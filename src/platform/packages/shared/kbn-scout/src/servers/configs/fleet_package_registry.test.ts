@@ -12,7 +12,7 @@ import { getFleetPackageRegistry, logFleetPackageRegistryHint } from './fleet_pa
 
 describe('getFleetPackageRegistry', () => {
   it('is disabled when neither variable is set', () => {
-    expect(getFleetPackageRegistry({})).toEqual({
+    expect(getFleetPackageRegistry({})).toMatchObject({
       enabled: false,
       port: undefined,
       kbnServerArgs: [],
@@ -20,7 +20,7 @@ describe('getFleetPackageRegistry', () => {
   });
 
   it('is disabled with the port alone, which CI exports for every job', () => {
-    expect(getFleetPackageRegistry({ FLEET_PACKAGE_REGISTRY_PORT: '6104' })).toEqual({
+    expect(getFleetPackageRegistry({ FLEET_PACKAGE_REGISTRY_PORT: '6104' })).toMatchObject({
       enabled: false,
       port: 6104,
       kbnServerArgs: [],
@@ -33,7 +33,7 @@ describe('getFleetPackageRegistry', () => {
         FLEET_PACKAGE_REGISTRY_PORT: '6104',
         SCOUT_FLEET_PACKAGE_REGISTRY: value,
       })
-    ).toEqual({
+    ).toMatchObject({
       enabled: true,
       port: 6104,
       kbnServerArgs: ['--xpack.fleet.registryUrl=http://localhost:6104'],
@@ -47,6 +47,23 @@ describe('getFleetPackageRegistry', () => {
         SCOUT_FLEET_PACKAGE_REGISTRY: 'false',
       }).enabled
     ).toBe(false);
+  });
+
+  it('builds the docker server entry for the base configs from the shared registry spec', () => {
+    const enabled = getFleetPackageRegistry({
+      FLEET_PACKAGE_REGISTRY_PORT: '6104',
+      SCOUT_FLEET_PACKAGE_REGISTRY: 'true',
+    }).dockerServer;
+    expect(enabled).toMatchObject({
+      enabled: true,
+      port: 6104,
+      portInContainer: 8080,
+      waitForLogLine: 'package manifests loaded',
+      waitForLogLineTimeoutMs: 6 * 60 * 1000,
+    });
+    expect(enabled.image).toContain('package-registry');
+
+    expect(getFleetPackageRegistry({}).dockerServer).toMatchObject({ enabled: false });
   });
 
   it('fails fast when the opt-in is set without a port', () => {
@@ -65,7 +82,7 @@ describe('getFleetPackageRegistry', () => {
   });
 
   it('ignores a bad port without the opt-in, so runs that never asked for the registry still boot', () => {
-    expect(getFleetPackageRegistry({ FLEET_PACKAGE_REGISTRY_PORT: 'abc' })).toEqual({
+    expect(getFleetPackageRegistry({ FLEET_PACKAGE_REGISTRY_PORT: 'abc' })).toMatchObject({
       enabled: false,
       port: undefined,
       kbnServerArgs: [],

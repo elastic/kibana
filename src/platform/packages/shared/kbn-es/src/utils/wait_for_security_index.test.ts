@@ -9,7 +9,10 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { gracefulExit } from 'exit-hook';
 import { waitForSecurityIndex } from './wait_for_security_index';
+
+jest.mock('exit-hook', () => ({ gracefulExit: jest.fn() }));
 
 jest.mock('@elastic/elasticsearch', () => {
   return {
@@ -63,5 +66,28 @@ describe('waitForSecurityIndex', () => {
     await expect(waitForSecurityIndex({ client, log, readyTimeout: 1000 })).rejects.toThrow(
       'ES cluster failed to bootstrap the security index with the 1 second timeout'
     );
+  });
+
+  test(`a SIGINT while waiting exits through exit-hook, and the listener is removed afterwards`, async () => {
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation((() => {}) as any);
+    const listenersBefore = process.listeners('SIGINT');
+    const client = {
+      security: {
+        createApiKey: jest.fn(async () => {
+          const added = process.listeners('SIGINT').filter((l) => !listenersBefore.includes(l));
+          expect(added).toHaveLength(1);
+          added[0]('SIGINT');
+          return { id: 'key' };
+        }),
+        invalidateApiKey: jest.fn(async () => ({})),
+      },
+    } as unknown as Client;
+
+    await waitForSecurityIndex({ client, log });
+
+    expect(gracefulExit).toHaveBeenCalledTimes(1);
+    expect(exitSpy).not.toHaveBeenCalled();
+    expect(process.listeners('SIGINT')).toEqual(listenersBefore);
+    exitSpy.mockRestore();
   });
 });

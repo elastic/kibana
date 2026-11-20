@@ -254,6 +254,21 @@ describe('runDockerServer', () => {
     expect(dockerCall(docker.calls, 'rm')).toEqual([['rm', 'container-1']]);
   });
 
+  it('concurrent stop() calls wait for the same kill instead of returning early', async () => {
+    const docker = fakeDocker({ cached: true });
+    const pending = runDockerServer(server, { log });
+    await new Promise((resolve) => setImmediate(resolve));
+    docker.stdout.write('package manifests loaded\n');
+    const running = await pending;
+
+    const first = running.stop();
+    const second = running.stop();
+    expect(second).toBe(first);
+    await Promise.all([first, second]);
+
+    expect(dockerCall(docker.calls, 'kill')).toEqual([['kill', 'container-1']]);
+  });
+
   it('stop() kills the container once and keeps it on CI', async () => {
     process.env.CI = 'true';
     const docker = fakeDocker({ cached: true });

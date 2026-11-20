@@ -19,7 +19,7 @@ import {
   kibanaDevServiceAccount,
 } from '@kbn/dev-utils';
 import type { KbnServerlessProjectType } from '@kbn/dev-utils';
-import { defineDockerServersConfig, packageRegistryDocker } from '@kbn/test-docker-servers';
+import { defineDockerServersConfig } from '@kbn/test-docker-servers';
 import { getDockerFileMountPath } from '@kbn/es';
 import {
   MOCK_IDP_REALM_NAME,
@@ -83,14 +83,8 @@ export const defaultConfig: ScoutServerConfig = {
   serverless: true,
   servers,
   dockerServers: defineDockerServersConfig({
-    // Same image, registry config and readiness check as the FTR Fleet suites; see
-    // `fleet_package_registry.ts` for when it is enabled.
-    registry: {
-      ...packageRegistryDocker,
-      enabled: fleetPackageRegistry.enabled,
-      port: fleetPackageRegistry.port,
-      waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
-    },
+    // See `fleet_package_registry.ts` for the spec and for when it is enabled.
+    registry: fleetPackageRegistry.dockerServer,
   }),
   esTestCluster: {
     from: 'serverless',

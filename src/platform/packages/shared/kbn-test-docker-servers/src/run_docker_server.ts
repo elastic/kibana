@@ -191,8 +191,8 @@ async function waitUntilReady(
 }
 
 /** `docker kill` / `docker rm` on a container that is already gone is not an error here. */
-function ignoreGoneContainer(containerId: string, error: unknown) {
-  const message = (error as { message?: string })?.message ?? '';
+function ignoreGoneContainer(containerId: string, error: Error) {
+  const message = error.message ?? '';
   if (
     !message.includes(`Container ${containerId} is not running`) &&
     !message.includes(`No such container: ${containerId}`)
@@ -262,10 +262,8 @@ export async function runDockerServer(
     },
   });
 
-  const stop = async () => {
-    if (stopped) {
-      return;
-    }
+  let stopPromise: Promise<void> | undefined;
+  const doStop = async () => {
     stopped = true;
     runningSub.unsubscribe();
     abort$.next();
@@ -302,6 +300,11 @@ export async function runDockerServer(
       { defaultValue: undefined }
     );
     log.info(`[docker:${name}] container stopped`);
+  };
+  // concurrent and repeated callers all wait for the same kill, none returns early
+  const stop = () => {
+    stopPromise = stopPromise ?? doStop();
+    return stopPromise;
   };
 
   try {

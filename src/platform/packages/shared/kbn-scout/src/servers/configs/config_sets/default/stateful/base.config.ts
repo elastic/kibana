@@ -23,7 +23,7 @@ import {
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { PRODUCT_DOC_STUB_REPOSITORY_URL } from '@kbn/test-kibana-server';
-import { defineDockerServersConfig, packageRegistryDocker } from '@kbn/test-docker-servers';
+import { defineDockerServersConfig } from '@kbn/test-docker-servers';
 import type { ScoutServerConfig } from '../../../../../types';
 import { getFleetPackageRegistry } from '../../../fleet_package_registry';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../../../constants';
@@ -54,14 +54,8 @@ const fleetPackageRegistry = getFleetPackageRegistry();
 export const defaultConfig: ScoutServerConfig = {
   servers,
   dockerServers: defineDockerServersConfig({
-    // Same image, registry config and readiness check as the FTR Fleet suites; see
-    // `fleet_package_registry.ts` for when it is enabled.
-    registry: {
-      ...packageRegistryDocker,
-      enabled: fleetPackageRegistry.enabled,
-      port: fleetPackageRegistry.port,
-      waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
-    },
+    // See `fleet_package_registry.ts` for the spec and for when it is enabled.
+    registry: fleetPackageRegistry.dockerServer,
   }),
   esTestCluster: {
     from: 'snapshot',

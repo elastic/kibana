@@ -23,6 +23,7 @@ import {
   runElasticsearch,
   runKibanaServer,
 } from '../../servers';
+import { asError } from '../../servers/as_error';
 import { getConfigRootDir, loadServersConfig } from '../../servers/configs';
 import { logFleetPackageRegistryHint } from '../../servers/configs/fleet_package_registry';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
@@ -142,40 +143,56 @@ async function runLocalServersAndTests(
   let shutdownEs: (() => Promise<void>) | undefined;
   let stopDockerServers: (() => Promise<void>) | undefined;
   let dockerStartup: Promise<() => Promise<void>> | undefined;
+  let esStartup: Promise<() => Promise<void>> | undefined;
 
-  // Runs once, from the signal hook or from the teardown below, whichever comes first. A signal
-  // while the docker servers are still starting aborts that start, which stops their containers.
+  // Runs once, from the signal hook or from the teardown below, whichever comes first. A start
+  // still in progress is aborted (docker) or waited for (Elasticsearch) so nothing is left
+  // behind, then whatever came up is stopped.
   const shutdownBackingServices = once(async () => {
     abortDockerStart.abort();
     await dockerStartup?.catch(() => {});
-    const errors: unknown[] = [];
-    await shutdownEs?.().catch((error) => errors.push(error));
-    await stopDockerServers?.().catch((error) => errors.push(error));
+    await esStartup?.catch(() => {});
+    const errors: Error[] = [];
+    const stop = async (fn?: () => Promise<void>) => {
+      try {
+        await fn?.();
+      } catch (error) {
+        errors.push(asError(error));
+      }
+    };
+    await stop(shutdownEs);
+    await stop(stopDockerServers);
     if (errors.length > 0) {
       throw errors[0];
     }
   });
   const removeShutdownHook = registerServerShutdown(procs, shutdownBackingServices);
 
-  let runError: unknown;
+  let runError: Error | undefined;
   try {
-    // Docker-backed services (e.g. the Fleet package registry) must be up before Kibana boots.
     logFleetPackageRegistryHint(log);
+    // Docker-backed services (e.g. the Fleet package registry) and Elasticsearch do not depend
+    // on each other, so they start together; both must be up before Kibana boots.
     dockerStartup = runDockerServers({
       config,
       log,
       onEarlyExit,
       signal: abortDockerStart.signal,
+    }).then((stop) => {
+      stopDockerServers = stop;
+      return stop;
     });
-    stopDockerServers = await dockerStartup;
-
-    shutdownEs = await runElasticsearch({
+    esStartup = runElasticsearch({
       onEarlyExit,
       config,
       log,
       esFrom: options.esFrom,
       logsDir: options.logsDir,
+    }).then((shutdown) => {
+      shutdownEs = shutdown;
+      return shutdown;
     });
+    await Promise.all([dockerStartup, esStartup]);
 
     await runKibanaServer({
       procs,
@@ -195,16 +212,23 @@ async function runLocalServersAndTests(
 
     await runPlaywrightTest(procs, cmd, cmdArgs, env);
   } catch (error) {
-    runError = error;
+    runError = asError(error);
   }
 
-  const shutdownErrors: unknown[] = [];
-  await procs.stop('kibana').catch((error) => shutdownErrors.push(error));
-  await shutdownBackingServices().catch((error) => shutdownErrors.push(error));
+  const shutdownErrors: Error[] = [];
+  await procs.stop('kibana').catch((error) => shutdownErrors.push(asError(error)));
+  await shutdownBackingServices().catch((error) => shutdownErrors.push(asError(error)));
   removeShutdownHook();
 
   if (earlyExitError !== undefined) {
     throw earlyExitError;
+  }
+  // The start was interrupted by a signal: the shutdown hook aborted it. Not a failure to
+  // report; exit with the signal's code, as exit-hook does once its hooks are done.
+  if (runError?.name === 'AbortError') {
+    log.info('scout: server start interrupted');
+    process.exitCode = 130;
+    return;
   }
   if (runError !== undefined) {
     throw runError;

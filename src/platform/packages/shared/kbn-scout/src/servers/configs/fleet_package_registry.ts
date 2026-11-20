@@ -17,6 +17,8 @@
  * switching every Scout lane to the docker image is a separate decision. Set
  * `SCOUT_FLEET_PACKAGE_REGISTRY=true` as well, as the EPR image promotion pipeline does.
  */
+import type { DockerServerSpec } from '@kbn/test-docker-servers';
+import { packageRegistryDocker } from '@kbn/test-docker-servers';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 export const SCOUT_FLEET_PACKAGE_REGISTRY_ENV = 'SCOUT_FLEET_PACKAGE_REGISTRY';
@@ -31,7 +33,20 @@ export interface ScoutFleetPackageRegistry {
   port: number | undefined;
   /** Kibana server args that make Fleet use the container; empty when disabled. */
   kbnServerArgs: string[];
+  /**
+   * The `dockerServers.registry` entry for the base server configs: same image, registry config
+   * file and readiness line as the FTR Fleet suites, enabled per the rule above.
+   */
+  dockerServer: DockerServerSpec;
 }
+
+const toDockerServer = (enabled: boolean, port: number | undefined): DockerServerSpec => ({
+  ...packageRegistryDocker,
+  enabled,
+  port: port ?? 0,
+  // the `:lite` image takes a while to load its manifests on first boot
+  waitForLogLineTimeoutMs: 6 * 60 * 1000,
+});
 
 export function getFleetPackageRegistry(
   env: NodeJS.ProcessEnv = process.env
@@ -49,7 +64,8 @@ export function getFleetPackageRegistry(
   // value must not break runs that never asked for the registry. This runs at module load of the
   // base configs, i.e. for every Scout server start.
   if (!optIn) {
-    return { enabled: false, port: validPort ? parsedPort : undefined, kbnServerArgs: [] };
+    const port = validPort ? parsedPort : undefined;
+    return { enabled: false, port, kbnServerArgs: [], dockerServer: toDockerServer(false, port) };
   }
 
   if (parsedPort === undefined) {
@@ -69,6 +85,7 @@ export function getFleetPackageRegistry(
     enabled: true,
     port: parsedPort,
     kbnServerArgs: [`--xpack.fleet.registryUrl=http://localhost:${parsedPort}`],
+    dockerServer: toDockerServer(true, parsedPort),
   };
 }
 

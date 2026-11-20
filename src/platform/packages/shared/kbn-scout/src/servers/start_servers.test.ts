@@ -70,11 +70,17 @@ describe('startServers', () => {
     process.exitCode = originalExitCode;
   });
 
-  it('starts the docker servers before Elasticsearch and stops everything once the servers exit', async () => {
+  it('starts the docker servers and Elasticsearch before Kibana, and stops everything once the servers exit', async () => {
     await startServers(log, options);
 
-    expect(runDockerServersMock.mock.invocationCallOrder[0]).toBeLessThan(
-      runElasticsearchMock.mock.invocationCallOrder[0]
+    const kibanaStart = runKibanaServerMock.mock.invocationCallOrder[0];
+    expect(runDockerServersMock.mock.invocationCallOrder[0]).toBeLessThan(kibanaStart);
+    expect(runElasticsearchMock.mock.invocationCallOrder[0]).toBeLessThan(kibanaStart);
+    expect(runElasticsearchMock).toHaveBeenCalledWith(
+      expect.objectContaining({ onEarlyExit: expect.any(Function) })
+    );
+    expect(runKibanaServerMock).toHaveBeenCalledWith(
+      expect.objectContaining({ onEarlyExit: expect.any(Function) })
     );
     expect(procs.waitForAllToStop).toHaveBeenCalledTimes(1);
     expect(shutdownEs).toHaveBeenCalledTimes(1);
@@ -131,14 +137,27 @@ describe('startServers', () => {
     const pending = startServers(log, options);
     await new Promise((resolve) => setImmediate(resolve));
     expect(registerServerShutdownMock).toHaveBeenCalledTimes(1);
-    expect(runElasticsearchMock).not.toHaveBeenCalled();
+    expect(runKibanaServerMock).not.toHaveBeenCalled();
 
     await shutdownHook();
     expect(containersStopped).toHaveBeenCalledTimes(1);
 
-    await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
-    expect(runElasticsearchMock).not.toHaveBeenCalled();
+    // an interrupted start is not a failure to report: exit-hook exits with the signal's code
+    await expect(pending).resolves.toBeUndefined();
+    expect(process.exitCode).toBe(130);
+    expect(runKibanaServerMock).not.toHaveBeenCalled();
+    // Elasticsearch was starting alongside; it is waited for and stopped too
+    expect(shutdownEs).toHaveBeenCalledTimes(1);
     expect(removeShutdownHook).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops the Elasticsearch that was starting alongside when a docker server fails to start', async () => {
+    runDockerServersMock.mockRejectedValue(new Error('no such image'));
+
+    await expect(startServers(log, options)).rejects.toThrow('no such image');
+
+    expect(shutdownEs).toHaveBeenCalledTimes(1);
+    expect(runKibanaServerMock).not.toHaveBeenCalled();
   });
 
   it('reports the container exit, not the Kibana start it interrupts', async () => {

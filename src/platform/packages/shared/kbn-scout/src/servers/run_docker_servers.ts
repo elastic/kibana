@@ -10,6 +10,7 @@
 import type { DockerServerSpec, RunningDockerServer } from '@kbn/test-docker-servers';
 import { runDockerServer, toDockerServer } from '@kbn/test-docker-servers';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { asError } from './as_error';
 import type { Config } from './configs';
 
 export type StopDockerServers = () => Promise<void>;
@@ -67,12 +68,12 @@ export async function runDockerServers({
   signal?.removeEventListener('abort', onCallerAbort);
 
   const running: RunningDockerServer[] = [];
-  const failures: unknown[] = [];
+  const failures: Error[] = [];
   for (const result of results) {
     if (result.status === 'fulfilled') {
       running.push(result.value);
     } else {
-      failures.push(result.reason);
+      failures.push(asError(result.reason));
     }
   }
 
@@ -82,10 +83,12 @@ export async function runDockerServers({
     }
     const stopResults = await Promise.allSettled(running.map((server) => server.stop()));
     const stopFailures = stopResults.flatMap((result, i) =>
-      result.status === 'rejected' ? [{ name: running[i].name, reason: result.reason }] : []
+      result.status === 'rejected'
+        ? [{ name: running[i].name, reason: asError(result.reason) }]
+        : []
     );
     for (const { name, reason } of stopFailures) {
-      log.error(`[docker:${name}] failed to stop: ${reason?.message ?? reason}`);
+      log.error(`[docker:${name}] failed to stop: ${reason.message}`);
     }
     if (stopFailures.length > 0) {
       throw stopFailures[0].reason;
@@ -96,9 +99,7 @@ export async function runDockerServers({
     // Stop errors are logged above; the startup failure is the one worth surfacing, and the
     // aborts it caused in the other servers are consequences, not the cause.
     await stop().catch(() => {});
-    throw (
-      failures.find((error) => (error as { name?: string })?.name !== 'AbortError') ?? failures[0]
-    );
+    throw failures.find((error) => error.name !== 'AbortError') ?? failures[0];
   }
 
   return stop;
