@@ -47,7 +47,7 @@ export const JudgeAgreementPanel: React.FC<JudgeAgreementPanelProps> = ({ binary
     <EuiTitle size="xxs">
       <h3>{TITLE}</h3>
     </EuiTitle>
-    {binary === null || binary.n === 0 ? (
+    {(binary === null || binary.n === 0) && !(ordinal && ordinal.n > 0) ? (
       <EuiText size="s" color="subdued">
         <p data-test-subj="evalsJudgeAgreementEmpty">{EMPTY}</p>
       </EuiText>
@@ -56,20 +56,24 @@ export const JudgeAgreementPanel: React.FC<JudgeAgreementPanelProps> = ({ binary
         compressed
         type="column"
         listItems={[
-          { title: SAMPLE_SIZE, description: binary.n },
-          { title: RAW_AGREEMENT, description: formatPercent(binary.rawAgreement) },
-          {
-            title: KAPPA,
-            description: formatMetricWithInterval(binary.kappa, binary.kappaInterval),
-          },
-          {
-            title: PRECISION,
-            description: formatMetricWithInterval(binary.precision, binary.precisionInterval),
-          },
-          {
-            title: RECALL,
-            description: formatMetricWithInterval(binary.recall, binary.recallInterval),
-          },
+          ...(binary && binary.n > 0
+            ? [
+                { title: SAMPLE_SIZE, description: binary.n },
+                { title: RAW_AGREEMENT, description: formatPercent(binary.rawAgreement) },
+                {
+                  title: KAPPA,
+                  description: formatMetricWithInterval(binary.kappa, binary.kappaInterval),
+                },
+                {
+                  title: PRECISION,
+                  description: formatMetricWithInterval(binary.precision, binary.precisionInterval),
+                },
+                {
+                  title: RECALL,
+                  description: formatMetricWithInterval(binary.recall, binary.recallInterval),
+                },
+              ]
+            : []),
           ...(ordinal && ordinal.n > 0
             ? [{ title: WEIGHTED_KAPPA, description: formatMetric(ordinal.weightedKappa) }]
             : []),

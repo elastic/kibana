@@ -84,10 +84,11 @@ export const useReviewQueue = (queueId: string) => {
  * The next pending item, with the judge's verdict withheld. It is only refetched after a
  * submit, never on focus or mount, so a reviewer keeps the item they are looking at.
  */
-export const useNextReviewItem = (queueId: string) => {
+export const useNextReviewItem = (queueId: string, { enabled = true } = {}) => {
   const { services } = useKibana();
 
   return useQuery({
+    enabled,
     queryKey: queryKeys.reviewQueues.next(queueId),
     queryFn: async (): Promise<GetNextReviewItemResponse> =>
       services.http!.get<GetNextReviewItemResponse>(
@@ -102,10 +103,11 @@ export const useNextReviewItem = (queueId: string) => {
   });
 };
 
-export const useReviewQueueAgreement = (queueId: string) => {
+export const useReviewQueueAgreement = (queueId: string, { enabled = true } = {}) => {
   const { services } = useKibana();
 
   return useQuery({
+    enabled,
     queryKey: queryKeys.reviewQueues.agreement(queueId),
     queryFn: async (): Promise<ReviewQueueAgreement> =>
       services.http!.get<ReviewQueueAgreement>(

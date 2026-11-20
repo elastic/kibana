@@ -9,6 +9,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { Logger } from '@kbn/logging';
 import type { InternalIStorageClient, StorageIndexAdapter } from '@kbn/storage-adapter';
 import { buildSpaceFilter } from '@kbn/evals-common';
+import { isResponseError } from '@kbn/es-errors';
 import { ReviewItemAlreadyReviewedError } from './review_item_already_reviewed_error';
 import { ReviewItemNotFoundError } from './review_item_not_found_error';
 import type {
@@ -69,7 +70,10 @@ export class ReviewClient {
     return { bool: { filter: [this.spaceFilter, ...filters] } };
   }
 
-  /** Writes a queue's sampled items as pending. Ids derive from queue and position, so a retry is idempotent. */
+  /**
+   * Writes a queue's sampled items as pending. Ids derive from queue and position and the write
+   * is a `create`, so a retry skips items that already exist instead of overwriting a verdict.
+   */
   async createPendingItems(queueId: string, items: NewReviewItem[]): Promise<number> {
     if (items.length === 0) {
       return 0;
@@ -81,7 +85,7 @@ export class ReviewClient {
     const timestamp = new Date().toISOString();
     const response = await this.storage.bulk({
       operations: items.map((item) => ({
-        index: {
+        create: {
           _id: getReviewItemId(queueId, item.position),
           document: {
             ...item,
@@ -97,11 +101,15 @@ export class ReviewClient {
     });
 
     if (response.errors) {
+      // 409 means the item already exists, which is what a retry is expected to hit.
       const [failure] = response.items
-        .map((item) => item.index?.error)
-        .filter((error): error is NonNullable<typeof error> => Boolean(error));
-      this.logger.error(`Failed to write review items: ${failure?.reason ?? 'unknown'}`);
-      throw new Error(`Failed to write review items: ${failure?.reason ?? 'unknown bulk error'}`);
+        .map((item) => item.create)
+        .filter((result) => result?.error && result.status !== 409)
+        .map((result) => result!.error!);
+      if (failure) {
+        this.logger.error(`Failed to write review items: ${failure.reason ?? 'unknown'}`);
+        throw new Error(`Failed to write review items: ${failure.reason ?? 'unknown bulk error'}`);
+      }
     }
 
     return response.items.length;
@@ -177,13 +185,23 @@ export class ReviewClient {
     verdict: Omit<ReviewHumanVerdict, 'reviewed_at'>,
     status: Extract<ReviewItemStatus, 'reviewed' | 'skipped'> = 'reviewed'
   ): Promise<ReviewItem> {
-    const current = await this.getItem(queueId, itemId);
-    if (!current) {
+    const response = await this.storage.search({
+      track_total_hits: false,
+      size: 1,
+      seq_no_primary_term: true,
+      query: this.scoped({ term: { queue_id: queueId } }, { term: { _id: itemId } }),
+    });
+    const [hit] = response.hits.hits;
+    if (!hit?._source || !hit._id) {
       throw new ReviewItemNotFoundError(itemId);
     }
-    if (current.status !== 'pending') {
+    if (hit._source.status !== 'pending') {
       throw new ReviewItemAlreadyReviewedError(itemId);
     }
+    if (hit._seq_no == null || hit._primary_term == null) {
+      throw new Error(`Review item "${itemId}" was read without _seq_no/_primary_term`);
+    }
+    const current: ReviewItem = { id: hit._id, ...hit._source };
 
     const timestamp = new Date().toISOString();
     const { id, ...rest } = current;
@@ -194,7 +212,21 @@ export class ReviewClient {
       updated_at: timestamp,
     };
 
-    await this.storage.index({ id, document, refresh: true });
+    try {
+      // Conditional on the version just read, so a concurrent submit loses instead of overwriting.
+      await this.storage.index({
+        id,
+        document,
+        refresh: true,
+        if_seq_no: hit._seq_no,
+        if_primary_term: hit._primary_term,
+      });
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 409) {
+        throw new ReviewItemAlreadyReviewedError(itemId);
+      }
+      throw error;
+    }
     return { id, ...document };
   }
 }

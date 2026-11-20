@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ReviewItemAlreadyReviewedError } from './review_item_already_reviewed_error';
 import { ReviewItemNotFoundError } from './review_item_not_found_error';
@@ -48,6 +49,7 @@ const matches = (id: string, source: ReviewItemStorageProperties, query: Query):
 
 const createMockAdapter = () => {
   const rows = new Map<string, ReviewItemStorageProperties>();
+  const versions = new Map<string, number>();
 
   const storage = {
     search: jest.fn(async (request: Record<string, any>) => {
@@ -55,7 +57,12 @@ const createMockAdapter = () => {
         .filter(([id, source]) => matches(id, source, request.query))
         .sort(([, a], [, b]) => a.position - b.position)
         .slice(0, request.size)
-        .map(([_id, _source]) => ({ _id, _source }));
+        .map(([_id, _source]) => ({
+          _id,
+          _source,
+          _seq_no: versions.get(_id) ?? 1,
+          _primary_term: 1,
+        }));
 
       const counts = new Map<string, number>();
       if (request.aggs?.by_status) {
@@ -76,19 +83,46 @@ const createMockAdapter = () => {
       };
     }),
     bulk: jest.fn(async ({ operations }: { operations: Array<Record<string, any>> }) => {
-      for (const operation of operations) {
-        rows.set(operation.index._id, operation.index.document);
+      const items = operations.map((operation) => {
+        const id = operation.create._id as string;
+        if (rows.has(id)) {
+          return { create: { status: 409, error: { reason: 'version conflict' } } };
+        }
+        rows.set(id, operation.create.document);
+        versions.set(id, 1);
+        return { create: { status: 201, result: 'created' } };
+      });
+      return { errors: items.some((entry) => entry.create.status === 409), items };
+    }),
+    index: jest.fn(
+      async ({
+        id,
+        document,
+        if_seq_no: ifSeqNo,
+      }: {
+        id: string;
+        document: any;
+        if_seq_no?: number;
+      }) => {
+        if (ifSeqNo != null && ifSeqNo !== versions.get(id)) {
+          throw new errors.ResponseError({
+            statusCode: 409,
+            body: {},
+            headers: {},
+            warnings: [],
+            meta: {} as any,
+          });
+        }
+        rows.set(id, document);
+        versions.set(id, (versions.get(id) ?? 0) + 1);
+        return { result: 'updated' };
       }
-      return { errors: false, items: operations.map(() => ({ index: { result: 'created' } })) };
-    }),
-    index: jest.fn(async ({ id, document }: { id: string; document: any }) => {
-      rows.set(id, document);
-      return { result: 'updated' };
-    }),
+    ),
   };
 
   return {
     rows,
+    versions,
     storage,
     adapter: { getClient: () => storage } as unknown as ReviewsStorageAdapter,
   };
@@ -145,6 +179,33 @@ describe('ReviewClient', () => {
     expect(rows.size).toBe(1);
   });
 
+  it('does not overwrite a reviewed item when the queue is written again', async () => {
+    const { client, rows } = setup();
+    await client.createPendingItems('q1', [item(0)]);
+    await client.submitVerdict('q1', getReviewItemId('q1', 0), { label: 'fail' });
+
+    await client.createPendingItems('q1', [item(0)]);
+
+    expect(rows.get(getReviewItemId('q1', 0))?.status).toBe('reviewed');
+  });
+
+  it('refuses a verdict that lost a race with a concurrent submit', async () => {
+    const { client, versions, storage } = setup();
+    await client.createPendingItems('q1', [item(0)]);
+    const id = getReviewItemId('q1', 0);
+    const realSearch = storage.search.getMockImplementation()!;
+    // Another reviewer's write lands between this reviewer's read and write.
+    storage.search.mockImplementationOnce(async (request: Record<string, any>) => {
+      const response = await realSearch(request);
+      versions.set(id, (versions.get(id) ?? 0) + 1);
+      return response;
+    });
+
+    await expect(client.submitVerdict('q1', id, { label: 'pass' })).rejects.toBeInstanceOf(
+      ReviewItemAlreadyReviewedError
+    );
+  });
+
   it('refuses more items than a queue can hold', async () => {
     const { client } = setup();
     const tooMany = Array.from({ length: MAX_REVIEW_ITEMS_PER_QUEUE + 1 }, (_, i) => item(i));
@@ -156,7 +217,7 @@ describe('ReviewClient', () => {
     const { client, storage } = setup();
     storage.bulk.mockResolvedValueOnce({
       errors: true,
-      items: [{ index: { error: { reason: 'boom' } } }],
+      items: [{ create: { status: 500, error: { reason: 'boom' } } }],
     } as any);
 
     await expect(client.createPendingItems('q1', [item(0)])).rejects.toThrow('boom');

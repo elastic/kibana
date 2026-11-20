@@ -345,6 +345,7 @@ export class EvalsPlugin
     this.onlineScoreService = new OnlineScoreService(this.logger, coreStart.dataStreams);
     this.reviewService = new ReviewService(
       this.logger,
+      // Origin-only under CPS: the review items index is plugin-owned and lives in this project.
       coreStart.elasticsearch.client.asInternalUser,
       this.isServerless
     );

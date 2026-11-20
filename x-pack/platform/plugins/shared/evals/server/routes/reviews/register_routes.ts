@@ -430,10 +430,17 @@ export const registerReviewQueueRoutes = ({
       },
       async (ctx, req, res) => {
         try {
+          const major = majorVersionOf(req.query.version);
+          if (major === undefined) {
+            return res.badRequest({
+              body: {
+                message: `"${req.query.version}" does not start with a major version number`,
+              },
+            });
+          }
           const spaceId = await resolveSpaceId(req);
           const evalsContext = await ctx.evals;
           const soClient = await getInternalReviewQueuesSoClient();
-          const major = majorVersionOf(req.query.version);
           const found = await soClient.find<EvalsReviewQueueAttributes>({
             type: EVALS_REVIEW_QUEUE_SAVED_OBJECT_TYPE,
             namespaces: [spaceId],
@@ -454,7 +461,7 @@ export const registerReviewQueueRoutes = ({
           ).flat();
           const body: EvaluatorReviewAgreement = {
             evaluator_name: req.params.name,
-            version_major: major ?? null,
+            version_major: major,
             queue_count: matching.length,
             ...computeItemsAgreement(items),
           };

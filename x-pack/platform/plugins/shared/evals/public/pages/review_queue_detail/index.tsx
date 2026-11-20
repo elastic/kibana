@@ -162,9 +162,10 @@ export const ReviewQueueDetailPage: React.FC = () => {
   const { queueId } = useParams<{ queueId: string }>();
   const { canReview } = useEvalsPermissions();
   const queue = useReviewQueue(queueId);
-  const next = useNextReviewItem(queueId);
+  // Both routes need the review privilege, so a read-only user must not fire them and get 403s.
+  const next = useNextReviewItem(queueId, { enabled: canReview });
   const submit = useSubmitReviewVerdict(queueId);
-  const agreement = useReviewQueueAgreement(queueId);
+  const agreement = useReviewQueueAgreement(queueId, { enabled: canReview });
   const [revealed, setRevealed] = useState<RevealedReviewItem | null>(null);
 
   const item: BlindReviewItem | null = revealed ?? next.data?.item ?? null;
@@ -193,7 +194,7 @@ export const ReviewQueueDetailPage: React.FC = () => {
     );
   };
 
-  if (queue.isLoading || (next.isLoading && !revealed)) {
+  if (queue.isLoading || (canReview && next.isLoading && !revealed)) {
     return <EuiLoadingSpinner size="xl" />;
   }
 
@@ -285,6 +286,19 @@ export const ReviewQueueDetailPage: React.FC = () => {
             <EuiCallOut announceOnMount size="s" title={i18n.NO_REVIEW_PRIVILEGE} />
           )}
         </>
+      ) : !canReview ? (
+        <EuiCallOut announceOnMount size="s" title={i18n.NO_REVIEW_PRIVILEGE} />
+      ) : next.error ? (
+        <EuiEmptyPrompt
+          color="danger"
+          iconType="warning"
+          title={<h3>{i18n.LOAD_ERROR_TITLE}</h3>}
+          actions={
+            <EuiButton onClick={() => next.refetch()} data-test-subj="evalsReviewNextRetry">
+              {i18n.RETRY}
+            </EuiButton>
+          }
+        />
       ) : (
         <EuiEmptyPrompt
           iconType="checkCircleFill"

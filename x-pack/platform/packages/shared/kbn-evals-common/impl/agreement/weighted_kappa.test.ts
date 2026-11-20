@@ -45,15 +45,15 @@ describe('computeWeightedKappa', () => {
     expect(near as number).toBeGreaterThan(far as number);
   });
 
-  it('uses the declared scale instead of the observed range', () => {
-    const pairs = toPairs([0, 0.5, 0, 0.5], [0, 0.5, 0.5, 0]);
-    const observed = computeWeightedKappa(pairs, { weighting: 'linear' });
-    const declared = computeWeightedKappa(pairs, {
-      weighting: 'linear',
-      scale: { min: 0, max: 1 },
-    });
-    // Weights are normalised by the range, which cancels in the ratio, so kappa is unchanged...
-    expect(declared).toBeCloseTo(observed as number, 12);
+  it('does not depend on the width of the scale', () => {
+    const judgeScores = [0, 1, 2, 1, 0];
+    const humanScores = [0, 2, 2, 0, 1];
+    const scaled = (values: number[]) => values.map((value) => value * 10);
+
+    expect(computeWeightedKappa(toPairs(scaled(judgeScores), scaled(humanScores)))).toBeCloseTo(
+      computeWeightedKappa(toPairs(judgeScores, humanScores)) as number,
+      12
+    );
   });
 
   it('is undefined for empty input or a degenerate scale', () => {

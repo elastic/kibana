@@ -377,6 +377,22 @@ describe('human review queue routes', () => {
       });
     });
 
+    it('answers 400 when the version has no leading major number', async () => {
+      const { handlerFor, soClient, context } = setup();
+
+      const response = await handlerFor('get', EVALS_EVALUATOR_REVIEW_AGREEMENT_URL)(
+        context as never,
+        httpServerMock.createKibanaRequest({
+          params: { name: 'correctness' },
+          query: { version: 'latest' },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(400);
+      expect(soClient.find).not.toHaveBeenCalled();
+    });
+
     it('reports no agreement when no queue matches', async () => {
       const { handlerFor, soClient, context } = setup();
       soClient.find.mockResolvedValue({ saved_objects: [] } as never);

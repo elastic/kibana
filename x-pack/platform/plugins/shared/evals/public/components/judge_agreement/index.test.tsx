@@ -89,4 +89,15 @@ describe('JudgeAgreementPanel', () => {
     renderPanel(null);
     expect(screen.getByTestId('evalsJudgeAgreementEmpty')).toBeInTheDocument();
   });
+
+  it('still shows the weighted kappa when no binary verdicts exist', () => {
+    render(
+      <I18nProvider>
+        <JudgeAgreementPanel binary={null} ordinal={{ n: 4, weightedKappa: 0.62 }} />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByTestId('evalsJudgeAgreementEmpty')).not.toBeInTheDocument();
+    expect(screen.getByTestId('evalsJudgeAgreement')).toHaveTextContent('0.62');
+  });
 });

@@ -66,6 +66,15 @@ describe('computeBinaryAgreement', () => {
     expect(result.kappa).toBeCloseTo(0, 12);
   });
 
+  it('reports no kappa interval when the error term collapses to zero', () => {
+    const result = computeBinaryAgreement([
+      ...repeat({ judge: true, human: true }, 3),
+      ...repeat({ judge: false, human: false }, 3),
+    ]);
+    expect(result.kappa).toBe(1);
+    expect(result.kappaInterval).toBeNull();
+  });
+
   it('gives kappa -1 for systematic disagreement', () => {
     const result = computeBinaryAgreement([
       ...repeat({ judge: true, human: false }, 5),

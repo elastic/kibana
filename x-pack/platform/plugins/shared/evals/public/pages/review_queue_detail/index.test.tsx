@@ -170,6 +170,22 @@ describe('ReviewQueueDetailPage', () => {
       expect(screen.getByText(/does not allow submitting reviews/)).toBeInTheDocument();
     });
     expect(screen.queryByTestId('evalsReviewSubmit')).not.toBeInTheDocument();
+    expect(screen.queryByText('Nothing left to review')).not.toBeInTheDocument();
+    expect(mockedNext).toHaveBeenCalledWith('queue-1', { enabled: false });
+    expect(mockedAgreement).toHaveBeenCalledWith('queue-1', { enabled: false });
+  });
+
+  it('shows a retry instead of a finished queue when loading the next item fails', () => {
+    mockedNext.mockReturnValue({
+      isLoading: false,
+      error: new Error('boom'),
+      data: undefined,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useNextReviewItem>);
+    renderPage();
+
+    expect(screen.getByTestId('evalsReviewNextRetry')).toBeInTheDocument();
+    expect(screen.queryByText('Nothing left to review')).not.toBeInTheDocument();
   });
 
   it('shows the empty state when no pending items remain', () => {

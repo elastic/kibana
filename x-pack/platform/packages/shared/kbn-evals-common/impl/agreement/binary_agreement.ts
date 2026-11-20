@@ -65,10 +65,14 @@ export const computeBinaryAgreement = (pairs: readonly BinaryLabelPair[]): Binar
     if (pe < 1) {
       kappa = (po - pe) / (1 - pe);
       const se = Math.sqrt((po * (1 - po)) / (n * (1 - pe) * (1 - pe)));
-      kappaInterval = {
-        low: Math.max(-1, kappa - Z_95 * se),
-        high: Math.min(1, kappa + Z_95 * se),
-      };
+      // The Wald error is 0 when the raters agree on every item or on none, which would claim a
+      // zero-width interval from a handful of samples. No interval is better than that one.
+      if (se > 0) {
+        kappaInterval = {
+          low: Math.max(-1, kappa - Z_95 * se),
+          high: Math.min(1, kappa + Z_95 * se),
+        };
+      }
     }
   }
 

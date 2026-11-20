@@ -15,11 +15,6 @@ export type KappaWeighting = 'linear' | 'quadratic';
 
 export interface WeightedKappaOptions {
   weighting?: KappaWeighting;
-  /**
-   * Full range of the scale. Defaults to the observed minimum and maximum across both raters,
-   * which understates disagreement when the scale is wider than the data.
-   */
-  scale?: { min: number; max: number };
 }
 
 /**
@@ -29,16 +24,16 @@ export interface WeightedKappaOptions {
  */
 export const computeWeightedKappa = (
   pairs: readonly ScorePair[],
-  { weighting = 'quadratic', scale }: WeightedKappaOptions = {}
+  { weighting = 'quadratic' }: WeightedKappaOptions = {}
 ): number | null => {
   const n = pairs.length;
   if (n === 0) {
     return null;
   }
   const all = pairs.flatMap(({ judge, human }) => [judge, human]);
-  const min = scale?.min ?? Math.min(...all);
-  const max = scale?.max ?? Math.max(...all);
-  const range = max - min;
+  // Normalising by the range cancels in the observed/expected ratio, so it only keeps the
+  // weights in [0, 1]; the result does not depend on the scale's width.
+  const range = Math.max(...all) - Math.min(...all);
   if (range <= 0) {
     return null;
   }
