@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import type { QueryKnowledgeIndicator } from '@kbn/significant-events-plugin/server';
+import type { QueryLink } from '@kbn/significant-events-schema';
 import { wrapReading } from '../../signals/wrap_reading';
 import type { RuleRow } from '../../rules/managed_rule_reader';
 import { toReading } from './to_reading';
 
-const KNOWLEDGE_INDICATOR: QueryKnowledgeIndicator = {
-  id: 'ki-timeouts',
+const KNOWLEDGE_INDICATOR: QueryLink = {
+  query: {
+    id: 'ki-timeouts',
+    title: 'Checkout timeouts',
+    description: 'Checkout calls time out',
+    esql: { query: 'FROM logs | WHERE message : "timeout"' },
+    severity_score: 70,
+    type: 'match',
+    features: [{ id: 'checkout' }],
+  },
   source_id: 'source-1',
-  source_enabled: true,
-  title: 'Checkout timeouts',
-  description: 'Checkout calls time out',
-  esql: 'FROM logs | WHERE message : "timeout"',
-  severity_score: 70,
-  query_type: 'match',
-  feature_ids: ['checkout'],
+  rule_backed: false,
+  rule_id: 'sig-rule-1',
 };
 
 // A step up at 10:20 still active in the run scheduled at 10:31 that read its clock at 10:32:01,
@@ -94,7 +97,10 @@ describe('toReading', () => {
     const after = toReading({
       knowledgeIndicator: {
         ...KNOWLEDGE_INDICATOR,
-        esql: 'FROM logs | WHERE message : "timed out"',
+        query: {
+          ...KNOWLEDGE_INDICATOR.query,
+          esql: { query: 'FROM logs | WHERE message : "timed out"' },
+        },
       },
       row: { ...ROW, rule_id: 'rule-2' },
       entity: ENTITY,
@@ -137,7 +143,10 @@ describe('toReading', () => {
 
   it('caps the importance of a knowledge indicator scored above 100', () => {
     const reading = toReading({
-      knowledgeIndicator: { ...KNOWLEDGE_INDICATOR, severity_score: 150 },
+      knowledgeIndicator: {
+        ...KNOWLEDGE_INDICATOR,
+        query: { ...KNOWLEDGE_INDICATOR.query, severity_score: 150 },
+      },
       row: ROW,
       entity: ENTITY,
       cpsEnabled: false,

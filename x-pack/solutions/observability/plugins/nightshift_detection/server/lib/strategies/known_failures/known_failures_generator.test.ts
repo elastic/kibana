@@ -55,15 +55,9 @@ describe('KnownFailuresGenerator', () => {
   });
 
   it("reports each rule's latest row once, about the service the knowledge indicator watches", async () => {
-    const watched = {
-      ...createKnowledgeIndicator('watched', 'FROM logs | WHERE message : "timeout"'),
-      feature_ids: ['checkout'],
-    };
-    const ruleId = getKnownFailureRuleId({
-      spaceId: 'default',
-      knowledgeIndicator: watched,
-      cpsEnabled: false,
-    });
+    const link = createLink('watched', 'FROM logs | WHERE message : "timeout"');
+    const watched = { ...link, query: { ...link.query, features: [{ id: 'checkout' }] } };
+    const ruleId = getKnownFailureRuleId({ spaceId: 'default', link: watched, cpsEnabled: false });
     const createRow = (minute: number, recentMax: number) => ({
       rule_id: ruleId,
       scheduled_timestamp: WINDOW.from + minute * 60_000,
@@ -91,9 +85,10 @@ describe('KnownFailuresGenerator', () => {
     const result = await new KnownFailuresGenerator().generate({
       spaceId: 'default',
       window: WINDOW,
+      sources: [{ id: 'source-1', enabled: true }],
       cpsEnabled: false,
       abortSignal: new AbortController().signal,
-      knowledge: { listQueryKnowledgeIndicators: async () => [watched], listFeatures },
+      knowledge: { listQueryLinks: async () => [watched], listFeatures },
       rules: {
         listManaged: async () => [{ id: ruleId, enabled: true }],
         // Newest first, as the reader sorts them.
