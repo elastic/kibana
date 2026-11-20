@@ -64,7 +64,7 @@ describe('ToolCallStep', () => {
     renderWithProviders(<ToolCallStep step={makeStep([], intent)} />);
     const label = screen.getByTestId('agentBuilderToolCallIntent');
     expect(label).toHaveTextContent(intent.trim());
-    expect(window.getComputedStyle(label)).toMatchObject({
+    expect(window.getComputedStyle(screen.getByRole('status'))).toMatchObject({
       minWidth: '0',
       whiteSpace: 'normal',
       overflowWrap: 'anywhere',
@@ -116,12 +116,21 @@ describe('ToolCallStep', () => {
     expect(screen.queryByText('ran')).not.toBeInTheDocument();
   });
 
-  it('shows only the intent for an error result', () => {
+  it('shows failed beside the intent for an error result', () => {
     renderWithProviders(
       <ToolCallStep step={makeStep([errorResult('r1')], 'Searching for failed logins')} />
     );
-    expect(screen.getByRole('status')).toHaveTextContent('Searching for failed logins');
+    expect(screen.getByRole('status')).toHaveTextContent('Searching for failed logins — failed');
+    expect(screen.getByText('failed')).toBeInTheDocument();
     expect(screen.queryByText('ran')).not.toBeInTheDocument();
+  });
+
+  it('shows failed rather than stopped for an error in an aborted turn', () => {
+    renderWithProviders(
+      <ToolCallStep step={makeStep([errorResult('r1')], 'Searching logs')} isAborted />
+    );
+    expect(screen.getByText('failed')).toBeInTheDocument();
+    expect(screen.queryByText('stopped')).not.toBeInTheDocument();
   });
 
   it('shows a stopped flyout when the turn is aborted and the step has no results', async () => {
@@ -146,7 +155,7 @@ describe('ToolCallStep', () => {
     expect(screen.getByTestId('agentBuilderToolCallIntent')).toHaveTextContent(
       'Searching for failed logins'
     );
-    expect(screen.getByText('stopped')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Searching for failed logins — stopped');
   });
 
   it('does not mark a completed call as stopped when its turn is aborted', () => {

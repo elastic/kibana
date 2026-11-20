@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiText, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -54,10 +54,6 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
     overflow-wrap: anywhere;
   `;
 
-  const statusItemStyles = css`
-    flex-shrink: 0;
-  `;
-
   const toolBadge = (
     <EuiBadge
       color={hasErrorResult ? 'danger' : 'default'}
@@ -77,35 +73,39 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
     </EuiBadge>
   );
 
+  const shouldAppendStatus = hasErrorResult || (isAborted && !hasResults);
+
   return (
-    <>
-      <EuiFlexGroup
-        responsive={false}
-        gutterSize="xs"
-        alignItems="baseline"
-        role="status"
-        aria-label={toolCallAriaLabel}
-      >
-        {step.intent?.trim() ? (
-          <EuiFlexItem grow={false} css={intentStyles} data-test-subj="agentBuilderToolCallIntent">
-            {step.intent}
-          </EuiFlexItem>
-        ) : (
-          <EuiFlexItem grow={false} css={intentStyles}>
-            {toolBadge}
-          </EuiFlexItem>
-        )}
-        {isAborted && !hasResults && (
-          <EuiFlexItem grow={false} css={statusItemStyles}>
-            <span css={suffixStyles}>
+    <EuiText
+      size="s"
+      color="inherit"
+      css={intentStyles}
+      role="status"
+      aria-label={toolCallAriaLabel}
+    >
+      {step.intent?.trim() ? (
+        <span data-test-subj="agentBuilderToolCallIntent">{step.intent}</span>
+      ) : (
+        toolBadge
+      )}
+      {shouldAppendStatus && (
+        <span css={suffixStyles}>
+          {' — '}
+          <span>
+            {hasErrorResult ? (
+              <FormattedMessage
+                id="xpack.agentBuilder.eventSteps.steps.toolCall.failedLabel"
+                defaultMessage="failed"
+              />
+            ) : (
               <FormattedMessage
                 id="xpack.agentBuilder.eventSteps.steps.toolCall.stopped"
                 defaultMessage="stopped"
               />
-            </span>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </>
+            )}
+          </span>
+        </span>
+      )}
+    </EuiText>
   );
 };
