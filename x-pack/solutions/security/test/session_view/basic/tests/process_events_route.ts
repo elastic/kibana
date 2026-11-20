@@ -178,6 +178,8 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
         const LATE_ALERT_UUID = 'late-alert-uuid';
         const LATE_ALERT_TIME = '2022-05-10T21:40:00.000Z';
         const ALERTS_INDEX = '.internal.alerts-security.alerts-default';
+        // the total of process events of the mock session since MOCK_SESSION_START_TIME
+        const PROCESS_EVENTS_IN_SESSION = 418;
         let lateAlertId: string;
 
         const getAlertUuids = (
@@ -245,6 +247,36 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
           });
           expect(response.status).to.be(200);
           expect(getAlertUuids(response.body.events)).to.not.contain(LATE_ALERT_UUID);
+        });
+
+        it('returns the alert on the page after an exactly full page', async () => {
+          // A page of the size of the session is exactly full, so the client fetches the next page with the
+          // time of the last process event as cursor. That page is not empty: it starts at the last event
+          // again, is short, and so is the last page of the session.
+          const query = {
+            index: MOCK_INDEX,
+            sessionEntityId: MOCK_SESSION_ENTITY_ID,
+            sessionStartTime: MOCK_SESSION_START_TIME,
+            pageSize: PROCESS_EVENTS_IN_SESSION,
+          };
+          const firstPage = await getTestRoute().query(query);
+          expect(firstPage.status).to.be(200);
+
+          const processEvents = firstPage.body.events.filter(
+            (event: { _source: { event?: { kind?: string; action?: string } } }) =>
+              // alerts also have an exec or fork action, and have the kind signal
+              event._source.event?.kind === 'event' &&
+              ['fork', 'exec', 'end'].includes(event._source.event?.action ?? '')
+          );
+          expect(processEvents.length).to.be(PROCESS_EVENTS_IN_SESSION);
+          expect(getAlertUuids(firstPage.body.events)).to.not.contain(LATE_ALERT_UUID);
+
+          const secondPage = await getTestRoute().query({
+            ...query,
+            cursor: processEvents[processEvents.length - 1]._source['@timestamp'],
+          });
+          expect(secondPage.status).to.be(200);
+          expect(getAlertUuids(secondPage.body.events)).to.contain(LATE_ALERT_UUID);
         });
       });
 
