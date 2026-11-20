@@ -14,7 +14,7 @@ export interface ResolutionGroupMemberRecord {
   entity?: {
     source?: string | string[];
     attributes?: { watchlists?: string | string[] };
-    lifecycle?: { first_seen?: string; last_activity?: string };
+    lifecycle?: { first_seen?: string; last_seen?: string; last_activity?: string };
   };
 }
 
@@ -24,8 +24,8 @@ export interface ResolutionGroupValues {
   sources: string[];
   watchlists: string[];
   firstSeen?: string;
-  /** The latest `entity.lifecycle.last_activity`. */
-  lastActivity?: string;
+  /** The latest `entity.lifecycle.last_seen` of the members, falling back to `last_activity` per member. */
+  lastLifecycleSeen?: string;
   /** The latest `@timestamp`, which is what the entities page shows as last seen. */
   lastSeen?: string;
 }
@@ -69,6 +69,8 @@ export const mergeResolutionGroupValues = (
   sources: [...new Set(records.flatMap(({ entity }) => toList(entity?.source)))],
   watchlists: [...new Set(records.flatMap(({ entity }) => toList(entity?.attributes?.watchlists)))],
   firstSeen: earliest(records.map(({ entity }) => entity?.lifecycle?.first_seen)),
-  lastActivity: latest(records.map(({ entity }) => entity?.lifecycle?.last_activity)),
+  lastLifecycleSeen: latest(
+    records.map(({ entity }) => entity?.lifecycle?.last_seen ?? entity?.lifecycle?.last_activity)
+  ),
   lastSeen: latest(records.map((record) => record['@timestamp'])),
 });
