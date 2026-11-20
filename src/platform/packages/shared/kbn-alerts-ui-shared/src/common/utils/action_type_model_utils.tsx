@@ -109,7 +109,7 @@ function getIconFromSpec(spec: ConnectorSpecResponse): IconType {
 
 const NO_AUTH_TYPE_ID = 'none';
 
-/** Marks one auth type option so the form's auth picker does not offer it. */
+/** Hides one auth type option from the form's auth picker. */
 const hideAuthTypeInPicker = (schema: ConnectorZodSchema, authTypeId: string): void => {
   const { secrets } = schema.shape;
   if (!('options' in secrets)) {
