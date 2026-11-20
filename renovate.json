@@ -1102,6 +1102,15 @@
       "enabled": true
     },
     {
+      "groupName": "ssh2",
+      "matchDepNames": ["ssh2"],
+      "reviewers": ["team:workflows-eng"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:One Workflow"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "normalize-path",
       "matchDepNames": ["normalize-path", "@types/normalize-path"],
       "reviewers": ["team:kibana-operations"],

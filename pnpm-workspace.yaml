@@ -31,6 +31,7 @@ allowBuilds:
   'backport': false # writes config into the home dir
   'core-js': false # donation banner
   'core-js-pure': false # donation banner
+  'cpu-features': false # optional native accel for ssh2; the client is pure JS
   'es5-ext': false # prints an informational message
   'msw': false # copies a worker script if configured; unused
   'nice-napi': false # optional piscina nice-value helper
@@ -38,6 +39,7 @@ allowBuilds:
   'playwright-chromium': false # browsers installed explicitly in bootstrap
   'protobufjs': false # prints a version-scheme warning
   'puppeteer': false # browser download skipped via .puppeteerrc
+  'ssh2': false # optional native crypto binding; pure JS fallback is used
 
 # @elastic/esql suite versions, referenced via `catalog:` below (replaces the
 # deprecated `$@elastic/esql` override syntax). Must match `@elastic/esql` in

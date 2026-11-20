@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { downloadFile } from './execute_in_connector';
+import { remoteHostDownloadFileStepCommonDefinition } from '../../../common/steps/remote_host';
+import { createServerStepDefinition } from '../../step_registry/types';
+
+interface Deps {
+  getActionsStart: () => ActionsPluginStartContract | undefined;
+}
+
+export const createRemoteHostDownloadFileStepDefinition = ({ getActionsStart }: Deps) =>
+  createServerStepDefinition({
+    ...remoteHostDownloadFileStepCommonDefinition,
+    handler: async (context) => {
+      const { remotePath } = context.input;
+      const connectorId = context.config['connector-id'];
+
+      const content = await downloadFile(
+        {
+          connectorId,
+          request: context.contextManager.getFakeRequest(),
+          actionsStart: getActionsStart(),
+          abortSignal: context.abortSignal,
+        },
+        remotePath,
+        context.maxStepSizeBytes && context.maxStepSizeBytes > 0
+          ? context.maxStepSizeBytes
+          : 10 * 1024 * 1024
+      );
+
+      return { output: { content } };
+    },
+  });

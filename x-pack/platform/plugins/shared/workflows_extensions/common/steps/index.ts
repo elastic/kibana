@@ -6,4 +6,5 @@
  */
 
 export * from './data';
+export * from './remote_host';
 export * from './workflow';

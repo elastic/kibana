@@ -194,7 +194,7 @@ pageLoadAssetSize:
   share: 379
   shared-core: 343009
   shared-misc: 155260
-  shared-packages: 6065481
+  shared-packages: 6084812
   shared-plugins: 13536562
   shared-solution-packages: 386709
   significantEvents: 4439
@@ -238,5 +238,5 @@ pageLoadAssetSize:
   visualizationListing: 1488
   visualizations: 1147
   watcher: 5497
-  workflowsExtensions: 38186
+  workflowsExtensions: 42020
   workflowsManagement: 41727

@@ -76,5 +76,6 @@ bump-cli
 @oxlint/plugins
 @types/mssql
 monaco-marker-data-provider
+ssh2
 tabbable
 @opentelemetry/otlp-grpc-exporter-base

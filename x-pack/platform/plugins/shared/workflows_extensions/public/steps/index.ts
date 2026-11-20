@@ -37,6 +37,21 @@ export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry
     import('./data/data_concat_step').then((m) => m.dataConcatStepDefinition)
   );
   stepRegistry.register(() =>
+    import('./remote_host/remote_host_run_command_step').then(
+      (m) => m.remoteHostRunCommandStepDefinition
+    )
+  );
+  stepRegistry.register(() =>
+    import('./remote_host/remote_host_upload_file_step').then(
+      (m) => m.remoteHostUploadFileStepDefinition
+    )
+  );
+  stepRegistry.register(() =>
+    import('./remote_host/remote_host_download_file_step').then(
+      (m) => m.remoteHostDownloadFileStepDefinition
+    )
+  );
+  stepRegistry.register(() =>
     import('./workflow/get_last_run_step').then((m) => m.getLastRunStepDefinition)
   );
 };

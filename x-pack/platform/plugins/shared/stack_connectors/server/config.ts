@@ -19,6 +19,12 @@ import {
 const allowedExperimentalValues = getExperimentalAllowedValues();
 
 export const configSchema = schema.object({
+  sshHost: schema.object(
+    {
+      allowLegacyAlgorithms: schema.boolean({ defaultValue: false }),
+    },
+    { defaultValue: { allowLegacyAlgorithms: false } }
+  ),
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
     validate(list) {

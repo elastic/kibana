@@ -9,11 +9,21 @@
 
 import * as connectorsSpecs from './all_specs';
 import type { ConnectorSpec } from './connector_spec';
+import { SshHost } from './specs/ssh_host/ssh_host';
+
+/**
+ * Specs for connector types that a hand-written stack connector already registers.
+ * Kept out of `all_specs` so they are not registered again as a second action type.
+ * Agent Builder still reads them for attachment text and tool sub-actions.
+ */
+const specsForExistingConnectors: ConnectorSpec[] = [SshHost];
 
 /**
  * Returns the ConnectorSpec for a given connector type ID, or undefined if not found.
  */
 export function getConnectorSpec(connectorTypeId: string): ConnectorSpec | undefined {
-  const specEntries = Object.values(connectorsSpecs);
-  return specEntries.find((s) => s.metadata.id === connectorTypeId);
+  return (
+    Object.values(connectorsSpecs).find((spec) => spec.metadata.id === connectorTypeId) ??
+    specsForExistingConnectors.find((spec) => spec.metadata.id === connectorTypeId)
+  );
 }
