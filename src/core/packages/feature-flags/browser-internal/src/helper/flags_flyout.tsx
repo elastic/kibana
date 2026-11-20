@@ -17,7 +17,6 @@ import {
   EuiButtonIcon,
   EuiCode,
   EuiFieldNumber,
-  EuiFieldSearch,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,12 +27,14 @@ import {
   EuiIconTip,
   EuiInMemoryTable,
   EuiLoadingSpinner,
+  EuiSearchBar,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
   type EuiBasicTableColumn,
+  type Query,
 } from '@elastic/eui';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import { buildPath } from '@kbn/core-http-browser';
@@ -143,6 +144,17 @@ function evaluationValues(flags: TrackedFlagEvaluation[] | undefined): Record<st
   return values;
 }
 
+/** Lets the search box offer and validate `field:value` terms. Other terms match as plain text. */
+const searchSchema = {
+  strict: false,
+  fields: {
+    key: { type: 'string' },
+    type: { type: 'string' },
+    source: { type: 'string' },
+    value: { type: 'string' },
+  },
+} as const;
+
 const SAVED_INDICATOR_DURATION_MS = 1400;
 const fadeInOut = keyframes`
   0% {
@@ -170,7 +182,7 @@ export function FlagsFlyout({
   const [forbidden, setForbidden] = useState(false);
   const [overridesUnavailable, setOverridesUnavailable] = useState(false);
   const [errorMessage, setErrorMessage] = useState<ReactNode>();
-  const [searchText, setSearchText] = useState('');
+  const [query, setQuery] = useState<Query>(EuiSearchBar.Query.MATCH_ALL);
   // flag key -> save sequence number, so a repeat save restarts the indicator animation
   // Flags with a save in progress. They show as runtime overrides before the server confirms.
   const [savingKeys, setSavingKeys] = useState<ReadonlySet<string>>(new Set());
@@ -379,10 +391,13 @@ export function FlagsFlyout({
     defaultMessage: 'Search flags',
   });
 
-  const visibleRows = useMemo(() => {
-    const needle = searchText.trim().toLowerCase();
-    return needle ? rows.filter(({ key }) => key.toLowerCase().includes(needle)) : rows;
-  }, [searchText, rows]);
+  const visibleRows = useMemo(
+    () =>
+      EuiSearchBar.Query.execute(query, rows, {
+        defaultFields: ['key', 'type', 'source', 'value'],
+      }),
+    [query, rows]
+  );
 
   const columns: Array<EuiBasicTableColumn<FlagRow>> = [
     {
@@ -534,13 +549,20 @@ export function FlagsFlyout({
         {!loading && !overridesUnavailable && (
           <>
             <EuiSpacer size="m" />
-            <EuiFieldSearch
-              fullWidth
-              value={searchText}
-              placeholder={searchPlaceholder}
-              aria-label={searchPlaceholder}
-              onChange={(event) => setSearchText(event.target.value)}
-              data-test-subj="featureFlagsHelperSearch"
+            <EuiSearchBar
+              query={query}
+              box={{
+                incremental: true,
+                placeholder: searchPlaceholder,
+                schema: searchSchema,
+                'data-test-subj': 'featureFlagsHelperSearch',
+              }}
+              onChange={({ query: nextQuery }) => {
+                // Keep the last valid query while the typed one is incomplete.
+                if (nextQuery) {
+                  setQuery(nextQuery);
+                }
+              }}
             />
           </>
         )}

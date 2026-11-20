@@ -82,6 +82,46 @@ describe('FlagsFlyout', () => {
     expect(screen.getByText('beta.flag')).toBeInTheDocument();
   });
 
+  test('searches by field as well as by flag name', async () => {
+    const http = createHttp();
+    http.post.mockResolvedValue({
+      flags: [
+        { key: 'alpha.flag', value: true },
+        { key: 'beta.flag', value: 'needle' },
+        { key: 'gamma.flag', value: 7 },
+      ],
+    });
+    http.get.mockResolvedValue({
+      runtimeOverrides: { 'gamma.flag': 7 },
+      configOverrides: {},
+    });
+    renderFlyout(http);
+    await screen.findByText('alpha.flag');
+    const search = screen.getByPlaceholderText('Search flags');
+    const expectOnly = async (shown: string[]) => {
+      await waitFor(() => {
+        ['alpha.flag', 'beta.flag', 'gamma.flag'].forEach((flag) => {
+          if (shown.includes(flag)) {
+            expect(screen.getByText(flag)).toBeInTheDocument();
+          } else {
+            expect(screen.queryByText(flag)).not.toBeInTheDocument();
+          }
+        });
+      });
+    };
+
+    await userEvent.type(search, 'type:boolean');
+    await expectOnly(['alpha.flag']);
+
+    await userEvent.clear(search);
+    await userEvent.type(search, 'source:runtime');
+    await expectOnly(['gamma.flag']);
+
+    await userEvent.clear(search);
+    await userEvent.type(search, 'needle');
+    await expectOnly(['beta.flag']);
+  });
+
   test('lists evaluated flags when the provider snapshot is empty', async () => {
     const http = createHttp();
     http.post.mockResolvedValue({ flags: [] });
