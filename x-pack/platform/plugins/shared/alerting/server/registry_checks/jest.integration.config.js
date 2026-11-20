@@ -12,7 +12,7 @@ module.exports = {
   rootDir: '../../../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/alerting'],
   testMatch: [
-    '<rootDir>/x-pack/platform/plugins/shared/alerting/server/integration_tests/alert_as_data_fields.test.ts',
-    '<rootDir>/x-pack/platform/plugins/shared/alerting/server/integration_tests/serverless_upgrade_and_rollback_checks.test.ts',
+    '<rootDir>/x-pack/platform/plugins/shared/alerting/server/registry_checks/alert_as_data_fields.test.ts',
+    '<rootDir>/x-pack/platform/plugins/shared/alerting/server/registry_checks/serverless_upgrade_and_rollback_checks.test.ts',
   ],
 };

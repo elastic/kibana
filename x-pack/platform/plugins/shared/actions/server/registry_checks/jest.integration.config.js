@@ -12,6 +12,6 @@ module.exports = {
   rootDir: '../../../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/actions'],
   testMatch: [
-    '<rootDir>/x-pack/platform/plugins/shared/actions/server/integration_tests/connector_types.test.ts',
+    '<rootDir>/x-pack/platform/plugins/shared/actions/server/registry_checks/connector_types.test.ts',
   ],
 };

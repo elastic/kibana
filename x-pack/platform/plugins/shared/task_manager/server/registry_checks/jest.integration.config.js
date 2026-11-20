@@ -12,7 +12,7 @@ module.exports = {
   rootDir: '../../../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/task_manager'],
   testMatch: [
-    '<rootDir>/x-pack/platform/plugins/shared/task_manager/server/integration_tests/task_cost_check.test.ts',
-    '<rootDir>/x-pack/platform/plugins/shared/task_manager/server/integration_tests/task_priority_check.test.ts',
+    '<rootDir>/x-pack/platform/plugins/shared/task_manager/server/registry_checks/task_cost_check.test.ts',
+    '<rootDir>/x-pack/platform/plugins/shared/task_manager/server/registry_checks/task_priority_check.test.ts',
   ],
 };

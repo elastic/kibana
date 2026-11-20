@@ -9,11 +9,9 @@ import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import type { TaskDefinition } from '../task';
-import { TaskCost } from '../task';
-import { setupTestServers } from './lib';
+import type { TaskDefinition, TaskPriority } from '../task';
+import { retry, setupTestServers } from '../integration_tests/lib';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
-import { sortBy } from 'lodash';
 
 jest.mock('../task_type_dictionary', () => {
   const actual = jest.requireActual('../task_type_dictionary');
@@ -25,8 +23,9 @@ jest.mock('../task_type_dictionary', () => {
   };
 });
 
-// Notify response-ops if a task sets a cost to something other than `Normal`
-describe('Task cost checks', () => {
+// Notify response-ops if a task sets a priority to something other than `Normal`
+// Failing: See https://github.com/elastic/kibana/issues/228815
+describe.skip('Task priority checks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let taskTypeDictionary: TaskTypeDictionary;
@@ -50,19 +49,17 @@ describe('Task cost checks', () => {
     }
   });
 
-  it('detects tasks with cost definitions', async () => {
-    const taskTypes = taskTypeDictionary.getAllDefinitions();
-    const taskTypesWithCost = sortBy(
-      taskTypes
+  it('detects tasks with priority definitions', async () => {
+    await retry(async () => {
+      const taskTypes = taskTypeDictionary.getAllDefinitions();
+      const taskTypesWithPriority = taskTypes
         .map((taskType: TaskDefinition) =>
-          !!taskType.cost ? { taskType: taskType.type, cost: taskType.cost } : null
+          !!taskType.priority ? { taskType: taskType.type, priority: taskType.priority } : null
         )
-        .filter(
-          (tt: { taskType: string; cost: TaskCost } | null) =>
-            null != tt && tt.cost !== TaskCost.Normal
-        ),
-      'taskType'
-    );
-    expect(taskTypesWithCost).toMatchSnapshot();
+        .filter((tt: { taskType: string; priority: TaskPriority } | null) => null != tt);
+
+      expect(taskTypesWithPriority.length).toEqual(2);
+      expect(taskTypesWithPriority).toMatchSnapshot();
+    });
   });
 });
