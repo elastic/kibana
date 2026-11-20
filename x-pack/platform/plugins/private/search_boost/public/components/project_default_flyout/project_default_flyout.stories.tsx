@@ -153,32 +153,23 @@ type Story = StoryObj<ProjectDefaultFlyoutProps>;
 
 export const Indices: Story = {};
 
-export const IndicesCustomProfile: Story = {
-  args: { selectedProfileName: 'catalog-fast' },
-};
-
 export const IndicesNoCustomProfiles: Story = {
   args: { profiles: MANAGED_INDICES_PROFILES },
 };
 
-/** Existing projects can have a converted profile instead of the Elastic-managed ones. */
-export const IndicesConvertedProfile: Story = {
+/**
+ * A built-in profile with no label or description listed for it,
+ * shows its name instead.
+ */
+export const IndicesUntrackedBuiltInProfile: Story = {
   args: {
     profiles: [indicesProfile('_converted_indices'), ...CUSTOM_INDICES_PROFILES],
     selectedProfileName: '_converted_indices',
   },
 };
 
-export const IndicesWithoutAppliesTo: Story = {
-  args: { matches: undefined, storageSizeInBytes: undefined },
-};
-
 export const DataStreams: Story = {
   args: DATA_STREAMS_ARGS,
-};
-
-export const DataStreamsCustomProfile: Story = {
-  args: { ...DATA_STREAMS_ARGS, selectedProfileName: 'logs-recent-week' },
 };
 
 export const DataStreamsNoCustomProfiles: Story = {
