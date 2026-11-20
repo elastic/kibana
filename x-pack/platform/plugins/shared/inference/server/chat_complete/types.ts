@@ -55,6 +55,8 @@ export type InferenceAdapterChatCompleteOptions = {
   metadata?: ChatCompleteMetadata;
   stream?: boolean;
   timeout?: number;
+  firstByteTimeoutMs?: number;
+  idleTimeoutMs?: number;
   maxContentLength?: number;
   cacheControl?: ChatCompleteCacheControl;
   sessionId?: string;
