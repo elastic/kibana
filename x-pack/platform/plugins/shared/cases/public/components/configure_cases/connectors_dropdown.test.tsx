@@ -59,6 +59,27 @@ describe('ConnectorsDropdown', () => {
     ).toBeInTheDocument();
   });
 
+  test.each([
+    ['dropdown-connector-no-connector', 'none'],
+    ['dropdown-connector-servicenow-1', 'servicenow-1'],
+    ['dropdown-connector-resilient-2', 'resilient-2'],
+    ['dropdown-connector-jira-1', 'jira-1'],
+    ['dropdown-connector-servicenow-sir', 'servicenow-sir'],
+    ['dropdown-connector-servicenow-uses-table-api', 'servicenow-uses-table-api'],
+  ])('it calls onChange with the connector id when selecting %s', async (testSubj, id) => {
+    const onChange = jest.fn();
+    renderWithTestingProviders(
+      <ConnectorsDropdown {...props} onChange={onChange} selectedConnector="other" />
+    );
+
+    // the EUI popover panel is `pointer-events: none` while it animates open
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    await user.click(screen.getByTestId('dropdown-connectors'));
+    await user.click(await screen.findByTestId(testSubj));
+
+    expect(onChange).toHaveBeenCalledWith(id);
+  });
+
   test('it disables the dropdown', () => {
     renderWithTestingProviders(<ConnectorsDropdown {...props} disabled={true} />);
 
@@ -102,18 +123,21 @@ describe('ConnectorsDropdown', () => {
     ).not.toThrow();
   });
 
-  test('it shows the deprecated tooltip when the connector is deprecated', () => {
+  test('it shows the deprecated tooltip when the connector is deprecated', async () => {
     renderWithTestingProviders(
       <ConnectorsDropdown {...props} selectedConnector="servicenow-uses-table-api" />
     );
 
-    const tooltips = screen.getAllByText(
+    await userEvent.hover(
+      screen.getByText('This connector is deprecated. Update it, or create a new one.')
+    );
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
       'This connector is deprecated. Update it, or create a new one.'
     );
-    expect(tooltips[0]).toBeInTheDocument();
   });
 
-  test('it shows the deprecated tooltip when the connector is deprecated by configuration', () => {
+  test('it shows the deprecated tooltip when the connector is deprecated by configuration', async () => {
     const connector = connectors[0];
     renderWithTestingProviders(
       <ConnectorsDropdown
@@ -128,9 +152,12 @@ describe('ConnectorsDropdown', () => {
       />
     );
 
-    const tooltips = screen.getAllByText(
+    await userEvent.hover(
+      screen.getByText('This connector is deprecated. Update it, or create a new one.')
+    );
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
       'This connector is deprecated. Update it, or create a new one.'
     );
-    expect(tooltips[0]).toBeInTheDocument();
   });
 });

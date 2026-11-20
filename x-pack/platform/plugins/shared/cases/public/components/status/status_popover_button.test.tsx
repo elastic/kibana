@@ -56,5 +56,21 @@ describe('StatusPopoverButton', () => {
         label
       );
     });
+
+    it('renders a distinct badge color per status', () => {
+      // Emotion derives the class name from the styles, so different colors yield different classes
+      const getClassName = (status: CaseStatuses) => {
+        const { unmount } = render(<StatusPopoverButton status={status} onClick={onClick} />);
+        const { className } = screen.getByTestId(`case-status-badge-popover-button-${status}`);
+        unmount();
+        return className;
+      };
+
+      const classNames = [CaseStatuses.open, CaseStatuses['in-progress'], CaseStatuses.closed].map(
+        getClassName
+      );
+
+      expect(new Set(classNames).size).toBe(3);
+    });
   });
 });
