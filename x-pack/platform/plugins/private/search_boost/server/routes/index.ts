@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { AuthzDisabled } from '@kbn/core-security-server';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { PROFILES_API_PATH, RULES_API_PATH } from '../../common/constants';
 import type { GetBoostProfilesResponse, GetBoostRulesResponse } from '../../common/types';
@@ -14,9 +15,7 @@ import { getRuleListItems } from '../lib/coverage';
 // Temporary until Elasticsearch can explain every index and data stream (see `local_explain.ts`).
 import { explainTargets, getBoostTargets } from '../lib/local_explain';
 
-const SECURITY = {
-  authz: { enabled: false, reason: 'Relies on es client for authorization' },
-} as const;
+const SECURITY = { authz: AuthzDisabled.delegateToESClient };
 
 export const registerRoutes = (router: IRouter) => {
   router.get(

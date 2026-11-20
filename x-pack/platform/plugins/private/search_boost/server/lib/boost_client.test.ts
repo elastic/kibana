@@ -52,6 +52,23 @@ describe('boost client', () => {
     });
   });
 
+  it('keeps `prewarm` and `pinned` when Elasticsearch already returns booleans', async () => {
+    const client = elasticsearchServiceMock.createElasticsearchClient();
+    const profile = {
+      name: 'fast',
+      type: 'indices',
+      is_builtin: false,
+      min_boost: 1,
+      max_boost: 5,
+      availability: 'base',
+      prewarm: false,
+      pinned: true,
+    };
+    client.transport.request.mockResolvedValue({ fast: profile });
+
+    expect(await getBoostProfiles(client)).toEqual([profile]);
+  });
+
   it('lists the rules', async () => {
     const client = elasticsearchServiceMock.createElasticsearchClient();
     const rule = {

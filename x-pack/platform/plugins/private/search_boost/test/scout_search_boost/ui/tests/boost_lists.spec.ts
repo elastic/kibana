@@ -55,6 +55,7 @@ test.describe('Search boost rules and profiles', { tag: ['@local-serverless-vect
     const indicesProfile = searchBoost.row(profilesTable, testData.indicesProfile);
 
     await test.step('has no accessibility violations', async () => {
+      await expect(indicesProfile).toBeVisible();
       const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
       expect(violations).toStrictEqual([]);
     });

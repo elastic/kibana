@@ -28,7 +28,8 @@
     "@kbn/data-lifecycle-phases",
     "@kbn/es-ui-shared-plugin",
     "@kbn/react-query",
-    "@kbn/shared-ux-router"
+    "@kbn/shared-ux-router",
+    "@kbn/core-security-server"
   ],
   "exclude": [
     "target/**/*"
