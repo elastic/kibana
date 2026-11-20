@@ -318,7 +318,7 @@ it.each([
   [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '14:cec28bf5'],
   [AESOP_DRIFT_MONITOR_WORKFLOW_ID, AESOP_DRIFT_MONITOR_YAML, '12:0fea1d55'],
   [AESOP_EXPLORER_WORKFLOW_ID, AESOP_EXPLORER_YAML, '13:7a836836'],
-  [AESOP_REFINE_WORKFLOW_ID, AESOP_REFINE_YAML, '1:14e4c70b'],
+  [AESOP_REFINE_WORKFLOW_ID, AESOP_REFINE_YAML, '2:7c7a68e3'],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
   (workflowId, inputs, expectedFingerprint) => {
@@ -703,6 +703,22 @@ describe('managedWorkflowDefinitions', () => {
         expect(step?.with).not.toHaveProperty('tools');
         expect(step?.with?.prompt).toContain('steps.collect_failures.output.markdown');
         expect(step?.with?.prompt).not.toMatch(/expected|reference_output|dataset/i);
+      });
+
+      // A schema sends the whole skill as one JSON tool argument; long
+      // markdown comes back with raw newlines and fails the argument parse.
+      it('takes the rewrite as tagged text, not structured output', () => {
+        expect(byName.get('rewrite')?.with).not.toHaveProperty('schema');
+        expect(byName.get('rewrite')?.with?.systemPrompt).toContain('<skill_instructions>');
+        expect(byName.get('parse_rewrite')?.with?.rewrite_content).toContain(
+          "split: '<skill_instructions>'"
+        );
+        expect(byName.get('resolve_rewrite')?.with?.rewrite_ok).toContain(
+          'variables.rewrite_tagged == true'
+        );
+        expect(byName.get('round_variants')?.with?.variants?.[1]).toContain(
+          'variables.rewrite_content'
+        );
       });
     });
   });

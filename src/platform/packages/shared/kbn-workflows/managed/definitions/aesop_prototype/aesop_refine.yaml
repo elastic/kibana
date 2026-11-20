@@ -32,20 +32,7 @@ consts:
   MIN_GAIN: 0.02
   FAILURE_THRESHOLD: 0.75
   MAX_FAILURES: 10
-  rewrite_schema:
-    type: object
-    properties:
-      content:
-        type: string
-        maxLength: 60000
-        description: The complete rewritten skill instructions (markdown), not a diff.
-      changes:
-        type: string
-        maxLength: 2000
-        description: What changed and which failures each change addresses, in a few sentences.
-    required:
-      - content
-      - changes
+  MAX_CONTENT_CHARS: 60000
 outputs:
   - name: rounds
     type: number
@@ -207,6 +194,11 @@ steps:
             expected answer; never copy a value, host, user or verdict from one
             example into the instructions. Keep what the current instructions
             already get right. Return the complete instructions, not a diff.
+            Answer in exactly this shape and nothing else:
+            <change_summary>what changed and which failures each change
+            addresses, in a few sentences</change_summary>
+            <skill_instructions>the complete rewritten instructions, as
+            markdown</skill_instructions>
           prompt: |-
             Current skill instructions:
 
@@ -217,16 +209,31 @@ steps:
             {{ steps.collect_failures.output.failed_examples }} of {{ steps.collect_failures.output.scored_examples }} examples failed (mean score {{ steps.collect_failures.output.mean_score }}, threshold {{ consts.FAILURE_THRESHOLD }}). The lowest-scoring ones:
 
             {{ steps.collect_failures.output.markdown }}
-          schema: '${{ consts.rewrite_schema }}'
+
+      # Plain text between tags, not a structured-output schema: a long
+      # markdown skill sent as a JSON tool argument comes back with raw
+      # newlines inside the string, and the strict argument parse rejects it.
+      # Runs every round so a skipped or failed rewrite clears last round's.
+      - name: parse_rewrite
+        type: data.set
+        with:
+          rewrite_tagged: >-
+            ${{ variables.have_failures == true
+              and steps.rewrite.error == null
+              and steps.rewrite.output.content contains '<skill_instructions>'
+              and steps.rewrite.output.content contains '</skill_instructions>' }}
+          rewrite_content: >-
+            {{ steps.rewrite.output.content | default: '' | split: '<skill_instructions>' | last | split: '</skill_instructions>' | first | strip | truncate: consts.MAX_CONTENT_CHARS, '' }}
+          rewrite_changes: >-
+            {{ steps.rewrite.output.content | default: '' | split: '<change_summary>' | last | split: '</change_summary>' | first | strip | truncate: 2000 }}
 
       - name: resolve_rewrite
         type: data.set
         with:
           rewrite_ok: >-
-            ${{ variables.have_failures == true
-              and steps.rewrite.error == null
-              and steps.rewrite.output.content.content != blank
-              and steps.rewrite.output.content.content != variables.current_content }}
+            ${{ variables.rewrite_tagged == true
+              and variables.rewrite_content != blank
+              and variables.rewrite_content != variables.current_content }}
 
       # Previous best (variant 0) against the rewrite (variant 1) and a fresh
       # no-skill baseline, in evaluate mode: no proposal and no nested refine.
@@ -238,7 +245,7 @@ steps:
         with:
           variants:
             - '{{ variables.current_content }}'
-            - '{{ steps.rewrite.output.content.content }}'
+            - '{{ variables.rewrite_content }}'
 
       - name: evaluate
         type: workflow.execute
@@ -306,9 +313,9 @@ steps:
             description: >-
               Round {{ variables.rounds }} of at most {{ consts.MAX_ROUNDS }}: {% if variables.evaluated == true %}the best arm scored {{ steps.evaluate.output.best_mean }} against a baseline of {{ steps.evaluate.output.baseline_mean }} (p={{ steps.evaluate.output.best_p_value | default: 'n/a' }}, n={{ steps.evaluate.output.sample_size }}); {% if variables.rewrite_best == true %}the rewrite beat the previous best{% else %}the previous best held{% endif %}.{% else %}no A/B ran.{% endif %} {% if variables.stop_reason != blank %}Stopped: {{ variables.stop_reason }}.{% endif %}
             content: >-
-              {% if variables.rewrite_ok == true %}{{ steps.rewrite.output.content.changes }}
+              {% if variables.rewrite_ok == true %}{{ variables.rewrite_changes }}
 
-              {{ steps.rewrite.output.content.content | truncate: 60000, "" }}{% endif %}
+              {{ variables.rewrite_content }}{% endif %}
             tags:
               - aesop
               - aesop:refine
