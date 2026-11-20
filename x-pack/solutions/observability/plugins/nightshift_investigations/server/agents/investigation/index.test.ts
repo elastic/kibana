@@ -83,6 +83,16 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).not.toContain('{{knowledge_wiki_section}}');
   });
 
+  it('tells the investigator to fetch the impact and per-service time series', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({ sandboxEnabled: true, wikiEnabled: false })
+    );
+
+    expect(base.instructions).toContain('Fetch the evidence for the impact as a time series');
+    expect(base.instructions).toContain('for each service or component it hit');
+    expect(base.instructions).toContain('never estimate or fill in points');
+  });
+
   it('adds Semantic Memory context and workflows when memory is enabled', async () => {
     const base = await baseFor(
       getInvestigationAgentType({
