@@ -201,6 +201,7 @@ minimumReleaseAgeExclude:
   - langsmith@0.11.1
   - qs@6.17.0
   - minimatch@11.0.4
+  # Required to install the requested MongoDB 7.9.0+ upgrade before its release-age window closes.
   - mongodb@7.9.1
 
 # pnpm reads all workspace config from this file — pnpm 11 no longer reads
