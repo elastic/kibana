@@ -20,9 +20,9 @@ import {
   AutomationsSection,
   ConnectAgentPanel,
   FailedAutomationRunsCallout,
+  KnowledgeDocumentsChartPanel,
   LearnMorePanel,
   ManageAutomationsLink,
-  OverviewPlaceholderPanel,
   OverviewStatCards,
   RecentKnowledgeDocumentsPanel,
   SourcesPanel,
@@ -82,13 +82,6 @@ const settingsTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.
 const discoverLinkLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.discoverLink', {
   defaultMessage: 'Open in Discover',
 });
-
-const documentsChartPlaceholderTitle = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.overview.placeholder.documentsChartTitle',
-  {
-    defaultMessage: 'Knowledge documents over time',
-  }
-);
 
 export const AiIndexDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -329,10 +322,7 @@ export const AiIndexDetailPage = () => {
             </EuiFlexItem>
             {hasKnowledgeIndicators && (
               <EuiFlexItem>
-                <OverviewPlaceholderPanel
-                  title={documentsChartPlaceholderTitle}
-                  data-test-subj="contextOverviewDocumentsChartPlaceholder"
-                />
+                <KnowledgeDocumentsChartPanel aiIndexId={resolvedAiIndexId} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

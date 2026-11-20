@@ -48,6 +48,18 @@ export interface ListKiGroupsResponse {
   groups: KiGroup[];
 }
 
+/** KIs added on one UTC day. */
+export interface KiHistogramBucket {
+  /** UTC day, `YYYY-MM-DD`. */
+  date: string;
+  count: number;
+}
+
+export interface KiHistogramResponse {
+  /** One bucket per day, oldest first, days without KIs included. */
+  buckets: KiHistogramBucket[];
+}
+
 export type KiJsonPrimitive = string | number | boolean | null;
 export type KiJsonValue = KiJsonPrimitive | KiJsonValue[] | { [key: string]: KiJsonValue };
 

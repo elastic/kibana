@@ -93,6 +93,10 @@ jest.mock('@kbn/workflows-ui', () => ({
 
 const mockUseListKi = jest.fn();
 
+jest.mock('../hooks/use_ki_histogram', () => ({
+  useKiHistogram: () => ({ buckets: [], isLoading: true, error: undefined }),
+}));
+
 jest.mock('../hooks/use_list_ki', () => ({
   useListKi: (...args: unknown[]) => mockUseListKi(...args),
 }));
@@ -656,8 +660,8 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextOverviewStatCardValue-sources')).toHaveTextContent('1');
     expect(screen.getByTestId('contextOverviewStatCardValue-automations')).toHaveTextContent('1');
     expect(screen.getByTestId('contextOverviewRecentDocuments')).toBeInTheDocument();
-    expect(screen.getByTestId('contextOverviewDocumentsChartPlaceholder')).toHaveTextContent(
-      'Coming soon.'
+    expect(screen.getByTestId('contextOverviewDocumentsChart')).toHaveTextContent(
+      'Knowledge documents over time'
     );
     expect(screen.getByTestId('contextOverviewLearnMore')).toBeInTheDocument();
     expect(screen.queryByTestId('contextOverviewFailedRunsCallout')).not.toBeInTheDocument();
@@ -734,9 +738,7 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.getByTestId('contextOverviewRecentDocumentsEmpty')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('contextOverviewDocumentsChartPlaceholder')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextOverviewDocumentsChart')).not.toBeInTheDocument();
   });
 
   it('shows no knowledge documents count when the summary request fails', async () => {

@@ -22,6 +22,7 @@
     "@kbn/core",
     "@kbn/core-http-browser",
     "@kbn/react-query",
+    "@kbn/charts-theme",
     "@kbn/scout",
     "@kbn/logging",
     "@kbn/config-schema",

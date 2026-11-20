@@ -185,3 +185,15 @@ describe('contextEngineQueryKeys.aiIndex.viewKi', () => {
     expect(viewKey[3]).toBe('ki');
   });
 });
+
+describe('contextEngineQueryKeys.aiIndex.kiHistogram', () => {
+  it('sits under the list_ki prefix, so KI mutations invalidate it too', () => {
+    expect(contextEngineQueryKeys.aiIndex.kiHistogram('idx')).toEqual([
+      'context_engine',
+      'ai_index',
+      'idx',
+      'list_ki',
+      '_histogram',
+    ]);
+  });
+});

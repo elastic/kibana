@@ -26,6 +26,10 @@ export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
  * `PATCH`, `DELETE` and `_restore` still reach it.
  */
 export const AI_INDEX_KI_GROUPS_PATH = `${AI_INDEX_KI_LIST_PATH}/_groups`;
+/** Same routing note as `_groups`: `GET` can't read a KI whose id is exactly `_histogram`. */
+export const AI_INDEX_KI_HISTOGRAM_PATH = `${AI_INDEX_KI_LIST_PATH}/_histogram`;
+/** Number of UTC days in the KI histogram, today included. */
+export const KI_HISTOGRAM_DAYS = 30;
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;
