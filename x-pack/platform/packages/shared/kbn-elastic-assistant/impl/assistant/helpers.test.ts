@@ -115,8 +115,8 @@ describe('helpers', () => {
       expect(result).toBe(inferenceEndpoint);
     });
 
-    it.each([undefined, '', 'NO_DEFAULT_CONNECTOR', 'NO_DEFAULT_MODEL'])(
-      'should ignore the connector flagged as default when the setting is %p',
+    it.each([undefined, '', 'NO_DEFAULT_CONNECTOR', 'a-stale-setting-value'])(
+      'should use the connector flagged as default by the server when the browser setting is %p',
       (settingValue) => {
         clientGet.mockImplementation((key: string) => {
           if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
@@ -124,15 +124,15 @@ describe('helpers', () => {
           }
           return undefined;
         });
-        const staleFlagged: AIConnector = { ...connector2, isDefault: true };
+        const flagged: AIConnector = { ...connector2, isDefault: true };
 
-        const result = getDefaultConnector([defaultConnector, staleFlagged], settings);
+        const result = getDefaultConnector([defaultConnector, flagged], settings);
 
-        expect(result).toBe(defaultConnector);
+        expect(result).toBe(flagged);
       }
     );
 
-    it('should prefer the exact id match over a connector flagged as default', () => {
+    it('should prefer the connector flagged as default by the server over an exact id match of the browser setting', () => {
       clientGet.mockImplementation((key: string) => {
         if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
           return defaultConnector.id;
@@ -141,9 +141,9 @@ describe('helpers', () => {
       });
       const flagged: AIConnector = { ...connector2, isDefault: true };
 
-      const result = getDefaultConnector([flagged, defaultConnector], settings);
+      const result = getDefaultConnector([defaultConnector, flagged], settings);
 
-      expect(result).toBe(defaultConnector);
+      expect(result).toBe(flagged);
     });
 
     it('should return the first connector if there are multiple connectors and no default connector is defined', () => {

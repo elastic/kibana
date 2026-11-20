@@ -17,9 +17,8 @@ import { useKibana } from '../lib/kibana';
  * not stack connectors. The alert AI summary has its own inference feature, so a model assigned
  * only to the AI Assistant does not change which model the summary uses.
  *
- * `getDefaultConnector` also falls back to the entry the server flagged as the default, so a
- * default saved as a stack connector alias of an endpoint is found even though the list holds the
- * endpoint id.
+ * `getDefaultConnector` prefers the entry the server flagged as the default, so a default saved as a
+ * stack connector alias of an endpoint is found even though the list holds the endpoint id.
  */
 export const useDefaultAIConnectorId = () => {
   const { http, notifications, settings } = useKibana().services;
