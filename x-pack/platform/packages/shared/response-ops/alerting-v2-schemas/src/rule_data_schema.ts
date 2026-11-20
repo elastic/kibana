@@ -708,7 +708,7 @@ const artifactsSchema = lazySchema(() =>
 
 /** Create rule API schema */
 
-const REASON_DESCRIPTION = `Alert reason configuration. Only allowed when kind is "alert". \`template\` is the alert reason template, for example "CPU on {{host.name}} was {{cpu_pct}}%." Maximum ${MAX_REASON_TEMPLATE_LENGTH} characters. Whitespace is preserved; empty or whitespace-only templates are rejected.`;
+const REASON_DESCRIPTION = `Alert reason configuration. Only allowed when kind is "alert". \`template\` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Maximum ${MAX_REASON_TEMPLATE_LENGTH} characters. Whitespace is preserved; empty or whitespace-only templates are rejected.`;
 
 const reasonSchema = lazySchema(() =>
   z

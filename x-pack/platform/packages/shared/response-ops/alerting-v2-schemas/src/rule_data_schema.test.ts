@@ -97,7 +97,7 @@ describe.each(reasonSchemaCases)('$api reason template', ({ schema, payload }) =
   });
 
   it('preserves the original unresolved template and surrounding whitespace', () => {
-    const reason = { template: '  CPU on {{host.name}} was {{cpu_pct}}%.\n' };
+    const reason = { template: '  CPU on {{data.host.name}} was {{data.cpu_pct}}%.\n' };
 
     expect(schema.parse({ ...payload, reason })).toMatchObject({ reason });
   });
@@ -116,7 +116,7 @@ describe.each(reasonSchemaCases)('$api reason template', ({ schema, payload }) =
     { template: 42 },
     {},
     { template: 'CPU', unknown_key: true },
-    'CPU on {{host.name}}',
+    'CPU on {{data.host.name}}',
     42,
   ])('rejects an invalid reason: %p', (reason) => {
     expect(schema.safeParse({ ...payload, reason }).success).toBe(false);
@@ -141,7 +141,7 @@ describe('reason template clearing and inheritance', () => {
   ])('rejects a reason on a signal rule in $api', ({ schema }) => {
     const result = schema.safeParse({
       ...validSignalCreateData,
-      reason: { template: 'Match on {{host.name}}' },
+      reason: { template: 'Match on {{data.host.name}}' },
     });
 
     expect(result.success).toBe(false);
@@ -156,7 +156,7 @@ describe('reason template clearing and inheritance', () => {
 
   it('rejects a reason on a signal rule in bulk create', () => {
     const result = bulkCreateRulesRequestSchema.safeParse({
-      items: [{ ...validSignalCreateData, reason: { template: 'Match on {{host.name}}' } }],
+      items: [{ ...validSignalCreateData, reason: { template: 'Match on {{data.host.name}}' } }],
     });
 
     expect(result.success).toBe(false);
@@ -169,7 +169,7 @@ describe('reason template clearing and inheritance', () => {
   });
 
   it('inherits the reason contract in bulk-create items', () => {
-    const reason = { template: 'CPU on {{host.name}} was {{cpu_pct}}%.' };
+    const reason = { template: 'CPU on {{data.host.name}} was {{data.cpu_pct}}%.' };
 
     expect(
       bulkCreateRulesRequestSchema.parse({ items: [{ ...validCreateData, reason }] }).items[0]
@@ -184,7 +184,7 @@ describe('reason template clearing and inheritance', () => {
 describe('isReasonAllowedForKind', () => {
   it('accepts an alert reason template', () => {
     expect(
-      isReasonAllowedForKind({ kind: 'alert', reason: { template: 'CPU on {{host.name}}' } })
+      isReasonAllowedForKind({ kind: 'alert', reason: { template: 'CPU on {{data.host.name}}' } })
     ).toBe(true);
   });
 
@@ -195,7 +195,7 @@ describe('isReasonAllowedForKind', () => {
 
   it('rejects a configured reason on a signal rule', () => {
     expect(
-      isReasonAllowedForKind({ kind: 'signal', reason: { template: 'CPU on {{host.name}}' } })
+      isReasonAllowedForKind({ kind: 'signal', reason: { template: 'CPU on {{data.host.name}}' } })
     ).toBe(false);
   });
 });

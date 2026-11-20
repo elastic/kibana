@@ -726,7 +726,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "reason": Object {
               "additionalProperties": false,
-              "description": "Alert reason configuration. Only allowed when kind is \\"alert\\". \`template\` is the alert reason template, for example \\"CPU on {{host.name}} was {{cpu_pct}}%.\\" Maximum 1024 characters. Whitespace is preserved; empty or whitespace-only templates are rejected. Omit to leave it unset. Null is not accepted.",
+              "description": "Alert reason configuration. Only allowed when kind is \\"alert\\". \`template\` is the alert reason template, for example \\"CPU on {{data.host.name}} was {{data.cpu_pct}}%.\\" Maximum 1024 characters. Whitespace is preserved; empty or whitespace-only templates are rejected. Omit to leave it unset. Null is not accepted.",
               "properties": Object {
                 "template": Object {
                   "description": "Alert reason template.",

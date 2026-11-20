@@ -340,7 +340,7 @@ describe('ruleModelVersions', () => {
         ?.forwardCompatibility as ObjectType;
       const attributes = {
         ...createV11RuleDocument().attributes,
-        reason: { template: 'CPU on {{host.name}} was {{cpu_pct}}%.' },
+        reason: { template: 'CPU on {{data.host.name}} was {{data.cpu_pct}}%.' },
       };
 
       expect(forwardCompatibility.validate({ ...attributes, future_field: true })).toEqual(
@@ -361,7 +361,7 @@ describe('ruleModelVersions', () => {
           ...document,
           attributes: {
             ...document.attributes,
-            reason: { template: 'CPU on {{host.name}} was {{cpu_pct}}%.' },
+            reason: { template: 'CPU on {{data.host.name}} was {{data.cpu_pct}}%.' },
           },
         },
         fromVersion: 12,

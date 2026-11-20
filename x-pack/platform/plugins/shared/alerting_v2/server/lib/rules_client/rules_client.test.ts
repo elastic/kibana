@@ -233,7 +233,7 @@ describe('RulesClient', () => {
 
     it('persists and returns the reason', async () => {
       const client = createClient();
-      const reason = { template: 'CPU on {{host.name}} is high: {{avg_cpu}}' };
+      const reason = { template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}' };
 
       const res = await client.createRule({
         data: { ...baseCreateData, id: 'rule-id-1', reason },
@@ -607,7 +607,7 @@ describe('RulesClient', () => {
       getRuleExecutorTaskIdMock.mockImplementation(
         ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
       );
-      const reason = { template: 'CPU on {{host.name}} is high: {{avg_cpu}}' };
+      const reason = { template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}' };
 
       const res = await client.bulkCreateRules({
         items: [
@@ -1060,12 +1060,12 @@ describe('RulesClient', () => {
       [
         'preserves the stored reason when it is omitted',
         { schedule: { every: '5m' } },
-        { template: 'old reason {{host.name}}' },
+        { template: 'old reason {{data.host.name}}' },
       ],
     ])('%s', async (_name, data, expectedReason) => {
       const client = createClient();
       rulesSavedObjectService.get.mockResolvedValueOnce({
-        attributes: { ...baseSoAttrs, reason: { template: 'old reason {{host.name}}' } },
+        attributes: { ...baseSoAttrs, reason: { template: 'old reason {{data.host.name}}' } },
         version: 'WzEsMV0=',
         id: 'rule-id-1',
       });
@@ -1814,7 +1814,7 @@ describe('RulesClient', () => {
         const client = createClient();
         const existingDoc = {
           id: 'rule-id-1',
-          attributes: { ...baseSoAttrs, reason: { template: 'old reason {{host.name}}' } },
+          attributes: { ...baseSoAttrs, reason: { template: 'old reason {{data.host.name}}' } },
           version: 'WzEsMV0=',
         };
         rulesSavedObjectService.get

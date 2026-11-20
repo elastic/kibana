@@ -43,7 +43,7 @@ const SAMPLE_RULE_DATA = {
   recovery: { strategy: 'no_breach' as const },
   no_data: { strategy: 'keep_last' as const },
   grouping: { fields: ['host.name'] },
-  reason: { template: 'CPU on {{host.name}} is high: {{avg_cpu}}' },
+  reason: { template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}' },
   state_transition: { pending: { count: 1 }, recovering: { count: 1 } },
 };
 

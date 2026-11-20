@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { deepFreeze } from '@kbn/std';
 import { ruleSavedObjectAttributesSchema } from './v9';
 
 const attributes = {
@@ -24,16 +23,12 @@ const attributes = {
 };
 
 describe('rule saved object attributes v9', () => {
-  beforeAll(() => {
-    deepFreeze({ schemas: { create: ruleSavedObjectAttributesSchema } });
-  });
-
   it('accepts existing rules without a reason', () => {
     expect(ruleSavedObjectAttributesSchema.validate(attributes)).toEqual(attributes);
   });
 
   it('preserves the original unresolved template including whitespace', () => {
-    const reason = { template: '  CPU on {{host.name}} was {{cpu_pct}}%.\n' };
+    const reason = { template: '  CPU on {{data.host.name}} was {{data.cpu_pct}}%.\n' };
     expect(ruleSavedObjectAttributesSchema.validate({ ...attributes, reason }).reason).toEqual(
       reason
     );
@@ -61,7 +56,7 @@ describe('rule saved object attributes v9', () => {
     { template: '\t\n' },
     { template: 42 },
     {},
-    'CPU on {{host.name}}',
+    'CPU on {{data.host.name}}',
     null,
   ])('rejects an invalid reason: %p', (reason) => {
     expect(() => ruleSavedObjectAttributesSchema.validate({ ...attributes, reason })).toThrow(

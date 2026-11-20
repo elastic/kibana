@@ -106,11 +106,14 @@ describe('utils', () => {
 
     it('stores the reason template at the top level', () => {
       const result = transformCreateRuleBodyToRuleSoAttributes(
-        { ...baseCreateData, reason: { template: 'CPU on {{host.name}} is {{cpu_pct}}%' } },
+        {
+          ...baseCreateData,
+          reason: { template: 'CPU on {{data.host.name}} is {{data.cpu_pct}}%' },
+        },
         serverFields
       );
 
-      expect(result.reason).toEqual({ template: 'CPU on {{host.name}} is {{cpu_pct}}%' });
+      expect(result.reason).toEqual({ template: 'CPU on {{data.host.name}} is {{data.cpu_pct}}%' });
     });
 
     it('leaves reason unset when not provided', () => {
@@ -337,7 +340,7 @@ describe('utils', () => {
 
     it('preserves the reason when update omits it', () => {
       const existing = createRuleSoAttributes({
-        reason: { template: 'High CPU on {{host.name}}' },
+        reason: { template: 'High CPU on {{data.host.name}}' },
       });
 
       const result = buildUpdateRuleAttributes(
@@ -346,7 +349,7 @@ describe('utils', () => {
         { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
       );
 
-      expect(result.reason).toEqual({ template: 'High CPU on {{host.name}}' });
+      expect(result.reason).toEqual({ template: 'High CPU on {{data.host.name}}' });
     });
 
     it('replaces the reason when update sends a new value', () => {
@@ -873,11 +876,13 @@ describe('utils', () => {
     });
 
     it('returns the reason in a response that satisfies the schema', () => {
-      const attrs = createRuleSoAttributes({ reason: { template: 'High CPU on {{host.name}}' } });
+      const attrs = createRuleSoAttributes({
+        reason: { template: 'High CPU on {{data.host.name}}' },
+      });
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
-      expect(result.reason).toEqual({ template: 'High CPU on {{host.name}}' });
+      expect(result.reason).toEqual({ template: 'High CPU on {{data.host.name}}' });
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 
