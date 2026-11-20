@@ -104,6 +104,26 @@ interface PackFormProps {
   onDirtyStateChange?: (isDirty: boolean) => void;
 }
 
+/**
+ * The agent policies a save writes the pack to: the selected ones, the ones with a
+ * shard, and every other agent policy of a shared integration that a selected one uses.
+ * Submission and the deploy confirmation must use the same set.
+ */
+export const getDeliveredPolicyIds = (
+  selectedPolicyIds: readonly string[],
+  shards: Record<string, number> | undefined,
+  groupsByPackagePolicyId: Record<string, { policyIds: string[] }> | undefined
+): string[] => {
+  const policies = new Set([...selectedPolicyIds, ...Object.keys(shards ?? {}).filter(Boolean)]);
+  for (const { policyIds: groupPolicyIds } of Object.values(groupsByPackagePolicyId ?? {})) {
+    if (groupPolicyIds.some((id) => selectedPolicyIds.includes(id))) {
+      groupPolicyIds.forEach((id) => policies.add(id));
+    }
+  }
+
+  return [...policies];
+};
+
 const PackFormComponent: React.FC<PackFormProps> = ({
   defaultValue,
   editMode = false,
@@ -377,21 +397,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         platform: platformValue,
         ...restPayload
       }: PackFormData) => {
-        const mappedShards = !isEmpty(shards)
-          ? (filter(
-              map(shards, (shard, key) => {
-                if (!isEmpty(key)) {
-                  return key;
-                }
-              })
-            ) as string[])
-          : [];
-        const policies = new Set([...payloadAgentPolicyIds, ...mappedShards]);
-        for (const { policyIds: groupPolicyIds } of Object.values(groupsByPackagePolicyId ?? {})) {
-          if (groupPolicyIds.some((id) => payloadAgentPolicyIds.includes(id))) {
-            groupPolicyIds.forEach((id) => policies.add(id));
-          }
-        }
+        const policies = getDeliveredPolicyIds(
+          payloadAgentPolicyIds,
+          shards,
+          groupsByPackagePolicyId
+        );
 
         // Emit schedule fields only when the user touched the schedule or the pack
         // already has one — otherwise an untouched legacy pack triggers a spurious
@@ -469,10 +479,15 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
 
+  const deliveredPolicyIds = useMemo(
+    () => getDeliveredPolicyIds(policyIds ?? [], shards, groupsByPackagePolicyId),
+    [policyIds, shards, groupsByPackagePolicyId]
+  );
+
   const agentCount = useMemo(
     () =>
       reduce(
-        policyIds,
+        deliveredPolicyIds,
         (acc, policyId) => {
           const agentPolicy = agentPoliciesById && agentPoliciesById[policyId];
 
@@ -480,7 +495,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         },
         0
       ),
-    [policyIds, agentPoliciesById]
+    [deliveredPolicyIds, agentPoliciesById]
   );
 
   const handleSaveClick = useCallback(async () => {
@@ -789,7 +804,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           onCancel={handleHideConfirmationModal}
           onConfirm={handleConfirmConfirmationClick}
           agentCount={agentCount}
-          agentPolicyCount={policyIds.length}
+          agentPolicyCount={deliveredPolicyIds.length}
         />
       )}
     </>

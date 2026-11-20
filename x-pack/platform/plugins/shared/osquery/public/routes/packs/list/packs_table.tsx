@@ -280,9 +280,13 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
         truncateText: true,
         width: '10%',
         render: (policyIds: string[], item: PackSavedObject) => {
-          // A disabled pack is not compiled into any integration, so the server reports
-          // no effective targets for it. Show its saved targets instead of a misleading 0.
-          const effectiveIds = item.enabled ? item.effective_policy_ids ?? policyIds : policyIds;
+          // A disabled pack is normally not compiled into any integration, so the server
+          // reports no effective targets for it. Show its saved targets instead of a
+          // misleading 0, but keep live targets if Fleet still delivers it (failed detach).
+          const effectiveIds =
+            item.enabled || item.effective_policy_ids?.length
+              ? item.effective_policy_ids ?? policyIds
+              : policyIds;
           const effectiveCount = effectiveIds?.length ?? 0;
 
           return effectiveCount > (policyIds?.length ?? 0) ? (

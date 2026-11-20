@@ -73,7 +73,9 @@ const packDataSchema = schema.object(
     updated_at: schema.maybe(schema.string()),
     updated_by: schema.maybe(schema.nullable(schema.string())),
     updated_by_profile_uid: schema.maybe(schema.nullable(schema.string())),
-    effective_policy_ids: schema.maybe(schema.arrayOf(schema.string())),
+    effective_policy_ids: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 10000 })
+    ),
     policy_ids: schema.maybe(
       schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 10000 })
     ),
@@ -100,8 +102,9 @@ const sharedIntegrationWarningsSchema = schema.maybe(
       code: schema.literal('shared_integration_overdelivery'),
       package_policy_id: schema.string(),
       package_policy_name: schema.string(),
-      additional_policy_ids: schema.arrayOf(schema.string()),
-    })
+      additional_policy_ids: schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 10000 }),
+    }),
+    { maxSize: 10000 }
   )
 );
 
@@ -125,7 +128,9 @@ export const readPackResponseSchema = schema.object({
       updated_at: schema.maybe(schema.string()),
       updated_by: schema.maybe(schema.nullable(schema.string())),
       updated_by_profile_uid: schema.maybe(schema.nullable(schema.string())),
-      effective_policy_ids: schema.maybe(schema.arrayOf(schema.string())),
+      effective_policy_ids: schema.maybe(
+        schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 10000 })
+      ),
       policy_ids: schema.maybe(
         schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 10000 })
       ),

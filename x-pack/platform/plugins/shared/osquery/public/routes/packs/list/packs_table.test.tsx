@@ -233,6 +233,30 @@ describe('PacksTable', () => {
         expect(within(cells[2]).queryByText(count, { selector: 'span[tabindex="0"]' })).toBeNull();
       }
     );
+
+    it('should keep live targets for a disabled pack that Fleet still delivers', () => {
+      mockUsePacks.mockReturnValue({
+        data: {
+          data: [
+            createPack({
+              enabled: false,
+              policy_ids: ['policy-1'],
+              effective_policy_ids: ['policy-1', 'policy-2'],
+            }),
+          ],
+          total: 1,
+        },
+        isLoading: false,
+        isFetching: false,
+      });
+      renderComponent();
+      const row = screen.getByText('test-pack').closest('tr');
+      expect(row).not.toBeNull();
+      const cells = within(row as HTMLElement).getAllByRole('cell');
+      expect(
+        within(cells[2]).getByText('2', { selector: 'span[tabindex="0"]' })
+      ).toBeInTheDocument();
+    });
   });
 
   describe('active/inactive toggle', () => {

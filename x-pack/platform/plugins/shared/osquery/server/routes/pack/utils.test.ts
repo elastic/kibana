@@ -2516,6 +2516,28 @@ describe('computeEffectivePolicyIds', () => {
     );
   });
 
+  test('ignores integrations and inputs that Fleet does not deliver', async () => {
+    const disabledIntegration = {
+      ...targetingPackagePolicy('off', ['A'], { 'space--pack': {} }),
+      enabled: false,
+    } as PackagePolicy;
+    const disabledInput = targetingPackagePolicy('input-off', ['B'], { 'space--pack': {} });
+    (disabledInput.inputs[0] as { enabled?: boolean }).enabled = false;
+    const live = {
+      ...targetingPackagePolicy('live', ['C'], { 'space--pack': {} }),
+      enabled: true,
+    } as PackagePolicy;
+
+    expect(
+      await computeEffectivePolicyIds(
+        ['pack'],
+        'space',
+        [disabledIntegration, disabledInput, live],
+        lookup
+      )
+    ).toEqual(new Map([['pack', ['C']]]));
+  });
+
   test('propagates lookup failures so callers can omit unknown effective targets', async () => {
     getByIds.mockRejectedValue(new Error('Fleet unavailable'));
     await expect(

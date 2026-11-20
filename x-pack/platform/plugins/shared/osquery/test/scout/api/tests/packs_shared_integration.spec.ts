@@ -76,27 +76,46 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ kbnClient, apiServices }) => {
+      // Attempt every cleanup (packs → integrations → agent policies) even if one fails,
+      // so a single error does not leave the remaining fixtures on the shared stack.
+      const failures: unknown[] = [];
+      const attempt = async (cleanup: () => Promise<unknown>) => {
+        try {
+          await cleanup();
+        } catch (error) {
+          failures.push(error);
+        }
+      };
+
       for (const packId of createdPackIds) {
-        await apiServices.osquery.packs.delete(packId);
+        await attempt(() => apiServices.osquery.packs.delete(packId));
       }
 
       for (const id of [sharedPackagePolicyId, dedicatedPackagePolicyId]) {
         if (id) {
-          await kbnClient.request({
-            method: 'DELETE',
-            path: `${testData.API_PATHS.FLEET_PACKAGE_POLICIES}/${id}`,
-            ignoreErrors: [404],
-          });
+          await attempt(() =>
+            kbnClient.request({
+              method: 'DELETE',
+              path: `${testData.API_PATHS.FLEET_PACKAGE_POLICIES}/${id}`,
+              ignoreErrors: [404],
+            })
+          );
         }
       }
 
       for (const agentPolicyId of createdAgentPolicyIds) {
-        await kbnClient.request({
-          method: 'POST',
-          path: `${testData.API_PATHS.FLEET_AGENT_POLICIES}/delete`,
-          body: { agentPolicyId },
-          ignoreErrors: [404],
-        });
+        await attempt(() =>
+          kbnClient.request({
+            method: 'POST',
+            path: `${testData.API_PATHS.FLEET_AGENT_POLICIES}/delete`,
+            body: { agentPolicyId },
+            ignoreErrors: [404],
+          })
+        );
+      }
+
+      if (failures.length) {
+        throw new AggregateError(failures, `${failures.length} cleanup step(s) failed`);
       }
     });
 
@@ -217,15 +236,21 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
 
       const items = response.body.data as Array<{
+        name: string;
         saved_object_id: string;
         policy_ids: string[];
         effective_policy_ids?: string[];
       }>;
-      const partial = items.find((item) => item.saved_object_id === partialPackId);
-      expect(partial?.policy_ids).toStrictEqual([policyA, policyB]);
+      // Saved on A only, so the list must report B as effective without saving it.
+      const partial = items.find((item) => item.name === `e2e-disabled-partial-${suffix}`);
+      expect(partial?.policy_ids).toStrictEqual([policyA]);
       expect([...(partial?.effective_policy_ids ?? [])].sort()).toStrictEqual(
         [policyA, policyB].sort()
       );
+
+      const dedicated = items.find((item) => item.name === `e2e-dedicated-${suffix}`);
+      expect(dedicated?.policy_ids).toStrictEqual([policyD]);
+      expect(dedicated?.effective_policy_ids).toStrictEqual([policyD]);
     });
 
     // Runs last: it attaches another agent policy to the shared integration.

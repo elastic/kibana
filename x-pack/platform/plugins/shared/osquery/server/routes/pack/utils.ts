@@ -1084,7 +1084,11 @@ export const computeEffectivePolicyIds = async (
   }
 
   for (const packagePolicy of packagePolicies) {
-    const packs = packagePolicy.inputs[0]?.config?.osquery?.value?.packs ?? {};
+    // Fleet leaves disabled integrations and inputs out of the agent policy, so their
+    // pack blocks are never delivered.
+    const input = packagePolicy.inputs[0];
+    if (packagePolicy.enabled === false || input?.enabled === false) continue;
+    const packs = input?.config?.osquery?.value?.packs ?? {};
     for (const packKey of Object.keys(packs)) {
       const owners = policyIdsByPackKey.get(packKey);
       if (!owners) continue;

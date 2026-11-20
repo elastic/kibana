@@ -210,6 +210,48 @@ describe('PackForm', () => {
     expect(mockUpdateAsync.mock.calls[0][0].policy_ids).toEqual(expected);
   });
 
+  it('asks for deploy confirmation when only an added shared-integration member has agents', async () => {
+    mockUseAgentPolicies.mockReturnValue({
+      data: {
+        agentPoliciesById: {
+          A: { id: 'A', name: 'Alpha', agents: 0 },
+          B: { id: 'B', name: 'Beta', agents: 5 },
+        },
+        groupsByPackagePolicyId: {
+          integration: { id: 'integration', name: 'Shared hosts', policyIds: ['A', 'B'] },
+        },
+        groupIdByPolicyId: { A: 'integration', B: 'integration' },
+      },
+      isFetching: false,
+      isError: false,
+    });
+    const { getByTestId, findByText } = renderWithContext(
+      <PackForm
+        editMode
+        defaultValue={{
+          saved_object_id: 'partial-pack',
+          id: 'partial-pack',
+          name: 'partial-pack',
+          description: '',
+          created_at: '2024-01-01',
+          created_by: 'test-user',
+          updated_at: '2024-01-01',
+          updated_by: 'test-user',
+          references: [],
+          enabled: true,
+          queries: {},
+          policy_ids: ['A'],
+        }}
+      />
+    );
+
+    fireEvent.click(getByTestId('update-pack-button'));
+    expect(
+      await findByText('This action will update 2 agent policies affecting 5 agents')
+    ).toBeInTheDocument();
+    expect(mockUpdateAsync).not.toHaveBeenCalled();
+  });
+
   it('sets 25% for a shared integration and submits member shards', async () => {
     mockUseAgentPolicies.mockReturnValue({
       data: {
