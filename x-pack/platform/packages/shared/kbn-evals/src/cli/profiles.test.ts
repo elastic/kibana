@@ -290,6 +290,17 @@ describe('warnOnDeprecatedProfileFlags', () => {
     );
   });
 
+  it('ignores deprecated flag names after the -- terminator, which are not flags of this CLI', () => {
+    expect(setup(['--', '--export-profile', 'x', '--datasets-profile=y'])).not.toHaveBeenCalled();
+  });
+
+  it('still warns for a deprecated flag that comes before the -- terminator', () => {
+    const warning = setup(['--export-profile', 'x', '--', '--datasets-profile', 'y']);
+
+    expect(warning).toHaveBeenCalledTimes(1);
+    expect(String(warning.mock.calls[0][0])).toContain('--export-profile');
+  });
+
   it('says the deprecated flag is ignored when the new one is passed with another value', () => {
     const warning = setup(['--export-profile', 'old', '--tracing-profile', 'new']);
 

@@ -88,9 +88,13 @@ export const readTracingProfile = (flagsReader: FlagsReader): string | undefined
 /**
  * The parser gives a declared string flag the value `""` whether it was left out or passed empty
  * (for example `--export-profile "$UNSET_VAR"`), so only the raw arguments show that it was typed.
+ * Arguments after the `--` terminator are not flags of this CLI, so they are not scanned.
  */
-const isFlagInArgv = (argv: readonly string[], flag: string): boolean =>
-  argv.some((arg) => arg === `--${flag}` || arg.startsWith(`--${flag}=`));
+const isFlagInArgv = (argv: readonly string[], flag: string): boolean => {
+  const terminatorIndex = argv.indexOf('--');
+  const flagArgs = terminatorIndex === -1 ? argv : argv.slice(0, terminatorIndex);
+  return flagArgs.some((arg) => arg === `--${flag}` || arg.startsWith(`--${flag}=`));
+};
 
 const warnOnDeprecatedFlag = (
   flagsReader: FlagsReader,
