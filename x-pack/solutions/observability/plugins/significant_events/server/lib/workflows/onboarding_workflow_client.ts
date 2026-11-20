@@ -26,6 +26,7 @@ import {
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
+import type { SourceType } from '@kbn/nightshift-shared';
 import { StatusError } from '../errors/status_error';
 import { isStartedBefore, WorkflowExecutionService } from './workflow_execution_service';
 import type { EbtTelemetryClient } from '../telemetry/ebt/client';
@@ -77,6 +78,7 @@ interface OnboardingWorkflowInputPayload {
   sourceId: string;
   sourceSlug: string;
   sourceRevision: string;
+  sourceType: SourceType;
   rootTriggeredBy?: 'scheduled';
   skipFeatures: boolean;
   skipQueries: boolean;
@@ -126,16 +128,19 @@ const toWorkflowInputPayload = ({
   inputs,
   sourceSlug,
   sourceRevision,
+  sourceType,
 }: {
   inputs: SignificantEventsKIsOnboardingInputs;
   sourceSlug: string;
   sourceRevision: string;
+  sourceType: SourceType;
 }): OnboardingWorkflowInputPayload => {
   const { sourceId, features, queries } = inputs;
   return {
     sourceId,
     sourceSlug,
     sourceRevision,
+    sourceType,
     rootTriggeredBy: inputs.rootTriggeredBy,
     skipFeatures: features.skip,
     skipQueries: queries.skip,
@@ -339,6 +344,7 @@ export class SignificantEventsKIsOnboardingClient {
         inputs,
         sourceSlug,
         sourceRevision: source.esql_updated_at,
+        sourceType: source.type,
       }),
       request,
     });
@@ -635,6 +641,27 @@ export class SignificantEventsKIsOnboardingClient {
     );
 
     return results;
+  }
+
+  /** Returns the newest onboarding execution for one source. */
+  async getLatestExecution({
+    sourceId,
+    sourceSlug,
+    request,
+  }: ISourceRunIdentity & { request: KibanaRequest }): Promise<
+    WorkflowExecutionListItemDto | undefined
+  > {
+    const { results } = await this.workflowExecutionService.getExecutions(
+      {
+        concurrencyGroupKey: buildConcurrencyKey({ sourceId, sourceSlug }),
+        size: 1,
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+      },
+      request.spaceId,
+      request
+    );
+    return results[0];
   }
 
   private async resolveSourceSlug({

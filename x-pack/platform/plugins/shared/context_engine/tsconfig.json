@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "server/dreaming/templates/*.json",
     "scripts/**/*",
     "test/scout_agent_builder/**/*"
   ],
@@ -38,7 +39,6 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/shared-ux-page-solution-nav",
     "@kbn/app-header",
-    "@kbn/app-menu",
     "@kbn/core-chrome-browser",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
@@ -85,6 +85,8 @@
     "@kbn/usage-collection-plugin",
     "@kbn/unsaved-changes-prompt",
     "@kbn/cloud-plugin",
-    "@kbn/core-chrome-browser-context-mocks"
+    "@kbn/core-chrome-browser-context-mocks",
+    "@kbn/router-utils",
+    "@kbn/test"
   ]
 }
