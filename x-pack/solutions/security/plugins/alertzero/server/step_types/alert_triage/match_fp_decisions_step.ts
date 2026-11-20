@@ -383,6 +383,11 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
             const allowed = alertIds.slice(0, notesLeft);
             totals.left_for_notes += alertIds.length - allowed.length;
             if (allowed.length === 0) continue;
+            const skipTags = [
+              VERDICT_INCONCLUSIVE_TAG,
+              `${TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX}${id}`,
+            ];
+            let skipping: string[] = [];
             try {
               if (!(await stillActive(id))) {
                 logger.info(
@@ -390,16 +395,25 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
                 );
                 continue;
               }
-              await tagInChunks(write, {
-                alertIds: allowed,
-                add: [VERDICT_INCONCLUSIVE_TAG, `${TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX}${id}`],
-                remove: [],
-              });
-              totals.skipped += allowed.length;
-              queueNotes(id, allowed, 'skipped');
+              // Counted and noted per chunk: a later chunk that fails must not leave the alerts of
+              // an earlier one out of analysis with no note and no charge on the note allowance.
+              for (let from = 0; from < allowed.length; from += TAG_CHUNK_SIZE) {
+                skipping = allowed.slice(from, from + TAG_CHUNK_SIZE);
+                await write({ alertIds: skipping, add: skipTags, remove: [] });
+                totals.skipped += skipping.length;
+                queueNotes(id, skipping, 'skipped');
+                skipping = [];
+              }
             } catch (error) {
               totals.tag_failures++;
               warn(`Could not tag the alerts of decision ${id}`, error);
+              // The failed chunk may be tagged in part. Its alerts were untriaged, so taking the
+              // tags off puts them back in analysis, and the next sweep tries them again.
+              if (skipping.length > 0) {
+                await write({ alertIds: skipping, add: [], remove: skipTags }).catch((untagError) =>
+                  warn(`Could not take the tags of decision ${id} off a failed chunk`, untagError)
+                );
+              }
             }
           }
         };

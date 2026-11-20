@@ -13,6 +13,7 @@ import {
   DECISION_MATCH_WORK_BUDGET_MS,
   DECISION_NOTES_PER_SWEEP,
   NOTE_CONCURRENCY,
+  TAG_CHUNK_SIZE,
   type DecisionAutoCloseMode,
 } from '../../alert_triage/constants';
 import { decisionId, groupByStrictKey } from '../../alert_triage/fp_decisions';
@@ -872,6 +873,52 @@ describe('triage match decisions step in on mode', () => {
       },
     });
     expect(closes()).toEqual([]);
+  });
+
+  it('counts and notes the dismissal tags of the chunks before one that failed, since those alerts left analysis', async () => {
+    const id = decisionId('do_not_propose', hashOf('C:\\x.exe'));
+    const ids = Array.from({ length: TAG_CHUNK_SIZE + 100 }, (_unused, i) => `s${i}`);
+    const { run, callKibanaApi, notes } = setup({
+      mode: 'on',
+      alerts: ids.map((alertId): [string, Record<string, unknown>] => [
+        alertId,
+        source('C:\\x.exe'),
+      ]),
+      decisions: { [id]: stored('do_not_propose') },
+    });
+    const inner = callKibanaApi.getMockImplementation()!;
+    callKibanaApi.mockImplementation(
+      async (params: { path: string; body?: Record<string, any> }) => {
+        if (
+          params.path.endsWith('/signals/tags') &&
+          params.body?.ids[0] === `s${TAG_CHUNK_SIZE}` &&
+          params.body?.tags.tags_to_add.length > 0
+        ) {
+          throw new Error('tag failed');
+        }
+        return inner(params);
+      }
+    );
+
+    const { output } = await run();
+
+    expect(output).toEqual(
+      expect.objectContaining({ skipped: TAG_CHUNK_SIZE, tag_failures: 1, notes_missing: 0 })
+    );
+    expect(notes().map(({ eventId }) => eventId)).toEqual(ids.slice(0, TAG_CHUNK_SIZE));
+    // The failed chunk may be tagged in part, so its tags come off and its alerts go to analysis.
+    expect(
+      callKibanaApi.mock.calls
+        .filter(([{ path }]) => path.endsWith('/signals/tags'))
+        .map(([{ body }]) => body)
+        .at(-1)
+    ).toEqual({
+      ids: ids.slice(TAG_CHUNK_SIZE),
+      tags: {
+        tags_to_add: [],
+        tags_to_remove: ['az:inconclusive', `az:skipped_by_decision:${id}`],
+      },
+    });
   });
 
   describe('a signer in `on`', () => {
