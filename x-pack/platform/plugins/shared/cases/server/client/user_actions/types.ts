@@ -17,6 +17,10 @@ export interface UserActionGet {
   caseId: string;
 }
 
+export interface UserActionGetDelta extends UserActionGet {
+  since: string;
+}
+
 export type GetConnectorsRequest = UserActionGet;
 export type GetUsersRequest = UserActionGet;
 

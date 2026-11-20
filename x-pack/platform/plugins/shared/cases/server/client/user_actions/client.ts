@@ -7,6 +7,7 @@
 
 import type {
   CaseUserActionsDeprecatedResponse,
+  CaseDeltaResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   GetCaseUsersResponse,
@@ -17,8 +18,15 @@ import { get } from './get';
 import { getConnectors } from './connectors';
 import { getStats } from './stats';
 import { getUsers } from './users';
-import type { GetConnectorsRequest, UserActionFind, UserActionGet, GetUsersRequest } from './types';
+import type {
+  GetConnectorsRequest,
+  UserActionFind,
+  UserActionGet,
+  UserActionGetDelta,
+  GetUsersRequest,
+} from './types';
 import { find } from './find';
+import { getDelta } from './delta';
 import type { CasesClient } from '../client';
 /**
  * API for interacting the actions performed by a user when interacting with the cases entities.
@@ -38,6 +46,10 @@ export interface UserActionsSubClient {
    */
   stats(params: UserActionGet): Promise<CaseUserActionStatsResponse>;
   /**
+   * Counts the user actions by other users since a given date, grouped by category
+   */
+  getDelta(params: UserActionGetDelta): Promise<CaseDeltaResponse>;
+  /**
    * Retrieves all users participating in a case
    */
   getUsers(params: GetUsersRequest): Promise<GetCaseUsersResponse>;
@@ -55,6 +67,7 @@ export const createUserActionsSubClient = (
     getAll: (params) => get(params, clientArgs),
     getConnectors: (params) => getConnectors(params, clientArgs),
     stats: (params) => getStats(params, casesClient, clientArgs),
+    getDelta: (params) => getDelta(params, casesClient, clientArgs),
     getUsers: (params) => getUsers(params, casesClient, clientArgs),
   };
 

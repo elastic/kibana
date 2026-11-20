@@ -134,6 +134,7 @@ export const INTERNAL_CASE_WORKFLOW_RUN_URL =
   `${CASES_INTERNAL_URL}/workflows/{workflow_id}/run` as const;
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
+export const INTERNAL_CASE_DELTA_URL = `${CASES_INTERNAL_URL}/{case_id}/delta` as const;
 export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
   `${CASES_INTERNAL_URL}/case/attachments/_find_containing_all` as const;
 
