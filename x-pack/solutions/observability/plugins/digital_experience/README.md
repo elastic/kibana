@@ -46,14 +46,17 @@ on serverless and stateful.
   users (distinct `app.installation.id`), error rate (exceptions per session), last seen, and the
   latest release. Rows are sorted by sessions and capped at 1,000. Crash-free sessions is `null`
   ("Not enough data") until a crash is defined and session start reaches the SDKs.
-- **Unmapped fields:** ES|QL rejects a query that reads a field no index maps, e.g.
-  `exception.type` on a cluster whose apps never threw. A `field_caps` call first lists the mobile
-  fields the user's readable OTel indices map (`server/lib/mobile/`): without `telemetry.sdk.name`
-  there is no mobile data, and a metric whose field is unmapped is 0 rather than read.
-- **Releases:** the release is the normalized `service.version`: a build in parentheses (`1.2.3 (45)`)
-  or after `+` (`1.2.3+45`) is dropped, so one release isn't split in two. The SDKs send the marketing
-  version already (the build goes to `app.build_id`); this covers versions set by hand. The latest release is the
-  one with the most sessions in the last 24 hours of the time range.
+- **Queries:** every mobile ES|QL query starts with `SET unmapped_fields = "NULLIFY"`, as the
+  session summaries do: a field no index maps, e.g. `exception.type` on a cluster whose apps never
+  threw, reads as `null` (and counts 0) instead of failing the query. Values from the request go in as
+  named `params`; only the Discover query, which takes no params, has them escaped into its text.
+  Results must be complete (`allow_partial_results: false`), and periods are half-open, so a
+  period and the one before it never share a document.
+- **Releases:** the release is `service.version` as the SDKs send it: Android's `versionName` and
+  iOS's short version, with the build (`versionCode`, `CFBundleVersion`) in `app.build_id`. It isn't
+  rewritten at query time; a version that carries its build would need fixing in the SDK or at
+  ingest. The latest release is each application's release with the most sessions in the last 24
+  hours of the time range, picked per application in ES|QL (`TOP`), so no row limit drops one.
 - **Applications list:** mobile rows have their own table (platforms, latest release, sessions, users,
   crash-free sessions, error rate, last seen) below the web table, or alone with the Mobile source
   filter, where it links to the EDOT Android and iOS docs without mobile data. The page loads chart

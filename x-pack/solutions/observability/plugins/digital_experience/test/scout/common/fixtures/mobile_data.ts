@@ -31,30 +31,34 @@ interface MobileDocument {
   sdkLanguage: string;
   osName?: string;
   version: string;
+  /** Android `versionCode` and iOS `CFBundleVersion`, apart from the release as the SDKs send it. */
+  buildId?: string;
   installationId?: string;
   sessionId: string;
   exception?: boolean;
 }
 
 const MOBILE_DOCUMENTS: MobileDocument[] = [
-  // React Native, Android: the build is part of the version.
+  // React Native, Android: `versionName` as the release, `versionCode` as the build.
   ...['rn-a-1', 'rn-a-2'].map((sessionId, index) => ({
     serviceName: MOBILE_APPS.reactNative,
     sdkName: 'android',
     sdkLanguage: 'java',
     osName: 'Android',
-    version: '1.0.0 (10)',
+    version: '1.0.0',
+    buildId: '10',
     installationId: 'installation-rn-android',
     sessionId,
     exception: index === 0,
   })),
-  // React Native, iOS: the same release with another build format.
+  // React Native, iOS: the same release, with its own build number.
   {
     serviceName: MOBILE_APPS.reactNative,
     sdkName: 'iOS',
     sdkLanguage: 'swift',
     osName: 'iOS',
-    version: '1.0.0+5',
+    version: '1.0.0',
+    buildId: '5',
     installationId: 'installation-rn-ios',
     sessionId: 'RN-I-1',
   },
@@ -85,6 +89,7 @@ const documents = MOBILE_DOCUMENTS.map((doc, index) => ({
       attributes: {
         'service.name': doc.serviceName,
         'service.version': doc.version,
+        ...(doc.buildId ? { 'app.build_id': doc.buildId } : {}),
         'telemetry.sdk.name': doc.sdkName,
         'telemetry.sdk.language': doc.sdkLanguage,
         ...(doc.osName ? { 'os.name': doc.osName } : {}),

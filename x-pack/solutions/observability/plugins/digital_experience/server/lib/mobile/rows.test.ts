@@ -21,6 +21,7 @@ describe('toPlatforms', () => {
     expect(toPlatforms(['iOS', 'android', 'java'])).toEqual(['android', 'ios']);
     expect(toPlatforms('iOS')).toEqual(['ios']);
     expect(toPlatforms(null)).toEqual([]);
+    expect(toPlatforms(['android', null, undefined])).toEqual(['android']);
   });
 });
 

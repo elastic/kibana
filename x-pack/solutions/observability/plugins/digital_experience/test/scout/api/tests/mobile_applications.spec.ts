@@ -93,7 +93,7 @@ apiTest.describe(
           return response.body as MobileKpisResponse;
         };
 
-        // `1.0.0 (10)` on Android and `1.0.0+5` on iOS are one release.
+        // One release on both platforms, whatever their builds (`app.build_id`).
         const all = await getKpis();
         expect(all).toMatchObject({
           hasData: true,

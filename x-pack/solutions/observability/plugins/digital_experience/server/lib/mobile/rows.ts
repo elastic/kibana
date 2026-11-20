@@ -24,8 +24,10 @@ const asArray = <T>(value: T | T[] | null | undefined): T[] => {
 
 /** The platforms of `telemetry.sdk.name` values, sorted and without repeats; other SDKs are left out. */
 export const toPlatforms = (sdkNames: unknown): MobilePlatform[] => {
-  const platforms = asArray(sdkNames as string | string[] | null).flatMap((sdkName) => {
-    const platform = PLATFORM_BY_SDK_NAME[sdkName.toLowerCase()];
+  // A null group, e.g. of a document without the field, has no platform.
+  const platforms = asArray(sdkNames as unknown).flatMap((sdkName) => {
+    const platform =
+      typeof sdkName === 'string' ? PLATFORM_BY_SDK_NAME[sdkName.toLowerCase()] : undefined;
     return platform ? [platform] : [];
   });
   return [...new Set(platforms)].sort();
