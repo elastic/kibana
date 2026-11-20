@@ -567,58 +567,78 @@ describe('KnowledgeIndicatorClient.getFeatures', () => {
 });
 
 describe('KnowledgeIndicatorClient.getLatestRevisionTimestamp', () => {
-  const printedQueryFor = (runEsql: jest.Mock): string => {
-    const query = runEsql.mock.calls[0][1] as { print: () => string };
-    return query.print();
-  };
+  const runEsql = jest.mocked(runEsqlQuery);
+  const timestampResponse = (values: Array<Array<string | null>>) => ({
+    columns: [{ name: 'latest_timestamp', type: 'date' }],
+    values,
+  });
 
-  it('returns the newest @timestamp among matching live revisions', async () => {
-    const { client, runEsql } = makeClient();
-    runEsql.mockResolvedValueOnce({
-      hits: [
-        createFeatureDoc({ id: 'a', '@timestamp': '2026-04-01T00:00:00.000Z' }),
-        createFeatureDoc({ id: 'b', '@timestamp': '2026-05-01T00:00:00.000Z' }),
-        createFeatureDoc({ id: 'c', '@timestamp': '2026-03-01T00:00:00.000Z' }),
-      ],
+  it('returns the aggregated timestamp', async () => {
+    const { client } = makeClient();
+    const timestamp = '2026-05-01T00:00:00.000Z';
+    runEsql.mockResolvedValueOnce(timestampResponse([[timestamp]]));
+
+    await expect(client.getLatestRevisionTimestamp(SOURCE)).resolves.toEqual({
+      '@timestamp': timestamp,
     });
-
-    const result = await client.getLatestRevisionTimestamp(SOURCE);
-
-    expect(result).toEqual({ '@timestamp': '2026-05-01T00:00:00.000Z' });
   });
 
-  it('returns null when no revisions match', async () => {
-    const { client, runEsql } = makeClient();
-    runEsql.mockResolvedValueOnce({ hits: [] });
+  it.each([
+    { scenario: 'the aggregate is null', values: [[null]] },
+    { scenario: 'the response has no rows', values: [] },
+  ])('returns null when $scenario', async ({ values }) => {
+    const { client } = makeClient();
+    runEsql.mockResolvedValueOnce(timestampResponse(values));
 
-    const result = await client.getLatestRevisionTimestamp(SOURCE);
-
-    expect(result).toBeNull();
+    await expect(client.getLatestRevisionTimestamp(SOURCE)).resolves.toBeNull();
   });
 
-  it('filters tombstones and excluded revisions via the post-grouping WHERE', async () => {
-    const { client, runEsql } = makeClient();
-    runEsql.mockResolvedValueOnce({ hits: [] });
+  it('returns null when the data stream does not exist yet', async () => {
+    const { client } = makeClient();
+    runEsql.mockResolvedValueOnce(undefined);
 
-    await client.getLatestRevisionTimestamp(SOURCE);
-
-    expect(runEsql).toHaveBeenCalledTimes(1);
-    // The post-grouping filter must reference both `deleted` and
-    // `excluded` so groups whose latest revision is a tombstone or an
-    // exclusion drop out. Without this, user-driven bulk deletes or
-    // bulk excludes would extend the identification throttle.
-    const printed = printedQueryFor(runEsql);
-    expect(printed).toContain('deleted');
-    expect(printed).toContain('excluded');
+    await expect(client.getLatestRevisionTimestamp(SOURCE)).resolves.toBeNull();
   });
 
-  it('passes the feature-type filter through to the WHERE clause', async () => {
-    const { client, runEsql } = makeClient();
-    runEsql.mockResolvedValueOnce({ hits: [] });
+  it('propagates query errors', async () => {
+    const { client } = makeClient();
+    const error = new Error('ES|QL query failed');
+    runEsql.mockRejectedValueOnce(error);
+
+    await expect(client.getLatestRevisionTimestamp(SOURCE)).rejects.toBe(error);
+  });
+
+  it('aggregates in one query after selecting and filtering the latest revisions', async () => {
+    const { client } = makeClient();
+    runEsql.mockResolvedValueOnce(timestampResponse([[null]]));
 
     await client.getLatestRevisionTimestamp(SOURCE, { types: ['entity', 'metric'] });
 
-    expect(printedQueryFor(runEsql)).toContain('feature.type');
+    expect(runEsql).toHaveBeenCalledTimes(1);
+    expect(executeAndDecodeSource).not.toHaveBeenCalled();
+    const [, query] = runEsql.mock.calls[0];
+    expect(query.split(' | ')).toEqual([
+      'FROM .significant_events-knowledge_indicators METADATA _id',
+      `WHERE \`kibana.space_ids\` == "${SPACE}"`,
+      `WHERE (type IN ("feature")) AND (\`source.id\` IN ("${SOURCE}"))`,
+      'INLINE STATS latest_ts = MAX(@timestamp) BY `source.id`, type, id',
+      'WHERE @timestamp == latest_ts',
+      'INLINE STATS tiebreaker_id = MAX(_id) BY `source.id`, type, id',
+      'WHERE _id == tiebreaker_id',
+      'WHERE (deleted IS NULL OR deleted == FALSE) AND (excluded IS NULL OR excluded == FALSE) ' +
+        'AND (expires_at IS NULL OR expires_at >= NOW()) AND (`feature.type` IN ("entity", "metric"))',
+      'STATS latest_timestamp = MAX(@timestamp)',
+    ]);
+  });
+
+  it('includes all feature types when the filter is empty', async () => {
+    const { client } = makeClient();
+    runEsql.mockResolvedValueOnce(timestampResponse([[null]]));
+
+    await client.getLatestRevisionTimestamp(SOURCE, { types: [] });
+
+    const [, query] = runEsql.mock.calls[0];
+    expect(query).not.toContain('feature.type');
   });
 });
 

@@ -384,6 +384,21 @@ describe('summarizeSessions', () => {
     expect(operations?.[2 * rows - 1]).toMatchObject({ session: { id: `s${rows - 1}` } });
   });
 
+  it('writes a full batch of summaries in one bulk request', async () => {
+    const ids = Array.from({ length: SESSIONS_PER_QUERY }, (_, index) => `s${index}`);
+    const esClient = setUp({
+      changed: () => ids.length,
+      ids: () => ids,
+      summaryRows: () => ids.map(summaryRow),
+    });
+
+    await run(esClient);
+
+    expect(esClient.bulk).toHaveBeenCalledTimes(1);
+    const [{ operations }] = esClient.bulk.mock.calls[0];
+    expect(operations).toHaveLength(2 * SESSIONS_PER_QUERY);
+  });
+
   it.each([1, 2, 3])(
     'runs up to %s summary queries at once, and writes every batch',
     async (concurrency) => {

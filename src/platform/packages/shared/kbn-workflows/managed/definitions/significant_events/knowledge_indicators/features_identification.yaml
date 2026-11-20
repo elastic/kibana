@@ -85,8 +85,8 @@ triggers:
         description: "Maximum number of excluded KI features sent in the LLM prompt."
       - name: maxEntityFilters
         type: number
-        default: 10
-        description: "Maximum number of entity filters applied during sampling."
+        default: 20
+        description: "Maximum number of entity filters applied during sampling. Equality filters on the same field count as one."
       - name: samplingTimeoutMs
         type: number
         default: 60000

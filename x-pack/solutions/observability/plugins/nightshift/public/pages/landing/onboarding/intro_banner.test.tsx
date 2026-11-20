@@ -29,7 +29,7 @@ const setup = () => {
 describe('OnboardingIntroBanner', () => {
   beforeEach(() => window.localStorage.clear());
 
-  it('pitches Nightshift next to the video and links to the live example in a new tab', () => {
+  it('pitches Nightshift next to the video', () => {
     setup();
 
     expect(screen.getByTestId('nightshiftOnboardingIntroBanner')).toHaveTextContent(
@@ -38,9 +38,7 @@ describe('OnboardingIntroBanner', () => {
     expect(screen.getByTestId('nightshiftOnboardingIntroBanner')).toHaveTextContent(
       'It helps you detect, investigate and resolve problems faster'
     );
-    const link = screen.getByRole('link', { name: 'Explore live example' });
-    expect(link).toHaveAttribute('href', 'https://ela.st/nightshift-try-it');
-    expect(link).toHaveAttribute('target', '_blank');
+    expect(screen.queryByRole('link', { name: 'Explore live example' })).not.toBeInTheDocument();
   });
 
   it('is dismissed for the space in this browser', () => {

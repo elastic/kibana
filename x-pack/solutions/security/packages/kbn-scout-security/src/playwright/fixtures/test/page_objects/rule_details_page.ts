@@ -74,6 +74,12 @@ export class RuleDetailsPage {
       .locator('xpath=following-sibling::dd[1]');
   }
 
+  /** Opens the investigation guide of the About section. Toasts from earlier actions can cover the toggle, so they are dismissed first. */
+  async openInvestigationNotes(): Promise<void> {
+    await this.page.components.toast().closeAll();
+    await this.investigationNotesToggle.click();
+  }
+
   async openAlertsTab(): Promise<void> {
     await this.alertsTab.click();
   }

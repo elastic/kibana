@@ -86,7 +86,8 @@ change of their status shows up within that time:
 - sessions are set up, the task's last run succeeded, it isn't lagging, and it has caught up since
   sessions were enabled, so a build in progress is never shown as lower numbers;
 - the time range starts within the sessions' 30 day lookback (from the start of that day, in UTC);
-- the user can read `digital-experience-sessions-*`, otherwise the raw events are read quietly;
+- the user can read `digital-experience-sessions-browser-*`, which a `digital-experience-sessions-*`
+  grant covers, otherwise the raw events are read quietly;
 - the sessions hold at least one application, so applications that send no `session.id`, which the
   summaries skip, still appear when no application sends one.
 
@@ -190,6 +191,24 @@ it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percent
   (`common/overview_filters_param.ts`). The routes read `meta` only, never a query a client wrote,
   and answer a param they would have to repair, e.g. one with more than ten values or a repeated
   one, with a 400, so a request gets the filters it asked for.
+- **Saved views:** **Views** lists the views of the space, each a name with the filters, KQL query and
+  percentile, and optionally the time range; applying one replaces them in one step. Everyone who
+  can read the app sees the views of the space and applies them. Saving, saving again and deleting
+  need `all` (the `manage` API and `save` UI privileges, and the saved object privilege for the
+  `digital-experience-view` type). A view belongs to the space, not to an application, and the space
+  holds up to 100, each with a name of its own. The routes are `GET`, `POST`, `PUT` and `DELETE`
+  `/internal/digital_experience/views`.
+- **Sharing:** the **Share** action in an application's header opens Kibana's Share modal on the
+  page the URL shows, any tab. The page is named by the app's locator (`DIGITAL_EXPERIENCE_LOCATOR`,
+  `common/locator.ts`): the service, the tab and the URL params it lists (time range, environment,
+  source, the Overview's filters, KQL query and percentile, the Sessions list's state). It is
+  registered on the browser and on the server, which creates short URLs, and other plugins can look
+  it up by its id, e.g. for the link of a rule or a report. With the **Short URLs** sub-feature
+  privilege (included in `all`) **Copy link** copies a short URL, a `url` saved object of the space,
+  and the modal can fix a relative time range; without it the link is the long URL. Following a
+  short URL needs no privilege of its own. A param the pages gain has to be added to
+  `DIGITAL_EXPERIENCE_LOCATOR_QUERY_KEYS`, which a test checks against the params of the Overview
+  and the Sessions list.
 - **Sessions tab:** `browser`, `os` and `country` are the Sessions tab's own params, which take one
   value, so the tab links carry a filter over only when it is exactly one included value. The
   Sessions list's **Entry page** facet is its page filter; it is a different question from the
@@ -258,12 +277,22 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
 ## Sessions
 
 A Task Manager task (`digital_experience:sessions-summaries`, every minute) summarizes EDOT Browser
-sessions from `traces-*.otel-*,logs-*.otel-*` into `digital-experience-sessions-<version>` with
+sessions from `traces-*.otel-*,logs-*.otel-*` into `digital-experience-sessions-browser-<version>` with
 ES|QL, one document per `service.name` + `session.id`: start/end time and duration, page views with
 entry/exit page and journey, page loads, clicks, JS errors, HTTP requests and failed requests, p75
 Core Web Vitals with their samples by rating, and environment, user, browser, OS and geo attributes.
 Like the applications list, it only reads browser SDK data (`telemetry.sdk.language: webjs`), and it
 skips events with an empty `service.name` or `session.id`.
+
+The Sessions tab, the session detail and the applications list read `digital-experience-sessions-browser-*`,
+and the index template covers only that pattern, so session summaries of another platform under
+`digital-experience-sessions-*` never mix with the browser ones. The privileges below name
+`digital-experience-sessions-*`, which covers the browser index.
+
+Setups that enabled sessions before the index was named `digital-experience-sessions-browser-<version>`
+keep an unused `digital-experience-sessions-1` index, which can be deleted. Delete their old
+`digital-experience-sessions` index template before enabling sessions again, so it does not conflict
+with the new `digital-experience-sessions-browser` template.
 
 Each run:
 
@@ -283,15 +312,14 @@ Each run:
    applications sharing an id.
 3. Rebuilds the sessions, 5,000 at a time, from their events of the last 24 hours, the longest a
    session lasts, with their ids as a literal `IN` list, which Elasticsearch looks up in the index:
-   an `IN (subquery)` scanned the whole lookback. One query aggregates per session and page URL,
-   then per session, for the counts, times, latest attributes, web vitals and journey. It keeps the
-   raw attribute fields of each group's latest event and cleans them into attributes once per
-   session, after the aggregation: cleaning every event's fields first took about 40% of the
-   query, and the same 5,000 sessions now take about 22% less time with identical rows.
+   an `IN (subquery)` scanned the whole lookback. One query returns the counts, times, latest
+   attributes, web vitals and journey of each session (see [Summary query](#summary-query)).
 4. Turns the rows into summaries 500 at a time, letting the event loop run between chunks, as a
    whole batch at once blocked a small Kibana for about half a second. Writes one summary per
-   session, keyed by a hash of `service.name` + `session.id`, and moves the checkpoint past the
-   window.
+   session, keyed by a hash of `service.name` + `session.id`, in one bulk request per batch, and
+   moves the checkpoint past the window. On serverless a bulk waits about 0.15 to 0.4 seconds for
+   durability whatever its size: 8,000 summaries took 2.3 s in four sequential bulks and 1.4 s in
+   one.
 
 A run starts no window after 45 seconds, and runs again right away while it is behind. On the first
 run after sessions are enabled, it starts from 30 days ago, at the start of that day in UTC, so it
@@ -336,6 +364,61 @@ per recorded segment to `logs-rum.replay.otel-*`, which the task already reads a
 would cost. It is absent rather than `false` until something sets it, and readers expose it as
 `hasReplay`.
 
+### Summary query
+
+`sessionSummaryQuery` (`server/services/sessions/summary_queries.ts`) rebuilds a batch of sessions
+in one ES|QL query. Its shape, with the aggregations elided:
+
+```esql
+FROM traces-*.otel-*, logs-*.otel-*
+| WHERE <window> AND <browser SDK> AND attributes.session.id IN (<5,000 ids>)
+| EVAL <event flags>, seen_<group> = <timestamp of events with any field of the group>
+| FORK (STATS <counts>, start_time, end_time,
+              raw_<field> = LAST(TO_STRING(<field>), seen_<group>)
+          BY service, session)
+       (WHERE event_name IN (<page views>) OR name IN (<page views>)
+        | STATS first_view = MIN(@timestamp), last_view = MAX(@timestamp)
+            BY service, session, page_url = attributes.url.full)
+       (WHERE (event_name == "browser.web_vital" OR name == "browser.web_vital") AND <has a value>
+        | EVAL lcp = CASE(vital == "lcp", vital_value, null), ...
+        | STATS lcp_p75 = PERCENTILE(lcp, 75), lcp_samples = COUNT(lcp), ...
+            BY service, session)
+| STATS <every session and vital column> = MAX(<column>),
+        pages = TOP(first_view, 30, "asc", page_url) WHERE page_url IS NOT NULL,
+        exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL
+  BY service, session
+| EVAL attribute_<name> = COALESCE(<cleaned raw_<field>>, ...)
+| EVAL <vital count> = COALESCE(<vital count>, 0), ...
+| DROP raw_*
+```
+
+- **The journey is its own branch.** Grouping every aggregation by page URL as well was the main
+  cost of the query. The second branch reads only page views and runs alongside the session stats;
+  the last `STATS` merges them, taking each column from the one row that has it. The branch filters
+  are on the source fields, as the event flags wrap them in `COALESCE`, which keeps Lucene from
+  applying them.
+- **So are the web vitals**, which are about 7% of the events: computing their columns, p75s and
+  counts on every event cost 19% to 32% of the query. A session without a vital has no row in
+  their branch, so its vital counts are set to 0 after the merge.
+- **A column per web vital**, so its p75 and sample count need no filter, and the thresholds
+  compare a number instead of the vital's name.
+- **Attributes are cleaned once per session.** The query keeps the raw fields of each group's
+  latest event and cleans them (trimmed, `""` and `"null"` as missing) after the last stage:
+  cleaning every event's fields first took about 40% of the query. Coalescing a group's fields per
+  event, before the aggregation, would save another 5% to 9% but isn't equivalent: a blank value
+  in a higher-priority field would win over a real value in a lower one, and then be cleaned to
+  null.
+- `FORK` needs Elasticsearch 9.4 or later, where its branches have no implicit `LIMIT 1000`.
+
+On 5,000 sessions of synthtrace data, the `FORK` version takes 10% to 27% less time and 5% to 15%
+less data-node CPU than aggregating per page URL first, depending on the segment layout, with
+identical rows ([#306059](https://github.com/elastic/kibana/issues/306059)), and the vitals branch
+another 19% to 32%. The measurements behind the task's design, where the time goes, and what was
+tried and dropped are in
+[`server/services/sessions/query_performance.md`](server/services/sessions/query_performance.md),
+with how to check a change: run the old and new query on the same session ids and compare every
+column of every row.
+
 ### Enabling sessions
 
 Sessions are set up by an explicit action, `POST /internal/digital_experience/sessions/enable`,
@@ -368,7 +451,7 @@ After the checks, enabling runs these steps, and a failure answers 500 naming th
 (`attributes.data.step`) with its details in the server log:
 
 1. `credentials`: Kibana can store an API key, so `xpack.encryptedSavedObjects.encryptionKey` is set.
-2. `template`: puts the `digital-experience-sessions` index template, as Kibana's internal user.
+2. `template`: puts the `digital-experience-sessions-browser` index template, as Kibana's internal user.
 3. `index`: creates the sessions index, as the user.
 4. `task`: schedules the summaries task with an API key that Task Manager grants on the user's behalf,
    and runs it right away.

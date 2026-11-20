@@ -54,7 +54,7 @@ export const vectorStyleSchema = lazySchema(() =>
   z
     .object({
       properties: vectorStylePropertiesSchema.default({}), // need default to match config-schema behavior
-      isTimeAware: z.boolean().default(true).optional().meta({
+      is_time_aware: z.boolean().default(true).optional().meta({
         description:
           'Set to true to apply global time to style metadata requests. When set to true, style metadata will be re-fetched when global time changes.',
       }),

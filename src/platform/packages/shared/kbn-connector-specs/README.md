@@ -690,10 +690,10 @@ import type {
 
 ## Contract Tests
 
-`createContractContext` (in `src/test`) runs actions offline against the vendor's OpenAPI spec, using [`@kbn/connector-emulate`](../kbn-connector-emulate/README.md). The handler gets a real axios client, authenticated by the connector's own auth type, whose requests are validated and answered by the mock:
+`createContractContext` (in `src/test/vendor_api`) runs actions offline against the vendor's OpenAPI spec, using [`@kbn/connector-emulate`](../kbn-connector-emulate/README.md). The handler gets a real axios client, authenticated by the connector's own auth type, whose requests are validated and answered by the mock:
 
 ```typescript
-import { createContractContext } from '../../test/create_contract_context';
+import { createContractContext } from '../../test/vendor_api/create_contract_context';
 
 const { runAction, mock } = await createContractContext({
   connector: FirecrawlConnector,
@@ -752,12 +752,13 @@ The folder holds:
 
 - `manifest.json`: the sources and the operations each action calls.
 - `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed (from Swagger 2.0, from a Google API Discovery document such as `https://gmail.googleapis.com/$discovery/rest?version=v1`, or from an AWS Smithy model, such as the files in [`aws/api-models-aws`](https://github.com/aws/api-models-aws), pinned to a commit; `awsJson1_0` and `awsJson1_1` services, such as CloudWatch, become an operation per `POST /<Operation>`, marked `x-amz-json` so the mock serves them by `X-Amz-Target`) and cut down to the recorded operations (under `paths`, or AutoRest's `x-ms-paths` for specs such as Azure Blob Storage's) and what they reference. Descriptions, examples and `x-` extensions other than `x-speakeasy-pagination`, `x-ms-pageable` and `x-ms-skip-url-encoding` (which marks a path parameter that spans segments, such as Azure's `{scope}`), and the routing that converted Smithy models carry (`x-path-parameter` for S3's virtual-hosted buckets, `x-optional-fixed-query` for its `x-id`) are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them, but they keep the components its updates reference.
+- `snapshots/<source>.graphql` and `snapshots/<source>.mcp.json`: for GraphQL and MCP sources, the root fields or tools the actions call and what they reach, without documentation. See [GraphQL and MCP sources](#graphql-and-mcp-sources).
 - `overlay.yaml` (optional): an [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) correcting the vendor specs, applied whenever they are loaded, including while recording. An action that matches nothing in specs fetched from the vendor (`--refresh`, `--drift`) is reported, as the vendor may have fixed the spec. Offline runs (`--check`) don't report it: a snapshot only has the operations the connector calls, so the action may still be needed.
 - `fixtures.json` (optional): see below.
 
 Actions run with a connector config sampled from the connector's `schema`, required properties only, so optional settings such as custom base URLs keep their defaults. They run under each auth type in `auth.types`, with placeholder secrets, and the manifest lists the operations reached under any of them, so an action that only some auth types allow (such as Gmail's write actions, which Elastic-managed OAuth refuses) is still recorded.
 
-Connectors that can't have a vendor spec, such as ones that talk to a database driver instead of an HTTP API, are listed in `vendor_api_exemptions.json` at the package root, by `metadata.id` with a reason. Existing connectors without a `vendor_api` folder are simply not recorded yet; [#295688](https://github.com/elastic/kibana/issues/295688) backfills them.
+Connectors that can't have a vendor spec, such as ones that talk to a database driver instead of an HTTP API, are listed in `src/test/vendor_api/vendor_api_exemptions.json`, by `metadata.id` with a reason. Existing connectors without a `vendor_api` folder are simply not recorded yet; [#295688](https://github.com/elastic/kibana/issues/295688) backfills them.
 
 Recording checks each action's `scope`. A `read` action may only send `GET`, `HEAD` or `OPTIONS`, or call the operations its fixture lists in `queries`, so other tools (such as live verification) can rely on `scope: 'read'` meaning the action changes no vendor state.
 
@@ -845,6 +846,21 @@ Per action:
 - `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec, and a `when` (`path`, `query` and `headers` by value, and the `body` fields it lists) to the requests with those values. Overrides that break the spec, or name an operation it lacks, are reported.
 
 `vendorApiFixturesSchema` is the schema.
+
+### GraphQL and MCP sources
+
+Connectors that call a GraphQL API or an MCP server have no paths to record, so their operations go by name: `{ "source": "main", "name": "query boards" }` for a GraphQL root field, and `tools/call search` for an MCP tool. A connector can mix them with OpenAPI sources. Name the format, and the URLs the connector calls, as the spec's URL doesn't tell:
+
+```bash
+node scripts/connector_vendor_api --connector monday_com \
+  --source main=https://example.com/schema.graphql --format main=graphql \
+  --endpoint main=https://api.monday.com/v2
+```
+
+- A `graphql` source's URL serves SDL or an introspection result, and an `mcp` source's serves a `tools/list` result, wrapped in JSON-RPC or not. The URL is only read with `GET`, so a server that needs an introspection request or an MCP session, or credentials, is captured once and served from a file.
+- `--inspect` skips these sources, as it reads OpenAPI operations.
+- A `read` action may call GraphQL queries and MCP tools annotated `readOnlyHint`. Anything else needs a `{ "name": "..." }` entry in the action's `queries` in `fixtures.json`, which says it changes no vendor state.
+- `--drift` classifies changes to the operations the connector calls, as `oasdiff` does for OpenAPI. A response that widens is breaking, as a connector reading it may not handle the new value: for GraphQL a new value of an enum a response can hold, or a new union member (`findSchemaChanges`), and for MCP a new output enum value. New optional input is non-breaking, as is a new value of an enum only requests send. An MCP tool losing its `readOnlyHint` is breaking, as read actions may only call read-only tools. Any other change to an MCP schema, such as a tighter bound, is treated as breaking.
 
 ### Drift detection
 
