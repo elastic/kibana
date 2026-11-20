@@ -298,21 +298,38 @@ function InvestigationGradientLabel({
   );
 }
 
-/** Outlined AI-gradient badge (kbn AI badge look) for counts and short status labels. */
+/** AI-gradient badge: light fill + gradient text (`base`), or hollow + gradient ring (`outlined`). */
 export function AiGradientBadge({
   children,
   testSubj,
   iconType,
+  variant = 'base',
 }: {
   children: React.ReactNode;
   testSubj?: string;
   iconType?: React.ComponentProps<typeof EuiBadge>['iconType'];
+  variant?: 'base' | 'outlined';
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { labelCss } = useAiButtonGradientStyles({ variant: 'outlined' });
-  const { gradientId, iconGradientCss, colors } = useSvgAiGradient({ variant: 'outlined' });
+  const { labelCss } = useAiButtonGradientStyles({ variant });
+  const { gradientId, iconGradientCss, colors } = useSvgAiGradient({ variant });
 
-  const borderGradient = `linear-gradient(90deg, ${euiTheme.colors.backgroundLightPrimary} 2.98%, ${euiTheme.colors.backgroundLightAssistance} 66.24%)`;
+  const lightFill = `linear-gradient(90deg, ${euiTheme.colors.backgroundLightPrimary} 2.98%, ${euiTheme.colors.backgroundLightAssistance} 66.24%)`;
+  const plateCss =
+    variant === 'outlined'
+      ? css`
+          background: linear-gradient(
+                ${euiTheme.colors.backgroundBasePlain},
+                ${euiTheme.colors.backgroundBasePlain}
+              )
+              padding-box,
+            ${lightFill} border-box;
+          border: ${euiTheme.border.width.thin} solid transparent;
+        `
+      : css`
+          background: ${lightFill};
+          border: ${euiTheme.border.width.thin} solid transparent;
+        `;
 
   return (
     <>
@@ -324,14 +341,8 @@ export function AiGradientBadge({
         data-test-subj={testSubj}
         css={[
           iconType != null ? iconGradientCss : undefined,
+          plateCss,
           css`
-            background: linear-gradient(
-                  ${euiTheme.colors.backgroundBasePlain},
-                  ${euiTheme.colors.backgroundBasePlain}
-                )
-                padding-box,
-              ${borderGradient} border-box;
-            border: ${euiTheme.border.width.thin} solid transparent;
             border-radius: ${euiTheme.size.l};
 
             .euiBadge__text {
@@ -354,7 +365,7 @@ function GradientOutlinedStatusBadge({
   testSubj?: string;
 }): React.ReactElement {
   return (
-    <AiGradientBadge iconType="check" testSubj={testSubj}>
+    <AiGradientBadge iconType="check" testSubj={testSubj} variant="outlined">
       {label}
     </AiGradientBadge>
   );
