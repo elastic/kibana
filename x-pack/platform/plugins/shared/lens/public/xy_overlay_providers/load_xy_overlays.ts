@@ -15,6 +15,7 @@ import {
   type TimeRange,
 } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -33,6 +34,8 @@ import { runActiveProviders, type XYOverlaysRunResult } from './run_active_provi
 const EMPTY_RESULT: XYOverlaysRunResult = { overlays: [], failures: [], truncations: [] };
 
 interface XYOverlaysSearchContext {
+  /** Time the base chart resolved its relative time range against. */
+  readonly now?: number;
   readonly timeRange?: TimeRange;
   readonly filters: Filter[];
   readonly query: Array<Query | AggregateQuery>;
@@ -86,7 +89,12 @@ export const loadXYOverlays = async ({
     return { ...EMPTY_RESULT, failures };
   }
 
-  const { timeRange, filters, query, esqlVariables, projectRouting, isApproximate } = searchContext;
+  const { now, filters, query, esqlVariables, projectRouting, isApproximate } = searchContext;
+  const timeRange =
+    searchContext.timeRange &&
+    getAbsoluteTimeRange(searchContext.timeRange, {
+      forceNow: now === undefined ? undefined : new Date(now),
+    });
   const kqlQueries = query.filter((entry): entry is Query => !isOfAggregateQueryType(entry));
 
   const getLayerScope = (layer: LensXYOverlayLayer) => {

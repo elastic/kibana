@@ -79,7 +79,7 @@ the chart shows a warning badge that names the provider and the error.
 | Surface | `executionContext.type` |
 |---|---|
 | Dashboard panel | `dashboard` |
-| Discover histogram | `discover` (with `name: 'unified_histogram'`) |
+| Discover histogram | `discover` |
 | App embedding the Lens component | whatever the app passes in the `executionContext` prop, by convention its app id |
 
 To use a feature flag or other plugin state in the rule, read it in your plugin and let the provider
@@ -94,7 +94,8 @@ Called after the base chart has rendered, once per matching layer. Resolve to th
 Use `context.executeEsql(esql, meta)` to query data. It runs the query with the same scope as the
 chart:
 
-- the chart's time range, and its time field for `?_tstart` / `?_tend`;
+- the chart's time range, resolved to absolute dates at the same `now` as the chart, and its time
+  field for `?_tstart` / `?_tend`;
 - the dashboard or app filters and KQL query, unless the layer ignores global filters;
 - ES|QL control variables, project routing and the approximation setting;
 - the chart's search session, so a refresh re-runs it;
@@ -110,7 +111,10 @@ the coordinates with `xAccessor` and `yAccessor`. Each accessor is a column name
 values that need converting. On time charts `x` must be a timestamp in milliseconds, so ES|QL dates,
 which are ISO strings, need a function such as `(row) => Date.parse(String(row['@timestamp']))`.
 Points are bound to the Y axis of the layer they were fetched for, and use the same X and Y scales as
-the layer. The overlay is dropped if that layer isn't drawn or has a categorical X axis.
+the layer. The overlay is dropped if that layer isn't drawn or has a categorical X axis. On histogram
+layers, such as date histograms, each point moves to the start of the bucket that contains it, so
+the bars keep their width. Points before the first bucket are dropped. `onPointClick` still gets the
+original row.
 
 Lens draws at most 1,000 points per overlay. Extra points are dropped, and the chart shows a warning
 badge. Query only what you plan to draw.

@@ -653,15 +653,17 @@ export function XYChart({
         }
       : {};
 
-  const clickHandler: ElementClickListener = ([elementEvent]) => {
+  const clickHandler: ElementClickListener = (elementEvents) => {
     // this cast is safe because we are rendering a cartesian chart
-    const [xyGeometry, xySeries] = elementEvent as XYChartElementEvent;
+    const xyElementEvents = elementEvents as XYChartElementEvent[];
 
-    const overlayPoint = getClickedOverlayPoint(overlays, xySeries.specId, xyGeometry.datum);
+    const overlayPoint = getClickedOverlayPoint(overlays, xyElementEvents);
     if (overlayPoint) {
       onOverlayPointClick?.(overlayPoint);
       return;
     }
+
+    const [xyGeometry, xySeries] = xyElementEvents[0];
 
     const layer = dataLayers.find((l) =>
       xySeries.seriesKeys.some((key: string | number) =>

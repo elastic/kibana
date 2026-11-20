@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { BasicPrettyPrinter, Parser } from '@elastic/esql';
 import {
   queryHasStatsCommand,
   queryHasTsSourceCommand,
@@ -47,6 +47,13 @@ interface ExemplarsQuery {
   readonly simulated: boolean;
 }
 
+/** The commands before the first `STATS`, so the samples go through the same filters as the chart. */
+const getPreAggregationQuery = (esql: string): string => {
+  const { root } = Parser.parse(esql);
+  const statsIndex = root.commands.findIndex(({ name }) => name === 'stats');
+  return BasicPrettyPrinter.print({ ...root, commands: root.commands.slice(0, statsIndex) });
+};
+
 /**
  * Real exemplars come from `SET exemplars` on `TS ... | STATS` queries. Any other query gets
  * simulated exemplars: the largest raw samples of the aggregated field, renamed to `value` and
@@ -62,7 +69,7 @@ export const getExemplarsQuery = (esql: string): ExemplarsQuery | undefined => {
   }
   return {
     esql: [
-      `FROM ${getIndexPatternFromESQLQuery(esql)}`,
+      getPreAggregationQuery(esql),
       `WHERE ${field} IS NOT NULL`,
       `SORT ${field} DESC`,
       `LIMIT ${SIMULATED_EXEMPLARS_LIMIT}`,

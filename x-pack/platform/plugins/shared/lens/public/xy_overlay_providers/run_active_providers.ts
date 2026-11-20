@@ -55,7 +55,13 @@ export const runActiveProviders = async ({
   getFetchContext,
 }: RunActiveProvidersParams): Promise<XYOverlaysRunResult> => {
   const settled = await Promise.allSettled(
-    activeProviders.map(({ provider, layer }) => provider.fetchOverlay(getFetchContext(layer)))
+    activeProviders.map(async ({ provider, layer }) => {
+      const overlay = await provider.fetchOverlay(getFetchContext(layer));
+      if (overlay && !Array.isArray(overlay.data)) {
+        throw new Error(`The "${provider.id}" overlay has no data array`);
+      }
+      return overlay;
+    })
   );
 
   if (abortSignal.aborted) {

@@ -9,18 +9,30 @@
 
 import React, { useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
-import { BubbleSeries, PointShape, type ScaleContinuousType } from '@elastic/charts';
+import {
+  BubbleSeries,
+  PointShape,
+  type ScaleContinuousType,
+  type XYChartElementEvent,
+} from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import { getAccessorByDimension } from '@kbn/chart-expressions-common';
-import type { CommonXYDataLayerConfig, XScaleType, XYOverlay, XYOverlayDatum } from '../../common';
+import type {
+  CommonXYDataLayerConfig,
+  XScaleType,
+  XYOverlay,
+  XYOverlayAccessor,
+  XYOverlayDatum,
+} from '../../common';
 import { XScaleTypes } from '../../common/constants';
 import { getSeriesXScaleType, getSeriesYScaleType, type GroupsConfiguration } from '../helpers';
 import type { OverlayPointClickEvent } from '../types';
+import { getXValues } from './x_domain';
 
 const OVERLAY_SPEC_ID_PREFIX = 'xy-overlay';
 
-const getOverlaySpecId = ({ id, layerId }: XYOverlay) =>
-  `${OVERLAY_SPEC_ID_PREFIX}-${id}-${layerId}`;
+export const getOverlaySpecId = ({ id, layerId }: XYOverlay): string =>
+  `${OVERLAY_SPEC_ID_PREFIX}-${JSON.stringify([id, layerId])}`;
 
 const NO_OVERLAYS: readonly XYOverlay[] = [];
 
@@ -40,14 +52,21 @@ export const useOverlays = (overlays$?: Observable<readonly XYOverlay[]>): reado
   return overlays;
 };
 
-/** Maps a chart element click to the overlay it hit, if any. The chart hands back the original datum object. */
+/**
+ * Returns the first overlay point among the elements hit by a click, even when a base series mark was hit first.
+ * The chart hands back the original datum object.
+ */
 export const getClickedOverlayPoint = (
   overlays: readonly XYOverlay[],
-  specId: string,
-  datum: XYOverlayDatum
+  elementEvents: readonly XYChartElementEvent[]
 ): OverlayPointClickEvent['data'] | undefined => {
-  const overlay = overlays.find((candidate) => getOverlaySpecId(candidate) === specId);
-  return overlay ? { overlayId: overlay.id, layerId: overlay.layerId, datum } : undefined;
+  for (const [{ datum }, { specId }] of elementEvents) {
+    const overlay = overlays.find((candidate) => getOverlaySpecId(candidate) === specId);
+    if (overlay) {
+      return { overlayId: overlay.id, layerId: overlay.layerId, datum };
+    }
+  }
+  return undefined;
 };
 
 export interface OverlaySeriesConfig {
@@ -55,11 +74,56 @@ export interface OverlaySeriesConfig {
   groupId: string;
   xScaleType: XScaleType;
   yScaleType: ScaleContinuousType;
+  data: XYOverlayDatum[];
+  xAccessor: XYOverlayAccessor;
 }
+
+const getOverlayX = ({ xAccessor }: XYOverlay, datum: XYOverlayDatum): number =>
+  typeof xAccessor === 'function' ? xAccessor(datum) : Number(datum[xAccessor]);
+
+/** Returns the start of the bucket containing `x`, or `undefined` when `x` is before the first bucket or not a number. */
+const findBucketStart = (bucketStarts: readonly number[], x: number): number | undefined => {
+  let bucketStart: number | undefined;
+  let low = 0;
+  let high = bucketStarts.length - 1;
+  while (low <= high) {
+    const middle = Math.floor((low + high) / 2);
+    if (bucketStarts[middle] <= x) {
+      bucketStart = bucketStarts[middle];
+      low = middle + 1;
+    } else {
+      high = middle - 1;
+    }
+  }
+  return bucketStart;
+};
+
+/**
+ * Moves each point to the start of its layer bucket. The chart derives the bar width from the smallest gap
+ * between X values, so points between buckets would shrink every bar of the base chart.
+ */
+const snapToBuckets = (
+  overlay: XYOverlay,
+  layer: CommonXYDataLayerConfig
+): Pick<OverlaySeriesConfig, 'data' | 'xAccessor'> => {
+  const bucketStarts = getXValues([layer]);
+  const snappedX = new Map<XYOverlayDatum, number>();
+  for (const datum of overlay.data) {
+    const bucketStart = findBucketStart(bucketStarts, getOverlayX(overlay, datum));
+    if (bucketStart !== undefined) {
+      snappedX.set(datum, bucketStart);
+    }
+  }
+  return {
+    data: overlay.data.filter((datum) => snappedX.has(datum)),
+    xAccessor: (datum) => snappedX.get(datum) ?? NaN,
+  };
+};
 
 /**
  * Pairs each overlay with the Y axis group and the scales of its layer, mirroring the layer's own series.
  * Overlays are dropped when their layer is not drawn or has a categorical X axis, where numeric `x` values cannot be placed.
+ * On histogram layers, points are snapped to the layer buckets so they never change the base chart's interval.
  */
 export const getOverlaySeriesConfigs = (
   overlays: readonly XYOverlay[],
@@ -84,7 +148,19 @@ export const getOverlaySeriesConfigs = (
     }
     const columnFormatId = table.columns.find(({ id }) => id === series.accessor)?.meta.params?.id;
     const yScaleType = getSeriesYScaleType(axis, columnFormatId);
-    return [{ overlay, groupId: axis.groupId, xScaleType, yScaleType }];
+    const { data, xAccessor: overlayXAccessor } = layer.isHistogram
+      ? snapToBuckets(overlay, layer)
+      : overlay;
+    return [
+      {
+        overlay,
+        groupId: axis.groupId,
+        xScaleType,
+        yScaleType,
+        data,
+        xAccessor: overlayXAccessor,
+      },
+    ];
   });
 
 interface OverlayPointsProps {
@@ -106,7 +182,7 @@ export const OverlayPoints = ({
   return (
     <>
       {getOverlaySeriesConfigs(overlays, yAxesConfiguration, dataLayers, defaultXScaleType).map(
-        ({ overlay, groupId, xScaleType, yScaleType }) => {
+        ({ overlay, groupId, xScaleType, yScaleType, data, xAccessor }) => {
           return (
             <BubbleSeries<XYOverlayDatum>
               key={getOverlaySpecId(overlay)}
@@ -115,9 +191,9 @@ export const OverlayPoints = ({
               groupId={groupId}
               xScaleType={xScaleType}
               yScaleType={yScaleType}
-              xAccessor={overlay.xAccessor}
+              xAccessor={xAccessor}
               yAccessors={[overlay.yAccessor]}
-              data={overlay.data}
+              data={data}
               hideInLegend
               color={color}
               bubbleSeriesStyle={{

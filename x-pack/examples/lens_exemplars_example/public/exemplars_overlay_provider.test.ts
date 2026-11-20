@@ -35,7 +35,6 @@ const DASHBOARD_CONTEXT = {
 };
 const DISCOVER_CONTEXT = {
   type: 'discover',
-  name: 'unified_histogram',
   description: 'fetch chart data and total hits',
   child: LENS_CHILD_CONTEXT,
 };
@@ -69,6 +68,21 @@ describe('exemplars overlay provider', () => {
         ].join('\n| '),
         simulated: true,
       });
+    });
+
+    it('keeps the commands that filter the rows before the aggregation', () => {
+      const query = getExemplarsQuery(
+        'FROM logs | WHERE service.name == "api" | EVAL kb = bytes / 1024 | STATS value = AVG(kb) BY bucket = BUCKET(@timestamp, 50)'
+      );
+      expect(query?.esql).toBe(
+        [
+          'FROM logs | WHERE service.name == "api" | EVAL kb = bytes / 1024',
+          'WHERE kb IS NOT NULL',
+          'SORT kb DESC',
+          'LIMIT 30',
+          'EVAL value = kb, simulated_exemplar = true',
+        ].join('\n| ')
+      );
     });
 
     it('returns undefined without an aggregated field', () => {

@@ -9,11 +9,22 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { act, renderHook } from '@testing-library/react';
-import { Position, ScaleType } from '@elastic/charts';
-import type { CommonXYDataLayerConfig, XYOverlay } from '../../common';
+import {
+  Position,
+  ScaleType,
+  type GeometryValue,
+  type XYChartElementEvent,
+  type XYChartSeriesIdentifier,
+} from '@elastic/charts';
+import type { CommonXYDataLayerConfig, XYOverlay, XYOverlayDatum } from '../../common';
 import { XScaleTypes } from '../../common/constants';
 import type { GroupsConfiguration } from '../helpers';
-import { getClickedOverlayPoint, getOverlaySeriesConfigs, useOverlays } from './overlay_points';
+import {
+  getClickedOverlayPoint,
+  getOverlaySeriesConfigs,
+  getOverlaySpecId,
+  useOverlays,
+} from './overlay_points';
 
 const point = { trace_id: 'trace-1', '@timestamp': 1000, value: 42 };
 
@@ -46,6 +57,19 @@ const createLayer = (
     ...overrides,
   } as CommonXYDataLayerConfig);
 
+const createHit = (specId: string, datum: XYOverlayDatum): XYChartElementEvent => {
+  const geometry: GeometryValue = { x: 0, y: 0, accessor: 'y1', mark: null, datum };
+  const series: XYChartSeriesIdentifier = {
+    key: specId,
+    specId,
+    xAccessor: 'x',
+    yAccessor: 'y1',
+    splitAccessors: new Map(),
+    seriesKeys: [],
+  };
+  return [geometry, series];
+};
+
 describe('overlay points', () => {
   it('follows the overlays pushed after the first render', () => {
     const overlays$ = new BehaviorSubject<readonly XYOverlay[]>([]);
@@ -61,8 +85,43 @@ describe('overlay points', () => {
     expect(
       getOverlaySeriesConfigs([overlay], yAxesConfiguration, [createLayer()], XScaleTypes.TIME)
     ).toEqual([
-      { overlay, groupId: 'left', xScaleType: XScaleTypes.TIME, yScaleType: ScaleType.Linear },
+      {
+        overlay,
+        groupId: 'left',
+        xScaleType: XScaleTypes.TIME,
+        yScaleType: ScaleType.Linear,
+        data: overlay.data,
+        xAccessor: overlay.xAccessor,
+      },
     ]);
+  });
+
+  it('snaps points to the bucket that contains them on histogram layers', () => {
+    const points = [500, 1500, 2999, 3500, Number.NaN].map((timestamp) => ({
+      '@timestamp': timestamp,
+      value: 1,
+    }));
+    const histogramLayer = createLayer({
+      isHistogram: true,
+      table: {
+        type: 'datatable',
+        rows: [{ timestamp: 3000 }, { timestamp: 1000 }, { timestamp: 2000 }],
+        columns: [
+          { id: 'timestamp', name: 'timestamp', meta: { type: 'date' } },
+          { id: 'avg', name: 'avg', meta: { type: 'number', params: { id: 'number' } } },
+        ],
+      },
+    });
+
+    const [{ data, xAccessor }] = getOverlaySeriesConfigs(
+      [{ ...overlay, data: points }],
+      yAxesConfiguration,
+      [histogramLayer],
+      XScaleTypes.TIME
+    );
+
+    expect(data).toEqual([points[1], points[2], points[3]]);
+    expect(typeof xAccessor === 'function' && data.map(xAccessor)).toEqual([1000, 2000, 3000]);
   });
 
   it('follows the scale type of the Y axis', () => {
@@ -110,8 +169,7 @@ describe('overlay points', () => {
   it('hands back the clicked datum itself', () => {
     const clicked = getClickedOverlayPoint(
       [overlay],
-      'xy-overlay-observability.exemplars-metrics',
-      point
+      [createHit(getOverlaySpecId(overlay), point)]
     );
 
     expect(clicked).toEqual({
@@ -122,7 +180,24 @@ describe('overlay points', () => {
     expect(clicked?.datum).toBe(point);
   });
 
+  it('finds an overlay point hit after a regular series mark', () => {
+    const clicked = getClickedOverlayPoint(
+      [overlay],
+      [createHit('some-data-series', {}), createHit(getOverlaySpecId(overlay), point)]
+    );
+
+    expect(clicked?.datum).toBe(point);
+  });
+
   it('ignores clicks on regular series', () => {
-    expect(getClickedOverlayPoint([overlay], 'some-data-series', point)).toBeUndefined();
+    expect(
+      getClickedOverlayPoint([overlay], [createHit('some-data-series', point)])
+    ).toBeUndefined();
+  });
+
+  it('gives a distinct series ID to every provider and layer pair', () => {
+    expect(getOverlaySpecId({ ...overlay, id: 'a-b', layerId: 'c' })).not.toBe(
+      getOverlaySpecId({ ...overlay, id: 'a', layerId: 'b-c' })
+    );
   });
 });

@@ -241,6 +241,41 @@ describe('Lens XY overlay providers', () => {
       ]);
     });
 
+    it('isolates a provider that throws synchronously or returns no data array', async () => {
+      const throwing = createExemplarsOverlayProvider({
+        id: 'throwing',
+        fetchOverlay: () => {
+          throw new Error('sync failure');
+        },
+      });
+      const withoutData = createExemplarsOverlayProvider({
+        id: 'withoutData',
+        fetchOverlay: async () =>
+          ({ type: 'points', title: 'No data' } as Awaited<
+            ReturnType<LensXYOverlayProvider['fetchOverlay']>
+          >),
+      });
+
+      const { overlays, failures } = await runActiveProviders({
+        activeProviders: [
+          { provider: throwing, layer },
+          { provider: withoutData, layer },
+          { provider: createExemplarsOverlayProvider(), layer },
+        ],
+        ...createRunContext(jest.fn().mockResolvedValue(exemplarsTable)),
+      });
+
+      expect(overlays.map(({ providerId }) => providerId)).toEqual(['observability.exemplars']);
+      expect(failures).toEqual([
+        { providerId: 'throwing', layerId: 'metrics', error: new Error('sync failure') },
+        {
+          providerId: 'withoutData',
+          layerId: 'metrics',
+          error: new Error('The "withoutData" overlay has no data array'),
+        },
+      ]);
+    });
+
     it('drops results of an aborted run', async () => {
       const abortController = new AbortController();
       abortController.abort();

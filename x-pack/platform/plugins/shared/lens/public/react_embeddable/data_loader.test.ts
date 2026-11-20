@@ -36,10 +36,20 @@ import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import * as Logger from './logger';
 import type { LensEmbeddableStartServices } from './types';
 import { waitFor } from '@testing-library/dom';
+import { XY_OVERLAYS_VARIABLE } from '@kbn/expression-xy-plugin/common';
+import type { LensXYOverlayProvidersConfig } from '@kbn/lens-common';
+import { loadXYOverlays } from '../xy_overlay_providers';
 
 jest.mock('@kbn/interpreter', () => ({
   toExpression: jest.fn().mockReturnValue('expression'),
 }));
+
+jest.mock('../xy_overlay_providers', () => ({
+  ...jest.requireActual('../xy_overlay_providers'),
+  loadXYOverlays: jest.fn(),
+}));
+
+const loadXYOverlaysMock = jest.mocked(loadXYOverlays);
 
 const loggerFn = jest.spyOn(Logger, 'addLog');
 
@@ -183,7 +193,10 @@ describe('Data Loader', () => {
     loggerFn.mockRestore();
   });
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    loadXYOverlaysMock.mockResolvedValue({ overlays: [], failures: [], truncations: [] });
+  });
 
   it('should re-render once on filter change', async () => {
     await expectRerenderOnDataLoader(async ({ parentApi }) => {
@@ -862,5 +875,104 @@ describe('Data Loader', () => {
     jest.advanceTimersByTime(200);
 
     expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1);
+  });
+
+  describe('XY overlays', () => {
+    const setup = async () => {
+      const runtimeState: LensRuntimeState = { attributes: getLensAttributesMock() };
+      const xyOverlayProviders$ = new BehaviorSubject<LensXYOverlayProvidersConfig | undefined>(
+        undefined
+      );
+      const parentApi = {
+        ...createUnifiedSearchApi(),
+        searchSessionId$: new BehaviorSubject<string>(''),
+        esqlVariables$: new BehaviorSubject<ESQLControlVariable[] | undefined>([]),
+        xyOverlayProviders$,
+      };
+      const internalApi = getLensInternalApiMock({
+        attributes$: new BehaviorSubject(runtimeState.attributes),
+      });
+      const services = {
+        ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
+          visOverrides: { id: 'lnsXY' },
+          dataOverrides: { id: 'formBased' },
+        }),
+        documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
+      };
+      const { cleanup } = loadEmbeddableData(
+        faker.string.uuid(),
+        jest.fn(() => runtimeState),
+        { ...getLensApiMock(), parentApi },
+        parentApi,
+        internalApi,
+        services
+      );
+      jest.advanceTimersByTime(100);
+      await waitFor(() => expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1));
+      const params = await waitForValue(
+        internalApi.expressionParams$,
+        (v: unknown) => isObject(v) && 'onData$' in v
+      );
+      const overlayEmissions = jest.fn();
+      const subscription = params.variables[XY_OVERLAYS_VARIABLE].subscribe(overlayEmissions);
+      const triggerReload = () => {
+        (internalApi.attributes$ as BehaviorSubject<LensDocument | undefined>).next({
+          ...internalApi.attributes$.getValue(),
+          title: faker.lorem.word(),
+        });
+        jest.advanceTimersByTime(200);
+      };
+      return {
+        params,
+        xyOverlayProviders$,
+        internalApi,
+        overlayEmissions,
+        triggerReload,
+        cleanup: () => {
+          subscription.unsubscribe();
+          cleanup();
+        },
+      };
+    };
+
+    it('loads overlays only after a final, successful base result', async () => {
+      const { params, cleanup } = await setup();
+
+      params.onData$({ type: 'error', error: { message: 'failed' } });
+      params.onData$({ type: 'datatable', rows: [], columns: [] }, undefined, true);
+      expect(loadXYOverlaysMock).not.toHaveBeenCalled();
+
+      params.onData$({ type: 'datatable', rows: [], columns: [] });
+      expect(loadXYOverlaysMock).toHaveBeenCalledTimes(1);
+
+      cleanup();
+    });
+
+    it('does not re-render the chart while there are no overlays to draw', async () => {
+      const { params, overlayEmissions, triggerReload, internalApi, cleanup } = await setup();
+
+      params.onData$({ type: 'datatable', rows: [], columns: [] });
+      await waitFor(() => expect(loadXYOverlaysMock).toHaveBeenCalledTimes(1));
+      triggerReload();
+      await waitFor(() => expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(2));
+
+      expect(overlayEmissions).toHaveBeenCalledTimes(1);
+      expect(overlayEmissions).toHaveBeenCalledWith([]);
+
+      cleanup();
+    });
+
+    it('does not refetch with the previous chart when providers change during a reload', async () => {
+      const { params, xyOverlayProviders$, triggerReload, cleanup } = await setup();
+
+      params.onData$({ type: 'datatable', rows: [], columns: [] });
+      expect(loadXYOverlaysMock).toHaveBeenCalledTimes(1);
+
+      triggerReload();
+      xyOverlayProviders$.next({ someProvider: false });
+      expect(loadXYOverlaysMock).toHaveBeenCalledTimes(1);
+
+      cleanup();
+    });
   });
 });

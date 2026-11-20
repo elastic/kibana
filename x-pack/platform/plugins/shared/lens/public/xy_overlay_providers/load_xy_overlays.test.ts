@@ -15,6 +15,8 @@ import { loadXYOverlays } from './load_xy_overlays';
 
 const ESQL = 'TS metrics-* | STATS AVG(http.server.request.duration) BY TBUCKET(1m)';
 const TIME_RANGE = { from: 'now-15m', to: 'now' };
+const NOW = Date.parse('2026-11-10T10:15:00.000Z');
+const ABSOLUTE_TIME_RANGE = { from: '2026-11-10T10:00:00.000Z', to: '2026-11-10T10:15:00.000Z' };
 const FILTERS: Filter[] = [{ meta: {}, query: { match_all: {} } }];
 const KQL = { language: 'kuery', query: 'service.name : "api"' };
 
@@ -48,8 +50,8 @@ const fetchContextSpy = jest.fn();
 const provider: LensXYOverlayProvider = {
   id: 'test.exemplars',
   isApplicable: () => true,
-  fetchOverlay: async ({ executeEsql, filters, queries }) => {
-    fetchContextSpy({ filters, queries });
+  fetchOverlay: async ({ executeEsql, filters, queries, timeRange }) => {
+    fetchContextSpy({ filters, queries, timeRange });
     const { rows } = await executeEsql('SET exemplars=true;', { title: 'Exemplars' });
     return {
       type: 'points',
@@ -71,6 +73,7 @@ const load = async (ignoreGlobalFilters: boolean) => {
     registry,
     attributes: createAttributes(ignoreGlobalFilters),
     searchContext: {
+      now: NOW,
       timeRange: TIME_RANGE,
       filters: FILTERS,
       query: [KQL],
@@ -96,7 +99,7 @@ describe('loadXYOverlays', () => {
       expect.objectContaining({
         query: 'SET exemplars=true;',
         kibanaQueryContext: {
-          timeRange: TIME_RANGE,
+          timeRange: ABSOLUTE_TIME_RANGE,
           timeField: '@timestamp',
           kibanaFilters: FILTERS,
           kqlQuery: [KQL],
@@ -124,12 +127,20 @@ describe('loadXYOverlays', () => {
     );
   });
 
-  it('hands providers the filters and queries applied to the layer', async () => {
+  it('hands providers the time range, filters and queries applied to the layer', async () => {
     await load(false);
-    expect(fetchContextSpy).toHaveBeenLastCalledWith({ filters: FILTERS, queries: [KQL] });
+    expect(fetchContextSpy).toHaveBeenLastCalledWith({
+      filters: FILTERS,
+      queries: [KQL],
+      timeRange: ABSOLUTE_TIME_RANGE,
+    });
 
     await load(true);
-    expect(fetchContextSpy).toHaveBeenLastCalledWith({ filters: [], queries: [] });
+    expect(fetchContextSpy).toHaveBeenLastCalledWith({
+      filters: [],
+      queries: [],
+      timeRange: ABSOLUTE_TIME_RANGE,
+    });
   });
 
   it('reports a throwing rule as a failure', async () => {

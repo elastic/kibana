@@ -59,9 +59,9 @@ const LENS_ACTIONS_OPTIONS: UseUnifiedHistogramProps['lensActionsOptions'] = {
   telemetrySource: 'discover',
 };
 
+// Without `name`, so the request context keeps the app-level `name: 'discover'`.
 const HISTOGRAM_EXECUTION_CONTEXT: UseUnifiedHistogramProps['executionContext'] = {
   type: 'discover',
-  name: 'unified_histogram',
 };
 
 const TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH: Array<keyof UnifiedHistogramFetchParamsExternal> = [

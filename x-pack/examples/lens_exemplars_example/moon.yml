@@ -23,7 +23,6 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/developer-examples-plugin'
-  - '@kbn/esql-utils'
   - '@kbn/expressions-plugin'
   - '@kbn/react-kibana-context-render'
   - '@kbn/react-kibana-mount'

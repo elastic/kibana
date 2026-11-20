@@ -105,7 +105,7 @@ describe('useLensProps', () => {
       useLensProps({
         fetch$,
         onLoad: jest.fn(),
-        executionContext: { type: 'discover', name: 'unified_histogram' },
+        executionContext: { type: 'discover' },
       })
     );
     act(() => {
@@ -114,7 +114,6 @@ describe('useLensProps', () => {
 
     expect(lensProps.result.current?.lensProps.executionContext).toEqual({
       type: 'discover',
-      name: 'unified_histogram',
       description: 'fetch chart data and total hits',
     });
   });
