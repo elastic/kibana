@@ -14,7 +14,11 @@ export interface RunContext {
   spaceId: string;
   /** Unique per tick; reported back and stamped on what the run records. */
   runId: string;
-  /** The minute the tick is for, in epoch milliseconds. Stamped on every signal as its schedule time. */
+  /**
+   * The minute the tick runs in, in epoch milliseconds. Stamped on every signal as its schedule
+   * time. It is the run's time, not the window's: history reads filter and order by it, so a window
+   * replayed after a failure must carry the later minute to win over its first attempt.
+   */
   scheduledMinute: number;
 }
 

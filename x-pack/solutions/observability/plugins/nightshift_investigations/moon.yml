@@ -94,6 +94,7 @@ dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/repo-info'
   - '@kbn/setup-node-env'
+  - '@kbn/user-profile-components'
 tags:
   - plugin
   - prod

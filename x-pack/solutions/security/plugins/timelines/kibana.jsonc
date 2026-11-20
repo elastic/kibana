@@ -9,21 +9,11 @@
   "plugin": {
     "id": "timelines",
     "browser": true,
-    "server": true,
-    "configPath": [
-      "xpack",
-      "timelines"
-    ],
+    "server": false,
     "requiredPlugins": [
-      "alerting",
-      "cases",
-      "data",
       "kibanaReact",
       "kibanaUtils"
     ],
-    "optionalPlugins": [],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "optionalPlugins": []
   }
 }

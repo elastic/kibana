@@ -653,7 +653,8 @@
         "diff",
         "fastest-levenshtein",
         "usng.js",
-        "react-reverse-portal"
+        "react-reverse-portal",
+        "tabbable"
       ],
       "reviewers": ["team:kibana-discover"],
       "matchBaseBranches": ["main"],
