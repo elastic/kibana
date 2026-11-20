@@ -91,6 +91,7 @@ export class CredentialRecovery {
   private readonly originalAuthorization: KibanaRequest['headers']['authorization'];
   private readonly clients: ElasticsearchClient[];
   private readonly snapshotClient: ElasticsearchClient;
+  private readonly expiryDeadline: number;
   private readonly dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
   private readonly keys: GrantedKey[] = [];
   private readonly usernames: string[] = [];
@@ -103,6 +104,11 @@ export class CredentialRecovery {
     private readonly request: KibanaRequest,
     private readonly options: RecoveryOptions
   ) {
+    this.expiryDeadline =
+      Date.now() +
+      (options.scenario === 'twice' || options.scenario === 'stale_first_after_second_expiry'
+        ? 100_000
+        : 70_000);
     this.originalHeaders = request.headers;
     this.originalAuthorization = request.headers.authorization;
 
@@ -121,6 +127,7 @@ export class CredentialRecovery {
     await setTimeout(waitMs);
     if (probeFirst) {
       await this.waitForTokenExpiry();
+      this.snapshotExpired = true;
     }
 
     const [firstClient, secondClient, staleClient] = this.clients;
@@ -238,20 +245,18 @@ export class CredentialRecovery {
   }
 
   private async waitForTokenExpiry(client = this.snapshotClient) {
-    const expiryDeadline = Date.now() + 70_000;
     while (true) {
       try {
         await client.security.authenticate();
       } catch (error) {
         if (isTokenExpiredError(error)) {
-          this.snapshotExpired = true;
           return;
         }
 
         throw error;
       }
 
-      if (Date.now() >= expiryDeadline) {
+      if (Date.now() >= this.expiryDeadline) {
         throw new Error('The captured credential did not expire within the test window');
       }
 
