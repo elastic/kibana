@@ -22,6 +22,7 @@ import {
 } from '../../../../entities/workflows/store';
 import type { StepDuration } from '../../../../shared/lib/build_step_durations';
 import {
+  CHEVRON_SLOT_PX,
   formatStepDurationLabel,
   getDurationGutterWidth,
   getStepDurationShare,
@@ -61,7 +62,8 @@ interface StepTooltipData {
 /**
  * Fills the tooltip element: the run count/total and avg/min/max breakdown for a repeated step,
  * the step's share of the whole run, and a warning line when step executions are still unloaded
- * and the figures undercount. The first line is emphasised.
+ * and the figures undercount. The first line is emphasised only when it heads further lines; a
+ * lone line is rendered at regular weight.
  */
 const renderTooltipContent = (
   tipEl: HTMLElement,
@@ -110,7 +112,7 @@ const renderTooltipContent = (
   const children: Node[] = [];
   lines.forEach((line, index) => {
     if (index > 0) children.push(document.createElement('br'));
-    if (index === 0) {
+    if (index === 0 && lines.length > 1) {
       const bold = document.createElement('strong');
       bold.textContent = line;
       children.push(bold);
@@ -176,7 +178,9 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
         // every wrapped line, so we keep this at (n,1,n,1).
         decorations.push({
           range: new monaco.Range(stepInfo.lineStart, 1, stepInfo.lineStart, 1),
-          options: { linesDecorationsClassName: classNames.join(' ') },
+          // zIndex draws the chip above Monaco's fold decoration, which shares the same box, so
+          // hovering the chip hits the chip and not the fold chevron's native tooltip.
+          options: { linesDecorationsClassName: classNames.join(' '), zIndex: 1 },
         });
       }
     }
@@ -294,8 +298,12 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
 
     const moveDisposable = editor.onMouseMove((e) => {
       const isGutter = e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_DECORATIONS;
+      // Only the chip itself (not the fold chevron sharing its lane) gets this tooltip, so the
+      // chevron keeps Monaco's native fold tooltip without a second one stacked on it.
+      const isChip = e.target.element?.classList.contains(BASE_CLASS) ?? false;
       const line = e.target.position?.lineNumber;
-      const tooltipData = isGutter && line != null ? lineTooltipRef.current.get(line) : undefined;
+      const tooltipData =
+        isGutter && isChip && line != null ? lineTooltipRef.current.get(line) : undefined;
 
       if (tooltipData) {
         cancelHide();
@@ -396,9 +404,9 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
         display: 'flex',
         justifyContent: 'flex-end',
         alignItems: 'flex-start', // keeps chip on the first line of a word-wrapped `- name:`
-        // 16px left padding ensures chip text never overlaps the folding chevron that Monaco
-        // renders at the left edge of the lines-decorations lane.
-        paddingLeft: '16px',
+        // Reserves the left slot for the fold chevron, which Monaco draws in the same box as this
+        // lane (the chevron rule below pins it to the left), so chip text never overlaps it.
+        paddingLeft: `${CHEVRON_SLOT_PX}px`,
         // Mirrors LANE_RIGHT_PADDING_PX in build_step_durations.ts (lane width estimate).
         paddingRight: '4px',
         overflow: 'hidden',
@@ -414,7 +422,21 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
         borderRadius: border.radius.small,
         lineHeight: '23px', // matches WORKFLOW_MONACO_LAYOUT_OPTIONS.lineHeight
         color: colors.textSubdued,
+        // The lane itself stays pointer-events:none so the rest of it (chevron included) reaches
+        // Monaco's fold decoration; only the chip text is hit-testable, for its own tooltip.
+        pointerEvents: 'auto',
       },
+
+      // Monaco centres the fold chevron in a box as wide as this lane. Pin it to the left slot
+      // while chips are shown; otherwise it would sit under the chip text.
+      ...(isActive
+        ? {
+            '.monaco-editor .margin-view-overlays': {
+              '.codicon-folding-expanded, .codicon-folding-collapsed, .codicon-folding-manual-expanded, .codicon-folding-manual-collapsed':
+                { justifyContent: 'flex-start' },
+            },
+          }
+        : {}),
 
       // Tone modifiers: a warm intensity ramp (amber text, then a pale fill and heavier weight)
       // rather than the risk/danger hues that mark failed steps in this gutter: a slow step that
@@ -433,7 +455,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
       // Per-label content injection. Built inline so Emotion owns insertion/cleanup.
       ...contentRules,
     });
-  }, [stepDurations, colors, border, font]);
+  }, [stepDurations, colors, border, font, isActive]);
 
   return { styles };
 };

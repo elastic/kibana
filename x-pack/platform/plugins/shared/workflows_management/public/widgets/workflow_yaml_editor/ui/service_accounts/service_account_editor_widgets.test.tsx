@@ -64,6 +64,7 @@ const setup = (enabled = true, yaml = 'settings:\n  run_as: ', canManage = false
   const directory = {
     isEnabled: () => enabled,
     get: jest.fn().mockResolvedValue(account),
+    lookup: jest.fn().mockResolvedValue({ status: 'found', account }),
     list: jest.fn().mockResolvedValue({ serviceAccounts: [account] }),
   };
   jest.mocked(useServiceAccountEditor).mockReturnValue(createServiceAccountEditor(directory));
@@ -440,6 +441,31 @@ describe('ServiceAccountEditorWidgets', () => {
     await screen.findByRole('option');
     expect(directory.list).toHaveBeenLastCalledWith(undefined, true);
     expect(editor.executeEdits).not.toHaveBeenCalled();
+  });
+
+  it('keeps the retried picker open when the pointer leaves the shrinking panel', async () => {
+    jest.useFakeTimers();
+    const { directory } = setup();
+    directory.list.mockResolvedValue({ error: 'unavailable' });
+    await act(async () => {
+      jest.advanceTimersByTime(100);
+    });
+    expect(screen.getByRole('alert')).toHaveTextContent('Unable to load service accounts.');
+    let resolvePage: (page: { serviceAccounts: (typeof account)[] }) => void = () => {};
+    directory.list.mockReturnValue(
+      new Promise((resolve) => {
+        resolvePage = resolve;
+      })
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    act(() => {
+      fireEvent.mouseOut(screen.getByTestId('serviceAccountEditorPopup'), {
+        relatedTarget: document.body,
+      });
+      jest.advanceTimersByTime(500);
+    });
+    await act(async () => resolvePage({ serviceAccounts: [account] }));
+    expect(screen.getByRole('option')).toHaveTextContent(account.name);
   });
 
   it.each([true, false])('gates Manage on the management capability (%s)', async (canManage) => {
