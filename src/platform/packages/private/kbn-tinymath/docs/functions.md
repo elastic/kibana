@@ -18,14 +18,14 @@ abs([-1 , -2, 3, -4]) // returns [1, 2, 3, 4]
 ```
 ***
 ## _add(_ ..._args_ _)_
-Calculates the sum of one or more numbers/arrays passed into the function. If at least one array of numbers is passed into the function, the function will calculate the sum by index.
+Calculates the sum of one or more numbers/arrays passed into the function. If you pass several arguments and at least one is an array, the function will calculate the sum by index.
 
 
 | Param | Type | Description |
 | --- | --- | --- |
 | ...args | <code>number</code> \| <code>Array.&lt;number&gt;</code> | one or more numbers or arrays of numbers |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The sum of all numbers in `args` if `args` contains only numbers. Returns an array of sums of the elements at each index, including all scalar numbers in `args` in the calculation at each index if `args` contains at least one array.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The sum of all numbers in `args` if `args` contains only numbers. Returns an array of sums of the elements at each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.  
 **Throws**:
 
 - `'Array length mismatch'` if `args` contains arrays of different lengths
@@ -79,7 +79,7 @@ Restricts a value to a given range. Returns `min` if the value is below it, `max
 | min | <code>number</code> \| <code>Array.&lt;number&gt;</code> | The minimum value this function returns. |
 | max | <code>number</code> \| <code>Array.&lt;number&gt;</code> | The maximum value this function returns. |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The closest value between `min` (inclusive) and `max` (inclusive). Returns an array with values greater than or equal to `min` and less than or equal to `max` at each index if `a`, `min`, or `max` is an array. If you leave out `min` or `max`, the result is `NaN`.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The closest value between `min` (inclusive) and `max` (inclusive). Returns an array with values greater than or equal to `min` and less than or equal to `max` at each index if `a`, `min`, or `max` is an array. If you leave out `min` or `max`, the result is `NaN`, or an array of `NaN` values if `a` is an array.  
 **Throws**:
 
 - `'Array length mismatch'` if `a`, `min`, or `max` are arrays of different lengths
@@ -176,7 +176,7 @@ Returns one of two values, depending on a condition.
 | a | <code>any</code> \| <code>Array.&lt;any&gt;</code> | the value to return if `cond` is true |
 | b | <code>any</code> \| <code>Array.&lt;any&gt;</code> | the value to return if `cond` is false |
 
-**Returns**: <code>any</code> \| <code>Array.&lt;any&gt;</code> - `a` if `cond` is true, otherwise `b`.  
+**Returns**: <code>any</code> \| <code>Array.&lt;any&gt;</code> - `a` if `cond` is true, otherwise `b`. TinyMath evaluates both `a` and `b` first, so an error in either one stops the expression.  
 **Throws**:
 
 - `'Condition clause is of the wrong type'` if `cond` is not a boolean
@@ -355,8 +355,8 @@ Calculates _e^x_ where _e_ is Euler&#x27;s number. For arrays, the function will
 **Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - `e^a`. Returns an array with the values of `e^x` evaluated where `x` is each element of `a` if `a` is an array.  
 **Example**  
 ```js
-exp(2) // returns e^2 = 7.3890560989306495
-exp([1, 2, 3]) // returns [e^1, e^2, e^3] = [2.718281828459045, 7.3890560989306495, 20.085536923187668]
+exp(2) // returns e^2 = 7.38905609893065
+exp([1, 2, 3]) // returns [e^1, e^2, e^3] = [2.718281828459045, 7.38905609893065, 20.085536923187668]
 ```
 ***
 ## _first(_ _a_ _)_
@@ -466,14 +466,14 @@ log([10, 100, 10000, 100000], 10) // returns [1, 2, 4, 5]
 ```
 ***
 ## _max(_ ..._args_ _)_
-Finds the maximum value of one or more numbers or arrays of numbers. If at least one array of numbers is passed into the function, the function will find the maximum by index.
+Finds the maximum value of one or more numbers or arrays of numbers. If you pass several arguments and at least one is an array, the function will find the maximum by index.
 
 
 | Param | Type | Description |
 | --- | --- | --- |
 | ...args | <code>number</code> \| <code>Array.&lt;number&gt;</code> | one or more numbers or arrays of numbers |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The maximum value of all numbers if `args` contains only numbers. Returns an array with the maximum values at each index, including all scalar numbers in `args` in the calculation at each index if `args` contains at least one array.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The maximum value of all numbers if `args` contains only numbers. Returns an array with the maximum values at each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.  
 **Throws**:
 
 - `'Array length mismatch'` if `args` contains arrays of different lengths
@@ -486,14 +486,18 @@ max([1, 9], 4, [3, 5]) // returns [max([1, 4, 3]), max([9, 4, 5])] = [4, 9]
 ```
 ***
 ## _mean(_ ..._args_ _)_
-Finds the mean value of one or more numbers or arrays of numbers. If at least one array of numbers is passed into the function, the function will find the mean by index.
+Finds the mean value of one or more numbers or arrays of numbers. If you pass several arguments and at least one is an array, the function will find the mean by index.
 
 
 | Param | Type | Description |
 | --- | --- | --- |
 | ...args | <code>number</code> \| <code>Array.&lt;number&gt;</code> | one or more numbers or arrays of numbers |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The mean value of all numbers if `args` contains only numbers. Returns an array with the mean values of each index, including all scalar numbers in `args` in the calculation at each index if `args` contains at least one array.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The mean value of all numbers if `args` contains only numbers. Returns an array with the mean values of each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.  
+**Throws**:
+
+- `'Array length mismatch'` if `args` contains arrays of different lengths
+
 **Example**  
 ```js
 mean(1, 2, 3) // returns 2
@@ -502,14 +506,18 @@ mean([1, 9], 5, [3, 4]) // returns [mean([1, 5, 3]), mean([9, 5, 4])] = [3, 6]
 ```
 ***
 ## _median(_ ..._args_ _)_
-Finds the median value(s) of one or more numbers or arrays of numbers. If at least one array of numbers is passed into the function, the function will find the median by index.
+Finds the median value(s) of one or more numbers or arrays of numbers. If you pass several arguments and at least one is an array, the function will find the median by index.
 
 
 | Param | Type | Description |
 | --- | --- | --- |
 | ...args | <code>number</code> \| <code>Array.&lt;number&gt;</code> | one or more numbers or arrays of numbers |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The median value of all numbers if `args` contains only numbers. Returns an array with the median values of each index, including all scalar numbers in `args` in the calculation at each index if `args` contains at least one array.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The median value of all numbers if `args` contains only numbers. Returns an array with the median values of each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.  
+**Throws**:
+
+- `'Array length mismatch'` if `args` contains arrays of different lengths
+
 **Example**  
 ```js
 median(1, 1, 2, 3) // returns 1.5
@@ -519,14 +527,14 @@ median([1, 9], 2, 4, [3, 5]) // returns [median([1, 2, 4, 3]), median([9, 2, 4, 
 ```
 ***
 ## _min(_ ..._args_ _)_
-Finds the minimum value of one or more numbers or arrays of numbers. If at least one array of numbers is passed into the function, the function will find the minimum by index.
+Finds the minimum value of one or more numbers or arrays of numbers. If you pass several arguments and at least one is an array, the function will find the minimum by index.
 
 
 | Param | Type | Description |
 | --- | --- | --- |
 | ...args | <code>number</code> \| <code>Array.&lt;number&gt;</code> | one or more numbers or arrays of numbers |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The minimum value of all numbers if `args` contains only numbers. Returns an array with the minimum values of each index, including all scalar numbers in `args` in the calculation at each index if `args` contains at least one array.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The minimum value of all numbers if `args` contains only numbers. Returns an array with the minimum values of each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.  
 **Throws**:
 
 - `'Array length mismatch'` if `args` contains arrays of different lengths
@@ -562,14 +570,18 @@ mod([14, 42, 65, 108], [5, 4, 14, 2]) // returns [4, 2, 9, 0]
 ```
 ***
 ## _mode(_ ..._args_ _)_
-Finds the mode value(s) of one or more numbers or arrays of numbers. If at least one array of numbers is passed into the function, the function will find the mode by index.
+Finds the mode value(s) of one or more numbers or arrays of numbers. If you pass several arguments and at least one is an array, the function will find the mode by index.
 
 
 | Param | Type | Description |
 | --- | --- | --- |
 | ...args | <code>number</code> \| <code>Array.&lt;number&gt;</code> | one or more numbers or arrays of numbers |
 
-**Returns**: <code>Array.&lt;number&gt;</code> \| <code>Array.&lt;Array.&lt;number&gt;&gt;</code> - An array mode value(s) of all numbers if `args` contains only numbers. Returns an array of arrays with mode value(s) of each index, including all scalar numbers in `args` in the calculation at each index  if `args` contains at least one array.  
+**Returns**: <code>Array.&lt;number&gt;</code> \| <code>Array.&lt;Array.&lt;number&gt;&gt;</code> - An array mode value(s) of all numbers if `args` contains only numbers. Returns an array of arrays with mode value(s) of each index, including all scalar numbers in `args` in the calculation at each index  if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.  
+**Throws**:
+
+- `'Array length mismatch'` if `args` contains arrays of different lengths
+
 **Example**  
 ```js
 mode(1, 1, 2, 3) // returns [1]
@@ -618,7 +630,7 @@ Raises a number to a given exponent. For arrays, the function will be applied in
 | a | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number or an array of numbers |
 | b | <code>number</code> | the power that `a` is raised to |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - `a` raised to the power of `b`. Returns an array with the each element raised to the power of `b` if `a` is an array.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - `a` raised to the power of `b`. Returns an array with each element raised to the power of `b` if `a` is an array.  
 **Throws**:
 
 - `'Missing exponent'` if `b` is not provided
@@ -667,14 +679,18 @@ random(-10,10) // returns a random number between -10 (inclusive) and 10 (exclus
 ```
 ***
 ## _range(_ ..._args_ _)_
-Finds the range of one or more numbers or arrays of numbers. If at least one array of numbers is passed into the function, the function will find the range by index.
+Finds the range of one or more numbers or arrays of numbers. If you pass several arguments and at least one is an array, the function will find the range by index.
 
 
 | Param | Type | Description |
 | --- | --- | --- |
 | ...args | <code>number</code> \| <code>Array.&lt;number&gt;</code> | one or more numbers or arrays of numbers |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The range value of all numbers if `args` contains only numbers. Returns an array with the range values at each index, including all scalar numbers in `args` in the calculation at each index if `args` contains at least one array.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The range value of all numbers if `args` contains only numbers. Returns an array with the range values at each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.  
+**Throws**:
+
+- `'Array length mismatch'` if `args` contains arrays of different lengths
+
 **Example**  
 ```js
 range(1, 2, 3) // returns 2
@@ -752,7 +768,7 @@ Calculates the square root of a number. For arrays, the function will be applied
 **Example**  
 ```js
 sqrt(9) // returns 3
-sqrt(30) //5.477225575051661
+sqrt(30) // returns 5.477225575051661
 sqrt([9, 16, 25]) // returns [3, 4, 5]
 ```
 ***

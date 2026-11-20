@@ -12,7 +12,7 @@
  * @param {(boolean)} cond a condition, such as `5 > 6` or the result of a comparison function
  * @param {(any|any[])} a the value to return if `cond` is true
  * @param {(any|any[])} b the value to return if `cond` is false
- * @return {(any|any[])} `a` if `cond` is true, otherwise `b`.
+ * @return {(any|any[])} `a` if `cond` is true, otherwise `b`. TinyMath evaluates both `a` and `b` first, so an error in either one stops the expression.
  * @throws `'Condition clause is of the wrong type'` if `cond` is not a boolean
  * @throws `'Missing a value'` if `a` is not provided
  * @throws `'Missing b value'` if `b` is not provided

@@ -8,9 +8,9 @@
  */
 
 /**
- * Finds the maximum value of one or more numbers or arrays of numbers. If at least one array of numbers is passed into the function, the function will find the maximum by index.
+ * Finds the maximum value of one or more numbers or arrays of numbers. If you pass several arguments and at least one is an array, the function will find the maximum by index.
  * @param {...(number|number[])} args one or more numbers or arrays of numbers
- * @return {(number|number[])} The maximum value of all numbers if `args` contains only numbers. Returns an array with the maximum values at each index, including all scalar numbers in `args` in the calculation at each index if `args` contains at least one array.
+ * @return {(number|number[])} The maximum value of all numbers if `args` contains only numbers. Returns an array with the maximum values at each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.
  * @throws `'Array length mismatch'` if `args` contains arrays of different lengths
  * @example
  * max(1, 2, 3) // returns 3

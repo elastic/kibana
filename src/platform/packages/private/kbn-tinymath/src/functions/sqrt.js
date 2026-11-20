@@ -14,7 +14,7 @@
  * @throws `'Unable find the square root of a negative number'` if `a` < 0
  * @example
  * sqrt(9) // returns 3
- * sqrt(30) //5.477225575051661
+ * sqrt(30) // returns 5.477225575051661
  * sqrt([9, 16, 25]) // returns [3, 4, 5]
  */
 
