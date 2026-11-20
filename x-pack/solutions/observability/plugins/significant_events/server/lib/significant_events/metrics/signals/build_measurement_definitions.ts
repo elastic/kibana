@@ -59,9 +59,11 @@ export const buildMeasurementDefinitions = ({
 }): {
   definitions: MeasurementDefinition[];
   skipped: SkippedMeasurementDefinition[];
+  previewQueries: string[];
 } => {
   const definitions: MeasurementDefinition[] = [];
   const skipped: SkippedMeasurementDefinition[] = [];
+  const previewQueries: string[] = [];
 
   for (const typeKI of typeKIs) {
     const breakdown = getBreakdown(typeKI);
@@ -87,12 +89,20 @@ export const buildMeasurementDefinitions = ({
       }
 
       const { variants } = plan;
-      const { entityFields, esql: definitionEsql } = renderSignalQuery({
+      const renderOptions = {
         esql,
         subtype: typeKI.subtype,
         breakdown,
         template,
         variants,
+      };
+      const { entityFields, esql: definitionEsql } = renderSignalQuery({
+        ...renderOptions,
+        perMinute: false,
+      });
+      const { esql: previewEsql } = renderSignalQuery({
+        ...renderOptions,
+        perMinute: true,
       });
       definitions.push({
         signal: template.signal,
@@ -113,8 +123,9 @@ export const buildMeasurementDefinitions = ({
           source,
         })),
       });
+      previewQueries.push(previewEsql);
     }
   }
 
-  return { definitions, skipped };
+  return { definitions, skipped, previewQueries };
 };

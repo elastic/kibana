@@ -533,13 +533,14 @@ const getMetricsDefinitionsRoute = createServerRoute({
       fieldPresence,
     });
     if (!params.query.preview) {
-      return result;
+      return { definitions: result.definitions, skipped: result.skipped };
     }
 
     return {
       definitions: await runDefinitionPreviews({
         esClient: streamDataEsClient,
         definitions: result.definitions,
+        previewQueries: result.previewQueries,
         signal: requestSignal,
       }),
       skipped: result.skipped,

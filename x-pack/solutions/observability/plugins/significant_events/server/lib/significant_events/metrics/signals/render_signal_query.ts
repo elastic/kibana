@@ -45,6 +45,22 @@ const filteredAggregation = (
 const coalesce = (columns: readonly string[]): string =>
   columns.length === 1 ? columns[0] : `COALESCE(${columns.join(', ')})`;
 
+const renderGrouping = (
+  fields: readonly string[],
+  perMinute: boolean,
+  firstGrouping: boolean
+): string =>
+  [
+    ...(perMinute ? [firstGrouping ? 'minute = BUCKET(@timestamp, 1 minute)' : 'minute'] : []),
+    ...fields,
+  ].join(', ');
+
+const renderOutputColumns = (
+  entityFields: readonly string[],
+  columns: readonly string[],
+  perMinute: boolean
+): string => [...(perMinute ? ['minute'] : []), ...entityFields, ...columns].join(', ');
+
 const renderEntityFieldDerivations = (
   additionalEntityFields: readonly SignalTemplateEntityField[]
 ): string[] =>
@@ -169,11 +185,13 @@ const renderGenericAggregation = ({
   entityFields,
   contextColumns,
   sampleColumn,
+  perMinute,
 }: {
   variants: readonly SignalTemplateVariant[];
   entityFields: readonly string[];
   contextColumns: readonly string[];
   sampleColumn?: string;
+  perMinute: boolean;
 }): string => {
   const arms = variants.map((variant, index) => renderVariantArm(variant, index, sampleColumn));
   const evaluations = arms.flatMap(({ evaluations: armEvaluations }) => armEvaluations);
@@ -189,16 +207,17 @@ const renderGenericAggregation = ({
 
   return [
     `| STATS ${arms.flatMap(({ aggregations }) => aggregations).join(',\n        ')}
-  BY ${entityFields.join(', ')}`,
+  BY ${renderGrouping(entityFields, perMinute, true)}`,
     ...(evaluations.length > 0 ? [`| EVAL ${evaluations.join(',\n       ')}`] : []),
     `| EVAL ${outputEvaluations.join(',\n       ')}`,
-    `| KEEP ${[...entityFields, 'value', ...contextColumns].join(', ')}`,
+    `| KEEP ${renderOutputColumns(entityFields, ['value', ...contextColumns], perMinute)}`,
   ].join('\n');
 };
 
 const renderContainerAggregation = (
   variants: readonly SignalTemplateVariant[],
-  entityFields: readonly string[]
+  entityFields: readonly string[],
+  perMinute: boolean
 ): string => {
   const containerArms = variants.map((variant, index) =>
     filteredAggregation(`container_value_${index}`, `AVG(${variant.field})`, variant)
@@ -206,31 +225,33 @@ const renderContainerAggregation = (
   const containerValue = coalesce(variants.map((_, index) => `container_value_${index}`));
 
   return `| STATS ${containerArms.join(',\n        ')}
-  BY ${[...entityFields, POD_FIELD, CONTAINER_FIELD].join(', ')}
+  BY ${renderGrouping([...entityFields, POD_FIELD, CONTAINER_FIELD], perMinute, true)}
 | EVAL container_value = ${containerValue},
        container = CONCAT(${POD_FIELD}, "/", ${CONTAINER_FIELD})
 | INLINE STATS max_container_value = MAX(container_value)
-  BY ${entityFields.join(', ')}
+  BY ${renderGrouping(entityFields, perMinute, false)}
 | WHERE container_value == max_container_value
 | STATS value = MAX(container_value),
         worst_container = MIN(container)
-  BY ${entityFields.join(', ')}
-| KEEP ${[...entityFields, 'value', 'worst_container'].join(', ')}`;
+  BY ${renderGrouping(entityFields, perMinute, false)}
+| KEEP ${renderOutputColumns(entityFields, ['value', 'worst_container'], perMinute)}`;
 };
 
-/** Renders one stored measurement query with no time range or minute bucket. */
+/** Renders one stored or per minute measurement query. */
 export const renderSignalQuery = ({
   esql,
   subtype,
   breakdown,
   template,
   variants,
+  perMinute,
 }: {
   esql: string;
   subtype: string;
   breakdown: readonly string[];
   template: SignalTemplate;
   variants: readonly SignalTemplateVariant[];
+  perMinute: boolean;
 }): { entityFields: string[]; esql: string } => {
   const workloadKind = WORKLOAD_KIND_BY_SUBTYPE[subtype];
   const additionalEntityFields = template.additionalEntityFields ?? [];
@@ -247,41 +268,28 @@ export const renderSignalQuery = ({
     : [];
   const aggregation =
     variants[0].formulaKind === 'container_average'
-      ? renderContainerAggregation(variants, entityFields)
+      ? renderContainerAggregation(variants, entityFields, perMinute)
       : renderGenericAggregation({
           variants,
           entityFields,
           contextColumns: template.contextColumns,
           sampleColumn: template.hint.sample_column,
+          perMinute,
         });
+  const filters = [
+    ...(perMinute ? [`@timestamp >= NOW() - ${PREVIEW_WINDOW}`] : []),
+    buildVariantFilter(variants),
+  ];
 
   return {
     entityFields,
     esql: [
       `SET unmapped_fields = "NULLIFY"; ${toFromSourceQuery(esql)}`,
-      `| WHERE ${buildVariantFilter(variants)}`,
+      `| WHERE ${filters.join('\n    AND ')}`,
       ...workloadPipeline,
       ...renderEntityFieldDerivations(additionalEntityFields),
       aggregation,
+      ...(perMinute ? [`| LIMIT ${DEFINITION_PREVIEW_LIMIT}`] : []),
     ].join('\n'),
   };
 };
-
-const addPreviewBuckets = (esql: string): string => {
-  let groupingIndex = 0;
-  return esql.replace(/\n  BY /g, () => {
-    const timestampField = groupingIndex++ === 0 ? '@timestamp' : 'minute';
-    return `\n  BY minute = BUCKET(${timestampField}, 1 minute), `;
-  });
-};
-
-/** Adds the preview time range, minute buckets, and row limit to a stored query. */
-export const renderDefinitionPreviewQuery = (esql: string): string =>
-  `${addPreviewBuckets(
-    esql.replace(
-      '| WHERE ',
-      `| WHERE @timestamp >= NOW() - ${PREVIEW_WINDOW}
-    AND `
-    )
-  ).replace('| KEEP ', '| KEEP minute, ')}
-| LIMIT ${DEFINITION_PREVIEW_LIMIT}`;

@@ -9,7 +9,7 @@ import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { timeoutSignal } from '@kbn/std';
-import { DEFINITION_PREVIEW_LIMIT, renderDefinitionPreviewQuery } from './render_signal_query';
+import { DEFINITION_PREVIEW_LIMIT } from './render_signal_query';
 import type {
   MeasurementDefinition,
   MeasurementDefinitionPreview,
@@ -100,12 +100,14 @@ const selectPreviewEntities = (
 const runPreview = async ({
   esClient,
   definition,
+  previewQuery,
   signal,
   from,
   to,
 }: {
   esClient: ElasticsearchClient;
   definition: MeasurementDefinition;
+  previewQuery: string;
   signal?: AbortSignal;
   from: string;
   to: string;
@@ -114,7 +116,7 @@ const runPreview = async ({
   try {
     const requestSignal = signal ? AbortSignal.any([signal, deadline]) : deadline;
     const response = (await esClient.esql.query(
-      { query: renderDefinitionPreviewQuery(definition.esql) },
+      { query: previewQuery },
       { signal: requestSignal }
     )) as ESQLSearchResponse;
     const rows = selectPreviewEntities(definition, getPreviewRows(definition, response));
@@ -145,10 +147,12 @@ const runPreview = async ({
 export const runDefinitionPreviews = async ({
   esClient,
   definitions,
+  previewQueries,
   signal,
 }: {
   esClient: ElasticsearchClient;
   definitions: readonly MeasurementDefinition[];
+  previewQueries: readonly string[];
   signal?: AbortSignal;
 }): Promise<MeasurementDefinition[]> => {
   const toDate = new Date();
@@ -157,8 +161,17 @@ export const runDefinitionPreviews = async ({
   const limit = pLimit(PREVIEW_CONCURRENCY);
 
   return Promise.all(
-    definitions.map((definition) =>
-      limit(() => runPreview({ esClient, definition, signal, from, to }))
+    definitions.map((definition, index) =>
+      limit(() =>
+        runPreview({
+          esClient,
+          definition,
+          previewQuery: previewQueries[index],
+          signal,
+          from,
+          to,
+        })
+      )
     )
   );
 };

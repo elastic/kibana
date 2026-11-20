@@ -11,10 +11,9 @@ import {
   type MetricsTypeKnowledgeIndicator,
 } from './build_measurement_definitions';
 import type { SignalFieldPresence } from './check_signal_fields';
-import { renderDefinitionPreviewQuery } from './render_signal_query';
 import { SIGNAL_TEMPLATES } from './signal_templates';
 import { getSignalVariantFields } from './types';
-import type { MeasurementDefinition, SignalTemplate, SignalTemplateVariant } from './types';
+import type { SignalTemplate, SignalTemplateVariant } from './types';
 
 const SOURCE_ID = 'source-id';
 
@@ -69,7 +68,7 @@ const build = (
   subtypes: string[],
   template: SignalTemplate,
   fieldPresence: SignalFieldPresence[]
-): { definitions: MeasurementDefinition[] } =>
+): ReturnType<typeof buildMeasurementDefinitions> =>
   buildMeasurementDefinitions({
     esql: 'FROM metrics-*',
     typeKIs: subtypes.map(createTypeKI),
@@ -151,22 +150,19 @@ describe('buildMeasurementDefinitions', () => {
 
   it('adds the preview range and puts the minute bucket first in every grouping', () => {
     const template = getTemplate('k8s.container.memory_vs_limit');
-    const { definitions } = build(
+    const { definitions, previewQueries } = build(
       ['k8s.deployment'],
       template,
       template.variants.map(createPresence)
     );
-    const previewQuery = renderDefinitionPreviewQuery(definitions[0].esql);
+    const previewQuery = previewQueries[0];
     const groupings = [...previewQuery.matchAll(/\n  BY ([^\n]+)/g)].map((match) => match[1]);
 
+    expect(definitions[0].esql).not.toContain('minute');
     expect(previewQuery).toContain('| WHERE @timestamp >= NOW() - 15 minutes');
     expect(groupings).toHaveLength(3);
     expect(groupings[0]).toMatch(/^minute = BUCKET\(@timestamp, 1 minute\), /);
-    expect(
-      groupings
-        .slice(1)
-        .every((grouping) => grouping.startsWith('minute = BUCKET(minute, 1 minute), '))
-    ).toBe(true);
+    expect(groupings.slice(1).every((grouping) => grouping.startsWith('minute, '))).toBe(true);
     expect(previewQuery).toContain('| KEEP minute, ');
     expect(previewQuery).toContain('| LIMIT 10000');
   });
@@ -185,11 +181,11 @@ describe('buildMeasurementDefinitions', () => {
     ]);
 
     fieldPresenceSets.forEach(({ template, presence }) => {
-      const { definitions } = build([template.subtypes[0]], template, presence);
+      const { definitions, previewQueries } = build([template.subtypes[0]], template, presence);
       expect(definitions).toHaveLength(1);
       const [definition] = definitions;
       expect(Parser.parse(definition.esql).errors).toEqual([]);
-      expect(Parser.parse(renderDefinitionPreviewQuery(definition.esql)).errors).toEqual([]);
+      expect(Parser.parse(previewQueries[0]).errors).toEqual([]);
     });
   });
 });
