@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   carryCounts,
@@ -40,6 +41,45 @@ const PATH = [
 ];
 
 const NOW = '2026-10-21T10:00:00.000Z';
+
+const MODEL_IMPORT_TIMEOUT = 240_000;
+const SETUP_TIMEOUT = 720_000;
+
+const warmUpInferenceEndpoint = (client: Client) =>
+  client.inference.inference(
+    {
+      inference_id: defaultInferenceEndpoints.ELSER,
+      input: 'warm up the managed semantic_text endpoint',
+    },
+    { requestTimeout: MODEL_IMPORT_TIMEOUT }
+  );
+
+const reimportTruncatedModels = async (client: Client) => {
+  const { trained_model_configs: elserModels } = await client.ml.getTrainedModels({
+    model_id: '.elser_model_2*',
+    allow_no_match: true,
+  });
+
+  // Elasticsearch rejects `definition_status` when a request resolves to more than one model.
+  const statuses = await Promise.all(
+    elserModels.map(({ model_id: modelId }) =>
+      client.ml.getTrainedModels({ model_id: modelId, include: 'definition_status' })
+    )
+  );
+  const truncated = statuses
+    .flatMap(({ trained_model_configs: configs }) => configs)
+    .filter(({ fully_defined }) => fully_defined === false);
+
+  for (const { model_id: modelId } of truncated) {
+    await client.ml.deleteTrainedModel({ model_id: modelId, force: true });
+    await client.ml.putTrainedModel(
+      { model_id: modelId, input: { field_names: ['text_field'] }, wait_for_completion: true },
+      { requestTimeout: MODEL_IMPORT_TIMEOUT }
+    );
+  }
+
+  return truncated.length > 0;
+};
 
 /** Carries whatever is stored onto TREE, then records one visit along PATH. */
 const visitOnce = (previous: StoredTreeCounts | undefined): DecisionTreeCounts =>
@@ -93,7 +133,17 @@ describe('Nightshift decision-tree store with Elasticsearch', () => {
     });
     await esServer.start();
     esClient = esServer.getClient();
-  });
+
+    // Every write runs inference, so a truncated ELSER download must fail here, not on a write.
+    try {
+      await warmUpInferenceEndpoint(esClient);
+    } catch (error) {
+      if (!(await reimportTruncatedModels(esClient))) {
+        throw error;
+      }
+      await warmUpInferenceEndpoint(esClient);
+    }
+  }, SETUP_TIMEOUT);
 
   beforeEach(async () => {
     await esClient.indices.delete({ index: DECISION_TREE_AI_INDEX_DEST, ignore_unavailable: true });
