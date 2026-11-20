@@ -18,33 +18,27 @@ import type { StepLogEntry, StepLogsApi, StepLogsConfig } from '@kbn/workflows-e
 
 const INITIAL_POLL_INTERVAL_MS = 500;
 const MAX_POLL_INTERVAL_MS = 5000;
+/** Extra polls after the step is already terminal so late-indexed engine logs can appear. */
+const POST_TERMINAL_RETRIES = 3;
 
-const terminalContainerCss = css`
-  font-family: monospace;
-  font-size: 12px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  word-break: break-all;
-`;
-
-// Standard 4-bit ANSI foreground → CSS hex
+// Classic VGA ANSI palette tuned for a dark terminal surface.
 const ANSI_FG: Record<number, string> = {
   30: '#000000',
-  31: '#cc0000',
-  32: '#4e9a06',
-  33: '#c4a000',
-  34: '#3465a4',
-  35: '#75507b',
-  36: '#06989a',
-  37: '#d3d7cf',
-  90: '#555753',
-  91: '#ef2929',
-  92: '#8ae234',
-  93: '#fce94f',
-  94: '#729fcf',
-  95: '#ad7fa8',
-  96: '#34e2e2',
-  97: '#eeeeec',
+  31: '#cd3131',
+  32: '#0dbc79',
+  33: '#e5e510',
+  34: '#2472c8',
+  35: '#bc3fbc',
+  36: '#11a8cd',
+  37: '#e5e5e5',
+  90: '#666666',
+  91: '#f14c4c',
+  92: '#23d18b',
+  93: '#f5f543',
+  94: '#3b8eea',
+  95: '#d670d6',
+  96: '#29b8db',
+  97: '#e5e5e5',
 };
 
 const ansi256ToHex = (n: number): string => {
@@ -87,7 +81,8 @@ const applyExtendedColor = (
   return null;
 };
 
-const applyAnsiCode = (
+/** @internal exported for unit tests */
+export const applyAnsiCode = (
   codes: number[],
   i: number,
   state: AnsiState,
@@ -97,6 +92,9 @@ const applyAnsiCode = (
   if (c === 0 || (rawParam === '' && codes.length === 1))
     return { state: { bold: false }, advance: 1 };
   if (c === 1) return { state: { ...state, bold: true }, advance: 1 };
+  if (c === 22) return { state: { ...state, bold: false }, advance: 1 };
+  if (c === 39) return { state: { ...state, fg: undefined }, advance: 1 };
+  if (c === 49) return { state: { ...state, bg: undefined }, advance: 1 };
   if ((c >= 30 && c <= 37) || (c >= 90 && c <= 97))
     return { state: { ...state, fg: ANSI_FG[c] }, advance: 1 };
   if ((c >= 40 && c <= 47) || (c >= 100 && c <= 107))
@@ -108,7 +106,8 @@ const applyAnsiCode = (
   return { state, advance: 1 };
 };
 
-const ansiToSpans = (text: string): React.ReactNode[] => {
+/** @internal exported for unit tests */
+export const ansiToSpans = (text: string): React.ReactNode[] => {
   const result: React.ReactNode[] = [];
   let state: AnsiState = { bold: false };
   let last = 0;
@@ -145,19 +144,60 @@ const ansiToSpans = (text: string): React.ReactNode[] => {
   return result;
 };
 
+const entriesEqual = (a: StepLogEntry[], b: StepLogEntry[]): boolean => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (
+      a[i].message !== b[i].message ||
+      a[i].timestamp !== b[i].timestamp ||
+      a[i].level !== b[i].level
+    ) {
+      return false;
+    }
+  }
+  return true;
+};
+
+/** Keep chronological order when entries carry timestamps; otherwise preserve resolver order. */
+const sortLogEntries = (entries: StepLogEntry[]): StepLogEntry[] => {
+  if (entries.length < 2 || !entries.some((e) => e.timestamp)) {
+    return entries;
+  }
+  return [...entries].sort((a, b) => {
+    if (!a.timestamp && !b.timestamp) return 0;
+    if (!a.timestamp) return 1;
+    if (!b.timestamp) return -1;
+    return a.timestamp.localeCompare(b.timestamp);
+  });
+};
+
 const TerminalLogsView = memo<{ entries: StepLogEntry[] }>(({ entries }) => {
   const { euiTheme } = useEuiTheme();
+  // Ink/ghost keep ANSI black/white readable in both Kibana color modes.
+  const terminalCss = css({
+    fontFamily: 'monospace',
+    fontSize: 12,
+    lineHeight: 1.5,
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-all',
+    backgroundColor: euiTheme.colors.ink,
+    color: euiTheme.colors.ghost,
+    padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
+    borderRadius: euiTheme.border.radius.medium,
+    maxHeight: 320,
+    overflow: 'auto',
+  });
   return (
-    <div css={terminalContainerCss}>
+    <div css={terminalCss} data-test-subj="workflowExecutionStepLogsTerminal">
       {entries.map((entry, i) => {
         const color =
           entry.level === 'error'
             ? euiTheme.colors.danger
             : entry.level === 'warn'
             ? euiTheme.colors.warning
-            : euiTheme.colors.text;
+            : undefined;
         return (
-          <div key={i} style={{ color }}>
+          <div key={i} style={color ? { color } : undefined}>
             {ansiToSpans(entry.message)}
           </div>
         );
@@ -173,6 +213,25 @@ interface StepLogsViewProps {
   logsApi: StepLogsApi;
 }
 
+const resolveLogs = (
+  stepExecution: WorkflowStepExecutionDto,
+  config: StepLogsConfig,
+  logsApi: StepLogsApi
+): Promise<StepLogEntry[]> => {
+  const { getLogs } = config;
+  const promise = getLogs
+    ? Promise.resolve(getLogs({ stepExecution, logsApi }))
+    : logsApi.fetchLogs().then((raw) =>
+        raw.map((e) => ({
+          message: e.message,
+          timestamp: e.timestamp,
+          level:
+            e.level === 'info' || e.level === 'warn' || e.level === 'error' ? e.level : undefined,
+        }))
+      );
+  return promise.then(sortLogEntries);
+};
+
 export const StepLogsView: React.FC<StepLogsViewProps> = ({ stepExecution, config, logsApi }) => {
   const [entries, setEntries] = useState<StepLogEntry[] | null>(null);
   const [hasError, setHasError] = useState(false);
@@ -183,26 +242,16 @@ export const StepLogsView: React.FC<StepLogsViewProps> = ({ stepExecution, confi
   const configRef = useRef(config);
   configRef.current = config;
 
+  const applyResult = (result: StepLogEntry[]) => {
+    setEntries((prev) => (prev && entriesEqual(prev, result) ? prev : result));
+    setHasError(false);
+  };
+
   useEffect(() => {
     let cancelled = false;
     let delay = INITIAL_POLL_INTERVAL_MS;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-    const fetchOnce = (): Promise<StepLogEntry[]> => {
-      const { getLogs } = configRef.current;
-      return getLogs
-        ? Promise.resolve(getLogs({ stepExecution: stepExecutionRef.current, logsApi }))
-        : logsApi.fetchLogs().then((raw) =>
-            raw.map((e) => ({
-              message: e.message,
-              timestamp: e.timestamp,
-              level:
-                e.level === 'info' || e.level === 'warn' || e.level === 'error'
-                  ? e.level
-                  : undefined,
-            }))
-          );
-    };
+    let postTerminalRemaining = POST_TERMINAL_RETRIES;
 
     const isTerminal = () =>
       TerminalExecutionStatuses.includes(stepExecutionRef.current.status as ExecutionStatus);
@@ -213,17 +262,24 @@ export const StepLogsView: React.FC<StepLogsViewProps> = ({ stepExecution, confi
       // always one last fetch after the step finishes and late-indexed logs are not missed.
       const wasTerminal = isTerminal();
       try {
-        const result = await fetchOnce();
+        const result = await resolveLogs(stepExecutionRef.current, configRef.current, logsApi);
         if (!cancelled) {
-          setEntries(result);
-          setHasError(false);
+          applyResult(result);
         }
       } catch {
         // keep previous entries on fetch error, keep polling while the step is running
         if (!cancelled) setHasError(true);
       }
-      if (!cancelled && !wasTerminal) {
+      if (cancelled) return;
+      if (!wasTerminal) {
         // Back off gradually so long-running steps do not poll at full rate forever.
+        delay = Math.min(delay * 1.5, MAX_POLL_INTERVAL_MS);
+        timeoutId = setTimeout(poll, delay);
+        return;
+      }
+      // Bounded retries after completion — engine logs can still be indexing.
+      if (postTerminalRemaining > 0) {
+        postTerminalRemaining -= 1;
         delay = Math.min(delay * 1.5, MAX_POLL_INTERVAL_MS);
         timeoutId = setTimeout(poll, delay);
       }
@@ -236,11 +292,34 @@ export const StepLogsView: React.FC<StepLogsViewProps> = ({ stepExecution, confi
     };
   }, [logsApi]); // logsApi is memoized on stepExecution.id — restarts only when the step changes
 
+  const { getLogs } = config;
+  const { status: stepStatus, output: stepOutput, input: stepInput } = stepExecution;
+
+  // When a custom getLogs resolver depends on final step I/O, refresh once that payload arrives
+  // after polling has already stopped for a terminal status.
+  useEffect(() => {
+    if (!getLogs) return;
+    if (!TerminalExecutionStatuses.includes(stepStatus as ExecutionStatus)) return;
+
+    let cancelled = false;
+    resolveLogs(stepExecutionRef.current, configRef.current, logsApi)
+      .then((result) => {
+        if (!cancelled) applyResult(result);
+      })
+      .catch(() => {
+        if (!cancelled) setHasError(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [logsApi, getLogs, stepStatus, stepOutput, stepInput]);
+
   if (entries === null) {
     if (hasError) {
       return (
         <EuiText color="danger" size="s">
-          <p>
+          <p data-test-subj="workflowExecutionStepLogsError">
             {i18n.translate('workflowsManagement.stepLogsView.fetchError', {
               defaultMessage: 'Failed to load logs.',
             })}
@@ -251,17 +330,28 @@ export const StepLogsView: React.FC<StepLogsViewProps> = ({ stepExecution, confi
     return <EuiLoadingSpinner size="m" />;
   }
 
-  if (entries.length === 0) {
-    return (
-      <EuiText color="subdued" size="s">
-        <p>
-          {i18n.translate('workflowsManagement.stepLogsView.emptyPlaceholder', {
-            defaultMessage: 'No logs.',
-          })}
-        </p>
-      </EuiText>
-    );
-  }
-
-  return <TerminalLogsView entries={entries} />;
+  return (
+    <>
+      {hasError && (
+        <EuiText color="danger" size="s" css={{ marginBottom: 8 }}>
+          <p data-test-subj="workflowExecutionStepLogsError">
+            {i18n.translate('workflowsManagement.stepLogsView.fetchErrorRefresh', {
+              defaultMessage: 'Failed to refresh logs. Showing the last successful load.',
+            })}
+          </p>
+        </EuiText>
+      )}
+      {entries.length === 0 ? (
+        <EuiText color="subdued" size="s">
+          <p>
+            {i18n.translate('workflowsManagement.stepLogsView.emptyPlaceholder', {
+              defaultMessage: 'No logs.',
+            })}
+          </p>
+        </EuiText>
+      ) : (
+        <TerminalLogsView entries={entries} />
+      )}
+    </>
+  );
 };

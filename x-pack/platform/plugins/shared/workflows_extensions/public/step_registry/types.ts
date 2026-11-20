@@ -33,6 +33,8 @@ export interface StepLogsConfig {
    * Custom log resolver. When omitted, the Logs section shows all engine-level log entries
    * for this step via `logsApi.fetchLogs()`. When defined, the step author decides what
    * to show — extract from `output`, call `logsApi`, or combine both.
+   * Entries that include `timestamp` are sorted chronologically before render; entries
+   * without timestamps keep the relative order returned by this function.
    */
   getLogs?: (params: {
     stepExecution: WorkflowStepExecutionDto;
