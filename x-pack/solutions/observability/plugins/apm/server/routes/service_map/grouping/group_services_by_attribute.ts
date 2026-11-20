@@ -24,17 +24,17 @@ import { NO_ATTRIBUTE_GROUP_ID } from './constants';
 export function groupServicesByAttribute({
   source,
   services,
-  valueOf,
+  valueOfService,
 }: {
   source: AttributeGroupingSource;
   services: readonly string[];
-  valueOf: (service: string) => string | undefined;
+  valueOfService: (service: string) => string | undefined;
 }): Omit<ServiceGroupingStrategy, 'passes'> {
   const groups: ServiceMapGroup[] = [];
   const indexById = new Map<string, number>();
 
   const assignment = services.map((service) => {
-    const value = valueOf(service);
+    const value = valueOfService(service);
     const group: ServiceMapGroup = value
       ? { id: `${source}:${value}`, kind: 'attribute', attribute: source, value }
       : { id: NO_ATTRIBUTE_GROUP_ID, kind: 'noAttribute', attribute: source };

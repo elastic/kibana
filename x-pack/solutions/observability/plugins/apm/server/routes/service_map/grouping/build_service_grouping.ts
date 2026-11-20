@@ -24,10 +24,10 @@ import { matchCallGraphToServices } from './match_service_call_graph';
 /** The attributes services are grouped by, in the order their strategies are listed. */
 const ATTRIBUTE_STRATEGIES: ReadonlyArray<{
   source: AttributeGroupingSource;
-  valueOf: (values: ServiceGroupingAttributeValues) => string | undefined;
+  readValue: (values: ServiceGroupingAttributeValues) => string | undefined;
 }> = [
-  { source: 'service.namespace', valueOf: ({ serviceNamespace }) => serviceNamespace },
-  { source: 'kubernetes.namespace', valueOf: ({ kubernetesNamespace }) => kubernetesNamespace },
+  { source: 'service.namespace', readValue: ({ serviceNamespace }) => serviceNamespace },
+  { source: 'kubernetes.namespace', readValue: ({ kubernetesNamespace }) => kubernetesNamespace },
 ];
 
 /**
@@ -56,14 +56,14 @@ export function buildServiceGrouping({
   const calls = groupServicesByCalls({ services, edges, stats });
   const strategies: ServiceGroupingStrategy[] = [{ ...calls, passes: true }];
 
-  for (const { source, valueOf } of ATTRIBUTE_STRATEGIES) {
+  for (const { source, readValue } of ATTRIBUTE_STRATEGIES) {
     const valueOfService = (service: string) => {
       const values = attributes?.[service];
-      return values ? valueOf(values) : undefined;
+      return values ? readValue(values) : undefined;
     };
     if (services.some(valueOfService)) {
       strategies.push({
-        ...groupServicesByAttribute({ source, services, valueOf: valueOfService }),
+        ...groupServicesByAttribute({ source, services, valueOfService }),
         passes: false,
       });
     }

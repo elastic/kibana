@@ -17,11 +17,15 @@ const namespaces: Record<string, string | undefined> = {
   payment: 'payments',
 };
 const services = Object.keys(namespaces);
-const valueOf = (service: string) => namespaces[service];
+const valueOfService = (service: string) => namespaces[service];
 
 describe('groupServicesByAttribute', () => {
   it('puts services sharing a value in one group, listed in the order their first service appears', () => {
-    const grouping = groupServicesByAttribute({ source: 'service.namespace', services, valueOf });
+    const grouping = groupServicesByAttribute({
+      source: 'service.namespace',
+      services,
+      valueOfService,
+    });
 
     expect(grouping).toEqual({
       source: 'service.namespace',
@@ -55,7 +59,7 @@ describe('groupServicesByAttribute', () => {
     const { groups, assignment } = groupServicesByAttribute({
       source: 'service.namespace',
       services: ['a', 'b', 'c'],
-      valueOf: (service) => (service === 'b' ? '' : undefined),
+      valueOfService: (service) => (service === 'b' ? '' : undefined),
     });
 
     expect(groups).toEqual([
@@ -68,15 +72,23 @@ describe('groupServicesByAttribute', () => {
     const { groups } = groupServicesByAttribute({
       source: 'service.namespace',
       services: ['a', 'b'],
-      valueOf: (service) => (service === 'a' ? 'noAttribute' : undefined),
+      valueOfService: (service) => (service === 'a' ? 'noAttribute' : undefined),
     });
 
     expect(groups.map(({ id }) => id)).toEqual(['service.namespace:noAttribute', 'noAttribute']);
   });
 
   it('gives the same groups for the same input', () => {
-    const first = groupServicesByAttribute({ source: 'service.namespace', services, valueOf });
-    const second = groupServicesByAttribute({ source: 'service.namespace', services, valueOf });
+    const first = groupServicesByAttribute({
+      source: 'service.namespace',
+      services,
+      valueOfService,
+    });
+    const second = groupServicesByAttribute({
+      source: 'service.namespace',
+      services,
+      valueOfService,
+    });
 
     expect(second).toEqual(first);
   });
