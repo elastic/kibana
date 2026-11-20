@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { euiFontSize, mathWithUnits } from '@elastic/eui';
+import { euiFontSize, euiScreenReaderOnly, mathWithUnits } from '@elastic/eui';
 
 export const DEFAULT_DATA_GRID_ROW_HEIGHT = 34;
 
@@ -20,9 +20,11 @@ export const getDataGridStyles = (themeContext: UseEuiTheme) => {
   const cellOutlineBorderRadius = mathWithUnits(euiTheme.border.radius.inline, (size) => size / 2);
 
   return {
+    tabGuard: css(euiScreenReaderOnly()),
     grid: css({
       position: 'relative',
       overflow: 'auto',
+      overflowAnchor: 'none',
       minBlockSize: 0,
       color: euiTheme.colors.textParagraph,
       backgroundColor: euiTheme.components.dataGridRowBackground,
@@ -34,10 +36,12 @@ export const getDataGridStyles = (themeContext: UseEuiTheme) => {
         outlineOffset: `calc(-1 * ${euiTheme.focus.width})`,
       },
     }),
-    headerRow: css({
+    headerRowGroup: css({
       position: 'sticky',
       insetBlockStart: 0,
       zIndex: 1,
+    }),
+    headerRow: css({
       display: 'grid',
       backgroundColor: euiTheme.colors.emptyShade,
       borderBlockEnd: euiTheme.border.thin,
@@ -92,7 +96,17 @@ export const getDataGridStyles = (themeContext: UseEuiTheme) => {
       padding: cellPadding,
       overflowWrap: 'break-word',
       whiteSpace: 'pre-wrap',
-      '&:hover::after': {
+      outline: 'none',
+      '&:focus::after': {
+        content: '""',
+        position: 'absolute',
+        zIndex: 3,
+        pointerEvents: 'none',
+        inset: 0,
+        border: `${euiTheme.border.width.thick} solid ${euiTheme.components.dataGridRowBorderActive}`,
+        borderRadius: cellOutlineBorderRadius,
+      },
+      '&:hover:not(:focus)::after': {
         content: '""',
         position: 'absolute',
         zIndex: 2,

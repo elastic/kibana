@@ -14,6 +14,7 @@ import type {
   InventoryTypeColumn,
   ListQueryDiagnostic,
   ListResponse,
+  PlanResponse,
   Provenance,
   SourceError,
   UnavailableColumn,
@@ -31,9 +32,10 @@ import {
   planRowLimit,
   probeSources,
   summarizeResults,
+  toEsqlRequestBody,
   toSourceError,
 } from '../inventory/executor';
-import type { EsqlQueryResult, PlanResult } from '../inventory/executor';
+import type { EsqlQueryResult, PlanResult, ProbeResult } from '../inventory/executor';
 import {
   buildColumns,
   ENTITY_ID_COLUMN,
@@ -47,6 +49,8 @@ import type { ListRequest } from '../inventory/types';
 
 /** Everything the list queries are generated from. */
 interface ListPlan {
+  /** The probe of each distinct source pattern, in source order. */
+  probes: Map<string, ProbeResult>;
   plans: QueryPlan[];
   identity: IdentityPlan;
   columns: OutputColumn[];
@@ -209,6 +213,34 @@ export class InventoryService {
     };
   };
 
+  /**
+   * Plans the request exactly as `list` does, probes included, and returns the probes and the list
+   * queries `list` would send as `POST /_query` bodies, without running the list queries.
+   * Throws as `list` does.
+   */
+  plan = async ({ type, window, limit, signal }: ListRequest): Promise<PlanResponse> => {
+    const definition = await this.getDynamicDefinition(type);
+    const { probes, plans, queries, probeErrors } = await this.planList(
+      definition,
+      window,
+      limit,
+      signal
+    );
+    return {
+      probes: [...probes].map(([indexPattern, probe]) => ({
+        indexPattern,
+        request: toEsqlRequestBody(probe.query),
+        hasTimeSeries: probe.failed ? null : probe.hasTimeSeries,
+      })),
+      queries: plans.map(({ indexPattern, engine }, position) => ({
+        indexPattern,
+        engine,
+        request: toEsqlRequestBody(queries[position]),
+      })),
+      errors: probeErrors,
+    };
+  };
+
   private hasDynamicDefinition = (definition: RegisteredEntityDefinition): boolean =>
     Boolean(definition.dynamic);
 
@@ -271,6 +303,7 @@ export class InventoryService {
         failedPatterns.has(plan.indexPattern) ? [] : [{ plan, query: allQueries[position] }]
       );
       return {
+        probes,
         plans: runnable.map(({ plan }) => plan),
         identity,
         columns,
