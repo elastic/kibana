@@ -25968,6 +25968,210 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/context_engine/memory/_forget:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/memory/_forget</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Requires the `contextEngine:write` privilege. Without `user_id`, the route forgets the caller's own memories, and a caller without a user profile gets a 403. Naming another user in `user_id` also requires `contextEngine:manage_memory`.
+
+        Forgets session memories by id for that user. The route reports a memory of another user or another space as `not_found`, so it does not reveal whether the memory exists.
+
+        Forgetting writes a tombstone so reads stop returning the memory, while Elasticsearch keeps its revisions until retention removes them. If Elasticsearch rejects a tombstone, the route returns `failed` with `error` and the caller can retry that id.
+
+        The route writes one `memory_forget` audit event per unique memory id. Forgetting still works when memory is turned off.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): contextEngine:manage_memory.
+      operationId: post-context-engine-memory-forget
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              forgetRequestExample:
+                description: Example request to forget two of the caller's memories, keeping their revisions until retention removes them
+                summary: Forget memories
+                value:
+                  ids:
+                    - 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+                    - 0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                ids:
+                  description: The ids of the memories to forget. The route collapses duplicates.
+                  items:
+                    maxLength: 256
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  minItems: 1
+                  type: array
+                user_id:
+                  description: The user the memories belong to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`. Memories of any other user return `not_found`.
+                  maxLength: 1024
+                  minLength: 1
+                  type: string
+              required:
+                - ids
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                failedForgetResponseExample:
+                  description: One memory was forgotten and Elasticsearch rejected the other tombstone
+                  summary: Failed to forget a memory
+                  value:
+                    results:
+                      - id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+                        outcome: forgotten
+                      - error: 'index [.ds-.context-engine-session-memory-2026.11.16-000001] blocked by: [TOO_MANY_REQUESTS/12/disk usage exceeded flood-stage watermark, index has read-only-allow-delete block];'
+                        id: 0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44
+                        outcome: failed
+                forgetResponseExample:
+                  description: One memory was forgotten, and the other does not exist for this user
+                  summary: Memories forgotten
+                  value:
+                    results:
+                      - id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+                        outcome: forgotten
+                      - id: 0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44
+                        outcome: not_found
+              schema:
+                additionalProperties: false
+                description: The outcome for every requested memory.
+                type: object
+                properties:
+                  results:
+                    description: One result per unique id, in request order.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          description: Why the tombstone failed when `outcome` is `failed`.
+                          type: string
+                        id:
+                          description: The memory id.
+                          type: string
+                        outcome:
+                          description: What happened to the memory.
+                          enum:
+                            - forgotten
+                            - already_forgotten
+                            - not_found
+                            - failed
+                          type: string
+                      required:
+                        - id
+                        - outcome
+                    maxItems: 100
+                    type: array
+                required:
+                  - results
+          description: The outcome for every requested memory.
+        '403':
+          content:
+            application/json:
+              examples:
+                manageMemoryRequiredExample:
+                  description: The request names another user in `user_id` and the caller lacks the manage memory privilege
+                  summary: Missing manage memory privilege
+                  value:
+                    error: Forbidden
+                    message: Acting on the memory of another user requires the [contextEngine:manage_memory] privilege.
+                    statusCode: 403
+                noUserProfileExample:
+                  description: '`user_id` is missing and the caller has no user profile'
+                  summary: No user profile
+                  value:
+                    error: Forbidden
+                    message: The caller has no user profile, so the request cannot be attributed to a user. Set `user_id`, log in to Kibana once to create a profile, or use an API key whose owner has one.
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: '`user_id` is missing and the caller has no user profile, or `user_id` names another user and the caller lacks `contextEngine:manage_memory`.'
+        '404':
+          content:
+            application/json:
+              examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Context Engine is turned off in this space.
+      summary: Forget session memories
+      tags:
+        - context engine
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_forget" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -H "kbn-xsrf: true" \
+              -d '{
+                "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10", "0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44"]
+              }'
+        - lang: Console
+          source: |
+            POST kbn:/api/context_engine/memory/_forget
+            {
+              "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10", "0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44"]
+            }
+      x-state: Experimental; added in 9.7.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/dashboards:
     get:
       tags:
