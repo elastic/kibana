@@ -1,0 +1,734 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  EuiAccordion,
+  EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCheckbox,
+  EuiFieldSearch,
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiNotificationBadge,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
+
+import { CardHeader } from './card_header';
+import {
+  MANAGED_INTEGRATION_EXAMPLES,
+  type AwsSchema,
+  type AwsServiceEntry,
+} from './aws_services_data';
+import {
+  DETECTION_RULES_BY_SERVICE,
+  GENERAL_CONTENT,
+  getContentForService,
+  getTechnicalAssets,
+  type AwsContentItem,
+  type AwsContentType,
+} from './aws_content_data';
+
+type ServiceStatus = 'healthy' | 'unhealthy' | 'pending' | 'updating';
+
+const STATUS_CYCLE: ServiceStatus[] = ['healthy', 'unhealthy', 'pending', 'updating'];
+
+const STATUS_BADGE_COLOR: Record<ServiceStatus, string> = {
+  healthy: 'success',
+  unhealthy: 'warning',
+  pending: 'default',
+  updating: 'default',
+};
+
+const REGION_LABELS: Record<string, string> = {
+  'us-east': 'US-East',
+  'us-west': 'US-West',
+  'eu-west-1': 'EU-West-1',
+  'ap-southeast-1': 'AP-Southeast-1',
+};
+
+const CONTENT_TYPE_ICONS: Record<AwsContentType, string> = {
+  dashboard: 'dashboardApp',
+  search: 'discoverApp',
+  alert_rule: 'bell',
+  content_package: 'package',
+  detection_rule: 'securityApp',
+  index_template: 'indexSettings',
+  component_template: 'indexMapping',
+  ingest_pipeline: 'pipelineApp',
+  transform: 'merge',
+};
+
+const SummaryItem: React.FunctionComponent<{ label: string; value: React.ReactNode }> = ({
+  label,
+  value,
+}) => (
+  <div>
+    <EuiText size="xs" color="subdued">
+      {label}
+    </EuiText>
+    <EuiText size="s">
+      <strong>{value}</strong>
+    </EuiText>
+  </div>
+);
+
+const DeploymentSummaryCard: React.FunctionComponent<{
+  deploymentMethod: 'agent' | 'managed';
+  services: AwsServiceEntry[];
+  triggerSources: Record<string, string>;
+  region: string;
+  identityName: string;
+  stackName: string;
+  receivedCount: number;
+  agentPolicyName: string;
+  managedReceivedCount: number;
+  agentReceivedCount: number;
+  showErrorStatuses?: boolean;
+}> = ({
+  deploymentMethod,
+  services,
+  triggerSources,
+  region,
+  identityName,
+  stackName,
+  receivedCount,
+  agentPolicyName,
+  managedReceivedCount,
+  agentReceivedCount,
+  showErrorStatuses,
+}) => {
+  // All deploy/arrival animations run on the Authenticate & Deploy step; the
+  // summary simply reads the lifted state, so it arrives already settled.
+  const allServices =
+    deploymentMethod === 'agent'
+      ? services.map((service, i) => ({
+          key: service.id,
+          name: service.name,
+          receiving: i < agentReceivedCount,
+          badge: 'Elastic Agent',
+        }))
+      : [
+          ...services.map((service, i) => ({
+            key: service.id,
+            name: service.name,
+            receiving: i < receivedCount,
+            badge: `Trigger: ${triggerSources[service.id] ?? 'S3'}`,
+          })),
+          ...MANAGED_INTEGRATION_EXAMPLES.map((name, i) => ({
+            key: name,
+            name,
+            receiving: i < managedReceivedCount,
+            badge: 'Managed Integration',
+          })),
+        ];
+  const receivingCount = allServices.filter((s) => s.receiving).length;
+
+  return (
+    <EuiPanel hasBorder paddingSize="l" style={{ overflow: 'hidden' }}>
+      <CardHeader
+        iconType="checkCircle"
+        title="Deployment summary"
+        servicesCount={allServices.length}
+      />
+      <EuiSpacer size="m" />
+      <EuiFlexGrid columns={4} gutterSize="l">
+        {deploymentMethod === 'agent' ? (
+          <>
+            <EuiFlexItem>
+              <SummaryItem label="Deployment method" value="Agent-based" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SummaryItem label="Agent policy" value={agentPolicyName || '—'} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SummaryItem label="Enrollment token" value="Default" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SummaryItem label="Agents" value="1 agent enrolled" />
+            </EuiFlexItem>
+          </>
+        ) : (
+          <>
+            <EuiFlexItem>
+              <SummaryItem label="Deployment method" value="Elastic Managed Integration" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SummaryItem label="Region" value={REGION_LABELS[region] ?? region} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SummaryItem label="Federated Identity Name" value={identityName || '—'} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SummaryItem label="CloudFormation stack" value={stackName || '—'} />
+            </EuiFlexItem>
+          </>
+        )}
+      </EuiFlexGrid>
+      <EuiHorizontalRule margin="m" />
+      <EuiText size="s" color="subdued">
+        {`${receivingCount} of ${allServices.length} service${
+          allServices.length === 1 ? '' : 's'
+        } receiving data`}
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiFlexGrid columns={4} gutterSize="m">
+        {allServices.map((service, idx) => (
+          <EuiFlexItem key={service.key} style={{ minWidth: 0 }}>
+            <EuiPanel hasBorder paddingSize="m">
+              <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  {service.receiving ? (
+                    <EuiIcon type="checkCircle" color="success" size="l" />
+                  ) : (
+                    <EuiLoadingSpinner size="l" />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem style={{ minWidth: 0 }}>
+                  <EuiText size="s" className="eui-textTruncate">
+                    <strong>{service.name}</strong>
+                  </EuiText>
+                  {showErrorStatuses ? (
+                    <EuiBadge color={STATUS_BADGE_COLOR[STATUS_CYCLE[idx % STATUS_CYCLE.length]]}>
+                      {STATUS_CYCLE[idx % STATUS_CYCLE.length]}
+                    </EuiBadge>
+                  ) : (
+                    <EuiText size="xs" color="subdued">
+                      {service.receiving ? 'Receiving data' : 'Detecting data...'}
+                    </EuiText>
+                  )}
+                  <EuiSpacer size="xs" />
+                  <div>
+                    <EuiBadge color="hollow">{service.badge}</EuiBadge>
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
+    </EuiPanel>
+  );
+};
+
+// Everything ships installed with the package today (all-or-nothing), so
+// this card is an OPT-OUT review, not an installer: every item starts as
+// "Installed" and an explicit per-row Remove action uninstalls it (Install
+// brings it back for day-2). Explicit verb buttons instead of checkboxes:
+// removal is semi-destructive, and a checkbox reads as batch selection
+// rather than an immediate state change. Required technical assets
+// (templates, pipelines, transforms) are listed too, but are not removable.
+type AssetState = 'installed' | 'removing' | 'removed' | 'installing';
+
+// Removable content types get their own accordion each; the required
+// technical types are lumped into a single "Required assets" accordion so
+// they don't demand per-category attention.
+const CONTENT_TYPE_ORDER: AwsContentType[] = [
+  'dashboard',
+  'search',
+  'alert_rule',
+  'detection_rule',
+  'content_package',
+];
+
+const TYPE_GROUP_LABELS: Record<AwsContentType, string> = {
+  dashboard: 'Dashboards',
+  search: 'Saved searches',
+  alert_rule: 'Alert rule templates',
+  detection_rule: 'Detection rules',
+  content_package: 'Content packages',
+  index_template: 'Index templates',
+  component_template: 'Component templates',
+  ingest_pipeline: 'Ingest pipelines',
+  transform: 'Transforms',
+};
+
+const TYPE_ITEM_LABELS: Record<AwsContentType, string> = {
+  dashboard: 'Dashboard',
+  search: 'Saved search',
+  alert_rule: 'Alert rule template',
+  detection_rule: 'Detection rule',
+  content_package: 'Content package',
+  index_template: 'Index template',
+  component_template: 'Component template',
+  ingest_pipeline: 'Ingest pipeline',
+  transform: 'Transform',
+};
+
+interface ReviewItem extends AwsContentItem {
+  serviceName: string;
+}
+
+const ContentItemRow: React.FunctionComponent<{
+  item: ReviewItem;
+  state: AssetState;
+  isRequired: boolean;
+  onToggle: () => void;
+  isSelected: boolean;
+  onSelectChange: () => void;
+}> = ({ item, state, isRequired, onToggle, isSelected, onSelectChange }) => {
+  const isTransitioning = state === 'removing' || state === 'installing';
+  return (
+    <EuiPanel hasBorder paddingSize="s">
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        {!isRequired && (
+          <EuiFlexItem grow={false}>
+            <EuiCheckbox
+              id={`awsOnboardingSelectContent-${item.id}`}
+              checked={isSelected}
+              disabled={isTransitioning}
+              onChange={onSelectChange}
+              aria-label={`Select ${item.title}`}
+              data-test-subj={`awsOnboardingSelectContent-${item.id}`}
+            />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem style={{ minWidth: 0 }}>
+          <EuiText size="s" className="eui-textTruncate">
+            <strong>{item.title}</strong>
+          </EuiText>
+          <EuiText size="xs" color="subdued">
+            {item.serviceName}
+            {item.description ? ` — ${item.description}` : ''}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {isRequired ? (
+            <EuiBadge color="hollow" iconType="lock">
+              Required
+            </EuiBadge>
+          ) : state === 'installed' || state === 'removing' ? (
+            <EuiBadge color="success" iconType="check">
+              Installed
+            </EuiBadge>
+          ) : (
+            <EuiBadge color="hollow">Available to install</EuiBadge>
+          )}
+        </EuiFlexItem>
+        {!isRequired && (
+          <EuiFlexItem grow={false} style={{ minWidth: 90 }}>
+            <EuiButtonEmpty
+              size="xs"
+              color={state === 'installed' ? 'danger' : 'primary'}
+              isLoading={isTransitioning}
+              onClick={onToggle}
+              aria-label={`${state === 'installed' ? 'Remove' : 'Install'} ${item.title}`}
+              data-test-subj={`awsOnboardingToggleContent-${item.id}`}
+            >
+              {state === 'removing'
+                ? 'Removing…'
+                : state === 'installing'
+                ? 'Installing…'
+                : state === 'installed'
+                ? 'Remove'
+                : 'Install'}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
+
+const InstallContentCard: React.FunctionComponent<{
+  services: AwsServiceEntry[];
+  schema: AwsSchema;
+}> = ({ services, schema }) => {
+  const [assetState, setAssetState] = useState<Record<string, AssetState>>({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const timers = useRef<number[]>([]);
+
+  useEffect(() => {
+    return () => timers.current.forEach((t) => window.clearTimeout(t));
+  }, []);
+
+  // Removable content for the selected services, tagged with the service it
+  // belongs to. Detection rules come from the separate
+  // security_detection_engine package.
+  const contentItems: ReviewItem[] = [
+    ...GENERAL_CONTENT.map((item) => ({ ...item, serviceName: 'Amazon Web Services' })),
+    ...services.flatMap((service) =>
+      getContentForService(service.id, schema).map((item) => ({
+        ...item,
+        serviceName: service.name,
+      }))
+    ),
+    ...services.flatMap((service) =>
+      (DETECTION_RULES_BY_SERVICE[service.id] ?? []).map((item) => ({
+        ...item,
+        serviceName: service.name,
+      }))
+    ),
+  ];
+  // Technical assets are required (non-removable) and live in their own
+  // single accordion — they don't count toward the installed/total numbers.
+  const requiredItems: ReviewItem[] = getTechnicalAssets(services);
+
+  const stateOf = (id: string): AssetState => assetState[id] ?? 'installed';
+  const installedCount = contentItems.filter((i) => stateOf(i.id) === 'installed').length;
+
+  const onToggle = (id: string) => {
+    const current = stateOf(id);
+    if (current === 'installed') {
+      setAssetState((prev) => ({ ...prev, [id]: 'removing' }));
+      timers.current.push(
+        window.setTimeout(
+          () => setAssetState((prev) => ({ ...prev, [id]: 'removed' })),
+          800
+        )
+      );
+    } else if (current === 'removed') {
+      setAssetState((prev) => ({ ...prev, [id]: 'installing' }));
+      timers.current.push(
+        window.setTimeout(
+          () => setAssetState((prev) => ({ ...prev, [id]: 'installed' })),
+          800
+        )
+      );
+    }
+  };
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const setGroupSelected = (items: ReviewItem[], checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      items.forEach((item) => (checked ? next.add(item.id) : next.delete(item.id)));
+      return next;
+    });
+  };
+
+  // Bulk actions only ever act on items in a settled state (installed or
+  // removed) — items already mid-transition are left alone rather than
+  // interrupted.
+  const selectedItems = contentItems.filter((i) => selectedIds.has(i.id));
+  const bulkInstallCount = selectedItems.filter((i) => stateOf(i.id) === 'removed').length;
+  const bulkRemoveCount = selectedItems.filter((i) => stateOf(i.id) === 'installed').length;
+
+  const onBulkInstall = () => {
+    selectedItems.filter((i) => stateOf(i.id) === 'removed').forEach((i) => onToggle(i.id));
+    setSelectedIds(new Set());
+  };
+
+  const onBulkRemove = () => {
+    selectedItems.filter((i) => stateOf(i.id) === 'installed').forEach((i) => onToggle(i.id));
+    setSelectedIds(new Set());
+  };
+
+  const query = searchQuery.trim().toLowerCase();
+  const matches = (item: ReviewItem) =>
+    !query ||
+    item.title.toLowerCase().includes(query) ||
+    item.serviceName.toLowerCase().includes(query);
+
+  const typeGroups = CONTENT_TYPE_ORDER.map((type) => ({
+    type,
+    items: contentItems.filter((i) => i.type === type && matches(i)),
+  })).filter((g) => g.items.length > 0);
+
+  const filteredRequired = requiredItems.filter(matches);
+
+  return (
+    <EuiPanel hasBorder paddingSize="l" style={{ overflow: 'hidden' }}>
+      <CardHeader
+        iconType="dashboardApp"
+        title="Installed content"
+        servicesCount={services.length}
+      />
+      <EuiSpacer size="m" />
+      <EuiFlexGroup alignItems="center" responsive={false}>
+        <EuiFlexItem>
+          <EuiText size="s">
+            <p>
+              Everything below was installed with the AWS integration. Remove anything you
+              don&apos;t need — you can reinstall it at any time, here or from the
+              integration&apos;s Assets tab. Required technical assets are listed separately at
+              the bottom and cannot be removed.
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            {`${installedCount} of ${contentItems.length} installed`}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFieldSearch
+        fullWidth
+        compressed
+        placeholder="Search content by name or service"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        isClearable
+        data-test-subj="awsOnboardingContentSearch"
+      />
+
+      {selectedIds.size > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiPanel color="subdued" paddingSize="s" hasShadow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <strong>{`${selectedIds.size} selected`}</strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLink onClick={() => setSelectedIds(new Set())}>Clear selection</EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem />
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  isDisabled={bulkInstallCount === 0}
+                  onClick={onBulkInstall}
+                  data-test-subj="awsOnboardingBulkInstall"
+                >
+                  {`Install selected (${bulkInstallCount})`}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  color="danger"
+                  isDisabled={bulkRemoveCount === 0}
+                  onClick={onBulkRemove}
+                  data-test-subj="awsOnboardingBulkRemove"
+                >
+                  {`Remove selected (${bulkRemoveCount})`}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </>
+      )}
+
+      {typeGroups.map(({ type, items }) => {
+        const groupInstalled = items.filter((i) => stateOf(i.id) === 'installed').length;
+        const groupSelectedCount = items.filter((i) => selectedIds.has(i.id)).length;
+        return (
+          <React.Fragment key={type}>
+            <EuiSpacer size="m" />
+            <EuiAccordion
+              id={`awsOnboardingContentGroup-${type}`}
+              forceState={query ? 'open' : undefined}
+              buttonContent={
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type={CONTENT_TYPE_ICONS[type]} size="m" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xxs">
+                      <h4>{TYPE_GROUP_LABELS[type]}</h4>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiNotificationBadge color="subdued">{items.length}</EuiNotificationBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+            >
+              <EuiSpacer size="s" />
+              {/* Toolbar row for this group — "select all" gets a real
+                  visible label instead of living as a bare, unlabeled
+                  checkbox off to the side, and sits alongside the
+                  installed count rather than competing with the
+                  accordion's own title row. */}
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiCheckbox
+                    id={`awsOnboardingSelectAllContent-${type}`}
+                    label={
+                      <EuiText size="xs" color="primary">
+                        Select all
+                      </EuiText>
+                    }
+                    checked={groupSelectedCount === items.length && items.length > 0}
+                    indeterminate={groupSelectedCount > 0 && groupSelectedCount < items.length}
+                    onChange={(e) => setGroupSelected(items, e.target.checked)}
+                    data-test-subj={`awsOnboardingSelectAllContent-${type}`}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {`${groupInstalled} of ${items.length} installed`}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+              <EuiHorizontalRule margin="none" />
+              <EuiSpacer size="s" />
+              {items.map((item, i) => (
+                <React.Fragment key={item.id}>
+                  {i > 0 && <EuiSpacer size="s" />}
+                  <ContentItemRow
+                    item={item}
+                    state={stateOf(item.id)}
+                    isRequired={false}
+                    onToggle={() => onToggle(item.id)}
+                    isSelected={selectedIds.has(item.id)}
+                    onSelectChange={() => toggleSelected(item.id)}
+                  />
+                </React.Fragment>
+              ))}
+            </EuiAccordion>
+          </React.Fragment>
+        );
+      })}
+
+      {filteredRequired.length > 0 && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiHorizontalRule margin="none" />
+          <EuiSpacer size="m" />
+          <EuiAccordion
+            id="awsOnboardingContentGroup-required"
+            forceState={query ? 'open' : undefined}
+            buttonContent={
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="lock" size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xxs">
+                    <h4>Required assets</h4>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiNotificationBadge color="subdued">
+                    {filteredRequired.length}
+                  </EuiNotificationBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            extraAction={
+              <EuiText size="xs" color="subdued">
+                Installed with the package — cannot be removed
+              </EuiText>
+            }
+          >
+            <EuiSpacer size="s" />
+            {filteredRequired.map((item, i) => (
+              <React.Fragment key={item.id}>
+                {i > 0 && <EuiSpacer size="s" />}
+                <ContentItemRow
+                  item={{
+                    ...item,
+                    description: TYPE_ITEM_LABELS[item.type],
+                  }}
+                  state="installed"
+                  isRequired
+                  onToggle={() => {}}
+                  isSelected={false}
+                  onSelectChange={() => {}}
+                />
+              </React.Fragment>
+            ))}
+          </EuiAccordion>
+        </>
+      )}
+    </EuiPanel>
+  );
+};
+
+export const StepDetectReview: React.FunctionComponent<{
+  deploymentMethod: 'agent' | 'managed';
+  services: AwsServiceEntry[];
+  schema: AwsSchema;
+  triggerSources: Record<string, string>;
+  region: string;
+  identityName: string;
+  stackName: string;
+  receivedCount: number;
+  agentPolicyName: string;
+  managedReceivedCount: number;
+  agentReceivedCount: number;
+  showErrorStatuses?: boolean;
+}> = ({
+  deploymentMethod,
+  services,
+  schema,
+  triggerSources,
+  region,
+  identityName,
+  stackName,
+  receivedCount,
+  agentPolicyName,
+  managedReceivedCount,
+  agentReceivedCount,
+  showErrorStatuses,
+}) => {
+  const [isAgentNoteDismissed, setIsAgentNoteDismissed] = useState(false);
+
+  return (
+    <>
+      <EuiTitle size="m">
+        <h2>Detect &amp; Review</h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued">
+        <p>
+          Review your deployment and the prebuilt content installed for your services — keep
+          what you need, remove the rest.
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+
+      {deploymentMethod === 'agent' && !isAgentNoteDismissed && (
+        <>
+          <KbnInfoCallout
+            title="Data detection depends on your agent setup"
+            onDismiss={() => setIsAgentNoteDismissed(true)}
+            data-test-subj="awsOnboardingAgentDetectNote"
+          >
+            <p>
+              If no Elastic Agent has been enrolled yet, you won&apos;t see incoming data on this
+              step. This won&apos;t stop you from continuing — you can add an agent at any time
+              from Fleet.
+            </p>
+          </KbnInfoCallout>
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      <DeploymentSummaryCard
+        deploymentMethod={deploymentMethod}
+        services={services}
+        triggerSources={triggerSources}
+        region={region}
+        identityName={identityName}
+        stackName={stackName}
+        receivedCount={receivedCount}
+        agentPolicyName={agentPolicyName}
+        managedReceivedCount={managedReceivedCount}
+        agentReceivedCount={agentReceivedCount}
+        showErrorStatuses={showErrorStatuses}
+      />
+      <EuiSpacer size="m" />
+      <InstallContentCard services={services} schema={schema} />
+    </>
+  );
+};
