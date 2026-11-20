@@ -18,6 +18,7 @@ import { basename, isAbsolute, relative, resolve } from 'path';
 import { silence } from '../../common';
 import {
   preCreateSecurityIndexesViaSamlAuth,
+  runDockerServers,
   runElasticsearch,
   runKibanaServer,
 } from '../../servers';
@@ -132,8 +133,12 @@ async function runLocalServersAndTests(
   };
 
   let shutdownEs;
+  let stopDockerServers;
 
   try {
+    // Docker-backed services (e.g. the Fleet package registry) must be up before Kibana boots.
+    stopDockerServers = await runDockerServers({ config, log, onEarlyExit });
+
     shutdownEs = await runElasticsearch({
       onEarlyExit,
       config,
@@ -163,8 +168,14 @@ async function runLocalServersAndTests(
     try {
       await procs.stop('kibana');
     } finally {
-      if (shutdownEs) {
-        await shutdownEs();
+      try {
+        if (shutdownEs) {
+          await shutdownEs();
+        }
+      } finally {
+        if (stopDockerServers) {
+          await stopDockerServers();
+        }
       }
     }
   }

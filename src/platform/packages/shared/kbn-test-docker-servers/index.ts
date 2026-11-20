@@ -9,6 +9,14 @@
 
 export type { DockerServer, DockerServerSpec } from './src/define_docker_servers_config';
 export { defineDockerServersConfig } from './src/define_docker_servers_config';
+export type { RunningDockerServer, RunDockerServerOptions } from './src/run_docker_server';
+export {
+  isDockerImageAvailableLocally,
+  runDockerServer,
+  toDockerServer,
+} from './src/run_docker_server';
+export { isActualError, observeContainerLogs } from './src/container_logs';
+export { observeContainerRunning } from './src/container_running';
 export {
   dockerRegistryPort,
   fleetPackageRegistryDockerImage,

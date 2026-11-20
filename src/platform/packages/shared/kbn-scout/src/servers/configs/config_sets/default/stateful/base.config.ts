@@ -23,31 +23,10 @@ import {
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { PRODUCT_DOC_STUB_REPOSITORY_URL } from '@kbn/test-kibana-server';
-import {
-  defineDockerServersConfig,
-  fleetPackageRegistryDockerImage,
-} from '@kbn/test-docker-servers';
+import { defineDockerServersConfig, packageRegistryDocker } from '@kbn/test-docker-servers';
 import type { ScoutServerConfig } from '../../../../../types';
+import { fleetPackageRegistry } from '../../../fleet_package_registry';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../../../constants';
-
-const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
-// EPR_REQUIRE_PACKAGE_SIGNATURES=false: the `:lite` distribution ships some
-// packages without `.sig` files, so opt out of upstream signature enforcement
-// (added in elastic/package-registry#1646).
-const dockerArgs: string[] = [
-  '-v',
-  `${packageRegistryConfig}:/package-registry/config.yml`,
-  '-e',
-  'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
-];
-
-/**
- * This is used by CI to set the docker registry port
- * you can also define this environment variable locally when running tests which
- * will spin up a local docker package registry locally for you
- * if this is defined it takes precedence over the `packageRegistryOverride` variable
- */
-const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
 const servers = {
   elasticsearch: {
@@ -71,15 +50,13 @@ const kbnUrl = `${servers.kibana.protocol}://${servers.kibana.hostname}:${server
 export const defaultConfig: ScoutServerConfig = {
   servers,
   dockerServers: defineDockerServersConfig({
+    // Same image, registry config and readiness check as the FTR Fleet suites; see
+    // `fleet_package_registry.ts` for when it is enabled.
     registry: {
-      enabled: !!dockerRegistryPort,
-      image: fleetPackageRegistryDockerImage,
-      portInContainer: 8080,
-      port: dockerRegistryPort,
-      args: dockerArgs,
-      waitForLogLine: 'package manifests loaded',
-      waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes,
-      preferCached: true,
+      ...packageRegistryDocker,
+      enabled: fleetPackageRegistry.enabled,
+      port: fleetPackageRegistry.port,
+      waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
     },
   }),
   esTestCluster: {
@@ -118,6 +95,9 @@ export const defaultConfig: ScoutServerConfig = {
     serverArgs: [
       `--server.port=${servers.kibana.port}`,
       '--status.allowAnonymous=true',
+      // Fleet installs packages from the docker registry when it is enabled (see
+      // `fleet_package_registry.ts`), from the public EPR otherwise.
+      ...fleetPackageRegistry.kbnServerArgs,
       // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should
       // either include `kibanaServerTestUser` credentials, or credentials provided by the test
       // user, or none at all in case anonymous access is used.

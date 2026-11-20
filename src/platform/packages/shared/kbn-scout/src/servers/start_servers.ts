@@ -18,6 +18,7 @@ import { getConfigRootDir, loadServersConfig } from './configs';
 import type { StartServerOptions } from './flags';
 import { preCreateSecurityIndexesViaSamlAuth } from './pre_create_security_indexes';
 import { ensureDefaultSpaceNPRE } from './ensure_default_space_npre';
+import { runDockerServers } from './run_docker_servers';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
 import { registerServerShutdown } from './server_shutdown';
@@ -38,17 +39,35 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     const config = await loadServersConfig(options.testTarget, log, configRootDir);
     const pwGrepTag = getPlaywrightGrepTag(options.testTarget);
 
-    const shutdownEs = once(
-      await runElasticsearch({
-        config,
-        log,
-        esFrom: options.esFrom,
-        preserveEsData: options.preserveEsData,
-        logsDir: options.logsDir,
-      })
-    );
+    // Docker-backed services (e.g. the Fleet package registry) must be up before Kibana boots,
+    // otherwise Fleet setup falls back to retrying against a registry that is not there yet.
+    const stopDockerServers = await runDockerServers({ config, log });
 
-    const removeShutdownHook = registerServerShutdown(procs, shutdownEs);
+    let shutdownEs: () => Promise<void>;
+    try {
+      shutdownEs = once(
+        await runElasticsearch({
+          config,
+          log,
+          esFrom: options.esFrom,
+          preserveEsData: options.preserveEsData,
+          logsDir: options.logsDir,
+        })
+      );
+    } catch (error) {
+      await stopDockerServers();
+      throw error;
+    }
+
+    const shutdownBackingServices = once(async () => {
+      try {
+        await shutdownEs();
+      } finally {
+        await stopDockerServers();
+      }
+    });
+
+    const removeShutdownHook = registerServerShutdown(procs, shutdownBackingServices);
 
     await ensureDefaultSpaceNPRE(config, log);
 
@@ -85,7 +104,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     );
 
     await procs.waitForAllToStop();
-    await shutdownEs();
+    await shutdownBackingServices();
     removeShutdownHook();
   });
 }

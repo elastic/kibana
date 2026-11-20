@@ -747,6 +747,18 @@ node scripts/scout run-tests --location local --arch stateful --domain classic -
 
 This command starts the required servers and automatically executes the tests using Playwright.
 
+#### Fleet Package Registry (Docker)
+
+By default, Kibana started by Scout installs Fleet packages (Elastic Defend, Fleet Server, System, ...) from the public EPR, `https://epr.elastic.co`. To install them from the docker image used by the FTR Fleet suites instead, opt in before starting the servers:
+
+```bash
+export FLEET_PACKAGE_REGISTRY_PORT=6104     # host port to publish the container on
+export SCOUT_FLEET_PACKAGE_REGISTRY=true    # start the container and point Kibana at it
+node scripts/scout run-tests --arch stateful --domain classic --config <playwright_config_path>
+```
+
+Scout then pulls the image from `FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE` (default: the promoted `docker.elastic.co/kibana-ci/package-registry-distribution:lite`, see `@kbn/test-docker-servers`), starts it before Elasticsearch and Kibana, passes `--xpack.fleet.registryUrl=http://localhost:<port>` to Kibana, and stops the container on shutdown. Both variables are required: CI exports `FLEET_PACKAGE_REGISTRY_PORT` for every job, and switching a lane to the docker image is an explicit decision (the EPR image promotion pipeline makes it to validate the candidate image). The container is also started for `node scripts/scout start-server`.
+
 #### Running Tests Separately
 
 If the servers are already running, you can execute tests independently using one of the following methods:
