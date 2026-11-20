@@ -243,6 +243,8 @@ export interface ResolveProfileEnvOverridesOptions {
   flagsReader: FlagsReader;
   profile?: string;
   suite?: EvalSuiteDefinition;
+  /** The arguments `flagsReader` was parsed from, used to spot deprecated flags. Defaults to the CLI's. */
+  argv?: readonly string[];
 }
 
 /**
@@ -277,8 +279,9 @@ export const resolveProfileEnvOverrides = async ({
   flagsReader,
   profile,
   suite,
+  argv = process.argv.slice(2),
 }: ResolveProfileEnvOverridesOptions): Promise<ResolvedProfileEnv> => {
-  warnOnDeprecatedProfileFlags(flagsReader, log);
+  warnOnDeprecatedProfileFlags(flagsReader, log, argv);
   const evaluationsKbnProfile = readEvaluationsKbnProfile(flagsReader) ?? profile;
   const tracingProfile =
     readTracingProfile(flagsReader) ?? profile ?? defaultExportProfile(repoRoot);

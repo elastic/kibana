@@ -85,16 +85,25 @@ export const readEvaluationsKbnProfile = (flagsReader: FlagsReader): string | un
 export const readTracingProfile = (flagsReader: FlagsReader): string | undefined =>
   readProfileFlag(flagsReader, TRACING_PROFILE_FLAGS);
 
+/**
+ * The parser gives a declared string flag the value `""` whether it was left out or passed empty
+ * (for example `--export-profile "$UNSET_VAR"`), so only the raw arguments show that it was typed.
+ */
+const isFlagInArgv = (argv: readonly string[], flag: string): boolean =>
+  argv.some((arg) => arg === `--${flag}` || arg.startsWith(`--${flag}=`));
+
 const warnOnDeprecatedFlag = (
   flagsReader: FlagsReader,
   log: ToolingLog,
+  argv: readonly string[],
   { current, deprecated }: ProfileFlagNames
 ): void => {
-  const deprecatedValue = flagsReader.string(deprecated);
-  if (deprecatedValue === undefined) return;
+  if (!isFlagInArgv(argv, deprecated)) return;
 
+  const deprecatedValue = flagsReader.string(deprecated);
   const currentValue = flagsReader.string(current);
-  const isIgnored = currentValue !== undefined && currentValue !== deprecatedValue;
+  const isIgnored =
+    deprecatedValue !== undefined && currentValue !== undefined && currentValue !== deprecatedValue;
   log.warning(
     isIgnored
       ? `--${deprecated} is deprecated and ignored because --${current} is also set. Use --${current}.`
@@ -102,10 +111,17 @@ const warnOnDeprecatedFlag = (
   );
 };
 
-/** Logs one warning for each deprecated profile flag that was passed. Call it once per command. */
-export const warnOnDeprecatedProfileFlags = (flagsReader: FlagsReader, log: ToolingLog): void => {
-  warnOnDeprecatedFlag(flagsReader, log, EVALUATIONS_KBN_PROFILE_FLAGS);
-  warnOnDeprecatedFlag(flagsReader, log, TRACING_PROFILE_FLAGS);
+/**
+ * Logs one warning for each deprecated profile flag typed in `argv`, whatever its value. Call it
+ * once per command.
+ */
+export const warnOnDeprecatedProfileFlags = (
+  flagsReader: FlagsReader,
+  log: ToolingLog,
+  argv: readonly string[]
+): void => {
+  warnOnDeprecatedFlag(flagsReader, log, argv, EVALUATIONS_KBN_PROFILE_FLAGS);
+  warnOnDeprecatedFlag(flagsReader, log, argv, TRACING_PROFILE_FLAGS);
 };
 
 /** The `Profiles:` line that `start`, `run` and `red-team` log, labelled with the flag names. */

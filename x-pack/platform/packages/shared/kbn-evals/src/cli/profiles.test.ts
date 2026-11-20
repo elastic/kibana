@@ -256,7 +256,7 @@ describe('warnOnDeprecatedProfileFlags', () => {
   const setup = (argv: string[]) => {
     const log = new ToolingLog();
     const warning = jest.spyOn(log, 'warning').mockImplementation(() => undefined);
-    warnOnDeprecatedProfileFlags(readProfileFlags(argv), log);
+    warnOnDeprecatedProfileFlags(readProfileFlags(argv), log, argv);
     return warning;
   };
 
@@ -275,6 +275,19 @@ describe('warnOnDeprecatedProfileFlags', () => {
     expect(messages[0]).toContain('--evaluations-kbn-profile');
     expect(messages[1]).toContain('--export-profile');
     expect(messages[1]).toContain('--tracing-profile');
+  });
+
+  it.each([
+    ['a separate empty value', ['--export-profile', '']],
+    ['an empty value after =', ['--export-profile=']],
+    ['no value at all', ['--export-profile']],
+  ])('still warns when the deprecated flag has %s', (_, argv) => {
+    const warning = setup(argv);
+
+    expect(warning).toHaveBeenCalledTimes(1);
+    expect(String(warning.mock.calls[0][0])).toBe(
+      '--export-profile is deprecated. Use --tracing-profile instead.'
+    );
   });
 
   it('says the deprecated flag is ignored when the new one is passed with another value', () => {

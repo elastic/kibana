@@ -367,6 +367,7 @@ describe('profile flags', () => {
         log,
         flagsReader: readFlags(argv),
         profile,
+        argv,
       });
       return { result, warning };
     };
