@@ -585,6 +585,21 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends(
         { maxSize: 1000 }
       )
     ),
+    active_agents_per_version: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          version: schema.string(),
+          count: schema.number(),
+        }),
+        {
+          maxSize: 1000,
+          meta: {
+            description:
+              'Number of active agents per version, excluding OpAMP agents. These are the agents package-level agent version conditions apply to.',
+          },
+        }
+      )
+    ),
     is_protected: schema.boolean({
       meta: {
         description:

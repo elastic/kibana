@@ -18,7 +18,11 @@ import {
   UpdatePackagePolicyRequestBodySchema,
 } from '../models';
 
-import { ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION, inputsFormat } from '../../../common/constants';
+import {
+  ACKNOWLEDGE_AGENT_VERSION_INCOMPATIBILITY_DESCRIPTION,
+  ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+  inputsFormat,
+} from '../../../common/constants';
 
 import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -241,6 +245,14 @@ export const UpgradePackagePoliciesRequestSchema = {
           availability: { since: '9.5.0', stability: 'stable' },
         },
       }),
+      acknowledge_agent_version_incompatibility: schema.maybe(
+        schema.boolean({
+          meta: {
+            description: ACKNOWLEDGE_AGENT_VERSION_INCOMPATIBILITY_DESCRIPTION,
+            availability: { since: '9.7.0', stability: 'stable' },
+          },
+        })
+      ),
     },
     { meta: { id: 'upgrade_package_policies_request' } }
   ),
@@ -266,6 +278,39 @@ export const DryRunPackagePoliciesRequestSchema = {
     { meta: { id: 'dry_run_package_policies_request' } }
   ),
 };
+
+export const AgentVersionBlockSchema = schema.object(
+  {
+    package_name: schema.string(),
+    package_version: schema.string(),
+    version_condition: schema.string(),
+    blocked_count: schema.number({
+      meta: {
+        description:
+          "Number of active agents that don't satisfy the condition and would stop collecting the integration's data.",
+      },
+    }),
+    observed_versions: schema.arrayOf(schema.string(), {
+      maxSize: 1000,
+      meta: { description: 'Versions reported by those agents.' },
+    }),
+    min_version: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'Lowest agent version satisfying the condition, when every blocked agent runs below it.',
+        },
+      })
+    ),
+  },
+  {
+    meta: {
+      id: 'package_policy_agent_version_block',
+      description:
+        "Set when some active agents don't satisfy the package-level agent version condition of the target package version.",
+    },
+  }
+);
 
 export const DryRunPackagePoliciesResponseBodySchema = schema.arrayOf(
   schema.object({
@@ -353,6 +398,7 @@ export const DryRunPackagePoliciesResponseBodySchema = schema.arrayOf(
         { maxSize: 1 }
       )
     ),
+    agent_version_block: schema.maybe(AgentVersionBlockSchema),
   }),
   { maxSize: 10000 }
 );

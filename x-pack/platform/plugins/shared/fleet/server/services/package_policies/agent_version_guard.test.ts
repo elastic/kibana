@@ -1,0 +1,298 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { PackagePolicyAgentVersionIncompatibleError } from '../../errors';
+import { appContextService } from '../app_context';
+import { agentPolicyService } from '../agent_policy';
+import { getAgentsByKuery } from '../agents';
+
+import {
+  AGENT_VERSION_CONDITION_AGENTS_KUERY,
+  assertAgentVersionCompatible,
+  getAgentVersionBlockMessage,
+  getAgentVersionBlocks,
+  getAgentVersionGuardScope,
+} from './agent_version_guard';
+
+jest.mock('../app_context');
+jest.mock('../agent_policy');
+jest.mock('../agents');
+
+const mockedAppContextService = jest.mocked(appContextService);
+const mockedGetByIds = jest.mocked(agentPolicyService.getByIds);
+const mockedGetAgentsByKuery = jest.mocked(getAgentsByKuery);
+
+const pkgInfo = (versionCondition?: string) => ({
+  name: 'aws_mq',
+  version: '2.3.0',
+  conditions: versionCondition ? { agent: { version: versionCondition } } : undefined,
+});
+
+const mockAgentVersions = (versionsByPolicy: Record<string, Record<string, number>>) =>
+  mockedGetAgentsByKuery.mockResolvedValue({
+    agents: [],
+    total: 0,
+    page: 1,
+    perPage: 0,
+    aggregations: {
+      policies: {
+        buckets: Object.fromEntries(
+          Object.entries(versionsByPolicy).map(([policyId, versions]) => [
+            policyId,
+            {
+              versions: {
+                buckets: Object.entries(versions).map(([key, docCount]) => ({
+                  key,
+                  doc_count: docCount,
+                })),
+              },
+            },
+          ])
+        ),
+      },
+    } as never,
+  });
+
+describe('agent_version_guard', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+      enableVersionSpecificPolicies: true,
+    } as ReturnType<typeof appContextService.getExperimentalFeatures>);
+    mockedGetByIds.mockImplementation(
+      async (_soClient, ids) =>
+        ids.map((id) => ({
+          id: typeof id === 'string' ? id : id.id,
+          supports_agentless: false,
+        })) as Awaited<ReturnType<typeof agentPolicyService.getByIds>>
+    );
+  });
+
+  describe('getAgentVersionBlocks', () => {
+    it('blocks when some active agents do not satisfy the condition', async () => {
+      mockAgentVersions({ 'policy-1': { '9.3.1': 2, '9.4.2': 5 } });
+
+      const blocks = await getAgentVersionBlocks([
+        { key: 'pp-1', pkgInfo: pkgInfo('^9.4.0'), agentPolicyIds: ['policy-1'] },
+      ]);
+
+      expect(blocks.get('pp-1')).toEqual({
+        package_name: 'aws_mq',
+        package_version: '2.3.0',
+        version_condition: '^9.4.0',
+        blocked_count: 2,
+        observed_versions: ['9.3.1'],
+        min_version: '9.4.0',
+      });
+      expect(mockedGetAgentsByKuery).toHaveBeenCalledTimes(1);
+      expect(mockedGetAgentsByKuery.mock.calls[0][2].kuery).toContain(
+        AGENT_VERSION_CONDITION_AGENTS_KUERY
+      );
+    });
+
+    it('excludes OpAMP and inactive agents through its agent query', () => {
+      expect(AGENT_VERSION_CONDITION_AGENTS_KUERY).toContain('not type:OPAMP');
+      expect(AGENT_VERSION_CONDITION_AGENTS_KUERY).toContain('status:offline');
+      expect(AGENT_VERSION_CONDITION_AGENTS_KUERY).toContain('status:orphaned');
+      expect(AGENT_VERSION_CONDITION_AGENTS_KUERY).not.toContain('status:inactive');
+      expect(AGENT_VERSION_CONDITION_AGENTS_KUERY).not.toContain('status:unenrolled');
+    });
+
+    it('does not block when every agent satisfies the condition', async () => {
+      mockAgentVersions({ 'policy-1': { '9.4.0': 2 } });
+
+      const blocks = await getAgentVersionBlocks([
+        { key: 'pp-1', pkgInfo: pkgInfo('^9.4.0'), agentPolicyIds: ['policy-1'] },
+      ]);
+
+      expect(blocks.size).toBe(0);
+    });
+
+    it('does not block an agent policy without active agents', async () => {
+      mockAgentVersions({});
+
+      const blocks = await getAgentVersionBlocks([
+        { key: 'pp-1', pkgInfo: pkgInfo('^9.4.0'), agentPolicyIds: ['policy-1'] },
+      ]);
+
+      expect(blocks.size).toBe(0);
+    });
+
+    it('evaluates agents at their major.minor, as version-specific policies do', async () => {
+      mockAgentVersions({ 'policy-1': { '9.4.8': 40 } });
+
+      const blocks = await getAgentVersionBlocks([
+        {
+          key: 'pp-1',
+          pkgInfo: pkgInfo('~9.4.6 || ~9.5.3 || ^9.6.0'),
+          agentPolicyIds: ['policy-1'],
+        },
+      ]);
+
+      expect(blocks.get('pp-1')).toEqual(
+        expect.objectContaining({ blocked_count: 40, observed_versions: ['9.4.8'] })
+      );
+      expect(blocks.get('pp-1')?.min_version).toBe('9.6.0');
+    });
+
+    it('sums the agents across the agent policies of each item with a single query', async () => {
+      mockAgentVersions({ 'policy-1': { '9.3.0': 1 }, 'policy-2': { '9.3.0': 2, '9.2.0': 1 } });
+
+      const blocks = await getAgentVersionBlocks([
+        { key: 'pp-1', pkgInfo: pkgInfo('^9.4.0'), agentPolicyIds: ['policy-1', 'policy-2'] },
+        { key: 'pp-2', pkgInfo: pkgInfo('^9.4.0'), agentPolicyIds: ['policy-1'] },
+      ]);
+
+      expect(blocks.get('pp-1')).toEqual(
+        expect.objectContaining({ blocked_count: 4, observed_versions: ['9.2.0', '9.3.0'] })
+      );
+      expect(blocks.get('pp-2')).toEqual(expect.objectContaining({ blocked_count: 1 }));
+      expect(mockedGetAgentsByKuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores packages without an agent version condition', async () => {
+      const blocks = await getAgentVersionBlocks([
+        { key: 'pp-1', pkgInfo: pkgInfo(), agentPolicyIds: ['policy-1'] },
+      ]);
+
+      expect(blocks.size).toBe(0);
+      expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
+    });
+
+    it('ignores agentless agent policies', async () => {
+      mockedGetByIds.mockResolvedValue([{ id: 'policy-1', supports_agentless: true }] as never);
+
+      const blocks = await getAgentVersionBlocks([
+        { key: 'pp-1', pkgInfo: pkgInfo('^9.4.0'), agentPolicyIds: ['policy-1'] },
+      ]);
+
+      expect(blocks.size).toBe(0);
+      expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when version-specific policies are disabled', async () => {
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        enableVersionSpecificPolicies: false,
+      } as ReturnType<typeof appContextService.getExperimentalFeatures>);
+
+      const blocks = await getAgentVersionBlocks([
+        { key: 'pp-1', pkgInfo: pkgInfo('^9.4.0'), agentPolicyIds: ['policy-1'] },
+      ]);
+
+      expect(blocks.size).toBe(0);
+      expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
+    });
+
+    it('blocks every agent when the condition is not a valid range', async () => {
+      mockAgentVersions({ 'policy-1': { '9.6.0': 3 } });
+
+      const blocks = await getAgentVersionBlocks([
+        { key: 'pp-1', pkgInfo: pkgInfo('not a range'), agentPolicyIds: ['policy-1'] },
+      ]);
+
+      expect(blocks.get('pp-1')).toEqual(expect.objectContaining({ blocked_count: 3 }));
+    });
+  });
+
+  describe('assertAgentVersionCompatible', () => {
+    it('throws an error carrying the block', async () => {
+      mockAgentVersions({ 'policy-1': { '9.3.1': 2 } });
+
+      const promise = assertAgentVersionCompatible({
+        pkgInfo: pkgInfo('^9.4.0'),
+        agentPolicyIds: ['policy-1'],
+        operation: 'upgrade',
+      });
+
+      await expect(promise).rejects.toThrow(PackagePolicyAgentVersionIncompatibleError);
+      await expect(promise).rejects.toThrow(
+        "Cannot upgrade aws_mq to 2.3.0: it requires agent version ^9.4.0, and 2 active agents on 9.3.1 don't satisfy it."
+      );
+    });
+
+    it('does not throw when the agents satisfy the condition', async () => {
+      mockAgentVersions({ 'policy-1': { '9.4.1': 2 } });
+
+      await expect(
+        assertAgentVersionCompatible({
+          pkgInfo: pkgInfo('^9.4.0'),
+          agentPolicyIds: ['policy-1'],
+          operation: 'add',
+        })
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('getAgentVersionBlockMessage', () => {
+    const block = {
+      package_name: 'azure_billing',
+      package_version: '1.13.0',
+      version_condition: '~9.4.6 || ~9.5.3 || ^9.6.0',
+      blocked_count: 40,
+      observed_versions: ['9.4.8'],
+    };
+
+    it('names the observed versions and omits the upgrade target when there is none', () => {
+      const message = getAgentVersionBlockMessage(block, 'upgrade');
+      expect(message).toContain(
+        "Cannot upgrade azure_billing to 1.13.0: it requires agent version ~9.4.6 || ~9.5.3 || ^9.6.0, and 40 active agents on 9.4.8 don't satisfy it."
+      );
+      expect(message).not.toContain('Upgrade the agents to');
+    });
+
+    it('suggests the minimum version when the agents run below it', () => {
+      expect(
+        getAgentVersionBlockMessage(
+          { ...block, observed_versions: ['9.3.0'], min_version: '9.6.0' },
+          'add'
+        )
+      ).toContain('Upgrade the agents to 9.6.0 or later.');
+    });
+
+    it('caps the number of listed versions', () => {
+      const observedVersions = Array.from({ length: 12 }, (_, i) => `8.${i}.0`);
+      expect(
+        getAgentVersionBlockMessage({ ...block, observed_versions: observedVersions }, 'add')
+      ).toContain('8.9.0 and 2 more');
+    });
+  });
+
+  describe('getAgentVersionGuardScope', () => {
+    it('checks every agent policy when the package version changes', () => {
+      expect(
+        getAgentVersionGuardScope({
+          oldPackageVersion: '1.0.0',
+          newPackageVersion: '1.1.0',
+          oldPolicyIds: ['policy-1'],
+          newPolicyIds: ['policy-1', 'policy-2'],
+        })
+      ).toEqual({ agentPolicyIds: ['policy-1', 'policy-2'], operation: 'upgrade' });
+    });
+
+    it('checks only the added agent policies when the package version is unchanged', () => {
+      expect(
+        getAgentVersionGuardScope({
+          oldPackageVersion: '1.0.0',
+          newPackageVersion: '1.0.0',
+          oldPolicyIds: ['policy-1'],
+          newPolicyIds: ['policy-1', 'policy-2'],
+        })
+      ).toEqual({ agentPolicyIds: ['policy-2'], operation: 'add' });
+    });
+
+    it('does not check other edits', () => {
+      expect(
+        getAgentVersionGuardScope({
+          oldPackageVersion: '1.0.0',
+          newPackageVersion: '1.0.0',
+          oldPolicyIds: ['policy-1', 'policy-2'],
+          newPolicyIds: ['policy-1'],
+        })
+      ).toBeUndefined();
+    });
+  });
+});

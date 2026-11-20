@@ -17,6 +17,7 @@ import type {
 import { installPackage } from '../../services/epm/packages';
 import { appContextService, packagePolicyService } from '../../services';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
+import type { BulkUpgradeSkippedPackagePolicy } from '../../../common/types';
 
 import { scheduleBulkOperationTask, formatError } from './utils';
 
@@ -37,6 +38,7 @@ interface BulkUpgradeTaskState {
     | {
         success: true;
         name: string;
+        skipped_package_policies?: BulkUpgradeSkippedPackagePolicy[];
       }
     | { success: false; name: string; error: { message: string } }
   >;
@@ -90,17 +92,20 @@ export async function _runBulkUpgradeTask({
         throw installResult.error;
       }
 
-      if (upgradePackagePolicies) {
-        await bulkUpgradePackagePolicies({
-          savedObjectsClient,
-          esClient,
-          pkgName: pkg.name,
-        });
-      }
+      const skippedPackagePolicies = upgradePackagePolicies
+        ? await bulkUpgradePackagePolicies({
+            savedObjectsClient,
+            esClient,
+            pkgName: pkg.name,
+          })
+        : [];
 
       results.push({
         name: pkg.name,
         success: true,
+        ...(skippedPackagePolicies.length
+          ? { skipped_package_policies: skippedPackagePolicies }
+          : {}),
       });
     } catch (error) {
       logger.error(`Upgrade of package: ${pkg.name} failed`, { error });
@@ -122,7 +127,7 @@ async function bulkUpgradePackagePolicies({
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   pkgName: string;
-}) {
+}): Promise<BulkUpgradeSkippedPackagePolicy[]> {
   const policyIdsToUpgrade = await packagePolicyService.listIds(savedObjectsClient, {
     page: 1,
     perPage: SO_SEARCH_LIMIT,
@@ -138,13 +143,34 @@ async function bulkUpgradePackagePolicies({
       esClient,
       policyIdsToUpgrade.items
     );
-    const errors = upgradePackagePoliciesResults
-      .filter((result) => !result.success)
+    // A package policy blocked by its agents' versions stays on its current package version until
+    // the agents are upgraded. That is expected, so it does not fail the package upgrade.
+    const failedResults = upgradePackagePoliciesResults.filter((result) => !result.success);
+    const agentVersionBlocked = failedResults.filter(
+      (result) => result.body?.attributes?.type === 'agent_version_incompatible'
+    );
+    if (agentVersionBlocked.length) {
+      appContextService
+        .getLogger()
+        .info(
+          `Package policies of ${pkgName} not upgraded because of their agents' versions: ${agentVersionBlocked
+            .map((result) => result.id)
+            .join(', ')}`
+        );
+    }
+    const errors = failedResults
+      .filter((result) => !agentVersionBlocked.includes(result))
       .map((result) => `${result.statusCode}: ${result.body?.message ?? ''}`);
     if (errors.length) {
       throw new Error(`Package policies upgrade for ${pkgName} failed:\n${errors.join('\n')}`);
     }
+    return agentVersionBlocked.map(({ id, name, body }) => ({
+      id,
+      name,
+      version_condition: body?.attributes?.agent_version_block?.version_condition,
+    }));
   }
+  return [];
 }
 
 export async function scheduleBulkUpgrade(

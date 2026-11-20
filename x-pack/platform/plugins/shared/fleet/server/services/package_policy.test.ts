@@ -28,6 +28,7 @@ import {
 import { CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE } from '../../common/constants/cloud_connector';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import { PackagePolicyMocks } from '../mocks/package_policy.mocks';
+import { PackagePolicyAgentVersionIncompatibleError } from '../errors';
 
 import type {
   PackageInfo,
@@ -99,6 +100,10 @@ import { outputService } from './output';
 import * as secretsModule from './secrets';
 import { recompileInputsWithAgentVersion } from './agent_policies/package_policies_to_agent_inputs';
 import { getAgentVersionsForVersionSpecificPolicies } from './utils/version_specific_policies';
+import {
+  assertAgentVersionCompatible,
+  getAgentVersionBlocks,
+} from './package_policies/agent_version_guard';
 
 jest.mock('./spaces/helpers', () => {
   return {
@@ -357,6 +362,12 @@ jest.mock('./epm/packages/get', () => ({
 jest.mock('./utils/version_specific_policies', () => ({
   ...jest.requireActual('./utils/version_specific_policies'),
   getAgentVersionsForVersionSpecificPolicies: jest.fn().mockResolvedValue([]),
+}));
+
+jest.mock('./package_policies/agent_version_guard', () => ({
+  ...jest.requireActual('./package_policies/agent_version_guard'),
+  getAgentVersionBlocks: jest.fn().mockResolvedValue(new Map()),
+  assertAgentVersionCompatible: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('./agent_policies/package_policies_to_agent_inputs', () => ({
@@ -17168,5 +17179,240 @@ describe('getCompiledVersionsForAgentPolicy()', () => {
 
     expect(result).toHaveLength(3);
     expect(result).toEqual(expect.arrayContaining(['9.1', '8.18', '9.3']));
+  });
+});
+
+describe('Package policy service agent version guard', () => {
+  const mockedAssertAgentVersionCompatible = jest.mocked(assertAgentVersionCompatible);
+  const mockedGetAgentVersionBlocks = jest.mocked(getAgentVersionBlocks);
+  const agentVersionBlock = {
+    package_name: 'endpoint',
+    package_version: '1.0.0',
+    version_condition: '^9.4.0',
+    blocked_count: 2,
+    observed_versions: ['9.3.1'],
+    min_version: '9.4.0',
+  };
+  const blockedError = new PackagePolicyAgentVersionIncompatibleError('blocked', agentVersionBlock);
+  const esClient = () => elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+  beforeEach(() => {
+    // Other tests in this file leave spies behind, e.g. on `update`
+    jest.restoreAllMocks();
+    appContextService.start(createAppContextStartContractMock());
+    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+    jest.mocked(licenseService.hasAtLeast).mockReturnValue(true);
+    (getPackageInfo as jest.Mock).mockReset().mockImplementation(mockedGetPackageInfo);
+    mockAgentPolicyGet();
+    mockedAssertAgentVersionCompatible.mockReset().mockResolvedValue(undefined);
+    mockedGetAgentVersionBlocks.mockReset().mockResolvedValue(new Map());
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+    mockAgentPolicyService.get.mockReset();
+  });
+
+  const mockSavedPackagePolicies = (
+    soClient: ReturnType<typeof createSavedObjectClientMock>,
+    packagePolicies: PackagePolicy[]
+  ) => {
+    soClient.bulkGet.mockResolvedValue({
+      saved_objects: packagePolicies.map((packagePolicy) => ({
+        id: packagePolicy.id,
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'test',
+        attributes: packagePolicy,
+      })),
+    });
+  };
+
+  describe('create', () => {
+    const newPackagePolicy = {
+      name: 'Test Package Policy',
+      namespace: 'test',
+      enabled: true,
+      policy_id: 'test',
+      policy_ids: ['test'],
+      inputs: [],
+      package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+    };
+    const createOptions = { id: 'test-package-policy', skipUniqueNameVerification: true };
+
+    it('checks the agents of the agent policies the package policy is added to', async () => {
+      const soClient = createSavedObjectClientMock();
+      mockedAssertAgentVersionCompatible.mockRejectedValue(blockedError);
+
+      await expect(
+        packagePolicyService.create(soClient, esClient(), newPackagePolicy, createOptions)
+      ).rejects.toThrow(blockedError);
+
+      expect(mockedAssertAgentVersionCompatible).toHaveBeenCalledWith({
+        pkgInfo: expect.objectContaining({ version: '1.3.2' }),
+        agentPolicyIds: ['test'],
+        operation: 'add',
+      });
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('is not bypassed by force', async () => {
+      mockedAssertAgentVersionCompatible.mockRejectedValue(blockedError);
+
+      await expect(
+        packagePolicyService.create(createSavedObjectClientMock(), esClient(), newPackagePolicy, {
+          ...createOptions,
+          force: true,
+        })
+      ).rejects.toThrow(blockedError);
+    });
+
+    it('skips the check when the incompatibility is acknowledged', async () => {
+      // The rest of the create is not under test
+      await packagePolicyService
+        .create(createSavedObjectClientMock(), esClient(), newPackagePolicy, {
+          ...createOptions,
+          acknowledgeAgentVersionIncompatibility: true,
+        })
+        .catch(() => undefined);
+
+      expect(mockedAssertAgentVersionCompatible).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('update', () => {
+    const update = (
+      packagePolicyUpdate: PackagePolicy,
+      options?: { acknowledgeAgentVersionIncompatibility?: boolean }
+    ) => {
+      const soClient = createSavedObjectClientMock();
+      mockSavedPackagePolicies(soClient, [createPackagePolicyMock()]);
+      // The rest of the update is not under test
+      return packagePolicyService
+        .update(soClient, esClient(), 'the-package-policy-id', packagePolicyUpdate, options)
+        .catch((error) => error);
+    };
+
+    it('checks every agent policy when the package version changes', async () => {
+      const packagePolicy = createPackagePolicyMock();
+      mockedAssertAgentVersionCompatible.mockRejectedValue(blockedError);
+
+      expect(
+        await update({ ...packagePolicy, package: { ...packagePolicy.package!, version: '1.0.0' } })
+      ).toBe(blockedError);
+      expect(mockedAssertAgentVersionCompatible).toHaveBeenCalledWith({
+        pkgInfo: expect.objectContaining({ version: '1.0.0' }),
+        agentPolicyIds: packagePolicy.policy_ids,
+        operation: 'upgrade',
+      });
+    });
+
+    it('checks only the added agent policies when policy_ids grows', async () => {
+      const packagePolicy = createPackagePolicyMock();
+
+      await update({ ...packagePolicy, policy_ids: [...packagePolicy.policy_ids, 'added-policy'] });
+
+      expect(mockedAssertAgentVersionCompatible).toHaveBeenCalledWith(
+        expect.objectContaining({ agentPolicyIds: ['added-policy'], operation: 'add' })
+      );
+    });
+
+    it('does not check other edits', async () => {
+      await update({ ...createPackagePolicyMock(), description: 'edited' });
+
+      expect(mockedAssertAgentVersionCompatible).not.toHaveBeenCalled();
+    });
+
+    it('skips the check when the incompatibility is acknowledged', async () => {
+      const packagePolicy = createPackagePolicyMock();
+
+      await update(
+        { ...packagePolicy, package: { ...packagePolicy.package!, version: '1.0.0' } },
+        { acknowledgeAgentVersionIncompatibility: true }
+      );
+
+      expect(mockedAssertAgentVersionCompatible).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('bulkUpdate', () => {
+    it('fails the blocked package policies only', async () => {
+      const soClient = createSavedObjectClientMock();
+      const packagePolicy = createPackagePolicyMock();
+      const otherPackagePolicy = { ...createPackagePolicyMock(), id: 'other-package-policy' };
+      mockSavedPackagePolicies(soClient, [packagePolicy, otherPackagePolicy]);
+      soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
+      mockedGetAgentVersionBlocks.mockResolvedValue(
+        new Map([[packagePolicy.id, agentVersionBlock]])
+      );
+
+      const upgradedPackage = { ...packagePolicy.package!, version: '1.0.0' };
+      const result = await packagePolicyService.bulkUpdate(soClient, esClient(), [
+        { ...packagePolicy, package: upgradedPackage },
+        { ...otherPackagePolicy, package: upgradedPackage },
+      ]);
+
+      expect(mockedGetAgentVersionBlocks).toHaveBeenCalledWith([
+        expect.objectContaining({
+          key: packagePolicy.id,
+          agentPolicyIds: packagePolicy.policy_ids,
+        }),
+        expect.objectContaining({ key: otherPackagePolicy.id }),
+      ]);
+      expect(result.failedPolicies).toEqual([
+        expect.objectContaining({ error: expect.any(PackagePolicyAgentVersionIncompatibleError) }),
+      ]);
+      expect(result.failedPolicies[0].packagePolicy.id).toBe(packagePolicy.id);
+      expect(soClient.bulkUpdate.mock.calls[0][0].map(({ id }) => id)).toEqual([
+        otherPackagePolicy.id,
+      ]);
+    });
+
+    it('skips the check when the incompatibility is acknowledged', async () => {
+      const soClient = createSavedObjectClientMock();
+      const packagePolicy = createPackagePolicyMock();
+      mockSavedPackagePolicies(soClient, [packagePolicy]);
+
+      // The rest of the update is not under test
+      await packagePolicyService
+        .bulkUpdate(
+          soClient,
+          esClient(),
+          [{ ...packagePolicy, package: { ...packagePolicy.package!, version: '1.0.0' } }],
+          { acknowledgeAgentVersionIncompatibility: true }
+        )
+        .catch(() => undefined);
+
+      expect(mockedGetAgentVersionBlocks).toHaveBeenCalledWith([]);
+    });
+  });
+
+  describe('bulkCreate', () => {
+    it('fails the blocked package policies', async () => {
+      const soClient = createSavedObjectClientMock();
+      mockedGetAgentVersionBlocks.mockResolvedValue(new Map([['blocked-id', agentVersionBlock]]));
+      mockAgentPolicyService.getByIds.mockResolvedValue([]);
+      soClient.bulkCreate.mockResolvedValue({ saved_objects: [] });
+
+      const result = await packagePolicyService.bulkCreate(soClient, esClient(), [
+        {
+          id: 'blocked-id',
+          name: 'Test Package Policy',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test',
+          policy_ids: ['test'],
+          inputs: [],
+          package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+        },
+      ]);
+
+      expect(result.failed).toEqual([
+        expect.objectContaining({ error: expect.any(PackagePolicyAgentVersionIncompatibleError) }),
+      ]);
+      expect(mockedGetAgentVersionBlocks).toHaveBeenCalledWith([
+        expect.objectContaining({ key: 'blocked-id', agentPolicyIds: ['test'] }),
+      ]);
+    });
   });
 });

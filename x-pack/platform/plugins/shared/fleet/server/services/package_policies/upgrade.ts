@@ -60,6 +60,8 @@ import {
   sendTelemetryEvents,
 } from '../upgrade_sender';
 
+import { getAgentVersionBlocks, getAgentVersionGuardScope } from './agent_version_guard';
+
 export async function _getUpgradePackagePolicyInfo({
   packagePolicyService,
   soClient,
@@ -368,7 +370,12 @@ export async function _packagePoliciesBulkUpgrade({
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   ids: string[];
-  options?: { user?: AuthenticatedUser; force?: boolean; batchSize?: number };
+  options?: {
+    user?: AuthenticatedUser;
+    force?: boolean;
+    batchSize?: number;
+    acknowledgeAgentVersionIncompatibility?: boolean;
+  };
   pkgVersion?: string;
 }): Promise<UpgradePackagePolicyResponse> {
   // Bulk upgrade packages policies
@@ -439,6 +446,7 @@ export async function _packagePoliciesBulkUpgrade({
           force: options?.force,
           user: options?.user,
           oldPackagePolicies: packagePolicies,
+          acknowledgeAgentVersionIncompatibility: options?.acknowledgeAgentVersionIncompatibility,
         }
       );
 
@@ -453,6 +461,7 @@ export async function _packagePoliciesBulkUpgrade({
       for (const res of bulkUpdateResults.failedPolicies ?? []) {
         result.push({
           id: res.packagePolicy.id as string,
+          name: res.packagePolicy.name,
           success: false,
           ...fleetErrorToResponseOptions(res.error as FleetError),
         });
@@ -475,7 +484,11 @@ export async function _packagePoliciesUpgrade({
   esClient: ElasticsearchClient;
   packagePolicyService: PackagePolicyClient;
   id: string;
-  options?: { user?: AuthenticatedUser; force?: boolean };
+  options?: {
+    user?: AuthenticatedUser;
+    force?: boolean;
+    acknowledgeAgentVersionIncompatibility?: boolean;
+  };
   packagePolicy?: PackagePolicy;
   pkgVersion?: string;
 }): Promise<UpgradePackagePolicyResponse> {
@@ -562,7 +575,27 @@ export async function _packagePoliciesGetUpgradeDryRunDiff({
       packagePolicy.package.experimental_data_stream_features = experimentalDataStreamFeatures;
     }
 
-    return calculateDiff(packagePolicy, packageInfo, assetsMap);
+    const diff = await calculateDiff(packagePolicy, packageInfo, assetsMap);
+
+    const agentVersionGuardScope = getAgentVersionGuardScope({
+      oldPackageVersion: packagePolicy.package?.version,
+      newPackageVersion: packageInfo.version,
+      oldPolicyIds: packagePolicy.policy_ids ?? [],
+      newPolicyIds: packagePolicy.policy_ids ?? [],
+    });
+    const agentVersionBlock = agentVersionGuardScope
+      ? (
+          await getAgentVersionBlocks([
+            {
+              key: id,
+              pkgInfo: packageInfo,
+              agentPolicyIds: agentVersionGuardScope.agentPolicyIds,
+            },
+          ])
+        ).get(id)
+      : undefined;
+
+    return agentVersionBlock ? { ...diff, agent_version_block: agentVersionBlock } : diff;
   } catch (error) {
     return {
       hasErrors: true,

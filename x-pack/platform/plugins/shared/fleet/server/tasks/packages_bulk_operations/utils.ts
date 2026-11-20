@@ -9,6 +9,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 
+import type { BulkUpgradeSkippedPackagePolicy } from '../../../common/types';
+
 export const TASK_TYPE = 'fleet:packages-bulk-operations';
 export const TASK_TITLE = 'Fleet packages bulk operations';
 export const TASK_TIMEOUT = '10m';
@@ -20,6 +22,7 @@ export interface BulkPackageOperationsTaskState {
     | {
         success: true;
         name: string;
+        skipped_package_policies?: BulkUpgradeSkippedPackagePolicy[];
       }
     | { success: false; name: string; error: { message: string } }
   >;

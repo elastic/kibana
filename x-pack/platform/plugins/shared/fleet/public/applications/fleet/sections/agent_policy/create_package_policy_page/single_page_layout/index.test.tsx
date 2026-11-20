@@ -24,6 +24,7 @@ import {
 import type { CreatePackagePolicyRouteState } from '../../../../types';
 import {
   sendCreatePackagePolicyForRq,
+  useBulkGetAgentPoliciesQuery,
   sendCreateAgentPolicy,
   sendGetAgentStatus,
   useIntraAppState,
@@ -95,6 +96,9 @@ jest.mock('../../../../hooks', () => {
       })
     ),
     useGetPackageInfoByKeyQuery: jest.fn(),
+    useBulkGetAgentPoliciesQuery: jest.fn((...args) =>
+      jest.requireActual('../../../../hooks').useBulkGetAgentPoliciesQuery(...args)
+    ),
     sendGetSettings: jest.fn().mockResolvedValue({
       data: { item: {} },
     }),
@@ -604,6 +608,62 @@ describe('When on the package policy create page', () => {
       await waitFor(() => {
         expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
       });
+    });
+
+    test('requires acknowledging that some agents would stop collecting data before saving', async () => {
+      const packageInfo = getMockPackageInfo();
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
+        ...packageInfo,
+        data: {
+          ...packageInfo.data,
+          item: { ...packageInfo.data.item, conditions: { agent: { version: '^9.4.0' } } },
+        },
+      });
+      const bulkGetAgentPoliciesQuery = jest.mocked(useBulkGetAgentPoliciesQuery);
+      const actualBulkGetAgentPoliciesQuery = bulkGetAgentPoliciesQuery.getMockImplementation();
+      bulkGetAgentPoliciesQuery.mockReturnValue({
+        data: {
+          items: [
+            {
+              id: 'agent-policy-1',
+              active_agents_per_version: [
+                { version: '9.3.1', count: 2 },
+                { version: '9.4.0', count: 1 },
+              ],
+            },
+          ],
+        },
+      } as unknown as ReturnType<typeof useBulkGetAgentPoliciesQuery>);
+
+      try {
+        await act(async () => {
+          render('agent-policy-1');
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('incompatibleAgentVersionCallout')).toBeInTheDocument();
+        });
+        const saveBtn = renderResult.getByText(/Save and continue/).closest('button')!;
+        expect(saveBtn).toBeDisabled();
+
+        await act(async () => {
+          fireEvent.click(
+            renderResult.getByTestId('acknowledgeAgentVersionIncompatibilityCheckbox')
+          );
+        });
+        await waitFor(() => expect(saveBtn).not.toBeDisabled());
+
+        await act(async () => {
+          fireEvent.click(saveBtn);
+        });
+
+        expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith(
+          expect.objectContaining({ acknowledge_agent_version_incompatibility: true }),
+          expect.anything()
+        );
+      } finally {
+        bulkGetAgentPoliciesQuery.mockImplementation(actualBulkGetAgentPoliciesQuery!);
+      }
     });
 
     test('warns when the policy saved but its cloud connector could not record the template details', async () => {

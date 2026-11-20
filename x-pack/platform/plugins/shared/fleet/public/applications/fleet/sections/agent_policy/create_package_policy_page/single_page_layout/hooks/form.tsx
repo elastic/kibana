@@ -291,6 +291,10 @@ export function useOnSubmit({
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<SavedPolicyResult>();
   // Create dataset templates toggle (checked/recommended by default)
   const [createDatasetTemplates, setCreateDatasetTemplates] = useState<boolean>(true);
+  // Set from the incompatible agent version callout, to create the package policy even though some
+  // agents don't satisfy the package's agent version condition
+  const [acknowledgeAgentVersionIncompatibility, setAcknowledgeAgentVersionIncompatibility] =
+    useState<boolean>(false);
   // Form state
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -729,6 +733,9 @@ export function useOnSubmit({
             policy_ids: agentPolicyIdToSave,
             force: forceInstall,
             create_dataset_templates: createDatasetTemplates,
+            ...(acknowledgeAgentVersionIncompatibility && {
+              acknowledge_agent_version_incompatibility: true,
+            }),
           },
           varGroups,
           packageInfo,
@@ -873,6 +880,7 @@ export function useOnSubmit({
       onSaveNavigate,
       confirmForceInstall,
       createDatasetTemplates,
+      acknowledgeAgentVersionIncompatibility,
       reportCredentialsAdded,
       reportDeployClicked,
       reportEnrollmentSucceeded,
@@ -905,5 +913,7 @@ export function useOnSubmit({
     submitAttempted,
     createDatasetTemplates,
     setCreateDatasetTemplates,
+    acknowledgeAgentVersionIncompatibility,
+    setAcknowledgeAgentVersionIncompatibility,
   };
 }

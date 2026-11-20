@@ -132,6 +132,8 @@ export {
   buildPolicyBaseIdWithFallbackKuery,
   buildPolicyBaseIdsWithFallbackKuery,
   extractAgentIdsWithData,
+  agentSatisfiesPackageVersionCondition,
+  getAgentVersionBlockers,
   getIncompatibleIntegrations,
   formatAgentConditionErrors,
 } from './services';

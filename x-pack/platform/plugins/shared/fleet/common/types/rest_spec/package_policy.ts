@@ -45,7 +45,11 @@ export interface GetOnePackagePolicyResponse {
 }
 
 export interface CreatePackagePolicyRequest {
-  body: NewPackagePolicy & { force?: boolean; create_dataset_templates?: boolean };
+  body: NewPackagePolicy & {
+    force?: boolean;
+    create_dataset_templates?: boolean;
+    acknowledge_agent_version_incompatibility?: boolean;
+  };
   query: {
     format?: typeof inputsFormat.Simplified | typeof inputsFormat.Legacy;
   };
@@ -56,7 +60,7 @@ export interface CreatePackagePolicyResponse {
 }
 
 export type UpdatePackagePolicyRequest = GetOnePackagePolicyRequest & {
-  body: UpdatePackagePolicy;
+  body: UpdatePackagePolicy & { acknowledge_agent_version_incompatibility?: boolean };
 };
 
 export type UpdatePackagePolicyResponse = CreatePackagePolicyResponse;
@@ -85,6 +89,8 @@ export type PostDeletePackagePoliciesResponse = Array<{
   statusCode?: number;
   body?: {
     message: string;
+    /** Error details. `type` is `agent_version_incompatible` when agents block the upgrade. */
+    attributes?: { type?: string; limit?: number; agent_version_block?: AgentVersionBlock };
   };
 }>;
 
@@ -95,13 +101,32 @@ export interface UpgradePackagePolicyBaseResponse {
   statusCode?: number;
   body?: {
     message: string;
+    /** Error details. `type` is `agent_version_incompatible` when agents block the upgrade. */
+    attributes?: { type?: string; limit?: number; agent_version_block?: AgentVersionBlock };
   };
+}
+
+/**
+ * Active agents that don't satisfy a package-level `conditions.agent.version`, and so would stop
+ * receiving the integration's inputs.
+ */
+export interface AgentVersionBlock {
+  package_name: string;
+  package_version: string;
+  version_condition: string;
+  blocked_count: number;
+  /** The versions reported by the blocked agents. */
+  observed_versions: string[];
+  /** The lowest agent version satisfying the condition, when the blocked agents all run below it. */
+  min_version?: string;
 }
 
 export interface UpgradePackagePolicyDryRunResponseItem extends UpgradePackagePolicyBaseResponse {
   hasErrors: boolean;
   diff?: [PackagePolicy, DryRunPackagePolicy];
   agent_diff?: [FullAgentPolicyInput[]];
+  /** Set when the upgrade is blocked because some agents don't satisfy the target version's agent version condition. */
+  agent_version_block?: AgentVersionBlock;
 }
 
 export type UpgradePackagePolicyDryRunResponse = UpgradePackagePolicyDryRunResponseItem[];

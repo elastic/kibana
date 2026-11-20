@@ -14,7 +14,7 @@ const createAgentPolicy = (
   versions: Array<{ version: string; count: number }> | undefined
 ): AgentPolicy =>
   ({
-    agents_per_version: versions,
+    active_agents_per_version: versions,
   } as unknown as AgentPolicy);
 
 const createPackageInfo = (agentVersionCondition?: string): PackageInfo =>
@@ -43,7 +43,7 @@ describe('getIncompatibleAgentVersionStatus', () => {
     expect(result).toEqual({ status: 'NONE' });
   });
 
-  it('returns { status: NONE } when agent policy has no agents_per_version', () => {
+  it('returns { status: NONE } when agent policy has no active_agents_per_version', () => {
     const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=8.0.0'), [
       createAgentPolicy(undefined),
     ]);
@@ -67,7 +67,14 @@ describe('getIncompatibleAgentVersionStatus', () => {
         { version: '8.1.0', count: 5 },
       ]),
     ]);
-    expect(result).toEqual({ status: 'SOME', versionCondition: '>=8.0.0' });
+    expect(result).toEqual({
+      status: 'SOME',
+      versionCondition: '>=8.0.0',
+      blockedCount: 2,
+      observedVersions: ['7.17.0'],
+      minVersion: '8.0.0',
+      agentPolicyCount: 1,
+    });
   });
 
   it('returns { status: ALL } with versionCondition when all agents are incompatible', () => {
@@ -77,7 +84,14 @@ describe('getIncompatibleAgentVersionStatus', () => {
         { version: '7.17.0', count: 3 },
       ]),
     ]);
-    expect(result).toEqual({ status: 'ALL', versionCondition: '>=8.0.0' });
+    expect(result).toEqual({
+      status: 'ALL',
+      versionCondition: '>=8.0.0',
+      blockedCount: 5,
+      observedVersions: ['7.16.0', '7.17.0'],
+      minVersion: '8.0.0',
+      agentPolicyCount: 1,
+    });
   });
 
   it('returns { status: SOME } across multiple agent policies with mixed compatibility', () => {
@@ -88,7 +102,14 @@ describe('getIncompatibleAgentVersionStatus', () => {
         { version: '8.1.0', count: 3 },
       ]),
     ]);
-    expect(result).toEqual({ status: 'SOME', versionCondition: '>=8.0.0' });
+    expect(result).toEqual({
+      status: 'SOME',
+      versionCondition: '>=8.0.0',
+      blockedCount: 2,
+      observedVersions: ['7.17.0'],
+      minVersion: '8.0.0',
+      agentPolicyCount: 2,
+    });
   });
 
   it('returns { status: ALL } when all agents across all policies are incompatible', () => {
@@ -96,7 +117,14 @@ describe('getIncompatibleAgentVersionStatus', () => {
       createAgentPolicy([{ version: '7.16.0', count: 2 }]),
       createAgentPolicy([{ version: '7.17.0', count: 3 }]),
     ]);
-    expect(result).toEqual({ status: 'ALL', versionCondition: '>=8.0.0' });
+    expect(result).toEqual({
+      status: 'ALL',
+      versionCondition: '>=8.0.0',
+      blockedCount: 5,
+      observedVersions: ['7.16.0', '7.17.0'],
+      minVersion: '8.0.0',
+      agentPolicyCount: 2,
+    });
   });
 
   describe('pre-release version coercion', () => {
@@ -111,7 +139,14 @@ describe('getIncompatibleAgentVersionStatus', () => {
       const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=8.0.0'), [
         createAgentPolicy([{ version: '7.17.0-SNAPSHOT', count: 1 }]),
       ]);
-      expect(result).toEqual({ status: 'ALL', versionCondition: '>=8.0.0' });
+      expect(result).toEqual({
+        status: 'ALL',
+        versionCondition: '>=8.0.0',
+        blockedCount: 1,
+        observedVersions: ['7.17.0-SNAPSHOT'],
+        minVersion: '8.0.0',
+        agentPolicyCount: 1,
+      });
     });
 
     it('returns SOME when pre-release agents satisfy the condition but others do not', () => {
@@ -121,7 +156,14 @@ describe('getIncompatibleAgentVersionStatus', () => {
           { version: '7.17.0', count: 3 },
         ]),
       ]);
-      expect(result).toEqual({ status: 'SOME', versionCondition: '>=8.0.0' });
+      expect(result).toEqual({
+        status: 'SOME',
+        versionCondition: '>=8.0.0',
+        blockedCount: 3,
+        observedVersions: ['7.17.0'],
+        minVersion: '8.0.0',
+        agentPolicyCount: 1,
+      });
     });
 
     it('returns NONE when all agents are pre-release versions that satisfy the condition', () => {
@@ -132,6 +174,34 @@ describe('getIncompatibleAgentVersionStatus', () => {
         ]),
       ]);
       expect(result).toEqual({ status: 'NONE' });
+    });
+  });
+
+  it('returns { status: NONE } when the agent policies have no active agents', () => {
+    const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=8.0.0'), [
+      createAgentPolicy([]),
+    ]);
+    expect(result).toEqual({ status: 'NONE' });
+  });
+
+  it('evaluates agents at their major.minor, as Fleet does when deploying the policy', () => {
+    const result = getIncompatibleAgentVersionStatus(
+      createPackageInfo('~9.4.6 || ~9.5.3 || ^9.6.0'),
+      [
+        createAgentPolicy([
+          { version: '9.4.8', count: 40 },
+          { version: '9.6.1', count: 2 },
+        ]),
+      ]
+    );
+    // 9.4.8 is in `~9.4.6` but is evaluated as 9.4.0, so the agents need 9.6.0
+    expect(result).toEqual({
+      status: 'SOME',
+      versionCondition: '~9.4.6 || ~9.5.3 || ^9.6.0',
+      blockedCount: 40,
+      observedVersions: ['9.4.8'],
+      minVersion: '9.6.0',
+      agentPolicyCount: 1,
     });
   });
 });

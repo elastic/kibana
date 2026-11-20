@@ -28,6 +28,7 @@ import {
   useUIExtension,
   useAuthz,
   sendBulkGetAgentPoliciesForRq,
+  useBulkGetAgentPoliciesQuery,
   useIsAgentlessQueryParam,
 } from '../../../hooks';
 import {
@@ -257,10 +258,43 @@ export const EditPackagePolicyForm = memo<{
       agentPolicies.find((policy) => policy.id === existingPolicy.id)
     );
   }, [agentPolicies, existingAgentPolicies]);
+  const addedAgentPolicyIds = useMemo(
+    () =>
+      agentPolicies
+        .filter(
+          (policy) =>
+            !existingAgentPolicies.find((existingPolicy) => existingPolicy.id === policy.id)
+        )
+        .map((policy) => policy.id),
+    [agentPolicies, existingAgentPolicies]
+  );
+  const { data: addedAgentPoliciesData } = useBulkGetAgentPoliciesQuery(addedAgentPolicyIds, {
+    ignoreMissing: true,
+    enabled: addedAgentPolicyIds.length > 0,
+  });
+  // Upgrading checks every agent policy, while adding agent policies only checks the added ones,
+  // as Fleet does on save. Other edits are not checked, the callout is only informative then.
+  const requiresAgentVersionAcknowledgement =
+    !hasAgentlessAgentPolicy && (isUpgrade || addedAgentPolicyIds.length > 0);
+  const agentPoliciesToCheck = useMemo(() => {
+    const addedAgentPolicies = addedAgentPolicyIds.length
+      ? addedAgentPoliciesData?.items ?? []
+      : [];
+    if (isUpgrade) {
+      return [...selectedExistingPolicies, ...addedAgentPolicies];
+    }
+    return addedAgentPolicyIds.length ? addedAgentPolicies : selectedExistingPolicies;
+  }, [isUpgrade, selectedExistingPolicies, addedAgentPolicyIds, addedAgentPoliciesData]);
   const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
     packageInfo,
-    selectedExistingPolicies
+    agentPoliciesToCheck
   );
+  const [acknowledgeAgentVersionIncompatibility, setAcknowledgeAgentVersionIncompatibility] =
+    useState<boolean>(false);
+  const isAgentVersionAcknowledgementMissing =
+    requiresAgentVersionAcknowledgement &&
+    incompatibleAgentVersion.status !== 'NONE' &&
+    !acknowledgeAgentVersionIncompatibility;
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
   const [impactedAgentCount, setImpactedAgentCount] = useState<number>(0);
@@ -382,11 +416,17 @@ export const EditPackagePolicyForm = memo<{
       return;
     }
 
-    const { error } = await savePackagePolicy({
-      policy_ids: newPolicyId
-        ? [...packagePolicy.policy_ids, newPolicyId]
-        : packagePolicy.policy_ids,
-    });
+    const { error } = await savePackagePolicy(
+      {
+        policy_ids: newPolicyId
+          ? [...packagePolicy.policy_ids, newPolicyId]
+          : packagePolicy.policy_ids,
+      },
+      {
+        acknowledgeAgentVersionIncompatibility:
+          requiresAgentVersionAcknowledgement && acknowledgeAgentVersionIncompatibility,
+      }
+    );
     if (!error) {
       if (packageInfo) {
         await applyNamespaceCustomizationChange(
@@ -710,13 +750,27 @@ export const EditPackagePolicyForm = memo<{
                 <IncompatibleAgentVersionCallout
                   incompatibility={incompatibleAgentVersion.status}
                   versionCondition={incompatibleAgentVersion.versionCondition}
+                  blockedCount={incompatibleAgentVersion.blockedCount}
+                  observedVersions={incompatibleAgentVersion.observedVersions}
+                  minVersion={incompatibleAgentVersion.minVersion}
+                  agentPolicyCount={incompatibleAgentVersion.agentPolicyCount}
+                  acknowledged={acknowledgeAgentVersionIncompatibility}
+                  onAcknowledgeChange={
+                    requiresAgentVersionAcknowledgement
+                      ? setAcknowledgeAgentVersionIncompatibility
+                      : undefined
+                  }
                 />
                 <EuiSpacer size="m" />
               </>
             )}
             {isUpgrade && upgradeDryRunData && (
               <>
-                <UpgradeStatusCallout dryRunData={upgradeDryRunData} newSecrets={newSecrets} />
+                <UpgradeStatusCallout
+                  dryRunData={upgradeDryRunData}
+                  newSecrets={newSecrets}
+                  hasAgentVersionIncompatibility={incompatibleAgentVersion.status !== 'NONE'}
+                />
                 <EuiSpacer size="xxl" />
               </>
             )}
@@ -777,7 +831,8 @@ export const EditPackagePolicyForm = memo<{
                           formState !== 'VALID' ||
                           hasAgentPolicyError ||
                           !validationResults ||
-                          (!isEdited && !isUpgrade)
+                          (!isEdited && !isUpgrade) ||
+                          isAgentVersionAcknowledgementMissing
                         }
                         tooltip={
                           !canWriteIntegrationPolicies

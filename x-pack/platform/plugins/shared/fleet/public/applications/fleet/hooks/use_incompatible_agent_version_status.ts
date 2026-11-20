@@ -7,15 +7,24 @@
 
 import { useMemo } from 'react';
 
-import satisfies from 'semver/functions/satisfies';
-import coerce from 'semver/functions/coerce';
-
+import { getAgentVersionBlockers } from '../../../../common/services';
 import type { AgentPolicy } from '../types';
 import type { PackageInfo } from '../../../../common/types';
 
 export type IncompatibleAgentVersionResult =
   | { status: 'NONE' }
-  | { status: 'SOME' | 'ALL'; versionCondition: string };
+  | {
+      status: 'SOME' | 'ALL';
+      versionCondition: string;
+      /** Number of active agents that don't satisfy the condition. */
+      blockedCount: number;
+      /** Versions reported by those agents. */
+      observedVersions: string[];
+      /** Lowest version satisfying the condition, when every blocked agent runs below it. */
+      minVersion?: string;
+      /** Number of agent policies that were checked. */
+      agentPolicyCount: number;
+    };
 
 export const useIncompatibleAgentVersionStatus = (
   packageInfo: PackageInfo | undefined,
@@ -26,6 +35,10 @@ export const useIncompatibleAgentVersionStatus = (
   }, [packageInfo, agentPolicies]);
 };
 
+/**
+ * Whether the active agents of `agentPolicies` satisfy the package-level agent version condition of
+ * `packageInfo`, evaluated the same way as Fleet's server-side check.
+ */
 export const getIncompatibleAgentVersionStatus = (
   packageInfo: PackageInfo | undefined,
   agentPolicies: AgentPolicy[] | undefined
@@ -34,23 +47,25 @@ export const getIncompatibleAgentVersionStatus = (
   if (!versionCondition) {
     return { status: 'NONE' };
   }
-  const status = (agentPolicies ?? []).reduce<'NONE' | 'SOME' | 'ALL'>((acc, agentPolicy) => {
-    if (acc === 'SOME') return acc;
-    const { agents_per_version: agentPerVersion } = agentPolicy;
-    if (!agentPerVersion) {
-      return acc;
-    }
-    const isIncompatible = (version: string) => {
-      const coerced = coerce(version);
-      return !satisfies(coerced ? coerced.version : version, versionCondition);
-    };
-    const hasAllIncompatible = agentPerVersion.every((entry) => isIncompatible(entry.version));
-    const hasSomeIncompatible = agentPerVersion.some((entry) => isIncompatible(entry.version));
-    return hasAllIncompatible ? 'ALL' : hasSomeIncompatible ? 'SOME' : acc;
-  }, 'NONE');
 
-  if (status === 'NONE') {
+  const agentVersionCounts = (agentPolicies ?? []).flatMap(
+    ({ active_agents_per_version: activeAgentsPerVersion }) => activeAgentsPerVersion ?? []
+  );
+  const { blockedCount, blockingVersions, minVersion } = getAgentVersionBlockers({
+    versionCondition,
+    agentVersionCounts,
+  });
+  if (blockedCount === 0) {
     return { status: 'NONE' };
   }
-  return { status, versionCondition };
+
+  const agentCount = agentVersionCounts.reduce((total, { count }) => total + count, 0);
+  return {
+    status: blockedCount >= agentCount ? 'ALL' : 'SOME',
+    versionCondition,
+    blockedCount,
+    observedVersions: blockingVersions,
+    ...(minVersion ? { minVersion } : {}),
+    agentPolicyCount: agentPolicies?.length ?? 0,
+  };
 };

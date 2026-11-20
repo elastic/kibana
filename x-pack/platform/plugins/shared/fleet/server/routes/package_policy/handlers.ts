@@ -237,7 +237,14 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-  const { force, id, package: pkg, create_dataset_templates, ...newPolicy } = request.body;
+  const {
+    force,
+    id,
+    package: pkg,
+    create_dataset_templates,
+    acknowledge_agent_version_incompatibility: acknowledgeAgentVersionIncompatibility,
+    ...newPolicy
+  } = request.body;
   if ('spaceIds' in newPolicy) {
     delete newPolicy.spaceIds;
   }
@@ -333,6 +340,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         force,
         spaceId,
         createDatasetTemplates: create_dataset_templates,
+        acknowledgeAgentVersionIncompatibility,
       },
       context,
       request
@@ -477,7 +485,12 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
 
   try {
     // simplified request
-    const { force, package: pkg, ...body } = request.body;
+    const {
+      force,
+      package: pkg,
+      acknowledge_agent_version_incompatibility: acknowledgeAgentVersionIncompatibility,
+      ...body
+    } = request.body;
     let newData: NewPackagePolicy;
 
     if (
@@ -571,7 +584,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       esClient,
       request.params.packagePolicyId,
       newData,
-      { user, force },
+      { user, force, acknowledgeAgentVersionIncompatibility },
       context
     );
     return response.ok({
@@ -727,10 +740,19 @@ export const upgradePackagePolicyHandler: RequestHandler<
     soClient,
     esClient,
     packagePolicyIds,
-    { user }
+    {
+      user,
+      acknowledgeAgentVersionIncompatibility:
+        request.body.acknowledge_agent_version_incompatibility,
+    }
   );
 
-  const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
+  // Mixed results are returned as a 200 with per-item results, so that one blocked package policy
+  // does not hide the ones that were upgraded. When every item failed, the first error is returned
+  // as before.
+  const firstFatalError = body.every((item) => !item.success)
+    ? body.find((item) => item.statusCode && item.statusCode !== 200)
+    : undefined;
 
   if (firstFatalError) {
     return response.customError({
@@ -757,7 +779,12 @@ export const dryRunUpgradePackagePolicyHandler: RequestHandler<
 
   await runWithCache(async () => {
     for (const id of packagePolicyIds) {
-      const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
+      const result = await packagePolicyService.getUpgradeDryRunDiff(
+        soClient,
+        id,
+        undefined,
+        request.body.packageVersion
+      );
       body.push(result);
     }
   });

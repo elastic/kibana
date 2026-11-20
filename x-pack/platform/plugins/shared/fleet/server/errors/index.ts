@@ -10,7 +10,7 @@ import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { isObjectLike } from 'lodash';
 
-import type { RegistryConnectionErrorType } from '../../common/types';
+import type { AgentVersionBlock, RegistryConnectionErrorType } from '../../common/types';
 import type { BreakingChangesLog } from '../../common/services/changelog_utils';
 
 import { FleetError } from '../../common/errors';
@@ -238,6 +238,15 @@ export class AgentRollbackError extends FleetError {
 }
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}
 export class PackagePolicyValidationError extends FleetError {}
+export class PackagePolicyAgentVersionIncompatibleError extends FleetError {
+  constructor(message: string, public readonly agentVersionBlock: AgentVersionBlock) {
+    super(message);
+    this.attributes = {
+      type: 'agent_version_incompatible',
+      agent_version_block: agentVersionBlock,
+    };
+  }
+}
 export class PackagePolicyNameExistsError extends FleetError {}
 export class BundledPackageLocationNotFoundError extends FleetError {}
 

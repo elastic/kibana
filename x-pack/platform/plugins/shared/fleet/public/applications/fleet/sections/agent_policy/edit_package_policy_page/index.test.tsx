@@ -647,6 +647,102 @@ describe('edit package policy page', () => {
     });
   });
 
+  describe('agent version incompatibility', () => {
+    const getPackageInfoByKey = jest.mocked(sendGetPackageInfoByKey);
+    let actualGetPackageInfoByKey: ReturnType<typeof getPackageInfoByKey.getMockImplementation>;
+
+    beforeEach(() => {
+      actualGetPackageInfoByKey = getPackageInfoByKey.getMockImplementation();
+      // Every package version requires agents on 9.4 or later
+      getPackageInfoByKey.mockImplementation(async (...args) => {
+        const response = await actualGetPackageInfoByKey!(...args);
+        return {
+          ...response,
+          data: {
+            ...response.data!,
+            item: { ...response.data!.item, conditions: { agent: { version: '^9.4.0' } } },
+          },
+        };
+      });
+      (sendBulkGetAgentPolicies as MockFn).mockResolvedValue({
+        data: {
+          items: [
+            {
+              id: 'agent-policy-1',
+              name: 'Agent policy 1',
+              active_agents_per_version: [{ version: '9.3.1', count: 2 }],
+            },
+          ],
+        },
+      });
+    });
+
+    afterEach(() => {
+      getPackageInfoByKey.mockImplementation(actualGetPackageInfoByKey!);
+    });
+
+    it('requires an acknowledgement before upgrading', async () => {
+      (useUIExtension as MockFn)
+        .mockReturnValueOnce({
+          view: 'package-policy-edit',
+          useLatestPackageVersion: true,
+          Component: TestComponent,
+        })
+        .mockReturnValueOnce(undefined)
+        .mockReturnValueOnce({
+          view: 'package-policy-edit-tabs',
+          useLatestPackageVersion: true,
+          Component: TestComponent,
+        });
+      (sendUpgradePackagePolicyDryRun as MockFn).mockResolvedValue({
+        data: [{ diff: [mockPackagePolicy, mockPackagePolicyNewVersion] }],
+      });
+
+      render();
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('incompatibleAgentVersionCallout')).toBeInTheDocument();
+      });
+      const upgradeBtn = renderResult.getByText(/Upgrade integration/).closest('button')!;
+      expect(upgradeBtn).toBeDisabled();
+
+      fireEvent.click(renderResult.getByTestId('acknowledgeAgentVersionIncompatibilityCheckbox'));
+      await waitFor(() => expect(upgradeBtn).not.toBeDisabled());
+
+      fireEvent.click(upgradeBtn);
+
+      await waitFor(() => {
+        expect(sendUpdatePackagePolicy).toHaveBeenCalledWith(
+          'nginx-1',
+          expect.objectContaining({ acknowledge_agent_version_incompatibility: true }),
+          expect.anything()
+        );
+      });
+    });
+
+    it('does not require an acknowledgement for other edits', async () => {
+      render();
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('incompatibleAgentVersionCallout')).toBeInTheDocument();
+      });
+      expect(
+        renderResult.queryByTestId('acknowledgeAgentVersionIncompatibilityCheckbox')
+      ).toBeNull();
+
+      fireEvent.click(renderResult.getByRole('switch'));
+      fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
+
+      await waitFor(() => {
+        expect(sendUpdatePackagePolicy).toHaveBeenCalledWith(
+          'nginx-1',
+          expect.not.objectContaining({ acknowledge_agent_version_incompatibility: true }),
+          expect.anything()
+        );
+      });
+    });
+  });
+
   it('should show review field conflicts if package useLatestPackageVersion and has conflicts', async () => {
     (useUIExtension as MockFn)
       .mockReturnValueOnce({

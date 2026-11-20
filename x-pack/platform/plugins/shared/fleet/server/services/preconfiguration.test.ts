@@ -13,6 +13,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { createSavedObjectClientMock } from '../mocks';
+import { PackagePolicyAgentVersionIncompatibleError } from '../errors';
 
 import type {
   InstallResult,
@@ -507,6 +508,53 @@ describe('policy preconfiguration', () => {
         }),
         expect.objectContaining({ id: 'test-1' })
       );
+    });
+
+    it('should skip a package policy blocked by its agents versions without failing setup', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      const logger = loggingSystemMock.create().get();
+      jest.mocked(appContextService).getLogger.mockReturnValue(logger);
+      mockedPackagePolicyService.create.mockRejectedValueOnce(
+        new PackagePolicyAgentVersionIncompatibleError('blocked by agents', {
+          package_name: 'test_package',
+          package_version: '3.0.0',
+          version_condition: '^9.4.0',
+          blocked_count: 1,
+          observed_versions: ['9.3.0'],
+        })
+      );
+
+      const { policies, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        [
+          {
+            name: 'Test policy',
+            namespace: 'default',
+            id: 'test-id',
+            package_policies: [
+              {
+                id: 'test-1',
+                name: 'Test package',
+                namespace: 'default',
+                package: { name: 'test_package' },
+                policy_ids: ['test-id'],
+                inputs: {},
+              },
+            ],
+          },
+        ] as PreconfiguredAgentPolicy[],
+        [{ name: 'test_package', version: '3.0.0' }],
+        mockDefaultOutput,
+        mockDefaultDownloadService,
+        DEFAULT_SPACE_ID
+      );
+
+      expect(policies.length).toEqual(1);
+      expect(nonFatalErrors.length).toBe(0);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('blocked by agents'));
     });
 
     it('should install packages and configure agent policies successfully for deleted managed policies', async () => {

@@ -362,6 +362,24 @@ async function upgradePackagePolicies(
       installedPackage.version
     );
 
+    // Not an error: the upgrade is retried on the next Fleet setup, by which time the agents may
+    // have been upgraded.
+    const { agent_version_block: agentVersionBlock } = dryRunResults;
+    if (agentVersionBlock) {
+      appContextService
+        .getLogger()
+        .info(
+          `[UpgradeManagedPackagePoliciesTask] Skipping upgrade of package policy ${
+            packagePolicy.id
+          } to ${agentVersionBlock.package_name}@${agentVersionBlock.package_version}: ${
+            agentVersionBlock.blocked_count
+          } active agents on ${agentVersionBlock.observed_versions.join(
+            ', '
+          )} don't satisfy its agent version condition ${agentVersionBlock.version_condition}`
+        );
+      continue;
+    }
+
     if (dryRunResults.hasErrors) {
       const errors = dryRunResults.diff
         ? dryRunResults.diff?.[1].errors

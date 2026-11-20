@@ -1,0 +1,15 @@
+- version: "1.2.0"
+  changes:
+    - description: Require a patch-level agent version.
+      type: enhancement
+      link: https://github.com/elastic/kibana
+- version: "1.1.0"
+  changes:
+    - description: Add a package-level agent version condition.
+      type: enhancement
+      link: https://github.com/elastic/kibana
+- version: "1.0.0"
+  changes:
+    - description: Initial release, without an agent version condition.
+      type: enhancement
+      link: https://github.com/elastic/kibana

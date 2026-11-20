@@ -91,6 +91,8 @@ export interface PackagePolicyClient {
       overwrite?: boolean;
       packageInfo?: PackageInfo;
       createDatasetTemplates?: boolean;
+      /** Proceed even if some active agents don't satisfy the package's agent version condition. */
+      acknowledgeAgentVersionIncompatibility?: boolean;
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest
@@ -110,6 +112,8 @@ export interface PackagePolicyClient {
       bumpRevision?: boolean;
       force?: true;
       asyncDeploy?: boolean;
+      /** Proceed even if some active agents don't satisfy the package's agent version condition. */
+      acknowledgeAgentVersionIncompatibility?: boolean;
     },
     request?: KibanaRequest
   ): Promise<{
@@ -154,7 +158,13 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser; force?: boolean; batchSize?: number },
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      batchSize?: number;
+      /** Proceed even if some active agents don't satisfy a package's agent version condition. */
+      acknowledgeAgentVersionIncompatibility?: boolean;
+    },
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse>;
 
@@ -214,6 +224,8 @@ export interface PackagePolicyClient {
       force?: boolean;
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
+      /** Proceed even if some active agents don't satisfy the package's agent version condition. */
+      acknowledgeAgentVersionIncompatibility?: boolean;
     },
     /** Request context so update callbacks can use the caller's Elasticsearch client. */
     context?: RequestHandlerContext
@@ -414,6 +426,8 @@ export interface PackagePolicyClientBulkUpdateOptions {
   asyncDeploy?: boolean;
   fromBulkUpgrade?: boolean;
   oldPackagePolicies?: PackagePolicy[];
+  /** Proceed even if some active agents don't satisfy a package's agent version condition. */
+  acknowledgeAgentVersionIncompatibility?: boolean;
 }
 
 export type PackagePolicyClientFindAllForAgentPolicyOptions = WithSpaceIdsOption;

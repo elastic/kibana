@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { isValidNamespace, validateNoPathTraversalIdSchema } from '../../services';
 import {
+  ACKNOWLEDGE_AGENT_VERSION_INCOMPATIBILITY_DESCRIPTION,
   MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY,
   PACKAGE_POLICY_CONDITION_MAX_LENGTH,
   VALIDATE_DATASTREAMS_PERMISSION_REGEX,
@@ -535,6 +536,14 @@ export const CreatePackagePolicyRequestBodySchema = schema.object(
         },
       })
     ),
+    acknowledge_agent_version_incompatibility: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: ACKNOWLEDGE_AGENT_VERSION_INCOMPATIBILITY_DESCRIPTION,
+          availability: { since: '9.7.0', stability: 'stable' },
+        },
+      })
+    ),
     // supports_agentless is deprecated for package policy creation in favor of the managed integrations API
     supports_agentless: schema.maybe(
       schema.nullable(
@@ -780,6 +789,14 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
           },
         })
       ),
+      acknowledge_agent_version_incompatibility: schema.maybe(
+        schema.boolean({
+          meta: {
+            description: ACKNOWLEDGE_AGENT_VERSION_INCOMPATIBILITY_DESCRIPTION,
+            availability: { since: '9.7.0', stability: 'stable' },
+          },
+        })
+      ),
       package: PackagePolicyPackageSchema,
       // supports_agentless is deprecated for package policy creation in favor of the managed integrations API
       supports_agentless: schema.maybe(
@@ -828,6 +845,14 @@ export const UpdatePackagePolicyRequestBodySchema = schema.object(
     ),
     version: schema.maybe(schema.string()),
     force: schema.maybe(schema.boolean()),
+    acknowledge_agent_version_incompatibility: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: ACKNOWLEDGE_AGENT_VERSION_INCOMPATIBILITY_DESCRIPTION,
+          availability: { since: '9.7.0', stability: 'stable' },
+        },
+      })
+    ),
   },
   { meta: { id: 'update_package_policy_request' } }
 );
@@ -1069,7 +1094,23 @@ export const PackagePolicyStatusResponseSchema = schema.object(
     success: schema.boolean(),
     name: schema.maybe(schema.string()),
     statusCode: schema.maybe(schema.number()),
-    body: schema.maybe(schema.object({ message: schema.string() })),
+    body: schema.maybe(
+      schema.object({
+        message: schema.string(),
+        attributes: schema.maybe(
+          schema.object(
+            {},
+            {
+              unknowns: 'allow',
+              meta: {
+                description:
+                  'Details of the error. `type` is `agent_version_incompatible` when the package policy was not upgraded because some active agents do not satisfy the package agent version condition.',
+              },
+            }
+          )
+        ),
+      })
+    ),
   },
   { meta: { id: 'package_policy_status_response' } }
 );

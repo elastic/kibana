@@ -1224,6 +1224,60 @@ describe('When calling package policy', () => {
       expect(packagePolicyServiceMock.getByIDs).not.toHaveBeenCalled();
     });
 
+    describe('agent version incompatibility', () => {
+      const blockedItem = {
+        id: '2',
+        success: false,
+        statusCode: 400,
+        body: {
+          message: 'Cannot upgrade test to 1.0.0',
+          attributes: { type: 'agent_version_incompatible' },
+        },
+      };
+
+      it('passes the acknowledgement to the upgrade', async () => {
+        packagePolicyServiceMock.bulkUpgrade.mockResolvedValue(responseBody);
+        const request = httpServerMock.createKibanaRequest({
+          body: {
+            packagePolicyIds: ['1'],
+            acknowledge_breaking_changes: true,
+            acknowledge_agent_version_incompatibility: true,
+          },
+        });
+        await upgradePackagePolicyHandler(context, request, response);
+        expect(packagePolicyServiceMock.bulkUpgrade).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          ['1'],
+          expect.objectContaining({ acknowledgeAgentVersionIncompatibility: true })
+        );
+      });
+
+      it('returns the per-item results when only some package policies are upgraded', async () => {
+        const body = [...responseBody, blockedItem];
+        packagePolicyServiceMock.bulkUpgrade.mockResolvedValue(body);
+        const request = httpServerMock.createKibanaRequest({
+          body: { packagePolicyIds: ['1', '2'], acknowledge_breaking_changes: true },
+        });
+        await upgradePackagePolicyHandler(context, request, response);
+        expect(response.ok).toHaveBeenCalledWith({ body });
+        expect(response.customError).not.toHaveBeenCalled();
+        expect(UpgradePackagePoliciesResponseBodySchema.validate(body)).toEqual(body);
+      });
+
+      it('returns the first error when no package policy is upgraded', async () => {
+        packagePolicyServiceMock.bulkUpgrade.mockResolvedValue([blockedItem]);
+        const request = httpServerMock.createKibanaRequest({
+          body: { packagePolicyIds: ['2'], acknowledge_breaking_changes: true },
+        });
+        await upgradePackagePolicyHandler(context, request, response);
+        expect(response.customError).toHaveBeenCalledWith({
+          statusCode: 400,
+          body: { message: 'Cannot upgrade test to 1.0.0' },
+        });
+      });
+    });
+
     describe('breaking changes', () => {
       const packagePolicies = [
         { id: '1', policy_ids: [], package: { name: 'test', version: '1.0.0' } },
@@ -1431,6 +1485,22 @@ describe('When calling package policy', () => {
       });
       const validationResp = DryRunPackagePoliciesResponseBodySchema.validate(responseBody);
       expect(validationResp).toEqual(responseBody);
+    });
+
+    it('should compute the diff against the requested package version', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1'],
+          packageVersion: '2.3.0',
+        },
+      });
+      await dryRunUpgradePackagePolicyHandler(context, request, response);
+      expect(packagePolicyServiceMock.getUpgradeDryRunDiff).toHaveBeenCalledWith(
+        expect.anything(),
+        '1',
+        undefined,
+        '2.3.0'
+      );
     });
 
     it('should deduplicate ids', async () => {

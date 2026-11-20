@@ -23,6 +23,7 @@ import { agentPolicyService } from '../agent_policy';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 
+import { getAgentVersionBlocks } from './agent_version_guard';
 import {
   _getUpgradePackagePolicyInfo,
   _packagePoliciesBulkUpgrade,
@@ -33,6 +34,11 @@ import {
 jest.mock('../spaces/helpers');
 
 jest.mock('../license');
+
+jest.mock('./agent_version_guard', () => ({
+  ...jest.requireActual('./agent_version_guard'),
+  getAgentVersionBlocks: jest.fn().mockResolvedValue(new Map()),
+}));
 
 async function mockedGetInstallation(params: any) {
   let pkg;
@@ -305,6 +311,47 @@ describe('Upgrade', () => {
       });
 
       expect(res.hasErrors).toBeFalsy();
+      expect(res.agent_version_block).toBeUndefined();
+    });
+
+    it('should report the agents blocking the upgrade without an error', async () => {
+      const agentVersionBlock = {
+        package_name: 'test',
+        package_version: '1.0.2',
+        version_condition: '^9.4.0',
+        blocked_count: 2,
+        observed_versions: ['9.3.1'],
+        min_version: '9.4.0',
+      };
+      jest
+        .mocked(getAgentVersionBlocks)
+        .mockResolvedValueOnce(new Map([['package-policy-id', agentVersionBlock]]));
+
+      const res = await _packagePoliciesGetUpgradeDryRunDiff({
+        id: 'package-policy-id',
+        soClient: savedObjectsClient,
+        packagePolicyService,
+        packagePolicy: {
+          id: '123',
+          name: 'test-123',
+          package: { title: 'test', name: 'test', version: '1.0.1' },
+          namespace: 'default',
+          policy_ids: ['agent-policy-1'],
+          inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
+        } as any,
+        pkgVersion: '1.0.2',
+      });
+
+      expect(res.hasErrors).toBeFalsy();
+      expect(res.statusCode).toBeUndefined();
+      expect(res.agent_version_block).toEqual(agentVersionBlock);
+      expect(getAgentVersionBlocks).toHaveBeenCalledWith([
+        expect.objectContaining({
+          key: 'package-policy-id',
+          pkgInfo: expect.objectContaining({ version: '1.0.2' }),
+          agentPolicyIds: ['agent-policy-1'],
+        }),
+      ]);
     });
 
     it('should return errors if there is a conflict to upgrade', async () => {
