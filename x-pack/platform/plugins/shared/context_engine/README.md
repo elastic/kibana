@@ -426,10 +426,14 @@ and the route audits the attempt as a failure. On `_forget`, when `user_id` does
 memory's owner, the route returns `not_found`.
 
 `_remember` writes one `memory_remember` audit event per request, when the background write
-finishes or when the route rejects the request. `_forget` writes one `memory_forget` audit
-event per unique id. Both events record the authenticated actor in `user.*`, the memory's
-owner in `user.target.id`, and the memory in `kibana.saved_object`. The routes record rejected
-requests, background write errors, `not_found`, `failed`, and Elasticsearch errors as failures.
+finishes or when the route rejects the request. Because `_remember` does not check whether a
+supplied `id` exists, a request with an unknown `id` creates a memory while auditing with
+`event.type` set to `change`. `_forget` writes one `memory_forget` audit event per unique id.
+Both events record the authenticated actor in `user.*`, the memory's owner in `user.target.id`,
+and the memory in `kibana.saved_object`. Because memories are scoped by space and user and the
+caller can choose `id`, two users can share the same id; combine the space, `user.target.id`,
+and `kibana.saved_object.id` to identify a single memory. The routes record rejected requests,
+background write errors, `not_found`, `failed`, and Elasticsearch errors as failures.
 
 ## Improvements
 
