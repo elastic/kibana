@@ -235,7 +235,7 @@ describe('SearchMethodsService', () => {
         });
       });
 
-      it('logs the project routing of the request, so that it can be run again as it was', async () => {
+      it('logs the project routing under the name Elasticsearch uses, so the body still runs in Console', async () => {
         mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
         const requestResponder = createMockRequestResponder();
         const inspector = createMockInspector(requestResponder);
@@ -243,7 +243,10 @@ describe('SearchMethodsService', () => {
         await service.esql({ query: 'FROM logs', projectRouting: 'test-project' }, { inspector });
 
         expect(requestResponder.json).toHaveBeenCalledWith(
-          expect.objectContaining({ projectRouting: 'test-project' })
+          expect.objectContaining({ project_routing: 'test-project' })
+        );
+        expect(requestResponder.json).toHaveBeenCalledWith(
+          expect.not.objectContaining({ projectRouting: expect.anything() })
         );
       });
 

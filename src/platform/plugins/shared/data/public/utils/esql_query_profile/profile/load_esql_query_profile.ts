@@ -51,8 +51,8 @@ export async function loadEsqlQueryProfile({
       ...(typeof requestJson.approximation === 'boolean'
         ? { approximation: requestJson.approximation }
         : {}),
-      ...(typeof requestJson.projectRouting === 'string'
-        ? { projectRouting: requestJson.projectRouting }
+      ...(typeof requestJson.project_routing === 'string'
+        ? { projectRouting: requestJson.project_routing }
         : {}),
     },
     { abortSignal }

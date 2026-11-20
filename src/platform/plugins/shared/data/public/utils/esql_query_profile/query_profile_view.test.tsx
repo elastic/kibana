@@ -141,7 +141,7 @@ describe('QueryProfileView', () => {
         time_zone: 'UTC',
         filter: { match_all: {} },
         approximation: true,
-        projectRouting: 'my-project',
+        project_routing: 'my-project',
       },
       { queryTime: { label: 'Query time', value: '15ms' } }
     );
