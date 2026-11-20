@@ -298,4 +298,57 @@ describe('convertAglioReference', () => {
     });
     expect((twice.paths as Record<string, any>)['/a'].get.operationId).toBe('first');
   });
+
+  it('fails on a page with no operations instead of loading an empty API', () => {
+    expect(() =>
+      convertAglioReference({
+        format: 'threatq-html',
+        html: '<html><body><h1>Documentation moved</h1></body></html>',
+      })
+    ).toThrow('No operations found');
+  });
+
+  describe('inferred schemas', () => {
+    const responseSchema = (body: string) => {
+      const { paths: inferred } = convertAglioReference({
+        format: 'threatq-html',
+        html: action(
+          'list',
+          'GET',
+          '/a',
+          'List',
+          '',
+          block('Response&nbsp;&nbsp;200', 'Content-Type: application/json', body)
+        ),
+      });
+      return (inferred as Record<string, any>)['/a'].get.responses['200'].content[
+        'application/json'
+      ].schema;
+    };
+
+    it('keeps the item type of an array that is empty in another record', () => {
+      const { properties } = responseSchema('{ "data": [ { "tags": [] }, { "tags": ["x"] } ] }')
+        .properties.data.items;
+      expect(properties.tags).toEqual({ type: 'array', items: { type: 'string' } });
+      expect(
+        responseSchema('{ "data": [ { "tags": ["x"] }, { "tags": [] } ] }').properties.data.items
+          .properties.tags
+      ).toEqual({ type: 'array', items: { type: 'string' } });
+    });
+
+    it('gives an array that no example fills any item', () => {
+      expect(responseSchema('{ "tags": [] }').properties.tags).toEqual({
+        type: 'array',
+        items: {},
+      });
+    });
+
+    it('merges only the properties a record has itself, not inherited names', () => {
+      const { properties } = responseSchema(
+        '{ "data": [ { "id": 1 }, { "constructor": 1, "toString": "x" } ] }'
+      ).properties.data.items;
+      expect(properties.constructor).toEqual({ type: 'integer' });
+      expect(properties.toString).toEqual({ type: 'string' });
+    });
+  });
 });

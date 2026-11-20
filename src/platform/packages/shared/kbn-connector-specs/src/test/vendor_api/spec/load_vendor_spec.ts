@@ -43,6 +43,13 @@ const apiVersionOf = ({ info }: OpenApiDocument): { apiVersion?: string } => {
   return typeof version === 'string' ? { apiVersion: version } : {};
 };
 
+/** The version in the page's file name (`…_v6.16.0.html`), not elsewhere in its URL. */
+const aglioVersionOf = (url: string): string | undefined => {
+  const { pathname } = new URL(url);
+  const fileName = pathname.slice(pathname.lastIndexOf('/') + 1);
+  return /[_-]v(\d+(?:\.\d+)+)/.exec(fileName)?.[1];
+};
+
 /**
  * Fetches a vendor spec and turns it into one OpenAPI 3.x document: Google Discovery, Smithy,
  * Swagger 2.0 and Markdown references are converted, external `$ref`s are bundled.
@@ -60,7 +67,7 @@ export const loadVendorSpec = async (
   }
   if (isAglioFormat(declaredFormat)) {
     // The page states no version of its own; vendors put it in the file's name (`…_v6.16.0.html`).
-    const apiVersion = /[_/-]v(\d+(?:\.\d+)+)/.exec(url)?.[1];
+    const apiVersion = aglioVersionOf(url);
     return {
       format: declaredFormat,
       ...(apiVersion ? { apiVersion } : {}),

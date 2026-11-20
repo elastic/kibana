@@ -75,8 +75,6 @@ const NULL_SCHEMA: JsonSchema = { nullable: true };
 const isNullSchema = (schema: JsonSchema): boolean =>
   schema.type === undefined && schema.nullable === true && Object.keys(schema).length === 1;
 
-const itemsOf = ({ items }: JsonSchema): JsonSchema => (isRecord(items) ? items : {});
-
 const mergeSchemas = (a: JsonSchema, b: JsonSchema): JsonSchema => {
   if (isNullSchema(a)) {
     return isNullSchema(b) ? a : { ...b, nullable: true };
@@ -90,12 +88,19 @@ const mergeSchemas = (a: JsonSchema, b: JsonSchema): JsonSchema => {
     const right = (b.properties ?? {}) as Record<string, JsonSchema>;
     const properties: Record<string, JsonSchema> = { ...left };
     for (const [name, schema] of Object.entries(right)) {
-      properties[name] = name in left ? mergeSchemas(left[name], schema) : schema;
+      properties[name] = Object.hasOwn(left, name) ? mergeSchemas(left[name], schema) : schema;
     }
     return { type: 'object', properties, ...nullable };
   }
   if (a.type === 'array' && b.type === 'array') {
-    return { type: 'array', items: mergeSchemas(itemsOf(a), itemsOf(b)), ...nullable };
+    // An array without `items` is an empty one, which says nothing about what the items are.
+    const items =
+      a.items === undefined
+        ? b.items
+        : b.items === undefined
+        ? a.items
+        : mergeSchemas(a.items as JsonSchema, b.items as JsonSchema);
+    return { type: 'array', ...(items === undefined ? {} : { items }), ...nullable };
   }
   if (a.type !== undefined && a.type === b.type) {
     return { ...a, ...nullable };
@@ -110,20 +115,20 @@ const mergeSchemas = (a: JsonSchema, b: JsonSchema): JsonSchema => {
 };
 
 /**
- * The schema an example body implies: its types and properties, none of them required, as a page
- * that shows only one example can't say which are. A `null` says only that the value can be
- * absent, and an empty array nothing of what it holds, so neither limits what else can be there.
+ * What an example value shows of its schema. A `null` says only that the value can be absent, and
+ * an empty array, left without `items`, nothing of what it holds, so neither limits what else can
+ * be there when examples are merged.
  */
-const inferSchema = (value: unknown): JsonSchema => {
+const observeSchema = (value: unknown): JsonSchema => {
   if (Array.isArray(value)) {
-    const [first, ...rest] = value.map(inferSchema);
-    return { type: 'array', items: first ? rest.reduce(mergeSchemas, first) : {} };
+    const [first, ...rest] = value.map(observeSchema);
+    return { type: 'array', ...(first ? { items: rest.reduce(mergeSchemas, first) } : {}) };
   }
   if (isRecord(value)) {
     return {
       type: 'object',
       properties: Object.fromEntries(
-        Object.entries(value).map(([name, property]) => [name, inferSchema(property)])
+        Object.entries(value).map(([name, property]) => [name, observeSchema(property)])
       ),
     };
   }
@@ -138,6 +143,31 @@ const inferSchema = (value: unknown): JsonSchema => {
       return value === null ? NULL_SCHEMA : {};
   }
 };
+
+// OpenAPI 3.0 wants `items` on every array, so one that no example filled gets any item.
+const withItems = (schema: JsonSchema): JsonSchema => {
+  if (schema.type === 'array') {
+    return { ...schema, items: isRecord(schema.items) ? withItems(schema.items) : {} };
+  }
+  if (schema.type === 'object' && isRecord(schema.properties)) {
+    return {
+      ...schema,
+      properties: Object.fromEntries(
+        Object.entries(schema.properties).map(([name, property]) => [
+          name,
+          withItems(property as JsonSchema),
+        ])
+      ),
+    };
+  }
+  return schema;
+};
+
+/**
+ * The schema an example body implies: its types and properties, none of them required, as a page
+ * that shows only one example can't say which are.
+ */
+const inferSchema = (value: unknown): JsonSchema => withItems(observeSchema(value));
 
 const parameterTypeOf = (type: string): 'integer' | 'number' | 'boolean' | 'string' => {
   if (/^integer/i.test(type)) return 'integer';
@@ -310,7 +340,7 @@ const toOperation = ($: CheerioAPI, element: AnyNode, path: string, queryNames: 
  * method, a URI template, its "URI Parameters" with their types, and the example bodies and
  * statuses of its requests and responses. The page lists no schemas, so request and response
  * schemas are inferred from the examples: their types and properties, none of them required.
- * Actions that share a method and path keep the first one.
+ * Actions that share a method and path keep the first one. A page with no actions is an error.
  */
 export const convertAglioReference = ({
   format,
@@ -342,6 +372,12 @@ export const convertAglioReference = ({
         paths[path] = { ...item, [method]: toOperation($, element, path, queryNames) };
       }
     });
+
+  // A landing page served with a 200, or a renderer change that breaks the selectors above, would
+  // otherwise load as an API with no endpoints, and drift would report them all missing.
+  if (Object.keys(paths).length === 0) {
+    throw new Error('No operations found in the Aglio API reference; is the URL its page?');
+  }
 
   return {
     openapi: '3.0.3',
