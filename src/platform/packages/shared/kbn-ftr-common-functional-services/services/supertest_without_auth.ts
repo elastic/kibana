@@ -21,11 +21,16 @@ import type { FtrProviderContext } from './ftr_provider_context';
  */
 export function SupertestWithoutAuthProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
+  const log = getService('log');
   const kbnUrl = formatUrl({
     ...config.get('servers.kibana'),
     auth: false,
   });
 
   const maxRetryMs = config.get('timeouts.try') as number;
-  return wrapKibanaSupertestAgent(supertest(kbnUrl), { maxRetryMs });
+  return wrapKibanaSupertestAgent(supertest(kbnUrl), {
+    maxRetryMs,
+    onRetry: ({ method, url, attempt, delayMs }) =>
+      log.warning(`ELU rate limiter 429, retry #${attempt} in ${delayMs}ms: ${method} ${url}`),
+  });
 }

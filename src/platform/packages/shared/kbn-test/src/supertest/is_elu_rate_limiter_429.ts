@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/** The limiter sends `RateLimit: "elu";r=0;t=<seconds>`; match the policy name, not a substring. */
+const ELU_POLICY = /^\s*"?elu"?\s*(?:;|,|$)/i;
+
 export interface EluRateLimitResponseLike {
   status?: number;
   headers?: Record<string, unknown>;
@@ -31,7 +34,7 @@ export const isEluRateLimiter429 = (response: EluRateLimitResponseLike | undefin
   }
 
   const rateLimitHeader = getHeader(response.headers, 'RateLimit');
-  return typeof rateLimitHeader === 'string' && rateLimitHeader.includes('elu');
+  return typeof rateLimitHeader === 'string' && ELU_POLICY.test(rateLimitHeader);
 };
 
 export const getEluRateLimiterRetryDelayMs = (response: EluRateLimitResponseLike | undefined) => {

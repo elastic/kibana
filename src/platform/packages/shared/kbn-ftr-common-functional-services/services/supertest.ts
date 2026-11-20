@@ -17,6 +17,7 @@ import type { FtrProviderContext } from './ftr_provider_context';
 
 export function KibanaSupertestProvider({ getService }: FtrProviderContext): supertest.Agent {
   const config = getService('config');
+  const log = getService('log');
   const kibanaServerConfig = config.get('servers.kibana');
   const kibanaServerUrl = formatUrl(kibanaServerConfig);
 
@@ -33,7 +34,11 @@ export function KibanaSupertestProvider({ getService }: FtrProviderContext): sup
   }
 
   const maxRetryMs = config.get('timeouts.try') as number;
-  return wrapKibanaSupertestAgent(supertest(kibanaServerUrl, options), { maxRetryMs });
+  return wrapKibanaSupertestAgent(supertest(kibanaServerUrl, options), {
+    maxRetryMs,
+    onRetry: ({ method, url, attempt, delayMs }) =>
+      log.warning(`ELU rate limiter 429, retry #${attempt} in ${delayMs}ms: ${method} ${url}`),
+  });
 }
 
 export function ElasticsearchSupertestProvider({

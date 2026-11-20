@@ -16,6 +16,7 @@ import {
 export { isEluRateLimiter429, getEluRateLimiterRetryDelayMs } from './is_elu_rate_limiter_429';
 export {
   wrapKibanaSupertestAgent,
+  type EluRetryInfo,
   type KibanaSupertestAgent,
   type WrapKibanaSupertestAgentOptions,
 } from './wrap_kibana_supertest_agent';
