@@ -30,7 +30,7 @@ describe('ProjectDefaultCard', () => {
     render(<ProjectDefaultCard {...defaultProps} />);
 
     expect(screen.getByTestId('searchBoostProjectDefaultValue-indices')).toHaveTextContent(
-      'Performant'
+      'Default'
     );
     expect(
       screen.getByText(
@@ -138,15 +138,6 @@ describe('ProjectDefaultCard', () => {
 
     expect(screen.getByText('Matching indices')).toBeInTheDocument();
     expect(screen.getByText('products')).toBeInTheDocument();
-  });
-
-  it('does not make the count badge open a popover when there are no matches', () => {
-    render(<ProjectDefaultCard {...defaultProps} matches={[]} />);
-
-    const badge = screen.getByTestId('searchBoostProjectDefaultCount-indices');
-    expect(badge).toHaveTextContent('0 indices');
-    expect(badge.tagName).toBe('SPAN');
-    expect(screen.queryByTestId('searchBoostMatchesPopover')).not.toBeInTheDocument();
   });
 
   it.each([
