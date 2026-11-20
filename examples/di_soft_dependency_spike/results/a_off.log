@@ -1,0 +1,10 @@
+scenario=a_off status=available
+setup order: spikeRtB spikeRegB spikeOptB 
+plugins-service] The following plugins are disabled: "spikeOptA,spikeRegA,spikeRtA,cloudChat,cloudExperiments,cloudFullStory,dataUsage,pageRenderScreenshotting,searchBoost,evals,inbox,notificationCenter,sandbox,serverless,usageApi,entityInventory,entityInventoryApp,nightshiftDetection,profiling,profilingDataAccess,serverlessObservability,serverlessSearch,securitySolutionServerless,serverlessVectordb".
+plugins.spikeRtB.spike] spikeRtB at setup sees {"fromA":"pending"}
+plugins.spikeRegB.spike] spikeRegB at setup sees {"visibleContributions":[],"registry":[]}
+plugins.spikeOptB.spike] spikeOptB at setup sees {"lookup":"absent","singletonInjected":"absent"}
+plugins.spikeRtB.spike] spikeRtB at start sees {"fromA":"pending"}
+plugins.spikeRegB.spike] spikeRegB at start sees {"visibleContributions":[],"registry":[]}
+plugins.spikeOptB.spike] spikeOptB at start sees {"lookup":"absent","singletonInjected":"absent"}
+plugins.spikeOptB.spike] spikeOptB deferred probe (started at setup) resolved "absent"

@@ -1,0 +1,14 @@
+scenario=control status=failed
+
+root] Reason: Topological ordering of plugins did not complete due to circular dependencies:
+Detected circular dependencies:
+  spikeClassicA -> spikeClassicB -> spikeClassicA
+Plugins with cyclic or missing dependencies: ["spikeClassicA","spikeClassicB"]
+Error: Topological ordering of plugins did not complete due to circular dependencies:
+Detected circular dependencies:
+  spikeClassicA -> spikeClassicB -> spikeClassicA
+Plugins with cyclic or missing dependencies: ["spikeClassicA","spikeClassicB"]
+ FATAL  Error: Topological ordering of plugins did not complete due to circular dependencies:
+Detected circular dependencies:
+  spikeClassicA -> spikeClassicB -> spikeClassicA
+Plugins with cyclic or missing dependencies: ["spikeClassicA","spikeClassicB"]

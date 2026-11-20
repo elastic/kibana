@@ -1,0 +1,16 @@
+scenario=both status=available
+setup order: spikeRtB spikeRtA spikeRegB spikeRegA spikeOptB spikeOptA 
+plugins.spikeRtB.spike] spikeRtB at setup sees {"fromA":"pending"}
+plugins.spikeRtA.spike] spikeRtA at setup sees {"fromB":"pending"}
+plugins.spikeRegB.spike] spikeRegB at setup sees {"visibleContributions":[],"registry":[]}
+plugins.spikeRegA.spike] spikeRegA at setup sees {"visibleContributions":["widget contributed by spikeRegB"],"registry":[]}
+plugins.spikeOptB.spike] spikeOptB at setup sees {"lookup":"absent","singletonInjected":"absent"}
+plugins.spikeOptA.spike] spikeOptA at setup sees {"lookup":"hello from spikeOptB","singletonInjected":"hello from spikeOptB"}
+plugins.spikeRtB.spike] spikeRtB at start sees {"fromA":"pending"}
+plugins.spikeRtA.spike] spikeRtA at start sees {"fromB":"pending"}
+plugins.spikeRegB.spike] spikeRegB at start sees {"visibleContributions":["widget contributed by spikeRegA"],"registry":["widget contributed by spikeRegA"]}
+plugins.spikeRegA.spike] spikeRegA at start sees {"visibleContributions":["widget contributed by spikeRegB"],"registry":["widget contributed by spikeRegB"]}
+plugins.spikeOptB.spike] spikeOptB at start sees {"lookup":"hello from spikeOptA","singletonInjected":"absent"}
+plugins.spikeOptA.spike] spikeOptA at start sees {"lookup":"hello from spikeOptB","singletonInjected":"hello from spikeOptB"}
+plugins.spikeOptB.spike] spikeOptB deferred probe (started at setup) resolved "hello from spikeOptA"
+plugins.spikeOptA.spike] spikeOptA deferred probe (started at setup) resolved "hello from spikeOptB"
