@@ -24,6 +24,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import { createReceiveOnlyConnectorValidator } from '../../receive_only_connector_validator';
 import {
   SearchInputSchema,
   GetRecordInputSchema,
@@ -94,6 +95,8 @@ export const ServicenowSearch: ConnectorSpec = {
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
+
+  validateConnector: createReceiveOnlyConnectorValidator('ServiceNow'),
 
   auth: {
     types: [

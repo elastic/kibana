@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import { createReceiveOnlyConnectorValidator } from '../../receive_only_connector_validator';
 import { MICROSOFT_TEAMS_CONNECTOR_TYPE_ID } from './constants';
 import { microsoftTeamsEvents } from './events';
 import {
@@ -65,6 +66,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
+
+  validateConnector: createReceiveOnlyConnectorValidator('Microsoft Teams'),
 
   auth: {
     types: [
