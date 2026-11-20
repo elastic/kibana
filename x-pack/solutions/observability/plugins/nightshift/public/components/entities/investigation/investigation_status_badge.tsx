@@ -332,9 +332,11 @@ export function AiGradientBadge({
         `;
 
   // Own span (not `.euiBadge__text`): EuiBadge skips that wrapper for numeric `0`.
+  // Drop AI-button label padding — EuiBadge already pads; the extra xs made counts too wide.
   // Forced-colors: gradients drop out — fall back to CanvasText so the count stays visible.
   const labelSpanCss = css`
     ${labelCss}
+    padding: 0;
 
     @media (forced-colors: active) {
       background: none !important;
