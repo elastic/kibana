@@ -707,6 +707,8 @@ describe('Workload Statistics Aggregator', () => {
   });
 
   test('recovery after errors occurrs at the next interval', async () => {
+    jest.useFakeTimers();
+
     const refreshInterval = 1000;
 
     const taskStore = taskStoreMock.create({});
@@ -719,24 +721,30 @@ describe('Workload Statistics Aggregator', () => {
       taskDefinitions: definitions,
     });
 
-    return new Promise<void>((resolve, reject) => {
-      let errorWasThrowAt = 0;
-      taskStore.aggregate.mockImplementation(async () => {
-        if (errorWasThrowAt === 0) {
-          errorWasThrowAt = Date.now();
-          throw new Error(`Elasticsearch has gone poof`);
-        } else if (Date.now() - errorWasThrowAt < refreshInterval) {
-          reject(new Error(`Elasticsearch is still poof`));
-        }
+    try {
+      const recovered = new Promise<void>((resolve, reject) => {
+        let errorWasThrowAt = 0;
+        taskStore.aggregate.mockImplementation(async () => {
+          if (errorWasThrowAt === 0) {
+            errorWasThrowAt = Date.now();
+            throw new Error(`Elasticsearch has gone poof`);
+          } else if (Date.now() - errorWasThrowAt < refreshInterval) {
+            reject(new Error(`Elasticsearch is still poof`));
+          }
 
-        return setTaskTypeCount(await mockAggregatedResult(), 'foo', { idle: 2 });
+          return setTaskTypeCount(await mockAggregatedResult(), 'foo', { idle: 2 });
+        });
+
+        workloadAggregator.pipe(take(2), bufferCount(2)).subscribe((results) => {
+          expect(results.length).toEqual(2);
+          resolve();
+        }, reject);
       });
 
-      workloadAggregator.pipe(take(2), bufferCount(2)).subscribe((results) => {
-        expect(results.length).toEqual(2);
-        resolve();
-      }, reject);
-    });
+      await Promise.all([recovered, jest.advanceTimersByTimeAsync(refreshInterval * 3)]);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
 
