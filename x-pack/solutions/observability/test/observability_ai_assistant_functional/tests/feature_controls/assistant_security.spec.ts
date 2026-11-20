@@ -14,14 +14,14 @@ import { createAndLoginUserWithCustomRole, deleteAndLogoutUser } from './helpers
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
+  const retry = getService('retry');
   const supertest = getService('supertest');
   const PageObjects = getPageObjects(['common', 'error', 'navigationalSearch', 'security']);
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
   const obsAssistantConversationsGlobalSearchEntry = 'Observability AI Assistant / Conversations';
 
-  // Failing: See https://github.com/elastic/kibana/issues/287866
-  describe.skip('ai assistant privileges', () => {
+  describe('ai assistant privileges', () => {
     describe('all privileges', () => {
       before(async () => {
         await createAndLoginUserWithCustomRole(getPageObjects, getService, {
@@ -85,10 +85,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
             shouldUseHashForSubUrl: false,
           });
-          const chatInputElement = await testSubjects.find(ui.pages.conversations.chatInput);
           await testSubjects.existOrFail(ui.pages.conversations.chatInput);
-          const isDisabled = await chatInputElement.getAttribute('disabled');
-          expect(isDisabled).to.be(null);
+          await retry.waitFor('chat input to become enabled', async () =>
+            testSubjects.isEnabled(ui.pages.conversations.chatInput)
+          );
         });
       });
     });
