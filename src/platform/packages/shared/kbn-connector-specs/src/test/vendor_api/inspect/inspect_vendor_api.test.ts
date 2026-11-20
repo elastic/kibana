@@ -396,7 +396,7 @@ actions:
     expect(warnings).toEqual([]);
     expect(output).toContain('/things');
     expect(problems).toEqual([
-      `v1 is captured from ${SPEC_URL} in manifest.json. To capture it again from ${SWAGGER_URL}, delete its snapshot and record with --source v1=${SWAGGER_URL}. If ${SWAGGER_URL} is public, remove "captured" from v1 in manifest.json first, or drift checks will skip it`,
+      `v1 is captured from ${SPEC_URL} in manifest.json. To capture it again from ${SWAGGER_URL}, delete its snapshot and record with --source v1=${SWAGGER_URL}. If ${SWAGGER_URL} is public, remove "captured" from v1 in manifest.json first, or drift checks will skip it. If it is another kind of document, also set "format" there and remove "pages", which recording would apply to it`,
     ]);
   });
 

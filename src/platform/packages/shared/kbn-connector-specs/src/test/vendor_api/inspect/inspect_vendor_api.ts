@@ -142,7 +142,7 @@ export const inspectVendorApi = async ({
     if (known && known.url !== url) {
       problems.push(
         known.captured
-          ? `${name} is captured from ${known.url} in ${MANIFEST}. To capture it again from ${url}, delete its snapshot and record with --source ${name}=${url}. If ${url} is public, remove "captured" from ${name} in ${MANIFEST} first, or drift checks will skip it`
+          ? `${name} is captured from ${known.url} in ${MANIFEST}. To capture it again from ${url}, delete its snapshot and record with --source ${name}=${url}. If ${url} is public, remove "captured" from ${name} in ${MANIFEST} first, or drift checks will skip it. If it is another kind of document, also set "format" there and remove "pages", which recording would apply to it`
           : `${name} is ${known.url} in ${MANIFEST}; to move it, record with --source ${name}=${url}`
       );
     } else if (directory && !known) {
