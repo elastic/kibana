@@ -35,6 +35,16 @@ describe('canManageSessionsInAllSpaces', () => {
     }
   );
 
+  it('denies it without checking when the route found it missing in this space', async () => {
+    const { authz, globally } = authzWith({ rbac: true, hasAllRequested: true });
+    const spaceRequest = Object.assign(httpServerMock.createKibanaRequest(), {
+      authzResult: { manage_digital_experience_sessions: false },
+    });
+
+    expect(await canManageSessionsInAllSpaces(authz, spaceRequest)).toBe(false);
+    expect(globally).not.toHaveBeenCalled();
+  });
+
   it('allows it without RBAC, as the routes check no Kibana privileges then', async () => {
     const { authz, globally } = authzWith({ rbac: false, hasAllRequested: false });
 

@@ -125,18 +125,13 @@ apiTest.describe('Enabling Digital Experience sessions', { tag: DIGITAL_EXPERIEN
   apiTest(
     'turns sessions off, and only a manager in all spaces turns them back on',
     async ({ apiClient, samlAuth }) => {
-      const adminHeaders = {
+      // Scout has one custom role per worker, which each custom login overwrites, so a custom
+      // user logs in right before their requests.
+      const headersAs = async (role: 'admin' | KibanaRole) => ({
         ...COMMON_HEADERS,
-        ...(await samlAuth.asInteractiveUser('admin')).cookieHeader,
-      };
-      const readerHeaders = {
-        ...COMMON_HEADERS,
-        ...(await samlAuth.asInteractiveUser(READER_ROLE)).cookieHeader,
-      };
-      const spaceManagerHeaders = {
-        ...COMMON_HEADERS,
-        ...(await samlAuth.asInteractiveUser(SPACE_MANAGER_ROLE)).cookieHeader,
-      };
+        ...(await samlAuth.asInteractiveUser(role)).cookieHeader,
+      });
+      const adminHeaders = await headersAs('admin');
       const post = (path: string, headers: Record<string, string>) =>
         apiClient.post(path, { headers, responseType: 'json' });
 
@@ -145,17 +140,28 @@ apiTest.describe('Enabling Digital Experience sessions', { tag: DIGITAL_EXPERIEN
       });
 
       await apiTest.step('sets sessions up', async () => {
-        expect(await post(SESSIONS_ENABLE_PATH, adminHeaders)).toHaveStatusCode(200);
+        const response = await post(SESSIONS_ENABLE_PATH, adminHeaders);
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toMatchObject({ canManage: true });
       });
 
       await apiTest.step('refuses a user who manages sessions in one space only', async () => {
+        const spaceManagerHeaders = await headersAs(SPACE_MANAGER_ROLE);
+        const status = await apiClient.get(SESSIONS_STATUS_PATH, {
+          headers: spaceManagerHeaders,
+          responseType: 'json',
+        });
+        expect(status.body).toMatchObject({ canManage: false, enabledBy: null });
+
         const response = await post(SESSIONS_DISABLE_PATH, spaceManagerHeaders);
         expect(response).toHaveStatusCode(403);
         expect(response.body.message).toContain('in all spaces');
       });
 
       await apiTest.step('refuses a reader', async () => {
-        expect(await post(SESSIONS_DISABLE_PATH, readerHeaders)).toHaveStatusCode(403);
+        expect(await post(SESSIONS_DISABLE_PATH, await headersAs(READER_ROLE))).toHaveStatusCode(
+          403
+        );
       });
 
       await apiTest.step('turns sessions off for a manager in all spaces', async () => {
@@ -169,6 +175,7 @@ apiTest.describe('Enabling Digital Experience sessions', { tag: DIGITAL_EXPERIEN
       });
 
       await apiTest.step('never sets turned-off sessions up again by itself', async () => {
+        const readerHeaders = await headersAs(READER_ROLE);
         const status = await apiClient.get(SESSIONS_STATUS_PATH, {
           headers: readerHeaders,
           responseType: 'json',

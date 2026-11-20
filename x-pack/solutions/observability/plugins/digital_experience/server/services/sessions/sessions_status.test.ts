@@ -57,6 +57,7 @@ const MISSING: SessionsStatus = {
   enabledBy: null,
   retentionDays: SESSIONS_LOOKBACK_DAYS,
   autoEnable: false,
+  canManage: false,
 };
 
 describe('getSessionsStatus', () => {
@@ -70,13 +71,13 @@ describe('getSessionsStatus', () => {
   /** The status as a user who can set sessions up reads it, with the details. */
   const statusOf = (
     state: SessionsTaskState,
-    { frequency, withDetails = true }: { frequency?: string; withDetails?: boolean } = {}
+    { frequency, canManage = true }: { frequency?: string; canManage?: boolean } = {}
   ) => {
     mockTask(state);
     return getSessionsStatus({
       taskManager,
       settings: { ...settings, ...(frequency ? { frequency } : {}) },
-      withDetails,
+      canManage,
       now: NOW,
     });
   };
@@ -101,6 +102,12 @@ describe('getSessionsStatus', () => {
       expect(taskManager.get).toHaveBeenCalledWith(SESSIONS_TASK_ID);
     });
 
+    it('tells a manager they manage sessions before they are set up', async () => {
+      expect(
+        await getSessionsStatus({ taskManager: undefined, settings, canManage: true, now: NOW })
+      ).toEqual({ ...MISSING, canManage: true });
+    });
+
     it('rethrows other errors reading the task', async () => {
       taskManager.get.mockRejectedValue(new Error('no shards available'));
 
@@ -121,20 +128,19 @@ describe('getSessionsStatus', () => {
       { enabled: false }
     );
 
-    expect(await getSessionsStatus({ taskManager, settings, withDetails: true, now: NOW })).toEqual(
-      {
-        ...MISSING,
-        installed: true,
-        disabled: true,
-        health: 'disabled',
-        installedVersion: SESSIONS_VERSION,
-        lagSeconds: 90,
-        summarizedUntil: healthyState.checkpoint,
-        lastRunAt: healthyState.lastRunAt,
-        lastSuccessAt: healthyState.lastSuccessAt,
-        enabledBy: 'ana',
-      }
-    );
+    expect(await getSessionsStatus({ taskManager, settings, canManage: true, now: NOW })).toEqual({
+      ...MISSING,
+      installed: true,
+      disabled: true,
+      health: 'disabled',
+      installedVersion: SESSIONS_VERSION,
+      lagSeconds: 90,
+      summarizedUntil: healthyState.checkpoint,
+      lastRunAt: healthyState.lastRunAt,
+      lastSuccessAt: healthyState.lastSuccessAt,
+      enabledBy: 'ana',
+      canManage: true,
+    });
   });
 
   it('reports healthy, caught-up summaries and who enabled them', async () => {
@@ -154,6 +160,7 @@ describe('getSessionsStatus', () => {
       enabledBy: 'ana',
       retentionDays: SESSIONS_LOOKBACK_DAYS,
       autoEnable: false,
+      canManage: true,
     });
   });
 
@@ -265,7 +272,7 @@ describe('getSessionsStatus', () => {
       const status = await getSessionsStatus({
         taskManager,
         settings,
-        withDetails: true,
+        canManage: true,
         now: NOW,
       });
 
@@ -313,7 +320,7 @@ describe('getSessionsStatus', () => {
 
   describe('without the details, for users who cannot set sessions up', () => {
     it('hides who enabled sessions', async () => {
-      expect((await statusOf(healthyState, { withDetails: false })).enabledBy).toBeNull();
+      expect((await statusOf(healthyState, { canManage: false })).enabledBy).toBeNull();
     });
 
     it('says the last run failed, but not why', async () => {
@@ -323,7 +330,7 @@ describe('getSessionsStatus', () => {
           ...healthyState,
           lastError: { message: 'security_exception: action denied for user [ana]', at },
         },
-        { withDetails: false }
+        { canManage: false }
       );
 
       expect(status).toEqual(
@@ -332,7 +339,7 @@ describe('getSessionsStatus', () => {
           lastError: { message: null, at },
         })
       );
-      expect(JSON.stringify(status)).not.toContain('ana');
+      expect(JSON.stringify(status)).not.toMatch(/\bana\b/);
     });
   });
 });

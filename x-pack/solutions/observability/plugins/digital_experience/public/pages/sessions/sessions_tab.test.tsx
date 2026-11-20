@@ -58,6 +58,7 @@ const status = (overrides: Partial<SessionsStatus> = {}): SessionsStatus => ({
   enabledBy: 'elastic',
   retentionDays: 30,
   autoEnable: false,
+  canManage: true,
   ...overrides,
 });
 
@@ -153,13 +154,10 @@ const listRequests = () => fetchesOf(LIST_ENDPOINT).map(([, options]) => options
 
 const TIME_QUERY = 'rangeFrom=now-15m&rangeTo=now';
 
-const renderTab = ({
-  search = '',
-  manageSessions = true,
-}: { search?: string; manageSessions?: boolean } = {}): MemoryHistory => {
+const renderTab = ({ search = '' }: { search?: string } = {}): MemoryHistory => {
   jest.mocked(useKibanaServices).mockReturnValue({
     application: {
-      capabilities: { digital_experience: { show: true, manageSessions } },
+      capabilities: { digital_experience: { show: true } },
       getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
     },
     http: {},
@@ -218,7 +216,7 @@ describe('SessionsTab', () => {
     it('sets sessions up by itself for a user who can, once, then lists the sessions', async () => {
       respondWith({ sessionsStatus: notSetUp() });
       mockFetch.mockImplementationOnce(async () => ({ ...notSetUp(), autoEnable: true }));
-      renderTab({ manageSessions: false });
+      renderTab();
 
       expect(
         await screen.findByTestId('digitalExperienceSessionRow-session-1')
@@ -248,7 +246,7 @@ describe('SessionsTab', () => {
 
     it('tells other users who sets sessions up, without a button, whatever their Kibana privileges', async () => {
       respondWith({ sessionsStatus: notSetUp() });
-      renderTab({ manageSessions: true });
+      renderTab();
 
       expect(await screen.findByTestId('digitalExperienceSessionsNotEnabled')).toHaveTextContent(
         'They are set up automatically when someone who can read your EDOT Browser data in full'
@@ -270,7 +268,7 @@ describe('SessionsTab', () => {
         }
         return respond?.(endpoint, ...rest);
       });
-      renderTab({ manageSessions: false });
+      renderTab();
 
       expect(await screen.findByTestId('digitalExperienceSessionsEnableError')).toHaveTextContent(
         'Missing privileges: cluster:read_security'
@@ -293,7 +291,7 @@ describe('SessionsTab', () => {
 
     it('tells other users who sets sessions up, and never grants a key for them', async () => {
       respondWith({ sessionsStatus: status({ apiKeyInvalid: true }) });
-      renderTab({ manageSessions: true });
+      renderTab();
 
       expect(await screen.findByTestId('digitalExperienceSessionsApiKeyInvalid')).toHaveTextContent(
         'They are set up automatically when someone who can read'
@@ -312,7 +310,7 @@ describe('SessionsTab', () => {
           health: 'degraded',
         }),
       });
-      renderTab({ manageSessions: false });
+      renderTab();
 
       expect(
         await screen.findByTestId('digitalExperienceSessionsApiKeyInvalid')
@@ -401,8 +399,8 @@ describe('SessionsTab', () => {
     });
 
     it('does not offer turning sessions off to other users', async () => {
-      respondWith();
-      renderTab({ manageSessions: false });
+      respondWith({ sessionsStatus: status({ canManage: false }) });
+      renderTab();
 
       await screen.findByTestId('digitalExperienceSessionRow-session-1');
       expect(screen.queryByTestId('digitalExperienceSessionsTurnOff')).not.toBeInTheDocument();
@@ -421,8 +419,8 @@ describe('SessionsTab', () => {
     });
 
     it('tells other users who can turn sessions back on, and never does it for them', async () => {
-      respondWith({ sessionsStatus: turnedOff() });
-      renderTab({ manageSessions: false });
+      respondWith({ sessionsStatus: { ...turnedOff(), canManage: false } });
+      renderTab();
 
       expect(await screen.findByTestId('digitalExperienceSessionsDisabled')).toHaveTextContent(
         'Manage session summaries privilege of Digital Experience in all spaces can turn them back on'

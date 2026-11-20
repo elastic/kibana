@@ -143,6 +143,11 @@ export interface SessionsStatus {
    * were turned off.
    */
   autoEnable: boolean;
+  /**
+   * True when the current user manages sessions in all spaces: they can turn sessions off and back
+   * on, and are told who enabled them and why a run failed.
+   */
+  canManage: boolean;
 }
 
 const TIME_VALUE = /^([1-9][0-9]*)(s|m|h)$/;

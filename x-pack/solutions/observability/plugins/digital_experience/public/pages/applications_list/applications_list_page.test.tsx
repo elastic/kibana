@@ -80,6 +80,7 @@ const HEALTHY_SESSIONS: SessionsStatus = {
   enabledBy: null,
   retentionDays: 30,
   autoEnable: false,
+  canManage: false,
 };
 
 const NOT_SET_UP: SessionsStatus = {
@@ -188,11 +189,10 @@ const respondWith = (
 const renderPage = ({
   isServerless = false,
   timeZoneSetting = 'UTC',
-  manageSessions = false,
-}: { isServerless?: boolean; timeZoneSetting?: string; manageSessions?: boolean } = {}) => {
+}: { isServerless?: boolean; timeZoneSetting?: string } = {}) => {
   jest.mocked(useKibanaServices).mockReturnValue({
     application: {
-      capabilities: { digital_experience: { show: true, manageSessions } },
+      capabilities: { digital_experience: { show: true } },
       getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
     },
     http: {},
@@ -706,9 +706,9 @@ describe('ApplicationsListPage', () => {
     });
 
     it('says who sets sessions up when the user cannot, whatever their Kibana privileges', async () => {
-      mockSessionsStatus({ status: NOT_SET_UP });
+      mockSessionsStatus({ status: { ...NOT_SET_UP, canManage: true } });
       respondWith([]);
-      renderPage({ manageSessions: true });
+      renderPage();
 
       expect(
         await screen.findByTestId('digitalExperienceApplicationsSessionsNotEnabled')
@@ -719,9 +719,9 @@ describe('ApplicationsListPage', () => {
     });
 
     it('says sessions are being set up while they are', async () => {
-      mockSessionsStatus({ status: NOT_SET_UP, enabling: true });
+      mockSessionsStatus({ status: { ...NOT_SET_UP, canManage: true }, enabling: true });
       respondWith([]);
-      renderPage({ manageSessions: true });
+      renderPage();
 
       expect(
         await screen.findByTestId('digitalExperienceApplicationsSessionsEnabling')
@@ -758,16 +758,22 @@ describe('ApplicationsListPage', () => {
 
     it.each([true, false])(
       'offers to turn sessions back on only to managers (manager: %s)',
-      async (manageSessions) => {
+      async (canManage) => {
         mockSessionsStatus({
-          status: { ...HEALTHY_SESSIONS, disabled: true, health: 'disabled', autoEnable: false },
+          status: {
+            ...HEALTHY_SESSIONS,
+            disabled: true,
+            health: 'disabled',
+            autoEnable: false,
+            canManage,
+          },
         });
         respondWith([app({ source: 'otel' })]);
-        renderPage({ manageSessions });
+        renderPage();
 
         const callout = await screen.findByTestId('digitalExperienceSessionsDisabled');
         const turnOn = screen.queryByTestId('digitalExperienceSessionsTurnOn');
-        if (manageSessions) {
+        if (canManage) {
           fireEvent.click(turnOn as HTMLElement);
           expect(enableSessions).toHaveBeenCalledTimes(1);
         } else {

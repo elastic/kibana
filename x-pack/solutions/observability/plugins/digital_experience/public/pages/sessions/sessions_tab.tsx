@@ -23,7 +23,6 @@ import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { getDateISORange } from '@kbn/timerange';
 import { SESSIONS_LOOKBACK_DAYS, type SessionsStatus } from '../../../common/sessions';
 import type { ApplicationSource } from '../../../common/types/applications';
-import { canManageSessions } from '../../capabilities';
 import { ColumnSelector } from '../../components/column_selector';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { TimeRangePicker } from '../../components/time_range_picker';
@@ -32,7 +31,6 @@ import { useApplicationLinks } from '../../hooks/use_application_links';
 import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_params';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useFormatters } from '../../hooks/use_formatters';
-import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useVisibleColumns } from '../../hooks/use_visible_columns';
 import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
@@ -332,8 +330,6 @@ export function SessionsTab({
   serviceName: string;
   source: ApplicationSource;
 }) {
-  const { application } = useKibanaServices();
-  const canManage = canManageSessions(application.capabilities);
   const {
     status,
     error,
@@ -345,6 +341,7 @@ export function SessionsTab({
     disabling,
     disableError,
   } = useSessionsStatus();
+  const canManage = status?.canManage === true;
   const enableProps = {
     canEnable: status?.autoEnable === true,
     canManage,

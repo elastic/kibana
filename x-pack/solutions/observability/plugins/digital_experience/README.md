@@ -498,8 +498,9 @@ on behalf of whoever enabled it last, and Task Manager invalidates the previous 
 its state, so its summaries are kept. The task never runs as the Kibana internal user: only the
 index template is the internal user's. Each enable writes a `digital_experience_sessions_enable`
 audit event, successful or not. Status reports who last enabled sessions, and why the last run
-failed, only to users who manage sessions: Elasticsearch errors can name that user, their roles
-and indices, so the others get a generic message. A run in progress doesn't stop enabling again
+failed, only to users who manage sessions in all spaces (`canManage`, which also shows the turn
+off and on controls): Elasticsearch errors can name that user, their roles and indices, so the
+others get a generic message. A run in progress doesn't stop enabling again
 from replacing the key. Without Task Manager, sessions can't be enabled.
 
 Like any granted key, the task's key has the access the user had when it was granted, and no

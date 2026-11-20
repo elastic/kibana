@@ -177,16 +177,14 @@ const statusRoute = createDigitalExperienceServerRoute({
     isServerless,
     logger,
   }): Promise<SessionsStatus> => {
-    const canManage =
-      request.authzResult?.[DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] === true;
-    const { taskManager, canEncrypt } = await getSessionsServices();
+    const { taskManager, canEncrypt, authz } = await getSessionsServices();
     let status: SessionsStatus;
     try {
       // The task and its state only; no session data is read with the internal user.
       status = await getSessionsStatus({
         taskManager,
         settings: sessionsSettings,
-        withDetails: canManage,
+        canManage: await canManageSessionsInAllSpaces(authz, request),
       });
     } catch (error) {
       logger.error(`Could not read the sessions status: ${describeError(error)}`);
@@ -254,11 +252,10 @@ const enableRoute = createDigitalExperienceServerRoute({
     if (!taskManager) {
       throw internal(NO_TASK_MANAGER_MESSAGE);
     }
-    const withDetails =
-      request.authzResult?.[DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] === true;
+    const canManage = await canManageSessionsInAllSpaces(authz, request);
     const getStatus = async () => {
       try {
-        return await getSessionsStatus({ taskManager, settings: sessionsSettings, withDetails });
+        return await getSessionsStatus({ taskManager, settings: sessionsSettings, canManage });
       } catch (error) {
         throw toReadError(error, logger, 'the sessions status');
       }
@@ -268,7 +265,7 @@ const enableRoute = createDigitalExperienceServerRoute({
     // changing whose access a working task runs with, is for managers.
     const current = await getStatus();
     const needsSetUp = !current.installed || (current.apiKeyInvalid && !current.disabled);
-    if (!needsSetUp && !(await canManageSessionsInAllSpaces(authz, request))) {
+    if (!needsSetUp && !canManage) {
       if (current.disabled) {
         throw forbidden(TURNED_OFF_MESSAGE);
       }
@@ -337,7 +334,7 @@ const disableRoute = createDigitalExperienceServerRoute({
       return await getSessionsStatus({
         taskManager,
         settings: sessionsSettings,
-        withDetails: true,
+        canManage: true,
       });
     } catch (error) {
       throw toReadError(error, logger, 'the sessions status');

@@ -46,7 +46,6 @@ import { PageLoadsChart } from './components/page_loads_chart';
 import { SessionsSourceStatus } from './components/sessions_source_status';
 import { SourceFilter } from './components/source_filter';
 import { useSessionsStatus } from '../../application/sessions_status_provider';
-import { canManageSessions } from '../../capabilities';
 import { ColumnSelector } from '../../components/column_selector';
 import { EnvironmentFilter } from '../../components/environment_filter';
 import { formatVital, RATING_COLORS, RATING_LABELS } from '../../utils/web_vitals';
@@ -704,7 +703,7 @@ export function ApplicationsListPage() {
             rangeStart={response?.pageLoadsOverTime.histogram.start}
             formatters={formatters}
             canEnable={sessionsStatus.autoEnable}
-            canManage={canManageSessions(application.capabilities)}
+            canManage={sessionsStatus.canManage}
             onEnable={enableSessions}
             enabling={enablingSessions}
             enableError={enableSessionsError}

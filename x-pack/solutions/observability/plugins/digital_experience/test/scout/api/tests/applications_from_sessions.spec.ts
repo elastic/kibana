@@ -316,6 +316,8 @@ apiTest.describe(
               ttfb: { sampleCount: 0 },
             },
           });
+          expect(application?.webVitals.lcp.p75Ms).toBeGreaterThanOrEqual(2000);
+          expect(application?.webVitals.lcp.p75Ms).toBeLessThanOrEqual(5000);
           expect([...(application?.environments ?? [])].sort()).toStrictEqual([
             PRODUCTION,
             STAGING,
@@ -373,7 +375,11 @@ apiTest.describe(
             jsErrors: { count: 0, perPageLoad: 0 },
             httpRequests: { count: 2, failedCount: 1, failedRatio: 0.5 },
             webVitals: {
-              lcp: { sampleCount: 1, ratings: { good: 0, needsImprovement: 0, poor: 1 } },
+              lcp: {
+                p75Ms: 5000,
+                sampleCount: 1,
+                ratings: { good: 0, needsImprovement: 0, poor: 1 },
+              },
             },
           });
           // Only this suite has sessions in its environments, so the trend is its one.

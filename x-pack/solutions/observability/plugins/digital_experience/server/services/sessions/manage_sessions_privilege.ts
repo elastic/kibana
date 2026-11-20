@@ -22,6 +22,10 @@ export const canManageSessionsInAllSpaces = async (
   if (!authz || !authz.mode.useRbacForRequest(request)) {
     return true;
   }
+  // Checked by the route for this space already: without it here, it isn't granted everywhere.
+  if (request.authzResult?.[DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] === false) {
+    return false;
+  }
   const { hasAllRequested } = await authz.checkPrivilegesWithRequest(request).globally({
     kibana: [authz.actions.api.get(DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions)],
   });

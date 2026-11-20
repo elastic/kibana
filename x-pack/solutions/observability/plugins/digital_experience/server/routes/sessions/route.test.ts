@@ -65,6 +65,7 @@ const status: SessionsStatus = {
   enabledBy: 'ana',
   retentionDays: SESSIONS_LOOKBACK_DAYS,
   autoEnable: false,
+  canManage: true,
 };
 const notSetUp: SessionsStatus = { ...status, installed: false, health: 'missing' };
 const turnedOff: SessionsStatus = { ...status, disabled: true, health: 'disabled' };
@@ -179,23 +180,23 @@ describe('sessions routes', () => {
 
   describe('status', () => {
     it.each([true, false])(
-      'reads the details of the status only for managers (manage sessions: %s)',
+      'reads the details of the status only for managers in all spaces (manager: %s)',
       async (canManage) => {
-        // The router fills `authzResult` from the route's extended privileges.
-        const { result, services } = runHandler(SESSIONS_STATUS_ENDPOINT, {
-          authzResult: { manage_digital_experience_sessions: canManage },
-        });
+        jest.mocked(canManageSessionsInAllSpaces).mockResolvedValue(canManage);
+        const { result, request, services } = runHandler(SESSIONS_STATUS_ENDPOINT);
 
         expect(await result).toEqual(status);
+        expect(canManageSessionsInAllSpaces).toHaveBeenCalledWith(services.authz, request);
         expect(getSessionsStatus).toHaveBeenCalledWith({
           taskManager: services.taskManager,
           settings,
-          withDetails: canManage,
+          canManage,
         });
       }
     );
 
     it('reads the status without Task Manager, which reports sessions missing', async () => {
+      jest.mocked(canManageSessionsInAllSpaces).mockResolvedValue(false);
       const { result } = runHandler(SESSIONS_STATUS_ENDPOINT, {
         services: {
           taskManager: undefined,
@@ -209,7 +210,7 @@ describe('sessions routes', () => {
       expect(getSessionsStatus).toHaveBeenCalledWith({
         taskManager: undefined,
         settings,
-        withDetails: false,
+        canManage: false,
       });
     });
 
@@ -294,10 +295,8 @@ describe('sessions routes', () => {
       expect(getSessionsStatus).toHaveBeenCalledWith({
         taskManager: services.taskManager,
         settings,
-        withDetails: false,
+        canManage: false,
       });
-      // Anyone may set sessions up; the Elasticsearch privileges decide.
-      expect(canManageSessionsInAllSpaces).not.toHaveBeenCalled();
       expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith({
         message: 'User [ana] enabled Digital Experience sessions',
         event: {
@@ -311,6 +310,7 @@ describe('sessions routes', () => {
     });
 
     it('returns the details of the status to managers', async () => {
+      jest.mocked(canManageSessionsInAllSpaces).mockResolvedValue(true);
       const { result, services } = runHandler(SESSIONS_ENABLE_ENDPOINT, {
         authzResult: asManager,
       });
@@ -320,7 +320,7 @@ describe('sessions routes', () => {
       expect(getSessionsStatus).toHaveBeenLastCalledWith({
         taskManager: services.taskManager,
         settings,
-        withDetails: true,
+        canManage: true,
       });
     });
 
@@ -331,7 +331,6 @@ describe('sessions routes', () => {
 
       expect(await result).toEqual(status);
       expect(enableSessions).toHaveBeenCalled();
-      expect(canManageSessionsInAllSpaces).not.toHaveBeenCalled();
     });
 
     it('leaves working sessions as they are for a user who does not manage them', async () => {
@@ -511,7 +510,7 @@ describe('sessions routes', () => {
       expect(getSessionsStatus).toHaveBeenCalledWith({
         taskManager: services.taskManager,
         settings,
-        withDetails: true,
+        canManage: true,
       });
       expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith({
         message: 'User [ana] disabled Digital Experience sessions',
