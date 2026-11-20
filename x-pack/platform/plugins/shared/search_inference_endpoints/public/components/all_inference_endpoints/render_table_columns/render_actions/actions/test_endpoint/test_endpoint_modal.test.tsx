@@ -100,7 +100,7 @@ describe('TestEndpointModal', () => {
     mockHookState(passingState);
     renderModal();
 
-    expect(screen.getByTestId('testEndpointAvailable')).toHaveTextContent('Test succeeded.');
+    expect(screen.getByTestId('testEndpointSuccess')).toHaveTextContent('Test succeeded.');
     expect(screen.getByTestId('testEndpointSummary')).toHaveTextContent(
       'Response: 201 • Query duration: 94 ms'
     );
@@ -115,7 +115,7 @@ describe('TestEndpointModal', () => {
     expect(screen.getByTestId('testEndpointSummary')).toHaveTextContent(
       'Response: 404 • Query duration: 94 ms'
     );
-    expect(screen.queryByTestId('testEndpointAvailable')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('testEndpointSuccess')).not.toBeInTheDocument();
   });
 
   it('shows only the query duration when the failure has no response code', () => {

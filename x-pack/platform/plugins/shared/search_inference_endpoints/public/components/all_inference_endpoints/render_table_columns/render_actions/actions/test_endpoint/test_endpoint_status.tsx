@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiText } from '
 import { i18n } from '@kbn/i18n';
 import type { TestEndpointResponse } from '../../../../../../../common/types';
 
-type TestEndpointState = 'loading' | 'available' | 'failure';
+type TestEndpointState = 'loading' | 'success' | 'failure';
 
 const STATES: Record<
   TestEndpointState,
@@ -25,11 +25,11 @@ const STATES: Record<
       defaultMessage: 'Waiting for response...',
     }),
   },
-  available: {
-    testSubj: 'testEndpointAvailable',
+  success: {
+    testSubj: 'testEndpointSuccess',
     icon: <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />,
     color: 'success',
-    message: i18n.translate('xpack.searchInferenceEndpoints.testEndpoint.available', {
+    message: i18n.translate('xpack.searchInferenceEndpoints.testEndpoint.succeeded', {
       defaultMessage: 'Test succeeded.',
     }),
   },
@@ -59,7 +59,7 @@ export const TestEndpointStatus: React.FC<TestEndpointStatusProps> = ({ isLoadin
     );
   }
 
-  const state: TestEndpointState = isLoading ? 'loading' : response?.ok ? 'available' : 'failure';
+  const state: TestEndpointState = isLoading ? 'loading' : response?.ok ? 'success' : 'failure';
   const { icon, color, message, testSubj } = STATES[state];
 
   return (
