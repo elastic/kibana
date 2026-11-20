@@ -13,12 +13,12 @@ import { omit } from 'lodash';
 import moment from 'moment';
 import { Server, ServerCredentials, status } from '@grpc/grpc-js';
 import { metrics, type Attributes } from '@opentelemetry/api';
-import { metrics as sdkMetrics } from '@elastic/opentelemetry-node/sdk';
+import { MeterProvider, MetricReader, type DataPoint } from '@opentelemetry/sdk-metrics';
 import { LogLevel } from '@kbn/logging';
 import type { OtelAppenderPluginConfig } from '@kbn/core-logging-server';
 import { OtelAppender } from './otel_appender';
 
-class TestMetricReader extends sdkMetrics.MetricReader {
+class TestMetricReader extends MetricReader {
   protected async onForceFlush(): Promise<void> {}
   protected async onShutdown(): Promise<void> {}
 }
@@ -95,7 +95,7 @@ type ExportConfig = Pick<OtelAppenderPluginConfig, 'protocol' | 'url' | 'maxElap
 /** Exports two records through a new appender and returns the exporter metrics it recorded. */
 const exportThroughAppender = async (config: ExportConfig) => {
   const reader = new TestMetricReader();
-  metrics.setGlobalMeterProvider(new sdkMetrics.MeterProvider({ readers: [reader] }));
+  metrics.setGlobalMeterProvider(new MeterProvider({ readers: [reader] }));
   try {
     const appender = new OtelAppender({ type: 'otel', headers: {}, ...config });
     appender.append(makeRecord('first'));
@@ -107,7 +107,7 @@ const exportThroughAppender = async (config: ExportConfig) => {
       resourceMetrics.scopeMetrics
         .flatMap(({ metrics: scopeMetrics }) => scopeMetrics)
         .filter(({ descriptor }) => descriptor.name === name)
-        .flatMap<sdkMetrics.DataPoint<unknown>>(({ dataPoints }) => dataPoints)
+        .flatMap<DataPoint<unknown>>(({ dataPoints }) => dataPoints)
         .map(({ attributes, value }) => ({ attributes, value }));
     return {
       exported: dataPointsOf('otel.sdk.exporter.log.exported'),

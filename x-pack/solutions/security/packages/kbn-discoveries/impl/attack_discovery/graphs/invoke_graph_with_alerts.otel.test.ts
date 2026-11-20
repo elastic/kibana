@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
 import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
 import { context, SpanStatusCode } from '@opentelemetry/api';
+import { defaultResource } from '@opentelemetry/resources';
+import { InMemorySpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -29,7 +30,7 @@ jest.mock('.', () => ({
 const MODEL_FRAGMENT = 'SECRET-MODEL-PAYLOAD-FRAGMENT';
 
 describe('invokeAttackDiscoveryGraphWithAlerts with a real tracer', () => {
-  const exporter = new tracing.InMemorySpanExporter();
+  const exporter = new InMemorySpanExporter();
   const contextManager = new AsyncHooksContextManager();
   const logger = {
     debug: jest.fn(),
@@ -42,8 +43,8 @@ describe('invokeAttackDiscoveryGraphWithAlerts with a real tracer', () => {
     contextManager.enable();
     context.setGlobalContextManager(contextManager);
     initInferenceTracerProvider({
-      processors: [new tracing.SimpleSpanProcessor(exporter)],
-      resource: resources.defaultResource(),
+      processors: [new SimpleSpanProcessor({ exporter })],
+      resource: defaultResource(),
     });
   });
 

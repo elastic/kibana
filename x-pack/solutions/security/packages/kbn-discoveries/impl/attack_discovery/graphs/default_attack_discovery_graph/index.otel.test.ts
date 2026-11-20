@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
 import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
 import { context } from '@opentelemetry/api';
+import { defaultResource } from '@opentelemetry/resources';
+import { InMemorySpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   initInferenceTracerProvider,
@@ -33,15 +34,15 @@ const prompts = {
 };
 
 describe('default attack discovery graph with a real tracer', () => {
-  const exporter = new tracing.InMemorySpanExporter();
+  const exporter = new InMemorySpanExporter();
   const contextManager = new AsyncHooksContextManager();
 
   beforeAll(() => {
     contextManager.enable();
     context.setGlobalContextManager(contextManager);
     initInferenceTracerProvider({
-      processors: [new tracing.SimpleSpanProcessor(exporter)],
-      resource: resources.defaultResource(),
+      processors: [new SimpleSpanProcessor({ exporter })],
+      resource: defaultResource(),
     });
   });
 
