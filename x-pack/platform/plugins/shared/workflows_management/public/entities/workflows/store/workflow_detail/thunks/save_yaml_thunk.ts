@@ -22,12 +22,13 @@ import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import {
   selectAiAssisted,
+  selectRemixTemplate,
   selectWorkflow,
   selectWorkflowDefinition,
   selectWorkflowId,
   selectYamlString,
 } from '../selectors';
-import { setWorkflow, setYamlString } from '../slice';
+import { setRemixTemplate, setWorkflow, setYamlString } from '../slice';
 
 /**
  * Without params, saves the current draft of the open workflow. With them, saves `yamlString` to
@@ -100,12 +101,22 @@ export const saveYamlThunk = createAsyncThunk<
           error: undefined,
           origin: 'workflow_detail',
           aiAssisted: isAiAssisted,
+          templateOrigin: originalWorkflow,
         });
 
         // For consistency, dispatch the loadWorkflow thunk to update the workflow in the store to the latest version from the API
         await dispatch(loadWorkflowThunk({ id }));
       } else {
-        const workflow = await workflowApi.createWorkflow({ yaml: yamlString });
+        // A draft seeded by "Remix with AI" is saved through the library, which
+        // records the template it started from.
+        const remixTemplate = selectRemixTemplate(state);
+        const workflow = remixTemplate
+          ? await workflowApi.createWorkflowFromTemplateRemix({
+              yaml: yamlString,
+              template: remixTemplate,
+            })
+          : await workflowApi.createWorkflow({ yaml: yamlString });
+        dispatch(setRemixTemplate(undefined));
 
         // Report telemetry for workflow creation
         // Use workflow.definition from the created workflow if available, otherwise fall back to workflowDefinition from state
@@ -116,6 +127,7 @@ export const saveYamlThunk = createAsyncThunk<
           editorType: 'yaml', // Saving YAML always comes from YAML editor
           origin: 'workflow_detail',
           aiAssisted: isAiAssisted,
+          templateOrigin: workflow,
         });
 
         // Migrate the create-session chat onto the saved workflow's tag
@@ -169,6 +181,7 @@ export const saveYamlThunk = createAsyncThunk<
           error: errorObj,
           origin: 'workflow_detail',
           aiAssisted: isAiAssisted,
+          templateOrigin: errorOriginalWorkflow,
         });
       } else {
         telemetry.reportWorkflowCreated({
