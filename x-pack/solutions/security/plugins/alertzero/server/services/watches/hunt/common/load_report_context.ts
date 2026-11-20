@@ -32,9 +32,9 @@ export interface ReportHuntContext {
   /**
    * True when the enrich workflow has not finished with the report: its
    * `lineage.extraction_method` is absent, blank or `pending`, so `extracted.*` is not
-   * written yet and a hunt would have nothing to search. `workflow_v4_rejected` is
-   * deliberately not pending: a rejected report has been through extraction and must
-   * retire.
+   * written yet and a hunt would have nothing to search. `enrich_workflow_rejected` and the legacy
+   * `workflow_v4_rejected` are deliberately not pending: a rejected report has been
+   * through extraction and must retire.
    */
   extraction_pending: boolean;
   /**
@@ -155,11 +155,13 @@ const readVendorProduct = (value: unknown): string | undefined => {
  * Loads the hunt inputs for one report from `.kibana-threat-reports`, scoped to
  * the acting space. Returns null when the report is not visible there. IOC
  * kinds Tier 1 cannot map to an ECS field (for example `user`) are dropped.
- * Adjudicated-out IOCs (`reference`, `denied`, deferred) are also dropped from
- * `iocs` and reported on `excluded_iocs` when any remain. Every loaded field is
- * clamped to the same bounds the HTTP schemas enforce on caller-supplied input
- * (text length, IOC and technique counts and lengths), so a stored report
- * cannot bypass the Tier 1 query or Tier 2 input bounds.
+ * Adjudicated-out IOCs (`reference`, `denied`, deferred) and non-routable
+ * `ip` / `cidr` values (loopback, RFC1918, and the shared special-use set) are
+ * also dropped from `iocs` and reported on `excluded_iocs` when any remain.
+ * The value check covers legacy docs that lack a `reference` tier. Every loaded
+ * field is clamped to the same bounds the HTTP schemas enforce on
+ * caller-supplied input (text length, IOC and technique counts and lengths), so
+ * a stored report cannot bypass the Tier 1 query or Tier 2 input bounds.
  *
  * `esClient` must be the internal user: the reports index is plugin-owned and
  * hidden, and Kibana feature privileges grant no Elasticsearch access to it, so
