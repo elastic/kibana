@@ -344,11 +344,9 @@ export class SyntheticsAppPage {
     await this.page.testSubj.click('syntheticsAgentPolicySelect');
     await this.page.click(`button[role="option"]:has-text("${agentPolicy}Agents: 0")`);
     if (tags?.length) {
-      await this.page.click('.euiComboBox__inputWrap');
-      for (const tag of tags) {
-        await this.page.fill('[aria-label="Tags"]', tag);
-        await this.page.press('[aria-label="Tags"]', 'Enter');
-      }
+      await this.page.components
+        .comboBox('syntheticsPrivateLocationTagsComboBox')
+        .setCustomSelectedOptions(tags);
     }
     await this.page.click('button:has-text("Save")');
   }
@@ -373,15 +371,14 @@ export class SyntheticsAppPage {
     await this.page.fill('input[name="key"]', key);
     await this.page.testSubj.fill('syntheticsAddParamFormTextArea', value);
     if (tags?.length) {
-      await this.page.click('.euiComboBox__inputWrap');
-      for (const tag of tags) {
-        await this.page.fill('[aria-label="Tags"]', tag);
-      }
+      await this.page.components
+        .comboBox('syntheticsAddParamFormTagsComboBox')
+        .setCustomSelectedOptions(tags);
     }
     if (description) {
       await this.page.fill('input[name="description"]', description);
     }
-    await this.page.click('text=Save');
+    await this.page.testSubj.click('syntheticsAddParamSaveButton');
   }
 
   async editGlobalParameter({
@@ -401,13 +398,11 @@ export class SyntheticsAppPage {
       await this.page.fill('[aria-label="New value"]', newValue);
     }
     if (tags?.length) {
-      await this.page.click('.euiComboBox__inputWrap');
-      for (const tag of tags) {
-        await this.page.fill('[aria-label="Tags"]', tag);
-        await this.page.press('[aria-label="Tags"]', 'Enter');
-      }
+      await this.page.components
+        .comboBox('syntheticsAddParamFormTagsComboBox')
+        .setCustomSelectedOptions(tags);
     }
-    await this.page.click('button:has-text("Save")');
+    await this.page.testSubj.click('syntheticsAddParamSaveButton');
   }
 
   async deleteGlobalParameter() {
