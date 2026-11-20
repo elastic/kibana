@@ -118,18 +118,42 @@ describe('buildSignalChecks', () => {
     );
   });
 
-  it('builds an OOM check from restart data and ties its reason to the new restart level', () => {
+  it('builds OOM checks from restart data and prefers a schema with termination reasons', () => {
     const template = getTemplate('k8s.container.oom_killed');
-    const { checks } = build(['k8s.deployment'], template, [
+    const { checks: restartOnlyChecks } = build(['k8s.deployment'], template, [
       {
         dataset: 'kubernetes.state_container',
         fields: new Set(['kubernetes.container.status.restarts']),
       },
     ]);
 
-    expect(checks).toHaveLength(1);
-    expect(checks[0].measurements.map(({ schema }) => schema)).toEqual(['ecs']);
-    expect(checks[0].esql_preview).toContain('| WHERE oom_level > min_restarts');
+    expect(restartOnlyChecks).toHaveLength(1);
+    const [restartOnlyCheck] = restartOnlyChecks;
+    expect(restartOnlyCheck.measurements.map(({ schema }) => schema)).toEqual(['ecs']);
+    expect(restartOnlyCheck.esql_preview).toContain(
+      'kubernetes.pod.uid, kubernetes.container.name, restart_level = kubernetes.container.status.restarts'
+    );
+    expect(restartOnlyCheck.esql_preview).toContain('WHERE oom_samples > 0');
+    expect(restartOnlyCheck.esql_preview).toContain('| WHERE oom_level > min_restarts');
+
+    const { checks: preferredChecks } = build(['k8s.deployment'], template, [
+      {
+        dataset: 'kubernetes.state_container',
+        cluster: 'cluster-a',
+        fields: new Set([
+          'kubernetes.container.status.restarts',
+          'kubernetes.container.status.last_terminated_reason',
+        ]),
+      },
+      {
+        dataset: 'k8sclusterreceiver.otel',
+        cluster: 'cluster-a',
+        fields: new Set(['k8s.container.restarts']),
+      },
+    ]);
+
+    expect(preferredChecks).toHaveLength(1);
+    expect(preferredChecks[0].measurements.map(({ schema }) => schema)).toEqual(['ecs']);
   });
 
   it('splits formulas that cannot merge by cluster and counts each cluster once', () => {

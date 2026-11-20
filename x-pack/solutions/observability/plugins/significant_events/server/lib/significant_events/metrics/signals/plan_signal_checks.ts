@@ -7,7 +7,7 @@
 
 import type { Condition } from '@kbn/streamlang';
 import type { SignalFieldPresence } from './check_signal_fields';
-import { getSignalVariantFields } from './types';
+import { getSignalVariantFields, getSignalVariantPreferredFields } from './types';
 import type { SignalFormulaKind, SignalTemplate, SignalTemplateVariant } from './types';
 
 export const CLUSTER_FIELD = 'orchestrator.cluster.name';
@@ -28,6 +28,11 @@ export interface SignalCheckPlan {
 const hasVariantFields = (presence: SignalFieldPresence, variant: SignalTemplateVariant): boolean =>
   presence.dataset === variant.dataset &&
   getSignalVariantFields(variant).every((field) => presence.fields.has(field));
+
+const hasVariantPreferredFields = (
+  presence: SignalFieldPresence,
+  variant: SignalTemplateVariant
+): boolean => getSignalVariantPreferredFields(variant).every((field) => presence.fields.has(field));
 
 const byPreference = (left: SignalTemplateVariant, right: SignalTemplateVariant): number =>
   Number(right.schema === 'otel') - Number(left.schema === 'otel');
@@ -51,11 +56,21 @@ const assignVariantsToClusters = (
 ): Array<{ variant: SignalTemplateVariant; clusters: Array<string | undefined> }> => {
   const clustersByVariant = new Map<SignalTemplateVariant, Array<string | undefined>>();
   for (const cluster of new Set(fieldPresence.map((presence) => presence.cluster))) {
-    const variant = variants.find((candidate) =>
-      fieldPresence.some(
-        (presence) => presence.cluster === cluster && hasVariantFields(presence, candidate)
-      )
-    );
+    // Prefer complete signal context, then fall back to the fields required to run.
+    const variant =
+      variants.find((candidate) =>
+        fieldPresence.some(
+          (presence) =>
+            presence.cluster === cluster &&
+            hasVariantFields(presence, candidate) &&
+            hasVariantPreferredFields(presence, candidate)
+        )
+      ) ??
+      variants.find((candidate) =>
+        fieldPresence.some(
+          (presence) => presence.cluster === cluster && hasVariantFields(presence, candidate)
+        )
+      );
     if (variant) {
       clustersByVariant.set(variant, [...(clustersByVariant.get(variant) ?? []), cluster]);
     }

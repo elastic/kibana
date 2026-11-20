@@ -70,13 +70,14 @@ export const getSignalVariantFields = (variant: SignalTemplateVariant): string[]
   switch (variant.formulaKind) {
     case 'ratio':
       return [variant.field, variant.denominatorField];
-    case 'oom_killed_count':
-      // The reason may be absent until a container terminates; previews nullify unmapped fields.
-      return [variant.field];
     default:
       return [variant.field];
   }
 };
+
+/** Returns fields that improve schema choice but are not required to run. */
+export const getSignalVariantPreferredFields = (variant: SignalTemplateVariant): string[] =>
+  variant.formulaKind === 'oom_killed_count' ? [variant.reasonField] : [];
 
 export interface SignalTemplate {
   signal: string;
