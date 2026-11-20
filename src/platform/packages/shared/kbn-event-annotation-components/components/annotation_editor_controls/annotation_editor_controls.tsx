@@ -47,11 +47,7 @@ import {
   isEsqlAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
-import {
-  defaultAnnotationLabel,
-  defaultRangeAnnotationLabel,
-  toLineAnnotationColor,
-} from './helpers';
+import { defaultAnnotationLabel, getRangeToPointOverrides } from './helpers';
 import { annotationsIconSet } from './icon_set';
 import { sanitizeProperties } from './helpers';
 import { TooltipSection } from './tooltip_annotation_panel';
@@ -203,28 +199,14 @@ const AnnotationEditorControls = ({
                       query: { esql: '' },
                       timeColumn: '',
                       key: { type: 'point_in_time' },
-                      ...(isRange
-                        ? {
-                            label:
-                              currentAnnotation.label === defaultRangeAnnotationLabel
-                                ? defaultAnnotationLabel
-                                : currentAnnotation.label,
-                            color: toLineAnnotationColor(currentAnnotation.color),
-                          }
-                        : {}),
+                      ...(isRange ? getRangeToPointOverrides(currentAnnotation) : {}),
                     })
                   );
                 }
                 if (typeFromId === 'query') {
                   // If coming from a range type, it requires some additional resets
                   const additionalRangeResets = isRangeAnnotationConfig(currentAnnotation)
-                    ? {
-                        label:
-                          currentAnnotation.label === defaultRangeAnnotationLabel
-                            ? defaultAnnotationLabel
-                            : currentAnnotation.label,
-                        color: toLineAnnotationColor(currentAnnotation.color),
-                      }
+                    ? getRangeToPointOverrides(currentAnnotation)
                     : {};
                   return update({
                     type: typeFromId,

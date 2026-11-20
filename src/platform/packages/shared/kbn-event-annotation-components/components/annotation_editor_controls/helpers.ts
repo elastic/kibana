@@ -52,6 +52,34 @@ export const toLineAnnotationColor = (color?: string) => {
   return chroma(transparentize(color, 1)).hex().toUpperCase();
 };
 
+interface AnnotationAppearance {
+  label: string;
+  color?: string;
+}
+
+interface AnnotationAppearanceOverrides {
+  label: string;
+  color: string;
+}
+
+/** Label and color overrides for turning a range annotation into a point annotation. */
+export const getRangeToPointOverrides = ({
+  label,
+  color,
+}: AnnotationAppearance): AnnotationAppearanceOverrides => ({
+  label: label === defaultRangeAnnotationLabel ? defaultAnnotationLabel : label,
+  color: toLineAnnotationColor(color),
+});
+
+/** Label and color overrides for turning a point annotation into a range annotation. */
+export const getPointToRangeOverrides = ({
+  label,
+  color,
+}: AnnotationAppearance): AnnotationAppearanceOverrides => ({
+  label: label === defaultAnnotationLabel ? defaultRangeAnnotationLabel : label,
+  color: toRangeAnnotationColor(color),
+});
+
 export const sanitizeProperties = (annotation: EventAnnotationConfig): EventAnnotationConfig => {
   if (isEsqlAnnotationConfig(annotation)) {
     const common = pick(annotation, [

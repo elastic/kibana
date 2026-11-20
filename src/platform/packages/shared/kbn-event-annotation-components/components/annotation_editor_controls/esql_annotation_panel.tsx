@@ -13,12 +13,7 @@ import { EuiComboBox, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { EsqlEventAnnotationConfig } from '@kbn/event-annotation-common';
-import {
-  defaultAnnotationLabel,
-  defaultRangeAnnotationLabel,
-  toLineAnnotationColor,
-  toRangeAnnotationColor,
-} from './helpers';
+import { getPointToRangeOverrides, getRangeToPointOverrides } from './helpers';
 
 interface Props {
   annotation: EsqlEventAnnotationConfig;
@@ -60,11 +55,7 @@ export const ConfigPanelEsqlAnnotation = ({
               onChange({
                 ...point,
                 key: { type: 'point_in_time' },
-                color: toLineAnnotationColor(annotation.color),
-                label:
-                  annotation.label === defaultRangeAnnotationLabel
-                    ? defaultAnnotationLabel
-                    : annotation.label,
+                ...getRangeToPointOverrides(annotation),
               });
               return;
             }
@@ -72,11 +63,7 @@ export const ConfigPanelEsqlAnnotation = ({
               ...annotation,
               key: { type: 'range' },
               endTimeColumn: '',
-              color: toRangeAnnotationColor(annotation.color),
-              label:
-                annotation.label === defaultAnnotationLabel
-                  ? defaultRangeAnnotationLabel
-                  : annotation.label,
+              ...getPointToRangeOverrides(annotation),
             });
           }}
         />
