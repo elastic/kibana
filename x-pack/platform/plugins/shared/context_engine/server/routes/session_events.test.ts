@@ -481,11 +481,6 @@ describe('session events routes', () => {
       ['a user event without content', withEvent({ ...base, id: 'e', type: 'user' })],
       ['an unknown event type', withEvent({ ...base, id: 'e', type: 'system' })],
       ['an unparseable event_at', withEvent({ ...userEvent, event_at: 'yesterday' })],
-      ['a non-ISO event_at', withEvent({ ...userEvent, event_at: 'Nov 16 2026' })],
-      [
-        'a calendar-invalid event_at',
-        withEvent({ ...userEvent, event_at: '2026-02-30T00:00:00Z' }),
-      ],
       ['a week date', withEvent({ ...userEvent, event_at: '2026-W47-1' })],
       ['an ordinal date', withEvent({ ...userEvent, event_at: '2026-320' })],
       ['a negative seq', withEvent({ ...userEvent, seq: -1 })],

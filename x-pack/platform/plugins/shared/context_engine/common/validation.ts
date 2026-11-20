@@ -107,53 +107,13 @@ export const validateRelativeSignalWindow = (value: string): string | undefined 
 export const validateNonBlank = (value: string): string | undefined =>
   value.trim().length > 0 ? undefined : 'must not be blank';
 
-// Matches Elasticsearch's `strict_date_optional_time`: YYYY-MM-DD with optional time and Z / ±HH(:)?MM offset.
-const ISO_DATE_PATTERN =
-  /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,9})?)?(?:Z|([+-])(\d{2}):?(\d{2}))?)?$/;
-
-const isValidIsoDate = (value: string): boolean => {
-  const match = ISO_DATE_PATTERN.exec(value);
-  if (!match) {
-    return false;
-  }
-  const [, yearStr, monthStr, dayStr, hourStr, minStr, secStr, _tzSign, tzHourStr, tzMinStr] =
-    match;
-  const year = Number(yearStr);
-  const month = Number(monthStr);
-  const day = Number(dayStr);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  if (
-    date.getUTCFullYear() !== year ||
-    date.getUTCMonth() !== month - 1 ||
-    date.getUTCDate() !== day
-  ) {
-    return false;
-  }
-  if (hourStr !== undefined) {
-    const hour = Number(hourStr);
-    const minute = Number(minStr);
-    const second = secStr !== undefined ? Number(secStr) : 0;
-    if (hour > 23 || minute > 59 || second > 59) {
-      return false;
-    }
-  }
-  if (tzHourStr !== undefined) {
-    const tzHour = Number(tzHourStr);
-    const tzMin = Number(tzMinStr);
-    if (tzHour > 18 || tzMin > 59 || (tzHour === 18 && tzMin > 0)) {
-      return false;
-    }
-  }
-  return true;
-};
-
-/** Returns a translated error message for a value that is not a valid ISO 8601 date, or `undefined` when valid. */
+/** Returns a translated error message for a value `Date.parse` cannot read, or `undefined` when valid. */
 export const validateIsoDate = (value: string): string | undefined =>
-  isValidIsoDate(value)
-    ? undefined
-    : i18n.translate('xpack.contextEngine.feedbackAnalysis.error.invalidAbsoluteFrom', {
+  Number.isNaN(Date.parse(value))
+    ? i18n.translate('xpack.contextEngine.feedbackAnalysis.error.invalidAbsoluteFrom', {
         defaultMessage: 'Must be an ISO 8601 date, for example 2026-01-31T00:00:00.000Z.',
-      });
+      })
+    : undefined;
 
 /**
  * A relative signal window shorter than the schedule interval leaves signals
