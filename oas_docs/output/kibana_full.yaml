@@ -93811,13 +93811,6 @@ paths:
                         name: logs-myapp-default
                         type: classic
                         updated_at: '2024-12-01T09:00:00.000Z'
-                      - description: All error-level logs across every stream
-                        name: logs.errors
-                        query:
-                          esql: FROM logs* | WHERE log.level == "error"
-                          view: logs.errors-view
-                        type: query
-                        updated_at: '2025-01-20T14:00:00.000Z'
           description: A list of all streams.
       summary: Get stream list
       tags:
@@ -94122,16 +94115,6 @@ paths:
         content:
           application/json:
             examples:
-              createQueryStream:
-                value:
-                  dashboards: []
-                  rules: []
-                  stream:
-                    description: All error-level logs across every stream
-                    query:
-                      esql: FROM logs* | WHERE log.level == "error"
-                      view: logs.errors-view
-                    type: query
               createWiredStream:
                 value:
                   dashboards: []
@@ -94237,8 +94220,6 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                draft:
-                  type: boolean
                 status:
                   enum:
                     - enabled
@@ -143961,8 +143942,6 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
-                            draft:
-                              type: boolean
                             fields:
                               $ref: '#/components/schemas/Kibana_HTTP_APIs_FieldDefinition'
                             routing:
@@ -143973,8 +143952,6 @@ paths:
                                     description: A non-empty string.
                                     minLength: 1
                                     type: string
-                                  draft:
-                                    type: boolean
                                   status:
                                     enum:
                                       - enabled
@@ -144076,109 +144053,6 @@ paths:
       tags:
         - streams
       x-state: Experimental; added in 9.1.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/streams/{name}/_query:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/_query</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Fetches the query settings of a query stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.
-      operationId: get-streams-name-query
-      parameters:
-        - description: The name of the query stream.
-          in: path
-          name: name
-          required: true
-          schema:
-            maxLength: 200
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples: {}
-            schema:
-              anyOf:
-                - additionalProperties: false
-                  type: object
-                  properties: {}
-                - {}
-              nullable: true
-      responses:
-        '200':
-          description: Query settings for the stream.
-      summary: Get query stream settings
-      tags:
-        - streams
-      x-state: Experimental; added in 9.4.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-    put:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/_query</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Upserts the query settings of a query stream definition<br/><br/>[Required authorization] Route required privileges: manage_stream.
-      operationId: put-streams-name-query
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: The name of the query stream.
-          in: path
-          name: name
-          required: true
-          schema:
-            maxLength: 200
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              upsertQueryStream:
-                value:
-                  query:
-                    esql: FROM logs* | WHERE log.level == "error" | KEEP @timestamp, message, host.name, log.level
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                field_descriptions:
-                  additionalProperties:
-                    maxLength: 1000
-                    type: string
-                  type: object
-                query:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    esql:
-                      maxLength: 65535
-                      type: string
-                  required:
-                    - esql
-              required:
-                - query
-      responses:
-        '200':
-          description: The query stream settings were updated successfully.
-      summary: Upsert query stream settings
-      tags:
-        - streams
-      x-state: Experimental; added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -168411,6 +168285,8 @@ components:
                 - failure_store
                 - classic
             query_streams:
+              deprecated: true
+              description: Deprecated. Query streams have been removed; this field is accepted for backwards compatibility and ignored.
               items:
                 type: object
                 properties:
@@ -189164,60 +189040,6 @@ components:
         - has_required_role
       title: profiling_setup_status_response
       type: object
-    Kibana_HTTP_APIs_QueryStreamUpsertRequest:
-      additionalProperties: false
-      type: object
-      properties:
-        dashboards:
-          items:
-            type: string
-          type: array
-        rules:
-          items:
-            type: string
-          type: array
-        stream:
-          additionalProperties: false
-          type: object
-          properties:
-            description:
-              type: string
-            field_descriptions:
-              additionalProperties:
-                type: string
-              type: object
-            query:
-              additionalProperties: false
-              type: object
-              properties:
-                esql:
-                  type: string
-                view:
-                  type: string
-              required:
-                - view
-                - esql
-            query_streams:
-              items:
-                type: object
-                properties:
-                  name:
-                    type: string
-                required:
-                  - name
-              type: array
-            type:
-              enum:
-                - query
-              type: string
-          required:
-            - description
-            - type
-            - query
-      required:
-        - dashboards
-        - rules
-        - stream
     Kibana_HTTP_APIs_reauthorize_transform_request:
       additionalProperties: false
       properties:
@@ -193934,7 +193756,6 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_WiredStreamUpsertRequest'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_ClassicStreamUpsertRequest'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_QueryStreamUpsertRequest'
     Kibana_HTTP_APIs_syntheticsJsonValue:
       description: Any JSON value.
     Kibana_HTTP_APIs_tagcloudLibItemNoESQL:
@@ -204316,8 +204137,6 @@ components:
                   additionalProperties: false
                   type: object
                   properties:
-                    draft:
-                      type: boolean
                     fields:
                       $ref: '#/components/schemas/Kibana_HTTP_APIs_FieldDefinition'
                     routing:
@@ -204328,8 +204147,6 @@ components:
                             description: A non-empty string.
                             minLength: 1
                             type: string
-                          draft:
-                            type: boolean
                           status:
                             enum:
                               - enabled
@@ -204351,6 +204168,8 @@ components:
                 - failure_store
                 - wired
             query_streams:
+              deprecated: true
+              description: Deprecated. Query streams have been removed; this field is accepted for backwards compatibility and ignored.
               items:
                 type: object
                 properties:

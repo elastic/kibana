@@ -139,6 +139,22 @@ export const modelVersions: SavedObjectsModelVersionMap = {
       create: configAttributesSchemaV3,
     },
   },
+  4: {
+    changes: [
+      {
+        // owner: @elastic/streams-ui (query and draft streams were removed)
+        type: 'data_removal',
+        removedAttributePaths: [
+          'observability:streamsEnableQueryStreams',
+          'observability:streamsEnableDraftStreams',
+        ],
+      },
+    ],
+    schemas: {
+      forwardCompatibility: configAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
+      create: configAttributesSchemaV3,
+    },
+  },
 };
 
 /**

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { get } from 'lodash';
 import type { Streams } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
@@ -16,6 +17,30 @@ import { loadDashboards } from './helpers/dashboards';
 const TEST_STREAM_NAME = 'logs-test-default';
 const WIRED_STREAM_NAME = 'logs.otel.wiredChild';
 const TEST_DASHBOARD_ID = '9230e631-1f1a-476d-b613-4b074c6cfdd0';
+const QUERY_STREAM_NAME = 'logs.otel.removedQuery';
+const DRAFT_STREAM_NAME = 'logs.otel.removedDraft';
+
+const queryStreamDefinition = {
+  name: QUERY_STREAM_NAME,
+  type: 'query',
+  description: '',
+  updated_at: new Date(0).toISOString(),
+  query: { view: `$.${QUERY_STREAM_NAME}`, esql: 'FROM logs.otel | LIMIT 10' },
+};
+
+const draftStreamDefinition = {
+  name: DRAFT_STREAM_NAME,
+  type: 'wired',
+  description: '',
+  updated_at: new Date(0).toISOString(),
+  ingest: {
+    lifecycle: { inherit: {} },
+    processing: { steps: [], updated_at: new Date(0).toISOString() },
+    settings: {},
+    wired: { fields: {}, routing: [], draft: true },
+    failure_store: { inherit: {} },
+  },
+};
 
 const oldProcessing = [
   {
@@ -126,7 +151,6 @@ const expectedStreamsResponse: Streams.ClassicStream.Definition = {
   name: TEST_STREAM_NAME,
   description: '',
   updated_at: new Date(0).toISOString(),
-  query_streams: [],
   ingest: {
     lifecycle: {
       ilm: {
@@ -147,7 +171,6 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
   name: WIRED_STREAM_NAME,
   description: '',
   updated_at: new Date(0).toISOString(),
-  query_streams: [],
   ingest: {
     lifecycle: {
       ilm: {
@@ -253,6 +276,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         document: wiredStreamDefinition,
       });
 
+      await esClient.index({
+        index: '.kibana_streams-000001',
+        id: QUERY_STREAM_NAME,
+        document: queryStreamDefinition,
+      });
+
+      await esClient.index({
+        index: '.kibana_streams-000001',
+        id: DRAFT_STREAM_NAME,
+        document: draftStreamDefinition,
+      });
+
       await Promise.all(
         attachmentLinks.map((link) =>
           esClient.index({
@@ -356,6 +391,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
       expect(getResponse.status).to.eql(200);
       expect(getResponse.body.stream).to.eql(expectedWiredStreamsResponse);
+    });
+
+    it('should hide stored query and draft streams', async () => {
+      const listResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
+      expect(listResponse.status).to.eql(200);
+      const listedNames = listResponse.body.streams.map((stream) => stream.name);
+      expect(listedNames).not.to.contain(QUERY_STREAM_NAME);
+      expect(listedNames).not.to.contain(DRAFT_STREAM_NAME);
+
+      for (const name of [QUERY_STREAM_NAME, DRAFT_STREAM_NAME]) {
+        const getResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+          params: { path: { name } },
+        });
+        expect(getResponse.status).to.eql(404);
+        expect(get(getResponse.body, 'attributes.data.reason')).to.eql('removed_stream_type');
+      }
     });
   });
 }

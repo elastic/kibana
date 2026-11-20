@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { Streams } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { ErrorPrompt } from './error_prompt';
 import { useStreamFlyoutDetail } from '../../hooks/use_stream_flyout_detail';
@@ -23,7 +22,7 @@ export function StreamRetention({ name, onClose }: StreamFlyoutProps) {
     );
   }
 
-  return !definition || Streams.QueryStream.GetResponse.is(definition) ? (
+  return !definition ? (
     <ErrorPrompt name={name} onClose={onClose} />
   ) : (
     <EuiFlexGroup>

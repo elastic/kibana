@@ -16,8 +16,8 @@ const REVERSE_ALIAS_MAP = new Map(
 
 /**
  * OTel passthrough objects and explicit aliases produce duplicate columns
- * in ES|QL results. Strip them so draft samples match what the Search API
- * returns for non-draft streams.
+ * in ES|QL results. Strip them so ES|QL samples match what the Search API
+ * returns.
  *
  * Two categories are removed:
  * 1. Passthrough aliases — e.g. `host.name` when `attributes.host.name` exists

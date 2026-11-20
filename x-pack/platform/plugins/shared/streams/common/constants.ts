@@ -28,6 +28,9 @@ export const UNIT_METRICS_STREAM = 'metrics-streams.otel-default';
 export const getStreamsUiMetadataSavedObjectId = (configurationSavedObjectId: string): string =>
   `${configurationSavedObjectId}-streams-ui-metadata`;
 
+/** `attributes.data.reason` of a 404 for a stream whose type (query or draft) was removed. */
+export const REMOVED_STREAM_TYPE_NOT_FOUND_REASON = 'removed_stream_type';
+
 export const STREAMS_API_PRIVILEGES = {
   read: 'read_stream',
   manage: 'manage_stream',

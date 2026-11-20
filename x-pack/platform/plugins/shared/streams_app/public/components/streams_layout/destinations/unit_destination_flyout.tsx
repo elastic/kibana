@@ -240,8 +240,6 @@ export const UnitDestinationFlyout = ({
                   streamName={destination.id}
                   esqlSource={esqlSource}
                   canReadFailureStore={false}
-                  isQueryStream={false}
-                  isDraft={false}
                   totals={totals}
                 />
                 <EuiSpacer size="l" />

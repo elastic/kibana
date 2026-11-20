@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate';
-import { assign, and, not, enqueueActions, setup, sendTo, assertEvent } from 'xstate';
+import { assign, and, enqueueActions, setup, sendTo, assertEvent } from 'xstate';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { Streams, isChildOf, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
+import { isChildOf, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
 import { ALWAYS_CONDITION, conditionSchema } from '@kbn/streamlang';
 import type { RoutingDefinition } from '@kbn/streams-schema';
 import type {
@@ -24,9 +24,6 @@ import {
   createStreamSuccessNotifier,
   createForkStreamActor,
   createDeleteStreamActor,
-  createQueryStreamActor,
-  createQueryStreamSuccessNotifier,
-  updateQueryStreamSuccessNotifier,
 } from './stream_actors';
 import { routingConverter } from '../../utils';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
@@ -50,7 +47,6 @@ export const streamRoutingMachine = setup({
     forkStream: getPlaceholderFor(createForkStreamActor),
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
     routingSamplesMachine: getPlaceholderFor(() => routingSamplesMachine),
-    createQueryStream: getPlaceholderFor(createQueryStreamActor),
   },
   actions: {
     notifyStreamSuccess: getPlaceholderFor(createStreamSuccessNotifier),
@@ -90,15 +86,14 @@ export const streamRoutingMachine = setup({
       isConditionEditorValid: true,
     })),
     setupRouting: assign((_, params: { definition: PartitionableDefinition }) => {
-      const routing = Streams.WiredStream.Definition.is(params.definition.stream)
-        ? params.definition.stream.ingest.wired.routing.map(routingConverter.toUIDefinition)
-        : [];
+      const routing = params.definition.stream.ingest.wired.routing.map(
+        routingConverter.toUIDefinition
+      );
 
       return {
         currentRuleId: null,
         initialRouting: routing,
         routing,
-        editingQueryStreamName: null,
       };
     }),
     storeCurrentRuleId: assign((_, params: { id: StreamRoutingContext['currentRuleId'] }) => ({
@@ -136,8 +131,6 @@ export const streamRoutingMachine = setup({
     setConditionEditorValidity: assign((_, params: { isValid: boolean }) => ({
       isConditionEditorValid: params.isValid,
     })),
-    notifyQueryStreamSuccess: getPlaceholderFor(createQueryStreamSuccessNotifier),
-    notifyQueryStreamUpdate: getPlaceholderFor(updateQueryStreamSuccessNotifier),
     storeBulkForkItems: assign((_, params: { items: BulkForkItem[] }) => ({
       bulkFork: { items: params.items, results: [] },
     })),
@@ -204,12 +197,6 @@ export const streamRoutingMachine = setup({
 
       return isChildOf(currentStream.name, currentRule.destination);
     },
-    isClassicStream: ({ context }) =>
-      Streams.ClassicStream.Definition.is(context.definition.stream),
-    isQueryStream: ({ context }) => Streams.QueryStream.Definition.is(context.definition.stream),
-    isQueryOnlyStream: ({ context }) =>
-      Streams.ClassicStream.Definition.is(context.definition.stream) ||
-      Streams.QueryStream.Definition.is(context.definition.stream),
     allBulkForksProcessed: ({ context }) => {
       const { bulkFork } = context;
       return bulkFork !== null && bulkFork.results.length >= bulkFork.items.length;
@@ -229,19 +216,11 @@ export const streamRoutingMachine = setup({
     isRefreshing: false,
     isConditionEditorValid: true,
     bulkFork: null,
-    editingQueryStreamName: null,
   }),
   initial: 'initializing',
   states: {
     initializing: {
-      always: [
-        {
-          // Classic and query streams only support query mode — skip ingestMode entirely
-          target: '#queryMode',
-          guard: 'isQueryOnlyStream',
-        },
-        { target: 'ready' },
-      ],
+      always: 'ready',
     },
     ready: {
       id: 'ready',
@@ -253,24 +232,14 @@ export const streamRoutingMachine = setup({
         'routingRule.setConditionEditorValidity': {
           actions: [{ type: 'setConditionEditorValidity', params: ({ event }) => event }],
         },
-        'stream.received': [
-          {
-            guard: 'isQueryOnlyStream',
-            actions: [
-              { type: 'storeDefinition', params: ({ event }) => event },
-              { type: 'setupRouting', params: ({ event }) => ({ definition: event.definition }) },
-              { type: 'clearRefreshing' },
-            ],
-          },
-          {
-            target: '#ready',
-            actions: [
-              { type: 'storeDefinition', params: ({ event }) => event },
-              { type: 'clearRefreshing' },
-            ],
-            reenter: true,
-          },
-        ],
+        'stream.received': {
+          target: '#ready',
+          actions: [
+            { type: 'storeDefinition', params: ({ event }) => event },
+            { type: 'clearRefreshing' },
+          ],
+          reenter: true,
+        },
         'routingSamples.setDocumentMatchFilter': {
           actions: sendTo('routingSamplesMachine', ({ event }) => ({
             type: 'routingSamples.setDocumentMatchFilter',
@@ -327,9 +296,6 @@ export const streamRoutingMachine = setup({
           id: 'ingestMode',
           initial: 'idle',
           on: {
-            'childStreams.mode.changeToQueryMode': {
-              target: '#queryMode',
-            },
             'stream.received': {
               target: '#ingestMode',
               actions: [
@@ -480,11 +446,10 @@ export const streamRoutingMachine = setup({
                       const currentRoutingRule = selectCurrentRule(context);
 
                       return {
-                        definition: context.definition as Streams.WiredStream.GetResponse,
+                        definition: context.definition,
                         where: currentRoutingRule.where,
                         destination: currentRoutingRule.destination,
                         status: currentRoutingRule.status,
-                        draft: event.draft,
                       };
                     },
                     onDone: {
@@ -574,7 +539,7 @@ export const streamRoutingMachine = setup({
                     id: 'upsertStreamActor',
                     src: 'upsertStream',
                     input: ({ context }) => ({
-                      definition: context.definition as Streams.WiredStream.GetResponse,
+                      definition: context.definition,
                       routing: context.routing.map(routingConverter.toAPIDefinition),
                     }),
                     onDone: {
@@ -623,7 +588,7 @@ export const streamRoutingMachine = setup({
                     id: 'upsertStreamActor',
                     src: 'upsertStream',
                     input: ({ context }) => ({
-                      definition: context.definition as Streams.WiredStream.GetResponse,
+                      definition: context.definition,
                       routing: context.routing.map(routingConverter.toAPIDefinition),
                     }),
                     onDone: {
@@ -671,7 +636,7 @@ export const streamRoutingMachine = setup({
                       }
 
                       return {
-                        definition: context.definition as Streams.WiredStream.GetResponse,
+                        definition: context.definition,
                         destination: routingRule.destination,
                         where: routingRule.where,
                         status: 'enabled',
@@ -715,7 +680,7 @@ export const streamRoutingMachine = setup({
                       const item = bulkFork!.items[nextIdx];
 
                       return {
-                        definition: context.definition as Streams.WiredStream.GetResponse,
+                        definition: context.definition,
                         destination: item.name,
                         where: item.condition,
                         status: 'enabled',
@@ -828,150 +793,6 @@ export const streamRoutingMachine = setup({
             },
           },
         },
-        queryMode: {
-          id: 'queryMode',
-          initial: 'idle',
-          on: {
-            'childStreams.mode.changeToIngestMode': {
-              guard: not('isQueryOnlyStream'),
-              target: '#ingestMode',
-              actions: assign({ editingQueryStreamName: null }),
-            },
-            'stream.received': {
-              target: '#queryMode',
-              actions: [
-                { type: 'storeDefinition', params: ({ event }) => event },
-                { type: 'clearRefreshing' },
-              ],
-              reenter: true,
-            },
-          },
-          states: {
-            idle: {
-              on: {
-                'queryStream.create': {
-                  guard: 'hasManagePrivileges',
-                  target: 'creating',
-                },
-                'queryStream.edit': {
-                  guard: 'hasManagePrivileges',
-                  target: 'editing',
-                  actions: assign(({ event }) => ({
-                    editingQueryStreamName: event.name,
-                  })),
-                },
-              },
-            },
-            creating: {
-              initial: 'changing',
-              on: {
-                'queryStream.cancel': 'idle',
-              },
-              states: {
-                changing: {
-                  on: {
-                    'queryStream.save': 'saving',
-                  },
-                },
-                saving: {
-                  invoke: {
-                    src: 'createQueryStream',
-                    input: ({ event }) => {
-                      assertEvent(event, 'queryStream.save');
-                      return {
-                        name: event.name,
-                        esqlQuery: event.esqlQuery,
-                      };
-                    },
-                    onDone: {
-                      target: '#queryMode.idle',
-                      actions: [
-                        { type: 'notifyQueryStreamSuccess' },
-                        { type: 'setRefreshing' },
-                        { type: 'refreshDefinition' },
-                      ],
-                    },
-                    onError: {
-                      target: 'changing',
-                      actions: [{ type: 'notifyStreamFailure' }],
-                    },
-                  },
-                },
-              },
-            },
-            editing: {
-              initial: 'changing',
-              on: {
-                'queryStream.cancelEdit': {
-                  target: 'idle',
-                  actions: assign(() => ({
-                    editingQueryStreamName: null,
-                  })),
-                },
-              },
-              states: {
-                changing: {
-                  on: {
-                    'queryStream.update': 'saving',
-                    'queryStream.delete': 'deleting',
-                  },
-                },
-                saving: {
-                  invoke: {
-                    src: 'createQueryStream',
-                    input: ({ event }) => {
-                      assertEvent(event, 'queryStream.update');
-                      return {
-                        name: event.name,
-                        esqlQuery: event.esqlQuery,
-                      };
-                    },
-                    onDone: {
-                      target: '#queryMode.idle',
-                      actions: [
-                        assign(() => ({ editingQueryStreamName: null })),
-                        { type: 'notifyQueryStreamUpdate' },
-                        { type: 'setRefreshing' },
-                        { type: 'refreshDefinition' },
-                      ],
-                    },
-                    onError: {
-                      target: 'changing',
-                      actions: [{ type: 'notifyStreamFailure' }],
-                    },
-                  },
-                },
-                deleting: {
-                  invoke: {
-                    src: 'deleteStream',
-                    input: ({ context }) => ({
-                      name: context.editingQueryStreamName!,
-                    }),
-                    onDone: {
-                      target: 'deleted',
-                      actions: [{ type: 'setRefreshing' }, { type: 'refreshDefinition' }],
-                    },
-                    onError: {
-                      target: 'changing',
-                    },
-                  },
-                },
-                deleted: {
-                  on: {
-                    'stream.received': {
-                      target: '#queryMode.idle',
-                      actions: [
-                        assign(() => ({ editingQueryStreamName: null })),
-                        { type: 'storeDefinition', params: ({ event }) => event },
-                        { type: 'clearRefreshing' },
-                      ],
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
       },
     },
   },
@@ -1001,7 +822,6 @@ export const createStreamRoutingMachineImplementations = ({
         telemetryClient,
       })
     ),
-    createQueryStream: createQueryStreamActor({ streamsRepositoryClient }),
   },
   actions: {
     refreshDefinition,
@@ -1009,12 +829,6 @@ export const createStreamRoutingMachineImplementations = ({
       toasts: core.notifications.toasts,
     }),
     notifyStreamFailure: createStreamFailureNotifier({
-      toasts: core.notifications.toasts,
-    }),
-    notifyQueryStreamSuccess: createQueryStreamSuccessNotifier({
-      toasts: core.notifications.toasts,
-    }),
-    notifyQueryStreamUpdate: updateQueryStreamSuccessNotifier({
       toasts: core.notifications.toasts,
     }),
   },

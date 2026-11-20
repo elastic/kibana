@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { css } from '@emotion/react';
-import { Streams } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { ErrorPrompt } from './error_prompt';
 import { StreamDetailAttachments } from '../stream_detail_attachments';
@@ -24,7 +23,7 @@ export function StreamAttachments({ name, onClose }: StreamFlyoutProps) {
     );
   }
 
-  return !definition || Streams.QueryStream.GetResponse.is(definition) ? (
+  return !definition ? (
     <ErrorPrompt name={name} onClose={onClose} />
   ) : (
     <div

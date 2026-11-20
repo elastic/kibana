@@ -39,10 +39,7 @@ export const streamsManagementSkill = defineSkillType({
     A Stream is a high-level object in Elastic representing a defined, referenceable portion of data in Elasticsearch. Each stream can serve as an anchor for attached assets (dashboards, alerts, SLOs). Streams manages all underlying Elasticsearch infrastructure automatically — the agent and user interact only through the Streams API and tools.
 
     <stream_types>
-    There are two categories: ingest streams (which control data processing) and query streams (which provide read-only views).
-
-    INGEST STREAMS (wired and classic):
-    Define how data is processed. A document exists in exactly one ingest stream (exception: draft mode — see below). Only ingest streams support Streamlang processing, lifecycle control, and failure stores.
+    There are two types of ingest streams (wired and classic). They define how data is processed. A document exists in exactly one ingest stream. Ingest streams support Streamlang processing, lifecycle control, and failure stores.
 
     Wired ingest streams:
     - Management: Fully managed by Elastic. All underlying infrastructure is fully managed — do not interact with it directly.
@@ -58,15 +55,10 @@ export const streamsManagementSkill = defineSkillType({
     - Creation: Often created by external mechanisms (Agent integrations, direct ES data stream creation), not through the Streams UI.
     - Fields: field_overrides only cover fields the user explicitly overrides; all other fields use the data stream's own dynamic mappings.
 
-    Query streams (ES|QL):
-    - Read-only data. Defined by an ES|QL query over any combination of data in Elasticsearch.
-    - The query definition can be created and updated via ${UPDATE_STREAM} with changes.query = {esql, field_descriptions?}. Documents are never ingested into a query stream — the data it exposes lives in the underlying sources.
-    - Not part of any stream hierarchy.
-    - Cannot be converted to an ingest stream. No processing, no lifecycle control, no failure store.
     </stream_types>
 
     <streamlang>
-    Processing is defined using Streamlang, a domain-specific language applied as write-mode processing (permanent changes) or read-mode views (query-time preview). It is NOT raw Elasticsearch ingest pipeline format. The agent never writes Streamlang directly — use ${DESIGN_PIPELINE} to propose pipeline changes from natural language descriptions, then ${UPDATE_STREAM} to apply them.
+    Processing is defined using Streamlang, a domain-specific language applied as write-mode processing (permanent changes). It is NOT raw Elasticsearch ingest pipeline format. The agent never writes Streamlang directly — use ${DESIGN_PIPELINE} to propose pipeline changes from natural language descriptions, then ${UPDATE_STREAM} to apply them.
     </streamlang>
 
     <processing_model>
@@ -95,9 +87,6 @@ export const streamsManagementSkill = defineSkillType({
     Unmapped fields are not errors. Only suggest mapping them when the user explicitly asks, or when they need to search/filter/aggregate on a source-only field.
     </unmapped_fields>
 
-    <draft_mode>
-    Technical preview — not yet available through agent tools. If a user asks, explain the concept (write-mode vs read-mode processing, previewing changes on existing data) but note it is not available through these tools.
-    </draft_mode>
     </streams_domain>
 
     <tool_selection>
@@ -117,7 +106,7 @@ export const streamsManagementSkill = defineSkillType({
     - Never construct Streamlang step objects manually — only use objects from ${DESIGN_PIPELINE} or ${INSPECT_STREAMS}.
     - Prefer a single comprehensive ${DESIGN_PIPELINE} call over multiple calls.
 
-    Write operations: "set retention" → ${UPDATE_STREAM} with changes.lifecycle. "create a partition" → ${CREATE_PARTITION}. "delete stream X" → ${DELETE_STREAM}. "map fields" → ${UPDATE_STREAM} with changes.fields. "create a query stream" / "save this ES|QL as a stream" → ${UPDATE_STREAM} with changes.query = {esql, field_descriptions?} (optionally with changes.description). Multiple ingest change types can be combined in a single ${UPDATE_STREAM} call, but changes.query is exclusive with ingest settings — query streams have no processing, lifecycle, fields, or failure store.
+    Write operations: "set retention" → ${UPDATE_STREAM} with changes.lifecycle. "create a partition" → ${CREATE_PARTITION}. "delete stream X" → ${DELETE_STREAM}. "map fields" → ${UPDATE_STREAM} with changes.fields. Multiple change types can be combined in a single ${UPDATE_STREAM} call.
 
     ILM retention workflow: When the user wants ILM retention but doesn't name a policy, call ${LIST_ILM_POLICIES} to discover options. If it returns ilm_available: false, explain that ILM is not available on this deployment and suggest DSL retention instead. Otherwise, present policies with phase summaries and current usage. After user selects, apply via ${UPDATE_STREAM} with changes.lifecycle.
 
@@ -209,7 +198,7 @@ export const streamsManagementSkill = defineSkillType({
     </temporal_behavior>
 
     <boundaries>
-    This skill can inspect and modify stream configurations, including creating and updating query streams (their ES|QL definition). It cannot create ILM policies (only reference existing ones), modify cluster settings, modify replicated (CCR) streams, reprocess or re-index existing documents, or ingest/process data through query streams (they are read-only ES|QL views with no processing, lifecycle, or failure store).
+    This skill can inspect and modify stream configurations but cannot create ILM policies (only reference existing ones), modify cluster settings, modify replicated (CCR) streams, or reprocess or re-index existing documents.
     </boundaries>
   `),
   getRegistryTools: () => [...STREAMS_READ_TOOL_IDS, ...STREAMS_WRITE_TOOL_IDS],

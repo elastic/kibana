@@ -10,7 +10,6 @@ import { css } from '@emotion/css';
 import React from 'react';
 import { ChildStreamList } from './child_stream_list';
 import { PreviewPanel } from './preview_panel';
-import { QueryStreamCreationProvider } from './query_stream_creation_context';
 
 interface PartitioningLayoutProps {
   availableStreams?: string[];
@@ -42,43 +41,41 @@ export const PartitioningLayout = ({ availableStreams, children }: PartitioningL
   return (
     <EuiFlexItem className={overflowAutoClass} grow>
       <EuiFlexGroup direction="column" gutterSize="s" className={overflowAutoClass}>
-        <QueryStreamCreationProvider>
-          <EuiPanel
-            hasShadow={false}
-            hasBorder={false}
-            borderRadius="none"
-            className={panelClass}
-            paddingSize="none"
-          >
-            <EuiResizableContainer>
-              {(EuiResizablePanel, EuiResizableButton) => (
-                <>
-                  <EuiResizablePanel
-                    initialSize={40}
-                    minSize="400px"
-                    tabIndex={0}
-                    paddingSize="l"
-                    className={leftPanelClass}
-                  >
-                    <ChildStreamList availableStreams={availableStreams} />
-                  </EuiResizablePanel>
+        <EuiPanel
+          hasShadow={false}
+          hasBorder={false}
+          borderRadius="none"
+          className={panelClass}
+          paddingSize="none"
+        >
+          <EuiResizableContainer>
+            {(EuiResizablePanel, EuiResizableButton) => (
+              <>
+                <EuiResizablePanel
+                  initialSize={40}
+                  minSize="400px"
+                  tabIndex={0}
+                  paddingSize="l"
+                  className={leftPanelClass}
+                >
+                  <ChildStreamList availableStreams={availableStreams} />
+                </EuiResizablePanel>
 
-                  <EuiResizableButton indicator="border" />
+                <EuiResizableButton indicator="border" />
 
-                  <EuiResizablePanel
-                    initialSize={60}
-                    tabIndex={0}
-                    minSize="300px"
-                    paddingSize="l"
-                    className={rightPanelClass}
-                  >
-                    <PreviewPanel />
-                  </EuiResizablePanel>
-                </>
-              )}
-            </EuiResizableContainer>
-          </EuiPanel>
-        </QueryStreamCreationProvider>
+                <EuiResizablePanel
+                  initialSize={60}
+                  tabIndex={0}
+                  minSize="300px"
+                  paddingSize="l"
+                  className={rightPanelClass}
+                >
+                  <PreviewPanel />
+                </EuiResizablePanel>
+              </>
+            )}
+          </EuiResizableContainer>
+        </EuiPanel>
         {children}
       </EuiFlexGroup>
     </EuiFlexItem>

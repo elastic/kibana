@@ -53,13 +53,6 @@ export const useStreamRoutingEvents = () => {
     }, DEBOUNCE_DELAY);
 
     return {
-      changeChildStreamsMode: (mode: 'ingestMode' | 'queryMode') => {
-        if (mode === 'ingestMode') {
-          service.send({ type: 'childStreams.mode.changeToIngestMode' });
-        } else {
-          service.send({ type: 'childStreams.mode.changeToQueryMode' });
-        }
-      },
       cancelChanges: () => {
         debouncedChangeRule.cancel();
         debouncedChangeSuggestionName.cancel();
@@ -87,8 +80,8 @@ export const useStreamRoutingEvents = () => {
       editRule: (id: string) => {
         service.send({ type: 'routingRule.edit', id });
       },
-      forkStream: async (routingRule?: RoutingDefinition, draft?: boolean) => {
-        service.send({ type: 'routingRule.fork', routingRule, draft });
+      forkStream: async (routingRule?: RoutingDefinition) => {
+        service.send({ type: 'routingRule.fork', routingRule });
 
         await waitFor(
           service,
@@ -137,37 +130,6 @@ export const useStreamRoutingEvents = () => {
       },
       saveEditedSuggestion: () => {
         service.send({ type: 'suggestion.saveSuggestion' });
-      },
-      // Query stream events
-      createQueryStream: () => {
-        service.send({ type: 'queryStream.create' });
-      },
-      cancelQueryStreamCreation: () => {
-        service.send({ type: 'queryStream.cancel' });
-      },
-      saveQueryStream: ({ name, esqlQuery }: { name: string; esqlQuery: string }) => {
-        service.send({ type: 'queryStream.save', name, esqlQuery });
-      },
-      editQueryStream: (name: string) => {
-        service.send({ type: 'queryStream.edit', name });
-      },
-      cancelQueryStreamEdit: () => {
-        service.send({ type: 'queryStream.cancelEdit' });
-      },
-      updateQueryStream: ({ name, esqlQuery }: { name: string; esqlQuery: string }) => {
-        service.send({ type: 'queryStream.update', name, esqlQuery });
-      },
-      deleteQueryStream: async () => {
-        service.send({ type: 'queryStream.delete' });
-        const snapshot = await waitFor(
-          service,
-          (s) =>
-            s.matches({ ready: { queryMode: 'idle' } }) ||
-            s.matches({ ready: { queryMode: { editing: 'changing' } } })
-        );
-        if (snapshot.matches({ ready: { queryMode: { editing: 'changing' } } })) {
-          throw new Error('Failed to delete stream');
-        }
       },
     };
   }, [service]);

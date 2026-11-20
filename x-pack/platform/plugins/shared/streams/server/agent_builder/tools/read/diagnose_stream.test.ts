@@ -87,14 +87,6 @@ const classicStreamDef = (
   },
 });
 
-const queryStreamDef = (name: string): Streams.QueryStream.Definition => ({
-  type: 'query',
-  name,
-  description: 'test',
-  updated_at: '2026-04-10T00:00:00.000Z',
-  query: { esql: 'FROM logs', view: '' },
-});
-
 describe('createDiagnoseStreamTool handler', () => {
   const setup = () => {
     const { getScopedClients, streamsClient, esClient, scopedClusterClient } =
@@ -257,19 +249,6 @@ describe('createDiagnoseStreamTool handler', () => {
           sample_stack_trace: expect.any(String),
         })
       );
-    }
-  });
-
-  it('handles query streams — returns not_applicable health', async () => {
-    const { tool, context, streamsClient } = setup();
-    streamsClient.getStream.mockResolvedValue(queryStreamDef('query.test'));
-
-    const result = await tool.handler({ name: 'query.test' }, context);
-
-    if ('results' in result) {
-      const data = result.results[0].data as Record<string, unknown>;
-      expect(data.stream_type).toBe('query');
-      expect(data.health).toBe('not_applicable');
     }
   });
 

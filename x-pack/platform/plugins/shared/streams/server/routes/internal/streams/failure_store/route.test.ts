@@ -15,14 +15,6 @@ type SimulatedTemplate = Awaited<
   >
 >;
 
-const queryStreamDefinition: Streams.QueryStream.Definition = {
-  type: 'query',
-  name: 'logs.query',
-  description: '',
-  updated_at: new Date().toISOString(),
-  query: { view: 'view', esql: 'FROM logs' },
-};
-
 const classicStreamDefinition: Streams.ClassicStream.Definition = {
   type: 'classic',
   name: 'logs-classic',
@@ -78,19 +70,6 @@ const expectStatusError = async (
 
 describe('resolveInheritedFailureStore', () => {
   describe('400 paths', () => {
-    it('throws a 400 when the stream is not an ingest stream', async () => {
-      await expectStatusError(
-        resolveInheritedFailureStore({
-          name: queryStreamDefinition.name,
-          definition: queryStreamDefinition,
-          getAncestors: notCalled('getAncestors'),
-          getTemplate: notCalled('getTemplate'),
-        }),
-        400,
-        'Inherited failure store is only available for ingest streams'
-      );
-    });
-
     it('throws a 400 when a classic stream has no resolvable template', async () => {
       await expectStatusError(
         resolveInheritedFailureStore({

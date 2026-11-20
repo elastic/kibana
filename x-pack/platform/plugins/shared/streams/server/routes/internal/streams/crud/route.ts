@@ -11,9 +11,9 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   ClassicIngestStreamEffectiveLifecycle,
   EffectiveFailureStore,
+  Streams,
 } from '@kbn/streams-schema';
-import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
@@ -47,25 +47,13 @@ export const listStreamsRoute = createServerRoute({
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ streams: ListStreamDetail[] }> => {
-    const { streamsClient, scopedClusterClient, uiSettingsClient } = await getScopedClients({
+    const { streamsClient, scopedClusterClient } = await getScopedClients({
       request,
     });
 
-    const [allStreams, isQueryStreamsEnabled] = await Promise.all([
-      streamsClient.listStreamsWithDataStreamExistence(),
-      uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS),
-    ]);
+    const allStreams = await streamsClient.listStreamsWithDataStreamExistence();
 
-    const availableStreams = allStreams.filter(({ stream }) => {
-      const isQueryStream = Streams.QueryStream.Definition.is(stream);
-
-      // Only include query streams if query streams are enabled
-      return !isQueryStream || (isQueryStream && isQueryStreamsEnabled);
-    });
-
-    const streamNames = availableStreams
-      .filter(({ exists }) => exists)
-      .map(({ stream }) => stream.name);
+    const streamNames = allStreams.filter(({ exists }) => exists).map(({ stream }) => stream.name);
 
     const streamPrivilegesMap = new Map<string, { read_failure_store: boolean }>();
 
@@ -89,11 +77,7 @@ export const listStreamsRoute = createServerRoute({
       dataStreams.data_streams.map((dataStream) => [dataStream.name, dataStream])
     );
 
-    const enrichedStreams = availableStreams.map<ListStreamDetail>(({ stream }) => {
-      if (Streams.QueryStream.Definition.is(stream)) {
-        return { stream, privileges: { read_failure_store: false } };
-      }
-
+    const enrichedStreams = allStreams.map<ListStreamDetail>(({ stream }) => {
       const match = dataStreamsByName.get(stream.name);
       const privileges = streamPrivilegesMap.get(stream.name);
       const canReadFailureStore = privileges?.read_failure_store ?? false;

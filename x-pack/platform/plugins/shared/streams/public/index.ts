@@ -12,6 +12,7 @@ import type { StreamsPluginSetup, StreamsPluginStart, WiredStreamsStatus } from 
 export type { StreamsPluginSetup, StreamsPluginStart, WiredStreamsStatus };
 
 export {
+  REMOVED_STREAM_TYPE_NOT_FOUND_REASON,
   STREAMS_API_PRIVILEGES,
   STREAMS_UI_PRIVILEGES,
   STREAMS_V2_FEATURE_ID,

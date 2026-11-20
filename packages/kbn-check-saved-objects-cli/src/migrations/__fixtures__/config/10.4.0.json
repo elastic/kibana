@@ -1,0 +1,31 @@
+{
+  "10.3.0": [
+    {
+      "buildNum": 9007199254740991
+    },
+    {
+      "buildNum": 9007199254740991,
+      "observability:streamsEnableQueryStreams": true,
+      "observability:streamsEnableDraftStreams": true,
+      "observability:streamsEnableWiredStreamViews": true
+    },
+    {
+      "buildNum": 9007199254740991,
+      "observability:streamsEnableQueryStreams": false,
+      "dateFormat:tz": "Europe/Madrid"
+    }
+  ],
+  "10.4.0": [
+    {
+      "buildNum": 9007199254740991
+    },
+    {
+      "buildNum": 9007199254740991,
+      "observability:streamsEnableWiredStreamViews": true
+    },
+    {
+      "buildNum": 9007199254740991,
+      "dateFormat:tz": "Europe/Madrid"
+    }
+  ]
+}

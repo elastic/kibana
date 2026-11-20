@@ -94,4 +94,27 @@ describe('ui settings migrations', () => {
       }
     `);
   });
+
+  it('removes the query and draft streams settings', async () => {
+    const input = [
+      {
+        type: 'config',
+        id: '1',
+        attributes: {
+          'banners:textContent': 'my custom banner',
+          'observability:streamsEnableQueryStreams': true,
+          'observability:streamsEnableDraftStreams': true,
+        },
+        references: [],
+      },
+    ];
+
+    const output = await testHarness.migrate(input);
+
+    expect(output[0].attributes).toMatchInlineSnapshot(`
+      Object {
+        "banners:textContent": "my custom banner",
+      }
+    `);
+  });
 });

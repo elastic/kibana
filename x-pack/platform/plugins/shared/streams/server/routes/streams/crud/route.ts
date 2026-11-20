@@ -8,7 +8,6 @@
 import { z } from '@kbn/zod/v4';
 import { badData } from '@hapi/boom';
 import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
@@ -19,7 +18,6 @@ import { validateClassicStreamRoute } from './validate_classic_stream_route';
 import {
   createWiredStreamRequest,
   updateClassicStreamRequest,
-  createQueryStreamRequest,
   getWiredStreamResponse,
   listStreamsResponse,
 } from '../../../oas_examples';
@@ -71,7 +69,6 @@ export const readStreamRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    logger,
   }): Promise<Streams.all.GetResponse> => {
     const { attachmentClient, streamsClient, scopedClusterClient } = await getScopedClients({
       request,
@@ -82,7 +79,6 @@ export const readStreamRoute = createServerRoute({
       attachmentClient,
       scopedClusterClient,
       streamsClient,
-      logger,
     });
 
     return body;
@@ -156,7 +152,6 @@ export const editStreamRoute = createServerRoute({
             examples: {
               createWiredStream: { value: createWiredStreamRequest },
               updateClassicStream: { value: updateClassicStreamRequest },
-              createQueryStream: { value: createQueryStreamRequest },
             },
           },
         },
@@ -179,12 +174,7 @@ export const editStreamRoute = createServerRoute({
     }),
     body: Streams.all.UpsertRequest.right,
   }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    context,
-  }): Promise<UpsertStreamResponse> => {
+  handler: async ({ params, request, getScopedClients }): Promise<UpsertStreamResponse> => {
     const { streamsClient } = await getScopedClients({ request });
 
     // Replicated data streams are managed by the source cluster via CCR.
@@ -203,15 +193,6 @@ export const editStreamRoute = createServerRoute({
       !(await streamsClient.isStreamsEnabled())
     ) {
       throw badData('Streams are not enabled for Wired streams.');
-    }
-
-    const core = await context.core;
-    const queryStreamsEnabled = await core.uiSettings.client.get(
-      OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS
-    );
-
-    if (Streams.QueryStream.UpsertRequest.is(params.body) && !queryStreamsEnabled) {
-      throw badData('Streams are not enabled for Query streams.');
     }
 
     return await streamsClient.upsertStream({
