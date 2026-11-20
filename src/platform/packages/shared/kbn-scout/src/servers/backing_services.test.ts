@@ -23,6 +23,15 @@ describe('resolveRunOutcome', () => {
     expect(resolveRunOutcome({ ...base, interrupted: false })).toBe('ok');
   });
 
+  it('still logs a run failure that preceded the interrupt', () => {
+    const errorSpy = jest.spyOn(log, 'error');
+    expect(
+      resolveRunOutcome({ ...base, interrupted: true, runError: new Error('2 tests failed') })
+    ).toBe('interrupted');
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('2 tests failed'));
+    errorSpy.mockRestore();
+  });
+
   it('reports an interrupt ahead of everything the interrupted steps threw or reported', () => {
     expect(
       resolveRunOutcome({

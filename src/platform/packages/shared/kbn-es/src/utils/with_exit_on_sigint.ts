@@ -15,7 +15,7 @@ export async function withExitOnSigint<T>(fn: () => Promise<T>): Promise<T> {
   // asynchronous shutdown hook (e.g. Scout stopping its docker containers), which `process.exit()`
   // skips; with no hooks registered this is the plain exit it always was. Only while the loop
   // runs: left registered, the listener would cut every later shutdown short the same way.
-  const exitOnSigint = () => gracefulExit();
+  const exitOnSigint = () => gracefulExit(2); // SIGINT: exit code 130, as node would
   process.on('SIGINT', exitOnSigint);
   try {
     return await fn();

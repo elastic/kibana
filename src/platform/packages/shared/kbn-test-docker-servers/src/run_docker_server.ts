@@ -276,52 +276,59 @@ export async function runDockerServer(
   let monitorRetries = 0;
   const watchContainer = () => {
     runningSub = observeContainerRunning(name, containerId, log).subscribe({
-      error: async (error) => {
-        if (stopped) {
-          return;
+      complete: () => {
+        if (!stopped) {
+          // the `docker wait` child was ended by a signal that did not come with a shutdown
+          onMonitorEvent(new Error('the container monitor ended'));
         }
-        // `docker wait` failing is not the same as the container exiting: unless the daemon says
-        // the container is gone, watch it again, backing off, and give up after a while.
-        const running =
-          error instanceof ContainerExitError ? false : await isDockerContainerRunning(containerId);
-        if (running !== false) {
-          if (stopped) {
-            return;
-          }
-          monitorRetries += 1;
-          if (monitorRetries > MONITOR_RETRY_MAX_ATTEMPTS) {
-            log.warning(
-              `[docker:${name}] lost the container monitor ${MONITOR_RETRY_MAX_ATTEMPTS} times (${error.message}); an exit will no longer be reported`
-            );
-            return;
-          }
-          const delay = Math.min(
-            MONITOR_RETRY_DELAY_MS * 2 ** (monitorRetries - 1),
-            MONITOR_RETRY_MAX_DELAY_MS
-          );
-          log.warning(
-            `[docker:${name}] lost the container monitor (${error.message}); watching again in ${
-              delay / SECOND
-            }s`
-          );
-          setTimeout(() => {
-            if (!stopped) {
-              watchContainer();
-            }
-          }, delay).unref();
-          return;
-        }
-        log.error(`[docker:${name}] Error ensuring that the container is running`);
-        log.error(error);
-        if (starting) {
-          // reported to the caller by the readiness race, or right after it settles
-          exitDuringStart = error;
-          rejectOnExit(error);
-          return;
-        }
-        onUnexpectedExit?.(error);
       },
+      error: (error) => onMonitorEvent(error),
     });
+  };
+  const onMonitorEvent = async (error: Error) => {
+    if (stopped) {
+      return;
+    }
+    // `docker wait` failing is not the same as the container exiting: unless the daemon says
+    // the container is gone, watch it again, backing off, and give up after a while.
+    const running =
+      error instanceof ContainerExitError ? false : await isDockerContainerRunning(containerId);
+    if (running !== false) {
+      if (stopped) {
+        return;
+      }
+      monitorRetries += 1;
+      if (monitorRetries > MONITOR_RETRY_MAX_ATTEMPTS) {
+        log.warning(
+          `[docker:${name}] lost the container monitor ${MONITOR_RETRY_MAX_ATTEMPTS} times (${error.message}); an exit will no longer be reported`
+        );
+        return;
+      }
+      const delay = Math.min(
+        MONITOR_RETRY_DELAY_MS * 2 ** (monitorRetries - 1),
+        MONITOR_RETRY_MAX_DELAY_MS
+      );
+      log.warning(
+        `[docker:${name}] lost the container monitor (${error.message}); watching again in ${
+          delay / SECOND
+        }s`
+      );
+      setTimeout(() => {
+        if (!stopped) {
+          watchContainer();
+        }
+      }, delay).unref();
+      return;
+    }
+    log.error(`[docker:${name}] Error ensuring that the container is running`);
+    log.error(error);
+    if (starting) {
+      // reported to the caller by the readiness race, or right after it settles
+      exitDuringStart = error;
+      rejectOnExit(error);
+      return;
+    }
+    onUnexpectedExit?.(error);
   };
   watchContainer();
 

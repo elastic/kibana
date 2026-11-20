@@ -115,6 +115,10 @@ export function resolveRunOutcome({
   // consequences), then an early exit (its teardown aborts the start too), then the run's own
   // error.
   if (interrupted) {
+    if (runError !== undefined && runError.name !== 'AbortError') {
+      // not the cause of the exit code, but not to be lost either (e.g. failing tests)
+      log.error(`the run had failed before the interrupt: ${runError.message}`);
+    }
     if (shutdownError !== undefined) {
       log.error(
         `shutdown after the interrupt failed, something may be left running: ${shutdownError.message}`
@@ -163,8 +167,9 @@ export async function runWithBackingServices(
   });
 
   // A backing service, or a server `body` started (Kibana), died on its own: Kibana would keep
-  // serving against it, so take everything down (SIGTERM, so a Playwright runner still writes
-  // its reports) and report that exit rather than whatever the teardown makes fail next.
+  // serving against it. Tearing the managed processes down (SIGTERM, so a Playwright runner
+  // still writes its reports) makes `body` return, and the one shutdown path below stops the
+  // rest; that exit is reported rather than whatever the teardown makes fail next.
   let earlyExitError: Error | undefined;
   const onEarlyExit = (msg: string) => {
     if (interrupted) {
@@ -174,10 +179,7 @@ export async function runWithBackingServices(
     log.info('scout: a backing service exited; shutting the servers down');
     earlyExitError = earlyExitError ?? new Error(msg);
     process.exitCode = 1;
-    procs
-      .teardown('SIGTERM')
-      .then(() => shutdownBackingServices())
-      .catch((error) => log.error(error));
+    procs.teardown('SIGTERM').catch((error) => log.error(error));
   };
 
   let runError: Error | undefined;
@@ -198,7 +200,9 @@ export async function runWithBackingServices(
   // Whatever failed, do not leave a detached container holding its port for the next run.
   const shutdownErrors: Error[] = [];
   await procs.teardown('SIGTERM').catch((error) => shutdownErrors.push(asError(error)));
-  log.info('scout: shutting down backing services');
+  if (backing) {
+    log.info('scout: shutting down backing services');
+  }
   await shutdownBackingServices().catch((error) => shutdownErrors.push(asError(error)));
   removeShutdownHook();
 
