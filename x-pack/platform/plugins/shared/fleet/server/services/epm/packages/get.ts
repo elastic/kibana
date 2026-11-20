@@ -747,6 +747,15 @@ async function getBundledPackageStream(
   };
 }
 
+const getBundledPackage = (
+  pkgName: string,
+  pkgVersion: string,
+  useStreaming: boolean
+): Promise<PackageResponse | undefined> =>
+  useStreaming
+    ? getBundledPackageStream(pkgName, pkgVersion, useStreaming)
+    : Registry.getBundledArchive(pkgName, pkgVersion);
+
 // gets package from install_source
 export async function getPackageFromSource(options: {
   pkgName: string;
@@ -805,7 +814,7 @@ export async function getPackageFromSource(options: {
       }
     }
     if (!res && pkgInstallSource === 'bundled') {
-      res = await getBundledPackageStream(pkgName, pkgVersion, useStreaming);
+      res = await getBundledPackage(pkgName, pkgVersion, useStreaming);
       logger.debug(`retrieved bundled package ${pkgName}-${pkgVersion} from bundled archive`);
     }
   } else {
@@ -814,7 +823,7 @@ export async function getPackageFromSource(options: {
       logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
     } catch (err) {
       if (err instanceof RegistryResponseError && err.status === 404) {
-        res = await getBundledPackageStream(pkgName, pkgVersion, useStreaming);
+        res = await getBundledPackage(pkgName, pkgVersion, useStreaming);
         logger.debug(`retrieved bundled package ${pkgName}-${pkgVersion}`);
       } else {
         throw err;
