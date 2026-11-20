@@ -72,6 +72,7 @@ describe('getConnectorEventTriggerDefinitions', () => {
       (definition) => definition.id
     );
 
+    expect(slack2HitlAction.name).toBe('slack2.hitl_action');
     expect(ids).toContain('slack2.message');
     expect(ids).not.toContain(slack2HitlAction.name);
   });

@@ -12,7 +12,8 @@ import type { z } from '@kbn/zod/v4';
 import type { connectorEventSchema } from './connector_event_schema';
 
 /**
- * A spoke event passed to the topic helper. `name` is the event id.
+ * A spoke event passed to the topic helper.
+ * `name` is the event id (`github.push`), not a `connectors.` prefix.
  * A spec entry passes its `eventId` as `name`.
  */
 export interface ConnectorEventTopicDefinition<
