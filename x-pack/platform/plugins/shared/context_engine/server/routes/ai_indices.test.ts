@@ -3129,25 +3129,12 @@ describe('ai indices routes', () => {
       it('requires the context engine write and workflow execute privileges', () => {
         expect(getRoute('POST', AI_INDEX_DREAMING_RUN_PATH).config.security).toEqual({
           authz: {
-            requiredPrivileges: [apiPrivileges.writeContextEngine],
-            extendedPrivileges: [WorkflowsManagementApiActions.execute],
+            requiredPrivileges: [
+              apiPrivileges.writeContextEngine,
+              WorkflowsManagementApiActions.execute,
+            ],
           },
         });
-      });
-
-      it('returns 403 without starting workflows when the workflow execute privilege is missing', async () => {
-        await callRoute(
-          'POST',
-          AI_INDEX_DREAMING_RUN_PATH,
-          { params: { aiIndexId: 'customer_support' } },
-          { [WorkflowsManagementApiActions.execute]: false }
-        );
-
-        expect(response.forbidden).toHaveBeenCalledWith({
-          body: { message: 'Missing privilege to execute workflows.' },
-        });
-        expect(aiIndexService.get).not.toHaveBeenCalled();
-        expect(dreamingScheduleService.run).not.toHaveBeenCalled();
       });
 
       it('starts dreaming workflows and returns execution ids', async () => {

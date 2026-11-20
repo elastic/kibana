@@ -105,13 +105,11 @@ describe('useLatestWorkflowExecution', () => {
 
     const { result } = renderLatest();
 
-    await waitFor(() => expect(result.current.execution).toEqual(expect.anything()));
+    await waitFor(() => expect(result.current.executions).toEqual(expect.anything()));
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith('wf-1', production);
     expect(result.current).toEqual(
       expect.objectContaining({
         isRunning: false,
-        workflowId: 'wf-1',
-        execution: expect.objectContaining({ id: 'run-1' }),
         executions: [
           {
             workflowId: 'wf-1',
@@ -132,7 +130,9 @@ describe('useLatestWorkflowExecution', () => {
 
     await waitFor(() => expect(result.current.isRunning).toBe(true));
     expect(result.current.activeExecutionId).toBe('run-2');
-    expect(result.current.execution).toEqual(expect.objectContaining({ id: 'run-3' }));
+    expect(result.current.executions?.[0]?.execution).toEqual(
+      expect.objectContaining({ id: 'run-3' })
+    );
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
       expect.objectContaining({ statuses: expect.arrayContaining([ExecutionStatus.RUNNING]) })
@@ -141,14 +141,13 @@ describe('useLatestWorkflowExecution', () => {
     expect(activeQuery.statuses).not.toContain(ExecutionStatus.COMPLETED);
   });
 
-  it('returns null for a workflow that never ran', async () => {
+  it('returns an empty executions list for a workflow that never ran', async () => {
     serveRuns({ latest: [], active: [] });
 
     const { result } = renderLatest();
 
-    await waitFor(() => expect(result.current.execution).toBeNull());
+    await waitFor(() => expect(result.current.executions).toEqual([]));
     expect(result.current.isRunning).toBe(false);
-    expect(result.current.executions).toEqual([]);
   });
 
   it('keeps a just-started run as running until the query observes it', async () => {
@@ -156,7 +155,7 @@ describe('useLatestWorkflowExecution', () => {
 
     const { result } = renderLatest(['wf-1'], { awaitedExecutionIds: ['run-2'] });
 
-    await waitFor(() => expect(result.current.execution).toEqual(expect.anything()));
+    await waitFor(() => expect(result.current.executions).toEqual(expect.anything()));
     expect(result.current.isRunning).toBe(true);
   });
 
@@ -173,7 +172,9 @@ describe('useLatestWorkflowExecution', () => {
     });
 
     await waitFor(() => expect(onAwaitedObserved).toHaveBeenCalledTimes(1));
-    expect(result.current.execution).toEqual(expect.objectContaining({ id: 'run-2' }));
+    expect(result.current.executions?.[0]?.execution).toEqual(
+      expect.objectContaining({ id: 'run-2' })
+    );
     expect(result.current.isRunning).toBe(false);
     expect(result.current.activeExecutionId).toBeUndefined();
   });
@@ -187,7 +188,7 @@ describe('useLatestWorkflowExecution', () => {
       onAwaitedObserved,
     });
 
-    await waitFor(() => expect(result.current.execution).toEqual(expect.anything()));
+    await waitFor(() => expect(result.current.executions).toEqual(expect.anything()));
     expect(onAwaitedObserved).not.toHaveBeenCalled();
     expect(result.current.isRunning).toBe(true);
   });
@@ -198,8 +199,7 @@ describe('useLatestWorkflowExecution', () => {
     const { result } = renderLatest();
 
     await waitFor(() => expect(result.current.isError).toBe(true));
-    expect(result.current.execution).toBeUndefined();
-    expect(result.current.executions).toEqual([]);
+    expect(result.current.executions).toBeUndefined();
     expect(result.current.isRunning).toBe(false);
   });
 
@@ -208,9 +208,8 @@ describe('useLatestWorkflowExecution', () => {
 
     expect(mockGetWorkflowExecutions).not.toHaveBeenCalled();
     expect(result.current).toEqual({
-      execution: undefined,
-      workflowId: undefined,
-      executions: [],
+      executions: undefined,
+      unavailableWorkflowIds: [],
       isRunning: false,
       activeExecutionId: undefined,
       isError: false,
@@ -219,7 +218,7 @@ describe('useLatestWorkflowExecution', () => {
   });
 
   describe('multiple workflow ids', () => {
-    it('uses the workflow with the most recent execution, not list order', async () => {
+    it('lists executions in workflowIds order', async () => {
       serveRunsForWorkflow({
         'wf-first': {
           latest: [
@@ -245,10 +244,8 @@ describe('useLatestWorkflowExecution', () => {
 
       const { result } = renderLatest(['wf-first', 'wf-second']);
 
-      await waitFor(() =>
-        expect(result.current.execution).toEqual(expect.objectContaining({ id: 'run-new' }))
-      );
-      expect(result.current.workflowId).toBe('wf-second');
+      await waitFor(() => expect(result.current.executions).toHaveLength(2));
+      expect(result.current.unavailableWorkflowIds).toEqual([]);
       expect(result.current.executions).toEqual([
         {
           workflowId: 'wf-first',
@@ -261,87 +258,7 @@ describe('useLatestWorkflowExecution', () => {
       ]);
     });
 
-    it('picks the newest run across three workflows and ties break to earlier workflowIds index', async () => {
-      serveRunsForWorkflow({
-        'wf-a': {
-          latest: [
-            {
-              id: 'run-a',
-              status: ExecutionStatus.COMPLETED,
-              startedAt: '2024-03-01T00:00:00.000Z',
-            },
-          ],
-          active: [],
-        },
-        'wf-b': {
-          latest: [
-            {
-              id: 'run-b',
-              status: ExecutionStatus.COMPLETED,
-              startedAt: '2024-05-01T00:00:00.000Z',
-            },
-          ],
-          active: [],
-        },
-        'wf-c': {
-          latest: [
-            {
-              id: 'run-c',
-              status: ExecutionStatus.COMPLETED,
-              startedAt: '2024-05-01T00:00:00.000Z',
-            },
-          ],
-          active: [],
-        },
-      });
-
-      const { result } = renderLatest(['wf-a', 'wf-b', 'wf-c']);
-
-      await waitFor(() =>
-        expect(result.current.execution).toEqual(expect.objectContaining({ id: 'run-b' }))
-      );
-      expect(result.current.workflowId).toBe('wf-b');
-      expect(result.current.executions.map(({ workflowId }) => workflowId)).toEqual([
-        'wf-a',
-        'wf-b',
-        'wf-c',
-      ]);
-    });
-
-    it('does not throw when a run has not started yet and falls back to createdAt', async () => {
-      serveRunsForWorkflow({
-        'wf-a': {
-          latest: [
-            {
-              id: 'run-pending',
-              status: ExecutionStatus.PENDING,
-              startedAt: undefined,
-              createdAt: '2024-06-01T00:00:00.000Z',
-            },
-          ],
-          active: [],
-        },
-        'wf-b': {
-          latest: [
-            {
-              id: 'run-done',
-              status: ExecutionStatus.COMPLETED,
-              startedAt: '2024-03-01T00:00:00.000Z',
-            },
-          ],
-          active: [],
-        },
-      });
-
-      const { result } = renderLatest(['wf-a', 'wf-b']);
-
-      await waitFor(() =>
-        expect(result.current.execution).toEqual(expect.objectContaining({ id: 'run-pending' }))
-      );
-      expect(result.current.workflowId).toBe('wf-a');
-    });
-
-    it('skips workflows with no run in executions but still picks newest among the rest', async () => {
+    it('skips workflows with no run in executions but includes those that ran', async () => {
       serveRunsForWorkflow({
         'wf-first': { latest: [], active: [] },
         'wf-second': {
@@ -352,12 +269,8 @@ describe('useLatestWorkflowExecution', () => {
 
       const { result } = renderLatest(['wf-first', 'wf-second']);
 
-      await waitFor(() =>
-        expect(result.current.execution).toEqual(expect.objectContaining({ id: 'run-2' }))
-      );
-      expect(result.current.workflowId).toBe('wf-second');
-      expect(result.current.executions).toHaveLength(1);
-      expect(result.current.executions[0]?.workflowId).toBe('wf-second');
+      await waitFor(() => expect(result.current.executions).toHaveLength(1));
+      expect(result.current.executions?.[0]?.workflowId).toBe('wf-second');
     });
 
     it('isRunning when any workflow has an active execution', async () => {
@@ -375,7 +288,7 @@ describe('useLatestWorkflowExecution', () => {
       expect(result.current.activeExecutionId).toBe('run-2');
     });
 
-    it('returns null when none of the workflows ever ran', async () => {
+    it('returns an empty list when none of the workflows ever ran', async () => {
       serveRunsForWorkflow({
         'wf-first': { latest: [], active: [] },
         'wf-second': { latest: [], active: [] },
@@ -383,9 +296,7 @@ describe('useLatestWorkflowExecution', () => {
 
       const { result } = renderLatest(['wf-first', 'wf-second']);
 
-      await waitFor(() => expect(result.current.execution).toBeNull());
-      expect(result.current.workflowId).toBeUndefined();
-      expect(result.current.executions).toEqual([]);
+      await waitFor(() => expect(result.current.executions).toEqual([]));
     });
 
     it('shows the second workflow when the first query failed', async () => {
@@ -406,10 +317,12 @@ describe('useLatestWorkflowExecution', () => {
       const { result } = renderLatest(['wf-first', 'wf-second']);
 
       await waitFor(() =>
-        expect(result.current.execution).toEqual(expect.objectContaining({ id: 'run-2' }))
+        expect(result.current.executions?.[0]?.execution).toEqual(
+          expect.objectContaining({ id: 'run-2' })
+        )
       );
-      expect(result.current.workflowId).toBe('wf-second');
       expect(result.current.isError).toBe(true);
+      expect(result.current.unavailableWorkflowIds).toEqual(['wf-first']);
       expect(result.current.executions).toEqual([
         {
           workflowId: 'wf-second',
@@ -418,18 +331,16 @@ describe('useLatestWorkflowExecution', () => {
       ]);
     });
 
-    it('leaves execution undefined when every query failed', async () => {
+    it('leaves executions undefined when every query failed', async () => {
       mockGetWorkflowExecutions.mockRejectedValue(new Error('lookup failed'));
 
       const { result } = renderLatest(['wf-first', 'wf-second']);
 
       await waitFor(() => expect(result.current.isError).toBe(true));
-      expect(result.current.execution).toBeUndefined();
-      expect(result.current.workflowId).toBeUndefined();
-      expect(result.current.executions).toEqual([]);
+      expect(result.current.executions).toBeUndefined();
     });
 
-    it('leaves execution and executions empty while any query is still pending', async () => {
+    it('leaves executions undefined while any query is still pending', async () => {
       mockGetWorkflowExecutions.mockImplementation((workflowId, query) => {
         if (workflowId === 'wf-first') {
           return new Promise(() => {});
@@ -446,9 +357,46 @@ describe('useLatestWorkflowExecution', () => {
       const { result } = renderLatest(['wf-first', 'wf-second']);
 
       await waitFor(() => expect(result.current.isLoading).toBe(true));
-      expect(result.current.execution).toBeUndefined();
-      expect(result.current.workflowId).toBeUndefined();
-      expect(result.current.executions).toEqual([]);
+      expect(result.current.executions).toBeUndefined();
+    });
+
+    it('settles when awaited ids appear on different refetches after a newer run replaces an earlier one', async () => {
+      jest.useFakeTimers();
+      try {
+        const onAwaitedObserved = jest.fn();
+        const byWorkflow: Record<string, FakeRuns> = {
+          'wf-first': {
+            latest: [{ id: 'run-a', status: ExecutionStatus.COMPLETED }],
+            active: [],
+          },
+          'wf-second': {
+            latest: [{ id: 'run-placeholder', status: ExecutionStatus.SKIPPED }],
+            active: [],
+          },
+        };
+        serveRunsForWorkflow(byWorkflow);
+
+        const { result } = renderLatest(['wf-first', 'wf-second'], {
+          awaitedExecutionIds: ['run-a', 'run-b'],
+          onAwaitedObserved,
+        });
+
+        await advance(0);
+        expect(onAwaitedObserved).not.toHaveBeenCalled();
+        expect(result.current.isRunning).toBe(true);
+
+        byWorkflow['wf-first'].latest = [{ id: 'run-newer', status: ExecutionStatus.SKIPPED }];
+        await advance(RUNNING_REFETCH_MS);
+        expect(onAwaitedObserved).not.toHaveBeenCalled();
+        expect(result.current.isRunning).toBe(true);
+
+        byWorkflow['wf-second'].latest = [{ id: 'run-b', status: ExecutionStatus.COMPLETED }];
+        await advance(RUNNING_REFETCH_MS);
+        await waitFor(() => expect(onAwaitedObserved).toHaveBeenCalledTimes(1));
+        expect(result.current.isRunning).toBe(false);
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('calls onAwaitedObserved only after every awaited id is seen', async () => {
@@ -473,6 +421,42 @@ describe('useLatestWorkflowExecution', () => {
     });
   });
 
+  it('keeps executions from cached data when a background refetch fails', async () => {
+    jest.useFakeTimers();
+    try {
+      let failRefetch = false;
+      mockGetWorkflowExecutions.mockImplementation(async (_workflowId, query) => {
+        if (failRefetch) {
+          throw new Error('refetch failed');
+        }
+        const runs = {
+          latest: [{ id: 'run-1', status: ExecutionStatus.COMPLETED }],
+          active: [] as FakeRun[],
+        };
+        const source = query.statuses ? runs.active : runs.latest;
+        return { results: source.map(withDefaults) };
+      });
+
+      const { result } = renderLatest();
+      await advance(0);
+      expect(result.current.executions?.[0]?.execution).toEqual(
+        expect.objectContaining({ id: 'run-1' })
+      );
+
+      failRefetch = true;
+      await advance(IDLE_REFETCH_MS);
+      await waitFor(() => expect(result.current.isError).toBe(true));
+      expect(result.current.executions).toEqual([
+        {
+          workflowId: 'wf-1',
+          execution: expect.objectContaining({ id: 'run-1' }),
+        },
+      ]);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   describe('polling', () => {
     beforeEach(() => {
       jest.useFakeTimers();
@@ -491,7 +475,9 @@ describe('useLatestWorkflowExecution', () => {
 
       const { result } = renderLatest();
       await advance(0);
-      expect(result.current.execution).toEqual(expect.objectContaining({ id: 'run-1' }));
+      expect(result.current.executions?.[0]?.execution).toEqual(
+        expect.objectContaining({ id: 'run-1' })
+      );
       expect(latestRunQueries()).toBe(1);
 
       runs.latest = [{ id: 'run-2', status: ExecutionStatus.RUNNING }];

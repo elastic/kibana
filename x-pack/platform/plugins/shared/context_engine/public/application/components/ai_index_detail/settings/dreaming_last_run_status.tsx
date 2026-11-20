@@ -27,10 +27,9 @@ import { useWorkflowSummaries } from '../../../hooks/use_workflow_summaries';
 import { getWorkflowExecutionPath } from '../../../utils/get_workflow_execution_path';
 import {
   getWorkflowExecutionStatusDisplay,
-  getWorkflowExecutionStatusIcon,
   WorkflowLastExecution,
 } from '../workflow_last_execution';
-import { getWorstExecutionStatus } from './dreaming_workflow_execution_utils';
+import { getWorstExecution } from './dreaming_workflow_execution_utils';
 
 const lastRunLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.runs.lastRun', {
   defaultMessage: 'Last run',
@@ -43,40 +42,70 @@ const popoverAriaLabel = i18n.translate(
   }
 );
 
+const neverRunRowLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.dreaming.runs.neverRun',
+  {
+    defaultMessage: 'Never run',
+  }
+);
+
+const statusUnavailableRowLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.dreaming.runs.statusUnavailable',
+  {
+    defaultMessage: 'Status unavailable',
+  }
+);
+
 export interface DreamingLastRunStatusProps {
   workflowIds: readonly string[];
-  executions: readonly WorkflowLatestExecution[];
-  execution: Pick<WorkflowExecutionListItemDto, 'id' | 'status' | 'startedAt'> | null | undefined;
+  executions: readonly WorkflowLatestExecution[] | undefined;
+  unavailableWorkflowIds: readonly string[];
 }
 
-type GetUrlForApp = (appId: string, options?: { path?: string }) => string;
+interface DreamingLastRunExecutionRowProps {
+  name: string;
+  execution: WorkflowExecutionListItemDto | undefined;
+  href: string | undefined;
+  isUnavailable: boolean;
+}
 
-const executionLinkHref = (
-  getUrlForApp: GetUrlForApp,
-  workflowId: string,
-  executionId: string
-): string =>
-  getUrlForApp(WORKFLOWS_APP_ID, {
-    path: getWorkflowExecutionPath(workflowId, executionId),
-  });
+const getRowStatusLabel = (
+  statusDisplay: ReturnType<typeof getWorkflowExecutionStatusDisplay> | undefined,
+  isUnavailable: boolean
+): string => {
+  if (statusDisplay) {
+    return statusDisplay.label;
+  }
+  if (isUnavailable) {
+    return statusUnavailableRowLabel;
+  }
+  return neverRunRowLabel;
+};
 
 const DreamingLastRunExecutionRow = ({
-  item,
   name,
-  getUrlForApp,
-}: {
-  item: WorkflowLatestExecution;
-  name: string;
-  getUrlForApp: GetUrlForApp;
-}) => {
-  const statusDisplay = getWorkflowExecutionStatusDisplay(item.execution.status);
-  const rowHref = executionLinkHref(getUrlForApp, item.workflowId, item.execution.id);
+  execution,
+  href,
+  isUnavailable,
+}: DreamingLastRunExecutionRowProps) => {
+  const statusDisplay = execution ? getWorkflowExecutionStatusDisplay(execution.status) : undefined;
+  const statusLabel = getRowStatusLabel(statusDisplay, isUnavailable);
+
+  const nameContent =
+    href !== undefined ? (
+      <EuiLink href={href} data-test-subj="contextAiIndexDreamingLastRunPopoverRowLink">
+        <strong>{name}</strong>
+      </EuiLink>
+    ) : (
+      <strong>{name}</strong>
+    );
 
   return (
     <EuiListGroupItem
+      wrapText
       data-test-subj="contextAiIndexDreamingLastRunPopoverRow"
       label={
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           {statusDisplay ? (
             <EuiFlexItem grow={false}>
               <EuiIcon
@@ -88,24 +117,20 @@ const DreamingLastRunExecutionRow = ({
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={false}>
-            <EuiText size="xs">
-              <strong>{name}</strong>
-            </EuiText>
+            <EuiText size="xs">{nameContent}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
-              {statusDisplay?.label ?? ''}
+              {statusLabel}
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink href={rowHref} data-test-subj="contextWorkflowLastExecutionLink">
-              {item.execution.startedAt ? (
-                <FormattedRelative value={new Date(item.execution.startedAt)} />
-              ) : (
-                statusDisplay?.label
-              )}
-            </EuiLink>
-          </EuiFlexItem>
+          {execution?.startedAt ? (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <FormattedRelative value={new Date(execution.startedAt)} />
+              </EuiText>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       }
     />
@@ -115,45 +140,40 @@ const DreamingLastRunExecutionRow = ({
 export const DreamingLastRunStatus = ({
   workflowIds,
   executions,
-  execution,
+  unavailableWorkflowIds,
 }: DreamingLastRunStatusProps) => {
-  const workflowIdsList = useMemo(() => [...workflowIds], [workflowIds]);
-  const { summaries } = useWorkflowSummaries(workflowIdsList);
+  const { summaries } = useWorkflowSummaries(workflowIds);
   const {
     services: { application },
   } = useKibana();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  if (workflowIds.length === 0) {
+  const executionByWorkflowId = useMemo(() => {
+    const byId = new Map<string, WorkflowExecutionListItemDto>();
+    for (const item of executions ?? []) {
+      byId.set(item.workflowId, item.execution);
+    }
+    return byId;
+  }, [executions]);
+
+  if (executions === undefined) {
     return null;
   }
 
-  if (execution === undefined) {
-    return null;
-  }
-
-  if (execution === null) {
+  if (executions.length === 0) {
     return (
       <WorkflowLastExecution hasExecution={false} data-test-subj="contextAiIndexDreamingLastRun" />
     );
   }
 
-  const { status, startedAt } = execution;
-  const terminalStatusIcon = getWorkflowExecutionStatusIcon(status);
-  const when = startedAt ? (
-    <FormattedRelative value={new Date(startedAt)} />
-  ) : (
-    terminalStatusIcon?.label
-  );
-
-  if (when === undefined) {
+  const worst = getWorstExecution(executions);
+  if (worst === undefined) {
     return null;
   }
 
-  const worst = getWorstExecutionStatus(executions);
-  const worstStatusDisplay = worst
-    ? getWorkflowExecutionStatusDisplay(worst.execution.status)
-    : terminalStatusIcon;
+  const worstStatusDisplay = getWorkflowExecutionStatusDisplay(worst.execution.status);
+  const worstStartedAt = worst.execution.startedAt;
+  const hasWorstStartedAt = worstStartedAt !== undefined && worstStartedAt !== '';
 
   return (
     <EuiFlexGroup
@@ -167,60 +187,71 @@ export const DreamingLastRunStatus = ({
           {lastRunLabel}
         </EuiText>
       </EuiFlexItem>
-      {worstStatusDisplay ? (
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            isOpen={isPopoverOpen}
-            closePopover={() => setIsPopoverOpen(false)}
-            anchorPosition="upCenter"
-            aria-label={popoverAriaLabel}
-            button={
-              <EuiButtonEmpty
-                size="xs"
-                color="text"
-                aria-label={popoverAriaLabel}
-                data-test-subj="contextAiIndexDreamingLastRunPopoverButton"
-                onClick={() => setIsPopoverOpen((open) => !open)}
-              >
-                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon
-                      type={worstStatusDisplay.type}
-                      color={worstStatusDisplay.color}
-                      size="s"
-                      data-test-subj={`contextAiIndexDreamingLastRunStatus-${
-                        worst?.execution.status ?? status
-                      }`}
-                      aria-hidden={true}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued">
-                      {worstStatusDisplay.label}
-                    </EuiText>
-                  </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(false)}
+          anchorPosition="upCenter"
+          hasArrow
+          aria-label={popoverAriaLabel}
+          button={
+            <EuiButtonEmpty
+              size="xs"
+              color="text"
+              data-test-subj="contextAiIndexDreamingLastRunPopoverButton"
+              onClick={() => setIsPopoverOpen((open) => !open)}
+            >
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon
+                    type={worstStatusDisplay.type}
+                    color={worstStatusDisplay.color}
+                    size="s"
+                    data-test-subj={`contextAiIndexDreamingLastRunStatus-${worst.execution.status}`}
+                    aria-hidden={true}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {worstStatusDisplay.label}
+                  </EuiText>
+                </EuiFlexItem>
+                {hasWorstStartedAt ? (
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs" color="subdued" className="eui-textTruncate">
-                      {when}
+                      <FormattedRelative value={new Date(worstStartedAt)} />
                     </EuiText>
                   </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiButtonEmpty>
-            }
-          >
-            <EuiListGroup>
-              {executions.map((item) => (
+                ) : null}
+              </EuiFlexGroup>
+            </EuiButtonEmpty>
+          }
+        >
+          <EuiListGroup>
+            {workflowIds.map((workflowId) => {
+              const execution = executionByWorkflowId.get(workflowId);
+              const href =
+                execution !== undefined
+                  ? application.getUrlForApp(WORKFLOWS_APP_ID, {
+                      path: getWorkflowExecutionPath(workflowId, execution.id),
+                    })
+                  : undefined;
+              const isUnavailable =
+                execution === undefined && unavailableWorkflowIds.includes(workflowId);
+
+              return (
                 <DreamingLastRunExecutionRow
-                  key={item.workflowId}
-                  item={item}
-                  name={summaries.get(item.workflowId)?.name ?? item.workflowId}
-                  getUrlForApp={application.getUrlForApp}
+                  key={workflowId}
+                  name={summaries.get(workflowId)?.name ?? workflowId}
+                  execution={execution}
+                  href={href}
+                  isUnavailable={isUnavailable}
                 />
-              ))}
-            </EuiListGroup>
-          </EuiPopover>
-        </EuiFlexItem>
-      ) : null}
+              );
+            })}
+          </EuiListGroup>
+        </EuiPopover>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

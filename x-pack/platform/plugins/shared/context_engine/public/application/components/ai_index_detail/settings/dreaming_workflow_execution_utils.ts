@@ -5,27 +5,35 @@
  * 2.0.
  */
 
+import { ExecutionStatus, type ExecutionStatusUnion } from '@kbn/workflows';
 import type { WorkflowLatestExecution } from '../../../hooks/use_latest_workflow_execution';
-import { getWorkflowExecutionStatusWorstRank } from '../workflow_last_execution';
 
-const executionStartedAt = (startedAt: string | undefined): string => startedAt ?? '';
+// Lower is worse.
+const STATUS_RANK: Readonly<Record<ExecutionStatusUnion, number>> = {
+  [ExecutionStatus.FAILED]: 0,
+  [ExecutionStatus.TIMED_OUT]: 0,
+  [ExecutionStatus.CANCELLED]: 1,
+  [ExecutionStatus.SKIPPED]: 2,
+  [ExecutionStatus.PENDING]: 3,
+  [ExecutionStatus.WAITING]: 3,
+  [ExecutionStatus.WAITING_FOR_INPUT]: 3,
+  [ExecutionStatus.WAITING_FOR_CHILD]: 3,
+  [ExecutionStatus.RUNNING]: 3,
+  [ExecutionStatus.QUEUED]: 3,
+  [ExecutionStatus.COMPLETED]: 4,
+};
 
-export const getWorstExecutionStatus = (
+/** Execution with the most severe status; first one wins on ties. */
+export const getWorstExecution = (
   executions: readonly WorkflowLatestExecution[]
 ): WorkflowLatestExecution | undefined => {
   let worst: WorkflowLatestExecution | undefined;
   let worstRank = Number.POSITIVE_INFINITY;
-  let worstStartedAt = '';
 
   for (const item of executions) {
-    const { status, startedAt } = item.execution;
-    const rank = getWorkflowExecutionStatusWorstRank(status);
-    const started = executionStartedAt(startedAt);
-    const isWorse =
-      rank < worstRank || (rank === worstRank && started.localeCompare(worstStartedAt) > 0);
-    if (isWorse) {
+    const rank = STATUS_RANK[item.execution.status];
+    if (rank < worstRank) {
       worstRank = rank;
-      worstStartedAt = started;
       worst = item;
     }
   }

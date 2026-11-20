@@ -19,9 +19,8 @@ import { DreamingPanel } from './dreaming_panel';
 jest.mock('../../../hooks/use_ai_index_dreaming', () => ({ useAiIndexDreaming: jest.fn() }));
 jest.mock('../../../hooks/use_latest_workflow_execution', () => ({
   useLatestWorkflowExecution: jest.fn(() => ({
-    execution: null,
-    workflowId: undefined,
     executions: [],
+    unavailableWorkflowIds: [],
     isRunning: false,
     activeExecutionId: undefined,
     isError: false,

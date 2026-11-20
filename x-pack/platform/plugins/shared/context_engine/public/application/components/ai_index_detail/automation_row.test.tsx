@@ -186,7 +186,7 @@ describe('AutomationRow', () => {
   beforeEach(() => {
     mockRunAutomation.mockClear();
     mockLatestExecution.mockReturnValue({
-      execution: undefined,
+      executions: undefined,
       isRunning: false,
       isLoading: true,
     });
@@ -382,7 +382,12 @@ describe('AutomationRow', () => {
 
     it('shows a spinner linking to the running execution instead of Run', () => {
       mockLatestExecution.mockReturnValue({
-        execution: { id: 'run-1', status: 'running', startedAt: new Date().toISOString() },
+        executions: [
+          {
+            workflowId: 'workflow-value-id',
+            execution: { id: 'run-1', status: 'running', startedAt: new Date().toISOString() },
+          },
+        ],
         activeExecutionId: 'run-1',
         isRunning: true,
         isLoading: false,
@@ -398,7 +403,12 @@ describe('AutomationRow', () => {
 
     it('shows the running spinner to users who cannot run workflows', () => {
       mockLatestExecution.mockReturnValue({
-        execution: { id: 'run-1', status: 'running', startedAt: new Date().toISOString() },
+        executions: [
+          {
+            workflowId: 'workflow-value-id',
+            execution: { id: 'run-1', status: 'running', startedAt: new Date().toISOString() },
+          },
+        ],
         activeExecutionId: 'run-1',
         isRunning: true,
         isLoading: false,
@@ -411,7 +421,7 @@ describe('AutomationRow', () => {
 
     it('says the status is unavailable when the execution query fails', () => {
       mockLatestExecution.mockReturnValue({
-        execution: undefined,
+        executions: undefined,
         isRunning: false,
         isError: true,
         isLoading: false,
@@ -426,7 +436,12 @@ describe('AutomationRow', () => {
 
     it('shows the status in place of the time for a skipped run without a start time', () => {
       mockLatestExecution.mockReturnValue({
-        execution: { id: 'run-2', status: 'skipped' },
+        executions: [
+          {
+            workflowId: 'workflow-value-id',
+            execution: { id: 'run-2', status: 'skipped' },
+          },
+        ],
         isRunning: false,
         isLoading: false,
       });
@@ -440,7 +455,12 @@ describe('AutomationRow', () => {
 
     it('shows when the workflow last ran and how it ended', () => {
       mockLatestExecution.mockReturnValue({
-        execution: { id: 'run-1', status: 'failed', startedAt: new Date().toISOString() },
+        executions: [
+          {
+            workflowId: 'workflow-value-id',
+            execution: { id: 'run-1', status: 'failed', startedAt: new Date().toISOString() },
+          },
+        ],
         isRunning: false,
         isLoading: false,
       });
@@ -451,7 +471,7 @@ describe('AutomationRow', () => {
     });
 
     it('says so when the workflow never ran', () => {
-      mockLatestExecution.mockReturnValue({ execution: null, isRunning: false, isLoading: false });
+      mockLatestExecution.mockReturnValue({ executions: [], isRunning: false, isLoading: false });
       renderAutomationRow(runnable);
 
       expect(screen.getByTestId('contextAutomationLastExecution')).toHaveTextContent('Never run');
@@ -466,7 +486,7 @@ describe('AutomationRow', () => {
     it('clears awaitedExecutionIds when the hook calls onAwaitedObserved', () => {
       mockLatestExecution.mockImplementation(
         (_workflowIds: string[], options?: LatestWorkflowExecutionHookOptions) => ({
-          execution: undefined,
+          executions: undefined,
           activeExecutionId: undefined,
           isRunning: (options?.awaitedExecutionIds?.length ?? 0) > 0,
           isLoading: false,

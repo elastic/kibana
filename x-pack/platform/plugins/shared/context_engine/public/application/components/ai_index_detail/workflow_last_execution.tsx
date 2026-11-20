@@ -14,12 +14,7 @@ import {
   type IconType,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import {
-  ExecutionStatus,
-  ExecutionStatusValues,
-  isTerminalStatus,
-  type ExecutionStatusUnion,
-} from '@kbn/workflows';
+import { ExecutionStatus, type ExecutionStatusUnion } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -47,7 +42,7 @@ const neverRunLabel = i18n.translate('xpack.contextEngine.workflowLastExecution.
   defaultMessage: 'Never run',
 });
 
-export const getWorkflowExecutionStatusIcon = (
+const getTerminalStatusDisplay = (
   status: ExecutionStatusUnion
 ): WorkflowExecutionStatusDisplay | undefined => {
   switch (status) {
@@ -96,49 +91,18 @@ export const getWorkflowExecutionStatusIcon = (
   }
 };
 
-const inProgressStatusDisplay = (): WorkflowExecutionStatusDisplay => ({
+const IN_PROGRESS_STATUS_DISPLAY: WorkflowExecutionStatusDisplay = {
   type: 'clock',
   color: 'subdued',
   label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.inProgress', {
     defaultMessage: 'In progress',
   }),
-});
-
-const isNonTerminal = (status: ExecutionStatusUnion): boolean => {
-  const parsed = ExecutionStatusValues.find((value) => value === status);
-  return parsed !== undefined && !isTerminalStatus(parsed);
 };
 
 /** Icon, color, and label for a workflow execution status, including non-terminal runs. */
 export const getWorkflowExecutionStatusDisplay = (
   status: ExecutionStatusUnion
-): WorkflowExecutionStatusDisplay | undefined => {
-  const terminal = getWorkflowExecutionStatusIcon(status);
-  if (terminal) {
-    return terminal;
-  }
-  if (isNonTerminal(status)) {
-    return inProgressStatusDisplay();
-  }
-  return undefined;
-};
-
-/** Lower rank is worse (failed/timed out are 0). */
-export const getWorkflowExecutionStatusWorstRank = (status: ExecutionStatusUnion): number => {
-  if (status === ExecutionStatus.FAILED || status === ExecutionStatus.TIMED_OUT) {
-    return 0;
-  }
-  if (status === ExecutionStatus.CANCELLED) {
-    return 1;
-  }
-  if (status === ExecutionStatus.SKIPPED) {
-    return 2;
-  }
-  if (isNonTerminal(status)) {
-    return 3;
-  }
-  return 4;
-};
+): WorkflowExecutionStatusDisplay => getTerminalStatusDisplay(status) ?? IN_PROGRESS_STATUS_DISPLAY;
 
 const hasNoExecution = (
   props: WorkflowLastExecutionProps
@@ -171,7 +135,7 @@ export const WorkflowLastExecution = (props: WorkflowLastExecutionProps) => {
     );
   }
 
-  const icon = status !== undefined ? getWorkflowExecutionStatusIcon(status) : undefined;
+  const icon = status !== undefined ? getTerminalStatusDisplay(status) : undefined;
   const when = startedAt ? <FormattedRelative value={new Date(startedAt)} /> : icon?.label;
 
   if (when === undefined) {

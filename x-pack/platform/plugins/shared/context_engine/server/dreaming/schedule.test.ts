@@ -603,5 +603,32 @@ describe('createDreamingScheduleService', () => {
       expect(result.skipped).toEqual([]);
       expect(result.failed).toEqual([]);
     });
+
+    it('treats an execution as started when its status lookup fails', async () => {
+      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
+      const traceId = traceDreamingWorkflowIdFor('support', SPACE);
+      const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
+      client.execute
+        .mockResolvedValueOnce('exec-dreaming')
+        .mockResolvedValueOnce('exec-trace')
+        .mockResolvedValueOnce('exec-relationships');
+      workflowsManagement.getWorkflowExecution.mockRejectedValue(new Error('lookup failed'));
+
+      const result = await createService(workflowsManagement).run({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(result).toEqual({
+        executions: [
+          { workflow_id: dreamingId, execution_id: 'exec-dreaming' },
+          { workflow_id: traceId, execution_id: 'exec-trace' },
+          { workflow_id: relationshipsId, execution_id: 'exec-relationships' },
+        ],
+        failed: [],
+        skipped: [],
+      });
+    });
   });
 });

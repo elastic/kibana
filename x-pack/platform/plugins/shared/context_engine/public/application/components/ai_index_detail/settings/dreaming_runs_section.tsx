@@ -40,10 +40,13 @@ export const DreamingRunsSection = ({
   onStarted,
 }: DreamingRunsSectionProps) => {
   const canWrite = useCanWriteContextEngine();
-  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow, canReadWorkflowExecution } = useWorkflowsCapabilities();
   const { runDreaming, isLoading: isRunLoading } = useRunDreaming({
-    onStarted: (response) =>
-      onStarted(response.executions.map(({ execution_id: executionId }) => executionId)),
+    onStarted: (response) => {
+      if (canReadWorkflowExecution) {
+        onStarted(response.executions.map(({ execution_id: executionId }) => executionId));
+      }
+    },
   });
 
   const isRunning = isRunLoading || latestIsRunning;

@@ -160,8 +160,10 @@ const DELETE_SECURITY: RouteSecurity = {
 
 const RUN_DREAMING_SECURITY: RouteSecurity = {
   authz: {
-    requiredPrivileges: [apiPrivileges.writeContextEngine],
-    extendedPrivileges: [...WorkflowsManagementOperationPrivileges.execute],
+    requiredPrivileges: [
+      apiPrivileges.writeContextEngine,
+      ...WorkflowsManagementOperationPrivileges.execute,
+    ],
   },
 };
 
@@ -182,7 +184,6 @@ const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
   hasWorkflowPrivileges(request, WorkflowsManagementOperationPrivileges.delete);
 
 const MEMORY_DISABLED_MESSAGE = 'Context Engine memory is turned off.';
-const RUN_DREAMING_FORBIDDEN_MESSAGE = 'Missing privilege to execute workflows.';
 
 const toPublicAiIndex = ({
   dreaming: _dreaming,
@@ -1318,9 +1319,6 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         if (!(await isMemoryEnabled(request))) {
           return response.notFound({ body: { message: MEMORY_DISABLED_MESSAGE } });
-        }
-        if (!hasWorkflowPrivileges(request, WorkflowsManagementOperationPrivileges.execute)) {
-          return response.forbidden({ body: { message: RUN_DREAMING_FORBIDDEN_MESSAGE } });
         }
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;

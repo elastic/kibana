@@ -263,13 +263,11 @@ const DreamingEditor = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>
-          <EuiText size="xs" color="subdued">
-            <DreamingLastRunStatus
-              workflowIds={workflowIds}
-              executions={latestExecution.executions}
-              execution={latestExecution.execution}
-            />
-          </EuiText>
+          <DreamingLastRunStatus
+            workflowIds={workflowIds}
+            executions={latestExecution.executions}
+            unavailableWorkflowIds={latestExecution.unavailableWorkflowIds}
+          />
         </div>
       </SettingsRow>
       <EuiHorizontalRule margin="m" />

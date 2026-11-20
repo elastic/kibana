@@ -29,12 +29,10 @@ export interface WorkflowLatestExecution {
 }
 
 export interface LatestWorkflowExecution {
-  /** Newest run across workflows (by `startedAt`, else `createdAt`); `null` if none; `undefined` while loading. */
-  execution: WorkflowExecutionListItemDto | null | undefined;
-  /** Workflow id of `execution`, for execution links. */
-  workflowId: string | undefined;
-  /** Latest run per workflow that has one, in `workflowIds` order. */
-  executions: readonly WorkflowLatestExecution[];
+  /** Latest run per workflow that has one, in `workflowIds` order; `undefined` while loading or when no query succeeded with data. */
+  executions: readonly WorkflowLatestExecution[] | undefined;
+  /** Workflows whose history lookup failed and has no cached result. */
+  unavailableWorkflowIds: readonly string[];
   /** A run is in progress, or the one just started has not been observed yet. */
   isRunning: boolean;
   activeExecutionId: string | undefined;
@@ -55,54 +53,7 @@ const productionExecutionsParams: GetWorkflowExecutionsParams = {
   omitStepRuns: true,
 };
 
-// `startedAt` is typed as required but is absent for executions that have not started yet.
-const readOptionalTimestamp = (
-  execution: WorkflowExecutionListItemDto,
-  key: 'startedAt' | 'createdAt'
-): string | undefined => {
-  if (!Object.hasOwn(execution, key)) {
-    return undefined;
-  }
-  const value = Reflect.get(execution, key);
-  return typeof value === 'string' ? value : undefined;
-};
-
-const parseTimestamp = (value: string | undefined): number | undefined => {
-  const trimmed = value?.trim() ?? '';
-  if (trimmed === '') {
-    return undefined;
-  }
-  const parsed = Date.parse(trimmed);
-  return Number.isNaN(parsed) ? undefined : parsed;
-};
-
-const executionCompareTime = (execution: WorkflowExecutionListItemDto): number =>
-  parseTimestamp(readOptionalTimestamp(execution, 'startedAt')) ??
-  parseTimestamp(readOptionalTimestamp(execution, 'createdAt')) ??
-  Number.NEGATIVE_INFINITY;
-
-const pickNewestExecution = (
-  items: readonly WorkflowLatestExecution[]
-): WorkflowLatestExecution | undefined => {
-  let best: WorkflowLatestExecution | undefined;
-  let bestTime = Number.NEGATIVE_INFINITY;
-
-  for (const item of items) {
-    const time = executionCompareTime(item.execution);
-    if (best === undefined || time > bestTime) {
-      best = item;
-      bestTime = time;
-    }
-  }
-
-  return best;
-};
-
-/**
- * Latest runs for workflows in list order. `execution` is the newest across workflows.
- * `awaitedExecutionIds` keeps running until every listed id appears on some workflow query.
- * `onAwaitedObserved` fires once all awaited ids are seen (keyed by joined ids).
- */
+/** Latest production runs for the given workflow ids, with optional await until listed execution ids appear. */
 export const useLatestWorkflowExecution = (
   workflowIds: readonly string[],
   {
@@ -118,12 +69,16 @@ export const useLatestWorkflowExecution = (
   const api = useWorkflowsApi();
   const queriesEnabled = enabled && workflowIds.length > 0;
 
-  const awaitingObservedRef = useRef(false);
+  const awaitSettledRef = useRef(false);
   const onAwaitedObservedRef = useRef(onAwaitedObserved);
   onAwaitedObservedRef.current = onAwaitedObserved;
 
   const awaitedIds = awaitedExecutionIds ?? [];
   const hasAwaited = awaitedIds.length > 0;
+  const awaitedKey = awaitedIds.join(',');
+
+  const observedAwaitedIdsRef = useRef<Set<string>>(new Set());
+  const lastAwaitedKeyRef = useRef(awaitedKey);
 
   const queries = useQueries({
     queries: workflowIds.map((workflowId) => ({
@@ -143,22 +98,29 @@ export const useLatestWorkflowExecution = (
       },
       enabled: queriesEnabled,
       refetchInterval: (current: LatestWorkflowExecutionData | undefined) =>
-        current?.activeExecution || (hasAwaited && !awaitingObservedRef.current)
+        current?.activeExecution || (hasAwaited && !awaitSettledRef.current)
           ? RUNNING_REFETCH_MS
           : IDLE_REFETCH_MS,
     })),
   });
 
-  const awaitedObserved =
-    hasAwaited &&
-    awaitedIds.every((awaitedId) =>
-      queries.some(
-        ({ data }) => data?.execution?.id === awaitedId || data?.activeExecution?.id === awaitedId
-      )
-    );
-  awaitingObservedRef.current = !hasAwaited || awaitedObserved;
+  if (lastAwaitedKeyRef.current !== awaitedKey) {
+    observedAwaitedIdsRef.current = new Set();
+    lastAwaitedKeyRef.current = awaitedKey;
+  }
 
-  const awaitedKey = awaitedIds.join(',');
+  const observedAwaitedIds = observedAwaitedIdsRef.current;
+  for (const { data } of queries) {
+    for (const id of [data?.execution?.id, data?.activeExecution?.id]) {
+      if (id !== undefined && awaitedIds.includes(id)) {
+        observedAwaitedIds.add(id);
+      }
+    }
+  }
+
+  const awaitedObserved =
+    hasAwaited && awaitedIds.every((awaitedId) => observedAwaitedIds.has(awaitedId));
+  awaitSettledRef.current = !hasAwaited || awaitedObserved;
 
   useEffect(() => {
     if (awaitedObserved) {
@@ -168,9 +130,8 @@ export const useLatestWorkflowExecution = (
 
   if (!queriesEnabled) {
     return {
-      execution: undefined,
-      workflowId: undefined,
-      executions: [],
+      executions: undefined,
+      unavailableWorkflowIds: [],
       isRunning: false,
       activeExecutionId: undefined,
       isError: false,
@@ -181,46 +142,38 @@ export const useLatestWorkflowExecution = (
   const hasPending = queries.some((query) => !query.isError && query.data === undefined);
   const isError = queries.some((query) => query.isError);
 
-  const executions: WorkflowLatestExecution[] = [];
-  if (!hasPending) {
-    for (let i = 0; i < workflowIds.length; i++) {
-      const query = queries[i];
-      if (query === undefined || query.isError || query.data === undefined) {
-        continue;
+  let executions: readonly WorkflowLatestExecution[] | undefined;
+
+  if (hasPending) {
+    executions = undefined;
+  } else {
+    const built = queries.flatMap(({ data }, index) => {
+      if (data === undefined) {
+        return [];
       }
-      const run = query.data.execution;
-      if (run !== null) {
-        executions.push({ workflowId: workflowIds[i], execution: run });
-      }
+      const run = data.execution;
+      return run !== null ? [{ workflowId: workflowIds[index], execution: run }] : [];
+    });
+    if (isError && built.length === 0) {
+      executions = undefined;
+    } else {
+      executions = built;
     }
   }
 
-  let execution: WorkflowExecutionListItemDto | null | undefined;
-  let workflowId: string | undefined;
-  const newest = hasPending ? undefined : pickNewestExecution(executions);
+  const activeExecutionId = queries
+    .map(({ data }) => data?.activeExecution?.id)
+    .find((id) => id !== undefined);
 
-  if (hasPending) {
-    execution = undefined;
-    workflowId = undefined;
-  } else if (newest !== undefined) {
-    execution = newest.execution;
-    workflowId = newest.workflowId;
-  } else if (isError) {
-    execution = undefined;
-    workflowId = undefined;
-  } else {
-    execution = null;
-    workflowId = undefined;
-  }
-
-  const activeExecutionId = queries.find(({ data }) => data?.activeExecution)?.data?.activeExecution
-    ?.id;
+  const unavailableWorkflowIds = workflowIds.filter((_, index) => {
+    const query = queries[index];
+    return query.isError && query.data === undefined;
+  });
 
   return {
-    execution,
-    workflowId,
-    executions: hasPending ? [] : executions,
-    isRunning: activeExecutionId !== undefined || !awaitingObservedRef.current,
+    executions,
+    unavailableWorkflowIds,
+    isRunning: activeExecutionId !== undefined || !awaitSettledRef.current,
     activeExecutionId,
     isError,
     isLoading: queries.some(({ isLoading }) => isLoading),

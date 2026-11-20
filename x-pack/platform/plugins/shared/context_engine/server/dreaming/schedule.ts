@@ -45,8 +45,6 @@ export interface DreamingWorkflowExecutionsQuery {
   executionTypes?: ExecutionType[];
   omitStepRuns?: boolean;
   size?: number;
-  sortField?: string;
-  sortOrder?: 'asc' | 'desc';
   request: KibanaRequest;
 }
 
@@ -245,19 +243,30 @@ export const createDreamingScheduleService = ({
     workflowId,
     spaceId,
     request,
+    workflowsManagement,
   }: {
     executionId: string;
     workflowId: string;
     spaceId: string;
     request: KibanaRequest;
+    workflowsManagement: DreamingWorkflowsApi | undefined;
   }): Promise<StartWorkflowResult> => {
-    const workflowsManagement = await getWorkflowsManagement();
     if (!workflowsManagement) {
       return { workflow_id: workflowId, execution_id: executionId };
     }
-    const execution = await workflowsManagement.getWorkflowExecution(executionId, spaceId, {
-      request,
-    });
+    let execution: WorkflowExecutionDto | null;
+    try {
+      execution = await workflowsManagement.getWorkflowExecution(executionId, spaceId, {
+        request,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      log.debug(
+        () =>
+          `Could not read status for dreaming execution '${executionId}' on '${workflowId}': ${message}`
+      );
+      return { workflow_id: workflowId, execution_id: executionId };
+    }
     if (execution === null) {
       return { workflow_id: workflowId, execution_id: executionId };
     }
@@ -323,8 +332,13 @@ export const createDreamingScheduleService = ({
         spaceId,
         workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndex.id, spaceId),
       });
-      const result = await classifyExecution({ executionId, workflowId, spaceId, request });
-      return result;
+      return await classifyExecution({
+        executionId,
+        workflowId,
+        spaceId,
+        request,
+        workflowsManagement,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (isRunInProgressError(error)) {

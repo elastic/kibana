@@ -83,17 +83,17 @@ export const AutomationRow = ({
     awaitedExecutionIds,
     onAwaitedObserved: clearStartedExecutionId,
   });
-  const executionWorkflowId = latest.workflowId ?? automation.value;
+  const latestExecution = latest.executions?.[0]?.execution;
   const isRunning = isLoading || latest.isRunning;
   const runningExecutionId = latest.activeExecutionId ?? startedExecutionId;
   const runningHref = runningExecutionId
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
-        path: getWorkflowExecutionPath(executionWorkflowId, runningExecutionId),
+        path: getWorkflowExecutionPath(automation.value, runningExecutionId),
       })
     : undefined;
-  const latestExecutionHref = latest.execution
+  const latestExecutionHref = latestExecution
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
-        path: getWorkflowExecutionPath(executionWorkflowId, latest.execution.id),
+        path: getWorkflowExecutionPath(automation.value, latestExecution.id),
       })
     : undefined;
 
@@ -234,16 +234,16 @@ export const AutomationRow = ({
                 })}
               </EuiText>
             </EuiFlexItem>
-          ) : hasWorkflowDefinition && latest.execution !== undefined ? (
+          ) : hasWorkflowDefinition && latest.executions !== undefined ? (
             <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
               <WorkflowLastExecution
-                {...(latest.execution
+                {...(latestExecution
                   ? {
-                      status: latest.execution.status,
-                      startedAt: latest.execution.startedAt,
+                      status: latestExecution.status,
+                      startedAt: latestExecution.startedAt,
                     }
                   : { hasExecution: false })}
-                href={latest.execution ? latestExecutionHref : undefined}
+                href={latestExecution ? latestExecutionHref : undefined}
                 data-test-subj="contextAutomationLastExecution"
               />
             </EuiFlexItem>
