@@ -13,6 +13,11 @@ import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { initializeTrackPanel } from './track_panel';
 import type { DashboardChildren } from './layout_manager/types';
 import type { ViewMode } from '@kbn/presentation-publishing';
+import { reportPanelSelectionStarted } from './telemetry/report_panel_selection_started';
+
+jest.mock('./telemetry/report_panel_selection_started', () => ({
+  reportPanelSelectionStarted: jest.fn(),
+}));
 
 const buildChild = (
   uuid: string,
@@ -442,6 +447,61 @@ describe('track panel', () => {
 
       expect(selectionApi.selectedPanelIds$.value).toEqual([]);
       selectionCleanup();
+    });
+
+    describe('selection started telemetry', () => {
+      beforeEach(() => {
+        (reportPanelSelectionStarted as jest.Mock).mockClear();
+      });
+
+      it('does not report before any panel is selected', () => {
+        const { selectionCleanup } = setupSelectionTest();
+
+        expect(reportPanelSelectionStarted).not.toHaveBeenCalled();
+        selectionCleanup();
+      });
+
+      it('reports only once while the selection stays non-empty', () => {
+        const { selectionApi, selectionCleanup } = setupSelectionTest();
+
+        selectionApi.togglePanelSelection('panel1');
+        selectionApi.togglePanelSelection('panel2');
+        selectionApi.addPanelsToSelection(['panel3']);
+        selectionApi.togglePanelSelection('panel3');
+        selectionApi.togglePanelSelection('panel2');
+
+        expect(reportPanelSelectionStarted).toHaveBeenCalledTimes(1);
+        selectionCleanup();
+      });
+
+      it('reports once when several panels are selected at once (marquee, select all)', () => {
+        const { selectionApi, selectionCleanup } = setupSelectionTest();
+
+        selectionApi.addPanelsToSelection(['panel1', 'panel2']);
+
+        expect(reportPanelSelectionStarted).toHaveBeenCalledTimes(1);
+        selectionCleanup();
+      });
+
+      it('reports again when selecting after the selection was cleared', () => {
+        const { selectionApi, selectionCleanup } = setupSelectionTest();
+
+        selectionApi.togglePanelSelection('panel1');
+        selectionApi.clearSelectedPanels();
+        selectionApi.togglePanelSelection('panel2');
+
+        expect(reportPanelSelectionStarted).toHaveBeenCalledTimes(2);
+        selectionCleanup();
+      });
+
+      it('stops reporting after cleanup', () => {
+        const { selectionApi, selectionCleanup } = setupSelectionTest();
+        selectionCleanup();
+
+        selectionApi.togglePanelSelection('panel1');
+
+        expect(reportPanelSelectionStarted).not.toHaveBeenCalled();
+      });
     });
   });
 });
