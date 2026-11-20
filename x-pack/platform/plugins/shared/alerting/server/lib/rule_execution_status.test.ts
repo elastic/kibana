@@ -442,6 +442,18 @@ describe('RuleExecutionStatus', () => {
         }
       `);
     });
+
+    test('error reason written by a newer Kibana is reported as unknown', () => {
+      const result = ruleExecutionStatusFromRaw(MockLogger, 'rule-id', {
+        status,
+        lastExecutionDate: date,
+        error: { reason: 'reason-from-a-newer-kibana', message: 'wops' },
+      });
+      expect(result?.error).toEqual({
+        reason: RuleExecutionStatusErrorReasons.Unknown,
+        message: 'wops',
+      });
+    });
   });
 });
 

@@ -56,7 +56,7 @@ const FORWARDED_FEATURE_INPUTS: ReadonlyArray<{
     childInput: 'maxExcludedFeaturesInPrompt',
     childDefault: 10,
   },
-  { parentInput: 'featuresMaxEntityFilters', childInput: 'maxEntityFilters', childDefault: 10 },
+  { parentInput: 'featuresMaxEntityFilters', childInput: 'maxEntityFilters', childDefault: 20 },
   {
     parentInput: 'featuresSamplingTimeoutMs',
     childInput: 'samplingTimeoutMs',

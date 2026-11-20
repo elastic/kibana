@@ -25,6 +25,11 @@ export type {
 
 export { dashboardStateToAttachmentData, attachmentDataToDashboardState } from './converters';
 
+export {
+  getComparableAttachmentState,
+  getComparableDashboardState,
+} from './compare_dashboard_data';
+
 export { DEFAULT_TIME_RANGE, EMPTY_DASHBOARD_STATE } from './dashboard_state_helpers';
 
 export { isDashboardAttachment } from './is_dashboard_attachment';
