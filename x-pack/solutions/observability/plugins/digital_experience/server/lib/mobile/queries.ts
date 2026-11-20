@@ -18,6 +18,15 @@ export const withEnvironmentCounts = (query: ComposerQuery): ComposerQuery =>
     'environmentName'
   )}`.pipe`SORT docs DESC`.pipe`LIMIT ${MAX_ENVIRONMENT_ROWS}`;
 
+/** The OS names to list, at most: Android, iOS and iPadOS today. */
+const MAX_OS_ROWS = 100;
+
+/** The sessions per OS name and platform, most first. */
+export const withOsCounts = (query: ComposerQuery): ComposerQuery =>
+  query.pipe`STATS sessions = COUNT_DISTINCT(${mobileColumn('sessionId')})
+      BY os_name = ${mobileColumn('osName')}, platform`.pipe`SORT sessions DESC`
+    .pipe`LIMIT ${MAX_OS_ROWS}`;
+
 /** The sessions per release, most first (then the higher release), up to `limit`. */
 export const withReleaseCounts = (query: ComposerQuery, limit: number): ComposerQuery =>
   query.pipe`WHERE ${mobileColumn('serviceVersion')} IS NOT NULL`
@@ -26,12 +35,12 @@ export const withReleaseCounts = (query: ComposerQuery, limit: number): Composer
     .pipe`LIMIT ${limit}`;
 
 /**
- * Each application's release with the most sessions on each platform, one row per application and
- * platform, so no cut on releases can leave one without.
+ * Each application's release with the most sessions on any platform, one row per application, so
+ * no cut on releases can leave one without.
  */
 export const withLatestReleases = (query: ComposerQuery): ComposerQuery =>
   query.pipe`WHERE ${mobileColumn('serviceVersion')} IS NOT NULL`
     .pipe`STATS sessions = COUNT_DISTINCT(${mobileColumn('sessionId')})
-      BY ${mobileColumn('serviceName')}, platform, release = ${mobileColumn('serviceVersion')}`
+      BY ${mobileColumn('serviceName')}, release = ${mobileColumn('serviceVersion')}`
     .pipe`STATS latest_release = TOP(sessions, 1, "desc", release)
-      BY ${mobileColumn('serviceName')}, platform`;
+      BY ${mobileColumn('serviceName')}`;

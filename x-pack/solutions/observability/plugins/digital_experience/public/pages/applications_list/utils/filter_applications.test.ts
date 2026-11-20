@@ -9,7 +9,7 @@ import type { ApplicationSource, ApplicationSummary } from '../../../../common/t
 import { filterApplications } from './filter_applications';
 
 const app = (serviceName: string, source: ApplicationSource) =>
-  ({ serviceName, source, platform: 'browser' } as ApplicationSummary);
+  ({ serviceName, source, applicationType: 'web' } as ApplicationSummary);
 
 const applications = [
   app('shop', 'otel'),

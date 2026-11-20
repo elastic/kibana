@@ -12,7 +12,7 @@ import { useDigitalExperienceParams } from './use_digital_experience_params';
 import { useUpdateUrlQuery } from './use_update_url_query';
 
 /** List filters kept in the URL; the time range has its own hook, `useTimeRange`. */
-type QueryParam = 'environment' | 'sourceFilter' | 'platformFilter';
+type QueryParam = 'environment' | 'sourceFilter' | 'platformFilter' | 'applicationType';
 
 /** Their values as the route validates them, e.g. an application source for `sourceFilter`. */
 type ListQueryParams = TypeOf<DigitalExperienceRoutes, '/'>['query'];

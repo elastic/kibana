@@ -11,8 +11,9 @@ import type { RouteMap } from '@kbn/typed-react-router-config';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import {
   applicationSourceRt,
-  applicationPlatformRt,
+  applicationTypeRt,
   DEFAULT_APPLICATION_SOURCE,
+  mobilePlatformRt,
 } from './utils/application_source';
 import { DigitalExperienceLayout } from './application/digital_experience_layout';
 import { useDigitalExperienceParams } from './hooks/use_digital_experience_params';
@@ -26,13 +27,13 @@ import { sessionsListQueryRt } from './utils/sessions_list_query';
 function ApplicationRoute({ tab }: { tab: ApplicationTabId }) {
   const {
     path: { serviceName },
-    query: { source, platform },
+    query: { source, applicationType },
   } = useDigitalExperienceParams('/{serviceName}');
   return (
     <ApplicationPage
       serviceName={serviceName}
       source={source}
-      platform={platform}
+      applicationType={applicationType}
       selectedTab={tab}
     />
   );
@@ -57,7 +58,9 @@ const digitalExperienceRoutes = {
         rangeTo: t.string,
         environment: t.string,
         sourceFilter: applicationSourceRt,
-        platformFilter: applicationPlatformRt,
+        platformFilter: mobilePlatformRt,
+        // The list's tab, and the page of the application a link opens: the mobile one or not.
+        applicationType: applicationTypeRt,
         // The Overview's filters, percentile and KQL.
         ...overviewQueryProps,
       }),
@@ -69,9 +72,8 @@ const digitalExperienceRoutes = {
           path: t.type({ serviceName: t.string }),
           query: t.intersection([
             t.type({ source: applicationSourceRt }),
-            // An EDOT application's platform, whose mobile ones have the mobile page (the browser,
-            // when unset), and the mobile page's release filter.
-            t.partial({ platform: applicationPlatformRt, release: t.string }),
+            // The mobile page's OS and release filters.
+            t.partial({ osName: t.string, release: t.string }),
           ]),
         }),
         // Links without a source open the Classic Overview.

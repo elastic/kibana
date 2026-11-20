@@ -12,7 +12,7 @@ import qs from 'query-string';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../common/feature';
 import type { OverviewFilters } from '../../common/overview_filters';
 import { encodeOverviewFilters } from '../../common/overview_filters_param';
-import { isMobilePlatform } from '../../common/application_source';
+import { APPLICATION_TYPE } from '../../common/application_source';
 import type { ApplicationSource } from '../../common/types/applications';
 import { SHARED_FILTER_NAMES } from '../utils/overview_filters_query';
 import type { SessionsListUrlQuery } from '../utils/sessions_list_query';
@@ -69,7 +69,7 @@ export const useApplicationLinks = (
   const { query: urlQuery } = useDigitalExperienceParams('/');
   // Every page using these links is an application's, so the route has validated these already.
   const {
-    query: { platform, release },
+    query: { osName, release },
   } = useDigitalExperienceParams('/{serviceName}');
   const { search } = useLocation();
 
@@ -84,8 +84,10 @@ export const useApplicationLinks = (
       ...listQuery,
       ...pick(urlQuery, OVERVIEW_QUERY_KEYS),
       ...(filters ? { filters } : {}),
-      // A mobile application's platform, which gives it the mobile page, and its release filter.
-      ...(isMobilePlatform(platform) ? { platform, release: release || undefined } : {}),
+      // The mobile page's filters; the list's `applicationType` gives it the mobile page.
+      ...(listQuery.applicationType === APPLICATION_TYPE.mobile
+        ? { osName: osName || undefined, release: release || undefined }
+        : {}),
       source,
     };
     const query = { ...listQuery, ...sharedFilters, source };
@@ -129,7 +131,7 @@ export const useApplicationLinks = (
     search,
     serviceName,
     source,
-    platform,
+    osName,
     release,
   ]);
 };

@@ -8,7 +8,7 @@
 import { forbidden, internal } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { APPLICATION_PLATFORM, APPLICATION_SOURCE } from '../../../common/application_source';
+import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../common/application_source';
 import type {
   ApplicationSource,
   ApplicationSummary,
@@ -65,13 +65,16 @@ const toClientError = (failures: SourceFailure[]) =>
 
 /** Web rows sort by page loads and mobile rows by sessions; web rows come first. */
 const byActivityThenName = (a: ApplicationSummary, b: ApplicationSummary): number => {
-  if (a.platform !== APPLICATION_PLATFORM.browser && b.platform !== APPLICATION_PLATFORM.browser) {
+  if (
+    a.applicationType === APPLICATION_TYPE.mobile &&
+    b.applicationType === APPLICATION_TYPE.mobile
+  ) {
     return b.sessions.count - a.sessions.count || a.serviceName.localeCompare(b.serviceName);
   }
-  if (a.platform !== APPLICATION_PLATFORM.browser) {
+  if (a.applicationType === APPLICATION_TYPE.mobile) {
     return 1;
   }
-  if (b.platform !== APPLICATION_PLATFORM.browser) {
+  if (b.applicationType === APPLICATION_TYPE.mobile) {
     return -1;
   }
   return b.pageLoads.count - a.pageLoads.count || a.serviceName.localeCompare(b.serviceName);

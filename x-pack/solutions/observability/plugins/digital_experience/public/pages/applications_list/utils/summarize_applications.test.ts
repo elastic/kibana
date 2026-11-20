@@ -28,7 +28,7 @@ const app = ({
 } = {}): WebApplicationSummary => ({
   serviceName,
   source,
-  platform: 'browser',
+  applicationType: 'web',
   environments: [],
   pageLoads: { count: pageLoads },
   sessions: sessions === null ? null : { count: sessions },

@@ -121,7 +121,7 @@ describe('getOtelApplications', () => {
         {
           serviceName: 'web',
           source: 'otel',
-          platform: 'browser',
+          applicationType: 'web',
           environments: ['production', 'canary'],
           pageLoads: { count: 12 },
           // The raw events don't count sessions.
@@ -145,7 +145,7 @@ describe('getOtelApplications', () => {
         {
           serviceName: 'no-spans',
           source: 'otel',
-          platform: 'browser',
+          applicationType: 'web',
           environments: ['staging'],
           pageLoads: { count: 1 },
           sessions: null,

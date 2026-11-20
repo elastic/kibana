@@ -100,7 +100,8 @@ describe('GET /internal/digital_experience/applications', () => {
         {
           serviceName: 'shop-mobile',
           source: 'otel',
-          platform: 'android',
+          applicationType: 'mobile',
+          platforms: ['android'],
           environments: [],
           latestRelease: '1.0.0',
           sessions: { count: 3 },

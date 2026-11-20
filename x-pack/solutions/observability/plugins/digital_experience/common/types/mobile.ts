@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComparedValue } from './applications';
+import type { ComparedValue, MobilePlatform } from './applications';
 
 /** The KPI row of a mobile application's page, each value against the previous period. */
 export interface MobileKpisResponse {
@@ -17,8 +17,12 @@ export interface MobileKpisResponse {
   crashFreeSessions: ComparedValue;
   /** Exceptions per session. */
   errorRate: ComparedValue;
-  /** Releases on the platform in the time range, whatever the release filter, most sessions first. */
+  /** Releases in the time range and OS, whatever the release filter, most sessions first. */
   releases: string[];
+  /** The resource `os.name` values in the time range, whatever the OS and release filters. */
+  osNames: string[];
+  /** The platforms in the time range, whatever the OS and release filters, sorted. */
+  platforms: MobilePlatform[];
   /** Environments in the time range, whatever the environment filter. */
   environments: string[];
   /** The bucket the panels chart with: hourly up to 24 hours, daily from there on. */

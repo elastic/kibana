@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApplicationPlatform, ApplicationSource, MobilePlatform } from './types/applications';
+import type { ApplicationSource, ApplicationType, MobilePlatform } from './types/applications';
 import { MOBILE_PLATFORMS } from './types/applications';
 
 /** Where an application's data comes from: EDOT or the Classic RUM agent. */
@@ -14,13 +14,18 @@ export const APPLICATION_SOURCE = {
   classic: 'classic',
 } as const satisfies Record<ApplicationSource, ApplicationSource>;
 
-/** Where an application runs: a browser, or a mobile platform. */
-export const APPLICATION_PLATFORM = {
-  browser: 'browser',
+/** What an application is: a web one or a mobile one, which has the mobile page. */
+export const APPLICATION_TYPE = {
+  web: 'web',
+  mobile: 'mobile',
+} as const satisfies Record<ApplicationType, ApplicationType>;
+
+/** The platforms a mobile application runs on. */
+export const MOBILE_PLATFORM = {
   android: 'android',
   ios: 'ios',
-} as const satisfies Record<ApplicationPlatform, ApplicationPlatform>;
+} as const satisfies Record<MobilePlatform, MobilePlatform>;
 
-/** Whether a platform is a mobile one, whose applications have the mobile page. */
+/** Whether a value is a mobile platform. */
 export const isMobilePlatform = (platform: string | null | undefined): platform is MobilePlatform =>
   (MOBILE_PLATFORMS as readonly string[]).includes(platform ?? '');

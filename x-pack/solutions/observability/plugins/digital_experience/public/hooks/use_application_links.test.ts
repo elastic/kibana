@@ -57,24 +57,27 @@ const mockRouteQuery = (query: Record<string, string>) =>
   } as unknown as ReturnType<typeof useDigitalExperienceParams>);
 
 describe('useApplicationLinks', () => {
-  it("keeps a mobile application's platform and release, as the route validated them", () => {
-    mockSearch('?source=otel&platform=ios&release=2.0.0');
-    mockRouteQuery({ source: 'otel', platform: 'ios', release: '2.0.0' });
+  it("keeps a mobile application's type, OS and release, as the route validated them", () => {
+    jest
+      .mocked(useListQuery)
+      .mockReturnValue({ rangeFrom: 'now-15m', rangeTo: 'now', applicationType: 'mobile' });
+    mockSearch('?source=otel&applicationType=mobile&osName=iOS&release=2.0.0');
+    mockRouteQuery({ source: 'otel', applicationType: 'mobile', osName: 'iOS', release: '2.0.0' });
 
     const { result } = renderHook(() => useApplicationLinks('shop-mobile', 'otel'));
 
     expect(result.current.overviewHref).toBe(
-      '/app/digital_experience/shop-mobile?platform=ios&rangeFrom=now-15m&rangeTo=now&release=2.0.0&source=otel'
+      '/app/digital_experience/shop-mobile?applicationType=mobile&osName=iOS&rangeFrom=now-15m&rangeTo=now&release=2.0.0&source=otel'
     );
   });
 
-  it('leaves the platform and release out of the links of a browser application', () => {
-    mockSearch('?source=otel&platform=browser&release=2.0.0');
-    mockRouteQuery({ source: 'otel', platform: 'browser', release: '2.0.0' });
+  it('leaves the OS and release out of the links of a web application', () => {
+    mockSearch('?source=otel&osName=iOS&release=2.0.0');
+    mockRouteQuery({ source: 'otel', osName: 'iOS', release: '2.0.0' });
 
     const { result } = renderHook(() => useApplicationLinks('shop', 'otel'));
 
-    expect(result.current.overviewHref).not.toContain('platform=');
+    expect(result.current.overviewHref).not.toContain('osName=');
     expect(result.current.overviewHref).not.toContain('release=');
   });
 });

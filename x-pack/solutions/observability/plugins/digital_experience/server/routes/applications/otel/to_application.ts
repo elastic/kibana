@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APPLICATION_PLATFORM, APPLICATION_SOURCE } from '../../../../common/application_source';
+import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../../common/application_source';
 import type { WebApplicationSummary } from '../../../../common/types/applications';
 import { ratio, toLastSeen } from '../../../lib/helpers/aggregations';
 import { toHttpRequests } from '../../../lib/helpers/http_requests';
@@ -17,7 +17,7 @@ import type { LogsBucket, SpansBucket } from './search_responses';
 export const toApplication = (logs: LogsBucket, spans?: SpansBucket): WebApplicationSummary => ({
   serviceName: logs.key,
   source: APPLICATION_SOURCE.otel,
-  platform: APPLICATION_PLATFORM.browser,
+  applicationType: APPLICATION_TYPE.web,
   environments: environmentsOf(logs, spans),
   pageLoads: { count: logs.pageLoads.doc_count },
   // Counting the distinct sessions of the raw events would add a cardinality to the heavy search.

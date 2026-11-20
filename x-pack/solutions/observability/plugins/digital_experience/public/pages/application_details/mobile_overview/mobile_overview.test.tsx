@@ -41,6 +41,8 @@ const KPIS: MobileKpisResponse = {
   crashFreeSessions: NO_VALUE,
   errorRate: { value: 0.5, previous: 0.25, delta: 0.25 },
   releases: ['2.0.0', '1.9.0'],
+  osNames: ['iOS', 'iPadOS', 'Android'],
+  platforms: ['android', 'ios'],
   environments: ['production'],
   bucket: 'hour',
   esql: 'FROM traces-*.otel-*,logs-*.otel-*',
@@ -49,10 +51,10 @@ const KPIS: MobileKpisResponse = {
 const fetch = jest.fn();
 const updateUrlQuery = jest.fn();
 
-const mockParams = (query: { release?: string } = {}) =>
+const mockParams = (query: { release?: string; osName?: string } = {}) =>
   jest.mocked(useDigitalExperienceParams).mockReturnValue({
     path: { serviceName: 'shop-mobile' },
-    query: { source: 'otel', platform: 'ios', ...query },
+    query: { source: 'otel', applicationType: 'mobile', ...query },
   } as unknown as ReturnType<typeof useDigitalExperienceParams>);
 
 const filterProps = (testSubj: string) =>
@@ -63,7 +65,7 @@ const filterProps = (testSubj: string) =>
     .pop();
 
 const renderPage = () =>
-  render(<MobileOverview serviceName="shop-mobile" platform="ios" />, { wrapper: EuiProvider });
+  render(<MobileOverview serviceName="shop-mobile" />, { wrapper: EuiProvider });
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -113,8 +115,8 @@ describe('MobileOverview', () => {
     );
   });
 
-  it("queries the KPIs of the page's platform, with the release from the URL", async () => {
-    mockParams({ release: '2.0.0' });
+  it('queries the KPIs with the OS and release from the URL', async () => {
+    mockParams({ osName: 'iPadOS', release: '2.0.0' });
     renderPage();
 
     await waitFor(() =>
@@ -123,7 +125,7 @@ describe('MobileOverview', () => {
         expect.objectContaining({
           params: {
             path: { serviceName: 'shop-mobile' },
-            query: expect.objectContaining({ platform: 'ios', release: '2.0.0' }),
+            query: expect.objectContaining({ osName: 'iPadOS', release: '2.0.0' }),
           },
         })
       )
@@ -152,11 +154,27 @@ describe('MobileOverview', () => {
     expect(updateUrlQuery).toHaveBeenNthCalledWith(2, { release: undefined });
   });
 
-  it('has no platform filter, as the page is of one platform', async () => {
+  it('lists the OS names of the response, and keeps one in the URL', async () => {
+    mockParams({ osName: 'iPadOS' });
     renderPage();
     await screen.findByTestId('digitalExperienceMobileKpis');
 
-    expect(filterProps('digitalExperienceMobilePlatformFilter')).toBeUndefined();
+    const props = filterProps('digitalExperienceMobileOsFilter');
+    expect(props?.options.map(({ value }) => value)).toEqual(['all', 'iOS', 'iPadOS', 'Android']);
+    expect(props?.selected).toBe('iPadOS');
+    props?.onChange('all');
+    expect(updateUrlQuery).toHaveBeenCalledWith({ osName: undefined });
+  });
+
+  it('shows a badge per platform of the application', async () => {
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    expect(
+      screen
+        .getAllByTestId('digitalExperiencePlatformBadge')
+        .map((badge) => badge.getAttribute('data-platform'))
+    ).toEqual(['android', 'ios']);
   });
 
   it('shows the previous period on every KPI with Compare on', async () => {

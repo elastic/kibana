@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { MOBILE_FIELDS } from '../../../../common/mobile_panel';
@@ -22,13 +21,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 interface LatestReleaseRow {
   [MOBILE_FIELDS.serviceName]: string;
-  platform: string;
   latest_release: string | null;
 }
-
-/** An application on a platform, as the rows of both queries name it. */
-const applicationKey = (row: { [MOBILE_FIELDS.serviceName]: string; platform: string }) =>
-  `${row[MOBILE_FIELDS.serviceName]}\u0000${row.platform}`;
 
 export interface GetMobileApplicationsParams {
   esClient: TracedElasticsearchClient;
@@ -61,7 +55,7 @@ const searchMobileApplications = async ({
 
   // Only for the listed applications, so each gets its latest release whatever the cap; that of
   // the last 24 hours of the range.
-  const serviceNames = uniq(applicationRows.map((row) => row[MOBILE_FIELDS.serviceName]));
+  const serviceNames = applicationRows.map((row) => row[MOBILE_FIELDS.serviceName]);
   const releaseRows =
     serviceNames.length > 0
       ? await runMobileEsql<LatestReleaseRow>(
@@ -72,14 +66,14 @@ const searchMobileApplications = async ({
         )
       : [];
   const latestByApplication = new Map(
-    releaseRows.map((row) => [applicationKey(row), row.latest_release ?? null])
+    releaseRows.map((row) => [row[MOBILE_FIELDS.serviceName], row.latest_release ?? null])
   );
 
   return {
     applications: applicationRows.map((row) =>
       toApplication(row, {
         environments: [],
-        latest: latestByApplication.get(applicationKey(row)) ?? null,
+        latest: latestByApplication.get(row[MOBILE_FIELDS.serviceName]) ?? null,
       })
     ),
     environments: toEnvironments(environmentRows),

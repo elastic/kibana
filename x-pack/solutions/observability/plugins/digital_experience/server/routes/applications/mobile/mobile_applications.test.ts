@@ -19,19 +19,20 @@ describe('applicationsQuery', () => {
     expect(query).toContain('exceptions = COUNT(`attributes.exception.type`)');
   });
 
-  it('has a row per application and platform, so a React Native app has one on each', () => {
-    expect(query).toContain('BY `service.name`, platform');
+  it('has a row per application, with the platforms it reported on', () => {
+    expect(query).toContain('platforms = VALUES(platform)');
+    expect(query).toMatch(/BY `service.name` \| SORT/);
   });
 });
 
 describe('latestReleasesQuery', () => {
-  it('picks one release per listed application, the names escaped', () => {
+  it('picks one release per listed application, any platform, the names escaped', () => {
     const { query } = latestReleasesQuery(['shop-mobile', 'a"b']).toRequest();
 
     expect(query).toContain('| WHERE `service.name` IN ("shop-mobile", "a\\"b")');
-    expect(query).toContain('BY `service.name`, platform, release = `service.version`');
+    expect(query).toContain('BY `service.name`, release = `service.version`');
     expect(query).toContain(
-      '| STATS latest_release = TOP(sessions, 1, "desc", release) BY `service.name`, platform'
+      '| STATS latest_release = TOP(sessions, 1, "desc", release) BY `service.name`'
     );
   });
 });
@@ -42,7 +43,7 @@ describe('toApplication', () => {
     sessions: 10,
     users: 4,
     exceptions: 5,
-    platform: 'ios',
+    platforms: ['ios', 'android'],
     last_seen: '2021-01-18T12:00:00.000Z',
   };
 
@@ -50,7 +51,8 @@ describe('toApplication', () => {
     expect(toApplication(row, { environments: [], latest: '2.0.0' })).toEqual({
       serviceName: 'shop-mobile',
       source: 'otel',
-      platform: 'ios',
+      applicationType: 'mobile',
+      platforms: ['android', 'ios'],
       environments: [],
       latestRelease: '2.0.0',
       sessions: { count: 10 },
@@ -59,6 +61,15 @@ describe('toApplication', () => {
       errorRate: 0.5,
       lastSeen: '2021-01-18T12:00:00.000Z',
     });
+  });
+
+  it('reads a single platform, which VALUES returns as a value, not a list', () => {
+    expect(
+      toApplication({ ...row, platforms: 'android' }, { environments: [], latest: null }).platforms
+    ).toEqual(['android']);
+    expect(
+      toApplication({ ...row, platforms: null }, { environments: [], latest: null }).platforms
+    ).toEqual([]);
   });
 
   it('has no error rate without sessions, and not enough data for crash-free sessions', () => {
@@ -108,7 +119,7 @@ describe('getMobileApplications', () => {
             sessions: 3,
             users: 2,
             exceptions: 1,
-            platform: 'android',
+            platforms: 'android',
             last_seen: '2021-01-18T12:00:00.000Z',
           },
         ],
@@ -120,11 +131,7 @@ describe('getMobileApplications', () => {
         ],
       })
       .mockResolvedValueOnce({
-        hits: [
-          { 'service.name': 'trailmap-android', platform: 'android', latest_release: '1.0.0' },
-          // The same name on another platform has its own latest release.
-          { 'service.name': 'trailmap-android', platform: 'ios', latest_release: '9.0.0' },
-        ],
+        hits: [{ 'service.name': 'trailmap-android', latest_release: '1.0.0' }],
       });
 
     const result = await getMobileApplications({ esClient: clientWith(esqlCall), ...range });
@@ -134,7 +141,7 @@ describe('getMobileApplications', () => {
       expect.objectContaining({
         serviceName: 'trailmap-android',
         latestRelease: '1.0.0',
-        platform: 'android',
+        platforms: ['android'],
         errorRate: 1 / 3,
       }),
     ]);

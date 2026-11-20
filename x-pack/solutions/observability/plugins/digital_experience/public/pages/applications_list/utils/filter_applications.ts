@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  APPLICATION_PLATFORM,
-  APPLICATION_SOURCE,
-  isMobilePlatform,
-} from '../../../../common/application_source';
+import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../../common/application_source';
 import type {
   ApplicationSource,
   ApplicationSummary,
@@ -23,11 +19,15 @@ export type ApplicationRow = WebApplicationSummary & { hasClassicData: boolean }
 
 /** Whether an application runs in a browser: an EDOT Browser or Classic RUM one. */
 export const isWebApplication = (app: ApplicationSummary): app is WebApplicationSummary =>
-  app.platform === APPLICATION_PLATFORM.browser;
+  app.applicationType === APPLICATION_TYPE.web;
+
+/** Whether an application is a mobile one: EDOT Android or iOS, React Native on top. */
+export const isMobileApplication = (app: ApplicationSummary): app is MobileApplicationSummary =>
+  app.applicationType === APPLICATION_TYPE.mobile;
 
 /**
- * The mobile applications of `applications`, of `platform` or of both, whose name contains
- * `search`; they have their own table and columns.
+ * The mobile applications of `applications` that run on `platform`, or all, whose name contains
+ * `search`; they have their own tab and columns.
  */
 export const mobileApplicationsMatching = ({
   applications,
@@ -41,8 +41,8 @@ export const mobileApplicationsMatching = ({
   const term = search.trim().toLowerCase();
   return applications.filter(
     (app): app is MobileApplicationSummary =>
-      isMobilePlatform(app.platform) &&
-      (!platform || app.platform === platform) &&
+      isMobileApplication(app) &&
+      (!platform || app.platforms.includes(platform)) &&
       (!term || app.serviceName.toLowerCase().includes(term))
   );
 };

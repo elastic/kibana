@@ -7,25 +7,18 @@
 
 import React, { useMemo } from 'react';
 import type { ReactNode } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHighlight,
-  EuiIcon,
-  EuiInMemoryTable,
-  EuiLink,
-} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiHighlight, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative } from '@kbn/i18n-react';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
-import { APPLICATION_SOURCE } from '../../../../common/application_source';
+import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../../common/application_source';
 import type {
   ComparedValue,
   MobileApplicationSummary,
-  MobilePlatform,
 } from '../../../../common/types/applications';
+import { PlatformBadges } from '../../../components/platform_badges';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../../../common/feature';
 import { APPLICATIONS_LIST_EBT_ELEMENTS } from '../../../ebt_constants';
 import { useDigitalExperienceRouter } from '../../../hooks/use_digital_experience_router';
@@ -36,19 +29,19 @@ import type { Formatters } from '../../../hooks/use_formatters';
 import {
   LAST_SEEN_LABEL,
   NOT_ENOUGH_DATA_LABEL,
-  MOBILE_PLATFORM_ICONS,
-  PLATFORM_LABELS,
   SESSIONS_LABEL,
   percentagePointsLabel,
 } from '../../../labels';
-import { applicationColumnPreset, metricColumnPreset } from '../../../utils/column_presets';
+import {
+  applicationColumnPreset,
+  metricColumnPreset,
+  timeColumnPreset,
+} from '../../../utils/column_presets';
+import { renderLastSeen } from './render_last_seen';
 
 const columnNames = {
   application: i18n.translate('xpack.digitalExperience.applications.mobile.applicationColumn', {
     defaultMessage: 'Mobile application',
-  }),
-  platform: i18n.translate('xpack.digitalExperience.applications.mobile.platformColumn', {
-    defaultMessage: 'Platform',
   }),
   latestRelease: i18n.translate('xpack.digitalExperience.applications.mobile.latestReleaseColumn', {
     defaultMessage: 'Latest release',
@@ -64,9 +57,9 @@ const columnNames = {
   }),
 };
 
-/** A React Native app has a row per platform, so the name alone isn't unique. */
-const getRowId = ({ serviceName, platform }: MobileApplicationSummary) =>
-  `${platform}:${serviceName}`;
+const getRowId = ({ serviceName }: MobileApplicationSummary) => serviceName;
+
+const nameCss = css({ minWidth: 0 });
 
 const SORT_BY_SESSIONS = { sort: { field: 'sessions.count', direction: 'desc' } } as const;
 
@@ -102,7 +95,7 @@ export function MobileApplicationsTable({
   const router = useDigitalExperienceRouter();
   const listQuery = useListQuery();
   const formatters = useFormatters();
-  const { formatNumber, formatDate } = formatters;
+  const { formatNumber } = formatters;
 
   const columns = useMemo<Array<EuiBasicTableColumn<MobileApplicationSummary>>>(
     () => [
@@ -111,48 +104,44 @@ export function MobileApplicationsTable({
         name: columnNames.application,
         ...applicationColumnPreset<MobileApplicationSummary>(),
         sortable: true,
-        render: (serviceName: string, { platform }: MobileApplicationSummary) => (
-          <EuiLink
-            data-test-subj="digitalExperienceMobileApplicationLink"
-            {...getEbtProps({
-              action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
-              element: APPLICATIONS_LIST_EBT_ELEMENTS.APPLICATION_LINK,
-            })}
-            className="eui-textTruncate"
-            href={application.getUrlForApp(DIGITAL_EXPERIENCE_FEATURE_ID, {
-              path: router.link('/{serviceName}', {
-                path: { serviceName },
-                // EDOT data on a mobile platform, which opens the mobile page.
-                query: { ...listQuery, source: APPLICATION_SOURCE.otel, platform },
-              }),
-            })}
-          >
-            <EuiHighlight search={searchTerm}>{serviceName}</EuiHighlight>
-          </EuiLink>
-        ),
-      },
-      {
-        field: 'platform',
-        name: columnNames.platform,
-        sortable: true,
-        render: (platform: MobilePlatform) => (
-          <EuiFlexGroup
-            data-test-subj="digitalExperienceMobilePlatform"
-            data-platform={platform}
-            gutterSize="s"
-            alignItems="center"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={MOBILE_PLATFORM_ICONS[platform]} aria-hidden={true} />
+        render: (serviceName: string, { platforms }: MobileApplicationSummary) => (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false} css={nameCss}>
+              <EuiLink
+                data-test-subj="digitalExperienceMobileApplicationLink"
+                {...getEbtProps({
+                  action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
+                  element: APPLICATIONS_LIST_EBT_ELEMENTS.APPLICATION_LINK,
+                })}
+                className="eui-textTruncate"
+                href={application.getUrlForApp(DIGITAL_EXPERIENCE_FEATURE_ID, {
+                  path: router.link('/{serviceName}', {
+                    path: { serviceName },
+                    // EDOT data of a mobile application, which opens the mobile page.
+                    query: {
+                      ...listQuery,
+                      source: APPLICATION_SOURCE.otel,
+                      applicationType: APPLICATION_TYPE.mobile,
+                    },
+                  }),
+                })}
+              >
+                <EuiHighlight search={searchTerm}>{serviceName}</EuiHighlight>
+              </EuiLink>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{PLATFORM_LABELS[platform]}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <PlatformBadges
+                data-test-subj="digitalExperienceMobilePlatforms"
+                platforms={platforms}
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         ),
       },
       {
         field: 'latestRelease',
         name: columnNames.latestRelease,
+        ...metricColumnPreset<MobileApplicationSummary>(),
         render: (release: string | null) =>
           release === null ? (
             <EmptyCellValue />
@@ -194,17 +183,12 @@ export function MobileApplicationsTable({
       {
         field: 'lastSeen',
         name: LAST_SEEN_LABEL,
-        render: (lastSeen: string | null) =>
-          lastSeen === null ? (
-            <EmptyCellValue />
-          ) : (
-            <span title={formatDate(lastSeen)}>
-              <FormattedRelative value={new Date(lastSeen)} />
-            </span>
-          ),
+        sortable: true,
+        ...timeColumnPreset<MobileApplicationSummary>(),
+        render: renderLastSeen(formatters),
       },
     ],
-    [application, router, listQuery, searchTerm, formatters, formatNumber, formatDate]
+    [application, router, listQuery, searchTerm, formatters, formatNumber]
   );
 
   return (

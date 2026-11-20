@@ -11,17 +11,17 @@ import { withEnvironmentCounts, withLatestReleases } from '../../../lib/mobile/q
 import { MAX_APPLICATIONS_PER_SOURCE } from '../constants';
 
 /**
- * Sessions, users, exceptions and last seen per application and platform, most sessions first; a
- * metric whose field no index maps is 0.
+ * Sessions, users, exceptions and last seen per application, with the platforms it reported on,
+ * most sessions first; a metric whose field no index maps is 0.
  */
 export const applicationsQuery = (): ComposerQuery =>
   mobileDocuments().pipe`STATS sessions = COUNT_DISTINCT(${mobileColumn('sessionId')}),
       users = COUNT_DISTINCT(${mobileColumn('installationId')}),
       exceptions = COUNT(${mobileColumn('exceptionType')}),
-      last_seen = MAX(@timestamp)
-    BY ${mobileColumn('serviceName')}, platform`.pipe`SORT sessions DESC, ${mobileColumn(
-    'serviceName'
-  )} ASC`.pipe`LIMIT ${MAX_APPLICATIONS_PER_SOURCE}`;
+      last_seen = MAX(@timestamp),
+      platforms = VALUES(platform)
+    BY ${mobileColumn('serviceName')}`.pipe`SORT sessions DESC, ${mobileColumn('serviceName')} ASC`
+    .pipe`LIMIT ${MAX_APPLICATIONS_PER_SOURCE}`;
 
 /**
  * The latest release, the one with the most sessions, of each of `serviceNames` on each platform

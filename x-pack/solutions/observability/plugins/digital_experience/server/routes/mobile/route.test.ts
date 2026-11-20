@@ -23,6 +23,8 @@ const RESPONSE: MobileKpisResponse = {
   crashFreeSessions: { value: null, previous: null, delta: null },
   errorRate: { value: 0.5, previous: null, delta: null },
   releases: ['1.2.3'],
+  osNames: ['iOS'],
+  platforms: ['ios'],
   environments: ['production'],
   bucket: 'hour',
   esql: 'FROM traces-*.otel-*,logs-*.otel-*',
@@ -33,7 +35,7 @@ const esClient = { esql: { query: jest.fn() } };
 const runHandler = ({
   query = { start: START, end: END },
 }: {
-  query?: { start: string; end: string; environment?: string; platform?: string; release?: string };
+  query?: { start: string; end: string; environment?: string; osName?: string; release?: string };
 }) => {
   const handler = mobileRouteRepository[MOBILE_KPIS_ENDPOINT].handler as unknown as (
     resources: unknown
@@ -65,7 +67,7 @@ describe('mobile KPIs route', () => {
         start: START,
         end: END,
         environment: 'production',
-        platform: 'ios',
+        osName: 'iPadOS',
         release: '1.2.3',
       },
     });
@@ -75,7 +77,7 @@ describe('mobile KPIs route', () => {
       expect.objectContaining({
         // The plugin's traced client, over the user's.
         esClient: expect.objectContaining({ client: esClient }),
-        filters: { serviceName: 'shop-mobile', platform: 'ios', release: '1.2.3' },
+        filters: { serviceName: 'shop-mobile', osName: 'iPadOS', release: '1.2.3' },
         start: Date.parse(START),
         end: Date.parse(END),
         environment: 'production',
@@ -89,21 +91,17 @@ describe('mobile KPIs route', () => {
       shape: { query: { safeParse: (query: unknown) => { success: boolean } } };
     };
     const isValid = (query: Record<string, string>) =>
-      schema.shape.query.safeParse({ start: START, end: END, platform: 'android', ...query })
-        .success;
+      schema.shape.query.safeParse({ start: START, end: END, ...query }).success;
 
-    it('accepts a platform and a release', () => {
-      expect(isValid({ platform: 'android', release: '1.2.3' })).toBe(true);
-      expect(isValid({ platform: 'ios' })).toBe(true);
+    it('accepts no filter, an OS and a release', () => {
+      expect(isValid({})).toBe(true);
+      expect(isValid({ osName: 'iPadOS', release: '1.2.3' })).toBe(true);
     });
 
-    it('requires the platform, as a page is of one', () => {
-      expect(schema.shape.query.safeParse({ start: START, end: END }).success).toBe(false);
-    });
-
-    it('rejects a range that starts after it ends, an unknown platform and a too long release', () => {
+    it('rejects a range that starts after it ends, an empty or too long OS, a too long release', () => {
       expect(isValid({ start: END, end: START })).toBe(false);
-      expect(isValid({ platform: 'windows' })).toBe(false);
+      expect(isValid({ osName: '' })).toBe(false);
+      expect(isValid({ osName: 'x'.repeat(65) })).toBe(false);
       expect(isValid({ release: 'x'.repeat(1025) })).toBe(false);
     });
   });

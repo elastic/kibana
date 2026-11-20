@@ -17,9 +17,9 @@ import {
 import type { MobilePanelFilters } from '../../../common/mobile_panel';
 import type { MobileKpisResponse } from '../../../common/types/mobile';
 import { runMobileEsql, timeFilter } from '../../lib/mobile/esql';
-import { withEnvironmentCounts, withReleaseCounts } from '../../lib/mobile/queries';
-import { toEnvironments, toReleases } from '../../lib/mobile/rows';
-import type { EnvironmentRow, ReleaseRow } from '../../lib/mobile/rows';
+import { withEnvironmentCounts, withOsCounts, withReleaseCounts } from '../../lib/mobile/queries';
+import { toEnvironments, toOsNames, toPlatforms, toReleases } from '../../lib/mobile/rows';
+import type { EnvironmentRow, OsRow, ReleaseRow } from '../../lib/mobile/rows';
 
 export interface GetMobileKpisParams {
   esClient: TracedElasticsearchClient;
@@ -52,11 +52,12 @@ export const getMobileKpis = async ({
 }: GetMobileKpisParams): Promise<MobileKpisResponse> => {
   const previous = getPreviousPeriod(start, end);
   const bucket = getMobileTimeBucket(start, end);
-  const { release, ...application } = filters;
+  const { release, osName, ...application } = filters;
   const statsQuery = withKpiStats(mobilePanelQuery(filters));
 
-  // The pickers list what the application reported on the platform, whatever the release filter.
-  const [[current], [before], releaseRows, environmentRows] = await Promise.all([
+  // The pickers list what the application reported, whatever their own filter: the releases on the
+  // selected OS, the OS names on any release.
+  const [[current], [before], releaseRows, osRows, environmentRows] = await Promise.all([
     runMobileEsql<KpiRow>(
       esClient,
       'get_mobile_kpis',
@@ -72,7 +73,13 @@ export const getMobileKpis = async ({
     runMobileEsql<ReleaseRow>(
       esClient,
       'get_mobile_releases',
-      withReleaseCounts(mobilePanelQuery(application), MAX_RELEASE_ROWS),
+      withReleaseCounts(mobilePanelQuery({ ...application, osName }), MAX_RELEASE_ROWS),
+      timeFilter(start, end, environment)
+    ),
+    runMobileEsql<OsRow>(
+      esClient,
+      'get_mobile_os_names',
+      withOsCounts(mobilePanelQuery(application)),
       timeFilter(start, end, environment)
     ),
     runMobileEsql<EnvironmentRow>(
@@ -91,6 +98,8 @@ export const getMobileKpis = async ({
     crashFreeSessions: toComparedValue(null, null),
     errorRate: toComparedValue(errorRateOf(current), errorRateOf(before)),
     releases: toReleases(releaseRows),
+    osNames: toOsNames(osRows),
+    platforms: toPlatforms(osRows.flatMap(({ platform }) => (platform ? [platform] : []))),
     environments: toEnvironments(environmentRows),
     bucket,
     esql: mobilePanelDiscoverEsql(filters, { bucket, environment }),

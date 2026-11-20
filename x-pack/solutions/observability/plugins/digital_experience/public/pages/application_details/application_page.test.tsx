@@ -327,7 +327,12 @@ describe('ApplicationPage', () => {
       useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
 
       render(
-        <ApplicationPage serviceName="my-app" source="otel" platform="android" selectedTab={tab} />
+        <ApplicationPage
+          serviceName="my-app"
+          source="otel"
+          applicationType="mobile"
+          selectedTab={tab}
+        />
       );
 
       expect(historyReplace).toHaveBeenCalledWith('/my-app?source=classic');

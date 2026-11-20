@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { compact, uniq } from 'lodash';
+import { castArray, compact, sortBy, uniq } from 'lodash';
+import { isMobilePlatform } from '../../../common/application_source';
 import { MOBILE_FIELDS } from '../../../common/mobile_panel';
+import type { MobilePlatform } from '../../../common/types/applications';
 import { MAX_ENVIRONMENTS } from '../constants';
 import { withNotDefined } from '../helpers/environment';
 
@@ -23,10 +25,19 @@ export interface ReleaseRow {
   release: string | null;
   sessions: number;
 }
-export interface PlatformRow {
-  sdk_name: string | null;
-  docs: number;
+export interface OsRow {
+  os_name: string | null;
+  platform: string | null;
+  sessions: number;
 }
+
+/** The platforms of `values`, sorted: a `VALUES` column is a single value when there is one. */
+export const toPlatforms = (values: string | string[] | null | undefined): MobilePlatform[] =>
+  sortBy(uniq(castArray(values ?? []).filter(isMobilePlatform)));
+
+/** The OS names of rows, in their order. */
+export const toOsNames = (rows: OsRow[]): string[] =>
+  uniq(compact(rows.map(({ os_name: osName }) => osName)));
 
 /** The releases of rows, in their order. */
 export const toReleases = (rows: ReleaseRow[]): string[] =>

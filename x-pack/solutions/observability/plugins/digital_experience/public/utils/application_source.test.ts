@@ -6,9 +6,10 @@
  */
 
 import {
-  applicationPlatformRt,
   applicationSourceRt,
+  applicationTypeRt,
   DEFAULT_APPLICATION_SOURCE,
+  mobilePlatformRt,
 } from './application_source';
 
 describe('applicationSourceRt', () => {
@@ -17,20 +18,30 @@ describe('applicationSourceRt', () => {
   });
 
   it('rejects other values, mobile included, which the router replaces with the default', () => {
-    // Mobile applications are EDOT data: `otel` with a mobile platform.
+    // Mobile applications are EDOT data: `otel` of the mobile type.
     expect(applicationSourceRt.is('mobile')).toBe(false);
     expect(applicationSourceRt.is('ios')).toBe(false);
     expect(DEFAULT_APPLICATION_SOURCE).toBe('classic');
   });
 });
 
-describe('applicationPlatformRt', () => {
-  it.each(['browser', 'android', 'ios'])('accepts %s', (platform) => {
-    expect(applicationPlatformRt.is(platform)).toBe(true);
+describe('applicationTypeRt', () => {
+  it.each(['web', 'mobile'])('accepts %s', (applicationType) => {
+    expect(applicationTypeRt.is(applicationType)).toBe(true);
   });
 
-  it('rejects iPadOS, which is the iOS platform, and other values', () => {
-    expect(applicationPlatformRt.is('ipados')).toBe(false);
-    expect(applicationPlatformRt.is('mobile')).toBe(false);
+  it('rejects other values', () => {
+    expect(applicationTypeRt.is('android')).toBe(false);
+  });
+});
+
+describe('mobilePlatformRt', () => {
+  it.each(['android', 'ios'])('accepts %s', (platform) => {
+    expect(mobilePlatformRt.is(platform)).toBe(true);
+  });
+
+  it('rejects iPadOS, which is the iOS platform, and the browser', () => {
+    expect(mobilePlatformRt.is('ipados')).toBe(false);
+    expect(mobilePlatformRt.is('browser')).toBe(false);
   });
 });

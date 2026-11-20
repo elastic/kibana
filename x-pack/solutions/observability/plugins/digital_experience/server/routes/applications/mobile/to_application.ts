@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { APPLICATION_SOURCE } from '../../../../common/application_source';
+import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../../common/application_source';
 import { MOBILE_FIELDS } from '../../../../common/mobile_panel';
-import type {
-  MobileApplicationSummary,
-  MobilePlatform,
-} from '../../../../common/types/applications';
+import type { MobileApplicationSummary } from '../../../../common/types/applications';
+import { toPlatforms } from '../../../lib/mobile/rows';
 
 /** One row of `applicationsQuery`. */
 export interface MobileApplicationRow {
@@ -18,7 +16,8 @@ export interface MobileApplicationRow {
   sessions: number;
   users: number;
   exceptions: number;
-  platform: MobilePlatform;
+  /** One value when the application reported on one platform. */
+  platforms: string | string[] | null;
   last_seen: string | null;
 }
 
@@ -27,11 +26,12 @@ export const toApplication = (
   row: MobileApplicationRow,
   { environments, latest }: { environments: string[]; latest: string | null }
 ): MobileApplicationSummary => {
-  const { sessions = 0, users = 0, exceptions = 0, platform, last_seen: lastSeen } = row;
+  const { sessions = 0, users = 0, exceptions = 0, platforms, last_seen: lastSeen } = row;
   return {
     serviceName: row[MOBILE_FIELDS.serviceName],
     source: APPLICATION_SOURCE.otel,
-    platform,
+    applicationType: APPLICATION_TYPE.mobile,
+    platforms: toPlatforms(platforms),
     environments,
     latestRelease: latest,
     sessions: { count: sessions },

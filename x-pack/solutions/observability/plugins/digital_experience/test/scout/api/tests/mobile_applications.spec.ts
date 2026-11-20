@@ -29,7 +29,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'returns a row per mobile application and platform, with EDOT as their source',
+      'returns a row per mobile application, with its platforms and EDOT as its source',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
@@ -42,9 +42,7 @@ apiTest.describe(
         const { applications, mobileAvailability } = response.body as ApplicationsResponse;
         expect(mobileAvailability).toBe('complete');
         for (const expected of EXPECTED_MOBILE_ROWS) {
-          expect(
-            findMobileApplication(applications, expected.serviceName, expected.platform)
-          ).toMatchObject({
+          expect(findMobileApplication(applications, expected.serviceName)).toMatchObject({
             ...expected,
             source: 'otel',
             // A crash isn't defined yet, so there is not enough data.
@@ -66,7 +64,7 @@ apiTest.describe(
 
         const { applications } = response.body as ApplicationsResponse;
         const mobileNames = applications
-          .filter(({ platform }) => platform !== 'browser')
+          .filter(({ applicationType }) => applicationType === 'mobile')
           .map(({ serviceName }) => serviceName);
         expect(mobileNames).not.toContain(MOBILE_APPS.backendJava);
         expect(mobileNames).not.toContain(MOBILE_APPS.browserOnIphone);
@@ -74,7 +72,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'answers the KPIs of a mobile application on one platform, iPadOS counted as iOS',
+      'answers the KPIs of a mobile application, all platforms or one OS, and lists its OS names',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
         const getKpis = async (query: Record<string, string>) => {
@@ -92,20 +90,27 @@ apiTest.describe(
           return response.body as MobileKpisResponse;
         };
 
-        expect(await getKpis({ platform: 'android' })).toMatchObject({
+        const all = await getKpis({});
+        expect(all).toMatchObject({
           hasData: true,
+          sessions: { value: 4 },
+          users: { value: 3 },
+          errorRate: { value: 0.25 },
+          releases: ['1.0.0'],
+          platforms: ['android', 'ios'],
+        });
+        expect([...all.osNames].sort()).toStrictEqual(['Android', 'iOS', 'iPadOS']);
+        // The OS filter narrows the KPIs, not the OS names.
+        const android = await getKpis({ osName: 'Android' });
+        expect(android).toMatchObject({
           sessions: { value: 2 },
           users: { value: 1 },
           errorRate: { value: 0.5 },
-          releases: ['1.0.0'],
         });
-        expect(await getKpis({ platform: 'ios' })).toMatchObject({
-          hasData: true,
-          sessions: { value: 2 },
-          users: { value: 2 },
-        });
-        expect((await getKpis({ platform: 'ios', release: '1.0.0' })).sessions.value).toBe(2);
-        expect((await getKpis({ platform: 'ios', release: '9.9.9' })).hasData).toBe(false);
+        expect(android.osNames).toHaveLength(3);
+        expect((await getKpis({ osName: 'iPadOS' })).sessions.value).toBe(1);
+        expect((await getKpis({ release: '1.0.0' })).sessions.value).toBe(4);
+        expect((await getKpis({ release: '9.9.9' })).hasData).toBe(false);
       }
     );
   }

@@ -15,7 +15,7 @@ import {
   TELEMETRY_SDK_LANGUAGE,
   TELEMETRY_SDK_NAME,
 } from '@kbn/apm-types';
-import { APPLICATION_PLATFORM } from './application_source';
+import { MOBILE_PLATFORM } from './application_source';
 import {
   BROWSER_SDK_LANGUAGE,
   ELASTIC_DISTRO_NAME,
@@ -52,7 +52,8 @@ export const mobileColumn = (field: keyof typeof MOBILE_FIELDS) => esql.col(MOBI
 /** The filters every mobile panel applies, besides the time range and the environment. */
 export interface MobilePanelFilters {
   serviceName: string;
-  platform: MobilePlatform;
+  /** A resource `os.name` as the SDKs send it, e.g. `iPadOS`. */
+  osName?: string;
   /** A release, as the SDKs send it in `service.version`; the build is in `app.build_id`. */
   release?: string;
 }
@@ -114,17 +115,20 @@ export const mobileDocuments = (): ComposerQuery =>
     'osName',
     OS_NAMES_BY_PLATFORM.android
   )} OR ${mobileColumn('sdkName')} == ${MOBILE_SDK_NAME_BY_PLATFORM.android}, ${
-    APPLICATION_PLATFORM.android
-  }, ${APPLICATION_PLATFORM.ios})`;
+    MOBILE_PLATFORM.android
+  }, ${MOBILE_PLATFORM.ios})`;
 
 /**
  * The documents of a mobile panel, filtered; the time range and environment are applied apart.
  * Values from the request are params, which `inlineParams` writes into the query for Discover.
  */
-export const mobilePanelQuery = ({ serviceName, platform, release }: MobilePanelFilters) => {
+export const mobilePanelQuery = ({ serviceName, osName, release }: MobilePanelFilters) => {
   let query = mobileDocuments().pipe`WHERE ${mobileColumn('serviceName')} == ${{
     service_name: serviceName,
-  }} AND platform == ${platform}`;
+  }}`;
+  if (osName) {
+    query = query.pipe`WHERE ${mobileColumn('osName')} == ${{ os_name: osName }}`;
+  }
   if (release) {
     query = query.pipe`WHERE ${mobileColumn('serviceVersion')} == ${{ release }}`;
   }

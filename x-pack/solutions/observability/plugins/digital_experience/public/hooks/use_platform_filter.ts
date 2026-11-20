@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ApplicationPlatform } from '../../common/types/applications';
+import type { MobilePlatform } from '../../common/types/applications';
 import { useQueryParam } from './use_query_param';
 
 /** Platform from the `platformFilter` URL param, `undefined` for all platforms. */
 export const usePlatformFilter = (): {
-  platformFilter: ApplicationPlatform | undefined;
-  setPlatformFilter: (platform: ApplicationPlatform | undefined) => void;
+  platformFilter: MobilePlatform | undefined;
+  setPlatformFilter: (platform: MobilePlatform | undefined) => void;
 } => {
   const { value: platformFilter, setValue: setPlatformFilter } = useQueryParam('platformFilter');
   return { platformFilter, setPlatformFilter };

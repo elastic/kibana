@@ -15,13 +15,15 @@ const TIMESTAMP = '2021-01-18T12:30:00.000Z';
 /**
  * Mobile applications as EDOT Android and iOS send them, in miniature: the Elastic distribution
  * (`telemetry.distro.name: elastic`) on a mobile `os.name`, with the upstream `telemetry.sdk.*`.
- * A React Native app on Android, iOS and iPadOS, an Android app, and two services that must never
- * show up as mobile: a backend Java service, and EDOT Browser on an iPhone, which is the Elastic
+ * A React Native app on Android, iOS and iPadOS, an Android app, an Android app on an SDK that
+ * still sends `telemetry.sdk.name: android` without the distribution, and two services that must
+ * never show up as mobile: a backend Java service, and EDOT Browser on an iPhone, which is the Elastic
  * distribution on `os.name: iOS` too.
  */
 export const MOBILE_APPS = {
   reactNative: 'scout-shop-mobile',
   android: 'scout-trailmap-android',
+  legacyAndroid: 'scout-legacy-android',
   backendJava: 'scout-backend-java',
   browserOnIphone: 'scout-browser-on-iphone',
   /** In no data at all, for the empty state. */
@@ -31,6 +33,8 @@ export const MOBILE_APPS = {
 interface MobileDocument {
   serviceName: string;
   distroName?: string;
+  /** The upstream `opentelemetry` unless set. */
+  sdkName?: string;
   sdkLanguage: string;
   osName?: string;
   version: string;
@@ -84,6 +88,14 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
     sessionId: 'android-1',
   },
   {
+    serviceName: MOBILE_APPS.legacyAndroid,
+    sdkName: 'android',
+    sdkLanguage: 'java',
+    version: '0.9.0',
+    installationId: 'installation-legacy-android',
+    sessionId: 'legacy-1',
+  },
+  {
     serviceName: MOBILE_APPS.backendJava,
     sdkLanguage: 'java',
     osName: 'Linux',
@@ -111,7 +123,7 @@ const documents = MOBILE_DOCUMENTS.map((doc, index) => ({
         'service.version': doc.version,
         ...(doc.buildId ? { 'app.build_id': doc.buildId } : {}),
         ...(doc.distroName ? { 'telemetry.distro.name': doc.distroName } : {}),
-        'telemetry.sdk.name': 'opentelemetry',
+        'telemetry.sdk.name': doc.sdkName ?? 'opentelemetry',
         'telemetry.sdk.language': doc.sdkLanguage,
         ...(doc.osName ? { 'os.name': doc.osName } : {}),
         ...(doc.installationId ? { 'app.installation.id': doc.installationId } : {}),
@@ -124,29 +136,30 @@ const documents = MOBILE_DOCUMENTS.map((doc, index) => ({
   },
 }));
 
-/** What the applications route should answer for each mobile application and platform. */
+/** What the applications route should answer for each mobile application, all its platforms. */
 export const EXPECTED_MOBILE_ROWS = [
   {
+    // One application on Android, iOS and iPadOS, which counts as iOS.
     serviceName: MOBILE_APPS.reactNative,
-    platform: 'android',
+    platforms: ['android', 'ios'],
     latestRelease: '1.0.0',
-    sessions: { count: 2 },
-    users: { count: 1 },
-    errorRate: 0.5,
-  },
-  {
-    // iPadOS counts as iOS.
-    serviceName: MOBILE_APPS.reactNative,
-    platform: 'ios',
-    latestRelease: '1.0.0',
-    sessions: { count: 2 },
-    users: { count: 2 },
-    errorRate: 0,
+    sessions: { count: 4 },
+    users: { count: 3 },
+    errorRate: 0.25,
   },
   {
     serviceName: MOBILE_APPS.android,
-    platform: 'android',
+    platforms: ['android'],
     latestRelease: '2.1.0',
+    sessions: { count: 1 },
+    users: { count: 1 },
+    errorRate: 0,
+  },
+  {
+    // Android from its SDK name alone: no distribution, no `os.name`.
+    serviceName: MOBILE_APPS.legacyAndroid,
+    platforms: ['android'],
+    latestRelease: '0.9.0',
     sessions: { count: 1 },
     users: { count: 1 },
     errorRate: 0,

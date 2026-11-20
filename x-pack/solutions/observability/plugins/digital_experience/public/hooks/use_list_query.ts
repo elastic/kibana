@@ -6,7 +6,12 @@
  */
 
 import { useMemo } from 'react';
-import type { ApplicationPlatform, ApplicationSource } from '../../common/types/applications';
+import type {
+  ApplicationSource,
+  ApplicationType,
+  MobilePlatform,
+} from '../../common/types/applications';
+import { useApplicationType } from './use_application_type';
 import { useEnvironment } from './use_environment';
 import { usePlatformFilter } from './use_platform_filter';
 import { useSourceFilter } from './use_source_filter';
@@ -17,7 +22,8 @@ import { useTimeRange } from './use_time_range';
 interface ListQuery extends TimeRange {
   environment?: string;
   sourceFilter?: ApplicationSource;
-  platformFilter?: ApplicationPlatform;
+  platformFilter?: MobilePlatform;
+  applicationType?: ApplicationType;
 }
 
 /**
@@ -29,6 +35,7 @@ export const useListQuery = (): ListQuery => {
   const { environment } = useEnvironment();
   const { sourceFilter } = useSourceFilter();
   const { platformFilter } = usePlatformFilter();
+  const { applicationType } = useApplicationType();
 
   return useMemo(
     () => ({
@@ -36,7 +43,8 @@ export const useListQuery = (): ListQuery => {
       ...(environment ? { environment } : {}),
       ...(sourceFilter ? { sourceFilter } : {}),
       ...(platformFilter ? { platformFilter } : {}),
+      ...(applicationType ? { applicationType } : {}),
     }),
-    [timeRange, environment, sourceFilter, platformFilter]
+    [timeRange, environment, sourceFilter, platformFilter, applicationType]
   );
 };

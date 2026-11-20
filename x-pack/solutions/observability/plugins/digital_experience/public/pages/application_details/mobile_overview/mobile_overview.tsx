@@ -7,7 +7,6 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  EuiBadge,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import type { MobilePlatform } from '../../../../common/types/applications';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
 import { EnvironmentFilter } from '../../../components/environment_filter';
 import { TimeRangePicker } from '../../../components/time_range_picker';
@@ -34,7 +32,7 @@ import { useEnvironment } from '../../../hooks/use_environment';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { toTimeRangeQuery } from '../../../utils/time_range_query';
-import { MOBILE_PLATFORM_ICONS, PLATFORM_LABELS } from '../../../labels';
+import { PlatformBadges } from '../../../components/platform_badges';
 import { MobilePanel } from './mobile_panel';
 
 const ALL = 'all';
@@ -42,6 +40,22 @@ const ALL = 'all';
 const ALL_RELEASES_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.allReleases', {
   defaultMessage: 'All releases',
 });
+
+const ALL_OS_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.allOs', {
+  defaultMessage: 'All operating systems',
+});
+
+/** The filter's options: all, then `values`, with the URL's value first when they lack it. */
+const toOptions = (
+  allLabel: string,
+  values: string[] | undefined,
+  selected: string | undefined
+) => [
+  { value: ALL, label: allLabel },
+  ...(selected && !values?.includes(selected) ? [selected] : [])
+    .concat(values ?? [])
+    .map((value) => ({ value, label: value })),
+];
 
 /** The sections the sibling issues fill; each shows a placeholder until then. */
 export const MOBILE_SECTIONS = [
@@ -101,27 +115,23 @@ const NO_DATA_BODY = i18n.translate('xpack.digitalExperience.mobile.empty.body',
 });
 
 /**
- * The mobile application page of one platform: filters, the KPI row and the sections the sibling
- * issues fill.
+ * The mobile application page, all its platforms: filters, the KPI row and the sections the
+ * sibling issues fill.
  */
-export function MobileOverview({
-  serviceName,
-  platform,
-}: {
-  serviceName: string;
-  platform: MobilePlatform;
-}) {
+export function MobileOverview({ serviceName }: { serviceName: string }) {
   const apiClient = useApiClient();
   const { timeRange } = useTimeRange();
   const { environment, setEnvironment } = useEnvironment();
   const { formatNumber, formatPercent } = useFormatters();
   // In the URL, so a reload or a shared link keeps it.
   const {
-    query: { release: releaseParam },
+    query: { release: releaseParam, osName: osNameParam },
   } = useDigitalExperienceParams('/{serviceName}');
   const release = releaseParam || undefined;
+  const osName = osNameParam || undefined;
   const updateUrlQuery = useUpdateUrlQuery();
   const setRelease = (value: string | undefined) => updateUrlQuery({ release: value });
+  const setOsName = (value: string | undefined) => updateUrlQuery({ osName: value });
   const [isComparing, setIsComparing] = useState(false);
 
   const {
@@ -135,10 +145,10 @@ export function MobileOverview({
         signal,
         params: {
           path: { serviceName },
-          query: { ...toTimeRangeQuery(timeRange, environment), platform, release },
+          query: { ...toTimeRangeQuery(timeRange, environment), osName, release },
         },
       }),
-    [apiClient, serviceName, timeRange, environment, platform, release],
+    [apiClient, serviceName, timeRange, environment, osName, release],
     { unsetValueOnError: true }
   );
   const isLoading = loading || (!kpis && !error);
@@ -148,13 +158,12 @@ export function MobileOverview({
   });
 
   const releaseOptions = useMemo(
-    () => [
-      { value: ALL, label: ALL_RELEASES_LABEL },
-      ...(release && !kpis?.releases.includes(release) ? [release] : [])
-        .concat(kpis?.releases ?? [])
-        .map((value) => ({ value, label: value })),
-    ],
+    () => toOptions(ALL_RELEASES_LABEL, kpis?.releases, release),
     [kpis?.releases, release]
+  );
+  const osOptions = useMemo(
+    () => toOptions(ALL_OS_LABEL, kpis?.osNames, osName),
+    [kpis?.osNames, osName]
   );
 
   const hasNoData = kpis !== undefined && !kpis.hasData;
@@ -173,15 +182,14 @@ export function MobileOverview({
   return (
     <>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiBadge
-            data-test-subj="digitalExperienceMobilePagePlatform"
-            iconType={MOBILE_PLATFORM_ICONS[platform]}
-            color="hollow"
-          >
-            {PLATFORM_LABELS[platform]}
-          </EuiBadge>
-        </EuiFlexItem>
+        {kpis?.platforms.length ? (
+          <EuiFlexItem grow={false}>
+            <PlatformBadges
+              data-test-subj="digitalExperienceMobilePagePlatforms"
+              platforms={kpis.platforms}
+            />
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>
             <EnvironmentFilter
@@ -189,6 +197,17 @@ export function MobileOverview({
               selected={environment}
               onChange={setEnvironment}
               isLoading={isLoading}
+            />
+            <SingleSelectFilter
+              data-test-subj="digitalExperienceMobileOsFilter"
+              ebtElement={MOBILE_APPLICATION_EBT_ELEMENTS.OS_FILTER}
+              label={i18n.translate('xpack.digitalExperience.mobile.filter.os', {
+                defaultMessage: 'OS',
+              })}
+              options={osOptions}
+              selected={osName ?? ALL}
+              isActive={osName !== undefined}
+              onChange={(value) => setOsName(value === ALL ? undefined : value)}
             />
             <SingleSelectFilter
               data-test-subj="digitalExperienceMobileReleaseFilter"

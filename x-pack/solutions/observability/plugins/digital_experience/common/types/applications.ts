@@ -16,10 +16,10 @@ export const MOBILE_PLATFORMS = ['android', 'ios'] as const;
 
 export type MobilePlatform = (typeof MOBILE_PLATFORMS)[number];
 
-/** Where an application runs: a browser, or a mobile platform. */
-export const APPLICATION_PLATFORMS = ['browser', ...MOBILE_PLATFORMS] as const;
+/** What an application is: a web one (EDOT Browser or Classic RUM) or a mobile one. */
+export const APPLICATION_TYPES = ['web', 'mobile'] as const;
 
-export type ApplicationPlatform = (typeof APPLICATION_PLATFORMS)[number];
+export type ApplicationType = (typeof APPLICATION_TYPES)[number];
 
 /**
  * The tabs of an application's page, in display order. The Overview is the page at the
@@ -82,7 +82,7 @@ export interface HttpRequests {
 export interface WebApplicationSummary {
   serviceName: string;
   source: ApplicationSource;
-  platform: 'browser';
+  applicationType: 'web';
   /** Environments the application reported in the time range, up to 10; empty when none is set. */
   environments: string[];
   pageLoads: { count: number };
@@ -113,16 +113,18 @@ export interface ComparedValue {
 }
 
 /**
- * One mobile application on one platform (EDOT Android or iOS, React Native on top), keyed on
- * `service.name` and the platform, so a React Native app has a row per platform.
+ * One mobile application (EDOT Android or iOS, React Native on top), keyed on `service.name`, so a
+ * React Native app is one application on both platforms.
  */
 export interface MobileApplicationSummary {
   serviceName: string;
   /** EDOT data, as mobile applications are OpenTelemetry only. */
   source: 'otel';
-  platform: MobilePlatform;
+  applicationType: 'mobile';
+  /** The platforms it reported on in the time range, sorted. */
+  platforms: MobilePlatform[];
   environments: string[];
-  /** `service.version` with the most sessions in the last 24 hours, `null` if none. */
+  /** `service.version` with the most sessions in the last 24 hours, any platform, `null` if none. */
   latestRelease: string | null;
   sessions: { count: number };
   /** Distinct `app.installation.id`. */

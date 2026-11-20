@@ -7,8 +7,8 @@
 
 import * as t from 'io-ts';
 import { APPLICATION_SOURCE } from '../../common/application_source';
-import { APPLICATION_PLATFORMS } from '../../common/types/applications';
-import type { ApplicationPlatform, ApplicationSource } from '../../common/types/applications';
+import { APPLICATION_TYPES, MOBILE_PLATFORMS } from '../../common/types/applications';
+import type { ApplicationSource } from '../../common/types/applications';
 
 /** An application source in the URL; the router replaces any other value (see `routes.tsx`). */
 export const applicationSourceRt = t.union([
@@ -18,13 +18,11 @@ export const applicationSourceRt = t.union([
 
 export const DEFAULT_APPLICATION_SOURCE: ApplicationSource = APPLICATION_SOURCE.classic;
 
-/**
- * An application platform in the URL: of the application, whose mobile ones have the mobile page,
- * or of the list's platform filter.
- */
-export const applicationPlatformRt = t.keyof(
-  Object.fromEntries(APPLICATION_PLATFORMS.map((platform) => [platform, null])) as Record<
-    ApplicationPlatform,
-    null
-  >
-);
+const keysOf = <TValue extends string>(values: readonly TValue[]) =>
+  t.keyof(Object.fromEntries(values.map((value) => [value, null])) as Record<TValue, null>);
+
+/** An application type in the URL: the list's tab, or the page an application opens. */
+export const applicationTypeRt = keysOf(APPLICATION_TYPES);
+
+/** A mobile platform in the URL, of the list's platform filter. */
+export const mobilePlatformRt = keysOf(MOBILE_PLATFORMS);

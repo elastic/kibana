@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APPLICATION_PLATFORM, APPLICATION_SOURCE } from '../../../../common/application_source';
+import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../../common/application_source';
 import type { WebApplicationSummary } from '../../../../common/types/applications';
 import { bucketKeys, ratio, toLastSeen } from '../../../lib/helpers/aggregations';
 import { toHttpRequests } from '../../../lib/helpers/http_requests';
@@ -19,7 +19,7 @@ export const toApplication = (bucket: ClassicBucket): WebApplicationSummary => {
   return {
     serviceName: bucket.key,
     source: APPLICATION_SOURCE.classic,
-    platform: APPLICATION_PLATFORM.browser,
+    applicationType: APPLICATION_TYPE.web,
     environments: bucketKeys(bucket.environments),
     pageLoads: { count: bucket.pageLoads.doc_count },
     sessions: null,

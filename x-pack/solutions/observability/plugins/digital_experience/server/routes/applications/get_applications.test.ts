@@ -11,7 +11,6 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
   ApplicationSummary,
   MobileApplicationSummary,
-  MobilePlatform,
   TimeSeriesPoint,
   ApplicationSource,
   WebApplicationSummary,
@@ -31,7 +30,7 @@ const app = (
 ): WebApplicationSummary => ({
   serviceName,
   source,
-  platform: 'browser',
+  applicationType: 'web',
   environments: [],
   pageLoads: { count: pageLoads },
   sessions: null,
@@ -277,14 +276,11 @@ describe('getApplications', () => {
   });
 
   describe('mobile applications', () => {
-    const mobileApp = (
-      serviceName: string,
-      platform: MobilePlatform,
-      sessions: number
-    ): MobileApplicationSummary => ({
+    const mobileApp = (serviceName: string, sessions: number): MobileApplicationSummary => ({
       serviceName,
       source: 'otel',
-      platform,
+      applicationType: 'mobile',
+      platforms: ['android', 'ios'],
       environments: [],
       latestRelease: null,
       sessions: { count: sessions },
@@ -298,7 +294,7 @@ describe('getApplications', () => {
       const { applications, mobileAvailability } = await getApplications({
         getOtelApplications: async () => result([app('shop', 'otel', 5)]),
         getMobileApplications: async () => ({
-          applications: [mobileApp('shop', 'ios', 1), mobileApp('shop', 'android', 9)],
+          applications: [mobileApp('news', 1), mobileApp('shop', 9)],
           environments: [],
         }),
         logger,
@@ -306,9 +302,10 @@ describe('getApplications', () => {
 
       expect(
         applications.map(
-          ({ serviceName, source, platform }) => `${serviceName}:${source}:${platform}`
+          ({ serviceName, source, applicationType }) =>
+            `${serviceName}:${source}:${applicationType}`
         )
-      ).toEqual(['shop:otel:browser', 'shop:otel:android', 'shop:otel:ios']);
+      ).toEqual(['shop:otel:web', 'shop:otel:mobile', 'news:otel:mobile']);
       expect(mobileAvailability).toBe('complete');
     });
 

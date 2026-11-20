@@ -19,26 +19,26 @@ import {
   EuiHighlight,
   EuiInMemoryTable,
   EuiLink,
+  EuiNotificationBadge,
   EuiPageSection,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative } from '@kbn/i18n-react';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import {
-  APPLICATION_PLATFORM,
-  APPLICATION_SOURCE,
-  isMobilePlatform,
-} from '../../../common/application_source';
+import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../common/application_source';
+import { APPLICATION_TYPES } from '../../../common/types/applications';
 import type {
   ApplicationSource,
+  ApplicationType,
   MobileAvailability,
   PageLoadsOverTime,
   VitalRatings,
@@ -65,6 +65,7 @@ import { useEnvironment } from '../../hooks/use_environment';
 import { useListQuery } from '../../hooks/use_list_query';
 import { useSourceFilter } from '../../hooks/use_source_filter';
 import { usePlatformFilter } from '../../hooks/use_platform_filter';
+import { useApplicationType } from '../../hooks/use_application_type';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import type { Formatters } from '../../hooks/use_formatters';
 import { useFormatters } from '../../hooks/use_formatters';
@@ -75,9 +76,12 @@ import type { ApplicationRow } from './utils/filter_applications';
 import {
   applicationsMatching,
   filterApplications,
+  isMobileApplication,
+  isWebApplication,
   mobileApplicationsMatching,
 } from './utils/filter_applications';
 import { MobileApplicationsTable } from './components/mobile_applications_table';
+import { renderLastSeen } from './components/render_last_seen';
 import { MobileOnboardingPrompt } from '../../components/mobile_onboarding_prompt';
 import {
   pageLoadsOfSources,
@@ -185,19 +189,6 @@ const renderCount =
 
 const renderErrorRate = (perPageLoad: number | null) =>
   perPageLoad === null ? <EmptyCellValue /> : perPageLoad.toFixed(2);
-
-const renderLastSeen =
-  ({ formatDate }: Formatters) =>
-  (lastSeen: string | null) =>
-    lastSeen === null ? (
-      <EmptyCellValue />
-    ) : (
-      <EuiToolTip content={formatDate(lastSeen)}>
-        <span tabIndex={0} data-test-subj="digitalExperienceLastSeen">
-          <FormattedRelative value={new Date(lastSeen)} />
-        </span>
-      </EuiToolTip>
-    );
 
 const CLASSIC_DATA_BADGE = i18n.translate('xpack.digitalExperience.applications.classicDataBadge', {
   defaultMessage: '+ Classic RUM',
@@ -466,6 +457,13 @@ const HIDDEN_COLUMNS_STORAGE_KEY = 'xpack.digitalExperience.applications.hiddenC
 
 const NO_PAGE_LOADS: Pick<PageLoadsOverTime, ApplicationSource> = { otel: [], classic: [] };
 
+const APPLICATION_TYPE_LABELS: Record<ApplicationType, string> = {
+  web: i18n.translate('xpack.digitalExperience.applications.tab.web', { defaultMessage: 'Web' }),
+  mobile: i18n.translate('xpack.digitalExperience.applications.tab.mobile', {
+    defaultMessage: 'Mobile',
+  }),
+};
+
 export function ApplicationsListPage() {
   const { application, ux } = useKibanaServices();
   const router = useDigitalExperienceRouter();
@@ -474,6 +472,7 @@ export function ApplicationsListPage() {
   const { environment, setEnvironment } = useEnvironment();
   const { sourceFilter, setSourceFilter } = useSourceFilter();
   const { platformFilter, setPlatformFilter } = usePlatformFilter();
+  const { applicationType, setApplicationType } = useApplicationType();
   const listQuery = useListQuery();
   const [search, setSearch] = useState('');
   const searchTerm = search.trim();
@@ -505,21 +504,27 @@ export function ApplicationsListPage() {
   const canFilterBySource = ux !== undefined;
   // A source in the URL is ignored where the filter isn't shown, so it can't hide every row.
   const selectedSource = canFilterBySource ? sourceFilter : undefined;
-  // Mobile applications are EDOT data, so Classic RUM has none, and they aren't the browser's.
-  const isMobilePlatformSelected = isMobilePlatform(platformFilter);
-  const showsMobile =
-    selectedSource !== APPLICATION_SOURCE.classic &&
-    platformFilter !== APPLICATION_PLATFORM.browser;
+  const mobileAvailability = response?.mobileAvailability ?? 'complete';
+  const hasWebApplications = response?.applications.some(isWebApplication) ?? false;
+  const hasMobileApplications = response?.applications.some(isMobileApplication) ?? false;
+  // Web and mobile applications have their own tab, shown when both have data, when the mobile
+  // search failed so its retry stays reachable, or when the URL picks one.
+  const showsTabs =
+    applicationType !== undefined ||
+    (hasWebApplications && (hasMobileApplications || mobileAvailability === 'unavailable'));
+  const selectedType =
+    applicationType ??
+    (!hasWebApplications && hasMobileApplications ? APPLICATION_TYPE.mobile : APPLICATION_TYPE.web);
+  const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
+
   const mobileItems = useMemo(
     () =>
-      showsMobile
-        ? mobileApplicationsMatching({
-            applications: response?.applications ?? [],
-            search,
-            platform: isMobilePlatform(platformFilter) ? platformFilter : undefined,
-          })
-        : [],
-    [response, showsMobile, platformFilter, search]
+      mobileApplicationsMatching({
+        applications: response?.applications ?? [],
+        search,
+        platform: platformFilter,
+      }),
+    [response, platformFilter, search]
   );
 
   const items = useMemo(
@@ -556,7 +561,6 @@ export function ApplicationsListPage() {
   );
   const unavailableSources = response?.unavailableSources ?? [];
   const partiallyAvailableSources = response?.partiallyAvailableSources ?? [];
-  const mobileAvailability = response?.mobileAvailability ?? 'complete';
 
   const { visibleColumns, setVisibleColumns } = useVisibleColumns({
     storageKey: HIDDEN_COLUMNS_STORAGE_KEY,
@@ -587,13 +591,13 @@ export function ApplicationsListPage() {
     <NoApplicationsInEnvironmentPrompt onShowAllEnvironments={() => setEnvironment(undefined)} />
   );
 
-  /** Any application, e.g. a mobile one with a web source selected, means the filters hide it. */
+  /** Any web application means the filters hide it. */
   const getWebNoItemsMessage = () => {
     const loadingOrError = getLoadingOrErrorMessage();
     if (loadingOrError) {
       return loadingOrError;
     }
-    if (response?.applications.length) {
+    if (hasWebApplications) {
       return NO_MATCHES_MESSAGE;
     }
     return environment ? noApplicationsInEnvironmentPrompt : noApplicationsPrompt;
@@ -618,7 +622,7 @@ export function ApplicationsListPage() {
         />
       );
     }
-    if (response?.applications.some(({ platform }) => isMobilePlatform(platform))) {
+    if (hasMobileApplications) {
       return NO_MATCHES_MESSAGE;
     }
     if (environment) {
@@ -632,10 +636,6 @@ export function ApplicationsListPage() {
       />
     );
   };
-
-  // The mobile table shows alone with the Mobile source, and below the web one with every source.
-  const showsWebTable = !isMobilePlatformSelected && (items.length > 0 || mobileItems.length === 0);
-  const showsMobileTable = isMobilePlatformSelected || mobileItems.length > 0;
 
   const columns = useMemo<Array<EuiBasicTableColumn<ApplicationRow>>>(() => {
     const applicationColumn: EuiBasicTableColumn<ApplicationRow> = {
@@ -788,25 +788,51 @@ export function ApplicationsListPage() {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        {unavailableSources.length > 0 && (
+        {showsTabs && (
+          <>
+            <EuiTabs data-test-subj="digitalExperienceApplicationTypeTabs">
+              {APPLICATION_TYPES.map((type) => (
+                <EuiTab
+                  key={type}
+                  data-test-subj={`digitalExperienceApplicationTypeTab-${type}`}
+                  {...getEbtProps({
+                    action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+                    element: APPLICATIONS_LIST_EBT_ELEMENTS.APPLICATION_TYPE_TAB,
+                  })}
+                  isSelected={type === selectedType}
+                  onClick={() => setApplicationType(type)}
+                  append={
+                    <EuiNotificationBadge color="subdued">
+                      {type === APPLICATION_TYPE.mobile ? mobileItems.length : items.length}
+                    </EuiNotificationBadge>
+                  }
+                >
+                  {APPLICATION_TYPE_LABELS[type]}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {!isMobileTab && unavailableSources.length > 0 && (
           <>
             <UnavailableSourcesCallOut sources={unavailableSources} />
             <EuiSpacer size="m" />
           </>
         )}
-        {partiallyAvailableSources.length > 0 && (
+        {!isMobileTab && partiallyAvailableSources.length > 0 && (
           <>
             <PartiallyAvailableSourcesCallOut sources={partiallyAvailableSources} />
             <EuiSpacer size="m" />
           </>
         )}
-        {mobileAvailability !== 'complete' && showsMobile && (
+        {isMobileTab && mobileAvailability !== 'complete' && (
           <>
             <MobileAvailabilityCallOut availability={mobileAvailability} />
             <EuiSpacer size="m" />
           </>
         )}
-        {!isMobilePlatformSelected && (
+        {!isMobileTab && (
           <>
             <ApplicationsSummaryPanel summary={summary} isLoading={isLoading} />
             <EuiSpacer size="m" />
@@ -829,10 +855,12 @@ export function ApplicationsListPage() {
                 onChange={setEnvironment}
                 isLoading={isLoading}
               />
-              {canFilterBySource && (
+              {!isMobileTab && canFilterBySource && (
                 <SourceFilter selected={sourceFilter} onChange={setSourceFilter} />
               )}
-              <PlatformFilter selected={platformFilter} onChange={setPlatformFilter} />
+              {isMobileTab && (
+                <PlatformFilter selected={platformFilter} onChange={setPlatformFilter} />
+              )}
             </EuiFilterGroup>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -846,7 +874,7 @@ export function ApplicationsListPage() {
               isClearable
             />
           </EuiFlexItem>
-          {showsWebTable && (
+          {!isMobileTab && (
             <EuiFlexItem grow={false}>
               <ColumnSelector
                 columns={OPTIONAL_COLUMNS}
@@ -857,7 +885,14 @@ export function ApplicationsListPage() {
           )}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        {showsWebTable && (
+        {isMobileTab ? (
+          <MobileApplicationsTable
+            items={mobileItems}
+            searchTerm={searchTerm}
+            isLoading={isLoading}
+            noItemsMessage={getMobileNoItemsMessage()}
+          />
+        ) : (
           <EuiInMemoryTable<ApplicationRow>
             data-test-subj="digitalExperienceApplicationsTable"
             tableCaption={APPLICATIONS_LABEL}
@@ -873,17 +908,6 @@ export function ApplicationsListPage() {
             loading={isLoading}
             noItemsMessage={getWebNoItemsMessage()}
           />
-        )}
-        {showsMobileTable && (
-          <>
-            {showsWebTable && <EuiSpacer size="l" />}
-            <MobileApplicationsTable
-              items={mobileItems}
-              searchTerm={searchTerm}
-              isLoading={isLoading}
-              noItemsMessage={getMobileNoItemsMessage()}
-            />
-          </>
         )}
       </EuiPageSection>
     </>

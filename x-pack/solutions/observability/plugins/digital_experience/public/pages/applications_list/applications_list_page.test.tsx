@@ -18,8 +18,8 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { useDigitalExperienceRouter } from '../../hooks/use_digital_experience_router';
 import { digitalExperienceRouter } from '../../routes';
 import type {
-  ApplicationPlatform,
   ApplicationSummary,
+  ApplicationType,
   MobileAvailability,
   MobileApplicationSummary,
   MobilePlatform,
@@ -31,6 +31,7 @@ import { SourceFilter } from './components/source_filter';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useSourceFilter } from '../../hooks/use_source_filter';
 import { usePlatformFilter } from '../../hooks/use_platform_filter';
+import { useApplicationType } from '../../hooks/use_application_type';
 import { createUiSettingsMock } from '../../test_utils/ui_settings_mock';
 
 jest.mock('../../hooks/use_kibana_services');
@@ -38,6 +39,7 @@ jest.mock('../../hooks/use_time_range');
 jest.mock('../../hooks/use_environment');
 jest.mock('../../hooks/use_source_filter');
 jest.mock('../../hooks/use_platform_filter');
+jest.mock('../../hooks/use_application_type');
 jest.mock('../../hooks/use_digital_experience_router');
 jest.mock('../../components/time_range_picker', () => ({ TimeRangePicker: jest.fn(() => null) }));
 jest.mock('../../components/environment_filter', () => ({
@@ -70,8 +72,13 @@ const setSourceFilter = jest.fn();
 const mockSourceFilter = (sourceFilter?: ApplicationSummary['source']) =>
   jest.mocked(useSourceFilter).mockReturnValue({ sourceFilter, setSourceFilter });
 
-const mockPlatformFilter = (platformFilter?: ApplicationPlatform) =>
+const mockPlatformFilter = (platformFilter?: MobilePlatform) =>
   jest.mocked(usePlatformFilter).mockReturnValue({ platformFilter, setPlatformFilter: jest.fn() });
+
+const setApplicationType = jest.fn();
+
+const mockApplicationType = (applicationType?: ApplicationType) =>
+  jest.mocked(useApplicationType).mockReturnValue({ applicationType, setApplicationType });
 
 const SAMPLES = 5;
 
@@ -105,7 +112,7 @@ const app = ({
 }> = {}): WebApplicationSummary => ({
   serviceName,
   source,
-  platform: 'browser',
+  applicationType: 'web',
   environments: [],
   pageLoads: { count: pageLoads },
   sessions: sessions === null ? null : { count: sessions },
@@ -179,13 +186,18 @@ beforeEach(() => {
   mockEnvironment();
   mockSourceFilter();
   mockPlatformFilter();
+  mockApplicationType();
   jest.mocked(useDigitalExperienceRouter).mockReturnValue(digitalExperienceRouter);
 });
 
-const mobileApp = (platform: MobilePlatform = 'android'): MobileApplicationSummary => ({
-  serviceName: 'shop-mobile',
+const mobileApp = (
+  serviceName = 'shop-mobile',
+  platforms: MobilePlatform[] = ['android', 'ios']
+): MobileApplicationSummary => ({
+  serviceName,
   source: 'otel',
-  platform,
+  applicationType: 'mobile',
+  platforms,
   environments: [],
   latestRelease: '1.2.3',
   sessions: { count: 7 },
@@ -195,13 +207,29 @@ const mobileApp = (platform: MobilePlatform = 'android'): MobileApplicationSumma
   lastSeen: '2021-01-18T12:25:00.000Z',
 });
 
+const webApp = () => app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 });
+
 describe('ApplicationsListPage mobile applications', () => {
-  it('lists them in their own table, linked to the page of their platform', async () => {
-    respondWith([mobileApp('ios')]);
+  it('shows them alone, without tabs, when there are no web applications', async () => {
+    respondWith([mobileApp()]);
     renderPage();
 
     expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
-    expect(screen.getByTestId('digitalExperienceMobilePlatform')).toHaveTextContent('iOS');
+    expect(screen.queryByTestId('digitalExperienceApplicationTypeTabs')).toBeNull();
+    expect(screen.queryByTestId('digitalExperienceApplicationsTable')).toBeNull();
+  });
+
+  it('lists one row per application with a badge per platform, linked to the mobile page', async () => {
+    respondWith([mobileApp()]);
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceMobileApplicationsTable');
+    expect(screen.getAllByTestId('digitalExperienceMobileApplicationLink')).toHaveLength(1);
+    expect(
+      screen
+        .getAllByTestId('digitalExperiencePlatformBadge')
+        .map((badge) => badge.getAttribute('data-platform'))
+    ).toEqual(['android', 'ios']);
     expect(screen.getByTestId('digitalExperienceMobileLatestRelease')).toHaveTextContent('1.2.3');
     expect(screen.getByTestId('digitalExperienceMobileSessions')).toHaveTextContent('7');
     expect(screen.getByTestId('digitalExperienceMobileCrashFree')).toHaveTextContent(
@@ -209,50 +237,49 @@ describe('ApplicationsListPage mobile applications', () => {
     );
     expect(screen.getByTestId('digitalExperienceMobileApplicationLink')).toHaveAttribute(
       'href',
-      '/app/digital_experience/shop-mobile?platform=ios&rangeFrom=now-15m&rangeTo=now&source=otel'
+      '/app/digital_experience/shop-mobile?applicationType=mobile&rangeFrom=now-15m&rangeTo=now&source=otel'
     );
   });
 
-  it('has a row per platform for a React Native app', async () => {
-    respondWith([mobileApp('android'), mobileApp('ios')]);
+  it('shows the web tab first when there are both, with the count of each', async () => {
+    respondWith([webApp(), mobileApp(), mobileApp('news-mobile')]);
     renderPage();
 
-    expect(await screen.findAllByTestId('digitalExperienceMobileApplicationLink')).toHaveLength(2);
+    expect(await screen.findByTestId('digitalExperienceApplicationsTable')).toBeVisible();
+    expect(screen.queryByTestId('digitalExperienceMobileApplicationsTable')).toBeNull();
+    expect(screen.getByTestId('digitalExperienceApplicationTypeTab-web')).toHaveTextContent('Web1');
+    const mobileTab = screen.getByTestId('digitalExperienceApplicationTypeTab-mobile');
+    expect(mobileTab).toHaveTextContent('Mobile2');
+
+    fireEvent.click(mobileTab);
+    expect(setApplicationType).toHaveBeenCalledWith('mobile');
   });
 
-  it('shows only the rows of a mobile platform, without the web table', async () => {
-    mockPlatformFilter('ios');
-    respondWith([
-      app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 }),
-      mobileApp('android'),
-      mobileApp('ios'),
-    ]);
+  it('shows the mobile tab without the web summary, source filter or column selector', async () => {
+    mockApplicationType('mobile');
+    respondWith([webApp(), mobileApp()]);
     renderPage();
 
     expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
-    expect(screen.getAllByTestId('digitalExperienceMobileApplicationLink')).toHaveLength(1);
     expect(screen.queryByTestId('digitalExperienceApplicationsTable')).toBeNull();
     expect(screen.queryByText('web-app')).toBeNull();
+    expect(jest.mocked(SourceFilter)).not.toHaveBeenCalled();
   });
 
-  it('shows none with the browser or the Classic RUM source, which have no mobile data', async () => {
-    respondWith([app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 }), mobileApp()]);
-    mockPlatformFilter('browser');
-    const { unmount } = renderPage();
-    expect(await screen.findByTestId('digitalExperienceApplicationsTable')).toBeVisible();
-    expect(screen.queryByTestId('digitalExperienceMobileApplicationsTable')).toBeNull();
-    unmount();
-
-    mockPlatformFilter();
-    mockSourceFilter('classic');
+  it('narrows the rows to those that run on the selected platform', async () => {
+    mockApplicationType('mobile');
+    mockPlatformFilter('ios');
+    respondWith([webApp(), mobileApp(), mobileApp('trailmap-android', ['android'])]);
     renderPage();
-    expect(await screen.findByTestId('digitalExperienceApplicationsTable')).toBeVisible();
-    expect(screen.queryByTestId('digitalExperienceMobileApplicationsTable')).toBeNull();
+
+    await screen.findByTestId('digitalExperienceMobileApplicationsTable');
+    expect(screen.getAllByTestId('digitalExperienceMobileApplicationLink')).toHaveLength(1);
+    expect(screen.queryByText('trailmap-android')).toBeNull();
   });
 
-  it('links to the mobile setup docs, not EDOT Browser, on a mobile platform without data', async () => {
-    mockPlatformFilter('android');
-    respondWith([app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 })]);
+  it('links to the mobile setup docs, not EDOT Browser, on the mobile tab without data', async () => {
+    mockApplicationType('mobile');
+    respondWith([webApp()]);
     renderPage();
 
     expect(await screen.findByTestId('digitalExperienceMobileApplicationsEmpty')).toBeVisible();
@@ -260,18 +287,14 @@ describe('ApplicationsListPage mobile applications', () => {
     expect(screen.queryByTestId('digitalExperienceApplicationsDocsLink')).toBeNull();
   });
 
-  it('offers a retry, not the setup docs, when only the mobile search failed', async () => {
-    mockPlatformFilter('android');
-    respondWith(
-      [app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 })],
-      [],
-      [],
-      null,
-      [],
-      'unavailable'
-    );
-    renderPage();
+  it('keeps the tabs, and offers a retry, when only the mobile search failed', async () => {
+    respondWith([webApp()], [], [], null, [], 'unavailable');
+    const { unmount } = renderPage();
+    expect(await screen.findByTestId('digitalExperienceApplicationTypeTabs')).toBeVisible();
+    unmount();
 
+    mockApplicationType('mobile');
+    renderPage();
     expect(await screen.findByTestId('digitalExperienceMobileApplicationsError')).toBeVisible();
     expect(screen.getByTestId('digitalExperienceMobileApplicationsRetry')).toBeVisible();
     expect(screen.getByTestId('digitalExperienceUnavailableMobile')).toBeVisible();

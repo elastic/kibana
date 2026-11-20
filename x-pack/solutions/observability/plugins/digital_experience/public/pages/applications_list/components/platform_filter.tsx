@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { APPLICATION_PLATFORMS } from '../../../../common/types/applications';
-import type { ApplicationPlatform } from '../../../../common/types/applications';
+import { MOBILE_PLATFORMS } from '../../../../common/types/applications';
+import type { MobilePlatform } from '../../../../common/types/applications';
 import { PLATFORM_LABELS } from '../../../labels';
-import { applicationPlatformRt } from '../../../utils/application_source';
+import { mobilePlatformRt } from '../../../utils/application_source';
 import { APPLICATIONS_LIST_EBT_ELEMENTS } from '../../../ebt_constants';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
 
@@ -27,19 +27,19 @@ const OPTIONS = [
       defaultMessage: 'All platforms',
     }),
   },
-  ...APPLICATION_PLATFORMS.map((platform) => ({
+  ...MOBILE_PLATFORMS.map((platform) => ({
     value: platform,
     label: PLATFORM_LABELS[platform],
   })),
 ];
 
-/** Platform filter: the browser, Android, iOS or all (`undefined`). */
+/** The mobile applications' platform filter: Android, iOS or all (`undefined`). */
 export function PlatformFilter({
   selected,
   onChange,
 }: {
-  selected: ApplicationPlatform | undefined;
-  onChange: (platform: ApplicationPlatform | undefined) => void;
+  selected: MobilePlatform | undefined;
+  onChange: (platform: MobilePlatform | undefined) => void;
 }) {
   return (
     <SingleSelectFilter
@@ -49,7 +49,7 @@ export function PlatformFilter({
       options={OPTIONS}
       selected={selected ?? ALL_PLATFORMS}
       isActive={selected !== undefined}
-      onChange={(value) => onChange(applicationPlatformRt.is(value) ? value : undefined)}
+      onChange={(value) => onChange(mobilePlatformRt.is(value) ? value : undefined)}
     />
   );
 }

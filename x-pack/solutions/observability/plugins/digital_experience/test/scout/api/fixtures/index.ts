@@ -9,7 +9,6 @@ import type {
   ApplicationSource,
   ApplicationSummary,
   MobileApplicationSummary,
-  MobilePlatform,
   WebApplicationSummary,
 } from '../../../../common/types/applications';
 
@@ -25,18 +24,17 @@ export const findApplication = (
 ): WebApplicationSummary | undefined =>
   applications.find(
     (application): application is WebApplicationSummary =>
-      application.platform === 'browser' &&
+      application.applicationType === 'web' &&
       application.serviceName === serviceName &&
       application.source === source
   );
 
-/** The row of one mobile application on one platform. */
+/** The row of one mobile application, all its platforms. */
 export const findMobileApplication = (
   applications: ApplicationSummary[],
-  serviceName: string,
-  platform: MobilePlatform
+  serviceName: string
 ): MobileApplicationSummary | undefined =>
   applications.find(
     (application): application is MobileApplicationSummary =>
-      application.platform === platform && application.serviceName === serviceName
+      application.applicationType === 'mobile' && application.serviceName === serviceName
   );

@@ -12,10 +12,10 @@ import { EuiEmptyPrompt, EuiLoadingLogo, EuiPageSection } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { APPLICATION_SOURCE, isMobilePlatform } from '../../../common/application_source';
+import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../common/application_source';
 import {
   APPLICATION_TAB_IDS,
-  type ApplicationPlatform,
+  type ApplicationType,
   type ApplicationSource,
   type ApplicationTabId,
 } from '../../../common/types/applications';
@@ -149,18 +149,18 @@ function ClassicRumOverview({ serviceName }: { serviceName: string }) {
 export function ApplicationPage({
   serviceName,
   source,
-  platform,
+  applicationType,
   selectedTab,
 }: {
   serviceName: string;
   source: ApplicationSource;
-  /** An EDOT application's platform, the browser when unset; mobile ones have the mobile page. */
-  platform?: ApplicationPlatform;
+  /** Whether the application is a web or a mobile one; web when unset. */
+  applicationType?: ApplicationType;
   selectedTab: ApplicationTabId;
 }) {
-  // Mobile applications are EDOT data: their platform, not their source, gives them the mobile page.
-  const mobilePlatform =
-    source === APPLICATION_SOURCE.otel && isMobilePlatform(platform) ? platform : undefined;
+  // Mobile applications are EDOT data: their type, not their source, gives them the mobile page.
+  const isMobile =
+    source === APPLICATION_SOURCE.otel && applicationType === APPLICATION_TYPE.mobile;
   const applicationsHref = useApplicationsHref();
   const history = useHistory();
   const { overviewHref, overviewPath, errorsHref, networkHref, reportsHref, sessionsHref } =
@@ -168,10 +168,9 @@ export function ApplicationPage({
   const shareAction = useShareAction({ serviceName, source, tab: selectedTab });
   // Classic RUM only has the Overview (and Sessions' unavailable prompt), and mobile only its
   // Overview; any other tab's URL is replaced by the Overview's.
-  const isUnsupportedTab =
-    mobilePlatform !== undefined
-      ? selectedTab !== 'overview'
-      : selectedTab !== 'sessions' && !tabsOf(source).includes(selectedTab);
+  const isUnsupportedTab = isMobile
+    ? selectedTab !== 'overview'
+    : selectedTab !== 'sessions' && !tabsOf(source, isMobile).includes(selectedTab);
   useEffect(() => {
     if (isUnsupportedTab) {
       history.replace(overviewPath);
@@ -191,10 +190,8 @@ export function ApplicationPage({
   ]);
 
   const renderOverview = () => {
-    if (mobilePlatform) {
-      return withPagePadding(
-        <MobileOverview serviceName={serviceName} platform={mobilePlatform} />
-      );
+    if (isMobile) {
+      return withPagePadding(<MobileOverview serviceName={serviceName} />);
     }
     return source === APPLICATION_SOURCE.otel ? (
       withPagePadding(<OtelOverview serviceName={serviceName} />)
@@ -236,7 +233,7 @@ export function ApplicationPage({
         title={serviceName}
         back={{ href: applicationsHref, label: APPLICATIONS_LABEL }}
         share={shareAction}
-        tabs={tabsOf(source, mobilePlatform !== undefined).map((id) => ({
+        tabs={tabsOf(source, isMobile).map((id) => ({
           id,
           label: APPLICATION_TAB_LABELS[id],
           isSelected: id === selectedTab,

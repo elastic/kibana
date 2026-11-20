@@ -36,9 +36,9 @@ EDOT Android and EDOT iOS applications (and React Native apps, which run on both
 the others. They ship with the rest of Digital Experience, behind `digitalExperience.enabled` only,
 on serverless and stateful.
 
-- **Source and platform:** `source` is the data model, `otel` or `classic`. Mobile applications
-  are OpenTelemetry only, so they are `otel`; what sets them apart is their `platform` (`browser`,
-  `android` or `ios`), which web applications have as `browser`.
+- **Source and type:** `source` is the data model, `otel` or `classic`. Mobile applications
+  are OpenTelemetry only, so they are `otel`; what sets them apart is their `applicationType`,
+  `mobile` (`web` for EDOT Browser and Classic RUM), and their `platforms` (`android`, `ios`).
 - **Identity:** a mobile `telemetry.sdk.name` (`android`, `iOS`), or, once the SDKs send the
   upstream values (elastic/rum-dev#106), the Elastic distribution
   (`resource.attributes.telemetry.distro.name: elastic`) on a mobile resource `os.name`: `Android`,
@@ -48,7 +48,8 @@ on serverless and stateful.
   EDOT Browser is the Elastic distribution too and reports the device's OS, e.g. `iOS` on an
   iPhone, so its documents (`telemetry.sdk.language: webjs`) are left out.
 - **Platform:** `android` for `os.name: Android` or `telemetry.sdk.name: android`, `ios` otherwise.
-- **Key:** one row per `service.name` and platform, so a React Native app has a row on each.
+- **Key:** one application per `service.name`, as obs-execution#645 has it: a React Native app is
+  one row, with the platforms it reported on (`VALUES(platform)`).
 - **Framework:** React Native will be marked by `elastic.app.framework.name`, pending the SDK team's
   review of the names; nothing reads it yet.
 - **Row metrics** (ES|QL, `server/routes/applications/mobile/`): sessions (distinct `session.id`),
@@ -67,15 +68,20 @@ on serverless and stateful.
   iOS's short version, with the build (`versionCode`, `CFBundleVersion`) in `app.build_id`. It isn't
   rewritten at query time; a version that carries its build would need fixing in the SDK or at
   ingest. The latest release is each application's release with the most sessions in the last 24
-  hours of the time range, picked per application in ES|QL (`TOP`), so no row limit drops one.
-- **Applications list:** mobile rows have their own table (platform, latest release, sessions,
-  users, crash-free sessions, error rate, last seen) below the web table. A Platform filter
-  (`platformFilter`) shows the browser's rows, or one mobile platform's alone, where it links to the
-  EDOT Android and iOS docs without mobile data. The Classic RUM source has no mobile rows. A failed
-  or partial mobile search is reported in `mobileAvailability`, apart from the sources. The page loads chart
-  and summary stay web-only. The environment picker lists both environment fields and "Not defined".
-- **Application page** (`/{serviceName}?source=otel&platform=android|ios`), one per platform:
-  environment and release filters (in the URL, so a reload or a shared link keeps them), a
+  hours of the time range, on any platform, picked per application in ES|QL (`TOP`), so no row
+  limit drops one.
+- **Applications list:** Web and Mobile tabs (`applicationType` in the URL), each with its count,
+  shown when both have data, when the mobile search failed, or when the URL picks one; otherwise the
+  list shows the only kind there is. The Mobile tab has its own table (the name with a badge per
+  platform, from `@kbn/custom-icons`, latest release, sessions, users, crash-free sessions, error
+  rate, last seen), a Platform filter (`platformFilter`: Android or iOS) and, without mobile data,
+  links to the EDOT Android and iOS docs. A failed or partial mobile search is reported in
+  `mobileAvailability`, apart from the sources. The summary, page loads chart, source filter and
+  column selector are the Web tab's. The environment picker lists both environment fields and
+  "Not defined".
+- **Application page** (`/{serviceName}?source=otel&applicationType=mobile`), all platforms: a
+  badge per platform, environment, OS (`osName`, the `os.name` values in the time range, e.g.
+  `iPadOS`) and release filters (in the URL, so a reload or a shared link keeps them), a
   Compare toggle, a KPI row (sessions, users, crash-free sessions, error rate) and empty sections
   (Health summary, Release health, Stability, Users and engagement, Performance, Views) for the
   sibling issues to fill. Every KPI uses `MobilePanel`: current value with its change against the
@@ -83,7 +89,8 @@ on serverless and stateful.
   link with the same ES|QL and filters (`common/mobile_panel.ts`). The time bucket is hourly up to
   24 hours and daily above. Without mobile data it links to the EDOT Android and iOS setup docs.
 - **Route:** `GET /internal/digital_experience/mobile_applications/{serviceName}/kpis`, with a
-  required `platform`.
+  optional `osName` and `release`. It also lists the OS names, platforms, releases (on the selected
+  OS) and environments for the pickers.
 
 ## Pages
 

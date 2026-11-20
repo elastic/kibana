@@ -76,6 +76,7 @@ export const DIGITAL_EXPERIENCE_EBT_ELEMENTS = {
 
 export const MOBILE_APPLICATION_EBT_ELEMENTS = {
   RELEASE_FILTER: 'mobileReleaseFilter',
+  OS_FILTER: 'mobileOsFilter',
   PANEL_DISCOVER_LINK: 'mobilePanelDiscoverLink',
   RETRY: 'mobileRetry',
 } as const;
@@ -86,6 +87,7 @@ export const APPLICATIONS_LIST_EBT_ELEMENTS = {
   CLASSIC_DATA_HINT: 'classicDataHint',
   SOURCE_FILTER: 'sourceFilter',
   PLATFORM_FILTER: 'platformFilter',
+  APPLICATION_TYPE_TAB: 'applicationTypeTab',
   COLUMN_SELECTOR: 'columnSelector',
   RETRY: 'applicationsRetry',
   SHOW_ALL_ENVIRONMENTS: 'showAllEnvironments',
