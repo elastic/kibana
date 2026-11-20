@@ -25,5 +25,5 @@ export interface ConnectorEventTopicDefinition<
 
 /** Data published on a connector event topic: the spoke payload plus the hub fields. */
 export type ConnectorEventBusData<TSchema extends z.ZodObject> = z.infer<
-  ReturnType<typeof connectorEventBusSchema<TSchema>>
+  ReturnType<typeof connectorEventBusSchema<TSchema['shape']>>
 >;

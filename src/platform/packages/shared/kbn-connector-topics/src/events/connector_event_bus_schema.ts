@@ -10,7 +10,9 @@
 import { z } from '@kbn/zod/v4';
 
 /** Extends a spoke event schema with the hub fields published on the bus. */
-export const connectorEventBusSchema = <TSchema extends z.ZodObject>(eventSchema: TSchema) =>
+export const connectorEventBusSchema = <TShape extends z.ZodRawShape>(
+  eventSchema: z.ZodObject<TShape>
+) =>
   eventSchema.extend({
     connectorId: z.string().describe('Id of the connector instance that received this event.'),
     connectorTypeId: z.string().describe('Connector type.'),

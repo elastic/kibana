@@ -46,8 +46,28 @@ describe('connector event topic types', () => {
       correlationKey: 'corr-1',
     };
 
+    type SlackBusData = ConnectorEventBusData<(typeof slack2Message)['eventSchema']>;
+    const numericChannel: SlackBusData = {
+      // @ts-expect-error channel must be a string
+      channel: 123,
+      messageId: '123.456',
+      connectorId: 'sales-ingress',
+      connectorTypeId: '.slack2',
+      spaceId: 'default',
+    };
+    // @ts-expect-error channel is required
+    const missingChannel: SlackBusData = {
+      messageId: '123.456',
+      connectorId: 'sales-ingress',
+      connectorTypeId: '.slack2',
+      spaceId: 'default',
+    };
+
     expect(payload.connectorId).toBe('sales-ingress');
     expect(withKey.text).toBe('hello');
+    expect(withKey.channel).toBe('C1');
+    expect(numericChannel.connectorId).toBe('sales-ingress');
+    expect(missingChannel.messageId).toBe('123.456');
     expect(withKey.correlationKey).toBe('corr-1');
   });
 });
