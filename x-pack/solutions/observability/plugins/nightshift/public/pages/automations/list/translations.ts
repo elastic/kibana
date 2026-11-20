@@ -26,6 +26,37 @@ export const listLabels = {
   automationColumn: i18n.translate('xpack.nightshift.automations.automationColumn', {
     defaultMessage: 'Automations',
   }),
+  slackMessageTrigger: i18n.translate('xpack.nightshift.automations.slackMessageTriggerLabel', {
+    defaultMessage: 'Slack message',
+  }),
+  destinationColumn: i18n.translate('xpack.nightshift.automations.destinationColumnLabel', {
+    defaultMessage: 'Destination',
+  }),
+  slackThreadDestination: i18n.translate(
+    'xpack.nightshift.automations.slackThreadDestinationLabel',
+    {
+      defaultMessage: 'Triggering Slack thread',
+    }
+  ),
+  noDestination: i18n.translate('xpack.nightshift.automations.noDestinationLabel', {
+    defaultMessage: 'No destination',
+  }),
+  lastRunColumn: i18n.translate('xpack.nightshift.automations.lastRunColumnLabel', {
+    defaultMessage: 'Last run',
+  }),
+  lastRunTooltip: i18n.translate('xpack.nightshift.automations.lastRunColumnTooltip', {
+    defaultMessage:
+      'Start time of the latest recorded run, including skipped runs. The selected time range does not affect this value.',
+  }),
+  loadingLastRun: i18n.translate('xpack.nightshift.automations.loadingLastRunLabel', {
+    defaultMessage: 'Loading last run',
+  }),
+  noRunsRecorded: i18n.translate('xpack.nightshift.automations.noRunsRecordedLabel', {
+    defaultMessage: 'No runs recorded',
+  }),
+  lastRunUnavailable: i18n.translate('xpack.nightshift.automations.lastRunUnavailableLabel', {
+    defaultMessage: 'Unavailable',
+  }),
   enabled: i18n.translate('xpack.nightshift.automations.enabledColumn', {
     defaultMessage: 'Enabled',
   }),

@@ -21,6 +21,7 @@ import {
   useDeleteAutomation,
   useRunAutomation,
   useFetchAutomations,
+  useAutomationsLastRuns,
   useToggleAutomation,
   useUpdateAutomation,
 } from '../../data/automations/use_automations';
@@ -46,6 +47,7 @@ jest.mock('../../data/automations/use_automations', () => ({
   useDeleteAutomation: jest.fn(),
   useRunAutomation: jest.fn(),
   useFetchAutomations: jest.fn(),
+  useAutomationsLastRuns: jest.fn(),
   useRefreshAutomations: jest.fn(() => jest.fn()),
   useToggleAutomation: jest.fn(),
   useUpdateAutomation: jest.fn(),
@@ -62,7 +64,7 @@ jest.mock('../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({
 jest.mock('../../data/relay_apps/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../data/relay_apps/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
-    bindings: [],
+    bindings: [{ channel: 'C12345', displayName: 'payments-oncall', visibility: 'public' }],
     isLoading: false,
     isError: false,
     isComplete: true,
@@ -84,6 +86,7 @@ const mockUseKibana = useKibana as jest.Mock;
 const mockUseInvestigationQuotas = useInvestigationQuotas as jest.Mock;
 
 const uiSettingsValues: Record<string, string> = {
+  dateFormat: 'YYYY-MM-DD HH:mm:ss',
   'dateFormat:tz': 'Browser',
   'dateFormat:dow': 'Sunday',
 };
@@ -114,6 +117,9 @@ describe('AutomationsPage', () => {
         },
       },
     });
+    jest.mocked(useAutomationsLastRuns).mockReturnValue({
+      data: undefined,
+    } as ReturnType<typeof useAutomationsLastRuns>);
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
     mockUseAutomationsRunCounts.mockReturnValue(undefined);
@@ -599,6 +605,52 @@ describe('AutomationsPage', () => {
       expect(within(reportRow).queryByTestId('automationTags')).not.toBeInTheDocument();
       expect(within(reportRow).getByTestId('automationUsage')).toHaveTextContent('1 / 5');
       expect(within(reportRow).queryByTestId('automationLimitReached')).not.toBeInTheDocument();
+    });
+
+    it('shows trigger labels, Slack destinations, and the latest run outside the default count range', () => {
+      const lastRunAt = '2026-10-01T12:00:00.000Z';
+      mockUseFetchAutomations.mockReturnValue({
+        data: {
+          automations: [
+            buildAutomation({
+              ...automations[0],
+              completions: [
+                { action: 'post_to_slack', targetMode: 'channel', destination: 'C12345' },
+              ],
+            }),
+            automations[1],
+            buildAutomation({
+              id: 'slack',
+              name: 'Investigate Slack messages',
+              trigger: { rows: [{ kind: 'slack', event: 'message' }] },
+              completions: [{ action: 'post_to_slack', targetMode: 'thread' }],
+            }),
+          ],
+        },
+        isInitialLoading: false,
+      });
+      jest.mocked(useAutomationsLastRuns).mockReturnValue({
+        data: { triage: lastRunAt },
+      } as ReturnType<typeof useAutomationsLastRuns>);
+      mockUseAutomationsRunsInRange.mockReturnValue([]);
+      mockUseAutomationsRunCounts.mockReturnValue({});
+
+      renderPage();
+
+      const alertRow = rowOf('Triage incoming alerts');
+      expect(within(alertRow).getByText('Alert triggered')).toBeVisible();
+      expect(within(alertRow).getByText('#payments-oncall')).toBeVisible();
+      expect(alertRow.querySelector('time')).toHaveAttribute('datetime', lastRunAt);
+
+      const scheduleRow = within(rowOf('Daily report'));
+      expect(scheduleRow.getByText('Scheduled')).toBeVisible();
+      expect(scheduleRow.getByText('No destination')).toBeVisible();
+      expect(scheduleRow.getByText('No runs recorded')).toBeVisible();
+
+      const slackRow = within(rowOf('Investigate Slack messages'));
+      expect(slackRow.getByText('Slack message')).toBeVisible();
+      expect(slackRow.getByText('Triggering Slack thread')).toBeVisible();
+      expect(slackRow.getByText('No runs recorded')).toBeVisible();
     });
 
     it('toggles an automation', () => {

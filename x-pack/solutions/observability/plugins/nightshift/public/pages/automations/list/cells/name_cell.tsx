@@ -7,10 +7,9 @@
 
 import { getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 import type { Automation } from '../../../../data/automations/use_automations';
-import { getTriggerDisplay } from '../../utils/trigger_display';
 import { AutomationTags } from './tags_badge';
 
 export const AutomationNameCell = ({
@@ -24,13 +23,6 @@ export const AutomationNameCell = ({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon
-          type={getTriggerDisplay(automation.trigger.rows[0]).icon}
-          size="m"
-          aria-hidden={true}
-        />
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiLink
           data-test-subj="nightshiftAutomationName"
