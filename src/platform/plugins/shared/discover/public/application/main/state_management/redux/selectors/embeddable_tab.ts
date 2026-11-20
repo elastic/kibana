@@ -8,9 +8,7 @@
  */
 
 import type { DiscoverSessionApiEmbeddableTab } from '@kbn/as-code-discover-schema';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { fromStoredEmbeddableTab } from '../../../../../../common/embeddable';
-import { migrateLegacyQuery } from '../../../../../utils/migrate_legacy_query';
 import { selectTab } from './tabs';
 import {
   getTabDataView,
@@ -43,12 +41,6 @@ export const selectTabEmbeddableTab = ({
   });
 
   const { serializedSearchSource } = tab;
-  const { query } = serializedSearchSource;
-  // Like SearchSource creation, read a query saved without a language as Lucene
-  const searchSource =
-    query === undefined || isOfAggregateQueryType(query)
-      ? serializedSearchSource
-      : { ...serializedSearchSource, query: migrateLegacyQuery(query) };
-
-  return fromStoredEmbeddableTab(tab, searchSource);
+  // The tab state keeps references inline, so no injectReferences step is needed here
+  return fromStoredEmbeddableTab(tab, serializedSearchSource);
 };
