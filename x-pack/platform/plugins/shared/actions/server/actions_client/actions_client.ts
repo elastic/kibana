@@ -302,18 +302,8 @@ export class ActionsClient {
     return getAuthStatus({ context: this.context });
   }
 
-  public async getConnectorSpec({
-    id,
-    configurationUtilities,
-  }: {
-    id: string;
-    configurationUtilities: ActionsConfigurationUtilities;
-  }) {
-    return getConnectorSpecAsJsonSchema({
-      context: this.context,
-      id,
-      configurationUtilities,
-    });
+  public async getConnectorSpec({ id }: { id: string }) {
+    return getConnectorSpecAsJsonSchema({ context: this.context, id });
   }
 
   /**

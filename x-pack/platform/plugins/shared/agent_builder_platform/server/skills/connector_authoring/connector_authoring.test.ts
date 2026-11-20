@@ -25,6 +25,8 @@ import { createConnectorSetupAttachmentType } from '../../attachment_types/conne
 jest.mock('@kbn/connector-specs', () => ({
   connectorsSpecs: {},
   getConnectorSpec: jest.fn(),
+  isEarsExperimentalConnector: jest.fn().mockReturnValue(false),
+  resolveActionScope: jest.fn().mockReturnValue('read'),
 }));
 
 const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;

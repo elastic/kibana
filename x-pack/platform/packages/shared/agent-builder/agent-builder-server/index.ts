@@ -242,7 +242,7 @@ export {
   parseRetryAfterMs,
   throwIfNotDelivered,
 } from './callbacks';
-export { describeZodSchema, formatSchemaForLlm } from './tools';
+export { describeSchema, formatSchemaForLlm } from './tools';
 export type {
   AvailabilityContext,
   AvailabilityResult,
@@ -254,6 +254,19 @@ export type {
   ConnectorSubActionDetail,
   ConnectorDetail,
 } from './agent_connectors';
+export type {
+  ConnectorSpecDetailInfo,
+  ConnectorSpecInfo,
+  ConnectorSpecProvider,
+  ConnectorSpecSummaryProvider,
+  SpecActionsClient,
+  SpecActionsStart,
+} from './connector_spec_provider';
+export {
+  createConnectorSpecProvider,
+  createPackageConnectorSpecProvider,
+  filterSpecActionsBySelection,
+} from './connector_spec_provider';
 export {
   listAgentConnectors,
   getAgentConnectorDetail,

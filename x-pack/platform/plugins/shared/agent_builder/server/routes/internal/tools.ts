@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { createConnectorSpecProvider } from '@kbn/agent-builder-server';
 import { listSearchSources } from '@kbn/agent-builder-genai-utils';
 import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { ListToolsResponse } from '@kbn/mcp-client';
@@ -536,9 +537,13 @@ export function registerInternalToolsRoutes({
         oauthConnectorIds
       );
 
+      const specProvider = createConnectorSpecProvider({
+        actionsStart: pluginsStart.actions,
+      });
       const connectors: ConnectorItem[] = filteredConnectors.map((connector) => {
         const isOAuth = connector.authMode === PER_USER_AUTH_MODE;
         return toConnectorItem(connector, {
+          specProvider,
           oauthStatus: isOAuth
             ? authorizedConnectorIds.has(connector.id)
               ? OAUTH_STATUS.AUTHORIZED
@@ -587,7 +592,12 @@ export function registerInternalToolsRoutes({
 
       return response.ok<GetConnectorResponse>({
         body: {
-          connector: toConnectorItem(connector, { oauthStatus }),
+          connector: toConnectorItem(connector, {
+            specProvider: createConnectorSpecProvider({
+              actionsStart: pluginsStart.actions,
+            }),
+            oauthStatus,
+          }),
         },
       });
     })
