@@ -57,6 +57,9 @@ export type OnRequestHandler = (
 
 const noop = () => undefined;
 
+const normalizeHeaders = (headers: IncomingHttpHeaders): IncomingHttpHeaders =>
+  Object.fromEntries(Object.entries(headers).map(([name, value]) => [name.toLowerCase(), value]));
+
 export const createTransport = ({
   scoped = false,
   getExecutionContext = noop,
@@ -76,7 +79,7 @@ export const createTransport = ({
     constructor(options: TransportOptions) {
       const { headers = {}, ...otherOptions } = options;
       super(otherOptions);
-      this.headers = headers;
+      this.headers = normalizeHeaders(headers);
     }
 
     async request(params: TransportRequestParams, options?: TransportRequestOptions) {
@@ -104,10 +107,13 @@ export const createTransport = ({
       // add stored headers to the options
       opts.headers = {
         ...this.headers,
-        ...options?.headers,
+        ...normalizeHeaders(options?.headers ?? {}),
       };
 
       onRequest({ scoped }, params, opts, logger);
+      // HTTP header names are case-insensitive. Normalize before sending so the renewal handler
+      // sees the same effective authorization value as Elasticsearch.
+      opts.headers = normalizeHeaders(opts.headers ?? {});
 
       try {
         return (await super.request(params, opts)) as TransportResult<any, any>;
@@ -117,16 +123,16 @@ export const createTransport = ({
             ? getUnauthorizedErrorHandler()
             : undefined;
           if (unauthorizedErrorHandler) {
-            const result = await unauthorizedErrorHandler(e);
+            const result = await unauthorizedErrorHandler(e, opts.headers);
             if (isRetryResult(result)) {
               this.headers = {
                 ...this.headers,
-                ...result.authHeaders,
+                ...normalizeHeaders(result.authHeaders),
               };
               const retryOpts = { ...opts };
               retryOpts.headers = {
                 ...this.headers,
-                ...options?.headers,
+                ...normalizeHeaders(options?.headers ?? {}),
               };
               return (await super.request(params, retryOpts)) as TransportResult<any, any>;
             }

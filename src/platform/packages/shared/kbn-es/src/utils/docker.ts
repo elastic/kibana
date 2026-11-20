@@ -186,6 +186,16 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   uiam?: boolean;
   /** Configure ES serverless with UIAM OAuth support (starts an additional uiam-oauth container) */
   uiamOAuth?: boolean;
+  /**
+   * ISO-8601 lifetime of the ephemeral tokens UIAM issues, such as service account exchange tokens
+   * (UIAM accepts PT1M to PT5M, default PT5M). Shorten it to exercise token renewal in tests.
+   */
+  uiamEphemeralTokenExpiration?: string;
+  /**
+   * ISO-8601 lifetime of session access tokens issued by UIAM. The minimum is PT1M,
+   * and the default is PT1H. Shorten this lifetime to exercise token renewal in tests.
+   */
+  uiamAccessTokenExpiration?: string;
   /** Configuration for a linked project in Cross Project Search (CPS) mode */
   linkedProject?: { projectId: string; port: number };
 }
@@ -1017,9 +1027,11 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   await Promise.all([
     setupDockerImage({ log, image: esServerlessImage }),
     ...(options.uiam
-      ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map(({ image }) =>
-          setupDockerImage({ log, image })
-        )
+      ? getUiamContainers({
+          includeOAuth: options.uiamOAuth,
+          ephemeralTokenExpiration: options.uiamEphemeralTokenExpiration,
+          accessTokenExpiration: options.uiamAccessTokenExpiration,
+        }).map(({ image }) => setupDockerImage({ log, image }))
       : []),
   ]);
   log.info(`[runServerlessCluster] Docker image(s) ready (${elapsed()})`);
@@ -1044,15 +1056,22 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
         ),
       });
       return node.name;
-    }).concat(
-      options.uiam
-        ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map((container) =>
-            runUiamContainer(log, container)
-          )
-        : []
-    )
+    })
   );
   log.info(`[runServerlessCluster] All ES nodes started (${elapsed()})`);
+
+  // UIAM containers must start sequentially: uiam-cosmosdb first, then uiam.
+  // Starting them in parallel risks uiam connecting to CosmosDB before the
+  // pgcosmos extension is ready, causing a fatal (non-retried) 503 on startup.
+  if (options.uiam) {
+    for (const container of getUiamContainers({
+      includeOAuth: options.uiamOAuth,
+      ephemeralTokenExpiration: options.uiamEphemeralTokenExpiration,
+      accessTokenExpiration: options.uiamAccessTokenExpiration,
+    })) {
+      nodeNames.push(await runUiamContainer(log, container));
+    }
+  }
 
   log.success(`Serverless ES cluster running.
   Login with username ${chalk.bold.cyan(ELASTIC_SERVERLESS_SUPERUSER)} or ${chalk.bold.cyan(
