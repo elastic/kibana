@@ -11,7 +11,6 @@ import { useAppContext } from '../contexts/app_context';
 
 interface ReturnValue {
   hasIndices: boolean;
-  indices: string[];
 }
 
 export const useHasIndices = () => {

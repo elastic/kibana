@@ -56,9 +56,7 @@ test.describe('Search Profiler query loading', { tag: testData.SEARCH_PROFILER_T
       loadFrom: PRECONFIGURED_QUERY,
     });
 
-    await expect
-      .poll(() => pageObjects.searchProfiler.indexComboBox.getSelectedOptions())
-      .toStrictEqual([INDEX_NAME]);
+    await expect(pageObjects.searchProfiler.indexInput).toHaveValue(INDEX_NAME);
     await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(PRECONFIGURED_QUERY);
   });
 
@@ -70,9 +68,7 @@ test.describe('Search Profiler query loading', { tag: testData.SEARCH_PROFILER_T
       loadFrom: PRECONFIGURED_QUERY,
     });
 
-    await expect
-      .poll(() => pageObjects.searchProfiler.indexComboBox.getSelectedOptions())
-      .toStrictEqual([INDEX_NAME]);
+    await expect(pageObjects.searchProfiler.indexInput).toHaveValue(INDEX_NAME);
     await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(PRECONFIGURED_QUERY);
 
     await pageObjects.searchProfiler.goto({
@@ -80,29 +76,31 @@ test.describe('Search Profiler query loading', { tag: testData.SEARCH_PROFILER_T
       loadFrom: UPDATED_QUERY,
     });
 
-    await expect
-      .poll(() => pageObjects.searchProfiler.indexComboBox.getSelectedOptions())
-      .toStrictEqual([UPDATED_INDEX_NAME]);
+    await expect(pageObjects.searchProfiler.indexInput).toHaveValue(UPDATED_INDEX_NAME);
     await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(UPDATED_QUERY);
   });
 
-  test('restores index and query after navigating away and back', async ({ pageObjects }) => {
-    await pageObjects.searchProfiler.goto();
+  for (const { name, query } of [
+    { name: 'valid', query: PERSISTED_QUERY },
+    { name: 'unfinished', query: '{ "query":' },
+    { name: 'empty', query: '' },
+  ]) {
+    test(`restores index and ${name} query after navigating away and back`, async ({
+      pageObjects,
+    }) => {
+      await pageObjects.searchProfiler.goto();
 
-    await pageObjects.searchProfiler.setIndex(PERSISTED_INDEX_NAME, { custom: true });
-    await pageObjects.searchProfiler.setQuery(PERSISTED_QUERY);
+      await pageObjects.searchProfiler.setIndex(PERSISTED_INDEX_NAME);
+      await pageObjects.searchProfiler.setQuery(query);
 
-    await expect
-      .poll(() => pageObjects.searchProfiler.indexComboBox.getSelectedOptions())
-      .toStrictEqual([PERSISTED_INDEX_NAME]);
-    await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(PERSISTED_QUERY);
+      await expect(pageObjects.searchProfiler.indexInput).toHaveValue(PERSISTED_INDEX_NAME);
+      await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(query);
 
-    await pageObjects.searchProfiler.gotoConsole();
-    await pageObjects.searchProfiler.goto();
+      await pageObjects.searchProfiler.gotoConsole();
+      await pageObjects.searchProfiler.goto();
 
-    await expect
-      .poll(() => pageObjects.searchProfiler.indexComboBox.getSelectedOptions())
-      .toStrictEqual([PERSISTED_INDEX_NAME]);
-    await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(PERSISTED_QUERY);
-  });
+      await expect(pageObjects.searchProfiler.indexInput).toHaveValue(PERSISTED_INDEX_NAME);
+      await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(query);
+    });
+  }
 });

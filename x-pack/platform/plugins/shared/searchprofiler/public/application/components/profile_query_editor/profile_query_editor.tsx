@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useRef, useState, memo, useCallback, useEffect, useMemo } from 'react';
+import React, { useRef, memo, useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { debounce } from 'lodash';
 import {
   EuiForm,
-  EuiComboBox,
+  EuiFieldText,
   EuiFormRow,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -71,6 +71,7 @@ const styles = {
  */
 export const ProfileQueryEditor = memo(() => {
   const editorPropsRef = useRef<EditorProps>(null as any);
+  const indexInputRef = useRef<HTMLInputElement>(null as any);
 
   const dispatch = useProfilerActionContext();
 
@@ -96,7 +97,6 @@ export const ProfileQueryEditor = memo(() => {
     storedQuery: storedState.query,
   });
   const editorValue = useRef(initialEditorValue);
-  const [indexValue, setIndexValue] = useState(initialIndexValue);
 
   const requestProfile = useRequestProfile();
   const debouncedUpdateQueryStorage = useMemo(
@@ -117,8 +117,13 @@ export const ProfileQueryEditor = memo(() => {
     };
   }, [debouncedUpdateQueryStorage, initialIndexValue]);
 
+  // Seed the uncontrolled index input from the initial value. Keeping this in an
+  // effect (instead of the render-path `inputRef` callback) ensures a re-render
+  // does not clobber a value already applied from a live URL change by `applyUrlParams`.
   useEffect(() => {
-    setIndexValue(initialIndexValue);
+    if (indexInputRef.current) {
+      indexInputRef.current.value = initialIndexValue;
+    }
   }, [initialIndexValue]);
 
   const applyUrlParams = useCallback((params: URLSearchParams) => {
@@ -135,7 +140,9 @@ export const ProfileQueryEditor = memo(() => {
     });
 
     editorValue.current = nextEditorValue;
-    setIndexValue(nextIndexValue);
+    if (indexInputRef.current) {
+      indexInputRef.current.value = nextIndexValue;
+    }
     editorPropsRef.current?.setValue(nextEditorValue);
     updateSearchProfilerState({ index: nextIndexValue });
     updateSearchProfilerQueryState(nextEditorValue);
@@ -158,7 +165,7 @@ export const ProfileQueryEditor = memo(() => {
     try {
       const { data: result, error } = await requestProfile({
         query: editorValue.current,
-        index: indexValue,
+        index: indexInputRef.current.value,
       });
       if (error) {
         notifications.addDanger(error);
@@ -213,25 +220,18 @@ export const ProfileQueryEditor = memo(() => {
                   defaultMessage: 'Index',
                 })}
               >
-                <EuiComboBox
+                <EuiFieldText
                   data-test-subj="indexName"
                   fullWidth
-                  isDisabled={!licenseEnabled}
-                  isLoading={isLoading}
-                  singleSelection={{ asPlainText: true }}
-                  options={[DEFAULT_INDEX_VALUE, ...(indicesData?.indices ?? [])].map((label) => ({
-                    label,
-                  }))}
-                  selectedOptions={indexValue ? [{ label: indexValue }] : []}
-                  onChange={(options) => {
-                    const value = options[0]?.label ?? '';
-                    setIndexValue(value);
-                    updateSearchProfilerState({ index: value });
+                  disabled={!licenseEnabled}
+                  inputRef={(ref) => {
+                    if (ref) {
+                      indexInputRef.current = ref;
+                    }
                   }}
-                  onCreateOption={(value) => {
-                    setIndexValue(value);
-                    updateSearchProfilerState({ index: value });
-                  }}
+                  onChange={(event) =>
+                    updateSearchProfilerState({ index: event.currentTarget.value })
+                  }
                 />
               </EuiFormRow>
             </EuiFlexItem>
