@@ -17,6 +17,7 @@ import { expect } from '@kbn/scout/ui';
  */
 export class DataFrameAnalyticsPage {
   private readonly codeEditor: KibanaCodeEditorWrapper;
+  private histogramRequestSucceeded?: Promise<boolean>;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
@@ -333,6 +334,14 @@ export class DataFrameAnalyticsPage {
     // Navigate directly rather than clicking the showOnHover table button; the button is
     // CSS-hidden until hover and its cross-app navigation is unreliable in Playwright.
     const rison = `(ml:(analysisType:${analysisType},jobId:${jobId}))`;
+    this.histogramRequestSucceeded = this.page
+      .waitForResponse((response) =>
+        response.url().includes('/data_visualizer/get_field_histograms/')
+      )
+      .then(
+        (response) => response.ok(),
+        () => false
+      );
     await this.page.goto(this.kbnUrl.app(`ml/data_frame_analytics/exploration?_g=${rison}`));
     await this.page.testSubj
       .locator('mlPageDataFrameAnalyticsExploration')
@@ -561,9 +570,10 @@ export class DataFrameAnalyticsPage {
     // Let histogram loading finish before interacting with cells, whether it succeeds
     // or reports an error. The histogram test step verifies chart success separately.
     if ((await histogramButton.getAttribute('aria-pressed')) === 'true') {
-      await histogramButton
-        .and(this.page.locator('[aria-busy="false"]'))
-        .waitFor({ state: 'visible' });
+      if (await this.histogramRequestSucceeded) {
+        const histogramChart = this.page.testSubj.locator(`mlDataGridChart-${columnId}`);
+        await histogramChart.waitFor({ state: 'visible' });
+      }
     }
 
     const featureImportanceCell = dataGrid.locator(

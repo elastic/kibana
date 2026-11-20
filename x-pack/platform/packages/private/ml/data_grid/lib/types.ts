@@ -154,10 +154,6 @@ export interface UseIndexDataReturnType
     | 'resultsField'
   > {
   /**
-   * Histogram request status.
-   */
-  chartsStatus?: 'pending' | 'loading' | 'complete';
-  /**
    * Callback to render cell values.
    */
   renderCellValue: RenderCellValue;

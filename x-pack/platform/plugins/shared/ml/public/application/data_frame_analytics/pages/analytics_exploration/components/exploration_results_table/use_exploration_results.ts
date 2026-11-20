@@ -53,7 +53,6 @@ export const useExplorationResults = (
   } = useMlKibana();
   const mlApi = useMlApi();
   const [baseline, setBaseLine] = useState<FeatureImportanceBaseline | undefined>();
-  const [chartsStatus, setChartsStatus] = useState<'pending' | 'loading' | 'complete'>('pending');
 
   const trainedModelsApiService = useTrainedModelsApiService();
 
@@ -100,7 +99,6 @@ export const useExplorationResults = (
   );
 
   const fetchColumnChartsData = async function () {
-    setChartsStatus('loading');
     try {
       if (jobConfig !== undefined && dataLoader !== undefined) {
         const columnChartsData = await dataLoader.loadFieldHistograms(
@@ -116,8 +114,6 @@ export const useExplorationResults = (
       }
     } catch (e) {
       showDataGridColumnChartErrorMessageToast(e, toasts);
-    } finally {
-      setChartsStatus('complete');
     }
   };
 
@@ -193,7 +189,6 @@ export const useExplorationResults = (
 
   return {
     ...dataGrid,
-    chartsStatus,
     renderCellValue,
     baseline,
     predictionFieldName,
