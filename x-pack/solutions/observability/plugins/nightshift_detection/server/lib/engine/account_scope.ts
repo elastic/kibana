@@ -66,7 +66,7 @@ export class AccountScope {
     });
     scope
       .bind(KnowledgeIndicators)
-      .toConstantValue(this.significantEvents.getKnowledgeIndicatorReader(accountRequest));
+      .toConstantValue(this.significantEvents.getKnowledgeIndicatorReader({ spaceId }));
     // The rules are the account's: Alerting v2 runs them with its API key.
     scope.bind(DetectionRulesClient).toConstantValue(
       await this.alerting.getRulesClientWithRequestInSpace(accountRequest, asSpaceId(spaceId), {
