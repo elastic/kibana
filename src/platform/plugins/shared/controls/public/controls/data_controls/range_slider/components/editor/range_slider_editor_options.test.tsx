@@ -61,28 +61,19 @@ describe('RangeSliderEditorOptions', () => {
   });
 
   describe('required selections setting', () => {
-    test('is shown for pinned controls', () => {
+    test.each([
+      ['shown for', true],
+      ['hidden for', false],
+    ])('is %s controls (isPinned: %s)', (_, isPinned) => {
       const component = render(
         <RangeSliderEditorOptions
           initialState={{} as RangeSliderControlState}
-          isPinned
+          isPinned={isPinned}
           updateState={jest.fn()}
           setControlEditorValid={jest.fn()}
         />
       );
-      expect(component.queryByText('Make selections required')).not.toBeNull();
-    });
-
-    test('is hidden for controls that are not pinned', () => {
-      const component = render(
-        <RangeSliderEditorOptions
-          initialState={{} as RangeSliderControlState}
-          isPinned={false}
-          updateState={jest.fn()}
-          setControlEditorValid={jest.fn()}
-        />
-      );
-      expect(component.queryByText('Make selections required')).toBeNull();
+      expect(Boolean(component.queryByText('Make selections required'))).toBe(isPinned);
     });
   });
 });

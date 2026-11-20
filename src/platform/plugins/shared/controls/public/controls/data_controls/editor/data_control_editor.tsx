@@ -265,13 +265,9 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   }, [editorState.data_view_id]);
 
   // existing controls ask the parent; new controls are created pinned whenever the parent supports pinning
-  const isPinned = useMemo(
-    () =>
-      controlId
-        ? apiHasPinnedPanels(parentApi) && parentApi.panelIsPinned(controlId)
-        : apiCanPinPanels(parentApi),
-    [controlId, parentApi]
-  );
+  const isPinned = controlId
+    ? apiHasPinnedPanels(parentApi) && parentApi.panelIsPinned(controlId)
+    : apiCanPinPanels(parentApi);
 
   const CustomSettingsComponent = useMemo(() => {
     if (!selectedControlType) return;

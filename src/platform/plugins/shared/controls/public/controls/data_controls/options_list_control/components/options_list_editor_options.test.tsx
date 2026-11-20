@@ -63,22 +63,16 @@ describe('Options list sorting button', () => {
   };
 
   describe('required selections setting', () => {
-    test('is shown for pinned controls', () => {
+    test.each([
+      ['shown for', true],
+      ['hidden for', false],
+    ])('is %s controls (isPinned: %s)', (_, isPinned) => {
       const component = mountComponent({
         initialState: getMockedState(),
         field: { type: 'string' } as DataViewField,
-        isPinned: true,
+        isPinned,
       });
-      expect(component.queryByText('Make selections required')).not.toBeNull();
-    });
-
-    test('is hidden for controls that are not pinned', () => {
-      const component = mountComponent({
-        initialState: getMockedState(),
-        field: { type: 'string' } as DataViewField,
-        isPinned: false,
-      });
-      expect(component.queryByText('Make selections required')).toBeNull();
+      expect(Boolean(component.queryByText('Make selections required'))).toBe(isPinned);
     });
   });
 
