@@ -179,23 +179,11 @@ export async function stepSaveSystemObject(context: InstallContext) {
       logger.debug(
         `Package install - Package is flagged with keep_policies_up_to_date, upgrading its associated package policies ${policyIdsToUpgrade}`
       );
-      const upgradeResults = await packagePolicyService.bulkUpgrade(
+      await packagePolicyService.bulkUpgrade(
         savedObjectsClient,
         esClient,
         policyIdsToUpgrade.items
       );
-      // The results carry per policy failures, e.g. a stale agent version cache that could not be
-      // cleared. Nothing retries them here, so make them visible.
-      const failedUpgrades = upgradeResults.filter(({ success }) => !success);
-      if (failedUpgrades.length > 0) {
-        logger.warn(
-          `Package install - Failed to upgrade ${
-            failedUpgrades.length
-          } package policies of ${pkgName}: ${failedUpgrades
-            .map(({ id, body }) => `[${id}]: ${body?.message}`)
-            .join(', ')}`
-        );
-      }
     });
   }
   logger.debug(
