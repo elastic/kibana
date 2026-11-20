@@ -529,6 +529,19 @@ describe('runCanaries', () => {
     expect(results[0].specId).toBe('.fake');
   });
 
+  it('reports a failed connector listing as misc for each case instead of aborting', async () => {
+    loadFixturesMock.mockReturnValue([fixtureFile([caseFor(), caseFor({ name: 'second' })])]);
+    listConnectorsMock.mockRejectedValue(new Error('Request timed out after 30000ms'));
+
+    const results = await runCanaries({ log, dryRun: false });
+
+    expect(results).toHaveLength(2);
+    expect(results.map((r) => r.outcome)).toEqual(['misc', 'misc']);
+    expect(results[0].reason).toMatch(/could not list the existing connectors.*timed out/);
+    expect(executeConnectorMock).not.toHaveBeenCalled();
+    expect(createConnectorMock).not.toHaveBeenCalled();
+  });
+
   it('throws when --only matches no fixture', async () => {
     await expect(runCanaries({ log, dryRun: false, only: ['.nope'] })).rejects.toThrow(
       /No fixtures match/

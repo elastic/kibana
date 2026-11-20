@@ -25,13 +25,21 @@ const getStatusCode = (result: ExecuteConnectorResult): number | undefined => {
   return Number.isInteger(statusCode) && statusCode > 0 ? statusCode : undefined;
 };
 
-/** Classifies an execute response with `status: 'error'` by `error_name`, then `error_meta.statusCode`, then (with no status) the message wording. */
+/** Classifies an execute response with `status: 'error'` by `error_name`, then `retry`, then `error_meta.statusCode`, then (with no status) the message wording. */
 export const classifyErrorResult = (result: ExecuteConnectorResult): Classification => {
   const statusCode = getStatusCode(result);
   const detail = result.message ?? 'no message';
 
   if (result.error_name && AUTH_ERROR_NAMES.has(result.error_name)) {
     return { outcome: 'auth', reason: `${result.error_name}: ${detail}` };
+  }
+  // The executor sets `retry` (a date, or `true`) when the vendor says to try again later, e.g. a rate-limited 403 or a 503
+  // with Retry-After, so a throttle is reported as transient rather than as an auth failure or API drift.
+  if (result.retry) {
+    return {
+      outcome: 'misc',
+      reason: `vendor asked to retry later (retry: ${String(result.retry)}): ${detail}`,
+    };
   }
   if (statusCode === undefined) {
     const text = `${result.message ?? ''} ${result.service_message ?? ''}`;

@@ -223,7 +223,7 @@ export const runCanaries = async ({
     (fixture) => wanted.size === 0 || wanted.has(normalizeSpecId(fixture.spec_id))
   );
   const available = new Set(allFixtures.map((f) => normalizeSpecId(f.spec_id)));
-  const unknown = [...wanted].filter((id) => !available.has(id));
+  const unknown = only.filter((id) => !available.has(normalizeSpecId(id)));
   if (unknown.length > 0) {
     throw new Error(
       `No fixtures match --only ${unknown.join(', ')}. Available: ${allFixtures
@@ -241,11 +241,20 @@ export const runCanaries = async ({
 
   let connection: KibanaConnection | undefined;
   const existing: ExistingConnector[] = [];
+  let listFailure: Classification | undefined;
   if (!dryRun) {
     log.info('Detecting Kibana...');
     connection = await detectKibana();
     log.info(`Connected to Kibana at ${chalk.cyan(connection.url)}`);
-    existing.push(...(await listConnectors(connection)));
+    // A failed listing is shared by every case, so it is reported per case instead of aborting the run.
+    try {
+      existing.push(...(await listConnectors(connection)));
+    } catch (err) {
+      listFailure = {
+        outcome: 'misc',
+        reason: `could not list the existing connectors: ${summarizeError(err)}`,
+      };
+    }
   }
 
   // Each fixture file targets its own connector (spec ids are unique), so files run concurrently.
@@ -288,6 +297,7 @@ export const runCanaries = async ({
         const invalid = validateCase(spec, fixtureCase);
         if (invalid) return invalid;
         if (!connection) return { outcome: 'ok', reason: 'dry run' };
+        if (listFailure) return listFailure;
 
         connector ??= setUpConnector(connection, existing, manifest);
         const connectorId = await connector;

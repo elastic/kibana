@@ -14,6 +14,13 @@ run(
   async ({ log, flags }) => {
     // An unset string flag arrives as '', so drop empty values.
     const only = [flags.only].flat().filter((v): v is string => typeof v === 'string' && v !== '');
+    // `--only=` or `--only ''` (for example from an unset CI variable) must not widen the run to every fixture.
+    const onlyFlagCount = process.argv.filter(
+      (arg) => arg === '--only' || arg.startsWith('--only=')
+    ).length;
+    if (onlyFlagCount > only.length) {
+      throw new Error('--only needs a spec id, e.g. --only .github');
+    }
     const results = await runCanaries({ log, dryRun: Boolean(flags['dry-run']), only });
     // A run that executed nothing must not look green.
     if (results.length === 0) {

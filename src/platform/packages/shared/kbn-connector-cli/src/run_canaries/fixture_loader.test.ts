@@ -70,6 +70,21 @@ describe('loadFixtures', () => {
     });
   });
 
+  it.each(['"false"', 'no_', '0'])('rejects a non-boolean enabled value (%s)', (value) => {
+    write(
+      'jira.yaml',
+      [
+        'spec_id: .jira-cloud',
+        'cases:',
+        '  - action: getProjects',
+        `    enabled: ${value}`,
+        '    expect: [{path: values, type: array}]',
+      ].join('\n')
+    );
+
+    expect(() => loadFixtures(dir)).toThrow(/"enabled" must be true or false/);
+  });
+
   it('rejects two fixture files for the same spec_id', () => {
     const content =
       'spec_id: .github\ncases:\n  - action: a\n    expect: [{path: a, type: string}]';

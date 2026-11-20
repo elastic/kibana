@@ -76,6 +76,20 @@ describe('classifyErrorResult', () => {
     expect(classifyErrorResult(errorResult({ message })).outcome).toBe('misc');
   });
 
+  it.each([
+    [403, '2026-11-20T12:00:00.000Z'],
+    [503, '2026-11-20T12:00:00.000Z'],
+    [403, true],
+  ])('classifies HTTP %i with retry %p as transient, not auth or error', (statusCode, retry) => {
+    const result = errorResult({ error_meta: { statusCode }, retry });
+    expect(classifyErrorResult(result).outcome).toBe('misc');
+  });
+
+  it.each([false, null, undefined])('ignores retry %p', (retry) => {
+    const result = errorResult({ error_meta: { statusCode: 403 }, retry });
+    expect(classifyErrorResult(result).outcome).toBe('auth');
+  });
+
   it('ignores a non-numeric status code', () => {
     const result = errorResult({ error_meta: { statusCode: 'nope' } });
     expect(classifyErrorResult(result).outcome).toBe('misc');

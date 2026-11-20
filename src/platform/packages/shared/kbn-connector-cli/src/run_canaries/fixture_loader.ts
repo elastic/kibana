@@ -33,6 +33,11 @@ const validate = (raw: unknown, filename: string): FixtureFile => {
     if (typeof rawCase.action !== 'string' || rawCase.action === '') {
       throw new Error(`${where}: missing action`);
     }
+    if ('enabled' in rawCase && typeof rawCase.enabled !== 'boolean') {
+      throw new Error(
+        `${where}: "enabled" must be true or false, not ${JSON.stringify(rawCase.enabled)}`
+      );
+    }
     const input = rawCase.input ?? {};
     if (!isRecord(input)) throw new Error(`${where}: "input" must be a mapping`);
     if (!Array.isArray(rawCase.expect) || rawCase.expect.length === 0) {

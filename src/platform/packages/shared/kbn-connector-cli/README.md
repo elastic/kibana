@@ -148,7 +148,7 @@ Only actions declared `scope: 'read'` are allowed. The scope is advisory and set
 | `auth` | HTTP 401/403 from the vendor, a connector authorization error, or (when there is no status) auth wording in the message, see below |
 | `test` | Executed, but the response no longer matches the fixture (the drift signal) |
 | `error` | Other 4xx or any 5xx from the vendor: drift or an outage |
-| `misc` | No HTTP status, timeout, network failure or dropped connection, 408/429, Kibana itself failing the request (other than a 400), the connector couldn't be set up (for example Vault), or an unexpected runner error |
+| `misc` | No HTTP status, timeout, network failure or dropped connection, 408/429, any error where the vendor asked to retry later (the execute response's `retry` is set, e.g. a rate-limited 403 or a 503 with `Retry-After`), Kibana itself failing the request (other than a 400), the connectors couldn't be listed or the connector couldn't be set up (for example Vault), or an unexpected runner error |
 | `fixture` | The fixture doesn't fit the current spec (no spec or enabled manifest for its `spec_id`, unknown action, wrong scope, input fails the action's schema), or Kibana answered the execute call with HTTP 400. Not vendor drift |
 
 The vendor status comes from `error_meta.statusCode` in the execute response. MCP-backed connectors such as `.github` may not set it. For errors with no status, the message is matched against common auth wording (`HTTP`/`HTTPS`/`status` followed by 401 or 403, unauthorized, forbidden, bad credentials, invalid key or token, authentication failed) to still report `auth`; anything else is `misc`. Checked live against `.github` with a bad token ("unauthorized: token authentication failed").
