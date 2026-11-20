@@ -151,4 +151,4 @@ node scripts/evals compare agent-builder-baseline agent-builder-change
 Notes:
 
 - The two runs must use the same connector and configuration.
-- `compare` reads through `EVAL_KBN_URL` (defaults to `http://elastic:changeme@localhost:5601/dev`).
+- `compare` reads through `EVAL_KBN_URL` (defaults to `http://elastic:changeme@localhost:5601`).
