@@ -10,7 +10,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { NotesButton } from './notes_button';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { EuiThemeProvider } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 

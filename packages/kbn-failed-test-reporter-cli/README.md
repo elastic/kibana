@@ -133,10 +133,11 @@ one, and issues that mention the same file as possibly related.
 
 - An open `failed-test` issue about the test (the per-test issues `report_failed_tests` files),
   about the suite, or about the whole file.
-- A closed one, as long as the test has not failed since it was closed. Once it fails again the
-  closed issue stops counting, and the new suite issue names it next to its test, in the tests
-  table's "Previously tracked in" column (`supersedes` in the summary). Without this, a closed issue would keep the suite silent for up
-  to `--closed-since-days`: once `report_failed_tests` stops writing, its per-test issues get no
+- A closed one, as long as the test has not failed since it was closed, or only within
+  `--reopen-grace-hours` of the close (below). Once it fails again the closed issue stops
+  counting, and the new suite issue names it next to its test, in the tests table's "Previously
+  tracked in" column (`supersedes` in the summary). Without this, a closed issue would keep the
+  suite silent for up to `--closed-since-days`: once `report_failed_tests` stops writing, its per-test issues get no
   new comments and the stale sweep closes them. The suite's own issue is the exception: it is
   reopened instead (below).
 - Closed issues last updated more than `--closed-since-days` ago (default 365) are not looked at.
@@ -186,9 +187,12 @@ whole file. A closed one isn't reopened for a block: the block gets an issue of 
   body or an earlier comment, as "(newly flaky)". On an issue no report has found flaky before, a
   consistently failing one, the first comment says "Now flaky" and lists every flaky test. How to
   skip the test is at the end of the body.
-- A closed issue is reopened, with a comment, when the suite failed after it was closed. It stays
-  closed when it was closed as a duplicate, or when the suite has not failed since: the report
-  window can still hold the failures a fix was merged for.
+- A closed issue is reopened, with a comment, when the suite failed more than
+  `--reopen-grace-hours` after it was closed (default 24). It stays closed when it was closed as a
+  duplicate, or when the suite has not failed since: the report window can still hold the
+  failures a fix was merged for. Failures within the grace period don't count either, as they
+  can come from builds without the fix: already running when it merged, testing an older Elastic
+  Cloud image, or on a release branch the backport hasn't reached yet.
 - An issue that already has the report, as on a retried build, is left alone.
 
 In CI the command posts as `elastic-vault-github-plugin-prod[bot]`, the app behind the pipeline's
