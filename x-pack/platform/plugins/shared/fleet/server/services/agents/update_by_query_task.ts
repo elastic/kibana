@@ -7,7 +7,7 @@
 
 import { setTimeout as sleep } from 'timers/promises';
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   TasksGetResponse,
   UpdateByQueryRequest,
@@ -36,11 +36,18 @@ interface UpdateByQueryTaskOptions {
  * successfully. Without it, the counters of the task's status are the only record of what it did.
  * Per-document `failures` are only available from `response`.
  */
-const toUpdateByQueryResponse = (task: TasksGetResponse): UpdateByQueryResponse => {
+const toUpdateByQueryResponse = (
+  task: TasksGetResponse,
+  taskId: string,
+  logger: Logger
+): UpdateByQueryResponse => {
   if (task.response) {
     return task.response as UpdateByQueryResponse;
   }
 
+  logger.warn(
+    `Update by query task ${taskId} finished without a response, reading its counters from the task status. Per-document failures are not available.`
+  );
   const status = (task.task.status ?? {}) as UpdateByQueryResponse;
   return {
     total: status.total,
@@ -93,7 +100,7 @@ export async function updateByQueryAndWait(
           `Update by query task ${taskId} failed: ${JSON.stringify(task.error).slice(0, 1000)}`
         );
       }
-      return toUpdateByQueryResponse(task);
+      return toUpdateByQueryResponse(task, taskId, logger);
     }
 
     if (Date.now() >= deadline) {
