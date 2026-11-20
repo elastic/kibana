@@ -119,6 +119,14 @@ export const contribution: WorkflowStepsContribution = {
     if (!processServices) return;
     services.registerService('agentBuilder', processServices.start);
     services.registerService('searchInferenceEndpoints', processServices.searchInferenceEndpoints);
+    // The same task handler `ServiceManager.startServices` builds for Kibana's own
+    // `agent-builder:run-agent` task type: `run_agent.task.ts` reads it from this registry when the
+    // module runs in a process, instead of the `host.plugins.agentBuilder.taskHandler` shortcut
+    // Kibana sends it directly.
+    services.registerService(
+      'agentBuilder.taskHandler',
+      processServices.getInternalServices().taskHandler
+    );
 
     // The steps that read agent builder's registries, so that the guard can name them.
     const stepIds = new Set<string>();

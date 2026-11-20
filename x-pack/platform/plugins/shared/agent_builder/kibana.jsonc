@@ -13,6 +13,9 @@
         "server/task_types/workflow_steps_contribution.ts"
       ]
     },
+    "taskTypes": [
+      "server/task_types/run_agent.task.ts"
+    ],
     "configPath": [
       "xpack",
       "agentBuilder"
@@ -57,6 +60,7 @@
       "licenseManagement",
       "security",
       "workflowsManagement",
+      "workflowsExecutionEngine",
       "usageCollection",
       "usageApi",
       "home",

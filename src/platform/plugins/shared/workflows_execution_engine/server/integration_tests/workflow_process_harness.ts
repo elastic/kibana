@@ -691,15 +691,18 @@ const startHarness = async (
   }
 
   const createdTaskCounts: number[] = [];
-  /** Runs the scheduled task of a workflow in the process; `onDispatchFailure` observes dispatch failures. */
-  const runTask = (
+  /**
+   * Builds the `RemoteTaskRunner` of a run without starting it, so a test can `cancel()` it while
+   * `promise` (its `run()`) is still pending — `runTask` only hands back that promise.
+   */
+  const runTaskHandle = (
     taskType: string,
     task: { id: string; params: Record<string, string> },
     onDispatchFailure?: TaskProcessDispatch['onDispatchFailure'],
     credentials?: { apiKey: string; userName?: string; spaceId?: string },
     tracing?: TaskProcessRunRequest['tracing']
-  ) =>
-    new RemoteTaskRunner({
+  ) => {
+    const runner = new RemoteTaskRunner({
       route: getRoute(taskType),
       request: {
         taskType,
@@ -751,7 +754,18 @@ const startHarness = async (
           ...options.featureFlags,
         })),
       fetchFn: undiciFetch as unknown as typeof fetch,
-    }).run();
+    });
+    return { runner, promise: runner.run() };
+  };
+
+  /** Runs the scheduled task of a workflow in the process; `onDispatchFailure` observes dispatch failures. */
+  const runTask = (
+    taskType: string,
+    task: { id: string; params: Record<string, string> },
+    onDispatchFailure?: TaskProcessDispatch['onDispatchFailure'],
+    credentials?: { apiKey: string; userName?: string; spaceId?: string },
+    tracing?: TaskProcessRunRequest['tracing']
+  ) => runTaskHandle(taskType, task, onDispatchFailure, credentials, tracing).promise;
 
   const run = (
     workflowId: string,
@@ -861,6 +875,7 @@ const startHarness = async (
     kibanaRequests,
     run,
     runTask,
+    runTaskHandle,
     runMeasured,
     getProcessPids,
     waitForRunTask,

@@ -32,6 +32,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { TaskTypeModule } from '@kbn/task-manager-plugin/server/task_type_module';
 import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -72,8 +73,26 @@ export interface ResumeWorkflowExecutionResponse {
   resumedBy: string;
 }
 
+export interface RegisterHostedTaskTypeOptions {
+  /**
+   * What the module reads as `host.plugins[id]` when it runs in Kibana (merged, not replacing, the
+   * three native workflow task types' own `host.plugins.workflowsExecutionEngine`). A task process
+   * instead gets the `start` contracts of the module's own `taskPlugins`, as for every task type
+   * module; this is a Kibana-only shortcut the caller's runner may use instead of building the
+   * engine's process runtime (`defineWorkflowHostedTaskType`'s `getProcessRuntime`).
+   */
+  plugins?: () => Promise<Record<string, unknown>>;
+}
+
 export interface WorkflowsExecutionEnginePluginSetup {
-  // No setup contract exposed yet. Extend this interface when other plugins need to configure the engine during setup.
+  /**
+   * Registers a task type module built with `defineWorkflowHostedTaskType` (one that reuses this
+   * engine's `workflow-steps` and `agent-builder` contributions and process services without being
+   * one of the three native workflow task types, such as an agent builder run): the same dispatch
+   * settings, parity ids, encryption keys, event log and task plugins a workflow worker is sent.
+   */
+  registerHostedTaskType: (module: TaskTypeModule, options?: RegisterHostedTaskTypeOptions) => void;
+  // Extend this interface when other plugins need to configure the engine during setup.
   [key: string]: unknown;
 }
 

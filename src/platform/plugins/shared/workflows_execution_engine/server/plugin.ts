@@ -20,7 +20,10 @@ import type {
 } from '@kbn/core/server';
 import { DATA_VIEWS_TASK_PROCESS_SETTINGS_ID } from '@kbn/data-views-plugin/server';
 import { FIELDS_METADATA_TASK_PROCESS_SETTINGS_ID } from '@kbn/fields-metadata-plugin/server';
-import type { TaskTypeRegistrationOptions } from '@kbn/task-manager-plugin/server/task_type_module';
+import type {
+  TaskTypeModule,
+  TaskTypeRegistrationOptions,
+} from '@kbn/task-manager-plugin/server/task_type_module';
 import type { TelemetryTaskProcessSettings } from '@kbn/telemetry-plugin/server/task_process_settings';
 import { WorkflowRepository } from '@kbn/workflows';
 import type { WorkflowsExecutionEngineConfig } from './config';
@@ -41,6 +44,7 @@ import { taskType as resumeTaskType } from './task_types/workflow_resume.task';
 import { taskType as runTaskType } from './task_types/workflow_run.task';
 import { taskType as scheduledTaskType } from './task_types/workflow_scheduled.task';
 import type {
+  RegisterHostedTaskTypeOptions,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginSetupDeps,
   WorkflowsExecutionEnginePluginStart,
@@ -276,7 +280,14 @@ export class WorkflowsExecutionEnginePlugin
       plugins.taskManager.registerTaskType(taskType, taskTypeOptions);
     }
 
-    return {};
+    return {
+      registerHostedTaskType: (module: TaskTypeModule, options?: RegisterHostedTaskTypeOptions) => {
+        plugins.taskManager.registerTaskType(module, {
+          ...taskTypeOptions,
+          hostExtensions: { ...taskTypeOptions.hostExtensions, plugins: options?.plugins },
+        });
+      },
+    } satisfies WorkflowsExecutionEnginePluginSetup;
   }
 
   public start(coreStart: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {

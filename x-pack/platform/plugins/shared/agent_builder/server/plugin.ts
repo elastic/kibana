@@ -43,6 +43,8 @@ import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerTaskDefinitions } from './services/execution';
+import type { TaskHandler } from './services/execution/task/task_handler';
+import { taskType as runAgentTaskType } from './task_types/run_agent.task';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
 import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
@@ -72,6 +74,14 @@ export class AgentBuilderPlugin
     if (!this.services) throw new Error('Agent Builder services are not set up');
     return this.services.serviceManager;
   }
+  /** The handler `agent-builder:run-agent` runs with in Kibana (`services/execution/task/task_handler.ts`). */
+  private getTaskHandler = (): TaskHandler => {
+    const services = this.serviceManager.internalStart;
+    if (!services) {
+      throw new Error('getTaskHandler called before service init');
+    }
+    return services.taskHandler;
+  };
   private cloudSetup?: CloudSetup;
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
@@ -154,16 +164,21 @@ export class AgentBuilderPlugin
     });
     const { setupContract } = this.services;
 
-    registerTaskDefinitions({
-      taskManager: setupDeps.taskManager,
-      getTaskHandler: () => {
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('getTaskHandler called before service init');
-        }
-        return services.taskHandler;
-      },
-    });
+    // `agent-builder:run-agent` runs in its own task process when the workflows execution engine is
+    // available (it is what builds the agent builder registries a process needs): registered through
+    // its `registerHostedTaskType`, with Kibana's own handler sent as `host.plugins.agentBuilder` so
+    // a run in Kibana never has to build the engine's process runtime for itself. Without the engine
+    // (it is an optional plugin), the task always runs in Kibana, as before.
+    if (setupDeps.workflowsExecutionEngine) {
+      setupDeps.workflowsExecutionEngine.registerHostedTaskType(runAgentTaskType, {
+        plugins: async () => ({ agentBuilder: { taskHandler: this.getTaskHandler() } }),
+      });
+    } else {
+      registerTaskDefinitions({
+        taskManager: setupDeps.taskManager,
+        getTaskHandler: () => this.getTaskHandler(),
+      });
+    }
 
     registerFeatures({ features: setupDeps.features });
 

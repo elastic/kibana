@@ -18,6 +18,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from './persistence';
+import { serializeExecutionError } from './utils/serialize_execution_error';
 import {
   FOLLOW_ABORT_DRAIN_TIMEOUT_MS,
   FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS,
@@ -29,6 +30,24 @@ import {
 } from './constants';
 
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Marks the execution `failed` before the follower gives up on it, so a dispatch that never reaches
+ * a worker (declined, capacity-rejected, or the process failed to spawn) does not leave the document
+ * `scheduled` forever for callers that read it without following (a list view, a later `get`). Best
+ * effort: the follower's own thrown error is what the current caller sees either way.
+ */
+const failAndThrow = async (
+  executionId: string,
+  executionClient: AgentExecutionClient,
+  message: string
+): Promise<never> => {
+  const error = createInternalError(message);
+  await executionClient
+    .updateStatus(executionId, ExecutionStatus.failed, { error: serializeExecutionError(error) })
+    .catch(() => undefined);
+  throw error;
+};
 
 /**
  * Wraps the polling async generator into an Observable<ChatEvent>.
@@ -106,18 +125,24 @@ async function* pollExecutionEvents(
 
     // 0. Safety timeouts
     if (now - startTime > FOLLOW_EXECUTION_TIMEOUT_MS) {
-      throw createInternalError(
+      await failAndThrow(
+        executionId,
+        executionClient,
         `Execution ${executionId} timed out: no terminal status reached within ${FOLLOW_EXECUTION_TIMEOUT_MS}ms`
       );
     }
     if (hasStartedRunning) {
       if (now - lastLivenessTime > FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS) {
-        throw createInternalError(
+        await failAndThrow(
+          executionId,
+          executionClient,
           `Execution ${executionId} timed out: no heartbeat for ${FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS}ms`
         );
       }
     } else if (now - lastLivenessTime > FOLLOW_EXECUTION_SCHEDULED_TIMEOUT_MS) {
-      throw createInternalError(
+      await failAndThrow(
+        executionId,
+        executionClient,
         `Execution ${executionId} timed out: not claimed by a worker within ${FOLLOW_EXECUTION_SCHEDULED_TIMEOUT_MS}ms`
       );
     }

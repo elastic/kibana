@@ -17,6 +17,7 @@ import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { createStandaloneEventLog } from '@kbn/event-log-plugin/server/standalone_event_log';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { createSecurityTaskPlugin } from '@kbn/security-plugin/server/task_plugin';
+import type { CancellableTask, RunContext } from '@kbn/task-manager-plugin/server/task';
 import { TASK_ENCRYPTED_SAVED_OBJECT_TYPE_REGISTRATIONS } from '@kbn/task-manager-plugin/server/task_process/host_capabilities/task_scheduling';
 import { TASK_SCHEDULING_CONTRIBUTIONS_KEY } from '@kbn/task-manager-plugin/server/task_scheduling_contribution';
 import type { TaskHost, TaskTypeModule } from '@kbn/task-manager-plugin/server/task_type_module';
@@ -54,15 +55,27 @@ const ACTION_SAVED_OBJECT_TYPES = new Set(['action', 'action_task_params', 'aler
 const getPluginRuntime = (host: TaskHost): WorkflowRuntime | undefined =>
   (host.plugins?.[WORKFLOWS_ENGINE_PLUGIN_ID] as WorkflowsEngineHostPlugin | undefined)?.runtime;
 
+/** Loaded here so that Kibana, which never gets here, does not load the process runtime module. */
+const createWorkflowRuntimeFromHostLazy = async (host: TaskHost) => {
+  const { createWorkflowRuntimeFromHost } = await import('./process_runtime');
+  return createWorkflowRuntimeFromHost(host);
+};
+
+/**
+ * What {@link defineWorkflowHostedTaskType}'s `getProcessRuntime` resolves to: the engine's process
+ * runtime, its service registry (what `workflow-steps` and `agent-builder` contributions registered
+ * while setting themselves up against it) and a `stop` to flush and release it, called from the
+ * caller's own `cleanup`.
+ */
+export type ProcessWorkflowRuntime = Awaited<ReturnType<typeof createWorkflowRuntimeFromHostLazy>>;
+
 /** Resolves the plugin runtime or creates the services of one process execution. */
 const getRuntime = async (
   host: TaskHost
 ): Promise<{ runtime: WorkflowRuntime; stop?: () => Promise<void> }> => {
   const runtime = getPluginRuntime(host);
   if (runtime) return { runtime };
-  // Loaded here so that Kibana, which never gets here, does not load it.
-  const { createWorkflowRuntimeFromHost } = await import('./process_runtime');
-  return createWorkflowRuntimeFromHost(host);
+  return createWorkflowRuntimeFromHostLazy(host);
 };
 
 /**
@@ -98,22 +111,226 @@ export type AgentBuilderContributionDeclares = Pick<
   | 'registerAnalyticsEventTypes'
 >;
 
+/** The part of {@link TaskTypeModule} a hosted task type (one of the three workflow task types, or
+ * another task type that reuses the engine's process services, such as an agent builder run) names
+ * for itself; everything else comes from the contributions. */
+type HostedTaskTypeDefinition = Pick<
+  TaskTypeModule,
+  | 'type'
+  | 'title'
+  | 'description'
+  | 'timeout'
+  | 'maxAttempts'
+  | 'paramsSchema'
+  | 'allowPriorityOverride'
+>;
+
+/**
+ * The fields of a hosted task type module derived purely from its contributions: what a workflow run
+ * (or another task type built on the same contributions, such as an agent builder run) needs besides
+ * the runner itself. Shared by {@link defineWorkflowTaskType} and {@link defineWorkflowHostedTaskType}
+ * so the two cannot drift on what a process is given.
+ */
+const buildContributedModuleFields = (
+  definition: HostedTaskTypeDefinition,
+  declared: Array<NonNullable<WorkflowStepsContribution['declares']>>,
+  contributions: NonNullable<TaskHost['contributions']>
+): Omit<TaskTypeModule, 'createTaskRunner' | 'contributions'> => ({
+  ...definition,
+  cancelGracePeriodMs: 5000,
+  // Reads and schedules the `workflow:*` tasks (and the `actions:*` tasks that run connectors).
+  taskManager: {
+    schedulableTypes: [
+      /^workflow:/,
+      /^actions:/,
+      ...declared.flatMap(({ schedulableTypes }) => schedulableTypes ?? []),
+    ],
+  },
+  licensing: true,
+  // Cases and the other steps count usage with the counters of their domain.
+  usageCounters: true,
+  // A run reports analytics events (its own, the connectors' and the steps'): Core requires the
+  // event types to be registered in the process, as the plugins do in Kibana.
+  analyticsEventTypes: [
+    ...Object.entries(workflowExecutionEventSchemas).map(([eventType, schema]) => ({
+      eventType,
+      schema: schema as never,
+    })),
+    ...actionsEventTypes,
+    ...declared.flatMap(({ analyticsEventTypes }) => analyticsEventTypes ?? []),
+  ],
+  createSavedObjectTypes: (encryption, settings) =>
+    declared.flatMap(
+      (declaration) =>
+        declaration.createSavedObjectTypes?.(encryption, settings, {
+          getContributions: <T extends object>(key: string) => (contributions[key] ?? []) as T[],
+        }) ?? []
+    ),
+  registerUiSettings: declared.some((declaration) => declaration.registerUiSettings)
+    ? (registry, settings) => {
+        const seen = new Set(
+          declared.flatMap(({ uiSettings }) => uiSettings?.flatMap(Object.keys) ?? [])
+        );
+        const globalSeen = new Set(
+          declared.flatMap(({ globalUiSettings }) => globalUiSettings?.flatMap(Object.keys) ?? [])
+        );
+        const register = (defaults: Record<string, UiSettingsParams>, global: boolean): void => {
+          const keys = global ? globalSeen : seen;
+          const unique = Object.fromEntries(
+            Object.entries(defaults).filter(([key]) => !keys.has(key) && keys.add(key))
+          );
+          if (Object.keys(unique).length > 0) {
+            if (global) registry.registerGlobal(unique);
+            else registry.register(unique);
+          }
+        };
+        const deduplicated = {
+          register: (defaults: Record<string, UiSettingsParams>) => register(defaults, false),
+          registerGlobal: (defaults: Record<string, UiSettingsParams>) => register(defaults, true),
+        };
+        for (const declaration of declared)
+          declaration.registerUiSettings?.(deduplicated, settings);
+      }
+    : undefined,
+  registerAnalyticsEventTypes: (analytics) => {
+    for (const declaration of declared) declaration.registerAnalyticsEventTypes?.(analytics);
+  },
+  featureFlags: Object.assign(
+    { [WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG]: false },
+    ...declared.map(({ featureFlags }) => featureFlags ?? {})
+  ),
+  eventLog: {
+    providers: [
+      { provider: ACTIONS_EVENT_LOG_PROVIDER, actions: Object.values(ACTIONS_EVENT_LOG_ACTIONS) },
+      ...declared.flatMap(({ eventLogProviders }) => eventLogProviders ?? []),
+    ],
+    create: createStandaloneEventLog,
+  },
+  // The config of the engine and its cloud fields, the security and actions configs the services
+  // it uses are built from, and what decides which API key a scheduled task is granted.
+  settings: [
+    WORKFLOWS_ENGINE_SETTINGS_ID,
+    WORKFLOWS_ENGINE_CLOUD_SETTINGS_ID,
+    'security',
+    'actions',
+    'taskManager',
+  ],
+  // What contributions read: a plugin that is disabled sends nothing, and its contribution then
+  // registers nothing, so these are not required.
+  optionalSettings: [...new Set(declared.flatMap(({ settings }) => settings ?? []))],
+  ...(declared.some(({ dataStreams }) => dataStreams?.length)
+    ? { dataStreams: declared.flatMap(({ dataStreams }) => dataStreams ?? []) }
+    : {}),
+  createDataStreams: (settings) => {
+    const config = settings[WORKFLOWS_ENGINE_SETTINGS_ID] as
+      | WorkflowsExecutionEngineConfig
+      | undefined;
+    if (!config) throw new Error('Native workflow data streams require engine settings');
+    return Object.values(getWorkflowDataStreamDefinitions(config.storage));
+  },
+  // Only when contributions declare some: it gives the runner `host.uiSettings`.
+  ...(declared.some(
+    ({ uiSettings, globalUiSettings, registerUiSettings }) =>
+      uiSettings?.length || globalUiSettings?.length || registerUiSettings
+  )
+    ? {
+        uiSettings: {
+          defaults: dedupeUiSettings(declared.flatMap(({ uiSettings }) => uiSettings ?? [])),
+          globalDefaults: dedupeUiSettings(
+            declared.flatMap(({ globalUiSettings }) => globalUiSettings ?? [])
+          ),
+        },
+      }
+    : {}),
+  taskPlugins: [
+    createSecurityTaskPlugin(kibanaPackageJson.version),
+    // The analytics shipper, opted in as Kibana is: the process ships its events before it answers.
+    createTelemetryTaskPlugin(kibanaPackageJson.version),
+    createWorkflowsEngineTaskPlugin(kibanaPackageJson.version),
+  ],
+});
+
+/** The keys read by a hosted task type's own `contributions`, and what they resolve to recursively. */
+const resolveContributedKeys = (
+  contributed: Record<string, unknown[]>
+): {
+  steps: WorkflowStepsContribution[];
+  additional: Array<{ declares?: AgentBuilderContributionDeclares }>;
+} => {
+  const steps = (contributed[WORKFLOW_STEPS_CONTRIBUTIONS_KEY] ??
+    []) as WorkflowStepsContribution[];
+  const keys = new Set([
+    AGENT_BUILDER_CONTRIBUTIONS_KEY,
+    CASES_ATTACHMENT_TYPES_CONTRIBUTIONS_KEY,
+    CASES_CLIENT_CONTRIBUTIONS_KEY,
+    ...steps.flatMap(({ declares }) => declares?.contributionKeys ?? []),
+  ]);
+  const additional: Array<{ declares?: AgentBuilderContributionDeclares }> = [];
+  for (const key of keys) {
+    const entries = (contributed[key] ?? []) as typeof additional;
+    additional.push(...entries);
+    for (const { declares } of entries) {
+      for (const nested of declares?.contributionKeys ?? []) keys.add(nested);
+    }
+  }
+  return { steps, additional };
+};
+
+/**
+ * The contribution keys every hosted task type reads: `alerting-rule-run` (the connector types of
+ * the plugins that own them), `workflow-steps` (the steps and triggers of the plugins that register
+ * them) and `agent-builder` (the tools, agents, skills and attachment types of the plugins that
+ * register them with agent builder), plus whatever the resolved contributions themselves declare.
+ */
+const contributedKeys = (
+  declared: Array<NonNullable<WorkflowStepsContribution['declares']>>
+): string[] => [
+  TASK_SCHEDULING_CONTRIBUTIONS_KEY,
+  RULE_RUN_CONTRIBUTIONS_KEY,
+  WORKFLOW_STEPS_CONTRIBUTIONS_KEY,
+  AGENT_BUILDER_CONTRIBUTIONS_KEY,
+  CASES_ATTACHMENT_TYPES_CONTRIBUTIONS_KEY,
+  CASES_CLIENT_CONTRIBUTIONS_KEY,
+  ...new Set(declared.flatMap(({ contributionKeys }) => contributionKeys ?? [])),
+];
+
+/** Attaches the lazily-built saved object declarations every hosted task type shares. */
+const withSavedObjectDeclarations = (
+  taskType: TaskTypeModule,
+  declared: Array<NonNullable<WorkflowStepsContribution['declares']>>
+): TaskTypeModule => {
+  // The saved object types and encrypted registrations are built from the code of the actions plugin,
+  // which costs something, so only when a task process reads them.
+  let declarations: ReturnType<typeof getRuleRunDeclarations> | undefined;
+  const getDeclarations = () => (declarations ??= getRuleRunDeclarations());
+  return Object.defineProperties(taskType, {
+    savedObjectTypes: {
+      enumerable: true,
+      get: () =>
+        getDeclarations()
+          .savedObjectTypes.filter((type) => ACTION_SAVED_OBJECT_TYPES.has(type.name))
+          .concat(declared.flatMap(({ savedObjectTypes }) => savedObjectTypes ?? [])),
+    },
+    encryptedSavedObjectTypes: {
+      enumerable: true,
+      get: () => [
+        ...getDeclarations().encryptedSavedObjectTypes.filter((registration) =>
+          ACTION_SAVED_OBJECT_TYPES.has(registration.type)
+        ),
+        ...TASK_ENCRYPTED_SAVED_OBJECT_TYPE_REGISTRATIONS,
+        ...declared.flatMap(({ encryptedSavedObjectTypes }) => encryptedSavedObjectTypes ?? []),
+      ],
+    },
+  });
+};
+
 /**
  * One of the three workflow task types as a module. What it declares is what a process needs and
  * Kibana already has: the same module is registered in Kibana (whose plugin hands over its runtime)
  * and bundled for the task process (which builds a runtime from its host).
  */
 export const defineWorkflowTaskType = (
-  definition: Pick<
-    TaskTypeModule,
-    | 'type'
-    | 'title'
-    | 'description'
-    | 'timeout'
-    | 'maxAttempts'
-    | 'paramsSchema'
-    | 'allowPriorityOverride'
-  >,
+  definition: HostedTaskTypeDefinition,
   pick: (runtime: WorkflowRuntime) => WorkflowTaskFunction,
   stepContributions: WorkflowStepsContribution[] = [],
   additionalContributions: Array<{ declares?: AgentBuilderContributionDeclares }> = [],
@@ -124,153 +341,15 @@ export const defineWorkflowTaskType = (
     ...additionalContributions.map((contribution) => contribution.declares ?? {}),
   ];
   const taskType = defineTaskType({
-    ...definition,
-    cancelGracePeriodMs: 5000,
-    // Reads and schedules the `workflow:*` tasks (and the `actions:*` tasks that run connectors).
-    taskManager: {
-      schedulableTypes: [
-        /^workflow:/,
-        /^actions:/,
-        ...declared.flatMap(({ schedulableTypes }) => schedulableTypes ?? []),
-      ],
-    },
-    licensing: true,
-    // Cases and the other steps count usage with the counters of their domain.
-    usageCounters: true,
-    // A run reports analytics events (its own, the connectors' and the steps'): Core requires the
-    // event types to be registered in the process, as the plugins do in Kibana.
-    analyticsEventTypes: [
-      ...Object.entries(workflowExecutionEventSchemas).map(([eventType, schema]) => ({
-        eventType,
-        schema: schema as never,
-      })),
-      ...actionsEventTypes,
-      ...declared.flatMap(({ analyticsEventTypes }) => analyticsEventTypes ?? []),
-    ],
-    createSavedObjectTypes: (encryption, settings) =>
-      declared.flatMap(
-        (declaration) =>
-          declaration.createSavedObjectTypes?.(encryption, settings, {
-            getContributions: <T extends object>(key: string) => (contributions[key] ?? []) as T[],
-          }) ?? []
-      ),
-    registerUiSettings: declared.some((declaration) => declaration.registerUiSettings)
-      ? (registry, settings) => {
-          const seen = new Set(
-            declared.flatMap(({ uiSettings }) => uiSettings?.flatMap(Object.keys) ?? [])
-          );
-          const globalSeen = new Set(
-            declared.flatMap(({ globalUiSettings }) => globalUiSettings?.flatMap(Object.keys) ?? [])
-          );
-          const register = (defaults: Record<string, UiSettingsParams>, global: boolean): void => {
-            const keys = global ? globalSeen : seen;
-            const unique = Object.fromEntries(
-              Object.entries(defaults).filter(([key]) => !keys.has(key) && keys.add(key))
-            );
-            if (Object.keys(unique).length > 0) {
-              if (global) registry.registerGlobal(unique);
-              else registry.register(unique);
-            }
-          };
-          const deduplicated = {
-            register: (defaults: Record<string, UiSettingsParams>) => register(defaults, false),
-            registerGlobal: (defaults: Record<string, UiSettingsParams>) =>
-              register(defaults, true),
-          };
-          for (const declaration of declared)
-            declaration.registerUiSettings?.(deduplicated, settings);
-        }
-      : undefined,
-    registerAnalyticsEventTypes: (analytics) => {
-      for (const declaration of declared) declaration.registerAnalyticsEventTypes?.(analytics);
-    },
-    featureFlags: Object.assign(
-      { [WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG]: false },
-      ...declared.map(({ featureFlags }) => featureFlags ?? {})
-    ),
-    eventLog: {
-      providers: [
-        { provider: ACTIONS_EVENT_LOG_PROVIDER, actions: Object.values(ACTIONS_EVENT_LOG_ACTIONS) },
-        ...declared.flatMap(({ eventLogProviders }) => eventLogProviders ?? []),
-      ],
-      create: createStandaloneEventLog,
-    },
-    // The config of the engine and its cloud fields, the security and actions configs the services
-    // it uses are built from, and what decides which API key a scheduled task is granted.
-    settings: [
-      WORKFLOWS_ENGINE_SETTINGS_ID,
-      WORKFLOWS_ENGINE_CLOUD_SETTINGS_ID,
-      'security',
-      'actions',
-      'taskManager',
-    ],
-    // What contributions read: a plugin that is disabled sends nothing, and its contribution then
-    // registers nothing, so these are not required.
-    optionalSettings: [...new Set(declared.flatMap(({ settings }) => settings ?? []))],
-    ...(declared.some(({ dataStreams }) => dataStreams?.length)
-      ? { dataStreams: declared.flatMap(({ dataStreams }) => dataStreams ?? []) }
-      : {}),
-    createDataStreams: (settings) => {
-      const config = settings[WORKFLOWS_ENGINE_SETTINGS_ID] as
-        | WorkflowsExecutionEngineConfig
-        | undefined;
-      if (!config) throw new Error('Native workflow data streams require engine settings');
-      return Object.values(getWorkflowDataStreamDefinitions(config.storage));
-    },
-    // Only when contributions declare some: it gives the runner `host.uiSettings`.
-    ...(declared.some(
-      ({ uiSettings, globalUiSettings, registerUiSettings }) =>
-        uiSettings?.length || globalUiSettings?.length || registerUiSettings
-    )
-      ? {
-          uiSettings: {
-            defaults: dedupeUiSettings(declared.flatMap(({ uiSettings }) => uiSettings ?? [])),
-            globalDefaults: dedupeUiSettings(
-              declared.flatMap(({ globalUiSettings }) => globalUiSettings ?? [])
-            ),
-          },
-        }
-      : {}),
-    // `alerting-rule-run`: the connector types of the plugins that own them. `workflow-steps`: the
-    // steps and triggers of the plugins that register them. `agent-builder`: the tools, agents, skills
-    // and attachment types of the plugins that register them with agent builder.
+    ...buildContributedModuleFields(definition, declared, contributions),
     contributions: {
-      keys: [
-        TASK_SCHEDULING_CONTRIBUTIONS_KEY,
-        RULE_RUN_CONTRIBUTIONS_KEY,
-        WORKFLOW_STEPS_CONTRIBUTIONS_KEY,
-        AGENT_BUILDER_CONTRIBUTIONS_KEY,
-        CASES_ATTACHMENT_TYPES_CONTRIBUTIONS_KEY,
-        CASES_CLIENT_CONTRIBUTIONS_KEY,
-        ...new Set(declared.flatMap(({ contributionKeys }) => contributionKeys ?? [])),
-      ],
+      keys: contributedKeys(declared),
       // A task process hands over what plugins contribute; the module is built again with it.
       apply: (contributed) => {
-        const steps = (contributed[WORKFLOW_STEPS_CONTRIBUTIONS_KEY] ??
-          []) as WorkflowStepsContribution[];
-        const keys = new Set([
-          AGENT_BUILDER_CONTRIBUTIONS_KEY,
-          CASES_ATTACHMENT_TYPES_CONTRIBUTIONS_KEY,
-          CASES_CLIENT_CONTRIBUTIONS_KEY,
-          ...steps.flatMap(({ declares }) => declares?.contributionKeys ?? []),
-        ]);
-        const additional: Array<{ declares?: AgentBuilderContributionDeclares }> = [];
-        for (const key of keys) {
-          const entries = (contributed[key] ?? []) as typeof additional;
-          additional.push(...entries);
-          for (const { declares } of entries) {
-            for (const nested of declares?.contributionKeys ?? []) keys.add(nested);
-          }
-        }
+        const { steps, additional } = resolveContributedKeys(contributed);
         return defineWorkflowTaskType(definition, pick, steps, additional, contributed);
       },
     },
-    taskPlugins: [
-      createSecurityTaskPlugin(kibanaPackageJson.version),
-      // The analytics shipper, opted in as Kibana is: the process ships its events before it answers.
-      createTelemetryTaskPlugin(kibanaPackageJson.version),
-      createWorkflowsEngineTaskPlugin(kibanaPackageJson.version),
-    ],
     createTaskRunner: (context, host) => {
       let services: ReturnType<typeof getRuntime> | undefined;
       const pluginRuntime = getPluginRuntime(host);
@@ -306,27 +385,57 @@ export const defineWorkflowTaskType = (
       };
     },
   });
-  // The saved object types and encrypted registrations are built from the code of the actions plugin,
-  // which costs something, so only when a task process reads them.
-  let declarations: ReturnType<typeof getRuleRunDeclarations> | undefined;
-  const getDeclarations = () => (declarations ??= getRuleRunDeclarations());
-  return Object.defineProperties(taskType, {
-    savedObjectTypes: {
-      enumerable: true,
-      get: () =>
-        getDeclarations()
-          .savedObjectTypes.filter((type) => ACTION_SAVED_OBJECT_TYPES.has(type.name))
-          .concat(declared.flatMap(({ savedObjectTypes }) => savedObjectTypes ?? [])),
+  return withSavedObjectDeclarations(taskType, declared);
+};
+
+/**
+ * A task type that is not one of the three workflow task types, but reuses the same engine
+ * contributions and process services (an agent builder run, say): the declared contributions,
+ * saved objects, settings and task plugins are identical, but the runner is the caller's own,
+ * given a lazy, memoized `getProcessRuntime` instead of the three workflow task functions
+ * {@link defineWorkflowTaskType} picks from `WorkflowRuntime`.
+ *
+ * Unlike {@link defineWorkflowTaskType}, this does not look at `host.plugins.workflowsExecutionEngine`
+ * for a Kibana-side shortcut: the caller's runner decides for itself, from its own plugin's host
+ * extensions, whether it is running in Kibana or a process, and only calls `getProcessRuntime` when
+ * it needs the process's registries (built, as a side effect, by running every `workflow-steps` and
+ * `agent-builder` contribution against this engine's process runtime).
+ */
+export const defineWorkflowHostedTaskType = (
+  definition: HostedTaskTypeDefinition,
+  createHostedTaskRunner: (
+    context: RunContext,
+    host: TaskHost,
+    getProcessRuntime: () => Promise<ProcessWorkflowRuntime>
+  ) => CancellableTask,
+  stepContributions: WorkflowStepsContribution[] = [],
+  additionalContributions: Array<{ declares?: AgentBuilderContributionDeclares }> = [],
+  contributions: NonNullable<TaskHost['contributions']> = {}
+): TaskTypeModule => {
+  const declared: Array<NonNullable<WorkflowStepsContribution['declares']>> = [
+    ...stepContributions.map((contribution) => contribution.declares ?? {}),
+    ...additionalContributions.map((contribution) => contribution.declares ?? {}),
+  ];
+  const taskType = defineTaskType({
+    ...buildContributedModuleFields(definition, declared, contributions),
+    contributions: {
+      keys: contributedKeys(declared),
+      apply: (contributed) => {
+        const { steps, additional } = resolveContributedKeys(contributed);
+        return defineWorkflowHostedTaskType(
+          definition,
+          createHostedTaskRunner,
+          steps,
+          additional,
+          contributed
+        );
+      },
     },
-    encryptedSavedObjectTypes: {
-      enumerable: true,
-      get: () => [
-        ...getDeclarations().encryptedSavedObjectTypes.filter((registration) =>
-          ACTION_SAVED_OBJECT_TYPES.has(registration.type)
-        ),
-        ...TASK_ENCRYPTED_SAVED_OBJECT_TYPE_REGISTRATIONS,
-        ...declared.flatMap(({ encryptedSavedObjectTypes }) => encryptedSavedObjectTypes ?? []),
-      ],
+    createTaskRunner: (context, host) => {
+      let processRuntime: Promise<ProcessWorkflowRuntime> | undefined;
+      const getProcessRuntime = () => (processRuntime ??= createWorkflowRuntimeFromHostLazy(host));
+      return createHostedTaskRunner(context, host, getProcessRuntime);
     },
   });
+  return withSavedObjectDeclarations(taskType, declared);
 };

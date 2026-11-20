@@ -36,6 +36,7 @@ import type {
   AgentBuilderSmlPluginStart,
 } from '@kbn/agent-builder-sml-plugin/server';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
+import type { WorkflowsExecutionEnginePluginSetup } from '@kbn/workflows-execution-engine/server';
 
 export type {
   AgentBuilderPluginSetup,
@@ -72,6 +73,12 @@ export interface AgentBuilderSetupDependencies {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
   agentBuilderSml: AgentBuilderSmlPluginSetup;
   files: FilesSetup;
+  /**
+   * Optional: lets `agent-builder:run-agent` run in its own task process, borrowing the engine's
+   * `workflow-steps`/`agent-builder` contributions and process services. Without it the task always
+   * runs in Kibana (`registerTaskDefinitions`).
+   */
+  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginSetup;
 }
 
 export interface AgentBuilderStartDependencies {
