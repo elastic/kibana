@@ -293,11 +293,16 @@ const isMessageIdToken = (
 };
 
 /**
- * True when the report wrote the `@` of this match defanged (`actor[@]evil[.]com`): the source
- * text has no `local@first-host-label` for it. Defanged dots alone do not count.
+ * True when the report wrote the `@` of this match defanged (`actor[@]evil[.]com`). Only the
+ * text touching the `@` is compared, from the last dot of the local part to the first dot of
+ * the host, so a defanged dot on either side (`20261001[.]6272F1@mail[.]evil[.]com`) does not
+ * count.
  */
-const isAtSignDefanged = (raw: string, originalLower: string): boolean =>
-  !originalLower.includes(raw.slice(0, raw.indexOf('.', raw.lastIndexOf('@'))));
+const isAtSignDefanged = (raw: string, originalLower: string): boolean => {
+  const at = raw.lastIndexOf('@');
+  const aroundAt = raw.slice(raw.lastIndexOf('.', at) + 1, raw.indexOf('.', at));
+  return !originalLower.includes(aroundAt);
+};
 
 /** Tier and basis for an email match, or `null` when it is not an address (rules 1 and 3 of PASS 1). */
 const classifyEmail = ({

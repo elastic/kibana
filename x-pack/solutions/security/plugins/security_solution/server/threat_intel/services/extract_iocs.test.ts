@@ -2200,6 +2200,8 @@ describe('extract_iocs — example emails, Message-IDs and non-addresses', () =>
       ['sendmail: msgid=<x@mail.evil-corp.com>'],
       ['Message-ID: <abc123@mail.evil-corp[.]com>'],
       ['Message-ID: <abc123@mail[.]evil-corp[.]com>'],
+      ['Message-ID: <20261001[.]6272F1@mail[.]evil-corp[.]com>'],
+      ['message-id=<20261001024829[.]6272F1E1393@mail[.]evil-corp[.]com>'],
       ['References: <id1@mail.evil-corp[.]com> <id2@mail.evil-corp[.]com>'],
     ])('%s', (text) => {
       const result = extractIocs({ text });
@@ -2256,6 +2258,11 @@ describe('extract_iocs — example emails, Message-IDs and non-addresses', () =>
       const result = extractIocs({ text });
       expect(emailValues(result)).toEqual(['actor@evil-corp.com']);
       expect(byValue(result, 'actor@evil-corp.com')?.tier_basis).toBe('defanged_source');
+    });
+
+    test('a defanged address with a dotted local part after a Message-ID header is kept', () => {
+      const result = extractIocs({ text: 'Message-ID: <first[.]last[@]evil-corp[.]com>' });
+      expect(emailValues(result)).toEqual(['first.last@evil-corp.com']);
     });
 
     test('a lone plain address on a References line with no heading markup yields nothing (known gap)', () => {
