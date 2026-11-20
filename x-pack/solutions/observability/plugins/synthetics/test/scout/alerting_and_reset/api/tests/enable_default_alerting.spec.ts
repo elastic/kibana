@@ -104,10 +104,19 @@ apiTest.describe(
       expect(res).toHaveStatusCode(200);
     });
 
-    apiTest.afterAll(async ({ apiServices, kbnClient }) => {
+    apiTest.afterAll(async ({ apiClient, apiServices, kbnClient }) => {
+      // Restore the default-rule settings this suite disables so they don't leak into sibling
+      // specs. Only the settings this suite changes are sent, to avoid the task-settings 409.
+      const settingsRes = await putDynamicSettings(apiClient, {
+        defaultStatusRuleEnabled: DYNAMIC_SETTINGS_DEFAULTS.defaultStatusRuleEnabled,
+        defaultTLSRuleEnabled: DYNAMIC_SETTINGS_DEFAULTS.defaultTLSRuleEnabled,
+        defaultConnectors: DYNAMIC_SETTINGS_DEFAULTS.defaultConnectors,
+      });
       await kbnClient.savedObjects.clean({ types: ['synthetics-monitor-multi-space'] });
       await apiServices.alerting.cleanup.deleteAllConnectors();
       await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
+      // Assert last so a failed reset does not skip the cleanup above.
+      expect(settingsRes).toHaveStatusCode(200);
     });
 
     const addHttpMonitor = async (apiClient: ApiClientFixture) =>
