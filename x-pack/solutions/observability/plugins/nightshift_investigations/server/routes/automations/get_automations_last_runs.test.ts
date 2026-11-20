@@ -18,7 +18,7 @@ describe('get automations last runs', () => {
       id: `automation-${index}`,
       attributes: { workflowId: `workflow-${index}` },
     }));
-    const automations = [...linkedAutomations, { id: 'unlinked', attributes: {} }];
+    const automations = [...linkedAutomations, { id: 'unlinked' }];
     const find = jest.fn().mockResolvedValue({ saved_objects: automations });
     const searchExecutionsView = jest.fn().mockResolvedValue({
       results: [{ workflowId: 'workflow-109', startedAt }],

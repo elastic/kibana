@@ -136,7 +136,7 @@ export const AutomationsTable = ({
         const triggers = new Map(
           trigger.rows.map((row) => {
             const { label, icon } = getTriggerDisplay(row);
-            return [row.kind === 'slack' ? listLabels.slackMessageTrigger : label, icon] as const;
+            return [label, icon] as const;
           })
         );
         return Array.from(triggers, ([label, icon]) => (

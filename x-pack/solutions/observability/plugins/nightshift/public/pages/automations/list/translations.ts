@@ -26,9 +26,6 @@ export const listLabels = {
   automationColumn: i18n.translate('xpack.nightshift.automations.automationColumn', {
     defaultMessage: 'Automations',
   }),
-  slackMessageTrigger: i18n.translate('xpack.nightshift.automations.slackMessageTriggerLabel', {
-    defaultMessage: 'Slack message',
-  }),
   destinationColumn: i18n.translate('xpack.nightshift.automations.destinationColumnLabel', {
     defaultMessage: 'Destination',
   }),

@@ -24,21 +24,24 @@ export const slackTriggerLabels: Record<SlackTriggerKind, string> = {
   }),
 };
 
+const slackMessageTrigger = i18n.translate(
+  'xpack.nightshift.automations.slackMessageTriggerLabel',
+  {
+    defaultMessage: 'Slack message',
+  }
+);
+
 export const TRIGGER_LABEL_ORDER = [
   triggerTypeLabels.alertTriggered,
-  ...Object.values(slackTriggerLabels),
+  slackMessageTrigger,
   triggerTypeLabels.scheduled,
 ];
-
-const SLACK_EVENT_KINDS = {
-  message: 'slack_message',
-} as const;
 
 export const getTriggerDisplay = (
   row: Automation['trigger']['rows'][number]
 ): { label: string; icon: string } => {
   if (row.kind === 'slack') {
-    return { label: slackTriggerLabels[SLACK_EVENT_KINDS[row.event]], icon: 'logoSlack' };
+    return { label: slackMessageTrigger, icon: 'logoSlack' };
   }
   if (row.kind === 'schedule') {
     return { label: triggerTypeLabels.scheduled, icon: 'calendar' };

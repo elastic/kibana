@@ -87,9 +87,11 @@ export const AutomationsPage = (): React.ReactElement => {
   const [order, setOrder] = useState<string[]>([]);
   const [page, setPage] = useState({ index: 0, size: DEFAULT_PAGE_SIZE });
   const automations = useMemo(() => data?.automations ?? [], [data?.automations]);
-  const { data: lastRuns, isInitialLoading: isLoadingLastRuns } = useAutomationsLastRuns(
-    automations.length > 0
-  );
+  const {
+    data: lastRuns,
+    isInitialLoading: isLoadingLastRuns,
+    isError: didLastRunsFail,
+  } = useAutomationsLastRuns(automations.length > 0);
   const isCreating = id === 'new';
   const detailAutomation = isCreating
     ? undefined
@@ -172,7 +174,7 @@ export const AutomationsPage = (): React.ReactElement => {
         isRunPending={runAutomation.isLoading}
         editDisabledReason={editDisabledReason}
         runCounts={runCounts}
-        lastRuns={lastRuns}
+        lastRuns={didLastRunsFail ? undefined : lastRuns}
         isLoadingLastRuns={isLoadingLastRuns}
         usedToday={usedToday}
         getFacets={getFacets}

@@ -18,7 +18,7 @@ describe('getTriggerDisplay', () => {
       icon: 'calendar',
     });
     expect(getTriggerDisplay({ kind: 'slack', event: 'message' })).toEqual({
-      label: 'New message in channel',
+      label: 'Slack message',
       icon: 'logoSlack',
     });
   });

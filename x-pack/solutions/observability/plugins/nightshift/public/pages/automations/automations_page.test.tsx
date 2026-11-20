@@ -80,6 +80,7 @@ const mockUseAutomationsRunCounts = useAutomationsRunCounts as jest.Mock;
 const mockUseCreateAutomation = useCreateAutomation as jest.Mock;
 const mockUseCurrentUsername = useCurrentUsername as jest.Mock;
 const mockUseDeleteAutomation = useDeleteAutomation as jest.Mock;
+const mockUseAutomationsLastRuns = useAutomationsLastRuns as jest.Mock;
 const mockUseFetchAutomations = useFetchAutomations as jest.Mock;
 const mockUseToggleAutomation = useToggleAutomation as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
@@ -117,9 +118,9 @@ describe('AutomationsPage', () => {
         },
       },
     });
-    jest.mocked(useAutomationsLastRuns).mockReturnValue({
+    mockUseAutomationsLastRuns.mockReturnValue({
       data: undefined,
-    } as ReturnType<typeof useAutomationsLastRuns>);
+    });
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
     mockUseAutomationsRunCounts.mockReturnValue(undefined);
@@ -629,9 +630,9 @@ describe('AutomationsPage', () => {
         },
         isInitialLoading: false,
       });
-      jest.mocked(useAutomationsLastRuns).mockReturnValue({
+      mockUseAutomationsLastRuns.mockReturnValue({
         data: { triage: lastRunAt },
-      } as ReturnType<typeof useAutomationsLastRuns>);
+      });
       mockUseAutomationsRunsInRange.mockReturnValue([]);
       mockUseAutomationsRunCounts.mockReturnValue({});
 
@@ -651,6 +652,29 @@ describe('AutomationsPage', () => {
       expect(slackRow.getByText('Slack message')).toBeVisible();
       expect(slackRow.getByText('Triggering Slack thread')).toBeVisible();
       expect(slackRow.getByText('No runs recorded')).toBeVisible();
+    });
+
+    it('shows a loading state while keeping the automation row visible', () => {
+      mockUseAutomationsLastRuns.mockReturnValue({ isInitialLoading: true });
+
+      renderPage();
+
+      expect(
+        within(rowOf('Triage incoming alerts')).getByLabelText('Loading last run')
+      ).toBeVisible();
+    });
+
+    it('shows unavailable instead of the cached timestamp after a failed refresh', () => {
+      mockUseAutomationsLastRuns.mockReturnValue({
+        data: { triage: '2026-10-01T12:00:00.000Z' },
+        isError: true,
+      });
+
+      renderPage();
+
+      const row = rowOf('Triage incoming alerts');
+      expect(within(row).getByText('Unavailable')).toBeVisible();
+      expect(row.querySelector('time')).not.toBeInTheDocument();
     });
 
     it('toggles an automation', () => {

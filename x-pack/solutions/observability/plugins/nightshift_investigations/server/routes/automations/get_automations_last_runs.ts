@@ -38,11 +38,10 @@ export const getAutomationsLastRunsRoute = createNightshiftInvestigationsServerR
       fields: ['workflowId'],
     });
     const workflowIdByAutomationId = new Map(
-      automations.flatMap((automation) =>
-        automation.attributes.workflowId
-          ? [[automation.id, automation.attributes.workflowId] as const]
-          : []
-      )
+      automations.flatMap(({ id, attributes }) => {
+        const workflowId = attributes?.workflowId;
+        return workflowId ? [[id, workflowId] as const] : [];
+      })
     );
     const workflowIds = [...new Set(workflowIdByAutomationId.values())];
     const { results } = workflowIds.length
