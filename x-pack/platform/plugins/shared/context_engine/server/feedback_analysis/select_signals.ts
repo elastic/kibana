@@ -40,6 +40,9 @@ const MAX_COOCCURRENCE_CONVERSATIONS = 1000;
  */
 const MAX_PATTERN_BUCKETS = 300;
 
+/** Covers every value of the fixed `SIGNAL_TAGS` set, so no tag is dropped. */
+const MAX_TAG_BUCKETS = 100;
+
 export interface SelectSignalsOptions {
   /** The AI index's `dest.value`. */
   destValue: string;
@@ -61,6 +64,8 @@ export interface SelectSignalsResult {
   spaces: string[];
   /** How many signals were attributed to this index in the window. */
   signalCount: number;
+  /** How many attributed signals carry each tag, not limited to the patterns. */
+  tagCounts: Array<{ tag: SignalTag; count: number }>;
   window: { from: string; to: string };
 }
 
@@ -89,6 +94,7 @@ interface PatternBucket {
 
 interface PatternAggregations {
   patterns: { buckets: PatternBucket[] };
+  tags: { buckets: Array<{ key: SignalTag; doc_count: number }> };
 }
 
 interface ConversationAggregations {
@@ -199,6 +205,11 @@ const buildPatterns = (aggregations: PatternAggregations | undefined): SignalPat
     };
   });
 
+const buildTagCounts = (
+  aggregations: PatternAggregations | undefined
+): SelectSignalsResult['tagCounts'] =>
+  (aggregations?.tags.buckets ?? []).map(({ key, doc_count: count }) => ({ tag: key, count }));
+
 /** Selects the signals that describe one AI index's retrieval quality. */
 export const selectSignals = async (
   esClient: ElasticsearchClient,
@@ -280,6 +291,7 @@ export const selectSignals = async (
       },
     },
     aggs: {
+      tags: { terms: { field: 'tags', size: MAX_TAG_BUCKETS } },
       patterns: {
         // A signal is bucketed once per tag it carries, so one tagged both `query_error` and
         // `coverage_gap` counts towards both patterns. Signals missing `data.target_index` or
@@ -313,6 +325,7 @@ export const selectSignals = async (
 
   return {
     patterns: buildPatterns(response.aggregations),
+    tagCounts: buildTagCounts(response.aggregations),
     // The search reads one space's index, so anything it matched came from that space.
     spaces: signalCount > 0 ? [spaceId] : [],
     signalCount,

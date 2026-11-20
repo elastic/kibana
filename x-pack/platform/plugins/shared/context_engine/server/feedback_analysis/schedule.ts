@@ -17,9 +17,9 @@ import { parseIntervalMinutes } from '../../common/validation';
 import { managedWorkflowIdSuffixFor } from '../utils/managed_workflow_suffix';
 
 /**
- * The one workflows management call this plugin makes, declared structurally rather than imported:
+ * The workflows management calls this plugin makes, declared structurally rather than imported:
  * workflows management reaches back here through Agent Builder, so depending on its contract would
- * close a project reference cycle.
+ * close a project reference cycle. Only the fields that are read are named.
  */
 export interface WorkflowEnablementApi {
   updateWorkflow(
@@ -28,6 +28,11 @@ export interface WorkflowEnablementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<unknown>;
+  getWorkflow(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{ yaml: string } | null>;
 }
 
 export interface ReconcileScheduleParams {
