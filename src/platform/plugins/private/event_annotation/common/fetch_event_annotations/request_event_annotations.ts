@@ -16,12 +16,9 @@ import type {
   ExpressionValueSearchContext,
   AggConfigs,
 } from '@kbn/data-plugin/common';
-import { parseEsInterval } from '@kbn/data-plugin/common';
 
 import type { ExecutionContext, Datatable } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
-import type { ESCalendarInterval, ESFixedInterval } from '@elastic/charts';
-import { roundDateToESInterval } from '@elastic/charts';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { i18n } from '@kbn/i18n';
@@ -34,6 +31,7 @@ import {
   isManualPointAnnotation,
   postprocessAnnotations,
   sortByTime,
+  toTimebucket,
   wrapRowsInDatatable,
 } from './utils';
 import type { ManualEventAnnotationOutput } from '../manual_event_annotation/types';
@@ -227,15 +225,8 @@ const convertManualToDatatableRows = (
 ) => {
   const datatableRows = manualGroup.annotations
     .map((annotation) => {
-      const initialDate = moment(annotation.time).valueOf();
-      const snappedDate = roundDateToESInterval(
-        initialDate,
-        parseEsInterval(interval) as ESCalendarInterval | ESFixedInterval,
-        'start',
-        timezone
-      );
       return {
-        timebucket: moment(snappedDate).toISOString(),
+        timebucket: toTimebucket({ time: annotation.time, interval, timezone }),
         ...annotation,
         type: isManualPointAnnotation(annotation) ? 'point' : 'range',
       };

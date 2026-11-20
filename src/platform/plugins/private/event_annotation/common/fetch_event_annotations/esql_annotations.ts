@@ -8,9 +8,6 @@
  */
 
 import moment from 'moment';
-import { roundDateToESInterval } from '@elastic/charts';
-import type { ESCalendarInterval, ESFixedInterval } from '@elastic/charts';
-import { parseEsInterval } from '@kbn/data-plugin/common';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { ExpressionValueSearchContext } from '@kbn/data-plugin/common';
 import type { ISearchMethods } from '@kbn/search-types';
@@ -25,7 +22,13 @@ import type {
 import { i18n } from '@kbn/i18n';
 import type { EsqlEventAnnotationOutput } from '../esql_event_annotation';
 import { annotationColumns } from '../types';
-import { ANNOTATIONS_PER_BUCKET, sortByTime, toAbsoluteDates, wrapRowsInDatatable } from './utils';
+import {
+  ANNOTATIONS_PER_BUCKET,
+  sortByTime,
+  toAbsoluteDates,
+  toTimebucket,
+  wrapRowsInDatatable,
+} from './utils';
 
 export const toEsqlAnnotationDatatable = ({
   annotation,
@@ -84,14 +87,7 @@ export const toEsqlAnnotationDatatable = ({
       continue;
     }
 
-    const timebucket = moment(
-      roundDateToESInterval(
-        moment(time).valueOf(),
-        parseEsInterval(interval) as ESCalendarInterval | ESFixedInterval,
-        'start',
-        timezone
-      )
-    ).toISOString();
+    const timebucket = toTimebucket({ time, interval, timezone });
     rows.push({
       id: endTime ? `${annotation.id}:${index}` : annotation.id,
       type: endTime ? 'range' : 'point',

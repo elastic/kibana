@@ -8,7 +8,9 @@
  */
 
 import type { TimeRange } from '@kbn/data-plugin/common';
-import { TimeBuckets, UI_SETTINGS } from '@kbn/data-plugin/common';
+import { TimeBuckets, UI_SETTINGS, parseEsInterval } from '@kbn/data-plugin/common';
+import { roundDateToESInterval } from '@elastic/charts';
+import type { ESCalendarInterval, ESFixedInterval } from '@elastic/charts';
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { omit, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
@@ -124,6 +126,25 @@ export const wrapRowsInDatatable = (rows: DatatableRow[], columns = annotationCo
 };
 
 export const ANNOTATIONS_PER_BUCKET = 10;
+
+/** Start of the date histogram bucket containing `time`, as an ISO string. */
+export const toTimebucket = ({
+  time,
+  interval,
+  timezone,
+}: {
+  time: string;
+  interval: string;
+  timezone: string;
+}): string =>
+  moment(
+    roundDateToESInterval(
+      moment(time).valueOf(),
+      parseEsInterval(interval) as ESCalendarInterval | ESFixedInterval,
+      'start',
+      timezone
+    )
+  ).toISOString();
 
 export const postprocessAnnotations = (
   esaggsResponses: Array<{
