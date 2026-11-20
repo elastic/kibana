@@ -110,6 +110,7 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/cps-utils'
   - '@kbn/ui-callout'
+  - '@kbn/test-jest-helpers'
 tags:
   - plugin
   - prod
