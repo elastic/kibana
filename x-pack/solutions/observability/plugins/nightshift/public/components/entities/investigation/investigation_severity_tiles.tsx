@@ -56,6 +56,7 @@ const getSeverityTileStyles = (
 ): {
   iconBox: Readonly<Record<Severity, SeverityIconBoxStyles>>;
   iconGlyphRotateUp: SerializedStyles;
+  tile: SerializedStyles;
   label: SerializedStyles;
   labelMuted: SerializedStyles;
   count: SerializedStyles;
@@ -98,6 +99,12 @@ const getSeverityTileStyles = (
     iconBox,
     iconGlyphRotateUp: css`
       transform: rotate(-90deg);
+    `,
+    // Four tiles share a row; where they no longer fit, they wrap into a grid instead of
+    // overflowing the page.
+    tile: css`
+      flex: 1 1 calc(${euiTheme.size.xxl} * 3);
+      min-width: 0;
     `,
     // Match EuiButtonEmpty: medium weight (EuiText has no weight prop).
     label: css`
@@ -156,7 +163,7 @@ export const InvestigationSeverityTiles = ({
   const styles = useMemo(() => getSeverityTileStyles(euiThemeContext), [euiThemeContext]);
 
   return (
-    <EuiFlexGroup gutterSize="m" responsive={false}>
+    <EuiFlexGroup gutterSize="m" responsive={false} wrap>
       {SEVERITY_OPTIONS.map((severity) => {
         const count = severityCounts[severity];
         const isPresent = presentSeverities.has(severity);
@@ -173,7 +180,7 @@ export const InvestigationSeverityTiles = ({
         const countIsMuted = isMuted || count === 0;
 
         return (
-          <EuiFlexItem key={severity}>
+          <EuiFlexItem key={severity} css={styles.tile}>
             <EuiPanel
               hasBorder
               hasShadow={false}
