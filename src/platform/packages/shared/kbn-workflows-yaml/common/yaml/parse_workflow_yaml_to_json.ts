@@ -13,7 +13,7 @@ import { ZodError } from '@kbn/zod/v4';
 import { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';
 import { getYamlDocumentErrors } from './validate_yaml_document';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../errors';
-import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../regex';
+import { isIssueOnTemplateValue } from '../regex';
 import type { ConnectorParamsSchemaResolver } from '../zod/enrich_error_message';
 import { formatZodError } from '../zod/format_zod_error';
 
@@ -53,26 +53,9 @@ export function parseWorkflowYamlToJSON<T extends ZodType>(
   const result = schema.safeParse(parseResult.json);
   if (!result.success) {
     // Filter out validation errors for dynamic values (${{ }}), variable values ({{ }}), and Liquid tags ({% ... %})
-    const filteredIssues = result.error.issues.filter((issue) => {
-      if (!issue.path || issue.path.length === 0) {
-        return true;
-      }
-
-      // Get value from parsed JSON at the error path
-      let value: unknown = parseResult.json;
-      for (const segment of issue.path) {
-        if (value == null || typeof value !== 'object') {
-          return true; // Keep error if path is invalid
-        }
-        value = (value as Record<string, unknown>)[segment as string];
-      }
-
-      const shouldSuppressError =
-        isDynamicValue(value) || isVariableValue(value) || isLiquidTagValue(value);
-
-      // Suppress error if value is a dynamic template, variable value, or Liquid tag
-      return !shouldSuppressError;
-    });
+    const filteredIssues = result.error.issues.filter(
+      (issue) => !isIssueOnTemplateValue(issue, parseResult.json)
+    );
 
     if (filteredIssues.length === 0) {
       return {
