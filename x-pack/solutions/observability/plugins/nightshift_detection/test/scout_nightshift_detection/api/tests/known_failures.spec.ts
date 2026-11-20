@@ -14,6 +14,7 @@ import {
   COMMON_HEADERS,
   RECONCILE_RULES_PATH,
   setNightshiftEnabled,
+  sleep,
   TICK_PATH,
 } from '../fixtures';
 
@@ -24,7 +25,8 @@ const KNOWLEDGE_INDICATOR_ID = 'known-failures-scout-timeouts';
 const MINUTE_MS = 60_000;
 /** A rule runs when created and every 5 minutes; a row is read once its window has settled. */
 const SIGNAL_TIMEOUT_MS = 10 * MINUTE_MS;
-const POLL_INTERVAL_MS = 15_000;
+/** The rule runs every 5 minutes, so a tick a minute is enough to see its row soon after. */
+const POLL_INTERVAL_MS = MINUTE_MS;
 const SETUP_TIMEOUT_MS = 3 * MINUTE_MS;
 
 interface ReconcileResponse {
@@ -89,7 +91,7 @@ const tickUntilSignal = async ({
   const deadline = Date.now() + SIGNAL_TIMEOUT_MS;
   let signal = await findSignal(esClient, sourceId);
   while (!signal && Date.now() < deadline) {
-    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+    await sleep(POLL_INTERVAL_MS);
     // A busy answer is fine: the engine's own workflow is ticking the space.
     await apiClient.post(TICK_PATH, { headers, body: {}, responseType: 'json' });
     signal = await findSignal(esClient, sourceId);

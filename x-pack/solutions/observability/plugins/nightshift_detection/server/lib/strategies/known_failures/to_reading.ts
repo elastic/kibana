@@ -51,17 +51,7 @@ export function toReading({
   if (!parsed.success) {
     return undefined;
   }
-  const {
-    change_at: changeAt,
-    change_type: changeType,
-    change_pvalue: pValue,
-    reference,
-    level_at_change: levelAtChange,
-    recovery_threshold: recoveryThreshold,
-    recent_max: recentMax,
-    // Read from the row: the run's clock can be a minute past its scheduled time.
-    window_end: bucketEnd,
-  } = parsed.data;
+  const { data } = parsed;
 
   return {
     status: 'breached',
@@ -72,9 +62,10 @@ export function toReading({
     source_id: knowledgeIndicator.source_id,
     entity,
     // The closed minutes whose maximum the rule compared with the recovery threshold.
-    bucket_start: bucketEnd - KNOWN_FAILURES_SETTINGS.recovery_minutes * MINUTE_MS,
-    bucket_end: bucketEnd,
-    value: recentMax,
+    // Read from the row, not the schedule: the run's clock can be a minute past its scheduled time.
+    bucket_start: data.window_end - KNOWN_FAILURES_SETTINGS.recovery_minutes * MINUTE_MS,
+    bucket_end: data.window_end,
+    value: data.recent_max,
     unit: 'count',
     title: knowledgeIndicator.title,
     description: knowledgeIndicator.description,
@@ -82,8 +73,8 @@ export function toReading({
     importance: knowledgeIndicator.severity_score ?? 50,
     evidence_esql: compileEvidenceQuery({
       esql: knowledgeIndicator.esql,
-      from: changeAt,
-      to: bucketEnd,
+      from: data.change_at,
+      to: data.window_end,
       cpsEnabled,
     }),
     role: 'primary',
@@ -91,12 +82,12 @@ export function toReading({
     compare_with_normal: false,
     quiet_period_minutes: KNOWN_FAILURES_SETTINGS.quiet_period_minutes,
     details: {
-      change_point_type: changeType,
-      p_value: pValue,
-      change_at: new Date(changeAt).toISOString(),
-      reference,
-      level_at_change: levelAtChange,
-      recovery_threshold: recoveryThreshold,
+      change_point_type: data.change_type,
+      p_value: data.change_pvalue,
+      change_at: new Date(data.change_at).toISOString(),
+      reference: data.reference,
+      level_at_change: data.level_at_change,
+      recovery_threshold: data.recovery_threshold,
       ki_id: knowledgeIndicator.id,
       linked_feature_ids: knowledgeIndicator.feature_ids,
     },
