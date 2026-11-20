@@ -120,6 +120,12 @@ export const TRIAGE_GROUPING_FLAG = 'alertzero.triageGrouping';
  */
 export const TRIAGE_DECISION_AUTO_CLOSE_FLAG = 'alertzero.triageDecisionAutoClose';
 export type DecisionAutoCloseMode = 'off' | 'shadow' | 'on';
+/**
+ * The mode from the `alertzero.triageDecisionAutoClose` flag. Only `shadow` and `on` turn decisions
+ * on; any other value, and a missing flag provider, read as `off`.
+ */
+export const toDecisionAutoCloseMode = (value: string): DecisionAutoCloseMode =>
+  value === 'shadow' || value === 'on' ? value : 'off';
 export const TRIAGE_WOULD_CLOSE_TAG_PREFIX = 'az:would_close:';
 export const TRIAGE_WOULD_SKIP_TAG_PREFIX = 'az:would_skip:';
 /** Added before an alert is closed by a decision, so revoke can find exactly those alerts. */

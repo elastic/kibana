@@ -30,9 +30,9 @@ import {
 import {
   TRIAGE_DECISION_AUTO_CLOSE_FLAG,
   TRIAGE_GROUPING_FLAG,
+  toDecisionAutoCloseMode,
   type DecisionAutoCloseMode,
 } from './alert_triage/constants';
-import { toDecisionAutoCloseMode } from './alert_triage/fp_decisions';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
