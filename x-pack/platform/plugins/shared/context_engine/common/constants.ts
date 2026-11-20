@@ -16,6 +16,7 @@ export const AI_INDEX_BY_ID_PATH = `${AI_INDEX_PATH}/{aiIndexId}`;
 export const AI_INDEX_QUERY_PATH = `${AI_INDEX_PATH}/_query`;
 export const AI_INDEX_DESCRIBE_PATH = `${AI_INDEX_BY_ID_PATH}/_describe`;
 export const AI_INDEX_DREAMING_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/dreaming`;
+export const DREAMING_TEMPLATES_PATH = `${INTERNAL_API_PATH}/dreaming_templates`;
 export const AI_INDEX_KI_SUMMARY_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/ki_summary`;
 export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/feedback_analysis`;
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
@@ -26,6 +27,9 @@ export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
  * `PATCH`, `DELETE` and `_restore` still reach it.
  */
 export const AI_INDEX_KI_GROUPS_PATH = `${AI_INDEX_KI_LIST_PATH}/_groups`;
+
+/** The most unique memory ids one forget call takes, which keeps its search under the result window. */
+export const MAX_SESSION_MEMORY_FORGET_IDS = 100;
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;

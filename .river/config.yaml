@@ -29,3 +29,17 @@ services:
 babysit:
   checks:
     - kibana-ci
+
+network:
+  allowed:
+    - cdn.cypress.io
+    - cdn.playwright.dev
+    - download.cypress.io
+    - epr.elastic.co
+    - github.com
+    - googlechromelabs.github.io
+    - playwright.download.prss.microsoft.com
+    - raw.githubusercontent.com
+    - registry.npmjs.org
+    - release-assets.githubusercontent.com
+    - storage.googleapis.com

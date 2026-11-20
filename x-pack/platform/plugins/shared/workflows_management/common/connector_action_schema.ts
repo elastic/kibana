@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import type { BaseConnectorContract } from '@kbn/workflows';
 import {
   ConsoleStepInputSchema,
+  ElasticsearchRequestStepInputSchema,
   KibanaFetcherConfigSchema,
   KibanaHttpMethodSchema,
   KibanaStepMetaSchema,
@@ -496,15 +497,7 @@ export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'elasticsearch.request',
     summary: 'Elasticsearch Request',
-    paramsSchema: lazySchema(() =>
-      z.object({
-        method: z.string(),
-        path: z.string(),
-        body: z.any().optional(),
-        params: z.any().optional(),
-        headers: z.any().optional(),
-      })
-    ),
+    paramsSchema: ElasticsearchRequestStepInputSchema,
     outputSchema: lazySchema(() => z.any()),
     description: i18n.translate('workflows.connectors.elasticsearch.request.description', {
       defaultMessage: 'Make a generic request to an Elasticsearch API',
