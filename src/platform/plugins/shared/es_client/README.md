@@ -37,9 +37,12 @@ Paths are checked in `server/route/es_path_access.ts` before Elasticsearch is ca
 
 1. **Blocked.** Paths whose first segment starts with `_security`, `_encryption` or `_ssl` (case-insensitive, after percent-decoding) are always rejected.
 2. **Allowed.** Otherwise the path must match one of:
+   - `/_count`
    - `/{index}`
    - `/{index}/_cache/clear`
    - `/{index}/_close`
+   - `/{index}/_count`
+   - `/{index}/_doc/{id}`
    - `/{index}/_flush`
    - `/{index}/_forcemerge`
    - `/{index}/_mapping`
@@ -49,7 +52,7 @@ Paths are checked in `server/route/es_path_access.ts` before Elasticsearch is ca
    - `/{index}/_stats`
    - `/{index}/_stats/{metric}`
 
-`{index}` is a comma-separated list of index names or patterns, none of which starts with `_` (so `_all` is rejected; use `*`). `{metric}` is any non-empty segment. The Elasticsearch root and all other APIs are rejected. To proxy another API, add its path to `ALLOWED_PATHS`.
+`{index}` is a comma-separated list of index names or patterns, none of which starts with `_` (so `_all` is rejected; use `*`). `{metric}` and `{id}` are any non-empty segment. The Elasticsearch root and all other APIs are rejected. To proxy another API, add its path to `ALLOWED_PATHS`.
 
 ## Browser usage
 

@@ -54,6 +54,32 @@ apiTest.describe('Elasticsearch proxy', { tag: tags.deploymentAgnostic }, () => 
     expect(mappingResponse.body[CREATED_INDEX].mappings.properties.tag.type).toBe('keyword');
   });
 
+  apiTest('serves the document and count APIs', async ({ apiClient }) => {
+    const docPath = `${PROXY_PATH}/${TEST_INDEX}/_doc/a%2Fb`;
+
+    const indexResponse = await apiClient.put(`${docPath}?refresh=true`, {
+      headers,
+      body: { message: 'slash id' },
+      responseType: 'json',
+    });
+    expect(indexResponse).toHaveStatusCode(201);
+
+    const getResponse = await apiClient.get(docPath, { headers, responseType: 'json' });
+    expect(getResponse).toHaveStatusCode(200);
+    expect(getResponse.body._id).toBe('a/b');
+
+    const countResponse = await apiClient.get(`${PROXY_PATH}/${TEST_INDEX}/_count`, {
+      headers,
+      responseType: 'json',
+    });
+    expect(countResponse).toHaveStatusCode(200);
+    expect(countResponse.body.count).toBe(1);
+
+    const deleteResponse = await apiClient.delete(docPath, { headers, responseType: 'json' });
+    expect(deleteResponse).toHaveStatusCode(200);
+    expect(deleteResponse.body.result).toBe('deleted');
+  });
+
   apiTest('accepts gzip-compressed bodies', async ({ apiClient }) => {
     const response = await apiClient.put(`${PROXY_PATH}/${TEST_INDEX}/_mapping`, {
       headers: { ...headers, 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' },

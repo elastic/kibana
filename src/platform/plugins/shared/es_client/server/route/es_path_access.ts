@@ -9,15 +9,19 @@
 
 const INDEX = '{index}';
 const METRIC = '{metric}';
+const ID = '{id}';
 
 /** Elasticsearch APIs whose path starts with one of these segments are never proxied. */
 export const BLOCKED_PATH_PREFIXES = ['_security', '_encryption', '_ssl'] as const;
 
 /** Elasticsearch paths that may be proxied, as path segments. Any method is allowed. */
 export const ALLOWED_PATHS: ReadonlyArray<readonly string[]> = [
+  ['_count'],
   [INDEX],
   [INDEX, '_cache', 'clear'],
   [INDEX, '_close'],
+  [INDEX, '_count'],
+  [INDEX, '_doc', ID],
   [INDEX, '_flush'],
   [INDEX, '_forcemerge'],
   [INDEX, '_mapping'],
@@ -44,7 +48,7 @@ const matchesSegment = (pattern: string, segment: string): boolean => {
   if (pattern === INDEX) {
     return isIndexExpression(segment);
   }
-  if (pattern === METRIC) {
+  if (pattern === METRIC || pattern === ID) {
     return segment.length > 0;
   }
   return pattern === segment;

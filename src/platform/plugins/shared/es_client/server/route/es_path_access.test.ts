@@ -11,9 +11,14 @@ import { isAllowedEsPath } from './es_path_access';
 
 describe('WHEN checking whether an Elasticsearch path may be proxied', () => {
   it.each([
+    '/_count',
     '/my-index',
     '/my-index/_cache/clear',
     '/my-index/_close',
+    '/my-index/_count',
+    '/my-index/_doc/1',
+    '/my-index/_doc/a%2Fb',
+    '/.kibana/_doc/_underscore-id',
     '/my-index/_flush',
     '/my-index/_forcemerge',
     '/my-index/_mapping',
@@ -44,7 +49,9 @@ describe('WHEN checking whether an Elasticsearch path may be proxied', () => {
 
   it.each([
     ['the root', '/'],
-    ['a document API', '/my-index/_doc/1'],
+    ['a document API without an id', '/my-index/_doc'],
+    ['a nested document path', '/my-index/_doc/1/extra'],
+    ['an empty document id', '/my-index/_doc/'],
     ['a search API', '/my-index/_search'],
     ['a cluster API', '/_cluster/settings'],
     ['an API in the index position', '/_cat/indices'],
