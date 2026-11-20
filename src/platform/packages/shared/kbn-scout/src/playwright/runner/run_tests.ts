@@ -166,7 +166,11 @@ async function runLocalServersAndTests(
       throw errors[0];
     }
   });
-  const removeShutdownHook = registerServerShutdown(procs, shutdownBackingServices);
+  let interrupted = false;
+  const removeShutdownHook = registerServerShutdown(procs, () => {
+    interrupted = true;
+    return shutdownBackingServices();
+  });
 
   let runError: Error | undefined;
   try {
@@ -223,10 +227,10 @@ async function runLocalServersAndTests(
   if (earlyExitError !== undefined) {
     throw earlyExitError;
   }
-  // The start was interrupted by a signal: the shutdown hook aborted it. Not a failure to
+  // The run was interrupted by a signal: whatever the aborted step threw is not a failure to
   // report; exit with the signal's code, as exit-hook does once its hooks are done.
-  if (runError?.name === 'AbortError') {
-    log.info('scout: server start interrupted');
+  if (interrupted || runError?.name === 'AbortError') {
+    log.info('scout: run interrupted');
     process.exitCode = 130;
     return;
   }

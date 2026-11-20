@@ -75,7 +75,11 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
 
     // Registered before anything starts: a SIGINT/SIGTERM during the registry readiness wait or
     // the Elasticsearch boot must not leave a detached container holding its port.
-    const removeShutdownHook = registerServerShutdown(procs, shutdownBackingServices);
+    let interrupted = false;
+    const removeShutdownHook = registerServerShutdown(procs, () => {
+      interrupted = true;
+      return shutdownBackingServices();
+    });
 
     // A backing service died on its own (e.g. the registry container got OOM-killed, the
     // Elasticsearch JVM went away). Kibana would keep serving against it, so take everything
@@ -174,9 +178,10 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       }
       throw earlyExitError;
     }
-    // The start was interrupted by a signal: the shutdown hook aborted it. Not a failure to
+    // The start was interrupted by a signal: whatever the aborted step threw (the docker start's
+    // AbortError, "ProcRunner is closing" from a Kibana start cut short) is not a failure to
     // report; exit with the signal's code, as exit-hook does once its hooks are done.
-    if (startupError?.name === 'AbortError') {
+    if (interrupted || startupError?.name === 'AbortError') {
       log.info('scout: server start interrupted');
       process.exitCode = SIGINT_EXIT_CODE;
       return;

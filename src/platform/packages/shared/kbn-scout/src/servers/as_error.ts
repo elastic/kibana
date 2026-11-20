@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** Narrows a caught value to an `Error`, so callers can keep error lists typed. */
+import { inspect } from 'util';
+
+/**
+ * Narrows a caught value to an `Error`, so callers can keep error lists typed. A thrown plain
+ * object (an HTTP response, a tool's error shape) keeps its fields in the message instead of
+ * collapsing to "[object Object]".
+ */
 export function asError(value: unknown): Error {
-  return value instanceof Error ? value : new Error(String(value));
+  if (value instanceof Error) {
+    return value;
+  }
+  return new Error(typeof value === 'string' ? value : inspect(value, { depth: 4 }));
 }
