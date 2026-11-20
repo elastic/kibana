@@ -8,7 +8,7 @@
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, COMMON_HEADERS, setNightshiftEnabled, sleep, TICK_PATH } from '../fixtures';
+import { apiTest, COMMON_HEADERS, setNightshiftEnabled, TICK_PATH } from '../fixtures';
 
 interface TickResponse {
   run_id: string;
@@ -30,7 +30,7 @@ const tickUntilRun = async (apiClient: ApiClientFixture, cookieHeader: Record<st
     if (response.body?.status !== 'busy' || attempt === MAX_TICK_ATTEMPTS) {
       return response;
     }
-    await sleep(1_000);
+    await new Promise((resolve) => setTimeout(resolve, 1_000));
   }
 };
 

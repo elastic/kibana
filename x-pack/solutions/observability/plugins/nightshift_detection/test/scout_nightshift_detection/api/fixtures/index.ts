@@ -47,7 +47,7 @@ const getRequestStatus = (error: unknown): number | undefined =>
     ? error.status
     : undefined;
 
-export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * The engine is gated on the nightshift.enabled flag. Overrides only work where
