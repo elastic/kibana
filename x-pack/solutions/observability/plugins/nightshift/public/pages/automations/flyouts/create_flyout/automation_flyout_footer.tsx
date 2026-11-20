@@ -47,7 +47,7 @@ export const AutomationFlyoutFooter = ({
         borderBlockStart: euiTheme.border.thin,
       }}
     >
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false} wrap>
         {[
           { label: labels.save, isEnabled: false, testSubject: 'submitAutomation' },
           {
