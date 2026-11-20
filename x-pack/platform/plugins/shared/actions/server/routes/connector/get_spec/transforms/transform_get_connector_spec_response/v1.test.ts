@@ -31,6 +31,7 @@ const result: GetConnectorSpecResult = {
     supportedFeatureIds: ['alerting'],
   },
   schema: formSchema,
+  actionSchemas: { listIncidents: { input: inputSchema, description: 'List incidents', scope: 'read' } },
   isTestable: true,
   authTypeIds: ['basic'],
   hasInboundEvents: false,
@@ -48,7 +49,7 @@ const result: GetConnectorSpecResult = {
 };
 
 describe('transformGetConnectorSpecResponse', () => {
-  it('returns only the pre-PR wire fields', () => {
+  it('returns wire fields and action schemas', () => {
     expect(transformGetConnectorSpecResponse(result)).toEqual({
       metadata: {
         id: 'test-connector',
@@ -61,6 +62,9 @@ describe('transformGetConnectorSpecResponse', () => {
         is_technical_preview: true,
       },
       schema: formSchema,
+      action_schemas: {
+        listIncidents: { input: inputSchema, description: 'List incidents', scope: 'read' },
+      },
       is_testable: true,
       actions: [
         {

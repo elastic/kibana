@@ -61,9 +61,13 @@ const multiActionSpec = (): ConnectorSpecResponse => ({
 
 const singleActionSpec = (): ConnectorSpecResponse => {
   const spec = multiActionSpec();
+  const sendMessage = spec.actionSchemas?.sendMessage;
+  if (!sendMessage) {
+    throw new Error('Missing sendMessage test schema');
+  }
   return {
     ...spec,
-    actionSchemas: { sendMessage: spec.actionSchemas.sendMessage },
+    actionSchemas: { sendMessage },
   };
 };
 

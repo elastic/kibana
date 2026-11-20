@@ -202,7 +202,11 @@ describe('spec_action_params_schema', () => {
 
     it('ignores unknown keys when the serialized input forbids additional properties', async () => {
       const spec = slackLikeSpec();
-      spec.actions.searchMessages.input.additionalProperties = false;
+      const searchMessages = spec.actionSchemas?.searchMessages;
+      if (!searchMessages) {
+        throw new Error('Missing searchMessages test schema');
+      }
+      searchMessages.input.additionalProperties = false;
 
       const result = await validateSpecActionParams(spec, {
         subAction: 'searchMessages',

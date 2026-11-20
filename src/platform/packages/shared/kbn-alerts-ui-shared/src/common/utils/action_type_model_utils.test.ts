@@ -30,7 +30,7 @@ function minimalConnectorSpecForForm(): ConnectorSpecResponse {
       supportedFeatureIds: ['alerting'],
     },
     schema: { type: 'object', properties: {} },
-    actions: {},
+    actions: [],
     isTestable: false,
   };
 }
@@ -49,7 +49,7 @@ describe('action_type_model_utils', () => {
       },
       schema: { type: 'object', properties: {} },
       is_testable: true,
-      actions: {},
+      actions: [],
     });
 
     const expectedClientSpec = (): ConnectorSpecResponse => ({
@@ -62,7 +62,8 @@ describe('action_type_model_utils', () => {
       },
       schema: { type: 'object', properties: {} },
       isTestable: true,
-      actions: {},
+      actionSchemas: {},
+      actions: [],
     });
 
     beforeEach(() => {
@@ -367,7 +368,7 @@ describe('action_type_model_utils', () => {
           },
           schema: { type: 'object', properties: {} },
           isTestable: false,
-          actions: {},
+          actions: [],
         },
         docLinks
       );

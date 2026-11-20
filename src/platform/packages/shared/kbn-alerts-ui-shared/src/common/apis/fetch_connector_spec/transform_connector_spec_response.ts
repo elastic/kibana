@@ -32,7 +32,10 @@ export interface ConnectorSpecWireResponse {
     is_technical_preview?: boolean;
   };
   schema: Record<string, unknown>;
-  action_schemas?: Record<string, { input: Record<string, unknown>; description?: string; scope: ActionScope }>;
+  action_schemas?: Record<
+    string,
+    { input: Record<string, unknown>; description?: string; scope: ActionScope }
+  >;
   alerting?: { default_action: string; message_field?: string };
   is_testable: boolean;
   actions?: ConnectorActionWireDef[];
@@ -49,7 +52,10 @@ export interface ConnectorActionWireDef {
 export interface ConnectorSpecResponse {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
-  actionSchemas?: Record<string, { input: Record<string, unknown>; description?: string; scope: ActionScope }>;
+  actionSchemas?: Record<
+    string,
+    { input: Record<string, unknown>; description?: string; scope: ActionScope }
+  >;
   alerting?: ConnectorAlertingHint;
   isTestable: boolean;
   actions?: ConnectorActionDef[];

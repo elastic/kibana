@@ -20,6 +20,9 @@ export type GetConnectorSpecResult = Pick<
 > & {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
-  actionSchemas: Record<string, { input: Record<string, unknown>; description?: string; scope: ActionScope }>;
+  actionSchemas: Record<
+    string,
+    { input: Record<string, unknown>; description?: string; scope: ActionScope }
+  >;
   alerting?: ConnectorAlertingHint;
 };
