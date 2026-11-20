@@ -337,8 +337,8 @@
   },
   "sources": {
     "network": {
-      "apiVersion": "10.4.57",
-      "fetchedAt": "2026-10-07T20:20:26.345Z",
+      "apiVersion": "11.0.97",
+      "fetchedAt": "2026-11-20T21:51:20.836Z",
       "format": "openapi",
       "latest": {
         "pattern": "/network/(v\\d+(?:\\.\\d+)+)",
@@ -346,11 +346,11 @@
       },
       "note": "UniFi publishes a file per release and no URL for the latest. Refresh by moving the version.",
       "pinned": true,
-      "url": "https://developer.ui.com/network/v10.4.57/openapi.json"
+      "url": "https://developer.ui.com/network/v11.0.97/openapi.json"
     },
     "protect": {
       "apiVersion": "0.0.0",
-      "fetchedAt": "2026-10-07T20:20:26.347Z",
+      "fetchedAt": "2026-11-20T21:51:26.717Z",
       "format": "openapi",
       "latest": {
         "pattern": "/protect/(v\\d+(?:\\.\\d+)+)",
@@ -358,7 +358,7 @@
       },
       "note": "UniFi publishes a file per release and no URL for the latest. Refresh by moving the version.",
       "pinned": true,
-      "url": "https://developer.ui.com/protect/v7.1.87/openapi.json"
+      "url": "https://developer.ui.com/protect/v7.4.102/openapi.json"
     }
   }
 }
