@@ -80,6 +80,18 @@ describe('toEnvironments', () => {
     ).toEqual(['production', 'staging', 'ENVIRONMENT_NOT_DEFINED']);
   });
 
+  it('keeps the 100 most used names, as the web sources do', () => {
+    const rows = Array.from({ length: 150 }, (_, index) => ({
+      docs: 150 - index,
+      'service.environment': `env-${index}`,
+    }));
+
+    const environments = toEnvironments(rows, ALL_MAPPED);
+
+    expect(environments).toHaveLength(100);
+    expect(environments[0]).toBe('env-0');
+  });
+
   it('has only "Not defined" when no index maps an environment field', () => {
     expect(toEnvironments([{ docs: 4 }], new Set([MOBILE_FIELDS.sdkName]))).toEqual([
       'ENVIRONMENT_NOT_DEFINED',

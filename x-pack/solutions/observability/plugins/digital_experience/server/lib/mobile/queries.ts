@@ -14,7 +14,7 @@ import {
 import type { MappedFields } from '../../../common/mobile_panel';
 import { MAX_ENVIRONMENTS } from '../constants';
 
-/** Combinations of the two environment fields to read; each field keeps its 100 most used. */
+/** The most used combinations of the environment fields to read; `toEnvironments` caps the names. */
 const MAX_ENVIRONMENT_ROWS = MAX_ENVIRONMENTS * MAX_ENVIRONMENTS;
 
 /**

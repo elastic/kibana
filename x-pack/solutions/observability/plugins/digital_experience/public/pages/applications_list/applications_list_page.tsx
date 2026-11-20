@@ -544,8 +544,7 @@ export function ApplicationsListPage() {
     hiddenByDefault: HIDDEN_BY_DEFAULT,
   });
 
-  // Without the source's own applications: no match, the environment prompt or its onboarding.
-  const getNoItemsMessage = (forMobile = false) => {
+  const getLoadingOrErrorMessage = () => {
     if (isLoading) {
       return LOADING_MESSAGE;
     }
@@ -561,27 +560,43 @@ export function ApplicationsListPage() {
         />
       );
     }
-    const sourceApplications = (response?.applications ?? []).filter(
-      (app) => (app.source === APPLICATION_SOURCE.mobile) === forMobile
-    );
-    if (forMobile ? sourceApplications.length > 0 : response?.applications.length) {
+    return undefined;
+  };
+
+  const noApplicationsInEnvironmentPrompt = (
+    <NoApplicationsInEnvironmentPrompt onShowAllEnvironments={() => setEnvironment(undefined)} />
+  );
+
+  /** Any application, e.g. a mobile one with a web source selected, means the filters hide it. */
+  const getWebNoItemsMessage = () => {
+    const loadingOrError = getLoadingOrErrorMessage();
+    if (loadingOrError) {
+      return loadingOrError;
+    }
+    if (response?.applications.length) {
+      return NO_MATCHES_MESSAGE;
+    }
+    return environment ? noApplicationsInEnvironmentPrompt : noApplicationsPrompt;
+  };
+
+  /** Only mobile applications count: without them it links to the mobile setup docs. */
+  const getMobileNoItemsMessage = () => {
+    const loadingOrError = getLoadingOrErrorMessage();
+    if (loadingOrError) {
+      return loadingOrError;
+    }
+    if (response?.applications.some(({ source }) => source === APPLICATION_SOURCE.mobile)) {
       return NO_MATCHES_MESSAGE;
     }
     if (environment) {
-      return (
-        <NoApplicationsInEnvironmentPrompt
-          onShowAllEnvironments={() => setEnvironment(undefined)}
-        />
-      );
+      return noApplicationsInEnvironmentPrompt;
     }
-    return forMobile ? (
+    return (
       <MobileOnboardingPrompt
         data-test-subj="digitalExperienceMobileApplicationsEmpty"
         title={NO_MOBILE_APPLICATIONS_TITLE}
         body={NO_MOBILE_APPLICATIONS_BODY}
       />
-    ) : (
-      noApplicationsPrompt
     );
   };
 
@@ -818,7 +833,7 @@ export function ApplicationsListPage() {
             pagination={true}
             sorting={SORT_BY_PAGE_LOADS}
             loading={isLoading}
-            noItemsMessage={getNoItemsMessage()}
+            noItemsMessage={getWebNoItemsMessage()}
           />
         )}
         {showsMobileTable && (
@@ -828,7 +843,7 @@ export function ApplicationsListPage() {
               items={mobileItems}
               searchTerm={searchTerm}
               isLoading={isLoading}
-              noItemsMessage={getNoItemsMessage(true)}
+              noItemsMessage={getMobileNoItemsMessage()}
             />
           </>
         )}

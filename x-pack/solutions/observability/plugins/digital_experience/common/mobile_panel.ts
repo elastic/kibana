@@ -14,6 +14,7 @@ import {
 } from '@kbn/apm-types';
 import { escapeStringValue } from '@kbn/esql-utils';
 import {
+  ENVIRONMENT_FIELDS,
   MOBILE_SDK_NAMES,
   OTEL_LOGS_INDEX,
   OTEL_TRACES_INDEX,
@@ -51,8 +52,6 @@ export const MOBILE_REQUIRED_FIELDS: readonly string[] = [
  * e.g. `exception.type` where no app ever threw, so the queries leave unmapped fields out.
  */
 export type MappedFields = ReadonlySet<string>;
-
-const ENVIRONMENT_FIELDS = [MOBILE_FIELDS.environment, MOBILE_FIELDS.environmentName];
 
 /** The filters every mobile panel applies, besides the time range and the environment. */
 export interface MobilePanelFilters {

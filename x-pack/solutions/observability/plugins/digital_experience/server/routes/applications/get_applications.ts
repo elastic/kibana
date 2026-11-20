@@ -26,11 +26,17 @@ type ApplicationsFetcher = () => Promise<SourceApplications>;
 type WebApplicationsFetcher = () => Promise<WebSourceApplications>;
 type AccessCheck = () => Promise<boolean>;
 
-const isWebSource = (source: ApplicationSource): source is WebApplicationSource =>
-  source !== APPLICATION_SOURCE.mobile;
-
-const isWebResult = (value: SourceApplications): value is WebSourceApplications =>
-  'pageLoadsOverTime' in value;
+/** A source's search, settled, and whether the user can read only part of its indices. */
+const settle = async <TResult>(
+  fetch: () => Promise<TResult>,
+  checkAccess?: AccessCheck
+): Promise<{ result: PromiseSettledResult<TResult>; isPartial: boolean }> => {
+  const [[result], isPartial] = await Promise.all([
+    Promise.allSettled([fetch()]),
+    checkAccess ? checkAccess() : Promise.resolve(false),
+  ]);
+  return { result, isPartial };
+};
 
 const NO_ACCESS_MESSAGE = i18n.translate('xpack.digitalExperience.applications.api.noAccess', {
   defaultMessage: "You don't have read access to the application data.",
@@ -98,9 +104,9 @@ export const getApplications = async ({
   hasPartialMobileAccess?: AccessCheck;
   logger: Logger;
 }): Promise<ApplicationsResponse> => {
-  const sources: Array<{
-    source: ApplicationSource;
-    fetch: ApplicationsFetcher | WebApplicationsFetcher;
+  const webSources: Array<{
+    source: WebApplicationSource;
+    fetch: WebApplicationsFetcher;
     checkAccess?: AccessCheck;
   }> = [
     {
@@ -110,23 +116,16 @@ export const getApplications = async ({
     },
   ];
   if (getClassicApplications) {
-    sources.push({
+    webSources.push({
       source: APPLICATION_SOURCE.classic,
       fetch: getClassicApplications,
       checkAccess: hasPartialClassicAccess,
     });
   }
-  if (getMobileApplications) {
-    sources.push({
-      source: APPLICATION_SOURCE.mobile,
-      fetch: getMobileApplications,
-      checkAccess: hasPartialMobileAccess,
-    });
-  }
 
-  const [results, partialAccess] = await Promise.all([
-    Promise.allSettled(sources.map(({ fetch }) => fetch())),
-    Promise.all(sources.map(async ({ checkAccess }) => (checkAccess ? checkAccess() : false))),
+  const [webSettled, mobileSettled] = await Promise.all([
+    Promise.all(webSources.map(({ fetch, checkAccess }) => settle(fetch, checkAccess))),
+    getMobileApplications ? settle(getMobileApplications, hasPartialMobileAccess) : undefined,
   ]);
 
   const loaded: SourceApplications[] = [];
@@ -139,28 +138,33 @@ export const getApplications = async ({
   };
   // Only EDOT Browser has sessions, and only when its source read them from the sessions index.
   let sessionsOverTime: TimeSeriesPoint[] | null = null;
-  results.forEach((result, index) => {
-    if (result.status === 'fulfilled') {
-      const { source } = sources[index];
-      const { value } = result;
-      loaded.push(value);
-      // Only the web sources have page loads, so the chart stays web-only.
-      const web = isWebSource(source) && isWebResult(value) ? value : null;
-      if (web && isWebSource(source)) {
-        pageLoadsOverTime[source] = web.pageLoadsOverTime;
-      }
-      if (web && source === APPLICATION_SOURCE.otel) {
-        sessionsOverTime = web.sessionsOverTime;
-      }
-      // The sessions index is summarized with the access of the user who enabled sessions, so when
-      // it answered (the only source with sessions), the user's raw indices hide no rows.
-      if (partialAccess[index] && (web?.sessionsOverTime ?? null) === null) {
-        partiallyAvailableSources.push(source);
-      }
-    } else {
-      failures.push({ source: sources[index].source, error: result.reason });
+  webSettled.forEach(({ result, isPartial }, index) => {
+    const { source } = webSources[index];
+    if (result.status === 'rejected') {
+      failures.push({ source, error: result.reason });
+      return;
+    }
+    const { value } = result;
+    loaded.push(value);
+    pageLoadsOverTime[source] = value.pageLoadsOverTime;
+    if (source === APPLICATION_SOURCE.otel) {
+      sessionsOverTime = value.sessionsOverTime;
+    }
+    // The sessions index is summarized with the access of the user who enabled sessions, so when
+    // it answered (the only source with sessions), the user's raw indices hide no rows.
+    if (isPartial && value.sessionsOverTime === null) {
+      partiallyAvailableSources.push(source);
     }
   });
+  // Mobile has no page loads or sessions over time: the chart stays web-only.
+  if (mobileSettled?.result.status === 'fulfilled') {
+    loaded.push(mobileSettled.result.value);
+    if (mobileSettled.isPartial) {
+      partiallyAvailableSources.push(APPLICATION_SOURCE.mobile);
+    }
+  } else if (mobileSettled) {
+    failures.push({ source: APPLICATION_SOURCE.mobile, error: mobileSettled.result.reason });
+  }
 
   if (loaded.length === 0) {
     failures.forEach((failure) => logger.error(describeFailure(failure)));

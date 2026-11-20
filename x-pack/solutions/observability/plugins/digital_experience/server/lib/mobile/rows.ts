@@ -13,6 +13,7 @@ import {
 import type { MappedFields } from '../../../common/mobile_panel';
 import type { MobilePlatform } from '../../../common/types/applications';
 import type { EsqlRow } from '../../services/sessions/summary_documents';
+import { MAX_ENVIRONMENTS } from '../constants';
 import { withNotDefined } from '../helpers/environment';
 import { normalizeVersion } from './normalize_version';
 
@@ -88,5 +89,6 @@ export const toEnvironments = (rows: EsqlRow[], mapped: MappedFields): string[] 
     }
     values.forEach((value) => names.add(value));
   });
-  return withNotDefined([...names], notDefined);
+  // Rows come most used first, so the cap keeps the most used names, as the web sources' terms do.
+  return withNotDefined([...names].slice(0, MAX_ENVIRONMENTS), notDefined);
 };
