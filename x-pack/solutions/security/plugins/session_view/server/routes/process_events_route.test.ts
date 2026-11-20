@@ -25,11 +25,11 @@ const getEmptyResponse = async () => {
   };
 };
 
-const getResponse = async () => {
+const getResponse = async (newestFirst = false) => {
   return {
     hits: {
       total: { value: mockEvents.length, relation: 'eq' },
-      hits: mockEvents.map((event) => {
+      hits: (newestFirst ? [...mockEvents].reverse() : mockEvents).map((event) => {
         return { _source: event };
       }),
     },
@@ -122,7 +122,8 @@ describe('process_events_route.ts', () => {
         forward: boolean,
         pageSize?: number
       ) => {
-        const client = elasticsearchServiceMock.createElasticsearchClient(getResponse());
+        // Elasticsearch returns a backward page newest first, and the route reverses it
+        const client = elasticsearchServiceMock.createElasticsearchClient(getResponse(!forward));
         const alertsClient = getAlertsClientMockInstance();
         const find = jest.spyOn(alertsClient, 'find');
 
@@ -164,16 +165,14 @@ describe('process_events_route.ts', () => {
         const cursor = '2021-11-23T15:25:06.510Z';
         const range = await fetchAndGetAlertsRange(cursor, false);
 
-        expect(range).toEqual({
-          gte: mockEvents[mockEvents.length - 1]['@timestamp'],
-          lte: cursor,
-        });
+        expect(range).toEqual({ gte: firstTimestamp, lte: cursor });
       });
 
       it('stops a backward page at its last event when the cursor is not newer', async () => {
-        const range = await fetchAndGetAlertsRange(firstTimestamp, false);
+        // a backward page holds events up to its cursor, so the cursor is at or after its last event
+        const range = await fetchAndGetAlertsRange(lastTimestamp, false);
 
-        expect(range?.lte).toBe(mockEvents[0]['@timestamp']);
+        expect(range).toEqual({ gte: firstTimestamp, lte: lastTimestamp });
       });
     });
   });
