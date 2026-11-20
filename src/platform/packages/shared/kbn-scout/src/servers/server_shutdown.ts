@@ -20,7 +20,8 @@ export const shutdownServers = async (
   shutdownEs: () => Promise<void>
 ): Promise<void> => {
   try {
-    await procs.teardown();
+    // SIGTERM: a Playwright runner still writes its reports; ProcRunner falls back to SIGKILL
+    await procs.teardown('SIGTERM');
   } finally {
     await shutdownEs();
   }

@@ -54,12 +54,14 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       async ({ onEarlyExit }) => {
         await ensureDefaultSpaceNPRE(config, log);
 
+        // No `onEarlyExit` for Kibana here: it exiting, however it exits, is how this command
+        // ends (`waitForAllToStop` below), as before. Elasticsearch and the docker servers do
+        // report their exits through it, since Kibana would keep serving against them.
         await runKibanaServer({
           procs,
           config,
           installDir: options.installDir,
           extraKbnOpts: getExtraKbnOpts(options.installDir, config.get('serverless')),
-          onEarlyExit,
         });
 
         reportTime(runStartTime, 'ready', {

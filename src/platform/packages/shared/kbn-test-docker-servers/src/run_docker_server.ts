@@ -19,6 +19,7 @@ import { ContainerExitError, observeContainerRunning } from './container_running
 const SECOND = 1000;
 const DEFAULT_WAIT_TIMEOUT_MS = 30 * SECOND;
 const LOG_DRAIN_TIMEOUT_MS = 10 * SECOND;
+const MONITOR_RETRY_DELAY_MS = 1 * SECOND;
 
 export interface RunningDockerServer {
   name: string;
@@ -259,33 +260,47 @@ export async function runDockerServer(
     onAbort();
   }
   let exitDuringStart: Error | undefined;
-  const runningSub = observeContainerRunning(name, containerId, log).subscribe({
-    error: async (error) => {
-      if (stopped) {
-        return;
-      }
-      // `docker wait` failing is not the same as the container exiting: when it is a monitor
-      // problem (a daemon hiccup) and the container is still running, keep going.
-      if (!(error instanceof ContainerExitError) && (await isDockerContainerRunning(containerId))) {
-        log.warning(
-          `[docker:${name}] lost the container monitor (${error.message}); the container is still running`
-        );
-        return;
-      }
-      if (stopped) {
-        return;
-      }
-      log.error(`[docker:${name}] Error ensuring that the container is running`);
-      log.error(error);
-      if (starting) {
-        // reported to the caller by the readiness race, or right after it settles
-        exitDuringStart = error;
-        rejectOnExit(error);
-        return;
-      }
-      onUnexpectedExit?.(error);
-    },
-  });
+  let runningSub: Rx.Subscription;
+  const watchContainer = () => {
+    runningSub = observeContainerRunning(name, containerId, log).subscribe({
+      error: async (error) => {
+        if (stopped) {
+          return;
+        }
+        // `docker wait` failing is not the same as the container exiting: when it is a monitor
+        // problem (a daemon hiccup) and the container is still running, watch it again.
+        if (
+          !(error instanceof ContainerExitError) &&
+          (await isDockerContainerRunning(containerId))
+        ) {
+          if (!stopped) {
+            log.warning(
+              `[docker:${name}] lost the container monitor (${error.message}); the container is still running, watching again`
+            );
+            setTimeout(() => {
+              if (!stopped) {
+                watchContainer();
+              }
+            }, MONITOR_RETRY_DELAY_MS).unref();
+          }
+          return;
+        }
+        if (stopped) {
+          return;
+        }
+        log.error(`[docker:${name}] Error ensuring that the container is running`);
+        log.error(error);
+        if (starting) {
+          // reported to the caller by the readiness race, or right after it settles
+          exitDuringStart = error;
+          rejectOnExit(error);
+          return;
+        }
+        onUnexpectedExit?.(error);
+      },
+    });
+  };
+  watchContainer();
 
   let stopPromise: Promise<void> | undefined;
   const doStop = async () => {

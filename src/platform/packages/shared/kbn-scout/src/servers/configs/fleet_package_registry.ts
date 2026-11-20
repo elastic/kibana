@@ -51,6 +51,7 @@ const registryDockerServer = (enabled: boolean, port: number | undefined): Docke
   waitForLogLineTimeoutMs: 6 * 60 * 1000,
 });
 
+/** Reads the registry opt-in from the env: whether to start the container, the Kibana args and the docker spec. */
 export function getFleetPackageRegistry(
   env: NodeJS.ProcessEnv = process.env
 ): ScoutFleetPackageRegistry {
@@ -99,11 +100,7 @@ export function getFleetPackageRegistry(
   };
 }
 
-/**
- * Before the docker servers start: fail on an opt-in that cannot be honoured, and say why the
- * registry container is not going to run when the port alone is set (the port alone used to
- * flip `dockerServers.registry.enabled` even though nothing started the container).
- */
+/** Fails on an opt-in that cannot be honoured and says why the container is not started when only the port is set. */
 export function assertFleetPackageRegistry(log: ToolingLog, env: NodeJS.ProcessEnv = process.env) {
   const registry = getFleetPackageRegistry(env);
   if (registry.error) {

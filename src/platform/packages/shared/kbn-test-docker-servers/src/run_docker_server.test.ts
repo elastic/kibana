@@ -44,23 +44,27 @@ function fakeDocker({
   const stdout = new PassThrough();
   const stderr = new PassThrough();
 
+  // one `docker wait` child per watch; the helpers below act on the latest one
   let resolveWait: (value: { stdout: string }) => void = () => {};
   let rejectWait: (error: unknown) => void = () => {};
-  const waitProc = Object.assign(
-    new Promise<{ stdout: string }>((resolve, reject) => {
-      resolveWait = resolve;
-      rejectWait = reject;
-    }),
-    { kill: () => rejectWait(Object.assign(new Error('killed'), { killed: true })) }
-  );
+  const newWaitProc = () => {
+    const proc = Object.assign(
+      new Promise<{ stdout: string }>((resolve, reject) => {
+        resolveWait = resolve;
+        rejectWait = reject;
+      }),
+      { kill: () => rejectWait(Object.assign(new Error('killed'), { killed: true })) }
+    );
+    // the runner handles this rejection; avoid an unhandled-rejection warning when nobody awaits it
+    proc.catch(() => {});
+    return proc;
+  };
   const interruptMonitor = () =>
     rejectWait(
       Object.assign(new Error('Command failed with exit code 130: docker wait'), { exitCode: 130 })
     );
   const failMonitor = () =>
     rejectWait(Object.assign(new Error('error during connect: EOF'), { exitCode: 1 }));
-  // the runner handles this rejection; avoid an unhandled-rejection warning when nobody awaits it
-  waitProc.catch(() => {});
 
   execaMock.mockImplementation((_cmd: string, args: string[]) => {
     calls.push(args);
@@ -76,7 +80,7 @@ function fakeDocker({
       case 'logs':
         return Object.assign(Promise.resolve({ stdout: '' }), { stdout, stderr });
       case 'wait':
-        return waitProc;
+        return newWaitProc();
       case 'inspect':
         return Promise.resolve({ stdout: fake.inspectRunning ? 'true\n' : 'false\n' });
       case 'kill':
@@ -365,6 +369,12 @@ describe('runDockerServer', () => {
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(onUnexpectedExit).not.toHaveBeenCalled();
     expect(dockerCall(docker.calls, 'inspect')).toHaveLength(1);
+    // the monitor is armed again after a short delay: a later exit is still reported
+    await new Promise((resolve) => setTimeout(resolve, 1100));
+    expect(dockerCall(docker.calls, 'wait')).toHaveLength(2);
+    docker.exitContainer(137);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(onUnexpectedExit).toHaveBeenCalledTimes(1);
 
     await running.stop();
   });

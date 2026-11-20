@@ -40,7 +40,7 @@ export interface BackingServices {
   shutdown: () => Promise<void>;
 }
 
-/** Starts the docker servers of the config and Elasticsearch, together, with a once-only shutdown. */
+/** Starts the docker servers of the config and Elasticsearch together; `shutdown` stops whatever came up, once. */
 export function startBackingServices({
   config,
   log,
@@ -67,9 +67,8 @@ export function startBackingServices({
 
   const shutdown = once(async () => {
     // A docker start still in progress is aborted (which stops its containers) and an
-    // Elasticsearch start is waited for. The docker servers stop first: they do not depend on
-    // Elasticsearch, and a container must not outlive a slow Elasticsearch boot that a signal
-    // cannot cut short.
+    // Elasticsearch start is waited for; the two stops run side by side, they do not depend on
+    // each other, and the docker one is not held back by a slow Elasticsearch boot.
     abortDockerStart.abort();
     const errors: Error[] = [];
     const stop = async (startup?: Promise<() => Promise<void>>) => {
@@ -80,8 +79,7 @@ export function startBackingServices({
         errors.push(asError(error));
       }
     };
-    await stop(dockerStartup);
-    await stop(esStartup);
+    await Promise.all([stop(dockerStartup), stop(esStartup)]);
     if (errors.length > 0) {
       throw errors[0];
     }
@@ -142,7 +140,7 @@ export interface RunWithBackingServicesOptions
   interruptedMessage: string;
 }
 
-/** Runs `body` between the start and the shutdown of the backing services, with the signal hook and early exits handled. */
+/** Runs `body` once the backing services are up and stops them after; returns 'interrupted' when a signal cut the run short, throws on failure. */
 export async function runWithBackingServices(
   { config, log, procs, es, interruptedMessage }: RunWithBackingServicesOptions,
   body: (context: { onEarlyExit: (msg: string) => void }) => Promise<void>
@@ -178,13 +176,15 @@ export async function runWithBackingServices(
   };
 
   let runError: Error | undefined;
+  let started = false;
   try {
     backing = startBackingServices({ config, log, onEarlyExit, es });
     await backing.ready;
+    started = true;
     await body({ onEarlyExit });
   } catch (error) {
     runError = asError(error);
-    if (!interrupted && earlyExitError === undefined) {
+    if (!started && !interrupted && earlyExitError === undefined) {
       // say so now: the shutdown below may wait for an Elasticsearch boot to settle first
       log.error(`scout: start failed, shutting the servers down: ${runError.message}`);
     }

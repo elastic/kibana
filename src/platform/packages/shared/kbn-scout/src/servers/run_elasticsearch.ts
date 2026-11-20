@@ -104,7 +104,15 @@ export async function runElasticsearch(
       waitForReady: true,
     };
 
-    await runLinkedServerlessCluster(log, serverlessOptions);
+    try {
+      await runLinkedServerlessCluster(log, serverlessOptions);
+    } catch (error) {
+      // the origin node is up and nobody else holds its handle yet
+      await cleanupElasticsearch(node, config.serverless, logsDir, log).catch((cleanupError) =>
+        log.error(cleanupError)
+      );
+      throw error;
+    }
   }
 
   return async () => {

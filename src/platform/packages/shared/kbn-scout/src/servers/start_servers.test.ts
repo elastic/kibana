@@ -78,8 +78,9 @@ describe('startServers', () => {
     expect(runElasticsearchMock).toHaveBeenCalledWith(
       expect.objectContaining({ onEarlyExit: expect.any(Function) })
     );
+    // Kibana exiting is how start-server ends; it is not an early exit
     expect(runKibanaServerMock).toHaveBeenCalledWith(
-      expect.objectContaining({ onEarlyExit: expect.any(Function) })
+      expect.not.objectContaining({ onEarlyExit: expect.anything() })
     );
     expect(procs.waitForAllToStop).toHaveBeenCalledTimes(1);
     expect(shutdownEs).toHaveBeenCalledTimes(1);
