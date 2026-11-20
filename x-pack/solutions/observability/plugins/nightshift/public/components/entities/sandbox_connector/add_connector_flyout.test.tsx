@@ -37,6 +37,27 @@ const setup = (options: Parameters<typeof mockKibanaServices>[0] = {}) => {
 };
 
 describe('AddConnectorFlyout', () => {
+  const originalInnerWidth = window.innerWidth;
+
+  afterEach(() => {
+    window.innerWidth = originalInnerWidth;
+  });
+
+  it('labels the create action with text on a desktop', async () => {
+    setup();
+
+    expect(await screen.findByTestId('.http-create')).toHaveTextContent('Create connector');
+  });
+
+  it('shrinks the create action to an icon on a phone, keeping its accessible name', async () => {
+    window.innerWidth = 390;
+    setup();
+
+    const createButton = await screen.findByTestId('.http-create');
+    expect(createButton).not.toHaveTextContent('Create connector');
+    expect(createButton).toHaveAttribute('aria-label', expect.stringContaining('Create connector'));
+  });
+
   it('lists the sandbox-capable types with how many connectors each has', async () => {
     setup();
 

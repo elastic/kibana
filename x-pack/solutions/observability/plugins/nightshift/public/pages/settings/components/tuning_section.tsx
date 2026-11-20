@@ -21,6 +21,7 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { useIsMobile } from '../../../hooks/use_is_mobile';
 import { SignificantEventsTuningConfigEditor } from './significant_events_tuning_config_editor';
 import { SettingsSectionRow } from './settings_section';
 import type { DetectionSettingsForm } from './use_detection_settings_form';
@@ -49,6 +50,7 @@ export const TuningSection = ({
   handleSaveTuningConfig: DetectionSettingsForm['handleSaveTuningConfig'];
 }) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const isMobile = useIsMobile();
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'nightshiftSettingsTuningFlyoutTitle',
   });
@@ -101,7 +103,7 @@ export const TuningSection = ({
       {isFlyoutOpen && (
         <EuiFlyout
           type="overlay"
-          size="50%"
+          size={isMobile ? 'fill' : '50%'}
           onClose={closeFlyout}
           aria-labelledby={flyoutTitleId}
           data-test-subj="nightshiftSettingsTuningFlyout"
@@ -128,7 +130,7 @@ export const TuningSection = ({
           </EuiFlyoutBody>
 
           <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+            <EuiFlexGroup justifyContent="spaceBetween" responsive={false} wrap>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="nightshiftSettingsTuningResetToDefaultsButton"

@@ -39,6 +39,7 @@ import {
 import { hasSameEsql } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
+import { useIsMobile } from '../../../../hooks/use_is_mobile';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSourcesApi } from '../../../../data/sources/use_sources_api';
 import { getFormattedError } from '../../../../common/errors';
@@ -82,6 +83,8 @@ export function SourceFlyout({
     notifications: { toasts },
   } = useKibana().services;
   const { createSource, updateSource } = useSourcesApi();
+  // Side by side the form and the preview don't both fit a phone, so they stack there.
+  const isMobile = useIsMobile();
   const titleId = useGeneratedHtmlId();
   // Only the query the user ran is previewed, so typing does not search on every keystroke.
   // `runId` changes on every run, so running an unchanged query still refetches it.
@@ -184,10 +187,18 @@ export function SourceFlyout({
           </EuiTitle>
         </EuiFlyoutHeader>
         {/* A flex child of the flyout, so both panels fill the height between header and footer. */}
-        <EuiResizableContainer css={{ flexGrow: 1, minHeight: 0 }}>
+        <EuiResizableContainer
+          direction={isMobile ? 'vertical' : 'horizontal'}
+          css={{ flexGrow: 1, minHeight: 0 }}
+        >
           {(EuiResizablePanel, EuiResizableButton) => (
             <>
-              <EuiResizablePanel initialSize={40} minSize="350px" paddingSize="l" tabIndex={0}>
+              <EuiResizablePanel
+                initialSize={isMobile ? 60 : 40}
+                minSize={isMobile ? '20%' : '350px'}
+                paddingSize="l"
+                tabIndex={0}
+              >
                 <EuiText size="s" color="subdued">
                   <p>{FORM_DESCRIPTION}</p>
                 </EuiText>
@@ -373,7 +384,12 @@ export function SourceFlyout({
                 </EuiForm>
               </EuiResizablePanel>
               <EuiResizableButton indicator="border" />
-              <EuiResizablePanel initialSize={60} minSize="300px" paddingSize="l" tabIndex={0}>
+              <EuiResizablePanel
+                initialSize={isMobile ? 40 : 60}
+                minSize={isMobile ? '20%' : '300px'}
+                paddingSize="l"
+                tabIndex={0}
+              >
                 <SourcePreview esql={preview.esql} runId={preview.runId} />
               </EuiResizablePanel>
             </>
