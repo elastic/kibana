@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { useHistory } from 'react-router-dom';
-import { omitBy, isUndefined } from 'lodash';
 import {
   EuiButton,
   EuiCode,
@@ -21,7 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
-import { useAbortableAsync } from '@kbn/react-hooks';
 import { getDateISORange } from '@kbn/timerange';
 import { SESSIONS_LOOKBACK_DAYS, type SessionsStatus } from '../../../common/sessions';
 import type { ApplicationSource } from '../../../common/types/applications';
@@ -30,7 +28,6 @@ import { ColumnSelector } from '../../components/column_selector';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { TimeRangePicker } from '../../components/time_range_picker';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../ebt_constants';
-import { useApiClient } from '../../hooks/use_api_client';
 import { useApplicationLinks } from '../../hooks/use_application_links';
 import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_params';
 import { useEnvironment } from '../../hooks/use_environment';
@@ -54,9 +51,10 @@ import {
   SESSIONS_OPTIONAL_COLUMN_IDS,
   SessionsTable,
 } from './components/sessions_table';
+import { useSessionsList } from './hooks/sessions_list_request';
 import { useSessionsListQuery } from './hooks/use_sessions_list_query';
 import { useSessionsStatus } from '../../application/sessions_status_provider';
-import { DURATION_BUCKETS, pickSessionsListQuery } from '../../utils/sessions_list_query';
+import { pickSessionsListQuery } from '../../utils/sessions_list_query';
 
 /** The attribute EDOT Browser stamps on every span and log of a session. */
 const SESSION_ID_FIELD = 'session.id';
@@ -186,7 +184,6 @@ function SessionsList({
   headerAction?: ReactNode;
 }) {
   const { rebuilding } = status;
-  const apiClient = useApiClient();
   const formatters = useFormatters();
   const { timeRange } = useTimeRange();
   const { environment } = useEnvironment();
@@ -217,52 +214,7 @@ function SessionsList({
     }
   }, [timeRange, environment, state.page, update, history]);
 
-  const {
-    value: response,
-    loading,
-    error,
-    refresh,
-  } = useAbortableAsync(
-    async ({ signal }) => {
-      const { startDate, endDate } = getDateISORange({
-        from: timeRange.rangeFrom,
-        to: timeRange.rangeTo,
-      });
-      const duration = DURATION_BUCKETS.find(({ id }) => id === state.duration);
-      return apiClient.fetch(
-        'GET /internal/digital_experience/applications/{serviceName}/sessions',
-        {
-          signal,
-          params: {
-            path: { serviceName },
-            query: omitBy(
-              {
-                start: startDate,
-                end: endDate,
-                query: state.search,
-                browser: state.browser,
-                os: state.os,
-                country: state.country,
-                entryPage: state.entryPage,
-                environment,
-                withJsErrors: state.withJsErrors ? 'true' : undefined,
-                withFailedRequests: state.withFailedRequests ? 'true' : undefined,
-                minDurationMs: duration?.minDurationMs,
-                maxDurationMs: duration?.maxDurationMs,
-                sortField: state.sortField,
-                sortDirection: state.sortDirection,
-                page: state.page,
-                perPage: state.perPage,
-              },
-              isUndefined
-            ) as { start: string; end: string },
-          },
-        }
-      );
-    },
-    [apiClient, serviceName, timeRange, environment, state],
-    { unsetValueOnError: true }
-  );
+  const { value: response, loading, error, refresh } = useSessionsList({ serviceName, state });
   // Refresh checks the status too, so a finished rebuild shows without reloading.
   const refreshAll = useCallback(() => {
     refresh();

@@ -1848,6 +1848,25 @@ class ConversationClientImpl implements ConversationClient {
     return document;
   }
 
+  /** Writes that only change per-user fields (read, pinned, feedback) keep `updated_at`. */
+  private resolveUpdateDate({
+    current,
+    changes,
+  }: {
+    current: NormalizedConversation;
+    changes: Omit<ConversationUpdatableFields, 'id'>;
+  }): Date {
+    const perUserFields: ReadonlySet<string> = new Set<keyof ConversationUpdatableFields>([
+      'read',
+      'read_by',
+      'pinned',
+      'pinned_by',
+      'feedback',
+    ]);
+    const changesContent = Object.keys(changes).some((key) => !perUserFields.has(key));
+    return changesContent ? new Date() : new Date(current.updated_at);
+  }
+
   /**
    * Read-modify-write against the stored conversation, retrying on conflict.
    * `fields` is replayed per attempt against the freshly read conversation, so it must be free of side effects.
@@ -1880,14 +1899,15 @@ class ConversationClientImpl implements ConversationClient {
         id: conversationId,
         mutate: (current) => {
           before = current;
+          const changes = fields(current);
           return updateConversation({
             conversation: current,
             update: {
               id: conversationId,
-              ...fields(current),
+              ...changes,
               ...(activeExecution && applyActiveExecutionUpdate(current, activeExecution)),
             },
-            updateDate: new Date(),
+            updateDate: this.resolveUpdateDate({ current, changes }),
             space: this.space,
           });
         },
