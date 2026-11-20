@@ -57,6 +57,13 @@ interface ListResponse {
   }>;
   errors: Array<{ indexPattern: string; status: number | null; reason: string }>;
   unavailableColumns: Array<{ column: string; indexPattern: string; field: string }>;
+  unsupportedMetrics: Array<{
+    indexPattern: string;
+    engine: string;
+    column: string;
+    field: string;
+    agg: string;
+  }>;
 }
 
 apiTest.describe(
@@ -142,7 +149,7 @@ apiTest.describe(
         // The OpenTelemetry time-series index holds no 2026-11-01 documents, so its `TS` plan reads none.
         expect(body.queries.map(({ rowCount }) => rowCount)).toStrictEqual([3, 0, 3]);
         expect(typeof body.took).toBe('number');
-        expect('unsupportedMetrics' in body).toBe(false);
+        expect(body.unsupportedMetrics).toStrictEqual([]);
         expect('documentFilterWarnings' in body).toBe(false);
       }
     );

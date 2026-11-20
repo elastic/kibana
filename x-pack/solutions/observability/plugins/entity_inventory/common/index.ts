@@ -74,11 +74,24 @@ export interface GetTypesResponse {
   types: InventoryType[];
 }
 
-/** An attribute column one source cannot fill because no index behind its pattern maps the field. */
+/** An attribute or metric column one source cannot fill because no index behind its pattern maps the field. */
 export interface UnavailableColumn {
   column: string;
   indexPattern: string;
   field: string;
+}
+
+/**
+ * A metric the generator skipped for a plan because the engine cannot compute it (rates under
+ * `FROM`). Same shape as the generator's skipped-metrics helper.
+ */
+export interface UnsupportedMetric {
+  indexPattern: string;
+  engine: QueryEngine;
+  /** Output column name (= metric `name`). */
+  column: string;
+  field: string;
+  agg: DynamicMetricAgg;
 }
 
 /** One plan query sent to Elasticsearch; a failed query has null `took` and `documentsFound` and `rowCount` 0. */
@@ -108,6 +121,8 @@ export interface ListResponse {
   queries: ListQueryDiagnostic[];
   errors: SourceError[];
   unavailableColumns: UnavailableColumn[];
+  /** Metrics omitted from a plan's STATS because the engine cannot compute them (e.g. rates on `FROM`). */
+  unsupportedMetrics: UnsupportedMetric[];
 }
 
 /** The body the inventory sends to Elasticsearch's `POST /_query` for one query. */
@@ -140,4 +155,6 @@ export interface PlanResponse {
   queries: PlanQuery[];
   /** One entry per source whose probe failed. */
   errors: SourceError[];
+  /** Metrics that would be omitted from those plan queries (e.g. rates on `FROM`). */
+  unsupportedMetrics: UnsupportedMetric[];
 }

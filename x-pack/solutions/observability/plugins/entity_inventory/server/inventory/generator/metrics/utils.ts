@@ -6,8 +6,8 @@
  */
 
 import type { DynamicMetric, DynamicMetricAgg } from '@kbn/entity-store/common';
-import type { QueryEngine } from '../../../../common';
-import type { QueryPlan, SkippedMetricOnPlan } from '../types';
+import type { QueryEngine, UnsupportedMetric } from '../../../../common';
+import type { QueryPlan } from '../types';
 
 const COUNT_AGGS: ReadonlySet<DynamicMetricAgg> = new Set(['count', 'count_distinct']);
 const RATE_AGGS: ReadonlySet<DynamicMetricAgg> = new Set([
@@ -33,9 +33,13 @@ export const listMetricsUnsupportedOnEngine = (
   engine: QueryEngine
 ): DynamicMetric[] => metrics.filter(({ agg }) => !canEngineComputeMetricAgg(engine, agg));
 
+/**
+ * Metrics this plan's engine cannot compute, as `UnsupportedMetric` for `_list` / `_plan`
+ * (`indexPattern`, `engine`, `column`, `field`, `agg`).
+ */
 export const listSkippedMetricsOnPlan = (
   plan: Pick<QueryPlan, 'indexPattern' | 'engine' | 'metrics'>
-): SkippedMetricOnPlan[] =>
+): UnsupportedMetric[] =>
   listMetricsUnsupportedOnEngine(plan.metrics, plan.engine).map(({ name, field, agg }) => ({
     indexPattern: plan.indexPattern,
     engine: plan.engine,

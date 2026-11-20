@@ -81,6 +81,45 @@ describe('interpretPlanResult', () => {
     ).toEqual(['host.ip']);
   });
 
+  it('treats an unmapped metric field as unavailable, but not a rate omitted under FROM', () => {
+    const fromPlan: QueryPlan = {
+      ...plan,
+      engine: 'FROM',
+      metrics: [
+        { name: 'cpu', field: 'system.cpu.pct', agg: 'last' },
+        { name: 'bytes', field: 'host.network.bytes', agg: 'sum_rate' },
+      ],
+    };
+    const metricColumns: OutputColumn[] = [
+      ...outputColumns,
+      { name: 'cpu', kind: 'metric', fieldByPlan: { 1: 'system.cpu.pct' }, agg: 'last' },
+      {
+        name: 'bytes',
+        kind: 'metric',
+        fieldByPlan: { 1: 'host.network.bytes' },
+        agg: 'sum_rate',
+      },
+    ];
+    expect(
+      interpretPlanResult(
+        {
+          plan: fromPlan,
+          columns: [
+            { name: 'host.id', type: 'keyword' },
+            { name: 'host.name', type: 'keyword' },
+            { name: 'os', type: 'keyword' },
+            { name: 'ip', type: 'ip' },
+            { name: 'cpu', type: 'null' },
+            { name: 'last_seen', type: 'date' },
+          ],
+          rows: [],
+        },
+        identity,
+        metricColumns
+      ).unavailableFields
+    ).toEqual(['system.cpu.pct']);
+  });
+
   it('is unusable when last_seen is absent', () => {
     expect(
       interpretPlanResult(result({ 'host.id': 'keyword' }), identity, outputColumns).reason

@@ -16,6 +16,12 @@ const columns: OutputColumn[] = [
   { name: 'entity.id', kind: 'id' },
   { name: 'host.name', kind: 'identity' },
   { name: 'os', kind: 'attribute', fieldByPlan: { 0: 'host.os.name', 1: 'os.name' } },
+  {
+    name: 'cpu',
+    kind: 'metric',
+    fieldByPlan: { 0: 'system.cpu.pct', 1: 'host.cpu.pct' },
+    agg: 'last',
+  },
   { name: 'last_seen', kind: 'last_seen' },
 ];
 
@@ -111,6 +117,29 @@ describe('mergeRows', () => {
     );
     expect(rows[0]['host.name']).toBe('h1');
     expect(rows[0]['entity.id']).toBe('a');
+  });
+
+  it('takes the first non-null metric in plan order, not the newest last_seen', () => {
+    const { rows, provenance } = mergeRows(
+      [
+        result(0, [{ 'entity.id': 'a', cpu: 0.1, last_seen: '2026-01-01T00:00:00.000Z' }]),
+        result(1, [{ 'entity.id': 'a', cpu: 0.9, last_seen: '2026-01-03T00:00:00.000Z' }]),
+      ],
+      columns
+    );
+    expect(rows[0].cpu).toBe(0.1);
+    expect(provenance.a).not.toHaveProperty('cpu');
+  });
+
+  it('does not let a null metric clobber an earlier value', () => {
+    const { rows } = mergeRows(
+      [
+        result(0, [{ 'entity.id': 'a', cpu: 0.4, last_seen: '2026-01-01T00:00:00.000Z' }]),
+        result(1, [{ 'entity.id': 'a', cpu: null, last_seen: '2026-01-02T00:00:00.000Z' }]),
+      ],
+      columns
+    );
+    expect(rows[0].cpu).toBe(0.4);
   });
 
   it('takes the newest last_seen', () => {

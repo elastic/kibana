@@ -15,10 +15,4 @@ export type { IdentityPlan } from './identity';
 export { generateListQueries } from './list_query';
 export { buildProbeQuery } from './probe_query';
 export { MAX_QUERY_PLANS } from './types';
-export type {
-  GeneratedQuery,
-  QueryPlan,
-  SkippedMetricOnPlan,
-  SourceProbe,
-  TimeWindow,
-} from './types';
+export type { GeneratedQuery, QueryPlan, SourceProbe, TimeWindow } from './types';
