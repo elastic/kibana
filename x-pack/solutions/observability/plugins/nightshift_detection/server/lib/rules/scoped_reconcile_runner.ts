@@ -11,7 +11,7 @@ import { Logger as CoreLogger, PluginSetup } from '@kbn/core-di';
 import type { CPSServerSetup } from '@kbn/cps/server';
 import { AccountScope } from '../engine/account_scope';
 import { DetectionEngineDataClient } from '../engine/es_client_tokens';
-import { EnabledSources, KnowledgeIndicators } from '../engine/tokens';
+import { KnowledgeIndicators, Sources } from '../engine/tokens';
 import { getErrorMessage } from '../errors/get_error_message';
 import { StrategyCatalog } from '../strategies/strategy_catalog';
 import type { ResourceContext } from '../strategies/types';
@@ -98,7 +98,9 @@ export class ScopedReconcileRunner {
     try {
       const context: ResourceContext = {
         spaceId,
-        sources: await scope.get(EnabledSources).list(),
+        // Disabled sources too: their rules are disabled, while a rule whose source is missing is
+        // deleted.
+        sources: await scope.get(Sources).list({ enabledOnly: false }),
         esClient: scope.get(DetectionEngineDataClient),
         abortSignal,
         knowledge: scope.get(KnowledgeIndicators),

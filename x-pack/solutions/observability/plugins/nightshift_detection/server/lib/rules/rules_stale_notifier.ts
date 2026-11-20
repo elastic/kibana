@@ -14,7 +14,7 @@ import { getErrorMessage } from '../errors/get_error_message';
 export type NotifyRulesStale = (params: { request: KibanaRequest; event: RulesStaleEvent }) => void;
 
 /**
- * Emits the rules stale trigger with the request that changed knowledge or sources, so the event
+ * Emits the rules stale trigger with the request that changed the sources, so the event
  * lands in its space and starts that space's rule reconcile workflow. Fire and forget: the write
  * that triggered it already committed, and the sources plugin awaits its listeners, so a slow or
  * failing emit must neither delay nor fail it. The workflow's schedule catches a lost event.
@@ -31,9 +31,7 @@ export function createRulesStaleNotifier({
       .then((client) => client.emitEvent(RULES_STALE_TRIGGER_ID, event))
       .catch((error) => {
         logger.warn(
-          `Could not mark the detection rules out of date after a ${
-            event.reason
-          } change of sources [${event.source_ids.join(
+          `Could not mark the detection rules out of date after a change of sources [${event.source_ids.join(
             ', '
           )}]; the scheduled reconciliation catches up: ${getErrorMessage(error)}`
         );

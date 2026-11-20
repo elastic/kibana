@@ -10,8 +10,10 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
 /**
- * Emitted when what the detection rules are built from changed in a space. The registry accepts
- * only letters, digits and dashes before the dot, so the namespace is kebab-case.
+ * Emitted when the sources of a space changed, so its detection rules may no longer match them.
+ * Knowledge indicator changes start the reconciliation through their own significant_events
+ * trigger. The registry accepts only letters, digits and dashes before the dot, so the namespace is
+ * kebab-case.
  */
 export const RULES_STALE_TRIGGER_ID = 'nightshift-detection.rulesStale' as const;
 
@@ -21,18 +23,12 @@ const MAX_SOURCE_ID_LENGTH = 1_024;
 
 const rulesStaleEventSchema = lazySchema(() =>
   z.object({
-    reason: z.enum(['knowledge_indicators', 'sources']).describe(
-      i18n.translate('xpack.nightshiftDetection.triggers.rulesStale.schema.reason', {
-        defaultMessage:
-          'What changed: the knowledge indicators of some sources, or the sources themselves.',
-      })
-    ),
     source_ids: z
       .array(z.string().max(MAX_SOURCE_ID_LENGTH))
       .max(MAX_SOURCE_IDS)
       .describe(
         i18n.translate('xpack.nightshiftDetection.triggers.rulesStale.schema.sourceIds', {
-          defaultMessage: 'The sources whose knowledge indicators or settings changed.',
+          defaultMessage: 'The sources that were created, changed or deleted.',
         })
       ),
   })
@@ -51,6 +47,6 @@ export const rulesStaleTriggerDefinition: CommonTriggerDefinition<typeof rulesSt
   }),
   description: i18n.translate('xpack.nightshiftDetection.triggers.rulesStale.description', {
     defaultMessage:
-      'Emitted when the knowledge indicators or the sources of a space change, so the alerting rules of the detection strategies no longer match them.',
+      'Emitted when the sources of a space change, so the alerting rules of the detection strategies no longer match them.',
   }),
 };

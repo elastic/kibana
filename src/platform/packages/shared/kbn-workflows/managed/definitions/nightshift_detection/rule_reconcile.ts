@@ -14,9 +14,9 @@ export const NIGHTSHIFT_DETECTION_RULE_RECONCILE_WORKFLOW_ID =
   'system-nightshift-detection-rule-reconcile';
 
 /**
- * Keeps the alerting rules of the detection strategies in a space up to date: started by the
- * engine's `nightshift-detection.rulesStale` trigger when knowledge indicators or sources change,
- * and every six hours. Installed per space and bound to the detection engine service account, it
+ * Keeps the alerting rules of the detection strategies in a space up to date: started by
+ * `significant-events.knowledgeIndicatorsChanged` when knowledge indicators change, by the engine's
+ * `nightshift-detection.rulesStale` when sources change, and every six hours. Installed per space and bound to the detection engine service account, it
  * calls `POST /internal/nightshift/detection/rules/_reconcile` as that account, so the rules run
  * with the account's API key.
  */

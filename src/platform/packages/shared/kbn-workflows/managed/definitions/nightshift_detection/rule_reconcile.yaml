@@ -23,16 +23,17 @@ settings:
     max: 1
 triggers:
   - type: nightshift-detection.rulesStale
+  - type: significant-events.knowledgeIndicatorsChanged
   - type: scheduled
     with:
       every: "6h"
 steps:
-  # Only the schedule and the engine's own trigger start this workflow. Anyone allowed to run
+  # Only the schedule and the triggers above start this workflow. Anyone allowed to run
   # workflows could otherwise change rules as the service account. Only server code sets
   # `triggeredBy`.
   - name: refuse_direct_runs
     type: if
-    condition: 'not (execution.triggeredBy : "scheduled" or execution.triggeredBy : "nightshift-detection.rulesStale")'
+    condition: 'not (execution.triggeredBy : "scheduled" or execution.triggeredBy : "nightshift-detection.rulesStale" or execution.triggeredBy : "significant-events.knowledgeIndicatorsChanged")'
     steps:
       - name: refuse
         type: workflow.fail

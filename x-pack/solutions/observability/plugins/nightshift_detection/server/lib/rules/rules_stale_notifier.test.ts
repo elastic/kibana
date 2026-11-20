@@ -9,7 +9,7 @@ import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createRulesStaleNotifier } from './rules_stale_notifier';
 
 const REQUEST = httpServerMock.createKibanaRequest();
-const EVENT = { reason: 'knowledge_indicators' as const, source_ids: ['source-1'] };
+const EVENT = { source_ids: ['source-1'] };
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 

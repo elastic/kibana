@@ -17,7 +17,7 @@ import type { SignificantEventsServerStart } from '@kbn/significant-events-plugi
 import { EngineHttpError } from '../errors/engine_http_error';
 import { DetectionRulesClient } from '../rules/rules_client_token';
 import { DetectionEngineDataClient } from './es_client_tokens';
-import { EnabledSources, KnowledgeIndicators } from './tokens';
+import { KnowledgeIndicators, Sources } from './tokens';
 
 /** The catalog is read in one page; a space with more sources than this is refused. */
 const MAX_LISTED_SOURCES = 10_000;
@@ -61,8 +61,8 @@ export class AccountScope {
     scope
       .bind(DetectionEngineDataClient)
       .toConstantValue(this.elasticsearch.client.asScoped(accountRequest).asCurrentUser);
-    scope.bind(EnabledSources).toConstantValue({
-      list: () => this.listEnabledSources(accountRequest),
+    scope.bind(Sources).toConstantValue({
+      list: ({ enabledOnly }) => this.listSources({ accountRequest, enabledOnly }),
     });
     scope
       .bind(KnowledgeIndicators)
@@ -77,14 +77,20 @@ export class AccountScope {
     return scope;
   }
 
-  private async listEnabledSources(accountRequest: KibanaRequest) {
+  private async listSources({
+    accountRequest,
+    enabledOnly,
+  }: {
+    accountRequest: KibanaRequest;
+    enabledOnly: boolean;
+  }) {
     const sourcesClient = await this.nightshiftSources.getSourcesClient({
       request: accountRequest,
     });
     const { sources, total } = await sourcesClient.list({
       page: 1,
       perPage: MAX_LISTED_SOURCES,
-      enabled: true,
+      enabled: enabledOnly ? true : undefined,
     });
 
     if (total > sources.length) {

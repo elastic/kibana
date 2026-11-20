@@ -74,7 +74,7 @@ function createContainer() {
   });
   container.bind(PluginStart('significantEvents')).toConstantValue({
     getKnowledgeIndicatorReader: () => ({
-      listQueryKnowledgeIndicators: async () => [],
+      listQueryLinks: async () => [],
       listFeatures: async () => [],
     }),
   });
@@ -83,9 +83,6 @@ function createContainer() {
     registerManagedWorkflowOwner: jest.fn(),
     registerTriggerDefinition: jest.fn(),
   });
-  container
-    .bind(PluginSetup('significantEvents'))
-    .toConstantValue({ onKnowledgeIndicatorsChange: jest.fn() });
   container.bind(PluginSetup('nightshiftSources')).toConstantValue({ onSourceChange: jest.fn() });
   container.bind(PluginSetup('workflowsManagement')).toConstantValue({});
   container.load(module);
