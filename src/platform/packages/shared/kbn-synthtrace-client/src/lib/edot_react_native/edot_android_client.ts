@@ -8,18 +8,27 @@
  */
 
 import type { OtelScope } from '../otel_logs';
+import { EVENT_APP_CRASH } from '../edot_shared/constants';
 import type { EdotLog } from '../edot_shared/edot_log';
+import { ERROR_KIND_ANR } from '../edot_shared/proposed_signals';
 import {
   EdotReactNativeClientBase,
   type CrashOptions,
+  type FreezeOptions,
   type HttpExceptionEventOptions,
   type HttpRequestOptions,
 } from './edot_react_native_client';
-import type { EdotReactNativeSpan } from './edot_react_native_span';
+import { MOBILE_PLATFORM } from './device_profiles';
+import {
+  MOBILE_SPAN_KIND,
+  MOBILE_SPAN_STATUS,
+  type EdotReactNativeSpan,
+} from './edot_react_native_span';
 
 // The OkHttp instrumentation version EDOT Android 1.10.0 ships with
 const HTTP_SCOPE: OtelScope = { name: 'io.opentelemetry.okhttp-3.0', version: '2.31.1-alpha' };
 const CRASH_SCOPE: OtelScope = { name: 'co.elastic.otel.android.instrumentation.crash' };
+const ANR_SCOPE: OtelScope = { name: 'co.elastic.otel.android.instrumentation.anr' };
 
 // `URL` drops the port when it is the default one of these schemes
 const DEFAULT_PORTS: Readonly<Record<string, number>> = {
@@ -84,7 +93,7 @@ const peerAddressOf = (hostname: string): string => {
 
 /** One installation of an EDOT React Native app on an Android device, recorded by EDOT Android. */
 export class EdotAndroidClient extends EdotReactNativeClientBase {
-  public readonly platform = 'android' as const;
+  public readonly platform = MOBILE_PLATFORM.ANDROID;
   protected readonly cellularOnAllSpans = true;
 
   protected formatUuid(uuid: string): string {
@@ -106,6 +115,7 @@ export class EdotAndroidClient extends EdotReactNativeClientBase {
     errorType,
     traceId,
     spanId,
+    parentSpanId,
   }: HttpRequestOptions): EdotReactNativeSpan {
     const parsedUrl = new URL(url);
     const urlFull = sanitizeUrl(parsedUrl);
@@ -120,10 +130,11 @@ export class EdotAndroidClient extends EdotReactNativeClientBase {
     return this.span({
       traceId,
       spanId,
+      parentSpanId,
       name: authority ? `${method} ${authority}` : method,
-      kind: 'Client',
+      kind: MOBILE_SPAN_KIND.CLIENT,
       scope: HTTP_SCOPE,
-      status: isError ? 'Error' : 'Unset',
+      status: isError ? MOBILE_SPAN_STATUS.ERROR : MOBILE_SPAN_STATUS.UNSET,
       attributes: {
         'http.request.method': method,
         'url.full': urlFull,
@@ -171,13 +182,30 @@ export class EdotAndroidClient extends EdotReactNativeClientBase {
     return this.log(
       CRASH_SCOPE,
       {
-        'otel.event.name': 'app.crash',
+        'otel.event.name': EVENT_APP_CRASH,
         'exception.type': type,
         'exception.message': message,
         'exception.stacktrace': stacktrace,
         ...this.logAttributes,
       },
-      { eventName: 'app.crash' }
+      { eventName: EVENT_APP_CRASH }
     );
+  }
+
+  /** An ANR: the main thread didn't answer within the system's timeout. */
+  freeze({ durationMs }: FreezeOptions): EdotLog {
+    const message = `Application did not respond for ${Math.round(durationMs)}ms`;
+    return this.freezeLog(ANR_SCOPE, ERROR_KIND_ANR, {
+      type: 'ApplicationNotResponding',
+      message,
+      stacktrace: [
+        'ApplicationNotResponding: ' + message,
+        '\tat android.os.MessageQueue.nativePollOnce(Native Method)',
+        '\tat android.os.MessageQueue.next(MessageQueue.java:335)',
+        '\tat android.os.Looper.loopOnce(Looper.java:186)',
+        '\tat android.os.Looper.loop(Looper.java:313)',
+        '\tat android.app.ActivityThread.main(ActivityThread.java:8663)',
+      ].join('\n'),
+    });
   }
 }

@@ -53,6 +53,11 @@ export interface EdotReactNativeAppOptions {
   appId?: string;
   /** Android `versionCode` and iOS `CFBundleVersion`. */
   buildNumber?: number;
+  /**
+   * An app built with EDOT Android or EDOT iOS directly, without React Native: it has no JavaScript
+   * runtime, so no JavaScript crashes, no `RNSScreen` and no React Native instrumentation scopes.
+   */
+  native?: boolean;
 }
 
 /**
@@ -62,6 +67,8 @@ export interface EdotReactNativeAppOptions {
 export class EdotReactNativeApp {
   readonly serviceName: string;
   private readonly appId: string;
+  private readonly native: boolean;
+  private readonly environment?: string;
   private readonly resourceAttributesByPlatform: Readonly<
     Record<MobilePlatform, Readonly<Record<string, unknown>>>
   >;
@@ -72,9 +79,12 @@ export class EdotReactNativeApp {
     environment,
     appId = `com.example.${serviceName.replace(/[^a-z0-9]/gi, '').toLowerCase()}`,
     buildNumber = 1,
+    native = false,
   }: EdotReactNativeAppOptions) {
     this.serviceName = serviceName;
     this.appId = appId;
+    this.native = native;
+    this.environment = environment;
     const service = { 'service.name': serviceName, 'service.version': serviceVersion };
     this.resourceAttributesByPlatform = {
       android: {
@@ -103,6 +113,12 @@ export class EdotReactNativeApp {
       ...profile.resourceAttributes,
     };
     const clientOptions = { ...options, slowdown: options.slowdown ?? profile.slowdown };
-    return new CLIENT_CLASSES[profile.platform](resourceAttributes, clientOptions, this.appId);
+    return new CLIENT_CLASSES[profile.platform](
+      resourceAttributes,
+      clientOptions,
+      this.appId,
+      this.native,
+      this.environment
+    );
   }
 }
