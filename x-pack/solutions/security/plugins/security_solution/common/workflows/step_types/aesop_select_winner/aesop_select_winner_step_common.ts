@@ -114,6 +114,22 @@ export const aesopSelectWinnerOutputSchema = lazySchema(() =>
       .describe(
         'True when the tiebreak arm improves on the baseline significantly, or n is too small; false when there is no tie'
       ),
+    best: z
+      .object({
+        index: z.number().int(),
+        target_id: z.string(),
+        mean: z.number(),
+        baseline_mean: z.number(),
+        improvement: z
+          .number()
+          .describe('Gain over the baseline in the improving direction; negative when worse'),
+        p_value: z.number().nullable(),
+        sample_size: z.number().int(),
+      })
+      .nullable()
+      .describe(
+        'Primary evaluator numbers of the arm with the largest gain among the arms that were not rejected, whether or not it beats the baseline; null when every arm was rejected'
+      ),
     rejected: z.array(
       z.object({
         target_id: z.string(),

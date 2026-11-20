@@ -689,4 +689,74 @@ describe('selectWinner', () => {
   it('returns no winner for an empty comparison', () => {
     expect(selectWinner(build([])).reasons).toEqual(['no arms to compare']);
   });
+
+  describe('best', () => {
+    it('reports the winning arm numbers', () => {
+      const result = selectWinner(
+        build([
+          arm('a', [
+            row({ evaluatorName: 'correctness', meanTarget: 0.6, pValue: 0.2 }),
+            ...codePass,
+          ]),
+          arm('b', [
+            row({ evaluatorName: 'correctness', meanTarget: 0.8, pValue: 0.01, sampleSize: 30 }),
+            ...codePass,
+          ]),
+        ])
+      );
+
+      expect(result.best).toEqual({
+        index: 1,
+        target_id: 'b',
+        mean: 0.8,
+        baseline_mean: 0.5,
+        improvement: expect.closeTo(0.3, 9),
+        p_value: 0.01,
+        sample_size: 30,
+      });
+    });
+
+    it('reports the closest arm when nothing beats the baseline', () => {
+      const result = selectWinner(
+        build([
+          arm('a', [
+            row({ evaluatorName: 'correctness', meanTarget: 0.3, pValue: 0.01 }),
+            ...codePass,
+          ]),
+          arm('b', [
+            row({ evaluatorName: 'correctness', meanTarget: 0.45, pValue: 0.6 }),
+            ...codePass,
+          ]),
+        ])
+      );
+
+      expect(result.winner_index).toBe(-1);
+      expect(result.best).toMatchObject({ target_id: 'b', improvement: expect.closeTo(-0.05, 9) });
+    });
+
+    it('reports the best tied arm on a tie', () => {
+      const result = selectWinner(
+        build(
+          [
+            arm('a', [
+              row({ evaluatorName: 'correctness', meanTarget: 0.7, pValue: 0.01 }),
+              ...codePass,
+            ]),
+            arm('b', [
+              row({ evaluatorName: 'correctness', meanTarget: 0.71, pValue: 0.01 }),
+              ...codePass,
+            ]),
+          ],
+          { min_delta: 0.02 }
+        )
+      );
+
+      expect(result.tie).toBe(true);
+      expect(result.best).toMatchObject({ target_id: 'b', mean: 0.71 });
+    });
+
+    it('is null when every arm is rejected', () => {
+      expect(selectWinner(build([arm('a', codePass)])).best).toBeNull();
+    });
+  });
 });

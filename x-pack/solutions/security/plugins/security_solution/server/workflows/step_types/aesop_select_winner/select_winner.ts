@@ -120,9 +120,23 @@ const pickTiebreak = (tied: PrimaryScore[]): PrimaryScore =>
     return row.index < top.index ? row : top;
   });
 
+const toBest = (score: PrimaryScore | null): Output['best'] =>
+  score === null
+    ? null
+    : {
+        index: score.index,
+        target_id: score.target_id,
+        mean: score.meanTarget,
+        baseline_mean: score.meanBaseline,
+        improvement: score.improvement,
+        p_value: score.pValue,
+        sample_size: score.sampleSize,
+      };
+
 const noWinner = (
   rejected: Output['rejected'],
   reasons: string[],
+  best: PrimaryScore | null = null,
   tied: PrimaryScore[] = [],
   tiebreak: PrimaryScore | null = null,
   alpha = 0
@@ -137,6 +151,7 @@ const noWinner = (
   tiebreak_target_id: tiebreak?.target_id ?? null,
   tiebreak_beats_baseline:
     tiebreak !== null && (tiebreak.pValue === null || tiebreak.pValue <= alpha),
+  best: toBest(best),
   rejected,
   reasons,
 });
@@ -175,17 +190,20 @@ export const selectWinner = (input: Input): Output => {
     ]);
   }
 
+  const best = scored.reduce((top, row) => (row.improvement > top.improvement ? row : top));
   const qualifying = scored.filter(({ improvement }) => improvement > 0);
   if (qualifying.length === 0) {
-    const closest = scored.reduce((top, row) => (row.improvement > top.improvement ? row : top));
-    return noWinner(rejected, [
-      `no arm beats the baseline on ${primary}; best was ${closest.target_id} at ${format(
-        closest.meanTarget
-      )} against ${format(closest.meanBaseline)}`,
-    ]);
+    return noWinner(
+      rejected,
+      [
+        `no arm beats the baseline on ${primary}; best was ${best.target_id} at ${format(
+          best.meanTarget
+        )} against ${format(best.meanBaseline)}`,
+      ],
+      best
+    );
   }
 
-  const best = qualifying.reduce((top, row) => (row.improvement > top.improvement ? row : top));
   const tied = qualifying.filter(
     ({ improvement }) => best.improvement - improvement <= input.min_delta + EPSILON
   );
@@ -197,6 +215,7 @@ export const selectWinner = (input: Input): Output => {
           .map(({ target_id: id }) => id)
           .join(', ')})`,
       ],
+      best,
       tied,
       pickTiebreak(tied),
       alpha
@@ -230,6 +249,7 @@ export const selectWinner = (input: Input): Output => {
     tiebreak_index: -1,
     tiebreak_target_id: null,
     tiebreak_beats_baseline: false,
+    best: toBest(best),
     rejected,
     reasons,
   };
