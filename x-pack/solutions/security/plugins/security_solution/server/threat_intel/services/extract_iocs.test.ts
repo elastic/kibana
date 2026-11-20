@@ -2198,6 +2198,9 @@ describe('extract_iocs — example emails, Message-IDs and non-addresses', () =>
       ['References: <a1@mail.evil-corp.com> <b2@mail.evil-corp.com> <c3@mail.evil-corp.com>'],
       ['"InternetMessageId": "<x@y.prod.outlook.com>"'],
       ['sendmail: msgid=<x@mail.evil-corp.com>'],
+      ['Message-ID: <abc123@mail.evil-corp[.]com>'],
+      ['Message-ID: <abc123@mail[.]evil-corp[.]com>'],
+      ['References: <id1@mail.evil-corp[.]com> <id2@mail.evil-corp[.]com>'],
     ])('%s', (text) => {
       const result = extractIocs({ text });
       expect(emailValues(result)).toEqual([]);

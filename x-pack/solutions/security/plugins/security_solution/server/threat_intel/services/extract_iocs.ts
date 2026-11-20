@@ -292,23 +292,35 @@ const isMessageIdToken = (
   );
 };
 
+/**
+ * True when the report wrote the `@` of this match defanged (`actor[@]evil[.]com`): the source
+ * text has no `local@first-host-label` for it. Defanged dots alone do not count.
+ */
+const isAtSignDefanged = (raw: string, originalLower: string): boolean =>
+  !originalLower.includes(raw.slice(0, raw.indexOf('.', raw.lastIndexOf('@'))));
+
 /** Tier and basis for an email match, or `null` when it is not an address (rules 1 and 3 of PASS 1). */
 const classifyEmail = ({
   refangedText,
+  originalLower,
   start,
   raw,
   wasDefanged,
   idListHeaderLines,
 }: {
   refangedText: string;
+  originalLower: string;
   start: number;
   raw: string;
   wasDefanged: boolean;
   idListHeaderLines: readonly Span[];
 }): { tier: IocTier; basis: string } | null => {
-  // Nobody defangs a Message-ID, so a defanged token is an address whatever header precedes it.
+  // A defanged `@` means the report is writing an address, whatever header precedes it. Defanged
+  // dots do not: phishing write-ups paste header blocks with every domain defanged
+  // (`Message-ID: <id@mail.evil[.]com>`), and those are still message IDs.
   const isMessageId =
-    !wasDefanged && isMessageIdToken(refangedText, start, start + raw.length, idListHeaderLines);
+    isMessageIdToken(refangedText, start, start + raw.length, idListHeaderLines) &&
+    !isAtSignDefanged(raw, originalLower);
   if (isMessageId) return null;
   const host = raw.slice(raw.lastIndexOf('@') + 1);
   if (isPlaceholderEmailHost(host)) return { tier: 'reference', basis: 'placeholder_email' };
@@ -1303,8 +1315,8 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   // First rule that applies wins, and every match records its span in `consumed` so the
   // host of a skipped match never resurfaces as a domain:
   //   1. Message-ID token (`message-id=<id@host>`, `References: <a@b> <c@d>`) → nothing, unless
-  //      the report wrote it defanged. A References or In-Reply-To line under an IOC heading
-  //      is not an ID list.
+  //      the report wrote its `@` defanged. A References or In-Reply-To line under an IOC
+  //      heading is not an ID list.
   //   2. Placeholder host (`test@test.com`, `a@b.lab.test`) → reference/placeholder_email,
   //      even when defanged. Runs before rule 3 because reserved TLDs are not in IANA_TLDS.
   //   3. Host TLD is not a real TLD → nothing. Trade-off: a real address glued to the next
@@ -1321,6 +1333,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
 
       const verdict = classifyEmail({
         refangedText,
+        originalLower,
         start: idx,
         raw,
         wasDefanged: !originalLower.includes(raw),
