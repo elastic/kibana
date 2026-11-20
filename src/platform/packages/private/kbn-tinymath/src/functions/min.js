@@ -10,7 +10,7 @@
 /**
  * Finds the minimum value of one or more numbers or arrays of numbers. If you pass several arguments and at least one is an array, the function will find the minimum by index.
  * @param {...(number|number[])} args one or more numbers or arrays of numbers
- * @return {(number|number[])} The minimum value of all numbers if `args` contains only numbers. Returns an array with the minimum values of each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.
+ * @return {(number|number[])} The minimum value of all numbers if `args` contains only numbers. Returns an array with the minimum values of each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element. A single empty array throws an error.
  * @throws `'Array length mismatch'` if `args` contains arrays of different lengths
  * @example
  * min(1, 2, 3) // returns 1

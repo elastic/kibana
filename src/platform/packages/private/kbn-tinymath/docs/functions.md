@@ -1,5 +1,5 @@
 # TinyMath Functions
-This document provides detailed information about the functions available in Tinymath and lists what parameters each function accepts, the return value of that function, and examples of how each function behaves. Most of the functions below accept arrays and apply JavaScript Math methods to each element of that array. For the functions that accept multiple arrays as parameters, the function generally does calculation index by index. Any function below can be wrapped by another function as long as the return type of the inner function matches the acceptable parameter type of the outer function.
+This document provides detailed information about the functions available in Tinymath and lists what parameters each function accepts, the return value of that function, and examples of how each function behaves. Most of the functions below accept arrays and apply JavaScript Math methods to each element of that array. For the functions that accept multiple arrays as parameters, the function generally does calculation index by index. Any function below can be wrapped by another function as long as the return type of the inner function matches the acceptable parameter type of the outer function. An expression can't contain an array directly, so the examples with arrays show what each function returns for array values from the data that the expression runs on.
 
 ## _abs(_ _a_ _)_
 Calculates the absolute value of a number. For arrays, the function will be applied index-wise to each element.
@@ -25,7 +25,7 @@ Calculates the sum of one or more numbers/arrays passed into the function. If yo
 | --- | --- | --- |
 | ...args | <code>number</code> \| <code>Array.&lt;number&gt;</code> | one or more numbers or arrays of numbers |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The sum of all numbers in `args` if `args` contains only numbers. Returns an array of sums of the elements at each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The sum of all numbers in `args` if `args` contains only numbers. Returns an array of sums of the elements at each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element. A single empty array throws an error.  
 **Throws**:
 
 - `'Array length mismatch'` if `args` contains arrays of different lengths
@@ -79,7 +79,7 @@ Restricts a value to a given range. Returns `min` if the value is below it, `max
 | min | <code>number</code> \| <code>Array.&lt;number&gt;</code> | The minimum value this function returns. |
 | max | <code>number</code> \| <code>Array.&lt;number&gt;</code> | The maximum value this function returns. |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The closest value between `min` (inclusive) and `max` (inclusive). Returns an array with values greater than or equal to `min` and less than or equal to `max` at each index if `a`, `min`, or `max` is an array. If you leave out `min` or `max`, the result is `NaN`, or an array of `NaN` values if `a` is an array.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The closest value between `min` (inclusive) and `max` (inclusive). Returns an array with values greater than or equal to `min` and less than or equal to `max` at each index if `a`, `min`, or `max` is an array. If you leave out `min` or `max`, the result is `NaN`, or an array of `NaN` values if `a` is an array. If `a` and `min` are both arrays and `max` is a number, each element of the result is `NaN`.  
 **Throws**:
 
 - `'Array length mismatch'` if `a`, `min`, or `max` are arrays of different lengths
@@ -290,15 +290,15 @@ cube([3, 4, 5]) // returns [27, 64, 125]
 ```
 ***
 ## _defaults(_ _a_,  _b_ _)_
-Replaces null values with a fallback value. For arrays, the function will be applied index-wise to each element.
+Replaces null or undefined values with a fallback value. For arrays, the function will be applied index-wise to each element.
 
 
 | Param | Type | Description |
 | --- | --- | --- |
-| a | <code>any</code> \| <code>Array.&lt;any&gt;</code> | a value or an array of values that can include null |
-| b | <code>any</code> | the value to use in place of null |
+| a | <code>any</code> \| <code>Array.&lt;any&gt;</code> | a value or an array of values that can include null or undefined values |
+| b | <code>any</code> | the value to use in place of null or undefined |
 
-**Returns**: <code>any</code> \| <code>Array.&lt;any&gt;</code> - `a` if it isn't null, otherwise `b`. Returns an array with `b` in place of each null element if `a` is an array.  
+**Returns**: <code>any</code> \| <code>Array.&lt;any&gt;</code> - `a` if it isn't null or undefined, otherwise `b`. Returns an array with `b` in place of each null or undefined element if `a` is an array.  
 **Example**  
 ```js
 defaults(5, 1) // returns 5
@@ -474,7 +474,7 @@ Finds the maximum value of one or more numbers or arrays of numbers. If you pass
 | --- | --- | --- |
 | ...args | <code>number</code> \| <code>Array.&lt;number&gt;</code> | one or more numbers or arrays of numbers |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The maximum value of all numbers if `args` contains only numbers. Returns an array with the maximum values at each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The maximum value of all numbers if `args` contains only numbers. Returns an array with the maximum values at each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element. A single empty array throws an error.  
 **Throws**:
 
 - `'Array length mismatch'` if `args` contains arrays of different lengths
@@ -494,7 +494,7 @@ Finds the mean value of one or more numbers or arrays of numbers. If you pass se
 | --- | --- | --- |
 | ...args | <code>number</code> \| <code>Array.&lt;number&gt;</code> | one or more numbers or arrays of numbers |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The mean value of all numbers if `args` contains only numbers. Returns an array with the mean values of each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The mean value of all numbers if `args` contains only numbers. Returns an array with the mean values of each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element. A single empty array throws an error.  
 **Throws**:
 
 - `'Array length mismatch'` if `args` contains arrays of different lengths
@@ -514,10 +514,10 @@ Finds the median value(s) of one or more numbers or arrays of numbers. If you pa
 | --- | --- | --- |
 | ...args | <code>number</code> \| <code>Array.&lt;number&gt;</code> | one or more numbers or arrays of numbers |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The median value of all numbers if `args` contains only numbers. Returns an array with the median values of each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The median value of all numbers if `args` contains only numbers. Returns an array with the median values of each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element, and `median` sorts that array in place in descending order. A later use of the same array in the expression sees the sorted values.  
 **Throws**:
 
-- `'Array length mismatch'` if `args` contains arrays of different lengths
+- `'Array length mismatch'` if `args` contains arrays of different lengths, unless the first array is empty, in which case the result is an empty array
 
 **Example**  
 ```js
@@ -535,7 +535,7 @@ Finds the minimum value of one or more numbers or arrays of numbers. If you pass
 | --- | --- | --- |
 | ...args | <code>number</code> \| <code>Array.&lt;number&gt;</code> | one or more numbers or arrays of numbers |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The minimum value of all numbers if `args` contains only numbers. Returns an array with the minimum values of each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The minimum value of all numbers if `args` contains only numbers. Returns an array with the minimum values of each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element. A single empty array throws an error.  
 **Throws**:
 
 - `'Array length mismatch'` if `args` contains arrays of different lengths
@@ -578,10 +578,10 @@ Finds the mode value(s) of one or more numbers or arrays of numbers. If you pass
 | --- | --- | --- |
 | ...args | <code>number</code> \| <code>Array.&lt;number&gt;</code> | one or more numbers or arrays of numbers |
 
-**Returns**: <code>Array.&lt;number&gt;</code> \| <code>Array.&lt;Array.&lt;number&gt;&gt;</code> - An array mode value(s) of all numbers if `args` contains only numbers. Returns an array of arrays with mode value(s) of each index, including all scalar numbers in `args` in the calculation at each index  if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> \| <code>Array.&lt;Array.&lt;number&gt;&gt;</code> - If you pass a single number, returns that number. If you pass only numbers, or a single array, returns an array of the mode value(s) of every value. If you pass several arguments and at least one is an array, returns an array of arrays with the mode value(s) at each index, including all scalar numbers in `args` in the calculation at each index.  
 **Throws**:
 
-- `'Array length mismatch'` if `args` contains arrays of different lengths
+- `'Array length mismatch'` if `args` contains arrays of different lengths, unless the first array is empty, in which case the result is an empty array
 
 **Example**  
 ```js
@@ -659,7 +659,7 @@ radtodeg([0, 1.5707963267948966, 3.141592653589793, 6.283185307179586]) // retur
 ```
 ***
 ## _random(_ _a_,  _b_ _)_
-Generates a random number within the given range where the lower bound is inclusive and the upper bound is exclusive. If no numbers are passed in, it will return a number between 0 and 1. If only one number is passed in, it will return a number between 0 and the number passed in.
+Generates a random number within the given range where the lower bound is inclusive and the upper bound is exclusive. If no numbers are passed in, it will return a number between 0 and 1. If only one number is passed in, it will return a number between 0 and the number passed in. If both bounds are equal, it returns that value.
 
 
 | Param | Type | Description |
@@ -687,7 +687,7 @@ Finds the range of one or more numbers or arrays of numbers. If you pass several
 | --- | --- | --- |
 | ...args | <code>number</code> \| <code>Array.&lt;number&gt;</code> | one or more numbers or arrays of numbers |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The range value of all numbers if `args` contains only numbers. Returns an array with the range values at each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The range value of all numbers if `args` contains only numbers. Returns an array with the range values at each index, including all scalar numbers in `args` in the calculation at each index if you pass several arguments and at least one is an array. If you pass a single array, the result covers every element. A single empty array throws an error.  
 **Throws**:
 
 - `'Array length mismatch'` if `args` contains arrays of different lengths

@@ -8,10 +8,10 @@
  */
 
 /**
- * Replaces null values with a fallback value. For arrays, the function will be applied index-wise to each element.
- * @param {(any|any[])} a a value or an array of values that can include null
- * @param {(any)} b the value to use in place of null
- * @return {(any|any[])} `a` if it isn't null, otherwise `b`. Returns an array with `b` in place of each null element if `a` is an array.
+ * Replaces null or undefined values with a fallback value. For arrays, the function will be applied index-wise to each element.
+ * @param {(any|any[])} a a value or an array of values that can include null or undefined values
+ * @param {(any)} b the value to use in place of null or undefined
+ * @return {(any|any[])} `a` if it isn't null or undefined, otherwise `b`. Returns an array with `b` in place of each null or undefined element if `a` is an array.
  *
  * @example
  * defaults(5, 1) // returns 5
