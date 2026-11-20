@@ -258,6 +258,38 @@ export const updateVendorApi = async ({
   const toolsOf = (name: string): readonly string[] | undefined =>
     toolFlags[name] ?? previous?.sources[name]?.tools;
 
+  // A captured source's snapshot is the only copy of it, taken from the URL it names, so neither
+  // can change without capturing it again.
+  const rejectChangesToCapture = async (name: string, known: ManifestSource) => {
+    const differs = (flag: unknown, current: unknown) =>
+      flag !== undefined && JSON.stringify(flag) !== JSON.stringify(current);
+    const file = snapshotFile(name, known.format);
+    const changes = [
+      differs(sourceFlags[name], known.url),
+      differs(formatFlags[name], known.format),
+      differs(pageFlags[name], known.pages),
+      differs(endpointFlags[name], known.endpoints),
+      differs(toolFlags[name], known.tools),
+    ];
+    if (changes.some(Boolean) && (await read(file)) !== undefined) {
+      throw new Error(
+        `${name} is captured from ${known.url}, so --source, --format, --pages, --endpoint and ` +
+          `--tool can't change it and keep ${file}. To capture it again, delete ${file} and ` +
+          'record without --refresh.'
+      );
+    }
+  };
+  // A refresh never takes the network to a captured source, which only answers to credentials. It
+  // is captured again by priming the spec cache, deleting its snapshot and recording without it.
+  const requireCaptureWithoutRefresh = (name: string, captured: true | undefined) => {
+    if (captured && refresh) {
+      throw new Error(
+        `${name} is captured but has no snapshot, and --refresh doesn't fetch captured sources. ` +
+          'Capture it again and record without --refresh.'
+      );
+    }
+  };
+
   const raw: Record<string, OpenApiDocument> = {};
   const protocols: Record<string, GraphQLSpec | McpSpec> = {};
   const formats: Record<string, ManifestSource['format']> = {};
@@ -267,6 +299,9 @@ export const updateVendorApi = async ({
     const known = previous?.sources[name];
     const declaredFormat = formatFlags[name] ?? known?.format;
     const captured = known?.captured;
+    if (known && captured) {
+      await rejectChangesToCapture(name, known);
+    }
     const endpoints = endpointFlags[name] ?? known?.endpoints;
     if (isProtocolFormat(declaredFormat)) {
       if (endpoints === undefined) {
@@ -282,6 +317,7 @@ export const updateVendorApi = async ({
       const snapshot =
         fetchAll && !captured ? undefined : await read(snapshotFile(name, declaredFormat));
       if (snapshot === undefined) {
+        requireCaptureWithoutRefresh(name, captured);
         log.info(`Loading ${name} from ${url}`);
         protocols[name] = await loadProtocolSpec({
           url,
@@ -305,6 +341,7 @@ export const updateVendorApi = async ({
     const snapshot =
       fetchAll && !captured ? undefined : await read(snapshotFile(name, declaredFormat));
     if (snapshot === undefined) {
+      requireCaptureWithoutRefresh(name, captured);
       const markdownFormat = markdownFormatOf(name);
       const pages = pagesOf(name);
       if (!markdownFormat && pages !== undefined) {
@@ -324,8 +361,9 @@ export const updateVendorApi = async ({
     }
   }
 
-  // Protocol sources are loaded apart from `raw`, so every source is counted through `urls`.
-  const fetchedEverySource = loaded.size === Object.keys(urls).length;
+  // An overlay only applies to the OpenAPI sources, which are the ones in `raw`. A GraphQL or MCP
+  // source, captured or not, has nothing for it to match.
+  const fetchedEverySource = Object.keys(raw).every((name) => loaded.has(name));
   const { specs, unmatchedActions } = applyOverlayWithFindings(raw, overlay);
   // A snapshot only has the operations the connector calls, so an overlay action matching
   // nothing there may still be needed.

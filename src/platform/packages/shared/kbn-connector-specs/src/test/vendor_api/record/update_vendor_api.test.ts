@@ -12,6 +12,7 @@ import os from 'os';
 import path from 'path';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../../connector_spec';
+import { parseManifest, serializeManifest } from '../manifest';
 import type { UpdateVendorApiOptions } from './update_vendor_api';
 import { updateVendorApi } from './update_vendor_api';
 
@@ -465,6 +466,106 @@ actions:
     });
 
     it('warns with --refresh, as the vendor spec has been fetched', async () => {
+      await update({ refresh: true });
+
+      expect(warnings).toEqual([
+        'overlay.yaml action 0 matches nothing in any source; the vendor may have fixed it',
+      ]);
+    });
+  });
+
+  describe('with a captured source', () => {
+    const NOTE = 'The vendor only serves this spec to a request carrying credentials.';
+    const writeManifest = (manifest: unknown) =>
+      fs.writeFile(
+        path.join(directory, 'manifest.json'),
+        serializeManifest(parseManifest(JSON.stringify(manifest)))
+      );
+
+    beforeEach(async () => {
+      await update({ sources: { main: SPEC_URL } });
+      const manifest = await readJson('manifest.json');
+      manifest.sources.main = { ...manifest.sources.main, captured: true, note: NOTE };
+      await writeManifest(manifest);
+      fetched = [];
+      warnings = [];
+    });
+
+    it('keeps the snapshot it was captured into on --refresh, without fetching it', async () => {
+      documents = {};
+
+      const { changed, problems } = await update({ refresh: true });
+
+      expect(problems).toEqual([]);
+      expect(changed).toEqual([]);
+      expect(fetched).toEqual([]);
+      expect((await readJson('manifest.json')).sources.main).toMatchObject({
+        captured: true,
+        note: NOTE,
+      });
+    });
+
+    it('refuses to point it somewhere else while its snapshot is the copy of the old URL', async () => {
+      await expect(
+        update({ sources: { main: 'https://specs.example.com/other.yaml' } })
+      ).rejects.toThrow('main is captured from https://specs.example.com/openapi.yaml');
+
+      expect((await readJson('manifest.json')).sources.main.url).toBe(SPEC_URL);
+      expect(fetched).toEqual([]);
+    });
+
+    it('accepts the URL it already has, and refuses to change how it is read', async () => {
+      await expect(update({ sources: { main: SPEC_URL } })).resolves.toMatchObject({ changed: [] });
+      await expect(update({ pages: { main: ['api/'] } })).rejects.toThrow('main is captured');
+    });
+
+    it('can be captured again by deleting the snapshot and recording without --refresh', async () => {
+      await fs.rm(path.join(directory, 'snapshots/main.openapi.json'));
+
+      await expect(update({ refresh: true })).rejects.toThrow(
+        "main is captured but has no snapshot, and --refresh doesn't fetch captured sources"
+      );
+      expect(fetched).toEqual([]);
+
+      documents['https://specs.example.com/other.yaml'] = specYaml('2.0');
+      await update({ sources: { main: 'https://specs.example.com/other.yaml' } });
+
+      expect(fetched).toContain('https://specs.example.com/other.yaml');
+      expect((await readJson('manifest.json')).sources.main).toMatchObject({
+        url: 'https://specs.example.com/other.yaml',
+        captured: true,
+        apiVersion: '2.0',
+      });
+    });
+
+    it('still judges the overlay of the OpenAPI sources it sits next to', async () => {
+      // A captured MCP source can't match an overlay action, so it can't hide that one is stale.
+      const manifest = await readJson('manifest.json');
+      manifest.sources.main = { ...manifest.sources.main, captured: undefined, note: undefined };
+      manifest.sources.tools = {
+        format: 'mcp',
+        url: 'https://specs.example.com/tools.json',
+        endpoints: ['https://mcp.example.com/mcp'],
+        captured: true,
+        note: NOTE,
+        fetchedAt: '2026-10-07T12:00:00.000Z',
+      };
+      await writeManifest(manifest);
+      await fs.writeFile(
+        path.join(directory, 'snapshots/tools.mcp.json'),
+        JSON.stringify({ tools: [{ name: 'search', inputSchema: { type: 'object' } }] })
+      );
+      await fs.writeFile(
+        path.join(directory, 'overlay.yaml'),
+        `
+overlay: 1.0.0
+info: { title: Example fixes, version: '1' }
+actions:
+  - target: $.paths['/gone']
+    remove: true
+`
+      );
+
       await update({ refresh: true });
 
       expect(warnings).toEqual([

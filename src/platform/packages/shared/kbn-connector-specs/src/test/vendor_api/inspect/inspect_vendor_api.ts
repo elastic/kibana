@@ -118,6 +118,13 @@ export const inspectVendorApi = async ({
       );
       continue;
     }
+    if (known?.captured) {
+      log.warning(
+        `Skipping ${name}: it is captured, so the vendor would not serve it to a plain fetch. ` +
+          'Its snapshot has only the operations the connector calls.'
+      );
+      continue;
+    }
     const pages = pageFlags[name] ?? known?.pages;
     if (!isMarkdownFormat(declaredFormat) && pages !== undefined) {
       throw new Error(`${name}: --pages only applies to Markdown references; pass --format`);

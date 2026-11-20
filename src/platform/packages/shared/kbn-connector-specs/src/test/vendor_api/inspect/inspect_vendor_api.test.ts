@@ -331,6 +331,38 @@ actions:
     });
   });
 
+  it('skips a captured source, which the vendor would not serve to a plain fetch', async () => {
+    await fs.writeFile(
+      path.join(directory, 'manifest.json'),
+      JSON.stringify({
+        sources: {
+          v1: {
+            format: 'openapi',
+            url: SPEC_URL,
+            captured: true,
+            note: 'Captured with credentials.',
+            fetchedAt: '2026-10-08T00:00:00.000Z',
+          },
+        },
+        operations: {},
+      })
+    );
+    const fetchText = jest.fn(async () => {
+      throw new Error('401 Unauthorized');
+    });
+    const warnings: string[] = [];
+
+    await inspect({
+      sources: {},
+      directory,
+      fetchText,
+      log: { info: () => {}, warning: (message) => warnings.push(message) },
+    });
+
+    expect(fetchText).not.toHaveBeenCalled();
+    expect(warnings).toEqual([expect.stringContaining('Skipping v1: it is captured')]);
+  });
+
   it('does not move a source the manifest has to another URL', async () => {
     await inspect({ directory });
     const { manifestUpdated, problems } = await inspect({

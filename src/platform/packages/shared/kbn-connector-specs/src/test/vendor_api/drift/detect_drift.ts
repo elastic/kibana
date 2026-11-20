@@ -573,7 +573,9 @@ export const detectDrift = async ({
   for (const [name, source] of Object.entries(manifest.sources)) {
     const { url } = source;
     if (source.captured) {
-      // Fetching it would only answer 401, which is not news; it is refreshed by capturing it again.
+      // Fetching it would only answer 401, which is not news; it is refreshed by capturing it
+      // again. It is reported even when another source can't be fetched.
+      sources[name] = { status: 'pinned' };
       continue;
     }
     try {
@@ -594,10 +596,9 @@ export const detectDrift = async ({
     }
   }
 
-  const latest =
-    Object.keys(sources).length === 0
-      ? await compareWithLatest({ connector, directory, manifest, fetchText: fetchOnce, now, diff })
-      : undefined;
+  const latest = Object.values(sources).some(({ status }) => status === 'unreachable')
+    ? undefined
+    : await compareWithLatest({ connector, directory, manifest, fetchText: fetchOnce, now, diff });
 
   const latestSpecs = latest?.result?.specs;
   const overlayText = await readOptional(path.join(directory, OVERLAY));
