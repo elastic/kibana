@@ -46,7 +46,7 @@ const parseForEditing = (yaml: string): { doc: Document; error?: string } => {
  * Detect the indentation unit used in the document by looking at the first
  * indented line. Falls back to 2 spaces.
  */
-const detectIndent = (yaml: string): number => {
+export const detectIndent = (yaml: string): number => {
   for (const line of yaml.split('\n')) {
     const match = line.match(/^( +)\S/);
     if (match) return match[1].length;

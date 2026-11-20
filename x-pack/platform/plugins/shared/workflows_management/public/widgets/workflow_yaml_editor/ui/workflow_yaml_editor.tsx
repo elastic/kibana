@@ -75,7 +75,7 @@ import {
   setHasYamlSchemaValidationErrors,
   setIsTestModalOpen,
 } from '../../../entities/workflows/store/workflow_detail/slice';
-import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
+import { ActionsMenuPopover, useWarmActionsMenu } from '../../../features/actions_menu_popover';
 import type {
   ActionOptionData,
   EditorCommand,
@@ -113,6 +113,8 @@ import {
 import { registerWorkflowDefinitionProvider } from '../lib/monaco_providers/workflow_definition_provider';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
+import { STEP_FRAGMENT_SCHEMA_FILE_MATCH_EXCLUSION } from '../lib/step_fragment/step_fragment_models';
+import { useInactiveDebouncedValue } from '../lib/use_inactive_debounced_value';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
@@ -126,6 +128,10 @@ import {
 
 // Monaco's default `scrollbar.verticalScrollbarSize`.
 const MONACO_VERTICAL_SCROLLBAR_SIZE = 14;
+
+// While the graph is showing, this editor is hidden and only mirrors the store. Pushing the whole
+// document into it on every graph edit costs time and memory, so it catches up after this much quiet.
+const HIDDEN_EDITOR_SYNC_DEBOUNCE_MS = 300;
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   ...WORKFLOW_MONACO_LAYOUT_OPTIONS,
@@ -238,6 +244,8 @@ export const WorkflowYAMLEditor = ({
   const saveYaml = useSaveYamlWithConfirmation(confirmDisable);
   const isSaving = useSelector(selectIsSaveInProgress);
   const dispatch = useDispatch();
+  // The actions menu is a lazy chunk shared with the visual editor: fetch it while idle.
+  useWarmActionsMenu();
   const workflow = useSelector(selectWorkflow);
   const isExecutionYaml = useSelector(selectIsExecutionsTab);
   const readOnlyReason = useWorkflowEditorReadOnlyReason();
@@ -262,6 +270,11 @@ export const WorkflowYAMLEditor = ({
   );
 
   const workflowYaml = useSelector(selectEditorYaml) ?? '';
+  const editorValue = useInactiveDebouncedValue(
+    workflowYaml,
+    isActive,
+    HIDDEN_EDITOR_SYNC_DEBOUNCE_MS
+  );
   const hasChanges = useSelector(selectHasChanges);
 
   const originalValue = workflow?.yaml ?? '';
@@ -354,7 +367,11 @@ export const WorkflowYAMLEditor = ({
     }
     return [
       {
-        fileMatch: ['*'],
+        // Step-fragment editors (the graph flyout's YAML tab) show a single
+        // de-indented step, not a full workflow — they validate against a
+        // hidden full-document shadow model instead (see
+        // `attachStepFragmentYamlSupport`), so they're excluded here.
+        fileMatch: ['*', STEP_FRAGMENT_SCHEMA_FILE_MATCH_EXCLUSION],
         // casting here because zod-to-json-schema returns a more complex type than JSONSchema7 expected by monaco-yaml
         schema: workflowJsonSchemaStrict as SchemasSettings['schema'],
         uri: workflowSchemaUriStrict,
@@ -961,6 +978,11 @@ export const WorkflowYAMLEditor = ({
         jumpToStepEntries={jumpToStepEntries}
         onCommandSelected={handleCommandSelected}
         onJumpToStep={handleJumpToStep}
+        disabledTriggerIds={
+          workflowDefinition?.triggers?.some((t) => t.type === 'manual')
+            ? (['manual'] as const)
+            : undefined
+        }
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {disableConfirmModal}
@@ -1006,7 +1028,7 @@ export const WorkflowYAMLEditor = ({
             options={options}
             chromeOverrides={workflowsEditorChromeOverrides}
             schemas={schemas}
-            value={workflowYaml}
+            value={editorValue}
             enableFindAction={true}
             dataTestSubj="workflowYamlEditor"
           />

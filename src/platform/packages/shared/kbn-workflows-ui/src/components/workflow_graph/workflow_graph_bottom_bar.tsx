@@ -9,11 +9,13 @@
 
 import {
   EuiButtonIcon,
+  euiCanAnimate,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPopover,
   EuiToolTip,
+  useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
 import type { CSSObject } from '@emotion/react';
@@ -23,10 +25,12 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOWS_CANVAS_CHROME_INSET } from './surface_radius';
 
 export type WorkflowDetailBottomBarView = 'yaml' | 'graph';
 
@@ -57,8 +61,7 @@ export interface WorkflowDetailBottomBarProps {
   editorView: WorkflowDetailBottomBarView;
   onEditorViewChange: (next: WorkflowDetailBottomBarView) => void;
   /**
-   * Leftmost slot shown only in YAML view (e.g. "add step" + documentation).
-   * Mirrors ZoomControls in graph view.
+   * Leftmost slot shown in both YAML and graph views (Actions menu + documentation).
    */
   yamlActionsSlot?: ReactNode;
   toolsSlot?: ReactNode;
@@ -87,17 +90,8 @@ export interface WorkflowDetailBottomBarProps {
   showViewToggle?: boolean;
 }
 
-// Figma Shadow/Medium composite.
-const BAR_SHADOW =
-  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 4px 8px 0 rgba(43, 57, 79, 0.12), 0 8px 16px 0 rgba(43, 57, 79, 0.06)';
-
-// Subtle shadow for the active view-toggle button (Figma Shadow/X-small).
-const TOGGLE_ACTIVE_SHADOW =
-  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06), 0 2px 8px 0 rgba(43, 57, 79, 0.05)';
-
-// Width (px) of the bar's position: relative container below which we switch
-// to the compact "…" pill. Chosen to give the full bar enough room before it
-// starts overlapping the zoom controls (bottom-left of the canvas).
+// Container width (px) below which the bar collapses to the compact "…" pill. Chosen to give the full bar enough room before it
+// starts overlapping the zoom stack (bottom-left) or minimap (bottom-right).
 const COMPACT_THRESHOLD_PX = 800;
 
 function ViewToggle({
@@ -108,11 +102,14 @@ function ViewToggle({
   onEditorViewChange: (next: WorkflowDetailBottomBarView) => void;
 }) {
   const { euiTheme } = useEuiTheme();
+  const activeToggleShadow = useEuiShadow('xs');
   const items: Array<{ id: WorkflowDetailBottomBarView; iconType: string; label: string }> = [
     {
       id: 'graph',
       iconType: 'workflow',
-      label: i18n.translate('workflowsUi.bottomBar.editorViewGraph', { defaultMessage: 'Graph' }),
+      label: i18n.translate('workflowsUi.bottomBar.editorViewGraph', {
+        defaultMessage: 'Visual builder',
+      }),
     },
     {
       id: 'yaml',
@@ -130,7 +127,7 @@ function ViewToggle({
       css={{
         background: euiTheme.colors.backgroundBaseSubdued,
         border: euiTheme.border.thin,
-        borderRadius: euiTheme.border.radius.control,
+        borderRadius: euiTheme.border.radius.panel,
         padding: euiTheme.size.xs,
         display: 'flex',
         alignItems: 'center',
@@ -158,9 +155,9 @@ function ViewToggle({
                 borderRadius: euiTheme.border.radius.control,
                 padding: 0,
                 background: active ? euiTheme.colors.backgroundBasePlain : 'transparent',
-                boxShadow: active ? TOGGLE_ACTIVE_SHADOW : 'none',
+                boxShadow: active ? activeToggleShadow : 'none',
                 color: euiTheme.colors.text,
-                transition: 'background 120ms ease, box-shadow 120ms ease',
+                [euiCanAnimate]: { transition: 'background 120ms ease, box-shadow 120ms ease' },
                 '&:hover': {
                   background: active
                     ? euiTheme.colors.backgroundBasePlain
@@ -204,6 +201,30 @@ function CompactToolsMenu({
     defaultMessage: 'Tools',
   });
 
+  const itemCss: CSSObject = {
+    width: '100%',
+    textAlign: 'left',
+    border: 0,
+    background: 'transparent',
+    padding: `${euiTheme.size.s} ${euiTheme.size.s}`,
+    borderRadius: 6,
+    cursor: 'pointer',
+    display: 'flex',
+    gap: euiTheme.size.s,
+    alignItems: 'center',
+    '&:hover': { background: euiTheme.colors.backgroundBaseInteractiveHover },
+    '&:focus-visible': {
+      outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.primary}`,
+      outlineOffset: euiTheme.border.width.thick,
+    },
+  };
+  // Anchors share the button look but must not pick up link colour / underline.
+  const linkCss: CSSObject = {
+    color: 'inherit',
+    textDecoration: 'none',
+    '&:hover': { textDecoration: 'none' },
+  };
+
   return (
     <EuiPopover
       isOpen={isOpen}
@@ -228,36 +249,34 @@ function CompactToolsMenu({
         {toolsSlot}
         {toolsMenuItems?.length ? (
           <div css={{ marginTop: toolsSlot ? euiTheme.size.s : 0 }}>
-            {toolsMenuItems.map((item) => (
-              <button
-                key={item.label}
-                type="button"
-                onClick={() => {
-                  item.onClick?.();
-                  close();
-                }}
-                css={{
-                  width: '100%',
-                  textAlign: 'left',
-                  border: 0,
-                  background: 'transparent',
-                  padding: `${euiTheme.size.s} ${euiTheme.size.s}`,
-                  borderRadius: 6,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  gap: euiTheme.size.s,
-                  alignItems: 'center',
-                  '&:hover': { background: euiTheme.colors.backgroundBaseInteractiveHover },
-                  '&:focus-visible': {
-                    outline: `2px solid ${euiTheme.colors.primary}`,
-                    outlineOffset: 2,
-                  },
-                }}
-              >
-                <EuiIcon type={item.iconType} aria-hidden />
-                <span>{item.label}</span>
-              </button>
-            ))}
+            {toolsMenuItems.map((item) => {
+              const content = (
+                <>
+                  <EuiIcon type={item.iconType} aria-hidden />
+                  <span>{item.label}</span>
+                </>
+              );
+              const handleActivate = () => {
+                item.onClick?.();
+                close();
+              };
+              return item.href ? (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  target={item.target}
+                  rel={item.target === '_blank' ? 'noopener noreferrer' : undefined}
+                  onClick={handleActivate}
+                  css={[itemCss, linkCss]}
+                >
+                  {content}
+                </a>
+              ) : (
+                <button key={item.label} type="button" onClick={handleActivate} css={itemCss}>
+                  {content}
+                </button>
+              );
+            })}
           </div>
         ) : null}
       </div>
@@ -283,8 +302,12 @@ function VerticalDivider({
     <div
       aria-hidden
       css={{
-        width: 1,
-        height: fullBar ? `calc(100% + ${euiTheme.size.s} * 2)` : fullHeight ? '100%' : 32,
+        width: euiTheme.border.width.thin,
+        height: fullBar
+          ? `calc(100% + ${euiTheme.size.s} * 2)`
+          : fullHeight
+          ? '100%'
+          : euiTheme.size.xl,
         marginBlock: fullBar ? `-${euiTheme.size.s}` : 0,
         marginInline: fullBar ? 0 : euiTheme.size.s,
         background: euiTheme.colors.borderBaseSubdued,
@@ -306,6 +329,7 @@ export function WorkflowDetailBottomBar({
   showViewToggle = true,
 }: WorkflowDetailBottomBarProps) {
   const { euiTheme } = useEuiTheme();
+  const floatingShadow = useEuiShadow('m');
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [compact, setCompact] = useState(false);
   const hasTools = Boolean(toolsSlot) || Boolean(toolsMenuItems?.length);
@@ -354,21 +378,37 @@ export function WorkflowDetailBottomBar({
 
   const handleExpandedMouseLeave = useCallback(() => {
     if (disableAutoCollapse) return;
-    if (!isInitialPhaseRef.current) {
-      collapseTimerRef.current = setTimeout(() => setIsExpanded(false), 600);
-    }
+    if (isInitialPhaseRef.current) return;
+    if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current);
+    collapseTimerRef.current = setTimeout(() => setIsExpanded(false), 600);
   }, [disableAutoCollapse]);
+
+  // Focus moving between the pill, the bar and its popovers must not collapse
+  // it: only a blur that lands outside the bar arms the deferred collapse.
+  const handleExpandedBlur = useCallback(
+    (event: React.FocusEvent<HTMLDivElement>) => {
+      const next = event.relatedTarget;
+      if (next instanceof Node && event.currentTarget.contains(next)) return;
+      handleExpandedMouseLeave();
+    },
+    [handleExpandedMouseLeave]
+  );
 
   const handlePillMouseEnter = useCallback(() => {
     if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current);
     setIsExpanded(true);
   }, []);
 
+  const bottomBarState = useMemo<WorkflowBottomBarContextValue>(
+    () => ({ isExpanded }),
+    [isExpanded]
+  );
+
   const barCss: CSSObject = {
     position: 'absolute',
     left: -2,
     right: -2,
-    bottom: 12 + bottomOffset,
+    bottom: WORKFLOWS_CANVAS_CHROME_INSET + bottomOffset,
     zIndex: euiTheme.levels.header,
     display: 'flex',
     justifyContent: 'center',
@@ -380,30 +420,87 @@ export function WorkflowDetailBottomBar({
   });
 
   return (
-    <WorkflowBottomBarContext.Provider value={{ isExpanded }}>
+    <WorkflowBottomBarContext.Provider value={bottomBarState}>
       <div ref={containerRef} css={barCss} data-test-subj="workflowDetailBottomBar">
+        {/* Collapsed pill — hover to expand. Precedes the bar in DOM order so Tab from
+            the focused pill continues into the bar it just revealed. */}
         <div
-          css={{
-            pointerEvents: isExpanded ? 'auto' : 'none',
-            opacity: isExpanded ? 1 : 0,
-            transition: 'opacity 200ms ease',
-            background: euiTheme.colors.backgroundBasePlain,
-            borderRadius: 12,
-            paddingBlock: euiTheme.size.s,
-            paddingLeft: 12,
-            paddingRight: euiTheme.size.s,
-            boxShadow: BAR_SHADOW,
-            display: 'inline-flex',
-            maxWidth: 'min(980px, 100%)',
-            position: 'relative',
-            zIndex: 1,
+          role="button"
+          tabIndex={isExpanded ? -1 : 0}
+          aria-label={pillLabel}
+          css={[
+            {
+              position: 'absolute',
+              left: '50%',
+              bottom: 0,
+              transform: 'translateX(-50%)',
+              pointerEvents: isExpanded ? 'none' : 'auto',
+              opacity: isExpanded ? 0 : 1,
+              [euiCanAnimate]: { transition: 'opacity 200ms ease' },
+              width: euiTheme.size.xxxxl,
+              height: euiTheme.size.l,
+              background: euiTheme.colors.primary,
+              borderRadius: 30,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            },
+            floatingShadow,
+          ]}
+          onMouseEnter={handlePillMouseEnter}
+          onFocus={handlePillMouseEnter}
+          onBlur={handleExpandedMouseLeave}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handlePillMouseEnter();
+            }
           }}
+        >
+          <EuiIcon
+            type="boxesVertical"
+            size="s"
+            color={euiTheme.colors.emptyShade}
+            css={{ transform: 'rotate(90deg)' }}
+            aria-hidden
+          />
+        </div>
+
+        <div
+          css={[
+            {
+              pointerEvents: isExpanded ? 'auto' : 'none',
+              opacity: isExpanded ? 1 : 0,
+              // Hidden once faded out so the collapsed controls leave the tab
+              // order and the accessibility tree.
+              visibility: isExpanded ? 'visible' : 'hidden',
+              [euiCanAnimate]: {
+                transition: isExpanded
+                  ? 'opacity 200ms ease'
+                  : 'opacity 200ms ease, visibility 0s linear 200ms',
+              },
+              background: euiTheme.colors.backgroundBasePlain,
+              borderRadius: euiTheme.border.radius.panel,
+              paddingBlock: euiTheme.size.s,
+              paddingLeft: euiTheme.size.m,
+              paddingRight: euiTheme.size.s,
+              display: 'inline-flex',
+              maxWidth: 'min(980px, 100%)',
+              position: 'relative',
+              zIndex: 1,
+            },
+            floatingShadow,
+          ]}
           onMouseEnter={handleExpandedMouseEnter}
           onMouseLeave={handleExpandedMouseLeave}
+          onFocus={handleExpandedMouseEnter}
+          onBlur={handleExpandedBlur}
+          data-test-subj="workflowDetailBottomBarContent"
         >
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" wrap={false}>
-            {/* Left section — yaml actions slot, only shown in yaml view. */}
-            {yamlActionsSlot && editorView === 'yaml' ? (
+            {/* Left section — Actions menu + documentation in both editor views. */}
+            {yamlActionsSlot ? (
               <>
                 <EuiFlexItem grow={false}>{yamlActionsSlot}</EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -448,48 +545,6 @@ export function WorkflowDetailBottomBar({
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
-        </div>
-
-        {/* Collapsed pill — hover to expand */}
-        <div
-          role="button"
-          tabIndex={0}
-          aria-label={pillLabel}
-          css={{
-            position: 'absolute',
-            left: '50%',
-            bottom: 0,
-            transform: 'translateX(-50%)',
-            pointerEvents: isExpanded ? 'none' : 'auto',
-            opacity: isExpanded ? 0 : 1,
-            transition: 'opacity 200ms ease',
-            width: 64,
-            height: 24,
-            background: euiTheme.colors.primary,
-            borderRadius: 30,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: BAR_SHADOW,
-            cursor: 'pointer',
-          }}
-          onMouseEnter={handlePillMouseEnter}
-          onFocus={handlePillMouseEnter}
-          onBlur={handleExpandedMouseLeave}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              handlePillMouseEnter();
-            }
-          }}
-        >
-          <EuiIcon
-            type="boxesVertical"
-            size="s"
-            color={euiTheme.colors.emptyShade}
-            css={{ transform: 'rotate(90deg)' }}
-            aria-hidden
-          />
         </div>
       </div>
     </WorkflowBottomBarContext.Provider>

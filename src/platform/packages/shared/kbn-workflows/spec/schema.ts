@@ -260,15 +260,21 @@ export const MaxStepSizePropSchema = z.object({
 });
 export type MaxStepSizeProp = z.infer<typeof MaxStepSizePropSchema>;
 
-export const MaxIterationsObjectSchema = z.object({
-  limit: z.number().int().positive(),
-  'on-limit': z.enum(['continue', 'fail']),
-});
+export const MaxIterationsObjectSchema = lazySchema(() =>
+  z
+    .object({
+      limit: z.number().int().positive(),
+      'on-limit': z.enum(['continue', 'fail']),
+    })
+    .meta({ label: 'Limit + behavior' })
+);
 
-export const MaxIterationsSchema = z.union([
-  z.number().int().positive(),
-  MaxIterationsObjectSchema,
-]);
+// The engine reads loop caps exactly as typed, so the form must not offer references for them.
+export const MaxIterationsSchema = lazySchema(() =>
+  z
+    .union([z.number().int().positive().meta({ label: 'Number' }), MaxIterationsObjectSchema])
+    .meta({ templatable: false })
+);
 export type MaxIterations = z.infer<typeof MaxIterationsSchema>;
 
 export const DEFAULT_LOOP_MAX_ITERATIONS = 2000;
@@ -631,11 +637,14 @@ export const WaitForApprovalStepSchema = BaseStepSchema.extend({
   .merge(StepWithOnFailureSchema);
 export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
-export const DataSetStepInputSchema = z
-  .record(z.string(), z.unknown())
-  .describe(
-    'Key-value pairs where keys are variable names and values are the data to store. Values support Liquid expressions. Access via {{ variables.key_name }}'
-  );
+export const DataSetStepInputSchema = lazySchema(() =>
+  z
+    .record(z.string(), z.unknown())
+    .describe(
+      'Key-value pairs where keys are variable names and values are the data to store. Values support Liquid expressions. Access via {{ variables.key_name }}'
+    )
+    .meta({ label: 'Variables' })
+);
 export const DataSetStepSchema = BaseStepSchema.extend({
   type: z.literal('data.set').describe('Set variables in the workflow context'),
   with: DataSetStepInputSchema,

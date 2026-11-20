@@ -7,11 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// The canvas loads lazily through one shared chunk; see `lazy_workflow_graph_canvas.tsx`.
 export {
   WorkflowGraphCanvasWithoutProvider,
-  type WorkflowGraphCanvasProps,
-} from './workflow_graph_canvas';
-export type { RenderStepIcon } from './workflow_graph_actions_context';
+  preloadWorkflowGraphCanvas,
+} from './lazy_workflow_graph_canvas';
+export type { WorkflowGraphCanvasProps } from './workflow_graph_canvas';
+export type {
+  NodeConfigWarningReason,
+  RenderStepIcon,
+  WorkflowGraphAnchorRect,
+  WorkflowGraphEditActions,
+  WorkflowGraphInsertionContext,
+} from './workflow_graph_actions_context';
+export type { PendingInsertVisual, PendingInsertStepContext } from './pending_insert';
 export { ReactFlowProvider } from '@xyflow/react';
 export {
   WorkflowDetailBottomBar,
@@ -25,3 +34,12 @@ export {
   type WorkflowVisualEditorFlyoutProps,
   type WorkflowVisualEditorFlyoutTarget,
 } from './workflow_visual_editor_flyout';
+export { resolveNodeChipStyle, type NodeChipStyle } from './resolve_node_chip_style';
+export { aiIconTileCss } from './ai_icon_tile';
+
+export { stepSupportsErrorHandlingSettings } from './step_supports_error_handling';
+export { WORKFLOWS_CANVAS_CHROME_INSET, WORKFLOWS_SURFACE_RADIUS } from './surface_radius';
+// Opt-in: sync-warm EUI icons (accordion arrows / node menus). Not run on import;
+// the canvas calls it on first render and workflows_management panels call it themselves.
+export { ensureWorkflowGraphEuiIcons } from './ensure_eui_icons';
+export { loadTypeIconMasks } from './type_icon_masks';

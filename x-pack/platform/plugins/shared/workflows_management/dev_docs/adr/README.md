@@ -49,3 +49,4 @@ What becomes easier, what becomes harder, what constraints this imposes on futur
 | [0011](0011_post_dagre_positioning_pipeline.md) | Post-dagre positioning pipeline | Superseded by ADR-0012 |
 | [0012](0012_reserved_side_lanes.md) | Reserved side lanes | Accepted (pipeline and post-dagre passes superseded by ADR-0013) |
 | [0013](0013_structure_driven_cross_axis_packing.md) | Structure-driven cross-axis packing | Accepted |
+| [0014](0014_one_lazy_boundary_per_heavy_surface.md) | One lazy boundary per heavy surface | Accepted |

@@ -15,7 +15,13 @@ import type {
 } from '@kbn/workflows';
 import { WORKFLOW_GRAPH_FOCUS_TRIGGER } from '@kbn/workflows';
 import { loadExecutionThunk } from './thunks/load_execution_thunk';
-import type { ActiveTab, ComputedData, LineColumnPosition, WorkflowDetailState } from './types';
+import type {
+  ActiveTab,
+  ComputedData,
+  LineColumnPosition,
+  TreeRun,
+  WorkflowDetailState,
+} from './types';
 import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
 import { resolveFocusForLine } from './utils/trigger_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
@@ -29,6 +35,9 @@ import type { WorkflowsResponse } from '../../model/types';
  */
 export const HIGHLIGHTED_STEP_TRIGGER = WORKFLOW_GRAPH_FOCUS_TRIGGER;
 
+/** Cap on remembered reference-tree runs; older ones fall back to the step history. */
+const MAX_TREE_RUNS = 10;
+
 export const initialWorkflowsState: WorkflowsResponse = {
   workflows: {},
   totalWorkflows: 0,
@@ -37,6 +46,7 @@ export const initialWorkflowsState: WorkflowsResponse = {
 // Initial state
 const initialState: WorkflowDetailState = {
   yamlString: '',
+  baselineYaml: '',
   isYamlSynced: true,
   isCheckingSave: false,
   computed: undefined,
@@ -60,6 +70,9 @@ const initialState: WorkflowDetailState = {
   highlightedStepId: undefined,
   isTestModalOpen: false,
   testStepModalOpenStepId: undefined,
+  testStepModalStayInEditor: false,
+  testModalStayInEditor: false,
+  treeRuns: [],
   replay: undefined,
   loading: initialLoadingState,
   hasYamlSchemaValidationErrors: false,
@@ -69,7 +82,9 @@ const initialState: WorkflowDetailState = {
     connectorType: undefined,
     connectorIdToEdit: undefined,
     insertPosition: undefined,
+    requestId: undefined,
   },
+  lastCreatedConnector: undefined,
 };
 
 // Slice
@@ -85,6 +100,7 @@ const workflowDetailSlice = createSlice({
         state.cursorPosition = undefined;
         state.focusedStepId = undefined;
         state.focusedTriggerId = undefined;
+        state.treeRuns = [];
       }
       state.workflow = action.payload;
     },
@@ -95,6 +111,30 @@ const workflowDetailSlice = createSlice({
     },
     setYamlString: (state, action: { payload: string }) => {
       state.yamlString = action.payload;
+    },
+    /**
+     * Applies a canvas edit immediately (no debounce), so gesture-driven inserts/
+     * deletes repaint in one frame. The computation middleware detects this action
+     * and calls `compute()` synchronously. `value` still flows through `yamlString`
+     * so the Monaco editor and undo history (⌘Z) see the change.
+     */
+    applyYamlEdit: (state, action: { payload: string }) => {
+      state.yamlString = action.payload;
+    },
+    /**
+     * Seeds `/create` with YAML and establishes the dirtiness baseline.
+     * Clears any previously loaded workflow so create never compares against it.
+     */
+    seedCreateYaml: (state, action: { payload: string }) => {
+      state.yamlString = action.payload;
+      state.baselineYaml = action.payload;
+      state.workflow = undefined;
+      state.computed = undefined;
+      state.cursorPosition = undefined;
+      state.focusedStepId = undefined;
+      state.focusedTriggerId = undefined;
+      state.highlightedStepId = undefined;
+      state.aiAssisted = false;
     },
     setIsYamlSynced: (state, action: { payload: boolean }) => {
       state.isYamlSynced = action.payload;
@@ -117,6 +157,11 @@ const workflowDetailSlice = createSlice({
     },
     setIsTestModalOpen: (state, action: { payload: boolean }) => {
       state.isTestModalOpen = action.payload;
+      state.testModalStayInEditor = false;
+    },
+    openTestModalInEditor: (state) => {
+      state.isTestModalOpen = true;
+      state.testModalStayInEditor = true;
     },
     setReplayExecutionId: (
       state,
@@ -139,6 +184,15 @@ const workflowDetailSlice = createSlice({
     },
     setTestStepModalOpenStepId: (state, action: { payload: string | undefined }) => {
       state.testStepModalOpenStepId = action.payload;
+      state.testStepModalStayInEditor = false;
+    },
+    openTestStepModalInEditor: (state, action: { payload: string }) => {
+      state.testStepModalOpenStepId = action.payload;
+      state.testStepModalStayInEditor = true;
+    },
+    addTreeRun: (state, action: { payload: TreeRun }) => {
+      const rest = state.treeRuns.filter((run) => run.executionId !== action.payload.executionId);
+      state.treeRuns = [...rest, action.payload].slice(-MAX_TREE_RUNS);
     },
     clearReplay: (state) => {
       state.replay = undefined;
@@ -196,7 +250,9 @@ const workflowDetailSlice = createSlice({
     // Connector flyout actions
     openCreateConnectorFlyout: (
       state,
-      action: { payload: { connectorType: string; insertPosition?: LineColumnPosition } }
+      action: {
+        payload: { connectorType: string; insertPosition?: LineColumnPosition; requestId?: string };
+      }
     ) => {
       state.connectorFlyout = { isOpen: true, ...action.payload };
     },
@@ -207,7 +263,13 @@ const workflowDetailSlice = createSlice({
       state.connectorFlyout = { isOpen: true, ...action.payload };
     },
     closeConnectorFlyout: (state) => {
-      state.connectorFlyout = { isOpen: false }; // connectorType, connectorToEdit, and insertPosition are undefined
+      state.connectorFlyout = { isOpen: false }; // connectorType, connectorToEdit, insertPosition and requestId are undefined
+    },
+    connectorCreated: (state, action: { payload: { requestId: string; id: string } }) => {
+      state.lastCreatedConnector = action.payload;
+    },
+    clearCreatedConnector: (state) => {
+      state.lastCreatedConnector = undefined;
     },
 
     // Internal actions - these are not for components usage
@@ -313,14 +375,19 @@ export const {
   setWorkflow,
   updateWorkflow,
   setYamlString,
+  applyYamlEdit,
+  seedCreateYaml,
   setIsYamlSynced,
   setIsCheckingSave,
   setCursorPosition,
   setHighlightedStepId,
   setIsTestModalOpen,
+  openTestModalInEditor,
   setReplayExecutionId,
   setReplayStepExecutionId,
   setTestStepModalOpenStepId,
+  openTestStepModalInEditor,
+  addTreeRun,
   clearReplay,
   setConnectors,
   setWorkflows,
@@ -335,6 +402,8 @@ export const {
   openCreateConnectorFlyout,
   openEditConnectorFlyout,
   closeConnectorFlyout,
+  connectorCreated,
+  clearCreatedConnector,
 
   // Internal action creators for middleware use only
   _setComputedDataInternal,

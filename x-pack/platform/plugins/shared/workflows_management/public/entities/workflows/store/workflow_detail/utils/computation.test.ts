@@ -443,4 +443,72 @@ steps:
       expect(outputs?.required).toEqual(['b']);
     });
   });
+
+  describe('multi-line scalars that look like YAML keys', () => {
+    // Markdown such as `**Evidence:** {{ x }}` reads as `key: *alias` to a per-line heuristic.
+    const stepNames = (yaml: string) =>
+      (performComputation(yaml).workflowDefinition?.steps ?? []).map((step) => step.name);
+
+    it('keeps every step when a flow-style multi-line quoted scalar holds such a line', () => {
+      const yaml = [
+        'name: t',
+        'enabled: false',
+        'triggers:',
+        '  - type: manual',
+        'steps: [',
+        '  { name: a, type: data.set, with: { text: "line one\\n',
+        '      **Evidence:** {{ x }}\\n',
+        '      done" } },',
+        '  { name: b, type: data.set, with: { y: 1 } }',
+        ']',
+        '',
+      ].join('\n');
+
+      expect(stepNames(yaml)).toEqual(['a', 'b']);
+    });
+
+    it('does not rewrite the content of a block scalar in the derived definition', () => {
+      const yaml = [
+        'name: t',
+        'enabled: false',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: a',
+        '    type: data.set',
+        '    with:',
+        '      text: |',
+        '        line one',
+        '        **Evidence:** {{ x }}',
+        '',
+      ].join('\n');
+
+      const step = performComputation(yaml).workflowDefinition?.steps[0] as {
+        with?: { text?: string };
+      };
+
+      expect(step.with?.text).toBe('line one\n**Evidence:** {{ x }}\n');
+    });
+
+    it('still corrects a single-line dangerous value', () => {
+      const yaml = [
+        'name: t',
+        'enabled: false',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: a',
+        '    type: data.set',
+        '    with:',
+        '      text: *pointer',
+        '',
+      ].join('\n');
+
+      const step = performComputation(yaml).workflowDefinition?.steps[0] as {
+        with?: { text?: string };
+      };
+
+      expect(step.with?.text).toBe('*pointer');
+    });
+  });
 });

@@ -178,4 +178,4 @@ in sync. `visitStepChildSlots` is the enumeration; it should be the only one.
 - The topology fingerprint changes for `on-failure.fallback` workflows; no consumer is affected.
 - Any future slot kind must be added to `visitStepChildSlots` and `STEP_CHILD_CONTAINER_KEYS`; the
   invariant test catches the gap within the same test run.
-- `visitStepChildren` is kept as a deprecated no-slot wrapper for callers not yet migrated.
+- `visitStepChildren` was removed once its callers moved to `visitStepChildSlots`.

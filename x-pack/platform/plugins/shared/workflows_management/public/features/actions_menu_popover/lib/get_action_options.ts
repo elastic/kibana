@@ -12,6 +12,7 @@ import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extens
 import { HardcodedIcons, ParallelIcon } from '@kbn/workflows-ui';
 import { buildBuiltInTriggerOptions, buildRegisteredTriggerOptions } from './build_trigger_options';
 import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
+import { resolveCatalogDisplayName } from '../../../shared/utils/catalog_display_name';
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionConnectorGroup, ActionGroup, ActionOptionData, IconVariant } from '../types';
 import { isActionGroup } from '../types';
@@ -297,6 +298,17 @@ export function getActionOptions(
         iconColor: euiTheme.colors.textAccentSecondary,
       },
       {
+        id: 'loop.continue',
+        label: i18n.translate('workflows.actionsMenu.loopContinue', {
+          defaultMessage: 'Continue',
+        }),
+        description: i18n.translate('workflows.actionsMenu.loopContinueDescription', {
+          defaultMessage: 'Skip the rest of the current iteration and move on to the next one',
+        }),
+        iconType: 'controls',
+        iconColor: euiTheme.colors.textAccentSecondary,
+      },
+      {
         id: 'parallel',
         label: i18n.translate('workflows.actionsMenu.parallel', {
           defaultMessage: 'Parallel',
@@ -387,7 +399,11 @@ export function getActionOptions(
       } else if (connector.type.startsWith('elasticsearch.')) {
         elasticSearchGroup.options.push({
           id: connector.type,
-          label: connector.summary || connector.description || connector.type,
+          label: resolveCatalogDisplayName({
+            type: connector.type,
+            summary: connector.summary,
+            description: stripHtml(connector.description),
+          }),
           description: firstSentence(stripHtml(connector.description)) || connector.type,
           iconType: 'logoElasticsearch',
           stability: connector.stability,
@@ -395,7 +411,11 @@ export function getActionOptions(
       } else if (connector.type.startsWith('kibana.')) {
         kibanaGroup.options.push({
           id: connector.type,
-          label: connector.summary || connector.description || connector.type,
+          label: resolveCatalogDisplayName({
+            type: connector.type,
+            summary: connector.summary,
+            description: stripHtml(connector.description),
+          }),
           description: firstSentence(stripHtml(connector.description)) || connector.type,
           iconType: 'logoKibana',
           stability: connector.stability,
@@ -430,7 +450,11 @@ export function getActionOptions(
         if (isActionGroup(groupOption)) {
           groupOption.options.push({
             id: connector.type,
-            label: connector.summary || connector.displayName,
+            label: resolveCatalogDisplayName({
+              type: connector.type,
+              summary: connector.summary,
+              displayName: connector.displayName,
+            }),
             description: connector.type,
             connectorType: connector.actionTypeId,
             instancesLabel: getInstancesLabel(connector.instances?.length),

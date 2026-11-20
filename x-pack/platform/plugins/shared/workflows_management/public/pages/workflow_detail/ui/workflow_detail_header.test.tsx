@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
@@ -23,6 +23,7 @@ import {
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
+import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 const mockUseKibana = jest.fn();
@@ -68,6 +69,13 @@ jest.mock('../../../entities/workflows/model/use_update_workflow', () => ({
 }));
 jest.mock('@kbn/css-utils/public/use_memo_css', () => ({
   useMemoCss: (styles: any) => mockUseMemoCss(styles),
+}));
+jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
+  useWorkflowsExperimentalUiSetting: jest.fn().mockReturnValue(false),
+}));
+jest.mock('../../../entities/workflows/model/use_workflow_stats', () => ({
+  useWorkflowFiltersOptions: () => ({ data: { tags: [] } }),
+  useWorkflowStats: () => ({ data: undefined }),
 }));
 
 describe('WorkflowDetailHeader', () => {
@@ -143,6 +151,7 @@ describe('WorkflowDetailHeader', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(false);
     localStorage.clear();
     mockNavigateToApp = jest.fn();
     mockUseKibana.mockReturnValue({
@@ -229,6 +238,40 @@ describe('WorkflowDetailHeader', () => {
     expect(getAllByText('Test Workflow').length).toBeGreaterThan(0);
   });
 
+  describe('workflow settings flyout', () => {
+    it('opens from the header gear and is editable with the visual editor on', () => {
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+      const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+
+      expect(screen.queryByTestId('workflowSettingsFlyout')).not.toBeInTheDocument();
+      fireEvent.click(getByTestId('workflowSettingsButton'));
+      expect(getByTestId('workflowSettingsFlyout')).toBeInTheDocument();
+      expect(getByTestId('workflowSettingsNameInput')).toBeEnabled();
+    });
+
+    it('is still reachable, but read-only, with the visual editor off', () => {
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(false);
+      const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+
+      fireEvent.click(getByTestId('workflowSettingsButton'));
+
+      expect(getByTestId('workflowSettingsFlyout')).toBeInTheDocument();
+      expect(getByTestId('workflowSettingsNameInput')).toBeDisabled();
+      expect(screen.queryByTestId('workflowSettingsFlyoutDone')).not.toBeInTheDocument();
+    });
+
+    it('is read-only for a workflow the user cannot edit, even with the visual editor on', () => {
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+      const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+        isManaged: true,
+      });
+
+      fireEvent.click(getByTestId('workflowSettingsButton'));
+
+      expect(getByTestId('workflowSettingsNameInput')).toBeDisabled();
+    });
+  });
+
   it('links to connector management from the overflow menu', async () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
 
@@ -307,6 +350,16 @@ describe('WorkflowDetailHeader', () => {
     });
     expect(getByTestId('saveWorkflowHeaderButton')).not.toBeDisabled();
   });
+
+  it.each([true, false])(
+    'has no Run action in the header (it lives on the bottom bar), with the experimental flag %s',
+    (enabled) => {
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(enabled);
+      renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+
+      expect(screen.queryByTestId('runWorkflowHeaderButton')).not.toBeInTheDocument();
+    }
+  );
 
   it('disables enabled toggle when yaml has validation errors', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
@@ -548,7 +601,7 @@ describe('WorkflowDetailHeader', () => {
     });
   });
 
-  it('exposes the change history entry point on the workflow tab when a workflow id is present', async () => {
+  it('exposes the change history entry point inline left of Executions when a workflow id is present', () => {
     const changeHistoryModal = {
       isOpen: false,
       openModal: jest.fn(),
@@ -560,11 +613,9 @@ describe('WorkflowDetailHeader', () => {
       </ChangeHistoryModalContext.Provider>
     );
 
-    // History lives in the overflow ("More") menu, so open it before locating the entry point.
-    await openAppMenuOverflow();
-
     const historyItem = getByTestId('workflowDetailHistoryButton');
     expect(historyItem).toBeInTheDocument();
+    expect(getByTestId('workflowDetailExecutionsButton')).toBeInTheDocument();
 
     fireEvent.click(historyItem);
     expect(changeHistoryModal.openModal).toHaveBeenCalledTimes(1);

@@ -6,6 +6,10 @@
  */
 
 import { createSelector } from 'redux-toolkit-v1';
+import {
+  isSameOutsideStructure,
+  isStructurallyEmptyWorkflowYaml,
+} from './utils/is_structurally_empty_workflow_yaml';
 import { getOmittedStepExecutionsCount } from '../../../../../common';
 import {
   buildStepDurations,
@@ -31,9 +35,34 @@ export const selectWorkflowTags = createSelector(
   (workflow) => workflow?.tags ?? []
 );
 
+/**
+ * Document dirtiness for leave-confirm + header badge.
+ * Saved workflows: YAML differs from last saved. Never-saved: differs from create
+ * baseline, except an empty scaffold (no triggers/steps) that is structurally empty again with
+ * everything else unchanged stays clean — visual add-then-delete drops keys and would otherwise
+ * false-positive vs the scaffold. Editing the name, description, consts or outputs is still a
+ * change, and so is emptying a scaffold that had steps (a remix).
+ */
 export const selectHasChanges = createSelector(
-  selectDetail,
-  (detail) => detail.yamlString !== detail.workflow?.yaml
+  [
+    (state: RootState) => state.detail.workflow?.yaml,
+    (state: RootState) => state.detail.yamlString,
+    (state: RootState) => state.detail.baselineYaml,
+  ],
+  (savedYaml, yamlString, baselineYaml) => {
+    if (savedYaml != null) {
+      return yamlString !== savedYaml;
+    }
+    if (yamlString === baselineYaml) {
+      return false;
+    }
+    // Only a scaffold that was empty to begin with can come back to "unchanged" by emptying it.
+    return !(
+      isStructurallyEmptyWorkflowYaml(baselineYaml) &&
+      isStructurallyEmptyWorkflowYaml(yamlString) &&
+      isSameOutsideStructure(yamlString, baselineYaml)
+    );
+  }
 );
 
 export const selectIsYamlSynced = createSelector(selectDetail, (detail) => detail.isYamlSynced);
@@ -115,6 +144,18 @@ export const selectTestStepModalOpenStepId = createSelector(
   selectDetail,
   (detail) => detail.testStepModalOpenStepId ?? undefined
 );
+
+export const selectTestStepModalStayInEditor = createSelector(
+  selectDetail,
+  (detail) => detail.testStepModalStayInEditor
+);
+
+export const selectTestModalStayInEditor = createSelector(
+  selectDetail,
+  (detail) => detail.testModalStayInEditor
+);
+
+export const selectTreeRuns = createSelector(selectDetail, (detail) => detail.treeRuns);
 
 export const selectIsSavingYaml = createSelector(
   selectDetail,
@@ -311,4 +352,12 @@ export const selectConnectorFlyoutConnectorToEdit = createSelector(
 export const selectConnectorFlyoutInsertPosition = createSelector(
   selectConnectorFlyout,
   (flyout) => flyout.insertPosition
+);
+export const selectConnectorFlyoutRequestId = createSelector(
+  selectConnectorFlyout,
+  (flyout) => flyout.requestId
+);
+export const selectLastCreatedConnector = createSelector(
+  selectDetail,
+  (detail) => detail.lastCreatedConnector
 );

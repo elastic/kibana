@@ -141,6 +141,14 @@ Mention the required follow-up PR, including the agreed event keys, in the first
 it is not forgotten. When this invocation is that follow-up, or the connector type is already on every
 Production-NonCanary version, add `'workflows'` and `events` together.
 
+The follow-up PR that adds `'workflows'` also adds the connector to the workflow visual builder's Scout
+tests, which rebuild fixture workflows through the graph form and fail on any value the form cannot author.
+Add one step of the connector (an action with its main input fields) to
+`x-pack/platform/plugins/shared/workflows_management/test/scout/ui/fixtures/graph_rebuild/workflows/connectors.yaml`,
+with `connector-id` set to a placeholder, and a matching entry (the connector's `connectorTypeId` and
+secrets) in the `connectors` fixture of `graph_rebuild/fixtures.ts`. Run
+`graph_rebuild/README.md`'s command for `connectors.spec.ts`. The directory belongs to the workflows team.
+
 **MCP connectors**: Use [reference/mcp-connector-setup.md](reference/mcp-connector-setup.md) as the direct starting template for the spec — it has concrete, copy-ready examples with the correct `lazySchema`, `callToolJson`/`callToolContent`, and test-mock patterns already in place. Do not reverse-engineer from existing connectors.
 
 **Type every handler explicitly.** Annotate each action's `input` parameter with its `z.infer`-derived

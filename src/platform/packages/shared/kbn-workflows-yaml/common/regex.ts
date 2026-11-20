@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isDynamicValue, isLiquidTagValue, isVariableValue } from '@kbn/workflows';
+
 /**
  * The characters a mustache key may contain. `}` is deliberately absent: it is what
  * terminates the greedy match below, and keeping it out of the class is what makes the
@@ -124,3 +126,12 @@ export {
   LIQUID_TAG_VALUE_REGEX,
   isLiquidTagValue,
 } from '@kbn/workflows';
+
+/**
+ * The one rule for "this value is a reference": a whole `{{ ... }}`, a whole `${{ ... }}`,
+ * or a value containing any `{% ... %}` tag. Typed-field checks are skipped for these values
+ * because they only resolve at run time.
+ */
+export function isReferenceValue(value: unknown): boolean {
+  return isVariableValue(value) || isDynamicValue(value) || isLiquidTagValue(value);
+}

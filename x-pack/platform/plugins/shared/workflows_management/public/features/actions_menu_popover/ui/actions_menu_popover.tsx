@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { ActionsMenu } from './actions_menu';
 import type { ActionsMenuProps } from './actions_menu';
 
-interface ActionsMenuPopoverProps extends ActionsMenuProps {
+export interface ActionsMenuPopoverProps extends ActionsMenuProps {
   isOpen: boolean;
   closePopover: () => void;
 }
@@ -23,6 +23,11 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   jumpToStepEntries,
   onCommandSelected,
   onJumpToStep,
+  insertionContext,
+  disabledTriggerIds,
+  presentation,
+  rootTitle,
+  onClose,
   closePopover,
   isOpen,
 }: ActionsMenuPopoverProps) {
@@ -51,6 +56,11 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
         jumpToStepEntries={jumpToStepEntries}
         onCommandSelected={onCommandSelected}
         onJumpToStep={onJumpToStep}
+        insertionContext={insertionContext}
+        disabledTriggerIds={disabledTriggerIds}
+        presentation={presentation}
+        rootTitle={rootTitle}
+        onClose={onClose ?? closePopover}
       />
     </EuiModal>
   );

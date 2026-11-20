@@ -210,6 +210,7 @@ jest.mock('../styles/global_workflow_editor_styles', () => ({
 
 let mockCloseActionsPopover: (() => void) | undefined;
 jest.mock('../../../features/actions_menu_popover', () => ({
+  useWarmActionsMenu: jest.fn(),
   ActionsMenuPopover: ({ closePopover }: { closePopover: () => void }) => {
     mockCloseActionsPopover = closePopover;
     return null;

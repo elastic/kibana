@@ -1,0 +1,104 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export interface PrecedingStepRef {
+  readonly name: string;
+  readonly type: string;
+}
+
+const isStepLike = (
+  value: unknown
+): value is { name: string; type: string } & Record<string, unknown> =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as { name?: unknown }).name === 'string' &&
+  typeof (value as { type?: unknown }).type === 'string';
+
+/** Nested step lists on composite steps, in the order they appear in the YAML. */
+const visitChildLists = (
+  step: Record<string, unknown>,
+  visit: (children: ReadonlyArray<unknown>) => void
+): void => {
+  if (Array.isArray(step.steps)) visit(step.steps);
+  if (Array.isArray(step.else)) visit(step.else);
+  if (Array.isArray(step.branches)) {
+    for (const branch of step.branches as Array<{ steps?: unknown[] }>) {
+      if (Array.isArray(branch.steps)) visit(branch.steps);
+    }
+  }
+  if (Array.isArray(step.cases)) {
+    for (const caseItem of step.cases as Array<{ steps?: unknown[] }>) {
+      if (Array.isArray(caseItem.steps)) visit(caseItem.steps);
+    }
+  }
+  if (Array.isArray(step.default)) visit(step.default);
+};
+
+/**
+ * Steps that appear before `currentStepName` in document order (depth-first), leaving out the
+ * other branches of the steps it sits in (the other arm of an `if`, other cases, other parallel
+ * branches), since those never run before it. Branches of steps that come before it stay, as
+ * they may have run. Used by the data-reference picker Steps group.
+ *
+ * TODO: extend for foreach.item and branch-local context so nested
+ * scope matches runtime availability, not only document order.
+ */
+export const getDocumentOrderPredecessors = (
+  steps: ReadonlyArray<unknown> | undefined,
+  currentStepName: string
+): readonly PrecedingStepRef[] => {
+  if (!steps || !currentStepName) return [];
+  const predecessors: PrecedingStepRef[] = [];
+  let found = false;
+
+  const visit = (list: ReadonlyArray<unknown>): void => {
+    for (const item of list) {
+      if (found) return;
+      if (isStepLike(item)) {
+        if (item.name === currentStepName) {
+          found = true;
+          return;
+        }
+        predecessors.push({ name: item.name, type: item.type });
+        const ownEnd = predecessors.length;
+        visitChildLists(item, (children) => {
+          if (found) return;
+          const listStart = predecessors.length;
+          visit(children);
+          // The current step is in this list, so the lists before it did not run.
+          if (found) predecessors.splice(ownEnd, listStart - ownEnd);
+        });
+      }
+    }
+  };
+
+  visit(steps);
+  return predecessors;
+};
+
+/**
+ * Every step in document order (depth-first). Used when the picker must scope
+ * to the whole workflow (e.g. workflow output values evaluated after the run).
+ */
+export const getAllDocumentOrderSteps = (
+  steps: ReadonlyArray<unknown> | undefined
+): readonly PrecedingStepRef[] => {
+  if (!steps) return [];
+  const all: PrecedingStepRef[] = [];
+
+  const visit = (list: ReadonlyArray<unknown>): void => {
+    for (const item of list) {
+      if (isStepLike(item)) {
+        all.push({ name: item.name, type: item.type });
+        visitChildLists(item, visit);
+      }
+    }
+  };
+
+  visit(steps);
+  return all;
+};

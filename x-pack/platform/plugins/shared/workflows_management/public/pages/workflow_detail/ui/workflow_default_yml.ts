@@ -5,7 +5,18 @@
  * 2.0.
  */
 
-export const workflowDefaultYaml = `name: New workflow
+/** Seed YAML for `/create` — empty structure for the visual builder canvas. */
+export const workflowDefaultYaml = `version: "1"
+name: New workflow
+enabled: false
+description: This is a new workflow
+triggers: []
+steps: []
+`;
+
+/** Hello-world sample that seeds `/create` when the visual editor is off. */
+export const workflowYamlEditorSeedYaml = `version: "1"
+name: New workflow
 enabled: false
 description: This is a new workflow
 triggers:

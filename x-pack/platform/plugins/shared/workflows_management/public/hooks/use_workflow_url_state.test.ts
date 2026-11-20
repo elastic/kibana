@@ -8,6 +8,7 @@
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter, useHistory } from 'react-router-dom';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH } from '@kbn/workflows/common/constants';
 import { useWorkflowUrlState } from './use_workflow_url_state';
@@ -15,9 +16,18 @@ import { getStoredEditorView, getStoredGraphDirection } from '../lib/workflow_ed
 
 type InitialEntries = React.ComponentProps<typeof MemoryRouter>['initialEntries'];
 
-const createWrapper = (initialEntries: InitialEntries = ['/']) => {
+const createWrapper = (
+  initialEntries: InitialEntries = ['/'],
+  { experimentalFeatures = false }: { experimentalFeatures?: boolean } = {}
+) => {
+  // The setting says whether the visual editor is the default view.
+  const services = { settings: { client: { get: () => experimentalFeatures } } };
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(MemoryRouter, { initialEntries }, children);
+    React.createElement(
+      KibanaContextProvider,
+      { services },
+      React.createElement(MemoryRouter, { initialEntries }, children)
+    );
   return Wrapper;
 };
 
@@ -46,12 +56,28 @@ describe('useWorkflowUrlState', () => {
     expect(result.current.lastViewedExecutionId).toBeUndefined();
   });
 
-  it('should parse view=graph and direction=LR from URL', () => {
+  it('defaults to the visual editor when the experimental features are on', () => {
     const { result } = renderHook(() => useWorkflowUrlState(), {
-      wrapper: createWrapper(['/?view=graph&direction=LR']),
+      wrapper: createWrapper(['/'], { experimentalFeatures: true }),
     });
 
     expect(result.current.editorView).toBe('graph');
+  });
+
+  it('opens the graph for view=graph even with the experimental features off', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?view=graph']),
+    });
+
+    expect(result.current.editorView).toBe('graph');
+  });
+
+  it('should parse view=yaml and direction=LR from URL', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?view=yaml&direction=LR']),
+    });
+
+    expect(result.current.editorView).toBe('yaml');
     expect(result.current.graphDirection).toBe('LR');
   });
 
@@ -61,16 +87,28 @@ describe('useWorkflowUrlState', () => {
     });
 
     act(() => {
+      result.current.setEditorView('yaml');
+    });
+
+    expect(result.current.editorView).toBe('yaml');
+    expect(result.current.selectedStepId).toBeUndefined();
+  });
+
+  it('should omit view from URL when setEditorView is graph', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?view=yaml']),
+    });
+
+    act(() => {
       result.current.setEditorView('graph');
     });
 
     expect(result.current.editorView).toBe('graph');
-    expect(result.current.selectedStepId).toBeUndefined();
   });
 
   it('should update URL when setGraphDirection is called', () => {
     const { result } = renderHook(() => useWorkflowUrlState(), {
-      wrapper: createWrapper(['/?view=graph']),
+      wrapper: createWrapper(['/?view=yaml']),
     });
 
     act(() => {
@@ -484,6 +522,67 @@ describe('useWorkflowUrlState', () => {
       expect(result.current.graphDirection).toBe('TB');
     });
   });
+  describe('switching to the default view while another one is stored', () => {
+    // The default view is never written to the URL, so these switches leave the URL as it was:
+    // the shown view must follow the stored preference, not only a change of the URL.
+    it('shows the graph again after YAML was left stored (default view: graph)', () => {
+      localStorage.setItem('workflowsUi.editor.view', '"yaml"');
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/'], { experimentalFeatures: true }),
+      });
+      expect(result.current.editorView).toBe('yaml');
+
+      act(() => {
+        result.current.setEditorView('graph');
+      });
+
+      expect(result.current.editorView).toBe('graph');
+    });
+
+    it('shows YAML again after the graph was left stored (default view: YAML)', () => {
+      localStorage.setItem('workflowsUi.editor.view', '"graph"');
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/'], { experimentalFeatures: false }),
+      });
+      expect(result.current.editorView).toBe('graph');
+
+      act(() => {
+        result.current.setEditorView('yaml');
+      });
+
+      expect(result.current.editorView).toBe('yaml');
+    });
+
+    it('switches when the URL already names the requested view', () => {
+      // The stored graph wins over `?view=yaml`; asking for YAML leaves the URL as it was.
+      localStorage.setItem('workflowsUi.editor.view', '"graph"');
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/?view=yaml'], { experimentalFeatures: true }),
+      });
+      expect(result.current.editorView).toBe('graph');
+
+      act(() => {
+        result.current.setEditorView('yaml');
+      });
+
+      expect(result.current.editorView).toBe('yaml');
+    });
+
+    it('updates every consumer of the hook, not only the one that switched', () => {
+      localStorage.setItem('workflowsUi.editor.view', '"yaml"');
+      const { result } = renderHook(
+        () => ({ switcher: useWorkflowUrlState(), reader: useWorkflowUrlState() }),
+        { wrapper: createWrapper(['/'], { experimentalFeatures: true }) }
+      );
+
+      act(() => {
+        result.current.switcher.setEditorView('graph');
+      });
+
+      expect(result.current.reader.editorView).toBe('graph');
+    });
+  });
+
   describe('browser history', () => {
     const renderWithHistory = (initialEntries: InitialEntries) =>
       renderHook(() => ({ urlState: useWorkflowUrlState(), history: useHistory() }), {

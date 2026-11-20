@@ -40,19 +40,11 @@ export interface DagPositionedNode {
   readonly height: number;
   /**
    * True when the node was placed in a reserved side lane. Cross-axis
-   * position-mutating passes (e.g. `separatePositionedOverlapsInPlace`)
-   * must treat these nodes as immovable so the lane's guaranteed clearance
-   * from the spine is preserved. Absent for spine nodes.
+   * position-mutating passes must treat these nodes as immovable so the
+   * lane's guaranteed clearance from the spine is preserved. Absent for spine
+   * nodes.
    */
   readonly crossPinned?: boolean;
-}
-
-export interface DagPositionedEdge {
-  readonly id: string;
-  readonly source: string;
-  readonly target: string;
-  /** Dagre waypoints (absolute). Empty = render straight line. */
-  readonly points: ReadonlyArray<{ readonly x: number; readonly y: number }>;
 }
 
 export type DagLayoutDirection = 'TB' | 'LR';
