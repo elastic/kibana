@@ -361,5 +361,17 @@ describe('ESQLControlApi', () => {
     test('returns false when variable_name is empty', () => {
       expect(factory.isDuplicate?.(createState(''), createState(''))).toBe(false);
     });
+
+    test('returns false when states have different control_type values', () => {
+      const queryState: OptionsListESQLControlState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        selected_options: ['option1'],
+        variable_name: 'geo_dest',
+        variable_type: 'values',
+        control_type: 'VALUES_FROM_QUERY',
+        esql_query: 'FROM logstash-* | STATS BY geo.dest',
+      };
+      expect(factory.isDuplicate?.(queryState, createState('geo_dest'))).toBe(false);
+    });
   });
 });

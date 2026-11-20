@@ -24,7 +24,8 @@
     "@kbn/i18n-react",
     "@kbn/content-list",
     "@kbn/content-list-provider",
-    "@kbn/content-list-toolbar"
+    "@kbn/content-list-toolbar",
+    "@kbn/data-lifecycle-phases"
   ],
   "exclude": [
     "target/**/*"

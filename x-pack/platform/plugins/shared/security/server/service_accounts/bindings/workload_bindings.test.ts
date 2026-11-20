@@ -674,7 +674,7 @@ describe('ServiceAccountWorkloadBindings', () => {
         bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => {
           throw new Error('execution failed');
         })
-      ).rejects.toThrowError('execution failed');
+      ).rejects.toThrow('execution failed');
 
       expect(backend.releaseFakeRequest).toHaveBeenCalledWith(mintedRequest);
     });
@@ -693,7 +693,7 @@ describe('ServiceAccountWorkloadBindings', () => {
 
       await expect(
         bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
-      ).rejects.toThrowError('failed integrity verification');
+      ).rejects.toThrow('failed integrity verification');
       expect(backend.createFakeRequest).not.toHaveBeenCalled();
     });
 
@@ -779,7 +779,7 @@ describe('ServiceAccountWorkloadBindings', () => {
         store.getVerified.mockRejectedValue(new Error('failed integrity verification'));
         const mint = jest.fn();
 
-        await expect(interceptor(mint)).rejects.toThrowError('failed integrity verification');
+        await expect(interceptor(mint)).rejects.toThrow('failed integrity verification');
         expect(mint).not.toHaveBeenCalled();
       });
 
@@ -865,7 +865,7 @@ describe('ServiceAccountWorkloadBindings', () => {
           bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => {
             throw new Error('execution failed');
           })
-        ).rejects.toThrowError('execution failed');
+        ).rejects.toThrow('execution failed');
 
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith(
@@ -913,7 +913,7 @@ describe('ServiceAccountWorkloadBindings', () => {
 
         await expect(
           bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
-        ).rejects.toThrowError('saved objects unavailable');
+        ).rejects.toThrow('saved objects unavailable');
 
         expect(audit.withoutRequest.log).not.toHaveBeenCalled();
       });
@@ -1164,7 +1164,7 @@ describe('ServiceAccountWorkloadBindings', () => {
         bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => {
           throw new Error('execution failed');
         })
-      ).rejects.toThrowError('execution failed');
+      ).rejects.toThrow('execution failed');
 
       expect(assumeAttempt.succeeded).toHaveBeenCalledTimes(1);
       expect(assumeAttempt.failed).not.toHaveBeenCalled();
