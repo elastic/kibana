@@ -31,7 +31,7 @@ export const registerUiSettings = (uiSettings: UiSettingsServiceSetup): void => 
       value: false,
       scope: 'namespace',
       category: [SECURITY_SOLUTION_CATEGORY],
-      solutionViews: ['security'],
+      solutionViews: ['security', 'classic'],
       technicalPreview: true,
       // Nothing this setting gates needs a reload any more: the app status updates live and routes
       // check it per request. The investigation template UI, which used to need the reload, is now
