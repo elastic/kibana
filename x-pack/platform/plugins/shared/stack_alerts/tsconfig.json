@@ -7,12 +7,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/alerting-plugin",
-    "@kbn/security-plugin",
-    "@kbn/core-test-helpers-kbn-server",
     "@kbn/repo-info",
-    "@kbn/event-log-plugin",
-    "@kbn/actions-plugin",
-    "@kbn/stack-connectors-plugin",
     "@kbn/features-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/kibana-react-plugin",

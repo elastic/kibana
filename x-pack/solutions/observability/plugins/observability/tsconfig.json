@@ -13,7 +13,6 @@
     "test/scout*/**/*"
   ],
   "kbn_references": [
-    "@kbn/stack-connectors-plugin",
     "@kbn/rule-data-utils",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/i18n",

@@ -72,6 +72,8 @@
     "@kbn/date-range-picker-presets-common",
     "@kbn/zod",
     "@kbn/licensing-plugin",
+    "@kbn/core-http-server-mocks",
+    "@kbn/logging-mocks",
   ],
   "exclude": ["target/**/*"]
 }

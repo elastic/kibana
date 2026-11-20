@@ -60,6 +60,7 @@
     "@kbn/presentation-util",
     "@kbn/zod",
     "@kbn/presentation-publishing-schemas",
+    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",

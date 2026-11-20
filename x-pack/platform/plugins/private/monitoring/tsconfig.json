@@ -11,8 +11,6 @@
     "test/scout/**/*"
   ],
   "kbn_references": [
-    "@kbn/stack-connectors-plugin",
-    "@kbn/task-manager-plugin",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/home-plugin",

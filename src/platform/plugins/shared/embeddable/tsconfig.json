@@ -41,7 +41,8 @@
     "@kbn/esql-browser",
     "@kbn/workflows-extensions",
     "@kbn/core-feature-flags-server",
-    "@kbn/task-manager-plugin"
+    "@kbn/task-manager-plugin",
+    "@kbn/repo-info"
   ],
   "exclude": ["target/**/*"]
 }

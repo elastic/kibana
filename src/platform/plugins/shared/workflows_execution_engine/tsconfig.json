@@ -75,7 +75,8 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/elastic-assistant-common",
     "@kbn/product-doc-base-plugin",
-    "@kbn/product-doc-common"
+    "@kbn/product-doc-common",
+    "@kbn/core-ui-settings-common"
   ],
   "exclude": ["target/**/*"]
 }

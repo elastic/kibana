@@ -15,7 +15,6 @@
     "@kbn/agent-builder-genai-utils",
     "@kbn/agent-builder-common",
     "@kbn/zod",
-    "@kbn/core-lifecycle-server",
     "@kbn/esql-language",
     "@kbn/esql-utils",
     "@kbn/product-doc-common",
@@ -42,7 +41,6 @@
     "@kbn/files-plugin",
     "@kbn/cloud-plugin",
     "@kbn/task-manager-plugin",
-    "@kbn/security-plugin",
     "@kbn/inference-plugin",
     "@kbn/product-doc-base-plugin",
   ]

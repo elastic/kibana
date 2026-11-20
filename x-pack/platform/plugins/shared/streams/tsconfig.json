@@ -91,6 +91,7 @@
     "@kbn/response-ops-rule-params",
     "@kbn/core-saved-objects-server",
     "@kbn/rule-data-utils",
-    "@kbn/workflows-execution-engine"
+    "@kbn/workflows-execution-engine",
+    "@kbn/data-plugin"
   ]
 }

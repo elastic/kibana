@@ -83,7 +83,8 @@
     "@kbn/tracing-utils",
     "@kbn/core-user-activity-server-internal",
     "@kbn/core-user-storage-server-internal",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/core-http-server"
   ],
   "exclude": ["target/**/*"]
 }
