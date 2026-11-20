@@ -9,6 +9,8 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
+import { appContextService } from '../app_context';
+
 import { updateByQueryAndWait } from './update_by_query_task';
 
 jest.mock('../app_context', () => {
@@ -34,6 +36,7 @@ describe('updateByQueryAndWait', () => {
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createInternalClient();
+    jest.mocked(appContextService.getLogger().warn).mockClear();
   });
 
   it('should start the update by query as a task instead of waiting for it in the request', async () => {
@@ -78,6 +81,7 @@ describe('updateByQueryAndWait', () => {
       version_conflicts: 1,
       failures: [{ id: 'agent3', cause: { reason: 'error reason' } }],
     });
+    expect(appContextService.getLogger().warn).not.toHaveBeenCalled();
   });
 
   it('should keep polling until the task has finished', async () => {
@@ -107,6 +111,9 @@ describe('updateByQueryAndWait', () => {
     const res = await updateByQueryAndWait(esClient, request, fastOptions);
 
     expect(res).toEqual({ total: 5, updated: 4, version_conflicts: 1, failures: [] });
+    expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+      expect.stringContaining('Update by query task node1:42 finished without a response')
+    );
   });
 
   it('should return a response that is not a task as is', async () => {
