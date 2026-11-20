@@ -7,6 +7,7 @@
 
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
+import { wrapKibanaSupertestAgent } from '@kbn/test';
 import type { FtrProviderContextWithSpaces } from '../../ftr_provider_context_with_spaces';
 import type { SecuritySolutionUtilsInterface, CustomRole, User } from './types';
 
@@ -28,7 +29,7 @@ export function SecuritySolutionESSUtils({
       auth: false,
     });
 
-    return supertest.agent(kbnUrl).auth(role, password);
+    return wrapKibanaSupertestAgent(supertest.agent(kbnUrl).auth(role, password));
   };
 
   const createUser = async (user: User): Promise<void> => {

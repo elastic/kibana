@@ -7,6 +7,7 @@
 
 import supertest from 'supertest';
 import { format as formatUrl } from 'url';
+import { wrapKibanaSupertestAgent } from '@kbn/test';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import type { RoleCredentials } from '@kbn/test-suites-xpack-platform/serverless/shared/services';
 import type { SearchService, SendOptions } from '@kbn/ftr-common-functional-services';
@@ -60,7 +61,7 @@ export function SecuritySolutionServerlessUtils({
     rolesCredentials.set(role, credentials);
 
     const agentWithCommonHeaders = supertest.agent(kbnUrl).set(commonRequestHeader);
-    return agentWithCommonHeaders.set(credentials.apiKeyHeader);
+    return wrapKibanaSupertestAgent(agentWithCommonHeaders.set(credentials.apiKeyHeader));
   };
 
   const createSuperTestWithCustomRole = async (roleDefinition: CustomRole) => {
@@ -72,7 +73,7 @@ export function SecuritySolutionServerlessUtils({
       .agent(kbnUrl)
       .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader);
-    return superTest;
+    return wrapKibanaSupertestAgent(superTest);
   };
 
   return {
