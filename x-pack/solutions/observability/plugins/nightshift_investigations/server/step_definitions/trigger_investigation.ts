@@ -136,6 +136,7 @@ export const triggerInvestigationStepDefinition = (
       const spaceId = workflow.spaceId;
       const input = triggerInvestigationStepInputSchema.parse(context.input);
       let automationBudget: AutomationBudget | undefined;
+      let automationName: string | undefined;
       let isManualAutomationRun = false;
       if (input.automation_id) {
         const soClient = getAutomationsSoClient(request, spaceId);
@@ -146,6 +147,7 @@ export const triggerInvestigationStepDefinition = (
         if (automation.workflowId !== workflow.id) {
           throw new Error('The automation does not belong to this workflow.');
         }
+        automationName = automation.name;
         // Public workflow inputs and metadata cannot grant manual accounting.
         isManualAutomationRun = execution.triggeredBy === MANUAL_AUTOMATION_TRIGGER_SOURCE;
         if (isManualAutomationRun && !isScheduleOnlyAutomation(automation)) {
@@ -218,6 +220,7 @@ export const triggerInvestigationStepDefinition = (
           {
             automationBudget,
             automationId: input.automation_id,
+            automationName,
             // A Slack thread subject means a Slack message started the run.
             entryPoint: input.subject_type === 'slack_thread' ? 'slack' : 'automation',
           }

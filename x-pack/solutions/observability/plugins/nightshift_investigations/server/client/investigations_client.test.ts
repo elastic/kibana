@@ -1524,6 +1524,81 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     );
   });
 
+  describe('records the automation that started a new investigation', () => {
+    const startFromAutomation = (instructions: string | undefined = '  Check payments first.  ') =>
+      makeClient().start(
+        {
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'automatic',
+          instructions,
+          context: { alerts: [makeAlert('alert-1')] },
+        },
+        {
+          automationId: 'automation-1',
+          automationName: 'Payments alerts',
+          entryPoint: 'automation',
+        }
+      );
+
+    it('in the creating write and in the run input, for the run that ensures the conversation', async () => {
+      await startFromAutomation();
+
+      expect(conversations.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: {
+            automation_id: 'automation-1',
+            automation_name: 'Payments alerts',
+            automation_instructions: 'Check payments first.',
+            severity: 'medium',
+            workflow_execution_ids: ['exec-1'],
+          },
+        })
+      );
+      expect(runInputs().context).toMatchObject({
+        nightshift_automation_id: 'automation-1',
+        nightshift_automation_name: 'Payments alerts',
+        nightshift_automation_instructions: 'Check payments first.',
+      });
+    });
+
+    it('without instructions when the automation has none', async () => {
+      await startFromAutomation('   ');
+
+      const { metadata } = conversations.create.mock.calls[0][0];
+      expect(metadata).toEqual({
+        automation_id: 'automation-1',
+        automation_name: 'Payments alerts',
+        severity: 'medium',
+        workflow_execution_ids: ['exec-1'],
+      });
+      expect(runInputs().context.nightshift_automation_instructions).toBeUndefined();
+    });
+
+    it('not for an investigation no automation started', async () => {
+      await startAlerts('alert-1');
+
+      expect(conversations.create.mock.calls[0][0].metadata).toEqual({
+        severity: 'medium',
+        workflow_execution_ids: ['exec-1'],
+      });
+      expect(runInputs().context.nightshift_automation_name).toBeUndefined();
+    });
+
+    it('not for a follow-up, which creates no conversation and carries no automation to the run', async () => {
+      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-pending' });
+
+      await startFromAutomation();
+
+      expect(conversations.create).not.toHaveBeenCalled();
+      expect(runInputs().context).toMatchObject({
+        is_follow_up: true,
+        nightshift_automation_id: 'automation-1',
+      });
+      expect(runInputs().context.nightshift_automation_name).toBeUndefined();
+      expect(runInputs().context.nightshift_automation_instructions).toBeUndefined();
+    });
+  });
+
   it('does not record the run again when the workflow created the conversation first', async () => {
     withConversations(makeConversation({ id: 'inv-new', workflowExecutionIds: ['exec-1'] }));
 
@@ -2129,6 +2204,51 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       /only run as the nightshift service account/
     );
     expect(conversations.create).not.toHaveBeenCalled();
+  });
+
+  it('records the automation that started the investigation when the run creates the conversation', async () => {
+    withExecution({
+      inputs: {
+        investigation_id: 'inv-1',
+        subjects,
+        context: {
+          nightshift_automation_id: 'automation-1',
+          nightshift_automation_name: 'Payments alerts',
+          nightshift_automation_instructions: 'Check payments first.',
+        },
+      },
+    });
+
+    await makeClient().ensureOrCreate('inv-1', 'exec-1');
+
+    expect(conversations.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: {
+          automation_id: 'automation-1',
+          automation_name: 'Payments alerts',
+          automation_instructions: 'Check payments first.',
+          severity: 'medium',
+          workflow_execution_ids: ['exec-1'],
+        },
+      })
+    );
+  });
+
+  it('records no automation for a run that carries no automation name', async () => {
+    withExecution({
+      inputs: {
+        investigation_id: 'inv-1',
+        subjects,
+        context: { nightshift_automation_id: 'automation-1' },
+      },
+    });
+
+    await makeClient().ensureOrCreate('inv-1', 'exec-1');
+
+    expect(conversations.create.mock.calls[0][0].metadata).toEqual({
+      severity: 'medium',
+      workflow_execution_ids: ['exec-1'],
+    });
   });
 
   it('creates the investigation conversation and records the run subjects', async () => {
