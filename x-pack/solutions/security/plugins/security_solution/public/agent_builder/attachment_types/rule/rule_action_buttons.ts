@@ -57,13 +57,13 @@ interface BuildPendingChangeButtonsParams extends RuleActionContext {
 const canReadRules = (application: ApplicationStart): boolean =>
   hasCapabilities(application.capabilities, RULES_UI_READ_PRIVILEGE);
 
-// Editing actions also need ES|QL turned on in Advanced Settings when the rule is ES|QL.
 const canChangeRuleFromChat = ({
   application,
   uiSettings,
   rule,
 }: Pick<RuleActionContext, 'application' | 'uiSettings' | 'rule'>): boolean =>
   hasCapabilities(application.capabilities, RULES_UI_EDIT_PRIVILEGE) &&
+  // ES|QL rules also need ES|QL turned on in Advanced Settings.
   (rule.type !== 'esql' || Boolean(uiSettings.get(ENABLE_ESQL)));
 
 const getDisabledReason = (rule: RuleResponse): string | undefined =>
@@ -79,8 +79,8 @@ const buildApplyToRuleFormButton = (
   icon: 'pencil',
   type,
   handler: () => {
-    // When the target form is already open, navigateToApp to the same path is a no-op and
-    // the aiCreatedRule$ subscription applies the rule to the form in place.
+    // The rule form fills its fields with this rule when it opens, or right away if it's
+    // already open.
     aiRuleCreation.setAiCreatedRule(rule, attachmentId);
     application.navigateToApp('securitySolutionUI', { path });
   },
