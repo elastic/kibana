@@ -18,6 +18,8 @@ import type {
   RelevantSkillsStep,
   PreExecutionWorkflowStep,
   SubagentRosterUpdatedStep,
+  DeliveredMessageStep,
+  InterimAnswerStep,
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
@@ -31,8 +33,10 @@ import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state'
 import type {
   ConversationEvent,
   ConversationWriteSource,
+  EventActor,
   TimelineEvent,
   UserIdAndName,
+  UserMessageEvent,
 } from '@kbn/agent-builder-common';
 import type { ExecutionPeek } from '../../execution/persistence';
 import type { ConversationWithoutRoundsWithPermissions } from '../../../../common/http_api/conversations';
@@ -55,6 +59,8 @@ export type ConversationCreateRequest = Omit<
 export interface AcquireActiveExecution {
   action: 'acquire';
   executionId: string;
+  /** The timeline id the execution writes its events under; steers sent to it are stamped with it. */
+  timelineExecutionId: string;
 }
 
 /** Clears the conversation's active execution when this execution still holds it. */
@@ -129,6 +135,26 @@ export interface AppendEventsRequest {
   consumeBackgroundExecution?: string;
 }
 
+export interface AppendSteerRequest {
+  id: string;
+  message: string;
+  /** Client-generated idempotency key: a retry after a lost response stores nothing twice. */
+  eventId: string;
+  actor: EventActor;
+}
+
+export interface AppendSteerResult {
+  event: UserMessageEvent;
+  /** True when an earlier request already stored this `eventId`. */
+  alreadyStored: boolean;
+}
+
+export interface ConversationWithVersion {
+  conversation: Conversation;
+  seqNo: number;
+  primaryTerm: number;
+}
+
 export interface ReplaceRoundEventsRequest {
   /** Conversation to update. */
   id: string;
@@ -198,7 +224,9 @@ export type PersistentConversationRoundStep =
   | PreExecutionWorkflowStep
   | SubagentRosterUpdatedStep
   | SubstitutionStep
-  | InjectedContextStep;
+  | InjectedContextStep
+  | DeliveredMessageStep
+  | InterimAnswerStep;
 
 /**
  * Legacy fields that may exist in old persisted documents.
