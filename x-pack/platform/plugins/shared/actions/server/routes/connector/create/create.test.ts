@@ -17,6 +17,7 @@ import { omit } from 'lodash';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import {
   createConnectorRequestBodySchemaV1,
+  getCreateConnectorRequestBodySchema,
   getCreateConnectorRequestBodySchemaV1,
 } from '../../../../common/routes/connector/apis/create';
 import { createMockConnector } from '../../../application/connector/mocks';
@@ -185,30 +186,6 @@ describe('createConnectorRoute', () => {
     });
   });
 
-  it('rejects spec_version when the connector catalog is disabled', async () => {
-    const { handler } = setupRoute();
-    const actionsClient = actionsClientMock.create();
-    const body = createConnectorRequestBodySchemaV1.validate({
-      name: 'Versioned connector',
-      connector_type_id: '.test-connector-type',
-      config: {},
-      secrets: {},
-      spec_version: '1',
-    });
-    const [context, req, res] = mockHandlerArguments(
-      { actionsClient, isCatalogFeatureFlagEnabled: jest.fn().mockReturnValue(false) },
-      { body },
-      ['badRequest']
-    );
-
-    await handler(context, req, res);
-
-    expect(res.badRequest).toHaveBeenCalledWith({
-      body: "[request body.spec_version]: Additional properties are not allowed ('spec_version' was unexpected)",
-    });
-    expect(actionsClient.create).not.toHaveBeenCalled();
-  });
-
   it('rejects a spec_version past the max length', () => {
     expect(() =>
       createConnectorRequestBodySchemaV1.validate({
@@ -216,32 +193,9 @@ describe('createConnectorRoute', () => {
         connector_type_id: '.test-connector-type',
         config: {},
         secrets: {},
-        spec_version: '1'.repeat(33),
+        spec_version: '1'.repeat(17),
       })
-    ).toThrow(/maximum length/);
-  });
-
-  it('omits spec_version when it is not requested and the connector catalog is disabled', async () => {
-    const { handler } = setupRoute();
-    const actionsClient = actionsClientMock.create();
-    actionsClient.create.mockResolvedValueOnce(createMockConnector({ specVersion: '1.3' }));
-    const body = createConnectorRequestBodySchemaV1.validate({
-      name: 'My connector',
-      connector_type_id: '.test-connector-type',
-      config: {},
-      secrets: {},
-    });
-    const [context, req, res] = mockHandlerArguments(
-      { actionsClient, isCatalogFeatureFlagEnabled: jest.fn().mockReturnValue(false) },
-      { body },
-      ['ok']
-    );
-
-    await handler(context, req, res);
-
-    expect(actionsClient.create).toHaveBeenCalledTimes(1);
-    expect(res.ok).toHaveBeenCalledTimes(1);
-    expect(jest.mocked(res.ok).mock.calls[0][0]?.body).not.toHaveProperty('spec_version');
+    ).toThrow('[spec_version]: value has length [17] but it must have a maximum length of [16].');
   });
 
   it('Returns error message to kibana on error', async () => {

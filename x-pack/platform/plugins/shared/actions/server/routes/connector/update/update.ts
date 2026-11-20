@@ -62,8 +62,7 @@ export const updateConnectorRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         try {
-          const actions = await context.actions;
-          const actionsClient = actions.getActionsClient();
+          const actionsClient = (await context.actions).getActionsClient();
           const { id }: UpdateConnectorParamsV1 = req.params;
           const {
             name,
@@ -85,8 +84,7 @@ export const updateConnectorRoute = (
               }),
               {
                 includeInboundEventsField: actionsConfigUtils.isInboundEventsEnabled(),
-                includeSpecVersionField:
-                  actionsConfigUtils.isCatalogEnabled() && actions.isCatalogFeatureFlagEnabled(),
+                includeSpecVersionField: actionsConfigUtils.isCatalogEnabled(),
               }
             ),
           });
