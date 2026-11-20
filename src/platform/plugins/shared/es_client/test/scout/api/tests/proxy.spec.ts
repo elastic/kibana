@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomUUID } from 'crypto';
 import { gzipSync } from 'zlib';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -14,7 +15,7 @@ import { apiTest, testData } from '../fixtures';
 
 const { COMMON_HEADERS, PROXY_PATH, TEST_INDEX, INDEX_SCOPED_ROLE } = testData;
 
-const CREATED_INDEX = `${TEST_INDEX}-created`;
+const CREATED_INDEX = `${TEST_INDEX}-created-${randomUUID()}`;
 const MISSING_INDEX = `${TEST_INDEX}-missing`;
 
 apiTest.describe('Elasticsearch proxy', { tag: tags.deploymentAgnostic }, () => {
