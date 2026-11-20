@@ -613,6 +613,7 @@ describe('InventoryService.list', () => {
         },
       ],
     });
+    expect(response.queries[0]).toMatchObject({ indexPattern: STATE_PATTERN, isPartial: true });
   });
 
   it.each([
