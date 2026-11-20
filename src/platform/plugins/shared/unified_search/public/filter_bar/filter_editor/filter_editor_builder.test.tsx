@@ -18,6 +18,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 
 const getStorage = (v: string) => {
   const storage = createMockStorage();
@@ -526,5 +528,316 @@ describe('Combined filter preview text', () => {
     expect(getFilterBadgeTextContent()).toBe(
       '(NOT clientip: 127.0.0.1 OR extension: is one of png, jpeg) AND bytes: 1000 to 2000'
     );
+  });
+});
+
+describe('Filter whose data view cannot be found', () => {
+  const missingDataViewId = 'missing-data-view-id';
+  const withMissingDataView = (filter: Filter): Filter => ({
+    ...filter,
+    meta: { ...filter.meta, index: missingDataViewId },
+  });
+
+  const onLocalFilterCreate = jest.fn();
+  const notFoundError = new SavedObjectNotFound({ type: 'index-pattern', id: missingDataViewId });
+  const renderWithMissingDataView = async (
+    filter: Filter,
+    {
+      indexPatterns = [mockedDataView],
+      loadDataView = () => Promise.reject(notFoundError),
+      withDataViewsService = true,
+    }: {
+      indexPatterns?: FilterableSource[];
+      loadDataView?: () => Promise<DataView>;
+      withDataViewsService?: boolean;
+    } = {}
+  ) => {
+    const onSubmit = jest.fn();
+    const onLocalFilterUpdate = jest.fn();
+    const dataViews = withDataViewsService
+      ? { ...dataMock.dataViews, get: jest.fn(loadDataView) }
+      : undefined;
+    let unmount = () => {};
+
+    await act(async () => {
+      ({ unmount } = render(
+        <FilterEditor
+          {...defaultProps}
+          filter={filter}
+          indexPatterns={indexPatterns}
+          onSubmit={onSubmit}
+          onLocalFilterCreate={onLocalFilterCreate}
+          onLocalFilterUpdate={onLocalFilterUpdate}
+          dataViews={dataViews}
+        />,
+        {
+          wrapper: ({ children }) => (
+            <I18nProvider>
+              <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+            </I18nProvider>
+          ),
+        }
+      ));
+    });
+
+    return { onSubmit, onLocalFilterUpdate, unmount };
+  };
+
+  it('selects a provided data view with the filter field, keeps the value and saves its ID', async () => {
+    const { onSubmit } = await renderWithMissingDataView(
+      withMissingDataView(filterPhrase('bytes', '1024'))
+    );
+
+    await waitFor(() => {
+      expect(getSingleParamValue()).toBe('1024');
+    });
+
+    fireEvent.click(screen.getByTestId('saveFilter'));
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        meta: expect.objectContaining({ index: mockedDataView.id, key: 'bytes' }),
+      })
+    );
+  });
+
+  it('notifies that another data view was selected until the user picks one', async () => {
+    const otherDataView = { ...mockedDataView, id: 'other-id', getName: () => 'other' } as DataView;
+    await renderWithMissingDataView(withMissingDataView(filterPhrase('bytes', '1024')), {
+      indexPatterns: [mockedDataView, otherDataView],
+    });
+
+    expect(await screen.findByTestId('filterEditorRecoveredDataViewNotice')).toHaveTextContent(
+      'logstash-*'
+    );
+
+    const pickDataView = async (name: string) => {
+      fireEvent.click(
+        within(screen.getByTestId('filterIndexPatternsSelect')).getByRole('combobox')
+      );
+      fireEvent.click(await screen.findByRole('option', { name }));
+      await waitFor(() => {
+        expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+      });
+    };
+    await pickDataView('other');
+    expect(screen.queryByTestId('filterEditorRecoveredDataViewNotice')).not.toBeInTheDocument();
+
+    // Picking the automatically selected data view again is the user's own choice.
+    await pickDataView('logstash-*');
+    expect(screen.queryByTestId('filterEditorRecoveredDataViewNotice')).not.toBeInTheDocument();
+  });
+
+  it('selects a data view by its fields for a filter without a data view ID', async () => {
+    const filter = filterPhrase('bytes', '1024');
+    const { onSubmit } = await renderWithMissingDataView({
+      ...filter,
+      meta: { ...filter.meta, index: undefined },
+    });
+
+    expect(await screen.findByTestId('filterEditorRecoveredDataViewNotice')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('saveFilter'));
+
+    expect(onSubmit.mock.calls[0][0].meta.index).toBe(mockedDataView.id);
+  });
+
+  it('keeps the data view ID and shows Query DSL without the data views service', async () => {
+    const { onSubmit } = await renderWithMissingDataView(
+      withMissingDataView(filterPhrase('bytes', '1024')),
+      { withDataViewsService: false }
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('filterIndexPatternsSelect')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('filterEditorRecoveredDataViewNotice')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('saveFilter'));
+
+    expect(onSubmit.mock.calls[0][0].meta.index).toBe(missingDataViewId);
+  });
+
+  it('ignores a data view that fails to load after the editor was closed', async () => {
+    let rejectLoad: (error: Error) => void = () => {};
+    const { onLocalFilterUpdate, unmount } = await renderWithMissingDataView(
+      withMissingDataView(filterPhrase('bytes', '1024')),
+      { loadDataView: () => new Promise((_, reject) => (rejectLoad = reject)) }
+    );
+    onLocalFilterUpdate.mockClear();
+
+    unmount();
+    await act(async () => rejectLoad(notFoundError));
+
+    expect(onLocalFilterUpdate).not.toHaveBeenCalled();
+  });
+
+  it('keeps the data view ID and shows Query DSL when loading fails for another reason', async () => {
+    const { onSubmit } = await renderWithMissingDataView(
+      withMissingDataView(filterPhrase('bytes', '1024')),
+      { loadDataView: () => Promise.reject(new Error('Network error')) }
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('filterIndexPatternsSelect')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('filterEditorRecoveredDataViewNotice')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('saveFilter'));
+
+    expect(onSubmit.mock.calls[0][0].meta.index).toBe(missingDataViewId);
+  });
+
+  it('does not select an ES|QL source', async () => {
+    const { fields } = mockedDataView;
+    const esqlSource: FilterableSource = {
+      kind: 'esql',
+      id: 'esql-dataset-id',
+      title: 'esql',
+      fields,
+      isTimeBased: () => false,
+      getFieldByName: (name) => fields.find((field) => field.name === name),
+    };
+    const { onSubmit } = await renderWithMissingDataView(
+      withMissingDataView(filterPhrase('bytes', '1024')),
+      { indexPatterns: [esqlSource] }
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('filterIndexPatternsSelect')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('saveFilter'));
+
+    expect(onSubmit.mock.calls[0][0].meta.index).toBe(missingDataViewId);
+  });
+
+  it('skips data views where the filter field is not filterable', async () => {
+    const nonSearchableDataView = {
+      ...mockedDataView,
+      id: 'non-searchable-data-view-id',
+      fields: mockedDataView.fields.map((field) => ({ ...field, searchable: false })),
+      getName: () => 'non-searchable',
+    } as DataView;
+    const { onSubmit } = await renderWithMissingDataView(
+      withMissingDataView(filterPhrase('bytes', '1024')),
+      { indexPatterns: [nonSearchableDataView, mockedDataView] }
+    );
+
+    await waitFor(() => {
+      expect(getSingleParamValue()).toBe('1024');
+    });
+
+    fireEvent.click(screen.getByTestId('saveFilter'));
+
+    expect(onSubmit.mock.calls[0][0].meta.index).toBe(mockedDataView.id);
+  });
+
+  it('saves the data view picked in Query DSL mode when no data view has the filter fields', async () => {
+    const { onSubmit, onLocalFilterUpdate } = await renderWithMissingDataView(
+      withMissingDataView(filterPhrase('unknown.field', 'value'))
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('filterIndexPatternsSelect')).toBeInTheDocument();
+    });
+
+    const dataViewPicker = within(screen.getByTestId('filterIndexPatternsSelect'));
+    fireEvent.change(dataViewPicker.getByRole('combobox'), { target: { value: 'logstash' } });
+    fireEvent.click(await screen.findByRole('option', { name: 'logstash-*' }));
+
+    // Reported as a change, so closing the editor asks before discarding the selection.
+    expect(onLocalFilterUpdate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ dataViewId: mockedDataView.id })
+    );
+
+    fireEvent.click(screen.getByTestId('saveFilter'));
+
+    expect(onSubmit.mock.calls[0][0].meta.index).toBe(mockedDataView.id);
+  });
+
+  it('keeps the missing data view ID in Query DSL mode when no data view is picked', async () => {
+    const { onSubmit, onLocalFilterUpdate } = await renderWithMissingDataView(
+      withMissingDataView(filterPhrase('unknown.field', 'value'))
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('filterIndexPatternsSelect')).toBeInTheDocument();
+    });
+
+    expect(onLocalFilterCreate).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        queryDslFilter: expect.objectContaining({ dataViewId: missingDataViewId }),
+      })
+    );
+    expect(onLocalFilterUpdate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ dataViewId: missingDataViewId })
+    );
+
+    fireEvent.click(screen.getByTestId('saveFilter'));
+
+    expect(onSubmit.mock.calls[0][0].meta.index).toBe(missingDataViewId);
+  });
+
+  it('reports no change when a recovered filter is switched to Query DSL', async () => {
+    const { onLocalFilterUpdate } = await renderWithMissingDataView(
+      withMissingDataView(filterPhrase('bytes', '1024'))
+    );
+    await waitFor(() => {
+      expect(getSingleParamValue()).toBe('1024');
+    });
+
+    fireEvent.click(screen.getByTestId('editQueryDSL'));
+
+    const [[{ queryDslFilter }]] = onLocalFilterCreate.mock.calls.slice(-1);
+    expect(queryDslFilter.dataViewId).toBe(mockedDataView.id);
+    expect(onLocalFilterUpdate).toHaveBeenLastCalledWith(queryDslFilter);
+  });
+
+  it('points the nested filters of a combined filter to the selected data view', async () => {
+    const combinedFilter = buildCombinedFilter(
+      BooleanRelation.AND,
+      [
+        withMissingDataView(filterPhrase('extension', 'png')),
+        withMissingDataView(filterRange('bytes', { gte: 1000, lt: 2000 })),
+      ],
+      { ...mockedDataView, id: missingDataViewId } as DataView
+    );
+    const { onSubmit } = await renderWithMissingDataView(combinedFilter);
+
+    await waitFor(() => {
+      expect(getFilterBadgeTextContent()).toBe('extension: png AND bytes: 1000 to 2000');
+    });
+
+    fireEvent.click(screen.getByTestId('saveFilter'));
+
+    const [[submittedFilter]] = onSubmit.mock.calls;
+    expect(submittedFilter.meta.index).toBe(mockedDataView.id);
+    expect(submittedFilter.meta.params.map(({ meta }: Filter) => meta.index)).toEqual([
+      mockedDataView.id,
+      mockedDataView.id,
+    ]);
+  });
+
+  it('saves the selected data view ID when submitted in Query DSL mode', async () => {
+    const { onSubmit } = await renderWithMissingDataView(
+      withMissingDataView(filterPhrase('bytes', '1024'))
+    );
+    await waitFor(() => {
+      expect(getSingleParamValue()).toBe('1024');
+    });
+
+    fireEvent.click(screen.getByTestId('editQueryDSL'));
+    fireEvent.click(screen.getByTestId('saveFilter'));
+
+    expect(onSubmit.mock.calls[0][0].meta.index).toBe(mockedDataView.id);
+  });
+
+  it('registers the recovered filter as the unchanged baseline', async () => {
+    await renderWithMissingDataView(withMissingDataView(filterPhrase('bytes', '1024')));
+
+    await waitFor(() => {
+      expect(onLocalFilterCreate).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          filter: expect.objectContaining({
+            meta: expect.objectContaining({ index: mockedDataView.id, key: 'bytes' }),
+          }),
+        })
+      );
+    });
   });
 });

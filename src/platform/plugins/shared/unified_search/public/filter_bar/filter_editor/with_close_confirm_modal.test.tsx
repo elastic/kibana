@@ -13,6 +13,8 @@ import React, { useEffect } from 'react';
 import { withCloseFilterEditorConfirmModal } from './with_close_confirm_modal';
 import type { WithCloseFilterEditorConfirmModalProps } from './with_close_confirm_modal';
 
+type ChangedFilter = Parameters<WithCloseFilterEditorConfirmModalProps['onLocalFilterUpdate']>[0];
+
 const phraseFilter = (value: string): Filter =>
   ({
     meta: {
@@ -36,7 +38,7 @@ interface HarnessProps extends WithCloseFilterEditorConfirmModalProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   initialFilter: Filter;
-  editedFilter: Filter;
+  editedFilter: ChangedFilter;
   pendingClickOutside: boolean;
   onClickOutsideHandled: () => void;
   shouldEdit: boolean;
@@ -84,7 +86,7 @@ const WrappedHarness = withCloseFilterEditorConfirmModal(Harness);
 
 interface DriverProps {
   filter: Filter;
-  editedFilter: Filter;
+  editedFilter: ChangedFilter;
 }
 
 const Driver: React.FC<DriverProps> = ({ filter, editedFilter }) => {
@@ -155,6 +157,24 @@ describe('withCloseFilterEditorConfirmModal', () => {
     await flush();
 
     expect(screen.getByTestId('editor-open')).toBeInTheDocument();
+    expect(screen.getByTestId(CONFIRM_MODAL)).toBeInTheDocument();
+  });
+
+  it('shows the discard-changes modal when only the Query DSL data view changed', async () => {
+    render(
+      <Driver
+        filter={original}
+        editedFilter={{ queryDsl: '{}', customLabel: null, dataViewId: 'picked-data-view-id' }}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('open'));
+    await flush();
+    fireEvent.click(screen.getByTestId('edit'));
+    await flush();
+    fireEvent.click(screen.getByTestId('click-outside'));
+    await flush();
+
     expect(screen.getByTestId(CONFIRM_MODAL)).toBeInTheDocument();
   });
 

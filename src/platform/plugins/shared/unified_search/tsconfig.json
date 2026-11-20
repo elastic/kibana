@@ -29,6 +29,7 @@
     "@kbn/field-types",
     "@kbn/react-field",
     "@kbn/ui-theme",
+    "@kbn/ui-callout",
     "@kbn/saved-objects-management-plugin",
     "@kbn/esql",
     "@kbn/esql-editor",

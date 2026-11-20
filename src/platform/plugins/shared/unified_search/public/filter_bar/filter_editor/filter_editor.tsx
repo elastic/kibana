@@ -54,9 +54,13 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import { Subject } from 'rxjs';
 import type { FilterableSource } from '@kbn/data-source';
+import { isEsqlFilterableSource } from '@kbn/data-source';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
+  getFilterableFields,
   getOperatorFromFilter,
   isFilterValid,
 } from './lib/filter_editor_utils';
@@ -64,10 +68,26 @@ import { FiltersBuilder } from '../../filters_builder';
 import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
 import { MIDDLE_TRUNCATION_PROPS, SINGLE_SELECTION_AS_TEXT_PROPS } from './lib/helpers';
 import { flattenFilters } from '../lib/flatten_filters';
+import { getFilterKeys } from '../filter_item/is_filter_applicable';
 import { filterBadgeStyle, filterPreviewLabelStyle } from './filter_editor.styles';
 import { ScrollableContainer } from './scrollable_container';
 
 const editorFormStyle = css({ padding: euiThemeVars.euiSizeM });
+
+const getDataViewName = (dataView?: FilterableSource): string =>
+  dataView?.getName?.() ?? dataView?.name ?? dataView?.title ?? '';
+
+/** Points a filter, and the nested filters of a combined one, from one data view to another. */
+const rebindFilterDataView = (filter: Filter, fromId?: string, toId?: string): Filter => ({
+  ...filter,
+  meta: {
+    ...filter.meta,
+    ...(filter.meta.index === fromId && { index: toId }),
+    ...(isCombinedFilter(filter) && {
+      params: filter.meta.params.map((nested) => rebindFilterDataView(nested, fromId, toId)),
+    }),
+  },
+});
 
 export const strings = {
   getPanelTitleAdd: () =>
@@ -107,6 +127,12 @@ export const strings = {
     i18n.translate('unifiedSearch.filter.filterEditor.dateViewSelectLabel', {
       defaultMessage: 'Data view',
     }),
+  getRecoveredDataViewNotice: (dataViewName: string) =>
+    i18n.translate('unifiedSearch.filter.filterEditor.recoveredDataViewNotice', {
+      defaultMessage:
+        "This filter's data view isn't available, so {dataViewName} was selected because it has the filter's fields.",
+      values: { dataViewName },
+    }),
   getQueryDslLabel: () =>
     i18n.translate('unifiedSearch.filter.filterEditor.queryDslLabel', {
       defaultMessage: 'Elasticsearch Query DSL',
@@ -129,6 +155,8 @@ export const strings = {
 interface QueryDslFilter {
   queryDsl: string;
   customLabel: string | null;
+  /** The data view ID the filter is saved with, which the data view picker can change. */
+  dataViewId?: string;
 }
 
 export interface FilterEditorComponentProps {
@@ -158,9 +186,16 @@ interface State {
   localFilter: Filter;
   isLoadingDataView?: boolean;
   resetVisibleHeight$: Subject<void>;
+  /** Set when the filter's data view isn't available and another one was selected, by its fields or in the picker. */
+  useSelectedDataViewOnSubmit: boolean;
+  /** The data view selected by the filter's fields, to notify the user about the swap. */
+  dataViewSelectedByFields?: FilterableSource;
 }
 
 class FilterEditorComponent extends Component<FilterEditorProps, State> {
+  /** Aborted on unmount, so a data view that loads after the editor closed is ignored. */
+  private readonly unmountController = new AbortController();
+
   constructor(props: FilterEditorProps) {
     super(props);
     const dataView = getIndexPatternFromFilter(props.filter, props.indexPatterns);
@@ -173,24 +208,32 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       localFilter: dataView ? merge({}, props.filter) : buildEmptyFilter(false),
       isLoadingDataView: !Boolean(dataView),
       resetVisibleHeight$: new Subject(),
+      useSelectedDataViewOnSubmit: false,
     };
   }
 
   componentDidMount() {
-    const { localFilter, queryDsl, customLabel, selectedDataView } = this.state;
+    const { localFilter, selectedDataView } = this.state;
     this.props.onLocalFilterCreate?.({
       filter: localFilter,
-      queryDslFilter: { queryDsl, customLabel },
+      queryDslFilter: this.getQueryDslFilter(),
     });
     this.props.onLocalFilterUpdate?.(localFilter);
-    if (!selectedDataView) {
-      const dataViewId = this.props.filter.meta.index;
-      if (!dataViewId || !this.props.dataViews) {
-        this.setState({ isLoadingDataView: false });
-      } else {
-        this.loadDataView(dataViewId, this.props.dataViews);
-      }
+    if (selectedDataView) return;
+
+    const dataViewId = this.props.filter.meta.index;
+    if (!dataViewId) {
+      this.selectDataViewByFields();
+    } else if (!this.props.dataViews) {
+      // Without the data views service it's unknown whether the data view exists, so keep its ID.
+      this.showFilterAsQueryDsl();
+    } else {
+      this.loadDataView(dataViewId, this.props.dataViews);
     }
+  }
+
+  componentWillUnmount() {
+    this.unmountController.abort();
   }
 
   /**
@@ -202,8 +245,10 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
    * @internal
    */
   private async loadDataView(dataViewId: string, dataViews: DataViewsContract) {
+    const { signal } = this.unmountController;
     try {
       const dataView = await dataViews.get(dataViewId, false);
+      if (signal.aborted) return;
       this.setState({
         selectedDataView: dataView,
         isLoadingDataView: false,
@@ -212,10 +257,59 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
         queryDsl: this.parseFilterToQueryDsl(this.props.filter, this.state.indexPatterns),
       });
     } catch (e) {
-      this.setState({
-        isLoadingDataView: false,
-      });
+      if (signal.aborted) return;
+      if (e instanceof SavedObjectNotFound) {
+        this.selectDataViewByFields();
+      } else {
+        // The data view may still exist (e.g. a network or permission error), so keep its ID.
+        this.showFilterAsQueryDsl();
+      }
     }
+  }
+
+  private showFilterAsQueryDsl() {
+    this.props.onLocalFilterUpdate?.(this.getQueryDslFilter());
+    this.setState({ isLoadingDataView: false, isCustomEditorOpen: true });
+  }
+
+  /**
+   * When the filter's data view isn't available (e.g. its ID changed or it has none), selects a
+   * provided data view that has all of the filter's fields, so the filter stays editable and is
+   * saved with that ID. Without a match, the filter is shown as Query DSL instead of an empty one.
+   */
+  private selectDataViewByFields() {
+    const { filter, indexPatterns, onLocalFilterCreate, onLocalFilterUpdate } = this.props;
+    const keys = getFilterKeys(filter);
+    if (keys.length === 0) {
+      this.setState({ isLoadingDataView: false });
+      return;
+    }
+
+    // ES|QL sources and sources without an ID can't be referenced as the filter's data view.
+    const dataView = indexPatterns.find((indexPattern) => {
+      if (!indexPattern.id || isEsqlFilterableSource(indexPattern)) return false;
+      const filterableFields = getFilterableFields(indexPattern);
+      return keys.every((key) => filterableFields.some(({ name }) => name === key));
+    });
+    if (!dataView) {
+      this.showFilterAsQueryDsl();
+      return;
+    }
+
+    const localFilter = merge({}, rebindFilterDataView(filter, filter.meta.index, dataView.id));
+    // The recovered filter is the baseline for the discard-changes check, not a user edit.
+    onLocalFilterCreate?.({
+      filter: localFilter,
+      queryDslFilter: this.getQueryDslFilter({ dataViewId: dataView.id }),
+    });
+    onLocalFilterUpdate?.(localFilter);
+    this.setState({
+      selectedDataView: dataView,
+      isLoadingDataView: false,
+      localFilter,
+      useSelectedDataViewOnSubmit: true,
+      dataViewSelectedByFields: dataView,
+    });
   }
 
   private parseFilterToQueryDsl(filter: Filter, indexPatterns: FilterableSource[]) {
@@ -337,7 +431,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
 
       return null;
     }
-    const { selectedDataView } = this.state;
+    const { selectedDataView, dataViewSelectedByFields } = this.state;
 
     return (
       <>
@@ -347,9 +441,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             placeholder={strings.getSelectDataView()}
             options={this.state.indexPatterns}
             selectedOptions={selectedDataView ? [selectedDataView] : []}
-            getLabel={(indexPattern) =>
-              indexPattern?.getName?.() ?? indexPattern?.name ?? indexPattern?.title ?? ''
-            }
+            getLabel={getDataViewName}
             onChange={this.onIndexPatternChange}
             isClearable={false}
             data-test-subj="filterIndexPatternsSelect"
@@ -358,6 +450,16 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
           />
         </EuiFormRow>
         <EuiSpacer size="s" />
+        {dataViewSelectedByFields && dataViewSelectedByFields === selectedDataView && (
+          <>
+            <KbnWarningCallout
+              size="s"
+              title={strings.getRecoveredDataViewNotice(getDataViewName(dataViewSelectedByFields))}
+              data-test-subj="filterEditorRecoveredDataViewNotice"
+            />
+            <EuiSpacer size="s" />
+          </>
+        )}
       </>
     );
   }
@@ -469,12 +571,9 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     const isCustomEditorOpen = !this.state.isCustomEditorOpen;
     this.setState({ isCustomEditorOpen });
     if (this.props.onLocalFilterUpdate) {
-      const { customLabel, queryDsl, localFilter } = this.state;
-      if (isCustomEditorOpen) {
-        this.props.onLocalFilterUpdate({ queryDsl, customLabel });
-      } else {
-        this.props.onLocalFilterUpdate(localFilter);
-      }
+      this.props.onLocalFilterUpdate(
+        isCustomEditorOpen ? this.getQueryDslFilter() : this.state.localFilter
+      );
     }
     // re-calculate visible height when switching between editors
     this.state.resetVisibleHeight$.next();
@@ -524,10 +623,22 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   }
 
   private onIndexPatternChange = ([selectedDataView]: FilterableSource[]) => {
-    this.setState({
-      selectedDataView,
-      localFilter: buildEmptyFilter(false, selectedDataView.id),
-    });
+    this.setState(
+      ({ useSelectedDataViewOnSubmit, selectedDataView: previousDataView }) => ({
+        selectedDataView,
+        localFilter: buildEmptyFilter(false, selectedDataView.id),
+        // Without a previous selection the filter's data view isn't available, so submit the picked one.
+        useSelectedDataViewOnSubmit: useSelectedDataViewOnSubmit || !previousDataView,
+        // The user chose the data view, so the notice about the automatic selection no longer applies.
+        dataViewSelectedByFields: undefined,
+      }),
+      () => {
+        // The picked data view changes the ID a Query DSL filter is saved with.
+        if (this.state.isCustomEditorOpen) {
+          this.props.onLocalFilterUpdate?.(this.getQueryDslFilter());
+        }
+      }
+    );
   };
 
   private onCustomLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -535,8 +646,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     this.setState({ customLabel });
     if (this.props.onLocalFilterUpdate) {
       if (this.state.isCustomEditorOpen) {
-        const { queryDsl } = this.state;
-        this.props.onLocalFilterUpdate({ queryDsl, customLabel });
+        this.props.onLocalFilterUpdate(this.getQueryDslFilter({ customLabel }));
       } else {
         const localFilter = {
           ...this.state.localFilter,
@@ -552,18 +662,21 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
 
   private onQueryDslChange = (queryDsl: string) => {
     this.setState({ queryDsl });
-    if (this.props.onLocalFilterUpdate) {
-      const { customLabel } = this.state;
-      this.props.onLocalFilterUpdate({ queryDsl, customLabel });
-    }
+    this.props.onLocalFilterUpdate?.(this.getQueryDslFilter({ queryDsl }));
   };
+
+  /** The Query DSL editor's state, compared with the initial one to detect unsaved changes. */
+  private getQueryDslFilter(overrides: Partial<QueryDslFilter> = {}): QueryDslFilter {
+    const { queryDsl, customLabel } = this.state;
+    return { queryDsl, customLabel, dataViewId: this.getOriginalFilter().meta.index, ...overrides };
+  }
 
   private getFilterFromQueryDsl = (queryDsl: string) => {
     const { customLabel } = this.state;
     const {
       $state,
       meta: { index, disabled = false, negate = false },
-    } = this.props.filter;
+    } = this.getOriginalFilter();
 
     if (!$state || !$state.store) {
       return;
@@ -625,6 +738,15 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     this.state.resetVisibleHeight$.next();
   };
 
+  /** The filter being edited, pointed to the selected data view if its own one isn't available. */
+  private getOriginalFilter(): Filter {
+    const { filter } = this.props;
+    const { selectedDataView, useSelectedDataViewOnSubmit } = this.state;
+    return useSelectedDataViewOnSubmit && selectedDataView?.id
+      ? rebindFilterDataView(filter, filter.meta.index, selectedDataView.id)
+      : filter;
+  }
+
   private onSubmit = () => {
     const { isCustomEditorOpen, queryDsl, customLabel } = this.state;
     const { $state } = this.props.filter;
@@ -634,18 +756,13 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     }
 
     if (isCustomEditorOpen) {
+      const originalFilter = this.getOriginalFilter();
       const filter =
         this.props.filter?.meta.type === FILTERS.CUSTOM ||
         // only convert non-custom filters to custom when DSL changes
         queryDsl !== this.parseFilterToQueryDsl(this.props.filter, this.state.indexPatterns)
           ? this.getFilterFromQueryDsl(queryDsl)
-          : {
-              ...this.props.filter,
-              meta: {
-                ...(this.props.filter.meta ?? {}),
-                alias: customLabel || null,
-              },
-            };
+          : { ...originalFilter, meta: { ...originalFilter.meta, alias: customLabel || null } };
       if (!filter) {
         return;
       }

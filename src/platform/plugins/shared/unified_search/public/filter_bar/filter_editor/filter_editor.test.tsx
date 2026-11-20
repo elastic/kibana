@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { act } from '@testing-library/react';
 import type { UseEuiTheme, EuiThemeComputed } from '@elastic/eui';
 import type { TestBed } from '@kbn/test-jest-helpers';
 import { registerTestBed } from '@kbn/test-jest-helpers';
@@ -197,6 +198,60 @@ describe('<FilterEditor />', () => {
       component.update();
       expect(exists('filterIndexPatternsSelect')).toBe(true);
       expect(find('filterIndexPatternsSelect').find('input').props().value).toBe('');
+    });
+  });
+  describe('filter whose data view cannot be found and whose fields match no provided data view', () => {
+    const filter = {
+      meta: {
+        type: 'phrase',
+        index: 'missing-data-view-id',
+        key: 'unknown.field',
+        params: { query: 'value' },
+        disabled: false,
+        negate: false,
+        alias: null,
+      },
+      query: { match_phrase: { 'unknown.field': 'value' } },
+      $state: { store: FilterStateStore.APP_STATE },
+    };
+    let onSubmit: jest.Mock;
+    let testBed: TestBed;
+
+    beforeEach(async () => {
+      dataMock.dataViews.get = jest.fn().mockReturnValue(Promise.reject());
+      onSubmit = jest.fn();
+      const defaultProps: Omit<FilterEditorProps, 'intl'> = {
+        theme: {
+          euiTheme: {} as unknown as EuiThemeComputed<{}>,
+          colorMode: 'DARK',
+          modifications: [],
+          highContrastMode: false,
+        } as UseEuiTheme<{}>,
+        filter,
+        indexPatterns: [dataViewMockList[0]],
+        onCancel: jest.fn(),
+        onSubmit,
+        docLinks: coreMock.createStart().docLinks,
+        dataViews: dataMock.dataViews,
+      };
+      testBed = await registerTestBed(FilterEditor, { defaultProps })();
+    });
+
+    it('shows the filter as Query DSL instead of an empty filter and submits it unchanged', async () => {
+      const { component, exists, find } = testBed;
+      await act(async () => {});
+      component.update();
+
+      expect(exists('customEditorInput')).toBe(true);
+      expect(JSON.parse(find('customEditorInput').props().value)).toEqual(filter.query);
+
+      find('saveFilter').simulate('click');
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: filter.query,
+          meta: expect.objectContaining({ index: 'missing-data-view-id', key: 'unknown.field' }),
+        })
+      );
     });
   });
 });

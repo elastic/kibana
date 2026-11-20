@@ -16,6 +16,7 @@ import { CloseFilterEditorConfirmModal } from './close_confirm_modal';
 interface QueryDslFilter {
   queryDsl: string;
   customLabel: string | null;
+  dataViewId?: string;
 }
 
 interface OriginalFilter {
@@ -38,7 +39,9 @@ const isQueryDslFilter = (filter: Filter | QueryDslFilter): filter is QueryDslFi
 };
 
 const isQueryDslFilterChanged = (original: QueryDslFilter, updated: QueryDslFilter) =>
-  original.queryDsl !== updated.queryDsl || original.customLabel !== updated.customLabel;
+  original.queryDsl !== updated.queryDsl ||
+  original.customLabel !== updated.customLabel ||
+  original.dataViewId !== updated.dataViewId;
 
 export function withCloseFilterEditorConfirmModal<
   T extends WithCloseFilterEditorConfirmModalProps = WithCloseFilterEditorConfirmModalProps
