@@ -39,6 +39,7 @@ import { cloneActionIcon, deleteActionIcon } from '../action_menu_icons';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { NIGHTSHIFT_APP_ROUTE } from '../../../../common/constants';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useAllRelayAppBindings } from '../../../data/relay_apps/use_relay_app_bindings';
 import { useRuleCatalog } from '../../../data/rules/use_rule_catalog';
 import { AutomationFormBody } from '../flyouts/form/automation_form_body';
 import {
@@ -74,9 +75,11 @@ import { useGlobalLimit } from '../hooks/use_global_limit';
 import { AutomationUsageCell } from '../list/cells/usage_cell';
 import { RunsSparkline } from '../list/cells/runs_sparkline';
 import { AutomationWorkflowWarning, getWorkflowRepairDisabledReason } from '../workflow_recovery';
+import { getUnconnectedSlackChannels } from '../utils/unconnected_slack_channels';
 import { InfoStrip } from './info_strip';
 import { RunHistory, STATUSES, type Run } from './run_history';
 import { RunDetail } from './run_detail';
+import { UnconnectedSlackChannelsCallout } from './unconnected_slack_channels_callout';
 
 const labels = {
   title: i18n.translate('xpack.nightshift.automations.detail.title', {
@@ -372,6 +375,12 @@ export const AutomationDetailFlyout = ({
     );
   };
 
+  const connectedChannels = useAllRelayAppBindings();
+  const unconnectedSlackChannels = getUnconnectedSlackChannels(
+    automation.trigger.rows,
+    connectedChannels
+  );
+
   const workflowWarning = (
     <AutomationWorkflowWarning
       automation={automation}
@@ -624,6 +633,9 @@ export const AutomationDetailFlyout = ({
                   />
                 ) : (
                   <>
+                    {unconnectedSlackChannels.length > 0 && (
+                      <UnconnectedSlackChannelsCallout channels={unconnectedSlackChannels} />
+                    )}
                     {automation.description?.trim() && (
                       <FormSection>
                         <SectionHeader title={labels.description} />
