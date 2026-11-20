@@ -439,7 +439,7 @@ describe('Library Routes', () => {
 
     it('should parse the supplied YAML, render it, and create a workflow through the shared create path', async () => {
       setToggle(true);
-      mockLibraryService.listTemplates.mockResolvedValue([{ slug: 'demo' }]);
+      mockLibraryService.listTemplates.mockResolvedValue([{ slug: 'demo', version: '1.0.0' }]);
       mockApi.createWorkflow.mockResolvedValue({ id: 'wf-2' });
 
       const response = httpServerMock.createResponseFactory();
@@ -592,7 +592,7 @@ describe('Library Routes', () => {
 
     it('should create the workflow with the remixed catalog template as its origin', async () => {
       setToggle(true);
-      mockLibraryService.listTemplates.mockResolvedValue([{ slug: 'demo' }]);
+      mockLibraryService.listTemplates.mockResolvedValue([{ slug: 'demo', version: '1.0.0' }]);
       const createdWorkflow = { id: 'wf-remix', yaml: REMIXED_YAML };
       mockApi.createWorkflow.mockResolvedValue(createdWorkflow);
 

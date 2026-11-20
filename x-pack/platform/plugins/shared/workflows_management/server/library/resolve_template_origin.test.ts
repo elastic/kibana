@@ -9,7 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { Template } from '@kbn/workflows-library';
 
 import { LibraryFetchError } from './errors';
-import { resolveTemplateOrigin } from './resolve_template_origin';
+import { CATALOG_LOOKUP_TIMEOUT_MS, resolveTemplateOrigin } from './resolve_template_origin';
 
 const catalogRow: Template = {
   slug: 'triage-alerts',
@@ -35,14 +35,31 @@ describe('resolveTemplateOrigin', () => {
         libraryService: buildLibraryService([catalogRow]),
         logger: loggerMock.create(),
         slug: 'triage-alerts',
-        version: '1.1.0',
+        version: '1.2.0',
         origin: 'import',
       })
     ).resolves.toEqual({
       templateSlug: 'triage-alerts',
-      templateVersion: '1.1.0',
+      templateVersion: '1.2.0',
       templateOrigin: 'import',
     });
+  });
+
+  it.each([
+    ['an older version', '1.1.0'],
+    ['a prerelease or build with free text', '1.2.0-acme-corp-secret+customer.xyz'],
+    ['a version that is not semver', 'latest'],
+    ['no version', undefined],
+  ])('keeps the slug but drops %s, which the catalog does not confirm', async (_, version) => {
+    await expect(
+      resolveTemplateOrigin({
+        libraryService: buildLibraryService([catalogRow]),
+        logger: loggerMock.create(),
+        slug: 'triage-alerts',
+        version,
+        origin: 'remix',
+      })
+    ).resolves.toEqual({ templateSlug: 'triage-alerts', templateOrigin: 'remix' });
   });
 
   it('stores a template outside the catalog as custom, without a version', async () => {
@@ -77,15 +94,32 @@ describe('resolveTemplateOrigin', () => {
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('upstream down'));
   });
 
-  it('drops a version that is not valid semver', async () => {
-    await expect(
-      resolveTemplateOrigin({
-        libraryService: buildLibraryService([catalogRow]),
-        logger: loggerMock.create(),
+  describe('when the catalog is slow', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('stores the template as custom once the lookup deadline passes', async () => {
+      const logger = loggerMock.create();
+      const libraryService = {
+        listTemplates: jest.fn(() => new Promise<Template[]>(() => {})),
+      };
+
+      const resolved = resolveTemplateOrigin({
+        libraryService,
+        logger,
         slug: 'triage-alerts',
-        version: 'latest',
+        version: '1.2.0',
         origin: 'remix',
-      })
-    ).resolves.toEqual({ templateSlug: 'triage-alerts', templateOrigin: 'remix' });
+      });
+      await jest.advanceTimersByTimeAsync(CATALOG_LOOKUP_TIMEOUT_MS);
+
+      await expect(resolved).resolves.toEqual({ templateSlug: 'custom', templateOrigin: 'remix' });
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('timed out'));
+    });
   });
 });
