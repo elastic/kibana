@@ -20,8 +20,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   FIELD_TYPES,
   UseField,
+  useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+
+const NO_AUTH_TYPE_ID = 'none';
 
 const inboundTitle = (
   <FormattedMessage
@@ -71,6 +74,73 @@ export const OutboundSectionTitle: React.FC = () => (
     {outboundTitle}
   </ConnectorFormSectionTitle>
 );
+
+interface OutboundFormSectionProps {
+  canSave: boolean;
+  /** Auth type to switch to when outbound is turned on, e.g. `basic` for Datadog keys. */
+  credentialedAuthTypeId: string;
+  children: ReactNode;
+}
+
+/**
+ * Outbound section with an on/off switch, for dual connectors that also offer no authentication.
+ * Off means receive only: no authentication and no actions. The outbound fields stay mounted
+ * while hidden so the form keeps their values.
+ */
+const OutboundFormSectionComponent: React.FC<OutboundFormSectionProps> = ({
+  canSave,
+  credentialedAuthTypeId,
+  children,
+}) => {
+  const [{ secrets }] = useFormData<{ secrets?: { authType?: string } }>({
+    watch: ['secrets.authType'],
+  });
+  const { setFieldValue } = useFormContext();
+  const isOutboundOn = secrets?.authType !== NO_AUTH_TYPE_ID;
+
+  const onChange = (checked: boolean) => {
+    if (checked) {
+      setFieldValue('secrets.authType', credentialedAuthTypeId);
+      setFieldValue('config.selectedActions', null);
+    } else {
+      setFieldValue('secrets.authType', NO_AUTH_TYPE_ID);
+      setFieldValue('config.selectedActions', []);
+    }
+  };
+
+  return (
+    <>
+      <OutboundSectionTitle />
+      <EuiFormRow
+        fullWidth
+        helpText={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionConnectorForm.sendActionsHelpDescription',
+          {
+            defaultMessage:
+              'Let workflows and agents call the service with this connector. Needs credentials.',
+          }
+        )}
+      >
+        <EuiSwitch
+          label={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionConnectorForm.sendActionsToggleSwitch',
+            { defaultMessage: 'Run actions' }
+          )}
+          checked={isOutboundOn}
+          disabled={!canSave}
+          onChange={(event) => onChange(event.target.checked)}
+          data-test-subj="outbound-actions-enabled-switch"
+        />
+      </EuiFormRow>
+      <div hidden={!isOutboundOn} data-test-subj="outbound-settings">
+        <EuiSpacer size="s" />
+        {children}
+      </div>
+    </>
+  );
+};
+
+export const OutboundFormSection = memo(OutboundFormSectionComponent);
 
 interface InboundEventsFormSectionProps {
   canSave: boolean;
