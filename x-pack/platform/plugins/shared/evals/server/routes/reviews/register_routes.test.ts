@@ -12,6 +12,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import {
   API_VERSIONS,
+  EVALS_EVALUATOR_REVIEW_AGREEMENT_URL,
   EVALS_REVIEW_QUEUES_URL,
   EVALS_REVIEW_QUEUE_AGREEMENT_URL,
   EVALS_REVIEW_QUEUE_ITEM_URL,
@@ -109,6 +110,7 @@ describe('human review queue routes', () => {
     ['get', EVALS_REVIEW_QUEUE_NEXT_URL],
     ['post', EVALS_REVIEW_QUEUE_ITEM_URL],
     ['get', EVALS_REVIEW_QUEUE_AGREEMENT_URL],
+    ['get', EVALS_EVALUATOR_REVIEW_AGREEMENT_URL],
   ] as const)('guards %s %s with the review privilege only', (method, url) => {
     const { versioned } = setup();
 
@@ -327,6 +329,68 @@ describe('human review queue routes', () => {
       queue_id: 'queue-1',
       evaluator: { name: 'correctness', version: '1.0.0' },
       binary: { n: 1, rawAgreement: 1 },
+    });
+  });
+
+  describe('evaluator agreement across a major version', () => {
+    const reviewed = (queueId: string, label: string) => ({
+      ...storedItem,
+      queue_id: queueId,
+      status: 'reviewed' as const,
+      human: { label, reviewed_at: '2026-01-01T00:00:00.000Z' },
+    });
+
+    it('pools the queues of the same evaluator and major, and leaves other majors out', async () => {
+      const { handlerFor, soClient, reviewClient, context } = setup();
+      const queue = (id: string, name: string, version: string) => ({
+        id,
+        type: 'evals-review-queue',
+        attributes: { ...queueAttributes, evaluator_name: name, evaluator_version: version },
+      });
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          queue('q-1', 'correctness', '2.0.0'),
+          queue('q-2', 'correctness', '2.3.1'),
+          queue('q-3', 'correctness', '1.9.0'),
+          queue('q-4', 'tone', '2.0.0'),
+        ],
+      } as never);
+      reviewClient.listItems.mockImplementation(async (queueId: string) => [
+        reviewed(queueId, 'pass'),
+      ]);
+
+      const response = await handlerFor('get', EVALS_EVALUATOR_REVIEW_AGREEMENT_URL)(
+        context as never,
+        httpServerMock.createKibanaRequest({
+          params: { name: 'correctness' },
+          query: { version: '2.1.0' },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(reviewClient.listItems.mock.calls.map(([id]) => id)).toEqual(['q-1', 'q-2']);
+      expect(response.payload).toMatchObject({
+        evaluator_name: 'correctness',
+        version_major: 2,
+        queue_count: 2,
+        binary: { n: 2 },
+      });
+    });
+
+    it('reports no agreement when no queue matches', async () => {
+      const { handlerFor, soClient, context } = setup();
+      soClient.find.mockResolvedValue({ saved_objects: [] } as never);
+
+      const response = await handlerFor('get', EVALS_EVALUATOR_REVIEW_AGREEMENT_URL)(
+        context as never,
+        httpServerMock.createKibanaRequest({
+          params: { name: 'correctness' },
+          query: { version: '3.0.0' },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(response.payload).toMatchObject({ queue_count: 0, binary: null });
     });
   });
 });

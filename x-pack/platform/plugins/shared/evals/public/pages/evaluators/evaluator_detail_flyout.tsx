@@ -30,6 +30,7 @@ import {
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { getJudgeScoreDirection, type JudgeEvidence, type LlmJudgeConfig } from '@kbn/evals-common';
+import { EvaluatorAgreementBadge } from '../../components/judge_agreement';
 import { useEvaluator } from '../../hooks/use_evaluators_api';
 import { getErrorMessage } from '../../utils/get_error_message';
 import { SCORE_DIRECTION_LABELS } from './lib';
@@ -38,6 +39,8 @@ import * as i18n from './translations';
 interface EvaluatorDetailFlyoutProps {
   evaluatorName: string;
   canEdit: boolean;
+  /** The agreement route needs the review privilege, so the badge is not requested without it. */
+  canReview?: boolean;
   onEdit: () => void;
   onClose: () => void;
 }
@@ -153,6 +156,7 @@ const JudgeDetails: React.FC<{ judge: LlmJudgeConfig }> = ({ judge }) => (
 export const EvaluatorDetailFlyout: React.FC<EvaluatorDetailFlyoutProps> = ({
   evaluatorName,
   canEdit,
+  canReview = false,
   onEdit,
   onClose,
 }) => {
@@ -258,6 +262,14 @@ export const EvaluatorDetailFlyout: React.FC<EvaluatorDetailFlyoutProps> = ({
                   <EuiBadge color="hollow">{`${i18n.VERSION_LABEL} ${evaluator.version}`}</EuiBadge>
                 )}
               </EuiFlexItem>
+              {canReview ? (
+                <EuiFlexItem grow={false}>
+                  <EvaluatorAgreementBadge
+                    evaluatorName={evaluatorName}
+                    version={evaluator.version}
+                  />
+                </EuiFlexItem>
+              ) : null}
               {isShowingOtherVersion ? (
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued" data-test-subj="evalsEvaluatorDetailPending">

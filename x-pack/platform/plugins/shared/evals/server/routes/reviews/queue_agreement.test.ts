@@ -6,7 +6,7 @@
  */
 
 import type { ReviewItem } from '../../storage/reviews/review_client';
-import { computeQueueAgreement } from './queue_agreement';
+import { computeItemsAgreement, computeQueueAgreement, majorVersionOf } from './queue_agreement';
 
 const context = {
   queue_id: 'queue-1',
@@ -93,5 +93,32 @@ describe('computeQueueAgreement', () => {
 
     expect(result.binary).toBeNull();
     expect(result.ordinal).toEqual({ n: 3, weightedKappa: 1 });
+  });
+});
+
+describe('computeItemsAgreement', () => {
+  it('pools items from several queues into one tally', () => {
+    const result = computeItemsAgreement([
+      item({ label: 'pass' }, { label: 'pass' }),
+      item({ label: 'fail' }, { label: 'fail' }),
+    ]);
+
+    expect(result.binary?.n).toBe(2);
+    expect(result.binary?.kappa).toBe(1);
+  });
+});
+
+describe('majorVersionOf', () => {
+  it.each([
+    ['1.0.0', 1],
+    ['v2.3.1', 2],
+    ['10', 10],
+    ['v3', 3],
+  ])('reads the major of %s', (version, major) => {
+    expect(majorVersionOf(version)).toBe(major);
+  });
+
+  it.each(['latest', '', 'x.1.0'])('has no major for %p', (version) => {
+    expect(majorVersionOf(version)).toBeUndefined();
   });
 });

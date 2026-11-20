@@ -31,10 +31,9 @@ const toPassFail = (label: string | undefined): boolean | undefined => {
  * sides gave a pass/fail label, and the ordinal one only when both gave a number, so an
  * evaluator that scores on a different scale simply yields `null` for the binary half.
  */
-export const computeQueueAgreement = (
-  items: readonly ReviewItem[],
-  context: Pick<ReviewQueueAgreement, 'queue_id' | 'evaluator' | 'counts'>
-): ReviewQueueAgreement => {
+export const computeItemsAgreement = (
+  items: readonly ReviewItem[]
+): Pick<ReviewQueueAgreement, 'binary' | 'ordinal'> => {
   const binaryPairs: BinaryLabelPair[] = [];
   const scorePairs: ScorePair[] = [];
 
@@ -58,8 +57,18 @@ export const computeQueueAgreement = (
       : null;
 
   return {
-    ...context,
     binary: binaryPairs.length > 0 ? computeBinaryAgreement(binaryPairs) : null,
     ordinal,
   };
+};
+
+export const computeQueueAgreement = (
+  items: readonly ReviewItem[],
+  context: Pick<ReviewQueueAgreement, 'queue_id' | 'evaluator' | 'counts'>
+): ReviewQueueAgreement => ({ ...context, ...computeItemsAgreement(items) });
+
+/** The leading integer of a semver, or `undefined` when the version does not start with one. */
+export const majorVersionOf = (version: string): number | undefined => {
+  const major = /^v?(\d+)(?:\.|$)/.exec(version.trim())?.[1];
+  return major === undefined ? undefined : Number(major);
 };

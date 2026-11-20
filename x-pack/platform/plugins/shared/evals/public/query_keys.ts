@@ -104,6 +104,8 @@ export const queryKeys = {
     detail: (queueId: string) => ['evals', 'review_queues', 'detail', queueId] as const,
     next: (queueId: string) => ['evals', 'review_queues', 'next', queueId] as const,
     agreement: (queueId: string) => ['evals', 'review_queues', 'agreement', queueId] as const,
+    evaluatorAgreement: (name: string, version: string) =>
+      ['evals', 'review_queues', 'evaluator_agreement', name, version] as const,
   },
   traceEvidence: {
     detail: (traceId: string) => ['evals', 'trace_evidence', traceId] as const,

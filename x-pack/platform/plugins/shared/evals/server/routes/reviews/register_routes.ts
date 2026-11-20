@@ -12,6 +12,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { KibanaRequest, SavedObject } from '@kbn/core/server';
 import {
   API_VERSIONS,
+  EVALS_EVALUATOR_REVIEW_AGREEMENT_URL,
   EVALS_REVIEW_QUEUES_URL,
   EVALS_REVIEW_QUEUE_AGREEMENT_URL,
   EVALS_REVIEW_QUEUE_ITEM_URL,
@@ -26,6 +27,7 @@ import {
   REVIEW_FAIL_LABEL,
   REVIEW_PASS_LABEL,
   type BlindReviewItem,
+  type EvaluatorReviewAgreement,
   type ReviewQueueWithCounts,
   type RevealedReviewItem,
 } from '@kbn/evals-common';
@@ -39,7 +41,7 @@ import { ReviewItemNotFoundError } from '../../storage/reviews/review_item_not_f
 import type { ReviewItem } from '../../storage/reviews/review_client';
 import type { RouteDependencies } from '../register_routes';
 import { getEsErrorLogDetails } from '../utils/get_es_error_log_details';
-import { computeQueueAgreement } from './queue_agreement';
+import { computeItemsAgreement, computeQueueAgreement, majorVersionOf } from './queue_agreement';
 import { sampleScores } from './sampler';
 
 const MAX_LISTED_QUEUES = 100;
@@ -401,6 +403,64 @@ export const registerReviewQueueRoutes = ({
           });
         } catch (error) {
           return fail(res, error, 'compute review agreement');
+        }
+      }
+    );
+
+  router.versioned
+    .get({
+      path: EVALS_EVALUATOR_REVIEW_AGREEMENT_URL,
+      access: INTERNAL_API_ACCESS,
+      security: reviewAuthz,
+      summary: 'Get judge-versus-human agreement for an evaluator, pooled within one major version',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {
+            params: schema.object({
+              name: schema.string({ minLength: 1, maxLength: MAX_EVALUATOR_NAME_LENGTH }),
+            }),
+            query: schema.object({
+              version: schema.string({ minLength: 1, maxLength: MAX_EVALUATOR_VERSION_LENGTH }),
+            }),
+          },
+        },
+      },
+      async (ctx, req, res) => {
+        try {
+          const spaceId = await resolveSpaceId(req);
+          const evalsContext = await ctx.evals;
+          const soClient = await getInternalReviewQueuesSoClient();
+          const major = majorVersionOf(req.query.version);
+          const found = await soClient.find<EvalsReviewQueueAttributes>({
+            type: EVALS_REVIEW_QUEUE_SAVED_OBJECT_TYPE,
+            namespaces: [spaceId],
+            perPage: MAX_LISTED_QUEUES,
+            sortField: 'created_at',
+            sortOrder: 'desc',
+          });
+          // Matched in code rather than in a saved-object filter, so a name is never spliced
+          // into a KQL string.
+          const matching = found.saved_objects.filter(
+            (so) =>
+              so.attributes.evaluator_name === req.params.name &&
+              majorVersionOf(so.attributes.evaluator_version) === major
+          );
+          const reviews = evalsContext.reviewService.getClient({ spaceId });
+          const items = (
+            await Promise.all(matching.map((so) => reviews.listItems(so.id, 'reviewed')))
+          ).flat();
+          const body: EvaluatorReviewAgreement = {
+            evaluator_name: req.params.name,
+            version_major: major ?? null,
+            queue_count: matching.length,
+            ...computeItemsAgreement(items),
+          };
+          return res.ok({ body });
+        } catch (error) {
+          return fail(res, error, 'compute evaluator review agreement');
         }
       }
     );

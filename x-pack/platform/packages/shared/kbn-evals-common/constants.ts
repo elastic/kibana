@@ -107,6 +107,10 @@ export const EVALS_REVIEW_QUEUE_NEXT_URL = `${EVALS_REVIEW_QUEUE_URL}/_next` as 
 export const EVALS_REVIEW_QUEUE_ITEM_URL = `${EVALS_REVIEW_QUEUE_URL}/items/{itemId}` as const;
 export const EVALS_REVIEW_QUEUE_AGREEMENT_URL = `${EVALS_REVIEW_QUEUE_URL}/agreement` as const;
 
+/** Agreement pooled over every review queue of one evaluator, within one major version. */
+export const EVALS_EVALUATOR_REVIEW_AGREEMENT_URL =
+  `${EVALS_EVALUATOR_URL}/review_agreement` as const;
+
 export const MAX_REVIEW_QUEUE_SAMPLE_SIZE = 1000 as const;
 export const MAX_REVIEW_RUBRIC_LENGTH = 8192 as const;
 export const MAX_REVIEW_RATIONALE_LENGTH = 4096 as const;

@@ -10,6 +10,7 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   API_VERSIONS,
+  EVALS_EVALUATOR_REVIEW_AGREEMENT_URL,
   EVALS_REVIEW_QUEUES_URL,
   EVALS_REVIEW_QUEUE_AGREEMENT_URL,
   EVALS_REVIEW_QUEUE_ITEM_URL,
@@ -18,6 +19,7 @@ import {
   EVALS_TRACE_EVIDENCE_URL,
   type GetNextReviewItemResponse,
   type GetReviewQueueResponse,
+  type EvaluatorReviewAgreement,
   type GetTraceEvidenceResponse,
   type ListReviewQueuesResponse,
   type ReviewQueueAgreement,
@@ -117,6 +119,21 @@ export const useReviewQueueAgreement = (queueId: string) => {
   });
 };
 
+export const useEvaluatorReviewAgreement = (name: string, version: string) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.reviewQueues.evaluatorAgreement(name, version),
+    queryFn: async (): Promise<EvaluatorReviewAgreement> =>
+      services.http!.get<EvaluatorReviewAgreement>(
+        EVALS_EVALUATOR_REVIEW_AGREEMENT_URL.replace('{name}', encodeURIComponent(name)),
+        { version: API_VERSIONS.internal.v1, query: { version } }
+      ),
+    retry: retryOnServerError,
+    refetchOnWindowFocus: false,
+  });
+};
+
 /**
  * Submitting does not refetch the next item: the page shows the revealed verdict first and
  * moves on when the reviewer asks to, via `refetchNext`.
@@ -141,6 +158,9 @@ export const useSubmitReviewVerdict = (queueId: string) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueues.detail(queueId) }),
         queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueues.agreement(queueId) }),
+        queryClient.invalidateQueries({
+          queryKey: ['evals', 'review_queues', 'evaluator_agreement'],
+        }),
         queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueues.list() }),
       ]);
     },

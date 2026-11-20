@@ -80,6 +80,7 @@ export type {
   BlindReviewItem,
   RevealedReviewItem,
   OrdinalAgreement,
+  EvaluatorReviewAgreement,
   ReviewQueueAgreement,
   ListReviewQueuesResponse,
   GetReviewQueueResponse,

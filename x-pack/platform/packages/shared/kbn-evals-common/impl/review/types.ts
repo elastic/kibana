@@ -83,6 +83,19 @@ export interface ReviewQueueAgreement {
   ordinal: OrdinalAgreement | null;
 }
 
+/**
+ * Agreement pooled across the review queues of one evaluator that share a major version.
+ * A major bump changes what the judge measures, so earlier labels stop counting toward it.
+ */
+export interface EvaluatorReviewAgreement {
+  evaluator_name: string;
+  /** The major version the pooled queues share, or null when the version has no leading integer. */
+  version_major: number | null;
+  queue_count: number;
+  binary: BinaryAgreement | null;
+  ordinal: OrdinalAgreement | null;
+}
+
 export interface ListReviewQueuesResponse {
   queues: ReviewQueueWithCounts[];
 }

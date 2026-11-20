@@ -32,10 +32,12 @@ import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import {
   useNextReviewItem,
   useReviewQueue,
+  useReviewQueueAgreement,
   useSubmitReviewVerdict,
   useTraceEvidence,
   type SubmitReviewVerdictVariables,
 } from '../../hooks/use_review_queues_api';
+import { JudgeAgreementPanel } from '../../components/judge_agreement';
 import { REVIEW_QUEUES_PATH } from '../review_queues_list';
 import { VerdictForm } from './verdict_form';
 import * as i18n from './translations';
@@ -162,6 +164,7 @@ export const ReviewQueueDetailPage: React.FC = () => {
   const queue = useReviewQueue(queueId);
   const next = useNextReviewItem(queueId);
   const submit = useSubmitReviewVerdict(queueId);
+  const agreement = useReviewQueueAgreement(queueId);
   const [revealed, setRevealed] = useState<RevealedReviewItem | null>(null);
 
   const item: BlindReviewItem | null = revealed ?? next.data?.item ?? null;
@@ -233,6 +236,12 @@ export const ReviewQueueDetailPage: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      {agreement.data ? (
+        <>
+          <JudgeAgreementPanel binary={agreement.data.binary} ordinal={agreement.data.ordinal} />
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
       <EuiPanel hasBorder hasShadow={false} paddingSize="m">
         <EuiTitle size="xxs">
           <h3>{i18n.RUBRIC_TITLE}</h3>
