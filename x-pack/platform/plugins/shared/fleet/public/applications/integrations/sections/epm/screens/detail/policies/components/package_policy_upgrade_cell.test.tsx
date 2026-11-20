@@ -28,6 +28,10 @@ jest.mock('../../../../../../hooks', () => ({
   sendBulkUpgradeAgentlessPolicies: jest.fn(),
 }));
 
+jest.mock('../../../installed_integrations/components/pending_upgrade_review_status', () => ({
+  PendingUpgradeReviewStatus: () => <div data-test-subj="pendingUpgradeReviewStatus" />,
+}));
+
 // These renders take ~45ms, so the 5s default only ever fails to a CI wall-clock stall.
 jest.setTimeout(30_000);
 
@@ -85,6 +89,32 @@ describe('PackagePolicyUpgradeCell', () => {
     expect(button).toHaveAttribute('href');
   });
 
+  it('does not link to the upgrade page of an agent-based policy managed by a cloud onboarding instance', () => {
+    const utils = renderCell({
+      packagePolicy: createPackagePolicy({
+        supports_agentless: false,
+        onboarding_deployment_id: 'deploy-1',
+      }),
+    });
+
+    // The upgrade page edits the policy, which only the onboarding flow may do.
+    expect(utils.queryByTestId('integrationPolicyUpgradeBtn')).not.toBeInTheDocument();
+  });
+
+  it('keeps the pending upgrade review of a package that keeps policies up to date for a policy managed by a cloud onboarding instance', () => {
+    // The review is a package-level prompt, not the policy's upgrade page.
+    const utils = renderCell({
+      packagePolicy: createPackagePolicy({
+        supports_agentless: false,
+        onboarding_deployment_id: 'deploy-1',
+        keepPoliciesUpToDate: true,
+        pendingUpgradeReview: { target_version: '0.5.0', action: 'pending' },
+      } as Partial<InMemoryPackagePolicy>),
+    });
+
+    expect(utils.getByTestId('pendingUpgradeReviewStatus')).toBeInTheDocument();
+  });
+
   describe('with disableAgentlessLegacyAPI enabled', () => {
     beforeEach(() => {
       // disableAgentlessLegacyAPI is on by default via allowedExperimentalValues.
@@ -108,6 +138,17 @@ describe('PackagePolicyUpgradeCell', () => {
 
       // The shared agentless-upgrade confirm modal is shown.
       expect(utils.getByTestId('confirmModalConfirmButton')).toBeInTheDocument();
+    });
+
+    it('keeps the in-place upgrade of a managed integration managed by a cloud onboarding instance', () => {
+      const utils = renderCell({
+        packagePolicy: createPackagePolicy({
+          supports_agentless: true,
+          onboarding_deployment_id: 'deploy-1',
+        }),
+      });
+
+      expect(utils.getByTestId('integrationPolicyUpgradeBtn')).not.toHaveAttribute('href');
     });
   });
 });

@@ -8,13 +8,21 @@
  */
 
 import { z, lazySchema } from '@kbn/zod';
-import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
+import {
+  DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  DEFAULT_ROW_HEIGHT_LINES,
+  LENS_DATATABLE_PAGE_SIZE_OPTIONS,
+} from '@kbn/lens-common';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import {
   applyColorToSchema,
+  colorByValueAbsoluteSchema,
+  colorByValuePaletteSchema,
+  colorByValuePercentageSchema,
   colorByValueSchema,
   colorMappingSchema,
   autoColorSchema,
+  staticColorSchema,
   AUTO_COLOR,
 } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
@@ -28,7 +36,7 @@ import {
   getMetricsWithChartDimensionSchemaWithRefBasedOps,
   getBucketsWithChartDimensionSchema,
 } from './shared';
-import { horizontalAlignmentSchema } from '../alignments';
+import { horizontalAlignmentSchema, leftRightAlignmentSchema } from '../alignments';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
 import { directionSchema } from '../enums';
 
@@ -152,13 +160,10 @@ const datatableStylingSchema = lazySchema(() =>
       /**
        * Paging configuration
        */
-      paging: z
-        .union([z.literal(10), z.literal(20), z.literal(30), z.literal(50), z.literal(100)])
-        .optional()
-        .meta({
-          description:
-            'Rows per page. When set, pagination is enabled with the specified number of rows.',
-        }),
+      paging: z.literal(LENS_DATATABLE_PAGE_SIZE_OPTIONS).optional().meta({
+        description:
+          'Rows per page. When set, pagination is enabled with the specified number of rows.',
+      }),
       /**
        * Sorting configuration
        */
@@ -218,7 +223,10 @@ const datatableConfigRowsOptionsNoESQLSchema = lazySchema(() =>
     /**
      * Color configuration
      */
-    color: z.union([colorMappingSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
+    color: z.union([colorMappingSchema, autoColorSchema]).optional().meta({
+      description:
+        'Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.',
+    }),
     /**
      * Whether to enable the one click filter
      */
@@ -241,14 +249,10 @@ const datatableConfigRowsOptionsESQLSchema = lazySchema(() =>
     /**
      * Color configuration
      */
-    color: z
-      .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
-      .default(AUTO_COLOR)
-      .optional()
-      .meta({
-        description:
-          'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
-      }),
+    color: z.union([colorByValueSchema, colorMappingSchema, autoColorSchema]).optional().meta({
+      description:
+        'Color configuration for ES|QL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.',
+    }),
   })
 );
 
@@ -257,14 +261,10 @@ const datatableConfigMetricsOptionsSchema = lazySchema(() =>
     /**
      * Color configuration
      */
-    color: z
-      .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
-      .default(AUTO_COLOR)
-      .optional()
-      .meta({
-        description:
-          'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
-      }),
+    color: z.union([colorByValueSchema, colorMappingSchema, autoColorSchema]).optional().meta({
+      description:
+        'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.',
+    }),
     /**
      * Alignment of the columns
      */
@@ -291,6 +291,107 @@ const datatableConfigMetricsOptionsSchema = lazySchema(() =>
       .optional()
       .meta({ description: 'Summary row configuration' }),
   })
+);
+
+const progressBarValueRangeSchema = lazySchema(() =>
+  z
+    .discriminatedUnion('type', [
+      z
+        .object({ type: z.literal('auto') })
+        .strict()
+        .meta({
+          description: 'The bar spans the minimum to the maximum of the loaded values.',
+        }),
+      z
+        .object({
+          type: z.literal('custom'),
+          min: z.number().meta({ description: 'Value at which the bar is empty.' }),
+          max: z.number().meta({ description: 'Value at which the bar is full.' }),
+        })
+        .strict()
+        .meta({
+          description: 'Custom explicit bounds.',
+        }),
+    ])
+    .meta({
+      id: 'visDatatableProgressBarValueRange',
+      title: 'Datatable progress bar value range',
+      description: 'The numeric span the progress bar represents',
+    })
+);
+
+/**
+ * Progress bar variants of a column, one per fill mode, replacing its `apply_color_to`, `color` and `alignment` options.
+ * Each variant and the union get a component `id`, so the OpenAPI spec stays within 2 levels of nested unions.
+ */
+const getProgressBarSchema = <Shape extends z.ZodRawShape, Config extends z.core.$ZodObjectConfig>(
+  columnSchema: z.ZodObject<Shape, Config>,
+  { id, title }: { id: string; title: string }
+) => {
+  const progressBarSchema = columnSchema.extend({
+    apply_color_to: z.literal('progress_bar').meta({
+      description:
+        "Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.",
+    }),
+    value_range: progressBarValueRangeSchema.default({ type: 'auto' }),
+    alignment: leftRightAlignmentSchema
+      .default('right')
+      .meta({ description: 'Label alignment relative to the progress bar.' }),
+  });
+
+  const paletteColorSchema = z
+    .union([
+      autoColorSchema,
+      colorByValuePaletteSchema,
+      colorByValueAbsoluteSchema,
+      colorByValuePercentageSchema,
+    ])
+    .default(AUTO_COLOR)
+    .meta({ description: 'Palette the bar takes its colors from.' });
+
+  return z
+    .discriminatedUnion('fill_mode', [
+      progressBarSchema
+        .extend({
+          fill_mode: z
+            .literal('single')
+            .meta({ description: 'Fills the bar with one fixed color.' }),
+          color: z
+            .union([staticColorSchema, autoColorSchema])
+            .default(AUTO_COLOR)
+            .meta({ description: 'Bar color.' }),
+        })
+        .meta({ id: `${id}Single`, title: `${title} (single fill)` }),
+      progressBarSchema
+        .extend({
+          fill_mode: z.literal('solid').meta({
+            description:
+              "Fills the bar using the palette color corresponding to the value's position within the palette scale.",
+          }),
+          color: paletteColorSchema,
+        })
+        .meta({ id: `${id}Solid`, title: `${title} (solid fill)` }),
+      progressBarSchema
+        .extend({
+          fill_mode: z.literal('gradient').default('gradient').meta({
+            description:
+              "Displays the palette across the bar's full range. Shorter bars reveal only the portion of the palette up to their length, rather than stretching the gradient to fit the bar.",
+          }),
+          color: paletteColorSchema,
+        })
+        .meta({ id: `${id}Gradient`, title: `${title} (gradient fill)` }),
+    ])
+    .meta({ id, title, openapi: { availability: { since: '9.6.1' } } });
+};
+
+const datatableMetricOptionsSchema = lazySchema(() =>
+  z.discriminatedUnion('apply_color_to', [
+    datatableConfigMetricsOptionsSchema,
+    getProgressBarSchema(datatableConfigMetricsOptionsSchema, {
+      id: 'visDatatableProgressBar',
+      title: 'Datatable metric progress bar',
+    }),
+  ])
 );
 
 interface SortByValidationInput {
@@ -366,7 +467,7 @@ export const datatableConfigSchemaNoESQL = lazySchema(() =>
       metrics: z
         .array(
           getMetricsWithChartDimensionSchemaWithRefBasedOps('datatableMetric').and(
-            datatableConfigMetricsOptionsSchema
+            datatableMetricOptionsSchema
           )
         )
         .min(1)
@@ -408,12 +509,27 @@ export const datatableConfigSchemaNoESQL = lazySchema(() =>
     })
 );
 
-const visDatatableESQLMetricSchema = lazySchema(() =>
-  esqlColumnWithFormatSchema.extend(datatableConfigMetricsOptionsSchema.shape).meta({
-    id: 'visDatatableESQLMetric',
-    title: 'Datatable Metric (ES|QL)',
-  })
-);
+const visDatatableESQLMetricSchema = lazySchema(() => {
+  const metricSchema = esqlColumnWithFormatSchema.extend(datatableConfigMetricsOptionsSchema.shape);
+  return z.discriminatedUnion('apply_color_to', [
+    metricSchema.meta({ id: 'visDatatableESQLMetric', title: 'Datatable Metric (ES|QL)' }),
+    getProgressBarSchema(metricSchema, {
+      id: 'visDatatableESQLMetricProgressBar',
+      title: 'Datatable metric progress bar (ES|QL)',
+    }),
+  ]);
+});
+
+const visDatatableESQLRowSchema = lazySchema(() => {
+  const rowSchema = esqlColumnWithFormatSchema.extend(datatableConfigRowsOptionsESQLSchema.shape);
+  return z.discriminatedUnion('apply_color_to', [
+    rowSchema,
+    getProgressBarSchema(rowSchema, {
+      id: 'visDatatableESQLRowProgressBar',
+      title: 'Datatable row progress bar (ES|QL)',
+    }),
+  ]);
+});
 
 export const datatableConfigSchemaESQL = lazySchema(() =>
   z
@@ -436,7 +552,7 @@ export const datatableConfigSchemaESQL = lazySchema(() =>
        * Row configuration, optional operations.
        */
       rows: z
-        .array(esqlColumnWithFormatSchema.extend(datatableConfigRowsOptionsESQLSchema.shape))
+        .array(visDatatableESQLRowSchema)
         .min(1)
         .max(50)
         .optional()

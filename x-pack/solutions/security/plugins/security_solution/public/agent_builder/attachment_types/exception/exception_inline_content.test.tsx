@@ -37,6 +37,45 @@ describe('ExceptionInlineContent', () => {
     expect(screen.getByText('user.name')).toBeInTheDocument();
   });
 
+  it('renders the exception name above the description', () => {
+    const { container } = renderContent({
+      name: 'Known non-threat hosts excluded from indicator match',
+      description: 'Host is under maintenance',
+      entries: [{ field: 'host.name', operator: 'exists' }],
+    });
+
+    expect(screen.getByTestId('securityExceptionAttachmentName')).toHaveTextContent(
+      'Known non-threat hosts excluded from indicator match'
+    );
+    const text = container.textContent ?? '';
+    expect(text.indexOf('Known non-threat hosts')).toBeLessThan(
+      text.indexOf('Host is under maintenance')
+    );
+  });
+
+  it('renders the name when the proposal has no description', () => {
+    renderContent({
+      name: 'Known non-threat hosts excluded from indicator match',
+      description: '',
+      entries: [{ field: 'host.name', operator: 'exists' }],
+    });
+
+    expect(screen.getByTestId('securityExceptionAttachmentName')).toBeInTheDocument();
+  });
+
+  it('omits the name block when the proposal has no name', () => {
+    // The server schema requires a name; this guards a payload written before that validation.
+    renderContent({
+      name: '',
+      description: 'Host is under maintenance',
+      entries: [{ field: 'host.name', operator: 'exists' }],
+    });
+
+    expect(screen.queryByTestId('securityExceptionAttachmentName')).not.toBeInTheDocument();
+    expect(screen.getByText('Host is under maintenance')).toBeInTheDocument();
+    expect(screen.getByText('host.name')).toBeInTheDocument();
+  });
+
   it('omits the description block when the proposal has none', () => {
     renderContent({
       name: 'Exclude maintenance host',

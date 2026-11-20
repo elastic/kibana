@@ -1,9 +1,23 @@
 {
-  "sha1": "6d852d165dd42fd113b755e3668cbcf7e13768f7",
+  "sha1": "e004339d31b632cc20417685a630231aa82a0685",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "ac58ea0c6b1a540-45371c654422c99",
+      "title": "SyntheticsAlertOnNoData — ungrouped names every pending location by label and keeps the labels on recovery",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/alert_on_no_data_ungrouped.spec.ts",
+        "line": 56,
+        "column": 6
+      }
+    },
     {
       "id": "8c53aec116a7430-bbc5c122cb266d2",
       "title": "SyntheticsAlertOnNoData triggers pending alerts per location, transitions pending to down, and recovers pending to up",

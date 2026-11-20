@@ -118,7 +118,7 @@ const keepRecommendedWarning = i18n.translate(
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data }) => {
-  const { http, isServerless, uiSettings } = useTriggerUiActionServices();
+  const { http, isServerless, uiSettings, cps } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
   const isEdit = !!metadata?.isEdit;
 
@@ -274,7 +274,10 @@ export const EsqlQueryExpression: React.FC<
       const fetchTimeFieldsData = async (queryObj: AggregateQuery) => {
         try {
           // Load the source columns with ES|QL (like Discover), so federated datasets work too
-          const projectRouting = getProjectRoutingFromEsqlQuery(queryObj.esql);
+          // Rules run with the space default routing, unless the query sets its own
+          const projectRouting =
+            getProjectRoutingFromEsqlQuery(queryObj.esql) ??
+            cps?.cpsManager?.getDefaultProjectRouting();
           const sourceQuery = getSourceCommandQueryFromESQLQuery(queryObj.esql);
           const [columns, timestampField] = await Promise.all([
             getEsqlSourceColumns({ esqlQuery: sourceQuery, http, projectRouting }),
@@ -300,7 +303,7 @@ export const EsqlQueryExpression: React.FC<
       }
       clearParam('timeField');
     },
-    [timeField, setParam, clearParam, http]
+    [timeField, setParam, clearParam, http, cps]
   );
 
   return (

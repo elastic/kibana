@@ -107,6 +107,22 @@ describe('runGenerationStep', () => {
     );
   });
 
+  it('forwards telemetryMetadata to invokeGenerationWorkflow when set', async () => {
+    const telemetryMetadata = { pluginId: 'alertzero', aggregateBy: 'alertzero-run-1' };
+
+    await runGenerationStep({ ...baseParams, telemetryMetadata });
+
+    expect(mockInvokeGenerationWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ telemetryMetadata })
+    );
+  });
+
+  it('omits telemetryMetadata from invokeGenerationWorkflow when unset', async () => {
+    await runGenerationStep(baseParams);
+
+    expect(mockInvokeGenerationWorkflow.mock.calls[0][0]).not.toHaveProperty('telemetryMetadata');
+  });
+
   it('returns the generation result on success', async () => {
     const result = await runGenerationStep(baseParams);
 

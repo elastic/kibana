@@ -11,6 +11,7 @@ import {
   OTHER_BUCKET_ESQL_LITERAL,
   buildOtherBucketLabelFragment,
   buildOtherBucketNamedFlagFragment,
+  buildOtherBucketOutputParts,
   buildOuterTopNOtherRemap,
 } from './build_outer_top_n_other_remap';
 
@@ -63,5 +64,35 @@ describe('buildOtherBucketLabelFragment', () => {
     expect(buildOtherBucketLabelFragment({ groupExpr: 'clientip', keyAlias: 'key_clientip' })).toBe(
       `clientip = COALESCE(TO_STRING(key_clientip), ${OTHER_BUCKET_ESQL_LITERAL})`
     );
+  });
+});
+
+describe('buildOtherBucketOutputParts', () => {
+  const baseInput = {
+    groupExpr: 'host.keyword',
+    keyAlias: 'key_host_keyword',
+    flagAlias: 'named_host_keyword',
+    sortClause: '`AVG(bytes)` DESC, key_host_keyword ASC',
+  };
+
+  it('sorts Other last, restores the label and drops the helper columns', () => {
+    expect(buildOtherBucketOutputParts(baseInput)).toEqual([
+      'EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG)',
+      'SORT named_host_keyword DESC, `AVG(bytes)` DESC, key_host_keyword ASC',
+      `EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), ${OTHER_BUCKET_ESQL_LITERAL})`,
+      'DROP named_host_keyword, key_host_keyword',
+    ]);
+  });
+
+  it('caps the rows after the sort and drops extra helper columns', () => {
+    expect(
+      buildOtherBucketOutputParts({ ...baseInput, limit: 4, dropAliases: ['rank_host_keyword'] })
+    ).toEqual([
+      'EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG)',
+      'SORT named_host_keyword DESC, `AVG(bytes)` DESC, key_host_keyword ASC',
+      'LIMIT 4',
+      `EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), ${OTHER_BUCKET_ESQL_LITERAL})`,
+      'DROP named_host_keyword, key_host_keyword, rank_host_keyword',
+    ]);
   });
 });

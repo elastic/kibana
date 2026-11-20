@@ -168,15 +168,21 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
 });
 
 describe('Nightshift CI coverage', () => {
-  it('keeps the existing label and Customer-0 specs alongside an isolated ORCA spec', () => {
+  it('runs the Customer-0 stored datasets alongside isolated ORCA and reinforcement specs', () => {
     const suite = suites.find(({ id }) => id === 'nightshift-investigations');
     expect(suite?.ciLabels).toEqual(['evals:nightshift-investigations']);
-    expect(suite?.shards?.map(({ id }) => id)).toEqual(['customer0', 'orcabench']);
+    expect(suite?.shards?.map(({ id }) => id)).toEqual([
+      'customer0-golden',
+      'customer0-connector-probes',
+      'orcabench',
+      'reinforcement',
+    ]);
     const files = suite?.shards?.flatMap(({ specFiles }) => specFiles) ?? [];
     expect(files).toEqual([
-      'evals/smoke/smoke.spec.ts',
-      'evals/investigation/investigation.spec.ts',
+      'evals/investigation/stored.spec.ts',
+      'evals/connector_probe/stored.spec.ts',
       'evals/investigation/orcabench.spec.ts',
+      'evals/reinforcement/reinforcement.spec.ts',
     ]);
     const configPath = suite?.configPath;
     expect(configPath).toBeDefined();

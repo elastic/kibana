@@ -696,7 +696,9 @@ describe('registerChatRoutes', () => {
     expect(result).toEqual({
       status: 400,
       payload: {
-        attributes: {},
+        attributes: {
+          code: 'badRequest',
+        },
         message:
           'target url "https://disallowed.example.com/events" is not added to the Kibana config xpack.actions.allowedHosts',
       },

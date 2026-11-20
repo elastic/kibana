@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiSuperDatePicker,
   EuiText,
 } from '@elastic/eui';
 import { useIsCpsMultiProject } from '@kbn/cps-utils';
@@ -30,6 +29,7 @@ import {
   setNightshiftRuleIdParam,
 } from '../../../common/url_params';
 import { RuleFlyout } from '../../../components/entities/rule/rule_flyout';
+import { NightshiftTimeRangePicker } from '../../../components/ui/time_range_picker';
 import type { DetectionRule } from '../../../data/rules/use_detection_rules';
 import { useDetectionRuleById, useDetectionRules } from '../../../data/rules/use_detection_rules';
 import { useRulesDemote } from '../../../data/rules/use_rules_demote';
@@ -198,13 +198,11 @@ export const RulesTab = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiSuperDatePicker
-            compressed
-            width="auto"
-            showUpdateButton={false}
+          <NightshiftTimeRangePicker
             start={timeRange.from}
             end={timeRange.to}
-            onTimeChange={({ start, end }) => onTimeRangeChange({ from: start, to: end })}
+            onChange={({ start, end }) => onTimeRangeChange({ from: start, to: end })}
+            showRefreshButton
             data-test-subj="nightshiftDetectionRulesTimePicker"
           />
         </EuiFlexItem>

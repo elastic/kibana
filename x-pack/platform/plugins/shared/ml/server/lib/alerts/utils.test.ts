@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildAnomalyAlertTimeFilter } from './utils';
+import { buildAnomalyAlertTimeFilter, chunkIdsForRequestPath } from './utils';
 
 describe('buildAnomalyAlertTimeFilter', () => {
   const lookbackInterval = '32m';
@@ -73,5 +73,30 @@ describe('buildAnomalyAlertTimeFilter', () => {
         minimum_should_match: 1,
       },
     });
+  });
+});
+
+describe('chunkIdsForRequestPath', () => {
+  test('returns no batches for no ids', () => {
+    expect(chunkIdsForRequestPath([])).toEqual([]);
+  });
+
+  test('returns a single batch when the ids fit', () => {
+    expect(chunkIdsForRequestPath(['job_a', 'job_b', 'job_c'])).toEqual(['job_a,job_b,job_c']);
+  });
+
+  test('accounts for the URL-encoded separator when splitting', () => {
+    // 'aaaa%2Cbbbb' is 11 characters, 'aaaa%2Cbbbb%2Ccccc' is 18
+    expect(chunkIdsForRequestPath(['aaaa', 'bbbb', 'cccc'], 11)).toEqual(['aaaa,bbbb', 'cccc']);
+    expect(chunkIdsForRequestPath(['aaaa', 'bbbb', 'cccc'], 10)).toEqual(['aaaa', 'bbbb', 'cccc']);
+  });
+
+  test('keeps every id in order and each batch within the default limit', () => {
+    const ids = Array.from({ length: 1000 }, (_, i) => `datafeed-test_job_${i}`);
+    const batches = chunkIdsForRequestPath(ids);
+
+    expect(batches.length).toBeGreaterThan(1);
+    batches.forEach((batch) => expect(encodeURIComponent(batch).length).toBeLessThanOrEqual(3500));
+    expect(batches.flatMap((batch) => batch.split(','))).toEqual(ids);
   });
 });

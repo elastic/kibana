@@ -6,6 +6,8 @@
  */
 
 import { createHash } from 'crypto';
+import { parse, stringify } from 'yaml';
+import { DEFAULT_EMAIL_PARAMS_TEMPLATE } from '@kbn/alerting-v2-constants';
 import type {
   CreateActionPolicyDataInput,
   CreateRuleData,
@@ -154,6 +156,44 @@ steps:
       body:
         marker: ${JSON.stringify(marker)}
 `;
+
+/**
+ * Workflow YAML that a simple email workflow saves: the default email message, with
+ * `to` and `subject` filled in, sent through the `.email` connector `connectorId`.
+ */
+export const buildDefaultEmailWorkflowYaml = ({
+  name,
+  connectorId,
+}: {
+  name: string;
+  connectorId: string;
+}): string => {
+  const { message } = parse(DEFAULT_EMAIL_PARAMS_TEMPLATE) as { message: string };
+
+  return stringify({
+    name,
+    enabled: true,
+    description: 'Scout simple workflow built from the default email template',
+    triggers: [
+      {
+        type: 'manual',
+        inputs: {
+          type: 'object',
+          properties: { payload: { $ref: '#/kibana/definitions/alertingV2NotificationGroup' } },
+          required: ['payload'],
+        },
+      },
+    ],
+    steps: [
+      {
+        name: 'notify',
+        type: 'email',
+        'connector-id': connectorId,
+        with: { to: ['ops@example.com'], subject: 'Scout default email', message },
+      },
+    ],
+  });
+};
 
 export const buildActionPolicyDestinations = (count: number) =>
   Array.from({ length: count }, (_, i) => ({

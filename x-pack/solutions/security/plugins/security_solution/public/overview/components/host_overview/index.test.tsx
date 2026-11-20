@@ -15,6 +15,8 @@ import { HostOverview } from '.';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import type { OpenFlyoutLinkProps } from '../../../flyout_v2/shared/components/open_flyout_link';
+import { FLYOUT_LINK_TEST_ID } from '../../../flyout/shared/components/test_ids';
 
 const defaultProps = {
   data: undefined,
@@ -24,6 +26,18 @@ const defaultProps = {
   isAuthorized: true,
   loading: true,
 };
+
+const mockOpenFlyoutLink = jest.fn();
+jest.mock('../../../flyout_v2/shared/components/open_flyout_link', () => {
+  const actual = jest.requireActual('../../../flyout_v2/shared/components/open_flyout_link');
+  return {
+    ...actual,
+    OpenFlyoutLink: (props: OpenFlyoutLinkProps) => {
+      mockOpenFlyoutLink(props);
+      return <actual.OpenFlyoutLink {...props} />;
+    },
+  };
+});
 
 jest.mock('../../../entity_analytics/api/hooks/use_risk_score');
 
@@ -44,7 +58,6 @@ describe('Host Summary Component', () => {
     hostName: 'testHostName',
     jobNameById: {},
     scopeId: 'default',
-    isFlyoutOpen: false,
   };
 
   beforeEach(() => {
@@ -118,5 +131,18 @@ describe('Host Summary Component', () => {
       </TestProviders>
     );
     expect(container).toHaveTextContent('aa7ca589f1b8220002f2fc61c64cfbf1');
+  });
+
+  test('it links the IP addresses to the network flyout', () => {
+    const { getAllByTestId } = render(
+      <TestProviders>
+        <HostOverview {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(mockOpenFlyoutLink).toHaveBeenCalledWith(
+      expect.objectContaining({ field: 'host.ip', value: '10.142.0.7' })
+    );
+    expect(getAllByTestId(FLYOUT_LINK_TEST_ID)[0]).toHaveTextContent('10.142.0.7');
   });
 });
