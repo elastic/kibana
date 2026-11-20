@@ -289,13 +289,25 @@ describe('runCustomResolutionRules', () => {
     );
   });
 
-  it('leaves all state alone when the rules cannot be loaded', async () => {
+  it('keeps the state of a live rule when the rules cannot be loaded', async () => {
     const previous = watermarked('a');
-    const { rules, logger } = await run(new Error('forbidden'), { previous });
+    const { rules, logger } = await run(new Error('forbidden'), {
+      previous,
+      reread: (id) => rule(id),
+    });
 
     expect(rules).toEqual(previous);
     expect(runEsqlMatcherRule).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('failed to load'));
+  });
+
+  it('drops the state of a deleted rule even when the rules cannot be loaded', async () => {
+    const { rules } = await run(new Error('forbidden'), {
+      previous: watermarked('deleted'),
+      reread: () => undefined,
+    });
+
+    expect(rules).toEqual({});
   });
 
   it('stops before the next rule once the task is aborted', async () => {
