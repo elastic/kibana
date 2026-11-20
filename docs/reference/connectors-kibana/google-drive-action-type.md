@@ -23,18 +23,36 @@ Google Drive connectors support the following authentication types. Select the a
 edit the connector.
 
 Quick Connect OAuth 2.0 (recommended) {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
-:   Elastic's managed OAuth flow for Google Drive. Grants read-only access (`drive.readonly` and `drive.metadata.readonly`). No app setup is required — select this option and authorize access through Elastic. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
+:   Elastic's managed OAuth flow for Google Drive. The picker shows a **Recommended** badge on this option. Grants read-only access (`drive.readonly` and `drive.metadata.readonly`). No app setup is required. Select this option and authorize access through Elastic. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
-Bearer Token
-:   A Google OAuth 2.0 access token with Google Drive API scopes. See **Get API credentials**.
-
-OAuth 2.0 authorization code
+OAuth 2.0 Authorization Code
 :   Uses a **Web application** OAuth client in Google Cloud. In {{kib}} you provide:
 
-    - **Client ID** and **Client Secret**: from that OAuth client
+    - **Client ID** and **Client secret**: from that OAuth client
     - **Redirect URI**: register {{kib}}’s OAuth callback in Google Cloud (see **Get API credentials**)
 
     The connector automatically uses the correct Google OAuth endpoints and scopes (`https://www.googleapis.com/auth/drive.readonly` and `https://www.googleapis.com/auth/drive.metadata.readonly`).
+
+::::{applies-switch}
+:::{applies-item} stack: preview =9.4
+
+Bearer token
+:   A Google OAuth 2.0 access token with Google Drive API scopes. Select **Bearer token** when you create the connector. See **Get API credentials**.
+
+:::
+:::{applies-item} stack: preview 9.5
+
+Bearer token
+:   Not offered when you create a new connector. A connector that already uses a bearer token keeps working. See [Bearer token (manual, short-lived)](#google-drive-bearer-token).
+
+:::
+:::{applies-item} serverless: preview
+
+Bearer token
+:   Not offered when you create a new connector. A connector that already uses a bearer token keeps working. See [Bearer token (manual, short-lived)](#google-drive-bearer-token).
+
+:::
+::::
 
 ## Test connectors [google-drive-action-configuration]
 
@@ -75,9 +93,9 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 No setup required. Select **Quick Connect OAuth 2.0** when you create the connector in {{kib}} and follow the authorization prompt to grant Elastic access to your Google Drive. Your Google Workspace administrator might need to approve the Elastic app. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
-### OAuth 2.0 authorization code
+### OAuth 2.0 Authorization Code
 
-This matches the **OAuth 2.0 authorization code** authentication type in {{kib}}. Configure a **Web application** OAuth
+This matches the **OAuth 2.0 Authorization Code** authentication type in {{kib}}. Configure a **Web application** OAuth
 client in Google Cloud (similar to common guides that use **Authorized JavaScript origins** and **Authorized redirect
 URIs**).
 
@@ -102,15 +120,19 @@ Start in **[Google Cloud Console](https://console.cloud.google.com/)**.
    `https://www.googleapis.com/auth/drive.metadata.readonly`, or broader scopes if your policy allows).
 
 4. Create the client, then copy **Client ID** and **Client secret** into the connector in {{kib}} when you select **OAuth
-   2.0 authorization code**. The connector automatically configures the correct Google OAuth endpoints and scopes.
+   2.0 Authorization Code**. The connector automatically configures the correct Google OAuth endpoints and scopes.
 
-### Bearer token (manual, short-lived)
+### Bearer token (manual, short-lived) [google-drive-bearer-token]
 
-To use **Bearer Token** authentication, you need a Google OAuth 2.0 access token with Drive API scopes. One way to obtain
-a token for testing is Google’s OAuth 2.0 Playground.
+:::{note}
+:applies_to: {"stack": "preview 9.5", "serverless": "preview"}
+**Bearer token** is not offered when you create a new Google Drive connector. Use these steps only for a connector that already uses a bearer token. That connector keeps working.
+:::
+
+To use **Bearer token** authentication, you need a Google OAuth 2.0 access token with Drive API scopes. One way to obtain a token for testing is Google's OAuth 2.0 Playground.
 
 1. Open the [OAuth 2.0 Playground](https://developers.google.com/oauthplayground/).
 2. In the list of APIs, select **Drive API v3** and select the `https://www.googleapis.com/auth/drive.readonly` scope (or `https://www.googleapis.com/auth/drive` for full access).
 3. Select **Authorize APIs** and sign in with your Google account.
 4. Select **Exchange authorization code for tokens**.
-5. Copy the **Access token** and enter it as the **Bearer Token** when configuring the connector in {{kib}}.
+5. Copy the **Access token** and enter it in the **Token** field for a connector that uses **Bearer token**.

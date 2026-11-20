@@ -149,9 +149,9 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [snowflake-api-credentials]
 
-The Snowflake connector supports two authentication methods: **OAuth Authorization Code** (recommended) and **Programmatic Access Token** (PAT).
+The Snowflake connector supports **OAuth 2.0 Authorization Code** and **Programmatic access token (PAT)**. The picker lists **OAuth 2.0 Authorization Code** first.
 
-### OAuth Authorization Code (recommended)
+### OAuth 2.0 Authorization Code
 
 Use this method to let users authorize the connector with their own Snowflake account. The connector handles token exchange and refresh automatically using Proof Key for Code Exchange (PKCE).
 
@@ -174,19 +174,19 @@ Use this method to let users authorize the connector with their own Snowflake ac
    SELECT SYSTEM$SHOW_OAUTH_CLIENT_SECRETS('KIBANA_OAUTH');
    ```
 
-3. In {{kib}}, create a Snowflake connector and select **OAuth Authorization Code** as the authentication method. Enter:
+3. In {{kib}}, create a Snowflake connector and select **OAuth 2.0 Authorization Code** as the authentication method. Enter:
    - **Authorization URL**: `https://<account>.snowflakecomputing.com/oauth/authorize`
    - **Token URL**: `https://<account>.snowflakecomputing.com/oauth/token-request`
-   - **Client ID** and **Client Secret** from step 2.
+   - **Client ID** and **Client secret** from step 2.
 4. Authorize with your Snowflake account.
 
-### Programmatic Access Token (PAT)
+### Programmatic access token (PAT)
 
 Use this method for quick setup or automated access. Snowflake PATs are tied to a specific user and role.
 
 1. In your Snowflake account, ensure programmatic access tokens are enabled for your user.
 2. Generate a PAT through the Snowflake web UI (**User Menu → Preferences → Programmatic Access Tokens**) or through SQL.
-3. In {{kib}}, create a Snowflake connector and select **Bearer** as the authentication method. Paste the PAT into the **Snowflake access token** field.
+3. In {{kib}}, create a Snowflake connector and select **Programmatic access token (PAT)** as the authentication method. Paste the PAT into the **Snowflake access token** field.
 
 ::::{note}
 PATs might expire depending on your Snowflake account configuration. Regenerate the token before it expires.

@@ -9,7 +9,7 @@ applies_to:
 
 # Slack (v2) connector [slack-v2-action-type]
 
-The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send and edit messages, create channels, and invite users to Slack channels using the Slack Web API. It supports three authentication methods: Quick Connect OAuth 2.0 (recommended), OAuth Authorization Code (Slack OAuth v2), and Bot Token.
+The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send and edit messages, create channels, and invite users to Slack channels using the Slack Web API.
 
 ## Create connectors in {{kib}} [define-slack-v2-ui]
 
@@ -17,19 +17,43 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [slack-v2-connector-configuration]
 
-Slack (v2) connectors support three authentication methods:
+::::{applies-switch}
+:::{applies-item} stack: preview =9.4
 
-Quick Connect OAuth 2.0 (recommended) {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
-:   Elastic's managed OAuth flow. Select this option and authorize access to your Slack workspace through Elastic. No app setup is required. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
+Slack (v2) connectors use **OAuth 2.0 Authorization Code**. Slack's OAuth v2 flow uses your own Slack app. You are redirected to Slack to authorize access to your workspace. You need a Slack app with a **Client ID**, a **Client secret**, and the appropriate user token scopes. See [Get API credentials (OAuth)](#slack-v2-api-credentials-oauth).
 
-OAuth Authorization Code
-:   Slack's OAuth v2 flow using your own Slack app. You will be redirected to Slack to authorize access to your workspace. Requires a Slack app with a Client ID, Client Secret, and the appropriate user token scopes. See [Get API credentials (OAuth)](#slack-v2-api-credentials-oauth) for setup steps.
+:::
+:::{applies-item} stack: preview =9.5
 
-Bot Token
-:   A long-lived Slack bot token (format: `xoxb-...`) from a Slack app. Paste the token directly — no OAuth redirect is required. See [Get API credentials (Bot Token)](#slack-v2-api-credentials-bot-token) for setup steps.
+The picker offers **OAuth 2.0 Authorization Code**. See [Get API credentials (OAuth)](#slack-v2-api-credentials-oauth). Starting with 9.5.4, it also offers **Bot Token**. Paste a long-lived Slack bot token (`xoxb-...`) in **Slack Bot Token**. See [Get API credentials (Bot Token)](#slack-v2-api-credentials-bot-token).
 
-::::{note}
-The **Search messages** action requires a user token and is not available when using Bot Token authentication. Use **Get conversation history** to read messages from a specific channel instead.
+**Quick Connect OAuth 2.0** is included, listed first with a **Recommended** badge, only when `xpack.actions.auth.ears.enabled` is `true` and `xpack.actions.auth.ears.url` is set. `xpack.actions.auth.ears.enabled` defaults to `false`. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
+
+The **Search messages** action requires a user token. It is not available with **Bot Token**. Use **Get conversation history** to read messages from a specific channel instead.
+
+:::
+:::{applies-item} stack: preview 9.6
+
+The picker lists **Quick Connect OAuth 2.0** first and shows a **Recommended** badge when `xpack.actions.auth.ears.enabled` is `true` (the default) and `xpack.actions.auth.ears.url` is set. It also offers **OAuth 2.0 Authorization Code** and **Bot Token**.
+
+**OAuth 2.0 Authorization Code** uses your own Slack app. See [Get API credentials (OAuth)](#slack-v2-api-credentials-oauth). **Bot Token** is a long-lived Slack bot token (`xoxb-...`) that you paste in **Slack Bot Token**. See [Get API credentials (Bot Token)](#slack-v2-api-credentials-bot-token). Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
+
+The **Search messages** action requires a user token. It is not available with **Bot Token**. Use **Get conversation history** to read messages from a specific channel instead.
+
+A connector created through the Elastic Slack app installation uses **Elastic Slack app (Bot Token)**. That option is not offered when you create a connector in the picker. **Search messages** is not available with it either.
+
+:::
+:::{applies-item} serverless: preview
+
+The picker lists **Quick Connect OAuth 2.0** first and shows a **Recommended** badge. It also offers **OAuth 2.0 Authorization Code** and **Bot Token**.
+
+**OAuth 2.0 Authorization Code** uses your own Slack app. See [Get API credentials (OAuth)](#slack-v2-api-credentials-oauth). **Bot Token** is a long-lived Slack bot token (`xoxb-...`) that you paste in **Slack Bot Token**. See [Get API credentials (Bot Token)](#slack-v2-api-credentials-bot-token). Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
+
+The **Search messages** action requires a user token. It is not available with **Bot Token**. Use **Get conversation history** to read messages from a specific channel instead.
+
+A connector created through the Elastic Slack app installation uses **Elastic Slack app (Bot Token)**. That option is not offered when you create a connector in the picker. **Search messages** is not available with it either.
+
+:::
 ::::
 
 ## Receive Slack events [slack-v2-inbound-events]
@@ -273,12 +297,16 @@ Ask question {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+`
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. If you use [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings), include `slack.com` in the list. To use **Upload file**, also include `files.slack.com`, which receives the file contents.
 
 ## Get API credentials (Quick Connect OAuth 2.0) [slack-v2-api-credentials-quick-connect]
+```{applies_to}
+serverless: preview
+stack: preview 9.5+
+```
 
 No setup required. Select **Quick Connect OAuth 2.0** when you create the connector in {{kib}} and follow the authorization prompt to grant Elastic access to your Slack workspace. Your Slack workspace administrator might need to approve the app. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 ## Get API credentials (OAuth) [slack-v2-api-credentials-oauth]
 
-To use OAuth Authorization Code authentication, you need a Slack app configured for OAuth.
+To use **OAuth 2.0 Authorization Code**, you need a Slack app configured for OAuth.
 
 1. Go to [Slack API: Your Apps](https://api.slack.com/apps) and select **Create New App**.
 2. Choose **From scratch**, give it a name (for example, "Kibana Slack Connector"), and select your workspace.
@@ -304,13 +332,17 @@ To use OAuth Authorization Code authentication, you need a Slack app configured 
    - `users:read.email` — look up users by email (for **Look up user by email**)
 4. Set the **Redirect URL** to your Kibana OAuth redirect URI.
 5. Under **Basic Information**, copy the **Client ID** and **Client Secret**.
-6. In {{kib}}, enter the Client ID and Client Secret when creating the Slack (v2) connector. You will be redirected to Slack to authorize access to your workspace.
+6. In {{kib}}, enter the **Client ID** and **Client secret** when creating the Slack (v2) connector. You will be redirected to Slack to authorize access to your workspace.
 
 ::::{note}
 Additional scopes may be required for certain actions. For example, `channels:write` is needed to create public channels or invite users, and `groups:write` is needed to create private channels or invite users. Add scopes as needed under **User Token Scopes** in your Slack app configuration.
 ::::
 
 ## Get API credentials (Bot Token) [slack-v2-api-credentials-bot-token]
+```{applies_to}
+serverless: preview
+stack: preview 9.5.4+
+```
 
 To use Bot Token authentication, you need a Slack app with a bot token.
 
