@@ -170,6 +170,8 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
    * Returns the input to record and the input to run with. They are the same object unless
    * the step references secrets: the recorded input then holds masks, and only the input to
    * run with holds values. That one must never be saved, logged or returned.
+   * The step execution runtime is told which values the step uses, so that it removes them
+   * from the output and the error of the step before saving them.
    */
   private async prepareInput(): Promise<{
     recordedInput: Record<string, unknown>;
@@ -194,6 +196,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     }
 
     const secrets = await workflowSecrets.resolve({ names: secretNames });
+    this.stepExecutionRuntime.protectSecretValues([...secrets.values()]);
     let recordedInput: Record<string, unknown>;
     if (isInputRecorded) {
       recordedInput = this.recordedInput();

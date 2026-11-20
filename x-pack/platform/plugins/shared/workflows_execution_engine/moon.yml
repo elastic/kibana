@@ -34,6 +34,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/security-plugin-types-server'
   - '@kbn/secrets-plugin'
+  - '@kbn/secrets'
   - '@kbn/deeplinks-workflows'
   - '@kbn/cloud-plugin'
   - '@kbn/utility-types'
