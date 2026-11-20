@@ -8,6 +8,7 @@
 import type { Finding } from '../matcher';
 import { FINDINGS_DATASET } from './constants';
 import { findingId, toFindingDoc, toSeverity } from './finding_doc';
+import { findingsMappings } from './mappings';
 import type { HostMeta } from './finding_doc';
 
 const HOST: HostMeta = { id: 'h1', name: 'web-1', os: { family: 'rhel', version: '9' } };
@@ -74,7 +75,85 @@ describe('findingId', () => {
   });
 });
 
+/**
+ * Every leaf path of `value` that the strict mapping does not declare. Arrays are transparent
+ * (an array of objects maps as the object), and `undefined` values are not serialized.
+ */
+const unmappedPaths = (
+  value: unknown,
+  mapping: { properties?: Record<string, unknown> } | undefined,
+  path = ''
+): string[] => {
+  if (value === undefined) return [];
+  if (Array.isArray(value)) return value.flatMap((item) => unmappedPaths(item, mapping, path));
+  if (value === null || typeof value !== 'object') return [];
+  return Object.entries(value).flatMap(([key, child]) => {
+    const here = path ? `${path}.${key}` : key;
+    const childMapping = mapping?.properties?.[key] as typeof mapping;
+    return childMapping
+      ? unmappedPaths(child, childMapping, here)
+      : child === undefined
+      ? []
+      : [here];
+  });
+};
+
 describe('toFindingDoc', () => {
+  it('writes only fields the strict findings mapping declares, optional fields included', () => {
+    const [advisory] = finding().advisories;
+    const doc = toFindingDoc(
+      finding({
+        unfixed: true,
+        vendorReason: 'Will not fix',
+        advisories: [
+          {
+            ...advisory,
+            refs: [
+              { id: 'RHSA-2026:1234', url: 'https://access.redhat.com/errata/RHSA-2026:1234' },
+              { id: 'CVE-2026-9999', url: 'https://access.redhat.com/security/cve/CVE-2026-9999' },
+            ],
+          },
+        ],
+      }),
+      { ...HOST, os: { ...HOST.os, name: 'Red Hat Enterprise Linux 9', kernel: '5.14.0-362.el9' } },
+      {
+        ...CTX,
+        kev: {
+          dateAdded: '2026-11-18',
+          dueDate: '2026-12-02',
+          knownRansomwareCampaignUse: 'Known',
+        },
+      }
+    );
+    // Guard the guard: the fixture must populate the optional fields it claims to cover.
+    expect(doc.host.os.kernel).toBeDefined();
+    expect(doc.vulnerability.kev).toBeDefined();
+    expect(doc.native_vuln_scanner.unfixed).toBe(true);
+    expect(doc.native_vuln_scanner.vendor_reason).toBeDefined();
+    expect(findingsMappings.dynamic).toBe('strict');
+    expect(unmappedPaths(JSON.parse(JSON.stringify(doc)), findingsMappings)).toEqual([]);
+  });
+
+  it('detects an unmapped field (the walker is not vacuous)', () => {
+    expect(
+      unmappedPaths(
+        { native_vuln_scanner: { advisories: [{ id: 'a', refs: [] }] } },
+        findingsMappings
+      )
+    ).toEqual(['native_vuln_scanner.advisories.refs']);
+  });
+
+  it('omits undefined optional advisory fields instead of writing them', () => {
+    const [advisory] = finding().advisories;
+    const doc = toFindingDoc(
+      finding({ advisories: [{ ...advisory, url: undefined, severity: undefined }] }),
+      HOST,
+      CTX
+    );
+    const [written] = doc.native_vuln_scanner.advisories;
+    expect(Object.keys(written).sort()).toEqual(['definition_id', 'id', 'source', 'title']);
+  });
+
   it('builds the fields the CNVM UI reads', () => {
     const doc = toFindingDoc(finding(), HOST, CTX);
     expect(doc).toMatchObject({

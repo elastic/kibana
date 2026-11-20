@@ -15,6 +15,16 @@ import { FINDINGS_DATASET, FINDINGS_VENDOR } from './constants';
 
 export type FindingSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
 
+/**
+ * The advisory fields the findings mapping declares. `MatchedAdvisory` carries more (`refs`,
+ * already flattened into `vulnerability.reference`), and the strict mapping rejects any
+ * field it does not list, so the doc takes this projection and never the matched advisory.
+ */
+export type FindingDocAdvisory = Pick<
+  Finding['advisories'][number],
+  'id' | 'source' | 'definition_id' | 'title' | 'url' | 'severity'
+>;
+
 export interface HostMeta {
   id: string;
   name?: string;
@@ -87,12 +97,28 @@ export interface FindingDoc {
     fixed_at?: string;
     feed_snapshot_time?: string;
     source_package?: string;
-    advisories: Finding['advisories'];
+    advisories: FindingDocAdvisory[];
     /** Set while the vendor has not fixed the CVE; such findings never alert. */
     unfixed?: boolean;
     vendor_reason?: string;
   };
 }
+
+const toDocAdvisory = ({
+  id,
+  source,
+  definition_id: definitionId,
+  title,
+  url,
+  severity,
+}: Finding['advisories'][number]): FindingDocAdvisory => ({
+  id,
+  source,
+  definition_id: definitionId,
+  title,
+  ...(url !== undefined ? { url } : {}),
+  ...(severity !== undefined ? { severity } : {}),
+});
 
 const SEVERITY_BY_VENDOR_LABEL: Readonly<Record<string, FindingSeverity>> = {
   // Ubuntu CVE priority.
@@ -252,7 +278,7 @@ export const toFindingDoc = (
       ...(pkg.source ? { source_package: pkg.source } : {}),
       ...(finding.unfixed ? { unfixed: true } : {}),
       ...(finding.vendorReason ? { vendor_reason: finding.vendorReason } : {}),
-      advisories,
+      advisories: advisories.map(toDocAdvisory),
     },
   };
 };
