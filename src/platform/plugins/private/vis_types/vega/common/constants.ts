@@ -14,16 +14,11 @@ export const VEGA_EMBEDDABLE_TYPE = 'vega';
 
 export const VEGA_SAVED_OBJECT_TYPE = 'vega';
 
+export const VEGA_API_PATH = '/api/vega';
+
+export const VEGA_API_VERSION = '2023-10-31';
+
 export const VEGA_SUPPORTED_TRIGGERS = [ON_APPLY_FILTER, ON_OPEN_PANEL_MENU];
 
-/**
- * Feature flag gating the standalone Vega embeddable (UI creation actions, public API schema
- * participation, and panel JSON export). Off by default.
- */
-export const VEGA_STANDALONE_EMBEDDABLE_FLAG = 'vega.standaloneEmbeddable';
-
-/**
- * Feature flag gating the Vega library item CRUD API (`/api/vega`). Off by default.
- * When off, all routes return 404 and are excluded from the public OAS spec.
- */
-export const VEGA_API_ENABLED_FLAG = 'vega.apiEnabled';
+/** The most filters a library item or a panel can store. */
+export const VEGA_MAX_FILTERS = 100;

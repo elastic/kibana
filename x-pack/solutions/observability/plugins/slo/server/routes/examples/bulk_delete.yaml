@@ -1,0 +1,68 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkDeleteRequest:
+          summary: Bulk delete two SLOs
+          value:
+            list:
+              - 8853df00-ae2e-11ed-90af-09bb6422b258
+              - d077e940-1515-11ee-9c50-9d096392f520
+responses:
+  '200':
+    content:
+      application/json:
+        examples:
+          bulkDeleteResponse:
+            summary: Bulk delete response with task ID
+            value:
+              taskId: d08506b7-f0e8-4f8b-a06a-a83940f4db91
+  '400':
+    description: Bad request
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/400_response
+        examples:
+          badRequestBodyExample:
+            summary: Invalid request body
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: |-
+                [
+                  {
+                    "expected": "array",
+                    "code": "invalid_type",
+                    "path": [
+                      "list"
+                    ],
+                    "message": "Invalid input: expected array, received string"
+                  }
+                ]
+  '401':
+    description: Unauthorized response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/401_response
+        examples:
+          unauthorizedExample:
+            summary: Unauthorized
+            value:
+              statusCode: 401
+              error: Unauthorized
+              message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+  '403':
+    description: Forbidden response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/403_response
+        examples:
+          forbiddenExample:
+            summary: Forbidden
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: 'API [POST /api/observability/slos/_bulk_delete] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]'

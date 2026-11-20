@@ -26,16 +26,21 @@ export const INVESTIGATION_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.events.columns.investigation',
   { defaultMessage: 'Investigation' }
 );
-export const TIME_COLUMN_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.events.columns.time',
-  { defaultMessage: 'Time' }
+export const UPDATED_AT_COLUMN_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.events.columns.updatedAt',
+  { defaultMessage: 'Updated at' }
 );
-export const TIME_COLUMN_TOOLTIP = i18n.translate(
-  'xpack.nightshift.detectionPage.events.columns.timeTooltip',
-  {
-    defaultMessage:
-      'When the event was raised. The time range shows every event that was live during it, so ongoing events raised earlier still appear.',
-  }
+export const UPDATED_AT_COLUMN_TOOLTIP = i18n.translate(
+  'xpack.nightshift.detectionPage.events.columns.updatedAtTooltip',
+  { defaultMessage: 'When the event last changed, including a reopen.' }
+);
+export const CREATED_AT_COLUMN_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.events.columns.createdAt',
+  { defaultMessage: 'Created at' }
+);
+export const CREATED_AT_COLUMN_TOOLTIP = i18n.translate(
+  'xpack.nightshift.detectionPage.events.columns.createdAtTooltip',
+  { defaultMessage: 'When the event first opened.' }
 );
 export const ACTIONS_COLUMN_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.events.columns.actions',
@@ -79,6 +84,13 @@ export const LIST_ERROR_TITLE = i18n.translate(
 export const LIST_ERROR_MESSAGE = i18n.translate(
   'xpack.nightshift.detectionPage.events.listErrorMessage',
   { defaultMessage: "The significant events list couldn't be loaded." }
+);
+export const INVESTIGATION_FILTER_ERROR_MESSAGE = i18n.translate(
+  'xpack.nightshift.detectionPage.events.investigationFilterErrorMessage',
+  {
+    defaultMessage:
+      "Events can't be filtered by investigation right now. Check that you can read investigations, or remove the filter.",
+  }
 );
 export const RETRY_LABEL = i18n.translate('xpack.nightshift.detectionPage.events.retryLabel', {
   defaultMessage: 'Try again',

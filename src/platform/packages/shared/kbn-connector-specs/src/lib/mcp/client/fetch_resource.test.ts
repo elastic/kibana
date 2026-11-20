@@ -10,7 +10,7 @@
 import { Agent, ProxyAgent, fetch as undiciFetch } from 'undici';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ConnectorNetworkSettings } from '../../clients/client_type_spec';
-import { createFetchResource } from './fetch_resource';
+import { createFetchResource, McpFetchTimeoutError } from './fetch_resource';
 
 const undiciFetchMock = undiciFetch as unknown as jest.Mock;
 
@@ -607,6 +607,25 @@ describe('createFetchResource', () => {
       // Combined once for the logical request; redirect hops reuse that signal.
       expect(addSpy.mock.calls.filter(([type]) => type === 'abort')).toHaveLength(1);
       addSpy.mockRestore();
+    });
+
+    it('throws a typed timeout error when a finite request reaches its deadline', async () => {
+      networkSettings.getResponseSettings.mockReturnValue({
+        maxContentLength: 1_000_000,
+        timeout: 1,
+      });
+      undiciFetchMock.mockImplementation(
+        (_url: string, init: RequestInit) =>
+          new Promise((_, reject) => {
+            const signal = init.signal as AbortSignal;
+            signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+          })
+      );
+      const resource = createResource({ targetUrl });
+
+      await expect(resource.fetch(targetUrl, { method: 'POST' })).rejects.toBeInstanceOf(
+        McpFetchTimeoutError
+      );
     });
   });
 

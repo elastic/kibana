@@ -45,7 +45,7 @@ const defaultLegendParams = {
   isLinesOnly: false,
 };
 
-const fieldMetaOptions = { isEnabled: true };
+const fieldMetaOptions = { is_enabled: true };
 
 describe('renderLegendDetailRow', () => {
   describe('ordinal', () => {
@@ -53,7 +53,7 @@ describe('renderLegendDetailRow', () => {
       const colorStyle = makeProperty({
         color: 'Blues',
         type: undefined,
-        fieldMetaOptions,
+        field_meta_options: fieldMetaOptions,
       });
 
       const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
@@ -72,7 +72,7 @@ describe('renderLegendDetailRow', () => {
       const colorStyle = makeProperty({
         color: 'Blues',
         type: undefined,
-        fieldMetaOptions,
+        field_meta_options: fieldMetaOptions,
       });
       colorStyle.getRangeFieldMeta = () => {
         return {
@@ -98,9 +98,9 @@ describe('renderLegendDetailRow', () => {
       const colorStyle = makeProperty({
         color: 'Blues',
         type: undefined,
-        dataMappingFunction: DATA_MAPPING_FUNCTION.PERCENTILES,
-        fieldMetaOptions: {
-          isEnabled: true,
+        data_mapping_function: DATA_MAPPING_FUNCTION.PERCENTILES,
+        field_meta_options: {
+          is_enabled: true,
           percentiles: [50, 75, 90, 95, 99],
         },
       });
@@ -130,8 +130,8 @@ describe('renderLegendDetailRow', () => {
     test('Should render custom ordinal legend with breaks', async () => {
       const colorStyle = makeProperty({
         type: COLOR_MAP_TYPE.ORDINAL,
-        useCustomColorRamp: true,
-        customColorRamp: [
+        use_custom_color_ramp: true,
+        custom_color_ramp: [
           {
             stop: 0,
             color: '#FF0000',
@@ -141,7 +141,7 @@ describe('renderLegendDetailRow', () => {
             color: '#00FF00',
           },
         ],
-        fieldMetaOptions,
+        field_meta_options: fieldMetaOptions,
       });
 
       const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
@@ -161,9 +161,9 @@ describe('renderLegendDetailRow', () => {
     test('Should render categorical legend with breaks from color ramp', async () => {
       const colorStyle = makeProperty({
         type: COLOR_MAP_TYPE.CATEGORICAL,
-        useCustomColorPalette: false,
-        colorCategory: 'palette_0',
-        fieldMetaOptions,
+        use_custom_color_palette: false,
+        color_category: 'palette_0',
+        field_meta_options: fieldMetaOptions,
       });
 
       const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
@@ -181,8 +181,8 @@ describe('renderLegendDetailRow', () => {
     test('Should render categorical legend with breaks from custom', async () => {
       const colorStyle = makeProperty({
         type: COLOR_MAP_TYPE.CATEGORICAL,
-        useCustomColorPalette: true,
-        customColorPalette: [
+        use_custom_color_palette: true,
+        custom_color_palette: [
           {
             stop: null, // should include the default stop
             color: '#FFFF00',
@@ -196,7 +196,7 @@ describe('renderLegendDetailRow', () => {
             color: '#00FF00',
           },
         ],
-        fieldMetaOptions,
+        field_meta_options: fieldMetaOptions,
       });
 
       const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
@@ -211,8 +211,8 @@ describe('renderLegendDetailRow', () => {
 test('Should pluck the categorical style-meta from fieldmeta', async () => {
   const colorStyle = makeProperty({
     type: COLOR_MAP_TYPE.CATEGORICAL,
-    colorCategory: 'palette_0',
-    fieldMetaOptions,
+    color_category: 'palette_0',
+    field_meta_options: fieldMetaOptions,
   });
 
   const meta = colorStyle._pluckCategoricalStyleMetaFromFieldMetaData({
@@ -240,7 +240,7 @@ describe('supportsFieldMeta', () => {
   test('should support fieldMeta when ordinal field supports fieldMeta', () => {
     const dynamicStyleOptions = {
       type: COLOR_MAP_TYPE.ORDINAL,
-      fieldMetaOptions,
+      field_meta_options: fieldMetaOptions,
     };
     const styleProp = makeProperty(dynamicStyleOptions);
 
@@ -250,7 +250,7 @@ describe('supportsFieldMeta', () => {
   test('should support fieldMeta when categorical field supports fieldMeta', () => {
     const dynamicStyleOptions = {
       type: COLOR_MAP_TYPE.CATEGORICAL,
-      fieldMetaOptions,
+      field_meta_options: fieldMetaOptions,
     };
     const styleProp = makeProperty(dynamicStyleOptions);
 
@@ -266,7 +266,7 @@ describe('supportsFieldMeta', () => {
     const layer = {} as unknown as IVectorLayer;
     const options = {
       type: COLOR_MAP_TYPE.ORDINAL,
-      fieldMetaOptions: { isEnabled: true },
+      field_meta_options: { is_enabled: true },
     };
 
     const styleProp = new DynamicColorProperty(
@@ -285,7 +285,7 @@ describe('supportsFieldMeta', () => {
   test('should not support fieldMeta when field is not provided', () => {
     const dynamicStyleOptions = {
       type: COLOR_MAP_TYPE.ORDINAL,
-      fieldMetaOptions,
+      field_meta_options: fieldMetaOptions,
     };
 
     const styleProp = new DynamicColorProperty(
@@ -304,9 +304,9 @@ describe('supportsFieldMeta', () => {
   test('should not support fieldMeta when using custom ramp for ordinal field', () => {
     const dynamicStyleOptions = {
       type: COLOR_MAP_TYPE.ORDINAL,
-      useCustomColorRamp: true,
-      customColorRamp: [],
-      fieldMetaOptions,
+      use_custom_color_ramp: true,
+      custom_color_ramp: [],
+      field_meta_options: fieldMetaOptions,
     };
     const styleProp = makeProperty(dynamicStyleOptions);
 
@@ -316,9 +316,9 @@ describe('supportsFieldMeta', () => {
   test('should not support fieldMeta when using custom palette for categorical field', () => {
     const dynamicStyleOptions = {
       type: COLOR_MAP_TYPE.CATEGORICAL,
-      useCustomColorPalette: true,
-      customColorPalette: [],
-      fieldMetaOptions,
+      use_custom_color_palette: true,
+      custom_color_palette: [],
+      field_meta_options: fieldMetaOptions,
     };
     const styleProp = makeProperty(dynamicStyleOptions);
 
@@ -331,7 +331,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
     test('should return null when field is not provided', async () => {
       const dynamicStyleOptions = {
         type: COLOR_MAP_TYPE.ORDINAL,
-        fieldMetaOptions,
+        field_meta_options: fieldMetaOptions,
       };
       const colorProperty = makeProperty(dynamicStyleOptions);
       expect(colorProperty._getMbColor()).toBeNull();
@@ -341,7 +341,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       const dynamicStyleOptions = {
         type: COLOR_MAP_TYPE.ORDINAL,
         field: {},
-        fieldMetaOptions,
+        field_meta_options: fieldMetaOptions,
       };
       // @ts-expect-error - test is verifing behavior when field is invalid.
       const colorProperty = makeProperty(dynamicStyleOptions);
@@ -352,7 +352,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       test('should return null when color ramp is not provided', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.ORDINAL,
-          fieldMetaOptions,
+          field_meta_options: fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBeNull();
@@ -382,7 +382,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         const options = {
           type: COLOR_MAP_TYPE.ORDINAL,
           color: 'Blues',
-          fieldMetaOptions: { isEnabled: true },
+          field_meta_options: { is_enabled: true },
         };
 
         const colorProperty = new DynamicColorProperty(
@@ -441,8 +441,8 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       test('should return null when customColorRamp is not provided', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.ORDINAL,
-          useCustomColorRamp: true,
-          fieldMetaOptions,
+          use_custom_color_ramp: true,
+          field_meta_options: fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBeNull();
@@ -451,9 +451,9 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       test('should return null when customColorRamp is empty', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.ORDINAL,
-          useCustomColorRamp: true,
-          customColorRamp: [],
-          fieldMetaOptions,
+          use_custom_color_ramp: true,
+          custom_color_ramp: [],
+          field_meta_options: fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBeNull();
@@ -475,12 +475,12 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         const layer = {} as unknown as IVectorLayer;
         const options = {
           type: COLOR_MAP_TYPE.ORDINAL,
-          useCustomColorRamp: true,
-          customColorRamp: [
+          use_custom_color_ramp: true,
+          custom_color_ramp: [
             { stop: 10, color: '#f7faff' },
             { stop: 100, color: '#072f6b' },
           ],
-          fieldMetaOptions: { isEnabled: true },
+          field_meta_options: { is_enabled: true },
         };
 
         const colorProperty = new DynamicColorProperty(
@@ -529,12 +529,12 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         const layer = {} as unknown as IVectorLayer;
         const options = {
           type: COLOR_MAP_TYPE.ORDINAL,
-          useCustomColorRamp: true,
-          customColorRamp: [
+          use_custom_color_ramp: true,
+          custom_color_ramp: [
             { stop: 10, color: '#f7faff' },
             { stop: 100, color: '#072f6b' },
           ],
-          fieldMetaOptions: { isEnabled: true },
+          field_meta_options: { is_enabled: true },
         };
 
         const colorProperty = new DynamicColorProperty(
@@ -573,7 +573,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
     test('should return "other category" color when field is not provided', async () => {
       const dynamicStyleOptions = {
         type: COLOR_MAP_TYPE.CATEGORICAL,
-        fieldMetaOptions,
+        field_meta_options: fieldMetaOptions,
       };
       const colorProperty = makeProperty(dynamicStyleOptions);
       expect(colorProperty._getMbColor()).toBe(OTHER_CATEGORY_DEFAULT_COLOR);
@@ -583,7 +583,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       const dynamicStyleOptions = {
         type: COLOR_MAP_TYPE.CATEGORICAL,
         field: {},
-        fieldMetaOptions,
+        field_meta_options: fieldMetaOptions,
       };
       // @ts-expect-error - test is verifing behavior when field is invalid.
       const colorProperty = makeProperty(dynamicStyleOptions);
@@ -594,7 +594,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       test('should return "other category" color when color palette is not provided', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
-          fieldMetaOptions,
+          field_meta_options: fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBe(OTHER_CATEGORY_DEFAULT_COLOR);
@@ -603,9 +603,9 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       test('should return mapbox expression for color palette', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
-          colorCategory: 'palette_0',
-          otherCategoryColor: 'grey',
-          fieldMetaOptions,
+          color_category: 'palette_0',
+          other_category_color: 'grey',
+          field_meta_options: fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toEqual([
@@ -624,8 +624,8 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       test('should return "other category" color when customColorPalette is not provided', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
-          useCustomColorPalette: true,
-          fieldMetaOptions,
+          use_custom_color_palette: true,
+          field_meta_options: fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBe(OTHER_CATEGORY_DEFAULT_COLOR);
@@ -634,9 +634,9 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       test('should return "other category" color when customColorPalette is empty', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
-          useCustomColorPalette: true,
-          customColorPalette: [],
-          fieldMetaOptions,
+          use_custom_color_palette: true,
+          custom_color_palette: [],
+          field_meta_options: fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBe(OTHER_CATEGORY_DEFAULT_COLOR);
@@ -645,10 +645,10 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       test('should return mapbox expression for custom color palette', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
-          useCustomColorPalette: true,
-          customColorPalette: [{ stop: 'MX', color: '#072f6b' }],
-          otherCategoryColor: '#f7faff',
-          fieldMetaOptions,
+          use_custom_color_palette: true,
+          custom_color_palette: [{ stop: 'MX', color: '#072f6b' }],
+          other_category_color: '#f7faff',
+          field_meta_options: fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toEqual([
@@ -666,8 +666,8 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
 test('isCategorical should return true when type is categorical', async () => {
   const categoricalColorStyle = makeProperty({
     type: COLOR_MAP_TYPE.CATEGORICAL,
-    colorCategory: 'palette_0',
-    fieldMetaOptions,
+    color_category: 'palette_0',
+    field_meta_options: fieldMetaOptions,
   });
 
   expect(categoricalColorStyle.isOrdinal()).toEqual(false);
@@ -678,7 +678,7 @@ test('isOrdinal should return true when type is ordinal', async () => {
   const ordinalColorStyle = makeProperty({
     type: undefined,
     color: 'Blues',
-    fieldMetaOptions,
+    field_meta_options: fieldMetaOptions,
   });
 
   expect(ordinalColorStyle.isOrdinal()).toEqual(true);
@@ -688,8 +688,8 @@ test('isOrdinal should return true when type is ordinal', async () => {
 test('Should read out ordinal type correctly', async () => {
   const ordinalColorStyle2 = makeProperty({
     type: COLOR_MAP_TYPE.ORDINAL,
-    colorCategory: 'palette_0',
-    fieldMetaOptions,
+    color_category: 'palette_0',
+    field_meta_options: fieldMetaOptions,
   });
 
   expect(ordinalColorStyle2.isOrdinal()).toEqual(true);
@@ -702,7 +702,7 @@ describe('renderDataMappingPopover', () => {
       {
         color: 'Blues',
         type: undefined,
-        fieldMetaOptions,
+        field_meta_options: fieldMetaOptions,
       },
       undefined,
       mockField
@@ -718,8 +718,8 @@ describe('getValueSuggestions', () => {
     const colorProperty = new DynamicColorProperty(
       {
         type: COLOR_MAP_TYPE.CATEGORICAL,
-        colorCategory: 'palette_0',
-        fieldMetaOptions,
+        color_category: 'palette_0',
+        field_meta_options: fieldMetaOptions,
       },
       VECTOR_STYLES.FILL_COLOR,
       null,
@@ -746,8 +746,8 @@ describe('getValueSuggestions', () => {
     const colorProperty = new DynamicColorProperty(
       {
         type: COLOR_MAP_TYPE.CATEGORICAL,
-        colorCategory: 'palette_0',
-        fieldMetaOptions,
+        color_category: 'palette_0',
+        field_meta_options: fieldMetaOptions,
       },
       VECTOR_STYLES.FILL_COLOR,
       fieldWithSource,

@@ -689,6 +689,29 @@ describe('Textbased Data Source', () => {
   });
 
   describe('#initializeDimension', () => {
+    it('does not initialize query reference dimensions with static thresholds', () => {
+      const state: TextBasedPrivateState = {
+        indexPatternRefs: [],
+        layers: { reference: { columns: [], query: { esql: 'FROM logs' } } },
+      };
+      const { initializeDimension } = TextBasedDatasource;
+      if (!initializeDimension) throw new Error('Expected dimension initialization');
+      const nextState = initializeDimension(
+        state,
+        'reference',
+        {},
+        {
+          columnId: 'threshold',
+          groupId: 'yReferenceLineLeft',
+          visualizationGroups: [],
+          staticValue: 42,
+        }
+      );
+      expect(nextState).toBe(state);
+      expect(nextState.layers.reference.columns).toEqual([]);
+      expect(nextState.layers.reference.query).toEqual(state.layers.reference.query);
+    });
+
     it('initializes the trendline time dimension from a TBUCKET alias', () => {
       const query = 'TS metrics-* | STATS avg_cpu = AVG(cpu) BY custom_time = TBUCKET(100)';
       const state = {

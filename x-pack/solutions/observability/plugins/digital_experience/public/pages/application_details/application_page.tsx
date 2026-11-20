@@ -5,27 +5,77 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiEmptyPrompt, EuiLoadingLogo, EuiPageHeader } from '@elastic/eui';
+import React, { useEffect } from 'react';
+import type { ReactNode } from 'react';
+import { useHistory } from 'react-router-dom';
+import { EuiEmptyPrompt, EuiLoadingLogo, EuiPageSection } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { APPLICATION_SOURCE } from '../../../common/application_source';
-import type { ApplicationSource } from '../../../common/types/applications';
+import {
+  APPLICATION_TAB_IDS,
+  type ApplicationSource,
+  type ApplicationTabId,
+} from '../../../common/types/applications';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
+import { useApplicationLinks } from '../../hooks/use_application_links';
+import { useApplicationsHref } from '../../hooks/use_applications_href';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
+import { useShareAction } from '../../hooks/use_share_action';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useTimeRange } from '../../hooks/use_time_range';
-
-/** Tabs of the Application view, in display order. */
-const APPLICATION_TAB_IDS = ['overview'] as const;
-
-type ApplicationTabId = (typeof APPLICATION_TAB_IDS)[number];
+import { APPLICATIONS_LABEL, SESSIONS_LABEL } from '../../labels';
+import { ErrorsTab } from '../errors/errors_tab';
+import { NetworkTab } from '../network/network_tab';
+import { ReportsTab } from '../reports/reports_tab';
+import { SessionsTab } from '../sessions/sessions_tab';
+import { OtelOverview } from './otel_overview/otel_overview';
 
 const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
   overview: i18n.translate('xpack.digitalExperience.application.tabs.overview', {
     defaultMessage: 'Overview',
   }),
+  errors: i18n.translate('xpack.digitalExperience.application.tabs.errors', {
+    defaultMessage: 'Errors',
+  }),
+  network: i18n.translate('xpack.digitalExperience.application.tabs.network', {
+    defaultMessage: 'Network',
+  }),
+  sessions: SESSIONS_LABEL,
+  reports: i18n.translate('xpack.digitalExperience.application.tabs.reports', {
+    defaultMessage: 'Reports',
+  }),
 };
+
+/**
+ * Errors, network, sessions and reports are read from EDOT Browser data only; Classic RUM applications have
+ * the ux plugin's dashboard as their Overview.
+ */
+const tabsOf = (source: ApplicationSource): readonly ApplicationTabId[] =>
+  source === APPLICATION_SOURCE.otel ? APPLICATION_TAB_IDS : ['overview'];
+
+const sessionsUnavailablePrompt = (
+  <EuiEmptyPrompt
+    data-test-subj="digitalExperienceSessionsUnavailable"
+    iconType="users"
+    title={
+      <h2>
+        {i18n.translate('xpack.digitalExperience.application.sessions.unavailableTitle', {
+          defaultMessage: 'No sessions for Classic RUM applications',
+        })}
+      </h2>
+    }
+    body={
+      <p>
+        {i18n.translate('xpack.digitalExperience.application.sessions.unavailableDescription', {
+          defaultMessage:
+            'Sessions are built from EDOT Browser data. Instrument this application with EDOT Browser to see its sessions.',
+        })}
+      </p>
+    }
+  />
+);
 
 const overviewUnavailablePrompt = (
   <EuiEmptyPrompt
@@ -63,83 +113,122 @@ const overviewLoadingPrompt = (
   />
 );
 
-const otelOverviewPlaceholder = (
-  <EuiEmptyPrompt
-    data-test-subj="digitalExperienceOtelOverviewPlaceholder"
-    iconType="package"
-    title={
-      <h2>
-        {i18n.translate('xpack.digitalExperience.application.overview.otel.title', {
-          defaultMessage: 'Overview coming soon',
-        })}
-      </h2>
-    }
-    body={
-      <p>
-        {i18n.translate('xpack.digitalExperience.application.overview.otel.body', {
-          defaultMessage: 'The Overview for EDOT Browser applications is not available yet.',
-        })}
-      </p>
-    }
-  />
+const withPagePadding = (content: ReactNode) => (
+  <EuiPageSection paddingSize="m" restrictWidth={false}>
+    {content}
+  </EuiPageSection>
 );
 
-export function ApplicationPage({
-  serviceName,
-  source,
-}: {
-  serviceName: string;
-  source: ApplicationSource;
-}) {
+/** The ux plugin's Classic RUM dashboard, which pads itself, or a prompt when it can't show. */
+function ClassicRumOverview({ serviceName }: { serviceName: string }) {
   const { ux } = useKibanaServices();
   const { timeRange, setTimeRange } = useTimeRange();
   const { environment } = useEnvironment();
 
-  const selectedTab: ApplicationTabId = 'overview';
-
-  useRouteBreadcrumb([{ text: serviceName }, { text: APPLICATION_TAB_LABELS[selectedTab] }]);
-
   // Wrapped in an object: a component is a function, which React state would call as an updater.
-  const { value: dashboard, error } = useAbortableAsync(async () => {
-    if (source !== APPLICATION_SOURCE.classic || !ux) {
-      return undefined;
-    }
-    return { Component: await ux.getClassicRumDashboard() };
-  }, [ux, source]);
+  const { value: dashboard, error } = useAbortableAsync(
+    async () => (ux ? { Component: await ux.getClassicRumDashboard() } : undefined),
+    [ux]
+  );
 
-  const renderOverview = () => {
-    if (source === APPLICATION_SOURCE.otel) {
-      return otelOverviewPlaceholder;
+  if (dashboard) {
+    return (
+      <dashboard.Component
+        serviceName={serviceName}
+        environment={environment}
+        timeRange={timeRange}
+        onTimeRangeChange={setTimeRange}
+      />
+    );
+  }
+  // Without ux (serverless) there is no Classic RUM dashboard to show.
+  return withPagePadding(error || !ux ? overviewUnavailablePrompt : overviewLoadingPrompt);
+}
+
+export function ApplicationPage({
+  serviceName,
+  source,
+  selectedTab,
+}: {
+  serviceName: string;
+  source: ApplicationSource;
+  selectedTab: ApplicationTabId;
+}) {
+  const applicationsHref = useApplicationsHref();
+  const history = useHistory();
+  const { overviewHref, overviewPath, errorsHref, networkHref, reportsHref, sessionsHref } =
+    useApplicationLinks(serviceName, source);
+  const shareAction = useShareAction({ serviceName, source, tab: selectedTab });
+  // Classic RUM only has the Overview (and Sessions' unavailable prompt); any other tab's URL is
+  // replaced by the Overview's, so a new EDOT-only tab needs no entry here.
+  const isUnsupportedTab = selectedTab !== 'sessions' && !tabsOf(source).includes(selectedTab);
+  useEffect(() => {
+    if (isUnsupportedTab) {
+      history.replace(overviewPath);
     }
-    if (dashboard) {
-      return (
-        <dashboard.Component
-          serviceName={serviceName}
-          environment={environment}
-          timeRange={timeRange}
-          onTimeRangeChange={setTimeRange}
-        />
-      );
+  }, [history, isUnsupportedTab, overviewPath]);
+  const tabHrefs: Record<ApplicationTabId, string> = {
+    overview: overviewHref,
+    errors: errorsHref,
+    network: networkHref,
+    reports: reportsHref,
+    sessions: sessionsHref(),
+  };
+
+  useRouteBreadcrumb([
+    { text: serviceName, href: overviewHref },
+    { text: APPLICATION_TAB_LABELS[selectedTab] },
+  ]);
+
+  const renderOverview = () =>
+    source === APPLICATION_SOURCE.otel ? (
+      withPagePadding(<OtelOverview serviceName={serviceName} />)
+    ) : (
+      <ClassicRumOverview serviceName={serviceName} />
+    );
+
+  const renderSessions = () =>
+    withPagePadding(
+      source === APPLICATION_SOURCE.otel ? (
+        <SessionsTab serviceName={serviceName} source={source} />
+      ) : (
+        sessionsUnavailablePrompt
+      )
+    );
+
+  const renderTab = () => {
+    if (isUnsupportedTab) {
+      return null;
     }
-    // Without ux (serverless) there is no Classic RUM dashboard to show.
-    if (error || !ux) {
-      return overviewUnavailablePrompt;
+    switch (selectedTab) {
+      case 'errors':
+        return withPagePadding(<ErrorsTab serviceName={serviceName} />);
+      case 'network':
+        return withPagePadding(<NetworkTab serviceName={serviceName} />);
+      case 'sessions':
+        return renderSessions();
+      case 'reports':
+        return withPagePadding(<ReportsTab />);
+      default:
+        return renderOverview();
     }
-    return overviewLoadingPrompt;
   };
 
   return (
     <>
-      <EuiPageHeader
-        pageTitle={serviceName}
-        bottomBorder
-        tabs={APPLICATION_TAB_IDS.map((id) => ({
+      <AppHeader
+        title={serviceName}
+        back={{ href: applicationsHref, label: APPLICATIONS_LABEL }}
+        share={shareAction}
+        tabs={tabsOf(source).map((id) => ({
+          id,
           label: APPLICATION_TAB_LABELS[id],
           isSelected: id === selectedTab,
+          href: tabHrefs[id],
           'data-test-subj': `digitalExperienceTab-${id}`,
         }))}
       />
-      {renderOverview()}
+      {renderTab()}
     </>
   );
 }

@@ -24,6 +24,7 @@ import {
   type AlertingPublisherContext,
 } from '../domain_events';
 import type { EventBus, Subscription } from '../event_bus';
+import { BaseEventBusSubscriber } from '../base_event_bus_subscriber';
 import { RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP } from './mappings';
 
 /**
@@ -37,49 +38,25 @@ import { RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP } from './mappings';
  * persist.
  */
 @injectable()
-export class RuleChangesHistorySubscriber {
-  #subscriptions: Subscription[] = [];
-
-  private readonly logger: LoggerServiceContract;
-
+export class RuleChangesHistorySubscriber extends BaseEventBusSubscriber {
   constructor(
     @inject(AlertingDomainEventBusToken)
-    private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
     @inject(RuleChangesHistoryServiceToken)
     private readonly changeHistory: RuleChangesHistoryServiceContract,
     @inject(CoreStart('userProfile'))
     private readonly userProfile: UserProfileServiceStart,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
-    this.logger = loggerService.forSubsystem('events');
+    super(bus, loggerService.forSubsystem('events'));
   }
 
-  public start(): void {
-    if (this.#subscriptions.length > 0) {
-      this.logger.debug({
-        message: () => 'Subscriber start called more than once; ignoring',
-      });
-
-      return;
-    }
-
-    for (const eventType of Object.keys(RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP) as Array<
-      RuleEvent['type']
-    >) {
-      const subscription = this.bus.subscribe(eventType, (event, context) =>
-        this.#dispatch(event as RuleEvent, context)
-      );
-
-      this.#subscriptions.push(subscription);
-    }
-  }
-
-  public stop(): void {
-    for (const subscription of this.#subscriptions) {
-      subscription.unsubscribe();
-    }
-
-    this.#subscriptions = [];
+  protected createSubscriptions(
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>
+  ): Subscription[] {
+    return (Object.keys(RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP) as Array<RuleEvent['type']>).map(
+      (eventType) => bus.subscribe(eventType, (event, context) => this.#dispatch(event, context))
+    );
   }
 
   async #dispatch(event: RuleEvent, context: AlertingPublisherContext): Promise<void> {

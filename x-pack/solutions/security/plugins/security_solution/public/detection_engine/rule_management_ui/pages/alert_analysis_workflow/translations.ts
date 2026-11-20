@@ -162,6 +162,41 @@ export const MAX_THRESHOLD_ARIA_LABEL = i18n.translate(
   }
 );
 
+export const DEPRECATION_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutTitle',
+  {
+    defaultMessage: 'This feature will be moved in an upcoming release',
+  }
+);
+
+export const DEPRECATION_CALLOUT_BODY = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutBody',
+  {
+    defaultMessage: 'The alert analysis workflow is being merged into the AlertZero Triage Worker.',
+  }
+);
+
+export const DEPRECATION_CALLOUT_LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutLearnMore',
+  {
+    defaultMessage: 'Learn about AlertZero here.',
+  }
+);
+
+export const DEPRECATION_CALLOUT_ENABLE_ALERTZERO = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutEnableAlertZero',
+  {
+    defaultMessage: 'Enable and explore AlertZero',
+  }
+);
+
+export const DEPRECATION_CALLOUT_ADJUST_TRIAGE_WORKER = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutAdjustTriageWorker',
+  {
+    defaultMessage: 'Adjust your AlertZero Triage Worker settings',
+  }
+);
+
 export const TAG_PREFIX_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.tagPrefixAriaLabel',
   {

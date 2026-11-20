@@ -18,6 +18,7 @@ import {
   deleteWorkflow,
   findInvestigationBySubject,
   findOrCreateSlackThread,
+  getSharedInvestigation,
   listSharedInvestigations,
   makeAlertSnapshot,
   runAlertStartWorkflow,
@@ -49,6 +50,14 @@ const NIGHTSHIFT_OPERATOR_ROLE: KibanaRole = {
       spaces: ['*'],
     },
   ],
+};
+
+const NIGHTSHIFT_V2_ALERT_OPERATOR_ROLE: KibanaRole = {
+  ...NIGHTSHIFT_OPERATOR_ROLE,
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['.rule-events'], privileges: ['read'] }],
+  },
 };
 
 const setNightshiftEnabled = (apiServices: ApiServicesFixture, enabled: boolean | null) =>
@@ -126,6 +135,56 @@ apiTest.describe(
             trigger_type: 'manual',
           }),
         ]);
+      }
+    );
+
+    apiTest(
+      'starts an investigation for a v2 alert without a rule',
+      async ({ apiClient, samlAuth, esClient }) => {
+        const episodeId = uniqueId('episode');
+        const ruleName = `Ad hoc ${episodeId}`;
+        await esClient.index({
+          index: '.rule-events',
+          op_type: 'create',
+          refresh: true,
+          document: {
+            '@timestamp': new Date().toISOString(),
+            scheduled_timestamp: new Date().toISOString(),
+            type: 'alert',
+            source: 'elastic.significant_events',
+            status: 'breached',
+            severity: 'medium',
+            alert: { id: episodeId, status: 'active' },
+            group_hash: episodeId,
+            space_id: 'default',
+            data: { rule_name: ruleName },
+          },
+        });
+        try {
+          const { cookieHeader: v2CookieHeader } = await samlAuth.asInteractiveUser(
+            NIGHTSHIFT_V2_ALERT_OPERATOR_ROLE
+          );
+          const response = await startInvestigation(apiClient, v2CookieHeader, {
+            subject: { type: 'alert', ids: [episodeId] },
+          });
+          expect(response).toHaveStatusCode(200);
+          const investigation = await waitForInvestigation(
+            apiClient,
+            v2CookieHeader,
+            response.body.investigation_id
+          );
+          expect(investigation.subjects[0].snapshot).toMatchObject({
+            alert_version: 'v2',
+            rule_name: ruleName,
+          });
+          expect(investigation.subjects[0].snapshot?.rule_id).toBeUndefined();
+        } finally {
+          await esClient.deleteByQuery({
+            index: '.rule-events',
+            query: { term: { 'alert.id': episodeId } },
+            refresh: true,
+          });
+        }
       }
     );
 
@@ -239,6 +298,14 @@ apiTest.describe(
         // Until Agent Builder titles the investigation, the route headlines the question.
         expect(title).toBe('why is checkout slow?');
 
+        // Later calls backfill a missing link, so the create alone must record it.
+        const permalink = `https://app.slack.com/client/${thread.workspace}/${thread.channel}/thread/${thread.channel}-${thread.thread_ts}`;
+        const justCreated = await getSharedInvestigation(apiClient, cookieHeader, id);
+        expect(justCreated).toHaveStatusCode(200);
+        expect((justCreated.body as SharedInvestigation).subjects).toStrictEqual([
+          expect.objectContaining({ slack: expect.objectContaining({ permalink }) }),
+        ]);
+
         const recorded = await findOrCreateSlackThread(apiClient, cookieHeader, {
           ...thread,
           create: false,
@@ -297,6 +364,7 @@ apiTest.describe(
             slack: {
               channel: thread.channel,
               thread_ts: thread.thread_ts,
+              permalink,
               status_message_ts: '1712345679.000200',
               seen_events: [{ event_id: 'EvSCOUT1', execution_id: 'exec-scout-1' }],
             },

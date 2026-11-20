@@ -32,6 +32,9 @@ import { KibanaSavedObjectType } from '../../../../../../../common/types/models'
 import { appendReturnParams } from '../../components/return_params';
 
 import {
+  ADD_INTEGRATION_CONFIGURABLE_PACKAGES,
+  isAssetOnlyIntegrationPackage,
+  isPackageFipsIncompatible,
   isPackagePrerelease,
   splitPkgKey,
   packageToPackagePolicyInputs,
@@ -100,7 +103,7 @@ import { Configs } from './configs';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 import { InstallButton } from './settings/install_button';
 import { EditIntegrationFlyout } from './components/edit_integration_flyout';
-import { ErrorIconPanel } from './components/icon_panel';
+import { ErrorIconPanel, getIconPanelWidth } from './components/icon_panel';
 
 export type DetailViewPanelName =
   | 'overview'
@@ -182,6 +185,7 @@ export function Detail() {
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isCustomPackage, setIsCustomPackage] = useState(false);
+  const [isFipsIncompatiblePackage, setIsFipsIncompatiblePackage] = useState(false);
 
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -232,6 +236,8 @@ export function Detail() {
       ? missingSecurityConfiguration
         ? AddIntegrationButtonDisabledReason.MISSING_SECURITY
         : AddIntegrationButtonDisabledReason.MISSING_PRIVILEGES
+      : isFipsIncompatiblePackage
+      ? AddIntegrationButtonDisabledReason.FIPS_INCOMPATIBLE
       : undefined;
 
   // A preselected agent policy stays on the Fleet wizard, which is the only flow that can
@@ -380,6 +386,11 @@ export function Detail() {
             }
           : packageInfoResponse;
       setPackageInfo(filteredPackageInfo);
+      // computed on the unfiltered response: the filter above strips the non FIPS templates
+      setIsFipsIncompatiblePackage(
+        !!isFipsEnabled &&
+          isPackageFipsIncompatible(packageInfoResponse.policy_templates, packageInfoResponse.name)
+      );
       setIsCustomPackage(
         (packageInfoResponse?.installationInfo?.install_source &&
           CUSTOM_INTEGRATION_SOURCES.includes(
@@ -661,6 +672,16 @@ export function Detail() {
     [getPath, history]
   );
 
+  // Temporary: integration packages with nothing to configure on an agent only install assets
+  const isAssetOnlyPackage = useMemo(
+    () =>
+      packageInfo
+        ? !ADD_INTEGRATION_CONFIGURABLE_PACKAGES.includes(packageInfo.name) &&
+          isAssetOnlyIntegrationPackage(packageInfo)
+        : false,
+    [packageInfo]
+  );
+
   const headerRightContent = useMemo(
     () =>
       packageInfo ? (
@@ -708,10 +729,37 @@ export function Detail() {
                     },
                   ]
                 : []),
-              ...(packageInfo.type === 'content'
-                ? !isInstalled
-                  ? [{ isDivider: true }, { content: <InstallButton {...packageInfo} /> }]
-                  : [] // if content package is already installed, don't show install button in header
+              ...(packageInfo.type === 'content' || isAssetOnlyPackage
+                ? // Nothing to show when the package is installed or the user can't install it, so no divider either.
+                  // Uploaded asset-only packages keep their edit action.
+                  (!isInstalled && canInstallPackages) || (isAssetOnlyPackage && isCustomPackage)
+                  ? [
+                      { isDivider: true },
+                      {
+                        content: (
+                          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+                            {isAssetOnlyPackage && isCustomPackage && (
+                              <EuiFlexItem grow={false}>
+                                <EditIntegrationButton
+                                  handleEditIntegrationClick={handleEditIntegrationClick}
+                                />
+                              </EuiFlexItem>
+                            )}
+                            {!isInstalled && canInstallPackages && (
+                              <EuiFlexItem grow={false}>
+                                <InstallButton
+                                  {...packageInfo}
+                                  variant={isAssetOnlyPackage ? 'assets' : 'package'}
+                                  // distinct from the one in the Settings tab, which shares the page
+                                  data-test-subj="installAssetsHeaderButton"
+                                />
+                              </EuiFlexItem>
+                            )}
+                          </EuiFlexGroup>
+                        ),
+                      },
+                    ]
+                  : []
                 : [
                     { isDivider: true },
                     {
@@ -752,7 +800,7 @@ export function Detail() {
             ].map((item, index) => (
               <EuiFlexItem grow={false} key={index} data-test-subj={item['data-test-subj']}>
                 {item.isDivider ?? false ? (
-                  <Divider />
+                  <Divider data-test-subj="headerDivider" />
                 ) : item.label ? (
                   <EuiDescriptionList className="eui-textRight" compressed textStyle="reverse">
                     <EuiDescriptionListTitle>{item.label}</EuiDescriptionListTitle>
@@ -773,6 +821,8 @@ export function Detail() {
       versionOptions,
       updateAvailable,
       isInstalled,
+      isAssetOnlyPackage,
+      canInstallPackages,
       isCustomPackage,
       handleEditIntegrationClick,
       addIntegrationDisabledReason,
@@ -984,15 +1034,45 @@ export function Detail() {
     </>
   ) : undefined;
 
+  const fipsCallout = isFipsIncompatiblePackage ? (
+    <>
+      <KbnWarningCallout
+        announceOnMount
+        title={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsFipsIncompatibleCalloutTitle"
+            defaultMessage="This integration is not FIPS compliant"
+          />
+        }
+        text={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsFipsIncompatibleCalloutDescription"
+            defaultMessage="It cannot be added on a FIPS-enabled deployment. Existing integration policies will fail to deploy and can be deleted."
+          />
+        }
+        data-test-subj="fipsIncompatibleCallout"
+      />
+      <EuiSpacer />
+    </>
+  ) : undefined;
+
+  const topContent =
+    securityCallout || fipsCallout ? (
+      <>
+        {securityCallout}
+        {fipsCallout}
+      </>
+    ) : undefined;
+
   return (
     <WithHeaderLayout
       leftColumn={headerLeftContent}
       rightColumn={headerRightContent}
       rightColumnGrow={false}
-      topContent={securityCallout}
+      topContent={topContent}
       tabs={headerTabs}
       tabsCss={`
-        margin-left: calc(${theme.euiTheme.size.base} * 6 + ${theme.euiTheme.size.xl} * 2 +
+        margin-left: calc(${getIconPanelWidth(theme.euiTheme.size.base, theme.euiTheme.size.xl)}px +
           ${theme.euiTheme.size.l});
       `}
     >

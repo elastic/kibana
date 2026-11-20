@@ -21,16 +21,13 @@ import type { LayoutDirection } from '@elastic/charts';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
-import {
-  CustomizablePalette,
-  DEFAULT_MAX_STOP,
-  DEFAULT_MIN_STOP,
-  applyPaletteParams,
-} from '@kbn/coloring';
+import { DEFAULT_MAX_STOP, DEFAULT_MIN_STOP, applyPaletteParams } from '@kbn/coloring';
+import { CustomizablePalette } from '@kbn/coloring-components';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { KbnPalette, useKbnPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
+import { useKbnPalettes } from '@kbn/palettes-components';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   VisualizationDimensionEditorProps,

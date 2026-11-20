@@ -24,7 +24,14 @@ export enum AgentBuilderErrorCode {
   agentUnavailable = 'agentUnavailable',
   conversationNotFound = 'conversationNotFound',
   conversationWriteConflict = 'conversationWriteConflict',
+  conversationBusy = 'conversationBusy',
   conversationAlreadyExists = 'conversationAlreadyExists',
+  backgroundExecutionAlreadyReported = 'backgroundExecutionAlreadyReported',
+  conversationPaused = 'conversationPaused',
+  conversationNotSteerable = 'conversationNotSteerable',
+  conversationAwaitingPrompt = 'conversationAwaitingPrompt',
+  noActiveExecution = 'noActiveExecution',
+  tooManyPendingSteers = 'tooManyPendingSteers',
   pluginNotFound = 'pluginNotFound',
   agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
@@ -332,6 +339,187 @@ export const createConversationWriteConflictError = ({
   return new AgentBuilderError(
     AgentBuilderErrorCode.conversationWriteConflict,
     `Conversation ${conversationId} was modified concurrently and the change could not be saved`,
+    { ...meta, conversationId, statusCode: 409 }
+  );
+};
+
+/**
+ * Error thrown when another live execution already holds the conversation.
+ */
+export type AgentBuilderConversationBusyError =
+  AgentBuilderError<AgentBuilderErrorCode.conversationBusy>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderConversationBusyError}
+ */
+export const isConversationBusyError = (err: unknown): err is AgentBuilderConversationBusyError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationBusy;
+};
+
+export const createConversationBusyError = ({
+  conversationId,
+  activeExecutionId,
+  meta = {},
+}: {
+  conversationId: string;
+  activeExecutionId: string;
+  meta?: Record<string, unknown>;
+}): AgentBuilderConversationBusyError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.conversationBusy,
+    `Conversation ${conversationId} already has an execution in progress`,
+    { ...meta, conversationId, activeExecutionId, statusCode: 409 }
+  );
+};
+
+/**
+ * Error thrown when a background sub-agent's result was already reported on its parent conversation.
+ */
+export type AgentBuilderBackgroundExecutionAlreadyReportedError =
+  AgentBuilderError<AgentBuilderErrorCode.backgroundExecutionAlreadyReported>;
+
+export const isBackgroundExecutionAlreadyReportedError = (
+  err: unknown
+): err is AgentBuilderBackgroundExecutionAlreadyReportedError => {
+  return (
+    isAgentBuilderError(err) &&
+    err.code === AgentBuilderErrorCode.backgroundExecutionAlreadyReported
+  );
+};
+
+export const createBackgroundExecutionAlreadyReportedError = ({
+  conversationId,
+  executionId,
+  meta = {},
+}: {
+  conversationId: string;
+  executionId: string;
+  meta?: Record<string, unknown>;
+}): AgentBuilderBackgroundExecutionAlreadyReportedError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.backgroundExecutionAlreadyReported,
+    `Background execution ${executionId} was already reported on conversation ${conversationId}`,
+    { ...meta, conversationId, executionId, statusCode: 409 }
+  );
+};
+
+export type AgentBuilderConversationNotSteerableError =
+  AgentBuilderError<AgentBuilderErrorCode.conversationNotSteerable>;
+
+export const isConversationNotSteerableError = (
+  err: unknown
+): err is AgentBuilderConversationNotSteerableError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationNotSteerable;
+};
+
+/** A public conversation cannot be steered: membership there is not a grant by the owner. */
+export const createConversationNotSteerableError = ({
+  conversationId,
+  meta = {},
+}: {
+  conversationId: string;
+  meta?: Record<string, unknown>;
+}): AgentBuilderConversationNotSteerableError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.conversationNotSteerable,
+    `Conversation ${conversationId} cannot be steered`,
+    { ...meta, conversationId, statusCode: 409 }
+  );
+};
+
+export type AgentBuilderConversationAwaitingPromptError =
+  AgentBuilderError<AgentBuilderErrorCode.conversationAwaitingPrompt>;
+
+export const isConversationAwaitingPromptError = (
+  err: unknown
+): err is AgentBuilderConversationAwaitingPromptError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationAwaitingPrompt;
+};
+
+/** The round is paused on a prompt: free text is not routed as its answer. */
+export const createConversationAwaitingPromptError = ({
+  conversationId,
+  meta = {},
+}: {
+  conversationId: string;
+  meta?: Record<string, unknown>;
+}): AgentBuilderConversationAwaitingPromptError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.conversationAwaitingPrompt,
+    `Conversation ${conversationId} is awaiting a prompt answer`,
+    { ...meta, conversationId, statusCode: 409 }
+  );
+};
+
+export type AgentBuilderNoActiveExecutionError =
+  AgentBuilderError<AgentBuilderErrorCode.noActiveExecution>;
+
+export const isNoActiveExecutionError = (
+  err: unknown
+): err is AgentBuilderNoActiveExecutionError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.noActiveExecution;
+};
+
+/** No live run holds the conversation and nothing is stored: the message can start a run instead. */
+export const createNoActiveExecutionError = ({
+  conversationId,
+  meta = {},
+}: {
+  conversationId: string;
+  meta?: Record<string, unknown>;
+}): AgentBuilderNoActiveExecutionError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.noActiveExecution,
+    `Conversation ${conversationId} has no active execution`,
+    { ...meta, conversationId, statusCode: 409 }
+  );
+};
+
+export type AgentBuilderTooManyPendingSteersError =
+  AgentBuilderError<AgentBuilderErrorCode.tooManyPendingSteers>;
+
+export const isTooManyPendingSteersError = (
+  err: unknown
+): err is AgentBuilderTooManyPendingSteersError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.tooManyPendingSteers;
+};
+
+export const createTooManyPendingSteersError = ({
+  conversationId,
+  meta = {},
+}: {
+  conversationId: string;
+  meta?: Record<string, unknown>;
+}): AgentBuilderTooManyPendingSteersError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.tooManyPendingSteers,
+    `Conversation ${conversationId} already has the maximum number of messages for its active execution`,
+    { ...meta, conversationId, statusCode: 429 }
+  );
+};
+
+/**
+ * Error thrown when an input that cannot answer a prompt reaches a conversation paused on one.
+ */
+export type AgentBuilderConversationPausedError =
+  AgentBuilderError<AgentBuilderErrorCode.conversationPaused>;
+
+export const isConversationPausedError = (
+  err: unknown
+): err is AgentBuilderConversationPausedError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationPaused;
+};
+
+export const createConversationPausedError = ({
+  conversationId,
+  meta = {},
+}: {
+  conversationId: string;
+  meta?: Record<string, unknown>;
+}): AgentBuilderConversationPausedError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.conversationPaused,
+    `Conversation ${conversationId} is paused on a prompt`,
     { ...meta, conversationId, statusCode: 409 }
   );
 };
@@ -663,6 +851,11 @@ export const AgentBuilderErrorUtils = {
   isAgentUnavailableError,
   isConversationNotFoundError,
   isConversationWriteConflictError,
+  isConversationBusyError,
+  isConversationNotSteerableError,
+  isConversationAwaitingPromptError,
+  isNoActiveExecutionError,
+  isTooManyPendingSteersError,
   isPluginNotFoundError,
   isWorkflowAbortedError,
   isWorkflowExecutionError,
@@ -680,6 +873,11 @@ export const AgentBuilderErrorUtils = {
   createAgentUnavailableError,
   createConversationNotFoundError,
   createConversationWriteConflictError,
+  createConversationBusyError,
+  createConversationNotSteerableError,
+  createConversationAwaitingPromptError,
+  createNoActiveExecutionError,
+  createTooManyPendingSteersError,
   createPluginNotFoundError,
   createWorkflowAbortedError,
   createWorkflowExecutionError,

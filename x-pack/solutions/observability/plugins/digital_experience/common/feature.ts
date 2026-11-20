@@ -12,7 +12,15 @@ export const DIGITAL_EXPERIENCE_FEATURE_ID = OBLT_DIGITAL_EXPERIENCE_APP_ID;
 export const DIGITAL_EXPERIENCE_API_PRIVILEGES = {
   read: 'read_digital_experience',
   manage: 'manage_digital_experience',
+  /** Set up the session summaries; a separate grant, not part of `all`. */
+  manageSessions: 'manage_digital_experience_sessions',
 } as const;
+
+/** Sub-feature privilege that grants `manageSessions`. */
+export const MANAGE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID = 'manage_sessions';
+
+/** Sub-feature privilege that grants `createShortUrl`, named like Discover's and Dashboard's. */
+export const CREATE_SHORT_URL_SUB_FEATURE_PRIVILEGE_ID = 'url_create';
 
 /** APM's API privilege, which the routes also require as the app reads its data through APM. */
 export const APM_API_PRIVILEGE = 'apm';
@@ -20,4 +28,6 @@ export const APM_API_PRIVILEGE = 'apm';
 export const DIGITAL_EXPERIENCE_UI_PRIVILEGES = {
   show: 'show',
   save: 'save',
+  manageSessions: 'manageSessions',
+  createShortUrl: 'createShortUrl',
 } as const;

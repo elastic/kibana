@@ -30,7 +30,22 @@ import {
 import type { AnyValueMap } from '@opentelemetry/api-logs';
 import { SeverityNumber, type Logger } from '@opentelemetry/api-logs';
 import { resources } from '@elastic/opentelemetry-node/sdk';
-import { BatchLogRecordProcessor, LoggerProvider } from '@opentelemetry/sdk-logs';
+import {
+  BatchLogRecordProcessor,
+  LoggerProvider,
+  type ReadableLogRecord,
+} from '@opentelemetry/sdk-logs';
+import type { ExporterMetrics } from '@opentelemetry/otlp-exporter-base';
+import { createOtlpHttpExporterMetrics } from '@opentelemetry/otlp-exporter-base/node-http';
+import {
+  convertLegacyOtlpGrpcOptions,
+  createOtlpGrpcExporterMetrics,
+} from '@opentelemetry/otlp-grpc-exporter-base';
+import { LogsExporterMetricsHelper } from '@opentelemetry/otlp-transformer';
+import {
+  OTEL_COMPONENT_TYPE_VALUE_OTLP_GRPC_LOG_EXPORTER,
+  OTEL_COMPONENT_TYPE_VALUE_OTLP_HTTP_LOG_EXPORTER,
+} from '@opentelemetry/semantic-conventions/incubating';
 import type {
   OtelAppenderConfig,
   OtelAppenderPluginConfig,
@@ -328,12 +343,11 @@ export class OtelAppender implements DisposableAppender {
   constructor(config: OtelAppenderPluginConfig) {
     const meterProvider = metrics.getMeterProvider();
     const maxElapsedTimeMs = config.maxElapsedTime?.asMilliseconds();
-    const baseExporter = createExporter(config, meterProvider);
     // The SDK's built-in retry gives up after ~13s; the retry layer extends it to the budget.
     const exporter =
       maxElapsedTimeMs !== undefined
-        ? new RetryingLogRecordExporter(baseExporter, maxElapsedTimeMs)
-        : baseExporter;
+        ? createRetryingExporter(config, meterProvider, maxElapsedTimeMs)
+        : createExporter(config, meterProvider);
     // Layer the resource from three sources (each overriding the previous):
     //   1. Auto-detected: host, OS, process, env-var OTel attributes
     //   2. Derived: service.name / service.version / deployment.environment from the
@@ -467,16 +481,59 @@ const omitDeepNilValues = (obj: Ecs) => {
   return result;
 };
 
+/**
+ * Wraps the SDK exporter in the retry layer, which records the `otel.sdk.exporter.*` metrics in
+ * its place so each batch is counted once, after its final attempt.
+ */
+const createRetryingExporter = (
+  config: OtelAppenderConfig,
+  meterProvider: MeterProvider,
+  maxElapsedTimeMs: number
+): RetryingLogRecordExporter => {
+  // Created before the SDK exporter so it takes the `otel.component.name` that exporter would get.
+  const exporterMetrics = createExporterMetrics(config, meterProvider);
+  return new RetryingLogRecordExporter(
+    createExporter(config, undefined),
+    maxElapsedTimeMs,
+    exporterMetrics
+  );
+};
+
+/** The `otel.sdk.exporter.*` metrics recorder the SDK exporter for `config.protocol` would use. */
+const createExporterMetrics = (
+  config: OtelAppenderConfig,
+  meterProvider: MeterProvider
+): ExporterMetrics<ReadableLogRecord[]> => {
+  switch (config.protocol) {
+    case 'http':
+    case 'proto':
+      return createOtlpHttpExporterMetrics(
+        OTEL_COMPONENT_TYPE_VALUE_OTLP_HTTP_LOG_EXPORTER,
+        LogsExporterMetricsHelper,
+        config.url,
+        meterProvider
+      );
+    case 'grpc':
+      return createOtlpGrpcExporterMetrics(
+        OTEL_COMPONENT_TYPE_VALUE_OTLP_GRPC_LOG_EXPORTER,
+        LogsExporterMetricsHelper,
+        // The SDK exporter records the normalized `host[:port]`, not the configured URL.
+        convertLegacyOtlpGrpcOptions({ url: config.url }, 'LOGS').url,
+        meterProvider
+      );
+  }
+};
+
 const createExporter = (
   config: OtelAppenderConfig,
-  selfObsMeterProvider: MeterProvider
+  selfObsMeterProvider: MeterProvider | undefined
 ): OTLPLogExporterHTTP | OTLPLogExporterGRPC | OTLPLogExporterPROTO => {
   const tls = resolveTlsMaterial(config.ssl);
 
   switch (config.protocol) {
     case 'http': {
       // No need to import the module at the top if not used in the switch statement.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
       return new OTLPLogExporter({
         url: config.url,
@@ -487,7 +544,7 @@ const createExporter = (
     }
     case 'proto': {
       // No need to import the module at the top if not used in the switch statement.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-proto');
       return new OTLPLogExporter({
         url: config.url,
@@ -498,14 +555,14 @@ const createExporter = (
     }
     case 'grpc': {
       // No need to import the module at the top if not used in the switch statement.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { Metadata, credentials } = require('@grpc/grpc-js');
       const metadata = new Metadata();
       Object.entries(config.headers ?? {}).forEach(([key, value]) => {
         metadata.add(key, value);
       });
       // No need to import the module at the top if not used in the switch statement.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-grpc');
       return new OTLPLogExporter({
         url: config.url,

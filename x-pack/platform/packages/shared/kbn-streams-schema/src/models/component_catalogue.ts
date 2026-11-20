@@ -5,6 +5,19 @@
  * 2.0.
  */
 
+import type { StreamsUnit } from './unit';
+
+export const SUPPORTED_COMPONENT_CATALOGUE_SCHEMA_VERSIONS = ['v1'] as const;
+
+export const isSupportedCatalogueSchemaVersion = (version: string | undefined): boolean =>
+  SUPPORTED_COMPONENT_CATALOGUE_SCHEMA_VERSIONS.some((supported) => supported === version);
+
+/**
+ * Set to `true` on a `GET /internal/streams/components` response that Kibana served from its
+ * cache because the distributor could not be reached, so the browser can say it may be out of date.
+ */
+export const STALE_COMPONENT_CATALOGUE_HEADER = 'x-streams-catalogue-stale';
+
 export type CatalogueSignal = 'logs' | 'metrics' | 'traces' | 'docs' | 'profiles';
 
 export type CatalogueComponentKind = 'source' | 'processor' | 'destination';
@@ -258,6 +271,7 @@ export interface CatalogueComponentDefinition {
   description?: string;
   supported_telemetry: CatalogueSignal[];
   telemetry_selection: CatalogueTelemetrySelection;
+  max_selected_telemetry?: number;
   status?: CatalogueComponentStatus;
   fields: CatalogueNamedFieldDefinition[];
   groups?: CatalogueFieldGroup[];
@@ -270,4 +284,12 @@ export interface ComponentCatalogue {
   components: CatalogueComponentSummary[];
   metadata: CatalogueMetadata;
   definitions: CatalogueComponentDefinition[];
+}
+
+export type ComponentValidationRequest = StreamsUnit.ComponentValidationRequest;
+
+export interface ComponentValidationResult {
+  /** False when any diagnostic is an error. */
+  valid: boolean;
+  diagnostics: StreamsUnit.Diagnostic[];
 }

@@ -207,6 +207,13 @@ export const FLYOUT_VIEW_DETAILS = i18n.translate(
   }
 );
 
+export const FLYOUT_ADD_TO_CHAT = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.addToChat',
+  {
+    defaultMessage: 'Add to chat',
+  }
+);
+
 export const FLYOUT_TAKE_ACTION = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.takeAction',
   {

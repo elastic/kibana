@@ -10,7 +10,7 @@ import { Route } from '@kbn/core-di-server';
 import { CreateRuleRoute } from '../routes/rules/create_rule_route';
 import { UpdateRuleRoute } from '../routes/rules/update_rule_route';
 import { GetRulesRoute } from '../routes/rules/get_rules_route';
-import { BulkGetRulesRoute } from '../routes/rules/get_rules_bulk_route';
+import { BulkGetRulesRoute } from '../routes/rules/bulk_get_rules_route';
 import { GetRuleRoute } from '../routes/rules/get_rule_route';
 import { DeleteRuleRoute } from '../routes/rules/delete_rule_route';
 import { RunRuleRoute } from '../routes/rules/run_rule_route';
@@ -64,6 +64,7 @@ import { ListActionPolicyExecutionsRoute } from '../routes/execution_history/lis
 import { ListRuleExecutionsRoute } from '../routes/execution_history/list_rule_executions_route';
 import { ListRuleChangeHistoryRoute } from '../routes/rule_change_history/list_rule_change_history_route';
 import { GetRuleChangeHistoryEventRoute } from '../routes/rule_change_history/get_rule_change_history_event_route';
+import { RestoreRuleChangeRoute } from '../routes/rule_change_history/restore_rule_change_route';
 import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_value_suggestions_route';
 import { MatcherRuleEventFieldsRoute } from '../routes/suggestions/matcher_rule_event_fields_route';
 import { SuggestUserProfilesRoute } from '../routes/suggestions/suggest_user_profiles_route';
@@ -71,6 +72,8 @@ import { UpsertRuleRoute } from '../routes/rules/upsert_rule_route';
 import { UpsertActionPolicyRoute } from '../routes/action_policies/upsert_action_policy_route';
 import { MatchActionPoliciesRoute } from '../routes/action_policies/match_action_policies_route';
 import { GetActionPolicyRoutingTagsRoute } from '../routes/action_policies/get_action_policy_routing_tags_route';
+import { PreviewActionPolicyTestRoute } from '../routes/action_policies/preview_action_policy_test_route';
+import { SendActionPolicyTestRoute } from '../routes/action_policies/send_action_policy_test_route';
 import { FindRuleTemplatesRoute } from '../routes/rule_templates/find_rule_templates_route';
 import { GetRuleTemplateTagsRoute } from '../routes/rule_templates/get_rule_template_tags_route';
 import { GetRuleTemplateRoute } from '../routes/rule_templates/get_rule_template_route';
@@ -134,6 +137,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(ListRuleExecutionsRoute);
   bind(Route).toConstantValue(ListRuleChangeHistoryRoute);
   bind(Route).toConstantValue(GetRuleChangeHistoryEventRoute);
+  bind(Route).toConstantValue(RestoreRuleChangeRoute);
   bind(Route).toConstantValue(MatcherValueSuggestionsRoute);
   bind(Route).toConstantValue(MatcherRuleEventFieldsRoute);
 
@@ -142,6 +146,8 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(UpsertActionPolicyRoute);
   bind(Route).toConstantValue(MatchActionPoliciesRoute);
   bind(Route).toConstantValue(GetActionPolicyRoutingTagsRoute);
+  bind(Route).toConstantValue(PreviewActionPolicyTestRoute);
+  bind(Route).toConstantValue(SendActionPolicyTestRoute);
   bind(Route).toConstantValue(FindRuleTemplatesRoute);
   bind(Route).toConstantValue(GetRuleTemplateTagsRoute);
   bind(Route).toConstantValue(GetRuleTemplateRoute);
