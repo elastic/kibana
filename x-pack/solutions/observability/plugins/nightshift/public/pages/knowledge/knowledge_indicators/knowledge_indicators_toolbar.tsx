@@ -41,6 +41,11 @@ const searchBarStyle = css`
   min-height: 44px;
 `;
 
+// Keeps the search field on its own row on a phone, with the filters wrapping below it.
+const searchItemStyle = css`
+  min-width: 200px;
+`;
+
 interface KnowledgeIndicatorsToolbarProps {
   knowledgeIndicators: KnowledgeIndicator[];
   filteredCount: number;
@@ -112,8 +117,8 @@ export function KnowledgeIndicatorsToolbar({
 }: KnowledgeIndicatorsToolbarProps) {
   return (
     <>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={searchBarStyle}>
-        <EuiFlexItem>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap css={searchBarStyle}>
+        <EuiFlexItem css={searchItemStyle}>
           <EuiFieldSearch
             data-test-subj="significantEventsAppKnowledgeIndicatorsToolbarFieldSearch"
             fullWidth

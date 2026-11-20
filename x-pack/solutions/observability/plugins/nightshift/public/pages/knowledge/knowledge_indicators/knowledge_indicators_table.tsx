@@ -21,6 +21,7 @@ import { KbnInfoCallout } from '@kbn/ui-callout';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import React, { useMemo } from 'react';
+import { useIsMobile } from '../../../hooks/use_is_mobile';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSourcesById } from '../../../data/sources/use_sources_by_id';
 import { getFeaturesFromKIs } from './utils/get_features_from_kis';
@@ -49,6 +50,7 @@ const KnowledgeIndicatorDetailsFlyout = React.lazy(() =>
 
 export function KnowledgeIndicatorsTable(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
+  const isMobile = useIsMobile();
   const {
     services: { application },
   } = useKibana();
@@ -214,8 +216,9 @@ export function KnowledgeIndicatorsTable(): React.ReactElement {
         `}
       >
         <EuiInMemoryTable<KnowledgeIndicator>
+          // On a phone the table collapses into cards instead of scrolling sideways.
           css={css`
-            min-width: 1100px;
+            min-width: ${isMobile ? '0' : '1100px'};
           `}
           items={filteredKnowledgeIndicators}
           itemId={getKnowledgeIndicatorItemId}

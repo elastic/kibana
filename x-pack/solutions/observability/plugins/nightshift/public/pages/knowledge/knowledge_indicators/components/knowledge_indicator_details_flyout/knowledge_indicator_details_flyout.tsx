@@ -32,6 +32,7 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { AggregatedFeature } from '@kbn/significant-events-schema';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useIsMobile } from '../../../../../hooks/use_is_mobile';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { buildFeatureDiscoverParams } from '../../../../../common/discover_helpers';
@@ -94,6 +95,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     },
   } = useKibana();
   const canManage = getNightshiftCapabilities(nightshift).canManage;
+  const isMobile = useIsMobile();
   const { timeState } = useTimefilter();
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'knowledgeIndicatorDetailsFlyoutTitle' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -321,7 +323,7 @@ export function KnowledgeIndicatorDetailsFlyout({
         aria-labelledby={flyoutTitleId}
         type="push"
         ownFocus={false}
-        size="40%"
+        size={isMobile ? 'fill' : '40%'}
         hideCloseButton
       >
         <FlyoutToolbarHeader
