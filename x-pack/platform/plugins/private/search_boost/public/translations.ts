@@ -262,6 +262,15 @@ export const DELETE_LABEL = i18n.translate('xpack.searchBoost.actions.delete', {
   defaultMessage: 'Delete',
 });
 
+export const CANCEL_BUTTON_LABEL = i18n.translate('xpack.searchBoost.flyout.cancelButton', {
+  defaultMessage: 'Cancel',
+});
+
+export const SAVE_CHANGES_BUTTON_LABEL = i18n.translate(
+  'xpack.searchBoost.flyout.saveChangesButton',
+  { defaultMessage: 'Save changes' }
+);
+
 export const PROFILE_NAME_LABEL = i18n.translate('xpack.searchBoost.profileName', {
   defaultMessage: 'Profile name',
 });
