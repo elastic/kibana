@@ -604,6 +604,10 @@ export const updateVendorApi = async ({
       ...(name in protocols && endpoints ? { endpoints: [...endpoints] } : {}),
       ...(tools === undefined ? {} : { tools: [...tools] }),
       ...(isCaptured(name) ? { captured: true as const } : {}),
+      // A pinned source stays so until its URL moves, which is how it is refreshed.
+      ...(previous?.sources[name]?.pinned && previous.sources[name].url === urls[name]
+        ? { pinned: true as const }
+        : {}),
       ...(pages === undefined ? {} : { pages: [...pages] }),
       ...(apiVersion === undefined ? {} : { apiVersion }),
       fetchedAt: fetchedAt ?? now().toISOString(),

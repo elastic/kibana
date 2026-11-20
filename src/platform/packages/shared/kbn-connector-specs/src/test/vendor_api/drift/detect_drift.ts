@@ -58,7 +58,8 @@ export interface SpecChange {
 export interface SourceDrift {
   /**
    * `unreachable` when the latest spec couldn't be fetched or loaded, and `pinned` for a captured
-   * source, which has no latest to compare with until someone captures it again with credentials.
+   * source, which has no latest to compare with until someone captures it again with credentials,
+   * and for a source at a fixed URL that answered with the snapshot: it can't notice a change.
    */
   readonly status: 'unchanged' | 'changed' | 'unreachable' | 'pinned';
   readonly error?: string;
@@ -481,9 +482,9 @@ const compareWithLatest = async ({
             },
           }
         : {};
-      const { url } = manifest.sources[name];
+      const { url, pinned } = manifest.sources[name];
       if (committed === current) {
-        sources[name] = { status: 'unchanged', ...servers, url };
+        sources[name] = { status: pinned ? 'pinned' : 'unchanged', ...servers, url };
       } else {
         const changes = await classifyChanges({
           format,

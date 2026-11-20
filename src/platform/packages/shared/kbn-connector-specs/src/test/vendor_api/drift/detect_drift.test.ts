@@ -479,6 +479,41 @@ components:
     });
   });
 
+  describe('with a source at a fixed URL', () => {
+    const pin = async () => {
+      const manifestFile = path.join(directory, 'manifest.json');
+      const manifest = JSON.parse(await fs.readFile(manifestFile, 'utf8'));
+      manifest.sources.main = {
+        ...manifest.sources.main,
+        pinned: true,
+        note: 'The vendor publishes a file per release and no URL for the latest.',
+      };
+      await fs.writeFile(manifestFile, JSON.stringify(manifest));
+    };
+
+    it('reports it as pinned, not unchanged, when it answers with the snapshot', async () => {
+      await pin();
+
+      const { sources, outcome } = await detect();
+
+      expect(sources.main).toMatchObject({ status: 'pinned', url: SPEC_URL });
+      expect(outcome).toBe('none');
+    });
+
+    it('still reports a change, and a source the vendor removed', async () => {
+      await pin();
+      documents[SPEC_URL] = specYaml({
+        itemProperties: '{ name: { type: string }, color: { type: string } }',
+      });
+
+      expect((await detect()).sources.main.status).toBe('changed');
+
+      delete documents[SPEC_URL];
+
+      expect((await detect()).sources.main.status).toBe('unreachable');
+    });
+  });
+
   it('opens an issue when the latest spec does not load', async () => {
     delete documents[SPEC_URL];
 

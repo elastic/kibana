@@ -61,6 +61,8 @@
       "apiVersion": "3.0",
       "fetchedAt": "2026-10-07T20:20:28.815Z",
       "format": "openapi",
+      "note": "Google publishes this spec as a dated file and no URL for the latest; a new spec is a new file name. Refresh by moving the URL.",
+      "pinned": true,
       "url": "https://storage.googleapis.com/gtidocresources/guides/GTI_API_v3_openapi_spec_10022025.json"
     }
   }

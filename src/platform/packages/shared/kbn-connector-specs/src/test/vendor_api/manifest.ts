@@ -64,6 +64,14 @@ const sourceSchema = z
      * what the capture took.
      */
     captured: z.literal(true).optional(),
+    /**
+     * Set when the vendor publishes no way to follow its spec: the URL names a version, a commit
+     * or a dated file, and a newer one lives at another URL. The source is fetched as any other,
+     * so a vendor that removes it still raises an issue, but one that answers with the snapshot is
+     * reported as `pinned` rather than `unchanged`, as it can't notice a vendor change. Refreshing
+     * it means moving the URL. Needs a `note` saying why it can't follow the vendor.
+     */
+    pinned: z.literal(true).optional(),
     /** The spec's `info.version`, when it has one. */
     apiVersion: z.string().optional(),
     /** When the snapshot last changed, as an ISO date-time. */
@@ -88,6 +96,14 @@ const sourceSchema = z
   .refine(({ captured, note }) => captured === undefined || note !== undefined, {
     message: 'A captured source needs a "note" saying what capturing it took',
     path: ['note'],
+  })
+  .refine(({ pinned, note }) => pinned === undefined || note !== undefined, {
+    message: 'A pinned source needs a "note" saying why it can\'t follow the vendor',
+    path: ['note'],
+  })
+  .refine(({ pinned, captured }) => pinned === undefined || captured === undefined, {
+    message: 'A source is captured or pinned, not both: a captured one is never fetched',
+    path: ['pinned'],
   });
 
 const located = { in: z.enum(['query', 'body', 'header']).optional() };
