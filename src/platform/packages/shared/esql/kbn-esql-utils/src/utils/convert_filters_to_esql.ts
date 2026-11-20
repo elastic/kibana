@@ -27,6 +27,7 @@ import {
   getPhraseFilterField,
   getPhraseFilterValue,
   getFilterField,
+  isEsqlFilter,
   BooleanRelation,
 } from '@kbn/es-query';
 import { sanitazeESQLInput } from './sanitaze_input';
@@ -53,6 +54,13 @@ export const convertFiltersToESQLExpression = (filters: Filter[]): FilterTransla
       continue;
     }
 
+    // These filters are on columns that the query creates, so they can't be used in a WHERE after
+    // the source command, where the columns do not exist yet. See `convertEsqlFiltersToESQLExpression`
+    if (isEsqlFilter(filter)) {
+      untranslatableFilters.push(filter);
+      continue;
+    }
+
     const negate = filter.meta?.negate ?? false;
     const expression = translateSingleFilter(filter, negate);
 
@@ -73,6 +81,58 @@ export const convertFiltersToESQLExpression = (filters: Filter[]): FilterTransla
     esqlExpression: translatedExpressions.join(' AND '),
     untranslatableFilters,
   };
+};
+
+/**
+ * Converts the filters on the columns that an ES|QL query creates (`kind: 'esql'`) to a WHERE expression
+ * for the end of that query, where the columns exist. The other filters are ignored.
+ * The match operator is not used as it can't be used on the columns that a query creates.
+ */
+export const convertEsqlFiltersToESQLExpression = (filters: Filter[]): string => {
+  const expressions: string[] = [];
+
+  for (const filter of filters) {
+    if (!isEsqlFilter(filter) || filter.meta?.disabled) {
+      continue;
+    }
+
+    const expression = translateEsqlFilter(filter, filter.meta?.negate ?? false);
+    if (expression) {
+      expressions.push(expression);
+    }
+  }
+
+  return expressions.join(' AND ');
+};
+
+const translateEsqlFilter = (filter: Filter, negate: boolean): string | null => {
+  if (isExistsFilter(filter)) {
+    return translateExistsFilter(filter, negate);
+  }
+
+  const field = filter.meta?.key;
+  if (!field) {
+    return null;
+  }
+  const escapedField = escapeFieldName(field);
+
+  if (isPhrasesFilter(filter)) {
+    const values = filter.meta.params;
+    if (!Array.isArray(values) || values.length === 0) {
+      return null;
+    }
+    return wrapWithNot(`${escapedField} IN (${values.map(formatESQLValue).join(', ')})`, negate);
+  }
+
+  if (isPhraseFilter(filter)) {
+    const value = getPhraseFilterValue(filter);
+    if (value === undefined || value === null) {
+      return null;
+    }
+    return wrapWithNot(`${escapedField} == ${formatESQLValue(value)}`, negate);
+  }
+
+  return null;
 };
 
 const translateSingleFilter = (filter: Filter, negate: boolean): string | null => {

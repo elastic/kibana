@@ -144,7 +144,11 @@ export {
   type ESQLHighlightTags,
 } from './utils/get_columns_with_highlights';
 export { buildRenameSourceFieldMap } from './utils/build_rename_source_field_map';
-export { convertFiltersToESQLExpression } from './utils/convert_filters_to_esql';
+export {
+  convertFiltersToESQLExpression,
+  convertEsqlFiltersToESQLExpression,
+} from './utils/convert_filters_to_esql';
+export { appendEsqlFiltersToESQLQuery } from './utils/append_to_query/append_esql_filters';
 export { convertQueryToESQLExpression } from './utils/convert_query_to_esql';
 export { injectWhereClauseAfterSourceCommand } from './utils/inject_where_after_source';
 

@@ -191,6 +191,59 @@ describe('open in discover action', () => {
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
   });
 
+  it('navigates to discover for an ES|QL chart and applies the filters on its created columns at the end of the query', async () => {
+    const viewUnderlyingDataArgs = {
+      dataViewSpec: { id: 'index-pattern-id' },
+      timeRange: {},
+      filters: [
+        {
+          meta: { type: 'phrase', key: 'host.name', params: { query: 'web-1' } },
+          query: { match_phrase: { 'host.name': 'web-1' } },
+        },
+        {
+          meta: { kind: 'esql', type: 'phrase', key: 'size', params: { query: 1 } },
+          query: { match_phrase: { size: 1 } },
+        },
+      ],
+      query: { esql: 'FROM logs | EVAL size = 1 | STATS c = COUNT(*) BY size' },
+      esqlControls: undefined,
+      columns: [],
+    };
+
+    const embeddable = {
+      ...compatibleEmbeddableApi,
+      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
+      isTextBasedLanguage: jest.fn(() => true),
+    };
+
+    const locator = {
+      getRedirectUrl: jest.fn(() => 'https://discover-redirect-url'),
+    } as unknown as DiscoverAppLocator;
+
+    globalThis.open = jest.fn();
+
+    await createOpenInDiscoverAction(
+      locator,
+      {
+        get: () => ({
+          isTimeBased: () => true,
+          toSpec: () => ({ id: 'index-pattern-id' }),
+        }),
+      } as unknown as DataViewsService,
+      true
+    ).execute({
+      embeddable,
+    } as ActionExecutionContext<EmbeddableApiContext>);
+
+    const { query } = (locator.getRedirectUrl as jest.Mock).mock.calls[0][0];
+    // the regular filter goes after the source command, where the index fields exist
+    expect(query.esql).toContain('FROM logs\n| WHERE `host.name` : "web-1"');
+    // the filter on the column that the query creates, only at the end of it
+    expect(query.esql.endsWith('BY size\n| WHERE `size` == 1')).toBe(true);
+    expect(query.esql.indexOf('size')).toBeLessThan(query.esql.indexOf('WHERE `size`'));
+    expect(query.esql.match(/WHERE `size`/g)).toHaveLength(1);
+  });
+
   it('navigates to discover for an ES|QL chart and translates the dashboard KQL into a KQL(...) clause', async () => {
     const viewUnderlyingDataArgs = {
       dataViewSpec: { id: 'index-pattern-id' },

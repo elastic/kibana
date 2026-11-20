@@ -106,6 +106,8 @@ export {
   getColumnsWithHighlights,
   buildRenameSourceFieldMap,
   convertFiltersToESQLExpression,
+  convertEsqlFiltersToESQLExpression,
+  appendEsqlFiltersToESQLQuery,
   convertQueryToESQLExpression,
   injectWhereClauseAfterSourceCommand,
   type ESQLStatsQueryMeta,

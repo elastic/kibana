@@ -12,9 +12,12 @@ import { Parser } from '@elastic/esql';
 import {
   esqlCommandRegistry,
   getNamedSubqueries,
+  getUnmappedFieldsStrategy,
+  type ESQLColumnData,
   type ESQLCommandSummary,
   type ESQLCommandSummaryContext,
   type FieldSummary,
+  type IAdditionalFields,
   type NamedSubquery,
 } from '@kbn/esql-language';
 import { parseEsqlCached } from './parse_esql_cached';
@@ -240,22 +243,37 @@ export function isComputedColumn(fieldName: string, summary: ESQLCommandSummary)
 
 /**
  * Returns the columns that the query creates (EVAL, STATS, DISSECT, ...) and that are part of its output.
- * STATS replaces the columns of the commands before it, so these are the ones of the last STATS and of the
- * commands after it. DROP and KEEP are not considered, as they don't have a summary.
+ * Each command knows the columns that it leaves (`columnsAfter`), so STATS, KEEP, DROP or RENAME are considered.
+ * The fields of the sources are not asked for, so there are no requests and the index fields are not included,
+ * except the ones that STATS groups by.
  * @param query The ES|QL query.
  * @returns The names of the columns.
  */
-export function getComputedColumnsInOutput(query: string): Set<string> {
+export async function getComputedColumnsInOutput(query: string): Promise<Set<string>> {
   const { root } = parseEsqlCached(query);
-  const lastStatsIndex = root.commands.map(({ name }) => name).lastIndexOf('stats');
-  const { newColumns, grouping, renamedColumnsPairs } = getQuerySummaryFromCommands(
-    root.commands.slice(Math.max(lastStatsIndex, 0)),
-    query,
-    createQuerySummaryContext(root, query)
-  );
+  const noFields = async () => [];
+  const additionalFields: IAdditionalFields = {
+    fromJoin: noFields,
+    fromEnrich: noFields,
+    fromFrom: noFields,
+    fromPromql: noFields,
+    namedSubqueries: getNamedSubqueries(root.header),
+  };
 
-  const columns = new Set([...newColumns, ...[...(grouping ?? [])].map(({ field }) => field)]);
-  // the pairs are [new name, old name]
-  renamedColumnsPairs?.forEach(([, oldName]) => columns.delete(oldName));
-  return columns;
+  const unmappedFieldsStrategy = getUnmappedFieldsStrategy(root.header);
+  let columns: ESQLColumnData[] = [];
+  for (const command of root.commands) {
+    const columnsAfter = esqlCommandRegistry.getCommandByName(command.name)?.methods.columnsAfter;
+    if (columnsAfter) {
+      columns = await columnsAfter(
+        command,
+        columns,
+        query,
+        additionalFields,
+        unmappedFieldsStrategy
+      );
+    }
+  }
+
+  return new Set(columns.map(({ name }) => name));
 }

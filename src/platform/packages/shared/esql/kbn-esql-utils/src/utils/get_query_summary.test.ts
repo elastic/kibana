@@ -276,53 +276,71 @@ describe('getQuerySummaryPerCommandType', () => {
 });
 
 describe('getComputedColumnsInOutput', () => {
-  const getColumns = (query: string) => [...getComputedColumnsInOutput(query)].sort();
+  const getColumns = async (query: string) => [...(await getComputedColumnsInOutput(query))].sort();
 
-  it('returns the columns created by EVAL', () => {
-    expect(getColumns('FROM logs | EVAL a = bytes * 2, b = "x"')).toEqual(['a', 'b']);
+  it('returns the columns created by EVAL', async () => {
+    expect(await getColumns('FROM logs | EVAL a = bytes * 2, b = "x"')).toEqual(['a', 'b']);
   });
 
-  it('returns no columns for a query that does not create any', () => {
-    expect(getColumns('FROM logs | WHERE bytes > 1 | LIMIT 10')).toEqual([]);
+  it('returns no columns for a query that does not create any', async () => {
+    expect(await getColumns('FROM logs | WHERE bytes > 1 | LIMIT 10')).toEqual([]);
   });
 
-  it('keeps an EVAL column that STATS groups by, even with commands after it', () => {
+  it('keeps an EVAL column that STATS groups by, even with commands after it', async () => {
     expect(
-      getColumns(
+      await getColumns(
         'FROM logs | EVAL size = CASE(bytes > 1, "big", "small") | STATS c = COUNT(*) BY size | SORT c DESC | LIMIT 10'
       )
     ).toEqual(['c', 'size']);
   });
 
-  it('does not return the EVAL columns that STATS does not output', () => {
-    expect(getColumns('FROM logs | EVAL a = bytes * 2 | STATS c = COUNT(*)')).toEqual(['c']);
-    expect(getColumns('FROM logs | EVAL a = bytes * 2 | STATS c = COUNT(*) BY host')).toEqual([
-      'c',
-      'host',
-    ]);
+  it('does not return the EVAL columns that STATS does not output', async () => {
+    expect(await getColumns('FROM logs | EVAL a = bytes * 2 | STATS c = COUNT(*)')).toEqual(['c']);
+    expect(await getColumns('FROM logs | EVAL a = bytes * 2 | STATS c = COUNT(*) BY host')).toEqual(
+      ['c', 'host']
+    );
   });
 
-  it('uses the last STATS, and the commands after it', () => {
+  it('uses the last STATS, and the commands after it', async () => {
     expect(
-      getColumns(
+      await getColumns(
         'FROM logs | EVAL a = 1 | STATS c = COUNT(*) BY a | STATS d = COUNT(*) | EVAL ratio = d / 2'
       )
     ).toEqual(['d', 'ratio']);
   });
 
-  it('returns the aliases of the STATS groupings', () => {
+  it('returns the aliases of the STATS groupings', async () => {
     expect(
-      getColumns('FROM logs | STATS c = COUNT(*) BY hour = BUCKET(@timestamp, 1 hour), host')
+      await getColumns('FROM logs | STATS c = COUNT(*) BY hour = BUCKET(@timestamp, 1 hour), host')
     ).toEqual(['c', 'host', 'hour']);
   });
 
-  it('keeps the STATS columns after a KEEP', () => {
+  it('keeps the STATS columns after a KEEP', async () => {
     expect(
-      getColumns('FROM logs | EVAL size = 1 | STATS c = COUNT(*) BY size | KEEP size, c')
+      await getColumns('FROM logs | EVAL size = 1 | STATS c = COUNT(*) BY size | KEEP size, c')
     ).toEqual(['c', 'size']);
   });
 
-  it('does not return the old name of a renamed column', () => {
-    expect(getColumns('FROM logs | EVAL a = 1 | RENAME a AS b')).toEqual(['b']);
+  it('does not return the columns that DROP or KEEP remove', async () => {
+    expect(await getColumns('FROM logs | EVAL a = 1, b = 2 | DROP a')).toEqual(['b']);
+    expect(await getColumns('FROM logs | EVAL a = 1, b = 2 | KEEP bytes, b')).toEqual(['b']);
+  });
+
+  it('does not return the old name of a renamed column', async () => {
+    expect(await getColumns('FROM logs | EVAL a = 1 | RENAME a AS b')).toEqual(['b']);
+  });
+
+  it('returns the columns created by DISSECT, GROK and ROW', async () => {
+    expect(await getColumns('FROM logs | DISSECT message "%{x} %{y}"')).toEqual(['x', 'y']);
+    expect(await getColumns('FROM logs | GROK message "%{WORD:w}"')).toEqual(['w']);
+    expect(await getColumns('ROW a = 1 | EVAL b = a + 1')).toEqual(['a', 'b']);
+  });
+
+  it('considers the queries that set how to handle the unmapped fields', async () => {
+    expect(
+      await getColumns(
+        'SET unmapped_fields = "LOAD"; FROM logs | EVAL a = not_mapped | STATS c = COUNT(*) BY a'
+      )
+    ).toEqual(['a', 'c']);
   });
 });

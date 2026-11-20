@@ -11,6 +11,7 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { getEsqlControls } from '@kbn/esql-controls-utils';
 import {
+  appendEsqlFiltersToESQLQuery,
   convertFiltersToESQLExpression,
   convertQueryToESQLExpression,
   injectWhereClauseAfterSourceCommand,
@@ -20,7 +21,7 @@ import type { DiscoverAppLocatorParams } from '../../../common';
 import type { ChangePointGridSearchRequest } from './resolve_change_point_grid_search_request';
 
 /** Builds a Discover location for the query and context the panel is currently showing. */
-export const getChangePointGridDiscoverLocatorParams = ({
+export const getChangePointGridDiscoverLocatorParams = async ({
   esql,
   searchContext,
   parentApi,
@@ -28,16 +29,19 @@ export const getChangePointGridDiscoverLocatorParams = ({
   esql: string;
   searchContext: ChangePointGridSearchRequest;
   parentApi?: unknown;
-}): DiscoverAppLocatorParams => {
+}): Promise<DiscoverAppLocatorParams> => {
   // Discover ES|QL mode can't accept DSL filters, so untranslatable filters are dropped, matching
   // Lens's "Explore in Discover" for ES|QL charts.
   const expressions = [
     convertQueryToESQLExpression(searchContext.inputQuery),
     convertFiltersToESQLExpression(searchContext.filters).esqlExpression,
   ].filter((expression) => expression.length > 0);
-  const effectiveEsql = expressions.length
+  const esqlWithFilters = expressions.length
     ? injectWhereClauseAfterSourceCommand(esql, expressions.join(' AND '))
     : esql;
+  // The filters on columns that the query creates can't go after the source command, as the
+  // columns don't exist there yet. They are applied at the end of the query.
+  const effectiveEsql = await appendEsqlFiltersToESQLQuery(esqlWithFilters, searchContext.filters);
   const esqlControls = apiIsPresentationContainer(parentApi)
     ? getEsqlControls(parentApi, { esql: effectiveEsql })
     : undefined;

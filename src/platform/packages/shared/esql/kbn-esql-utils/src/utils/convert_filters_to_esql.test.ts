@@ -9,7 +9,10 @@
 
 import type { Filter, CombinedFilter } from '@kbn/es-query';
 import { BooleanRelation, FILTERS } from '@kbn/es-query';
-import { convertFiltersToESQLExpression } from './convert_filters_to_esql';
+import {
+  convertEsqlFiltersToESQLExpression,
+  convertFiltersToESQLExpression,
+} from './convert_filters_to_esql';
 
 describe('convertFiltersToESQLExpression', () => {
   describe('empty and disabled filters', () => {
@@ -443,6 +446,67 @@ describe('convertFiltersToESQLExpression', () => {
       const result = convertFiltersToESQLExpression([filter]);
       expect(result.esqlExpression).toBe('');
       expect(result.untranslatableFilters).toEqual([]);
+    });
+  });
+});
+
+describe('ES|QL filters', () => {
+  const esqlFilter: Filter = {
+    meta: { kind: 'esql', key: 'size', type: FILTERS.PHRASE, params: { query: 'big' } },
+    query: { match_phrase: { size: 'big' } },
+  };
+
+  it('are not translated for the WHERE after the source command, as the column does not exist there', () => {
+    const regularFilter: Filter = {
+      meta: { key: 'host', type: FILTERS.PHRASE, params: { query: 'a' } },
+      query: { match_phrase: { host: 'a' } },
+    };
+
+    expect(convertFiltersToESQLExpression([regularFilter, esqlFilter])).toEqual({
+      esqlExpression: '`host` : "a"',
+      untranslatableFilters: [esqlFilter],
+    });
+  });
+
+  describe('convertEsqlFiltersToESQLExpression', () => {
+    it('does not use the match operator, which does not work on columns that a query creates', () => {
+      expect(convertEsqlFiltersToESQLExpression([esqlFilter])).toBe('`size` == "big"');
+    });
+
+    it('translates the several values, the negation and exists filters', () => {
+      const phrases = {
+        ...esqlFilter,
+        meta: { ...esqlFilter.meta, type: FILTERS.PHRASES, params: ['a', 'b'] },
+      };
+      const exists = {
+        meta: { kind: 'esql' as const, type: FILTERS.EXISTS, key: 'size' },
+        query: { exists: { field: 'size' } },
+      };
+
+      expect(convertEsqlFiltersToESQLExpression([phrases])).toBe('`size` IN ("a", "b")');
+      expect(
+        convertEsqlFiltersToESQLExpression([
+          { ...phrases, meta: { ...phrases.meta, negate: true } },
+        ])
+      ).toBe('NOT (`size` IN ("a", "b"))');
+      expect(convertEsqlFiltersToESQLExpression([exists])).toBe('`size` IS NOT NULL');
+      expect(
+        convertEsqlFiltersToESQLExpression([{ ...exists, meta: { ...exists.meta, negate: true } }])
+      ).toBe('`size` IS NULL');
+    });
+
+    it('ignores the disabled filters and the ones that are not ES|QL ones', () => {
+      const regularFilter: Filter = {
+        meta: { key: 'host', type: FILTERS.PHRASE, params: { query: 'a' } },
+        query: { match_phrase: { host: 'a' } },
+      };
+
+      expect(
+        convertEsqlFiltersToESQLExpression([
+          regularFilter,
+          { ...esqlFilter, meta: { ...esqlFilter.meta, disabled: true } },
+        ])
+      ).toBe('');
     });
   });
 });
