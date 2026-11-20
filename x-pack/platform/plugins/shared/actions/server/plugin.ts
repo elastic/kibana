@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
@@ -22,7 +23,6 @@ import type {
   ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import type { Subscription } from 'rxjs';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
@@ -344,10 +344,7 @@ export class ActionsPlugin
   private setupContract?: PluginSetupContract;
   private connectorCatalogFeatureFlagSubscription?: Subscription;
   private connectorCatalog?: ConnectorCatalogHandle;
-  private resolveCatalogReady: () => void = () => {};
-  private readonly catalogReady: Promise<void> = new Promise<void>((resolve) => {
-    this.resolveCatalogReady = resolve;
-  });
+  private catalogReady: Promise<void> = Promise.resolve();
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -641,6 +638,7 @@ export class ActionsPlugin
         this.connectorEventEmitter = emitter;
       },
     };
+    // Kept for start(): catalog types are built with the same setup helpers that stack_connectors uses.
     this.setupContract = setupContract;
     return setupContract;
   }
@@ -924,9 +922,11 @@ export class ActionsPlugin
       }).catch(() => {});
     }
 
+    void this.validateEnabledConnectorTypes(plugins, connectorCatalog.ready);
+
     this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
 
-    const startContract: PluginStartContract = {
+    return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
       },
@@ -976,9 +976,6 @@ export class ActionsPlugin
         }).getUsableOAuthConnectorIds({ profileUid, connectorIds });
       },
     };
-
-    this.validateEnabledConnectorTypes(plugins, connectorCatalog.ready);
-    return startContract;
   }
 
   private getUnsecuredSavedObjectsClient = (
@@ -1222,7 +1219,6 @@ export class ActionsPlugin
     };
   };
 
-  /** Starts the first catalog load, driven by the `xpack.actions.catalog.enabled` config. */
   private startConnectorCatalog(core: CoreStart): ConnectorCatalogHandle {
     const { setupContract, actionTypeRegistry, logger } = this;
     const isEnabled = this.actionsConfig.catalog.enabled;
@@ -1242,15 +1238,15 @@ export class ActionsPlugin
       logger,
     });
     this.connectorCatalog = handle;
-    void handle.ready.then(this.resolveCatalogReady);
+    this.catalogReady = handle.ready;
     return handle;
   }
 
   /** Warns about allowlisted connector types that are still not registered after the first catalog load. */
-  private validateEnabledConnectorTypes = (
+  private validateEnabledConnectorTypes = async (
     plugins: ActionsPluginsStart,
     catalogReady: Promise<void>
-  ): void => {
+  ): Promise<void> => {
     const { enabledActionTypes } = this.actionsConfig;
     if (
       !plugins.serverless ||
@@ -1267,17 +1263,18 @@ export class ActionsPlugin
       return;
     }
 
-    // Catalog types register after start(), so check again once the first load has ended.
-    void catalogReady.then(() => {
-      const unavailableTypes = pendingTypes.filter(
-        (connectorType) => !this.actionTypeRegistry?.has(connectorType)
+    // Catalog types register after start(), so check again once the load has ended.
+    await catalogReady;
+    const unavailableTypes = pendingTypes.filter(
+      (connectorType) => !this.actionTypeRegistry?.has(connectorType)
+    );
+    if (unavailableTypes.length > 0) {
+      this.logger.warn(
+        `Connector types [${unavailableTypes.join(
+          ', '
+        )}] in xpack.actions.enabledActionTypes are not registered.`
       );
-      if (unavailableTypes.length > 0) {
-        this.logger.warn(
-          `Enabled connector types [${unavailableTypes.join(', ')}] are not registered.`
-        );
-      }
-    });
+    }
   };
 
   private getAxiosInstanceWithAuthHelper = (

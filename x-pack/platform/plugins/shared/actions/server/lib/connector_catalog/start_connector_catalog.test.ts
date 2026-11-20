@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getConnectorType } from '../../fixtures';
-import { CATALOG_FIRST_LOAD_TIMEOUT_MS } from './constants';
+import { CATALOG_START_LOAD_TIMEOUT_MS } from './constants';
 import { startConnectorCatalog } from './start_connector_catalog';
 import type { ConnectorCatalogStorage, StoredCatalogDefinition } from './types';
 
@@ -32,19 +32,15 @@ describe('startConnectorCatalog', () => {
   const actionTypeRegistry = { has: jest.fn(), register: jest.fn() };
   const buildType = jest.fn();
 
-  const startWithHandle = (timeoutMs?: number, isEnabled: boolean = true) =>
+  const startCatalog = (overrides: Partial<Parameters<typeof startConnectorCatalog>[0]> = {}) =>
     startConnectorCatalog({
-      isEnabled,
+      isEnabled: true,
       storage,
       actionTypeRegistry,
       buildType,
       logger,
-      timeoutMs,
+      ...overrides,
     });
-
-  const start = (timeoutMs?: number) => {
-    return startWithHandle(timeoutMs).ready;
-  };
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -65,7 +61,7 @@ describe('startConnectorCatalog', () => {
   });
 
   it('calls no storage method and registers nothing when the config is off', async () => {
-    const { ready } = startWithHandle(undefined, false);
+    const { ready } = startCatalog({ isEnabled: false });
 
     await expect(ready).resolves.toBeUndefined();
 
@@ -75,7 +71,7 @@ describe('startConnectorCatalog', () => {
   });
 
   it('loads and logs the count at info', async () => {
-    await start();
+    await startCatalog().ready;
 
     expect(storage.getManifest).toHaveBeenCalledTimes(1);
     expect(actionTypeRegistry.register).toHaveBeenCalledTimes(1);
@@ -112,7 +108,7 @@ describe('startConnectorCatalog', () => {
   it('logs at warn and resolves when a read is rejected', async () => {
     storage.getManifest.mockRejectedValue(new Error('read failed'));
 
-    await expect(start()).resolves.toBeUndefined();
+    await expect(startCatalog().ready).resolves.toBeUndefined();
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('read failed'));
     expect(logger.info).not.toHaveBeenCalled();
@@ -124,8 +120,8 @@ describe('startConnectorCatalog', () => {
       storage.getManifest.mockReturnValue(new Promise(() => {}));
       const onResolved = jest.fn();
 
-      const promise = start().then(onResolved);
-      await jest.advanceTimersByTimeAsync(CATALOG_FIRST_LOAD_TIMEOUT_MS - 1);
+      const promise = startCatalog().ready.then(onResolved);
+      await jest.advanceTimersByTimeAsync(CATALOG_START_LOAD_TIMEOUT_MS - 1);
       expect(onResolved).not.toHaveBeenCalled();
 
       await jest.advanceTimersByTimeAsync(1);
@@ -139,7 +135,7 @@ describe('startConnectorCatalog', () => {
       jest.useFakeTimers();
       storage.getManifest.mockReturnValue(new Promise(() => {}));
 
-      const promise = start(1000);
+      const promise = startCatalog({ timeoutMs: 1000 }).ready;
       await jest.advanceTimersByTimeAsync(1000);
       await promise;
 
@@ -147,7 +143,7 @@ describe('startConnectorCatalog', () => {
       expect(signal.aborted).toBe(true);
     });
 
-    it('registers nothing when the result arrives after the timeout', async () => {
+    it('registers nothing when the ES read ends after the timeout', async () => {
       jest.useFakeTimers();
       let resolveManifest: (value: typeof manifest) => void = () => {};
       storage.getManifest.mockReturnValue(
@@ -156,7 +152,7 @@ describe('startConnectorCatalog', () => {
         })
       );
 
-      const promise = start(1000);
+      const promise = startCatalog({ timeoutMs: 1000 }).ready;
       await jest.advanceTimersByTimeAsync(1000);
       await promise;
       resolveManifest(manifest);
@@ -169,7 +165,7 @@ describe('startConnectorCatalog', () => {
     it('clears the timer when the load ends before the timeout', async () => {
       jest.useFakeTimers();
 
-      await start();
+      await startCatalog().ready;
 
       expect(jest.getTimerCount()).toBe(0);
     });
@@ -179,7 +175,7 @@ describe('startConnectorCatalog', () => {
     it('aborts a running load without warn or info logs', async () => {
       jest.useFakeTimers();
       storage.getManifest.mockReturnValue(new Promise(() => {}));
-      const { ready, stop } = startWithHandle();
+      const { ready, stop } = startCatalog();
 
       await jest.advanceTimersByTimeAsync(0);
       expect(storage.getManifest).toHaveBeenCalledTimes(1);

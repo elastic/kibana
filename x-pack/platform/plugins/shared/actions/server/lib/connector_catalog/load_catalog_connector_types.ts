@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { ActionTypeRegistry } from '../../action_type_registry';
 import { ensureSufficientLicense } from '../ensure_sufficient_license';
+import { getErrorMessage } from './get_error_message';
 import type {
   CatalogActionType,
   CatalogDefinitionRef,
@@ -19,9 +20,6 @@ const VERSION_PATTERN = /^\d+(\.\d+)*$/;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
-
-const getErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 const parseManifestRows = (raw: string, logger: Logger): CatalogDefinitionRef[] => {
   let manifest: unknown;

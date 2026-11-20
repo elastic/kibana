@@ -28,7 +28,7 @@ interface ConstructorOpts {
   logger: Logger;
   store: TaskStore;
   pollInterval?: number;
-  getTaskTypes: () => string[];
+  getTaskTypes: () => Set<string>;
   excludedTypes: Set<string>;
 }
 
@@ -48,7 +48,7 @@ export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecy
   private logger: Logger;
   private readonly pollInterval: number;
 
-  private readonly getTaskTypes: () => string[];
+  private readonly getTaskTypes: () => Set<string>;
   private readonly excludedTypes: Set<string>;
 
   private running: boolean = false;
@@ -79,7 +79,9 @@ export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecy
 
   private async runCollectionCycle() {
     const start = Date.now();
-    const searchedTypes = this.getTaskTypes().filter((type) => !this.excludedTypes.has(type));
+    const searchedTypes = Array.from(this.getTaskTypes()).filter(
+      (type) => !this.excludedTypes.has(type)
+    );
     try {
       const results = await this.store.aggregate({
         size: 0,

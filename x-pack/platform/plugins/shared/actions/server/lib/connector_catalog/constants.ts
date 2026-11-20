@@ -16,4 +16,4 @@ export const getCatalogDefinitionDocId = ({ id, version }: CatalogDefinitionRef)
 export const getCatalogAssetDocId = (sha256: string): string => `asset:${sha256}`;
 
 // Budget for the whole first load: the index read, then building and registering the types.
-export const CATALOG_FIRST_LOAD_TIMEOUT_MS = 30_000;
+export const CATALOG_START_LOAD_TIMEOUT_MS = 30_000;

@@ -18,7 +18,7 @@ import {
   createConnectorCatalogStorage,
 } from '../lib/connector_catalog';
 import { loadFixture } from '../lib/declarative_connectors/__fixtures__/load_fixture';
-import { setupTestServers } from './lib';
+import { retry, setupTestServers } from './lib';
 
 const mockCaptured: { start?: PluginStartContract } = {};
 
@@ -85,16 +85,6 @@ describe('Connector catalog at start', () => {
       // The event log index is created lazily.
       return [];
     }
-  };
-
-  const waitFor = async <T>(read: () => Promise<T>, isDone: (value: T) => boolean): Promise<T> => {
-    const deadline = Date.now() + 60_000;
-    let value = await read();
-    while (!isDone(value) && Date.now() < deadline) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      value = await read();
-    }
-    return value;
   };
 
   beforeAll(async () => {
@@ -190,9 +180,10 @@ describe('Connector catalog at start', () => {
       ]);
     expect(response.errors).toBe(false);
 
-    const events = await waitFor(findSuccessfulExecuteEvents, (found) => found.length > 0);
-
-    expect(events.length).toBeGreaterThan(0);
+    await retry(async () => {
+      const events = await findSuccessfulExecuteEvents();
+      expect(events.length).toBeGreaterThan(0);
+    });
 
     const checkIpRequests = receivedRequests.filter(
       ({ method, path }) => method === 'GET' && path === '/api/v2/check'
