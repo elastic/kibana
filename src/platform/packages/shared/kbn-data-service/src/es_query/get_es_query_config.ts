@@ -38,20 +38,19 @@ export function getEsQueryConfig(config: KibanaConfig): EsQueryConfig {
 /**
  * Async variant of `getEsQueryConfig` for config sources whose `get` returns a promise
  * (for example the server-side `IUiSettingsClient`). Reads only the settings the query config needs.
+ * The settings are the ones `getEsQueryConfig` reads, so the two cannot drift apart.
  */
 export async function getEsQueryConfigAsync(config: AsyncKibanaConfig): Promise<EsQueryConfig> {
-  const [allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex, dateFormatTZ] =
-    await Promise.all([
-      config.get(UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS),
-      config.get(UI_SETTINGS.QUERY_STRING_OPTIONS),
-      config.get(UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX),
-      config.get('dateFormat:tz'),
-    ]);
+  const keys: string[] = [];
+  getEsQueryConfig({
+    get: <T>(key: string): T => {
+      keys.push(key);
+      return undefined as T;
+    },
+  });
 
-  return {
-    allowLeadingWildcards,
-    queryStringOptions,
-    ignoreFilterIfFieldNotInIndex,
-    dateFormatTZ,
-  };
+  const values = await Promise.all(keys.map((key) => config.get(key)));
+  const valuesByKey = new Map(keys.map((key, index) => [key, values[index]]));
+
+  return getEsQueryConfig({ get: <T>(key: string): T => valuesByKey.get(key) });
 }
