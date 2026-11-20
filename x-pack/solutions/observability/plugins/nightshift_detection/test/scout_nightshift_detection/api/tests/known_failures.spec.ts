@@ -25,6 +25,7 @@ const MINUTE_MS = 60_000;
 /** A rule runs when created and every 5 minutes; a row is read once its window has settled. */
 const SIGNAL_TIMEOUT_MS = 10 * MINUTE_MS;
 const POLL_INTERVAL_MS = 15_000;
+const SETUP_TIMEOUT_MS = 3 * MINUTE_MS;
 
 interface ReconcileResponse {
   status: 'completed' | 'busy';
@@ -55,7 +56,7 @@ const seedStepUp = async (esClient: EsClient) => {
   await esClient.bulk({ operations, refresh: 'wait_for' });
 };
 
-const findSignal = async (esClient: EsClient) => {
+const findSignal = async (esClient: EsClient, sourceId: string) => {
   const response = await esClient.search<{ status: string; data: Record<string, unknown> }>({
     index: ALERT_EVENTS_DATA_STREAM,
     size: 1,
@@ -64,6 +65,8 @@ const findSignal = async (esClient: EsClient) => {
         filter: [
           { term: { type: 'signal' } },
           { term: { 'data.fingerprint': `known_failures:${KNOWLEDGE_INDICATOR_ID}` } },
+          // An earlier run against the same servers left a signal of another source.
+          { term: { 'data.source_id': sourceId } },
         ],
       },
     },
@@ -76,18 +79,20 @@ const tickUntilSignal = async ({
   apiClient,
   esClient,
   headers,
+  sourceId,
 }: {
   apiClient: ApiClientFixture;
   esClient: EsClient;
   headers: Record<string, string>;
+  sourceId: string;
 }) => {
   const deadline = Date.now() + SIGNAL_TIMEOUT_MS;
-  let signal = await findSignal(esClient);
+  let signal = await findSignal(esClient, sourceId);
   while (!signal && Date.now() < deadline) {
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
     // A busy answer is fine: the engine's own workflow is ticking the space.
     await apiClient.post(TICK_PATH, { headers, body: {}, responseType: 'json' });
-    signal = await findSignal(esClient);
+    signal = await findSignal(esClient, sourceId);
   }
   return signal;
 };
@@ -100,6 +105,8 @@ apiTest.describe(
     let sourceId: string;
 
     apiTest.beforeAll(async ({ samlAuth, apiServices, config, apiClient, esClient }) => {
+      // Creating the source starts its onboarding workflows, which can hold Kibana past 60 s.
+      apiTest.setTimeout(SETUP_TIMEOUT_MS);
       if (!config.isCloud) {
         await setNightshiftEnabled(apiServices, true);
       }
@@ -163,7 +170,7 @@ apiTest.describe(
         });
         expect(second.body).toMatchObject({ status: 'completed', created: 0, failures: [] });
 
-        const signal = await tickUntilSignal({ apiClient, esClient, headers });
+        const signal = await tickUntilSignal({ apiClient, esClient, headers, sourceId });
 
         expect(signal).toMatchObject({
           status: 'breached',

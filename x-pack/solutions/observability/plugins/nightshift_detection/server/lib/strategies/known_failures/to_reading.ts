@@ -14,10 +14,11 @@ import { KNOWN_FAILURES_SETTINGS, KNOWN_FAILURES_STRATEGY_ID } from './constants
 
 const MINUTE_MS = 60_000;
 
-/** The columns the rule query keeps; `change_at` is a date, which `.rule-events` stores as epoch ms. */
+/** The columns the rule query keeps; dates come out of `.rule-events` as epoch ms. */
 const knownFailureRowSchema = lazySchema(() =>
   z.object({
     change_at: z.number().int(),
+    window_end: z.number().int(),
     change_type: z.string(),
     change_pvalue: z.number(),
     reference: z.number(),
@@ -58,12 +59,9 @@ export function toReading({
     level_at_change: levelAtChange,
     recovery_threshold: recoveryThreshold,
     recent_max: recentMax,
+    // Read from the row: the run's clock can be a minute past its scheduled time.
+    window_end: bucketEnd,
   } = parsed.data;
-  // The closed minutes whose maximum the rule compared with the recovery threshold. The rule ran
-  // at its scheduled minute, give or take its own delay, and left the end margin out.
-  const bucketEnd =
-    Math.floor(row.scheduled_timestamp / MINUTE_MS) * MINUTE_MS -
-    KNOWN_FAILURES_SETTINGS.end_margin_minutes * MINUTE_MS;
 
   return {
     status: 'breached',
@@ -73,6 +71,7 @@ export function toReading({
     rule_id: row.rule_id,
     source_id: knowledgeIndicator.source_id,
     entity,
+    // The closed minutes whose maximum the rule compared with the recovery threshold.
     bucket_start: bucketEnd - KNOWN_FAILURES_SETTINGS.recovery_minutes * MINUTE_MS,
     bucket_end: bucketEnd,
     value: recentMax,

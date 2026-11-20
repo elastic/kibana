@@ -22,10 +22,11 @@ const KNOWLEDGE_INDICATOR: QueryKnowledgeIndicator = {
   feature_ids: ['checkout'],
 };
 
-// A step up at 10:20 still active in the run scheduled at 10:31:07.
+// A step up at 10:20 still active in the run scheduled at 10:31 that read its clock at 10:32:01,
+// so it compared the minutes up to 10:31.
 const ROW: RuleRow = {
   rule_id: 'rule-1',
-  scheduled_timestamp: Date.UTC(2026, 10, 20, 10, 31, 7),
+  scheduled_timestamp: Date.UTC(2026, 10, 20, 10, 31, 0),
   data: {
     change_at: Date.UTC(2026, 10, 20, 10, 20),
     change_type: 'step_change',
@@ -35,6 +36,7 @@ const ROW: RuleRow = {
     recovery_threshold: 13.5,
     recent_max: 26,
     minute_count: 360,
+    window_end: Date.UTC(2026, 10, 20, 10, 31),
   },
 };
 
@@ -55,16 +57,16 @@ describe('toReading', () => {
       rule_id: 'rule-1',
       source_id: 'source-1',
       entity: ENTITY,
-      // The run's minute 10:31 less the one-minute margin, and the five minutes before it.
-      bucket_start: Date.UTC(2026, 10, 20, 10, 25),
-      bucket_end: Date.UTC(2026, 10, 20, 10, 30),
+      // The minutes the rule compared, not those its scheduled time would suggest.
+      bucket_start: Date.UTC(2026, 10, 20, 10, 26),
+      bucket_end: Date.UTC(2026, 10, 20, 10, 31),
       value: 26,
       unit: 'count',
       title: 'Checkout timeouts',
       description: 'Checkout calls time out',
       importance: 70,
       evidence_esql:
-        'FROM logs | WHERE message : "timeout"\n| WHERE @timestamp >= "2026-11-20T10:20:00.000Z" AND @timestamp < "2026-11-20T10:30:00.000Z"',
+        'FROM logs | WHERE message : "timeout"\n| WHERE @timestamp >= "2026-11-20T10:20:00.000Z" AND @timestamp < "2026-11-20T10:31:00.000Z"',
       role: 'primary',
       compare_with_normal: false,
       quiet_period_minutes: 5,

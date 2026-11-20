@@ -75,6 +75,7 @@ describe('KnownFailuresGenerator', () => {
         level_at_change: 25,
         recovery_threshold: 13.5,
         recent_max: recentMax,
+        window_end: WINDOW.from + (minute - 1) * 60_000,
       },
     });
     const listFeatures = jest.fn().mockResolvedValue([

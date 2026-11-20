@@ -74,8 +74,10 @@ export function compileKnownFailureQuery({
     `EVAL seg_start = COALESCE(prev_change, ${start}), seg_end = COALESCE(next_change, ${end})`,
     `INLINE STATS change_type = MAX(cp_type) WHERE bucket == change_at, change_pvalue = MAX(cp_pvalue) WHERE bucket == change_at, value_at_change = MAX(metric_value) WHERE bucket == change_at, pre_median = MEDIAN(metric_value) WHERE bucket >= seg_start AND bucket < change_at, post_median = MEDIAN(metric_value) WHERE bucket >= change_at AND bucket < seg_end, recent_max = MAX(metric_value) WHERE bucket >= ${end} - ${settings.recovery_minutes} minutes`,
     'EVAL reference = pre_median, level_at_change = CASE(change_type == "spike", value_at_change::DOUBLE, post_median), is_increase = change_type == "spike" OR (change_type IN ("step_change", "trend_change") AND post_median > pre_median), recovery_threshold = reference + (level_at_change - reference) / 2, active = is_increase AND recent_max > recovery_threshold',
+    // The end of the closed minutes the run compared, so the signal reports exactly those.
+    `EVAL window_end = ${end}`,
     'WHERE bucket == change_at AND active',
-    'KEEP change_at, change_type, change_pvalue, reference, level_at_change, recovery_threshold, recent_max, minute_count',
+    'KEEP change_at, change_type, change_pvalue, reference, level_at_change, recovery_threshold, recent_max, minute_count, window_end',
     // Joined with a new line, so a KI that ends in a `//` comment cannot swallow the next pipe.
   ].join('\n| ');
 
