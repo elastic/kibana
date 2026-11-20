@@ -33,6 +33,22 @@ export const UPDATE_BY_QUERY_CANCEL_WAIT_MS = 30 * 1000;
 
 const CANCELED_REASON = 'cancelled after exceeding the maximum duration';
 
+/**
+ * Whether an update by query ended before it went through all of its documents, without a
+ * failure to explain it (a failure also ends the request early, and is reported as one).
+ */
+const endedEarly = (response: UpdateByQueryResponse): boolean => {
+  if (response.total === undefined || (response.failures ?? []).length > 0) {
+    return false;
+  }
+  const processed =
+    (response.updated ?? 0) +
+    (response.deleted ?? 0) +
+    (response.noops ?? 0) +
+    (response.version_conflicts ?? 0);
+  return processed < response.total;
+};
+
 interface UpdateByQueryTaskOptions {
   pollIntervalMs?: number;
   maxDurationMs?: number;
@@ -122,9 +138,13 @@ export async function updateByQueryAndWait(
         );
       }
       const response = toUpdateByQueryResponse(task, taskId, logger);
-      return cancelRequestedAt === undefined
-        ? response
-        : { ...response, canceled: response.canceled ?? CANCELED_REASON };
+      // Asking for a cancellation does not mean the task was stopped by it: it can finish between
+      // the last poll and the request. A result that went through every document stays a plain
+      // success, so it is not turned into an error and a retry.
+      if (cancelRequestedAt === undefined || response.canceled || !endedEarly(response)) {
+        return response;
+      }
+      return { ...response, canceled: CANCELED_REASON };
     }
 
     const taskStatus = JSON.stringify(task.task.status ?? {}).slice(0, 500);

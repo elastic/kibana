@@ -209,6 +209,27 @@ describe('updateByQueryAndWait', () => {
     expect(res.canceled).toEqual(expect.any(String));
   });
 
+  it('should keep the result of a task that finished before the cancellation took effect', async () => {
+    esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
+    esClient.tasks.get
+      .mockResolvedValueOnce({ completed: false, task: {} } as any)
+      .mockResolvedValueOnce({
+        completed: true,
+        task: {},
+        // every agent was updated: the cancel request arrived after the work was done
+        response: { total: 5, updated: 5, version_conflicts: 0, failures: [] },
+      } as any);
+
+    const res = await updateByQueryAndWait(esClient, request, {
+      pollIntervalMs: 1,
+      maxDurationMs: 0,
+    });
+
+    expect(esClient.tasks.cancel).toHaveBeenCalledTimes(1);
+    expect(res.updated).toEqual(5);
+    expect(res.canceled).toBeUndefined();
+  });
+
   it('should not mark the outcome as cancelled when the task finishes in time', async () => {
     esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
     esClient.tasks.get.mockResolvedValue({
