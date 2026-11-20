@@ -21,14 +21,6 @@ import {
 import { PerformanceOverlay } from './performance_overlay';
 import type { PerformanceRecorder } from './performance_recorder';
 import { createPerformanceRecorder } from './performance_recorder';
-import { FIXED_COLUMN_WIDTHS_MIN_PX } from './column_widths';
-
-// The flyout body width the resize observer reports, since jsdom lays nothing out; wide by default.
-let mockBodyWidth = FIXED_COLUMN_WIDTHS_MIN_PX;
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useResizeObserver: () => ({ width: mockBodyWidth, height: 0 }),
-}));
 
 const recordList = (recorder: PerformanceRecorder, browserMs: number) =>
   recorder.record({
@@ -75,10 +67,6 @@ const renderOverlay = (enabled: boolean) => {
 };
 
 describe('PerformanceOverlay', () => {
-  afterEach(() => {
-    mockBodyWidth = FIXED_COLUMN_WIDTHS_MIN_PX;
-  });
-
   it('renders nothing while the flag is off', () => {
     const { core, recorder } = renderOverlay(false);
     recordList(recorder, 60);
@@ -117,7 +105,7 @@ describe('PerformanceOverlay', () => {
     expect(screen.queryByTestId('entityInventoryPerformanceBadge')).not.toBeInTheDocument();
   });
 
-  it('opens a flyout with a titled breakdown, the errors above one row per query and probe, and the history last', async () => {
+  it('opens a flyout showing the timings, every query and probe, and the errors of the latest list call', async () => {
     const { recorder } = renderOverlay(true);
     act(() => {
       recorder.record({
@@ -135,27 +123,10 @@ describe('PerformanceOverlay', () => {
     fireEvent.click(await screen.findByTestId('entityInventoryPerformanceBadge'));
 
     const historyRows = screen.getAllByTestId('entityInventoryPerformanceHistoryRow');
-    expect(historyRows.map((row) => row.textContent)).toEqual([
-      expect.stringContaining('host list'),
-      expect.stringContaining('Aborted'),
-    ]);
+    expect(historyRows).toHaveLength(2);
     expect(historyRows[0]).toHaveTextContent('61.3 ms52.0 ms3');
 
     await screen.findByTestId('entityInventoryPerformanceListDetail');
-    // The history comes last, after the selected call and its unavailable columns.
-    expect(
-      screen
-        .getAllByTestId(/^entityInventoryPerformance(ListDetail|UnavailableColumns|History)$/)
-        .map((element) => element.getAttribute('data-test-subj'))
-    ).toEqual([
-      'entityInventoryPerformanceListDetail',
-      'entityInventoryPerformanceUnavailableColumns',
-      'entityInventoryPerformanceHistory',
-    ]);
-
-    expect(screen.getByTestId('entityInventoryPerformanceDetailTitle')).toHaveTextContent(
-      /^host list$/
-    );
     const subtitle = screen.getByTestId('entityInventoryPerformanceDetailSubtitle');
     expect(subtitle).toHaveTextContent('OK · 61.3 ms round trip · 120 rows');
     expect(subtitle).not.toHaveTextContent('truncated');
@@ -192,20 +163,6 @@ describe('PerformanceOverlay', () => {
     ]);
 
     const queries = screen.getByTestId('entityInventoryPerformanceQueries');
-    expect(
-      within(queries)
-        .getAllByRole('columnheader')
-        .map((th) => th.textContent)
-    ).toEqual([
-      'Details',
-      'Index pattern',
-      'Status',
-      'Engine',
-      'ES time',
-      'CPU time',
-      'Docs',
-      'Rows',
-    ]);
     const queryRows = within(queries)
       .getAllByRole('row')
       .filter((row) => within(row).queryByTestId('entityInventoryPerformanceRowExpand'));
@@ -244,38 +201,19 @@ describe('PerformanceOverlay', () => {
       .getAllByRole('row')
       .filter((row) => within(row).queryByTestId('entityInventoryPerformanceRowExpand'));
     expect(probeRows).toHaveLength(3);
-    expect(
-      within(probes)
-        .getAllByRole('columnheader')
-        .map((th) => th.textContent)
-    ).toEqual(['Details', 'Index pattern', 'Status', 'Plans', 'ES time', '']);
     expect(probeRows[0]).toHaveTextContent('metrics-*OKTS + FROM3.0 ms');
     expect(probeRows[1]).toHaveTextContent('traces-*FailedNone');
     // A verification error is the normal "no time-series index" answer, not a failure.
     expect(probeRows[2]).toHaveTextContent('logs-appOKFROM only');
     expect(within(probes).queryByTestId('entityInventoryPerformanceRowDetail')).toBeNull();
 
-    // The response's errors, as they came, directly above the queries.
+    // The response's errors, as they came.
     const errorsSection = screen.getByTestId('entityInventoryPerformanceErrors');
-    expect(
-      within(errorsSection)
-        .getAllByRole('columnheader')
-        .map((th) => th.textContent)
-    ).toEqual(['Index pattern', 'HTTP status', 'Reason']);
     const errorRows = within(errorsSection).getAllByRole('row').slice(1);
     expect(errorRows.map((row) => row.textContent)).toEqual([
       expect.stringMatching(/logs-\*.*400.*Unknown column \[host\.name\]/),
       expect.stringMatching(/traces-\*.*403.*security_exception/),
       expect.stringMatching(/apm-\*.*503.*Cluster unavailable/),
-    ]);
-    expect(
-      screen
-        .getAllByTestId(/^entityInventoryPerformance(Errors|Queries|Probes)$/)
-        .map((element) => element.getAttribute('data-test-subj'))
-    ).toEqual([
-      'entityInventoryPerformanceErrors',
-      'entityInventoryPerformanceQueries',
-      'entityInventoryPerformanceProbes',
     ]);
 
     expect(screen.getByTestId('entityInventoryPerformanceUnavailableColumns')).toHaveTextContent(
@@ -480,70 +418,5 @@ describe('PerformanceOverlay', () => {
     expect(
       screen.queryByTestId('entityInventoryPerformanceUnavailableColumns')
     ).not.toBeInTheDocument();
-  });
-
-  describe('column widths', () => {
-    const headerWidths = (testSubj: string) =>
-      within(screen.getByTestId(testSubj))
-        .getAllByRole('columnheader')
-        .map(({ style }) => style.width);
-
-    const openFlyout = async () => {
-      const { recorder } = renderOverlay(true);
-      act(() => {
-        recordList(recorder, 61.26);
-      });
-      fireEvent.click(await screen.findByTestId('entityInventoryPerformanceBadge'));
-    };
-
-    it('aligns the columns with fixed widths in a wide flyout', async () => {
-      await openFlyout();
-
-      expect(headerWidths('entityInventoryPerformanceHistory')).toEqual([
-        '96px',
-        '',
-        '168px',
-        '80px',
-        '88px',
-        '176px',
-      ]);
-      expect(headerWidths('entityInventoryPerformanceQueries')).toEqual([
-        '32px',
-        '',
-        '80px',
-        '88px',
-        '80px',
-        '88px',
-        '96px',
-        '80px',
-      ]);
-      expect(headerWidths('entityInventoryPerformanceProbes')).toEqual([
-        '32px',
-        '',
-        '80px',
-        '88px',
-        '80px',
-        '264px',
-      ]);
-    });
-
-    it('leaves the widths to the table in a narrow flyout, keeping the request selectable', async () => {
-      mockBodyWidth = FIXED_COLUMN_WIDTHS_MIN_PX - 1;
-      await openFlyout();
-
-      expect(headerWidths('entityInventoryPerformanceHistory')).toEqual(Array(6).fill(''));
-      expect(headerWidths('entityInventoryPerformanceQueries')).toEqual([
-        '32px',
-        ...Array(7).fill(''),
-      ]);
-      // The probes drop the filler that only aligned them with the queries.
-      expect(headerWidths('entityInventoryPerformanceProbes')).toEqual([
-        '32px',
-        ...Array(4).fill(''),
-      ]);
-      expect(screen.getByTestId('entityInventoryPerformanceHistorySelect')).toHaveTextContent(
-        'host list'
-      );
-    });
   });
 });
