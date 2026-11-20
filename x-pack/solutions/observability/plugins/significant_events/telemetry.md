@@ -61,8 +61,9 @@ runs. Reusing one execution ID would conflate distinct runs. Thread the pipeline
    `detection_workflow_execution_ids`.
 4. Join an investigation to the run that wrote the alert version it was triggered for through
    `source_workflow_execution_id`, and to the significant event through `event_id`. The discovery
-   run that created the event is the earliest `nightshift-agent-tool-event-write` row with that
-   `event_id`.
+   run that created the event is the earliest write-event row with that `event_id`, under either
+   `nightshift-agent-tool-event-write` or its pre-rename
+   `significant-events-agent-tool-event-write` name.
 
 An alert automation resolves the alert it was triggered for, and when the alert is a significant
 event the Nightshift trigger step reads `workflow_execution_id` from the alert event `data` and
@@ -87,10 +88,10 @@ stages to one cycle.
 | Any Significant Events row | Workflow Engine terminal event | `workflow_execution_id = workflowExecutionId` |
 | Child workflow | Its ancestors | Terminal event `executionChain`, root first and direct parent last |
 | `nightshift-features-identified`, `nightshift-significant-events-queries-generated` | Onboarding run | `parent_workflow_execution_id` (absent when the child runs on its own) |
-| `nightshift-agent-tool-event-write` (discovery) | Detection runs it consumed | `detection_workflow_execution_ids` contains the detection run's `workflow_execution_id` |
+| `nightshift-agent-tool-event-write` or pre-rename `significant-events-agent-tool-event-write` (discovery) | Detection runs it consumed | `detection_workflow_execution_ids` contains the detection run's `workflow_execution_id` |
 | `nightshift-investigation-started` | Run that wrote the triggering alert version | `source_workflow_execution_id` = that run's `workflow_execution_id` |
 | `nightshift-investigation-started` | Significant event | `event_id` |
-| `nightshift-investigation-started` | Discovery run that created the event | `event_id` = earliest `nightshift-agent-tool-event-write.event_id`, then its `workflow_execution_id` |
+| `nightshift-investigation-started` | Discovery run that created the event | `event_id` = earliest new- or old-name write event's `event_id`, then its `workflow_execution_id` |
 | Detection or discovery | Onboarding | `source_id` / `source_ids` only; KIs are shared across onboarding runs |
 
 `parent_workflow_execution_id` joins to `nightshift-onboarding-scheduled.workflow_execution_id` only
@@ -129,7 +130,10 @@ discovery_writes AS (
   FROM nightshift_ebt_events AS w
   JOIN investigation AS i
     ON w.event_id = i.event_id
-  WHERE w.event_type = 'nightshift-agent-tool-event-write'
+  WHERE w.event_type IN (
+    'significant-events-agent-tool-event-write',
+    'nightshift-agent-tool-event-write'
+  )
 )
 SELECT d.workflow_execution_id AS discovery_run,
        detection_run,

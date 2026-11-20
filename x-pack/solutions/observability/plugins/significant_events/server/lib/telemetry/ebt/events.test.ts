@@ -25,8 +25,30 @@ import {
 const isOptional = (field: { _meta?: { optional?: boolean } }) => field._meta?.optional === true;
 
 describe('EBT event types', () => {
-  it.each(Object.values(eventTypes))('$eventType has the nightshift- prefix', ({ eventType }) => {
-    expect(eventType).toMatch(/^nightshift-[a-z]+(-[a-z]+)*$/);
+  it('uses the expected wire names', () => {
+    const wireNames = Object.fromEntries(
+      Object.entries(eventTypes).map(([name, { eventType }]) => [name, eventType])
+    );
+
+    expect(wireNames).toEqual({
+      agentBuilderKnowledgeIndicatorCreatedEventType:
+        'nightshift-agent-builder-knowledge-indicator-created',
+      agentToolEventCreateEventType: 'nightshift-agent-tool-event-create',
+      agentToolEventSearchEventType: 'nightshift-agent-tool-event-search',
+      agentToolEventWriteEventType: 'nightshift-agent-tool-event-write',
+      agentToolFailedEventType: 'nightshift-agent-tool-failed',
+      agentToolKiIdentificationStartedEventType: 'nightshift-agent-tool-ki-identification-started',
+      detectionScanEventType: 'nightshift-detection-scan',
+      discoveryCompletedEventType: 'nightshift-significant-events-discovery-completed',
+      discoveryStartedEventType: 'nightshift-significant-events-discovery-started',
+      discoveryTriggeredEventType: 'nightshift-significant-events-discovery-triggered',
+      eventStatusChangedEventType: 'nightshift-event-status-changed',
+      knowledgeIndicatorEventsGeneratedEventType: 'nightshift-significant-events-queries-generated',
+      knowledgeIndicatorFeaturesIdentifiedEventType: 'nightshift-features-identified',
+      knowledgeIndicatorQueriesGenerationFailedEventType:
+        'nightshift-significant-events-queries-generation-failed',
+      onboardingScheduledEventType: 'nightshift-onboarding-scheduled',
+    });
   });
 
   it.each([
