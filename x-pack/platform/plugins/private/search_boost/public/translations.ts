@@ -139,10 +139,10 @@ interface ManagedProfileMessage {
 
 const MANAGED_PROFILE_MESSAGES: Readonly<Record<ManagedProfileName, ManagedProfileMessage>> = {
   default_indices: {
-    label: i18n.translate('xpack.searchBoost.managedProfile.performantIndices.label', {
-      defaultMessage: 'Performant',
+    label: i18n.translate('xpack.searchBoost.managedProfile.defaultIndices.label', {
+      defaultMessage: 'Default',
     }),
-    description: i18n.translate('xpack.searchBoost.managedProfile.performantIndices.description', {
+    description: i18n.translate('xpack.searchBoost.managedProfile.defaultIndices.description', {
       defaultMessage:
         'Consistently low average latency, scaling to high query throughput as load grows.',
     }),

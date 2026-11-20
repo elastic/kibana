@@ -30,7 +30,7 @@ describe('ProjectDefaultCard', () => {
     render(<ProjectDefaultCard {...defaultProps} />);
 
     expect(screen.getByTestId('searchBoostProjectDefaultValue-indices')).toHaveTextContent(
-      'Performant'
+      'Default'
     );
     expect(
       screen.getByText(
