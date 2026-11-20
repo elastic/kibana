@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChatCompletionReasoning, ChatCompletionReasoningEffort } from '@kbn/inference-common';
+import type { ChatCompletionReasoning } from '@kbn/inference-common';
 
 // OpenAI Chat Completions rejects function tools on these reasoning models unless
 // reasoning effort is explicitly `none`. Keep the default scoped to them: models with
@@ -69,26 +69,16 @@ export const resolveChatCompletionReasoning = ({
  * Resolve the `reasoning_effort` to send to the OpenAI Chat Completions API, which rejects
  * function tools on gpt-5.6, gpt-6-luna and gpt-6-sol models unless the effort is explicitly `none`.
  *
- * An explicit caller effort always wins. Otherwise `none` is the default for those models when
- * native tools are present, unless the caller enabled reasoning without choosing an effort.
+ * This is a constraint rather than a default, so it does not yield to the caller's `reasoning`,
+ * which the OpenAI connector adapter does not forward for any model.
  */
 export const resolveOpenAIReasoningEffort = ({
-  reasoning,
   hasNativeTools,
   model,
 }: {
-  reasoning?: ChatCompletionReasoning;
   hasNativeTools: boolean;
   model?: string;
-}): ChatCompletionReasoningEffort | undefined => {
-  if (reasoning?.effort) {
-    return reasoning.effort;
-  }
-
-  if (reasoning?.enabled) {
-    return undefined;
-  }
-
+}): 'none' | undefined => {
   if (
     hasNativeTools &&
     model &&

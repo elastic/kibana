@@ -155,40 +155,4 @@ describe('resolveOpenAIReasoningEffort', () => {
   it('returns undefined when the model is unknown', () => {
     expect(resolveOpenAIReasoningEffort({ hasNativeTools: true })).toBeUndefined();
   });
-
-  it('returns the caller-provided effort over the none default', () => {
-    expect(
-      resolveOpenAIReasoningEffort({
-        reasoning: { effort: 'high' },
-        hasNativeTools: true,
-        model: 'gpt-5.6-terra',
-      })
-    ).toBe('high');
-  });
-
-  it('returns the caller-provided effort without tools or a known model', () => {
-    expect(
-      resolveOpenAIReasoningEffort({ reasoning: { effort: 'low' }, hasNativeTools: false })
-    ).toBe('low');
-  });
-
-  it('skips the none default when the caller enabled reasoning without an effort', () => {
-    expect(
-      resolveOpenAIReasoningEffort({
-        reasoning: { enabled: true },
-        hasNativeTools: true,
-        model: 'gpt-5.6-terra',
-      })
-    ).toBeUndefined();
-  });
-
-  it('keeps the none default when the caller reasoning sets neither effort nor enabled', () => {
-    expect(
-      resolveOpenAIReasoningEffort({
-        reasoning: { exclude: true },
-        hasNativeTools: true,
-        model: 'gpt-5.6-terra',
-      })
-    ).toBe('none');
-  });
 });

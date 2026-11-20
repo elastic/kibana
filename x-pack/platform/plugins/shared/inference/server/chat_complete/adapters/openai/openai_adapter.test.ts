@@ -19,7 +19,7 @@ import {
   MessageRole,
   InferenceConnectorType,
 } from '@kbn/inference-common';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { ChatCompletionReasoning, InferenceConnector } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { openAIAdapter } from './openai_adapter';
@@ -647,59 +647,59 @@ describe('openAIAdapter', () => {
         expect(getRequest().body).not.toHaveProperty('reasoning_effort');
       });
 
-      it('forwards the caller-provided effort instead of the none default', () => {
+      it('sends none and logs when the caller requested reasoning on a model that requires none', () => {
+        const requested: ChatCompletionReasoning[] = [{ effort: 'high' }, { enabled: true }];
+
+        for (const reasoning of requested) {
+          logger.debug.mockClear();
+          executorMock.invoke.mockClear();
+
+          openAIAdapter
+            .chatComplete({
+              ...defaultArgs,
+              messages,
+              tools,
+              modelName: 'gpt-5.6-terra',
+              reasoning,
+            })
+            .subscribe(noop);
+
+          expect(getRequest().body.reasoning_effort).toBe('none');
+          expect(logger.debug).toHaveBeenCalledWith(
+            expect.stringContaining('Overriding the requested reasoning')
+          );
+        }
+      });
+
+      it('does not log when the caller did not ask for reasoning', () => {
+        logger.debug.mockClear();
+
         openAIAdapter
           .chatComplete({
             ...defaultArgs,
             messages,
             tools,
             modelName: 'gpt-5.6-terra',
-            reasoning: { effort: 'high' },
+            reasoning: { effort: 'none' },
           })
           .subscribe(noop);
 
-        expect(getRequest().body.reasoning_effort).toBe('high');
+        expect(getRequest().body.reasoning_effort).toBe('none');
+        expect(logger.debug).not.toHaveBeenCalled();
       });
 
-      it('forwards the caller-provided effort for models without a default', () => {
-        openAIAdapter
-          .chatComplete({
-            ...defaultArgs,
-            messages,
-            modelName: 'gpt-5.4',
-            reasoning: { effort: 'low' },
-          })
-          .subscribe(noop);
-
-        expect(getRequest().body.reasoning_effort).toBe('low');
-      });
-
-      it('forwards the caller-provided effort with simulated function calling', () => {
+      it('does not forward the caller reasoning for other models', () => {
         openAIAdapter
           .chatComplete({
             ...defaultArgs,
             messages,
             tools,
-            modelName: 'gpt-5.6-terra',
-            functionCalling: 'simulated',
-            reasoning: { effort: 'medium' },
-          })
-          .subscribe(noop);
-
-        expect(getRequest().body.reasoning_effort).toBe('medium');
-      });
-
-      it('does not forward the unified reasoning object', () => {
-        openAIAdapter
-          .chatComplete({
-            ...defaultArgs,
-            messages,
-            tools,
-            modelName: 'gpt-5.6-terra',
+            modelName: 'gpt-4o',
             reasoning: { effort: 'high', summary: 'auto' },
           })
           .subscribe(noop);
 
+        expect(getRequest().body).not.toHaveProperty('reasoning_effort');
         expect(getRequest().body).not.toHaveProperty('reasoning');
       });
     });

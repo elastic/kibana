@@ -58,8 +58,6 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         ? !isNativeFunctionCallingSupported(connector)
         : functionCalling === 'simulated';
 
-    const modelId = modelName ?? connector.config?.defaultModel;
-
     let request: OpenAIRequest;
 
     if (useSimulatedFunctionCalling) {
@@ -69,28 +67,27 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         toolChoice,
         tools,
       });
-      const reasoningEffort = resolveOpenAIReasoningEffort({
-        reasoning,
-        hasNativeTools: false,
-        model: modelId,
-      });
-
       request = {
         stream,
         ...getTemperatureIfValid(temperature, { connector, modelName }),
         model: modelName,
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
-        ...(reasoningEffort ? { reasoning_effort: reasoningEffort } : {}),
       };
     } else {
       const toolsForRequest = ensureToolsWhenHistoryHasToolUse({ tools, messages });
       const openAiTools = toolsToOpenAI(toolsForRequest);
       const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
+      const modelId = modelName ?? connector.config?.defaultModel;
       const reasoningEffort = resolveOpenAIReasoningEffort({
-        reasoning,
         hasNativeTools: hasTools,
         model: modelId,
       });
+
+      if (reasoningEffort && ((reasoning?.effort ?? 'none') !== 'none' || reasoning?.enabled)) {
+        logger.debug(
+          `Overriding the requested reasoning with reasoning_effort "${reasoningEffort}": model "${modelId}" rejects native tools at any other effort`
+        );
+      }
 
       request = {
         stream,
