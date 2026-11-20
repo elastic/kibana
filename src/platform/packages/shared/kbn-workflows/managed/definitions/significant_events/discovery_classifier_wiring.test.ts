@@ -15,6 +15,7 @@ interface WorkflowStep {
   name: string;
   type?: string;
   condition?: string;
+  if?: string;
   'on-failure'?: { continue?: boolean };
   'iteration-on-failure'?: { continue?: boolean };
   foreach?: string;
@@ -105,6 +106,22 @@ describe('discovery workflow detection classifier wiring', () => {
 
       expect(step.type).toBe('significantEvents.classifyDetections');
       expect(step['on-failure']).toBeUndefined();
+    });
+
+    it('resolves written detections after the agent and reports unknown rule uuids', () => {
+      const resolve = requireStep('resolve_written_detections');
+      const report = requireStep('report_discovery_completed');
+
+      expect(topLevelIndex('run_discovery_agent')).toBeLessThan(
+        topLevelIndex('resolve_written_detections')
+      );
+      expect(resolve.type).toBe('significantEvents.resolveWrittenDetections');
+      expect(resolve.if).toBe('${{ steps.run_discovery_agent.error == null }}');
+      expect(resolve['on-failure']).toEqual({ continue: true });
+      expect(report.with?.body).toMatchObject({
+        unknown_reported_rule_count:
+          '${{ steps.resolve_written_detections.output.unknown_reported_count | default: 0 }}',
+      });
     });
 
     it('passes the detection rows, the space and every classifier input to the step', () => {

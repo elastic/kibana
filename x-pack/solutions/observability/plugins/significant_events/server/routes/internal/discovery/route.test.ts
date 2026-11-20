@@ -175,7 +175,7 @@ describe('discovery completed report', () => {
         getSpaceId: jest.fn().mockResolvedValue('space-a'),
         server: {},
         telemetry: { trackSignificantEventsDiscoveryCompleted: track },
-        logger: { debug: jest.fn() },
+        logger: { debug: jest.fn(), warn: jest.fn() },
       } as unknown as CompletedParams,
     };
   };
@@ -198,6 +198,7 @@ describe('discovery completed report', () => {
     });
     expect(reported.duration_ms).toBeGreaterThanOrEqual(90_000);
     expect(reported).not.toHaveProperty('error_message');
+    expect(handlerParams.logger.warn).not.toHaveBeenCalled();
   });
 
   it('still reports when the execution record cannot be read', async () => {
@@ -215,6 +216,24 @@ describe('discovery completed report', () => {
       error_message: 'agent step failed',
     });
     expect(reported).not.toHaveProperty('duration_ms');
+  });
+
+  it('warns and reports unknown written rules', async () => {
+    const { handlerParams, track } = makeParams({
+      body: { unknown_reported_rule_count: 2 },
+    });
+
+    await completedRoute.handler(handlerParams);
+
+    expect(handlerParams.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '2 reported rule uuids were not in the discovery batch of discovery-1'
+      )
+    );
+    expect(track).toHaveBeenCalledWith(
+      expect.objectContaining({ unknown_reported_rule_count: 2 }),
+      handlerParams.request
+    );
   });
 
   it('reports a step timeout from the failure fallback as timed out', async () => {

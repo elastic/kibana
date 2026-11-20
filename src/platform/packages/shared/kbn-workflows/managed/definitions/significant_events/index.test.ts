@@ -39,6 +39,7 @@ interface WorkflowStep {
     path?: string;
     body?: Record<string, unknown> & { runId?: string; parentWorkflowExecutionId?: string };
     written_rule_uuids?: string;
+    stamp_rule_uuids?: string;
     inputs?: Record<string, string>;
     schema?: WorkflowJsonSchema;
     message?: string;
@@ -264,12 +265,18 @@ describe('significant events persistence workflow contracts', () => {
     );
   });
 
-  it('stamps discovery detections only from reported completed outcomes', () => {
+  it('stamps discovery detections from resolved written events and reported completed outcomes', () => {
     expect(requireStep(discovery, 'compute_written_rule_uuids').with?.written_rule_uuids).toContain(
       '| default: [] | uniq'
     );
+    expect(requireStep(discovery, 'compute_stamp_rule_uuids').with?.stamp_rule_uuids).toContain(
+      'steps.resolve_written_detections.output.stamp_rule_uuids'
+    );
     expect(requireStep(discovery, 'maybe_stamp_processed').condition).toContain(
       'steps.count_written_rules.output.writtenCount > 0'
+    );
+    expect(requireStep(discovery, 'maybe_stamp_processed').condition).toContain(
+      'steps.run_discovery_agent.error == null'
     );
   });
 });

@@ -38,6 +38,7 @@ export const CLIENT_REGISTRATION_EXCEPTIONS: readonly string[] = [
   // @elastic/nightshift — significant_events
   'significantEvents.classifyDetections',
   'significantEvents.resolveModel',
+  'significantEvents.resolveWrittenDetections',
 
   // @elastic/alertzero-common-layer — alertzero
   'alertzero.investigation.summarize',

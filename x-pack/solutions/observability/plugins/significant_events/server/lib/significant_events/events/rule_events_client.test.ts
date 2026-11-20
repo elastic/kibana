@@ -158,6 +158,83 @@ const lastStatusWritten = (client: jest.Mocked<AlertEventsClientApi>) =>
     data: Record<string, unknown>;
   };
 
+describe('findDetectionsWrittenByRun', () => {
+  it('scopes the query to the space, significant events, and workflow execution', async () => {
+    const row: MockRow = {
+      source: ruleEventSource(),
+      dataJson: JSON.stringify({
+        signals: [{ metadata: { detection_id: 'detection-a', rule_uuid: 'rule-a' } }],
+      }),
+    };
+    const { client, query } = createClient(async () => sourceResponse([row]));
+
+    await expect(
+      client.findDetectionsWrittenByRun({ workflowExecutionId: 'execution-1', limit: 1_000 })
+    ).resolves.toEqual({
+      pairs: [{ detection_id: 'detection-a', rule_uuid: 'rule-a' }],
+      truncated: false,
+    });
+
+    expect(lastQuery(query)).toContain(
+      'WHERE space_id == "default" AND type == "alert" AND source == "elastic.significant_events"'
+    );
+    expect(lastQuery(query)).toContain(
+      'WHERE FIELD_EXTRACT(data, "workflow_execution_id") == "execution-1"'
+    );
+    expect(lastQuery(query)).toContain('EVAL data_json = JSON_EXTRACT(_source, "$.data")');
+  });
+
+  it('skips an unparseable row and a malformed signal while keeping the valid pairs', async () => {
+    const rows: MockRow[] = [
+      { source: ruleEventSource(), dataJson: '{not json' },
+      {
+        source: ruleEventSource({ group_hash: 'group-hash-2' }),
+        dataJson: JSON.stringify({
+          signals: [
+            { metadata: { detection_id: 'detection-a' } },
+            { metadata: { detection_id: 'detection-b', rule_uuid: 'rule-b' } },
+          ],
+        }),
+      },
+    ];
+    const { client } = createClient(async () => sourceResponse(rows));
+
+    await expect(
+      client.findDetectionsWrittenByRun({ workflowExecutionId: 'execution-1', limit: 1_000 })
+    ).resolves.toEqual({
+      pairs: [{ detection_id: 'detection-b', rule_uuid: 'rule-b' }],
+      truncated: false,
+    });
+  });
+
+  it('keeps the first capped rows and marks the result truncated', async () => {
+    const rows: MockRow[] = [
+      {
+        source: ruleEventSource(),
+        dataJson: JSON.stringify({
+          signals: [{ metadata: { detection_id: 'detection-a', rule_uuid: 'rule-a' } }],
+        }),
+      },
+      {
+        source: ruleEventSource({ group_hash: 'group-hash-2' }),
+        dataJson: JSON.stringify({
+          signals: [{ metadata: { detection_id: 'detection-b', rule_uuid: 'rule-b' } }],
+        }),
+      },
+    ];
+    const { client, query } = createClient(async () => sourceResponse(rows));
+
+    await expect(
+      client.findDetectionsWrittenByRun({ workflowExecutionId: 'execution-1', limit: 1 })
+    ).resolves.toEqual({
+      pairs: [{ detection_id: 'detection-a', rule_uuid: 'rule-a' }],
+      truncated: true,
+    });
+
+    expect(lastQuery(query)).toContain('LIMIT 2');
+  });
+});
+
 describe('RuleEventsClient', () => {
   describe('updateEventStatus', () => {
     it('writes a system status as a rule event carrying the decided status', async () => {

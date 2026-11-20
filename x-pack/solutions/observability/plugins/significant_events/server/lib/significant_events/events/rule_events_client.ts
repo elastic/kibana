@@ -34,6 +34,7 @@ import {
   type SignificantEventCloseReason,
 } from '@kbn/significant-events-schema';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { lazySchema, z } from '@kbn/zod/v4';
 import {
   MAX_DEDUP_SCAN_LIMIT,
   type CommonSearchOptions,
@@ -219,6 +220,47 @@ interface RuleEventSourceRow {
 }
 
 type RuleEventSourceRowWithCreatedAt = RuleEventSourceRow & { created_at: string };
+
+export interface WrittenDetectionPair {
+  detection_id: string;
+  rule_uuid: string;
+}
+
+interface RuleEventDataRow {
+  data_json: string;
+}
+
+const writtenDataSchema = lazySchema(() => z.object({ signals: z.array(z.unknown()) }));
+const writtenSignalSchema = lazySchema(() =>
+  z.object({
+    metadata: z.object({ detection_id: z.string(), rule_uuid: z.string() }),
+  })
+);
+
+const parseJson = (json: string): unknown => {
+  try {
+    return JSON.parse(json || '{}');
+  } catch {
+    return undefined;
+  }
+};
+
+/** A row that is not valid JSON, or a signal that lacks the pair, is skipped without failing the lookup. */
+const writtenDetectionPairs = (dataJson: string): WrittenDetectionPair[] => {
+  const data = writtenDataSchema.safeParse(parseJson(dataJson));
+  if (!data.success) return [];
+  return data.data.signals.flatMap((signal) => {
+    const parsed = writtenSignalSchema.safeParse(signal);
+    return parsed.success
+      ? [
+          {
+            detection_id: parsed.data.metadata.detection_id,
+            rule_uuid: parsed.data.metadata.rule_uuid,
+          },
+        ]
+      : [];
+  });
+};
 
 /**
  * `.rule-events` doesn't guarantee `source_ids` is an array — bridge docs write a scalar
@@ -719,6 +761,34 @@ export class RuleEventsClient {
     return {
       hits: hits.map(decodeSignificantEventResponse),
       lastGroupHash: hits.at(-1)?.[GROUP_HASH_FIELD],
+    };
+  }
+
+  async findDetectionsWrittenByRun({
+    workflowExecutionId,
+    limit,
+  }: {
+    workflowExecutionId: string;
+    limit: number;
+  }): Promise<{ pairs: WrittenDetectionPair[]; truncated: boolean }> {
+    const rows = await executeEsqlQuery<RuleEventDataRow>({
+      esClient: this.clients.esClient,
+      query: withDataJsonProjection(
+        buildBaseQuery(this.clients.space).where`FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
+          'workflow_execution_id'
+        )}) == ${esql.str(workflowExecutionId)}`
+      )
+        .sort(['@timestamp', 'DESC'])
+        .limit(limit + 1)
+        .keep('data_json'),
+      fields: ['data_json'],
+    });
+    const truncated = rows.length > limit;
+    return {
+      pairs: rows
+        .slice(0, limit)
+        .flatMap(({ data_json: dataJson }) => writtenDetectionPairs(dataJson)),
+      truncated,
     };
   }
 
