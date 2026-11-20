@@ -481,6 +481,41 @@ actions:
     });
   });
 
+  describe('with a pinned source that says where newer versions are announced', () => {
+    const V1 = 'https://specs.example.com/v1/openapi.yaml';
+    const V2 = 'https://specs.example.com/v2/openapi.yaml';
+    const NOTE = 'The vendor publishes a file per release and no URL for the latest.';
+    const LATEST = { url: 'https://specs.example.com/releases', pattern: '/(v\\d+)/' };
+
+    it('stays pinned, and keeps where to look, when it moves to the next version', async () => {
+      for (const version of ['v1', 'v2']) {
+        documents[`https://specs.example.com/${version}/openapi.yaml`] = documents[SPEC_URL];
+        documents[`https://specs.example.com/${version}/models.yaml`] = documents[MODELS_URL];
+      }
+      await update({ sources: { main: V1 } });
+      const manifest = await readJson('manifest.json');
+      manifest.sources.main = {
+        ...manifest.sources.main,
+        pinned: true,
+        note: NOTE,
+        latest: LATEST,
+      };
+      await fs.writeFile(
+        path.join(directory, 'manifest.json'),
+        serializeManifest(parseManifest(JSON.stringify(manifest)))
+      );
+
+      await update({ sources: { main: V2 } });
+
+      expect((await readJson('manifest.json')).sources.main).toMatchObject({
+        url: V2,
+        pinned: true,
+        note: NOTE,
+        latest: LATEST,
+      });
+    });
+  });
+
   describe('with a captured source', () => {
     const NOTE = 'The vendor only serves this spec to a request carrying credentials.';
     const writeManifest = (manifest: unknown) =>

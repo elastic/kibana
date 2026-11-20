@@ -604,13 +604,10 @@ export const updateVendorApi = async ({
       ...(name in protocols && endpoints ? { endpoints: [...endpoints] } : {}),
       ...(tools === undefined ? {} : { tools: [...tools] }),
       ...(isCaptured(name) ? { captured: true as const } : {}),
-      // A pinned source stays so until its URL moves, which is how it is refreshed.
-      ...(previous?.sources[name]?.pinned && previous.sources[name].url === urls[name]
-        ? { pinned: true as const }
-        : {}),
-      ...(previous?.sources[name]?.latest && previous.sources[name].url === urls[name]
-        ? { latest: previous.sources[name].latest }
-        : {}),
+      // Moving a pinned source to the vendor's next version is how it is refreshed, so both marks
+      // stay; remove them by hand once a source follows the vendor.
+      ...(previous?.sources[name]?.pinned ? { pinned: true as const } : {}),
+      ...(previous?.sources[name]?.latest ? { latest: previous.sources[name].latest } : {}),
       ...(pages === undefined ? {} : { pages: [...pages] }),
       ...(apiVersion === undefined ? {} : { apiVersion }),
       fetchedAt: fetchedAt ?? now().toISOString(),
