@@ -10,7 +10,10 @@
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { asyncExitHook } from 'exit-hook';
 
-const SHUTDOWN_TIMEOUT_MS = 2 * 60 * 1000;
+// Above the Elasticsearch ready timeout (2 minutes): a shutdown that starts during the
+// Elasticsearch boot waits for that boot to settle before stopping it, and the forced exit must
+// not land first. A second signal exits right away for whoever does not want to wait.
+const SHUTDOWN_TIMEOUT_MS = 5 * 60 * 1000;
 
 export const shutdownServers = async (
   procs: Pick<ProcRunner, 'teardown'>,

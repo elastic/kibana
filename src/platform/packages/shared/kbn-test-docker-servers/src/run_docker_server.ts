@@ -190,12 +190,16 @@ async function waitUntilReady(
   );
 }
 
-/** `docker kill` / `docker rm` on a container that is already gone is not an error here. */
+/**
+ * `docker kill` / `docker rm` on a container that is already gone is not an error here. The
+ * daemon's wording changed case over versions ("Container ... is not running" became
+ * "container ... is not running"), so match without it.
+ */
 function ignoreGoneContainer(containerId: string, error: Error) {
-  const message = error.message ?? '';
+  const message = (error.message ?? '').toLowerCase();
   if (
-    !message.includes(`Container ${containerId} is not running`) &&
-    !message.includes(`No such container: ${containerId}`)
+    !message.includes(`container ${containerId} is not running`.toLowerCase()) &&
+    !message.includes(`no such container: ${containerId}`.toLowerCase())
   ) {
     throw error;
   }

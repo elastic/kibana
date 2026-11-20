@@ -13,6 +13,9 @@ import { inspect } from 'util';
  * Narrows a caught value to an `Error`, so callers can keep error lists typed. A thrown plain
  * object (an HTTP response, a tool's error shape) keeps its fields in the message instead of
  * collapsing to "[object Object]".
+ *
+ * `unknown` on purpose: a `catch` value is whatever was thrown, and this is the one place that
+ * turns it into an `Error` so nothing else has to widen its types.
  */
 export function asError(value: unknown): Error {
   if (value instanceof Error) {

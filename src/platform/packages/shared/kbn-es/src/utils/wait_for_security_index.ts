@@ -9,7 +9,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { gracefulExit } from 'exit-hook';
+import { withExitOnSigint } from './with_exit_on_sigint';
 const DEFAULT_READY_TIMEOUT = 10 * 1000; // 10 seconds
 
 export interface WaitOptions {
@@ -26,16 +26,7 @@ export async function waitForSecurityIndex({
   log,
   readyTimeout = DEFAULT_READY_TIMEOUT,
 }: WaitOptions) {
-  // Same as `waitUntilClusterReady`: exit on SIGINT while the loop runs, through exit-hook so
-  // the caller's asynchronous shutdown hooks still run, and only while the loop runs.
-  const exitOnSigint = () => gracefulExit();
-  process.on('SIGINT', exitOnSigint);
-
-  try {
-    await pollUntilReady({ client, log, readyTimeout });
-  } finally {
-    process.off('SIGINT', exitOnSigint);
-  }
+  await withExitOnSigint(() => pollUntilReady({ client, log, readyTimeout }));
 }
 
 async function pollUntilReady({ client, log, readyTimeout }: Required<WaitOptions>) {

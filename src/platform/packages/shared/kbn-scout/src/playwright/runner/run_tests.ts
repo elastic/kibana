@@ -17,12 +17,9 @@ import { pickLevelFromFlags } from '@kbn/tooling-log';
 import { basename, isAbsolute, relative, resolve } from 'path';
 import { silence } from '../../common';
 import { preCreateSecurityIndexesViaSamlAuth, runKibanaServer } from '../../servers';
-import { asError } from '../../servers/as_error';
-import type { BackingServices } from '../../servers/backing_services';
-import { resolveRunOutcome, startBackingServices } from '../../servers/backing_services';
+import { runWithBackingServices } from '../../servers/backing_services';
 import { getConfigRootDir, loadServersConfig } from '../../servers/configs';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
-import { registerServerShutdown } from '../../servers/server_shutdown';
 import type { ScoutPlaywrightProjects } from '../types';
 import { getPlaywrightLimitOptions } from '../tags';
 import { execFilePromise, getPlaywrightGrepTag, withKibanaSwcRegister } from '../utils';
@@ -125,72 +122,36 @@ async function runLocalServersAndTests(
   const configRootDir = getConfigRootDir(options.configPath, options.testTarget);
   const config = await loadServersConfig(options.testTarget, log, configRootDir);
 
-  let backing: BackingServices | undefined;
-  const shutdownBackingServices = () => backing?.shutdown() ?? Promise.resolve();
-
-  // Registered before anything starts: a SIGINT/SIGTERM during the registry readiness wait or
-  // the Elasticsearch boot must not leave a detached container holding its port.
-  let interrupted = false;
-  const removeShutdownHook = registerServerShutdown(procs, () => {
-    interrupted = true;
-    return shutdownBackingServices();
-  });
-
-  // A backing service (Elasticsearch, Kibana, a docker container) died on its own. Stop the run:
-  // the tests would otherwise fail one by one with opaque errors, and report this exit instead.
-  // SIGTERM, so the Playwright runner still writes its reports.
-  let earlyExitError: Error | undefined;
-  const onEarlyExit = (msg: string) => {
-    log.error(msg);
-    earlyExitError = earlyExitError ?? new Error(msg);
-    procs.teardown('SIGTERM').catch((error) => log.error(error));
-  };
-
-  let runError: Error | undefined;
-  try {
-    // Both must be up before Kibana boots.
-    backing = startBackingServices({
+  // The docker servers (e.g. the Fleet package registry) and Elasticsearch come up before Kibana
+  // boots; everything is stopped when the tests end, on a signal and when any step fails.
+  return runWithBackingServices(
+    {
       config,
       log,
-      onEarlyExit,
-      es: { esFrom: options.esFrom, logsDir: options.logsDir },
-    });
-    await backing.ready;
-
-    await runKibanaServer({
       procs,
-      onEarlyExit,
-      config,
-      installDir: options.installDir,
-      extraKbnOpts: getExtraKbnOpts(options.installDir, config.get('serverless')),
-    });
+      es: { esFrom: options.esFrom, logsDir: options.logsDir },
+      interruptedMessage: 'scout: run interrupted',
+    },
+    async ({ onEarlyExit }) => {
+      await runKibanaServer({
+        procs,
+        onEarlyExit,
+        config,
+        installDir: options.installDir,
+        extraKbnOpts: getExtraKbnOpts(options.installDir, config.get('serverless')),
+      });
 
-    // wait for 5 seconds
-    await silence(log, 5000);
+      // wait for 5 seconds
+      await silence(log, 5000);
 
-    // Pre-create Elasticsearch Security indexes after server startup. Skipped for `prebootOnly`
-    if (!config.get('prebootOnly')) {
-      await preCreateSecurityIndexesViaSamlAuth(config, log);
+      // Pre-create Elasticsearch Security indexes after server startup. Skipped for `prebootOnly`
+      if (!config.get('prebootOnly')) {
+        await preCreateSecurityIndexesViaSamlAuth(config, log);
+      }
+
+      await runPlaywrightTest(procs, cmd, cmdArgs, env);
     }
-
-    await runPlaywrightTest(procs, cmd, cmdArgs, env);
-  } catch (error) {
-    runError = asError(error);
-  }
-
-  const shutdownErrors: Error[] = [];
-  await procs.stop('kibana').catch((error) => shutdownErrors.push(asError(error)));
-  await shutdownBackingServices().catch((error) => shutdownErrors.push(asError(error)));
-  removeShutdownHook();
-
-  return resolveRunOutcome({
-    log,
-    earlyExitError,
-    interrupted,
-    interruptedMessage: 'scout: run interrupted',
-    runError,
-    shutdownError: shutdownErrors[0],
-  });
+  );
 }
 
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {

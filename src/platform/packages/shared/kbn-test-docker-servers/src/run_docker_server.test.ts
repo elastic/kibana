@@ -241,7 +241,10 @@ describe('runDockerServer', () => {
   });
 
   it('still removes a container that had already exited when stop() runs', async () => {
-    const docker = fakeDocker({ cached: true, killError: 'Container container-1 is not running' });
+    const docker = fakeDocker({
+      cached: true,
+      killError: 'cannot kill container: container-1: container container-1 is not running',
+    });
 
     const pending = runDockerServer(server, { log });
     await new Promise((resolve) => setImmediate(resolve));

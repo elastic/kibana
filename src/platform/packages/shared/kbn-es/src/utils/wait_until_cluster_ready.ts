@@ -10,7 +10,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { gracefulExit } from 'exit-hook';
+import { withExitOnSigint } from './with_exit_on_sigint';
 const DEFAULT_READY_TIMEOUT = 120 * 1000; // 2 minutes
 
 export type ClusterReadyStatus = 'green' | 'yellow';
@@ -36,19 +36,7 @@ export async function waitUntilClusterReady({
   log,
   readyTimeout = DEFAULT_READY_TIMEOUT,
 }: WaitOptions) {
-  // The loop would continue until timeout even if SIGINT is signaled, so exit while it runs.
-  // Through exit-hook, not `process.exit()`: whoever started the cluster may have registered an
-  // asynchronous shutdown hook (e.g. Scout stopping its docker containers), and `process.exit()`
-  // skips those. With no hooks registered this is the plain exit it always was. Only while the
-  // loop runs: left registered, the listener would cut every later shutdown short the same way.
-  const exitOnSigint = () => gracefulExit();
-  process.on('SIGINT', exitOnSigint);
-
-  try {
-    await pollUntilReady({ client, expectedStatus, log, readyTimeout });
-  } finally {
-    process.off('SIGINT', exitOnSigint);
-  }
+  await withExitOnSigint(() => pollUntilReady({ client, expectedStatus, log, readyTimeout }));
 }
 
 async function pollUntilReady({

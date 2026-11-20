@@ -12,7 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { runDockerServers } from './run_docker_servers';
 import { runElasticsearch } from './run_elasticsearch';
 import { runKibanaServer } from './run_kibana_server';
-import { registerServerShutdown, shutdownServers } from './server_shutdown';
+import { registerServerShutdown } from './server_shutdown';
 import { startServers } from './start_servers';
 import type { StartServerOptions } from './flags';
 
@@ -36,7 +36,6 @@ jest.mock('./run_kibana_server', () => ({
 }));
 jest.mock('./server_shutdown', () => ({
   registerServerShutdown: jest.fn(),
-  shutdownServers: jest.fn(),
 }));
 
 const withProcRunnerMock = withProcRunner as jest.Mock;
@@ -44,13 +43,12 @@ const runDockerServersMock = runDockerServers as jest.Mock;
 const runElasticsearchMock = runElasticsearch as jest.Mock;
 const runKibanaServerMock = runKibanaServer as jest.Mock;
 const registerServerShutdownMock = registerServerShutdown as jest.Mock;
-const shutdownServersMock = shutdownServers as jest.Mock;
 
 const log = new ToolingLog({ level: 'silent', writeTo: process.stdout });
 const options = { testTarget: { location: 'local' } } as unknown as StartServerOptions;
 
 describe('startServers', () => {
-  const procs = { teardown: jest.fn(), waitForAllToStop: jest.fn() };
+  const procs = { teardown: jest.fn().mockResolvedValue(undefined), waitForAllToStop: jest.fn() };
   const stopDockerServers = jest.fn();
   const shutdownEs = jest.fn();
   const removeShutdownHook = jest.fn();
@@ -58,6 +56,7 @@ describe('startServers', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    procs.teardown.mockResolvedValue(undefined);
     withProcRunnerMock.mockImplementation(async (_log, fn) => fn(procs));
     runDockerServersMock.mockResolvedValue(stopDockerServers);
     runElasticsearchMock.mockResolvedValue(shutdownEs);
@@ -166,9 +165,6 @@ describe('startServers', () => {
       onEarlyExit = handler;
       return stopDockerServers;
     });
-    shutdownServersMock.mockImplementation(async (_procs, shutdownBackingServices) => {
-      await shutdownBackingServices();
-    });
     runKibanaServerMock.mockImplementation(async () => {
       onEarlyExit('[docker:registry] container exited unexpectedly: exit code 137');
       throw new Error('kibana exited before it was ready');
@@ -187,9 +183,6 @@ describe('startServers', () => {
       onEarlyExit = handler;
       return stopDockerServers;
     });
-    shutdownServersMock.mockImplementation(async (_procs, shutdownBackingServices) => {
-      await shutdownBackingServices();
-    });
     procs.waitForAllToStop.mockImplementation(async () => {
       onEarlyExit('[docker:registry] container exited unexpectedly');
     });
@@ -199,9 +192,30 @@ describe('startServers', () => {
       '[docker:registry] container exited unexpectedly'
     );
 
-    expect(shutdownServersMock).toHaveBeenCalledWith(procs, expect.any(Function));
+    expect(procs.teardown).toHaveBeenCalledWith('SIGTERM');
     expect(shutdownEs).toHaveBeenCalledTimes(1);
     expect(stopDockerServers).toHaveBeenCalledTimes(1);
     expect(process.exitCode).toBe(1);
+  });
+
+  it('treats an Elasticsearch exit caused by the signal as part of the interrupt', async () => {
+    let shutdownHook: () => Promise<void> = async () => {};
+    registerServerShutdownMock.mockImplementation((_procs, hook) => {
+      shutdownHook = hook;
+      return removeShutdownHook;
+    });
+    let esEarlyExit: (msg: string) => void = () => {};
+    runElasticsearchMock.mockImplementation(async ({ onEarlyExit }) => {
+      esEarlyExit = onEarlyExit;
+      return shutdownEs;
+    });
+    procs.waitForAllToStop.mockImplementation(async () => {
+      // a terminal Ctrl-C: the hook fires, then the ES JVM (which got the signal too) exits
+      await shutdownHook();
+      esEarlyExit('ES exitted unexpectedly');
+    });
+
+    await expect(startServers(log, options)).resolves.toBeUndefined();
+    expect(process.exitCode).toBe(130);
   });
 });
