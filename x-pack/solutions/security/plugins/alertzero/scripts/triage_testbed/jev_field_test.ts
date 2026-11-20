@@ -19,10 +19,10 @@
  * the share of harmless changes that it flags by mistake.
  *
  * Read it as a comparison between changes and wordings, and not as a rate for production. Synthetic data only: it goes to the QA
- * endpoint in `QA_ES_URL` with the key in `QA_ES_API_KEY`, only with `--confirm-data-ok`.
+ * endpoint in `REMOTE_ES_URL` with the key in `REMOTE_ES_API_KEY`, only with `--confirm-data-ok`.
  *
  * Usage:
- *   QA_ES_URL=... QA_ES_API_KEY=... node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/jev_field_test_cli.js \
+ *   REMOTE_ES_URL=... REMOTE_ES_API_KEY=... node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/jev_field_test_cli.js \
  *     --data <sample folder> --out <report.json> [--per-kind 40] [--seed 1] [--concurrency 3] [--endpoint <id>] \
  *     [--dry-run | --confirm-data-ok]
  */
@@ -518,7 +518,6 @@ export const main = async (): Promise<void> => {
   const args: Partial<Record<ValueFlagKey, string>> = {
     seed: '1',
     concurrency: '3',
-    endpoint: '.typesafe-jev-1.13_decision',
   };
   const flags: Readonly<Record<string, ValueFlagKey>> = {
     '--data': 'data',
@@ -556,14 +555,15 @@ export const main = async (): Promise<void> => {
         `${first ? alertInput(first.doc) : alertInput(example.doc)}\n` +
         (dryRun
           ? 'Dry run: nothing was sent.\n'
-          : 'Nothing was sent: pass --confirm-data-ok to send this synthetic data to QA_ES_URL.\n')
+          : 'Nothing was sent: pass --confirm-data-ok to send this synthetic data to REMOTE_ES_URL.\n')
     );
     return;
   }
-  const url = process.env.QA_ES_URL;
-  const apiKey = process.env.QA_ES_API_KEY;
-  if (!url || !apiKey) throw new Error('QA_ES_URL and QA_ES_API_KEY must be set');
-  if (!url.startsWith('https://')) throw new Error('QA_ES_URL must be an https URL');
+  const url = process.env.REMOTE_ES_URL;
+  const apiKey = process.env.REMOTE_ES_API_KEY;
+  if (!url || !apiKey) throw new Error('REMOTE_ES_URL and REMOTE_ES_API_KEY must be set');
+  if (!url.startsWith('https://')) throw new Error('REMOTE_ES_URL must be an https URL');
+  if (!endpoint) throw new Error('--endpoint <inference endpoint id> is required');
 
   const scored = await scoreFieldChanges({
     bases,

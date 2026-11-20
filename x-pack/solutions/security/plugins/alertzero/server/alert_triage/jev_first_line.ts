@@ -10,7 +10,7 @@
  * task type. A call has one text and answers each question about that text once, so a batch of the alerts of one rule is one text
  * with numbered alerts and one question for each alert.
  *
- * What the lanes do is an assumption of the PoC, not a policy (`on-week/notes/plan/poc_plan.md`):
+ * What the lanes do is an assumption of the PoC, not a policy:
  * - `benign`: the attack probability is at most 0.05 and Jev's own confidence is at least 0.9. In `on` mode the alert gets a false
  *   positive verdict and skips analysis.
  * - `attack`: the attack probability is at least 0.98. The alert is analyzed, as every alert that is not benign is.
@@ -31,8 +31,11 @@ export type JevFirstLineMode = 'off' | 'shadow' | 'on';
 export const toJevFirstLineMode = (value: string): JevFirstLineMode =>
   value === 'shadow' || value === 'on' ? value : 'off';
 
-/** The inference endpoint of the decision model. Elasticsearch serves it through the Elastic Inference Service. */
-export const JEV_ENDPOINT_ID = '.typesafe-jev-1.13_decision';
+/**
+ * The feature flag that names the inference endpoint of the decision model (`feature_flags.overrides`). It has no default, so the code
+ * holds no endpoint id: without it the step does not call the model and reports `failed`, and every alert is analyzed.
+ */
+export const JEV_ENDPOINT_FLAG = 'alertzero.triageJevEndpointId';
 
 /** The tag of an alert that Jev scored: `az:jev_lane:<lane>`. It keeps the alert out of later Jev searches. */
 export const JEV_LANE_TAG_PREFIX = 'az:jev_lane:';

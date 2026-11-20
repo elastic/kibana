@@ -17,13 +17,13 @@
  * - the score of the planted variants and of the harmless hash updates
  * - the latency, and the spread between the repeats and between the wordings
  *
- * Synthetic data only. The data goes to the QA endpoint in `QA_ES_URL` with the key in `QA_ES_API_KEY`, only with
+ * Synthetic data only. The data goes to the remote Elasticsearch endpoint in `REMOTE_ES_URL` with the key in `REMOTE_ES_API_KEY`, only with
  * `--confirm-data-ok`. Without that flag (or with `--dry-run`) nothing is sent. The key is never printed.
  *
  * Usage:
- *   QA_ES_URL=... QA_ES_API_KEY=... node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/jev_experiment_cli.js \
+ *   REMOTE_ES_URL=... REMOTE_ES_API_KEY=... node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/jev_experiment_cli.js \
  *     --data <sample folder> --out <report.json> [--es http://localhost:9200 --haiku-window <from>,<to> ...] \
- *     [--endpoint .typesafe-jev-1.13_decision] [--repeats 2] [--concurrency 4] [--limit N] [--batch [--batch-size 50]] \
+ *     --endpoint <inference endpoint id> [--repeats 2] [--concurrency 4] [--limit N] [--batch [--batch-size 50]] \
  *     [--extra-fields kibana.alert.reason,...] \
  *     [--dry-run | --confirm-data-ok]
  *
@@ -926,7 +926,6 @@ type ValueFlagKey =
 
 export const main = async (): Promise<void> => {
   const args: Partial<Record<ValueFlagKey, string>> = {
-    endpoint: '.typesafe-jev-1.13_decision',
     repeats: '2',
     concurrency: '4',
     es: 'http://localhost:9200',
@@ -986,14 +985,15 @@ export const main = async (): Promise<void> => {
     process.stdout.write(
       dryRun
         ? 'Dry run: nothing was sent.\n'
-        : 'Nothing was sent: pass --confirm-data-ok to send this synthetic data to QA_ES_URL.\n'
+        : 'Nothing was sent: pass --confirm-data-ok to send this synthetic data to REMOTE_ES_URL.\n'
     );
     return;
   }
-  const url = process.env.QA_ES_URL;
-  const apiKey = process.env.QA_ES_API_KEY;
-  if (!url || !apiKey) throw new Error('QA_ES_URL and QA_ES_API_KEY must be set');
-  if (!url.startsWith('https://')) throw new Error('QA_ES_URL must be an https URL');
+  const url = process.env.REMOTE_ES_URL;
+  const apiKey = process.env.REMOTE_ES_API_KEY;
+  if (!url || !apiKey) throw new Error('REMOTE_ES_URL and REMOTE_ES_API_KEY must be set');
+  if (!url.startsWith('https://')) throw new Error('REMOTE_ES_URL must be an https URL');
+  if (!endpoint) throw new Error('--endpoint <inference endpoint id> is required');
 
   const haiku: Record<string, Map<string, string>> = {};
   if (haikuWindows.length > 0) {

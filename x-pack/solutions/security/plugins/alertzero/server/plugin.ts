@@ -35,6 +35,7 @@ import {
   type DecisionAutoCloseMode,
 } from './alert_triage/constants';
 import {
+  JEV_ENDPOINT_FLAG,
   JEV_FIRST_LINE_FLAG,
   toJevFirstLineMode,
   type JevFirstLineMode,
@@ -152,6 +153,8 @@ export class AlertZeroPlugin
   private decisionAutoCloseFlagSubscription?: Subscription;
   private verdictCacheMode: VerdictCacheMode = 'off';
   private jevFirstLineMode: JevFirstLineMode = 'off';
+  private jevEndpointId = '';
+  private jevEndpointFlagSubscription?: Subscription;
   private verdictCacheFlagSubscription?: Subscription;
   private jevFirstLineFlagSubscription?: Subscription;
   private scanFailuresService?: ScanFailuresService;
@@ -299,6 +302,7 @@ export class AlertZeroPlugin
       getDecisionAutoCloseMode: async () => this.decisionAutoCloseMode,
       getVerdictCacheMode: async () => this.verdictCacheMode,
       getJevFirstLineMode: async () => this.jevFirstLineMode,
+      getJevEndpointId: async () => this.jevEndpointId,
       logger: stepsLogger,
     });
 
@@ -406,6 +410,12 @@ export class AlertZeroPlugin
       .getStringValue$<string>(JEV_FIRST_LINE_FLAG, 'off')
       .subscribe((mode) => {
         this.jevFirstLineMode = toJevFirstLineMode(mode);
+      });
+    // The id of the inference endpoint of the decision model. There is no default: the code names no endpoint.
+    this.jevEndpointFlagSubscription = core.featureFlags
+      .getStringValue$<string>(JEV_ENDPOINT_FLAG, '')
+      .subscribe((endpointId) => {
+        this.jevEndpointId = endpointId.trim();
       });
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
@@ -630,5 +640,6 @@ export class AlertZeroPlugin
     this.decisionAutoCloseFlagSubscription?.unsubscribe();
     this.verdictCacheFlagSubscription?.unsubscribe();
     this.jevFirstLineFlagSubscription?.unsubscribe();
+    this.jevEndpointFlagSubscription?.unsubscribe();
   }
 }

@@ -43,7 +43,9 @@ export interface JevFirstLineStepDependencies {
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
   /** The flag mode. A missing or mistyped value reads as `off`, so it cannot tag or close an alert. */
   getMode: () => Promise<JevFirstLineMode>;
-  getDecide: () => JevDecide;
+  /** The id of the inference endpoint of the decision model, from a feature flag. An empty id means that none is set. */
+  getEndpointId: () => Promise<string>;
+  getDecide: (endpointId: string) => JevDecide;
   /** A port, so that tests do not wait between the retries of a call. */
   pause?: (ms: number) => Promise<void>;
 }
@@ -89,6 +91,7 @@ const defaultPause = (ms: number): Promise<void> =>
 export const getTriageJevFirstLineStepDefinition = ({
   isContextEngineEnabled,
   getMode,
+  getEndpointId,
   getDecide,
   pause = defaultPause,
 }: JevFirstLineStepDependencies) =>
@@ -106,6 +109,14 @@ export const getTriageJevFirstLineStepDefinition = ({
           return result('disabled');
         }
 
+        const endpointId = await getEndpointId();
+        if (endpointId === '') {
+          logger.warn(
+            'The decision model has no endpoint (feature flag alertzero.triageJevEndpointId), so no alert is scored.'
+          );
+          return result('failed');
+        }
+
         const now = new Date();
         const workDeadline = now.getTime() + DECISION_MATCH_WORK_BUDGET_MS;
         const filters = {
@@ -114,7 +125,7 @@ export const getTriageJevFirstLineStepDefinition = ({
           excludedRuleTags: input.excluded_rule_tags,
         };
         const write = tagAlerts(contextManager);
-        const decide = getDecide();
+        const decide = getDecide(endpointId);
         const totals = { ...NOTHING };
         const outOfTime = () => {
           if (Date.now() <= workDeadline) return false;

@@ -92,6 +92,7 @@ const setup = ({
   enabled = true,
   decide = fakeDecide(),
   getDecideThrows = false,
+  endpointId = 'decision-endpoint',
   tagFailsFor,
 }: {
   alerts: Array<[string, Source]>;
@@ -99,6 +100,8 @@ const setup = ({
   enabled?: boolean;
   decide?: jest.Mock<ReturnType<JevDecide>, Parameters<JevDecide>>;
   getDecideThrows?: boolean;
+  /** The endpoint id of the flag. An empty id means that none is set. */
+  endpointId?: string;
   /** A tag call whose first tag is this one fails. */
   tagFailsFor?: string;
 }) => {
@@ -116,13 +119,16 @@ const setup = ({
     }
   );
   const pause = jest.fn(async (_ms: number) => undefined);
+  const endpointsUsed: string[] = [];
   const warn = jest.fn();
   const run = () =>
     getTriageJevFirstLineStepDefinition({
       isContextEngineEnabled: async () => enabled,
       getMode: async () => mode,
-      getDecide: () => {
+      getEndpointId: async () => endpointId,
+      getDecide: (id) => {
         if (getDecideThrows) throw new Error('no client');
+        endpointsUsed.push(id);
         return decide;
       },
       pause,
@@ -143,7 +149,7 @@ const setup = ({
       .filter(([{ path }]) => path.endsWith('/signals/tags'))
       .map(([{ body }]) => body as { ids: string[]; tags: { tags_to_add: string[] } })
       .map(({ ids, tags }) => ({ ids, add: tags.tags_to_add }));
-  return { run, decide, callKibanaApi, tagCalls, pause, warn };
+  return { run, decide, callKibanaApi, tagCalls, pause, warn, endpointsUsed };
 };
 
 describe('triage Jev first line step', () => {
@@ -159,6 +165,31 @@ describe('triage Jev first line step', () => {
       expect(output).toMatchObject({ status: 'off', scored: 0, calls: 0 });
       expect(callKibanaApi).not.toHaveBeenCalled();
       expect(decide).not.toHaveBeenCalled();
+    });
+
+    it('asks for the endpoint of the flag, not for one in the code', async () => {
+      const { run, endpointsUsed } = setup({
+        endpointId: 'my-endpoint',
+        alerts: [['a-1', registryAlert('BENIGN-1')]],
+      });
+
+      await run();
+
+      expect(endpointsUsed).toEqual(['my-endpoint']);
+    });
+
+    it('scores nothing and fails open when no endpoint is set: no alert is read and no tag is written', async () => {
+      const { run, callKibanaApi, decide, warn } = setup({
+        endpointId: '',
+        alerts: [['a-1', registryAlert('BENIGN-1')]],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ status: 'failed', scored: 0, calls: 0 });
+      expect(callKibanaApi).not.toHaveBeenCalled();
+      expect(decide).not.toHaveBeenCalled();
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('alertzero.triageJevEndpointId'));
     });
 
     it('reports `disabled` and scores nothing when the Context Engine is off', async () => {

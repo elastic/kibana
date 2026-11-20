@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { JEV_ENDPOINT_ID } from '../../alert_triage/jev_first_line';
 
 /** Asks the decision model the questions about one text. It returns the answers by name of question. */
 export type JevDecide = (
@@ -20,7 +19,7 @@ export type JevDecide = (
  * privilege. (shortcut: the privilege for the service account is not designed; do it before this runs outside a test.)
  */
 export const makeJevDecide =
-  (esClient: ElasticsearchClient, endpoint: string = JEV_ENDPOINT_ID): JevDecide =>
+  (esClient: ElasticsearchClient, endpoint: string): JevDecide =>
   async (input, questions) => {
     const response = await esClient.transport.request<{
       decision?: { answers?: Record<string, unknown> };

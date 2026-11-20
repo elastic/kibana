@@ -60,6 +60,7 @@ export const registerStepDefinitions = ({
   getDecisionAutoCloseMode,
   getVerdictCacheMode,
   getJevFirstLineMode,
+  getJevEndpointId,
   logger,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -77,6 +78,7 @@ export const registerStepDefinitions = ({
   getDecisionAutoCloseMode: () => Promise<DecisionAutoCloseMode>;
   getVerdictCacheMode: () => Promise<VerdictCacheMode>;
   getJevFirstLineMode: () => Promise<JevFirstLineMode>;
+  getJevEndpointId: () => Promise<string>;
   logger?: Logger;
 }) => {
   workflowsExtensions.registerStepDefinition(
@@ -141,9 +143,10 @@ export const registerStepDefinitions = ({
     getTriageJevFirstLineStepDefinition({
       isContextEngineEnabled,
       getMode: getJevFirstLineMode,
-      getDecide: () => {
+      getEndpointId: getJevEndpointId,
+      getDecide: (endpointId) => {
         if (!getInternalEsClient) throw new Error('No Elasticsearch client for the decision model');
-        return makeJevDecide(getInternalEsClient());
+        return makeJevDecide(getInternalEsClient(), endpointId);
       },
     })
   );
