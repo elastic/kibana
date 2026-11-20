@@ -55,6 +55,10 @@ describe('ResourceManager', () => {
     manager.registerResource('r2', initB);
 
     manager.startInitialization();
+
+    expect(initA.initialize).toHaveBeenCalledTimes(1);
+    expect(initB.initialize).toHaveBeenCalledTimes(1);
+
     await expect(manager.waitForResources(['r1', 'r2'])).resolves.toBeUndefined();
 
     expect(initA.initialize).toHaveBeenCalledTimes(1);
@@ -181,6 +185,7 @@ describe('ResourceManager', () => {
       );
       manager.startInitialization();
 
+      await expect(manager.ensureResourceReady('broken')).rejects.toThrow('broken failure');
       await expect(manager.waitForResources(['needed'])).resolves.toBeUndefined();
     });
 
