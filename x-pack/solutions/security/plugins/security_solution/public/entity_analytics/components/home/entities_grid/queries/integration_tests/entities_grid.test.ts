@@ -218,12 +218,12 @@ const FILTER_CASES: readonly FilterCase[] = [
     ['user:alice@okta', 'user:bob@okta'],
   ],
   [
-    // Unknown is also the absence of a level: host:h3 has none.
+    // Unknown is also the absence of a level: host:h3 has none, service:payments stores Unknown.
     'an unknown risk level filter',
     { entityFilters: { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.Unknown] } },
     'entity.name',
     'asc',
-    ['host:h3'],
+    ['service:payments', 'host:h3'],
   ],
   [
     'an unknown risk level filter with a risk level',
@@ -235,7 +235,7 @@ const FILTER_CASES: readonly FilterCase[] = [
     },
     'entity.name',
     'asc',
-    ['host:h1', 'host:h3'],
+    ['service:payments', 'host:h1', 'host:h3'],
   ],
   [
     // host:h1 is high impact itself, and extreme through one of its aliases.
@@ -589,11 +589,13 @@ describe('entities grid on Elasticsearch', () => {
     it('counts the open alerts in the window per severity, with the last one', async () => {
       expect(await fetchColumnValues('alert_count')).toEqual({
         // The alerts of host:h1 and of its two aliases: host:h4 was last alerted half an hour ago.
+        // That includes a failed login that also names user:bob@okta, which bob does not count.
         'host:h1': {
           ...NO_SEVERITIES,
-          alert_count: 5,
+          alert_count: 6,
           alert_critical: 2,
           alert_high: 2,
+          alert_medium: 1,
           alert_low: 1,
           last_seen_alert: hoursAgo(cluster.now, 0.5),
         },
@@ -615,6 +617,24 @@ describe('entities grid on Elasticsearch', () => {
       });
     });
 
+    it('counts an unstamped failed login for its host, not for the user it names', async () => {
+      const sortArgs: QueryArgs = {
+        ...BASE_ARGS,
+        sort: { field: 'alert_count', direction: 'desc' },
+      };
+      const getBobCount = (rows: Row[]) =>
+        rows.find((row) => row['entity.id'] === 'user:bob@okta')?.alert_count;
+
+      const enriched = await fetchColumnValues('alert_count');
+      const sorted = await fetchPage(cluster.runQuery, sortArgs);
+      const sortedAll = await cluster.runQuery(buildAlertSortAllQuery(sortArgs));
+
+      expect(enriched['host:h1']).toMatchObject({ alert_medium: 1 });
+      expect(enriched['user:bob@okta']).toEqual(NO_ALERTS);
+      expect(getBobCount(sorted)).toBeNull();
+      expect(getBobCount(sortedAll)).toBeNull();
+    });
+
     it('counts the anomaly records of the installed jobs, in a group those of its members', async () => {
       expect(await fetchColumnValues('anomaly_count')).toEqual({
         'host:h1': { anomaly_count: 1 },
@@ -628,7 +648,7 @@ describe('entities grid on Elasticsearch', () => {
 
     it('counts the alerts and anomalies of an entity alone in individual rows', async () => {
       expect(await fetchColumnValues('alert_count', 'individual')).toMatchObject({
-        'host:h1': { alert_count: 3 },
+        'host:h1': { alert_count: 4 },
         'host:h4': { alert_count: 1 },
         'host:h5': { alert_count: 1 },
       });

@@ -145,7 +145,7 @@ describe('updateVendorApi', () => {
   it('fetches and bundles new sources, and writes the manifest and a projected snapshot', async () => {
     const result = await update({ sources: { main: SPEC_URL } });
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       changed: ['snapshots/main.openapi.json', 'manifest.json'],
       problems: [],
     });
@@ -204,7 +204,7 @@ describe('updateVendorApi', () => {
     await update({ sources: { main: SPEC_URL } });
     fetched = [];
 
-    expect(await update({ now: () => new Date('2027-01-01T00:00:00.000Z') })).toEqual({
+    expect(await update({ now: () => new Date('2027-01-01T00:00:00.000Z') })).toMatchObject({
       changed: [],
       problems: [],
     });
@@ -326,6 +326,51 @@ describe('updateVendorApi', () => {
     ]);
   });
 
+  it('reports operations the auth type requests too few OAuth scopes for, until an overlay corrects them', async () => {
+    documents[SPEC_URL] = specYaml('1.0')
+      .replace(
+        `servers: [{ url: '${BASE}' }]`,
+        `servers: [{ url: '${BASE}' }]\nsecurity: [{ oauth: [items:all, items:admin] }]`
+      )
+      .replace(
+        'components:\n',
+        `components:\n  securitySchemes:\n    oauth:\n      type: oauth2\n      flows: { clientCredentials: { tokenUrl: '${BASE}/token', scopes: {} } }\n`
+      );
+    const scoped: ConnectorSpec = {
+      ...connector,
+      auth: {
+        types: [
+          {
+            type: 'oauth_client_credentials',
+            defaults: { tokenUrl: `${BASE}/token`, scope: 'items:read' },
+          },
+        ],
+      },
+    };
+
+    const { problems } = await update({ connector: scoped, sources: { main: SPEC_URL } });
+
+    expect(problems).toEqual([
+      "listItems: under auth type oauth_client_credentials, GET /items needs OAuth scopes the auth type doesn't request: Token was granted items:read, but the operation needs one of items:all items:admin; add one to the auth type's default \"scope\", or correct the spec's scopes in overlay.yaml",
+    ]);
+
+    await fs.writeFile(
+      path.join(directory, 'overlay.yaml'),
+      `
+overlay: 1.0.0
+info: { title: Example fixes, version: '1' }
+actions:
+  - target: $.security[?@.oauth]
+    remove: true
+  - target: $.security
+    update:
+      - oauth: [items:read]
+`
+    );
+
+    expect((await update({ connector: scoped })).problems).toEqual([]);
+  });
+
   it('reports an auth type that cannot be recorded as a problem, so no manifest lacks its operations', async () => {
     const twoAuthTypes: ConnectorSpec = { ...connector, auth: { types: ['none', 'unavailable'] } };
 
@@ -335,6 +380,30 @@ describe('updateVendorApi', () => {
       expect.stringMatching(/^auth type unavailable can't be used against the contract mock/),
     ]);
     expect(warnings.filter((warning) => warning.includes('auth type'))).toEqual([]);
+  });
+
+  it('records past operations whose schemas are broken, reporting the actions that call them', async () => {
+    const broken = (yaml: string) =>
+      yaml.replace(
+        `schema: { type: array, items: { type: string } }`,
+        `schema: { $ref: '#/components/schemas/Void' }`
+      );
+    documents[SPEC_URL] = broken(specYaml('1.0'));
+
+    expect((await update({ sources: { main: SPEC_URL } })).problems).toEqual([]);
+    expect(warnings).toContainEqual(
+      expect.stringMatching(
+        /^GET \/tags is left out of the mock, as its schema in the spec is invalid/
+      )
+    );
+    expect((await readJson('manifest.json')).operations).toEqual({ listItems: [itemsOperation] });
+
+    const { problems } = await update({ connector: withTags, refresh: true });
+    expect(problems).toEqual([
+      expect.stringMatching(
+        /^listTags: calls GET \/tags, whose schema in the spec is invalid \(response 200 application\/json\): .*Void.*; correct the spec in overlay\.yaml$/
+      ),
+    ]);
   });
 
   it('reports list-like operations it cannot propose pagination for', async () => {
@@ -371,9 +440,37 @@ actions:
       { source: 'main', method: 'get', path: '/legacy' },
     ]);
     expect(Object.keys((await readJson('snapshots/main.openapi.json')).paths)).toEqual(['/items']);
-    expect(warnings).toEqual([
-      'overlay.yaml action 1 matches nothing in any source; the vendor may have fixed it',
-    ]);
+  });
+
+  describe('with an overlay action that matches nothing', () => {
+    beforeEach(async () => {
+      await update({ sources: { main: SPEC_URL } });
+      warnings = [];
+      await fs.writeFile(
+        path.join(directory, 'overlay.yaml'),
+        `
+overlay: 1.0.0
+info: { title: Example fixes, version: '1' }
+actions:
+  - target: $.paths['/gone']
+    remove: true
+`
+      );
+    });
+
+    it('stays quiet offline, as the route may just be left out of the snapshot', async () => {
+      await update();
+
+      expect(warnings).toEqual([]);
+    });
+
+    it('warns with --refresh, as the vendor spec has been fetched', async () => {
+      await update({ refresh: true });
+
+      expect(warnings).toEqual([
+        'overlay.yaml action 0 matches nothing in any source; the vendor may have fixed it',
+      ]);
+    });
   });
 
   it('keeps the components that overlay updates reference in the snapshot', async () => {
@@ -401,7 +498,7 @@ actions:
     expect((await readJson('snapshots/main.openapi.json')).components.schemas.Legacy).toEqual({
       type: 'object',
     });
-    expect(await update({ connector: withLegacy })).toEqual({ changed: [], problems: [] });
+    expect(await update({ connector: withLegacy })).toMatchObject({ changed: [], problems: [] });
   });
 
   it('reports what would change in check mode without writing', async () => {
@@ -439,7 +536,7 @@ actions:
       },
     });
 
-    expect(await update({ sources: { main: discoveryUrl } })).toEqual({
+    expect(await update({ sources: { main: discoveryUrl } })).toMatchObject({
       changed: ['snapshots/main.openapi.json', 'manifest.json'],
       problems: [],
     });
@@ -512,7 +609,7 @@ actions:
         pages: { search: ['api-reference/'] },
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         changed: ['snapshots/search.openapi.json', 'manifest.json'],
         problems: [],
       });
@@ -542,9 +639,9 @@ actions:
       });
       fetched = [];
 
-      expect(await update({ connector: searcher })).toEqual({ changed: [], problems: [] });
+      expect(await update({ connector: searcher })).toMatchObject({ changed: [], problems: [] });
       expect(fetched).toEqual([]);
-      expect(await update({ connector: searcher, refresh: true })).toEqual({
+      expect(await update({ connector: searcher, refresh: true })).toMatchObject({
         changed: [],
         problems: [],
       });

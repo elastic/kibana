@@ -103,6 +103,14 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
 
       await discover.createEsqlControl(LOGSTASH_QUERY_START);
       await discover.waitUntilTabIsLoaded();
+
+      // CN can already be the default selection, so pin a different baseline before saving.
+      const baselineControlId = await controls.getOnlyControlId();
+      await controls.optionsList.openPopover(baselineControlId);
+      await controls.optionsList.selectOption('US');
+      await controls.optionsList.ensurePopoverIsClosed();
+      await discover.waitUntilTabIsLoaded();
+
       await discover.saveSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
       await expect(controls.group).toBeVisible();
@@ -113,6 +121,8 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await expect(controls.frames).toHaveCount(1);
 
       const controlId = await controls.getOnlyControlId();
+      await expect(controls.optionsList.getSelectionsLocator(controlId)).toHaveText('US');
+
       await controls.optionsList.openPopover(controlId);
       await controls.optionsList.selectOption('CN');
       await discover.waitUntilTabIsLoaded();

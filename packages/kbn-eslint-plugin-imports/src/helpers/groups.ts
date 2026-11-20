@@ -9,6 +9,27 @@
 
 import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 import type { ModuleId } from '@kbn/repo-source-classifier';
+import { CORE_PRIVATE_IMPORTERS } from './core_private_importers';
+
+export type ImportViolation = 'CORE_PRIVATE_IMPORT' | 'ILLEGAL_IMPORT';
+
+const isInCore = ({ repoRel }: ModuleId): boolean => repoRel.startsWith('src/core/');
+
+const isCorePrivateImport = (from: ModuleId, imported: ModuleId): boolean =>
+  imported.visibility === 'private' && isInCore(imported) && !isInCore(from);
+
+/**
+ * Returns why `from` may not import `imported`, or undefined if the import is allowed
+ */
+export const getImportViolation = (
+  from: ModuleId,
+  imported: ModuleId
+): ImportViolation | undefined => {
+  if (isCorePrivateImport(from, imported) && !CORE_PRIVATE_IMPORTERS.has(from.repoRel)) {
+    return 'CORE_PRIVATE_IMPORT';
+  }
+  return isImportableFrom(from, imported.group, imported.visibility) ? undefined : 'ILLEGAL_IMPORT';
+};
 
 /**
  * Checks whether a given ModuleGroup can import from another one

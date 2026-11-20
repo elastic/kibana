@@ -28,6 +28,7 @@ const createAction = (
 ): EpisodeAction => ({
   displayName: overrides.id,
   iconType: 'star',
+  enforcesOwnPrivileges: false,
   isCompatible: () => true,
   execute: jest.fn(async () => {}),
   ...overrides,

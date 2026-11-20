@@ -203,8 +203,8 @@ export class VectorStyle implements IVectorStyle {
     return {
       type: LAYER_STYLE_TYPE.VECTOR,
       properties: { ...getDefaultStaticProperties(), ...properties },
-      isTimeAware,
-    } as NormalizedVectorStyleDescriptor;
+      is_time_aware: isTimeAware,
+    };
   }
 
   static createDefaultStyleProperties(mapColors: string[]) {
@@ -224,7 +224,7 @@ export class VectorStyle implements IVectorStyle {
     this._descriptor = descriptor
       ? {
           ...descriptor,
-          ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware),
+          ...VectorStyle.createDescriptor(descriptor.properties, descriptor.is_time_aware),
         }
       : VectorStyle.createDescriptor();
 
@@ -551,7 +551,7 @@ export class VectorStyle implements IVectorStyle {
   }
 
   isTimeAware() {
-    return this._descriptor.isTimeAware ?? true;
+    return this._descriptor.is_time_aware ?? true;
   }
 
   getPropertiesDescriptor(): NormalizedVectorStyleDescriptor['properties'] {
@@ -698,7 +698,7 @@ export class VectorStyle implements IVectorStyle {
 
   isUsingCustomIcon(symbolId: string) {
     if (this._icon.isDynamic()) {
-      const { customIconStops } = this._icon.getOptions() as IconDynamicOptions;
+      const { custom_icon_stops: customIconStops } = this._icon.getOptions() as IconDynamicOptions;
       return customIconStops ? customIconStops.some(({ icon }) => icon === symbolId) : false;
     }
     const { value } = this._icon.getOptions() as IconStaticOptions;
@@ -1020,11 +1020,11 @@ export class VectorStyle implements IVectorStyle {
       );
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const options = { ...descriptor.options } as IconDynamicOptions;
-      if (options.customIconStops) {
-        options.customIconStops.forEach((iconStop) => {
+      if (options.custom_icon_stops) {
+        options.custom_icon_stops.forEach((iconStop) => {
           const meta = this._getIconMeta(iconStop.icon);
           if (meta) {
-            (iconStop.iconSource as Writable<IconStop['iconSource']>) = meta.iconSource;
+            (iconStop.icon_source as Writable<IconStop['icon_source']>) = meta.iconSource;
           }
         });
       }

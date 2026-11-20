@@ -139,6 +139,8 @@ import {
 } from '../../../../../hooks';
 import { isAgentlessPoliciesUIEnabled } from '../../../../../services';
 
+import { useChangelog } from '../hooks';
+
 import { SettingsPage } from './settings';
 
 const mockUseGetPackageInstallStatus = useGetPackageInstallStatus as jest.Mock;
@@ -639,6 +641,37 @@ describe('SettingsPage', () => {
         });
         expect(mockMutateAsync).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('breaking changes range', () => {
+    afterEach(() => {
+      jest.mocked(useGetPackagePoliciesQuery).mockReturnValue({ data: { items: [] } } as any);
+    });
+
+    it('should compute the breaking changes from the oldest package policy version', () => {
+      mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+        status: InstallStatus.installed,
+        version: '1.3.0',
+      }));
+      mockUseAuthz.mockReturnValue({
+        fleet: { readSettings: true },
+        integrations: { installPackages: true, writePackageSettings: true },
+      });
+      jest.mocked(useGetPackagePoliciesQuery).mockReturnValue({
+        data: {
+          items: [
+            { id: 'policy-1', policy_ids: [], package: { name: 'nginx', version: '1.1.0' } },
+            { id: 'policy-2', policy_ids: [], package: { name: 'nginx', version: '1.0.0' } },
+            { id: 'policy-3', policy_ids: [], package: { name: 'nginx', version: '1.3.0' } },
+          ],
+        },
+      } as any);
+
+      renderComponent({ ...basePackageInfo, latestVersion: '2.0.0' });
+
+      expect(useChangelog).toHaveBeenCalledWith('nginx', '2.0.0', '1.3.0');
+      expect(useChangelog).toHaveBeenCalledWith('nginx', '2.0.0', '1.0.0');
     });
   });
 });

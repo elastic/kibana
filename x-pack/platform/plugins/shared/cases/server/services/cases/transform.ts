@@ -184,8 +184,15 @@ export function transformESModelToCase(
 
   const externalService = transformESExternalService(caseData.external_service, references);
 
-  const { total_alerts, total_comments, total_events, extended_fields, ...caseAttributes } =
-    caseData;
+  const {
+    total_alerts,
+    total_comments,
+    total_events,
+    extended_fields,
+    // Server-owned: stored for telemetry and never part of the API response.
+    extract_observables_source: _extractObservablesSource,
+    ...caseAttributes
+  } = caseData;
 
   const severity = SEVERITY_ESMODEL_TO_EXTERNAL[caseAttributes.severity] ?? CaseSeverity.LOW;
   const status = STATUS_ESMODEL_TO_EXTERNAL[caseAttributes.status] ?? CaseStatuses.open;

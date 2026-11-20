@@ -56,6 +56,7 @@ export type RelayClaimResponse =
 
 export interface RelayCallbackResponse {
   status: number;
+  headers: Headers;
 }
 
 /**
@@ -92,6 +93,17 @@ export interface RelayBindingsPage {
   bindings: RelayBinding[];
   /** Present when more pages remain; pass back as `cursor` to fetch the next page. */
   nextCursor?: string;
+}
+
+export interface RelayAvailableChannel {
+  scope_id: string;
+  display_name: string;
+}
+
+export interface RelayAvailableChannelsPage {
+  channels: RelayAvailableChannel[];
+  /** True when the Relay stopped listing early, so some channels are missing. */
+  truncated: boolean;
 }
 
 /**
@@ -137,6 +149,11 @@ export interface RelayReadMessagesInput {
   limit?: number;
 }
 
+/** A single thread (`GET .../channels/:id/threads/:ts`); the whole thread unless narrowed. */
+export interface RelayReadThreadInput extends RelayReadMessagesInput {
+  threadTs: string;
+}
+
 export interface RelayReadMessage {
   ts: string;
   threadTs?: string;
@@ -148,7 +165,7 @@ export interface RelayReadMessage {
 
 export interface RelayReadResponse {
   channel: { id: string; name: string };
-  /** Newest first. */
+  /** Channel reads come newest first, thread reads oldest first. */
   messages: RelayReadMessage[];
   /** Slack has more in the window, or the Relay clipped the response at its size cap. */
   truncated: boolean;
@@ -171,6 +188,8 @@ export interface RelayClientContract {
    * read subsequent pages of the cursor-paginated endpoint.
    */
   listBindings(tenantKey: string, options?: RelayListBindingsOptions): Promise<RelayBindingsPage>;
+  /** Public channels the bot is in that no deployment has bound. 429 if Slack throttled the listing. */
+  listAvailableChannels(tenantKey: string): Promise<RelayAvailableChannelsPage>;
   /** Claim an unclaimed channel for this deployment (put-if-absent; 409 if already claimed). */
   bind(tenantKey: string, channelId: string): Promise<void>;
   /** Release a channel binding owned by this deployment (404 if none; 403 if owned by another). */
@@ -179,6 +198,8 @@ export interface RelayClientContract {
   trigger(input: RelayTriggerInput): Promise<RelayTriggerResponse>;
   /** Read a window of a bound public channel. 403 `not_readable` on any denial; 429 if Slack throttled it. */
   readMessages(input: RelayReadMessagesInput): Promise<RelayReadResponse>;
+  /** Read one thread of a bound public channel. Fails like `readMessages`. */
+  readThread(input: RelayReadThreadInput): Promise<RelayReadResponse>;
   isRelayOrigin(url: string): boolean;
   postCallback(url: string, body: unknown, signal: AbortSignal): Promise<RelayCallbackResponse>;
 }

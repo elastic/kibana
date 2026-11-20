@@ -12,11 +12,11 @@ import {
   aiAssistantSearchConnectorIndexPattern,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import { useEditableSettings } from '@kbn/management-settings-hooks';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { LogSourcesSettingSynchronisationInfo } from '@kbn/logs-data-access-plugin/public';
 import type { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
-import { useEditableSettings } from '../../../hooks/use_editable_settings';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { BottomBarActions } from '../bottom_bar_actions/bottom_bar_actions';
@@ -36,14 +36,16 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
   ];
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings(settingsKeys);
+    useEditableSettings({ settingsKeys, settingsClient: settings.client });
 
   const canEditAdvancedSettings = capabilities.advancedSettings?.save;
 
   async function handleSave() {
     try {
-      await saveAll();
-      window.location.reload();
+      const { requiresReload } = await saveAll();
+      if (requiresReload) {
+        window.location.reload();
+      }
     } catch (e) {
       const error = e as Error;
       notifications.toasts.addDanger({

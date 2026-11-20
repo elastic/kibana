@@ -31,7 +31,7 @@ Elasticsearch URL
 **Elasticsearch API key (recommended)**
 
 API Key
-:   The encoded API key value, in the form `ApiKey <encoded>` where `<encoded>` is the base64-encoded `id:api_key` string from the [create API key](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-api-key) response (`POST /_security/api_key`). Grant the key at minimum: `read` privilege on the indices you search.
+:   The encoded API key value, which is the base64-encoded `id:api_key` string from the [create API key](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-api-key) response (`POST /_security/api_key`). Grant the key at minimum: `read` privilege on the indices you search.
 
 **Username and password**
 
@@ -76,7 +76,7 @@ The Elasticsearch connector has the following actions:
 3. Give the key a name and, under **Control security privileges**, grant at minimum:
    - `read` indices privilege on the index patterns you intend to search.
 4. Click **Create API key**, then copy the **Encoded** value.
-5. Enter the Elasticsearch endpoint URL and the encoded key (prefixed with `ApiKey `, for example `ApiKey dGhpcyBpcyBhIHRlc3Q=`) when configuring the connector in {{kib}}.
+5. Enter the Elasticsearch endpoint URL and the encoded key when configuring the connector in {{kib}}.
 
 Alternatively, create the key via the API:
 
@@ -98,7 +98,7 @@ POST /_security/api_key
 }
 ```
 
-Use the `encoded` field from the response as the **API Key** value, prepended with `ApiKey `.
+Use the `encoded` field from the response as the **API Key** value.
 
 **Username and password (self-managed clusters)**
 

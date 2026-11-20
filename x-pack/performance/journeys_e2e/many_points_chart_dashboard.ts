@@ -19,7 +19,6 @@ export const journey = setupDashboardJourney({
     esArchives: ['x-pack/performance/es_archives/million_integers'],
     kbnArchives: ['x-pack/performance/kbn_archives/many_points_dashboard.json'],
   }),
-  dashboardName: 'Many points',
-  dashboardLinkSubj: 'dashboardListingTitleLink-Many-points',
+  dashboardTitle: 'Many points',
   visualizationCount: 1,
 });
