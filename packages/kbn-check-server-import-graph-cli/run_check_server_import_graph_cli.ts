@@ -10,7 +10,7 @@
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 
-import { BANNED_NODE_MODULES, checkServerImportGraph } from './src/check_server_import_graph';
+import { checkServerImportGraph } from './src/check_server_import_graph';
 
 run(
   async ({ log, flagsReader }) => {
