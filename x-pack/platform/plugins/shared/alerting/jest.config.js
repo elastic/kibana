@@ -10,6 +10,7 @@ module.exports = {
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/alerting'],
   testPathIgnorePatterns: [
+    '<rootDir>/x-pack/platform/plugins/shared/alerting/server/integration_tests/',
     '<rootDir>/x-pack/platform/plugins/shared/alerting/server/registry_checks/',
   ],
   coverageDirectory:

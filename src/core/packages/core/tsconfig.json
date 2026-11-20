@@ -178,7 +178,8 @@
     "@kbn/core-pricing-browser",
     "@kbn/core-pricing-server-internal",
     "@kbn/core-pricing-common",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/repo-packages"
   ],
   "exclude": ["target/**/*"]
 }

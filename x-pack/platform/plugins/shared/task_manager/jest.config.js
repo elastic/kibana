@@ -10,6 +10,7 @@ module.exports = {
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/task_manager'],
   testPathIgnorePatterns: [
+    '<rootDir>/x-pack/platform/plugins/shared/task_manager/server/integration_tests/',
     '<rootDir>/x-pack/platform/plugins/shared/task_manager/server/registry_checks/',
   ],
   coverageDirectory:
