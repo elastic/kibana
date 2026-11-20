@@ -98,3 +98,4 @@ export { ThreatQ } from './specs/threatq/threatq';
 export * from './specs/azure_sql/azure_sql';
 export * from './specs/solarwinds_platform/solarwinds_platform';
 export { SSF } from './specs/ssf/ssf';
+export * from './specs/microsoft_defender_for_endpoint/microsoft_defender_for_endpoint';
