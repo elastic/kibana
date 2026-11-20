@@ -61,6 +61,7 @@ const MODE_CUSTOM = 'custom';
 const MODE_NONE = 'none';
 
 type SelectionMode = typeof MODE_ALL | typeof MODE_CUSTOM | typeof MODE_NONE;
+export type ConnectorActionSelectionMode = SelectionMode;
 
 const MODE_OPTIONS: Array<{ id: SelectionMode; label: string }> = [
   {
@@ -86,6 +87,8 @@ const MODE_OPTIONS: Array<{ id: SelectionMode; label: string }> = [
 export interface ConnectorActionSelectorProps {
   value: string[] | null;
   onChange: (value: string[] | null) => void;
+  /** Called when the user picks All, Custom, or None. */
+  onModeChange?: (mode: ConnectorActionSelectionMode) => void;
   actions: ConnectorActionDef[];
   readOnly?: boolean;
   /** Shows a None mode that saves an empty selection, turning every action off. */
@@ -97,6 +100,7 @@ export interface ConnectorActionSelectorProps {
 export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = ({
   value: rawSelected,
   onChange,
+  onModeChange,
   actions,
   readOnly = false,
   allowNone = false,
@@ -222,8 +226,9 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
       } else {
         onChange(previousSpecificRef.current ?? defaultReadActionNames);
       }
+      onModeChange?.(nextMode);
     },
-    [onChange, rawSelected, defaultReadActionNames]
+    [onChange, onModeChange, rawSelected, defaultReadActionNames]
   );
 
   const handleSelectionChange = useCallback(

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { lazy, useEffect, useMemo, useRef } from 'react';
+import React, { lazy, useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionType } from '@kbn/actions-types';
 import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
@@ -23,10 +23,14 @@ import type { ConnectorZodSchema } from '@kbn/connector-specs';
 import { getMeta, setMeta } from '@kbn/connector-specs';
 import {
   UseField,
+  useFormContext,
   useFormData,
   type FieldHook,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { ConnectorActionSelector } from '../components/connector_action_selector';
+import {
+  ConnectorActionSelector,
+  type ConnectorActionSelectionMode,
+} from '../components/connector_action_selector';
 import type {
   ConnectorActionDef,
   ConnectorSpecResponse,
@@ -150,6 +154,10 @@ export function transformSpecToActionTypeModel(
       const specActions = spec.actions ?? [];
       // Connectors that receive inbound events stay useful with every action turned off.
       const allowNoActions = registeredSpec !== undefined && connectorSpecHasEvents(registeredSpec);
+      // First auth type that carries credentials, used when actions are turned back on.
+      const credentialedAuthTypeId = (registeredSpec?.auth?.types ?? [])
+        .map((authTypeDef) => (typeof authTypeDef === 'string' ? authTypeDef : authTypeDef.type))
+        .find((authTypeId) => authTypeId !== NO_AUTH_TYPE_ID);
 
       // Bridges UseField's FieldHook API to ConnectorActionSelector's value/onChange props.
       const ConnectorActionSelectorField = ({
@@ -166,31 +174,34 @@ export function transformSpecToActionTypeModel(
         });
         const authType = secrets?.authType;
         const previousAuthTypeRef = useRef(authType);
-        const { value, setValue } = field;
+        const { setFieldValue } = useFormContext();
+        const { setValue } = field;
 
-        // No authentication can only receive events, so it turns every action off.
-        // Leaving it turns them back on.
+        // No authentication can only receive events, so choosing it turns every action off.
+        // Choosing another auth type leaves the actions as they are.
         useEffect(() => {
           const previousAuthType = previousAuthTypeRef.current;
           previousAuthTypeRef.current = authType;
-          if (!allowNoActions || previousAuthType === authType) {
-            return;
-          }
-          if (authType === NO_AUTH_TYPE_ID) {
+          if (allowNoActions && previousAuthType !== authType && authType === NO_AUTH_TYPE_ID) {
             setValue([]);
-          } else if (
-            previousAuthType === NO_AUTH_TYPE_ID &&
-            Array.isArray(value) &&
-            value.length === 0
-          ) {
-            setValue(null);
           }
-        }, [authType, setValue, value]);
+        }, [authType, setValue]);
+
+        // Turning actions back on needs credentials, so it moves off No authentication.
+        const handleModeChange = useCallback(
+          (mode: ConnectorActionSelectionMode) => {
+            if (mode !== 'none' && authType === NO_AUTH_TYPE_ID && credentialedAuthTypeId) {
+              setFieldValue('secrets.authType', credentialedAuthTypeId);
+            }
+          },
+          [authType, setFieldValue]
+        );
 
         return (
           <ConnectorActionSelector
             value={field.value ?? null}
             onChange={field.setValue}
+            onModeChange={handleModeChange}
             actions={actions}
             readOnly={readOnly}
             allowNone={allowNoActions}
