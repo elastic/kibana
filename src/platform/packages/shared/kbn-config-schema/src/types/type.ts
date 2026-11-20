@@ -80,10 +80,10 @@ export interface SchemaStructureEntry {
 
 export interface GetSchemaStructureOptions {
   /**
-   * List the nested keys inside conditional schemas (`schema.conditional`, `offeringBasedSchema`)
-   * instead of reporting the conditional as a single leaf.
+   * List the nested keys inside schemas with several branches (`schema.conditional`, `offeringBasedSchema`,
+   * `schema.oneOf`, `schema.nullable`, `schema.discriminatedUnion`) instead of reporting them as a single leaf.
    */
-  expandConditionals?: boolean;
+  expandBranches?: boolean;
 }
 
 /**
@@ -331,8 +331,8 @@ function recursiveGetSchemaStructure(
     array.push(...recursiveGetSchemaStructure(val.schema, [...path, key], options));
   }
 
-  if (!array.length && options.expandConditionals) {
-    array.push(...getConditionalBranchesStructure(internalSchema, path, options));
+  if (!array.length && options.expandBranches) {
+    array.push(...getBranchesStructure(internalSchema, path, options));
   }
 
   if (!array.length) {
@@ -352,22 +352,48 @@ function recursiveGetSchemaStructure(
   return array;
 }
 
+interface SchemaBranchTerm {
+  schema?: SchemaLike;
+  then?: SchemaLike;
+  otherwise?: SchemaLike;
+  switch?: SchemaBranchTerm[];
+}
+
 /**
- * Merges the nested keys of every branch of a conditional schema (`schema.conditional`, `offeringBasedSchema`).
+ * Collects the branch schemas of `when` conditions (`schema.conditional`, `offeringBasedSchema`) and of
+ * alternatives (`schema.oneOf`, `schema.nullable`, `schema.discriminatedUnion`).
+ */
+function getBranchSchemas(internalSchema: Schema): Schema[] {
+  const terms = (internalSchema as any).$_terms ?? {};
+  const branchTerms: SchemaBranchTerm[] = [...(terms.whens ?? []), ...(terms.matches ?? [])];
+  const collect = ({
+    schema,
+    then,
+    otherwise,
+    switch: cases = [],
+  }: SchemaBranchTerm): Array<SchemaLike | undefined> => [
+    schema,
+    then,
+    otherwise,
+    ...cases.flatMap(collect),
+  ];
+  return branchTerms.flatMap(collect).filter((branch): branch is Schema => isSchema(branch));
+}
+
+/**
+ * Merges the nested keys of every branch of a conditional or alternatives schema.
  *
  * Returns an empty array when no branch has nested keys, so the caller falls back to a single leaf entry.
  * A key gets `never` added to its type when one of the branches cannot hold it. A leaf branch that can hold a
  * value (such as a record) keeps its own entry at the parent path, so it stays distinct from the nested keys.
+ * A `null` or `never` leaf branch holds no value, so it only adds `never` to the nested keys.
  */
-function getConditionalBranchesStructure(
+function getBranchesStructure(
   internalSchema: Schema,
   path: string[],
   options: GetSchemaStructureOptions
 ): SchemaStructureEntry[] {
-  const whens: WhenOptions[] = (internalSchema as any).$_terms?.whens ?? [];
-  const branches = whens
-    .flatMap(({ then, otherwise }) => [then, otherwise])
-    .filter((branch): branch is Schema => isSchema(branch));
+  const branches = getBranchSchemas(internalSchema);
 
   const objectBranches: SchemaStructureEntry[][] = [];
   const leafTypes: string[] = [];
@@ -397,7 +423,9 @@ function getConditionalBranchesStructure(
     }
   }
 
-  const valueLeafTypes = [...new Set(leafTypes.filter((type) => type !== 'never'))];
+  const valueLeafTypes = [
+    ...new Set(leafTypes.filter((type) => type !== 'never' && type !== 'null')),
+  ];
   const parentEntries: SchemaStructureEntry[] = valueLeafTypes.length
     ? [{ path, type: valueLeafTypes.join('|') }]
     : [];

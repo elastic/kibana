@@ -989,7 +989,7 @@ test('returns schema structure', () => {
   ]);
 });
 
-describe('schema structure with expandConditionals', () => {
+describe('schema structure with expandBranches', () => {
   const objSchema = schema.object({
     plain: schema.boolean({ defaultValue: true }),
     serverlessOnly: offeringBasedSchema({
@@ -1020,7 +1020,7 @@ describe('schema structure with expandConditionals', () => {
   });
 
   test('lists the nested keys of every conditional branch', () => {
-    expect(objSchema.getSchemaStructure({ expandConditionals: true })).toEqual([
+    expect(objSchema.getSchemaStructure({ expandBranches: true })).toEqual([
       { path: ['plain'], type: 'boolean?' },
       { path: ['serverlessOnly', 'enabled'], type: 'boolean?|never' },
       { path: ['serverlessOnly', 'nested', 'url'], type: 'string?|never' },
@@ -1040,7 +1040,7 @@ describe('schema structure with expandConditionals', () => {
       ),
     });
 
-    expect(recordOrObject.getSchemaStructure({ expandConditionals: true })).toEqual([
+    expect(recordOrObject.getSchemaStructure({ expandBranches: true })).toEqual([
       { path: ['settings'], type: 'record' },
       { path: ['settings', 'enabled'], type: 'boolean|never' },
     ]);
@@ -1056,9 +1056,53 @@ describe('schema structure with expandConditionals', () => {
       ),
     });
 
-    expect(dottedKeys.getSchemaStructure({ expandConditionals: true })).toEqual([
+    expect(dottedKeys.getSchemaStructure({ expandBranches: true })).toEqual([
       { path: ['dotted', 'ui.enabled'], type: 'boolean|never' },
       { path: ['dotted', 'ui', 'enabled'], type: 'string|never' },
+    ]);
+  });
+
+  test('lists the nested keys of every oneOf branch', () => {
+    const oneOfSchema = schema.object({
+      setting: schema.oneOf([
+        schema.object({ enabled: schema.boolean(), url: schema.string() }),
+        schema.object({ enabled: schema.boolean() }),
+        schema.string(),
+      ]),
+    });
+
+    expect(oneOfSchema.getSchemaStructure()).toEqual([
+      { path: ['setting'], type: 'object?|string' },
+    ]);
+    expect(oneOfSchema.getSchemaStructure({ expandBranches: true })).toEqual([
+      { path: ['setting'], type: 'string' },
+      { path: ['setting', 'enabled'], type: 'boolean|never' },
+      { path: ['setting', 'url'], type: 'string|never' },
+    ]);
+  });
+
+  test('lists the nested keys of a nullable object without a parent null entry', () => {
+    const nullableSchema = schema.object({
+      setting: schema.nullable(schema.object({ enabled: schema.boolean() })),
+    });
+
+    expect(nullableSchema.getSchemaStructure({ expandBranches: true })).toEqual([
+      { path: ['setting', 'enabled'], type: 'boolean|never' },
+    ]);
+  });
+
+  test('lists the nested keys of every discriminatedUnion case', () => {
+    const unionSchema = schema.object({
+      auth: schema.discriminatedUnion('type', [
+        schema.object({ type: schema.literal('basic'), username: schema.string() }),
+        schema.object({ type: schema.literal('token'), token: schema.string() }),
+      ]),
+    });
+
+    expect(unionSchema.getSchemaStructure({ expandBranches: true })).toEqual([
+      { path: ['auth', 'type'], type: 'basic|token' },
+      { path: ['auth', 'username'], type: 'string|never' },
+      { path: ['auth', 'token'], type: 'string|never' },
     ]);
   });
 });

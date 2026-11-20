@@ -49,7 +49,7 @@ export function getExposedConfigKeys<T = unknown>(
   if (!exposeToBrowser) {
     return {};
   }
-  const schemaStructure = schema.getSchemaStructure({ expandConditionals: true });
+  const schemaStructure = schema.getSchemaStructure({ expandBranches: true });
   const flattenedConfigSchema: Record<string, string> = {};
   for (const { path, type } of schemaStructure) {
     if (checkIsPathExposed(path, exposeToBrowser)) {

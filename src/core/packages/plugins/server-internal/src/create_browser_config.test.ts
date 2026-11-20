@@ -221,4 +221,28 @@ describe('createBrowserConfig and getExposedConfigKeys', () => {
       exposedConfigKeys: { 'offering.exposed1': 'boolean?|never' },
     });
   });
+
+  it('lists keys nested inside oneOf schemas', () => {
+    const configSchema = schema.object({
+      oneOf: schema.oneOf([
+        schema.object({ exposed1: schema.string(), notExposed2: schema.string() }),
+        schema.object({ exposed1: schema.number() }),
+      ]),
+    });
+    const descriptor: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
+      schema: configSchema,
+      exposeToBrowser: {
+        oneOf: { exposed1: true },
+      },
+    };
+
+    const result = getBrowserConfigAndExposedKeys(
+      { oneOf: { exposed1: '1', notExposed2: '2' } },
+      descriptor
+    );
+    expect(result).toEqual({
+      browserConfig: { oneOf: { exposed1: '1' } },
+      exposedConfigKeys: { 'oneOf.exposed1': 'string|number' },
+    });
+  });
 });
