@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ScoutPage } from '@kbn/scout';
 import { findImportedSavedObjectId, spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
@@ -16,6 +17,18 @@ import {
 } from '../constants';
 
 let fewPanelsDashboardId = '';
+
+/**
+ * Kibana picks Cmd or Ctrl from the browser's platform, which can differ from the host OS that
+ * `ControlOrMeta` is resolved against, and selection only starts when that key is held alone.
+ */
+const getSelectionModifier = async (page: ScoutPage): Promise<'Meta' | 'Control'> => {
+  const platform = await page.evaluate(() => {
+    const { userAgentData } = navigator as Navigator & { userAgentData?: { platform?: string } };
+    return userAgentData?.platform || navigator.userAgent || navigator.platform;
+  });
+  return platform.toLowerCase().includes('mac') ? 'Meta' : 'Control';
+};
 
 spaceTest.describe('Panel multi-selection', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -57,10 +70,8 @@ spaceTest.describe('Panel multi-selection', { tag: tags.deploymentAgnostic }, ()
         const box = await firstPanel.boundingBox();
         expect(box).not.toBeNull();
         // Near the bottom-left corner, away from the hover actions and the panel's own controls.
-        // Kibana picks Cmd or Ctrl from the browser's user agent, which can differ from the host OS
-        // that `ControlOrMeta` is resolved against, so both keys are held.
         await firstPanel.click({
-          modifiers: ['Control', 'Meta'],
+          modifiers: [await getSelectionModifier(page)],
           position: { x: 8, y: (box?.height ?? 16) - 8 },
         });
         await expect(toolbar).toBeVisible();
@@ -107,7 +118,7 @@ spaceTest.describe('Panel multi-selection', { tag: tags.deploymentAgnostic }, ()
         expect(box).not.toBeNull();
         // the checkboxes only show up once a panel is selected, so the selection starts with Cmd/Ctrl+click
         await firstPanel.click({
-          modifiers: ['Control', 'Meta'],
+          modifiers: [await getSelectionModifier(page)],
           position: { x: 8, y: (box?.height ?? 16) - 8 },
         });
         await pageObjects.dashboard
