@@ -213,9 +213,12 @@ const EMAIL_PATTERN = /\b[a-z0-9._%+\-]+@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+
 // sendmail `msgid=`), followed by an optional closing quote, `:` or `=`, optional whitespace
 // and an optional opening quote.
 const ID_HEADER_BEFORE_TOKEN = /(?:message[-_]?id|msgid)["']?[ \t]*[:=][ \t]*["']?$/i;
-// A line that opens with a header whose bracketed tokens are all message IDs. A line starts at
-// the start of the text or after `\n`.
-const ID_LIST_HEADER_LINE = /(?<![^\n])[ \t]*(?:in-reply-to|references)[ \t]*:[^\n]*/gi;
+// A line that is a References or In-Reply-To header and nothing but its bracketed tokens, which
+// are then all message IDs. Reports also use `References:` as a label, so a line with any other
+// text (`References: reported by <actor@evil.com>`) is not one. A line starts at the start of
+// the text or after `\n`.
+const ID_LIST_HEADER_LINE =
+  /(?<![^\n])[ \t]*(?:in-reply-to|references)[ \t]*:[ \t]*(?:<[^<>\s]+>[ \t\r,]*)+(?![^\n])/gi;
 // An ID token and the header name before it are short, so only this much text on either side of
 // a match is read (998 is the RFC 5322 line limit). The report text is untrusted and the check
 // runs once per email match, so reading the whole line would be quadratic on one long line.
@@ -303,7 +306,10 @@ const classifyEmail = ({
   wasDefanged: boolean;
   idListHeaderLines: readonly Span[];
 }): { tier: IocTier; basis: string } | null => {
-  if (isMessageIdToken(refangedText, start, start + raw.length, idListHeaderLines)) return null;
+  // Nobody defangs a Message-ID, so a defanged token is an address whatever header precedes it.
+  const isMessageId =
+    !wasDefanged && isMessageIdToken(refangedText, start, start + raw.length, idListHeaderLines);
+  if (isMessageId) return null;
   const host = raw.slice(raw.lastIndexOf('@') + 1);
   if (isPlaceholderEmailHost(host)) return { tier: 'reference', basis: 'placeholder_email' };
   if (!IANA_TLDS.has(host.slice(host.lastIndexOf('.') + 1))) return null;
@@ -998,14 +1004,17 @@ const sectionKindAtOffset = (
 // (same length, so offsets are unchanged) and the quad is left to the ordinary passes. A marker:
 //   - the tcpdump protocol word (`IP ` / `IP6 `) directly before a `quad.port` token;
 //   - a tcpdump flow, `quad.port > quad.port:` with the trailing colon, anywhere on the line;
-//   - a netstat protocol column at the start of the line (`tcp`, `tcp4`, `udp6`, ... lower case,
-//     then whitespace and a column starting with a digit).
+//   - a BSD netstat row: a protocol column at the start of the line (`tcp`, `tcp4`, `udp6`,
+//     `tcp46`, lower case), the two queue counters, then a `quad.port` local address. Prose
+//     that only starts with `udp 4 ...` is not a row.
 // Without a marker the five-part rule wins. Solaris `netstat -an` rows (no protocol column) and
 // `ip.port -> ip.port` text without a marker yield no IP.
 const QUAD_PORT = new RegExp(`(?<!\\d\\.)\\b(${IPV4})(\\.\\d{1,5})\\b(?!\\.\\d)`, 'g');
 const TCPDUMP_PROTOCOL = new RegExp(`\\bIP6? ${IPV4}\\.\\d`);
 const TCPDUMP_FLOW = new RegExp(`${IPV4}\\.\\d{1,5}\\s*>\\s*${IPV4}\\.\\d{1,5}:`);
-const NETSTAT_ROW = /^[ \t]*(?:tcp|udp)[46]?[ \t]+\d/;
+const NETSTAT_ROW = new RegExp(
+  `^[ \\t]*(?:tcp|udp)(?:46|4|6)?[ \\t]+\\d+[ \\t]+\\d+[ \\t]+${IPV4}\\.\\d{1,5}(?![\\d.])`
+);
 
 const hasCaptureMarker = (line: string): boolean =>
   TCPDUMP_PROTOCOL.test(line) || TCPDUMP_FLOW.test(line) || NETSTAT_ROW.test(line);
@@ -1293,7 +1302,9 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   // Full address is the indicator; host-domain is suppressed (mail provider noise).
   // First rule that applies wins, and every match records its span in `consumed` so the
   // host of a skipped match never resurfaces as a domain:
-  //   1. Message-ID token (`message-id=<id@host>`, `References: <a@b> <c@d>`) → nothing.
+  //   1. Message-ID token (`message-id=<id@host>`, `References: <a@b> <c@d>`) → nothing, unless
+  //      the report wrote it defanged. A References or In-Reply-To line under an IOC heading
+  //      is not an ID list.
   //   2. Placeholder host (`test@test.com`, `a@b.lab.test`) → reference/placeholder_email,
   //      even when defanged. Runs before rule 3 because reserved TLDs are not in IANA_TLDS.
   //   3. Host TLD is not a real TLD → nothing. Trade-off: a real address glued to the next
@@ -1313,7 +1324,8 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
         start: idx,
         raw,
         wasDefanged: !originalLower.includes(raw),
-        idListHeaderLines,
+        idListHeaderLines:
+          sectionKindAtOffset(idx, sectionSpans) === 'ioc' ? [] : idListHeaderLines,
       });
       if (verdict) {
         pushIoc({

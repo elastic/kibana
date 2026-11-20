@@ -2235,6 +2235,33 @@ describe('extract_iocs — example emails, Message-IDs and non-addresses', () =>
       expect(emailValues(result)).toEqual(['actor@evil-corp.com']);
     });
 
+    test.each<[string, string]>([
+      ['a References label with prose', 'References: reported by <actor@evil-corp.com>'],
+      [
+        'a References line under an IOC heading',
+        '## Indicators of Compromise\nReferences: <actor@evil-corp.com>',
+      ],
+    ])('%s', (_label, text) => {
+      expect(emailValues(extractIocs({ text }))).toEqual(['actor@evil-corp.com']);
+    });
+
+    test.each<[string, string]>([
+      ['after a References label', 'References: reported by <actor[@]evil-corp[.]com>'],
+      ['as the only token on a References line', 'References: <actor[@]evil-corp[.]com>'],
+      ['after a Message-ID header', 'Message-ID: <actor[@]evil-corp[.]com>'],
+    ])('a defanged address %s is discriminating', (_label, text) => {
+      const result = extractIocs({ text });
+      expect(emailValues(result)).toEqual(['actor@evil-corp.com']);
+      expect(byValue(result, 'actor@evil-corp.com')?.tier_basis).toBe('defanged_source');
+    });
+
+    test('a lone plain address on a References line with no heading markup yields nothing (known gap)', () => {
+      const result = extractIocs({
+        text: 'Indicators of Compromise\nReferences: <actor@evil-corp.com>',
+      });
+      expect(emailValues(result)).toEqual([]);
+    });
+
     test('an address on the line after an ID header', () => {
       const result = extractIocs({
         text: 'In-Reply-To: <id1@mail.evil-corp.com>\nReach me at <actor@evil-corp.com>',
@@ -2463,6 +2490,7 @@ describe('extract_iocs — version numbers are not IPs', () => {
       '    10.0.0.5.51234 > 185.220.101.4.443: Flags [S]',
       '... ethertype IPv4 (0x0800), length 74: 10.0.0.5.51234 > 185.220.101.4.443: Flags [S]',
       '  tcp4  0  0  10.0.0.5.51234  185.220.101.4.443  ESTABLISHED',
+      'tcp46      0      0  10.0.0.5.51234      185.220.101.4.443      ESTABLISHED',
     ];
 
     test.each(CAPTURES)('recovers the public address from %s', (text) => {
@@ -2490,6 +2518,12 @@ describe('extract_iocs — version numbers are not IPs', () => {
 
     test('a Solaris-style netstat row with no protocol column yields no IP (known gap)', () => {
       expect(ipsOf('   10.0.0.5.22   185.220.101.4.51234   64128 0 ESTABLISHED')).toEqual([]);
+    });
+
+    test('prose that starts with a protocol word and a number is not a netstat row', () => {
+      expect(ipsOf('udp 4 mentions of host 185.220.101.4 and version 1.2.3.4.5')).toEqual([
+        '185.220.101.4',
+      ]);
     });
 
     test.each(['tcp: fix stall in agent 3.0.4.2.0', 'TCP keepalive fixed in 3.0.4.2.0'])(
