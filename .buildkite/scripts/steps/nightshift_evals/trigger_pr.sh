@@ -32,10 +32,9 @@ trap on_trigger_error ERR
 
 echo "--- Triggering Nightshift Evals pipeline (kibana-nightshift-evals-pr)"
 
-# GITHUB_PR_LABELS is pre-filtered to whitespace-free labels by getEvalTriggerStep
-# (getForwardablePrLabels in eval_pipeline.ts), so it forwards safely alongside the scalar
-# PR-context vars. trigger_pipeline.ts splits its extra-env arg on spaces, so every forwarded
-# value must be whitespace-free — we defensively skip any that isn't.
+# The child pipeline runs a fixed experiment, so it gets no labels, only the PR context.
+# trigger_pipeline.ts splits its extra-env arg on spaces, so every forwarded value must be
+# whitespace-free — we defensively skip any that isn't.
 GITHUB_ENV_VARS=()
 for var in \
   GITHUB_PR_NUMBER \
@@ -47,8 +46,7 @@ for var in \
   GITHUB_PR_TARGET_BRANCH \
   GITHUB_PR_TRIGGERED_SHA \
   GITHUB_PR_DRAFT \
-  GITHUB_PR_MAINTAINER_APPROVED \
-  GITHUB_PR_LABELS; do
+  GITHUB_PR_MAINTAINER_APPROVED; do
   value="${!var:-}"
   if [[ -n "$value" && ! "$value" =~ [[:space:]] ]]; then
     GITHUB_ENV_VARS+=("$var=$value")

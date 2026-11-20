@@ -337,23 +337,20 @@ EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 
 #### Nightshift evals (`elastic/nightshift-evals`)
 
-A second, separate path runs the tasks of the `nightshift-evals` repo. It runs next to the
-suites above and does not change how they are selected. Kibana runs from source, so there is
-no Kibana build step.
+A second, separate path runs one experiment from the `nightshift-evals` repo. It runs next to
+the suites above and does not change how they are selected. Kibana runs from source, so there
+is no Kibana build step.
 
-| Label                      | Effect                                                              |
-| -------------------------- | ------------------------------------------------------------------- |
-| `nightshift-evals:<task>`  | Run a task from the repo's `ci/tasks.yaml`                          |
-| `nightshift-evals:all`     | Run every task                                                      |
-| `models:eis/<model-id>`    | One run per model. Without one, Kibana's default model is used      |
+Add the label `ci:nightshift-evals` to a PR to start it. The label configures nothing. The
+experiment is hardcoded in `NIGHTSHIFT_EXPERIMENT` in
+[`nightshift_evals_pipeline.ts`](../../../../../.buildkite/pipelines/nightshift_evals/nightshift_evals_pipeline.ts):
+the task, its flags, the GCS data it needs and the step timeout. It uses Kibana's default
+model. To change the experiment, edit that constant.
 
-Only `eis/*` model labels count here. The result shows as a `nightshift-evals` commit status
-and as one PR comment per task. The pipelines are `kibana-nightshift-evals-pr`,
-`kibana-nightshift-evals-on-demand` and `kibana-nightshift-evals-weekly`.
-
-For on-demand builds, set `NIGHTSHIFT_EVAL_TASK` (a task id, a comma list, or `all`) and
-`EVAL_MODEL_GROUPS`. Optional: `NIGHTSHIFT_EVAL_ARGS` (extra `eval` flags) and
-`NIGHTSHIFT_EVALS_REF` (a branch or SHA of nightshift-evals, default `main`).
+The result shows as a `nightshift-evals` commit status, a build annotation and a PR comment.
+The pipelines are `kibana-nightshift-evals-pr` and `kibana-nightshift-evals-weekly`
+(Sundays, 20:00 GMT). Both run the same experiment. `NIGHTSHIFT_EVALS_REF` sets the branch or
+SHA of nightshift-evals to clone (default `main`).
 
 ---
 

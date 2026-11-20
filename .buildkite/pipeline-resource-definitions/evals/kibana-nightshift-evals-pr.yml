@@ -16,7 +16,7 @@ spec:
     kind: Pipeline
     metadata:
       name: 'Kibana / Nightshift Evals / PR'
-      description: 'Runs the label-selected nightshift-evals tasks for a PR (triggered asynchronously from kibana-pull-request)'
+      description: 'Runs the hardcoded nightshift-evals experiment for a PR labelled ci:nightshift-evals (triggered asynchronously from kibana-pull-request)'
     spec:
       env:
         KBN_EVALS: '1'
@@ -33,7 +33,7 @@ spec:
       cancel_intermediate_builds: true
       default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/scripts/pipelines/nightshift_evals_pr/pipeline.sh
+      pipeline_file: .buildkite/scripts/pipelines/nightshift_evals/pipeline.sh
       initial_step_plugins:
         - sparse-checkout#v1.6.0:
             paths:

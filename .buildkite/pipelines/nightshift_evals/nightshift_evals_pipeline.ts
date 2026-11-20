@@ -7,223 +7,88 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  getForwardablePrLabels,
-  parseGithubPrLabels,
-  toBuildkiteYamlString,
-} from '../evals/eval_pipeline.ts';
-
-const TASK_LABEL_PREFIX = 'nightshift-evals:';
-const ALL_TASKS = 'all';
-const MODEL_LABEL_PREFIX = 'models:';
-const EIS_MODEL_PREFIX = 'eis/';
-const DEFAULT_TIMEOUT_IN_MINUTES = 90;
-
-export type NightshiftEvalMode = 'pr' | 'weekly';
+// This label only starts the pipeline. It does not configure the run.
+export const NIGHTSHIFT_EVAL_LABEL = 'ci:nightshift-evals';
 
 export interface NightshiftEvalDownload {
   // A gs:// path, copied to `dest` relative to the nightshift-evals checkout.
-  src: string;
-  dest: string;
-  recursive?: boolean;
+  readonly src: string;
+  readonly dest: string;
+  readonly recursive?: boolean;
 }
 
-export interface NightshiftEvalTaskConfig {
-  timeoutMinutes?: number;
-  downloads?: NightshiftEvalDownload[];
-  pr?: { args?: string[] };
-  weekly?: { args?: string[] };
+export interface NightshiftEvalExperiment {
+  readonly task: string;
+  // Extra `uv run eval <task>` flags.
+  readonly args: readonly string[];
+  readonly downloads: readonly NightshiftEvalDownload[];
+  readonly timeoutMinutes: number;
+  // An empty id means Kibana's default model.
+  readonly connectorId: string;
 }
 
-export interface NightshiftEvalSelection {
-  // Task ids, or `'all'` for every task in `ci/tasks.yaml`.
-  tasks: string[] | typeof ALL_TASKS;
-  // Connector ids; an empty entry (`''`) means Kibana's default model.
-  connectorIds: string[];
-}
+/** The experiment CI runs. Change it here. */
+export const NIGHTSHIFT_EXPERIMENT: NightshiftEvalExperiment = {
+  task: 'ki_feature_extraction',
+  args: ['--dataset', 'orca-bench', '--scenario', 'day-2026-04-19'],
+  downloads: [
+    {
+      src: 'gs://nightshift-datasets/orca-bench/data-0418/2026-10-01/snapshots',
+      dest: 'snapshots/orca-bench/repository',
+      recursive: true,
+    },
+    {
+      src: 'gs://nightshift-datasets/orca-bench/data-0418/2026-10-01/manifest.json',
+      dest: 'snapshots/orca-bench/manifest.json',
+    },
+    {
+      src: 'gs://nightshift-datasets/detection-engine/ki-feature-extraction/orca-bench/v1/ground-truth.json',
+      dest: 'tasks/ki_feature_extraction/ground-truth/orca-bench-v1.json',
+    },
+  ],
+  timeoutMinutes: 240,
+  connectorId: '',
+};
+
+const RUN_STEP_KEY = 'nightshift-evals-run';
+
+const agentLines = (machineType: string, extra: string[] = []): string[] => [
+  `    agents:`,
+  `      image: family/kibana-ubuntu-2404`,
+  `      imageProject: elastic-images-prod`,
+  `      provider: gcp`,
+  `      machineType: ${machineType}`,
+  ...extra,
+];
 
 /**
- * Same id Kibana's `--eis` flag gives a preconfigured connector, see `toConnectorId` in
- * `packages/kbn-cli-dev-mode/src/eis_dev_orchestrator.ts`.
+ * YAML double-quoted scalar with `$` escaped to `$$` so Buildkite upload won't interpolate it.
  */
-export const toConnectorId = (modelId: string): string =>
-  modelId
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-
-const normalizeBuildkiteKey = (value: string): string =>
-  value
-    .toLowerCase()
-    .replace(/[^a-z0-9_-]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-
-const toConnectorIds = (modelGroups: string[]): string[] => {
-  const ids = modelGroups
-    .filter((group) => group.startsWith(EIS_MODEL_PREFIX))
-    .map((group) => toConnectorId(group.slice(EIS_MODEL_PREFIX.length)))
-    .filter(Boolean);
-  return ids.length > 0 ? [...new Set(ids)] : [''];
-};
-
-/** Which tasks and models the PR labels select, or `null` when no task label is present. */
-export const parseNightshiftSelection = (githubPrLabels: string): NightshiftEvalSelection | null => {
-  const labels = parseGithubPrLabels(githubPrLabels);
-  const tasks = labels
-    .filter((label) => label.startsWith(TASK_LABEL_PREFIX))
-    .map((label) => label.slice(TASK_LABEL_PREFIX.length).trim())
-    .filter(Boolean);
-  if (tasks.length === 0) {
-    return null;
-  }
-
-  const modelGroups = labels
-    .filter((label) => label.startsWith(MODEL_LABEL_PREFIX))
-    .map((label) => label.slice(MODEL_LABEL_PREFIX.length).trim())
-    .filter((group) => !group.startsWith('judge:'));
-  const ignored = modelGroups.filter((group) => !group.startsWith(EIS_MODEL_PREFIX));
-  if (ignored.length > 0) {
-    console.error(`nightshift-evals only supports eis/* models; ignoring: ${ignored.join(', ')}`);
-  }
-
-  return {
-    tasks: tasks.includes(ALL_TASKS) ? ALL_TASKS : [...new Set(tasks)],
-    connectorIds: toConnectorIds(modelGroups),
-  };
-};
-
-/** Same selection from the env of an on-demand or weekly build. */
-export const parseNightshiftSelectionFromEnv = (
-  taskEnv: string,
-  modelGroupsEnv: string
-): NightshiftEvalSelection | null => {
-  const tasks = taskEnv
-    .split(',')
-    .map((task) => task.trim())
-    .filter(Boolean);
-  if (tasks.length === 0) {
-    return null;
-  }
-  const modelGroups = modelGroupsEnv
-    .split(',')
-    .map((group) => group.trim())
-    .filter(Boolean);
-  return {
-    tasks: tasks.includes(ALL_TASKS) ? ALL_TASKS : [...new Set(tasks)],
-    connectorIds: toConnectorIds(modelGroups),
-  };
-};
+const toYamlString = (value: string): string => JSON.stringify(value).replace(/\$/g, '$$$$');
 
 /**
- * Task steps for a selection, as a YAML fragment under one group. Preemptible only when
- * `preemptible` is true, so a PR run is never silently re-run after a lost worker.
+ * Heavy steps run on preemptible (spot) agents unless `EVAL_PREEMPTIBLE` is `0`, `false` or `no`.
+ * The PR pipeline sets `0`, so a lost worker does not silently re-run the experiment.
  */
-export const buildNightshiftEvalSteps = ({
-  tasks,
-  connectorIds,
-  taskConfigs,
-  mode,
-  extraArgs = [],
-  preemptible,
-}: {
-  tasks: string[];
-  connectorIds: string[];
-  taskConfigs: Record<string, NightshiftEvalTaskConfig>;
-  mode: NightshiftEvalMode;
-  extraArgs?: string[];
-  preemptible: boolean;
-}): string => {
-  const unknown = tasks.filter((task) => !taskConfigs[task]);
-  if (unknown.length > 0) {
-    throw new Error(
-      `Unknown nightshift-evals task(s): ${unknown.join(', ')}. ` +
-        `Known: ${Object.keys(taskConfigs).join(', ') || 'none'}`
-    );
-  }
-
-  const steps = tasks.flatMap((task) =>
-    connectorIds.map((connectorId) => {
-      const config = taskConfigs[task];
-      const args = [...(config[mode]?.args ?? []), ...extraArgs];
-      const key = `nightshift-evals-${normalizeBuildkiteKey(task)}-${
-        normalizeBuildkiteKey(connectorId) || 'default'
-      }`;
-      return [
-        `      - label: ${toBuildkiteYamlString(`Nightshift Evals: ${task} / ${connectorId || 'default'}`)}`,
-        `        key: ${key}`,
-        `        command: bash .buildkite/scripts/steps/nightshift_evals/run_task.sh`,
-        `        env:`,
-        `          KBN_EVALS: '1'`,
-        `          FTR_EIS_CCM: '1'`,
-        `          NIGHTSHIFT_EVAL_TASK: ${toBuildkiteYamlString(task)}`,
-        `          NIGHTSHIFT_EVAL_CONNECTOR_ID: ${toBuildkiteYamlString(connectorId)}`,
-        `          NIGHTSHIFT_EVAL_ARGS: ${toBuildkiteYamlString(args.join(' '))}`,
-        `          NIGHTSHIFT_EVAL_DOWNLOADS: ${toBuildkiteYamlString(
-          JSON.stringify(config.downloads ?? [])
-        )}`,
-        `        timeout_in_minutes: ${config.timeoutMinutes ?? DEFAULT_TIMEOUT_IN_MINUTES}`,
-        `        agents:`,
-        `          image: family/kibana-ubuntu-2404`,
-        `          imageProject: elastic-images-prod`,
-        `          provider: gcp`,
-        `          machineType: n2-standard-8`,
-        ...(preemptible ? [`          preemptible: true`] : []),
-        `        retry:`,
-        `          automatic:`,
-        ...(preemptible ? [`            - exit_status: '-1'`, `              limit: 3`] : []),
-        `            - exit_status: '*'`,
-        `              limit: 1`,
-      ].join('\n');
-    })
-  );
-
-  const taskKeys = tasks.flatMap((task) =>
-    connectorIds.map(
-      (connectorId) =>
-        `nightshift-evals-${normalizeBuildkiteKey(task)}-${
-          normalizeBuildkiteKey(connectorId) || 'default'
-        }`
-    )
-  );
-
-  const commentStep = [
-    `      - label: 'Nightshift Evals: post PR comment'`,
-    `        key: nightshift-evals-pr-comment`,
-    `        command: bash .buildkite/scripts/steps/nightshift_evals/post_pr_comment.sh`,
-    `        env:`,
-    `          KBN_EVALS: '1'`,
-    `          NIGHTSHIFT_EVAL_TASKS: ${toBuildkiteYamlString(tasks.join(','))}`,
-    `        depends_on:`,
-    ...taskKeys.map((taskKey) => `          - ${toBuildkiteYamlString(taskKey)}`),
-    `        allow_dependency_failure: true`,
-    `        timeout_in_minutes: 10`,
-    `        agents:`,
-    `          image: family/kibana-ubuntu-2404`,
-    `          imageProject: elastic-images-prod`,
-    `          provider: gcp`,
-    `          machineType: n2-standard-2`,
-  ].join('\n');
-
-  return [
-    `steps:`,
-    `  - group: Nightshift Evals`,
-    `    key: nightshift-evals`,
-    `    steps:`,
-    ...steps,
-    ...(mode === 'pr' ? [commentStep] : []),
-  ].join('\n');
+export const isPreemptibleEnabled = (): boolean => {
+  const raw = (process.env.EVAL_PREEMPTIBLE ?? '').trim().toLowerCase();
+  return !['0', 'false', 'no'].includes(raw);
 };
 
+/** Whether the PR labels (a comma-separated string) contain the start label. */
+const hasNightshiftEvalLabel = (githubPrLabels: string): boolean =>
+  githubPrLabels
+    .split(',')
+    .map((label) => label.trim())
+    .includes(NIGHTSHIFT_EVAL_LABEL);
+
 /**
- * Command step that fires `kibana-nightshift-evals-pr`, or `null` when no task label is set.
- * Fire-and-forget like the kbn-evals trigger: `soft_fail` keeps a trigger hiccup off the PR.
- * Needs no Kibana build, since nightshift-evals runs Kibana from source.
+ * Command step that fires `kibana-nightshift-evals-pr`, or `null` without the start label.
+ * Fire-and-forget: `soft_fail` keeps a trigger hiccup off the PR. It needs no Kibana build,
+ * since nightshift-evals runs Kibana from source.
  */
 export const getNightshiftEvalTriggerStep = (githubPrLabels: string): string | null => {
-  const forwardableLabels = getForwardablePrLabels(githubPrLabels);
-  if (!parseNightshiftSelection(forwardableLabels)) {
+  if (!hasNightshiftEvalLabel(githubPrLabels)) {
     return null;
   }
 
@@ -231,18 +96,54 @@ export const getNightshiftEvalTriggerStep = (githubPrLabels: string): string | n
     `  - label: ':robot_face: Trigger Nightshift Evals'`,
     `    key: nightshift-evals-trigger`,
     `    command: bash .buildkite/scripts/steps/nightshift_evals/trigger_pr.sh`,
-    `    env:`,
-    `      GITHUB_PR_LABELS: ${toBuildkiteYamlString(forwardableLabels)}`,
     `    timeout_in_minutes: 10`,
     `    soft_fail: true`,
-    `    agents:`,
-    `      image: family/kibana-ubuntu-2404`,
-    `      imageProject: elastic-images-prod`,
-    `      provider: gcp`,
-    `      machineType: n2-standard-2`,
+    ...agentLines('n2-standard-2'),
     `    retry:`,
     `      automatic:`,
     `        - exit_status: '*'`,
     `          limit: 1`,
   ].join('\n');
+};
+
+/** The run step and the PR comment step for `NIGHTSHIFT_EXPERIMENT`, as a YAML fragment. */
+export const getNightshiftEvalSteps = ({ preemptible }: { preemptible: boolean }): string => {
+  const { task, args, downloads, timeoutMinutes, connectorId } = NIGHTSHIFT_EXPERIMENT;
+
+  const runStep = [
+    `  - label: ${toYamlString(`Nightshift Evals: ${task}`)}`,
+    `    key: ${RUN_STEP_KEY}`,
+    `    command: bash .buildkite/scripts/steps/nightshift_evals/run_task.sh`,
+    `    env:`,
+    `      KBN_EVALS: '1'`,
+    `      FTR_EIS_CCM: '1'`,
+    `      NIGHTSHIFT_EVAL_TASK: ${toYamlString(task)}`,
+    `      NIGHTSHIFT_EVAL_CONNECTOR_ID: ${toYamlString(connectorId)}`,
+    `      NIGHTSHIFT_EVAL_ARGS: ${toYamlString(args.join(' '))}`,
+    `      NIGHTSHIFT_EVAL_DOWNLOADS: ${toYamlString(JSON.stringify(downloads))}`,
+    `    timeout_in_minutes: ${timeoutMinutes}`,
+    ...agentLines('n2-standard-8', preemptible ? [`      preemptible: true`] : []),
+    `    retry:`,
+    `      automatic:`,
+    // Preemptible only: retry lost workers (-1). Dropped otherwise so a lost
+    // worker/timeout doesn't silently re-run the whole experiment.
+    ...(preemptible ? [`        - exit_status: '-1'`, `          limit: 3`] : []),
+    `        - exit_status: '*'`,
+    `          limit: 1`,
+  ].join('\n');
+
+  const commentStep = [
+    `  - label: 'Nightshift Evals: post PR comment'`,
+    `    key: nightshift-evals-pr-comment`,
+    `    command: bash .buildkite/scripts/steps/nightshift_evals/post_pr_comment.sh`,
+    `    env:`,
+    `      KBN_EVALS: '1'`,
+    `      NIGHTSHIFT_EVAL_TASKS: ${toYamlString(task)}`,
+    `    depends_on: ${RUN_STEP_KEY}`,
+    `    allow_dependency_failure: true`,
+    `    timeout_in_minutes: 10`,
+    ...agentLines('n2-standard-2'),
+  ].join('\n');
+
+  return [runStep, commentStep].join('\n');
 };

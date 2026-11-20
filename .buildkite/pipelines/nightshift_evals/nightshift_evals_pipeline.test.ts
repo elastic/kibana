@@ -9,162 +9,107 @@
 
 import { parse as yamlParse } from 'yaml';
 import {
-  buildNightshiftEvalSteps,
+  NIGHTSHIFT_EVAL_LABEL,
+  NIGHTSHIFT_EXPERIMENT,
+  getNightshiftEvalSteps,
   getNightshiftEvalTriggerStep,
-  parseNightshiftSelection,
-  parseNightshiftSelectionFromEnv,
-  toConnectorId,
+  isPreemptibleEnabled,
 } from './nightshift_evals_pipeline.ts';
-
-const TASK_CONFIGS = {
-  ki_feature_extraction: {
-    timeoutMinutes: 120,
-    downloads: [{ src: 'gs://bucket/data', dest: 'snapshots/x', recursive: true }],
-    pr: { args: ['--dataset', 'otel-demo'] },
-    weekly: { args: ['--dataset', 'orca-bench'] },
-  },
-  other_task: {},
-};
 
 type Step = Record<string, any>;
 
-const taskSteps = (yaml: string): Step[] => {
-  const parsed = yamlParse(yaml) as { steps: Array<{ steps: Step[] }> };
-  return parsed.steps[0].steps.filter((step) => step.command?.includes('run_task.sh'));
-};
+const parseSteps = (fragment: string): Step[] =>
+  (yamlParse(`steps:\n${fragment}`) as { steps: Step[] }).steps;
+
+const ORIGINAL_ENV = process.env;
 
 describe('nightshift_evals_pipeline', () => {
-  describe('toConnectorId', () => {
-    it('matches the id Kibana gives an EIS connector', () => {
-      expect(toConnectorId('anthropic-claude-4.6-sonnet')).toBe('anthropic-claude-4-6-sonnet');
-      expect(toConnectorId('OpenAI_GPT-5.4')).toBe('openai-gpt-5-4');
-    });
+  beforeEach(() => {
+    process.env = { ...ORIGINAL_ENV };
+    delete process.env.EVAL_PREEMPTIBLE;
   });
 
-  describe('parseNightshiftSelection', () => {
-    it('returns null without a task label', () => {
-      expect(parseNightshiftSelection('')).toBeNull();
-      expect(parseNightshiftSelection('evals:smoke-tests,models:eis/openai-gpt-5.4')).toBeNull();
-    });
-
-    it('uses the default model when no eis model label is present', () => {
-      expect(parseNightshiftSelection('nightshift-evals:ki_feature_extraction')).toEqual({
-        tasks: ['ki_feature_extraction'],
-        connectorIds: [''],
-      });
-    });
-
-    it('maps eis models to connector ids and ignores other model labels', () => {
-      jest.spyOn(console, 'error').mockImplementation();
-      const labels =
-        'nightshift-evals:a,nightshift-evals:b,models:eis/anthropic-claude-4.6-sonnet,' +
-        'models:eis/openai-gpt-5.4,models:openrouter/openai-gpt-5.4,models:judge:eis/x';
-      expect(parseNightshiftSelection(labels)).toEqual({
-        tasks: ['a', 'b'],
-        connectorIds: ['anthropic-claude-4-6-sonnet', 'openai-gpt-5-4'],
-      });
-    });
-
-    it('selects every task for `nightshift-evals:all`', () => {
-      expect(parseNightshiftSelection('nightshift-evals:all,nightshift-evals:a')?.tasks).toBe(
-        'all'
-      );
-    });
-  });
-
-  describe('parseNightshiftSelectionFromEnv', () => {
-    it('reads tasks and model groups from the build env', () => {
-      expect(parseNightshiftSelectionFromEnv('a, b', 'eis/openai-gpt-5.4')).toEqual({
-        tasks: ['a', 'b'],
-        connectorIds: ['openai-gpt-5-4'],
-      });
-      expect(parseNightshiftSelectionFromEnv('', 'eis/x')).toBeNull();
-    });
+  afterAll(() => {
+    process.env = ORIGINAL_ENV;
   });
 
   describe('getNightshiftEvalTriggerStep', () => {
-    it('is null without a task label', () => {
-      expect(getNightshiftEvalTriggerStep('evals:smoke-tests')).toBeNull();
+    it('is null without the start label', () => {
+      expect(getNightshiftEvalTriggerStep('')).toBeNull();
+      expect(getNightshiftEvalTriggerStep('evals:smoke-tests,models:eis/openai-gpt-5.4')).toBeNull();
     });
 
-    it('does not depend on the Kibana build and is soft-fail', () => {
-      const step = yamlParse(
-        `steps:\n${getNightshiftEvalTriggerStep('nightshift-evals:a')}`
-      ).steps[0];
-      expect(step.depends_on).toBeUndefined();
+    it('matches the label exactly, not as a substring', () => {
+      expect(getNightshiftEvalTriggerStep(`${NIGHTSHIFT_EVAL_LABEL}-other`)).toBeNull();
+      expect(getNightshiftEvalTriggerStep(`x${NIGHTSHIFT_EVAL_LABEL}`)).toBeNull();
+    });
+
+    it('fires for the label among others', () => {
+      expect(getNightshiftEvalTriggerStep(`foo, ${NIGHTSHIFT_EVAL_LABEL} ,bar`)).not.toBeNull();
+    });
+
+    it('is soft-fail, needs no Kibana build and forwards no labels', () => {
+      const [step] = parseSteps(getNightshiftEvalTriggerStep(NIGHTSHIFT_EVAL_LABEL) as string);
       expect(step.soft_fail).toBe(true);
-      expect(step.env.GITHUB_PR_LABELS).toBe('nightshift-evals:a');
-    });
-
-    it('drops labels with whitespace before forwarding', () => {
-      const step = yamlParse(
-        `steps:\n${getNightshiftEvalTriggerStep('nightshift-evals:a,good first issue')}`
-      ).steps[0];
-      expect(step.env.GITHUB_PR_LABELS).toBe('nightshift-evals:a');
+      expect(step.depends_on).toBeUndefined();
+      expect(step.env).toBeUndefined();
+      expect(step.command).toContain('trigger_pr.sh');
     });
   });
 
-  describe('buildNightshiftEvalSteps', () => {
-    const build = (overrides = {}) =>
-      buildNightshiftEvalSteps({
-        tasks: ['ki_feature_extraction'],
-        connectorIds: ['model-a', 'model-b'],
-        taskConfigs: TASK_CONFIGS,
-        mode: 'pr',
-        preemptible: false,
-        ...overrides,
-      });
+  describe('getNightshiftEvalSteps', () => {
+    const build = (preemptible = false) => parseSteps(getNightshiftEvalSteps({ preemptible }));
+    const { task, args, downloads, timeoutMinutes } = NIGHTSHIFT_EXPERIMENT;
 
-    it('emits one step per task and model', () => {
-      const steps = taskSteps(build());
-      expect(steps.map((step) => step.env.NIGHTSHIFT_EVAL_CONNECTOR_ID)).toEqual([
-        'model-a',
-        'model-b',
-      ]);
-      expect(steps[0].key).toBe('nightshift-evals-ki_feature_extraction-model-a');
-    });
-
-    it('takes args and timeout from the task config for the mode', () => {
-      const [pr] = taskSteps(build());
-      expect(pr.env.NIGHTSHIFT_EVAL_ARGS).toBe('--dataset otel-demo');
-      expect(pr.timeout_in_minutes).toBe(120);
-      expect(JSON.parse(pr.env.NIGHTSHIFT_EVAL_DOWNLOADS)).toHaveLength(1);
-
-      const [weekly] = taskSteps(build({ mode: 'weekly' }));
-      expect(weekly.env.NIGHTSHIFT_EVAL_ARGS).toBe('--dataset orca-bench');
-    });
-
-    it('appends extra args and defaults the timeout', () => {
-      const [step] = taskSteps(build({ tasks: ['other_task'], extraArgs: ['--scenario', 's'] }));
-      expect(step.env.NIGHTSHIFT_EVAL_ARGS).toBe('--scenario s');
-      expect(step.timeout_in_minutes).toBe(90);
-    });
-
-    it('names the default model step `default`', () => {
-      const [step] = taskSteps(build({ connectorIds: [''] }));
-      expect(step.key).toBe('nightshift-evals-ki_feature_extraction-default');
-      expect(step.label).toContain('default');
+    it('runs the hardcoded experiment with the default model', () => {
+      const [run] = build();
+      expect(run.command).toContain('run_task.sh');
+      expect(run.env.NIGHTSHIFT_EVAL_TASK).toBe(task);
+      expect(run.env.NIGHTSHIFT_EVAL_CONNECTOR_ID).toBe('');
+      expect(run.env.NIGHTSHIFT_EVAL_ARGS).toBe(args.join(' '));
+      expect(JSON.parse(run.env.NIGHTSHIFT_EVAL_DOWNLOADS)).toEqual(downloads);
+      expect(run.timeout_in_minutes).toBe(timeoutMinutes);
+      // The EIS key and the Vault config the run needs.
+      expect(run.env.KBN_EVALS).toBe('1');
+      expect(run.env.FTR_EIS_CCM).toBe('1');
     });
 
     it('uses preemptible agents only when asked', () => {
-      expect(taskSteps(build())[0].agents.preemptible).toBeUndefined();
-      expect(taskSteps(build())[0].retry.automatic).toEqual([{ exit_status: '*', limit: 1 }]);
-      expect(taskSteps(build({ preemptible: true }))[0].agents.preemptible).toBe(true);
-    });
+      const [plain] = build(false);
+      expect(plain.agents.preemptible).toBeUndefined();
+      expect(plain.retry.automatic).toEqual([{ exit_status: '*', limit: 1 }]);
 
-    it('adds the PR comment step after every task step, in pr mode only', () => {
-      const parsed = yamlParse(build()) as { steps: Array<{ steps: Step[] }> };
-      const comment = parsed.steps[0].steps.find((step) => step.key === 'nightshift-evals-pr-comment');
-      expect(comment?.depends_on).toEqual([
-        'nightshift-evals-ki_feature_extraction-model-a',
-        'nightshift-evals-ki_feature_extraction-model-b',
+      const [spot] = build(true);
+      expect(spot.agents.preemptible).toBe(true);
+      expect(spot.retry.automatic).toEqual([
+        { exit_status: '-1', limit: 3 },
+        { exit_status: '*', limit: 1 },
       ]);
-      expect(comment?.allow_dependency_failure).toBe(true);
-      expect(build({ mode: 'weekly' })).not.toContain('nightshift-evals-pr-comment');
     });
 
-    it('fails for an unknown task', () => {
-      expect(() => build({ tasks: ['nope'] })).toThrow('Unknown nightshift-evals task(s): nope');
+    it('posts the PR comment after the run, even when it failed', () => {
+      const [run, comment] = build();
+      expect(comment.command).toContain('post_pr_comment.sh');
+      expect(comment.depends_on).toBe(run.key);
+      expect(comment.allow_dependency_failure).toBe(true);
+      expect(comment.env.NIGHTSHIFT_EVAL_TASKS).toBe(task);
+    });
+  });
+
+  describe('isPreemptibleEnabled', () => {
+    it.each([
+      [undefined, true],
+      ['1', true],
+      ['0', false],
+      ['false', false],
+      [' No ', false],
+    ])('EVAL_PREEMPTIBLE=%p -> %p', (value, expected) => {
+      if (value === undefined) {
+        delete process.env.EVAL_PREEMPTIBLE;
+      } else {
+        process.env.EVAL_PREEMPTIBLE = value;
+      }
+      expect(isPreemptibleEnabled()).toBe(expected);
     });
   });
 });

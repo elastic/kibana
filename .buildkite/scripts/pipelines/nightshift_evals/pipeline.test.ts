@@ -21,42 +21,48 @@ const importPipelineModule = async () => {
   });
 };
 
-describe('nightshift_evals_pr pipeline generation', () => {
+const emittedYaml = (): string => (mockEmitPipeline.mock.calls[0][0] as string[]).join('\n');
+
+describe('nightshift_evals pipeline generation', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
     process.env = { ...ORIGINAL_ENV };
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
+    delete process.env.EVAL_PREEMPTIBLE;
   });
 
   afterAll(() => {
     process.env = ORIGINAL_ENV;
   });
 
-  it('emits pre-build, the plan step and a trailing post-build, without a Kibana build', async () => {
-    process.env.GITHUB_PR_LABELS = 'nightshift-evals:ki_feature_extraction';
-
+  it('emits pre-build, the run and comment steps and a trailing post-build, without a Kibana build', async () => {
     await importPipelineModule();
 
-    const yaml = (mockEmitPipeline.mock.calls[0][0] as string[]).join('\n');
+    expect(mockEmitPipeline).toHaveBeenCalledTimes(1);
+    const yaml = emittedYaml();
     expect(yaml).toContain('pre_build.sh');
-    expect(yaml).toContain('plan_steps.sh');
+    expect(yaml).toContain('run_task.sh');
+    expect(yaml).toContain('post_pr_comment.sh');
     expect(yaml).not.toContain('build_kibana.sh');
+    expect(yaml).not.toContain('plan_steps');
     expect(yaml).toContain('post_build.sh');
     expect(yaml).toContain('continue_on_failure: true');
   });
 
-  it('fails loudly when no task label is forwarded', async () => {
-    process.env.GITHUB_PR_LABELS = 'evals:smoke-tests';
-    jest.spyOn(console, 'error').mockImplementation();
-    jest.spyOn(process, 'exit').mockImplementation(((code?: number) => {
-      throw new Error(`process.exit:${code}`);
-    }) as never);
+  it('needs no labels in the environment', async () => {
+    delete process.env.GITHUB_PR_LABELS;
+    await importPipelineModule();
+    expect(emittedYaml()).toContain('run_task.sh');
+  });
 
-    await expect(importPipelineModule()).rejects.toThrow('process.exit:1');
-    expect(mockEmitPipeline).not.toHaveBeenCalled();
+  it('runs on spot agents by default and on regular agents when EVAL_PREEMPTIBLE=0', async () => {
+    await importPipelineModule();
+    expect(emittedYaml()).toContain('preemptible: true');
+
+    jest.resetModules();
+    mockEmitPipeline.mockClear();
+    process.env.EVAL_PREEMPTIBLE = '0';
+    await importPipelineModule();
+    expect(emittedYaml()).not.toContain('preemptible: true');
   });
 });
