@@ -7,21 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { join } from 'path';
 import type { ScoutServerConfig } from '../../../../types';
 
+const EXPORTERS_ARG_PREFIX = '--xpack.agentBuilder.tracing.exporters=';
+
+const isHttpUrl = (value: unknown): boolean => {
+  if (typeof value !== 'string') return false;
+  try {
+    return ['http:', 'https:'].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+};
+
+const isStringRecord = (value: unknown): boolean =>
+  typeof value === 'object' &&
+  value !== null &&
+  !Array.isArray(value) &&
+  Object.values(value).every((header) => typeof header === 'string');
+
+// Mirrors `xpack.agentBuilder.tracing.exporters` in the Agent Builder config schema, so a value
+// Kibana would reject at boot fails here, before the stack starts.
 const assertAgentBuilderExporters = (exporters: unknown): void => {
   const valid =
     Array.isArray(exporters) &&
-    exporters.every(
-      (exporter) =>
-        typeof exporter === 'object' &&
-        exporter !== null &&
-        typeof (exporter as { url?: unknown }).url === 'string'
-    );
+    exporters.every((exporter) => {
+      if (typeof exporter !== 'object' || exporter === null) return false;
+      const { url, headers } = exporter as { url?: unknown; headers?: unknown };
+      return isHttpUrl(url) && (headers === undefined || isStringRecord(headers));
+    });
   if (!valid) {
     throw new Error(
-      'AGENT_BUILDER_TRACING_EXPORTERS must be a JSON array of objects with a string "url", ' +
-        'e.g. [{"url":"https://host/v1/traces"}]'
+      'AGENT_BUILDER_TRACING_EXPORTERS must be a JSON array of objects with an http(s) "url" and ' +
+        'optional string-valued "headers", e.g. [{"url":"https://host/v1/traces"}]'
     );
   }
 };
@@ -43,7 +62,8 @@ const argName = (arg: string): string => arg.slice(0, arg.indexOf('=') + 1);
  *   The value is JSON in the shape of `xpack.agentBuilder.tracing.exporters`: an array of
  *   `{ "url": "<http(s) OTLP traces URL>", "headers"?: { "<name>": "<value>" } }`. This is NOT the
  *   `TRACING_EXPORTERS` telemetry shape (`[{ "grpc": { "url": ... } }]`), which Kibana would reject
- *   at boot.
+ *   at boot. Headers carry credentials and Scout logs Kibana's argv, so the value reaches Kibana
+ *   through the environment and `kibana.tracing.yml`, never as a `--xpack...` argument.
  *
  * Inherited copies of these args are dropped first, so the value is deterministic regardless of
  * arg ordering.
@@ -58,16 +78,23 @@ export const withEvalsSecurity = (baseConfig: ScoutServerConfig): ScoutServerCon
     '--uiSettings.overrides.genAiSettings:tokenUsageTracking=true',
     '--uiSettings.overrides.agentBuilder:tracing:includeUserData=true',
     '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
-    ...(agentBuilderTracingExporters
-      ? [`--xpack.agentBuilder.tracing.exporters=${agentBuilderTracingExporters}`]
-      : []),
+    ...(agentBuilderTracingExporters ? [`--config=${join(__dirname, 'kibana.tracing.yml')}`] : []),
   ];
-  const overriddenNames = new Set(overrides.map(argName));
+  // The exporters arg is always dropped, so an inherited copy never puts credentials in argv.
+  const overriddenNames = new Set([...overrides.map(argName), EXPORTERS_ARG_PREFIX]);
 
   return {
     ...baseConfig,
     kbnTestServer: {
       ...baseConfig.kbnTestServer,
+      ...(agentBuilderTracingExporters
+        ? {
+            env: {
+              ...baseConfig.kbnTestServer.env,
+              AGENT_BUILDER_TRACING_EXPORTERS: agentBuilderTracingExporters,
+            },
+          }
+        : {}),
       serverArgs: [
         ...baseConfig.kbnTestServer.serverArgs.filter((arg) => !overriddenNames.has(argName(arg))),
         ...overrides,

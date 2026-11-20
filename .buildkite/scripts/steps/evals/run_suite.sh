@@ -109,11 +109,29 @@ record_suite_failure() {
 # The token-usage data stream lives on the step's throwaway ES, so copy it into a build artifact
 # before Scout is stopped. Suites that never enable token usage tracking write nothing, so an empty
 # export uploads nothing. Best effort: it must never change the step's exit status, and it prints
-# only counts and model ids, never the ES URL or credentials.
+# only counts and model ids, never the ES URL or credentials. It runs inside the EXIT trap, so the
+# whole export and upload share a time budget (TOKEN_USAGE_EXPORT_BUDGET_SECONDS) and every ES call
+# has its own timeout: a stuck ES must not hold the step open until Buildkite kills it.
+
+# Runs es_curl with a timeout of $1 seconds and splits the response into TU_BODY and TU_STATUS
+# (000 when curl itself failed).
+token_usage_es() {
+  local resp max_time="$1"
+  shift
+  resp="$(es_curl -sS --max-time "$max_time" -w '\n%{http_code}' "$@" 2>/dev/null)" || resp=""
+  TU_STATUS="${resp##*$'\n'}"
+  TU_BODY="${resp%$'\n'*}"
+  if [[ ! "$TU_STATUS" =~ ^[0-9]{3}$ ]]; then
+    TU_STATUS=000
+    TU_BODY=""
+  fi
+}
+
 export_token_usage() {
   [[ -f .scout/servers/local.json ]] || return 0
   command -v buildkite-agent >/dev/null 2>&1 || return 0
-  local es_url out_dir out_file scroll_id='' page hits pages=0 truncated=0 max_pages=500 name_part artifact_name=''
+  local es_url out_dir out_file scroll_id='' next_scroll_id hits pages=0 truncated=0 incomplete=0 first=1 max_pages=500 name_part artifact_name=''
+  local deadline=$((SECONDS + ${TOKEN_USAGE_EXPORT_BUDGET_SECONDS:-180})) remaining call_timeout
   es_url="$(jq -r '.hosts.elasticsearch // empty' .scout/servers/local.json | sed -E 's:/*$::; s:^([a-z]+\://)[^/@]*@:\1:')"
   [[ -n "$es_url" ]] || return 0
   out_dir="target/token_usage"
@@ -126,12 +144,29 @@ export_token_usage() {
   done
   out_file="$out_dir/token_usage${artifact_name}.ndjson"
   : >"$out_file"
-  page="$(es_curl -sS --max-time 60 "$es_url/.kibana-inference-token-usage/_search?scroll=2m&size=2000&expand_wildcards=all" \
-    -H 'Content-Type: application/json' -d '{"sort":["_doc"]}' 2>/dev/null)" || page=""
+  # Documents are written with the default 1s refresh interval, so the last ones of a run may not be
+  # searchable yet. A refresh of a missing index returns 404, which the search below handles.
+  token_usage_es 20 -X POST "$es_url/.kibana-inference-token-usage/_refresh?expand_wildcards=all"
+  token_usage_es 20 "$es_url/.kibana-inference-token-usage/_search?scroll=2m&size=2000&expand_wildcards=all" \
+    -H 'Content-Type: application/json' -d '{"sort":["_doc"]}'
   while true; do
-    hits="$(printf '%s' "$page" | jq -c '.hits.hits[]?._source' 2>/dev/null)" || break
-    # Assigned before the empty-page exit so the scroll context is cleared even when page 1 is empty.
-    scroll_id="$(printf '%s' "$page" | jq -r '._scroll_id // empty' 2>/dev/null)" || scroll_id=""
+    # Kept as the last valid scroll id, so a failing page still lets the context be cleared.
+    next_scroll_id="$(printf '%s' "$TU_BODY" | jq -r '._scroll_id // empty' 2>/dev/null)" || next_scroll_id=""
+    [[ -z "$next_scroll_id" ]] || scroll_id="$next_scroll_id"
+    # A failed or partly failed page must not look like "no more documents": the artifact would be a
+    # silent partial export. A 404 on the first search means the index was never created, i.e. the
+    # suite wrote nothing.
+    if [[ "$TU_STATUS" != 200 ]] ||
+      ! printf '%s' "$TU_BODY" | jq -e '(.error // null) == null and ((._shards.failed // 0) == 0)' >/dev/null 2>&1; then
+      if (( first )) && [[ "$TU_STATUS" == 404 ]]; then
+        break
+      fi
+      incomplete=1
+      echo "--- Token usage export failed (HTTP $TU_STATUS) after $pages page(s); the artifact is incomplete"
+      break
+    fi
+    first=0
+    hits="$(printf '%s' "$TU_BODY" | jq -c '.hits.hits[]?._source' 2>/dev/null)" || hits=""
     [[ -n "$hits" ]] || break
     if (( pages >= max_pages )); then
       truncated=1
@@ -140,24 +175,37 @@ export_token_usage() {
     printf '%s\n' "$hits" >>"$out_file"
     pages=$((pages + 1))
     [[ -n "$scroll_id" ]] || break
-    page="$(es_curl -sS --max-time 60 "$es_url/_search/scroll" -H 'Content-Type: application/json' \
-      -d "{\"scroll\":\"2m\",\"scroll_id\":\"$scroll_id\"}" 2>/dev/null)" || break
+    remaining=$((deadline - SECONDS))
+    if (( remaining <= 0 )); then
+      incomplete=1
+      echo "--- Token usage export hit its time budget after $pages page(s); the artifact is incomplete"
+      break
+    fi
+    call_timeout=$(( remaining < 20 ? remaining : 20 ))
+    token_usage_es "$call_timeout" "$es_url/_search/scroll" -H 'Content-Type: application/json' \
+      -d "{\"scroll\":\"2m\",\"scroll_id\":\"$scroll_id\"}"
   done
   if (( truncated )); then
     echo "--- Token usage export truncated at $max_pages pages; the artifact is incomplete"
   fi
-  if [[ -n "${scroll_id:-}" ]]; then
-    es_curl -sS --max-time 30 -X DELETE "$es_url/_search/scroll" -H 'Content-Type: application/json' \
-      -d "{\"scroll_id\":\"$scroll_id\"}" >/dev/null 2>&1 || true
+  if [[ -n "$scroll_id" ]]; then
+    token_usage_es 10 -X DELETE "$es_url/_search/scroll" -H 'Content-Type: application/json' \
+      -d "{\"scroll_id\":\"$scroll_id\"}"
   fi
   if [[ ! -s "$out_file" ]]; then
     echo "--- Token usage docs: 0 (nothing to upload)"
     rm -f "$out_file"
     return 0
   fi
-  echo "--- Token usage docs: $(wc -l <"$out_file") (by model)"
+  echo "--- Token usage docs: $(wc -l <"$out_file") (by model)$( (( incomplete || truncated )) && echo ' - INCOMPLETE' )"
   jq -r '.model.model_id // "unknown"' "$out_file" | sort | uniq -c || true
-  buildkite-agent artifact upload "$out_file" || true
+  remaining=$((deadline - SECONDS))
+  (( remaining >= 30 )) || remaining=30
+  if command -v timeout >/dev/null 2>&1; then
+    timeout "$remaining" buildkite-agent artifact upload "$out_file" || echo "--- Token usage upload failed or timed out"
+  else
+    buildkite-agent artifact upload "$out_file" || true
+  fi
 }
 
 on_exit() {

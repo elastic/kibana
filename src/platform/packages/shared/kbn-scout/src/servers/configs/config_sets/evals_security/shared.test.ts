@@ -11,7 +11,10 @@ import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { parse } from 'yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getConfigFromFiles } from '@kbn/config';
+import { schema } from '@kbn/config-schema';
 import type { ScoutServerConfig } from '../../../../types';
+import { withEvalsSecurity } from './shared';
 
 const CONFIG_SETS_DIR = join(__dirname, '..');
 const STATEFUL_CONFIG = 'stateful/classic.stateful.config';
@@ -26,6 +29,7 @@ const INCLUDE_USER_DATA_ARG = '--uiSettings.overrides.agentBuilder:tracing:inclu
 const INCLUDE_TOOL_DETAILS_ARG =
   '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true';
 const EXPORTERS_ARG_PREFIX = '--xpack.agentBuilder.tracing.exporters=';
+const EXPORTERS_CONFIG_PATH = join(__dirname, 'kibana.tracing.yml');
 
 /**
  * Every `evals_*` config set that is NOT Security. All other discovered sets must be built on
@@ -125,30 +129,75 @@ describe('evals config sets', () => {
       );
     });
 
-    it('passes a valid value through to every Security config set', () => {
+    it('hands a valid value to every Security config set through the environment', () => {
       const exporters = '[{"url":"https://golden.example/v1/traces"}]';
 
       securityConfigSets.forEach((configSet) => {
-        const args = serverArgs(configSet, { AGENT_BUILDER_TRACING_EXPORTERS: exporters });
+        const servers = loadServers(configSet, { AGENT_BUILDER_TRACING_EXPORTERS: exporters });
 
-        expect(args.filter((arg) => arg.startsWith(EXPORTERS_ARG_PREFIX))).toEqual([
-          `${EXPORTERS_ARG_PREFIX}${exporters}`,
-        ]);
+        expect(servers.kbnTestServer.env.AGENT_BUILDER_TRACING_EXPORTERS).toBe(exporters);
+        expect(servers.kbnTestServer.serverArgs).toContain(`--config=${EXPORTERS_CONFIG_PATH}`);
       });
     });
 
-    it('accepts exporter headers', () => {
-      const exporters = '[{"url":"https://golden.example/v1/traces","headers":{"x-key":"v"}}]';
+    it('keeps exporter headers out of the Kibana arguments Scout logs', () => {
+      const exporters =
+        '[{"url":"https://golden.example/v1/traces","headers":{"authorization":"ApiKey s3cret"}}]';
 
+      securityConfigSets.forEach((configSet) => {
+        const servers = loadServers(configSet, { AGENT_BUILDER_TRACING_EXPORTERS: exporters });
+
+        expect(servers.kbnTestServer.env.AGENT_BUILDER_TRACING_EXPORTERS).toBe(exporters);
+        expect(servers.kbnTestServer.serverArgs.join('\n')).not.toContain('s3cret');
+        expect(
+          servers.kbnTestServer.serverArgs.some((arg) => arg.startsWith(EXPORTERS_ARG_PREFIX))
+        ).toBe(false);
+      });
+    });
+
+    it('reads the exporters from the environment in the loaded Kibana config', () => {
+      const exporters = [
+        { url: 'https://golden.example/v1/traces', headers: { authorization: 'ApiKey s3cret' } },
+      ];
+      process.env.AGENT_BUILDER_TRACING_EXPORTERS = JSON.stringify(exporters);
+
+      const config = getConfigFromFiles([EXPORTERS_CONFIG_PATH]);
+
+      expect(config.xpack.agentBuilder.tracing.exporters).toBe(JSON.stringify(exporters));
       expect(
-        serverArgs('evals_security', { AGENT_BUILDER_TRACING_EXPORTERS: exporters })
-      ).toContain(`${EXPORTERS_ARG_PREFIX}${exporters}`);
+        schema
+          .arrayOf(
+            schema.object({
+              url: schema.uri({ scheme: ['http', 'https'] }),
+              headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+            })
+          )
+          .validate(config.xpack.agentBuilder.tracing.exporters)
+      ).toEqual(exporters);
+    });
+
+    it('drops an exporters arg inherited from the base config', () => {
+      const base = {
+        kbnTestServer: {
+          env: {},
+          serverArgs: [`${EXPORTERS_ARG_PREFIX}[{"url":"https://x","headers":{"a":"inherited"}}]`],
+        },
+      } as unknown as ScoutServerConfig;
+
+      expect(withEvalsSecurity(base).kbnTestServer.serverArgs.join('\n')).not.toContain(
+        'inherited'
+      );
     });
 
     it.each([
       ['the telemetry shape', '[{"grpc":{"url":"https://golden.example:4317"}}]'],
       ['a non-array', '{"url":"https://golden.example/v1/traces"}'],
       ['a non-string url', '[{"url":42}]'],
+      ['a non-URL string', '[{"url":"not a url"}]'],
+      ['a non-http(s) url', '[{"url":"ftp://golden.example/v1/traces"}]'],
+      ['headers that are an array', '[{"url":"https://golden.example","headers":["a"]}]'],
+      ['headers with a non-string value', '[{"url":"https://golden.example","headers":{"a":1}}]'],
+      ['null headers', '[{"url":"https://golden.example","headers":null}]'],
       ['a null entry', '[null]'],
     ])('throws on %s, which Kibana would reject at boot', (_name, exporters) => {
       expect(() =>
