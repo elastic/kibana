@@ -23,6 +23,7 @@ const row = {
   [attributeColumn('user')]: 'ana@example.com',
   [attributeColumn('appVersion')]: '2.3.0',
   [attributeColumn('appBuildId')]: '230',
+  [attributeColumn('appInstallationId')]: 'Install-1',
   [attributeColumn('deviceModel')]: 'iPhone15,2',
   [attributeColumn('deviceManufacturer')]: 'Apple',
   [attributeColumn('os')]: 'iOS',
@@ -48,9 +49,10 @@ describe('toMobileSessionDocuments', () => {
         tap_count: 12,
         http_request_count: 9,
         http_failed_request_count: 2,
+        platform: 'ios',
         environment: 'production',
         user: { key: 'ana@example.com' },
-        app: { version: '2.3.0', build_id: '230' },
+        app: { version: '2.3.0', build_id: '230', installation_id: 'Install-1' },
         device: { model: 'iPhone15,2', manufacturer: 'Apple' },
         os: { name: 'iOS', version: '18.1' },
         network: { connection_type: 'wifi' },
@@ -85,11 +87,23 @@ describe('toMobileSessionDocuments', () => {
         event_count: 0,
         crash_count: 0,
         tap_count: 0,
+        platform: null,
         environment: null,
-        app: { version: null, build_id: null },
+        app: { version: null, build_id: null, installation_id: null },
         search: ['s'],
       })
     );
+  });
+
+  it.each([
+    ['Android', 'android'],
+    ['iOS', 'ios'],
+    ['iPadOS', 'ios'],
+    ['Linux', null],
+  ])('reads the platform of %s as %s', (os, platform) => {
+    const [document] = toMobileSessionDocuments([{ ...row, [attributeColumn('os')]: os }]);
+
+    expect(document.platform).toBe(platform);
   });
 
   it.each(['service', 'session', 'start_time', 'end_time'])('skips a row without %s', (column) => {

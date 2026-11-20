@@ -409,6 +409,7 @@ describe('runSessionsTask', () => {
           platform: MOBILE_SESSIONS_PLATFORM,
           checkpoint: new Date(checkpoint - RECONCILE_MS).toISOString(),
           until: checkpoint,
+          rebuildUntil: checkpoint,
           windowMs: INITIAL_WINDOW_MS,
         })
       );
@@ -423,7 +424,7 @@ describe('runSessionsTask', () => {
       );
     });
 
-    it('carries on with a pass under way, and keeps when it started', async () => {
+    it('carries on with a pass under way, rebuilding up to the regular checkpoint', async () => {
       const passState: SessionsTaskState = {
         ...mobileState,
         reconcileFrom: minutesAgo(600),
@@ -447,6 +448,7 @@ describe('runSessionsTask', () => {
         expect.objectContaining({
           checkpoint: minutesAgo(600),
           until: Date.parse(minutesAgo(10)),
+          rebuildUntil: Date.parse(summarized.checkpoint),
           windowMs: 3 * INITIAL_WINDOW_MS,
         })
       );

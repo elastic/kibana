@@ -298,6 +298,7 @@ export const runSessionsTask = async ({
               now,
               checkpoint: pass.from,
               until: Date.parse(pass.until),
+              rebuildUntil: Date.parse(result.checkpoint),
               windowMs: pass.windowMs,
               budgetMs: RUN_BUDGET_MS - elapsed,
               timeLimitMs: RUN_TIME_LIMIT_MS - elapsed,

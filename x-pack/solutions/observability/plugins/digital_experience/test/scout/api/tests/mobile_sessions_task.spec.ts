@@ -26,11 +26,13 @@ const TRACES_INDEX = 'traces-generic.otel-default';
 /** Applications and an environment no other suite uses, so their summaries are exactly these. */
 const IOS_APP = 'dx-mobile-contract-ios';
 const ANDROID_APP = 'dx-mobile-contract-android';
+const UPSTREAM_ANDROID_APP = 'dx-mobile-contract-android-upstream';
 const BACKEND_APP = 'dx-mobile-contract-backend';
-const APPS = [IOS_APP, ANDROID_APP, BACKEND_APP];
+const APPS = [IOS_APP, ANDROID_APP, UPSTREAM_ANDROID_APP, BACKEND_APP];
 const ENVIRONMENT = 'dx-mobile-contract-env';
 const IOS_SESSION = 'DX-MOBILE-IOS-SESSION-1';
 const ANDROID_SESSION = 'dx-mobile-android-session-1';
+const UPSTREAM_ANDROID_SESSION = 'dx-mobile-android-upstream-session-1';
 const BACKEND_SESSION = 'dx-mobile-backend-session-1';
 
 const SECOND_MS = 1000;
@@ -45,6 +47,7 @@ const iosResource = {
     'service.name': IOS_APP,
     'service.version': '2.3.0',
     'app.build_id': '230',
+    'app.installation.id': 'DX-MOBILE-IOS-INSTALL-1',
     'telemetry.sdk.name': 'iOS',
     'telemetry.sdk.language': 'swift',
     'deployment.environment.name': ENVIRONMENT,
@@ -59,35 +62,50 @@ const androidResource = {
   attributes: {
     'service.name': ANDROID_APP,
     'service.version': '5.0.1',
+    'app.installation.id': 'dx-mobile-android-install-1',
     'telemetry.sdk.name': 'android',
     // As any Java backend's: the task tells them apart by the SDK name.
     'telemetry.sdk.language': 'java',
     'deployment.environment.name': ENVIRONMENT,
-    'device.model.name': 'Pixel 8',
+    'device.model.identifier': 'Pixel 8',
     'device.manufacturer': 'Google',
     'os.name': 'Android',
     'os.version': '15',
   },
 };
 
+/** EDOT Android once it reports the upstream SDK name, identifying itself by its distro. */
+const upstreamAndroidResource = {
+  attributes: {
+    ...androidResource.attributes,
+    'service.name': UPSTREAM_ANDROID_APP,
+    'telemetry.sdk.name': 'opentelemetry',
+    'telemetry.distro.name': 'elastic',
+  },
+};
+
+/** An EDOT Java service: the Elastic distro too, but not a mobile OS. */
 const backendResource = {
   attributes: {
     'service.name': BACKEND_APP,
     'telemetry.sdk.name': 'opentelemetry',
     'telemetry.sdk.language': 'java',
+    'telemetry.distro.name': 'elastic',
+    'os.name': 'Linux',
     'deployment.environment.name': ENVIRONMENT,
   },
 };
 
 /**
- * Two mobile sessions and a backend one. The iOS session has two screen views, a tap, two requests
- * (a success and a 503) and a crash sent five minutes after it happened, as EDOT iOS does on the
- * next launch. The Android one has two taps and a crash sent two days late, which is left out.
+ * Three mobile sessions and a backend one. The iOS session has two screen views, a tap, two
+ * requests (a success and a 503) and a crash sent five minutes after it happened, as EDOT iOS does
+ * on the next launch. The Android one has two taps and a crash sent two days late, which is left
+ * out. The upstream Android one has a tap.
  */
 const buildEvents = (startMs: number) => {
   const at = (offsetMs: number) => new Date(startMs + offsetMs).toISOString();
   const log = (
-    resource: typeof iosResource | typeof androidResource | typeof backendResource,
+    resource: { attributes: Record<string, string> },
     sessionId: string,
     offsetMs: number,
     eventName: string,
@@ -149,6 +167,7 @@ const buildEvents = (startMs: number) => {
         {},
         30 * SECOND_MS - 2 * DAY_MS
       ),
+      log(upstreamAndroidResource, UPSTREAM_ANDROID_SESSION, 0, 'app.widget.click'),
       log(backendResource, BACKEND_SESSION, 0, 'app.widget.click'),
     ],
     spans: [
@@ -250,15 +269,20 @@ apiTest.describe(
           apiKeyInvalid: false,
         });
 
+        // A summary can show up from a window that ends between its session's events, so wait
+        // until every event is summarized.
+        const newestEventMs = startMs + 5 * MINUTE_MS;
         await expect
           .poll(
             async () => {
               await runMobileSessionsTask(kbnClient);
-              return (await getSummary(esClient, IOS_SESSION)) !== undefined;
+              const { summarizedUntil } = (await getStatus(apiClient)).mobile;
+              return summarizedUntil !== null && Date.parse(summarizedUntil) > newestEventMs;
             },
             { timeout: SUMMARIZE_TIMEOUT_MS, intervals: [POLL_MS] }
           )
           .toBe(true);
+        await esClient.indices.refresh({ index: MOBILE_SESSIONS_INDEX });
 
         expect(await getSummary(esClient, IOS_SESSION)).toStrictEqual({
           session: { id: IOS_SESSION },
@@ -273,9 +297,10 @@ apiTest.describe(
           tap_count: 1,
           http_request_count: 2,
           http_failed_request_count: 1,
+          platform: 'ios',
           environment: ENVIRONMENT,
           user: { key: 'ana@example.com' },
-          app: { version: '2.3.0', build_id: '230' },
+          app: { version: '2.3.0', build_id: '230', installation_id: 'DX-MOBILE-IOS-INSTALL-1' },
           device: { model: 'iPhone15,2', manufacturer: 'Apple' },
           os: { name: 'iOS', version: '18.1' },
           network: { connection_type: 'wifi' },
@@ -299,9 +324,16 @@ apiTest.describe(
           event_count: 2,
           crash_count: 0,
           tap_count: 2,
+          platform: 'android',
+          app: { version: '5.0.1', build_id: null, installation_id: 'dx-mobile-android-install-1' },
           device: { model: 'Pixel 8', manufacturer: 'Google' },
           os: { name: 'Android', version: '15' },
           network: { connection_type: 'cell' },
+        });
+        expect(await getSummary(esClient, UPSTREAM_ANDROID_SESSION)).toMatchObject({
+          service: { name: UPSTREAM_ANDROID_APP },
+          tap_count: 1,
+          platform: 'android',
         });
         expect(await getSummary(esClient, BACKEND_SESSION)).toBeUndefined();
 

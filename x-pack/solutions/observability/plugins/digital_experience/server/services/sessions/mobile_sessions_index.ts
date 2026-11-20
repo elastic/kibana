@@ -6,6 +6,7 @@
  */
 
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { MobilePlatform } from '../../../common/otel_data';
 import {
   MOBILE_SESSIONS_INDEX_PATTERN,
   MOBILE_SESSIONS_INDEX_TEMPLATE_NAME,
@@ -31,9 +32,12 @@ export interface MobileSessionDocument {
   /** HTTP requests the app made with a known outcome, and the failed ones. */
   http_request_count: number;
   http_failed_request_count: number;
+  /** From the OS name, which both SDKs send. */
+  platform: MobilePlatform | null;
   environment: string | null;
   user: { key: string | null };
-  app: { version: string | null; build_id: string | null };
+  /** `installation_id` is a random id per install, so it counts users without an opt-in. */
+  app: { version: string | null; build_id: string | null; installation_id: string | null };
   device: { model: string | null; manufacturer: string | null };
   os: { name: string | null; version: string | null };
   network: { connection_type: string | null };
@@ -56,9 +60,10 @@ export const mobileSessionsIndexMappings = {
     tap_count: count,
     http_request_count: count,
     http_failed_request_count: count,
+    platform: keyword,
     environment: keyword,
     user: { properties: { key: keyword } },
-    app: { properties: { version: keyword, build_id: keyword } },
+    app: { properties: { version: keyword, build_id: keyword, installation_id: keyword } },
     device: { properties: { model: keyword, manufacturer: keyword } },
     os: { properties: { name: keyword, version: keyword } },
     network: { properties: { connection_type: keyword } },

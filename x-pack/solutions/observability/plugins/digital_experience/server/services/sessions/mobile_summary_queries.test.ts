@@ -30,6 +30,12 @@ describe('mobileSessionEvents', () => {
     expect(events).toContain('attributes.session.id IS NOT NULL');
   });
 
+  it('also reads them by the Elastic distro and a mobile OS, once the SDKs report upstream names', () => {
+    expect(mobileSessionEvents('changed_from', 'changed_to')).toContain(
+      'OR (resource.attributes.telemetry.distro.name == "elastic"\n      AND resource.attributes.os.name IN ("Android", "iOS", "iPadOS"))'
+    );
+  });
+
   it('leaves out crashes sent more than the longest session after they happened', () => {
     expect(mobileSessionEvents('changed_from', 'changed_to')).toContain(LATE_CRASH);
   });
@@ -87,7 +93,14 @@ describe('mobileSessionSummaryQuery', () => {
       Object.keys(MOBILE_SESSION_ATTRIBUTE_FIELDS).sort()
     );
     expect(query).toContain('resource.attributes.device.model.identifier');
+    expect(query).not.toContain('device.model.name');
     expect(query).toContain('| DROP raw_*');
+  });
+
+  it('reads the build id from service.build when EDOT iOS uses its legacy names', () => {
+    expect(query).toMatch(
+      /attribute_app_build_id = COALESCE\([^\n]*raw_resource_attributes_app_build_id[^\n]*raw_resource_attributes_service_build/
+    );
   });
 
   it('caps the rows at a lower cluster limit', () => {

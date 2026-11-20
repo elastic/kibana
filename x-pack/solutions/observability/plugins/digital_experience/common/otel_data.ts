@@ -14,9 +14,20 @@ export const BROWSER_SDK_LANGUAGE = 'webjs';
 
 /**
  * `telemetry.sdk.name` of EDOT Android and EDOT iOS, which EDOT React Native runs on. Not the
- * language: EDOT Android's is `java`, as backend Java services'.
+ * language: EDOT Android's is `java`, as backend Java services'. Both SDKs are moving to the
+ * upstream SDK values, identifying themselves with `ELASTIC_DISTRO` instead.
  */
 export const MOBILE_SDK_NAMES = ['android', 'iOS'] as const;
+export const TELEMETRY_DISTRO_NAME = 'telemetry.distro.name';
+export const ELASTIC_DISTRO = 'elastic';
+/** The resource's `os.name`; not `os.type`, which is `linux` on Android and `darwin` on iOS. */
+export const OS_NAME = 'os.name';
+/** `os.name` per mobile platform: EDOT iOS takes it from `UIDevice.systemName`, `iPadOS` on iPads. */
+export const MOBILE_OS_NAMES = {
+  android: ['Android'],
+  ios: ['iOS', 'iPadOS'],
+} as const;
+export type MobilePlatform = keyof typeof MOBILE_OS_NAMES;
 
 /** EDOT Android and EDOT iOS crash events; EDOT iOS names them `crash` with legacy names. */
 export const CRASH_EVENTS = ['app.crash', 'crash'] as const;

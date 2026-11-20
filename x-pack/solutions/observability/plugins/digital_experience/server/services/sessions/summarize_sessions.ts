@@ -70,6 +70,11 @@ export interface SummarizeSessionsParams {
   checkpoint: string | null;
   /** Summarizes no event from it on; the sync delay bounds it either way. */
   until?: number;
+  /**
+   * Rebuilds the sessions from their events up to it rather than up to their window's end: a
+   * reconcile pass must not drop the events the regular pass has summarized past the window.
+   */
+  rebuildUntil?: number;
   windowMs: number;
   /** Starts no window after this much time, so the run ends before its timeout. */
   budgetMs: number;
@@ -316,6 +321,7 @@ export const summarizeSessions = async ({
   now,
   checkpoint,
   until: untilParam = Infinity,
+  rebuildUntil,
   windowMs,
   budgetMs,
   timeLimitMs,
@@ -354,7 +360,7 @@ export const summarizeSessions = async ({
           platform,
           esClient,
           {
-            changedTo: window.changedTo,
+            changedTo: iso(Math.max(to, rebuildUntil ?? to)),
             rebuildFrom: iso(Math.max(earliest, from - SESSIONS_MAX_SESSION_HOURS * HOUR_MS)),
           },
           ids,

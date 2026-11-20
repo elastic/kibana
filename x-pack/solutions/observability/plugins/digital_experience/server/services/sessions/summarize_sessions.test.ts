@@ -519,6 +519,26 @@ describe('summarizeSessions', () => {
     );
   });
 
+  it('finds the sessions up to `until`, and rebuilds them up to `rebuildUntil`', async () => {
+    const esClient = setUp();
+    const until = UNTIL - 30 * MINUTE;
+    const rebuildUntil = UNTIL - 10 * MINUTE;
+
+    await run(esClient, {
+      checkpoint: new Date(until - 30 * MINUTE).toISOString(),
+      until,
+      rebuildUntil,
+    });
+
+    const changedToOf = (match: string) =>
+      esClient.esql.query.mock.calls
+        .filter(([{ query }]) => query.includes(match))
+        .map(([{ params }]) => paramOf(params as estypes.EsqlNamedValue[], 'changed_to'));
+    expect(changedToOf('sessions = COUNT_DISTINCT')).toEqual([new Date(until).toISOString()]);
+    expect(changedToOf('VALUES(session_id)')).toEqual([new Date(until).toISOString()]);
+    expect(changedToOf('page_view_count = COUNT')).toEqual([new Date(rebuildUntil).toISOString()]);
+  });
+
   it('reads and writes with the platform’s events, summary query and index', async () => {
     const esClient = setUp();
 

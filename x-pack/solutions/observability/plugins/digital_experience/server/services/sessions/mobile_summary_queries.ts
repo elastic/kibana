@@ -9,12 +9,17 @@ import { OTEL_EVENT_NAME, TELEMETRY_SDK_NAME } from '@kbn/apm-types';
 import { escapeStringValue } from '@kbn/esql-utils';
 import {
   CRASH_EVENTS,
+  ELASTIC_DISTRO,
   EVENT_WIDGET_CLICK,
+  MOBILE_OS_NAMES,
   MOBILE_SDK_NAMES,
+  OS_NAME,
   OTEL_OBSERVED_TIMESTAMP,
   OTEL_SCOPE_NAME,
   OTEL_SPAN_ID,
+  TELEMETRY_DISTRO_NAME,
   VIEW_CONTROLLER_SCOPE,
+  resourceAttributeField,
 } from '../../../common/otel_data';
 import { SESSIONS_MAX_SESSION_HOURS } from '../../../common/sessions';
 import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fields';
@@ -38,12 +43,13 @@ export const MOBILE_SESSION_ATTRIBUTE_FIELDS = {
   environment: SESSION_ATTRIBUTE_FIELDS.environment,
   user: SESSION_ATTRIBUTE_FIELDS.user,
   appVersion: ['resource.attributes.service.version'],
-  appBuildId: ['resource.attributes.app.build_id'],
-  // EDOT Android and EDOT iOS write the model identifier, such as `iPhone15,2`.
-  deviceModel: [
-    'resource.attributes.device.model.name',
-    'resource.attributes.device.model.identifier',
-  ],
+  // EDOT iOS writes `service.build` with its legacy attribute names.
+  appBuildId: ['resource.attributes.app.build_id', 'resource.attributes.service.build'],
+  // A random id per install, which both SDKs send, unlike the opt-in user.
+  appInstallationId: ['resource.attributes.app.installation.id'],
+  // The identifier both SDKs send, such as `iPhone15,2`: marketing names in the same column would
+  // count one device twice.
+  deviceModel: ['resource.attributes.device.model.identifier'],
   deviceManufacturer: ['resource.attributes.device.manufacturer'],
   os: ['resource.attributes.os.name'],
   osVersion: ['resource.attributes.os.version'],
@@ -59,7 +65,7 @@ export type MobileSessionAttribute = keyof typeof MOBILE_SESSION_ATTRIBUTE_FIELD
 export const MOBILE_SESSION_ATTRIBUTE_GROUPS = {
   environment: ['environment'],
   user: ['user'],
-  app: ['appVersion', 'appBuildId'],
+  app: ['appVersion', 'appBuildId', 'appInstallationId'],
   device: ['deviceModel', 'deviceManufacturer', 'os', 'osVersion'],
   network: ['networkConnectionType'],
   geo: ['countryIso', 'region', 'city'],
@@ -79,11 +85,15 @@ const LATE_CRASH = `COALESCE(${OTEL_EVENT_NAME} IN (${texts(
   CRASH_EVENTS
 )}) AND TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP}) < @timestamp - ${SESSIONS_MAX_SESSION_HOURS} hours, false)`;
 
+const MOBILE_SDK = `(${TELEMETRY_SDK_NAME} IN (${texts(MOBILE_SDK_NAMES)})
+    OR (${resourceAttributeField(TELEMETRY_DISTRO_NAME)} == ${escapeStringValue(ELASTIC_DISTRO)}
+      AND ${resourceAttributeField(OS_NAME)} IN (${texts(
+  Object.values(MOBILE_OS_NAMES).flat()
+)})))`;
+
 /** The EDOT Android and EDOT iOS events with a session and an application, but late crashes. */
-export const mobileSessionEvents = sessionEventsOf(
-  `${TELEMETRY_SDK_NAME} IN (${texts(MOBILE_SDK_NAMES)})
-  AND NOT ${LATE_CRASH}`
-);
+export const mobileSessionEvents = sessionEventsOf(`${MOBILE_SDK}
+  AND NOT ${LATE_CRASH}`);
 
 const MOBILE_SESSION_STATS: Stat[] = [
   ['start_time', 'MIN(event_time)'],

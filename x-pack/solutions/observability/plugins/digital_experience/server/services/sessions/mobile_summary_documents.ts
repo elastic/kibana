@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MOBILE_OS_NAMES, type MobilePlatform } from '../../../common/otel_data';
 import { numberOr, stringOrNull } from '../../lib/helpers/values';
 import type { MobileSessionDocument } from './mobile_sessions_index';
 import type { MobileSessionAttribute } from './mobile_summary_queries';
@@ -13,6 +14,16 @@ import { attributeColumn } from './summary_queries';
 
 const attributeOf = (row: EsqlRow, attribute: MobileSessionAttribute): string | null =>
   stringOrNull(row[attributeColumn(attribute)]);
+
+const platformOf = (os: string | null): MobilePlatform | null => {
+  if (MOBILE_OS_NAMES.android.some((name) => name === os)) {
+    return 'android';
+  }
+  if (MOBILE_OS_NAMES.ios.some((name) => name === os)) {
+    return 'ios';
+  }
+  return null;
+};
 
 /** One summary per row of the mobile summary query. */
 export const toMobileSessionDocuments = (rows: EsqlRow[]): MobileSessionDocument[] =>
@@ -46,9 +57,14 @@ export const toMobileSessionDocuments = (rows: EsqlRow[]): MobileSessionDocument
         tap_count: numberOr(row.tap_count, 0),
         http_request_count: numberOr(row.http_request_count, 0),
         http_failed_request_count: numberOr(row.http_failed_request_count, 0),
+        platform: platformOf(os),
         environment: attributeOf(row, 'environment'),
         user: { key: user },
-        app: { version: appVersion, build_id: attributeOf(row, 'appBuildId') },
+        app: {
+          version: appVersion,
+          build_id: attributeOf(row, 'appBuildId'),
+          installation_id: attributeOf(row, 'appInstallationId'),
+        },
         device: { model: deviceModel, manufacturer: attributeOf(row, 'deviceManufacturer') },
         os: { name: os, version: osVersion },
         network: { connection_type: attributeOf(row, 'networkConnectionType') },
