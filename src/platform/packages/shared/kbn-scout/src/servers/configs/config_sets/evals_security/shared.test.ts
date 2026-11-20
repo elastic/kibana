@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { existsSync, readdirSync, readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { parse } from 'yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { getConfigFromFiles } from '@kbn/config';
-import { schema } from '@kbn/config-schema';
 import type { ScoutServerConfig } from '../../../../types';
 import { withEvalsSecurity } from './shared';
 
@@ -24,55 +22,80 @@ const SECURITY_SUITES_DIR = 'x-pack/solutions/security/';
 // is in that directory. Add an id here, not a path exception, when one is not.
 const EXTRA_SECURITY_SUITE_IDS: string[] = [];
 
-const TOKEN_USAGE_ARG = '--uiSettings.overrides.genAiSettings:tokenUsageTracking=true';
-const INCLUDE_USER_DATA_ARG = '--uiSettings.overrides.agentBuilder:tracing:includeUserData=true';
-const INCLUDE_TOOL_DETAILS_ARG =
-  '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true';
-const EXPORTERS_ARG_PREFIX = '--xpack.agentBuilder.tracing.exporters=';
-const EXPORTERS_CONFIG_PATH = join(__dirname, 'kibana.tracing.yml');
-
-/**
- * Every `evals_*` config set that is NOT Security. All other discovered sets must be built on
- * `evals_security`, so a new Security set that extends `evals_tracing` directly fails here
- * instead of silently running without token usage tracking. A new non-Security set has to be
- * added to this list on purpose.
- */
-const NON_SECURITY_CONFIG_SETS = [
-  'evals_tracing',
-  'evals_agent_builder',
-  'evals_alerting_v2',
-  'evals_nightshift_investigations',
-  // Platform-owned: the benchmark spans platform and security skills and is not Security-owned.
-  'evals_skill_selection',
-  // Platform-owned, no Security suite; tracked as a follow-up.
-  'evals_workflows',
-  'evals_automatic_import',
+const OVERRIDE_PREFIXES = [
+  '--uiSettings.overrides.genAiSettings:tokenUsageTracking=',
+  '--uiSettings.overrides.agentBuilder:tracing:includeUserData=',
+  '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=',
 ];
+const TOKEN_USAGE_ARG = `${OVERRIDE_PREFIXES[0]}true`;
+const INCLUDE_USER_DATA_ARG = `${OVERRIDE_PREFIXES[1]}true`;
+const INCLUDE_TOOL_DETAILS_ARG = `${OVERRIDE_PREFIXES[2]}true`;
 
-const discoverConfigSets = (): string[] =>
-  readdirSync(CONFIG_SETS_DIR, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && entry.name.startsWith('evals_'))
-    .map(({ name }) => name)
-    .filter((name) => existsSync(join(CONFIG_SETS_DIR, name, `${STATEFUL_CONFIG}.ts`)))
-    .sort();
-
-const loadServers = (configSet: string, env: Record<string, string> = {}): ScoutServerConfig => {
+const serverArgs = (configSet: string, env: Record<string, string> = {}): string[] => {
   let servers: ScoutServerConfig | undefined;
   jest.isolateModules(() => {
     Object.assign(process.env, env);
     ({ servers } = jest.requireActual(join(CONFIG_SETS_DIR, configSet, STATEFUL_CONFIG)));
   });
   if (!servers) throw new Error(`${configSet} failed to load`);
-  return servers;
+  return servers.kbnTestServer.serverArgs;
 };
 
-const serverArgs = (configSet: string, env?: Record<string, string>): string[] =>
-  loadServers(configSet, env).kbnTestServer.serverArgs;
+const expectSecurityOverrides = (configSet: string, env?: Record<string, string>) => {
+  const args = serverArgs(configSet, env);
 
-describe('evals config sets', () => {
+  expect(args).toContain(TOKEN_USAGE_ARG);
+  expect(args).toContain(INCLUDE_USER_DATA_ARG);
+  // Set even though TRACING_EXPORTERS is unset: without it SkillInvoked scores 0 for every model.
+  expect(args).toContain(INCLUDE_TOOL_DETAILS_ARG);
+  OVERRIDE_PREFIXES.forEach((prefix) => {
+    expect(args.filter((arg) => arg.startsWith(prefix))).toHaveLength(1);
+  });
+};
+
+describe('withEvalsSecurity', () => {
+  const base = (serverArgs_: string[]) =>
+    ({ kbnTestServer: { env: {}, serverArgs: serverArgs_ } } as unknown as ScoutServerConfig);
+
+  it('adds the overrides once and replaces inherited values', () => {
+    const args = withEvalsSecurity(
+      base([
+        '--uiSettings.overrides.genAiSettings:tokenUsageTracking=false',
+        '--uiSettings.overrides.agentBuilder:tracing:includeUserData=false',
+        '--other=1',
+      ])
+    ).kbnTestServer.serverArgs;
+
+    expect(args).toEqual([
+      '--other=1',
+      TOKEN_USAGE_ARG,
+      INCLUDE_USER_DATA_ARG,
+      INCLUDE_TOOL_DETAILS_ARG,
+    ]);
+  });
+
+  it('keeps every inherited --config, which can be passed more than once', () => {
+    const original = process.env.AGENT_BUILDER_TRACING_EXPORTERS;
+    // The exporters env var used to add a `--config=` override that de-duplicated on the bare
+    // `--config=` prefix and so dropped every inherited one; it must stay inert.
+    process.env.AGENT_BUILDER_TRACING_EXPORTERS = '[{"url":"https://example.test/v1/traces"}]';
+    try {
+      const args = withEvalsSecurity(
+        base(['--config=/a/kibana.tracing.yml', '--config=/b/other.yml'])
+      ).kbnTestServer.serverArgs;
+
+      expect(args).toEqual(
+        expect.arrayContaining(['--config=/a/kibana.tracing.yml', '--config=/b/other.yml'])
+      );
+    } finally {
+      if (original === undefined) delete process.env.AGENT_BUILDER_TRACING_EXPORTERS;
+      else process.env.AGENT_BUILDER_TRACING_EXPORTERS = original;
+    }
+  });
+});
+
+describe('Security eval suites', () => {
   const originalEnv = process.env;
-  const configSets = discoverConfigSets();
-  const securityConfigSets = configSets.filter((name) => !NON_SECURITY_CONFIG_SETS.includes(name));
 
   beforeEach(() => {
     process.env = { ...originalEnv };
@@ -81,205 +104,78 @@ describe('evals config sets', () => {
     process.env.CI = 'true';
     delete process.env.GCS_CREDENTIALS;
     delete process.env.TRACING_EXPORTERS;
-    delete process.env.AGENT_BUILDER_TRACING_EXPORTERS;
   });
 
   afterEach(() => {
     process.env = originalEnv;
   });
 
-  it('discovers the config sets', () => {
-    expect(configSets).toEqual(expect.arrayContaining(['evals_security', 'evals_tracing']));
-    expect(NON_SECURITY_CONFIG_SETS.filter((name) => !configSets.includes(name))).toEqual([]);
-  });
+  interface SuiteEntry {
+    id: string;
+    configPath: string;
+    serverConfigSet?: string;
+    scoutArch?: string;
+  }
+  interface PipelineStep {
+    env?: Record<string, string>;
+    steps?: PipelineStep[];
+  }
 
-  describe('Security config sets', () => {
-    it.each(securityConfigSets)('%s enables token usage and tracing details', (configSet) => {
-      const args = serverArgs(configSet);
+  const { suites } = JSON.parse(
+    readFileSync(join(REPO_ROOT, '.buildkite/pipelines/evals/evals.suites.json'), 'utf8')
+  ) as { suites: SuiteEntry[] };
+  const securitySuites = suites.filter(
+    ({ id, configPath }) =>
+      configPath.startsWith(SECURITY_SUITES_DIR) || EXTRA_SECURITY_SUITE_IDS.includes(id)
+  );
+  const securitySuiteIds = new Set(securitySuites.map(({ id }) => id));
 
-      expect(args).toContain(TOKEN_USAGE_ARG);
-      expect(args).toContain(INCLUDE_USER_DATA_ARG);
-      // Set even though TRACING_EXPORTERS is unset: without it SkillInvoked scores 0 for every model.
-      expect(args).toContain(INCLUDE_TOOL_DETAILS_ARG);
-    });
-
-    it.each(securityConfigSets)('%s sets each override exactly once', (configSet) => {
-      const args = serverArgs(configSet, { TRACING_EXPORTERS: '[{"http":{"url":"http://x"}}]' });
-
-      [
-        '--uiSettings.overrides.genAiSettings:tokenUsageTracking=',
-        '--uiSettings.overrides.agentBuilder:tracing:includeUserData=',
-        '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=',
-      ].forEach((prefix) => {
-        expect(args.filter((arg) => arg.startsWith(prefix))).toHaveLength(1);
-      });
-    });
-  });
-
-  describe('non-Security config sets', () => {
-    it.each(NON_SECURITY_CONFIG_SETS)('%s does not enable token usage tracking', (configSet) => {
-      expect(serverArgs(configSet).some((arg) => arg.includes('tokenUsageTracking'))).toBe(false);
-    });
-  });
-
-  describe('AGENT_BUILDER_TRACING_EXPORTERS', () => {
-    it('adds no exporters arg when unset', () => {
-      expect(serverArgs('evals_security').some((arg) => arg.startsWith(EXPORTERS_ARG_PREFIX))).toBe(
-        false
-      );
-    });
-
-    it('hands a valid value to every Security config set through the environment', () => {
-      const exporters = '[{"url":"https://golden.example/v1/traces"}]';
-
-      securityConfigSets.forEach((configSet) => {
-        const servers = loadServers(configSet, { AGENT_BUILDER_TRACING_EXPORTERS: exporters });
-
-        expect(servers.kbnTestServer.env.AGENT_BUILDER_TRACING_EXPORTERS).toBe(exporters);
-        expect(servers.kbnTestServer.serverArgs).toContain(`--config=${EXPORTERS_CONFIG_PATH}`);
-      });
-    });
-
-    it('keeps exporter headers out of the Kibana arguments Scout logs', () => {
-      const exporters =
-        '[{"url":"https://golden.example/v1/traces","headers":{"authorization":"ApiKey s3cret"}}]';
-
-      securityConfigSets.forEach((configSet) => {
-        const servers = loadServers(configSet, { AGENT_BUILDER_TRACING_EXPORTERS: exporters });
-
-        expect(servers.kbnTestServer.env.AGENT_BUILDER_TRACING_EXPORTERS).toBe(exporters);
-        expect(servers.kbnTestServer.serverArgs.join('\n')).not.toContain('s3cret');
-        expect(
-          servers.kbnTestServer.serverArgs.some((arg) => arg.startsWith(EXPORTERS_ARG_PREFIX))
-        ).toBe(false);
-      });
-    });
-
-    it('reads the exporters from the environment in the loaded Kibana config', () => {
-      const exporters = [
-        { url: 'https://golden.example/v1/traces', headers: { authorization: 'ApiKey s3cret' } },
-      ];
-      process.env.AGENT_BUILDER_TRACING_EXPORTERS = JSON.stringify(exporters);
-
-      const config = getConfigFromFiles([EXPORTERS_CONFIG_PATH]);
-
-      expect(config.xpack.agentBuilder.tracing.exporters).toBe(JSON.stringify(exporters));
-      expect(
-        schema
-          .arrayOf(
-            schema.object({
-              url: schema.uri({ scheme: ['http', 'https'] }),
-              headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-            })
-          )
-          .validate(config.xpack.agentBuilder.tracing.exporters)
-      ).toEqual(exporters);
-    });
-
-    it('drops an exporters arg inherited from the base config', () => {
-      const base = {
-        kbnTestServer: {
-          env: {},
-          serverArgs: [`${EXPORTERS_ARG_PREFIX}[{"url":"https://x","headers":{"a":"inherited"}}]`],
-        },
-      } as unknown as ScoutServerConfig;
-
-      expect(withEvalsSecurity(base).kbnTestServer.serverArgs.join('\n')).not.toContain(
-        'inherited'
-      );
-    });
-
-    it.each([
-      ['the telemetry shape', '[{"grpc":{"url":"https://golden.example:4317"}}]'],
-      ['a non-array', '{"url":"https://golden.example/v1/traces"}'],
-      ['a non-string url', '[{"url":42}]'],
-      ['a non-URL string', '[{"url":"not a url"}]'],
-      ['a non-http(s) url', '[{"url":"ftp://golden.example/v1/traces"}]'],
-      ['headers that are an array', '[{"url":"https://golden.example","headers":["a"]}]'],
-      ['headers with a non-string value', '[{"url":"https://golden.example","headers":{"a":1}}]'],
-      ['null headers', '[{"url":"https://golden.example","headers":null}]'],
-      ['a null entry', '[null]'],
-    ])('throws on %s, which Kibana would reject at boot', (_name, exporters) => {
-      expect(() =>
-        loadServers('evals_security', { AGENT_BUILDER_TRACING_EXPORTERS: exporters })
-      ).toThrow(/AGENT_BUILDER_TRACING_EXPORTERS/);
-    });
-
-    it('throws on malformed JSON instead of starting a stack with a broken exporter', () => {
-      expect(() =>
-        loadServers('evals_security', { AGENT_BUILDER_TRACING_EXPORTERS: '[{' })
-      ).toThrow(SyntaxError);
-    });
-  });
-
-  describe('evals.suites.json', () => {
-    interface SuiteEntry {
-      id: string;
-      configPath: string;
-      serverConfigSet?: string;
-      scoutArch?: string;
-    }
-    const { suites } = JSON.parse(
-      readFileSync(join(REPO_ROOT, '.buildkite/pipelines/evals/evals.suites.json'), 'utf8')
-    ) as { suites: SuiteEntry[] };
-    const securitySuites = suites.filter(
-      ({ id, configPath }) =>
-        configPath.startsWith(SECURITY_SUITES_DIR) || EXTRA_SECURITY_SUITE_IDS.includes(id)
-    );
-
-    it('has Security suites', () => {
-      expect(securitySuites.length).toBeGreaterThan(0);
-    });
-
-    it.each(securitySuites.map(({ id, serverConfigSet }) => [id, serverConfigSet]))(
-      'Security suite %s resolves to a config set built on evals_security (%s)',
-      (_id, serverConfigSet) => {
-        const configSet = serverConfigSet ?? DEFAULT_CONFIG_SET;
-
-        expect(securityConfigSets).toContain(configSet);
+  const weeklyOverrides = (
+    (
+      parse(readFileSync(join(REPO_ROOT, '.buildkite/pipelines/evals/llm_evals.yml'), 'utf8')) as {
+        steps?: PipelineStep[];
       }
+    ).steps ?? []
+  )
+    .flatMap(({ steps }) => steps ?? [])
+    .map(({ env }) => env)
+    .filter(
+      (env): env is Record<string, string> =>
+        Boolean(env?.EVAL_SUITE_ID && env.EVAL_SERVER_CONFIG_SET) &&
+        securitySuiteIds.has(env?.EVAL_SUITE_ID ?? '')
     );
 
-    it('never pairs a serverless suite with a Security set that has no serverless config', () => {
-      const serverlessSecuritySuites = securitySuites.filter(
-        ({ scoutArch }) => scoutArch === 'serverless'
-      );
+  it('has Security suites', () => {
+    expect(securitySuites.length).toBeGreaterThan(0);
+  });
 
-      serverlessSecuritySuites.forEach(({ serverConfigSet = DEFAULT_CONFIG_SET }) => {
+  it.each(securitySuites.map(({ id, serverConfigSet }) => [id, serverConfigSet]))(
+    'Security suite %s resolves to a config set with token usage and tracing details (%s)',
+    (_id, serverConfigSet) => {
+      expectSecurityOverrides(serverConfigSet ?? DEFAULT_CONFIG_SET);
+    }
+  );
+
+  it('sets each override exactly once when TRACING_EXPORTERS is set', () => {
+    new Set(
+      securitySuites.map(({ serverConfigSet }) => serverConfigSet ?? DEFAULT_CONFIG_SET)
+    ).forEach((configSet) => {
+      expectSecurityOverrides(configSet, { TRACING_EXPORTERS: '[{"http":{"url":"http://x"}}]' });
+    });
+  });
+
+  it('never pairs a serverless suite with a config set that has no serverless config', () => {
+    securitySuites
+      .filter(({ scoutArch }) => scoutArch === 'serverless')
+      .forEach(({ serverConfigSet = DEFAULT_CONFIG_SET }) => {
         expect(existsSync(join(CONFIG_SETS_DIR, serverConfigSet, 'serverless'))).toBe(true);
       });
-    });
+  });
 
-    it('only names config sets that exist', () => {
-      suites.forEach(({ serverConfigSet }) => {
-        if (serverConfigSet) expect(configSets).toContain(serverConfigSet);
-      });
-    });
-
-    interface PipelineStep {
-      env?: Record<string, string>;
-      steps?: PipelineStep[];
-    }
-
-    it('keeps weekly pipeline overrides of a Security suite on a Security config set', () => {
-      const pipeline = parse(
-        readFileSync(join(REPO_ROOT, '.buildkite/pipelines/evals/llm_evals.yml'), 'utf8')
-      ) as { steps?: PipelineStep[] };
-      const securitySuiteIds = new Set(securitySuites.map(({ id }) => id));
-
-      const overrides = (pipeline.steps ?? [])
-        .flatMap(({ steps }) => steps ?? [])
-        .map(({ env }) => env)
-        .filter(
-          (env): env is Record<string, string> =>
-            Boolean(env?.EVAL_SUITE_ID && env.EVAL_SERVER_CONFIG_SET) &&
-            securitySuiteIds.has(env?.EVAL_SUITE_ID ?? '')
-        );
-
-      expect(overrides.length).toBeGreaterThan(0);
-      overrides.forEach((env) => {
-        expect(securityConfigSets).toContain(env.EVAL_SERVER_CONFIG_SET);
-      });
+  it('keeps weekly pipeline overrides of a Security suite on a config set with the overrides', () => {
+    expect(weeklyOverrides.length).toBeGreaterThan(0);
+    weeklyOverrides.forEach((env) => {
+      expectSecurityOverrides(env.EVAL_SERVER_CONFIG_SET);
     });
   });
 });

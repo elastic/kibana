@@ -1,4 +1,0 @@
-# Keeps Agent Builder trace exporter headers (credentials) out of Kibana process arguments, which
-# Scout logs: the value is read from the environment instead. Only loaded when
-# AGENT_BUILDER_TRACING_EXPORTERS is set.
-xpack.agentBuilder.tracing.exporters: ${AGENT_BUILDER_TRACING_EXPORTERS}

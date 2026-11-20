@@ -47,8 +47,6 @@ dependsOn:
   - '@kbn/as-code-dashboard-schema'
   - '@kbn/as-code-discover-schema'
   - '@kbn/monaco'
-  - '@kbn/config'
-  - '@kbn/config-schema'
 tags:
   - test-helper
   - package

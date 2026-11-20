@@ -189,8 +189,13 @@ export_token_usage() {
     echo "--- Token usage export truncated at $max_pages pages; the artifact is incomplete"
   fi
   if [[ -n "$scroll_id" ]]; then
-    token_usage_es 10 -X DELETE "$es_url/_search/scroll" -H 'Content-Type: application/json' \
-      -d "{\"scroll_id\":\"$scroll_id\"}"
+    # Counted against the budget like every other call; with none left the context just expires
+    # (the 2m scroll keep-alive) on the throwaway ES.
+    remaining=$((deadline - SECONDS))
+    if (( remaining > 0 )); then
+      token_usage_es $(( remaining < 10 ? remaining : 10 )) -X DELETE "$es_url/_search/scroll" \
+        -H 'Content-Type: application/json' -d "{\"scroll_id\":\"$scroll_id\"}"
+    fi
   fi
   if [[ ! -s "$out_file" ]]; then
     echo "--- Token usage docs: 0 (nothing to upload)"
@@ -200,7 +205,10 @@ export_token_usage() {
   echo "--- Token usage docs: $(wc -l <"$out_file") (by model)$( (( incomplete || truncated )) && echo ' - INCOMPLETE' )"
   jq -r '.model.model_id // "unknown"' "$out_file" | sort | uniq -c || true
   remaining=$((deadline - SECONDS))
-  (( remaining >= 30 )) || remaining=30
+  if (( remaining <= 0 )); then
+    echo "--- Token usage export hit its time budget before the upload; the artifact was not uploaded"
+    return 0
+  fi
   if command -v timeout >/dev/null 2>&1; then
     timeout "$remaining" buildkite-agent artifact upload "$out_file" || echo "--- Token usage upload failed or timed out"
   else
@@ -211,7 +219,6 @@ export_token_usage() {
 on_exit() {
   local exit_status=$?
   trap - EXIT
-  export_token_usage || true
   # The pre-run snapshot is only a baseline; ES fills `.es` while the suite runs, so these are the
   # numbers that show a watermark breach. Skipped in the parent fanout step, which never starts ES.
   # Diagnostics must never abort the trap under `set -e`, or the steps below are skipped and the
@@ -221,8 +228,11 @@ on_exit() {
     df -h . || true
     du -sh .es 2>/dev/null || true
   fi
-  cleanup
   record_suite_failure "$exit_status"
+  # Last before cleanup, which stops the ES it reads from: on a timeout or cancel the trap only gets
+  # a short grace period before SIGKILL, and the triage data above must already be written.
+  export_token_usage || true
+  cleanup
   exit "$exit_status"
 }
 

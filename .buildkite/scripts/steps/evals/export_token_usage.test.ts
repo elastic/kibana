@@ -143,6 +143,23 @@ describe('export_token_usage', () => {
     expect(output).toContain('time budget');
   });
 
+  it('counts the scroll cleanup and the upload against the budget', () => {
+    const { calls } = run('budget');
+
+    expect(calls.some((call) => call.startsWith('DELETE'))).toBe(false);
+    expect(calls.some((call) => call.startsWith('UPLOAD'))).toBe(false);
+  });
+
+  it('exports after the triage data is written and before cleanup stops ES', () => {
+    const onExit = Fs.readFileSync(SCRIPT, 'utf-8').match(/^on_exit\(\) \{[\s\S]*?^}/m)?.[0] ?? '';
+    const at = (needle: string) => onExit.indexOf(needle);
+
+    expect(at('du -sh .es')).toBeGreaterThan(-1);
+    expect(at('du -sh .es')).toBeLessThan(at('record_suite_failure "$exit_status"'));
+    expect(at('record_suite_failure "$exit_status"')).toBeLessThan(at('export_token_usage ||'));
+    expect(at('export_token_usage ||')).toBeLessThan(at('\n  cleanup\n'));
+  });
+
   it('never prints the Elasticsearch credentials', () => {
     (['ok', 'shardfail', 'scrollfail', 'budget'] as Scenario[]).forEach((scenario) => {
       expect(run(scenario).output).not.toMatch(/u:p@/);
