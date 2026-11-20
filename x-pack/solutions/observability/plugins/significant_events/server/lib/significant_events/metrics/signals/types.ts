@@ -6,8 +6,8 @@
  */
 
 export type SignalSchema = 'ecs' | 'otel';
-export type SignalDirection = 'higher_is_worse' | 'lower_is_worse';
 export type SignalComparison = '>' | '>=' | '<' | '==';
+export type SignalMetricType = 'gauge' | 'counter' | 'state';
 
 export type SignalSource =
   | {
@@ -17,20 +17,17 @@ export type SignalSource =
       ruleTemplateId: string;
       adapted?: string;
     }
-  | { kind: 'nightshift_default'; reason: string }
-  | { kind: 'undecided'; reason: string };
+  | { kind: 'nightshift_default'; reason: string };
 
 export type SignalFormulaKind =
   | 'average'
   | 'inverse_average'
   | 'container_average'
-  | 'restart_delta'
   | 'matching_value_count'
   | 'minimum'
   | 'maximum'
   | 'error_rate'
-  | 'ratio'
-  | 'oom_killed_count';
+  | 'ratio';
 
 interface SignalTemplateVariantBase {
   schema: SignalSchema;
@@ -38,11 +35,6 @@ interface SignalTemplateVariantBase {
   field: string;
   formula: string;
   preAggregationFilter?: string;
-  additionalBreakdown?: readonly string[];
-  minimumSampleCount?: number;
-  direction: SignalDirection;
-  comparison: SignalComparison;
-  threshold: number;
   source: SignalSource;
 }
 
@@ -53,14 +45,12 @@ export type SignalTemplateVariant = SignalTemplateVariantBase &
           | 'average'
           | 'inverse_average'
           | 'container_average'
-          | 'restart_delta'
           | 'minimum'
           | 'maximum'
           | 'error_rate';
       }
     | { formulaKind: 'matching_value_count'; matchingValues: readonly string[] }
     | { formulaKind: 'ratio'; denominatorField: string }
-    | { formulaKind: 'oom_killed_count'; reasonField: string; reasonValue: string }
   );
 
 /** Returns the fields that must have data before a signal variant can run. */
@@ -73,18 +63,31 @@ export const getSignalVariantFields = (variant: SignalTemplateVariant): string[]
   }
 };
 
-/** Returns fields that improve schema choice but are not required to run. */
-export const getSignalVariantPreferredFields = (variant: SignalTemplateVariant): string[] =>
-  variant.formulaKind === 'oom_killed_count' ? [variant.reasonField] : [];
+export interface SignalTemplateEntityField {
+  name: string;
+  fields: readonly string[];
+}
+
+export interface SignalTemplateHint {
+  comparison: SignalComparison;
+  threshold: number;
+  window: string;
+  min_samples?: number;
+  sample_column?: string;
+}
 
 export interface SignalTemplate {
   signal: string;
   subtypes: readonly string[];
-  window: string;
+  metricType: SignalMetricType;
+  unit: string;
+  contextColumns: readonly string[];
+  hint: SignalTemplateHint;
+  additionalEntityFields?: readonly SignalTemplateEntityField[];
   variants: readonly SignalTemplateVariant[];
 }
 
-/** One schema's contribution to a check; several when a check merges schemas per entity. */
+/** One schema's contribution to a measurement definition. */
 export interface SignalMeasurement {
   schema: SignalSchema;
   dataset: string;
@@ -93,27 +96,42 @@ export interface SignalMeasurement {
   source: SignalSource;
 }
 
-export interface SignalClusterExclusion {
-  names: string[];
+export interface MeasurementDefinitionHint extends SignalTemplateHint {
+  source: SignalSource;
 }
 
-export interface SignalCheck {
+export type MeasurementPreviewRow = {
+  entity: string;
+  minute: string;
+  value: number;
+} & Record<string, string | number | boolean | null>;
+
+export interface MeasurementDefinitionPreview {
+  from: string;
+  to: string;
+  rows: MeasurementPreviewRow[];
+  truncated: boolean;
+  error?: string;
+}
+
+export interface MeasurementDefinition {
   signal: string;
   type_ki_id: string;
-  subtype: string;
+  entity_type: string;
+  entity_fields: string[];
+  metric_type: SignalMetricType;
+  unit: string;
+  value_column: 'value';
+  context_columns: string[];
+  esql: string;
+  hint: MeasurementDefinitionHint;
   measurements: SignalMeasurement[];
-  excluded_clusters?: SignalClusterExclusion;
-  breakdown: string[];
-  window: string;
-  direction: SignalDirection;
-  comparison: SignalComparison;
-  threshold: number;
-  esql_preview: string;
+  preview?: MeasurementDefinitionPreview;
 }
 
-export interface SkippedSignal {
+export interface SkippedMeasurementDefinition {
   signal: string;
   type_ki_id: string;
-  subtype: string;
+  entity_type: string;
   reason: string;
 }

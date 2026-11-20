@@ -43,11 +43,12 @@ import {
   identifyMetricsEntities,
 } from '../../../../lib/significant_events/metrics/identify_metrics_entities';
 import {
-  buildSignalChecks,
+  buildMeasurementDefinitions,
   getApplicableSignalTemplates,
   isMetricsTypeKnowledgeIndicator,
-} from '../../../../lib/significant_events/metrics/signals/build_signal_checks';
+} from '../../../../lib/significant_events/metrics/signals/build_measurement_definitions';
 import { checkSignalFields } from '../../../../lib/significant_events/metrics/signals/check_signal_fields';
+import { runDefinitionPreviews } from '../../../../lib/significant_events/metrics/signals/run_definition_previews';
 import { SIGNAL_TEMPLATES } from '../../../../lib/significant_events/metrics/signals/signal_templates';
 
 const getSerializedByteLength = (value: unknown) =>
@@ -474,11 +475,11 @@ const identifyMetricsEntitiesRoute = createServerRoute({
   },
 });
 
-const getMetricsSignalChecksRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{sourceId}/metrics/signal_checks',
+const getMetricsDefinitionsRoute = createServerRoute({
+  endpoint: 'GET /internal/nightshift/sources/{sourceId}/metrics/definitions',
   options: {
     access: 'internal',
-    summary: 'Build runnable signal checks for a metrics source',
+    summary: 'Build measurement definitions for a metrics source',
     timeout: { idleSocket: 300_000 },
   },
   security: {
@@ -489,9 +490,15 @@ const getMetricsSignalChecksRoute = createServerRoute({
   params: lazySchema(() =>
     z.object({
       path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      query: z.object({
+        preview: z
+          .enum(['true', 'false'])
+          .optional()
+          .transform((value) => value === 'true'),
+      }),
     })
   ),
-  handler: async ({ params, request, getScopedClients, server, logger }) => {
+  handler: async ({ params, request, getScopedClients, server }) => {
     const scopedClients = await getScopedClients({ request });
     const { streamDataEsClient, sourcesClient, licensing } = scopedClients;
 
@@ -511,28 +518,32 @@ const getMetricsSignalChecksRoute = createServerRoute({
     ]);
     const typeKIs = features.filter(isMetricsTypeKnowledgeIndicator);
     const templates = getApplicableSignalTemplates(typeKIs, SIGNAL_TEMPLATES);
-    const { presence: fieldPresence, truncated: fieldPresenceTruncated } = await checkSignalFields({
+    const fieldPresence = await checkSignalFields({
       esClient: streamDataEsClient,
       esql: source.esql,
       datasets,
       templates,
       signal: requestSignal,
     });
-    if (fieldPresenceTruncated) {
-      logger
-        .get('features_identification', 'metrics_signal_checks', source.id)
-        .warn(
-          `Signal field presence probe reached its limit for source [${source.id}]; cluster exclusions were skipped.`
-        );
-    }
 
-    return buildSignalChecks({
+    const result = buildMeasurementDefinitions({
       esql: source.esql,
       typeKIs,
       templates,
       fieldPresence,
-      fieldPresenceTruncated,
     });
+    if (!params.query.preview) {
+      return result;
+    }
+
+    return {
+      definitions: await runDefinitionPreviews({
+        esClient: streamDataEsClient,
+        definitions: result.definitions,
+        signal: requestSignal,
+      }),
+      skipped: result.skipped,
+    };
   },
 });
 
@@ -581,6 +592,6 @@ export const internalIdentifyKIFeaturesRoutes = {
   ...identifyInferredFeaturesRoute,
   ...identifyComputedFeaturesRoute,
   ...identifyMetricsEntitiesRoute,
-  ...getMetricsSignalChecksRoute,
+  ...getMetricsDefinitionsRoute,
   ...shouldIdentifyRoute,
 };

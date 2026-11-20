@@ -34,29 +34,23 @@ const nightshiftDefault = (reason: string): SignalSource => ({
   reason,
 });
 
-const undecided = (reason: string): SignalSource => ({
-  kind: 'undecided',
-  reason,
-});
-
 // Signal ids are stable API values; add new ids instead of renaming existing ones.
 export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
   // kubernetes_otel/kibana/alerting_rule_template/kubernetes_otel-container-cpu-throttling.json L32, L40-L41.
   {
     signal: 'k8s.container.cpu_vs_limit',
     subtypes: WORKLOAD_SUBTYPES.slice(0, 3),
-    window: '15 minutes',
+    metricType: 'gauge',
+    unit: 'ratio',
+    contextColumns: ['worst_container'],
+    hint: { comparison: '>', threshold: 0.9, window: '15 minutes' },
     variants: [
       {
         schema: 'ecs',
         dataset: 'kubernetes.container',
         field: 'kubernetes.container.cpu.usage.limit.pct',
-        formula:
-          'MAX over containers of AVG(kubernetes.container.cpu.usage.limit.pct) per container',
+        formula: 'Worst per container AVG(kubernetes.container.cpu.usage.limit.pct)',
         formulaKind: 'container_average',
-        direction: 'higher_is_worse',
-        comparison: '>',
-        threshold: 0.9,
         source: nightshiftDefault(
           'OTel template threshold applied to the Elastic Agent field; the classic Kubernetes package ships no rule template'
         ),
@@ -65,11 +59,8 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         schema: 'otel',
         dataset: 'kubeletstatsreceiver.otel',
         field: 'k8s.container.cpu_limit_utilization',
-        formula: 'MAX over containers of AVG(k8s.container.cpu_limit_utilization) per container',
+        formula: 'Worst per container AVG(k8s.container.cpu_limit_utilization)',
         formulaKind: 'container_average',
-        direction: 'higher_is_worse',
-        comparison: '>',
-        threshold: 0.9,
         source: kubernetesOtelRule('kubernetes_otel-container-cpu-throttling'),
       },
     ],
@@ -78,102 +69,26 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
   {
     signal: 'k8s.container.memory_vs_limit',
     subtypes: WORKLOAD_SUBTYPES.slice(0, 3),
-    window: '15 minutes',
+    metricType: 'gauge',
+    unit: 'ratio',
+    contextColumns: ['worst_container'],
+    hint: { comparison: '>', threshold: 0.9, window: '15 minutes' },
     variants: [
       {
         schema: 'ecs',
         dataset: 'kubernetes.container',
         field: 'kubernetes.container.memory.usage.limit.pct',
-        formula:
-          'MAX over containers of AVG(kubernetes.container.memory.usage.limit.pct) per container',
+        formula: 'Worst per container AVG(kubernetes.container.memory.usage.limit.pct)',
         formulaKind: 'container_average',
-        direction: 'higher_is_worse',
-        comparison: '>',
-        threshold: 0.9,
         source: nightshiftDefault('OTel template threshold applied to the Elastic Agent field'),
       },
       {
         schema: 'otel',
         dataset: 'kubeletstatsreceiver.otel',
         field: 'k8s.container.memory_limit_utilization',
-        formula: 'MAX over containers of AVG(k8s.container.memory_limit_utilization) per container',
+        formula: 'Worst per container AVG(k8s.container.memory_limit_utilization)',
         formulaKind: 'container_average',
-        direction: 'higher_is_worse',
-        comparison: '>',
-        threshold: 0.9,
         source: kubernetesOtelRule('kubernetes_otel-container-memory-near-limit'),
-      },
-    ],
-  },
-  // kubernetes_otel/kibana/alerting_rule_template/kubernetes_otel-pod-crashloopbackoff.json L31, L39-L40.
-  {
-    signal: 'k8s.container.restarts',
-    subtypes: WORKLOAD_SUBTYPES,
-    window: '15 minutes',
-    variants: [
-      {
-        schema: 'ecs',
-        dataset: 'kubernetes.state_container',
-        field: 'kubernetes.container.status.restarts',
-        formula: 'SUM(MAX(restarts) - MIN(restarts) per container)',
-        formulaKind: 'restart_delta',
-        direction: 'higher_is_worse',
-        comparison: '>',
-        threshold: 0,
-        source: undecided('counter delta over 15 min; no rule template for the classic package'),
-      },
-      {
-        schema: 'otel',
-        dataset: 'k8sclusterreceiver.otel',
-        field: 'k8s.container.restarts',
-        formula: 'SUM(MAX(restarts) - MIN(restarts) per container)',
-        formulaKind: 'restart_delta',
-        direction: 'higher_is_worse',
-        comparison: '>',
-        threshold: 0,
-        source: kubernetesOtelRule(
-          'kubernetes_otel-pod-crashloopbackoff',
-          "MAX minus MIN over the window instead of MAX, so restarts from before the window don't fire"
-        ),
-      },
-    ],
-  },
-  // kubernetes_otel/kibana/alerting_rule_template/kubernetes_otel-oomkilled-containers.json L31, L39-L40.
-  {
-    signal: 'k8s.container.oom_killed',
-    subtypes: WORKLOAD_SUBTYPES,
-    window: '15 minutes',
-    variants: [
-      {
-        schema: 'ecs',
-        dataset: 'kubernetes.state_container',
-        field: 'kubernetes.container.status.restarts',
-        formula:
-          'COUNT(containers whose restart counter rose to a level that reports an OOMKilled reason)',
-        formulaKind: 'oom_killed_count',
-        reasonField: 'kubernetes.container.status.last_terminated_reason',
-        reasonValue: 'OOMKilled',
-        direction: 'higher_is_worse',
-        comparison: '>',
-        threshold: 0,
-        source: nightshiftDefault('OTel template threshold applied to the Elastic Agent field'),
-      },
-      {
-        schema: 'otel',
-        dataset: 'k8sclusterreceiver.otel',
-        field: 'k8s.container.restarts',
-        formula:
-          'COUNT(containers whose restart counter rose to a level that reports an OOMKilled reason)',
-        formulaKind: 'oom_killed_count',
-        reasonField: 'k8s.container.status.last_terminated_reason',
-        reasonValue: 'OOMKilled',
-        direction: 'higher_is_worse',
-        comparison: '>',
-        threshold: 0,
-        source: kubernetesOtelRule(
-          'kubernetes_otel-oomkilled-containers',
-          'requires the restart counter to rise within the window to a level that reports an OOMKilled reason'
-        ),
       },
     ],
   },
@@ -181,18 +96,18 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
   {
     signal: 'k8s.node.not_ready',
     subtypes: ['k8s.node'],
-    window: '1 minute',
+    metricType: 'state',
+    unit: 'boolean',
+    contextColumns: [],
+    hint: { comparison: '==', threshold: 1, window: '1 minute' },
     variants: [
       {
         schema: 'ecs',
         dataset: 'kubernetes.state_node',
         field: 'kubernetes.node.status.ready',
-        formula: 'COUNT(kubernetes.node.status.ready IN ("false", "unknown"))',
+        formula: 'MAX(CASE(ready IN ("false", "unknown"), 1, 0))',
         formulaKind: 'matching_value_count',
         matchingValues: ['false', 'unknown'],
-        direction: 'higher_is_worse',
-        comparison: '>',
-        threshold: 0,
         source: nightshiftDefault(
           'condition from the classic Kubernetes dashboard, not a rule template'
         ),
@@ -201,11 +116,8 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         schema: 'otel',
         dataset: 'k8sclusterreceiver.otel',
         field: 'k8s.node.condition_ready',
-        formula: 'MIN(k8s.node.condition_ready)',
+        formula: '1 - MIN(k8s.node.condition_ready)',
         formulaKind: 'minimum',
-        direction: 'lower_is_worse',
-        comparison: '==',
-        threshold: 0,
         source: kubernetesOtelRule('kubernetes_otel-node-not-ready'),
       },
     ],
@@ -214,18 +126,18 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
   {
     signal: 'k8s.node.memory_pressure',
     subtypes: ['k8s.node'],
-    window: '1 minute',
+    metricType: 'state',
+    unit: 'boolean',
+    contextColumns: [],
+    hint: { comparison: '==', threshold: 1, window: '1 minute' },
     variants: [
       {
         schema: 'ecs',
         dataset: 'kubernetes.state_node',
         field: 'kubernetes.node.status.memory_pressure',
-        formula: 'COUNT(*) WHERE kubernetes.node.status.memory_pressure == "true"',
+        formula: 'MAX(CASE(memory_pressure == "true", 1, 0))',
         formulaKind: 'matching_value_count',
         matchingValues: ['true'],
-        direction: 'higher_is_worse',
-        comparison: '>',
-        threshold: 0,
         source: nightshiftDefault('OTel template threshold applied to the Elastic Agent field'),
       },
       {
@@ -234,9 +146,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         field: 'k8s.node.condition_memory_pressure',
         formula: 'MAX(k8s.node.condition_memory_pressure)',
         formulaKind: 'maximum',
-        direction: 'higher_is_worse',
-        comparison: '==',
-        threshold: 1,
         source: kubernetesOtelRule('kubernetes_otel-node-memory-pressure'),
       },
     ],
@@ -245,18 +154,18 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
   {
     signal: 'k8s.node.disk_pressure',
     subtypes: ['k8s.node'],
-    window: '1 minute',
+    metricType: 'state',
+    unit: 'boolean',
+    contextColumns: [],
+    hint: { comparison: '==', threshold: 1, window: '1 minute' },
     variants: [
       {
         schema: 'ecs',
         dataset: 'kubernetes.state_node',
         field: 'kubernetes.node.status.disk_pressure',
-        formula: 'COUNT(*) WHERE kubernetes.node.status.disk_pressure == "true"',
+        formula: 'MAX(CASE(disk_pressure == "true", 1, 0))',
         formulaKind: 'matching_value_count',
         matchingValues: ['true'],
-        direction: 'higher_is_worse',
-        comparison: '>',
-        threshold: 0,
         source: nightshiftDefault('OTel template threshold applied to the Elastic Agent field'),
       },
       {
@@ -265,9 +174,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         field: 'k8s.node.condition_disk_pressure',
         formula: 'MAX(k8s.node.condition_disk_pressure)',
         formulaKind: 'maximum',
-        direction: 'higher_is_worse',
-        comparison: '==',
-        threshold: 1,
         source: kubernetesOtelRule('kubernetes_otel-node-disk-pressure'),
       },
     ],
@@ -276,7 +182,10 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
   {
     signal: 'k8s.node.filesystem_usage',
     subtypes: ['k8s.node'],
-    window: '15 minutes',
+    metricType: 'gauge',
+    unit: 'ratio',
+    contextColumns: [],
+    hint: { comparison: '>', threshold: 0.85, window: '15 minutes' },
     variants: [
       {
         schema: 'ecs',
@@ -285,9 +194,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         denominatorField: 'kubernetes.node.fs.capacity.bytes',
         formula: 'AVG(kubernetes.node.fs.used.bytes) / AVG(kubernetes.node.fs.capacity.bytes)',
         formulaKind: 'ratio',
-        direction: 'higher_is_worse',
-        comparison: '>',
-        threshold: 0.85,
         source: nightshiftDefault('OTel template threshold applied to the Elastic Agent field'),
       },
       {
@@ -297,9 +203,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         denominatorField: 'k8s.node.filesystem.capacity',
         formula: 'AVG(k8s.node.filesystem.usage) / AVG(k8s.node.filesystem.capacity)',
         formulaKind: 'ratio',
-        direction: 'higher_is_worse',
-        comparison: '>',
-        threshold: 0.85,
         source: kubernetesOtelRule('kubernetes_otel-node-filesystem-saturation'),
       },
     ],
@@ -308,7 +211,14 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
   {
     signal: 'k8s.volume.space_low',
     subtypes: ['k8s.namespace'],
-    window: '15 minutes',
+    metricType: 'gauge',
+    unit: 'ratio',
+    contextColumns: [],
+    hint: { comparison: '<', threshold: 0.2, window: '15 minutes' },
+    additionalEntityFields: [
+      { name: 'kubernetes.pod.name', fields: ['kubernetes.pod.name'] },
+      { name: 'volume', fields: ['k8s.volume.name', 'kubernetes.volume.name'] },
+    ],
     variants: [
       {
         schema: 'ecs',
@@ -318,10 +228,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         formula:
           'AVG(kubernetes.volume.fs.available.bytes) / AVG(kubernetes.volume.fs.capacity.bytes)',
         formulaKind: 'ratio',
-        additionalBreakdown: ['kubernetes.pod.name', 'kubernetes.volume.name'],
-        direction: 'lower_is_worse',
-        comparison: '<',
-        threshold: 0.2,
         source: nightshiftDefault('OTel template threshold applied to the Elastic Agent field'),
       },
       {
@@ -331,10 +237,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         denominatorField: 'k8s.volume.capacity',
         formula: 'AVG(k8s.volume.available) / AVG(k8s.volume.capacity)',
         formulaKind: 'ratio',
-        additionalBreakdown: ['kubernetes.pod.name', 'k8s.volume.name'],
-        direction: 'lower_is_worse',
-        comparison: '<',
-        threshold: 0.2,
         source: kubernetesOtelRule('kubernetes_otel-persistent-volume-space-low'),
       },
     ],
@@ -343,7 +245,16 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
   {
     signal: 'host.cpu.utilization',
     subtypes: ['host'],
-    window: '5 minutes',
+    metricType: 'gauge',
+    unit: 'ratio',
+    contextColumns: ['sample_count'],
+    hint: {
+      comparison: '>=',
+      threshold: 0.85,
+      window: '5 minutes',
+      min_samples: 5,
+      sample_column: 'sample_count',
+    },
     variants: [
       {
         schema: 'ecs',
@@ -351,10 +262,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         field: 'system.cpu.total.norm.pct',
         formula: 'AVG(system.cpu.total.norm.pct)',
         formulaKind: 'average',
-        minimumSampleCount: 5,
-        direction: 'higher_is_worse',
-        comparison: '>=',
-        threshold: 0.85,
         source: systemRule('system-cpu-utilization'),
       },
       {
@@ -364,10 +271,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         formula: '1 - AVG(metrics.system.cpu.utilization) WHERE state == "idle"',
         formulaKind: 'inverse_average',
         preAggregationFilter: 'state == "idle"',
-        minimumSampleCount: 5,
-        direction: 'higher_is_worse',
-        comparison: '>=',
-        threshold: 0.85,
         source: nightshiftDefault(
           'system template threshold applied to the OTel field; no system OTel template'
         ),
@@ -378,7 +281,16 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
   {
     signal: 'host.memory.utilization',
     subtypes: ['host'],
-    window: '5 minutes',
+    metricType: 'gauge',
+    unit: 'ratio',
+    contextColumns: ['sample_count'],
+    hint: {
+      comparison: '>=',
+      threshold: 0.9,
+      window: '5 minutes',
+      min_samples: 5,
+      sample_column: 'sample_count',
+    },
     variants: [
       {
         schema: 'ecs',
@@ -386,10 +298,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         field: 'system.memory.actual.used.pct',
         formula: 'AVG(system.memory.actual.used.pct)',
         formulaKind: 'average',
-        minimumSampleCount: 5,
-        direction: 'higher_is_worse',
-        comparison: '>=',
-        threshold: 0.9,
         source: systemRule('system-memory-utilization'),
       },
       {
@@ -399,10 +307,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         formula: 'AVG(system.memory.utilization) WHERE state == "used"',
         formulaKind: 'average',
         preAggregationFilter: 'state == "used"',
-        minimumSampleCount: 5,
-        direction: 'higher_is_worse',
-        comparison: '>=',
-        threshold: 0.9,
         source: nightshiftDefault(
           'system template threshold applied to the OTel field; no system OTel template'
         ),
@@ -413,7 +317,17 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
   {
     signal: 'service.error_rate',
     subtypes: ['service'],
-    window: '15 minutes',
+    metricType: 'gauge',
+    unit: 'ratio',
+    contextColumns: ['request_count'],
+    hint: {
+      comparison: '>',
+      threshold: 0.05,
+      window: '15 minutes',
+      min_samples: 20,
+      sample_column: 'request_count',
+    },
+    additionalEntityFields: [{ name: 'transaction.type', fields: ['transaction.type'] }],
     variants: [
       {
         schema: 'ecs',
@@ -421,11 +335,6 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         field: 'event.success_count',
         formula: '1 - SUM(event.success_count) / COUNT(event.success_count)',
         formulaKind: 'error_rate',
-        additionalBreakdown: ['transaction.type'],
-        minimumSampleCount: 20,
-        direction: 'higher_is_worse',
-        comparison: '>',
-        threshold: 0.05,
         source: nightshiftDefault(
           '5% error rate over at least 20 requests, our example; APM ships no error rate rule template'
         ),
