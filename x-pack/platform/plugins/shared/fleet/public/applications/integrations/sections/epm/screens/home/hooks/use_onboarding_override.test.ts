@@ -30,6 +30,7 @@ const ALL_HIDDEN_NAMES = [
   'aws_bedrock',
   'aws_bedrock_agentcore',
   'aws_billing',
+  'aws_otel',
   'aws_cloudwatch_input_otel',
   'aws_logs',
   'aws_mq',

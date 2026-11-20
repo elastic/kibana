@@ -27,7 +27,7 @@ export const DEFAULT_NAMESPACE = 'default';
 export const AWS_MAIN_PACKAGE_NAME = 'aws';
 
 /** The package every service uses with the OTel data format; no other package is deployed then. */
-export const AWS_OTEL_PACKAGE_NAME = 'aws_cloudwatch_input_otel';
+export const AWS_OTEL_PACKAGE_NAME = 'aws_otel';
 
 /**
  * Packages the integration name already stands for, so a default name needs no package suffix:

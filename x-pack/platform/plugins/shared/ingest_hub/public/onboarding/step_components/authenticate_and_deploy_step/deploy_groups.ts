@@ -14,7 +14,13 @@ import type {
   ServiceChipState,
 } from '../../onboarding_flow_context';
 import type { ServiceVars, ServiceInstance } from '../service_settings_step/use_service_settings';
-import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
+import {
+  buildPackageInputs,
+  applyInputVars,
+  buildPackageVars,
+  disableUnselectedStreams,
+  getPackageVarNames,
+} from './package_inputs';
 import {
   getCreateDatasetTemplates,
   reconcileInstances,
@@ -214,6 +220,8 @@ export async function deployGroup(
     }
   }
 
+  disableUnselectedStreams(inputs, pkgInfo);
+
   const pkgVarNames = getPackageVarNames(pkgInfo);
   // Refs of a sibling policy let a new group reuse credentials the user kept; Fleet tracks them
   // on the new policy too, so deleting the sibling does not delete the shared secret.
@@ -224,6 +232,16 @@ export async function deployGroup(
     undefined,
     connectorId ? undefined : authenticateAndDeployStep.existingSecretRefs,
     getPolicyVarSettings(policySettings, 'managed_integration', pkgVarNames)
+  );
+  applyInputVars(inputs, pkgInfo, (inputVarNames) =>
+    buildPackageVars(
+      globalRegion,
+      staticKeys,
+      inputVarNames,
+      undefined,
+      connectorId ? undefined : authenticateAndDeployStep.existingSecretRefs,
+      getPolicyVarSettings(policySettings, 'managed_integration', inputVarNames)
+    )
   );
 
   const createDatasetTemplates = getCreateDatasetTemplates(group, storedServiceVars);

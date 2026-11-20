@@ -310,14 +310,83 @@ describe('AWS service matrix', () => {
     });
   });
 
-  describe('input package entries (aws_cloudwatch_input_otel)', () => {
+  describe('composable integration entries (aws_otel)', () => {
+    const streamVars = (names: string[]) =>
+      names.map((name) => ({ name, type: 'text', required: false, show_user: false }));
+    const COMPOSABLE_PKG = {
+      policy_templates: [
+        {
+          name: 'aws',
+          title: 'AWS metrics',
+          data_streams: ['ec2', 'sqs'],
+          deployment_modes: { agentless: { enabled: true } },
+          // Input vars are not resolved from the input package: the stream vars are the settings.
+          inputs: [{ type: 'otelcol', title: 'AWS CloudWatch', vars: [] }],
+        },
+      ],
+      data_streams: [
+        {
+          path: 'ec2',
+          type: 'metrics',
+          dataset: 'aws.ec2',
+          streams: [{ input: 'otelcol', vars: streamVars(['period', 'autodiscover_limit']) }],
+        },
+        {
+          path: 'sqs',
+          type: 'metrics',
+          dataset: 'aws.sqs',
+          streams: [{ input: 'otelcol', vars: streamVars(['period']) }],
+        },
+      ],
+    };
+
+    const OTEL_STATIC = AWS_SERVICES_STATIC.filter((e) => ['ec2_otel', 'sqs_otel'].includes(e.id));
+    const [ec2Otel, sqsOtel] = buildAwsServiceMatrix(
+      { aws_otel: COMPOSABLE_PKG as any },
+      OTEL_STATIC
+    );
+
+    it('restricts each service to its own data stream of the aws policy template', () => {
+      expect(ec2Otel.dataStreams).toEqual(['ec2']);
+      expect(sqsOtel.dataStreams).toEqual(['sqs']);
+    });
+
+    it('sets inputs to the stream input type (otelcol)', () => {
+      expect(ec2Otel.inputs).toEqual(['otelcol']);
+    });
+
+    it('derives the var definitions from the data stream streams', () => {
+      expect(Object.keys(ec2Otel.varDefsByDataStream?.ec2.varDefsByInput.otelcol ?? {})).toEqual([
+        'period',
+        'autodiscover_limit',
+      ]);
+      expect(Object.keys(sqsOtel.varDefsByDataStream?.sqs.varDefsByInput.otelcol ?? {})).toEqual([
+        'period',
+      ]);
+    });
+
+    it('keeps the dataset pinned by the data stream', () => {
+      expect(ec2Otel.varDefsByDataStream?.ec2.dataset).toBe('aws.ec2');
+    });
+
+    it('derives signalTypes from the data stream type', () => {
+      expect(ec2Otel.signalTypes).toEqual(['metrics']);
+    });
+
+    it('is a managed integration deployable agentless', () => {
+      expect(ec2Otel.deploymentMethods.map((m) => m.method)).toContain('managed_integration');
+    });
+  });
+
+  describe('input package entries', () => {
+    const INPUT_STATIC = [{ id: 'input_pkg_service', packageName: 'input_pkg' }];
     const INPUT_PKG = {
       policy_templates: [
         {
-          name: 'aws.ec2',
+          name: 'input_pkg_service',
           input: 'otelcol',
           type: 'metrics',
-          title: 'AWS EC2 OpenTelemetry Metrics',
+          title: 'Input package service',
           vars: [
             { name: 'period', type: 'text', required: false, show_user: true },
             {
@@ -334,30 +403,25 @@ describe('AWS service matrix', () => {
       data_streams: [],
     };
 
-    const EC2_OTEL_STATIC = AWS_SERVICES_STATIC.filter((e) => e.id === 'ec2_otel');
-    const EC2_OTEL_MATRIX = buildAwsServiceMatrix(
-      { aws_cloudwatch_input_otel: INPUT_PKG as any },
-      EC2_OTEL_STATIC
-    );
-    const ec2Otel = EC2_OTEL_MATRIX[0];
+    const [inputPkgEntry] = buildAwsServiceMatrix({ input_pkg: INPUT_PKG as any }, INPUT_STATIC);
 
     it('uses a synthetic data stream keyed to the entry id', () => {
-      expect(ec2Otel.dataStreams).toEqual(['ec2_otel']);
+      expect(inputPkgEntry.dataStreams).toEqual(['input_pkg_service']);
     });
 
     it('sets inputs to the PT input type (otelcol)', () => {
-      expect(ec2Otel.inputs).toEqual(['otelcol']);
+      expect(inputPkgEntry.inputs).toEqual(['otelcol']);
     });
 
     it('stores the PT title in inputTitles for the otelcol input', () => {
-      expect(ec2Otel.inputTitles?.otelcol).toBe('AWS EC2 OpenTelemetry Metrics');
+      expect(inputPkgEntry.inputTitles?.otelcol).toBe('Input package service');
     });
 
     it('sets identityFederationSupported to false without a cloud-provider var_group option', () => {
-      expect(ec2Otel.identityFederationSupported).toBe(false);
+      expect(inputPkgEntry.identityFederationSupported).toBe(false);
     });
 
-    describe('with an Identity Federation var_group option (aws_cloudwatch_input_otel >= 0.8.0)', () => {
+    describe('with an Identity Federation var_group option', () => {
       const IDF_VAR_GROUPS = [
         {
           name: 'credential_type',
@@ -381,8 +445,8 @@ describe('AWS service matrix', () => {
 
       it('derives true from package-level var_groups', () => {
         const [entry] = buildAwsServiceMatrix(
-          { aws_cloudwatch_input_otel: { ...INPUT_PKG, var_groups: IDF_VAR_GROUPS } as any },
-          EC2_OTEL_STATIC
+          { input_pkg: { ...INPUT_PKG, var_groups: IDF_VAR_GROUPS } as any },
+          INPUT_STATIC
         );
         expect(entry.identityFederationSupported).toBe(true);
       });
@@ -392,10 +456,7 @@ describe('AWS service matrix', () => {
           ...INPUT_PKG,
           policy_templates: [{ ...INPUT_PKG.policy_templates[0], var_groups: IDF_VAR_GROUPS }],
         };
-        const [entry] = buildAwsServiceMatrix(
-          { aws_cloudwatch_input_otel: pkg as any },
-          EC2_OTEL_STATIC
-        );
+        const [entry] = buildAwsServiceMatrix({ input_pkg: pkg as any }, INPUT_STATIC);
         expect(entry.identityFederationSupported).toBe(true);
       });
 
@@ -407,25 +468,27 @@ describe('AWS service matrix', () => {
           },
         ];
         const [entry] = buildAwsServiceMatrix(
-          { aws_cloudwatch_input_otel: { ...INPUT_PKG, var_groups: keysOnly } as any },
-          EC2_OTEL_STATIC
+          { input_pkg: { ...INPUT_PKG, var_groups: keysOnly } as any },
+          INPUT_STATIC
         );
         expect(entry.identityFederationSupported).toBe(false);
       });
     });
 
     it('injects data_stream.dataset with default = PT name into varDefsByDataStream', () => {
-      const dsInfo = ec2Otel.varDefsByDataStream?.ec2_otel;
-      expect(dsInfo?.varDefsByInput?.otelcol?.['data_stream.dataset']?.default).toBe('aws.ec2');
+      const dsInfo = inputPkgEntry.varDefsByDataStream?.input_pkg_service;
+      expect(dsInfo?.varDefsByInput?.otelcol?.['data_stream.dataset']?.default).toBe(
+        'input_pkg_service'
+      );
     });
 
     it('injects data_stream.type with default = PT signal type into varDefsByDataStream', () => {
-      const dsInfo = ec2Otel.varDefsByDataStream?.ec2_otel;
+      const dsInfo = inputPkgEntry.varDefsByDataStream?.input_pkg_service;
       expect(dsInfo?.varDefsByInput?.otelcol?.['data_stream.type']?.default).toBe('metrics');
     });
 
     it('derives signalTypes from the PT type field', () => {
-      expect(ec2Otel.signalTypes).toContain('metrics');
+      expect(inputPkgEntry.signalTypes).toContain('metrics');
     });
 
     it('uses a synthetic DS even when the package has data_streams (input package detection fix)', () => {

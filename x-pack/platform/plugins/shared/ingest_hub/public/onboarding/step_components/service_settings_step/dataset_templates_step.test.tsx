@@ -73,7 +73,7 @@ import { ServiceSettingsStep } from '.';
 
 const datasetVar = { name: 'data_stream.dataset', type: 'text', show_user: true, default: 'x' };
 
-const makeOtel = (id: string, packageName = 'aws_cloudwatch_input_otel') =>
+const makeOtel = (id: string, packageName = 'aws_otel') =>
   ({
     id,
     name: id,

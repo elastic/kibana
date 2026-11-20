@@ -36,7 +36,7 @@ const MATRIX_PACKAGES = [
   'awsfargate',
   'aws_mq',
   'aws_logs',
-  'aws_cloudwatch_input_otel',
+  'aws_otel',
   'aws_securityhub',
   'aws_billing',
   'amazon_security_lake',

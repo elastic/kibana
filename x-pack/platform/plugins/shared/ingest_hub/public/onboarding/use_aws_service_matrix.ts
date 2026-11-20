@@ -72,12 +72,7 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     data: cloudwatchOtelData,
     isError: cloudwatchOtelIsError,
     refetch: cloudwatchOtelRefetch,
-  } = useGetPackageInfoByKeyQuery(
-    'aws_cloudwatch_input_otel',
-    undefined,
-    PACKAGE_QUERY_OPTIONS,
-    CACHE_OPTS
-  );
+  } = useGetPackageInfoByKeyQuery('aws_otel', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
   const {
     data: securityHubData,
     isError: securityHubIsError,
@@ -111,7 +106,7 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
       ...(mqData?.item && { aws_mq: mqData.item }),
       ...(logsData?.item && { aws_logs: logsData.item }),
       ...(cloudwatchOtelData?.item && {
-        aws_cloudwatch_input_otel: cloudwatchOtelData.item,
+        aws_otel: cloudwatchOtelData.item,
       }),
       ...(securityHubData?.item && { aws_securityhub: securityHubData.item }),
       ...(billingData?.item && { aws_billing: billingData.item }),
@@ -127,7 +122,7 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
         fargateIsError && !fargateData?.item && 'awsfargate',
         mqIsError && !mqData?.item && 'aws_mq',
         logsIsError && !logsData?.item && 'aws_logs',
-        cloudwatchOtelIsError && !cloudwatchOtelData?.item && 'aws_cloudwatch_input_otel',
+        cloudwatchOtelIsError && !cloudwatchOtelData?.item && 'aws_otel',
         securityHubIsError && !securityHubData?.item && 'aws_securityhub',
         billingIsError && !billingData?.item && 'aws_billing',
         securityLakeIsError && !securityLakeData?.item && 'amazon_security_lake',

@@ -22,7 +22,7 @@ import {
   IS_ADD_DATA_PAGE_V2_ENABLED,
 } from '../../common/feature_flags';
 
-const AWS_CLOUDWATCH_OTEL_PACKAGE = 'aws_cloudwatch_input_otel';
+const AWS_CLOUDWATCH_OTEL_PACKAGE = 'aws_otel';
 const RESOLVE_TIMEOUT_MS = 30_000;
 
 export const CloudwatchIntegrationRedirect: React.FC = () => {

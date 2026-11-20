@@ -263,18 +263,18 @@ describe('buildIncomingDataRequests', () => {
 
   it('issues one request per agent for OTel instances', () => {
     const requests = buildIncomingDataRequests([
-      instance({ packageName: 'aws_cloudwatch_input_otel', isOtel: true, agentIds: ['a1', 'a2'] }),
+      instance({ packageName: 'aws_otel', isOtel: true, agentIds: ['a1', 'a2'] }),
     ]);
     expect(requests).toEqual([
       {
-        key: 'aws_cloudwatch_input_otel@4.0.0:a1',
-        pkgName: 'aws_cloudwatch_input_otel',
+        key: 'aws_otel@4.0.0:a1',
+        pkgName: 'aws_otel',
         pkgVersion: '4.0.0',
         agentIds: ['a1'],
       },
       {
-        key: 'aws_cloudwatch_input_otel@4.0.0:a2',
-        pkgName: 'aws_cloudwatch_input_otel',
+        key: 'aws_otel@4.0.0:a2',
+        pkgName: 'aws_otel',
         pkgVersion: '4.0.0',
         agentIds: ['a2'],
       },

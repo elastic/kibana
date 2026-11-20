@@ -262,7 +262,7 @@ describe('deployGroup — dedicated index template for a custom dataset', () => 
   const otel = {
     id: 'ec2',
     name: 'Amazon EC2',
-    packageName: 'aws_cloudwatch_input_otel',
+    packageName: 'aws_otel',
     dataStreams: ['ec2'],
     inputs: ['otelcol'],
     showInUI: true,
@@ -280,7 +280,7 @@ describe('deployGroup — dedicated index template for a custom dataset', () => 
   } as unknown as AwsServiceMatrixEntry;
 
   const otelGroup: DeployGroup = {
-    groupId: 'aws_cloudwatch_input_otel',
+    groupId: 'aws_otel',
     instanceIds: ['ec2'],
     members: [
       {

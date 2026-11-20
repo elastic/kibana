@@ -527,7 +527,7 @@ describe('Handlers', () => {
         {
           query: {
             agentsIds: ['agent-1'],
-            pkgName: 'aws_cloudwatch_input_otel',
+            pkgName: 'aws_otel',
             pkgVersion: '0.5.0',
             previewData: false,
           },
@@ -548,7 +548,7 @@ describe('Handlers', () => {
         {
           query: {
             agentsIds: ['agent-1'],
-            pkgName: 'aws_cloudwatch_input_otel',
+            pkgName: 'aws_otel',
             pkgVersion: '0.5.0',
             previewData: false,
           },
@@ -1100,7 +1100,7 @@ describe('Handlers', () => {
     describe('identity-free gate for input-only OTel packages', () => {
       const inputOtelPackageInfo = {
         type: 'input',
-        name: 'aws_cloudwatch_input_otel',
+        name: 'aws_otel',
         version: '0.6.0',
         policy_templates: [
           {
@@ -1123,7 +1123,7 @@ describe('Handlers', () => {
       ];
 
       const inputPackagePolicy = {
-        package: { name: 'aws_cloudwatch_input_otel', version: '0.6.0' },
+        package: { name: 'aws_otel', version: '0.6.0' },
         namespace: 'production',
         inputs: [
           {
@@ -1132,7 +1132,7 @@ describe('Handlers', () => {
               {
                 data_stream: { type: 'metrics' },
                 vars: {
-                  'data_stream.dataset': { value: 'aws_cloudwatch_input_otel.aws.ec2' },
+                  'data_stream.dataset': { value: 'aws_otel.aws.ec2' },
                 },
               },
             ],
@@ -1158,7 +1158,7 @@ describe('Handlers', () => {
           {
             query: {
               agentsIds: ['agent-1'],
-              pkgName: 'aws_cloudwatch_input_otel',
+              pkgName: 'aws_otel',
               pkgVersion: '0.6.0',
               previewData: false,
             },
@@ -1170,7 +1170,7 @@ describe('Handlers', () => {
         expect(getIncomingDataByDataStreams).toHaveBeenCalledWith(
           expect.objectContaining({
             agentId: 'agent-1',
-            dataStreamPattern: 'metrics-aws_cloudwatch_input_otel.aws.ec2.otel-production',
+            dataStreamPattern: 'metrics-aws_otel.aws.ec2.otel-production',
           })
         );
       });

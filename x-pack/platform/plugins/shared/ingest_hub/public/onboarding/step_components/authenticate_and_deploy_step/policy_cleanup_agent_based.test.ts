@@ -589,3 +589,100 @@ describe('cleanupAgentBasedPolicies — typed keys', () => {
     expect(ops.sharedRefs?.get('access_key_id')).toEqual(refs.access_key_id);
   });
 });
+
+describe('updateAgentBasedPolicy — input-level credentials (aws_otel)', () => {
+  const ec2Otel = {
+    ...makeService('ec2_otel', 'aws_otel'),
+    policyTemplate: 'aws',
+    dataStreams: ['ec2'],
+    inputs: ['otelcol'],
+    defaultEnabledInputs: ['otelcol'],
+    varDefsByDataStream: {
+      ec2: { inputs: ['otelcol'], defaultEnabledInputs: ['otelcol'], varDefsByInput: {} },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+  const instance = makeInstance('inst-b', 'ec2_otel');
+  const storedServiceVars = {
+    'inst-b': {
+      enabledDataStreams: ['ec2'],
+      varsByDataStream: { ec2: { enabledInputs: ['otelcol'], varsByInput: { otelcol: {} } } },
+    },
+  };
+  const secretRef = { isSecretRef: true, id: 'ref-secret' };
+
+  beforeEach(() => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: {
+          version: '0.1.0',
+          policy_templates: [
+            {
+              name: 'aws',
+              inputs: [
+                {
+                  type: 'otelcol',
+                  vars: [
+                    { name: 'region' },
+                    { name: 'access_key_id' },
+                    { name: 'secret_access_key' },
+                    { name: 'role_arn' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+    mockGetOnePackagePolicy.mockResolvedValue({
+      data: {
+        item: {
+          name: 'existing-policy-name',
+          namespace: 'existing-ns',
+          package: { version: '0.1.0' },
+          inputs: [
+            {
+              type: 'otelcol',
+              policy_template: 'aws',
+              vars: {
+                access_key_id: { value: 'AKIA-OLD' },
+                secret_access_key: { value: secretRef },
+                role_arn: { value: 'arn:aws:iam::1:role/old' },
+              },
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  const redeploy = (agentCredentials?: Record<string, string>) =>
+    cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      storedServiceVars,
+      instances: [instance],
+      servicesMap: new Map([['ec2_otel', ec2Otel]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: [],
+      ...(agentCredentials ? { agentCredentials: agentCredentials as never } : {}),
+    });
+
+  it('keeps the existing input vars when a service-settings-only redeploy has no credentials', async () => {
+    await redeploy();
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].inputs['aws-otelcol'].vars).toEqual({
+      region: 'us-east-1',
+      access_key_id: 'AKIA-OLD',
+      secret_access_key: secretRef,
+      role_arn: 'arn:aws:iam::1:role/old',
+    });
+  });
+
+  it('drops the stale authentication vars when the credential method changes', async () => {
+    await redeploy({ method: 'assume_role', role_arn: 'arn:aws:iam::1:role/new' });
+    const vars = mockUpdatePackagePolicy.mock.calls[0][1].inputs['aws-otelcol'].vars;
+    expect(vars).toEqual({ region: 'us-east-1', role_arn: 'arn:aws:iam::1:role/new' });
+    expect(vars).not.toHaveProperty('access_key_id');
+    expect(vars).not.toHaveProperty('secret_access_key');
+  });
+});

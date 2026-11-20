@@ -29,6 +29,8 @@ import type {
 
 export interface PackageInputEntry {
   enabled: boolean;
+  /** Input-level vars (region, credentials) of packages that declare them on the input. */
+  vars?: Record<string, string | null | SecretRefValue>;
   streams: Record<
     string,
     {
@@ -202,7 +204,7 @@ export function buildPackageInputs(
       const activeInputs = resolveActiveInputs(service, dsId, dsVars);
 
       // Fleet input key: <policyTemplateName>-<inputType>
-      // Use policyTemplate when present (e.g. aws_cloudwatch_input_otel entries where id !== PT name).
+      // Use policyTemplate when present (e.g. aws_otel entries where id !== PT name).
       const ptName = service.policyTemplate ?? service.id;
       const dsView = makeDsView(service, dsId);
       // Fleet stream key for input packages: <packageName>.<policyTemplateName>
@@ -212,9 +214,11 @@ export function buildPackageInputs(
       // isInputPackage: buildAwsServiceMatrix sets entry.id = pt.name for input-package PTs, so
       // dsId === service.id iff the service was built from a PT (not a standalone data stream).
       const isInputPackage = dsId === service.id && !!service.policyTemplate;
+      // Fleet keys simplified-policy streams by dataset, which a data stream may pin to a value
+      // other than its path (e.g. aws_otel's `ec2` stream writes to `aws.ec2`).
       const streamKey = isInputPackage
         ? `${service.packageName}.${ptName}`
-        : `${service.packageName}.${dsId}`;
+        : service.varDefsByDataStream?.[dsId]?.dataset ?? `${service.packageName}.${dsId}`;
 
       for (const inputType of activeInputs) {
         const inputKey = `${ptName}-${inputType}`;
@@ -243,6 +247,49 @@ export function buildPackageInputs(
   }
 
   return inputs;
+}
+
+interface PackageInfoStreams {
+  policy_templates?: Array<{
+    name?: string;
+    data_streams?: string[];
+    inputs?: Array<{ id?: string; type: string }>;
+  }>;
+  data_streams?: Array<{
+    path: string;
+    dataset?: string;
+    streams?: Array<{ input: string }>;
+  }>;
+}
+
+/**
+ * Explicitly disables the streams of a shared policy template that were not selected. Services of
+ * one template (e.g. aws_otel's `aws` template, one data stream per service) share an input key,
+ * and Fleet keeps the manifest default for every stream missing from the request, so an
+ * unselected default-enabled sibling would otherwise be collected too.
+ */
+export function disableUnselectedStreams(
+  inputs: Record<string, PackageInputEntry>,
+  pkgInfo: unknown
+): void {
+  const { policy_templates: templates = [], data_streams: dataStreams = [] } =
+    (pkgInfo as PackageInfoStreams) ?? {};
+  for (const template of templates) {
+    for (const input of template.inputs ?? []) {
+      const key = template.name ? `${template.name}-${input.id ?? input.type}` : input.type;
+      const entry = inputs[key];
+      if (!entry?.enabled) continue;
+      for (const dsPath of template.data_streams ?? []) {
+        const ds = dataStreams.find((d) => d.path === dsPath);
+        for (const stream of ds?.streams ?? []) {
+          const streamKey = ds?.dataset;
+          if (stream.input === input.type && streamKey && !entry.streams[streamKey]) {
+            entry.streams[streamKey] = { enabled: false, vars: {} };
+          }
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -330,7 +377,7 @@ export function buildPackageVars(
 ): Record<string, string | null | SecretRefValue> | undefined {
   const vars: Record<string, string | null | SecretRefValue> = {};
   if (globalRegion && pkgVarNames.has('default_region')) vars.default_region = globalRegion;
-  // 'region' (distinct from 'default_region') is a package-level var on aws_cloudwatch_input_otel
+  // 'region' (distinct from 'default_region') is a package-level var on aws_otel
   // today; ECS packages use 'default_region'. The pkgVarNames guard ensures it only fires when
   // the deployed package actually declares it.
   if (globalRegion && pkgVarNames.has('region')) vars.region = globalRegion;
@@ -385,6 +432,50 @@ export function buildPackageVars(
     if (sessionTokenRef && pkgVarNames.has('session_token')) vars.session_token = sessionTokenRef;
   }
   return Object.keys(vars).length > 0 ? vars : undefined;
+}
+
+/**
+ * The var names each input of the package's policy templates declares, keyed like the inputs of
+ * the request (`<policyTemplate>-<input>`). Composable packages (e.g. aws_otel) keep region and
+ * credentials there instead of at package level.
+ */
+export function getInputVarNames(pkgInfo: unknown): Map<string, Set<string>> {
+  const templates =
+    (
+      pkgInfo as {
+        policy_templates?: Array<{
+          name?: string;
+          inputs?: Array<{ id?: string; type: string; vars?: Array<{ name: string }> }>;
+        }>;
+      }
+    )?.policy_templates ?? [];
+  const result = new Map<string, Set<string>>();
+  for (const template of templates) {
+    for (const input of template.inputs ?? []) {
+      if (!input.vars?.length) continue;
+      const inputKey = input.id ?? input.type;
+      const key = template.name ? `${template.name}-${inputKey}` : inputKey;
+      result.set(key, new Set(input.vars.map((v) => v.name)));
+    }
+  }
+  return result;
+}
+
+/**
+ * Sets the vars of every selected input that declares vars of its own, built from the var names
+ * that input declares. The package-level vars are built from `getPackageVarNames` as before.
+ */
+export function applyInputVars(
+  inputs: Record<string, PackageInputEntry>,
+  pkgInfo: unknown,
+  buildVars: (varNames: Set<string>, inputKey: string) => PackageInputEntry['vars']
+): void {
+  for (const [key, varNames] of getInputVarNames(pkgInfo)) {
+    const entry = inputs[key];
+    if (!entry?.enabled) continue;
+    const vars = buildVars(varNames, key);
+    if (vars && Object.keys(vars).length > 0) entry.vars = vars;
+  }
 }
 
 export function getPackageVarNames(pkgInfo: { vars?: Array<{ name: string }> }): Set<string> {

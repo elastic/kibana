@@ -170,7 +170,7 @@ export class ObservabilityOnboardingPlugin
       './fleet_extensions/elb_logs_cloud_forwarder'
     );
     plugins.fleet.registerExtension({
-      package: 'aws_cloudwatch_input_otel',
+      package: 'aws_otel',
       view: 'package-policy-create-bottom',
       Component: getLazyElbLogsCloudForwarderExtension(core),
     });

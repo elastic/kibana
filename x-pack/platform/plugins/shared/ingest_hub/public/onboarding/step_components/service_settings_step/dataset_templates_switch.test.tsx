@@ -45,7 +45,7 @@ const service = {
   id: 'ec2',
   name: 'Amazon EC2',
   signalTypes: ['metrics'],
-  packageName: 'aws_cloudwatch_input_otel',
+  packageName: 'aws_otel',
   dataStreams: ['ec2'],
   inputs: ['otelcol'],
   defaultEnabledInputs: ['otelcol'],
