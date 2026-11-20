@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { renderHook } from '@testing-library/react';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 import { INTEGRATED_ONBOARDING_FEATURE_FLAG } from '../common/constants';
@@ -25,13 +25,19 @@ describe('integrated onboarding feature flag', () => {
       );
     });
 
-    it('emits true when the flag is on', async () => {
+    it('emits again when the flag changes', () => {
       const featureFlags = coreFeatureFlagsMock.createStart();
-      featureFlags.getBooleanValue$.mockReturnValue(of(true));
+      const flag$ = new BehaviorSubject(false);
+      featureFlags.getBooleanValue$.mockReturnValue(flag$);
+      const values: boolean[] = [];
 
-      await expect(firstValueFrom(getIntegratedOnboardingEnabled$(featureFlags))).resolves.toBe(
-        true
+      const subscription = getIntegratedOnboardingEnabled$(featureFlags).subscribe((value) =>
+        values.push(value)
       );
+      flag$.next(true);
+      subscription.unsubscribe();
+
+      expect(values).toEqual([false, true]);
     });
   });
 
