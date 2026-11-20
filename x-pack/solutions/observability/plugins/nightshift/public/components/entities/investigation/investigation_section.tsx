@@ -40,6 +40,7 @@ import type {
 } from '../../../data/investigations/use_investigation_sections';
 import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationCardActions } from './investigation_card_actions';
+import { AiGradientBadge } from './investigation_status_badge';
 import { useInvestigationAssignees } from './use_investigation_assignees';
 
 export interface InvestigationSectionProps {
@@ -255,12 +256,18 @@ const SectionHeading = ({
     </EuiFlexItem>
     {showCount && (
       <EuiFlexItem grow={false}>
-        <EuiBadge
-          color={severity != null ? SEVERITY_DOT_COLOR[severity] : 'default'}
-          data-test-subj={`nightshiftInvestigationSectionCount-${id}`}
-        >
-          {total}
-        </EuiBadge>
+        {id === 'in-progress' ? (
+          <AiGradientBadge testSubj={`nightshiftInvestigationSectionCount-${id}`}>
+            {total}
+          </AiGradientBadge>
+        ) : (
+          <EuiBadge
+            color={severity != null ? SEVERITY_DOT_COLOR[severity] : 'default'}
+            data-test-subj={`nightshiftInvestigationSectionCount-${id}`}
+          >
+            {total}
+          </EuiBadge>
+        )}
       </EuiFlexItem>
     )}
   </EuiFlexGroup>

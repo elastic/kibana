@@ -298,12 +298,15 @@ function InvestigationGradientLabel({
   );
 }
 
-function GradientOutlinedStatusBadge({
-  label,
+/** Outlined AI-gradient badge (kbn AI badge look) for counts and short status labels. */
+export function AiGradientBadge({
+  children,
   testSubj,
+  iconType,
 }: {
-  label: string;
+  children: React.ReactNode;
   testSubj?: string;
+  iconType?: React.ComponentProps<typeof EuiBadge>['iconType'];
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { labelCss } = useAiButtonGradientStyles({ variant: 'outlined' });
@@ -316,11 +319,11 @@ function GradientOutlinedStatusBadge({
       <SvgAiGradientDefs gradientId={gradientId} colors={colors} />
       <EuiBadge
         color="hollow"
-        iconType="check"
-        iconSide="left"
+        iconType={iconType}
+        iconSide={iconType != null ? 'left' : undefined}
         data-test-subj={testSubj}
         css={[
-          iconGradientCss,
+          iconType != null ? iconGradientCss : undefined,
           css`
             background: linear-gradient(
                   ${euiTheme.colors.backgroundBasePlain},
@@ -337,9 +340,23 @@ function GradientOutlinedStatusBadge({
           `,
         ]}
       >
-        {label}
+        {children}
       </EuiBadge>
     </>
+  );
+}
+
+function GradientOutlinedStatusBadge({
+  label,
+  testSubj,
+}: {
+  label: string;
+  testSubj?: string;
+}): React.ReactElement {
+  return (
+    <AiGradientBadge iconType="check" testSubj={testSubj}>
+      {label}
+    </AiGradientBadge>
   );
 }
 
