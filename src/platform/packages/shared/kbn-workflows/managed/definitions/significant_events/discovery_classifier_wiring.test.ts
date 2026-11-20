@@ -125,31 +125,40 @@ describe('discovery workflow detection classifier wiring', () => {
     });
 
     describe('stamp rule uuids', () => {
+      const resolved = requireStep('compute_resolved_stamp_rule_uuids');
+      const fallback = requireStep('compute_fallback_stamp_rule_uuids');
       const stampRuleUuids = requireStep('compute_stamp_rule_uuids').with?.stamp_rule_uuids;
-      const reported = {
-        compute_written_rule_uuids: { output: { written_rule_uuids: ['rule-X'] } },
+
+      // Runs each stamp step only when its `if` passes, as the engine does, then merges the outputs.
+      const stampRules = (resolver: { error: { message: string } | null; stamp: string[] }) => {
+        const context = {
+          steps: {
+            resolve_written_detections: {
+              error: resolver.error,
+              output: resolver.error ? undefined : { stamp_rule_uuids: resolver.stamp },
+            },
+            compute_written_rule_uuids: { output: { written_rule_uuids: ['rule-X'] } },
+          },
+        };
+        const run = (step: typeof resolved) =>
+          evaluate(step.if, context)
+            ? { output: { stamp_rule_uuids: evaluate(step.with?.stamp_rule_uuids, context) } }
+            : undefined;
+
+        return evaluate(stampRuleUuids, {
+          steps: {
+            compute_resolved_stamp_rule_uuids: run(resolved),
+            compute_fallback_stamp_rule_uuids: run(fallback),
+          },
+        });
       };
 
       it('keeps an empty resolver result instead of falling back to the reported rules', () => {
-        expect(
-          evaluate(stampRuleUuids, {
-            steps: {
-              ...reported,
-              compute_resolved_stamp_rule_uuids: { output: { stamp_rule_uuids: [] } },
-            },
-          })
-        ).toEqual([]);
+        expect(stampRules({ error: null, stamp: [] })).toEqual([]);
       });
 
       it('falls back to the reported rules when the resolver step failed', () => {
-        expect(
-          evaluate(stampRuleUuids, {
-            steps: {
-              ...reported,
-              compute_fallback_stamp_rule_uuids: { output: { stamp_rule_uuids: ['rule-X'] } },
-            },
-          })
-        ).toEqual(['rule-X']);
+        expect(stampRules({ error: { message: 'down' }, stamp: [] })).toEqual(['rule-X']);
       });
     });
 
