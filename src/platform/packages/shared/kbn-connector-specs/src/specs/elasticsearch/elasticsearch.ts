@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import { UISchemas } from '../../connector_spec_ui';
-import { callEsApi } from './elasticsearch_api';
+import { callEsApi, esApiKeyHeaderSchema } from './elasticsearch_api';
 import {
   EsqlInputSchema,
   GetClusterInfoInputSchema,
@@ -54,15 +54,16 @@ export const Elasticsearch: ConnectorSpec = {
           label: i18n.translate('connectorSpecs.elasticsearch.auth.apiKeyHeader.label', {
             defaultMessage: 'Elasticsearch API key',
           }),
+          // api_key_header stores the key under the header name, so the field is `Authorization`.
+          fields: { Authorization: esApiKeyHeaderSchema },
           meta: {
-            headerField: { hidden: true },
-            apiKey: {
+            Authorization: {
               label: i18n.translate('connectorSpecs.elasticsearch.auth.apiKey.label', {
                 defaultMessage: 'API Key',
               }),
               helpText: i18n.translate('connectorSpecs.elasticsearch.auth.apiKey.helpText', {
                 defaultMessage:
-                  'Enter "ApiKey encoded" where encoded is the base64-encoded "id:api_key" value from the Elasticsearch create API key response (POST /_security/api_key). Grant the key at minimum: read on the indices you search.',
+                  'Enter the base64-encoded "id:api_key" value from the Elasticsearch create API key response (POST /_security/api_key). Grant the key at minimum: read on the indices you search.',
               }),
             },
           },
@@ -225,7 +226,7 @@ export const Elasticsearch: ConnectorSpec = {
     '  Example: FROM logs-* | WHERE @timestamp > NOW() - 1 hour | STATS count = COUNT(*) BY service.name | SORT count DESC | LIMIT 10',
     '',
     '### Auth notes',
-    '- API key auth is recommended. Enter the full "ApiKey encoded" value from the Elasticsearch create API key response (POST /_security/api_key).',
+    '- API key auth is recommended. Enter the encoded value from the Elasticsearch create API key response (POST /_security/api_key).',
     '- The key must be granted read privilege on the indices you search.',
     '- For Elastic Cloud deployments, use the Elasticsearch endpoint URL shown in the Cloud console.',
   ].join('\n'),

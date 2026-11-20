@@ -19,7 +19,12 @@ export const SIGNIFICANT_EVENT_INVESTIGATION_STATES = [
 export type SignificantEventInvestigationState =
   (typeof SIGNIFICANT_EVENT_INVESTIGATION_STATES)[number];
 
-export const SIGNIFICANT_EVENTS_SORT_FIELDS = ['created_at', 'severity', 'status'] as const;
+export const SIGNIFICANT_EVENTS_SORT_FIELDS = [
+  'created_at',
+  'updated_at',
+  'severity',
+  'status',
+] as const;
 export type SignificantEventsSortField = (typeof SIGNIFICANT_EVENTS_SORT_FIELDS)[number];
 
 export const isSignificantEventsSortField = (value: unknown): value is SignificantEventsSortField =>

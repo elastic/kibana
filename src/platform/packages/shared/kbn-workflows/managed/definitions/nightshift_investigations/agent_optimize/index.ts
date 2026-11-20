@@ -13,7 +13,7 @@ import type { ManagedWorkflowDefinition } from '../../../types';
 export const NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID = 'system-nightshift-agent-optimize';
 
 /**
- * Post-round workflow that updates Cortex and Semantic Memory in parallel, then
+ * Post-round workflow that updates Wiki and Semantic Memory in parallel, then
  * distills the round into the decision tree.
  *
  * Agent Builder's afterExecution hook still runs `post_execution_workflow_ids`

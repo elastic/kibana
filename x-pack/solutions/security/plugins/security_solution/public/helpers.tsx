@@ -23,11 +23,14 @@ import {
   APP_UI_ID,
   CASES_FEATURE_ID,
   CASES_PATH,
+  CONFIGURATIONS_PATH,
+  COVERAGE_OVERVIEW_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
   MANAGE_PATH,
   RULES_ADD_PATH,
   RULES_CHANGES_HISTORY_PATH,
+  RULES_CREATE_PATH,
   RULES_PATH,
   THREAT_INTELLIGENCE_PATH,
   ONBOARDING_PATH,
@@ -51,6 +54,7 @@ import {
 import { timelineActions } from './timelines/store';
 import { TimelineId } from '../common/types';
 import { AllRulesTabs } from './detection_engine/rule_management_ui/components/rules_table/constants';
+import { RuleDetailTabs } from './detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import { hasAccessToAttackDiscovery, hasAccessToSecuritySolution } from './helpers_access';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
@@ -219,6 +223,26 @@ export const isRuleChangesHistoryPath = (pathname: string): boolean =>
   });
 
 /**
+ * Matches the Create new rule page, whose app header owns the page actions.
+ */
+export const isRuleCreationPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: RULES_CREATE_PATH,
+    exact: true,
+    strict: false,
+  });
+
+/**
+ * Matches the Edit rule settings page, whose app header owns the page actions.
+ */
+export const isRuleEditPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: `${RULES_PATH}/id/:detailName/edit`,
+    exact: true,
+    strict: false,
+  });
+
+/**
  * Matches the Rules page tabs (installed, monitoring, updates), whose app header owns the page actions.
  */
 export const isRulesManagementPath = (pathname: string): boolean =>
@@ -228,9 +252,35 @@ export const isRulesManagementPath = (pathname: string): boolean =>
     strict: false,
   });
 
+export const isRuleDetailsPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: `${RULES_PATH}/id/:detailName/:tabName(${Object.values(RuleDetailTabs).join('|')})`,
+    exact: true,
+    strict: false,
+  });
+
+/**
+ * Matches the MITRE coverage page, whose app header owns the page actions.
+ */
+export const isCoverageOverviewPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: COVERAGE_OVERVIEW_PATH,
+    exact: true,
+    strict: false,
+  });
+
 export const isCloudSecurityPosturePath = (pathname: string): boolean =>
   !!matchPath(pathname, {
     path: CLOUD_SECURITY_POSTURE_BASE_PATH,
+    strict: false,
+  });
+
+/**
+ * Matches the Configurations page, whose app header owns the page actions.
+ */
+export const isConfigurationsPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: CONFIGURATIONS_PATH,
     strict: false,
   });
 
@@ -270,6 +320,26 @@ export const isManageLandingPath = (pathname: string): boolean =>
     exact: true,
     strict: false,
   });
+
+/**
+ * Matches the pages migrated to the page app header, which render their own actions
+ * and therefore must not mount the legacy global header action menu.
+ */
+export const isPageWithAppHeaderPath = (pathname: string): boolean =>
+  [
+    isRuleChangesHistoryPath,
+    isRulesManagementPath,
+    isRulesAddPath,
+    isRuleCreationPath,
+    isRuleEditPath,
+    isRuleDetailsPath,
+    isCoverageOverviewPath,
+    isExceptionsPath,
+    isCloudSecurityPosturePath,
+    isConfigurationsPath,
+    isEndpointManagementPath,
+    isManageLandingPath,
+  ].some((matchesPath) => matchesPath(pathname));
 
 const isAlertsPath = (pathname: string): boolean => {
   return !!matchPath(pathname, {

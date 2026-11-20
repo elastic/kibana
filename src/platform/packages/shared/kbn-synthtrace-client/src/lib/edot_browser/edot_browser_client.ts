@@ -9,20 +9,17 @@
 
 import type { OtelScope } from '../otel_logs';
 import { generateLongId, generateShortId } from '../utils/generate_id';
+import { LOGS_INDEX, SEVERITY_ERROR, SEVERITY_INFO, TRACES_INDEX } from '../edot_shared/constants';
+import { EdotLog } from '../edot_shared/edot_log';
+import { EdotSpan } from '../edot_shared/edot_span';
 import { asFloat } from './as_float';
-import { EdotBrowserLog } from './edot_browser_log';
-import { EdotBrowserSpan } from './edot_browser_span';
+import type { EdotBrowserSpan, EdotBrowserSpanDocument } from './edot_browser_span';
 import { getWebVitalRating, type WebVitalName } from './health_profiles';
 
-const LOGS_INDEX = 'logs-generic.otel-default';
-const TRACES_INDEX = 'traces-generic.otel-default';
 const SCOPE_PREFIX = '@opentelemetry/browser-instrumentation';
 const DISTRO_SCOPE_NAME = '@elastic/opentelemetry-browser';
 // Version of the instrumentations, which EDOT Browser's `^0.8.0` range resolves to
 const SCOPE_VERSION = '0.8.2';
-
-const SEVERITY_INFO = 9;
-const SEVERITY_ERROR = 17;
 
 const HTTP_PORT_FROM_PROTOCOL: Readonly<Record<string, number>> = { 'http:': 80, 'https:': 443 };
 
@@ -120,6 +117,17 @@ export class EdotBrowserClient {
     return 'browser.brands' in this.resourceAttributes;
   }
 
+  /**
+   * The JavaScript engine, which decides how the browser writes stack traces. A browser that isn't
+   * Chromium or Firefox is taken for Safari, the other one that is still around.
+   */
+  public get browserEngine(): 'chromium' | 'firefox' | 'webkit' {
+    if (this.isChromium) {
+      return 'chromium';
+    }
+    return this.resourceAttributes['browser.name'] === 'Firefox' ? 'firefox' : 'webkit';
+  }
+
   public get hasSession(): boolean {
     return Boolean(this.options.sessionId);
   }
@@ -138,8 +146,8 @@ export class EdotBrowserClient {
     scope: OtelScope,
     attributes: Record<string, unknown>,
     severityNumber: number = SEVERITY_INFO
-  ): EdotBrowserLog {
-    return new EdotBrowserLog({ _index: LOGS_INDEX })
+  ): EdotLog {
+    return new EdotLog({ _index: LOGS_INDEX })
       .eventName(eventName)
       .severity(severityNumber)
       .scope(scope)
@@ -152,7 +160,7 @@ export class EdotBrowserClient {
     instrumentation: string,
     attributes: Record<string, unknown>,
     severityNumber: number = SEVERITY_INFO
-  ): EdotBrowserLog {
+  ): EdotLog {
     return this.logWithScope(
       eventName,
       { name: `${SCOPE_PREFIX}/${instrumentation}`, version: SCOPE_VERSION },
@@ -286,7 +294,8 @@ export class EdotBrowserClient {
     pageX: number;
     pageY: number;
     tagName: string;
-    cssSelector: string;
+    /** Unset when the instrumentation can't build a selector for the element. */
+    cssSelector?: string;
     button?: MouseButton;
     /** The element's `data-otel-*` attributes, without the prefix. */
     otelAttributes?: Record<string, string>;
@@ -297,18 +306,30 @@ export class EdotBrowserClient {
       'browser.tag_name': tagName,
       'browser.element.attributes': otelAttributes,
       'browser.mouse_event.button': button,
-      'browser.css_selector': cssSelector,
+      ...(cssSelector !== undefined ? { 'browser.css_selector': cssSelector } : {}),
     });
   }
 
-  exception({ type, message, stacktrace }: { type: string; message: string; stacktrace: string }) {
+  /**
+   * An uncaught exception. Only errors have a type and a stack trace: a thrown string or a rejected
+   * promise with a plain value has a message and nothing else.
+   */
+  exception({
+    type,
+    message,
+    stacktrace,
+  }: {
+    type?: string;
+    message: string;
+    stacktrace?: string;
+  }) {
     return this.log(
       'exception',
       'errors',
       {
-        'exception.type': type,
+        ...(type !== undefined ? { 'exception.type': type } : {}),
         'exception.message': message,
-        'exception.stacktrace': stacktrace,
+        ...(stacktrace !== undefined ? { 'exception.stacktrace': stacktrace } : {}),
       },
       SEVERITY_ERROR
     );
@@ -337,14 +358,14 @@ export class EdotBrowserClient {
     instrumentation?: HttpInstrumentation;
     traceId?: string;
     spanId?: string;
-  }) {
+  }): EdotBrowserSpan {
     const parsedUrl = new URL(url);
     const serverPort = Number(parsedUrl.port) || HTTP_PORT_FROM_PROTOCOL[parsedUrl.protocol];
     const isError = statusCode === undefined || statusCode >= 400 || errorType !== undefined;
     const resolvedErrorType =
       errorType ?? (statusCode !== undefined ? String(statusCode) : undefined);
 
-    return new EdotBrowserSpan({
+    return new EdotSpan<EdotBrowserSpanDocument>({
       _index: TRACES_INDEX,
       trace_id: traceId,
       span_id: spanId,

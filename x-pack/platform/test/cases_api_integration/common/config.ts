@@ -103,7 +103,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
           ...findTestPluginPaths([
-            path.resolve(__dirname, 'plugins'),
+            path.resolve(
+              __dirname,
+              '../../../test_plugins/security_investigations/cases_api_integration'
+            ),
             path.resolve(__dirname, '../../alerting_api_integration/common/plugins'),
           ]),
           `--xpack.actions.preconfigured=${JSON.stringify({

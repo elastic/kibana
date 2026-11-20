@@ -223,6 +223,16 @@ const getMessageEditorAriaLabel = ({
   });
 };
 
+// Narrow to editable controls: after a sidebar click focus sits on the conversation row button,
+// so a broader "focus moved elsewhere" check would suppress the auto-focus in the normal case.
+const isEditableElementFocused = (): boolean => {
+  const { activeElement } = document;
+  return (
+    activeElement instanceof HTMLElement &&
+    (activeElement.isContentEditable || activeElement.matches('input, textarea'))
+  );
+};
+
 const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   onSubmit,
   onEditorFocus,
@@ -443,10 +453,12 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     updateLeadingMention,
   ]);
 
-  // Skip auto-focus while a HITL prompt is open, it should own focus instead
+  // Skip auto-focus while a HITL prompt is open, or while another editable control already has
+  // focus, since both should own focus instead
   useEffect(() => {
     if (isAwaitingPrompt || isConversationReadOnly) return;
     const timeoutId = setTimeout(() => {
+      if (isEditableElementFocused()) return;
       messageEditorController.focus();
     }, 200);
 

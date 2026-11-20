@@ -10,9 +10,10 @@ import type { ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
+import type { OverviewPercentile } from '../../../../../common/overview_filters';
 import type { ApplicationOverview } from '../../../../../common/types/overview';
 import { useFormatters } from '../../../../hooks/use_formatters';
-import { LOAD_TIME_LABEL, PAGE_LOADS_LABEL } from '../../../../labels';
+import { loadTimeLabel, PAGE_LOADS_LABEL } from '../../../../labels';
 import { formatDurationMs } from '../../../../utils/format_duration';
 
 const JS_ERRORS_LABEL = i18n.translate('xpack.digitalExperience.overview.kpis.jsErrorsLabel', {
@@ -78,9 +79,12 @@ function Kpi({
 /** The four headline metrics of the Overview, each with its unit. */
 export function OverviewKpis({
   overview,
+  percentile,
   isLoading,
 }: {
   overview: ApplicationOverview;
+  /** The percentile the load time is at, named in its label. */
+  percentile: OverviewPercentile;
   isLoading: boolean;
 }) {
   const { formatNumber, formatPercent } = useFormatters();
@@ -96,9 +100,15 @@ export function OverviewKpis({
       />
       <Kpi
         data-test-subj="digitalExperienceOverviewLoadTime"
-        label={LOAD_TIME_LABEL}
+        label={loadTimeLabel(percentile)}
         hint={loadTimeHint(loadTime.sampleCount)}
-        value={loadTime.p75Ms === null ? <EmptyCellValue /> : formatDurationMs(loadTime.p75Ms)}
+        value={
+          loadTime.percentileMs === null ? (
+            <EmptyCellValue />
+          ) : (
+            formatDurationMs(loadTime.percentileMs)
+          )
+        }
         isLoading={isLoading}
       />
       <Kpi

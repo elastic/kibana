@@ -69,6 +69,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     params,
     getAutomationsSoClient,
     getWorkflowsManagement,
+    isUniversalAlertingAvailable,
     getInvestigatorServiceAccountService,
     context,
   }) => {
@@ -121,6 +122,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
               automationId: params.path.id,
               automation: merged,
               serviceAccountId,
+              universalAlerts: isUniversalAlertingAvailable(),
             }),
           },
           spaceId,

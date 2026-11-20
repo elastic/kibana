@@ -19,8 +19,6 @@ import {
   type VisualizationAttachmentData,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
-import { resolveCustomContentQuery } from '@kbn/custom-content-common';
-import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import {
   ToolResultType,
   SupportedChartType,
@@ -29,7 +27,7 @@ import {
 import {
   buildLensConfig,
   buildVegaConfig,
-  generateCustomContentEsql,
+  buildCustomContentConfig,
   selectDefaultTimeRange,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
@@ -253,9 +251,6 @@ const readTarget = (target: CreateVisualizationTarget) => ({
   regenerateEsql: target.type === 'attachment' ? target.regenerate_esql ?? undefined : undefined,
 });
 
-const NO_QUERY_HINT =
-  'Pass an exact "index" and a more specific "query", an "esql" the user supplied, or "has_data": false only if the panel genuinely has no data.';
-
 export const createVisualizationTool = (): BuiltinToolDefinition<
   typeof createVisualizationSchema
 > => {
@@ -335,50 +330,26 @@ Ground first: make sure the target index exists and every field you reference is
             );
           }
 
-          // The model supplies intent, never markup. Same resolver the dashboard uses.
-          const resolveTemplate = createCustomContentTemplateResolver({
-            modelProvider,
-            esClient,
-            logger,
-          });
           const existingTemplate = getExistingTemplate(existingData);
-          const existingEsql = existingData?.esql;
-
-          const { query: mergedEsql, isChanging: isQueryChanging } =
-            await resolveCustomContentQuery({
-              suppliedQuery: esql,
-              hasData,
-              regenerate: regenerateEsql,
-              existingQuery: existingEsql,
-              isNewPanel: !existingData,
-              generate: (existingQueries) =>
-                generateCustomContentEsql({
-                  nlQuery,
-                  index,
-                  existingQueries,
-                  modelProvider,
-                  events,
-                  logger,
-                  esClient,
-                  noQueryHint: NO_QUERY_HINT,
-                  ...(requestedTimeRange ? { timeRange: requestedTimeRange } : {}),
-                }),
-            });
-
-          // Sampling costs a round trip, so it only happens when the query actually changes,
-          // including when has_data: false clears a stored query.
-          const { template, height } = await resolveTemplate({
-            prompt: nlQuery,
-            esqlQuery: isQueryChanging ? mergedEsql : undefined,
-            existingTemplate,
-            hasExistingQuery: !isQueryChanging && Boolean(mergedEsql),
+          const { esqlQuery, template, height } = await buildCustomContentConfig({
+            nlQuery,
+            index,
+            esql,
+            hasData,
+            regenerateESQL: regenerateEsql,
+            existing: existingData && { esqlQuery: existingData.esql, template: existingTemplate },
+            timeRange: requestedTimeRange,
+            modelProvider,
+            logger,
+            events,
+            esClient,
           });
 
           visualizationData = {
             renderer: 'custom_content',
             query: nlQuery,
             visualization: { template, height },
-            ...(mergedEsql ? { esql: mergedEsql } : {}),
+            ...(esqlQuery ? { esql: esqlQuery } : {}),
           };
         } else if (renderer === 'vega') {
           const existingSpec = getExistingVegaSpec(existingData);

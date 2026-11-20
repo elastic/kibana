@@ -8,7 +8,29 @@
  */
 
 import type { Method } from 'axios';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext } from '../../connector_spec';
+import { API_KEY_AUTH_REQUIRED_MESSAGE } from '../../auth_types/translations';
+
+// Values that already carry an auth scheme Elasticsearch accepts are kept as is.
+const AUTH_SCHEME_PATTERN = /^(ApiKey|Bearer|Basic)\s+\S/i;
+
+/** Builds the Authorization header value, adding the `ApiKey` scheme when the value has none. */
+export const toEsApiKeyHeader = (value: string): string => {
+  const trimmed = value.trim();
+  if (!trimmed || AUTH_SCHEME_PATTERN.test(trimmed)) {
+    return trimmed;
+  }
+  return `ApiKey ${trimmed}`;
+};
+
+/**
+ * Secret schema for the API key field. It runs on save and on every execution, so keys
+ * pasted without the prefix work, including keys of connectors saved before this change.
+ */
+export const esApiKeyHeaderSchema = lazySchema(() =>
+  z.string().trim().min(1, { message: API_KEY_AUTH_REQUIRED_MESSAGE }).overwrite(toEsApiKeyHeader)
+);
 
 export function getBaseUrl(ctx: ActionContext): string {
   const { url } = (ctx.config ?? {}) as { url?: string };

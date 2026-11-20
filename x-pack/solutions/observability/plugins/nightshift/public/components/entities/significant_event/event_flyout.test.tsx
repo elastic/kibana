@@ -271,6 +271,58 @@ describe('EventFlyout', () => {
     );
   });
 
+  it('clears the focused event after New chat closes an overlay flyout', async () => {
+    const { unmount } = renderFlyout({
+      type: 'overlay',
+      event: {
+        ...mockEvent,
+        investigations: [
+          {
+            workflow_execution_id: 'exec-1',
+            started_at: '2026-07-10T12:00:00Z',
+            completed_at: '2026-07-10T12:05:00Z',
+          },
+        ],
+      },
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
+    unmount();
+
+    expect(mockFocusedSignificantEventService.clearFocusedEvent).toHaveBeenCalledWith('evt-001');
+  });
+
+  it('keeps a staged overlay event when it refetches after New chat', async () => {
+    const { rerender, unmount } = renderFlyout({
+      type: 'overlay',
+      event: {
+        ...mockEvent,
+        investigations: [
+          {
+            workflow_execution_id: 'exec-1',
+            started_at: '2026-07-10T12:00:00Z',
+            completed_at: '2026-07-10T12:05:00Z',
+          },
+        ],
+      },
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
+    rerender(
+      <EventFlyout
+        event={{ ...mockEvent, summary: 'Updated after refetch' }}
+        onClose={jest.fn()}
+        type="overlay"
+      />
+    );
+
+    expect(mockFocusedSignificantEventService.clearFocusedEvent).not.toHaveBeenCalled();
+    unmount();
+    expect(mockFocusedSignificantEventService.clearFocusedEvent).toHaveBeenCalledWith('evt-001');
+  });
+
   it('offers a new chat instead of the investigation chat while it is running', async () => {
     mockUseInvestigation.mockReturnValue({ status: 'running' });
     renderFlyout({

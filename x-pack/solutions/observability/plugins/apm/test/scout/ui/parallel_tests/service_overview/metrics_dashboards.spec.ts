@@ -207,8 +207,7 @@ const dashboardScenarios: DashboardScenario[] = [
   },
 ];
 
-// Failing: See https://github.com/elastic/kibana/issues/266972
-test.describe.skip(
+test.describe(
   'Metrics Tab - Dashboard Catalog',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

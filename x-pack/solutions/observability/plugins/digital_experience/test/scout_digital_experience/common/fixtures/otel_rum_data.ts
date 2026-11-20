@@ -22,24 +22,6 @@ const readBulkLines = (): BulkLine[] =>
     .filter((line) => line.trim() !== '')
     .map((line) => JSON.parse(line));
 
-/** Indexes the mock EDOT Browser data, leaving the documents that already exist as they are. */
-export const ingestOtelRumData = async (esClient: EsClient): Promise<void> => {
-  const { errors, items } = await esClient.bulk({
-    operations: readBulkLines(),
-    refresh: 'wait_for',
-  });
-  if (!errors) {
-    return;
-  }
-
-  const failures = items
-    .map((item) => item.create)
-    .filter((result) => result?.error && result.status !== 409);
-  if (failures.length > 0) {
-    throw new Error(`Could not ingest the OTel RUM data: ${JSON.stringify(failures[0])}`);
-  }
-};
-
 /** Deletes the mock EDOT Browser documents by their ids, leaving the rest of the data streams. */
 export const deleteOtelRumData = async (esClient: EsClient): Promise<void> => {
   const documents = readBulkLines().flatMap(({ create }) =>
@@ -52,4 +34,22 @@ export const deleteOtelRumData = async (esClient: EsClient): Promise<void> => {
     refresh: true,
     ignore_unavailable: true,
   });
+};
+
+/** Indexes the mock EDOT Browser data, replacing what an interrupted run left behind. */
+export const ingestOtelRumData = async (esClient: EsClient): Promise<void> => {
+  // Data streams only accept `create`, which would keep a leftover document's old body.
+  await deleteOtelRumData(esClient);
+  const { errors, items } = await esClient.bulk({
+    operations: readBulkLines(),
+    refresh: 'wait_for',
+  });
+  if (!errors) {
+    return;
+  }
+
+  const failures = items.map((item) => item.create).filter((result) => result?.error);
+  if (failures.length > 0) {
+    throw new Error(`Could not ingest the OTel RUM data: ${JSON.stringify(failures[0])}`);
+  }
 };

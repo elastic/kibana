@@ -126,6 +126,7 @@ export { SOURCE_TYPES, sourceTypeSchema, type SourceType } from './src/sources/s
 export {
   analyzeSourceQuery,
   getSourceCommandQuery,
+  getSourceLocalIndexExpressions,
   getSourceReadTargets,
   hasMultipleSourceIndices,
   validateSourceQuery,
@@ -142,9 +143,17 @@ export {
   NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
   NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
   NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
+  NIGHTSHIFT_ONLINE_EVALS_USAGE_ID,
 } from './src/nightshift_usage_ids';
 
 export { conditionToESQLFilterAst } from './src/condition_to_esql_filter';
+
+export {
+  isNightshiftSpaceGatedEndpoint,
+  isNightshiftSupportedSpace,
+  NIGHTSHIFT_SUPPORTED_SPACE_ID,
+  NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE,
+} from './src/spaces';
 
 export {
   SETTINGS_TAB_IDS,

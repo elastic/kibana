@@ -24,7 +24,7 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
     indices: [
       {
         names: [
-          'ai-index-idx-nightshift-cortex',
+          'ai-index-idx-nightshift-wiki',
           'ai-index-idx-nightshift-semantic-memory',
           'ai-index-idx-nightshift-decision-trees',
         ],
@@ -59,6 +59,8 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
         privileges: [
           'feature_agenticInvestigations.minimal_read',
           'feature_agenticInvestigations.investigations_all',
+          'feature_alerting_v2_rules.read',
+          'feature_alerting_v2_alerts.read',
           'feature_agentBuilder.minimal_all',
           // Running an agent bound to a service account needs this sub-feature privilege;
           // `minimal_all` does not include it. See kibana#300175.

@@ -73,6 +73,7 @@ const setup = ({ canEncrypt = true, requestLifetimeMs = 600_000 } = {}) => {
     audit: auditServiceMock.create(),
     getCurrentUser: jest.fn(),
     getCurrentUserProfileId: jest.fn(),
+    getUserProfiles: jest.fn().mockResolvedValue([]),
   });
   return { backend, exchange, credentialStore, clusterClient, license, logger };
 };

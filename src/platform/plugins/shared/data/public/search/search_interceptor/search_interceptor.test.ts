@@ -1462,6 +1462,94 @@ describe('SearchInterceptor', () => {
         sessionService.getSessionId.mockImplementation(() => sessionId);
       });
 
+      test('evicting one session preserves another session in the shared cache', async () => {
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        searchInterceptor
+          .search(basicReq, { sessionId: 'other' })
+          .subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(searchInterceptor.hasResponseCacheForSession('other')).toBe(true);
+
+        searchInterceptor.evictResponseCacheForSession('other');
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+        expect(searchInterceptor.hasResponseCacheForSession(sessionId)).toBe(true);
+        expect(searchInterceptor.hasResponseCacheForSession('other')).toBe(false);
+
+        searchInterceptor
+          .search(basicReq, { sessionId: 'other' })
+          .subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(3);
+        expect(error).not.toHaveBeenCalled();
+      });
+
+      test('session eviction preserves active consumers and the next search misses', async () => {
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel();
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(1);
+        searchInterceptor.evictResponseCacheForSession(sessionId);
+        await timeTravel(10);
+        expect(complete).toHaveBeenCalledTimes(2);
+        expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+        expect(searchInterceptor.hasResponseCacheForSession(sessionId)).toBe(false);
+
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+        expect(searchInterceptor.hasResponseCacheForSession(sessionId)).toBe(true);
+        expect(error).not.toHaveBeenCalled();
+      });
+
+      test('reuses completed partial responses within the same session', async () => {
+        mockCoreSetup.http.post.mockResolvedValue(
+          getMockSearchResponse({
+            id: 'partial-result',
+            isPartial: true,
+            isRunning: false,
+            rawResponse: {},
+          })
+        );
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(searchInterceptor.hasResponseCacheForSession(sessionId)).toBe(true);
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(1);
+        expect(complete).toHaveBeenCalledTimes(2);
+        expect(error).not.toHaveBeenCalled();
+      });
+
+      test('should bypass cached responses when restoring a session', async () => {
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
+        sessionService.getSearchOptions.mockReturnValue({
+          sessionId,
+          isRestore: false,
+          isStored: false,
+        });
+
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(searchInterceptor.hasResponseCacheForSession(sessionId)).toBe(true);
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(1);
+
+        sessionService.getSearchOptions.mockReturnValue({
+          sessionId,
+          isRestore: true,
+          isStored: true,
+        });
+
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+        expect(complete).toHaveBeenCalledTimes(2);
+        expect(error).not.toHaveBeenCalled();
+      });
+
       test('should be disabled if there is no session', async () => {
         mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
 

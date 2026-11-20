@@ -153,8 +153,8 @@ const quote = (value: string): string =>
     .join('\n');
 
 /**
- * Lays the same outcome out as Block Kit: the impact, then the conclusion quoted, the hypotheses,
- * and a button back to Kibana.
+ * Lays the same outcome out as Block Kit: what happened and the impact, then the conclusion quoted,
+ * the hypotheses, and a button back to Kibana.
  */
 export const buildInvestigationSlackBlocks = ({
   investigation,
@@ -198,6 +198,13 @@ export const buildInvestigationSlackBlocks = ({
 
   const blocks: SlackBlock[] = [];
 
+  const whatHappened = investigation.summary?.trim();
+  if (whatHappened) {
+    blocks.push(
+      ...section("What's happened", escapeMrkdwn(truncate(whatHappened, MAX_SUMMARY_LENGTH)))
+    );
+  }
+
   const entityNames = (investigation.impact?.entities ?? [])
     .map(({ name }) => oneLine(name))
     .filter(Boolean);
@@ -205,8 +212,7 @@ export const buildInvestigationSlackBlocks = ({
     .slice(0, MAX_IMPACT_ENTITIES)
     .map((name) => `\`${escapeMrkdwn(name)}\``);
   const hiddenEntities = entityNames.length - shownEntities.length;
-  // Without an impact summary, what happened stands in for it.
-  const impactText = investigation.impact?.summary?.trim() || investigation.summary?.trim();
+  const impactText = investigation.impact?.summary?.trim();
   const impactLines = [
     impactText ? escapeMrkdwn(truncate(impactText, MAX_SUMMARY_LENGTH)) : '',
     shownEntities.length > 0
@@ -214,7 +220,10 @@ export const buildInvestigationSlackBlocks = ({
       : '',
   ].filter(Boolean);
   if (impactLines.length > 0) {
-    blocks.push(...section('Impact', impactLines.join('\n')), { type: 'divider' });
+    blocks.push(...section('Impact', impactLines.join('\n')));
+  }
+  if (blocks.length > 0) {
+    blocks.push({ type: 'divider' });
   }
 
   if (investigation.verdict?.trim()) {

@@ -14,7 +14,6 @@ import type {
   SubstitutionStep,
   InjectedContextStep,
   BackgroundAgentCompleteStep,
-  TodosStep,
   AskUserQuestionStep,
   RelevantSkillsStep,
   PreExecutionWorkflowStep,
@@ -192,7 +191,6 @@ export type PersistentConversationRoundStep =
   | ReasoningStep
   | CompactionStep
   | BackgroundAgentCompleteStep
-  | TodosStep
   | AskUserQuestionStep
   | RelevantSkillsStep
   | PreExecutionWorkflowStep

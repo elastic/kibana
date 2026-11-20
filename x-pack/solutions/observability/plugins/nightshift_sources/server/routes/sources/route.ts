@@ -9,6 +9,7 @@ import { isBoom } from '@hapi/boom';
 import { lazySchema, z } from '@kbn/zod/v4';
 import {
   NIGHTSHIFT_API_PRIVILEGES,
+  NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
   createSourceRequestSchema,
   listSourcesQuerySchema,
   updateSourceRequestSchema,
@@ -77,7 +78,7 @@ const createSourceRoute = createNightshiftSourcesServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({
@@ -96,11 +97,11 @@ const validateSourceQueryRoute = createNightshiftSourcesServerRoute({
     access: 'internal',
     summary: 'Validate a Nightshift source query',
     description:
-      'Runs the checks create runs on the ES|QL query, as the calling user, without storing anything. A structurally invalid query comes back with `valid: false` and the reason. A query the user cannot read is a 403, as on create.',
+      'Runs the checks create runs on the ES|QL query, as the calling user, without storing anything. A structurally invalid query comes back with `valid: false` and the reason.',
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: lazySchema(() =>
@@ -155,7 +156,7 @@ const updateSourceRoute = createNightshiftSourcesServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({
@@ -179,7 +180,7 @@ const deleteSourceRoute = createNightshiftSourcesServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({
@@ -201,7 +202,7 @@ const enableSourceRoute = createNightshiftSourcesServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({
@@ -223,7 +224,7 @@ const disableSourceRoute = createNightshiftSourcesServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({

@@ -8,8 +8,8 @@
 import React from 'react';
 
 import { fireEvent, waitFor } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
-import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
 import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import { useLicense } from '../../../../../hooks';
@@ -55,7 +55,7 @@ describe('RollbackButton', () => {
   });
 
   const renderAndHover = async (installSource: string, isCustomPackage: boolean) => {
-    const result = createIntegrationsTestRendererMock().render(
+    const result = renderWithI18n(
       <RollbackButton
         packageInfo={getPackageInfo(installSource)}
         isCustomPackage={isCustomPackage}

@@ -51,4 +51,13 @@ export const DESTINATION_SIGNAL_LABELS: Record<DestinationSignal, string> = {
   traces: i18n.translate('xpack.streams.destinations.tracesSignalLabel', {
     defaultMessage: 'Traces',
   }),
+  docs: i18n.translate('xpack.streams.destinations.docsSignalLabel', {
+    defaultMessage: 'Documents',
+  }),
 };
+
+const isDestinationSignal = (signal: string): signal is DestinationSignal =>
+  Object.hasOwn(DESTINATION_SIGNAL_LABELS, signal);
+
+export const getSignalLabel = (signal: string): string =>
+  isDestinationSignal(signal) ? DESTINATION_SIGNAL_LABELS[signal] : signal;

@@ -87,7 +87,7 @@ export interface MaxLengthBrand {
 }
 
 /** A non-empty string the list API accepts, at most `maxLength` long. */
-const filterValueRt = (maxLength: number) =>
+export const filterValueRt = (maxLength: number) =>
   t.brand(
     nonEmptyStringRt,
     (value): value is t.Branded<NonEmptyString, MaxLengthBrand> => value.length <= maxLength,

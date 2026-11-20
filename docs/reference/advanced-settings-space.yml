@@ -1061,6 +1061,20 @@ groups:
           self: ga
           serverless: unavailable
 
+      - setting: "discover:enableSolutionProfilesInClassic"
+        id: discover-enablesolutionprofilesinclassic
+        description: |
+          Controls whether **Discover** switches to a [tailored experience](docs-content://explore-analyze/discover/discover-get-started.md#context-aware-discover) for Observability and Security data when you use Classic navigation, with columns, cell renderers, and document details that suit that data. Turn this setting off to always use the default **Discover** experience. Changing this setting requires a page reload.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 9.6
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
       - setting: "doc_table:hideTimeColumn"
         id: doctable-hidetimecolumn
         description: |
@@ -1444,6 +1458,20 @@ groups:
         default: 500
         applies_to:
           stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+
+      - setting: "observability:apmMaxNumberOfServices"
+        id: observability-apm-max-number-of-services
+        description: |
+          Sets the maximum number of services shown in the {{product.apm}} Service inventory. Values must be between 1 and 5000. Higher values slow down queries and use more memory on {{es}}. Above 2000 the query can exceed the [`search.max_buckets`](elasticsearch://reference/elasticsearch/configuration-reference/search-settings.md#search-settings-max-buckets) cluster setting, which defaults to 65536.
+        datatype: int
+        default: 1000
+        applies_to:
+          stack: ga 9.6+
           ech: ga
           ece: ga
           eck: ga
@@ -2036,9 +2064,11 @@ groups:
       - setting: "securitySolution:defaultIndex"
         id: securitysolution-defaultindex
         description: |
-          A comma-delimited list of {{es}} indices from which the {{security-app}} collects events. The {{security-app}} uses this list to generate the [default Security data view](docs-content://solutions/security/get-started/data-views-elastic-security.md#default-data-view-security). The [entity store](docs-content://solutions/security/advanced-entity-analytics/entity-store.md) also extracts entities from these indices.
+          A comma-delimited list of {{es}} indices from which the {{security-app}} collects events. The {{security-app}} uses this list to generate the [default Security data view](docs-content://solutions/security/get-started/data-views-elastic-security.md#default-data-view-security), which most {{security-app}} pages query, including the [Indicators page](docs-content://solutions/security/investigate/indicators-of-compromise.md) (**Security** → **Intelligence**). The [entity store](docs-content://solutions/security/advanced-entity-analytics/entity-store.md) also extracts entities from these indices.
 
           Index patterns can use wildcards. For example, `filebeat-*` matches all indices that start with `filebeat-`.
+
+          To display indicators stored on a remote cluster on the Indicators page, add the matching [cross-cluster search](docs-content://explore-analyze/cross-cluster-search.md) pattern to this list, for example `*:logs-ti_*`. Adding the pattern to `securitySolution:defaultThreatIndex` alone doesn't make those indicators appear on the Indicators page.
 
           If you leave the `-*elastic-cloud-logs-*` pattern in the list, Elastic Cloud monitoring logs are excluded from {{security-app}} queries.
         datatype: array
@@ -2058,7 +2088,9 @@ groups:
       - setting: "securitySolution:defaultThreatIndex"
         id: securitysolution-threatindices
         description: |
-          A comma-delimited list of threat intelligence indices from which the {{security-app}} collects indicators. Features that query these indices include the Threat Intelligence view on the Overview dashboard, indicator match rules, and the alert enrichment query.
+          A comma-delimited list of threat intelligence indices from which the {{security-app}} collects indicators for detection and enrichment. Features that query these indices are the Threat Intelligence view on the Overview dashboard, the default indicator index of indicator match rules, and the alert enrichment query.
+
+          This setting doesn't affect the [Indicators page](docs-content://solutions/security/investigate/indicators-of-compromise.md) (**Security** → **Intelligence**), which queries the default Security data view generated from `securitySolution:defaultIndex`. Refer to [Troubleshoot indicators of compromise](docs-content://troubleshoot/security/indicators-of-compromise.md).
 
           Do not remove or overwrite the `logs-ti_*` index pattern as it is used by {{agent}} integrations.
         datatype: array
@@ -2237,22 +2269,6 @@ groups:
           self: ga
           serverless:
             security: ga
-
-      - setting: "securitySolution:enableNewFlyout"
-        id: security-solution-enable-new-flyout
-        description: |
-          Enables the new flyout system for document (alert and event), attack, host, user, rule, network, indicator of compromise, misconfigurations, and vulnerabilities details.
-
-          Turn this setting off to use the previous flyout layout, which uses right, left, and preview panels instead of a single flyout with [child flyouts](docs-content://solutions/security/get-started/elastic-security-ui.md#details-flyouts).
-        datatype: bool
-        default: true
-        applies_to:
-          stack: ga 9.5+
-          ech: ga
-          ece: ga
-          eck: ga
-          self: ga
-          serverless: unavailable
 
       - setting: "securitySolution:enableRuleChangesHistory"
         id: security-solution-enable-rule-changes-history

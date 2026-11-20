@@ -19,6 +19,18 @@ export const REPORT_BURST = 5;
 /** Interval at which one warning is allowed again once the burst is used up. */
 export const REPORT_REFILL_MS = 60_000;
 
+/**
+ * Time threshold that distinguishes short-lived blocks from ongoing blocks.
+ * Blocks shorter than this are reported once after they end.
+ * Blocks lasting this long or longer are reported as ongoing, with elapsed time,
+ * and repeated until they end or the process terminates.
+ */
+export const ONGOING_REPORT_AFTER_MS = 2_000;
+/** Ongoing reports repeat this often while the block is shorter than the next constant... */
+export const ONGOING_REPEAT_MS = 3_000;
+/** ...and every REPORT_REFILL_MS after that. */
+export const ONGOING_FAST_REPEATS_UNTIL_MS = 12_000;
+
 /** Kibana is considered running this long after its overall status first becomes available... */
 export const RUNNING_GRACE_MS = 30_000;
 /** ...or this long after the watchdog service starts, whichever comes first. */

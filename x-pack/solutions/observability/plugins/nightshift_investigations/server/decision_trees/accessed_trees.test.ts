@@ -34,7 +34,7 @@ describe('extractAccessedTreeIds', () => {
         },
         {
           tool_id: SANDBOX_VIEW_FILE_TOOL_ID,
-          params: { file_path: '/workspace/cortex/INDEX.md' },
+          params: { file_path: '/workspace/wiki/INDEX.md' },
         },
       ])
     ).toEqual([]);

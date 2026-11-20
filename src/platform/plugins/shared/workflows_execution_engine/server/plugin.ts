@@ -1167,6 +1167,7 @@ export class WorkflowsExecutionEnginePlugin
                   event: {
                     type: 'scheduled',
                     timestamp: new Date().toISOString(),
+                    scheduledFor: new Date(taskInstance.runAt).toISOString(),
                     source: 'task-manager',
                   },
                   triggeredBy: 'scheduled',

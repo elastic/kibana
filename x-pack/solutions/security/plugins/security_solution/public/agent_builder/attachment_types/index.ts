@@ -180,7 +180,6 @@ export const registerEntityAttachment = ({
   experimentalFeatures,
   resolveSecurityCanvasContext,
   searchSession,
-  uiSettings,
   rendering,
   spaces,
   registerImpactEntityOpener,
@@ -192,7 +191,6 @@ export const registerEntityAttachment = ({
   experimentalFeatures: ExperimentalFeatures;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
-  uiSettings: IUiSettingsClient;
   rendering: CoreStart['rendering'];
   spaces?: SpacesPluginStart;
   registerImpactEntityOpener?: AgenticInvestigationsPublicPluginStart['registerImpactEntityOpener'];
@@ -226,7 +224,6 @@ export const registerEntityAttachment = ({
         chrome,
         resolveSecurityCanvasContext,
         searchSession,
-        uiSettings,
       })
     );
   });
@@ -308,17 +305,13 @@ export const registerEntityAnalyticsDashboardAttachment = ({
   application,
   agentBuilder,
   chrome,
-  experimentalFeatures,
   searchSession,
-  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
-  experimentalFeatures: ExperimentalFeatures;
   searchSession?: ISessionService;
-  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_analytics_dashboard_attachment" */
@@ -329,9 +322,7 @@ export const registerEntityAnalyticsDashboardAttachment = ({
       application,
       agentBuilder,
       chrome,
-      experimentalFeatures,
       searchSession,
-      uiSettings,
     });
   });
 };
@@ -354,8 +345,6 @@ export const registerEntityGraphAttachment = ({
   agentBuilder,
   chrome,
   searchSession,
-  experimentalFeatures,
-  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
@@ -363,8 +352,6 @@ export const registerEntityGraphAttachment = ({
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   searchSession?: ISessionService;
-  experimentalFeatures: ExperimentalFeatures;
-  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_graph_attachment" */
@@ -378,8 +365,6 @@ export const registerEntityGraphAttachment = ({
         agentBuilder,
         chrome,
         searchSession,
-        experimentalFeatures,
-        uiSettings,
       })
     );
   });
@@ -396,17 +381,13 @@ export const registerEntityRiskScoreHistoryAttachment = ({
   application,
   agentBuilder,
   chrome,
-  experimentalFeatures,
   searchSession,
-  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
-  experimentalFeatures: ExperimentalFeatures;
   searchSession?: ISessionService;
-  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_risk_score_history_attachment" */
@@ -418,9 +399,7 @@ export const registerEntityRiskScoreHistoryAttachment = ({
         application,
         agentBuilder,
         chrome,
-        experimentalFeatures,
         searchSession,
-        uiSettings,
       })
     );
   });

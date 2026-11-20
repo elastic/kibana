@@ -36,8 +36,13 @@ const TAKEN_PREFIX = '\u2705';
 
 const BARE_ID_RE = /^([A-Za-z]\w*)$/;
 
+const SURROUNDING_QUOTES_RE = /^["']|["']$/g;
+
+/** Condition the parser gives an edge drawn without a label. */
+export const UNLABELED_EDGE_CONDITION = 'next';
+
 /** Display-only usage counters some renderers append; never persisted into a label. */
-const STATS_SUFFIX_RE = /\s*\u00b7\s*visits\s+\d+\s*\u00b7\s*reinforced\s+\d+\s*$/;
+const STATS_SUFFIX_RE = /\s*\u00b7\s*visits\s+\d+\s*\u00b7\s*reinforced\s+\d+(?:\.\d+)?\s*$/;
 
 const SKIPPED_LINE_PREFIXES = ['flowchart', '%%', 'style ', 'classDef ', 'class '];
 
@@ -59,6 +64,16 @@ const splitLinesKeepEnds = (text: string): string[] => {
     lines.push(text.slice(start));
   }
   return lines;
+};
+
+/** Cleans a raw edge label into its condition and whether it carries the taken (✅) marker. */
+export const parseEdgeCondition = (
+  rawCondition: string
+): { condition: string; isTaken: boolean } => {
+  const unquoted = rawCondition.trim().replace(SURROUNDING_QUOTES_RE, '').trim();
+  const isTaken = unquoted.startsWith(TAKEN_PREFIX);
+  const condition = isTaken ? unquoted.slice(TAKEN_PREFIX.length).trim() : unquoted;
+  return { condition: condition || UNLABELED_EDGE_CONDITION, isTaken };
 };
 
 const FENCE_OPENER_RE = /^[ \t]*(`{3,}|~{3,})[ \t]*mermaid[ \t]*$/i;
@@ -199,16 +214,11 @@ export const parseMermaidDecisionTree = (
       continue;
     }
 
-    let condition = rawCondition.replace(/^["']|["']$/g, '').trim();
-    const isTaken = condition.startsWith(TAKEN_PREFIX);
-    if (isTaken) {
-      condition = condition.slice(TAKEN_PREFIX.length).trim();
-    }
-
+    const { condition, isTaken } = parseEdgeCondition(rawCondition);
     edges.push({
       source_node_id: sourceId,
       target_node_id: targetId,
-      condition: condition || 'next',
+      condition,
       is_taken: isTaken,
     });
   }

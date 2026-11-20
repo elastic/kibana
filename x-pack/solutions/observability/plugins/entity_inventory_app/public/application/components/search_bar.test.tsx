@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
@@ -17,6 +18,11 @@ import { ENTITY_INVENTORY_APP_NAME } from '../constants';
 import { EntityInventorySearchProvider } from '../context/search_context';
 import { MAX_TIME_RANGE_HINT, SEARCH_BAR_PLACEHOLDERS } from '../translations';
 import { EntityInventorySearchBar } from './search_bar';
+
+const mockDataView = jest.fn((): DataView | undefined => undefined);
+jest.mock('../hooks/use_entity_inventory_data_view', () => ({
+  useEntityInventoryDataView: () => ({ dataView: mockDataView() }),
+}));
 
 // Mirrors the real SearchBar: the picker keeps its own state, resynced only when the range props change.
 const MockSearchBar = jest.fn(({ dateRangeFrom, onQuerySubmit }: StatefulSearchBarProps) => {
@@ -56,6 +62,16 @@ const renderSearchBar = (entityCategory: EntityInventoryEntityCategory = 'all') 
 describe('EntityInventorySearchBar', () => {
   beforeEach(() => {
     MockSearchBar.mockClear();
+    mockDataView.mockReturnValue(undefined);
+  });
+
+  it('gives the data view of the scope to the search bar', () => {
+    const dataView = { title: 'metrics-*' } as DataView;
+    mockDataView.mockReturnValue(dataView);
+
+    renderSearchBar();
+
+    expect(lastSearchBarProps().indexPatterns).toEqual([dataView]);
   });
 
   it('renders a controlled unified search bar with the legacy date picker', () => {

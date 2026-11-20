@@ -39,6 +39,7 @@ import {
   SESSIONS_VERSION,
   sessionsTransformId,
 } from '../../common/sessions';
+import { SESSION_ATTRIBUTE_FIELDS } from '../../common/session_attribute_fields';
 import { partitionFilters, type SessionsPartition } from './partitions';
 import {
   SOURCE_EVENT_OUTCOME_FIELD,
@@ -70,51 +71,6 @@ export const ERROR_FILTER = anyOf(eventNamed(EVENT_EXCEPTION), {
   term: { [SOURCE_EVENT_OUTCOME_FIELD]: 'failure' },
 });
 export const WEB_VITAL_FILTER = eventNamed(EVENT_WEB_VITAL);
-
-/**
- * Candidate source fields per summarized attribute, in priority order. The dest
- * pipeline keeps the first non-empty value, so the same attribute can come from
- * the event or resource scope.
- */
-export const SESSION_ATTRIBUTE_FIELDS = {
-  user: [
-    'attributes.user.email',
-    'resource.attributes.user.email',
-    'attributes.user.id',
-    'resource.attributes.user.id',
-    'attributes.user.name',
-    'resource.attributes.user.name',
-  ],
-  browser: [
-    'resource.attributes.browser.name',
-    'attributes.browser.name',
-    'resource.attributes.user_agent.name',
-    'attributes.user_agent.name',
-  ],
-  browserVersion: [
-    'resource.attributes.browser.version',
-    'attributes.browser.version',
-    'resource.attributes.user_agent.version',
-    'attributes.user_agent.version',
-  ],
-  os: [
-    'resource.attributes.os.name',
-    'attributes.os.name',
-    'resource.attributes.browser.platform',
-    'attributes.browser.platform',
-  ],
-  device: [
-    'resource.attributes.device.model.name',
-    'attributes.device.model.name',
-    'resource.attributes.device.type',
-  ],
-  countryIso: [
-    'attributes.client.geo.country_iso_code',
-    'resource.attributes.client.geo.country_iso_code',
-  ],
-  region: ['attributes.client.geo.region_name', 'resource.attributes.client.geo.region_name'],
-  city: ['attributes.client.geo.city_name', 'resource.attributes.client.geo.city_name'],
-} as const;
 
 type SessionAttribute = keyof typeof SESSION_ATTRIBUTE_FIELDS;
 

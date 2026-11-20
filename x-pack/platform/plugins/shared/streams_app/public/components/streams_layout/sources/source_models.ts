@@ -33,14 +33,19 @@ export type SourceSignal = StreamsV2.OtlpSignal;
 /** Logs, metrics, and traces. Spec also has docs/profiles; those are not ingest choices here. */
 export const SOURCE_SIGNALS: SourceSignal[] = ['logs', 'metrics', 'traces'];
 
+/** Docs shows as a badge but is never picked, so it stays out of `SourceSignal`. */
+export type SourceDisplaySignal = SourceSignal | 'docs';
+
+export const SOURCE_DISPLAY_SIGNALS: SourceDisplaySignal[] = ['logs', 'metrics', 'traces', 'docs'];
+
 const DEFAULT_SUPPORTED_TELEMETRY: Record<SourceType, UnitSource['supported_telemetry']> = {
   otlp: [...SOURCE_SIGNALS],
   es_otlp: [...SOURCE_SIGNALS],
   // Prometheus Remote Write v1 decodes only to OTel metrics.
   prometheus_remote_write: ['metrics'],
   es_prometheus_remote_write: ['metrics'],
-  // Async bulk is the ECS path for logs, metrics, and traces.
-  async_bulk: [...SOURCE_SIGNALS],
+  // Managed _bulk carries documents only (streams-spec async_bulk.schema.yaml).
+  async_bulk: ['docs'],
   bulk: ['docs'],
 };
 
@@ -213,19 +218,18 @@ export const createSourceViewModel = ({
   supportedTelemetry,
 });
 
-/** Logs, metrics, and traces this source accepts, for badges and similar UI. */
 export const getSourceDisplaySignals = (
   source: ConfiguredSource,
   supportedTelemetry?: UnitSource['supported_telemetry']
-): SourceSignal[] => {
+): SourceDisplaySignal[] => {
   const configured = readConfiguredOtlpSignals(source);
   if (configured && configured.length > 0) {
     return SOURCE_SIGNALS.filter((signal) => configured.includes(signal));
   }
   if (supportedTelemetry !== undefined) {
-    return SOURCE_SIGNALS.filter((signal) => supportedTelemetry.includes(signal));
+    return SOURCE_DISPLAY_SIGNALS.filter((signal) => supportedTelemetry.includes(signal));
   }
-  return SOURCE_SIGNALS.filter((signal) =>
+  return SOURCE_DISPLAY_SIGNALS.filter((signal) =>
     DEFAULT_SUPPORTED_TELEMETRY[source.type].includes(signal)
   );
 };

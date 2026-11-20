@@ -10,12 +10,15 @@
 import {
   EMPTY,
   catchError,
+  combineLatest,
   concatMap,
   delay,
   distinctUntilChanged,
   filter,
   firstValueFrom,
+  map,
   merge,
+  skipWhile,
   take,
   timer,
   type Observable,
@@ -27,11 +30,17 @@ import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
 import { OPS_CONFIG_PATH, type OpsConfigType } from '../ops_config';
 import { EventLoopWatchdog } from './event_loop_watchdog';
+import { resolveDiagnosticDir } from './resolve_diagnostic_dir';
 import { resolveWorkerLogging, type LoggingConfigSubset } from './resolve_worker_logging';
 import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './constants';
 
 /** Feature flag that turns the event loop watchdog on and off at runtime. */
 export const EVENT_LOOP_WATCHDOG_FEATURE_FLAG = 'core.eventLoopWatchdog.enabled';
+/** Per-role CPU profiling flags. */
+export const EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAGS = {
+  background_tasks: 'core.eventLoopWatchdog.profiling.backgroundTasks.enabled',
+  ui: 'core.eventLoopWatchdog.profiling.ui.enabled',
+} as const satisfies Record<'background_tasks' | 'ui', string>;
 const LOGGER_CONTEXT = ['metrics', 'event_loop_watchdog'] as const;
 
 export interface EventLoopWatchdogSetupDeps {
@@ -55,6 +64,7 @@ export class EventLoopWatchdogService {
   private readonly logger: Logger;
   private watchdog?: EventLoopWatchdog;
   private enabledFallback = false;
+  private nodeRoles: readonly string[] = [];
   private subscription?: Subscription;
   private overall$?: Observable<ServiceStatus>;
 
@@ -64,12 +74,18 @@ export class EventLoopWatchdogService {
 
   public async setup({ status, nodeRoles, serviceVersion }: EventLoopWatchdogSetupDeps) {
     this.overall$ = status.overall$;
+    this.nodeRoles = nodeRoles;
     const { configService } = this.coreContext;
     const [{ eventLoopWatchdog: config }, loggingConfig] = await Promise.all([
       firstValueFrom(configService.atPath<OpsConfigType>(OPS_CONFIG_PATH)),
       firstValueFrom(configService.atPath<LoggingConfigSubset>('logging')),
     ]);
     const runningThresholdMs = config.blockThreshold.asMilliseconds();
+    const { profiling, startup } = config;
+    const perPhaseMs = (key: keyof typeof profiling) => ({
+      starting: (startup.profiling[key] ?? profiling[key]).asMilliseconds(),
+      running: profiling[key].asMilliseconds(),
+    });
     this.enabledFallback = config.enabled;
     this.watchdog = new EventLoopWatchdog({
       logger: this.logger,
@@ -82,6 +98,12 @@ export class EventLoopWatchdogService {
         nodeRoles,
         version: serviceVersion,
       }),
+      profiling: {
+        startAfterMs: perPhaseMs('startAfter'),
+        maxDurationMs: perPhaseMs('maxDuration'),
+        cooldownMs: perPhaseMs('cooldown'),
+        diagnosticDir: resolveDiagnosticDir(),
+      },
     });
   }
 
@@ -121,6 +143,8 @@ export class EventLoopWatchdogService {
         },
       });
 
+    this.subscription.add(this.followProfilingFlags(featureFlags));
+
     // Startup ends once Kibana is first available plus a grace period, or after a while regardless.
     const available$ = (this.overall$ ?? EMPTY).pipe(
       filter(({ level }) => level === ServiceStatusLevels.available),
@@ -142,7 +166,37 @@ export class EventLoopWatchdogService {
     await this.watchdog?.stop();
   }
 
-  /** One log line with the message, and the stack at debug, as `ManagedWorker` does. */
+  /** Role-specific profiling flags default to off. */
+  private followProfilingFlags(
+    featureFlags: EventLoopWatchdogStartDeps['featureFlags']
+  ): Subscription {
+    const flags$ = Object.entries(EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAGS)
+      .filter(([role]) => this.nodeRoles.includes(role))
+      .map(([, flag]) => featureFlags.getBooleanValue$(flag, false));
+    return combineLatest(flags$)
+      .pipe(
+        map((values) => values.some(Boolean)),
+        distinctUntilChanged(),
+        // Nodes whose profiling flags have never been on log nothing.
+        skipWhile((enabled) => !enabled)
+      )
+      .subscribe({
+        next: (enabled) => {
+          // Temporary: replaced by the profiling log line once enabled in the worker itself
+          this.logger.info(
+            `Event loop watchdog profiling flag ${enabled ? 'on' : 'off'} for this node`
+          );
+        },
+        error: (error) => {
+          this.logFailure(
+            'error',
+            'Event loop watchdog profiling flag failed, treating it as off',
+            error
+          );
+        },
+      });
+  }
+
   private logFailure(level: 'warn' | 'error', message: string, error: Error): void {
     this.logger[level](`${message}: ${error.message}`);
     if (error.stack) {

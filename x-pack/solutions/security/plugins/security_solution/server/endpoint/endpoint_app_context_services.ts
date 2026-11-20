@@ -487,6 +487,14 @@ export class EndpointAppContextService {
     return this.startDependencies.agentBuilder;
   }
 
+  public getFleetAgentService(): FleetStartContract['agentService'] {
+    if (!this.startDependencies?.fleetStartServices) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.fleetStartServices.agentService;
+  }
+
   private getFleetAuthzService(): FleetStartContract['authz'] {
     if (!this.startDependencies?.fleetStartServices) {
       throw new EndpointAppContentServicesNotStartedError();

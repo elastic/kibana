@@ -9,7 +9,7 @@
  * What the managed investigation and combined workflows reference must exist in the step registry of every install
  * that gets them, whatever the feature flags say.
  *
- * The combined materialize workflow installs with Cortex or Memory, and the combined optimize
+ * The combined materialize workflow installs with Wiki or Memory, and the combined optimize
  * workflow now also carries the reinforcement phase, so both reference `nightshift.*` steps on
  * installs where the corresponding feature is off. If one of those steps were only registered
  * under its own flag, the install would resolve a step type the engine does not know. The check
@@ -62,7 +62,7 @@ const referencedStepTypes = (workflowId: string): string[] => {
 };
 
 const registeredStepIds = (flags: {
-  cortexEnabled: boolean;
+  wikiEnabled: boolean;
   memoryEnabled: boolean;
   decisionTreesEnabled: boolean;
 }): string[] => {
@@ -71,7 +71,7 @@ const registeredStepIds = (flags: {
     coreMock.createPluginInitializerContext({
       enabled: true,
       sandbox: { isAvailable: true },
-      cortex: { enabled: flags.cortexEnabled },
+      wiki: { enabled: flags.wikiEnabled },
       decision_trees: { enabled: flags.decisionTreesEnabled },
       memory: { enabled: flags.memoryEnabled },
     })
@@ -92,18 +92,18 @@ const registeredStepIds = (flags: {
 };
 
 const FEATURE_MATRIX = [
-  { name: 'cortex only', cortexEnabled: true, memoryEnabled: false, decisionTreesEnabled: false },
-  { name: 'memory only', cortexEnabled: false, memoryEnabled: true, decisionTreesEnabled: false },
+  { name: 'wiki only', wikiEnabled: true, memoryEnabled: false, decisionTreesEnabled: false },
+  { name: 'memory only', wikiEnabled: false, memoryEnabled: true, decisionTreesEnabled: false },
   {
-    name: 'cortex, memory and trees',
-    cortexEnabled: true,
+    name: 'wiki, memory and trees',
+    wikiEnabled: true,
     memoryEnabled: true,
     decisionTreesEnabled: true,
   },
 ];
 
 describe('combined workflows only reference registered step types', () => {
-  // The combined workflows install whenever Cortex or Memory is on, whatever the tree flag, so
+  // The combined workflows install whenever Wiki or Memory is on, whatever the tree flag, so
   // these are exactly the installs that can resolve them.
   it.each(FEATURE_MATRIX)('with $name', ({ ...flags }) => {
     const registered = registeredStepIds(flags);
@@ -132,7 +132,7 @@ describe('agent hooks around the combined workflows', () => {
     const base = await baseFor(
       getInvestigationAgentType({
         sandboxEnabled: true,
-        cortexEnabled: true,
+        wikiEnabled: true,
         memoryEnabled: true,
         decisionTreesEnabled: true,
       })

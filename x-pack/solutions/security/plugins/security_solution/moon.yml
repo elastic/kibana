@@ -64,6 +64,7 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/securitysolution-t-grid'
   - '@kbn/securitysolution-timeline-common'
+  - '@kbn/securitysolution-timeline-components'
   - '@kbn/rule-registry-plugin'
   - '@kbn/securitysolution-utils'
   - '@kbn/securitysolution-list-constants'

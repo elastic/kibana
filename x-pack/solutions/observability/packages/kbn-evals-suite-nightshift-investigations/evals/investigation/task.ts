@@ -111,6 +111,20 @@ const readConversation = async (
   }
 };
 
+/**
+ * Why the last round stopped, when the agent failed or was aborted. Agent Builder keeps such a
+ * round as `completed`, so without this a crash would read as an investigation that concluded nothing.
+ */
+const roundInterruptionError = (rounds: ConversationRound[]): string | undefined => {
+  const interruption = rounds.at(-1)?.interruption;
+  if (!interruption) return undefined;
+  if (interruption.type === 'failed') {
+    return `Investigation round failed: ${interruption.error.message}`;
+  }
+  const source = interruption.aborted_by?.source;
+  return `Investigation round was aborted${source ? ` by ${source}` : ''}`;
+};
+
 const isPersisted = (conversation: { rounds: ConversationRound[] } | undefined): boolean =>
   Boolean(
     conversation &&
@@ -179,9 +193,6 @@ export const runInvestigation = async (
           subject: { type: 'manual' },
           message: example.input.question,
           connector_id: connector.id,
-          ...(example.input.telemetry_target
-            ? { telemetry_target: example.input.telemetry_target }
-            : {}),
         }),
       }
     );
@@ -238,9 +249,15 @@ export const runInvestigation = async (
         conclusion: reply,
       };
     }
-    if (!investigation.in_progress && !output.structured_report.conclusion) {
-      // There is no failed state: a run that ended without a conclusion recorded none.
-      output.execution_error ??= NO_CONCLUSION_ERROR;
+    if (!investigation.in_progress) {
+      // The investigation has no failed state, so its last round says whether the agent crashed,
+      // even after recording a verdict, or simply recorded no conclusion.
+      const interruption = roundInterruptionError(conversation.rounds);
+      if (interruption) {
+        output.execution_error ??= interruption;
+      } else if (!output.structured_report.conclusion) {
+        output.execution_error ??= NO_CONCLUSION_ERROR;
+      }
     }
     output.conversation_round_count = conversation.rounds.length;
     output.usage = extractUsage(conversation.rounds);

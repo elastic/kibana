@@ -775,6 +775,222 @@
       "approvedBy": "@elastic/obs-ux-management-team",
       "oasdiffId": "api-path-removed-without-deprecation",
       "prUrl": "https://github.com/elastic/kibana/pull/300516"
+    },
+    {
+      "path": "/api/observability/slos",
+      "method": "get",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. settings.syncField is nullable in the SLO settings schema (`z.string().nullable().optional()`), so the stored definition and the response can already contain null; the hand-written spec did not document it.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-became-nullable",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos",
+      "method": "get",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Schema restructuring with the same accepted values: budgetingMethod is anyOf the 'occurrences' and 'timeslices' literals (same values); instanceId is anyOf '*' or a string (any string, as before); indicator is a $ref to SLOIndicator, a oneOf of the 7 indicator components discriminated by type; timeWindow is a $ref to SLOTimeWindow, a oneOf of SLOTimeWindowRolling and SLOTimeWindowCalendarAligned discriminated by type; createdAt and updatedAt gain format date-time (they are ISO 8601 strings from Date.toISOString()).",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos",
+      "method": "get",
+      "reason": "False positive: indicator and timeWindow are now oneOf named components, and the required properties moved into each variant. Every SLOIndicatorProperties* variant requires type and params, and both SLOTimeWindow* variants require duration and type. Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/_bulk_purge_rollup",
+      "method": "post",
+      "reason": "Documentation only: the purgePolicy variants are now the named components SLOBulkPurgePolicyFixedAge and SLOBulkPurgePolicyFixedTime with a discriminator mapping, and the fixed_time timestamp is documented as format date-time. oasdiff no longer matches the inline fixed_time variant; both variants and their required fields are unchanged, and request validation is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "request-property-one-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/_bulk_snapshot",
+      "method": "post",
+      "reason": "Documentation only: `at` is documented as format date-time. Request validation is unchanged and still accepts any date string that `new Date()` can parse.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "request-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/_bulk_snapshot",
+      "method": "post",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Snapshot results[] is now documented as anyOf a summary variant (id, instanceId, summary) and an error variant (id, instanceId, error) instead of one object with optional summary and error. Each result still carries exactly one of them.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-optional-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/_bulk_snapshot",
+      "method": "post",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Snapshot results[] items are now documented as anyOf a summary variant and an error variant (both objects) instead of a single object; the result shape is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/_bulk_snapshot",
+      "method": "post",
+      "reason": "False positive: snapshot results[] is now anyOf a summary variant and an error variant, and both variants still require id and instanceId. Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/_definitions",
+      "method": "get",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. settings.syncField is nullable in the SLO settings schema (`z.string().nullable().optional()`), so the stored definition and the response can already contain null; the hand-written spec did not document it.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-became-nullable",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/_definitions",
+      "method": "get",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Schema restructuring with the same accepted values: budgetingMethod is anyOf the 'occurrences' and 'timeslices' literals (same values); indicator is a $ref to SLOIndicator, a oneOf of the 7 indicator components discriminated by type; timeWindow is a $ref to SLOTimeWindow, a oneOf of SLOTimeWindowRolling and SLOTimeWindowCalendarAligned discriminated by type; createdAt and updatedAt gain format date-time (they are ISO 8601 strings from Date.toISOString()).",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/_definitions",
+      "method": "get",
+      "reason": "False positive: indicator and timeWindow are now oneOf named components, and the required properties moved into each variant. Every SLOIndicatorProperties* variant requires type and params, and both SLOTimeWindow* variants require duration and type. Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "get",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. settings.syncField is nullable in the SLO settings schema (`z.string().nullable().optional()`), so the stored definition and the response can already contain null; the hand-written spec did not document it.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-became-nullable",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "get",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Schema restructuring with the same accepted values: budgetingMethod is anyOf the 'occurrences' and 'timeslices' literals (same values); instanceId is anyOf '*' or a string (any string, as before); indicator is a $ref to SLOIndicator, a oneOf of the 7 indicator components discriminated by type; timeWindow is a $ref to SLOTimeWindow, a oneOf of SLOTimeWindowRolling and SLOTimeWindowCalendarAligned discriminated by type; createdAt and updatedAt gain format date-time (they are ISO 8601 strings from Date.toISOString()).",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "get",
+      "reason": "False positive: indicator and timeWindow are now oneOf named components, and the required properties moved into each variant. Every SLOIndicatorProperties* variant requires type and params, and both SLOTimeWindow* variants require duration and type. Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "put",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. settings.syncField is nullable in the SLO settings schema (`z.string().nullable().optional()`), so the stored definition and the response can already contain null; the hand-written spec did not document it.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-became-nullable",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "put",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Schema restructuring with the same accepted values: budgetingMethod is anyOf the 'occurrences' and 'timeslices' literals (same values); indicator is a $ref to SLOIndicator, a oneOf of the 7 indicator components discriminated by type; timeWindow is a $ref to SLOTimeWindow, a oneOf of SLOTimeWindowRolling and SLOTimeWindowCalendarAligned discriminated by type; createdAt and updatedAt gain format date-time (they are ISO 8601 strings from Date.toISOString()).",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "put",
+      "reason": "False positive: indicator and timeWindow are now oneOf named components, and the required properties moved into each variant. Every SLOIndicatorProperties* variant requires type and params, and both SLOTimeWindow* variants require duration and type. Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}/_reset",
+      "method": "post",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. settings.syncField is nullable in the SLO settings schema (`z.string().nullable().optional()`), so the stored definition and the response can already contain null; the hand-written spec did not document it.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-became-nullable",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}/_reset",
+      "method": "post",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Schema restructuring with the same accepted values: budgetingMethod is anyOf the 'occurrences' and 'timeslices' literals (same values); indicator is a $ref to SLOIndicator, a oneOf of the 7 indicator components discriminated by type; timeWindow is a $ref to SLOTimeWindow, a oneOf of SLOTimeWindowRolling and SLOTimeWindowCalendarAligned discriminated by type; createdAt and updatedAt gain format date-time (they are ISO 8601 strings from Date.toISOString()).",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}/_reset",
+      "method": "post",
+      "reason": "False positive: indicator and timeWindow are now oneOf named components, and the required properties moved into each variant. Every SLOIndicatorProperties* variant requires type and params, and both SLOTimeWindow* variants require duration and type. Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}/_snapshot",
+      "method": "get",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Snapshot results[] is now documented as anyOf a summary variant (id, instanceId, summary) and an error variant (id, instanceId, error) instead of one object with optional summary and error. Each result still carries exactly one of them.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-optional-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}/_snapshot",
+      "method": "get",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Snapshot results[] items are now documented as anyOf a summary variant and an error variant (both objects) instead of a single object; the result shape is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}/_snapshot",
+      "method": "get",
+      "reason": "False positive: snapshot results[] is now anyOf a summary variant and an error variant, and both variants still require id and instanceId. Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos",
+      "method": "post",
+      "reason": "Widening, not breaking: filters[].meta.value in SLOKqlWithFilters was string-only and now also accepts a range params object and an array of phrase values, matching FilterMeta.value in @kbn/es-query. Every request that was valid before is still valid.",
+      "approvedBy": "@elastic/nightshift-sre-agent-team",
+      "oasdiffId": "request-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/303236"
+    },
+    {
+      "path": "/api/observability/slos",
+      "method": "post",
+      "reason": "False-positive: oasdiff reports the anyOf subschemas as removed because each one embeds a filter whose SLOKqlWithFilters filters[].meta.value was widened from string to a union of string, range params object and array of phrase values. No subschema was removed, and every request that was valid before is still valid.",
+      "approvedBy": "@elastic/nightshift-sre-agent-team",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/303236"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "put",
+      "reason": "Widening, not breaking: filters[].meta.value in SLOKqlWithFilters was string-only and now also accepts a range params object and an array of phrase values, matching FilterMeta.value in @kbn/es-query. Every request that was valid before is still valid.",
+      "approvedBy": "@elastic/nightshift-sre-agent-team",
+      "oasdiffId": "request-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/303236"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "put",
+      "reason": "False-positive: oasdiff reports the anyOf subschemas as removed because each one embeds a filter whose SLOKqlWithFilters filters[].meta.value was widened from string to a union of string, range params object and array of phrase values. No subschema was removed, and every request that was valid before is still valid.",
+      "approvedBy": "@elastic/nightshift-sre-agent-team",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/303236"
     }
   ]
 }

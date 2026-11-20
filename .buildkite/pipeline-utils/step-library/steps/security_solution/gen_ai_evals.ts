@@ -29,7 +29,7 @@ export const securitySolutionGenAiEvalsSteps = (): readonly Step[] => [
         key: 'security-solution-gen-ai-evaluations',
         timeout_in_minutes: 50,
         parallelism: 1,
-        agents: spotAgent('n2-standard-4', spotZones.centralFCA),
+        agents: spotAgent('n2-standard-4', spotZones.n2),
         retry: retry.agentLossOrAnyOnce,
       }),
     ],

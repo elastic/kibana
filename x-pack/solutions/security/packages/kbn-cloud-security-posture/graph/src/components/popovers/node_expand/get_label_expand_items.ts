@@ -52,6 +52,11 @@ export interface GetLabelExpandItemsOptions {
   shouldRender: LabelExpandShouldRender;
   /** Whether this is a single alert node. Changes label to "Show alert details". Defaults to false. */
   isSingleAlert?: boolean;
+  /**
+   * Whether this is a grouped events node. Changes label to "Show grouped events".
+   * Takes precedence over `isSingleAlert`. Defaults to false.
+   */
+  isGroupedEvents?: boolean;
 }
 
 /**
@@ -71,6 +76,7 @@ export const getLabelExpandItems = (
     toggleFilter,
     shouldRender,
     isSingleAlert = false,
+    isGroupedEvents = false,
   } = options;
 
   const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [];
@@ -105,15 +111,28 @@ export const getLabelExpandItems = (
       items.push({ type: 'separator' });
     }
 
-    const eventDetailsLabel = isSingleAlert
-      ? i18n.translate(
+    const getEventDetailsLabel = (): string => {
+      if (isGroupedEvents) {
+        return i18n.translate(
+          'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showGroupedEvents',
+          { defaultMessage: 'Show grouped events' }
+        );
+      }
+
+      if (isSingleAlert) {
+        return i18n.translate(
           'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showAlertDetails',
           { defaultMessage: 'Show alert details' }
-        )
-      : i18n.translate(
-          'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventDetails',
-          { defaultMessage: 'Show event details' }
         );
+      }
+
+      return i18n.translate(
+        'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventDetails',
+        { defaultMessage: 'Show event details' }
+      );
+    };
+
+    const eventDetailsLabel = getEventDetailsLabel();
 
     items.push({
       type: 'item',

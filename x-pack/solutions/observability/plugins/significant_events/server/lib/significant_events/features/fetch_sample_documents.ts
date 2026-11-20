@@ -13,6 +13,7 @@ import { getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { getDiverseSampleDocuments } from '@kbn/nightshift-ai';
 import { conditionToESQLFilterAst } from '@kbn/nightshift-shared';
 import { withSpan } from '@kbn/apm-utils';
+import { timeoutSignal } from '@kbn/std';
 import { getEntityFilters } from './get_entity_filters';
 import { parseError } from '../../streams/parse_error';
 import { createSignificantEventsTracedEsClient } from '../create_significant_events_traced_es_client';
@@ -92,43 +93,96 @@ export async function fetchSampleDocuments({
   }
 
   const entityFilters = getEntityFilters(features, maxEntityFilters);
-  const samplingSignal = AbortSignal.timeout(samplingTimeoutMs);
-  const tracedEsClient = createSignificantEventsTracedEsClient({
-    client: esClient,
-    logger,
-    abortSignal: samplingSignal,
-  });
+  const samplingSignal = timeoutSignal(samplingTimeoutMs);
+  try {
+    const tracedEsClient = createSignificantEventsTracedEsClient({
+      client: esClient,
+      logger,
+      abortSignal: samplingSignal,
+    });
 
-  if (entityFilters.length === 0) {
-    const diverseSize = Math.round(size * diverseRatio);
+    if (entityFilters.length === 0) {
+      const diverseSize = Math.round(size * diverseRatio);
 
-    const [{ hits: diverseHits }, { hits: randomHits }] = await Promise.all([
-      diverseSize > 0
-        ? withSpan(
+      const [{ hits: diverseHits }, { hits: randomHits }] = await Promise.all([
+        diverseSize > 0
+          ? withSpan(
+              {
+                name: 'sample_documents_diverse',
+                labels: { stream: index, strategy: 'diverse', sampleSize: String(diverseSize) },
+              },
+              () =>
+                getDiverseSampleDocuments({
+                  esClient: tracedEsClient,
+                  index,
+                  start,
+                  end,
+                  size: diverseSize,
+                  iteration,
+                  logger,
+                })
+            ).catch((err) => {
+              logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
+              return EMPTY_SAMPLE;
+            })
+          : Promise.resolve(EMPTY_SAMPLE),
+        withRandomSamplingErrorContext(
+          withSpan(
             {
-              name: 'sample_documents_diverse',
-              labels: { stream: index, strategy: 'diverse', sampleSize: String(diverseSize) },
+              name: 'sample_documents_random',
+              labels: { stream: index, strategy: 'random', sampleSize: String(size) },
             },
             () =>
-              getDiverseSampleDocuments({
-                esClient: tracedEsClient,
+              getSampleDocumentsEsql({
+                esClient,
                 index,
                 start,
                 end,
-                size: diverseSize,
-                iteration,
-                logger,
+                sampleSize: size,
+                abortSignal: samplingSignal,
               })
-          ).catch((err) => {
-            logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
-            return EMPTY_SAMPLE;
-          })
-        : Promise.resolve(EMPTY_SAMPLE),
-      withRandomSamplingErrorContext(
+          ),
+          { index, samplingTimeoutMs }
+        ),
+      ]);
+
+      const { documents, bucketCounts } = mergeDocuments(
+        [
+          { hits: diverseHits, cap: diverseSize, label: 'diverse' },
+          { hits: randomHits, cap: size, label: 'random' },
+        ],
+        size
+      );
+
+      logger.debug(
+        () =>
+          `Sampled ${documents.length} documents (${bucketCounts.diverse} diverse, ${bucketCounts.random} random). No entities available to filter by.`
+      );
+
+      return {
+        documents,
+        totalFilters: 0,
+        filtersCapped: false,
+        hasFilteredDocuments: false,
+      };
+    }
+
+    const entityFilteredSize = Math.round(size * entityFilteredRatio);
+    const diverseSize = Math.round(size * diverseRatio);
+    const whereCondition = conditionToESQLFilterAst({
+      and: entityFilters.map((filter) => ({ not: filter })),
+    });
+
+    const [{ hits: entityFilteredHits }, { hits: diverseHits }, { hits: randomHits }] =
+      await Promise.all([
         withSpan(
           {
-            name: 'sample_documents_random',
-            labels: { stream: index, strategy: 'random', sampleSize: String(size) },
+            name: 'sample_documents_entity_filtered',
+            labels: {
+              stream: index,
+              strategy: 'entity-filtered',
+              sampleSize: String(entityFilteredSize),
+            },
           },
           () =>
             getSampleDocumentsEsql({
@@ -136,16 +190,63 @@ export async function fetchSampleDocuments({
               index,
               start,
               end,
-              sampleSize: size,
+              sampleSize: entityFilteredSize,
+              whereCondition,
+              unmappedFields: 'LOAD',
               abortSignal: samplingSignal,
             })
+        ).catch((err) => {
+          logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
+          return EMPTY_SAMPLE;
+        }),
+        diverseSize > 0
+          ? withSpan(
+              {
+                name: 'sample_documents_diverse',
+                labels: {
+                  stream: index,
+                  strategy: 'diverse',
+                  sampleSize: String(diverseSize + entityFilteredSize),
+                },
+              },
+              () =>
+                getDiverseSampleDocuments({
+                  esClient: tracedEsClient,
+                  index,
+                  start,
+                  end,
+                  size: diverseSize + entityFilteredSize,
+                  iteration,
+                  logger,
+                })
+            ).catch((err) => {
+              logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
+              return EMPTY_SAMPLE;
+            })
+          : Promise.resolve(EMPTY_SAMPLE),
+        withRandomSamplingErrorContext(
+          withSpan(
+            {
+              name: 'sample_documents_random',
+              labels: { stream: index, strategy: 'random', sampleSize: String(size) },
+            },
+            () =>
+              getSampleDocumentsEsql({
+                esClient,
+                index,
+                start,
+                end,
+                sampleSize: size,
+                abortSignal: samplingSignal,
+              })
+          ),
+          { index, samplingTimeoutMs }
         ),
-        { index, samplingTimeoutMs }
-      ),
-    ]);
+      ]);
 
     const { documents, bucketCounts } = mergeDocuments(
       [
+        { hits: entityFilteredHits, cap: entityFilteredSize, label: 'entity-filtered' },
         { hits: diverseHits, cap: diverseSize, label: 'diverse' },
         { hits: randomHits, cap: size, label: 'random' },
       ],
@@ -154,118 +255,24 @@ export async function fetchSampleDocuments({
 
     logger.debug(
       () =>
-        `Sampled ${documents.length} documents (${bucketCounts.diverse} diverse, ${bucketCounts.random} random). No entities available to filter by.`
+        `Sampled ${documents.length} documents (${
+          bucketCounts['entity-filtered']
+        } entity-filtered, ${bucketCounts.diverse} diverse, ${bucketCounts.random} random). ${
+          entityFilters.length
+        } entity filters applied (${
+          features.length - entityFilters.length
+        } omitted):\n${JSON.stringify(entityFilters)}`
     );
 
     return {
       documents,
-      totalFilters: 0,
-      filtersCapped: false,
-      hasFilteredDocuments: false,
+      totalFilters: features.length,
+      filtersCapped: features.length > maxEntityFilters,
+      hasFilteredDocuments: entityFilteredHits.length > 0,
     };
+  } finally {
+    samplingSignal.dispose();
   }
-
-  const entityFilteredSize = Math.round(size * entityFilteredRatio);
-  const diverseSize = Math.round(size * diverseRatio);
-  const whereCondition = conditionToESQLFilterAst({
-    and: entityFilters.map((filter) => ({ not: filter })),
-  });
-
-  const [{ hits: entityFilteredHits }, { hits: diverseHits }, { hits: randomHits }] =
-    await Promise.all([
-      withSpan(
-        {
-          name: 'sample_documents_entity_filtered',
-          labels: {
-            stream: index,
-            strategy: 'entity-filtered',
-            sampleSize: String(entityFilteredSize),
-          },
-        },
-        () =>
-          getSampleDocumentsEsql({
-            esClient,
-            index,
-            start,
-            end,
-            sampleSize: entityFilteredSize,
-            whereCondition,
-            unmappedFields: 'LOAD',
-            abortSignal: samplingSignal,
-          })
-      ).catch((err) => {
-        logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
-        return EMPTY_SAMPLE;
-      }),
-      diverseSize > 0
-        ? withSpan(
-            {
-              name: 'sample_documents_diverse',
-              labels: {
-                stream: index,
-                strategy: 'diverse',
-                sampleSize: String(diverseSize + entityFilteredSize),
-              },
-            },
-            () =>
-              getDiverseSampleDocuments({
-                esClient: tracedEsClient,
-                index,
-                start,
-                end,
-                size: diverseSize + entityFilteredSize,
-                iteration,
-                logger,
-              })
-          ).catch((err) => {
-            logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
-            return EMPTY_SAMPLE;
-          })
-        : Promise.resolve(EMPTY_SAMPLE),
-      withRandomSamplingErrorContext(
-        withSpan(
-          {
-            name: 'sample_documents_random',
-            labels: { stream: index, strategy: 'random', sampleSize: String(size) },
-          },
-          () =>
-            getSampleDocumentsEsql({
-              esClient,
-              index,
-              start,
-              end,
-              sampleSize: size,
-              abortSignal: samplingSignal,
-            })
-        ),
-        { index, samplingTimeoutMs }
-      ),
-    ]);
-
-  const { documents, bucketCounts } = mergeDocuments(
-    [
-      { hits: entityFilteredHits, cap: entityFilteredSize, label: 'entity-filtered' },
-      { hits: diverseHits, cap: diverseSize, label: 'diverse' },
-      { hits: randomHits, cap: size, label: 'random' },
-    ],
-    size
-  );
-
-  logger.debug(
-    () =>
-      `Sampled ${documents.length} documents (${bucketCounts['entity-filtered']} entity-filtered, ${
-        bucketCounts.diverse
-      } diverse, ${bucketCounts.random} random). ${entityFilters.length} entity filters applied (${
-        features.length - entityFilters.length
-      } omitted):\n${JSON.stringify(entityFilters)}`
-  );
-
-  return {
-    documents,
-    totalFilters: features.length,
-    filtersCapped: features.length > maxEntityFilters,
-    hasFilteredDocuments: entityFilteredHits.length > 0,
-  };
 }
 
 function mergeDocuments(

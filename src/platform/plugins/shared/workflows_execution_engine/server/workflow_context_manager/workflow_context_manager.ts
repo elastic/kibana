@@ -9,8 +9,6 @@
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { KQLSyntaxError } from '@kbn/es-query';
-import { decodeKqlTemplateValues, evaluateKql, parseKqlTemplate } from '@kbn/eval-kql';
 import {
   type EsWorkflowStepExecution,
   type SerializedError,
@@ -30,6 +28,7 @@ import {
   type CallKibanaApiParams,
   type CallKibanaApiResult,
 } from '../lib/call_kibana_api';
+import { evaluateCondition } from '../step/evaluate_condition';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId, isTemplateExpression } from '../utils';
 import { isSerializedError } from '../utils/errors';
@@ -275,36 +274,8 @@ export class WorkflowContextManager {
     additionalContext?: Record<string, unknown>
   ): boolean {
     const renderedCondition = this.renderConditionAccordingToContext(condition, additionalContext);
-
-    if (typeof renderedCondition === 'boolean') {
-      return renderedCondition;
-    }
-    if (typeof renderedCondition === 'undefined') {
-      return false;
-    }
-
-    if (typeof renderedCondition === 'string') {
-      try {
-        return evaluateKql(parseKqlTemplate(renderedCondition), this.getContext());
-      } catch (error) {
-        if (error instanceof KQLSyntaxError) {
-          throw new Error(
-            `Syntax error in condition "${condition}" for step ${
-              this.node.stepId
-            }: ${decodeKqlTemplateValues(String(error))}`
-          );
-        }
-        throw error;
-      }
-    }
-
-    throw new Error(
-      `Invalid condition.` +
-        `Got ${JSON.stringify(
-          condition
-        )} (type: ${typeof condition}), but expected boolean or string. ` +
-        `When using templating syntax, the expression must evaluate to a boolean or string (KQL expression).`
-    );
+    const fullContext = { ...this.getContext(), ...additionalContext };
+    return evaluateCondition(renderedCondition, fullContext, this.node.stepId);
   }
 
   /**

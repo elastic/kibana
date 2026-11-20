@@ -112,3 +112,27 @@ export const INVENTORY_DEFINITION_FIXTURES: readonly InventoryDefinitionFixture[
   k8sNodeFixture,
   hostLikeFixture,
 ];
+
+/**
+ * An identity on `entity.id`, like the built-in `generic` but keeping the type prefix, with the
+ * `k8s.node` sources. Left out of the list above: its list query carries a raw column.
+ */
+export const entityIdFixture: InventoryDefinitionFixture = {
+  ...k8sNodeFixture,
+  type: 'inventory_generic',
+  name: 'Generic',
+  identityField: { singleField: 'entity.id' },
+};
+
+/** A ranking led by `entity.id`, with the host-like sources. Left out of the list above too. */
+export const rankedEntityIdFixture: InventoryDefinitionFixture = {
+  ...hostLikeFixture,
+  type: 'inventory_ranked_generic',
+  name: 'Ranked generic',
+  identityField: {
+    euidRanking: {
+      branches: [{ ranking: [[{ field: 'entity.id' }], [{ field: 'host.hostname' }]] }],
+    },
+    documentsFilter: getPresenceFilter([['entity.id'], ['host.hostname']]),
+  },
+};

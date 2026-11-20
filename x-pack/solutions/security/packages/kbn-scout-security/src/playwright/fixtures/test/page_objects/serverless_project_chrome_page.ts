@@ -15,11 +15,21 @@ import type { Locator, ScoutPage } from '@kbn/scout';
  */
 export class ServerlessProjectChromePage {
   public readonly primaryNav: Locator;
+  /**
+   * The primary nav, but only once `data-overflow-measured` is set. Chrome first renders every
+   * item in the primary menu and measures which ones fit a frame later, so reading placement
+   * before that can catch an item moments before it moves into the "More" overflow. Use this
+   * when an expectation depends on where an item ended up.
+   */
+  public readonly measuredPrimaryNav: Locator;
   public readonly morePopover: Locator;
   public readonly moreMenuTrigger: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.primaryNav = this.page.testSubj.locator('kbnChromeNav-primaryNavigation');
+    this.measuredPrimaryNav = this.primaryNav.and(
+      this.page.locator('[data-overflow-measured="true"]')
+    );
     this.morePopover = this.page.testSubj.locator('side-nav-popover-More');
     this.moreMenuTrigger = this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
   }

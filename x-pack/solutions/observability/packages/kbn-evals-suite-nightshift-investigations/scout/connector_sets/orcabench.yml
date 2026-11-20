@@ -1,0 +1,13 @@
+# The `orcabench` connector set: one Elasticsearch connector to the cluster holding the ORCA
+# snapshot, named the way an operator would name it. evals/investigation/connector_sets.ts lists
+# this id and saves it on the investigator. Credentials stay in the hook environment.
+# An External Elasticsearch (`.elasticsearch`) connector, as Nightshift onboarding creates for users.
+xpack.actions.preconfigured.orcabench-es:
+  name: orcabench_es
+  actionTypeId: .elasticsearch
+  config:
+    url: ${NIGHTSHIFT_ES_URL}
+    selectedActions: [_test]
+  secrets:
+    authType: api_key_header
+    Authorization: "ApiKey ${NIGHTSHIFT_ES_API_KEY}"

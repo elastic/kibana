@@ -7,7 +7,7 @@
 
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import { getLeafPanels } from '../dashboard_panels';
-import type { DashboardAgentEvaluator } from '../types';
+import type { DashboardAgentEvaluator, DashboardDatasetExample } from '../types';
 import { noDashboardResult, skippedResult } from '../evaluator_utils';
 import {
   COLOR_FORMAT_RULES,
@@ -20,6 +20,7 @@ import {
   getRuleStrictness,
   getRuleTarget,
   type DashboardRuleId,
+  type DashboardRuleViolation,
 } from './dashboard_rules';
 import { targetsPanel } from './rule_model';
 
@@ -34,11 +35,21 @@ export const DASHBOARD_CONTROLS_EVALUATOR_NAME = 'Dashboard Controls';
  * Scores the `must` rules in `rules`: one unit per panel some rule targets,
  * plus one per dashboard-level rule, and the score is the fraction of units
  * with no violation. `should` violations are listed as guidance, never scored.
+ * A violation `isRequested` accepts is what the prompt asked for, not a defect.
  */
 export const createRuleEvaluator = (
   name: string,
   rules: readonly DashboardRuleId[],
-  skipReason?: (dashboard: DashboardAttachmentData) => string | undefined
+  {
+    skipReason,
+    isRequested,
+  }: {
+    skipReason?: (dashboard: DashboardAttachmentData) => string | undefined;
+    isRequested?: (
+      violation: DashboardRuleViolation,
+      expected: DashboardDatasetExample['output']
+    ) => boolean;
+  } = {}
 ): DashboardAgentEvaluator => {
   const mustRules = rules.filter((rule) => getRuleStrictness(rule) === 'must');
   const shouldRules = rules.filter((rule) => getRuleStrictness(rule) === 'should');
@@ -48,7 +59,7 @@ export const createRuleEvaluator = (
     name,
     kind: 'CODE',
     direction: 'maximize',
-    evaluate: async ({ output }) => {
+    evaluate: async ({ expected, output }) => {
       const { dashboard } = output;
       if (!dashboard) {
         return noDashboardResult;
@@ -70,7 +81,9 @@ export const createRuleEvaluator = (
         return skippedResult(`No panel of a kind that [${mustRules.join(', ')}] check.`);
       }
 
-      const violations = findViolations(dashboard, mustRules);
+      const violations = findViolations(dashboard, mustRules).filter(
+        (violation) => !isRequested?.(violation, expected)
+      );
       const guidance = findViolations(dashboard, shouldRules);
       const flaggedPanelIds = new Set(violations.flatMap(({ panelIds }) => panelIds));
       const failedDashboardRules = new Set(
@@ -93,7 +106,10 @@ export const createRuleEvaluator = (
   };
 };
 
-/** Panels inside the 48-column grid, not overlapping, and no full-width KPI; default sizes are guidance. */
+/**
+ * Panels inside the 48-column grid, not overlapping, no empty cell above other
+ * panels, and no full-width KPI; default sizes are guidance.
+ */
 export const dashboardLayoutRulesEvaluator = createRuleEvaluator(
   DASHBOARD_LAYOUT_RULES_EVALUATOR_NAME,
   LAYOUT_RULES
@@ -128,12 +144,21 @@ export const dashboardChartStylingEvaluator = createRuleEvaluator(
 
 /**
  * Kibana palettes only (no legacy ones), no static color overrides on
- * default-palette charts, and no percent format on a column the query already
- * scales to 0–100. Gauge bands other than the default four are guidance.
+ * default-palette charts unless the prompt asks for the color, and no percent
+ * format on a column the query already scales to 0–100. Gauge bands other
+ * than the default four are guidance.
  */
 export const dashboardColorFormatEvaluator = createRuleEvaluator(
   DASHBOARD_COLOR_FORMAT_EVALUATOR_NAME,
-  COLOR_FORMAT_RULES
+  COLOR_FORMAT_RULES,
+  {
+    isRequested: ({ rule, panelIds }, expected) =>
+      rule === 'static_color_override' &&
+      panelIds.length > 0 &&
+      panelIds.every((id) =>
+        expected?.panelEdits?.some(({ panel, color }) => panel === id && color !== undefined)
+      ),
+  }
 );
 
 /**
@@ -144,6 +169,8 @@ export const dashboardColorFormatEvaluator = createRuleEvaluator(
 export const dashboardControlsEvaluator = createRuleEvaluator(
   DASHBOARD_CONTROLS_EVALUATOR_NAME,
   CONTROL_RULES,
-  ({ pinned_panels: controls = [] }) =>
-    controls.length === 0 ? 'The dashboard has no controls.' : undefined
+  {
+    skipReason: ({ pinned_panels: controls = [] }) =>
+      controls.length === 0 ? 'The dashboard has no controls.' : undefined,
+  }
 );

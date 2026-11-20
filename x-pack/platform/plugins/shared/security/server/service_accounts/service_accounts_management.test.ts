@@ -124,8 +124,12 @@ describe('ServiceAccountsManagement', () => {
       workloadTypes.resolveBoundWorkloads.mockImplementation(async (bindings) =>
         bindings.map(({ workloadId }) =>
           workloadId === 'verified'
-            ? { title: 'Nightly report', href: '/s/marketing/app/workflows/verified' }
-            : {}
+            ? {
+                status: 'present' as const,
+                title: 'Nightly report',
+                href: '/s/marketing/app/workflows/verified',
+              }
+            : { status: 'unknown' as const }
         )
       );
     });

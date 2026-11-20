@@ -505,7 +505,7 @@ export const EXCLUDE_BUILDING_BLOCKS_DETAIL_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.excludeBuildingBlocksDetailText',
   {
     defaultMessage:
-      "Each EQL sequence rule's main alert is still triaged. Only the building block alerts it creates are skipped.",
+      'Alerts marked as Building Block detections by the rule configuration will be skipped.',
   }
 );
 

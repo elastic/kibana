@@ -29,11 +29,10 @@ import {
 
 const options: NightshiftAgentTypeOptions = {
   sandboxEnabled: true,
-  cortexEnabled: true,
+  wikiEnabled: true,
   memoryEnabled: true,
   investigationToolsEnabled: true,
   proposalsEnabled: true,
-  telemetryConnectorId: 'telemetry',
 };
 
 const configurationFor = async (
@@ -71,7 +70,7 @@ describe('Nightshift assistant agent type', () => {
     expect(instructions).toBe(ASSISTANT_INSTRUCTIONS);
     expect(instructions).not.toBe(investigatorInstructions);
     expect(assistant).toMatchObject({
-      connector_ids: ['telemetry'],
+      connector_ids: [],
       workflow_ids: [
         getNightshiftBoundHookWorkflowId(
           NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
@@ -89,35 +88,19 @@ describe('Nightshift assistant agent type', () => {
     expect(investigator.tools?.[0]?.tool_ids).not.toContain('proposals.create');
   });
 
-  it('allows every configured telemetry target, like the investigator', async () => {
-    const telemetryOptions: NightshiftAgentTypeOptions = {
-      ...options,
-      telemetryConnectorId: undefined,
-      telemetryConfig: {
-        telemetry_targets: { c0: { connector_id: 'c0' }, orca: { connector_id: 'orca' } },
-      } as NightshiftAgentTypeOptions['telemetryConfig'],
-    };
-
-    const assistant = await configurationFor(getAssistantAgentType(telemetryOptions));
-    const investigator = await configurationFor(getInvestigationAgentType(telemetryOptions));
-
-    expect(assistant.connector_ids).toEqual(['c0', 'orca']);
-    expect(assistant.connector_ids).toEqual(investigator.connector_ids);
-  });
-
-  it('inherits the investigator saved connectors after the telemetry connectors, deduplicated', async () => {
+  it('inherits the investigator saved connectors, deduplicated', async () => {
     const request = httpServerMock.createKibanaRequest();
-    const getInheritedConnectorIds = jest.fn(async () => ['github', 'telemetry', 'pagerduty']);
+    const getInheritedConnectorIds = jest.fn(async () => ['github', 'github', 'pagerduty']);
     const { baseConfiguration } = getAssistantAgentType({ ...options, getInheritedConnectorIds });
     if (typeof baseConfiguration !== 'function') throw new Error('Expected a resolver');
 
     const { connector_ids: connectorIds } = await baseConfiguration({ request, spaceId: 'ops' });
 
-    expect(connectorIds).toEqual(['telemetry', 'github', 'pagerduty']);
+    expect(connectorIds).toEqual(['github', 'pagerduty']);
     expect(getInheritedConnectorIds).toHaveBeenCalledWith({ request, spaceId: 'ops' });
   });
 
-  it('keeps the telemetry connectors when the inherited connectors cannot be read', async () => {
+  it('keeps no connectors when the inherited connectors cannot be read', async () => {
     const logger = loggingSystemMock.createLogger();
     const { baseConfiguration } = getAssistantAgentType({
       ...options,
@@ -133,7 +116,7 @@ describe('Nightshift assistant agent type', () => {
       baseConfiguration,
     });
 
-    expect(connectorIds).toEqual(['telemetry']);
+    expect(connectorIds).toEqual([]);
     expect(logger.warn).toHaveBeenCalledWith(
       'Failed to resolve inherited connectors for space "default": registry down'
     );
@@ -143,7 +126,7 @@ describe('Nightshift assistant agent type', () => {
     for (const path of [
       '/workspace/connectors.md',
       '/workspace/.connector-docs/elastic.md',
-      '/workspace/cortex/INDEX.md',
+      '/workspace/wiki/INDEX.md',
       '/workspace/memories/.index.json',
     ]) {
       expect(ASSISTANT_INSTRUCTIONS).toContain(path);

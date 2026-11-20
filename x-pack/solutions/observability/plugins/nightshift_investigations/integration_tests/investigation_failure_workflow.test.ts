@@ -75,7 +75,7 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
   engine.dependencies.coreStart.featureFlags.getBooleanValue$.mockImplementation(
     (flag, defaultValue) => of(flag === WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG || defaultValue)
   );
-  const routing = createRoutingTestContext('fake_space_id');
+  const routing = createRoutingTestContext('default');
   const destinations = [{ type: 'slack', connector_id: 'slack', params: { channel: '#alerts' } }];
   const delivered: NotificationExecution[] = [];
   const execute = jest.fn(async (execution: NotificationExecution) => {
@@ -134,7 +134,7 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
   const latestRuns = jest.fn(async () => ({ results: [{ id: 'fake_workflow_execution_id' }] }));
   const client = new NightshiftInvestigationsClient({
     request: engine.fakeKibanaRequest,
-    spaceIdOverride: 'fake_space_id',
+    spaceIdOverride: 'default',
     logger: engine.loggerMock,
     workflowsManagement: {
       management: {

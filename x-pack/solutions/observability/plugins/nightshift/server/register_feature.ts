@@ -94,7 +94,8 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         description: i18n.translate(
           'xpack.nightshift.featureRegistry.configureSubFeatureDescription',
           {
-            defaultMessage: 'Pause activity, edit settings, and manage limits.',
+            defaultMessage:
+              'Pause activity, edit settings, manage limits, and create, edit, enable, disable or delete sources. Sources decide which indices the Nightshift service account reads, and the significant events and detections it finds are shown to everyone with Nightshift access in the space.',
           }
         ),
         privilegeGroups: [

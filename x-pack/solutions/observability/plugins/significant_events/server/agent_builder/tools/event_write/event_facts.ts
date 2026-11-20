@@ -14,7 +14,6 @@ import {
   type SignificantEvent,
 } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
-import type { CompactBulkError } from '../bulk_write';
 import {
   addsNewDetectionRules,
   extractRuleUuids,
@@ -31,6 +30,7 @@ import type {
   LoadedCandidate,
   ResolvedWriteCandidate,
   WriteCandidate,
+  WriteOutcome,
 } from './types';
 
 const isLiveStatus = (status: SignificantEvent['status'] | undefined): boolean =>
@@ -305,23 +305,26 @@ export const buildPendingWrite = ({
 /** Writes `error ? bulk_error (or superseded) : written` into `results` for each pending write, by index. */
 export const applyWriteOutcomes = ({
   pendingWrites,
-  errors,
+  outcomes,
   results,
 }: {
   pendingWrites: Array<ReturnType<typeof buildPendingWrite>>;
-  errors: Array<CompactBulkError | undefined>;
+  outcomes: WriteOutcome[];
   results: BulkResults;
 }): void => {
   pendingWrites.forEach(({ candidate, status, narrativePreserved, severity }, responseIndex) => {
-    const error = errors[responseIndex];
-    if (error) {
+    const outcome = outcomes[responseIndex];
+    if (outcome.error) {
       results[candidate.index] = {
         index: candidate.index,
         event_id: candidate.eventId,
+        ...('reopensSeries' in candidate && candidate.reopensSeries
+          ? { existing_event_id: candidate.eventId }
+          : {}),
         status,
         written: false,
-        reason: error.type === 'superseded_write' ? 'superseded' : 'bulk_error',
-        error,
+        reason: outcome.error.type === 'superseded_write' ? 'superseded' : 'bulk_error',
+        error: outcome.error,
       };
       return;
     }
@@ -331,10 +334,9 @@ export const applyWriteOutcomes = ({
       status,
       written: true,
       severity,
+      ...(narrativePreserved ? { narrative_preserved: true } : {}),
+      ...(outcome.created ? { created: true, group_hash: outcome.groupHash } : { created: false }),
     };
-    if (narrativePreserved) {
-      result.narrative_preserved = true;
-    }
     results[candidate.index] = result;
   });
 };

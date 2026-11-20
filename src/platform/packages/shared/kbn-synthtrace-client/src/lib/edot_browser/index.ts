@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BROWSER_PROFILES, pickBrowserProfile } from './browser_profiles';
+import { BROWSER_PROFILES, pickBrowserProfile, withoutBrowserDetails } from './browser_profiles';
 import { EdotBrowserApp, type EdotBrowserAppOptions } from './edot_browser_app';
 import { idleTab, session } from './edot_browser_session';
 import { HEALTH_PROFILES } from './health_profiles';
@@ -19,7 +19,11 @@ export type { EdotBrowserSpanDocument } from './edot_browser_span';
 export type {
   EdotBrowserDocument,
   EdotBrowserEvent,
+  EdotBrowserExceptionTemplate,
+  EdotBrowserPage,
+  EdotBrowserResource,
   EdotBrowserSite,
+  EdotBrowserStackFrame,
 } from './edot_browser_session';
 
 export const edotBrowser = {
@@ -28,5 +32,6 @@ export const edotBrowser = {
   idleTab,
   browserProfiles: BROWSER_PROFILES,
   pickBrowserProfile,
+  withoutBrowserDetails,
   healthProfiles: HEALTH_PROFILES,
 };

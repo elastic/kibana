@@ -16,7 +16,6 @@ import { lazyObject } from '@kbn/lazy-object';
 const createFeatureFlagsSetup = (): jest.Mocked<FeatureFlagsSetup> => {
   return lazyObject({
     getInitialFeatureFlags: jest.fn().mockImplementation(() => ({})),
-    setProvider: jest.fn(),
     appendContext: jest.fn().mockImplementation(Promise.resolve),
   });
 };

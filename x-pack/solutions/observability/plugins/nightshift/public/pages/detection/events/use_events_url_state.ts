@@ -37,8 +37,8 @@ const SEVERITY_QUERY_PARAM = 'severity';
 const INVESTIGATION_QUERY_PARAM = 'investigation';
 const SORT_FIELD_QUERY_PARAM = 'sortField';
 const SORT_ORDER_QUERY_PARAM = 'sortOrder';
-// The design leads with the most severe events.
-const DEFAULT_SORT: EventsSort = { field: 'severity', order: 'desc' };
+// Recently changed events lead the list.
+const DEFAULT_SORT: EventsSort = { field: 'updated_at', order: 'desc' };
 const isSignificantEventStatus = (value: string): value is SignificantEventStatus =>
   SIGNIFICANT_EVENT_STATUS_OPTIONS.includes(value as SignificantEventStatus);
 

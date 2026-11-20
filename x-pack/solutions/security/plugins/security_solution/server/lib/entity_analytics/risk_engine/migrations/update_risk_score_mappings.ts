@@ -13,7 +13,7 @@ import { getDefaultRiskEngineConfiguration } from '../utils/saved_object_configu
 import { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import type { RiskEngineConfiguration } from '../../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
-import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
 
 export const MAX_PER_PAGE = 10_000;
 
@@ -50,7 +50,7 @@ export const updateRiskScoreMappings = async ({
       );
 
       const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+      const soClient = buildNamespacedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
       const riskEngineDataClient = new RiskEngineDataClient({
         logger,
         kibanaVersion,

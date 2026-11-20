@@ -50,6 +50,7 @@ import { playwrightOverrides, playwrightSettings } from './playwright.mts';
 import { testingLibraryOverrides } from './testing_library.mts';
 import { unusedVarsOverrides } from './unused_vars.mts';
 import { importPluginOverrides } from './import_plugin.mts';
+import { importExtraneousDependenciesOverrides } from './import_compat.mts';
 import { restrictedImportsOverrides } from './restricted_imports.mts';
 import { monacoRules } from './monaco.mts';
 import { nestedConfigOverrides, teamOverrides } from './team_overrides.mts';
@@ -58,6 +59,7 @@ const movedFromEslintOverrides: OxlintOverride[] = [
   ...javascriptOverrides,
   ...typescriptOverrides,
   ...jestOverrides,
+  ...importExtraneousDependenciesOverrides,
   ...teamOverrides,
   ...restrictedImportsOverrides,
   ...formatjsOverrides,
@@ -125,7 +127,12 @@ export default defineConfig<OxlintConfig>({
   categories: {
     correctness: 'off',
   },
-  settings: playwrightSettings,
+  settings: {
+    ...playwrightSettings,
+    // `@kbn/compat/import-*` resolve imports through eslint-plugin-import, which forgets resolutions
+    // after 30s by default. Files don't appear or disappear during a run.
+    'import/cache': { lifetime: 'Infinity' },
+  },
   rules: {
     ...javascriptRules,
     ...kbnConfigRules,

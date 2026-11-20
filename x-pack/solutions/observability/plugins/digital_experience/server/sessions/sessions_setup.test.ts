@@ -17,11 +17,13 @@ import {
   type SessionsSettings,
 } from '../../common/sessions';
 import {
-  enableSessions,
+  checkSessionsPrivileges,
   getMissingSessionsPrivileges,
   getRestrictedSourceIndices,
   getSessionsStatus,
   indexPatternCovers,
+  indexPatternsOverlap,
+  installSessions,
   lagSecondsOf,
 } from './sessions_setup';
 import { SessionsNewerVersionError } from './sessions_newer_version_error';
@@ -35,6 +37,8 @@ type Client = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClie
 const NOW = Date.parse('2026-10-27T12:00:00.000Z');
 const ENABLED_AT = '2026-10-27T11:00:00.000Z';
 const SOURCE_INDICES = ['traces-*.otel-*', 'logs-*.otel-*'];
+/** How the predefined Serverless `editor` and `viewer` roles grant read. */
+const EDITOR_READ_PATTERN = '/~(([.]|ilm-history-).*)/';
 const oneTransform: SessionsSettings = { frequency: '1m', partitions: 1 };
 
 const managedTransform = (
@@ -55,6 +59,10 @@ const managedTransform = (
 type IndexPrivilegesEntry = Awaited<
   ReturnType<Client['security']['getUserPrivileges']>
 >['indices'][number];
+
+type RoleIndices = NonNullable<
+  Awaited<ReturnType<Client['security']['queryRole']>>['roles'][number]['indices']
+>[number];
 
 const mockReadPrivileges = (client: Client, indices: Array<Partial<IndexPrivilegesEntry>>) =>
   client.security.getUserPrivileges.mockResolvedValue({
@@ -114,7 +122,11 @@ const grantAll = (client: Client) => {
 describe('sessions setup', () => {
   let esClient: ScopedClient;
   const logger = loggingSystemMock.createLogger();
-  const enableArgs = () => ({ esClient, logger, enabledBy: 'ana', now: new Date(ENABLED_AT) });
+  const installArgs = () => ({
+    esClient,
+    logger,
+    enabled: { enabledBy: 'ana', enabledAt: ENABLED_AT },
+  });
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -130,15 +142,50 @@ describe('sessions setup', () => {
         username: 'reader',
       });
 
-      expect(await getMissingSessionsPrivileges(esClient.asCurrentUser)).toEqual([
-        'cluster:manage_transform',
-        'index:traces-*.otel-*:read',
-      ]);
+      expect(
+        await getMissingSessionsPrivileges(esClient.asCurrentUser, { isServerless: false })
+      ).toEqual(['cluster:manage_transform', 'index:traces-*.otel-*:read']);
+    });
+
+    it('also requires read_security on Serverless, to read the user’s roles', async () => {
+      esClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: false,
+        cluster: { manage_transform: false, read_security: false },
+        index: {},
+        application: {},
+        username: 'reader',
+      });
+
+      expect(
+        await getMissingSessionsPrivileges(esClient.asCurrentUser, { isServerless: true })
+      ).toEqual(['cluster:manage_transform', 'cluster:read_security']);
+      expect(esClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cluster: [
+            'manage_transform',
+            'manage_ingest_pipelines',
+            'manage_index_templates',
+            'read_security',
+          ],
+        })
+      );
+    });
+
+    it('does not require read_security on stateful', async () => {
+      grantAll(esClient.asCurrentUser);
+
+      await getMissingSessionsPrivileges(esClient.asCurrentUser, { isServerless: false });
+
+      expect(esClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cluster: ['manage_transform', 'manage_ingest_pipelines', 'manage_index_templates'],
+        })
+      );
     });
   });
 
-  describe('enableSessions', () => {
-    it('fails before writing anything when the user lacks privileges', async () => {
+  describe('checkSessionsPrivileges', () => {
+    it('refuses a user who lacks privileges', async () => {
       esClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: false,
         cluster: { manage_transform: false },
@@ -148,41 +195,41 @@ describe('sessions setup', () => {
       });
 
       await expect(
-        enableSessions({ ...enableArgs(), settings: oneTransform })
+        checkSessionsPrivileges(esClient.asCurrentUser, { isServerless: false })
       ).rejects.toBeInstanceOf(SessionsPrivilegesError);
-      expect(esClient.asSecondaryAuthUser.ingest.putPipeline).not.toHaveBeenCalled();
-      expect(esClient.asSecondaryAuthUser.indices.putIndexTemplate).not.toHaveBeenCalled();
-      expect(esClient.asSecondaryAuthUser.transform.putTransform).not.toHaveBeenCalled();
     });
 
     it.each([
       ['document-level security', { query: ['{"term":{"service.name":"checkout-web"}}'] }],
       ['field-level security', { field_security: [{ grant: ['@timestamp', 'resource.*'] }] }],
-    ])(
-      'fails before writing anything when source read is filtered by %s',
-      async (_name, restriction) => {
-        grantAll(esClient.asCurrentUser);
-        mockReadPrivileges(esClient.asCurrentUser, [restriction]);
-
-        const error = await enableSessions({ ...enableArgs(), settings: oneTransform }).catch(
-          (e) => e
-        );
-
-        expect(error).toBeInstanceOf(SessionsRestrictedReadError);
-        expect(error.restrictedIndices).toEqual(SOURCE_INDICES);
-        expect(error.message).toContain('without document- or field-level security');
-        expect(esClient.asSecondaryAuthUser.ingest.putPipeline).not.toHaveBeenCalled();
-        expect(esClient.asSecondaryAuthUser.transform.putTransform).not.toHaveBeenCalled();
-        expect(esClient.asSecondaryAuthUser.transform.updateTransform).not.toHaveBeenCalled();
-      }
-    );
-
-    it('stamps who enabled sessions, and when, on every transform', async () => {
+    ])('refuses a user whose source read is filtered by %s', async (_name, restriction) => {
       grantAll(esClient.asCurrentUser);
+      mockReadPrivileges(esClient.asCurrentUser, [restriction]);
+
+      const error = await checkSessionsPrivileges(esClient.asCurrentUser, {
+        isServerless: false,
+      }).catch((e) => e);
+
+      expect(error).toBeInstanceOf(SessionsRestrictedReadError);
+      expect(error.restrictedIndices).toEqual(SOURCE_INDICES);
+      expect(error.message).toContain('without document- or field-level security');
+    });
+
+    it('passes a user with every privilege and unfiltered reads', async () => {
+      grantAll(esClient.asCurrentUser);
+
+      await expect(
+        checkSessionsPrivileges(esClient.asCurrentUser, { isServerless: false })
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('installSessions', () => {
+    it('stamps who enabled sessions, and when, on every transform', async () => {
       mockTransforms(esClient.asSecondaryAuthUser, [managedTransform(sessionsTransformId(0, 2))]);
       mockStats(esClient.asSecondaryAuthUser, [idleStats(sessionsTransformId(0, 2))]);
 
-      await enableSessions({ ...enableArgs(), settings: { frequency: '1m', partitions: 2 } });
+      await installSessions({ ...installArgs(), settings: { frequency: '1m', partitions: 2 } });
 
       const client = esClient.asSecondaryAuthUser;
       const stamped = expect.objectContaining({ enabled_by: 'ana', enabled_at: ENABLED_AT });
@@ -194,11 +241,33 @@ describe('sessions setup', () => {
       );
     });
 
-    it('installs pipeline, template and transform as the requesting user', async () => {
-      grantAll(esClient.asCurrentUser);
+    it('installs with the given credentials and enable stamp, without checking privileges', async () => {
       mockTransforms(esClient.asSecondaryAuthUser, []);
 
-      await enableSessions({ ...enableArgs(), settings: oneTransform });
+      await installSessions({
+        esClient,
+        logger,
+        settings: oneTransform,
+        enabled: { enabledBy: 'ana', enabledAt: '2026-10-01T00:00:00.000Z' },
+      });
+
+      expect(esClient.asCurrentUser.security.hasPrivileges).not.toHaveBeenCalled();
+      expect(esClient.asCurrentUser.security.getUserPrivileges).not.toHaveBeenCalled();
+      expect(esClient.asSecondaryAuthUser.transform.putTransform).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _meta: expect.objectContaining({
+            enabled_by: 'ana',
+            enabled_at: '2026-10-01T00:00:00.000Z',
+          }),
+        })
+      );
+      expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledWith({ index: SESSIONS_INDEX });
+    });
+
+    it('installs pipeline, template and transform as the requesting user', async () => {
+      mockTransforms(esClient.asSecondaryAuthUser, []);
+
+      await installSessions({ ...installArgs(), settings: oneTransform });
 
       const client = esClient.asSecondaryAuthUser;
       expect(client.ingest.putPipeline).toHaveBeenCalledWith(
@@ -216,13 +285,12 @@ describe('sessions setup', () => {
     });
 
     it('waits until the new dest index accepts searches, so the list can read it right away', async () => {
-      grantAll(esClient.asCurrentUser);
       mockTransforms(esClient.asSecondaryAuthUser, []);
       // The index calls run as the current user: Elasticsearch ignores secondary authorization there.
       const client = esClient.asCurrentUser;
       client.count.mockRejectedValueOnce(esError(503)).mockResolvedValueOnce({ count: 0 } as never);
 
-      await enableSessions({ ...enableArgs(), settings: oneTransform });
+      await installSessions({ ...installArgs(), settings: oneTransform });
 
       // Created before the transforms start, so it exists when enabling returns.
       expect(client.indices.create).toHaveBeenCalledWith({
@@ -242,7 +310,6 @@ describe('sessions setup', () => {
     });
 
     it('keeps an existing dest index, without needing view_index_metadata to check for it', async () => {
-      grantAll(esClient.asCurrentUser);
       mockTransforms(esClient.asSecondaryAuthUser, []);
       esClient.asCurrentUser.indices.create.mockRejectedValue(
         new errors.ResponseError({
@@ -254,36 +321,33 @@ describe('sessions setup', () => {
         })
       );
 
-      await enableSessions({ ...enableArgs(), settings: oneTransform });
+      await installSessions({ ...installArgs(), settings: oneTransform });
 
       expect(esClient.asCurrentUser.indices.exists).not.toHaveBeenCalled();
       expect(esClient.asSecondaryAuthUser.transform.startTransform).toHaveBeenCalled();
     });
 
     it('fails when the dest index cannot be created for another reason', async () => {
-      grantAll(esClient.asCurrentUser);
       mockTransforms(esClient.asSecondaryAuthUser, []);
       esClient.asCurrentUser.indices.create.mockRejectedValue(esError(403));
 
-      await expect(enableSessions({ ...enableArgs(), settings: oneTransform })).rejects.toThrow();
+      await expect(installSessions({ ...installArgs(), settings: oneTransform })).rejects.toThrow();
       expect(esClient.asSecondaryAuthUser.transform.startTransform).not.toHaveBeenCalled();
     });
 
     it('does not wait on errors other than an unavailable index', async () => {
-      grantAll(esClient.asCurrentUser);
       mockTransforms(esClient.asSecondaryAuthUser, []);
       esClient.asCurrentUser.count.mockRejectedValue(esError(403));
 
-      await enableSessions({ ...enableArgs(), settings: oneTransform });
+      await installSessions({ ...installArgs(), settings: oneTransform });
 
       expect(esClient.asCurrentUser.count).toHaveBeenCalledTimes(1);
     });
 
     it('installs one transform per partition', async () => {
-      grantAll(esClient.asCurrentUser);
       mockTransforms(esClient.asSecondaryAuthUser, []);
 
-      await enableSessions({ ...enableArgs(), settings: { frequency: '1m', partitions: 4 } });
+      await installSessions({ ...installArgs(), settings: { frequency: '1m', partitions: 4 } });
 
       const client = esClient.asSecondaryAuthUser;
       const ids = client.transform.putTransform.mock.calls.map(([request]) => request.transform_id);
@@ -292,11 +356,10 @@ describe('sessions setup', () => {
     });
 
     it('is idempotent: refreshes installed transforms and applies a new frequency', async () => {
-      grantAll(esClient.asCurrentUser);
       mockTransforms(esClient.asSecondaryAuthUser, [managedTransform(SESSIONS_TRANSFORM_ID)]);
       mockStats(esClient.asSecondaryAuthUser, [idleStats(SESSIONS_TRANSFORM_ID)]);
 
-      await enableSessions({ ...enableArgs(), settings: { frequency: '5m', partitions: 1 } });
+      await installSessions({ ...installArgs(), settings: { frequency: '5m', partitions: 1 } });
 
       const client = esClient.asSecondaryAuthUser;
       expect(client.transform.putTransform).not.toHaveBeenCalled();
@@ -321,11 +384,10 @@ describe('sessions setup', () => {
     });
 
     it('stops a failed transform before restarting it', async () => {
-      grantAll(esClient.asCurrentUser);
       mockTransforms(esClient.asSecondaryAuthUser, [managedTransform(SESSIONS_TRANSFORM_ID)]);
       mockStats(esClient.asSecondaryAuthUser, [{ id: SESSIONS_TRANSFORM_ID, state: 'failed' }]);
 
-      await enableSessions({ ...enableArgs(), settings: oneTransform });
+      await installSessions({ ...installArgs(), settings: oneTransform });
 
       expect(esClient.asSecondaryAuthUser.transform.stopTransform).toHaveBeenCalledWith({
         transform_id: SESSIONS_TRANSFORM_ID,
@@ -335,10 +397,9 @@ describe('sessions setup', () => {
     });
 
     it('repartitions in place: replaces transforms but keeps the shared dest index', async () => {
-      grantAll(esClient.asCurrentUser);
       mockTransforms(esClient.asSecondaryAuthUser, [managedTransform(SESSIONS_TRANSFORM_ID)]);
 
-      await enableSessions({ ...enableArgs(), settings: { frequency: '1m', partitions: 2 } });
+      await installSessions({ ...installArgs(), settings: { frequency: '1m', partitions: 2 } });
 
       const client = esClient.asSecondaryAuthUser;
       expect(client.transform.deleteTransform).toHaveBeenCalledWith({
@@ -350,7 +411,6 @@ describe('sessions setup', () => {
     });
 
     it('replaces a previous version and drops its dest index once', async () => {
-      grantAll(esClient.asCurrentUser);
       mockTransforms(esClient.asSecondaryAuthUser, [
         managedTransform('digital-experience-sessions-0-p0of2', {
           version: 0,
@@ -363,7 +423,7 @@ describe('sessions setup', () => {
         }),
       ]);
 
-      await enableSessions({ ...enableArgs(), settings: oneTransform });
+      await installSessions({ ...installArgs(), settings: oneTransform });
 
       expect(
         esClient.asSecondaryAuthUser.transform.deleteTransform.mock.calls.map(
@@ -373,14 +433,33 @@ describe('sessions setup', () => {
       expect(esClient.asSecondaryAuthUser.transform.putTransform).toHaveBeenCalled();
     });
 
+    it('keeps the previous version running until its replacement exists', async () => {
+      mockTransforms(esClient.asSecondaryAuthUser, [
+        managedTransform('digital-experience-sessions-0', {
+          version: 0,
+          destIndex: 'digital-experience-sessions-0',
+        }),
+      ]);
+      const { transform } = esClient.asSecondaryAuthUser;
+      transform.putTransform.mockRejectedValueOnce(esError(503));
+
+      await expect(installSessions({ ...installArgs(), settings: oneTransform })).rejects.toThrow();
+      // Still installed, so the update stays pending and the next attempt retries it.
+      expect(transform.deleteTransform).not.toHaveBeenCalled();
+
+      await installSessions({ ...installArgs(), settings: oneTransform });
+      expect(transform.putTransform.mock.invocationCallOrder[1]).toBeLessThan(
+        transform.deleteTransform.mock.invocationCallOrder[0]
+      );
+    });
+
     it('refuses to replace transforms from a newer version, before writing anything', async () => {
-      grantAll(esClient.asCurrentUser);
       const newerId = `digital-experience-sessions-${SESSIONS_VERSION + 1}`;
       mockTransforms(esClient.asSecondaryAuthUser, [
         managedTransform(newerId, { version: SESSIONS_VERSION + 1, destIndex: newerId }),
       ]);
 
-      const error = await enableSessions({ ...enableArgs(), settings: oneTransform }).catch(
+      const error = await installSessions({ ...installArgs(), settings: oneTransform }).catch(
         (e) => e
       );
 
@@ -435,6 +514,25 @@ describe('sessions setup', () => {
     });
   });
 
+  describe('indexPatternsOverlap', () => {
+    it.each([
+      ['logs-*.otel-*', 'logs-*.otel-*', true],
+      ['logs-*', 'logs-*.otel-*', true],
+      ['logs-checkout*', 'logs-*.otel-*', true],
+      ['logs-*.otel-default', 'logs-*.otel-*', true],
+      ['*-default', 'logs-*.otel-*', true],
+      ['logs-?.otel-?', 'logs-*.otel-*', true],
+      ['*', 'logs-*.otel-*', true],
+      ['traces-*', 'logs-*.otel-*', false],
+      ['logs-*.ecs-*', 'logs-*.otel-*', true],
+      ['logs-apm.app', 'logs-*.otel-*', false],
+      ['.siem-signals*', 'logs-*.otel-*', false],
+      [EDITOR_READ_PATTERN, 'logs-*.otel-*', true],
+    ])('%s overlaps %s: %s', (rolePattern, pattern, overlaps) => {
+      expect(indexPatternsOverlap(rolePattern, pattern)).toBe(overlaps);
+    });
+  });
+
   describe('getRestrictedSourceIndices', () => {
     let client: Client;
 
@@ -447,7 +545,7 @@ describe('sessions setup', () => {
       expect(await getRestrictedSourceIndices(client)).toEqual({ indices: [], reason: 'filtered' });
     });
 
-    it('lists only the patterns without unrestricted read', async () => {
+    it('lists only the patterns a role filters', async () => {
       mockReadPrivileges(client, [
         { names: ['traces-*.otel-*'] },
         { names: ['logs-*.otel-*'], query: ['{"match_all":{}}'] },
@@ -467,12 +565,58 @@ describe('sessions setup', () => {
       expect((await getRestrictedSourceIndices(client)).indices).toEqual([]);
     });
 
-    it('ignores privileges that do not include read, and FLS that grants every field', async () => {
+    it('ignores filters on privileges that do not read documents, and FLS that grants every field', async () => {
       mockReadPrivileges(client, [
-        { privileges: ['view_index_metadata'] },
+        { privileges: ['view_index_metadata', 'monitor'], query: ['{"match_all":{}}'] },
         { names: ['logs-*.otel-*'], field_security: [{ grant: ['*'] }] },
       ]);
-      expect((await getRestrictedSourceIndices(client)).indices).toEqual(['traces-*.otel-*']);
+      expect((await getRestrictedSourceIndices(client)).indices).toEqual([]);
+    });
+
+    it('refuses a filtered read granted through an action pattern or another privilege', async () => {
+      mockReadPrivileges(client, [
+        {
+          names: ['traces-*.otel-*'],
+          privileges: ['indices:data/read/*', 'view_index_metadata'],
+          query: ['{"match_all":{}}'],
+        },
+        {
+          names: ['logs-*.otel-*'],
+          privileges: ['read_failure_store'],
+          field_security: [{ grant: ['@timestamp'] }],
+        },
+      ]);
+      expect((await getRestrictedSourceIndices(client)).indices).toEqual(SOURCE_INDICES);
+    });
+
+    it('does not count an action pattern as proof of unrestricted read', async () => {
+      mockReadPrivileges(client, [
+        { query: ['{"match_all":{}}'] },
+        { names: ['*'], privileges: ['indices:data/read/*'] },
+      ]);
+      expect((await getRestrictedSourceIndices(client)).indices).toEqual(SOURCE_INDICES);
+    });
+
+    it('ignores filters on indices the source patterns cannot match', async () => {
+      mockReadPrivileges(client, [
+        { names: ['.siem-signals*', 'metrics-*'], query: ['{"match_all":{}}'] },
+        { names: ['logs-checkout*'], field_security: [{ grant: ['@timestamp'] }] },
+      ]);
+      expect((await getRestrictedSourceIndices(client)).indices).toEqual(['logs-*.otel-*']);
+    });
+
+    it('accepts a read granted through a regular expression, without filters', async () => {
+      // `has_privileges` checks the read itself.
+      mockReadPrivileges(client, [{ names: [EDITOR_READ_PATTERN] }]);
+      expect((await getRestrictedSourceIndices(client)).indices).toEqual([]);
+    });
+
+    it('refuses a filtered read through a regular expression, which none can prove lifted', async () => {
+      mockReadPrivileges(client, [
+        { names: [EDITOR_READ_PATTERN], query: ['{"match_all":{}}'] },
+        { names: [EDITOR_READ_PATTERN] },
+      ]);
+      expect((await getRestrictedSourceIndices(client)).indices).toEqual(SOURCE_INDICES);
     });
 
     it('cannot verify an API key with its own role descriptors', async () => {
@@ -486,6 +630,124 @@ describe('sessions setup', () => {
     it('rethrows other errors', async () => {
       client.security.getUserPrivileges.mockRejectedValue(esError(500));
       await expect(getRestrictedSourceIndices(client)).rejects.toThrow();
+    });
+
+    describe('on Serverless, where only operator users may read their privileges', () => {
+      const mockAuthenticated = (
+        roles: string[],
+        authenticationType: 'token' | 'realm' | 'api_key' = 'token'
+      ) =>
+        client.security.authenticate.mockResolvedValue({
+          username: 'uiam-user',
+          roles,
+          authentication_type: authenticationType,
+        } as unknown as Awaited<ReturnType<Client['security']['authenticate']>>);
+
+      const mockRoles = (roles: Array<{ name: string; indices: Array<Partial<RoleIndices>> }>) =>
+        client.security.queryRole.mockResolvedValue({
+          total: roles.length,
+          count: roles.length,
+          roles: roles.map(({ name, indices }) => ({
+            name,
+            cluster: [],
+            run_as: [],
+            indices: indices.map((entry) => ({
+              names: SOURCE_INDICES,
+              privileges: ['read', 'view_index_metadata'],
+              ...entry,
+            })),
+          })),
+        } as Awaited<ReturnType<Client['security']['queryRole']>>);
+
+      beforeEach(() => {
+        client.security.getUserPrivileges.mockRejectedValue(esError(410));
+      });
+
+      it('reads the user’s roles, including predefined ones, and accepts unrestricted read', async () => {
+        mockAuthenticated(['admin']);
+        mockRoles([{ name: 'admin', indices: [{ names: ['*'], privileges: ['all'] }] }]);
+
+        expect(await getRestrictedSourceIndices(client)).toEqual({
+          indices: [],
+          reason: 'filtered',
+        });
+        expect(client.security.queryRole).toHaveBeenCalledWith({
+          query: { terms: { name: ['admin'] } },
+          size: 1,
+        });
+      });
+
+      it('lists the patterns a role filters by document- or field-level security', async () => {
+        mockAuthenticated(['traces-dls', 'logs-fls']);
+        mockRoles([
+          {
+            name: 'traces-dls',
+            indices: [{ names: ['traces-*'], query: '{"term":{"service.name":"checkout-web"}}' }],
+          },
+          {
+            name: 'logs-fls',
+            indices: [{ names: ['logs-*'], field_security: { grant: ['@timestamp'] } }],
+          },
+        ]);
+
+        expect(await getRestrictedSourceIndices(client)).toEqual({
+          indices: SOURCE_INDICES,
+          reason: 'filtered',
+        });
+      });
+
+      it('lets an unrestricted role lift another role’s filter', async () => {
+        mockAuthenticated(['dls', 'reader']);
+        mockRoles([
+          { name: 'dls', indices: [{ query: '{"match_all":{}}' }] },
+          { name: 'reader', indices: [{}] },
+        ]);
+
+        expect((await getRestrictedSourceIndices(client)).indices).toEqual([]);
+      });
+
+      it('accepts the predefined editor role’s regular expression read next to a custom role', async () => {
+        mockAuthenticated(['editor', 'sessions-setup']);
+        mockRoles([
+          {
+            name: 'editor',
+            indices: [
+              { names: [EDITOR_READ_PATTERN], privileges: ['read', 'view_index_metadata'] },
+              { names: ['.siem-signals*'], privileges: ['read'], query: '{"match_all":{}}' },
+            ],
+          },
+          {
+            name: 'sessions-setup',
+            indices: [{ names: ['digital-experience-sessions-*'], privileges: ['all'] }],
+          },
+        ]);
+
+        expect((await getRestrictedSourceIndices(client)).indices).toEqual([]);
+      });
+
+      it('finds no filter for a user without roles, and reads none', async () => {
+        mockAuthenticated([], 'realm');
+
+        expect((await getRestrictedSourceIndices(client)).indices).toEqual([]);
+        expect(client.security.queryRole).not.toHaveBeenCalled();
+      });
+
+      it('cannot verify an API key, which holds no roles', async () => {
+        mockAuthenticated([], 'api_key');
+
+        expect(await getRestrictedSourceIndices(client)).toEqual({
+          indices: SOURCE_INDICES,
+          reason: 'unverifiable',
+        });
+        expect(client.security.queryRole).not.toHaveBeenCalled();
+      });
+
+      it('rethrows errors reading the roles', async () => {
+        mockAuthenticated(['custom']);
+        client.security.queryRole.mockRejectedValue(esError(403));
+
+        await expect(getRestrictedSourceIndices(client)).rejects.toThrow();
+      });
     });
   });
 
@@ -541,8 +803,48 @@ describe('sessions setup', () => {
         expect.objectContaining({
           enabledBy: 'bob',
           enabledAt: ENABLED_AT,
-          authorization: { roles: ['dex_admin'], apiKeyName: null, serviceAccount: null },
+          authorization: {
+            roles: ['dex_admin'],
+            apiKeyId: null,
+            apiKeyName: null,
+            serviceAccount: null,
+          },
         })
+      );
+    });
+
+    it('reports the API key the transforms run with', async () => {
+      mockTransforms(client, [
+        {
+          ...managedTransform(SESSIONS_TRANSFORM_ID),
+          authorization: { api_key: { id: 'key-1', name: 'Digital Experience sessions' } },
+        },
+      ] as never);
+      mockStats(client, [idleStats(SESSIONS_TRANSFORM_ID)]);
+
+      const status = await getSessionsStatus(client, { settings: oneTransform, now: NOW });
+
+      expect(status.authorization).toEqual({
+        roles: null,
+        apiKeyId: 'key-1',
+        apiKeyName: 'Digital Experience sessions',
+        serviceAccount: null,
+      });
+      expect(status.autoUpdate).toBe(false);
+    });
+
+    it('reports rebuilding until a current transform completes its first checkpoint', async () => {
+      mockTransforms(client, [managedTransform(SESSIONS_TRANSFORM_ID)]);
+      mockStats(client, [
+        idleStats(SESSIONS_TRANSFORM_ID, 30, { checkpointing: { last: { checkpoint: 0 } } }),
+      ]);
+      expect(await getSessionsStatus(client, { settings: oneTransform, now: NOW })).toEqual(
+        expect.objectContaining({ rebuilding: true })
+      );
+
+      mockStats(client, [idleStats(SESSIONS_TRANSFORM_ID)]);
+      expect(await getSessionsStatus(client, { settings: oneTransform, now: NOW })).toEqual(
+        expect.objectContaining({ rebuilding: false })
       );
     });
 

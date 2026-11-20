@@ -335,6 +335,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           connectionRadius={connectionRadius}
           reconnectRadius={reconnectRadius}
           edgesReconnectable={edgesReconnectable}
+          connectOnClick={false}
           onEdgeClick={noop}
           onNodeClick={onNodeClick}
           onNodeContextMenu={onNodeContextMenu}

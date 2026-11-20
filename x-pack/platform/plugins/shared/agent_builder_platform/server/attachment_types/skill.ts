@@ -6,6 +6,10 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ComponentsNode } from '@kbn/isomer-components';
+import { AGENT_BUILDER_APP_ID, AGENT_BUILDER_MANAGE_PATHS } from '@kbn/deeplinks-agent-builder';
+import { toKibanaAppUrl } from '@kbn/agent-builder-plugin/server';
+import { i18n } from '@kbn/i18n';
 import {
   SKILL_ATTACHMENT_TYPE,
   skillAttachmentDataSchema,
@@ -68,6 +72,81 @@ export const createSkillAttachmentType = (): AttachmentTypeDefinition<
         return { type: 'text', value };
       },
     };
+  },
+  /**
+   * The skill's description, tools and files, and its content as code, with a button to the skills
+   * in Management. Not to the skill's own page, which doesn't exist until the skill is saved and shows
+   * the saved version, not the one in the conversation.
+   */
+  toSurfaceComposition: (
+    {
+      data: {
+        skill: {
+          id,
+          name,
+          description,
+          content,
+          tool_ids: toolIds,
+          referenced_content: referencedContent,
+        },
+      },
+    },
+    { kibanaUrl }
+  ) => {
+    const files = (referencedContent ?? []).map(
+      ({ relativePath, name: fileName }) => `${relativePath}/${fileName}.md`
+    );
+
+    const items = [
+      toolIds.length > 0 && {
+        label: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.surface.tools', {
+          defaultMessage: 'Tools',
+        }),
+        value: toolIds.join(', '),
+      },
+      files.length > 0 && {
+        label: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.surface.files', {
+          defaultMessage: 'Files',
+        }),
+        value: files.join(', '),
+      },
+    ].filter((item): item is { label: string; value: string } => Boolean(item));
+
+    const body: ComponentsNode[] = [
+      ...(description ? [{ type: 'markdown' as const, text: description }] : []),
+      ...(items.length > 0 ? [{ type: 'fields' as const, items }] : []),
+      ...(content
+        ? [
+            {
+              type: 'code' as const,
+              language: 'markdown',
+              text: content,
+            },
+          ]
+        : []),
+      ...(kibanaUrl
+        ? [
+            {
+              type: 'actions' as const,
+              buttons: [
+                {
+                  label: i18n.translate(
+                    'xpack.agentBuilderPlatform.attachments.skill.surface.manageSkills',
+                    { defaultMessage: 'Manage skills' }
+                  ),
+                  url: toKibanaAppUrl(
+                    kibanaUrl,
+                    AGENT_BUILDER_APP_ID,
+                    AGENT_BUILDER_MANAGE_PATHS.skills
+                  ),
+                },
+              ],
+            },
+          ]
+        : []),
+    ];
+
+    return { type: 'view', title: name, subtitle: id, body };
   },
   getAgentDescription: () => {
     return `A \`skill\` attachment is a versioned draft of an Agent Builder skill. When \`mode\` is "create" the card shows a "Create" button (POST). When \`mode\` is "edit" the card shows an "Edit in Management" link if the skill has no unsaved changes, or a "Save changes" button (PUT) once edits are present. \`skill.id\` always identifies the persisted skill. In both cases \`skill\` holds the full content including \`id\`. Render it inline by emitting <render_attachment id="ATTACHMENT_ID" />. Emit at most one render per round — if you call \`patch_skill\` after loading or proposing the skill, hold the render until after the final patch so the user sees a single up-to-date card. Do not invent attachment ids — only render ids returned by propose_skill, load_skill_for_editing, or patch_skill.`;

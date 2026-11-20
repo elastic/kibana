@@ -12,7 +12,6 @@ import { connect, useDispatch } from 'react-redux-v7';
 import deepEqual from 'fast-deep-equal';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
@@ -21,19 +20,7 @@ import { useDataView } from '../../../../../data_view_manager/hooks/use_data_vie
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
-import {
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsRightPanelKey,
-} from '../../../../../flyout/document_details/shared/constants/panel_keys';
-import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
-import {
-  AttackDetailsLeftPanelKey,
-  AttackDetailsRightPanelKey,
-} from '../../../../../flyout/attack_details/constants/panel_keys';
-import { NOTES_TAB_ID } from '../../../../../flyout/attack_details/constants/left_panel_paths';
-import { isAttackDiscoveryRow } from '../../unified_components/data_table/is_attack_discovery_row';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useTimelineDataFilters } from '../../../../containers/use_timeline_data_filters';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
@@ -112,7 +99,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     query: { filterManager: timelineFilterManager },
   } = timelineDataService;
 
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openNotes } = useFlyoutApi();
 
   const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -228,63 +214,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
    */
   const onUpdatePageIndex = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
-  const { openFlyout } = useExpandableFlyoutApi();
-
   const onToggleShowNotes = useCallback(
     (eventId?: string, eventData?: DataTableRecord & TimelineItem) => {
-      if (!eventId) {
+      if (!eventId || !eventData) {
         return;
       }
 
-      const isAttackRow = eventData != null && isAttackDiscoveryRow(eventData);
-      const indexName =
-        (isAttackRow ? eventData.ecs._index : undefined) ?? selectedPatterns.join(',');
-
-      if (enableNewFlyout && eventData) {
-        openNotes({ hit: eventData, origin: FLYOUT_ORIGIN.TIMELINE });
-      } else if (isAttackRow) {
-        openFlyout({
-          right: {
-            id: AttackDetailsRightPanelKey,
-            params: {
-              attackId: eventId,
-              indexName,
-            },
-          },
-          left: {
-            id: AttackDetailsLeftPanelKey,
-            path: {
-              tab: NOTES_TAB_ID,
-            },
-            params: {
-              attackId: eventId,
-              indexName,
-            },
-          },
-        });
-      } else {
-        openFlyout({
-          right: {
-            id: DocumentDetailsRightPanelKey,
-            params: {
-              id: eventId,
-              indexName,
-              scopeId: timelineId,
-            },
-          },
-          left: {
-            id: DocumentDetailsLeftPanelKey,
-            path: {
-              tab: LeftPanelNotesTab,
-            },
-            params: {
-              id: eventId,
-              indexName,
-              scopeId: timelineId,
-            },
-          },
-        });
-      }
+      openNotes({ hit: eventData, origin: FLYOUT_ORIGIN.TIMELINE });
       telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
         location: timelineId,
       });
@@ -293,7 +229,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         panel: 'left',
       });
     },
-    [enableNewFlyout, openNotes, openFlyout, selectedPatterns, telemetry, timelineId]
+    [openNotes, telemetry, timelineId]
   );
 
   const rowAdditionalLeadingControls = useTimelineControlColumn({

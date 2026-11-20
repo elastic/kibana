@@ -76,34 +76,11 @@ module.exports = {
           '@typescript-eslint/no-unsafe-function-type': 'off',
           '@typescript-eslint/no-empty-object-type': 'off',
           // ##
-          camelcase: 'off',
           // rely on typescript
           'no-undef': 'off',
 
           '@typescript-eslint/no-var-requires': 'error',
-          'import/order': [
-            'error',
-            {
-              groups: [['external', 'builtin'], 'internal', ['parent', 'sibling', 'index']],
-            },
-          ],
-          'no-undef-init': 'error',
           'no-unused-expressions': 'off',
-          'spaced-comment': [
-            'error',
-            'always',
-            {
-              exceptions: ['/'],
-            },
-          ],
-          // Old tslint yml override or defined rules
-          'no-restricted-syntax': [
-            'error',
-            {
-              selector: 'TSEnumDeclaration[const=true]',
-              message: 'Do not use `const` with enum declarations',
-            },
-          ],
         },
         eslintConfigPrettierRules
       ),

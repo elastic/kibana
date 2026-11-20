@@ -14,6 +14,7 @@ import * as commonServices from '../../../common/services';
 import { createAgentAction, createErrorActionResults } from './actions';
 import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
 import { restartBatch } from './restart_action_runner';
+import { getPendingRestartActions } from './pending_restart';
 
 jest.mock('./actions', () => ({
   createAgentAction: jest.fn(),
@@ -24,6 +25,10 @@ jest.mock('./hosted_agent', () => ({
   getAgentPolicyRestrictions: jest.fn(),
   isHostedAgent: jest.fn(),
   isAgentlessAgent: jest.fn(),
+}));
+
+jest.mock('./pending_restart', () => ({
+  getPendingRestartActions: jest.fn(),
 }));
 
 jest.mock('../app_context', () => ({
@@ -43,6 +48,9 @@ const mockCreateErrorActionResults = createErrorActionResults as jest.MockedFunc
 >;
 const mockGetAgentPolicyRestrictions = getAgentPolicyRestrictions as jest.MockedFunction<
   typeof getAgentPolicyRestrictions
+>;
+const mockGetPendingRestartActions = getPendingRestartActions as jest.MockedFunction<
+  typeof getPendingRestartActions
 >;
 const mockIsAgentlessAgent = isAgentlessAgent as jest.MockedFunction<typeof isAgentlessAgent>;
 const mockIsHostedAgent = isHostedAgent as jest.MockedFunction<typeof isHostedAgent>;
@@ -75,6 +83,7 @@ describe('restartBatch', () => {
     mockIsAgentRestartSupported.mockReturnValue(true);
     mockCreateAgentAction.mockResolvedValue({ id: 'action-1' } as any);
     mockCreateErrorActionResults.mockResolvedValue(undefined);
+    mockGetPendingRestartActions.mockResolvedValue(new Map());
   });
 
   it('creates action for all agents when none are hosted', async () => {
@@ -201,6 +210,57 @@ describe('restartBatch', () => {
       internalSoClient,
       expect.objectContaining({ total: 42 })
     );
+  });
+
+  describe('pending restart filtering', () => {
+    beforeEach(() => {
+      mockGetPendingRestartActions.mockResolvedValue(
+        new Map([['pending-agent', { action_id: 'pending-action', created_at: '2026-11-06' }]])
+      );
+    });
+
+    it('excludes agents with a pending restart and writes error results', async () => {
+      await restartBatch(esClient, soClient, [makeAgent('pending-agent'), makeAgent('a1')], {
+        spaceId: 'default',
+      });
+
+      expect(mockGetPendingRestartActions).toHaveBeenCalledWith(esClient, ['pending-agent', 'a1'], {
+        excludeActionId: expect.any(String),
+      });
+      expect(mockCreateAgentAction).toHaveBeenCalledWith(
+        esClient,
+        internalSoClient,
+        expect.objectContaining({ agents: ['a1'] })
+      );
+      const errorsArg = (mockCreateErrorActionResults as jest.Mock).mock.calls[0][2];
+      expect(Object.keys(errorsArg)).toEqual(['pending-agent']);
+      expect(errorsArg['pending-agent'].message).toMatch(/pending restart action pending-action/);
+    });
+
+    it('excludes the current bulk action from the pending lookup', async () => {
+      await restartBatch(esClient, soClient, [makeAgent('a1')], {
+        spaceId: 'default',
+        actionId: 'retried-action',
+      });
+
+      expect(mockGetPendingRestartActions).toHaveBeenCalledWith(esClient, ['a1'], {
+        excludeActionId: 'retried-action',
+      });
+    });
+
+    it('includes agents with a pending restart when force is set', async () => {
+      await restartBatch(esClient, soClient, [makeAgent('pending-agent'), makeAgent('a1')], {
+        spaceId: 'default',
+        force: true,
+      });
+
+      expect(mockGetPendingRestartActions).not.toHaveBeenCalled();
+      expect(mockCreateAgentAction).toHaveBeenCalledWith(
+        esClient,
+        internalSoClient,
+        expect.objectContaining({ agents: ['pending-agent', 'a1'] })
+      );
+    });
   });
 
   describe('version filtering', () => {

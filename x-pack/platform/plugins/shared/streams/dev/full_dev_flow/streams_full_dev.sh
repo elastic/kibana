@@ -270,6 +270,14 @@ cmd_status() {
   else
     missing "StreamUnit $UNIT_NS/$UNIT_ID"
   fi
+  # Source validation reads the registry per target, which answers 503 until every unit in it has the annotation.
+  # Every ingest request then fails, not only the ones for a source.
+  unannotated="$(kubectl_ctx -n "$UNIT_NS" get streamunit -o json 2>/dev/null \
+    | jq -r '.items[] | select(.metadata.annotations["streams.k8s.elastic.co/sources"] == null) | .metadata.name' \
+    | paste -sd, - || true)"
+  if [[ -n "$unannotated" ]]; then
+    missing "sources annotation on $UNIT_NS/$unannotated  →  kubectl -n $UNIT_NS annotate streamunit <name> streams.k8s.elastic.co/sources= (until then ingest answers 503)"
+  fi
   if ds_has_docs "$LOGS_DEV_DS" || ds_has_docs "$LOGS_PROD_DS"; then
     ok "demo logs ($LOGS_DEV_DS / $LOGS_PROD_DS)"
   else
@@ -279,6 +287,13 @@ cmd_status() {
     ok "collector metrics ($METRICS_DS)"
   else
     missing "collector metrics ($METRICS_DS)"
+  fi
+  if [[ -n "$ES" ]] && es_curl "$ES/$METRICS_DS/_count" -H 'Content-Type: application/json' \
+      -d '{"query":{"exists":{"field":"metrics.streams.source.items"}}}' 2>/dev/null \
+      | jq -e '.count > 0' >/dev/null 2>&1; then
+    ok "source metrics (metrics.streams.source.items)"
+  else
+    missing "source metrics (metrics.streams.source.items)  →  run traffic; setup needs yq and helm to enable them"
   fi
 }
 
@@ -423,10 +438,76 @@ ensure_es_alias() {
   kubectl_ctx apply -f "$ASSETS/es_alias.yaml" >/dev/null
 }
 
+# Prints the collector config overlay that emits the source metrics (streams.source.*), or nothing.
+# The ingest collector owns that curation pipeline, so it is rendered from its chart at the commit
+# the image tag names, never copied here. The chart's 30s reporting interval is shortened for dev.
+source_metrics_overlay() {
+  local repo="${STREAMS_HOSTED_OTEL_COLLECTOR:-}"
+  local chart_dir="$STATE_DIR/hosted-otel-collector-chart"
+  local interval_ms="${STREAMS_SOURCE_METRICS_INTERVAL_MS:-10000}"
+  local sha rendered missing=""
+
+  [[ "$MOTEL_COLLECTOR_TAG" =~ ^git-([0-9a-f]{7,40})$ ]] || {
+    warn "source metrics off: image tag $MOTEL_COLLECTOR_TAG is not git-<commit>, so no chart matches it"
+    return 0
+  }
+  sha="${BASH_REMATCH[1]}"
+  [[ -d "$repo/.git" ]] || missing="a hosted-otel-collector checkout (STREAMS_HOSTED_OTEL_COLLECTOR)"
+  command -v helm >/dev/null 2>&1 || missing="${missing:+$missing, }helm"
+  command -v yq >/dev/null 2>&1 || missing="${missing:+$missing, }yq (brew install yq)"
+  [[ -z "$missing" ]] || {
+    warn "source metrics off: need $missing"
+    return 0
+  }
+  git -C "$repo" cat-file -e "$sha^{commit}" 2>/dev/null || {
+    warn "source metrics off: commit $sha is not in $repo, run git fetch there"
+    return 0
+  }
+
+  rm -rf "$chart_dir"
+  mkdir -p "$chart_dir"
+  git -C "$repo" archive "$sha" helm | tar -x -C "$chart_dir"
+  rendered="$STATE_DIR/hosted-otel-collector-config.yaml"
+  (
+    cd "$chart_dir/helm/ingest"
+    helm dependency build >/dev/null
+    helm template motel . --show-only templates/configmap.yaml \
+      --set streamsTelemetry.enabled=true --set sourceValidation.enabled=true
+  ) | yq '.data."collector-config.yaml"' > "$rendered" 2>/dev/null || {
+    warn "source metrics off: could not render the chart at $sha"
+    return 0
+  }
+  [[ "$(yq '.service.pipelines | has("metrics/streams-telemetry")' "$rendered")" == "true" ]] || {
+    warn "source metrics off: the chart at $sha has no streams-telemetry pipeline, use a newer image"
+    return 0
+  }
+
+  interval_ms="$interval_ms" yq '{
+    "receivers": {"otlp/streams-telemetry": .receivers["otlp/streams-telemetry"]},
+    "processors": (.processors | with_entries(select(.key | test("/streams-telemetry$")))),
+    "exporters": {"kafka": {"metrics": .exporters.kafka.metrics}},
+    "service": {
+      "telemetry": {"metrics": {
+        "level": .service.telemetry.metrics.level,
+        "readers": [.service.telemetry.metrics.readers[] | select(.periodic.exporter.otlp.endpoint == "http://localhost:4350")],
+        "views": .service.telemetry.metrics.views
+      }},
+      "pipelines": {"metrics/streams-telemetry": .service.pipelines["metrics/streams-telemetry"]}
+    }
+  }
+  | .processors["interval/streams-telemetry"].interval = strenv(interval_ms) + "ms"
+  | .service.telemetry.metrics.readers[0].periodic.interval = (strenv(interval_ms) | to_number)' "$rendered"
+}
+
 ensure_motel() {
   log "ensuring motel"
   local rendered="$STATE_DIR/motel.yaml"
   sed "s/__COLLECTOR_TAG__/$MOTEL_COLLECTOR_TAG/g" "$ASSETS/motel.yaml" > "$rendered"
+  local overlay
+  overlay="$(source_metrics_overlay)"
+  if [[ -n "$overlay" ]]; then
+    OVERLAY="$overlay" yq -i 'select(.kind == "ConfigMap").data."streams-telemetry.yaml" = strenv(OVERLAY)' "$rendered"
+  fi
   local applied
   applied="$(kubectl_ctx apply -f "$rendered")"
   if [[ -n "${STREAMS_CONTROLLER:-}" && -x "$STREAMS_CONTROLLER/dev/registry-secret.sh" ]]; then
@@ -541,7 +622,7 @@ mint_source_api_key() {
   SOURCE_KEY="$(printf '%s' "$body" | jq -r '.encodedApiKey // empty')"
   if [[ -z "$SOURCE_KEY" || "$SOURCE_KEY" == "null" ]]; then
     printf '%s\n' "$body" >&2
-    die "failed to mint a source API key (does elastic_serverless have ingest_source_manager / manage_own_api_key?)"
+    die "failed to mint a source API key (does the Kibana user have manage_own_api_key and the streams application write privilege on source:$SOURCE_ID?)"
   fi
   printf '%s' "$SOURCE_KEY" > "$STATE_DIR/source_api_key"
   chmod 600 "$STATE_DIR/source_api_key"
@@ -853,7 +934,7 @@ send_traffic_round() {
 print_ready() {
   echo
   echo "Local Streams backend is ready. Login: $ES_USER / $ES_PASS"
-  echo "  Canvas   ${KIBANA_URL:-http://localhost:5601}/app/streams/new-experience/"
+  echo "  Canvas   ${KIBANA_URL:-http://localhost:5601}/app/streams/v2/unit/$UNIT_ID/map"
   echo "  Discover ${KIBANA_URL:-http://localhost:5601}/app/discover"
   echo "  Logs     FROM $LOGS_DEV_DS  |  FROM $LOGS_PROD_DS"
   echo "  Failures FROM $LOGS_DEV_DS::failures  |  FROM $LOGS_PROD_DS::failures"
@@ -1167,7 +1248,7 @@ reset_canvas_unit() {
     -H 'Content-Type: application/json' -d '{}' || true)"
   if ! printf '%s' "$body" | jq -e '.acknowledged == true' >/dev/null 2>&1; then
     printf '%s\n' "$body" >&2
-    warn "Canvas unit reset did not acknowledge; reload /app/streams/new-experience/ after Kibana is up"
+    warn "Canvas unit reset did not acknowledge; reload /app/streams/v2/unit/$UNIT_ID/map after Kibana is up"
   fi
 }
 

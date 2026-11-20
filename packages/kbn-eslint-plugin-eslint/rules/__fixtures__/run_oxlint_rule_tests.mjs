@@ -53,6 +53,8 @@ const parityTests = {
   module_migration: () => require('../module_migration.test.js'),
   no_async_foreach: () => require('../no_async_foreach.test.js'),
   no_async_promise_body: () => require('../no_async_promise_body.test.js'),
+  no_abort_signal_timeout: () => require('../no_abort_signal_timeout.test.js'),
+  no_uncleared_race_timeout: () => require('../no_uncleared_race_timeout.test.js'),
   no_conditional_saved_object_type_registration: () =>
     require('../no_conditional_saved_object_type_registration.test.js'),
   no_constructor_args_in_property_initializers: () =>
@@ -88,6 +90,7 @@ const parityTests = {
   scout_no_promise_all_with_playwright_apis: () =>
     require('../scout_no_promise_all_with_playwright_apis.test.js'),
   scout_no_raw_eui_selectors: () => require('../scout_no_raw_eui_selectors.test.js'),
+  scout_no_raw_locators: () => require('../scout_no_raw_locators.test.js'),
   scout_prefer_both_arch_tags: () => require('../scout_prefer_both_arch_tags.test.js'),
   scout_require_api_client_in_api_test: () =>
     require('../scout_require_api_client_in_api_test.test.js'),

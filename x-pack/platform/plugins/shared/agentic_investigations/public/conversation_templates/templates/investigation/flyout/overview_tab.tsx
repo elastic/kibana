@@ -98,6 +98,13 @@ export const InvestigationOverview: React.FC<
     [data, conversation.metadata?.verdict, onOpenEntity]
   );
 
+  // The skeleton only stands in for an empty overview. Once there is anything to read, such as
+  // when an agent resumes after a proposal is decided, the header's running state is enough.
+  const hasFindings =
+    Boolean(investigation.summary?.trim()) ||
+    Object.values(sections).some(Boolean) ||
+    (data?.proposals.length ?? 0) > 0;
+
   return (
     <OverviewTab
       investigation={investigation}
@@ -106,7 +113,7 @@ export const InvestigationOverview: React.FC<
       proposedActionsContent={proposedActionsContent}
       proposedActionsCount={proposedActionsCount}
       sections={sections}
-      isRunning={data?.in_progress ?? false}
+      showLoadingSection={(data?.in_progress ?? false) && !hasFindings}
     />
   );
 };

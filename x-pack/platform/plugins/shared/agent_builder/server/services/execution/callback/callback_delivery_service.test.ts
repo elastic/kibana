@@ -270,6 +270,74 @@ describe('resolveConversation', () => {
   });
 });
 
+describe('runOnBeforeNewConversation', () => {
+  const context = {
+    origin: { type: ConversationOriginType.Slack, external_conversation_id: 'thread-1' },
+    spaceId: 'default',
+    request: {} as KibanaRequest,
+    agentId: 'agent-1',
+  };
+
+  it('allows the turn when no hook is registered', async () => {
+    await expect(
+      createCallbackDeliveryService().runOnBeforeNewConversation(context)
+    ).resolves.toEqual(expect.any(Function));
+  });
+
+  it('gives back what earlier hooks took when a later hook refuses', async () => {
+    const service = createCallbackDeliveryService();
+    const release = jest.fn().mockResolvedValue(undefined);
+    service.setup().registerOnBeforeNewConversation(jest.fn().mockResolvedValue(release));
+    service
+      .setup()
+      .registerOnBeforeNewConversation(jest.fn().mockRejectedValue(new Error('refused')));
+
+    await expect(service.runOnBeforeNewConversation(context)).rejects.toThrow('refused');
+    expect(release).toHaveBeenCalledTimes(1);
+  });
+
+  it('releases what every hook took once, without throwing when a release fails', async () => {
+    const service = createCallbackDeliveryService();
+    const failing = jest.fn().mockRejectedValue(new Error('storage down'));
+    const release = jest.fn().mockResolvedValue(undefined);
+    service.setup().registerOnBeforeNewConversation(jest.fn().mockResolvedValue(release));
+    service.setup().registerOnBeforeNewConversation(jest.fn().mockResolvedValue(failing));
+
+    const releaseAll = await service.runOnBeforeNewConversation(context);
+    await expect(releaseAll()).resolves.toBeUndefined();
+    await releaseAll();
+
+    expect(failing).toHaveBeenCalledTimes(1);
+    expect(release).toHaveBeenCalledTimes(1);
+  });
+
+  it('runs every registered hook in order', async () => {
+    const service = createCallbackDeliveryService();
+    const first = jest.fn().mockResolvedValue(undefined);
+    const second = jest.fn().mockResolvedValue(undefined);
+    service.setup().registerOnBeforeNewConversation(first);
+    service.setup().registerOnBeforeNewConversation(second);
+
+    await service.runOnBeforeNewConversation(context);
+
+    expect(first).toHaveBeenCalledWith(context);
+    expect(second).toHaveBeenCalledWith(context);
+    expect(first.mock.invocationCallOrder[0]).toBeLessThan(second.mock.invocationCallOrder[0]);
+  });
+
+  it('propagates a refusal without running the next hook', async () => {
+    const service = createCallbackDeliveryService();
+    const next = jest.fn();
+    service
+      .setup()
+      .registerOnBeforeNewConversation(jest.fn().mockRejectedValue(new Error('refused')));
+    service.setup().registerOnBeforeNewConversation(next);
+
+    await expect(service.runOnBeforeNewConversation(context)).rejects.toThrow('refused');
+    expect(next).not.toHaveBeenCalled();
+  });
+});
+
 describe('makeCallbackRequest', () => {
   afterEach(() => {
     jest.useRealTimers();

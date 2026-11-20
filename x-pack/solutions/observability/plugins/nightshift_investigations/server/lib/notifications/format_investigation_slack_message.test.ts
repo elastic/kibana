@@ -154,7 +154,7 @@ describe('buildInvestigationSlackBlocks', () => {
       .filter(({ type }) => type === 'section')
       .map((block) => (block.text as { text: string }).text);
 
-  it('lays out the impact, the quoted conclusion, the hypotheses, and the button', () => {
+  it('lays out what happened, the impact, the quoted conclusion, the hypotheses, and the button', () => {
     const blocks = buildInvestigationSlackBlocks({
       investigation: completed({
         verdict: 'Connection pool exhausted.\nIt started after the deploy.',
@@ -177,6 +177,8 @@ describe('buildInvestigationSlackBlocks', () => {
     expect(blocks.map(({ type }) => type)).toEqual([
       'section',
       'section',
+      'section',
+      'section',
       'divider',
       'section',
       'section',
@@ -185,6 +187,8 @@ describe('buildInvestigationSlackBlocks', () => {
       'actions',
     ]);
     expect(sectionTexts(blocks)).toEqual([
+      "*What's happened*",
+      'p99 latency on checkout rose after the 14:02 deploy of payments-api.',
       '*Impact*',
       'Checkout errors for 12% of users.\n`checkout`',
       '*Conclusion*',
@@ -192,7 +196,7 @@ describe('buildInvestigationSlackBlocks', () => {
       '*Hypotheses*',
       '• *payments-api leaks connections* _(Confirmed · 86%)_: Pool hit its max at 14:03.',
     ]);
-    expect(blocks[7]).toMatchObject({
+    expect(blocks[9]).toMatchObject({
       elements: [{ type: 'button', text: { text: 'View Full Investigation' }, url: URL }],
     });
     expect(JSON.stringify(blocks)).not.toContain('follow-up');
@@ -240,13 +244,14 @@ describe('buildInvestigationSlackBlocks', () => {
     expect(sectionTexts(blocks)).toEqual(['*Hypotheses*', '• *Maybe* _(Investigating · 40%)_']);
   });
 
-  it('uses what happened as the impact when there is no impact summary', () => {
+  it('shows what happened without an impact section when there is no impact', () => {
     const blocks = buildInvestigationSlackBlocks({
       investigation: completed({ impact: undefined }),
       url: URL,
     });
-    expect(sectionTexts(blocks).slice(0, 2)).toEqual([
-      '*Impact*',
+    expect(blocks.map(({ type }) => type)).toEqual(['section', 'section', 'divider', 'actions']);
+    expect(sectionTexts(blocks)).toEqual([
+      "*What's happened*",
       'p99 latency on checkout rose after the 14:02 deploy of payments-api.',
     ]);
   });
@@ -261,10 +266,14 @@ describe('buildInvestigationSlackBlocks', () => {
 
   it('escapes mrkdwn control characters in agent-written text', () => {
     const blocks = buildInvestigationSlackBlocks({
-      investigation: completed({ impact: undefined, verdict: 'Errors > 5% on <api> & co' }),
+      investigation: completed({
+        summary: undefined,
+        impact: undefined,
+        verdict: 'Errors > 5% on <api> & co',
+      }),
       url: URL,
     });
-    expect(sectionTexts(blocks)[3]).toBe('> Errors &gt; 5% on &lt;api&gt; &amp; co');
+    expect(sectionTexts(blocks)[1]).toBe('> Errors &gt; 5% on &lt;api&gt; &amp; co');
   });
 
   it('keeps the started header within the 150 characters Slack allows', () => {

@@ -11,7 +11,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
+import type { SetupBuilds } from './breakages';
 import {
+  checkFlakyTest,
   classifyTest,
   flakiestQualifyingBranch,
   latestRunAcrossBranches,
@@ -98,6 +100,180 @@ describe('flakiestQualifyingBranch', () => {
     expect(
       flakiestQualifyingBranch([branch('main', 100, 10), branch('9.5', 20, 2)], thresholds)?.branch
     ).toBe('main');
+  });
+});
+
+/** Builds run an hour apart, build 0 on Oct 1, 2026. */
+const FIRST_BUILD_AT = Date.UTC(2026, 9, 1);
+const HOUR_MS = 60 * 60 * 1000;
+
+/** Builds of one setup numbered from `first` on, oldest first: `x` failed, `.` passed. */
+const setupBuilds = (pattern: string, first = 1, branch = 'main'): SetupBuilds => ({
+  branch,
+  setup: 'kibana-on-merge a.config.ts stateful-classic local',
+  builds: [...pattern].map((outcome, index) => {
+    const ranAt = new Date(FIRST_BUILD_AT + (first + index) * HOUR_MS);
+    return {
+      buildId: `build-${first + index}`,
+      buildNumber: first + index,
+      failed: outcome === 'x',
+      ranAt,
+      failedAt: outcome === 'x' ? ranAt : undefined,
+    };
+  }),
+});
+
+const branchCounts = (branch: string, builds: number, failedBuilds: number) => ({
+  branch,
+  builds,
+  failedBuilds,
+});
+
+describe('checkFlakyTest', () => {
+  const strict = { ...thresholds, minFailRate: 0.03 };
+  /** An hour after the build numbered `last`. */
+  const after = (last: number, hours = 1) => new Date(FIRST_BUILD_AT + (last + hours) * HOUR_MS);
+
+  it('does nothing to a test without breakages that still fails', () => {
+    expect(
+      checkFlakyTest(
+        [setupBuilds(`${'.'.repeat(45)}x....x....`)],
+        [branchCounts('main', 55, 2)],
+        strict,
+        after(55, 48)
+      )
+    ).toEqual({ outcome: 'none' });
+    expect(checkFlakyTest([], [], strict, after(0))).toEqual({ outcome: 'none' });
+  });
+
+  it('drops a test broken up to its latest build, whatever its other builds show', () => {
+    const setups = [
+      setupBuilds(`${'.'.repeat(80)}${'x'.repeat(20)}`),
+      // flaky enough on 9.5 on its own
+      setupBuilds(`${'.'.repeat(15)}x...x.x...`, 500, '9.5'),
+    ];
+    const counts = [branchCounts('main', 100, 20), branchCounts('9.5', 25, 3)];
+
+    expect(checkFlakyTest(setups, counts, strict, after(524))).toEqual({
+      outcome: 'dropped',
+      cause: 'broken',
+      reason:
+        'broken right now, 20 failed builds in a row on main (#81 to #100) in ' +
+        'kibana-on-merge a.config.ts stateful-classic local',
+    });
+  });
+
+  it('drops a test that clears the thresholds only thanks to a past breakage', () => {
+    // 13 of 200 failed, 12 of them in a row: 1 of 188 builds otherwise
+    const setups = [setupBuilds(`${'.'.repeat(90)}${'x'.repeat(12)}${'.'.repeat(90)}x.......`)];
+
+    expect(checkFlakyTest(setups, [branchCounts('main', 200, 13)], strict, after(200))).toEqual({
+      outcome: 'dropped',
+      cause: 'breakages',
+      reason:
+        'below the thresholds without its breakage, 12 failed builds in a row on main ' +
+        '(#91 to #102) in kibana-on-merge a.config.ts stateful-classic local',
+    });
+  });
+
+  it('names the longest of several past breakages', () => {
+    const setups = [
+      setupBuilds(`${'.'.repeat(90)}xxxxx${'.'.repeat(50)}${'x'.repeat(8)}${'.'.repeat(50)}`),
+    ];
+
+    expect(checkFlakyTest(setups, [branchCounts('main', 203, 13)], strict, after(203))).toEqual({
+      outcome: 'dropped',
+      cause: 'breakages',
+      reason:
+        'below the thresholds without its 2 breakages, the longest 8 failed builds in a row on ' +
+        'main (#146 to #153) in kibana-on-merge a.config.ts stateful-classic local',
+    });
+  });
+
+  it('keeps a test flaky apart from a past breakage, counted without it', () => {
+    // 8 of 170 builds still failed outside the breakage
+    const scattered = `${'.'.repeat(20)}x`.repeat(4);
+    const pattern = `${scattered}.${'x'.repeat(12)}.${scattered}`;
+    const counts = [branchCounts('main', 182, 20)];
+    const kept = {
+      outcome: 'kept',
+      breakageBuilds: 12,
+      flakiestBranch: { branch: 'main', builds: 170, failedBuilds: 8, buildFailRate: 8 / 170 },
+    };
+
+    expect(checkFlakyTest([setupBuilds(pattern)], counts, strict, after(182))).toEqual(kept);
+    // the same builds broke in a second setup: each is taken off once
+    const secondSetup = {
+      ...setupBuilds(pattern),
+      setup: 'kibana-on-merge b.config.ts serverless local',
+    };
+    expect(checkFlakyTest([setupBuilds(pattern), secondSetup], counts, strict, after(182))).toEqual(
+      kept
+    );
+  });
+
+  describe('a test that stopped failing', () => {
+    // 10 of 150 failed, the last at build 100, then 50 clean builds: 3.3 failures missed at 6.7%
+    const pattern = `${'.........x'.repeat(10)}${'.'.repeat(50)}`;
+    const counts = [branchCounts('main', 150, 10)];
+
+    it('is dropped as fixed once it missed enough failures, a day after its last one', () => {
+      expect(checkFlakyTest([setupBuilds(pattern)], counts, strict, after(100, 24))).toEqual({
+        outcome: 'dropped',
+        cause: 'fixed',
+        reason: 'fixed, no failures in the 50 builds on main since 2026-10-05',
+      });
+    });
+
+    it('is kept within a day of its last failure', () => {
+      expect(checkFlakyTest([setupBuilds(pattern)], counts, strict, after(100, 23))).toEqual({
+        outcome: 'none',
+      });
+    });
+
+    it('is kept until it missed enough failures', () => {
+      // 15 clean builds: 1.3 failures missed at 8.7%
+      const fewer = `${'.........x'.repeat(10)}${'.'.repeat(15)}`;
+      expect(
+        checkFlakyTest([setupBuilds(fewer)], [branchCounts('main', 115, 10)], strict, after(500))
+      ).toEqual({ outcome: 'none' });
+    });
+
+    it('is kept while it still fails on another branch it qualifies on', () => {
+      const setups = [setupBuilds(pattern), setupBuilds('.........x'.repeat(10), 1000, '9.6')];
+      const bothCounts = [...counts, branchCounts('9.6', 100, 10)];
+      expect(checkFlakyTest(setups, bothCounts, strict, after(1100, 24))).toEqual({
+        outcome: 'none',
+      });
+    });
+
+    it('is judged on its failure rate without its breakages', () => {
+      // 5 of 110 failed outside a 20 build breakage: 1.4 failures missed, 5.8 with the breakage
+      const flaky = '.........x'.repeat(5);
+      const withBreakage = `${'.'.repeat(30)}${'x'.repeat(20)}${flaky}${'.'.repeat(30)}`;
+      const breakageCounts = [branchCounts('main', 130, 25)];
+      expect(
+        checkFlakyTest([setupBuilds(withBreakage)], breakageCounts, strict, after(100, 24))
+      ).toMatchObject({ outcome: 'kept' });
+    });
+
+    it('counts a breakage as its last failure', () => {
+      // 10 of 145 failed outside a 12 build breakage that ended 5 builds ago: 35 clean builds
+      // since the failure before it would be enough, the 5 since the breakage are not
+      const breakageSince = `${'.........x'.repeat(10)}${'.'.repeat(30)}${'x'.repeat(12)}.....`;
+      expect(
+        checkFlakyTest(
+          [setupBuilds(breakageSince)],
+          [branchCounts('main', 157, 22)],
+          strict,
+          after(157, 48)
+        )
+      ).toEqual({
+        outcome: 'kept',
+        breakageBuilds: 12,
+        flakiestBranch: { branch: 'main', builds: 145, failedBuilds: 10, buildFailRate: 10 / 145 },
+      });
+    });
   });
 });
 
@@ -227,6 +403,10 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
   /** Branch counts where every test in `testIds` qualifies on `main`. */
   const activeCounts = (testIds: string[]) =>
     new Map(testIds.map((testId) => [testId, [mainCounts()]]));
+
+  beforeEach(() => {
+    jest.spyOn(queries, 'fetchSetupBuilds').mockResolvedValue({ byTest: new Map(), truncated: [] });
+  });
 
   afterEach(() => {
     jest.restoreAllMocks();
@@ -618,6 +798,128 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       expect.anything(),
       ['still-running', 'flaky-on-9.5'],
       options.samplesPerTest
+    );
+  });
+
+  it('leaves out flaky tests whose failures are breakages before ranking, so the cap is filled with flaky tests', async () => {
+    jest
+      .spyOn(queries, 'fetchFailingFiles')
+      .mockResolvedValue([{ framework: 'jest', filePath: 'a.test.ts' }]);
+    jest.spyOn(queries, 'fetchTestStats').mockResolvedValue([
+      // outranks `flaky` and would take the only slot
+      statsRow({ testId: 'broken', failedBuilds: 20 }),
+      statsRow({ testId: 'flaky' }),
+      statsRow({ testId: 'never-passed', runs: 20, fails: 20, builds: 20, failedBuilds: 20 }),
+    ]);
+    jest
+      .spyOn(queries, 'fetchBranchCounts')
+      .mockResolvedValue(activeCounts(['broken', 'flaky', 'never-passed']));
+    jest
+      .spyOn(queries, 'fetchTestMetadata')
+      .mockResolvedValue(
+        new Map([
+          [
+            'broken',
+            { testId: 'broken', title: 'breaks', filePath: 'a.test.ts', owners: [], areas: [] },
+          ],
+        ])
+      );
+    const fetchSetupBuilds = jest.spyOn(queries, 'fetchSetupBuilds').mockResolvedValue({
+      byTest: new Map([
+        ['broken', [setupBuilds(`${'.'.repeat(80)}${'x'.repeat(20)}`)]],
+        ['flaky', [setupBuilds(`${'.....x....'.repeat(10)}`)]],
+      ]),
+      truncated: [],
+    });
+    const fetchBranchStats = jest
+      .spyOn(queries, 'fetchBranchStats')
+      .mockResolvedValue(activeBranchStats(['flaky']));
+    jest.spyOn(queries, 'fetchTargetStats').mockResolvedValue(new Map());
+    jest.spyOn(queries, 'fetchTestErrors').mockResolvedValue(new Map());
+    jest.spyOn(queries, 'fetchSampleFailures').mockResolvedValue(new Map());
+    jest.spyOn(queries, 'fetchFilePipelineStats').mockResolvedValue(new Map());
+    const info = jest.spyOn(log, 'info');
+
+    const { data: report } = await ScoutFlakyTests.fromElasticsearch(es, options, log);
+
+    // only flaky tests are checked: one that never passed is no flaky issue either way
+    expect(fetchSetupBuilds).toHaveBeenCalledWith(es, expect.anything(), [
+      expect.objectContaining({ testId: 'broken' }),
+      expect.objectContaining({ testId: 'flaky' }),
+    ]);
+    expect(report.flaky.map((entry) => entry.testId)).toEqual(['flaky']);
+    expect(report.consistentlyFailing.map((entry) => entry.testId)).toEqual(['never-passed']);
+    expect(fetchBranchStats).toHaveBeenCalledWith(es, expect.anything(), [
+      expect.objectContaining({ testId: 'flaky' }),
+      expect.objectContaining({ testId: 'never-passed' }),
+    ]);
+    expect(info).toHaveBeenCalledWith(
+      'Dropped a.test.ts › breaks from the report: broken right now, 20 failed builds in a row on main ' +
+        '(#81 to #100) in kibana-on-merge a.config.ts stateful-classic local'
+    );
+  });
+
+  it('counts and ranks a flaky test kept despite a past breakage without the builds of it', async () => {
+    jest
+      .spyOn(queries, 'fetchFailingFiles')
+      .mockResolvedValue([{ framework: 'jest', filePath: 'a.test.ts' }]);
+    jest.spyOn(queries, 'fetchTestStats').mockResolvedValue([
+      // 20 failed builds, 12 of them in a row
+      statsRow({ testId: 'past-breakage', failedBuilds: 20 }),
+      statsRow({ testId: 'steady' }),
+    ]);
+    jest.spyOn(queries, 'fetchBranchCounts').mockResolvedValue(
+      new Map([
+        ['past-breakage', [mainCounts({ failedBuilds: 20 })]],
+        ['steady', [mainCounts()]],
+      ])
+    );
+    jest.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(new Map());
+    jest.spyOn(queries, 'fetchSetupBuilds').mockResolvedValue({
+      byTest: new Map([
+        [
+          'past-breakage',
+          [
+            setupBuilds(
+              `${`${'.'.repeat(9)}x`.repeat(4)}.${'x'.repeat(12)}.` +
+                `${`${'.'.repeat(10)}x`.repeat(4)}..`
+            ),
+          ],
+        ],
+        ['steady', [setupBuilds(`${'.'.repeat(9)}x`.repeat(10))]],
+      ]),
+      truncated: [],
+    });
+    jest
+      .spyOn(queries, 'fetchBranchStats')
+      .mockResolvedValue(activeBranchStats(['past-breakage', 'steady']));
+    jest.spyOn(queries, 'fetchTargetStats').mockResolvedValue(new Map());
+    jest.spyOn(queries, 'fetchTestErrors').mockResolvedValue(new Map());
+    jest.spyOn(queries, 'fetchSampleFailures').mockResolvedValue(new Map());
+    jest.spyOn(queries, 'fetchFilePipelineStats').mockResolvedValue(new Map());
+    const info = jest.spyOn(log, 'info');
+
+    const { data: report } = await ScoutFlakyTests.fromElasticsearch(
+      es,
+      { ...options, thresholds: { ...thresholds, maxTests: 2 } },
+      log
+    );
+
+    expect(report.flaky.map((entry) => entry.testId)).toEqual(['steady', 'past-breakage']);
+    expect(report.flaky[1]).toMatchObject({
+      builds: 88,
+      failedBuilds: 8,
+      buildFailRate: 8 / 88,
+      flakiestBranch: { branch: 'main', builds: 88, failedBuilds: 8, buildFailRate: 8 / 88 },
+    });
+    expect(info).toHaveBeenCalledWith(
+      'Kept past-breakage › (unknown), flaky even without its breakages; ' +
+        'took the 12 builds of its breakages off its counts'
+    );
+    expect(info).toHaveBeenCalledWith(
+      expect.stringMatching(
+        /^Checked 2 flaky tests for breakages \(failed builds in a row, too many to be chance\) and fixes in .+: dropped 0 from the report \(0 broken right now, 0 flaky only because of their breakages, 0 fixed: no failures in enough builds since their last one\); kept 1 that are flaky even without their breakages, with those builds taken off their counts; 1 unchanged$/
+      )
     );
   });
 

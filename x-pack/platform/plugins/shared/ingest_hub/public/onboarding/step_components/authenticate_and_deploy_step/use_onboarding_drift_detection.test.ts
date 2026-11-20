@@ -233,3 +233,88 @@ describe('useOnboardingDriftDetection — global namespace', () => {
     );
   });
 });
+
+describe('useOnboardingDriftDetection — package policy settings', () => {
+  const updateDetectAndReviewStep = jest.fn();
+
+  const renderDrift = ({
+    policySettings,
+    savedPolicySettings,
+    deploymentMethod = 'agent_based',
+  }: {
+    policySettings?: Record<string, string>;
+    savedPolicySettings?: Record<string, string>;
+    deploymentMethod?: 'agent_based' | 'managed_integration';
+  }) => {
+    mockGetDeployment.mockResolvedValue({
+      item: {
+        connectorId: 'connector-1',
+        serviceVars: {},
+        agentPolicyIds: [],
+        // The default credential method, so only the settings can drift.
+        authMethod: 'static_keys',
+        policySettings: savedPolicySettings,
+      },
+    });
+    return renderHook(() =>
+      useOnboardingDriftDetection({
+        onboardingDeploymentId: 'deployment-1',
+        policyIdsByInstance: { [INSTANCE_ID]: 'policy-1' },
+        awsServicesMap: new Map(),
+        deploymentMethod,
+        connectorId: 'connector-1',
+        agentBasedDeployment: {
+          agentCredentialMethod: undefined,
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: [],
+        },
+        serviceSettings: {
+          globalRegion: 'us-east-1',
+          serviceVars: {},
+          instances: [instance],
+          policySettings,
+        },
+        isDirty: false,
+        updateDetectAndReviewStep,
+      })
+    );
+  };
+
+  const expectDirty = async (result: { current: { driftSettled: boolean } }, isDirty: boolean) => {
+    await waitFor(() => expect(result.current.driftSettled).toBe(true));
+    expect(updateDetectAndReviewStep).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isDirty })
+    );
+  };
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('is dirty when the output changed since the last deploy', async () => {
+    const { result } = renderDrift({
+      policySettings: { output_id: 'kafka-1' },
+      savedPolicySettings: { output_id: 'logstash-1' },
+    });
+    await expectDirty(result, true);
+  });
+
+  it('is dirty when the output was set back to the inherited one', async () => {
+    const { result } = renderDrift({
+      policySettings: { output_id: '' },
+      savedPolicySettings: { output_id: 'logstash-1' },
+    });
+    await expectDirty(result, true);
+  });
+
+  it('stays clean when the inherited output is chosen and none was saved', async () => {
+    const { result } = renderDrift({ policySettings: { output_id: '' } });
+    await expectDirty(result, false);
+  });
+
+  it('ignores an output under managed integration, which does not apply it', async () => {
+    const { result } = renderDrift({
+      deploymentMethod: 'managed_integration',
+      policySettings: { output_id: 'kafka-1' },
+    });
+    await expectDirty(result, false);
+  });
+});

@@ -19,19 +19,33 @@ describe('ops.eventLoopWatchdog config', () => {
     expect(config.blockThreshold.asMilliseconds()).toBe(200);
     expect(config.startup.blockThreshold).toBeUndefined();
     expect(config.statsInterval.asMinutes()).toBe(10);
+    expect(config.profiling.startAfter.asSeconds()).toBe(30);
+    expect(config.profiling.maxDuration.asSeconds()).toBe(10);
+    expect(config.profiling.cooldown.asMinutes()).toBe(1);
+    expect(config.startup.profiling).toEqual({});
   });
 
   it('accepts all keys', () => {
     const config = validate({
       enabled: true,
       blockThreshold: '500ms',
-      startup: { blockThreshold: '1s' },
+      profiling: { startAfter: '20s', maxDuration: '5s', cooldown: '5m' },
+      startup: {
+        blockThreshold: '1s',
+        profiling: { startAfter: '45s', maxDuration: '15s', cooldown: '2m' },
+      },
       statsInterval: '1h',
     });
     expect(config.enabled).toBe(true);
     expect(config.blockThreshold.asMilliseconds()).toBe(500);
     expect(config.startup.blockThreshold?.asMilliseconds()).toBe(1000);
     expect(config.statsInterval.asHours()).toBe(1);
+    expect(config.profiling.startAfter.asSeconds()).toBe(20);
+    expect(config.profiling.maxDuration.asSeconds()).toBe(5);
+    expect(config.profiling.cooldown.asMinutes()).toBe(5);
+    expect(config.startup.profiling.startAfter?.asSeconds()).toBe(45);
+    expect(config.startup.profiling.maxDuration?.asSeconds()).toBe(15);
+    expect(config.startup.profiling.cooldown?.asMinutes()).toBe(2);
   });
 
   describe.each([
@@ -50,6 +64,48 @@ describe('ops.eventLoopWatchdog config', () => {
     });
   });
 
+  describe.each([
+    ['startAfter', '2s', '4m', '1999ms', '241s', 'PT2S', 'PT4M'],
+    ['maxDuration', '1s', '30s', '999ms', '31s', 'PT1S', 'PT30S'],
+    ['cooldown', '10s', '24h', '9s', '25h', 'PT10S', 'PT24H'],
+  ])('profiling.%s', (setting, min, max, belowMin, aboveMax, minIso, maxIso) => {
+    describe.each([
+      ['profiling', (value: string) => ({ profiling: { [setting]: value } })],
+      ['startup.profiling', (value: string) => ({ startup: { profiling: { [setting]: value } } })],
+    ])('under %s', (prefix, build) => {
+      it.each([min, max])('accepts %s', (value) => {
+        expect(() => validate(build(value))).not.toThrow();
+      });
+
+      it.each([
+        [belowMin, `Value must be equal to or greater than [${minIso}]`],
+        [aboveMax, `Value must be equal to or less than [${maxIso}]`],
+      ])('rejects %s', (value, message) => {
+        expect(() => validate(build(value))).toThrow(
+          `[eventLoopWatchdog.${prefix}.${setting}]: ${message}`
+        );
+      });
+    });
+  });
+
+  // No check between startAfter and blockThreshold: every valid blockThreshold stays valid.
+  it('accepts a startAfter below the blockThreshold', () => {
+    expect(() =>
+      validate({
+        blockThreshold: '60s',
+        profiling: { startAfter: '2s' },
+        startup: { blockThreshold: '60s', profiling: { startAfter: '2s' } },
+      })
+    ).not.toThrow();
+  });
+
+  it('leaves unset startup.profiling settings undefined', () => {
+    const config = validate({ startup: { profiling: { startAfter: '45s' } } });
+    expect(config.startup.profiling.startAfter?.asSeconds()).toBe(45);
+    expect(config.startup.profiling.maxDuration).toBeUndefined();
+    expect(config.startup.profiling.cooldown).toBeUndefined();
+  });
+
   it.each(['1m', '24h'])('accepts a statsInterval of %s', (value) => {
     expect(() => validate({ statsInterval: value })).not.toThrow();
   });
@@ -66,19 +122,6 @@ describe('ops.eventLoopWatchdog config', () => {
   it('rejects a heartbeatInterval key', () => {
     expect(() => validate({ heartbeatInterval: '50ms' })).toThrow(
       "[eventLoopWatchdog.heartbeatInterval]: Additional properties are not allowed ('heartbeatInterval' was unexpected)"
-    );
-  });
-
-  // Profiling keys aren't in this config yet, so reject them rather than accept and ignore them.
-  it('rejects profile keys', () => {
-    expect(() => validate({ profile: { enabled: true } })).toThrow(
-      "[eventLoopWatchdog.profile]: Additional properties are not allowed ('profile' was unexpected)"
-    );
-  });
-
-  it('rejects profile keys under startup', () => {
-    expect(() => validate({ startup: { profile: { startAfter: '5s' } } })).toThrow(
-      "[eventLoopWatchdog.startup.profile]: Additional properties are not allowed ('profile' was unexpected)"
     );
   });
 });

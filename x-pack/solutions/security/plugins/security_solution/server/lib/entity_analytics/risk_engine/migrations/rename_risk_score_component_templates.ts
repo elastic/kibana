@@ -9,7 +9,7 @@ import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 import { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import type { RiskEngineConfiguration } from '../../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
-import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
 import { mappingComponentName } from '../../risk_score/configurations';
 
 export const MAX_PER_PAGE = 10_000;
@@ -57,7 +57,7 @@ export const renameRiskScoreComponentTemplate = async ({
 
       logger.info(`Starting Risk Score component template migration on namespace ${namespace}`);
 
-      const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+      const soClient = buildNamespacedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
 
       const riskScoreDataClient = new RiskScoreDataClient({
         logger,

@@ -37,8 +37,12 @@ import {
   roundUserMessageEventId,
   normalizeInteractive,
 } from '@kbn/agent-builder-common';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { decodeSmlLinkId, parseSmlEntryId } from '@kbn/agent-builder-sml-plugin/server';
 import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
+import type { OnBeforeNewConversationContext } from '@kbn/agent-builder-server/callbacks';
 import type {
   AbortExecutionOptions,
   AbortExecutionResult,
@@ -95,14 +99,47 @@ interface ParentExecution {
   agentId: string;
 }
 
+/** Looks up an SML type, to know the attachment type its items attach as. */
+export type GetSmlTypeDefinition = (
+  typeId: string
+) => Pick<SmlTypeDefinition, 'attachmentType'> | undefined;
+
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   attachmentsService: AttachmentServiceStart;
   callbackDeliveryService: CallbackDeliveryService;
+  getSmlTypeDefinition: GetSmlTypeDefinition;
   securityPlugin?: SecurityPluginStart;
 }
+
+// Links to the items picked from the chat input's menu: `[label](sml://<url-encoded entry id>)`.
+const SML_LINK_PATTERN = /\]\(sml:\/\/([^)?\s]+)/g;
+const MAX_LINK_LABEL_LENGTH = 300;
+// Linked items are resolved on every message, so how many are read, and at once, is bounded.
+const MAX_LINKED_ITEMS = 30;
+const LINKED_ITEMS_CONCURRENCY = 5;
+
+// A character preceded by an odd number of backslashes is escaped: the serializer escapes
+// brackets and backslashes in labels, so an escaped `]` is label text, not the end of a link.
+const isEscaped = (message: string, index: number): boolean => {
+  let backslashes = 0;
+  while (message[index - 1 - backslashes] === '\\') backslashes++;
+  return backslashes % 2 === 1;
+};
+
+// The label of the link whose text ends at `closeIndex`, read back to its unescaped `[`. Reading
+// back, and for a bounded length, keeps this linear on text with many brackets.
+const getLinkLabel = (message: string, closeIndex: number): string => {
+  const earliest = Math.max(0, closeIndex - MAX_LINK_LABEL_LENGTH);
+  for (let index = closeIndex - 1; index >= earliest; index--) {
+    if (message[index] === '[' && !isEscaped(message, index)) {
+      return message.slice(index + 1, closeIndex);
+    }
+  }
+  return '';
+};
 
 export const createAgentExecutionService = (
   deps: AgentExecutionServiceDeps
@@ -188,6 +225,15 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
     }
 
+    // After the caller is authorized, and never for a replayed delivery, which the original already
+    // paid for. Given back below whenever the turn writes no conversation.
+    const newConversation = resolvedConversation?.newConversation;
+    const releaseNewConversation =
+      newConversation &&
+      !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
+        ? await this.deps.callbackDeliveryService.runOnBeforeNewConversation(newConversation)
+        : undefined;
+
     // Reserved for the round this run opens, so its events are named after it.
     const roundId = uuidv4();
 
@@ -222,6 +268,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         interactivity,
       });
     } catch (err) {
+      await releaseNewConversation?.();
       if (isVersionConflictError(err)) {
         if (metadata?.execution_idempotency_key) {
           this.logger.debug(
@@ -284,6 +331,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         // A refused run never started, so it leaves no execution record behind: a keyed
         // redelivery then starts afresh instead of replaying the refusal.
         if (isConversationBusyError(err) || isConversationWriteConflictError(err)) {
+          // Only a refusal is known to have written nothing; any other failure may follow a
+          // write that landed, so what the hooks took stays taken.
+          await releaseNewConversation?.();
           try {
             await executionClient.delete(executionId);
           } catch (deleteErr) {
@@ -984,6 +1034,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     validatedParams: ConversationExecutionParams;
     conversation: ConversationWithOperation;
     receivedAt: Date;
+    newConversation?: OnBeforeNewConversationContext;
   }> {
     const validatedParams = await this.validateAttachments(params, request);
     const receivedAt = new Date();
@@ -1008,12 +1059,19 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       subagentCreation: resolvedParams.subagentCreation,
     });
 
-    return { validatedParams: resolvedParams, conversation, receivedAt };
+    return {
+      validatedParams: resolvedParams,
+      conversation,
+      receivedAt,
+      newConversation: resolved.newConversation,
+    };
   }
 
   /**
    * The conversation an execution continues and the agent it runs on: the ones it names, else the
-   * ones its origin resolves to. No conversation id starts a new conversation.
+   * ones its origin resolves to. No conversation id starts a new conversation; for an origin's
+   * execution, `newConversation` is what the on-before-new-conversation hooks run with before it is
+   * written.
    */
   private async resolveConversation({
     params,
@@ -1025,7 +1083,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     spaceId: string;
     request: KibanaRequest;
     conversationClient: ConversationClient;
-  }): Promise<{ conversationId?: string; agentId: string }> {
+  }): Promise<{
+    conversationId?: string;
+    agentId: string;
+    newConversation?: OnBeforeNewConversationContext;
+  }> {
     const { conversationId, origin } = params;
     const agentId = this.requestedAgentId(params);
 
@@ -1038,9 +1100,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       conversationClient
     );
 
+    if (!resolution) {
+      return { agentId, newConversation: { origin, spaceId, request, agentId } };
+    }
+
     return {
-      conversationId: resolution?.conversationId,
-      agentId: resolution?.agentId ?? agentId,
+      conversationId: resolution.conversationId,
+      agentId: resolution.agentId ?? agentId,
     };
   }
 
@@ -1122,10 +1188,32 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     params: T,
     request: KibanaRequest
   ): Promise<T> {
-    const validated = await this.deps.attachmentsService.validateAttachmentInputs(
+    const { attachmentsService } = this.deps;
+    const attached = await attachmentsService.validateAttachmentInputs(
       params.nextInput.attachments,
       request
     );
+
+    // Linked items are best effort: one that no longer resolves, for example a deleted dashboard,
+    // is left out so the message still sends.
+    const linked = this.getReferencedAttachments(params.nextInput.message);
+    const referenced: AttachmentInput[] = [];
+    for (let start = 0; start < linked.length; start += LINKED_ITEMS_CONCURRENCY) {
+      const batch = linked.slice(start, start + LINKED_ITEMS_CONCURRENCY);
+      const results = await Promise.allSettled(
+        batch.map((input) => attachmentsService.validateAttachmentInputs([input], request))
+      );
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          referenced.push(...(result.value ?? []));
+          return;
+        }
+        const { type, origin } = batch[index];
+        this.logger.debug(`Skipping linked ${type} '${origin}': ${result.reason?.message}`);
+      });
+    }
+    const validated =
+      attached || referenced.length > 0 ? [...(attached ?? []), ...referenced] : undefined;
 
     // Trimmed once here so the receipt-time write and the round the completed run rewrites agree
     // on the text; `undefined` stays `undefined` for a purely attachment-driven message.
@@ -1140,6 +1228,31 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         ...(validated ? { attachments: validated } : {}),
       },
     };
+  }
+
+  /** The items linked in the message that can be attached, as by-reference attachment inputs. */
+  private getReferencedAttachments(message: string | undefined): AttachmentInput[] {
+    const inputs = new Map<string, AttachmentInput>();
+    for (const match of (message ?? '').matchAll(SML_LINK_PATTERN)) {
+      if (inputs.size >= MAX_LINKED_ITEMS) break;
+      const [, encodedId] = match;
+      // A `]` inside a label is escaped; text that looks like a link there was not picked.
+      if (isEscaped(message ?? '', match.index ?? 0)) continue;
+      const entry = parseSmlEntryId(decodeSmlLinkId(encodedId));
+      const type = entry && this.deps.getSmlTypeDefinition(entry.type)?.attachmentType;
+      const key = entry && `${type}:${entry.originId}`;
+      if (entry && type && key && !inputs.has(key)) {
+        // The label, without its trigger, tells the agent which attachment a link in the message is.
+        const label = getLinkLabel(message ?? '', match.index ?? 0);
+        const description = label.replace(/\\([\\[\]])/g, '$1').replace(/^[#@]/, '');
+        inputs.set(key, {
+          type,
+          origin: entry.originId,
+          ...(description ? { description } : {}),
+        });
+      }
+    }
+    return Array.from(inputs.values());
   }
 
   private createExecutionClient(): AgentExecutionClient {
