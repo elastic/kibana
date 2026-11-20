@@ -5,72 +5,62 @@
  * 2.0.
  */
 
-import type { NightshiftSource } from '@kbn/nightshift-shared';
-import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import type { QueryLink } from '@kbn/significant-events-schema';
+import { REVISION_SIZE_LIMIT } from '../knowledge_indicator_client/revision_reader';
 import { createKnowledgeIndicatorReader } from './knowledge_indicator_reader';
 
-const createLink = (sourceId: string, id: string, esql: string): QueryLink => ({
-  source_id: sourceId,
-  rule_backed: false,
-  rule_id: `rule-${id}`,
-  query: {
-    id,
-    type: 'match',
-    title: `Title ${id}`,
-    description: `Description ${id}`,
-    esql: { query: esql },
-    severity_score: 70,
-    features: [{ id: 'checkout' }],
-  },
-});
-
-/** Honours the `enabled` filter, so a reader that asks for enabled sources only loses the others. */
-const createSourcesClient = (sources: Array<Pick<NightshiftSource, 'id' | 'enabled'>>) =>
-  ({
-    list: jest.fn(async ({ enabled }: { enabled?: boolean }) => {
-      const listed = sources.filter(
-        (source) => enabled === undefined || source.enabled === enabled
-      );
-      return { sources: listed, total: listed.length };
-    }),
-  } as unknown as SourcesClient);
+const createReader = () => {
+  const getQueryLinks = jest.fn().mockResolvedValue([]);
+  const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
+  const reader = createKnowledgeIndicatorReader({
+    indicatorReader: { getQueryLinks, getFeatures },
+  });
+  return { reader, getQueryLinks, getFeatures };
+};
 
 describe('createKnowledgeIndicatorReader', () => {
-  describe('listQueryKnowledgeIndicators', () => {
-    it('keeps the knowledge indicators of disabled sources and drops those of deleted ones', async () => {
-      const getQueryLinks = jest
-        .fn()
-        .mockResolvedValue([
-          createLink('enabled-source', 'ki-1', 'FROM logs | WHERE message : "timeout"'),
-          createLink('disabled-source', 'ki-2', 'FROM logs | STATS c = COUNT(*)'),
-          createLink('deleted-source', 'ki-3', 'FROM logs'),
-        ]);
-      const reader = createKnowledgeIndicatorReader({
-        indicatorReader: { getQueryLinks, getFeatures: jest.fn() },
-        getSourcesClient: async () =>
-          createSourcesClient([
-            { id: 'enabled-source', enabled: true },
-            { id: 'disabled-source', enabled: false },
-          ]),
-      });
+  describe('listQueryLinks', () => {
+    it('reads the rule-backed and unbacked links of the given sources', async () => {
+      const { reader, getQueryLinks } = createReader();
 
-      const indicators = await reader.listQueryKnowledgeIndicators();
+      await reader.listQueryLinks({ sourceIds: ['logs-app'] });
 
-      expect(indicators).toEqual([
-        {
-          id: 'ki-1',
-          source_id: 'enabled-source',
-          source_enabled: true,
-          title: 'Title ki-1',
-          description: 'Description ki-1',
-          esql: 'FROM logs | WHERE message : "timeout"',
-          severity_score: 70,
-          query_type: 'match',
-          feature_ids: ['checkout'],
-        },
-        expect.objectContaining({ id: 'ki-2', source_enabled: false, query_type: 'stats' }),
-      ]);
+      expect(getQueryLinks).toHaveBeenCalledWith(['logs-app'], { ruleUnbacked: 'include' });
+    });
+
+    it('returns no links without reading when no sources are given', async () => {
+      const { reader, getQueryLinks } = createReader();
+
+      await expect(reader.listQueryLinks({ sourceIds: [] })).resolves.toEqual([]);
+      expect(getQueryLinks).not.toHaveBeenCalled();
+    });
+
+    it('throws rather than return a list cut at the read limit', async () => {
+      const { reader, getQueryLinks } = createReader();
+      getQueryLinks.mockResolvedValue(new Array<QueryLink>(REVISION_SIZE_LIMIT));
+
+      await expect(reader.listQueryLinks({ sourceIds: ['logs-app'] })).rejects.toThrow(
+        `${REVISION_SIZE_LIMIT} or more`
+      );
+    });
+  });
+
+  describe('listFeatures', () => {
+    it('reads the features of the given sources and types', async () => {
+      const { reader, getFeatures } = createReader();
+
+      await reader.listFeatures({ sourceIds: ['logs-app'], types: ['entity'] });
+
+      expect(getFeatures).toHaveBeenCalledWith(['logs-app'], { type: ['entity'] });
+    });
+
+    it('returns no features without reading when no types are given', async () => {
+      const { reader, getFeatures } = createReader();
+
+      await expect(reader.listFeatures({ sourceIds: ['logs-app'], types: [] })).resolves.toEqual(
+        []
+      );
+      expect(getFeatures).not.toHaveBeenCalled();
     });
   });
 });

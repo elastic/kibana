@@ -81,7 +81,6 @@ import type {
   SignificantEventsPluginSetupDependencies,
   SignificantEventsPluginStartDependencies,
   SignificantEventsServer,
-  SignificantEventsServerSetup,
   SignificantEventsServerStart,
 } from './types';
 import {
@@ -95,10 +94,6 @@ import {
   createSignificantEventsServices,
 } from './lib/significant_events/significant_events_clients';
 import { detectionsDataStream } from './lib/significant_events/detections';
-import {
-  createKnowledgeIndicatorChangeEmitter,
-  type KnowledgeIndicatorChangeEmitter,
-} from './lib/knowledge_indicators/knowledge_indicator_change_emitter';
 import { createKnowledgeIndicatorReader } from './lib/knowledge_indicators/contract/knowledge_indicator_reader';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsSkills } from './agent_builder/skills/register_skills';
@@ -121,6 +116,7 @@ import {
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { createTriggerEmitter } from './workflows/triggers/emit';
+import { KNOWLEDGE_INDICATORS_CHANGED_TRIGGER_ID } from '../common/workflows/triggers';
 import {
   installDiscoveryAgents,
   registerSignificantEventsDiscoveryAgentTypes,
@@ -150,7 +146,7 @@ const RULE_CREATION_APP = 'nightshift';
 export class SignificantEventsPlugin
   implements
     Plugin<
-      SignificantEventsServerSetup,
+      void,
       SignificantEventsServerStart,
       SignificantEventsPluginSetupDependencies,
       SignificantEventsPluginStartDependencies
@@ -167,20 +163,16 @@ export class SignificantEventsPlugin
   private managedWorkflowsInstaller?: ManagedWorkflowsInstaller;
   private maintenanceService?: SignificantEventsMaintenanceService;
   private knowledgeIndicatorService?: KnowledgeIndicatorService;
-  private readonly knowledgeIndicatorChangeEmitter: KnowledgeIndicatorChangeEmitter;
   constructor(context: PluginInitializerContext) {
     this.isDev = context.env.mode.dev;
     this.logger = context.logger.get();
     this.kibanaVersion = context.env.packageInfo.version;
-    this.knowledgeIndicatorChangeEmitter = createKnowledgeIndicatorChangeEmitter(
-      this.logger.get('knowledge_indicators')
-    );
   }
 
   public setup(
     core: CoreSetup<SignificantEventsPluginStartDependencies>,
     plugins: SignificantEventsPluginSetupDependencies
-  ): SignificantEventsServerSetup {
+  ): void {
     this.server = {
       logger: this.logger,
       workflowsManagement: plugins.workflowsManagement,
@@ -288,6 +280,12 @@ export class SignificantEventsPlugin
         return alertActionsClientPromise;
       };
 
+      const triggerEmitter = createTriggerEmitter({
+        workflowsExtensions: pluginsStart.workflowsExtensions,
+        request,
+        logger: this.logger,
+      });
+
       const significantEventsClients = createSignificantEventsClients({
         services: significantEventsServices,
         dataStreams: coreStart.dataStreams,
@@ -297,11 +295,7 @@ export class SignificantEventsPlugin
         space,
         getAlertEventsClient,
         getAlertActionsClient,
-        triggerEmitter: createTriggerEmitter({
-          workflowsExtensions: pluginsStart.workflowsExtensions,
-          request,
-          logger: this.logger,
-        }),
+        triggerEmitter,
         telemetry: {
           trackEventStatusChanged: (params) =>
             this.ebtTelemetryService.getClient().trackEventStatusChanged(params, request),
@@ -350,13 +344,10 @@ export class SignificantEventsPlugin
               run,
             });
           },
-          // Not awaited: a listener must never hold up or fail a write that already committed.
+          // The emitter does not wait and logs its own failures, so a workflow can never hold up
+          // or fail a write that already committed. The request carries the space to the workflow.
           onWrite: (sourceId) => {
-            void this.knowledgeIndicatorChangeEmitter.emit({
-              request,
-              spaceId: space,
-              sourceIds: [sourceId],
-            });
+            triggerEmitter?.(KNOWLEDGE_INDICATORS_CHANGED_TRIGGER_ID, { source_ids: [sourceId] });
           },
         });
 
@@ -685,8 +676,6 @@ export class SignificantEventsPlugin
       logger: this.logger,
       runDevModeChecks: this.isDev,
     });
-
-    return { onKnowledgeIndicatorsChange: this.knowledgeIndicatorChangeEmitter.subscribe };
   }
 
   public start(
@@ -898,7 +887,6 @@ export class SignificantEventsPlugin
             esClient: core.elasticsearch.client.asInternalUser,
             space: request.spaceId,
           }),
-          getSourcesClient: () => plugins.nightshiftSources.getSourcesClient({ request }),
         });
       },
     };

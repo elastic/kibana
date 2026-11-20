@@ -45,22 +45,8 @@ import type {
   NightshiftSourcesServerSetup,
   NightshiftSourcesServerStart,
 } from '@kbn/nightshift-sources-plugin/server';
-import type { KnowledgeIndicatorsChangeListener } from './lib/knowledge_indicators/knowledge_indicator_change_emitter';
 import type { KnowledgeIndicatorReader } from './lib/knowledge_indicators/contract/knowledge_indicator_reader';
 import type { SeveritySync } from './lib/significant_events/events/severity';
-
-/**
- * What other plugins get at setup. Read-only knowledge indicator events; nothing else is planned on
- * this contract.
- */
-export interface SignificantEventsServerSetup {
-  /**
-   * Registers a listener called after every committed write to the knowledge indicators of some
-   * sources, with the request that made it. A listener that throws is logged and never fails or
-   * delays the write. Returns the unsubscribe function.
-   */
-  onKnowledgeIndicatorsChange: (listener: KnowledgeIndicatorsChangeListener) => () => void;
-}
 
 /**
  * What other plugins get at start. Read-only knowledge indicator access; nothing else is planned on
@@ -68,9 +54,10 @@ export interface SignificantEventsServerSetup {
  */
 export interface SignificantEventsServerStart {
   /**
-   * Reads the knowledge indicators of the request's space, with the request's sources client.
-   * Knowledge indicators are read as the internal user but the source catalog as the request, so a
-   * principal that can't read `nightshift-source` sees no knowledge indicators.
+   * Reads the knowledge indicators of the request's space. They are read as the internal user,
+   * filtered by the request's space; the request's privileges are not checked, so the caller
+   * decides which sources it may read. To hear about changes, subscribe a workflow to the
+   * `significant-events.knowledgeIndicatorsChanged` trigger.
    */
   getKnowledgeIndicatorReader: (request: KibanaRequest) => KnowledgeIndicatorReader;
 }
