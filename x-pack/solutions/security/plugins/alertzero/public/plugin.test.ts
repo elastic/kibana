@@ -359,10 +359,10 @@ describe('AlertZeroPublicPlugin workflow step registration', () => {
     return workflowsExtensions;
   };
 
-  it('registers the reportWorkerOutcome step so the workflows editor knows it', () => {
+  it('registers the AlertZero steps so the workflows editor knows them', () => {
     const { registerStepDefinition } = setupPlugin(true);
 
-    expect(registerStepDefinition).toHaveBeenCalledTimes(1);
+    expect(registerStepDefinition).toHaveBeenCalledTimes(4);
   });
 
   it('registers no step when the deployment kill switch is off', () => {
