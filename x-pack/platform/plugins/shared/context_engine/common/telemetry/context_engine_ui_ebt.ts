@@ -23,6 +23,7 @@ const ebtElement = {
   aiIndexCreatePageTraceSelector: 'contextEngine.aiIndexCreatePage.traceSelector',
   aiIndexDetailPage: 'contextEngine.aiIndexDetailPage',
   aiIndexDetailPageOnboardingPanel: 'contextEngine.aiIndexDetailPage.onboardingPanel',
+  aiIndexDetailPageOverview: 'contextEngine.aiIndexDetailPage.overview',
   aiIndexDetailPageDescriptionPanel: 'contextEngine.aiIndexDetailPage.descriptionPanel',
   aiIndexDetailPageTracesPanel: 'contextEngine.aiIndexDetailPage.tracesPanel',
   aiIndexDetailPageSourcesPanel: 'contextEngine.aiIndexDetailPage.sourcesPanel',
@@ -63,6 +64,13 @@ const ebtAction = {
   onboarding: {
     COPY_PROMPT: 'copy_prompt',
   },
+  overview: {
+    OPEN_STAT_CARD: 'open_stat_card',
+    OPEN_RECENT_DOCUMENT: 'open_recent_document',
+    VIEW_ALL_DOCUMENTS: 'view_all_documents',
+    OPEN_FAILED_RUN: 'open_failed_run',
+    VIEW_FAILED_AUTOMATIONS: 'view_failed_automations',
+  },
   description: {
     SAVE: 'save_description',
     CANCEL: 'cancel_description',
@@ -87,6 +95,7 @@ const ebtAction = {
     SUGGEST: 'suggest_automation',
     CREATE: 'create_automation',
     ADD_MENU: 'open_add_automation_menu',
+    MANAGE_IN_SETTINGS: 'manage_automations_in_settings',
     ROW_ACTIONS_MENU: 'open_automation_actions_menu',
     RUN_WORKFLOW: 'run_actions_workflows',
     PREVIEW_WORKFLOW: 'preview_actions_workflows',

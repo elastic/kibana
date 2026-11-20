@@ -7,7 +7,14 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getKiGroups, getKis, probeColumns } from './ki_list';
+import {
+  getKiGroups,
+  getKiHistogram,
+  getKis,
+  kiHistogramDays,
+  latestRevisionPipeline,
+  probeColumns,
+} from './ki_list';
 
 const BACKING_INDEX = 'ai-index-idx-sample';
 const INDEX_DEST = { type: 'index' as const, value: BACKING_INDEX };
@@ -1236,5 +1243,124 @@ describe('getKiGroups', () => {
     expect(queryText(0)).toContain('| LIMIT 2');
     expect(queryText(1)).toContain('| SORT _score DESC, title_sort ASC NULLS LAST, id ASC');
     expect(queryText(1)).toContain('| LIMIT 1');
+  });
+});
+
+describe('kiHistogramDays', () => {
+  it('returns the last 30 UTC days, oldest first, today included', () => {
+    const days = kiHistogramDays(new Date('2026-03-01T23:30:00.000-05:00'));
+
+    expect(days).toHaveLength(30);
+    // 23:30 in New York is already March 2 in UTC.
+    expect(days[29]).toBe('2026-03-02');
+    expect(days[0]).toBe('2026-02-01');
+  });
+});
+
+describe('latestRevisionPipeline', () => {
+  const has = () => true;
+
+  it('adds first_seen only when asked, so other callers keep their query', () => {
+    expect(latestRevisionPipeline(INDEX_DEST, has).join('\n')).not.toContain('first_seen');
+    expect(latestRevisionPipeline(DATA_STREAM_DEST, has, { firstSeen: true })).toContain(
+      'INLINE STATS latest = MAX(revision_time), first_seen = MIN(@timestamp) BY id'
+    );
+  });
+});
+
+describe('getKiHistogram', () => {
+  const query = jest.fn();
+  const esClient = { esql: { query } } as unknown as ElasticsearchClient;
+  const NOW = new Date('2026-11-20T10:00:00.000Z');
+  const histogramResponse = (rows: Array<[number, string]>) => ({
+    columns: [{ name: 'count' }, { name: 'day' }],
+    values: rows,
+  });
+
+  beforeEach(() => {
+    query.mockReset();
+  });
+
+  it('counts non-deleted KIs per day by first revision and fills empty days with zero', async () => {
+    query.mockResolvedValueOnce(probeResponse(ALL_FIELDS)).mockResolvedValueOnce(
+      histogramResponse([
+        [3, '2026-11-20T00:00:00.000Z'],
+        [2, '2026-10-22T00:00:00.000Z'],
+      ])
+    );
+
+    const { buckets } = await getKiHistogram(esClient, { dest: INDEX_DEST, now: NOW });
+
+    expect(buckets).toHaveLength(30);
+    expect(buckets[0]).toEqual({ date: '2026-10-22', count: 2 });
+    expect(buckets[1]).toEqual({ date: '2026-10-23', count: 0 });
+    expect(buckets[29]).toEqual({ date: '2026-11-20', count: 3 });
+
+    const {
+      query: text,
+      params,
+      allow_partial_results: allowPartialResults,
+    } = query.mock.calls[1][0];
+    expect(allowPartialResults).toBe(false);
+    expect(text).toContain('first_seen = MIN(@timestamp)');
+    expect(text).toContain('| WHERE ki_status IN ("active", "expired")\n');
+    // A KI without any revision timestamp still counts by its updated_at.
+    expect(text).toContain('| EVAL added_at = COALESCE(first_seen, TO_DATETIME(updated_at))\n');
+    expect(text).toContain(
+      '| WHERE added_at >= TO_DATETIME(?from) AND added_at < TO_DATETIME(?to)\n'
+    );
+    expect(text).toContain('| EVAL day = DATE_TRUNC(1 day, added_at)\n');
+    expect(text).toContain('| STATS count = COUNT(*) BY day');
+    expect(params).toEqual([
+      { from: '2026-10-22T00:00:00.000Z' },
+      { to: '2026-11-21T00:00:00.000Z' },
+    ]);
+  });
+
+  it('falls back to updated_at when the dest has no @timestamp', async () => {
+    query
+      .mockResolvedValueOnce(probeResponse(['id', 'updated_at']))
+      .mockResolvedValueOnce(histogramResponse([[1, '2026-11-19T00:00:00.000Z']]));
+
+    const { buckets } = await getKiHistogram(esClient, { dest: INDEX_DEST, now: NOW });
+
+    expect(buckets[28]).toEqual({ date: '2026-11-19', count: 1 });
+    expect(query.mock.calls[1][0].query).toContain('| EVAL added_at = TO_DATETIME(updated_at)\n');
+    expect(query.mock.calls[1][0].query).not.toContain('first_seen');
+  });
+
+  it('returns 30 empty days without a query when the dest has no date column', async () => {
+    query.mockResolvedValueOnce(probeResponse(['id', 'title']));
+
+    const { buckets } = await getKiHistogram(esClient, { dest: INDEX_DEST, now: NOW });
+
+    expect(buckets).toHaveLength(30);
+    expect(buckets.every(({ count }) => count === 0)).toBe(true);
+    expect(query).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns 30 empty days when the dest index does not exist', async () => {
+    query.mockRejectedValueOnce(unknownIndexError());
+
+    const { buckets } = await getKiHistogram(esClient, { dest: INDEX_DEST, now: NOW });
+
+    expect(buckets).toHaveLength(30);
+    expect(buckets.every(({ count }) => count === 0)).toBe(true);
+    expect(query).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('getKiHistogram without updated_at', () => {
+  const query = jest.fn();
+  const esClient = { esql: { query } } as unknown as ElasticsearchClient;
+
+  it('uses the first revision timestamp alone', async () => {
+    query
+      .mockResolvedValueOnce(probeResponse(['id', '@timestamp']))
+      .mockResolvedValueOnce({ columns: [{ name: 'count' }, { name: 'day' }], values: [] });
+
+    await getKiHistogram(esClient, { dest: INDEX_DEST, now: new Date('2026-11-20T10:00:00Z') });
+
+    expect(query.mock.calls[1][0].query).toContain('| EVAL added_at = first_seen\n');
   });
 });

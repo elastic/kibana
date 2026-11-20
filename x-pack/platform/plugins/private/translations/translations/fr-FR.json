@@ -25783,8 +25783,6 @@
     "xpack.contextEngine.aiIndexDetail.signals.groupEmpty": "Aucun signal trouvé pour ce groupe.",
     "xpack.contextEngine.aiIndexDetail.signals.groupViewDetailsButton": "Afficher les détails",
     "xpack.contextEngine.aiIndexDetail.signals.loadMore": "Charger plus",
-    "xpack.contextEngine.aiIndexDetail.signals.lockedAriaLabel": "Signaux verrouillés. Créez une automatisation ci-dessus pour commencer à collecter des signaux.",
-    "xpack.contextEngine.aiIndexDetail.signals.lockedBody": "Créez une automatisation ci-dessus pour commencer à collecter des signaux.",
     "xpack.contextEngine.aiIndexDetail.signals.managedNoAgent.prompt": "Un agent de feedback doit être configuré pour cet index géré afin d’activer \"Analyser & améliorer\".",
     "xpack.contextEngine.aiIndexDetail.signals.nextButton": "Suivant",
     "xpack.contextEngine.aiIndexDetail.signals.noTarget": "cible inconnue",

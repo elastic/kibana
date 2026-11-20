@@ -25813,8 +25813,6 @@
     "xpack.contextEngine.aiIndexDetail.signals.groupEmpty": "Für diese Gruppe wurden keine Signale gefunden.",
     "xpack.contextEngine.aiIndexDetail.signals.groupViewDetailsButton": "Details anzeigen",
     "xpack.contextEngine.aiIndexDetail.signals.loadMore": "Mehr laden",
-    "xpack.contextEngine.aiIndexDetail.signals.lockedAriaLabel": "Signale gesperrt. Erstellen Sie oben eine Automatisierung, um mit der Erfassung von Signalen zu beginnen.",
-    "xpack.contextEngine.aiIndexDetail.signals.lockedBody": "Erstellen Sie oben eine Automatisierung, um mit der Erfassung von Signalen zu beginnen.",
     "xpack.contextEngine.aiIndexDetail.signals.managedNoAgent.prompt": "Für diesen verwalteten Index muss ein Feedback-Agent konfiguriert werden, um „Analysieren und verbessern“ zu aktivieren.",
     "xpack.contextEngine.aiIndexDetail.signals.nextButton": "Weiter",
     "xpack.contextEngine.aiIndexDetail.signals.noTarget": "Unbekanntes Ziel",

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,8 +20,12 @@ import {
   AiIndexCreatedCallout,
   AutomationsSection,
   ConnectAgentPanel,
-  LockedSectionPanel,
-  SignalsPanel,
+  FailedAutomationRunsCallout,
+  KnowledgeDocumentsChartPanel,
+  LearnMorePanel,
+  ManageAutomationsLink,
+  OverviewStatCards,
+  RecentKnowledgeDocumentsPanel,
   SourcesPanel,
 } from '../components/ai_index_detail';
 import { buildAiIndexOnboardingPrompt } from '../components/ai_index_detail/onboarding_prompt';
@@ -34,6 +39,7 @@ import { useKibanaUrl } from '../hooks/use_kibana_url';
 import { useListKi } from '../hooks/use_list_ki';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
+import { getVisibleAutomations, getVisibleWorkflowIds } from '../utils/visible_automations';
 import {
   ContextEngineSubPageHeader,
   contextEngineBackDestinationLabel,
@@ -50,6 +56,10 @@ import {
   getAiIndexSettingsPath,
 } from '../paths';
 import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
+
+// Flex items don't shrink below their content by default, so a long document title would
+// push the chart off screen. With 0, the title truncates instead.
+const shrinkableFlexItemStyle = css({ minWidth: 0 });
 
 const managedBadgeLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.managedBadge', {
   defaultMessage: 'Managed',
@@ -77,13 +87,6 @@ const settingsTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.
 const discoverLinkLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.discoverLink', {
   defaultMessage: 'Open in Discover',
 });
-
-const signalsLockedAriaLabel = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.signals.lockedAriaLabel',
-  {
-    defaultMessage: 'Signals locked. Create an automation above to start collecting signals.',
-  }
-);
 
 export const AiIndexDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -126,7 +129,11 @@ export const AiIndexDetailPage = () => {
     history.replace({ ...location, state: undefined });
   }, [location, history]);
 
-  const { summary, isLoading: isKiSummaryLoading } = useListKi({
+  const {
+    summary,
+    isLoading: isKiSummaryLoading,
+    error: kiSummaryError,
+  } = useListKi({
     aiIndexId: aiIndex?.id,
     size: KI_SUMMARY_PAGE_SIZE,
     status: KI_NOT_DELETED_STATUSES,
@@ -138,21 +145,26 @@ export const AiIndexDetailPage = () => {
   const hasKnowledgeIndicators = hasLoadedKiSummary && summary.total > 0;
   const showKnowledgeIndicatorsTabInHeader = isKnowledgeIndicatorsTab || hasKnowledgeIndicators;
 
-  const {
-    hideEditControls,
-    showOnboardingPanel,
-    showAutomationsPanel,
-    showSignalsSection,
-    showSignalsPanel,
-  } = useAiIndexOverviewSections({
-    aiIndex,
-    isLoading,
-    hasKnowledgeIndicators,
-    isKnowledgeIndicatorsLoading: isKiSummaryLoading,
-  });
+  const { hideEditControls, showOnboardingPanel, showAutomationsPanel } =
+    useAiIndexOverviewSections({
+      aiIndex,
+      isLoading,
+      hasKnowledgeIndicators,
+      isKnowledgeIndicatorsLoading: isKiSummaryLoading,
+    });
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
   const sources = useMemo(() => aiIndex?.sources ?? [], [aiIndex?.sources]);
+  const automations = useMemo(() => aiIndex?.automations ?? [], [aiIndex?.automations]);
+  const visibleAutomationsCount = useMemo(
+    () => getVisibleAutomations(automations, isMemoryEnabled).length,
+    [automations, isMemoryEnabled]
+  );
+  const visibleWorkflowIds = useMemo(
+    () => getVisibleWorkflowIds(automations, isMemoryEnabled),
+    [automations, isMemoryEnabled]
+  );
+  const isManaged = aiIndex?.managed === true;
 
   const { kibanaUrl } = useKibanaUrl();
   const onboardingPrompt = useMemo(() => {
@@ -281,10 +293,45 @@ export const AiIndexDetailPage = () => {
           showMemory={isMemoryEnabled}
         />
       )}
+      {aiIndex && !isManaged && <FailedAutomationRunsCallout workflowIds={visibleWorkflowIds} />}
       {showOnboardingPanel && (
         <>
           <ConnectAgentPanel prompt={onboardingPrompt} />
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
+        </>
+      )}
+      {aiIndex && (
+        <>
+          <OverviewStatCards
+            aiIndexId={aiIndex.id}
+            knowledgeDocumentsCount={kiSummaryError ? undefined : summary.total}
+            sourcesCount={sources.length}
+            automationsCount={visibleAutomationsCount}
+            isManaged={isManaged}
+            isMemoryEnabled={isMemoryEnabled}
+            isLoading={isKiSummaryLoading}
+          />
+          <EuiSpacer size="l" />
+        </>
+      )}
+      {/* Wait for the summary, so the chart column does not pop in next to Recent documents. */}
+      {hasLoadedKiSummary && (
+        <>
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem css={shrinkableFlexItemStyle}>
+              <RecentKnowledgeDocumentsPanel
+                aiIndexId={resolvedAiIndexId}
+                isManaged={isManaged}
+                isMemoryEnabled={isMemoryEnabled}
+              />
+            </EuiFlexItem>
+            {hasKnowledgeIndicators && (
+              <EuiFlexItem css={shrinkableFlexItemStyle}>
+                <KnowledgeDocumentsChartPanel aiIndexId={resolvedAiIndexId} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
         </>
       )}
       <AutomationsSection
@@ -293,29 +340,16 @@ export const AiIndexDetailPage = () => {
         aiIndexId={resolvedAiIndexId}
         onSaved={refetch}
         isUnlocked={showAutomationsPanel}
+        headerAction={
+          hideEditControls ? undefined : <ManageAutomationsLink aiIndexId={resolvedAiIndexId} />
+        }
       />
-      <EuiSpacer size="m" />
-      {showSignalsSection &&
-        (showSignalsPanel ? (
-          <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
-        ) : (
-          <LockedSectionPanel
-            data-test-subj="contextSignalsLocked"
-            ariaLabel={signalsLockedAriaLabel}
-            title={
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.signals.title"
-                defaultMessage="Signals"
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.signals.lockedBody"
-                defaultMessage="Create an automation above to start collecting signals."
-              />
-            }
-          />
-        ))}
+      {aiIndex && !isManaged && (
+        <>
+          <EuiSpacer size="l" />
+          <LearnMorePanel />
+        </>
+      )}
     </>
   );
 
@@ -374,6 +408,7 @@ export const AiIndexDetailPage = () => {
           navigateToContextEngine(CONTEXT_ENGINE_PATHS.landing);
         }}
         pageTitle={pageTitle}
+        description={aiIndex?.description || undefined}
         menu={headerMenu}
         badges={headerBadges}
         tabs={headerTabs}

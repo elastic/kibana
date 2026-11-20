@@ -1169,6 +1169,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     contextEngine: {
       overview: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine`,
       aiIndices: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine/concepts#ai-indices`,
+      sources: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine/concepts#sources`,
+      memory: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine/concepts#memory`,
     },
     agentBuilder: {
       agentBuilder: `${ELASTIC_DOCS}explore-analyze/ai-features/elastic-agent-builder`,

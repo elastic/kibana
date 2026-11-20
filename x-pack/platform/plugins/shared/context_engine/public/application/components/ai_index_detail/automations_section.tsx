@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import type { ReactNode } from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { AutomationsLockedDescription } from './automations_locked_description';
 import { AutomationsPanel } from './automations_panel';
@@ -26,6 +27,8 @@ interface AutomationsSectionProps {
   aiIndexId: string;
   onSaved: () => void;
   isUnlocked: boolean;
+  /** Replaces the "Add automation" menu in the panel header (see `AutomationsPanel`). */
+  headerAction?: ReactNode;
 }
 
 export const AutomationsSection = ({
@@ -34,6 +37,7 @@ export const AutomationsSection = ({
   aiIndexId,
   onSaved,
   isUnlocked,
+  headerAction,
 }: AutomationsSectionProps) =>
   isUnlocked ? (
     <AutomationsPanel
@@ -41,6 +45,7 @@ export const AutomationsSection = ({
       aiIndex={aiIndex}
       onSaved={onSaved}
       isManaged={aiIndex?.managed === true}
+      headerAction={headerAction}
     />
   ) : (
     <LockedSectionPanel

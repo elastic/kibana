@@ -8,13 +8,19 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
-import { toOptionalKiStatus, type KiStatus } from '../../common/ki_lifecycle_status';
+import {
+  KI_NOT_DELETED_STATUSES,
+  toOptionalKiStatus,
+  type KiStatus,
+} from '../../common/ki_lifecycle_status';
 import { DEFAULT_KI_LIST_SORT, type KiListSort } from '../../common/ki_list_sort';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
-import { MAX_KI_TYPE_FILTER_LENGTH } from '../../common/constants';
+import { KI_HISTOGRAM_DAYS, MAX_KI_TYPE_FILTER_LENGTH } from '../../common/constants';
 import { MAX_KI_TYPE_FILTER_COUNT, takeTopKiTypeCounts } from '../../common/ki_type_counts';
 import type {
   KiGroup,
+  KiHistogramBucket,
+  KiHistogramResponse,
   KiListItem,
   ListKiGroupsResponse,
   ListKisResponse,
@@ -264,6 +270,11 @@ const getRowsSort = (
   return [...evalClauses, `SORT ${[...scoreKeys, ...sortKeys, 'id ASC'].join(', ')}`];
 };
 
+export interface LatestRevisionOptions {
+  /** Also keeps `first_seen`: the oldest revision `@timestamp` of each KI, null when none has one. */
+  firstSeen?: boolean;
+}
+
 /**
  * Keeps only the latest revision by `@timestamp` for each logical id.
  * On an index dest the same id may exist in several backing indices, so those are distinct KIs.
@@ -271,15 +282,18 @@ const getRowsSort = (
  */
 export const latestRevisionPipeline = (
   dest: AiIndexDest,
-  has: (field: 'id' | '@timestamp') => boolean
+  has: (field: 'id' | '@timestamp') => boolean,
+  { firstSeen = false }: LatestRevisionOptions = {}
 ): string[] => {
   const key = dest.type === 'data_stream' ? 'id' : '_index, id';
+  // `@timestamp`, not `revision_time`: one revision without a timestamp must not make it 1970.
+  const firstSeenStat = firstSeen ? ', first_seen = MIN(@timestamp)' : '';
   return [
     has('id') ? 'EVAL id = COALESCE(id, _id)' : 'EVAL id = _id',
     ...(has('@timestamp')
       ? [
           'EVAL revision_time = COALESCE(@timestamp, TO_DATETIME("1970-01-01T00:00:00Z"))',
-          `INLINE STATS latest = MAX(revision_time) BY ${key}`,
+          `INLINE STATS latest = MAX(revision_time)${firstSeenStat} BY ${key}`,
           'WHERE revision_time == latest',
           `INLINE STATS latest_doc = MAX(_id) BY ${key}`,
           'WHERE _id == latest_doc',
@@ -303,13 +317,14 @@ const currentKisQuery = (
   sources: string[],
   has: (field: KiListField) => boolean,
   statuses?: KiStatus[],
-  query?: string
+  query?: string,
+  revisionOptions?: LatestRevisionOptions
 ): string =>
   [
     `FROM ${fromSources(sources)} ${
       query !== undefined ? 'METADATA _id, _index, _score' : 'METADATA _id, _index'
     }`,
-    ...latestRevisionPipeline(dest, has),
+    ...latestRevisionPipeline(dest, has, revisionOptions),
     lifecycleStatusEvalClause(has),
     kiStatusEvalClause(has),
     ...statusFilterClause(statuses),
@@ -334,7 +349,8 @@ const prepareCurrentKis = async (
   esClient: ElasticsearchClient,
   dest: AiIndexDest,
   statuses?: KiStatus[],
-  query?: string
+  query?: string,
+  revisionOptions?: LatestRevisionOptions
 ): Promise<CurrentKisContext | undefined> => {
   // Zero-row probes resolve the mapped columns under the caller's own read privilege; an
   // expression that resolves to nothing is left out so the rest of the dest still lists.
@@ -356,7 +372,8 @@ const prepareCurrentKis = async (
     sources.map(({ expression }) => expression),
     has,
     statuses,
-    query
+    query,
+    revisionOptions
   );
   return { base, has };
 };
@@ -511,4 +528,74 @@ export const getKiGroups = async (
     kis: toKiListItems(groupRows[i]),
   }));
   return { total, total_other: totalOther, groups };
+};
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** The `YYYY-MM-DD` keys of the histogram window: the last `KI_HISTOGRAM_DAYS` UTC days, oldest first. */
+export const kiHistogramDays = (now: Date): string[] => {
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  return Array.from({ length: KI_HISTOGRAM_DAYS }, (_, i) =>
+    new Date(today - (KI_HISTOGRAM_DAYS - 1 - i) * DAY_MS).toISOString().slice(0, 10)
+  );
+};
+
+/**
+ * When a KI was added: its first revision `@timestamp`, else `updated_at`. Checked per KI, since
+ * the indices of one dest can differ. Undefined when the dest has neither column.
+ */
+const addedAtExpression = (has: (field: KiListField) => boolean): string | undefined => {
+  if (has('@timestamp') && has('updated_at')) {
+    return 'COALESCE(first_seen, TO_DATETIME(updated_at))';
+  }
+  if (has('@timestamp')) {
+    return 'first_seen';
+  }
+  return has('updated_at') ? 'TO_DATETIME(updated_at)' : undefined;
+};
+
+/**
+ * Non-deleted KIs added per UTC day over the last `KI_HISTOGRAM_DAYS` days, days without KIs
+ * included. Kibana picks the window, so the day keys and the query use the same clock.
+ */
+export const getKiHistogram = async (
+  esClient: ElasticsearchClient,
+  { dest, now = new Date() }: { dest: AiIndexDest; now?: Date }
+): Promise<KiHistogramResponse> => {
+  const days = kiHistogramDays(now);
+  const toBuckets = (counts: Map<string, number> = new Map()): KiHistogramResponse => ({
+    buckets: days.map((date): KiHistogramBucket => ({ date, count: counts.get(date) ?? 0 })),
+  });
+
+  const context = await prepareCurrentKis(esClient, dest, [...KI_NOT_DELETED_STATUSES], undefined, {
+    firstSeen: true,
+  });
+  const addedAt = context !== undefined ? addedAtExpression(context.has) : undefined;
+  if (context === undefined || addedAt === undefined) {
+    return toBuckets();
+  }
+
+  const from = `${days[0]}T00:00:00.000Z`;
+  const to = new Date(Date.parse(`${days[days.length - 1]}T00:00:00.000Z`) + DAY_MS).toISOString();
+  const histogramQuery = [
+    context.base,
+    `EVAL added_at = ${addedAt}`,
+    'WHERE added_at >= TO_DATETIME(?from) AND added_at < TO_DATETIME(?to)',
+    'EVAL day = DATE_TRUNC(1 day, added_at)',
+    'STATS count = COUNT(*) BY day',
+  ].join('\n| ');
+  const response = await esClient.esql.query({
+    query: histogramQuery,
+    params: [{ from }, { to }],
+    // A shard failure must fail the chart, not undercount days.
+    allow_partial_results: false,
+  });
+
+  const counts = new Map(
+    toRecords(response as unknown as ESQLSearchResponse).map(({ day, count }) => [
+      String(day).slice(0, 10),
+      Number(count),
+    ])
+  );
+  return toBuckets(counts);
 };

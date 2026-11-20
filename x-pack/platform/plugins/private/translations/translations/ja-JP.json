@@ -25865,8 +25865,6 @@
     "xpack.contextEngine.aiIndexDetail.signals.groupEmpty": "このグループのシグナルが見つかりません。",
     "xpack.contextEngine.aiIndexDetail.signals.groupViewDetailsButton": "詳細を表示",
     "xpack.contextEngine.aiIndexDetail.signals.loadMore": "さらに読み込む",
-    "xpack.contextEngine.aiIndexDetail.signals.lockedAriaLabel": "シグナルはロックされています。シグナル収集を開始するには、上記で自動化を作成してください。",
-    "xpack.contextEngine.aiIndexDetail.signals.lockedBody": "信号の収集を開始するには、上記で自動化を作成してください。",
     "xpack.contextEngine.aiIndexDetail.signals.managedNoAgent.prompt": "\"分析 & 改善\" を有効にするには、この管理対象インデックスにフィードバックエージェントを設定する必要があります。",
     "xpack.contextEngine.aiIndexDetail.signals.nextButton": "次へ",
     "xpack.contextEngine.aiIndexDetail.signals.noTarget": "不明なターゲット",

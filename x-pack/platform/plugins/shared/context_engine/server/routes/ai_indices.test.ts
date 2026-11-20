@@ -47,6 +47,7 @@ import {
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
   AI_INDEX_KI_GROUPS_PATH,
+  AI_INDEX_KI_HISTOGRAM_PATH,
   AI_INDEX_KI_RESTORE_PATH,
   AI_INDEX_KI_LIST_PATH,
   AI_INDEX_PATH,
@@ -363,6 +364,7 @@ describe('ai indices routes', () => {
     await callRoute('GET', AI_INDEX_BY_ID_PATH, { params: { aiIndexId: 'a' } });
     await callRoute('GET', AI_INDEX_KI_LIST_PATH, { params: { aiIndexId: 'a' } });
     await callRoute('GET', AI_INDEX_KI_GROUPS_PATH, { params: { aiIndexId: 'a' } });
+    await callRoute('GET', AI_INDEX_KI_HISTOGRAM_PATH, { params: { aiIndexId: 'a' } });
     await callRoute('GET', AI_INDEX_KI_BY_ID_PATH, {
       params: { aiIndexId: 'a', kiId: 'ki-1' },
       query: { index: kiBackingIndex },
@@ -387,7 +389,7 @@ describe('ai indices routes', () => {
     });
 
     expect(response.notFound.mock.calls).toEqual(
-      Array(14).fill([{ body: { message: 'Not Found' } }])
+      Array(15).fill([{ body: { message: 'Not Found' } }])
     );
     expect(aiIndexService.create).not.toHaveBeenCalled();
     expect(aiIndexService.put).not.toHaveBeenCalled();
@@ -417,6 +419,10 @@ describe('ai indices routes', () => {
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
     expect(getRoute('GET', AI_INDEX_KI_GROUPS_PATH).config).toMatchObject({
+      access: 'internal',
+      security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
+    });
+    expect(getRoute('GET', AI_INDEX_KI_HISTOGRAM_PATH).config).toMatchObject({
       access: 'internal',
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
@@ -1570,6 +1576,52 @@ describe('ai indices routes', () => {
       aiIndexService.get.mockRejectedValue(new AiIndexNotFoundError('missing'));
 
       await callRoute('GET', AI_INDEX_KI_GROUPS_PATH, { params: { aiIndexId: 'missing' } });
+
+      expect(response.notFound).toHaveBeenCalled();
+      expect(esEsqlQuery).not.toHaveBeenCalled();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'ai_index_list', outcome: 'failure' }),
+        })
+      );
+    });
+  });
+
+  describe('GET /internal/context_engine/ai_index/{aiIndexId}/kis/_histogram', () => {
+    const probe = {
+      columns: ['id', '@timestamp', 'updated_at', 'type', 'title'].map((name) => ({ name })),
+      values: [],
+    };
+
+    it('returns 30 daily buckets for the AI Index dest and audits the read', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery.mockResolvedValueOnce(probe).mockResolvedValueOnce({
+        columns: [{ name: 'count' }, { name: 'day' }],
+        values: [],
+      });
+
+      await callRoute('GET', AI_INDEX_KI_HISTOGRAM_PATH, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', 'default');
+      expect(esEsqlQuery.mock.calls[1][0].query).toContain(
+        'FROM "ai-index-ds-customer_support" METADATA _id, _index'
+      );
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { buckets: expect.objectContaining({ length: 30 }) },
+      });
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'ai_index_list', outcome: 'success' }),
+        })
+      );
+    });
+
+    it('returns 404 and audits the failure when the AI Index does not exist', async () => {
+      aiIndexService.get.mockRejectedValue(new AiIndexNotFoundError('missing'));
+
+      await callRoute('GET', AI_INDEX_KI_HISTOGRAM_PATH, { params: { aiIndexId: 'missing' } });
 
       expect(response.notFound).toHaveBeenCalled();
       expect(esEsqlQuery).not.toHaveBeenCalled();

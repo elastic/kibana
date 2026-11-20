@@ -33,6 +33,7 @@ import {
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
   AI_INDEX_KI_GROUPS_PATH,
+  AI_INDEX_KI_HISTOGRAM_PATH,
   AI_INDEX_KI_RESTORE_PATH,
   AI_INDEX_KI_LIST_PATH,
   AI_INDEX_PATH,
@@ -52,6 +53,7 @@ import type {
 import type {
   DeleteKiResponse,
   GetKiResponse,
+  KiHistogramResponse,
   ListKiGroupsResponse,
   ListKisResponse,
   RestoreKiResponse,
@@ -89,7 +91,7 @@ import type { AiIndexChangeField, AiIndexChangeNotifier } from '../ai_indices/ch
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { GetAiIndexDataReadServiceParams } from '../types';
 import { getKi } from '../ai_indices/ki_get';
-import { getKiGroups, getKis } from '../ai_indices/ki_list';
+import { getKiGroups, getKiHistogram, getKis } from '../ai_indices/ki_list';
 import { buildKiApiWriter, restoreKi, softDeleteKi, updateKi } from '../ai_indices/ki_write';
 import { DREAMING_TEMPLATES } from '../dreaming/dreaming_templates';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
@@ -816,6 +818,44 @@ export const registerAiIndexRoutes = ({
             ...(query !== undefined ? { query } : {}),
             sort,
           });
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId }));
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId, error })
+          );
+          return handleAiIndexError(error, response, logger);
+        }
+      })
+    );
+
+  // Count Knowledge Indicators added per day. A static segment wins over `{kiId}` in hapi routing.
+  router.versioned
+    .get({
+      path: AI_INDEX_KI_HISTOGRAM_PATH,
+      security: READ_SECURITY,
+      access: 'internal',
+      summary: 'Count Knowledge Indicators added per day',
+      description:
+        'Returns how many non-deleted Knowledge Indicators were added on each of the last 30 UTC days, oldest first, days without KIs included. The added date is the first revision `@timestamp` of a KI, else its `updated_at`.',
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: aiIndexIdParamsSchema,
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId } = request.params;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        try {
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
+          const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+          const body: KiHistogramResponse = await getKiHistogram(esClient, { dest: aiIndex.dest });
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId }));
           return response.ok({ body });
         } catch (error) {

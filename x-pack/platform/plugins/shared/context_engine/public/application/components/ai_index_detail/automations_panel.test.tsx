@@ -433,4 +433,28 @@ describe('AutomationsPanel', () => {
 
     expect(screen.getByTestId('contextAddAutomationButton')).toBeDisabled();
   });
+
+  describe('with a header action', () => {
+    const headerAction = <span data-test-subj="customHeaderAction">Manage</span>;
+
+    it('shows the header action instead of the add menu next to the rows', () => {
+      mockUseAutomationsEditor.mockReturnValue(
+        editorResult({ automations: oneAutomation, workflowIds: ['wf-1'] })
+      );
+
+      renderPanel({ headerAction });
+
+      expect(screen.getByTestId('customHeaderAction')).toBeInTheDocument();
+      expect(screen.getByTestId('contextAiIndexAutomationRow')).toBeInTheDocument();
+      expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
+    });
+
+    it('shows the header action and no add button in the empty state', () => {
+      renderPanel({ headerAction });
+
+      expect(screen.getByTestId('customHeaderAction')).toBeInTheDocument();
+      expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
+      expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
+    });
+  });
 });

@@ -20,19 +20,22 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Route, Router } from '@kbn/shared-ux-router';
 import { createEvent, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { ExecutionStatus } from '@kbn/workflows';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import {
   CONTEXT_ENGINE_PATHS,
   getAiIndexDetailPath,
   getAiIndexKnowledgeDocumentsPath,
+  getAiIndexSettingsPath,
+  getAiIndexSourcesPath,
 } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AiIndexDetailPage } from './ai_index_detail_page';
-import { useFeedbackLoopEnabled } from '../hooks/use_feedback_loop_enabled';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
 
@@ -70,12 +73,13 @@ jest.mock('../hooks/use_data_connectors', () => ({
 }));
 
 const mockMgetWorkflows = jest.fn();
-const mockCreateWorkflow = jest.fn();
+const mockGetWorkflowExecutions = jest.fn();
 
 jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowsApi: () => ({
     mgetWorkflows: mockMgetWorkflows,
-    createWorkflow: mockCreateWorkflow,
+    getWorkflowExecutions: mockGetWorkflowExecutions,
+    createWorkflow: jest.fn(),
   }),
   useWorkflowsCapabilities: () => ({
     canExecuteWorkflow: true,
@@ -89,6 +93,10 @@ jest.mock('@kbn/workflows-ui', () => ({
 }));
 
 const mockUseListKi = jest.fn();
+
+jest.mock('../hooks/use_ki_histogram', () => ({
+  useKiHistogram: () => ({ buckets: [], isLoading: true, error: undefined }),
+}));
 
 jest.mock('../hooks/use_list_ki', () => ({
   useListKi: (...args: unknown[]) => mockUseListKi(...args),
@@ -111,14 +119,6 @@ const defaultListKiMock = {
   refetch: jest.fn(),
 };
 
-jest.mock('../hooks/use_signal_groups', () => ({
-  useSignalGroups: () => ({ groups: [], isLoading: false, error: undefined, refetch: jest.fn() }),
-}));
-
-jest.mock('../hooks/use_feedback_loop_enabled', () => ({
-  useFeedbackLoopEnabled: jest.fn(() => true),
-}));
-
 jest.mock('../hooks/use_memory_enabled', () => ({
   useMemoryEnabled: jest.fn(() => true),
 }));
@@ -135,20 +135,9 @@ jest.mock('../hooks/use_agent_builder_agents', () => ({
   }),
 }));
 
-const mockUseFeedbackLoopEnabled = jest.mocked(useFeedbackLoopEnabled);
 const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
 const mockUseAiIndexDreaming = jest.mocked(useAiIndexDreaming);
 const preferenceDreaming = { enabled: true, facts: [{ type: 'preference' }] };
-
-jest.mock('../hooks/use_signals', () => ({
-  useSignals: () => ({
-    signals: [],
-    total: 0,
-    isLoading: false,
-    error: undefined,
-    refetch: jest.fn(),
-  }),
-}));
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
@@ -259,7 +248,7 @@ const confirmAutomationDelete = async () => {
 };
 
 const removeAutomationFromRow = async (rowIndex: number) => {
-  const actionButtons = screen.getAllByTestId('contextAutomationRowActionsButton');
+  const actionButtons = await screen.findAllByTestId('contextAutomationRowActionsButton');
   fireEvent.click(actionButtons[rowIndex]);
   fireEvent.click(await screen.findByTestId('contextRemoveAutomationButton'));
   await confirmAutomationDelete();
@@ -268,8 +257,7 @@ const removeAutomationFromRow = async (rowIndex: number) => {
 describe('AiIndexDetailPage', () => {
   beforeEach(() => {
     mockMgetWorkflows.mockResolvedValue([]);
-    mockCreateWorkflow.mockResolvedValue({ id: 'wf-created' });
-    mockUseFeedbackLoopEnabled.mockReturnValue(true);
+    mockGetWorkflowExecutions.mockResolvedValue({ results: [] });
     mockUseListKi.mockImplementation(() => defaultListKiMock);
     mockUseMemoryEnabled.mockReturnValue(true);
     mockUseAiIndexDreaming.mockReturnValue({ dreaming: undefined, isLoading: false });
@@ -554,23 +542,6 @@ describe('AiIndexDetailPage', () => {
       'Automations locked. Add a source in the Sources tab to unlock automations.'
     );
     expect(screen.queryByTestId('contextAiIndexAutomationsEmpty')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
-  });
-
-  it('hides the signals section when the feedback loop is disabled', async () => {
-    mockUseFeedbackLoopEnabled.mockReturnValue(false);
-
-    const services = createServices();
-    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
-
-    renderWithProviders(services);
-
-    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-sources'));
-    expect(await screen.findByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-overview'));
-    expect(screen.getByTestId('contextAutomationsLocked')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextSignalsPanel')).not.toBeInTheDocument();
   });
 
   it('shows automations once sources are configured', async () => {
@@ -583,7 +554,29 @@ describe('AiIndexDetailPage', () => {
 
     expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
+  });
+
+  it('links automations to Settings instead of offering to add them on the Overview', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
+
+    const manageLink = screen.getByTestId('contextAutomationsManageInSettingsLink');
+    expect(manageLink).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.automations.MANAGE_IN_SETTINGS
+    );
+    fireEvent.click(manageLink);
+
+    expect(services.application.navigateToApp).toHaveBeenCalledWith(
+      CONTEXT_ENGINE_APP_ID,
+      expect.objectContaining({ path: getAiIndexSettingsPath(aiIndex.id) })
+    );
   });
 
   it('keeps automations visible when sources are removed but automations remain', async () => {
@@ -617,8 +610,6 @@ describe('AiIndexDetailPage', () => {
 
     await waitForAiIndexDetailLoaded();
 
-    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextSignalsPanel')).not.toBeInTheDocument();
     expect(await screen.findByTestId('contextAiIndexAutomationRow')).toBeInTheDocument();
   });
 
@@ -630,6 +621,196 @@ describe('AiIndexDetailPage', () => {
 
     expect(await screen.findByTestId('contextAiIndexDetailError')).toHaveTextContent('boom');
     expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toBeInTheDocument();
+  });
+
+  it('shows the description in the page header, not as an editable panel', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, description: 'Ops runbooks' });
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+      'Ops runbooks'
+    );
+    expect(screen.queryByTestId('contextAddDescriptionButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
+  });
+
+  it('shows no header description when the AI index has none', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.description)).not.toBeInTheDocument();
+  });
+
+  it('shows the summary widgets on the Overview', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextOverviewStatCardValue-knowledgeDocuments')).toHaveTextContent(
+      '25'
+    );
+    expect(screen.getByTestId('contextOverviewStatCardValue-sources')).toHaveTextContent('1');
+    expect(screen.getByTestId('contextOverviewStatCardValue-automations')).toHaveTextContent('1');
+    expect(screen.getByTestId('contextOverviewRecentDocuments')).toBeInTheDocument();
+    expect(screen.getByTestId('contextOverviewDocumentsChart')).toHaveTextContent(
+      'Knowledge documents over time'
+    );
+    expect(screen.getByTestId('contextOverviewLearnMore')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextOverviewFailedRunsCallout')).not.toBeInTheDocument();
+  });
+
+  it('opens the Sources tab from its stat card', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+    fireEvent.click(
+      within(screen.getByTestId('contextOverviewStatCard-sources')).getByRole('link')
+    );
+
+    expect(services.application.navigateToApp).toHaveBeenCalledWith(
+      CONTEXT_ENGINE_APP_ID,
+      expect.objectContaining({ path: getAiIndexSourcesPath(aiIndex.id) })
+    );
+  });
+
+  it('opens the automations on the Settings tab from the Automations card, also with memory off', async () => {
+    mockUseMemoryEnabled.mockReturnValue(false);
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    mockMgetWorkflows.mockResolvedValue([{ id: 'wf-1', name: 'My workflow', enabled: true }]);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+    fireEvent.click(
+      within(screen.getByTestId('contextOverviewStatCard-automations')).getByRole('link')
+    );
+
+    const settingsTab = await screen.findByTestId('contextAiIndexSettingsTab');
+    expect(await within(settingsTab).findByTestId('contextAiIndexAutomationRow')).toHaveTextContent(
+      'My workflow'
+    );
+  });
+
+  it('does not count dreaming automations while memory is off', async () => {
+    mockUseMemoryEnabled.mockReturnValue(false);
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      automations: [
+        { type: 'workflow', value: 'wf-1' },
+        { type: 'workflow', value: 'system-context-engine-dreaming-my-ai-index' },
+      ],
+    });
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextOverviewStatCardValue-automations')).toHaveTextContent('1');
+  });
+
+  it('gives the empty recent documents panel the full row when there are no documents', async () => {
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
+      total: 0,
+      summary: { total: 0, countsByType: [] },
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextOverviewRecentDocumentsEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextOverviewDocumentsChart')).not.toBeInTheDocument();
+  });
+
+  it('shows no knowledge documents count when the summary request fails', async () => {
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
+      total: 0,
+      summary: { total: 0, countsByType: [] },
+      error: new Error('Request timed out'),
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextOverviewStatCardValue-knowledgeDocuments')).toHaveTextContent(
+      '-'
+    );
+  });
+
+  it('shows the Manage in Settings link only once the AI index is known to be editable', async () => {
+    const services = createServices();
+    let resolveAiIndexGet: (value: GetAiIndexResponse) => void = () => {};
+    services.http.get.mockImplementation(
+      () =>
+        new Promise<GetAiIndexResponse>((resolve) => {
+          resolveAiIndexGet = resolve;
+        })
+    );
+
+    renderWithProviders(services);
+
+    expect(screen.queryByTestId('contextAutomationsManageInSettingsLink')).not.toBeInTheDocument();
+
+    resolveAiIndexGet(aiIndex);
+
+    expect(await screen.findByTestId('contextAutomationsManageInSettingsLink')).toBeInTheDocument();
+  });
+
+  it('warns about a failed automation run', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    mockMgetWorkflows.mockResolvedValue([
+      { id: 'wf-1', name: 'My workflow', enabled: true, definition: { name: 'My workflow' } },
+    ]);
+    mockGetWorkflowExecutions.mockImplementation(async (_workflowId, query) => ({
+      results: query.statuses
+        ? []
+        : [
+            {
+              id: 'run-1',
+              status: ExecutionStatus.FAILED,
+              error: { type: 'Error', message: 'boom' },
+            },
+          ],
+    }));
+
+    renderWithProviders(services);
+
+    expect(await screen.findByTestId('contextOverviewFailedRunsMessage')).toHaveTextContent(
+      'My workflow: boom'
+    );
   });
 
   it('edits the description on the Settings tab and refetches the AI index', async () => {
@@ -741,17 +922,17 @@ describe('AiIndexDetailPage', () => {
     expect(mockMgetWorkflows).not.toHaveBeenCalled();
   });
 
-  it('shows edit controls once the AI index has loaded', async () => {
+  it('shows the Add automation menu on the Settings tab once the AI index has loaded', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
 
-    renderWithProviders(services);
+    renderWithProviders(services, undefined, getAiIndexSettingsPath(aiIndex.id));
 
     expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
 
     await waitForAiIndexDetailLoaded();
 
-    expect(screen.getByTestId('contextAddAutomationButton')).toBeEnabled();
+    expect(await screen.findByTestId('contextAddAutomationButton')).toBeEnabled();
   });
 
   it('keeps the rows rendered while the summaries for an edited list resolve', async () => {
@@ -809,52 +990,22 @@ describe('AiIndexDetailPage', () => {
     });
   });
 
-  it('creates a workflow, attaches it, and opens the editor', async () => {
-    const services = createServices();
-    services.http.get.mockResolvedValue(aiIndex);
-    services.http.put.mockResolvedValue({ status: 'updated' });
-
-    renderWithProviders(services);
-
-    await waitForAiIndexDetailLoaded();
-
-    fireEvent.click(screen.getByTestId('contextAddAutomationButton'));
-    fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
-
-    await waitFor(() => {
-      expect(mockCreateWorkflow).toHaveBeenCalledWith({
-        yaml: expect.stringContaining('my-ai-index automation'),
-      });
-    });
-
-    await waitFor(() => {
-      expect(services.http.put).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index/my-ai-index',
-        expect.objectContaining({
-          body: JSON.stringify({
-            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
-            automations: [{ type: 'workflow', value: 'wf-created' }],
-            sources: [{ type: 'esql', value: 'FROM My view' }],
-            traces: [],
-          }),
-        })
-      );
-    });
-
-    expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
-      path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index',
-    });
-  });
-
   it('hides edit controls and shows the managed badge for managed AI indexes', async () => {
     const services = createServices();
-    services.http.get.mockResolvedValue({ ...aiIndex, managed: true });
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      managed: true,
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    mockMgetWorkflows.mockResolvedValue([{ id: 'wf-1', name: 'My workflow', enabled: true }]);
 
     renderWithProviders(services);
 
     await waitForAiIndexDetailLoaded();
 
     expect(screen.getByTestId('contextAiIndexDetailManagedBadge')).toHaveTextContent('Managed');
+    fireEvent.click(await screen.findByTestId('contextAutomationRowActionsButton'));
+    expect(screen.queryByTestId('contextRemoveAutomationButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-sources'));
     await screen.findByTestId('contextSourcesPanel');
@@ -876,9 +1027,35 @@ describe('AiIndexDetailPage', () => {
     await screen.findByTestId('contextAiIndexDetailManagedBadge');
 
     expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextSignalsPanel')).not.toBeInTheDocument();
+  });
+
+  it('shows managed AI indexes read-only on the Overview', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      managed: true,
+      sources: [],
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    mockMgetWorkflows.mockResolvedValue([
+      { id: 'wf-1', name: 'My workflow', enabled: true, definition: { name: 'My workflow' } },
+    ]);
+    mockGetWorkflowExecutions.mockImplementation(async (_workflowId, query) => ({
+      results: query.statuses ? [] : [{ id: 'run-1', status: ExecutionStatus.FAILED, error: null }],
+    }));
+
+    renderWithProviders(services);
+
+    await screen.findByTestId('contextAiIndexDetailManagedBadge');
+    expect(await screen.findByTestId('contextAiIndexAutomationRow')).toBeInTheDocument();
+
+    expect(screen.getByTestId('contextOverviewStatCardValue-sources')).toHaveTextContent('-');
+    expect(screen.getByTestId('contextOverviewRecentDocuments')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAutomationsManageInSettingsLink')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextOverviewLearnMore')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextOverviewFailedRunsCallout')).not.toBeInTheDocument();
   });
 
   it('shows edit controls and no managed badge for non-managed AI indexes', async () => {
@@ -890,7 +1067,6 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.queryByTestId('contextAiIndexDetailManagedBadge')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextAddAutomationButton')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-sources'));
     expect(screen.getByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
   });

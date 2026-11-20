@@ -25863,8 +25863,6 @@
     "xpack.contextEngine.aiIndexDetail.signals.groupEmpty": "找不到此组的信号。",
     "xpack.contextEngine.aiIndexDetail.signals.groupViewDetailsButton": "查看详情",
     "xpack.contextEngine.aiIndexDetail.signals.loadMore": "加载更多",
-    "xpack.contextEngine.aiIndexDetail.signals.lockedAriaLabel": "信号已锁定。在上方创建自动化，以开始收集信号。",
-    "xpack.contextEngine.aiIndexDetail.signals.lockedBody": "在上方创建自动化，以开始收集信号。",
     "xpack.contextEngine.aiIndexDetail.signals.managedNoAgent.prompt": "必须为此托管索引配置反馈代理，才能启用 \"分析 & 改进\"。",
     "xpack.contextEngine.aiIndexDetail.signals.nextButton": "下一步",
     "xpack.contextEngine.aiIndexDetail.signals.noTarget": "未知目标",
