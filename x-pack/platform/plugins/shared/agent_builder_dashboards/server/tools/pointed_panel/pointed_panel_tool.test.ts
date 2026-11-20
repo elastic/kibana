@@ -286,6 +286,32 @@ describe('createPointedPanelTool', () => {
       'not backed by ES|QL',
     ],
     [
+      'the Lens query reads a control variable',
+      {
+        [POINTER_ID]: pointer(),
+        'dashboard-1': dashboard([
+          lensPanel({
+            type: 'metric',
+            data_source: {
+              type: 'esql',
+              query: 'FROM logs | WHERE @timestamp >= ?_tstart AND host == ?host | STATS COUNT(*)',
+            },
+          }),
+        ]),
+      },
+      'reads dashboard control values (?host)',
+    ],
+    [
+      'a custom panel query reads a control variable',
+      {
+        [POINTER_ID]: pointer(),
+        'dashboard-1': dashboard([
+          customPanel({ template: '<p/>', esql_query: ['FROM logs', 'FROM logs | KEEP ??field'] }),
+        ]),
+      },
+      'reads dashboard control values (?field)',
+    ],
+    [
       'the panel type is unsupported',
       {
         [POINTER_ID]: pointer(),

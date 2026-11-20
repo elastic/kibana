@@ -35,6 +35,19 @@ import { extractEsqlQueries } from '../generate/time_range/extract_esql_queries'
 import { resolvePointedPanel } from '../resolve_pointed_panel';
 
 const MAX_QUERY_LENGTH = 2048;
+const ESQL_PARAM_PATTERN = /\?{1,2}([A-Za-z_]\w*)/g;
+const TIME_RANGE_PARAMS: ReadonlySet<string> = new Set(['_tstart', '_tend']);
+
+/** Named ES|QL params other than the time range ones, which only the dashboard's controls fill. */
+const getControlParams = (queries: readonly string[]): string[] => [
+  ...new Set(
+    queries.flatMap((query) =>
+      [...query.matchAll(ESQL_PARAM_PATTERN)]
+        .map(([, name]) => name)
+        .filter((name) => !TIME_RANGE_PARAMS.has(name))
+    )
+  ),
+];
 
 type PersistedFields = 'attachment_id' | 'version';
 
@@ -63,6 +76,19 @@ const pointedPanelSchema = lazySchema(() =>
 const getCustomContentQueries = (panel: AttachmentPanel): string[] =>
   (panel.config as Partial<CustomContentState>).esql_query ?? [];
 
+/** The panel's ES|QL: a Lens panel's one query, or a custom panel's queries in template order. */
+const getPanelEsql = (panel: AttachmentPanel): string | string[] | undefined => {
+  if (panel.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE) {
+    const queries = getCustomContentQueries(panel);
+    return queries.length ? queries : undefined;
+  }
+  if (panel.type === LENS_EMBEDDABLE_TYPE) {
+    const [esql] = extractEsqlQueries([panel]);
+    return esql;
+  }
+  return undefined;
+};
+
 /**
  * Maps a dashboard panel onto the visualization attachment payload its renderer expects, plus the
  * tool result describing it. This is the reverse of the attachment panel resolver: ES|QL Lens
@@ -75,6 +101,20 @@ const panelToVisualization = (
   attachmentData: VisualizationAttachmentData;
   resultData: UnpersistedVisualizationResultData;
 } => {
+  const panelEsql = getPanelEsql(panel);
+  const controlParams = getControlParams(
+    typeof panelEsql === 'string' ? [panelEsql] : panelEsql ?? []
+  );
+  if (controlParams.length > 0) {
+    throw new Error(
+      `This panel's ES|QL reads dashboard control values (${controlParams
+        .map((name) => `?${name}`)
+        .join(
+          ', '
+        )}), which the chat cannot supply, so it cannot be shown here. Describe it with action "read" instead, or point the user to the dashboard.`
+    );
+  }
+
   if (panel.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE) {
     const config = panel.config as Partial<CustomContentState>;
     if (!config.template) {
@@ -127,19 +167,6 @@ const panelToVisualization = (
   );
 };
 
-/** The panel's ES|QL: a Lens panel's one query, or a custom panel's queries in template order. */
-const getPanelEsql = (panel: AttachmentPanel): string | string[] | undefined => {
-  if (panel.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE) {
-    const queries = getCustomContentQueries(panel);
-    return queries.length ? queries : undefined;
-  }
-  if (panel.type === LENS_EMBEDDABLE_TYPE) {
-    const [esql] = extractEsqlQueries([panel]);
-    return esql;
-  }
-  return undefined;
-};
-
 const errorResult = (message: string, panelAttachmentId: string) => ({
   results: [
     {
@@ -170,7 +197,7 @@ export const createPointedPanelTool = (): BuiltinToolDefinition<typeof pointedPa
 
 Actions:
 - \`read\`: returns the panel's id, type, title, current config and ES|QL when it has any: one query for a Lens panel, the list of queries for a custom panel, in the order its template reads them. Use it to answer a question about the panel or describe what it shows. Editing does not need it: \`${dashboardTools.generateDashboard}\` loads the panel's current config itself.
-- \`show\`: copies the panel into a new visualization attachment and returns \`attachment_id\` and \`version\`. Render it as the last part of your response with \`<render_attachment id="{attachment_id}" version="{version}" />\`. Use it when the user asks to see, show, paint or preview the panel here in the chat, or asks for it as a visualization. Never regenerate the panel with the visualization creation tool for that: it would author a different chart. The copy is independent of the dashboard: later panel edits do not update it. Supports ES|QL Lens panels and custom panels.
+- \`show\`: copies the panel into a new visualization attachment and returns \`attachment_id\` and \`version\`. Render it as the last part of your response with \`<render_attachment id="{attachment_id}" version="{version}" />\`. Use it when the user asks to see, show, paint or preview the panel here in the chat, or asks for it as a visualization. Never regenerate the panel with the visualization creation tool for that: it would author a different chart. The copy is independent of the dashboard: later panel edits do not update it. It renders with the dashboard's time range only when the dashboard stores one, otherwise with the chat's; the dashboard's filters, query and control selections are not applied, so its numbers can differ from the panel on the dashboard. Supports ES|QL Lens panels and custom panels whose queries read no control variables.
 
 This tool never changes the panel; edits go through \`${dashboardTools.generateDashboard}\` by panel id.`,
   schema: pointedPanelSchema,
@@ -220,7 +247,7 @@ This tool never changes the panel; edits go through \`${dashboardTools.generateD
       return errorResult(error instanceof Error ? error.message : String(error), panelAttachmentId);
     }
 
-    // The copy renders with the dashboard's time range, not whatever range the chat happens to have.
+    // Only a dashboard that stores its time range has one; otherwise the copy uses the chat's range.
     const timeRange = dashboardData.time_range
       ? { time_range: { from: dashboardData.time_range.from, to: dashboardData.time_range.to } }
       : {};
