@@ -132,18 +132,30 @@
       "apiVersion": "2024-02-01",
       "fetchedAt": "2026-10-07T20:18:57.184Z",
       "format": "swagger",
+      "latest": {
+        "pattern": "stable/(\\d{4}-\\d{2}-\\d{2})",
+        "url": "https://api.github.com/repos/Azure/azure-rest-api-specs/contents/specification/containerservice/resource-manager/Microsoft.ContainerService/aks/stable"
+      },
       "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/containerservice/resource-manager/Microsoft.ContainerService/aks/stable/2024-02-01/managedClusters.json"
     },
     "resources": {
       "apiVersion": "2021-04-01",
       "fetchedAt": "2026-10-07T20:18:57.185Z",
       "format": "swagger",
+      "latest": {
+        "pattern": "stable/(\\d{4}-\\d{2}-\\d{2})",
+        "url": "https://api.github.com/repos/Azure/azure-rest-api-specs/contents/specification/resources/resource-manager/Microsoft.Resources/resources/stable"
+      },
       "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/resources/resource-manager/Microsoft.Resources/resources/stable/2021-04-01/resources.json"
     },
     "subscriptions": {
       "apiVersion": "2022-12-01",
       "fetchedAt": "2026-10-07T20:18:57.185Z",
       "format": "swagger",
+      "latest": {
+        "pattern": "stable/(\\d{4}-\\d{2}-\\d{2})",
+        "url": "https://api.github.com/repos/Azure/azure-rest-api-specs/contents/specification/resources/resource-manager/Microsoft.Resources/subscriptions/stable"
+      },
       "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/resources/resource-manager/Microsoft.Resources/subscriptions/stable/2022-12-01/subscriptions.json"
     }
   }
