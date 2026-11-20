@@ -106,12 +106,25 @@ const codeSampleBody = ({ lang, source }: CodeSample) =>
     lang === 'curl' ? /-d '([\s\S]*)'/.exec(source)?.[1] ?? '' : source.slice(source.indexOf('\n'))
   );
 
+const codeSampleRequest = ({ lang, source }: CodeSample) => {
+  const match =
+    lang === 'curl'
+      ? /-X (\w+) "https:\/\/\$\{KIBANA_URL\}(\/[^"?]*)/.exec(source)
+      : /^(\w+) kbn:(\/[^\s?]*)/.exec(source);
+  return match ? `${match[1]} ${match[2]}` : undefined;
+};
+
+const routePattern = (route: string) =>
+  new RegExp(
+    `^${route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\{[^}]+\\\}/g, '[^/]+')}$`
+  );
+
 describe('route examples', () => {
   it('covers every route that links an example file', () => {
     expect(routesWithExamples).toHaveLength(8);
   });
 
-  describe.each(routesWithExamples)('$route', ({ validation, examples, handler }) => {
+  describe.each(routesWithExamples)('$route', ({ route, validation, examples, handler }) => {
     const responseSchemas = validation.response ?? {};
     const declaredStatuses = Object.keys(responseSchemas).filter((key) => /^\d+$/.test(key));
 
@@ -151,6 +164,13 @@ describe('route examples', () => {
         }
       );
     }
+
+    it.each(examples['x-codeSamples'] ?? [])(
+      '$lang code sample targets the route method and path',
+      (sample) => {
+        expect(codeSampleRequest(sample)).toMatch(routePattern(route));
+      }
+    );
 
     if (examples.requestBody) {
       const [[, requestExample]] = examplesOf(examples.requestBody);

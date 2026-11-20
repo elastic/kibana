@@ -427,8 +427,8 @@ otherwise). One failing AI index rejects the request and nothing is saved.
 
 Each request writes one `memory_save_event` audit event. It records the user the events belong
 to in `user.target.id`, the session in `kibana.saved_object`, and how many events were saved
-and failed. Rejected requests and failed writes are recorded as failures. Core adds the caller,
-the space and the request id.
+and failed. Rejected requests, failed writes, and batches where every event fails are recorded as
+failures. Core adds the caller, the space and the request id.
 
 ## Improvements
 

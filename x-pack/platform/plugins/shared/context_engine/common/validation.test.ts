@@ -9,6 +9,7 @@ import {
   parseIntervalMinutes,
   parseRelativeFromMinutes,
   validateIsoDate,
+  validateNonBlank,
   validateFeedbackAnalysisInterval,
   validateRelativeSignalWindow,
   validateSignalWindowCoversInterval,
@@ -74,13 +75,44 @@ describe('validateRelativeSignalWindow', () => {
   });
 });
 
-describe('validateIsoDate', () => {
-  it('accepts an ISO date', () => {
-    expect(validateIsoDate('2026-01-31T00:00:00.000Z')).toBeUndefined();
+describe('validateNonBlank', () => {
+  it('accepts strings with non-whitespace characters', () => {
+    expect(validateNonBlank('abc')).toBeUndefined();
+    expect(validateNonBlank(' a ')).toBeUndefined();
   });
 
-  it('rejects an unparseable date', () => {
-    expect(validateIsoDate('last tuesday')).toMatch(/ISO 8601/);
+  it.each(['', ' ', '\t\n'])('rejects %j', (value) => {
+    expect(validateNonBlank(value)).toBe('must not be blank');
+  });
+});
+
+describe('validateIsoDate', () => {
+  it.each([
+    '2026-01-31',
+    '2024-02-29',
+    '2026-01-31T00:00',
+    '2026-01-31T00:00:00.000Z',
+    '2026-11-16T09:58:00.123456789Z',
+    '2026-11-16T10:58:00+01:00',
+    '2026-11-16T10:58:00-0530',
+  ])('accepts valid ISO 8601 date %s', (value) => {
+    expect(validateIsoDate(value)).toBeUndefined();
+  });
+
+  it.each([
+    'last tuesday',
+    '1',
+    '0',
+    'foo 12',
+    '12/31/2026',
+    'Nov 16 2026',
+    '2026-02-29T00:00:00Z',
+    '2026-02-30T00:00:00Z',
+    '2026-13-01',
+    '2026-11-16T24:00:00Z',
+    '2026-11-16T10:58:00+19:00',
+  ])('rejects invalid date %s', (value) => {
+    expect(validateIsoDate(value)).toMatch(/ISO 8601/);
   });
 });
 

@@ -54,6 +54,11 @@ export interface SendMessageVars {
   conversationAttachments?: VersionedAttachment[];
   resetAttachments?: () => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+  /**
+   * Called when the server rejects the request before any event arrives. Returning true means
+   * the caller dealt with it and no toast is shown.
+   */
+  onRejected?: (error: unknown) => boolean;
 }
 
 export interface SendMessageMutationBindings {
@@ -237,9 +242,13 @@ export const useSendMessageMutation = ({
           browserToolExecutor,
           isAborted: () => isStreamCancelled(handle),
         }).catch((error: unknown) => {
-          if (!streamEventArrived && isRequestRejectedError(error)) {
-            addErrorToast({ title: formatAgentBuilderErrorMessage(error) });
+          if (streamEventArrived || !isRequestRejectedError(error)) {
+            return;
           }
+          if (vars.onRejected?.(error)) {
+            return;
+          }
+          addErrorToast({ title: formatAgentBuilderErrorMessage(error) });
         });
 
         if (isDetached(handle)) {

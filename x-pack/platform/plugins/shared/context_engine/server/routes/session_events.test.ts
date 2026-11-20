@@ -11,10 +11,10 @@ import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { registerSessionEventsRoutes } from './session_events';
 import {
+  MAX_MEMORY_ID_LENGTH,
+  MAX_MEMORY_USER_ID_LENGTH,
   MAX_SESSION_EVENTS_PER_REQUEST,
-  MAX_SESSION_EVENT_ID_LENGTH,
   MAX_SESSION_EVENT_TEXT_LENGTH,
-  MAX_SESSION_EVENT_USER_ID_LENGTH,
   SESSION_EVENTS_SAVE_PATH,
 } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -52,6 +52,7 @@ describe('session events routes', () => {
   let featureFlagEnabled: boolean;
   let memoryEnabled: boolean;
   let profileUid: string | null;
+  let getProfileId: jest.Mock<Promise<string | null>>;
   let authzResult: Record<string, boolean>;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let aiIndexService: { get: jest.Mock };
@@ -65,7 +66,7 @@ describe('session events routes', () => {
           client: { get: jest.fn().mockImplementation(async () => featureFlagEnabled) },
         },
         security: { audit: { logger: { log: auditLog } } },
-        userProfile: { getCurrentProfileId: async () => profileUid },
+        userProfile: { getCurrentProfileId: getProfileId },
         elasticsearch: { client: { asCurrentUser: esClient } },
       }),
     } as unknown as Parameters<RequestHandler>[0]);
@@ -94,9 +95,12 @@ describe('session events routes', () => {
     featureFlagEnabled = true;
     memoryEnabled = true;
     profileUid = 'u_jdoe_profile';
-    authzResult = { [apiPrivileges.manageMemory]: true };
+    getProfileId = jest.fn(async () => profileUid);
+    authzResult = {};
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    aiIndexService = { get: jest.fn(async (id: string) => aiIndex(id)) };
+    aiIndexService = {
+      get: jest.fn(async (id: string) => aiIndex(id)),
+    };
     auditLog = jest.fn();
     response = httpServerMock.createResponseFactory();
     service = {
@@ -233,6 +237,7 @@ describe('session events routes', () => {
     });
 
     it('files the events under another user when user_id names one, with manage memory', async () => {
+      authzResult = { [apiPrivileges.manageMemory]: true };
       await callRoute({ session_id: 's1', user_id: 'u_other', events: [userEvent] });
 
       expect(savedScope()).toEqual({ space: 'marketing', userId: 'u_other' });
@@ -279,6 +284,7 @@ describe('session events routes', () => {
 
     it('saves for the named user when the caller has no profile, with manage memory', async () => {
       profileUid = null;
+      authzResult = { [apiPrivileges.manageMemory]: true };
 
       await callRoute({ session_id: 's1', user_id: 'u_someone', events: [userEvent] });
 
@@ -288,7 +294,7 @@ describe('session events routes', () => {
   });
 
   describe('ai_index_ids', () => {
-    it("checks the caller's write privilege on each AI index's backing index once", async () => {
+    it("checks the caller's write privilege and deduplicates ai_index_ids before saving", async () => {
       writableIndices({ 'ai-index-ds-ops': true, 'ai-index-ds-sales': true });
 
       await callRoute({
@@ -304,7 +310,7 @@ describe('session events routes', () => {
       expect(esClient.security.hasPrivileges).toHaveBeenCalledWith({
         index: [{ names: ['ai-index-ds-ops', 'ai-index-ds-sales'], privileges: ['write'] }],
       });
-      expect(service.saveEvents).toHaveBeenCalledTimes(1);
+      expect(savedInput()).toMatchObject({ aiIndexIds: ['ops', 'sales'] });
     });
 
     it('returns 403 and saves nothing when one AI index is not writable', async () => {
@@ -318,7 +324,7 @@ describe('session events routes', () => {
       expect(service.saveEvents).not.toHaveBeenCalled();
     });
 
-    it('returns 404 and saves nothing when an AI index does not exist', async () => {
+    it('returns 404, audits, and saves nothing when an AI index does not exist', async () => {
       aiIndexService.get.mockRejectedValueOnce(new AiIndexNotFoundError('missing'));
 
       await callRoute({ session_id: 's1', ai_index_ids: ['missing'], events: [userEvent] });
@@ -327,6 +333,27 @@ describe('session events routes', () => {
         body: { message: expect.stringContaining("'missing' not found") },
       });
       expect(service.saveEvents).not.toHaveBeenCalled();
+      expect(auditedEvents()).toEqual([
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'failure' }),
+          error: expect.objectContaining({ code: 'AiIndexNotFoundError' }),
+        }),
+      ]);
+    });
+
+    it('audits and rethrows unexpected errors while checking AI index privileges', async () => {
+      esClient.security.hasPrivileges.mockRejectedValueOnce(new Error('es unreachable'));
+
+      await expect(
+        callRoute({ session_id: 's1', ai_index_ids: ['ops'], events: [userEvent] })
+      ).rejects.toThrow('es unreachable');
+      expect(service.saveEvents).not.toHaveBeenCalled();
+      expect(auditedEvents()).toEqual([
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'failure' }),
+          error: { code: 'Error', message: 'es unreachable' },
+        }),
+      ]);
     });
 
     it('checks nothing when the request names no AI index', async () => {
@@ -359,13 +386,44 @@ describe('session events routes', () => {
       ]);
     });
 
+    it('records failure when every event in the batch failed', async () => {
+      service.saveEvents.mockResolvedValueOnce({
+        results: [{ id: 'evt-1', status: 'failed', error: 'inference failed' }],
+      });
+
+      await callRoute({ session_id: 's1', events: [userEvent] });
+
+      expect(auditedEvents()).toEqual([
+        expect.objectContaining({
+          message: 'Failed to save 1 event(s) of session [id=s1]',
+          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'failure' }),
+          user: { target: { id: 'u_jdoe_profile' } },
+        }),
+      ]);
+    });
+
     it('records the named user as the target of the events', async () => {
+      authzResult = { [apiPrivileges.manageMemory]: true };
       await callRoute({ session_id: 's1', user_id: 'u_other', events: [userEvent] });
 
       expect(auditedEvents()).toEqual([
         expect.objectContaining({
           event: expect.objectContaining({ action: 'memory_save_event', outcome: 'success' }),
           user: { target: { id: 'u_other' } },
+        }),
+      ]);
+    });
+
+    it('audits and rethrows when resolving the user profile fails', async () => {
+      getProfileId.mockRejectedValueOnce(new Error('profile activation failed'));
+
+      await expect(callRoute({ session_id: 's1', events: [userEvent] })).rejects.toThrow(
+        'profile activation failed'
+      );
+      expect(auditedEvents()).toEqual([
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'failure' }),
+          error: { code: 'Error', message: 'profile activation failed' },
         }),
       ]);
     });
@@ -423,6 +481,11 @@ describe('session events routes', () => {
       ['a user event without content', withEvent({ ...base, id: 'e', type: 'user' })],
       ['an unknown event type', withEvent({ ...base, id: 'e', type: 'system' })],
       ['an unparseable event_at', withEvent({ ...userEvent, event_at: 'yesterday' })],
+      ['a non-ISO event_at', withEvent({ ...userEvent, event_at: 'Nov 16 2026' })],
+      [
+        'a calendar-invalid event_at',
+        withEvent({ ...userEvent, event_at: '2026-02-30T00:00:00Z' }),
+      ],
       ['a week date', withEvent({ ...userEvent, event_at: '2026-W47-1' })],
       ['an ordinal date', withEvent({ ...userEvent, event_at: '2026-320' })],
       ['a negative seq', withEvent({ ...userEvent, seq: -1 })],
@@ -437,12 +500,17 @@ describe('session events routes', () => {
       ['an unknown top-level field', { ...valid, transcript: 'old shape' }],
       ['the stored field name ai_index_id', { ...valid, ai_index_id: ['ops'] }],
       ['a missing session_id', { events: [userEvent] }],
-      ['an over-long session_id', { ...valid, session_id: tooLong(MAX_SESSION_EVENT_ID_LENGTH) }],
-      [
-        'an over-long event id',
-        withEvent({ ...userEvent, id: tooLong(MAX_SESSION_EVENT_ID_LENGTH) }),
-      ],
-      ['an over-long user_id', { ...valid, user_id: tooLong(MAX_SESSION_EVENT_USER_ID_LENGTH) }],
+      ['a blank session_id', { ...valid, session_id: '   ' }],
+      ['a blank user_id', { ...valid, user_id: '  ' }],
+      ['a blank ai_index_ids entry', { ...valid, ai_index_ids: [' '] }],
+      ['an invalid ai_index_ids entry', { ...valid, ai_index_ids: ['INVALID_UPPER'] }],
+      ['a blank event id', withEvent({ ...userEvent, id: ' ' })],
+      ['a blank turn_id', withEvent({ ...userEvent, turn_id: '\t' })],
+      ['a blank tool_call_id', withEvent({ ...toolEvent, tool_call_id: ' ' })],
+      ['a blank tool_name', withEvent({ ...toolEvent, tool_name: ' ' })],
+      ['an over-long session_id', { ...valid, session_id: tooLong(MAX_MEMORY_ID_LENGTH) }],
+      ['an over-long event id', withEvent({ ...userEvent, id: tooLong(MAX_MEMORY_ID_LENGTH) })],
+      ['an over-long user_id', { ...valid, user_id: tooLong(MAX_MEMORY_USER_ID_LENGTH) }],
       [
         'over-long content',
         withEvent({ ...userEvent, content: tooLong(MAX_SESSION_EVENT_TEXT_LENGTH) }),

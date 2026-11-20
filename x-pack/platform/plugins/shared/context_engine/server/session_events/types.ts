@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type {
+  SaveSessionEventResult,
+  SaveSessionEventsResponse,
+} from '../../common/http_api/session_events';
+
 interface SessionEventBase {
   /** Unique within the session. */
   id: string;
@@ -99,17 +104,12 @@ export interface SaveEventsInput {
   events: readonly SessionEventInput[];
 }
 
-export type SaveEventResult =
-  | { id: string; status: 'created' }
-  | { id: string; status: 'failed'; error: string };
+export type SaveEventResult = SaveSessionEventResult;
 
 export interface SessionEventsService {
   /**
    * Writes one document per event. A resent event is stored again, so readers drop duplicates by
    * session and event id. Results follow the order of `input.events`.
    */
-  saveEvents(
-    scope: SessionEventsScope,
-    input: SaveEventsInput
-  ): Promise<{ results: SaveEventResult[] }>;
+  saveEvents(scope: SessionEventsScope, input: SaveEventsInput): Promise<SaveSessionEventsResponse>;
 }
