@@ -521,7 +521,7 @@ Built-in evaluator factories you can use directly or as inspiration for custom e
   - `Criteria` -- scores output against user-defined criteria (most commonly used)
   - `Correctness` -- checks factual accuracy against expected output
   - `Groundedness` -- verifies claims are supported by provided context
-- **Trace-based** -- `createTraceBasedEvaluator` (token usage, latency, tool calls), `createSkillInvocationEvaluator` (checks that the agent read the skill's `SKILL.md` or loaded it with `load_skill`)
+- **Trace-based** -- `createTraceBasedEvaluator` (token usage, latency, tool calls), `createSkillInvocationEvaluator` (checks for a `filestore.read` of the skill's `SKILL.md` or a `load_skill` call for it; tool status is not checked, so a failed call can still count)
 - **IR (information retrieval)** -- `createIrEvaluators` (Precision@K, Recall@K, F1@K, HitRate@K, MRR@K, NDCG@K, MAP@K)
 - **Code evaluators** -- any inline `{ name, kind: 'CODE', direction, evaluate }` object
 
