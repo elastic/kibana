@@ -35,6 +35,12 @@ import {
  */
 export const HYDRATION_TICK_BUDGET_RESPONSES = 2;
 
+/**
+ * Share of the response cap a grown batch is projected to fill, assuming every row is as wide as
+ * the widest row seen. The rest is headroom for JSON escaping and the `alert_id` column.
+ */
+export const BATCH_TARGET_SHARE = 0.8;
+
 const LOGGED_OVERSIZED_ALERT_IDS = 10;
 
 interface RawAlertData {
@@ -65,6 +71,12 @@ export class HydrateAlertDataStep implements DispatcherStep {
    */
   private readonly maxResponseSizeBytes: number;
   private readonly tickBudgetBytes: number;
+
+  /**
+   * Alert ids per hydration query. Kept across ticks (the step is a singleton), so wide alert
+   * data does not cost the same failed queries on every tick.
+   */
+  private maxIdsPerQuery = ESQL_QUERY_ROW_LIMIT;
 
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
@@ -165,10 +177,10 @@ export class HydrateAlertDataStep implements DispatcherStep {
 
   /**
    * Runs the hydration queries one at a time, in `alertIds` order. When a response exceeds
-   * the response cap, the batch is halved and retried; the halved size is kept
-   * for the remaining batches, since they likely carry data as wide. Once the next response could
-   * overflow the tick budget, the remaining ids are deferred, but never before the
-   * first series is complete, so every tick makes progress.
+   * the response cap, the batch is halved and retried. After a full batch, the size grows to
+   * what its widest row projects to fit, but never back to a size that failed in this tick. The
+   * size carries over to the next tick. Once the next response could overflow the tick budget, the remaining
+   * ids are deferred, but never before the first series is complete, so every tick makes progress.
    */
   private async fetchAlertData({
     alertIds,
@@ -185,9 +197,9 @@ export class HydrateAlertDataStep implements DispatcherStep {
   }): Promise<FetchAlertDataResult> {
     const rows: RawAlertData[] = [];
     const oversizedAlertIds: string[] = [];
-    let maxIdsPerQuery = ESQL_QUERY_ROW_LIMIT;
     let chunkStart = 0;
     let hydratedBytes = 0;
+    let smallestFailedBatchSize = Infinity;
 
     for (const chunk of chunkInClauseLiterals(alertIds)) {
       let offset = 0;
@@ -198,32 +210,59 @@ export class HydrateAlertDataStep implements DispatcherStep {
           return { rows, oversizedAlertIds, deferredAlertIds: alertIds.slice(processed) };
         }
 
-        const batch = chunk.slice(offset, offset + maxIdsPerQuery);
+        const batch = chunk.slice(offset, offset + this.maxIdsPerQuery);
         try {
           const batchRows = await this.queryService.executeQuery<RawAlertData>({
             query: getAlertDataQuery(batch, bounds).query,
             abortSignal,
             maxResponseSize: this.maxResponseSizeBytes,
           });
+          let widestRowBytes = 0;
           for (const row of batchRows) {
             rows.push(row);
-            hydratedBytes += row.data_json?.length ?? 0;
+            const rowBytes = row.data_json?.length ?? 0;
+            hydratedBytes += rowBytes;
+            widestRowBytes = Math.max(widestRowBytes, rowBytes);
           }
           offset += batch.length;
+
+          // A short batch (end of a chunk) may be cut before the widest rows of a full one.
+          const projectedSize =
+            widestRowBytes === 0
+              ? ESQL_QUERY_ROW_LIMIT
+              : Math.min(
+                  ESQL_QUERY_ROW_LIMIT,
+                  Math.floor((BATCH_TARGET_SHARE * this.maxResponseSizeBytes) / widestRowBytes)
+                );
+          const canGrow =
+            batch.length === this.maxIdsPerQuery &&
+            projectedSize > batch.length &&
+            projectedSize < smallestFailedBatchSize;
+          if (canGrow) {
+            this.maxIdsPerQuery = projectedSize;
+            logger.debug({
+              message: () =>
+                `Widest hydrated row was ${widestRowBytes} bytes; growing from ${batch.length} ` +
+                `to ${projectedSize} alerts per query`,
+            });
+          }
         } catch (error) {
           if (!isMaximumResponseSizeExceededError(error)) throw error;
 
           if (batch.length === 1) {
             oversizedAlertIds.push(batch[0]);
             offset += 1;
+            // The failed sizes may all be due to this alert, so they no longer cap growth.
+            smallestFailedBatchSize = Infinity;
             continue;
           }
 
-          maxIdsPerQuery = Math.ceil(batch.length / 2);
+          smallestFailedBatchSize = Math.min(smallestFailedBatchSize, batch.length);
+          this.maxIdsPerQuery = Math.ceil(batch.length / 2);
           logger.debug({
             message: () =>
               `Hydration response for ${batch.length} alerts exceeded ` +
-              `${this.maxResponseSizeBytes} bytes; retrying with ${maxIdsPerQuery} alerts per query`,
+              `${this.maxResponseSizeBytes} bytes; retrying with ${this.maxIdsPerQuery} alerts per query`,
           });
         }
       }

@@ -8,7 +8,11 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
-import { HydrateAlertDataStep, HYDRATION_TICK_BUDGET_RESPONSES } from './hydrate_alert_data_step';
+import {
+  BATCH_TARGET_SHARE,
+  HydrateAlertDataStep,
+  HYDRATION_TICK_BUDGET_RESPONSES,
+} from './hydrate_alert_data_step';
 import { ESQL_QUERY_ROW_LIMIT } from '../queries';
 import type { SuppressedAlert } from '../state';
 import type { Alert } from '../types';
@@ -373,7 +377,7 @@ describe('HydrateAlertDataStep', () => {
       expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
-    it('keeps the halved batch size for the remaining alerts', async () => {
+    it('does not grow back to a batch size that failed in the same tick', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const { loggerService } = createLoggerService();
       const step = createStep(queryService);
@@ -433,6 +437,129 @@ describe('HydrateAlertDataStep', () => {
         `1 of 2 alerts have data larger than ${HYDRATION_MAX_RESPONSE_SIZE_BYTES} bytes; ` +
           'their data will be absent (first alert ids: ep-1)'
       );
+    });
+
+    it('grows the batch size again after skipping an oversized alert', async () => {
+      const { queryService, mockEsClient } = createQueryService();
+      const { loggerService } = createLoggerService();
+      const step = createStep(queryService);
+
+      const alerts = ['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6'].map((id) =>
+        createAlert({ alert_id: id })
+      );
+
+      mockEsClient.esql.query
+        .mockRejectedValueOnce(responseTooLarge())
+        .mockRejectedValueOnce(responseTooLarge())
+        .mockRejectedValueOnce(responseTooLarge())
+        .mockRejectedValueOnce(responseTooLarge())
+        .mockResolvedValue(createAlertDataResponse([]));
+
+      await step.execute(createDispatcherPipelineState({ dispatchable: alerts }), loggerService);
+
+      expect(queriedIds(mockEsClient)).toEqual([
+        ['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6'],
+        ['ep-1', 'ep-2', 'ep-3'],
+        ['ep-1', 'ep-2'],
+        ['ep-1'],
+        ['ep-2'],
+        ['ep-3', 'ep-4', 'ep-5', 'ep-6'],
+      ]);
+    });
+
+    describe('on the next tick', () => {
+      const MAX_RESPONSE_SIZE_BYTES = 1024 * 1024;
+
+      const alertsFrom = (first: number, count: number): Alert[] =>
+        Array.from({ length: count }, (_, index) =>
+          createAlert({ alert_id: `ep-${first + index}` })
+        );
+
+      // Halves 4 ids to 2 per query; the empty responses cannot grow it back to the failed size.
+      const learnTwoIdsPerQuery = async (
+        step: HydrateAlertDataStep,
+        mockEsClient: DeeplyMockedApi<ElasticsearchClient>
+      ) => {
+        mockEsClient.esql.query
+          .mockRejectedValueOnce(responseTooLarge())
+          .mockResolvedValue(createAlertDataResponse([]));
+        await step.execute(
+          createDispatcherPipelineState({ dispatchable: alertsFrom(1, 4) }),
+          createLoggerService().loggerService
+        );
+        expect(queriedIds(mockEsClient)).toEqual([
+          ['ep-1', 'ep-2', 'ep-3', 'ep-4'],
+          ['ep-1', 'ep-2'],
+          ['ep-3', 'ep-4'],
+        ]);
+        mockEsClient.esql.query.mockReset();
+      };
+
+      // A row this wide projects `idsPerQuery` ids into the target share of the cap.
+      const dataJsonProjecting = (idsPerQuery: number) =>
+        `{"a":"${'x'.repeat(
+          Math.floor((BATCH_TARGET_SHARE * MAX_RESPONSE_SIZE_BYTES) / idsPerQuery) - 8
+        )}"}`;
+
+      it('starts from the learned batch size and grows it to the row limit when rows are empty', async () => {
+        const { queryService, mockEsClient } = createQueryService();
+        const step = createStep(queryService, { maxResponseSize: '1mb' });
+        await learnTwoIdsPerQuery(step, mockEsClient);
+
+        mockEsClient.esql.query.mockResolvedValue(createAlertDataResponse([]));
+        await step.execute(
+          createDispatcherPipelineState({ dispatchable: alertsFrom(5, 8) }),
+          createLoggerService().loggerService
+        );
+
+        expect(queriedIds(mockEsClient)).toEqual([
+          ['ep-5', 'ep-6'],
+          ['ep-7', 'ep-8', 'ep-9', 'ep-10', 'ep-11', 'ep-12'],
+        ]);
+      });
+
+      it('keeps the batch size when the widest row projects no larger batch', async () => {
+        const { queryService, mockEsClient } = createQueryService();
+        const step = createStep(queryService, { maxResponseSize: '1mb' });
+        await learnTwoIdsPerQuery(step, mockEsClient);
+
+        mockEsClient.esql.query.mockResolvedValue(
+          createAlertDataResponse([{ alert_id: 'ep-0', data_json: dataJsonProjecting(2) }])
+        );
+        await step.execute(
+          createDispatcherPipelineState({ dispatchable: alertsFrom(5, 6) }),
+          createLoggerService().loggerService
+        );
+
+        expect(queriedIds(mockEsClient)).toEqual([
+          ['ep-5', 'ep-6'],
+          ['ep-7', 'ep-8'],
+          ['ep-9', 'ep-10'],
+        ]);
+      });
+
+      it('projects the batch size from the widest row, not the average', async () => {
+        const { queryService, mockEsClient } = createQueryService();
+        const step = createStep(queryService, { maxResponseSize: '1mb' });
+        await learnTwoIdsPerQuery(step, mockEsClient);
+
+        mockEsClient.esql.query.mockResolvedValue(
+          createAlertDataResponse([
+            { alert_id: 'ep-0', data_json: '{}' },
+            { alert_id: 'ep-00', data_json: dataJsonProjecting(4) },
+          ])
+        );
+        await step.execute(
+          createDispatcherPipelineState({ dispatchable: alertsFrom(5, 10) }),
+          createLoggerService().loggerService
+        );
+
+        expect(queriedIds(mockEsClient)).toEqual([
+          ['ep-5', 'ep-6'],
+          ['ep-7', 'ep-8', 'ep-9', 'ep-10'],
+          ['ep-11', 'ep-12', 'ep-13', 'ep-14'],
+        ]);
+      });
     });
   });
 
