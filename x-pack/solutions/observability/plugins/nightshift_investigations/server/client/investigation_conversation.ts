@@ -93,38 +93,23 @@ export const findInvestigationConversation = async (
 export interface InvestigationAutomation {
   id: string;
   name: string;
-  /** What the automation ran with when it started; omitted when it had none. */
-  instructions?: string;
 }
 
 // The investigation template's limits for these fields; a longer value would fail the creating write.
 const MAX_AUTOMATION_ID_LENGTH = 500;
 const MAX_AUTOMATION_NAME_LENGTH = 500;
-const MAX_AUTOMATION_INSTRUCTIONS_METADATA_LENGTH = 5_000;
 
 /**
- * The conversation metadata that records the automation that started an investigation. The
- * instructions are a snapshot: later edits to the automation do not change them.
+ * The conversation metadata that records the automation that started an investigation. The name
+ * is a snapshot: renaming the automation later does not change it.
  */
 export const toAutomationMetadata = ({
   id,
   name,
-  instructions,
-}: InvestigationAutomation): Record<string, string> => {
-  const trimmedInstructions = instructions?.trim();
-  return {
-    automation_id: id.slice(0, MAX_AUTOMATION_ID_LENGTH),
-    automation_name: name.slice(0, MAX_AUTOMATION_NAME_LENGTH),
-    ...(trimmedInstructions
-      ? {
-          automation_instructions: trimmedInstructions.slice(
-            0,
-            MAX_AUTOMATION_INSTRUCTIONS_METADATA_LENGTH
-          ),
-        }
-      : {}),
-  };
-};
+}: InvestigationAutomation): Record<string, string> => ({
+  automation_id: id.slice(0, MAX_AUTOMATION_ID_LENGTH),
+  automation_name: name.slice(0, MAX_AUTOMATION_NAME_LENGTH),
+});
 
 /** Severity a new investigation starts at, until the investigating agent rates it. */
 export const INITIAL_INVESTIGATION_SEVERITY = 'medium' as const;

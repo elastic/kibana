@@ -75,12 +75,5 @@ export const investigationTemplate: ConversationTemplate = {
         'Name of the automation that started the investigation, as it was when it started. Do not change.',
       max_length: 500,
     },
-    automation_instructions: {
-      input_type: 'TEXT',
-      required: false,
-      description:
-        'Instructions the automation ran this investigation with, as they were when it started. Do not change.',
-      max_length: 5_000,
-    },
   },
 };

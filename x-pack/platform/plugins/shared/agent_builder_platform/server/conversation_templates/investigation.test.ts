@@ -11,7 +11,6 @@ describe('investigation conversation template', () => {
   it.each([
     ['automation_id', 500],
     ['automation_name', 500],
-    ['automation_instructions', 5_000],
   ])('declares the optional bounded text field %s', (name, maxLength) => {
     expect(investigationTemplate.fields[name]).toMatchObject({
       input_type: 'TEXT',

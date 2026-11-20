@@ -1525,12 +1525,11 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
   });
 
   describe('records the automation that started a new investigation', () => {
-    const startFromAutomation = (instructions: string | undefined = '  Check payments first.  ') =>
+    const startFromAutomation = () =>
       makeClient().start(
         {
           subject: { type: 'alert', id: 'alert-1' },
           trigger_type: 'automatic',
-          instructions,
           context: { alerts: [makeAlert('alert-1')] },
         },
         {
@@ -1548,7 +1547,6 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
           metadata: {
             automation_id: 'automation-1',
             automation_name: 'Payments alerts',
-            automation_instructions: 'Check payments first.',
             severity: 'medium',
             workflow_execution_ids: ['exec-1'],
           },
@@ -1557,21 +1555,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
       expect(runInputs().context).toMatchObject({
         nightshift_automation_id: 'automation-1',
         nightshift_automation_name: 'Payments alerts',
-        nightshift_automation_instructions: 'Check payments first.',
       });
-    });
-
-    it('without instructions when the automation has none', async () => {
-      await startFromAutomation('   ');
-
-      const { metadata } = conversations.create.mock.calls[0][0];
-      expect(metadata).toEqual({
-        automation_id: 'automation-1',
-        automation_name: 'Payments alerts',
-        severity: 'medium',
-        workflow_execution_ids: ['exec-1'],
-      });
-      expect(runInputs().context.nightshift_automation_instructions).toBeUndefined();
     });
 
     it('not for an investigation no automation started', async () => {
@@ -1595,7 +1579,6 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
         nightshift_automation_id: 'automation-1',
       });
       expect(runInputs().context.nightshift_automation_name).toBeUndefined();
-      expect(runInputs().context.nightshift_automation_instructions).toBeUndefined();
     });
   });
 
@@ -2214,7 +2197,6 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         context: {
           nightshift_automation_id: 'automation-1',
           nightshift_automation_name: 'Payments alerts',
-          nightshift_automation_instructions: 'Check payments first.',
         },
       },
     });
@@ -2226,7 +2208,6 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         metadata: {
           automation_id: 'automation-1',
           automation_name: 'Payments alerts',
-          automation_instructions: 'Check payments first.',
           severity: 'medium',
           workflow_execution_ids: ['exec-1'],
         },

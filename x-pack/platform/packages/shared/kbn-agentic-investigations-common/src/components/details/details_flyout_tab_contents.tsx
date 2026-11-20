@@ -45,8 +45,6 @@ export interface OverviewTabProps {
 export interface OverviewSections {
   /** Trigger / subject card. Shown under "What's happened", with no section heading. */
   subjects?: React.ReactNode;
-  /** What started the investigation, such as an automation and its instructions. Shown right under the subjects. */
-  automation?: React.ReactNode;
   /**
    * Replaces the impact read from the conversation's `investigation_impact` attachment, for a
    * host that reads fresher impact itself. Absent, the tab renders the attachment.
@@ -72,7 +70,7 @@ export const OverviewTab = memo<OverviewTabProps>(
     sections = {},
     showLoadingSection = false,
   }) => {
-    const { subjects, automation, impact, conclusion, reasoning } = sections;
+    const { subjects, impact, conclusion, reasoning } = sections;
 
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -86,14 +84,6 @@ export const OverviewTab = memo<OverviewTabProps>(
 
         {subjects && (
           <EuiFlexItem data-test-subj="investigationOverviewSubjects">{subjects}</EuiFlexItem>
-        )}
-
-        {automation && (
-          <EuiFlexItem data-test-subj="investigationOverviewAutomation">
-            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.automation}>
-              {automation}
-            </DetailsBlock>
-          </EuiFlexItem>
         )}
 
         {impact ? (

@@ -12,18 +12,8 @@ import {
 } from './investigation_conversation';
 
 describe('toAutomationMetadata', () => {
-  it('records the automation with its trimmed instructions', () => {
-    expect(
-      toAutomationMetadata({ id: 'a1', name: 'Payments alerts', instructions: '  Look at it.\n' })
-    ).toEqual({
-      automation_id: 'a1',
-      automation_name: 'Payments alerts',
-      automation_instructions: 'Look at it.',
-    });
-  });
-
-  it.each([undefined, '', '  \n '])('leaves out instructions that are %p', (instructions) => {
-    expect(toAutomationMetadata({ id: 'a1', name: 'Payments alerts', instructions })).toEqual({
+  it('records the automation id and name', () => {
+    expect(toAutomationMetadata({ id: 'a1', name: 'Payments alerts' })).toEqual({
       automation_id: 'a1',
       automation_name: 'Payments alerts',
     });
@@ -33,12 +23,10 @@ describe('toAutomationMetadata', () => {
     const metadata = toAutomationMetadata({
       id: 'a'.repeat(600),
       name: 'n'.repeat(600),
-      instructions: 'i'.repeat(6000),
     });
 
     expect(metadata.automation_id).toHaveLength(500);
     expect(metadata.automation_name).toHaveLength(500);
-    expect(metadata.automation_instructions).toHaveLength(5000);
   });
 });
 

@@ -9,8 +9,10 @@ import React from 'react';
 import moment from 'moment';
 import { createEvent, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import type { ApplicationStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
+import type { InvestigationAutomation } from '../../../common/investigations/investigation';
 import type { InvestigationSubject } from '../../../common/subjects/subject';
 import { createSubjectAttachmentRenderer } from './subject_attachment_definition';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -430,18 +432,79 @@ const alertSubject = (id: string): SubjectRowData => ({
   },
 });
 
-const renderList = (subjects: SubjectRowData[], services: SubjectServices = {}) =>
+const renderList = (
+  subjects: SubjectRowData[],
+  services: SubjectServices = {},
+  automation?: InvestigationAutomation
+) =>
   render(
     <EuiProvider>
       <I18nProvider>
         <KibanaContextProvider services={services}>
-          <SubjectList subjects={subjects} />
+          <SubjectList subjects={subjects} automation={automation} />
         </KibanaContextProvider>
       </I18nProvider>
     </EuiProvider>
   );
 
 describe('SubjectList', () => {
+  describe('with the automation that started the investigation', () => {
+    const automation = { id: 'automation-1', name: 'Payments alerts' };
+    const getUrlForApp = jest.fn(
+      (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
+    );
+    const navigateToApp = jest.fn();
+    const application = { getUrlForApp, navigateToApp } as unknown as ApplicationStart;
+
+    beforeEach(() => jest.clearAllMocks());
+
+    it('adds a trigger row under the subjects that links to the automation', () => {
+      renderList([alertSubject('a-1')], { application }, automation);
+
+      const row = screen.getByTestId('investigationSubject-automation');
+      expect(row).toHaveTextContent(/^Payments alertsTrigger · Automation$/);
+      expect(row).toHaveAttribute('href', '/app/nightshift/automations/automation-1');
+      expect(screen.getByTestId('investigationSubjectList').lastElementChild).toBe(row);
+    });
+
+    it('opens the automation inside Kibana, and leaves a modified click to the browser', () => {
+      renderList([alertSubject('a-1')], { application }, automation);
+      const row = screen.getByTestId('investigationSubject-automation');
+
+      fireEvent.click(row);
+      expect(navigateToApp).toHaveBeenCalledWith('nightshift', {
+        path: '/automations/automation-1',
+      });
+
+      navigateToApp.mockClear();
+      fireEvent.click(row, { metaKey: true });
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('escapes the automation id in the link', () => {
+      renderList([], { application }, { id: 'a/b?c', name: 'Odd' });
+
+      expect(screen.getByTestId('investigationSubject-automation')).toHaveAttribute(
+        'href',
+        '/app/nightshift/automations/a%2Fb%3Fc'
+      );
+    });
+
+    it('shows the name without a link when the application service is missing', () => {
+      renderList([alertSubject('a-1')], {}, automation);
+
+      const row = screen.getByTestId('investigationSubject-automation');
+      expect(row).toHaveTextContent('Payments alerts');
+      expect(row).not.toHaveAttribute('href');
+    });
+
+    it('shows no automation row without an automation', () => {
+      renderList([alertSubject('a-1')], { application });
+
+      expect(screen.queryByTestId('investigationSubject-automation')).not.toBeInTheDocument();
+    });
+  });
+
   it('renders one row per subject when there is at most one alert', () => {
     renderList([alertSubject('a-1'), { type: 'manual', id: 'q-1', summary: 'Why is it slow?' }]);
 

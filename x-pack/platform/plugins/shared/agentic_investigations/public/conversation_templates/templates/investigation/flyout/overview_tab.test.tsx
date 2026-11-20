@@ -104,27 +104,7 @@ describe('InvestigationOverview', () => {
     );
   });
 
-  it('shows who started the investigation with the instructions it ran with', () => {
-    mockUseInvestigation.mockReturnValue({
-      data: {
-        ...investigation,
-        metadata: {
-          ...investigation.metadata,
-          automation: { id: 'automation-1', name: 'Payments alerts' },
-          automation_instructions: 'Check the payment service first.',
-        },
-      },
-    });
-
-    renderOverview();
-
-    const block = screen.getByTestId('investigationOverviewAutomation');
-    expect(block).toHaveTextContent('Started by');
-    expect(block).toHaveTextContent('Payments alerts');
-    expect(block).toHaveTextContent('Check the payment service first.');
-  });
-
-  it('shows the automation name without an instructions line when it had none', () => {
+  it('shows the automation that started the investigation as part of the trigger, with a link and no instructions', () => {
     mockUseInvestigation.mockReturnValue({
       data: {
         ...investigation,
@@ -137,21 +117,38 @@ describe('InvestigationOverview', () => {
 
     renderOverview();
 
-    expect(screen.getByTestId('investigationOverviewAutomation')).toHaveTextContent(
+    expect(screen.getByTestId('investigationSubjectList')).toContainElement(
+      screen.getByTestId('investigationSubject-automation')
+    );
+    expect(screen.getByTestId('investigationSubject-automation')).toHaveTextContent(
       'Payments alerts'
     );
-    expect(
-      screen.queryByTestId('investigationOverviewAutomationInstructions')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Started by')).not.toBeInTheDocument();
   });
 
-  it('shows no "Started by" block for an investigation no automation started', () => {
+  it('shows the automation even when the investigation has no subject', () => {
+    mockUseInvestigation.mockReturnValue({
+      data: {
+        ...investigation,
+        subjects: [],
+        metadata: {
+          ...investigation.metadata,
+          automation: { id: 'automation-1', name: 'Payments alerts' },
+        },
+      },
+    });
+
+    renderOverview();
+
+    expect(screen.getByTestId('investigationSubject-automation')).toBeInTheDocument();
+  });
+
+  it('shows no automation row for an investigation no automation started', () => {
     mockUseInvestigation.mockReturnValue({ data: investigation });
 
     renderOverview();
 
-    expect(screen.queryByTestId('investigationOverviewAutomation')).not.toBeInTheDocument();
-    expect(screen.queryByText('Started by')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationSubject-automation')).not.toBeInTheDocument();
   });
 
   it('leaves the hypothesis tree out without hypotheses', () => {

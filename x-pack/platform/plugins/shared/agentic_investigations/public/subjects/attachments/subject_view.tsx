@@ -10,15 +10,17 @@ import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import { EuiIcon, EuiIconTip, EuiPanel, EuiText, euiTextTruncate, useEuiTheme } from '@elastic/eui';
+import type { InvestigationAutomation } from '../../../common/investigations/investigation';
 import type {
   InvestigationSubject,
   InvestigationSubjectType,
 } from '../../../common/subjects/subject';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
 import { getSubjectDisplayType, getSubjectTitle, type SubjectRowData } from './subject_title';
-import { useAlertsListLink, useSubjectLink } from './subject_link';
+import { useAlertsListLink, useAutomationLink, useSubjectLink } from './subject_link';
 import { useSubjectFlyout } from './use_subject_flyout';
 import {
+  AUTOMATION_TRIGGER_LABEL,
   OPEN_IN_FLYOUT,
   OPEN_NEW_TAB,
   OPENS_IN_NEW_TAB,
@@ -361,13 +363,34 @@ const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) =
   );
 };
 
-/**
- * An investigation's subjects in one bordered list. Several alerts collapse into one "N alerts"
- * row, which opens the alerts list filtered to them.
- */
-export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({
-  subjects: allSubjects,
+/** The automation that started an investigation, as a row that opens the automation. */
+const AutomationRow: React.FC<{ automation: InvestigationAutomation }> = ({
+  automation: { id, name },
 }) => {
+  const { href, onClick } = useAutomationLink(id);
+
+  return (
+    <CompactRow
+      iconType="bolt"
+      tone="neutral"
+      title={name}
+      description={AUTOMATION_TRIGGER_LABEL}
+      href={href}
+      onLinkClick={onClick}
+      data-test-subj="investigationSubject-automation"
+    />
+  );
+};
+
+/**
+ * An investigation's subjects in one bordered list, followed by the automation that started it,
+ * if any. Several alerts collapse into one "N alerts" row, which opens the alerts list filtered
+ * to them.
+ */
+export const SubjectList: React.FC<{
+  subjects: SubjectRowData[];
+  automation?: InvestigationAutomation;
+}> = ({ subjects: allSubjects, automation }) => {
   const { euiTheme } = useEuiTheme();
   const subjects = useMemo(
     () =>
@@ -405,6 +428,7 @@ export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({
       data-test-subj="investigationSubjectList"
     >
       {rows}
+      {automation && <AutomationRow automation={automation} />}
     </EuiPanel>
   );
 };

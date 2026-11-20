@@ -135,13 +135,7 @@ const toAutomationMetadataFromContext = (context: unknown): Record<string, strin
   }
   const id = asString(context.nightshift_automation_id);
   const name = asString(context.nightshift_automation_name);
-  return id && name
-    ? toAutomationMetadata({
-        id,
-        name,
-        instructions: asString(context.nightshift_automation_instructions),
-      })
-    : undefined;
+  return id && name ? toAutomationMetadata({ id, name }) : undefined;
 };
 
 function asLifecycleCorrelationId(v: unknown): string | undefined {
@@ -571,7 +565,7 @@ export class NightshiftInvestigationsClient {
     }: {
       automationBudget?: AutomationBudget;
       automationId?: string;
-      /** Recorded on a new investigation with the automation's instructions, so it shows what started it. */
+      /** Recorded on a new investigation, so it shows what started it. */
       automationName?: string;
       entryPoint: InvestigationEntryPoint;
     }
@@ -698,7 +692,7 @@ export class NightshiftInvestigationsClient {
       // round) must neither overwrite it nor duplicate it.
       automationMetadata =
         !isFollowUp && automationId && automationName
-          ? toAutomationMetadata({ id: automationId, name: automationName, instructions })
+          ? toAutomationMetadata({ id: automationId, name: automationName })
           : undefined;
       const inputs = {
         message: buildInvestigationRoundMessage({
@@ -720,7 +714,6 @@ export class NightshiftInvestigationsClient {
           nightshift_automation_id: automationId,
           // The run's `_ensure` step creates the conversation when this start has not yet.
           nightshift_automation_name: automationMetadata?.automation_name,
-          nightshift_automation_instructions: automationMetadata?.automation_instructions,
           is_follow_up: isFollowUp,
           source: resolvedSubject.type,
           [`${resolvedSubject.type}_id`]: resolvedSubject.id,

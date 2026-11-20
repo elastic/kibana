@@ -51,6 +51,12 @@ export const subjectTriggerLabel = (type: InvestigationSubjectType): string =>
     values: { type: SUBJECT_TYPE_LABELS[type] },
   });
 
+/** The line under the automation row's title: the automation started the investigation. */
+export const AUTOMATION_TRIGGER_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.subjects.automationTriggerLabel',
+  { defaultMessage: 'Trigger · Automation' }
+);
+
 export const OPENS_IN_NEW_TAB = i18n.translate(
   'xpack.agenticInvestigations.subjects.opensInNewTab',
   { defaultMessage: 'Opens in a new tab' }

@@ -11,7 +11,11 @@ import {
   ALERTING_V2_EPISODES_LOCATOR,
   ALERTING_V2_EPISODES_STATUS_ALL,
 } from '@kbn/alerting-v2-constants';
-import { ALERTS_LOCATOR_ID, createObservabilityAlertingV2Host } from '@kbn/deeplinks-observability';
+import {
+  ALERTS_LOCATOR_ID,
+  NIGHTSHIFT_APP_ID,
+  createObservabilityAlertingV2Host,
+} from '@kbn/deeplinks-observability';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { isUniversalAlertSnapshot } from '../../../common/subjects/subject';
@@ -210,6 +214,27 @@ export const useAlertsListLink = (alerts: readonly SubjectRowData[]): SubjectLin
 
 /** Alert ids are uuids, so a comma never appears in one. */
 const ALERT_IDS_KEY_SEPARATOR = ',';
+
+/**
+ * Where an automation's page opens: the automation's details in the Nightshift app. Without the
+ * app's URL (no `application` service) there is no link and the row stays plain text.
+ */
+export const useAutomationLink = (automationId: string): SubjectLink => {
+  const { application } = useKibana<SubjectServices>().services;
+  const path = `/automations/${encodeURIComponent(automationId)}`;
+  const href = application?.getUrlForApp(NIGHTSHIFT_APP_ID, { path });
+  const onClick = useCallback(
+    (event: React.MouseEvent) => {
+      if (!application || isModifiedClick(event)) {
+        return;
+      }
+      event.preventDefault();
+      void application.navigateToApp(NIGHTSHIFT_APP_ID, { path });
+    },
+    [application, path]
+  );
+  return { href, onClick: href === undefined ? undefined : onClick, isExternal: false };
+};
 
 /** Resolves a locator target to a URL, and to a click that navigates to it inside Kibana. */
 const useLocatorLink = (

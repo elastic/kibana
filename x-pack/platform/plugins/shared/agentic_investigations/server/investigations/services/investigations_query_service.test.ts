@@ -163,18 +163,16 @@ const searchFilter = (client: { search: jest.Mock }): string =>
   toKqlExpression(client.search.mock.calls[0][0].filter as KueryNode);
 
 describe('toMetadata', () => {
-  it('reads the automation that started the investigation and its instructions', () => {
+  it('reads the automation that started the investigation', () => {
     expect(
       toMetadata({
         status: 'open',
         automation_id: 'automation-1',
         automation_name: 'Payments alerts',
-        automation_instructions: 'Check the payment service first.',
       })
     ).toEqual({
       status: 'open',
       automation: { id: 'automation-1', name: 'Payments alerts' },
-      automation_instructions: 'Check the payment service first.',
     });
   });
 
@@ -186,17 +184,6 @@ describe('toMetadata', () => {
     expect(toMetadata({ status: 'open', automation_name: '', automation_id: 'a' })).toEqual({
       status: 'open',
     });
-  });
-
-  it('reads an automation without instructions', () => {
-    expect(
-      toMetadata({
-        status: 'open',
-        automation_id: 'automation-1',
-        automation_name: 'Payments alerts',
-        automation_instructions: '',
-      })
-    ).toEqual({ status: 'open', automation: { id: 'automation-1', name: 'Payments alerts' } });
   });
 });
 
