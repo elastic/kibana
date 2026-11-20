@@ -10,12 +10,15 @@
 import { z } from '@kbn/zod/v4';
 
 /** Extends a spoke event schema with the hub fields published on the bus. */
-export const connectorEventBusSchema = <TShape extends z.ZodRawShape>(
+export const connectorEventSchema = <TShape extends z.ZodRawShape>(
   eventSchema: z.ZodObject<TShape>
 ) =>
   eventSchema.extend({
     connectorId: z.string().describe('Id of the connector instance that received this event.'),
-    connectorTypeId: z.string().describe('Connector type.'),
+    connectorTypeId: z.string().describe('Connector type id (for example .inboundWebhook).'),
     spaceId: z.string().describe('Kibana space of the connector instance.'),
-    correlationKey: z.string().optional().describe('Correlation key supplied by the connector.'),
+    correlationKey: z
+      .string()
+      .optional()
+      .describe('Optional correlation key supplied by the connector for this ingest.'),
   });

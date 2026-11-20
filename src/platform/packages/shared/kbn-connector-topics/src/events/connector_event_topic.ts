@@ -9,7 +9,7 @@
 
 import type { z } from '@kbn/zod/v4';
 
-import type { connectorEventBusSchema } from './connector_event_bus_schema';
+import type { connectorEventSchema } from './connector_event_schema';
 
 /**
  * A spoke event passed to the topic helper. `name` is the event id.
@@ -25,5 +25,5 @@ export interface ConnectorEventTopicDefinition<
 
 /** Data published on a connector event topic: the spoke payload plus the hub fields. */
 export type ConnectorEventBusData<TSchema extends z.ZodObject> = z.infer<
-  ReturnType<typeof connectorEventBusSchema<TSchema['shape']>>
+  ReturnType<typeof connectorEventSchema<TSchema['shape']>>
 >;

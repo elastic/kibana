@@ -10,10 +10,7 @@ import type { ConnectorSpec } from '@kbn/connector-specs';
 import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
-import {
-  registerConnectorEventTriggers,
-  toConnectorEventTriggerSchema,
-} from './register_connector_event_triggers';
+import { registerConnectorEventTriggers } from './register_connector_event_triggers';
 
 const createOutboundSpec = (): ConnectorSpec => ({
   metadata: {
@@ -133,36 +130,5 @@ describe('registerConnectorEventTriggers', () => {
         );
       }, 0)
     );
-  });
-});
-
-describe('toConnectorEventTriggerSchema', () => {
-  const schema = toConnectorEventTriggerSchema(z.object({ body: z.unknown() }));
-
-  it('accepts the bridge-enriched payload', () => {
-    expect(
-      schema.safeParse({
-        body: { eventType: 'order.created' },
-        connectorId: 'sales-ingress',
-        connectorTypeId: '.inboundWebhook',
-        spaceId: 'default',
-        correlationKey: 'corr-1',
-      }).success
-    ).toBe(true);
-  });
-
-  it('accepts a payload without the optional correlationKey', () => {
-    expect(
-      schema.safeParse({
-        body: {},
-        connectorId: 'sales-ingress',
-        connectorTypeId: '.inboundWebhook',
-        spaceId: 'default',
-      }).success
-    ).toBe(true);
-  });
-
-  it('rejects a payload missing connector instance fields', () => {
-    expect(schema.safeParse({ body: {} }).success).toBe(false);
   });
 });

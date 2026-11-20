@@ -7,10 +7,10 @@
 
 import { connectorSpecHasEvents, connectorsSpecs } from '@kbn/connector-specs';
 import type { ConnectorSpec } from '@kbn/connector-specs';
+import { connectorEventSchema } from '@kbn/connector-topics';
 import { i18n } from '@kbn/i18n';
 import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { z } from '@kbn/zod/v4';
 
 type ConnectorSpecWithEvents = ConnectorSpec & {
   events: NonNullable<ConnectorSpec['events']>;
@@ -36,38 +36,6 @@ const formatConnectorEventTriggerTitle = (displayName: string, eventTitle: strin
     values: { displayName: connectorTriggerDisplayName(displayName), eventTitle },
   });
 
-/**
- * Hub/bridge fields always present on connector-event payloads at emit time.
- * Spec `eventSchema` is the spoke mapping only (e.g. `body`); Workflows must
- * accept the enriched object or `emitEvent` validation rejects the event.
- */
-export const toConnectorEventTriggerSchema = (specEventSchema: z.ZodObject): z.ZodObject =>
-  specEventSchema.extend({
-    connectorId: z.string().describe(
-      i18n.translate('workflows.triggers.connectorEvent.connectorIdDescription', {
-        defaultMessage: 'Id of the connector instance that received this event.',
-      })
-    ),
-    connectorTypeId: z.string().describe(
-      i18n.translate('workflows.triggers.connectorEvent.connectorTypeIdDescription', {
-        defaultMessage: 'Connector type id (for example .inboundWebhook).',
-      })
-    ),
-    spaceId: z.string().describe(
-      i18n.translate('workflows.triggers.connectorEvent.spaceIdDescription', {
-        defaultMessage: 'Kibana space of the connector instance.',
-      })
-    ),
-    correlationKey: z
-      .string()
-      .optional()
-      .describe(
-        i18n.translate('workflows.triggers.connectorEvent.correlationKeyDescription', {
-          defaultMessage: 'Optional correlation key supplied by the connector for this ingest.',
-        })
-      ),
-  });
-
 export const getConnectorEventTriggerDefinitions = ({
   inboundEventsEnabled,
   specs = Object.values(connectorsSpecs),
@@ -87,7 +55,7 @@ export const getConnectorEventTriggerDefinitions = ({
         id: eventDefinition.eventId,
         title: formatConnectorEventTriggerTitle(spec.metadata.displayName, eventDefinition.title),
         description: eventDefinition.description,
-        eventSchema: toConnectorEventTriggerSchema(eventDefinition.eventSchema),
+        eventSchema: connectorEventSchema(eventDefinition.eventSchema),
         stability: 'tech_preview' as const,
         requiresConnectorId: true,
       }))

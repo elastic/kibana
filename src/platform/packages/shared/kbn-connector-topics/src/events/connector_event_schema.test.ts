@@ -9,13 +9,13 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { connectorEventBusSchema } from './connector_event_bus_schema';
+import { connectorEventSchema } from './connector_event_schema';
 import { inboundWebhookReceived } from './inbound_webhook';
 
 const spokeDescription = 'Raw inbound JSON body. Filter with KQL on event.body.<path>.';
 
-describe('connectorEventBusSchema', () => {
-  const schema = connectorEventBusSchema(inboundWebhookReceived.eventSchema);
+describe('connectorEventSchema', () => {
+  const schema = connectorEventSchema(inboundWebhookReceived.eventSchema);
 
   it('accepts the hub fields and the spoke payload', () => {
     expect(
@@ -50,7 +50,7 @@ describe('connectorEventBusSchema', () => {
   });
 
   it('keeps a described spoke field when the schema is built inline', () => {
-    const extended = connectorEventBusSchema(
+    const extended = connectorEventSchema(
       z.object({
         text: z.string().describe('Message text.'),
       })
