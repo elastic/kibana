@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { validateAccessPolicy } from '@kbn/ols';
 import { deepFreeze } from '@kbn/std';
 import type { SavedObjectsType, ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 
@@ -72,6 +73,8 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistryInternal
         `Type ${type.name}: Cannot specify 'supportsAccessControl' as 'true' unless 'namespaceType' is either 'multiple' or 'multiple-isolated'.`
       );
     }
+    validateAccessPolicyType(type);
+
     const supportsAccessControl = this.accessControlEnabled ? type.supportsAccessControl : false;
 
     const typeWithAccessControl = { ...type, supportsAccessControl };
@@ -164,6 +167,11 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistryInternal
     return this.types.get(type)?.supportsAccessControl ?? false;
   }
 
+  /** {@inheritDoc ISavedObjectTypeRegistry.getAccessPolicy} */
+  public getAccessPolicy(type: string) {
+    return this.types.get(type)?.accessPolicy;
+  }
+
   /** {@inheritDoc ISavedObjectTypeRegistryInternal.setAccessControlEnabled} */
   public setAccessControlEnabled(enabled: boolean) {
     this.accessControlEnabled = enabled;
@@ -174,6 +182,42 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistryInternal
     return this.accessControlEnabled;
   }
 }
+
+/**
+ * Checks a type's object-level security (OLS) access policy. The policy is checked and registered
+ * whether or not OLS is enabled, so that the stored ACLs a type relies on never depend on runtime
+ * configuration.
+ */
+const validateAccessPolicyType = ({
+  name,
+  namespaceType,
+  supportsAccessControl,
+  accessPolicy,
+}: SavedObjectsType) => {
+  if (!accessPolicy) {
+    return;
+  }
+
+  // An object with a policy belongs to one space, so access decisions never span spaces.
+  if (namespaceType !== 'multiple-isolated') {
+    throw new Error(
+      `Type ${name}: Cannot specify 'accessPolicy' unless 'namespaceType' is 'multiple-isolated'.`
+    );
+  }
+
+  // A type uses one access model: the platform ACL or `accessControl`.
+  if (supportsAccessControl) {
+    throw new Error(
+      `Type ${name}: Cannot specify both 'accessPolicy' and 'supportsAccessControl'.`
+    );
+  }
+
+  try {
+    validateAccessPolicy(accessPolicy);
+  } catch (error) {
+    throw new Error(`Type ${name}: Invalid 'accessPolicy'. ${error.message}`);
+  }
+};
 
 const validateType = ({ name, management, hidden, hiddenFromHttpApis }: SavedObjectsType) => {
   if (management) {

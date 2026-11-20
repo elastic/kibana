@@ -274,6 +274,11 @@ transfer, and, when a replacement repairs an invalid ACL, its owner and every en
 listed, so that a deleted or disabled recipient never blocks an unrelated change. A caller who becomes the owner of a
 new or claimed object isn't listed either.
 
+The package doesn't check feature privileges. A caller that checks them returns what it finds with the stored change,
+as an `AclWarning`: an `entry` warning names a grant whose recipient lacks the privileges of its access, and an
+`owner` warning names a new owner who lacks the privileges to manage access or transfer the object. Neither blocks the change, because the
+access applies as soon as the principal gets the privileges.
+
 `prepareInitialAcl` builds the ACL of a new object. The caller becomes the owner, general access is the requested
 value or the type's default, and every entry gets the current time as `added_at`. A request without a principal
 creates the object without an ACL, so the type's default applies. Asking for anything else, such as entries or other

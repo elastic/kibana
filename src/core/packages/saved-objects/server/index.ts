@@ -15,6 +15,7 @@ export type {
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
+  SavedObjectsOlsExtensionFactory,
   SavedObjectsExtensionFactory,
 } from './src/client_factory';
 export type { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './src/contracts';
@@ -133,11 +134,18 @@ export type {
   SetAccessControlToWriteParams,
 } from './src/extensions/security';
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
+export {
+  getOlsObjectKey,
+  type OlsObject,
+  type OlsRepositoryOperation,
+  type ISavedObjectsOlsExtension,
+} from './src/extensions/ols';
 export type { SavedObjectsExtensions } from './src/extensions/extensions';
 export {
   ENCRYPTION_EXTENSION_ID,
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
+  OLS_EXTENSION_ID,
 } from './src/extensions/extensions';
 export {
   SavedObjectsErrorHelpers,

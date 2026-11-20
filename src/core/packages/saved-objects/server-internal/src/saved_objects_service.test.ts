@@ -35,6 +35,7 @@ import type {
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
+  SavedObjectsOlsExtensionFactory,
 } from '@kbn/core-saved-objects-server';
 import { configServiceMock } from '@kbn/config-mocks';
 import type { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
@@ -359,6 +360,32 @@ describe('SavedObjectsService', () => {
           })
         );
       });
+
+      it('registers the OLS extension to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        const olsExtension: jest.Mocked<SavedObjectsOlsExtensionFactory> = jest.fn();
+        setup.setOlsExtension(olsExtension);
+
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({ olsExtensionFactory: olsExtension })
+        );
+      });
+
+      it('throws when the OLS extension is set twice', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        setup.setOlsExtension(jest.fn());
+
+        expect(() => setup.setOlsExtension(jest.fn())).toThrowErrorMatchingInlineSnapshot(
+          `"OLS extension is already set, and can only be set once"`
+        );
+      });
     });
 
     describe('#registerType', () => {
@@ -656,6 +683,12 @@ describe('SavedObjectsService', () => {
           });
         }).toThrowErrorMatchingInlineSnapshot(
           `"cannot call \`registerType\` after service startup."`
+        );
+
+        expect(() => {
+          setup.setOlsExtension(jest.fn());
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"cannot call \`setOlsExtension\` after service startup."`
         );
       });
 
@@ -968,6 +1001,22 @@ describe('SavedObjectsService', () => {
 
           expect(extensions.securityExtension).toBeUndefined();
           expect(securityFactory).not.toHaveBeenCalled();
+        });
+
+        it('never includes the OLS extension, because internal clients are system paths', async () => {
+          const coreContext = createCoreContext();
+          const soService = new SavedObjectsService(coreContext);
+          const setup = await soService.setup(createSetupDeps());
+
+          const olsFactory = jest.fn().mockReturnValue({});
+          setup.setOlsExtension(olsFactory);
+
+          await soService.start(createStartDeps());
+
+          const extensions = (soService as any).getInternalExtensions([]);
+
+          expect(extensions).toHaveProperty('olsExtension', undefined);
+          expect(olsFactory).not.toHaveBeenCalled();
         });
 
         it('never includes security extension regardless of excludedExtensions parameter', async () => {
