@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import moment from 'moment';
 import { TestProviders } from '../../../../../common/mock';
 import { EnrichmentRangePicker } from './threat_intelligence_view_enrichment_range_picker';
 import {
@@ -40,16 +41,25 @@ describe('EnrichmentRangePicker', () => {
   });
 
   it('invokes setRange', async () => {
-    render(
+    const { container } = render(
       <TestProviders>
         <EnrichmentRangePicker {...rangePickerProps} />
       </TestProviders>
     );
 
+    const startInput = container.querySelector('input.start-picker') as HTMLInputElement;
+    await userEvent.clear(startInput);
+    await userEvent.type(startInput, '08/10/2019 06:29 PM');
+
     await userEvent.click(
       screen.getByTestId(THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID)
     );
 
-    expect(setRangeSpy).toHaveBeenCalled();
+    expect(setRangeSpy).toHaveBeenCalledTimes(1);
+    expect(setRangeSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: moment('08/10/2019 06:29 PM', 'MM/DD/YYYY hh:mm A').toISOString(),
+      })
+    );
   });
 });

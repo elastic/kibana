@@ -381,7 +381,13 @@ export class Simulator {
    * Return DOM nodes that match `selector`.
    */
   private domNodes(selector: string): HTMLElement[] {
-    return Array.from(document.body.querySelectorAll<HTMLElement>(selector));
+    // Scope to this instance's container so multiple simulators don't see each other's nodes.
+    // EUI popovers render in portals attached to `document.body`, so include those as well.
+    const roots: ParentNode[] = [
+      this.renderResult.container,
+      ...Array.from(document.body.querySelectorAll<HTMLElement>('[data-euiportal="true"]')),
+    ];
+    return roots.flatMap((root) => Array.from(root.querySelectorAll<HTMLElement>(selector)));
   }
 
   /**
