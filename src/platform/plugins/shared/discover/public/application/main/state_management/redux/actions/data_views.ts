@@ -10,7 +10,7 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { differenceBy } from 'lodash';
 import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
-import { createInternalStateAsyncThunk } from '../utils';
+import { createInternalStateAsyncThunk, getMemoizedRequest } from '../utils';
 import type { RuntimeStateManager } from '../runtime_state';
 
 export const loadDataViewList = createInternalStateAsyncThunk(
@@ -23,18 +23,14 @@ const initialDataViewListRequests = new WeakMap<RuntimeStateManager, Promise<voi
 /** Loads the data view list, once per Discover instance. */
 export const loadDataViewListOnce: InternalStateThunkActionCreator<[], Promise<void>> = () =>
   function loadDataViewListOnceThunkFn(dispatch, _, { runtimeStateManager }) {
-    let request = initialDataViewListRequests.get(runtimeStateManager);
-
-    if (!request) {
-      request = dispatch(loadDataViewList()).then((action) => {
+    return getMemoizedRequest(initialDataViewListRequests, runtimeStateManager, () =>
+      dispatch(loadDataViewList()).then((action) => {
+        // A failed request is retried by the next caller.
         if (loadDataViewList.rejected.match(action)) {
           initialDataViewListRequests.delete(runtimeStateManager);
         }
-      });
-      initialDataViewListRequests.set(runtimeStateManager, request);
-    }
-
-    return request;
+      })
+    );
   };
 
 export const setAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> = (adHocDataViews) =>

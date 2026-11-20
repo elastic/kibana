@@ -52,8 +52,9 @@ export interface OpsConfigType {
 const blockThresholdBounds = { min: '200ms', max: '60s' } as const;
 // Low enough for a profile to finish before a liveness probe restarts a blocked Kibana.
 const startAfterBounds = { min: '2s', max: '4m' } as const;
-// A longer capture makes a larger profile, which the worker holds in memory.
-const maxDurationBounds = { min: '1s', max: '30s' } as const;
+// A longer capture makes a larger profile, which the worker holds in memory. A shorter one can
+// end before the profiler's ~1.5s cold start on Serverless, leaving it empty.
+const maxDurationBounds = { min: '2s', max: '10s' } as const;
 const cooldownBounds = { min: '10s', max: '24h' } as const;
 
 const configSchema = schema.object({

@@ -187,7 +187,7 @@ describe('nightshift-investigations scout hook', () => {
     expect(runHook({ sandbox: { apiKey: 'REPLACE_ME', url: 'REPLACE_ME' } }).output).toEqual({});
   });
 
-  it('rejects sandbox settings without an API key instead of silently running only smoke', () => {
+  it('rejects sandbox settings without an API key instead of silently dropping them', () => {
     const { status, stderr } = runHook({ sandbox: { url: 'https://sandbox.example.com' } });
     expect(status).toBe(1);
     expect(stderr).toContain('sandbox host port set without an API key');
@@ -247,6 +247,32 @@ describe('nightshift-investigations scout hook', () => {
       rmSync(shimDir, { recursive: true, force: true });
     }
   });
+  it('exports NIGHTSHIFT_DECISION_TREES only when the reinforcement micro-eval is selected', () => {
+    expect(
+      runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASETS: 'reinforcement' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBe('true');
+    expect(
+      runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASETS: ' reinforcement ' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBe('true');
+    expect(
+      runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASETS: 'trace-only' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBeUndefined();
+  });
+
+  it('exports NIGHTSHIFT_DECISION_TREES on the reinforcement CI shard only', () => {
+    expect(
+      runHook({ sandbox: SANDBOX }, { EVAL_SHARD_ID: 'reinforcement' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBe('true');
+    expect(
+      runHook({ sandbox: SANDBOX }, { EVAL_SHARD_ID: 'customer0' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBeUndefined();
+  });
+
   it('keeps dataset selection out of the server fingerprint', () => {
     expect(runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASET_NAME: 'first' }).output).toEqual(
       runHook(
@@ -256,7 +282,7 @@ describe('nightshift-investigations scout hook', () => {
     );
   });
 
-  it('leaves dataset validation to Playwright, including smoke-only startup', () => {
+  it('leaves dataset validation to Playwright, including startup without a sandbox', () => {
     const result = runHook(
       {},
       { NIGHTSHIFT_DATASET_NAME: 'stored', NIGHTSHIFT_EXAMPLES_FILE: 'examples.json' }
@@ -480,6 +506,17 @@ describe('ORCA CI shard', () => {
       NIGHTSHIFT_ES_API_KEY: existing.nightshift.telemetry.apiKey,
     });
     expect(output.env).not.toHaveProperty('NIGHTSHIFT_ORCA_ES_PASSWORD');
+  });
+  it('starts the reinforcement shard with the default connector set and decision trees', () => {
+    const { output } = runHook(
+      { ...existing, nightshiftOrcaEs: orca },
+      { EVAL_SHARD_ID: 'reinforcement' }
+    );
+    expect(output.env).toEqual({
+      ...runHook({ ...existing, nightshiftOrcaEs: orca }, { EVAL_SHARD_ID: 'customer0' }).output
+        .env,
+      NIGHTSHIFT_DECISION_TREES: 'true',
+    });
   });
   it('selects ORCA from NIGHTSHIFT_DATASETS for local runs outside CI', () => {
     const { output, status } = runHook(

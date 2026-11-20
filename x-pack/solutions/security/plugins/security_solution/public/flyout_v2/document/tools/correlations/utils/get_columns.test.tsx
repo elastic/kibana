@@ -11,13 +11,10 @@ import userEvent from '@testing-library/user-event';
 import { formatDate } from '@elastic/eui';
 import { EntityStoreEuidApiProvider } from '@kbn/entity-store/public';
 import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TestProviders } from '../../../../../common/mock';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { mockFlyoutApi } from '../../../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { getColumns, TIMESTAMP_DATE_FORMAT } from './get_columns';
 
-jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/hooks/is_in_security_app', () => ({
   useIsInSecurityApp: () => false,
@@ -31,7 +28,6 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   useUiSetting: jest.fn(() => false),
 }));
 
-const scopeId = 'test-scope';
 const dataTestSubj = 'TEST';
 const mockOnShowAlert = jest.fn();
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
@@ -46,7 +42,6 @@ const renderColumn = (element: React.ReactElement) =>
 describe('getColumns', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     useUserPrivilegesMock.mockReturnValue({
       timelinePrivileges: {
         read: true,
@@ -61,7 +56,6 @@ describe('getColumns', () => {
 
   it('returns 5 columns', () => {
     const columns = getColumns({
-      scopeId,
       dataTestSubj,
       onShowAlert: mockOnShowAlert,
     });
@@ -73,7 +67,6 @@ describe('getColumns', () => {
 
     it('renders the preview button with correct test id', () => {
       const [previewColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
       });
@@ -88,7 +81,6 @@ describe('getColumns', () => {
 
     it('calls onShowAlert with row id and index when clicked', async () => {
       const [previewColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
       });
@@ -110,7 +102,6 @@ describe('getColumns', () => {
         'kibana.alert.rule.name': 'My Detection Rule',
       };
       const [previewColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
       });
@@ -133,7 +124,6 @@ describe('getColumns', () => {
   describe('timestamp column', () => {
     it('renders formatted date', () => {
       const [, timestampColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
       });
@@ -150,7 +140,6 @@ describe('getColumns', () => {
 
     it('has field @timestamp', () => {
       const [, timestampColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
       });
@@ -164,29 +153,10 @@ describe('getColumns', () => {
       'kibana.alert.rule.uuid': 'rule-uuid-123',
     };
 
-    it('renders rule name as a PreviewLink when useLegacyExpandableFlyout is true', () => {
+    it('renders rule name as an OpenFlyoutLink', () => {
       const [, , ruleColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
-        useLegacyExpandableFlyout: true,
-      });
-      const { render: renderCell } = ruleColumn as {
-        render: (row: Record<string, unknown>) => React.ReactElement;
-      };
-
-      renderColumn(renderCell(row));
-
-      expect(screen.getByText('My Detection Rule')).toBeInTheDocument();
-      expect(screen.getByTestId(`${dataTestSubj}RulePreview`)).toBeInTheDocument();
-    });
-
-    it('renders rule name as an OpenFlyoutLink when useLegacyExpandableFlyout is false', () => {
-      const [, , ruleColumn] = getColumns({
-        scopeId,
-        dataTestSubj,
-        onShowAlert: mockOnShowAlert,
-        useLegacyExpandableFlyout: false,
       });
       const { render: renderCell } = ruleColumn as {
         render: (row: Record<string, unknown>) => React.ReactElement;
@@ -197,39 +167,11 @@ describe('getColumns', () => {
       expect(screen.getByText('My Detection Rule')).toBeInTheDocument();
       expect(screen.getByTestId(`${dataTestSubj}RuleLink`)).toBeInTheDocument();
     });
-
-    it('renders rule name as plain text when user cannot read rules', () => {
-      useUserPrivilegesMock.mockReturnValue({
-        timelinePrivileges: {
-          read: true,
-        },
-        rulesPrivileges: {
-          rules: {
-            read: false,
-          },
-        },
-      });
-
-      const [, , ruleColumn] = getColumns({
-        scopeId,
-        dataTestSubj,
-        onShowAlert: mockOnShowAlert,
-      });
-      const { render: renderCell } = ruleColumn as {
-        render: (row: Record<string, unknown>) => React.ReactElement;
-      };
-
-      renderColumn(renderCell(row));
-
-      expect(screen.getByText('My Detection Rule')).toBeInTheDocument();
-      expect(screen.queryByTestId(`${dataTestSubj}RulePreview`)).not.toBeInTheDocument();
-    });
   });
 
   describe('reason column', () => {
     it('renders reason value', () => {
       const [, , , reasonColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
       });
@@ -244,7 +186,6 @@ describe('getColumns', () => {
 
     it('has field kibana.alert.reason', () => {
       const [, , , reasonColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
       });
@@ -255,7 +196,6 @@ describe('getColumns', () => {
   describe('severity column', () => {
     it('renders SeverityBadge for a valid severity value', () => {
       const [, , , , severityColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
       });
@@ -271,7 +211,6 @@ describe('getColumns', () => {
 
     it('renders plain text for an invalid severity value', () => {
       const [, , , , severityColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
       });
@@ -286,7 +225,6 @@ describe('getColumns', () => {
 
     it('has field kibana.alert.severity', () => {
       const [, , , , severityColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
       });
@@ -298,7 +236,6 @@ describe('getColumns', () => {
     it('renders preview button without crashing when dataTestSubj is undefined', () => {
       const row = { id: 'id', index: 'idx' };
       const [previewColumn] = getColumns({
-        scopeId,
         onShowAlert: mockOnShowAlert,
       });
       const { render: renderCell } = previewColumn as {

@@ -36,8 +36,8 @@ describe('DetectionPausedCallout', () => {
     renderCallout();
 
     const callout = screen.getByTestId('streams-settings-maintenance-paused-status');
-    expect(callout).toHaveTextContent('Paused automatically because Nightshift was turned off');
-    expect(callout).toHaveTextContent('Turning Nightshift back on does not resume activity');
+    expect(callout).toHaveTextContent('Paused automatically because nightshift was turned off');
+    expect(callout).toHaveTextContent('Turning nightshift back on does not resume activity');
     expect(callout).not.toHaveTextContent('Resume from settings');
   });
 

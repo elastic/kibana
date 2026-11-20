@@ -21,6 +21,11 @@ export interface DurationOptions {
   // we need to special-case defaultValue as we want to handle string inputs too
   defaultValue?: DurationValueType | Reference<DurationValueType> | (() => DurationValueType);
   validate?: (value: Duration) => string | void;
+  /**
+   * Maximum length of a string input, checked before the string is parsed.
+   * Set it when the value comes from untrusted input such as an HTTP request.
+   */
+  maxLength?: number;
   min?: DurationValueType;
   max?: DurationValueType;
 }
@@ -51,6 +56,9 @@ export class DurationType extends Type<Duration> {
     super(
       () => {
         let schema = internals.duration();
+        if (options.maxLength !== undefined) {
+          schema = schema.maxLength(options.maxLength);
+        }
         if (options.min) {
           schema = schema.min(options.min);
         }
@@ -74,6 +82,8 @@ export class DurationType extends Type<Duration> {
         return `expected value of type [moment.Duration] but got [${typeDetect(value)}]`;
       case 'duration.parse':
         return new SchemaTypeError(message, path);
+      case 'duration.maxLength':
+        return `Value must be a string of at most [${limit}] characters`;
       case 'duration.min':
         return `Value must be equal to or greater than [${limit.toString()}]`;
       case 'duration.max':

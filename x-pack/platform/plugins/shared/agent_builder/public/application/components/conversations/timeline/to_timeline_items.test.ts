@@ -16,6 +16,7 @@ import {
 import type { ToolResult } from '@kbn/agent-builder-common';
 import { groupTimelineEvents, buildItems } from './to_timeline_items';
 import { createUserMessageEvent } from './items/user_message_event.factory';
+import { createAgentMessageEvent } from './items/agent_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
 import { createExecutionFailedEvent } from './items/execution_failed_event.factory';
@@ -37,6 +38,14 @@ const makeEventsById = (events: TimelineDisplayEvent[]) => new Map(events.map((e
 describe('groupTimelineEvents', () => {
   it('returns empty array for empty input', () => {
     expect(groupTimelineEvents([], new Map())).toEqual([]);
+  });
+
+  it('keeps an agent message as its own item', () => {
+    const report = createAgentMessageEvent({ id: 'report-1' });
+
+    expect(groupTimelineEvents([report], makeEventsById([report]))).toEqual([
+      { kind: 'agentMessage', key: 'report-1', event: report },
+    ]);
   });
 
   it('groups a full round into 2 items — one agentTurn with status completed', () => {
@@ -637,6 +646,91 @@ describe('groupTimelineEvents while a run streams', () => {
       expect(turn.status).toBe('completed');
       expect(turn.terminal).toBe(terminated);
     }
+  });
+});
+
+describe('groupTimelineEvents placing steers', () => {
+  const trigger = createUserMessageEvent({ id: 'ask', created_at: '2026-01-01T00:00:00.000Z' });
+  const started = createExecutionStartedEvent({
+    id: 'started',
+    execution_id: 'exec-1',
+    trigger_event_id: 'ask',
+    created_at: '2026-01-01T00:00:01.000Z',
+  });
+  const steer = (id: string) =>
+    createUserMessageEvent({
+      id,
+      created_at: '2026-01-01T00:00:02.000Z',
+      data: { message: `steer ${id}`, steer: { execution_id: 'exec-1' } },
+    });
+  const readStep = (eventId: string) =>
+    createExecutionStepEvent({
+      id: `step-${eventId}`,
+      execution_id: 'exec-1',
+      trigger_event_id: 'ask',
+      created_at: '2026-01-01T00:00:03.000Z',
+      data: {
+        sequence: 0,
+        step: {
+          type: ConversationRoundStepType.deliveredMessage,
+          event_id: eventId,
+          author: { type: EventActorType.user, id: 'user-1' },
+          is_run_owner: true,
+          message: `steer ${eventId}`,
+          delivered_at: '2026-01-01T00:00:03.000Z',
+          cycle: 1,
+        },
+      },
+    });
+  const aborted = createExecutionAbortedEvent({
+    id: 'aborted',
+    execution_id: 'exec-1',
+    trigger_event_id: 'ask',
+    created_at: '2026-01-01T00:00:04.000Z',
+  });
+  const standaloneSteers = (events: TimelineDisplayEvent[]) =>
+    groupTimelineEvents(events, makeEventsById(events)).flatMap((item) =>
+      item.kind === 'userMessage' && item.event.id !== 'ask' ? [item] : []
+    );
+
+  it('shows an unread steer as waiting while its run is live', () => {
+    const [item] = standaloneSteers([trigger, started, steer('s1')]);
+
+    expect(item.steerState).toBe('waiting');
+  });
+
+  it('folds a steer the run read into its turn even after the run was stopped', () => {
+    expect(standaloneSteers([trigger, started, steer('s1'), readStep('s1'), aborted])).toEqual([]);
+  });
+
+  it('keeps a steer the stopped run never read standalone, with no status', () => {
+    const [item] = standaloneSteers([trigger, started, steer('s1'), aborted]);
+
+    expect(item.steerState).toBeUndefined();
+  });
+
+  it('gives a steer an earlier run never read no status while a later run is live', () => {
+    const nextTrigger = createUserMessageEvent({
+      id: 'ask-2',
+      created_at: '2026-01-01T00:00:05.000Z',
+    });
+    const nextStarted = createExecutionStartedEvent({
+      id: 'started-2',
+      execution_id: 'exec-2',
+      trigger_event_id: 'ask-2',
+      created_at: '2026-01-01T00:00:06.000Z',
+    });
+    const items = standaloneSteers([
+      trigger,
+      started,
+      steer('s1'),
+      aborted,
+      nextTrigger,
+      nextStarted,
+    ]);
+    const item = items.find(({ event }) => event.id === 's1');
+
+    expect(item?.steerState).toBeUndefined();
   });
 });
 

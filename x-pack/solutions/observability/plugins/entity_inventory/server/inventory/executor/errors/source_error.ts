@@ -5,15 +5,8 @@
  * 2.0.
  */
 
+import type { SourceError } from '../../../../common';
 import { asNumber, asText } from '../utils';
-
-/** A failed query against one source, safe to return to the caller. */
-export interface SourceError {
-  indexPattern: string;
-  /** The HTTP status Elasticsearch answered with, null when there was no response. */
-  status: number | null;
-  reason: string;
-}
 
 interface ErrorLike {
   message?: unknown;

@@ -27,8 +27,8 @@ import {
   setNightshiftInvestigationIdParam,
 } from '../../../common/url_params';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useCurrentUserName } from '../../../hooks/use_current_user_name';
 import { OnboardingIntroBanner } from './intro_banner';
+import type { IntroBannerDismissal } from '../../../components/use_intro_banner_dismissal';
 import {
   ONBOARDING_STEP_IDS,
   OnboardingStepsCard,
@@ -112,15 +112,16 @@ export function NightshiftOnboarding({
   latestInvestigation,
   automationsHref,
   onFinish,
+  introBannerDismissal,
 }: {
   latestInvestigation?: InvestigationSummary;
   automationsHref?: string;
+  introBannerDismissal?: IntroBannerDismissal;
   /** "Skip this step" / Done on the last step. */
   onFinish: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder } = useKibana().services;
-  const greetingName = useCurrentUserName();
   const history = useHistory();
   const { search } = useLocation();
   const { data, isInitialLoading } = useOnboarding();
@@ -165,6 +166,9 @@ export function NightshiftOnboarding({
     : latestInvestigation && stepOverride !== 'investigate'
     ? 'automate'
     : 'investigate';
+
+  const isIntroStep = step === 'enable' || step === 'addData' || step === 'connectSources';
+  const introBannerVisible = isIntroStep && !introBannerDismissal?.isDismissed;
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
@@ -353,11 +357,11 @@ export function NightshiftOnboarding({
         padding-bottom: calc(${euiTheme.size.xxl} * 1.5);
       `}
     >
-      <NightshiftHeader title={HERO_TITLES[step]} isGreetingInline greetingName={greetingName} />
+      <NightshiftHeader title={HERO_TITLES[step]} />
       <EuiSpacer size="l" />
-      {(step === 'enable' || step === 'addData' || step === 'connectSources') && (
+      {introBannerVisible && (
         <>
-          <OnboardingIntroBanner />
+          <OnboardingIntroBanner dismissal={introBannerDismissal} />
           <EuiSpacer size="xl" />
         </>
       )}

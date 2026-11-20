@@ -118,8 +118,12 @@ const formatSignificantSecurityEventForAgent = (
             }`;
       const scope = [
         `${detection.total} event(s)`,
-        detection.host_count !== undefined ? `${detection.host_count} host(s)` : undefined,
-        detection.user_count !== undefined ? `${detection.user_count} user(s)` : undefined,
+        detection.host_count !== undefined
+          ? `${detection.host_count}${detection.hosts_truncated ? '+' : ''} host(s)`
+          : undefined,
+        detection.user_count !== undefined
+          ? `${detection.user_count}${detection.users_truncated ? '+' : ''} user(s)`
+          : undefined,
         detection.from_sample ? 'from sampled hits' : undefined,
       ]
         .filter((part): part is string => part !== undefined)
@@ -270,7 +274,9 @@ The payload contains:
 - hunt_result: structured IOC Hunt / Behavior Hunt findings (status, counts, per-index hit detail, resolved IOCs, derived behaviors). Prefer these numbers over evidence_for/evidence_against when both are present.
   "Confirmed by" names the hunt(s) that corroborated this finding; the hunt statuses are report-scoped, so attribute the hit to that line and not to a hunt status. A behavior with "no verdict" learned nothing and is not evidence of a clean environment.
 - hypothesis_tested, evidence_for, evidence_against: the hunt's working hypothesis and its analyst narrative on top of hunt_result
-- evaluation_record_ref: link into the evaluation subsystem`;
+- evaluation_record_ref: link into the evaluation subsystem
+
+Rendering this attachment inline displays the finding as a card: the headline with its basis, what matched and where, the hosts and users involved, related events with links to Discover, and the hypothesis with its evidence for and against.`;
 
 export const createSignificantSecurityEventAttachmentType = (): AttachmentTypeDefinition =>
   createReadonlyAttachmentType({
@@ -279,7 +285,6 @@ export const createSignificantSecurityEventAttachmentType = (): AttachmentTypeDe
     readSchema: significantSecurityEventAttachmentReadSchema,
     formatForAgent: formatSignificantSecurityEventForAgent,
     describePayload,
-    renderNoun: 'event card',
     // Backstop only. The real bound is `SECTION_CHAR_BUDGET` per list section, which keeps a
     // payload at the schema's caps inside this limit; reaching it here would mean a section
     // grew unbounded, and the cut drops whole sections without saying so.

@@ -188,8 +188,8 @@ export const runPackageReport = async ({
    * if the run were complete, silently dropping whichever finding failed to attach.
    *
    * Undefined skips the check below rather than failing closed: an already-installed Worker
-   * that has not yet picked up the call site supplying this field (its `yamlTemplate` hash does
-   * not cover the imported YAML it renders, so it only updates when its own `version` bumps)
+   * that has not yet picked up the call site supplying this field (it keeps its previous YAML
+   * until it is re-rendered)
    * must not have every packaging call start erroring just because this step's own schema
    * changed out from under it -- that would turn a staleness gap into an outage.
    */
@@ -359,6 +359,12 @@ export const runPackageReport = async ({
       });
   const { proposals, converged, alreadyOpenCount, mintSuppression } = resolved;
 
+  // A confirmed hit still reaches here when the hunt retired the report
+  // (`incomplete_final` stamped the gate). Name the gaps on the report-scoped subject and in
+  // the Investigation summary so the SSE path does not look like a clean full search.
+  const unsearched =
+    huntStatus === 'retired_incomplete' ? dedupeCoverageGaps(coordinator.coverageGaps) : undefined;
+
   const subjects = deriveCoverageSubjects({
     spaceId,
     state: {
@@ -371,9 +377,11 @@ export const runPackageReport = async ({
         dismissHold,
         converged,
         alreadyOpen: alreadyOpenCount,
+        unsearched,
       }),
       coordinator,
       reportContext,
+      unsearched,
     },
     investigationConversationId,
   });
@@ -406,7 +414,17 @@ export const runPackageReport = async ({
     // pointer to the Proposal, is a decision left for a follow-up.
     dismiss: decided.dismiss && dismissHold === 'none',
     dismissHold,
-    closureSummary: decided.closureSummary,
+    // The Investigation's own summary once its Proposals settle. A retired run says so here
+    // too, the way the no-hit closure does, or the closed Investigation reads as a full search.
+    closureSummary:
+      unsearched && unsearched.gaps.length > 0
+        ? `${decided.closureSummary} ${gapCountPhrase(
+            unsearched
+          )} left part of the report unsearched, so the report is retired without a full search. Not searched: ${describeGaps(
+            unsearched,
+            MAX_CLOSURE_GAP_CHARS
+          )}.`
+        : decided.closureSummary,
     expectedProposalCount,
     mintSuppression,
   };

@@ -29,11 +29,13 @@ import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
 import { ServiceAccountCredentialRefusedError } from './credential_refused_error';
 import { toDescriptionField } from './description_field';
+import { ServiceAccountExchangeRefusedError } from './exchange_refused_error';
 import type {
   CreateServiceAccountFakeRequestParams,
   ServiceAccountMintedToken,
 } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
+import { getOperationErrorType, serviceAccountsMetrics } from './metrics';
 import { getPlatformAssumerServiceAccountIds } from './platform_assumers';
 import { buildRoleAssignments, readApplicationRoles } from './role_assignments';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
@@ -57,7 +59,6 @@ import {
 } from '../../common/service_accounts';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
 import { getDetailedErrorMessage } from '../errors';
-import { securityTelemetry } from '../otel/instrumentation';
 import {
   assertUiamCredential,
   getUiamAuthorizationHeaderFromRequest,
@@ -175,6 +176,8 @@ export interface UiamServiceAccountsOptions {
 }
 
 export class UiamServiceAccounts implements ServiceAccountsBackend {
+  readonly type = 'uiam';
+
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
@@ -205,7 +208,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       logger,
       // `boundAt` is not consulted: UIAM issues a new id on every create, so a binding can never
       // name a later account than the one it was made for.
-      (serviceAccountId) => this.exchangeToken(serviceAccountId),
+      (serviceAccountId, { trigger }) =>
+        serviceAccountsMetrics.measureTokenExchange({ backend: this.type, trigger }, () =>
+          this.exchangeToken(serviceAccountId)
+        ),
       requestLifetimeMs
     );
   }
@@ -217,17 +223,15 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     const auditLogger = this.audit.asScoped(request);
     try {
       const account = await this.createAccount(request, params, auditLogger);
-      securityTelemetry.recordServiceAccountCreationAttempt({
-        outcome: 'success',
-        serviceAccountBackend: 'uiam',
-      });
+      serviceAccountsMetrics.recordOperation({ operation: 'create', backend: this.type });
       return account;
     } catch (e) {
       // An authorization refusal is the one failure audited. `createAccount` logs it, and the
       // success event, where the validated parameters are in scope.
-      securityTelemetry.recordServiceAccountCreationAttempt({
-        outcome: 'failure',
-        serviceAccountBackend: 'uiam',
+      serviceAccountsMetrics.recordOperation({
+        operation: 'create',
+        backend: this.type,
+        errorType: getOperationErrorType(e),
       });
       throw e;
     }
@@ -491,8 +495,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
    */
   private async exchangeToken(serviceAccountId: string): Promise<ServiceAccountMintedToken> {
     if (!this.license.isEnabled()) {
-      throw Boom.forbidden(
-        'Cannot exchange a service account token: security features are disabled in Elasticsearch'
+      throw new ServiceAccountExchangeRefusedError(
+        'security_disabled',
+        'Cannot exchange a service account token: security features are disabled in Elasticsearch',
+        403
       );
     }
 
@@ -516,6 +522,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         retryable: retryDelay !== null,
         retryAfterMs: retryDelay ?? 0,
         statusCode: Boom.isBoom(cause) ? cause.output.statusCode : undefined,
+        errorCode: getUiamErrorCode(cause),
       });
     }
 
@@ -555,7 +562,8 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     try {
       const token = await this.fakeRequests.ensureFreshToken(
         request,
-        SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS
+        SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS,
+        'reauthenticate'
       );
       return { authorization: `Bearer ${token}` };
     } catch {
@@ -630,6 +638,15 @@ const getNotFound = (id: string, error: unknown): Boom.Boom | null => {
     parsed.data.error.code === UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND
     ? Boom.notFound(`Service account [${id}] was not found`)
     : null;
+};
+
+/** The error code of a UIAM error response, or `undefined` when the error is not one. */
+const getUiamErrorCode = (error: Error): string | undefined => {
+  if (!Boom.isBoom(error)) {
+    return undefined;
+  }
+  const parsed = uiamErrorResponseSchema.safeParse(error.output.payload);
+  return parsed.success ? parsed.data.error.code : undefined;
 };
 
 const getExchangeRetryDelay = (error: Error): number | null => {

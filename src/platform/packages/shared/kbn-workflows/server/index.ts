@@ -37,7 +37,6 @@ export {
 } from './external_resume/constants';
 export { buildExternalResumeUrl } from './external_resume/build_external_resume_url';
 export { buildExternalResumeFormUrl } from './external_resume/build_external_resume_form_url';
-export { computeTokenHmac } from './external_resume/compute_token_hmac';
 
 export type {
   GetManagedWorkflowStatusOptions,

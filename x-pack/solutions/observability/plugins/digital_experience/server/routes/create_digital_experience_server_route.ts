@@ -5,13 +5,25 @@
  * 2.0.
  */
 
+import { notFound } from '@hapi/boom';
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository-utils';
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { DIGITAL_EXPERIENCE_ENABLED_FLAG } from '../../common/feature_flags';
 import type { SessionsSettings } from '../../common/sessions';
+import type { SessionsReadableCache } from '../services/sessions/sessions_readable';
 import { describeError, toClientError } from '../lib/helpers/errors';
-import type { SessionsApiKeys } from '../sessions/sessions_api_key';
-import type { SessionsAutoUpdateState } from '../sessions/sessions_auto_update';
+
+/** What sessions need from other plugins, available once they have started. */
+export interface SessionsServices {
+  /** Runs the summaries task; without it, sessions can't be enabled. */
+  taskManager: TaskManagerStartContract | undefined;
+  /** Whether Kibana can store the task's API key, which needs an encryption key. */
+  canEncrypt: boolean;
+  /** Whether the applications list can read the sessions, shared across requests. */
+  sessionsReadable: SessionsReadableCache;
+}
 
 export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHandlerResources {
   /** Optional: only the Classic source needs it. */
@@ -19,12 +31,9 @@ export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHand
   isServerless: boolean;
   /** Whether the ux plugin is enabled; the Classic RUM source needs it, like the browser does. */
   isUxEnabled: boolean;
-  /** `xpack.digitalExperience.sessions` config: the transforms' frequency and partitions. */
+  /** `xpack.digital_experience.sessions` config: how often the summaries task runs. */
   sessionsSettings: SessionsSettings;
-  /** The API key the sessions transforms run with, when Kibana can store one. */
-  sessionsApiKeys: SessionsApiKeys;
-  /** What the health task's last run found about automatic updates of the sessions transforms. */
-  getSessionsAutoUpdateState: () => Promise<SessionsAutoUpdateState>;
+  getSessionsServices: () => Promise<SessionsServices>;
 }
 
 const createServerRoute = createServerRouteFactory<
@@ -40,6 +49,11 @@ export const createDigitalExperienceServerRoute: typeof createServerRoute = ({
   createServerRoute({
     ...route,
     handler: async (resources) => {
+      const { featureFlags } = await resources.context.core;
+      if (!(await featureFlags.getBooleanValue(DIGITAL_EXPERIENCE_ENABLED_FLAG, false))) {
+        throw notFound();
+      }
+
       try {
         return await handler(resources);
       } catch (error) {
