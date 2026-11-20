@@ -94,3 +94,31 @@ it('leaves other majors alone on the first patch of a new major', () => {
 
   expect(readBranches()).toEqual(['main', '10.0', '9.6', '8.19']);
 });
+
+describe('pipeline resource definitions', () => {
+  const schedule = (branch: string) => `        Daily build (${branch}):
+          cronline: 0 22 * * * America/New_York
+          message: Daily build
+          branch: '${branch}'
+`;
+
+  const definition = (branches: readonly string[]) => `spec:
+  implementation:
+    spec:
+      branch_configuration: main ${branches.join(' ')}
+      provider_settings:
+        build_branches: false
+      schedules:
+${branches.map(schedule).join('')}      tags:
+        - kibana
+`;
+
+  it('drops the n-2 minor from branch_configuration and schedules', () => {
+    const file = join(workDir, 'definition.yml');
+    writeFileSync(file, definition(['9.6', '9.5', '9.4', '8.19']));
+
+    run('prune_superseded_minor_branches definition.yml', '9.6', '9.6.1');
+
+    expect(readFileSync(file, 'utf8')).toEqual(definition(['9.6', '9.5', '8.19']));
+  });
+});

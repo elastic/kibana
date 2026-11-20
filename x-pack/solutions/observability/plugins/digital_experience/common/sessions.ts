@@ -16,9 +16,16 @@ export const SESSIONS_VERSION = 1;
 export const SESSIONS_MANAGED_BY = 'digital_experience';
 
 export const SESSIONS_SOURCE_INDICES = [OTEL_TRACES_INDEX, OTEL_LOGS_INDEX] as const;
-export const SESSIONS_INDEX = `digital-experience-sessions-${SESSIONS_VERSION}`;
-export const SESSIONS_INDEX_PATTERN = 'digital-experience-sessions-*';
-export const SESSIONS_INDEX_TEMPLATE_NAME = 'digital-experience-sessions';
+const SESSIONS_INDEX_PREFIX = 'digital-experience-sessions-';
+/** Matches the session summaries of every platform; the documented index privileges name it. */
+export const ALL_SESSIONS_INDEX_PATTERN = `${SESSIONS_INDEX_PREFIX}*`;
+const BROWSER_SESSIONS_BASE_NAME = `${SESSIONS_INDEX_PREFIX}browser`;
+/** The browser session summaries. */
+export const SESSIONS_INDEX = `${BROWSER_SESSIONS_BASE_NAME}-${SESSIONS_VERSION}`;
+/** The browser session summaries of every version: what the readers and the template cover. */
+export const SESSIONS_INDEX_PATTERN = `${BROWSER_SESSIONS_BASE_NAME}-*`;
+/** The browser session summaries index template. */
+export const SESSIONS_INDEX_TEMPLATE_NAME = BROWSER_SESSIONS_BASE_NAME;
 
 export const SESSIONS_TASK_TYPE = 'digital_experience:sessions-summaries';
 export const SESSIONS_TASK_ID = 'digital_experience:sessions-summaries';
@@ -214,24 +221,74 @@ export interface SessionListResponse {
   kpis: SessionListKpis;
 }
 
-export type SessionTimelineEventKind =
-  | 'page_view'
-  | 'click'
-  | 'error'
-  | 'web_vital'
-  | 'span'
-  | 'log';
+/** The events the journey lists; the API leaves out all others, which Discover shows. */
+export type SessionTimelineEventKind = 'page_view' | 'click' | 'error' | 'web_vital';
 
 export interface SessionTimelineEvent {
   kind: SessionTimelineEventKind;
   name: string;
   timestamp: string;
   offsetMs: number;
-  durationMs: number | null;
   page: string | null;
   detail: string | null;
+  /** The stack trace of an error, when the browser reported one. */
+  stacktrace: string | null;
   traceId: string | null;
   spanId: string | null;
+}
+
+/** How long each network phase of a request took, in milliseconds; 0 when it didn't happen. */
+export interface SessionRequestPhases {
+  /** Queued before the DNS lookup or the connection started. */
+  queued: number;
+  dns: number;
+  /** TCP connection, TLS included. */
+  connect: number;
+  tls: number;
+  /** From sending the request to the first byte of the response. */
+  waiting: number;
+  download: number;
+}
+
+/** A network request of the session: the page document, a resource, or a fetch/XHR call. */
+export interface SessionRequest {
+  url: string;
+  /** The W3C `initiatorType`, e.g. `script` or `fetch`; `navigation` for the page document. */
+  initiatorType: string;
+  method: string | null;
+  statusCode: number | null;
+  failed: boolean;
+  /** When the request started, placed from the timings relative to its page's time origin. */
+  startTime: string;
+  durationMs: number;
+  /**
+   * The phases, unless the browser withheld them: a cross-origin resource whose server doesn't
+   * send `Timing-Allow-Origin` only reports when it started and ended.
+   */
+  phases: SessionRequestPhases | null;
+  /** The browser withheld the phases and sizes: `Timing-Allow-Origin` is missing. */
+  timingWithheld: boolean;
+  /** Served from the browser cache, without network transfer. */
+  cached: boolean;
+  /** Bytes over the network, headers included. */
+  transferSize: number | null;
+  /** Bytes of the response body after decompression. */
+  decodedBodySize: number | null;
+  renderBlocking: boolean;
+  protocol: string | null;
+  traceId: string | null;
+  spanId: string | null;
+  /** The index of the page visit the request belongs to, in `pageVisits`. */
+  visitIndex: number;
+}
+
+/** The milestones of a full page load, in milliseconds from the start of its navigation. */
+export interface SessionPageLoad {
+  navigationStart: string;
+  /** Time to first byte. */
+  responseStartMs: number | null;
+  domContentLoadedMs: number | null;
+  loadMs: number | null;
 }
 
 export interface SessionPageVisit {
@@ -244,6 +301,8 @@ export interface SessionPageVisit {
   clickCount: number;
   errorCount: number;
   webVitals: SessionWebVitals;
+  /** Set on a visit that loaded the page document, rather than an in-app navigation. */
+  load: SessionPageLoad | null;
 }
 
 export interface SessionDetailResponse {
@@ -251,6 +310,8 @@ export interface SessionDetailResponse {
   timeline: SessionTimelineEvent[];
   timelineTruncated: boolean;
   pageVisits: SessionPageVisit[];
+  requests: SessionRequest[];
+  requestsTruncated: boolean;
 }
 
 export const emptyWebVitals = (): SessionWebVitals => ({

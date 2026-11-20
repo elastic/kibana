@@ -8,7 +8,7 @@
 import net from 'node:net';
 import dns from 'node:dns/promises';
 import { Agent } from 'undici';
-import { isNonRoutableIPv4, isNonRoutableIPv6 } from '../lib/ip_ranges';
+import { isNonRoutableIPv4, isNonRoutableIPv6 } from '@kbn/alertzero-common';
 
 const DEFAULT_USER_AGENT = 'Kibana-ThreatIntel/1.0 (+https://www.elastic.co/security)';
 const DEFAULT_TIMEOUT_MS = 30_000;
