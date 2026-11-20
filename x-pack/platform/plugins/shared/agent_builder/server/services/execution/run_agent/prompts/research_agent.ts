@@ -119,7 +119,7 @@ const getAgentSystemMessage = async ({
   configuration: {
     instructions: customInstructions,
     aiIndexCatalog,
-    capabilities: { attachmentTools },
+    capabilities: { attachmentTools, bashTool },
   },
   outputSchema,
   skills,
@@ -232,7 +232,7 @@ ${
   customRenderingSection ? '- Use custom rendering when appropriate.\n' : ''
 }- Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
 
-${getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash })}
+${getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash && bashTool })}
 
 ${experimentalFeatures.dynamicTools ? getDynamicToolsInstructions() : ''}
 
