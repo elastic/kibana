@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorValidator } from './connector_spec';
+import type { ConnectorValidator } from '@kbn/actions-types';
 
 const NO_AUTH_TYPE_ID = 'none';
 

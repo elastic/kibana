@@ -25,6 +25,7 @@ import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
 import type { LicenseType } from '@kbn/licensing-types';
+import type { ConnectorValidator } from '@kbn/actions-types';
 import type { AxiosHeaderValue, AxiosInstance } from 'axios';
 import type { ConnectorSpecEvents } from './connector_spec_events';
 import type { ClientRegistry, ClientTypeId } from './lib/clients/client_registry';
@@ -389,12 +390,6 @@ export interface ConnectorSandbox {
   /** Config fields holding a URL; the host of each configured URL is added to `hosts`. */
   hostsFromConfig?: readonly string[];
 }
-
-/** Validates a connector's config and secrets together. Returns an error message, or null when valid. */
-export type ConnectorValidator = (
-  config: Record<string, unknown>,
-  secrets: Record<string, unknown>
-) => string | null;
 
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;

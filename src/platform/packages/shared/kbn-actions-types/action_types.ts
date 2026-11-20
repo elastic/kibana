@@ -42,3 +42,9 @@ export interface ActionType {
 export type ConnectorUserAuthStatus = 'connected' | 'not_connected' | 'not_applicable';
 
 export type ConnectorAuthStatusMap = Record<string, { userAuthStatus: ConnectorUserAuthStatus }>;
+
+/** Validates a connector's config and secrets together. Returns an error message, or null when valid. */
+export type ConnectorValidator<
+  Config extends Record<string, unknown> = Record<string, unknown>,
+  Secrets extends Record<string, unknown> = Record<string, unknown>
+> = (config: Config, secrets: Secrets) => string | null;
