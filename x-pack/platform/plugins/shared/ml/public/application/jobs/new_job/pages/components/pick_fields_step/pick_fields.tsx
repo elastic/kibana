@@ -25,6 +25,7 @@ import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 import {
   isSingleMetricJobCreator,
   isMultiMetricJobCreator,
+  isEsqlJobCreator,
   isPopulationJobCreator,
   isCategorizationJobCreator,
   isAdvancedJobCreator,
@@ -80,6 +81,8 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
               setCurrentStep(
                 isAdvancedJobCreator(jobCreator)
                   ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
+                  : isEsqlJobCreator(jobCreator)
+                  ? WIZARD_STEPS.ESQL_QUERY
                   : WIZARD_STEPS.TIME_RANGE
               )
             }

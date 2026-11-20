@@ -75,6 +75,8 @@ export const Wizard: FC<Props> = ({
   const firstStep =
     jobCreator.type === JOB_TYPE.ADVANCED
       ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
+      : jobCreator.type === JOB_TYPE.ESQL
+      ? WIZARD_STEPS.ESQL_QUERY
       : WIZARD_STEPS.TIME_RANGE;
 
   const [currentStep, setCurrentStep] = useState(firstStep);

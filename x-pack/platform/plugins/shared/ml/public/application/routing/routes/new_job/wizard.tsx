@@ -66,6 +66,16 @@ const getMultiMetricBreadcrumbs = (navigateToApp: NavigateToApp) => [
   },
 ];
 
+const getEsqlBreadcrumbs = (navigateToApp: NavigateToApp) => [
+  ...getBaseBreadcrumbs(navigateToApp),
+  {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.esqlLabel', {
+      defaultMessage: 'ES|QL',
+    }),
+    href: '',
+  },
+];
+
 const getPopulationBreadcrumbs = (navigateToApp: NavigateToApp) => [
   ...getBaseBreadcrumbs(navigateToApp),
   {
@@ -144,6 +154,12 @@ export const multiMetricRouteFactoryRedirect = (): MlRoute => ({
   },
 
   breadcrumbs: [],
+});
+
+export const esqlRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ESQL),
+  render: () => <EsqlPageWrapper />,
+  breadcrumbs: getEsqlBreadcrumbs(navigateToApp),
 });
 
 export const populationRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
@@ -241,6 +257,31 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
           <Page jobType={jobType} existingJobsAndGroups={results.existingJobsAndGroups} />
         ) : null}
       </DataSourceContextProvider>
+    </PageLoader>
+  );
+};
+
+const EsqlPageWrapper: FC = () => {
+  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
+    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
+  );
+  const {
+    services: {
+      mlServices: { mlApi },
+    },
+  } = useMlKibana();
+
+  const { context, results } = useRouteResolver('full', ['canGetJobs', 'canCreateJob'], {
+    ...basicResolvers(),
+    privileges: () => checkCreateJobsCapabilitiesResolver(mlApi, redirectToJobsManagementPage),
+    existingJobsAndGroups: () => mlApi.jobs.getAllJobAndGroupIds(),
+  });
+
+  return (
+    <PageLoader context={context}>
+      {results ? (
+        <Page jobType={JOB_TYPE.ESQL} existingJobsAndGroups={results.existingJobsAndGroups} />
+      ) : null}
     </PageLoader>
   );
 };

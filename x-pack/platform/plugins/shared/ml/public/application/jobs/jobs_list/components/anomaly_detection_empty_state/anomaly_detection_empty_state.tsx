@@ -35,7 +35,7 @@ export const AnomalyDetectionEmptyState: FC<{
   } = useMlKibana();
 
   const redirectToCreateJobSelectIndexPage = useCreateAndNavigateToManagementMlLink(
-    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
+    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_DATA_SOURCE,
     'anomaly_detection'
   );
 

@@ -27,7 +27,11 @@ import { WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import type { JobRunner } from '../../../common/job_runner';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
-import { isSingleMetricJobCreator, isAdvancedJobCreator } from '../../../common/job_creator';
+import {
+  isSingleMetricJobCreator,
+  isAdvancedJobCreator,
+  isClassicJobCreator,
+} from '../../../common/job_creator';
 import { JobDetails } from './components/job_details';
 import { DatafeedDetails } from './components/datafeed_details';
 import { DetectorChart } from './components/detector_chart';
@@ -140,7 +144,9 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }
 
   const convertToAdvanced = () => {
-    convertToAdvancedJob(jobCreator, navigateToMlManagement);
+    if (isClassicJobCreator(jobCreator)) {
+      convertToAdvancedJob(jobCreator, navigateToMlManagement);
+    }
   };
 
   useEffect(() => {
@@ -211,7 +217,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                     datafeedEditorMode={jsonEditorMode}
                   />
                 </EuiFlexItem>
-                {isAdvanced === false && (
+                {isAdvanced === false && isClassicJobCreator(jobCreator) && (
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       onClick={convertToAdvanced}

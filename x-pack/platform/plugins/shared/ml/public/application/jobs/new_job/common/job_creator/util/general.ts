@@ -27,7 +27,7 @@ import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { MlLocatorParams } from '../../../../../../locator';
 import { jobCloningService } from '../../../../../services/job_cloning_service';
 import type { NewJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import type { JobCreatorType } from '..';
+import type { ClassicJobCreatorType, JobCreatorType } from '..';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const getFieldByIdFactory =
@@ -240,7 +240,7 @@ export type NavigateToMlManagementLink = (
 ) => Promise<void>;
 
 export function convertToMultiMetricJob(
-  jobCreator: JobCreatorType,
+  jobCreator: ClassicJobCreatorType,
   navigateToPath: NavigateToMlManagementLink
 ) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
@@ -252,7 +252,7 @@ export function convertToMultiMetricJob(
 }
 
 export function convertToAdvancedJob(
-  jobCreator: JobCreatorType,
+  jobCreator: ClassicJobCreatorType,
   navigateToPath: NavigateToMlManagementLink
 ) {
   jobCreator.createdBy = null;
@@ -320,6 +320,10 @@ export function getJobCreatorTitle(jobCreator: JobCreatorType) {
     case JOB_TYPE.GEO:
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.geo', {
         defaultMessage: 'Geo',
+      });
+    case JOB_TYPE.ESQL:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.esql', {
+        defaultMessage: 'ES|QL',
       });
     default:
       return '';

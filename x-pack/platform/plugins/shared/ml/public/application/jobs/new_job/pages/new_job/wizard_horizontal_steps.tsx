@@ -84,6 +84,16 @@ export const WizardHorizontalSteps: FC<Props> = ({
     });
   }
 
+  if (jobType === JOB_TYPE.ESQL) {
+    stepsConfig.splice(0, 1, {
+      title: i18n.translate('xpack.ml.newJob.wizard.step.esqlQueryTitle', {
+        defaultMessage: 'ES|QL Query',
+      }),
+      ...createStepProps(WIZARD_STEPS.ESQL_QUERY),
+      'data-test-subj': 'mlJobWizardEsqlQueryStep',
+    });
+  }
+
   function createStepProps(step: WIZARD_STEPS) {
     return {
       onClick: () => jumpToStep(step),

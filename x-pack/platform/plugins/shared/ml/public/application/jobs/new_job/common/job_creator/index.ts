@@ -6,6 +6,7 @@
  */
 
 export { JobCreator } from './job_creator';
+export { JobCreatorClassic } from './job_creator_classic';
 export { SingleMetricJobCreator } from './single_metric_job_creator';
 export { MultiMetricJobCreator } from './multi_metric_job_creator';
 export { PopulationJobCreator } from './population_job_creator';
@@ -13,7 +14,8 @@ export { AdvancedJobCreator } from './advanced_job_creator';
 export { CategorizationJobCreator } from './categorization_job_creator';
 export { RareJobCreator } from './rare_job_creator';
 export { GeoJobCreator } from './geo_job_creator';
-export type { JobCreatorType } from './type_guards';
+export { EsqlJobCreator } from './esql_job_creator';
+export type { JobCreatorType, ClassicJobCreatorType } from './type_guards';
 export {
   isSingleMetricJobCreator,
   isMultiMetricJobCreator,
@@ -22,5 +24,7 @@ export {
   isCategorizationJobCreator,
   isRareJobCreator,
   isGeoJobCreator,
+  isEsqlJobCreator,
+  isClassicJobCreator,
 } from './type_guards';
 export { jobCreatorFactory } from './job_creator_factory';

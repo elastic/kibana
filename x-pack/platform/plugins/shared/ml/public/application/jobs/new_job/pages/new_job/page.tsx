@@ -18,6 +18,7 @@ import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { cloneDatafeed, getJobCreatorTitle } from '../../common/job_creator/util/general';
 import {
+  EsqlJobCreator,
   jobCreatorFactory,
   isAdvancedJobCreator,
   isCategorizationJobCreator,
@@ -62,15 +63,21 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const isMlCpsEnabled = getIsMlCpsEnabled();
   const chartInterval = useTimeBuckets(uiSettings);
 
+  const isEsql = jobType === JOB_TYPE.ESQL;
+  // ES|QL jobs are not based on a data view, so no data source context is provided for them.
+  const selectedDataView = isEsql ? null : dataSourceContext.selectedDataView;
+
   const jobCreator = useMemo(
     () =>
-      jobCreatorFactory(jobType)(
-        mlApi,
-        newJobCapsService,
-        dataSourceContext.selectedDataView,
-        dataSourceContext.selectedSavedSearch,
-        dataSourceContext.combinedQuery
-      ),
+      isEsql
+        ? new EsqlJobCreator(mlApi, newJobCapsService)
+        : jobCreatorFactory(jobType)(
+            mlApi,
+            newJobCapsService,
+            dataSourceContext.selectedDataView,
+            dataSourceContext.selectedSavedSearch,
+            dataSourceContext.combinedQuery
+          ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobType]
   );
@@ -85,6 +92,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   let firstWizardStep =
     jobType === JOB_TYPE.ADVANCED
       ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
+      : isEsql
+      ? WIZARD_STEPS.ESQL_QUERY
       : WIZARD_STEPS.TIME_RANGE;
 
   let autoSetTimeRange = jobCloningService.autoSetTimeRange;
@@ -100,7 +109,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     // if we're not skipping the time range, this is a standard job clone, so wipe the jobId
     if (jobCloningService.skipTimeRangeStep === false) {
       jobCreator.jobId = '';
-    } else if (jobType !== JOB_TYPE.ADVANCED) {
+    } else if (jobType !== JOB_TYPE.ADVANCED && !isEsql) {
       firstWizardStep = WIZARD_STEPS.PICK_FIELDS;
     }
 
@@ -135,7 +144,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       jobCreator.modelChangeAnnotations = true;
     }
 
-    if (dataSourceContext.selectedSavedSearch !== null) {
+    if (!isEsql && dataSourceContext.selectedSavedSearch !== null) {
       // Jobs created from saved searches cannot be cloned in the wizard as the
       // ML job config holds no reference to the saved search ID.
       jobCreator.createdBy = null;
@@ -196,13 +205,13 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   chartInterval.setInterval('auto');
 
   const chartLoader = useMemo(
-    () => new ChartLoader(mlApi, dataSourceContext.selectedDataView, jobCreator.query),
-    [mlApi, dataSourceContext.selectedDataView, jobCreator.query]
+    () => new ChartLoader(mlApi, selectedDataView, jobCreator.query),
+    [mlApi, selectedDataView, jobCreator.query]
   );
 
   const mapLoader = useMemo(
-    () => new MapLoader(mlApi, dataSourceContext.selectedDataView, jobCreator.query, mapsPlugin),
-    [mlApi, dataSourceContext.selectedDataView, jobCreator.query, mapsPlugin]
+    () => new MapLoader(mlApi, selectedDataView, jobCreator.query, mapsPlugin),
+    [mlApi, selectedDataView, jobCreator.query, mapsPlugin]
   );
 
   const resultsLoader = useMemo(
@@ -229,7 +238,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
       <div style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
         <EuiText size={'s'}>
-          {dataSourceContext.selectedDataView.isPersisted() ? (
+          {selectedDataView === null ? null : selectedDataView.isPersisted() ? (
             <FormattedMessage
               id="xpack.ml.newJob.page.createJob.dataViewName"
               defaultMessage="Using data view {dataViewName}"

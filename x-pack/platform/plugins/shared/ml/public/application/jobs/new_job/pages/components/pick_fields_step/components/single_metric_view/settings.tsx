@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 
 import { convertToMultiMetricJob } from '../../../../../common/job_creator/util/general';
+import { isClassicJobCreator } from '../../../../../common/job_creator';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 
@@ -27,7 +28,9 @@ export const SingleMetricSettings: FC<Props> = ({ setIsValid }) => {
   const navigateToMlManagement = useNavigateToManagementMlLink('anomaly_detection');
 
   const convertToMultiMetric = () => {
-    convertToMultiMetricJob(jobCreator, navigateToMlManagement);
+    if (isClassicJobCreator(jobCreator)) {
+      convertToMultiMetricJob(jobCreator, navigateToMlManagement);
+    }
   };
 
   return (

@@ -66,6 +66,9 @@ async function getWizardUrlFromCloningJob(createdBy: string | undefined, dataVie
     case CREATED_BY_LABEL.GEO_FROM_LENS:
       page = JOB_TYPE.GEO;
       break;
+    case CREATED_BY_LABEL.ESQL:
+      page = JOB_TYPE.ESQL;
+      break;
     case CREATED_BY_LABEL.ADVANCED:
     default:
       page = JOB_TYPE.ADVANCED;

@@ -12,6 +12,7 @@ import type { AdvancedJobCreator } from './advanced_job_creator';
 import type { CategorizationJobCreator } from './categorization_job_creator';
 import type { RareJobCreator } from './rare_job_creator';
 import type { GeoJobCreator } from './geo_job_creator';
+import type { EsqlJobCreator } from './esql_job_creator';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export type JobCreatorType =
@@ -21,7 +22,10 @@ export type JobCreatorType =
   | AdvancedJobCreator
   | CategorizationJobCreator
   | RareJobCreator
-  | GeoJobCreator;
+  | GeoJobCreator
+  | EsqlJobCreator;
+
+export type ClassicJobCreatorType = Exclude<JobCreatorType, EsqlJobCreator>;
 
 export function isSingleMetricJobCreator(
   jobCreator: JobCreatorType
@@ -57,4 +61,14 @@ export function isRareJobCreator(jobCreator: JobCreatorType): jobCreator is Rare
 
 export function isGeoJobCreator(jobCreator: JobCreatorType): jobCreator is GeoJobCreator {
   return jobCreator.type === JOB_TYPE.GEO;
+}
+
+export function isClassicJobCreator(
+  jobCreator: JobCreatorType
+): jobCreator is ClassicJobCreatorType {
+  return jobCreator.type !== JOB_TYPE.ESQL;
+}
+
+export function isEsqlJobCreator(jobCreator: JobCreatorType): jobCreator is EsqlJobCreator {
+  return jobCreator.type === JOB_TYPE.ESQL;
 }

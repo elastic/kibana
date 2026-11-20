@@ -27,7 +27,7 @@ export type LineChartData = Record<DetectorIndex, LineChartPoint[]>;
 const eq = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 
 export class ChartLoader {
-  protected _dataView: DataView;
+  protected _dataView: DataView | null;
   protected _mlApi: MlApi;
 
   private _timeFieldName: string = '';
@@ -38,7 +38,7 @@ export class ChartLoader {
   private _getEventRateData;
   private _getCategoryFields;
 
-  constructor(mlApi: MlApi, indexPattern: DataView, query: object) {
+  constructor(mlApi: MlApi, indexPattern: DataView | null, query: object) {
     this._mlApi = mlApi;
     this._dataView = indexPattern;
     this._query = query;
@@ -48,9 +48,16 @@ export class ChartLoader {
     this._getEventRateData = memoizeOne(mlResultsServiceProvider(mlApi).getEventRateData, eq);
     this._getCategoryFields = memoizeOne(getCategoryFieldsOrig, eq);
 
-    if (typeof indexPattern.timeFieldName === 'string') {
+    if (typeof indexPattern?.timeFieldName === 'string') {
       this._timeFieldName = indexPattern.timeFieldName;
     }
+  }
+
+  private _getIndexPattern(): string {
+    if (this._dataView === null) {
+      throw new Error('A data view is required to load chart data');
+    }
+    return this._dataView.getIndexPattern();
   }
 
   async loadLineCharts(
@@ -74,7 +81,7 @@ export class ChartLoader {
       const aggFieldPairNames = aggFieldPairs.map(getAggFieldPairNames);
 
       const resp = await this._newJobLineChart(
-        this._dataView.getIndexPattern(),
+        this._getIndexPattern(),
         this._timeFieldName,
         start,
         end,
@@ -113,7 +120,7 @@ export class ChartLoader {
       const aggFieldPairNames = aggFieldPairs.map(getAggFieldPairNames);
 
       const resp = await this._newJobPopulationsChart(
-        this._dataView.getIndexPattern(),
+        this._getIndexPattern(),
         this._timeFieldName,
         start,
         end,
@@ -141,7 +148,7 @@ export class ChartLoader {
   ): Promise<LineChartPoint[]> {
     if (this._timeFieldName !== '') {
       const resp = await this._getEventRateData(
-        this._dataView.getIndexPattern(),
+        this._getIndexPattern(),
         this._query,
         this._timeFieldName,
         start,
@@ -171,7 +178,7 @@ export class ChartLoader {
   ): Promise<string[]> {
     const { results } = await this._getCategoryFields(
       this._mlApi,
-      this._dataView.getIndexPattern(),
+      this._getIndexPattern(),
       field.name,
       10,
       this._query,

@@ -13,7 +13,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job, Detector, CustomRule } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlApi } from '../../../../services/ml_api_service';
-import { JobCreator } from './job_creator';
+import { JobCreatorClassic } from './job_creator_classic';
 import { createBasicDetector } from './util/default_configs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
@@ -32,7 +32,7 @@ export interface RichDetector {
   useNull: boolean | null;
 }
 
-export class AdvancedJobCreator extends JobCreator {
+export class AdvancedJobCreator extends JobCreatorClassic {
   protected _type: JOB_TYPE = JOB_TYPE.ADVANCED;
   private _richDetectors: RichDetector[] = [];
   private _queryString: string;
