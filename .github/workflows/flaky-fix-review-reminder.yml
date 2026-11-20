@@ -1,0 +1,50 @@
+name: Flaky fix review reminder
+
+# Daily sweep over open PRs labeled `flaky-test-fixer` (opened against main by
+# kibanamachine, later marked ready for review). Once such a PR has had no human
+# review for 4 days (weekends included), this pings the codeowners of the
+# changed files. Despite the daily schedule it never pings daily: reminders
+# embed a hidden marker, and a PR is only re-pinged 4+ days after the last one.
+# A submitted human review stops the reminders; drafts are skipped.
+
+on:
+  schedule:
+    # daily at 07:00 UTC
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Log what would be pinged instead of commenting'
+        type: boolean
+        default: false
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  remind:
+    name: Ping codeowners of PRs labeled flaky-test-fixer with no review for 4+ days
+    runs-on: ubuntu-latest
+    if: github.repository == 'elastic/kibana'
+    concurrency:
+      group: flaky-fix-review-reminder
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: |
+            .github/CODEOWNERS
+            .github/scripts/flaky_fix_review_reminder.js
+          sparse-checkout-cone-mode: false
+      - name: Install matcher dependency
+        run: npm install --no-save --no-package-lock ignore@7.0.5
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          DRY_RUN: ${{ inputs.dry_run == true }}
+        with:
+          # must be kibanamachine (github-actions wouldn't send the notification to the team)
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          script: |
+            const flakyFixReviewReminder = require('./.github/scripts/flaky_fix_review_reminder');
+            await flakyFixReviewReminder({ github, context, core });
