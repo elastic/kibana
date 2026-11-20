@@ -18,7 +18,7 @@ import AddToTimelineButton, {
 } from './add_to_timeline';
 import type { DataProvider } from '@kbn/securitysolution-timeline-common';
 import { IS_OPERATOR } from '@kbn/securitysolution-timeline-common';
-import { TestProviders } from '../../../mock';
+import { TestProviders } from '../../../common/mock/timeline';
 import {
   PRESS,
   ADD_TO_TIMELINE,
@@ -26,8 +26,6 @@ import {
 } from '@kbn/securitysolution-timeline-components';
 
 const coreStart = coreMock.createStart();
-
-jest.mock('../../../hooks/use_selector');
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux-v7', () => {
@@ -40,8 +38,8 @@ jest.mock('react-redux-v7', () => {
 });
 
 const mockStartDragToTimeline = jest.fn();
-jest.mock('../../../hooks/use_add_to_timeline', () => {
-  const originalModule = jest.requireActual('../../../hooks/use_add_to_timeline');
+jest.mock('./use_add_to_timeline', () => {
+  const originalModule = jest.requireActual('./use_add_to_timeline');
 
   return {
     ...originalModule,
