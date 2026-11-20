@@ -303,7 +303,6 @@ test('runs services on "start"', async () => {
   expect(mockSecurityService.start).not.toHaveBeenCalled();
   expect(mockUserProfileService.start).not.toHaveBeenCalled();
   expect(mockInjectionService.start).not.toHaveBeenCalled();
-  expect(mockInjectionService.ready).not.toHaveBeenCalled();
 
   await server.start();
 
@@ -323,10 +322,6 @@ test('runs services on "start"', async () => {
   expect(mockUserProfileService.start).toHaveBeenCalledTimes(1);
   expect(mockUserSettingsService.start).toHaveBeenCalledTimes(1);
   expect(mockInjectionService.start).toHaveBeenCalledTimes(1);
-  expect(mockInjectionService.ready).toHaveBeenCalledTimes(1);
-  expect(mockPluginsService.start.mock.invocationCallOrder[0]).toBeLessThan(
-    mockInjectionService.ready.mock.invocationCallOrder[0]
-  );
   // start() polls runtime flag overrides on a timer. Stop so Jest can exit.
   await server.stop();
 });

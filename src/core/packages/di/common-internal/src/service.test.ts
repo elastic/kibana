@@ -23,6 +23,7 @@ describe('CoreInjectionService', () => {
   let service: CoreInjectionService;
 
   beforeEach(() => {
+    pluginModuleMock.ready.mockClear();
     container = new Container();
     service = new CoreInjectionService();
   });
@@ -73,6 +74,7 @@ describe('CoreInjectionService', () => {
       expect(start).toEqual({
         fork: expect.any(Function),
         getContainer: expect.any(Function),
+        ready: expect.any(Function),
       });
     });
 
@@ -96,6 +98,13 @@ describe('CoreInjectionService', () => {
   describe('ready', () => {
     it('should allow resolving soft dependencies', () => {
       service.ready();
+
+      expect(pluginModuleMock.ready).toHaveBeenCalledTimes(1);
+    });
+
+    it('should be callable detached from the start contract', () => {
+      const { ready } = service.start();
+      ready();
 
       expect(pluginModuleMock.ready).toHaveBeenCalledTimes(1);
     });

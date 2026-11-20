@@ -95,7 +95,7 @@ function createInternalSetupContract(): jest.MockedObjectDeep<InternalCoreDiServ
 }
 
 function createInternalStartContract(): jest.MockedObjectDeep<InternalCoreDiServiceStart> {
-  return createStartContract();
+  return Object.assign(createStartContract(), { ready: jest.fn() });
 }
 
 /**

@@ -705,7 +705,6 @@ export class Server {
     this.coreApp.start(this.coreStart);
 
     await this.plugins.start(this.coreStart);
-    this.injection.ready();
 
     await this.http.start();
     this.status.setReady(true);
