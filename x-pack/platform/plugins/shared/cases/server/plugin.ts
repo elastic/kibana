@@ -71,6 +71,7 @@ import {
   V2_NOOP_ACTIVITY_WRITER,
   V2_NOOP_ATTACHMENTS_WRITER,
   V2_NOOP_DATA_VIEW_REFRESHER,
+  V2_NOOP_READER,
   V2_NOOP_WRITER,
 } from './cases_analytics_v2';
 import { CasesEventBus } from './events/event_bus';
@@ -544,6 +545,7 @@ export class CasePlugin
       // service calls it fire-and-forget after every template mutation.
       analyticsV2DataViewRefresher:
         this.casesAnalyticsV2Service?.getDataViewRefresher() ?? V2_NOOP_DATA_VIEW_REFRESHER,
+      analyticsV2Reader: this.casesAnalyticsV2Service?.getReader() ?? V2_NOOP_READER,
     });
 
     return {

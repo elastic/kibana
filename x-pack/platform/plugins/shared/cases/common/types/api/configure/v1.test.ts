@@ -28,6 +28,9 @@ import {
   MAX_TEMPLATE_TAG_LENGTH,
   MAX_TITLE_LENGTH,
   MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
+  MAX_METRICS_PER_PAGE,
+  MAX_METRIC_LABEL_LENGTH,
+  MAX_METRIC_QUERY_LENGTH,
 } from '../../../constants';
 import { CaseSeverity } from '../../domain';
 import { ConnectorTypes } from '../../domain/connector/v1';
@@ -43,6 +46,7 @@ import {
   NumberCustomFieldConfigurationSchema,
   TemplateConfigurationSchema,
   ObservableTypesConfigurationSchema,
+  KpiMetricsConfigurationRequestSchema,
 } from './v1';
 
 describe('configure', () => {
@@ -738,6 +742,86 @@ describe('configure', () => {
       });
       const result = ObservableTypesConfigurationSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('KpiMetricsConfigurationRequestSchema', () => {
+    const customMetric = {
+      kind: 'custom' as const,
+      label: 'Critical open cases',
+      index: 'cases' as const,
+      query: 'case.status: open and case.severity: critical',
+      display: 'value' as const,
+    };
+    const predefinedMetric = {
+      kind: 'predefined' as const,
+      predefinedId: 'open_cases',
+      display: 'value' as const,
+    };
+
+    it('accepts custom and predefined metrics without ids', () => {
+      const metrics = { casesList: [customMetric, predefinedMetric] };
+      const result = KpiMetricsConfigurationRequestSchema.safeParse(metrics);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(metrics);
+    });
+
+    it('accepts an aggregation, a threshold, and a direction', () => {
+      const metric = {
+        ...customMetric,
+        aggregation: { type: 'median' as const, field: 'case.time_to_resolve' },
+        threshold: { comparator: 'above' as const, value: 3600 },
+        direction: 'lower_is_better' as const,
+      };
+      const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] });
+      expect(result.success).toBe(true);
+    });
+
+    it(`does not accept more than ${MAX_METRICS_PER_PAGE} metrics for one page`, () => {
+      const casesList = new Array(MAX_METRICS_PER_PAGE + 1).fill(customMetric);
+      expect(KpiMetricsConfigurationRequestSchema.safeParse({ casesList }).success).toBe(false);
+      expect(
+        KpiMetricsConfigurationRequestSchema.safeParse({ caseDetails: casesList }).success
+      ).toBe(false);
+    });
+
+    it('does not accept a label above the length limit', () => {
+      const metric = { ...customMetric, label: 'a'.repeat(MAX_METRIC_LABEL_LENGTH + 1) };
+      const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] });
+      expect(result.success).toBe(false);
+    });
+
+    it('does not accept a query above the length limit', () => {
+      const metric = { ...customMetric, query: 'a'.repeat(MAX_METRIC_QUERY_LENGTH + 1) };
+      const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] });
+      expect(result.success).toBe(false);
+    });
+
+    it('does not accept an unknown index', () => {
+      const metric = { ...customMetric, index: 'alerts' };
+      const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] });
+      expect(result.success).toBe(false);
+    });
+
+    it('does not accept an unknown kind', () => {
+      const metric = { ...customMetric, kind: 'esql' };
+      const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts metrics in the configure request and the patch request', () => {
+      const metrics = { casesList: [customMetric] };
+      expect(
+        ConfigurationRequestSchema.safeParse({
+          connector: serviceNow,
+          closure_type: 'close-by-user',
+          owner: 'Cases',
+          metrics,
+        }).success
+      ).toBe(true);
+      expect(ConfigurationPatchRequestSchema.safeParse({ version: '123', metrics }).success).toBe(
+        true
+      );
     });
   });
 });

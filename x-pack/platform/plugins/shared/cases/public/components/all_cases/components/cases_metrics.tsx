@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -17,12 +18,24 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import prettyMilliseconds from 'pretty-ms';
+import type { KpiMetricResult } from '../../../../common/types/api';
+import type { KpiMetricConfiguration } from '../../../../common/types/domain';
 import { CaseStatuses } from '../../../../common/types/domain';
 import { StatusStats } from '../../status/status_stats';
-import { ATTC_DESCRIPTION, ATTC_STAT, ATTC_STAT_INFO_ARIA_LABEL } from '../translations';
+import { statuses } from '../../status/config';
+import {
+  ATTC_DESCRIPTION,
+  ATTC_STAT,
+  ATTC_STAT_INFO_ARIA_LABEL,
+  KPI_METRIC_ANALYTICS_DISABLED,
+  KPI_METRIC_UNKNOWN,
+} from '../translations';
+import type { KpiMetricTileProps } from './kpi_metric_tile';
+import { KpiMetricTile } from './kpi_metric_tile';
 
 const PRETTY_MS_OPTIONS = { compact: true, verbose: false } as const;
 const MTTR_MULTIPLIER = 1000;
+const KPI_TILES_PER_ROW = 4;
 
 export interface CasesMetricsProps {
   /**
@@ -34,15 +47,92 @@ export interface CasesMetricsProps {
   countClosedCases: number;
   mttr: number | null | undefined;
   isLoading: boolean;
+  /**
+   * The saved case list metrics. With no saved list, the bar shows the four default stats.
+   */
+  kpiMetrics?: KpiMetricConfiguration[];
+  kpiResults?: KpiMetricResult[];
+  isLoadingKpiResults?: boolean;
+  isAnalyticsEnabled?: boolean;
 }
 
-const CasesMetricsComponent: React.FC<CasesMetricsProps> = ({
-  countOpenCases,
-  countInProgressCases,
-  countClosedCases,
-  mttr,
-  isLoading,
-}) => {
+type KpiTileValues = Omit<KpiMetricTileProps, 'threshold' | 'dataTestSubj'>;
+
+const getPredefinedTileValues = (
+  predefinedId: string,
+  { countOpenCases, countInProgressCases, countClosedCases, mttr, isLoading }: CasesMetricsProps
+): KpiTileValues => {
+  switch (predefinedId) {
+    case 'open_cases':
+      return {
+        label: statuses[CaseStatuses.open].stats.title,
+        value: countOpenCases,
+        format: 'number',
+        isLoading,
+      };
+    case 'in_progress_cases':
+      return {
+        label: statuses[CaseStatuses['in-progress']].stats.title,
+        value: countInProgressCases,
+        format: 'number',
+        isLoading,
+      };
+    case 'closed_cases':
+      return {
+        label: statuses[CaseStatuses.closed].stats.title,
+        value: countClosedCases,
+        format: 'number',
+        isLoading,
+      };
+    case 'average_time_to_close':
+      return { label: ATTC_STAT, value: mttr, format: 'duration', isLoading };
+    default:
+      return {
+        label: predefinedId,
+        value: null,
+        format: 'number',
+        isLoading: false,
+        errorMessage: KPI_METRIC_UNKNOWN,
+      };
+  }
+};
+
+const getKpiTileValues = (
+  metric: KpiMetricConfiguration,
+  props: CasesMetricsProps
+): KpiTileValues => {
+  if (metric.kind === 'predefined') {
+    return getPredefinedTileValues(metric.predefinedId, props);
+  }
+
+  const { kpiResults, isLoadingKpiResults = false, isAnalyticsEnabled = false } = props;
+  const base = { label: metric.label, value: null, format: 'number' as const };
+
+  if (!isAnalyticsEnabled) {
+    return { ...base, isLoading: false, errorMessage: KPI_METRIC_ANALYTICS_DISABLED };
+  }
+
+  const result = kpiResults?.find(({ id }) => id === metric.id);
+
+  if (result == null) {
+    return { ...base, isLoading: isLoadingKpiResults };
+  }
+
+  if (result.type === 'error') {
+    return { ...base, isLoading: isLoadingKpiResults, errorMessage: result.message };
+  }
+
+  return {
+    ...base,
+    value: result.value,
+    format: result.format,
+    isLoading: isLoadingKpiResults,
+  };
+};
+
+const CasesMetricsComponent: React.FC<CasesMetricsProps> = (props) => {
+  const { countOpenCases, countInProgressCases, countClosedCases, mttr, isLoading, kpiMetrics } =
+    props;
   const { euiTheme } = useEuiTheme();
 
   const mttrValue = useMemo(
@@ -56,6 +146,28 @@ const CasesMetricsComponent: React.FC<CasesMetricsProps> = ({
     `,
     [euiTheme.border.radius.panel]
   );
+
+  if (kpiMetrics != null) {
+    if (kpiMetrics.length === 0) {
+      return null;
+    }
+
+    return (
+      <EuiPanel hasBorder paddingSize="m" grow={false} css={panelStyles}>
+        <EuiFlexGrid columns={KPI_TILES_PER_ROW} data-test-subj="cases-kpi-tiles">
+          {kpiMetrics.map((metric) => (
+            <EuiFlexItem key={metric.id}>
+              <KpiMetricTile
+                {...getKpiTileValues(metric, props)}
+                threshold={metric.threshold}
+                dataTestSubj={`cases-kpi-tile-${metric.id}`}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+      </EuiPanel>
+    );
+  }
 
   return (
     <EuiPanel hasBorder paddingSize="m" grow={false} css={panelStyles}>

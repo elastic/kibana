@@ -11,6 +11,10 @@ import type {
   SingleCaseMetricsResponse,
   CasesMetricsRequest,
   CasesMetricsResponse,
+  KpiMetricsRequest,
+  KpiMetricsResponse,
+  KpiMetricPreviewRequest,
+  KpiMetricPreviewResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 
@@ -18,6 +22,8 @@ import type { CasesClientArgs } from '../types';
 import { getStatusTotalsByType } from './get_status_totals';
 import { getCaseMetrics } from './get_case_metrics';
 import { getCasesMetrics } from './get_cases_metrics';
+import { getKpiMetrics } from './get_kpi_metrics';
+import { previewKpiMetric } from './preview_kpi_metric';
 import type { GetCaseMetricsParams } from './types';
 
 /**
@@ -30,6 +36,14 @@ export interface MetricsSubClient {
    * Retrieves the total number of open, closed, and in-progress cases.
    */
   getStatusTotalsByType(params: CasesStatusRequest): Promise<CasesStatusResponse>;
+  /**
+   * Retrieves the values of the case list KPI metrics that read the analytics indices.
+   */
+  getKpiMetrics(params: KpiMetricsRequest): Promise<KpiMetricsResponse>;
+  /**
+   * Retrieves the value of one unsaved custom KPI metric.
+   */
+  previewKpiMetric(params: KpiMetricPreviewRequest): Promise<KpiMetricPreviewResponse>;
 }
 
 /**
@@ -48,6 +62,8 @@ export const createMetricsSubClient = (
       getCasesMetrics(params, casesClient, clientArgs),
     getStatusTotalsByType: (params: CasesStatusRequest) =>
       getStatusTotalsByType(params, clientArgs),
+    getKpiMetrics: (params: KpiMetricsRequest) => getKpiMetrics(params, clientArgs),
+    previewKpiMetric: (params: KpiMetricPreviewRequest) => previewKpiMetric(params, clientArgs),
   };
 
   return Object.freeze(casesSubClient);

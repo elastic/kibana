@@ -37,6 +37,8 @@ export const casesQueriesKeys = {
   connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
   casesList: () => [...casesQueriesKeys.all, 'list'] as const,
   casesStatuses: () => [...casesQueriesKeys.casesList(), 'statuses'] as const,
+  kpiMetrics: (params: unknown) =>
+    [...casesQueriesKeys.casesList(), 'kpi-metrics', params] as const,
   cases: (params: unknown) => [...casesQueriesKeys.casesList(), 'all-cases', params] as const,
   similarCases: (id: string, params: unknown) =>
     [...casesQueriesKeys.caseView(), id, 'similar', params] as const,
@@ -86,6 +88,7 @@ export const casesMutationsKeys = {
   bulkDeleteAttachments: ['bulk-delete-attachments'] as const,
   bulkCreateAttachments: ['bulk-create-attachments'] as const,
   persistCaseConfiguration: ['persist-case-configuration'] as const,
+  previewKpiMetric: ['preview-kpi-metric'] as const,
   replaceCustomField: ['replace-custom-field'] as const,
   postObservable: ['post-observable'] as const,
   patchObservable: ['patch-observable'] as const,

@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import type { KpiMetricsConfigurationRequest } from '../../../common/types/api';
 import type {
   CustomFieldsConfiguration,
   CustomFieldTypes,
@@ -16,6 +17,7 @@ import {
   validateCustomFieldKeysAgainstConfiguration,
   validateCustomFieldTypesInRequest as validateCaseCustomFieldTypesInRequest,
 } from '../cases/validators';
+import { getKpiMetricFieldError, getKpiMetricQueryError } from '../metrics/kpi';
 
 /**
  * Throws an error if the request tries to change the type of existing custom fields.
@@ -85,4 +87,41 @@ export const validateTemplatesCustomFieldsInRequest = ({
     validateCustomFieldKeysAgainstConfiguration(params);
     validateCaseCustomFieldTypesInRequest(params);
   });
+};
+
+/**
+ * Throws an error if a page has duplicated metric ids, or if a custom KPI metric has a KQL syntax error
+ * or a field that the catalog does not allow.
+ */
+export const validateKpiMetricsInRequest = ({
+  metrics,
+}: {
+  metrics?: KpiMetricsConfigurationRequest;
+}) => {
+  if (metrics == null) {
+    return;
+  }
+
+  (['casesList', 'caseDetails'] as const).forEach((page) => {
+    validateDuplicatedKeysInRequest({
+      requestFields: metrics[page]?.flatMap(({ id }) => (id != null ? [{ key: id }] : [])),
+      fieldName: `metrics.${page}`,
+    });
+  });
+
+  const errors = [...(metrics.casesList ?? []), ...(metrics.caseDetails ?? [])].flatMap(
+    (metric) => {
+      if (metric.kind !== 'custom') {
+        return [];
+      }
+
+      return [getKpiMetricQueryError(metric.query), getKpiMetricFieldError(metric)]
+        .filter((error): error is string => error != null)
+        .map((error) => `"${metric.label}": ${error}`);
+    }
+  );
+
+  if (errors.length > 0) {
+    throw Boom.badRequest(`Invalid KPI metrics in request: ${errors.join(' ')}`);
+  }
 };

@@ -55,6 +55,7 @@ import {
 } from '../validators';
 import {
   validateCustomFieldTypesInRequest,
+  validateKpiMetricsInRequest,
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
@@ -62,6 +63,7 @@ import { assertCanStoreExtractObservables } from '../../common/assert_can_store_
 import { OWNER_INFO } from '../../../common/constants/owners';
 import type { Owner } from '../../../common/constants/types';
 import { ensureGlobalFieldDefinitions } from './ensure_field_definitions';
+import { assignKpiMetricIds } from './kpi_metrics';
 
 /**
  * Defines the internal helper functions.
@@ -351,7 +353,9 @@ export async function update(
       requestFields: request.observableTypes,
     });
 
-    const { version, templates, ...queryWithoutVersion } = request;
+    validateKpiMetricsInRequest({ metrics: request.metrics });
+
+    const { version, templates, metrics, ...queryWithoutVersion } = request;
 
     const configuration = await caseConfigureService.get({
       unsecuredSavedObjectsClient,
@@ -459,6 +463,9 @@ export async function update(
       updatedAttributes: {
         ...queryWithoutVersionAndConnector,
         ...(updatedTemplates && { templates: updatedTemplates }),
+        ...(metrics !== undefined && {
+          metrics: { ...configuration.attributes.metrics, ...assignKpiMetricIds(metrics) },
+        }),
         ...(connector != null && { connector }),
         updated_at: updateDate,
         updated_by: user,
@@ -523,6 +530,8 @@ export async function create(
     validateDuplicatedObservableTypesInRequest({
       requestFields: validatedConfigurationRequest.observableTypes,
     });
+
+    validateKpiMetricsInRequest({ metrics: validatedConfigurationRequest.metrics });
 
     let error = null;
 
@@ -630,6 +639,7 @@ export async function create(
             .autoExtractDefault ??
           false,
         workflowTags: validatedConfigurationRequest.workflowTags ?? [],
+        metrics: assignKpiMetricIds(validatedConfigurationRequest.metrics),
       },
       id: savedObjectID,
     });

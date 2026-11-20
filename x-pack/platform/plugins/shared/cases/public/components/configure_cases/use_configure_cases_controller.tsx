@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { ActionConnector, ObservableTypeConfiguration } from '../../../common/types/domain';
+import type { KpiMetricRequest } from '../../../common/types/api';
 import { getNoneConnector } from '../../../common/utils/connectors';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
@@ -75,7 +76,9 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     observableTypes,
     extractObservables,
     workflowTags,
+    metrics,
   } = currentConfiguration;
+  const kpiMetrics = metrics?.casesList;
 
   const {
     mutate: persistCaseConfigure,
@@ -406,6 +409,33 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     ]
   );
 
+  const onSaveKpiMetrics = useCallback(
+    (updatedKpiMetrics: KpiMetricRequest[]) => {
+      persistCaseConfigure({
+        connector,
+        closureType,
+        customFields,
+        templates,
+        observableTypes,
+        workflowTags,
+        id: configurationId,
+        version: configurationVersion,
+        metrics: { casesList: updatedKpiMetrics },
+      });
+    },
+    [
+      connector,
+      closureType,
+      customFields,
+      templates,
+      observableTypes,
+      workflowTags,
+      persistCaseConfigure,
+      configurationId,
+      configurationVersion,
+    ]
+  );
+
   const AddOrEditObservableTypeFlyout =
     flyOutVisibility?.type === 'observableTypes' && flyOutVisibility?.visible ? (
       <CommonFlyout<ObservableTypeConfiguration>
@@ -463,6 +493,8 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     onDeleteObservableType,
     onChangeWorkflowTags,
     AddOrEditObservableTypeFlyout,
+    kpiMetrics,
+    onSaveKpiMetrics,
   };
 };
 

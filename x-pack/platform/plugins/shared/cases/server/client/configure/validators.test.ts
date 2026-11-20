@@ -8,6 +8,7 @@
 import { CustomFieldTypes } from '../../../common/types/domain';
 import {
   validateCustomFieldTypesInRequest,
+  validateKpiMetricsInRequest,
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
 
@@ -401,6 +402,135 @@ describe('validators', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"Invalid duplicated templates[0]'s customFields keys in request: first_key"`
       );
+    });
+  });
+
+  describe('validateKpiMetricsInRequest', () => {
+    const customMetric = {
+      kind: 'custom' as const,
+      label: 'Critical cases',
+      index: 'cases' as const,
+      query: 'case.severity: critical',
+      display: 'value' as const,
+    };
+
+    it('does not throw when the metrics are undefined', () => {
+      expect(() => validateKpiMetricsInRequest({})).not.toThrow();
+    });
+
+    it('does not throw for valid metrics', () => {
+      expect(() =>
+        validateKpiMetricsInRequest({
+          metrics: {
+            casesList: [
+              { kind: 'predefined', predefinedId: 'open_cases', display: 'value' },
+              customMetric,
+              {
+                ...customMetric,
+                label: 'Median time to resolve',
+                query: '',
+                aggregation: { type: 'median', field: 'case.time_to_resolve' },
+              },
+              {
+                ...customMetric,
+                label: 'Unique assignees',
+                aggregation: { type: 'cardinality', field: 'case.assignees.username' },
+              },
+            ],
+          },
+        })
+      ).not.toThrow();
+    });
+
+    it('throws for a KQL syntax error', () => {
+      expect(() =>
+        validateKpiMetricsInRequest({
+          metrics: { casesList: [{ ...customMetric, query: 'status: closed or (space_id: *' }] },
+        })
+      ).toThrow(/Invalid KPI metrics in request: "Critical cases": The KQL query is not valid/);
+    });
+
+    it('throws for a field that the catalog does not have', () => {
+      expect(() =>
+        validateKpiMetricsInRequest({
+          metrics: {
+            casesList: [
+              { ...customMetric, aggregation: { type: 'sum', field: 'case.description' } },
+            ],
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid KPI metrics in request: \\"Critical cases\\": The field case.description is not allowed for the cases index."`
+      );
+    });
+
+    it('throws for a numeric aggregation on a keyword field', () => {
+      expect(() =>
+        validateKpiMetricsInRequest({
+          metrics: {
+            casesList: [{ ...customMetric, aggregation: { type: 'avg', field: 'case.status' } }],
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid KPI metrics in request: \\"Critical cases\\": The avg aggregation needs a numeric field. case.status is not a numeric field."`
+      );
+    });
+
+    it('throws for a field aggregation without a field', () => {
+      expect(() =>
+        validateKpiMetricsInRequest({
+          metrics: { casesList: [{ ...customMetric, aggregation: { type: 'max' } }] },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid KPI metrics in request: \\"Critical cases\\": The max aggregation needs a field."`
+      );
+    });
+
+    it('validates the metrics of the case details page', () => {
+      expect(() =>
+        validateKpiMetricsInRequest({
+          metrics: { caseDetails: [{ ...customMetric, query: 'a:(' }] },
+        })
+      ).toThrow(/The KQL query is not valid/);
+    });
+
+    it('reports every invalid metric', () => {
+      expect(() =>
+        validateKpiMetricsInRequest({
+          metrics: {
+            casesList: [
+              { ...customMetric, label: 'First', query: 'a:(' },
+              { ...customMetric, label: 'Second', aggregation: { type: 'min', field: 'unknown' } },
+            ],
+          },
+        })
+      ).toThrow(/"First": The KQL query is not valid.*"Second": The field unknown is not allowed/s);
+    });
+
+    it('throws for duplicated metric ids in one page', () => {
+      expect(() =>
+        validateKpiMetricsInRequest({
+          metrics: {
+            casesList: [
+              { ...customMetric, id: 'same' },
+              { ...customMetric, id: 'same', label: 'Other' },
+            ],
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid duplicated metrics.casesList keys in request: same"`
+      );
+    });
+
+    it('does not throw for the same metric id in different pages', () => {
+      expect(() =>
+        validateKpiMetricsInRequest({
+          metrics: {
+            casesList: [{ ...customMetric, id: 'same' }],
+            caseDetails: [{ ...customMetric, id: 'same' }],
+          },
+        })
+      ).not.toThrow();
     });
   });
 });

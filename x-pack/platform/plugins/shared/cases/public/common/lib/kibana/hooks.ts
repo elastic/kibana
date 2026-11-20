@@ -51,12 +51,14 @@ export const useCasesConfig = () => {
       chatEnabled: config?.chat?.enabled ?? false,
       templatesEnabled: config?.templates?.enabled ?? false,
       runWorkflowsEnabled: config?.runWorkflows?.enabled ?? false,
+      analyticsV2Enabled: config?.analyticsV2?.enabled ?? false,
     }),
     [
       config?.attachments?.enabled,
       config?.chat?.enabled,
       config?.templates?.enabled,
       config?.runWorkflows?.enabled,
+      config?.analyticsV2?.enabled,
     ]
   );
 };

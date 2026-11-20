@@ -13,6 +13,7 @@ export * from './application';
 export * from './observables';
 export * from './attachments';
 export * from './workflow';
+export * from './kpi_metrics';
 
 /**
  * Cases connector limits.
@@ -121,6 +122,8 @@ export const INTERNAL_DELETE_FILE_ATTACHMENTS_URL =
 export const INTERNAL_GET_CASE_CATEGORIES_URL = `${CASES_INTERNAL_URL}/categories` as const;
 export const INTERNAL_CASE_METRICS_URL = `${CASES_INTERNAL_URL}/metrics` as const;
 export const INTERNAL_CASE_METRICS_DETAILS_URL = `${CASES_INTERNAL_URL}/metrics/{case_id}` as const;
+export const INTERNAL_KPI_METRICS_URL = `${CASES_INTERNAL_URL}/kpi_metrics` as const;
+export const INTERNAL_KPI_METRICS_PREVIEW_URL = `${INTERNAL_KPI_METRICS_URL}/_preview` as const;
 export const INTERNAL_CASE_SIMILAR_CASES_URL = `${CASES_INTERNAL_URL}/{case_id}/_similar` as const;
 export const INTERNAL_PUT_CUSTOM_FIELDS_URL = `${CASES_INTERNAL_URL}/{case_id}/custom_fields/{custom_field_id}`;
 export const INTERNAL_CASE_OBSERVABLES_URL = `${CASES_INTERNAL_URL}/{case_id}/observables` as const;
@@ -507,6 +510,14 @@ export const MIN_BULK_DELETE_OBSERVABLE_IDS = 1;
 export const MAX_OBSERVABLE_TYPE_LABEL_LENGTH = 50;
 
 export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
+
+export const MAX_METRICS_PER_PAGE = 8 as const;
+export const MAX_METRIC_LABEL_LENGTH = 50 as const;
+export const MAX_METRIC_QUERY_LENGTH = 2000 as const;
+export const MAX_METRIC_ID_LENGTH = 36 as const;
+export const MAX_METRIC_PREDEFINED_ID_LENGTH = 64 as const;
+export const MAX_METRIC_FIELD_LENGTH = 128 as const;
+export const MAX_METRIC_DATE_LENGTH = 64 as const;
 
 /**
  * EBT events

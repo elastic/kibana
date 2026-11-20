@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
@@ -22,6 +22,12 @@ import {
   MAX_TITLE_LENGTH,
   MAX_LENGTH_PER_WORKFLOW_TAG,
   MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
+  MAX_METRICS_PER_PAGE,
+  MAX_METRIC_LABEL_LENGTH,
+  MAX_METRIC_QUERY_LENGTH,
+  MAX_METRIC_ID_LENGTH,
+  MAX_METRIC_PREDEFINED_ID_LENGTH,
+  MAX_METRIC_FIELD_LENGTH,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, regexStringSchema } from '../../../schema';
 import {
@@ -29,7 +35,15 @@ import {
   CustomFieldToggleTypeSchema,
   CustomFieldNumberTypeSchema,
 } from '../../domain/custom_field/v1';
-import { ClosureTypeSchema, ConfigurationBasicWithoutOwnerSchema } from '../../domain/configure/v1';
+import {
+  ClosureTypeSchema,
+  ConfigurationBasicWithoutOwnerSchema,
+  KpiMetricAggregationTypeSchema,
+  KpiMetricDirectionSchema,
+  KpiMetricDisplaySchema,
+  KpiMetricIndexSchema,
+  KpiMetricThresholdSchema,
+} from '../../domain/configure/v1';
 import type { Configuration, Configurations } from '../../domain/configure/v1';
 import { CaseConnectorSchema } from '../../domain/connector/v1';
 import { CaseBaseOptionalFieldsRequestSchema } from '../case/v1';
@@ -174,25 +188,97 @@ export const TemplatesConfigurationSchema = limitedArraySchema({
   fieldName: 'templates',
 });
 
-export const ConfigurationRequestSchema = z.object({
-  /**
-   * The external connector
-   */
-  connector: CaseConnectorSchema,
-  /**
-   * Whether to close the case after it has been synced with the external system
-   */
-  closure_type: ClosureTypeSchema,
-  /**
-   * The plugin owner that manages this configuration
-   */
-  owner: z.string().max(MAX_TITLE_LENGTH),
-  customFields: CustomFieldsConfigurationSchema.optional(),
-  templates: TemplatesConfigurationSchema.optional(),
-  observableTypes: ObservableTypesConfigurationSchema.optional(),
-  extractObservables: z.boolean().optional(),
-  workflowTags: WorkflowTagsConfigurationSchema.optional(),
+const KpiMetricBaseRequestSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The server generates the id of a new metric
+     */
+    id: limitedStringSchema({
+      fieldName: 'metric id',
+      min: 1,
+      max: MAX_METRIC_ID_LENGTH,
+    }).optional(),
+    display: KpiMetricDisplaySchema,
+    threshold: KpiMetricThresholdSchema.optional(),
+    direction: KpiMetricDirectionSchema.optional(),
+  })
+);
+
+const KpiMetricFieldSchema = limitedStringSchema({
+  fieldName: 'metric field',
+  min: 1,
+  max: MAX_METRIC_FIELD_LENGTH,
 });
+
+export const PredefinedKpiMetricRequestSchema = lazySchema(() =>
+  KpiMetricBaseRequestSchema.extend({
+    kind: z.literal('predefined'),
+    predefinedId: limitedStringSchema({
+      fieldName: 'predefinedId',
+      min: 1,
+      max: MAX_METRIC_PREDEFINED_ID_LENGTH,
+    }),
+  })
+);
+
+export const CustomKpiMetricRequestSchema = lazySchema(() =>
+  KpiMetricBaseRequestSchema.extend({
+    kind: z.literal('custom'),
+    label: limitedStringSchema({ fieldName: 'metric label', min: 1, max: MAX_METRIC_LABEL_LENGTH }),
+    index: KpiMetricIndexSchema,
+    query: limitedStringSchema({ fieldName: 'metric query', min: 0, max: MAX_METRIC_QUERY_LENGTH }),
+    aggregation: z
+      .object({
+        type: KpiMetricAggregationTypeSchema,
+        field: KpiMetricFieldSchema.optional(),
+      })
+      .optional(),
+    percent: z.boolean().optional(),
+    groupBy: z.object({ field: KpiMetricFieldSchema }).optional(),
+  })
+);
+
+export const KpiMetricRequestSchema = lazySchema(() =>
+  z.discriminatedUnion('kind', [PredefinedKpiMetricRequestSchema, CustomKpiMetricRequestSchema])
+);
+
+const KpiMetricsListRequestSchema = (fieldName: string) =>
+  limitedArraySchema({
+    codec: KpiMetricRequestSchema,
+    min: 0,
+    max: MAX_METRICS_PER_PAGE,
+    fieldName,
+  });
+
+export const KpiMetricsConfigurationRequestSchema = lazySchema(() =>
+  z.object({
+    casesList: KpiMetricsListRequestSchema('metrics.casesList').optional(),
+    caseDetails: KpiMetricsListRequestSchema('metrics.caseDetails').optional(),
+  })
+);
+
+export const ConfigurationRequestSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The external connector
+     */
+    connector: CaseConnectorSchema,
+    /**
+     * Whether to close the case after it has been synced with the external system
+     */
+    closure_type: ClosureTypeSchema,
+    /**
+     * The plugin owner that manages this configuration
+     */
+    owner: z.string().max(MAX_TITLE_LENGTH),
+    customFields: CustomFieldsConfigurationSchema.optional(),
+    templates: TemplatesConfigurationSchema.optional(),
+    observableTypes: ObservableTypesConfigurationSchema.optional(),
+    extractObservables: z.boolean().optional(),
+    workflowTags: WorkflowTagsConfigurationSchema.optional(),
+    metrics: KpiMetricsConfigurationRequestSchema.optional(),
+  })
+);
 
 export const GetConfigurationFindRequestSchema = z.object({
   /**
@@ -208,18 +294,23 @@ export const CaseConfigureRequestParamsSchema = z.object({
   configuration_id: z.string().max(512),
 });
 
-export const ConfigurationPatchRequestSchema = z.object({
-  closure_type: ClosureTypeSchema.optional(),
-  connector: ConfigurationBasicWithoutOwnerSchema.shape.connector.optional(),
-  customFields: CustomFieldsConfigurationSchema.optional(),
-  templates: TemplatesConfigurationSchema.optional(),
-  observableTypes: ObservableTypesConfigurationSchema.optional(),
-  extractObservables: z.boolean().optional(),
-  workflowTags: WorkflowTagsConfigurationSchema.optional(),
-  version: z.string().max(512),
-});
+export const ConfigurationPatchRequestSchema = lazySchema(() =>
+  z.object({
+    closure_type: ClosureTypeSchema.optional(),
+    connector: ConfigurationBasicWithoutOwnerSchema.shape.connector.optional(),
+    customFields: CustomFieldsConfigurationSchema.optional(),
+    templates: TemplatesConfigurationSchema.optional(),
+    observableTypes: ObservableTypesConfigurationSchema.optional(),
+    extractObservables: z.boolean().optional(),
+    workflowTags: WorkflowTagsConfigurationSchema.optional(),
+    metrics: KpiMetricsConfigurationRequestSchema.optional(),
+    version: z.string().max(512),
+  })
+);
 
 export type ConfigurationRequest = z.infer<typeof ConfigurationRequestSchema>;
+export type KpiMetricRequest = z.infer<typeof KpiMetricRequestSchema>;
+export type KpiMetricsConfigurationRequest = z.infer<typeof KpiMetricsConfigurationRequestSchema>;
 export type ConfigurationPatchRequest = z.infer<typeof ConfigurationPatchRequestSchema>;
 export type GetConfigurationFindRequest = z.infer<typeof GetConfigurationFindRequestSchema>;
 export type GetConfigureResponse = Configurations;

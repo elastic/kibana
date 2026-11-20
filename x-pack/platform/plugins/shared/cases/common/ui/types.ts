@@ -75,6 +75,9 @@ export interface CasesUiConfigType {
   chat?: {
     enabled: boolean;
   };
+  analyticsV2?: {
+    enabled: boolean;
+  };
   markdownPlugins: {
     lens: boolean;
   };
@@ -172,6 +175,7 @@ export type CasesConfigurationUI = Pick<
   | 'observableTypes'
   | 'extractObservables'
   | 'workflowTags'
+  | 'metrics'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];

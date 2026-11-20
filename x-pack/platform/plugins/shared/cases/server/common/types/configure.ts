@@ -13,6 +13,7 @@ import type {
   CaseCustomFields,
   CaseSeverity,
   ConfigurationAttributes,
+  KpiMetricsConfiguration,
 } from '../../../common/types/domain';
 import {
   ConfigurationActivityFieldsSchema,
@@ -35,6 +36,10 @@ export interface ConfigurationPersistedAttributes {
   observableTypes?: PersistedObservableTypesConfiguration;
   extractObservables?: boolean;
   workflowTags?: string[];
+  /**
+   * KPI metrics of the case list and the case details page. Stored in `_source` only.
+   */
+  metrics?: KpiMetricsConfiguration;
   legacyTemplatesMigrated?: boolean;
   legacyCustomFieldsMigrated?: boolean;
   /**
