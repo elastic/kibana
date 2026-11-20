@@ -105,7 +105,13 @@ export async function runKibanaServer(options: RunKibanaServerOptions) {
     ...(options.extraKbnOpts ?? []),
 
     // VALIDATION ONLY: force the ELU rate limiter on for FTR-launched Kibana
-    ...(uiPrefix === 'ftr' ? ['--server.rateLimiter.enabled=true'] : []),
+    ...(uiPrefix === 'ftr'
+      ? [
+          '--server.rateLimiter.enabled=true',
+          '--server.rateLimiter.elu=0.05',
+          '--server.rateLimiter.term=short',
+        ]
+      : []),
   ]);
 
   if (installDir) {
