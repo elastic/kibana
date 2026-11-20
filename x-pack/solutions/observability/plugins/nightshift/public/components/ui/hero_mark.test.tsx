@@ -30,7 +30,8 @@ describe('HeroMark', () => {
       const { euiTheme } = useEuiTheme();
       backgroundBasePlain = euiTheme.colors.backgroundBasePlain;
       textGhost = euiTheme.colors.textGhost;
-      borderWidthThick = euiTheme.border.width.thick;
+      // Theme token is `BorderWidth | undefined`; stringify for the regex assertion.
+      borderWidthThick = String(euiTheme.border.width.thick ?? '');
       return <HeroMark severity="critical" />;
     };
 
@@ -39,6 +40,8 @@ describe('HeroMark', () => {
         <Probe />
       </EuiProvider>
     );
+
+    expect(borderWidthThick.length).toBeGreaterThan(0);
 
     const ring = screen.getByTestId('nightshiftHeroMarkSeverityDotRing');
     const ringStyles = styleChunksForClass(ring.className);
