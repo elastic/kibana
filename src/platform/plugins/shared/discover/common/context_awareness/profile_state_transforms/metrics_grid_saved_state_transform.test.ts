@@ -39,7 +39,7 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
       counterAggregation: 'max',
       gaugeAggregation: 'min',
       histogramPercentile: 'p50',
-      histogramVisualization: 'lnsXY',
+      histogramVisualization: 'lnsHeatmap',
       dimensions: ['host.name'],
       searchTerm: 'bytes',
       gridSortField: 'recency',
@@ -50,7 +50,7 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
         counterAggregation: 'max',
         gaugeAggregation: 'min',
         histogramPercentile: 'p50',
-        histogramVisualization: 'lnsXY',
+        histogramVisualization: 'lnsHeatmap',
         dimensions: ['host.name'],
         searchTerm: 'bytes',
         sortField: 'recency',
@@ -74,7 +74,7 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
         counterAggregation: 'max',
         gaugeAggregation: 'min',
         histogramPercentile: 'p50',
-        histogramVisualization: 'lnsXY',
+        histogramVisualization: 'lnsHeatmap',
         dimensions: ['host.name'],
         searchTerm: 'bytes',
         sortField: 'alphabetically',
@@ -120,7 +120,7 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
   it('restores the default histogram visualization when a saved session predates it', () => {
     const registry = createRegistry();
     const currentState = {
-      metricsState: { histogramVisualization: 'lnsHeatmap' as const },
+      metricsState: { histogramVisualization: 'lnsXY' as const },
     };
     const restored = registry.fromSavedState({
       type: DiscoverTabType.Metrics,
@@ -131,9 +131,9 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
       searchTerm: '',
     });
 
-    expect(restored.metricsState).toMatchObject({ histogramVisualization: 'lnsXY' });
+    expect(restored.metricsState).toMatchObject({ histogramVisualization: 'lnsHeatmap' });
     expect(registry.mergeState(currentState, restored).metricsState).toMatchObject({
-      histogramVisualization: 'lnsXY',
+      histogramVisualization: 'lnsHeatmap',
     });
   });
 
@@ -143,7 +143,7 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
       counterAggregation: 'sum',
       gaugeAggregation: 'avg',
       histogramPercentile: 'p95',
-      histogramVisualization: 'lnsXY',
+      histogramVisualization: 'lnsHeatmap',
       dimensions: [],
       searchTerm: '',
       gridSortField: 'alphabetically',

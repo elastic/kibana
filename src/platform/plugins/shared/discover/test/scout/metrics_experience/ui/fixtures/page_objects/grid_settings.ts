@@ -11,6 +11,7 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 
 export type SimpleAggregationOption = 'avg' | 'sum' | 'min' | 'max';
 export type HistogramPercentileOption = 'p50' | 'p75' | 'p90' | 'p95' | 'p99';
+export type HistogramDisplayOption = 'distribution' | 'percentile';
 
 export interface GridSettings {
   readonly editButton: Locator;
@@ -18,6 +19,8 @@ export interface GridSettings {
   readonly counterSelect: Locator;
   readonly gaugeSelect: Locator;
   readonly histogramSelect: Locator;
+  readonly distributionChoice: Locator;
+  readonly percentileChoice: Locator;
   readonly applyButton: Locator;
   readonly cancelButton: Locator;
   readonly open: () => Promise<void>;
@@ -27,6 +30,8 @@ export interface GridSettings {
   readonly selectGaugeAggregation: (option: SimpleAggregationOption) => Promise<void>;
   /** Opens the histogram percentile dropdown and clicks the given option; does not apply it. */
   readonly selectHistogramPercentile: (option: HistogramPercentileOption) => Promise<void>;
+  /** Selects how histogram metrics are drawn; does not apply it. */
+  readonly selectHistogramDisplay: (option: HistogramDisplayOption) => Promise<void>;
   /** Clicks "Apply and close": commits the staged selections and closes the flyout. */
   readonly apply: () => Promise<void>;
   /** Clicks "Cancel": discards the staged selections and closes the flyout. */
@@ -39,6 +44,14 @@ export function createGridSettings(page: ScoutPage): GridSettings {
   const counterSelect = page.testSubj.locator('metricsExperienceGridSettingsCounterSelect');
   const gaugeSelect = page.testSubj.locator('metricsExperienceGridSettingsGaugeSelect');
   const histogramSelect = page.testSubj.locator('metricsExperienceGridSettingsHistogramSelect');
+  const distributionChoice = page.testSubj.locator(
+    'metricsExperienceGridSettingsDistributionChoice'
+  );
+  const percentileChoice = page.testSubj.locator('metricsExperienceGridSettingsPercentileChoice');
+  const histogramDisplayChoices = {
+    distribution: distributionChoice,
+    percentile: percentileChoice,
+  } as const;
   const applyButton = page.testSubj.locator('metricsExperienceGridSettingsApplyButton');
   const cancelButton = page.testSubj.locator('metricsExperienceGridSettingsCancelButton');
 
@@ -63,6 +76,8 @@ export function createGridSettings(page: ScoutPage): GridSettings {
     counterSelect,
     gaugeSelect,
     histogramSelect,
+    distributionChoice,
+    percentileChoice,
     applyButton,
     cancelButton,
     open,
@@ -72,6 +87,10 @@ export function createGridSettings(page: ScoutPage): GridSettings {
       selectFromDropdown(gaugeSelect, `metricsExperienceGridSettingsGaugeOption-${option}`),
     selectHistogramPercentile: (option) =>
       selectFromDropdown(histogramSelect, `metricsExperienceGridSettingsHistogramOption-${option}`),
+    selectHistogramDisplay: async (option) => {
+      await open();
+      await histogramDisplayChoices[option].click();
+    },
     apply: async () => {
       await applyButton.click();
       await flyout.waitFor({ state: 'hidden' });
