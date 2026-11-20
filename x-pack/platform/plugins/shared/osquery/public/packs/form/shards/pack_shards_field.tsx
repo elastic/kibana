@@ -42,12 +42,14 @@ const PackShardsFieldComponent = ({ options, isDisabled = false }: PackShardsFie
   const { data: { agentPoliciesById, groupsByPackagePolicyId } = {} } = useAgentPolicies();
 
   const rootShards = watchRoot('shards');
+  const rootPolicyIds: string[] | undefined = watchRoot('policy_ids');
 
   const initialShardsArray = useMemo(() => {
     const initialConvertedShards = convertShardsToArray(
       rootShards,
       agentPoliciesById,
-      groupsByPackagePolicyId
+      groupsByPackagePolicyId,
+      rootPolicyIds
     );
     if (!isEmpty(initialConvertedShards)) {
       if (initialConvertedShards[initialConvertedShards.length - 1].policy.key) {
@@ -58,7 +60,7 @@ const PackShardsFieldComponent = ({ options, isDisabled = false }: PackShardsFie
     }
 
     return [defaultShardData];
-  }, [agentPoliciesById, rootShards, groupsByPackagePolicyId]);
+  }, [agentPoliciesById, rootShards, groupsByPackagePolicyId, rootPolicyIds]);
 
   const { control, watch, getFieldState, formState, resetField, setValue, reset } = useForm<{
     shardsArray: ShardsArray;
@@ -84,8 +86,9 @@ const PackShardsFieldComponent = ({ options, isDisabled = false }: PackShardsFie
       const normalizedShards = convertShardsToObject(initialShardsArray, groupsByPackagePolicyId);
       // Collapsing per-policy shards of a shared integration to one row is a
       // display normalization, not a user edit: the server already writes the
-      // max shard per integration (resolveSharedPackagePolicyShard), so keep the
-      // form pristine instead of flagging unsaved changes on open.
+      // max shard per integration (resolveSharedPackagePolicyShard, where a
+      // targeted member without a shard counts as 100), so keep the form
+      // pristine instead of flagging unsaved changes on open.
       if (!deepEqual(normalizedShards, rootShards)) {
         setValueRoot('shards', normalizedShards, { shouldDirty: false });
       }

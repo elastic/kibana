@@ -22,15 +22,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIcon,
   EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiPanel,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiSpacer,
   EuiText,
   EuiSearchBar,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { EuiSearchBarOnChangeArgs, Query } from '@elastic/eui';
+import type { EuiSearchBarOnChangeArgs, Query, UseEuiTheme } from '@elastic/eui';
 import { PLUGIN_ID as FLEET_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useAgentPolicies } from '../../agent_policies';
@@ -45,6 +49,8 @@ interface PolicyRow {
   // no Fleet page to link to.
   isOrphan: boolean;
   members?: PolicyRow[];
+  // Set on a shared-integration row, whose `name` is its first member's name.
+  integrationName?: string;
   searchTerms?: string;
 }
 
@@ -204,6 +210,83 @@ const AgentCountCell: React.FC<AgentCountCellProps> = React.memo(({ count }) => 
 
 AgentCountCell.displayName = 'AgentCountCell';
 
+const popoverListCss = ({ euiTheme }: UseEuiTheme) => ({
+  width: euiTheme.base * 26,
+  margin: 0,
+  padding: 0,
+  listStyle: 'none',
+});
+
+const sharedPoliciesPanelProps = { 'data-test-subj': 'policyAssignmentSharedPoliciesPopover' };
+
+interface SharedPoliciesPopoverProps {
+  integrationName: string;
+  members: PolicyRow[];
+  renderMember: (member: PolicyRow) => React.ReactNode;
+}
+
+// Same shape as Fleet's MultipleAgentPoliciesSummaryLine: the row names one
+// agent policy and a "+N" badge opens the full list of the integration's
+// agent policies.
+const SharedPoliciesPopover: React.FC<SharedPoliciesPopoverProps> = ({
+  integrationName,
+  members,
+  renderMember,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const toggle = useCallback(() => setIsOpen((open) => !open), []);
+  const close = useCallback(() => setIsOpen(false), []);
+  const titleId = useGeneratedHtmlId({ prefix: 'sharedIntegrationPolicies' });
+
+  return (
+    <EuiPopover
+      aria-labelledby={titleId}
+      isOpen={isOpen}
+      closePopover={close}
+      anchorPosition="downCenter"
+      panelProps={sharedPoliciesPanelProps}
+      button={
+        <EuiBadge
+          color="hollow"
+          onClick={toggle}
+          onClickAriaLabel={i18n.translate(
+            'xpack.osquery.pack.form.sharedIntegration.moreBadgeAriaLabel',
+            {
+              defaultMessage: 'Show the {count} agent policies of shared integration {name}',
+              values: { count: members.length, name: integrationName },
+            }
+          )}
+          data-test-subj="policyAssignmentSharedPoliciesBadge"
+        >
+          <FormattedMessage
+            id="xpack.osquery.pack.form.sharedIntegration.moreBadge"
+            defaultMessage="+{count}"
+            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+            values={{ count: members.length - 1 }}
+          />
+        </EuiBadge>
+      }
+    >
+      <EuiPopoverTitle id={titleId}>
+        <FormattedMessage
+          id="xpack.osquery.pack.form.sharedIntegration.popoverTitle"
+          defaultMessage="Shared integration {name} is used by"
+          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+          values={{ name: integrationName }}
+        />
+      </EuiPopoverTitle>
+      <ul css={popoverListCss}>
+        {members.map((member) => (
+          <li key={member.id}>
+            {renderMember(member)}
+            <EuiSpacer size="xs" />
+          </li>
+        ))}
+      </ul>
+    </EuiPopover>
+  );
+};
+
 interface PolicyAssignmentFormValues {
   policy_ids: string[];
   shards: Record<string, number>;
@@ -291,15 +374,25 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   const allPolicies = useMemo<PolicyRow[]>(() => {
     const rows = knownPolicies.filter((policy) => !groupIdByPolicyId?.[policy.id]);
     for (const group of Object.values(groupsByPackagePolicyId ?? {})) {
-      const members = knownPolicies.filter((policy) => group.policyIds.includes(policy.id));
+      const members = knownPolicies
+        .filter((policy) => group.policyIds.includes(policy.id))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      if (members.length === 0) continue;
+
+      // Named after its first agent policy (like Fleet's shared-integration
+      // summary), so the row sorts and reads like any other policy row.
       rows.push({
         id: group.id,
-        name: group.name,
-        description: '',
-        agents: 0,
+        name: members[0].name,
+        description: members[0].description,
+        agents: members.reduce((sum, { agents }) => sum + agents, 0),
         isOrphan: false,
         members,
-        searchTerms: members.map(({ name, description }) => `${name} ${description}`).join(' '),
+        integrationName: group.name,
+        searchTerms: [
+          group.name,
+          ...members.map(({ name, description }) => `${name} ${description}`),
+        ].join(' '),
       });
     }
 
@@ -317,11 +410,14 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     return selected;
   }, [selectedIds, groupsByPackagePolicyId]);
 
+  // Shard-keyed policies are explicit targets too: the form keeps them out of
+  // `policy_ids` (they live in `shards`), so they must not be reported as
+  // included only through the shared integration.
   const implicitPolicyIds = useMemo(() => {
     const explicit = new Set(selectedIds ?? []);
 
-    return new Set([...selectedSet].filter((id) => !explicit.has(id)));
-  }, [selectedIds, selectedSet]);
+    return new Set([...selectedSet].filter((id) => !explicit.has(id) && !shardKeySet.has(id)));
+  }, [selectedIds, selectedSet, shardKeySet]);
 
   const implicitPolicyNames = useMemo(
     () =>
@@ -470,6 +566,60 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     [receivingPolicyIds]
   );
 
+  // One marker per member. "Included" covers members pulled in by the current
+  // selection; "Receives this pack" (from the server) is kept only for a group
+  // that gets the pack while none of its members is selected, i.e. Fleet drift.
+  // Like Fleet's shared-integration popover, the policy name itself links to
+  // the agent policy.
+  const renderGroupMember = useCallback(
+    (member: PolicyRow) => (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+        <EuiFlexItem grow={false} className="eui-textTruncate">
+          {canReadFleetPolicies ? (
+            <EuiLink
+              href={getUrlForApp(FLEET_PLUGIN_ID, {
+                path: pagePathGetters.policy_details({ policyId: member.id })[1],
+              })}
+              target="_blank"
+              data-test-subj={`viewPolicy-${member.id}`}
+            >
+              {member.name}
+            </EuiLink>
+          ) : (
+            member.name
+          )}
+        </EuiFlexItem>
+        {implicitPolicyIds.has(member.id) ? (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">
+              <FormattedMessage
+                id="xpack.osquery.pack.form.sharedIntegration.includedLabel"
+                defaultMessage="Included via shared integration"
+              />
+            </EuiBadge>
+          </EuiFlexItem>
+        ) : (
+          !selectedSet.has(member.id) &&
+          receivingPolicyIds?.includes(member.id) && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">
+                <FormattedMessage
+                  id="xpack.osquery.pack.form.sharedIntegration.receivesPackLabel"
+                  defaultMessage="Receives this pack via shared integration"
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+          )
+        )}
+        <EuiFlexItem />
+        <EuiFlexItem grow={false} className="eui-textNoWrap">
+          <AgentCountCell count={member.agents} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [implicitPolicyIds, selectedSet, receivingPolicyIds, canReadFleetPolicies, getUrlForApp]
+  );
+
   const columns = useMemo<Array<EuiBasicTableColumn<PolicyRow>>>(
     () => [
       {
@@ -486,7 +636,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
                 item.members
                   ? i18n.translate('xpack.osquery.pack.form.sharedIntegration.checkboxAriaLabel', {
                       defaultMessage: 'Select shared integration {name}, {count} agent policies',
-                      values: { name: item.name, count: item.members.length },
+                      values: { name: item.integrationName, count: item.members.length },
                     })
                   : undefined
               }
@@ -507,47 +657,54 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         render: (name: string, item: PolicyRow) => {
           if (!item.members) return renderPolicyName(item);
 
-          const label = i18n.translate('xpack.osquery.pack.form.sharedIntegration.badge', {
-            defaultMessage: 'Shared integration: {name}',
-            values: { name },
-          });
+          const integrationName = item.integrationName ?? '';
 
           return (
-            <div role="group" aria-label={label}>
-              <EuiToolTip
-                content={i18n.translate('xpack.osquery.pack.form.sharedIntegration.tooltip', {
-                  defaultMessage:
-                    'Packs are delivered per Osquery Manager integration; every agent policy using it receives the pack',
-                })}
-              >
-                <EuiBadge tabIndex={0}>{label}</EuiBadge>
-              </EuiToolTip>
-              <ul>
-                {item.members.map((member) => (
-                  <li key={member.id}>
-                    <EuiSpacer size="xs" />
-                    <EuiFlexGroup alignItems="center" gutterSize="s">
-                      <EuiFlexItem>
-                        {renderPolicyName(member)}
-                        {implicitPolicyIds.has(member.id) && (
-                          <EuiText size="s" color="subdued">
-                            <FormattedMessage
-                              id="xpack.osquery.pack.form.sharedIntegration.includedLabel"
-                              defaultMessage="Included via shared integration"
-                            />
-                          </EuiText>
-                        )}
-                        <DescriptionCell description={member.description} />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <AgentCountCell count={member.agents} />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>{renderPolicyLink(member)}</EuiFlexItem>
-                    </EuiFlexGroup>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <EuiFlexGroup
+              role="group"
+              aria-label={i18n.translate('xpack.osquery.pack.form.sharedIntegration.badge', {
+                defaultMessage: 'Shared integration: {name}',
+                values: { name: integrationName },
+              })}
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+              wrap={false}
+            >
+              <EuiFlexItem grow={false} className="eui-textTruncate">
+                {name}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SharedPoliciesPopover
+                  integrationName={integrationName}
+                  members={item.members}
+                  renderMember={renderGroupMember}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate('xpack.osquery.pack.form.sharedIntegration.tooltip', {
+                    defaultMessage:
+                      'These agent policies share the Osquery Manager integration {name}. Packs are delivered per integration, so they are selected together.',
+                    values: { name: integrationName },
+                  })}
+                >
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    className="eui-textNoWrap"
+                    tabIndex={0}
+                    data-test-subj="policyAssignmentSharedLabel"
+                  >
+                    <FormattedMessage
+                      id="xpack.osquery.pack.form.sharedIntegration.sharedLabel"
+                      defaultMessage="Shared"
+                    />{' '}
+                    <EuiIcon type="info" aria-hidden={true} />
+                  </EuiText>
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         },
       },
@@ -557,8 +714,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
           defaultMessage: 'Description',
         }),
         truncateText: true,
-        render: (description: string, item: PolicyRow) =>
-          item.members ? null : <DescriptionCell description={description} />,
+        render: (description: string) => <DescriptionCell description={description} />,
       },
       {
         field: 'agents',
@@ -567,16 +723,16 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         }),
         width: '140px',
         align: 'right' as const,
-        render: (agents: number, item: PolicyRow) =>
-          item.members ? null : <AgentCountCell count={agents} />,
+        render: (agents: number) => <AgentCountCell count={agents} />,
       },
       {
         name: '',
         width: '140px',
         align: 'right' as const,
         // Orphan rows have no Fleet page behind them, so linking would send the
-        // user to a not-found screen.
-        render: (item: PolicyRow) => (item.members ? null : renderPolicyLink(item)),
+        // user to a not-found screen. A shared row links its first agent policy,
+        // like Fleet's summary line; the popover links every member.
+        render: (item: PolicyRow) => renderPolicyLink(item.members?.[0] ?? item),
       },
     ],
     [
@@ -586,7 +742,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
       isRowShardAssigned,
       renderPolicyLink,
       renderPolicyName,
-      implicitPolicyIds,
+      renderGroupMember,
     ]
   );
 
@@ -731,7 +887,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
                 'xpack.osquery.pack.form.sharedIntegration.partialSelectionDescription',
                 {
                   defaultMessage:
-                    'These agent policies already receive this pack via a shared integration and will be included when you save: {policyNames}.',
+                    'These agent policies already receive this pack via a shared integration. Saving adds them to this pack’s agent policies: {policyNames}.',
                   values: { policyNames: implicitPolicyNames },
                 }
               )}

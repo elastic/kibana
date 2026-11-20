@@ -25,6 +25,31 @@ describe('shared integration shards', () => {
     expect(convertShardsToArray({ B: 0 }, policies, groups)[0].percentage).toBe(0);
   });
 
+  it('starts a group row at 100 when a targeted member has no shard, matching the server max', () => {
+    expect(convertShardsToArray({ A: 10 }, policies, groups, ['B'])).toEqual([
+      { policy: { key: 'integration', label: 'Alpha, Beta' }, percentage: 100 },
+    ]);
+  });
+
+  it.each([
+    { label: 'A first', shards: { A: 10, B: 50 } },
+    { label: 'B first', shards: { B: 50, A: 10 } },
+  ])('keeps the max stored shard when every targeted member has one ($label)', ({ shards }) => {
+    expect(convertShardsToArray(shards, policies, groups, ['B'])[0].percentage).toBe(50);
+  });
+
+  it('keeps the stored shard when the member without a shard is not targeted', () => {
+    expect(convertShardsToArray({ A: 10 }, policies, groups, ['D'])).toEqual([
+      { policy: { key: 'integration', label: 'Alpha, Beta' }, percentage: 10 },
+    ]);
+  });
+
+  it('does not raise an ungrouped shard because its own policy is also targeted', () => {
+    expect(convertShardsToArray({ D: 30 }, policies, groups, ['D'])).toEqual([
+      { policy: { key: 'D', label: 'Dedicated' }, percentage: 30 },
+    ]);
+  });
+
   it('returns no rows when a new pack has no shards yet', () => {
     expect(
       convertShardsToArray(undefined as unknown as Record<string, number>, policies, groups)

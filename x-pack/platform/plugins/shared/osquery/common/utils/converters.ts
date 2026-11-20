@@ -83,16 +83,27 @@ export const convertShardsToObject = (
     {} as Shard
   );
 
+const FULL_SHARD = 100;
+
+/**
+ * @param targetedPolicyIds agent policies selected without a shard. The server
+ * resolves one shard per shared integration as the max over its targeted
+ * members, counting a targeted member without a shard as 100%, so the group
+ * row has to start from that same value. Otherwise saving the form unchanged
+ * would lower the live shard.
+ */
 export const convertShardsToArray = (
   shards: DefaultValues<Shard>,
   policiesById?: Record<string, { name: string }>,
-  groups: ShardIntegrationGroups = {}
+  groups: ShardIntegrationGroups = {},
+  targetedPolicyIds: readonly string[] = []
 ): ShardsArray => {
   const groupIdByPolicyId = new Map(
     Object.entries(groups).flatMap(([id, { policyIds }]) =>
       policyIds.map((policyId) => [policyId, id] as const)
     )
   );
+  const targeted = new Set(targetedPolicyIds);
   const rows = new Map<string, ShardsArray[number]>();
   for (const [policyId, percentage] of Object.entries(shards ?? {})) {
     if (percentage == null) {
@@ -107,12 +118,15 @@ export const convertShardsToArray = (
     }
 
     const memberIds = groups[key]?.policyIds ?? [policyId];
+    const hasTargetedMemberWithoutShard =
+      key !== policyId &&
+      memberIds.some((id) => targeted.has(id) && (shards as Shard | undefined)?.[id] == null);
     rows.set(key, {
       policy: {
         key,
         label: memberIds.map((id) => policiesById?.[id]?.name ?? '').join(', '),
       },
-      percentage,
+      percentage: hasTargetedMemberWithoutShard ? FULL_SHARD : percentage,
     });
   }
 

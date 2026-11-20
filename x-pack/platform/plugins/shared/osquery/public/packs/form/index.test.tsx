@@ -259,6 +259,53 @@ describe('PackForm', () => {
     expect(mockUpdateAsync.mock.calls[0][0].policy_ids).toEqual(['A', 'B']);
   });
 
+  it('keeps a shared integration at 100% when an untouched pack is saved with one member sharded', async () => {
+    mockUseAgentPolicies.mockReturnValue({
+      data: {
+        agentPoliciesById: {
+          A: { id: 'A', name: 'Alpha', agents: 0 },
+          B: { id: 'B', name: 'Beta', agents: 0 },
+        },
+        groupsByPackagePolicyId: {
+          integration: { id: 'integration', name: 'Shared hosts', policyIds: ['A', 'B'] },
+        },
+        groupIdByPolicyId: { A: 'integration', B: 'integration' },
+      },
+      isFetching: false,
+      isError: false,
+    });
+    const { getByTestId, queryByText } = renderWithContext(
+      <PackForm
+        editMode
+        defaultValue={{
+          saved_object_id: 'legacy-shard-pack',
+          id: 'legacy-shard-pack',
+          name: 'legacy-shard-pack',
+          description: '',
+          created_at: '2024-01-01',
+          created_by: 'test-user',
+          updated_at: '2024-01-01',
+          updated_by: 'test-user',
+          references: [],
+          enabled: true,
+          queries: {},
+          policy_ids: ['A', 'B'],
+          effective_policy_ids: ['A', 'B'],
+          shards: { A: 10 },
+        }}
+      />
+    );
+
+    expect(within(getByTestId('packShardsForm-0')).getByRole('spinbutton')).toHaveValue(100);
+    expect(queryByText('Included via shared integration')).not.toBeInTheDocument();
+    expect(
+      queryByText('Shared integration includes additional agent policies')
+    ).not.toBeInTheDocument();
+    fireEvent.click(getByTestId('update-pack-button'));
+    await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+    expect(mockUpdateAsync.mock.calls[0][0].shards).toEqual({ A: 100, B: 100 });
+  });
+
   it.each([false, true])(
     'marks effective drift owners without adopting them (read-only: %s)',
     async (isReadOnly) => {
