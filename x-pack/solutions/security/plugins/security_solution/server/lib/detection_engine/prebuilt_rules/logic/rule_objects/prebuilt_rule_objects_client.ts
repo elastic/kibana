@@ -13,6 +13,7 @@ import type {
   RuleTagArray,
   RuleVersion,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import { prepareKQLStringParam } from '../../../../../../common/utils/kql';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
 import { internalRuleToAPIResponse } from '../../../rule_management/logic/detection_rules_client/converters/internal_rule_to_api_response';
@@ -131,7 +132,9 @@ export const createPrebuiltRuleObjectsClient = (
           const baseFilterKQL = convertRulesFilterToKQL({
             showElasticRules: true,
           });
-          const ruleIdsKQL = `alert.attributes.params.ruleId:(${ruleIds.join(' or ')})`;
+          const ruleIdsKQL = `alert.attributes.params.ruleId:(${ruleIds
+            .map((ruleId) => prepareKQLStringParam(ruleId))
+            .join(' or ')})`;
           const filterKQL = baseFilterKQL ? `(${baseFilterKQL}) AND (${ruleIdsKQL})` : ruleIdsKQL;
 
           const rulesData = await findRules({
@@ -141,13 +144,14 @@ export const createPrebuiltRuleObjectsClient = (
             page: 1,
             sortField,
             sortOrder,
-            fields: ['params.ruleId', 'params.version', 'tags'],
+            fields: ['params.ruleId', 'params.version', 'params.library', 'tags'],
           });
           return rulesData.data.map((rule) => ({
             id: rule.id,
             rule_id: rule.params.ruleId,
             version: rule.params.version,
             tags: rule.tags,
+            ...(rule.params.library ? { library_id: rule.params.library.id } : {}),
           }));
         }
       );

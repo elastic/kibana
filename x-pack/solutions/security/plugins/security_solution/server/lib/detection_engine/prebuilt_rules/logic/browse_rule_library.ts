@@ -16,6 +16,7 @@ import { prepareKQLStringParam } from '../../../../../common/utils/kql';
 import type { PrebuiltRuleAssetRecord } from '../model/rule_assets/prebuilt_rule_asset';
 import { convertPrebuiltRuleAssetSearchTermToKQL } from './build_prebuilt_rule_installation_kql';
 import type { IPrebuiltRuleAssetsClient } from './rule_assets/prebuilt_rule_assets_client';
+import type { LibraryRelease } from './rule_assets/prebuilt_rule_assets_client/methods/library_release_filter';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from './rule_assets/prebuilt_rule_assets_type';
 import type { RuleSummary } from './rule_objects/prebuilt_rule_objects_client';
 
@@ -23,7 +24,7 @@ import type { RuleSummary } from './rule_objects/prebuilt_rule_objects_client';
 const BROWSE_FIELDS = [
   'rule_id',
   'version',
-  // Needed to match each hit back to the library it was requested from.
+  // Needed to tell which library each rule belongs to.
   'library_id',
   'name',
   'description',
@@ -139,9 +140,10 @@ const toRule = (
 
 interface BrowseRuleLibraryParams {
   ruleAssetsClient: IPrebuiltRuleAssetsClient;
-  installedRuleVersions: readonly RuleSummary[];
+  // Looks up the installed rules of the given rule ids, which are the ones on the page.
+  fetchInstalledRuleVersions: (ruleIds: string[]) => Promise<readonly RuleSummary[]>;
   libraryTitles: ReadonlyMap<string, string>;
-  libraryIds: string[];
+  libraries: readonly LibraryRelease[];
   search?: string;
   tags?: readonly string[];
   tactics?: readonly string[];
@@ -151,14 +153,14 @@ interface BrowseRuleLibraryParams {
 }
 
 /**
- * The latest version of every rule in the given libraries, with an install state for the current space.
- * Only rule ids are held for the whole result, full rule documents are read for the requested page only.
+ * A page of the rules the given libraries have now, with an install state for the current space. The page and
+ * the total come from one query, and installed rules are looked up for the rules on the page only.
  */
 export const browseRuleLibrary = async ({
   ruleAssetsClient,
-  installedRuleVersions,
+  fetchInstalledRuleVersions,
   libraryTitles,
-  libraryIds,
+  libraries,
   search,
   tags,
   tactics,
@@ -166,30 +168,25 @@ export const browseRuleLibrary = async ({
   page,
   perPage,
 }: BrowseRuleLibraryParams): Promise<BrowseRuleLibraryResponseBody> => {
-  // An empty list would read as "no library filter" further down and return rules from every source.
-  if (libraryIds.length === 0) {
-    return { rules: [], total: 0, page, per_page: perPage };
-  }
-
-  const latestVersions = await ruleAssetsClient.fetchLatestVersions({
-    libraryIds,
+  const { assets, total } = await ruleAssetsClient.fetchLibraryAssetsPage({
+    libraries,
     filter: buildBrowseKql({ search, tags, tactics }),
     sort,
-  });
-
-  const pageVersions = latestVersions.slice((page - 1) * perPage, page * perPage);
-  const { assets } = await ruleAssetsClient.fetchAssetsByVersion(pageVersions, {
-    libraryIds,
+    page,
+    perPage,
     fields: BROWSE_FIELDS,
   });
 
+  const installedRuleVersions = await fetchInstalledRuleVersions(
+    assets.map(({ rule_id: ruleId }) => ruleId)
+  );
   const installedByRuleId = new Map(installedRuleVersions.map((rule) => [rule.rule_id, rule]));
 
   return {
     rules: assets.map((asset) =>
       toRule(asset, installedByRuleId.get(asset.rule_id), libraryTitles)
     ),
-    total: latestVersions.length,
+    total,
     page,
     per_page: perPage,
   };

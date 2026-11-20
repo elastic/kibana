@@ -24,6 +24,8 @@ export interface RuleLibrarySummary {
   sync_status?: RuleLibrarySyncStatus;
   synced_at?: string;
   last_error?: string;
+  // Only while the library is syncing: how many of its rules are saved so far. No total means it is unknown.
+  sync_progress?: { done: number; total?: number };
   // Distinct rule_ids in the library. Libraries store every version of a rule, so this is not the item count.
   rule_count: number;
   source_url?: string;

@@ -33,6 +33,7 @@ const libraryObject = (id: string, spaceId?: string) => ({
     name: id,
     title: `${id} title`,
     provider: { type: 'git' as const },
+    version: '1.0.0',
     ...(spaceId ? { space_id: spaceId } : {}),
   },
 });
@@ -54,7 +55,7 @@ describe('browseRuleLibraryRoute', () => {
       page: 1,
     });
     jest.mocked(createPrebuiltRuleObjectsClient).mockReturnValue({
-      fetchInstalledRuleVersions: jest.fn().mockResolvedValue([]),
+      fetchInstalledRuleVersionsByIds: jest.fn().mockResolvedValue([]),
     } as unknown as ReturnType<typeof createPrebuiltRuleObjectsClient>);
     jest
       .mocked(browseRuleLibrary)
@@ -70,7 +71,10 @@ describe('browseRuleLibraryRoute', () => {
 
     expect(response.status).toEqual(200);
     const [params] = jest.mocked(browseRuleLibrary).mock.calls[0];
-    expect(params.libraryIds).toEqual(['elastic', 'elastic-community']);
+    expect(params.libraries).toEqual([
+      { id: 'elastic', version: '1.0.0' },
+      { id: 'elastic-community', version: '1.0.0' },
+    ]);
     expect(params.page).toBe(1);
     expect(params.perPage).toBe(10);
   });
@@ -81,8 +85,8 @@ describe('browseRuleLibraryRoute', () => {
       requestContextMock.convertContext(context)
     );
 
-    expect(jest.mocked(browseRuleLibrary).mock.calls[0][0].libraryIds).toEqual([
-      'elastic-community',
+    expect(jest.mocked(browseRuleLibrary).mock.calls[0][0].libraries).toEqual([
+      { id: 'elastic-community', version: '1.0.0' },
     ]);
   });
 

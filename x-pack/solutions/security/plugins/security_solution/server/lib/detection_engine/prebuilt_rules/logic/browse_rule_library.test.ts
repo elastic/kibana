@@ -43,102 +43,93 @@ const libraryTitles = new Map([
 ]);
 
 describe('browseRuleLibrary', () => {
-  const fetchLatestVersions = jest.fn();
-  const fetchAssetsByVersion = jest.fn();
-  const ruleAssetsClient = {
-    fetchLatestVersions,
-    fetchAssetsByVersion,
-  } as unknown as IPrebuiltRuleAssetsClient;
+  const fetchLibraryAssetsPage = jest.fn();
+  const fetchInstalledRuleVersions = jest.fn();
+  const ruleAssetsClient = { fetchLibraryAssetsPage } as unknown as IPrebuiltRuleAssetsClient;
+
+  const libraries = [
+    { id: 'elastic', version: '9.6.2' },
+    { id: 'elastic-community', version: '0.0.2' },
+  ];
 
   const browse = (overrides: Partial<Parameters<typeof browseRuleLibrary>[0]> = {}) =>
     browseRuleLibrary({
       ruleAssetsClient,
-      installedRuleVersions: [],
+      fetchInstalledRuleVersions,
       libraryTitles,
-      libraryIds: ['elastic', 'elastic-community'],
+      libraries,
       page: 1,
       perPage: 10,
       ...overrides,
     });
 
+  const respondWith = (assets: PrebuiltRuleAssetRecord[], total = assets.length) =>
+    fetchLibraryAssetsPage.mockResolvedValue({ assets, total });
+
   beforeEach(() => {
     jest.clearAllMocks();
-    fetchLatestVersions.mockResolvedValue([]);
-    fetchAssetsByVersion.mockResolvedValue({ assets: [] });
+    respondWith([]);
+    fetchInstalledRuleVersions.mockResolvedValue([]);
   });
 
-  it('returns nothing, and reads nothing, when there are no libraries to browse', async () => {
-    const result = await browse({ libraryIds: [] });
-
-    expect(result).toEqual({ rules: [], total: 0, page: 1, per_page: 10 });
-    expect(fetchLatestVersions).not.toHaveBeenCalled();
-  });
-
-  it('restricts the read to the requested libraries', async () => {
-    await browse({ libraryIds: ['elastic-community'] });
-
-    expect(fetchLatestVersions).toHaveBeenCalledWith(
-      expect.objectContaining({ libraryIds: ['elastic-community'] })
+  it('reads one page of the rules the libraries have now, and reports the overall total', async () => {
+    respondWith(
+      Array.from({ length: 10 }, (_, i) => asset(`rule-${i + 10}`, 'elastic')),
+      25
     );
-  });
-
-  it('reads full rules for the requested page only, and reports the overall total', async () => {
-    const versions = Array.from({ length: 25 }, (_, i) => ({
-      rule_id: `rule-${i}`,
-      version: 1,
-      library_id: 'elastic',
-    }));
-    fetchLatestVersions.mockResolvedValue(versions);
-    fetchAssetsByVersion.mockResolvedValue({
-      assets: versions.slice(10, 20).map(({ rule_id: ruleId }) => asset(ruleId, 'elastic')),
-    });
 
     const result = await browse({ page: 2, perPage: 10 });
 
-    expect(fetchAssetsByVersion).toHaveBeenCalledWith(versions.slice(10, 20), expect.anything());
+    expect(fetchLibraryAssetsPage).toHaveBeenCalledTimes(1);
+    expect(fetchLibraryAssetsPage).toHaveBeenCalledWith(
+      expect.objectContaining({ libraries, page: 2, perPage: 10 })
+    );
     expect(result.total).toBe(25);
     expect(result.rules).toHaveLength(10);
     expect(result.page).toBe(2);
   });
 
-  it('asks for the library of each rule, which is needed to match results back to it', async () => {
-    fetchLatestVersions.mockResolvedValue([{ rule_id: 'a', version: 1, library_id: 'elastic' }]);
-    fetchAssetsByVersion.mockResolvedValue({ assets: [asset('a', 'elastic')] });
-
+  it('asks for the library of each rule, which tells where it comes from', async () => {
     await browse();
 
-    expect(fetchAssetsByVersion).toHaveBeenCalledWith(
-      expect.anything(),
+    expect(fetchLibraryAssetsPage).toHaveBeenCalledWith(
       expect.objectContaining({ fields: expect.arrayContaining(['library_id']) })
     );
   });
 
-  it('marks a rule installed from the same library as installed', async () => {
-    fetchLatestVersions.mockResolvedValue([{ rule_id: 'a', version: 1, library_id: 'elastic' }]);
-    fetchAssetsByVersion.mockResolvedValue({ assets: [asset('a', 'elastic')] });
+  it('looks up installed rules for the rules on the page only', async () => {
+    respondWith([asset('a', 'elastic'), asset('b', 'elastic')], 40000);
 
-    const { rules } = await browse({ installedRuleVersions: [installed('a', 'elastic')] });
+    await browse();
+
+    expect(fetchInstalledRuleVersions).toHaveBeenCalledTimes(1);
+    expect(fetchInstalledRuleVersions).toHaveBeenCalledWith(['a', 'b']);
+  });
+
+  it('marks a rule installed from the same library as installed', async () => {
+    respondWith([asset('a', 'elastic')]);
+    fetchInstalledRuleVersions.mockResolvedValue([installed('a', 'elastic')]);
+
+    const { rules } = await browse();
 
     expect(rules[0].install_state).toBe('installed');
     expect(rules[0].installed_from_library).toBeUndefined();
   });
 
   it('reads an installed rule without a library as installed from the Elastic library', async () => {
-    fetchLatestVersions.mockResolvedValue([{ rule_id: 'a', version: 1, library_id: 'elastic' }]);
-    fetchAssetsByVersion.mockResolvedValue({ assets: [asset('a', 'elastic')] });
+    respondWith([asset('a', 'elastic')]);
+    fetchInstalledRuleVersions.mockResolvedValue([installed('a')]);
 
-    const { rules } = await browse({ installedRuleVersions: [installed('a')] });
+    const { rules } = await browse();
 
     expect(rules[0].install_state).toBe('installed');
   });
 
   it('names the library when the same rule is installed from another one', async () => {
-    fetchLatestVersions.mockResolvedValue([
-      { rule_id: 'a', version: 1, library_id: 'elastic-community' },
-    ]);
-    fetchAssetsByVersion.mockResolvedValue({ assets: [asset('a', 'elastic-community')] });
+    respondWith([asset('a', 'elastic-community')]);
+    fetchInstalledRuleVersions.mockResolvedValue([installed('a')]);
 
-    const { rules } = await browse({ installedRuleVersions: [installed('a')] });
+    const { rules } = await browse();
 
     expect(rules[0].install_state).toBe('installed_from_other_library');
     expect(rules[0].installed_from_library).toEqual({
@@ -148,10 +139,10 @@ describe('browseRuleLibrary', () => {
   });
 
   it('marks a rule that is not installed as installable', async () => {
-    fetchLatestVersions.mockResolvedValue([{ rule_id: 'a', version: 1, library_id: 'elastic' }]);
-    fetchAssetsByVersion.mockResolvedValue({ assets: [asset('a', 'elastic')] });
+    respondWith([asset('a', 'elastic')]);
+    fetchInstalledRuleVersions.mockResolvedValue([installed('other', 'elastic')]);
 
-    const { rules } = await browse({ installedRuleVersions: [installed('other', 'elastic')] });
+    const { rules } = await browse();
 
     expect(rules[0].install_state).toBe('installable');
   });
@@ -159,14 +150,14 @@ describe('browseRuleLibrary', () => {
   it('passes the tags on to the read', async () => {
     await browse({ tags: ['Domain: Endpoint', 'OS: Linux'] });
 
-    const [params] = fetchLatestVersions.mock.calls[0];
+    const [params] = fetchLibraryAssetsPage.mock.calls[0];
     expect(params.filter).toBe('(security-rule.tags: ("Domain: Endpoint" AND "OS: Linux"))');
   });
 
   it('passes the tactics on to the read', async () => {
     await browse({ tactics: ['TA0002', 'TA0003'] });
 
-    const [params] = fetchLatestVersions.mock.calls[0];
+    const [params] = fetchLibraryAssetsPage.mock.calls[0];
     expect(params.filter).toBe('(security-rule.threat.tactic.id: ("TA0002" or "TA0003"))');
   });
 
@@ -175,7 +166,7 @@ describe('browseRuleLibrary', () => {
 
     await browse({ search: 'powershell', sort });
 
-    const [params] = fetchLatestVersions.mock.calls[0];
+    const [params] = fetchLibraryAssetsPage.mock.calls[0];
     expect(params.sort).toEqual(sort);
     expect(params.filter).toContain('powershell');
   });

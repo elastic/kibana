@@ -58,6 +58,48 @@ describe('listRuleLibrariesRoute', () => {
     listRuleLibrariesRoute(server.router, clients.logger);
   });
 
+  it('says how far a library that is syncing has got, counting at the release it is syncing to', async () => {
+    const fetchRuleCountsByLibrary = jest
+      .fn()
+      .mockResolvedValueOnce({ acme: 3 })
+      .mockResolvedValueOnce({ acme: 12500 });
+    jest.mocked(createPrebuiltRuleAssetsClient).mockReturnValue({
+      fetchRuleCountsByLibrary,
+    } as unknown as ReturnType<typeof createPrebuiltRuleAssetsClient>);
+    respondWith([
+      libraryObject('acme', {
+        version: '1.0.0',
+        sync_status: 'syncing',
+        sync_target_version: '1.1.0',
+        sync_total: 40006,
+      }),
+      libraryObject('other', { version: '2.0.0', sync_status: 'synced' }),
+    ]);
+
+    const response = await server.inject(listRequest(), requestContextMock.convertContext(context));
+
+    expect(fetchRuleCountsByLibrary).toHaveBeenNthCalledWith(
+      2,
+      [{ id: 'acme', version: '1.1.0' }],
+      { includeDeprecated: true }
+    );
+    const [acme, other] = response.body.libraries;
+    expect(acme.sync_progress).toEqual({ done: 12500, total: 40006 });
+    expect(other.sync_progress).toBeUndefined();
+  });
+
+  it('leaves out the total when it is not known', async () => {
+    const fetchRuleCountsByLibrary = jest.fn().mockResolvedValue({ acme: 40 });
+    jest.mocked(createPrebuiltRuleAssetsClient).mockReturnValue({
+      fetchRuleCountsByLibrary,
+    } as unknown as ReturnType<typeof createPrebuiltRuleAssetsClient>);
+    respondWith([libraryObject('acme', { sync_status: 'syncing', sync_target_version: '1.1.0' })]);
+
+    const response = await server.inject(listRequest(), requestContextMock.convertContext(context));
+
+    expect(response.body.libraries[0].sync_progress).toEqual({ done: 40 });
+  });
+
   it('ensures the built-in libraries exist before listing', async () => {
     respondWith([]);
 

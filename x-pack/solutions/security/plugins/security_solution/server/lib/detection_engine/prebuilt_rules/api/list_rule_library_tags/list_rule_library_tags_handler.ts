@@ -47,7 +47,11 @@ export const listRuleLibraryTagsHandler = async (
 
     const tags = await createPrebuiltRuleAssetsClient(ctx.core.savedObjects.client, {
       ruleLibraryEnabled: true,
-    }).fetchTagsByLibraries(libraryId ? [libraryId] : libraries.map(({ id }) => id));
+    }).fetchTagsByLibraries(
+      libraries
+        .filter(({ id }) => !libraryId || id === libraryId)
+        .map(({ id, attributes }) => ({ id, version: attributes.version }))
+    );
 
     return response.ok({ body: { tags } });
   } catch (err) {

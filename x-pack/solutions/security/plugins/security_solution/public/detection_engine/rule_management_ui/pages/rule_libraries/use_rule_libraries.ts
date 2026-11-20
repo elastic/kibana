@@ -20,18 +20,20 @@ const POLL_WHILE_SYNCING_MS = 3000;
 
 export const useRuleLibraries = () => {
   const { addError } = useAppToasts();
-  const { data, isLoading, isError } = useFetchRuleLibrariesQuery({
-    refetchInterval: (response) =>
-      response?.libraries.some(({ sync_status: status }) => status === 'syncing')
-        ? POLL_WHILE_SYNCING_MS
-        : false,
-  });
   const {
     mutate: sync,
     isLoading: isSyncing,
     variables,
   } = useSyncRuleLibrariesMutation({
     onError: (error) => addError(error, { title: i18n.SYNC_ERROR_TITLE }),
+  });
+  // The sync request lasts as long as the sync, so the list is read while it runs, which is how progress
+  // gets here. Reading only once the list says a library is syncing would start too late.
+  const { data, isLoading, isError } = useFetchRuleLibrariesQuery({
+    refetchInterval: (response) =>
+      isSyncing || response?.libraries.some(({ sync_status: status }) => status === 'syncing')
+        ? POLL_WHILE_SYNCING_MS
+        : false,
   });
   const { mutateAsync: create, isLoading: isCreating } = useCreateRuleLibraryMutation({
     onError: (error) => addError(error, { title: i18n.CREATE_ERROR_TITLE }),

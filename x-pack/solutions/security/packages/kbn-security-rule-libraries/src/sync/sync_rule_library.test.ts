@@ -89,6 +89,72 @@ describe('syncRuleLibrary', () => {
     );
   });
 
+  it('saves each rule with the release it was read from', async () => {
+    inspect.mockResolvedValue({ ruleCount: 1 });
+
+    await syncRuleLibrary({ client, provider, logger, id: 'custom' });
+
+    expect(bulkCreate.mock.calls[0][0][0].attributes.library_version).toBe('1.0.0');
+  });
+
+  it('does not save the release on a version that a newer one of the release replaces', async () => {
+    inspect.mockResolvedValue({ ruleCount: 2 });
+    readLatestItems.mockImplementation(async (_library, _ref, onBatch) => {
+      await onBatch([
+        { rule_id: 'a', version: 1, path: 'p/a1', attributes: {}, superseded: true },
+        { rule_id: 'a', version: 2, path: 'p/a2', attributes: {} },
+      ]);
+    });
+
+    await syncRuleLibrary({ client, provider, logger, id: 'custom' });
+
+    const [objects] = bulkCreate.mock.calls[0];
+    expect(objects[0].attributes).not.toHaveProperty('library_version');
+    expect(objects[1].attributes.library_version).toBe('1.0.0');
+  });
+
+  it('saves the release and how many rules it has before reading the rules, so progress can be shown', async () => {
+    inspect.mockResolvedValue({ ruleCount: 7 });
+
+    await syncRuleLibrary({ client, provider, logger, id: 'custom' });
+
+    expect(update).toHaveBeenCalledWith('security-rule-library', 'custom', {
+      sync_target_version: '1.0.0',
+      sync_total: 7,
+    });
+    expect(finalUpdate()).toEqual(
+      expect.objectContaining({ sync_target_version: null, sync_total: null })
+    );
+  });
+
+  it('saves no total for a library that has no list of rule files', async () => {
+    get.mockResolvedValue({
+      attributes: savedAttributes({ provider: { type: 'fleet' } }),
+      version: 'WzEsMV0=',
+    });
+
+    await syncRuleLibrary({ client, provider, logger, id: 'custom' });
+
+    expect(update).toHaveBeenCalledWith('security-rule-library', 'custom', {
+      sync_target_version: '1.0.0',
+    });
+  });
+
+  it('clears the release and the total when the sync fails', async () => {
+    inspect.mockResolvedValue({ ruleCount: 7 });
+    readLatestItems.mockRejectedValue(new Error('boom'));
+
+    await syncRuleLibrary({ client, provider, logger, id: 'custom' });
+
+    expect(finalUpdate()).toEqual(
+      expect.objectContaining({
+        sync_status: 'sync_failed',
+        sync_target_version: null,
+        sync_total: null,
+      })
+    );
+  });
+
   it('keeps what was saved for a field the manifest does not have', async () => {
     inspect.mockResolvedValue({ ruleCount: 1, manifest: { license: 'Apache-2.0' } });
 

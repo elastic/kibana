@@ -59,17 +59,18 @@ export const browseRuleLibraryHandler = async (
     }
 
     const rulesClient = await ctx.alerting.getRulesClient();
-    const installedRuleVersions = await createPrebuiltRuleObjectsClient(
-      rulesClient
-    ).fetchInstalledRuleVersions();
+    const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
     const body = await browseRuleLibrary({
       ruleAssetsClient: createPrebuiltRuleAssetsClient(ctx.core.savedObjects.client, {
         ruleLibraryEnabled: true,
       }),
-      installedRuleVersions,
+      fetchInstalledRuleVersions: (ruleIds) =>
+        ruleObjectsClient.fetchInstalledRuleVersionsByIds({ ruleIds }),
       libraryTitles: new Map(libraries.map(({ id, attributes }) => [id, attributes.title])),
-      libraryIds: libraryId ? [libraryId] : libraries.map(({ id }) => id),
+      libraries: libraries
+        .filter(({ id }) => !libraryId || id === libraryId)
+        .map(({ id, attributes }) => ({ id, version: attributes.version })),
       search,
       tags,
       tactics,

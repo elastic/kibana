@@ -69,6 +69,7 @@ const RuleLibrariesPageComponent: React.FC = () => {
   const [isAddLibraryOpen, setIsAddLibraryOpen] = useState(false);
   const [openedRule, setOpenedRule] = useState<LibraryRuleRow>();
   const [libraryToRemove, setLibraryToRemove] = useState<RuleLibraryListItem>();
+  const [removingLibraryId, setRemovingLibraryId] = useState<string>();
 
   const isAllSelected = selectedLibraryId === ALL_LIBRARIES_ID;
   const selectedLibrary = libraries.find(({ id }) => id === selectedLibraryId);
@@ -136,12 +137,13 @@ const RuleLibrariesPageComponent: React.FC = () => {
 
   const handleRemoveLibrary = async (keepRuleVersions: boolean) => {
     if (!libraryToRemove) return;
-    const isRemoved = await removeLibrary(libraryToRemove.id, keepRuleVersions);
-    if (isRemoved) {
-      selectLibrary(ALL_LIBRARIES_ID);
-      setSelectedTab('rules');
-      setLibraryToRemove(undefined);
-    }
+    const { id } = libraryToRemove;
+    // The dialog closes at once, and the library header shows the removal as it runs. Once the library is
+    // gone from the list, the page moves on to all libraries by itself.
+    setLibraryToRemove(undefined);
+    setRemovingLibraryId(id);
+    await removeLibrary(id, keepRuleVersions);
+    setRemovingLibraryId(undefined);
   };
 
   const menu = useMemo<AppHeaderMenu>(
@@ -224,6 +226,7 @@ const RuleLibrariesPageComponent: React.FC = () => {
                 onRemove={(libraryId) =>
                   setLibraryToRemove(libraries.find(({ id }) => id === libraryId))
                 }
+                removingLibraryId={removingLibraryId}
                 isInstalling={isInstalling}
                 onInstall={install}
                 onInstallAll={installAll}

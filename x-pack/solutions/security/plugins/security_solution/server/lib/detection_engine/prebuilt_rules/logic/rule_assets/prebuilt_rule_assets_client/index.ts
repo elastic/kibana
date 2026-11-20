@@ -15,7 +15,14 @@ import type { BasicRuleInfo } from '../../basic_rule_info';
 import type { FetchLatestAssetsOptions } from './methods/fetch_latest_assets';
 import { fetchLatestAssets } from './methods/fetch_latest_assets';
 import { fetchLatestVersions } from './methods/fetch_latest_versions';
+import { fetchLibraryRuleVersions } from './methods/fetch_library_rule_versions';
 import { fetchRuleCountsByLibrary } from './methods/fetch_rule_counts_by_library';
+import type {
+  FetchLibraryAssetsPageParams,
+  LibraryAssetsPage,
+} from './methods/fetch_library_assets_page';
+import { fetchLibraryAssetsPage } from './methods/fetch_library_assets_page';
+import type { LibraryRelease } from './methods/library_release_filter';
 import { fetchTagsByLibraries } from './methods/fetch_tags_by_libraries';
 import type {
   FetchAssetsByVersionResult,
@@ -43,9 +50,18 @@ export interface IPrebuiltRuleAssetsClient {
 
   fetchTagsByVersion(versions: RuleVersionSpecifier[]): Promise<string[]>;
 
-  fetchRuleCountsByLibrary(): Promise<Record<string, number>>;
+  /** A page of the rules the given libraries have now, in one query, whatever the number of rules. */
+  fetchLibraryAssetsPage(params: FetchLibraryAssetsPageParams): Promise<LibraryAssetsPage>;
 
-  fetchTagsByLibraries(libraryIds: string[]): Promise<string[]>;
+  /** Every rule the given libraries have now, with no limit on how many. */
+  fetchLibraryRuleVersions(libraries: readonly LibraryRelease[]): Promise<BasicRuleInfo[]>;
+
+  fetchRuleCountsByLibrary(
+    libraries: readonly LibraryRelease[],
+    options?: { includeDeprecated?: boolean }
+  ): Promise<Record<string, number>>;
+
+  fetchTagsByLibraries(libraries: readonly LibraryRelease[]): Promise<string[]>;
 
   fetchDeprecatedRules(ruleIds?: string[]): Promise<DeprecatedPrebuiltRuleAsset[]>;
 }
@@ -104,15 +120,30 @@ export const createPrebuiltRuleAssetsClient = (
       });
     },
 
-    fetchRuleCountsByLibrary: (): Promise<Record<string, number>> => {
-      return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchRuleCountsByLibrary', async () => {
-        return fetchRuleCountsByLibrary(savedObjectsClient);
+    fetchLibraryAssetsPage: (params: FetchLibraryAssetsPageParams): Promise<LibraryAssetsPage> => {
+      return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLibraryAssetsPage', async () => {
+        return fetchLibraryAssetsPage(savedObjectsClient, params);
       });
     },
 
-    fetchTagsByLibraries: (ids: string[]): Promise<string[]> => {
+    fetchLibraryRuleVersions: (libraries: readonly LibraryRelease[]): Promise<BasicRuleInfo[]> => {
+      return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLibraryRuleVersions', async () => {
+        return fetchLibraryRuleVersions(savedObjectsClient, libraries);
+      });
+    },
+
+    fetchRuleCountsByLibrary: (
+      libraries: readonly LibraryRelease[],
+      countOptions?: { includeDeprecated?: boolean }
+    ): Promise<Record<string, number>> => {
+      return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchRuleCountsByLibrary', async () => {
+        return fetchRuleCountsByLibrary(savedObjectsClient, libraries, countOptions);
+      });
+    },
+
+    fetchTagsByLibraries: (libraries: readonly LibraryRelease[]): Promise<string[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchTagsByLibraries', async () => {
-        return fetchTagsByLibraries(savedObjectsClient, ids);
+        return fetchTagsByLibraries(savedObjectsClient, libraries);
       });
     },
 

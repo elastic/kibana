@@ -60,6 +60,7 @@ const securityRuleV5 = securityRuleV4.extends(
     library_id: schema.maybe(schema.string({ maxLength: 128 })),
     library_path: schema.maybe(schema.string({ maxLength: 1024 })),
     library_title: schema.maybe(schema.string({ maxLength: 256 })),
+    library_version: schema.maybe(schema.string({ maxLength: 256 })),
   },
   { unknowns: 'allow' }
 );
@@ -68,6 +69,11 @@ const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
     library_id: {
+      type: 'keyword',
+    },
+    // The release of the library this rule was read from. The rules a library has now are the ones whose
+    // release is the library's version.
+    library_version: {
       type: 'keyword',
     },
     rule_id: {
@@ -326,6 +332,9 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
           type: 'mappings_addition',
           addedMappings: {
             library_id: {
+              type: 'keyword',
+            },
+            library_version: {
               type: 'keyword',
             },
           },

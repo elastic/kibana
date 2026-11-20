@@ -79,6 +79,8 @@ const libraryV1 = schema.object(
       ])
     ),
     sync_started_at: schema.maybe(str()),
+    sync_target_version: schema.maybe(schema.nullable(str())),
+    sync_total: schema.maybe(schema.nullable(schema.number())),
     synced_at: schema.maybe(str()),
     last_error: schema.maybe(schema.nullable(text())),
     item_count: schema.maybe(schema.number()),
@@ -107,6 +109,8 @@ export const ruleLibraryType: SavedObjectsType = {
       version: { type: 'keyword' },
       sync_status: { type: 'keyword' },
       sync_started_at: { type: 'date' },
+      sync_target_version: { type: 'keyword' },
+      sync_total: { type: 'long' },
     },
   },
   modelVersions: {

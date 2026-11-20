@@ -49,6 +49,9 @@ export interface RuleLibraryAttributes {
   previous_version?: string;
   sync_status?: SyncStatus;
   sync_started_at?: string;
+  // The release being synced and how many rules it has. Kept while the sync runs, so progress can be shown.
+  sync_target_version?: string | null;
+  sync_total?: number | null;
   synced_at?: string;
   last_error?: string | null;
   item_count?: number;
@@ -60,6 +63,9 @@ export interface RuleLibraryItem {
   // File path inside the library, e.g. `rules/linux/reverse_shell.yml`.
   path: string;
   attributes: Record<string, unknown>;
+  // An older version of a rule that the same release has a newer version of. It is kept, but it is not one of
+  // the rules the library has now.
+  superseded?: boolean;
 }
 
 export interface RuleKey {

@@ -42,7 +42,8 @@ const redactUrl = (url: string): string => {
 const toSummary = (
   id: string,
   attributes: RuleLibraryAttributes,
-  ruleCount: number
+  ruleCount: number,
+  syncedSoFar?: number
 ): RuleLibrarySummary => ({
   id,
   title: attributes.title,
@@ -57,6 +58,14 @@ const toSummary = (
   synced_at: attributes.synced_at,
   last_error: attributes.last_error ?? undefined,
   rule_count: ruleCount,
+  ...(syncedSoFar !== undefined
+    ? {
+        sync_progress: {
+          done: syncedSoFar,
+          ...(attributes.sync_total ? { total: attributes.sync_total } : {}),
+        },
+      }
+    : {}),
   source_url: attributes.provider.url ? redactUrl(attributes.provider.url) : undefined,
   branch: attributes.provider.branch,
 });
@@ -83,13 +92,33 @@ export const listRuleLibrariesHandler = async (
 
     await ensureLibraries({ client, logger });
 
-    const [visibleLibraries, ruleCounts] = await Promise.all([
-      findVisibleRuleLibraries(client, spaceId),
-      createPrebuiltRuleAssetsClient(ctx.core.savedObjects.client).fetchRuleCountsByLibrary(),
-    ]);
+    const visibleLibraries = await findVisibleRuleLibraries(client, spaceId);
+    const ruleAssetsClient = createPrebuiltRuleAssetsClient(ctx.core.savedObjects.client);
+    const ruleCounts = await ruleAssetsClient.fetchRuleCountsByLibrary(
+      visibleLibraries.map(({ id, attributes }) => ({ id, version: attributes.version }))
+    );
+
+    // A library that is syncing is counted at the release it is syncing to, deprecated rules included, as
+    // the total is.
+    const syncingReleases = visibleLibraries.flatMap(({ id, attributes }) =>
+      attributes.sync_status === 'syncing' && attributes.sync_target_version
+        ? [{ id, version: attributes.sync_target_version }]
+        : []
+    );
+    const syncedSoFar = await ruleAssetsClient.fetchRuleCountsByLibrary(syncingReleases, {
+      includeDeprecated: true,
+    });
+    const syncingIds = new Set(syncingReleases.map(({ id }) => id));
 
     const libraries = visibleLibraries
-      .map(({ id, attributes }) => toSummary(id, attributes, ruleCounts[id] ?? 0))
+      .map(({ id, attributes }) =>
+        toSummary(
+          id,
+          attributes,
+          ruleCounts[id] ?? 0,
+          syncingIds.has(id) ? syncedSoFar[id] ?? 0 : undefined
+        )
+      )
       .sort(
         (a, b) => definitionOrder(a.id) - definitionOrder(b.id) || a.title.localeCompare(b.title)
       );

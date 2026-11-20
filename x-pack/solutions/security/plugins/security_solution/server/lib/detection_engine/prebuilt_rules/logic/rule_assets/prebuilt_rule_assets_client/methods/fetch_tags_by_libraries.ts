@@ -9,18 +9,19 @@ import type { AggregationsMultiBucketAggregateBase } from '@elastic/elasticsearc
 import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/core/server';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
+import type { LibraryRelease } from './library_release_filter';
+import { buildLibraryReleaseFilter, hasSyncedLibrary } from './library_release_filter';
 
 const MAX_TAGS = 1000;
 
 /**
- * The tags used by the rules of the given libraries, to offer them as a filter. Older versions of a rule are
- * included, so a tag that only an old version has can be listed.
+ * The tags used by the rules the given libraries have now, to offer them as a filter.
  */
 export async function fetchTagsByLibraries(
   savedObjectsClient: SavedObjectsClientContract,
-  libraryIds: string[]
+  libraries: readonly LibraryRelease[]
 ): Promise<string[]> {
-  if (libraryIds.length === 0) {
+  if (!hasSyncedLibrary(libraries)) {
     return [];
   }
 
@@ -34,7 +35,7 @@ export async function fetchTagsByLibraries(
     size: 0,
     query: {
       bool: {
-        filter: [{ terms: { [`${PREBUILT_RULE_ASSETS_SO_TYPE}.library_id`]: libraryIds } }],
+        filter: [buildLibraryReleaseFilter(libraries)],
         must_not: { term: { [`${PREBUILT_RULE_ASSETS_SO_TYPE}.deprecated`]: true } },
       },
     },

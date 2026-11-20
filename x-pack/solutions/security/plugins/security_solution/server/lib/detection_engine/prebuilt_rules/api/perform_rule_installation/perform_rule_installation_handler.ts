@@ -32,6 +32,8 @@ import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebui
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import type { RuleSignatureId, RuleVersion } from '../../../../../../common/api/detection_engine';
 import { excludeLicenseRestrictedRules } from '../../logic/utils';
+import type { BasicRuleInfo } from '../../logic/basic_rule_info';
+import { fetchInstalledRuleIds } from '../../logic/fetch_installed_rule_ids';
 import { findVisibleRuleLibraries } from '../../logic/rule_libraries/find_visible_rule_libraries';
 import {
   resolveAllRuleInstalls,
@@ -110,26 +112,40 @@ export const performRuleInstallationHandler = async (
       ruleErrors.push(...resolved.errors);
     } else if (mode === 'ALL_RULES') {
       const libraryId = request.body.library_id;
+      let allLatestVersions: BasicRuleInfo[];
+      let installedRuleIds: Set<string>;
+
       if (libraryId) {
         const visibleLibraries = await findVisibleRuleLibraries(
           ctx.core.savedObjects.getClient({ includedHiddenTypes: [RULE_LIBRARY_SO_TYPE] }),
           ctx.securitySolution.getSpaceId()
         );
-        if (!visibleLibraries.some(({ id }) => id === libraryId)) {
+        const library = visibleLibraries.find(({ id }) => id === libraryId);
+        if (!library) {
           return siemResponse.error({
             statusCode: 404,
             body: `Rule library "${libraryId}" not found`,
           });
         }
+
+        // Read a page at a time, and the installed ones a few hundred at a time, so a library with tens of
+        // thousands of rules is installed whole.
+        allLatestVersions = await ruleAssetsClient.fetchLibraryRuleVersions([
+          { id: libraryId, version: library.attributes.version },
+        ]);
+        installedRuleIds = await fetchInstalledRuleIds(
+          ruleObjectsClient,
+          allLatestVersions.map(({ rule_id: ruleId }) => ruleId)
+        );
+      } else {
+        allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
+        const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
+        installedRuleIds = new Set(currentRuleVersions.map((version) => version.rule_id));
       }
 
-      const allLatestVersions = await ruleAssetsClient.fetchLatestVersions(
-        libraryId ? { libraryIds: [libraryId] } : undefined
-      );
-      const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
       const allInstallableRules = resolveAllRuleInstalls({
         latestVersions: allLatestVersions,
-        installedRuleIds: new Set(currentRuleVersions.map((version) => version.rule_id)),
+        installedRuleIds,
       });
       ruleInstallQueue.push(...(await excludeLicenseRestrictedRules(allInstallableRules, mlAuthz)));
     }

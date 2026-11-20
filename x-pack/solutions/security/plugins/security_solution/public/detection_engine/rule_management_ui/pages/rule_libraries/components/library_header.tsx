@@ -24,6 +24,7 @@ import type { EuiDescriptionListProps } from '@elastic/eui';
 import { FormattedDate, FormattedRelative, FormattedTime } from '@kbn/i18n-react';
 import type { RuleLibraryListItem, RuleLibraryProviderType, RuleLibrarySyncStatus } from '../types';
 import * as i18n from '../translations';
+import { LibrarySyncBar } from './library_sync_bar';
 import { LibraryActionsMenu } from './library_actions_menu';
 
 const STATUS_LABEL: Record<RuleLibrarySyncStatus, string> = {
@@ -40,12 +41,22 @@ const STATUS_COLOR_TOKEN = {
   sync_failed: 'danger',
 } as const;
 
+const getStatusLabel = (
+  status: RuleLibrarySyncStatus,
+  progress: RuleLibraryListItem['syncProgress']
+): string =>
+  status === 'syncing' && progress
+    ? i18n.STATUS_SYNCING_PROGRESS(progress.done, progress.total)
+    : STATUS_LABEL[status];
+
 interface StatusIndicatorProps {
   status: RuleLibrarySyncStatus;
   error?: string;
+  progress?: RuleLibraryListItem['syncProgress'];
+  isRemoving?: boolean;
 }
 
-const StatusIndicator = ({ status, error }: StatusIndicatorProps) => {
+const StatusIndicator = ({ status, error, progress, isRemoving = false }: StatusIndicatorProps) => {
   const { euiTheme } = useEuiTheme();
 
   const indicator = (
@@ -59,19 +70,28 @@ const StatusIndicator = ({ status, error }: StatusIndicatorProps) => {
           marginInlineEnd: euiTheme.size.xs,
           borderRadius: '50%',
           verticalAlign: 'middle',
-          backgroundColor: euiTheme.colors[STATUS_COLOR_TOKEN[status]],
+          backgroundColor: euiTheme.colors[isRemoving ? 'danger' : STATUS_COLOR_TOKEN[status]],
         }}
       />
-      {STATUS_LABEL[status]}
+      {isRemoving ? i18n.STATUS_REMOVING : getStatusLabel(status, progress)}
     </>
   );
 
-  if (status !== 'sync_failed' || !error) {
+  // The error of a failed sync, or the exact count of one that is running.
+  const tooltip = isRemoving
+    ? undefined
+    : status === 'sync_failed' && error
+    ? error
+    : status === 'syncing' && progress?.total
+    ? i18n.SYNC_PROGRESS_TOOLTIP(progress.done, progress.total)
+    : undefined;
+
+  if (!tooltip) {
     return indicator;
   }
 
   return (
-    <EuiToolTip content={error}>
+    <EuiToolTip content={tooltip}>
       <span tabIndex={0}>{indicator}</span>
     </EuiToolTip>
   );
@@ -131,10 +151,20 @@ const getSourceFacts = ({
       ]
     : [];
 
-const getSyncFacts = (library: RuleLibraryListItem): EuiDescriptionListProps['listItems'] => [
+const getSyncFacts = (
+  library: RuleLibraryListItem,
+  isRemoving: boolean
+): EuiDescriptionListProps['listItems'] => [
   {
     title: i18n.FACT_STATUS,
-    description: <StatusIndicator status={library.syncStatus} error={library.lastError} />,
+    description: (
+      <StatusIndicator
+        status={library.syncStatus}
+        error={library.lastError}
+        progress={library.syncProgress}
+        isRemoving={isRemoving}
+      />
+    ),
   },
   {
     title: i18n.FACT_LAST_SYNC,
@@ -176,6 +206,8 @@ interface LibraryHeaderProps {
   library: RuleLibraryListItem;
   canSync: boolean;
   canRemove: boolean;
+  // While the library is being removed the header shows the same bar as for a sync, without values.
+  isRemoving?: boolean;
   onSync: (libraryId: string) => void;
   onRemove: (libraryId: string) => void;
 }
@@ -184,10 +216,23 @@ export const LibraryHeader = ({
   library,
   canSync,
   canRemove,
+  isRemoving = false,
   onSync,
   onRemove,
 }: LibraryHeaderProps) => (
-  <EuiPanel hasBorder paddingSize="m" data-test-subj="ruleLibraryHeader">
+  <EuiPanel
+    hasBorder
+    paddingSize="m"
+    css={{ position: 'relative', overflow: 'hidden' }}
+    data-test-subj="ruleLibraryHeader"
+  >
+    {library.syncStatus === 'syncing' || isRemoving ? (
+      <LibrarySyncBar
+        progress={isRemoving ? undefined : library.syncProgress}
+        position="absolute"
+        data-test-subj="ruleLibraryHeaderSyncBar"
+      />
+    ) : null}
     <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon type={library.icon} size="xl" aria-hidden={true} />
@@ -205,7 +250,7 @@ export const LibraryHeader = ({
         <EuiFlexGroup direction="column" gutterSize="xs">
           <FactsLine listItems={getSummaryFacts(library)} />
           {library.sourceUrl ? <FactsLine listItems={getSourceFacts(library)} /> : null}
-          <FactsLine listItems={getSyncFacts(library)} />
+          <FactsLine listItems={getSyncFacts(library, isRemoving)} />
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

@@ -21,6 +21,12 @@ import * as i18n from '../translations';
 
 const TACTICS_POPOVER_WIDTH = 300;
 
+// TODO: The tactics offered here are a hard coded list of ATT&CK tactics, bundled with the plugin from a JSON
+// file, and not the ones the rules of the library actually use. The MITRE framework is being moved out of that
+// JSON and into Elasticsearch, and the managed MITRE data feature was turned on in
+// https://github.com/elastic/kibana/pull/292796. This list should be read from there, so it follows the
+// framework version and does not need a release to change.
+//
 // The tactics in the order of the ATT&CK matrix, which is how the coverage overview lists them.
 const ORDERED_TACTICS = [...tactics].sort((a, b) => {
   const position = (id: string) => {

@@ -36,26 +36,35 @@ type ManifestUpdate = Partial<
   Pick<RuleLibraryAttributes, 'title' | 'description' | 'license' | 'owner' | 'images'>
 >;
 
+interface ManifestRead {
+  update: ManifestUpdate;
+  // How many rule files the library has, which is known once its files are listed. Fleet libraries have none.
+  ruleCount?: number;
+}
+
 // What the library says about itself, which replaces what was saved. Fleet libraries have no manifest.
 const readManifestUpdate = async (
   provider: RuleLibraryProvider,
   library: RuleLibraryAttributes,
   ref: LibraryVersionRef,
   logger: Logger
-): Promise<ManifestUpdate> => {
-  if (library.provider.type === 'fleet') return {};
+): Promise<ManifestRead> => {
+  if (library.provider.type === 'fleet') return { update: {} };
 
   try {
-    const { manifest, manifestError } = await provider.inspect(library, ref);
+    const { manifest, manifestError, ruleCount } = await provider.inspect(library, ref);
     if (manifestError) {
       logger.warn(`Manifest of rule library "${library.name}" could not be used: ${manifestError}`);
     }
     const { title, description, license, owner, images } = manifest ?? {};
-    return Object.fromEntries(
-      Object.entries({ title, description, license, owner, images }).filter(
-        ([, value]) => value !== undefined
-      )
-    );
+    return {
+      update: Object.fromEntries(
+        Object.entries({ title, description, license, owner, images }).filter(
+          ([, value]) => value !== undefined
+        )
+      ),
+      ruleCount,
+    };
   } catch (error) {
     // The manifest only adds details, so a library that has no readable one still syncs.
     logger.warn(
@@ -63,7 +72,7 @@ const readManifestUpdate = async (
         error instanceof Error ? error.message : String(error)
       }`
     );
-    return {};
+    return { update: {} };
   }
 };
 
@@ -71,15 +80,18 @@ const writeBatch = async (
   client: SavedObjectsClientContract,
   libraryId: string,
   libraryTitle: string,
+  libraryVersion: string,
   items: RuleLibraryItem[]
 ): Promise<void> => {
   const { saved_objects: saved } = await client.bulkCreate(
-    items.map(({ rule_id: ruleId, version, path, attributes }) => ({
+    items.map(({ rule_id: ruleId, version, path, attributes, superseded }) => ({
       type: PREBUILT_RULE_SO_TYPE,
       id: `${libraryId}_${ruleId}_${version}`,
       attributes: {
         ...attributes,
         library_id: libraryId,
+        // Left out for a version that a newer one of the release replaces, so it is not counted or listed.
+        ...(superseded ? {} : { library_version: libraryVersion }),
         library_title: libraryTitle,
         library_path: path,
         managed: true,
@@ -137,7 +149,7 @@ export const syncRuleLibrary = async ({
       return { id, outcome: 'up_to_date', version: ref.version, item_count: attributes.item_count };
     }
 
-    const manifestUpdate = await readManifestUpdate(
+    const { update: manifestUpdate, ruleCount } = await readManifestUpdate(
       provider,
       { ...attributes, secret },
       ref,
@@ -145,10 +157,17 @@ export const syncRuleLibrary = async ({
     );
     const title = manifestUpdate.title ?? attributes.title;
 
-    // Nothing is ever deleted: historical versions and rules removed upstream are kept.
+    // The rules are saved with the release, so counting them against the total shows how far the sync is.
+    await client.update(RULE_LIBRARY_SO_TYPE, id, {
+      sync_target_version: ref.version,
+      ...(ruleCount !== undefined ? { sync_total: ruleCount } : {}),
+    });
+
+    // Nothing is ever deleted: historical versions and rules removed upstream are kept. Every rule of this
+    // release is saved with the release, which is how the rules the library has now are told apart.
     let count = 0;
     await provider.readLatestItems({ ...attributes, secret }, ref, async (items) => {
-      await writeBatch(client, id, title, items);
+      await writeBatch(client, id, title, ref.version, items);
       count += items.length;
     });
 
@@ -160,6 +179,8 @@ export const syncRuleLibrary = async ({
       item_count: count,
       sync_status: 'synced',
       synced_at: new Date().toISOString(),
+      sync_target_version: null,
+      sync_total: null,
       last_error: null,
     });
     logger.info(`Rule library "${id}" synced to ${ref.version} (${count} rules)`);
@@ -169,6 +190,8 @@ export const syncRuleLibrary = async ({
     logger.error(`Rule library "${id}" sync failed: ${message}`);
     await client.update(RULE_LIBRARY_SO_TYPE, id, {
       sync_status: 'sync_failed',
+      sync_target_version: null,
+      sync_total: null,
       last_error: message,
     });
     return { id, outcome: 'failed', version: attributes.version, error: message };

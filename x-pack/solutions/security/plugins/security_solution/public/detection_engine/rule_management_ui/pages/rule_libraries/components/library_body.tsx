@@ -31,6 +31,8 @@ interface LibraryBodyProps {
   onSelectTab: (tab: LibraryTab) => void;
   onSync: (libraryIds?: string[]) => void;
   onRemove: (libraryId: string) => void;
+  // The id of the library that is being removed, if any.
+  removingLibraryId?: string;
   isInstalling: boolean;
   onInstall: (rules: LibraryRuleRow[]) => void;
   onInstallAll: (libraryId: string) => void;
@@ -50,6 +52,7 @@ export const LibraryBody = ({
   onSelectTab,
   onSync,
   onRemove,
+  removingLibraryId,
   isInstalling,
   onInstall,
   onInstallAll,
@@ -57,6 +60,7 @@ export const LibraryBody = ({
 }: LibraryBodyProps) => {
   const isNeverSynced = Boolean(selectedLibrary && !selectedLibrary.version);
   const isAnySyncing = libraries.some(({ syncStatus }) => syncStatus === 'syncing');
+  const isRemovingSelected = Boolean(selectedLibrary && selectedLibrary.id === removingLibraryId);
 
   return (
     <>
@@ -64,8 +68,9 @@ export const LibraryBody = ({
         <>
           <LibraryHeader
             library={selectedLibrary}
-            canSync={canEdit}
-            canRemove={canEdit}
+            canSync={canEdit && !isRemovingSelected}
+            canRemove={canEdit && !isRemovingSelected}
+            isRemoving={isRemovingSelected}
             onSync={(libraryId) => onSync([libraryId])}
             onRemove={onRemove}
           />

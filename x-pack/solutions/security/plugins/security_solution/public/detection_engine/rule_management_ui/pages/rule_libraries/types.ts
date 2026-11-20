@@ -25,6 +25,8 @@ export interface RuleLibraryListItem {
   syncStatus: RuleLibrarySyncStatus;
   syncedAt?: string;
   lastError?: string;
+  // Only while syncing. No total means it is not known.
+  syncProgress?: { done: number; total?: number };
   owner: string;
   license: string;
   scope: RuleLibraryScope;

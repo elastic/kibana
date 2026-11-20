@@ -5,67 +5,58 @@
  * 2.0.
  */
 
-import type { AggregationsMultiBucketAggregateBase } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsFiltersAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/core/server';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
-
-const MAX_LIBRARIES = 1000;
-// Highest value Elasticsearch honours for the cardinality aggregation, so counts stay exact up to 40k rules.
-const CARDINALITY_PRECISION_THRESHOLD = 40000;
+import type { LibraryRelease } from './library_release_filter';
+import { buildLibraryReleaseFilter, hasSyncedLibrary } from './library_release_filter';
 
 /**
- * Counts distinct, non-deprecated rule_ids per library_id. Libraries keep every version of a rule, so
- * counting documents would overstate the number of rules. A deprecated rule is left out whole, including
- * the older versions that are not themselves marked as deprecated.
+ * Counts the rules each library has now, without the deprecated ones unless asked to include them. The count is
+ * exact, and a library that has not been synced has none.
  */
 export async function fetchRuleCountsByLibrary(
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  libraries: readonly LibraryRelease[],
+  { includeDeprecated = false }: { includeDeprecated?: boolean } = {}
 ): Promise<Record<string, number>> {
+  if (!hasSyncedLibrary(libraries)) {
+    return {};
+  }
+
+  const syncedLibraries = libraries.filter(({ version }) => Boolean(version));
   const result = await savedObjectsClient.search<
     SavedObjectsRawDocSource,
-    {
-      libraries: AggregationsMultiBucketAggregateBase<{
-        key: string;
-        rules: { value: number };
-        deprecated: { rules: { value: number } };
-      }>;
-    }
+    { libraries: AggregationsFiltersAggregate }
   >({
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
     namespaces: [savedObjectsClient.getCurrentNamespace() ?? 'default'],
     _source: false,
     size: 0,
+    query: {
+      bool: includeDeprecated
+        ? {}
+        : { must_not: { term: { [`${PREBUILT_RULE_ASSETS_SO_TYPE}.deprecated`]: true } } },
+    },
     aggs: {
       libraries: {
-        terms: { field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.library_id`, size: MAX_LIBRARIES },
-        aggs: {
-          rules: {
-            cardinality: {
-              field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
-              precision_threshold: CARDINALITY_PRECISION_THRESHOLD,
-            },
-          },
-          deprecated: {
-            filter: { term: { [`${PREBUILT_RULE_ASSETS_SO_TYPE}.deprecated`]: true } },
-            aggs: {
-              rules: {
-                cardinality: {
-                  field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
-                  precision_threshold: CARDINALITY_PRECISION_THRESHOLD,
-                },
-              },
-            },
-          },
+        filters: {
+          filters: Object.fromEntries(
+            syncedLibraries.map((library) => [library.id, buildLibraryReleaseFilter([library])])
+          ),
         },
       },
     },
   });
 
   const buckets = result.aggregations?.libraries?.buckets;
-  invariant(Array.isArray(buckets), 'fetchRuleCountsByLibrary: expected buckets to be an array');
+  invariant(
+    buckets && !Array.isArray(buckets),
+    'fetchRuleCountsByLibrary: expected buckets to be an object'
+  );
 
   return Object.fromEntries(
-    buckets.map(({ key, rules, deprecated }) => [key, rules.value - deprecated.rules.value])
+    Object.entries(buckets).map(([id, { doc_count: count }]) => [id, count])
   );
 }

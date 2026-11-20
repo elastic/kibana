@@ -27,6 +27,7 @@ const libraryObject = (id: string, spaceId?: string) => ({
     name: id,
     title: id,
     provider: { type: 'git' as const },
+    version: '1.0.0',
     ...(spaceId ? { space_id: spaceId } : {}),
   },
 });
@@ -67,13 +68,16 @@ describe('listRuleLibraryTagsRoute', () => {
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({ tags: ['OS: Linux'] });
-    expect(fetchTagsByLibraries).toHaveBeenCalledWith(['custom']);
+    expect(fetchTagsByLibraries).toHaveBeenCalledWith([{ id: 'custom', version: '1.0.0' }]);
   });
 
   it('lists the tags of every library you can see when none is requested', async () => {
     await inject();
 
-    expect(fetchTagsByLibraries).toHaveBeenCalledWith(['elastic', 'custom']);
+    expect(fetchTagsByLibraries).toHaveBeenCalledWith([
+      { id: 'elastic', version: '1.0.0' },
+      { id: 'custom', version: '1.0.0' },
+    ]);
   });
 
   it('returns 404 for a library that does not exist or belongs to another space', async () => {

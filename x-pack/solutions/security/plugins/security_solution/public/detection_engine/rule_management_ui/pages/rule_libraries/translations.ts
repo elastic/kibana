@@ -985,3 +985,46 @@ export const GROUP_CUSTOM_SHARED = i18n.translate(
     defaultMessage: 'Custom (Shared)',
   }
 );
+
+export const STATUS_SYNCING_PROGRESS = (done: number, total?: number) =>
+  total
+    ? i18n.translate(
+        'xpack.securitySolution.detectionEngine.ruleLibraries.statusSyncingProgressLabel',
+        {
+          defaultMessage: 'Syncing · {percent}%',
+          values: { percent: Math.min(100, Math.floor((done / total) * 100)) },
+        }
+      )
+    : i18n.translate(
+        'xpack.securitySolution.detectionEngine.ruleLibraries.statusSyncingCountLabel',
+        {
+          defaultMessage: 'Syncing · {done, number} rules synced',
+          values: { done },
+        }
+      );
+
+export const SYNC_PROGRESS_TOOLTIP = (done: number, total: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleLibraries.syncProgressTooltip', {
+    defaultMessage: '{done, number} of {total, number} rules',
+    values: { done, total },
+  });
+
+export const SYNC_BAR_INDETERMINATE_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.syncBarIndeterminateAriaLabel',
+  {
+    defaultMessage: 'Syncing the library',
+  }
+);
+
+export const SYNC_BAR_ARIA_LABEL = (done: number, total: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleLibraries.syncBarAriaLabel', {
+    defaultMessage: 'Syncing the library, {done, number} of {total, number} rules',
+    values: { done, total },
+  });
+
+export const STATUS_REMOVING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.statusRemovingLabel',
+  {
+    defaultMessage: 'Removing',
+  }
+);

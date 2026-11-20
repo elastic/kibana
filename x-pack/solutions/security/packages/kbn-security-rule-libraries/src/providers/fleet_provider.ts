@@ -57,7 +57,38 @@ export class FleetProvider implements RuleLibraryProvider {
     { version }: LibraryVersionRef,
     onBatch: ItemBatch
   ): Promise<void> {
-    await this.walk(version, onBatch, () => true);
+    // A package keeps the older versions of a rule next to the newest one, and only the newest is a rule the
+    // library has now.
+    const newestVersions = await this.readNewestVersions(version);
+    await this.walk(
+      version,
+      (items) =>
+        onBatch(
+          items.map((item) =>
+            item.version < (newestVersions.get(item.rule_id) ?? item.version)
+              ? { ...item, superseded: true }
+              : item
+          )
+        ),
+      () => true
+    );
+  }
+
+  private async readNewestVersions(version: string): Promise<Map<string, number>> {
+    const { archiveIterator } = await this.packages.getPackageStream(this.packageName, version);
+    const newest = new Map<string, number>();
+
+    await archiveIterator.traverseEntries(async ({ path, buffer }) => {
+      if (!buffer) return;
+      const { rule_id: ruleId, version: ruleVersion } = parseItem(
+        path,
+        buffer,
+        toLibraryPath(path)
+      );
+      newest.set(ruleId, Math.max(newest.get(ruleId) ?? 0, ruleVersion));
+    }, isRulePath);
+
+    return newest;
   }
 
   async readSpecificItems(
