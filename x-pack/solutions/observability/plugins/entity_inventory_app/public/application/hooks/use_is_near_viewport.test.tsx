@@ -6,6 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout';
 import type { IntersectionObserverMockControls } from '../../__fixtures__/intersection_observer_mock';
 import { installIntersectionObserverMock } from '../../__fixtures__/intersection_observer_mock';
 import { NEAR_VIEWPORT_ROOT_MARGIN, useIsNearViewport } from './use_is_near_viewport';
@@ -47,38 +48,20 @@ describe('useIsNearViewport', () => {
       expect(observer.getRootMargins(element)).toEqual([NEAR_VIEWPORT_ROOT_MARGIN]);
     });
 
-    it('measures the margin from the nearest scrollable ancestor, which clips the element before the viewport does', () => {
-      const scroller = document.createElement('div');
-      scroller.style.overflowY = 'auto';
-      // JSDOM has no layout, so say the container really scrolls.
-      Object.defineProperty(scroller, 'scrollHeight', { value: 2000 });
-      Object.defineProperty(scroller, 'clientHeight', { value: 500 });
-      const wrapper = document.createElement('div');
+    it('measures the margin from the scroll container of the layout, which clips the element before the viewport does', () => {
+      const scrollContainer = document.createElement('div');
+      scrollContainer.id = APP_MAIN_SCROLL_CONTAINER_ID;
       const element = document.createElement('div');
-      wrapper.appendChild(element);
-      scroller.appendChild(wrapper);
-      document.body.appendChild(scroller);
+      scrollContainer.appendChild(element);
+      document.body.appendChild(scrollContainer);
 
       renderHook(() => useIsNearViewport(element));
 
-      expect(observer.getRoots(element)).toEqual([scroller]);
-      scroller.remove();
+      expect(observer.getRoots(element)).toEqual([scrollContainer]);
+      scrollContainer.remove();
     });
 
-    it('skips an ancestor that allows scrolling but has nothing to scroll, and watches from the viewport', () => {
-      const idle = document.createElement('div');
-      idle.style.overflowY = 'auto';
-      const element = document.createElement('div');
-      idle.appendChild(element);
-      document.body.appendChild(idle);
-
-      renderHook(() => useIsNearViewport(element));
-
-      expect(observer.getRoots(element)).toEqual([null]);
-      idle.remove();
-    });
-
-    it('watches from the viewport when no ancestor scrolls', () => {
+    it('watches from the viewport when the layout has no scroll container', () => {
       const element = document.createElement('div');
       document.body.appendChild(element);
 
