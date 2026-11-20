@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Seeds broken detection rules for the Rule Doctor demo.
 #
-# Creates source indices and seven enabled rules tagged "rule-doctor-demo":
+# Creates source indices and 16 enabled rules tagged "rule-doctor-demo":
 #
 #   1. No matching index  — searches logs-doctordemo_dns_v1*, but the data moved to logs-doctordemo_dns_v2.
 #   2. Renamed field      — ES|QL query uses `user_name`, the data has `user.name`.
@@ -13,17 +13,16 @@ set -euo pipefail
 #   6. Data gone          — searches logs-doctordemo_firewall, quiet for 5 days, nothing replaced it.
 #   7. Healthy control    — runs clean on live data. The doctor must leave it alone.
 #   8. Alert limit        — 60 events from one host against max_signals 20; a fit for suppression.
-#   9. No ES|QL _id       — ES|QL query without METADATA _id (only warns if Kibana does not add it).
-#  10. Missing indicators — indicator match on logs-doctordemo_ti_v1*; indicators moved to logs-doctordemo_ti_v2.
-#  11. Over the cap      — max_signals 5000, above the default Kibana alerting limit of 1000.
-#  12. Deleted data view — searches a data view id that does not exist.
-#  13. Missing ML job    — machine learning rule on a job nobody installed (needs a Platinum or trial license).
-#  14. Text grouping     — threshold rule groups by host.id, which is text in logs-doctordemo_textagg.
-#  15. Bad query         — Lucene query with an unbalanced parenthesis.
-#  16. Nothing anywhere  — searches logs-doctordemo_retired*, which no index matches and no integration ships.
-#  17. Blind API key     — created by the doctor_demo_blind user, whose role cannot read logs-doctordemo_proc.
+#   9. Missing indicators — indicator match on logs-doctordemo_ti_v1*; indicators moved to logs-doctordemo_ti_v2.
+#  10. Over the cap      — max_signals 5000, above the default Kibana alerting limit of 1000.
+#  11. Deleted data view — searches a data view id that does not exist.
+#  12. Missing ML job    — machine learning rule on a job nobody installed (needs a Platinum or trial license).
+#  13. Text grouping     — threshold rule groups by host.id, which is text in logs-doctordemo_textagg.
+#  14. Bad query         — Lucene query with an unbalanced parenthesis.
+#  15. Nothing anywhere  — searches logs-doctordemo_retired*, which no index matches and no integration ships.
+#  16. Blind API key     — created by the doctor_demo_blind user, whose role cannot read logs-doctordemo_proc.
 #
-# Rules 1-4 and 12-15 fail or warn on their first run, rules 8-11, 16 and 17 warn. Rules 5-6 run clean and are only found
+# Rules 1-4 and 11-14 fail or warn on their first run, rules 8-10, 15 and 16 warn. Rules 5-6 run clean and are only found
 # by the sweep's freshness check. Wait about a minute after seeding, then run the
 # sweep (the script prints the command).
 #
@@ -40,7 +39,7 @@ ES_URL="${ES_URL:-http://localhost:9200}"
 KIBANA_USER="${KIBANA_USER:-elastic}"
 KIBANA_PASSWORD="${KIBANA_PASSWORD:-changeme}"
 KIBANA_SPACE="${KIBANA_SPACE:-default}"
-# Test-only user for demo 17. Its role reads one demo index, nothing else.
+# Test-only user for demo 16. Its role reads one demo index, nothing else.
 BLIND_USER="doctor_demo_blind"
 BLIND_PASSWORD="${BLIND_PASSWORD:-doctor-demo-blind-pw}"
 TAG="rule-doctor-demo"
@@ -179,7 +178,6 @@ create_rule '{"name":"Doctor demo: VPN login from new IP","type":"query","langua
 create_rule '{"name":"Doctor demo: firewall deny to crown jewel","type":"query","language":"kuery","index":["logs-doctordemo_firewall"],"query":"destination.ip: \"192.0.2.10\" and event.action: \"deny\""}'
 create_rule '{"name":"Doctor demo: healthy control","type":"query","language":"kuery","index":["logs-doctordemo_web"],"query":"host.name: \"web-01\""}'
 create_rule '{"name":"Doctor demo: failed service logins","type":"query","language":"kuery","index":["logs-doctordemo_auth"],"query":"event.category: \"authentication\" and event.outcome: \"failure\"","max_signals":20}'
-create_rule '{"name":"Doctor demo: netcat via ES|QL without _id","type":"esql","language":"esql","query":"FROM logs-doctordemo_proc | WHERE process.name == \"nc\" | KEEP @timestamp, host.name, process.name"}'
 create_rule '{"name":"Doctor demo: web traffic to known bad IP","type":"threat_match","language":"kuery","index":["logs-doctordemo_web"],"query":"*:*","threat_index":["logs-doctordemo_ti_v1*"],"threat_query":"*:*","threat_language":"kuery","threat_mapping":[{"entries":[{"field":"source.ip","type":"mapping","value":"threat.indicator.ip"}]}]}'
 create_rule '{"name":"Doctor demo: failed logins over the cap","type":"query","language":"kuery","index":["logs-doctordemo_auth"],"query":"event.outcome: \"failure\"","max_signals":5000}'
 create_rule '{"name":"Doctor demo: logins on a deleted data view","type":"query","language":"kuery","data_view_id":"doctordemo-deleted-view","query":"event.category: \"authentication\""}'
@@ -189,7 +187,7 @@ create_rule '{"name":"Doctor demo: unbalanced Lucene query","type":"query","lang
 
 create_rule '{"name":"Doctor demo: retired source","type":"query","language":"kuery","index":["logs-doctordemo_retired*"],"query":"event.module: \"legacy_ids\" and event.action: \"signature_match\""}'
 
-# Rule 17 runs with the blind user's API key, which cannot see logs-doctordemo_proc.
+# Rule 16 runs with the blind user's API key, which cannot see logs-doctordemo_proc.
 kbn PUT "/api/security/role/doctor_demo_blind" '{"elasticsearch":{"indices":[{"names":["logs-doctordemo_web"],"privileges":["read","view_index_metadata"]}]},"kibana":[{"base":["all"],"spaces":["*"]}]}' >/dev/null
 es POST "/_security/user/$BLIND_USER" "{\"password\":\"$BLIND_PASSWORD\",\"roles\":[\"doctor_demo_blind\"]}" >/dev/null
 KIBANA_USER="$BLIND_USER" KIBANA_PASSWORD="$BLIND_PASSWORD" create_rule '{"name":"Doctor demo: netcat seen by a blind key","type":"query","language":"kuery","index":["logs-doctordemo_proc"],"query":"process.name: \"nc\""}'
