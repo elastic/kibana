@@ -18,7 +18,8 @@ import {
 import type { InfraBackendLibs } from '../../lib/infra_types';
 import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';
-import { AnomalyThresholdRangeError, NoSuchRemoteClusterError } from '../../lib/sources/errors';
+import { AnomalyThresholdRangeError } from '../../lib/sources/errors';
+import { handleSourceStatusError } from './handle_source_status_error';
 import type { MetricsSourceStatus } from '../../../common/metrics_sources';
 import {
   metricsSourceConfigurationResponseRT,
@@ -49,16 +50,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         remoteClustersExist: true,
       };
     } catch (err) {
-      logger.error(err);
-
-      if (err instanceof NoSuchRemoteClusterError) {
-        return defaultStatus;
-      }
-
-      return {
-        metricIndicesExist: false,
-        remoteClustersExist: true,
-      };
+      return handleSourceStatusError(logger, sourceId, err);
     }
   };
 
