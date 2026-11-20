@@ -35,6 +35,7 @@ import type {
 import { registerRoutes } from './routes/register_routes';
 import { DatasetService } from './storage/datasets/dataset_service';
 import { EvaluatorDefinitionService } from './storage/evaluators/evaluator_definition_service';
+import { ReviewService } from './storage/reviews/review_service';
 import { EvaluationScoreService } from './storage/scores/evaluation_score_service';
 import { evaluationsDataStreamDefinition } from './storage/scores/scores_index_template';
 import { OnlineScoreService } from './storage/scores/online_score_service';
@@ -55,6 +56,7 @@ export class EvalsPlugin
   private evaluationScoreService?: EvaluationScoreService;
   private evaluatorDefinitionService?: EvaluatorDefinitionService;
   private onlineScoreService?: OnlineScoreService;
+  private reviewService?: ReviewService;
   private started = false;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
@@ -170,7 +172,8 @@ export class EvalsPlugin
           !this.datasetService ||
           !this.evaluationScoreService ||
           !this.onlineScoreService ||
-          !this.evaluatorDefinitionService
+          !this.evaluatorDefinitionService ||
+          !this.reviewService
         ) {
           throw new Error('Evals storage services have not been initialized');
         }
@@ -180,6 +183,7 @@ export class EvalsPlugin
           evaluationScoreService: this.evaluationScoreService,
           onlineScoreService: this.onlineScoreService,
           evaluatorDefinitionService: this.evaluatorDefinitionService,
+          reviewService: this.reviewService,
           evaluatorRegistry,
         };
       }
@@ -317,6 +321,11 @@ export class EvalsPlugin
       evaluatorRegistry.isBuiltIn
     );
     this.onlineScoreService = new OnlineScoreService(this.logger, coreStart.dataStreams);
+    this.reviewService = new ReviewService(
+      this.logger,
+      coreStart.elasticsearch.client.asInternalUser,
+      this.isServerless
+    );
 
     return {
       datasetService: this.datasetService,

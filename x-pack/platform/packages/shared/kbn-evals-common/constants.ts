@@ -62,6 +62,7 @@ export const EvaluationIndices = {
   DATASETS: `${EVALUATION_INDEX_PREFIX}-datasets`,
   DATASET_EXAMPLES: `${EVALUATION_INDEX_PREFIX}-dataset-examples`,
   EVALUATORS: `${EVALUATION_INDEX_PREFIX}-evaluators`,
+  REVIEWS: `${EVALUATION_INDEX_PREFIX}-reviews`,
 } as const;
 
 export const TRACES_INDEX_PATTERN = 'traces-*' as const;
