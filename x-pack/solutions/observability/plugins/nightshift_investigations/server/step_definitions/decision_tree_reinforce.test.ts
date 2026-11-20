@@ -12,6 +12,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { loggerMock } from '@kbn/logging-mocks';
+import * as tracing from '../tracing';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
 import {
   DECISION_TREE_LEARNING_TOOL_IDS,
@@ -257,6 +258,61 @@ describe('decisionTreeReinforceStepDefinition', () => {
       expect(get).toHaveBeenCalledTimes(1);
       expect(runAgent).not.toHaveBeenCalled();
     });
+  });
+
+  it("runs the reinforcement sub-agent inside a span on the investigator round's trace", async () => {
+    const roundTraceId = 'ebf7677419199e9edc53ac5dc26b9e0e';
+    const order: string[] = [];
+    const spanSpy = jest
+      .spyOn(tracing, 'withNightshiftBackgroundSpan')
+      .mockImplementation(async (_options, fn) => {
+        order.push('span:start');
+        const result = await fn(undefined);
+        order.push('span:end');
+        return result;
+      });
+    runAgent.mockImplementation(async () => {
+      order.push('runAgent');
+      return { result: { round: { response: { message: 'Persisted 1 tree' } } } };
+    });
+    const get = jest.fn().mockResolvedValue({
+      id: 'inv-1',
+      rounds: [
+        {
+          id: 'round-1',
+          trace_id: ['other-trace', roundTraceId],
+          input: { message: 'Why is checkout slow?' },
+          response: { message: 'Connection pool exhausted.' },
+          steps: [],
+        },
+      ],
+    });
+    const withConversations = {
+      agents: { runAgent },
+      conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
+    } as unknown as AgentBuilderPluginStart;
+
+    await decisionTreeReinforceStepDefinition({ getAgentBuilder: () => withConversations }).handler(
+      createContext({
+        prompt: 'Why is checkout slow?',
+        response: 'Connection pool exhausted.',
+        conversation_id: 'inv-1',
+        round_id: 'round-1',
+        message: 'Task: create a new decision tree',
+        turn_kind: 'initial_investigation',
+        connector_id: 'claude-sonnet',
+      })
+    );
+
+    expect(spanSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'nightshift.decisionTreeReinforce',
+        foregroundTraceId: roundTraceId,
+      }),
+      expect.any(Function)
+    );
+    expect(order).toEqual(['span:start', 'runAgent', 'span:end']);
+    spanSpy.mockRestore();
   });
 
   it('returns the submit tool arguments in call order', async () => {

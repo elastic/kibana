@@ -54,3 +54,11 @@ export {
   type ToWorkflowExecutionEngineModelOptions,
   type WorkflowExecutionEngineModelSource,
 } from './to_workflow_execution_engine_model/to_workflow_execution_engine_model';
+export {
+  DYNAMIC_VALUE_REGEX,
+  isDynamicValue,
+  LIQUID_TAG_VALUE_REGEX,
+  isLiquidTagValue,
+  VARIABLE_VALUE_REGEX,
+  isVariableValue,
+} from './template_value/template_value';

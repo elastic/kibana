@@ -12,7 +12,11 @@ the `--failing-suites-repo owner/name` given. A suite that already has an issue 
 or failing, gets a comment on it instead, with the builds the tests failed in and the commits
 since they last passed: at most once a day for each pipeline and branch while the break lasts
 (`failing.postedAt` in the issue's metadata), and right away when the issue is closed and was
-updated in the last 30 days, which reopens it.
+updated in the last 30 days, which reopens it. Each post also adds the break's tests, branch and
+pipeline to the issue's `flaky-test-suite` metadata, so `/skip` skips the suite on that branch too.
+A build counts once the job's retry reported the test too; on a pipeline whose jobs aren't
+retried, like the Elastic Cloud ones, `FAILING_SUITES_JOB_RETRIES=0` counts it on its one attempt.
+Builds of another repository than `elastic/kibana` get no link to the commits in between.
 
 `REPORT_FAILED_TESTS_PER_TEST_ISSUES=false` keeps it from opening or updating per-test issues: a
 failure that a suite issue tracks still bumps it, and one that none tracks is indexed and written
@@ -28,7 +32,7 @@ next to `REPORT_FAILED_TESTS_TO_GITHUB`, only on pipelines the daily flaky repor
 anywhere else a new failure would never get an issue. Flip it back to fall back to the legacy
 reporting at any time.
 
-Issues for FTR, Jest (unit and integration) and Scout tests link to the
+Issues for FTR, Jest (unit and integration), Cypress and Scout tests link to the
 [Single test history](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history)
 dashboard in the CI space, which shows the test's daily passed and failed attempts, its daily
 failure percentage and its recent failed attempts with their Buildkite jobs. Existing issues get
@@ -82,10 +86,12 @@ in `kibana-fips`". The issue's `suite.branches` only lists the branch, so `/skip
 on that branch in every pipeline. A pipeline added to the report is judged on its own unless it is
 added to those judged together too.
 
-Breakages don't count as flakiness. A breakage is a run of at least 3 failed builds in a row in one
-pipeline, config and target, a failure that passed on a retry included, with less than a 1% chance
-for a test failing at random as often. A test in a breakage up to its latest build is broken right
-now and is dropped from the report. A test whose breakages are over is checked against the
+Breakages don't count as flakiness. A breakage is a run of at least 3 builds in a row in one
+pipeline, config and target where the test failed every attempt, with less than a 1% chance for a
+test failing every attempt at random as often. A build where a retry passed ends the run: a test
+that fails, then passes on a retry, build after build is flaky, not broken, and stays in the report.
+A test in a breakage up to its latest build is broken right now and is dropped from the report, as
+it's the consistently failing check's to report. A test whose breakages are over is checked against the
 thresholds again without their builds: it's dropped if it no longer clears them, and otherwise
 kept, counted and ranked without those builds. Each test dropped this way is logged with the
 breakage that dropped it, or the longest one, and each test kept with how many builds it lost.
@@ -111,10 +117,17 @@ A suite gets an issue when at least one of its tests is not tracked yet (below),
 first and at most `--max-new-issues` per run (default 10). The issue is titled
 `Flaky <Framework> [UI|API] suite: <suite title>` (`Flaky Scout API suite: …`,
 `Flaky Jest integration suite: …`) and labelled `failed-test` plus the owning teams' labels (in
-`elastic/kibana` only). The body shows the numbers of each flaky test and the branch it qualified
-on, what the config runs, the suite's distinct errors with their share of the failures and where
-each was last seen, breakdowns by branch (⏭️ marks the branches every setup skips it on), by Scout
-target and by pipeline, and links issues that mention the same file as possibly related.
+`elastic/kibana` only). The body opens with how many days of the report window the suite's tests
+failed on, then a row per flaky test: a Kibana logo button that opens its
+[Single test history](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history), the
+branch it qualified on, and a square per day of the window, oldest first: 🟥 for a day it failed
+on, 🟩 for one it only passed on, ⬜ for one it didn't run on. The days are counted on the branches
+it is flaky on, back from the end of the window, from `byBranch[].failedDaysAgo` and
+`byBranch[].ranDaysAgo` in the report; reports written before those were recorded get neither.
+A line names the owners and the config. Then come the suite's distinct errors with their share of
+the failures and a line on where each was last seen, the status by branch (⏭️ marks the branches
+every setup skips it on) and by Scout target, the failures by pipeline when it failed on more than
+one, and issues that mention the same file as possibly related.
 
 ### Which issues count as tracking a test
 
@@ -179,11 +192,12 @@ whole file. A closed one isn't reopened for a block: the block gets an issue of 
 - An issue that already has the report, as on a retried build, is left alone.
 
 In CI the command posts as `elastic-vault-github-plugin-prod[bot]`, the app behind the pipeline's
-short-lived GitHub token. The failed-test alert of `elastic/kibana-operations` (`triage/`) doesn't
-run on its comments, only on the `kibanamachine` ones `report_failed_tests` posts for CI failures:
-a Slack message to the teams that opted in to alerts for existing failures (none at the time of
-writing). Editing a body or reopening an issue runs no alert; a reopen does start the
-`failed-test-investigator` workflow again.
+short-lived GitHub token. In `elastic/kibana`, its comment on an open `failed-test` issue runs the
+failed-test alert of `elastic/kibana-operations` (`triage/`): a Slack message to the teams that
+opted in to alerts for existing failures (none at the time of writing). The alert reads
+`report.count` from the metadata, so the body is updated before the comment is posted. Editing a
+body or reopening an issue runs no alert; a reopen does start the `failed-test-investigator`
+workflow again.
 
 The stale `failed-test` sweep closes the issues of suites that drop out of the report, as nothing
 refreshes them any more.

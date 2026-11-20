@@ -9,7 +9,7 @@
 
 import type { Client as ESClient } from '@elastic/elasticsearch';
 import { SCOUT_TEST_EVENTS_INDEX_PATTERN } from '@kbn/scout-info';
-import type { SetupBuilds } from './breakages';
+import type { BuildOutcome, SetupBuilds } from './breakages';
 import { ESQL_ROW_LIMIT, inList, quoteEsqlString } from './esql';
 import { buildExecutionModels } from './execution_model';
 import { scopeKey, type JudgedScope } from './judged_scope';
@@ -200,10 +200,15 @@ export const buildBranchStatsQuery = (
       `is_execution = CASE(${model.executionFilter}, 1, 0)`,
       `failed = CASE(is_execution == 1 AND ${model.failedExpression} == 1, 1, 0)`,
       `status = ${RUN_STATUS}`,
+      `days_ago = DATE_DIFF("day", @timestamp, TO_DATETIME(${quoteEsqlString(
+        scope.to.toISOString()
+      )}))`,
       ...judged.eval,
     ].join(', ')}`,
     'STATS builds = COUNT_DISTINCT(CASE(is_execution == 1, buildkite.build.id, NULL)),' +
       ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)),' +
+      ' failed_days_ago = VALUES(CASE(failed == 1, days_ago, NULL)),' +
+      ' ran_days_ago = VALUES(CASE(is_execution == 1, days_ago, NULL)),' +
       ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)),' +
       ' last_failed_build_url = LAST(buildkite.build.url, @timestamp) WHERE failed == 1,' +
       ' last_failed_job_id = LAST(buildkite.job_id, @timestamp) WHERE failed == 1,' +
@@ -413,6 +418,12 @@ export const fetchTestMetadata = async (
   );
 };
 
+/** `VALUES` gives a single value as itself and none as null. */
+const sortedDays = (value: number | number[] | null | undefined): number[] | undefined =>
+  value === null || value === undefined
+    ? undefined
+    : (Array.isArray(value) ? [...value] : [value]).sort((a, b) => a - b);
+
 /**
  * Per-branch build counts, latest run and whether every setup skipped it, for the given tests,
  * most failed builds first. Tests are grouped by execution model so that each one is counted the
@@ -431,6 +442,8 @@ export const fetchBranchStats = async (
         judged_pipeline?: string | null;
         builds: number;
         failed_builds: number;
+        failed_days_ago?: number | number[] | null;
+        ran_days_ago?: number | number[] | null;
         last_failed_at: string | null;
         last_failed_build_url: string | null;
         last_failed_job_id: string | null;
@@ -507,6 +520,8 @@ export const fetchBranchStats = async (
       skipped:
         record.latest_status === 'skipped' &&
         skipped.get(branchKey(record.test_id, scoped)) === true,
+      failedDaysAgo: sortedDays(record.failed_days_ago),
+      ranDaysAgo: sortedDays(record.ran_days_ago),
     });
     byTest.set(record.test_id, stats);
   }
@@ -576,9 +591,9 @@ export const fetchBranchCounts = async (
 
 /**
  * One row per build of the given tests of one execution model, per branch and setup (pipeline,
- * config file and Scout target): whether the test failed in the build, a failure that passed on
- * a retry included. Over the same executions as the per-branch counts. Only setups where the test
- * failed at least once: the others have no breakage, and they are most of the rows.
+ * config file and Scout target): whether the test failed and whether it passed in the build, on a
+ * retry included, which tell its outcome. Over the same executions as the per-branch counts. Only setups where the test failed at least once: the others have no
+ * breakage, and they are most of the rows.
  */
 export const buildSetupBuildsQuery = (
   scope: FlakyTestQueryScope,
@@ -597,10 +612,11 @@ export const buildSetupBuildsQuery = (
     ].join(' AND ')}`,
     `EVAL ${[
       `failed = ${model.failedExpression}`,
+      `passed = ${model.passedExpression}`,
       `setup = ${SETUP_EXPRESSION}`,
       ...judged.eval,
     ].join(', ')}`,
-    'STATS failed = MAX(failed), ran_at = MIN(@timestamp),' +
+    'STATS failed = MAX(failed), passed = MAX(passed), ran_at = MIN(@timestamp),' +
       ' failed_at = MAX(CASE(failed == 1, @timestamp, NULL))' +
       ` BY test.id, ${judged.by}, setup, buildkite.build.id, buildkite.build.number`,
     'INLINE STATS setup_failed = MAX(failed) BY test.id, buildkite.branch, setup',
@@ -624,6 +640,14 @@ const chunk = <T>(values: readonly T[], size: number): T[][] =>
   Array.from({ length: Math.ceil(values.length / size) }, (_, index) =>
     values.slice(index * size, (index + 1) * size)
   );
+
+/** A build's outcome, from whether the test failed and passed in it, on a retry included. */
+const buildOutcome = ({ failed, passed }: { failed: number; passed: number }): BuildOutcome => {
+  if (failed === 1) {
+    return passed === 1 ? 'recovered' : 'failed';
+  }
+  return 'passed';
+};
 
 export interface SetupBuildsResult {
   /** Per test, its builds in each branch and setup where it failed, oldest first. */
@@ -653,6 +677,7 @@ export const fetchSetupBuilds = async (
           build_id: string | null;
           build_number: number | null;
           failed: number;
+          passed: number;
           ran_at: string;
           failed_at: string | null;
         }>(es, buildSetupBuildsQuery(scope, frameworks, batch)),
@@ -688,7 +713,7 @@ export const fetchSetupBuilds = async (
       setupBuilds.builds.push({
         buildId: record.build_id,
         buildNumber: record.build_number,
-        failed: record.failed === 1,
+        outcome: buildOutcome(record),
         ranAt: new Date(record.ran_at),
         failedAt: record.failed_at === null ? undefined : new Date(record.failed_at),
       });

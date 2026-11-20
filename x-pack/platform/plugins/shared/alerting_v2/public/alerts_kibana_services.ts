@@ -6,6 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -23,6 +24,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
  * (`mountEpisodesApp` + `KibanaContextProvider`).
  */
 export type AlertsKibanaServices = CoreStart & {
+  agentBuilder?: AgentBuilderPluginStart;
   share: SharePluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;

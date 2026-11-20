@@ -10,8 +10,6 @@ export const ES_ARCHIVES = {
   RUM_TEST_DATA: 'x-pack/solutions/observability/plugins/ux/e2e/fixtures/rum_test_data',
 };
 
-export const UX_APP_PATH = '/app/ux';
-
 export const DEFAULT_QUERY_PARAMS = {
   percentile: '50',
   rangeFrom: '2020-05-18T11:51:00.000Z',
