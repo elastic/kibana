@@ -206,6 +206,11 @@ const convertInterface = (
   if (typeName.name === 'QueryContainer' && typeName.namespace === '_types.query_dsl') {
     return { __scope_link: 'GLOBAL.query' };
   }
+  // processors are defined once in the `_processor` pseudo-endpoint (js/ingest.ts), so any
+  // ProcessorContainer (pipeline `processors`, `on_failure`, ...) links to it
+  if (typeName.name === 'ProcessorContainer' && typeName.namespace === 'ingest._types') {
+    return { __scope_link: '_processor' };
+  }
   const additionalPropertiesBehavior = definedType.behaviors?.find(
     ({ type }) =>
       type.namespace === '_spec_utils' &&
