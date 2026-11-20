@@ -107,6 +107,7 @@ import {
   getOriginalAxisPosition,
   getMaximumFractionDigits,
   mapAnnotationClickEvents,
+  getLayerBucketEnd,
 } from '../helpers';
 import { getXDomain, getXValues, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -126,7 +127,12 @@ import {
   OUTSIDE_RECT_ANNOTATION_WIDTH,
   OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
 } from './annotations';
-import { getClickedOverlayPoint, OverlayPoints, useOverlays } from './overlay_points';
+import {
+  getClickedBaseSeriesEvent,
+  getClickedOverlayPoint,
+  OverlayPoints,
+  useOverlays,
+} from './overlay_points';
 import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
 import { DataLayers } from './data_layers';
 import { Tooltip as CustomTooltip } from './tooltip';
@@ -663,7 +669,11 @@ export function XYChart({
       return;
     }
 
-    const [xyGeometry, xySeries] = xyElementEvents[0];
+    const baseSeriesEvent = getClickedBaseSeriesEvent(overlays, xyElementEvents);
+    if (!baseSeriesEvent) {
+      return;
+    }
+    const [xyGeometry, xySeries] = baseSeriesEvent;
 
     const layer = dataLayers.find((l) =>
       xySeries.seriesKeys.some((key: string | number) =>
@@ -1160,7 +1170,9 @@ export function XYChart({
                 yAxesConfiguration={yAxesConfiguration}
                 dataLayers={dataLayers}
                 defaultXScaleType={defaultXScaleType}
-                xInterval={xDomain?.minInterval}
+                getLayerBucketEnd={(layer) =>
+                  getLayerBucketEnd(data.datatableUtilities, layer, timeZone)
+                }
               />
             ) : null}
             {referenceLineLayers.length ? (

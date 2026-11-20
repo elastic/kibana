@@ -20,10 +20,12 @@ import type { CommonXYDataLayerConfig, XYOverlay, XYOverlayDatum } from '../../c
 import { XScaleTypes } from '../../common/constants';
 import type { GroupsConfiguration } from '../helpers';
 import {
+  getClickedBaseSeriesEvent,
   getClickedOverlayPoint,
   getOverlaySeriesConfigs,
   getOverlaySpecId,
   useOverlays,
+  type GetLayerBucketEnd,
 } from './overlay_points';
 
 const point = { trace_id: 'trace-1', '@timestamp': 1000, value: 42 };
@@ -111,13 +113,17 @@ describe('overlay points', () => {
         },
       });
 
-    const snap = (bucketStarts: number[], timestamps: number[], xInterval?: number) => {
+    const snap = (
+      bucketStarts: number[],
+      timestamps: number[],
+      getLayerBucketEnd?: GetLayerBucketEnd
+    ) => {
       const [{ data, xAccessor }] = getOverlaySeriesConfigs(
         [{ ...overlay, data: timestamps.map((timestamp) => ({ '@timestamp': timestamp })) }],
         yAxesConfiguration,
         [createHistogramLayer(bucketStarts)],
         XScaleTypes.TIME,
-        xInterval
+        getLayerBucketEnd
       );
       return data.map((datum) => [
         datum['@timestamp'],
@@ -134,16 +140,17 @@ describe('overlay points', () => {
     });
 
     it('drops points in empty buckets and after the last drawn bucket', () => {
-      expect(snap([1000, 3000], [1500, 2500, 3500, 4100], 1000)).toEqual([
+      const getLayerBucketEnd = () => (bucketStart: number) => bucketStart + 1000;
+      expect(snap([1000, 3000], [1500, 2500, 3500, 4100], getLayerBucketEnd)).toEqual([
         [1500, 1000],
         [3500, 3000],
       ]);
     });
 
-    it('keeps points in adjacent buckets longer than the interval, like calendar months', () => {
-      expect(snap([0, 31, 59], [30, 58], 28)).toEqual([
-        [30, 0],
-        [58, 31],
+    it('drops points after the smallest bucket gap when the layer has no known interval', () => {
+      expect(snap([1000, 2000, 4000], [2500, 3500, 4999, 5000])).toEqual([
+        [2500, 2000],
+        [4999, 4000],
       ]);
     });
   });
@@ -220,6 +227,16 @@ describe('overlay points', () => {
         [passive],
         [createHit('some-data-series', {}), createHit(getOverlaySpecId(passive), point)]
       )
+    ).toBeUndefined();
+  });
+
+  it('hands the base series handler the first regular series hit, skipping overlay points', () => {
+    const baseHit = createHit('some-data-series', {});
+    expect(
+      getClickedBaseSeriesEvent([overlay], [createHit(getOverlaySpecId(overlay), point), baseHit])
+    ).toBe(baseHit);
+    expect(
+      getClickedBaseSeriesEvent([overlay], [createHit(getOverlaySpecId(overlay), point)])
     ).toBeUndefined();
   });
 

@@ -71,6 +71,20 @@ export const getClickedOverlayPoint = (
   return undefined;
 };
 
+/** Returns the first element hit by a click that belongs to a base series, skipping overlay points. */
+export const getClickedBaseSeriesEvent = (
+  overlays: readonly XYOverlay[],
+  elementEvents: readonly XYChartElementEvent[]
+): XYChartElementEvent | undefined =>
+  elementEvents.find(
+    ([, { specId }]) => !overlays.some((overlay) => getOverlaySpecId(overlay) === specId)
+  );
+
+/** Returns where a bucket of the layer ends, or `undefined` when the layer has no known interval. */
+export type GetLayerBucketEnd = (
+  layer: CommonXYDataLayerConfig
+) => ((bucketStart: number) => number) | undefined;
+
 export interface OverlaySeriesConfig {
   overlay: XYOverlay;
   groupId: string;
@@ -93,13 +107,12 @@ const getSmallestGap = (sortedValues: readonly number[]): number | undefined => 
 };
 
 /**
- * Returns the start of the drawn bucket containing `x`, or `undefined` when no drawn bucket contains it.
- * A bucket ends where the next one starts when they are adjacent, so calendar intervals of varying length still match,
- * and one interval after its start otherwise, so points in empty or dropped buckets are not moved onto another bar.
+ * Returns the start of the drawn bucket containing `x`, or `undefined` when no drawn bucket contains it,
+ * so points in empty or dropped buckets are not moved onto another bar.
  */
 const findBucketStart = (
   bucketStarts: readonly number[],
-  interval: number,
+  getEnd: (bucketStart: number) => number,
   x: number
 ): number | undefined => {
   let bucketIndex: number | undefined;
@@ -118,12 +131,7 @@ const findBucketStart = (
     return undefined;
   }
   const bucketStart = bucketStarts[bucketIndex];
-  const nextBucketStart = bucketStarts[bucketIndex + 1];
-  const bucketEnd =
-    nextBucketStart !== undefined && nextBucketStart - bucketStart < 2 * interval
-      ? nextBucketStart
-      : bucketStart + interval;
-  return x < bucketEnd ? bucketStart : undefined;
+  return x < getEnd(bucketStart) ? bucketStart : undefined;
 };
 
 /**
@@ -133,13 +141,14 @@ const findBucketStart = (
 const snapToBuckets = (
   overlay: XYOverlay,
   layer: CommonXYDataLayerConfig,
-  xInterval: number | undefined
+  getLayerBucketEnd: GetLayerBucketEnd
 ): Pick<OverlaySeriesConfig, 'data' | 'xAccessor'> => {
   const bucketStarts = getXValues([layer]);
-  const interval = xInterval ?? getSmallestGap(bucketStarts) ?? Infinity;
+  const smallestGap = getSmallestGap(bucketStarts) ?? Infinity;
+  const getEnd = getLayerBucketEnd(layer) ?? ((bucketStart: number) => bucketStart + smallestGap);
   const snappedX = new Map<XYOverlayDatum, number>();
   for (const datum of overlay.data) {
-    const bucketStart = findBucketStart(bucketStarts, interval, getOverlayX(overlay, datum));
+    const bucketStart = findBucketStart(bucketStarts, getEnd, getOverlayX(overlay, datum));
     if (bucketStart !== undefined) {
       snappedX.set(datum, bucketStart);
     }
@@ -154,14 +163,14 @@ const snapToBuckets = (
  * Pairs each overlay with the Y axis group and the scales of its layer, mirroring the layer's own series.
  * Overlays are dropped when their layer is not drawn or has a categorical X axis, where numeric `x` values cannot be placed.
  * On histogram layers, points are snapped to the layer buckets so they never change the base chart's interval.
- * `xInterval` is the bucket interval of the chart's X domain; without it, the smallest gap between buckets is used.
+ * Without a known interval, a bucket is assumed to span the smallest gap between buckets.
  */
 export const getOverlaySeriesConfigs = (
   overlays: readonly XYOverlay[],
   yAxesConfiguration: GroupsConfiguration,
   dataLayers: readonly CommonXYDataLayerConfig[],
   defaultXScaleType: XScaleType,
-  xInterval?: number
+  getLayerBucketEnd: GetLayerBucketEnd = () => undefined
 ): OverlaySeriesConfig[] =>
   overlays.flatMap((overlay) => {
     const layer = dataLayers.find(({ layerId }) => layerId === overlay.layerId);
@@ -181,7 +190,7 @@ export const getOverlaySeriesConfigs = (
     const columnFormatId = table.columns.find(({ id }) => id === series.accessor)?.meta.params?.id;
     const yScaleType = getSeriesYScaleType(axis, columnFormatId);
     const { data, xAccessor: overlayXAccessor } = layer.isHistogram
-      ? snapToBuckets(overlay, layer, xInterval)
+      ? snapToBuckets(overlay, layer, getLayerBucketEnd)
       : overlay;
     return [
       {
@@ -200,7 +209,7 @@ interface OverlayPointsProps {
   yAxesConfiguration: GroupsConfiguration;
   dataLayers: readonly CommonXYDataLayerConfig[];
   defaultXScaleType: XScaleType;
-  xInterval?: number;
+  getLayerBucketEnd: GetLayerBucketEnd;
 }
 
 export const OverlayPoints = ({
@@ -208,7 +217,7 @@ export const OverlayPoints = ({
   yAxesConfiguration,
   dataLayers,
   defaultXScaleType,
-  xInterval,
+  getLayerBucketEnd,
 }: OverlayPointsProps) => {
   const { euiTheme } = useEuiTheme();
   const color = euiTheme.colors.vis.euiColorVis6;
@@ -220,7 +229,7 @@ export const OverlayPoints = ({
         yAxesConfiguration,
         dataLayers,
         defaultXScaleType,
-        xInterval
+        getLayerBucketEnd
       ).map(({ overlay, groupId, xScaleType, yScaleType, data, xAccessor }) => {
         return (
           <BubbleSeries<XYOverlayDatum>

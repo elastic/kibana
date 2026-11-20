@@ -45,9 +45,11 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ESQL_TABLE_TYPE, getAggsFormats } from '@kbn/data-plugin/common';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import type { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
-import type { DataLayerConfig } from '../../common';
+import { BehaviorSubject } from 'rxjs';
+import type { DataLayerConfig, XYOverlay } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { XyEndzones } from './x_domain';
+import { getOverlaySpecId } from './overlay_points';
 import {
   chartsActiveCursorService,
   chartsThemeService,
@@ -1409,6 +1411,86 @@ describe('XYChart component', () => {
           table: data,
           value: 2,
         },
+      ],
+    });
+  });
+
+  test('onElementClick builds the filter from the regular series hit when a non-clickable overlay point is hit first', () => {
+    const geometry: GeometryValue = { x: 5, y: 1, accessor: 'y1', mark: null, datum: {} };
+    const series = {
+      key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
+      specId: 'd',
+      yAccessor: 'd',
+      splitAccessors: new Map().set('b', 2),
+      seriesKeys: [2, 'd'],
+    };
+    const overlay: XYOverlay = {
+      type: 'points',
+      id: 'test.overlay',
+      layerId: 'first',
+      title: 'Overlay',
+      data: [{ x: 999, d: 1 }],
+      xAccessor: 'x',
+      yAccessor: 'd',
+      clickable: false,
+    };
+    const overlayGeometry: GeometryValue = {
+      x: 999,
+      y: 1,
+      accessor: 'y1',
+      mark: null,
+      datum: overlay.data[0],
+    };
+    const overlaySeries = {
+      key: getOverlaySpecId(overlay),
+      specId: getOverlaySpecId(overlay),
+      yAccessor: 'd',
+      splitAccessors: new Map(),
+      seriesKeys: ['d'],
+    };
+
+    const { args, data } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <XYChart
+        {...defaultProps}
+        overlays$={new BehaviorSubject<readonly XYOverlay[]>([overlay])}
+        args={{
+          ...args,
+          layers: [
+            {
+              layerId: 'first',
+              type: 'dataLayer',
+              layerType: LayerTypes.DATA,
+              isHistogram: true,
+              seriesType: 'bar',
+              isStacked: true,
+              isHorizontal: false,
+              isPercentage: false,
+              showLines: true,
+              xAccessor: 'b',
+              xScaleType: 'time',
+              splitAccessors: ['b'],
+              accessors: ['d'],
+              columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+              palette: mockPaletteOutput,
+              table: data,
+            },
+          ],
+        }}
+      />
+    );
+    wrapper.update();
+
+    wrapper.find(Settings).first().prop('onElementClick')!([
+      [overlayGeometry, overlaySeries as XYChartSeriesIdentifier],
+      [geometry, series as XYChartSeriesIdentifier],
+    ]);
+
+    expect(onClickValue).toHaveBeenCalledWith({
+      data: [
+        { column: 1, row: 1, table: data, value: 5 },
+        { column: 1, row: 0, table: data, value: 2 },
       ],
     });
   });
