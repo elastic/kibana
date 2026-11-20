@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.26';
+export const PROTOTYPE_VERSION = '1.27';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,12 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-11-20',
+    summary: 'Larger type icons in tables, and at most three sparkline columns by default.',
+    details:
+      'Type marks in the list sit one step larger next to the label. A table opens with at most three metric columns that draw a sparkline. Functions keeps Invocations, Error rate, and p99 duration. Storage keeps Request rate, 4xx error ratio, and First-byte latency. The other metrics stay in the column picker. Bump to v1.27.',
+  },
   {
     date: '2026-11-20',
     summary:

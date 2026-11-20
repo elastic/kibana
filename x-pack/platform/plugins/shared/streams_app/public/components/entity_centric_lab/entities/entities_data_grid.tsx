@@ -264,9 +264,11 @@ const k8sContextCatalogColumn = (id: K8sContextKey): CatalogColumn => ({
   label: K8S_CONTEXT_LABEL[id],
 });
 
-// Metric columns to show by default per entity type. These surface the most
-// operationally-relevant signals for each resource kind so the user sees
-// actionable data without needing to configure columns.
+// Metric columns to show by default per entity type. Each one draws a
+// sparkline, so a table starts with at most three. The rest stay in the
+// column picker.
+const MAX_DEFAULT_METRIC_COLUMNS = 3;
+
 const DEFAULT_METRICS_BY_BUCKET: Readonly<Record<string, readonly string[]>> = {
   // Kubernetes
   'kubernetes:nodes': ['metric:cpu-util', 'metric:memory-util', 'metric:pod-count'],
@@ -322,60 +324,20 @@ const DEFAULT_METRICS_BY_BUCKET: Readonly<Record<string, readonly string[]>> = {
     'metric:invocations',
     'metric:error-rate',
     'metric:p99-duration',
-    'metric:concurrent-executions',
-    'metric:memory-util',
   ],
-  'cloud:aws s3 bucket': [
-    'metric:request-rate',
-    'metric:s3-4xx',
-    'metric:first-byte',
-    'metric:bucket-size',
-    'metric:object-count',
-  ],
+  'cloud:aws s3 bucket': ['metric:request-rate', 'metric:s3-4xx', 'metric:first-byte'],
   // Functions category (same metrics as cloud Lambda)
   'functions:aws lambda function': [
     'metric:invocations',
     'metric:error-rate',
     'metric:p99-duration',
-    'metric:concurrent-executions',
-    'metric:memory-util',
   ],
-  'functions:azure function': [
-    'metric:invocations',
-    'metric:error-rate',
-    'metric:p99-duration',
-    'metric:concurrent-executions',
-    'metric:memory-util',
-  ],
-  'functions:gcp cloud function': [
-    'metric:invocations',
-    'metric:error-rate',
-    'metric:p99-duration',
-    'metric:concurrent-executions',
-    'metric:memory-util',
-  ],
+  'functions:azure function': ['metric:invocations', 'metric:error-rate', 'metric:p99-duration'],
+  'functions:gcp cloud function': ['metric:invocations', 'metric:error-rate', 'metric:p99-duration'],
   // Storage category (same metrics as cloud S3)
-  'storage:aws s3 bucket': [
-    'metric:request-rate',
-    'metric:s3-4xx',
-    'metric:first-byte',
-    'metric:bucket-size',
-    'metric:object-count',
-  ],
-  'storage:azure blob storage': [
-    'metric:request-rate',
-    'metric:s3-4xx',
-    'metric:first-byte',
-    'metric:bucket-size',
-    'metric:object-count',
-  ],
-  'storage:gcp cloud storage bucket': [
-    'metric:request-rate',
-    'metric:s3-4xx',
-    'metric:first-byte',
-    'metric:bucket-size',
-    'metric:object-count',
-  ],
+  'storage:aws s3 bucket': ['metric:request-rate', 'metric:s3-4xx', 'metric:first-byte'],
+  'storage:azure blob storage': ['metric:request-rate', 'metric:s3-4xx', 'metric:first-byte'],
+  'storage:gcp cloud storage bucket': ['metric:request-rate', 'metric:s3-4xx', 'metric:first-byte'],
 };
 
 const UPTIME_COLUMN_ID = 'age';
@@ -421,7 +383,10 @@ const defaultVisibleIdsFor = (bucketKey: string, isHomogeneous: boolean): string
     return withUptimeLast([name, typeId, ...rest.filter((id) => id !== typeId)]);
   }
   const extra = getK8sContextColumnIds(bucketKey).defaultVisible;
-  const metricIds = DEFAULT_METRICS_BY_BUCKET[bucketKey] ?? [];
+  const metricIds = (DEFAULT_METRICS_BY_BUCKET[bucketKey] ?? []).slice(
+    0,
+    MAX_DEFAULT_METRIC_COLUMNS
+  );
   const cloudAccountIds = bucketKeyShowsCloudAccountByDefault(bucketKey)
     ? [CLOUD_ACCOUNT_COLUMN_ID]
     : [];
@@ -580,7 +545,7 @@ const TypeCell = ({ type }: { type: string }) => {
   if (!logo) return <>{type}</>;
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      <EuiIcon type={logo} size="s" aria-hidden />
+      <EuiIcon type={logo} size="m" aria-hidden />
       <span>{type}</span>
     </span>
   );
