@@ -1409,7 +1409,7 @@ export const Slack: ConnectorSpec = {
             : Buffer.from(typedInput.content, 'utf8');
         const contentLength = contentBuffer.length;
 
-        // Step 1: Get an upload URL from Slack.
+        // Step 1: Get an upload URL from Slack. This method only takes a form body, not JSON.
         ctx.log.debug(
           `Slack uploadFile step 1 — getUploadURLExternal: filename=${typedInput.filename} length=${contentLength}`
         );
@@ -1421,8 +1421,11 @@ export const Slack: ConnectorSpec = {
             request: () =>
               ctx.client.post(
                 `${SLACK_API_BASE}/files.getUploadURLExternal`,
-                { filename: typedInput.filename, length: contentLength },
-                { headers: { 'Content-Type': 'application/json; charset=utf-8' } }
+                new URLSearchParams({
+                  filename: typedInput.filename,
+                  length: String(contentLength),
+                }),
+                { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
               ),
           });
 
