@@ -26,6 +26,15 @@ const registeredAuthTypes = Object.values(authTypeSpecs) as NormalizedAuthType[]
 const getAuthTypeId = (authType: string | AuthTypeDef): string =>
   typeof authType === 'string' ? authType : authType.type;
 
+// Specs that receive events must offer no authentication, so they can receive events without
+// outbound credentials. These predate the rule; remove an id once its spec adds `none`.
+const EVENT_SPECS_WITHOUT_NO_AUTH: ReadonlySet<string> = new Set([
+  '.github',
+  '.microsoft-teams',
+  '.servicenow_search',
+  '.slack2',
+]);
+
 describe('connector spec contracts', () => {
   it('uses unique connector IDs', () => {
     const connectorIds = allSpecs.map(([, spec]) => spec.metadata.id);
@@ -134,6 +143,21 @@ describe('connector spec contracts', () => {
     }
     for (const [eventKey, def] of Object.entries(spec.events.definitions)) {
       expect(def.eventId).toBe(buildEventId(spec.metadata.id, eventKey));
+    }
+  });
+
+  it.each(allSpecs)('%s offers no authentication when it receives events', (_exportName, spec) => {
+    if (spec.events === undefined || EVENT_SPECS_WITHOUT_NO_AUTH.has(spec.metadata.id)) {
+      return;
+    }
+    expect((spec.auth?.types ?? []).map(getAuthTypeId)).toContain('none');
+  });
+
+  it('only exempts specs that receive events and lack no authentication', () => {
+    for (const connectorId of EVENT_SPECS_WITHOUT_NO_AUTH) {
+      const spec = allSpecs.find(([, { metadata }]) => metadata.id === connectorId)?.[1];
+      expect(spec?.events).toBeDefined();
+      expect((spec?.auth?.types ?? []).map(getAuthTypeId)).not.toContain('none');
     }
   });
 
