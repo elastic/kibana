@@ -295,11 +295,29 @@ describe('TaskProcessSupervisor', () => {
     expect(forkFn).not.toHaveBeenCalled();
   });
 
-  it('validates required task bundles before accepting work', () => {
+  it('does not require a bundle for every registered task type; an unbundled one is simply not served', () => {
     const { supervisor } = setup();
-    expect(() => supervisor.start(['workflow:run'])).toThrow(
-      'Missing task bundles for workflow:run'
+    expect(() => supervisor.start(['workflow:run'])).not.toThrow();
+    expect(supervisor.serves('workflow:run')).toBe(false);
+    expect(supervisor.serves('alerting_v2:cleanup')).toBe(true);
+    expect(supervisor.getRoute('workflow:run')).toBeDefined();
+  });
+
+  it('throws when a manifest entry points at a bundle file that does not exist', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'task-bundles-'));
+    writeFileSync(
+      join(dir, 'manifest.json'),
+      JSON.stringify({ bundles: { a: { file: 'missing.js', taskType: 'alerting_v2:cleanup' } } })
     );
+    const supervisor = new TaskProcessSupervisor({
+      settings: {
+        bundle_dir: dir,
+        kibanaVersion: '9.9.9',
+        getElasticsearchConfig: () => ({ hosts: ['http://es:9200'] } as never),
+      },
+      logger: loggingSystemMock.createLogger(),
+    });
+    expect(() => supervisor.start()).toThrow('Missing task bundle files for alerting_v2:cleanup');
   });
 
   it('starts the bundle for a run, with the settings sent over the fork channel', async () => {
@@ -457,6 +475,7 @@ describe('TaskProcessSupervisor', () => {
     const [a] = await Promise.all([first, second]);
     expect(supervisor.getStats()).toMatchObject({
       live: 2,
+      peakLive: 2,
       active: 2,
       max: 2,
       spawned: 2,
@@ -469,6 +488,8 @@ describe('TaskProcessSupervisor', () => {
     await third;
     expect(children).toHaveLength(3);
     expect(supervisor.getStats().active).toBe(2);
+    // The third process starts after the first is released, so live never exceeds two at once.
+    expect(supervisor.getStats().peakLive).toBe(2);
   });
 
   it('frees its place when a process cannot be started, and reports why', async () => {

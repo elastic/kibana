@@ -34,6 +34,10 @@ export const WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS = 15 * 1000; // 1
 
 export const CLAIM_STRATEGY_MGET = 'mget';
 
+// Validation-only default used to force every module task type into a task process in CI; not for
+// merge. Revert to `'in_process'` once the task-process effort is validated end to end.
+export const DEFAULT_TASK_EXECUTION_MODE = 'child_process';
+
 export const DEFAULT_DISCOVERY_INTERVAL_MS = 1000 * 10; // 10 seconds
 const MIN_DISCOVERY_INTERVAL_MS = 1000; // 1 second
 const MAX_DISCOVERY_INTERVAL_MS = 1000 * 60 * 5; // 5 minutes
@@ -235,7 +239,7 @@ export const configSchema = schema.object(
               schema.literal('child_process'),
               schema.literal('remote'),
             ],
-            { defaultValue: 'in_process' }
+            { defaultValue: DEFAULT_TASK_EXECUTION_MODE }
           ),
           /* child_process: where the bundles are; defaults to `task_bundles` or `target/task_bundles`. */
           bundle_dir: schema.maybe(schema.string()),

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { existsSync } from 'fs';
 import { TaskManagerPlugin } from './plugin';
 import type { TaskManagerSetupContract } from './plugin';
 import { createInitialMiddleware } from './lib/middleware';
@@ -53,9 +54,28 @@ const mockSupervisor = {
   start: jest.fn(),
   stop: jest.fn().mockResolvedValue(undefined),
   getRoute: jest.fn(),
+  serves: jest.fn().mockReturnValue(true),
+  getTaskTypes: jest.fn().mockReturnValue([]),
+  getStats: jest.fn().mockReturnValue({
+    live: 0,
+    peakLive: 0,
+    active: 0,
+    spawned: 0,
+    spawnFailures: 0,
+    spawnTimeouts: 0,
+    capacityRejections: 0,
+  }),
 };
 jest.mock('./task_process/supervisor', () => ({
   TaskProcessSupervisor: jest.fn().mockImplementation(() => mockSupervisor),
+}));
+
+// `startTaskProcessSupervisor` checks the manifest exists before creating the supervisor when
+// Kibana is running from source with no explicit `bundle_dir`; tests do not depend on what has
+// actually been built on disk.
+jest.mock('fs', () => ({
+  ...jest.requireActual('fs'),
+  existsSync: jest.fn().mockReturnValue(true),
 }));
 
 const deleteCurrentNodeSpy = jest.spyOn(KibanaDiscoveryService.prototype, 'deleteCurrentNode');
@@ -125,6 +145,9 @@ describe('TaskManagerPlugin', () => {
     mockClaimNudgeService.start.mockClear();
     mockClaimNudgeService.stop.mockClear();
     mockClaimNudgeService.notify.mockClear();
+    // `startTaskProcessSupervisor` checks for a built manifest before creating the supervisor;
+    // tests assume bundles exist unless a test explicitly says otherwise.
+    (existsSync as jest.Mock).mockReturnValue(true);
   });
 
   describe('setup', () => {
@@ -330,10 +353,19 @@ describe('TaskManagerPlugin', () => {
       mockSupervisor.start.mockClear();
       mockSupervisor.stop.mockClear();
       mockSupervisor.getRoute.mockClear();
+      mockSupervisor.serves.mockReset().mockReturnValue(true);
+      mockSupervisor.getTaskTypes.mockReset().mockReturnValue([]);
+      (existsSync as jest.Mock).mockReturnValue(true);
     });
 
-    test('runs every task in this process by default', () => {
+    test('routes task types with a bundle to a task process by default (validation default: child_process)', () => {
       const { taskProcessDispatch } = create();
+      expect(taskProcessDispatch).toBeDefined();
+      expect(TaskProcessSupervisor).toHaveBeenCalled();
+    });
+
+    test('runs every task in this process when mode is explicitly in_process', () => {
+      const { taskProcessDispatch } = create({ mode: 'in_process' });
       expect(taskProcessDispatch).toBeUndefined();
       expect(TaskProcessSupervisor).not.toHaveBeenCalled();
     });
@@ -452,6 +484,80 @@ describe('TaskManagerPlugin', () => {
       await plugin.stop();
       expect(mockSupervisor.stop).toHaveBeenCalledTimes(1);
       deleteCurrentNodeSpy.mockClear();
+    });
+
+    test('running from source with no task bundles built runs every module in this process and warns once', () => {
+      (existsSync as jest.Mock).mockReturnValue(false);
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+        ...pluginInitializerContextParams,
+        task_execution: { mode: 'child_process' },
+      } as TaskManagerConfig);
+      pluginInitializerContext.node.roles.backgroundTasks = true;
+      const core = coreMock.createSetup();
+      (core.elasticsearch.legacy as { config$: unknown }).config$ = of({
+        hosts: ['http://es:9200'],
+        customHeaders: {},
+        requestHeadersWhitelist: [],
+        idleSocketTimeout: moment.duration(1000),
+        dnsCacheTtl: moment.duration(1000),
+        requestTimeout: moment.duration(1000),
+        sniffInterval: false,
+        ssl: { verificationMode: 'full' },
+      });
+      const logger = pluginInitializerContext.logger.get();
+      const plugin = new TaskManagerPlugin(pluginInitializerContext);
+      const setup = plugin.setup(core, { usageCollection: undefined });
+      setup.registerTaskType(
+        defineTaskType({
+          type: 'test:module',
+          createTaskRunner: () => ({ run: async () => ({ state: {} }) }),
+        })
+      );
+      plugin.start(coreStart, {
+        cloud: cloudMock.createStart(),
+        licensing: licensingMock.createStart(),
+      });
+      const { taskProcessDispatch } = (TaskPollingLifecycle as jest.Mock).mock.calls.at(-1)[0];
+
+      expect(TaskProcessSupervisor).not.toHaveBeenCalled();
+      expect(taskProcessDispatch.getRoute('test:module')).toBeUndefined();
+      expect((logger.warn as jest.Mock).mock.calls.at(-1)[0]).toMatch(
+        /No task bundle manifest.*running from source.*every task type runs in this process/
+      );
+    });
+
+    test('a distributable still requires the manifest even with no bundle_dir override', () => {
+      // `existsSync` is only consulted for the from-source skip; a distributable always creates
+      // the supervisor, whose own `start()` throws when the manifest is missing.
+      (existsSync as jest.Mock).mockReturnValue(false);
+      mockSupervisor.start.mockImplementationOnce(() => {
+        throw new Error('No task bundle manifest');
+      });
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+        ...pluginInitializerContextParams,
+        task_execution: { mode: 'child_process' },
+      } as TaskManagerConfig);
+      (pluginInitializerContext.env.packageInfo as { dist: boolean }).dist = true;
+      pluginInitializerContext.node.roles.backgroundTasks = true;
+      const core = coreMock.createSetup();
+      (core.elasticsearch.legacy as { config$: unknown }).config$ = of({
+        hosts: ['http://es:9200'],
+        customHeaders: {},
+        requestHeadersWhitelist: [],
+        idleSocketTimeout: moment.duration(1000),
+        dnsCacheTtl: moment.duration(1000),
+        requestTimeout: moment.duration(1000),
+        sniffInterval: false,
+        ssl: { verificationMode: 'full' },
+      });
+      const plugin = new TaskManagerPlugin(pluginInitializerContext);
+      plugin.setup(core, { usageCollection: undefined });
+      expect(() =>
+        plugin.start(coreStart, {
+          cloud: cloudMock.createStart(),
+          licensing: licensingMock.createStart(),
+        })
+      ).toThrow();
     });
   });
 

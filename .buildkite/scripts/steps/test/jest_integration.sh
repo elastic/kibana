@@ -9,5 +9,8 @@ is_test_execution_step
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/setup_es_snapshot_cache.sh
 
+echo '--- Build task bundles'
+node scripts/task_bundle --manifest
+
 echo '--- Jest Integration Tests'
 .buildkite/scripts/steps/test/jest_parallel.sh jest.integration.config.js

@@ -49,7 +49,12 @@ xpack.task_manager.task_execution:
 **`child_process`.** Each run forks the task type's bundle, sends it Kibana's own Elasticsearch
 connection over the fork channel, runs the task in it and stops it when the run ends. If the process
 cannot be started, Task Manager retries process execution according to the task retry policy.
-A process-routed task never runs inside Kibana as a fallback. Required bundles are validated at startup.
+A process-routed task never runs inside Kibana as a fallback. A registered task type module that has
+no bundle in the manifest is not process-routed at all: it keeps running in Kibana, as it would with
+`mode: in_process`. A manifest entry whose file is missing on disk still fails startup, since that is
+a broken build. Running from source with no bundles built at all (no `manifest.json` in `bundle_dir`)
+runs every task type in Kibana and logs a warning, unless `bundle_dir` was set explicitly or Kibana is
+a distributable, in which case the manifest is still required.
 
 ```yaml
 xpack.task_manager.task_execution:

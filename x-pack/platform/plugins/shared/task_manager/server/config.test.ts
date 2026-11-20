@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configSchema, CLAIM_STRATEGY_MGET } from './config';
+import { configSchema, CLAIM_STRATEGY_MGET, DEFAULT_TASK_EXECUTION_MODE } from './config';
 
 describe('config validation', () => {
   test('task manager defaults', () => {
@@ -335,10 +335,10 @@ describe('config validation', () => {
     expect(() => configSchema.validate(config)).not.toThrow();
   });
 
-  test('runs tasks in this process by default', () => {
+  test('defaults task_execution.mode to DEFAULT_TASK_EXECUTION_MODE', () => {
     expect(configSchema.validate({}).task_execution).toBeUndefined();
     expect(configSchema.validate({ task_execution: {} }).task_execution).toEqual({
-      mode: 'in_process',
+      mode: DEFAULT_TASK_EXECUTION_MODE,
     });
   });
 

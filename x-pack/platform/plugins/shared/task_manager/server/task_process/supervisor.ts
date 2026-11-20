@@ -99,6 +99,8 @@ const DRAIN_KILL_GRACE_MS = 2_000;
 export interface TaskProcessSupervisorStats {
   /** Processes alive now, including ones that are shutting down. */
   live: number;
+  /** The most processes alive at once since this supervisor started: `live` only ever reports now. */
+  peakLive: number;
   /** Processes held by a run now; this is what `max` bounds. */
   active: number;
   max?: number;
@@ -139,6 +141,7 @@ export class TaskProcessSupervisor {
   private readonly idle = new Set<ReusableChild>();
   private stopping = false;
   private activeCount = 0;
+  private peakLive = 0;
   private readonly stats = {
     spawned: 0,
     spawnFailures: 0,
@@ -155,7 +158,12 @@ export class TaskProcessSupervisor {
     }
   ) {}
 
-  /** Reads which task types the bundles serve. No process starts until a run needs one. */
+  /**
+   * Reads which task types the bundles serve. No process starts until a run needs one. A task type
+   * that is registered but absent from the manifest simply does not run in a process (it runs in
+   * Kibana); only a manifest entry whose file is missing on disk fails startup, since that is a
+   * broken build rather than a task type that cannot run in a process.
+   */
   public start(requiredTaskTypes: readonly string[] = []) {
     const { settings, logger } = this.params;
     const manifestPath = join(settings.bundle_dir, 'manifest.json');
@@ -176,15 +184,27 @@ export class TaskProcessSupervisor {
         packs,
       });
     }
-    const required = new Set([...requiredTaskTypes, ...this.bundleByTaskType.keys()]);
-    const missing = [...required].filter((type) => {
-      const bundle = this.bundleByTaskType.get(type);
-      return !bundle || !existsSync(bundle.file);
-    });
-    if (missing.length) {
-      throw new Error(`Missing task bundles for ${missing.join(', ')}; rebuild the task bundles`);
+    const missingFiles = [...this.bundleByTaskType.values()].filter(
+      (bundle) => !existsSync(bundle.file)
+    );
+    if (missingFiles.length) {
+      throw new Error(
+        `Missing task bundle files for ${missingFiles
+          .map((bundle) => bundle.taskType)
+          .join(', ')}; rebuild the task bundles`
+      );
     }
-    logger.debug(`Task bundles serve ${[...this.bundleByTaskType.keys()]}`);
+    const unserved = requiredTaskTypes.filter((type) => !this.bundleByTaskType.has(type));
+    logger.debug(
+      `Task bundles serve ${[...this.bundleByTaskType.keys()]}${
+        unserved.length ? `; not served (run in this process): ${unserved}` : ''
+      }`
+    );
+  }
+
+  /** Whether this task type has a bundle; a type without one is not served by this supervisor. */
+  public serves(taskType: string): boolean {
+    return this.bundleByTaskType.has(taskType);
   }
 
   /** Returns a process route even when its bundle is unavailable. */
@@ -219,6 +239,7 @@ export class TaskProcessSupervisor {
   public getStats(): TaskProcessSupervisorStats {
     return {
       live: this.children.size,
+      peakLive: this.peakLive,
       active: this.activeCount,
       max: this.params.settings.maxConcurrentProcesses,
       ...this.stats,
@@ -372,6 +393,7 @@ export class TaskProcessSupervisor {
       logger.debug(`Task process ${bundle.name} error: ${error.message}`)
     );
     this.children.add(child);
+    this.peakLive = Math.max(this.peakLive, this.children.size);
     const labels: Record<string, string> = {
       task_type: bundle.taskType,
       ...(context?.executionUuid ? { run_id: context.executionUuid } : {}),

@@ -30,6 +30,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { InvalidateAPIKeysParams } from '@kbn/security-plugin-types-server';
 import { join } from 'path';
+import { existsSync } from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { IElasticsearchConfig } from '@kbn/core-elasticsearch-server';
 import { collectRemoteGaugeMetrics } from './task_process/metrics_transport';
@@ -42,7 +43,6 @@ import type { TaskHost, TaskTypeModule, TaskTypeRegistrationOptions } from './ta
 import { assertHostExtensions, toTaskDefinition } from './task_type_module';
 import { resolveSettingsByPlugin, serializeSettings } from './task_process/settings';
 import { TaskProcessDispatchFailureCounter } from './task_process/dispatch_failure_counter';
-import { TaskProcessAcquireError } from './task_process/acquire_error';
 import type { TaskProcessInit } from './task_process/wire';
 import { taskType as deleteInactiveNodesTaskType } from './task_types/delete_inactive_nodes.task';
 import { taskType as markRemovedTasksTaskType } from './task_types/mark_removed_tasks_as_unrecognized.task';
@@ -51,6 +51,7 @@ import { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskExecutionControlService } from './execution_control';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import type { TaskManagerConfig } from './config';
+import { DEFAULT_TASK_EXECUTION_MODE } from './config';
 import type { Middleware } from './lib/middleware';
 import { createInitialMiddleware, addMiddlewareToChain } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
@@ -495,7 +496,7 @@ export class TaskManagerPlugin
       return init;
     };
 
-    const { mode = 'in_process', remote } = this.config.task_execution ?? {};
+    const { mode = DEFAULT_TASK_EXECUTION_MODE, remote } = this.config.task_execution ?? {};
     if (mode !== 'in_process') {
       const telemetry = getTelemetryConfiguration('kibana');
       if (
@@ -581,15 +582,10 @@ export class TaskManagerPlugin
           if (mode === 'remote') {
             return { url: remote!.url.replace(/\/$/, ''), token: remote!.token };
           }
-          if (this.taskProcessSupervisor) return this.taskProcessSupervisor.getRoute(taskType);
-          return {
-            acquire: async () => {
-              throw new TaskProcessAcquireError(
-                'unavailable',
-                'Task process supervisor is unavailable'
-              );
-            },
-          };
+          // No supervisor (no task bundles when running from source) or no bundle for this task
+          // type: it is not routed to a process, and runs in this process instead.
+          if (!this.taskProcessSupervisor?.serves(taskType)) return undefined;
+          return this.taskProcessSupervisor.getRoute(taskType);
         },
       };
     }
@@ -937,7 +933,7 @@ export class TaskManagerPlugin
       bulkUpdateSchedules: (...args) => taskScheduling.bulkUpdateSchedules(...args),
       getRegisteredTypes: () => this.definitions.getAllTypes(),
       getTaskProcessStats: () => ({
-        mode: this.config.task_execution?.mode ?? 'in_process',
+        mode: this.config.task_execution?.mode ?? DEFAULT_TASK_EXECUTION_MODE,
         dispatchFailures: this.taskProcessDispatchFailures.getCounts(),
         processes: this.taskProcessSupervisor?.getStats(),
       }),
@@ -962,11 +958,12 @@ export class TaskManagerPlugin
 
   /**
    * In `child_process` mode, lets task types with a bundle run in a process Kibana starts for each
-   * run, with Kibana's own Elasticsearch connection.
+   * run, with Kibana's own Elasticsearch connection. A task type that is registered but has no
+   * bundle runs in this process instead.
    */
   private startTaskProcessSupervisor() {
     const {
-      mode,
+      mode = DEFAULT_TASK_EXECUTION_MODE,
       bundle_dir: bundleDir,
       max_concurrent_processes: maxConcurrentProcesses,
       child_max_old_space_mb: childMaxOldSpaceMb,
@@ -974,15 +971,21 @@ export class TaskManagerPlugin
       reuse,
     } = this.config.task_execution ?? {};
     if (mode !== 'child_process') return;
+    const isDist = this.initContext.env.packageInfo.dist;
+    const resolvedBundleDir =
+      bundleDir ?? join(REPO_ROOT, isDist ? 'task_bundles' : 'target/task_bundles');
+    // Running from source with no explicit `bundle_dir` and no bundles built: every task type runs
+    // in this process. A distributable, or an explicit `bundle_dir`, still requires the manifest.
+    if (!bundleDir && !isDist && !existsSync(join(resolvedBundleDir, 'manifest.json'))) {
+      this.logger.warn(
+        `No task bundle manifest at ${resolvedBundleDir}; running from source with no task bundles built (node scripts/task_bundle), so every task type runs in this process`
+      );
+      return;
+    }
     try {
       this.taskProcessSupervisor = new TaskProcessSupervisor({
         settings: {
-          bundle_dir:
-            bundleDir ??
-            join(
-              REPO_ROOT,
-              this.initContext.env.packageInfo.dist ? 'task_bundles' : 'target/task_bundles'
-            ),
+          bundle_dir: resolvedBundleDir,
           kibanaVersion: this.kibanaVersion,
           maxConcurrentProcesses: maxConcurrentProcesses ?? this.config.max_workers,
           childMaxOldSpaceMb,
@@ -1001,6 +1004,14 @@ export class TaskManagerPlugin
         logger: this.logger,
       });
       this.taskProcessSupervisor.start([...this.moduleTaskTypes]);
+      const served = this.taskProcessSupervisor.getTaskTypes();
+      const unserved = [...this.moduleTaskTypes].filter((type) => !served.includes(type));
+      this.logger.info(
+        `Task processes serve ${served.length} task type(s); ${unserved.length} registered task ` +
+          `type(s) have no task bundle and run in this process${
+            unserved.length ? ` (${unserved.join(', ')})` : ''
+          }; reuse is ${reuse?.enabled ? 'on' : 'off'}`
+      );
     } catch (error) {
       this.taskProcessSupervisor = undefined;
       this.logger.error(`Task processes could not start: ${error.message}`);
@@ -1010,6 +1021,10 @@ export class TaskManagerPlugin
 
   public async stop() {
     this.unregisterGaugeSource?.();
+    if (this.taskProcessSupervisor) {
+      const stats = this.startContract?.getTaskProcessStats();
+      this.logger.info(`Task processes at shutdown: ${JSON.stringify(stats)}`);
+    }
     await this.taskProcessSupervisor?.stop();
     this.licenseSubscriber?.cleanup();
     this.claimNudgeService?.stop();
