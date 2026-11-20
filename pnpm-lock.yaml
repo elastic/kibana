@@ -1003,6 +1003,9 @@ importers:
       '@kbn/connector-specs':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-connector-specs
+      '@kbn/connector-topics':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-connector-topics
       '@kbn/console-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/console
@@ -8114,6 +8117,8 @@ importers:
       mongodb-connection-string-url:
         specifier: 7.0.3
         version: 7.0.3
+
+  src/platform/packages/shared/kbn-connector-topics: {}
 
   src/platform/packages/shared/kbn-content-management-utils: {}
 
