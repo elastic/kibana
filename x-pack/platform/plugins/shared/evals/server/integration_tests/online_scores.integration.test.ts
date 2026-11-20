@@ -16,6 +16,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   API_VERSIONS,
+  EVALS_ONLINE_SCORES_PRIVILEGES_URL,
   EVALS_ONLINE_SCORES_URL,
   EvaluationIndices,
   type IngestOnlineScoresRequestBodyInput,
@@ -31,6 +32,7 @@ import {
 } from '../storage/scores/online_score_service';
 import { registerIngestOnlineScoresRoute } from '../routes/online_scores/ingest_online_scores';
 import { registerListOnlineScoresRoute } from '../routes/online_scores/list_online_scores';
+import { registerGetOnlineScoresPrivilegesRoute } from '../routes/online_scores/get_online_scores_privileges';
 import {
   buildOnlineEvalAlertRuleParams,
   type OnlineEvalAlertTrigger,
@@ -445,6 +447,80 @@ describe('online scores ingestion and listing integration', () => {
     it('respects the trigger direction', async () => {
       expect(await runRule(0.1, 'above')).toHaveLength(1);
       expect(await runRule(0.5, 'above')).toHaveLength(0);
+    });
+  });
+  describe('online scores privileges route', () => {
+    const basicAuth = (username: string, password: string) =>
+      `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+    const NO_READ_USER = { username: 'online_scores_no_read', password: 'changeme-no-read' };
+
+    const callPrivilegesRoute = async (authorization: string) => {
+      const router = httpServiceMock.createRouter();
+      registerGetOnlineScoresPrivilegesRoute({
+        router,
+        logger,
+        canEncrypt: false,
+        evaluatorRegistry: createEvaluatorRegistry(),
+        getInferenceStart: async () =>
+          ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+        getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
+        getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+        security: { license: { isEnabled: () => true } },
+      });
+      const { handler } = (router.versioned as MockedVersionedRouter).getRoute(
+        'get',
+        EVALS_ONLINE_SCORES_PRIVILEGES_URL
+      ).versions[API_VERSIONS.internal.v1];
+      // Acts as the request's user: a real ES client that authenticates with the given credentials.
+      const asCurrentUser = esClient.child({ headers: { authorization } });
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: { asCurrentUser } } }),
+      } as unknown as Parameters<typeof handler>[0];
+      return handler(
+        context,
+        httpServerMock.createKibanaRequest({
+          method: 'get',
+          path: EVALS_ONLINE_SCORES_PRIVILEGES_URL,
+        }) as Parameters<typeof handler>[1],
+        kibanaResponseFactory
+      );
+    };
+
+    beforeAll(async () => {
+      const admin = esClient.child({
+        headers: { authorization: basicAuth('elastic', 'changeme') },
+      });
+      await admin.security.putRole({
+        name: 'online_scores_no_read',
+        indices: [{ names: ['unrelated-*'], privileges: ['read'] }],
+      });
+      await admin.security.putUser({
+        username: NO_READ_USER.username,
+        password: NO_READ_USER.password,
+        roles: ['online_scores_no_read'],
+      });
+    });
+
+    afterAll(async () => {
+      const admin = esClient.child({
+        headers: { authorization: basicAuth('elastic', 'changeme') },
+      });
+      await admin.security.deleteUser({ username: NO_READ_USER.username }).catch(() => {});
+      await admin.security.deleteRole({ name: 'online_scores_no_read' }).catch(() => {});
+    });
+
+    it('reports has_read: false for a user without read on the online scores index', async () => {
+      const response = await callPrivilegesRoute(
+        basicAuth(NO_READ_USER.username, NO_READ_USER.password)
+      );
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({ has_read: false });
+    });
+
+    it('reports has_read: true for a superuser', async () => {
+      const response = await callPrivilegesRoute(basicAuth('elastic', 'changeme'));
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({ has_read: true });
     });
   });
 });

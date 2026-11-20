@@ -91,6 +91,23 @@ describe('OnlineEvalAlertRuleButton', () => {
     expect(screen.getByTestId('onlineEvalCreateAlertRuleButton')).toBeInTheDocument();
   });
 
+  it('is disabled with a privilege-check error tooltip when the privilege fetch fails', async () => {
+    mockedUsePrivileges.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    } as unknown as ReturnType<typeof useOnlineScoresPrivileges>);
+    renderButton();
+
+    const button = screen.getByTestId('onlineEvalCreateAlertRuleButton');
+    expect(button).toBeDisabled();
+    fireEvent.mouseOver(button);
+    expect(
+      await screen.findByText('Could not check your privileges on the online scores index.')
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/read index privilege/)).not.toBeInTheDocument();
+  });
+
   it('is disabled with an explanatory tooltip when the user cannot read the online scores index', async () => {
     mockedUsePrivileges.mockReturnValue({
       data: { has_read: false },

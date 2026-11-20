@@ -174,8 +174,11 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
   const { data: evaluatorData } = useEvaluator(
     hasRequiredPlugins ? selectedMetric?.evaluatorName : undefined
   );
-  const { data: privileges, isLoading: isLoadingPrivileges } =
-    useOnlineScoresPrivileges(hasRequiredPlugins);
+  const {
+    data: privileges,
+    isLoading: isLoadingPrivileges,
+    isError: isPrivilegesError,
+  } = useOnlineScoresPrivileges(hasRequiredPlugins);
   const canReadOnlineScores = privileges?.has_read === true;
   const direction = useMemo(() => {
     const score = evaluatorData?.evaluator.judge?.output.scores.find(
@@ -275,11 +278,20 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
       button
     ) : (
       <EuiToolTip
-        content={i18n.translate('xpack.evals.onlineEvaluations.alertRule.missingPrivilegeTooltip', {
-          defaultMessage:
-            'You need the read index privilege on {index} to create alert rules for online evaluation scores.',
-          values: { index: EvaluationIndices.ONLINE_SCORES },
-        })}
+        content={
+          isPrivilegesError
+            ? i18n.translate(
+                'xpack.evals.onlineEvaluations.alertRule.privilegeCheckFailedTooltip',
+                {
+                  defaultMessage: 'Could not check your privileges on the online scores index.',
+                }
+              )
+            : i18n.translate('xpack.evals.onlineEvaluations.alertRule.missingPrivilegeTooltip', {
+                defaultMessage:
+                  'You need the read index privilege on {index} to create alert rules for online evaluation scores.',
+                values: { index: EvaluationIndices.ONLINE_SCORES },
+              })
+        }
         data-test-subj="onlineEvalCreateAlertRuleTooltip"
       >
         {button}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { HttpStart } from '@kbn/core/public';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { API_VERSIONS, EVALS_ONLINE_SCORES_PRIVILEGES_URL } from '@kbn/evals-common';
@@ -16,12 +17,12 @@ interface OnlineScoresPrivilegesResponse {
 
 /** Whether the current user can read the online scores index that alert rules query. */
 export const useOnlineScoresPrivileges = (enabled: boolean) => {
-  const { services } = useKibana();
+  const { services } = useKibana<{ http: HttpStart }>();
 
   return useQuery({
     queryKey: queryKeys.onlineEvals.privileges(),
     queryFn: async (): Promise<OnlineScoresPrivilegesResponse> =>
-      services.http!.get<OnlineScoresPrivilegesResponse>(EVALS_ONLINE_SCORES_PRIVILEGES_URL, {
+      services.http.get<OnlineScoresPrivilegesResponse>(EVALS_ONLINE_SCORES_PRIVILEGES_URL, {
         version: API_VERSIONS.internal.v1,
       }),
     enabled,
