@@ -911,6 +911,12 @@ Each connector whose outcome is `issue` gets one issue labelled `connector-valid
 
 The `kibana / connector vendor API drift` Buildkite pipeline (`.buildkite/pipelines/connector_vendor_api_drift.yml`) runs both weekly, creates the `connector-validation` label if it's missing, and refreshes the artifacts of the `refresh` connectors in a single bot PR, which it closes once there is nothing left to refresh. Start a build by hand to check now; set `CONNECTOR_VENDOR_API_CONNECTOR` on the build to check one connector, which leaves the refresh PR alone. `CONNECTOR_VENDOR_API_GITHUB_REPO` in its resource definition switches it from a dry run (empty) to a sandbox repository or to `elastic/kibana`.
 
+`--coverage` writes one JSON document per connector as NDJSON (default `target/connector_vendor_api/coverage.ndjson`, or `--report`; `--json` writes one JSON array to `coverage.json` instead), from the committed artifacts and without network access: its direction (actions, events or both), API types (the format of each source, plus `mcp` when actions call an MCP server no source describes; for an exempt connector, one type read from the exemption's free-text reason) with `api_type_actions`, how many actions call each (monday.com: 11 MCP, 7 GraphQL; an action that calls two kinds counts under both), auth types, whether the emulator can serve it and what stops it, where its mock responses come from, whether it has a vendor spec to check for drift, and where it is available (Workflows, Agent Builder). A coverage dashboard reads it.
+
+```bash
+node scripts/connector_vendor_api --coverage
+```
+
 ### Running a connector in Kibana against its contract mock
 
 `node scripts/connector_emulate` serves a connector's contract mock as an HTTP forward proxy (see the server mode section of `@kbn/connector-emulate`'s README), so a running Kibana can execute the connector without vendor credentials:
