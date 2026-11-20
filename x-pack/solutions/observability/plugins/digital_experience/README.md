@@ -39,13 +39,15 @@ on serverless and stateful.
 - **Source and platform:** `source` is the data model, `otel` or `classic`. Mobile applications
   are OpenTelemetry only, so they are `otel`; what sets them apart is their `platform` (`browser`,
   `android` or `ios`), which web applications have as `browser`.
-- **Identity:** the Elastic distribution, `resource.attributes.telemetry.distro.name: elastic`
-  (elastic/rum-dev#106), on a mobile resource `os.name`: `Android`, `iOS` or `iPadOS`, over
-  `traces-*.otel-*,logs-*.otel-*`. Not `os.type`, which can't tell the platforms apart (Android
-  sends `linux`, iOS `darwin`), nor `telemetry.sdk.*`, which carries the upstream SDKs' values.
+- **Identity:** a mobile `telemetry.sdk.name` (`android`, `iOS`), or, once the SDKs send the
+  upstream values (elastic/rum-dev#106), the Elastic distribution
+  (`resource.attributes.telemetry.distro.name: elastic`) on a mobile resource `os.name`: `Android`,
+  `iOS` or `iPadOS`, over `traces-*.otel-*,logs-*.otel-*`. The same rule as the mobile session
+  summaries. Not `os.type`, which can't tell the platforms apart (Android sends `linux`, iOS
+  `darwin`), nor `telemetry.sdk.language`, which is `java` for EDOT Android and backend Java alike.
   EDOT Browser is the Elastic distribution too and reports the device's OS, e.g. `iOS` on an
   iPhone, so its documents (`telemetry.sdk.language: webjs`) are left out.
-- **Platform:** `android` for `os.name: Android`, `ios` for `iOS` and `iPadOS`.
+- **Platform:** `android` for `os.name: Android` or `telemetry.sdk.name: android`, `ios` otherwise.
 - **Key:** one row per `service.name` and platform, so a React Native app has a row on each.
 - **Framework:** React Native will be marked by `elastic.app.framework.name`, pending the SDK team's
   review of the names; nothing reads it yet.

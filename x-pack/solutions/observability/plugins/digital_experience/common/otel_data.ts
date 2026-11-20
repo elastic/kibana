@@ -30,6 +30,13 @@ export const BROWSER_SDK_LANGUAGE = 'webjs';
 export const ELASTIC_DISTRO_NAME = 'elastic';
 
 /**
+ * `telemetry.sdk.name` of EDOT Android and EDOT iOS before they report the Elastic distribution
+ * and the upstream SDK values. Not the language: EDOT Android's is `java`, as backend Java's.
+ */
+export const MOBILE_SDK_NAME_BY_PLATFORM = { android: 'android', ios: 'iOS' } as const;
+export const MOBILE_SDK_NAMES = Object.values(MOBILE_SDK_NAME_BY_PLATFORM);
+
+/**
  * An attribute as stored in the OTel indices, e.g. `attributes.session.id`. Queries can use the
  * unprefixed name, which the templates' passthrough objects resolve to the highest-priority
  * scope that maps it; the session summaries group by the stored fields so that a scope mapping

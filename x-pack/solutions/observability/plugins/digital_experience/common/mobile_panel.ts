@@ -13,11 +13,14 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TELEMETRY_SDK_LANGUAGE,
+  TELEMETRY_SDK_NAME,
 } from '@kbn/apm-types';
 import { APPLICATION_PLATFORM } from './application_source';
 import {
   BROWSER_SDK_LANGUAGE,
   ELASTIC_DISTRO_NAME,
+  MOBILE_SDK_NAMES,
+  MOBILE_SDK_NAME_BY_PLATFORM,
   OTEL_LOGS_INDEX,
   OTEL_TRACES_INDEX,
   attributeField,
@@ -33,6 +36,7 @@ export const MOBILE_FIELDS = {
   distroName: resourceAttributeField('telemetry.distro.name'),
   osName: resourceAttributeField('os.name'),
   sdkLanguage: TELEMETRY_SDK_LANGUAGE,
+  sdkName: TELEMETRY_SDK_NAME,
   serviceName: SERVICE_NAME,
   serviceVersion: 'service.version',
   sessionId: attributeField('session.id'),
@@ -55,7 +59,7 @@ export interface MobilePanelFilters {
 
 /**
  * The resource `os.name` of each platform. Not `os.type`, which can't tell them apart (Android
- * sends `linux`, iOS `darwin`), nor `telemetry.sdk.*`, which carries the upstream SDKs' values.
+ * sends `linux`, iOS `darwin`).
  */
 export const OS_NAMES_BY_PLATFORM: Readonly<Record<MobilePlatform, readonly string[]>> = {
   android: ['Android'],
@@ -94,18 +98,22 @@ export const inValues = (field: keyof typeof MOBILE_FIELDS, values: readonly str
   ]);
 
 /**
- * The EDOT Android and iOS documents of the OTel indices, each with its `platform`: the Elastic
- * distribution on a mobile `os.name`. EDOT Browser is an Elastic distribution too, and reports the
- * device's OS (e.g. `iOS` on an iPhone), so its `webjs` documents are left out. Fields no index maps
- * read as `null` instead of failing the query, e.g. `exception.type` where no app ever threw.
+ * The EDOT Android and iOS documents of the OTel indices, each with its `platform`: a mobile
+ * `telemetry.sdk.name`, or, once the SDKs send the upstream values, the Elastic distribution on a
+ * mobile `os.name`. EDOT Browser is an Elastic distribution too, and reports the device's OS (e.g.
+ * `iOS` on an iPhone), so its `webjs` documents are left out. Fields no index maps read as `null`
+ * instead of failing the query, e.g. `exception.type` where no app ever threw.
  */
 export const mobileDocuments = (): ComposerQuery =>
   esql.from(OTEL_TRACES_INDEX, OTEL_LOGS_INDEX).addSetCommand('unmapped_fields', 'nullify')
-    .pipe`WHERE ${mobileColumn('distroName')} == ${ELASTIC_DISTRO_NAME}`.pipe`WHERE ${inValues(
+    .pipe`WHERE ${inValues('sdkName', MOBILE_SDK_NAMES)} OR (${mobileColumn(
+    'distroName'
+  )} == ${ELASTIC_DISTRO_NAME} AND ${inValues('osName', MOBILE_OS_NAMES)})`
+    .pipe`WHERE COALESCE(${mobileColumn('sdkLanguage')}, "") != ${BROWSER_SDK_LANGUAGE}`
+    .pipe`EVAL platform = CASE(${inValues(
     'osName',
-    MOBILE_OS_NAMES
-  )}`.pipe`WHERE COALESCE(${mobileColumn('sdkLanguage')}, "") != ${BROWSER_SDK_LANGUAGE}`
-    .pipe`EVAL platform = CASE(${inValues('osName', OS_NAMES_BY_PLATFORM.android)}, ${
+    OS_NAMES_BY_PLATFORM.android
+  )} OR ${mobileColumn('sdkName')} == ${MOBILE_SDK_NAME_BY_PLATFORM.android}, ${
     APPLICATION_PLATFORM.android
   }, ${APPLICATION_PLATFORM.ios})`;
 

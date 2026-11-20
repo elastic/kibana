@@ -50,21 +50,21 @@ describe('mobileDocuments', () => {
     );
   });
 
-  it('keeps the Elastic distribution on a mobile os.name, iPadOS included', () => {
-    expect(query).toContain('`resource.attributes.telemetry.distro.name` == "elastic"');
-    expect(query).toContain('`resource.attributes.os.name` IN ("Android", "iOS", "iPadOS")');
+  it('keeps a mobile SDK name, or the Elastic distribution on a mobile os.name, iPadOS included', () => {
+    expect(query).toContain(
+      'WHERE (`telemetry.sdk.name` IN ("android", "iOS")) OR `resource.attributes.telemetry.distro.name` == "elastic" AND (`resource.attributes.os.name` IN ("Android", "iOS", "iPadOS"))'
+    );
   });
 
   it('leaves out EDOT Browser, which reports the device OS too, e.g. iOS on an iPhone', () => {
     expect(query).toContain('COALESCE(`telemetry.sdk.language`, "") != "webjs"');
   });
 
-  it('derives the platform from os.name, not from os.type or telemetry.sdk.*', () => {
+  it('derives the platform from os.name or the SDK name, not from os.type', () => {
     expect(query).toContain(
-      'EVAL platform = CASE(`resource.attributes.os.name` IN ("Android"), "android", "ios")'
+      'EVAL platform = CASE((`resource.attributes.os.name` IN ("Android")) OR `telemetry.sdk.name` == "android", "android", "ios")'
     );
     expect(query).not.toContain('os.type');
-    expect(query).not.toContain('telemetry.sdk.name');
   });
 });
 
