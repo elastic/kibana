@@ -20,24 +20,24 @@ const getStoredFilter = (meta: Partial<StoredFilter['meta']> = {}): StoredFilter
     params: { query: 'large' },
     negate: false,
     disabled: false,
-    esql: true,
+    kind: 'esql',
     ...meta,
   },
   query: { match_phrase: { size_class: 'large' } },
 });
 
 describe('ES|QL filters', () => {
-  it('keeps the ES|QL marker when converting to the as code format', () => {
+  it('keeps the ES|QL kind when converting to the as code format', () => {
     const asCode = fromStoredFilter(getStoredFilter());
 
-    expect(asCode).toEqual(expect.objectContaining({ esql: true }));
+    expect(asCode).toEqual(expect.objectContaining({ kind: 'esql' }));
     expect(asCodeFilterSchema.safeParse(asCode).success).toBe(true);
   });
 
-  it('keeps the ES|QL marker when converting back to a stored filter', () => {
+  it('keeps the ES|QL kind when converting back to a stored filter', () => {
     const stored = toStoredFilter(fromStoredFilter(getStoredFilter())!);
 
-    expect(stored?.meta.esql).toBe(true);
+    expect(stored?.meta.kind).toBe('esql');
   });
 
   it('keeps the marker for exists and several values filters', () => {
@@ -55,28 +55,28 @@ describe('ES|QL filters', () => {
     };
 
     [exists, phrases].forEach((filter) => {
-      expect(toStoredFilter(fromStoredFilter(filter)!)?.meta.esql).toBe(true);
+      expect(toStoredFilter(fromStoredFilter(filter)!)?.meta.kind).toBe('esql');
     });
   });
 
   it('does not add the marker to other filters', () => {
-    const { esql, ...meta } = getStoredFilter().meta;
+    const { kind, ...meta } = getStoredFilter().meta;
     const asCode = fromStoredFilter({ ...getStoredFilter(), meta });
 
-    expect(asCode).not.toHaveProperty('esql');
-    expect(toStoredFilter(asCode!)?.meta).not.toHaveProperty('esql');
+    expect(asCode).not.toHaveProperty('kind');
+    expect(toStoredFilter(asCode!)?.meta).not.toHaveProperty('kind');
   });
 
   it('only keeps the marker on condition filters, the other types are DSL ones', () => {
     const custom: StoredFilter = {
-      meta: { type: 'custom', esql: true },
+      meta: { type: 'custom', kind: 'esql' },
       query: { bool: { filter: [{ term: { host: 'a' } }] } },
     };
 
     const asCode = fromStoredFilter(custom);
 
     expect(asCode).toEqual(expect.objectContaining({ type: 'dsl' }));
-    expect(asCode).not.toHaveProperty('esql');
+    expect(asCode).not.toHaveProperty('kind');
     expect(asCodeFilterSchema.safeParse(asCode).success).toBe(true);
   });
 });

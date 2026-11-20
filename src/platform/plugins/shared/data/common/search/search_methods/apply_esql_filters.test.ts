@@ -15,7 +15,7 @@ const query =
 
 const getFilter = (meta: Partial<Filter['meta']>): Filter => ({
   meta: {
-    esql: true,
+    kind: 'esql',
     key: 'size',
     type: FILTERS.PHRASE,
     params: { query: 'big' },
@@ -74,7 +74,7 @@ describe('applyEsqlFilters', () => {
 
   it('ignores disabled and DSL filters', () => {
     expect(applyEsqlFilters(query, [getFilter({ disabled: true })])).toBe(query);
-    expect(applyEsqlFilters(query, [getFilter({ esql: undefined })])).toBe(query);
+    expect(applyEsqlFilters(query, [getFilter({ kind: undefined })])).toBe(query);
   });
 
   it('applies several filters', () => {

@@ -237,3 +237,25 @@ export function getSummaryPerCommand(
 export function isComputedColumn(fieldName: string, summary: ESQLCommandSummary): boolean {
   return summary.newColumns.has(fieldName) || Boolean(summary.metadataColumns?.has(fieldName));
 }
+
+/**
+ * Returns the columns that the query creates (EVAL, STATS, DISSECT, ...) and that are part of its output.
+ * STATS replaces the columns of the commands before it, so these are the ones of the last STATS and of the
+ * commands after it. DROP and KEEP are not considered, as they don't have a summary.
+ * @param query The ES|QL query.
+ * @returns The names of the columns.
+ */
+export function getComputedColumnsInOutput(query: string): Set<string> {
+  const { root } = parseEsqlCached(query);
+  const lastStatsIndex = root.commands.map(({ name }) => name).lastIndexOf('stats');
+  const { newColumns, grouping, renamedColumnsPairs } = getQuerySummaryFromCommands(
+    root.commands.slice(Math.max(lastStatsIndex, 0)),
+    query,
+    createQuerySummaryContext(root, query)
+  );
+
+  const columns = new Set([...newColumns, ...[...(grouping ?? [])].map(({ field }) => field)]);
+  // the pairs are [new name, old name]
+  renamedColumnsPairs?.forEach(([, oldName]) => columns.delete(oldName));
+  return columns;
+}

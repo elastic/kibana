@@ -130,7 +130,7 @@ describe('FilterItemComponent.closePopover', () => {
     render(
       <FilterItemComponent
         {...props}
-        filter={{ ...filter, meta: { ...filter.meta, esql: true } }}
+        filter={{ ...filter, meta: { ...filter.meta, kind: 'esql' as const } }}
       />
     );
 

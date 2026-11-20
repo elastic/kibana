@@ -214,9 +214,9 @@ export const asCodeConditionFilterSchema = lazySchema(() =>
     .extend({
       type: z.literal(ASCODE_FILTER_TYPE.CONDITION),
       condition: conditionSchema,
-      esql: z.boolean().optional().meta({
+      kind: z.literal('esql').optional().meta({
         description:
-          'When `true`, the filter is on a column created by an ES|QL query, which cannot be expressed as a DSL query. It is applied as a `WHERE` clause to the ES|QL queries that have the column, and it is ignored by the other queries.',
+          'What the filter is evaluated against. Not set for the filters on the fields of a data view, which are applied as a DSL query. `esql` is for a filter on a column created by an ES|QL query, which cannot be expressed as a DSL query: it is applied as a `WHERE` clause to the ES|QL queries that have the column, and it is ignored by the other queries.',
       }),
     })
     .meta({

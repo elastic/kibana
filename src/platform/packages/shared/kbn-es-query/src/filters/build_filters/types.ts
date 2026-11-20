@@ -72,9 +72,10 @@ export type FilterMeta = {
   controlledBy?: string;
   // allows grouping of filters
   group?: string;
-  // filters on a column created by an ES|QL query, so it cannot be expressed as a DSL query.
-  // It is applied as a WHERE at the end of the ES|QL queries that produce that column and ignored by DSL queries
-  esql?: boolean;
+  // what the filter is evaluated against. Empty for the filters on the fields of a data view, which are DSL queries.
+  // 'esql' is for the filters on a column created by an ES|QL query, which cannot be DSL. They are applied as a WHERE
+  // at the end of the ES|QL queries that produce that column, and ignored by DSL queries
+  kind?: 'esql';
   // index and type are optional only because when you create a new filter, there are no defaults
   index?: string;
   isMultiIndex?: boolean;

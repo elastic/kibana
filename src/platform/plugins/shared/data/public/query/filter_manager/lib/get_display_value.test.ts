@@ -81,7 +81,7 @@ describe('getDisplayValueFromFilter', () => {
   it('does not throw for an ES|QL filter on a column that is not a field of the data view', () => {
     const filter = {
       ...phraseFilter,
-      meta: { ...phraseFilter.meta, key: 'size_class', esql: true },
+      meta: { ...phraseFilter.meta, key: 'size_class', kind: 'esql' as const },
       query: { match_phrase: { size_class: 'large' } },
     };
     expect(getDisplayValueFromFilter(filter, [stubIndexPattern])).toBe('ios');

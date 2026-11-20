@@ -244,8 +244,8 @@ describe('build query', () => {
 
     test('should ignore filters on columns created by an ES|QL query', () => {
       const filters = [
-        { query: { match_phrase: { size: 'big' } }, meta: { esql: true, negate: false } },
-        { query: { match_phrase: { size: 'small' } }, meta: { esql: true, negate: true } },
+        { query: { match_phrase: { size: 'big' } }, meta: { kind: 'esql', negate: false } },
+        { query: { match_phrase: { size: 'small' } }, meta: { kind: 'esql', negate: true } },
         { query: { query_string: { query: 'foo' } }, meta: {} },
       ] as Filter[];
 

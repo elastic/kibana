@@ -312,7 +312,7 @@ function convertPhraseFilter(
       ...baseProperties,
       type: 'condition',
       condition,
-      ...getEsqlProperty(filter),
+      ...getKindProperty(filter),
     } as AsCodeConditionFilter;
   } catch (error) {
     // If conversion fails, fall back to DSL
@@ -330,7 +330,7 @@ function convertPhrasesFilter(
       ...baseProperties,
       type: ASCODE_FILTER_TYPE.CONDITION,
       condition,
-      ...getEsqlProperty(filter),
+      ...getKindProperty(filter),
     } as AsCodeConditionFilter;
   } catch (error) {
     // If conversion fails, fall back to DSL
@@ -371,7 +371,7 @@ function convertExistsFilter(
       ...baseProperties,
       type: ASCODE_FILTER_TYPE.CONDITION,
       condition,
-      ...getEsqlProperty(filter),
+      ...getKindProperty(filter),
     } as AsCodeConditionFilter;
   } catch (error) {
     // If conversion fails, fall back to DSL
@@ -435,8 +435,8 @@ function convertToDSLFilter(
  * Extract base properties from stored filter
  */
 /** Only condition filters can be ES|QL filters, the other types are DSL ones */
-function getEsqlProperty(storedFilter: StoredFilter): Pick<AsCodeConditionFilter, 'esql'> {
-  return storedFilter.meta?.esql === true ? { esql: true } : {};
+function getKindProperty(storedFilter: StoredFilter): Pick<AsCodeConditionFilter, 'kind'> {
+  return storedFilter.meta?.kind === 'esql' ? { kind: 'esql' } : {};
 }
 
 function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter> {

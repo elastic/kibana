@@ -37,7 +37,7 @@ export const isFilterDisabled = (filter: Filter): boolean => get(filter, 'meta.d
  *
  * @public
  */
-export const isEsqlFilter = (filter: Filter): boolean => get(filter, 'meta.esql', false) === true;
+export const isEsqlFilter = (filter: Filter): boolean => get(filter, 'meta.kind') === 'esql';
 
 /**
  *
