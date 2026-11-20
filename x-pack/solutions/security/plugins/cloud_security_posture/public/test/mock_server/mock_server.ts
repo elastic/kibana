@@ -38,7 +38,7 @@ jest.setTimeout(10 * 3000);
 export interface MockServer {
   use: (...handlers: RequestHandler[]) => void;
   resetHandlers: () => void;
-  fetch: (input: string, init?: RequestInit) => Promise<Response>;
+  fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 }
 
 /**
@@ -57,7 +57,10 @@ export const setupMockServer = ({ debug = false }: { debug?: boolean } = {}): Mo
       handlers = [...defaultHandlers];
     },
     fetch: async (input, init) => {
-      const request = new Request(new URL(input, window.location.href).toString(), init);
+      const request =
+        input instanceof Request
+          ? new Request(input, init)
+          : new Request(new URL(input, window.location.href), init);
       const response = await getResponse(handlers, request);
 
       if (!response) {
@@ -92,7 +95,7 @@ export const startMockServer = (server: MockServer) => {
   beforeAll(() => {
     fetchSpy = jest
       .spyOn(globalThis, 'fetch')
-      .mockImplementation((input, init) => server.fetch(String(input), init));
+      .mockImplementation((input, init) => server.fetch(input, init));
   });
   afterAll(() => fetchSpy.mockRestore());
   beforeEach(() => {
