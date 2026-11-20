@@ -6,7 +6,7 @@
  */
 
 import { createHash } from 'crypto';
-import { isNonRoutableIPv4 } from '@kbn/alertzero-common';
+import { isNonRoutableIPv4, isPlaceholderEmailHost } from '@kbn/alertzero-common';
 import { type IocType, MAX_URL_LENGTH } from '../../../common/threat_intel';
 import { IANA_TLDS } from '../data/iana_tlds';
 import { IOC_NOISE_DOMAINS } from '../data/ioc_noise_domains';
@@ -201,6 +201,69 @@ const normalizeUrlCase = (url: string): string => {
 // email: local-part @ host (with optional defanged [.] in host)
 // local-part: printable non-whitespace non-@ chars
 const EMAIL_PATTERN = /\b[a-z0-9._%+\-]+@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z]{2,24}\b/gi;
+
+// Message-ID headers have the shape of an address (`<20261001.6272F1@mail.lab.test>`) but name
+// a message, not a mailbox. An ID header name is any name ending in message-id, message_id,
+// messageid or msgid (Message-ID, Resent-Message-ID, InternetMessageId, postfix `message-id=`,
+// sendmail `msgid=`), followed by an optional closing quote, `:` or `=`, optional whitespace
+// and an optional opening quote.
+const ID_HEADER_BEFORE_TOKEN = /[\w-]*(?:message[-_]?id|msgid)["']?[ \t]*[:=][ \t]*["']?$/i;
+// A header whose bracketed tokens are all message IDs.
+const ID_LIST_HEADER_AT_LINE_START = /^[ \t]*(?:in-reply-to|references)[ \t]*:/i;
+
+/**
+ * True when the email match at `[start, end)` sits inside a token a mail Message-ID header
+ * introduces. Same line only: a folded header whose ID is on the next line is not recognized.
+ * The check runs on the enclosing `<...>` or `"..."` token, not on the match, because an ID
+ * local part can hold characters EMAIL_PATTERN stops at (`=`), so the match may start mid-token.
+ */
+const isMessageIdToken = (text: string, start: number, end: number): boolean => {
+  const lineStart = text.lastIndexOf('\n', start - 1) + 1;
+  const nextNewline = text.indexOf('\n', end);
+  const lineEnd = nextNewline === -1 ? text.length : nextNewline;
+  const before = text.slice(lineStart, start);
+  const after = text.slice(end, lineEnd);
+
+  let tokenStartInLine = -1;
+  let isAngle = false;
+  const lt = before.lastIndexOf('<');
+  if (lt > before.lastIndexOf('>') && after.includes('>')) {
+    tokenStartInLine = lt;
+    isAngle = true;
+  } else {
+    const quotes = before.split('"').length - 1;
+    if (quotes % 2 === 1 && after.includes('"')) {
+      tokenStartInLine = before.lastIndexOf('"');
+    }
+  }
+  if (tokenStartInLine === -1) return false;
+
+  const beforeToken = before.slice(0, tokenStartInLine);
+  if (ID_HEADER_BEFORE_TOKEN.test(beforeToken)) return true;
+  return isAngle && ID_LIST_HEADER_AT_LINE_START.test(text.slice(lineStart, lineEnd));
+};
+
+/** Tier and basis for an email match, or `null` when it is not an address (rules 1 and 3 of PASS 1). */
+const classifyEmail = ({
+  refangedText,
+  start,
+  raw,
+  wasDefanged,
+}: {
+  refangedText: string;
+  start: number;
+  raw: string;
+  wasDefanged: boolean;
+}): { tier: IocTier; basis: string } | null => {
+  if (isMessageIdToken(refangedText, start, start + raw.length)) return null;
+  const host = raw.slice(raw.lastIndexOf('@') + 1);
+  if (isPlaceholderEmailHost(host)) return { tier: 'reference', basis: 'placeholder_email' };
+  if (!IANA_TLDS.has(host.slice(host.lastIndexOf('.') + 1))) return null;
+  // Defanged-in-source (the @ or a dot was rebuilt by refang) → discriminating, like a defanged domain.
+  return wasDefanged
+    ? { tier: 'discriminating', basis: 'defanged_source' }
+    : { tier: 'uncertain', basis: 'uncertain_default' };
+};
 
 // CIDR: IPv4/mask (defang already applied before this runs)
 const CIDR_PATTERN =
@@ -897,6 +960,10 @@ const sectionKindAtOffset = (
  * References-section: → reference/references_section
  *   UNLESS already discriminating (defanged_source or ioc_section) — defanged value
  *   in a citation is still a real IOC.
+ *
+ * Placeholder emails (tier_basis 'placeholder_email') are exempt from both: an
+ * example address stays reference under an IOC heading, and its basis is not
+ * rewritten to references_section under a References heading.
  */
 /**
  * The tier/basis a containing section imposes, or `null` to keep the per-value
@@ -906,6 +973,9 @@ const sectionOverrideFor = (
   ioc: WorkingIoc,
   kind: SectionKind
 ): { tier: IocTier; basis: string } | null => {
+  if (ioc.tier_basis === 'placeholder_email') {
+    return null;
+  }
   if (kind === 'ioc') {
     // Denylist / vendor_research reference stays — they are high-confidence noise.
     if (
@@ -1054,6 +1124,15 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
 
   // ── PASS 1: emails ────────────────────────────────────────────────────────
   // Full address is the indicator; host-domain is suppressed (mail provider noise).
+  // First rule that applies wins, and every match records its span in `consumed` so the
+  // host of a skipped match never resurfaces as a domain:
+  //   1. Message-ID token (`message-id=<id@host>`, `References: <a@b> <c@d>`) → nothing.
+  //   2. Placeholder host (`test@test.com`, `a@b.lab.test`) → reference/placeholder_email,
+  //      even when defanged. Runs before rule 3 because reserved TLDs are not in IANA_TLDS.
+  //   3. Host TLD is not a real TLD → nothing. Trade-off: a real address glued to the next
+  //      word (`actor@evil.comwill`) is lost rather than repaired, since the right cut point
+  //      is ambiguous (`.co`, `.com` and `.cool` are all TLDs).
+  //   4. Otherwise: discriminating if defanged in the source, else uncertain.
   {
     const pattern = new RegExp(EMAIL_PATTERN.source, EMAIL_PATTERN.flags);
     for (const match of matchesWithOffset(refangedText, pattern)) {
@@ -1061,21 +1140,23 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
       const idx = match.index;
       consumed.push([idx, idx + match[0].length]);
 
-      // Email tier: defanged-in-source → discriminating (like a defanged domain)
-      // We check if the @ was in the original text or reconstructed by refang.
-      const wasDefanged = !originalLower.includes(raw);
-      const tier: IocTier = wasDefanged ? 'discriminating' : 'uncertain';
-      const basis = wasDefanged ? 'defanged_source' : 'uncertain_default';
-
-      pushIoc({
-        type: 'email',
-        value: raw,
-        defanged: defangValue('email', raw, defang),
-        tier,
-        tier_heuristic: tier,
-        tier_basis: basis,
-        _offset: idx,
+      const verdict = classifyEmail({
+        refangedText,
+        start: idx,
+        raw,
+        wasDefanged: !originalLower.includes(raw),
       });
+      if (verdict) {
+        pushIoc({
+          type: 'email',
+          value: raw,
+          defanged: defangValue('email', raw, defang),
+          tier: verdict.tier,
+          tier_heuristic: verdict.tier,
+          tier_basis: verdict.basis,
+          _offset: idx,
+        });
+      }
     }
   }
 

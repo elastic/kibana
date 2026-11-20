@@ -2077,3 +2077,169 @@ describe('extract_iocs — nested-object cap', () => {
     expect(promotable).toBeGreaterThanOrEqual(nonPromotable);
   });
 });
+
+describe('extract_iocs — example emails, Message-IDs and non-addresses', () => {
+  const byValue = (result: ReturnType<typeof extractIocs>, value: string) =>
+    result.iocs.find((ioc) => ioc.type === 'email' && ioc.value === value);
+
+  // Verbatim excerpts from the Elastic Security Labs Zimbra log file article.
+  const ZIMBRA_EXCERPT = [
+    'Sep 30 22:48:29 mail postfix/pickup[57597]: 6272F1E1393: uid=997 from=<zimbra>',
+    'Sep 30 22:48:29 mail postfix/cleanup[57599]: 6272F1E1393: message-id=<20261001024829.6272F1E1393@mail.lab.test>',
+    'Sep 30 22:48:29 mail postfix/cleanup[57599]: 6DD441E13F5: message-id=<20261001024829.6DD441E13F5@mail.lab.test>',
+    'Sep 30 22:48:29 mail postfix/qmgr[57598]: 6272F1E1393: from=<zimbra@mail.lab.test>, size=604, nrcpt=1 (queue active)',
+    '',
+    'A normal SMTP message includes a MAIL FROM section, denoting the sender, and a RCPT TO, specifying the recipient, along with DATA, which is the message. The first two require the email address to be wrapped in angle brackets; for example, <address@host.name>. If an attacker doesn’t follow the wrapping and omits the final >, the specified unclosed address will show up in the log file. For example, an address of <address@host.namewill have a log entry as follows:',
+    '',
+    '[>] MAIL FROM:<test@test.com>',
+  ].join('\n');
+
+  describe('Zimbra article', () => {
+    const result = extractIocs({ text: ZIMBRA_EXCERPT });
+
+    test.each(['test@test.com', 'zimbra@mail.lab.test', 'address@host.name'])(
+      '%s is reference / placeholder_email',
+      (value) => {
+        const ioc = byValue(result, value);
+        expect(ioc?.tier).toBe('reference');
+        expect(ioc?.tier_heuristic).toBe('reference');
+        expect(ioc?.tier_basis).toBe('placeholder_email');
+      }
+    );
+
+    test('stores no Message-ID and no glued address', () => {
+      const emails = emailValues(result);
+      expect(emails.some((value) => value.includes('namewill'))).toBe(false);
+      expect(emails.some((value) => value.startsWith('20261001024829'))).toBe(false);
+      expect([...emails].sort()).toEqual([
+        'address@host.name',
+        'test@test.com',
+        'zimbra@mail.lab.test',
+      ]);
+    });
+
+    test('does not surface the email hosts as domains', () => {
+      const domains = domainValues(result);
+      for (const host of ['mail.lab.test', 'host.name', 'host.namewill']) {
+        expect(domains).not.toContain(host);
+      }
+    });
+
+    test('ioc_set_hash is null for a text holding only those emails', () => {
+      expect(result.ioc_set_hash).toBeNull();
+    });
+  });
+
+  describe('controls', () => {
+    test('a plain-prose email on a real domain stays uncertain', () => {
+      const ioc = byValue(
+        extractIocs({ text: 'attacker used jasonsaayman@gmail.com as comms' }),
+        'jasonsaayman@gmail.com'
+      );
+      expect(ioc?.tier).toBe('uncertain');
+      expect(ioc?.tier_basis).toBe('uncertain_default');
+    });
+
+    test('a defanged email stays discriminating', () => {
+      const ioc = byValue(extractIocs({ text: 'bad@evil[.]com' }), 'bad@evil.com');
+      expect(ioc?.tier).toBe('discriminating');
+      expect(ioc?.tier_basis).toBe('defanged_source');
+    });
+
+    test('an address on an example-family label with a real TLD is not a placeholder', () => {
+      const ioc = byValue(
+        extractIocs({ text: 'the account dev-user@corp.example.cloud logged in' }),
+        'dev-user@corp.example.cloud'
+      );
+      expect(ioc?.tier).toBe('uncertain');
+      expect(ioc?.tier_basis).toBe('uncertain_default');
+    });
+
+    test('a defanged placeholder is still reference', () => {
+      const ioc = byValue(
+        extractIocs({ text: 'sent to test[@]test[.]com today' }),
+        'test@test.com'
+      );
+      expect(ioc?.tier).toBe('reference');
+      expect(ioc?.tier_basis).toBe('placeholder_email');
+    });
+
+    test.each([
+      ['## Indicators of Compromise\n\n- test@test.com\n'],
+      ['## References\n\n- test@test.com\n'],
+    ])('a placeholder under a section heading keeps its basis: %j', (text) => {
+      const ioc = byValue(extractIocs({ text }), 'test@test.com');
+      expect(ioc?.tier).toBe('reference');
+      expect(ioc?.tier_basis).toBe('placeholder_email');
+    });
+
+    test.each([
+      'a@corp.example',
+      'a@corp.invalid',
+      'a@corp.localhost',
+      'a@corp.local',
+      'a@corp.internal',
+      'a@example.com',
+      'a@domain.com',
+      'a@yourdomain.com',
+      'a@company.com',
+    ])('%s is a placeholder', (value) => {
+      const ioc = byValue(extractIocs({ text: `contact ${value} for details` }), value);
+      expect(ioc?.tier).toBe('reference');
+      expect(ioc?.tier_basis).toBe('placeholder_email');
+    });
+  });
+
+  describe('Message-ID forms yield no email and no domain', () => {
+    test.each([
+      ['Message-ID: <abc123@mail.evil-corp.com>'],
+      ['X-Original-Message-ID: <abc123@mail.evil-corp.com>'],
+      ['Message-ID: <CAHk-=wiABCdef123@mail.gmail.com>'],
+      ['References: <a1@mail.evil-corp.com> <b2@mail.evil-corp.com> <c3@mail.evil-corp.com>'],
+      ['"InternetMessageId": "<x@y.prod.outlook.com>"'],
+      ['sendmail: msgid=<x@mail.evil-corp.com>'],
+    ])('%s', (text) => {
+      const result = extractIocs({ text });
+      expect(emailValues(result)).toEqual([]);
+      expect(domainValues(result)).toEqual([]);
+    });
+  });
+
+  describe('real addresses near ID headers are kept', () => {
+    test('an address on the line after an ID header', () => {
+      const result = extractIocs({
+        text: 'In-Reply-To: <id1@mail.evil-corp.com>\nReach me at <actor@evil-corp.com>',
+      });
+      expect(emailValues(result)).toEqual(['actor@evil-corp.com']);
+    });
+
+    test('an indented From after an indented References', () => {
+      const result = extractIocs({
+        text: '    References: <id1@mail.evil-corp.com>\n    From: "IT" <phish@evil-corp.com>',
+      });
+      expect(emailValues(result)).toEqual(['phish@evil-corp.com']);
+    });
+
+    test('a folded Message-ID header still yields an email (known gap)', () => {
+      const result = extractIocs({ text: 'Message-ID:\n <abc123@mail.evil-corp.com>' });
+      expect(emailValues(result)).toEqual(['abc123@mail.evil-corp.com']);
+    });
+
+    test('References prose without angle brackets yields the email', () => {
+      expect(emailValues(extractIocs({ text: 'References: see actor@evil-corp.com' }))).toEqual([
+        'actor@evil-corp.com',
+      ]);
+    });
+
+    test('a From header yields the email', () => {
+      expect(emailValues(extractIocs({ text: 'From: <phish@evil-corp.com>' }))).toEqual([
+        'phish@evil-corp.com',
+      ]);
+    });
+  });
+
+  test('an address glued to the next word yields nothing (documents the TLD rule trade-off)', () => {
+    const result = extractIocs({ text: 'contact actor@evil.comwill soon' });
+    expect(emailValues(result)).toEqual([]);
+  });
+});
