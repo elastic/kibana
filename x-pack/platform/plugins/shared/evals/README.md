@@ -209,7 +209,7 @@ evals.registerEvaluator({
 
 ## API routes
 
-All routes are internal (`elastic-api-version: 1`). Read routes require the `read_evals` privilege; write routes require `manage_evals`.
+All routes are internal (`elastic-api-version: 1`). Read routes require the `read_evals` privilege; write routes require `manage_evals`. The human review queue routes (`/internal/evals/review_queues`) require `manage_evals_review`, which only the `all` feature privilege grants: `read` cannot create queues, label items or see the judge verdicts and rationales held in them.
 
 - **Experiments** — list, detail, scores, and statistical comparison of two experiments. Dataset-level examples are returned as one unpaginated group with eager score and evaluator details but without complete inputs or outputs. Input/output previews are bounded to 2,048 characters, and complete input and output are retrieved for one example repetition on demand.
 - **Experiment execution (Workflows)** — launch a run, save it as a reusable workflow, preview the generated YAML, list run templates, and poll or cancel a run. Requires an Enterprise license; otherwise returns `501`.

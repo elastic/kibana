@@ -6,19 +6,9 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
+import type { ReviewQueueSampleStrategy, ReviewQueueSourceFilter } from '@kbn/evals-common';
 
 export const EVALS_REVIEW_QUEUE_SAVED_OBJECT_TYPE = 'evals-review-queue' as const;
-
-export type ReviewQueueSampleStrategy = 'uniform' | 'stratified_by_label';
-
-export type ReviewQueueSourceKind = 'experiment' | 'online';
-
-/** Which scores a queue samples from. */
-export interface ReviewQueueSourceFilter {
-  source: ReviewQueueSourceKind;
-  experiment_id?: string;
-  monitor_id?: string;
-}
 
 export interface EvalsReviewQueueAttributes {
   name: string;

@@ -322,6 +322,7 @@ describe('POST /internal/evals/traces/_resolve_instrumentation', () => {
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getInternalReviewQueuesSoClient: async () => savedObjectsClientMock.create(),
     });
 
     const route = versionedRouter.getRoute('post', EVALS_RESOLVE_INSTRUMENTATION_URL);

@@ -67,6 +67,25 @@ export type {
   AlphaMetric,
   KrippendorffUnit,
 } from './impl/agreement';
+export type {
+  ReviewQueueSampleStrategy,
+  ReviewQueueSourceKind,
+  ReviewItemStatus,
+  ReviewQueueSourceFilter,
+  ReviewQueue,
+  ReviewQueueCounts,
+  ReviewQueueWithCounts,
+  ReviewItemSourceRef,
+  ReviewHumanVerdict,
+  BlindReviewItem,
+  RevealedReviewItem,
+  OrdinalAgreement,
+  ReviewQueueAgreement,
+  ListReviewQueuesResponse,
+  GetReviewQueueResponse,
+  GetNextReviewItemResponse,
+  SubmitReviewItemResponse,
+} from './impl/review';
 export {
   DEFAULT_JUDGE_SCORE_DIRECTION,
   getJudgeScoreDirection,

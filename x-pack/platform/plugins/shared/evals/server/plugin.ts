@@ -25,7 +25,10 @@ import {
   EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE,
   evalsRemoteKibanaConfigSavedObjectType,
 } from './saved_objects/remote_kibana_config';
-import { evalsReviewQueueSavedObjectType } from './saved_objects/review_queue';
+import {
+  EVALS_REVIEW_QUEUE_SAVED_OBJECT_TYPE,
+  evalsReviewQueueSavedObjectType,
+} from './saved_objects/review_queue';
 import type {
   EvalsRequestHandlerContext,
   EvalsPluginSetup,
@@ -201,7 +204,11 @@ export class EvalsPlugin
       privileges: {
         all: {
           app: ['kibana', PLUGIN_ID],
-          api: [EVALS_API_PRIVILEGES.read, EVALS_API_PRIVILEGES.manage],
+          api: [
+            EVALS_API_PRIVILEGES.read,
+            EVALS_API_PRIVILEGES.manage,
+            EVALS_API_PRIVILEGES.review,
+          ],
           management: { ai: [PLUGIN_ID] },
           savedObject: {
             all: [],
@@ -229,6 +236,12 @@ export class EvalsPlugin
       })
     );
 
+    const internalReviewQueuesSoClientPromise = coreSetup.getStartServices().then(([coreStart]) =>
+      coreStart.savedObjects.getUnsafeInternalClient({
+        includedHiddenTypes: [EVALS_REVIEW_QUEUE_SAVED_OBJECT_TYPE],
+      })
+    );
+
     const getInferenceStart = () =>
       coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.inference);
 
@@ -240,6 +253,11 @@ export class EvalsPlugin
     const getCurrentUsername = async (request: KibanaRequest): Promise<string | undefined> => {
       const [, pluginsStart] = await coreSetup.getStartServices();
       return pluginsStart.security?.authc.getCurrentUser(request)?.username;
+    };
+
+    const getCurrentProfileUid = async (request: KibanaRequest): Promise<string | undefined> => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      return pluginsStart.security?.authc.getCurrentUser(request)?.profile_uid;
     };
 
     // When security is disabled there is no per-space authz to enforce, so grant.
@@ -284,8 +302,10 @@ export class EvalsPlugin
       getEncryptedSavedObjectsStart: () =>
         coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.encryptedSavedObjects),
       getInternalRemoteConfigsSoClient: () => internalRemoteConfigsSoClientPromise,
+      getInternalReviewQueuesSoClient: () => internalReviewQueuesSoClientPromise,
       getSpaceId,
       getCurrentUsername,
+      getCurrentProfileUid,
       checkManageEvalsPrivileges,
       getAccessibleSpaceIds,
       taskProviderRegistry,

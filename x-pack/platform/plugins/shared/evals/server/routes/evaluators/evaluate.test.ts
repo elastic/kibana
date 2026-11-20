@@ -134,6 +134,7 @@ describe('POST /internal/evals/_evaluate', () => {
         } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getInternalReviewQueuesSoClient: async () => savedObjectsClientMock.create(),
       getSpaceId,
     });
 

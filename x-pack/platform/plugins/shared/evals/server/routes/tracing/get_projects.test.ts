@@ -87,6 +87,7 @@ describe('GET /internal/evals/tracing/projects', () => {
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => ({} as EncryptedSavedObjectsPluginStart),
       getInternalRemoteConfigsSoClient: async () => ({} as SavedObjectsClientContract),
+      getInternalReviewQueuesSoClient: async () => ({} as SavedObjectsClientContract),
     });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;

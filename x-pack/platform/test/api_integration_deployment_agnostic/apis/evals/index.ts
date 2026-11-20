@@ -15,5 +15,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./traces'));
     loadTestFile(require.resolve('./tracing_projects'));
     loadTestFile(require.resolve('./evaluators'));
+    loadTestFile(require.resolve('./review_queues'));
   });
 }

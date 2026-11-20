@@ -36,6 +36,7 @@ describe('GET experiment example repetition details', () => {
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getInternalReviewQueuesSoClient: async () => savedObjectsClientMock.create(),
       getSpaceId,
     });
 
