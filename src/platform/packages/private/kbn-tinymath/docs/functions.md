@@ -79,11 +79,13 @@ Restricts a value to a given range. Returns `min` if the value is below it, `max
 | min | <code>number</code> \| <code>Array.&lt;number&gt;</code> | The minimum value this function returns. |
 | max | <code>number</code> \| <code>Array.&lt;number&gt;</code> | The maximum value this function returns. |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The closest value between `min` (inclusive) and `max` (inclusive). Returns an array with values greater than or equal to `min` and less than or equal to `max` at each index if `a`, `min`, or `max` is an array. If you leave out `min` or `max`, the result is `NaN`, or an array of `NaN` values if `a` or `min` is an array. If `a` and `min` are both arrays and `max` is a number, each element of the result is `NaN`.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The closest value between `min` (inclusive) and `max` (inclusive). Returns an array with values greater than or equal to `min` and less than or equal to `max` at each index if `a`, `min`, or `max` is an array. In an expression, if you leave out `min` or `max`, the result is `NaN`, or an array of `NaN` values if `a` or `min` is an array. If `a` and `min` are both arrays and `max` is a number, each element of the result is `NaN`.  
 **Throws**:
 
 - `'Array length mismatch'` if `a`, `min`, or `max` are arrays of different lengths
 - `'Min must be less than max'` if `max` is less than `min`
+- `'Missing minimum value. You may want to use the 'max' function instead'` if `min` is null and you call the function directly
+- `'Missing maximum value. You may want to use the 'min' function instead'` if `max` is null and you call the function directly
 
 **Example**  
 ```js
@@ -700,7 +702,7 @@ range([1, 9], 4, [3, 5]) // returns [range([1, 4, 3]), range([9, 4, 5])] = [3, 5
 ```
 ***
 ## _round(_ _a_,  _b_ _)_
-Rounds a number to the nearest integer by default, or to a number of decimal places if you pass `b`. A value exactly halfway rounds toward positive infinity. For arrays, the function will be applied index-wise to each element.
+Rounds a number to the nearest integer by default, or to a number of decimal places if you pass `b`. A value exactly halfway rounds toward positive infinity. Decimals such as 1.005 aren&#x27;t stored exactly in binary, so `round(1.005, 2)` returns 1, not 1.01. For arrays, the function will be applied index-wise to each element.
 
 
 | Param | Type | Description |
@@ -717,6 +719,7 @@ round(-10.1, 2) // returns -10.1
 round(10.93745987, 4) // returns 10.9375
 round(2.5) // returns 3
 round(-2.5) // returns -2
+round(1.005, 2) // returns 1
 round([2.9234, 5.1234, 3.5234, 4.49234324], 2) // returns [2.92, 5.12, 3.52, 4.49]
 ```
 ***
