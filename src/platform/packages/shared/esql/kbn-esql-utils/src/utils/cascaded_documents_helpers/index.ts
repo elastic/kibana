@@ -129,6 +129,8 @@ export const ESQL_STATS_QUERY_META_EXCLUSION_REASON = {
   GROUP_FIELD_STRIPPED_BY_KEEP: 'group_field_stripped_by_keep',
 } as const;
 
+export type { NodeAggregatedValues };
+
 export type ESQLStatsQueryMetaExclusionReason =
   (typeof ESQL_STATS_QUERY_META_EXCLUSION_REASON)[keyof typeof ESQL_STATS_QUERY_META_EXCLUSION_REASON];
 

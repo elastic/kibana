@@ -737,13 +737,16 @@ describe('DiscoverDocumentFlyout', () => {
     expect(toolkit.getCurrentTab().appState.expandedDoc).toBeUndefined();
   });
 
-  it('copies a document link that uses the nested grid query instead of the group-by query', async () => {
+  it('copies a document link that uses the nested grid query, narrowed by the values the row displayed', async () => {
     const services = createDiscoverServicesMock();
     const toolkit = getDiscoverInternalStateMock({ services });
-    const groupingQuery = { esql: 'FROM logs | STATS count() BY extension' };
+    // a TS source always drops the STATS from the leaf query, which is what makes the row's
+    // values the only thing narrowing the documents
+    const groupingQuery = { esql: 'TS logs | STATS exts = VALUES(extension) BY bytes' };
     const expandedDocCascadePath = {
-      nodePath: ['extension'],
-      nodePathMap: { extension: 'png' },
+      nodePath: ['bytes'],
+      nodePathMap: { bytes: '100' },
+      nodeAggregatedValues: { exts: ['png'] },
     };
     const cascadeQuery = constructCascadeQuery({
       query: groupingQuery,
@@ -752,6 +755,20 @@ describe('DiscoverDocumentFlyout', () => {
       nodeType: 'leaf',
       ...expandedDocCascadePath,
     });
+
+    // the aggregate values are what the expansion narrowed on, so a link copied from the flyout
+    // has to carry them too, otherwise it reopens a broader set of documents than was on screen
+    expect(cascadeQuery?.esql).toContain('MATCH_PHRASE(extension, "png")');
+    expect(
+      constructCascadeQuery({
+        query: groupingQuery,
+        dataView: dataViewMock,
+        esqlVariables: undefined,
+        nodeType: 'leaf',
+        nodePath: expandedDocCascadePath.nodePath,
+        nodePathMap: expandedDocCascadePath.nodePathMap,
+      })?.esql
+    ).not.toContain('MATCH_PHRASE');
 
     await toolkit.initializeTabs();
     toolkit.internalState.dispatch(
