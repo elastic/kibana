@@ -2461,6 +2461,7 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /src/platform/packages/shared/kbn-jest/src/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
 /packages/kbn-eslint-plugin-imports/src/helpers/core_private_importers.ts @elastic/kibana-core
 /src/platform/packages/shared/kbn-jest/src/setup/mocks.vega.js @elastic/kibana-dashboards
+/src/platform/packages/shared/kbn-jest/src/setup/mocks.pdfmake.js @elastic/kibana-reporting-services
 /x-pack/platform/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/platform/test/serverless/**/test_suites/saved_objects_management/ @elastic/kibana-core
 /x-pack/platform/test/serverless/api_integration/test_suites/telemetry/ @elastic/kibana-core
