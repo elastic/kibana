@@ -30,7 +30,9 @@ import {
 export const BANNED_NODE_MODULES: ReadonlySet<string> = new Set([
   '@elastic/eui',
   '@emotion/react',
-  'd3',
+  'react-use',
+  '@xyflow/react',
+  'd3'
 ]);
 
 const relative = (absolute: string): string => Path.relative(REPO_ROOT, absolute);
