@@ -2258,6 +2258,15 @@ describe('extract_iocs — version numbers are not IPs', () => {
 
     test.each<[string, string]>([
       ['the full Hitachi advisory text', HITACHI],
+      [
+        'the held-out Siemens Industrial Edge Device Kit advisory lines',
+        [
+          '*   Industrial Edge Device Kit - arm64 V1.26 vers:intdot/<1.26.2.1 (CVE-2026-44414, CVE-2026-44415)',
+          '*   Industrial Edge Device Kit - arm64 V1.27 vers:intdot/<1.27.1.1 (CVE-2026-44414, CVE-2026-44415)',
+          '*   Industrial Edge Device Kit - arm64 V1.28 vers:intdot/<1.28.0.6 (CVE-2026-44414, CVE-2026-44415)',
+          'Update to V1.26.2-1 or later version',
+        ].join('\n'),
+      ],
       ['an intdot range', '- SIMATIC BRAUMAT vers:intdot/>=8.2.0.1|<8.2.0.5 (CVE-2026-1)'],
       ['an intdot upper bound', '- SIMATIC WinCC OA V3.20 vers:intdot/<3.20.17.1'],
       ['a five-part number after <=', '- EB2 <=3.0.4.2.0'],
