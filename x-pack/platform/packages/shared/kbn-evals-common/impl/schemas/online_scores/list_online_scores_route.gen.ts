@@ -21,6 +21,18 @@ export const ListOnlineScoresRequestQuery = lazySchema(() =>
     monitor_id: z.string().max(1024),
     page: z.coerce.number().int().min(1).optional().default(1),
     per_page: z.coerce.number().int().min(1).max(100).optional().default(50),
+    /**
+     * Lower bound of the `@timestamp` range, as an ISO date or Elasticsearch date math (for example `now-1h`).
+     */
+    from: z.string().max(64).optional(),
+    /**
+     * Upper bound of the `@timestamp` range, as an ISO date or Elasticsearch date math (for example `now`).
+     */
+    to: z.string().max(64).optional(),
+    /**
+     * Only return scores with this `score.name`.
+     */
+    score_name: z.string().max(256).optional(),
   })
 );
 export type ListOnlineScoresRequestQuery = z.infer<typeof ListOnlineScoresRequestQuery>;

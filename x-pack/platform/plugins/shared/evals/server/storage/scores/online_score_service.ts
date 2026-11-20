@@ -34,6 +34,9 @@ export interface ListOnlineScoresParams {
   spaceId: string;
   page: number;
   perPage: number;
+  from?: string;
+  to?: string;
+  scoreName?: string;
 }
 
 export const computeOnlineScoreDocumentId = (
@@ -141,6 +144,9 @@ export class OnlineScoreService {
     spaceId,
     page,
     perPage,
+    from: rangeFrom,
+    to: rangeTo,
+    scoreName,
   }: ListOnlineScoresParams): Promise<ListOnlineScoresResponse> {
     const from = (page - 1) * perPage;
     const response = await this.search({
@@ -150,7 +156,23 @@ export class OnlineScoreService {
       sort: [{ '@timestamp': { order: 'desc' } }],
       query: {
         bool: {
-          filter: [{ term: { 'monitor.id': monitorId } }, { term: { space_ids: spaceId } }],
+          filter: [
+            { term: { 'monitor.id': monitorId } },
+            { term: { space_ids: spaceId } },
+            ...(scoreName ? [{ term: { 'score.name': scoreName } }] : []),
+            ...(rangeFrom || rangeTo
+              ? [
+                  {
+                    range: {
+                      '@timestamp': {
+                        ...(rangeFrom ? { gte: rangeFrom } : {}),
+                        ...(rangeTo ? { lte: rangeTo } : {}),
+                      },
+                    },
+                  },
+                ]
+              : []),
+          ],
         },
       },
     });

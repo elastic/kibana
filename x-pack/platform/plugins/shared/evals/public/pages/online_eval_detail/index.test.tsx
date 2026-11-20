@@ -31,6 +31,11 @@ jest.mock('../../hooks/use_evals_permissions');
 jest.mock('../../hooks/use_evals_api');
 jest.mock('../../hooks/use_model_connectors');
 jest.mock('../../hooks/use_active_space_id');
+jest.mock('../../components/online_eval_alert_rule/online_eval_alert_rule_button', () => ({
+  OnlineEvalAlertRuleButton: ({ metrics }: { metrics: Array<{ metric: string }> }) => (
+    <div data-test-subj="mockAlertRuleButton">{metrics.map(({ metric }) => metric).join(',')}</div>
+  ),
+}));
 
 jest.mock('@kbn/lens-embeddable-utils', () => ({
   LensConfigBuilder: jest.fn().mockImplementation(() => ({
@@ -79,8 +84,8 @@ const parsedConfig = {
   connectorId: 'connector-1',
 };
 
-const renderPage = () => {
-  const history = createMemoryHistory({ initialEntries: ['/online/workflow-1'] });
+const renderPage = (entry = '/online/workflow-1') => {
+  const history = createMemoryHistory({ initialEntries: [entry] });
   return render(
     <Router history={history}>
       <Route path="/online/:workflowId">
@@ -204,6 +209,14 @@ describe('OnlineEvalDetailPage', () => {
     expect(lensEmbeddableComponent).not.toHaveBeenCalled();
   });
 
+  it('offers the scored metrics and configured evaluators to the alert rule button', async () => {
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockAlertRuleButton')).toHaveTextContent('factuality,correctness');
+    });
+  });
+
   it('renders rows from the online scores route response', async () => {
     renderPage();
 
@@ -223,6 +236,24 @@ describe('OnlineEvalDetailPage', () => {
     expect(screen.getByText('factuality')).toBeInTheDocument();
     expect(screen.getByText('Scores and traces')).toBeInTheDocument();
     expect(screen.getByText('Score trends')).toBeInTheDocument();
+  });
+
+  it('narrows the scores table to the window and metric from the alert drill-down link', async () => {
+    renderPage('/online/workflow-1?from=now-1h&to=now&metric=factuality');
+
+    await waitFor(() => {
+      expect(httpGet).toHaveBeenCalledWith(EVALS_ONLINE_SCORES_URL, {
+        query: {
+          monitor_id: 'workflow-1',
+          page: 1,
+          per_page: 25,
+          from: 'now-1h',
+          to: 'now',
+          score_name: 'factuality',
+        },
+        version: API_VERSIONS.internal.v1,
+      });
+    });
   });
 
   it('opens the trace waterfall flyout when trace id is clicked', async () => {

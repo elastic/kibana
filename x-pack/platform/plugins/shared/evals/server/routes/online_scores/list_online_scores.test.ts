@@ -109,6 +109,35 @@ describe('GET /internal/evals/online_scores', () => {
     });
   });
 
+  it('forwards the time window and score name filters to the service', async () => {
+    const { handler, context, onlineScoreService } = setup();
+    onlineScoreService.list.mockResolvedValueOnce({ total: 0, data: [] });
+
+    const request = httpServerMock.createKibanaRequest({
+      method: 'get',
+      path: EVALS_ONLINE_SCORES_URL,
+      query: {
+        monitor_id: 'workflow-1',
+        from: 'now-1h',
+        to: 'now',
+        score_name: 'factuality',
+      },
+    });
+    const response = await handler(context as any, request, kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    // The mocked request skips schema defaults, so page/perPage are left to the service defaults.
+    expect(onlineScoreService.list).toHaveBeenCalledWith({
+      monitorId: 'workflow-1',
+      spaceId: 'space-a',
+      page: undefined,
+      perPage: undefined,
+      from: 'now-1h',
+      to: 'now',
+      scoreName: 'factuality',
+    });
+  });
+
   it('returns 500 when service throws', async () => {
     const { handler, context, onlineScoreService, logger } = setup();
     onlineScoreService.list.mockRejectedValueOnce(new Error('es failure'));

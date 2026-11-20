@@ -49,10 +49,12 @@ import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import { useEvalsTraceFetcher } from '../../hooks/use_evals_api';
 import { OnlineEvalScoresTable } from '../../components/online_eval_scores_table';
+import { OnlineEvalAlertRuleButton } from '../../components/online_eval_alert_rule/online_eval_alert_rule_button';
+import type { OnlineEvalAlertMetric } from '../../components/online_eval_alert_rule/online_eval_alert_rule_button';
 import {
   useDeleteOnlineEvalWorkflow,
   useOnlineEvalWorkflow,
@@ -240,7 +242,23 @@ const buildScoreCountByLabelLensConfig = ({
 
 export const OnlineEvalDetailPage: React.FC = () => {
   const history = useHistory();
+  const { search } = useLocation();
   const { workflowId } = useParams<{ workflowId: string }>();
+  const scoreWindow = useMemo(() => {
+    const query = new URLSearchParams(search);
+    return {
+      from: query.get('from') ?? undefined,
+      to: query.get('to') ?? undefined,
+      metric: query.get('metric') ?? undefined,
+    };
+  }, [search]);
+  const timeRange = useMemo(
+    () =>
+      scoreWindow.from && scoreWindow.to
+        ? { from: scoreWindow.from, to: scoreWindow.to }
+        : EMPTY_TIME_RANGE,
+    [scoreWindow]
+  );
   const { services } = useKibana<{
     http: HttpStart;
     dataViews: DataViewsPublicPluginStart;
@@ -332,6 +350,10 @@ export const OnlineEvalDetailPage: React.FC = () => {
               monitor_id: workflowId,
               page: pageIndex + 1,
               per_page: SCORES_PER_PAGE,
+              ...(scoreWindow.from && scoreWindow.to
+                ? { from: scoreWindow.from, to: scoreWindow.to }
+                : {}),
+              ...(scoreWindow.metric ? { score_name: scoreWindow.metric } : {}),
             },
             version: API_VERSIONS.internal.v1,
           }
@@ -357,7 +379,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [services.http, workflowId, pageIndex]);
+  }, [services.http, workflowId, pageIndex, scoreWindow]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -458,6 +480,19 @@ export const OnlineEvalDetailPage: React.FC = () => {
       }),
     [draftState.draft?.evaluators, evaluatorOptions]
   );
+
+  const alertMetrics = useMemo<OnlineEvalAlertMetric[]>(() => {
+    const byMetric = new Map<string, OnlineEvalAlertMetric>();
+    scoresData.forEach(({ score, evaluator }) => {
+      byMetric.set(score.name, { metric: score.name, evaluatorName: evaluator.name });
+    });
+    (workflow?.parsedConfig?.evaluators ?? []).forEach(({ name }) => {
+      if (!byMetric.has(name)) {
+        byMetric.set(name, { metric: name, evaluatorName: name });
+      }
+    });
+    return Array.from(byMetric.values());
+  }, [scoresData, workflow?.parsedConfig?.evaluators]);
 
   const canEditSettings = canManage && Boolean(draftState.draft);
   const hasLlmEvaluatorSelected = selectedEvaluators.some((option) => option.kind === 'llm');
@@ -565,6 +600,14 @@ export const OnlineEvalDetailPage: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <OnlineEvalAlertRuleButton
+                  workflowId={workflow.id}
+                  workflowName={workflow.name}
+                  spaceId={spaceId}
+                  metrics={alertMetrics}
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSwitch
                   label={i18n.translate('xpack.evals.onlineEvaluations.detail.enabledSwitchLabel', {
@@ -1179,7 +1222,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
                     <services.lens.EmbeddableComponent
                       id="online-evals-average-score-trend"
                       attributes={averageScoreAttributes}
-                      timeRange={EMPTY_TIME_RANGE}
+                      timeRange={timeRange}
                       style={{ height: 280 }}
                     />
                   </div>
@@ -1216,7 +1259,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
                     <services.lens.EmbeddableComponent
                       id="online-evals-score-label-counts"
                       attributes={scoreCountAttributes}
-                      timeRange={EMPTY_TIME_RANGE}
+                      timeRange={timeRange}
                       style={{ height: 280 }}
                     />
                   </div>

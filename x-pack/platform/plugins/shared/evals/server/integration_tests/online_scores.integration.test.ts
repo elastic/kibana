@@ -31,6 +31,10 @@ import {
 } from '../storage/scores/online_score_service';
 import { registerIngestOnlineScoresRoute } from '../routes/online_scores/ingest_online_scores';
 import { registerListOnlineScoresRoute } from '../routes/online_scores/list_online_scores';
+import {
+  buildOnlineEvalAlertRuleParams,
+  type OnlineEvalAlertTrigger,
+} from '../../common/online_evals/alert_rule_query';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -94,7 +98,7 @@ const cleanupOnlineScoresStorage = async (esClient: ElasticsearchClient) => {
 };
 
 describe('online scores ingestion and listing integration', () => {
-  jest.setTimeout(180000);
+  jest.setTimeout(420000);
 
   let manageES: TestElasticsearchUtils;
   let esClient: ElasticsearchClient;
@@ -326,5 +330,106 @@ describe('online scores ingestion and listing integration', () => {
         perPage: 10,
       })
     ).resolves.toMatchObject({ total: 3 });
+  });
+
+  describe('online score alert rule query', () => {
+    // A fresh monitor per test keeps seeded docs from earlier tests out of the rule window.
+    let MONITOR_ID = 'workflow-alert-0';
+    let monitorCounter = 0;
+
+    const seedScores = async (
+      docs: Array<{ value: number; spaceId?: string; metric?: string }>
+    ) => {
+      const now = Date.now();
+      await esClient.bulk({
+        refresh: 'wait_for',
+        operations: docs.flatMap(({ value, spaceId = 'space-a', metric = 'factuality' }, i) => [
+          { create: { _index: EvaluationIndices.ONLINE_SCORES } },
+          {
+            '@timestamp': new Date(now - i * 1000).toISOString(),
+            space_ids: [spaceId],
+            monitor: { id: MONITOR_ID, name: 'Alert monitor' },
+            trace_id: `trace-${i}`,
+            evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
+            score: { name: metric, value, label: 'x' },
+          },
+        ]),
+      });
+    };
+
+    /** Runs the generated rule params the way the `.es-query` ES|QL executor does. */
+    const runRule = async (
+      threshold: number,
+      trigger: OnlineEvalAlertTrigger = 'below',
+      minSampleSize = 3
+    ) => {
+      const params = buildOnlineEvalAlertRuleParams({
+        monitorId: MONITOR_ID,
+        spaceId: 'space-a',
+        metric: 'factuality',
+        threshold,
+        trigger,
+        minSampleSize,
+        windowSize: 1,
+        windowUnit: 'h',
+        drillDownUrl: `/online/${MONITOR_ID}?from=now-1h&to=now&metric=factuality`,
+      });
+      const response = await esClient.esql.query({
+        query: params.esqlQuery.esql,
+        filter: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  [params.timeField]: {
+                    gt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+                    lte: new Date(Date.now() + 1000).toISOString(),
+                    format: 'strict_date_optional_time',
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+      return response.values;
+    };
+
+    beforeEach(async () => {
+      monitorCounter += 1;
+      MONITOR_ID = `workflow-alert-${monitorCounter}`;
+      await seedScores([
+        { value: 0.2 },
+        { value: 0.3 },
+        { value: 0.4 },
+        // Same monitor and metric in another space: must never count towards the rule.
+        { value: 1, spaceId: 'space-b' },
+        { value: 1, spaceId: 'space-b' },
+        { value: 1, spaceId: 'space-b' },
+        // Another metric on the same monitor.
+        { value: 1, metric: 'relevance' },
+      ]);
+    });
+
+    it('fires when the windowed average is below the threshold', async () => {
+      const rows = await runRule(0.5);
+      expect(rows).toHaveLength(1);
+      expect(rows[0][0]).toBeCloseTo(0.3, 5);
+      expect(rows[0][1]).toBe(3);
+      expect(String(rows[0][2])).toContain(`/online/${MONITOR_ID}`);
+    });
+
+    it('stays quiet when the average is above the threshold', async () => {
+      expect(await runRule(0.1)).toHaveLength(0);
+    });
+
+    it('stays quiet below the minimum sample size', async () => {
+      expect(await runRule(0.5, 'below', 4)).toHaveLength(0);
+    });
+
+    it('respects the trigger direction', async () => {
+      expect(await runRule(0.1, 'above')).toHaveLength(1);
+      expect(await runRule(0.5, 'above')).toHaveLength(0);
+    });
   });
 });

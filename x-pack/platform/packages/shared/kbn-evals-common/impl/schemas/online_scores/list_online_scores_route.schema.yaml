@@ -34,6 +34,27 @@ paths:
             minimum: 1
             maximum: 100
             default: 50
+        - in: query
+          name: from
+          required: false
+          description: Lower bound of the `@timestamp` range, as an ISO date or Elasticsearch date math (for example `now-1h`).
+          schema:
+            type: string
+            maxLength: 64
+        - in: query
+          name: to
+          required: false
+          description: Upper bound of the `@timestamp` range, as an ISO date or Elasticsearch date math (for example `now`).
+          schema:
+            type: string
+            maxLength: 64
+        - in: query
+          name: score_name
+          required: false
+          description: Only return scores with this `score.name`.
+          schema:
+            type: string
+            maxLength: 256
       responses:
         '200':
           description: Successful response

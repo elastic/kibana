@@ -49,6 +49,9 @@ export const registerListOnlineScoresRoute = ({
             spaceId,
             page: request.query.page,
             perPage: request.query.per_page,
+            from: request.query.from,
+            to: request.query.to,
+            scoreName: request.query.score_name,
           });
 
           return response.ok({

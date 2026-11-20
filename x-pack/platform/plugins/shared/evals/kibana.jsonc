@@ -21,7 +21,13 @@
       "spaces",
       "security",
       "workflowsExtensions",
-      "workflowsManagement"
+      "workflowsManagement",
+      "alerting",
+      "triggersActionsUi",
+      "data",
+      "unifiedSearch",
+      "charts",
+      "fieldsMetadata"
     ],
     "requiredBundles": ["kibanaReact", "data", "spaces", "workflowsExtensions"]
   }
