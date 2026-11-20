@@ -25,6 +25,7 @@ const userActionsStats: CaseUserActionsStats = {
   totalCommentDeletions: 0,
   totalCommentCreations: 10,
   totalHiddenCommentUpdates: 0,
+  totalCommentUpdates: 0,
   totalOtherActions: 3,
   totalOtherActionDeletions: 0,
 };
@@ -58,6 +59,7 @@ describe('useLastPage', () => {
           totalComments: 0,
           totalCommentDeletions: 0,
           totalHiddenCommentUpdates: 0,
+          totalCommentUpdates: 0,
           totalCommentCreations: 10,
           totalOtherActions: 0,
           totalOtherActionDeletions: 0,
@@ -71,6 +73,29 @@ describe('useLastPage', () => {
     });
   });
 
+  it('leaves hidden comment edits out of the last page', async () => {
+    const stats = {
+      ...userActionsStats,
+      total: 38,
+      totalCommentCreations: 10,
+      totalCommentUpdates: 9,
+    };
+
+    const { result: all } = renderHook(() =>
+      useLastPage({ userActionsStats: stats, userActivityQueryParams })
+    );
+    const { result: history } = renderHook(() =>
+      useLastPage({
+        userActionsStats: stats,
+        userActivityQueryParams: { ...userActivityQueryParams, type: 'action' },
+      })
+    );
+
+    // 38 - 9 = 29 visible rows; History is 29 - 10 comments = 19.
+    expect(all.current).toEqual({ lastPage: 3 });
+    expect(history.current).toEqual({ lastPage: 2 });
+  });
+
   it('returns correct last page when filter type is all', async () => {
     const { result } = renderHook(() =>
       useLastPage({
@@ -78,6 +103,7 @@ describe('useLastPage', () => {
           total: 38,
           totalDeletions: 0,
           totalHiddenCommentUpdates: 0,
+          totalCommentUpdates: 0,
           totalComments: 17,
           totalCommentDeletions: 0,
           totalCommentCreations: 10,
@@ -101,6 +127,7 @@ describe('useLastPage', () => {
           totalDeletions: 0,
           totalComments: 17,
           totalHiddenCommentUpdates: 0,
+          totalCommentUpdates: 0,
           totalCommentDeletions: 0,
           totalCommentCreations: 11,
           totalOtherActions: 21,
@@ -125,6 +152,7 @@ describe('useLastPage', () => {
           total: 38,
           totalDeletions: 0,
           totalHiddenCommentUpdates: 0,
+          totalCommentUpdates: 0,
           totalComments: 17,
           totalCommentDeletions: 0,
           totalCommentCreations: 10,
@@ -150,6 +178,7 @@ describe('useLastPage', () => {
           total: 38,
           totalDeletions: 0,
           totalHiddenCommentUpdates: 0,
+          totalCommentUpdates: 0,
           totalComments: 17,
           totalCommentDeletions: 0,
           totalCommentCreations: 10,
@@ -175,6 +204,7 @@ describe('useLastPage', () => {
           total: 38,
           totalDeletions: 0,
           totalHiddenCommentUpdates: 0,
+          totalCommentUpdates: 0,
           totalComments: 17,
           totalCommentDeletions: 0,
           totalCommentCreations: 10,
@@ -200,6 +230,7 @@ describe('useLastPage', () => {
           total: 38,
           totalDeletions: 0,
           totalHiddenCommentUpdates: 0,
+          totalCommentUpdates: 0,
           totalComments: 17,
           totalCommentDeletions: 0,
           totalCommentCreations: 10,

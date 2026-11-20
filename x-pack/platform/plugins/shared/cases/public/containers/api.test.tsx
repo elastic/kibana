@@ -587,6 +587,7 @@ describe('Cases API', () => {
             sortOrder: 'asc',
             page: 1,
             perPage: 10,
+            hideCommentEdits: true,
           },
         }
       );
@@ -608,6 +609,7 @@ describe('Cases API', () => {
             sortOrder: 'desc',
             page: 2,
             perPage: 15,
+            hideCommentEdits: true,
           },
         }
       );
@@ -625,6 +627,7 @@ describe('Cases API', () => {
             sortOrder: 'asc',
             page: 1,
             perPage: 10,
+            hideCommentEdits: true,
           },
         }
       );
@@ -657,6 +660,7 @@ describe('Cases API', () => {
             sortOrder: 'asc',
             page: 1,
             perPage: 10,
+            hideCommentEdits: true,
             search: 'hello world',
           },
         }
@@ -679,6 +683,7 @@ describe('Cases API', () => {
             sortOrder: 'asc',
             page: 1,
             perPage: 10,
+            hideCommentEdits: true,
             authors: ['elastic'],
           },
         }
@@ -701,6 +706,7 @@ describe('Cases API', () => {
             sortOrder: 'asc',
             page: 1,
             perPage: 10,
+            hideCommentEdits: true,
             authors: ['elastic', 'other'],
           },
         }
@@ -736,6 +742,7 @@ describe('Cases API', () => {
             sortOrder: 'asc',
             page: 1,
             perPage: 10,
+            hideCommentEdits: true,
             sources: ['agent', 'user'],
           },
         }
@@ -751,6 +758,7 @@ describe('Cases API', () => {
       total_comment_deletions: 0,
       total_comment_creations: 10,
       total_hidden_comment_updates: 0,
+      total_comment_updates: 0,
       total_other_actions: 10,
       total_other_action_deletions: 0,
     };

@@ -213,9 +213,22 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     expect(screen.getByTestId('user-action-via-source')).toHaveTextContent('via Elastic AI Agent');
   });
 
+  it('passes the actions prefix through as its own row field', () => {
+    const actionsPrefix = <span data-test-subj="actions-prefix">{'Last edited'}</span>;
+    getCreationActivity.mockReturnValue({ ...creationActivityProps, actionsPrefix });
+
+    const [built] = createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build();
+
+    expect(built.actionsPrefix).toBe(actionsPrefix);
+  });
+
   it('keeps only the copy link when the attachment is deleted', () => {
     const getActions = jest.fn().mockReturnValue([]);
-    getCreationActivity.mockReturnValue({ ...creationActivityProps, getActions });
+    getCreationActivity.mockReturnValue({
+      ...creationActivityProps,
+      getActions,
+      actionsPrefix: <span data-test-subj="actions-prefix" />,
+    });
 
     const [built] = createRegisteredAttachmentUserActionBuilder({
       ...userActionBuilderArgs,
@@ -236,5 +249,6 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
       `${attachment.id}-permLink`
     );
     expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
+    expect(built).not.toHaveProperty('actionsPrefix');
   });
 });

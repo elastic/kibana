@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_USER_ACTIONS_PER_PAGE,
   MAX_USER_ACTION_SEARCH_LENGTH,
@@ -53,16 +53,22 @@ const UserActionFindRequestSourcesValues = [
 /**
  * User actions stats API
  */
-export const CaseUserActionStatsSchema = z.object({
-  total: z.number(),
-  total_deletions: z.number(),
-  total_comments: z.number(),
-  total_comment_deletions: z.number(),
-  total_comment_creations: z.number(),
-  total_hidden_comment_updates: z.number(),
-  total_other_actions: z.number(),
-  total_other_action_deletions: z.number(),
-});
+export const CaseUserActionStatsSchema = lazySchema(() =>
+  z.object({
+    total: z.number(),
+    total_deletions: z.number(),
+    total_comments: z.number(),
+    total_comment_deletions: z.number(),
+    total_comment_creations: z.number(),
+    total_hidden_comment_updates: z.number(),
+    total_comment_updates: z.number(),
+    /** Create and delete rows of thread replies; edits are in `total_comment_updates`. */
+    total_replies: z.number().optional(),
+    total_reply_creations: z.number().optional(),
+    total_other_actions: z.number(),
+    total_other_action_deletions: z.number(),
+  })
+);
 
 export const CaseUserActionStatsResponseSchema = CaseUserActionStatsSchema;
 
@@ -119,8 +125,30 @@ export const UserActionInternalFindRequestSchema = UserActionFindRequestSchema.e
     min: 0,
     max: MAX_USER_ACTION_SOURCES_FILTER_LENGTH,
   }).optional(),
+  /** Leaves out user-comment edit rows; the UI shows them in the comment's edit history instead. */
+  hideCommentEdits: lazySchema(() =>
+    z
+      .union([z.boolean(), z.enum(['true', 'false']).transform((value) => value === 'true')])
+      .optional()
+  ),
+  /** Leaves out thread replies; the UI shows them in the thread panel of their comment. */
+  hideReplies: lazySchema(() =>
+    z
+      .union([z.boolean(), z.enum(['true', 'false']).transform((value) => value === 'true')])
+      .optional()
+  ),
 });
 
+/**
+ * Attachment edit history API
+ */
+export const AttachmentHistoryResponseSchema = lazySchema(() =>
+  z.object({
+    userActions: UserActionsSchema,
+  })
+);
+
+export type AttachmentHistoryResponse = z.infer<typeof AttachmentHistoryResponseSchema>;
 export type UserActionInternalFindRequest = z.infer<typeof UserActionInternalFindRequestSchema>;
 export type UserActionFindResponse = z.infer<typeof UserActionFindResponseSchema>;
 export type CaseUserActionDeprecatedResponse = z.infer<

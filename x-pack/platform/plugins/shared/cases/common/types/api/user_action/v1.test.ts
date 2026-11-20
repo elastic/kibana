@@ -202,6 +202,7 @@ describe('User actions APIs', () => {
         total_comment_deletions: 0,
         total_comment_creations: 0,
         total_hidden_comment_updates: 0,
+        total_comment_updates: 0,
         total_other_actions: 40,
         total_other_action_deletions: 0,
       };

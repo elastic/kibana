@@ -19,6 +19,7 @@ interface MarkdownEditorProps extends EditorBaseProps {
   height?: number;
   onChange: (content: string) => void;
   value: string;
+  placeholder?: string;
 }
 
 export type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;

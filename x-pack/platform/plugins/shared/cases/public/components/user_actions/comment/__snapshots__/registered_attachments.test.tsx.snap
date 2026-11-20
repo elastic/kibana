@@ -5,6 +5,7 @@ Array [
   Object {
     "actions": <Memo(UserActionContentToolbar)
       id="basic-comment-id"
+      withCopyLinkAction={true}
     >
       <React.Fragment>
         My button
@@ -123,6 +124,7 @@ Array [
   Object {
     "actions": <Memo(UserActionContentToolbar)
       id="basic-comment-id"
+      withCopyLinkAction={true}
     >
       <React.Fragment>
         My button
@@ -241,6 +243,7 @@ Array [
   Object {
     "actions": <Memo(UserActionContentToolbar)
       id="basic-comment-id"
+      withCopyLinkAction={true}
     >
       <Memo(RegisteredAttachmentsPropertyActions)
         hideDefaultActions={false}

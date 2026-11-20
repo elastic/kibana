@@ -29,6 +29,9 @@ describe('delete', () => {
     clientArgs.services.attachmentService.bulkDelete.mockImplementation(
       async ({ savedObjectIds }) => savedObjectIds
     );
+    clientArgs.services.attachmentService.getter.getCaseAttachmentsForDeletion.mockResolvedValue(
+      []
+    );
   });
 
   describe('deleteComment', () => {
@@ -46,6 +49,30 @@ describe('delete', () => {
       ]);
       expect(clientArgs.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
         savedObjectIds: ['mock-comment-1'],
+        refresh: true,
+      });
+    });
+
+    it('deletes the replies of the comment with it', async () => {
+      clientArgs.services.attachmentService.getter.getCaseAttachmentsForDeletion.mockResolvedValue([
+        { ...toAttachmentForDeletion(mockCaseComments[0], 'mock-id-1'), id: 'reply-1' },
+      ]);
+
+      await deleteComment({ caseID: 'mock-id-1', savedObjectId: 'mock-comment-1' }, clientArgs);
+
+      expect(
+        clientArgs.services.attachmentService.getter.getCaseAttachmentsForDeletion
+      ).toHaveBeenCalledWith({ caseId: 'mock-id-1', filter: expect.anything() });
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entities: [
+            expect.objectContaining({ id: 'mock-comment-1' }),
+            expect.objectContaining({ id: 'reply-1' }),
+          ],
+        })
+      );
+      expect(clientArgs.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
+        savedObjectIds: ['mock-comment-1', 'reply-1'],
         refresh: true,
       });
     });

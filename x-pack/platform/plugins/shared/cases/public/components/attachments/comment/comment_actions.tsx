@@ -6,25 +6,40 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import copy from 'copy-to-clipboard';
+import { useCaseViewNavigation } from '../../../common/navigation';
+import type { CaseUser } from '../../../containers/types';
+import { useGetReplyCounts } from '../../../containers/threads/hooks';
 import { UserCommentPropertyActions } from '../../user_actions/property_actions/user_comment_property_actions';
 import { DELETE_COMMENT_SUCCESS_TOAST } from './translations';
 import { useCommentRenderingContext } from '../../user_actions/comment/comment_rendering_context';
+import { useIsAuthor } from './use_is_author';
 
 export interface CommentActionsProps {
+  caseId: string;
   commentId: string;
   content: string;
+  createdBy: CaseUser;
 }
 
 /**
  * Renders a toolbar with actions for a comment.
  */
-export const CommentActions: React.FC<CommentActionsProps> = ({ commentId, content }) => {
+export const CommentActions: React.FC<CommentActionsProps> = ({
+  caseId,
+  commentId,
+  content,
+  createdBy,
+}) => {
   const {
     loadingCommentIds = [],
     handleManageMarkdownEditId,
     handleDeleteComment,
     handleManageQuote,
   } = useCommentRenderingContext();
+  const { getCaseViewUrl } = useCaseViewNavigation();
+  const { data: replyCounts } = useGetReplyCounts(caseId);
+  const isAuthor = useIsAuthor(createdBy);
 
   const isLoading = useMemo(
     () => loadingCommentIds.includes(commentId),
@@ -49,6 +64,10 @@ export const CommentActions: React.FC<CommentActionsProps> = ({ commentId, conte
     }
   }, [handleManageQuote, content]);
 
+  const onCopyLink = useCallback(() => {
+    copy(getCaseViewUrl({ detailName: caseId, commentId }, true));
+  }, [caseId, commentId, getCaseViewUrl]);
+
   return (
     <UserCommentPropertyActions
       isLoading={isLoading}
@@ -56,6 +75,9 @@ export const CommentActions: React.FC<CommentActionsProps> = ({ commentId, conte
       onEdit={onEdit}
       onDelete={onDelete}
       onQuote={onQuote}
+      onCopyLink={onCopyLink}
+      replyCount={replyCounts?.counts[commentId] ?? 0}
+      canDelete={isAuthor}
     />
   );
 };

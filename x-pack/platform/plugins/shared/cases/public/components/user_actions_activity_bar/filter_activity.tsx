@@ -11,6 +11,7 @@ import { EuiFilterGroup, EuiFilterButton } from '@elastic/eui';
 import type { CaseUserActionsStats } from '../../containers/types';
 import * as i18n from './translations';
 import type { UserActivityFilter } from './types';
+import { getVisibleUserActionCounts } from './utils';
 
 interface FilterActivityProps {
   isLoading?: boolean;
@@ -30,6 +31,8 @@ export const FilterActivity = React.memo<FilterActivityProps>(
       [onFilterChange, type]
     );
 
+    const { total: visibleTotal, comments, history } = getVisibleUserActionCounts(userActionsStats);
+
     return (
       <EuiFilterGroup data-test-subj="user-actions-filter-activity-group">
         <EuiFilterButton
@@ -39,7 +42,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isToggle
           isSelected={type === 'all'}
           hasActiveFilters={type === 'all'}
-          numFilters={userActionsStats?.total ?? 0}
+          numFilters={visibleTotal}
           isLoading={isLoading}
           isDisabled={isLoading}
           data-test-subj="user-actions-filter-activity-button-all"
@@ -53,7 +56,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isToggle
           isSelected={type === 'user'}
           hasActiveFilters={type === 'user'}
-          numFilters={userActionsStats?.totalCommentCreations ?? 0}
+          numFilters={comments}
           isLoading={isLoading}
           isDisabled={isLoading}
           onClick={() => handleFilterChange('user')}
@@ -65,10 +68,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isToggle
           isSelected={type === 'action'}
           hasActiveFilters={type === 'action'}
-          numFilters={Math.max(
-            (userActionsStats?.total ?? 0) - (userActionsStats?.totalCommentCreations ?? 0),
-            0
-          )}
+          numFilters={history}
           onClick={() => handleFilterChange('action')}
           isLoading={isLoading}
           isDisabled={isLoading}

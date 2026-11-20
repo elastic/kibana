@@ -45,6 +45,7 @@ import {
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
+jest.mock('../../attachments/comment/use_is_author', () => ({ useIsAuthor: () => true }));
 
 const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;

@@ -12,11 +12,11 @@ import { isCommentUserAction } from '../../../../common/utils/user_actions';
 import type { attachmentApiV2, userActionApiV1 } from '../../../../common/types/api';
 import { UserActionInternalFindRequestSchema } from '../../../../common/types/api';
 import { INTERNAL_CASE_FIND_USER_ACTIONS_URL } from '../../../../common/constants';
-import { toUnifiedAttachmentPayload } from '../../../common/attachments';
 import { createCaseError } from '../../../common/error';
 import { decodeWithExcessOrThrowZod } from '../../../common/runtime_types';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
+import { projectCommentUserActionsToUnified } from './project_user_actions';
 
 const params = {
   params: schema.object({
@@ -52,28 +52,10 @@ export const findUserActionsRoute = createCasesRoute({
           params: options,
         });
 
-      // Stored legacy-shaped, but the UI only renders unified. The public route stays legacy.
-      const userActions = userActionsResponse.userActions.map((userAction) => {
-        if (!isCommentUserAction(userAction)) {
-          return userAction;
-        }
-
-        try {
-          return {
-            ...userAction,
-            payload: {
-              ...userAction.payload,
-              comment: toUnifiedAttachmentPayload(userAction.payload.comment),
-            },
-          };
-        } catch (error) {
-          // A malformed historical payload must not fail the whole activity feed.
-          logger.warn(
-            `Failed to project user action ${userAction.id} comment payload to unified: ${error}`
-          );
-          return userAction;
-        }
-      });
+      const userActions = projectCommentUserActionsToUnified(
+        userActionsResponse.userActions,
+        logger
+      );
 
       const uniqueCommentIds: Set<string> = new Set();
       for (const action of userActions) {

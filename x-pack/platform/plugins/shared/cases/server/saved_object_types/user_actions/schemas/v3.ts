@@ -27,7 +27,7 @@ const originSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-const payloadSchema = payloadSchemaV1.extends({
+export const payloadSchema = payloadSchemaV1.extends({
   origin: schema.maybe(originSchema),
 });
 

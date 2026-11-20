@@ -16,15 +16,32 @@ import { getMockCommentRenderingContext } from '../../user_actions/mock';
 import { UserCommentPropertyActions } from '../../user_actions/property_actions/user_comment_property_actions';
 import type { CommentActionsProps } from './comment_actions';
 
+import copy from 'copy-to-clipboard';
+import { useGetReplyCounts } from '../../../containers/threads/hooks';
+import { useIsAuthor } from './use_is_author';
+
 jest.mock('../../user_actions/property_actions/user_comment_property_actions', () => ({
   UserCommentPropertyActions: jest.fn(() => null),
 }));
+jest.mock('../../../containers/threads/hooks');
+jest.mock('./use_is_author');
+jest.mock('../../../common/navigation/hooks', () => ({
+  useCaseViewNavigation: () => ({
+    getCaseViewUrl: ({ detailName, commentId }: { detailName: string; commentId: string }) =>
+      `/cases/${detailName}/${commentId}`,
+  }),
+}));
+jest.mock('copy-to-clipboard', () => jest.fn());
 
 const propertyActionsMock = UserCommentPropertyActions as unknown as jest.Mock;
+const useGetReplyCountsMock = useGetReplyCounts as jest.Mock;
+const useIsAuthorMock = useIsAuthor as jest.Mock;
 
 const defaultProps: CommentActionsProps = {
+  caseId: 'case-1',
   commentId: 'comment-1',
   content: 'This is a comment',
+  createdBy: { username: 'author', fullName: null, email: null, profileUid: 'author-uid' },
 };
 
 const utils = getMockCommentRenderingContext();
@@ -45,6 +62,31 @@ const getPropertyActionsProps = (): ComponentProps<typeof UserCommentPropertyAct
 describe('CommentActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useGetReplyCountsMock.mockReturnValue({ data: { counts: { 'comment-1': 3 }, threads: {} } });
+    useIsAuthorMock.mockReturnValue(true);
+  });
+
+  it('passes the reply count of the comment', () => {
+    renderComponent();
+
+    expect(useGetReplyCountsMock).toHaveBeenCalledWith('case-1');
+    expect(getPropertyActionsProps().replyCount).toBe(3);
+  });
+
+  it('copies the reference link of the comment', () => {
+    renderComponent();
+
+    getPropertyActionsProps().onCopyLink?.();
+
+    expect(copy).toHaveBeenCalledWith('/cases/case-1/comment-1');
+  });
+
+  it.each([true, false])('lets only the author delete (author: %s)', (isAuthor) => {
+    useIsAuthorMock.mockReturnValue(isAuthor);
+    renderComponent();
+
+    expect(useIsAuthorMock).toHaveBeenCalledWith(defaultProps.createdBy);
+    expect(getPropertyActionsProps().canDelete).toBe(isAuthor);
   });
 
   it('renders the property actions with the comment content', () => {

@@ -7,13 +7,16 @@
 
 import React, { useMemo } from 'react';
 
+import { EuiText } from '@elastic/eui';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useLensOpenVisualization } from '../../markdown_editor/plugins/lens/use_lens_open_visualization';
 import * as i18n from './translations';
+import { COPY_REFERENCE_LINK } from '../translations';
 import { UserActionPropertyActions } from './property_actions';
 import { DeleteAttachmentConfirmationModal } from '../delete_attachment_confirmation_modal';
 import { useDeletePropertyAction } from './use_delete_property_action';
+import { getDeleteWithRepliesBody } from '../../attachments/comment/translations';
 
 interface Props {
   isLoading: boolean;
@@ -21,6 +24,11 @@ interface Props {
   onEdit: () => void;
   onDelete: () => void;
   onQuote: () => void;
+  onCopyLink?: () => void;
+  /** When above 0, the delete confirmation warns that the replies go too. */
+  replyCount?: number;
+  /** Hides the delete action, e.g. for comments posted by someone else. */
+  canDelete?: boolean;
 }
 
 const UserCommentPropertyActionsComponent: React.FC<Props> = ({
@@ -29,6 +37,9 @@ const UserCommentPropertyActionsComponent: React.FC<Props> = ({
   onEdit,
   onDelete,
   onQuote,
+  onCopyLink,
+  replyCount = 0,
+  canDelete = true,
 }) => {
   const { permissions } = useCasesContext();
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
@@ -42,7 +53,7 @@ const UserCommentPropertyActionsComponent: React.FC<Props> = ({
 
   const propertyActions = useMemo(() => {
     const showEditPencilIcon = permissions.update;
-    const showTrashIcon = permissions.delete;
+    const showTrashIcon = permissions.delete && canDelete;
     const showQuoteIcon = permissions.create;
 
     const showLensEditor = permissions.update && canUseEditor && actionConfig;
@@ -68,6 +79,16 @@ const UserCommentPropertyActionsComponent: React.FC<Props> = ({
             },
           ]
         : []),
+      ...(onCopyLink != null
+        ? [
+            {
+              type: AttachmentActionType.BUTTON as const,
+              iconType: 'link',
+              label: COPY_REFERENCE_LINK,
+              onClick: onCopyLink,
+            },
+          ]
+        : []),
       ...(showTrashIcon
         ? [
             {
@@ -85,11 +106,13 @@ const UserCommentPropertyActionsComponent: React.FC<Props> = ({
     permissions.update,
     permissions.delete,
     permissions.create,
+    canDelete,
     canUseEditor,
     actionConfig,
     onEdit,
     onModalOpen,
     onQuote,
+    onCopyLink,
   ]);
 
   return (
@@ -106,7 +129,11 @@ const UserCommentPropertyActionsComponent: React.FC<Props> = ({
           onCancel={onCancel}
           onConfirm={onConfirm}
           focusButtonRef={buttonRef}
-        />
+        >
+          {replyCount > 0 ? (
+            <EuiText size="s">{getDeleteWithRepliesBody(replyCount)}</EuiText>
+          ) : null}
+        </DeleteAttachmentConfirmationModal>
       ) : null}
     </>
   );
