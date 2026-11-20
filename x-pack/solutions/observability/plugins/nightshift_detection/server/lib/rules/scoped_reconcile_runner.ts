@@ -21,7 +21,6 @@ import {
   type StrategyAlertingRule,
   type StrategyError,
 } from './alerting_rule_reconciler';
-import { ManagedRuleReader } from './managed_rule_reader';
 import { SpaceRulesLock } from './space_rules_lock';
 
 /**
@@ -91,8 +90,7 @@ export class ScopedReconcileRunner {
     abortSignal: AbortSignal;
   }): Promise<ReconcileRulesResult> {
     const scope = await this.accountScope.fork({ accountRequest, spaceId });
-    // Both read the rules client bound in the fork, so they live and die with it.
-    scope.bind(ManagedRuleReader).toSelf();
+    // Reads the rules client bound in the fork, so it lives and dies with it.
     scope.bind(AlertingRuleReconciler).toSelf();
 
     try {

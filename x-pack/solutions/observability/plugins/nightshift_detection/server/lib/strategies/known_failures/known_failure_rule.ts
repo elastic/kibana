@@ -30,13 +30,6 @@ export function getUnwatchableReason(
   return undefined;
 }
 
-/**
- * The window, the margin and the minute still open when the rule runs. Derived, so tuning the
- * window cannot leave a lookback that cuts its first minutes off.
- */
-const getRuleLookback = (): string =>
-  `${KNOWN_FAILURES_SETTINGS.window_minutes + KNOWN_FAILURES_SETTINGS.end_margin_minutes + 1}m`;
-
 /** The rule that watches a countable knowledge indicator; the reconciler adds the engine's identity. */
 export function buildKnownFailureRule({
   knowledgeIndicator,
@@ -50,8 +43,12 @@ export function buildKnownFailureRule({
     metadata: { name: knowledgeIndicator.title },
     time_field: '@timestamp',
     schedule: {
-      every: KNOWN_FAILURES_SETTINGS.rule_every,
-      lookback: getRuleLookback(),
+      every: `${KNOWN_FAILURES_SETTINGS.rule_every_minutes}m`,
+      // The window, the margin and the minute still open when the rule runs. Derived, so tuning
+      // the window cannot leave a lookback that cuts its first minutes off.
+      lookback: `${
+        KNOWN_FAILURES_SETTINGS.window_minutes + KNOWN_FAILURES_SETTINGS.end_margin_minutes + 1
+      }m`,
     },
     // One active change per run at most, so a run writes one row and a new change a new group.
     grouping: { fields: ['change_at'] },
@@ -59,7 +56,6 @@ export function buildKnownFailureRule({
       base: compileKnownFailureQuery({
         esql: knowledgeIndicator.esql,
         cpsEnabled,
-        settings: KNOWN_FAILURES_SETTINGS,
       }),
     },
   };

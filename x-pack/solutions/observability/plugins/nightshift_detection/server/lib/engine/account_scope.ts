@@ -15,6 +15,7 @@ import { asSpaceId } from '@kbn/core-spaces-common';
 import type { NightshiftSourcesServerStart } from '@kbn/nightshift-sources-plugin/server';
 import type { SignificantEventsServerStart } from '@kbn/significant-events-plugin/server';
 import { EngineHttpError } from '../errors/engine_http_error';
+import { ManagedRuleReader } from '../rules/managed_rule_reader';
 import { DetectionRulesClient } from '../rules/rules_client_token';
 import { DetectionEngineDataClient } from './es_client_tokens';
 import { KnowledgeIndicators, Sources } from './tokens';
@@ -75,6 +76,8 @@ export class AccountScope {
         app: 'nightshift',
       })
     );
+    // Reads that rules client, so it lives and dies with the scope.
+    scope.bind(ManagedRuleReader).toSelf();
 
     return scope;
   }

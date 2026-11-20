@@ -25,9 +25,6 @@ export const KNOWN_FAILURES_SETTINGS = {
   end_margin_minutes: 1,
   /** Minutes without a breached signal after which an event of this strategy may close. */
   quiet_period_minutes: 5,
-  /** How often the rule runs. */
-  rule_every: '5m',
+  /** How often the rule runs, which is also how often the strategy reads its rows. */
+  rule_every_minutes: 5,
 } as const;
-
-/** The tunables of Known failures, as the compiler and the mapper read them. */
-export type KnownFailuresSettings = typeof KNOWN_FAILURES_SETTINGS;

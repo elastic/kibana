@@ -8,7 +8,7 @@
 import { injectable } from 'inversify';
 import type { DetectionStrategy } from '../detection_strategy';
 import type { DesiredResources, DetectionStrategyDescriptor, ResourceContext } from '../types';
-import { KNOWN_FAILURES_STRATEGY_ID } from './constants';
+import { KNOWN_FAILURES_SETTINGS, KNOWN_FAILURES_STRATEGY_ID } from './constants';
 import { buildKnownFailureRule, getUnwatchableReason } from './known_failure_rule';
 import { KnownFailuresGenerator } from './known_failures_generator';
 
@@ -26,7 +26,7 @@ export class KnownFailuresStrategy implements DetectionStrategy {
     description:
       'Reports when a failure the knowledge indicators describe starts happening more often than before.',
     // The rules run every five minutes, so reading more often would only find the same rows.
-    cadence_minutes: 5,
+    cadence_minutes: KNOWN_FAILURES_SETTINGS.rule_every_minutes,
     settle_minutes: 1,
     daily_new_event_cap: 10,
   };

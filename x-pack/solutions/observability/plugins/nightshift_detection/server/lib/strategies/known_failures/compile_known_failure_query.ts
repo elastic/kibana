@@ -8,7 +8,7 @@
 import { Parser } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
-import type { KnownFailuresSettings } from './constants';
+import { KNOWN_FAILURES_SETTINGS } from './constants';
 
 const FILTER_ONLY_COMMANDS = new Set(['from', 'where']);
 
@@ -53,15 +53,11 @@ export function canCompileKnownFailureQuery(esql: string): boolean {
 export function compileKnownFailureQuery({
   esql,
   cpsEnabled,
-  settings,
 }: {
   esql: string;
   cpsEnabled: boolean;
-  settings: Pick<
-    KnownFailuresSettings,
-    'window_minutes' | 'recovery_minutes' | 'end_margin_minutes'
-  >;
 }): string {
+  const settings = KNOWN_FAILURES_SETTINGS;
   const base = esql.trim();
   if (!canCompileKnownFailureQuery(base)) {
     throw new Error('Known failures counts FROM … | WHERE … queries only');

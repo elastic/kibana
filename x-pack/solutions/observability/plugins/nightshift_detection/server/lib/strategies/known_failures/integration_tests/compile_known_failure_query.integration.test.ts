@@ -99,7 +99,6 @@ const runCompiledQuery = async (esClient: ElasticsearchClient, scenario: string)
   const query = compileKnownFailureQuery({
     esql: `FROM ${getIndex(scenario)} | WHERE log.level == "error" AND message : "timeout"`,
     cpsEnabled: false,
-    settings: KNOWN_FAILURES_SETTINGS,
   });
   const { columns, values } = await esClient.esql.query({ query });
 
