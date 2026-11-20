@@ -279,13 +279,17 @@ describe('digital experience mobile scenarios', () => {
     });
 
     it('writes one platform only when asked to, and rejects options it does not know', async () => {
-      // `os.name` tells the platforms apart; `os.type` is `linux` on Android and `darwin` on iOS
-      const osNamesOfSessions = (platformDocs: OtelDocument[]) =>
-        new Set(
-          platformDocs
-            .filter((doc) => eventNameOf(doc) === EVENT_SESSION_START)
-            .map((doc) => resourceOf(doc)['os.name'])
+      // The mobile summaries match sessions by the distro, and tell the platforms apart by
+      // `os.name`; `os.type` is `linux` on Android and `darwin` on iOS
+      const osNamesOfSessions = (platformDocs: OtelDocument[]) => {
+        const sessionStarts = platformDocs.filter(
+          (doc) => eventNameOf(doc) === EVENT_SESSION_START
         );
+        sessionStarts.forEach((doc) =>
+          expect(resourceOf(doc)['telemetry.distro.name']).toBe('elastic')
+        );
+        return new Set(sessionStarts.map((doc) => resourceOf(doc)['os.name']));
+      };
       const ios = await run(native, {
         scenarioOpts: { seed: 'native', platform: 'ios', scale: 0.25 },
         from,
