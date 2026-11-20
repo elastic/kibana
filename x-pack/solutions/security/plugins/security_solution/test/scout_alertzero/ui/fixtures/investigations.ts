@@ -11,7 +11,7 @@ import type { ApiServicesFixture, KbnClient } from '@kbn/scout-security';
 const AGENT_BUILDER_HEADERS = { 'elastic-api-version': '2023-10-31' };
 
 /**
- * AlertZero works only in a Security space, but the default space can use the Classic view.
+ * These suites run AlertZero in a Security space, but the default space can use the Classic view.
  * Set the Security view, turn on the AlertZero setting, and return a function that restores both.
  */
 export const enableAlertZero = async ({

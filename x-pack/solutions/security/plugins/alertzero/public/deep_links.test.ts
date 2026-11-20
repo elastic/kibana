@@ -21,6 +21,12 @@ describe('getAlertZeroDeepLinks', () => {
     expect(ids).not.toContain('more');
   });
 
+  it('shows every link in both the Classic and the Security solution navigation', () => {
+    for (const { visibleIn } of getAlertZeroDeepLinks()) {
+      expect(visibleIn).toEqual(expect.arrayContaining(['classicSideNav', 'projectSideNav']));
+    }
+  });
+
   it('registers no link for a page the app does not route', () => {
     // Chats and Records were placeholder routes; a deep link outliving its route is a dead
     // sidebar entry and a dead global-search hit.
