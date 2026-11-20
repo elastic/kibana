@@ -748,14 +748,6 @@ node scripts/connector_vendor_api --connector databricks --source docs=https://d
 
 The pages are converted to OpenAPI with `convertMarkdownReference`, and recorded, projected and snapshotted like any other source. A prefix that selects no page fails the run, as the vendor may have moved the group. `--inspect` takes `--format` and `--pages` too, and adds them to the manifest with the source.
 
-A reference published as one static page rendered by Aglio (`threatq-html`) takes `--format` the same way, and the source's URL is the page, which is converted with `convertAglioReference`:
-
-```sh
-node scripts/connector_vendor_api --connector threatq --source rest_api=https://helpcenter.threatq.com/assets/HTML/api/ThreatQ_REST_API_Reference_v6.16.0.html --format rest_api=threatq-html
-```
-
-Such a page lists no schemas, so the snapshot's request and response schemas are inferred from its examples (see the `@kbn/connector-emulate` README) and may need an overlay. The vendor publishes a file per release, so the source follows a release until its URL is moved to the next; `--drift` can only see what a URL serves.
-
 The folder holds:
 
 - `manifest.json`: the sources and the operations each action calls.
