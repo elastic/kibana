@@ -626,9 +626,8 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         policy_ids: [''],
       } as PackagePolicy);
 
-    const hasAgentlessGrant = (
-      descriptor: { indices?: Array<{ names?: string[] }> } | undefined
-    ) => (descriptor?.indices ?? []).some((index) => index.names?.includes('agentless-*'));
+    const hasAgentlessGrant = (descriptor: { indices?: Array<{ names?: string[] }> } | undefined) =>
+      (descriptor?.indices ?? []).some((index) => index.names?.includes('agentless-*'));
 
     it('does NOT grant agentless-* permissions when the package is not agentless-eligible, even with the flag set', async () => {
       const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
