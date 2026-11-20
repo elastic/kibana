@@ -9,7 +9,8 @@
  * The space the suite runs in. The default space ('default') is the current
  * behaviour; a shared golden endpoint can host the suite in its own space by
  * exporting HUNT_WATCH_SPACE_ID (data-stream aliases, the alerts index and the
- * per-space Worker workflow id all derive from it).
+ * per-space Worker workflow id all derive from it). It names indices and ids
+ * only: kbnClient requests carry no `/s/<id>` prefix and run in the default space.
  */
 export const HUNT_WATCH_SPACE_ENV = 'HUNT_WATCH_SPACE_ID';
 

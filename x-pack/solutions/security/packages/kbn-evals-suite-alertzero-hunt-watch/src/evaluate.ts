@@ -12,6 +12,7 @@ import {
 } from '@kbn/alertzero-common';
 import { HuntWatchClient } from './harness/hunt_client';
 import { ensureHuntWorkerEnabled, restoreHuntWorker } from './harness/worker_setup';
+import { ensureSecuritySolutionView, restoreSolutionView } from './harness/solution_view';
 import { huntWatchSpaceId } from './harness/space';
 
 // Paths are inlined like the template suite (threat-intel-enrichment): packages
@@ -96,6 +97,9 @@ export const assertTierPinned = ({
  *   test. The hunt resolves each tier's model from these settings first and only
  *   then falls back to the stack defaults, so without this the run measures
  *   whatever the stack default is.
+ * - `securitySolutionView` (auto, worker-scoped): on stateful, gives the default
+ *   space the Security solution view (AlertZero routes answer 404 in a Classic
+ *   space) and restores the previous view on teardown.
  * - `huntWorker` (worker-scoped): installs and enables the hunt Worker with a
  *   service account, asserts it is enabled before any phase runs, and on
  *   teardown restores the Worker's prior state and deletes a service account
@@ -109,6 +113,7 @@ export const evaluate = base.extend<
   {},
   {
     modelSettingsForHuntWatch: void;
+    securitySolutionView: void;
     huntWorker: { serviceAccountId: string };
     huntWatchClient: HuntWatchClient;
     huntWorkerWorkflowId: string;
@@ -180,9 +185,24 @@ export const evaluate = base.extend<
     { scope: 'worker', auto: true },
   ],
 
+  // Before the Worker setup: on stateful its first call (GET /internal/alertzero/workers)
+  // answers 404 in a Classic space.
+  securitySolutionView: [
+    async ({ kbnClient, log }, use) => {
+      const prior = await ensureSecuritySolutionView(kbnClient, log);
+      try {
+        await use();
+      } finally {
+        await restoreSolutionView(kbnClient, log, prior);
+      }
+    },
+    { scope: 'worker', auto: true },
+  ],
+
   huntWorker: [
-    async ({ kbnClient, log, modelSettingsForHuntWatch }, use) => {
+    async ({ kbnClient, log, modelSettingsForHuntWatch, securitySolutionView }, use) => {
       void modelSettingsForHuntWatch;
+      void securitySolutionView;
       const { serviceAccountId, prior } = await ensureHuntWorkerEnabled(kbnClient, log);
       try {
         await use({ serviceAccountId });

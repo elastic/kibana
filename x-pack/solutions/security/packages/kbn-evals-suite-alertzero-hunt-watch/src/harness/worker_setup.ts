@@ -57,7 +57,7 @@ interface WorkerEntry {
 const isNotFound = (e: unknown): boolean =>
   e instanceof KbnClientRequesterError && e.status === 404;
 
-const isServerlessDeployment = async (kbnClient: KbnClient): Promise<boolean> => {
+export const isServerlessDeployment = async (kbnClient: KbnClient): Promise<boolean> => {
   const status = await kbnClient.request<{ version?: { build_flavor?: string } }>({
     path: '/api/status',
     method: 'GET',
