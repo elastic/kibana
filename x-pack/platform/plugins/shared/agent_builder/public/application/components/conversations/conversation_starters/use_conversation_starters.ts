@@ -7,7 +7,6 @@
 
 import { useCallback, useMemo } from 'react';
 import type { ConversationStarter } from '@kbn/agent-builder-common';
-import { useResolvedAgent } from '../../../hooks/agents/use_resolved_agent';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useAgentSendState } from '../../../hooks/agents/use_agent_send_state';
@@ -23,11 +22,9 @@ import { resolveConversationStarters } from './resolve_conversation_starters';
  */
 export const useConversationStarters = () => {
   const agentId = useAgentId();
-  // Only `agent` is used: while it loads it is undefined, and `isLoading` stays true forever when the
-  // agent is found in the list, because react-query v4 reports it for the disabled by-id query too.
-  const { agent } = useResolvedAgent(agentId);
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
-  const { agentExists, isBoundAgentForbidden, isAgentModelLoading } = useAgentSendState(agentId);
+  const { agent, agentExists, isBoundAgentForbidden, isAgentModelLoading } =
+    useAgentSendState(agentId);
   const spaceId = useActiveSpaceId();
   const { sessionTag } = useConversationContext();
   const { currentUser } = useCurrentUser();

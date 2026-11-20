@@ -6,7 +6,6 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { useResolvedAgent } from '../../../hooks/agents/use_resolved_agent';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useAgentSendState } from '../../../hooks/agents/use_agent_send_state';
@@ -16,7 +15,6 @@ import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useConversationStarters } from './use_conversation_starters';
 
-jest.mock('../../../hooks/agents/use_resolved_agent');
 jest.mock('../../../hooks/use_conversation');
 jest.mock('../../../hooks/use_submit_message');
 jest.mock('../../../hooks/agents/use_agent_send_state');
@@ -25,7 +23,6 @@ jest.mock('../../../hooks/use_input_draft');
 jest.mock('../../../context/active_space_context');
 jest.mock('../../../context/conversation/conversation_context');
 
-const mockUseResolvedAgent = jest.mocked(useResolvedAgent);
 const mockUseAgentId = jest.mocked(useAgentId);
 const mockUseSubmitMessage = jest.mocked(useSubmitMessage);
 const mockUseAgentSendState = jest.mocked(useAgentSendState);
@@ -38,12 +35,9 @@ const submitMessage = jest.fn();
 const takeNewChatDraft = jest.fn();
 const saveDraftTo = jest.fn();
 
-const mockAgent = (agent: Record<string, unknown> | undefined, isLoading = false) => {
-  mockUseResolvedAgent.mockReturnValue({ agent: agent as never, isLoading });
-};
-
 const mockSendState = (overrides: Partial<ReturnType<typeof useAgentSendState>> = {}) => {
   mockUseAgentSendState.mockReturnValue({
+    agent: undefined,
     agentExists: true,
     isAgentDeleted: false,
     isBoundAgentForbidden: false,
@@ -65,38 +59,31 @@ describe('useConversationStarters', () => {
     submitMessage.mockReset();
     mockUseAgentId.mockReturnValue('agent-1');
     mockUseSubmitMessage.mockReturnValue({ submitMessage, isCreatingConversation: false });
-    mockSendState();
+    mockSendState({
+      agent: {
+        id: 'agent-1',
+        conversation_starters: [{ label: 'first' }, { label: 'second', prompt: 'Second prompt' }],
+      } as never,
+    });
     mockUseActiveSpaceId.mockReturnValue('default');
     mockUseConversationContext.mockReturnValue({ sessionTag: 'tag' } as never);
     mockUseCurrentUser.mockReturnValue({ currentUser: { user: { username: 'elastic' } } } as never);
     takeNewChatDraft.mockReturnValue(null);
     mockUseCarryOverDraft.mockReturnValue({ takeNewChatDraft, saveDraftTo });
-    mockAgent({
-      id: 'agent-1',
-      conversation_starters: [{ label: 'first' }, { label: 'second', prompt: 'Second prompt' }],
-    });
   });
 
   it('returns the starters of the selected agent', () => {
     const { result } = renderHook(() => useConversationStarters());
 
-    expect(mockUseResolvedAgent).toHaveBeenCalledWith('agent-1');
+    expect(mockUseAgentSendState).toHaveBeenCalledWith('agent-1');
     expect(result.current.starters).toEqual([
       { label: 'first' },
       { label: 'second', prompt: 'Second prompt' },
     ]);
   });
 
-  it('returns the starters even though isLoading stays true for an agent found in the list', () => {
-    mockAgent({ id: 'agent-1', conversation_starters: [{ label: 'first' }] }, true);
-
-    const { result } = renderHook(() => useConversationStarters());
-
-    expect(result.current.starters).toEqual([{ label: 'first' }]);
-  });
-
-  it('returns no starters while the agent is loading', () => {
-    mockAgent(undefined, true);
+  it('returns no starters while the agent is not found yet', () => {
+    mockSendState({ agent: undefined });
 
     const { result } = renderHook(() => useConversationStarters());
 
@@ -120,7 +107,7 @@ describe('useConversationStarters', () => {
   });
 
   it('returns no starters when the agent has none', () => {
-    mockAgent({ id: 'agent-1' });
+    mockSendState({ agent: { id: 'agent-1' } as never });
 
     const { result } = renderHook(() => useConversationStarters());
 

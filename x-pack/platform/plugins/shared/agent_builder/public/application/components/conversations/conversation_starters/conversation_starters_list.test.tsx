@@ -68,6 +68,38 @@ describe('ConversationStartersList', () => {
     expect(onSelect).toHaveBeenCalledWith(starter);
   });
 
+  it('tags each card for click telemetry with its position and not its text', () => {
+    render(
+      <ConversationStartersList
+        starters={[{ label: 'first' }, { label: 'second', prompt: 'secret prompt' }]}
+        onSelect={jest.fn()}
+      />,
+      { wrapper }
+    );
+
+    const [first, second] = screen.getAllByTestId('agentBuilderConversationStarter');
+
+    expect(first).toHaveAttribute('data-ebt-action', 'conversation_starter_click');
+    expect(first).toHaveAttribute('data-ebt-element', 'agentBuilder.pageContent');
+    expect(first).toHaveAttribute('data-ebt-detail', '1');
+    expect(second).toHaveAttribute('data-ebt-detail', '2');
+    expect(second.outerHTML).not.toContain('secret prompt');
+  });
+
+  it('reports clicks in the flyout under the flyout element', () => {
+    render(
+      <ConversationStartersList starters={[{ label: 'first' }]} onSelect={jest.fn()} isStacked />,
+      {
+        wrapper,
+      }
+    );
+
+    expect(screen.getByTestId('agentBuilderConversationStarter')).toHaveAttribute(
+      'data-ebt-element',
+      'agentBuilder.flyout'
+    );
+  });
+
   it('does not call onSelect when disabled', () => {
     const onSelect = jest.fn();
     render(

@@ -97,6 +97,7 @@ describe('useConversationStarters with the real agent hooks', () => {
 
   it('shows nothing for an agent without starters', async () => {
     list.mockResolvedValue([{ id: 'agent-1', name: 'Agent' }]);
+    get.mockResolvedValue({ id: 'agent-1', name: 'Agent' });
 
     const { result } = renderHook(() => useConversationStarters(), { wrapper });
 

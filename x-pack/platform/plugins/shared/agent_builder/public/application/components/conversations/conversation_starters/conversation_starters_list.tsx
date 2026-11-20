@@ -16,7 +16,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { ConversationStarter } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
 const groupAriaLabel = i18n.translate('xpack.agentBuilder.conversationStarters.groupAriaLabel', {
   defaultMessage: 'Conversation starters',
@@ -82,7 +84,7 @@ export const ConversationStartersList: React.FC<ConversationStartersListProps> =
       css={styles.group}
       data-test-subj="agentBuilderConversationStarters"
     >
-      {starters.map((starter) => (
+      {starters.map((starter, index) => (
         <EuiFlexItem key={starter.label} grow={false} css={styles.item}>
           <EuiPanel
             hasBorder
@@ -91,6 +93,13 @@ export const ConversationStartersList: React.FC<ConversationStartersListProps> =
             disabled={isDisabled}
             onClick={() => onSelect(starter)}
             data-test-subj="agentBuilderConversationStarter"
+            {...getEbtProps({
+              element: isStacked
+                ? AGENT_BUILDER_UI_EBT.element.flyout
+                : AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.conversationStarters.CONVERSATION_STARTER_CLICK,
+              detail: `${index + 1}`,
+            })}
           >
             <span css={styles.label}>{starter.label}</span>
           </EuiPanel>
