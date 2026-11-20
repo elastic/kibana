@@ -8,6 +8,11 @@
  */
 
 import {
+  SLACK_EVENT_EMAIL_MAX,
+  SLACK_EVENT_ID_MAX,
+  SLACK_EVENT_NAME_MAX,
+  SLACK_EVENT_TEXT_MAX,
+  SLACK_RESPONSE_URL_MAX,
   slack2AppMention,
   slack2ChannelCreated,
   slack2FilePublic,
@@ -45,12 +50,7 @@ import {
 } from './constants';
 import { readSlackMessageText } from './message_text';
 
-const SLACK_EVENT_ID_MAX = 128;
-const SLACK_EVENT_NAME_MAX = 256;
-const SLACK_EVENT_TEXT_MAX = 40_000;
-const SLACK_EVENT_EMAIL_MAX = 320;
 const SLACK_URL_VERIFICATION_CHALLENGE_MAX = 1024;
-const SLACK_RESPONSE_URL_MAX = 2048;
 
 interface ParsedSlackEvent {
   readonly eventId: string;

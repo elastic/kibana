@@ -9,6 +9,10 @@
 
 import type { Logger } from '@kbn/logging';
 import {
+  SERVICENOW_CHANGED_FIELDS_MAX,
+  SERVICENOW_ID_MAX,
+  SERVICENOW_TEXT_MAX,
+  SERVICENOW_VALUE_MAX,
   servicenowSearchChangeApprovalStateChanged,
   servicenowSearchCommentAdded,
   servicenowSearchIncidentCreated,
@@ -40,10 +44,6 @@ import {
   SERVICENOW_WORK_NOTE_ADDED_EVENT_KEY,
 } from './constants';
 
-const SERVICENOW_ID_MAX = 128;
-const SERVICENOW_VALUE_MAX = 1024;
-const SERVICENOW_TEXT_MAX = 40_000;
-const SERVICENOW_CHANGED_FIELDS_MAX = 20;
 const SERVICENOW_OCCURRENCE_MAX = 64;
 
 interface ChangedField {

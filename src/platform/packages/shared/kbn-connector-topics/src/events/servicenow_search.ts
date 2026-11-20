@@ -9,10 +9,10 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 
-const SERVICENOW_ID_MAX = 128;
-const SERVICENOW_VALUE_MAX = 1024;
-const SERVICENOW_TEXT_MAX = 40_000;
-const SERVICENOW_CHANGED_FIELDS_MAX = 20;
+export const SERVICENOW_ID_MAX = 128;
+export const SERVICENOW_VALUE_MAX = 1024;
+export const SERVICENOW_TEXT_MAX = 40_000;
+export const SERVICENOW_CHANGED_FIELDS_MAX = 20;
 
 const snId = (description: string) =>
   z.string().min(1).max(SERVICENOW_ID_MAX).describe(description);

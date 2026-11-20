@@ -9,7 +9,7 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 
-const TEAMS_ID_MAX = 1024;
+export const TEAMS_ID_MAX = 1024;
 
 const teamsId = (description: string) => z.string().min(1).max(TEAMS_ID_MAX).describe(description);
 

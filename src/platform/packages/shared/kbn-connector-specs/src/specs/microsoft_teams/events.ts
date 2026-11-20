@@ -8,6 +8,7 @@
  */
 
 import {
+  TEAMS_ID_MAX,
   microsoftTeamsChannelCreated,
   microsoftTeamsChannelMessage,
   microsoftTeamsChatCreated,
@@ -32,7 +33,6 @@ import {
   MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_KEY,
 } from './constants';
 
-const TEAMS_ID_MAX = 1024;
 const ENTRA_GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const GRAPH_RESOURCE_PREFIX = /^https:\/\/graph\.microsoft\.com\/v1\.0\//i;
 const ODATA_SEGMENT = /^([A-Za-z]+)[(](?:'([^']*)'|"([^"]*)")[)]$/;

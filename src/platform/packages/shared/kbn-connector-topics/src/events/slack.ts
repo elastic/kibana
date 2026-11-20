@@ -9,11 +9,11 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 
-const SLACK_EVENT_ID_MAX = 128;
-const SLACK_EVENT_NAME_MAX = 256;
-const SLACK_EVENT_TEXT_MAX = 40_000;
-const SLACK_EVENT_EMAIL_MAX = 320;
-const SLACK_RESPONSE_URL_MAX = 2048;
+export const SLACK_EVENT_ID_MAX = 128;
+export const SLACK_EVENT_NAME_MAX = 256;
+export const SLACK_EVENT_TEXT_MAX = 40_000;
+export const SLACK_EVENT_EMAIL_MAX = 320;
+export const SLACK_RESPONSE_URL_MAX = 2048;
 
 const slackId = (description: string) =>
   z.string().min(1).max(SLACK_EVENT_ID_MAX).describe(description);

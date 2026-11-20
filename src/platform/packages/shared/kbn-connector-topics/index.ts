@@ -25,6 +25,7 @@ export {
 } from './src/events/github';
 export { inboundWebhookReceived } from './src/events/inbound_webhook';
 export {
+  TEAMS_ID_MAX,
   microsoftTeamsChannelCreated,
   microsoftTeamsChannelMessage,
   microsoftTeamsChatCreated,
@@ -32,6 +33,10 @@ export {
   microsoftTeamsTeamMemberAdded,
 } from './src/events/microsoft_teams';
 export {
+  SERVICENOW_CHANGED_FIELDS_MAX,
+  SERVICENOW_ID_MAX,
+  SERVICENOW_TEXT_MAX,
+  SERVICENOW_VALUE_MAX,
   servicenowSearchChangeApprovalStateChanged,
   servicenowSearchCommentAdded,
   servicenowSearchIncidentCreated,
@@ -40,6 +45,11 @@ export {
   servicenowSearchWorkNoteAdded,
 } from './src/events/servicenow_search';
 export {
+  SLACK_EVENT_EMAIL_MAX,
+  SLACK_EVENT_ID_MAX,
+  SLACK_EVENT_NAME_MAX,
+  SLACK_EVENT_TEXT_MAX,
+  SLACK_RESPONSE_URL_MAX,
   slack2AppMention,
   slack2ChannelCreated,
   slack2FilePublic,
