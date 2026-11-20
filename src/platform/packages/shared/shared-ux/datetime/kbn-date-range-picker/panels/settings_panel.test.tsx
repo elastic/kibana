@@ -48,13 +48,13 @@ describe('SettingsPanel', () => {
     });
 
     it("names the browser's time zone when timeZone is omitted", () => {
-      const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      jest
+        .spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions')
+        .mockReturnValue({ timeZone: 'Etc/GMT+5' } as Intl.ResolvedDateTimeFormatOptions);
       renderSettingsPanel();
 
       expect(
-        screen.getByText(
-          new RegExp(`Time zone is unset\\. Your browser's default is ${browserTimeZone}`)
-        )
+        screen.getByText("Time zone is unset. Your browser's default is Etc/GMT+5 (GMT-05:00).")
       ).toBeInTheDocument();
       expect(screen.queryByText(/undefined|null/)).not.toBeInTheDocument();
     });
