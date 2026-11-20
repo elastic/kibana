@@ -11,6 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { OnlineEvalAlertRuleButton } from './online_eval_alert_rule_button';
 import { useEvaluator } from '../../hooks/use_evaluators_api';
+import { useOnlineScoresPrivileges } from '../../hooks/use_online_scores_privileges';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -18,9 +19,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 jest.mock('@kbn/alerts-ui-shared', () => ({
   useGetRuleTypesPermissions: jest.fn(),
-}));
-jest.mock('@kbn/response-ops-rule-form/lib', () => ({
-  isValidRuleFormPlugins: () => true,
 }));
 jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
   RuleForm: ({
@@ -35,10 +33,12 @@ jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
   ),
 }));
 jest.mock('../../hooks/use_evaluators_api');
+jest.mock('../../hooks/use_online_scores_privileges');
 
 const mockedUseKibana = jest.mocked(useKibana);
 const mockedUsePermissions = jest.mocked(useGetRuleTypesPermissions);
 const mockedUseEvaluator = jest.mocked(useEvaluator);
+const mockedUsePrivileges = jest.mocked(useOnlineScoresPrivileges);
 
 const baseServices = {
   http: {},
@@ -79,12 +79,31 @@ describe('OnlineEvalAlertRuleButton', () => {
     mockedUseEvaluator.mockReturnValue({ data: undefined } as unknown as ReturnType<
       typeof useEvaluator
     >);
+    mockedUsePrivileges.mockReturnValue({
+      data: { has_read: true },
+      isLoading: false,
+    } as unknown as ReturnType<typeof useOnlineScoresPrivileges>);
     setPermissions(true);
   });
 
   it('is shown when the user can create rules', () => {
     renderButton();
     expect(screen.getByTestId('onlineEvalCreateAlertRuleButton')).toBeInTheDocument();
+  });
+
+  it('is disabled with an explanatory tooltip when the user cannot read the online scores index', async () => {
+    mockedUsePrivileges.mockReturnValue({
+      data: { has_read: false },
+      isLoading: false,
+    } as unknown as ReturnType<typeof useOnlineScoresPrivileges>);
+    renderButton();
+
+    const button = screen.getByTestId('onlineEvalCreateAlertRuleButton');
+    expect(button).toBeDisabled();
+    fireEvent.mouseOver(button);
+    expect(
+      await screen.findByText(/read index privilege on \.evaluation-online-scores/)
+    ).toBeInTheDocument();
   });
 
   it('is hidden when the user lacks rule privileges', () => {
@@ -100,6 +119,8 @@ describe('OnlineEvalAlertRuleButton', () => {
     renderButton();
     expect(screen.queryByTestId('onlineEvalCreateAlertRuleButton')).not.toBeInTheDocument();
     expect(mockedUsePermissions).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+    expect(mockedUseEvaluator).toHaveBeenCalledWith(undefined);
+    expect(mockedUsePrivileges).toHaveBeenCalledWith(false);
   });
 
   it('prefills the rule query with the space filter, metric and threshold', async () => {
@@ -117,7 +138,7 @@ describe('OnlineEvalAlertRuleButton', () => {
     });
     const esql = esqlNode.textContent ?? '';
     expect(esql).toContain('monitor.id == "workflow-1"');
-    expect(esql).toContain('space_ids == "space-a"');
+    expect(esql).toContain('MV_CONTAINS(space_ids, "space-a")');
     expect(esql).toContain('score.name == "factuality"');
     expect(esql).toContain('avg_score < 0.7');
     expect(esql).toContain('/app/evals/online/workflow-1');

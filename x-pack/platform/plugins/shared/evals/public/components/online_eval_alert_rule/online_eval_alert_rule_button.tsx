@@ -17,14 +17,13 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { getJudgeScoreDirection } from '@kbn/evals-common';
+import { EvaluationIndices, getJudgeScoreDirection } from '@kbn/evals-common';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
-import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '@kbn/alerts-ui-shared';
-import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
-import type { RuleFormData } from '@kbn/response-ops-rule-form';
+import type { RuleFormData, RuleFormPlugins } from '@kbn/response-ops-rule-form';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import { AlertConsumers, ES_QUERY_ID } from '@kbn/rule-data-utils';
 import type { CoreStart } from '@kbn/core/public';
@@ -39,6 +38,7 @@ import type {
   OnlineEvalTimeWindowUnit,
 } from '../../../common/online_evals/alert_rule_query';
 import { useEvaluator } from '../../hooks/use_evaluators_api';
+import { useOnlineScoresPrivileges } from '../../hooks/use_online_scores_privileges';
 import type { EvalsStartDependencies } from '../../types';
 
 const RuleFormFlyout = lazy(async () => {
@@ -97,7 +97,13 @@ const UNIT_OPTIONS: Array<{ value: OnlineEvalTimeWindowUnit; text: string }> = [
 ];
 
 type AlertRuleServices = CoreStart &
-  Pick<EvalsStartDependencies, 'triggersActionsUi' | 'data' | 'unifiedSearch' | 'charts'>;
+  Pick<EvalsStartDependencies, 'dataViews'> &
+  Partial<
+    Pick<
+      EvalsStartDependencies,
+      'triggersActionsUi' | 'data' | 'unifiedSearch' | 'charts' | 'fieldsMetadata'
+    >
+  >;
 
 export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps> = ({
   workflowId,
@@ -105,22 +111,47 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
   spaceId,
   metrics,
 }) => {
-  const { services } = useKibana<AlertRuleServices & Record<string, unknown>>();
-  const { http, notifications, application, triggersActionsUi } = services;
+  const { services } = useKibana<AlertRuleServices>();
+  const {
+    http,
+    notifications,
+    application,
+    i18n: i18nStart,
+    theme,
+    userProfile,
+    settings,
+    docLinks,
+    triggersActionsUi,
+    data,
+    dataViews,
+    unifiedSearch,
+    charts,
+    fieldsMetadata,
+  } = services;
 
-  const ruleTypeRegistry: RuleTypeRegistryContract | undefined =
-    triggersActionsUi?.ruleTypeRegistry;
-  const actionTypeRegistry: ActionTypeRegistryContract | undefined =
-    triggersActionsUi?.actionTypeRegistry;
+  // The optional plugins are narrowed here so the rule form gets a fully typed plugin bag.
+  const ruleFormPlugins: RuleFormPlugins | undefined =
+    triggersActionsUi && data && unifiedSearch && charts && fieldsMetadata
+      ? {
+          http,
+          i18n: i18nStart,
+          theme,
+          userProfile,
+          application,
+          notifications,
+          charts,
+          settings,
+          data,
+          dataViews,
+          unifiedSearch,
+          docLinks,
+          ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
+          actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+          fieldsMetadata,
+        }
+      : undefined;
   const hasRequiredPlugins = Boolean(
-    triggersActionsUi &&
-      services.data &&
-      services.unifiedSearch &&
-      services.charts &&
-      services.fieldsMetadata &&
-      ruleTypeRegistry &&
-      actionTypeRegistry &&
-      isValidRuleFormPlugins(services)
+    ruleFormPlugins?.ruleTypeRegistry && ruleFormPlugins.actionTypeRegistry
   );
 
   const { authorizedToCreateAnyRules, ruleTypesState } = useGetRuleTypesPermissions({
@@ -140,7 +171,12 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
   const [minSampleSize, setMinSampleSize] = useState('10');
 
   const selectedMetric = metrics.find((candidate) => candidate.metric === metric) ?? metrics[0];
-  const { data: evaluatorData } = useEvaluator(selectedMetric?.evaluatorName);
+  const { data: evaluatorData } = useEvaluator(
+    hasRequiredPlugins ? selectedMetric?.evaluatorName : undefined
+  );
+  const { data: privileges, isLoading: isLoadingPrivileges } =
+    useOnlineScoresPrivileges(hasRequiredPlugins);
+  const canReadOnlineScores = privileges?.has_read === true;
   const direction = useMemo(() => {
     const score = evaluatorData?.evaluator.judge?.output.scores.find(
       ({ name }) => name === selectedMetric?.metric
@@ -150,7 +186,7 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
   const trigger = triggerOverride ?? getDefaultAlertTrigger(direction);
 
   if (
-    !hasRequiredPlugins ||
+    !ruleFormPlugins ||
     ruleTypesState.isLoading ||
     !authorizedToCreateAnyRules ||
     !spaceId ||
@@ -199,7 +235,8 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
       consumer: AlertConsumers.ALERTS,
       schedule: { interval: '5m' },
       actions: [],
-      // The ES|QL branch of the `.es-query` params has no `index`/`esQuery`/`searchConfiguration`.
+      // `@kbn/response-ops-rule-params` does not export the ES|QL variant of the `.es-query` params,
+      // so the builder's result is cast to the exported union type.
       params: buildOnlineEvalAlertRuleParams({
         ...options,
         drillDownUrl,
@@ -208,7 +245,7 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
         investigation_guide: {
           blob: i18n.translate('xpack.evals.onlineEvaluations.alertRule.investigationGuide', {
             defaultMessage:
-              'Open the [online evaluation]({url}) filtered to the rule window to find the traces behind the score change.',
+              'Open the [online evaluation]({url}) to find the traces behind the score change. The link shows the rule window counted back from when you open it, not from when the alert fired.',
             values: { url: drillDownUrl },
           }),
         },
@@ -222,6 +259,8 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
     <EuiButton
       size="s"
       iconType="bell"
+      isDisabled={!canReadOnlineScores}
+      isLoading={isLoadingPrivileges}
       onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
       data-test-subj="onlineEvalCreateAlertRuleButton"
     >
@@ -231,10 +270,26 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
     </EuiButton>
   );
 
+  const buttonWithTooltip =
+    canReadOnlineScores || isLoadingPrivileges ? (
+      button
+    ) : (
+      <EuiToolTip
+        content={i18n.translate('xpack.evals.onlineEvaluations.alertRule.missingPrivilegeTooltip', {
+          defaultMessage:
+            'You need the read index privilege on {index} to create alert rules for online evaluation scores.',
+          values: { index: EvaluationIndices.ONLINE_SCORES },
+        })}
+        data-test-subj="onlineEvalCreateAlertRuleTooltip"
+      >
+        {button}
+      </EuiToolTip>
+    );
+
   return (
     <>
       <EuiPopover
-        button={button}
+        button={buttonWithTooltip}
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
         anchorPosition="downRight"
@@ -370,16 +425,12 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
           </EuiFlexGroup>
         </EuiPopoverFooter>
       </EuiPopover>
-      {isFlyoutOpen && ruleTypeRegistry && actionTypeRegistry ? (
+      {isFlyoutOpen ? (
         <KibanaContextProvider services={services}>
           <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
             <RuleFormFlyout
               data-test-subj="onlineEvalAlertRuleForm"
-              plugins={{
-                ...(services as unknown as React.ComponentProps<typeof RuleFormFlyout>['plugins']),
-                ruleTypeRegistry,
-                actionTypeRegistry,
-              }}
+              plugins={ruleFormPlugins}
               ruleTypeId={ES_QUERY_ID}
               initialValues={buildInitialValues()}
               initialMetadata={{ isManagementPage: false }}
