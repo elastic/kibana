@@ -485,10 +485,23 @@ steps:
     on-failure:
       continue: true
 
+  # Liquid `default` also replaces an empty array, so only one of these two steps runs and `concat` joins them.
+  - name: compute_resolved_stamp_rule_uuids
+    type: data.set
+    if: '${{ steps.resolve_written_detections.error == null }}'
+    with:
+      stamp_rule_uuids: '${{ steps.resolve_written_detections.output.stamp_rule_uuids }}'
+
+  - name: compute_fallback_stamp_rule_uuids
+    type: data.set
+    if: '${{ steps.resolve_written_detections.error != null }}'
+    with:
+      stamp_rule_uuids: '${{ steps.compute_written_rule_uuids.output.written_rule_uuids | default: [] }}'
+
   - name: compute_stamp_rule_uuids
     type: data.set
     with:
-      stamp_rule_uuids: '{% if steps.resolve_written_detections.error == null %}{{ steps.resolve_written_detections.output.stamp_rule_uuids | json }}{% else %}{{ steps.compute_written_rule_uuids.output.written_rule_uuids | default: [] | json }}{% endif %}'
+      stamp_rule_uuids: '${{ steps.compute_resolved_stamp_rule_uuids.output.stamp_rule_uuids | concat: steps.compute_fallback_stamp_rule_uuids.output.stamp_rule_uuids }}'
 
   # Size must be computed separately — comparison operators cannot follow a filter chain.
   - name: count_written_rules

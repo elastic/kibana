@@ -121,12 +121,14 @@ export const resolveWrittenDetectionsStepDefinition = ({ logger }: { logger: Log
         );
       }
 
-      return {
-        output: resolveStampRules({
-          batch,
-          reportedRuleUuids,
-          runWrittenPairs,
-        }),
-      };
+      const output = resolveStampRules({ batch, reportedRuleUuids, runWrittenPairs });
+
+      if (output.derived_count === 0 && reportedRuleUuids.length > 0) {
+        logger.debug(
+          `resolveWrittenDetections derived no rules from events written by ${workflowExecutionId}, though the agent reported ${reportedRuleUuids.length}`
+        );
+      }
+
+      return { output };
     },
   });

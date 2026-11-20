@@ -124,17 +124,33 @@ describe('discovery workflow detection classifier wiring', () => {
       expect(resolve.with).not.toHaveProperty('space_id');
     });
 
-    it('falls back to the validated agent report when resolving written detections has no output', () => {
+    describe('stamp rule uuids', () => {
       const stampRuleUuids = requireStep('compute_stamp_rule_uuids').with?.stamp_rule_uuids;
+      const reported = {
+        compute_written_rule_uuids: { output: { written_rule_uuids: ['rule-X'] } },
+      };
 
-      expect(
-        evaluate(stampRuleUuids, {
-          steps: {
-            resolve_written_detections: { error: { message: 'unavailable' } },
-            compute_written_rule_uuids: { output: { written_rule_uuids: ['rule-A'] } },
-          },
-        })
-      ).toEqual(['rule-A']);
+      it('keeps an empty resolver result instead of falling back to the reported rules', () => {
+        expect(
+          evaluate(stampRuleUuids, {
+            steps: {
+              ...reported,
+              compute_resolved_stamp_rule_uuids: { output: { stamp_rule_uuids: [] } },
+            },
+          })
+        ).toEqual([]);
+      });
+
+      it('falls back to the reported rules when the resolver step failed', () => {
+        expect(
+          evaluate(stampRuleUuids, {
+            steps: {
+              ...reported,
+              compute_fallback_stamp_rule_uuids: { output: { stamp_rule_uuids: ['rule-X'] } },
+            },
+          })
+        ).toEqual(['rule-X']);
+      });
     });
 
     it('reports the unknown reported rule count in the completed body', () => {
