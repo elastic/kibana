@@ -248,11 +248,13 @@ const getGroupCollections = (
     .filter(([, members]) => members.size >= 2)
     .map(([groupId, members]) => {
       const memberPackages = [...members.values()];
+      // Use the icon of the member named after the group (the ECS package), like the browse tiles.
+      const iconMember = members.get(groupId) ?? memberPackages[0];
       return {
         id: `collection:${groupId}`,
         title: INTEGRATION_GROUPS[groupId].title,
         name: groupId,
-        icon: getEuiIconType(memberPackages[0], basePath),
+        icon: getEuiIconType(iconMember, basePath),
         url: `${browsePath}?${COLLECTION_QUERYPARAM}=${encodeURIComponent(groupId)}`,
         members: memberPackages.map(({ name, title }) => ({ name, title })),
         // The package titles, plus the titles the packages' own results had so a search for a policy
