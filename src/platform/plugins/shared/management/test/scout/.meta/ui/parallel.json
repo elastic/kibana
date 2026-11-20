@@ -1,5 +1,5 @@
 {
-  "sha1": "bf4eea94087cc3d00c5080a6036684fc331feedd",
+  "sha1": "03977fd5d5765355073f043b8cae655cfd4c600f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -70,7 +70,7 @@
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/nav_access.spec.ts",
         "line": 16,
-        "column": 14
+        "column": 24
       }
     },
     {
@@ -83,7 +83,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/nav_access.spec.ts",
-        "line": 81,
+        "line": 80,
         "column": 3
       }
     },
@@ -111,8 +111,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/other_sections.spec.ts",
-        "line": 40,
-        "column": 9
+        "line": 39,
+        "column": 11
       }
     },
     {

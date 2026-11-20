@@ -1,5 +1,5 @@
 {
-  "sha1": "f6e323e1b7415d15571832e93513afb347acc0e0",
+  "sha1": "0171c62670c41f7d1b740ce31f0bbd2fbe5a86ff",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -20,26 +20,26 @@
     {
       "id": "631f7bf9bf7ee97-322fddc6892c2d3",
       "title": "Synthetics real-agent shard rebalance does not fail over a stopped agent that still has recent Heartbeat data",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/parallel_tests/rebalance.spec.ts",
-        "line": 73,
+        "line": 74,
         "column": 60
       }
     },
     {
       "id": "631f7bf9bf7ee97-ccfaf285a0803d8",
       "title": "Synthetics real-agent shard rebalance failovers a stopped agent onto the survivor, runs there, and does not steal load on recovery",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/parallel_tests/rebalance.spec.ts",
-        "line": 91,
+        "line": 92,
         "column": 35
       }
     }

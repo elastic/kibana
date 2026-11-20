@@ -68,6 +68,25 @@ describe('useModelSettingsForm', () => {
     expect(result.current.sections[0].children).toHaveLength(2);
   });
 
+  it('reset restores the saved assignments and clears the dirty state', () => {
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    act(() => {
+      result.current.updateEndpoints('child_1', ['endpoint-z']);
+    });
+    expect(result.current.isDirty).toBe(true);
+
+    act(() => {
+      result.current.reset();
+    });
+
+    expect(result.current.isDirty).toBe(false);
+    expect(result.current.assignments).toEqual({
+      child_1: ['endpoint-a', 'endpoint-b'],
+      child_2: ['endpoint-c'],
+    });
+  });
+
   it('initializes assignments from recommendedEndpoints when no saved data', () => {
     const { result } = renderHook(() => useModelSettingsForm());
 

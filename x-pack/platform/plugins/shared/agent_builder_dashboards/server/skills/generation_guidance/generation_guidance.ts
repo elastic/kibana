@@ -45,7 +45,7 @@ For an existing dashboard:
 - Use \`edit_panels\` to change existing panel content in place. Reorganizing or enhancing a dashboard does not require replacing panels.
 - For focused edits, pass only the requested change in the edit \`query\` (e.g. "make the error series blue"). The chart author preserves unrelated presentation settings. Set \`applyChartRules: true\` to apply all presentation defaults to an existing ES|QL Lens panel instead.
 - Set \`preserveESQL: true\` when the panel's query should stay unchanged. Omit it when the edit changes what the panel measures. This is independent of \`applyChartRules\`, so a query change and presentation enhancement can share one edit.
-- If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
+- These panels cannot be edited, only moved, resized, or removed: DSL-based, form-based, and other non-ES|QL Lens panels, and by-reference panels (\`config.savedObjectId\` or \`config.ref_id\`). A by-reference panel's content is unknown: do not look it up with any tool or API; its title is the only hint. When the user asks to change one of these panels, say so, propose replacing it with a new ES|QL-based Lens panel, and wait for explicit confirmation before replacing it.
 - Use \`move_panels\` to move existing panels between the top level and sections without changing panel content.
 
 ## Panel Inputs

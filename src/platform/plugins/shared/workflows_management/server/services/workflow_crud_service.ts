@@ -151,7 +151,7 @@ export class WorkflowCrudService {
     return firstValueFrom(
       this.deps
         .getCoreStart()
-        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)
+        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, true)
     );
   }
 

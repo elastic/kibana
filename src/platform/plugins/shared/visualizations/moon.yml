@@ -18,6 +18,7 @@ project:
   sourceRoot: src/platform/plugins/shared/visualizations
 dependsOn:
   - '@kbn/app-header'
+  - '@kbn/scout'
   - '@kbn/core'
   - '@kbn/charts-plugin'
   - '@kbn/data-plugin'
@@ -100,10 +101,12 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks: {}

@@ -12,10 +12,12 @@ import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common';
 import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_UPDATED_UI_EVENT, type DashboardUpdatedUiEventData } from '../../../common';
+import { enterEditModeForAgentChanges } from './enter_edit_mode';
 
 export interface AgentLiveUpdatesSubscriptionParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
+  canWriteDashboards: boolean;
   upsertAttachment: (attachment: DashboardAttachment) => void;
 }
 
@@ -31,6 +33,7 @@ const isDashboardUpdatedUiEvent = (
 export const createAgentLiveUpdatesSubscription = ({
   agentBuilder,
   api,
+  canWriteDashboards,
   upsertAttachment,
 }: AgentLiveUpdatesSubscriptionParams): Subscription =>
   agentBuilder.events.ui.activeConversation$
@@ -54,5 +57,8 @@ export const createAgentLiveUpdatesSubscription = ({
         return;
       }
 
+      if (canWriteDashboards) {
+        enterEditModeForAgentChanges(api);
+      }
       api.setState(attachmentDataToDashboardState(attachment.data), { changedBy: ['agent'] });
     });

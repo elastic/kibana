@@ -1,5 +1,5 @@
 {
-  "sha1": "2a12788ce10b42369c5e746c2ae96aeb0bb657af",
+  "sha1": "1c490c4f57cac0fc39db7b41fef2e10a5a39ceef",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -299,7 +299,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 50,
+        "line": 59,
         "column": 61
       }
     },
@@ -315,7 +315,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 62,
+        "line": 71,
         "column": 34
       }
     },
@@ -331,7 +331,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 75,
+        "line": 84,
         "column": 24
       }
     },
@@ -347,7 +347,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 93,
+        "line": 99,
         "column": 30
       }
     },
@@ -363,7 +363,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 113,
+        "line": 119,
         "column": 15
       }
     },
@@ -379,7 +379,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 140,
+        "line": 146,
         "column": 11
       }
     },
@@ -395,7 +395,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 158,
+        "line": 164,
         "column": 40
       }
     },
@@ -411,7 +411,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 197,
+        "line": 203,
         "column": 27
       }
     },
@@ -427,7 +427,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 171,
+        "line": 176,
         "column": 29
       }
     },

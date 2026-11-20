@@ -117,6 +117,14 @@ export const API_PRIVATE_LOCATIONS_ONLY = i18n.translate(
   }
 );
 
+const URL_REQUIRED_ERROR = i18n.translate('xpack.synthetics.monitorConfig.urls.requiredError', {
+  defaultMessage: 'URL is required',
+});
+
+const HOST_REQUIRED_ERROR = i18n.translate('xpack.synthetics.monitorConfig.hosts.requiredError', {
+  defaultMessage: 'Host is required',
+});
+
 const API_PRIVATE_LOCATION_REQUIRED = i18n.translate(
   'xpack.synthetics.monitorConfig.monitorType.api.privateLocationRequiredTooltip',
   {
@@ -327,6 +335,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   [`urls__single`]: {
     fieldKey: ConfigKey.URLS,
     required: true,
+    error: URL_REQUIRED_ERROR,
     component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.urlsSingle.label', {
       defaultMessage: 'Website URL',
@@ -355,6 +364,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   [`urls__http`]: {
     fieldKey: ConfigKey.URLS,
     required: true,
+    error: URL_REQUIRED_ERROR,
     component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.urls.label', {
       defaultMessage: 'URL',
@@ -383,6 +393,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   [`hosts__tcp`]: {
     fieldKey: ConfigKey.HOSTS,
     required: true,
+    error: HOST_REQUIRED_ERROR,
     component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.hostsTCP.label', {
       defaultMessage: 'Host:Port',
@@ -406,6 +417,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   [`hosts__icmp`]: {
     fieldKey: ConfigKey.HOSTS,
     required: true,
+    error: HOST_REQUIRED_ERROR,
     component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.hostsICMP.label', {
       defaultMessage: 'Host',
@@ -484,6 +496,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   [ConfigKey.LOCATIONS]: {
     fieldKey: ConfigKey.LOCATIONS,
     required: true,
+    error: i18n.translate('xpack.synthetics.monitorConfig.locations.requiredError', {
+      defaultMessage: 'At least one location is required',
+    }),
     controlled: true,
     component: LocationsComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.locations.label', {
