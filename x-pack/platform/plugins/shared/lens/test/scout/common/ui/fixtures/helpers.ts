@@ -12,6 +12,7 @@ import {
   KibanaCodeEditorWrapper,
   QueryBar,
   ContentListWrapper,
+  enableElasticChartDebug,
   type ApiServicesFixture,
   type KibanaUrl,
   type Locator,
@@ -280,13 +281,6 @@ interface LogstashLensEditorBeforeEachContext {
 
 /** Matches FTR lens group5 `browser.setWindowSize(1280, 1200)`. */
 export const LENS_EDITOR_VIEWPORT = { width: 1280, height: 1200 } as const;
-
-/** Enables elastic-charts debug state for subsequent page loads in this browser context. */
-export async function enableElasticChartDebug(context: ElasticChartDebugContext): Promise<void> {
-  await context.addInitScript(() => {
-    (window as unknown as { _echDebugStateFlag?: boolean })._echDebugStateFlag = true;
-  });
-}
 
 /**
  * Creates a space-scoped Logstash data view + common uiSettings so Visualize/Lens

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
-import { enableElasticChartDebug, test } from '../../fixtures';
+import { enableElasticChartDebug, tags } from '@kbn/scout';
+import { test } from '../../fixtures';
 import { createStreamScenario } from '../../fixtures/stream_scenario';
 
 const scenario = createStreamScenario({

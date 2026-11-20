@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { enableElasticChartDebug } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
@@ -49,9 +50,7 @@ spaceTest.describe('Discover ES|QL dashboard', { tag: '@local-stateful-classic' 
     async ({ context, pageObjects, page }) => {
       const { discover, lens } = pageObjects;
 
-      await context.addInitScript(() => {
-        (window as unknown as { _echDebugStateFlag?: boolean })._echDebugStateFlag = true;
-      });
+      await enableElasticChartDebug(context);
 
       await discover.goto({ queryMode: 'esql' });
       await discover.waitUntilTabIsLoaded();

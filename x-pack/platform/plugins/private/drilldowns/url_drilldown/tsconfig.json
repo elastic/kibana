@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/embeddable-plugin",
@@ -21,6 +21,7 @@
     "@kbn/rison",
     "@kbn/datemath",
     "@kbn/zod",
+    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",

@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { waitForChartRenderComplete } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { setComboBoxValue } from '../combo_box_helpers';
 import { RANDOM_SAMPLER_OPTION_VALUES, type RandomSamplerOption } from '../random_sampler';
@@ -200,9 +201,7 @@ export class DataDrift {
   ) {
     const chart = this.page.testSubj.locator(`dataDriftDocCountChart-${id}`);
     await chart.waitFor({ state: 'visible', timeout: 30_000 });
-    await chart
-      .locator('.echChartStatus[data-ech-render-complete="true"]')
-      .waitFor({ state: 'attached', timeout: 30_000 });
+    await waitForChartRenderComplete(chart, { timeout: 30_000 });
 
     // FTR `elasticChart.getCanvas(testSubj)` returns `.echCanvasRenderer` and clicks
     // with WebDriver Actions using the element center as origin ([0, 0] = center).

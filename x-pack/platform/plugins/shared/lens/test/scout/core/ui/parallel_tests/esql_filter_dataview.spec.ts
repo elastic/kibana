@@ -7,6 +7,7 @@
 
 import { LENS_METRIC_STATE_DEFAULTS } from '@kbn/lens-common';
 import type { EsqlEditor, KbnClient, ScoutPage } from '@kbn/scout';
+import { waitForChartRenderComplete } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { applyLensInlineEditorAndWaitClosed, spaceTest, testData } from '../fixtures';
@@ -91,9 +92,7 @@ const setEsqlQueryAndRun = async (
   await esqlEditor.runQuery();
   const chart = page.testSubj.locator('xyVisChart');
   await expect(chart).toBeVisible();
-  await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
-    state: 'attached',
-  });
+  await waitForChartRenderComplete(chart);
 };
 
 spaceTest.describe(

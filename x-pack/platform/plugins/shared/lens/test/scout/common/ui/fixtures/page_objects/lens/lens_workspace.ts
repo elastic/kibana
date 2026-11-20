@@ -7,7 +7,13 @@
 
 import type { DebugState } from '@elastic/charts';
 import { encode as encodeRison } from '@kbn/rison';
-import { AppMenu, KibanaCodeEditorWrapper, type Locator, type ScoutPage } from '@kbn/scout';
+import {
+  AppMenu,
+  getChartDebugState,
+  KibanaCodeEditorWrapper,
+  type Locator,
+  type ScoutPage,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { LOGSTASH_IN_RANGE_DATES } from '../../../../fixtures/constants';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
@@ -346,15 +352,7 @@ export class LensWorkspace {
   async getCurrentChartDebugState(visType: string): Promise<DebugState> {
     await this.deps.waitForVisualization(visType);
     const chart = this.page.testSubj.locator('lnsWorkspace').getByTestId(visType);
-    // Elastic Charts status node — no Lens data-test-subj; same signal as FTR / open-in-Lens helpers.
-    await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
-      state: 'attached',
-    });
-    const debugJson = await chart.locator('.echChartStatus').getAttribute('data-ech-debug-state');
-    if (!debugJson) {
-      throw new Error('Elastic charts debugState not found — enable chart debug before navigation');
-    }
-    return JSON.parse(debugJson) as DebugState;
+    return getChartDebugState<DebugState>(chart);
   }
 
   /**
@@ -365,15 +363,7 @@ export class LensWorkspace {
    */
   async getDashboardChartDebugState(chartTestSubj: string): Promise<DebugState> {
     const chart = this.page.testSubj.locator(chartTestSubj);
-    // Elastic Charts status node — no Lens data-test-subj; same signal as the editor helper.
-    await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
-      state: 'attached',
-    });
-    const debugJson = await chart.locator('.echChartStatus').getAttribute('data-ech-debug-state');
-    if (!debugJson) {
-      throw new Error('Elastic charts debugState not found — enable chart debug before navigation');
-    }
-    return JSON.parse(debugJson) as DebugState;
+    return getChartDebugState<DebugState>(chart);
   }
 
   /**

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { enableElasticChartDebug, test } from '../../fixtures';
+import { enableElasticChartDebug } from '@kbn/scout';
+import { test } from '../../fixtures';
 import { createLogsDBScenario, logsDBDeploymentTags } from '../../fixtures/logsdb_stream_downgrade';
 
 const scenario = createLogsDBScenario({

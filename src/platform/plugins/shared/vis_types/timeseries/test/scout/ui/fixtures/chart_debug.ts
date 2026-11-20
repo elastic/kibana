@@ -21,19 +21,7 @@ export const CHART_POLL_OPTIONS = { timeout: 30_000 };
 
 export type AnnotationData = NonNullable<DebugState['annotations']>[number]['data'];
 
-interface ElasticChartDebugContext {
-  addInitScript: (script: () => void) => Promise<{ dispose: () => Promise<void> }>;
-}
-
-/**
- * Enables the `@elastic/charts` debug state for every page loaded in this browser
- * context. Must run before navigation: the flag is read while the chart mounts.
- */
-export const enableElasticChartDebug = async (context: ElasticChartDebugContext): Promise<void> => {
-  await context.addInitScript(() => {
-    (window as unknown as { _echDebugStateFlag?: boolean })._echDebugStateFlag = true;
-  });
-};
+export { enableElasticChartDebug } from '@kbn/scout';
 
 export const getAreasCount = (debugState: DebugState): number => debugState.areas?.length ?? 0;
 

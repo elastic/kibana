@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { enableElasticChartDebug } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   completeLensCsvExport,
   createAdHocDataViewFromLens,
   createRuntimeFieldFromEditor,
-  enableElasticChartDebug,
   spaceTest,
   testData,
 } from '../fixtures';
