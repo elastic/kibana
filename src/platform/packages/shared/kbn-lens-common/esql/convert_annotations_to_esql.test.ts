@@ -120,6 +120,19 @@ describe('convertQueryAnnotationsToEsql', () => {
     });
   });
 
+  it('does not carry over unknown properties of the query annotation', () => {
+    const state = {
+      layers: [annotationLayer([{ ...queryAnnotation, futureQueryOnlyProp: 'x' }])],
+    };
+
+    const result = convertQueryAnnotationsToEsql(state, indexPatterns);
+
+    expect(result).toEqual({ ok: true, state: expect.anything() });
+    const [layer] = (result as { state: { layers: Array<{ annotations: object[] }> } }).state
+      .layers;
+    expect(layer.annotations[0]).not.toHaveProperty('futureQueryOnlyProp');
+  });
+
   it.each([
     [
       'global filters apply to the layer',

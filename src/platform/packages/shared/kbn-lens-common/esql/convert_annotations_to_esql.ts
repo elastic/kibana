@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { pick } from 'lodash';
 import { esql } from '@elastic/esql';
 import { getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import { convertQueryToESQLExpression, sanitazeESQLInput } from '@kbn/esql-utils';
@@ -21,6 +22,20 @@ import { LENS_LAYER_TYPES } from '../visualizations/constants';
 
 // Matches the implicit ES|QL default; explicit so the cap is visible and editable after conversion
 export const CONVERTED_ANNOTATION_QUERY_LIMIT = 1000;
+
+// Explicit allowlist: a field added to the annotation types must be opted in here, so query-only
+// fields never leak into persisted ES|QL annotations.
+const SHARED_ANNOTATION_FIELDS = [
+  'id',
+  'key',
+  'label',
+  'color',
+  'isHidden',
+  'icon',
+  'lineStyle',
+  'lineWidth',
+  'textVisibility',
+] as const satisfies ReadonlyArray<keyof QueryPointEventAnnotationConfig>;
 
 interface AnnotationLayerShape {
   layerType?: string;
@@ -188,36 +203,16 @@ const toEsqlAnnotation = (
     `LIMIT ${CONVERTED_ANNOTATION_QUERY_LIMIT}`,
   ].join(' | ');
 
-  const {
-    id,
-    key,
-    label,
-    color,
-    isHidden,
-    icon,
-    lineStyle,
-    lineWidth,
-    textVisibility,
-    extraFields,
-  } = annotation;
   return {
     ok: true,
     annotation: {
-      id,
-      key,
-      label,
-      color,
-      isHidden,
-      icon,
-      lineStyle,
-      lineWidth,
-      textVisibility,
+      ...pick(annotation, SHARED_ANNOTATION_FIELDS),
       type: 'esql',
       query: { esql: query },
       timeField,
       timeColumn: timeField,
       ...(textField ? { textColumn: textField } : {}),
-      ...(extraFields?.length ? { extraColumns: extraFields } : {}),
+      ...(annotation.extraFields?.length ? { extraColumns: annotation.extraFields } : {}),
     },
   };
 };
