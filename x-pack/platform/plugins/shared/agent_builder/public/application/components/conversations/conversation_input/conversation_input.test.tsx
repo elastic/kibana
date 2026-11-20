@@ -350,7 +350,12 @@ describe('ConversationInput', () => {
       jest.useFakeTimers();
       saveDraft.mockReset();
       clearDraft.mockReset();
-      mockedUseInputDraft.mockReturnValue({ draft: null, saveDraft, clearDraft });
+      mockedUseInputDraft.mockReturnValue({
+        draft: null,
+        saveDraft,
+        clearDraft,
+        keepUnsentFor: jest.fn(),
+      });
       takeDraftRef = { current: null };
       renderInput(<ConversationInput takeDraftRef={takeDraftRef} />);
     });

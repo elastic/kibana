@@ -97,15 +97,11 @@ export const useInputDraft = ({
       target: { agentId: string | undefined; conversationId: string | undefined },
       content: string
     ) => {
-      if (!username || !target.agentId) return;
-      const targetKey = buildKey(
-        spaceId,
-        sessionTag ?? 'default',
-        username,
-        target.agentId,
+      const targetKey = getDraftKey(
+        { spaceId, sessionTag, username, agentId: target.agentId },
         target.conversationId
       );
-      if (getFromStorage(targetKey)) return;
+      if (!targetKey || getFromStorage(targetKey)) return;
       // The image data is not kept with the draft, so its link would restore a phantom placeholder.
       writeToStorage(targetKey, content.replace(IMAGE_LINK_RE, ''));
     },

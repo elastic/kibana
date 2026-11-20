@@ -19,6 +19,13 @@ import { useNavigation } from './use_navigation';
 import { useToasts } from './use_toasts';
 import { appPaths } from '../utils/app_paths';
 
+export interface SubmitMessageOptions {
+  /** Handles a rejection before streaming; return true to suppress the default toast. */
+  onRejected?: (error: unknown) => boolean;
+  /** Called with the id of the conversation this submit created, before the message is sent. */
+  onConversationCreated?: (conversationId: string) => void;
+}
+
 /**
  * Single source of truth for "send this message". A new conversation is created on the server
  * first, so it exists, is cached and is in the sidebar before anything streams into it; then the
@@ -26,11 +33,6 @@ import { appPaths } from '../utils/app_paths';
  * `isCreatingConversation` is true while any request creating a conversation is in flight, from this
  * hook or another one, so the input and the conversation starters hold submits for each other.
  */
-export interface SubmitMessageOptions {
-  /** Handles a rejection before streaming; return true to suppress the default toast. */
-  onRejected?: (error: unknown) => boolean;
-}
-
 export const useSubmitMessage = () => {
   const conversationId = useConversationId();
   const { sendMessage } = useConversationStream();
@@ -54,7 +56,7 @@ export const useSubmitMessage = () => {
     useIsMutating({ mutationKey: mutationKeys.createConversation }) > 0;
 
   const submitMessage = useCallback(
-    async (message: string, { onRejected }: SubmitMessageOptions = {}) => {
+    async (message: string, { onRejected, onConversationCreated }: SubmitMessageOptions = {}) => {
       if (conversationId) {
         sendMessage({ message, conversationId, ...(onRejected ? { onRejected } : {}) });
         return;
