@@ -25613,9 +25613,9 @@ paths:
 
         The route needs the `contextEngine:write` privilege. Without `user_id` the events belong to the caller's user profile, and a caller without one gets a 403. Naming another user in `user_id` also needs `contextEngine:manage_memory`. Each AI index in `ai_index_ids` must exist in this space, and the caller needs the Elasticsearch `write` privilege on its backing index. Otherwise the request is rejected and nothing is saved.
 
-        Each request writes one `memory_save_event` audit event.
+        After authorization, validation, and feature-flag checks pass, each request writes one `memory_save_event` audit event.
 
-        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off, or when an AI index in `ai_index_ids` does not exist.
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off (`contextEngine:memoryEnabled`), or when an AI index in `ai_index_ids` does not exist.
 
         **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): contextEngine:manage_memory.
       operationId: post-context-engine-memory-save-event
@@ -25710,7 +25710,7 @@ paths:
                   minLength: 1
                   type: string
                 user_id:
-                  description: The user the events belong to. Defaults to the caller's user profile. Naming another user needs `contextEngine:manage_memory`.
+                  description: The Kibana user profile UID that the events belong to. Defaults to the caller's user profile. Naming another user requires `contextEngine:manage_memory`.
                   maxLength: 1024
                   minLength: 1
                   type: string
@@ -160841,6 +160841,7 @@ components:
       type: object
     Kibana_HTTP_APIs_context_engine_session_event_assistant:
       additionalProperties: true
+      description: An assistant message or tool call request event.
       properties:
         content:
           description: The assistant message. It is indexed for semantic search.
@@ -160856,7 +160857,7 @@ components:
           minLength: 1
           type: string
         seq:
-          description: An optional order key for events within the session.
+          description: An integer order key for events within the session.
           maximum: 9007199254740991
           minimum: 0
           type: number
@@ -160899,6 +160900,7 @@ components:
       type: object
     Kibana_HTTP_APIs_context_engine_session_event_meta:
       additionalProperties: true
+      description: A session metadata event carrying custom fields.
       properties:
         event_at:
           description: When the agent created the event, as an ISO 8601 date and time such as `2026-11-16T09:58:00.000Z`.
@@ -160910,7 +160912,7 @@ components:
           minLength: 1
           type: string
         seq:
-          description: An optional order key for events within the session.
+          description: An integer order key for events within the session.
           maximum: 9007199254740991
           minimum: 0
           type: number
@@ -160932,6 +160934,7 @@ components:
       type: object
     Kibana_HTTP_APIs_context_engine_session_event_reasoning:
       additionalProperties: true
+      description: A model reasoning text event.
       properties:
         content:
           description: The reasoning text. It is stored but not indexed.
@@ -160947,7 +160950,7 @@ components:
           minLength: 1
           type: string
         seq:
-          description: An optional order key for events within the session.
+          description: An integer order key for events within the session.
           maximum: 9007199254740991
           minimum: 0
           type: number
@@ -160969,6 +160972,7 @@ components:
       type: object
     Kibana_HTTP_APIs_context_engine_session_event_tool:
       additionalProperties: true
+      description: A tool execution result event.
       properties:
         event_at:
           description: When the agent created the event, as an ISO 8601 date and time such as `2026-11-16T09:58:00.000Z`.
@@ -160980,7 +160984,7 @@ components:
           minLength: 1
           type: string
         seq:
-          description: An optional order key for events within the session.
+          description: An integer order key for events within the session.
           maximum: 9007199254740991
           minimum: 0
           type: number
@@ -161022,6 +161026,7 @@ components:
       type: object
     Kibana_HTTP_APIs_context_engine_session_event_user:
       additionalProperties: true
+      description: A user message event.
       properties:
         content:
           description: The user message. It is indexed for semantic search.
@@ -161037,7 +161042,7 @@ components:
           minLength: 1
           type: string
         seq:
-          description: An optional order key for events within the session.
+          description: An integer order key for events within the session.
           maximum: 9007199254740991
           minimum: 0
           type: number
