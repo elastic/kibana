@@ -95,7 +95,7 @@ const eventSchema = schema.discriminatedUnion('type', [
       type: schema.literal('user'),
       content: textSchema('The user message. It is indexed for semantic search.'),
     },
-    allowOtherFields
+    { ...allowOtherFields, meta: { id: 'context_engine_session_event_user' } }
   ),
   schema.object(
     {
@@ -114,7 +114,7 @@ const eventSchema = schema.discriminatedUnion('type', [
         })
       ),
     },
-    allowOtherFields
+    { ...allowOtherFields, meta: { id: 'context_engine_session_event_assistant' } }
   ),
   schema.object(
     {
@@ -122,7 +122,7 @@ const eventSchema = schema.discriminatedUnion('type', [
       type: schema.literal('reasoning'),
       content: schema.maybe(textSchema('The reasoning text. It is stored but not indexed.')),
     },
-    allowOtherFields
+    { ...allowOtherFields, meta: { id: 'context_engine_session_event_reasoning' } }
   ),
   schema.object(
     {
@@ -141,9 +141,12 @@ const eventSchema = schema.discriminatedUnion('type', [
         )
       ),
     },
-    allowOtherFields
+    { ...allowOtherFields, meta: { id: 'context_engine_session_event_tool' } }
   ),
-  schema.object({ ...baseEventProps, type: schema.literal('meta') }, allowOtherFields),
+  schema.object(
+    { ...baseEventProps, type: schema.literal('meta') },
+    { ...allowOtherFields, meta: { id: 'context_engine_session_event_meta' } }
+  ),
 ]);
 
 const saveEventsBodySchema = schema.object({
