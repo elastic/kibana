@@ -87,12 +87,13 @@ export function HeroMark({ severity }: HeroMarkProps): React.ReactElement {
             width: ${euiTheme.size.s};
           `}
         >
-          {/* Solid disc + outline underneath. */}
+          {/* Solid disc + knockout ring (page fill, not textGhost — ghost stays light in dark mode). */}
           <span
             css={css`
               background: ${dotColor};
               border-radius: 50%;
-              box-shadow: 0 0 0 ${euiTheme.border.width.thick} ${euiTheme.colors.textGhost};
+              box-shadow: 0 0 0 ${euiTheme.border.width.thick}
+                ${euiTheme.colors.backgroundBasePlain};
               inset: 0;
               position: absolute;
               z-index: 0;
