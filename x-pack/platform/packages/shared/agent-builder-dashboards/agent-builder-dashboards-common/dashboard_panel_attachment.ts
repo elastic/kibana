@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type {
   Attachment,
   AttachmentInput,
@@ -20,12 +20,14 @@ export const DASHBOARD_PANEL_LABEL_MAX_LENGTH = 512;
  * A dashboard panel attachment is a thin pointer: it names one panel on a dashboard attachment in the
  * same conversation and never carries the panel configuration itself.
  */
-export const dashboardPanelAttachmentDataSchema = z.object({
-  dashboard_attachment_id: z.string().min(1).max(MAX_ID_LENGTH),
-  panel_id: z.string().min(1).max(MAX_ID_LENGTH),
-  label: z.string().max(DASHBOARD_PANEL_LABEL_MAX_LENGTH),
-  panel_type: z.string().min(1).max(MAX_ID_LENGTH),
-});
+export const dashboardPanelAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    dashboard_attachment_id: z.string().min(1).max(MAX_ID_LENGTH),
+    panel_id: z.string().min(1).max(MAX_ID_LENGTH),
+    label: z.string().max(DASHBOARD_PANEL_LABEL_MAX_LENGTH),
+    panel_type: z.string().min(1).max(MAX_ID_LENGTH),
+  })
+);
 
 export type DashboardPanelAttachmentData = z.infer<typeof dashboardPanelAttachmentDataSchema>;
 
