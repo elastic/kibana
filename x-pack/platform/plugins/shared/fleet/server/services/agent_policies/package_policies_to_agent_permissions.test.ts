@@ -593,13 +593,16 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
   });
 
   describe('agentless permissions', () => {
-    const buildAgentlessPackagePolicy = (pkgName: string): PackagePolicy =>
+    const buildAgentlessPackagePolicy = (
+      pkgName: string,
+      supportsAgentless: boolean
+    ): PackagePolicy =>
       ({
         id: `package-policy-${pkgName}`,
         name: 'agentless-test-policy',
         namespace: 'test',
         enabled: true,
-        supports_agentless: true,
+        supports_agentless: supportsAgentless,
         package: { name: pkgName, version: '1.0.0', title: pkgName },
         inputs: [
           {
@@ -623,22 +626,46 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         policy_ids: [''],
       } as PackagePolicy);
 
-    it('does NOT grant agentless-* permissions when the package is not agentless-eligible', async () => {
+    const hasAgentlessGrant = (
+      descriptor: { indices?: Array<{ names?: string[] }> } | undefined
+    ) => (descriptor?.indices ?? []).some((index) => index.names?.includes('agentless-*'));
+
+    it('does NOT grant agentless-* permissions when the package is not agentless-eligible, even with the flag set', async () => {
       const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
-        buildAgentlessPackagePolicy('non_agentless_pkg'),
+        buildAgentlessPackagePolicy('non_agentless_pkg', true),
       ]);
 
-      const indices = permissions?.['package-policy-non_agentless_pkg']?.indices ?? [];
-      expect(indices.some((index: any) => index.names?.includes('agentless-*'))).toBe(false);
+      const descriptor = permissions?.['package-policy-non_agentless_pkg'];
+      expect(hasAgentlessGrant(descriptor)).toBe(false);
+      // The normal data stream grant must survive so the integration keeps ingesting; a dropped
+      // descriptor would also report no agentless grant and hide a regression.
+      expect(descriptor?.indices).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ names: ['logs-non_agentless_pkg.logs-test'] }),
+        ])
+      );
     });
 
-    it('grants agentless-* permissions when the package is agentless-eligible', async () => {
+    it('grants agentless-* permissions when the package is agentless-eligible and the flag is set', async () => {
       const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
-        buildAgentlessPackagePolicy('agentless_pkg'),
+        buildAgentlessPackagePolicy('agentless_pkg', true),
       ]);
 
-      const indices = permissions?.['package-policy-agentless_pkg']?.indices ?? [];
-      expect(indices.some((index: any) => index.names?.includes('agentless-*'))).toBe(true);
+      expect(hasAgentlessGrant(permissions?.['package-policy-agentless_pkg'])).toBe(true);
+    });
+
+    it('does NOT grant agentless-* permissions for an eligible package when the flag is not set', async () => {
+      const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildAgentlessPackagePolicy('agentless_pkg', false),
+      ]);
+
+      const descriptor = permissions?.['package-policy-agentless_pkg'];
+      expect(hasAgentlessGrant(descriptor)).toBe(false);
+      expect(descriptor?.indices).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ names: ['logs-agentless_pkg.logs-test'] }),
+        ])
+      );
     });
   });
 
