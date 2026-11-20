@@ -6,8 +6,15 @@
  */
 
 import type { EvaluationResult } from '@kbn/evals';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { HuntEvaluator } from './dataset_evaluator';
-import { assertCodeScoresPass, createRunCollector, withScoreCollection } from './run_summary';
+import {
+  assertCodeScoresPass,
+  createRunCollector,
+  summarizeFailuresByRow,
+  withScoreCollection,
+  type CodeFailure,
+} from './run_summary';
 
 const evaluatorReturning = (
   name: string,
@@ -27,10 +34,10 @@ const params = {
   metadata: undefined,
 } as unknown as Parameters<HuntEvaluator['evaluate']>[0];
 
-const runAll = async (evaluators: HuntEvaluator[]) => {
+const runAll = async (evaluators: HuntEvaluator[], metadata?: Record<string, unknown>) => {
   const collector = createRunCollector();
   for (const evaluator of withScoreCollection(evaluators, collector)) {
-    await evaluator.evaluate(params);
+    await evaluator.evaluate({ ...params, metadata } as typeof params);
   }
   return collector;
 };
@@ -60,6 +67,18 @@ describe('withScoreCollection', () => {
     });
   });
 
+  it('records the row gate tag from example metadata', async () => {
+    const collector = await runAll([evaluatorReturning('Outcome Label', 'CODE', { score: 0 })], {
+      gate: 'capability',
+    });
+    expect(collector.codeFailures[0].gate).toBe('capability');
+  });
+
+  it('leaves the gate unset on an untagged row', async () => {
+    const collector = await runAll([evaluatorReturning('Outcome Label', 'CODE', { score: 0 })]);
+    expect(collector.codeFailures[0]).not.toHaveProperty('gate');
+  });
+
   it('records every score in the sink regardless of kind or label', async () => {
     const collector = await runAll([
       evaluatorReturning('Outcome Label', 'CODE', { score: 1 }),
@@ -83,5 +102,84 @@ describe('assertCodeScoresPass', () => {
     ).toThrow(
       /Outcome Label \[default: a\]: 0 \(bad outcome\)[\s\S]*SSE Attachment \[default: b\]: MISSING/
     );
+  });
+
+  const capabilityMiss: CodeFailure = {
+    evaluator: 'Outcome Label',
+    row: 'default: hit',
+    gate: 'capability',
+    score: 0,
+    explanation: 'hit: outcome "partial", expected one of [completed]',
+  };
+  const invariantMiss: CodeFailure = {
+    evaluator: 'Index Scope Gate',
+    row: 'default: scope',
+    score: 0,
+    explanation: 'scope gate did not short-circuit',
+  };
+  const newLog = () => ({ warning: jest.fn() } as unknown as ToolingLog & { warning: jest.Mock });
+
+  it('reports and does not gate a capability miss for a non-reference model', () => {
+    const log = newLog();
+    expect(() =>
+      assertCodeScoresPass('golden', [capabilityMiss], { gatesCapability: false, log })
+    ).not.toThrow();
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('1 CODE miss(es) on capability rows, reported and not gated')
+    );
+  });
+
+  it('gates a capability miss for a reference model', () => {
+    const log = newLog();
+    expect(() =>
+      assertCodeScoresPass('golden', [capabilityMiss], { gatesCapability: true, log })
+    ).toThrow(/golden: 1 CODE evaluator miss/);
+    expect(log.warning).not.toHaveBeenCalled();
+  });
+
+  it('gates capability rows when no option is passed', () => {
+    expect(() => assertCodeScoresPass('golden', [capabilityMiss])).toThrow(/1 CODE evaluator/);
+  });
+
+  it('gates an untagged miss for every model', () => {
+    const log = newLog();
+    expect(() =>
+      assertCodeScoresPass('golden', [capabilityMiss, invariantMiss], {
+        gatesCapability: false,
+        log,
+      })
+    ).toThrow(/golden: 1 CODE evaluator miss[\s\S]*Index Scope Gate \[default: scope\]/);
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('[default: hit]'));
+  });
+});
+
+describe('summarizeFailuresByRow', () => {
+  it('collapses correlated misses into one line naming the coordinator status', () => {
+    const row = 'default: ti-report-aws-iam-behavior-only-historic-02';
+    const lines = summarizeFailuresByRow([
+      { evaluator: 'Outcome Label', row, score: 0, explanation: 'x: outcome "partial"' },
+      {
+        evaluator: 'Evidence Honesty',
+        row,
+        score: 0,
+        explanation: 'x: evidence written=false (coordinator incomplete_retryable, hunt partial)',
+      },
+      { evaluator: 'Tier 2 Execution', row, score: 0, explanation: 'x: tier2 executed=false' },
+    ]);
+    expect(lines).toEqual([
+      `  [${row}] 3 miss(es), root cause: coordinator incomplete_retryable: Outcome Label, Evidence Honesty, Tier 2 Execution`,
+    ]);
+  });
+
+  it('falls back to the outcome label, then to no cause', () => {
+    expect(
+      summarizeFailuresByRow([
+        { evaluator: 'Outcome Label', row: 'a', score: 0, explanation: 'outcome "failed"' },
+        { evaluator: 'SSE Attachment', row: 'b', score: null, label: 'MISSING' },
+      ])
+    ).toEqual([
+      '  [a] 1 miss(es), root cause: outcome failed: Outcome Label',
+      '  [b] 1 miss(es): SSE Attachment',
+    ]);
   });
 });

@@ -7,6 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HuntEvaluator } from './dataset_evaluator';
+import type { HuntGate, HuntRowMetadata } from '../types';
 import { computeScoreStats, type ScoreStats } from '../score_stats';
 
 export type ScoreSink = Map<string, Array<number | null>>;
@@ -15,6 +16,8 @@ export type ScoreSink = Map<string, Array<number | null>>;
 export interface CodeFailure {
   evaluator: string;
   row: string;
+  /** The row's gate tag; absent means `invariant`. */
+  gate?: HuntGate;
   score: number | null;
   label?: string | null;
   explanation?: string | null;
@@ -49,9 +52,11 @@ export const withScoreCollection = (
       collector.scores.set(evaluator.name, bucket);
       const miss = result.score !== 1 && result.label !== 'N/A';
       if (miss && evaluator.kind === 'CODE') {
+        const { gate } = (args.metadata ?? {}) as HuntRowMetadata;
         collector.codeFailures.push({
           evaluator: evaluator.name,
           row: describeRow(args.input),
+          ...(gate ? { gate } : {}),
           score: result.score ?? null,
           label: result.label,
           explanation: result.explanation,
@@ -67,24 +72,71 @@ export const withScoreCollection = (
     },
   })) as HuntEvaluator[];
 
+const describeFailure = ({ evaluator, row, score, label, explanation }: CodeFailure): string =>
+  `  - ${evaluator} [${row}]: ${score ?? label ?? 'null'}${explanation ? ` (${explanation})` : ''}`;
+
+// One failed Tier 2 grounding scores 0 on every downstream check of the row (outcome, hit, SSE,
+// evidence, Proposal). Naming the coordinator status once keeps six misses from reading as six
+// regressions.
+const rootCauseOf = (failures: CodeFailure[]): string | undefined => {
+  for (const { explanation } of failures) {
+    const coordinator = explanation?.match(/coordinator (\w+)/)?.[1];
+    if (coordinator) return `coordinator ${coordinator}`;
+  }
+  for (const { explanation } of failures) {
+    const outcome = explanation?.match(/outcome "(\w+)"/)?.[1];
+    if (outcome) return `outcome ${outcome}`;
+  }
+  return undefined;
+};
+
+/** One line per row: the evaluators that missed and the shared root cause, if one is named. */
+export const summarizeFailuresByRow = (failures: CodeFailure[]): string[] => {
+  const byRow = new Map<string, CodeFailure[]>();
+  for (const failure of failures) {
+    byRow.set(failure.row, [...(byRow.get(failure.row) ?? []), failure]);
+  }
+  return [...byRow].map(([row, rowFailures]) => {
+    const cause = rootCauseOf(rowFailures);
+    return `  [${row}] ${rowFailures.length} miss(es)${cause ? `, root cause: ${cause}` : ''}: ${[
+      ...new Set(rowFailures.map(({ evaluator }) => evaluator)),
+    ].join(', ')}`;
+  });
+};
+
 /**
  * The CI pass criterion for CODE evaluators: every applicable check scores exactly 1 on every
- * row. A 0 is a pinned behavior that changed; MISSING is an artifact that should exist and does
- * not. Both fail the dataset after the summary is logged, so a regression in the weekly run
+ * gating row. A 0 is a pinned behavior that changed; MISSING is an artifact that should exist and
+ * does not. Both fail the dataset after the summary is logged, so a regression in the weekly run
  * turns the step red instead of only lowering a mean. LLM judges are reported, never gated here.
+ *
+ * Rows tagged `capability` gate only when `gatesCapability` is true (a reference subject model,
+ * see `reference_models.ts`). For any other model their misses are logged as a capability
+ * report and the dataset passes on its invariant rows alone.
  */
-export const assertCodeScoresPass = (datasetName: string, failures: CodeFailure[]): void => {
-  if (failures.length === 0) return;
-  const lines = failures.map(
-    ({ evaluator, row, score, label, explanation }) =>
-      `  - ${evaluator} [${row}]: ${score ?? label ?? 'null'}${
-        explanation ? ` (${explanation})` : ''
-      }`
-  );
+export const assertCodeScoresPass = (
+  datasetName: string,
+  failures: CodeFailure[],
+  { gatesCapability = true, log }: { gatesCapability?: boolean; log?: ToolingLog } = {}
+): void => {
+  const gating = failures.filter(({ gate }) => gatesCapability || gate !== 'capability');
+  const reported = failures.filter((failure) => !gating.includes(failure));
+  if (reported.length > 0) {
+    log?.warning(
+      `${datasetName}: ${
+        reported.length
+      } CODE miss(es) on capability rows, reported and not gated for this subject model:\n${summarizeFailuresByRow(
+        reported
+      ).join('\n')}`
+    );
+  }
+  if (gating.length === 0) return;
   throw new Error(
     `${datasetName}: ${
-      failures.length
-    } CODE evaluator miss(es); every applicable CODE check must score 1\n${lines.join('\n')}`
+      gating.length
+    } CODE evaluator miss(es); every applicable CODE check must score 1\n${summarizeFailuresByRow(
+      gating
+    ).join('\n')}\n${gating.map(describeFailure).join('\n')}`
   );
 };
 
