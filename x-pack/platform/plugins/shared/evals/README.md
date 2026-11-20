@@ -325,7 +325,7 @@ The plugin UI is organized into five navigation tabs:
 
 A comparison runs one paired test per evaluator, and each example counts once: its repetitions are combined first, so N is the number of examples. Repetitions of one example share the same input, so they are not independent evidence.
 
-`repetition_policy` sets how the repetitions are combined. The page and the `ai.evals.compareExperiments` workflow step always use the default.
+`repetition_policy` sets how the repetitions are combined. The page takes it from its URL, which the CLI report link sets for `median`. The `ai.evals.compareExperiments` workflow step always uses the default.
 
 - `mean` (default): the average of the example's valid scores.
 - `median`: the median. Only for scores in [0, 1]. Other slices are left out and listed in `pairing.rejectedSlices`, and the request fails with 400 when none is left.
