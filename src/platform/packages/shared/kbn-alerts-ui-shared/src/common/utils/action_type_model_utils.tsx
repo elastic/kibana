@@ -159,7 +159,7 @@ export function transformSpecToActionTypeModel(
       }
       const connectorZodSchema: ConnectorZodSchema = parsedZodSchema;
       const specActions = spec.actions ?? [];
-      // Connectors with an Outbound switch choose No authentication only through the switch.
+      // Connectors with an Outbound switch hide auth type none in outbound options.
       if (getOutboundToggleDefaultAuthTypeId(registeredSpec) !== undefined) {
         hideAuthTypeInPicker(connectorZodSchema, NO_AUTH_TYPE_ID);
       }
