@@ -16,7 +16,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
   RelayClientContract,
 } from '@kbn/actions-plugin/server';
-import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   AgentBuilderSmlPluginSetup,
@@ -54,12 +54,12 @@ import type { SeveritySync } from './lib/significant_events/events/severity';
  */
 export interface SignificantEventsServerStart {
   /**
-   * Reads the knowledge indicators of the request's space. They are read as the internal user,
-   * filtered by the request's space; the request's privileges are not checked, so the caller
-   * decides which sources it may read. To hear about changes, subscribe a workflow to the
+   * Reads the knowledge indicators of one space as the internal user. It takes a space, not a
+   * request, because no user's privileges are checked: the caller decides which sources it may
+   * read. To hear about changes, subscribe a workflow to the
    * `significant-events.knowledgeIndicatorsChanged` trigger.
    */
-  getKnowledgeIndicatorReader: (request: KibanaRequest) => KnowledgeIndicatorReader;
+  getKnowledgeIndicatorReader: (params: { spaceId: string }) => KnowledgeIndicatorReader;
 }
 
 export interface SignificantEventsPluginSetupDependencies {

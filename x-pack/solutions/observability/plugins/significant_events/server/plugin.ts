@@ -875,17 +875,17 @@ export class SignificantEventsPlugin
     const { knowledgeIndicatorService } = this;
 
     return {
-      getKnowledgeIndicatorReader: (request) => {
+      getKnowledgeIndicatorReader: ({ spaceId }) => {
         if (!knowledgeIndicatorService) {
           throw new Error('Knowledge indicators are read only after the plugin is set up');
         }
 
         return createKnowledgeIndicatorReader({
-          // The data stream is read as the internal user, filtered by the request's space, as the
-          // plugin's own knowledge indicator client does.
+          // The data stream is read as the internal user, filtered by the space, as the plugin's
+          // own knowledge indicator client does.
           indicatorReader: knowledgeIndicatorService.getReader({
             esClient: core.elasticsearch.client.asInternalUser,
-            space: request.spaceId,
+            space: spaceId,
           }),
         });
       },
