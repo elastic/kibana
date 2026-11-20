@@ -82,12 +82,13 @@ const specWireResponse = {
     },
     required: ['config', 'secrets'],
   },
-  actions: {
+  action_schemas: {
     sendMessage: {
       input: { type: 'object', properties: { channel: { type: 'string' } } },
       scope: 'write',
     },
   },
+  actions: [{ name: 'sendMessage', is_tool: false, scope: 'write' }],
   alerting: { default_action: 'sendMessage' },
   is_testable: true,
 };

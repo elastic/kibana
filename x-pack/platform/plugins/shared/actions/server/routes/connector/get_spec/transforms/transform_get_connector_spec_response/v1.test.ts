@@ -31,7 +31,9 @@ const result: GetConnectorSpecResult = {
     supportedFeatureIds: ['alerting'],
   },
   schema: formSchema,
-  actionSchemas: { listIncidents: { input: inputSchema, description: 'List incidents', scope: 'read' } },
+  actionSchemas: {
+    listIncidents: { input: inputSchema, description: 'List incidents', scope: 'read' },
+  },
   isTestable: true,
   authTypeIds: ['basic'],
   hasInboundEvents: false,
