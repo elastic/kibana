@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactWrapper } from 'enzyme';
+import { fireEvent } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { noAncestorsTwoChildenInIndexCalledAwesomeIndex } from '../data_access_layer/mocks/no_ancestors_two_children_in_index_called_awesome_index';
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
@@ -67,7 +67,7 @@ describe("Resolver, when rendered with the `indices` prop set to `[]` and the `d
     beforeEach(() => {
       simulator.indices = ['awesome_index'];
     });
-    // Combining assertions here for performance. Unfortunately, Enzyme + jsdom + React is slow.
+    // Combining assertions here for performance. Unfortunately, jsdom + React is slow.
     it(`should have 3 nodes, with the entityID's 'origin', 'firstChild', and 'secondChild'. 'origin' should be selected when the simulator has the right indices`, async () => {
       await expect(
         simulator.map(() => ({
@@ -126,7 +126,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
          * ready before any `it` in this describe runs. The node list may render one React
          * cycle after the graph (e.g. when EUI's AutoSizer provides its size), so verifying
          * it here ensures the "should show links to the 3 nodes in the node list" test
-         * sees an up-to-date enzyme wrapper in its synchronous assertion.
+         * sees up-to-date DOM in its synchronous assertion.
          */
         simulator.map(() => ({
           graphElements: simulator.testSubject('resolver:graph').length,
@@ -143,7 +143,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       });
     }, 30000);
 
-    // Combining assertions here for performance. Unfortunately, Enzyme + jsdom + React is slow.
+    // Combining assertions here for performance. Unfortunately, jsdom + React is slow.
     it(`should have 3 nodes, with the entityID's 'origin', 'firstChild', and 'secondChild'. 'origin' should be selected.`, async () => {
       await expect(
         simulator.map(() => ({
@@ -184,14 +184,16 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
             // There should be only one tree.
             treeCount: tree.length,
             // The tree should have 3 nodes in it.
-            nodesOwnedByTrees: tree.find(Simulator.nodeElementSelector()).length,
+            nodesOwnedByTrees: tree.flatMap((element) =>
+              Array.from(element.querySelectorAll(Simulator.nodeElementSelector()))
+            ).length,
           };
         })
       ).toYieldEqualTo({ treeCount: 1, nodesOwnedByTrees: 3 });
     }, 30000);
 
     it(`should show links to the 3 nodes in the node list.`, () => {
-      // The beforeEach already confirmed nodeListLinkCount === 3 and updated the enzyme wrapper,
+      // The beforeEach already confirmed nodeListLinkCount === 3 and rendered the DOM,
       // so a direct synchronous assertion is sufficient and avoids any async timeout risk.
       expect(simulator.testSubject('resolver:node-list:node-link:title').length).toBe(3);
     });
@@ -203,7 +205,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
         );
         // Click the second child node's primary button
         if (button) {
-          button.simulate('click', { button: 0 });
+          fireEvent.click(button[0], { button: 0 });
         }
       }, 30000);
       it('should render the second child node as selected, and the origin as not selected, and the query string should indicate that the second child is selected', async () => {
@@ -239,9 +241,9 @@ describe.skip('Resolver, when using a generated tree with 20 generations, 4 chil
     // If the camera has not moved it will return a node with ID 2kt059pl3i, this is the first node with the state
     // loading that is outside of the initial loaded view
     const getLoadingNodeInList = async () => {
-      return (await graphSimulator.resolve('resolver:node-list:node-link'))
-        ?.findWhere((wrapper) => wrapper.text().toLowerCase().includes('loading'))
-        ?.first();
+      return (await graphSimulator.resolve('resolver:node-list:node-link'))?.find((element) =>
+        element.textContent?.toLowerCase().includes('loading')
+      );
     };
 
     const loadingNode = await getLoadingNodeInList();
@@ -249,16 +251,16 @@ describe.skip('Resolver, when using a generated tree with 20 generations, 4 chil
     if (!loadingNode) {
       throw new Error("Unable to find a node without it's node data");
     }
-    loadingNode.simulate('click', { button: 0 });
+    fireEvent.click(loadingNode, { button: 0 });
     // the time here is equivalent to the animation duration in the camera reducer
     graphSimulator.runAnimationFramesTimeFromNow(1000);
-    return loadingNode.prop('data-test-node-id');
+    return loadingNode.getAttribute('data-test-node-id');
   };
 
   const identifiedLoadingNodeInGraph: (
     graphSimulator: Simulator,
     nodeIDToFind: string
-  ) => Promise<ReactWrapper | undefined> = async (
+  ) => Promise<HTMLElement[] | undefined> = async (
     graphSimulator: Simulator,
     nodeIDToFind: string
   ) => graphSimulator.resolveWrapper(() => graphSimulator.selectedProcessNode(nodeIDToFind));
@@ -267,10 +269,9 @@ describe.skip('Resolver, when using a generated tree with 20 generations, 4 chil
     graphSimulator: Simulator,
     nodeIDToFind: string
   ) => Promise<string | undefined> = async (graphSimulator: Simulator, nodeIDToFind: string) =>
-    (await graphSimulator.resolveWrapper(() => graphSimulator.selectedProcessNode(nodeIDToFind)))
-      ?.find('[data-test-subj="resolver:node:description"]')
-      .first()
-      .text();
+    (
+      await graphSimulator.resolveWrapper(() => graphSimulator.selectedProcessNode(nodeIDToFind))
+    )?.[0]?.querySelector('[data-test-subj="resolver:node:description"]')?.textContent ?? undefined;
 
   let generatorDAL: DataAccessLayer;
 
@@ -356,7 +357,7 @@ describe.skip('Resolver, when using a generated tree with 20 generations, 4 chil
         );
         // Click the primary button to reload the node's data
         if (firstLoadingNodeInListButton) {
-          firstLoadingNodeInListButton.simulate('click', { button: 0 });
+          fireEvent.click(firstLoadingNodeInListButton[0], { button: 0 });
         }
       });
 
@@ -410,7 +411,7 @@ describe.skip('Resolver, when using a generated tree with 20 generations, 4 chil
 
         // navigate back to the node list in the panel
         if (breadcrumbs) {
-          breadcrumbs.simulate('click', { button: 0 });
+          fireEvent.click(breadcrumbs[0], { button: 0 });
         }
       });
 
@@ -419,18 +420,18 @@ describe.skip('Resolver, when using a generated tree with 20 generations, 4 chil
           // grab the node in the list that has the ID that we're looking for
           return (
             (await simulator.resolve('resolver:node-list:node-link'))
-              ?.findWhere((wrapper) => wrapper.prop('data-test-node-id') === foundLoadingNodeInList)
-              ?.first()
+              ?.find(
+                (element) => element.getAttribute('data-test-node-id') === foundLoadingNodeInList
+              )
               // grab the description tag so we can determine the state of the process
-              .find('desc')
-              .first()
+              ?.querySelector('desc')
           );
         };
 
         // check that the panel displays the node as terminated as well
         await expect(
           simulator.map(async () => ({
-            nodeState: (await getNodeInPanelList())?.text(),
+            nodeState: (await getNodeInPanelList())?.textContent,
           }))
         ).toYieldEqualTo({
           nodeState: 'Terminated Process',
@@ -518,7 +519,7 @@ describe('Resolver, when analyzing a tree that has 2 related registry and 1 rela
     it('should show exactly one option with the correct count', async () => {
       await expect(
         simulator.map(() =>
-          simulator.testSubject('resolver:map:node-submenu-item').map((node) => node.text())
+          simulator.testSubject('resolver:map:node-submenu-item').map((node) => node.textContent)
         )
       ).toYieldEqualTo([
         '1 authentication',
@@ -552,7 +553,7 @@ function pxNum(px: string): number {
  */
 function computedNodeBoundaries(entityID: string): AABB {
   const { left, top, width, height } = getComputedStyle(
-    simulator.processNodeElements({ entityID }).getDOMNode()
+    simulator.processNodeElements({ entityID })[0]
   );
   return {
     minimum: [pxNum(left), pxNum(top)],
@@ -565,7 +566,7 @@ function computedNodeBoundaries(entityID: string): AABB {
  */
 function computedEdgeStartingCoordinates(): Vector2[] {
   return simulator.testSubject('resolver:graph:edgeline').map((edge) => {
-    const { left, top } = getComputedStyle(edge.getDOMNode());
+    const { left, top } = getComputedStyle(edge);
     return [pxNum(left), pxNum(top)];
   });
 }
@@ -575,7 +576,7 @@ function computedEdgeStartingCoordinates(): Vector2[] {
  */
 function computedEdgeTerminalCoordinates(): Vector2[] {
   return simulator.testSubject('resolver:graph:edgeline').map((edge) => {
-    const { left, top, width, transform } = getComputedStyle(edge.getDOMNode());
+    const { left, top, width, transform } = getComputedStyle(edge);
     /**
      * Without the transform in the rotation, edgelines lay flat across the x-axis.
      * Plotting the x/y of the line's terminal point here takes the rotation into account.

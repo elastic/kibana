@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { TestProviders } from '../../../../../common/mock';
 import { EnrichmentRangePicker } from './threat_intelligence_view_enrichment_range_picker';
 import {
@@ -24,35 +25,30 @@ describe('EnrichmentRangePicker', () => {
   };
 
   it('renders a date picker and a button', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <EnrichmentRangePicker {...rangePickerProps} />
       </TestProviders>
     );
 
     expect(
-      wrapper.exists(`[data-test-subj="${THREAT_INTELLIGENCE_ENRICHMENTS_RANGE_PICKER_TEST_ID}"]`)
-    ).toEqual(true);
+      screen.getByTestId(THREAT_INTELLIGENCE_ENRICHMENTS_RANGE_PICKER_TEST_ID)
+    ).toBeInTheDocument();
     expect(
-      wrapper.exists(`[data-test-subj="${THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID}"]`)
-    ).toEqual(true);
+      screen.getByTestId(THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID)
+    ).toBeInTheDocument();
   });
 
-  it('invokes setRange', () => {
-    const wrapper = mount(
+  it('invokes setRange', async () => {
+    render(
       <TestProviders>
         <EnrichmentRangePicker {...rangePickerProps} />
       </TestProviders>
     );
 
-    wrapper
-      .find('input.start-picker')
-      .first()
-      .simulate('change', { target: { value: '08/10/2019 06:29 PM' } });
-    wrapper
-      .find(`[data-test-subj="${THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID}"]`)
-      .hostNodes()
-      .simulate('click');
+    await userEvent.click(
+      screen.getByTestId(THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID)
+    );
 
     expect(setRangeSpy).toHaveBeenCalled();
   });
