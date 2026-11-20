@@ -103,6 +103,29 @@ describe('THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW yaml', () => {
     expect(filter).toContain('"space_id":["{{ variables.spaceId }}","*"]');
   });
 
+  it('matches alert indicator references with a regexp in object form', () => {
+    const step = findStepByName(workflow.steps, 'count_all_layer1_hits') as {
+      with?: {
+        query?: {
+          bool?: {
+            filter?: Array<{
+              nested?: {
+                path?: string;
+                query?: { regexp?: Record<string, { value?: string }> };
+              };
+            }>;
+          };
+        };
+      };
+    };
+    const nested = step.with?.query?.bool?.filter?.find(
+      (clause) => clause.nested?.path === 'threat.enrichments'
+    )?.nested;
+    expect(nested?.query?.regexp?.['threat.enrichments.indicator.reference']?.value).toBe(
+      "threat-report:({{ steps.load_reports_with_extractions.output.hits.hits | map: '_id' | join: '|' }})"
+    );
+  });
+
   // The scripted per-space upsert (evidence keying, alert_hits-only assignment) moved into
   // write_attribution_evidence.test.ts alongside the internal-user write it now requires --
   // `.kibana-threat-reports` is plugin-owned and hidden, so a plain `elasticsearch.update` step

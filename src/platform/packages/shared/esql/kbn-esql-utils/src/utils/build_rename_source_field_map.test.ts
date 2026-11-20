@@ -165,6 +165,54 @@ describe('buildRenameSourceFieldMap', () => {
     });
   });
 
+  describe('nested pipelines', () => {
+    it('preserves rename provenance through an identity EVAL', () => {
+      const query = 'FROM (FROM logs | EVAL bytes = bytes | RENAME bytes AS size)';
+
+      expect(buildRenameSourceFieldMap(query)).toEqual(new Map([['size', 'bytes']]));
+    });
+
+    it.each([
+      'FROM (FROM logs | EVAL bytes = bytes | EVAL bytes = bytes * 2) | RENAME bytes AS size',
+      'FROM (FROM logs | EVAL bytes = bytes) | EVAL bytes = bytes * 2 | RENAME bytes AS size',
+    ])('does not preserve an identity EVAL overwritten by a computed EVAL: %s', (query) => {
+      expect(buildRenameSourceFieldMap(query)).toEqual(new Map());
+    });
+
+    it('preserves an alias captured before an outer computed EVAL', () => {
+      const query =
+        'FROM (FROM logs | EVAL bytes = bytes) | EVAL saved = bytes | EVAL bytes = bytes * 2 | RENAME saved AS size';
+
+      expect(resolve('size', query)).toBe('bytes');
+    });
+
+    it.each([
+      'FROM (FROM logs | RENAME bytes AS size | RENAME size AS total)',
+      'FROM logs | FORK (RENAME bytes AS size | RENAME size AS total) (LIMIT 1)',
+    ])('resolves nested RENAME chains to the source field: %s', (query) => {
+      expect(resolve('total', query)).toBe('bytes');
+    });
+
+    it.each([
+      'FROM (FROM logs | RENAME bytes AS size | EVAL size = size * 2)',
+      'FROM logs | FORK (RENAME bytes AS size | EVAL size = size * 2) (LIMIT 1)',
+    ])('does not resolve a nested RENAME overwritten by EVAL: %s', (query) => {
+      expect(resolve('size', query)).toBe('size');
+    });
+  });
+
+  describe('LET bindings', () => {
+    it('resolves a RENAME inside a referenced binding to the source field', () => {
+      const query = 'LET a = (FROM logs | RENAME bytes AS size); FROM a';
+      expect(resolve('size', query)).toBe('bytes');
+    });
+
+    it('does not resolve a binding RENAME that the binding later shadows', () => {
+      const query = 'LET a = (FROM logs | RENAME bytes AS size | EVAL size = size * 2); FROM a';
+      expect(resolve('size', query)).toBe('size');
+    });
+  });
+
   describe('ENRICH WITH aliases', () => {
     it('resolves ENRICH ... WITH new_name = enrich_field as a rename', () => {
       const query = 'FROM logs | ENRICH servers ON host WITH server_name = host_name';
