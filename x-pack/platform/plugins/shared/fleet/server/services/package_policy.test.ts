@@ -7606,10 +7606,14 @@ describe('Package policy service', () => {
           failures: [{ id: 'package-policy-1', error: new Error('clear failed') }],
         });
 
-        // Return what was asked for, so the result shows which policies were passed on as updated.
+        // The mocked bulkGet returns every policy whatever is asked for. Keep the reads real but
+        // only return the requested ids, so the result shows which policies were passed on.
+        const getByIDs = packagePolicyService.getByIDs.bind(packagePolicyService);
         const getByIDsSpy = jest
           .spyOn(packagePolicyService, 'getByIDs')
-          .mockImplementation(async (_soClient, ids) => ids.map((id) => ({ id } as PackagePolicy)));
+          .mockImplementation(async (soClient, ids, options) =>
+            (await getByIDs(soClient, ids, options)).filter(({ id }) => ids.includes(id))
+          );
 
         const { flags, failedIds, updatedIds } = await bulkUpdateAndGetUnchangedFlags([{}, {}]);
         getByIDsSpy.mockRestore();
@@ -16970,17 +16974,29 @@ describe('clearStaleInputsForVersions()', () => {
   const clear = (soClient: any, candidates: any[]) =>
     (packagePolicyService as any).clearStaleInputsForVersions(soClient, candidates);
 
-  const makeSoClient = (caches: Record<string, Record<string, any>>) => {
+  // Each read returns a new version, like a saved object that was written in between.
+  const READ_VERSIONS = ['WzEsMV0=', 'WzIsMV0='];
+  const makeSoClient = (
+    caches: Record<string, Record<string, any>>,
+    pkg: { name: string; version: string } = noConditionPackageInfo
+  ) => {
     const soClient = savedObjectsClientMock.create();
-    soClient.bulkGet.mockImplementation(async (objs: any[]) => ({
-      saved_objects: objs.map(({ id }) => ({
-        id,
-        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        references: [],
-        version: 'WzEsMV0=',
-        attributes: { inputs_for_versions: caches[id] },
-      })),
-    }));
+    let reads = 0;
+    soClient.bulkGet.mockImplementation(async (objs: any[]) => {
+      const version = READ_VERSIONS[reads++];
+      return {
+        saved_objects: objs.map(({ id }) => ({
+          id,
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          version,
+          attributes: {
+            inputs_for_versions: caches[id],
+            package: { name: pkg.name, title: pkg.name, version: pkg.version },
+          },
+        })),
+      };
+    });
     soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
     return soClient;
   };
@@ -17056,31 +17072,98 @@ describe('clearStaleInputsForVersions()', () => {
     ).toEqual([['b', 'Failed to clear inputs_for_versions of package policy [b]: Conflict']]);
   });
 
+  const conflict = (id: string) => ({
+    id,
+    type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    error: { statusCode: 409, error: 'Conflict', message: 'Conflict' },
+  });
+  const candidate = (packagePolicyId: string) => ({
+    packagePolicyId,
+    packageInfo: noConditionPackageInfo,
+    assetsMap: noConditionAssetsMap,
+  });
+
   it('retries a failed clear once with the fresh version and succeeds', async () => {
     const soClient = makeSoClient({ a: { '9.5': [] } });
     soClient.bulkUpdate
-      .mockResolvedValueOnce({
-        saved_objects: [
-          {
-            id: 'a',
-            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-            error: { statusCode: 409, error: 'Conflict', message: 'Conflict' },
-          },
-        ],
-      } as any)
+      .mockResolvedValueOnce({ saved_objects: [conflict('a')] } as any)
       .mockResolvedValueOnce({ saved_objects: [{ id: 'a', attributes: {} }] } as any);
 
-    const result = await clear(soClient, [
-      {
-        packagePolicyId: 'a',
-        packageInfo: noConditionPackageInfo,
-        assetsMap: noConditionAssetsMap,
-      },
-    ]);
+    const result = await clear(soClient, [candidate('a')]);
 
     expect(result).toEqual({ cleared: true, failures: [] });
     expect(soClient.bulkGet).toHaveBeenCalledTimes(2);
     expect(soClient.bulkUpdate).toHaveBeenCalledTimes(2);
+    expect(soClient.bulkUpdate.mock.calls[0][0]).toEqual([
+      expect.objectContaining({ id: 'a', version: 'WzEsMV0=' }),
+    ]);
+    expect(soClient.bulkUpdate.mock.calls[1][0]).toEqual([
+      expect.objectContaining({ id: 'a', version: 'WzIsMV0=' }),
+    ]);
+  });
+
+  it('does not clear on retry when a concurrent edit moved the package policy to another package version', async () => {
+    const soClient = makeSoClient({ a: { '9.5': [] } });
+    const readOnce = soClient.bulkGet.getMockImplementation()!;
+    soClient.bulkGet.mockImplementationOnce(readOnce).mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: 'a',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          version: 'WzIsMV0=',
+          attributes: {
+            inputs_for_versions: { '9.5': [] },
+            package: { name: 'test', title: 'test', version: '2.0.0' },
+          },
+        },
+      ],
+    } as any);
+    soClient.bulkUpdate.mockResolvedValueOnce({ saved_objects: [conflict('a')] } as any);
+
+    const result = await clear(soClient, [candidate('a')]);
+
+    // The concurrent edit owns the cache of its package version, so there is nothing to report.
+    expect(result).toEqual({ cleared: false, failures: [] });
+    expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the partial result and reports the pending policies when the retry read rejects', async () => {
+    const soClient = makeSoClient({ a: { '9.5': [] }, b: { '9.5': [] } });
+    const readOnce = soClient.bulkGet.getMockImplementation()!;
+    soClient.bulkGet.mockImplementationOnce(readOnce).mockRejectedValueOnce(new Error('ES down'));
+    soClient.bulkUpdate.mockResolvedValueOnce({
+      saved_objects: [{ id: 'a', attributes: {} }, conflict('b')],
+    } as any);
+
+    const result = await clear(soClient, [candidate('a'), candidate('b')]);
+
+    expect(result.cleared).toBe(true);
+    expect(
+      result.failures.map(({ id, error }: { id: string; error: Error }) => [id, error.message])
+    ).toEqual([['b', 'Failed to clear inputs_for_versions of package policy [b]: ES down']]);
+  });
+
+  it('keeps the failure of a policy that cannot be read on retry', async () => {
+    const soClient = makeSoClient({ a: { '9.5': [] } });
+    const readOnce = soClient.bulkGet.getMockImplementation()!;
+    soClient.bulkGet.mockImplementationOnce(readOnce).mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: 'a',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          error: { statusCode: 404, error: 'Not Found', message: 'Not Found' },
+        },
+      ],
+    } as any);
+    soClient.bulkUpdate.mockResolvedValueOnce({ saved_objects: [conflict('a')] } as any);
+
+    const result = await clear(soClient, [candidate('a')]);
+
+    expect(result.cleared).toBe(false);
+    expect(
+      result.failures.map(({ id, error }: { id: string; error: Error }) => [id, error.message])
+    ).toEqual([['a', 'Failed to clear inputs_for_versions of package policy [a]: Not Found']]);
   });
 
   it('does not write when no cache is stored', async () => {

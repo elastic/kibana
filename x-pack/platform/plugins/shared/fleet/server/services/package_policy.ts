@@ -21,6 +21,8 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObject,
   SavedObjectsUpdateResponse,
+  SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
@@ -976,8 +978,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
    * An upgrade to a package that dropped its agent version condition leaves the `inputs_for_versions`
    * of the old version behind, so agents keep receiving the stale inputs and the agent policy keeps
    * its version conditions. Clears the cache of the given package policies whose package has no
-   * condition, with a single read and write. Returns whether any cache was cleared, and the
-   * failures (e.g. on a version conflict). The callers report them only after the agent policies
+   * condition, with a bulk read and write, retried once for the failed writes. Returns whether
+   * any cache was cleared, and the failures (e.g. on a version conflict). The callers report them only after the agent policies
    * were recomputed, so the caches that were cleared are not left unrecomputed.
    */
   private async clearStaleInputsForVersions(
@@ -998,9 +1000,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return { cleared: false, failures: [] };
     }
     const savedObjectType = await getPackagePolicySavedObjectType();
-    let pendingIds = withoutCondition.map(({ packagePolicyId }) => packagePolicyId);
+    const candidateById = new Map(
+      withoutCondition.map((candidate) => [candidate.packagePolicyId, candidate])
+    );
+    let pendingIds = [...candidateById.keys()];
     let clearedCount = 0;
-    let failedClears: Array<{ id: string; error: { message: string } }> = [];
+    // Failure message by package policy id. Only failed writes are retried, read failures are kept.
+    const failures = new Map<string, string>();
     // A failed clear is usually a version conflict with a concurrent edit, so retry it once, with
     // the fresh version, before reporting it.
     for (
@@ -1008,50 +1014,74 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       attempt < CLEAR_STALE_INPUTS_ATTEMPTS && pendingIds.length > 0;
       attempt++
     ) {
-      const { saved_objects: packagePolicySOs } = await soClient
-        .bulkGet<PackagePolicySOAttributes>(
-          pendingIds.map((id) => ({ type: savedObjectType, id, fields: ['inputs_for_versions'] }))
-        )
-        .catch(
-          catchAndSetErrorStackTrace.withMessage(
-            'attempt to read inputs_for_versions of package policy saved objects failed'
-          )
-        );
-      const stale = packagePolicySOs.filter(
-        (so): so is SavedObject<PackagePolicySOAttributes> =>
-          !isSavedObjectErrorResult(so) &&
-          Object.keys(so.attributes?.inputs_for_versions ?? {}).length > 0
-      );
-      if (stale.length === 0) {
-        failedClears = [];
+      pendingIds.forEach((id) => failures.delete(id));
+
+      let packagePolicySOs: SavedObjectsBulkResponse<PackagePolicySOAttributes>['saved_objects'];
+      try {
+        ({ saved_objects: packagePolicySOs } = await soClient.bulkGet<PackagePolicySOAttributes>(
+          pendingIds.map((id) => ({
+            type: savedObjectType,
+            id,
+            fields: ['inputs_for_versions', 'package'],
+          }))
+        ));
+      } catch (error) {
+        // Keep what was already cleared, so the callers still recompute for it.
+        pendingIds.forEach((id) => failures.set(id, (error as Error).message));
         break;
       }
-      // Pass the version so a concurrent edit is not overwritten (conflicts show up as failed results).
-      const { saved_objects: clearResults } = await soClient
-        .bulkUpdate<PackagePolicySOAttributes>(
+
+      const stale: Array<SavedObject<PackagePolicySOAttributes>> = [];
+      for (const so of packagePolicySOs) {
+        if (isSavedObjectErrorResult(so)) {
+          failures.set(so.id, so.error.message);
+          continue;
+        }
+        const { packageInfo } = candidateById.get(so.id)!;
+        // A concurrent edit may have moved the package policy to another package version, whose
+        // cache is not stale. That edit owns the cache then.
+        if (
+          so.attributes.package?.name !== packageInfo.name ||
+          so.attributes.package?.version !== packageInfo.version
+        ) {
+          continue;
+        }
+        if (Object.keys(so.attributes.inputs_for_versions ?? {}).length > 0) {
+          stale.push(so);
+        }
+      }
+      if (stale.length === 0) {
+        break;
+      }
+
+      let clearResults: SavedObjectsBulkUpdateResponse<PackagePolicySOAttributes>['saved_objects'];
+      try {
+        // Pass the version so a concurrent edit is not overwritten (conflicts show up as failed
+        // results).
+        ({ saved_objects: clearResults } = await soClient.bulkUpdate<PackagePolicySOAttributes>(
           stale.map(({ id, version }) => ({
             type: savedObjectType,
             id,
             attributes: { inputs_for_versions: {} },
             version,
           }))
-        )
-        .catch(
-          catchAndSetErrorStackTrace.withMessage(
-            'attempt to clear inputs_for_versions of package policy saved objects failed'
-          )
-        );
+        ));
+      } catch (error) {
+        stale.forEach(({ id }) => failures.set(id, (error as Error).message));
+        break;
+      }
       // Bulk operations report per object failures in the results instead of rejecting.
-      failedClears = clearResults.filter(isSavedObjectErrorResult);
+      const failedClears = clearResults.filter(isSavedObjectErrorResult);
+      failedClears.forEach(({ id, error }) => failures.set(id, error.message));
       clearedCount += stale.length - failedClears.length;
       pendingIds = failedClears.map(({ id }) => id);
     }
     return {
       cleared: clearedCount > 0,
-      failures: failedClears.map(({ id, error }) => ({
+      failures: [...failures].map(([id, message]) => ({
         id,
         error: new FleetError(
-          `Failed to clear inputs_for_versions of package policy [${id}]: ${error.message}`
+          `Failed to clear inputs_for_versions of package policy [${id}]: ${message}`
         ),
       })),
     };
