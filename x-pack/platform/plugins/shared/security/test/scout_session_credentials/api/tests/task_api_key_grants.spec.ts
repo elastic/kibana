@@ -74,7 +74,11 @@ apiTest.describe(
             const deniedCleanup = await apiClient.delete(
               `internal/test_endpoints/authentication/tasks/${tasks[0].id}`,
               {
-                headers: { ...viewer.cookieHeader, 'kbn-xsrf': 'true' },
+                headers: {
+                  ...viewer.cookieHeader,
+                  'kbn-xsrf': 'true',
+                  'x-elastic-internal-origin': 'kibana',
+                },
                 responseType: 'json',
               }
             );
