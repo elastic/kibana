@@ -429,7 +429,7 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
             {i18n.translate('alertsUIShared.connectorActionSelector.noActionsHint', {
-              defaultMessage: 'No actions are available. The connector only receives events.',
+              defaultMessage: 'No actions are available.',
             })}
           </EuiText>
         </>
