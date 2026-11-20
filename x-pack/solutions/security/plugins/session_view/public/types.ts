@@ -8,6 +8,7 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { Process } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -18,6 +19,11 @@ export interface SessionViewPluginStart {}
 
 export interface SessionViewPluginStartDeps {
   usageCollection?: UsageCollectionStart;
+  /**
+   * Only present on Cross-Project Search (CPS) enabled deployments. Used to tell a CPS linked
+   * project apart from a plain CCS remote cluster: both carry a `prefix:index` name.
+   */
+  cps?: CPSPluginStart;
 }
 
 export interface SessionViewPluginSetupDeps {
