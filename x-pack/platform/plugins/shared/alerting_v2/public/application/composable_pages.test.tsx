@@ -21,6 +21,7 @@ const ALL_CAPABILITIES = {
   alerting_v2_execution_history: { read: true, all: true },
 };
 
+let mockCapabilities: Record<string, Record<string, boolean>> = ALL_CAPABILITIES;
 let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockCanReadConnectors = true;
 
@@ -33,7 +34,7 @@ jest.mock('@kbn/core-di-browser', () => {
     Context: actual.createContext(undefined),
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
-        return new ActualUserCapabilities({ capabilities: ALL_CAPABILITIES });
+        return new ActualUserCapabilities({ capabilities: mockCapabilities });
       }
       if (token === 'uiSettings') {
         return { get: () => mockAlertingV2ExperimentalFeaturesEnabled };
@@ -355,6 +356,29 @@ describe('composable pages', () => {
     it('ImportsPage renders when parent route matches', () => {
       renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
       expect(screen.getByTestId('importsPage')).toBeInTheDocument();
+    });
+
+    it('ImportsPage renders for a user who can read alerts but has no rules access', () => {
+      mockCapabilities = {
+        ...ALL_CAPABILITIES,
+        alerting_v2_rules: { read: false, all: false },
+        alerting_v2_alerts: { read: true, all: false },
+      };
+      renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
+
+      expect(screen.getByTestId('importsPage')).toBeInTheDocument();
+      mockCapabilities = ALL_CAPABILITIES;
+    });
+
+    it('ImportsPage asks for alerts access when the user cannot read alerts', () => {
+      mockCapabilities = { ...ALL_CAPABILITIES, alerting_v2_alerts: { read: false, all: false } };
+      renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
+
+      expect(screen.queryByTestId('importsPage')).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('alertingRequiredPrivilege-alerting_v2_alerts')
+      ).toBeInTheDocument();
+      mockCapabilities = ALL_CAPABILITIES;
     });
 
     it('ImportsPage asks for connector access when the user cannot read connectors', () => {

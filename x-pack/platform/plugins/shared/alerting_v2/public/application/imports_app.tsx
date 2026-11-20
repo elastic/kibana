@@ -37,7 +37,7 @@ export const ImportsApp = () => {
   }
 
   return (
-    <RequireAlertingPrivilege features={['rules']} pageName={pageName}>
+    <RequireAlertingPrivilege features={['alerts']} pageName={pageName}>
       {canReadConnectors ? (
         <Routes>
           <Route exact path={path}>

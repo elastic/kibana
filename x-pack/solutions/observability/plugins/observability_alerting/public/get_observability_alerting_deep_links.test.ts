@@ -197,7 +197,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
   });
 
   it('registers no deep link for the Import alerts page, so search and navigation cannot reach it', () => {
-    // A user who can open the page: Universal Rules and connector read access.
+    // A user who can open the page: Universal Alerts and connector read access.
     const everyCapabilitySet = capabilities({
       actions: { show: true },
       alerting_v2_rules: { read: true, all: true },
