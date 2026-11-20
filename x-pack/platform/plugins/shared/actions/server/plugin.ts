@@ -83,6 +83,7 @@ import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
 import { setupInboundEvents, type ConnectorEventEmitter } from './inbound';
+import { registerConnectorEventTopics } from './inbound/register_connector_event_topics';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   initializeOAuthStateCleanupTask,
@@ -528,6 +529,9 @@ export class ActionsPlugin
       spaces: this.spaces,
       inMemoryConnectors: this.inMemoryConnectors,
       getConnectorEventEmitter: () => this.connectorEventEmitter,
+    });
+    registerConnectorEventTopics((topic) => {
+      core.pubsub.registerTopic(topic);
     });
     defineRoutes({
       getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',
