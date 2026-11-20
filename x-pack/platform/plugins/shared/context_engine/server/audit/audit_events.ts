@@ -161,6 +161,7 @@ export const improvementAuditEvent = ({
 
 export enum MemoryAuditAction {
   FORGET = 'memory_forget',
+  REMEMBER = 'memory_remember',
   SAVE_EVENT = 'memory_save_event',
 }
 
@@ -199,6 +200,48 @@ export const sessionMemoryForgetAuditEvent = ({
     error: failure && {
       code: failure.name,
       message: failure.message,
+    },
+  };
+};
+
+export interface SessionMemoryRememberAuditEventParams {
+  memoryId?: string;
+  sessionId: string;
+  targetUserId?: string;
+  revision: boolean;
+  error?: Error;
+}
+
+/**
+ * Audits one `_remember` request when its write finishes or the route rejects it. Core adds the
+ * caller, the space, and the request id.
+ */
+export const sessionMemoryRememberAuditEvent = ({
+  memoryId,
+  sessionId,
+  targetUserId,
+  revision,
+  error,
+}: SessionMemoryRememberAuditEventParams): AuditEvent => {
+  const doc = `session memory${
+    memoryId !== undefined ? ` [id=${memoryId}]` : ''
+  } of session [id=${sessionId}]`;
+
+  return {
+    message: error ? `Failed attempt to remember ${doc}` : `User has remembered ${doc}`,
+    event: {
+      action: MemoryAuditAction.REMEMBER,
+      category: ['database'],
+      type: [revision ? 'change' : 'creation'],
+      outcome: error ? 'failure' : 'success',
+    },
+    ...(targetUserId !== undefined && { user: { target: { id: targetUserId } } }),
+    ...(memoryId !== undefined && {
+      kibana: { saved_object: { type: 'session_memory', id: memoryId } },
+    }),
+    error: error && {
+      code: error.name,
+      message: error.message,
     },
   };
 };
