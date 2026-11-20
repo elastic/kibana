@@ -49,10 +49,12 @@ export const CRITICAL_FILES_JEST_INTEGRATION_TESTS = [
 ];
 
 // Integration configs that snapshot a global registry (rule-type params, connector types, task
-// types) fed by downstream plugins. Those publishers sit upstream of these configs, so
-// includeDownstream never marks them affected — they must run regardless of the graph. Keep tiny.
+// types, config keys exposed to the browser) fed by downstream plugins. Those publishers sit upstream
+// of these configs, so includeDownstream never marks them affected — they must run regardless of the
+// graph. Keep tiny.
 export const ALWAYS_RUN_JEST_INTEGRATION_CONFIGS = [
   'x-pack/platform/plugins/shared/alerting/jest.integration.config.js',
   'x-pack/platform/plugins/shared/actions/jest.integration.config.js',
   'x-pack/platform/plugins/shared/task_manager/jest.integration.config.js',
+  'src/core/packages/core/server/integration_tests/exposed_config_keys/jest.integration.config.js',
 ];
