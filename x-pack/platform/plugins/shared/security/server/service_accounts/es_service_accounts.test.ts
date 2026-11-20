@@ -17,6 +17,7 @@ import {
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import type { CheckPrivileges, CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 
+import { BINDING_CLOCK_SKEW_TOLERANCE_MS } from './credentials';
 import type { ServiceAccountCredentialStore } from './credentials';
 import {
   ES_SERVICE_ACCOUNT_MAX_ROLES,
@@ -135,6 +136,7 @@ describe('EsServiceAccounts', () => {
       delete: jest.fn().mockResolvedValue(true),
       getDecrypted: jest.fn().mockResolvedValue(null),
       findExisting: jest.fn().mockResolvedValue(new Set()),
+      getCreatedAt: jest.fn().mockResolvedValue(null),
     } as unknown as jest.Mocked<ServiceAccountCredentialStore>;
 
     mockCheckPrivileges = { globally: jest.fn() } as unknown as jest.Mocked<CheckPrivileges>;
@@ -1845,14 +1847,16 @@ describe('EsServiceAccounts', () => {
 
   describe('#getSummary', () => {
     const ACCOUNT_ID = 'kibana/nightshift-relay';
+    const BOUND_AT = '2026-08-21T12:00:00.000Z';
+    const BINDING = { boundAt: BOUND_AT };
 
     it('reads the account as Kibana and reports only its name and status', async () => {
       clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(
         accountEntry({ roles: ['viewer'], description: 'Runs investigation workflows.' })
       );
-      credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
+      credentialStore.getCreatedAt.mockResolvedValue('2026-08-21T00:00:00.000Z');
 
-      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).resolves.toEqual({
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID, BINDING)).resolves.toEqual({
         id: ACCOUNT_ID,
         name: 'nightshift-relay',
         enabled: true,
@@ -1860,7 +1864,38 @@ describe('EsServiceAccounts', () => {
       });
       expect(clusterClient.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
       expect(clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith(READ_ACCOUNT, {});
-      expect(credentialStore.findExisting).toHaveBeenCalledWith([ACCOUNT_ID]);
+      expect(credentialStore.getCreatedAt).toHaveBeenCalledWith(ACCOUNT_ID);
+      expect(credentialStore.getDecrypted).not.toHaveBeenCalled();
+    });
+
+    // The token exchange refuses a binding made to an earlier account with the same id, so a
+    // caller that showed this account as usable would let the run fail.
+    it('reports an account created again after the workload was bound as not assumable', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(accountEntry());
+      credentialStore.getCreatedAt.mockResolvedValue('2026-08-22T00:00:00.000Z');
+
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID, BINDING)).resolves.toMatchObject({
+        enabled: true,
+        assumable: false,
+      });
+    });
+
+    it('allows the same clock skew between the create and the bind as the exchange', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValue(accountEntry());
+
+      credentialStore.getCreatedAt.mockResolvedValue(
+        new Date(Date.parse(BOUND_AT) + BINDING_CLOCK_SKEW_TOLERANCE_MS).toISOString()
+      );
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID, BINDING)).resolves.toMatchObject({
+        assumable: true,
+      });
+
+      credentialStore.getCreatedAt.mockResolvedValue(
+        new Date(Date.parse(BOUND_AT) + BINDING_CLOCK_SKEW_TOLERANCE_MS + 1).toISOString()
+      );
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID, BINDING)).resolves.toMatchObject({
+        assumable: false,
+      });
     });
 
     // kibana_system can read service accounts but not their tokens, so the token check that #get
@@ -1870,7 +1905,7 @@ describe('EsServiceAccounts', () => {
         accountEntry({ enabled: false })
       );
 
-      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).resolves.toEqual({
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID, BINDING)).resolves.toEqual({
         id: ACCOUNT_ID,
         name: 'nightshift-relay',
         enabled: false,
@@ -1882,10 +1917,32 @@ describe('EsServiceAccounts', () => {
       );
     });
 
+    it('reports the account as not assumable when Kibana cannot decrypt stored credentials', async () => {
+      serviceAccounts = new EsServiceAccounts({
+        requestLifetimeMs: 600_000,
+        logger,
+        license,
+        clusterClient,
+        checkPrivilegesWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+        audit,
+        credentialStore,
+        canEncrypt: false,
+        getCurrentUser,
+        getCurrentUserProfileId,
+        getUserProfiles: jest.fn().mockResolvedValue([]),
+      });
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(accountEntry());
+      credentialStore.getCreatedAt.mockResolvedValue('2026-08-21T00:00:00.000Z');
+
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID, BINDING)).resolves.toMatchObject({
+        assumable: false,
+      });
+    });
+
     it('authorizes no user and makes no call as one', async () => {
       clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(accountEntry());
 
-      await serviceAccounts.getSummary(ACCOUNT_ID);
+      await serviceAccounts.getSummary(ACCOUNT_ID, BINDING);
 
       expect(mockCheckPrivileges.globally).not.toHaveBeenCalled();
       expect(clusterClient.asScoped).not.toHaveBeenCalled();
@@ -1894,8 +1951,8 @@ describe('EsServiceAccounts', () => {
     it('resolves `null` when there is no such account', async () => {
       clusterClient.asInternalUser.transport.request.mockResolvedValueOnce({});
 
-      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).resolves.toBeNull();
-      expect(credentialStore.findExisting).not.toHaveBeenCalled();
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID, BINDING)).resolves.toBeNull();
+      expect(credentialStore.getCreatedAt).not.toHaveBeenCalled();
     });
 
     it('rejects with a 502 for an account Elasticsearch reports as not user-managed', async () => {
@@ -1903,7 +1960,7 @@ describe('EsServiceAccounts', () => {
         [ACCOUNT_ID]: { type: 'built_in', role_descriptor: {} },
       });
 
-      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).rejects.toMatchObject({
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID, BINDING)).rejects.toMatchObject({
         output: { statusCode: 502 },
       });
     });
@@ -1911,7 +1968,7 @@ describe('EsServiceAccounts', () => {
     it('rejects on a 404, which may not come from Elasticsearch', async () => {
       clusterClient.asInternalUser.transport.request.mockRejectedValueOnce(esError(404));
 
-      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).rejects.toMatchObject({
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID, BINDING)).rejects.toMatchObject({
         meta: { statusCode: 404 },
       });
     });
@@ -1928,7 +1985,7 @@ describe('EsServiceAccounts', () => {
         'other/nightshift-relay',
         `kibana/${'a'.repeat(SERVICE_ACCOUNT_NAME_MAX_LENGTH + 1)}`,
       ]) {
-        await expect(serviceAccounts.getSummary(id)).resolves.toBeNull();
+        await expect(serviceAccounts.getSummary(id, BINDING)).resolves.toBeNull();
       }
       expect(clusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();
     });
@@ -1938,7 +1995,7 @@ describe('EsServiceAccounts', () => {
         accountEntry({ roles: 'viewer' })
       );
 
-      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).rejects.toMatchObject({
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID, BINDING)).rejects.toMatchObject({
         output: { statusCode: 502 },
       });
     });
@@ -1946,7 +2003,7 @@ describe('EsServiceAccounts', () => {
     it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
       license.isEnabled.mockReturnValue(false);
 
-      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).rejects.toMatchObject({
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID, BINDING)).rejects.toMatchObject({
         output: { statusCode: 403 },
       });
       expect(clusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();

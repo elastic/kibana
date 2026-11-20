@@ -11,6 +11,7 @@ import type {
   CreateServiceAccountServerParams,
   ServiceAccount,
   ServiceAccountSummary,
+  ServiceAccountWorkloadBinding,
   UiamProjectType,
 } from '@kbn/core-security-server';
 
@@ -40,6 +41,12 @@ export type ServiceAccountLookup =
   | { status: 'present'; credentialCreatedAt?: string }
   | { status: 'missing' }
   | { status: 'unknown' };
+
+/**
+ * The binding a summary describes the account of. On Elasticsearch, `assumable` depends on when
+ * the workload was bound, because an account deleted and created again keeps its ID.
+ */
+export type ServiceAccountSummaryBinding = Pick<ServiceAccountWorkloadBinding, 'boundAt'>;
 
 /**
  * Paging parameters for listing service accounts. `after` is the `next_page` cursor of the
@@ -79,13 +86,17 @@ export interface ServiceAccountsBackend {
   get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry>;
 
   /**
-   * Reads the name and status of one service account as Kibana, resolving `null` when there is no
-   * such account. Performs no user authorization: it backs
+   * Reads the name and status of the account of a workload's binding as Kibana, resolving `null`
+   * when there is no such account. Performs no user authorization: it backs
    * `core.security.serviceAccounts.getWorkloadServiceAccountSummary`, which only names the account
    * of a workload's verified binding, and whose callers authorize their users against the workload. Unlike {@link get}, `assumable` is taken from the credential Kibana
-   * stored, without asking the identity provider.
+   * stored, without asking the identity provider, and is `false` when the token exchange would
+   * refuse the binding as one made to an earlier account with the same ID.
    */
-  getSummary(id: string): Promise<ServiceAccountSummary | null>;
+  getSummary(
+    id: string,
+    binding: ServiceAccountSummaryBinding
+  ): Promise<ServiceAccountSummary | null>;
 
   /**
    * Deletes one service account, rejecting with a 404 when there is no such account. Requires the

@@ -15,6 +15,9 @@ import type { ServiceAccountCredentialAttributes } from './credential_saved_obje
 import { getCredentialId, SERVICE_ACCOUNT_CREDENTIAL_TYPE } from './credential_saved_object';
 import { getDetailedErrorMessage } from '../../errors';
 
+/** The credential attributes that may be read without decrypting. */
+type UnverifiedCredentialField = Exclude<keyof ServiceAccountCredentialAttributes, 'token'>;
+
 export interface ServiceAccountCredentialStoreOptions {
   client: SavedObjectsClientContract;
   encryptedClient: EncryptedSavedObjectsClient;
@@ -83,30 +86,56 @@ export class ServiceAccountCredentialStore {
    * Which of the given accounts Kibana holds a credential for. Accounts with none are simply
    * absent from the result.
    *
-   * Existence is the whole answer: nothing outside this store reads a credential's attributes,
-   * and what the caller does with the answer is its own business. The documents are read without
-   * decrypting, so this says a credential is on file, not that it still works.
+   * The documents are read without decrypting, so this says a credential is on file, not that it
+   * still works.
    *
    * An account whose credential cannot be read throws rather than resolving absent. Absent means
    * "Kibana holds nothing for this account", which a caller is entitled to act on, and a document
    * Kibana failed to read is not that.
    */
   async findExisting(serviceAccountIds: string[]): Promise<Set<string>> {
-    const existing = new Set<string>();
+    // Nothing here reads an attribute, but `readUnverified` needs one field, so ask for a cheap one.
+    const found = await this.readUnverified(serviceAccountIds, ['serviceAccountId']);
+    return new Set(found.keys());
+  }
+
+  /**
+   * When Kibana created the credential it holds for the account, or `null` when it holds none or
+   * the credential records no creation time. Throws like {@link findExisting} when the credential
+   * cannot be read.
+   *
+   * Read without decrypting, so the timestamp is not authenticated. It is good enough to predict
+   * whether the exchange will refuse a binding, but never to decide it: only
+   * {@link getDecrypted} may do that.
+   */
+  async getCreatedAt(serviceAccountId: string): Promise<string | null> {
+    const found = await this.readUnverified([serviceAccountId], ['createdAt']);
+    return found.get(serviceAccountId)?.createdAt ?? null;
+  }
+
+  /**
+   * Reads only the given attributes of each account's credential, without decrypting. Accounts
+   * with no credential are absent from the result, and any other read failure throws.
+   *
+   * `fields` must name at least one attribute and never `token`, because an empty list makes the
+   * saved objects client return the whole document, ciphertext included.
+   */
+  private async readUnverified<K extends UnverifiedCredentialField>(
+    serviceAccountIds: string[],
+    fields: readonly [K, ...K[]]
+  ): Promise<Map<string, Pick<ServiceAccountCredentialAttributes, K>>> {
+    const found = new Map<string, Pick<ServiceAccountCredentialAttributes, K>>();
     if (serviceAccountIds.length === 0) {
-      return existing;
+      return found;
     }
 
     const { saved_objects: savedObjects } = await this.client.bulkGet<
-      Pick<ServiceAccountCredentialAttributes, 'serviceAccountId'>
+      Pick<ServiceAccountCredentialAttributes, K>
     >(
       serviceAccountIds.map((serviceAccountId) => ({
         type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
         id: getCredentialId(serviceAccountId),
-        // Nothing here reads an attribute, but the list cannot be empty: the saved objects client
-        // reads that as "no filtering" and hands back the whole document, ciphertext included.
-        // One cheap field keeps the token out of the response.
-        fields: ['serviceAccountId'],
+        fields: [...fields],
       }))
     );
 
@@ -122,10 +151,10 @@ export class ServiceAccountCredentialStore {
         );
       }
 
-      existing.add(serviceAccountId);
+      found.set(serviceAccountId, result.attributes);
     });
 
-    return existing;
+    return found;
   }
 
   /**
