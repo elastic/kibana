@@ -3377,16 +3377,25 @@ describe('Authenticator', () => {
         },
       });
       const otherRenewedHeaders = { authorization: 'Bearer other-new' };
+      const storedHeaders = { authorization: 'Bearer core-stored' };
+      const otherStoredHeaders = { authorization: 'Bearer core-stored' };
+      mockOptions.authHeadersStorage.set(request, storedHeaders);
+      mockOptions.authHeadersStorage.set(other, otherStoredHeaders);
+      expect(mockOptions.authHeadersStorage.get(request)).not.toBe(
+        mockOptions.authHeadersStorage.get(other)
+      );
+      mockOptions.authHeadersStorage.set.mockClear();
       authenticateSession.mockImplementation(async (incoming) =>
         AuthenticationResult.succeeded(user, {
           authHeaders: incoming.uuid === other.uuid ? otherRenewedHeaders : renewedHeaders,
         })
       );
       await Promise.all([
-        authenticator.reauthenticate(request, originalHeaders),
-        authenticator.reauthenticate(other, originalHeaders),
+        authenticator.reauthenticate(request, storedHeaders),
+        authenticator.reauthenticate(other, otherStoredHeaders),
       ]);
       expect(authenticateSession).toHaveBeenCalledTimes(2);
+      expect(mockOptions.authHeadersStorage.set).toHaveBeenCalledTimes(2);
       expect(mockOptions.authHeadersStorage.set).toHaveBeenCalledWith(request, renewedHeaders);
       expect(mockOptions.authHeadersStorage.set).toHaveBeenCalledWith(other, otherRenewedHeaders);
       expect(authenticator.getRequestCredentials(request)).toEqual(credentialsFor(renewedHeaders));

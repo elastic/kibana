@@ -160,7 +160,7 @@ export const createTransport = ({
     constructor(options: TransportOptions) {
       const { headers = {}, ...otherOptions } = options;
       super(otherOptions);
-      this.headers = headers;
+      this.headers = normalizeHeaders(headers);
     }
 
     async request(params: TransportRequestParams, options?: TransportRequestOptions) {
@@ -196,7 +196,7 @@ export const createTransport = ({
       // add stored headers to the options
       opts.headers = {
         ...this.headers,
-        ...options?.headers,
+        ...normalizeHeaders(options?.headers ?? {}),
       };
 
       onRequest({ scoped }, params, opts, logger);
@@ -213,13 +213,13 @@ export const createTransport = ({
           if (isRetryResult(result)) {
             this.headers = {
               ...this.headers,
-              ...result.authHeaders,
+              ...normalizeHeaders(result.authHeaders),
             };
             const retryOpts = { ...opts };
-            retryOpts.headers = normalizeHeaders({
+            retryOpts.headers = {
               ...this.headers,
-              ...options?.headers,
-            });
+              ...normalizeHeaders(options?.headers ?? {}),
+            };
 
             const retryResponse = (await super.request(params, retryOpts)) as TransportResult<
               any,

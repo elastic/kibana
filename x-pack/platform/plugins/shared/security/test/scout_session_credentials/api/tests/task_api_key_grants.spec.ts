@@ -18,7 +18,11 @@ apiTest.describe(
     apiTest('rejects task scheduling without manage_security', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
       const response = await apiClient.post('internal/test_endpoints/authentication/tasks', {
-        headers: { ...cookieHeader, 'kbn-xsrf': 'true' },
+        headers: {
+          ...cookieHeader,
+          'kbn-xsrf': 'true',
+          'x-elastic-internal-origin': 'kibana',
+        },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(403);
