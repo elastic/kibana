@@ -274,6 +274,31 @@ describe('EditPipelineFlyout', () => {
       expect(screen.getByText('value')).toBeInTheDocument();
     });
 
+    it('expands arrays of objects into their fields', () => {
+      mockUseGetDataStreamResults.mockReturnValue({
+        data: {
+          ...createMockResults(),
+          results: [
+            {
+              rules: [{ name: 'block-ssh' }, { name: 'allow-web', owner: 'admin' }],
+            },
+          ],
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: jest.fn(),
+      });
+
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      expect(screen.queryByText('rules')).not.toBeInTheDocument();
+      expect(screen.getByText('rules.name')).toBeInTheDocument();
+      expect(screen.getByText('block-ssh')).toBeInTheDocument();
+      expect(screen.getByText('rules.owner')).toBeInTheDocument();
+      expect(screen.getByText('admin')).toBeInTheDocument();
+    });
+
     it('should show search box with correct placeholder', () => {
       render(<EditPipelineFlyout {...defaultProps} />);
 
