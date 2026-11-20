@@ -14,6 +14,7 @@ import { REVISION_SIZE_LIMIT } from '../knowledge_indicator_client/revision_read
 
 /** A query knowledge indicator of the request's space, as other plugins read it. */
 export interface QueryKnowledgeIndicator {
+  /** Unique within its source only; two sources can hold the same id. */
   id: string;
   source_id: string;
   /** Whether the source is enabled; a disabled source keeps its knowledge indicators. */
@@ -54,11 +55,14 @@ export interface KnowledgeIndicatorReader {
    * Every live query knowledge indicator of the space, rule-backed or not. Expired ones and those
    * of deleted sources are left out; those of disabled sources are kept, with `source_enabled: false`.
    * Throws when the space has more than one read returns (10,000), rather than return part of them.
+   * The source catalog is read as the request, so a principal that can't read `nightshift-source`
+   * sees no knowledge indicators at all, even though they exist.
    */
   listQueryKnowledgeIndicators(): Promise<QueryKnowledgeIndicator[]>;
   /**
    * The live features of the given sources, of the given types (`entity`, `dependency`, ...). No
-   * types gives no features.
+   * types gives no features. Returns at most 10,000, most confident first, and does not throw past
+   * that: a caller missing a feature has to fall back to the source.
    */
   listFeatures(params: {
     sourceIds: string[];

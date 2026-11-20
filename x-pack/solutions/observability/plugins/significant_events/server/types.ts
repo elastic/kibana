@@ -67,7 +67,11 @@ export interface SignificantEventsServerSetup {
  * this contract.
  */
 export interface SignificantEventsServerStart {
-  /** Reads the knowledge indicators of the request's space, with the request's sources client. */
+  /**
+   * Reads the knowledge indicators of the request's space, with the request's sources client.
+   * Knowledge indicators are read as the internal user but the source catalog as the request, so a
+   * principal that can't read `nightshift-source` sees no knowledge indicators.
+   */
   getKnowledgeIndicatorReader: (request: KibanaRequest) => KnowledgeIndicatorReader;
 }
 
