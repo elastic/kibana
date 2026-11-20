@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { toResponseFixtures, vendorApiFixturesSchema } from './fixtures';
+import { toResponseFixtures, vendorApiFixturesSchema } from './record/fixtures';
 import type { VendorApiManifest } from './manifest';
 import { parseManifest, serializeManifest, SOURCE_NAME_PATTERN } from './manifest';
 
