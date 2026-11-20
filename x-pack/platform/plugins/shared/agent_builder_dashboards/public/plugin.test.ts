@@ -10,8 +10,7 @@ import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
   ENHANCE_DASHBOARD_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
-import { ADD_TO_CHAT_ACTION_ID } from '@kbn/embeddable-plugin/public';
-import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { DASHBOARD_PANEL_ADD_TO_CHAT_PROVIDER_ID } from './add_to_chat/add_to_chat_provider';
 import { AgentBuilderDashboardsPlugin } from './plugin';
 import type { AgentBuilderDashboardsPluginPublicStartDependencies } from './types';
 
@@ -31,6 +30,7 @@ jest.mock('./attachment_types', () => ({
 describe('AgentBuilderDashboardsPlugin', () => {
   const registerActionAsync = jest.fn();
   const attachAction = jest.fn();
+  const registerAddToChatProvider = jest.fn();
   const openChat = jest.fn();
 
   const createCoreStart = (showAgentBuilder: boolean) =>
@@ -51,6 +51,9 @@ describe('AgentBuilderDashboardsPlugin', () => {
         openChat,
         getAgentBuilderAccess: jest.fn(),
       },
+      agentBuilderVisualizations: {
+        addToChat: { registerProvider: registerAddToChatProvider },
+      },
       dashboard: {},
       share: {
         url: {
@@ -68,10 +71,11 @@ describe('AgentBuilderDashboardsPlugin', () => {
   beforeEach(() => {
     registerActionAsync.mockClear();
     attachAction.mockClear();
+    registerAddToChatProvider.mockClear();
     openChat.mockClear();
   });
 
-  it('registers the lazy chat and enhance actions when Agent Builder is available', async () => {
+  it('registers the lazy chat and enhance actions and the Add to chat provider when Agent Builder is available', async () => {
     const plugin = new AgentBuilderDashboardsPlugin({} as PluginInitializerContext);
 
     plugin.start(createCoreStart(true), createStartDependencies());
@@ -84,8 +88,9 @@ describe('AgentBuilderDashboardsPlugin', () => {
       ENHANCE_DASHBOARD_ACTION_ID,
       expect.any(Function)
     );
-    expect(registerActionAsync).toHaveBeenCalledWith(ADD_TO_CHAT_ACTION_ID, expect.any(Function));
-    expect(attachAction).toHaveBeenCalledWith(ON_OPEN_PANEL_MENU, ADD_TO_CHAT_ACTION_ID);
+    expect(registerAddToChatProvider).toHaveBeenCalledWith(
+      expect.objectContaining({ id: DASHBOARD_PANEL_ADD_TO_CHAT_PROVIDER_ID })
+    );
 
     const openChatAction = await registerActionAsync.mock.calls[0][1]();
     expect(openChatAction.id).toBe(OPEN_DASHBOARD_CHAT_ACTION_ID);
@@ -103,5 +108,6 @@ describe('AgentBuilderDashboardsPlugin', () => {
 
     expect(registerActionAsync).not.toHaveBeenCalled();
     expect(attachAction).not.toHaveBeenCalled();
+    expect(registerAddToChatProvider).not.toHaveBeenCalled();
   });
 });

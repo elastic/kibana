@@ -8,8 +8,8 @@
 import { BehaviorSubject } from 'rxjs';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
-import type { ActiveConversation, EmbeddableChatAccess } from '@kbn/agent-builder-browser';
-import { AGENT_BUILDER_EVENT_TYPES, type Conversation } from '@kbn/agent-builder-common';
+import type { ActiveConversation } from '@kbn/agent-builder-browser';
+import type { Conversation } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -18,11 +18,14 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { ADD_TO_CHAT_ACTION_ID } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { createCanvasDashboardRegistry, type IdGenerator } from '../attachment_types';
 import { DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED } from '../telemetry/event_types';
-import { createAddToChatAction, type AddToChatActionDeps } from './add_to_chat_action';
+import {
+  createDashboardAddToChatProvider,
+  DASHBOARD_PANEL_ADD_TO_CHAT_PROVIDER_ID,
+  type DashboardAddToChatProviderDeps,
+} from './add_to_chat_provider';
 
 const DRAFT_ID = 'draft-attachment-id';
 const pointerId = (dashboardAttachmentId: string) =>
@@ -97,20 +100,18 @@ const expectedPointer = (dashboardAttachmentId: string, label = 'CPU usage') => 
 
 const CANVAS_ATTACHMENT_ID = 'canvas-attachment-id';
 
-const createAction = ({
+const createProvider = ({
   dashboardApi = createDashboardApi(),
   canvasDashboardApi,
   closeCanvas = jest.fn(),
   active = null,
   canWriteDashboards = true,
-  access = { hasRequiredLicense: true, hasLlmConnector: true },
 }: {
   dashboardApi?: DashboardApi;
   canvasDashboardApi?: DashboardApi;
   closeCanvas?: () => void;
   active?: ActiveConversation | null;
   canWriteDashboards?: boolean;
-  access?: EmbeddableChatAccess;
 } = {}) => {
   const openChat = jest.fn();
   const addAttachment = jest.fn();
@@ -119,11 +120,10 @@ const createAction = ({
   const agentBuilder = {
     openChat,
     addAttachment,
-    getAgentBuilderAccess: jest.fn(async () => access),
     events: {
       ui: { activeConversation$: new BehaviorSubject<ActiveConversation | null>(active) },
     },
-  } as unknown as AddToChatActionDeps['agentBuilder'];
+  } as unknown as DashboardAddToChatProviderDeps['agentBuilder'];
   const canvasDashboards = createCanvasDashboardRegistry();
   if (canvasDashboardApi) {
     canvasDashboards.register(canvasDashboardApi, {
@@ -131,7 +131,7 @@ const createAction = ({
       closeCanvas,
     });
   }
-  const action = createAddToChatAction({
+  const provider = createDashboardAddToChatProvider({
     agentBuilder,
     dashboardAppApi$: new BehaviorSubject<DashboardApi | undefined>(dashboardApi),
     canvasDashboards,
@@ -139,33 +139,34 @@ const createAction = ({
     canWriteDashboards,
     draftAttachmentId,
   });
-  return { action, dashboardApi, openChat, addAttachment, reportEvent };
+  return { provider, dashboardApi, openChat, addAttachment, reportEvent };
 };
 
-type Action = ReturnType<typeof createAction>['action'];
-const isCompatible = (action: Action, embeddable: unknown) => action.isCompatible!({ embeddable });
-const execute = (action: Action, embeddable: unknown) => action.execute({ embeddable });
+type Provider = ReturnType<typeof createProvider>['provider'];
+const isCompatible = async (provider: Provider, embeddable: unknown) =>
+  provider.isCompatible(embeddable);
+const execute = (provider: Provider, embeddable: unknown) => provider.execute(embeddable);
 
-describe('createAddToChatAction', () => {
-  it('registers under the shared action id', () => {
-    expect(createAction().action.id).toBe(ADD_TO_CHAT_ACTION_ID);
+describe('createDashboardAddToChatProvider', () => {
+  it('reports the dashboard panel pathway', () => {
+    expect(createProvider().provider.id).toBe(DASHBOARD_PANEL_ADD_TO_CHAT_PROVIDER_ID);
   });
 
   describe('isCompatible', () => {
     it('accepts an ES|QL Lens panel of the dashboard open in the app, in edit mode', async () => {
-      const { action, dashboardApi } = createAction();
+      const { provider, dashboardApi } = createProvider();
 
       await expect(
-        isCompatible(action, createEmbeddable({ parentApi: dashboardApi }))
+        isCompatible(provider, createEmbeddable({ parentApi: dashboardApi }))
       ).resolves.toBe(true);
     });
 
     it('accepts a custom panel even without a query', async () => {
-      const { action, dashboardApi } = createAction();
+      const { provider, dashboardApi } = createProvider();
 
       await expect(
         isCompatible(
-          action,
+          provider,
           createEmbeddable({
             type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
             parentApi: dashboardApi,
@@ -176,72 +177,62 @@ describe('createAddToChatAction', () => {
     });
 
     it('rejects a Lens panel without an ES|QL query', async () => {
-      const { action, dashboardApi } = createAction();
+      const { provider, dashboardApi } = createProvider();
 
       await expect(
-        isCompatible(action, createEmbeddable({ parentApi: dashboardApi, esql: [] }))
+        isCompatible(provider, createEmbeddable({ parentApi: dashboardApi, esql: [] }))
       ).resolves.toBe(false);
     });
 
     it('rejects other panel types', async () => {
-      const { action, dashboardApi } = createAction();
+      const { provider, dashboardApi } = createProvider();
 
       await expect(
-        isCompatible(action, createEmbeddable({ type: 'markdown', parentApi: dashboardApi }))
+        isCompatible(provider, createEmbeddable({ type: 'markdown', parentApi: dashboardApi }))
       ).resolves.toBe(false);
     });
 
     it('rejects panels that do not belong to the dashboard open in the app or the canvas', async () => {
-      const { action } = createAction();
+      const { provider } = createProvider();
 
       await expect(
-        isCompatible(action, createEmbeddable({ parentApi: createDashboardApi() }))
+        isCompatible(provider, createEmbeddable({ parentApi: createDashboardApi() }))
       ).resolves.toBe(false);
     });
 
     it('accepts panels in view mode', async () => {
-      const { action, dashboardApi } = createAction({
+      const { provider, dashboardApi } = createProvider({
         dashboardApi: createDashboardApi({ viewMode: 'view' }),
       });
 
       await expect(
-        isCompatible(action, createEmbeddable({ parentApi: dashboardApi }))
+        isCompatible(provider, createEmbeddable({ parentApi: dashboardApi }))
       ).resolves.toBe(true);
     });
 
     it('accepts panels of a dashboard rendered in the chat canvas', async () => {
       const canvasDashboardApi = createDashboardApi({ viewMode: 'view' });
-      const { action } = createAction({ canvasDashboardApi });
+      const { provider } = createProvider({ canvasDashboardApi });
 
       await expect(
-        isCompatible(action, createEmbeddable({ parentApi: canvasDashboardApi }))
+        isCompatible(provider, createEmbeddable({ parentApi: canvasDashboardApi }))
       ).resolves.toBe(true);
     });
 
     it('rejects when the user cannot write dashboards', async () => {
-      const { action, dashboardApi } = createAction({ canWriteDashboards: false });
+      const { provider, dashboardApi } = createProvider({ canWriteDashboards: false });
 
       await expect(
-        isCompatible(action, createEmbeddable({ parentApi: dashboardApi }))
-      ).resolves.toBe(false);
-    });
-
-    it('rejects when agent builder has no LLM connector', async () => {
-      const { action, dashboardApi } = createAction({
-        access: { hasRequiredLicense: true, hasLlmConnector: false },
-      });
-
-      await expect(
-        isCompatible(action, createEmbeddable({ parentApi: dashboardApi }))
+        isCompatible(provider, createEmbeddable({ parentApi: dashboardApi }))
       ).resolves.toBe(false);
     });
   });
 
   describe('execute', () => {
     it('opens a new conversation with the dashboard and the pointer when no chat is bound', async () => {
-      const { action, dashboardApi, openChat, addAttachment, reportEvent } = createAction();
+      const { provider, dashboardApi, openChat, addAttachment, reportEvent } = createProvider();
 
-      await execute(action, createEmbeddable({ parentApi: dashboardApi }));
+      const result = await execute(provider, createEmbeddable({ parentApi: dashboardApi }));
 
       expect(addAttachment).not.toHaveBeenCalled();
       expect(openChat).toHaveBeenCalledWith({
@@ -261,18 +252,17 @@ describe('createAddToChatAction', () => {
         chat_state: 'new_conversation',
         is_saved_dashboard: true,
       });
-      expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, {
-        pathway: 'dashboard_panel',
-        attachments: [DASHBOARD_ATTACHMENT_TYPE, DASHBOARD_PANEL_ATTACHMENT_TYPE],
+      expect(result).toEqual({
+        attachmentTypes: [DASHBOARD_ATTACHMENT_TYPE, DASHBOARD_PANEL_ATTACHMENT_TYPE],
       });
     });
 
     it('points at the dashboard attachment linked to the open dashboard', async () => {
-      const { action, dashboardApi, openChat, addAttachment, reportEvent } = createAction({
+      const { provider, dashboardApi, openChat, addAttachment, reportEvent } = createProvider({
         active: activeConversation([linkedDashboardAttachment('dash-1')]),
       });
 
-      await execute(action, createEmbeddable({ parentApi: dashboardApi }));
+      await execute(provider, createEmbeddable({ parentApi: dashboardApi }));
 
       expect(openChat).not.toHaveBeenCalled();
       expect(addAttachment).toHaveBeenCalledTimes(1);
@@ -284,12 +274,12 @@ describe('createAddToChatAction', () => {
     });
 
     it('links an unsaved dashboard to an origin-less dashboard attachment', async () => {
-      const { action, dashboardApi, addAttachment, reportEvent } = createAction({
+      const { provider, dashboardApi, addAttachment, reportEvent } = createProvider({
         dashboardApi: createDashboardApi({ unsaved: true }),
         active: activeConversation([linkedDashboardAttachment(undefined)]),
       });
 
-      await execute(action, createEmbeddable({ parentApi: dashboardApi }));
+      await execute(provider, createEmbeddable({ parentApi: dashboardApi }));
 
       expect(addAttachment).toHaveBeenCalledTimes(1);
       expect(addAttachment).toHaveBeenCalledWith(expectedPointer('linked-attachment-id'));
@@ -300,11 +290,11 @@ describe('createAddToChatAction', () => {
     });
 
     it('stages the dashboard under the draft id before the pointer when nothing is linked', async () => {
-      const { action, dashboardApi, addAttachment, reportEvent } = createAction({
+      const { provider, dashboardApi, addAttachment, reportEvent } = createProvider({
         active: activeConversation([linkedDashboardAttachment('another-dashboard')]),
       });
 
-      await execute(action, createEmbeddable({ parentApi: dashboardApi }));
+      await execute(provider, createEmbeddable({ parentApi: dashboardApi }));
 
       expect(addAttachment).toHaveBeenCalledTimes(2);
       expect(addAttachment).toHaveBeenNthCalledWith(
@@ -319,12 +309,12 @@ describe('createAddToChatAction', () => {
     });
 
     it('stages a managed dashboard without an origin instead of pointing at its attachment', async () => {
-      const { action, dashboardApi, addAttachment, reportEvent } = createAction({
+      const { provider, dashboardApi, addAttachment, reportEvent } = createProvider({
         dashboardApi: createDashboardApi({ managed: true }),
         active: activeConversation([linkedDashboardAttachment('dash-1')]),
       });
 
-      await execute(action, createEmbeddable({ parentApi: dashboardApi }));
+      await execute(provider, createEmbeddable({ parentApi: dashboardApi }));
 
       expect(addAttachment).toHaveBeenCalledTimes(2);
       expect(addAttachment).toHaveBeenNthCalledWith(
@@ -344,12 +334,12 @@ describe('createAddToChatAction', () => {
 
     it('points at the dashboard attachment a canvas panel belongs to', async () => {
       const canvasDashboardApi = createDashboardApi({ viewMode: 'view' });
-      const { action, openChat, addAttachment, reportEvent } = createAction({
+      const { provider, openChat, addAttachment, reportEvent } = createProvider({
         canvasDashboardApi,
         active: activeConversation(),
       });
 
-      await execute(action, createEmbeddable({ parentApi: canvasDashboardApi }));
+      const result = await execute(provider, createEmbeddable({ parentApi: canvasDashboardApi }));
 
       expect(openChat).not.toHaveBeenCalled();
       expect(addAttachment).toHaveBeenCalledTimes(1);
@@ -358,28 +348,25 @@ describe('createAddToChatAction', () => {
         DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED,
         expect.objectContaining({ chat_state: 'canvas' })
       );
-      expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, {
-        pathway: 'dashboard_panel',
-        attachments: [DASHBOARD_PANEL_ATTACHMENT_TYPE],
-      });
+      expect(result).toEqual({ attachmentTypes: [DASHBOARD_PANEL_ATTACHMENT_TYPE] });
     });
 
     it('closes the canvas after adding the pointer so the chat input shows it', async () => {
       const canvasDashboardApi = createDashboardApi({ viewMode: 'view' });
       const closeCanvas = jest.fn();
-      const { action, addAttachment } = createAction({ canvasDashboardApi, closeCanvas });
+      const { provider, addAttachment } = createProvider({ canvasDashboardApi, closeCanvas });
 
-      await execute(action, createEmbeddable({ parentApi: canvasDashboardApi }));
+      await execute(provider, createEmbeddable({ parentApi: canvasDashboardApi }));
 
       expect(addAttachment).toHaveBeenCalledWith(expectedPointer(CANVAS_ATTACHMENT_ID));
       expect(closeCanvas).toHaveBeenCalledTimes(1);
     });
 
     it('leaves the label empty for an untitled Lens panel', async () => {
-      const { action, dashboardApi, openChat } = createAction();
+      const { provider, dashboardApi, openChat } = createProvider();
 
       await execute(
-        action,
+        provider,
         createEmbeddable({
           parentApi: dashboardApi,
           untitled: true,
@@ -395,7 +382,7 @@ describe('createAddToChatAction', () => {
     });
 
     it('derives the label of an untitled Lens panel from its chart config', async () => {
-      const { action, dashboardApi, openChat } = createAction({
+      const { provider, dashboardApi, openChat } = createProvider({
         dashboardApi: createDashboardApi({
           panels: [
             {
@@ -412,7 +399,7 @@ describe('createAddToChatAction', () => {
         }),
       });
 
-      await execute(action, createEmbeddable({ parentApi: dashboardApi, untitled: true }));
+      await execute(provider, createEmbeddable({ parentApi: dashboardApi, untitled: true }));
 
       expect(openChat).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -422,10 +409,10 @@ describe('createAddToChatAction', () => {
     });
 
     it('labels an untitled custom panel with its type display name', async () => {
-      const { action, dashboardApi, openChat } = createAction();
+      const { provider, dashboardApi, openChat } = createProvider();
 
       await execute(
-        action,
+        provider,
         createEmbeddable({
           type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
           parentApi: dashboardApi,
@@ -451,11 +438,11 @@ describe('createAddToChatAction', () => {
     });
 
     it('does nothing when the panel is not compatible', async () => {
-      const { action, dashboardApi, openChat, addAttachment, reportEvent } = createAction({
+      const { provider, dashboardApi, openChat, addAttachment, reportEvent } = createProvider({
         canWriteDashboards: false,
       });
 
-      await execute(action, createEmbeddable({ parentApi: dashboardApi }));
+      await execute(provider, createEmbeddable({ parentApi: dashboardApi }));
 
       expect(openChat).not.toHaveBeenCalled();
       expect(addAttachment).not.toHaveBeenCalled();

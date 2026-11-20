@@ -7,7 +7,6 @@
 
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core/public';
 import { once } from 'lodash';
-import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED, type AddToChatClickedEvent } from './event_types';
 
 export type { AddToChatChatState, AddToChatClickedEvent } from './event_types';
@@ -42,19 +41,14 @@ export const registerAgentBuilderDashboardsAnalyticsEvents = once(
 );
 
 /**
- * Reports an "Add to chat" click as the shared agent builder event and the dashboard detail event;
- * telemetry failures never break the action.
+ * Reports the dashboard details of an "Add to chat" click; the action reports the shared agent
+ * builder event. Telemetry failures never break the action.
  */
 export const reportAddToChatClicked = (
   analytics: AnalyticsServiceStart,
-  event: AddToChatClickedEvent,
-  attachmentTypes: readonly string[]
+  event: AddToChatClickedEvent
 ): void => {
   try {
-    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, {
-      pathway: 'dashboard_panel',
-      attachments: [...attachmentTypes],
-    });
     analytics.reportEvent(DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED, { ...event });
   } catch {
     // never break the action on telemetry errors

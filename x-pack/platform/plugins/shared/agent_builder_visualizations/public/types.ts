@@ -12,12 +12,17 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { AddToChatProvider } from './add_to_chat';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderVisualizationsPluginPublicSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AgentBuilderVisualizationsPluginPublicStart {}
+export interface AgentBuilderVisualizationsPluginPublicStart {
+  addToChat: {
+    /** Lets a plugin decide what the "Add to chat" panel action sends for the panels it handles. */
+    registerProvider: (provider: AddToChatProvider) => void;
+  };
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderVisualizationsPluginPublicSetupDependencies {}

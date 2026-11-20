@@ -7,8 +7,8 @@
 
 import type { Observable } from 'rxjs';
 import { firstValueFrom, map, skip } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { AddToChatProvider } from '@kbn/agent-builder-visualizations-plugin/public';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -25,7 +25,6 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
-import { ADD_TO_CHAT_ACTION_ID } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   apiHasParentApi,
@@ -34,20 +33,18 @@ import {
   apiPublishesEsql,
   apiPublishesTitle,
   getTitle,
-  type EmbeddableApiContext,
   type HasTypeDisplayName,
   type HasUniqueId,
 } from '@kbn/presentation-publishing';
-import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { CanvasDashboard, CanvasDashboardRegistry, IdGenerator } from '../attachment_types';
 import { resolveDashboardAttachmentLink } from '../attachment_types/dashboard_integration/reconcile';
 import { reportAddToChatClicked, type AddToChatChatState } from '../telemetry';
 
-export interface AddToChatActionDeps {
-  agentBuilder: Pick<
-    AgentBuilderPluginStart,
-    'openChat' | 'addAttachment' | 'getAgentBuilderAccess' | 'events'
-  >;
+/** The pathway the shared "Add to chat" event reports for dashboard panels. */
+export const DASHBOARD_PANEL_ADD_TO_CHAT_PROVIDER_ID = 'dashboard_panel';
+
+export interface DashboardAddToChatProviderDeps {
+  agentBuilder: Pick<AgentBuilderPluginStart, 'openChat' | 'addAttachment' | 'events'>;
   dashboardAppApi$: DashboardStart['dashboardAppClientApi$'];
   canvasDashboards: Pick<CanvasDashboardRegistry, 'get'>;
   analytics: AnalyticsServiceStart;
@@ -67,7 +64,7 @@ interface PanelDashboard {
  */
 const getPanelDashboard = (
   embeddable: unknown,
-  { dashboardAppApi$, canvasDashboards }: AddToChatActionDeps
+  { dashboardAppApi$, canvasDashboards }: DashboardAddToChatProviderDeps
 ): PanelDashboard | undefined => {
   if (!apiHasParentApi(embeddable)) {
     return undefined;
@@ -103,43 +100,34 @@ const getPanelLabel = (embeddable: HasUniqueId, dashboardData: DashboardAttachme
   return (title || derived || typeDisplayName || '').slice(0, DASHBOARD_PANEL_LABEL_MAX_LENGTH);
 };
 
-export const createAddToChatAction = (
-  deps: AddToChatActionDeps
-): ActionDefinition<EmbeddableApiContext> => {
+/**
+ * Handles "Add to chat" for ES|QL Lens and custom panels of the dashboard open in the dashboard app
+ * or in the sidebar chat canvas: it sends a pointer to the panel, with the dashboard when the chat
+ * has no attachment for it yet.
+ */
+export const createDashboardAddToChatProvider = (
+  deps: DashboardAddToChatProviderDeps
+): AddToChatProvider => {
   const { agentBuilder, analytics, canWriteDashboards, draftAttachmentId } = deps;
-  const isCompatible = async (embeddable: unknown): Promise<boolean> => {
-    if (
-      !getPanelDashboard(embeddable, deps) ||
-      !canWriteDashboards ||
-      !isRefinablePanel(embeddable)
-    ) {
-      return false;
-    }
-    const access = await agentBuilder.getAgentBuilderAccess();
-    return access.hasRequiredLicense && access.hasLlmConnector;
-  };
+  const isCompatible = (embeddable: unknown): boolean =>
+    canWriteDashboards &&
+    Boolean(getPanelDashboard(embeddable, deps)) &&
+    isRefinablePanel(embeddable);
 
   return {
-    id: ADD_TO_CHAT_ACTION_ID,
-    type: ADD_TO_CHAT_ACTION_ID,
-    order: 25,
-    getDisplayName: () =>
-      i18n.translate('xpack.agentBuilderDashboards.addToChat.displayName', {
-        defaultMessage: 'Add to chat',
-      }),
-    getIconType: () => 'addToChat',
-    isCompatible: ({ embeddable }) => isCompatible(embeddable),
-    getCompatibilityChangesSubject: ({ embeddable }): Observable<undefined> | undefined =>
+    id: DASHBOARD_PANEL_ADD_TO_CHAT_PROVIDER_ID,
+    isCompatible,
+    getCompatibilityChangesSubject: (embeddable): Observable<undefined> | undefined =>
       apiPublishesEsql(embeddable)
         ? embeddable.esql$.pipe(
             skip(1),
             map(() => undefined)
           )
         : undefined,
-    execute: async ({ embeddable }) => {
+    execute: async (embeddable) => {
       const panelDashboard = getPanelDashboard(embeddable, deps);
-      if (!panelDashboard || !isRefinablePanel(embeddable) || !(await isCompatible(embeddable))) {
-        return;
+      if (!panelDashboard || !isRefinablePanel(embeddable) || !isCompatible(embeddable)) {
+        return undefined;
       }
       const { dashboardApi, canvasDashboard } = panelDashboard;
 
@@ -150,17 +138,15 @@ export const createAddToChatAction = (
         ? CUSTOM_CONTENT_EMBEDDABLE_TYPE
         : LENS_EMBEDDABLE_TYPE;
       const reportClicked = (chatState: AddToChatChatState) =>
-        reportAddToChatClicked(
-          analytics,
-          {
-            panel_type: panelType,
-            chat_state: chatState,
-            is_saved_dashboard: Boolean(dashboardApi.savedObjectId$.getValue()),
-          },
-          chatState === 'new_conversation' || chatState === 'staged_attachment'
-            ? [DASHBOARD_ATTACHMENT_TYPE, DASHBOARD_PANEL_ATTACHMENT_TYPE]
-            : [DASHBOARD_PANEL_ATTACHMENT_TYPE]
-        );
+        reportAddToChatClicked(analytics, {
+          panel_type: panelType,
+          chat_state: chatState,
+          is_saved_dashboard: Boolean(dashboardApi.savedObjectId$.getValue()),
+        });
+      const pointerOnly = { attachmentTypes: [DASHBOARD_PANEL_ATTACHMENT_TYPE] };
+      const dashboardAndPointer = {
+        attachmentTypes: [DASHBOARD_ATTACHMENT_TYPE, DASHBOARD_PANEL_ATTACHMENT_TYPE],
+      };
       const buildDashboardAttachment = (
         id: string,
         origin: string | undefined
@@ -189,7 +175,7 @@ export const createAddToChatAction = (
         reportClicked('canvas');
         agentBuilder.addAttachment(buildPanelPointer(canvasDashboard.attachmentId));
         canvasDashboard.closeCanvas();
-        return;
+        return pointerOnly;
       }
 
       const activeConversation = await firstValueFrom(agentBuilder.events.ui.activeConversation$);
@@ -212,14 +198,14 @@ export const createAddToChatAction = (
             buildPanelPointer(draftAttachmentId.current),
           ],
         });
-        return;
+        return dashboardAndPointer;
       }
 
       // The sidebar is open: point at the dashboard attachment already linked to this dashboard.
       if (linkedAttachment) {
         reportClicked('linked_attachment');
         agentBuilder.addAttachment(buildPanelPointer(linkedAttachment.id));
-        return;
+        return pointerOnly;
       }
 
       // New conversation, or a dashboard the sidebar integration did not attach, e.g. an unlinkable
@@ -227,6 +213,7 @@ export const createAddToChatAction = (
       reportClicked('staged_attachment');
       agentBuilder.addAttachment(buildDashboardAttachment(draftAttachmentId.current, origin));
       agentBuilder.addAttachment(buildPanelPointer(draftAttachmentId.current));
+      return dashboardAndPointer;
     },
   };
 };
