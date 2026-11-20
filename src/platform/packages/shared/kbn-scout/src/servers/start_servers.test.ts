@@ -58,12 +58,16 @@ describe('startServers', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    process.exitCode = originalExitCode;
     withProcRunnerMock.mockImplementation(async (_log, fn) => fn(procs));
     runDockerServersMock.mockResolvedValue(stopDockerServers);
     runElasticsearchMock.mockResolvedValue(shutdownEs);
     runKibanaServerMock.mockResolvedValue(undefined);
     registerServerShutdownMock.mockReturnValue(removeShutdownHook);
+  });
+
+  // `onEarlyExit` sets `process.exitCode`; left set, it would fail the jest worker itself.
+  afterEach(() => {
+    process.exitCode = originalExitCode;
   });
 
   it('starts the docker servers before Elasticsearch and stops everything once the servers exit', async () => {
