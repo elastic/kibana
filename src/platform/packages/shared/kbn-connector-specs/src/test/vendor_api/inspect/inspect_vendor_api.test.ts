@@ -459,6 +459,33 @@ actions:
       ]);
     });
 
+    it('sets the format of an MCP source a Markdown reference replaces, and does not suggest capturing it', async () => {
+      const indexUrl = 'https://docs.example.com/llms.txt';
+      const documents: Record<string, string> = {
+        [indexUrl]: '- [Search](api/search.md)',
+        'https://docs.example.com/api/search.md': [
+          '# Search',
+          '',
+          '`GET` `/v1/search`',
+          '',
+          '**Base URL:** `https://api.example.com`',
+        ].join('\n'),
+      };
+      await captured({ format: 'mcp', endpoints: ['https://mcp.example.com/mcp'] });
+
+      const { problems } = await inspect({
+        sources: { v1: indexUrl },
+        formats: { v1: 'brave-markdown' },
+        pages: { v1: ['api/'] },
+        directory,
+        fetchText: async (url) => documents[url],
+      });
+
+      expect(problems).toEqual([
+        `v1 is captured from ${SPEC_URL} in manifest.json. ${indexUrl} is brave-markdown, so first edit v1 in manifest.json: set "format" to "brave-markdown", remove "endpoints". A Markdown reference can't be captured, so it is public: remove "captured" from v1 too, or drift checks skip it, and record with --source v1=${indexUrl} --format v1=brave-markdown --pages v1=api/.`,
+      ]);
+    });
+
     it('says which GraphQL and MCP fields the replacement leaves behind', async () => {
       await captured({ format: 'mcp', endpoints: ['https://mcp.example.com/mcp'] });
 

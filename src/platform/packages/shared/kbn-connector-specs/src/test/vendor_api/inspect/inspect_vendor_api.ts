@@ -95,14 +95,16 @@ const describeCapturedReplacement = ({
     ...(isMarkdownFormat(format) ? [`--format ${name}=${format}`] : []),
     ...(pages ?? []).map((prefix) => `--pages ${name}=${prefix}`),
   ].join(' ');
-  // Recording tells OpenAPI from Swagger by itself, and --format names a Markdown reference, so
-  // the manifest's format only has to change when it names a kind the replacement isn't.
+  // Recording validates the manifest before --format applies, so a GraphQL or MCP source's format
+  // changes with the endpoints and tools it loses. A Markdown reference's only has to change when
+  // the replacement isn't one, as --format names Markdown, and recording tells OpenAPI from
+  // Swagger by itself.
   const declaresOtherKind =
-    (isMarkdownFormat(known.format) || isProtocolFormat(known.format)) && !isMarkdownFormat(format);
+    isProtocolFormat(known.format) || (isMarkdownFormat(known.format) && !isMarkdownFormat(format));
   const edits = [
     ...(declaresOtherKind ? [`set "format" to "${format}"`] : []),
     // Recording applies the manifest's pages when no --pages is given, and only to a Markdown
-    // reference, so they go unless the replacement is one inspected without --pages of its own.
+    // reference, so they stay only for a Markdown replacement inspected with --pages of its own.
     ...(known.pages !== undefined && (!isMarkdownFormat(format) || pages === undefined)
       ? ['remove "pages"']
       : []),
@@ -115,8 +117,11 @@ const describeCapturedReplacement = ({
     ...(edits.length > 0
       ? [`${url} is ${format}, so first edit ${name} in ${MANIFEST}: ${edits.join(', ')}.`]
       : []),
-    `If ${url} also needs credentials, capture it from there: record with ${recordFlags} --capture ${name}=<file>.`,
-    `If it is public, also remove "captured" from ${name}, or drift checks skip it, and record with ${recordFlags}.`,
+    // A Markdown reference is read from an index and the pages it links to, so it can't be
+    // captured from one document.
+    isMarkdownFormat(format)
+      ? `A Markdown reference can't be captured, so it is public: remove "captured" from ${name} too, or drift checks skip it, and record with ${recordFlags}.`
+      : `If ${url} also needs credentials, capture it from there: record with ${recordFlags} --capture ${name}=<file>. If it is public, also remove "captured" from ${name}, or drift checks skip it, and record with ${recordFlags}.`,
   ].join(' ');
 };
 
