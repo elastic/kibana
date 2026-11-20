@@ -127,6 +127,8 @@ export const getESQLControlFactory = <
       const api = finalizeApi({
         ...stateApi,
         ...selections.api,
+        setSelectedOptions: (options: string[]) =>
+          selections.internalApi.setSelectedOptions(options),
         ...labelManager.api,
         ...relatedPanelsApi,
         dataLoading$,
