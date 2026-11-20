@@ -24,6 +24,11 @@ import { TaskAlreadyRunningError } from './lib/errors';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import { taskManagerClaimNudgeTelemetry } from './otel/claim_nudge_telemetry';
+import {
+  EnsureScheduledOffsetMs,
+  EnsureScheduledResetThresholdSecs,
+  MaxEnsureScheduledOffsetSecs,
+} from './constants';
 
 let fakeTimer: sinon.SinonFakeTimers;
 jest.mock('uuid', () => ({
@@ -31,6 +36,7 @@ jest.mock('uuid', () => ({
 }));
 
 jest.mock('./constants', () => ({
+  ...jest.requireActual('./constants'),
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['foo'],
 }));
 
@@ -379,6 +385,184 @@ describe('TaskScheduling', () => {
     // No key would be granted, so there is no leak to guard against and the lookup is skipped.
     expect(mockTaskStore.taskExists).not.toHaveBeenCalled();
     expect(mockTaskStore.schedule).toHaveBeenCalled();
+  });
+
+  describe('ensureScheduled runAt offset', () => {
+    const thresholdMs = EnsureScheduledResetThresholdSecs * 1000;
+    function adHocTask(id: string, overrides: Partial<TaskInstance> = {}) {
+      return { id, taskType: 'foo', params: {}, state: {}, ...overrides };
+    }
+
+    function scheduledRunAts(): Array<Date | undefined> {
+      return mockTaskStore.schedule.mock.calls.map(([task]) => task.runAt);
+    }
+
+    // Other tests rely on the fake clock staying where it was, so it is put back afterwards.
+    let clockBeforeSuite: number;
+    beforeAll(() => {
+      clockBeforeSuite = Date.now();
+    });
+    afterAll(() => {
+      fakeTimer.setSystemTime(clockBeforeSuite);
+    });
+
+    beforeEach(() => {
+      // A new instance has no previous call, which is treated as one at time 0.
+      fakeTimer.setSystemTime(clockBeforeSuite + thresholdMs);
+    });
+
+    test('adds an offset that grows with each call made within the threshold', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const start = Date.now();
+
+      await taskScheduling.ensureScheduled(adHocTask('task-1'));
+      await taskScheduling.ensureScheduled(adHocTask('task-2'));
+      await taskScheduling.ensureScheduled(adHocTask('task-3'));
+      await taskScheduling.ensureScheduled(adHocTask('task-4'));
+
+      expect(scheduledRunAts()).toEqual([
+        new Date(start),
+        new Date(start + EnsureScheduledOffsetMs),
+        new Date(start + 2 * EnsureScheduledOffsetMs),
+        new Date(start + 3 * EnsureScheduledOffsetMs),
+      ]);
+    });
+
+    test('offsets from the time of each call', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const firstCall = Date.now();
+
+      await taskScheduling.ensureScheduled(adHocTask('task-1'));
+      fakeTimer.tick(1000);
+      await taskScheduling.ensureScheduled(adHocTask('task-2'));
+      const secondCall = Date.now();
+      fakeTimer.tick(1000);
+      await taskScheduling.ensureScheduled(adHocTask('task-3'));
+      const thirdCall = Date.now();
+
+      expect(scheduledRunAts()).toEqual([
+        new Date(firstCall),
+        new Date(secondCall + EnsureScheduledOffsetMs),
+        new Date(thirdCall + 2 * EnsureScheduledOffsetMs),
+      ]);
+    });
+
+    test('keeps growing while each call is within the threshold of the previous one', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      await taskScheduling.ensureScheduled(adHocTask('task-1'));
+      fakeTimer.tick(thresholdMs - 1);
+      await taskScheduling.ensureScheduled(adHocTask('task-2'));
+      fakeTimer.tick(thresholdMs - 1);
+      await taskScheduling.ensureScheduled(adHocTask('task-3'));
+      const thirdCall = Date.now();
+
+      expect(scheduledRunAts()[2]).toEqual(new Date(thirdCall + 2 * EnsureScheduledOffsetMs));
+    });
+
+    test('resets the offset once a call is at least the threshold after the previous one', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const firstCall = Date.now();
+
+      await taskScheduling.ensureScheduled(adHocTask('task-1'));
+      await taskScheduling.ensureScheduled(adHocTask('task-2'));
+      fakeTimer.tick(thresholdMs);
+      const afterReset = Date.now();
+      await taskScheduling.ensureScheduled(adHocTask('task-3'));
+      await taskScheduling.ensureScheduled(adHocTask('task-4'));
+
+      expect(scheduledRunAts()).toEqual([
+        new Date(firstCall),
+        new Date(firstCall + EnsureScheduledOffsetMs),
+        new Date(afterReset),
+        new Date(afterReset + EnsureScheduledOffsetMs),
+      ]);
+    });
+
+    test('does not change an explicit runAt, but still counts the call', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const start = Date.now();
+      const explicitRunAt = new Date(start + 60 * 60 * 1000);
+
+      await taskScheduling.ensureScheduled(adHocTask('task-1'));
+      await taskScheduling.ensureScheduled(adHocTask('task-2', { runAt: explicitRunAt }));
+      await taskScheduling.ensureScheduled(adHocTask('task-3'));
+
+      expect(scheduledRunAts()).toEqual([
+        new Date(start),
+        explicitRunAt,
+        new Date(start + 2 * EnsureScheduledOffsetMs),
+      ]);
+    });
+
+    test('does not set runAt for an rrule schedule, but still counts the call', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const start = Date.now();
+      const rrule = { freq: 3, interval: 1, tzid: 'UTC', byhour: [3], byminute: [0] };
+
+      await taskScheduling.ensureScheduled(adHocTask('task-1'));
+      await taskScheduling.ensureScheduled(adHocTask('task-2', { schedule: { rrule } }));
+      await taskScheduling.ensureScheduled(adHocTask('task-3'));
+
+      expect(scheduledRunAts()).toEqual([
+        new Date(start),
+        undefined,
+        new Date(start + 2 * EnsureScheduledOffsetMs),
+      ]);
+    });
+
+    test('counts calls for tasks that already exist', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+
+      await taskScheduling.ensureScheduled(adHocTask('existing-task'));
+      await taskScheduling.ensureScheduled(adHocTask('task-2'));
+      const secondCall = Date.now();
+
+      expect(scheduledRunAts()[1]).toEqual(new Date(secondCall + EnsureScheduledOffsetMs));
+    });
+
+    test('resets the offset to 0 once it would exceed the maximum', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const maxSteps = (MaxEnsureScheduledOffsetSecs * 1000) / EnsureScheduledOffsetMs;
+      const start = Date.now();
+
+      for (let i = 0; i < maxSteps + 4; i++) {
+        await taskScheduling.ensureScheduled(adHocTask(`task-${i}`));
+      }
+
+      expect(scheduledRunAts().slice(maxSteps)).toEqual([
+        new Date(start + MaxEnsureScheduledOffsetSecs * 1000),
+        new Date(start),
+        new Date(start + EnsureScheduledOffsetMs),
+        new Date(start + 2 * EnsureScheduledOffsetMs),
+      ]);
+    });
+
+    test('never offsets by more than the maximum while called continuously', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const maxOffsetMs = MaxEnsureScheduledOffsetSecs * 1000;
+      const offsets: number[] = [];
+
+      for (let i = 0; i < 300; i++) {
+        await taskScheduling.ensureScheduled(adHocTask(`task-${i}`));
+        offsets.push(Number(scheduledRunAts()[i]) - Date.now());
+        fakeTimer.tick(100);
+      }
+
+      expect(Math.max(...offsets)).toBe(maxOffsetMs);
+    });
+
+    test('tracks the offset separately for each TaskScheduling instance', async () => {
+      const first = new TaskScheduling(taskSchedulingOpts);
+      const second = new TaskScheduling(taskSchedulingOpts);
+      const start = Date.now();
+
+      await first.ensureScheduled(adHocTask('task-1'));
+      await second.ensureScheduled(adHocTask('task-2'));
+
+      expect(scheduledRunAts()).toEqual([new Date(start), new Date(start)]);
+    });
   });
 
   describe('ensureScheduled with regenerateApiKey', () => {
