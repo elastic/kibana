@@ -238,8 +238,9 @@ function instantiateProvider(
  */
 export class Authenticator {
   // Remember requests handled by explicit HTTP authentication so their expired credentials
-  // cannot be renewed from an unrelated browser session cookie.
-  private readonly explicitHTTPRequests = new WeakSet<Headers>();
+  // cannot be renewed from an unrelated browser session cookie. The UUID is stable across
+  // KibanaRequest wrappers, whereas each wrapper receives a fresh headers object.
+  private readonly explicitHTTPRequests = new Set<string>();
   // Core stores one authentication-header object per incoming request. All KibanaRequest wrappers
   // for that request read the same object. Keep both old and renewed header objects in this map,
   // so calls that still hold an expired token can find the latest token and share its renewal.
@@ -454,8 +455,12 @@ export class Authenticator {
       );
 
       if (!authenticationResult.notHandled()) {
-        if (provider.type === HTTPAuthenticationProvider.type) {
-          this.explicitHTTPRequests.add(request.headers);
+        if (provider.type === HTTPAuthenticationProvider.type && !request.isFakeRequest) {
+          const { uuid } = request;
+          this.explicitHTTPRequests.add(uuid);
+          request.events.completed$.subscribe(() => {
+            this.explicitHTTPRequests.delete(uuid);
+          });
         }
         if (!ownsSession && existingSession.value?.provider.name) {
           // 'telemetry' to see how prevalent it is for users
@@ -584,7 +589,7 @@ export class Authenticator {
     // A session cookie on the same request must not let an explicit HTTP credential fall back
     // to another user's session.
     // Fake requests have no browser session to renew.
-    if (request.isFakeRequest || !user || this.explicitHTTPRequests.has(request.headers)) {
+    if (request.isFakeRequest || !user || this.explicitHTTPRequests.has(request.uuid)) {
       return null;
     }
 

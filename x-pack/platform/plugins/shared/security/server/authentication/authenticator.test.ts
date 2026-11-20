@@ -2788,6 +2788,12 @@ describe('Authenticator', () => {
         authenticateSession.mockClear();
 
         await expect(authenticator.reauthenticate(request, request.headers)).resolves.toBeNull();
+        mockOptions.authHeadersStorage.set(request, { authorization });
+        const routeRequest = { ...request, headers: { ...request.headers } };
+        expect(routeRequest.headers).not.toBe(request.headers);
+        await expect(
+          authenticator.reauthenticate(routeRequest, { authorization })
+        ).resolves.toBeNull();
         expect(authenticateSession).not.toHaveBeenCalled();
       }
     );
