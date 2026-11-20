@@ -479,17 +479,18 @@ describe('filters', () => {
 });
 
 describe('errors', () => {
-  test('adds context to the message and keeps the original error', async () => {
+  test('adds context to the message and keeps the original error as the cause', async () => {
     const originalError = Object.assign(new Error('Saved object not found'), { statusCode: 404 });
     dataViewsService.get.mockRejectedValueOnce(originalError);
 
     const provider = searchSourceFromLocatorFactory(mockServices);
     const error = await provider({ dataViewId: 'missing-data-view' }).catch((e) => e);
 
-    expect(error).toBe(originalError);
-    expect(error.statusCode).toBe(404);
+    expect(error.cause).toBe(originalError);
     expect(error.message).toBe(
       'Failed to resolve the search from DiscoverAppLocatorParams (dataViewId: missing-data-view): Saved object not found'
     );
+    // the original error is not modified
+    expect(originalError.message).toBe('Saved object not found');
   });
 });

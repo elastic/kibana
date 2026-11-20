@@ -23,6 +23,8 @@ export interface ResolvedLocatorSearch {
   searchSource: ISearchSource;
 }
 
+const isString = (value: unknown): value is string => typeof value === 'string';
+
 const isSortOrderPair = (item: unknown): boolean =>
   Array.isArray(item) &&
   item.length === 2 &&
@@ -44,8 +46,6 @@ const validateParams = ({ columns, sort }: DiscoverAppLocatorParams): void => {
     );
   }
 };
-
-const isString = (value: unknown): value is string => typeof value === 'string';
 
 /**
  * Resolves the saved search, data view and a base search source from DiscoverAppLocatorParams.
@@ -90,16 +90,17 @@ export const resolveLocatorSearch = async (
 
     return { savedSearch, dataView, searchSource };
   } catch (error) {
-    // Add context to the message, but rethrow the original error to keep its type and status code
-    if (error instanceof Error) {
-      const context = [
-        savedSearchId && `savedSearchId: ${savedSearchId}`,
-        dataViewId && `dataViewId: ${dataViewId}`,
-      ]
-        .filter(Boolean)
-        .join(', ');
-      error.message = `Failed to resolve the search from DiscoverAppLocatorParams (${context}): ${error.message}`;
-    }
-    throw error;
+    const context = [
+      savedSearchId && `savedSearchId: ${savedSearchId}`,
+      dataViewId && `dataViewId: ${dataViewId}`,
+    ]
+      .filter(Boolean)
+      .join(', ');
+    const reason = error instanceof Error ? error.message : String(error);
+
+    throw new Error(
+      `Failed to resolve the search from DiscoverAppLocatorParams (${context}): ${reason}`,
+      { cause: error }
+    );
   }
 };

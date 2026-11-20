@@ -42,6 +42,7 @@ let uiSettingsClient: IUiSettingsClient;
 let soClient: SavedObjectsClientContract;
 let searchSourceStart: ISearchStartSearchSource;
 let mockServices: Services;
+let dataViewsService: { get: jest.Mock };
 let mockSavedSearch: SavedObject<SavedSearchAttributes>;
 
 // mock params containing the discover app locator
@@ -54,11 +55,13 @@ beforeAll(async () => {
   uiSettingsClient = coreMock.createStart().uiSettings.asScopedToClient(soClient);
   searchSourceStart = await dataStartMock.search.searchSource.asScoped(request);
 
+  dataViewsService = { get: jest.fn() };
+
   mockServices = {
     searchSourceStart,
     savedObjects: soClient,
     uiSettings: uiSettingsClient,
-    dataViewsService: {} as DataViewsService,
+    dataViewsService: dataViewsService as unknown as DataViewsService,
   };
 
   const soClientGet = soClient.get;
@@ -69,6 +72,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
+  dataViewsService.get.mockReset();
   mockPayload = [{ params: { savedSearchId: mockSavedSearchId } }];
   mockSavedSearch = { ...defaultSavedSearch, attributes: { ...defaultSavedSearch.attributes } };
   const uiSettingsGet = uiSettingsClient.get;
@@ -101,14 +105,30 @@ test(`retrieves title from saved search contents`, async () => {
   expect(title).toBe(testTitle);
 });
 
-test(`throws error if DiscoverAppLocatorParams do not contain a saved search ID`, async () => {
-  const testFn = async () => {
-    mockPayload = [{ params: { dataViewId: 'not-yet-supported' } }];
-    const provider = titleFromLocatorFactory(mockServices);
-    return await provider(mockPayload[0].params);
-  };
+test(`retrieves title from the data view name if the params only contain a data view ID`, async () => {
+  dataViewsService.get.mockResolvedValue({ getName: () => 'logs-*' });
 
-  await expect(testFn).rejects.toEqual(
-    new Error('DiscoverAppLocatorParams must contain a saved search reference')
+  const provider = titleFromLocatorFactory(mockServices);
+  const title = await provider({ dataViewId: 'test-data-view-id' });
+
+  expect(dataViewsService.get).toHaveBeenCalledWith('test-data-view-id');
+  expect(title).toBe('logs-*');
+});
+
+test(`prefers the saved search title if the params contain a saved search ID and a data view ID`, async () => {
+  const provider = titleFromLocatorFactory(mockServices);
+  const title = await provider({ savedSearchId: mockSavedSearchId, dataViewId: 'test-id' });
+
+  expect(dataViewsService.get).not.toHaveBeenCalled();
+  expect(title).toBe(defaultSavedSearch.attributes.title);
+});
+
+test(`throws error if DiscoverAppLocatorParams do not contain a saved search or data view ID`, async () => {
+  const provider = titleFromLocatorFactory(mockServices);
+
+  await expect(provider({})).rejects.toEqual(
+    new Error(
+      'DiscoverAppLocatorParams must contain a saved search reference or a data view reference'
+    )
   );
 });

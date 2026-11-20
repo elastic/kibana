@@ -161,7 +161,9 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
       searchSource.setField('query', query);
     }
 
-    // Inject sort: locator params (current state) take precedence over the saved search
+    // Inject sort: locator params (current state) take precedence over the saved search.
+    // Unlike the columns, an explicit empty sort is kept on purpose: it means the sort was cleared,
+    // so the default sort applies instead of the one of the saved search (same as the Discover UI).
     const defaultSortDir = await services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING);
     const sort = getSortForSearchSource({
       sort: (params.sort ?? savedSearch?.sort) as Array<[string, string]> | undefined,
