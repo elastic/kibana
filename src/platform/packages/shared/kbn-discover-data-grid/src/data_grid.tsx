@@ -47,7 +47,7 @@ export interface DataGridVirtualizationOptions {
 
 /** How the grid's scroll viewport gets its height. */
 export type DataGridViewport =
-  /** Fills the height of its container, which needs a height of its own. */
+  /** Fills the height of its container, which needs a height of its own, up to the screen height. */
   | { readonly mode: 'fill' }
   /** Has a fixed height in pixels. */
   | { readonly mode: 'fixed'; readonly height: number };

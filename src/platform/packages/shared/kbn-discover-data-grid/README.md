@@ -74,8 +74,9 @@ Text headers provide their own accessible name. Set a column's optional `ariaLab
 rendered header needs a different accessible name, such as an icon-only or abbreviated header.
 The `viewport` option decides how the grid's scroll viewport gets its height. By default
 (`{ mode: 'fill' }`) the grid fills its container, which needs a height of its own, such as a flex
-item with a defined size. If the container has none, the grid is never taller than the screen, so the
-number of mounted rows stays bounded. Use `{ mode: 'fixed', height }` for a fixed height in pixels.
+item with a defined size. It is never taller than the screen, even in a taller container, so the
+number of mounted rows stays bounded when the container has no height. Use
+`{ mode: 'fixed', height }` for a fixed height in pixels, which can be taller than the screen.
 The grid does not measure its container: the browser sizes the viewport and the virtualizer observes
 it.
 Pass `data-test-subj` to give the grid element, the element with the `grid` role, a test subject.
