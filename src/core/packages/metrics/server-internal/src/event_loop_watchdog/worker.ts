@@ -19,7 +19,7 @@ import { isMainThread, workerData } from 'node:worker_threads';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { WorkerLogger } from '@kbn/core-threads-server-internal';
 import { createWorkerLogger } from '@kbn/core-threads-server-internal';
-import { WriteAdmission } from './admission';
+import { WriteAdmission, profileSignature } from './admission';
 import { BlockDetector, type DetectedBlock } from './block_detector';
 import { BlockStats } from './block_stats';
 import {
@@ -47,6 +47,8 @@ export interface WatchdogWorkerDeps {
   logger: WorkerLogger;
   /** Monotonic clock in microseconds, the same clock the main thread stamps. */
   nowUs?: () => number;
+  /** Wall-clock time in milliseconds, for the clock hours that profile file admission uses. */
+  wallClockMs?: () => number;
   heapUsed?: () => number;
   createSession?: () => InspectorSession;
   /**
@@ -77,7 +79,7 @@ interface Capture {
 
 const toMs = (us: number): number => Math.floor(us / 1000);
 const blocks = (count: number): string => `${count} ${count === 1 ? 'block' : 'blocks'}`;
-const noFiles = (): FileCounts => ({ written: 0, inWindow: 0, fileLimit: 0, writeFailed: 0 });
+const noFiles = (): FileCounts => ({ written: 0, sameFrame: 0, hourLimit: 0, writeFailed: 0 });
 const noCaptures = (): ProfilingStats => ({
   pastStartAfter: 0,
   profiled: 0,
@@ -86,7 +88,7 @@ const noCaptures = (): ProfilingStats => ({
   skippedCooldown: 0,
   profilingActiveMs: 0,
   maxStopHeartbeatGapMs: 0,
-  files: { starting: noFiles(), running: noFiles() },
+  files: noFiles(),
 });
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -132,6 +134,7 @@ export const runWatchdogWorker = (
   {
     logger,
     nowUs = monotonicUs,
+    wallClockMs = Date.now,
     heapUsed = () => getHeapStatistics().used_heap_size,
     createSession = createInspectorSession,
     root = REPO_ROOT,
@@ -279,12 +282,12 @@ export const runWatchdogWorker = (
       .finally(() => endCapture(current));
   };
 
-  const writeProfile = async (phase: Phase, path: string, profile: CpuProfile) => {
+  const writeProfile = async (path: string, profile: CpuProfile) => {
     try {
       await Fs.writeFile(path, JSON.stringify(prepareProfile(profile, root)));
-      counts.files[phase].written++;
+      counts.files.written++;
     } catch (error) {
-      counts.files[phase].writeFailed++;
+      counts.files.writeFailed++;
       logger.error(`Failed to write an event loop block profile: ${errorMessage(error)}`, {
         tags: ['event-loop-watchdog'],
       });
@@ -341,16 +344,16 @@ export const runWatchdogWorker = (
         ? 'empty'
         : diagnosticDir === undefined
         ? 'no_directory'
-        : admission.admit(phase, blockedMs, nowMs);
+        : admission.admit(profileSignature(summary), wallClockMs());
     const path =
       diagnosticDir && file === 'admitted'
         ? Path.join(diagnosticDir, fileName(phase, blockedMs, new Date()))
         : undefined;
-    if (file === 'in_window') {
-      counts.files[phase].inWindow++;
+    if (file === 'same_frame') {
+      counts.files.sameFrame++;
     }
-    if (file === 'file_limit') {
-      counts.files[phase].fileLimit++;
+    if (file === 'hour_limit') {
+      counts.files.hourLimit++;
     }
     captureNumber++;
     const frameLists = formatFrameLists(summary);
@@ -388,7 +391,7 @@ export const runWatchdogWorker = (
       }
     );
     if (path) {
-      await writeProfile(phase, path, profile);
+      await writeProfile(path, profile);
     }
   };
 

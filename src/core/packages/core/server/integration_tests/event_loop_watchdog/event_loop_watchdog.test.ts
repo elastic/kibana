@@ -43,7 +43,7 @@ interface WorkerLogLine {
           profiled: number;
           captureFailed: number;
           skippedCooldown: number;
-          files: Record<'starting' | 'running', { written: number; writeFailed: number }>;
+          files: { written: number; writeFailed: number };
         };
       };
       profile?: {
@@ -416,7 +416,7 @@ describe('event loop watchdog in a child process', () => {
       expect(lines[0].kibana?.event_loop_watchdog?.profile?.file).toBe('admitted');
       // The stats count the write only after it completes, so this confirms it finished before
       // shutdown.
-      const files = statsOf(result).map(({ profiling }) => profiling?.files.running);
+      const files = statsOf(result).map(({ profiling }) => profiling?.files);
       expect(files.reduce((sum, counts) => sum + (counts?.written ?? 0), 0)).toBe(1);
       expect(files.reduce((sum, counts) => sum + (counts?.writeFailed ?? 0), 0)).toBe(0);
       expectViewableProfile(profile);

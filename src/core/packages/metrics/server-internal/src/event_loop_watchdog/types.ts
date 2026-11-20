@@ -15,18 +15,13 @@ import type { ProfileSummary } from './profile_summary';
 /** Startup is noisier than steady state, so blocks are counted per phase. */
 export type Phase = 'starting' | 'running';
 
-export interface AdmissionLimits {
-  /** Admissions allowed per rolling hour before only record captures are eligible. */
-  perHour: number;
-  /** A record must exceed this multiple of the phase's longest admitted block. */
-  minGrowth: number;
-  /**
-   * Maximum captures admitted for this phase over the worker's lifetime, including failed writes.
-   */
-  maxFiles: number;
-}
-
-export type AdmissionOutcome = 'admitted' | 'in_window' | 'file_limit';
+/**
+ * Whether a capture may write a profile file:
+ * - `admitted`: the first capture this clock hour for its top frame, while the hour has slots left.
+ * - `same_frame`: this clock hour already admitted a capture with the same top frame.
+ * - `hour_limit`: this clock hour already admitted `FILES_PER_HOUR` captures.
+ */
+export type AdmissionOutcome = 'admitted' | 'same_frame' | 'hour_limit';
 
 export interface WatchdogProfilingData {
   startAfterMs: Readonly<Record<Phase, number>>;
@@ -133,26 +128,18 @@ export interface ProfilingStats {
   profilingActiveMs: number;
   /** Largest `stopHeartbeatGapMs` of the captures that ended in the period. */
   maxStopHeartbeatGapMs: number;
-  /**
-   * Profile file outcomes per phase. Captures without samples or without a directory aren't
-   * counted.
-   */
-  files: Record<Phase, FileCounts>;
+  /** Profile file outcomes. Captures without samples or without a directory aren't counted. */
+  files: FileCounts;
 }
 
-/** Profile file outcomes for one phase. */
+/** Profile file outcomes, combined across both phases. */
 export interface FileCounts {
   /** Files written in full, counted when the write finishes. */
   written: number;
-  /**
-   * Captures refused because the rolling hour was full and the block didn't beat the phase's
-   * record.
-   */
-  inWindow: number;
-  /**
-   * Captures refused because the phase already admitted `maxFiles` files since the worker started.
-   */
-  fileLimit: number;
+  /** Captures refused as duplicates within the same clock hour. */
+  sameFrame: number;
+  /** Captures refused as exceeding the per-hour limit. */
+  hourLimit: number;
   /** Admitted captures whose write failed, counted when the write fails. */
   writeFailed: number;
 }

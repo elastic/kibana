@@ -7,98 +7,101 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WriteAdmission } from './admission';
-import { ADMISSION_LIMITS, ROLLING_HOUR_MS } from './constants';
-import type { Phase } from './types';
+import { WriteAdmission, profileSignature } from './admission';
+import { FILES_PER_HOUR, HOUR_MS } from './constants';
+import type { ProfileSummary } from './profile_summary';
 
-const { starting, running } = ADMISSION_LIMITS;
-const BLOCKED_MS = 400;
+/** 10:00 UTC: the start of a clock hour. */
+const HOUR_START = Date.UTC(2026, 10, 20, 10);
 
-/** Admits `perHour` captures of `blockedMs` at t = 0, 1, ... */
-const fillHour = (admission: WriteAdmission, phase: Phase, blockedMs = BLOCKED_MS) => {
-  for (let i = 0; i < ADMISSION_LIMITS[phase].perHour; i++) {
-    expect(admission.admit(phase, blockedMs, i)).toBe('admitted');
+/** Admits `FILES_PER_HOUR` distinct signatures at the start of the hour. */
+const fillHour = (admission: WriteAdmission) => {
+  for (let i = 0; i < FILES_PER_HOUR; i++) {
+    expect(admission.admit(`src/frame_${i}.ts:1`, HOUR_START + i)).toBe('admitted');
   }
 };
 
-/** The shortest running block that's a record over `longestMs`. */
-const runningRecord = (longestMs: number) => Math.floor(longestMs * running.minGrowth) + 1;
-
 describe('WriteAdmission', () => {
-  it('refuses a capture that is not a record once perHour are admitted in the rolling hour', () => {
+  it('admits one capture per signature in a clock hour', () => {
     const admission = new WriteAdmission();
-    fillHour(admission, 'running');
-    expect(admission.admit('running', BLOCKED_MS, running.perHour)).toBe('in_window');
+    expect(admission.admit('src/a.ts:1', HOUR_START)).toBe('admitted');
+    expect(admission.admit('src/a.ts:1', HOUR_START + 1)).toBe('same_frame');
+    expect(admission.admit('src/b.ts:1', HOUR_START + 2)).toBe('admitted');
   });
 
-  it('admits a running record above minGrowth times the longest, and a refusal changes nothing', () => {
+  it('refuses a new signature once the hour has admitted FILES_PER_HOUR', () => {
     const admission = new WriteAdmission();
-    fillHour(admission, 'running');
-    const notRecord = BLOCKED_MS * running.minGrowth;
-    expect(admission.admit('running', notRecord, running.perHour)).toBe('in_window');
-    expect(admission.admit('running', notRecord, running.perHour)).toBe('in_window');
-    expect(admission.admit('running', runningRecord(BLOCKED_MS), running.perHour)).toBe('admitted');
+    fillHour(admission);
+    expect(admission.admit('src/new.ts:1', HOUR_START + HOUR_MS - 1)).toBe('hour_limit');
   });
 
-  it('admits a startup record that is longer than the longest', () => {
+  it('reports same_frame before hour_limit for a signature the full hour already admitted', () => {
     const admission = new WriteAdmission();
-    fillHour(admission, 'starting');
-    expect(admission.admit('starting', BLOCKED_MS, starting.perHour)).toBe('in_window');
-    expect(admission.admit('starting', BLOCKED_MS + 1, starting.perHour)).toBe('admitted');
+    fillHour(admission);
+    expect(admission.admit('src/frame_0.ts:1', HOUR_START + 10)).toBe('same_frame');
   });
 
-  it('frees a slot when the first admission leaves the rolling hour', () => {
+  it('clears the signatures when the clock hour changes', () => {
     const admission = new WriteAdmission();
-    fillHour(admission, 'running');
-    expect(admission.admit('running', BLOCKED_MS, ROLLING_HOUR_MS - 1)).toBe('in_window');
-    expect(admission.admit('running', BLOCKED_MS, ROLLING_HOUR_MS)).toBe('admitted');
+    fillHour(admission);
+    expect(admission.admit('src/frame_0.ts:1', HOUR_START + HOUR_MS)).toBe('admitted');
+    expect(admission.admit('src/new.ts:1', HOUR_START + HOUR_MS + 1)).toBe('admitted');
   });
 
-  it('keeps the rolling hour and record separate per phase', () => {
+  it('uses clock hours, not an hour from the first admission', () => {
     const admission = new WriteAdmission();
-    fillHour(admission, 'starting', 2 * BLOCKED_MS);
-    expect(admission.admit('starting', 2 * BLOCKED_MS, starting.perHour)).toBe('in_window');
-    // Running has its own rolling hour, and startup's longer blocks do not raise the running
-    // record.
-    fillHour(admission, 'running');
-    expect(admission.admit('running', runningRecord(BLOCKED_MS), running.perHour)).toBe('admitted');
+    const lastMinute = HOUR_START + HOUR_MS - 60_000;
+    expect(admission.admit('src/a.ts:1', lastMinute)).toBe('admitted');
+    // One minute later is a new clock hour.
+    expect(admission.admit('src/a.ts:1', HOUR_START + HOUR_MS)).toBe('admitted');
   });
 
-  it('keeps the file cap separate per phase', () => {
-    const admission = new WriteAdmission({
-      starting: { ...starting, maxFiles: 2 },
-      running: { ...running, maxFiles: 1 },
-    });
-    expect(admission.admit('starting', 300, 0)).toBe('admitted');
-    expect(admission.admit('starting', 300, 1)).toBe('admitted');
-    expect(admission.admit('starting', 300, 2)).toBe('file_limit');
-    expect(admission.admit('running', 300, 3)).toBe('admitted');
-    expect(admission.admit('running', 300, 4)).toBe('file_limit');
-  });
-
-  it('stops at maxFiles regardless of the rolling hour or a record', () => {
-    const admission = new WriteAdmission({
-      ...ADMISSION_LIMITS,
-      running: { ...running, perHour: 10, maxFiles: 2 },
-    });
-    expect(admission.admit('running', 200, 0)).toBe('admitted');
-    expect(admission.admit('running', 300, 1)).toBe('admitted');
-    expect(admission.admit('running', 10_000, 2)).toBe('file_limit');
-  });
-
-  it('decides the same with records admitted beyond perHour in the rolling hour', () => {
+  it('keeps refusals from using a slot', () => {
     const admission = new WriteAdmission();
-    fillHour(admission, 'running');
-    const records = 3;
-    let longestMs = BLOCKED_MS;
-    for (let i = 0; i < records; i++) {
-      longestMs = runningRecord(longestMs);
-      expect(admission.admit('running', longestMs, running.perHour + i)).toBe('admitted');
-    }
-    expect(admission.admit('running', BLOCKED_MS, running.perHour + records)).toBe('in_window');
-    // Even after the first `records` admission timestamps expire, `perHour` remain in the hour.
-    expect(admission.admit('running', BLOCKED_MS, ROLLING_HOUR_MS + records - 1)).toBe('in_window');
-    // The next earliest timestamp expires, freeing a slot in the rolling-hour window.
-    expect(admission.admit('running', BLOCKED_MS, ROLLING_HOUR_MS + records)).toBe('admitted');
+    expect(admission.admit('src/a.ts:1', HOUR_START)).toBe('admitted');
+    expect(admission.admit('src/a.ts:1', HOUR_START + 1)).toBe('same_frame');
+    expect(admission.admit('src/a.ts:1', HOUR_START + 2)).toBe('same_frame');
+    expect(admission.admit('src/b.ts:1', HOUR_START + 3)).toBe('admitted');
+    expect(admission.admit('src/c.ts:1', HOUR_START + 4)).toBe('admitted');
+  });
+});
+
+describe('profileSignature', () => {
+  const summary = (overrides: Partial<ProfileSummary>): ProfileSummary => ({
+    samples: 10,
+    frames: [],
+    kibanaFrames: [],
+    ...overrides,
+  });
+
+  it('uses the top Kibana frame location', () => {
+    expect(
+      profileSignature(
+        summary({
+          frames: [{ name: 'parse', location: 'node_modules/zod/index.js:5', percent: 80 }],
+          topKibanaFrame: { location: 'src/core/server/spin.ts:10', percent: 80 },
+        })
+      )
+    ).toBe('src/core/server/spin.ts:10');
+  });
+
+  it('falls back to the top frame location without a Kibana frame', () => {
+    expect(
+      profileSignature(
+        summary({
+          frames: [{ name: 'parse', location: 'node_modules/zod/index.js:5', percent: 80 }],
+        })
+      )
+    ).toBe('node_modules/zod/index.js:5');
+  });
+
+  it('falls back to the top frame name when it has no location', () => {
+    expect(
+      profileSignature(summary({ frames: [{ name: '(garbage collector)', percent: 90 }] }))
+    ).toBe('(garbage collector)');
+  });
+
+  it('uses (unknown) without any frame', () => {
+    expect(profileSignature(summary({}))).toBe('(unknown)');
   });
 });

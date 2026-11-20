@@ -7,46 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ADMISSION_LIMITS, ROLLING_HOUR_MS } from './constants';
-import type { AdmissionOutcome, Phase } from './types';
-
-interface PhaseState {
-  /** Newest admission times, at most `perHour`. */
-  admittedTimes: number[];
-  longestAdmittedMs: number;
-  admitted: number;
-}
-
-const newPhaseState = (): PhaseState => ({ admittedTimes: [], longestAdmittedMs: 0, admitted: 0 });
+import { FILES_PER_HOUR, HOUR_MS } from './constants';
+import type { ProfileSummary } from './profile_summary';
+import type { AdmissionOutcome } from './types';
 
 /**
- * Admits profile captures for file output independently per phase. Allows `perHour` admissions
- * per rolling hour; after that, a block must exceed `minGrowth` times the longest admitted block.
- * `maxFiles` caps lifetime admissions, and a failed write still consumes a slot.
+ * The code a capture blocked in: the top Kibana frame's location, else the top frame's location or
+ * name. Frames without a script, such as `(garbage collector)`, have no location.
+ */
+export const profileSignature = ({ topKibanaFrame, frames }: ProfileSummary): string => {
+  if (topKibanaFrame?.location) {
+    return topKibanaFrame.location;
+  }
+  const [topFrame] = frames;
+  if (!topFrame) {
+    return '(unknown)';
+  }
+  return topFrame.location ?? topFrame.name;
+};
+
+/**
+ * Admits up to `FILES_PER_HOUR` profile files per clock hour, one per signature. A failed write
+ * still uses its slot. The signatures clear when the hour changes.
  */
 export class WriteAdmission {
-  private readonly phases: Record<Phase, PhaseState> = {
-    starting: newPhaseState(),
-    running: newPhaseState(),
-  };
+  private hour = -1;
+  private readonly written = new Set<string>();
 
-  constructor(private readonly limits = ADMISSION_LIMITS) {}
-
-  public admit(phase: Phase, blockedMs: number, nowMs: number): AdmissionOutcome {
-    const { perHour, minGrowth, maxFiles } = this.limits[phase];
-    const state = this.phases[phase];
-    if (state.admitted >= maxFiles) {
-      return 'file_limit';
+  /** `nowMs` is wall-clock time so that hours match the log timestamps. */
+  public admit(signature: string, nowMs: number): AdmissionOutcome {
+    const hour = Math.floor(nowMs / HOUR_MS);
+    if (hour !== this.hour) {
+      this.hour = hour;
+      this.written.clear();
     }
-    const inRollingHour = state.admittedTimes.filter((time) => time > nowMs - ROLLING_HOUR_MS);
-    if (inRollingHour.length >= perHour && blockedMs <= state.longestAdmittedMs * minGrowth) {
-      return 'in_window';
+    if (this.written.has(signature)) {
+      return 'same_frame';
     }
-    // Only the newest `perHour` timestamps matter; if these have aged out, fewer than `perHour`
-    // admissions remain in the hour.
-    state.admittedTimes = [...inRollingHour, nowMs].slice(-perHour);
-    state.longestAdmittedMs = Math.max(state.longestAdmittedMs, blockedMs);
-    state.admitted++;
+    if (this.written.size >= FILES_PER_HOUR) {
+      return 'hour_limit';
+    }
+    this.written.add(signature);
     return 'admitted';
   }
 }
