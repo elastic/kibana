@@ -15,6 +15,7 @@ import {
   createPostDynamicSettingsRoute,
   DynamicSettingsSchema,
 } from './dynamic_settings';
+import { DefaultRuleService } from '../default_alerts/default_alert_service';
 import type { RouteContext } from '../types';
 
 const buildRouteContext = (overrides: Partial<RouteContext> = {}): RouteContext =>
@@ -74,6 +75,54 @@ describe('dynamic settings routes', () => {
         certAgeThreshold: 100,
       });
       expect(result).toMatchObject({ certAgeThreshold: 100 });
+    });
+
+    describe('default rule actions', () => {
+      const setUp = (body: Record<string, unknown>) => {
+        jest.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue({
+          ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES,
+          defaultConnectors: ['old'],
+        });
+        jest
+          .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
+          .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
+        return buildRouteContext({ request: { body } as never, context: {} as never });
+      };
+
+      it('refreshes default rule actions with the stored previous connectors when connectors change', async () => {
+        const refresh = jest
+          .spyOn(DefaultRuleService.prototype, 'refreshDefaultRuleActions')
+          .mockResolvedValue();
+
+        await createPostDynamicSettingsRoute().handler(setUp({ defaultConnectors: ['new'] }));
+
+        expect(refresh).toHaveBeenCalledWith(
+          expect.objectContaining({ defaultConnectors: ['new'] }),
+          ['old']
+        );
+      });
+
+      it('does not refresh default rules when connectors and email are unchanged', async () => {
+        const refresh = jest
+          .spyOn(DefaultRuleService.prototype, 'refreshDefaultRuleActions')
+          .mockResolvedValue();
+
+        await createPostDynamicSettingsRoute().handler(setUp({ certAgeThreshold: 100 }));
+
+        expect(refresh).not.toHaveBeenCalled();
+      });
+
+      it('does not persist settings when refreshing rules fails so the save can be retried', async () => {
+        jest
+          .spyOn(DefaultRuleService.prototype, 'refreshDefaultRuleActions')
+          .mockRejectedValue(new Error('forbidden'));
+        const routeContext = setUp({ defaultConnectors: ['new'] });
+
+        await expect(createPostDynamicSettingsRoute().handler(routeContext)).rejects.toThrow(
+          'forbidden'
+        );
+        expect(syntheticsSettingsModule.setSyntheticsDynamicSettings).not.toHaveBeenCalled();
+      });
     });
 
     it('ignores privateLocationsSyncInterval from older clients', async () => {
