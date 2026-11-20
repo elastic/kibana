@@ -195,6 +195,26 @@ describe('triage revoke decision step', () => {
     });
   });
 
+  it.each([
+    ['reading', { getError: Object.assign(new Error('forbidden'), { statusCode: 403 }) }],
+    ['deleting', { updateError: Object.assign(new Error('forbidden'), { statusCode: 403 }) }],
+  ])(
+    'reports a 403 on %s the decision as denied, not as a failure a rerun could fix',
+    async (_label, errors) => {
+      const { run, calls } = setup(errors);
+
+      const { output } = await run();
+
+      expect(calls('/signals/search')).toEqual([]);
+      expect(output).toEqual({
+        status: 'denied',
+        alerts_reopened: 0,
+        alerts_released: 0,
+        failures: 0,
+      });
+    }
+  );
+
   it('does not check access when the decision is read, so the worker pays nothing on the normal path', async () => {
     const { run, hasPrivileges } = setup({});
 

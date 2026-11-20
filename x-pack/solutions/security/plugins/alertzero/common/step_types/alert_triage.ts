@@ -597,7 +597,7 @@ const revokeFpDecisionOutputSchema = lazySchema(() =>
     status: z
       .enum(REVOKE_FP_DECISION_STATUSES)
       .describe(
-        '`not_found` when no such decision exists in this space. Alerts that carry its tag are still put back. `denied` when the caller cannot write the decisions index: nothing was changed.'
+        '`not_found` when no such decision exists in this space. Alerts that carry its tag are still put back. `denied` when the caller cannot read or write the decisions index: nothing was changed.'
       ),
     alerts_reopened: z.number().describe('Alerts the decision closed that were reopened.'),
     alerts_released: z

@@ -92,6 +92,9 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
             index: [{ names: [TRIAGE_DECISIONS_AI_INDEX_DEST.value], privileges: ['index'] }],
           });
           status = canWrite ? 'not_found' : 'denied';
+        } else if (statusCodeOf(error) === 403) {
+          // A rerun cannot succeed without the privilege, so this is not a failure to retry.
+          status = 'denied';
         } else {
           failures++;
           logger.warn(
