@@ -22,6 +22,7 @@ const AUTOCOMPLETE_ENTITIES_TIMEOUT_MS = 30_000;
 export class ConsolePage {
   public readonly inputEditor: Locator;
   public readonly inputEditorContainer: Locator;
+  public readonly appContainer: Locator;
   public readonly outputEditor: Locator;
   public readonly inputEditorLines: Locator;
   public readonly outputEditorContent: Locator;
@@ -98,6 +99,7 @@ export class ConsolePage {
   constructor(private readonly page: ScoutPage) {
     this.inputEditor = this.page.getByTestId('consoleMonacoEditor');
     this.inputEditorContainer = this.page.getByTestId('consoleMonacoEditorContainer');
+    this.appContainer = this.page.getByTestId('console');
     this.outputEditor = this.page.getByTestId('consoleMonacoOutput');
     this.inputEditorLines = this.inputEditor.locator('.view-lines');
     this.outputEditorContent = this.outputEditor.locator('.monaco-scrollable-element');
@@ -197,8 +199,19 @@ export class ConsolePage {
     return this.page.getByRole('dialog', { name: title });
   }
 
+  /**
+   * Console resolves autocomplete and every API reference link from the Elasticsearch spec
+   * definitions it fetches before mounting, and renders an editor that looks fully working
+   * without them. Gate on this so a definition-less Console fails here, rather than later as
+   * a missing suggestion or a documentation tab that never opens.
+   */
+  async waitForActiveApiLoaded() {
+    await expect(this.appContainer).toHaveAttribute('data-console-active-api-status', 'complete');
+  }
+
   async goto() {
     await this.page.gotoApp('dev_tools', { hash: 'console', readyWhen: this.inputEditor });
+    await this.waitForActiveApiLoaded();
   }
 
   /**
@@ -212,6 +225,7 @@ export class ConsolePage {
       readyWhen: this.inputEditor,
     });
     await this.sendRequestButton.waitFor({ state: 'visible' });
+    await this.waitForActiveApiLoaded();
   }
 
   /**
