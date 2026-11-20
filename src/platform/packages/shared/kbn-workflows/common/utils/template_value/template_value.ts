@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ZodError } from '@kbn/zod/v4';
+
 export const DYNAMIC_VALUE_REGEX = /^\$\{\{\s*\S[\s\S]*\}\}$/;
 
 /**
@@ -53,4 +55,46 @@ export function isLiquidTagValue(value: unknown): boolean {
     return false;
   }
   return LIQUID_TAG_VALUE_REGEX.test(value);
+}
+
+/** Whether a value is a template that only renders at run time: `${{ }}`, `{{ }}` or a Liquid tag. */
+export function isTemplateValue(value: unknown): boolean {
+  return isDynamicValue(value) || isVariableValue(value) || isLiquidTagValue(value);
+}
+
+type ValidationIssue = ZodError['issues'][number];
+
+/**
+ * Whether `issue` is only there because a template (see `isTemplateValue`) sits where a concrete
+ * value is expected, so it can't be judged before the template renders. `root` is the parsed value
+ * the issue paths point into.
+ *
+ * An `invalid_union` issue sits on the union's own path, so the value there is the whole object and
+ * never a template. Its `errors` hold one list of issues per branch, with paths relative to the
+ * union. The union is satisfied when one branch fails on templates alone, so the issue is dropped
+ * then. Unions nest, hence the recursion.
+ */
+export function isIssueOnTemplateValue(
+  issue: ValidationIssue,
+  root: unknown,
+  basePath: ReadonlyArray<PropertyKey> = []
+): boolean {
+  const path = [...basePath, ...(issue.path ?? [])];
+  if (issue.code === 'invalid_union') {
+    return issue.errors.some((branchIssues) =>
+      branchIssues.every((branchIssue) => isIssueOnTemplateValue(branchIssue, root, path))
+    );
+  }
+  if (path.length === 0) {
+    return false;
+  }
+
+  let value: unknown = root;
+  for (const segment of path) {
+    if (value == null || typeof value !== 'object') {
+      return false; // The path leads nowhere, so there is no template to excuse the issue.
+    }
+    value = (value as Record<PropertyKey, unknown>)[segment];
+  }
+  return isTemplateValue(value);
 }

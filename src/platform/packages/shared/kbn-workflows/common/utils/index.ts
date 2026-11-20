@@ -57,6 +57,8 @@ export {
 export {
   DYNAMIC_VALUE_REGEX,
   isDynamicValue,
+  isIssueOnTemplateValue,
+  isTemplateValue,
   LIQUID_TAG_VALUE_REGEX,
   isLiquidTagValue,
   VARIABLE_VALUE_REGEX,

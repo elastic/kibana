@@ -46,11 +46,16 @@ import CONTEXT_ENGINE_TRACE_DREAMING_YAML from './definitions/context_engine/dre
 import CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML from './definitions/context_engine/dreaming_traces_batch.yaml';
 import CONTEXT_ENGINE_RELATIONSHIPS_YAML from './definitions/context_engine/relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
-import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../common/utils';
+import { isIssueOnTemplateValue } from '../common/utils';
 import { visitNestedSteps } from '../definition/definition_utils';
 import type { VisitNestedStepEntry, WorkflowStep } from '../definition/definition_utils';
 import { getElasticsearchConnectors } from '../spec/elasticsearch';
-import { ElasticsearchRequestStepInputSchema, WorkflowSchemaBase } from '../spec/schema';
+import { getKibanaConnectors } from '../spec/kibana';
+import {
+  ElasticsearchRequestStepInputSchema,
+  KibanaRequestStepInputSchema,
+  WorkflowSchemaBase,
+} from '../spec/schema';
 
 const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(z.object({ type: z.string().min(1) }).passthrough()).min(1),
@@ -230,12 +235,21 @@ function hasYaml(
   return typeof definition.yaml === 'string';
 }
 
-const elasticsearchConnectorsByType = new Map(
-  getElasticsearchConnectors().map((connector) => [connector.type, connector])
+const connectorsByType = new Map(
+  [...getElasticsearchConnectors(), ...getKibanaConnectors()].map((connector) => [
+    connector.type,
+    connector,
+  ])
 );
 
+// The generic request steps have no package connector: the editor checks them against these.
+const requestStepParamsSchemas = new Map<string, z.ZodType>([
+  ['elasticsearch.request', ElasticsearchRequestStepInputSchema],
+  ['kibana.request', KibanaRequestStepInputSchema],
+]);
+
 const OBJECT_FORM_HINT =
-  'Hint: the editor schema rejects some shorthand that Elasticsearch accepts. If this is one, use the object form, for example `term: { field: { value: false } }`, `prefix: { field: { value: "a" } }` or `_source: { includes: [...] }`.';
+  'Hint: the editor schema rejects some shorthand that Elasticsearch accepts. If this is one, use the object form, for example `term: { field: { value: false } }`, `prefix: { field: { value: "a" } }` or `_source: { includes: [...] }`. A `kibana.request` step takes `method`, `path`, `headers` and `query` directly under `with`, not nested under `request`.';
 
 function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
   const { id } = definition;
@@ -448,13 +462,14 @@ describe('managedWorkflowDefinitions', () => {
     }
   );
 
-  // Mirrors the editor's Run validation (POST /api/workflows/test): every elasticsearch.* step's
-  // `with` must satisfy the connector paramsSchema from spec/elasticsearch; a stored `valid: true`
-  // does not cover it. Values that are whole-string {{ }} / ${{ }} templates or contain {% %} tags
-  // are skipped, as parseWorkflowYamlToJSON does. elasticsearch.request has no package connector,
-  // so it is checked against the input schema its editor contract uses.
+  // Mirrors the editor's Run validation (POST /api/workflows/test): every elasticsearch.* and kibana.*
+  // step's `with` must satisfy the connector paramsSchema from spec/elasticsearch or spec/kibana; a
+  // stored `valid: true` does not cover it. Issues that only come from whole-string {{ }} / ${{ }}
+  // values or {% %} tags are skipped, as parseWorkflowYamlToJSON does, including a union that one
+  // branch satisfies once those are set aside. The generic request steps have no package connector,
+  // so they are checked against the input schema their editor contract uses.
   it.each(managedDefinitionsById)(
-    '%s elasticsearch steps satisfy the connector params schema',
+    '%s elasticsearch and kibana steps satisfy the connector params schema',
     (_id, definition) => {
       // The raw parse is walked (not ManagedWorkflowSchema.parse) so zod stripping cannot hide a
       // `with` key, and because the schema types settings.on-failure.fallback as BaseStep[], which
@@ -466,18 +481,16 @@ describe('managedWorkflowDefinitions', () => {
       const failures: Array<{ path: string; issuePaths: string[]; error: string }> = [];
 
       const visitor = ({ step, path }: VisitNestedStepEntry) => {
-        if (!step.type.startsWith('elasticsearch.')) {
+        if (!step.type.startsWith('elasticsearch.') && !step.type.startsWith('kibana.')) {
           return;
         }
         const paramsSchema =
-          step.type === 'elasticsearch.request'
-            ? ElasticsearchRequestStepInputSchema
-            : elasticsearchConnectorsByType.get(step.type)?.paramsSchema;
+          requestStepParamsSchemas.get(step.type) ?? connectorsByType.get(step.type)?.paramsSchema;
         if (!paramsSchema) {
           failures.push({
             path,
             issuePaths: [],
-            error: `Unknown elasticsearch step type '${step.type}': add a package connector`,
+            error: `Unknown step type '${step.type}': add a package connector`,
           });
           return;
         }
@@ -488,24 +501,9 @@ describe('managedWorkflowDefinitions', () => {
           return;
         }
 
-        const survivingIssues = result.error.issues.filter((issue) => {
-          // An empty path is `with` itself, which Run also skips when it is a whole-value template.
-          let current: unknown = params;
-          for (const segment of issue.path) {
-            if (current === null || typeof current !== 'object') {
-              return true;
-            }
-            current = (current as Record<string, unknown>)[String(segment)];
-          }
-          if (current === undefined) {
-            return true;
-          }
-          return !(
-            isDynamicValue(current) ||
-            isVariableValue(current) ||
-            isLiquidTagValue(current)
-          );
-        });
+        const survivingIssues = result.error.issues.filter(
+          (issue) => !isIssueOnTemplateValue(issue, params)
+        );
 
         if (survivingIssues.length > 0) {
           failures.push({
