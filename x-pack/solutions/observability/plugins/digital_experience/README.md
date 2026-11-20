@@ -95,14 +95,8 @@ privileges like the app.
 **Where the EDOT Browser rows come from:** the sessions index only (see [Sessions](#sessions)), as
 the current user, over session summaries instead of aggregating every raw event; the list never
 reads `logs-*.otel-*` or `traces-*.otel-*`. Classic RUM reads its own indices. Two searches run at
-once, one for the metrics and one for the p75 of the vitals: Elasticsearch runs a search on a
-shard in one thread, and the percentiles are half the cost, so on a single shard the two finish in
-about half the time of one. On 12M synthetic sessions, a 30-day range took about 0.9 s instead of
-2 s, 7 days 0.3 s instead of 0.5 s, and 24 hours under 0.1 s; the time grows with the sessions in
-the range, not the size of the index. They use the same Elasticsearch CPU in total, so the gain
-shrinks when many users load the list at once. Computing the p75 only for the applications of the
-table's page was slower: the busiest applications hold most sessions, and the table sorts by the
-vitals in the browser. ES|QL took about as long as the search.
+once, one for the metrics and one for the p75 of the vitals (see
+[Applications list performance](#applications-list-performance)).
 Without sessions set up there is no index and so no EDOT Browser application, and a failing
 sessions search leaves the source out like any other (`unavailableSources`); the sessions states
 above say why rows are missing. The user needs `read` on `digital-experience-sessions-browser-*`,
@@ -525,6 +519,23 @@ its checkpoint, rebuilding what it missed within the lookback. Removing the task
 (`digital_experience:sessions-summaries`) with the Task Manager API also stops it and invalidates
 its key, after which sessions are set up again like the first time.
 
+Turning sessions off leaves the task's key valid, unused, until they are turned back on. Revoking
+it then was considered:
+
+- **Revoking the Elasticsearch key from the plugin** (`invalidateAsInternalUser` with the task's
+  `userScope.apiKeyId`): immediate, but on serverless the task may also hold a UIAM key, whose
+  secret is encrypted on the task, so it would keep working. It would also have to skip keys the
+  user supplied (`apiKeyCreatedByUser`), which Task Manager never revokes.
+- **Removing the task, with the turned-off state kept elsewhere** (such as the index template's
+  `_meta`): Task Manager revokes both keys and honors user-owned ones, but only after its removal
+  delay (`invalidate_api_key_task.removalDelay`, an hour by default), and the checkpoint is lost, so
+  turning sessions back on rebuilds the lookback.
+- **A flag in the task state, with the run returning early**: the key stays valid just the same,
+  writing the flag also needs the request, and the task would still run every minute.
+
+So for now the key is only replaced when sessions are turned back on. To revoke it at once,
+invalidate it with the security API.
+
 ### Scaling and freshness
 
 Each run rebuilds every session that received new events from its whole history, so cost grows with
@@ -563,6 +574,71 @@ lags and then catches up; no data is lost.
 > read in the source indices, regardless of the document- and field-level security or index
 > privileges of the people who later read it. Enable sessions with a user whose source access is
 > appropriate for every reader of `digital-experience-sessions-*`.
+
+### Applications list performance
+
+The list's cost grows with the sessions that overlap the time range, about 150 ms per million on
+one shard, not with the size of the index: the index sort on `start_time` keeps the time filter
+cheap. On a local 9.7 node (3 GB heap) with 12M synthetic sessions over 30 days and 50 applications,
+warm medians:
+
+| Range (sessions)  | One search | Metrics and p75 searches at once |
+| ----------------- | ---------- | -------------------------------- |
+| 24 hours (400k)   | 110–155 ms | 75–100 ms                        |
+| 7 days (2.8M)     | ~490 ms    | 270–330 ms                       |
+| 30 days (12M)     | 2.0–2.1 s  | ~0.93 s                          |
+
+At about 3M sessions a day that is roughly 0.3 s for 24 hours, 1.5 s for 7 days and 7 s for 30.
+In one search, the 5 percentiles per application were half the time, the 15 vital sums about a
+third, and the chart under a tenth. Listing the applications without metrics took 20 ms.
+
+What was tried or considered, and kept as is for now:
+
+- **Two searches at once (done):** Elasticsearch runs a search on a shard in one thread, so the
+  p75 search alongside the metrics halves the time on a single shard. The total Elasticsearch CPU
+  is the same, slightly more for the filter run twice, so the gain shrinks when many users load the
+  list at once.
+- **The p75 only for the table's page:** slower (2.5 s instead of 0.8 s for the p75 search over 30
+  days). The table sorts by page loads, so its first page holds the busiest applications, 65% of
+  the sessions here; the filter on them cost more than it saved; the p75 search would have to wait
+  for the metrics; and the table sorts by the vitals in the browser, which needs them for every
+  application.
+- **ES|QL:** the same figures, with exact totals and p75 within a few milliseconds, in about the
+  same time (10–25% faster over 30 days, slightly slower on short ranges). The cost is reading about
+  30 columns per session and the percentiles, whatever the language, and ES|QL's `BUCKET` would lose
+  the date histogram's time zone.
+- **Dropping the p75 vitals from the list:** halves the cost, as the ratings come from the sums,
+  but the list loses its p75 columns.
+- **More primary shards:** spreads long ranges over several nodes; nothing on a single node, and
+  more shards to manage.
+- **Hourly rollups of the summaries:** the biggest gain for long ranges, but another index, task
+  and query path to keep consistent with the summaries.
+
+**Application cap and paging.** Each source returns at most 1,000 applications
+(`MAX_APPLICATIONS_PER_SOURCE`), those with the most page loads, and the table sorts, searches and
+pages them in the browser. An application costs about 17 buckets in the metrics search, so the cap
+stays well below `search.max_buckets` (65,536), which would fail the whole search; it also bounds
+the response and the table. Beyond the cap, the applications with the fewest page loads are left out
+without notice, which a "top 1,000 by page loads" message would fix. Paging on the server was
+considered:
+
+- **Aggregations:** `composite` pages but can't sort by a metric such as page loads or a vital;
+  `bucket_sort` still computes every bucket and only trims the response.
+- **ES|QL:** sorts by any metric and has no bucket limit, so the cap could be a `LIMIT` after
+  sorting, but it has no `OFFSET` (a page is `LIMIT` and a slice in Kibana), and `STATS` computes
+  every application first, so a page costs as much as the whole list.
+- **Either way:** the EDOT Browser and Classic RUM rows come from different indices and are merged
+  by name, so a sorted page across both needs the top rows of each; searching, sorting and paging
+  each become a request; and the summary and the "+ Classic RUM" hint need queries of their own.
+
+Fetching the whole list once is simpler and no slower up to a few hundred applications. If lists of
+thousands appear, the cheapest step is ES|QL for the sessions source without paging: sorted and
+limited in the query, with no bucket limit.
+
+**Retention.** Sessions older than the 30-day lookback are not deleted: the lookback only bounds what
+the task builds. The list's time is unaffected, as above, but the index and its merges keep growing,
+and the list's "kept for 30 days" message only describes what is built. A data stream with a 30-day
+lifecycle, or a delete by query in the task, would bound it.
 
 ### Reading sessions
 
