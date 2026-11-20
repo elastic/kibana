@@ -20,6 +20,7 @@ import {
 import { removeDeviceControl } from '../../../common/endpoint/models/policy_config_helpers';
 import { set } from '@kbn/safer-lodash-set';
 import type { PolicyConfig } from '../../../common/endpoint/types';
+import { setExportProviders } from '../../../common/endpoint/models/export_providers';
 
 const ESSENTIALS_KEYS = ALL_PRODUCT_FEATURE_KEYS.filter(
   (key) =>
@@ -150,5 +151,23 @@ describe('validatePolicyAgainstProductFeatures', () => {
       expect(thrown?.statusCode).toBe(403);
       expect(thrown?.apiPassThrough).toBe(true);
     });
+  });
+
+  // The update callback strips them instead, so a create or a later update is never rejected
+  it('does not reject export providers when endpointResponseActions is disabled', () => {
+    const policyWithProviders = setExportProviders(policyFactory(), [
+      { id: 'azure-1', type: 'azure_blob', account_name: 'acct', container: 'dumps' },
+    ]);
+
+    expect(() =>
+      validatePolicyAgainstProductFeatures(
+        makeInput(policyWithProviders),
+        createProductFeaturesServiceMock(
+          ALL_PRODUCT_FEATURE_KEYS.filter(
+            (key) => key !== ProductFeatureSecurityKey.endpointResponseActions
+          )
+        )
+      )
+    ).not.toThrow();
   });
 });

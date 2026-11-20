@@ -86,6 +86,7 @@ import {
   disableProtections,
   resetCustomNotifications,
 } from '../../common/endpoint/models/policy_config_helpers';
+import { setExportProviders } from '../../common/endpoint/models/export_providers';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../lib/product_features_service/mocks';
 import * as moment from 'moment';
@@ -1992,6 +1993,134 @@ describe('Fleet integrations', () => {
         for (const os of ['windows', 'mac', 'linux'] as const) {
           expect(policy[os].ai_data_collection).toEqual({ enabled: true });
         }
+      });
+    });
+
+    describe('Export providers', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const provider = {
+        id: 'azure-1',
+        type: 'azure_blob',
+        account_name: 'acct',
+        container: 'dumps',
+      } as const;
+      // Not literals at the call sites, so the extra `credentials` key needs no cast
+      const providerWithCredentials = { ...provider, credentials: { account_key: 'key' } };
+
+      const runUpdate = async (policy: PolicyConfig): Promise<PolicyConfig> => {
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = policy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        return updatedPolicyConfig.inputs[0]!.config!.policy.value;
+      };
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+        experimentalFeatures = { ...experimentalFeatures, responseActionsEndpointFileExport: true };
+      });
+
+      describe.each<[string, () => void]>([
+        [
+          'the feature flag is off',
+          () => {
+            experimentalFeatures = {
+              ...experimentalFeatures,
+              responseActionsEndpointFileExport: false,
+            };
+          },
+        ],
+        [
+          'the endpointResponseActions product feature is disabled',
+          () => {
+            productFeaturesService = createProductFeaturesServiceMock(
+              ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_response_actions')
+            );
+          },
+        ],
+      ])('when %s', (_, setUp) => {
+        beforeEach(() => {
+          setUp();
+        });
+
+        it('should remove export providers from every OS and keep the rest of the policy', async () => {
+          const policy = await runUpdate(setExportProviders(policyFactory(), [provider]));
+
+          for (const os of ['windows', 'mac', 'linux'] as const) {
+            expect(policy[os]).not.toHaveProperty('response_actions');
+          }
+          expect(policy.windows.malware).toEqual(policyFactory().windows.malware);
+        });
+
+        it('should remove invalid export providers without an error', async () => {
+          const invalidProvider = { ...providerWithCredentials, id: 'not valid' };
+          const policy = await runUpdate(setExportProviders(policyFactory(), [invalidProvider]));
+
+          expect(policy.windows).not.toHaveProperty('response_actions');
+        });
+
+        it('should not apply the license check to removed export providers', async () => {
+          licenseEmitter.next(Platinum);
+
+          const policy = await runUpdate(
+            setExportProviders(policyFactoryWithoutPaidEnterpriseFeatures(), [provider])
+          );
+
+          expect(policy.windows).not.toHaveProperty('response_actions');
+        });
+      });
+
+      it('should save valid export providers on every OS', async () => {
+        const policy = await runUpdate(setExportProviders(policyFactory(), [provider]));
+
+        for (const os of ['windows', 'mac', 'linux'] as const) {
+          expect(policy[os].response_actions).toEqual({ export_providers: [provider] });
+        }
+      });
+
+      it('should reject export providers with credentials', async () => {
+        const policy = setExportProviders(policyFactory(), [providerWithCredentials]);
+
+        await expect(runUpdate(policy)).rejects.toMatchObject({
+          statusCode: 400,
+          apiPassThrough: true,
+          message: 'export_providers[0] "azure-1": credentials are not supported yet',
+        });
+      });
+
+      it('should reject export providers that differ between OSes', async () => {
+        const policy = setExportProviders(policyFactory(), [provider]);
+        policy.mac.response_actions = { export_providers: [] };
+
+        await expect(runUpdate(policy)).rejects.toMatchObject({
+          statusCode: 400,
+          message: 'response_actions.export_providers must be the same for windows, mac and linux',
+        });
+      });
+
+      it('should reject export providers below an Enterprise license', async () => {
+        licenseEmitter.next(Platinum);
+
+        await expect(
+          runUpdate(setExportProviders(policyFactoryWithoutPaidEnterpriseFeatures(), [provider]))
+        ).rejects.toMatchObject({
+          statusCode: 403,
+          message: 'Platinum license does not support this action. Please upgrade your license.',
+        });
       });
     });
 

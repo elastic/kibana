@@ -69,6 +69,7 @@ export const ENDPOINT_CAPABILITIES = [
   'kill_process_descendants',
   'get_file_multi_path',
   'get_file_force',
+  'file_export',
 ] as const;
 
 export type EndpointCapabilities = (typeof ENDPOINT_CAPABILITIES)[number];
