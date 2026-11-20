@@ -161,7 +161,7 @@ describe('createPointedPanelTool', () => {
         renderer: 'custom_content',
         query: 'Panel "Stick figure" from dashboard "Web Traffic"',
         visualization: { template: '<svg />', title: 'Stick figure' },
-        esql: 'FROM logs',
+        esql: ['FROM logs'],
       },
     });
     expect(result).toMatchObject({
@@ -173,6 +173,22 @@ describe('createPointedPanelTool', () => {
         visualization: { prompt: 'Panel "Stick figure" from dashboard "Web Traffic"' },
       },
     });
+  });
+
+  it('copies every query of a custom panel that reads several', async () => {
+    const { result, add } = await run({
+      [POINTER_ID]: pointer(),
+      'dashboard-1': dashboard([
+        customPanel({ template: '<p/>', esql_query: ['FROM logs', 'FROM metrics'] }),
+      ]),
+    });
+
+    expect(add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ esql: ['FROM logs', 'FROM metrics'] }),
+      })
+    );
+    expect(result).toMatchObject({ data: { esql: 'FROM logs' } });
   });
 
   it('copies an ES|QL Lens panel with its config, query and chart type', async () => {
@@ -260,16 +276,6 @@ describe('createPointedPanelTool', () => {
       'the custom panel has no template',
       { [POINTER_ID]: pointer(), 'dashboard-1': dashboard([customPanel({})]) },
       'no template yet',
-    ],
-    [
-      'the custom panel reads several queries',
-      {
-        [POINTER_ID]: pointer(),
-        'dashboard-1': dashboard([
-          customPanel({ template: '<p/>', esql_query: ['FROM logs', 'FROM metrics'] }),
-        ]),
-      },
-      'reads several ES|QL queries',
     ],
     [
       'the Lens panel is not backed by ES|QL',

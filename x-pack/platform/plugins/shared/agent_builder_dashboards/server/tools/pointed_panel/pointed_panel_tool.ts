@@ -81,24 +81,20 @@ const panelToVisualization = (
       throw new Error('This custom panel has no template yet, so there is nothing to show.');
     }
     const queries = getCustomContentQueries(panel);
-    if (queries.length > 1) {
-      throw new Error(
-        'This custom panel reads several ES|QL queries, so it cannot be shown as a visualization yet.'
-      );
-    }
-    const [esql] = queries;
+    const [firstQuery] = queries;
     const title = getPanelLabel(panel);
     return {
       attachmentData: {
         renderer: 'custom_content',
         query,
         visualization: { template: config.template, ...(title ? { title } : {}) },
-        ...(esql ? { esql } : {}),
+        ...(queries.length ? { esql: queries } : {}),
       },
       resultData: {
         renderer: 'custom_content',
+        // the first query, as create_visualization reports it
+        ...(firstQuery ? { esql: firstQuery } : {}),
         visualization: { prompt: query },
-        ...(esql ? { esql } : {}),
       },
     };
   }
