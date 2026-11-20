@@ -19,7 +19,7 @@ jest.mock('../../plugin', () => ({
 const DISCOVER_URL = 'http://discover/url';
 
 describe('useGetGenerateDiscoverLink', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const mockGetUnifiedDocViewerServices = require('../../plugin').getUnifiedDocViewerServices;
   const mockDiscoverLocator = {
     getRedirectUrl: jest.fn(() => DISCOVER_URL),

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { applyCortexEdits } from '../cortex/optimize';
-import { createCortexPageStore } from '../cortex/page_store';
+import { applyWikiEdits } from '../wiki/optimize';
+import { createWikiPageStore } from '../wiki/page_store';
 import { createDecisionTreeStore } from '../decision_trees/store';
 import { createLearningStore } from '../decision_trees/learning_store';
 import { applyMemoryEdits } from '../memory/optimize';
@@ -25,14 +26,14 @@ const FULL_TREE = `flowchart TD
     E3 --> X2((Slow query))`;
 
 describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writes', () => {
-  it('stamps Cortex provenance, increments version, and returns full before/after applied_writes', async () => {
+  it('stamps Wiki provenance, increments version, and returns full before/after applied_writes', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
       get: jest
         .fn()
         .mockResolvedValueOnce({
           found: true,
-          _id: 'default:cortex_service_checkout',
+          _id: 'default:wiki_service_checkout',
           _seq_no: 1,
           _primary_term: 1,
           _source: {
@@ -49,7 +50,7 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
         })
         .mockResolvedValueOnce({
           found: true,
-          _id: 'default:cortex_service_checkout',
+          _id: 'default:wiki_service_checkout',
           _seq_no: 1,
           _primary_term: 1,
           _source: {
@@ -67,13 +68,13 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
       index: jest.fn().mockResolvedValue({ _seq_no: 2, _primary_term: 1 }),
     };
 
-    const store = createCortexPageStore({
+    const store = createWikiPageStore({
       esClient: esClient as never,
       logger: loggerMock.create(),
       spaceId: 'default',
     });
 
-    const appliedWrites = await applyCortexEdits({
+    const appliedWrites = await applyWikiEdits({
       store,
       edits: [
         {
@@ -108,8 +109,8 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
     );
     expect(appliedWrites).toEqual([
       {
-        store: 'cortex',
-        item_id: 'cortex_service_checkout',
+        store: 'wiki',
+        item_id: 'wiki_service_checkout',
         action: 'upsert',
         version: 2,
         before_status: 'tentative',
@@ -234,6 +235,7 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
       connectorNames: ['elasticsearch'],
       getSpaceId: () => 'space-1',
       getUsername: () => 'jdoe',
+      analytics: coreMock.createSetup().analytics,
       logger: loggerMock.create(),
     });
     const recordSysTool = tools.find((t) => t.id === 'nightshift_record_system_learning')!;
@@ -244,6 +246,7 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
       const toolContext = {
         request: {} as never,
         runContext: { stack: [{ type: 'agent', conversationId: reinfConvId }] },
+        callContext: { toolId: 'tool', toolCallId: 'call-1', callSource: 'agent' },
         esClient: { asCurrentUser: esClient },
         agentConfiguration: { connector_ids: [] },
       } as never;
@@ -264,8 +267,10 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
               tree_id: 'symptom:checkout-high-latency',
               file_path: 'decision-trees/decision_tree_checkout-high-latency.md',
               evidence_gatherer_metadata: [],
+              merged_nodes: [],
             },
           ],
+          traversals: [],
           summary: 'Created initial tree.',
         } as never,
         toolContext
@@ -304,6 +309,9 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
     expect(result).toEqual({
       output: {
         message: 'Persisted 1 tree',
+        // The reinforcement agent's own conversation, and no submit steps in this mocked round.
+        conversation_id: expect.any(String),
+        submissions_json: '[]',
         applied_writes: [
           {
             store: 'decision_tree_learning',

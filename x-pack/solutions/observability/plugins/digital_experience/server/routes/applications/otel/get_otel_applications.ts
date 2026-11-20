@@ -16,7 +16,7 @@ import { logsSearch, spansSearch } from './search_requests';
 import type { LogsAggregations, SpansAggregations } from './search_responses';
 import { toApplication } from './to_application';
 
-interface GetOtelApplicationsParams extends SearchParams {
+export interface GetOtelApplicationsParams extends SearchParams {
   esClient: ElasticsearchClient;
   /** Cancels the searches, e.g. when the HTTP request is aborted. */
   signal?: AbortSignal;
@@ -63,6 +63,7 @@ const searchOtelApplications = async ({
     applications,
     environments: pickerEnvironments(logs),
     pageLoadsOverTime: toTimeSeries(logs?.inEnvironment.pageLoadsOverTime?.histogram),
+    sessionsOverTime: null,
   };
 };
 

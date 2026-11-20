@@ -90,6 +90,7 @@ const createMockMessageEditor = (): {
       commandMatch: { isActive: false, activeCommand: null, hasVisibleContent: true },
       dismissActionMenu: jest.fn(),
       handleCommandSelect: jest.fn(),
+      handleCommandReplaceText: jest.fn(),
       reportMenuContent: jest.fn(),
     },
     controller: {

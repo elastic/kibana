@@ -15,7 +15,7 @@ import { SINGLE_SELECTION_AS_TEXT_PROPS } from '../../../../../common/constants'
 import type { IField } from '../../../fields/field';
 
 interface Props {
-  dataTestSubj: string;
+  dataTestSubj?: string;
   field: IField;
   getValueSuggestions: (query: string) => Promise<string[]>;
   onChange: (value: string) => void;

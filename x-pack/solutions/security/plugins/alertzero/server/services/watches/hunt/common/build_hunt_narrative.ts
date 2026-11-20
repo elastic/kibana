@@ -14,6 +14,7 @@ import type { HuntModelTier } from '../types';
 import type { ValidatedBehavior } from '../tier2/types';
 import { isRetryableIncompleteReason } from './completeness';
 import { TIER2_MODEL_TIERS, describeModelTiers } from './hunt_model_tiers';
+import { MAX_LISTED, code, codeList, listOf, plural } from './text_lists';
 import type { Tier2TargetSource } from './resolve_tier2_targets';
 
 /**
@@ -23,28 +24,13 @@ import type { Tier2TargetSource } from './resolve_tier2_targets';
  */
 export interface HuntNarrativeContext {
   reportTitle?: string;
+  /** The scope was blocked because the default data view held only hidden or alerts indices. */
+  blockedByPolicyOnly?: boolean;
 }
 
-const MAX_LISTED = 6;
 const MAX_BEHAVIORS_NARRATED = 8;
 /** Under journal_note.yaml's `message` maxLength (8000) with headroom for the caller's suffix. */
 export const MAX_HUNT_NARRATIVE_CHARS = 7000;
-
-const plural = (count: number, singular: string, pluralForm = `${singular}s`): string =>
-  `${count} ${count === 1 ? singular : pluralForm}`;
-
-const code = (value: string): string => `\`${value}\``;
-
-const listOf = (items: string[], max = MAX_LISTED): string => {
-  const shown = items.slice(0, max);
-  const rest = items.length - shown.length;
-  if (shown.length === 0) return '';
-  if (rest > 0) return `${shown.join(', ')} and ${plural(rest, 'more', 'more')}`;
-  if (shown.length === 1) return shown[0];
-  return `${shown.slice(0, -1).join(', ')} and ${shown[shown.length - 1]}`;
-};
-
-const codeList = (items: string[], max = MAX_LISTED): string => listOf(items.map(code), max);
 
 const describeIocs = (iocs: HuntIoc[]): string => {
   const byType = new Map<string, string[]>();
@@ -239,7 +225,13 @@ const describeTier1 = (tier1: HuntForThreatResult, excludedIocCount = 0): string
   const matchedIocs = new Set<string>();
   const matchedTechniques = new Set<string>();
   for (const hit of tier1.hits) {
-    if (hit.matched?.ioc?.value) matchedIocs.add(hit.matched.ioc.value);
+    if (hit.matched?.iocs && hit.matched.iocs.length > 0) {
+      for (const ioc of hit.matched.iocs) {
+        if (ioc.value) matchedIocs.add(ioc.value);
+      }
+    } else if (hit.matched?.ioc?.value) {
+      matchedIocs.add(hit.matched.ioc.value);
+    }
     if (hit.matched?.technique_id) matchedTechniques.add(hit.matched.technique_id);
   }
   if (matchedIocs.size > 0) {
@@ -315,6 +307,8 @@ const describeCoverage = (result: HuntCoordinatorCoreResult): string[] => {
       ? result.has_confirmed_hit
         ? '**Coverage: incomplete, retryable.** The confirmed hit stands, but part of the search did not run for a transient reason, so this run is not a statement about everything the report describes.'
         : '**Coverage: incomplete, retryable.** Part of the search did not run for a transient reason, so the report is not marked as hunted, stays eligible for a later sweep, and this run is not a statement that the environment is clean.'
+      : result.has_confirmed_hit
+      ? '**Coverage: incomplete.** The confirmed hit stands, but part of the search did not run, and repeating the run is not expected to change that; the report is retired without a full search.'
       : '**Coverage: incomplete.** Part of the search did not run, and repeating the run is not expected to change that; the report is retired, but this run is not a statement that the environment is clean.',
   ];
   for (const gap of gaps) {
@@ -365,7 +359,9 @@ const describeOutcome = (
   if (result.status === 'blocked') {
     return {
       heading: 'Hunt Watch could not hunt this report',
-      summary: `Hunt Watch could not hunt ${report}: no index in the space's default data view is visible to this hunt, so nothing was searched.`,
+      summary: ctx.blockedByPolicyOnly
+        ? `Hunt Watch could not hunt ${report}: the space's default data view names only hidden or alerts indices, which Hunt does not search, so nothing was searched.`
+        : `Hunt Watch could not hunt ${report}: no index in the space's default data view is visible to this hunt, so nothing was searched.`,
     };
   }
   if (result.tier2_skipped_reason === 'report_not_found') {
@@ -429,9 +425,14 @@ const describeOutcome = (
 };
 
 /** One short clause for the run conclusion, e.g. "confirmed hit: Tier 1 matched 121 documents; Tier 2 confirmed 2 of 5 behaviors". */
-export const buildHuntHeadline = (result: HuntCoordinatorCoreResult): string => {
+export const buildHuntHeadline = (
+  result: HuntCoordinatorCoreResult,
+  ctx: HuntNarrativeContext = {}
+): string => {
   if (result.status === 'blocked') {
-    return "hunt blocked, no index in the space's default data view is visible to this hunt";
+    return ctx.blockedByPolicyOnly
+      ? "hunt blocked, the space's default data view names only hidden or alerts indices"
+      : "hunt blocked, no index in the space's default data view is visible to this hunt";
   }
   if (result.tier2_skipped_reason === 'report_not_found') {
     return 'hunt failed, the report is not visible in this space';

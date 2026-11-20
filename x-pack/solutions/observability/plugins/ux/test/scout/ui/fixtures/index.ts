@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ObltTestFixtures, ObltWorkerFixtures } from '@kbn/scout-oblt';
+import type { ObltTestFixtures } from '@kbn/scout-oblt';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout-oblt';
 import { UxDashboardPage } from './page_objects';
 
@@ -20,17 +20,15 @@ export const test = baseTest.extend<UxTestFixtures>({
     {
       pageObjects,
       page,
-      kbnUrl,
     }: {
       pageObjects: ObltTestFixtures['pageObjects'];
       page: ObltTestFixtures['page'];
-      kbnUrl: ObltWorkerFixtures['kbnUrl'];
     },
     use: (pageObjects: UxTestFixtures['pageObjects']) => Promise<void>
   ) => {
     const extendedPageObjects: UxTestFixtures['pageObjects'] = {
       ...pageObjects,
-      uxDashboard: createLazyPageObject(UxDashboardPage, page, kbnUrl),
+      uxDashboard: createLazyPageObject(UxDashboardPage, page),
     };
 
     await use(extendedPageObjects);

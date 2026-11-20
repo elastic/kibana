@@ -26,6 +26,7 @@ import * as LABELS from '../translations';
 import type { InferenceEndpoint } from '../types/types';
 import { InferenceServiceFormFields } from './inference_service_form_fields';
 import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mutation';
+import { omitEmptyFieldValues } from '../utils/helpers';
 
 const MIN_ALLOCATIONS = 0;
 const DEFAULT_NUM_THREADS = 1;
@@ -160,7 +161,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
       return;
     }
 
-    mutate(data, !!isEdit);
+    mutate(isEdit ? data : omitEmptyFieldValues(data), !!isEdit);
   }, [form, isEdit, mutate]);
 
   const isPreconfigured = inferenceEndpoint?.config.inferenceId.startsWith('.');

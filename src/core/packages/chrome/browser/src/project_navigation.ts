@@ -304,7 +304,7 @@ export interface ProjectNavigationLinkItem {
   isExternal?: boolean;
 }
 
-/** One titled list inside a hover registration. */
+/** One titled supplementary list registered against a navigation target. */
 export interface ProjectNavigationLinkList {
   /** Unique within the registration. Rendered ids are `${id}:${item.id}`. */
   id: string;
@@ -313,8 +313,9 @@ export interface ProjectNavigationLinkList {
 }
 
 /**
- * Everything one feature contributes to an existing deep link's hover popover. One per target.
- * Chrome attaches this to primary and footer hover only, not More.
+ * Everything one feature contributes to an existing deep link's supplementary navigation. One per
+ * target. Chrome attaches the lists to primary and footer items, where they render in the hover
+ * popover and in an existing side panel, but not in More.
  */
 export interface ProjectNavigationLinks {
   id: string;
@@ -340,6 +341,12 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
   navigationTree$: Observable<NavigationTreeDefinition<LinkId>>;
   /** Optional icon for the solution navigation to render in the select dropdown. */
   icon?: IconType;
+  /**
+   * Id of the plugin that owns this navigation tree. When provided, Core (in development builds)
+   * attributes the tree's `link` references to this plugin so implicit navigation dependencies can
+   * be cross-checked against the plugin's manifest (see https://github.com/elastic/kibana/issues/66682).
+   */
+  ownerPluginId?: string;
 }
 
 export type SolutionNavigationDefinitions = {

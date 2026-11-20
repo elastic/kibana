@@ -39,6 +39,7 @@ import {
   useFitToContent,
   ReBroadcastMouseDownEvents,
   usePersistHoverContentWidget,
+  globalMonacoStyleOverrides,
 } from './mods';
 import { styles } from './editor.styles';
 
@@ -685,6 +686,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       className="kibanaCodeEditor"
     >
       <Global styles={classNameCss} />
+      <Global styles={globalMonacoStyleOverrides} />
       {scopedStyles !== undefined && <Global styles={scopedStyles} />}
       {accessibilityOverlayEnabled && renderPrompt()}
       <FullScreenDisplay>

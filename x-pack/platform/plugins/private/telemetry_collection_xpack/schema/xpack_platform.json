@@ -1560,6 +1560,104 @@
             }
           }
         },
+        "dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr": {
+          "properties": {
+            "per_alert": {
+              "properties": {
+                "p50": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "P50 of action groups dispatched per action policy with grouping mode per_alert over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                },
+                "p99": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "P99 of action groups dispatched per action policy with grouping mode per_alert over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "Average action groups dispatched per action policy with grouping mode per_alert over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                }
+              }
+            },
+            "per_field": {
+              "properties": {
+                "p50": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "P50 of action groups dispatched per action policy with grouping mode per_field over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                },
+                "p99": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "P99 of action groups dispatched per action policy with grouping mode per_field over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "Average action groups dispatched per action policy with grouping mode per_field over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                }
+              }
+            },
+            "all": {
+              "properties": {
+                "p50": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "P50 of action groups dispatched per action policy with grouping mode all over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                },
+                "p99": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "P99 of action groups dispatched per action policy with grouping mode all over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "Average action groups dispatched per action policy with grouping mode all over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "dispatcher_action_groups_throttled_count_by_strategy_24hr": {
+          "properties": {
+            "on_status_change": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of action groups throttled over the last 24 hours with strategy on_status_change (configured, or the default for per_alert policies without throttle)."
+              }
+            },
+            "per_status_interval": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of action groups throttled over the last 24 hours with strategy per_status_interval."
+              }
+            },
+            "time_interval": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of action groups throttled over the last 24 hours with strategy time_interval (configured, or the default for per_field and all policies without throttle)."
+              }
+            },
+            "every_time": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of action groups throttled over the last 24 hours with strategy every_time."
+              }
+            }
+          }
+        },
         "alerts_count": {
           "type": "long",
           "_meta": {
@@ -13865,10 +13963,101 @@
             "description": "The maximum number of the concurrent user sessions (0 if not configured)."
           }
         },
+        "sessionCookieSecure": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if session cookies are set with the Secure attribute (configured explicitly, or enabled automatically because Kibana serves TLS)."
+          }
+        },
+        "sessionCookieSameSite": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The SameSite attribute configured for session cookies (`Strict`, `Lax` or `None`), or `not_configured` when the setting is not set."
+          }
+        },
+        "sessionCookieNameCustomized": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the session cookie name differs from the default."
+          }
+        },
         "anonymousCredentialType": {
           "type": "keyword",
           "_meta": {
             "description": "The credential type that is configured for the anonymous authentication provider."
+          }
+        },
+        "serviceAccounts": {
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "_meta": {
+                "description": "Indicates if service accounts are available on this deployment."
+              }
+            },
+            "boundWorkloads": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of workloads bound to a service account."
+                  }
+                },
+                "serviceAccounts": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of service accounts with at least one workload."
+                  }
+                },
+                "byWorkload": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "pluginId": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The ID of the plugin that owns the workload type."
+                        }
+                      },
+                      "workloadType": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The workload type, unique within its plugin."
+                        }
+                      },
+                      "count": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "The number of bound workloads of this type."
+                        }
+                      }
+                    }
+                  }
+                },
+                "byBinderType": {
+                  "properties": {
+                    "user": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of workloads bound by a user."
+                      }
+                    },
+                    "api_key": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of workloads bound with an API key."
+                      }
+                    },
+                    "service_account": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of workloads bound by a service account."
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

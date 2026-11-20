@@ -27,6 +27,7 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
+import { setSelectedLayerId, updateVisualizationState } from '../../../state_management';
 
 jest.mock('../../../id_generator');
 
@@ -273,6 +274,72 @@ describe('ConfigPanel', () => {
           ],
         }
       );
+    });
+  });
+
+  describe('layer content focus', () => {
+    it('should not move focus to the layer content on initial render', () => {
+      const props = getDefaultProps();
+      renderConfigPanel(props);
+      act(() => jest.runOnlyPendingTimers());
+
+      expect(screen.getByTestId('lns-layerPanel-0')).not.toHaveFocus();
+    });
+
+    it('should move focus to the layer content when the selected layer changes', () => {
+      const props = getDefaultProps();
+      frame.datasourceLayers.second = props.datasourceMap.formBased.publicAPIMock;
+      const { store } = renderConfigPanel(props);
+      act(() => jest.runOnlyPendingTimers());
+      expect(screen.getByTestId('lns-layerPanel-0')).not.toHaveFocus();
+
+      act(() => {
+        store.dispatch(setSelectedLayerId({ layerId: 'second' }));
+      });
+      act(() => jest.runOnlyPendingTimers());
+
+      expect(screen.getByTestId('lns-layerPanel-1')).toHaveFocus();
+    });
+
+    it('should move focus to the layer content when another layer is removed', () => {
+      const props = getDefaultProps();
+      frame.datasourceLayers.second = props.datasourceMap.formBased.publicAPIMock;
+      const { store } = renderConfigPanel(props);
+      act(() => jest.runOnlyPendingTimers());
+      expect(screen.getByTestId('lns-layerPanel-0')).not.toHaveFocus();
+
+      delete frame.datasourceLayers.second;
+      act(() => {
+        store.dispatch(
+          updateVisualizationState({ visualizationId: 'testVis', newState: 'one layer' })
+        );
+      });
+      act(() => jest.runOnlyPendingTimers());
+
+      expect(screen.getByTestId('lns-layerPanel-0')).toHaveFocus();
+    });
+
+    it('should move focus to the layer content when the chart type changes but keeps the layer', () => {
+      const props = getDefaultProps();
+      const { rerender } = renderConfigPanel(props);
+      act(() => jest.runOnlyPendingTimers());
+      expect(screen.getByTestId('lns-layerPanel-0')).not.toHaveFocus();
+
+      const { visualizationMap, datasourceMap, ...rest } = props;
+      rerender(
+        <EditorFrameServiceProvider
+          visualizationMap={visualizationMap}
+          datasourceMap={datasourceMap}
+        >
+          <ConfigPanel
+            {...rest}
+            activeVisualization={{ ...rest.activeVisualization, id: 'testVis2' }}
+          />
+        </EditorFrameServiceProvider>
+      );
+      act(() => jest.runOnlyPendingTimers());
+
+      expect(screen.getByTestId('lns-layerPanel-0')).toHaveFocus();
     });
   });
 

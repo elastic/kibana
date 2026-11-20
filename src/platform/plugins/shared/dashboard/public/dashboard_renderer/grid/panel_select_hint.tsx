@@ -17,8 +17,8 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { SelectionRect } from './use_panel_selection_gestures';
 
 const hintLabel = i18n.translate('dashboard.panelSelectHint.label', {
-  defaultMessage: '{modifierKey}+click to select panel',
-  values: { modifierKey: isMac ? 'Cmd' : 'Ctrl' },
+  defaultMessage: '{modifierKey} + Click to select panel',
+  values: { modifierKey: isMac ? '⌘' : 'Ctrl' },
 });
 
 /** Short-lived badge explaining the selection gesture, shown over the title bar of the clicked panel */

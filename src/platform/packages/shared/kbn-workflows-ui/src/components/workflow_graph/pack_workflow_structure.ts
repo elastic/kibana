@@ -44,8 +44,8 @@ interface Packed {
  *   on the spine, so it never holds empty space and the body is never pushed to a side;
  * - a branch with no step of its own is a bypass lane node; it reserves room for its
  *   edge label, so the label never runs into the box around it;
- * - fallback lanes (and the body attached to a `merge` step) sit to the right of
- *   everything their owner reaches, further out for each nesting level;
+ * - fallback lanes sit to the right of everything their owner reaches, further out
+ *   for each nesting level;
  * - triggers form a centred row in declaration order above the first step.
  *
  * Pure: returns new nodes. Nodes the structure does not mention are returned as is.
@@ -102,12 +102,9 @@ export const packCrossAxis = ({
     };
   };
 
-  /**
-   * Adds sequences to the right of `base`, each one `nodeSep` past what is already there
-   * and past `clearance`, how far the items sharing its rows reach to the right.
-   */
-  const withSidesOnTheRight = (base: Packed, sides: readonly Packed[], clearance = 0): Packed => {
-    let reach = Math.max(base.right, clearance);
+  /** Adds sequences to the right of `base`, each one `nodeSep` past what is already there. */
+  const withSidesOnTheRight = (base: Packed, sides: readonly Packed[]): Packed => {
+    let reach = base.right;
     const spines = sides.map((side) => {
       const spine = reach + nodeSep + side.left;
       reach = spine + side.right;
@@ -130,16 +127,7 @@ export const packCrossAxis = ({
   };
 
   const packSequence = (items: StructureSequence): Packed => {
-    // The body of a `merge` step hangs off it, but the items after it start on the same
-    // rows (nothing pushes them down, unlike a fallback lane), so it must clear them.
-    // Packing back to front measures each item once, against the final reach of what follows.
-    const packed: Packed[] = [];
-    let followingReach = 0;
-    [...items].reverse().forEach((item) => {
-      const piece = packItem(item, item.kind === 'step' && item.attached ? followingReach : 0);
-      packed.unshift(piece);
-      followingReach = Math.max(followingReach, piece.right);
-    });
+    const packed = items.map(packItem);
     return {
       left: Math.max(0, ...packed.map((piece) => piece.left)),
       right: Math.max(0, ...packed.map((piece) => piece.right)),
@@ -181,15 +169,11 @@ export const packCrossAxis = ({
     };
   };
 
-  const packItem = (item: StructureItem, clearance = 0): Packed => {
+  const packItem = (item: StructureItem): Packed => {
     const lanes = item.lanes.map((lane) => packSequence(lane.items));
     switch (item.kind) {
       case 'step':
-        return withSidesOnTheRight(
-          packNode(item.id),
-          [...lanes, ...(item.attached ? [packSequence(item.attached)] : [])],
-          clearance
-        );
+        return withSidesOnTheRight(packNode(item.id), lanes);
       case 'fork':
         return withSidesOnTheRight(packFork(item), lanes);
       case 'container':

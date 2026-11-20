@@ -12,7 +12,9 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import type { EntityInventoryAppStartDependencies } from './types';
+import type { StartServices } from './hooks/use_kibana';
+import { createFixtureEntityInventoryApiClient } from './__fixtures__/inventory_client';
+import type { EntityInventoryAppPublicConfig, EntityInventoryAppStartDependencies } from './types';
 
 const MockPageTemplate = ({ children }: { children?: React.ReactNode }) => (
   <div data-test-subj="mockPageTemplate">{children}</div>
@@ -34,6 +36,13 @@ export const createStartDependenciesMock = (): EntityInventoryAppStartDependenci
   };
 };
 
+/** Browser config of the app, with the time range limit on unless it is disabled. */
+export const createPublicConfigMock = ({
+  timeRangeLimitDisabled = false,
+}: { timeRangeLimitDisabled?: boolean } = {}): EntityInventoryAppPublicConfig => ({
+  timeRangeLimit: { disabled: timeRangeLimitDisabled },
+});
+
 /** Core start mock whose rendering context also supplies the chrome that `AppHeader` reads. */
 export const createCoreStartMock = () => {
   const core = coreMock.createStart();
@@ -43,3 +52,12 @@ export const createCoreStartMock = () => {
   ));
   return core;
 };
+
+/** Services of the mounted app, with a fixture inventory client unless one is given. */
+export const createAppServicesMock = (overrides: Partial<StartServices> = {}): StartServices => ({
+  ...createCoreStartMock(),
+  ...createStartDependenciesMock(),
+  inventoryApi: createFixtureEntityInventoryApiClient(),
+  config: createPublicConfigMock(),
+  ...overrides,
+});
