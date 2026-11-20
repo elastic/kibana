@@ -1,0 +1,991 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`optimizer input for investigator rounds checkout latency traced to redis evictions gives the Cortex optimizer the same input 1`] = `
+Object {
+  "assistantMessage": "Root cause: Redis evicting cart keys at 98% memory; checkout times out on cache misses. Informed by Cortex page redis.",
+  "toolCalls": Array [
+    Object {
+      "params": Object {
+        "file_path": "/workspace/cortex/INDEX.md",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "text": "# Cortex index
+- redis (established, 3x)",
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "call-1",
+      "tool_id": "nightshift_sandbox_view_file",
+    },
+    Object {
+      "params": Object {
+        "command": "esql \\"FROM logs-* | WHERE service.name == \\\\\\"checkout\\\\\\" AND log.level == \\\\\\"error\\\\\\" | STATS c = COUNT() BY message | SORT c DESC | LIMIT 5\\"",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "exit_code": 0,
+            "stdout": "2026-10-11T14:02:00Z checkout ERROR redis timeout after 500ms key=cart:1000
+2026-10-11T14:02:01Z checkout ERROR redis timeout after 500ms key=cart:1001
+2026-10-11T14:02:02Z checkout ERROR redis timeout after 500ms key=cart:1002
+2026-10-11T14:02:03Z checkout ERROR redis timeout after 500ms key=cart:1003
+2026-10-11T14:02:04Z checkout ERROR redis timeout after 500ms key=cart:1004
+2026-10-11T14:02:05Z checkout ERROR redis timeout after 500ms key=cart:1005
+2026-10-11T14:02:06Z checkout ERROR redis timeout after 500ms key=cart:1006
+2026-10-11T14:02:07Z checkout ERROR redis timeout after 500ms key=cart:1007
+2026-10-11T14:02:08Z checkout ERROR redis timeout after 500ms key=cart:1008
+2026-10-11T14:02:09Z checkout ERROR redis timeout after 500ms key=cart:1009
+2026-10-11T14:02:10Z checkout ERROR redis timeout after 500ms key=cart:1010
+2026-10-11T14:02:11Z checkout ERROR redis timeout after 500ms key=cart:1011
+2026-10-11T14:02:12Z checkout ERROR redis timeout after 500ms key=cart:1012
+2026-10-11T14:02:13Z checkout ERROR redis timeout after 500ms key=cart:1013
+2026-10-11T14:02:14Z checkout ERROR redis timeout after 500ms key=cart:1014
+2026-10-11T14:02:15Z checkout ERROR redis timeout after 500ms key=cart:1015
+2026-10-11T14:02:16Z checkout ERROR redis timeout after 500ms key=cart:1016
+2026-10-11T14:02:17Z checkout ERROR redis timeout after 500ms key=cart:1017
+2026-10-11T14:02:18Z checkout ERROR redis timeout after 500ms key=cart:1018
+2026-10-11T14:02:19Z checkout ERROR redis timeout after 500ms key=cart:1019
+2026-10-11T14:02:20Z checkout ERROR redis timeout after 500ms key=cart:1020
+2026-10-11T14:02:21Z checkout ERROR redis timeout after 500ms key=cart:1021
+2026-10-11T14:02:22Z checkout ERROR redis timeout after 500ms key=cart:1022
+2026-10-11T14:02:23Z checkout ERROR redis timeout after 500ms key=cart:1023
+2026-10-11T14:02:24Z checkout ERROR redis timeout after 500ms key=cart:1024
+2026-10-11T14:02:25Z checkout ERROR redis timeout after 500ms key=cart:1025
+2026-10-11T14:02:26Z checkout ERROR redis timeout after 500ms key=cart:1026
+2026-10-11T14:02:27Z checkout ERROR redis timeout after 500ms key=cart:1027
+2026-10-11T14:02:28Z checkout ERROR redis timeout after 500ms key=cart:1028
+2026-10-11T14:02:29Z checkout ERROR redis timeout after 500ms key=cart:1029
+2026-10-11T14:02:30Z checkout ERROR redis timeout after 500ms key=cart:1030
+2026-10-11T14:02:31Z checkout ERROR redis timeout after 500ms key=cart:1031
+2026-10-11T14:02:32Z checkout ERROR redis timeout after 500ms key=cart:1032
+2026-10-11T14:02:33Z checkout ERROR redis timeout after 500ms key=cart:1033
+2026-10-11T14:02:34Z checkout ERROR redis timeout after 500ms key=cart:1034
+2026-10-11T14:02:35Z checkout ERROR redis timeout after 500ms key=cart:1035
+2026-10-11T14:02:36Z checkout ERROR redis timeout after 500ms key=cart:1036
+2026-10-11T14:02:37Z checkout ERROR redis timeout after 500ms key=cart:1037
+2026-10-11T14:02:38Z checkout ERROR redis timeout after 500ms key=cart:1038
+2026-10-11T14:02:39Z checkout ERROR redis timeout after 500ms key=cart:1039
+2026-10-11T14:02:40Z checkout ERROR redis timeout after 500ms key=cart:1040
+2026-10-11T14:02:41Z checkout ERROR redis timeout after 500ms key=cart:1041
+2026-10-11T14:02:42Z checkout ERROR redis timeout after 500ms key=cart:1042
+2026-10-11T14:02:43Z checkout ERROR redis timeout after 500ms key=cart:1043
+2026-10-11T14:02:44Z checkout ERROR redis timeout after 500ms key=cart:1044
+2026-10-11T14:02:45Z checkout ERROR redis timeout after 500ms key=cart:1045
+2026-10-11T14:02:46Z checkout ERROR redis timeout after 500ms key=cart:1046
+2026-10-11T14:02:47Z checkout ERROR redis timeout after 500ms key=cart:1047
+2026-10-11T14:02:48Z checkout ERROR redis timeout after 500ms key=cart:1048
+2026-10-11T14:02:49Z checkout ERROR redis timeout after 500ms key=cart:1049
+2026-10-11T14:02:50Z checkout ERROR redis timeout after 500ms key=cart:1050
+2026-10-11T14:02:51Z checkout ERROR redis timeout after 500ms key=cart:1051
+2026-10-11T14:02:52Z checkout ERROR redis timeout after 500ms key=cart:1052
+2026-10-11T14:02:53Z checkout ERROR redis timeout after 500ms key=cart:1053
+2026-10-11T14:02:54Z checkout ERROR redis timeout after 500ms key=cart:1054
+2026-10-11T14:02:55Z checkout ERROR redis timeout after 500ms key=cart:1055
+2026-10-11T14:02:56Z checkout ERROR redis timeout after 500ms key=cart:1056
+2026-10-11T14:02:57Z checkout ERROR redis timeout after 500ms key=cart:1057
+2026-10-11T14:02:58Z checkout ERROR redis timeout after 500ms key=cart:1058
+2026-10-11T14:02:59Z checkout ERROR redis timeout after 500ms key=cart:1059",
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "call-3",
+      "tool_id": "nightshift_sandbox_bash",
+    },
+    Object {
+      "params": Object {
+        "command": "curl -s \\"$CONNECTOR_CONFIG_URL/metrics-redis*/_search?size=0\\"",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "exit_code": 0,
+            "stdout": "{\\"evicted_keys\\": 4210, \\"used_memory_pct\\": 98}",
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "call-4",
+      "tool_id": "nightshift_sandbox_bash",
+    },
+    Object {
+      "params": Object {
+        "file_path": "/workspace/cortex/services/redis.md",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "text": "# redis
+Cart cache. maxmemory 2gb.",
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "call-5",
+      "tool_id": "nightshift_sandbox_view_file",
+    },
+    Object {
+      "params": Object {
+        "command": "esql \\"FROM traces-* | STATS p95 = PERCENTILE(transaction.duration.us, 95)\\"",
+      },
+      "tool_call_id": "call-6",
+      "tool_id": "nightshift_sandbox_bash",
+    },
+  ],
+  "userMessage": "Investigate the checkout latency alert (p95 > 2s since 14:00 UTC).",
+}
+`;
+
+exports[`optimizer input for investigator rounds checkout latency traced to redis evictions gives the memory optimizer the same input from the hook tool calls when the round cannot be read 1`] = `
+Object {
+  "assistantMessage": "Root cause: Redis evicting cart keys at 98% memory; checkout times out on cache misses. Informed by Cortex page redis.",
+  "investigation": Array [
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "file_path": "/workspace/cortex/INDEX.md",
+      },
+      "resultText": "# Cortex index
+- redis (established, 3x)",
+      "toolId": "nightshift_sandbox_view_file",
+    },
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "step": "triage",
+        "summary": "Loaded Cortex; checking checkout errors.",
+      },
+      "resultText": "{\\"ok\\":true}",
+      "toolId": "platform.streams.investigation_progress_report",
+    },
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "command": "esql \\"FROM logs-* | WHERE service.name == \\\\\\"checkout\\\\\\" AND log.level == \\\\\\"error\\\\\\" | STATS c = COUNT() BY message | SORT c DESC | LIMIT 5\\"",
+      },
+      "resultText": "2026-10-11T14:02:00Z checkout ERROR redis timeout after 500ms key=cart:1000
+2026-10-11T14:02:01Z checkout ERROR redis timeout after 500ms key=cart:1001
+2026-10-11T14:02:02Z checkout ERROR redis timeout after 500ms key=cart:1002
+2026-10-11T14:02:03Z checkout ERROR redis timeout after 500ms key=cart:1003
+2026-10-11T14:02:04Z checkout ERROR redis timeout after 500ms key=cart:1004
+2026-10-11T14:02:05Z checkout ERROR redis timeout after 500ms key=cart:1005
+2026-10-11T14:02:06Z checkout ERROR redis timeout after 500ms key=cart:1006
+2026-10-11T14:02:07Z checkout ERROR redis timeout after 500ms key=cart:1007
+2026-10-11T14:02:08Z checkout ERROR redis timeout after 500ms key=cart:1008
+2026-10-11T14:02:09Z checkout ERROR redis timeout after 500ms key=cart:1009
+2026-10-11T14:02:10Z checkout ERROR redis timeout after 500ms key=cart:1010
+2026-10-11T14:02:11Z checkout ERROR redis timeout after 500ms key=cart:1011
+2026-10-11T14:02:12Z checkout ERROR redis timeout after 500ms key=cart:1012
+2026-10-11T14:02:13Z checkout ERROR redis timeout after 500ms key=cart:1013
+2026-10-11T14:02:14Z checkout ERROR redis timeout after 500ms key=cart:1014
+2026-10-11T14:02:15Z checkout ERROR redis timeout after 500ms key=cart:1015
+2026-10-11T14:02:16Z checkout ERROR redis timeout after 500ms key=cart:1016
+2026-10-11T14:02:17Z checkout ERROR redis timeout after 500ms key=cart:1017
+2026-10-11T14:02:18Z checkout ERROR redis timeout after 500ms key=cart:1018
+2026-10-11T14:02:19Z checkout ERROR redis timeout after 500ms key=cart:1019
+2026-10-11T14:02:20Z checkout ERROR redis timeout after 500ms key=cart:1020
+2026-10-11T14:02:21Z checkout ERROR redis timeout after 500ms key=cart:1021
+2026-10-11T14:02:22Z checkout ERROR redis timeout after 500ms key=cart:1022
+2026-10-11T14:02:23Z checkout ERROR redis timeout after 500ms key=cart:1023
+2026-10-11T14:02:24Z checkout ERROR redis timeout after 500ms key=cart:1024
+2026-10-11T14:02:25Z checkout ERROR redis timeout after 500ms key=cart:1025
+2026-10-11T14:02:26Z checkout ERROR redis timeout after 500ms key=cart:1026
+2026-10-11T14:02:27Z checkout ERROR redis timeout after 500ms key=cart:1027
+2026-10-11T14:02:28Z checkout ERROR redis timeout after 500ms key=cart:1028
+2026-10-11T14:02:29Z checkout ERROR redis timeout after 500ms key=cart:1029
+2026-10-11T14:02:30Z checkout ERROR redis timeout after 500ms key=cart:1030
+2026-10-11T14:02:31Z checkout ERROR redis timeout after 500ms key=cart:1031
+2026-10-11T14:02:32Z checkout ERROR redis timeout after 500ms key=cart:1032
+2026-10-11T14:02:33Z checkout ERROR redis timeout after 500ms key=cart:1033
+2026-10-11T14:02:34Z checkout ERROR redis timeout after 500ms key=cart:1034
+2026-10-11T14:02:35Z checkout ERROR redis timeout after 500ms key=cart:1035
+2026-10-11T14:02:36Z checkout ERROR redis timeout after 500ms key=cart:1036
+2026-10-11T14:02:37Z checkout ERROR redis timeout after 500ms key=cart:1037
+2026-10-11T14:02:38Z checkout ERROR redis timeout after 500ms key=cart:1038
+2026-10-11T14:02:39Z checkout ERROR redis timeout after 500ms key=cart:1039
+2026-10-11T14:02:40Z checkout ERROR redis timeout after 500ms key=cart:1040
+2026-10-11T14:02:41Z checkout ERROR redis timeout after 500ms key=cart:1041
+2026-10-11T14:02:42Z checkout ERROR redis timeout after 500ms key=cart:1042
+2026-10-11T14:02:43Z checkout ERROR redis timeout after 500ms key=cart:1043
+2026-10-11T14:02:44Z checkout ERROR redis timeout after 500ms key=cart:1044
+2026-10-11T14:02:45Z checkout ERROR redis timeout after 500ms key=cart:1045
+2026-10-11T14:02:46Z checkout ERROR redis timeout after 500ms key=cart:1046
+2026-10-11T14:02:47Z checkout ERROR redis timeout after 500ms key=cart:1047
+2026-10-11T14:02:48Z checkout ERROR redis timeout after 500ms key=cart:1048
+2026-10-11T14:02:49Z checkout ERROR redis timeout after 500ms key=cart:1049
+2026-10-11T14:02:50Z checkout ERROR redis timeout after 500ms key=cart:1050
+2026-10-11T14:02:51Z checkout ERROR redis timeout after 500ms key=cart:1051
+2026-10-11T14:02:52Z checkout ERROR redis timeout after 500ms key=cart:1052
+2026-10-11T14:02:53Z checkout ERROR redis timeout after 500ms key=cart:1053
+2026-10-11T14:02:54Z checkout ERROR redis timeout after 500ms key=cart:1054
+2026-10-11T14:02:55Z checkout ERROR redis timeout after 500ms key=cart:1055
+2026-10-11T14:02:56Z checkout ERROR redis timeout after 500ms key=cart:1056
+2026-10-11T14:02:57Z checkout ERROR redis timeout after 500ms key=cart:1057
+2026-10-11T14:02:58Z checkout ERROR redis timeout after 500ms key=cart:1058
+2026-10-11T14:02:59Z checkout ERROR redis timeout after 500ms key=cart:1059",
+      "toolId": "nightshift_sandbox_bash",
+    },
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "command": "curl -s \\"$CONNECTOR_CONFIG_URL/metrics-redis*/_search?size=0\\"",
+      },
+      "resultText": "{\\"evicted_keys\\": 4210, \\"used_memory_pct\\": 98}",
+      "toolId": "nightshift_sandbox_bash",
+    },
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "file_path": "/workspace/cortex/services/redis.md",
+      },
+      "resultText": "# redis
+Cart cache. maxmemory 2gb.",
+      "toolId": "nightshift_sandbox_view_file",
+    },
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "command": "esql \\"FROM traces-* | STATS p95 = PERCENTILE(transaction.duration.us, 95)\\"",
+      },
+      "resultText": undefined,
+      "toolId": "nightshift_sandbox_bash",
+    },
+  ],
+  "recalledIds": Array [
+    "memory_redis-cart-cache",
+  ],
+  "toolCalls": Array [
+    Object {
+      "params": Object {
+        "file_path": "/workspace/cortex/INDEX.md",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "text": "# Cortex index
+- redis (established, 3x)",
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "call-1",
+      "tool_id": "nightshift_sandbox_view_file",
+    },
+    Object {
+      "params": Object {
+        "step": "triage",
+        "summary": "Loaded Cortex; checking checkout errors.",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "ok": true,
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "call-2",
+      "tool_id": "platform.streams.investigation_progress_report",
+    },
+    Object {
+      "params": Object {
+        "command": "esql \\"FROM logs-* | WHERE service.name == \\\\\\"checkout\\\\\\" AND log.level == \\\\\\"error\\\\\\" | STATS c = COUNT() BY message | SORT c DESC | LIMIT 5\\"",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "exit_code": 0,
+            "stdout": "2026-10-11T14:02:00Z checkout ERROR redis timeout after 500ms key=cart:1000
+2026-10-11T14:02:01Z checkout ERROR redis timeout after 500ms key=cart:1001
+2026-10-11T14:02:02Z checkout ERROR redis timeout after 500ms key=cart:1002
+2026-10-11T14:02:03Z checkout ERROR redis timeout after 500ms key=cart:1003
+2026-10-11T14:02:04Z checkout ERROR redis timeout after 500ms key=cart:1004
+2026-10-11T14:02:05Z checkout ERROR redis timeout after 500ms key=cart:1005
+2026-10-11T14:02:06Z checkout ERROR redis timeout after 500ms key=cart:1006
+2026-10-11T14:02:07Z checkout ERROR redis timeout after 500ms key=cart:1007
+2026-10-11T14:02:08Z checkout ERROR redis timeout after 500ms key=cart:1008
+2026-10-11T14:02:09Z checkout ERROR redis timeout after 500ms key=cart:1009
+2026-10-11T14:02:10Z checkout ERROR redis timeout after 500ms key=cart:1010
+2026-10-11T14:02:11Z checkout ERROR redis timeout after 500ms key=cart:1011
+2026-10-11T14:02:12Z checkout ERROR redis timeout after 500ms key=cart:1012
+2026-10-11T14:02:13Z checkout ERROR redis timeout after 500ms key=cart:1013
+2026-10-11T14:02:14Z checkout ERROR redis timeout after 500ms key=cart:1014
+2026-10-11T14:02:15Z checkout ERROR redis timeout after 500ms key=cart:1015
+2026-10-11T14:02:16Z checkout ERROR redis timeout after 500ms key=cart:1016
+2026-10-11T14:02:17Z checkout ERROR redis timeout after 500ms key=cart:1017
+2026-10-11T14:02:18Z checkout ERROR redis timeout after 500ms key=cart:1018
+2026-10-11T14:02:19Z checkout ERROR redis timeout after 500ms key=cart:1019
+2026-10-11T14:02:20Z checkout ERROR redis timeout after 500ms key=cart:1020
+2026-10-11T14:02:21Z checkout ERROR redis timeout after 500ms key=cart:1021
+2026-10-11T14:02:22Z checkout ERROR redis timeout after 500ms key=cart:1022
+2026-10-11T14:02:23Z checkout ERROR redis timeout after 500ms key=cart:1023
+2026-10-11T14:02:24Z checkout ERROR redis timeout after 500ms key=cart:1024
+2026-10-11T14:02:25Z checkout ERROR redis timeout after 500ms key=cart:1025
+2026-10-11T14:02:26Z checkout ERROR redis timeout after 500ms key=cart:1026
+2026-10-11T14:02:27Z checkout ERROR redis timeout after 500ms key=cart:1027
+2026-10-11T14:02:28Z checkout ERROR redis timeout after 500ms key=cart:1028
+2026-10-11T14:02:29Z checkout ERROR redis timeout after 500ms key=cart:1029
+2026-10-11T14:02:30Z checkout ERROR redis timeout after 500ms key=cart:1030
+2026-10-11T14:02:31Z checkout ERROR redis timeout after 500ms key=cart:1031
+2026-10-11T14:02:32Z checkout ERROR redis timeout after 500ms key=cart:1032
+2026-10-11T14:02:33Z checkout ERROR redis timeout after 500ms key=cart:1033
+2026-10-11T14:02:34Z checkout ERROR redis timeout after 500ms key=cart:1034
+2026-10-11T14:02:35Z checkout ERROR redis timeout after 500ms key=cart:1035
+2026-10-11T14:02:36Z checkout ERROR redis timeout after 500ms key=cart:1036
+2026-10-11T14:02:37Z checkout ERROR redis timeout after 500ms key=cart:1037
+2026-10-11T14:02:38Z checkout ERROR redis timeout after 500ms key=cart:1038
+2026-10-11T14:02:39Z checkout ERROR redis timeout after 500ms key=cart:1039
+2026-10-11T14:02:40Z checkout ERROR redis timeout after 500ms key=cart:1040
+2026-10-11T14:02:41Z checkout ERROR redis timeout after 500ms key=cart:1041
+2026-10-11T14:02:42Z checkout ERROR redis timeout after 500ms key=cart:1042
+2026-10-11T14:02:43Z checkout ERROR redis timeout after 500ms key=cart:1043
+2026-10-11T14:02:44Z checkout ERROR redis timeout after 500ms key=cart:1044
+2026-10-11T14:02:45Z checkout ERROR redis timeout after 500ms key=cart:1045
+2026-10-11T14:02:46Z checkout ERROR redis timeout after 500ms key=cart:1046
+2026-10-11T14:02:47Z checkout ERROR redis timeout after 500ms key=cart:1047
+2026-10-11T14:02:48Z checkout ERROR redis timeout after 500ms key=cart:1048
+2026-10-11T14:02:49Z checkout ERROR redis timeout after 500ms key=cart:1049
+2026-10-11T14:02:50Z checkout ERROR redis timeout after 500ms key=cart:1050
+2026-10-11T14:02:51Z checkout ERROR redis timeout after 500ms key=cart:1051
+2026-10-11T14:02:52Z checkout ERROR redis timeout after 500ms key=cart:1052
+2026-10-11T14:02:53Z checkout ERROR redis timeout after 500ms key=cart:1053
+2026-10-11T14:02:54Z checkout ERROR redis timeout after 500ms key=cart:1054
+2026-10-11T14:02:55Z checkout ERROR redis timeout after 500ms key=cart:1055
+2026-10-11T14:02:56Z checkout ERROR redis timeout after 500ms key=cart:1056
+2026-10-11T14:02:57Z checkout ERROR redis timeout after 500ms key=cart:1057
+2026-10-11T14:02:58Z checkout ERROR redis timeout after 500ms key=cart:1058
+2026-10-11T14:02:59Z checkout ERROR redis timeout after 500ms key=cart:1059",
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "call-3",
+      "tool_id": "nightshift_sandbox_bash",
+    },
+    Object {
+      "params": Object {
+        "command": "curl -s \\"$CONNECTOR_CONFIG_URL/metrics-redis*/_search?size=0\\"",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "exit_code": 0,
+            "stdout": "{\\"evicted_keys\\": 4210, \\"used_memory_pct\\": 98}",
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "call-4",
+      "tool_id": "nightshift_sandbox_bash",
+    },
+    Object {
+      "params": Object {
+        "file_path": "/workspace/cortex/services/redis.md",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "text": "# redis
+Cart cache. maxmemory 2gb.",
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "call-5",
+      "tool_id": "nightshift_sandbox_view_file",
+    },
+    Object {
+      "params": Object {
+        "command": "esql \\"FROM traces-* | STATS p95 = PERCENTILE(transaction.duration.us, 95)\\"",
+      },
+      "tool_call_id": "call-6",
+      "tool_id": "nightshift_sandbox_bash",
+    },
+  ],
+  "userMessage": "Investigate the checkout latency alert (p95 > 2s since 14:00 UTC).",
+}
+`;
+
+exports[`optimizer input for investigator rounds checkout latency traced to redis evictions gives the memory optimizer the same input from the persisted round 1`] = `
+Object {
+  "assistantMessage": "Root cause: Redis evicting cart keys at 98% memory; checkout times out on cache misses. Informed by Cortex page redis.",
+  "investigation": Array [
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "file_path": "/workspace/cortex/INDEX.md",
+      },
+      "resultText": "# Cortex index
+- redis (established, 3x)",
+      "toolId": "nightshift_sandbox_view_file",
+    },
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "step": "triage",
+        "summary": "Loaded Cortex; checking checkout errors.",
+      },
+      "resultText": "{\\"ok\\":true}",
+      "toolId": "platform.streams.investigation_progress_report",
+    },
+    Object {
+      "kind": "reasoning",
+      "text": "Check checkout errors before looking at dependencies.",
+    },
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "command": "esql \\"FROM logs-* | WHERE service.name == \\\\\\"checkout\\\\\\" AND log.level == \\\\\\"error\\\\\\" | STATS c = COUNT() BY message | SORT c DESC | LIMIT 5\\"",
+      },
+      "resultText": "2026-10-11T14:02:00Z checkout ERROR redis timeout after 500ms key=cart:1000
+2026-10-11T14:02:01Z checkout ERROR redis timeout after 500ms key=cart:1001
+2026-10-11T14:02:02Z checkout ERROR redis timeout after 500ms key=cart:1002
+2026-10-11T14:02:03Z checkout ERROR redis timeout after 500ms key=cart:1003
+2026-10-11T14:02:04Z checkout ERROR redis timeout after 500ms key=cart:1004
+2026-10-11T14:02:05Z checkout ERROR redis timeout after 500ms key=cart:1005
+2026-10-11T14:02:06Z checkout ERROR redis timeout after 500ms key=cart:1006
+2026-10-11T14:02:07Z checkout ERROR redis timeout after 500ms key=cart:1007
+2026-10-11T14:02:08Z checkout ERROR redis timeout after 500ms key=cart:1008
+2026-10-11T14:02:09Z checkout ERROR redis timeout after 500ms key=cart:1009
+2026-10-11T14:02:10Z checkout ERROR redis timeout after 500ms key=cart:1010
+2026-10-11T14:02:11Z checkout ERROR redis timeout after 500ms key=cart:1011
+2026-10-11T14:02:12Z checkout ERROR redis timeout after 500ms key=cart:1012
+2026-10-11T14:02:13Z checkout ERROR redis timeout after 500ms key=cart:1013
+2026-10-11T14:02:14Z checkout ERROR redis timeout after 500ms key=cart:1014
+2026-10-11T14:02:15Z checkout ERROR redis timeout after 500ms key=cart:1015
+2026-10-11T14:02:16Z checkout ERROR redis timeout after 500ms key=cart:1016
+2026-10-11T14:02:17Z checkout ERROR redis timeout after 500ms key=cart:1017
+2026-10-11T14:02:18Z checkout ERROR redis timeout after 500ms key=cart:1018
+2026-10-11T14:02:19Z checkout ERROR redis timeout after 500ms key=cart:1019
+2026-10-11T14:02:20Z checkout ERROR redis timeout after 500ms key=cart:1020
+2026-10-11T14:02:21Z checkout ERROR redis timeout after 500ms key=cart:1021
+2026-10-11T14:02:22Z checkout ERROR redis timeout after 500ms key=cart:1022
+2026-10-11T14:02:23Z checkout ERROR redis timeout after 500ms key=cart:1023
+2026-10-11T14:02:24Z checkout ERROR redis timeout after 500ms key=cart:1024
+2026-10-11T14:02:25Z checkout ERROR redis timeout after 500ms key=cart:1025
+2026-10-11T14:02:26Z checkout ERROR redis timeout after 500ms key=cart:1026
+2026-10-11T14:02:27Z checkout ERROR redis timeout after 500ms key=cart:1027
+2026-10-11T14:02:28Z checkout ERROR redis timeout after 500ms key=cart:1028
+2026-10-11T14:02:29Z checkout ERROR redis timeout after 500ms key=cart:1029
+2026-10-11T14:02:30Z checkout ERROR redis timeout after 500ms key=cart:1030
+2026-10-11T14:02:31Z checkout ERROR redis timeout after 500ms key=cart:1031
+2026-10-11T14:02:32Z checkout ERROR redis timeout after 500ms key=cart:1032
+2026-10-11T14:02:33Z checkout ERROR redis timeout after 500ms key=cart:1033
+2026-10-11T14:02:34Z checkout ERROR redis timeout after 500ms key=cart:1034
+2026-10-11T14:02:35Z checkout ERROR redis timeout after 500ms key=cart:1035
+2026-10-11T14:02:36Z checkout ERROR redis timeout after 500ms key=cart:1036
+2026-10-11T14:02:37Z checkout ERROR redis timeout after 500ms key=cart:1037
+2026-10-11T14:02:38Z checkout ERROR redis timeout after 500ms key=cart:1038
+2026-10-11T14:02:39Z checkout ERROR redis timeout after 500ms key=cart:1039
+2026-10-11T14:02:40Z checkout ERROR redis timeout after 500ms key=cart:1040
+2026-10-11T14:02:41Z checkout ERROR redis timeout after 500ms key=cart:1041
+2026-10-11T14:02:42Z checkout ERROR redis timeout after 500ms key=cart:1042
+2026-10-11T14:02:43Z checkout ERROR redis timeout after 500ms key=cart:1043
+2026-10-11T14:02:44Z checkout ERROR redis timeout after 500ms key=cart:1044
+2026-10-11T14:02:45Z checkout ERROR redis timeout after 500ms key=cart:1045
+2026-10-11T14:02:46Z checkout ERROR redis timeout after 500ms key=cart:1046
+2026-10-11T14:02:47Z checkout ERROR redis timeout after 500ms key=cart:1047
+2026-10-11T14:02:48Z checkout ERROR redis timeout after 500ms key=cart:1048
+2026-10-11T14:02:49Z checkout ERROR redis timeout after 500ms key=cart:1049
+2026-10-11T14:02:50Z checkout ERROR redis timeout after 500ms key=cart:1050
+2026-10-11T14:02:51Z checkout ERROR redis timeout after 500ms key=cart:1051
+2026-10-11T14:02:52Z checkout ERROR redis timeout after 500ms key=cart:1052
+2026-10-11T14:02:53Z checkout ERROR redis timeout after 500ms key=cart:1053
+2026-10-11T14:02:54Z checkout ERROR redis timeout after 500ms key=cart:1054
+2026-10-11T14:02:55Z checkout ERROR redis timeout after 500ms key=cart:1055
+2026-10-11T14:02:56Z checkout ERROR redis timeout after 500ms key=cart:1056
+2026-10-11T14:02:57Z checkout ERROR redis timeout after 500ms key=cart:1057
+2026-10-11T14:02:58Z checkout ERROR redis timeout after 500ms key=cart:1058
+2026-10-11T14:02:59Z checkout ERROR redis timeout after 500ms key=cart:1059",
+      "toolId": "nightshift_sandbox_bash",
+    },
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "command": "curl -s \\"$CONNECTOR_CONFIG_URL/metrics-redis*/_search?size=0\\"",
+      },
+      "resultText": "{\\"evicted_keys\\": 4210, \\"used_memory_pct\\": 98}",
+      "toolId": "nightshift_sandbox_bash",
+    },
+    Object {
+      "kind": "reasoning",
+      "text": "Cortex has a redis page; compare its limits with current usage.",
+    },
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "file_path": "/workspace/cortex/services/redis.md",
+      },
+      "resultText": "# redis
+Cart cache. maxmemory 2gb.",
+      "toolId": "nightshift_sandbox_view_file",
+    },
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "command": "esql \\"FROM traces-* | STATS p95 = PERCENTILE(transaction.duration.us, 95)\\"",
+      },
+      "resultText": undefined,
+      "toolId": "nightshift_sandbox_bash",
+    },
+  ],
+  "recalledIds": Array [
+    "memory_redis-cart-cache",
+  ],
+  "toolCalls": Array [
+    Object {
+      "params": Object {
+        "file_path": "/workspace/cortex/INDEX.md",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "text": "# Cortex index
+- redis (established, 3x)",
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "call-1",
+      "tool_id": "nightshift_sandbox_view_file",
+    },
+    Object {
+      "params": Object {
+        "step": "triage",
+        "summary": "Loaded Cortex; checking checkout errors.",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "ok": true,
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "call-2",
+      "tool_id": "platform.streams.investigation_progress_report",
+    },
+    Object {
+      "params": Object {
+        "command": "esql \\"FROM logs-* | WHERE service.name == \\\\\\"checkout\\\\\\" AND log.level == \\\\\\"error\\\\\\" | STATS c = COUNT() BY message | SORT c DESC | LIMIT 5\\"",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "exit_code": 0,
+            "stdout": "2026-10-11T14:02:00Z checkout ERROR redis timeout after 500ms key=cart:1000
+2026-10-11T14:02:01Z checkout ERROR redis timeout after 500ms key=cart:1001
+2026-10-11T14:02:02Z checkout ERROR redis timeout after 500ms key=cart:1002
+2026-10-11T14:02:03Z checkout ERROR redis timeout after 500ms key=cart:1003
+2026-10-11T14:02:04Z checkout ERROR redis timeout after 500ms key=cart:1004
+2026-10-11T14:02:05Z checkout ERROR redis timeout after 500ms key=cart:1005
+2026-10-11T14:02:06Z checkout ERROR redis timeout after 500ms key=cart:1006
+2026-10-11T14:02:07Z checkout ERROR redis timeout after 500ms key=cart:1007
+2026-10-11T14:02:08Z checkout ERROR redis timeout after 500ms key=cart:1008
+2026-10-11T14:02:09Z checkout ERROR redis timeout after 500ms key=cart:1009
+2026-10-11T14:02:10Z checkout ERROR redis timeout after 500ms key=cart:1010
+2026-10-11T14:02:11Z checkout ERROR redis timeout after 500ms key=cart:1011
+2026-10-11T14:02:12Z checkout ERROR redis timeout after 500ms key=cart:1012
+2026-10-11T14:02:13Z checkout ERROR redis timeout after 500ms key=cart:1013
+2026-10-11T14:02:14Z checkout ERROR redis timeout after 500ms key=cart:1014
+2026-10-11T14:02:15Z checkout ERROR redis timeout after 500ms key=cart:1015
+2026-10-11T14:02:16Z checkout ERROR redis timeout after 500ms key=cart:1016
+2026-10-11T14:02:17Z checkout ERROR redis timeout after 500ms key=cart:1017
+2026-10-11T14:02:18Z checkout ERROR redis timeout after 500ms key=cart:1018
+2026-10-11T14:02:19Z checkout ERROR redis timeout after 500ms key=cart:1019
+2026-10-11T14:02:20Z checkout ERROR redis timeout after 500ms key=cart:1020
+2026-10-11T14:02:21Z checkout ERROR redis timeout after 500ms key=cart:1021
+2026-10-11T14:02:22Z checkout ERROR redis timeout after 500ms key=cart:1022
+2026-10-11T14:02:23Z checkout ERROR redis timeout after 500ms key=cart:1023
+2026-10-11T14:02:24Z checkout ERROR redis timeout after 500ms key=cart:1024
+2026-10-11T14:02:25Z checkout ERROR redis timeout after 500ms key=cart:1025
+2026-10-11T14:02:26Z checkout ERROR redis timeout after 500ms key=cart:1026
+2026-10-11T14:02:27Z checkout ERROR redis timeout after 500ms key=cart:1027
+2026-10-11T14:02:28Z checkout ERROR redis timeout after 500ms key=cart:1028
+2026-10-11T14:02:29Z checkout ERROR redis timeout after 500ms key=cart:1029
+2026-10-11T14:02:30Z checkout ERROR redis timeout after 500ms key=cart:1030
+2026-10-11T14:02:31Z checkout ERROR redis timeout after 500ms key=cart:1031
+2026-10-11T14:02:32Z checkout ERROR redis timeout after 500ms key=cart:1032
+2026-10-11T14:02:33Z checkout ERROR redis timeout after 500ms key=cart:1033
+2026-10-11T14:02:34Z checkout ERROR redis timeout after 500ms key=cart:1034
+2026-10-11T14:02:35Z checkout ERROR redis timeout after 500ms key=cart:1035
+2026-10-11T14:02:36Z checkout ERROR redis timeout after 500ms key=cart:1036
+2026-10-11T14:02:37Z checkout ERROR redis timeout after 500ms key=cart:1037
+2026-10-11T14:02:38Z checkout ERROR redis timeout after 500ms key=cart:1038
+2026-10-11T14:02:39Z checkout ERROR redis timeout after 500ms key=cart:1039
+2026-10-11T14:02:40Z checkout ERROR redis timeout after 500ms key=cart:1040
+2026-10-11T14:02:41Z checkout ERROR redis timeout after 500ms key=cart:1041
+2026-10-11T14:02:42Z checkout ERROR redis timeout after 500ms key=cart:1042
+2026-10-11T14:02:43Z checkout ERROR redis timeout after 500ms key=cart:1043
+2026-10-11T14:02:44Z checkout ERROR redis timeout after 500ms key=cart:1044
+2026-10-11T14:02:45Z checkout ERROR redis timeout after 500ms key=cart:1045
+2026-10-11T14:02:46Z checkout ERROR redis timeout after 500ms key=cart:1046
+2026-10-11T14:02:47Z checkout ERROR redis timeout after 500ms key=cart:1047
+2026-10-11T14:02:48Z checkout ERROR redis timeout after 500ms key=cart:1048
+2026-10-11T14:02:49Z checkout ERROR redis timeout after 500ms key=cart:1049
+2026-10-11T14:02:50Z checkout ERROR redis timeout after 500ms key=cart:1050
+2026-10-11T14:02:51Z checkout ERROR redis timeout after 500ms key=cart:1051
+2026-10-11T14:02:52Z checkout ERROR redis timeout after 500ms key=cart:1052
+2026-10-11T14:02:53Z checkout ERROR redis timeout after 500ms key=cart:1053
+2026-10-11T14:02:54Z checkout ERROR redis timeout after 500ms key=cart:1054
+2026-10-11T14:02:55Z checkout ERROR redis timeout after 500ms key=cart:1055
+2026-10-11T14:02:56Z checkout ERROR redis timeout after 500ms key=cart:1056
+2026-10-11T14:02:57Z checkout ERROR redis timeout after 500ms key=cart:1057
+2026-10-11T14:02:58Z checkout ERROR redis timeout after 500ms key=cart:1058
+2026-10-11T14:02:59Z checkout ERROR redis timeout after 500ms key=cart:1059",
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "call-3",
+      "tool_id": "nightshift_sandbox_bash",
+    },
+    Object {
+      "params": Object {
+        "command": "curl -s \\"$CONNECTOR_CONFIG_URL/metrics-redis*/_search?size=0\\"",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "exit_code": 0,
+            "stdout": "{\\"evicted_keys\\": 4210, \\"used_memory_pct\\": 98}",
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "call-4",
+      "tool_id": "nightshift_sandbox_bash",
+    },
+    Object {
+      "params": Object {
+        "file_path": "/workspace/cortex/services/redis.md",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "text": "# redis
+Cart cache. maxmemory 2gb.",
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "call-5",
+      "tool_id": "nightshift_sandbox_view_file",
+    },
+    Object {
+      "params": Object {
+        "command": "esql \\"FROM traces-* | STATS p95 = PERCENTILE(transaction.duration.us, 95)\\"",
+      },
+      "tool_call_id": "call-6",
+      "tool_id": "nightshift_sandbox_bash",
+    },
+  ],
+  "userMessage": "Investigate the checkout latency alert (p95 > 2s since 14:00 UTC).",
+}
+`;
+
+exports[`optimizer input for investigator rounds payment 503s from an unavailable fraud-check dependency gives the Cortex optimizer the same input 1`] = `
+Object {
+  "assistantMessage": "payment 503s come from fraud-check being unavailable since 14:10; traces index listing failed.",
+  "toolCalls": Array [
+    Object {
+      "params": Object {
+        "command": "esql \\"FROM logs-* | WHERE service.name == \\\\\\"payment\\\\\\" | LIMIT 20\\"",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "exit_code": 0,
+            "stdout": "payment 503 upstream fraud-check unavailable",
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "p-2",
+      "tool_id": "nightshift_sandbox_bash",
+    },
+    Object {
+      "params": Object {
+        "content": "payment 503s start 14:10",
+        "file_path": "/workspace/notes.md",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "ok": true,
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "p-4",
+      "tool_id": "nightshift_sandbox_write_file",
+    },
+    Object {
+      "params": Object {
+        "command": "curl -s \\"$CONNECTOR_CONFIG_URL/_cat/indices/traces-*?v\\"",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "message": "connection reset by peer",
+          },
+          "type": "error",
+        },
+      ],
+      "tool_call_id": "p-5",
+      "tool_id": "nightshift_sandbox_bash",
+    },
+  ],
+  "userMessage": "Why is payment returning 503?",
+}
+`;
+
+exports[`optimizer input for investigator rounds payment 503s from an unavailable fraud-check dependency gives the memory optimizer the same input from the hook tool calls when the round cannot be read 1`] = `
+Object {
+  "assistantMessage": "payment 503s come from fraud-check being unavailable since 14:10; traces index listing failed.",
+  "investigation": Array [
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "step": "triage",
+      },
+      "resultText": undefined,
+      "toolId": "platform.streams.investigation_progress_report",
+    },
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "command": "esql \\"FROM logs-* | WHERE service.name == \\\\\\"payment\\\\\\" | LIMIT 20\\"",
+      },
+      "resultText": "payment 503 upstream fraud-check unavailable",
+      "toolId": "nightshift_sandbox_bash",
+    },
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "note": "missing tool id",
+      },
+      "resultText": undefined,
+      "toolId": "unknown_tool",
+    },
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "content": "payment 503s start 14:10",
+        "file_path": "/workspace/notes.md",
+      },
+      "resultText": "{\\"ok\\":true}",
+      "toolId": "nightshift_sandbox_write_file",
+    },
+    Object {
+      "isError": true,
+      "kind": "tool",
+      "params": Object {
+        "command": "curl -s \\"$CONNECTOR_CONFIG_URL/_cat/indices/traces-*?v\\"",
+      },
+      "resultText": "connection reset by peer",
+      "toolId": "nightshift_sandbox_bash",
+    },
+  ],
+  "recalledIds": Array [
+    "memory_redis-cart-cache",
+  ],
+  "toolCalls": Array [
+    Object {
+      "params": Object {
+        "step": "triage",
+      },
+      "tool_call_id": "p-1",
+      "tool_id": "platform.streams.investigation_progress_report",
+    },
+    Object {
+      "params": Object {
+        "command": "esql \\"FROM logs-* | WHERE service.name == \\\\\\"payment\\\\\\" | LIMIT 20\\"",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "exit_code": 0,
+            "stdout": "payment 503 upstream fraud-check unavailable",
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "p-2",
+      "tool_id": "nightshift_sandbox_bash",
+    },
+    Object {
+      "params": Object {
+        "note": "missing tool id",
+      },
+      "tool_call_id": "p-3",
+    },
+    Object {
+      "params": Object {
+        "content": "payment 503s start 14:10",
+        "file_path": "/workspace/notes.md",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "ok": true,
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "p-4",
+      "tool_id": "nightshift_sandbox_write_file",
+    },
+    Object {
+      "params": Object {
+        "command": "curl -s \\"$CONNECTOR_CONFIG_URL/_cat/indices/traces-*?v\\"",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "message": "connection reset by peer",
+          },
+          "type": "error",
+        },
+      ],
+      "tool_call_id": "p-5",
+      "tool_id": "nightshift_sandbox_bash",
+    },
+  ],
+  "userMessage": "Why is payment returning 503?",
+}
+`;
+
+exports[`optimizer input for investigator rounds payment 503s from an unavailable fraud-check dependency gives the memory optimizer the same input from the persisted round 1`] = `
+Object {
+  "assistantMessage": "payment 503s come from fraud-check being unavailable since 14:10; traces index listing failed.",
+  "investigation": Array [
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "step": "triage",
+      },
+      "resultText": undefined,
+      "toolId": "platform.streams.investigation_progress_report",
+    },
+    Object {
+      "kind": "reasoning",
+      "text": "Start from payment logs.",
+    },
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "command": "esql \\"FROM logs-* | WHERE service.name == \\\\\\"payment\\\\\\" | LIMIT 20\\"",
+      },
+      "resultText": "payment 503 upstream fraud-check unavailable",
+      "toolId": "nightshift_sandbox_bash",
+    },
+    Object {
+      "isError": false,
+      "kind": "tool",
+      "params": Object {
+        "content": "payment 503s start 14:10",
+        "file_path": "/workspace/notes.md",
+      },
+      "resultText": "{\\"ok\\":true}",
+      "toolId": "nightshift_sandbox_write_file",
+    },
+    Object {
+      "isError": true,
+      "kind": "tool",
+      "params": Object {
+        "command": "curl -s \\"$CONNECTOR_CONFIG_URL/_cat/indices/traces-*?v\\"",
+      },
+      "resultText": "connection reset by peer",
+      "toolId": "nightshift_sandbox_bash",
+    },
+  ],
+  "recalledIds": Array [
+    "memory_redis-cart-cache",
+  ],
+  "toolCalls": Array [
+    Object {
+      "params": Object {
+        "step": "triage",
+      },
+      "tool_call_id": "p-1",
+      "tool_id": "platform.streams.investigation_progress_report",
+    },
+    Object {
+      "params": Object {
+        "command": "esql \\"FROM logs-* | WHERE service.name == \\\\\\"payment\\\\\\" | LIMIT 20\\"",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "exit_code": 0,
+            "stdout": "payment 503 upstream fraud-check unavailable",
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "p-2",
+      "tool_id": "nightshift_sandbox_bash",
+    },
+    Object {
+      "params": Object {
+        "note": "missing tool id",
+      },
+      "tool_call_id": "p-3",
+    },
+    Object {
+      "params": Object {
+        "content": "payment 503s start 14:10",
+        "file_path": "/workspace/notes.md",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "ok": true,
+          },
+          "type": "other",
+        },
+      ],
+      "tool_call_id": "p-4",
+      "tool_id": "nightshift_sandbox_write_file",
+    },
+    Object {
+      "params": Object {
+        "command": "curl -s \\"$CONNECTOR_CONFIG_URL/_cat/indices/traces-*?v\\"",
+      },
+      "results": Array [
+        Object {
+          "data": Object {
+            "message": "connection reset by peer",
+          },
+          "type": "error",
+        },
+      ],
+      "tool_call_id": "p-5",
+      "tool_id": "nightshift_sandbox_bash",
+    },
+  ],
+  "userMessage": "Why is payment returning 503?",
+}
+`;
