@@ -279,21 +279,20 @@ export class WorkflowGraphAuthoringPage {
   }
 
   /**
-   * Sets a step field to a plain string value. Some fields that are
-   * logically strings are still schema-typed as a union (e.g.
-   * `index: string | string[]`) and render as a JSON-kind input — such a
-   * field parses its raw text as JSON, so it must be JSON-encoded first or
-   * the edit is silently dropped. Detected via the field's `data-language`.
+   * Sets a step field through `writeValue`, which drives whichever control
+   * the form renders for it (tags combo box, inline editor, input, JSON
+   * editor, ...).
    */
-  async setStepFieldValue(fieldPath: string, value: string): Promise<void> {
-    const field = this.stepField(fieldPath);
-    const language = await field.getAttribute('data-language');
-    await field.fill(language === 'json' ? JSON.stringify(value) : value);
+  async setStepFieldValue(fieldPath: string, value: YamlValue): Promise<void> {
+    await this.stepField(fieldPath).waitFor();
+    if (!(await this.writeValue(fieldPath, value))) {
+      throw new Error(`the step form has no control for "${fieldPath}"`);
+    }
   }
 
-  /** Sets a step field to a JSON object/array value, written as-is. */
-  async setStepFieldJSON(fieldPath: string, value: unknown): Promise<void> {
-    await this.stepField(fieldPath).fill(JSON.stringify(value));
+  /** Sets a step field to a JSON object/array value, through `writeValue`. */
+  async setStepFieldJSON(fieldPath: string, value: YamlValue): Promise<void> {
+    await this.setStepFieldValue(fieldPath, value);
   }
 
   /** Renames the step currently open in the config panel. */

@@ -183,6 +183,10 @@ test.describe(
       });
 
       await test.step('the produced YAML reflects every authored step', async () => {
+        // The last graph edit reaches the YAML model asynchronously.
+        await expect
+          .poll(() => workflowEditor.getYamlEditorValue())
+          .toContain('name: process_item');
         const yaml = await workflowEditor.getYamlEditorValue();
 
         expect(yaml).toContain('type: manual');
