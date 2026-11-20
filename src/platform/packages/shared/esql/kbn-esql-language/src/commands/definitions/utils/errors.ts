@@ -80,6 +80,15 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: { name: out.name },
         }),
       };
+    case 'subqueryNotSupportedInTs':
+      return {
+        message: i18n.translate(
+          'esqlLanguage.esql.validation.subqueryNotSupportedInTsErrorMessage',
+          {
+            defaultMessage: 'Subqueries are not supported in TS command',
+          }
+        ),
+      };
     case 'unknownCastingType':
       return {
         message: i18n.translate('esqlLanguage.esql.validation.unknownCastingType', {
@@ -719,6 +728,9 @@ export const errors = {
       errors.byId('unknownDataSource', source.location, { name: source.name }),
       'getSources'
     ),
+
+  subqueryNotSupportedInTs: (source: ESQLSource): ESQLMessage =>
+    errors.byId('subqueryNotSupportedInTs', source.location, {}),
 
   unknownPolicy: (policyName: string, location: ESQLLocation): ESQLMessage =>
     tagSemanticError(errors.byId('unknownPolicy', location, { name: policyName }), 'getPolicies'),
