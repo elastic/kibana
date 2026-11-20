@@ -68599,7 +68599,6 @@
     "xpack.streams.sources.createSourceFailedTitle": "ソースの作成を完了できませんでした",
     "xpack.streams.sources.createSourceModalDescription": "データをこのストリームに取り込む方法を選択します",
     "xpack.streams.sources.createSourceModalTitle": "ソースを作成",
-    "xpack.streams.sources.dangerAreaLabel": "危険エリア",
     "xpack.streams.sources.deleteApiKeyAriaLabel": "APIキーを削除",
     "xpack.streams.sources.deleteApiKeyButtonLabel": "削除",
     "xpack.streams.sources.deleteApiKeyConfirmButtonLabel": "APIキーを削除",

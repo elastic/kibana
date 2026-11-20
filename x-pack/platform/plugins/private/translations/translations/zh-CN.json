@@ -68585,7 +68585,6 @@
     "xpack.streams.sources.createSourceFailedTitle": "无法完成数据源创建",
     "xpack.streams.sources.createSourceModalDescription": "选择数据进入此数据流的方式",
     "xpack.streams.sources.createSourceModalTitle": "创建源",
-    "xpack.streams.sources.dangerAreaLabel": "危险区域",
     "xpack.streams.sources.deleteApiKeyAriaLabel": "删除 API 密钥",
     "xpack.streams.sources.deleteApiKeyButtonLabel": "删除",
     "xpack.streams.sources.deleteApiKeyConfirmButtonLabel": "删除 API 密钥",
