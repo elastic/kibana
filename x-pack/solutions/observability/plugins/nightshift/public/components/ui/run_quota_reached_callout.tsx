@@ -34,7 +34,7 @@ const getCalloutTitle = (group: DetectionRunQuotaGroup, limit: number): string =
         values: { limit },
       });
 
-// Only Discovery has a back link from settings; the Knowledge page has none.
+// `origin` makes the Settings back button return to Detections; Knowledge has no equivalent origin.
 const SETTINGS_PATH: Record<DetectionRunQuotaGroup, string> = {
   detection: '/settings/detections?origin=detections',
   ki_extraction: '/settings/detections',
