@@ -97,7 +97,7 @@ export const ConversationStartersList: React.FC<ConversationStartersListProps> =
       {starters.map((starter, index) => (
         <EuiFlexItem key={starter.label} grow={false} css={styles.item}>
           <EuiPanel
-            hasShadow
+            hasBorder
             paddingSize="none"
             css={styles.card}
             disabled={isDisabled}
