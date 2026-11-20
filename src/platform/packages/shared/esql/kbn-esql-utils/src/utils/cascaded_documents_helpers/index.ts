@@ -18,7 +18,6 @@ import {
   mutate,
   synth,
   isBinaryExpression,
-  Walker,
   isInlineCast,
 } from '@elastic/esql';
 import type {
@@ -59,6 +58,7 @@ import {
   removeBackticks,
   isSupportedFieldType,
   isTimeseriesSourceQuery,
+  isColumnStrippedFromOutput,
   hasForkCommand,
   isUnsupportedTimeseriesCascadeQuery,
   requiresMatchPhrase,
@@ -125,8 +125,8 @@ export const ESQL_STATS_QUERY_META_EXCLUSION_REASON = {
   MALFORMED_GROUPING: 'malformed_grouping',
   /** A grouping option applies a function the cascade experience does not support. */
   UNSUPPORTED_GROUPING_FUNCTION: 'unsupported_grouping_function',
-  /** A KEEP command strips the grouping option from the resulting records. */
-  GROUP_FIELD_STRIPPED_BY_KEEP: 'group_field_stripped_by_keep',
+  /** A KEEP or DROP command strips the grouping option from the resulting records. */
+  GROUP_FIELD_STRIPPED: 'group_field_stripped',
 } as const;
 
 export type { NodeAggregatedValues };
@@ -301,34 +301,12 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
       break;
     }
 
-    // given that keep commands strip fields from the resulting records,
-    // we need to ascertain that if a keep command exists after the operating stats command,
-    // it specifies the current group field
-    const offendingKeepCommand = esqlQuery.ast.commands
-      .slice(groupDeclarationStatsCommandIndex)
-      .reduce((acc, cmd) => {
-        if (cmd.name !== 'keep') {
-          return acc || false;
-        }
-
-        let offending = false;
-
-        Walker.walk(cmd, {
-          visitColumn: (node) => {
-            // if we don't find a node that targets the current group field,
-            // then we know the keep command is invalidating
-            // the possibility of grouping by the current group field
-            offending = node.name !== groupFieldName;
-          },
-        });
-
-        return acc || offending;
-      }, false);
-
-    if (offendingKeepCommand) {
-      // we found a keep command that strips the current group field from the resulting records,
-      // so we break out of the loop as that invalidates the possibility of grouping by the current group field
-      groupingExclusionReason = ESQL_STATS_QUERY_META_EXCLUSION_REASON.GROUP_FIELD_STRIPPED_BY_KEEP;
+    // given that keep and drop commands strip fields from the resulting records,
+    // we need to ascertain that neither of them removes the current group field after it was declared
+    if (isColumnStrippedFromOutput(esqlQuery, groupDeclarationStatsCommandIndex, groupFieldName)) {
+      // the records the query returns carry no value for the current group field,
+      // so there is nothing left to group the cascade by
+      groupingExclusionReason = ESQL_STATS_QUERY_META_EXCLUSION_REASON.GROUP_FIELD_STRIPPED;
       break;
     }
 
@@ -655,6 +633,8 @@ function handleStatsByColumnLeafOperation({
         // hence we need to compensate by ensuring aggregates derived from functions that act as filters are accounted for
         ...(omittedStatsCommand
           ? buildValuesAggregateFilterExpressions({
+              editorQuery,
+              operatingStatsCommandIndex,
               statsSummary: operatingStatsCommandSummary,
               nodeAggregatedValues,
               dataViewFields,

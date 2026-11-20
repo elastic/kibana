@@ -344,12 +344,41 @@ describe('cascaded documents helpers utils', () => {
         [
           'a KEEP command strips the grouping option',
           'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | KEEP count',
-          'group_field_stripped_by_keep',
+          'group_field_stripped',
+        ],
+        [
+          'a DROP command strips the grouping option',
+          'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | DROP clientip',
+          'group_field_stripped',
+        ],
+        [
+          'a DROP command strips the grouping option through a wildcard pattern',
+          'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | DROP client*',
+          'group_field_stripped',
         ],
       ])('reports why no metadata was produced when %s', (_, queryString, exclusionReason) => {
         const result = getESQLStatsQueryMeta(queryString);
         expect(result.groupByFields).toEqual([]);
         expect(result.exclusionReason).toBe(exclusionReason);
+      });
+
+      it.each([
+        [
+          'a KEEP command lists the grouping option alongside other columns',
+          'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | KEEP clientip, count',
+        ],
+        [
+          'a KEEP command matches the grouping option through a wildcard pattern',
+          'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | KEEP client*',
+        ],
+        [
+          'a DROP command names a column other than the grouping option',
+          'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | DROP count',
+        ],
+      ])('still offers the cascade experience when %s', (_, queryString) => {
+        const result = getESQLStatsQueryMeta(queryString);
+        expect(result.groupByFields).toEqual([{ field: 'clientip', type: 'column' }]);
+        expect(result.exclusionReason).toBeUndefined();
       });
 
       it('withholds the cascade experience from TS queries that declare multiple STATS commands', () => {
@@ -1021,6 +1050,62 @@ describe('cascaded documents helpers utils', () => {
             // the aggregate functions we filter on skip nulls, so a null reported for the row
             // means every document behind it lacks the field
             nodeAggregatedValues: { 'values(tags)': null },
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND tags IS NULL'
+          );
+        });
+
+        it.each([
+          ['a DROP command names the aggregate', '| DROP tags_seen'],
+          ['a DROP command matches the aggregate through a wildcard pattern', '| DROP tags_*'],
+          ['a KEEP command leaves the aggregate out', '| KEEP `host.name`'],
+        ])('leaves documents unconstrained when %s', (_, projection) => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              TS kibana_sample_data_logstsdb | STATS tags_seen = values(tags) BY host.name ${projection}
+            `,
+          };
+
+          mockDataViewFields({ 'host.name': keywordField, tags: keywordField });
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['host.name'],
+            nodePathMap: { 'host.name': 'www.elastic.co' },
+            // the aggregate never reached the result, so the row reports it the same way it reports
+            // one that held null for every document, and only the query tells the two apart
+            nodeAggregatedValues: { tags_seen: null },
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co"'
+          );
+        });
+
+        it('still filters on null when a projection leaves the aggregate in place', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              TS kibana_sample_data_logstsdb | STATS tags_seen = values(tags), count = COUNT(*) BY host.name | DROP count
+            `,
+          };
+
+          mockDataViewFields({ 'host.name': keywordField, tags: keywordField });
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['host.name'],
+            nodePathMap: { 'host.name': 'www.elastic.co' },
+            nodeAggregatedValues: { tags_seen: null },
           });
 
           expect(cascadeQuery).toBeDefined();
