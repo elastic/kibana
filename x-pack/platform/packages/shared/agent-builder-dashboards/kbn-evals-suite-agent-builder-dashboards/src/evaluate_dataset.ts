@@ -8,7 +8,13 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { DASHBOARD_ATTACHMENT_TYPE, isSection } from '@kbn/agent-builder-dashboards-common';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  DASHBOARD_PANEL_ATTACHMENT_TYPE,
+  getDashboardPanelAttachmentId,
+  isSection,
+  type DashboardAttachmentData,
+} from '@kbn/agent-builder-dashboards-common';
 import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
 import {
   createTrajectoryEvaluator,
@@ -23,6 +29,7 @@ import {
   type ExperimentTask,
 } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { getLeafPanels } from './dashboard_panels';
 import { onlyWhen, withLowScoreLogging } from './evaluator_utils';
 import { createControlQueriesEvaluator } from './evaluators/control_queries';
 import { dashboardControlSourcingEvaluator } from './evaluators/control_sourcing';
@@ -48,6 +55,7 @@ import {
 import { enhanceScopeEvaluator } from './evaluators/enhance_scope_evaluator';
 import { dashboardLayoutEditEvaluator } from './evaluators/layout_edit';
 import { dashboardPanelEditsEvaluator } from './evaluators/panel_edits';
+import { panelPointerScopeEvaluator } from './evaluators/panel_pointer_scope';
 import { dashboardReplaceConfirmationEvaluator } from './evaluators/replace_confirmation';
 import { createReplyEvaluator } from './evaluators/reply_judge';
 import { createUnavailableRequestsEvaluator } from './evaluators/unavailable_requests';
@@ -103,6 +111,28 @@ const useAgentTraceIds = (evaluator: Evaluator): DashboardAgentEvaluator => ({
     };
   },
 });
+
+/** Pointers to seeded panels, shaped the way the refine with chat action stages them. */
+const toPanelPointers = (dashboard: DashboardAttachmentData, panelIds: readonly string[]) => {
+  const panels = getLeafPanels(dashboard);
+  return panelIds.map((panelId) => {
+    const panel = panels.find(({ id }) => id === panelId);
+    if (!panel) {
+      throw new Error(`Panel pointer names "${panelId}", which the seeded dashboard does not have`);
+    }
+    const { title } = panel.config;
+    return {
+      id: getDashboardPanelAttachmentId({ dashboardAttachmentId: SEEDED_DASHBOARD_ID, panelId }),
+      type: DASHBOARD_PANEL_ATTACHMENT_TYPE,
+      data: {
+        dashboard_attachment_id: SEEDED_DASHBOARD_ID,
+        panel_id: panelId,
+        panel_type: panel.type,
+        ...(typeof title === 'string' ? { label: title } : {}),
+      },
+    };
+  });
+};
 
 /**
  * Answers an `ask_user_question` prompt with the option for a mode, or free
@@ -187,7 +217,10 @@ export function createEvaluateDataset({
         data: { ...data },
       })),
       ...(seededDashboard
-        ? [{ id: SEEDED_DASHBOARD_ID, type: DASHBOARD_ATTACHMENT_TYPE, data: seededDashboard }]
+        ? [
+            { id: SEEDED_DASHBOARD_ID, type: DASHBOARD_ATTACHMENT_TYPE, data: seededDashboard },
+            ...toPanelPointers(seededDashboard, input?.panelPointers ?? []),
+          ]
         : []),
       ...(seededResults
         ? [
@@ -225,18 +258,30 @@ export function createEvaluateDataset({
             promptResponses: answerModeQuestion(modeQuestion, modeAnswer),
           })
         : undefined;
-    const last = answer ?? opening;
-    const steps = answer ? combineTurnSteps(opening.steps, answer.steps) : opening.steps;
+    const answered = answer ?? opening;
+    const answeredSteps = answer ? combineTurnSteps(opening.steps, answer.steps) : opening.steps;
+
+    const followUp =
+      input?.followUp && answered.conversationId
+        ? await agentBuilderClient.converse({
+            agentId,
+            conversationId: answered.conversationId,
+            input: input.followUp,
+          })
+        : undefined;
+    const last = followUp ?? answered;
+    const steps = followUp ? [...answeredSteps, ...followUp.steps] : answeredSteps;
 
     return {
       errors: getToolErrors(steps),
       messages: [{ message: last.message }],
       steps,
       agentTraceId: last.traceId,
-      agentTraceIds: [opening.traceId, answer?.traceId].filter(
+      agentTraceIds: [opening.traceId, answer?.traceId, followUp?.traceId].filter(
         (traceId): traceId is string => traceId !== undefined
       ),
-      turns: answer ? 2 : 1,
+      turns: 1 + (answer ? 1 : 0) + (followUp ? 1 : 0),
+      ...(followUp ? { followUpSteps: followUp.steps } : {}),
       openingPrompts: opening.prompts,
       openingToolIds: getToolIds({ errors: [], messages: [], steps: opening.steps }),
       ...(await readDashboards(last, steps, seededDashboard !== undefined)),
@@ -318,6 +363,7 @@ export function createEvaluateDataset({
     dashboardLayoutEditEvaluator,
     dashboardPanelEditsEvaluator,
     dashboardReplaceConfirmationEvaluator,
+    panelPointerScopeEvaluator,
     createUnavailableRequestsEvaluator(esClient),
     createReplyEvaluator(evaluators),
     positiveOnly(trajectoryEvaluator),

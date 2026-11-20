@@ -80,7 +80,8 @@ describe('createDashboardPanelAttachmentType', () => {
   it('tells the agent to apply the request to the panel instead of answering in chat', async () => {
     const text = await formatPointer(pointerData);
 
-    expect(text).toContain('is about this panel');
+    expect(text).toContain("That message's request is about this panel");
+    expect(text).toContain('Later messages are about this panel only when');
     expect(text).toContain('do not answer with the content in chat');
     expect(text).not.toContain('This is a custom panel');
   });
@@ -106,6 +107,7 @@ describe('createDashboardPanelAttachmentType', () => {
 
     expect(description).toContain(dashboardTools.generateDashboard);
     expect(description).toContain('Edit the panel in place by its panel id');
+    expect(description).toContain('A pointer from an earlier message does not make later messages');
     expect(description).toContain('Never create a new visualization attachment');
   });
 });

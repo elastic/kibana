@@ -41,8 +41,9 @@ export const createDashboardPanelAttachmentType = (): AttachmentTypeDefinition<
     }),
   }),
   getAgentDescription: () =>
-    `A dashboard panel attachment points at one panel of a dashboard attachment in this conversation: the user is referring to that panel. It carries no configuration; its text gives the exact calls for its panel.
-- Requests made while it is attached are about that panel, even when they do not mention it: apply them to the panel through \`${dashboardTools.generateDashboard}\` (load the dashboards skill first) instead of answering with the content in chat.
+    `A dashboard panel attachment points at one panel of a dashboard attachment in this conversation: the user is referring to that panel in the message it is attached to. It carries no configuration; its text gives the exact calls for its panel.
+- The request of the message a pointer is attached to is about that panel, even when it does not mention it: apply it to the panel through \`${dashboardTools.generateDashboard}\` (load the dashboards skill first) instead of answering with the content in chat. A message with several pointers is about all of their panels.
+- A pointer from an earlier message does not make later messages about its panel: handle a later message on its own, unless it mentions the panel or continues the same change.
 - Edit the panel in place by its panel id. Never create a new visualization attachment or add a new panel to refine a panel that already exists. After editing, render only the dashboard attachment.
 - To show the panel itself inline in the chat, use \`${dashboardTools.pointedPanel}\` with \`action: "show"\`; never regenerate it with the visualization creation tool.
 - If the panel no longer exists, tell the user instead of recreating it.`,
@@ -68,7 +69,7 @@ const formatDashboardPanelAttachment = ({
   [
     `The user is referring to the panel ${
       label ? `"${label}" ` : ''
-    }(panelId: "${panelId}", type: ${panelType}) on the dashboard attachment "${dashboardAttachmentId}". Whatever the user asks while this is attached is about this panel: apply it to the panel; do not answer with the content in chat.`,
+    }(panelId: "${panelId}", type: ${panelType}) on the dashboard attachment "${dashboardAttachmentId}" in the message this is attached to. That message's request is about this panel: apply it to the panel; do not answer with the content in chat. Later messages are about this panel only when they mention it or continue the same change.`,
     `- Edit: call \`${
       dashboardTools.generateDashboard
     }\` with \`dashboardId: "${dashboardAttachmentId}"\` and \`panels: [{ id: "${panelId}", content: { type: ${getEditContentType(
