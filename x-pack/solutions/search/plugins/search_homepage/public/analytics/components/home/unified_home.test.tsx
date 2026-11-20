@@ -10,6 +10,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { useAnalyticsClusterState } from '../../hooks/use_analytics_cluster_state';
 import { useAnalyticsLinks } from '../../hooks/use_analytics_links';
+import { useChromeHidden } from '../../hooks/use_chrome_hidden';
 import { useEventsOverTime } from '../../hooks/use_events_over_time';
 import type { EventsOverTimeResult } from '../../hooks/use_events_over_time';
 import { useAnalyticsPreferences } from '../../hooks/use_analytics_preferences';
@@ -54,6 +55,10 @@ jest.mock('../../../components/search_homepage/search_homepage', () => ({
   SearchHomepagePage: () => <div data-test-subj="elasticsearchHomePage" />,
 }));
 jest.mock('../../hooks/use_analytics_cluster_state');
+jest.mock('../../hooks/use_chrome_hidden');
+jest.mock('../shared/connection_details', () => ({
+  ConnectionDetails: () => <div data-test-subj="connectionDetailsStub" />,
+}));
 jest.mock('../../hooks/use_analytics_links');
 jest.mock('../../hooks/use_analytics_preferences');
 jest.mock('../../hooks/use_sample_data');
@@ -312,9 +317,7 @@ describe('UnifiedHomePage', () => {
       setup();
 
       const gate = screen.getByTestId('analyticsHomeNoData');
-      expect(within(gate).getByRole('heading', { level: 1 })).toHaveTextContent(
-        'Add your data to get started'
-      );
+      expect(within(gate).getByRole('heading', { level: 1 })).toHaveTextContent('Add your data');
       expect(gate).not.toHaveTextContent(/analytics|dashboard/i);
     });
 
@@ -561,6 +564,43 @@ describe('UnifiedHomePage', () => {
       expect(screen.queryByTestId('analyticsHomeSourcesFlyout')).not.toBeInTheDocument();
     });
 
+    describe('file upload tile', () => {
+      const getTile = (): HTMLElement =>
+        screen.getByTestId('analyticsHomeFeaturedSource-fileUpload');
+
+      it('announces a dialog where the upload opens on the page', () => {
+        setup({ links: createLinksMock({ sourceOpensDialog: jest.fn(() => true) }) });
+
+        expect(getTile()).toHaveAttribute('aria-haspopup', 'dialog');
+
+        fireEvent.click(screen.getByTestId('analyticsHomeMoreSources'));
+        expect(screen.getByTestId('analyticsHomeFlyoutSource-fileUpload')).toHaveAttribute(
+          'aria-haspopup',
+          'dialog'
+        );
+      });
+
+      it('announces nothing where the upload leaves the page', () => {
+        setup();
+
+        expect(getTile()).not.toHaveAttribute('aria-haspopup');
+      });
+
+      it('opens from "More sources" too, handing over the button that listed the sources', () => {
+        const { links } = setup();
+        const moreSources = screen.getByTestId('analyticsHomeMoreSources');
+
+        fireEvent.click(moreSources);
+        fireEvent.click(screen.getByTestId('analyticsHomeFlyoutSource-fileUpload'));
+
+        expect(screen.queryByTestId('analyticsHomeSourcesFlyout')).not.toBeInTheDocument();
+        expect(links.openSource).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'fileUpload', target: { type: 'fileUpload' } }),
+          moreSources
+        );
+      });
+    });
+
     describe('website crawl tile', () => {
       const getTile = (): HTMLElement => screen.getByTestId('analyticsHomeFeaturedSource-webCrawl');
       const withoutWebCrawl = (): AnalyticsLinks =>
@@ -640,6 +680,18 @@ describe('UnifiedHomePage', () => {
       expectOnlyView('analyticsHomeNoData');
     });
 
+    it('shows the connection details and hides the Kibana chrome until data arrives', () => {
+      const { showResult } = setup();
+
+      expect(screen.getByTestId('connectionDetailsStub')).toBeInTheDocument();
+      expect(jest.mocked(useChromeHidden)).toHaveBeenLastCalledWith(true);
+
+      showResult(createClusterStateResult(HAS_DATA_STATE));
+
+      expect(screen.queryByTestId('connectionDetailsStub')).not.toBeInTheDocument();
+      expect(jest.mocked(useChromeHidden)).toHaveBeenLastCalledWith(false);
+    });
+
     it('switches to the explore view when events arrive', () => {
       const { showResult } = setup();
       expectOnlyView('analyticsHomeNoData');
@@ -698,9 +750,7 @@ describe('UnifiedHomePage', () => {
       expect(screen.getByTestId('analyticsHomeExploreTitle')).toHaveTextContent(
         `Explore ${OWN_SMALL_SOURCE.name}`
       );
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-        'Your events are ready to explore'
-      );
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Explore your events');
     });
 
     it('says the events are samples when every source is, and starts on the clickstream sample', () => {
@@ -713,7 +763,7 @@ describe('UnifiedHomePage', () => {
       });
 
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-        'Your sample events are ready to explore'
+        'Explore your sample events'
       );
       expect(screen.getByTestId('analyticsHomeExploreTitle')).toHaveTextContent(
         `Explore ${CLICKSTREAM_SAMPLE_SOURCE.name}`
@@ -725,11 +775,11 @@ describe('UnifiedHomePage', () => {
       });
     });
 
-    it('promises a refreshing dashboard rather than a live one', () => {
+    it('says what the dashboard opens with', () => {
       setup({ result: createClusterStateResult(HAS_DATA_STATE) });
 
       expect(screen.getByTestId('analyticsHomeNext')).toHaveTextContent(
-        'It refreshes every 30 seconds.'
+        'The dashboard opens with starter panels that you can edit before saving.'
       );
     });
 
@@ -1023,7 +1073,7 @@ describe('UnifiedHomePage', () => {
 
       expectOnlyView('analyticsHomeError');
       expect(screen.getByTestId('analyticsHomeErrorCallout')).toHaveTextContent(
-        'We could not inspect this deployment'
+        'Unable to check this deployment for data'
       );
       expect(screen.queryByTestId('analyticsHomeConnectPanel')).not.toBeInTheDocument();
 

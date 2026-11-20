@@ -20,6 +20,11 @@ jest.mock('./analytics/components/onboarding/guided_setup', () => ({
   GuidedSetupPage: () => <div data-test-subj="guidedSetupPage" />,
 }));
 
+const mockSetChromeHidden = jest.fn();
+jest.mock('./hooks/use_kibana', () => ({
+  useKibana: () => ({ services: { setChromeHidden: mockSetChromeHidden } }),
+}));
+
 jest.mock('./components/web_crawls/web_crawls', () => ({
   SearchWebCrawlsPage: () => <div data-test-subj="searchWebCrawlsPage" />,
 }));
@@ -70,6 +75,7 @@ describe('HomepageRouter', () => {
 
     expect(await screen.findByTestId('searchWebCrawlsPage')).toBeInTheDocument();
     expect(history.location.pathname).toBe('/web_crawls');
+    expect(mockSetChromeHidden).toHaveBeenLastCalledWith(false);
     expect(screen.queryByTestId('unifiedHomePage')).not.toBeInTheDocument();
   });
 

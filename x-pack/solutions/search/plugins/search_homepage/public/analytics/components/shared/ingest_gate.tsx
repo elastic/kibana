@@ -17,7 +17,11 @@ interface IngestGateProps {
   title?: string;
   links: Pick<
     AnalyticsLinks,
-    'canUseIntegrations' | 'isSourceAvailable' | 'openSource' | 'browseIntegrations'
+    | 'canUseIntegrations'
+    | 'isSourceAvailable'
+    | 'sourceOpensDialog'
+    | 'openSource'
+    | 'browseIntegrations'
   >;
   sampleData: AnalyticsSampleData;
   /** Called once the sample events are in the cluster. */

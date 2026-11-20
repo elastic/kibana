@@ -118,8 +118,7 @@ const BuildStep = ({ source, links }: Omit<SearchSetupStepProps, 'stepId'>): Rea
       <EuiText size="s" color="subdued" data-test-subj="analyticsOnboardingBuildUnavailable">
         <p>
           {i18n.translate('xpack.searchHomepage.analytics.onboarding.build.unavailable', {
-            defaultMessage:
-              'The AI agent and Index Management are not available to you. Your home page lists what you can do next.',
+            defaultMessage: 'The AI agent and Index Management are not available to you.',
           })}
         </p>
       </EuiText>

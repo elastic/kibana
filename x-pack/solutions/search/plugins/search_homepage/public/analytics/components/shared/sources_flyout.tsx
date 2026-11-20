@@ -35,7 +35,11 @@ interface SourcesFlyoutProps {
   audience: AnalyticsSourceAudience;
   links: Pick<
     AnalyticsLinks,
-    'canUseIntegrations' | 'isSourceAvailable' | 'openSource' | 'browseIntegrations'
+    | 'canUseIntegrations'
+    | 'isSourceAvailable'
+    | 'sourceOpensDialog'
+    | 'openSource'
+    | 'browseIntegrations'
   >;
   /** The control that opened the flyout, which a source that opens a dialog returns the focus to. */
   getOpener?: () => HTMLElement | null;
@@ -149,6 +153,7 @@ export const SourcesFlyout = ({
                       placement="Flyout"
                       source={source}
                       canUseIntegrations={links.canUseIntegrations}
+                      opensDialog={links.sourceOpensDialog(source)}
                       onSelect={(selectedSource) => {
                         const opener = getOpener?.();
                         // The embedded Console opens underneath the flyout's mask.

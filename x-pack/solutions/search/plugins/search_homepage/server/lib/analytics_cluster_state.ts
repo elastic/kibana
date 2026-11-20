@@ -29,8 +29,16 @@ import { ANALYTICS_ROLE_FIELD_TYPES, detectSourceFields } from './analytics_sour
 
 const MAX_RECENT_DASHBOARDS = 3;
 
-/** The same definition of user data as the Elasticsearch home deployment stats. */
-const USER_INDICES_PATTERN = ['*', '-.*', '-traces-agent_builder.otel-*'];
+/**
+ * The Elasticsearch home's definition of user data, less the logs Agent Builder writes about its
+ * own runs next to its traces.
+ */
+const USER_INDICES_PATTERN = [
+  '*',
+  '-.*',
+  '-traces-agent_builder.otel-*',
+  '-logs-agent_builder.otel-*',
+];
 const NON_USER_INDEX_PREFIX = '.';
 const NON_USER_INDEX_ATTRIBUTES: readonly string[] = ['hidden', 'system'];
 // Covers the Kibana sample data sets and what the Console tutorials create, such as
@@ -77,6 +85,8 @@ interface ResolvedSource {
   indexNames: readonly string[];
   /** The field a data stream orders its events by; indices declare none. */
   timestampField?: string;
+  /** The index mode; a data stream's backing indices can differ, so it has none. */
+  mode?: string;
 }
 
 interface CountedSource extends ResolvedSource {
@@ -109,6 +119,7 @@ const resolveSources = async (client: IScopedClusterClient): Promise<ResolvedSou
         'indices.name',
         'indices.attributes',
         'indices.data_stream',
+        'indices.mode',
         'data_streams.name',
         'data_streams.backing_indices',
         'data_streams.timestamp_field',
@@ -131,7 +142,12 @@ const resolveSources = async (client: IScopedClusterClient): Promise<ResolvedSou
           dataStream === undefined &&
           !attributes.some((attribute) => NON_USER_INDEX_ATTRIBUTES.includes(attribute))
       )
-      .map(({ name }) => ({ name, kind: 'index' as const, indexNames: [name] })),
+      .map(({ name, mode }) => ({
+        name,
+        kind: 'index' as const,
+        indexNames: [name],
+        ...(mode !== undefined && { mode }),
+      })),
   ];
 };
 
@@ -352,11 +368,18 @@ export const fetchAnalyticsClusterState = async ({
 
   const sources = await Promise.all(
     rankedSources.slice(0, MAX_ANALYTICS_EVENT_SOURCES).map(
-      async ({ name, kind, documentsCount, timestampField }): Promise<AnalyticsEventSource> => ({
+      async ({
+        name,
+        kind,
+        documentsCount,
+        timestampField,
+        mode,
+      }): Promise<AnalyticsEventSource> => ({
         name,
         kind,
         documentsCount,
         isSampleData: isSampleSourceName(name),
+        ...(mode !== undefined && { mode }),
         ...(await describeSourceFields(client, { name, kind, timestampField })),
       })
     )

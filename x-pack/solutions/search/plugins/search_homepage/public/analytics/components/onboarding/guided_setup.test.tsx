@@ -42,6 +42,10 @@ jest.mock('../lazy_views', () => ({
   LazySearchSetupStep: jest.requireActual('./search_setup_step').SearchSetupStep,
 }));
 jest.mock('../../hooks/use_analytics_cluster_state');
+jest.mock('../../hooks/use_chrome_hidden');
+jest.mock('../shared/connection_details', () => ({
+  ConnectionDetails: () => <div data-test-subj="connectionDetailsStub" />,
+}));
 jest.mock('../../hooks/use_analytics_links');
 jest.mock('../../hooks/use_analytics_preferences');
 jest.mock('../../hooks/use_sample_data');
@@ -314,7 +318,7 @@ describe('GuidedSetupPage', () => {
         `Data detected in ${SEARCH_SOURCE.name}`
       );
       expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
-        'Your data is ready to search'
+        'This deployment has data'
       );
 
       fireEvent.click(screen.getByTestId('analyticsOnboardingExploreDetected'));
@@ -482,6 +486,15 @@ describe('GuidedSetupPage', () => {
       );
     });
 
+    it('announces a dialog on the file upload tile where the upload opens on the page', () => {
+      setup({ links: createLinksMock({ sourceOpensDialog: jest.fn(() => true) }) });
+
+      expect(screen.getByTestId('analyticsOnboardingFeaturedSource-fileUpload')).toHaveAttribute(
+        'aria-haspopup',
+        'dialog'
+      );
+    });
+
     it('leaves the website crawl out where it is unavailable', () => {
       setup({
         links: createLinksMock({
@@ -515,7 +528,7 @@ describe('GuidedSetupPage', () => {
       );
       expect(screen.queryByTestId('analyticsOnboardingConnectPanel')).not.toBeInTheDocument();
       expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
-        'Your events are ready to explore'
+        'This deployment has events'
       );
 
       fireEvent.click(screen.getByTestId('analyticsOnboardingAddSource'));
@@ -543,7 +556,7 @@ describe('GuidedSetupPage', () => {
 
       expectOnlyStep('connect', 1);
       expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
-        'Your sample events are ready to explore'
+        'This deployment has sample events'
       );
     });
 

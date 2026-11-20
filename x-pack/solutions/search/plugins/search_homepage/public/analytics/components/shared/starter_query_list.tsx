@@ -133,8 +133,7 @@ export const StarterQueryList = ({
                         : i18n.translate(
                             'xpack.searchHomepage.analytics.starterQueries.missingDiscoverPrivilege',
                             {
-                              defaultMessage:
-                                'You need access to Discover to run this query. You can still copy it.',
+                              defaultMessage: 'You need access to Discover to run this query.',
                             }
                           )
                     }

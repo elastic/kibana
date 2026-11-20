@@ -40,6 +40,10 @@ jest.mock('../../../components/search_homepage/search_homepage', () => ({
   SearchHomepagePage: () => <div data-test-subj="elasticsearchHomePage" />,
 }));
 jest.mock('../../hooks/use_analytics_cluster_state');
+jest.mock('../../hooks/use_chrome_hidden');
+jest.mock('./connection_details', () => ({
+  ConnectionDetails: () => <div data-test-subj="connectionDetailsStub" />,
+}));
 jest.mock('../../hooks/use_analytics_links');
 jest.mock('../../hooks/use_analytics_preferences');
 jest.mock('../../hooks/use_sample_data');
@@ -161,7 +165,7 @@ describe('WebCrawlFlyoutProvider', () => {
       onManageWebCrawls: expect.any(Function),
     });
     expect(dialog).toHaveTextContent('can take several minutes');
-    expect(dialog).toHaveTextContent('When the first page is indexed, this page changes');
+    expect(dialog).toHaveTextContent('Track the crawl here or under Add data on the home page.');
   });
 
   it('states the page limit a crawl starts with, from the number it hands the form', () => {
@@ -306,7 +310,7 @@ describe('crawling a website from the ingest gate', () => {
 
     fireEvent.click(screen.getByTestId('analyticsHomeFeaturedSource-webCrawl'));
     expect(screen.getByTestId('analyticsWebCrawlFlyoutNextStep')).toHaveTextContent(
-      'When the first page is indexed, this page changes'
+      'Track the crawl here or under Add data on the home page.'
     );
     const panel = screen.getByTestId('webCrawlPanelStub');
     const url = screen.getByTestId('webCrawlUrlStub');
@@ -321,7 +325,7 @@ describe('crawling a website from the ingest gate', () => {
     expect(screen.getByTestId('webCrawlPanelStub')).toBe(panel);
     expect(url).toHaveFocus();
     expect(screen.getByTestId('analyticsWebCrawlFlyoutNextStep')).toHaveTextContent(
-      /^The progress of the crawl stays here and under Add data on the home page\.$/
+      'Track the crawl here or under Add data on the home page.'
     );
 
     fireEvent.click(screen.getByTestId('analyticsWebCrawlFlyoutClose'));

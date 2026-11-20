@@ -23,7 +23,9 @@ import type {
   DiscoverESQLLocatorParams,
 } from '@kbn/discover-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
+import { useEventsIndexFlyout } from '../components/shared/events_index_flyout_context';
 import { useWebCrawlFlyout } from '../components/shared/web_crawl_flyout_context';
+import { useFileUploadFlyout } from './use_file_upload_flyout';
 import {
   ANALYTICS_AGENT_SESSION_TAG,
   ANALYTICS_TELEMETRY_PREFIX,
@@ -31,7 +33,6 @@ import {
   HOME_PATH,
 } from '../constants';
 import { buildSearchRequestExample } from '../search_request_example';
-import { buildBulkApiExample } from '../bulk_api_example';
 import { withAutoRefresh } from '../dashboard_refresh';
 import { buildGeneratedDashboardParams, buildSourceDashboardParams } from '../starter_dashboard';
 import type { AnalyticsLinks, AnalyticsSource, AnalyticsSourceTarget } from '../types';
@@ -41,6 +42,7 @@ const INTEGRATIONS_BROWSE_PATH = '/browse';
 const DATA_FEDERATION_NAV_LINK_ID = 'management:data_federation';
 const INDEX_MANAGEMENT_LOCATOR_ID = 'SEARCH_INDEX_MANAGEMENT_LOCATOR_ID';
 const HOME_APP_ID = 'home';
+const GETTING_STARTED_APP_ID = 'searchGettingStarted';
 const FILE_UPLOAD_PATH = '#/tutorial_directory/fileDataViz';
 const SAMPLE_DATA_PATH = '#/tutorial_directory/sampleData';
 const STARTER_QUERY_TIME_RANGE = { from: 'now-7d', to: 'now' };
@@ -77,6 +79,8 @@ export const useAnalyticsLinks = (): AnalyticsLinks => {
   } = useKibana().services;
   const { capabilities } = application;
   const webCrawlFlyout = useWebCrawlFlyout();
+  const eventsIndexFlyout = useEventsIndexFlyout();
+  const fileUploadFlyout = useFileUploadFlyout();
 
   const canUseIntegrations = capabilities.fleet?.read === true;
   const canUseDiscover = capabilities.discover_v2?.show === true;
@@ -148,9 +152,35 @@ export const useAnalyticsLinks = (): AnalyticsLinks => {
           return isEmbeddedConsoleAvailable();
         case 'webCrawl':
           return webCrawlFlyout.isAvailable;
+        case 'eventsIndex':
+          return eventsIndexFlyout.isAvailable;
         default:
           return true;
       }
+    };
+
+    const sourceOpensDialog: AnalyticsLinks['sourceOpensDialog'] = ({ target: { type } }) => {
+      switch (type) {
+        case 'webCrawl':
+        case 'eventsIndex':
+          return true;
+        case 'fileUpload':
+          return fileUploadFlyout.isAvailable;
+        default:
+          return false;
+      }
+    };
+
+    const openFileUploadPage = (): void => {
+      application.navigateToApp(HOME_APP_ID, { path: FILE_UPLOAD_PATH }).catch(showNavigationError);
+    };
+
+    const openFileUpload = (opener?: HTMLElement | null): void => {
+      if (!fileUploadFlyout.isAvailable) {
+        openFileUploadPage();
+        return;
+      }
+      fileUploadFlyout.open(opener).catch(openFileUploadPage);
     };
 
     const openDataFederation = (): void => {
@@ -166,17 +196,15 @@ export const useAnalyticsLinks = (): AnalyticsLinks => {
       reportClick(`open_source_${id}`);
       switch (target.type) {
         case 'fileUpload':
-          application
-            .navigateToApp(HOME_APP_ID, { path: FILE_UPLOAD_PATH })
-            .catch(showNavigationError);
+          openFileUpload(opener);
           return;
         case 'sampleDataDirectory':
           application
             .navigateToApp(HOME_APP_ID, { path: SAMPLE_DATA_PATH })
             .catch(showNavigationError);
           return;
-        case 'console':
-          openConsole(buildBulkApiExample(Date.now()));
+        case 'gettingStarted':
+          application.navigateToApp(GETTING_STARTED_APP_ID).catch(showNavigationError);
           return;
         case 'apiTutorial':
           openApiTutorial();
@@ -192,6 +220,9 @@ export const useAnalyticsLinks = (): AnalyticsLinks => {
           return;
         case 'webCrawl':
           webCrawlFlyout.open(opener);
+          return;
+        case 'eventsIndex':
+          eventsIndexFlyout.open(opener);
           return;
         default:
           navigateToIntegrations(getIntegrationsPath(target));
@@ -306,6 +337,7 @@ export const useAnalyticsLinks = (): AnalyticsLinks => {
       canOpenAgentChat,
       canOpenIndices: indexManagementLocator !== undefined,
       isSourceAvailable,
+      sourceOpensDialog,
       openSource,
       browseIntegrations,
       openDiscover,
@@ -336,6 +368,8 @@ export const useAnalyticsLinks = (): AnalyticsLinks => {
     canUseIntegrations,
     chrome,
     consolePlugin,
+    eventsIndexFlyout,
+    fileUploadFlyout,
     history,
     notifications,
     share,

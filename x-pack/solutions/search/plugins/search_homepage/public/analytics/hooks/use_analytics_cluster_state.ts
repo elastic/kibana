@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
+import { useCallback } from 'react';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { ANALYTICS_CLUSTER_STATE_PATH } from '../../../common/analytics';
 import { useKibana } from '../../hooks/use_kibana';
 import type { AnalyticsClusterState, AnalyticsClusterStateResult } from '../types';
@@ -13,6 +14,15 @@ import type { AnalyticsClusterState, AnalyticsClusterStateResult } from '../type
 const ANALYTICS_CLUSTER_STATE_QUERY_KEY = ['searchHomepageAnalyticsClusterState'];
 export const NO_DATA_POLL_INTERVAL_MS = 10_000;
 export const REFRESH_INTERVAL_MS = 60_000;
+
+/** Asks the cluster again now, for a page that knows its data has just changed. */
+export const useRefetchAnalyticsClusterState = (): (() => void) => {
+  const queryClient = useQueryClient();
+
+  return useCallback((): void => {
+    queryClient.invalidateQueries({ queryKey: ANALYTICS_CLUSTER_STATE_QUERY_KEY });
+  }, [queryClient]);
+};
 
 /**
  * What the cluster holds for the analytics pages. With `poll`, keeps asking while the tab is

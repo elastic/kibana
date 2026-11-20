@@ -198,10 +198,23 @@ export const getAnalyticsSources = (): readonly AnalyticsSource[] => [
       defaultMessage: 'Send data with the API',
     }),
     description: i18n.translate('xpack.searchHomepage.analytics.sources.api.description', {
-      defaultMessage: 'Index documents or events from your own code with the bulk API.',
+      defaultMessage:
+        'Connect your application with a client library, an API key and code examples.',
     }),
     iconType: 'commandLine',
-    target: { type: 'console' },
+    target: { type: 'gettingStarted' },
+  },
+  {
+    id: 'eventsIndex',
+    group: 'sendEvents',
+    title: i18n.translate('xpack.searchHomepage.analytics.sources.eventsIndex.title', {
+      defaultMessage: 'Create an events index',
+    }),
+    description: i18n.translate('xpack.searchHomepage.analytics.sources.eventsIndex.description', {
+      defaultMessage: 'An empty index in columnar mode for events you send with the API.',
+    }),
+    iconType: 'tablePlus',
+    target: { type: 'eventsIndex' },
   },
   {
     id: 'fileUpload',
@@ -334,7 +347,7 @@ export const getAnalyticsSources = (): readonly AnalyticsSource[] => [
     }),
     description: i18n.translate(
       'xpack.searchHomepage.analytics.sources.dataFederation.description',
-      { defaultMessage: 'Run ES|QL over files in object storage without ingesting them.' }
+      { defaultMessage: 'Query object storage directly.' }
     ),
     iconType: 'storage',
     target: { type: 'dataFederation' },

@@ -14,7 +14,6 @@ import { useSourceGeneration } from '../../hooks/use_source_generation';
 import type { AnalyticsClusterState, AnalyticsLinks } from '../../types';
 import { AddSourceButton } from '../shared/add_source_button';
 import { BuildDashboardButton } from '../shared/build_dashboard_button';
-import { GENERATED_DASHBOARD_REFRESH_INTERVAL_SECONDS } from '../../dashboard_refresh';
 import {
   getClusterSummary,
   getDefaultEventSource,
@@ -53,10 +52,10 @@ export const HasDataView = ({
         title={
           hasOnlySampleSources(state)
             ? i18n.translate('xpack.searchHomepage.analytics.home.hasData.sampleTitle', {
-                defaultMessage: 'Your sample events are ready to explore',
+                defaultMessage: 'Explore your sample events',
               })
             : i18n.translate('xpack.searchHomepage.analytics.home.hasData.title', {
-                defaultMessage: 'Your events are ready to explore',
+                defaultMessage: 'Explore your events',
               })
         }
         summary={getClusterSummary(state, { includeDashboards: false })}
@@ -114,8 +113,7 @@ export const HasDataView = ({
               <p>
                 {i18n.translate('xpack.searchHomepage.analytics.home.hasData.nextText', {
                   defaultMessage:
-                    'Next: turn these events into a dashboard with starter panels you can edit. It refreshes every {seconds, plural, one {second} other {# seconds}}.',
-                  values: { seconds: GENERATED_DASHBOARD_REFRESH_INTERVAL_SECONDS },
+                    'The dashboard opens with starter panels that you can edit before saving.',
                 })}
               </p>
             </EuiText>

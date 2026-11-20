@@ -260,25 +260,25 @@ export const getActorNoun = (kind: AnalyticsActorKind): ActorNoun => {
 export const getInferredUseCaseNote = (useCaseId: AnalyticsUseCaseId): string => {
   const notes: Record<AnalyticsUseCaseId, string> = {
     clickstream: i18n.translate('xpack.searchHomepage.analytics.sourceRoles.looksLikeClickstream', {
-      defaultMessage: 'These look like clickstream events, so the questions start there.',
+      defaultMessage: 'These look like clickstream events.',
     }),
     gaming: i18n.translate('xpack.searchHomepage.analytics.sourceRoles.looksLikeGaming', {
-      defaultMessage: 'These look like game events, so the questions start with players.',
+      defaultMessage: 'These look like game events.',
     }),
     transactions: i18n.translate(
       'xpack.searchHomepage.analytics.sourceRoles.looksLikeTransactions',
-      { defaultMessage: 'These look like payment events, so the questions start with amounts.' }
+      { defaultMessage: 'These look like payment events.' }
     ),
     adtech: i18n.translate('xpack.searchHomepage.analytics.sourceRoles.looksLikeAdtech', {
-      defaultMessage: 'These look like ad events, so the questions start with campaigns.',
+      defaultMessage: 'These look like ad events.',
     }),
     iot: i18n.translate('xpack.searchHomepage.analytics.sourceRoles.looksLikeIot', {
-      defaultMessage: 'These look like device readings, so the questions start with measurements.',
+      defaultMessage: 'These look like device readings.',
     }),
     customerFacing: i18n.translate(
       'xpack.searchHomepage.analytics.sourceRoles.looksLikeCustomerFacing',
       {
-        defaultMessage: 'These look like multi-tenant events, so the questions start with tenants.',
+        defaultMessage: 'These look like multi-tenant events.',
       }
     ),
   };

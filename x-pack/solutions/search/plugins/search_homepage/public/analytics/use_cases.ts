@@ -22,8 +22,7 @@ export const getAnalyticsUseCases = (): readonly AnalyticsUseCase[] => [
       defaultMessage: 'Clickstream and product analytics',
     }),
     description: i18n.translate('xpack.searchHomepage.analytics.useCases.clickstream.description', {
-      defaultMessage:
-        'Follow users through sessions, funnels and purchases to see how people use your product.',
+      defaultMessage: 'Follow users through sessions, funnels and purchases.',
     }),
     iconType: 'globe',
     sampleDataset: 'clickstream',
@@ -71,8 +70,7 @@ export const getAnalyticsUseCases = (): readonly AnalyticsUseCase[] => [
       defaultMessage: 'Gaming telemetry',
     }),
     description: i18n.translate('xpack.searchHomepage.analytics.useCases.gaming.description', {
-      defaultMessage:
-        'Track players, matches and in-game purchases as they happen, across every title.',
+      defaultMessage: 'Track players, matches and in-game purchases.',
     }),
     iconType: 'bolt',
     indexPattern: GAMING_INDEX,
@@ -119,8 +117,7 @@ export const getAnalyticsUseCases = (): readonly AnalyticsUseCase[] => [
     description: i18n.translate(
       'xpack.searchHomepage.analytics.useCases.transactions.description',
       {
-        defaultMessage:
-          'Watch payments, orders and transfers as they arrive and spot the ones that look wrong.',
+        defaultMessage: 'Watch payments, orders and transfers, and spot outliers.',
       }
     ),
     iconType: 'money',
@@ -168,8 +165,7 @@ export const getAnalyticsUseCases = (): readonly AnalyticsUseCase[] => [
       defaultMessage: 'Adtech',
     }),
     description: i18n.translate('xpack.searchHomepage.analytics.useCases.adtech.description', {
-      defaultMessage:
-        'Measure impressions, clicks and conversions per campaign while the budget is still being spent.',
+      defaultMessage: 'Measure impressions, clicks and conversions per campaign.',
     }),
     iconType: 'bullseye',
     indexPattern: ADTECH_INDEX,
@@ -217,8 +213,7 @@ export const getAnalyticsUseCases = (): readonly AnalyticsUseCase[] => [
       defaultMessage: 'IoT and devices',
     }),
     description: i18n.translate('xpack.searchHomepage.analytics.useCases.iot.description', {
-      defaultMessage:
-        'Collect readings and state changes from fleets of devices and catch the ones drifting out of range.',
+      defaultMessage: 'Collect readings and state changes from fleets of devices.',
     }),
     iconType: 'thermometer',
     indexPattern: IOT_INDEX,
@@ -265,8 +260,7 @@ export const getAnalyticsUseCases = (): readonly AnalyticsUseCase[] => [
     description: i18n.translate(
       'xpack.searchHomepage.analytics.useCases.customerFacing.description',
       {
-        defaultMessage:
-          'Serve usage and performance analytics to your own customers, with fast queries per tenant.',
+        defaultMessage: 'Serve usage and performance analytics to your own customers.',
       }
     ),
     iconType: 'users',

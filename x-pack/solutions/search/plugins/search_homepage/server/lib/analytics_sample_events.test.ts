@@ -18,6 +18,8 @@ const INDEX = 'kibana_sample_data_clickstream';
 const NOW = Date.parse('2026-11-19T10:00:00.000Z');
 const EVENTS = generateSampleEvents({ now: NOW });
 
+const COLUMNAR_SETTINGS = { mode: 'columnar', sort: { field: ['@timestamp'], order: ['desc'] } };
+
 const esError = (statusCode: number, type = 'exception'): Error =>
   Object.assign(new Error(type), { statusCode, body: { error: { type } } });
 
@@ -34,13 +36,19 @@ describe('sample events', () => {
       aggregations: { latest: { value: latestEventTime } },
     });
   };
+  const mockIndexMode = (mode?: string): void => {
+    client.asCurrentUser.indices.getSettings.mockResponse({
+      [INDEX]: { settings: mode === undefined ? {} : { index: { mode } } },
+    });
+  };
   const mockNotInstalled = (): void => {
     client.asCurrentUser.search.mockRejectedValue(esError(404, 'index_not_found_exception'));
   };
   const mockBulkAccepted = (): void => {
     client.asCurrentUser.bulk.mockResponse({ took: 1, errors: false, items: [] });
   };
-  const install = () => installSampleEvents({ client, logger, now: NOW });
+  const install = (isServerless = false) =>
+    installSampleEvents({ client, logger, isServerless, now: NOW });
 
   beforeEach(() => {
     client = elasticsearchServiceMock.createScopedClusterClient();
@@ -62,6 +70,9 @@ describe('sample events', () => {
       expect(client.asCurrentUser.indices.create).toHaveBeenCalledWith(
         expect.objectContaining({ index: INDEX, mappings: SAMPLE_EVENTS_MAPPINGS })
       );
+      expect(client.asCurrentUser.indices.create.mock.calls[0][0]).toHaveProperty('settings', {
+        index: { ...COLUMNAR_SETTINGS, number_of_shards: 1, auto_expand_replicas: '0-1' },
+      });
 
       const bulkCalls = client.asCurrentUser.bulk.mock.calls.map(([request]) => request);
       const operations = bulkCalls.flatMap(({ operations: chunk = [] }) => chunk);
@@ -75,8 +86,22 @@ describe('sample events', () => {
       expect(client.asInternalUser.indices.create).not.toHaveBeenCalled();
     });
 
-    it('leaves complete, recent events untouched', async () => {
+    it('sends no shard or replica settings to serverless Elasticsearch, which rejects them', async () => {
+      mockNotInstalled();
+      mockBulkAccepted();
+
+      await expect(install(true)).resolves.toMatchObject({ status: 'installed' });
+
+      expect(client.asCurrentUser.indices.create).toHaveBeenCalledWith({
+        index: INDEX,
+        settings: { index: COLUMNAR_SETTINGS },
+        mappings: SAMPLE_EVENTS_MAPPINGS,
+      });
+    });
+
+    it('leaves complete, recent events in a columnar index untouched', async () => {
       mockInstalled(EVENTS.length, NOW - SAMPLE_EVENTS_MAX_AGE_MS);
+      mockIndexMode('columnar');
 
       await expect(install()).resolves.toEqual({
         index: INDEX,
@@ -107,6 +132,47 @@ describe('sample events', () => {
       expect(client.asCurrentUser.indices.delete.mock.invocationCallOrder[0]).toBeLessThan(
         client.asCurrentUser.indices.create.mock.invocationCallOrder[0]
       );
+    });
+
+    it.each([
+      ['no index mode of its own', undefined],
+      ['another index mode', 'logsdb'],
+    ])('replaces complete, recent events in an index with %s', async (_, mode) => {
+      mockInstalled(EVENTS.length, NOW);
+      mockIndexMode(mode);
+      mockBulkAccepted();
+
+      await expect(install()).resolves.toMatchObject({ status: 'replaced' });
+
+      expect(client.asCurrentUser.indices.getSettings).toHaveBeenCalledWith({
+        index: INDEX,
+        name: 'index.mode',
+      });
+      expect(client.asCurrentUser.indices.delete).toHaveBeenCalledWith({ index: INDEX });
+      expect(client.asCurrentUser.indices.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          settings: expect.objectContaining({ index: expect.objectContaining(COLUMNAR_SETTINGS) }),
+        })
+      );
+    });
+
+    it('does not read the index mode of events it replaces anyway', async () => {
+      mockInstalled(0, null);
+      mockBulkAccepted();
+
+      await install();
+
+      expect(client.asCurrentUser.indices.getSettings).not.toHaveBeenCalled();
+    });
+
+    it('throws what Elasticsearch answers when the caller may not read the index settings', async () => {
+      mockInstalled(EVENTS.length, NOW);
+      client.asCurrentUser.indices.getSettings.mockRejectedValue(
+        esError(403, 'security_exception')
+      );
+
+      await expect(install()).rejects.toMatchObject({ statusCode: 403 });
+      expect(client.asCurrentUser.indices.delete).not.toHaveBeenCalled();
     });
 
     it('throws what Elasticsearch answers when the caller may not read the index', async () => {

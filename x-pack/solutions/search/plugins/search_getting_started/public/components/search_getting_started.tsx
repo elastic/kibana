@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -16,6 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { hasSeenData } from '@kbn/search-shared-ui';
 
 import { useKibana } from '../hooks/use_kibana';
 import { useGettingStartedLoaded } from '../hooks/use_getting_started_loaded';
@@ -30,11 +31,29 @@ export const SearchGettingStartedPage: React.FC = () => {
     services: { application },
   } = useKibana();
   useGettingStartedLoaded();
+  // Without data the chrome is hidden, so the page offers its own way back to the home.
+  const hasBackLink = useMemo(() => !hasSeenData(), []);
 
   return (
     <SearchGettingStartedPageTemplate>
       <EuiPageTemplate.Section data-test-subj="gettingStartedHeader" paddingSize="xl" grow={false}>
-        <EuiSpacer size="xl" />
+        {hasBackLink ? (
+          <EuiButtonEmpty
+            iconType="chevronSingleLeft"
+            flush="left"
+            size="s"
+            data-test-subj="gettingStartedBackToHome"
+            onClick={() => {
+              application.navigateToApp('searchHomepage');
+            }}
+          >
+            {i18n.translate('xpack.searchGettingStarted.searchGettingStartedPage.backToHome', {
+              defaultMessage: 'Back to add data',
+            })}
+          </EuiButtonEmpty>
+        ) : (
+          <EuiSpacer size="xl" />
+        )}
         <SearchGettingStartedHeader />
         <EuiSpacer size="xl" />
         <EuiPanel color="subdued" paddingSize="none">

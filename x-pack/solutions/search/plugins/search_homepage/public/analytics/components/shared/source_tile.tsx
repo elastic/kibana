@@ -19,6 +19,8 @@ interface SourceTileProps {
   placement: 'Featured' | 'Flyout';
   source: AnalyticsSource;
   canUseIntegrations: boolean;
+  /** Set when the source opens a dialog rather than leaving the page. */
+  opensDialog: boolean;
   /** Receives the tile's button, so that a source that opens a dialog can hand the focus back. */
   onSelect: (source: AnalyticsSource, button: HTMLButtonElement) => void;
 }
@@ -29,6 +31,7 @@ export const SourceTile = ({
   placement,
   source,
   canUseIntegrations,
+  opensDialog,
   onSelect,
 }: SourceTileProps): React.JSX.Element => {
   const isDisabled = !canUseIntegrations && isIntegrationSource(source);
@@ -42,7 +45,7 @@ export const SourceTile = ({
       description={source.description}
       iconType={source.iconType}
       isDisabled={isDisabled}
-      opensDialog={source.target.type === 'webCrawl'}
+      opensDialog={opensDialog}
       onClick={(button) => onSelect(source, button)}
     />
   );
@@ -56,7 +59,7 @@ export const SourceTile = ({
       display="block"
       content={i18n.translate('xpack.searchHomepage.analytics.sourceTile.missingPrivilegeTooltip', {
         defaultMessage:
-          'This source is set up through an integration, which needs the Integrations privilege. Ask your administrator for access.',
+          'This source needs the Integrations privilege. Ask your administrator for access.',
       })}
     >
       {tileButton}

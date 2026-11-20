@@ -46,7 +46,7 @@ describe('registerAnalyticsSampleEventsRoutes', () => {
     jest.clearAllMocks();
     router = httpServiceMock.createRouter();
     logger = loggingSystemMock.createLogger();
-    registerAnalyticsSampleEventsRoutes(router, logger);
+    registerAnalyticsSampleEventsRoutes(router, logger, { isServerless: true });
   });
 
   it.each(['post', 'delete'] as const)(
@@ -69,7 +69,11 @@ describe('registerAnalyticsSampleEventsRoutes', () => {
       const { core, response, result } = callHandler('post');
       await result;
 
-      expect(mockInstall).toHaveBeenCalledWith({ client: core.elasticsearch.client, logger });
+      expect(mockInstall).toHaveBeenCalledWith({
+        client: core.elasticsearch.client,
+        logger,
+        isServerless: true,
+      });
       expect(response.ok).toHaveBeenCalledWith({ body: installed });
     });
 
@@ -81,7 +85,7 @@ describe('registerAnalyticsSampleEventsRoutes', () => {
 
       expect(response.forbidden).toHaveBeenCalledWith({
         body: {
-          message: `Failed to install the sample events: your role needs the read, create_index, index and delete_index index privileges on ${INDEX}`,
+          message: `Failed to install the sample events: your role needs the read, view_index_metadata, create_index, index and delete_index index privileges on ${INDEX}`,
         },
       });
       expect(response.ok).not.toHaveBeenCalled();

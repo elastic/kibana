@@ -7,11 +7,13 @@
 
 import type { AggregationsMaxAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { EVENTS_INDEX_MODE } from '../../common/analytics_events_index';
 import { ANALYTICS_SAMPLE_EVENTS_INDEX } from '../../common/analytics_sample_events';
 import type {
   AnalyticsSampleEventsInstallResult,
   AnalyticsSampleEventsRemoveResult,
 } from '../../common/analytics_sample_events';
+import { getEventsIndexSettings } from './analytics_events_index';
 import { SAMPLE_EVENTS_MAPPINGS, generateSampleEvents } from './analytics_sample_events_generator';
 import type { SampleEvent } from './analytics_sample_events_generator';
 
@@ -67,6 +69,18 @@ const readInstalledEvents = async (
   }
 };
 
+/** Whether the installed index has the index mode a new install creates it in. */
+const hasEventsIndexMode = async (client: IScopedClusterClient): Promise<boolean> => {
+  const { [ANALYTICS_SAMPLE_EVENTS_INDEX]: index } = await client.asCurrentUser.indices.getSettings(
+    {
+      index: ANALYTICS_SAMPLE_EVENTS_INDEX,
+      name: 'index.mode',
+    }
+  );
+
+  return index?.settings?.index?.mode === EVENTS_INDEX_MODE;
+};
+
 /** Resolves whether there was an index to delete. */
 const deleteIndex = async (client: IScopedClusterClient): Promise<boolean> => {
   try {
@@ -80,11 +94,17 @@ const deleteIndex = async (client: IScopedClusterClient): Promise<boolean> => {
   }
 };
 
-const createIndex = async (client: IScopedClusterClient): Promise<void> => {
+const createIndex = async (client: IScopedClusterClient, isServerless: boolean): Promise<void> => {
   try {
     await client.asCurrentUser.indices.create({
       index: ANALYTICS_SAMPLE_EVENTS_INDEX,
-      settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
+      settings: {
+        index: {
+          ...getEventsIndexSettings(),
+          // Serverless Elasticsearch manages shards and replicas itself and rejects these settings.
+          ...(isServerless ? {} : { number_of_shards: 1, auto_expand_replicas: '0-1' }),
+        },
+      },
       mappings: SAMPLE_EVENTS_MAPPINGS,
     });
   } catch (error) {
@@ -133,16 +153,18 @@ const indexEvents = async (
 export interface SampleEventsParams {
   client: IScopedClusterClient;
   logger: Logger;
+  isServerless: boolean;
 }
 
 /**
  * Creates the sample events index as the caller and fills it with a generated week of events that
- * ends at `now`. Complete, recent events are left untouched; incomplete or outdated ones are
- * replaced. A failed install removes what it created, so the index is never left half filled.
+ * ends at `now`. Complete, recent events are left untouched; incomplete or outdated ones, and
+ * ones in an index of another index mode, are replaced. A failed install removes what it created, so the index is never left half filled.
  */
 export const installSampleEvents = async ({
   client,
   logger,
+  isServerless,
   now = Date.now(),
 }: SampleEventsParams & { now?: number }): Promise<AnalyticsSampleEventsInstallResult> => {
   const events = generateSampleEvents({ now });
@@ -152,7 +174,8 @@ export const installSampleEvents = async ({
     installed !== null &&
     installed.count === events.length &&
     installed.latestEventTime !== null &&
-    installed.latestEventTime >= now - SAMPLE_EVENTS_MAX_AGE_MS
+    installed.latestEventTime >= now - SAMPLE_EVENTS_MAX_AGE_MS &&
+    (await hasEventsIndexMode(client))
   ) {
     return {
       index: ANALYTICS_SAMPLE_EVENTS_INDEX,
@@ -162,7 +185,7 @@ export const installSampleEvents = async ({
   }
 
   const isReplacing = installed !== null && (await deleteIndex(client));
-  await createIndex(client);
+  await createIndex(client, isServerless);
 
   try {
     await indexEvents(client, events);

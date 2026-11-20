@@ -93,6 +93,8 @@ export interface AnalyticsEventSource {
   /** Date field to bucket events on; null when none could be detected. */
   timeField: string | null;
   isSampleData: boolean;
+  /** The index mode, such as `standard` or `columnar`; absent for a data stream. */
+  mode?: string;
   /** Absent when no field could be given a part. */
   fields?: AnalyticsSourceFields;
 }

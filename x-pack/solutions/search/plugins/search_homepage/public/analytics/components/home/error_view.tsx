@@ -7,7 +7,7 @@
 
 import type { Ref } from 'react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KbnWarningCallout } from '@kbn/ui-callout';
@@ -40,11 +40,7 @@ export const ErrorView = ({
     <KbnWarningCallout
       announceOnMount
       title={i18n.translate('xpack.searchHomepage.analytics.home.error.calloutTitle', {
-        defaultMessage: 'We could not inspect this deployment',
-      })}
-      text={i18n.translate('xpack.searchHomepage.analytics.home.error.calloutText', {
-        defaultMessage:
-          'The check for existing data failed, so this page cannot tell what to show you next.',
+        defaultMessage: 'Unable to check this deployment for data',
       })}
       actionProps={{
         primary: {
@@ -61,28 +57,15 @@ export const ErrorView = ({
       data-test-subj="analyticsHomeErrorCallout"
     />
     <EuiHorizontalRule margin="l" />
-    <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued">
-          <p>
-            {i18n.translate('xpack.searchHomepage.analytics.home.error.connectPrompt', {
-              defaultMessage: 'You can still add data in the meantime.',
-            })}
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <AddSourceButton
-          page="home"
-          name="AddSource"
-          emphasis="low"
-          audience="all"
-          links={links}
-          label={i18n.translate('xpack.searchHomepage.analytics.home.error.connectButton', {
-            defaultMessage: 'Add data',
-          })}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <AddSourceButton
+      page="home"
+      name="AddSource"
+      emphasis="low"
+      audience="all"
+      links={links}
+      label={i18n.translate('xpack.searchHomepage.analytics.home.error.connectButton', {
+        defaultMessage: 'Add data',
+      })}
+    />
   </KibanaPageTemplate.Section>
 );

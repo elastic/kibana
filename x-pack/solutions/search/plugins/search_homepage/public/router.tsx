@@ -15,7 +15,9 @@ import {
   LEGACY_ANALYTICS_HOME_PATH,
   LEGACY_ANALYTICS_ONBOARDING_PATH,
 } from './analytics/constants';
+import { EventsIndexFlyoutProvider } from './analytics/components/shared/events_index_flyout';
 import { WebCrawlFlyoutProvider } from './analytics/components/shared/web_crawl_flyout';
+import { useKibana } from './hooks/use_kibana';
 import { storePreferredJourney } from './analytics/hooks/use_analytics_preferences';
 import { WEB_CRAWLS_ROUTE } from './home_config';
 
@@ -46,30 +48,42 @@ const LegacyAnalyticsRedirect = ({ to }: { to: string }): React.JSX.Element => {
   return <Redirect to={to} />;
 };
 
+/** A page that is not held behind the ingest gate, so it always has the Kibana chrome. */
+const WithChrome = ({ children }: { children: React.ReactNode }): React.JSX.Element => {
+  const { setChromeHidden } = useKibana().services;
+  useEffect(() => setChromeHidden(false), [setChromeHidden]);
+
+  return <>{children}</>;
+};
+
 /**
  * One home and one guided setup. What they show is decided by the data in the cluster, so there
  * is no route per journey and no first-visit redirect.
  */
 export const HomepageRouter = (): React.JSX.Element => (
   <WebCrawlFlyoutProvider>
-    <Suspense fallback={null}>
-      <Routes>
-        <Route exact path={GUIDED_SETUP_PATH}>
-          <GuidedSetupPage />
-        </Route>
-        <Route exact path={LEGACY_ANALYTICS_ONBOARDING_PATH}>
-          <LegacyAnalyticsRedirect to={GUIDED_SETUP_PATH} />
-        </Route>
-        <Route exact path={LEGACY_ANALYTICS_HOME_PATH}>
-          <LegacyAnalyticsRedirect to={HOME_PATH} />
-        </Route>
-        <Route exact path={WEB_CRAWLS_ROUTE}>
-          <SearchWebCrawlsPage />
-        </Route>
-        <Route>
-          <UnifiedHomePage />
-        </Route>
-      </Routes>
-    </Suspense>
+    <EventsIndexFlyoutProvider>
+      <Suspense fallback={null}>
+        <Routes>
+          <Route exact path={GUIDED_SETUP_PATH}>
+            <GuidedSetupPage />
+          </Route>
+          <Route exact path={LEGACY_ANALYTICS_ONBOARDING_PATH}>
+            <LegacyAnalyticsRedirect to={GUIDED_SETUP_PATH} />
+          </Route>
+          <Route exact path={LEGACY_ANALYTICS_HOME_PATH}>
+            <LegacyAnalyticsRedirect to={HOME_PATH} />
+          </Route>
+          <Route exact path={WEB_CRAWLS_ROUTE}>
+            <WithChrome>
+              <SearchWebCrawlsPage />
+            </WithChrome>
+          </Route>
+          <Route>
+            <UnifiedHomePage />
+          </Route>
+        </Routes>
+      </Suspense>
+    </EventsIndexFlyoutProvider>
   </WebCrawlFlyoutProvider>
 );

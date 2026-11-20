@@ -47,7 +47,13 @@
     "@kbn/utility-types",
     "@kbn/search-code-examples",
     "@kbn/cloud",
+    "@kbn/cloud-plugin",
+    "@kbn/search-api-keys-components",
     "@kbn/web-crawler-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/react-kibana-mount",
+    "@kbn/ui-actions-plugin",
+    "@kbn/file-upload-common",
   ],
   "exclude": [
     "target/**/*"

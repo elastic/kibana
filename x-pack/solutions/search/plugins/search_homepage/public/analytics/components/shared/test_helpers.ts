@@ -22,6 +22,7 @@ export const createLinksMock = (overrides: Partial<AnalyticsLinks> = {}): Analyt
   canOpenAgentChat: true,
   canOpenIndices: true,
   isSourceAvailable: jest.fn(() => true),
+  sourceOpensDialog: jest.fn(({ target }) => target.type === 'webCrawl'),
   openSource: jest.fn(),
   browseIntegrations: jest.fn(),
   openDiscover: jest.fn(),

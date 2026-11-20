@@ -22,7 +22,11 @@ interface AddSourceButtonProps {
   audience: AnalyticsSourceAudience;
   links: Pick<
     AnalyticsLinks,
-    'canUseIntegrations' | 'isSourceAvailable' | 'openSource' | 'browseIntegrations'
+    | 'canUseIntegrations'
+    | 'isSourceAvailable'
+    | 'sourceOpensDialog'
+    | 'openSource'
+    | 'browseIntegrations'
   >;
 }
 

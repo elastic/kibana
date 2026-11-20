@@ -22,6 +22,7 @@ import { DEFAULT_SAMPLE_DATASET } from '../../constants';
 import { getFeaturedAnalyticsEntries } from '../../sources';
 import type { AnalyticsLinks, AnalyticsSampleData, AnalyticsSourceList } from '../../types';
 import { AddSourceButton } from './add_source_button';
+import { ConnectionDetails } from './connection_details';
 import type { AnalyticsPageId } from './page_ids';
 import { getPageTelemetryId, getPageTestSubj } from './page_ids';
 import { SourceTile } from './source_tile';
@@ -34,7 +35,11 @@ interface ConnectPanelProps {
   title?: string;
   links: Pick<
     AnalyticsLinks,
-    'canUseIntegrations' | 'isSourceAvailable' | 'openSource' | 'browseIntegrations'
+    | 'canUseIntegrations'
+    | 'isSourceAvailable'
+    | 'sourceOpensDialog'
+    | 'openSource'
+    | 'browseIntegrations'
   >;
   sampleData: AnalyticsSampleData;
   /** Called once the sample events are in the cluster. */
@@ -100,6 +105,7 @@ export const ConnectPanel = ({
                 placement="Featured"
                 source={entry.source}
                 canUseIntegrations={links.canUseIntegrations}
+                opensDialog={links.sourceOpensDialog(entry.source)}
                 onSelect={links.openSource}
               />
             </EuiFlexItem>
@@ -142,6 +148,8 @@ export const ConnectPanel = ({
           defaultMessage: 'More sources',
         })}
       />
+      <EuiHorizontalRule margin="m" />
+      <ConnectionDetails page={page} />
       <EuiHorizontalRule margin="m" />
       <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
         <EuiFlexItem grow={false}>

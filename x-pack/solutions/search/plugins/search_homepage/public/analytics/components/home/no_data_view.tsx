@@ -31,11 +31,7 @@ export const NoDataView = ({
     <HomeHeader
       headingRef={headingRef}
       title={i18n.translate('xpack.searchHomepage.analytics.home.noData.title', {
-        defaultMessage: 'Add your data to get started',
-      })}
-      description={i18n.translate('xpack.searchHomepage.analytics.home.noData.description', {
-        defaultMessage:
-          'Everything in Elasticsearch starts with your data. Add some, and this page shows you what to do with it next.',
+        defaultMessage: 'Add your data',
       })}
     />
     <IngestGate

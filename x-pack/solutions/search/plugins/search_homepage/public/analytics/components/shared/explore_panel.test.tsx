@@ -77,7 +77,7 @@ describe('ExplorePanel with detected fields', () => {
     ]);
     expect(screen.getByTestId('analyticsHomeQueryCode-source_measure_by_dimension')).toBeVisible();
     expect(screen.getByTestId('analyticsHomeExploreUseCaseNote')).toHaveTextContent(
-      'These look like payment events, so the questions start with amounts.'
+      'These look like payment events.'
     );
   });
 

@@ -18,10 +18,13 @@
     ],
     "optionalPlugins": [
       "agentBuilder",
+      "cloud",
       "console",
       "home",
       "licensing",
       "searchNavigation",
+      "spaces",
+      "uiActions",
       "usageCollection",
       "webCrawler",
     ],

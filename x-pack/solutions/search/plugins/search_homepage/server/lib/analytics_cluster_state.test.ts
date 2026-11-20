@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { IndicesResolveIndexResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -25,6 +26,7 @@ interface ResolvedIndex {
   name: string;
   attributes?: string[];
   data_stream?: string;
+  mode?: string;
 }
 
 interface ResolvedDataStream {
@@ -79,7 +81,8 @@ describe('fetchAnalyticsClusterState', () => {
         ...dataStream,
       })),
       aliases: [],
-    });
+      // The client's types do not know the columnar index modes yet.
+    } as IndicesResolveIndexResponse);
     client.asCurrentUser.search.mockResolvedValue({
       took: 1,
       timed_out: false,
@@ -167,7 +170,7 @@ describe('fetchAnalyticsClusterState', () => {
 
     await fetch();
 
-    const pattern = ['*', '-.*', '-traces-agent_builder.otel-*'];
+    const pattern = ['*', '-.*', '-traces-agent_builder.otel-*', '-logs-agent_builder.otel-*'];
     expect(client.asCurrentUser.indices.resolveIndex).toHaveBeenCalledWith(
       expect.objectContaining({ name: pattern, expand_wildcards: ['open'] })
     );
@@ -210,6 +213,27 @@ describe('fetchAnalyticsClusterState', () => {
       ['clicks', 'dataStream', 10],
       ['orders', 'index', 5],
     ]);
+  });
+
+  it('reports the index mode of an index and none for a data stream', async () => {
+    const { fetch, client } = setup({
+      indices: [{ name: 'events', mode: 'columnar' }, { name: 'orders' }],
+      dataStreams: [{ name: 'clicks', backing_indices: ['.ds-clicks-000001'] }],
+      countsByIndex: { events: 3, orders: 2, '.ds-clicks-000001': 1 },
+    });
+
+    const { sources } = await fetch();
+
+    expect(sources.map(({ name, mode }) => [name, mode])).toEqual([
+      ['events', 'columnar'],
+      ['orders', undefined],
+      ['clicks', undefined],
+    ]);
+    expect(sources[1]).not.toHaveProperty('mode');
+    expect(client.asCurrentUser.indices.resolveIndex).toHaveBeenCalledWith(
+      expect.objectContaining({ filter_path: expect.arrayContaining(['indices.mode']) })
+    );
+    expect(client.asCurrentUser.indices.getSettings).not.toHaveBeenCalled();
   });
 
   it('does not count sources that hold no documents', async () => {

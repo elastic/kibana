@@ -99,6 +99,7 @@ describe('analytics sources', () => {
       'messageQueues',
       'httpEndpoint',
       'api',
+      'eventsIndex',
       'fileUpload',
       'customIntegration',
       'sampleDataDirectory',
@@ -124,7 +125,7 @@ describe('analytics sources', () => {
   it('keeps every way in that the classic home and getting started offered', () => {
     expect(sources.map(({ target }) => target.type)).toEqual(
       expect.arrayContaining([
-        'console',
+        'gettingStarted',
         'fileUpload',
         'externalUrl',
         'sampleDataDirectory',
@@ -145,6 +146,16 @@ describe('analytics sources', () => {
         title: 'Crawl a website',
         description: 'Enter a URL and index its pages for search.',
         target: { type: 'webCrawl' },
+      })
+    );
+  });
+
+  it('offers an empty events index as a form on the page, with the other ways to send data', () => {
+    expect(sources.find(({ id }) => id === 'eventsIndex')).toEqual(
+      expect.objectContaining({
+        group: 'sendEvents',
+        title: 'Create an events index',
+        target: { type: 'eventsIndex' },
       })
     );
   });

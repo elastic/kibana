@@ -11,12 +11,14 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
 import { createMemoryHistory } from 'history';
 import { coreMock } from '@kbn/core/public/mocks';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useKibana } from '../../hooks/use_kibana';
-import { buildBulkApiExample } from '../bulk_api_example';
 import { buildSearchRequestExample } from '../search_request_example';
 import { GENERATED_PANELS } from '../components/shared/test_helpers';
+import type { EventsIndexFlyoutApi } from '../components/shared/events_index_flyout_context';
+import { EventsIndexFlyoutContext } from '../components/shared/events_index_flyout_context';
 import type { WebCrawlFlyoutApi } from '../components/shared/web_crawl_flyout_context';
 import { WebCrawlFlyoutContext } from '../components/shared/web_crawl_flyout_context';
 import { getAnalyticsSources } from '../sources';
@@ -75,7 +77,9 @@ describe('useAnalyticsLinks', () => {
     hasLocators = true,
     isEmbeddedConsoleAvailable = true,
     dataFederationHref,
+    hasFileUploadFlyout = false,
     webCrawlFlyout,
+    eventsIndexFlyout,
   }: {
     capabilities?: Record<string, Record<string, boolean>>;
     chatExperience?: AIChatExperience;
@@ -83,7 +87,9 @@ describe('useAnalyticsLinks', () => {
     hasLocators?: boolean;
     isEmbeddedConsoleAvailable?: boolean;
     dataFederationHref?: string;
+    hasFileUploadFlyout?: boolean;
     webCrawlFlyout?: WebCrawlFlyoutApi;
+    eventsIndexFlyout?: EventsIndexFlyoutApi;
   } = {}) => {
     const core = coreMock.createStart();
     const navigate = jest.fn().mockResolvedValue(undefined);
@@ -91,6 +97,8 @@ describe('useAnalyticsLinks', () => {
     const openChat = jest.fn();
     const openEmbeddedConsole = jest.fn();
     const reportUiCounter = jest.fn();
+    const executeTriggerActions = jest.fn().mockResolvedValue(undefined);
+    const queryClient = new QueryClient();
     const history = createMemoryHistory({ initialEntries: ['/analytics'] });
 
     core.application.navigateToApp.mockResolvedValue(undefined);
@@ -117,24 +125,39 @@ describe('useAnalyticsLinks', () => {
         },
         history,
         share: { url: { locators: { get: getLocator } } },
+        uiActions: { hasAction: () => hasFileUploadFlyout, executeTriggerActions },
         usageCollection: { reportUiCounter },
       },
     });
 
+    const withEventsIndexFlyout = (children: React.ReactNode): React.ReactNode =>
+      eventsIndexFlyout === undefined
+        ? children
+        : React.createElement(
+            EventsIndexFlyoutContext.Provider,
+            { value: eventsIndexFlyout },
+            children
+          );
+
     const { result } = renderHook(() => useAnalyticsLinks(), {
       wrapper: ({ children }: PropsWithChildren) =>
-        webCrawlFlyout === undefined
-          ? React.createElement(React.Fragment, null, children)
-          : React.createElement(
-              WebCrawlFlyoutContext.Provider,
-              { value: webCrawlFlyout },
-              children
-            ),
+        React.createElement(
+          QueryClientProvider,
+          { client: queryClient },
+          webCrawlFlyout === undefined
+            ? withEventsIndexFlyout(children)
+            : React.createElement(
+                WebCrawlFlyoutContext.Provider,
+                { value: webCrawlFlyout },
+                withEventsIndexFlyout(children)
+              )
+        ),
     });
 
     return {
       links: result.current,
       application: core.application,
+      executeTriggerActions,
       getLocator,
       history,
       navigate,
@@ -157,14 +180,16 @@ describe('useAnalyticsLinks', () => {
     const windowOpen = jest.spyOn(window, 'open').mockReturnValue(null);
     const { links, application, navigate, openEmbeddedConsole } = setup();
 
-    // The website crawl opens on the page, and only where its flyout is provided.
-    const sources = getAnalyticsSources().filter(({ target }) => target.type !== 'webCrawl');
+    // The website crawl and the events index open on the page, and only where their flyout is provided.
+    const sources = getAnalyticsSources().filter(
+      ({ target }) => target.type !== 'webCrawl' && target.type !== 'eventsIndex'
+    );
     for (const source of sources) {
       expect(links.isSourceAvailable(source)).toBe(true);
       links.openSource(source);
     }
     // The API tutorial is loaded on demand.
-    await waitFor(() => expect(openEmbeddedConsole).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(openEmbeddedConsole).toHaveBeenCalledTimes(1));
 
     expect(
       application.navigateToApp.mock.calls.length +
@@ -202,6 +227,32 @@ describe('useAnalyticsLinks', () => {
     });
   });
 
+  describe('events index', () => {
+    const eventsIndexSource = sourceWithTarget({ type: 'eventsIndex' });
+
+    it('is unavailable and opens nothing where no flyout is provided', () => {
+      const { links, application } = setup();
+
+      expect(links.isSourceAvailable(eventsIndexSource)).toBe(false);
+      links.openSource(eventsIndexSource);
+
+      expect(application.navigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('opens the flyout and hands it the control that asked', () => {
+      const open = jest.fn();
+      const { links, application } = setup({ eventsIndexFlyout: { isAvailable: true, open } });
+      const opener = document.createElement('button');
+
+      expect(links.isSourceAvailable(eventsIndexSource)).toBe(true);
+      expect(links.sourceOpensDialog(eventsIndexSource)).toBe(true);
+      links.openSource(eventsIndexSource, opener);
+
+      expect(open).toHaveBeenCalledWith(opener);
+      expect(application.navigateToApp).not.toHaveBeenCalled();
+    });
+  });
+
   it('opens the search content sources where they live', async () => {
     const windowOpen = jest.spyOn(window, 'open').mockReturnValue(null);
     const { links, application, navigate, openEmbeddedConsole } = setup();
@@ -233,7 +284,7 @@ describe('useAnalyticsLinks', () => {
     expect(links.isSourceAvailable(sourceWithTarget({ type: 'createIndex' }))).toBe(false);
     expect(links.isSourceAvailable(sourceWithTarget({ type: 'apiTutorial' }))).toBe(false);
     expect(links.isSourceAvailable(sourceWithTarget({ type: 'fileUpload' }))).toBe(true);
-    expect(links.isSourceAvailable(sourceWithTarget({ type: 'console' }))).toBe(true);
+    expect(links.isSourceAvailable(sourceWithTarget({ type: 'gettingStarted' }))).toBe(true);
   });
 
   it('opens a search request for the source in the embedded console', () => {
@@ -298,36 +349,61 @@ describe('useAnalyticsLinks', () => {
     expect(application.navigateToApp).not.toHaveBeenCalled();
   });
 
-  it('opens file upload in the home app', () => {
-    const { links, application } = setup();
+  describe('file upload', () => {
+    const fileUploadSource = sourceWithTarget({ type: 'fileUpload' });
+    const FILE_UPLOAD_PAGE = ['home', { path: '#/tutorial_directory/fileDataViz' }];
 
-    links.openSource(sourceWithTarget({ type: 'fileUpload' }));
+    it('opens the file upload flyout on the page', () => {
+      const { links, application, executeTriggerActions } = setup({ hasFileUploadFlyout: true });
 
-    expect(application.navigateToApp).toHaveBeenCalledWith('home', {
-      path: '#/tutorial_directory/fileDataViz',
+      expect(links.isSourceAvailable(fileUploadSource)).toBe(true);
+      expect(links.sourceOpensDialog(fileUploadSource)).toBe(true);
+      links.openSource(fileUploadSource, document.createElement('button'));
+
+      expect(executeTriggerActions).toHaveBeenCalledWith(
+        'OPEN_FILE_UPLOAD_LITE_TRIGGER',
+        expect.objectContaining({ location: 'search-homepage' })
+      );
+      expect(application.navigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('opens the file upload page where there is no flyout', () => {
+      const { links, application, executeTriggerActions } = setup();
+
+      expect(links.isSourceAvailable(fileUploadSource)).toBe(true);
+      expect(links.sourceOpensDialog(fileUploadSource)).toBe(false);
+      links.openSource(fileUploadSource);
+
+      expect(executeTriggerActions).not.toHaveBeenCalled();
+      expect(application.navigateToApp).toHaveBeenCalledWith(...FILE_UPLOAD_PAGE);
+    });
+
+    it('opens the file upload page when the flyout fails to open', async () => {
+      const { links, application, executeTriggerActions } = setup({ hasFileUploadFlyout: true });
+      executeTriggerActions.mockRejectedValue(new Error('no flyout'));
+
+      links.openSource(fileUploadSource);
+
+      await waitFor(() =>
+        expect(application.navigateToApp).toHaveBeenCalledWith(...FILE_UPLOAD_PAGE)
+      );
     });
   });
 
-  it('opens the embedded console with a bulk request dated at the click when it is on the page', () => {
-    const NOW = Date.UTC(2026, 5, 1, 12);
-    jest.spyOn(Date, 'now').mockReturnValue(NOW);
+  it('says which sources open a dialog on the page', () => {
+    const { links } = setup();
+
+    expect(links.sourceOpensDialog(sourceWithTarget({ type: 'webCrawl' }))).toBe(true);
+    expect(links.sourceOpensDialog(sourceWithTarget({ type: 'gettingStarted' }))).toBe(false);
+  });
+
+  it('opens the getting started page for sending data with the API', () => {
     const { links, application, openEmbeddedConsole } = setup();
 
-    links.openSource(sourceWithTarget({ type: 'console' }));
+    links.openSource(sourceWithTarget({ type: 'gettingStarted' }));
 
-    expect(openEmbeddedConsole).toHaveBeenCalledWith(buildBulkApiExample(NOW));
-    expect(application.navigateToApp).not.toHaveBeenCalled();
-  });
-
-  it('opens Dev Tools when the embedded console is not on the page', () => {
-    const { links, application, openEmbeddedConsole } = setup({
-      isEmbeddedConsoleAvailable: false,
-    });
-
-    links.openSource(sourceWithTarget({ type: 'console' }));
-
+    expect(application.navigateToApp).toHaveBeenCalledWith('searchGettingStarted');
     expect(openEmbeddedConsole).not.toHaveBeenCalled();
-    expect(application.navigateToApp).toHaveBeenCalledWith('dev_tools');
   });
 
   it('opens data federation through its navigation link', () => {

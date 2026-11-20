@@ -5,17 +5,27 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { BehaviorSubject } from 'rxjs';
+import type {
+  AppMountParameters,
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { QueryClient } from '@kbn/react-query';
+import { hasSeenData } from '@kbn/search-shared-ui';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 
 import type {
   SearchGettingStartedPluginSetup,
   SearchGettingStartedPluginStart,
   SearchGettingStartedAppPluginStartDependencies,
+  SearchGettingStartedServicesContextDeps,
 } from './types';
-
-const SEARCH_HOMEPAGE_APP_ID = 'searchHomepage';
+import { docLinks } from './common/doc_links';
 
 export class SearchGettingStartedPlugin
   implements
@@ -26,6 +36,12 @@ export class SearchGettingStartedPlugin
       SearchGettingStartedAppPluginStartDependencies
     >
 {
+  private readonly kibanaVersion: string;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = this.initializerContext.env.packageInfo.version;
+  }
+
   public setup(
     core: CoreSetup<
       SearchGettingStartedAppPluginStartDependencies,
@@ -33,20 +49,32 @@ export class SearchGettingStartedPlugin
     >,
     deps: {}
   ): SearchGettingStartedPluginSetup {
+    const queryClient = new QueryClient({});
+    const kibanaVersion = this.kibanaVersion;
+    // Decided before the app renders: a deployment not known to hold data gets no chrome here either.
+    const getAppUpdate: AppUpdater = () => ({ hideChrome: !hasSeenData() });
+    const appUpdater$ = new BehaviorSubject<AppUpdater>(getAppUpdate);
     core.application.register({
       id: PLUGIN_ID,
       appRoute: PLUGIN_PATH,
       title: PLUGIN_NAME,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: 'logoElasticsearch',
-      // The unified Elasticsearch home replaced this page; its URL is kept for old links.
-      async mount() {
-        const [coreStart] = await core.getStartServices();
-        await coreStart.application.navigateToApp(SEARCH_HOMEPAGE_APP_ID, { replace: true });
+      async mount({ element, history }: AppMountParameters) {
+        appUpdater$.next(getAppUpdate);
+        const { renderApp } = await import('./application');
+        const [coreStart, depsStart] = await core.getStartServices();
+        docLinks.setDocLinks(coreStart.docLinks.links);
+        const services: SearchGettingStartedServicesContextDeps = {
+          ...depsStart,
+          history,
+          usageCollection: depsStart.usageCollection,
+        };
 
-        return () => {};
+        return renderApp(coreStart, services, element, queryClient, kibanaVersion);
       },
       order: 1,
+      updater$: appUpdater$,
       visibleIn: [],
     });
 

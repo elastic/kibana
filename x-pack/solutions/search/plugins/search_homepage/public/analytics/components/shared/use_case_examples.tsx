@@ -62,15 +62,6 @@ export const UseCaseExamples = ({
     >
       {isOpen && (
         <>
-          <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate('xpack.searchHomepage.analytics.useCaseExamples.description', {
-                defaultMessage:
-                  'Pick the kind of events you work with to see questions other teams ask of them.',
-              })}
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
           <UseCaseTiles
             page={page}
             useCases={useCases}

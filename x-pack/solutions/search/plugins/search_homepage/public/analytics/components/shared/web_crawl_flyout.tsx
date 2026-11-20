@@ -24,7 +24,6 @@ import type { WebCrawlerPublicStart } from '@kbn/web-crawler-plugin/public';
 import { STORAGE_KEY_PREFIX, WEB_CRAWLS_ROUTE } from '../../../home_config';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ANALYTICS_TELEMETRY_PREFIX, FIRST_WEB_CRAWL_MAX_PAGES } from '../../constants';
-import { useAnalyticsClusterState } from '../../hooks/use_analytics_cluster_state';
 import type { WebCrawlFlyoutApi } from './web_crawl_flyout_context';
 import { WebCrawlFlyoutContext } from './web_crawl_flyout_context';
 
@@ -40,9 +39,6 @@ const WebCrawlFlyout = ({
   onClose,
 }: WebCrawlFlyoutProps): React.JSX.Element => {
   const titleId = useGeneratedHtmlId({ prefix: 'analyticsWebCrawlFlyoutTitle' });
-  const { state } = useAnalyticsClusterState();
-  // Once the cluster holds data the page underneath has already changed, or never will.
-  const isPageChangeAhead = state === undefined || state.stage === 'noData';
 
   return (
     <EuiFlyout
@@ -65,7 +61,7 @@ const WebCrawlFlyout = ({
           <p>
             {i18n.translate('xpack.searchHomepage.analytics.webCrawlFlyout.description', {
               defaultMessage:
-                'A crawl runs in the background and can take several minutes. You can close this panel while it runs.',
+                'A crawl can take several minutes and continues after you close this panel.',
             })}
           </p>
           <p data-test-subj="analyticsWebCrawlFlyoutPageLimit">
@@ -88,15 +84,9 @@ const WebCrawlFlyout = ({
         <EuiSpacer size="m" />
         <EuiText size="s" color="subdued">
           <p data-test-subj="analyticsWebCrawlFlyoutNextStep">
-            {isPageChangeAhead
-              ? i18n.translate('xpack.searchHomepage.analytics.webCrawlFlyout.nextStep', {
-                  defaultMessage:
-                    'When the first page is indexed, this page changes to show what you can do with your search data. The progress of the crawl stays here and under Add data on the home page.',
-                })
-              : i18n.translate('xpack.searchHomepage.analytics.webCrawlFlyout.progress', {
-                  defaultMessage:
-                    'The progress of the crawl stays here and under Add data on the home page.',
-                })}
+            {i18n.translate('xpack.searchHomepage.analytics.webCrawlFlyout.progress', {
+              defaultMessage: 'Track the crawl here or under Add data on the home page.',
+            })}
           </p>
         </EuiText>
       </EuiFlyoutBody>

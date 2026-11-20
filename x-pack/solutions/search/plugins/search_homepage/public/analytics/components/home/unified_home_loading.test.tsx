@@ -30,6 +30,10 @@ jest.mock('../../../components/search_homepage/search_homepage', () => ({
   SearchHomepagePage: () => <div data-test-subj="elasticsearchHomePage" />,
 }));
 jest.mock('../../hooks/use_analytics_cluster_state');
+jest.mock('../../hooks/use_chrome_hidden');
+jest.mock('../shared/connection_details', () => ({
+  ConnectionDetails: () => <div data-test-subj="connectionDetailsStub" />,
+}));
 jest.mock('../../hooks/use_analytics_links');
 jest.mock('../../hooks/use_analytics_preferences');
 jest.mock('../../hooks/use_sample_data');

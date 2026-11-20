@@ -183,14 +183,6 @@ export const ExplorePanel = ({
         )}
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.searchHomepage.analytics.explorePanel.description', {
-            defaultMessage:
-              'Start from a question instead of a blank editor. The query opens in Discover, ready to run and refine.',
-          })}
-        </p>
-      </EuiText>
       {upgrade.shown?.summary ? (
         <EuiText
           size="xs"

@@ -58,8 +58,10 @@ export type AnalyticsSourceTarget =
   | { type: 'integrationCategory'; categoryPath: string }
   /** The create-custom-integration flow. */
   | { type: 'integrationCreate' }
+  /** The file upload flyout, opened on this page; the file upload page where there is none. */
   | { type: 'fileUpload' }
-  | { type: 'console' }
+  /** The Elasticsearch getting started page, with connection details and code examples. */
+  | { type: 'gettingStarted' }
   | { type: 'dataFederation' }
   | { type: 'externalUrl'; url: string }
   /** The index list, where an empty index can be created. */
@@ -68,7 +70,9 @@ export type AnalyticsSourceTarget =
   | { type: 'apiTutorial' }
   | { type: 'sampleDataDirectory' }
   /** The form that crawls a website, opened on this page; needs the web crawler plugin. */
-  | { type: 'webCrawl' };
+  | { type: 'webCrawl' }
+  /** The form that creates an empty index for events, opened on this page. */
+  | { type: 'eventsIndex' };
 
 export interface AnalyticsSource {
   id: string;
@@ -123,6 +127,8 @@ export interface AnalyticsLinks {
   canOpenIndices: boolean;
   /** Whether the place a source links to exists in this deployment. */
   isSourceAvailable: (source: AnalyticsSource) => boolean;
+  /** Whether opening the source keeps the user on this page, in a dialog. */
+  sourceOpensDialog: (source: AnalyticsSource) => boolean;
   /** `opener` is the control that asked, which gets the focus back from a source that opens a dialog. */
   openSource: (source: AnalyticsSource, opener?: HTMLElement | null) => void;
   browseIntegrations: () => void;

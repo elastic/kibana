@@ -9,6 +9,7 @@ import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } fr
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useAnalyticsClusterState } from '../../hooks/use_analytics_cluster_state';
+import { useChromeHidden } from '../../hooks/use_chrome_hidden';
 import { useAnalyticsLinks } from '../../hooks/use_analytics_links';
 import { useAnalyticsPreferences } from '../../hooks/use_analytics_preferences';
 import { useSampleData } from '../../hooks/use_sample_data';
@@ -38,6 +39,8 @@ export const UnifiedHomePage = (): React.JSX.Element => {
 
   const resolution = state === undefined ? undefined : resolveJourney(state, preferredJourney);
   const stage = state?.stage;
+  // A first request that failed has no gate to keep the user at.
+  useChromeHidden(stage === undefined ? (isError ? false : undefined) : stage === 'noData');
   let view: HomeView | undefined;
   if (state !== undefined) {
     view = resolution === undefined || stage === 'noData' ? 'gate' : resolution.journey;
@@ -79,9 +82,6 @@ export const UnifiedHomePage = (): React.JSX.Element => {
     if (hasArrived && view === 'search') {
       notifications.toasts.addSuccess({
         title: getDetectedTitle('data', detectedSourceName),
-        text: i18n.translate('xpack.searchHomepage.analytics.home.searchDetectedText', {
-          defaultMessage: 'This page now shows what you can do with your search data.',
-        }),
         'data-test-subj': 'analyticsHomeSearchDataDetected',
       });
     }

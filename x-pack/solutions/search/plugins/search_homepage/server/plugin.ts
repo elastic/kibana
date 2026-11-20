@@ -13,6 +13,7 @@ import type { SearchHomepageConfig } from './config';
 import { createPreferredEndpointTracker } from './lib/analytics_generation_availability';
 import { createGenerationCache } from './lib/analytics_generation_cache';
 import { registerAnalyticsClusterStateRoute } from './routes/analytics_cluster_state';
+import { registerAnalyticsEventsIndexRoute } from './routes/analytics_events_index';
 import { registerAnalyticsEventsOverTimeRoute } from './routes/analytics_events_over_time';
 import { registerAnalyticsGenerationRoutes } from './routes/analytics_generation';
 import { registerAnalyticsSampleEventsRoutes } from './routes/analytics_sample_events';
@@ -31,10 +32,12 @@ export class SearchHomepagePlugin
 {
   private readonly logger: Logger;
   private readonly config: SearchHomepageConfig;
+  private readonly isServerless: boolean;
 
   constructor(initializerContext: PluginInitializerContext<SearchHomepageConfig>) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get();
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -52,7 +55,8 @@ export class SearchHomepagePlugin
       preferredEndpoint: createPreferredEndpointTracker(),
     });
     registerAnalyticsEventsOverTimeRoute(router, this.logger);
-    registerAnalyticsSampleEventsRoutes(router, this.logger);
+    registerAnalyticsSampleEventsRoutes(router, this.logger, { isServerless: this.isServerless });
+    registerAnalyticsEventsIndexRoute(router, this.logger);
     registerAnalyticsClusterStateRoute(router, this.logger, {
       // Read per request: other plugins add dashboards to the sample data sets during their setup.
       getSampleDashboardIds: () =>

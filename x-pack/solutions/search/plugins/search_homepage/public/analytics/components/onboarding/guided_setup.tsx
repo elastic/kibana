@@ -23,6 +23,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { ANALYTICS_TELEMETRY_PREFIX } from '../../constants';
 import { useAnalyticsClusterState } from '../../hooks/use_analytics_cluster_state';
+import { useChromeHidden } from '../../hooks/use_chrome_hidden';
 import { useAnalyticsLinks } from '../../hooks/use_analytics_links';
 import { useAnalyticsPreferences } from '../../hooks/use_analytics_preferences';
 import { useSampleData } from '../../hooks/use_sample_data';
@@ -64,6 +65,7 @@ export const GuidedSetupPage = (): React.JSX.Element => {
   const sampleData = useSampleData();
   const { state, isError, isFetching, refetch } = useAnalyticsClusterState({ poll: true });
   const { preferredJourney, setPreferredJourney } = useAnalyticsPreferences();
+  useChromeHidden(state === undefined ? (isError ? false : undefined) : state.stage === 'noData');
 
   const resolution =
     state === undefined || state.stage === 'noData'
@@ -201,11 +203,7 @@ export const GuidedSetupPage = (): React.JSX.Element => {
             announceOnMount
             data-test-subj="analyticsOnboardingError"
             title={i18n.translate('xpack.searchHomepage.analytics.onboarding.errorTitle', {
-              defaultMessage: 'We could not inspect this deployment',
-            })}
-            text={i18n.translate('xpack.searchHomepage.analytics.onboarding.errorText', {
-              defaultMessage:
-                'The check for existing data failed, so this setup cannot tell which step you are on.',
+              defaultMessage: 'Unable to check this deployment for data',
             })}
             actionProps={{
               primary: {
@@ -228,7 +226,7 @@ export const GuidedSetupPage = (): React.JSX.Element => {
             audience="all"
             links={links}
             label={i18n.translate('xpack.searchHomepage.analytics.onboarding.errorAddDataButton', {
-              defaultMessage: 'Add data in the meantime',
+              defaultMessage: 'Add data',
             })}
           />
         </KibanaPageTemplate.Section>
@@ -271,10 +269,14 @@ export const GuidedSetupPage = (): React.JSX.Element => {
               {stepCopy.title}
             </h2>
           </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText size="s" color="subdued">
-            <p>{stepCopy.description}</p>
-          </EuiText>
+          {stepCopy.description !== undefined && (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiText size="s" color="subdued">
+                <p>{stepCopy.description}</p>
+              </EuiText>
+            </>
+          )}
         </div>
         <EuiSpacer size="l" />
         <Suspense

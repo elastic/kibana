@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { firstValueFrom } from 'rxjs';
+import { coreMock } from '@kbn/core/public/mocks';
 import { SearchGettingStartedPlugin } from './plugin';
 
 describe('SearchGettingStartedPlugin', () => {
   const setupPlugin = () => {
     const coreSetup = coreMock.createSetup();
-    const coreStart = coreMock.createStart();
-    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
-    new SearchGettingStartedPlugin().setup(coreSetup, {});
+    new SearchGettingStartedPlugin(coreMock.createPluginInitializerContext()).setup(coreSetup, {});
     const [[app]] = coreSetup.application.register.mock.calls;
 
-    return { app, coreStart };
+    return { app };
   };
 
   it('keeps its URL but is listed in no navigation or global search', () => {
@@ -29,20 +28,23 @@ describe('SearchGettingStartedPlugin', () => {
     });
   });
 
-  it('replaces itself with the Elasticsearch home when opened', async () => {
-    const { app, coreStart } = setupPlugin();
-    const element = document.createElement('div');
+  it('hides the chrome in a browser that has not seen data in the deployment', async () => {
+    const { app } = setupPlugin();
+    const { updater$, ...rest } = app;
+    if (!updater$) {
+      throw new Error('The app registered no updater');
+    }
 
-    const unmount = await app.mount({
-      ...coreMock.createAppMountParameters(),
-      element,
-      history: scopedHistoryMock.create(),
-    });
+    expect((await firstValueFrom(updater$))(rest)?.hideChrome).toBe(true);
 
-    expect(coreStart.application.navigateToApp).toHaveBeenCalledWith('searchHomepage', {
-      replace: true,
-    });
-    expect(element).toBeEmptyDOMElement();
-    expect(unmount).toEqual(expect.any(Function));
+    localStorage.setItem('searchHomepage.hasData', 'true');
+    const { app: nextApp } = setupPlugin();
+    const { updater$: nextUpdater$, ...nextRest } = nextApp;
+    if (!nextUpdater$) {
+      throw new Error('The app registered no updater');
+    }
+
+    expect((await firstValueFrom(nextUpdater$))(nextRest)?.hideChrome).toBe(false);
+    localStorage.clear();
   });
 });

@@ -34,7 +34,7 @@ const getDisabledReason = (
   }
   if (source === undefined) {
     return i18n.translate('xpack.searchHomepage.analytics.buildDashboard.noSource', {
-      defaultMessage: 'Connect an event source first, so the dashboard has events to show.',
+      defaultMessage: 'Connect an event source first.',
     });
   }
   return undefined;

@@ -49,7 +49,11 @@ const toErrorResponse = (
 };
 
 /** Installs and removes the generated sample event stream with the caller's own index privileges. */
-export const registerAnalyticsSampleEventsRoutes = (router: IRouter, logger: Logger): void => {
+export const registerAnalyticsSampleEventsRoutes = (
+  router: IRouter,
+  logger: Logger,
+  { isServerless }: { isServerless: boolean }
+): void => {
   router.post(
     {
       path: ANALYTICS_SAMPLE_EVENTS_PATH,
@@ -63,6 +67,7 @@ export const registerAnalyticsSampleEventsRoutes = (router: IRouter, logger: Log
         const body: AnalyticsSampleEventsInstallResult = await installSampleEvents({
           client: elasticsearch.client,
           logger,
+          isServerless,
         });
 
         return response.ok({ body });
@@ -72,7 +77,7 @@ export const registerAnalyticsSampleEventsRoutes = (router: IRouter, logger: Log
           logger,
           error,
           INSTALL_FAILURE_MESSAGE,
-          'read, create_index, index and delete_index'
+          'read, view_index_metadata, create_index, index and delete_index'
         );
       }
     }

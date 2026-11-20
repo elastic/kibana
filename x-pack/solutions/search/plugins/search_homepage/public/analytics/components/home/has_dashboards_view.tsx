@@ -132,8 +132,7 @@ export const HasDashboardsView = ({
                 : i18n.translate(
                     'xpack.searchHomepage.analytics.home.hasDashboards.missingDashboardPrivilege',
                     {
-                      defaultMessage:
-                        'You need permission to create dashboards. You can still open existing ones.',
+                      defaultMessage: 'You need permission to create dashboards.',
                     }
                   )
             }

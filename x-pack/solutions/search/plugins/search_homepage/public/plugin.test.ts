@@ -52,4 +52,37 @@ describe('SearchHomepagePlugin', () => {
     expect(await getDeepLinks(app)).toBeUndefined();
     expect(app.deepLinks).toEqual([expect.objectContaining({ id: 'analytics' })]);
   });
+
+  describe('chrome', () => {
+    const getHideChrome = async ({ updater$, ...app }: App) => {
+      if (!updater$) {
+        throw new Error('The app registered no updater');
+      }
+      const update = await firstValueFrom(updater$);
+      return update(app)?.hideChrome;
+    };
+
+    afterEach(() => localStorage.clear());
+
+    it('is hidden from the first render in a browser that has not seen data here', async () => {
+      const { app } = setupPlugin();
+
+      expect(await getHideChrome(app)).toBe(true);
+    });
+
+    it('is shown from the first render in a browser that has seen data here', async () => {
+      localStorage.setItem('searchHomepage.hasData', 'true');
+      const { app } = setupPlugin();
+
+      expect(await getHideChrome(app)).toBe(false);
+    });
+
+    it('stays hidden when the web crawls link is added', async () => {
+      const { plugin, app } = setupPlugin();
+
+      plugin.start(coreMock.createStart(), { elasticsearchHome, share, webCrawler });
+
+      expect(await getHideChrome(app)).toBe(true);
+    });
+  });
 });
