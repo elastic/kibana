@@ -94,7 +94,7 @@ export type RootlyCreateIncidentInput = z.infer<typeof RootlyCreateIncidentInput
 
 export const RootlyGetIncidentInputSchema = lazySchema(() =>
   z.object({
-    incidentId: z.string().min(1).max(MAX_ID_LENGTH).describe('The Rootly incident ID.'),
+    incidentId: z.string().min(1).max(MAX_ID_LENGTH).uuid().describe('The Rootly incident ID.'),
   })
 );
 export type RootlyGetIncidentInput = z.infer<typeof RootlyGetIncidentInputSchema>;
@@ -150,7 +150,12 @@ export type RootlyListIncidentsInput = z.infer<typeof RootlyListIncidentsInputSc
 
 export const RootlyUpdateIncidentInputSchema = lazySchema(() =>
   z.object({
-    incidentId: z.string().min(1).max(MAX_ID_LENGTH).describe('The Rootly incident ID to update.'),
+    incidentId: z
+      .string()
+      .min(1)
+      .max(MAX_ID_LENGTH)
+      .uuid()
+      .describe('The Rootly incident ID to update.'),
     title: z.string().max(MAX_TITLE_LENGTH).optional().describe('New incident title.'),
     summary: z.string().max(MAX_TEXT_LENGTH).optional().describe('New incident summary.'),
     severityId: z.string().max(MAX_ID_LENGTH).optional().describe('New severity resource ID.'),
@@ -175,7 +180,7 @@ export type RootlyUpdateIncidentInput = z.infer<typeof RootlyUpdateIncidentInput
 
 export const RootlyIncidentLifecycleInputSchema = lazySchema(() =>
   z.object({
-    incidentId: z.string().min(1).max(MAX_ID_LENGTH).describe('The Rootly incident ID.'),
+    incidentId: z.string().min(1).max(MAX_ID_LENGTH).uuid().describe('The Rootly incident ID.'),
     message: z
       .string()
       .max(MAX_TEXT_LENGTH)
@@ -191,6 +196,7 @@ export const RootlyTriageIncidentInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_ID_LENGTH)
+      .uuid()
       .describe('The Rootly incident ID to move into triage.'),
   })
 );
@@ -198,7 +204,7 @@ export type RootlyTriageIncidentInput = z.infer<typeof RootlyTriageIncidentInput
 
 export const RootlyAssignIncidentUserInputSchema = lazySchema(() =>
   z.object({
-    incidentId: z.string().min(1).max(MAX_ID_LENGTH).describe('The Rootly incident ID.'),
+    incidentId: z.string().min(1).max(MAX_ID_LENGTH).uuid().describe('The Rootly incident ID.'),
     userId: z.string().min(1).max(MAX_ID_LENGTH).describe('The Rootly user ID to assign.'),
     incidentRoleId: z
       .string()
@@ -215,6 +221,7 @@ export const RootlyCreateActionItemInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_ID_LENGTH)
+      .uuid()
       .describe('The Rootly incident ID to file the action item on.'),
     summary: z.string().min(1).max(MAX_TITLE_LENGTH).describe('Action item summary.'),
     description: z.string().max(MAX_TEXT_LENGTH).optional().describe('Action item description.'),
@@ -243,6 +250,7 @@ export const RootlyListActionItemsInputSchema = lazySchema(() =>
     incidentId: z
       .string()
       .max(MAX_ID_LENGTH)
+      .uuid()
       .optional()
       .describe("Scope to a single incident's action items. Omit to list org-wide."),
     status: z.string().max(50).optional().describe('Filter by status.'),
@@ -257,6 +265,7 @@ export const RootlyCreateTimelineEventInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_ID_LENGTH)
+      .uuid()
       .describe('The Rootly incident ID to post the event to.'),
     event: z
       .string()
@@ -290,7 +299,7 @@ export type RootlyListTeamsInput = z.infer<typeof RootlyListTeamsInputSchema>;
 
 export const RootlyAddIncidentSubscribersInputSchema = lazySchema(() =>
   z.object({
-    incidentId: z.string().min(1).max(MAX_ID_LENGTH).describe('The Rootly incident ID.'),
+    incidentId: z.string().min(1).max(MAX_ID_LENGTH).uuid().describe('The Rootly incident ID.'),
     userIds: z
       .array(z.string().max(MAX_ID_LENGTH))
       .min(1)

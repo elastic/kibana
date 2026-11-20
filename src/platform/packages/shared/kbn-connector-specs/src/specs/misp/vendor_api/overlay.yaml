@@ -70,3 +70,19 @@ actions:
                 application/json:
                   schema:
                     type: object
+
+  - target: $.components.schemas.AttributeNoId.properties.event_id
+    description: >-
+      Points at the shared EventId schema, which allows ten digits only. Removed so the property
+      below can describe what MISP takes here.
+    remove: true
+  - target: $.components.schemas.AttributeNoId.properties
+    description: >-
+      MISP addresses an event by its numeric id or by its UUID, which its own spec shows: the
+      attribute search filter takes either. The shared EventId schema is left alone, because
+      widening it would make a UUID match both branches of that filter's union.
+    update:
+      event_id:
+        type: string
+        maxLength: 36
+        pattern: ^(\d{1,10}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$

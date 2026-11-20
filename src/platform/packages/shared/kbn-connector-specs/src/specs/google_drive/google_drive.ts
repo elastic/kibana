@@ -175,6 +175,8 @@ export const GoogleDriveConnector: ConnectorSpec = {
             ),
           pageSize: z
             .number()
+            .int()
+            .min(1)
             .max(1000)
             .default(DEFAULT_PAGE_SIZE)
             .describe('Number of results to return (default 250, max 1000)'),
@@ -262,6 +264,8 @@ export const GoogleDriveConnector: ConnectorSpec = {
             ),
           pageSize: z
             .number()
+            .int()
+            .min(1)
             .max(1000)
             .default(DEFAULT_PAGE_SIZE)
             .describe('Number of results to return (default 250, max 1000)'),

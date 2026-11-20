@@ -48,6 +48,9 @@ export const ListBucketsInputSchema = lazySchema(() =>
       ),
     maxResults: z
       .number()
+      .int()
+      .min(1)
+      .max(1000)
       .optional()
       .describe(`Maximum number of buckets to return (default: ${DEFAULT_PAGE_SIZE}, max 1000)`),
     pageToken: z
@@ -87,6 +90,9 @@ export const ListObjectsInputSchema = lazySchema(() =>
       ),
     maxResults: z
       .number()
+      .int()
+      .min(1)
+      .max(1000)
       .optional()
       .describe(`Maximum number of objects to return (default: ${DEFAULT_PAGE_SIZE}, max 1000)`),
     pageToken: z

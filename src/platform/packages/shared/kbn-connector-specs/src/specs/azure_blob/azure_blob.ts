@@ -288,6 +288,7 @@ export const AzureBlob: ConnectorSpec = {
             .describe('The name of the container that holds the blob. Example: "my-container"'),
           blobName: z
             .string()
+            .min(1)
             .max(MAX_BLOB_NAME_LENGTH)
             .describe(
               'The full name (path) of the blob to download. Example: "logs/2024/january.log"'
@@ -327,6 +328,7 @@ export const AzureBlob: ConnectorSpec = {
             .describe('The name of the container that holds the blob. Example: "my-container"'),
           blobName: z
             .string()
+            .min(1)
             .max(MAX_BLOB_NAME_LENGTH)
             .describe(
               'The full name (path) of the blob to inspect. Example: "logs/2024/january.log"'

@@ -82,6 +82,18 @@ const actionFixtureSchema = z
     queries: z.array(queryOperationSchema).optional(),
     /** Served by the mock for this action's runs, in place of sampled responses. */
     responses: z.array(responseOverrideSchema).optional(),
+    /**
+     * Inputs that are deliberately looser than the vendor field they feed, so the strictness
+     * check leaves them alone. Reviewers read the reason.
+     */
+    looseInputs: z
+      .object({
+        reason: z.string().min(1),
+        /** Dotted paths in the action's input, e.g. `scrapeOptions.waitFor`. */
+        inputs: z.array(z.string().min(1)).min(1),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 

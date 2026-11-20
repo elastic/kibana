@@ -13,3 +13,12 @@ actions:
       accepted here.
     update:
       - '2021-06-08'
+
+  - target: $['x-ms-paths']['/{containerName}/{blob}'].*.parameters[?@.name == 'blob'].schema.pattern
+    description: >-
+      Azure names a blob with 1 to 1024 characters and rules out only control characters
+      (https://learn.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata).
+      This pattern allows alphanumeric segments and a single extension, so an everyday name such
+      as `my-file_v2.tar.gz` or one with a space would be refused. The length bounds next to it
+      are right and stay.
+    remove: true

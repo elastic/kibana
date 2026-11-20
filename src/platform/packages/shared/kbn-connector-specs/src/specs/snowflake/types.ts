@@ -11,6 +11,10 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 // https://docs.snowflake.com/en/sql-reference/identifiers-syntax
 const MAX_IDENTIFIER_LENGTH = 255;
+// A quoted identifier, an unquoted one, or a positional `$1`. Snowflake's spec spells the same
+// rule with its alternatives anchored unevenly, which would accept a quoted name with anything
+// after it.
+const SNOWFLAKE_IDENTIFIER = /^("([^"]|"")+"|[a-zA-Z_][a-zA-Z0-9_$]*|\$[0-9]+)$/;
 const MAX_STATEMENT_LENGTH = 100_000;
 const MAX_BINDING_VALUE_LENGTH = 1_048_576;
 const MAX_BINDING_KEY_LENGTH = 10;
@@ -83,6 +87,7 @@ export const ExecuteStatementInputSchema = lazySchema(() =>
     database: z
       .string()
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .optional()
       .describe(
         'Database to use for execution. Case-sensitive — must match the value returned by SHOW DATABASES. If omitted, uses the user default (DEFAULT_NAMESPACE).'
@@ -90,6 +95,7 @@ export const ExecuteStatementInputSchema = lazySchema(() =>
     schema: z
       .string()
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .optional()
       .describe(
         'Schema to use for execution. Case-sensitive. If omitted, uses the user default (DEFAULT_NAMESPACE).'
@@ -97,6 +103,7 @@ export const ExecuteStatementInputSchema = lazySchema(() =>
     warehouse: z
       .string()
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .optional()
       .describe(
         'Warehouse to use for execution. Case-sensitive. If omitted, uses the user default (DEFAULT_WAREHOUSE).'
@@ -104,6 +111,7 @@ export const ExecuteStatementInputSchema = lazySchema(() =>
     role: z
       .string()
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .optional()
       .describe(
         'Role to use for execution. Case-sensitive. If omitted, uses the user default (DEFAULT_ROLE).'
@@ -158,6 +166,7 @@ export const RunQueryInputSchema = lazySchema(() =>
     database: z
       .string()
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .optional()
       .describe(
         'Database to use for execution. Case-sensitive — must match the value returned by SHOW DATABASES. If omitted, uses the user default (DEFAULT_NAMESPACE).'
@@ -165,6 +174,7 @@ export const RunQueryInputSchema = lazySchema(() =>
     schema: z
       .string()
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .optional()
       .describe(
         'Schema to use for execution. Case-sensitive. If omitted, uses the user default (DEFAULT_NAMESPACE).'
@@ -172,6 +182,7 @@ export const RunQueryInputSchema = lazySchema(() =>
     warehouse: z
       .string()
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .optional()
       .describe(
         'Warehouse to use for execution. Case-sensitive. If omitted, uses the user default (DEFAULT_WAREHOUSE).'
@@ -179,6 +190,7 @@ export const RunQueryInputSchema = lazySchema(() =>
     role: z
       .string()
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .optional()
       .describe(
         'Role to use for execution. Case-sensitive. If omitted, uses the user default (DEFAULT_ROLE).'
@@ -250,6 +262,7 @@ export const ListCommonQueryParamsSchema = lazySchema(() =>
     like: z
       .string()
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .optional()
       .describe(
         'Case-insensitive SQL pattern to filter by object name. Supports "%" (any sequence) and "_" (single char) wildcards. Examples: "CUST%", "%_LOG", "ORDERS". Omit to return all visible objects.'
@@ -257,6 +270,7 @@ export const ListCommonQueryParamsSchema = lazySchema(() =>
     startsWith: z
       .string()
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .optional()
       .describe(
         'Case-sensitive prefix filter on the object name. Unlike like, this does not use wildcards. Example: "PROD_" returns only names starting with exactly "PROD_".'
@@ -273,6 +287,7 @@ export const ListCommonQueryParamsSchema = lazySchema(() =>
     fromName: z
       .string()
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .optional()
       .describe(
         'Cursor for pagination. Returns only rows whose name sorts after this value (case-sensitive, alphabetical). Use the last name from a previous page to fetch the next page.'
@@ -306,6 +321,7 @@ export const ListSchemasInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive database name (e.g. "PROD_DB") whose schemas to list. Use listDatabases to discover available databases.'
       ),
@@ -323,6 +339,7 @@ export const ListTablesInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive database name containing the schema. Use listDatabases to discover available databases.'
       ),
@@ -330,6 +347,7 @@ export const ListTablesInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive schema name whose tables to list (e.g. "PUBLIC"). Use listSchemas to discover available schemas.'
       ),
@@ -353,6 +371,7 @@ export const ListViewsInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive database name containing the schema. Use listDatabases to discover available databases.'
       ),
@@ -360,6 +379,7 @@ export const ListViewsInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive schema name whose views to list (e.g. "PUBLIC"). Use listSchemas to discover available schemas.'
       ),
@@ -377,6 +397,7 @@ export const DescribeTableInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive database name containing the table (e.g. "PROD_DB"). Must match the value returned by listDatabases.'
       ),
@@ -384,6 +405,7 @@ export const DescribeTableInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive schema name containing the table (e.g. "PUBLIC"). Must match the value returned by listSchemas.'
       ),
@@ -391,6 +413,7 @@ export const DescribeTableInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive table name (e.g. "ORDERS"). Must match the value returned by listTables. Returns columns (name, type, nullable, default, comment), clustering keys, row count, and other metadata.'
       ),
@@ -408,6 +431,7 @@ export const DescribeViewInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive database name containing the view. Must match the value returned by listDatabases.'
       ),
@@ -415,6 +439,7 @@ export const DescribeViewInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive schema name containing the view. Must match the value returned by listSchemas.'
       ),
@@ -422,6 +447,7 @@ export const DescribeViewInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive view name. Must match the value returned by listViews. Returns the view definition, columns, and the underlying query text.'
       ),
@@ -442,6 +468,7 @@ export const ListCortexSearchServicesInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive database name containing the schema. Use listDatabases to discover available databases.'
       ),
@@ -449,6 +476,7 @@ export const ListCortexSearchServicesInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive schema name whose Cortex Search services to list. Use listSchemas to discover available schemas.'
       ),
@@ -462,6 +490,7 @@ export const CortexSearchInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive database name containing the Cortex Search service. Use listDatabases or listCortexSearchServices to discover.'
       ),
@@ -469,6 +498,7 @@ export const CortexSearchInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive schema name containing the Cortex Search service. Use listCortexSearchServices to discover.'
       ),
@@ -476,6 +506,7 @@ export const CortexSearchInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(MAX_IDENTIFIER_LENGTH)
+      .regex(SNOWFLAKE_IDENTIFIER)
       .describe(
         'Case-sensitive name of the Cortex Search service to query. Use listCortexSearchServices to discover available services.'
       ),

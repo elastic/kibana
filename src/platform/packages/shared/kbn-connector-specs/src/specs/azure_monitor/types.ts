@@ -476,6 +476,7 @@ export const ListMetricAlertRulesInputSchema = lazySchema(() =>
   z.object({
     resourceGroupName: z
       .string()
+      .min(1)
       .max(MAX_RESOURCE_GROUP_NAME_LENGTH)
       .optional()
       .describe(
@@ -718,6 +719,7 @@ export const ListScheduledQueryRulesInputSchema = lazySchema(() =>
   z.object({
     resourceGroupName: z
       .string()
+      .min(1)
       .max(MAX_RESOURCE_GROUP_NAME_LENGTH)
       .optional()
       .describe(

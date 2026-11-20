@@ -161,6 +161,10 @@ const describeFinding = (finding: RecordingFinding): string => {
       return `the response override for ${finding.operation} breaks the spec: ${finding.violations
         .map(({ message }) => message)
         .join('; ')}`;
+    case 'loose-input': {
+      const { input, operation, parameter, gap } = finding.loose;
+      return `input "${input}" accepts more than ${operation} allows for its ${parameter}, which declares ${gap.keyword} ${gap.vendor} where the input declares ${gap.connector}; tighten the input, or record why it is looser under "looseInputs" in ${FIXTURES}`;
+    }
   }
 };
 
@@ -178,7 +182,8 @@ const isProblem = ({ kind }: RecordingFinding): boolean =>
   kind === 'insufficient-scope' ||
   kind === 'read-scope' ||
   kind === 'unused-query' ||
-  kind === 'rejected-response';
+  kind === 'rejected-response' ||
+  kind === 'loose-input';
 
 /**
  * Regenerates a connector's `vendor_api` artifacts: records its actions against the vendor
