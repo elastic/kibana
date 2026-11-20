@@ -254,7 +254,11 @@ describe.skip('Resolver, when using a generated tree with 20 generations, 4 chil
     fireEvent.click(loadingNode, { button: 0 });
     // the time here is equivalent to the animation duration in the camera reducer
     graphSimulator.runAnimationFramesTimeFromNow(1000);
-    return loadingNode.getAttribute('data-test-node-id');
+    const nodeId = loadingNode.getAttribute('data-test-node-id');
+    if (nodeId === null) {
+      throw new Error('The loading node has no data-test-node-id attribute');
+    }
+    return nodeId;
   };
 
   const identifiedLoadingNodeInGraph: (

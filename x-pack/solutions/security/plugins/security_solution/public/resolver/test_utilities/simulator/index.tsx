@@ -156,7 +156,6 @@ export class Simulator {
    * Unmount the Resolver component. Use this to test what happens when code that uses Resolver unmounts it.
    */
   public unmount(): void {
-    this.unmounted = true;
     this.renderResult.unmount();
   }
 
@@ -219,13 +218,6 @@ export class Simulator {
    */ () => void {
     return this.spyMiddleware.debugActions();
   }
-
-  /**
-   * Whether `unmount()` has been called. Used to guard against setState/update calls on a
-   * unmounted component, which throw and would leave the Promise in `map()` permanently
-   * unresolved.
-   */
-  private unmounted = false;
 
   /**
    * Yield the result of `mapper` over and over, once per event-loop cycle.
