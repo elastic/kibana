@@ -184,6 +184,7 @@ export function registerGetStepDefinitionsTool(
 
 Supports filtering by exact step type, keyword search, or category.
 Deprecated steps are excluded from broad discovery by default, but exact step type lookups still return them.
+Step types reserved for managed workflows are never returned, even for exact lookups.
 When a small number of results is returned, input/config parameter summaries and usage examples are included.
 Common step properties (name, type, if, timeout, on-failure) are NOT listed per step -- they apply to all steps (see skill prompt).
 Set includeOutputSummary=true to get a compact one-line summary of each step's output fields (useful for knowing what data is available via \`{{ steps.name.field }}\`).

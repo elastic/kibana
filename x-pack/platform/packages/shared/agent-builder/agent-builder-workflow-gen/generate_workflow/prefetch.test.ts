@@ -178,6 +178,33 @@ describe('prefetch helpers', () => {
       expect(ids).toContain('custom.internal');
       expect(ids).not.toContain('custom.managedOnly');
     });
+
+    it('does not let a dynamic connector of the same type bring back a managed-only step', async () => {
+      getStepExposureMock.mockImplementation((stepType: string) =>
+        stepType === 'custom.managedOnly' ? 'managed_only' : 'open'
+      );
+
+      const result = await prefetchStepDefinitions({
+        api: buildApi({
+          getAvailableConnectors: jest.fn().mockResolvedValue({
+            connectorTypes: {
+              '.custom': {
+                instances: [],
+                subActions: [{ name: 'managedOnly' }, { name: 'open' }],
+                enabled: true,
+              },
+            },
+            totalConnectors: 1,
+          }),
+        }),
+        spaceId: 'default',
+        request: {} as any,
+      });
+
+      const ids = result.map((d) => d.id);
+      expect(ids).toContain('custom.open');
+      expect(ids).not.toContain('custom.managedOnly');
+    });
   });
 
   describe('prefetchTriggerDefinitions', () => {

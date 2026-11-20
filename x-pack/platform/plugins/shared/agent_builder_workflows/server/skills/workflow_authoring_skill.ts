@@ -37,7 +37,7 @@ These tools answer questions about *what's installed* on the user's Kibana. Use 
 - **${workflowTools.getTriggerDefinitions}**: Look up a trigger type's full event context schema.
 - **${workflowTools.getExamples}**: Search the bundled example library for working YAML patterns.
 - **${workflowTools.getConnectors}**: List connector instances configured in the user's environment.
-- **${workflowTools.validateWorkflow}**: Validate a complete workflow YAML string. When validation fails, step definitions for referenced step types are automatically included.
+- **${workflowTools.validateWorkflow}**: Validate a complete workflow YAML string. When validation fails, step definitions for referenced step types are automatically included, except for step types reserved for managed workflows.
 
 ### Execution & Debugging
 - **${platformCoreTools.executeWorkflow}**: Run a full workflow end-to-end. Use this for "run the workflow" requests.
@@ -267,7 +267,7 @@ When fixing validation errors on an existing workflow:
 
 1. Call \`${workflowTools.validateWorkflow}\` — it automatically includes step definitions for all referenced step types when validation fails
 2. Analyze the errors and identify the problematic steps
-3. If a step type does NOT exist: tell the user and list similar alternatives from the included step definitions
+3. If a step type does NOT exist: tell the user and list similar alternatives from the included step definitions. Rely on the "Unknown step type" validation error, not on a missing definition: step types reserved for managed workflows exist but have no definition
 4. Call \`${platformCoreTools.generateWorkflow}\` with an explicit description of each fix to apply
 5. NEVER guess or replace a step type with something unrelated
 6. **After fixing an error, scan the entire YAML for other occurrences of the same mistake.** For example, if you fix \`triggers.event\` → \`event\` in one place, check all other Liquid expressions for the same incorrect pattern and fix them all in one pass

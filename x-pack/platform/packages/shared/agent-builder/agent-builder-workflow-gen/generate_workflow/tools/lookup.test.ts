@@ -59,4 +59,27 @@ describe('lookupStepDefinitions', () => {
 
     expect(result).toEqual({ error: 'No step type matching custom.managedOnly' });
   });
+
+  it('does not let a dynamic connector of the same type bring back a managed-only step', async () => {
+    const dynamicDeps = {
+      ...deps,
+      api: {
+        getAvailableConnectors: jest.fn().mockResolvedValue({
+          connectorTypes: {
+            '.custom': { enabled: true, subActions: [{ name: 'managedOnly' }, { name: 'open' }] },
+          },
+          totalConnectors: 1,
+        }),
+      },
+    } as unknown as LookupDeps;
+
+    const searchResult = await lookupStepDefinitions({ search: 'custom.' }, dynamicDeps);
+    const exactResult = await lookupStepDefinitions(
+      { stepType: 'custom.managedOnly' },
+      dynamicDeps
+    );
+
+    expect(getStepIds(searchResult)).toEqual(['custom.internal', 'custom.open']);
+    expect(exactResult).toEqual({ error: 'No step type matching custom.managedOnly' });
+  });
 });

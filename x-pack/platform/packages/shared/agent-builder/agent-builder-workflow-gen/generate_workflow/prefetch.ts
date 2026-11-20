@@ -114,7 +114,14 @@ export const prefetchStepDefinitions = async ({
         : [baseType];
 
     for (const stepType of stepTypes) {
-      if (builtInIds.has(stepType) || allConnectorIds.has(stepType)) continue;
+      // A dynamic connector of the same type must not bring back a managed-only step.
+      if (
+        builtInIds.has(stepType) ||
+        allConnectorIds.has(stepType) ||
+        getStepExposure(stepType) === 'managed_only'
+      ) {
+        continue;
+      }
       dynamicSummaries.push({
         id: stepType,
         label: info.displayName ?? stepType,

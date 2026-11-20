@@ -39,7 +39,8 @@ const buildDynamicConnectorStepEntries = async (
         : [baseType];
 
     for (const stepType of stepTypes) {
-      if (knownIds.has(stepType)) continue;
+      // A dynamic connector of the same type must not bring back a managed-only step.
+      if (knownIds.has(stepType) || getStepExposure(stepType) === 'managed_only') continue;
       out.push({
         id: stepType,
         label: info.displayName ?? stepType,
