@@ -26,7 +26,9 @@ import {
 } from './inbound_events_form_section';
 
 /** First auth type with credentials, when the spec also offers no authentication. */
-const getOutboundToggleAuthTypeId = (actionTypeId: string | undefined): string | undefined => {
+const getOutboundToggleDefaultAuthTypeId = (
+  actionTypeId: string | undefined
+): string | undefined => {
   const authTypeIds = (getConnectorSpec(actionTypeId ?? '')?.auth?.types ?? []).map((authType) =>
     typeof authType === 'string' ? authType : authType.type
   );
@@ -74,7 +76,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   const showDualInbound = isDual && isClusterInboundEventsEnabled && showInboundEvents;
   // Dual connectors that can run without credentials get an Outbound on/off switch.
   const outboundToggleAuthTypeId =
-    isDual && showInboundEvents ? getOutboundToggleAuthTypeId(actionTypeId) : undefined;
+    isDual && showInboundEvents ? getOutboundToggleDefaultAuthTypeId(actionTypeId) : undefined;
   const showSettingsSection =
     FieldsComponent !== null || settingsContent != null || showDualInbound;
   const showSettingsTitle =
