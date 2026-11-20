@@ -49,7 +49,7 @@ export interface ProjectDefaultCardProps {
   type: BoostProfileType;
   ruleName: string;
   profile: BoostProfileBase;
-  matches: ReadonlyArray<Pick<BoostRuleMatch, 'name' | 'isHidden' | 'outrankedByRuleName'>>;
+  matches: readonly BoostRuleMatch[];
   canEdit: boolean;
   onEdit: () => void;
   onViewProfile?: (profileName: string) => void;
