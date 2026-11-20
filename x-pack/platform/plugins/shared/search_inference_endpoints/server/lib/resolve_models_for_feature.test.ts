@@ -392,6 +392,17 @@ describe('resolveModelsForFeature', () => {
     const result = await resolve({ defaultConnectorId: 'default' });
 
     expect(result.connectors).toEqual([other, { ...defaultInOverride, isDefault: true }]);
+    expect(getConnectorById).not.toHaveBeenCalled();
+  });
+
+  it('does not look the default up for an empty saved override', async () => {
+    getForFeature.mockResolvedValue({ endpoints: [], warnings: [], soEntryFound: true });
+    getConnectorList.mockResolvedValue([inferenceConnector('default')]);
+
+    const result = await resolve({ defaultConnectorId: 'default' });
+
+    expect(getConnectorById).not.toHaveBeenCalled();
+    expect(result.connectors).toEqual([]);
   });
 
   it('flags the endpoint behind an alias default in a saved override', async () => {
@@ -407,6 +418,7 @@ describe('resolveModelsForFeature', () => {
 
     const result = await resolve({ defaultConnectorId: '.my-alias' });
 
+    expect(getConnectorById).toHaveBeenCalledWith('.my-alias');
     expect(result.connectors).toEqual([other, { ...endpoint, isDefault: true }]);
   });
 
