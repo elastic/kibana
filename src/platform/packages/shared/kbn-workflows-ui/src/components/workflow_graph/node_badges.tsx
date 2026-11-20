@@ -204,11 +204,17 @@ export function NodeConfigWarningIndicator({
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
+          boxSizing: 'border-box',
+          width: euiTheme.size.l,
+          height: euiTheme.size.l,
+          borderRadius: '50%',
+          background: euiTheme.colors.backgroundLightWarning,
+          border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderStrongWarning}`,
           lineHeight: 0,
           '&:focus-visible': { outline: `2px solid ${euiTheme.colors.primary}` },
         }}
       >
-        <EuiIcon type="warningFill" size="m" color={euiTheme.colors.textWarning} aria-hidden />
+        <EuiIcon type="warning" size="m" color={euiTheme.colors.textWarning} aria-hidden />
       </span>
     </EuiToolTip>
   );

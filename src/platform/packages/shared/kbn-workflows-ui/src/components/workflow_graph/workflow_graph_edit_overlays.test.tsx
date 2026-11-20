@@ -79,6 +79,13 @@ describe('WorkflowGraphEditOverlays terminal stubs', () => {
       expect(svg.querySelector('line')).toHaveAttribute('marker-end', `url(#${markerIds[index]})`);
     });
   });
+
+  it('draws the stub line solid, up to the add-step button', () => {
+    renderOverlays();
+
+    const line = screen.getByTestId('workflowGraphTerminalStubs').querySelector('line');
+    expect(line).not.toHaveAttribute('stroke-dasharray');
+  });
 });
 
 describe('WorkflowGraphEditOverlays wire hit size', () => {

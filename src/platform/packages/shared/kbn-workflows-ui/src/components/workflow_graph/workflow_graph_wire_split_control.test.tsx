@@ -50,56 +50,59 @@ const renderControl = (control: WireInsertionControl = makeControl()) => {
 
 describe('WorkflowGraphWireSplitControl', () => {
   describe('reveal', () => {
-    it('keeps a mid-wire control hidden and dashed at rest', () => {
+    it('keeps a mid-wire control hidden at rest, with a solid border', () => {
       const { root, button } = renderControl();
 
       expect(root).toHaveStyle({ opacity: '0' });
-      expect(button).toHaveStyle({ borderStyle: 'dashed' });
+      expect(button).toHaveStyle({ borderStyle: 'solid' });
     });
 
-    it('reveals a mid-wire control as a dashed ghost on hover and hides it again on leave', () => {
+    it('reveals a mid-wire control on hover and hides it again on leave', () => {
       const { root, button } = renderControl();
+      const restBorderColor = getComputedStyle(button).borderColor;
 
       fireEvent.mouseEnter(root);
       expect(root).toHaveStyle({ opacity: '1' });
       // Only hovering the button itself turns it primary (CSS :hover rule), not the wire.
-      expect(button).toHaveStyle({ borderStyle: 'dashed' });
-      expect(button).not.toHaveStyle({ borderStyle: 'solid' });
+      expect(button).toHaveStyle({ borderStyle: 'solid' });
+      expect(getComputedStyle(button).borderColor).toBe(restBorderColor);
 
       fireEvent.mouseLeave(root);
       expect(root).toHaveStyle({ opacity: '0' });
-      expect(button).toHaveStyle({ borderStyle: 'dashed' });
+      expect(button).toHaveStyle({ borderStyle: 'solid' });
     });
 
     it('reveals a mid-wire control when the button receives focus and hides it on blur', async () => {
       const user = userEvent.setup();
       const { root, button } = renderControl();
+      const restBorderColor = getComputedStyle(button).borderColor;
 
       await user.tab();
       expect(button).toHaveFocus();
       expect(root).toHaveStyle({ opacity: '1' });
       // Keyboard focus on the button itself is the "primary" state (:focus-visible rule).
-      expect(button).toHaveStyle({ borderStyle: 'solid' });
+      expect(getComputedStyle(button).borderColor).not.toBe(restBorderColor);
 
       await user.tab();
       expect(button).not.toHaveFocus();
       expect(root).toHaveStyle({ opacity: '0' });
     });
 
-    it('keeps a terminal control visible and dashed at rest, without any hover', () => {
+    it('keeps a terminal control visible with a solid border at rest, without any hover', () => {
       const { root, button } = renderControl(makeControl({ id: 'terminal:a', kind: 'terminal' }));
 
       expect(root).toHaveStyle({ opacity: '1' });
-      expect(button).toHaveStyle({ borderStyle: 'dashed' });
+      expect(button).toHaveStyle({ borderStyle: 'solid' });
     });
 
-    it('keeps a terminal control dashed while hovered (only the button hover rule fills it)', () => {
+    it('keeps a terminal control unfilled while hovered (only the button hover rule fills it)', () => {
       const { root, button } = renderControl(makeControl({ id: 'terminal:a', kind: 'terminal' }));
+      const restBorderColor = getComputedStyle(button).borderColor;
 
       fireEvent.mouseEnter(root);
 
       expect(root).toHaveStyle({ opacity: '1' });
-      expect(button).toHaveStyle({ borderStyle: 'dashed' });
+      expect(getComputedStyle(button).borderColor).toBe(restBorderColor);
     });
   });
 

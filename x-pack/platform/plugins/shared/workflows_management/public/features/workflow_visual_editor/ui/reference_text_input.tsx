@@ -117,6 +117,9 @@ export function ReferenceTextInput({
   const [isEditing, setIsEditing] = useState(false);
   const pendingRef = useRef<Pending | undefined>({ kind: 'end' });
   const heightPx = parseInt(String(euiTheme.size.xl), 10) || 32;
+  // The editor sits inside the box's border, so it is this much shorter than the box: the box then
+  // keeps the read view's height when the editor mounts, instead of growing and pushing the form down.
+  const editorHeightPx = heightPx - 2 * (parseInt(String(euiTheme.border.width.thin), 10) || 1);
   const valueRef = useRef(value);
   valueRef.current = value;
   // The editor registers its blur listener once, at mount; it must still call the latest handler.
@@ -314,13 +317,13 @@ export function ReferenceTextInput({
           const single = text.replace(/\r?\n/g, ' ');
           onChange(single, caretAfterChange(single, event), typedCharacter(event));
         }}
-        height={heightPx}
+        height={editorHeightPx}
         aria-label={ariaLabel}
         dataTestSubj={testSubj}
         editorDidMount={handleEditorMount}
         options={{
           ...EDITOR_OPTIONS,
-          padding: { top: Math.max(0, Math.floor((heightPx - 2 - 18) / 2)) },
+          padding: { top: Math.max(0, Math.floor((editorHeightPx - 18) / 2)) },
         }}
       />
     </div>

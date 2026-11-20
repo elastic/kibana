@@ -167,7 +167,7 @@ export function WorkflowGraphEditOverlays({
             </marker>
           </defs>
           {terminalStubs.map((control) => {
-            // Stop the stroke just shy of the dashed + so the arrowhead meets its rim.
+            // Stop the stroke just shy of the + so the arrowhead meets its rim.
             const tipInset = 11;
             const isLr = control.direction === 'LR';
             const x2 = isLr ? control.segmentEnd.x - tipInset : control.segmentEnd.x;
@@ -181,7 +181,6 @@ export function WorkflowGraphEditOverlays({
                 y2={y2}
                 stroke={stubStroke}
                 strokeWidth={1}
-                strokeDasharray="4 3"
                 markerEnd={`url(#${terminalArrowId})`}
               />
             );
@@ -222,7 +221,7 @@ export function WorkflowGraphEditOverlays({
                   width: TRIGGER_GHOST_SIZE,
                   height: TRIGGER_GHOST_SIZE,
                   borderRadius: '50%',
-                  border: `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseProminent}`,
+                  border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseProminent}`,
                   background: euiTheme.colors.backgroundBasePlain,
                   color: euiTheme.colors.textSubdued,
                   boxShadow: 'none',
@@ -233,13 +232,12 @@ export function WorkflowGraphEditOverlays({
                   cursor: 'pointer',
                   [euiCanAnimate]: {
                     transition:
-                      'background 150ms ease, color 150ms ease, border-color 150ms ease, border-style 150ms ease, box-shadow 150ms ease',
+                      'background 150ms ease, color 150ms ease, border-color 150ms ease, box-shadow 150ms ease',
                   },
                   '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
                   '&:hover, &:focus-visible': {
                     background: euiTheme.colors.primary,
                     borderColor: euiTheme.colors.primary,
-                    borderStyle: 'solid',
                     color: euiTheme.colors.backgroundBasePlain,
                     boxShadow: `0 0 0 2px ${euiTheme.colors.backgroundBasePlain}`,
                   },

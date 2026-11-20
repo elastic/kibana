@@ -41,9 +41,9 @@ export interface WorkflowGraphWireSplitControlProps {
 
 /**
  * Add-step control on a wire or terminal stub.
- * Mid-wire: invisible until hovering (or focusing) the wire segment it owns reveals a dashed
- * ghost circle; it only turns primary when the button itself is hovered or focused.
- * Terminal: persistent dashed circle at the stub tip.
+ * Mid-wire: invisible until hovering (or focusing) the wire segment it owns reveals a ghost
+ * circle; it only turns primary when the button itself is hovered or focused.
+ * Terminal: persistent circle at the stub tip.
  *
  * Failure / error-path insertion stays on the node edge — not here.
  */
@@ -140,7 +140,7 @@ export const WorkflowGraphWireSplitControl = memo(function WorkflowGraphWireSpli
                 width: WIRE_CONTROL_SIZE,
                 height: WIRE_CONTROL_SIZE,
                 borderRadius: '50%',
-                border: `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseProminent}`,
+                border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseProminent}`,
                 background: euiTheme.colors.backgroundBasePlain,
                 color: euiTheme.colors.textSubdued,
                 display: 'inline-flex',
@@ -151,13 +151,12 @@ export const WorkflowGraphWireSplitControl = memo(function WorkflowGraphWireSpli
                 flex: '0 0 auto',
                 boxShadow: 'none',
                 [euiCanAnimate]: {
-                  transition: `background ${PORT_SPRING_MS} ${PORT_SPRING_EASE}, color ${PORT_SPRING_MS} ${PORT_SPRING_EASE}, border-color ${PORT_SPRING_MS} ${PORT_SPRING_EASE}, border-style ${PORT_SPRING_MS} ${PORT_SPRING_EASE}, box-shadow ${PORT_SPRING_MS} ${PORT_SPRING_EASE}`,
+                  transition: `background ${PORT_SPRING_MS} ${PORT_SPRING_EASE}, color ${PORT_SPRING_MS} ${PORT_SPRING_EASE}, border-color ${PORT_SPRING_MS} ${PORT_SPRING_EASE}, box-shadow ${PORT_SPRING_MS} ${PORT_SPRING_EASE}`,
                 },
                 '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
                 '&:hover, &:focus-visible': {
                   background: euiTheme.colors.primary,
                   borderColor: euiTheme.colors.primary,
-                  borderStyle: 'solid',
                   color: euiTheme.colors.backgroundBasePlain,
                   boxShadow: `0 0 0 2px ${euiTheme.colors.backgroundBasePlain}`,
                 },
