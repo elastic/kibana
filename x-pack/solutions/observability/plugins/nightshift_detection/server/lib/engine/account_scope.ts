@@ -54,6 +54,8 @@ export class AccountScope {
     accountRequest: KibanaRequest;
     spaceId: string;
   }): Promise<AccountScopeContainer> {
+    // Branded before forking, so a malformed id throws without leaving a forked container behind.
+    const space = asSpaceId(spaceId);
     const scope = this.injection.fork();
 
     scope.bind(Request).toConstantValue(accountRequest);
@@ -66,10 +68,10 @@ export class AccountScope {
     });
     scope
       .bind(KnowledgeIndicators)
-      .toConstantValue(this.significantEvents.getKnowledgeIndicatorReader({ spaceId }));
+      .toConstantValue(this.significantEvents.getKnowledgeIndicatorReader({ spaceId: space }));
     // The rules are the account's: Alerting v2 runs them with its API key.
     scope.bind(DetectionRulesClient).toConstantValue(
-      await this.alerting.getRulesClientWithRequestInSpace(accountRequest, asSpaceId(spaceId), {
+      await this.alerting.getRulesClientWithRequestInSpace(accountRequest, space, {
         app: 'nightshift',
       })
     );
