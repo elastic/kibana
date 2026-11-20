@@ -16,7 +16,8 @@ project:
   channel: ''
   owner: '@elastic/workflows-eng'
   sourceRoot: src/platform/packages/shared/kbn-connector-topics
-dependsOn: []
+dependsOn:
+  - '@kbn/zod'
 tags:
   - shared-common
   - package
