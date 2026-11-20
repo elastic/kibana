@@ -37,12 +37,24 @@ spaceTest.describe(
       await seeded?.cleanup();
     });
 
-    spaceTest('shows the isolated host in the endpoint list', async ({ pageObjects }) => {
-      const host = requireHost(seeded);
-      const { endpointList } = pageObjects;
+    spaceTest(
+      'offers Release but not Respond in the row actions of an isolated host',
+      async ({ pageObjects }) => {
+        const host = requireHost(seeded);
+        const { endpointList } = pageObjects;
 
-      await endpointList.goto();
-      await expect(endpointList.rowFor(host.hostname)).toBeVisible();
-    });
+        await spaceTest.step('the row action menu offers Release', async () => {
+          await endpointList.goto();
+          await expect(endpointList.rowFor(host.hostname)).toBeVisible();
+          await endpointList.openRowActions(host.hostname);
+          await expect(endpointList.rowActionsMenu).toBeVisible();
+          await expect(endpointList.releaseMenuItem).toBeVisible();
+        });
+
+        await spaceTest.step('the row action menu does not offer Respond', async () => {
+          await expect(endpointList.respondInRowActionsMenu).toHaveCount(0);
+        });
+      }
+    );
   }
 );

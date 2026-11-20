@@ -1,5 +1,5 @@
 {
-  "sha1": "8e66961bc67557571ef059d735028c2f9c910eec",
+  "sha1": "702f883fc6a481102aac8ead7a46661dd050960a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -31,8 +31,8 @@
       }
     },
     {
-      "id": "7586980fd1201f0-475aa8e6d9c6798",
-      "title": "Endpoint list row actions on Security Essentials shows the isolated host in the endpoint list",
+      "id": "7586980fd1201f0-6b4cad9190ac4be",
+      "title": "Endpoint list row actions on Security Essentials offers Release but not Respond in the row actions of an isolated host",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_essentials"
