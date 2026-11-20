@@ -66,8 +66,12 @@ spaceTest.describe('Dashboard replay cache', { tag: '@local-stateful-classic' },
 
   spaceTest('replays the session started by Refresh', async ({ page, pageObjects, network }) => {
     const { controls, dashboard } = pageObjects;
+    const refreshButton = page.testSubj.locator('querySubmitButton');
     await countSearchesOnReturn(dashboard, network);
+    await expect(refreshButton).toHaveAttribute('aria-label', /^Updated /);
+
     await refetchDashboard(dashboard, network, () => dashboard.refresh());
+    await expect(refreshButton).toHaveAttribute('aria-label', 'Refresh query');
     const results = await readResults(page, controls);
 
     expect(await countSearchesOnReturn(dashboard, network)).toBe(0);
