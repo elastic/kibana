@@ -703,7 +703,7 @@ export const triageStoreFpDecisionsStepCommonDefinition: CommonStepDefinition<
     'xpack.alertzero.workflows.steps.triageStoreFpDecisions.description',
     {
       defaultMessage:
-        'Stores the exact patterns of an approved or dismissed closure proposal as Knowledge Items, so later alerts can be matched without the model.',
+        'Stores the exact patterns of an approved or dismissed closure proposal as Knowledge Indicators, so later alerts can be matched without the model.',
     }
   ),
   category: StepCategory.KibanaSecurity,

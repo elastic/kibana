@@ -11,7 +11,7 @@ import { buildPatternKeys, describePatternKey } from './pattern_key';
 
 /**
  * The verdict cache: a model verdict for one strict pattern key, kept so that a later alert of the same key can reuse it.
- * This module is pure: alert documents and verdicts in, records and Knowledge Item documents out. The steps do the reading
+ * This module is pure: alert documents and verdicts in, records and Knowledge Indicator (KI) documents out. The steps do the reading
  * and the writing. In `shadow` a hit is a tag, and the alert is analyzed as before. In `on` a hit takes the verdict of the record and skips
  * analysis, except for the alerts that a guard fires on and a small audit sample, which are analyzed.
  *
@@ -367,7 +367,7 @@ export const pickKeyRepresentatives = ({
 };
 
 // ---------------------------------------------------------------------------
-// The Knowledge Item document and its reader
+// The Knowledge Indicator document and its reader
 // ---------------------------------------------------------------------------
 
 type Source = Record<string, unknown>;
@@ -381,7 +381,7 @@ const toRunAttributes = ({ alertId, verdict, confidence }: CacheRun) => ({
 });
 
 /**
- * The Knowledge Item document of a record, for the same index as the decisions. `content` is for humans: reuse reads
+ * The Knowledge Indicator document of a record, for the same index as the decisions. `content` is for humans: reuse reads
  * `attributes`. Novelty lists are an array of `{ field, values }` and not an object keyed by field name, because the
  * field names contain dots, and Elasticsearch would turn each dot into a nested object.
  */

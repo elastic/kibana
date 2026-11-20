@@ -392,7 +392,7 @@ describe('pickKeyRepresentatives', () => {
   });
 });
 
-describe('the Knowledge Item document and its reader', () => {
+describe('the Knowledge Indicator document and its reader', () => {
   const full = (): VerdictCacheRecord => ({
     ...written(act(pending(), fresh('alert-2'))),
     jevScore: 0.04,
