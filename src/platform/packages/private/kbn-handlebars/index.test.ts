@@ -268,7 +268,7 @@ describe('Handlebars.compileAST', () => {
       });
     });
 
-    describe('context references with `strict` and `assumeObjects`', () => {
+    describe('context references', () => {
       it('should render `{{this}}` for primitive values with `strict` set to true', () => {
         expectTemplate('{{#each items}}{{this}}{{/each}}')
           .withCompileOptions({ strict: true })
@@ -295,6 +295,12 @@ describe('Handlebars.compileAST', () => {
           .withCompileOptions({ strict: true, assumeObjects: true })
           .withInput({ items: ['a', 'b'] })
           .toCompileTo('ab');
+      });
+
+      it('should render the context for a path that starts with an empty segment', () => {
+        expectTemplate('{{[].label}}')
+          .withInput({ '': { label: 'nested' }, toString: () => 'context' })
+          .toCompileTo('context');
       });
     });
   });
