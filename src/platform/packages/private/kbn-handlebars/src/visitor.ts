@@ -411,11 +411,7 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   private pushToOutputWithEscapeCheck(result: any, node: ProcessableNodeWithPathParts) {
-    if (
-      !(node as hbs.AST.MustacheStatement).escaped ||
-      this.compileOptions.noEscape === true ||
-      typeof result !== 'string'
-    ) {
+    if (!(node as hbs.AST.MustacheStatement).escaped || this.compileOptions.noEscape === true) {
       this.output.push(result);
     } else {
       this.output.push(Handlebars.escapeExpression(result));
@@ -640,15 +636,7 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
         this.output.push(result);
       }
     } else {
-      if (
-        (node as hbs.AST.MustacheStatement).escaped === false ||
-        this.compileOptions.noEscape === true ||
-        typeof helperResult !== 'string'
-      ) {
-        this.output.push(helperResult);
-      } else {
-        this.output.push(Handlebars.escapeExpression(helperResult));
-      }
+      this.pushToOutputWithEscapeCheck(helperResult, node);
     }
   }
 
