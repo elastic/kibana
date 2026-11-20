@@ -75,6 +75,10 @@ outputs:
     type: boolean
   - name: refine_started
     type: boolean
+  # True when the live skill is built-in (read-only) and the approved winner
+  # was recorded for its owning team instead of deployed.
+  - name: shipped_proposal
+    type: boolean
 triggers:
   - type: manual
     inputs:
@@ -90,6 +94,15 @@ triggers:
           type: string
           maxLength: 64
           description: Name of the new skill, used only when skill_id is empty.
+        base_skill_id:
+          type: string
+          maxLength: 128
+          description: >-
+            Skill whose tool_ids and referenced_content every variant arm
+            copies, so a variant is compared with the same tools and
+            references as the skill it would replace. Defaults to skill_id.
+            The refine workflow sets it on its evaluate-only rounds, which run
+            without a skill_id.
         skill_description:
           type: string
           maxLength: 1024
@@ -194,6 +207,41 @@ steps:
       best_variant: ''
       best_content: ''
       refine: false
+      base_skill_id: "{{ inputs.base_skill_id | default: inputs.skill_id | default: '' }}"
+      live_readonly: false
+      variant_tool_ids: []
+      variant_referenced_content: []
+      shipped_proposal: false
+
+  # ----------------------------------------------------------------------
+  # The skill the variants are built on. Its tool_ids and referenced_content
+  # go onto every variant; without them a variant of a skill that calls tools
+  # or loads references is scored with neither and loses for that reason
+  # alone. Tools a built-in registers inline (getInlineTools) are not in the
+  # public API, so they cannot be copied: a variant of such a skill still runs
+  # without them, and the comparison favours the live arm.
+  # A read-only (built-in) live skill cannot be written: approval then records
+  # the winner for the owning team instead of a PUT.
+  # ----------------------------------------------------------------------
+  - name: get_live_skill
+    type: kibana.request
+    if: '${{ variables.base_skill_id != blank }}'
+    timeout: '30s'
+    with:
+      method: GET
+      path: '/s/{{ workflow.spaceId }}/api/agent_builder/skills/{{ variables.base_skill_id }}'
+      headers:
+        elastic-api-version: '2023-10-31'
+    on-failure:
+      continue: true
+
+  - name: resolve_live_skill
+    type: data.set
+    if: '${{ variables.base_skill_id != blank and steps.get_live_skill.error == null and steps.get_live_skill.output.id != null }}'
+    with:
+      live_readonly: '${{ variables.has_live_skill == true and steps.get_live_skill.output.readonly == true }}'
+      variant_tool_ids: '${{ steps.get_live_skill.output.tool_ids | default: variables.variant_tool_ids }}'
+      variant_referenced_content: '${{ steps.get_live_skill.output.referenced_content | default: variables.variant_referenced_content }}'
 
   # ----------------------------------------------------------------------
   # Baseline arm: no skill at all. Every other arm is judged against it.
@@ -338,6 +386,8 @@ steps:
             description: >-
               {{ inputs.skill_description | default: 'AESOP prototype candidate variant. Created by the A/B compare workflow; safe to delete when no run is active.' }}
             content: '{{ foreach.item }}'
+            tool_ids: '${{ variables.variant_tool_ids }}'
+            referenced_content: '${{ variables.variant_referenced_content }}'
         on-failure:
           continue: true
 
@@ -607,8 +657,8 @@ steps:
 
           Nothing has been deployed yet.
           {% assign tiebreak_marker = variables.arm_variant_indexes[steps.winner.output.tiebreak_index] %}
-          **If you approve**, {% if tiebreak_marker == 'live' %}the live skill stays as it is: it has the highest mean of the tied arms (experiment `{{ steps.winner.output.tiebreak_target_id }}`), so nothing is changed.{% else %}the agent deploys variant {{ tiebreak_marker }} of {{ inputs.variants.size }} (experiment `{{ steps.winner.output.tiebreak_target_id }}`), the tied arm with the highest mean{% if variables.has_live_skill == true %}, onto `{{ variables.target_skill_id }}` after storing its current content for a drift rollback{% else %}, as the new skill `{{ variables.target_skill_name }}`{% endif %}. On equal means the lowest variant index wins. The write runs as the AESOP identity (the user who enabled the explorer), after you approve.{% endif %}
-          **If you dismiss**, every tied arm is rejected and nothing is deployed.
+          **If you approve**, {% if tiebreak_marker == 'live' %}the live skill stays as it is: it has the highest mean of the tied arms (experiment `{{ steps.winner.output.tiebreak_target_id }}`), so nothing is changed.{% elsif variables.live_readonly == true %}variant {{ tiebreak_marker }} of {{ inputs.variants.size }} (experiment `{{ steps.winner.output.tiebreak_target_id }}`), the tied arm with the highest mean, is recorded as a proposed change to `{{ variables.target_skill_id }}` for its owning team. `{{ variables.target_skill_id }}` is a built-in (read-only) skill, so nothing is written to it; the record holds the approved content and a diff against the current content.{% else %}the agent deploys variant {{ tiebreak_marker }} of {{ inputs.variants.size }} (experiment `{{ steps.winner.output.tiebreak_target_id }}`), the tied arm with the highest mean{% if variables.has_live_skill == true %}, onto `{{ variables.target_skill_id }}` after storing its current content for a drift rollback{% else %}, as the new skill `{{ variables.target_skill_name }}`{% endif %}. On equal means the lowest variant index wins. The write runs as the AESOP identity (the user who enabled the explorer), after you approve.{% endif %}
+          **If you dismiss**, every tied arm is rejected and nothing is {% if variables.live_readonly == true %}recorded for the owning team{% else %}deployed{% endif %}.
           **To deploy a different tied arm**, dismiss this proposal and re-run the A/B with only that variant.
 
           **Tied arms**
@@ -658,7 +708,7 @@ steps:
       inputs:
         origin: alertzero
         conversationId: '{{ inputs.investigation_id }}'
-        title: "AESOP: {% if variables.has_live_skill == true %}update {{ variables.target_skill_id }}{% else %}create the skill {{ variables.target_skill_name }}{% endif %}"
+        title: "AESOP: {% if variables.live_readonly == true %}propose a change to the built-in skill {{ variables.target_skill_id }}{% elsif variables.has_live_skill == true %}update {{ variables.target_skill_id }}{% else %}create the skill {{ variables.target_skill_name }}{% endif %}"
         comment: |-
           **AESOP: {% if variables.has_live_skill == true %}deploy the winning variant of `{{ variables.target_skill_id }}`{% else %}create the new skill `{{ variables.target_skill_name }}`{% endif %}?**
 
@@ -679,7 +729,7 @@ steps:
           **Evaluators:** skill-secret-scanner, skill-prompt-injection, skill-pii, esql-compile, skill-index-resolves, correctness.factuality (judge, ranks arms); the secret and prompt-injection scanners reject any regression beyond {{ consts.CODE_TOLERANCE }} vs baseline, skill-pii, esql-compile and skill-index-resolves only one that is significant at p ≤ 0.05 or has no p-value
 
           **On approval**
-          {% if variables.has_live_skill == true %}If you approve, the agent stores the current content of `{{ variables.target_skill_id }}` (so a drift rollback can restore it), PUTs the winner onto it as the AESOP identity (the user who enabled the explorer, acting after your approval), and enables the skill's drift monitor.{% else %}If you approve, the agent creates the skill as the AESOP identity (the user who enabled the explorer, acting after your approval) and enables its drift monitor.{% endif %} Scratch variant skills are deleted either way. If you dismiss, the decision and your reason are recorded and nothing is deployed.
+          {% if variables.live_readonly == true %}`{{ variables.target_skill_id }}` is a built-in (read-only) skill, so nothing is written to it. If you approve, the agent records the winner as a proposed change for the skill's owning team: the approved content and a diff against the current content, with the A/B result and your name. The skill keeps running as shipped.{% elsif variables.has_live_skill == true %}If you approve, the agent stores the current content of `{{ variables.target_skill_id }}` (so a drift rollback can restore it), PUTs the winner onto it as the AESOP identity (the user who enabled the explorer, acting after your approval), and enables the skill's drift monitor.{% else %}If you approve, the agent creates the skill as the AESOP identity (the user who enabled the explorer, acting after your approval) and enables its drift monitor.{% endif %} Scratch variant skills are deleted either way. If you dismiss, the decision and your reason are recorded and nothing is deployed.
         impact: medium
         confidence: medium
         autoApprove: false
@@ -764,9 +814,67 @@ steps:
   # KI keyed by the skill id, and only then PUT the winner. The PUT is gated on
   # the KI write: without the prior content a rollback has nothing to restore.
   # ----------------------------------------------------------------------
+  # ----------------------------------------------------------------------
+  # Approval, built-in (read-only) live skill: the PUT would be rejected, so
+  # nothing is written to the skill. The approved winner and a diff against
+  # the shipped content are recorded as a KI for the team that owns the
+  # skill, which applies it in its own code. No drift monitor: nothing
+  # AESOP deployed is running.
+  # ----------------------------------------------------------------------
+  - name: shipped_diff
+    type: security.aesopSkillDiff
+    if: '${{ steps.resolve_decision.output.approved == true and variables.live_readonly == true }}'
+    with:
+      skill_id: '{{ variables.target_skill_id }}'
+      current_content: '${{ steps.get_live_skill.output.content }}'
+      proposed_content: '${{ variables.winner_content }}'
+    on-failure:
+      continue: true
+
+  - name: write_shipped_proposal_ki
+    type: context-engine.createKi
+    if: '${{ steps.resolve_decision.output.approved == true and variables.live_readonly == true }}'
+    with:
+      ai_index_id: '{{ consts.AI_INDEX_ID }}'
+      ki_id: 'shipped-proposal-{{ execution.id }}'
+      ki:
+        type: aesop.shipped_skill_proposal
+        title: 'AESOP proposed change to the built-in skill {{ variables.target_skill_id }}'
+        description: >-
+          {% if variables.is_tie == true %}The analyst picked the tiebreak arm of a tie{% else %}The analyst approved the winning variant{% endif %}; approved by {{ variables.approved_by | default: 'an unknown approver' }}. `{{ variables.target_skill_id }}` is read-only, so nothing was written; the content is the approved winner and the diff attribute shows the change against the shipped skill ({{ steps.shipped_diff.output.lines_added | default: '?' }} lines added, {{ steps.shipped_diff.output.lines_removed | default: '?' }} removed).
+        content: '{{ variables.winner_content | truncate: 60000, "" }}'
+        tags:
+          - aesop
+          - aesop:shipped-proposal
+        attributes:
+          skill_id: '{{ variables.target_skill_id }}'
+          source: ab_compare
+          approved_by: '{{ variables.approved_by }}'
+          proposal_id: '{{ steps.resolve_decision.output.proposal_id }}'
+          via_tie_pick: '{{ variables.is_tie }}'
+          winner_experiment_id: "{{ steps.winner.output.winner_target_id | default: steps.winner.output.tiebreak_target_id | default: '' }}"
+          baseline_experiment_id: '{{ steps.baseline_start.output.experiment_id }}'
+          reasons: "{{ steps.winner.output.reasons | join: ' ' | truncate: 5000 }}"
+          # A KI attribute holds at most 10000 characters; a longer diff is cut
+          # and diff_truncated says so. The content above holds the whole winner.
+          diff: "{{ steps.shipped_diff.output.diff | default: '' | truncate: 9500 }}"
+          diff_truncated: "{% assign diff_size = steps.shipped_diff.output.diff | default: '' | size %}{% if diff_size > 9500 %}true{% else %}false{% endif %}"
+          lines_added: "{{ steps.shipped_diff.output.lines_added | default: '' }}"
+          lines_removed: "{{ steps.shipped_diff.output.lines_removed | default: '' }}"
+          dataset_id: '{{ inputs.dataset_id }}'
+          workflow_execution_id: '{{ execution.id }}'
+    on-failure:
+      continue: true
+
+  - name: mark_shipped_proposal
+    type: data.set
+    if: '${{ steps.write_shipped_proposal_ki.output != null and steps.write_shipped_proposal_ki.error == null }}'
+    with:
+      shipped_proposal: true
+
   - name: get_prior_skill
     type: kibana.request
-    if: '${{ steps.resolve_decision.output.approved == true and variables.has_live_skill == true }}'
+    if: '${{ steps.resolve_decision.output.approved == true and variables.has_live_skill == true and variables.live_readonly != true }}'
     timeout: '30s'
     with:
       method: GET
@@ -780,7 +888,7 @@ steps:
   # restored whole, so the deploy is refused instead of storing a truncation.
   - name: resolve_prior_skill
     type: data.set
-    if: '${{ steps.resolve_decision.output.approved == true and variables.has_live_skill == true }}'
+    if: '${{ steps.resolve_decision.output.approved == true and variables.has_live_skill == true and variables.live_readonly != true }}'
     with:
       prior_ok: >-
         ${{ steps.get_prior_skill.error == null
@@ -960,5 +1068,6 @@ steps:
       clear_winner: '${{ variables.deploy_candidate == true or variables.tie_proposed == true }}'
       is_tie: '${{ variables.is_tie == true }}'
       refine_started: '${{ variables.refine == true and steps.start_refine.error == null }}'
+      shipped_proposal: '${{ variables.shipped_proposal == true }}'
       skip_reason: >-
-        {% if steps.baseline_start.error != null %}The baseline experiment could not be started: {{ steps.baseline_start.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif variables.baseline_scored != true %}The baseline arm produced no scores; nothing to compare.{% elsif variables.live_failed == true %}The live skill arm produced no scores (is `{{ inputs.skill_id }}` a skill id?); the variants were not run, since they could not be compared with the live skill.{% elsif variables.arm_count < 1 %}No arm produced scores; nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.winner.error != null %}Picking the winner failed: {{ steps.winner.error.message }}{% elsif variables.propose != true %}Evaluate mode, nothing was proposed.{% if variables.reject_reason != blank %} {{ variables.reject_reason }}{% endif %}{% elsif variables.is_tie == true and steps.propose_tie_pick.error != null %}The tie proposal failed: {{ steps.propose_tie_pick.error.message }}{% elsif variables.is_tie == true and steps.resolve_decision.output.dismissed == true %}The tie proposal was dismissed; every tied arm was rejected.{% elsif variables.is_tie == true and variables.winner_variant == 'live' %}{% if steps.resolve_decision.output.approved == true %}Tied arms; the live skill has the highest mean, so approving the pick changed nothing.{% else %}Tied arms, nothing deployed; the analyst was asked to confirm keeping the live skill.{% endif %}{% elsif variables.deploy_candidate != true and variables.tie_deploy != true %}Rejected: {{ variables.reject_reason }}{% if variables.refine == true %} A refine pass was started from variant {{ variables.best_variant }}{% if steps.start_refine.error != null %}, but it failed to start: {{ steps.start_refine.error.message }}{% endif %}.{% endif %}{% elsif steps.propose_deploy.error != null %}The proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.resolve_decision.output.dismissed == true %}The proposal was dismissed.{% elsif steps.resolve_decision.output.approved != true %}The proposal was not decided.{% elsif steps.resolve_prior_skill.output.prior_ok == false %}The current skill content could not be read or is too long to store for a rollback; nothing was changed.{% elsif steps.store_prior_content.error != null %}The prior content could not be stored, so nothing was changed: {{ steps.store_prior_content.error.message }}{% elsif steps.update_skill.error != null %}The update failed after approval: {{ steps.update_skill.error.message }}{% elsif steps.create_skill.error != null %}Creating the skill failed after approval: {{ steps.create_skill.error.message }}{% elsif steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}
+        {% if steps.baseline_start.error != null %}The baseline experiment could not be started: {{ steps.baseline_start.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif variables.baseline_scored != true %}The baseline arm produced no scores; nothing to compare.{% elsif variables.live_failed == true %}The live skill arm produced no scores (is `{{ inputs.skill_id }}` a skill id?); the variants were not run, since they could not be compared with the live skill.{% elsif variables.arm_count < 1 %}No arm produced scores; nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.winner.error != null %}Picking the winner failed: {{ steps.winner.error.message }}{% elsif variables.propose != true %}Evaluate mode, nothing was proposed.{% if variables.reject_reason != blank %} {{ variables.reject_reason }}{% endif %}{% elsif variables.is_tie == true and steps.propose_tie_pick.error != null %}The tie proposal failed: {{ steps.propose_tie_pick.error.message }}{% elsif variables.is_tie == true and steps.resolve_decision.output.dismissed == true %}The tie proposal was dismissed; every tied arm was rejected.{% elsif variables.is_tie == true and variables.winner_variant == 'live' %}{% if steps.resolve_decision.output.approved == true %}Tied arms; the live skill has the highest mean, so approving the pick changed nothing.{% else %}Tied arms, nothing deployed; the analyst was asked to confirm keeping the live skill.{% endif %}{% elsif variables.deploy_candidate != true and variables.tie_deploy != true %}Rejected: {{ variables.reject_reason }}{% if variables.refine == true %} A refine pass was started from variant {{ variables.best_variant }}{% if steps.start_refine.error != null %}, but it failed to start: {{ steps.start_refine.error.message }}{% endif %}.{% endif %}{% elsif steps.propose_deploy.error != null %}The proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.resolve_decision.output.dismissed == true %}The proposal was dismissed.{% elsif steps.resolve_decision.output.approved != true %}The proposal was not decided.{% elsif variables.live_readonly == true %}{% if variables.shipped_proposal == true %}`{{ variables.target_skill_id }}` is a built-in (read-only) skill, so nothing was deployed; the approved winner and its diff were recorded for the owning team (knowledge indicator `shipped-proposal-{{ execution.id }}`).{% elsif steps.write_shipped_proposal_ki.error != null %}`{{ variables.target_skill_id }}` is a built-in (read-only) skill and the proposal for its owning team could not be recorded: {{ steps.write_shipped_proposal_ki.error.message }}{% endif %}{% elsif steps.resolve_prior_skill.output.prior_ok == false %}The current skill content could not be read or is too long to store for a rollback; nothing was changed.{% elsif steps.store_prior_content.error != null %}The prior content could not be stored, so nothing was changed: {{ steps.store_prior_content.error.message }}{% elsif steps.update_skill.error != null %}The update failed after approval: {{ steps.update_skill.error.message }}{% elsif steps.create_skill.error != null %}Creating the skill failed after approval: {{ steps.create_skill.error.message }}{% elsif steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}

@@ -32,6 +32,7 @@ import { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprin
 import { aesopSelectWinnerStepDefinition } from './aesop_select_winner/aesop_select_winner_step';
 import { aesopCaptureDatasetStepDefinition } from './aesop_capture_dataset/aesop_capture_dataset_step';
 import { aesopCollectFailuresStepDefinition } from './aesop_collect_failures/aesop_collect_failures_step';
+import { aesopSkillDiffStepDefinition } from './aesop_skill_diff/aesop_skill_diff_step';
 
 type StepLoader = () => Promise<PublicStepDefinition | undefined>;
 
@@ -56,7 +57,7 @@ describe('registerWorkflowSteps (public)', () => {
 
     registerWorkflowSteps(workflowsExtensions, enabled);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(24);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(25);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(expect.any(Function));
   });
 
@@ -90,6 +91,7 @@ describe('registerWorkflowSteps (public)', () => {
       loader22,
       loader23,
       loader24,
+      loader25,
     ] = getStepLoaders(workflowsExtensions);
 
     await expect(loader1()).resolves.toBe(renderAlertNarrativeStepDefinition);
@@ -116,6 +118,7 @@ describe('registerWorkflowSteps (public)', () => {
     await expect(loader22()).resolves.toBe(aesopSelectWinnerStepDefinition);
     await expect(loader23()).resolves.toBe(aesopCaptureDatasetStepDefinition);
     await expect(loader24()).resolves.toBe(aesopCollectFailuresStepDefinition);
+    await expect(loader25()).resolves.toBe(aesopSkillDiffStepDefinition);
   });
 
   it('does not register the AESOP steps when the prototype is disabled', async () => {
@@ -130,5 +133,6 @@ describe('registerWorkflowSteps (public)', () => {
     expect(loaded).not.toContain(aesopSelectWinnerStepDefinition);
     expect(loaded).not.toContain(aesopCaptureDatasetStepDefinition);
     expect(loaded).not.toContain(aesopCollectFailuresStepDefinition);
+    expect(loaded).not.toContain(aesopSkillDiffStepDefinition);
   });
 });

@@ -315,10 +315,10 @@ it.each([
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '5:fa71b87b'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '7:2ce58cc9'],
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '6:063c014a'],
-  [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '14:cec28bf5'],
+  [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '15:5df3a16b'],
   [AESOP_DRIFT_MONITOR_WORKFLOW_ID, AESOP_DRIFT_MONITOR_YAML, '12:0fea1d55'],
   [AESOP_EXPLORER_WORKFLOW_ID, AESOP_EXPLORER_YAML, '13:7a836836'],
-  [AESOP_REFINE_WORKFLOW_ID, AESOP_REFINE_YAML, '2:7c7a68e3'],
+  [AESOP_REFINE_WORKFLOW_ID, AESOP_REFINE_YAML, '3:b00ee031'],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
   (workflowId, inputs, expectedFingerprint) => {
@@ -574,8 +574,10 @@ describe('managedWorkflowDefinitions', () => {
     describe('A/B compare tie-deploy wiring', () => {
       interface WiringStep {
         name: string;
+        type?: string;
         if?: string;
         with?: Record<string, any>;
+        steps?: WiringStep[];
       }
       const stepsByName = (): Map<string, WiringStep> => {
         const parsed = parse(AESOP_AB_COMPARE_YAML);
@@ -648,6 +650,48 @@ describe('managedWorkflowDefinitions', () => {
         expect(stepsByName().get('resolve_refine')?.with?.refine).toContain(condition);
       });
 
+      // A built-in skill is read-only: its PUT is rejected, so an approval
+      // records a proposal for the owning team and writes nothing.
+      it.each(['get_prior_skill', 'resolve_prior_skill'])(
+        'skips %s for a read-only live skill',
+        (name) => {
+          expect(stepsByName().get(name)?.if).toContain('variables.live_readonly != true');
+        }
+      );
+
+      it.each(['shipped_diff', 'write_shipped_proposal_ki'])(
+        'runs %s only on approval of a read-only live skill',
+        (name) => {
+          const condition = stepsByName().get(name)?.if;
+          expect(condition).toContain('steps.resolve_decision.output.approved == true');
+          expect(condition).toContain('variables.live_readonly == true');
+        }
+      );
+
+      it('diffs the approved winner against the shipped content', () => {
+        const step = stepsByName().get('shipped_diff');
+        expect(step?.type).toBe('security.aesopSkillDiff');
+        expect(step?.with?.current_content).toContain('steps.get_live_skill.output.content');
+        expect(step?.with?.proposed_content).toContain('variables.winner_content');
+      });
+
+      it('marks the live skill read-only only when it exists', () => {
+        expect(stepsByName().get('resolve_live_skill')?.with?.live_readonly).toContain(
+          'variables.has_live_skill == true'
+        );
+      });
+
+      it.each(['tool_ids', 'referenced_content'])(
+        'creates variants with the base skill %s',
+        (field) => {
+          // create_variant runs inside the variants foreach.
+          const createVariant = [...stepsByName().values()]
+            .flatMap((step) => step.steps ?? [])
+            .find(({ name }) => name === 'create_variant');
+          expect(createVariant?.with?.body?.[field]).toContain('variables.variant_');
+        }
+      );
+
       it('hands the refine the best arm, by content and experiment', () => {
         const step = stepsByName().get('start_refine');
         expect(step?.if).toContain('variables.refine == true');
@@ -678,6 +722,10 @@ describe('managedWorkflowDefinitions', () => {
         expect(byName.get('evaluate')?.with?.['workflow-id']).toBe(AESOP_AB_COMPARE_WORKFLOW_ID);
         expect(inputs?.propose).toBe(false);
         expect(inputs?.allow_refine).toBe(false);
+      });
+
+      it('keeps the live skill tools and references on every round variant', () => {
+        expect(byName.get('evaluate')?.with?.inputs?.base_skill_id).toContain('inputs.skill_id');
       });
 
       it('proposes a win through a fresh A/B that cannot refine again', () => {

@@ -133,5 +133,9 @@ export const registerWorkflowSteps = (
         (m) => m.aesopCollectFailuresStepDefinition
       )
     );
+
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./aesop_skill_diff/aesop_skill_diff_step').then((m) => m.aesopSkillDiffStepDefinition)
+    );
   }
 };

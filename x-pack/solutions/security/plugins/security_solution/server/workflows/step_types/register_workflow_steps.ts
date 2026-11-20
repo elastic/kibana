@@ -31,6 +31,7 @@ import { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprin
 import { aesopSelectWinnerStepDefinition } from './aesop_select_winner';
 import { aesopCaptureDatasetStepDefinition } from './aesop_capture_dataset';
 import { aesopCollectFailuresStepDefinition } from './aesop_collect_failures';
+import { aesopSkillDiffStepDefinition } from './aesop_skill_diff';
 
 export interface RegisterWorkflowStepsDeps {
   experimentalFeatures: Pick<ExperimentalFeatures, 'aesopPrototypeEnabled'>;
@@ -69,5 +70,6 @@ export const registerWorkflowSteps = (
     workflowsExtensions.registerStepDefinition(aesopSelectWinnerStepDefinition);
     workflowsExtensions.registerStepDefinition(aesopCaptureDatasetStepDefinition);
     workflowsExtensions.registerStepDefinition(aesopCollectFailuresStepDefinition);
+    workflowsExtensions.registerStepDefinition(aesopSkillDiffStepDefinition);
   }
 };

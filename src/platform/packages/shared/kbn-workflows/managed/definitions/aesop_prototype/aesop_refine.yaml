@@ -253,6 +253,8 @@ steps:
         with:
           workflow-id: system-security-aesop-ab-compare
           inputs:
+            # The variants keep the live skill's tools and references.
+            base_skill_id: '{{ inputs.skill_id }}'
             skill_description: '{{ inputs.skill_description }}'
             dataset_id: '{{ inputs.dataset_id }}'
             connector_id: '{{ inputs.connector_id }}'
