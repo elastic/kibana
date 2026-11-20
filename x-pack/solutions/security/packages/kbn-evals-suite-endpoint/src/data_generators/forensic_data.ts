@@ -90,6 +90,24 @@ const KILL_CHAIN: ForensicEvent[] = [
       message: 'OUTLOOK.EXE spawned an encoded PowerShell command (phishing attachment macro).',
     },
   },
+  // Short-lived process: Defend stores its start and end on one document, so a
+  // `WHERE event.type == "start"` filter drops it with a multi-value warning.
+  {
+    offsetMinutes: 1,
+    host: FORENSIC_HOSTS.patientZero,
+    index: PROCESS_INDEX,
+    document: {
+      event: { category: ['process'], type: ['start', 'end'], kind: 'event' },
+      process: {
+        name: 'whoami.exe',
+        pid: 4907,
+        executable: 'C:\\Windows\\System32\\whoami.exe',
+        command_line: 'whoami.exe /all',
+        parent: { name: 'powershell.exe', pid: 4821 },
+      },
+      message: 'Encoded PowerShell ran whoami /all for host and privilege discovery.',
+    },
+  },
   {
     offsetMinutes: 2,
     host: FORENSIC_HOSTS.patientZero,
