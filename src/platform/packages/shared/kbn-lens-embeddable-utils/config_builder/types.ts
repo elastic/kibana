@@ -85,6 +85,11 @@ export interface LensBaseLayer {
   value: LensLayerQuery;
 }
 
+export type LensFormatConfig = Pick<
+  LensBaseLayer,
+  'format' | 'decimals' | 'suffix' | 'compactValues' | 'fromUnit' | 'toUnit'
+>;
+
 export interface LensBaseXYLayer {
   dataset?: LensDataset;
   yAxis: LensBaseLayer[];
@@ -248,10 +253,7 @@ export interface LensHeatmapConfigBase {
   /** field name to apply breakdown based on field type or full breakdown configuration */
   breakdown?: LensBreakdownConfig;
   /** Y-axis field format. Layer `format` still applies to the cell value. */
-  breakdownFormat?: Pick<
-    LensBaseLayer,
-    'format' | 'decimals' | 'suffix' | 'compactValues' | 'fromUnit' | 'toUnit'
-  >;
+  breakdownFormat?: LensFormatConfig;
   xAxis: LensBreakdownConfig;
   legend?: Identity<LensLegendConfig>;
   axisLabel?: { xAxis?: boolean; yAxis?: boolean };

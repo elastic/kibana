@@ -10,6 +10,7 @@
 import {
   LENS_HEATMAP_DEFAULT_COLOR_STEPS,
   LENS_RANGE_MODES,
+  isColumnOfType,
   type FormBasedPersistedState,
   type GenericIndexPatternColumn,
   type HeatmapPalette,
@@ -149,32 +150,30 @@ function withBreakdownFormat(
   if (!format) {
     return column;
   }
-  if (column.operationType === 'range') {
-    const rangeColumn = column as RangeIndexPatternColumn;
+  if (isColumnOfType<RangeIndexPatternColumn>('range', column)) {
     // Histogram keys are numbers, so they keep a scalar format. Explicit ranges are
     // RangeKey objects and need the range wrapper or lens_format_column drops the bounds.
     const parentFormat =
-      rangeColumn.params.type === LENS_RANGE_MODES.Range
-        ? rangeColumn.params.parentFormat ?? {
+      column.params.type === LENS_RANGE_MODES.Range
+        ? column.params.parentFormat ?? {
             id: 'range',
             params: { template: 'arrow_right', replaceInfinity: true },
           }
         : undefined;
     return {
-      ...rangeColumn,
+      ...column,
       params: {
-        ...rangeColumn.params,
+        ...column.params,
         format,
         ...(parentFormat ? { parentFormat } : {}),
       },
     };
   }
-  if (column.operationType === 'terms') {
-    const termsColumn = column as TermsIndexPatternColumn;
+  if (isColumnOfType<TermsIndexPatternColumn>('terms', column)) {
     return {
-      ...termsColumn,
+      ...column,
       params: {
-        ...termsColumn.params,
+        ...column.params,
         format,
       },
     };
@@ -192,14 +191,7 @@ function getValueColumns(layer: LensHeatmapConfig) {
   const format = toBreakdownFormat(layer.breakdownFormat);
   return [
     ...(layer.breakdown
-      ? [
-          getValueColumn(
-            getAccessorName('y'),
-            layer.breakdown,
-            format ? 'number' : undefined,
-            format
-          ),
-        ]
+      ? [getValueColumn(getAccessorName('y'), layer.breakdown, undefined, format)]
       : []),
     getValueColumn(getAccessorName('x'), layer.xAxis as string),
     getValueColumn(ACCESSOR, layer.value),

@@ -300,7 +300,7 @@ test('writes the breakdown format onto the ES|QL Y column', async () => {
   const yColumn = columns.find((column) => column.columnId === 'y_metric_formula_accessor');
   const valueColumn = columns.find((column) => column.columnId === 'metric_formula_accessor');
 
-  expect(yColumn?.meta).toEqual({ type: 'number' });
+  expect(yColumn?.meta).toBeUndefined();
   expect(yColumn?.params?.format).toEqual({
     id: 'duration',
     params: {
