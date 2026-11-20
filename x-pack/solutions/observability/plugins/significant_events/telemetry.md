@@ -6,7 +6,11 @@ Every EBT event type of this plugin is `nightshift-<name>` in kebab-case, the pr
 the `nightshift_investigations` and `nightshift_sources` events; give a new event the same prefix.
 Kibana versions before the rename sent the same events as `significant-events-<name>` (for example
 `significant-events-detection-scan` for `nightshift-detection-scan`). Those rows keep the old name,
-so a query that spans the rename has to match both.
+so a query that spans the rename has to match both. The rename swapped only the prefix, so the five
+queries-generation and discovery events, whose old names doubled it
+(`significant-events-significant-events-discovery-started`), keep an inner `significant-events`
+segment (`nightshift-significant-events-discovery-started`). That segment is intentional: it keeps
+the old-to-new mapping one to one.
 
 ## Workflow execution identity
 
