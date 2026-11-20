@@ -33,6 +33,8 @@ export const getAlertZeroDeepLinks = (capabilities?: Capabilities): AppDeepLink[
             id: SecurityPageName.alertZeroEscalations,
             title: i18n.NAV_ESCALATIONS,
             path: '/escalations',
+            // Right after the AlertZero app link (`order: -3`), above every Security entry in the Classic nav.
+            order: -2,
             visibleIn: [
               'globalSearch',
               'classicSideNav',
@@ -45,6 +47,7 @@ export const getAlertZeroDeepLinks = (capabilities?: Capabilities): AppDeepLink[
       id: SecurityPageName.alertZeroWatches,
       title: i18n.NAV_WATCHES,
       path: '/watches',
+      order: -1,
       visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
     },
   ];

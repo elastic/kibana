@@ -110,7 +110,8 @@ export class AlertZeroPublicPlugin
       // navigation tree — those trees hold no check of their own.
       status: AppStatus.inaccessible,
       visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
-      order: 101,
+      // Lower than every Security entry in the Classic nav (1–13), so AlertZero heads that category.
+      order: -3,
       // Initial deep links without capability filtering — capabilities are not available at
       // setup. `start()` emits an update via appUpdater$ once capabilities are known.
       deepLinks: getAlertZeroDeepLinks(),
