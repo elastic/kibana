@@ -161,6 +161,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: '2b1c57a5609d19590cd953edd380d4db7ee6ea2c62c370915b1e71dc98cc0483',
   },
   {
+    id: 'context-engine.lucidDreamingBatchReady',
+    schemaHash: '66c7c288b0442bd1ca76631ff2f52b4dae579985c1223cf3f2c97201e2162d6b',
+  },
+  {
     id: 'datadog.alert',
     schemaHash: '7c96173386337514269164d21db906ce5308554fdd79ebab6694e990269af578',
   },

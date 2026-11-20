@@ -117,7 +117,7 @@ describe('DreamingPanel', () => {
     );
   });
 
-  it('saves edited types, keeping the rest of the config and the default schedule', async () => {
+  it('saves edited types, keeping the rest of the config, as lucid and relationship dreaming', async () => {
     renderPanel(aiIndexWith(factsOnly));
 
     expect(screen.queryByTestId('contextAiIndexDreamingSave')).not.toBeInTheDocument();
@@ -128,13 +128,14 @@ describe('DreamingPanel', () => {
       expect(saveConfig).toHaveBeenCalledWith({
         aiIndexId: 'tickets',
         config: {
-          enabled: true,
-          schedule: { interval: '24h' },
+          enabled: false,
           instructions: 'Record fixes.',
           connector_id: 'my-connector',
           facts: [{ type: 'solution' }],
           entities: null,
           relationships: [],
+          lucid: { enabled: true, interval: '1m' },
+          relationship_dreaming: { enabled: false, interval: '24h' },
         },
       })
     );
@@ -171,12 +172,62 @@ describe('DreamingPanel', () => {
     );
   });
 
-  it('turns dreaming off and changes how often it runs', async () => {
-    renderPanel(aiIndexWith({ ...factsOnly, schedule: { interval: '1h' } }));
+  it('turns lucid dreaming on with its own interval and connector', async () => {
+    renderPanel(aiIndexWith({ ...factsOnly, enabled: false, lucid: { enabled: false } }));
 
-    expect(screen.getByTestId('contextAiIndexDreamingInterval')).toHaveValue('1h');
-    fireEvent.click(screen.getByTestId('contextAiIndexDreamingEnabled'));
-    fireEvent.change(screen.getByTestId('contextAiIndexDreamingInterval'), {
+    expect(screen.getByTestId('contextAiIndexDreamingLucidInterval')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingLucid'));
+    fireEvent.change(screen.getByTestId('contextAiIndexDreamingLucidInterval'), {
+      target: { value: '5m' },
+    });
+    fireEvent.change(screen.getByTestId('contextAiIndexDreamingLucidConnector'), {
+      target: { value: ' small-model ' },
+    });
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
+
+    await waitFor(() =>
+      expect(saveConfig).toHaveBeenCalledWith({
+        aiIndexId: 'tickets',
+        config: expect.objectContaining({
+          connector_id: 'my-connector',
+          lucid: { enabled: true, interval: '5m', connector_id: 'small-model' },
+        }),
+      })
+    );
+  });
+
+  it('turns lucid dreaming off, keeping its connector', async () => {
+    renderPanel(
+      aiIndexWith({ ...factsOnly, lucid: { enabled: true, connector_id: 'small-model' } })
+    );
+
+    expect(screen.getByTestId('contextAiIndexDreamingLucidConnector')).toHaveValue('small-model');
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingLucid'));
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
+
+    await waitFor(() =>
+      expect(saveConfig).toHaveBeenCalledWith({
+        aiIndexId: 'tickets',
+        config: expect.objectContaining({
+          lucid: { enabled: false, interval: '1m', connector_id: 'small-model' },
+        }),
+      })
+    );
+  });
+
+  it('turns relationship dreaming on with its own interval, apart from lucid dreaming', async () => {
+    renderPanel(
+      aiIndexWith({
+        ...factsOnly,
+        entities: SUPPORT_ENTITIES,
+        relationships: [{ type: 'affects' }],
+        lucid: { enabled: false },
+        relationship_dreaming: { enabled: false },
+      })
+    );
+
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingRelationships'));
+    fireEvent.change(screen.getByTestId('contextAiIndexDreamingRelationshipInterval'), {
       target: { value: '6h' },
     });
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
@@ -184,20 +235,48 @@ describe('DreamingPanel', () => {
     await waitFor(() =>
       expect(saveConfig).toHaveBeenCalledWith({
         aiIndexId: 'tickets',
-        config: expect.objectContaining({ enabled: false, schedule: { interval: '6h' } }),
+        config: expect.objectContaining({
+          lucid: { enabled: false, interval: '1m' },
+          relationship_dreaming: { enabled: true, interval: '6h' },
+        }),
       })
     );
   });
 
-  it('does not save an interval shorter than the floor', () => {
+  it('offers relationship dreaming only with a relationship type', () => {
     renderPanel(aiIndexWith(factsOnly));
 
-    fireEvent.change(screen.getByTestId('contextAiIndexDreamingInterval'), {
-      target: { value: '5m' },
+    expect(screen.getByTestId('contextAiIndexDreamingRelationships')).toBeDisabled();
+    expect(screen.getByText('Add a relationship type below to link entities.')).toBeInTheDocument();
+  });
+
+  it('does not save a lucid interval of an hour or more', () => {
+    renderPanel(aiIndexWith(factsOnly));
+
+    fireEvent.change(screen.getByTestId('contextAiIndexDreamingLucidInterval'), {
+      target: { value: '60m' },
     });
 
-    expect(screen.getByText('Must be at least 15 minutes.')).toBeInTheDocument();
+    expect(screen.getByText('Must be from 1m to 59m, for example 5m.')).toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
+  });
+
+  it('does not save a relationship interval under an hour or over 30 days', () => {
+    renderPanel(
+      aiIndexWith({
+        ...factsOnly,
+        entities: SUPPORT_ENTITIES,
+        relationships: [{ type: 'affects' }],
+      })
+    );
+
+    const field = screen.getByTestId('contextAiIndexDreamingRelationshipInterval');
+    fireEvent.change(field, { target: { value: '30m' } });
+    expect(screen.getByText('Must be from 1h to 30d, for example 6h or 1d.')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
+
+    fireEvent.change(field, { target: { value: '31d' } });
+    expect(screen.getByText('Must be from 1h to 30d, for example 6h or 1d.')).toBeInTheDocument();
   });
 
   it('discards edits', () => {

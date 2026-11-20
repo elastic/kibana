@@ -41,9 +41,10 @@ export const getReadTraceTranscriptsStepDefinition = (
       const { spaceId } = context.contextManager.getContext().workflow;
       const {
         ai_index_id: aiIndexId,
-        since,
+        since: sinceInput,
+        rounds,
         after,
-        size = DEFAULT_TRACE_TRANSCRIPTS_READ_SIZE,
+        size: sizeInput = DEFAULT_TRACE_TRANSCRIPTS_READ_SIZE,
         max_tokens: maxTokens = DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS,
         batch_tokens: batchTokens = DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS,
         settle_minutes: settleMinutes = DEFAULT_TRACE_SETTLE_MINUTES,
@@ -54,6 +55,12 @@ export const getReadTraceTranscriptsStepDefinition = (
           message: 'Insufficient privileges to read AI indices',
         });
       }
+      const traceIds = rounds ? [...new Set(rounds.map(({ trace_id: traceId }) => traceId))] : [];
+      const since = rounds
+        ? new Date(
+            Math.min(...rounds.map(({ ended_at: endedAt }) => Date.parse(endedAt))) - 1
+          ).toISOString()
+        : sinceInput ?? '';
       const empty = { memories: [], batches: [], resume_from: since, sources: [], skipped: 0 };
       if (!(await isContextEngineEnabled(spaceId)) || !(await isMemoryEnabled())) {
         return { output: empty };
@@ -75,16 +82,18 @@ export const getReadTraceTranscriptsStepDefinition = (
         return { output: empty };
       }
 
-      const until = new Date(getCurrentDate().getTime() - settleMinutes * MINUTE_MS).toISOString();
+      const now = getCurrentDate().getTime();
+      const until = new Date(rounds ? now : now - settleMinutes * MINUTE_MS).toISOString();
       const output = await readTraceTranscripts({
         esClient: context.contextManager.getScopedEsClient(),
         traces: aiIndex.traces,
         spaceId,
         since,
-        ...(after ? { after } : {}),
+        ...(after && !rounds ? { after } : {}),
         until,
-        size,
+        size: rounds ? traceIds.length : sizeInput,
         maxTokens,
+        ...(rounds && { traceIds }),
       });
       return { output: { ...output, batches: batchByConversation(output.memories, batchTokens) } };
     },

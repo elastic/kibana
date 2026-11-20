@@ -42,6 +42,11 @@ import { createFeedbackAnalysisChangeHandler } from './feedback_analysis/change_
 import { createDreamingChangeHandler } from './dreaming/change_handler';
 import type { DreamingScheduleService, DreamingWorkflowsApi } from './dreaming/schedule';
 import { createDreamingScheduleService } from './dreaming/schedule';
+import {
+  createLucidDreamingScheduler,
+  registerLucidDreamingTaskDefinition,
+} from './lucid_dreaming/task';
+import { lucidDreamingBatchReadyTriggerDefinition } from '../common/lucid_dreaming';
 import { AiIndexChangeNotifier } from './ai_indices/changes';
 import { AiIndexDataReadService } from './ai_indices/data_read_service';
 import { AiIndexService } from './ai_indices/service';
@@ -242,6 +247,24 @@ export class ContextEnginePlugin
     };
     const isDreamingAvailable = async (spaceId: string) =>
       (await isContextEngineEnabled(spaceId)) && (await this.isGlobalMemoryEnabled());
+
+    setupDeps.workflowsExtensions.registerTriggerDefinition(
+      lucidDreamingBatchReadyTriggerDefinition
+    );
+    registerLucidDreamingTaskDefinition({
+      taskManager: setupDeps.taskManager,
+      getAiIndexService,
+      isDreamingAvailable,
+      getScopedEsClient: async (request) => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+      },
+      getWorkflowsClient: async (request) => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.workflowsExtensions.getClient(request);
+      },
+      logger: this.logger.get('lucid_dreaming'),
+    });
 
     this.aiIndexChanges.register(createFeedbackAnalysisChangeHandler(getScheduleService));
     this.aiIndexChanges.register(
@@ -466,12 +489,14 @@ export class ContextEnginePlugin
       ...(this.workflowsManagement ? { workflowsManagement: this.workflowsManagement } : {}),
     });
 
+    const lucidDreaming = createLucidDreamingScheduler({ taskManager: startDeps.taskManager });
     this.dreamingScheduleService = createDreamingScheduleService({
       logger: this.logger,
       getManagedWorkflowsClient: () =>
         startDeps.workflowsExtensions.initManagedWorkflowsClient(CONTEXT_ENGINE_WORKFLOW_OWNER),
       getWorkflowsManagement: () => this.workflowsManagementApiPromise,
       getAiIndexService: () => aiIndexService,
+      lucidDreaming,
     });
 
     const soClient = coreStart.savedObjects.createInternalRepository();

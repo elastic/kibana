@@ -9,6 +9,8 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_LUCID_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_LUCID_TRACE_DREAMING_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
@@ -17,15 +19,22 @@ import type { ContextEngineDreamingWorkflowTemplateValues } from '@kbn/workflows
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
   DEFAULT_DREAMING_INTERVAL,
+  DEFAULT_LUCID_DREAMING_INTERVAL,
+  DEFAULT_RELATIONSHIP_DREAMING_INTERVAL,
   MIN_DREAMING_INTERVAL_MINUTES,
+  MIN_RELATIONSHIP_DREAMING_INTERVAL_MINUTES,
   dreamingBuildsAnything,
   dreamingTypesOf,
+  isLucidDreaming,
+  isRelationshipDreaming,
+  isSplitDreaming,
   type AiIndexDreamingConfig,
 } from '../../common/dreaming';
 import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import { parseIntervalMinutes } from '../../common/validation';
 import type { AiIndexService } from '../ai_indices/service';
 import type { WorkflowEnablementApi } from '../feedback_analysis/schedule';
+import type { LucidDreamingScheduler } from '../lucid_dreaming/task';
 
 /** The workflows management API dreaming uses. */
 export interface DreamingWorkflowsApi extends WorkflowEnablementApi {
@@ -76,9 +85,45 @@ export const traceDreamingBatchWorkflowIdFor = (aiIndexId: string, spaceId: stri
 export const relationshipsWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
   `${CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
 
+/** The id of the workflow lucid dreaming turns new memories of an AI index into facts with. */
+export const lucidDreamingWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
+  `${CONTEXT_ENGINE_LUCID_DREAMING_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
+
+/** The id of the workflow lucid dreaming turns new agent rounds of an AI index into facts with. */
+export const lucidTraceDreamingWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
+  `${CONTEXT_ENGINE_LUCID_TRACE_DREAMING_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(
+    aiIndexId,
+    spaceId
+  )}`;
+
 /** Whether an AI index has dreaming on and configured to build something. */
 export const shouldDream = ({ dreaming }: { dreaming?: AiIndexDreamingConfig }): boolean =>
-  dreaming?.enabled === true && dreamingBuildsAnything(dreaming);
+  isSplitDreaming(dreaming)
+    ? isLucidDreaming(dreaming) || isRelationshipDreaming(dreaming)
+    : dreaming?.enabled === true && dreamingBuildsAnything(dreaming);
+
+/** Whether an AI index builds facts and entities, on its schedule or by lucid dreaming. */
+export const shouldBuildFactsAndEntities = ({
+  dreaming,
+}: {
+  dreaming?: AiIndexDreamingConfig;
+}): boolean => (isSplitDreaming(dreaming) ? isLucidDreaming(dreaming) : shouldDream({ dreaming }));
+
+/** Whether an AI index links relationships, on its schedule or by relationship dreaming. */
+export const shouldLinkRelationships = ({
+  dreaming,
+}: {
+  dreaming?: AiIndexDreamingConfig;
+}): boolean => {
+  if (isSplitDreaming(dreaming)) {
+    return isRelationshipDreaming(dreaming);
+  }
+  return (
+    dreaming !== undefined &&
+    shouldDream({ dreaming }) &&
+    dreamingTypesOf(dreaming).relationships.length > 0
+  );
+};
 
 /** The dreaming workflow template values for an AI index. */
 export const dreamingTemplateValuesFor = (
@@ -91,9 +136,12 @@ export const dreamingTemplateValuesFor = (
     aiIndexId: aiIndex.id,
     instanceKey: managedWorkflowIdSuffixFor(aiIndex.id, spaceId),
     memoriesIndex: aiIndex.dest.value,
-    intervalMinutes:
-      parseIntervalMinutes(dreaming.schedule?.interval ?? DEFAULT_DREAMING_INTERVAL) ??
-      MIN_DREAMING_INTERVAL_MINUTES,
+    intervalMinutes: isSplitDreaming(dreaming)
+      ? parseIntervalMinutes(
+          dreaming.relationship_dreaming?.interval ?? DEFAULT_RELATIONSHIP_DREAMING_INTERVAL
+        ) ?? MIN_RELATIONSHIP_DREAMING_INTERVAL_MINUTES
+      : parseIntervalMinutes(dreaming.schedule?.interval ?? DEFAULT_DREAMING_INTERVAL) ??
+        MIN_DREAMING_INTERVAL_MINUTES,
     connectorId: dreaming.connector_id ?? '',
     instructions: dreaming.instructions ?? '',
     factTypes: facts,
@@ -102,46 +150,89 @@ export const dreamingTemplateValuesFor = (
   };
 };
 
-const DREAMING_WORKFLOWS = [
-  {
-    definitionId: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
-    label: 'dreaming',
-    workflowIdFor: dreamingWorkflowIdFor,
-    attach: true,
-  },
-  {
-    definitionId: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
-    label: 'the trace dreaming batch workflow',
-    workflowIdFor: traceDreamingBatchWorkflowIdFor,
-    attach: false,
-  },
-  {
-    definitionId: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
-    label: 'trace dreaming',
-    workflowIdFor: traceDreamingWorkflowIdFor,
-    attach: true,
-  },
-  {
-    definitionId: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
-    label: 'relationships',
-    workflowIdFor: relationshipsWorkflowIdFor,
-    attach: true,
-  },
-] as const;
+const DREAMING_WORKFLOW = {
+  definitionId: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  label: 'dreaming',
+  workflowIdFor: dreamingWorkflowIdFor,
+  attach: true,
+} as const;
+const TRACE_DREAMING_BATCH_WORKFLOW = {
+  definitionId: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
+  label: 'the trace dreaming batch workflow',
+  workflowIdFor: traceDreamingBatchWorkflowIdFor,
+  attach: false,
+} as const;
+const TRACE_DREAMING_WORKFLOW = {
+  definitionId: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+  label: 'trace dreaming',
+  workflowIdFor: traceDreamingWorkflowIdFor,
+  attach: true,
+} as const;
+const RELATIONSHIPS_WORKFLOW = {
+  definitionId: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
+  label: 'relationships',
+  workflowIdFor: relationshipsWorkflowIdFor,
+  attach: true,
+} as const;
+const LUCID_DREAMING_WORKFLOW = {
+  definitionId: CONTEXT_ENGINE_LUCID_DREAMING_WORKFLOW_ID,
+  label: 'lucid dreaming',
+  workflowIdFor: lucidDreamingWorkflowIdFor,
+  attach: true,
+} as const;
+const LUCID_TRACE_DREAMING_WORKFLOW = {
+  definitionId: CONTEXT_ENGINE_LUCID_TRACE_DREAMING_WORKFLOW_ID,
+  label: 'lucid trace dreaming',
+  workflowIdFor: lucidTraceDreamingWorkflowIdFor,
+  attach: true,
+} as const;
 
-type DreamingWorkflow = (typeof DREAMING_WORKFLOWS)[number];
+type DreamingWorkflow =
+  | typeof DREAMING_WORKFLOW
+  | typeof TRACE_DREAMING_BATCH_WORKFLOW
+  | typeof TRACE_DREAMING_WORKFLOW
+  | typeof RELATIONSHIPS_WORKFLOW
+  | typeof LUCID_DREAMING_WORKFLOW
+  | typeof LUCID_TRACE_DREAMING_WORKFLOW;
+
+/** In install order: a batch workflow is installed before the workflow that runs it. */
+const SCHEDULED_DREAMING_WORKFLOWS: readonly DreamingWorkflow[] = [
+  DREAMING_WORKFLOW,
+  TRACE_DREAMING_BATCH_WORKFLOW,
+  TRACE_DREAMING_WORKFLOW,
+  RELATIONSHIPS_WORKFLOW,
+];
+const LUCID_DREAMING_WORKFLOWS: readonly DreamingWorkflow[] = [
+  TRACE_DREAMING_BATCH_WORKFLOW,
+  LUCID_DREAMING_WORKFLOW,
+  LUCID_TRACE_DREAMING_WORKFLOW,
+];
+const ALL_DREAMING_WORKFLOWS: readonly DreamingWorkflow[] = [
+  ...SCHEDULED_DREAMING_WORKFLOWS,
+  LUCID_DREAMING_WORKFLOW,
+  LUCID_TRACE_DREAMING_WORKFLOW,
+];
+/** The workflows lucid dreaming prompts with its own connector. */
+const LUCID_CONNECTOR_WORKFLOWS: ReadonlySet<DreamingWorkflow> = new Set([
+  TRACE_DREAMING_BATCH_WORKFLOW,
+  LUCID_DREAMING_WORKFLOW,
+  LUCID_TRACE_DREAMING_WORKFLOW,
+]);
 
 export const createDreamingScheduleService = ({
   logger,
   getManagedWorkflowsClient,
   getWorkflowsManagement,
   getAiIndexService,
+  lucidDreaming,
 }: {
   logger: Logger;
   getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
   /** Resolves to `undefined` without workflows management. */
   getWorkflowsManagement: () => Promise<DreamingWorkflowsApi | undefined>;
   getAiIndexService: () => AiIndexService;
+  /** Missing: lucid dreaming does not run. */
+  lucidDreaming?: LucidDreamingScheduler;
 }): DreamingScheduleService => {
   const log = logger.get('dreaming_schedule');
 
@@ -186,20 +277,30 @@ export const createDreamingScheduleService = ({
   const automationFor = (workflow: DreamingWorkflow, aiIndexId: string, spaceId: string) =>
     ({ type: 'workflow', value: workflow.workflowIdFor(aiIndexId, spaceId) } as const);
 
+  const removeWorkflows = async (
+    workflows: readonly DreamingWorkflow[],
+    aiIndex: AiIndexItem,
+    spaceId: string,
+    request: KibanaRequest
+  ) => {
+    for (const workflow of workflows) {
+      await uninstall(workflow, aiIndex.id, spaceId, request);
+      if (workflow.attach && !aiIndex.managed) {
+        await getAiIndexService().removeAutomation(
+          aiIndex.id,
+          spaceId,
+          automationFor(workflow, aiIndex.id, spaceId)
+        );
+      }
+    }
+  };
+
   return {
     async reconcile({ aiIndex, spaceId, request }) {
       const { id: aiIndexId, dreaming } = aiIndex;
       if (!dreaming || !shouldDream(aiIndex)) {
-        for (const workflow of DREAMING_WORKFLOWS) {
-          await uninstall(workflow, aiIndexId, spaceId, request);
-          if (workflow.attach && !aiIndex.managed) {
-            await getAiIndexService().removeAutomation(
-              aiIndexId,
-              spaceId,
-              automationFor(workflow, aiIndexId, spaceId)
-            );
-          }
-        }
+        await removeWorkflows(ALL_DREAMING_WORKFLOWS, aiIndex, spaceId, request);
+        await lucidDreaming?.unschedule({ aiIndexId, spaceId });
         log.debug(() => `Removed dreaming for AI index '${aiIndexId}' in space '${spaceId}'`);
         return;
       }
@@ -211,13 +312,31 @@ export const createDreamingScheduleService = ({
         );
       }
 
+      const lucid = lucidDreaming !== undefined && isLucidDreaming(dreaming);
+      const installed: readonly DreamingWorkflow[] = isSplitDreaming(dreaming)
+        ? [
+            ...(lucid ? LUCID_DREAMING_WORKFLOWS : []),
+            ...(isRelationshipDreaming(dreaming) ? [RELATIONSHIPS_WORKFLOW] : []),
+          ]
+        : SCHEDULED_DREAMING_WORKFLOWS;
+      await removeWorkflows(
+        ALL_DREAMING_WORKFLOWS.filter((workflow) => !installed.includes(workflow)),
+        aiIndex,
+        spaceId,
+        request
+      );
+
       const values = dreamingTemplateValuesFor(aiIndex, dreaming, spaceId);
+      const lucidValues = {
+        ...values,
+        connectorId: dreaming.lucid?.connector_id ?? values.connectorId,
+      };
       const client = await getManagedWorkflowsClient();
-      for (const workflow of DREAMING_WORKFLOWS) {
+      for (const workflow of installed) {
         await client.install(workflow.definitionId, {
           spaceId,
           workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndexId, spaceId),
-          values,
+          values: lucid && LUCID_CONNECTOR_WORKFLOWS.has(workflow) ? lucidValues : values,
         });
 
         const workflowId = workflow.workflowIdFor(aiIndexId, spaceId);
@@ -235,12 +354,23 @@ export const createDreamingScheduleService = ({
           `Installed ${workflow.label} for AI index '${aiIndexId}' in space '${spaceId}' every ${values.intervalMinutes}m, running as the user who saved its config`
         );
       }
+
+      if (lucid) {
+        const interval = dreaming.lucid?.interval ?? DEFAULT_LUCID_DREAMING_INTERVAL;
+        await lucidDreaming.schedule({ aiIndexId, spaceId, request, interval });
+        log.info(
+          `Watching AI index '${aiIndexId}' in space '${spaceId}' for lucid dreaming every ${interval}, as the user who saved its config`
+        );
+      } else {
+        await lucidDreaming?.unschedule({ aiIndexId, spaceId });
+      }
     },
 
     async remove({ aiIndexId, spaceId, request }) {
-      for (const workflow of DREAMING_WORKFLOWS) {
+      for (const workflow of ALL_DREAMING_WORKFLOWS) {
         await uninstall(workflow, aiIndexId, spaceId, request);
       }
+      await lucidDreaming?.unschedule({ aiIndexId, spaceId });
       log.debug(() => `Removed dreaming for deleted AI index '${aiIndexId}' in space '${spaceId}'`);
     },
   };

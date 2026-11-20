@@ -21,7 +21,11 @@ import {
   RESERVED_ENTITY_ATTRIBUTE_KEYS,
   validateDreamingTypes,
 } from '../../../common/dreaming';
-import { validateDreamingInterval } from '../../../common/validation';
+import {
+  validateDreamingInterval,
+  validateLucidDreamingInterval,
+  validateRelationshipDreamingInterval,
+} from '../../../common/validation';
 
 const validateType = (value: string): string | undefined =>
   DREAMING_TYPE_PATTERN.test(value)
@@ -151,6 +155,68 @@ export const dreamingConfigSchema = schema.object(
             },
           }
         )
+      )
+    ),
+    lucid: schema.maybe(
+      schema.object(
+        {
+          enabled: schema.boolean({
+            meta: {
+              description:
+                'Whether facts and entities are built from new memories and agent rounds soon after they arrive, in small batches.',
+            },
+          }),
+          interval: schema.maybe(
+            schema.string({
+              maxLength: MAX_DREAMING_INTERVAL_LENGTH,
+              validate: validateLucidDreamingInterval,
+              meta: {
+                description:
+                  'How often to look for new memories and agent rounds, from `1m` to `59m`. Defaults to `1m`.',
+              },
+            })
+          ),
+          connector_id: schema.maybe(
+            schema.string({
+              minLength: 1,
+              maxLength: MAX_DREAMING_CONNECTOR_ID_LENGTH,
+              meta: {
+                description:
+                  'The AI connector lucid dreaming prompts, such as a cheaper model. Omitted: the dreaming connector.',
+              },
+            })
+          ),
+        },
+        {
+          meta: {
+            description:
+              'Lucid dreaming (experimental). Setting it or `relationship_dreaming` replaces `enabled` and `schedule`; with neither, everything is dreamed on the schedule.',
+          },
+        }
+      )
+    ),
+    relationship_dreaming: schema.maybe(
+      schema.object(
+        {
+          enabled: schema.boolean({
+            meta: { description: 'Whether relationships are linked on their own schedule.' },
+          }),
+          interval: schema.maybe(
+            schema.string({
+              maxLength: MAX_DREAMING_INTERVAL_LENGTH,
+              validate: validateRelationshipDreamingInterval,
+              meta: {
+                description: 'How often to link, from `1h` to `30d`. Defaults to `24h`.',
+              },
+            })
+          ),
+        },
+        {
+          meta: {
+            description:
+              'Relationship dreaming (experimental). Setting it or `lucid` replaces `enabled` and `schedule`.',
+          },
+        }
       )
     ),
   },

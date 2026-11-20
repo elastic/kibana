@@ -66,6 +66,11 @@ export class ContextEnginePlugin
     setupDeps.workflowsExtensions.registerStepDefinition(() =>
       import('./step_types/verify_ki_step').then((m) => m.VerifyKiStepDefinition)
     );
+    setupDeps.workflowsExtensions.registerTriggerDefinition(() =>
+      import('./triggers/lucid_dreaming_batch_ready').then(
+        (m) => m.lucidDreamingBatchReadyPublicTriggerDefinition
+      )
+    );
 
     this.setupAgentBuilderStart(core);
     registerStepDefinitions({
