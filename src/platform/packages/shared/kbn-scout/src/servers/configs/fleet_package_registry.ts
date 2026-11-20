@@ -35,28 +35,38 @@ export function getFleetPackageRegistry(
   env: NodeJS.ProcessEnv = process.env
 ): ScoutFleetPackageRegistry {
   const rawPort = env[FLEET_PACKAGE_REGISTRY_PORT_ENV];
-  const port = rawPort ? Number(rawPort) : undefined;
+  const parsedPort = rawPort ? Number(rawPort) : undefined;
+  const validPort =
+    parsedPort !== undefined &&
+    Number.isInteger(parsedPort) &&
+    parsedPort > 0 &&
+    parsedPort < 65536;
   const optIn = TRUE_VALUES.includes((env[SCOUT_FLEET_PACKAGE_REGISTRY_ENV] ?? '').toLowerCase());
 
-  if (port !== undefined && !(Number.isInteger(port) && port > 0 && port < 65536)) {
-    throw new Error(
-      `${FLEET_PACKAGE_REGISTRY_PORT_ENV} must be a valid port number, got "${rawPort}"`
-    );
+  // Without the opt-in the port is informational only (CI exports it for every job), so a bad
+  // value must not break runs that never asked for the registry. This runs at module load of the
+  // base configs, i.e. for every Scout server start.
+  if (!optIn) {
+    return { enabled: false, port: validPort ? parsedPort : undefined, kbnServerArgs: [] };
   }
 
-  if (optIn && port === undefined) {
+  if (parsedPort === undefined) {
     throw new Error(
       `${SCOUT_FLEET_PACKAGE_REGISTRY_ENV} is set but ${FLEET_PACKAGE_REGISTRY_PORT_ENV} is not: ` +
         'the package registry container needs a host port to publish on'
     );
   }
 
-  const enabled = optIn && port !== undefined;
+  if (!validPort) {
+    throw new Error(
+      `${FLEET_PACKAGE_REGISTRY_PORT_ENV} must be a valid port number, got "${rawPort}"`
+    );
+  }
 
   return {
-    enabled,
-    port,
-    kbnServerArgs: enabled ? [`--xpack.fleet.registryUrl=http://localhost:${port}`] : [],
+    enabled: true,
+    port: parsedPort,
+    kbnServerArgs: [`--xpack.fleet.registryUrl=http://localhost:${parsedPort}`],
   };
 }
 

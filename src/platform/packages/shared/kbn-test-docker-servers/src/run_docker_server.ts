@@ -71,7 +71,7 @@ async function dockerRun(server: DockerServer, log: ToolingLog): Promise<string>
 
     return res.stdout.trim();
   } catch (error) {
-    if (error?.exitCode === 125 && error?.message.includes('port is already allocated')) {
+    if (error?.exitCode === 125 && error?.message?.includes('port is already allocated')) {
       throw new Error(`
         [docker:${name}] Another process is already listening on port ${port}.
 
@@ -183,6 +183,11 @@ export async function runDockerServer(
   const logLine$ = observeContainerLogs(name, containerId, log);
 
   // ensure container stays running, report if it exits on its own
+  let rejectOnExit: (error: Error) => void = () => {};
+  const exited = new Promise<never>((_, reject) => {
+    rejectOnExit = reject;
+  });
+  exited.catch(() => {}); // only observed while waiting for readiness below
   const runningSub = observeContainerRunning(name, containerId, log).subscribe({
     error: (error) => {
       if (stopped) {
@@ -190,6 +195,7 @@ export async function runDockerServer(
       }
       log.error(`[docker:${name}] Error ensuring that the container is running`);
       log.error(error);
+      rejectOnExit(error);
       onUnexpectedExit?.(error);
     },
   });
@@ -210,8 +216,8 @@ export async function runDockerServer(
       }
     } catch (error) {
       if (
-        !error.message.includes(`Container ${containerId} is not running`) &&
-        !error.message.includes(`No such container: ${containerId}`)
+        !error?.message?.includes(`Container ${containerId} is not running`) &&
+        !error?.message?.includes(`No such container: ${containerId}`)
       ) {
         throw error;
       }
@@ -225,7 +231,8 @@ export async function runDockerServer(
   };
 
   try {
-    await waitUntilReady(server, logLine$, log);
+    // a container that dies before the readiness line fails here, not after the wait timeout
+    await Promise.race([waitUntilReady(server, logLine$, log), exited]);
   } catch (error) {
     await stop();
     throw error;

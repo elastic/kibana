@@ -11,6 +11,11 @@ import type { DockerServerSpec, RunningDockerServer } from '@kbn/test-docker-ser
 import { runDockerServer, toDockerServer } from '@kbn/test-docker-servers';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Config } from './configs';
+import {
+  FLEET_PACKAGE_REGISTRY_PORT_ENV,
+  SCOUT_FLEET_PACKAGE_REGISTRY_ENV,
+  fleetPackageRegistry,
+} from './configs/fleet_package_registry';
 
 export type StopDockerServers = () => Promise<void>;
 
@@ -34,6 +39,14 @@ export async function runDockerServers({
     .map(([name, spec]) => toDockerServer(name, spec));
 
   if (servers.length === 0) {
+    if (!fleetPackageRegistry.enabled && process.env[FLEET_PACKAGE_REGISTRY_PORT_ENV]) {
+      // The port alone used to flip `dockerServers.registry.enabled`, although nothing started
+      // the container. Say so, in case someone expects the registry from the port alone.
+      log.info(
+        `scout: ${FLEET_PACKAGE_REGISTRY_PORT_ENV} is set but ${SCOUT_FLEET_PACKAGE_REGISTRY_ENV} is not; ` +
+          'the Fleet package registry container is not started and Kibana installs packages from the public EPR'
+      );
+    }
     return async () => {};
   }
 
@@ -60,11 +73,21 @@ export async function runDockerServers({
   }
 
   const stop: StopDockerServers = async () => {
-    await Promise.all(running.map((server) => server.stop()));
+    const stopResults = await Promise.allSettled(running.map((server) => server.stop()));
+    const stopFailures = stopResults.flatMap((result, i) =>
+      result.status === 'rejected' ? [{ name: running[i].name, reason: result.reason }] : []
+    );
+    for (const { name, reason } of stopFailures) {
+      log.error(`[docker:${name}] failed to stop: ${reason?.message ?? reason}`);
+    }
+    if (stopFailures.length > 0) {
+      throw stopFailures[0].reason;
+    }
   };
 
   if (failures.length > 0) {
-    await stop();
+    // Stop errors are logged above; the startup failure is the one worth surfacing.
+    await stop().catch(() => {});
     throw failures[0];
   }
 

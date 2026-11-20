@@ -54,9 +54,20 @@ describe('getFleetPackageRegistry', () => {
     );
   });
 
-  it('fails fast on a port that is not a number', () => {
-    expect(() => getFleetPackageRegistry({ FLEET_PACKAGE_REGISTRY_PORT: 'abc' })).toThrow(
-      /must be a valid port number/
-    );
+  it('fails fast on a port that is not a number when opted in', () => {
+    expect(() =>
+      getFleetPackageRegistry({
+        FLEET_PACKAGE_REGISTRY_PORT: 'abc',
+        SCOUT_FLEET_PACKAGE_REGISTRY: 'true',
+      })
+    ).toThrow(/must be a valid port number/);
+  });
+
+  it('ignores a bad port without the opt-in, so runs that never asked for the registry still boot', () => {
+    expect(getFleetPackageRegistry({ FLEET_PACKAGE_REGISTRY_PORT: 'abc' })).toEqual({
+      enabled: false,
+      port: undefined,
+      kbnServerArgs: [],
+    });
   });
 });

@@ -92,6 +92,35 @@ describe('runDockerServers', () => {
     expect(stopRegistry).toHaveBeenCalledTimes(1);
   });
 
+  it('surfaces the startup failure even when stopping the other servers fails too', async () => {
+    runDockerServerMock.mockImplementation(async (server) => {
+      if (server.name === 'broken') {
+        throw new Error('no such image');
+      }
+      return { name: server.name, stop: jest.fn().mockRejectedValue(new Error('kill failed')) };
+    });
+
+    await expect(
+      runDockerServers({ config: configWith({ registry: spec(true), broken: spec(true) }), log })
+    ).rejects.toThrow('no such image');
+  });
+
+  it('reports which server failed to stop', async () => {
+    runDockerServerMock.mockImplementation(async (server) => ({
+      name: server.name,
+      stop:
+        server.name === 'registry'
+          ? jest.fn().mockRejectedValue(new Error('kill failed'))
+          : jest.fn(),
+    }));
+    const stop = await runDockerServers({
+      config: configWith({ registry: spec(true), other: spec(true) }),
+      log,
+    });
+
+    await expect(stop()).rejects.toThrow('kill failed');
+  });
+
   it('forwards an unexpected container exit to onEarlyExit', async () => {
     runDockerServerMock.mockImplementation(async (server, { onUnexpectedExit }) => {
       onUnexpectedExit(new Error('exited with code 137'));

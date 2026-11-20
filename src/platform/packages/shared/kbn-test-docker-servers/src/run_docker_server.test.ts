@@ -157,6 +157,17 @@ describe('runDockerServer', () => {
     expect(dockerCall(docker.calls, 'rm')).toEqual([['rm', 'container-1']]);
   });
 
+  it('fails fast when the container exits before the readiness line', async () => {
+    const docker = fakeDocker({ cached: true });
+
+    const pending = runDockerServer({ ...server, waitForLogLineTimeoutMs: 60_000 }, { log });
+    await new Promise((resolve) => setImmediate(resolve));
+    docker.exitContainer(1);
+
+    await expect(pending).rejects.toThrow('unexpectedly exitted with code 1');
+    expect(dockerCall(docker.calls, 'kill')).toEqual([['kill', 'container-1']]);
+  });
+
   it('stop() kills the container once and keeps it on CI', async () => {
     process.env.CI = 'true';
     const docker = fakeDocker({ cached: true });
