@@ -6,11 +6,15 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { Logger as CoreLogger } from '@kbn/core-di';
+import { Logger as CoreLogger, PluginSetup } from '@kbn/core-di';
+import type { CPSServerSetup } from '@kbn/cps/server';
+import type { KnowledgeIndicatorReader } from '@kbn/significant-events-plugin/server';
+import { once } from 'lodash';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { getErrorMessage } from '../errors/get_error_message';
 import { AvailabilityService } from '../availability/availability_service';
+import { ManagedRuleReader } from '../rules/managed_rule_reader';
 import { DetectionSignalStore } from '../signals/signal_store';
 import { wrapReading } from '../signals/wrap_reading';
 import { DetectionStateClient } from '../state/detection_state_client';
@@ -21,7 +25,7 @@ import { planWindows } from './plan_windows';
 import type { PlannedWindow } from './plan_windows';
 import { SpaceRunLock } from './space_run_lock';
 import type { StrategyRunResult, TickResult } from './tick_result';
-import { RunContext, Sources } from './tokens';
+import { KnowledgeIndicators, RunContext, Sources } from './tokens';
 
 /**
  * Deadline for the generators of one tick, counted from taking the space's run lock, so a slow
@@ -74,8 +78,22 @@ export class EngineRunner {
     @inject(DetectionSignalStore) private readonly signalStore: DetectionSignalStore,
     @inject(Sources) private readonly sources: Sources,
     @inject(DetectionEngineDataClient) private readonly dataClient: ElasticsearchClient,
-    @inject(CoreLogger) private readonly logger: Logger
-  ) {}
+    @inject(KnowledgeIndicators) knowledge: KnowledgeIndicatorReader,
+    @inject(ManagedRuleReader) private readonly rules: ManagedRuleReader,
+    @inject(CoreLogger) private readonly logger: Logger,
+    @inject(PluginSetup<CPSServerSetup>('cps'))
+    @optional()
+    private readonly cps: CPSServerSetup | undefined
+  ) {
+    // Read once per tick, at the first window that asks: every window of every strategy gets the
+    // same knowledge, and a tick with nothing due reads none.
+    this.knowledge = {
+      listQueryKnowledgeIndicators: once(() => knowledge.listQueryKnowledgeIndicators()),
+      listFeatures: (params) => knowledge.listFeatures(params),
+    };
+  }
+
+  private readonly knowledge: KnowledgeIndicatorReader;
 
   /**
    * Runs one tick:
@@ -225,6 +243,9 @@ export class EngineRunner {
                   : controller.signal,
               }),
           },
+          knowledge: this.knowledge,
+          rules: this.rules,
+          cpsEnabled: this.cps?.getCpsEnabled() ?? false,
           abortSignal: controller.signal,
           logger: this.logger,
         }),

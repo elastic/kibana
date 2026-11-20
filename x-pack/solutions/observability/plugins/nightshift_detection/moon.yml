@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/config-schema'
   - '@kbn/cps'
+  - '@kbn/cps-server-utils'
   - '@kbn/core'
   - '@kbn/core-di'
   - '@kbn/core-di-server'

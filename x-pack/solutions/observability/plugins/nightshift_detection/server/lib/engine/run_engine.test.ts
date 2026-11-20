@@ -14,6 +14,7 @@ import type { DetectionStrategy } from '../strategies/detection_strategy';
 import { InMemorySignalStore } from '../../test_utils/in_memory_signal_store';
 import { InMemorySavedObjectsRepository } from '../../test_utils/in_memory_saved_objects_repository';
 import { createTestStrategy, TEST_STRATEGY_ID } from '../../test_utils/test_strategy';
+import type { ManagedRuleReader } from '../rules/managed_rule_reader';
 import { EngineRunner, RUN_BUDGET_MS } from './run_engine';
 import type { SpaceRunLock } from './space_run_lock';
 
@@ -67,7 +68,10 @@ function createRunner({
     signals,
     { list: async () => [] },
     elasticsearchServiceMock.createElasticsearchClient(),
-    loggingSystemMock.createLogger()
+    { listQueryKnowledgeIndicators: async () => [], listFeatures: async () => [] },
+    { listManaged: async () => [], readRows: async () => [] } as unknown as ManagedRuleReader,
+    loggingSystemMock.createLogger(),
+    undefined
   );
 
   return { runner, state, signals };

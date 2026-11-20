@@ -13,7 +13,7 @@ import { apiTest, COMMON_HEADERS, setNightshiftEnabled, TICK_PATH } from '../fix
 interface TickResponse {
   run_id: string;
   status: 'completed' | 'busy' | 'unavailable';
-  strategies: unknown[];
+  strategies: Array<{ id: string }>;
 }
 
 /** The workflow `_enable` installs ticks every minute and can hold the space for a moment. */
@@ -62,8 +62,9 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.status).toBe('completed');
-      // Phase 1 binds no strategy, so nothing is due.
-      expect(response.body.strategies).toStrictEqual([]);
+      // Known failures is the only strategy; whether it is due depends on the minute.
+      const otherStrategies = response.body.strategies.filter(({ id }) => id !== 'known_failures');
+      expect(otherStrategies).toStrictEqual([]);
     });
   }
 );

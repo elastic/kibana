@@ -15,6 +15,7 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicatorReader } from '@kbn/significant-events-plugin/server';
 import type { z } from '@kbn/zod/v4';
 import type { detectionSignalReadingSchema } from '../../../common/detection_signal';
+import type { ManagedRuleReader } from '../rules/managed_rule_reader';
 import type { SeriesId } from './series_key';
 
 /** What a strategy declares about itself; the engine reads it to schedule the strategy. */
@@ -78,6 +79,12 @@ export interface GeneratorContext {
   esClient: ElasticsearchClient;
   /** The strategy's own history. */
   history: SignalHistoryReader;
+  /** The space's knowledge indicators, read as the detection service account, once per tick. */
+  knowledge: KnowledgeIndicatorReader;
+  /** The engine's managed rules in the space, and the rows they wrote. */
+  rules: Pick<ManagedRuleReader, 'listManaged' | 'readRows'>;
+  /** Whether cross-project search is on, so a strategy builds the same rule queries as its resources. */
+  cpsEnabled: boolean;
   /** Aborted when the run is out of time or cancelled; long queries should stop on it. */
   abortSignal: AbortSignal;
   logger: Logger;
@@ -85,7 +92,10 @@ export interface GeneratorContext {
 
 /** What a generator reports for one window. */
 export interface GenerateResult {
-  /** A reading for every series evaluated in every bucket of the window, breaching or not. */
+  /**
+   * A reading for every series evaluated in every bucket of the window, breaching or not. A strategy
+   * may report breaches only instead, and then sets `quiet_period_minutes` on them.
+   */
   readings: DetectionSignalReading[];
   /** Things the generator could not do, such as a source without the fields it needs. */
   notes: string[];

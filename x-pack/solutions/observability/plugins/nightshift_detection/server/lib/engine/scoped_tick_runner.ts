@@ -10,6 +10,7 @@ import { inject, injectable } from 'inversify';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { Logger as CoreLogger } from '@kbn/core-di';
 import { getErrorMessage } from '../errors/get_error_message';
+import { ManagedRuleReader } from '../rules/managed_rule_reader';
 import { AccountScope } from './account_scope';
 import { EngineRunner } from './run_engine';
 import type { TickResult } from './tick_result';
@@ -53,6 +54,8 @@ export class ScopedTickRunner {
       runId: uuidv4(),
       scheduledMinute: Math.floor(now / MINUTE_MS) * MINUTE_MS,
     });
+    // Reads the rules client bound in the fork, so it lives and dies with it.
+    scope.bind(ManagedRuleReader).toSelf();
     scope.bind(EngineRunner).toSelf();
 
     try {
