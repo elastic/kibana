@@ -15,6 +15,7 @@ import type { AddVersionOpts, VersionedRouteValidation } from '@kbn/core-http-se
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerAiIndexRoutes } from './ai_indices';
 import { registerSessionEventsRoutes } from './session_events';
+import { registerSessionMemoryRoutes } from './session_memory';
 
 interface ExampleMediaType {
   content: { 'application/json': { examples: Record<string, { value: unknown }> } };
@@ -85,6 +86,12 @@ registerSessionEventsRoutes({
   isMemoryEnabled: async () => false,
 });
 
+registerSessionMemoryRoutes({
+  router: routerCapturingRoutes,
+  getSpaces: jest.fn(),
+  getSessionMemoryService: jest.fn(),
+});
+
 const routesWithExamples = registered.flatMap(({ route, opts, handler }) => {
   const examplePath = opts.options?.oasOperationObject?.();
   if (typeof examplePath !== 'string' || opts.validate === false) {
@@ -121,7 +128,7 @@ const routePattern = (route: string) =>
 
 describe('route examples', () => {
   it('covers every route that links an example file', () => {
-    expect(routesWithExamples).toHaveLength(8);
+    expect(routesWithExamples).toHaveLength(9);
   });
 
   describe.each(routesWithExamples)('$route', ({ route, validation, examples, handler }) => {

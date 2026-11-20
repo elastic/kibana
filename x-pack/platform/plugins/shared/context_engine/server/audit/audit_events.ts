@@ -160,8 +160,48 @@ export const improvementAuditEvent = ({
 });
 
 export enum MemoryAuditAction {
+  FORGET = 'memory_forget',
   SAVE_EVENT = 'memory_save_event',
 }
+
+export interface SessionMemoryForgetAuditEventParams {
+  memoryId: string;
+  targetUserId?: string;
+  failure?: 'not_found' | Error;
+}
+
+const notFoundFailure = { name: 'not_found', message: 'Session memory not found' };
+
+/** Audits forgetting one session memory; core adds the caller, the space and the request id. */
+export const sessionMemoryForgetAuditEvent = ({
+  memoryId,
+  targetUserId,
+  failure: failureParam,
+}: SessionMemoryForgetAuditEventParams): AuditEvent => {
+  const doc =
+    targetUserId !== undefined
+      ? `session memory [id=${memoryId}] of user [id=${targetUserId}]`
+      : `session memory [id=${memoryId}]`;
+  const failure = failureParam === 'not_found' ? notFoundFailure : failureParam;
+
+  return {
+    message: failure ? `Failed attempt to forget ${doc}` : `User has forgotten ${doc}`,
+    event: {
+      action: MemoryAuditAction.FORGET,
+      category: ['database'],
+      type: ['deletion'],
+      outcome: failure ? 'failure' : 'success',
+    },
+    ...(targetUserId !== undefined && { user: { target: { id: targetUserId } } }),
+    kibana: {
+      saved_object: { type: 'session_memory', id: memoryId },
+    },
+    error: failure && {
+      code: failure.name,
+      message: failure.message,
+    },
+  };
+};
 
 /** Audits one `_save_event` request; core adds the caller, the space and the request id. */
 export const sessionEventsSaveAuditEvent = ({
