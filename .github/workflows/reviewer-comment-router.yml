@@ -28,6 +28,7 @@ jobs:
             )
             || (
               contains(github.event.comment.body, '@claude')
+              && contains(github.event.issue.labels.*.name, 'reviewer:claude')
             )
             || (
               contains(github.event.comment.body, '@scout')
@@ -45,6 +46,7 @@ jobs:
             )
             || (
               contains(github.event.comment.body, '@claude')
+              && contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
             )
             || (
               contains(github.event.comment.body, '@scout')
@@ -63,7 +65,7 @@ jobs:
 
       - name: Validate reviewer comment
         id: route
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const { routeReviewerComment } = require('./.github/scripts/reviewer_comment');
