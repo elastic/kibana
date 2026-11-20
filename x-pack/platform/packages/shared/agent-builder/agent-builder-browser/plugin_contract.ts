@@ -266,6 +266,10 @@ export interface AgentBuilderPluginStart {
   /**
    * Opens the conversation sidebar.
    *
+   * With any option, `options` replace the config set with `setChatConfig` instead of being merged
+   * with it, so pass again whatever of that config is needed, such as `conversationStarters`. Without
+   * options, the config set with `setChatConfig` is used.
+   *
    * @param options - Configuration options for the sidebar
    * @returns An object containing the sidebar reference
    *
@@ -287,7 +291,16 @@ export interface AgentBuilderPluginStart {
    * If the sidebar is open, it will be closed. Otherwise, it will be opened.
    */
   toggleChat: (options?: OpenConversationSidebarOptions) => void;
+  /**
+   * Sets the config used the next time the sidebar is opened without options, and updates the
+   * sidebar if it is open. It replaces the previous config as a whole. Call `clearChatConfig` when
+   * the page that set it goes away.
+   */
   setChatConfig: (config: EmbeddableConversationProps) => void;
+  /**
+   * Removes the config set with `setChatConfig`. In a sidebar that is open it also removes the
+   * browser API tools and the conversation starters.
+   */
   clearChatConfig: () => void;
   /**
    * Adds an attachment to the active conversation sidebar.

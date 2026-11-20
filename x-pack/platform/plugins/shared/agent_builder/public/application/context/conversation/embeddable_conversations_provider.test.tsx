@@ -145,6 +145,11 @@ const renderEmbeddableProvider = ({
     services,
     unmount,
     getConversation,
+    resetChatConfig: () => {
+      act(() => {
+        callbacks?.resetChatConfig();
+      });
+    },
     updateProps: (props: EmbeddableConversationProps) => {
       act(() => {
         callbacks?.updateProps(props);
@@ -331,6 +336,48 @@ describe('EmbeddableConversationsProvider conversation starters', () => {
     // The props are replaced as a whole, so a config without starters removes them.
     updateProps({ agentId: AGENT_ID, sessionTag: TAG_A });
     expect(await screen.findByText('starters:none')).toBeInTheDocument();
+  });
+});
+
+describe('EmbeddableConversationsProvider reset of the config of a page', () => {
+  const ConfigSpy = () => {
+    const { agentId, conversationStarters, browserApiTools } = useConversationContext();
+    const labels = (conversationStarters ?? []).map(({ label }) => label).join('|');
+    return (
+      <>
+        <div>{`agent:${agentId}`}</div>
+        <div>{`starters:${labels || 'none'}`}</div>
+        <div>{`tools:${browserApiTools?.length ?? 0}`}</div>
+      </>
+    );
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    localStorage.clear();
+    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
+      effectiveDefaultAgentId: null,
+      isRestricted: false,
+      isReady: true,
+    });
+  });
+
+  it('removes the starters and the browser API tools and keeps the rest of the config', async () => {
+    const { updateProps, resetChatConfig } = renderEmbeddableProvider({ children: <ConfigSpy /> });
+    updateProps({
+      agentId: AGENT_ID,
+      sessionTag: TAG_A,
+      conversationStarters: [{ label: 'first' }],
+      browserApiTools: [{ id: 'tool' }] as never,
+    });
+    expect(await screen.findByText('starters:first')).toBeInTheDocument();
+    expect(screen.getByText('tools:1')).toBeInTheDocument();
+
+    resetChatConfig();
+
+    expect(await screen.findByText('starters:none')).toBeInTheDocument();
+    expect(screen.getByText('tools:0')).toBeInTheDocument();
+    expect(screen.getByText(`agent:${AGENT_ID}`)).toBeInTheDocument();
   });
 });
 

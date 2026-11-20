@@ -69,8 +69,12 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     if (onRegisterCallbacks) {
       onRegisterCallbacks({
         updateProps: (newProps) => setCurrentProps(newProps),
-        resetBrowserApiTools: () =>
-          setCurrentProps((prevProps) => ({ ...prevProps, browserApiTools: undefined })),
+        resetChatConfig: () =>
+          setCurrentProps((prevProps) => ({
+            ...prevProps,
+            browserApiTools: undefined,
+            conversationStarters: undefined,
+          })),
         addAttachment: (attachment) =>
           setCurrentProps((prevProps) => ({
             ...prevProps,
