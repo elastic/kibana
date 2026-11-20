@@ -115,6 +115,23 @@ describe('helpers', () => {
       expect(result).toBe(inferenceEndpoint);
     });
 
+    it.each([undefined, '', 'NO_DEFAULT_CONNECTOR', 'NO_DEFAULT_MODEL'])(
+      'should ignore the connector flagged as default when the setting is %p',
+      (settingValue) => {
+        clientGet.mockImplementation((key: string) => {
+          if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
+            return settingValue;
+          }
+          return undefined;
+        });
+        const staleFlagged: AIConnector = { ...connector2, isDefault: true };
+
+        const result = getDefaultConnector([defaultConnector, staleFlagged], settings);
+
+        expect(result).toBe(defaultConnector);
+      }
+    );
+
     it('should prefer the exact id match over a connector flagged as default', () => {
       clientGet.mockImplementation((key: string) => {
         if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {

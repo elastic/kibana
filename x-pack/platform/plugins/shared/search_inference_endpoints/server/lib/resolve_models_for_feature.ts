@@ -157,5 +157,22 @@ export const resolveModelsForFeature = async ({
     }
   }
 
+  if (
+    soEntryFound &&
+    !ignoreGlobalDefault &&
+    defaultConnectorId &&
+    defaultConnectorId !== NO_DEFAULT_CONNECTOR
+  ) {
+    // A saved override replaces the list, so the default is not added to it. Still flag the
+    // entry the default setting resolves to when the override already contains it, so a default
+    // saved as a stack connector alias is found.
+    const defaultConnector = await fetchConnectorById(defaultConnectorId);
+    if (defaultConnector) {
+      connectors = connectors.map((c) =>
+        c.connectorId === defaultConnector.connectorId ? { ...c, isDefault: true } : c
+      );
+    }
+  }
+
   return { connectors, warnings: featureResult.warnings, soEntryFound };
 };

@@ -359,7 +359,7 @@ describe('resolveModelsForFeature', () => {
     expect(result.connectors[0]).not.toHaveProperty('isDefault');
   });
 
-  it('ignores the default connector when soEntryFound is true', async () => {
+  it('does not add the default connector to a saved override that does not contain it', async () => {
     const resolved = inferenceConnector('feature-ep');
     getForFeature.mockResolvedValue({
       endpoints: [resolved],
@@ -367,15 +367,74 @@ describe('resolveModelsForFeature', () => {
       soEntryFound: true,
     });
     getConnectorList.mockResolvedValue([resolved]);
+    getConnectorById.mockResolvedValue(inferenceConnector('default'));
 
     const result = await resolve({ defaultConnectorId: 'default' });
 
-    expect(getConnectorById).not.toHaveBeenCalled();
     expect(result).toEqual({
       connectors: [resolved],
       warnings: [],
       soEntryFound: true,
     });
+  });
+
+  it('flags the default connector in a saved override that already contains it', async () => {
+    const other = inferenceConnector('other-ep');
+    const defaultInOverride = inferenceConnector('default');
+    getForFeature.mockResolvedValue({
+      endpoints: [other, defaultInOverride],
+      warnings: [],
+      soEntryFound: true,
+    });
+    getConnectorList.mockResolvedValue([other, defaultInOverride]);
+    getConnectorById.mockResolvedValue(defaultInOverride);
+
+    const result = await resolve({ defaultConnectorId: 'default' });
+
+    expect(result.connectors).toEqual([other, { ...defaultInOverride, isDefault: true }]);
+  });
+
+  it('flags the endpoint behind an alias default in a saved override', async () => {
+    const other = inferenceConnector('other-ep');
+    const endpoint = inferenceConnector('endpoint-id');
+    getForFeature.mockResolvedValue({
+      endpoints: [other, endpoint],
+      warnings: [],
+      soEntryFound: true,
+    });
+    getConnectorList.mockResolvedValue([other, endpoint]);
+    getConnectorById.mockResolvedValue(endpoint);
+
+    const result = await resolve({ defaultConnectorId: '.my-alias' });
+
+    expect(result.connectors).toEqual([other, { ...endpoint, isDefault: true }]);
+  });
+
+  it('does not flag anything in a saved override when the default lookup fails', async () => {
+    const resolved = inferenceConnector('feature-ep');
+    getForFeature.mockResolvedValue({ endpoints: [resolved], warnings: [], soEntryFound: true });
+    getConnectorList.mockResolvedValue([resolved]);
+    getConnectorById.mockRejectedValue(new Error('not found'));
+
+    const result = await resolve({ defaultConnectorId: 'missing' });
+
+    expect(result.connectors).toEqual([resolved]);
+  });
+
+  it('does not flag anything in a saved override when ignoreGlobalDefault is true', async () => {
+    const defaultInOverride = inferenceConnector('default');
+    getForFeature.mockResolvedValue({
+      endpoints: [defaultInOverride],
+      warnings: [],
+      soEntryFound: true,
+    });
+    getConnectorList.mockResolvedValue([defaultInOverride]);
+    getConnectorById.mockResolvedValue(defaultInOverride);
+
+    const result = await resolve({ defaultConnectorId: 'default' }, 'my_feature', true);
+
+    expect(getConnectorById).not.toHaveBeenCalled();
+    expect(result.connectors).toEqual([defaultInOverride]);
   });
 
   it('returns the merged list without the default connector when its lookup fails', async () => {
