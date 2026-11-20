@@ -48,9 +48,12 @@ describe('useMatchedActionPolicies', () => {
     };
     http.fetch.mockResolvedValueOnce(fakeResponse as any);
 
-    const { result } = renderHook(() => useMatchedActionPolicies({ http, tags: ['env:prod'] }), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useMatchedActionPolicies({ http, routingTags: ['env:prod'] }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(result.current.isLoading).toBe(true);
     expect(result.current.evaluatedCount).toBe(0);
@@ -66,7 +69,7 @@ describe('useMatchedActionPolicies', () => {
       '/internal/alerting/v2/action_policies/_match',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ rule: { tags: ['env:prod'] } }),
+        body: JSON.stringify({ rule: { routing_tags: ['env:prod'] } }),
       })
     );
   });
@@ -75,9 +78,12 @@ describe('useMatchedActionPolicies', () => {
     const http = httpServiceMock.createStartContract();
     http.fetch.mockRejectedValue(new Error('Network error'));
 
-    const { result } = renderHook(() => useMatchedActionPolicies({ http, tags: ['env:prod'] }), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useMatchedActionPolicies({ http, routingTags: ['env:prod'] }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -106,7 +112,7 @@ describe('useMatchedActionPolicies', () => {
     expect(http.fetch).toHaveBeenCalledTimes(1);
   });
 
-  it('re-fetches when tags change', async () => {
+  it('re-fetches when routing tags change', async () => {
     const http = httpServiceMock.createStartContract();
     http.fetch
       .mockResolvedValueOnce({
@@ -121,19 +127,20 @@ describe('useMatchedActionPolicies', () => {
       } as any);
 
     const { result, rerender } = renderHook(
-      ({ tags }: { tags: string[] }) => useMatchedActionPolicies({ http, tags }),
-      { wrapper: createWrapper(), initialProps: { tags: ['env:prod'] } }
+      ({ routingTags }: { routingTags: string[] }) =>
+        useMatchedActionPolicies({ http, routingTags }),
+      { wrapper: createWrapper(), initialProps: { routingTags: ['env:prod'] } }
     );
 
     await waitFor(() => expect(result.current.items[0].action_policy.id).toBe('ap-1'));
 
-    rerender({ tags: ['env:staging'] });
+    rerender({ routingTags: ['env:staging'] });
     await waitFor(() => expect(result.current.items[0].action_policy.id).toBe('ap-2'));
 
     expect(http.fetch).toHaveBeenCalledTimes(2);
   });
 
-  it('reports previous matches while the query for new tags is still in flight', async () => {
+  it('reports previous matches while the query for new routing tags is still in flight', async () => {
     const http = httpServiceMock.createStartContract();
     let resolveNext: (value: unknown) => void = () => {};
     http.fetch.mockResolvedValueOnce({
@@ -150,13 +157,14 @@ describe('useMatchedActionPolicies', () => {
     );
 
     const { result, rerender } = renderHook(
-      ({ tags }: { tags: string[] }) => useMatchedActionPolicies({ http, tags }),
-      { wrapper: createWrapper(), initialProps: { tags: ['env:prod'] } }
+      ({ routingTags }: { routingTags: string[] }) =>
+        useMatchedActionPolicies({ http, routingTags }),
+      { wrapper: createWrapper(), initialProps: { routingTags: ['env:prod'] } }
     );
 
     await waitFor(() => expect(result.current.items[0].action_policy.id).toBe('ap-1'));
 
-    rerender({ tags: ['env:staging'] });
+    rerender({ routingTags: ['env:staging'] });
 
     await waitFor(() => expect(result.current.isPreviousData).toBe(true));
     expect(result.current.isLoading).toBe(false);
@@ -173,7 +181,7 @@ describe('useMatchedActionPolicies', () => {
     expect(result.current.items[0].action_policy.id).toBe('ap-2');
   });
 
-  it('fires a request with an empty rule body when no tags are provided', async () => {
+  it('fires a request with an empty rule body when no routing tags are provided', async () => {
     const http = httpServiceMock.createStartContract();
     const fakeResponse = {
       items: [{ action_policy: { id: 'ap-global', name: 'Global Policy' }, category: 'catch_all' }],

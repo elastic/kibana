@@ -6,9 +6,11 @@
  */
 
 import { Container, ContainerModule } from 'inversify';
-import { OnSetup, OnStart, PluginSetup } from '@kbn/core-di';
+import { OnSetup, OnStart, PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
 import { createAlertAttachmentType } from '../agent_builder/attachments/alert_attachment_type';
@@ -20,7 +22,8 @@ import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_st
 import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { createLoggerService } from '../lib/services/logger_service/logger_service.mock';
 import { UiSettingsClientToken } from '../lib/services/settings_service/tokens';
-import type { AlertingServerSetupDependencies } from '../types';
+import { SpacesService } from '../lib/services/spaces_service/spaces_service';
+import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { bindAgentBuilder } from './bind_agent_builder';
 
 jest.mock('../agent_builder/attachments/rule_attachment_type', () => ({
@@ -92,7 +95,7 @@ describe('bindAgentBuilder', () => {
   };
 
   beforeEach(() => {
-    container = new Container();
+    container = new Container({ defaultScope: 'Singleton' });
     agentBuilder = agentBuilderMocks.createSetup();
     agentBuilderSml = { registerType: jest.fn() };
     uiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
@@ -119,6 +122,10 @@ describe('bindAgentBuilder', () => {
     );
 
     container.bind(CoreStart('injection')).toConstantValue({} as never);
+    container
+      .bind(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
+      .toConstantValue(spacesMock.createStart());
+    container.bind(SpacesService).toSelf();
     container.bind(LoggerServiceToken).toConstantValue(loggerService);
     container.bind(UiSettingsClientToken).toConstantValue(uiSettingsClient as never);
     container.bind(WorkflowsManagementApiToken).toConstantValue(workflowsManagementApi as never);
@@ -230,6 +237,29 @@ describe('bindAgentBuilder', () => {
         'space-1',
         request
       );
+    });
+
+    it('wires the serverless project type into skill availability', async () => {
+      bindAgentBuilderPlugin();
+      const cloud = cloudMock.createSetup();
+      cloud.serverless.projectType = 'security';
+      container
+        .bind(PluginSetup<NonNullable<AlertingServerSetupDependencies['cloud']>>('cloud'))
+        .toConstantValue(cloud);
+
+      runOnStart();
+
+      const { availability } = registerSkillsMock.mock.calls[0][1];
+      await expect(
+        availability.handler({
+          request: {},
+          spaceId: 'default',
+          uiSettings: { get: jest.fn().mockResolvedValue(true) },
+        } as never)
+      ).resolves.toEqual({
+        status: 'unavailable',
+        reason: 'Universal alerting skills are only available in Observability projects',
+      });
     });
   });
 });

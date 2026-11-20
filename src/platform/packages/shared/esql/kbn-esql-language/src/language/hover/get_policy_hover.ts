@@ -32,17 +32,17 @@ export async function getPolicyHover(
     result.push(
       ...[
         {
-          value: `${i18n.translate('kbn-esql-language.esql.hover.policyIndexes', {
+          value: `${i18n.translate('esqlLanguage.esql.hover.policyIndexes', {
             defaultMessage: '**Indexes**',
           })}: ${policyMetadata.sourceIndices.join(', ')}`,
         },
         {
-          value: `${i18n.translate('kbn-esql-language.esql.hover.policyMatchingField', {
+          value: `${i18n.translate('esqlLanguage.esql.hover.policyMatchingField', {
             defaultMessage: '**Matching field**',
           })}: ${policyMetadata.matchField}`,
         },
         {
-          value: `${i18n.translate('kbn-esql-language.esql.hover.policyEnrichedFields', {
+          value: `${i18n.translate('esqlLanguage.esql.hover.policyEnrichedFields', {
             defaultMessage: '**Fields**',
           })}: ${policyMetadata.enrichFields.join(', ')}`,
         },

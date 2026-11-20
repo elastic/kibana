@@ -108,7 +108,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'returns a 403 when the user does not have sufficient privileges',
+      'returns no documents when the user cannot access any data streams',
       async ({ apiClient, samlAuth }) => {
         // The permission boundary is the subject of the test, so a custom role is required.
         const { cookieHeader } = await samlAuth.asInteractiveUser(noAccessRole);
@@ -118,7 +118,8 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(403);
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.totalDocs).toStrictEqual([]);
       }
     );
   }

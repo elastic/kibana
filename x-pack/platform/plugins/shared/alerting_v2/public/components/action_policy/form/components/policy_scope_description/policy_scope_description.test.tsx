@@ -29,15 +29,15 @@ describe('PolicyScopeDescription', () => {
     renderWithI18n(<PolicyScopeDescription matcher={{ tags: ['prod'] }} />);
 
     expect(
-      screen.getByText('Applies to all rules with one or more of the selected tags')
+      screen.getByText('Applies to all rules with one or more of the selected routing tags')
     ).toBeInTheDocument();
   });
 
-  it('shows tags-only copy when tags are set and expression is null', () => {
-    renderWithI18n(<PolicyScopeDescription matcher={{ tags: ['prod'], expression: null }} />);
+  it('shows tags-only copy when tags are set and expression is unset', () => {
+    renderWithI18n(<PolicyScopeDescription matcher={{ tags: ['prod'] }} />);
 
     expect(
-      screen.getByText('Applies to all rules with one or more of the selected tags')
+      screen.getByText('Applies to all rules with one or more of the selected routing tags')
     ).toBeInTheDocument();
   });
 
@@ -48,7 +48,7 @@ describe('PolicyScopeDescription', () => {
 
     expect(
       screen.getByText(
-        'Applies to all rules with one or more of the selected tags, and matching the expression conditions'
+        'Applies to all rules with one or more of the selected routing tags, and matching the expression conditions'
       )
     ).toBeInTheDocument();
   });
@@ -61,10 +61,8 @@ describe('PolicyScopeDescription', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows expression-only copy when expression is set and tags are null', () => {
-    renderWithI18n(
-      <PolicyScopeDescription matcher={{ tags: null, expression: 'data.host:"x"' }} />
-    );
+  it('shows expression-only copy when expression is set and tags are unset', () => {
+    renderWithI18n(<PolicyScopeDescription matcher={{ expression: 'data.host:"x"' }} />);
 
     expect(
       screen.getByText('Applies to all alerts matching the expression conditions')
@@ -76,7 +74,7 @@ describe('PolicyScopeDescription', () => {
 
     expect(
       screen.getByText(
-        'Define which alert episodes this policy applies to. Select rule tags (joined with OR) and/or add a KQL match expression in advanced matching.'
+        'Define which alert episodes this policy applies to. Select routing tags (joined with OR) and/or add a KQL match expression in advanced matching.'
       )
     ).toBeInTheDocument();
   });

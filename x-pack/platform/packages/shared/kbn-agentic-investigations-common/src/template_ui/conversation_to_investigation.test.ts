@@ -42,7 +42,7 @@ const runSummary = {
 };
 
 describe('conversationToInvestigation', () => {
-  it('reads the identity and timestamps straight off the conversation', () => {
+  it('reads the identity and creation time straight off the conversation', () => {
     const result = conversationToInvestigation(conversation());
 
     expect(result).toMatchObject({
@@ -50,7 +50,6 @@ describe('conversationToInvestigation', () => {
       template_id: 'investigation',
       title: 'Impossible travel — exec account',
       createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-02T00:00:00Z',
     });
   });
 
@@ -61,7 +60,7 @@ describe('conversationToInvestigation', () => {
           status: 'open',
           severity: 'high',
           summary: 'A second sign-in replayed the same session cookie.',
-          workflow_execution_id: 'exec-77',
+          workflow_execution_ids: ['exec-77', 'exec-88'],
         },
       })
     );
@@ -69,7 +68,7 @@ describe('conversationToInvestigation', () => {
     expect(result.status).toBe('open');
     expect(result.severity).toBe('high');
     expect(result.summary).toBe('A second sign-in replayed the same session cookie.');
-    expect(result.watch_execution_id).toBe('exec-77');
+    expect(result.worker_execution_ids).toEqual(['exec-77', 'exec-88']);
   });
 
   it('falls back to the single-line description when there is no summary', () => {
@@ -78,6 +77,14 @@ describe('conversationToInvestigation', () => {
     );
 
     expect(result.summary).toBe('One line about the incident.');
+  });
+
+  it('returns an empty execution list when the metadata contains no IDs', () => {
+    const result = conversationToInvestigation(
+      conversation({ metadata: { workflow_execution_ids: [] } })
+    );
+
+    expect(result.worker_execution_ids).toEqual([]);
   });
 
   it('prefers the long summary over the description when both are set', () => {
@@ -118,9 +125,7 @@ describe('conversationToInvestigation', () => {
     expect(result.severity).toBeUndefined();
     expect(result.summary).toBeUndefined();
     expect(result.assignee).toBeNull();
-    // No metadata field declares a watch, so this stays empty rather than guessing one.
-    expect(result.watch_id).toBe('');
-    expect(result.watch_execution_id).toBe('');
+    expect(result.worker_execution_ids).toEqual([]);
     // Proposal-queue concepts a conversation cannot answer.
     expect(result.affectedSurface).toBeUndefined();
     expect(result.recommendedAction).toBeUndefined();
@@ -260,6 +265,41 @@ describe('conversationToInvestigation', () => {
       expect(result.events[0].summary).toBe('Added a platform.proposal attachment');
     });
 
+    it('labels attachment_restored and skips hidden attachment events', () => {
+      const result = conversationToInvestigation(
+        conversation({
+          events: [
+            event({
+              id: 'r',
+              type: TimelineEventType.attachmentRestored,
+              data: {
+                attachment_id: 'a1',
+                attachment_type: 'esql',
+                current_version: 1,
+                source: 'http_api',
+              },
+            }),
+            event({
+              id: 'h',
+              type: TimelineEventType.attachmentUpdated,
+              created_at: '2024-01-01T01:00:01Z',
+              data: {
+                attachment_id: 's1',
+                attachment_type: 'screen_context',
+                previous_version: 1,
+                current_version: 2,
+                render_inline: false,
+                source: 'chat_input',
+                hidden: true,
+              },
+            }),
+          ],
+        })
+      );
+
+      expect(result.events.map(({ summary }) => summary)).toEqual(['Restored a esql attachment']);
+    });
+
     it('falls back to the username when the actor has no display name', () => {
       const result = conversationToInvestigation(
         conversation({
@@ -349,5 +389,17 @@ describe('conversationToEscalationHeader', () => {
       conversation({ metadata: { assignees: 'uid-single' } })
     );
     expect(result.assigneeUids).toEqual([]);
+  });
+
+  it('reads the summary, falling back to the single-line description', () => {
+    expect(
+      conversationToEscalationHeader(
+        conversation({ metadata: { summary: 'Long form', description: 'Short' } })
+      ).summary
+    ).toBe('Long form');
+    expect(
+      conversationToEscalationHeader(conversation({ metadata: { description: 'Short' } })).summary
+    ).toBe('Short');
+    expect(conversationToEscalationHeader(conversation()).summary).toBeUndefined();
   });
 });

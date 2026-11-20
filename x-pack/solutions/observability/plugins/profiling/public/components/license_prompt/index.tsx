@@ -25,15 +25,14 @@ export function LicensePrompt() {
       title={
         <h1>
           {i18n.translate('xpack.profiling.invalidLicense.message', {
-            defaultMessage: 'To access Universal Profiling, upgrade to an Enterprise subscription',
+            defaultMessage: 'To access Profiling, upgrade to an Enterprise subscription',
           })}
         </h1>
       }
       body={
         <p>
           {i18n.translate('xpack.profiling.invalidLicense.description', {
-            defaultMessage:
-              'You must have an Enterprise subscription to use Universal Profiling features.',
+            defaultMessage: 'You must have an Enterprise subscription to use Profiling features.',
           })}
         </p>
       }

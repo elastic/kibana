@@ -13,11 +13,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiSelectable,
   EuiText,
   EuiTextTruncate,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiPopoverProps } from '@elastic/eui';
@@ -169,13 +171,20 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
     }
   `;
 
+  const triggerContentStyles = css`
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.xs};
+  `;
+
   const triggerButton = (
     <EuiButtonEmpty
       size="s"
-      iconType="chevronSingleDown"
-      iconSide="right"
       flush="both"
       color="text"
+      css={css`
+        color: ${euiTheme.colors.textHeading};
+      `}
       onClick={() => setIsPopoverOpen((v) => !v)}
       data-test-subj="agentBuilderAgentSelectorButton"
       {...getEbtProps({
@@ -183,17 +192,18 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
         action: AGENT_BUILDER_UI_EBT.action.navSidebar.AGENT_SELECTOR_OPEN,
       })}
     >
-      <EuiText size="m">
-        <strong>
-          {
+      <span css={triggerContentStyles}>
+        <EuiTitle size="xxs">
+          <span>
             <EuiTextTruncate
               text={selectedAgent?.name ?? fallbackLabel ?? ''}
               truncation="end"
               width={180}
             />
-          }
-        </strong>
-      </EuiText>
+          </span>
+        </EuiTitle>
+        <EuiIcon type="chevronSingleDown" size="s" aria-hidden={true} />
+      </span>
     </EuiButtonEmpty>
   );
 

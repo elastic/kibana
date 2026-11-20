@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuditLogger } from '@kbn/core-security-server';
-import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { AiIndexDataReadService } from './data_read_service';
 import { describeAiIndex } from './describe';
@@ -22,7 +22,7 @@ const describeAiIndexMock = jest.mocked(describeAiIndex);
 const filterReadableAiIndicesMock = jest.mocked(filterReadableAiIndices);
 const probeAiIndicesMock = jest.mocked(probeAiIndices);
 
-const aiIndex: AiIndexHttpItem = {
+const aiIndex: AiIndexItem = {
   id: 'support',
   dest: { type: 'index', value: 'ai-index-idx-support' },
   managed: false,
@@ -41,12 +41,14 @@ describe('AiIndexDataReadService', () => {
   const auditLogger = { log: jest.fn() } as unknown as jest.Mocked<AuditLogger>;
   const aiIndexService = { get: jest.fn(), list: jest.fn() };
   const logger = loggingSystemMock.createLogger();
+  const isMemoryEnabled = jest.fn().mockResolvedValue(true);
   const service = new AiIndexDataReadService({
     esClient,
     spaceId: 'marketing',
     auditLogger,
     aiIndexService,
     logger,
+    isMemoryEnabled,
   });
 
   beforeEach(() => {
@@ -54,6 +56,7 @@ describe('AiIndexDataReadService', () => {
     auditLogger.log.mockReset();
     aiIndexService.get.mockReset();
     aiIndexService.list.mockReset();
+    isMemoryEnabled.mockClear();
     describeAiIndexMock.mockReset();
     filterReadableAiIndicesMock.mockReset();
     probeAiIndicesMock.mockReset();
@@ -129,7 +132,12 @@ describe('AiIndexDataReadService', () => {
         aiIndices: [aiIndex],
         logger,
       });
-      expect(describeAiIndexMock).toHaveBeenCalledWith({ esClient, aiIndex, spaceId: 'marketing' });
+      expect(describeAiIndexMock).toHaveBeenCalledWith({
+        esClient,
+        aiIndex,
+        spaceId: 'marketing',
+        includeMemory: true,
+      });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'User has described AI index [id=support]',
@@ -151,6 +159,17 @@ describe('AiIndexDataReadService', () => {
           event: expect.objectContaining({ action: 'ai_index_describe', outcome: 'failure' }),
           error: { code: 'AiIndexNotFoundError', message: "AI index 'missing' not found" },
         })
+      );
+    });
+
+    it('passes the user scope through', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndex);
+      describeAiIndexMock.mockResolvedValue(contextBlock);
+
+      await service.describe('support', { userId: 'alice' });
+
+      expect(describeAiIndexMock).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'marketing', userId: 'alice' })
       );
     });
 
@@ -209,7 +228,7 @@ describe('AiIndexDataReadService', () => {
   });
 
   describe('list', () => {
-    const withId = (id: string): AiIndexHttpItem => ({ ...aiIndex, id });
+    const withId = (id: string): AiIndexItem => ({ ...aiIndex, id });
     const registry = ['readable', 'forbidden'].map(withId);
 
     it('lists the space registry filtered to readable entries and audit-logs success', async () => {

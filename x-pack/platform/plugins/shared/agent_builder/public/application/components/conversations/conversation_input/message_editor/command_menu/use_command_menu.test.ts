@@ -7,11 +7,19 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useCommandMenu } from './use_command_menu';
+import { CommandId } from './types';
 import { getTextBeforeCursor } from './utils/get_text_before_cursor';
+import { useExperimentalFeatures } from '../../../../../hooks/use_experimental_features';
+import { useIsSharedConversation } from '../../../../../hooks/use_conversation';
 
 jest.mock('../../../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: () => true,
+  useExperimentalFeatures: jest.fn(),
 }));
+jest.mock('../../../../../hooks/use_conversation', () => ({
+  useIsSharedConversation: jest.fn(),
+}));
+const mockedUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
+const mockedUseIsSharedConversation = jest.mocked(useIsSharedConversation);
 
 jest.mock('./utils/get_text_before_cursor');
 const mockGetTextBeforeCursor = jest.mocked(getTextBeforeCursor);
@@ -21,6 +29,8 @@ const mockElement = document.createElement('div');
 describe('useCommandMenuCommand', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedUseExperimentalFeatures.mockReturnValue(true);
+    mockedUseIsSharedConversation.mockReturnValue(true);
   });
 
   it('returns inactive match initially', () => {
@@ -106,16 +116,60 @@ describe('useCommandMenuCommand', () => {
     expect(result.current.match.isActive).toBe(false);
   });
 
+  describe('mentions', () => {
+    const typeMention = (result: { current: ReturnType<typeof useCommandMenu> }) => {
+      mockGetTextBeforeCursor.mockReturnValue('hi @jul');
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+    };
+
+    it('"@" opens the mention menu in a shared chat with the experimental flag on', () => {
+      const { result } = renderHook(() => useCommandMenu());
+      typeMention(result);
+
+      expect(result.current.match.activeCommand?.command.id).toBe(CommandId.Mention);
+      expect(result.current.match.activeCommand?.query).toBe('jul');
+    });
+
+    it('"@" opens no menu in a chat that is not shared', () => {
+      mockedUseIsSharedConversation.mockReturnValue(false);
+      const { result } = renderHook(() => useCommandMenu());
+      typeMention(result);
+
+      expect(result.current.match.isActive).toBe(false);
+    });
+
+    it('"@" opens no menu with the experimental flag off', () => {
+      mockedUseExperimentalFeatures.mockReturnValue(false);
+      const { result } = renderHook(() => useCommandMenu());
+      typeMention(result);
+
+      expect(result.current.match.isActive).toBe(false);
+    });
+
+    it('turns the mention menu on when the chat becomes shared, without a remount', () => {
+      mockedUseIsSharedConversation.mockReturnValue(false);
+      const { result, rerender } = renderHook(() => useCommandMenu());
+
+      mockedUseIsSharedConversation.mockReturnValue(true);
+      rerender();
+      typeMention(result);
+
+      expect(result.current.match.activeCommand?.command.id).toBe(CommandId.Mention);
+    });
+  });
+
   describe('no stickiness — a later trigger always wins immediately', () => {
-    it('lets a "/" elsewhere in the text win outright, with no memory of an earlier "@" mention', () => {
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match');
+    it('lets a "/" elsewhere in the text win outright, with no memory of an earlier "#" mention', () => {
+      mockGetTextBeforeCursor.mockReturnValue('#connector/no_match');
       const { result } = renderHook(() => useCommandMenu());
       act(() => {
         result.current.checkInputForCommand(mockElement);
       });
       expect(result.current.match.activeCommand?.command.id).toBe('sml');
 
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match and more /skill');
+      mockGetTextBeforeCursor.mockReturnValue('#connector/no_match and more /skill');
       act(() => {
         result.current.checkInputForCommand(mockElement);
       });
@@ -126,7 +180,7 @@ describe('useCommandMenuCommand', () => {
 
   describe('hasVisibleContent: always visible within the first word', () => {
     it('is visible while still on the first word, before any content is confirmed', () => {
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match');
+      mockGetTextBeforeCursor.mockReturnValue('#connector/no_match');
       const { result } = renderHook(() => useCommandMenu());
       act(() => {
         result.current.checkInputForCommand(mockElement);
@@ -136,7 +190,7 @@ describe('useCommandMenuCommand', () => {
     });
 
     it('stays visible on backspace after being reported empty, so a typo can still be fixed', () => {
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match');
+      mockGetTextBeforeCursor.mockReturnValue('#connector/no_match');
       const { result } = renderHook(() => useCommandMenu());
       act(() => {
         result.current.checkInputForCommand(mockElement);
@@ -145,7 +199,7 @@ describe('useCommandMenuCommand', () => {
         result.current.reportContent(false, 'connector/no_match');
       });
 
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_matc');
+      mockGetTextBeforeCursor.mockReturnValue('#connector/no_matc');
       act(() => {
         result.current.checkInputForCommand(mockElement);
       });
@@ -157,7 +211,7 @@ describe('useCommandMenuCommand', () => {
 
   describe('hasVisibleContent: past the first word, defaults to hidden until confirmed', () => {
     it('is hidden by default once a space is crossed, before any confirmation arrives', () => {
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match ');
+      mockGetTextBeforeCursor.mockReturnValue('#connector/no_match ');
       const { result } = renderHook(() => useCommandMenu());
       act(() => {
         result.current.checkInputForCommand(mockElement);
@@ -222,7 +276,7 @@ describe('useCommandMenuCommand', () => {
 
     it('stays hidden across a whole sentence typed after a mention that never gets confirmed', () => {
       const { result } = renderHook(() => useCommandMenu());
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no-match');
+      mockGetTextBeforeCursor.mockReturnValue('#connector/no-match');
       act(() => {
         result.current.checkInputForCommand(mockElement);
       });
@@ -230,8 +284,8 @@ describe('useCommandMenuCommand', () => {
         result.current.reportContent(false, 'connector/no-match');
       });
 
-      const sentence = '@connector/no-match this is not a match';
-      for (let end = '@connector/no-match'.length + 1; end <= sentence.length; end++) {
+      const sentence = '#connector/no-match this is not a match';
+      for (let end = '#connector/no-match'.length + 1; end <= sentence.length; end++) {
         mockGetTextBeforeCursor.mockReturnValue(sentence.slice(0, end));
         act(() => {
           result.current.checkInputForCommand(mockElement);

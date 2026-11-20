@@ -18,7 +18,7 @@ export interface StartModelResponse {
 }
 
 export const startModel = async ({ modelId }: StartModelArgs): Promise<StartModelResponse> => {
-  const route = `/internal/enterprise_search/ml/models/${modelId}/deploy`;
+  const route = `/internal/enterprise_search/ml/models/${encodeURIComponent(modelId)}/deploy`;
   return await HttpLogic.values.http.post<StartModelResponse>(route);
 };
 

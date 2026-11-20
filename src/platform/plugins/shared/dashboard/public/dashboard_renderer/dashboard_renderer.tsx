@@ -33,6 +33,7 @@ import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
 import type { DashboardRedirect } from '../dashboard_app/types';
+import { publishDashboardAppClientApi } from '../services/dashboard_app_client_api';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import { coreServices, uiActionsService } from '../services/kibana_services';
 
@@ -72,6 +73,12 @@ export interface DashboardRendererProps {
    * Callback invoked when the dashboard API is destroyed.
    */
   onApiCleanup?: () => void;
+  /**
+   * Publishes this dashboard's API on the Dashboard start contract's `dashboardAppClientApi$`
+   * while it is loaded, so app-level integrations such as the Agent Builder chat can attach to it.
+   * Set it only on a page's primary dashboard, never on embedded or preview renderers.
+   */
+  publishAsAppClientApi?: boolean;
 }
 
 export function DashboardRenderer({
@@ -83,6 +90,7 @@ export function DashboardRenderer({
   getCreationOptions,
   onApiAvailable,
   onApiCleanup,
+  publishAsAppClientApi,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
@@ -144,12 +152,18 @@ export function DashboardRenderer({
           return;
         }
 
-        cleanupDashboardApi = results.cleanup;
         setDashboard({
           api: results.api,
           internalApi: results.internalApi,
           showControlGroup: results.useControlsIntegration ?? true,
         });
+        const unpublishAppClientApi = publishAsAppClientApi
+          ? publishDashboardAppClientApi(results.api)
+          : undefined;
+        cleanupDashboardApi = () => {
+          unpublishAppClientApi?.();
+          results.cleanup();
+        };
         onApiAvailable?.(results.api, results.internalApi);
       })
       .catch((err) => {

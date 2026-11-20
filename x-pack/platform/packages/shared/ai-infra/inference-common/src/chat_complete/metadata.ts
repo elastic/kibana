@@ -31,19 +31,18 @@ export interface ConnectorTelemetryMetadata {
   productFeature?: string;
   /** Sent as the X-Elastic-Inference-Interaction-Id header on inference endpoint requests. */
   interactionId?: string;
-}
-
-export interface ChatCompleteAnonymizationTarget {
-  targetType: 'data_view' | 'index_pattern' | 'index';
-  targetId: string;
+  /** Sent as the X-Elastic-Trace-Id header on inference endpoint requests. */
+  traceId?: string;
+  /** Sent as the X-Elastic-User-Id header on inference endpoint requests. */
+  userId?: string;
+  /** Sent as the X-Elastic-Space-Id header on inference endpoint requests. */
+  spaceId?: string;
 }
 
 /**
- * Optional anonymization metadata consumers can pass so inference can resolve
- * field-based policy for a target.
+ * Optional anonymization metadata consumers can pass to inference.
  */
 export interface ChatCompleteAnonymizationMetadata {
   profileId?: string;
   replacementsId?: string;
-  target?: ChatCompleteAnonymizationTarget;
 }

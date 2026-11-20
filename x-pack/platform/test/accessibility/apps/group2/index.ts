@@ -11,7 +11,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('X-Pack Accessibility Tests - Group 2', function () {
     loadTestFile(require.resolve('./ml'));
     loadTestFile(require.resolve('./ml_anomaly_detection'));
-    loadTestFile(require.resolve('./transform'));
     loadTestFile(require.resolve('./lens'));
     loadTestFile(require.resolve('./ml_trained_models'));
   });

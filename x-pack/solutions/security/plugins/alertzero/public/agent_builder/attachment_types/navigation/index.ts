@@ -16,6 +16,7 @@ export {
   buildEntityLookupEsql,
   buildEventLookupEsql,
   buildEventsLookupEsql,
-  buildThreatReportLookupEsql,
+  buildIocMatchEsql,
 } from './esql_queries';
+export { buildWorkflowExecutionUrl } from './workflow_urls';
 export type { AttachmentNavigationDeps } from './types';

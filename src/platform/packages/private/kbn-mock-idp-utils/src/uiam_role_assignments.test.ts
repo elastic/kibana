@@ -13,10 +13,13 @@ import { buildMockIdpUiamRoleAssignments } from './uiam_role_assignments';
 // unknown role ID instead of rejecting it, so a typo here would only show up as a 403 at runtime.
 const KNOWN_UIAM_ROLE_IDS = new Set([
   'ess-default-organization',
+  'organization-admin',
+  'billing-admin',
   'elasticsearch-application-only',
+  'elasticsearch-viewer',
+  'observability-admin',
   'observability-application-only',
   'security-application-only',
-  'workplaceai-application-only',
   'vectordb-application-only',
 ]);
 
@@ -39,6 +42,28 @@ describe('buildMockIdpUiamRoleAssignments', () => {
     ]);
   });
 
+  it('grants the requested organization roles without application roles', () => {
+    const { organization } = buildMockIdpUiamRoleAssignments({
+      organizationId,
+      projectType: 'security',
+      applicationRoles: ['admin'],
+      organizationRoleIds: ['billing-admin'],
+    });
+
+    expect(organization).toEqual([
+      {
+        role_id: 'ess-default-organization',
+        organization_id: organizationId,
+        application_roles: [],
+      },
+      {
+        role_id: 'billing-admin',
+        organization_id: organizationId,
+        application_roles: [],
+      },
+    ]);
+  });
+
   it('grants the requested application roles on every project type, origin type first', () => {
     const { project } = buildMockIdpUiamRoleAssignments({
       organizationId,
@@ -47,16 +72,32 @@ describe('buildMockIdpUiamRoleAssignments', () => {
     });
 
     expect(project).toEqual(
-      ['security', 'elasticsearch', 'observability', 'workplaceai', 'vectordb'].map(
-        (projectType) => ({
-          role_id: `${projectType}-application-only`,
-          organization_id: organizationId,
-          project_type: projectType,
-          application_roles: ['viewer', 'editor'],
-          project_scope: { scope: 'all' },
-        })
-      )
+      ['security', 'elasticsearch', 'observability', 'vectordb'].map((projectType) => ({
+        role_id: `${projectType}-application-only`,
+        organization_id: organizationId,
+        project_type: projectType,
+        application_roles: ['viewer', 'editor'],
+        project_scope: { scope: 'all' },
+      }))
     );
+  });
+
+  it('grants the requested project roles on the origin project type without application roles', () => {
+    const { project } = buildMockIdpUiamRoleAssignments({
+      organizationId,
+      projectType: 'security',
+      applicationRoles: ['viewer'],
+      projectRoles: ['admin'],
+    });
+
+    expect(project).toHaveLength(5);
+    expect(project[4]).toEqual({
+      role_id: 'security-admin',
+      organization_id: organizationId,
+      project_type: 'security',
+      application_roles: [],
+      project_scope: { scope: 'all' },
+    });
   });
 
   it('only uses role IDs that UIAM defines', () => {
@@ -64,6 +105,8 @@ describe('buildMockIdpUiamRoleAssignments', () => {
       organizationId,
       projectType: 'observability',
       applicationRoles: ['admin'],
+      organizationRoleIds: ['organization-admin', 'billing-admin'],
+      projectRoles: ['admin'],
     });
 
     for (const { role_id: roleId } of [...organization, ...project]) {

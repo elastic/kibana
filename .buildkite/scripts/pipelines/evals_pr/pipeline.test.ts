@@ -9,7 +9,6 @@
 
 const mockGetEvalPipeline = jest.fn();
 const mockEmitPipeline = jest.fn();
-const mockGetPipeline = jest.fn();
 
 jest.mock('../../../pipelines/evals/eval_pipeline.ts', () => ({
   getEvalPipeline: mockGetEvalPipeline,
@@ -17,7 +16,6 @@ jest.mock('../../../pipelines/evals/eval_pipeline.ts', () => ({
 
 jest.mock('#pipeline-utils', () => ({
   emitPipeline: mockEmitPipeline,
-  getPipeline: mockGetPipeline,
 }));
 
 const ORIGINAL_ENV = process.env;
@@ -34,10 +32,6 @@ describe('evals_pr pipeline generation', () => {
     jest.resetModules();
     process.env = { ...ORIGINAL_ENV };
     process.env.GITHUB_PR_LABELS = 'evals:smoke-tests,models:eis/openai-gpt-5.4';
-    // Stand in for the canonical post_build.yml fragment reused via getPipeline.
-    mockGetPipeline.mockReturnValue(
-      '  - wait: ~\n    continue_on_failure: true\n\n  - command: .buildkite/scripts/lifecycle/post_build.sh\n    label: Post-Build'
-    );
   });
 
   afterEach(() => {
@@ -60,11 +54,8 @@ describe('evals_pr pipeline generation', () => {
     expect(yaml).toContain('build_kibana.sh');
     expect(yaml).toContain('group: LLM Evals');
     // Post-Build is the canonical step reused (not duplicated) behind a trailing-wait barrier.
-    expect(mockGetPipeline).toHaveBeenCalledWith(
-      '.buildkite/pipelines/pull_request/post_build.yml'
-    );
     expect(yaml).toContain('post_build.sh');
-    expect(yaml).toContain('wait: ~');
+    expect(yaml).toContain('wait: null');
     expect(yaml).toContain('continue_on_failure: true');
   });
 

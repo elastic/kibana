@@ -14,8 +14,9 @@ import { InitialTabStateService } from '../plugin_imports/initial_tab_state_serv
 import { DataSourceService } from '@kbn/data-source';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { searchSessionsManagementMock } from '@kbn/search-sessions-management-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import { alertingV2PluginMock } from '@kbn/alerting-v2-plugin/public/mocks';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
 import {
   analyticsServiceMock,
@@ -30,6 +31,7 @@ import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
+  ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   SAMPLE_SIZE_SETTING,
   SAMPLE_ROWS_PER_PAGE_SETTING,
@@ -113,6 +115,11 @@ export function createDiscoverServicesMock(): DiscoverServices {
     return searchSource;
   };
 
+  dataPlugin.search.dslPaginated = jest.fn().mockResolvedValue({
+    rawResponse: { hits: { total: 2, hits: [] } },
+    pagination: { hasNextPage: jest.fn().mockReturnValue(false), nextPage: jest.fn() },
+  });
+
   dataPlugin.search.searchSource.createEmpty = jest.fn(() => createSearchSourceWithDeps());
 
   dataPlugin.search.searchSource.create = jest.fn(async (fields?: Record<string, unknown>) => {
@@ -127,26 +134,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
     return createSearchSourceWithDeps(fields);
   });
 
-  const expressionsPlugin = expressionsPluginMock.createStartContract();
-
-  expressionsPlugin.run = jest.fn(() =>
-    of({
-      partial: false,
-      result: {
-        rows: [],
-      },
-    })
-  ) as unknown as typeof expressionsPlugin.run;
-
-  expressionsPlugin.execute = jest.fn(() => ({
-    getData: jest.fn(() =>
-      of({
-        result: { type: 'datatable', rows: [], columns: [] },
-      })
-    ),
-  })) as unknown as typeof expressionsPlugin.execute;
-
   const corePluginMock = coreMock.createStart();
+  corePluginMock.http.get.mockResolvedValue(undefined);
 
   const uiSettingsMock: Partial<typeof corePluginMock.uiSettings> = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -174,6 +163,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
       } else if (key === HIDE_ANNOUNCEMENTS) {
         return false;
       } else if (key === SEARCH_ON_PAGE_LOAD_SETTING) {
+        return true;
+      } else if (key === ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING) {
         return true;
       }
     }),
@@ -301,7 +292,6 @@ export function createDiscoverServicesMock(): DiscoverServices {
     notifications: {
       toasts: notificationServiceMock.createStartContract().toasts,
     },
-    expressions: expressionsPlugin,
     savedObjectsTagging: {
       ui: {
         getTagIdsFromReferences: jest.fn().mockResolvedValue([]),
@@ -310,6 +300,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     savedSearch,
     discoverSessionService,
+    searchSessionsManagement: searchSessionsManagementMock.createStartContract(),
     dataViews: dataPlugin.dataViews,
     dataSourceService: new DataSourceService(dataPlugin.dataViews),
     timefilter: dataPlugin.query.timefilter.timefilter,
@@ -351,15 +342,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       getOriginatingPath: jest.fn(() => undefined),
       clearEditorState: jest.fn(),
     },
-    alertingVTwo: {
-      CreateRuleOptionsFlyout: jest.fn(() => null),
-      RulesPage: jest.fn(() => null),
-      RuleLibraryPage: jest.fn(() => null),
-      EpisodesPage: jest.fn(() => null),
-      ActionPoliciesPage: jest.fn(() => null),
-      ExecutionHistoryPage: jest.fn(() => null),
-      createAlertingV2HostApp: jest.fn(),
-    },
+    alertingVTwo: alertingV2PluginMock.createStartContract(),
     trackUiMetric: jest.fn(),
     logger: { get: jest.fn(() => loggerMock.create()) },
   } as unknown as DiscoverServices;

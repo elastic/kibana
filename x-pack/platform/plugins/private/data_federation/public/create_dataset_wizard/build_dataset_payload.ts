@@ -11,6 +11,7 @@ import type { DatasetFormat, DatasetSettingsFile } from '../../common/dataset_ty
 import { buildDatasetMappings } from './mapping_step/mapping_editor';
 import {
   buildDatasetSettingsFromFormValues,
+  DEFAULT_SCHEMA_RESOLUTION,
   type CreateDatasetFormValues,
 } from './create_dataset_form_state';
 
@@ -58,7 +59,7 @@ const isUnmanagedSettingCompatible = (
   const { format, mode, quote, schema_resolution: schemaResolution } = appliedSettings;
   if (!isSettingSupportedForFormat(key, format)) return false;
   if (FILE_ORDER_SETTING_KEYS.includes(key)) {
-    return !schemaResolution || schemaResolution === 'first_file_wins';
+    return !schemaResolution || schemaResolution === DEFAULT_SCHEMA_RESOLUTION;
   }
   if (key === 'multi_value_syntax' && value === 'brackets') {
     return isCsvQuotingEnabled({ format, mode, quote, multi_value_syntax: value });

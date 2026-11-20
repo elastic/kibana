@@ -7,32 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AST } from 'eslint';
-import type { ParsedEslintDisableComment } from './regex';
-import { ESLINT_DISABLE_VALUE } from './regex';
+import type { Comment, Location } from '@oxlint/plugins';
+import type { DisableValueType } from './regex';
 
+/**
+ * Returns where to report a disable comment so the comment cannot suppress its own report, which
+ * it would when it is naked or names the reporting rule. Oxlint suppresses diagnostics overlapping
+ * an `*-disable` block from its first character and the whole `*-disable-line` line up to the
+ * comment's end, so those reports use a zero-length location at the comment start or end.
+ */
 export function getReportLocFromComment(
-  comment: ParsedEslintDisableComment
-): AST.SourceLocation | undefined {
-  const cStart = comment?.loc?.start;
-  const cEnd = comment?.loc?.end;
-  const cStartLine = comment?.loc?.start?.line;
-
-  // start or end loc is undefined, exit early
-  if (cStart === undefined || cEnd === undefined || cStartLine === undefined) {
-    return;
+  { loc }: Comment,
+  disableValueType: DisableValueType
+): Location {
+  switch (disableValueType) {
+    case 'disable-next-line':
+      return loc;
+    case 'disable-line':
+      return { start: loc.end, end: loc.end };
+    case 'disable':
+      return { start: loc.start, end: loc.start };
   }
-
-  const disableStartsOnNextLine =
-    comment.disableValueType === ESLINT_DISABLE_VALUE.DISABLE_NEXT_LINE;
-  const disableStartsInline = comment.disableValueType === ESLINT_DISABLE_VALUE.DISABLE_LINE;
-  const cStartColumn = comment?.loc?.start?.column ?? 0;
-  return disableStartsOnNextLine
-    ? { start: cStart, end: cEnd }
-    : {
-        // At this point we could have eslint-disable block or an eslint-disable-line.
-        // If we have an inline disable we need to report the column as -1 in order to get the report
-        start: { line: cStartLine, column: disableStartsInline ? -1 : cStartColumn - 1 },
-        end: cEnd,
-      };
 }

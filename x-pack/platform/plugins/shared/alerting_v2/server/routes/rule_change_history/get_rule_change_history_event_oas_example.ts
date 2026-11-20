@@ -53,8 +53,8 @@ export const RULE_CHANGE_NOT_FOUND_RESPONSE: OasExampleEntry = {
   value: {
     code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND,
     error: 'Not Found',
-    message: 'Rule change with event id "missing-event" not found for rule "rule-1"',
-    details: { rule_id: 'rule-1', event_id: 'missing-event' },
+    message: 'Rule change with event id "missing-event" not found',
+    details: { event_id: 'missing-event' },
   },
 };
 

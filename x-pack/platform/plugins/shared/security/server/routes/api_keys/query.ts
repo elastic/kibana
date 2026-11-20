@@ -27,6 +27,9 @@ const transformAPIKeyNames = (keys: SecurityApiKey[]) => {
   });
 };
 
+// `search_after` needs an order identical across requests, which index order (`_doc`) is not.
+const SORT_TIEBREAKER_FIELDS = ['name', 'creation'] as const;
+
 export function defineQueryApiKeysAndAggregationsRoute({
   router,
   getAuthenticationService,
@@ -168,10 +171,11 @@ export function defineQueryApiKeysAndAggregationsRoute({
           }
         }
 
-        // `search_after` needs a total order; `id` is not sortable here, so `_doc` breaks ties.
         const transformedSort = sort && [
           { [sort.field]: { order: sort.direction } },
-          { _doc: { order: 'asc' as const } },
+          ...SORT_TIEBREAKER_FIELDS.filter((field) => field !== sort.field).map((field) => ({
+            [field]: { order: 'asc' as const },
+          })),
         ];
         let queryResult: Partial<QueryApiKeyResult>;
         try {

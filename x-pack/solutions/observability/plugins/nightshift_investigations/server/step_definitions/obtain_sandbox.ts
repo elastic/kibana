@@ -9,8 +9,9 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
-import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
+import type { NightshiftSandboxStart } from '../sandbox_audit';
 import { scopeConversationId } from '../tools/sandbox_bash/tool_utils';
+import { getSandboxStepCaller } from './sandbox_caller';
 import { withTimeout } from './with_timeout';
 
 /** Caps a stuck sandbox allocate so it cannot stall hydrate or optimize. */
@@ -33,7 +34,7 @@ export const obtainSandboxStepDefinition = ({
   getSandboxStart,
   logger,
 }: {
-  getSandboxStart: () => SandboxPluginStart | undefined;
+  getSandboxStart: () => NightshiftSandboxStart | undefined;
   logger: Logger;
 }) =>
   createServerStepDefinition({
@@ -85,14 +86,29 @@ export const obtainSandboxStepDefinition = ({
       }
 
       try {
-        const session = sandboxStart.getSessionForSpace(spaceId, conversationId);
+        const session = sandboxStart.getSessionForSpace(
+          spaceId,
+          conversationId,
+          getSandboxStepCaller(context)
+        );
 
         // Stat is enough: the session allocates on the first RPC, including workspace restore.
-        await withTimeout(
-          (_signal) => session.statFiles(['/workspace']),
-          ALLOCATE_TIMEOUT_MS,
-          `Sandbox allocate timed out after ${ALLOCATE_TIMEOUT_MS}ms`
-        );
+        const allocate = () =>
+          withTimeout(
+            (_signal) => session.statFiles(['/workspace']),
+            ALLOCATE_TIMEOUT_MS,
+            `Sandbox allocate timed out after ${ALLOCATE_TIMEOUT_MS}ms`
+          );
+        try {
+          await allocate();
+        } catch (error) {
+          logger.warn(
+            `Sandbox allocate failed for ${sandboxId}, retrying once: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          await allocate();
+        }
       } catch (error) {
         if (required) {
           throw error;

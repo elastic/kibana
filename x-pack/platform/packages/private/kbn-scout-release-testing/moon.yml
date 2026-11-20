@@ -19,12 +19,14 @@ project:
 dependsOn:
   - '@kbn/scout'
   - '@kbn/unified-doc-viewer'
+  - '@kbn/discover-plugin'
 tags:
   - functional-tests
   - package
   - dev
   - group-platform
   - private
+  - scout-tests
 fileGroups:
   src:
     - '**/*.ts'

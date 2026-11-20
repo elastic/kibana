@@ -9,23 +9,26 @@ import type { CreateSnoozeSeriesActionBody } from '@kbn/alerting-v2-schemas';
 import type { AlertingOasOperationObject } from '../../oas_types';
 import { buildOasOperation } from '../../oas_utils';
 import {
+  ALERT_SERIES_ALREADY_SNOOZED_RESPONSE,
   ALERT_SERIES_NOT_FOUND_RESPONSE,
   INVALID_SERIES_ACTION_PARAMS_RESPONSE,
+  SAMPLE_SNOOZED_UNTIL,
 } from '../alert_oas_shared_examples';
 
 export const CREATE_SNOOZE_SERIES_ACTION_REQUEST: CreateSnoozeSeriesActionBody = {
-  snoozed_until: '2026-01-16T12:00:00.000Z',
+  snoozed_until: SAMPLE_SNOOZED_UNTIL,
 };
 
 export const createSnoozeSeriesActionOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
       name: 'createSnoozeSeriesActionRequest',
-      summary: 'Snooze until 2026-01-16T12:00:00.000Z',
+      summary: `Snooze until ${SAMPLE_SNOOZED_UNTIL}`,
       value: CREATE_SNOOZE_SERIES_ACTION_REQUEST,
     },
     responses: {
       400: INVALID_SERIES_ACTION_PARAMS_RESPONSE,
       404: ALERT_SERIES_NOT_FOUND_RESPONSE,
+      409: ALERT_SERIES_ALREADY_SNOOZED_RESPONSE,
     },
   });

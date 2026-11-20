@@ -8,12 +8,16 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import type { CoreStart, Logger } from '@kbn/core/server';
+import type { NightshiftSandboxStart } from '../sandbox_audit';
+import { usesKnowledge } from '../agents/agent_policy';
 import { hydrateMemoryWorkspace } from '../memory/register_memory';
+import { MEMORY_WORKSPACE_ROOT } from '../memory/materialize';
+import { degradeOnWriterFailure } from '../lib/hydrate_notification';
 import type { NightshiftTelemetryClient } from '../telemetry';
+import { withNightshiftBackgroundSpan } from '../tracing';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
+import { getSandboxStepCaller } from './sandbox_caller';
 import { withTimeout } from './with_timeout';
 
 /** Caps a stuck write so it cannot stall the rest of the parallel hydrate. */
@@ -21,13 +25,15 @@ const MATERIALIZE_TIMEOUT_MS = 45_000;
 
 export const memoryMaterializeToSandboxStepDefinition = ({
   getSandboxStart,
-  getMemoryEsClient,
+  getSavedObjects,
+  getUiSettings,
   logger,
   isEnabled,
   telemetry,
 }: {
-  getSandboxStart: () => SandboxPluginStart | undefined;
-  getMemoryEsClient: () => Promise<ElasticsearchClient>;
+  getSandboxStart: () => NightshiftSandboxStart | undefined;
+  getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
+  getUiSettings?: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
   isEnabled?: () => boolean;
   telemetry: NightshiftTelemetryClient;
@@ -64,12 +70,16 @@ export const memoryMaterializeToSandboxStepDefinition = ({
     outputSchema: z.object({
       sandbox_id: z.string().describe('Sandbox that received the memory pages.'),
       skipped: z.boolean().optional(),
+      failed: z.boolean().optional().describe('The write failed; its contents may be incomplete.'),
       recalled_ids: z
         .array(z.string())
         .describe('Memory page ids recalled for this exact conversation round.'),
       notification: z
         .string()
-        .describe('Markdown fragment listing memory pages new this turn, or empty.'),
+        .describe(
+          'Markdown fragment listing memory pages new this turn, empty when there were none. ' +
+            'On failure, the incomplete-materialization notice for /workspace/memories.'
+        ),
     }),
     handler: async (context) => {
       const {
@@ -98,7 +108,7 @@ export const memoryMaterializeToSandboxStepDefinition = ({
           output: { sandbox_id: sandboxId, skipped: true, recalled_ids: [], notification: '' },
         };
       }
-      if (trimmedAgentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
+      if (!usesKnowledge(trimmedAgentId)) {
         context.logger.info('Skipped memory materialize for unsupported agent');
         context.logger.debug(`Memory materialize unsupported agent=${trimmedAgentId}`);
         return {
@@ -117,7 +127,8 @@ export const memoryMaterializeToSandboxStepDefinition = ({
 
       const session = sandboxStart.getSessionForSpace(
         spaceId,
-        unscopeConversationId(spaceId, sandboxId)
+        unscopeConversationId(spaceId, sandboxId),
+        getSandboxStepCaller(context)
       );
 
       context.logger.info(
@@ -127,20 +138,38 @@ export const memoryMaterializeToSandboxStepDefinition = ({
 
       let result: Awaited<ReturnType<typeof hydrateMemoryWorkspace>>;
       try {
-        result = await withTimeout(
-          async (signal) =>
-            hydrateMemoryWorkspace({
-              session,
-              esClient: await getMemoryEsClient(),
-              spaceId,
-              agentId: trimmedAgentId,
-              query: prompt,
-              signal,
-              logger,
-            }),
-          MATERIALIZE_TIMEOUT_MS,
-          `Memory materialize to sandbox timed out after ${MATERIALIZE_TIMEOUT_MS}ms`,
-          context.abortSignal
+        result = await withNightshiftBackgroundSpan(
+          {
+            name: 'nightshift.memoryRecallAndWrite',
+            traceId: workflowExecutionId,
+            conversationId,
+            spaceId,
+            workflowExecutionId,
+            request: context.contextManager?.getFakeRequest?.(),
+            getSavedObjects,
+            getUiSettings,
+            logger,
+          },
+          async (span) => {
+            const res = await withTimeout(
+              async (signal) =>
+                hydrateMemoryWorkspace({
+                  session,
+                  esClient: context.contextManager.getScopedEsClient(),
+                  spaceId,
+                  agentId: trimmedAgentId,
+                  query: prompt,
+                  signal,
+                  logger,
+                }),
+              MATERIALIZE_TIMEOUT_MS,
+              `Memory materialize to sandbox timed out after ${MATERIALIZE_TIMEOUT_MS}ms`,
+              context.abortSignal
+            );
+            span?.setAttribute('nightshift.recalled_ids', JSON.stringify(res.recalledIds));
+            span?.setAttribute('nightshift.recall_mode', res.summary.retrievalMode);
+            return res;
+          }
         );
       } catch (error) {
         telemetry.reportSemanticMemoryMaterialized({
@@ -149,7 +178,22 @@ export const memoryMaterializeToSandboxStepDefinition = ({
           workflow_execution_id: workflowExecutionId,
           outcome: 'failure',
         });
-        throw error;
+        // Degrade to a system_update line rather than a failed step: this is a
+        // before-agent hook, so throwing here aborts the investigator round over one
+        // writer that could not reach the sandbox.
+        return {
+          output: {
+            sandbox_id: sandboxId,
+            recalled_ids: [],
+            ...degradeOnWriterFailure({
+              logger: context.logger,
+              label: 'Memory materialize',
+              sandboxId,
+              directory: MEMORY_WORKSPACE_ROOT,
+              error,
+            }),
+          },
+        };
       }
 
       telemetry.reportSemanticMemoryMaterialized({

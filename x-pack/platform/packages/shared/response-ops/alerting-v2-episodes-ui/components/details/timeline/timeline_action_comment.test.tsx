@@ -19,7 +19,7 @@ const makeEntry = (
   '@timestamp': '2026-07-02T10:00:00.000Z',
   action_type: 'ack',
   actor: { type: 'user', profile_uid: 'user-1' },
-  episode_id: 'episode-1',
+  alert_id: 'episode-1',
   group_hash: 'group-1',
   tags: [],
   assignee_uid: null,

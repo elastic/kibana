@@ -38,6 +38,8 @@ apiTest.describe(
   () => {
     let editorHeaders: Record<string, string>;
     let adminHeaders: Record<string, string>;
+    // the opt-out lives on the shared clean up task, so a failed test must not leave it on
+    let leftoverCleanUpDisabled = false;
 
     apiTest.beforeAll(async ({ requestAuth, apiClient, kbnClient }) => {
       const { apiKeyHeader: editorKey } = await requestAuth.getApiKey('editor');
@@ -50,6 +52,9 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient, apiServices, kbnClient }) => {
+      if (leftoverCleanUpDisabled) {
+        await triggerPrivateLocationCleanup(apiClient, editorHeaders);
+      }
       await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
       await deleteAllSyntheticsPackagePolicies(apiClient, adminHeaders);
       await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
@@ -94,7 +99,20 @@ apiTest.describe(
         await testNowMonitor(apiClient, editorHeaders, secondMonitorId);
         expect(await getSyntheticsPackagePolicies(apiClient, adminHeaders)).toHaveLength(3);
 
+        const disableRes = await triggerPrivateLocationCleanup(apiClient, editorHeaders, {
+          disable: true,
+        });
+        leftoverCleanUpDisabled = true;
+        expect(disableRes.body).toStrictEqual({
+          success: true,
+          message: 'Daily clean up of leftover private location package policies is disabled.',
+        });
+        // disabling runs nothing, so the orphan is still there
+        expect(await getSyntheticsPackagePolicies(apiClient, adminHeaders)).toHaveLength(3);
+
+        // a later call without `disable` turns the daily clean up back on and runs it
         await triggerPrivateLocationCleanup(apiClient, editorHeaders);
+        leftoverCleanUpDisabled = false;
 
         await tryForTime(30_000, async () => {
           const items = await getSyntheticsPackagePolicies(apiClient, adminHeaders);

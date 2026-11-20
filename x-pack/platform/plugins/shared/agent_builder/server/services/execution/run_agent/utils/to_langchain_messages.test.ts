@@ -24,6 +24,7 @@ import type {
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
+  EventActorType,
   ExecutionStatus,
   TimelineEventType,
   isTimelineEvent,
@@ -38,13 +39,16 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { ProcessedConversation } from './prepare_conversation';
+import { attachmentTypeInstructions } from '../prompts/utils/attachments';
 import {
   T0,
   abortedExec0Timeline,
+  attachmentEventFixture,
   completedRoundTimeline,
   eventsNativeConversation,
   failedExec0Timeline,
   pausedAndResumedRoundTimeline,
+  pausedRoundTimeline,
   pausedThenInterruptedResumeTimeline,
   processedCustomEventFixture,
   roundsOfTimeline,
@@ -302,6 +306,7 @@ describe('prepareMessages', () => {
       conversation: createConversation({
         previousRounds,
         nextInput: makeRoundInput('hook rewrite on resume'),
+        resumedRoundId: 'round-1',
       }),
     });
 
@@ -524,6 +529,66 @@ describe('prepareMessages', () => {
     expect(isAIMessage(toolCallAIMessage)).toBe(true);
     expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
     expect((toolCallAIMessage as AIMessage).tool_calls![0].name).toBe(sanitizeToolId('.search'));
+  });
+
+  describe('agent messages', () => {
+    const reportActor = { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' };
+    const report = 'Background sub-agent execution child-1 finished.\n\nResult:\nPEAR';
+    const expectNotice = (message: { content: unknown }) => {
+      const content = String(message.content);
+      expect(isHumanMessage(message as HumanMessage)).toBe(true);
+      expect(content).toContain('<system_notice>');
+      expect(content).toContain('<agent-id>child-agent</agent-id>');
+      expect(content).toContain(report);
+      expect(content).not.toContain('[User:');
+    };
+
+    it('renders the input of a wake run as a notice, not as a user turn of the owner', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({
+          nextInput: {
+            ...makeRoundInput(report),
+            author: { id: 'owner', username: 'owner' },
+            actor: reportActor,
+          },
+        }),
+      });
+
+      expect(result).toHaveLength(1);
+      expectNotice(result[0]);
+    });
+
+    it('renders a completed wake round in history as a notice', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({
+          previousRounds: [
+            createRound({ input: { ...makeRoundInput(report), actor: reportActor } }),
+          ],
+          nextInput: makeRoundInput('what did it say?'),
+        }),
+      });
+
+      expectNotice(result[0]);
+      expect(result[result.length - 1].content).toBe('what did it say?');
+    });
+
+    it('renders a standalone agent message as a notice', async () => {
+      const conversation = createConversation({ nextInput: makeRoundInput('next') });
+      conversation.timeline = [
+        {
+          id: 'report-1',
+          type: TimelineEventType.agentMessage,
+          created_at: now,
+          actor: reportActor,
+          data: { message: report, attachments: [], actor: reportActor },
+        } as unknown as ProcessedTimelineEvent,
+      ];
+
+      const result = await prepareMessages({ conversation });
+
+      expect(result).toHaveLength(2);
+      expectNotice(result[0]);
+    });
   });
 
   describe('with attachments', () => {
@@ -1137,25 +1202,23 @@ describe('prepareMessages', () => {
       expect(aiMsg.content).toBe('I need to search for foo');
     });
 
-    it('injects per-tool reasoning as _reasoning in tool call args', async () => {
+    it('injects the tool call intent as _intent in tool call args', async () => {
       const groupId = 'group-1';
       const toolCall1 = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
         { tool_result_id: 'r1', type: ToolResultType.other, data: { result: 'a' } },
       ]);
 
-      const step1: ToolCallStep = { ...makeToolCallStep(toolCall1), tool_call_group_id: groupId };
-      const reasoningStep: ReasoningStep = {
-        type: ConversationRoundStepType.reasoning,
-        reasoning: 'searching for foo specifically',
-        tool_call_id: 'call-1',
+      const step1: ToolCallStep = {
+        ...makeToolCallStep(toolCall1),
         tool_call_group_id: groupId,
+        intent: 'searching for foo specifically',
       };
 
       const previousRounds = [
         createRound({
           id: 'round-1',
           input: makeRoundInput('find foo'),
-          steps: [reasoningStep, step1],
+          steps: [step1],
           response: makeAssistantResponse('done!'),
           started_at: now,
         }),
@@ -1167,12 +1230,12 @@ describe('prepareMessages', () => {
 
       const aiMsg = result[1] as AIMessage;
       expect(aiMsg.tool_calls![0].args).toEqual({
-        _reasoning: 'searching for foo specifically',
+        _intent: 'searching for foo specifically',
         query: 'foo',
       });
     });
 
-    it('sets both group reasoning and per-tool reasoning', async () => {
+    it('sets both group reasoning and per-tool intent', async () => {
       const groupId = 'group-1';
       const toolCall1 = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
         { tool_result_id: 'r1', type: ToolResultType.other, data: { result: 'a' } },
@@ -1181,8 +1244,16 @@ describe('prepareMessages', () => {
         { tool_result_id: 'r2', type: ToolResultType.other, data: { result: 'b' } },
       ]);
 
-      const step1: ToolCallStep = { ...makeToolCallStep(toolCall1), tool_call_group_id: groupId };
-      const step2: ToolCallStep = { ...makeToolCallStep(toolCall2), tool_call_group_id: groupId };
+      const step1: ToolCallStep = {
+        ...makeToolCallStep(toolCall1),
+        tool_call_group_id: groupId,
+        intent: 'intent for call-1',
+      };
+      const step2: ToolCallStep = {
+        ...makeToolCallStep(toolCall2),
+        tool_call_group_id: groupId,
+        intent: 'intent for call-2',
+      };
 
       const previousRounds = [
         createRound({
@@ -1194,19 +1265,7 @@ describe('prepareMessages', () => {
               reasoning: 'group level thought',
               tool_call_group_id: groupId,
             } as ReasoningStep,
-            {
-              type: ConversationRoundStepType.reasoning,
-              reasoning: 'reason for call-1',
-              tool_call_id: 'call-1',
-              tool_call_group_id: groupId,
-            } as ReasoningStep,
             step1,
-            {
-              type: ConversationRoundStepType.reasoning,
-              reasoning: 'reason for call-2',
-              tool_call_id: 'call-2',
-              tool_call_group_id: groupId,
-            } as ReasoningStep,
             step2,
           ],
           response: makeAssistantResponse('done!'),
@@ -1221,11 +1280,11 @@ describe('prepareMessages', () => {
       const aiMsg = result[1] as AIMessage;
       expect(aiMsg.content).toBe('group level thought');
       expect(aiMsg.tool_calls![0].args).toEqual({
-        _reasoning: 'reason for call-1',
+        _intent: 'intent for call-1',
         query: 'foo',
       });
       expect(aiMsg.tool_calls![1].args).toEqual({
-        _reasoning: 'reason for call-2',
+        _intent: 'intent for call-2',
         id: 42,
       });
     });
@@ -1314,6 +1373,79 @@ describe('prepareMessages', () => {
     });
   });
 
+  describe('with attachment events', () => {
+    it('renders a legacy message exactly as before, and its unmarked events not at all', async () => {
+      const legacyTimeline = [
+        ...timelineFromRounds([
+          {
+            id: 'old',
+            input: makeRoundInput('Q', [], {
+              attachment_refs: [{ attachment_id: 'a', version: 1, type: 'text' }],
+              attachment_context: '<attachments>LEGACY</attachments>',
+            }),
+            response: { message: 'A' },
+          },
+        ]),
+        attachmentEventFixture({
+          id: 'old-evt',
+          executionId: 'old::execution',
+          toolCallId: 'x',
+          legacy: true,
+        }),
+        attachmentEventFixture({
+          id: 'old-del',
+          executionId: 'old::execution',
+          kind: 'deleted',
+          legacy: true,
+        }),
+      ];
+      const messages = await prepareMessages({
+        conversation: {
+          timeline: legacyTimeline,
+          nextInput: makeRoundInput('next'),
+          attachmentTypes: [{ type: 'text', description: 'Plain text' }],
+          attachmentStateManager: createAttachmentStateManager([], {
+            getTypeDefinition: () => undefined,
+          }),
+        } as ProcessedConversation,
+      });
+      expect(String(messages[0].content)).toBe(
+        `Q\n\n<attachments>LEGACY</attachments>\n\n\n${attachmentTypeInstructions([
+          { type: 'text', description: 'Plain text' },
+        ])}\n`
+      );
+      expect(JSON.stringify(messages.map((m) => m.content))).not.toContain('conversation_event');
+    });
+
+    it('renders the input events of a standalone message inside it, once', async () => {
+      const linked = attachmentEventFixture({
+        id: 'att',
+        source: 'chat_input',
+        triggerEventId: 'm1',
+      });
+      const message = {
+        id: 'm1',
+        type: TimelineEventType.userMessage,
+        created_at: T0,
+        actor: { type: 'user', id: 'u' },
+        data: { ...makeRoundInput('note'), attachment_events: [linked] },
+      } as unknown as ProcessedTimelineEvent;
+      const messages = await prepareMessages({
+        conversation: {
+          timeline: [message, linked],
+          nextInput: makeRoundInput('next'),
+          attachmentTypes: [],
+          attachmentStateManager: createAttachmentStateManager([], {
+            getTypeDefinition: () => undefined,
+          }),
+        } as ProcessedConversation,
+      });
+      expect(messages).toHaveLength(2);
+      expect(String(messages[0].content)).toContain('note');
+      expect(String(messages[0].content).match(/<conversation_event /g)).toHaveLength(1);
+    });
+  });
+
   describe('background execution notices (from round steps)', () => {
     const makeBgStep = (overrides: Partial<BackgroundExecutionState> = {}): ConversationRoundStep =>
       ({
@@ -1374,7 +1506,7 @@ describe('prepareMessages', () => {
         (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
       );
       expect(noticeMessage).toBeDefined();
-      expect((noticeMessage as any).content).toContain('has failed');
+      expect((noticeMessage as any).content).toContain('finished with status failed');
       expect((noticeMessage as any).content).toContain('Something broke');
     });
 
@@ -1397,6 +1529,63 @@ describe('prepareMessages', () => {
         (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
       );
       expect(noticeMessages).toHaveLength(0);
+    });
+  });
+
+  describe('dynamic tool definitions after compaction', () => {
+    const compactionSummary: CompactionSummary = {
+      summarized_round_count: 1,
+      created_at: '2024-01-01T00:00:00.000Z',
+      token_count: 100,
+      structured_data: {
+        discussion_summary: 'User loaded a skill.',
+        user_intent: 'Use the skill',
+        key_topics: [],
+        outcomes_and_decisions: [],
+        agent_actions: [],
+        entities: [],
+        unanswered_questions: [],
+        tool_calls_summary: [],
+      },
+    };
+    const definition = {
+      tool_id: 'platform.core.cases',
+      description: 'Search cases',
+      parameters: { type: 'object' as const },
+    };
+
+    it('re-injects the definitions right after the summary', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput: makeRoundInput('follow-up') }),
+        compactionSummary,
+        dynamicToolDefinitions: [definition],
+      });
+
+      // compaction user + compaction assistant + definitions notice + nextInput user
+      expect(result).toHaveLength(4);
+      expect(isHumanMessage(result[2])).toBe(true);
+      expect(result[2].content).toContain('<dynamic_tools>');
+      expect(result[2].content).toContain(JSON.stringify(definition));
+    });
+
+    it('renders no notice when there are no definitions', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput: makeRoundInput('follow-up') }),
+        compactionSummary,
+        dynamicToolDefinitions: [],
+      });
+
+      expect(result).toHaveLength(3);
+      expect(result.some((msg) => String(msg.content).includes('<dynamic_tools>'))).toBe(false);
+    });
+
+    it('renders no notice without a compaction summary', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput: makeRoundInput('follow-up') }),
+        dynamicToolDefinitions: [definition],
+      });
+
+      expect(result.some((msg) => String(msg.content).includes('<dynamic_tools>'))).toBe(false);
     });
   });
 });
@@ -1720,6 +1909,38 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
       expect(texts[5].content).toContain('attempt to answer the previous message failed');
       expect(texts[5].content).toContain('code="internalError"');
       expect(texts[6].content).toContain('bye');
+    });
+
+    it('renders a paused round the run does not resume as history, closed by a notice', async () => {
+      const timeline = processedTimeline(pausedRoundTimeline('r1', ['tc1']));
+
+      const messages = await prepareMessages({ conversation: conversationOf(timeline) });
+
+      // user message, tool call, interrupted tool result, notice, next input
+      expect(messages.map((message) => message.getType())).toEqual([
+        'human',
+        'ai',
+        'tool',
+        'human',
+        'human',
+      ]);
+      expect((messages[1] as AIMessage).tool_calls?.[0].id).toBe('tc1');
+      expect(String(messages[2].content)).toContain('"interrupted":true');
+      expect(String(messages[3].content)).toContain('<system_notice>');
+      expect(String(messages[3].content)).toContain('the user has not answered');
+      expect(String(messages[4].content)).toContain('bye');
+    });
+
+    it('lists the unanswered questions of a paused round the run does not resume', async () => {
+      // the first four events: the round paused on its ask_user_question, before the answer
+      const timeline = processedTimeline(pausedAndResumedRoundTimeline().slice(0, 4));
+
+      const messages = await prepareMessages({ conversation: conversationOf(timeline) });
+
+      // user message, notice, next input; the unanswered ask step renders nothing
+      expect(messages.map((message) => message.getType())).toEqual(['human', 'human', 'human']);
+      expect(String(messages[1].content)).toContain('<question>q</question>');
+      expect(String(messages[2].content)).toContain('bye');
     });
 
     it('renders an aborted round with the aborted notice', async () => {

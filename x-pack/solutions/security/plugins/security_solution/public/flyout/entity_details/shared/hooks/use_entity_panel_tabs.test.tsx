@@ -25,6 +25,14 @@ describe('useEntityPanelTabs', () => {
     expect(result.current.tabs![1].id).toBe(TABLE_TAB_ID);
   });
 
+  it('returns null tabs in group view', () => {
+    const { result } = renderHook(() =>
+      useEntityPanelTabs({ entityRecord: mockEntityRecord, isGroupView: true })
+    );
+
+    expect(result.current.tabs).toBeNull();
+  });
+
   it('defaults to overview tab', () => {
     const { result } = renderHook(() => useEntityPanelTabs({ entityRecord: mockEntityRecord }));
 

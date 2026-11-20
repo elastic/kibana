@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { HistorySnapshotBodyParams } from '../../constants';
 import { parseDurationToMs } from '../../../infra/time';
 
@@ -39,6 +39,6 @@ function isValidHistorySnapshotFrequency(frequency: string): boolean {
 }
 
 /** `frequency` (interval) and `retentionDays`. An empty object is valid; callers that require a change refine further. */
-export const HistorySnapshotConfigSchema = HistorySnapshotBodyParams.superRefine(
-  validateHistorySnapshotParams
+export const HistorySnapshotConfigSchema = lazySchema(() =>
+  HistorySnapshotBodyParams.superRefine(validateHistorySnapshotParams)
 );

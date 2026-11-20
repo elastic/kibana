@@ -19,19 +19,21 @@ import { buildOasOperation } from '../oas_utils';
 export const UPDATE_ACTION_POLICY_REQUEST: UpdateActionPolicyData = {
   name: 'Notify on production alerts (updated)',
   description: 'Updated description.',
+  matcher: { tags: ['production'], expression: null },
 };
 
 export const updateActionPolicyOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
       name: 'updateActionPolicyRequest',
-      summary: 'Rename and update the description',
+      summary: 'Rename the policy and clear the matcher expression, keeping its tags',
       value: UPDATE_ACTION_POLICY_REQUEST,
     },
     responses: {
       200: actionPolicyResponseExample('updateActionPolicyResponse', 'Updated action policy', {
         name: UPDATE_ACTION_POLICY_REQUEST.name,
-        description: UPDATE_ACTION_POLICY_REQUEST.description,
+        description: UPDATE_ACTION_POLICY_REQUEST.description ?? undefined,
+        matcher: { tags: ['production'] },
       }),
       400: invalidActionPolicyDataResponse('update'),
       403: ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE,

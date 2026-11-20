@@ -501,6 +501,12 @@ export interface ActivityDocSource {
     tags_changed?: string[];
     connector_id_new?: string;
   };
+  source?: {
+    type: string;
+    id: string;
+    name?: string;
+    run_id?: string;
+  };
 }
 
 /**

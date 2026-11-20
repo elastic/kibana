@@ -11,6 +11,9 @@ import {
   kafkaAuthType,
   kafkaCompressionType,
   kafkaConnectionType,
+  kafkaKerberosAuthType,
+  kafkaOAuth2GrantType,
+  kafkaOAuth2SignatureAlgorithm,
   kafkaPartitionType,
   kafkaSaslMechanism,
   kafkaVerificationModes,
@@ -58,6 +61,22 @@ const secretRefSchema = schema.oneOf([
   }),
   schema.string(),
 ]);
+
+// an update removes a secret by setting it to `null`: leaving it out keeps the saved one
+const nullableSecretRefSchema = schema.oneOf([
+  schema.literal(null),
+  schema.object({
+    id: schema.string(),
+    hash: schema.maybe(schema.string()),
+  }),
+  schema.string(),
+]);
+
+const BeatsUpdateSecretsSchema = schema.maybe(
+  schema.object({
+    ssl: schema.maybe(schema.object({ key: schema.maybe(nullableSecretRefSchema) })),
+  })
+);
 
 /**
  * Shared sub-schemas (extracted to avoid type explosion when variants become named components)
@@ -149,6 +168,7 @@ const BeatsUpdateSchema = {
   name: schema.maybe(schema.string()),
   is_default: schema.maybe(schema.boolean()),
   is_default_monitoring: schema.maybe(schema.boolean()),
+  secrets: BeatsUpdateSecretsSchema,
 };
 
 const PresetSchema = schema.oneOf([
@@ -210,8 +230,8 @@ const RemoteElasticSearchUpdateSchema = {
   service_token: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   secrets: schema.maybe(
     schema.object({
-      service_token: schema.maybe(secretRefSchema),
-      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+      service_token: schema.maybe(nullableSecretRefSchema),
+      ssl: schema.maybe(schema.object({ key: schema.maybe(nullableSecretRefSchema) })),
     })
   ),
   sync_integrations: schema.maybe(schema.boolean()),
@@ -242,12 +262,131 @@ const LogstashUpdateSchema = {
       maxSize: MAX_HOSTS,
     })
   ),
-  secrets: schema.maybe(
+};
+
+// 1 day. The agent is given the durations in nanoseconds, so this also keeps them safe integers.
+const MAX_OAUTH2_DURATION_SECONDS = 86400;
+
+/**
+ * Settings of the OAuth2 authentication method, they follow the `oauth2clientauthextension` of the
+ * OpenTelemetry collector. The client secret and the client certificate key are in `secrets`.
+ * The `*_file` settings are paths on the host of the agent.
+ */
+const KafkaOAuth2Schema = schema.object({
+  grant_type: schema.maybe(
+    schema.oneOf([
+      schema.literal(kafkaOAuth2GrantType.ClientCredentials),
+      schema.literal(kafkaOAuth2GrantType.JwtBearer),
+    ])
+  ),
+  client_id: schema.maybe(schema.string()),
+  client_id_file: schema.maybe(schema.string()),
+  client_secret_file: schema.maybe(schema.string()),
+  token_url: schema.string({ minLength: 1 }),
+  scopes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  // url.Values of the agent: every parameter takes a list of values
+  endpoint_params: schema.maybe(
+    schema.recordOf(schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 }))
+  ),
+  tls: schema.maybe(
     schema.object({
-      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+      ca_file: schema.maybe(schema.string()),
+      cert_file: schema.maybe(schema.string()),
+      key_file: schema.maybe(schema.string()),
+      insecure_skip_verify: schema.maybe(schema.boolean()),
+      server_name_override: schema.maybe(schema.string()),
+      min_version: schema.maybe(schema.string()),
+      max_version: schema.maybe(schema.string()),
     })
   ),
-};
+  // in seconds, the agent is given them in nanoseconds
+  timeout: schema.maybe(
+    schema.number({
+      min: 0,
+      max: MAX_OAUTH2_DURATION_SECONDS,
+      meta: {
+        description:
+          'How long, in seconds, a request to the token endpoint can take before it times out. There is no limit when it is not set.',
+      },
+    })
+  ),
+  expiry_buffer: schema.maybe(
+    schema.number({
+      min: 0,
+      max: MAX_OAUTH2_DURATION_SECONDS,
+      meta: {
+        description:
+          "How many seconds before a token's expiry the agent requests a new one. It defaults to `300` when not set.",
+      },
+    })
+  ),
+  // jwt-bearer grant only
+  client_certificate_key_id: schema.maybe(schema.string()),
+  client_certificate_key_file: schema.maybe(schema.string()),
+  signature_algorithm: schema.maybe(
+    schema.oneOf([
+      schema.literal(kafkaOAuth2SignatureAlgorithm.Rs256),
+      schema.literal(kafkaOAuth2SignatureAlgorithm.Rs384),
+      schema.literal(kafkaOAuth2SignatureAlgorithm.Rs512),
+    ])
+  ),
+  iss: schema.maybe(schema.string()),
+  audience: schema.maybe(schema.string()),
+  claims: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+});
+
+/**
+ * Settings of the Kerberos authentication method, they follow the `kerberos` settings of the Kafka
+ * output of Beats. The password is in `secrets`. The paths are paths on the host of the agent.
+ */
+const KafkaKerberosSchema = schema.object({
+  auth_type: schema.oneOf(
+    [schema.literal(kafkaKerberosAuthType.Keytab), schema.literal(kafkaKerberosAuthType.Password)],
+    {
+      meta: {
+        description:
+          'How the agent authenticates with Kerberos: a keytab file, or a username and password.',
+      },
+    }
+  ),
+  config_path: schema.string({
+    minLength: 1,
+    meta: {
+      description: 'Path to the Kerberos configuration file (`krb5.conf`) on the agent host.',
+    },
+  }),
+  keytab: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Path to the keytab file on the agent host. Required when `auth_type` is `keytab`.',
+      },
+    })
+  ),
+  username: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.',
+      },
+    })
+  ),
+  service_name: schema.maybe(
+    schema.string({ meta: { description: 'Kerberos service name of the Kafka brokers.' } })
+  ),
+  realm: schema.string({
+    minLength: 1,
+    meta: { description: 'Kerberos realm. This is usually the domain name in uppercase.' },
+  }),
+  enable_krb5_fast: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Whether to use Kerberos FAST authentication. This can conflict with some Active Directory installations. It defaults to `false` when not set.',
+      },
+    })
+  ),
+});
 
 export const KafkaSchema = {
   ...BeatsBaseSchema,
@@ -285,6 +424,7 @@ export const KafkaSchema = {
     schema.literal(kafkaAuthType.Userpass),
     schema.literal(kafkaAuthType.Ssl),
     schema.literal(kafkaAuthType.Kerberos),
+    schema.literal(kafkaAuthType.OAuth2),
   ]),
   connection_type: schema.maybe(
     schema.oneOf([
@@ -308,6 +448,8 @@ export const KafkaSchema = {
       }),
     ])
   ),
+  oauth2: schema.maybe(schema.oneOf([schema.literal(null), KafkaOAuth2Schema])),
+  kerberos: schema.maybe(schema.oneOf([schema.literal(null), KafkaKerberosSchema])),
   partition: schema.maybe(
     schema.oneOf([
       schema.literal(kafkaPartitionType.Random),
@@ -335,6 +477,13 @@ export const KafkaSchema = {
     schema.object({
       password: schema.maybe(secretRefSchema),
       ssl: schema.maybe(schema.object({ key: secretRefSchema })),
+      oauth2: schema.maybe(
+        schema.object({
+          client_secret: schema.maybe(secretRefSchema),
+          client_certificate_key: schema.maybe(secretRefSchema),
+        })
+      ),
+      kerberos: schema.maybe(schema.object({ password: schema.maybe(secretRefSchema) })),
     })
   ),
 };
@@ -355,7 +504,21 @@ const KafkaUpdateSchema = {
       schema.literal(kafkaAuthType.Userpass),
       schema.literal(kafkaAuthType.Ssl),
       schema.literal(kafkaAuthType.Kerberos),
+      schema.literal(kafkaAuthType.OAuth2),
     ])
+  ),
+  secrets: schema.maybe(
+    schema.object({
+      password: schema.maybe(nullableSecretRefSchema),
+      ssl: schema.maybe(schema.object({ key: nullableSecretRefSchema })),
+      oauth2: schema.maybe(
+        schema.object({
+          client_secret: schema.maybe(secretRefSchema),
+          client_certificate_key: schema.maybe(secretRefSchema),
+        })
+      ),
+      kerberos: schema.maybe(schema.object({ password: schema.maybe(secretRefSchema) })),
+    })
   ),
 };
 
@@ -621,6 +784,26 @@ const OtlpSecretsSchema = schema.maybe(
   })
 );
 
+const OtlpUpdateSecretsSchema = schema.maybe(
+  schema.object({
+    otlp_exporter: schema.maybe(
+      schema.object({
+        tls: schema.maybe(
+          schema.object({
+            key_pem: schema.maybe(nullableSecretRefSchema),
+            tpm: schema.maybe(
+              schema.object({
+                owner_auth: schema.maybe(nullableSecretRefSchema),
+                auth: schema.maybe(nullableSecretRefSchema),
+              })
+            ),
+          })
+        ),
+      })
+    ),
+  })
+);
+
 export const OtlpSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Otlp),
@@ -637,7 +820,7 @@ export const OtlpUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Otlp)),
   otlp_exporter: schema.maybe(OtlpExporterSchema),
-  secrets: OtlpSecretsSchema,
+  secrets: OtlpUpdateSecretsSchema,
 };
 
 export const OutputSchema = schema.discriminatedUnion('type', [

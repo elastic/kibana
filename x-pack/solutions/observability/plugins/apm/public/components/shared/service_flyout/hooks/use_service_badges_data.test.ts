@@ -187,6 +187,20 @@ describe('useServiceBadgesData', () => {
 
       expect(result.current.alertsCount).toBeUndefined();
     });
+
+    it('passes isCachable: false for alerts_count so absolute ranges do not freeze stale badge snapshots', () => {
+      setupFetchers({ alertsData: { alertsCount: 5 } });
+      renderHook(() => useServiceBadgesData(baseParams));
+
+      const alertsFetcher = mockUseFetcher.mock.calls[0][0] as (callApmApi: jest.Mock) => unknown;
+      const callApmApi = jest.fn().mockResolvedValue({ alertsCount: 5 });
+      alertsFetcher(callApmApi);
+
+      expect(callApmApi).toHaveBeenCalledWith(
+        'GET /internal/apm/services/{serviceName}/alerts_count',
+        expect.objectContaining({ isCachable: false })
+      );
+    });
   });
 
   describe('anomalyData', () => {

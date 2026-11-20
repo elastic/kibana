@@ -16,10 +16,7 @@ import { i18n } from '@kbn/i18n';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 
-import {
-  DISCOVER_SESSION_API_BASE_PATH,
-  DISCOVER_SESSION_API_VERSION,
-} from '../../../../../../common/constants';
+import { DISCOVER_SESSION_API_BASE_PATH } from '../../../../../../common/constants';
 import type { DiscoverSessionSanitizeRequest } from '../../../../../../server';
 
 interface ExportDiscoverSessionJsonFlyoutProps {
@@ -103,15 +100,12 @@ export const ExportDiscoverSessionJsonFlyout = ({
             )}
           </EuiFlexGroup>
         }
-        isTechnicalPreview
         objectType={i18n.translate('discover.exportJson.objectTypeLabel', {
           defaultMessage: 'Discover session',
         })}
         openInConsole={{
           canShow: canShowDevTools,
-          // TODO: Remove `apiVersion` when the Discover session API access becomes `public`.
-          getRequest: (jsonValue) =>
-            `POST kbn:${DISCOVER_SESSION_API_BASE_PATH}?apiVersion=${DISCOVER_SESSION_API_VERSION}\n${jsonValue}`,
+          getRequest: (jsonValue) => `POST kbn:${DISCOVER_SESSION_API_BASE_PATH}\n${jsonValue}`,
           useUrl: useConsoleUrl,
         }}
         prepareExportJson={sanitizeExportJson}

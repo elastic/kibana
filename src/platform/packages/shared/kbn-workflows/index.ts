@@ -23,9 +23,10 @@ export {
 } from './spec/builtin_step_definitions';
 export type { BuiltInStepDefinition } from './spec/builtin_step_definitions';
 export {
-  builtInTriggerDefinitions,
+  getBuiltInTriggerDefinitions,
   getBuiltInTriggerDefinition,
 } from './spec/builtin_trigger_definitions';
+export { getTriggerName } from './common/get_trigger_name';
 export {
   builtinWorkflowInputDefinitions,
   builtinWorkflowInputDefinitionRefValuesForZod,
@@ -63,6 +64,7 @@ export type { WorkflowExecutionLogEntry } from './common/workflow_execution_log_
 export * from './common/utils';
 export * from './common/step_types';
 export * from './common/hitl';
+export * from './common/hitl_slack_interactive';
 export * from './common/wait_for_approval';
 export {
   getManagedWorkflowSelectorVisibilityContext,
@@ -93,6 +95,11 @@ export {
   SCHEDULED_INTERVAL_ERROR,
   SCHEDULED_INTERVAL_PATTERN,
   ManualTriggerSchema,
+  DEFAULT_PAGE_TRIGGER_ID,
+  getPageTriggerId,
+  isPageTrigger,
+  PageTriggerSchema,
+  type PageTrigger,
   TriggerSchema,
   getCustomTriggerZodSchema,
   getTriggerSchema,
@@ -104,6 +111,7 @@ export {
   type CustomTriggerOn,
   type CustomTriggerSchemaConfig,
   type CustomTriggerSchemaInput,
+  type TriggerSchemaOptions,
   type TriggerType,
   type WorkflowEventsValue,
 } from './spec/schema/triggers';
@@ -121,12 +129,14 @@ export {
   actionCategorySchema,
   actionImpactSchema,
   actionMetadataSchema,
+  actionSubjectKindSchema,
 } from './managed/action_workflow';
 export type {
   ActionApprovalPolicy,
   ActionCategory,
   ActionImpact,
   ActionMetadata,
+  ActionSubjectKind,
 } from './managed/action_workflow';
 
 export {
@@ -145,6 +155,8 @@ export {
   workflowAccessControlSchema,
   storedWorkflowAccessControlSchema,
   getWorkflowPermissions,
+  getWorkflowAccessDecisions,
+  toWorkflowPermissions,
 } from './common/access_control';
 export type {
   WorkflowAccessControl,

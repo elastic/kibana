@@ -66,7 +66,7 @@ steps:
 
 The plugin registers an event-driven trigger `example.customTrigger` and exposes a route to emit events for it. Workflows that subscribe to this trigger in the same space will run when an event is emitted.
 
-You can emit events in two ways: **via the request-scoped client** (from a route, recommended) or **directly** via the start contract when you have a request and space id. This example uses the request-scoped client. For the full guide (both options, naming, approval), see the [Workflows Extensions README — Contributing Event-Driven Triggers](../../src/platform/plugins/shared/workflows_extensions/README.md#contributing-event-driven-triggers).
+You can emit events in two ways: **via the request-scoped client** (from a route, recommended) or **directly** via the start contract when you have a request and space id. This example uses the request-scoped client. For the full guide (both options, naming, approval), see the [Workflows Extensions README — Contributing Event-Driven Triggers](../../x-pack/platform/plugins/shared/workflows_extensions/README.md#contributing-event-driven-triggers).
 
 ### Emit an event (request context)
 
@@ -91,7 +91,7 @@ curl -X POST -u elastic:changeme -H 'Content-Type: application/json' \
 
 The trigger id is `example.customTrigger` (kebab-case namespace, camelCase event). The event payload must match the trigger’s `eventSchema` (`message` required; `source`, `category`, and `labels` optional).
 
-For information about some guardrails in event-driven triggers see [Event-driven guardrails](../../src/platform/plugins/shared/workflows_extensions/dev_docs/TRIGGERS.md#event-driven-guardrails).
+For information about some guardrails in event-driven triggers see [Event-driven guardrails](../../x-pack/platform/plugins/shared/workflows_extensions/dev_docs/TRIGGERS.md#event-driven-guardrails).
 
 ## Managed Workflows
 
@@ -137,7 +137,7 @@ steps:
 
 - **`system-` prefix** is reserved for managed workflow IDs; user-created workflows cannot use it.
 - **`yamlTemplate(values)`** enables install-time parameterization; `values` are persisted and reused on upgrades.
-- **`versionStrategy: 'auto'`** means the platform re-installs the workflow on startup when the template changes.
+- **`versionStrategy: 'auto'`** means the platform re-installs the workflow on startup when its rendered YAML changes.
 - **`enablement: 'restorable'`** preserves user-toggled enabled state across managed updates.
 - **`spaceId`** is mandatory — use `'*'` (the global space constant) for workflows visible from every space.
 
@@ -152,8 +152,8 @@ Create the account first with `POST /internal/security/service_account`, for exa
 `serviceAccountId`; role names must exist on the target deployment and allow the workflow's
 steps. Creation requires explicit roles on both UIAM and Elasticsearch backends.
 
-With this example plugin and `xpack.security.serviceAccounts.enabled` enabled, the following
-internal endpoints use the authenticated request's space:
+With this example plugin loaded and `xpack.security.serviceAccounts.enabled` set to `true` (the
+default outside serverless), the following internal endpoints use the authenticated request's space:
 
 - `POST /internal/workflows_extensions_example/managed_service_account/{id}` with
   `{ "serviceAccountId": "<existing SA ID>" }` installs or updates the instance.
@@ -180,7 +180,7 @@ authorized rebinding, rejection of unauthorized installation/rebinding/removal, 
 
 ```sh
 nvm use
-node scripts/scout run-tests --arch serverless --domain search --config src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/playwright.config.ts
+node scripts/scout run-tests --arch serverless --domain search --config x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/playwright.config.ts
 ```
 
 The `service_accounts` server configuration loads this example on local UIAM and stateful Elasticsearch.
@@ -194,5 +194,5 @@ not validate `kibana.request` authentication or automatic startup provisioning.
 
 2. **Handler Function**: The handler receives validated input and the step execution runtime context, and returns output conforming to the output schema.
 
-3. **Metadata Registration**: The public plugin registers UI metadata that helps users understand and use the step in the workflow editor.
+3. **Metadata Registration**: The public plugin registers UI metadata that helps users understand and use the step in the workflow editor. This registration is required: without it the editor rejects the step as an unknown type, even though the server can run it. See [Server and Client Registration Check](../../x-pack/platform/plugins/shared/workflows_extensions/dev_docs/STEPS.md#server-and-client-registration-check).
 

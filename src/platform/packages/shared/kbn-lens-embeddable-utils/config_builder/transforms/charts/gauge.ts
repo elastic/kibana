@@ -14,11 +14,16 @@ import type {
   TextBasedLayer,
   TypedLensSerializedState,
 } from '@kbn/lens-common';
-import { LENS_GAUGE_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
+import {
+  GAUGE_SHAPES,
+  LENS_GAUGE_DEFAULT_COLOR_STEPS,
+  LENS_GAUGE_DEFAULT_SHAPE,
+} from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import { DatasourceUnsupportedError } from '../../errors';
 import type { GaugeConfig, LensApiConfig } from '../../schema';
 import {
   AUTO_COLOR,
@@ -132,19 +137,22 @@ function reverseBuildVisualizationState(
   );
 
   if (!dataSource || dataSource.type == null) {
-    throw new Error('Unsupported DataSource type');
+    throw new DatasourceUnsupportedError();
   }
+
+  // Legacy saved objects may omit `shape`; the Lens runtime renders them as a horizontal bullet.
+  const shape = visualization.shape ?? LENS_GAUGE_DEFAULT_SHAPE;
 
   const props: DeepPartial<DeepMutable<GaugeConfig>> = {
     ...generateApiLayer(layer),
     styling: stripUndefined({
       shape:
-        visualization.shape === 'horizontalBullet'
+        shape === GAUGE_SHAPES.HORIZONTAL_BULLET
           ? { type: 'bullet', orientation: 'horizontal' }
-          : visualization.shape === 'verticalBullet'
+          : shape === GAUGE_SHAPES.VERTICAL_BULLET
           ? { type: 'bullet', orientation: 'vertical' }
           : {
-              type: visualization.shape === 'semiCircle' ? 'semi_circle' : visualization.shape,
+              type: shape === GAUGE_SHAPES.SEMI_CIRCLE ? 'semi_circle' : shape,
             },
     }),
     metric: isEsqlTableTypeDataSource(dataSource)
@@ -213,7 +221,9 @@ function reverseBuildVisualizationState(
     }
 
     if (visualization.colorMode === 'palette') {
-      props.metric.color = fromColorByValueLensStateToAPI(visualization.palette) ?? AUTO_COLOR;
+      props.metric.color =
+        fromColorByValueLensStateToAPI(visualization.palette, LENS_GAUGE_DEFAULT_COLOR_STEPS) ??
+        AUTO_COLOR;
     } else {
       props.metric.color = NO_COLOR;
     }

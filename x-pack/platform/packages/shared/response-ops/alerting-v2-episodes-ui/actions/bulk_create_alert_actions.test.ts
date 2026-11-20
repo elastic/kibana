@@ -28,7 +28,7 @@ describe('series bulk actions', () => {
 
   it('bulkSnoozeSeriesActions POSTs the items envelope to _bulk_snooze and returns the bulk response', async () => {
     mockHttp.post.mockResolvedValue({ affected_count: 1, errors: [] });
-    const items = [{ group_hash: 'g1', snoozed_until: '2026-05-01T00:00:00Z' }];
+    const items = [{ series_id: 's1', snoozed_until: '2026-05-01T00:00:00Z' }];
     const result = await bulkSnoozeSeriesActions(mockHttp, items);
     expect(mockHttp.post).toHaveBeenCalledWith(
       `${ALERTING_V2_INTERNAL_SERIES_API_PATH}/_bulk_snooze`,
@@ -39,7 +39,7 @@ describe('series bulk actions', () => {
 
   it('bulkUnsnoozeSeriesActions POSTs the items envelope to _bulk_unsnooze and returns the bulk response', async () => {
     mockHttp.post.mockResolvedValue({ affected_count: 1, errors: [] });
-    const items = [{ group_hash: 'g1' }];
+    const items = [{ series_id: 's1' }];
     const result = await bulkUnsnoozeSeriesActions(mockHttp, items);
     expect(mockHttp.post).toHaveBeenCalledWith(
       `${ALERTING_V2_INTERNAL_SERIES_API_PATH}/_bulk_unsnooze`,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { CreateAlertEventsStep } from './create_alert_events_step';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 import {
   collectStreamResults,
   createPipelineStream,
@@ -30,6 +30,11 @@ describe('CreateAlertEventsStep', () => {
     const config: PluginConfig = {
       enabled: true,
       invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+      retention: {
+        ruleEvents: { enabled: false, dataRetention: '90d' },
+        alertActions: { dispatcher: { enabled: false, dataRetention: '90d' } },
+      },
+      dispatcher: { paused: false, run: { timeout: '1m', alerts: { max: 10000 } } },
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
@@ -42,13 +47,10 @@ describe('CreateAlertEventsStep', () => {
       },
     };
 
-    const pluginConfigAccessor =
-      coreMock.createPluginInitializerContext<PluginConfig>(config).config;
-
     const logger = createLoggerService();
     mockLogger = logger.mockLogger;
 
-    return new CreateAlertEventsStep(logger.loggerService, pluginConfigAccessor);
+    return new CreateAlertEventsStep(logger.loggerService, createConfigServiceMock(config));
   }
 
   beforeEach(() => {
@@ -330,7 +332,6 @@ describe('CreateAlertEventsStep', () => {
       buildGroupHash({
         rowDoc: { 'host.name': host },
         groupKeyFields: ['host.name'],
-        fallbackSeed: 'unused',
       });
 
     it('never drops an active group and preserves the active set on state for reuse', async () => {

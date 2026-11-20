@@ -12,14 +12,41 @@ import {
   sendGetPackageInfoByKey,
 } from '@kbn/fleet-plugin/public';
 
+import { getEffectiveNamespace } from '../../common/effective_namespace';
+import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
-import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
+import {
+  detectSecretRefs,
+  fetchAgentlessSecretRefs,
+  withoutCoveredCredentials,
+} from './secret_refs';
+import type { ExistingSecretRefs } from './secret_refs';
+import { runWithSharedSecrets } from './shared_secrets';
+import {
+  computePolicyCleanupOps,
+  resolveSurvivingMembers,
+  toOnboardingDeploymentQuery,
+} from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
+import {
+  getPolicySettingsUpdate,
+  getPolicyVarSettings,
+  getPolicyVarSettingsUpdate,
+} from '../../common/policy_settings';
 
 export interface CleanupManagedIntegrationsOpts extends BuildPolicyBodyOpts {
   pendingCleanupPolicyIds: Record<string, string>;
   currentPolicyIdsByInstance: Record<string, string>;
+  /**
+   * True when the typed credentials will be stored as new Fleet secrets. They are then stored once
+   * (on the first updated policy) and the other updates use that secret.
+   */
+  hasTypedSecrets?: boolean;
+  /** Instances joining a policy in this run: written with its surviving members, in one PUT. */
+  addedInstanceIdsByPolicy?: Record<string, string[]>;
+  /** Policies already written this run with the surviving members: counted as updated, not PUT again. */
+  alreadyUpdatedPolicyIds?: ReadonlySet<string>;
 }
 
 /**
@@ -30,16 +57,30 @@ export interface CleanupManagedIntegrationsOpts extends BuildPolicyBodyOpts {
  */
 export async function cleanupManagedIntegrationsPolicies(
   opts: CleanupManagedIntegrationsOpts
-): Promise<PolicyCleanupOps> {
-  const { pendingCleanupPolicyIds, currentPolicyIdsByInstance } = opts;
+): Promise<PolicyCleanupOps & { sharedRefs?: ExistingSecretRefs }> {
+  const {
+    pendingCleanupPolicyIds,
+    currentPolicyIdsByInstance,
+    authenticateAndDeployStep,
+    hasTypedSecrets,
+    addedInstanceIdsByPolicy,
+    alreadyUpdatedPolicyIds,
+    onboardingDeploymentId,
+  } = opts;
   const planned = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
 
   const succeededDeletes: string[] = [];
   const succeededUpdates: Array<{ policyId: string; survivingInstanceIds: string[] }> = [];
+  const alreadyUpdated = planned.toUpdate.filter(({ policyId }) =>
+    alreadyUpdatedPolicyIds?.has(policyId)
+  );
+  const toRun = planned.toUpdate.filter(({ policyId }) => !alreadyUpdatedPolicyIds?.has(policyId));
 
-  await Promise.allSettled([
-    ...planned.toDelete.map((policyId) =>
-      sendDeleteAgentlessPolicy(policyId)
+  const { staticKeys } = authenticateAndDeployStep;
+
+  const deletes = Promise.allSettled(
+    planned.toDelete.map((policyId) =>
+      sendDeleteAgentlessPolicy(policyId, toOnboardingDeploymentQuery(onboardingDeploymentId))
         .then(() => {
           succeededDeletes.push(policyId);
         })
@@ -47,20 +88,45 @@ export async function cleanupManagedIntegrationsPolicies(
           // eslint-disable-next-line no-console
           console.error(`Failed to delete managed-integrations policy ${policyId}:`, err);
         })
-    ),
-    ...planned.toUpdate.map(({ policyId, survivingInstanceIds }) =>
-      updateManagedIntegrationsPolicy(policyId, survivingInstanceIds, opts)
-        .then(() => {
-          succeededUpdates.push({ policyId, survivingInstanceIds });
-        })
-        .catch((err) => {
-          // eslint-disable-next-line no-console
-          console.error(`Failed to update managed-integrations policy ${policyId}:`, err);
-        })
-    ),
-  ]);
+    )
+  );
+  const updates = runWithSharedSecrets({
+    items: toRun,
+    hasTypedSecrets: Boolean(hasTypedSecrets),
+    // An update can delete the secret it replaced: finish one before starting the next.
+    sequential: true,
+    run: ({ policyId, survivingInstanceIds }, sharedRefs) =>
+      updateManagedIntegrationsPolicy(
+        policyId,
+        [...survivingInstanceIds, ...(addedInstanceIdsByPolicy?.[policyId] ?? [])],
+        sharedRefs
+          ? {
+              ...opts,
+              authenticateAndDeployStep: {
+                ...authenticateAndDeployStep,
+                staticKeys: staticKeys && withoutCoveredCredentials(staticKeys, sharedRefs),
+                existingSecretRefs: sharedRefs,
+              },
+            }
+          : opts
+      ),
+    getPolicyId: ({ policyId }) => policyId,
+    fetchRefs: fetchAgentlessSecretRefs,
+  });
 
-  return { toDelete: succeededDeletes, toUpdate: succeededUpdates };
+  const [, { results, sharedRefs }] = await Promise.all([deletes, updates]);
+  succeededUpdates.push(...alreadyUpdated);
+  results.forEach((result, i) => {
+    const { policyId, survivingInstanceIds } = toRun[i];
+    if (result.status === 'fulfilled') {
+      succeededUpdates.push({ policyId, survivingInstanceIds });
+    } else {
+      // eslint-disable-next-line no-console
+      console.error(`Failed to update managed-integrations policy ${policyId}:`, result.reason);
+    }
+  });
+
+  return { toDelete: succeededDeletes, toUpdate: succeededUpdates, sharedRefs };
 }
 
 export async function updateManagedIntegrationsPolicy(
@@ -73,6 +139,8 @@ export async function updateManagedIntegrationsPolicy(
     storedServiceVars,
     globalRegion,
     namespace,
+    globalNamespace,
+    policySettings,
     authenticateAndDeployStep,
     servicesMap,
   } = opts;
@@ -121,13 +189,18 @@ export async function updateManagedIntegrationsPolicy(
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
     serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ?? {
-      enabledDataStreams: service.dataStreams,
+      enabledDataStreams: getDefaultEnabledDataStreams(service),
       varsByDataStream: {},
     };
   }
 
   const services = members.map(({ service }) => service);
-  const inputs = buildPackageInputs(services, serviceVarsMap, globalRegion);
+  const inputs = buildPackageInputs(
+    services,
+    serviceVarsMap,
+    globalRegion,
+    getPolicyVarSettings(policySettings, 'managed_integration')
+  );
 
   // Explicitly disable unrelated inputs (Fleet may enable them by manifest default).
   const pkgTemplates: Array<{
@@ -147,10 +220,13 @@ export async function updateManagedIntegrationsPolicy(
 
   const { staticKeys } = authenticateAndDeployStep;
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });
-  const vars = buildPackageVars(globalRegion, staticKeys, pkgVarNames);
 
   const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
-  const policyNamespace = existingNamespace ?? namespace;
+  // The namespace the instances now deploy into wins, so a change made while editing a deployed
+  // flow reaches the policy. Without one the policy keeps what it has.
+  const policyNamespace =
+    getEffectiveNamespace(members[0].instance.instanceId, storedServiceVars, globalNamespace) ||
+    (existingNamespace ?? namespace);
 
   // Use the override connector when the caller explicitly provides one (e.g. a dirty redeploy
   // that changed identity federation settings). Otherwise preserve the connector already on the
@@ -166,14 +242,33 @@ export async function updateManagedIntegrationsPolicy(
       ? rawConnector
       : ({ enabled: true, cloud_connector_id: rawConnector } as const);
 
-  await sendUpdateAgentlessPolicy(policyId, {
-    name: policyName,
-    namespace: policyNamespace,
-    package: { name: packageName, version: pkgVersion },
-    ...(vars ? { vars } : {}),
-    inputs,
-    // null means "detach" (same as omitting — per Fleet schema); undefined means "preserve". Use
-    // !== undefined rather than truthiness so an intentional null reaches the wire explicitly.
-    ...(cloudConnector !== undefined ? { cloud_connector: cloudConnector } : {}),
-  });
+  // The PUT is a full replace, so credentials the user did not retype must be sent back as the
+  // policy's own secret refs or Fleet deletes the stored secrets. Not applicable once the policy
+  // authenticates through a cloud connector.
+  const vars = buildPackageVars(
+    globalRegion,
+    staticKeys,
+    pkgVarNames,
+    undefined,
+    cloudConnector
+      ? undefined
+      : authenticateAndDeployStep.existingSecretRefs ?? detectSecretRefs(existingGetResult.item),
+    getPolicyVarSettingsUpdate(policySettings, 'managed_integration', pkgVarNames)
+  );
+
+  await sendUpdateAgentlessPolicy(
+    policyId,
+    {
+      name: policyName,
+      namespace: policyNamespace,
+      package: { name: packageName, version: pkgVersion },
+      ...(vars ? { vars } : {}),
+      inputs,
+      ...getPolicySettingsUpdate(policySettings, 'managed_integration'),
+      // null means "detach" (same as omitting — per Fleet schema); undefined means "preserve". Use
+      // !== undefined rather than truthiness so an intentional null reaches the wire explicitly.
+      ...(cloudConnector !== undefined ? { cloud_connector: cloudConnector } : {}),
+    },
+    { query: toOnboardingDeploymentQuery(opts.onboardingDeploymentId) }
+  );
 }

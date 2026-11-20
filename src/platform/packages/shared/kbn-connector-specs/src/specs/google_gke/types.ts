@@ -126,7 +126,16 @@ const gkeVersion = () =>
       'A GKE version. Full form "1.31.5-gke.1023000", a prefix such as "1.31" (picks the default patch), "latest", or "-" for the cluster default. Valid values come from getServerConfig.'
     );
 
-const nodeCount = (what: string) => z.number().int().min(0).max(15000).describe(what);
+// GKE allows 1,000 nodes per node pool per zone (2,000 for TPU), and the cluster autoscaler is
+// unsupported above 15,000 nodes. Standard clusters upgrade at most 100 nodes in parallel.
+const MAX_NODES_PER_POOL_ZONE = 2000;
+const MAX_AUTOSCALED_NODES = 15000;
+const MAX_PARALLEL_NODE_UPGRADES = 100;
+
+const nodeCount = (what: string) =>
+  z.number().int().min(0).max(MAX_NODES_PER_POOL_ZONE).describe(what);
+const totalNodeCount = (what: string) =>
+  z.number().int().min(0).max(MAX_AUTOSCALED_NODES).describe(what);
 
 const resourceLabels = () =>
   z
@@ -179,14 +188,14 @@ const resourceManagerTags = () =>
     );
 
 const clusterRef = {
-  projectId: projectId(),
-  location: location(),
-  clusterId: clusterId(),
+  projectId: lazySchema(() => projectId()),
+  location: lazySchema(() => location()),
+  clusterId: lazySchema(() => clusterId()),
 };
 
 const nodePoolRef = {
   ...clusterRef,
-  nodePoolId: nodePoolId(),
+  nodePoolId: lazySchema(() => nodePoolId()),
 };
 
 /**
@@ -195,24 +204,34 @@ const nodePoolRef = {
  * (`totalMinNodeCount`/`totalMaxNodeCount`). The two families are mutually exclusive.
  */
 const autoscalingFields = {
-  minNodeCount: nodeCount(
-    'Minimum nodes PER ZONE. For a regional cluster the pool spans several zones, so the real floor is this number times the zone count. Mutually exclusive with totalMinNodeCount.'
-  ).optional(),
-  maxNodeCount: nodeCount(
-    'Maximum nodes PER ZONE. Must be >= minNodeCount. Mutually exclusive with totalMaxNodeCount.'
-  ).optional(),
-  totalMinNodeCount: nodeCount(
-    'Minimum nodes across ALL zones of the pool. Mutually exclusive with minNodeCount.'
-  ).optional(),
-  totalMaxNodeCount: nodeCount(
-    'Maximum nodes across ALL zones of the pool. Must be >= totalMinNodeCount. Mutually exclusive with maxNodeCount.'
-  ).optional(),
-  locationPolicy: z
-    .enum(['BALANCED', 'ANY'])
-    .optional()
-    .describe(
-      'How the autoscaler spreads new nodes across zones: "BALANCED" keeps zones even (default), "ANY" prefers whichever zone has capacity (recommended with Spot VMs).'
-    ),
+  minNodeCount: lazySchema(() =>
+    nodeCount(
+      'Minimum nodes PER ZONE. For a regional cluster the pool spans several zones, so the real floor is this number times the zone count. Mutually exclusive with totalMinNodeCount.'
+    ).optional()
+  ),
+  maxNodeCount: lazySchema(() =>
+    nodeCount(
+      'Maximum nodes PER ZONE. Must be >= minNodeCount. Mutually exclusive with totalMaxNodeCount.'
+    ).optional()
+  ),
+  totalMinNodeCount: lazySchema(() =>
+    totalNodeCount(
+      'Minimum nodes across ALL zones of the pool. Mutually exclusive with minNodeCount.'
+    ).optional()
+  ),
+  totalMaxNodeCount: lazySchema(() =>
+    totalNodeCount(
+      'Maximum nodes across ALL zones of the pool. Must be >= totalMinNodeCount. Mutually exclusive with maxNodeCount.'
+    ).optional()
+  ),
+  locationPolicy: lazySchema(() =>
+    z
+      .enum(['BALANCED', 'ANY'])
+      .optional()
+      .describe(
+        'How the autoscaler spreads new nodes across zones: "BALANCED" keeps zones even (default), "ANY" prefers whichever zone has capacity (recommended with Spot VMs).'
+      )
+  ),
 };
 
 const hasPerZoneBounds = (v: { minNodeCount?: number; maxNodeCount?: number }) =>
@@ -476,14 +495,14 @@ export const CreateNodePoolInputSchema = lazySchema(() =>
       .number()
       .int()
       .min(0)
-      .max(20)
+      .max(MAX_PARALLEL_NODE_UPGRADES)
       .optional()
       .describe('Upgrade setting: extra nodes GKE may add during an upgrade (default 1).'),
     maxUnavailable: z
       .number()
       .int()
       .min(0)
-      .max(20)
+      .max(MAX_PARALLEL_NODE_UPGRADES)
       .optional()
       .describe(
         'Upgrade setting: nodes that may be unavailable at once during an upgrade (default 0).'

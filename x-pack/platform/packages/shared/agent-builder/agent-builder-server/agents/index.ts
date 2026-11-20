@@ -13,10 +13,13 @@ export type {
   AgentEventEmitter,
   AgentEventEmitterFn,
   ExperimentalFeatures,
+  DeploymentContext,
+  DeploymentEnvironment,
   DeductiveRuntimeConfig,
   SubAgentExecutor,
   SubAgentExecution,
   ConversationClient,
+  ExecutionConversationAccess,
 } from './provider';
 export type {
   RunAgentFn,

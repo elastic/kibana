@@ -8,7 +8,10 @@
 import React from 'react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
-import type { DatasetErrorModeFormValue } from '../../../create_dataset_form_state';
+import {
+  DEFAULT_ERROR_MODE,
+  type DatasetErrorModeFormValue,
+} from '../../../create_dataset_form_state';
 import type { ComboBoxChange } from '../../../components/combo_box_selection_validity';
 import {
   EuiComboBoxNoCustomOption,
@@ -58,7 +61,7 @@ export function ErrorModeSelect({
       onChange={onChange}
       onBlur={onBlur}
       options={ERROR_MODE_OPTIONS}
-      defaultValue="fail_fast"
+      defaultValue={DEFAULT_ERROR_MODE}
       isInvalid={isInvalid}
       placeholder={createDatasetWizardStrings.settingsErrorModePlaceholder}
       aria-label={createDatasetWizardStrings.settingsErrorModeLabel}

@@ -14,16 +14,20 @@ import { summarizeEntityCounts } from './utils';
 
 const BULK_CREATE_BATCH_SIZE = 500;
 
+/** Minimum time after a failed population before populate() will try again. */
+export const POPULATION_RETRY_COOLDOWN_MS = 60 * 1000;
+
 type InitializationState =
   | { status: 'idle' }
-  | { status: 'initializing'; promise: Promise<boolean> }
+  | { status: 'initializing'; promise: Promise<boolean>; servesPartialData: boolean }
   | { status: 'ready' }
-  | { status: 'failed' };
+  | { status: 'degraded'; failedAt: number }
+  | { status: 'failed'; failedAt: number };
 
 export class MitreAttackDataService {
   private readonly logger: Logger;
 
-  /** Tracks the population lifecycle; transitions idle → initializing → ready | failed. */
+  /** Tracks the population lifecycle; transitions idle → initializing → ready | degraded (partial write, retried after cooldown) | failed. */
   private state: InitializationState = { status: 'idle' };
 
   /** Type-scoped internal repository supplied by initialize() at plugin start; undefined until then. */
@@ -39,11 +43,12 @@ export class MitreAttackDataService {
   }
 
   public get isInitialized(): boolean {
-    return this.state.status === 'ready';
+    return this.state.status === 'ready' || this.state.status === 'degraded';
   }
 
   /**
-   * Loads all MITRE ATT&CK entities into the Saved Objects index.
+   * Loads all bundled MITRE entities (every framework and version in the artifact) into
+   * the Saved Objects index.
    * Returns true on success, false on failure. Never rejects.
    * Concurrent calls while a run is in progress return the same in-flight promise.
    */
@@ -54,8 +59,22 @@ export class MitreAttackDataService {
     if (this.state.status === 'initializing') {
       return this.state.promise;
     }
-    const promise = this.runPopulation();
-    this.state = { status: 'initializing', promise };
+    if (this.state.status === 'failed' || this.state.status === 'degraded') {
+      const elapsedMs = Date.now() - this.state.failedAt;
+      if (elapsedMs < POPULATION_RETRY_COOLDOWN_MS) {
+        this.logger.debug(
+          `Skipping MITRE data population retry; last attempt ${
+            this.state.status === 'degraded' ? 'was incomplete' : 'failed'
+          } ${Math.round(elapsedMs / 1000)}s ago`
+        );
+        return Promise.resolve(this.state.status === 'degraded');
+      }
+    }
+    const wasDegraded = this.state.status === 'degraded';
+    // runPopulation runs synchronously up to its first await; a sync failure would set
+    // `failed` and then be overwritten by `initializing` if the state were assigned afterwards.
+    const promise = Promise.resolve().then(() => this.runPopulation(wasDegraded));
+    this.state = { status: 'initializing', promise, servesPartialData: wasDegraded };
     return promise;
   }
 
@@ -67,10 +86,18 @@ export class MitreAttackDataService {
     if (this.state.status === 'ready') {
       return Promise.resolve(true);
     }
+    if (this.state.status === 'degraded') {
+      // Repair in the background (subject to the cooldown) while serving the written data.
+      void this.populate();
+      return Promise.resolve(true);
+    }
+    if (this.state.status === 'initializing' && this.state.servesPartialData) {
+      return Promise.resolve(true);
+    }
     return this.populate();
   }
 
-  private async runPopulation(): Promise<boolean> {
+  private async runPopulation(wasDegraded: boolean): Promise<boolean> {
     try {
       if (this.savedObjectsRepository === undefined) {
         throw new Error(
@@ -107,33 +134,43 @@ export class MitreAttackDataService {
         }
       }
 
-      if (allErrors.length > 0) {
-        // Population can fail for every entity at once. Log a bounded sample
-        // rather than the full list so one bad run cannot flood the log.
-        // The total count is always reported alongside it.
-        const firstFailures = allErrors
-          .slice(0, 5)
-          .map(({ id, message }) => `${id}: ${message}`)
-          .join('; ');
+      // Log a bounded sample rather than the full list so one bad run cannot flood the log.
+      // The total count is always reported alongside it.
+      const firstFailures = allErrors
+        .slice(0, 5)
+        .map(({ id, message }) => `${id}: ${message}`)
+        .join('; ');
+
+      if (allErrors.length === entities.length) {
         this.logger.error(
-          `Failed to populate MITRE ATT&CK data: ${allErrors.length} error(s) out of ${entities.length} entities. First failures: ${firstFailures}`
+          `Failed to populate MITRE data: ${allErrors.length} error(s) out of ${entities.length} entities. First failures: ${firstFailures}`
         );
-        this.state = { status: 'failed' };
+        // A failed repair must not take already-served data offline.
+        this.state = { status: wasDegraded ? 'degraded' : 'failed', failedAt: Date.now() };
         return false;
       }
 
+      if (allErrors.length > 0) {
+        this.logger.warn(
+          `MITRE data partially populated: ${allErrors.length} error(s) out of ${entities.length} entities. First failures: ${firstFailures}`
+        );
+        // Serve what was written; a retry after the cooldown overwrites the gaps.
+        this.state = { status: 'degraded', failedAt: Date.now() };
+        return true;
+      }
+
       this.state = { status: 'ready' };
+      // Counts are reported per framework and version so a framework that mapped
+      // incorrectly is not hidden inside the combined total.
       this.logger.info(
-        `MITRE ATT&CK data populated: ${entities.length} entities. ${summarizeEntityCounts(
-          entities
-        )}`
+        `MITRE data populated: ${entities.length} entities (${summarizeEntityCounts(entities)})`
       );
       return true;
     } catch (err) {
       this.logger.error(
-        `Failed to populate MITRE ATT&CK data: ${err instanceof Error ? err.message : String(err)}`
+        `Failed to populate MITRE data: ${err instanceof Error ? err.message : String(err)}`
       );
-      this.state = { status: 'failed' };
+      this.state = { status: wasDegraded ? 'degraded' : 'failed', failedAt: Date.now() };
       return false;
     }
   }

@@ -27,6 +27,7 @@ import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
 import { LensApp } from './lens_app';
 import { ListingTable } from './listing_table';
+import { EmbeddableAlertsTablePage } from './embeddable_alerts_table';
 import { LoginPage } from './login_page';
 import { HomePage } from './home_page';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
@@ -49,6 +50,7 @@ export {
   QueryBar,
   UnifiedTabs,
   ListingTable,
+  EmbeddableAlertsTablePage,
 };
 
 export interface PageObjectsFixtures {
@@ -69,6 +71,7 @@ export interface PageObjects {
   filterBar: FilterBar;
   inspector: InspectorPage;
   listingTable: ListingTable;
+  embeddableAlertsTable: EmbeddableAlertsTablePage;
   home: HomePage;
   maps: MapsPage;
   queryBar: QueryBar;
@@ -101,6 +104,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
     inspector: createLazyPageObject(InspectorPage, fixtures.page),
     listingTable: createLazyPageObject(ListingTable, fixtures.page),
+    embeddableAlertsTable: createLazyPageObject(EmbeddableAlertsTablePage, fixtures.page),
     home: createLazyPageObject(HomePage, fixtures.page),
     maps: createLazyPageObject(MapsPage, fixtures.page),
     queryBar: createLazyPageObject(QueryBar, fixtures.page),

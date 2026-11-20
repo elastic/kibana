@@ -10,7 +10,6 @@
 import { useHistory, useParams } from 'react-router-dom';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { DATASETS_ROUTE, type EsqlDatasetsResult } from '@kbn/esql-types';
 import React, { useEffect, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
@@ -25,6 +24,8 @@ import {
   internalStateActions,
   InternalStateProvider,
   RuntimeStateManagerProvider,
+  selectTab,
+  TabInitializationStatus,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from './state_management/redux';
@@ -55,9 +56,7 @@ export interface MainRouteProps {
   onAppLeave?: AppMountParameters['onAppLeave'];
 }
 
-type InitializeMainRoute = (
-  rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>
-) => Promise<DiscoverInternalState['initializationState']>;
+type LoadedRootProfileState = Extract<RootProfileState, { rootProfileLoading: false }>;
 
 const defaultCustomizationCallbacks: CustomizationCallback[] = [];
 
@@ -107,7 +106,7 @@ export const DiscoverMainRoute = ({
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { customizationContext, runtimeStateManager } = props;
   const services = useDiscoverServices();
-  const { core, dataViews, chrome, data } = services;
+  const { core, chrome, data } = services;
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
@@ -116,29 +115,17 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     customizationContext.displayMode === 'standalone';
 
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
-  const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
-    async (loadedRootProfileState) => {
-      const [hasESData, hasDataView, defaultDataViewExists, hasESQLDatasets] = await Promise.all([
-        dataViews.hasData.hasESData().catch(() => false),
-        dataViews.hasData.hasDataView().catch(() => false),
-        dataViews.defaultDataViewExists().catch(() => false),
-        core.http
-          .get<EsqlDatasetsResult>(DATASETS_ROUTE)
-          .then((res) => res.datasets.length > 0)
-          .catch(() => false),
-        dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
-        initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
-      ]);
-      const initializationState: DiscoverInternalState['initializationState'] = {
-        hasESData: hasESData || hasESQLDatasets,
-        hasDataView: (hasDataView && defaultDataViewExists) || hasESQLDatasets,
-      };
+  const [profileInitializationState, initializeProfile] = useAsyncFunction(
+    async (loadedRootProfileState: LoadedRootProfileState) => {
+      try {
+        await initializeProfileDataViews(loadedRootProfileState);
+      } catch {
+        // The tab can still open without the profile's inline data views.
+      }
+
       const defaultProfileEsqlQuery = loadedRootProfileState.getDefaultEsqlQuery();
 
       dispatch(internalStateActions.setDefaultProfileEsqlQuery(defaultProfileEsqlQuery));
-      dispatch(internalStateActions.setInitializationState(initializationState));
-
-      return initializationState;
     }
   );
 
@@ -169,6 +156,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
       );
 
       if (!persistedDiscoverSessionId || isSwitchingSession) {
+        dispatch(internalStateActions.closeSaveSessionModal());
         initializeTabs({
           discoverSessionId: nextDiscoverSessionId,
           shouldClearAllTabs: isSwitchingSession,
@@ -180,10 +168,16 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   );
 
   useEffect(() => {
+    // Start the checks and the list early so tabs can reuse the requests when they initialize.
+    dispatch(internalStateActions.loadDataAvailabilityOnce());
+    dispatch(internalStateActions.loadDataViewListOnce());
+  }, [dispatch]);
+
+  useEffect(() => {
     if (!rootProfileState.rootProfileLoading) {
-      initializeMainRoute(rootProfileState);
+      initializeProfile(rootProfileState);
     }
-  }, [initializeMainRoute, rootProfileState]);
+  }, [initializeProfile, rootProfileState]);
 
   useEffect(() => {
     initializeDiscoverSession.current({ nextDiscoverSessionId: currentDiscoverSessionId });
@@ -235,9 +229,11 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   ]);
 
   const areTabsInitializing = useInternalStateSelector((state) => state.tabs.areInitializing);
+  const initializationState = useInternalStateSelector((state) => state.initializationState);
+  const showsWelcomePage = useInternalStateSelector(selectShowsWelcomePage);
   const isLoading =
     rootProfileState.rootProfileLoading ||
-    mainRouteInitializationState.loading ||
+    profileInitializationState.loading ||
     tabsInitializationState.loading ||
     areTabsInitializing;
 
@@ -245,19 +241,16 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     return <BrandedLoadingIndicator />;
   }
 
-  const error = mainRouteInitializationState.error || tabsInitializationState.error;
+  const error = profileInitializationState.error || tabsInitializationState.error;
 
   if (error) {
     return <InitializationError error={error} />;
   }
 
-  if (
-    !mainRouteInitializationState.value.hasESData &&
-    !mainRouteInitializationState.value.hasDataView
-  ) {
+  if (showsWelcomePage) {
     return (
       <NoDataPage
-        {...mainRouteInitializationState.value}
+        {...initializationState}
         onDataViewCreated={() => {
           // This is unused if there is no ES data
         }}
@@ -300,4 +293,14 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
       </DiscoverTopNavMenuProvider>
     </ChartPortalsRenderer>
   );
+};
+
+// A tab reports no data only after checking ES data, so `hasESData` is known when this applies.
+const selectShowsWelcomePage = (state: DiscoverInternalState) => {
+  const currentTab = selectTab(state, state.tabs.unsafeCurrentId);
+  const isCurrentTabWithoutData =
+    currentTab?.initializationState.initializationStatus === TabInitializationStatus.NoData;
+  const { hasESData, hasDataView } = state.initializationState;
+
+  return isCurrentTabWithoutData && !hasESData && !hasDataView;
 };

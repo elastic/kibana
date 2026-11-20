@@ -16,13 +16,18 @@ import { ElasticInferenceServiceModelsPage } from './elastic_inference_service_m
 import { EIS_DISPLAY_OPTIONS_TOUR_STORAGE_KEY } from '../../hooks/use_display_options_tour';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { useEisModels } from '../../hooks/use_eis_models';
+import type { EisPageState } from '../../hooks/use_eis_page_state';
 import { InferenceEndpoints } from '../../__mocks__/inference_endpoints';
+import { groupEndpointsByModel } from '../../utils/eis_utils';
 
 jest.mock('../../hooks/use_eis_models');
 jest.mock('../../hooks/use_kibana');
 
 const { useKibana } = jest.requireMock('../../hooks/use_kibana');
 const mockUseKibana = useKibana as jest.Mock;
+
+const mockNavigateToApp = jest.fn();
+const mockShowErrorDialog = jest.fn();
 
 const mockKibanaReturn = ({
   manage = true,
@@ -32,9 +37,11 @@ const mockKibanaReturn = ({
     notifications: {
       toasts: { addSuccess: jest.fn(), addDanger: jest.fn() },
       tours: { isEnabled: () => toursEnabled },
+      showErrorDialog: mockShowErrorDialog,
     },
     application: {
       capabilities: { searchInferenceEndpoints: { show: true, manage } },
+      navigateToApp: mockNavigateToApp,
     },
   },
 });
@@ -51,18 +58,59 @@ const mockUseEisModels = useEisModels as jest.Mock;
 const endpoints = InferenceEndpoints.filter((ep) => ep.service === 'elastic');
 
 const SEARCH_BOX = 'contentListToolbar-searchBox';
+const SORT_MENU_BUTTON = 'eisModelsSortMenuButton';
+const RESULTS_SUMMARY = 'eisModelsResultsSummary';
 
 const countCards = (container: HTMLElement) =>
   container.querySelectorAll('[data-test-subj^="eisModelCard-"]').length;
 
+const getFirstCardTestSubj = (container: HTMLElement) =>
+  container.querySelector('[data-test-subj^="eisModelCard-"]')?.getAttribute('data-test-subj') ??
+  '';
+
+const selectSortOption = async (
+  getByTestId: ReturnType<typeof render>['getByTestId'],
+  optionId: string
+) => {
+  fireEvent.click(getByTestId(SORT_MENU_BUTTON));
+  const option = await waitFor(() => getByTestId(`eisModelsSortOption-${optionId}`));
+  fireEvent.click(option);
+};
+
+const sortTestEndpoints: EisInferenceEndpoint[] = [
+  {
+    inference_id: 'alpha-model',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: { model_id: 'alpha-model-id' },
+    metadata: {
+      heuristics: { status: 'ga', release_date: '2024-01-01' },
+      display: { name: 'Alpha Sort Model', model_creator: 'Elastic' },
+    },
+  },
+  {
+    inference_id: 'zeta-model',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: { model_id: 'zeta-model-id' },
+    metadata: {
+      heuristics: { status: 'ga', release_date: '2026-06-01' },
+      display: { name: 'Zeta Sort Model', model_creator: 'Elastic' },
+    },
+  },
+];
+
 // The page mounts under the app's `Router`, which is what enables the Content
 // List's URL sync — omitting it here hid a filtering regression from jest.
-const renderPage = () =>
+const renderPage = (pageState: EisPageState = 'models') =>
   render(
     <EuiThemeProvider>
       <I18nProvider>
         <Router history={createMemoryHistory()}>
-          <ElasticInferenceServiceModelsPage />
+          <ElasticInferenceServiceModelsPage
+            pageState={pageState}
+            isCloudConnectPromoVisible={false}
+          />
         </Router>
       </I18nProvider>
     </EuiThemeProvider>
@@ -88,19 +136,174 @@ describe('ElasticInferenceServiceModelsPage', () => {
 
   it('renders a loading spinner when data is loading', () => {
     mockUseEisModels.mockReturnValue({ data: undefined, isLoading: true, isError: false });
-    const { container } = renderPage();
-    expect(container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    const { getByTestId } = renderPage('loading');
+    expect(getByTestId('eisModelsLoadingSpinner')).toBeInTheDocument();
   });
 
-  it('renders an error prompt when fetching fails', () => {
-    mockUseEisModels.mockReturnValue({ data: undefined, isLoading: false, isError: true });
-    const { getByText } = renderPage();
-    expect(getByText('Unable to load models')).toBeInTheDocument();
+  describe('Elastic Inference Service unavailable', () => {
+    const error = new Error('Service unavailable');
+    const refetch = jest.fn();
+
+    it('renders the unavailable prompt without the models grid', () => {
+      mockUseEisModels.mockReturnValue({ data: undefined, isError: true, error, refetch });
+      const { getByTestId, queryByTestId } = renderPage('unavailable');
+      expect(getByTestId('eisUnavailablePrompt')).toBeInTheDocument();
+      expect(queryByTestId(SEARCH_BOX)).not.toBeInTheDocument();
+    });
+
+    it('refetches the models when Retry is clicked', () => {
+      mockUseEisModels.mockReturnValue({ data: undefined, isError: true, error, refetch });
+      const { getByTestId } = renderPage('unavailable');
+      fireEvent.click(getByTestId('eisUnavailableRetryButton'));
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('opens the error dialog when View error details is clicked', () => {
+      mockUseEisModels.mockReturnValue({ data: undefined, isError: true, error, refetch });
+      const { getByTestId } = renderPage('unavailable');
+      fireEvent.click(getByTestId('eisUnavailableErrorDetailsButton'));
+      expect(mockShowErrorDialog).toHaveBeenCalledWith({
+        title: 'Elastic Inference Service unavailable',
+        error,
+      });
+    });
+
+    it('shows a loading Retry button while refetching', () => {
+      mockUseEisModels.mockReturnValue({
+        data: undefined,
+        isError: true,
+        isFetching: true,
+        error,
+        refetch,
+      });
+      const { getByTestId } = renderPage('unavailable');
+      expect(getByTestId('eisUnavailableRetryButton')).toBeDisabled();
+    });
+
+    it('hides View error details when there is no error', () => {
+      mockUseEisModels.mockReturnValue({ data: [], error: null, refetch });
+      const { queryByTestId } = renderPage('unavailable');
+      expect(queryByTestId('eisUnavailableErrorDetailsButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('self-managed without Elastic Inference Service', () => {
+    it('renders the self-managed empty prompt without the models grid', () => {
+      mockUseEisModels.mockReturnValue({ data: [], isLoading: false, isError: false });
+      const { getByTestId, queryByTestId } = renderPage('selfManagedEmpty');
+      expect(getByTestId('eisSelfManagedEmptyPrompt')).toBeInTheDocument();
+      expect(getByTestId('eisDocumentationLink')).toBeInTheDocument();
+      expect(queryByTestId(SEARCH_BOX)).not.toBeInTheDocument();
+    });
+
+    it('opens Cloud Connect when Connect your cluster is clicked', () => {
+      mockUseEisModels.mockReturnValue({ data: [], isLoading: false, isError: false });
+      const { getByTestId } = renderPage('selfManagedEmpty');
+      fireEvent.click(getByTestId('eisConnectYourClusterButton'));
+      expect(mockNavigateToApp).toHaveBeenCalledWith('cloud_connect', { openInNewTab: true });
+    });
+  });
+
+  describe('Elastic Inference Service disabled in Cloud Connect', () => {
+    it('renders the disabled callout above the models grid', async () => {
+      mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
+      const { container, getByTestId } = renderPage('serviceDisabled');
+      expect(getByTestId('eisServiceDisabledCallout')).toBeInTheDocument();
+      await waitFor(() => expect(countCards(container)).toBeGreaterThan(0));
+    });
+
+    it('opens Cloud Connect when Open Cloud Connect is clicked', () => {
+      mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
+      const { getByTestId } = renderPage('serviceDisabled');
+      fireEvent.click(getByTestId('eisOpenCloudConnectButton'));
+      expect(mockNavigateToApp).toHaveBeenCalledWith('cloud_connect', { openInNewTab: true });
+    });
+
+    it('does not render the disabled callout when the service is enabled', async () => {
+      const { queryByTestId } = await renderPopulatedPage();
+      expect(queryByTestId('eisServiceDisabledCallout')).not.toBeInTheDocument();
+    });
   });
 
   it('renders model cards when data is loaded', async () => {
     const { container } = await renderPopulatedPage();
     expect(countCards(container)).toBeGreaterThan(0);
+  });
+
+  it('renders the sort menu with the default sort selected', async () => {
+    const { getByTestId } = await renderPopulatedPage();
+    expect(getByTestId(SORT_MENU_BUTTON)).toHaveTextContent('Sort by: A → Z');
+  });
+
+  it('shows the visible models out of the full catalog in the results summary', async () => {
+    const { container, getByTestId } = await renderPopulatedPage();
+    const total = groupEndpointsByModel(endpoints).length;
+    expect(countCards(container)).toBeLessThan(total);
+    expect(getByTestId(RESULTS_SUMMARY)).toHaveTextContent(
+      `Showing ${countCards(container)} of ${total}`
+    );
+  });
+
+  it('updates the results summary when search narrows models', async () => {
+    const { getByTestId } = await renderPopulatedPage();
+    const total = groupEndpointsByModel(endpoints).length;
+
+    const searchBox = getByTestId(SEARCH_BOX);
+    fireEvent.change(searchBox, { target: { value: 'Jina Reranker v2' } });
+    fireEvent.keyUp(searchBox, { key: 'Enter', code: 'Enter' });
+
+    await waitFor(() =>
+      expect(getByTestId(RESULTS_SUMMARY)).toHaveTextContent(`Showing 1 of ${total}`)
+    );
+  });
+
+  it('reorders model cards when the sort option changes', async () => {
+    mockUseEisModels.mockReturnValue({
+      data: sortTestEndpoints,
+      isLoading: false,
+      isError: false,
+    });
+    const { container, getByTestId } = renderPage();
+    await waitFor(() => expect(countCards(container)).toBe(2));
+    expect(getFirstCardTestSubj(container)).toBe('eisModelCard-Alpha Sort Model');
+
+    await selectSortOption(getByTestId, 'nameDesc');
+    await waitFor(() =>
+      expect(getFirstCardTestSubj(container)).toBe('eisModelCard-Zeta Sort Model')
+    );
+
+    await selectSortOption(getByTestId, 'releasedDesc');
+    await waitFor(() =>
+      expect(getFirstCardTestSubj(container)).toBe('eisModelCard-Zeta Sort Model')
+    );
+    expect(getByTestId(SORT_MENU_BUTTON)).toHaveTextContent('Sort by: Newest');
+
+    await selectSortOption(getByTestId, 'releasedAsc');
+    await waitFor(() =>
+      expect(getFirstCardTestSubj(container)).toBe('eisModelCard-Alpha Sort Model')
+    );
+  });
+
+  it('keeps search filtering when the sort option changes', async () => {
+    mockUseEisModels.mockReturnValue({
+      data: sortTestEndpoints,
+      isLoading: false,
+      isError: false,
+    });
+    const { container, getByTestId, queryByTestId } = renderPage();
+    await waitFor(() => expect(countCards(container)).toBe(2));
+
+    const searchBox = getByTestId(SEARCH_BOX);
+    fireEvent.change(searchBox, { target: { value: 'Alpha' } });
+    fireEvent.keyUp(searchBox, { key: 'Enter', code: 'Enter' });
+
+    await waitFor(() => expect(countCards(container)).toBe(1));
+    expect(queryByTestId('eisModelCard-Zeta Sort Model')).not.toBeInTheDocument();
+
+    await selectSortOption(getByTestId, 'nameDesc');
+    await waitFor(() => expect(countCards(container)).toBe(1));
+    expect(getByTestId('eisModelCard-Alpha Sort Model')).toBeInTheDocument();
+    expect(getByTestId(RESULTS_SUMMARY)).toHaveTextContent('Showing 1 of 2');
   });
 
   it('renders empty state when no endpoints returned', async () => {
@@ -169,6 +372,57 @@ describe('ElasticInferenceServiceModelsPage', () => {
     expect(getByTestId('modelFamilyFilterMultiselect')).toBeInTheDocument();
   });
 
+  it('filters models by region and clears the selection', async () => {
+    mockUseEisModels.mockReturnValue({
+      data: [
+        {
+          inference_id: '.us-model',
+          task_type: 'chat_completion',
+          service: 'elastic',
+          service_settings: { model_id: 'us-model' },
+          metadata: {
+            heuristics: { status: 'ga' },
+            display: { name: 'US Model', model_creator: 'Anthropic' },
+            regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }],
+          },
+        },
+        {
+          inference_id: '.eu-model',
+          task_type: 'chat_completion',
+          service: 'elastic',
+          service_settings: { model_id: 'eu-model' },
+          metadata: {
+            heuristics: { status: 'ga' },
+            display: { name: 'EU Model', model_creator: 'OpenRouter' },
+            regions: [{ geo: 'eu' }],
+          },
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    const { getByTestId, queryByTestId } = renderPage();
+    await waitFor(() => expect(getByTestId('eisModelCard-US Model')).toBeInTheDocument());
+    expect(getByTestId('regionFilterMultiselect')).toHaveTextContent('Region');
+
+    fireEvent.click(getByTestId('regionFilterMultiselect'));
+    fireEvent.click(await waitFor(() => getByTestId('regionFilterOption-geo-us')));
+    await waitFor(() => expect(queryByTestId('eisModelCard-EU Model')).not.toBeInTheDocument());
+    expect(getByTestId('eisModelCard-US Model')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('regionFilterOption-geo-eu'));
+    await waitFor(() => expect(getByTestId('eisModelCard-EU Model')).toBeInTheDocument());
+    expect(getByTestId('eisModelCard-US Model')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('regionFilterOption-geo-us'));
+    fireEvent.click(getByTestId('regionFilterOption-geo-eu'));
+    await waitFor(() => expect(getByTestId('eisModelCard-EU Model')).toBeInTheDocument());
+
+    fireEvent.click(getByTestId('regionFilterOption-region-aws-us-east-1'));
+    await waitFor(() => expect(queryByTestId('eisModelCard-EU Model')).not.toBeInTheDocument());
+    expect(getByTestId('eisModelCard-US Model')).toBeInTheDocument();
+  });
+
   it('filters models by provider via model family filter', async () => {
     const { container, getByTestId, getByText } = await renderPopulatedPage();
     const allCards = countCards(container);
@@ -196,6 +450,8 @@ describe('ElasticInferenceServiceModelsPage', () => {
     expect(table).toHaveTextContent('End of Life');
     expect(queryByText('Supported tasks')).not.toBeInTheDocument();
     expect(getByTestId('contentListFooter-pagination')).toBeInTheDocument();
+    expect(queryByTestId(RESULTS_SUMMARY)).not.toBeInTheDocument();
+    expect(queryByTestId(SORT_MENU_BUTTON)).not.toBeInTheDocument();
 
     const searchBox = getByTestId(SEARCH_BOX);
     fireEvent.change(searchBox, { target: { value: 'Jina Reranker v2' } });

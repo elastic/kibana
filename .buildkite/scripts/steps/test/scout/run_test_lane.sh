@@ -4,13 +4,19 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
 
-SCOUT_SERVER_LOG=".scout/server.log"
+SCOUT_SERVER_LOG=""
 PLAYWRIGHT_BIN="./node_modules/.bin/playwright"
+PLAYWRIGHT_WATCHDOG=".buildkite/scripts/steps/test/scout/run_playwright_with_watchdog.ts"
+HANG_DIAGNOSTICS_DIR=".scout/hang-diagnostics"
+# Hard cap per config, in case the watchdog itself fails. Slowest config is ~21m.
+CONFIG_RUN_TIMEOUT="30m"
 
 LOAD_IDS=()
+LOAD_CONFIG_SETS=()
 PASSED_INDICES=""
 PASSED=()
 FAILED=()
+FAILED_COUNT_AT_SERVER_START=0
 SKIPPED=()
 RETRY_SPEC_FILES=()
 TOTAL_FLAKY=0
@@ -57,6 +63,13 @@ flaky_count() {
   report="$(json_report_path "$idx")"
   [[ -f "$report" ]] || { echo 0; return; }
   jq -r '.stats.flaky // 0' "$report" 2>/dev/null || echo 0
+}
+
+# True if a config's JSON report exists and records no unexpected test results or run-level errors
+all_tests_passed() {
+  local report
+  report="$(json_report_path "$1")"
+  [[ -f "$report" ]] && jq -e '.stats.unexpected == 0 and (.errors | length) == 0' "$report" > /dev/null 2>&1
 }
 
 # After a config fails, persist its failed spec files so the next attempt can re-run only those.
@@ -138,9 +151,12 @@ mark_index_passed() {
   buildkite-agent meta-data set "$PASSED_LOAD_INDICES_META_KEY" "$PASSED_INDICES"
 }
 
-# Extract the load IDs (Scout test config paths) assigned to this lane from the loads file
+# Extract the load IDs (Scout test config paths) assigned to this lane and the server config set of each load
 read_load_ids() {
-  mapfile -t LOAD_IDS < <(jq -r --arg key "$BUILDKITE_STEP_KEY" '.[$key].loadIDs[]' "$SCOUT_TEST_LANE_LOADS_PATH")
+  mapfile -t LOAD_IDS < <(jq -r --arg key "$BUILDKITE_STEP_KEY" \
+    '.[$key].loadGroups[]?.loadIDs[]?' "$SCOUT_TEST_LANE_LOADS_PATH")
+  mapfile -t LOAD_CONFIG_SETS < <(jq -r --arg key "$BUILDKITE_STEP_KEY" \
+    '.[$key].loadGroups[]? | .configSet as $configSet | .loadIDs[]? | $configSet' "$SCOUT_TEST_LANE_LOADS_PATH")
 
   if [[ ${#LOAD_IDS[@]} -eq 0 ]]; then
     echo "No test lane load IDs found for step key '$BUILDKITE_STEP_KEY'"
@@ -164,6 +180,7 @@ upload_test_server_log() {
 # Start the Scout test server in the background and wait for it to become ready
 start_server() {
   local timeout_seconds="$1"
+  FAILED_COUNT_AT_SERVER_START=${#FAILED[@]}
   mkdir -p "$(dirname "$SCOUT_SERVER_LOG")"
 
   echo "--- Starting test server (timeout: ${timeout_seconds}s)"
@@ -200,15 +217,20 @@ start_server() {
   exit 1
 }
 
-# Stop the test server if it's still running
+# Stop the test server if it's still running and upload its log if any config failed against it
 stop_server() {
-  if [[ -n "${SCOUT_SERVER_PID:-}" ]] && kill -0 "$SCOUT_SERVER_PID" 2>/dev/null; then
+  if [[ -z "${SCOUT_SERVER_PID:-}" ]]; then
+    return
+  fi
+
+  if kill -0 "$SCOUT_SERVER_PID" 2>/dev/null; then
     echo "--- Stopping test server (PID: $SCOUT_SERVER_PID)"
     kill "$SCOUT_SERVER_PID" 2>/dev/null || true
     wait "$SCOUT_SERVER_PID" 2>/dev/null || true
   fi
+  SCOUT_SERVER_PID=""
 
-  if [[ ${#FAILED[@]} -gt 0 ]]; then
+  if [[ ${#FAILED[@]} -gt $FAILED_COUNT_AT_SERVER_START ]]; then
     upload_test_server_log
   fi
 }
@@ -233,6 +255,7 @@ run_scout_tests() {
     "${spec_filter_args[@]+"${spec_filter_args[@]}"}"
     "--config=$config_path"
     "--grep=$PLAYWRIGHT_GREP_TAG"
+    "${PLAYWRIGHT_GREP_INVERT_ARGS[@]+"${PLAYWRIGHT_GREP_INVERT_ARGS[@]}"}"
     "--project=$PLAYWRIGHT_PROJECT"
   )
 
@@ -240,7 +263,8 @@ run_scout_tests() {
     "SCOUT_TARGET_LOCATION=$SCOUT_TEST_TARGET_LOCATION"
     "SCOUT_TARGET_ARCH=$SCOUT_TEST_TARGET_ARCH"
     "SCOUT_TARGET_DOMAIN=$SCOUT_TEST_TARGET_DOMAIN"
-    "NODE_OPTIONS=${NODE_OPTIONS:-} --require=@kbn/swc-register/install"
+    # The report flags let the watchdog get a Node diagnostic report out of a hung Playwright
+    "NODE_OPTIONS=${NODE_OPTIONS:-} --require=@kbn/swc-register/install --report-on-signal --report-signal=SIGUSR2 --report-directory=$HANG_DIAGNOSTICS_DIR"
     # Pin the JSON report to a path we control (see json_report_path).
     "PLAYWRIGHT_JSON_OUTPUT_FILE=$(json_report_path "$idx")"
   )
@@ -248,10 +272,25 @@ run_scout_tests() {
   local start_time
   start_time=$(date +%s)
 
+  # Node does not create the report directory itself
+  mkdir -p "$HANG_DIAGNOSTICS_DIR"
+
   set +e
-  env "${pw_env[@]}" "$PLAYWRIGHT_BIN" "${pw_args[@]}"
+  timeout --kill-after=1m "$CONFIG_RUN_TIMEOUT" \
+    node "$PLAYWRIGHT_WATCHDOG" "$(json_report_path "$idx")" env "${pw_env[@]}" "$PLAYWRIGHT_BIN" "${pw_args[@]}"
   local exit_code=$?
   set -e
+
+  local timed_out=false
+  if [[ $exit_code -eq 124 || $exit_code -eq 137 ]]; then
+    timed_out=true
+    buildkite-agent artifact upload "$HANG_DIAGNOSTICS_DIR/*" || echo "No hang diagnostics to upload"
+    # The report is only written once the run is over, so Playwright hung on exit, not mid-run
+    if all_tests_passed "$idx"; then
+      echo "Playwright hung after finishing $config_path, all tests passed"
+      exit_code=0
+    fi
+  fi
 
   local elapsed=$(( $(date +%s) - start_time ))
   local duration
@@ -278,12 +317,16 @@ run_scout_tests() {
       upload_report_events "$config_path"
       snapshot_failed_specs "$idx"
       FAILED+=("$config_path")
-      echo "Exited with code $exit_code for $config_path"
+      if [[ "$timed_out" == true ]]; then
+        echo "Timed out for $config_path"
+      else
+        echo "Exited with code $exit_code for $config_path"
+      fi
       ;;
   esac
 }
 
-# Upload Scout reporter events and clean up event reports, preserving failure reports
+# Upload Scout reporter events in the background, preserving failure reports for annotations
 upload_report_events() {
   local config_path="$1"
 
@@ -296,23 +339,16 @@ upload_report_events() {
     return
   fi
 
-  echo "~~~ Uploading report events: $config_path"
+  echo "Uploading report events in the background: $config_path"
 
-  set +e
-  node scripts/scout upload-events --dontFailOnError
-  local exit_code=$?
-  set -e
-
-  if [[ $exit_code -ne 0 ]]; then
-    echo "Upload failed for $config_path (exit code $exit_code)"
-  fi
-
-  # Clean up event reports to avoid double ingestion, preserving failure reports for annotations
+  local event_dirs=()
   for dir in .scout/reports/scout-playwright-*; do
     if [[ -d "$dir" ]] && [[ "$dir" != *"scout-playwright-test-failures-"* ]]; then
-      rm -rf "$dir"
+      event_dirs+=("$dir")
     fi
   done
+
+  scout_upload_events_in_background "${event_dirs[@]}"
 }
 
 # Return the final status of a config path based on the run results
@@ -351,7 +387,7 @@ print_summary() {
   echo "Test server configuration:"
   echo "  Arch: $SCOUT_TEST_TARGET_ARCH"
   echo "  Domain: $SCOUT_TEST_TARGET_DOMAIN"
-  echo "  Server config set: $SCOUT_TEST_SERVER_CONFIG_SET"
+  echo "  Server config set(s): $(jq -r --arg key "$BUILDKITE_STEP_KEY" '[.[$key].loadGroups[]?.configSet] | join(", ")' "$SCOUT_TEST_LANE_LOADS_PATH")"
   echo ""
   echo "Test count by status:"
   if [[ ${#PASSED[@]} -gt 0 ]]; then
@@ -377,7 +413,6 @@ check_required_env_vars \
   SCOUT_TEST_TARGET_LOCATION \
   SCOUT_TEST_TARGET_ARCH \
   SCOUT_TEST_TARGET_DOMAIN \
-  SCOUT_TEST_SERVER_CONFIG_SET \
   SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS \
   KIBANA_BUILD_LOCATION
 
@@ -389,16 +424,31 @@ download_test_lane_loads
 read_load_ids
 load_passed_indices
 
-trap stop_server EXIT
-start_server "$SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS"
+# Skips tests whose '@limit/*' tags the distributed target attributes don't satisfy
+PLAYWRIGHT_GREP_INVERT="$(jq -r --arg key "$BUILDKITE_STEP_KEY" '.[$key].playwright.options.grepInvert // empty' "$SCOUT_TEST_LANE_LOADS_PATH")"
+PLAYWRIGHT_GREP_INVERT_ARGS=()
+if [[ -n "$PLAYWRIGHT_GREP_INVERT" ]]; then
+  PLAYWRIGHT_GREP_INVERT_ARGS=("--grep-invert=$PLAYWRIGHT_GREP_INVERT")
+fi
+
+trap 'scout_await_event_uploads; stop_server' EXIT
 
 for i in "${!LOAD_IDS[@]}"; do
   config_path="${LOAD_IDS[$i]}"
+  config_set="${LOAD_CONFIG_SETS[$i]}"
 
   if has_load_index_passed "$i"; then
     SKIPPED+=("$config_path")
     echo "~~~ Skipping (already passed): $config_path"
     continue
+  fi
+
+  # Loads are grouped by server config set; (re)start the server only when the next load needs a different one
+  if [[ -z "${SCOUT_SERVER_PID:-}" || "$config_set" != "${SCOUT_TEST_SERVER_CONFIG_SET:-}" ]]; then
+    stop_server
+    SCOUT_TEST_SERVER_CONFIG_SET="$config_set"
+    SCOUT_SERVER_LOG=".scout/server_${i}_${config_set}.log"
+    start_server "$SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS"
   fi
 
   run_scout_tests "$i" "$config_path"

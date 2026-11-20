@@ -8,13 +8,13 @@
 import React, { useMemo } from 'react';
 import {
   EuiBadge,
-  EuiBadgeGroup,
   EuiBasicTable,
   EuiButtonIcon,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiToolTip,
   useEuiTheme,
+  useDataGridColumnSelector,
   type Criteria,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -33,24 +34,15 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RuleKindBadge } from '../../components/rule_details/rule_summary_header';
 import { RuleActionsMenu } from './rule_actions_menu';
+import { RuleTagsCell } from './rule_tags_cell';
 import { RulesBulkActions } from './rules_bulk_actions';
-
-const labelsContainerStyle = css`
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  overflow: hidden;
-`;
-
-const labelBadgeStyle = css`
-  min-width: 0;
-  flex-shrink: 1;
-`;
-
-const overflowTooltipStyle = css`
-  flex-shrink: 0;
-  line-height: 0;
-`;
+import {
+  RULES_LIST_COLUMN_LABELS,
+  SELECTOR_COLUMNS,
+  SELECTOR_OPTIONS,
+  isRulesListColumnId,
+  type RulesListColumnId,
+} from './rules_list_columns';
 
 const descriptionTextStyle = css`
   text-overflow: ellipsis;
@@ -75,7 +67,7 @@ export interface RulesListTableProps {
   sortDirection?: 'asc' | 'desc';
   isLoading: boolean;
 
-  /** When false, write affordances (selection, bulk actions, quick edit, actions menu) are hidden and the enabled toggle is read-only. */
+  /** When false, write affordances (selection, bulk actions, quick edit) are hidden and the enabled toggle is read-only. The actions menu still shows read actions. */
   canWrite: boolean;
 
   /** Bulk selection state */
@@ -95,8 +87,7 @@ export interface RulesListTableProps {
   onBulkUpdateApiKey: () => void;
 
   /** Row action callbacks */
-  onNavigateToDetails: (rule: RuleApiResponse) => void;
-  onExpand: (rule: RuleApiResponse) => void;
+  onOpenSummary: (rule: RuleApiResponse) => void;
   onQuickEdit: (rule: RuleApiResponse) => void;
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
@@ -113,6 +104,10 @@ export interface RulesListTableProps {
 
   /** Pagination callback */
   onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
+
+  /** Optional columns to render, in display order. Name, selection, and actions always render. */
+  visibleColumnIds: RulesListColumnId[];
+  onVisibleColumnIdsChange: (ids: RulesListColumnId[]) => void;
 }
 
 const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50];
@@ -141,8 +136,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkDisable,
   onBulkDelete,
   onBulkUpdateApiKey,
-  onNavigateToDetails,
-  onExpand,
+  onOpenSummary,
   onQuickEdit,
   onEdit,
   onClone,
@@ -154,6 +148,8 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   togglingRuleId,
   isBulkTogglingEnabled,
   onTableChange,
+  visibleColumnIds,
+  onVisibleColumnIdsChange,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -175,90 +171,11 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     pageSizeOptions,
   };
 
-  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(() => {
-    const showActionsColumn = canWrite || onViewChangeHistory;
-
-    return [
-      ...(canWrite
-        ? ([
-            {
-              field: 'id',
-              name: (
-                <EuiCheckbox
-                  id="selectAllPage"
-                  checked={isPageSelected}
-                  onChange={onSelectPage}
-                  aria-label={i18n.translate('xpack.alertingV2.rulesList.selectAllPage', {
-                    defaultMessage: 'Select all rules on this page',
-                  })}
-                  data-test-subj="selectAllRulesOnPage"
-                />
-              ),
-              width: '32px',
-              render: (id: string) => (
-                <EuiCheckbox
-                  id={`select-rule-${id}`}
-                  checked={isRowSelected(id)}
-                  onChange={() => onSelectRow(id)}
-                  aria-label={i18n.translate('xpack.alertingV2.rulesList.selectRule', {
-                    defaultMessage: 'Select rule',
-                  })}
-                  data-test-subj={`checkboxSelectRow-${id}`}
-                />
-              ),
-            },
-          ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
-        : []),
-      {
-        name: '',
-        width: '32px',
-        render: (rule: RuleApiResponse) => (
-          <EuiToolTip
-            content={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
-              defaultMessage: 'Open rule summary',
-            })}
-            disableScreenReaderOutput
-          >
-            <EuiButtonIcon
-              iconType="maximize"
-              color="text"
-              onClick={() => onExpand(rule)}
-              aria-label={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
-                defaultMessage: 'Open rule summary',
-              })}
-              data-test-subj={`expandRule-${rule.id}`}
-            />
-          </EuiToolTip>
-        ),
-      },
-      {
-        field: 'metadata',
-        name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
-        ),
-        truncateText: true,
-        sortable: true,
-        render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
-          <div>
-            <EuiLink
-              onClick={() => onNavigateToDetails(rule)}
-              data-test-subj={`ruleNameLink-${rule.id}`}
-            >
-              {metadata?.name ?? rule.id}
-            </EuiLink>
-            {metadata?.description && (
-              <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
-                {metadata.description}
-              </EuiText>
-            )}
-          </div>
-        ),
-      },
-      {
+  const optionalColumns: Record<RulesListColumnId, EuiBasicTableColumn<RuleApiResponse>> = useMemo(
+    () => ({
+      source: {
         field: 'query',
-        name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.source" defaultMessage="Source" />
-        ),
+        name: RULES_LIST_COLUMN_LABELS.source,
         width: '18%',
         truncateText: true,
         render: (query: RuleApiResponse['query']) => {
@@ -272,68 +189,59 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           );
         },
       },
-      {
+      tags: {
+        field: 'metadata',
+        name: RULES_LIST_COLUMN_LABELS.tags,
+        width: '18%',
+        render: (metadata: RuleApiResponse['metadata']) => (
+          <RuleTagsCell
+            tags={metadata?.tags}
+            containerTestSubj="tagsContainer"
+            overflowTestSubj="overflowTagsBadge"
+          />
+        ),
+      },
+      routingTags: {
         field: 'metadata',
         name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.tags" defaultMessage="Tags" />
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{RULES_LIST_COLUMN_LABELS.routingTags}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="info"
+                color="subdued"
+                anchorProps={{ 'data-test-subj': 'routingTagsColumnInfoIcon' }}
+                aria-label={i18n.translate(
+                  'xpack.alertingV2.rulesList.column.routingTags.ariaLabel',
+                  { defaultMessage: 'What are routing tags?' }
+                )}
+                content={i18n.translate('xpack.alertingV2.rulesList.column.routingTags.tooltip', {
+                  defaultMessage:
+                    'Action policies apply to a rule when they share at least one of its routing tags.',
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
-        width: '20%',
-        render: (_metadata: RuleApiResponse['metadata']) => {
-          const tags = _metadata?.tags;
-          if (!tags || tags.length === 0) {
-            return (
-              <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
-            );
-          }
-          const overflowCount = tags.length - 1;
-          return (
-            <EuiBadgeGroup
-              gutterSize="xs"
-              css={labelsContainerStyle}
-              data-test-subj="tagsContainer"
-            >
-              <EuiBadge color="hollow" css={overflowCount > 0 ? labelBadgeStyle : undefined}>
-                {tags[0]}
-              </EuiBadge>
-              {overflowCount > 0 && (
-                <span css={overflowTooltipStyle}>
-                  <EuiToolTip content={tags.slice(1).join(', ')}>
-                    <EuiBadge
-                      tabIndex={0}
-                      color="hollow"
-                      data-test-subj="overflowTagsBadge"
-                      iconType="tag"
-                      title=""
-                    >
-                      {i18n.translate('xpack.alertingV2.rulesList.tags.overflow', {
-                        defaultMessage: '+{count}',
-                        values: { count: overflowCount },
-                      })}
-                    </EuiBadge>
-                  </EuiToolTip>
-                </span>
-              )}
-            </EuiBadgeGroup>
-          );
-        },
+        width: '18%',
+        render: (metadata: RuleApiResponse['metadata']) => (
+          <RuleTagsCell
+            tags={metadata?.routing_tags}
+            containerTestSubj="routingTagsContainer"
+            overflowTestSubj="overflowRoutingTagsBadge"
+          />
+        ),
       },
-      {
+      kind: {
         field: 'kind',
-        name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.kind" defaultMessage="Outcome" />
-        ),
+        name: RULES_LIST_COLUMN_LABELS.kind,
         width: '10%',
         sortable: true,
         render: (kind: RuleKind) => <RuleKindBadge kind={kind} />,
       },
-      {
+      enabled: {
         field: 'enabled',
-        name: (
-          <FormattedMessage
-            id="xpack.alertingV2.rulesList.column.enabled"
-            defaultMessage="Enabled"
-          />
-        ),
+        name: RULES_LIST_COLUMN_LABELS.enabled,
         width: '8%',
         sortable: true,
         render: (enabled: boolean, rule: RuleApiResponse) => {
@@ -376,64 +284,115 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           );
         },
       },
-      ...(showActionsColumn
+    }),
+    [canWrite, togglingRuleId, isBulkTogglingEnabled, onToggleEnabled]
+  );
+
+  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(() => {
+    return [
+      ...(canWrite
         ? ([
             {
+              field: 'id',
               name: (
-                <FormattedMessage
-                  id="xpack.alertingV2.rulesList.column.actions"
-                  defaultMessage="Actions"
+                <EuiCheckbox
+                  id="selectAllPage"
+                  checked={isPageSelected}
+                  onChange={onSelectPage}
+                  aria-label={i18n.translate('xpack.alertingV2.rulesList.selectAllPage', {
+                    defaultMessage: 'Select all rules on this page',
+                  })}
+                  data-test-subj="selectAllRulesOnPage"
                 />
               ),
-              width: '8%',
-              align: 'right',
-              render: (rule: RuleApiResponse) => (
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  responsive={false}
-                  justifyContent="flexEnd"
-                >
-                  {canWrite ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
-                          defaultMessage: 'Edit rule',
-                        })}
-                        disableScreenReaderOutput
-                      >
-                        <EuiButtonIcon
-                          iconType="pencil"
-                          color="text"
-                          onClick={() => onQuickEdit(rule)}
-                          aria-label={i18n.translate(
-                            'xpack.alertingV2.rulesList.action.quickEdit',
-                            {
-                              defaultMessage: 'Edit rule',
-                            }
-                          )}
-                          data-test-subj={`quickEditRule-${rule.id}`}
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  ) : null}
-                  <EuiFlexItem grow={false}>
-                    <RuleActionsMenu
-                      rule={rule}
-                      canWrite={canWrite}
-                      onEdit={onEdit}
-                      onClone={onClone}
-                      onDelete={onDelete}
-                      onUpdateApiKey={onUpdateApiKey}
-                      onRun={onRun}
-                      onViewChangeHistory={onViewChangeHistory}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+              width: '32px',
+              render: (id: string) => (
+                <EuiCheckbox
+                  id={`select-rule-${id}`}
+                  checked={isRowSelected(id)}
+                  onChange={() => onSelectRow(id)}
+                  aria-label={i18n.translate('xpack.alertingV2.rulesList.selectRule', {
+                    defaultMessage: 'Select rule',
+                  })}
+                  data-test-subj={`checkboxSelectRow-${id}`}
+                />
               ),
             },
           ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
         : []),
+      {
+        field: 'metadata',
+        name: (
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
+        ),
+        truncateText: true,
+        sortable: true,
+        render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
+          <div>
+            <EuiLink onClick={() => onOpenSummary(rule)} data-test-subj={`ruleNameLink-${rule.id}`}>
+              {metadata?.name ?? rule.id}
+            </EuiLink>
+            {metadata?.description && (
+              <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
+                {metadata.description}
+              </EuiText>
+            )}
+          </div>
+        ),
+      },
+      ...visibleColumnIds.map((id) => optionalColumns[id]),
+      {
+        name: (
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.column.actions"
+            defaultMessage="Actions"
+          />
+        ),
+        width: '8%',
+        align: 'right',
+        render: (rule: RuleApiResponse) => (
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            responsive={false}
+            justifyContent="flexEnd"
+          >
+            {canWrite ? (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+                    defaultMessage: 'Edit rule',
+                  })}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="pencil"
+                    color="text"
+                    onClick={() => onQuickEdit(rule)}
+                    aria-label={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+                      defaultMessage: 'Edit rule',
+                    })}
+                    data-test-subj={`quickEditRule-${rule.id}`}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <RuleActionsMenu
+                rule={rule}
+                canWrite={canWrite}
+                onEdit={onEdit}
+                onClone={onClone}
+                onDelete={onDelete}
+                onUpdateApiKey={onUpdateApiKey}
+                onRun={onRun}
+                onViewChangeHistory={onViewChangeHistory}
+                showViewDetails
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      },
     ];
   }, [
     canWrite,
@@ -441,27 +400,35 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     isRowSelected,
     onSelectPage,
     onSelectRow,
-    onNavigateToDetails,
-    onExpand,
+    onOpenSummary,
+    visibleColumnIds,
+    optionalColumns,
     onQuickEdit,
     onEdit,
     onClone,
     onDelete,
-    onToggleEnabled,
     onUpdateApiKey,
     onRun,
     onViewChangeHistory,
-    togglingRuleId,
-    isBulkTogglingEnabled,
   ]);
+
+  const [columnSelector] = useDataGridColumnSelector(
+    SELECTOR_COLUMNS,
+    {
+      visibleColumns: visibleColumnIds,
+      setVisibleColumns: (ids) => onVisibleColumnIdsChange(ids.filter(isRulesListColumnId)),
+    },
+    SELECTOR_OPTIONS,
+    RULES_LIST_COLUMN_LABELS
+  );
 
   const noItemsMessage =
     search || hasActiveFilters
       ? i18n.translate('xpack.alertingV2.rulesList.noSearchResults', {
-          defaultMessage: 'No rules match your search or filters.',
+          defaultMessage: 'No Universal rules match your search or filters.',
         })
       : i18n.translate('xpack.alertingV2.rulesList.noRules', {
-          defaultMessage: 'No rules found.',
+          defaultMessage: 'No Universal rules found.',
         });
 
   // Single wrapper is required: ContentList lays out its children with a column
@@ -516,6 +483,14 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             onBulkDelete={onBulkDelete}
           />
         ) : null}
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            margin-inline-start: auto;
+          `}
+        >
+          {columnSelector}
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
@@ -12,7 +13,8 @@ import {
   MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS,
 } from '../../common/constants';
 import type { AiIndexDest, KiTypeCount } from '../../common/http_api/ai_indices';
-import { buildAiIndexSpaceFilter } from '../../common/space_filter';
+import { buildAiIndexReadFilter } from '../../common/space_filter';
+import { EXCLUDE_MEMORY_KI_TYPES_CONDITION } from './example_queries';
 import { kiLifecyclePipeline } from './ki_lifecycle';
 import type { AiIndexField, AiIndexTagCount } from './types';
 
@@ -31,6 +33,7 @@ export interface DescribeAiIndexAggregationsParams {
   esClient: ElasticsearchClient;
   dest: AiIndexDest;
   spaceId: string;
+  userId?: string;
   fields: AiIndexField[];
 }
 
@@ -42,10 +45,16 @@ const isAggregatableKeyword = (fields: AiIndexField[], path: string): boolean =>
   );
 
 /** Counts per value of `field` over the current, active, unexpired KIs; `tags` is multi-valued. */
-const countsQuery = ({ type, value }: AiIndexDest, field: string, size: number): string =>
+const countsQuery = (
+  { type, value }: AiIndexDest,
+  field: string,
+  size: number,
+  excludeMemory: boolean
+): string =>
   [
     `FROM ${value} METADATA _id, _index`,
     ...kiLifecyclePipeline(type),
+    ...(excludeMemory ? [`WHERE ${EXCLUDE_MEMORY_KI_TYPES_CONDITION}`] : []),
     ...(field === KI_TAGS_FIELD ? [`MV_EXPAND ${field}`] : []),
     `WHERE ${field} IS NOT NULL`,
     `STATS count = COUNT(*) BY ${field}`,
@@ -55,26 +64,27 @@ const countsQuery = ({ type, value }: AiIndexDest, field: string, size: number):
 
 const runCounts = async (
   esClient: ElasticsearchClient,
-  spaceId: string,
+  filter: QueryDslQueryContainer,
   query: string
 ): Promise<Array<Record<string, unknown>>> => {
   const { columns, values } = (await esClient.esql.query({
     query,
-    filter: buildAiIndexSpaceFilter(spaceId),
+    filter,
     allow_partial_results: false,
   })) as unknown as ESQLSearchResponse;
   return values.map((row) => Object.fromEntries(columns.map((column, i) => [column.name, row[i]])));
 };
 
 /**
- * Space- and lifecycle-filtered counts on `type` / `tags`, through the same pipeline `_query`
- * applies; each skipped unless an aggregatable keyword. A caller without index `read` is turned
- * away by the read service before reaching here.
+ * Space-, user- and lifecycle-filtered counts on `type` / `tags`, through the same pipeline
+ * `_query` applies; each skipped unless an aggregatable keyword. A caller without index `read` is
+ * turned away by the read service before reaching here.
  */
 export const describeAiIndexAggregations = async ({
   esClient,
   dest,
   spaceId,
+  userId,
   fields,
 }: DescribeAiIndexAggregationsParams): Promise<AiIndexAggregationsDescription> => {
   const hasType = isAggregatableKeyword(fields, KI_TYPE_FIELD);
@@ -83,19 +93,20 @@ export const describeAiIndexAggregations = async ({
     return NO_COUNTS;
   }
 
+  const filter = buildAiIndexReadFilter({ spaceId, userId });
   const [types, tags] = await Promise.all([
     hasType
       ? runCounts(
           esClient,
-          spaceId,
-          countsQuery(dest, KI_TYPE_FIELD, MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS)
+          filter,
+          countsQuery(dest, KI_TYPE_FIELD, MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS, true)
         )
       : [],
     hasTags
       ? runCounts(
           esClient,
-          spaceId,
-          countsQuery(dest, KI_TAGS_FIELD, MAX_AI_INDEX_DESCRIBE_TAG_COUNTS)
+          filter,
+          countsQuery(dest, KI_TAGS_FIELD, MAX_AI_INDEX_DESCRIBE_TAG_COUNTS, hasType)
         )
       : [],
   ]);

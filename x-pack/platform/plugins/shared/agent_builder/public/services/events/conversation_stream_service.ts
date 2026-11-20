@@ -5,50 +5,73 @@
  * 2.0.
  */
 
-import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, defer, finalize, map } from 'rxjs';
-import type { PromptResponseEvent } from '@kbn/agent-builder-common';
+import type { MonoTypeOperatorFunction, Observable } from 'rxjs';
+import { BehaviorSubject, defer, finalize, map, tap } from 'rxjs';
+import type { ChatEvent, PromptResponseEvent } from '@kbn/agent-builder-common';
 import type { LiveEventsState, TimelineDisplayEvent } from './sse_to_events';
 import { emptyLiveEventsState, sseToEvents, upsertEvent } from './sse_to_events';
-import type { EventsService } from './events_service';
-
-export type ChatEventSource = Pick<EventsService, 'getChatEvents$' | 'getStreamEnded$'>;
 
 interface ConversationStream {
   conversationId: string;
   state$: BehaviorSubject<LiveEventsState>;
-  sub: Subscription;
+  /** A stream of this view is open for the conversation, so the state is held even unobserved. */
+  running: boolean;
 }
 
+/**
+ * Holds the live events of the runs this copy of the UI streams, one state per conversation. A
+ * mutation feeds its stream in through `trackStream`; nothing arrives from other copies of the UI
+ * or from the public events broadcast.
+ */
 export class ConversationStreamService {
   private readonly streams = new Map<string, ConversationStream>();
 
-  constructor(private readonly source: ChatEventSource) {}
+  dispose(): void {
+    this.streams.clear();
+  }
 
   private ensure(conversationId: string): ConversationStream {
     return this.streams.get(conversationId) ?? this.createStream(conversationId);
   }
 
   private createStream(conversationId: string): ConversationStream {
-    const state$ = new BehaviorSubject<LiveEventsState>(emptyLiveEventsState());
-    const sub = this.source
-      .getChatEvents$(conversationId)
-      .subscribe((event) => state$.next(sseToEvents(state$.getValue(), event)));
-    const stream: ConversationStream = { conversationId, state$, sub };
+    const stream: ConversationStream = {
+      conversationId,
+      state$: new BehaviorSubject<LiveEventsState>(emptyLiveEventsState()),
+      running: false,
+    };
     this.streams.set(conversationId, stream);
-
-    sub.add(
-      this.source.getStreamEnded$(conversationId).subscribe(() => this.onStreamEnded(stream))
-    );
     return stream;
   }
 
-  private onStreamEnded({ conversationId, state$ }: ConversationStream) {
+  /**
+   * Folds a stream's events into the conversation's live events. The stream is marked running on
+   * subscribe, before its first event, so the state survives while nothing observes it; its end -
+   * completed, errored or aborted - drops a half-written answer and releases the state once
+   * nothing holds it.
+   */
+  trackStream(conversationId: string): MonoTypeOperatorFunction<ChatEvent> {
+    return (source$) =>
+      defer(() => {
+        const stream = this.ensure(conversationId);
+        stream.running = true;
+
+        return source$.pipe(
+          tap((event) => {
+            stream.state$.next(sseToEvents(stream.state$.getValue(), event));
+          }),
+          finalize(() => this.onStreamEnded(stream))
+        );
+      });
+  }
+
+  private onStreamEnded(stream: ConversationStream) {
+    stream.running = false;
     // A run that never reached its terminal event leaves a half-written answer behind; drop it.
-    if (state$.getValue().cursor) {
-      state$.next(emptyLiveEventsState());
+    if (stream.state$.getValue().cursor) {
+      stream.state$.next(emptyLiveEventsState());
     }
-    this.maybeTeardown(conversationId);
+    this.maybeTeardown(stream.conversationId);
   }
 
   private maybeTeardown(conversationId: string) {
@@ -56,11 +79,11 @@ export class ConversationStreamService {
     if (!stream) {
       return;
     }
-    const canReclaim = !stream.state$.observed && !stream.state$.getValue().cursor;
+    const canReclaim =
+      !stream.state$.observed && !stream.state$.getValue().cursor && !stream.running;
     if (!canReclaim) {
       return;
     }
-    stream.sub.unsubscribe();
     this.streams.delete(conversationId);
   }
 

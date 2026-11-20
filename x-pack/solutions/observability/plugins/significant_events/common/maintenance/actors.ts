@@ -7,3 +7,6 @@
 
 /** `updatedBy` on the maintenance state when turning the Nightshift flag off paused it. */
 export const MAINTENANCE_FEATURE_FLAG_ACTOR = 'system:feature_flag';
+
+/** `updatedBy` when a reinstall re-applies the pause of a space whose document recorded no actor. */
+export const MAINTENANCE_REASSERT_ACTOR = 'system:reassert';

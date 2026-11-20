@@ -16,7 +16,7 @@ import {
   type ConversationRound,
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
-import { ExecutionStatus } from '@kbn/workflows';
+import { AGENT_BUILDER_HOOK_TRIGGER_SOURCE, ExecutionStatus } from '@kbn/workflows';
 import {
   MAX_TOOL_RESULT_ARRAY_ITEMS,
   MAX_TOOL_RESULT_DATA_CHARS,
@@ -24,6 +24,8 @@ import {
   runAfterExecutionWorkflows,
 } from './run_after_execution_workflows';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
+import { context as otelContext, createContextKey, ROOT_CONTEXT } from '@opentelemetry/api';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { getCurrentSpaceId } from '../../utils/spaces';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
@@ -119,6 +121,7 @@ describe('runAfterExecutionWorkflows', () => {
     return {
       workflowApi: { getWorkflow } as unknown as WorkflowApi,
       getWorkflow,
+      savedObjects,
       getInternalServices: jest.fn(() => ({
         spaces: {},
         uiSettings,
@@ -135,6 +138,7 @@ describe('runAfterExecutionWorkflows', () => {
     agentConfiguration: { tools: [], post_execution_workflow_ids: ['wf-1'] },
     agentId: 'agent-1',
     conversationId: 'conv-1',
+    conversationAccess: 'readWrite',
     ...overrides,
   });
 
@@ -153,13 +157,46 @@ describe('runAfterExecutionWorkflows', () => {
   });
 
   describe('early-exit guards', () => {
+    it('does nothing for an ephemeral run on an existing conversation', async () => {
+      const { workflowApi, getInternalServices } = createDeps();
+      const context = createContext({ conversationAccess: 'readOnly' });
+
+      await runAfterExecutionWorkflows({
+        context,
+        workflowApi,
+        getInternalServices,
+        logger,
+      });
+
+      expect(executeWorkflowMock).not.toHaveBeenCalled();
+    });
+
+    it('still runs for a one-shot run that stores nothing', async () => {
+      const { workflowApi, getInternalServices } = createDeps();
+      const context = createContext({ conversationAccess: 'none' });
+
+      await runAfterExecutionWorkflows({
+        context,
+        workflowApi,
+        getInternalServices,
+        logger,
+      });
+
+      expect(executeWorkflowMock).toHaveBeenCalledTimes(1);
+    });
+
     it('does nothing when post_execution_workflow_ids is empty', async () => {
       const { workflowApi, getInternalServices } = createDeps();
       const context = createContext({
         agentConfiguration: { tools: [], post_execution_workflow_ids: [] },
       });
 
-      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+      await runAfterExecutionWorkflows({
+        context,
+        workflowApi,
+        getInternalServices,
+        logger,
+      });
 
       expect(executeWorkflowMock).not.toHaveBeenCalled();
     });
@@ -170,7 +207,12 @@ describe('runAfterExecutionWorkflows', () => {
         agentConfiguration: { tools: [] },
       });
 
-      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+      await runAfterExecutionWorkflows({
+        context,
+        workflowApi,
+        getInternalServices,
+        logger,
+      });
 
       expect(executeWorkflowMock).not.toHaveBeenCalled();
     });
@@ -181,7 +223,12 @@ describe('runAfterExecutionWorkflows', () => {
         round: makeRound({ status: ConversationRoundStatus.inProgress }),
       });
 
-      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+      await runAfterExecutionWorkflows({
+        context,
+        workflowApi,
+        getInternalServices,
+        logger,
+      });
 
       expect(executeWorkflowMock).not.toHaveBeenCalled();
     });
@@ -192,13 +239,20 @@ describe('runAfterExecutionWorkflows', () => {
         round: makeRound({ status: ConversationRoundStatus.awaitingPrompt }),
       });
 
-      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+      await runAfterExecutionWorkflows({
+        context,
+        workflowApi,
+        getInternalServices,
+        logger,
+      });
 
       expect(executeWorkflowMock).not.toHaveBeenCalled();
     });
 
     it('does nothing when the workflows UI setting is disabled', async () => {
-      const { workflowApi, getInternalServices } = createDeps({ uiEnabled: false });
+      const { workflowApi, getInternalServices } = createDeps({
+        uiEnabled: false,
+      });
 
       await runAfterExecutionWorkflows({
         context: createContext(),
@@ -243,11 +297,18 @@ describe('runAfterExecutionWorkflows', () => {
         connectorId: ' current-connector ',
       });
 
-      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+      await runAfterExecutionWorkflows({
+        context,
+        workflowApi,
+        getInternalServices,
+        logger,
+      });
 
       expect(executeWorkflowMock).toHaveBeenCalledWith(
         expect.objectContaining({
           workflowId: 'wf-1',
+          // Lets a workflow refuse runs that a user started directly.
+          triggeredBy: AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
           workflowParams: {
             prompt: 'my question',
             response: 'my answer',
@@ -284,7 +345,12 @@ describe('runAfterExecutionWorkflows', () => {
         }),
       });
 
-      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+      await runAfterExecutionWorkflows({
+        context,
+        workflowApi,
+        getInternalServices,
+        logger,
+      });
 
       expect(getWorkflow).toHaveBeenCalledWith('wf-1', 'default', request);
       expect(executeWorkflowMock).toHaveBeenCalledWith(
@@ -314,7 +380,12 @@ describe('runAfterExecutionWorkflows', () => {
           }),
         });
 
-        await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+        await runAfterExecutionWorkflows({
+          context,
+          workflowApi,
+          getInternalServices,
+          logger,
+        });
 
         expect(getWorkflow).not.toHaveBeenCalled();
         const params = executeWorkflowMock.mock.calls[0][0].workflowParams as Record<
@@ -340,7 +411,12 @@ describe('runAfterExecutionWorkflows', () => {
         }),
       });
 
-      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+      await runAfterExecutionWorkflows({
+        context,
+        workflowApi,
+        getInternalServices,
+        logger,
+      });
 
       const params = executeWorkflowMock.mock.calls[0][0].workflowParams as Record<string, unknown>;
       expect(params).not.toHaveProperty('agent_id');
@@ -420,6 +496,26 @@ describe('runAfterExecutionWorkflows', () => {
         const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
         expect(params).toHaveProperty('round_connector_id', 'current-connector');
         expect(params).not.toHaveProperty('workflow_context');
+      });
+
+      it('sends the round trace id (latest one when merged) only when declared', async () => {
+        const { workflowApi, getInternalServices } = createDeps({
+          definition: strictDefinition([...legacyInputNames, 'round_trace_id']),
+        });
+
+        await runAfterExecutionWorkflows({
+          context: createContext({
+            round: { ...round, trace_id: ['trace-1', 'trace-2'] },
+            connectorId: 'current-connector',
+          }),
+          workflowApi,
+          getInternalServices,
+          logger,
+        });
+
+        const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
+        expect(params).toHaveProperty('round_trace_id', 'trace-2');
+        expect(params).not.toHaveProperty('round_connector_id');
       });
 
       describe('tool_results', () => {
@@ -652,7 +748,12 @@ describe('runAfterExecutionWorkflows', () => {
       });
 
       await expect(
-        runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger })
+        runAfterExecutionWorkflows({
+          context,
+          workflowApi,
+          getInternalServices,
+          logger,
+        })
       ).resolves.toBeUndefined();
 
       expect(getWorkflow).toHaveBeenCalledTimes(2);
@@ -685,7 +786,12 @@ describe('runAfterExecutionWorkflows', () => {
       });
 
       await expect(
-        runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger })
+        runAfterExecutionWorkflows({
+          context,
+          workflowApi,
+          getInternalServices,
+          logger,
+        })
       ).resolves.toBeUndefined();
 
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('wf-1'));
@@ -797,7 +903,12 @@ describe('runAfterExecutionWorkflows', () => {
         agentConfiguration: { tools: [], post_execution_workflow_ids: ['wf-a', 'wf-b'] },
       });
 
-      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+      await runAfterExecutionWorkflows({
+        context,
+        workflowApi,
+        getInternalServices,
+        logger,
+      });
 
       expect(executeWorkflowMock).toHaveBeenCalledTimes(2);
       expect(executeWorkflowMock).toHaveBeenNthCalledWith(
@@ -823,6 +934,40 @@ describe('runAfterExecutionWorkflows', () => {
       expect(executeWorkflowMock).toHaveBeenCalledWith(
         expect.objectContaining({ waitForCompletion: true })
       );
+    });
+
+    it('detaches executeWorkflow from the active OpenTelemetry context using ROOT_CONTEXT', async () => {
+      const contextManager = new AsyncLocalStorageContextManager();
+      otelContext.setGlobalContextManager(contextManager);
+      contextManager.enable();
+
+      try {
+        const { workflowApi, getInternalServices } = createDeps();
+        const testKey = createContextKey('test.foreground_span_key');
+        let observedContextBeforeHook: unknown;
+        let observedContextDuringExecute: unknown = 'unset';
+
+        executeWorkflowMock.mockImplementation(async () => {
+          observedContextDuringExecute = otelContext.active().getValue(testKey);
+          return { success: true, execution: completedExecution };
+        });
+
+        const parentCtx = ROOT_CONTEXT.setValue(testKey, 'foreground-span');
+        await otelContext.with(parentCtx, () => {
+          observedContextBeforeHook = otelContext.active().getValue(testKey);
+          return runAfterExecutionWorkflows({
+            context: createContext(),
+            workflowApi,
+            getInternalServices,
+            logger,
+          });
+        });
+
+        expect(observedContextBeforeHook).toBe('foreground-span');
+        expect(observedContextDuringExecute).toBeUndefined();
+      } finally {
+        contextManager.disable();
+      }
     });
   });
 });

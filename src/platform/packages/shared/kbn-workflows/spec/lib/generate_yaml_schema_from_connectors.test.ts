@@ -11,7 +11,9 @@ import { z } from '@kbn/zod/v4';
 import {
   CONNECTOR_ID_MAX_LENGTH,
   type ConnectorContractUnion,
+  type CustomTriggerSchemaInput,
   generateYamlSchemaFromConnectors,
+  getWorkflowJsonSchema,
 } from '../..';
 
 const BASE_WORKFLOW = {
@@ -20,6 +22,40 @@ const BASE_WORKFLOW = {
 };
 
 describe('generateYamlSchemaFromConnectors', () => {
+  it.each<{ format: string; triggers: CustomTriggerSchemaInput[] }>([
+    {
+      format: 'strings',
+      triggers: ['cases.updated', 'slack.message', 'slack.reaction'],
+    },
+    {
+      format: 'objects',
+      triggers: [
+        { id: 'cases.updated' },
+        { id: 'slack.message', requiresConnectorId: true },
+        { id: 'slack.reaction', requiresConnectorId: true },
+      ],
+    },
+    {
+      format: 'mixed strings and objects',
+      triggers: [
+        'cases.updated',
+        { id: 'slack.message', requiresConnectorId: true },
+        { id: 'slack.reaction', requiresConnectorId: true },
+      ],
+    },
+  ])('generates identical JSON schemas regardless of trigger order for $format', ({ triggers }) => {
+    const reversedTriggers = triggers.toReversed();
+    const originalOrder = [...reversedTriggers];
+    const schema = getWorkflowJsonSchema(generateYamlSchemaFromConnectors([], triggers));
+    const reversedSchema = getWorkflowJsonSchema(
+      generateYamlSchemaFromConnectors([], reversedTriggers)
+    );
+
+    expect(schema).not.toBeNull();
+    expect(reversedSchema).toEqual(schema);
+    expect(reversedTriggers).toEqual(originalOrder);
+  });
+
   describe('strict mode', () => {
     it('should generate a valid YAML schema from connectors', () => {
       const connectors: ConnectorContractUnion[] = [
@@ -61,6 +97,35 @@ describe('generateYamlSchemaFromConnectors', () => {
           steps: [],
         })
       ).toThrow();
+    });
+  });
+
+  describe('unknown step types', () => {
+    const schema = generateYamlSchemaFromConnectors([]);
+    const waitStep = { name: 'pause', type: 'wait', with: { duration: '1s' } };
+    const inLoop = (step: Record<string, unknown>) => ({
+      name: 'loop',
+      type: 'foreach',
+      foreach: '{{ inputs.items }}',
+      steps: [step],
+    });
+    // `merge` was a built-in step type that never ran. This is a complete snippet that
+    // used to validate, so it fails only because the type is gone.
+    const unknownSteps = [
+      { name: 'combine', type: 'merge', sources: ['a', 'b'], steps: [waitStep] },
+      { name: 'unknown', type: 'not.a.step' },
+    ];
+
+    it.each(unknownSteps)('rejects type "$type" at the workflow root', (step) => {
+      expect(schema.safeParse({ ...BASE_WORKFLOW, steps: [step] }).success).toBe(false);
+    });
+
+    it.each(unknownSteps)('rejects type "$type" inside a container step', (step) => {
+      expect(schema.safeParse({ ...BASE_WORKFLOW, steps: [inLoop(step)] }).success).toBe(false);
+    });
+
+    it('accepts the same container with a known step type', () => {
+      expect(schema.safeParse({ ...BASE_WORKFLOW, steps: [inLoop(waitStep)] }).success).toBe(true);
     });
   });
 

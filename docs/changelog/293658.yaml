@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/293658
-issues:
-- https://github.com/elastic/security-team/issues/19676
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: "Fix workflow executions hanging when a resume task cannot be scheduled"

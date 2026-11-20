@@ -40,8 +40,10 @@ import {
   RECORD_USAGE_INTERVAL,
 } from './audit_service';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { createMinimallyAuthenticatedUser } from '../authentication/providers/base';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
+import { sessionMock } from '../session_management/session.mock';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 
@@ -64,8 +66,16 @@ const getSpaceId = jest.fn().mockReturnValue('default');
 const getSID = jest.fn().mockResolvedValue('SESSION_ID');
 const recordAuditLoggingUsage = jest.fn();
 
+// Lets a `log` call that nobody awaits, such as the one from the post-auth hook, finish.
+const flushMicrotasks = async () => {
+  for (let i = 0; i < 10; i++) {
+    await Promise.resolve();
+  }
+};
+
 beforeEach(() => {
   logger.info.mockClear();
+  logger.error.mockClear();
   logging.configure.mockClear();
   logger.isLevelEnabled.mockClear().mockReturnValue(true);
   recordAuditLoggingUsage.mockClear();
@@ -245,6 +255,40 @@ describe('#asScoped', () => {
     audit.stop();
   });
 
+  it('keeps `user.target` from the event when the request user is resolved', async () => {
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      status,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+    const request = httpServerMock.createKibanaRequest();
+
+    await auditSetup.asScoped(request).log({
+      message: 'MESSAGE',
+      event: { action: 'ACTION' },
+      user: { name: 'DISCARDED', target: { id: 'kibana/relay', name: 'relay' } },
+    });
+    expect(logger.info).toHaveBeenLastCalledWith(
+      'MESSAGE',
+      expect.objectContaining({
+        user: {
+          id: 'uid',
+          name: 'jdoe',
+          roles: ['admin'],
+          target: { id: 'kibana/relay', name: 'relay' },
+        },
+      })
+    );
+    audit.stop();
+  });
+
   it('includes user.email when the current user has an email', async () => {
     const getCurrentUserWithEmail = jest.fn().mockReturnValue({
       username: 'jdoe',
@@ -323,7 +367,8 @@ describe('#asScoped', () => {
 
     const logWithConfig = async (
       auditConfig: Partial<ConfigType['audit']>,
-      isServerless: boolean
+      isServerless: boolean,
+      getCurrentUserForRequest: jest.Mock = getCurrentUserWithRealm
     ) => {
       const audit = new AuditService(logger);
       const auditSetup = audit.setup({
@@ -333,7 +378,7 @@ describe('#asScoped', () => {
         status,
         http,
         isServerless,
-        getCurrentUser: getCurrentUserWithRealm,
+        getCurrentUser: getCurrentUserForRequest,
         getSpaceId,
         getSID,
         recordAuditLoggingUsage,
@@ -371,6 +416,81 @@ describe('#asScoped', () => {
       const user = await logWithConfig(otelAppender, false);
       expect(user).not.toHaveProperty('domain');
     });
+
+    it('omits it for a minimally authenticated user, and still logs the event', async () => {
+      const minimalUser = createMinimallyAuthenticatedUser(
+        sessionMock.createValue({ username: 'jdoe', userProfileId: 'uid' })
+      );
+
+      expect(
+        await logWithConfig(otelAppender, true, jest.fn().mockReturnValue(minimalUser))
+      ).toEqual({ id: 'uid', name: 'jdoe', roles: [] });
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('logs the request event for a minimally authenticated user from the post-auth hook', async () => {
+      const minimalUser = createMinimallyAuthenticatedUser(
+        sessionMock.createValue({ username: 'jdoe', userProfileId: 'uid' })
+      );
+      const audit = new AuditService(logger);
+      audit.setup({
+        license,
+        config: createAuditConfig(otelAppender),
+        logging,
+        status,
+        http,
+        isServerless: true,
+        getCurrentUser: jest.fn().mockReturnValue(minimalUser),
+        getSpaceId,
+        getSID,
+        recordAuditLoggingUsage,
+      });
+      const [[onPostAuth]] = http.registerOnPostAuth.mock.calls;
+      const request = httpServerMock.createKibanaRequest({ auth: { isAuthenticated: true } });
+
+      await onPostAuth(
+        request,
+        httpServerMock.createResponseFactory(),
+        httpServiceMock.createOnPostAuthToolkit()
+      );
+      await flushMicrotasks();
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'http_request' }),
+          user: { id: 'uid', name: 'jdoe', roles: [] },
+        })
+      );
+      expect(logger.error).not.toHaveBeenCalled();
+      audit.stop();
+    });
+  });
+
+  it('does not reject, and logs an error, when the event cannot be written', async () => {
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      status,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID: jest.fn().mockRejectedValue(new Error('Session index is unavailable.')),
+      recordAuditLoggingUsage,
+    });
+
+    await expect(
+      auditSetup
+        .asScoped(httpServerMock.createKibanaRequest())
+        .log({ message: 'MESSAGE', event: { action: 'ACTION' } })
+    ).resolves.toBeUndefined();
+    expect(logger.info).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to write audit event [action=ACTION]: Session index is unavailable.'
+    );
+    audit.stop();
   });
 
   it('logs event enriched with meta data from fake request', async () => {
@@ -453,6 +573,169 @@ describe('#asScoped', () => {
       })
     );
     audit.stop();
+  });
+
+  describe('service accounts', () => {
+    const SERVICE_ACCOUNT_ID = 'kibana/nightshift-relay';
+    const serviceAccountPrincipal = {
+      type: 'service_account' as const,
+      serviceAccountId: SERVICE_ACCOUNT_ID,
+      variant: 'stack' as const,
+    };
+
+    const setupWith = (
+      overrides: Partial<Parameters<AuditService['setup']>[0]> = {}
+    ): { audit: AuditService; auditSetup: ReturnType<AuditService['setup']> } => {
+      const audit = new AuditService(logger);
+      const auditSetup = audit.setup({
+        license,
+        config,
+        logging,
+        status,
+        http,
+        getCurrentUser: () => null,
+        getSpaceId: (req) => req.spaceId,
+        getSID: () => Promise.resolve(undefined),
+        recordAuditLoggingUsage,
+        ...overrides,
+      });
+      return { audit, auditSetup };
+    };
+
+    const serviceAccountFakeRequest = () =>
+      kibanaRequestFactory({
+        headers: { authorization: 'Bearer essu_token' },
+        spaceId: asSpaceId('my-space'),
+      } as FakeRawRequest);
+
+    it('names the service account a fake request runs as, without roles', async () => {
+      const getFakeRequestPrincipal = jest.fn().mockReturnValue(serviceAccountPrincipal);
+      const { audit, auditSetup } = setupWith({ getFakeRequestPrincipal });
+      const request = serviceAccountFakeRequest();
+
+      await auditSetup.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+
+      expect(getFakeRequestPrincipal).toHaveBeenCalledWith(request);
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({
+          user: { id: SERVICE_ACCOUNT_ID, name: SERVICE_ACCOUNT_ID },
+          kibana: { space_id: 'my-space', session_id: undefined },
+          trace: { id: request.id },
+        })
+      );
+      audit.stop();
+    });
+
+    it('keeps `user.target` from the event on a service account fake request', async () => {
+      const { audit, auditSetup } = setupWith({
+        getFakeRequestPrincipal: () => serviceAccountPrincipal,
+      });
+
+      await auditSetup.asScoped(serviceAccountFakeRequest()).log({
+        message: 'MESSAGE',
+        event: { action: 'ACTION' },
+        user: { name: 'DISCARDED', target: { id: 'kibana/other-account' } },
+      });
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({
+          user: {
+            id: SERVICE_ACCOUNT_ID,
+            name: SERVICE_ACCOUNT_ID,
+            target: { id: 'kibana/other-account' },
+          },
+        })
+      );
+      audit.stop();
+    });
+
+    it('keeps the event user on a fake request the service accounts backend did not mint', async () => {
+      const { audit, auditSetup } = setupWith({ getFakeRequestPrincipal: () => null });
+
+      await auditSetup.asScoped(serviceAccountFakeRequest()).log({
+        message: 'MESSAGE',
+        event: { action: 'ACTION' },
+        user: { name: 'EVENT_USER' },
+      });
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({ user: { name: 'EVENT_USER' } })
+      );
+      audit.stop();
+    });
+
+    it('uses the service account id as `user.id` for a request authenticated with a service account token', async () => {
+      const getFakeRequestPrincipal = jest.fn();
+      const { audit, auditSetup } = setupWith({
+        getFakeRequestPrincipal,
+        getCurrentUser: () =>
+          ({
+            username: SERVICE_ACCOUNT_ID,
+            roles: [],
+            authentication_provider: { type: 'http', name: '__http__' },
+            authentication_realm: { type: '_service_account', name: '_service_account' },
+          } as never),
+      });
+
+      await auditSetup
+        .asScoped(httpServerMock.createKibanaRequest())
+        .log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({
+          user: { id: SERVICE_ACCOUNT_ID, name: SERVICE_ACCOUNT_ID, roles: [] },
+        })
+      );
+      expect(getFakeRequestPrincipal).not.toHaveBeenCalled();
+      audit.stop();
+    });
+
+    it('leaves a user with a profile unchanged, without asking about fake requests', async () => {
+      const getFakeRequestPrincipal = jest.fn();
+      const { audit, auditSetup } = setupWith({ getFakeRequestPrincipal, getCurrentUser });
+
+      await auditSetup
+        .asScoped(httpServerMock.createKibanaRequest())
+        .log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({ user: { id: 'uid', name: 'jdoe', roles: ['admin'] } })
+      );
+      expect(getFakeRequestPrincipal).not.toHaveBeenCalled();
+      audit.stop();
+    });
+
+    // `log` is not awaited by its callers, so a workload can release its fake request while the
+    // session lookup is still pending.
+    it('names the service account even when the fake request is released before the event is written', async () => {
+      let resolveSID: (sid: string | undefined) => void = () => {};
+      const getFakeRequestPrincipal = jest.fn().mockReturnValue(serviceAccountPrincipal);
+      const { audit, auditSetup } = setupWith({
+        getFakeRequestPrincipal,
+        getSID: () =>
+          new Promise((resolve) => {
+            resolveSID = resolve;
+          }),
+      });
+
+      const logged = auditSetup
+        .asScoped(serviceAccountFakeRequest())
+        .log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+      getFakeRequestPrincipal.mockReturnValue(null);
+      resolveSID(undefined);
+      await logged;
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({ user: { id: SERVICE_ACCOUNT_ID, name: SERVICE_ACCOUNT_ID } })
+      );
+      audit.stop();
+    });
   });
 
   it('does not log to audit logger if event matches ignore filter', async () => {

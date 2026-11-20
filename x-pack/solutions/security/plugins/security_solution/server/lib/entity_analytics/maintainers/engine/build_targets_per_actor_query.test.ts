@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import type { RelationshipIntegrationConfig } from './types';
 
-const HOST_ESQL_EXISTS = euid.esql.getEuidDocumentsContainsIdFilter('host');
-const USER_ESQL_EXISTS = euid.esql.getEuidDocumentsContainsIdFilter('user');
+const HOST_ESQL_EXISTS = euid.esql.getEuidDocumentsContainsIdFilter(
+  getBuiltInEntityDefinition('host')
+);
+const USER_ESQL_EXISTS = euid.esql.getEuidDocumentsContainsIdFilter(
+  getBuiltInEntityDefinition('user')
+);
 
 const accessesConfig: RelationshipIntegrationConfig = {
   kind: 'bucketed',

@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** Root container for the measure (spacing inspection) overlay. */
-export const MEASURE_OVERLAY_ID = 'measureOverlay';
-
 /** Root container for the edit (drag/resize) overlay. */
 export const EDIT_OVERLAY_ID = 'editOverlay';
 
@@ -309,7 +306,6 @@ const DEVTOOL_RESIZE_SELECTOR = `[${DEVTOOL_RESIZE_HANDLE_ATTR}]`;
 
 /** Set of element IDs belonging to tool overlays. */
 export const IGNORED_ELEMENT_IDS = new Set([
-  MEASURE_OVERLAY_ID,
   EDIT_OVERLAY_ID,
   LAYOUT_OVERLAY_ID,
   LAYOUT_SETTINGS_FLYOUT_ID,

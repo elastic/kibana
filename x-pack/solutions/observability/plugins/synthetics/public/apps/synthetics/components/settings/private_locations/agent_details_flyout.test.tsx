@@ -34,6 +34,7 @@ const agent: AgentStat = {
   platform: 'linux',
   tags: ['prod'],
   monitorsAssigned: 2,
+  complete: false,
 };
 
 describe('AgentDetailsFlyout', () => {

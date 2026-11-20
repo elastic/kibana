@@ -13,7 +13,6 @@ import {
   K8S_NODE_NAME,
 } from '@kbn/metrics-data-access-plugin/common';
 import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
-import { useIsPodSchemaSelectorEnabled } from '../../../../../hooks/use_is_pod_schema_selector_enabled';
 import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
 import type { ToolbarProps } from './types';
 
@@ -29,27 +28,16 @@ export const semconvPodGroupByFields = [K8S_NAMESPACE_NAME, K8S_NODE_NAME, K8S_D
  * Uses the same request schema as the snapshot (`preferredSchema ?? DEFAULT_SCHEMA`).
  */
 export const podGroupByFieldsForSchema = (
-  preferredSchema: DataSchemaFormat | null | undefined,
-  isPodSchemaSelectorEnabled: boolean
+  preferredSchema: DataSchemaFormat | null | undefined
 ): string[] => {
   const requestSchema = preferredSchema ?? DEFAULT_SCHEMA;
-  return isPodSchemaSelectorEnabled && requestSchema === 'semconv'
-    ? semconvPodGroupByFields
-    : ecsPodGroupByFields;
+  return requestSchema === 'semconv' ? semconvPodGroupByFields : ecsPodGroupByFields;
 };
 
 export const PodToolbarItems = (props: ToolbarProps) => {
-  const isPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled();
-  const groupByFields = podGroupByFieldsForSchema(
-    props.preferredSchema,
-    isPodSchemaSelectorEnabled
-  );
+  const groupByFields = podGroupByFieldsForSchema(props.preferredSchema);
 
   return (
-    <MetricsAndGroupByToolbarItems
-      {...props}
-      groupByFields={groupByFields}
-      allowSchemaSelection={isPodSchemaSelectorEnabled}
-    />
+    <MetricsAndGroupByToolbarItems {...props} groupByFields={groupByFields} allowSchemaSelection />
   );
 };

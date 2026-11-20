@@ -13,9 +13,10 @@ import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
 import { ANOMALY_SCORE_MATCH_GROUP_ID } from '@kbn/ml-plugin/server/lib/alerts/register_anomaly_detection_alert_type';
 import { ML_ALERT_TYPES } from '@kbn/ml-plugin/common/constants/alerts';
+import { DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { Spaces } from '../../../../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
+import { getUrlPrefix, ObjectRemover, resetRulesSettings } from '../../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 
 const ACTION_TYPE_ID = '.index';
@@ -75,8 +76,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
 
-  // Failing: See https://github.com/elastic/kibana/issues/279661
-  describe.skip('alert', () => {
+  describe('alert', () => {
     const objectRemover = new ObjectRemover(supertest);
     let actionId: string;
 
@@ -86,6 +86,22 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       await esTestIndexToolOutput.destroy();
       await esTestIndexToolOutput.setup();
+
+      // The rule matches each ML result document in exactly one run (by `event.ingested`), so
+      // against a live real-time datafeed the alert flaps between active and recovered while the
+      // interim bucket is rewritten. Once the framework detects flapping it delays recovery and
+      // keeps the alert active, but the executor still writes its recovery payload (which has no
+      // anomaly score) onto that active document, blanking `kibana.alert.anomaly_score`. Disable
+      // flapping so every alerts-as-data document keeps the score it was raised with.
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          enabled: DISABLE_FLAPPING_SETTINGS.enabled,
+          look_back_window: DISABLE_FLAPPING_SETTINGS.lookBackWindow,
+          status_change_threshold: DISABLE_FLAPPING_SETTINGS.statusChangeThreshold,
+        })
+        .expect(200);
 
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -105,6 +121,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
     afterEach(async () => {
       await objectRemover.removeAll();
+      await resetRulesSettings(supertest, Spaces.space1.id);
       await esTestIndexTool.destroy();
       await esTestIndexToolOutput.destroy();
       await ml.api.deleteAnomalyDetectionJobES(AD_JOB_ID);

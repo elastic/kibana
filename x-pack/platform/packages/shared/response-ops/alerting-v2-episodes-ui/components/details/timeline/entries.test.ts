@@ -27,7 +27,7 @@ const makeAction = (ts: string): EpisodeActionHistoryEntry => ({
   '@timestamp': ts,
   action_type: 'ack',
   actor: { type: 'user', profile_uid: 'user-uid-1' },
-  episode_id: 'ep-1',
+  alert_id: 'ep-1',
   group_hash: 'hash-1',
   tags: [],
   assignee_uid: null,

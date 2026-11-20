@@ -1,0 +1,21 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    // oxlint imports the config with native Node type stripping, which requires explicit
+    // `.mts` extensions on relative imports.
+    "noEmit": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": [
+    "**/*.mts"
+  ],
+  "kbn_references": [
+    "@kbn/babel-preset",
+    "@kbn/repo-info",
+    "@kbn/repo-packages"
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

@@ -41,6 +41,7 @@
     "@kbn/attack-discovery-schedules-common",
     "@kbn/event-log-plugin",
     "@kbn/workflows-management-plugin",
-    "@kbn/datemath"
+    "@kbn/datemath",
+    "@kbn/core-security-common"
   ]
 }

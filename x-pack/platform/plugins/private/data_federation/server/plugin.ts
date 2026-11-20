@@ -17,6 +17,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { License } from '@kbn/license-api-guard-plugin/server';
 import { MINIMUM_LICENSE_TYPE, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { registerDataSetsRoutes } from './routes/register_routes';
+import { registerUiSettings } from './ui_settings';
 import type { DataFederationConfigType } from './config';
 
 export class DataFederationServerPlugin
@@ -26,18 +27,24 @@ export class DataFederationServerPlugin
   private readonly config: DataFederationConfigType;
   private readonly logger: Logger;
   private readonly license = new License();
+  private readonly isServerless: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<DataFederationConfigType>();
     this.logger = initializerContext.logger.get();
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  public setup({ http }: CoreSetup, { features }: { features: FeaturesPluginSetup }) {
+  public setup(
+    { http, uiSettings, docLinks }: CoreSetup,
+    { features }: { features: FeaturesPluginSetup }
+  ) {
     if (!this.config.enabled) {
       return;
     }
 
     this.license.setup({ pluginName: PLUGIN_NAME, logger: this.logger });
+    registerUiSettings({ uiSettings, docLinks, isServerless: this.isServerless });
 
     features.registerElasticsearchFeature({
       id: PLUGIN_ID,

@@ -6,6 +6,7 @@
  */
 
 import semverCompare from 'semver/functions/compare';
+import { toBuiltIn } from './to_built_in';
 import type { EvaluatorDefinition, EvaluatorRegistry } from './types';
 
 const latestOf = (definitions: EvaluatorDefinition[]): EvaluatorDefinition | undefined =>
@@ -27,6 +28,9 @@ export const createEvaluatorRegistryMock = (
   };
 
   return {
+    register: (definition) => {
+      byName.set(definition.name, [...(byName.get(definition.name) ?? []), toBuiltIn(definition)]);
+    },
     isBuiltIn: (name) => visibleDefinitions(name).some(({ origin }) => origin === 'built_in'),
     asScoped: () => ({
       list: async () =>

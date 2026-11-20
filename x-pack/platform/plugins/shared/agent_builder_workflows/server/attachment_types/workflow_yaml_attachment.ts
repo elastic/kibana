@@ -12,7 +12,11 @@ import type {
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
-import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOW_EDITOR_READ_ONLY_REASONS,
+  WORKFLOW_YAML_ATTACHMENT_TYPE,
+  type WorkflowEditorReadOnlyReason,
+} from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
@@ -37,6 +41,10 @@ const workflowYamlDataSchema = z.object({
     .array(clientDiagnosticSchema)
     .optional()
     .describe('Client-side validation diagnostics from the editor'),
+  readOnlyReason: z
+    .enum(WORKFLOW_EDITOR_READ_ONLY_REASONS)
+    .optional()
+    .describe('Why the editor cannot apply changes; absent when the user can edit'),
 });
 
 type WorkflowYamlData = z.infer<typeof workflowYamlDataSchema>;
@@ -58,6 +66,21 @@ const areWorkflowYamlsEquivalent = (left: string, right: string): boolean => {
 
   return left.trim() === right.trim();
 };
+
+const READ_ONLY_REASON_MESSAGES: Record<WorkflowEditorReadOnlyReason, string> = {
+  executions_tab:
+    'The user is viewing a past execution on the Executions tab; its id is in the page URL. ' +
+    'The YAML above is the current workflow definition, which can differ from the version that ran. ' +
+    `Call \`${platformCoreTools.getWorkflowExecutionStatus}\` with the execution id to inspect the run. ` +
+    'When you propose a change, the editor opens the Workflow tab, where the user can review and save it.',
+  managed:
+    'This workflow is managed by Elastic. The user cannot edit or save it. Explain the fix, but do not claim it can be applied.',
+  no_permission:
+    'The user does not have permission to edit this workflow. Explain the fix, but do not claim it can be applied.',
+};
+
+const formatReadOnlySection = (reason: WorkflowEditorReadOnlyReason | undefined): string =>
+  reason ? `\n\nEditor is read-only: ${READ_ONLY_REASON_MESSAGES[reason]}` : '';
 
 const createWorkflowYamlAttachmentType = (
   api: WorkflowsManagementApi,
@@ -171,7 +194,7 @@ const createWorkflowYamlAttachmentType = (
           type: 'text' as const,
           value:
             `Current Workflow YAML:\n\n\`\`\`yaml\n${data.yaml}\n\`\`\`` +
-            `${validationSection}\n\n` +
+            `${validationSection}${formatReadOnlySection(data.readOnlyReason)}\n\n` +
             `Use \`${platformCoreTools.generateWorkflow}\` to create or modify this workflow. It emits a diff card in chat and updates this attachment.\n` +
             `Use \`${platformCoreTools.executeWorkflow}\` with \`attachmentId\` set to this attachment's id to run this workflow end-to-end (no save required).\n` +
             `Render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>.`,

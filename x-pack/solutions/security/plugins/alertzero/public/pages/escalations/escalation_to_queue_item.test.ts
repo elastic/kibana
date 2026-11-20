@@ -138,4 +138,18 @@ describe('escalationToQueueItem', () => {
       expect(item.assigneeUids).toEqual([]);
     });
   });
+
+  describe('entityIds', () => {
+    it('is undefined when the server did not hydrate any', () => {
+      expect(escalationToQueueItem(base).entityIds).toBeUndefined();
+    });
+
+    it('copies the hydrated entity ids', () => {
+      const item = escalationToQueueItem({
+        ...base,
+        entity_ids: ['host-1', 'user-1'],
+      } as EscalationConversationSummary);
+      expect(item.entityIds).toEqual(['host-1', 'user-1']);
+    });
+  });
 });

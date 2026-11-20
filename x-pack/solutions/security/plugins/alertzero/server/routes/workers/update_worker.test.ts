@@ -7,7 +7,10 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
-import { SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID } from '@kbn/alertzero-common';
+import {
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+} from '@kbn/alertzero-common';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
@@ -30,6 +33,7 @@ const setupRoute = (update: jest.Mock) => {
     logger: loggingSystemMock.createLogger(),
     getSpaceId: () => 'default',
     getWorkersService: () => ({ update }),
+    isCpsEnabled: () => false,
   } as unknown as RouteDependencies);
 
   const handler = addVersion.mock.calls[0][1] as (
@@ -86,10 +90,35 @@ describe('registerUpdateWorkerRoute', () => {
     );
   });
 
-  it('maps a blocked Alert Triage enable to 400 with a message for the reason', async () => {
+  it('maps a template-free reports index block to 400 naming the index', async () => {
     const update = jest
       .fn()
-      .mockResolvedValue({ outcome: 'blocked', reason: 'alertAnalysisRuntimeDisabled' });
+      .mockResolvedValue({ outcome: 'blocked', reason: 'huntSupplyReportsIndexUnmanaged' });
+    const { handler } = setupRoute(update);
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(
+      createRouteContextMock(),
+      httpServerMock.createKibanaRequest({
+        params: { workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID },
+        body: { enabled: true },
+        kibanaRequestState: {
+          requestId: '123',
+          requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+          startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
+          authzResult: managedUpdateAuthzResult,
+        },
+      }),
+      response
+    );
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: expect.stringContaining('exists without its template') },
+    });
+  });
+
+  it('maps a no-model block to 400 naming the Worker and Feature settings', async () => {
+    const update = jest.fn().mockResolvedValue({ outcome: 'blocked', reason: 'noModel' });
     const { handler } = setupRoute(update);
     const response = httpServerMock.createResponseFactory();
 
@@ -110,7 +139,8 @@ describe('registerUpdateWorkerRoute', () => {
 
     expect(response.badRequest).toHaveBeenCalledWith({
       body: {
-        message: expect.stringContaining('alert analysis to be turned on for this space'),
+        message:
+          'Alert Triage cannot be turned on because no AI model is available to you in this space. Configure one in Feature settings, or ask an administrator for access to connectors.',
       },
     });
   });
@@ -137,6 +167,34 @@ describe('registerUpdateWorkerRoute', () => {
     });
   });
 
+  it('returns 403 when the caller lacks manage_security', async () => {
+    const update = jest.fn();
+    const { handler } = setupRoute(update);
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(
+      createRouteContextMock({ manageSecurity: false }),
+      httpServerMock.createKibanaRequest({
+        params: { workerId: TRIAGE },
+        body: { settingsRevision: 1, settings: { autonomy: 'manual' } },
+        kibanaRequestState: {
+          requestId: '123',
+          requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+          startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
+          authzResult: managedUpdateAuthzResult,
+        },
+      }),
+      response
+    );
+
+    expect(update).not.toHaveBeenCalled();
+    expect(response.forbidden).toHaveBeenCalledWith({
+      body: {
+        message: 'Modifying a worker requires the manage_security cluster privilege',
+      },
+    });
+  });
+
   it('updates settings without Workflows managed-update privileges', async () => {
     const update = jest.fn().mockResolvedValue({
       outcome: 'updated',
@@ -157,5 +215,37 @@ describe('registerUpdateWorkerRoute', () => {
     expect(update).toHaveBeenCalled();
     expect(response.forbidden).not.toHaveBeenCalled();
     expect(response.ok).toHaveBeenCalled();
+  });
+
+  it('hands the service a universe callback that returns the filtered patterns', async () => {
+    const update = jest.fn().mockResolvedValue({
+      outcome: 'updated',
+      response: { worker: { id: TRIAGE } },
+    });
+    const { handler } = setupRoute(update);
+    const base = createRouteContextMock() as { core: Promise<object> };
+    const context = {
+      ...base,
+      core: base.core.then((core) => ({
+        ...core,
+        uiSettings: {
+          client: {
+            get: jest.fn().mockResolvedValue(['logs-*', '.alerts-security.alerts-default']),
+          },
+        },
+      })),
+    };
+
+    await handler(
+      context,
+      httpServerMock.createKibanaRequest({
+        params: { workerId: TRIAGE },
+        body: { settingsRevision: 1, settings: { autonomy: 'manual' } },
+      }),
+      httpServerMock.createResponseFactory()
+    );
+
+    const getHuntUniverse = update.mock.calls[0].at(-1) as () => Promise<string[]>;
+    await expect(getHuntUniverse()).resolves.toEqual(['logs-*']);
   });
 });

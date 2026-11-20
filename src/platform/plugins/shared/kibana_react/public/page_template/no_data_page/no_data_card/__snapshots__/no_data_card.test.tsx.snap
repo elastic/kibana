@@ -53,7 +53,7 @@ exports[`NoDataCard props button 1`] = `
 
 exports[`NoDataCard props href 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-euiCard-center"
+  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-euiCard-center"
 >
   <div
     class="euiCard__main emotion-euiCard__main-vertical"
@@ -65,14 +65,11 @@ exports[`NoDataCard props href 1`] = `
         class="euiTitle euiCard__title emotion-euiTitle-s"
         id="generated-idTitle"
       >
-        <a
-          aria-describedby="generated-idDescription"
-          class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
-          href="#"
-          rel="noreferrer"
+        <span
+          class="emotion-euiCard__text-center"
         >
           Card title
-        </a>
+        </span>
       </p>
       <div
         class="euiText emotion-euiText-s-euiCard__description"
@@ -86,9 +83,10 @@ exports[`NoDataCard props href 1`] = `
     <div
       class="emotion-euiCard__footer"
     >
-      <button
+      <a
         class="euiButton emotion-euiButtonDisplay-m-fill-primary"
-        type="button"
+        href="#"
+        rel="noreferrer"
       >
         <span
           class="emotion-euiButtonDisplayContent"
@@ -99,7 +97,92 @@ exports[`NoDataCard props href 1`] = `
             Button
           </span>
         </span>
-      </button>
+      </a>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NoDataCard props href without button renders a footer button labeled with the title 1`] = `
+<div
+  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-euiCard-center"
+>
+  <div
+    class="euiCard__main emotion-euiCard__main-vertical"
+  >
+    <div
+      class="euiCard__content emotion-euiCard__content-vertical"
+    >
+      <p
+        class="euiTitle euiCard__title emotion-euiTitle-s"
+        id="generated-idTitle"
+      >
+        <span
+          class="emotion-euiCard__text-center"
+        >
+          Card title
+        </span>
+      </p>
+      <div
+        class="euiText emotion-euiText-s-euiCard__description"
+        id="generated-idDescription"
+      >
+        <p>
+          Description
+        </p>
+      </div>
+    </div>
+    <div
+      class="emotion-euiCard__footer"
+    >
+      <a
+        class="euiButton emotion-euiButtonDisplay-m-fill-primary"
+        href="#"
+        rel="noreferrer"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          <span
+            class="eui-textTruncate css-13ifi6d-m"
+          >
+            Card title
+          </span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NoDataCard props no button and no href/onClick renders no footer control 1`] = `
+<div
+  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-euiCard-center"
+>
+  <div
+    class="euiCard__main emotion-euiCard__main-vertical"
+  >
+    <div
+      class="euiCard__content emotion-euiCard__content-vertical"
+    >
+      <p
+        class="euiTitle euiCard__title emotion-euiTitle-s"
+        id="generated-idTitle"
+      >
+        <span
+          class="emotion-euiCard__text-center"
+        >
+          Card title
+        </span>
+      </p>
+      <div
+        class="euiText emotion-euiText-s-euiCard__description"
+        id="generated-idDescription"
+      >
+        <p>
+          Description
+        </p>
+      </div>
     </div>
   </div>
 </div>
@@ -145,6 +228,59 @@ exports[`NoDataCard props recommended 1`] = `
         Recommended
       </span>
     </span>
+  </div>
+</div>
+`;
+
+exports[`NoDataCard props target and rel are forwarded to the footer button 1`] = `
+<div
+  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-euiCard-center"
+>
+  <div
+    class="euiCard__main emotion-euiCard__main-vertical"
+  >
+    <div
+      class="euiCard__content emotion-euiCard__content-vertical"
+    >
+      <p
+        class="euiTitle euiCard__title emotion-euiTitle-s"
+        id="generated-idTitle"
+      >
+        <span
+          class="emotion-euiCard__text-center"
+        >
+          Card title
+        </span>
+      </p>
+      <div
+        class="euiText emotion-euiText-s-euiCard__description"
+        id="generated-idDescription"
+      >
+        <p>
+          Description
+        </p>
+      </div>
+    </div>
+    <div
+      class="emotion-euiCard__footer"
+    >
+      <a
+        class="euiButton emotion-euiButtonDisplay-m-fill-primary"
+        href="#"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          <span
+            class="eui-textTruncate css-13ifi6d-m"
+          >
+            Button
+          </span>
+        </span>
+      </a>
+    </div>
   </div>
 </div>
 `;

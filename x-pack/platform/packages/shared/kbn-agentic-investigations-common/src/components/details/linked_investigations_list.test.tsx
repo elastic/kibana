@@ -37,6 +37,27 @@ const ITEMS: LinkedInvestigationItem[] = [
 ];
 
 describe('LinkedInvestigationsList', () => {
+  it('shows "Action required" only for open investigations with pending proposals', () => {
+    renderList({
+      items: [
+        { id: 'inv-1', title: 'A', status: 'open', pending_proposal_count: 2 },
+        { id: 'inv-2', title: 'B', status: 'open', pending_proposal_count: 0 },
+        { id: 'inv-3', title: 'C', status: 'open' },
+        { id: 'inv-4', title: 'D', status: 'closed', pending_proposal_count: 1 },
+      ],
+    });
+    expect(screen.getByTestId('linkedInvestigationActionRequired-inv-1')).toHaveTextContent(
+      'Action required'
+    );
+    expect(screen.queryByTestId('linkedInvestigationActionRequired-inv-2')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('linkedInvestigationActionRequired-inv-3')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('linkedInvestigationActionRequired-inv-4')).not.toBeInTheDocument();
+    // The status badge gives way to "Action required", and stays for every other row.
+    expect(screen.queryByTestId('linkedInvestigationStatus-inv-1')).not.toBeInTheDocument();
+    expect(screen.getByTestId('linkedInvestigationStatus-inv-2')).toBeInTheDocument();
+    expect(screen.getByTestId('linkedInvestigationStatus-inv-4')).toBeInTheDocument();
+  });
+
   it('renders a loading skeleton while isLoading is true', () => {
     renderList({ isLoading: true });
     expect(screen.getByTestId('linkedInvestigationsLoading')).toBeInTheDocument();

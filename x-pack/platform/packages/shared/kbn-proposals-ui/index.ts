@@ -7,6 +7,7 @@
 
 export { ApprovalModal, type ApprovalModalProps } from './src/approval_modal';
 export { ApprovalContent, type ApprovalContentProps } from './src/approval_content';
+export { ApprovalActorTime, type ApprovalActorTimeProps } from './src/approval_actor_time';
 export {
   getApprovalOutcomeBadge,
   type ApprovalOutcomeBadge,
@@ -17,6 +18,7 @@ export {
   ProposedActionStatusBadge,
   type ProposedActionStatusBadgeProps,
 } from './src/needs_review_badge';
+export { ProposalCaption, type ProposalCaptionProps } from './src/proposal_caption';
 export {
   getProposalCaption,
   getProposalDecision,

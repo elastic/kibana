@@ -7,6 +7,7 @@
 
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { kiLifecyclePipeline } from './ki_lifecycle';
+import { MEMORY_KI_TYPES } from '../../common/memory';
 
 export interface AiIndexExampleQuery {
   title: string;
@@ -15,16 +16,25 @@ export interface AiIndexExampleQuery {
 }
 
 const KEEP = '| KEEP title, description, content, type, tags';
+export const EXCLUDE_MEMORY_KI_TYPES_CONDITION = `type IS NULL OR (${MEMORY_KI_TYPES.map(
+  (type) => `type != "${type}"`
+).join(' AND ')})`;
+export const EXCLUDE_MEMORY_KI_TYPES_FILTER = `| WHERE ${EXCLUDE_MEMORY_KI_TYPES_CONDITION}`;
 
 /**
  * Three fixed ES|QL shapes for the canonical KI schema (`title`, `description`, `content`, their
  * `.semantic` multi-fields, `type`, `tags`), each opening with the lifecycle pipeline for the dest
- * type; only the `FROM` target changes. Indices with other mappings need the field names adapted.
+ * type. Memory exclusion is optional so a disabled global feature does not expose memory-specific
+ * instructions. Indices with other mappings need the field names adapted.
  */
-export const buildExampleQueries = ({ type, value }: AiIndexDest): AiIndexExampleQuery[] => {
+export const buildExampleQueries = (
+  { type, value }: AiIndexDest,
+  { excludeMemory = false }: { excludeMemory?: boolean } = {}
+): AiIndexExampleQuery[] => {
   const from = [
     `FROM ${value} METADATA _id, _index, _score`,
     ...kiLifecyclePipeline(type).map((command) => `| ${command}`),
+    ...(excludeMemory ? [EXCLUDE_MEMORY_KI_TYPES_FILTER] : []),
   ];
   return [
     {

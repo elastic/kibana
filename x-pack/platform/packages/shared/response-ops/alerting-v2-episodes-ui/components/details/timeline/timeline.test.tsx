@@ -20,7 +20,7 @@ const makeAction = (id: string, ts: string): ActionEntry => ({
     '@timestamp': ts,
     action_type: 'ack',
     actor: { type: 'user', profile_uid: 'user-1' },
-    episode_id: 'ep-1',
+    alert_id: 'ep-1',
     group_hash: 'hash-1',
     tags: [],
     assignee_uid: null,

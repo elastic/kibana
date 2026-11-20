@@ -18,10 +18,18 @@ const request = {} as KibanaRequest;
 const warn = jest.fn();
 const logger = { warn } as never;
 const workflow = { enabled: true, valid: true, definition: {} };
+/** The space's entry point, bound to the space's agent account. */
+const boundWorkflow = (_id: string, spaceId: string) => ({
+  ...workflow,
+  definition: { settings: { run_as: 'kibana/nightshift_agent' } },
+});
 const agentBuilder = {} as never;
+const agenticInvestigations = {} as never;
+const proposals = {} as never;
 const workflowsExtensions = {} as never;
+const getWorkflow = jest.fn();
 const workflowsManagement = {
-  management: { getClient: () => ({ getWorkflow: jest.fn().mockResolvedValue(workflow) }) },
+  management: { getClient: () => ({ getWorkflow }) },
 } as never;
 const getConnectorById = jest.fn(async (connectorId: string) => ({ connectorId }));
 const getClient = jest.fn();
@@ -39,15 +47,51 @@ const createDependencies = (featureFlags = createFeatureFlagsMock(true)) => ({
   request,
   featureFlags,
   agentBuilder,
+  agenticInvestigations,
+  proposals,
   inference,
   logger,
   workflowsExtensions,
   workflowsManagement,
+  isServiceAccountExecutionEnabled: () => true,
 });
 
 beforeEach(() => {
   jest.clearAllMocks();
   getConnectorById.mockImplementation(async (connectorId: string) => ({ connectorId }));
+  getWorkflow.mockImplementation(async (id: string, spaceId: string) => boundWorkflow(id, spaceId));
+});
+
+it('checks the bound investigation workflow of the space', async () => {
+  await expect(
+    isInvestigationInfrastructureAvailable({ ...createDependencies(), spaceId: 'obs' })
+  ).resolves.toBe(true);
+  expect(getWorkflow).toHaveBeenCalledWith('system-nightshift-investigation-bound-obs', 'obs');
+});
+
+it('returns false while service accounts are turned off', async () => {
+  await expect(
+    isInvestigationInfrastructureAvailable({
+      ...createDependencies(),
+      isServiceAccountExecutionEnabled: () => false,
+    })
+  ).resolves.toBe(false);
+  expect(getWorkflow).not.toHaveBeenCalled();
+});
+
+it('returns false while the entry point is not bound to an account', async () => {
+  getWorkflow.mockResolvedValue({
+    ...workflow,
+    definition: { settings: {} },
+  });
+
+  await expect(isInvestigationInfrastructureAvailable(createDependencies())).resolves.toBe(false);
+});
+
+it('returns false while the bound workflow is disabled', async () => {
+  getWorkflow.mockResolvedValue({ ...workflow, enabled: false });
+
+  await expect(isInvestigationInfrastructureAvailable(createDependencies())).resolves.toBe(false);
 });
 
 it('returns true when every infrastructure requirement is available', async () => {
@@ -129,4 +173,14 @@ it('returns false when the default model is missing and no connector is explicit
 
   await expect(isInvestigationRunAvailable(createDependencies())).resolves.toBe(false);
   expect(getConnectorById).toHaveBeenCalledWith(NIGHTSHIFT_DEFAULT_MODELS.investigation, request);
+});
+
+it.each([
+  ['agenticInvestigations', { agenticInvestigations: undefined }],
+  ['proposals', { proposals: undefined }],
+])('returns false when %s is not enabled', async (_label, missing) => {
+  await expect(
+    isInvestigationInfrastructureAvailable({ ...createDependencies(), ...missing })
+  ).resolves.toBe(false);
+  expect(getConnectorById).not.toHaveBeenCalled();
 });

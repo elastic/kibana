@@ -10,6 +10,7 @@ import { formatBaselineAndAnomaly, buildDescription, mapSummaryToRow } from './m
 
 const makeEntry = (overrides: Partial<AnomalySummaryEntry> = {}): AnomalySummaryEntry => ({
   recordId: 'rec-1',
+  entityId: 'user:alice',
   jobId: 'security-job-1',
   jobName: 'Security Job 1',
   detectorIndex: 0,

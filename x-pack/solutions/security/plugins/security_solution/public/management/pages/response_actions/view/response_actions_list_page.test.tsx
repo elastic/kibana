@@ -10,6 +10,7 @@ import * as reactTestingLibrary from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import {
   type AppContextTestRender,
   createAppRootMockRenderer,
@@ -106,6 +107,23 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
             return get(key);
           }),
         },
+        docLinks: {
+          links: {
+            securitySolution: {
+              responseActionsHistory: 'https://example.com/response-actions-history',
+            },
+          },
+        },
+        // Needed by `SecurityAppHeader`'s "Add integrations" app menu item injection.
+        http: {
+          basePath: { prepend: (path: string) => path },
+        },
+        application: {
+          capabilities: {
+            fleet: { read: false },
+            siem: {},
+          },
+        },
       },
     }),
   };
@@ -178,17 +196,20 @@ describe('Response actions history page', () => {
     jest.runOnlyPendingTimers();
   });
 
-  describe('Hide/Show header', () => {
-    it('should show header when data is in', () => {
+  describe('Page header', () => {
+    it('should show the header with the page title when data is in', () => {
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/response_actions_history?page=3&pageSize=20`);
       });
       render();
       const { getByTestId } = renderResult;
-      expect(getByTestId('responseActionsPage-header')).toBeTruthy();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeTruthy();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title).textContent).toEqual(
+        'Response actions history'
+      );
     });
 
-    it('should not show header when there is no actions index', () => {
+    it('should still show the header when there is no actions index', () => {
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/response_actions_history?page=3&pageSize=20`);
       });
@@ -199,8 +220,11 @@ describe('Response actions history page', () => {
         },
       };
       render();
-      const { queryByTestId } = renderResult;
-      expect(queryByTestId('responseActionsPage-header')).toBeNull();
+      const { getByTestId } = renderResult;
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeTruthy();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title).textContent).toEqual(
+        'Response actions history'
+      );
     });
   });
 

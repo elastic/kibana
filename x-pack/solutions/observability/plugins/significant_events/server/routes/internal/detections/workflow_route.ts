@@ -26,7 +26,10 @@ import {
   type AnalysisProfileId,
 } from '../../../lib/significant_events/rules/schedule';
 import { createServerRoute } from '../../create_server_route';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { listAllSources } from '../../utils/list_all_sources';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
 
 interface AnalysisProfileGroup {
   config: AnalysisProfileConfig;
@@ -166,11 +169,17 @@ const changePointScanRoute = createServerRoute({
       logger,
     });
     const spaceId = await getSpaceId(request);
-    const [kiClient, sigEventsContext] = await Promise.all([
+    const [kiClient, sigEventsContext, enabledSources] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
       scopedClients.getSignificantEventsAlertingContext(),
+      listAllSources(scopedClients.sourcesClient, { enabled: true }),
     ]);
-    const queryLinks = await kiClient.getRuleBackedQueryLinks();
+    // A disabled source's rules are off, and the scan keeps trailing zeros on purpose so a rule
+    // that goes quiet reads as a drop. Scanning them would turn every disable into detections.
+    const enabledSourceIds = new Set(enabledSources.map(({ id }) => id));
+    const queryLinks = (await kiClient.getRuleBackedQueryLinks()).filter((link) =>
+      enabledSourceIds.has(link.source_id)
+    );
 
     const defaultConfig = getAnalysisProfileConfig({ severity_score: 0 });
     const criticalLookback = params.body.lookback;
@@ -200,20 +209,30 @@ const changePointScanRoute = createServerRoute({
     const criticalRuleCount = countRulesForProfile(queryLinks, CRITICAL_ANALYSIS_PROFILE);
     const defaultRuleCount = countRulesForProfile(queryLinks, DEFAULT_ANALYSIS_PROFILE);
 
-    telemetry.trackSignificantEventsDetectionScan({
-      took_ms: took,
-      duration_ms: durationMs,
-      rules_requested: queryLinks.length,
-      rules_scanned: buckets.length,
-      critical_rule_count: criticalRuleCount,
-      default_rule_count: defaultRuleCount,
-      alerting_engine: 'v2',
-      alerts_source_index: sigEventsContext.alertsReader.index,
-      lookback: criticalLookback,
-      bucket_interval: criticalBucketInterval,
-      default_lookback: defaultConfig.lookback,
-      default_bucket_interval: defaultConfig.bucketInterval,
-      space_id: spaceId,
+    const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
+    trackTelemetryBestEffort({
+      logger,
+      description: 'detection scan telemetry',
+      track: () =>
+        telemetry.trackSignificantEventsDetectionScan(
+          {
+            workflow_execution_id: workflowExecutionId,
+            took_ms: took,
+            duration_ms: durationMs,
+            rules_requested: queryLinks.length,
+            rules_scanned: buckets.length,
+            critical_rule_count: criticalRuleCount,
+            default_rule_count: defaultRuleCount,
+            alerting_engine: 'v2',
+            alerts_source_index: sigEventsContext.alertsReader.index,
+            lookback: criticalLookback,
+            bucket_interval: criticalBucketInterval,
+            default_lookback: defaultConfig.lookback,
+            default_bucket_interval: defaultConfig.bucketInterval,
+            space_id: spaceId,
+          },
+          request
+        ),
     });
 
     return { alertIndex: sigEventsContext.alertsReader.index, aggregations };

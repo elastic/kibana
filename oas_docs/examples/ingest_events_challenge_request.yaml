@@ -1,0 +1,4 @@
+summary: Inbound webhook handshake. A top-level string challenge is echoed and no event is emitted.
+value:
+  type: ping
+  challenge: abc

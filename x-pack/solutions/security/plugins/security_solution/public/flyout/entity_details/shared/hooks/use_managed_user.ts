@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { ManagedUserHits } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { UsersQueries } from '../../../../../common/api/search_strategy';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
@@ -18,7 +19,13 @@ export interface ManagedUserData {
   data: ManagedUserHits;
 }
 
-export const useManagedUser = (): ManagedUserData => {
+export interface UseManagedUserOptions {
+  executionContext?: KibanaExecutionContext;
+}
+
+export const useManagedUser = ({
+  executionContext,
+}: UseManagedUserOptions = {}): ManagedUserData => {
   const { deleteQuery, setQuery } = useGlobalTime();
   const {
     loading: loadingManagedUser,
@@ -31,6 +38,7 @@ export const useManagedUser = (): ManagedUserData => {
       users: {},
     },
     errorMessage: i18n.FAIL_MANAGED_USER,
+    executionContext,
   });
 
   useQueryInspector({

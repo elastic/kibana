@@ -17,6 +17,16 @@ actions:
         - Use this API to define a complete, self-contained dashboard in a single payload, including inline visualizations (both data view and ES|QL based), controls, and filters.
         - Use the [Visualizations API](visualizations#tag/Visualizations/operation/create-visualization) to create reusable charts saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library). You can then embed them in dashboards as linked panels using their ID.
 
+        ## Stability
+
+        | 9.4 | 9.5 | Serverless |
+        | --- | --- | --- |
+        | Experimental | Generally available ¹ | Generally available ² |
+
+        ¹ This version introduces breaking changes. Refer to the [Kibana release notes](https://www.elastic.co/docs/release-notes/kibana/breaking-changes).
+
+        ² On July 13, 2026, a new version of this API released on Elastic Cloud Serverless and introduced breaking changes. Refer to the [Elastic Cloud Serverless release notes](https://www.elastic.co/docs/release-notes/cloud-serverless/breaking-changes).
+
         ## Get started
 
         Before you begin:
@@ -135,6 +145,27 @@ actions:
 
         > info
         > The following panel types are supported in the Kibana UI but not yet by the REST API: `map`, `legacy_vis`, `alerts_table`. Write operations (`POST`, `PUT`) return a `400` error when these panel types are included. Read operations (`GET`) strip these panels from the response and include them in a list of warnings.
+
+        ### Panel type availability
+
+        You can specify a panel **inline** so it exists only in that dashboard, or reference a panel already saved to the library and link it from multiple dashboards. Support for some panel types is added over time, so the available types depend on your Kibana version.
+
+        | Panel type | Inline | Linked from library |
+        | --- | --- | --- |
+        | Visualizations | Since 9.4 | Since 9.4 |
+        | Discover sessions | Since 9.4 | Since 9.4 |
+        | Images | Since 9.4 | N/A |
+        | Markdown | Since 9.4 | Since 9.4 |
+        | Links | Since 9.5 | Since 9.5 |
+        | Controls | Since 9.4 | N/A |
+        | SLO | Since 9.4 | N/A |
+        | Synthetics | Since 9.4 | N/A |
+        | APM service map | Since 9.5 | N/A |
+        | Machine learning and AIOps | Since 9.5 | N/A |
+        | Maps | Coming soon | Coming soon |
+        | Vega | Coming soon | Coming soon |
+        | Alerts table | Coming soon | N/A |
+        | Legacy visualizations | N/A | N/A |
 
         ### Embedding library items
 

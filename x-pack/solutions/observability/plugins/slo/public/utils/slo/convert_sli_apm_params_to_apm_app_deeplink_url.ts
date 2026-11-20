@@ -8,9 +8,10 @@
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
+  is,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
-  kqlQuerySchema,
+  kqlWithFiltersSchema,
 } from '@kbn/slo-schema';
 
 export function convertSliApmParamsToApmAppDeeplinkUrl(
@@ -18,8 +19,8 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
   timeRangeOverride?: { from: string; to: string }
 ): string | undefined {
   if (
-    !apmTransactionDurationIndicatorSchema.is(slo.indicator) &&
-    !apmTransactionErrorRateIndicatorSchema.is(slo.indicator)
+    !is(apmTransactionDurationIndicatorSchema, slo.indicator) &&
+    !is(apmTransactionErrorRateIndicatorSchema, slo.indicator)
   ) {
     return undefined;
   }
@@ -49,12 +50,15 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
     qs.append('rangeTo', 'now');
   }
 
-  const kueryParams = [];
+  const kueryParams: string[] = [];
   if (transactionName && transactionName !== ALL_VALUE) {
     kueryParams.push(`transaction.name : "${transactionName}"`);
   }
-  if (filter && kqlQuerySchema.is(filter) && filter.length > 0) {
-    kueryParams.push(filter);
+  // The APM app only accepts a KQL string, so filter pills (`filters`) can't be forwarded
+  const filterKuery = (is(kqlWithFiltersSchema, filter) ? filter.kqlQuery : filter)?.trim();
+  if (filterKuery) {
+    // Parenthesize the user KQL so `or` clauses don't escape the `and` scoping clauses
+    kueryParams.push(`(${filterKuery})`);
   }
 
   const groupings = slo.groupings ?? {};

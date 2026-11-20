@@ -29,6 +29,17 @@ describe('tokenCountToOpenAiUsage', () => {
     });
   });
 
+  it('folds thinking tokens into completion_tokens and reports them as reasoning_tokens', () => {
+    expect(tokenCountToOpenAiUsage({ prompt: 10, completion: 5, thinking: 12, total: 27 })).toEqual(
+      {
+        prompt_tokens: 10,
+        completion_tokens: 17,
+        total_tokens: 27,
+        completion_tokens_details: { reasoning_tokens: 12 },
+      }
+    );
+  });
+
   it('is used for streaming and non-streaming responses', () => {
     const tokens = { prompt: 10, completion: 5, total: 15, cached: 8 };
     const expected = tokenCountToOpenAiUsage(tokens);

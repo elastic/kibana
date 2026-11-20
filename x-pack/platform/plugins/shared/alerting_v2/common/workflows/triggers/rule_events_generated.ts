@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { ID_MAX_LENGTH, ruleKindSchema, tagsSchema } from '@kbn/alerting-v2-schemas';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
@@ -30,78 +30,82 @@ export const RuleEventsGeneratedTriggerId = 'alerting.ruleEventsGenerated' as co
  * `ruleKindSchema`, `tagsSchema`) so this trigger stays in lockstep with what
  * the rule schemas actually persist.
  */
-export const ruleEventsGeneratedRuleSchema = z.object({
-  id: z
-    .string()
-    .max(ID_MAX_LENGTH)
-    .describe(
-      i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.id', {
-        defaultMessage: 'Unique rule identifier.',
-      })
-    ),
-  spaceId: z
-    .string()
-    .max(ID_MAX_LENGTH)
-    .describe(
-      i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.spaceId', {
-        defaultMessage: 'Kibana space ID where the rule lives.',
-      })
-    ),
-  kind: ruleKindSchema.describe(
-    i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.kind', {
-      defaultMessage:
-        'Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.',
-    })
-  ),
-  tags: tagsSchema.describe(
-    i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.tags', {
-      defaultMessage: 'Rule tags.',
-    })
-  ),
-});
-
-export const ruleEventsGeneratedEventSchema = z.object({
-  rule: ruleEventsGeneratedRuleSchema.describe(
-    i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.rule', {
-      defaultMessage: 'Rule whose execution produced this event.',
-    })
-  ),
-  execution: z
-    .object({
-      executionId: z.string().describe(
-        i18n.translate(
-          'xpack.alertingV2.triggers.ruleEventsGenerated.schema.execution.executionId',
-          {
-            defaultMessage: "Task Manager's execution UUID for this run.",
-          }
-        )
+export const ruleEventsGeneratedRuleSchema = lazySchema(() =>
+  z.object({
+    id: z
+      .string()
+      .max(ID_MAX_LENGTH)
+      .describe(
+        i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.id', {
+          defaultMessage: 'Unique rule identifier.',
+        })
       ),
-      scheduledAt: z.string().describe(
-        i18n.translate(
-          'xpack.alertingV2.triggers.ruleEventsGenerated.schema.execution.scheduledAt',
-          {
-            defaultMessage:
-              'Scheduled run timestamp. Equals `scheduled_timestamp` on the `.rule-events` documents this run produced.',
-          }
-        )
+    spaceId: z
+      .string()
+      .max(ID_MAX_LENGTH)
+      .describe(
+        i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.spaceId', {
+          defaultMessage: 'Kibana space ID where the rule lives.',
+        })
       ),
-    })
-    .describe(
-      i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.execution', {
-        defaultMessage: 'Execution identity and correlation keys for this run.',
-      })
-    ),
-  ruleEventsGenerated: z
-    .number()
-    .int()
-    .min(1)
-    .describe(
-      i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.ruleEventsGenerated', {
+    kind: ruleKindSchema.describe(
+      i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.kind', {
         defaultMessage:
-          'Number of rule events persisted to `.rule-events` by this run. Always greater than zero for this trigger.',
+          'Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.',
       })
     ),
-});
+    tags: tagsSchema.describe(
+      i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.tags', {
+        defaultMessage: 'Rule tags.',
+      })
+    ),
+  })
+);
+
+export const ruleEventsGeneratedEventSchema = lazySchema(() =>
+  z.object({
+    rule: ruleEventsGeneratedRuleSchema.describe(
+      i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.rule', {
+        defaultMessage: 'Rule whose execution produced this event.',
+      })
+    ),
+    execution: z
+      .object({
+        executionId: z.string().describe(
+          i18n.translate(
+            'xpack.alertingV2.triggers.ruleEventsGenerated.schema.execution.executionId',
+            {
+              defaultMessage: "Task Manager's execution UUID for this run.",
+            }
+          )
+        ),
+        scheduledAt: z.string().describe(
+          i18n.translate(
+            'xpack.alertingV2.triggers.ruleEventsGenerated.schema.execution.scheduledAt',
+            {
+              defaultMessage:
+                'Scheduled run timestamp. Equals `scheduled_timestamp` on the `.rule-events` documents this run produced.',
+            }
+          )
+        ),
+      })
+      .describe(
+        i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.execution', {
+          defaultMessage: 'Execution identity and correlation keys for this run.',
+        })
+      ),
+    ruleEventsGenerated: z
+      .number()
+      .int()
+      .min(1)
+      .describe(
+        i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.ruleEventsGenerated', {
+          defaultMessage:
+            'Number of rule events persisted to `.rule-events` by this run. Always greater than zero for this trigger.',
+        })
+      ),
+  })
+);
 
 export type RuleEventsGeneratedTriggerPayload = z.infer<typeof ruleEventsGeneratedEventSchema>;
 

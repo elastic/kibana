@@ -23,12 +23,14 @@ import * as i18n from './timeline/translations';
 
 export interface AlertEpisodeTimelineSectionProps {
   episodeId: string;
+  seriesId: string | null | undefined;
   groupHash: string | undefined;
   services: Pick<AlertEpisodeDetailsServices, 'data' | 'spaces' | 'userProfile'>;
 }
 
 export const AlertEpisodeTimelineSection = ({
   episodeId,
+  seriesId,
   groupHash,
   services,
 }: AlertEpisodeTimelineSectionProps) => {
@@ -45,6 +47,7 @@ export const AlertEpisodeTimelineSection = ({
     isFetchingNextPage,
   } = useFetchEpisodeActionsHistoryQuery({
     episodeId,
+    seriesId,
     groupHash,
     services,
   });

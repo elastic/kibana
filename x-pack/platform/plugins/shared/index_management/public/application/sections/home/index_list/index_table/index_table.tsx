@@ -434,7 +434,6 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
             },
           })}
         />
-        <EuiSpacer />
       </>
     );
   }
@@ -447,6 +446,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
 
     return (
       <>
+        <EuiSpacer />
         <KbnWarningCallout
           data-test-subj="indicesEnrichmentErrorCallout"
           title={i18n.translate('xpack.idxMgmt.indexTable.enrichmentErrorTitle', {
@@ -462,7 +462,6 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
             />
           }
         />
-        <EuiSpacer size="m" />
       </>
     );
   }

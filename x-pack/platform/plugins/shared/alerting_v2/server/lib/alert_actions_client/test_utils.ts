@@ -10,6 +10,14 @@ import type { AlertActionDocument } from '../../resources/datastreams/alert_acti
 import { alertEpisodeStatus, alertEventStatus } from '../../resources/datastreams/alert_events';
 import type { HandlerItem } from './handler';
 import type { AlertEventRecord } from './types';
+import {
+  EMPTY_ALERT_ACTION_STATE,
+  type AlertActionState,
+} from './context_loaders/load_alert_action_states';
+import {
+  EMPTY_SERIES_ACTION_STATE,
+  type SeriesActionState,
+} from './context_loaders/load_series_action_states';
 
 /**
  * Sentinel audit doc used by handler tests. Handlers either forward
@@ -24,13 +32,28 @@ const SENTINEL_ALERT_ACTION_DOC = { sentinel: 'audit-doc' } as unknown as AlertA
  * orchestrator hands to each handler's `prepare` method. Callers own
  * the `action` body because each handler test targets a specific
  * `action_type` variant of the discriminated union. `alertActionDoc`
- * defaults to a sentinel that tests can compare by identity.
+ * defaults to a sentinel that tests can compare by identity, and
+ * `alertActionState` to a clean alert with no prior ack, assignee or tags.
  */
 export const buildHandlerItem = <TBody extends CreateAlertActionBody>(
   action: TBody,
   alertEvent: AlertEventRecord,
-  alertActionDoc: AlertActionDocument = SENTINEL_ALERT_ACTION_DOC
-): HandlerItem<TBody> => ({ action, alertEvent, alertActionDoc });
+  {
+    alertActionDoc = SENTINEL_ALERT_ACTION_DOC,
+    alertActionState,
+    seriesActionState,
+  }: {
+    alertActionDoc?: AlertActionDocument;
+    alertActionState?: Partial<AlertActionState>;
+    seriesActionState?: Partial<SeriesActionState>;
+  } = {}
+): HandlerItem<TBody> => ({
+  action,
+  alertEvent,
+  alertActionDoc,
+  alertActionState: { ...EMPTY_ALERT_ACTION_STATE, ...alertActionState },
+  seriesActionState: { ...EMPTY_SERIES_ACTION_STATE, ...seriesActionState },
+});
 
 /**
  * Builds an in-memory `AlertEventRecord` — the flattened, post-projection

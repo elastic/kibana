@@ -6,8 +6,8 @@
  */
 
 import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
-import { TLSParamsType } from '../../../../../../common/runtime_types/zod/alerts';
-import { formatZodErrors } from '../../../../../../common/runtime_types/zod/format_errors';
+import { TLSParamsType } from '../../../../../../common/runtime_types/schemas/alerts';
+import { formatZodErrors } from '../../../../../../common/runtime_types/schemas/format_errors';
 
 export function validateTLSAlertParams(ruleParams: any): ValidationResult {
   const errors: Record<string, any> = {};

@@ -30,10 +30,11 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { get } from 'lodash';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
-import type { Direction, PairedTTestResult } from '@kbn/evals-common';
+import type { Direction, ComparisonResult, MetricType, StatisticalTestId } from '@kbn/evals-common';
 import {
   useCompareExperiments,
   useEvalsTraceFetcher,
@@ -110,7 +111,39 @@ const DIRECTION_HINTS: Record<Direction, string> = {
   neutral: i18n.DIFF_NEUTRAL_DIRECTION,
 };
 
-const DiffValue: React.FC<{ diff: number; direction: Direction }> = ({ diff, direction }) => {
+const TEST_LABELS: Record<StatisticalTestId, string> = {
+  paired_t: i18n.TEST_LABEL_PAIRED_T,
+  wilcoxon_signed_rank: i18n.TEST_LABEL_WILCOXON,
+  mcnemar: i18n.TEST_LABEL_MCNEMAR,
+};
+
+const METRIC_TYPE_LABELS: Record<MetricType, string> = {
+  binary: i18n.METRIC_TYPE_LABEL_BINARY,
+  continuous_bounded: i18n.METRIC_TYPE_LABEL_CONTINUOUS_BOUNDED,
+  continuous_unbounded: i18n.METRIC_TYPE_LABEL_CONTINUOUS_UNBOUNDED,
+  count: i18n.METRIC_TYPE_LABEL_COUNT,
+  ordinal_k: i18n.METRIC_TYPE_LABEL_ORDINAL,
+};
+
+const TestValue: React.FC<{
+  metricType: MetricType;
+  hypothesisTest: ComparisonResult['hypothesisTest'];
+}> = ({ metricType, hypothesisTest }) => {
+  const label = TEST_LABELS[hypothesisTest.id];
+  return (
+    <EuiToolTip
+      content={i18n.getTestTooltip(label, METRIC_TYPE_LABELS[metricType], hypothesisTest.method)}
+    >
+      <span tabIndex={0}>{label}</span>
+    </EuiToolTip>
+  );
+};
+
+const DiffValue: React.FC<{
+  diff: number;
+  direction: Direction;
+  discordantPairs?: ComparisonResult['hypothesisTest']['discordantPairs'];
+}> = ({ diff, direction, discordantPairs }) => {
   const { euiTheme } = useEuiTheme();
   if (!Number.isFinite(diff)) return <span>-</span>;
 
@@ -127,7 +160,10 @@ const DiffValue: React.FC<{ diff: number; direction: Direction }> = ({ diff, dir
       : improved
       ? i18n.DIFF_IMPROVED
       : i18n.DIFF_REGRESSED;
-  const tooltip = verdictHint ? `${verdictHint} · ${directionHint}` : directionHint;
+  const discordantHint = discordantPairs
+    ? i18n.getDiscordantPairsHint(discordantPairs.targetOnly, discordantPairs.baselineOnly)
+    : null;
+  const tooltip = [verdictHint, directionHint, discordantHint].filter(Boolean).join(' · ');
 
   return (
     <EuiToolTip content={tooltip}>
@@ -602,10 +638,10 @@ export const CompareExperimentsPage: React.FC = () => {
     direction: Direction;
   } | null>(null);
 
-  const [sortField, setSortField] = useState<keyof PairedTTestResult>('datasetName');
+  const [sortField, setSortField] = useState('datasetName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const handleRowClick = useCallback((result: PairedTTestResult) => {
+  const handleRowClick = useCallback((result: ComparisonResult) => {
     setFlyoutState({
       datasetId: result.datasetId,
       datasetName: result.datasetName,
@@ -630,8 +666,8 @@ export const CompareExperimentsPage: React.FC = () => {
     const dir = sortDirection === 'asc' ? 1 : -1;
 
     results.sort((a, b) => {
-      const valA = a[sortField];
-      const valB = b[sortField];
+      const valA = get(a, sortField);
+      const valB = get(b, sortField);
 
       if (valA == null && valB == null) return 0;
       if (valA == null) return 1;
@@ -664,12 +700,15 @@ export const CompareExperimentsPage: React.FC = () => {
       'Mean target',
       'Diff',
       'Direction',
+      'Metric type',
+      'Test',
+      'Method',
       'p-value',
       'Significant',
       'Outcome',
     ];
     const rows = sortedResults.map((r) => {
-      const diff = computeCompareDiff(r.meanTarget, r.meanBaseline);
+      const diff = computeCompareDiff(r.target.mean, r.baseline.mean);
       const significant =
         r.pValue !== null && Number.isFinite(r.pValue) && r.pValue < SIGNIFICANCE_THRESHOLD;
       let outcome = '';
@@ -680,10 +719,13 @@ export const CompareExperimentsPage: React.FC = () => {
         `"${r.datasetName.replace(/"/g, '""')}"`,
         `"${r.evaluatorName.replace(/"/g, '""')}"`,
         r.sampleSize,
-        r.meanBaseline.toFixed(4),
-        r.meanTarget.toFixed(4),
+        r.baseline.mean.toFixed(4),
+        r.target.mean.toFixed(4),
         diff.toFixed(4),
         r.direction,
+        r.metricType,
+        r.hypothesisTest.id,
+        r.hypothesisTest.method ?? '',
         r.pValue !== null && Number.isFinite(r.pValue) ? r.pValue.toFixed(6) : '',
         significant ? 'Yes' : 'No',
         outcome,
@@ -704,7 +746,7 @@ export const CompareExperimentsPage: React.FC = () => {
 
   const firstRowByDataset = useMemo(() => {
     const seen = new Set<string>();
-    const firstRows = new Set<PairedTTestResult>();
+    const firstRows = new Set<ComparisonResult>();
     for (const item of sortedResults) {
       if (!seen.has(item.datasetId)) {
         firstRows.add(item);
@@ -716,13 +758,13 @@ export const CompareExperimentsPage: React.FC = () => {
 
   const isGroupedByDataset = sortField === 'datasetName';
 
-  const columns: Array<EuiBasicTableColumn<PairedTTestResult>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<ComparisonResult>> = useMemo(
     () => [
       {
         field: 'datasetName',
         name: i18n.COLUMN_DATASET,
         sortable: true,
-        render: (_val: string, item: PairedTTestResult) => {
+        render: (_val: string, item: ComparisonResult) => {
           if (isGroupedByDataset && !firstRowByDataset.has(item)) return null;
           return <strong>{item.datasetName}</strong>;
         },
@@ -740,14 +782,14 @@ export const CompareExperimentsPage: React.FC = () => {
         align: 'right' as const,
       },
       {
-        field: 'meanBaseline',
+        field: 'baseline.mean',
         name: i18n.COLUMN_MEAN_BASELINE,
         sortable: true,
         render: (val: number) => formatScore(val),
         align: 'right' as const,
       },
       {
-        field: 'meanTarget',
+        field: 'target.mean',
         name: i18n.COLUMN_MEAN_TARGET,
         sortable: true,
         render: (val: number) => formatScore(val),
@@ -755,13 +797,20 @@ export const CompareExperimentsPage: React.FC = () => {
       },
       {
         name: i18n.COLUMN_DIFF,
-        render: (item: PairedTTestResult) => (
+        render: (item: ComparisonResult) => (
           <DiffValue
-            diff={computeCompareDiff(item.meanTarget, item.meanBaseline)}
+            diff={computeCompareDiff(item.target.mean, item.baseline.mean)}
             direction={item.direction}
+            discordantPairs={item.hypothesisTest.discordantPairs}
           />
         ),
         align: 'right' as const,
+      },
+      {
+        name: i18n.COLUMN_TEST,
+        render: (item: ComparisonResult) => (
+          <TestValue metricType={item.metricType} hypothesisTest={item.hypothesisTest} />
+        ),
       },
       {
         field: 'pValue',
@@ -772,10 +821,10 @@ export const CompareExperimentsPage: React.FC = () => {
       },
       {
         name: i18n.COLUMN_SIGNIFICANCE,
-        render: (item: PairedTTestResult) => (
+        render: (item: ComparisonResult) => (
           <SignificanceBadge
             pValue={item.pValue}
-            diff={computeCompareDiff(item.meanTarget, item.meanBaseline)}
+            diff={computeCompareDiff(item.target.mean, item.baseline.mean)}
             direction={item.direction}
           />
         ),
@@ -957,16 +1006,16 @@ export const CompareExperimentsPage: React.FC = () => {
               ]}
             />
           ) : (
-            <EuiBasicTable<PairedTTestResult>
+            <EuiBasicTable<ComparisonResult>
               tableCaption={i18n.TABLE_CAPTION}
               items={sortedResults}
               columns={columns}
               sorting={{
-                sort: { field: sortField, direction: sortDirection },
+                sort: { field: sortField as keyof ComparisonResult, direction: sortDirection },
               }}
               onChange={({ sort }) => {
                 if (sort) {
-                  setSortField(sort.field as keyof PairedTTestResult);
+                  setSortField(sort.field);
                   setSortDirection(sort.direction);
                 }
               }}

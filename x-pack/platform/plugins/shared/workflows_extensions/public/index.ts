@@ -1,0 +1,41 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { PluginInitializerContext } from '@kbn/core/public';
+import { WorkflowsExtensionsPublicPlugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new WorkflowsExtensionsPublicPlugin(initializerContext);
+}
+
+export type {
+  WorkflowsExtensionsPublicPluginSetup,
+  WorkflowsExtensionsPublicPluginStart,
+} from './types';
+
+export type {
+  PublicStepDefinition,
+  StepLogsConfig,
+  StepLogsApi,
+  StepLogEntry,
+} from './step_registry/types';
+export type { StepDocumentation } from '@kbn/workflows';
+
+export { createPublicStepDefinition } from './step_registry/types';
+
+// Exposed so host plugins (Storybook, tests) can build a populated registry
+// without a running Kibana — same registration calls used in setup().
+export { PublicStepRegistry } from './step_registry';
+export { registerInternalStepDefinitions } from './steps';
+export { PublicTriggerRegistry } from './trigger_registry';
+export { registerInternalTriggerDefinitions } from './triggers';
+
+export type {
+  PublicTriggerDefinition,
+  TriggerDocumentation,
+  TriggerSnippets,
+} from './trigger_registry/types';

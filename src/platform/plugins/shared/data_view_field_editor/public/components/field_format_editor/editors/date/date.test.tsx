@@ -12,7 +12,7 @@ import { createFieldFormatMock } from '../test_utils';
 import { DateFormatEditor } from './date';
 import { formatId } from './constants';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 
 const fieldType = 'date';
 
@@ -71,5 +71,15 @@ describe('DateFormatEditor', () => {
     expect(screen.getByText('Documentation')).toBeVisible();
     expect(screen.getByText(mockedTimeNow)).toBeVisible();
     expect(screen.getByText(`converted date for ${mockedTimeNow}`)).toBeVisible();
+  });
+
+  it('should fire change with the new pattern when the pattern input changes', () => {
+    renderDateFormatEditor();
+
+    fireEvent.change(screen.getByTestId('dateEditorPattern'), {
+      target: { value: 'MMM Do YYYY' },
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith({ pattern: 'MMM Do YYYY' });
   });
 });

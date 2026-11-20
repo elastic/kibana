@@ -28,6 +28,7 @@ import {
   type MonitorFixture,
 } from '../test_helpers/monitor_fixtures';
 import { ConfigKey } from './config_key';
+
 import {
   BrowserFieldsCodec,
   EncryptedBrowserFieldsCodec,
@@ -37,7 +38,7 @@ import {
   ICMPFieldsCodec,
   SyntheticsMonitorCodec,
   TCPFieldsCodec,
-} from './monitor_types';
+} from '../schemas/monitor_types';
 
 const COMMON_REQUIRED_KEYS = [
   ConfigKey.APM_SERVICE_NAME,

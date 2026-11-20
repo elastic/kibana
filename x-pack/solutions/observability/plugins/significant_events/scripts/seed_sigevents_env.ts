@@ -7,11 +7,9 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { Client } from '@elastic/elasticsearch';
-import type { ToolingLog } from '@kbn/tooling-log';
 import { CLAIMS_APP } from '@kbn/synthtrace/src/scenarios/sigevents/mock_apps/claims';
-import type { ConnectionConfig } from './seed_sigevents_env/lib/get_connection_config';
 import { getConnectionConfig } from './seed_sigevents_env/lib/get_connection_config';
-import { kibanaRequest } from './seed_sigevents_env/lib/kibana';
+import { SEED_SOURCE_TITLE, ensureSeedSource } from './seed_sigevents_env/lib/seed_source';
 import { CLAIMS_SEED } from './seed_sigevents_env/scenarios/claims';
 import {
   seedAlerts,
@@ -22,39 +20,11 @@ import {
   runDiscovery,
   verifyChangePoint,
 } from './seed_sigevents_env/steps';
-import type { SeedContext } from './seed_sigevents_env/types';
+import type { SeedBaseContext, SeedContext } from './seed_sigevents_env/types';
 import { getSynthtraceDefaultStream } from './seed_sigevents_env/types';
 
 /** Fixed RNG seed — changing this invalidates all deterministic IDs (alerts, features) across re-runs. */
 const FIXED_SEED = 42;
-
-export async function ensureStreamsEnabled(
-  config: ConnectionConfig,
-  space: string,
-  log: ToolingLog
-): Promise<void> {
-  const { status, data } = await kibanaRequest(
-    config,
-    'POST',
-    '/api/streams/_enable',
-    undefined,
-    space
-  );
-  if (status === 200) {
-    log.info('Streams enabled successfully');
-  } else if (status === 400) {
-    const msg = JSON.stringify(data ?? '');
-    if (msg.includes('already enabled') || msg.includes('Cannot change stream types')) {
-      log.info('Streams already enabled');
-    } else {
-      throw new Error(`Failed to enable streams: ${status} ${msg}`);
-    }
-  } else if (status === 404) {
-    log.warning('Streams API not available — skipping');
-  } else {
-    throw new Error(`Failed to enable streams: ${status} ${JSON.stringify(data)}`);
-  }
-}
 
 run(
   async ({ log, flags }) => {
@@ -82,9 +52,7 @@ run(
       throw new Error(`Unknown scenario "${scenarioName}". Available: ${available}`);
     }
 
-    await ensureStreamsEnabled(config, space, log);
-
-    const ctx: SeedContext = {
+    const baseCtx: SeedBaseContext = {
       esUrl: config.esUrl,
       kibanaUrl: config.kibanaUrl,
       username: config.username,
@@ -103,15 +71,20 @@ run(
 
     if (flags.clean === true) {
       log.info('Running clean before seeding…');
-      await cleanSeedData(ctx, esClient, config, log);
+      await cleanSeedData(baseCtx, esClient, config, log);
     }
 
     // Step ordering matters — dependencies:
-    //   logs       → must exist before alerts (ESQL runs against seeded logs)
+    //   logs       → must exist before the source (creating a source executes its query)
+    //   source     → must exist before features and queries (both are keyed by its id)
     //   queries    → must be promoted before rule_ids can be read (needed by alerts)
 
     log.info('Seeding logs…');
-    const { seriesStartMs, seriesEndMs, manifest } = await seedLogs(ctx, esClient, log);
+    const { seriesStartMs, seriesEndMs, manifest } = await seedLogs(baseCtx, esClient, log);
+
+    log.info('Ensuring seed source…');
+    const source = await ensureSeedSource(config, space, streamName, log);
+    const ctx: SeedContext = { ...baseCtx, sourceId: source.id, viewName: source.view_name };
 
     log.info('Seeding features…');
     await seedFeatures(ctx, manifest, config, log);
@@ -149,8 +122,8 @@ run(
         --scenario <name>        Scenario key in CLAIMS_SEED (default: fraud_check_redis_herring)
                                  Available: fraud_check_redis_herring, healthy_baseline
         --space <name>           Kibana space for seeded assets (default: default)
-        --clean                  Delete all previously seeded data (features, alerts, queries,
-                                 and the data stream) before re-seeding
+        --clean                  Delete all previously seeded data (the seed source with its features
+                                 and queries, alerts, and the data stream) before re-seeding
         --run-discovery          Run detection, seed post-detection evidence, then run AI discovery
                                  and verify an active event (requires a configured inference connector)
         --es-url <url>           Elasticsearch URL (default: from kibana.dev.yml)
@@ -159,7 +132,8 @@ run(
         --kibana-url <url>       Kibana base URL (default: from kibana.dev.yml, auto-detects dev base path)
 
         Notes:
-          The target stream is auto-enabled (POST /api/streams/_enable) if not yet active.
+          A Nightshift source titled "${SEED_SOURCE_TITLE}" is created over the data stream
+          once the logs are seeded, and reused on later runs.
       `,
     },
   }

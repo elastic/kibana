@@ -27,7 +27,7 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
-import type { PackagePolicyAssetsMap } from '../../common/types';
+import type { AgentPolicyPackagePoliciesSummary, PackagePolicyAssetsMap } from '../../common/types';
 import type { DeletePackagePoliciesResponse } from '../../common/types';
 import type {
   NewPackagePolicy,
@@ -115,6 +115,11 @@ export interface PackagePolicyClient {
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
+    /**
+     * Pass to `agentPolicyService.bumpRevision` when bumping separately (`bumpRevision: false`).
+     * Treat a missing value as `false`.
+     */
+    agentVersionConditionsUnchanged?: boolean;
   }>;
 
   bulkUpdate(
@@ -129,6 +134,11 @@ export interface PackagePolicyClient {
       packagePolicy: NewPackagePolicyWithId;
       error: Error | SavedObjectError;
     }>;
+    /**
+     * Pass to `agentPolicyService.bumpRevision` when bumping separately (`bumpRevision: false`).
+     * Treat a missing value as `false`.
+     */
+    agentVersionConditionsUnchanged?: boolean;
   }>;
 
   /**
@@ -159,6 +169,11 @@ export interface PackagePolicyClient {
     agentPolicyId: string,
     options?: PackagePolicyClientFindAllForAgentPolicyOptions
   ): Promise<PackagePolicy[]>;
+
+  getSummaryForAgentPolicies(
+    soClient: SavedObjectsClientContract,
+    agentPolicyIds: string[]
+  ): Promise<Map<string, AgentPolicyPackagePoliciesSummary>>;
 
   compilePackagePolicyForVersions(
     soClient: SavedObjectsClientContract,

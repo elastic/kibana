@@ -61,7 +61,7 @@ export const extractedIocSchema = schema.object({
   tier_basis: schema.string({ minLength: 1, maxLength: MAX_IOC_TIER_BASIS_LENGTH }),
   port: schema.maybe(schema.number()),
   deferred_unreviewed: schema.maybe(schema.boolean()),
-  // Prompt-only source-text window (url/domain candidates). Never persisted:
+  // Prompt-only source-text window (url/domain/hash candidates). Never persisted:
   // enrich_report_core strips it before its output reaches persist_extractions.
   context: schema.maybe(schema.string({ maxLength: MAX_IOC_CONTEXT_LENGTH })),
 });

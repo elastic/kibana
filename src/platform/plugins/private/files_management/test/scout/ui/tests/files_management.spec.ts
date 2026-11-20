@@ -23,7 +23,7 @@ import { test, testData } from '../fixtures';
 
 const { FILES_API } = testData;
 
-test.describe('Files management', { tag: tags.stateful.classic }, () => {
+test.describe('Files management', { tag: tags.deploymentAgnostic }, () => {
   const createdFileIds: string[] = [];
 
   test.beforeEach(async ({ browserAuth }) => {

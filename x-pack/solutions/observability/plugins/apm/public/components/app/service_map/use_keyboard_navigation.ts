@@ -17,10 +17,12 @@ interface UseKeyboardNavigationOptions {
   edges: ServiceMapEdge[];
   selectedNodeId: string | null;
   selectedNodeForPopover: ServiceMapNode | null;
-  selectedEdgeForPopover: ServiceMapEdge | null;
+  selectedEdgeForFlyout: ServiceMapEdge | null;
   onNodeSelect: (node: ServiceMapNode | null) => void;
   onEdgeSelect: (edge: ServiceMapEdge | null) => void;
   onPopoverClose: () => void;
+  /** When false, disables keyboard selection to match mouse click + drag being disabled. */
+  isInteractive?: boolean;
 }
 
 interface UseKeyboardNavigationResult {
@@ -43,10 +45,11 @@ export function useKeyboardNavigation({
   edges,
   selectedNodeId,
   selectedNodeForPopover,
-  selectedEdgeForPopover,
+  selectedEdgeForFlyout,
   onNodeSelect,
   onEdgeSelect,
   onPopoverClose,
+  isInteractive = true,
 }: UseKeyboardNavigationOptions): UseKeyboardNavigationResult {
   const [screenReaderAnnouncement, setScreenReaderAnnouncement] = useState<string>('');
 
@@ -89,7 +92,11 @@ export function useKeyboardNavigation({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && (selectedNodeForPopover || selectedEdgeForPopover)) {
+      if (!isInteractive) {
+        return;
+      }
+      // The flyouts close themselves on Escape (EUI), also when a child flyout is focused.
+      if (event.key === 'Escape' && selectedNodeForPopover) {
         event.preventDefault();
         onPopoverClose();
         setScreenReaderAnnouncement(
@@ -109,7 +116,7 @@ export function useKeyboardNavigation({
           if (!focusedEdge) return;
           event.preventDefault();
 
-          if (selectedEdgeForPopover?.id === edgeElementId) {
+          if (selectedEdgeForFlyout?.id === edgeElementId) {
             onPopoverClose();
           } else {
             onEdgeSelect(focusedEdge);
@@ -181,11 +188,12 @@ export function useKeyboardNavigation({
     edges,
     selectedNodeId,
     selectedNodeForPopover,
-    selectedEdgeForPopover,
+    selectedEdgeForFlyout,
     onNodeSelect,
     onEdgeSelect,
     onPopoverClose,
     findNodeInDirection,
+    isInteractive,
   ]);
 
   return {

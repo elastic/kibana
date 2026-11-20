@@ -55,6 +55,36 @@ spaceTest.describe(
     );
 
     spaceTest(
+      'preserves the time field and sorting when switching to an inline Classic view',
+      async ({ page, pageObjects }) => {
+        const { discover, dataGrid } = pageObjects;
+        // This pattern matches the shared archive, but not the persisted logstash-* view.
+        await discover.writeAndSubmitEsqlQuery('FROM logstash-2015.09.* | LIMIT 10');
+        await discover.selectClassicMode();
+        await discover.submitQuery();
+        await discover.waitUntilSearchingHasFinished();
+
+        await expect.poll(() => discover.getSelectedDataViewName()).toBe('logstash-2015.09.*');
+        expect(await discover.isCurrentDataViewAdHoc()).toBe(true);
+        await expect(page.testSubj.locator('unifiedHistogramChart')).toBeVisible();
+        await expect(dataGrid.getColumnHeader('@timestamp')).toHaveAttribute(
+          'aria-sort',
+          'descending'
+        );
+        const dataViewId = await discover.getCurrentDataViewId();
+
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
+        await expect.poll(() => discover.getCurrentDataViewId()).toBe(dataViewId);
+        await expect(page.testSubj.locator('unifiedHistogramChart')).toBeVisible();
+        await expect(dataGrid.getColumnHeader('@timestamp')).toHaveAttribute(
+          'aria-sort',
+          'descending'
+        );
+      }
+    );
+
+    spaceTest(
       'shows hit count and available data views after switching',
       async ({ page, pageObjects }) => {
         const { discover } = pageObjects;

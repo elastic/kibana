@@ -105,6 +105,7 @@ export interface GetWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  runName?: string;
   omitStepRuns?: boolean;
   /** Datemath lower bound for filtering executions by finishedAt (applied to finishedAt). */
   finishedAfter?: string;
@@ -173,6 +174,11 @@ export interface WorkflowsConfig {
   eventDrivenExecutionEnabled: boolean;
 }
 
+/** Workflows the caller can read, or `undefined` when no workflow is hidden from them. */
+export interface ReadableWorkflowIdsResponse {
+  workflowIds?: string[];
+}
+
 export interface SearchTriggerEventLogParams {
   kql?: string;
   from?: string;
@@ -191,6 +197,19 @@ export interface SearchTriggerEventLogResult {
   total: number;
   page: number;
   size: number;
+}
+
+export interface LinkedRule {
+  id: string;
+  name: string;
+  ruleTypeId: string;
+}
+
+export interface GetLinkedRulesResponse {
+  total: number;
+  /** Linked rules in the space that the user cannot read. */
+  hiddenTotal: number;
+  rules: LinkedRule[];
 }
 
 export interface RestoreWorkflowVersionParams {

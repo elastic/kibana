@@ -349,6 +349,12 @@ export const JudgeScore = lazySchema(() =>
       .max(20)
       .optional(),
     description: z.string().max(2048).optional(),
+    /**
+     * How comparisons read this score: `maximize` when a higher value is better, `minimize` when a lower value is better, and `neutral` when it is informational only. Applies to numeric values and to the values assigned to labels. Absent means `maximize`.
+     */
+    direction: Direction.optional().describe(
+      'How comparisons read this score: `maximize` when a higher value is better, `minimize` when a lower value is better, and `neutral` when it is informational only. Applies to numeric values and to the values assigned to labels. Absent means `maximize`.'
+    ),
   })
 );
 export type JudgeScore = z.infer<typeof JudgeScore>;

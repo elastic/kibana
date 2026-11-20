@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ValidateCustomYaraSignatureDiagnostic } from '../../../../../../common/api/endpoint/custom_yara_signatures';
+import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH } from '../../../../../../common/endpoint/service/artifacts/constants';
 
 export const FORM_TITLE = i18n.translate(
   'xpack.securitySolution.customYaraSignatures.form.createTitle',
@@ -84,6 +85,20 @@ export const DEFINITION_DESCRIPTION = i18n.translate(
   }
 );
 
+export const COMMENTS_TITLE = i18n.translate(
+  'xpack.securitySolution.customYaraSignatures.form.commentsTitle',
+  {
+    defaultMessage: 'Comments',
+  }
+);
+
+export const COMMENTS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.customYaraSignatures.form.commentsDescription',
+  {
+    defaultMessage: 'Add a comment to your YARA signature.',
+  }
+);
+
 export const SIGNATURE_EDITOR_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.customYaraSignatures.form.signatureEditorAriaLabel',
   {
@@ -97,6 +112,13 @@ export const VALIDATION_REQUEST_ERROR = i18n.translate(
     defaultMessage: 'Unable to validate YARA signature.',
   }
 );
+
+export const getContentTooLargeMessage = (byteLength: number): string =>
+  i18n.translate('xpack.securitySolution.customYaraSignatures.form.contentTooLargeMessage', {
+    defaultMessage:
+      'Definition must not exceed {maxByteLength, number} bytes (currently {byteLength, number} bytes)',
+    values: { maxByteLength: MAX_YARA_RULE_CONTENT_BYTE_LENGTH, byteLength },
+  });
 
 /** User-facing validation diagnostic, including a severity prefix for assistive technology. */
 export const getValidationDiagnosticMessage = ({

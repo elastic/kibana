@@ -34,7 +34,7 @@ const mockGetUISnapshotStore = jest.fn().mockReturnValue(null);
 const mockDataCascadeRefObject = { getUISnapshotStore: mockGetUISnapshotStore };
 
 jest.mock('@kbn/shared-ux-document-data-cascade', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const ReactLib = require('react');
   const actual = jest.requireActual('@kbn/shared-ux-document-data-cascade');
   const MockDataCascade = ReactLib.forwardRef(function MockDataCascade(
@@ -91,7 +91,7 @@ const defaultQueryMeta: ESQLStatsQueryMeta = {
 };
 
 jest.mock('./blocks', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const ReactLib = require('react');
   const actual = jest.requireActual('./blocks');
   return {
@@ -128,7 +128,7 @@ const createWrapper = async (overrides?: Partial<CascadedDocumentsContext>) => {
     availableCascadeGroups: ['category'],
     selectedCascadeGroups: ['category'],
     cascadedDocumentsFetcher: createMockFetcher(),
-    cascadedColumnsMeta: {},
+    cascadedLeafDataSource: undefined,
     esqlQuery,
     esqlVariables: undefined,
     timeRange: undefined,

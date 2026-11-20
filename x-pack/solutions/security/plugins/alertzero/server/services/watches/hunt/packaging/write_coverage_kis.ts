@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest';
-import { HUNT_COVERAGE_AI_INDEX_ID } from '../../../../../common/step_types/package_report';
+import { HUNT_COVERAGE_AI_INDEX_DEST } from '../../../../../common/step_types/package_report';
 import { buildCoverageSubject } from './coverage_ki_id';
 import type { CoverageSubject, CoverageWriteResult } from './types';
 
@@ -62,9 +61,7 @@ export const createCoverageWriter = ({
   /** Already bound to this run's request by the caller; see the step's own dependency. */
   isContextEngineEnabled: () => Promise<boolean>;
 }): ((subjects: CoverageSubject[]) => Promise<CoverageWriteResult>) => {
-  // Context Engine owns how an AI index id maps to a backing store, so ask it rather than
-  // rebuilding the prefix here and drifting when it changes.
-  const { value: backingIndex } = getAiIndexDest('index', HUNT_COVERAGE_AI_INDEX_ID);
+  const { value: backingIndex } = HUNT_COVERAGE_AI_INDEX_DEST;
 
   return async (subjects) => {
     const written: CoverageWriteResult['written'] = [];
@@ -152,8 +149,24 @@ export const createCoverageWriter = ({
               report_id: subject.reportId,
               investigation_id: subject.investigationConversationId,
               watch_id: 'hunt',
-              producer: 'hunt.packageReport.v1',
+              // Bumped from v1: this write adds threat_summary / data_sources /
+              // validated_esql / esql_status / severity / investigation_summary /
+              // has_confirmed_hit, so Detection can tell an enriched KI apart from a lean v1
+              // KI still pending from before this change.
+              producer: 'hunt.packageReport.v2',
               space_id: spaceId,
+              // Omitted rather than written empty: a reader should see a missing field, not an
+              // empty string or an empty array, when this run had nothing to say.
+              ...(subject.threatSummary ? { threat_summary: subject.threatSummary } : {}),
+              ...(subject.dataSources.length > 0 ? { data_sources: subject.dataSources } : {}),
+              ...(subject.validatedEsql
+                ? { validated_esql: subject.validatedEsql, esql_status: subject.esqlStatus }
+                : {}),
+              ...(subject.severity ? { severity: subject.severity } : {}),
+              ...(subject.investigationSummary
+                ? { investigation_summary: subject.investigationSummary }
+                : {}),
+              has_confirmed_hit: subject.hasConfirmedHit,
             },
           },
           refresh: 'wait_for',

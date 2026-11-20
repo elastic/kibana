@@ -7,16 +7,16 @@
 
 import React from 'react';
 
-import type { DatasetSchemaResolutionFormValue } from '../../create_dataset_form_state';
+import {
+  DEFAULT_SCHEMA_RESOLUTION,
+  type DatasetSchemaResolutionFormValue,
+} from '../../create_dataset_form_state';
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import type { ComboBoxChange } from '../combo_box_selection_validity';
 import {
   EuiComboBoxNoCustomOption,
   type EuiComboBoxNoCustomOptionOption,
 } from '../eui_combo_box_no_custom_option';
-
-export const DEFAULT_SCHEMA_RESOLUTION: Exclude<DatasetSchemaResolutionFormValue, ''> =
-  'first_file_wins';
 
 const SCHEMA_RESOLUTION_OPTIONS: Array<
   EuiComboBoxNoCustomOptionOption<Exclude<DatasetSchemaResolutionFormValue, ''>>

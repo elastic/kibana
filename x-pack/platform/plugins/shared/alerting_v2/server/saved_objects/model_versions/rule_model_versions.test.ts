@@ -145,6 +145,162 @@ describe('ruleModelVersions', () => {
     });
   });
 
+  describe('v8 to v9 migration', () => {
+    const migrator = createModelVersionTestMigrator({ type: ruleType });
+
+    const createV8RuleDocument = (): SavedObject =>
+      migrator.migrate({
+        document: createV5RuleDocument({
+          metadata: { name: 'test-rule', tags: ['prod'] },
+          createdBy: { profile_uid: 'author_profile_uid' },
+          updatedBy: { profile_uid: 'editor_profile_uid' },
+        }),
+        fromVersion: 5,
+        toVersion: 8,
+      });
+
+    it('leaves existing rules unchanged, since routing_tags is optional', () => {
+      const document = createV8RuleDocument();
+      const migrated = migrator.migrate({ document, fromVersion: 8, toVersion: 9 });
+
+      expect(migrated.attributes).toEqual(document.attributes);
+    });
+
+    it('accepts routing tags in the v9 forward compatibility schema', () => {
+      const forwardCompatibility = ruleModelVersions['9']?.schemas
+        ?.forwardCompatibility as ObjectType;
+      const attributes = {
+        ...(createV8RuleDocument().attributes as Record<string, unknown>),
+        metadata: { name: 'test-rule', tags: ['prod'], routing_tags: ['sre'] },
+      };
+
+      expect(
+        (forwardCompatibility.validate(attributes) as { metadata: Record<string, unknown> })
+          .metadata.routing_tags
+      ).toEqual(['sre']);
+    });
+
+    it('drops routing tags when a v8 node reads a v9 rule', () => {
+      const forwardCompatibility = ruleModelVersions['8']?.schemas
+        ?.forwardCompatibility as ObjectType;
+      const attributes = {
+        ...(createV8RuleDocument().attributes as Record<string, unknown>),
+        metadata: { name: 'test-rule', tags: ['prod'], routing_tags: ['sre'] },
+      };
+
+      expect(
+        (forwardCompatibility.validate(attributes) as { metadata: Record<string, unknown> })
+          .metadata
+      ).toEqual({ name: 'test-rule', tags: ['prod'] });
+    });
+  });
+
+  describe('v9 to v10 migration', () => {
+    const migrator = createModelVersionTestMigrator({ type: ruleType });
+
+    const createV9RuleDocument = (): SavedObject =>
+      migrator.migrate({
+        document: createV5RuleDocument({
+          metadata: { name: 'test-rule', tags: ['prod'] },
+          createdBy: { profile_uid: 'author_profile_uid' },
+          updatedBy: { profile_uid: 'editor_profile_uid' },
+        }),
+        fromVersion: 5,
+        toVersion: 9,
+      });
+
+    it('leaves existing rules unchanged, since metadata.template is optional', () => {
+      const document = createV9RuleDocument();
+      const migrated = migrator.migrate({ document, fromVersion: 9, toVersion: 10 });
+
+      expect(migrated.attributes).toEqual(document.attributes);
+    });
+
+    it('accepts a template in the v10 forward compatibility schema', () => {
+      const forwardCompatibility = ruleModelVersions['10']?.schemas
+        ?.forwardCompatibility as ObjectType;
+      const attributes = {
+        ...(createV9RuleDocument().attributes as Record<string, unknown>),
+        metadata: { name: 'test-rule', template: { id: 'template-1' } },
+      };
+
+      expect(
+        (forwardCompatibility.validate(attributes) as { metadata: Record<string, unknown> })
+          .metadata.template
+      ).toEqual({ id: 'template-1' });
+    });
+
+    it('drops the template when a v9 node reads a v10 rule', () => {
+      const forwardCompatibility = ruleModelVersions['9']?.schemas
+        ?.forwardCompatibility as ObjectType;
+      const attributes = {
+        ...(createV9RuleDocument().attributes as Record<string, unknown>),
+        metadata: { name: 'test-rule', template: { id: 'template-1' } },
+      };
+
+      expect(
+        (forwardCompatibility.validate(attributes) as { metadata: Record<string, unknown> })
+          .metadata
+      ).toEqual({ name: 'test-rule' });
+    });
+  });
+
+  describe('v10 to v11 migration', () => {
+    const migrator = createModelVersionTestMigrator({ type: ruleType });
+
+    const createV10RuleDocument = (): SavedObject =>
+      migrator.migrate({
+        document: createV5RuleDocument({
+          metadata: { name: 'test-rule', tags: ['prod'], template: { id: 'template-1' } },
+          createdBy: { profile_uid: 'author_profile_uid' },
+          updatedBy: { profile_uid: 'editor_profile_uid' },
+        }),
+        fromVersion: 5,
+        toVersion: 10,
+      });
+
+    it('indexes metadata.template.id as a keyword', () => {
+      expect(ruleModelVersions['11']?.changes).toEqual([
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            metadata: {
+              properties: {
+                template: { properties: { id: { type: 'keyword', ignore_above: 256 } } },
+              },
+            },
+          },
+        },
+      ]);
+    });
+
+    it('declares the same mapping on the type as the model version adds', () => {
+      expect(ruleMappings.properties?.metadata).toMatchObject({
+        properties: {
+          template: { properties: { id: { type: 'keyword', ignore_above: 256 } } },
+        },
+      });
+    });
+
+    it('leaves existing rules unchanged', () => {
+      const document = createV10RuleDocument();
+      const migrated = migrator.migrate({ document, fromVersion: 10, toVersion: 11 });
+
+      expect(migrated.attributes).toEqual(document.attributes);
+    });
+
+    it('keeps the template in the v11 forward compatibility schema', () => {
+      const forwardCompatibility = ruleModelVersions['11']?.schemas
+        ?.forwardCompatibility as ObjectType;
+      const attributes = createV10RuleDocument().attributes as Record<string, unknown>;
+
+      expect(
+        (forwardCompatibility.validate(attributes) as { metadata: Record<string, unknown> })
+          .metadata.template
+      ).toEqual({ id: 'template-1' });
+    });
+  });
+
   // The actor is a nested object, so these pin that `unknowns: 'ignore'` on the
   // attributes schema reaches it. It does: config-schema maps the option to Joi's
   // `stripUnknown`, which cascades to children that do not override it. Without

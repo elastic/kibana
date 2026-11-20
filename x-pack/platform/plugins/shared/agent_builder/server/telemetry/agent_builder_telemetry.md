@@ -235,6 +235,9 @@ execution. For per-execution figures, and for pauses that were never resumed, se
 | `origin` | keyword | no | External system the conversation came from. See [Conversation origin](#conversation-origin). |
 | `input_tokens` | integer | yes | Input tokens consumed in this round. |
 | `cached_input_tokens` | integer | no | Input tokens served from cache in this round (subset of `input_tokens`), when reported by the provider. |
+| `reasoning_tokens` | integer | no | Reasoning (thinking) tokens in this round (subset of `output_tokens`), when reported by the provider. |
+| `models` | keyword[] | no | Distinct models that served the LLM calls of this round, when the per-model breakdown is available. |
+| `models_count` | integer | no | Number of distinct models in `models`, not of connectors: connectors serving the same model count once. |
 | `llm_calls` | integer | yes | Number of LLM calls made during the round. |
 | `message_length` | integer | yes | Character length of the user's input message. |
 | `model` | keyword | no | LLM model identifier. |
@@ -250,6 +253,7 @@ execution. For per-execution figures, and for pauses that were never resumed, se
 | `tool_calls` | integer | yes | Total number of tool-call steps in this round. |
 | `tool_call_errors` | integer | yes | Number of tool calls where all results were errors. |
 | `tools_invoked` | keyword[] | yes | Normalized tool IDs invoked (may contain duplicates for per-tool counts). |
+| `workflow_execution_id` | keyword | no | The workflow execution whose `ai.agent` step started the round. See [Round attribution](#round-attribution). |
 
 ### `agent_builder_execution_complete`
 
@@ -277,6 +281,9 @@ An execution with `outcome: prompt_requested` and no `agent_builder_round_comple
 | `outcome` | keyword | yes | `responded` if it ended the round, `prompt_requested` if it paused. |
 | `input_tokens` | integer | yes | Input tokens consumed by this execution alone. |
 | `cached_input_tokens` | integer | no | Cache reads, a subset of `input_tokens`. |
+| `reasoning_tokens` | integer | no | Reasoning (thinking) tokens, a subset of `output_tokens`. |
+| `models` | keyword[] | no | Distinct models that served this execution's LLM calls. |
+| `models_count` | integer | no | Number of distinct models in `models`, not of connectors: connectors serving the same model count once. |
 | `output_tokens` | integer | yes | Output tokens produced by this execution alone. |
 | `llm_calls` | integer | yes | LLM calls made by this execution alone. |
 | `model` | keyword | no | LLM model identifier. |
@@ -309,6 +316,7 @@ Fired when a round fails with an unrecoverable error.
 | `model_provider` | keyword | no | LLM provider identifier. |
 | `error_type` | keyword | yes | Sanitized/normalized error type or code. |
 | `error_message` | keyword | yes | Error message (truncated to 500 chars). |
+| `workflow_execution_id` | keyword | no | The workflow execution whose `ai.agent` step started the round. See [Round attribution](#round-attribution). |
 
 ### `agent_builder_tool_call_success`
 
@@ -345,6 +353,71 @@ Fired when a tool call fails.
 | `error_message` | keyword | yes | Error message (truncated to 500 chars). |
 | `duration_ms` | integer | yes | Tool execution time in milliseconds. |
 
+### `agent_builder_conversation_fields_changed`
+
+Fired once per **write that changed at least one template field** the conversation's template opts
+in with `report_changes` (see [Reporting template field changes](#reporting-template-field-changes)).
+One event covers every opted-in field the write changed: closing an Investigation with a reason
+sends one event listing `status` and `close_reason`, so a close and its reason stay paired.
+
+It is sent from the conversation client after the write has landed, on create and on every write
+the `ai.conversation.updated` workflow trigger also describes (`patchMetadata`, `update`,
+`applyTemplate` and the rest), for every writer: an agent through its tools, a workflow step, an
+HTTP route, or another plugin through the server API. It doesn't depend on that trigger's
+per-template opt-in. A write that leaves every opted-in field as it was sends nothing. A failure
+to describe or report the changes is logged and never fails the write.
+
+Only SELECT fields can opt in, and the values sent are the field's `options`. A stored value that
+isn't one of them is reported as `unrecognized` (not `other`, which templates use as a real
+option). Templates are registered by plugins in code, so the template id, the field names and the
+values are fixed strings, never customer content.
+
+`changed_fields` is a record of field name to `true` (for example
+`{ "status": true, "close_reason": true }`), so a dashboard can filter on
+`changed_fields.close_reason: true`. EBT has no typed map, so it is declared `pass_through` and
+isn't schema-validated; `describeConversationFieldsChanged` builds it from the same changes as
+`changes`, and its tests are the control. A field that opts in can't have a dot in its name
+(template validation rejects it), so each key stays one field on the telemetry cluster. `changes`
+is a schema-validated array.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `conversation_id` | keyword | yes | The conversation whose fields changed. Usually a random UUID, but a caller may supply its own. |
+| `template_id` | keyword | yes | The template that declares the fields. |
+| `source` | keyword | yes | `execution`, `workflow`, `http_api` or `server_api`: the same value the `ai.conversation.updated` workflow trigger reports. |
+| `change_kind` | keyword | yes | `created` when the write created the conversation, otherwise `updated`. |
+| `changed_fields` | record (pass_through) | yes | The fields the write changed, as field name to `true`. The same fields as `changes`, for filtering without unnesting. |
+| `changes` | object[] | yes | One entry per changed field, in the template's declaration order: `field` (keyword, required), `previous_value` and `next_value` (keyword, optional). |
+| `changes.previous_value` | keyword | no | The value before the write. Absent when the write created the conversation, when it applied the template (values stored under another template aren't values of this one), or when the field had no value. |
+| `changes.next_value` | keyword | no | The value after the write. Absent when the write cleared the field. |
+
+What it doesn't report: who made the change (only how it reached storage), fields the template
+doesn't opt in, non-SELECT fields, and a value written again unchanged. A select field can't be
+cleared through `patchMetadata`, so a reopened Investigation keeps its last close reason, and a
+reopen lists only `status`.
+
+### Reporting template field changes
+
+A template owner opts a field in by setting `report_changes: true` on its definition:
+
+```ts
+status: {
+  input_type: 'SELECT',
+  options: ['open', 'closed'],
+  report_changes: true,
+},
+```
+
+- `report_changes` is only allowed on `SELECT` fields. Registering a template that sets it on any
+  other input type fails validation (`validateTemplateDefinition`), so free text can't be
+  reported by mistake.
+- The field's name can't contain a dot, because it is reported as a key of `changed_fields`.
+- Choose fields whose options are worth counting over time, such as a lifecycle status or a close
+  reason. Each write that changes one sends an event, so prefer fields that change a few times in a
+  conversation's life.
+- The built-in `investigation` and `escalation` templates report `status` and `close_reason`
+  (`agent_builder_platform/server/conversation_templates`).
+
 ### Conversation origin
 
 `agent_builder_round_complete`, `agent_builder_round_error`, `agent_builder_tool_call_success`
@@ -356,6 +429,40 @@ only value.
 started from the Agent Builder UI or a direct call to the converse API carry no `origin`, and
 neither do rounds and tool calls from sub-agent runs, since a sub-agent opens its own execution
 without inheriting the parent's origin.
+
+### Round attribution
+
+`agent_builder_round_complete` and `agent_builder_round_error` carry an optional
+`workflow_execution_id`: for a round started by a workflow `ai.agent` step, the ID of that workflow
+execution, the same engine-generated ID the workflows engine reports as `workflowExecutionId`. It
+joins a round to the workflow run that started it, so a run's agent work (LLM calls, model, tool
+calls, round errors) can be counted per run; the engine already reports the run's token totals.
+
+- The `ai.agent` step passes it as the `workflowExecutionId` execution parameter for every round,
+  whether or not it sets `plugin-id`. No route accepts it.
+- A persistent sub-agent that such a round creates, or sends a message to, inherits it, so its
+  rounds join to the same run. Standalone sub-agent runs inherit it too, but report no round
+  events.
+- Rounds from the Agent Builder UI and the converse and chat APIs carry none.
+
+`agent_builder_execution_complete` and tool-call events don't carry it.
+
+The same id is the one source of the workflow run for EIS too: every LLM call of such an execution
+sends it to EIS as the `interactionId` connector telemetry field (the
+`X-Elastic-Inference-Interaction-Id` header), so EIS usage joins to the same run. Only the main
+agent's loop sends it, the same calls that carry the trace, user and space ids: the sub-agents it
+spawns (persistent or standalone) don't. An `interactionId` the caller set itself is kept. Only EIS
+inference endpoints get this header; other connectors receive only `pluginId` and `aggregateBy`.
+
+What it doesn't attribute:
+
+- The id is the workflow execution whose step ran the agent, not the root of a chain of workflows;
+  join through the engine's run events to reach the root.
+- Standalone sub-agent runs report no round events, so their work isn't counted per run.
+- Sub-agents' EIS calls carry no `interactionId`, so EIS usage grouped by run counts only the
+  main agent's calls.
+- A run that fails while it is being set up (for example, its connector can't be resolved) reports
+  no `agent_builder_round_error`, with or without the id.
 
 ### Skill CRUD events
 

@@ -19,7 +19,13 @@ import { BehaviorSubject } from 'rxjs';
 import { AlertRuleFromVisAction } from './alert_rule_from_vis_ui_action';
 import * as AlertFlyoutComponentModule from './rule_flyout_component';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
+
+// Cold-loading the real flyout chunk would be charged to whichever test runs first; the real
+// `getRuleFlyoutComponent` is covered by `rule_flyout_component.test.tsx` with this same mock.
+jest.mock('@kbn/response-ops-rule-form/flyout', () => ({ RuleForm: () => null }));
+
+let mockFlyoutContent: Promise<JSX.Element | null | void> | undefined;
 
 // mock lazy flyout component
 jest.mock('@kbn/presentation-util', () => ({
@@ -32,7 +38,8 @@ jest.mock('@kbn/presentation-util', () => ({
       closeFlyout: () => void;
     }) => Promise<JSX.Element | null | void>;
   }) => {
-    return loadContent({ closeFlyout: jest.fn() });
+    mockFlyoutContent = loadContent({ closeFlyout: jest.fn() });
+    return mockFlyoutContent;
   },
 }));
 
@@ -101,19 +108,19 @@ describe('AlertRuleFromVisAction', () => {
     startDependenciesMock
   );
 
-  // `execute` opens the flyout without awaiting its lazily-imported content, so flush pending
-  // async work after each call to ensure `getRuleFlyoutComponent` has been called before we read it.
+  // `execute` opens the flyout without awaiting its content, so await it before reading the spy.
   const executeAndFlush = async (context: Parameters<typeof action.execute>[0]) => {
     await act(async () => {
       await action.execute(context);
+      await mockFlyoutContent;
     });
-    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
   };
 
   const getCreateAlertRuleLastCalledInitialValues = () => last(spy.mock.calls ?? [])?.[5];
 
   beforeEach(() => {
     spy.mockClear();
+    mockFlyoutContent = undefined;
   });
 
   afterAll(() => {
@@ -441,12 +448,30 @@ describe('AlertRuleFromVisAction', () => {
     `);
   });
 
+  describe('isCompatible', () => {
+    it('is compatible with a Lens panel that runs an ES|QL query', async () => {
+      const embeddable = getLensApiMock({
+        esql$: new BehaviorSubject<AggregateQuery[]>([
+          { esql: 'FROM index | STATS count = COUNT(*)' },
+        ]),
+      });
+      expect(await action.isCompatible({ embeddable })).toBe(true);
+    });
+
+    it('is not compatible with a Lens panel that does not use ES|QL', async () => {
+      const embeddable = getLensApiMock({
+        esql$: new BehaviorSubject<AggregateQuery[]>([]),
+      });
+      expect(await action.isCompatible({ embeddable })).toBe(false);
+    });
+  });
+
   describe('when executed without a data parameter', () => {
     it('derives data from the embeddable and uses placeholder threshold values', async () => {
       const embeddable = getLensApiMock({
-        query$: new BehaviorSubject<Query | AggregateQuery | undefined>({
-          esql: 'FROM index | STATS count = COUNT(*)',
-        }),
+        esql$: new BehaviorSubject<AggregateQuery[]>([
+          { esql: 'FROM index | STATS count = COUNT(*)' },
+        ]),
         getInspectorAdapters: jest.fn(() => ({
           tables: {
             tables: {
@@ -510,9 +535,9 @@ describe('AlertRuleFromVisAction', () => {
     });
     it('uses placeholder split values when the X axis is not a timestamp', async () => {
       const embeddable = getLensApiMock({
-        query$: new BehaviorSubject<Query | AggregateQuery | undefined>({
-          esql: 'FROM index | STATS count = COUNT(*) BY group',
-        }),
+        esql$: new BehaviorSubject<AggregateQuery[]>([
+          { esql: 'FROM index | STATS count = COUNT(*) BY group' },
+        ]),
         getInspectorAdapters: jest.fn(() => ({
           tables: {
             tables: {

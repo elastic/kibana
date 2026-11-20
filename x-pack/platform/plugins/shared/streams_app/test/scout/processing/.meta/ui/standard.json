@@ -1,5 +1,5 @@
 {
-  "sha1": "7d84f56ef130a0fa474c1c07ce7f34d9bc353e09",
+  "sha1": "fcf9c538e5b75e6ac11356d2153dec2d079296f1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -567,7 +567,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/processing/ui/tests/error_handling.spec.ts",
-        "line": 60,
+        "line": 63,
         "column": 24
       }
     },

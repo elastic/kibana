@@ -12,8 +12,10 @@ export enum SuggestionCategory {
   PROMQL_METRIC_QUALIFIER = 'promql_metric_qualifier', // PromQL label selector {}, range selector [5m]
   LANGUAGE_KEYWORD = 'language_keyword', // BY, WHERE, ON, WITH, AS
   CONSTANT_VALUE = 'constant_value', // Prompt text, query text constants
+  COMMAND_MODIFIER = 'command_modifier', // Optional modifier typed before the arguments (HIGHLIGHT prefix = ...)
   USER_DEFINED_COLUMN = 'user_defined_column',
   TIME_PARAM = 'time_param',
+  GEO_PRECISION_PARAM = 'geo_precision_param',
   RECOMMENDED_FIELD = 'recommended_field',
   LOOKUP_COMMON_FIELD = 'lookup_common_field',
   ECS_FIELD = 'ecs_field',

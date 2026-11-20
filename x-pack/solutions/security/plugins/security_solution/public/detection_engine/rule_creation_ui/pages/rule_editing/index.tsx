@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-import type { EuiTabbedContentTab } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiResizableContainer,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiLink, EuiResizableContainer, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { AppHeaderTab } from '@kbn/app-header';
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -71,16 +60,18 @@ import { extractValidationMessages } from '../../../rule_creation/logic/extract_
 import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/validation_warning_codes';
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
-import { CustomHeaderPageMemo } from '..';
+import { RuleFormAppHeader } from '..';
 import { usePrebuiltRulesCustomizationStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { useAddRuleAttachmentToChatMenuItem } from '../../components/add_rule_attachment_to_chat_button';
+import { useGetSecuritySolutionUrl } from '../../../../common/components/link_to';
+import { PAGE_TITLE as RULE_DETAILS_PAGE_TITLE } from '../../../rule_details_ui/pages/rule_details/translations';
 import { useAgentBuilderRuleCreation } from '../rule_creation/hooks/use_agent_builder_rule_creation';
 import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
+import { EditRuleFormButtons } from './edit_rule_form_buttons';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -95,7 +86,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     investigationGuide: { edit: canEditInvestigationGuides },
     customHighlightedFields: { edit: canEditCustomHighlightedFields },
   } = useUserPrivileges().rulesPrivileges;
-  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const hasRulePermissionsForEditPage =
     canEditRules ||
     (canReadRules && canEditInvestigationGuides) ||
@@ -124,14 +114,16 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const collapseFn = useRef<() => void | undefined>();
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
 
-  const backOptions = useMemo(
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const back = useMemo(
     () => ({
-      path: getRuleDetailsUrl(ruleId ?? ''),
-      text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
-      pageId: SecurityPageName.rules,
-      dataTestSubj: 'ruleEditBackToRuleDetails',
+      label: rule?.name ?? RULE_DETAILS_PAGE_TITLE,
+      href: getSecuritySolutionUrl({
+        deepLinkId: SecurityPageName.rules,
+        path: getRuleDetailsUrl(ruleId ?? ''),
+      }),
     }),
-    [rule?.name, ruleId]
+    [getSecuritySolutionUrl, rule?.name, ruleId]
   );
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
@@ -221,7 +213,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   });
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
 
-  const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern({
+  const { indexPattern, isIndexPatternLoading, isIndexPatternSettled } = useRuleIndexPattern({
     dataSourceType: defineStepData.dataSourceType,
     index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
@@ -398,6 +390,20 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     ]
   );
 
+  const headerTabs = useMemo<AppHeaderTab[]>(
+    () =>
+      tabs.map(({ id, name, disabled, tooltip, 'data-test-subj': dataTestSubj }) => ({
+        id,
+        label: name,
+        isSelected: id === activeStep,
+        onClick: () => setActiveStep(id),
+        disabled,
+        toolTipContent: tooltip,
+        'data-test-subj': dataTestSubj,
+      })),
+    [tabs, activeStep]
+  );
+
   const { startTransaction } = useStartTransaction();
 
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
@@ -517,26 +523,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     saveChanges,
   ]);
 
-  const onTabClick = useCallback(async (tab: EuiTabbedContentTab) => {
-    const targetStep = tab.id as RuleStep;
-    setActiveStep(targetStep);
-  }, []);
-
-  const renderTabs = () => {
-    return tabs.map((tab, index) => (
-      <EuiToolTip key={index} position="top" content={tab.tooltip}>
-        <EuiTab
-          onClick={() => onTabClick(tab)}
-          isSelected={tab.id === activeStep}
-          disabled={tab.disabled}
-          data-test-subj={tab['data-test-subj']}
-        >
-          {tab.name}
-        </EuiTab>
-      </EuiToolTip>
-    ));
-  };
-
   const goToDetailsRule = useCallback(
     (ev: React.SyntheticEvent) => {
       ev.preventDefault();
@@ -558,29 +544,20 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     ),
   });
 
-  const addToChatButton = useMemo(
-    () =>
-      isAgentChatExperienceEnabled ? (
-        <AddRuleAttachmentToChatButton
-          defineStepData={defineStepData}
-          aboutStepData={aboutStepData}
-          scheduleStepData={scheduleStepData}
-          actionsStepData={actionsStepData}
-          actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-          existingRuleId={rule?.id}
-          pathway="rule_editing"
-        />
-      ) : null,
-    [
-      isAgentChatExperienceEnabled,
-      defineStepData,
-      aboutStepData,
-      scheduleStepData,
-      actionsStepData,
-      triggersActionsUi.actionTypeRegistry,
-      rule?.id,
-    ]
-  );
+  const addToChatAction = useAddRuleAttachmentToChatMenuItem({
+    defineStepData,
+    aboutStepData,
+    scheduleStepData,
+    actionsStepData,
+    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+    existingRuleId: rule?.id,
+    pathway: 'rule_editing',
+  });
+
+  const toggleRulePreview = useCallback(() => {
+    collapseFn.current?.();
+    setIsRulePreviewVisible((isVisible) => !isVisible);
+  }, []);
 
   const verifyRuleDefinitionForPreview = useCallback(
     () => defineStepForm.validate(),
@@ -624,6 +601,14 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     <>
       {confirmSavingWithWarningModal}
       <SecuritySolutionPageWrapper>
+        <RuleFormAppHeader
+          title={i18n.PAGE_TITLE}
+          back={back}
+          isRulePreviewVisible={isRulePreviewVisible}
+          onToggleRulePreview={toggleRulePreview}
+          addToChatAction={addToChatAction}
+          tabs={headerTabs}
+        />
         <EuiResizableContainer>
           {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
             collapseFn.current = () => togglePanel?.('preview', { direction: 'left' });
@@ -649,15 +634,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                           />
                         )}
 
-                      <CustomHeaderPageMemo
-                        backOptions={backOptions}
-                        isLoading={isLoading}
-                        title={i18n.PAGE_TITLE}
-                        isRulePreviewVisible={isRulePreviewVisible}
-                        setIsRulePreviewVisible={setIsRulePreviewVisible}
-                        togglePanel={togglePanel}
-                        addToChatButton={addToChatButton}
-                      />
                       {isRulesCustomizationEnabled && upgradeCallout}
                       {invalidSteps.length > 0 && (
                         <EuiCallOut
@@ -690,8 +666,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         </EuiCallOut>
                       )}
 
-                      <EuiTabs>{renderTabs()}</EuiTabs>
-
                       {tabs.map((tab) => tab.content)}
 
                       <EuiSpacer />
@@ -702,24 +676,12 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         justifyContent="flexEnd"
                         responsive={false}
                       >
-                        <EuiFlexItem grow={false}>
-                          <EuiButton iconType="cross" onClick={goToDetailsRule}>
-                            {i18n.CANCEL}
-                          </EuiButton>
-                        </EuiFlexItem>
-
-                        <EuiFlexItem grow={false}>
-                          <EuiButton
-                            data-test-subj="ruleEditSubmitButton"
-                            fill
-                            onClick={onSubmit}
-                            iconType="save"
-                            isLoading={isLoading}
-                            isDisabled={loading}
-                          >
-                            {i18n.SAVE_CHANGES}
-                          </EuiButton>
-                        </EuiFlexItem>
+                        <EditRuleFormButtons
+                          onCancel={goToDetailsRule}
+                          onSubmit={onSubmit}
+                          isLoading={isLoading}
+                          isDisabled={loading || !isIndexPatternSettled}
+                        />
                       </EuiFlexGroup>
                     </MaxWidthEuiFlexItem>
                   </EuiFlexGroup>

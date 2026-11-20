@@ -137,11 +137,13 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       isAnonymousPage,
     });
 
-    // Build script paths for external plugins using the same route scheme as bundle routes
-    const externalPluginScriptPaths = [...externalPluginIds].map((pluginId) => {
-      const { version } = uiPlugins.internal.get(pluginId)!;
-      return `${bundlesHref}/plugin/${pluginId}/${version}/${pluginId}.plugin.js`;
+    // Only load external plugins this page needs (enabled, anonymous-page filtered, or
+    // required bundles), keeping the startup detection order for their script tags.
+    const externalPluginInfos = [...externalPluginIds].flatMap((pluginId) => {
+      const info = bundlePaths.get(pluginId);
+      return info ? [{ pluginId, ...info }] : [];
     });
+    const externalPluginScriptPaths = externalPluginInfos.map(({ bundlePath }) => bundlePath);
 
     const chunkPaths = getAllChunkFilenames().map((f) => `${bundlesHref}/${f}`);
 
@@ -159,16 +161,13 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       'kbn-monaco': `${bundlesHref}/kbn-monaco/`,
       // Internal plugins use the unified bundles directory
       ...Object.fromEntries(
-        [...bundlePaths.entries()]
-          .filter(([pluginId]) => !externalPluginIds.has(pluginId))
-          .map(([pluginId]) => [pluginId, bundlesDir])
+        [...bundlePaths.keys()]
+          .filter((pluginId) => !externalPluginIds.has(pluginId))
+          .map((pluginId) => [pluginId, bundlesDir])
       ),
       // External plugins use their own versioned bundle route
       ...Object.fromEntries(
-        [...externalPluginIds].map((pluginId) => {
-          const { version } = uiPlugins.internal.get(pluginId)!;
-          return [pluginId, `${bundlesHref}/plugin/${pluginId}/${version}/`];
-        })
+        externalPluginInfos.map(({ pluginId, publicPath }) => [pluginId, publicPath])
       ),
     });
 

@@ -27,7 +27,6 @@ describe('buildRulePayload', () => {
       metadata: { name: 'Host CPU high' },
       schedule: { every: '5m' },
       query: { base: 'FROM logs-*' },
-      state_transition: null,
       time_field: DEFAULT_TIME_FIELD,
     });
   });

@@ -75,7 +75,7 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
       value: defaultValue,
     },
   });
-  const [{ value }] = useFormData({ form });
+  const [{ value }, , isFormDataReady] = useFormData({ form });
   const { submit, isValid } = form;
   const formFieldConfig = getTextFieldConfig({
     required: customFieldConfiguration.required,
@@ -85,12 +85,18 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
     value === customFieldConfiguration?.defaultValue && isEmpty(initialValue);
 
   useEffect(() => {
+    // Until a field registers, `useFormData` reports an empty form, which would publish an
+    // `undefined` value as if the user had cleared the field.
+    if (!isFormDataReady) {
+      return;
+    }
+
     onChange({
       value,
       isValid,
       submit,
     });
-  }, [isValid, onChange, submit, value]);
+  }, [isFormDataReady, isValid, onChange, submit, value]);
 
   return (
     <Form form={form}>

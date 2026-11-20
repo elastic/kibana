@@ -17,7 +17,7 @@ import {
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { UserAvatar } from '@kbn/user-profile-components';
+import { UserAvatar, getUserDisplayName } from '@kbn/user-profile-components';
 import { EMPTY_VALUE } from '../constants';
 import * as i18n from './translations';
 
@@ -97,7 +97,7 @@ export const UserProfileDisplay = ({
   }
 
   const { user } = profile;
-  const username = user.username;
+  const displayName = getUserDisplayName(user);
   const avatar = profile.data?.avatar;
 
   return (
@@ -112,8 +112,8 @@ export const UserProfileDisplay = ({
         <UserAvatar user={user} avatar={avatar} size="s" />
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-        <EuiText size="s" className="eui-textTruncate" title={username}>
-          {username}
+        <EuiText size="s" className="eui-textTruncate" title={displayName}>
+          {displayName}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

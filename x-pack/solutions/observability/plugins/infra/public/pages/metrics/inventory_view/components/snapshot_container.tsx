@@ -12,10 +12,10 @@ import { useSourceContext } from '../../../../containers/metrics_source';
 import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
-import { useInventoryRequestSchema } from '../hooks/use_inventory_request_schema';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { snapshotMetricForInventoryRequest } from '../lib/snapshot_metric_for_catalog';
 import { LayoutView } from './layout_view';
+import { getInventoryRequestSchema } from '../lib/get_inventory_request_schema';
 
 export const SnapshotContainer = React.memo(function SnapshotContainer() {
   const { sourceId } = useSourceContext();
@@ -23,7 +23,7 @@ export const SnapshotContainer = React.memo(function SnapshotContainer() {
     useWaffleOptionsContext();
   const { currentTime } = useWaffleTimeContext();
   const { filterQuery } = useWaffleFiltersContext();
-  const requestSchema = useInventoryRequestSchema(nodeType, preferredSchema);
+  const requestSchema = getInventoryRequestSchema(preferredSchema);
   const inventoryModel = findInventoryModel(nodeType);
   const requestMetric = useMemo(
     () =>

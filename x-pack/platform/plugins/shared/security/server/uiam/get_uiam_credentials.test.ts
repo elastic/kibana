@@ -6,8 +6,9 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
-import { getUiamCredentialsFromRequest } from './get_uiam_credentials';
+import { assertUiamCredential, getUiamCredentialsFromRequest } from './get_uiam_credentials';
 
 describe('getUiamCredentialsFromRequest', () => {
   it.each([
@@ -33,5 +34,25 @@ describe('getUiamCredentialsFromRequest', () => {
         httpServerMock.createKibanaRequest({ headers: { authorization: 'Bearer other' } })
       )
     ).toThrow('Provided credential is not compatible with UIAM');
+  });
+});
+
+describe('assertUiamCredential', () => {
+  it('accepts a UIAM credential', () => {
+    expect(() =>
+      assertUiamCredential(new HTTPAuthorizationHeader('Bearer', 'essu_token'))
+    ).not.toThrow();
+  });
+
+  it('rejects a missing authorization header with a 401', () => {
+    expect(() => assertUiamCredential(null)).toThrow(
+      expect.objectContaining({ output: expect.objectContaining({ statusCode: 401 }) })
+    );
+  });
+
+  it('rejects a credential UIAM would not accept with a 400', () => {
+    expect(() =>
+      assertUiamCredential(new HTTPAuthorizationHeader('Basic', 'dXNlcjpwYXNz'))
+    ).toThrow(expect.objectContaining({ output: expect.objectContaining({ statusCode: 400 }) }));
   });
 });

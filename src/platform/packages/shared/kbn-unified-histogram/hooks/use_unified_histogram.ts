@@ -44,6 +44,10 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    */
   withLensActions?: boolean;
   /**
+   * Options forwarded to Lens when opening the chart in the Lens editor or saving it
+   */
+  lensActionsOptions?: UnifiedHistogramChartProps['lensActionsOptions'];
+  /**
    * Disabled action IDs for the Lens embeddable
    */
   disabledActions?: LensEmbeddableInput['disabledActions'];
@@ -126,7 +130,6 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
   const isChartAvailable = checkChartAvailability({
     chart,
     dataSource: fetchParams?.dataSource,
-    isPlainRecord: fetchParams?.isESQLQuery,
   });
 
   useEffect(() => {

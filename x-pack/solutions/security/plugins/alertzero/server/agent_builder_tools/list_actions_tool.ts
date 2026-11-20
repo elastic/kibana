@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
@@ -16,15 +16,17 @@ import type { ActionsService } from '../services/actions/actions_service';
 
 import type { AssertAlertZeroAccess } from './assert_alertzero_access';
 
-const listByCategorySchema = z.object({
-  categories: z
-    .array(actionCategorySchema)
-    .max(20)
-    .optional()
-    .describe(
-      'Category keywords to filter on (e.g. ["contain", "escalate"]). An action is returned when its declared category matches ANY of these. Omit to list every available action.'
-    ),
-});
+const listByCategorySchema = lazySchema(() =>
+  z.object({
+    categories: z
+      .array(actionCategorySchema)
+      .max(20)
+      .optional()
+      .describe(
+        'Category keywords to filter on (e.g. ["contain", "escalate"]). An action is returned when its declared category matches ANY of these. Omit to list every available action.'
+      ),
+  })
+);
 
 /**
  * `security.alertzero.actions.list` — lets an agent discover the

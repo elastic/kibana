@@ -34,7 +34,7 @@ describe('GettingStartedPage', () => {
     jest.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(true);
   });
   it('works with cloud locations', () => {
-    const { getByText } = render(<GettingStartedPage />, {
+    const { getByText, getByTestId } = render(<GettingStartedPage />, {
       state: {
         serviceLocations: {
           locations: [
@@ -57,7 +57,11 @@ describe('GettingStartedPage', () => {
     });
 
     // page is loaded
-    expect(getByText('Create a single page browser monitor')).toBeInTheDocument();
+    expect(getByText('Create your first monitor')).toBeInTheDocument();
+    expect(getByText('Monitor a single page')).toBeInTheDocument();
+    expect(getByTestId('syntheticsGettingStartedPageLink')).toHaveTextContent(
+      'Choose a monitor type'
+    );
   });
 
   it('serves on prem getting started experience when locations are not available', () => {

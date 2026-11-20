@@ -12,7 +12,11 @@ import { useController } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
-import { validateSkipRows, type CreateDatasetFormValues } from '../../../create_dataset_form_state';
+import {
+  DEFAULT_SKIP_ROWS,
+  validateSkipRows,
+  type CreateDatasetFormValues,
+} from '../../../create_dataset_form_state';
 import { FormRowLabelWithInfo } from '../../../components/form_row_label_with_info';
 
 export function SkipRowsField({ control }: { control: Control<CreateDatasetFormValues> }) {
@@ -42,7 +46,7 @@ export function SkipRowsField({ control }: { control: Control<CreateDatasetFormV
         <FormattedMessage
           id="xpack.dataFederation.createDatasetForm.settingsSkipRowsHelp"
           defaultMessage="{zeroValue} by default"
-          values={{ zeroValue: <EuiCode>0</EuiCode> }}
+          values={{ zeroValue: <EuiCode>{DEFAULT_SKIP_ROWS}</EuiCode> }}
         />
       }
       fullWidth

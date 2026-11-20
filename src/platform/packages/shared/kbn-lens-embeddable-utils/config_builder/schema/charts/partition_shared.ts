@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { isEqual } from 'lodash';
 import type { AutoColorType, ColorMappingType, StaticColorType } from '../color';
 import { DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../color';
@@ -15,44 +15,48 @@ import { groupIsNotCollapsed } from '../../utils';
 
 /**
  * A grouping dimension is only considered to have an explicit coloring assignment when its color
- * differs from the default categorical mapping that the schema applies to every breakdown dimension.
- * Without this check, the auto-applied default would make every dimension look "colored" and the
- * single-dimension coloring rules below could never be satisfied for multi-breakdown charts.
+ * differs from the default categorical mapping. The response carries that default mapping on the
+ * first non-collapsed group, so a request that sends it back (or sets it on other groups) is not
+ * an assignment, and the single-dimension coloring rules below stay satisfiable.
  */
 function hasAssignedColoring(color?: ColorMappingType): boolean {
   return color != null && !isEqual(color, DEFAULT_CATEGORICAL_COLOR_MAPPING);
 }
 
-export const valueDisplaySchema = z
-  .object({
-    visible: z.boolean().optional().meta({ description: 'Show metric values on the chart' }),
-    mode: z
-      .union([z.literal('absolute'), z.literal('percentage')])
-      .optional()
-      .meta({
-        description: 'How to format values when visible.',
-      }),
-    percent_decimals: z
-      .number()
-      .min(0)
-      .max(10)
-      .default(2)
-      .optional()
-      .meta({ description: 'Decimal places for percentage display (0-10)' }),
-  })
-  .strict()
-  .optional()
-  .meta({
-    id: 'visValueDisplay',
-    description:
-      'Configure the visibility and the format of the values rendered on each chart partition section',
-  });
+export const valueDisplaySchema = lazySchema(() =>
+  z
+    .object({
+      visible: z.boolean().optional().meta({ description: 'Show metric values on the chart' }),
+      mode: z
+        .union([z.literal('absolute'), z.literal('percentage')])
+        .optional()
+        .meta({
+          description: 'How to format values when visible.',
+        }),
+      percent_decimals: z
+        .number()
+        .min(0)
+        .max(10)
+        .default(2)
+        .optional()
+        .meta({ description: 'Decimal places for percentage display (0-10)' }),
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visValueDisplay',
+      description:
+        'Configure the visibility and the format of the values rendered on each chart partition section',
+    })
+);
 
-export const legendNestedSchema = z
-  .boolean()
-  .default(false)
-  .optional()
-  .meta({ description: 'Show nested legend with hierarchical breakdown levels' });
+export const legendNestedSchema = lazySchema(() =>
+  z
+    .boolean()
+    .default(false)
+    .optional()
+    .meta({ description: 'Show nested legend with hierarchical breakdown levels' })
+);
 
 export type PartitionMetric =
   | {}

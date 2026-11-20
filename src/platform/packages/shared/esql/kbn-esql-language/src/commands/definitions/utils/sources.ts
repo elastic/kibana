@@ -131,10 +131,10 @@ export const buildSourcesDefinitions = (
       asSnippet: isIntegration,
       kind,
       detail: isIntegration
-        ? i18n.translate('kbn-esql-language.esql.autocomplete.integrationDefinition', {
+        ? i18n.translate('esqlLanguage.esql.autocomplete.integrationDefinition', {
             defaultMessage: SOURCES_TYPES.INTEGRATION,
           })
-        : i18n.translate('kbn-esql-language.esql.autocomplete.sourceDefinition', {
+        : i18n.translate('esqlLanguage.esql.autocomplete.sourceDefinition', {
             defaultMessage: '{type}',
             values: {
               type: type ?? SOURCES_TYPES.INDEX,
@@ -160,13 +160,33 @@ export const buildViewsDefinitions = (
         label: name,
         text: getSafeInsertSourceText(name),
         kind: 'Issue',
-        detail: i18n.translate('kbn-esql-language.esql.autocomplete.viewDefinition', {
+        detail: i18n.translate('esqlLanguage.esql.autocomplete.viewDefinition', {
           defaultMessage: '{type}',
           values: { type: type ?? SOURCES_TYPES.VIEW },
         }),
         documentation: buildDocumentation(description, links),
       });
     });
+
+/**
+ * Builds suggestion items for the LET bindings that FROM can read.
+ */
+export const buildNamedSubqueriesDefinitions = (
+  names: string[],
+  alreadyUsed: string[] = []
+): ISuggestionItem[] =>
+  names
+    .filter((name) => !alreadyUsed.includes(name))
+    .map((name) =>
+      withAutoSuggest({
+        label: name,
+        text: getSafeInsertSourceText(name),
+        kind: 'Issue',
+        detail: i18n.translate('esqlLanguage.esql.autocomplete.namedSubqueryDefinition', {
+          defaultMessage: 'LET',
+        }),
+      })
+    );
 
 /**
  * Builds suggestion items for ES|QL datasets (GET _query/dataset).
@@ -183,7 +203,7 @@ export const buildDatasetsDefinitions = (
         label: name,
         text,
         kind: 'Issue',
-        detail: i18n.translate('kbn-esql-language.esql.autocomplete.datasetDefinition', {
+        detail: i18n.translate('esqlLanguage.esql.autocomplete.datasetDefinition', {
           defaultMessage: 'Dataset',
         }),
       });
@@ -305,12 +325,14 @@ export async function additionalSourcesSuggestions(
   sourceReplacementContext?: {
     textBeforeCursor: string;
     commandStart: number;
-  }
+  },
+  namedSubqueries: string[] = []
 ) {
   const sourceNames = new Set([
     ...sources.map(({ name }) => name),
     ...views.map(({ name }) => name),
     ...datasets.map(({ name }) => name),
+    ...namedSubqueries,
   ]);
   const prefix = findFinalWord(queryText);
   const isComplete = prefix ? sourceExists(prefix, sourceNames) : false;
@@ -355,8 +377,14 @@ export async function additionalSourcesSuggestions(
   const sourceSuggestions = getSourceSuggestions(sources, ignored, sourceReplacementContext);
   const viewSuggestions = buildViewsDefinitions(views, ignored);
   const datasetSuggestions = buildDatasetsDefinitions(datasets, ignored);
+  const namedSubquerySuggestions = buildNamedSubqueriesDefinitions(namedSubqueries, ignored);
 
-  return [...sourceSuggestions, ...viewSuggestions, ...datasetSuggestions];
+  return [
+    ...namedSubquerySuggestions,
+    ...sourceSuggestions,
+    ...viewSuggestions,
+    ...datasetSuggestions,
+  ];
 }
 
 // Treating lookup and time_series mode indices
@@ -372,7 +400,7 @@ export const specialIndicesToSuggestions = (
         label: index.name,
         text: index.name + ' ',
         kind: 'Issue',
-        detail: i18n.translate('kbn-esql-language.esql.autocomplete.sourceDefinition', {
+        detail: i18n.translate('esqlLanguage.esql.autocomplete.sourceDefinition', {
           defaultMessage: '{type}',
           values: {
             type: index.mode ?? SOURCES_TYPES.INDEX,
@@ -390,7 +418,7 @@ export const specialIndicesToSuggestions = (
             asSnippet: true,
             kind: 'Issue',
             detail: i18n.translate(
-              'kbn-esql-language.esql.autocomplete.specialIndexes.indexType.alias',
+              'esqlLanguage.esql.autocomplete.specialIndexes.indexType.alias',
               {
                 defaultMessage: 'Alias',
               }

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FlyoutTemplate } from './flyout_template';
 
@@ -39,7 +39,7 @@ describe('FlyoutTemplate header title icon and description', () => {
     jest.restoreAllMocks();
   });
 
-  it('renders the header title as an H3', () => {
+  it('renders the header title as an H2', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Header title="Alert details" />
@@ -49,8 +49,23 @@ describe('FlyoutTemplate header title icon and description', () => {
       </FlyoutTemplate>
     );
 
-    const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
+    const title = screen.getByRole('heading', { level: 2, name: 'Alert details' });
     expect(title).toBeInTheDocument();
+  });
+
+  it('renders the header title in the heading element set by titleElement', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Alert details" titleElement="h3" />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
+    expect(title.id).toMatch(/^flyoutTemplateTitle/);
+    expect(screen.queryByRole('heading', { level: 2 })).not.toBeInTheDocument();
   });
 
   it('assigns a generated id to the visible header title for flyout labeling', () => {
@@ -63,11 +78,11 @@ describe('FlyoutTemplate header title icon and description', () => {
       </FlyoutTemplate>
     );
 
-    const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
+    const title = screen.getByRole('heading', { level: 2, name: 'Alert details' });
     expect(title.id).toMatch(/^flyoutTemplateTitle/);
   });
 
-  it('renders a link title inside the H3 heading', () => {
+  it('renders a link title inside the H2 heading', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Header title={<a href="#details">Alert details</a>} />
@@ -77,13 +92,76 @@ describe('FlyoutTemplate header title icon and description', () => {
       </FlyoutTemplate>
     );
 
-    const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
+    const title = screen.getByRole('heading', { level: 2, name: 'Alert details' });
     expect(within(title).getByRole('link', { name: 'Alert details' })).toHaveAttribute(
       'href',
       '#details'
     );
     expect(title).toHaveStyleRule('font-weight', 'inherit', { target: / a$/ });
     expect(title).toHaveStyleRule('font-weight', 'inherit', { target: / button$/ });
+  });
+
+  it('reveals a string title from the truncated collapsed heading', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Alert details" collapsed={true} />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('heading', { level: 2 })).toHaveAttribute('title', 'Alert details');
+  });
+
+  it('leaves a node title untitled when collapsed even with titleText, so its own tooltip is not covered', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header
+          title={<a href="#details">Alert details</a>}
+          titleText="Alert details"
+          collapsed={true}
+        />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('heading', { level: 2 })).not.toHaveAttribute('title');
+  });
+
+  it('leaves the collapsed heading untitled when a node title has no titleText', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title={<a href="#details">Alert details</a>} collapsed={true} />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('heading', { level: 2 })).not.toHaveAttribute('title');
+  });
+
+  it('prefers titleText over a string title for the collapsed reveal', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header
+          title="Alert details"
+          titleText="Full alert details"
+          collapsed={true}
+        />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('heading', { level: 2 })).toHaveAttribute(
+      'title',
+      'Full alert details'
+    );
   });
 
   const body = (
@@ -128,7 +206,7 @@ describe('FlyoutTemplate header title icon and description', () => {
       </FlyoutTemplate>
     );
 
-    const heading = screen.getByRole('heading', { level: 3, name: 'Alert details' });
+    const heading = screen.getByRole('heading', { level: 2, name: 'Alert details' });
     expect(heading.id).toMatch(/^flyoutTemplateTitle/);
   });
 
@@ -141,6 +219,46 @@ describe('FlyoutTemplate header title icon and description', () => {
     );
 
     expect(container.querySelector('[data-euiicon-type]')).toBeNull();
+  });
+
+  it('renders a loading spinner beside the title, outside the heading', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Alert details" isLoading />
+        {body}
+      </FlyoutTemplate>
+    );
+
+    const spinner = screen.getByTestId('flyoutHeaderTitleLoading');
+    expect(spinner).toHaveAttribute('aria-label', 'Loading');
+    expect(screen.getByRole('heading', { level: 2, name: 'Alert details' })).not.toContainElement(
+      spinner
+    );
+  });
+
+  it('names the loading spinner with loadingLabel', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Alert details" isLoading loadingLabel="Syncing attachments" />
+        {body}
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('flyoutHeaderTitleLoading')).toHaveAttribute(
+      'aria-label',
+      'Syncing attachments'
+    );
+  });
+
+  it('renders no loading spinner by default', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Alert details" />
+        {body}
+      </FlyoutTemplate>
+    );
+
+    expect(screen.queryByTestId('flyoutHeaderTitleLoading')).not.toBeInTheDocument();
   });
 
   it('renders the description below the title', () => {
@@ -296,6 +414,27 @@ describe('FlyoutTemplate header blocks', () => {
     expect(screen.getByText('Badge 6')).toBeInTheDocument();
   });
 
+  it('closes the overflow popover when the collapsed prop hides the header content', async () => {
+    const ui = (collapsed: boolean) => (
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
+        <FlyoutTemplate.Header title="Alert details" collapsed={collapsed}>
+          {badges(6)}
+        </FlyoutTemplate.Header>
+        {body}
+      </FlyoutTemplate>
+    );
+    const { rerender } = renderTemplate(ui(false));
+    const trigger = screen.getByRole('button', { name: 'Show 2 more badges' });
+
+    await userEvent.click(trigger);
+    const panel = await screen.findByTestId('flyoutHeaderBadgeOverflowPanel');
+    await waitFor(() => expect(panel).toHaveAttribute('data-popover-open', 'true'));
+
+    rerender(ui(true));
+
+    await waitFor(() => expect(panel).not.toHaveAttribute('data-popover-open', 'true'));
+  });
+
   it('places the blocks inside the collapsible region', () => {
     renderHeader(
       <>
@@ -325,6 +464,52 @@ describe('FlyoutTemplate header blocks', () => {
     const badge = screen.getByTestId('badgeUrgent');
     expect(badge).toHaveAttribute('data-foo', 'badgeFoo');
     expect(badge).toHaveAttribute('title', 'Needs attention');
+  });
+
+  it('gives a tooltipped, non-interactive badge a tab stop and shows the tooltip on focus', async () => {
+    renderHeader(
+      <FlyoutTemplate.Header.Badge toolTipContent="More context" data-test-subj="badgeInfo">
+        Info
+      </FlyoutTemplate.Header.Badge>
+    );
+
+    const badge = screen.getByTestId('badgeInfo');
+    expect(badge).toHaveAttribute('tabindex', '0');
+
+    act(() => badge.focus());
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('More context');
+  });
+
+  it('adds no tab stop to a badge without a tooltip or to a tooltipped link badge', () => {
+    renderHeader(
+      <>
+        <FlyoutTemplate.Header.Badge data-test-subj="badgePlain">Plain</FlyoutTemplate.Header.Badge>
+        <FlyoutTemplate.Header.Badge
+          href="#details"
+          toolTipContent="Go to details"
+          data-test-subj="badgeLink"
+        >
+          Link
+        </FlyoutTemplate.Header.Badge>
+      </>
+    );
+
+    expect(screen.getByTestId('badgePlain')).not.toHaveAttribute('tabindex');
+    expect(screen.getByTestId('badgeLink')).not.toHaveAttribute('tabindex');
+  });
+
+  it('renders an onClick badge as a button and calls onClick when clicked', async () => {
+    const onClick = jest.fn();
+    renderHeader(
+      <FlyoutTemplate.Header.Badge onClick={onClick} onClickAriaLabel="Open details">
+        Details
+      </FlyoutTemplate.Header.Badge>
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Open details' }));
+
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 
   it('forwards a custom data attribute through the MetaBlock part', () => {

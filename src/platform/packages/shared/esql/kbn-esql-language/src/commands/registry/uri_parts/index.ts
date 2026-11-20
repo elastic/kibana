@@ -24,8 +24,9 @@ export const uriPartsCommand = {
   name: Commands.URI_PARTS,
   methods: uriPartsCommandMethods,
   metadata: {
+    docPreserving: true,
     preview: true,
-    description: i18n.translate('kbn-esql-language.esql.definitions.uriPartsDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.uriPartsDoc', {
       defaultMessage: 'Parses a URI string and extracts its components into new columns',
     }),
     declaration: 'URI_PARTS prefix = expression',

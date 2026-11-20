@@ -6,9 +6,7 @@
  */
 
 import type { SchemaOutput } from '../schema_output';
-import { AlertConfigCodec, AlertConfigsCodec } from '../zod/alert_config';
-
-export { AlertConfigCodec, AlertConfigsCodec };
+import type { AlertConfigCodec, AlertConfigsCodec } from '../schemas/alert_config';
 
 export type AlertConfig = SchemaOutput<typeof AlertConfigCodec>;
 export type AlertConfigs = SchemaOutput<typeof AlertConfigsCodec>;

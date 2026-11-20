@@ -18,6 +18,7 @@ import {
   hydrateDataSourceSelection,
   getDiscoverColumnsWithFallbackFieldsFromDisplayOptions,
   getDiscoverFiltersFromState,
+  getControlOptionsFromControlsState,
 } from './logs_explorer_url_schema';
 import type { DisplayOptions } from './logs_explorer_schema_types';
 
@@ -60,7 +61,11 @@ export const DiscoverRedirect = ({
     const discoverParams: DiscoverAppLocatorParams = {
       timeRange: parsedState.time,
       refreshInterval: parsedState.refreshInterval,
-      filters: getDiscoverFiltersFromState(dataViewSpec.id, parsedState.filters),
+      filters: getDiscoverFiltersFromState(
+        dataViewSpec.id,
+        parsedState.filters,
+        getControlOptionsFromControlsState(parsedState.controls)
+      ),
       query: parsedState.query,
       breakdownField: parsedState.chart?.breakdownField ?? undefined,
       columns: getDiscoverColumnsWithFallbackFieldsFromDisplayOptions(

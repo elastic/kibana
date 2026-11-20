@@ -35,6 +35,11 @@ import {
   reportWorkflowSuccess,
 } from '../../lib/telemetry/report_workflow_telemetry';
 import type { MisconfigurationType } from '../../lib/telemetry/event_based_telemetry';
+import {
+  attackDiscoveryTemplateOmissionMessage,
+  capAttackDiscoveryTemplateCount,
+  getAttackDiscoveryTemplateAlertLimit,
+} from '../graphs/template_completion';
 import { getSpaceId } from '../../lib/helpers/get_space_id';
 import { isWorkflowsEnabled } from '../../lib/helpers/is_workflows_enabled';
 import { AttackDiscoveryError } from '../../lib/errors/attack_discovery_error';
@@ -60,6 +65,7 @@ import {
 } from './run_manual_orchestration';
 import type {
   DefaultWorkflowIds,
+  ElasticAssistantStart,
   ExecuteGenerationWorkflowParams,
   ParsedApiConfig,
   WorkflowConfig,
@@ -485,6 +491,33 @@ const handleGenerationFailure = async ({
   }
 };
 
+/**
+ * A space that never used the AI Assistant has no anonymization fields data stream yet.
+ * A failed install is logged and the run continues; returns `false` only when the install failed.
+ */
+const ensureAssistantSpaceResources = async ({
+  elasticAssistant,
+  logger,
+  spaceId,
+}: {
+  elasticAssistant: ElasticAssistantStart | undefined;
+  logger: Logger;
+  spaceId: string;
+}): Promise<boolean> => {
+  try {
+    if ((await elasticAssistant?.ensureSpaceResources(spaceId)) === false) {
+      logger.warn(`Could not install the AI Assistant resources for space '${spaceId}'`);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    logger.warn(
+      `Could not install the AI Assistant resources for space '${spaceId}': ${error.message}`
+    );
+    return false;
+  }
+};
+
 export async function executeGenerationWorkflow({
   alerts,
   alertsIndexPattern,
@@ -509,6 +542,7 @@ export async function executeGenerationWorkflow({
   source,
   sourceMetadata,
   start,
+  telemetryMetadata,
   trigger,
   type,
   workflowConfig,
@@ -558,7 +592,37 @@ export async function executeGenerationWorkflow({
     // the catch below routes through handleGenerationFailure.
     await assertAuthorizedToExecuteWorkflows({ authz, request, spaceId });
 
-    parsedApiConfig = getParsedApiConfig(apiConfig);
+    const resolvedApiConfig = getParsedApiConfig(apiConfig);
+    parsedApiConfig = resolvedApiConfig;
+
+    const inference = (
+      pluginsStart as {
+        inference?: {
+          getConnectorById: (id: string, request: KibanaRequest) => Promise<unknown>;
+        };
+      }
+    ).inference;
+    const templateAlertLimit =
+      inference?.getConnectorById != null
+        ? await getAttackDiscoveryTemplateAlertLimit(() =>
+            inference.getConnectorById(resolvedApiConfig.connector_id, request)
+          )
+        : undefined;
+    let retrievalSize = size;
+    const cappedRetrievalSize = capAttackDiscoveryTemplateCount(
+      templateAlertLimit != null ? retrievalSize : undefined
+    );
+    if (
+      templateAlertLimit != null &&
+      retrievalSize != null &&
+      cappedRetrievalSize != null &&
+      cappedRetrievalSize < retrievalSize
+    ) {
+      logger.warn(
+        attackDiscoveryTemplateOmissionMessage(retrievalSize - cappedRetrievalSize, retrievalSize)
+      );
+      retrievalSize = cappedRetrievalSize;
+    }
 
     assertAttackDiscoveryType({ type });
 
@@ -570,7 +634,7 @@ export async function executeGenerationWorkflow({
         end,
         esql_query: workflowConfig.esql_query,
         filter,
-        size,
+        size: retrievalSize,
         space_id: spaceId,
         start,
         validation_workflow_id: workflowConfig.validation_workflow_id,
@@ -603,10 +667,34 @@ export async function executeGenerationWorkflow({
 
     authenticatedUser = createAuthenticatedUserForEventLogging({ authenticationInfo });
 
-    const anonymizationFields = await fetchAnonymizationFields({
-      esClient,
+    const { elasticAssistant } = pluginsStart as {
+      elasticAssistant?: ElasticAssistantStart;
+    };
+    const resourcesInstalled = await ensureAssistantSpaceResources({
+      elasticAssistant,
       logger,
       spaceId,
+    });
+
+    // The anonymization fields index is Kibana-owned configuration, not user data.
+    // It is read with the internal user, as the AI Assistant `_find` route does, so
+    // callers are not required to hold index privileges on it. The caller was
+    // already authorized above, and every alert read still runs as the caller.
+    const anonymizationFields = await fetchAnonymizationFields({
+      esClient: coreStart.elasticsearch.client.asInternalUser,
+      logger,
+      spaceId,
+    }).catch((error: unknown) => {
+      // This error reaches the Worker's batch errors and the run step, where the log warning is not visible.
+      if (resourcesInstalled) {
+        throw error;
+      }
+
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(
+        `Could not install the AI Assistant resources for this space, so its anonymization fields could not be read: ${message}`,
+        { cause: error }
+      );
     });
 
     const hasProvidedAlerts = alerts != null && alerts.length > 0;
@@ -744,11 +832,13 @@ export async function executeGenerationWorkflow({
       filter,
       logger,
       request: pipelineRequest,
-      size,
+      size: retrievalSize,
       source,
+      templateAlertLimit,
       sourceMetadata,
       spaceId,
       start,
+      ...(telemetryMetadata != null ? { telemetryMetadata } : {}),
       trigger,
       workflowConfig,
       workflowsManagementApi: workflowsApi,

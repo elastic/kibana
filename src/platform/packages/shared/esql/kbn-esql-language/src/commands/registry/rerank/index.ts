@@ -27,7 +27,8 @@ export const rerankCommand: ICommand = {
   name: Commands.RERANK,
   methods: rerankCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-language.esql.definitions.rerankDoc', {
+    docPreserving: true,
+    description: i18n.translate('esqlLanguage.esql.definitions.rerankDoc', {
       defaultMessage:
         'Uses an inference model to compute new relevance scores for documents, directly within your ES|QL queries.',
     }),

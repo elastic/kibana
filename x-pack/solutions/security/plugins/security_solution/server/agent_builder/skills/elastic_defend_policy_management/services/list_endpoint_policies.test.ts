@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -42,14 +41,10 @@ const createReadAccess = async () => {
     })
   );
 
-  const getStartServices = jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
-  ]) as unknown as StartServicesAccessor;
   const access = await createPolicyAccessContext(
     endpointAppContextService,
     { request, spaceId: SPACE_ID },
-    ENDPOINT_POLICY_READ_REQUIRED_AUTHZ,
-    getStartServices
+    ENDPOINT_POLICY_READ_REQUIRED_AUTHZ
   );
   const soClient = access.fleet.getSoClient();
   const listPolicies = jest.spyOn(access.fleet.packagePolicy, 'list');
@@ -239,6 +234,7 @@ describe('listEndpointPolicies', () => {
         },
         linuxProtectionModes: {
           malware: ProtectionModes.prevent,
+          ransomware: ProtectionModes.prevent,
           behavior: ProtectionModes.prevent,
         },
         globalTelemetryEnabled: false,
@@ -258,6 +254,18 @@ describe('listEndpointPolicies', () => {
     expect(item).not.toHaveProperty('normalizedConfig');
     expect(item).not.toHaveProperty('policy_ids');
     expect(item).not.toHaveProperty('agents');
+  });
+
+  it('reports linux ransomware as off when the policy predates it or the flag is off', async () => {
+    const { access, listPolicies } = await createReadAccess();
+    const policy = createEndpointPolicy({ id: 'no-linux-ransomware', name: 'Legacy Policy' });
+    delete policy.inputs[0]?.config?.policy?.value.linux.ransomware;
+    listPolicies.mockResolvedValue(createPage([policy], 1, 1, 20));
+
+    const result = await listEndpointPolicies(access, { page: 1, perPage: 20 });
+    const [item] = result.dto.items;
+
+    expect(item?.posture.linuxProtectionModes.ransomware).toBe(ProtectionModes.off);
   });
 
   it('caps long name and description at 512 and flags only the cut fields', async () => {

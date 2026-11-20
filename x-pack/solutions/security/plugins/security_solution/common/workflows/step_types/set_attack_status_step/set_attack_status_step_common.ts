@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -14,36 +14,42 @@ import { MAX_ATTACK_ID_LENGTH, MAX_WORKFLOW_MESSAGE_LENGTH } from '../common/con
 
 export const SetAttackStatusStepId = 'security.setAttackStatus' as const;
 
-const idsBase = z.object({
-  ids: z
-    .union([
-      z.string().min(1).max(MAX_ATTACK_ID_LENGTH),
-      z.array(z.string().min(1).max(MAX_ATTACK_ID_LENGTH)).min(1),
-    ])
-    .describe('A single attack ID or a list of IDs to support bulk updates'),
-  update_related_alerts: z
-    .boolean()
-    .optional()
-    .default(false)
-    .describe('Whether to apply the status to any related alerts of the attack.'),
-});
+const idsBase = lazySchema(() =>
+  z.object({
+    ids: z
+      .union([
+        z.string().min(1).max(MAX_ATTACK_ID_LENGTH),
+        z.array(z.string().min(1).max(MAX_ATTACK_ID_LENGTH)).min(1),
+      ])
+      .describe('A single attack ID or a list of IDs to support bulk updates'),
+    update_related_alerts: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe('Whether to apply the status to any related alerts of the attack.'),
+  })
+);
 
-export const setAttackStatusInputSchema = z.discriminatedUnion('status', [
-  idsBase.extend({
-    status: z.literal('closed').describe('The new status for the attacks'),
-    reason: Reason.optional().describe(
-      'Optional reason when closing the attack (e.g. duplicate, false_positive)'
-    ),
-  }),
-  idsBase.extend({
-    status: z.enum(['open', 'acknowledged']).describe('The new status for the attacks'),
-  }),
-]);
+export const setAttackStatusInputSchema = lazySchema(() =>
+  z.discriminatedUnion('status', [
+    idsBase.extend({
+      status: z.literal('closed').describe('The new status for the attacks'),
+      reason: Reason.optional().describe(
+        'Optional reason when closing the attack (e.g. duplicate, false_positive)'
+      ),
+    }),
+    idsBase.extend({
+      status: z.enum(['open', 'acknowledged']).describe('The new status for the attacks'),
+    }),
+  ])
+);
 
-export const setAttackStatusOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
-});
+export const setAttackStatusOutputSchema = lazySchema(() =>
+  z.object({
+    success: z.boolean(),
+    message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
+  })
+);
 
 export const setAttackStatusStepCommonDefinition: BaseStepDefinition<
   typeof setAttackStatusInputSchema,

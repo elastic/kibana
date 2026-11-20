@@ -43,7 +43,9 @@ import {
   valuePlaceholderConstant,
   defaultValuePlaceholderConstant,
 } from '../../../../../registry/complete_items';
+import { getGeoPrecisionLiterals, getGeoPrecisionSystemParam } from '../../../literals';
 import { parametersFromHintsResolvers } from '../../parameters_from_hints';
+import { getTimeSeriesAggregateFieldTypes } from '../../../time_series_aggregate_args';
 
 // functionDefinition is guaranteed by in_function.ts early return
 type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
@@ -184,6 +186,20 @@ function buildLiteralSuggestions(
 
   suggestions.push(...constantOnlySuggestions);
 
+  const geoPrecisionSystemParam = functionDefinition
+    ? paramDefinitions
+        .map(({ name }) => getGeoPrecisionSystemParam(functionDefinition.name, name))
+        .find(Boolean)
+    : undefined;
+  if (geoPrecisionSystemParam) {
+    suggestions.push(
+      ...getGeoPrecisionLiterals(geoPrecisionSystemParam, {
+        addComma: config.shouldAddComma,
+        advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+      })
+    );
+  }
+
   // Date literals (now(), 1 hour, 2 days, ?_tstart, ?_tend) - only add if not already added by constantOnly path
   // Skip for:
   // - FTS functions
@@ -239,7 +255,14 @@ async function buildFieldAndFunctionSuggestions(
     );
 
     await builder.addFields({
-      types: config.acceptedTypes,
+      types: [
+        ...config.acceptedTypes,
+        ...getTimeSeriesAggregateFieldTypes(
+          config.acceptedTypes,
+          ctx.context?.isTimeseriesSource === true,
+          functionParamContext.functionDefinition?.type
+        ),
+      ] as FunctionParameterType[],
       ignoredColumns,
       addComma: config.shouldAddComma,
       canBeMultiValue,

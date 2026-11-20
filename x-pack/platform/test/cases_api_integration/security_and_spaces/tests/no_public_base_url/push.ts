@@ -117,7 +117,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const allWorkNotes: string[] = allCommentRequests.map((request) => request.work_notes);
         const expectedNotes = [
           'This is a cool comment\n\nAdded by elastic.',
-          'Elastic Alerts attached to the case: 3',
+          'Elastic Alerts attached to the case: 3 added (3 total)',
         ];
 
         /**

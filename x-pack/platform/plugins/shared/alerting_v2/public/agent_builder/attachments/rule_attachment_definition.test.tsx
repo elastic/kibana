@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
-import { OBSERVABILITY_ALERTING_HOST } from '../observability_alerting_host';
+import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import { createRuleAttachmentDefinition } from './rule_attachment_definition';
 
 const mockUpsertRule = jest.fn().mockImplementation(async (id: string) => ({ id }));
@@ -17,6 +17,7 @@ const mockRulesNavigateSync = jest.fn();
 const mockAddSuccess = jest.fn();
 
 jest.mock('../../application/bind_locators_to_host', () => ({
+  bindLocatorsToHost: (locators: unknown, _host: unknown) => locators,
   getAlertingV2Locators: () => ({
     rulesLocators: { navigateSync: (...args: unknown[]) => mockRulesNavigateSync(...args) },
   }),
@@ -84,11 +85,55 @@ describe('createRuleAttachmentDefinition', () => {
   });
 
   describe('getIcon', () => {
-    it('returns watchesApp', () => {
+    it('returns if', () => {
       const services = createMockServices();
       const definition = createRuleAttachmentDefinition(services);
 
-      expect(definition.getIcon!()).toBe('watchesApp');
+      expect(definition.getIcon!()).toBe('if');
+    });
+  });
+
+  describe('getHeader', () => {
+    it.each([
+      ['alert', 'bell'],
+      ['signal', 'chartBarVertical'],
+    ])('returns the %s kind icon', (kind, icon) => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+
+      expect(definition.getHeader!({ attachment: { data: { kind } } as any })).toEqual({ icon });
+    });
+
+    it('adds an unsaved changes badge when the latest version is newer than the last sync', () => {
+      const definition = createRuleAttachmentDefinition(createMockServices());
+      const attachment = {
+        ...createAttachment({ origin: 'rule-123' }),
+        versionData: {
+          version: 2,
+          versionCount: 2,
+          createdAt: '2026-04-02T00:00:00.000Z',
+          originSyncedAt: '2026-04-01T00:00:00.000Z',
+        },
+      };
+
+      expect(definition.getHeader!({ attachment }).badges).toEqual([
+        { label: 'Unsaved', color: 'primary', iconType: 'save' },
+      ]);
+    });
+
+    it('has no badge when the latest version matches the last sync', () => {
+      const definition = createRuleAttachmentDefinition(createMockServices());
+      const attachment = {
+        ...createAttachment({ origin: 'rule-123' }),
+        versionData: {
+          version: 1,
+          versionCount: 1,
+          createdAt: '2026-04-01T00:00:00.000Z',
+          originSyncedAt: '2026-04-01T00:00:00.000Z',
+        },
+      };
+
+      expect(definition.getHeader!({ attachment }).badges).toBeUndefined();
     });
   });
 
@@ -135,7 +180,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('draft')).toBeDefined();
+      expect(getByText('Draft')).toBeDefined();
     });
 
     it('shows enabled status when origin set and enabled is undefined (server default)', () => {
@@ -147,7 +192,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('enabled')).toBeDefined();
+      expect(getByText('Enabled')).toBeDefined();
     });
 
     it('shows disabled status when origin set and enabled is false', () => {
@@ -159,7 +204,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('disabled')).toBeDefined();
+      expect(getByText('Disabled')).toBeDefined();
     });
 
     it('shows schedule interval', () => {
@@ -171,7 +216,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('Every 5m')).toBeDefined();
+      expect(getByText('Every 5 min')).toBeDefined();
     });
   });
 
@@ -288,11 +333,12 @@ describe('createRuleAttachmentDefinition', () => {
     });
 
     describe('Update Rule handler', () => {
-      it('calls upsertRule with the origin id', async () => {
+      it('calls upsertRule with the origin id and refreshes the origin', async () => {
         const services = createMockServices();
         const definition = createRuleAttachmentDefinition(services);
         const attachment = createAttachment({ origin: 'rule-123' });
         const registerActionButtons = jest.fn();
+        const updateOrigin = jest.fn().mockResolvedValue(undefined);
 
         render(
           <>
@@ -300,7 +346,7 @@ describe('createRuleAttachmentDefinition', () => {
               { attachment, isSidebar: false },
               {
                 registerActionButtons,
-                updateOrigin: jest.fn(),
+                updateOrigin,
                 closeCanvas: jest.fn(),
               }
             )}
@@ -316,6 +362,7 @@ describe('createRuleAttachmentDefinition', () => {
           'rule-123',
           expect.objectContaining({ metadata: attachment.data.metadata })
         );
+        expect(updateOrigin).toHaveBeenCalledWith('rule-123');
       });
     });
 

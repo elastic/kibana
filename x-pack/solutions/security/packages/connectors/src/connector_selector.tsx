@@ -161,6 +161,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
                 }}
                 data-test-subj="connector-selector"
                 isDisabled={isDisabled}
+                aria-label={i18n.getConnectorButtonAriaLabel(buttonLabel)}
               >
                 {buttonLabel}
               </EuiButton>

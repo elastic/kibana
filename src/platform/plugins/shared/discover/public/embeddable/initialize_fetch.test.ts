@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { EsqlSource } from '@kbn/data-source';
+import type { estypes } from '@elastic/elasticsearch';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { ISearchStart } from '@kbn/data-plugin/public';
 
 import { discoverServiceMock } from '../__mocks__/services';
 import { initializeFetch } from './initialize_fetch';
@@ -27,6 +30,38 @@ jest.mock('../application/main/data_fetching/resolve_esql_source');
 
 const mockFetchEsql = fetchEsql as jest.MockedFunction<typeof fetchEsql>;
 const mockResolveEsqlSource = resolveEsqlSource as jest.MockedFunction<typeof resolveEsqlSource>;
+
+type SearchResponse = estypes.SearchResponse;
+type ShowWarnings = ISearchStart['showWarnings'];
+
+// `hasNextPage` is a function of the search method's pagination, not a flag
+const createPagination = (
+  hasNextPage: boolean,
+  nextPage: jest.Mock = jest.fn(async () => null)
+) => ({ hasNextPage: jest.fn().mockReturnValue(hasNextPage), nextPage });
+
+// What `showWarnings` does for each warning of the requests the adapter retains
+const reportWarnings =
+  (...warnings: SearchResponseWarning[]): ShowWarnings =>
+  (_adapter, callback) =>
+    warnings.forEach((warning) =>
+      callback?.(warning, { request: {}, response: {} as SearchResponse, requestId: undefined })
+    );
+
+const createDeferred = <T>() => {
+  let resolve: (value: T) => void = () => {};
+  const promise = new Promise<T>((res) => {
+    resolve = res;
+  });
+  return { promise, resolve };
+};
+
+const createWarning = (requestName: string): SearchResponseWarning => ({
+  type: 'incomplete',
+  requestName,
+  clusters: {},
+  openInInspector: jest.fn(),
+});
 
 describe('initialize fetch', () => {
   const searchSource = createSearchSourceMock({ index: dataViewMock });
@@ -46,11 +81,17 @@ describe('initialize fetch', () => {
   } = getMockedSearchApi({ searchSource, savedSearch });
   const refreshTrigger$ = new BehaviorSubject<void>(undefined);
   let cleanupFetch: (() => void) | undefined;
+  let fetchMore: (() => Promise<void>) | undefined;
+  let cancelRequests: (() => void) | undefined;
 
   const waitOneTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
   beforeAll(async () => {
-    const { cleanup } = initializeFetch({
+    const {
+      cleanup,
+      fetchMore: fetchMoreFn,
+      cancelRequests: cancelRequestsFn,
+    } = initializeFetch({
       api: mockedApi,
       stateManager,
       discoverServices: discoverServiceMock,
@@ -63,6 +104,8 @@ describe('initialize fetch', () => {
       setApproximationApplied: jest.fn(),
     });
     cleanupFetch = cleanup;
+    fetchMore = fetchMoreFn;
+    cancelRequests = cancelRequestsFn;
     await waitOneTick();
   });
 
@@ -70,19 +113,18 @@ describe('initialize fetch', () => {
     expect(stateManager.rows.getValue()).toEqual([]);
     expect(stateManager.totalHitCount.getValue()).toEqual(0);
 
-    searchSource.fetch$ = jest.fn().mockImplementation(() =>
-      of({
-        rawResponse: {
-          hits: {
-            hits: [
-              { _id: '1', _index: dataViewMock.id },
-              { _id: '2', _index: dataViewMock.id },
-            ],
-            total: 2,
-          },
+    discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+      rawResponse: {
+        hits: {
+          hits: [
+            { _id: '1', _index: dataViewMock.id },
+            { _id: '2', _index: dataViewMock.id },
+          ],
+          total: 2,
         },
-      })
-    );
+      },
+      pagination: createPagination(false),
+    });
     mockedApi.savedSearch$.next(savedSearch); // reload
     await waitOneTick();
 
@@ -96,14 +138,23 @@ describe('initialize fetch', () => {
     expect(stateManager.inspectorAdapters.getValue().requests).toBeDefined();
   });
 
+  it('clears the ES|QL result source of a previous fetch on a data view fetch', async () => {
+    stateManager.resultDataSource.next({ kind: 'esql' } as EsqlSource);
+    discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+      rawResponse: { hits: { hits: [], total: 0 } },
+      pagination: createPagination(false),
+    });
+    mockedApi.savedSearch$.next(savedSearch); // reload
+    await waitOneTick();
+
+    expect(stateManager.resultDataSource.getValue()).toBeUndefined();
+  });
+
   it('should catch and emit error', async () => {
     expect(mockedApi.searchError$.getValue()).toBeUndefined();
-    searchSource.fetch$ = jest.fn().mockImplementation(
-      () =>
-        new Observable(() => {
-          throw new Error('Search failed');
-        })
-    );
+    discoverServiceMock.data.search.dslPaginated = jest
+      .fn()
+      .mockRejectedValue(new Error('Search failed'));
     mockedApi.savedSearch$.next(savedSearch);
     await waitOneTick();
     expect(mockedApi.searchError$.getValue()).toBeDefined();
@@ -113,12 +164,13 @@ describe('initialize fetch', () => {
   it('should correctly handle aborted requests', async () => {
     const abortSignals: AbortSignal[] = [];
 
-    searchSource.fetch$ = jest.fn().mockImplementation(
-      (options) =>
-        new Observable(() => {
-          abortSignals.push(options.abortSignal);
-        })
-    );
+    discoverServiceMock.data.search.dslPaginated = jest
+      .fn()
+      .mockImplementation(async (_params, options) => {
+        abortSignals.push(options.abortSignal);
+        // never resolves, to simulate a long-running request
+        return new Promise(() => {});
+      });
 
     mockedApi.savedSearch$.next(savedSearch); // reload
     await waitOneTick(); // allow first request to start
@@ -134,18 +186,244 @@ describe('initialize fetch', () => {
     expect(abortSignals[2].aborted).toBe(false); // third request was not aborted
   });
 
+  describe('fetchMore', () => {
+    const firstPage = [{ _id: '1', _index: dataViewMock.id, sort: [1] }];
+    const secondPage = [{ _id: '2', _index: dataViewMock.id, sort: [2] }];
+
+    it('should append the next page to the rows and update the pagination', async () => {
+      const nextPagination = createPagination(false);
+      const nextPage = jest.fn().mockResolvedValue({
+        rawResponse: { hits: { hits: secondPage, total: 2 } },
+        pagination: nextPagination,
+      });
+      discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+        rawResponse: { hits: { hits: firstPage, total: 2 } },
+        pagination: createPagination(true, nextPage),
+      });
+      mockedApi.savedSearch$.next(savedSearch);
+      await waitOneTick();
+      expect(stateManager.rows.getValue()).toHaveLength(1);
+
+      await fetchMore?.();
+
+      expect(nextPage).toHaveBeenCalledTimes(1);
+      expect(nextPage).toHaveBeenCalledWith({
+        abortSignal: expect.any(AbortSignal),
+        executionContext: expect.any(Object),
+      });
+      expect(stateManager.rows.getValue()).toEqual(
+        [...firstPage, ...secondPage].map((hit) => buildDataTableRecord(hit, dataViewMock))
+      );
+      expect(stateManager.pagination.getValue()).toBe(nextPagination);
+      expect(stateManager.isLoadingMore.getValue()).toBe(false);
+    });
+
+    it('should report the panel as loading while the next page loads and honor cancellation', async () => {
+      let signal: AbortSignal | undefined;
+      const nextPage = jest.fn().mockImplementation(
+        (options: { abortSignal: AbortSignal }) =>
+          new Promise((_resolve, reject) => {
+            signal = options.abortSignal;
+            signal.addEventListener('abort', () => reject(new Error('aborted')));
+          })
+      );
+      discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+        rawResponse: { hits: { hits: firstPage, total: 2 } },
+        pagination: createPagination(true, nextPage),
+      });
+      mockedApi.savedSearch$.next(savedSearch);
+      await waitOneTick();
+      expect(mockedApi.dataLoading$.getValue()).toBe(false);
+
+      const pending = fetchMore?.();
+      await waitOneTick();
+      expect(mockedApi.dataLoading$.getValue()).toBe(true);
+      expect(stateManager.isLoadingMore.getValue()).toBe(true);
+
+      cancelRequests?.(); // what the dashboard cancel button triggers
+      await pending;
+
+      expect(signal?.aborted).toBe(true);
+      expect(mockedApi.dataLoading$.getValue()).toBe(false);
+      expect(stateManager.isLoadingMore.getValue()).toBe(false);
+      expect(mockedApi.searchError$.getValue()).toBeUndefined();
+    });
+
+    it('should do nothing when there is no next page', async () => {
+      const nextPage = jest.fn();
+      discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+        rawResponse: { hits: { hits: firstPage, total: 1 } },
+        pagination: createPagination(false, nextPage),
+      });
+      mockedApi.savedSearch$.next(savedSearch);
+      await waitOneTick();
+
+      await fetchMore?.();
+
+      expect(nextPage).not.toHaveBeenCalled();
+      expect(stateManager.rows.getValue()).toHaveLength(1);
+    });
+
+    it('should replace the warnings with the ones reported after loading a page', async () => {
+      const initialWarning = createWarning('Table');
+      const pageWarnings = [createWarning('Table'), createWarning('Table (page 2)')];
+      const showWarnings = jest.mocked(discoverServiceMock.data.search.showWarnings);
+      showWarnings.mockReset();
+      showWarnings.mockImplementationOnce(reportWarnings(initialWarning));
+      showWarnings.mockImplementationOnce(reportWarnings(...pageWarnings));
+      const nextPage = jest.fn().mockResolvedValue({
+        rawResponse: { hits: { hits: secondPage, total: 2 } },
+        pagination: createPagination(false),
+      });
+      discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+        rawResponse: { hits: { hits: firstPage, total: 2 } },
+        pagination: createPagination(true, nextPage),
+      });
+      mockedApi.savedSearch$.next(savedSearch);
+      await waitOneTick();
+      expect(mockedApi.fetchWarnings$.getValue()).toEqual([initialWarning]);
+
+      await fetchMore?.();
+
+      expect(mockedApi.fetchWarnings$.getValue()).toEqual(pageWarnings);
+    });
+
+    it('should keep the warnings when a page sent no request', async () => {
+      const initialWarning = createWarning('Table');
+      const showWarnings = jest.mocked(discoverServiceMock.data.search.showWarnings);
+      showWarnings.mockReset();
+      showWarnings.mockImplementation(reportWarnings(initialWarning));
+      discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+        rawResponse: { hits: { hits: firstPage, total: 2 } },
+        pagination: createPagination(true, jest.fn().mockResolvedValue(null)),
+      });
+      mockedApi.savedSearch$.next(savedSearch);
+      await waitOneTick();
+      showWarnings.mockClear();
+
+      await fetchMore?.();
+
+      expect(showWarnings).not.toHaveBeenCalled();
+      expect(mockedApi.fetchWarnings$.getValue()).toEqual([initialWarning]);
+    });
+
+    it('should ignore another request while a page is loading', async () => {
+      const page = createDeferred<unknown>();
+      const nextPage = jest.fn().mockReturnValue(page.promise);
+      discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+        rawResponse: { hits: { hits: firstPage, total: 2 } },
+        pagination: createPagination(true, nextPage),
+      });
+      mockedApi.savedSearch$.next(savedSearch);
+      await waitOneTick();
+
+      const firstRequest = fetchMore?.();
+      await waitOneTick();
+      await fetchMore?.(); // e.g. a double click
+
+      expect(nextPage).toHaveBeenCalledTimes(1);
+
+      page.resolve({
+        rawResponse: { hits: { hits: secondPage, total: 2 } },
+        pagination: createPagination(false),
+      });
+      await firstRequest;
+
+      expect(stateManager.rows.getValue()).toHaveLength(2);
+      expect(stateManager.isLoadingMore.getValue()).toBe(false);
+    });
+
+    it('should leave the rows, pagination and loading state alone when no page came back', async () => {
+      const pagination = createPagination(true, jest.fn().mockResolvedValue(null));
+      discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+        rawResponse: { hits: { hits: firstPage, total: 2 } },
+        pagination,
+      });
+      mockedApi.savedSearch$.next(savedSearch);
+      await waitOneTick();
+
+      await fetchMore?.();
+
+      expect(stateManager.rows.getValue()).toHaveLength(1);
+      expect(stateManager.pagination.getValue()).toBe(pagination);
+      expect(stateManager.isLoadingMore.getValue()).toBe(false);
+      expect(mockedApi.dataLoading$.getValue()).toBe(false);
+      expect(mockedApi.searchError$.getValue()).toBeUndefined();
+    });
+
+    it('should do nothing without pagination', async () => {
+      stateManager.pagination.next(undefined); // e.g. an ES|QL panel, or before the first page
+      const dataLoadingBefore = mockedApi.dataLoading$.getValue();
+
+      await fetchMore?.();
+
+      expect(stateManager.isLoadingMore.getValue()).toBe(false);
+      expect(mockedApi.dataLoading$.getValue()).toBe(dataLoadingBefore);
+      expect(mockedApi.searchError$.getValue()).toBeUndefined();
+    });
+
+    it('should leave the loading state to a refetch that replaced the request', async () => {
+      const nextPage = jest.fn().mockImplementation(
+        (options: { abortSignal: AbortSignal }) =>
+          new Promise((_resolve, reject) => {
+            options.abortSignal.addEventListener('abort', () => reject(new Error('aborted')));
+          })
+      );
+      discoverServiceMock.data.search.dslPaginated = jest
+        .fn()
+        .mockResolvedValueOnce({
+          rawResponse: { hits: { hits: firstPage, total: 2 } },
+          pagination: createPagination(true, nextPage),
+        })
+        .mockReturnValue(new Promise(() => {})); // the refetch is still running
+      mockedApi.savedSearch$.next(savedSearch);
+      await waitOneTick();
+
+      const pending = fetchMore?.();
+      await waitOneTick();
+      expect(stateManager.isLoadingMore.getValue()).toBe(true);
+
+      mockedApi.savedSearch$.next(savedSearch); // a refetch replaces the request
+      await waitOneTick();
+      await pending;
+
+      // The refetch cleared the old pagination, and it owns the loading state, not the old request
+      expect(stateManager.pagination.getValue()).toBeUndefined();
+      expect(stateManager.isLoadingMore.getValue()).toBe(false);
+      expect(mockedApi.dataLoading$.getValue()).toBe(true);
+      expect(mockedApi.searchError$.getValue()).toBeUndefined();
+    });
+
+    it('should surface an error from loading the next page and stop loading', async () => {
+      discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+        rawResponse: { hits: { hits: firstPage, total: 2 } },
+        pagination: createPagination(
+          true,
+          jest.fn().mockRejectedValue(new Error('Next page failed'))
+        ),
+      });
+      mockedApi.savedSearch$.next(savedSearch);
+      await waitOneTick();
+
+      await fetchMore?.();
+
+      expect(mockedApi.searchError$.getValue()?.message).toBe('Next page failed');
+      expect(stateManager.isLoadingMore.getValue()).toBe(false);
+      expect(stateManager.rows.getValue()).toHaveLength(1);
+    });
+  });
+
   it('should fetch again when refresh trigger emits', async () => {
-    const fetchMock = jest.fn().mockImplementation(() =>
-      of({
-        rawResponse: {
-          hits: {
-            hits: [{ _id: '1', _index: dataViewMock.id }],
-            total: 1,
-          },
+    const fetchMock = jest.fn().mockResolvedValue({
+      rawResponse: {
+        hits: {
+          hits: [{ _id: '1', _index: dataViewMock.id }],
+          total: 1,
         },
-      })
-    );
-    searchSource.fetch$ = fetchMock;
+      },
+      pagination: createPagination(false),
+    });
+    discoverServiceMock.data.search.dslPaginated = fetchMock;
 
     mockedApi.savedSearch$.next(savedSearch);
     await waitOneTick();
@@ -237,16 +515,14 @@ describe('initialize fetch ES|QL', () => {
     jest.clearAllMocks();
   });
 
-  it('resolves EsqlSource and publishes columnsMeta from LIMIT 0 columns', async () => {
+  it('resolves EsqlSource and publishes it as the result source when the fetch has none', async () => {
     const { mocked, esqlSource$ } = setup();
     await waitOneTick();
     await waitOneTick();
 
     expect(mockResolveEsqlSource).toHaveBeenCalledTimes(1);
     expect(mockFetchEsql).toHaveBeenCalledTimes(1);
-    expect(mocked.stateManager.columnsMeta.getValue()).toEqual({
-      message: { type: 'string', esType: 'keyword', isComputedColumn: false },
-    });
+    expect(mocked.stateManager.resultDataSource.getValue()).toBe(esqlSource$.getValue());
     expect(
       esqlSource$
         .getValue()

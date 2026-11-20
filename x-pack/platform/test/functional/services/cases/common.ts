@@ -102,6 +102,10 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async selectClosureOption(value: 'close-by-user' | 'close-by-pushing') {
+      // The switch is disabled while connectors load, and a click on it then is dropped.
+      await retry.waitFor('selectClosureOption: closure switch to be enabled', async () => {
+        return testSubjects.isEnabled('automatic-closure-switch');
+      });
       const checked = await testSubjects.getAttribute('automatic-closure-switch', 'aria-checked');
       const isPushing = checked === 'true';
       const shouldBePushing = value === 'close-by-pushing';
@@ -128,6 +132,26 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
         const toast = await toasts.getElementByIndex(1);
         const text = await toast.getVisibleText();
         expect(text).to.contain(content);
+      });
+    },
+
+    /**
+     * Selects a case in the "Select case" modal, re-issuing the click until the modal closes —
+     * a click dispatched while the modal is still resizing around the loading cases table lands
+     * off the button, and webdriver reports no error. Re-issuing is safe: the handler closes the
+     * modal before the attach request, so only the first click that lands takes effect.
+     */
+    async selectCaseInModal(caseId: string) {
+      await testSubjects.existOrFail('all-cases-modal');
+      await testSubjects.existOrFail(`cases-table-row-select-${caseId}`);
+
+      await retry.waitFor(`the cases modal to close after selecting case ${caseId}`, async () => {
+        if (!(await testSubjects.exists('all-cases-modal'))) {
+          return true;
+        }
+
+        await (await testSubjects.find(`cases-table-row-select-${caseId}`)).click();
+        return false;
       });
     },
 

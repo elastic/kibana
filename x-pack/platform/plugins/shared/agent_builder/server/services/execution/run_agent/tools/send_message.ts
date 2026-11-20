@@ -7,30 +7,48 @@
 
 import type { Observable } from 'rxjs';
 import { filter, firstValueFrom } from 'rxjs';
-import { z } from '@kbn/zod/v4';
-import { ToolType, isRoundCompleteEvent, internalTools } from '@kbn/agent-builder-common';
+import { z, lazySchema } from '@kbn/zod/v4';
+import {
+  ChatTriggerMode,
+  SELF_AGENT_ID,
+  ToolType,
+  isRoundCompleteEvent,
+  internalTools,
+  isConversationBusyError,
+} from '@kbn/agent-builder-common';
 import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
 import type { ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
-import type { InternalBuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
+import type {
+  InternalBuiltinToolDefinition,
+  ModelSource,
+  SubAgentExecutor,
+} from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BackgroundExecutionService } from '../background_execution_service';
 import type { SubagentTracker } from '../subagent_tracker';
 import { filterReachableSubagents } from '../utils/filter_reachable_subagents';
+import { selectSubagentModelSource } from '../utils/select_subagent_model_source';
+import { triggerModeSchema } from '../utils/trigger_mode_schema';
 
-const schema = z.object({
-  to: z.string().describe('Name of the persistent sub-agent to talk to.'),
-  prompt: z.string().describe('The message to send.'),
-  run_in_background: z
-    .boolean()
-    .optional()
-    .describe(
-      'Set to true to fire this message off and continue with other work; you will be notified when the sub-agent finishes replying.'
-    ),
-  effort: z
-    .enum([EffortLevels.low, EffortLevels.medium, EffortLevels.high])
-    .optional()
-    .describe('The effort level of this exchange.'),
-});
+const baseSchema = lazySchema(() =>
+  z.object({
+    to: z.string().describe('Name of the persistent sub-agent to talk to.'),
+    prompt: z.string().describe('The message to send.'),
+    run_in_background: z
+      .boolean()
+      .optional()
+      .describe(
+        'Set to true to fire this message off and continue with other work; you will be notified when the sub-agent finishes replying.'
+      ),
+    effort: z
+      .enum([EffortLevels.low, EffortLevels.medium, EffortLevels.high])
+      .optional()
+      .describe('The effort level of this exchange.'),
+  })
+);
+const fullSchema = lazySchema(() => baseSchema.extend({ trigger_mode: triggerModeSchema }));
+type SendMessageSchema = typeof baseSchema | typeof fullSchema;
+type SendMessageParams = z.infer<typeof baseSchema> & { trigger_mode?: ChatTriggerMode };
 
 const toolDescription = `Send a message to an existing persistent sub-agent.
 
@@ -44,21 +62,31 @@ The sub-agent sees the full history of your prior exchanges with it.
 `;
 
 export const createSendMessageTool = ({
+  agentId: ownerAgentId,
   executionId: parentExecutionId,
+  parentModel,
   subAgentExecutor,
   abortSignal,
   backgroundExecutionService,
   subagentTracker,
   allowedIds,
+  inferenceFeatureIdBySubagent,
+  backgroundWakeEnabled = false,
 }: {
   agentId: string;
   executionId: string;
+  /** Model source the parent run was asked to run on, inherited by its sub-agents. */
+  parentModel?: ModelSource;
   subAgentExecutor: SubAgentExecutor;
   abortSignal?: AbortSignal;
   backgroundExecutionService?: BackgroundExecutionService;
   subagentTracker?: SubagentTracker;
   allowedIds: Set<string>;
-}): InternalBuiltinToolDefinition<typeof schema> => {
+  inferenceFeatureIdBySubagent?: ReadonlyMap<string, string | undefined>;
+  /** Whether a finished background sub-agent wakes the parent, which `trigger_mode` steers. */
+  backgroundWakeEnabled?: boolean;
+}): InternalBuiltinToolDefinition<SendMessageSchema> => {
+  const schema: SendMessageSchema = backgroundWakeEnabled ? fullSchema : baseSchema;
   return {
     id: internalTools.sendMessageToAgent,
     description: toolDescription,
@@ -66,7 +94,13 @@ export const createSendMessageTool = ({
     schema,
     tags: ['subagent'],
     handler: async (
-      { to, prompt, run_in_background = false, effort = 'medium' },
+      {
+        to,
+        prompt,
+        run_in_background = false,
+        trigger_mode,
+        effort = EffortLevels.medium,
+      }: SendMessageParams,
       { events, modelProvider }
     ) => {
       if (!subagentTracker) {
@@ -111,15 +145,28 @@ export const createSendMessageTool = ({
       }
 
       try {
-        const subAgentModel = await modelProvider.selectModel({
+        const modelSource = await selectSubagentModelSource({
+          modelProvider,
+          parentModel,
           effortLevel: effort as EffortLevel,
+          inferenceFeatureId: inferenceFeatureIdBySubagent?.get(entry.agent_id),
         });
+        const agentId = entry.agent_id === SELF_AGENT_ID ? ownerAgentId : entry.agent_id;
         const { executionId, events$ } = await subAgentExecutor.sendToSubAgent({
+          agentId,
           parentExecutionId,
           conversationId: entry.conversation_id,
           prompt,
-          connectorId: subAgentModel.connector.connectorId,
-          ...(run_in_background ? {} : { abortSignal }),
+          modelSource,
+          ...(run_in_background
+            ? {
+                background: {
+                  ...(backgroundWakeEnabled
+                    ? { parentTriggerMode: trigger_mode ?? ChatTriggerMode.Always }
+                    : {}),
+                },
+              }
+            : { abortSignal }),
         });
 
         events.reportProgress(`Sub-agent execution ${executionId} started`, {
@@ -127,12 +174,15 @@ export const createSendMessageTool = ({
         });
 
         if (run_in_background) {
-          backgroundExecutionService?.registerExecution(executionId);
+          backgroundExecutionService?.registerExecution(executionId, agentId);
           return {
             results: [
               createOtherResult({
                 agent_execution_id: executionId,
                 status: 'queued',
+                ...(backgroundWakeEnabled
+                  ? { trigger_mode: trigger_mode ?? ChatTriggerMode.Always }
+                  : {}),
               }),
             ],
           };
@@ -149,6 +199,16 @@ export const createSendMessageTool = ({
           ],
         };
       } catch (error) {
+        if (isConversationBusyError(error)) {
+          return {
+            results: [
+              createErrorResult(
+                `Sub-agent "${to}" is still answering your previous message. Wait for its reply before sending another message.`
+              ),
+            ],
+          };
+        }
+
         const message = error instanceof Error ? error.message : String(error);
         return {
           results: [createErrorResult(`send_message failed: ${message}`)],

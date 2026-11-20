@@ -21,6 +21,7 @@ import {
   additionalSourcesSuggestions,
   buildViewsDefinitions,
   buildDatasetsDefinitions,
+  buildNamedSubqueriesDefinitions,
 } from '../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../options/metadata';
 import { getRecommendedQueriesSuggestions } from '../options/recommended_queries';
@@ -86,7 +87,11 @@ async function handleFromAutocomplete(
   });
 
   // METADATA suggestions - uses commandText for regex pattern matching
-  const metadataSuggestions = await getMetadataSuggestions(command, commandText);
+  const metadataSuggestions = await getMetadataSuggestions(
+    command,
+    commandText,
+    callbacks?.isServerless
+  );
   if (metadataSuggestions) {
     return metadataSuggestions;
   }
@@ -148,19 +153,21 @@ function suggestInitialSources(
   commandStart: number,
   subquerySuggestions?: ISuggestionItem[]
 ): ISuggestionItem[] {
-  let sources = context?.sources ?? [];
-
-  if (context?.isCursorInSubquery) {
-    sources = sources.filter((source) => source.type !== SOURCES_TYPES.TIMESERIES);
-  }
+  const { namedSubqueries, sources, views, datasets } = getVisibleSources(context);
 
   const sourceSuggestions = getSourceSuggestions(sources, [], {
     textBeforeCursor: innerText,
     commandStart,
   });
-  const viewSuggestions = buildViewsDefinitions(context?.views ?? [], []);
-  const datasetSuggestions = buildDatasetsDefinitions(context?.datasets ?? [], []);
-  const suggestions = [...sourceSuggestions, ...viewSuggestions, ...datasetSuggestions];
+  const viewSuggestions = buildViewsDefinitions(views, []);
+  const datasetSuggestions = buildDatasetsDefinitions(datasets, []);
+  const namedSubquerySuggestions = buildNamedSubqueriesDefinitions(namedSubqueries);
+  const suggestions = [
+    ...namedSubquerySuggestions,
+    ...sourceSuggestions,
+    ...viewSuggestions,
+    ...datasetSuggestions,
+  ];
 
   if (subquerySuggestions && shouldSuggestSubquery(context)) {
     suggestions.push(...subquerySuggestions);
@@ -214,12 +221,7 @@ async function suggestAdditionalSources(
   }
 
   const canRewriteFromToTs = indexes.length === 1 && isTypingIndexName;
-
-  let sources = context?.sources ?? [];
-
-  if (context?.isCursorInSubquery) {
-    sources = sources.filter((source) => source.type !== SOURCES_TYPES.TIMESERIES);
-  }
+  const { namedSubqueries, sources, views, datasets } = getVisibleSources(context);
 
   const recommendedQueries = await getRecommendedQueriesSuggestions(
     context?.editorExtensions ?? EMPTY_EXTENSIONS,
@@ -231,9 +233,10 @@ async function suggestAdditionalSources(
     sources,
     indexes.map(({ name }) => name),
     recommendedQueries,
-    context?.views ?? [],
-    context?.datasets ?? [],
-    canRewriteFromToTs ? sourceReplacementContext : undefined
+    views,
+    datasets,
+    canRewriteFromToTs ? sourceReplacementContext : undefined,
+    namedSubqueries
   );
 
   if (subquerySuggestions && isRestartingExpression(innerText) && shouldSuggestSubquery(context)) {
@@ -255,4 +258,20 @@ async function suggestAdditionalSources(
 
 function shouldSuggestSubquery(context: ICommandContext | undefined): boolean {
   return !context?.isCursorInSubquery;
+}
+
+function getVisibleSources(context: ICommandContext | undefined) {
+  const namedSubqueries = context?.namedSubqueries?.map(({ name }) => name) ?? [];
+  const isVisible = ({ name }: { name: string }) => !namedSubqueries.includes(name);
+
+  return {
+    namedSubqueries,
+    sources: (context?.sources ?? []).filter(
+      (source) =>
+        isVisible(source) &&
+        !(context?.isCursorInSubquery && source.type === SOURCES_TYPES.TIMESERIES)
+    ),
+    views: (context?.views ?? []).filter(isVisible),
+    datasets: (context?.datasets ?? []).filter(isVisible),
+  };
 }

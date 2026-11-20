@@ -6,12 +6,17 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest, getPlaywrightTagsFor } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { KbnClient } from '@kbn/kbn-client';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { createLlmProxy } from '@kbn/ftr-llm-proxy';
-import { mockFinalAnswer, mockTitleGeneration, mockToolCall } from '../../common/llm_mocks';
+import {
+  mockFinalAnswer,
+  mockTemplateGeneration,
+  mockTitleGeneration,
+  mockToolCall,
+} from '../../common/llm_mocks';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'kibana',
@@ -48,7 +53,7 @@ const CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE = 'platform.custom_content.panel_co
 const CUSTOM_CONTENT_UPDATE_TOOL_ID = 'custom_content_update_panel';
 const CUSTOM_CONTENT_UPDATED_UI_EVENT = 'custom_content:updated';
 const EMBEDDABLE_ID = 'panel-under-test';
-const UPDATED_ESQL_QUERY = 'FROM logs-* | STATS count = COUNT(*)';
+const UPDATED_ESQL_QUERY = 'ROW count = 3';
 
 interface ParsedSseBlock {
   type: string;
@@ -102,7 +107,13 @@ const getConversationId = (streamText: string): string => {
  */
 apiTest.describe(
   'Custom content — Refine with chat tool UI events',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  // Local-only: the LLM proxy binds to the runner's loopback, unreachable from a Cloud Kibana.
+  {
+    tag: [
+      ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
+      ...getPlaywrightTagsFor('serverless', 'search', 'local'),
+    ],
+  },
   () => {
     let adminCredentials: RoleApiCredentials;
     let llmProxy: LlmProxy;
@@ -135,8 +146,9 @@ apiTest.describe(
         mockTitleGeneration(llmProxy, 'Tool UI events');
         mockToolCall(llmProxy, CUSTOM_CONTENT_UPDATE_TOOL_ID, {
           embeddable_id: EMBEDDABLE_ID,
-          esqlQuery: UPDATED_ESQL_QUERY,
+          dataQueries: [{ esql: UPDATED_ESQL_QUERY }],
         });
+        mockTemplateGeneration(llmProxy, '<p>{{ rows[0]["count"].value }}</p>');
         mockFinalAnswer(llmProxy, 'Panel updated');
 
         const res = await apiClient.post(CHAT_CONVERSE_ASYNC, {

@@ -13,12 +13,15 @@ import type { ContextTimelineEvent } from './context_timeline';
 export const ensureValidInput = ({
   input,
   timeline,
+  allowResume = true,
 }: {
   input: ConverseInput;
   timeline: ContextTimelineEvent[];
+  /** When false, a paused conversation takes standard input: the run does not resume it. */
+  allowResume?: boolean;
 }) => {
   // The single definition of "paused": an unanswered prompt_requested as the last terminal.
-  const pending = pendingPromptRequest(timeline);
+  const pending = allowResume ? pendingPromptRequest(timeline) : undefined;
   const pendingPrompts =
     pending?.data.outcome.type === 'prompt_requested' ? pending.data.outcome.prompts : [];
 

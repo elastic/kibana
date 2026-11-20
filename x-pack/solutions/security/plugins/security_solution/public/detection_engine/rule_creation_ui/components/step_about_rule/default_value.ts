@@ -8,10 +8,11 @@
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 import type { AboutStepRule } from '../../../common/types';
 import { fillEmptySeverityMappings } from '../../../common/helpers';
+import { MITRE_ATTACK_FRAMEWORK } from '../../../../../common/detection_engine/mitre/iterate_mitre_threat_entities';
 
 export const threatDefault = [
   {
-    framework: 'MITRE ATT&CK',
+    framework: MITRE_ATTACK_FRAMEWORK,
     tactic: { id: 'none', name: 'none', reference: 'none' },
     technique: [],
   },

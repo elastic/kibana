@@ -8,7 +8,10 @@
 import React from 'react';
 
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
-import type { DatasetPartitionDetectionFormValue } from '../../create_dataset_form_state';
+import {
+  DEFAULT_PARTITION_DETECTION,
+  type DatasetPartitionDetectionFormValue,
+} from '../../create_dataset_form_state';
 import type { ComboBoxChange } from '../combo_box_selection_validity';
 import {
   EuiComboBoxNoCustomOption,
@@ -64,7 +67,7 @@ export function PartitionDetectionSelect({
       onChange={onChange}
       onBlur={onBlur}
       options={PARTITION_DETECTION_OPTIONS}
-      defaultValue="auto"
+      defaultValue={DEFAULT_PARTITION_DETECTION}
       isInvalid={isInvalid}
       placeholder={createDatasetWizardStrings.settingsPartitionDetectionPlaceholder}
       aria-label={createDatasetWizardStrings.settingsPartitionDetectionLabel}

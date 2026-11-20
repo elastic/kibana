@@ -9,6 +9,7 @@
 
 import { stringify } from 'yaml';
 import { getEdotCollectorConfig } from '@kbn/edot-collector';
+import { CONTAINER_LOG_OPERATORS } from './container_log_operators';
 
 /**
  * Extends the base EDOT Collector config with Kubernetes receivers, processors,
@@ -21,13 +22,14 @@ export function getEdotK8sCollectorConfig({
   password,
   namespace = 'otel-demo',
   demoId = 'otel-demo',
-  logsIndex = 'logs.otel',
+  logsIndex,
 }: {
   elasticsearchEndpoint: string;
   username: string;
   password: string;
   namespace?: string;
   demoId?: string;
+  /** Routes container logs and k8s events to this index. Unset: the default `logs-generic.otel-default` data stream. */
   logsIndex?: string;
 }): string {
   const base = getEdotCollectorConfig({ elasticsearchEndpoint, username, password }) as {
@@ -119,64 +121,7 @@ export function getEdotK8sCollectorConfig({
     include_file_name: false,
     retry_on_failure: { enabled: true, initial_interval: '1s', max_interval: '30s' },
     operators: [
-      {
-        type: 'json_parser',
-        id: 'parser-docker',
-        timestamp: { parse_from: 'attributes.time', layout: '%Y-%m-%dT%H:%M:%S.%LZ' },
-      },
-      {
-        type: 'recombine',
-        id: 'multiline',
-        combine_field: 'attributes.log',
-        is_first_entry: 'attributes.log != nil and attributes.log matches "^[^[:space:]]"',
-        combine_with: '\\n',
-        max_log_size: 102400,
-        source_identifier: 'attributes["log.file.path"]',
-      },
-      {
-        type: 'regex_parser',
-        id: 'extract_k8s_metadata',
-        regex:
-          '^/var/log/pods/(?P<namespace>[^_]+)_(?P<pod>[^_]+)_(?P<uid>[^/]+)/(?P<container>[^/]+)/.*\\.log$',
-        parse_from: 'attributes["log.file.path"]',
-        on_error: 'send',
-      },
-      {
-        type: 'move',
-        id: 'move_namespace',
-        from: 'attributes.namespace',
-        to: 'resource["k8s.namespace.name"]',
-        on_error: 'send',
-      },
-      {
-        type: 'move',
-        id: 'move_pod',
-        from: 'attributes.pod',
-        to: 'resource["k8s.pod.name"]',
-        on_error: 'send',
-      },
-      {
-        type: 'move',
-        id: 'move_uid',
-        from: 'attributes.uid',
-        to: 'resource["k8s.pod.uid"]',
-        on_error: 'send',
-      },
-      {
-        type: 'move',
-        id: 'move_container',
-        from: 'attributes.container',
-        to: 'resource["k8s.container.name"]',
-        on_error: 'send',
-      },
-      {
-        type: 'move',
-        id: 'move_stream',
-        from: 'attributes.stream',
-        to: 'attributes["log.iostream"]',
-        on_error: 'send',
-      },
-      { type: 'move', id: 'move_log_to_body', from: 'attributes.log', to: 'body' },
+      ...CONTAINER_LOG_OPERATORS,
       {
         type: 'json_parser',
         id: 'parse_application_json',
@@ -281,10 +226,15 @@ export function getEdotK8sCollectorConfig({
   };
 
   // Route logs to the configured index via the elasticsearch.index attribute
-  // (same approach used by the onboarding flow's Helm chart)
-  base.processors['resource/wired_streams'] = {
-    attributes: [{ key: 'elasticsearch.index', value: logsIndex, action: 'upsert' }],
-  };
+  // (same approach used by the onboarding flow's Helm chart). Without it the exporter
+  // writes to the default logs-generic.otel-default data stream.
+  const logsRoutingProcessors: string[] = [];
+  if (logsIndex) {
+    base.processors['resource/wired_streams'] = {
+      attributes: [{ key: 'elasticsearch.index', value: logsIndex, action: 'upsert' }],
+    };
+    logsRoutingProcessors.push('resource/wired_streams');
+  }
 
   base.processors.cumulativetodelta = {};
 
@@ -297,7 +247,7 @@ export function getEdotK8sCollectorConfig({
   // OTLP logs: feed to elasticapm for APM error detection.
   // The elasticapm connector internally routes processed events to ES
   // (landing in logs-generic.otel-default); we can't control that routing.
-  // Container logs go to logs.otel via the logs/k8s pipeline instead.
+  // Container logs go through the logs/k8s pipeline instead.
   delete pipelines.logs;
   pipelines['logs/otlp'] = {
     receivers: ['otlp'],
@@ -310,7 +260,7 @@ export function getEdotK8sCollectorConfig({
       'k8sattributes',
       'resourcedetection',
       'resource',
-      'resource/wired_streams',
+      ...logsRoutingProcessors,
       'batch',
     ],
     exporters: ['elasticsearch', 'debug'],
@@ -318,7 +268,7 @@ export function getEdotK8sCollectorConfig({
 
   pipelines['logs/k8s_events'] = {
     receivers: ['k8sobjects'],
-    processors: ['resourcedetection', 'resource', 'resource/wired_streams', 'batch'],
+    processors: ['resourcedetection', 'resource', ...logsRoutingProcessors, 'batch'],
     exporters: ['elasticsearch', 'debug'],
   };
 

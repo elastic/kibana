@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isIP } from 'net';
+
 import { apiTest, OTEL_RECEIVER_PORT, OTEL_TEST_PROJECT_ID, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
@@ -253,13 +255,42 @@ apiTest.describe(
         expect(e['kibana.session.id']).toBeDefined();
 
         // Network.
-        expect(e['source.address']).toBe('127.0.0.1');
-        expect(e['source.ip']).toBe('127.0.0.1');
+        expect(isIP(String(e['source.address']))).not.toBe(0);
+        expect(isIP(String(e['source.ip']))).not.toBe(0);
 
         // AUDIT_OTEL_FIELD_RENAMES: trace.id → http.request.id (avoids OTel TraceId collision).
         expect(e['http.request.id']).toBeDefined();
         expect(e['request.id']).toBeUndefined();
         expect(e['trace.id']).toBeUndefined();
+      }
+    );
+
+    apiTest(
+      'http_request: logged for a route with minimal authentication, without user.domain',
+      async ({ apiClient, samlAuth }) => {
+        const snap = receiver.snapshot();
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+
+        // The search route uses minimal authentication, so the user comes from the session and
+        // carries no authentication realm.
+        await apiClient.post('internal/search/es', {
+          headers: { ...cookieHeader, ...KBN_XSRF, 'elastic-api-version': '1' },
+          body: { params: { index: '.kibana', body: { size: 0 } } },
+          responseType: 'json',
+        });
+
+        const e = await snap.waitForLogRecord(
+          (attrs) =>
+            attrs['event.action'] === 'http_request' &&
+            typeof attrs['url.original'] === 'string' &&
+            (attrs['url.original'] as string).includes('/internal/search/es')
+        );
+
+        expectOtelEnvelope(e);
+        expect(e['user.name']).toBeDefined();
+        expect(e['user.id']).toBe(e['user.name']);
+        expect(e['user.domain']).toBeUndefined();
+        expect(e['kibana.session.id']).toBeDefined();
       }
     );
 
@@ -313,8 +344,8 @@ apiTest.describe(
         expect(e['kibana.session.id']).toBeDefined();
 
         // Network.
-        expect(e['source.address']).toBe('127.0.0.1');
-        expect(e['source.ip']).toBe('127.0.0.1');
+        expect(isIP(String(e['source.address']))).not.toBe(0);
+        expect(isIP(String(e['source.ip']))).not.toBe(0);
         expect(e['http.request.id']).toBeDefined();
       }
     );

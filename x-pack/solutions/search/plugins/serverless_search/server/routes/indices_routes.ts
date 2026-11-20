@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 
 import { fetchSearchResults } from '@kbn/search-index-documents/lib';
@@ -22,7 +21,7 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
       validate: {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
-          search_query: schema.maybe(schema.string()),
+          search_query: schema.maybe(schema.string({ maxLength: 1000 })),
           size: schema.number({ defaultValue: 20, min: 0 }),
         }),
       },
@@ -59,43 +58,10 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
 
   router.get(
     {
-      path: '/internal/serverless_search/index_names',
-      validate: {
-        query: schema.object({
-          query: schema.maybe(schema.string()),
-        }),
-      },
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the es client',
-        },
-      },
-    },
-    errorHandler(logger)(async (context, request, response) => {
-      const client = (await context.core).elasticsearch.client.asCurrentUser;
-
-      const result = await client.indices.get({
-        expand_wildcards: 'open',
-        index: request.query.query ? `*${request.query.query}*` : '*',
-      });
-      return response.ok({
-        body: {
-          index_names: Object.keys(result || {}).filter(
-            (indexName) => !isHidden(result[indexName]) && !isClosed(result[indexName])
-          ),
-        },
-        headers: { 'content-type': 'application/json' },
-      });
-    })
-  );
-
-  router.get(
-    {
       path: '/internal/serverless_search/index/{indexName}',
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
       security: {
@@ -129,7 +95,7 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
           trackTotalHits: schema.boolean({ defaultValue: false }),
         }),
         params: schema.object({
-          index_name: schema.string(),
+          index_name: schema.string({ maxLength: 1024 }),
         }),
         query: schema.object({
           page: schema.number({ defaultValue: 0, min: 0 }),
@@ -172,13 +138,3 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
     })
   );
 };
-
-function isHidden(index?: IndicesIndexState): boolean {
-  return index?.settings?.index?.hidden === true || index?.settings?.index?.hidden === 'true';
-}
-function isClosed(index?: IndicesIndexState): boolean {
-  return (
-    index?.settings?.index?.verified_before_close === true ||
-    index?.settings?.index?.verified_before_close === 'true'
-  );
-}

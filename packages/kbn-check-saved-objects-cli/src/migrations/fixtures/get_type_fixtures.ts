@@ -49,7 +49,6 @@ export async function getTypeFixtures({
         typeName: name,
         message: `'${name}' SO type is missing test fixtures for '${current}'.`,
         fixHint: `The template file '${path}' has been generated. Populate it with sample documents.`,
-        docsAnchor: '#defining-model-versions',
       });
     } else {
       throw new SavedObjectsCheckError({
@@ -58,7 +57,6 @@ export async function getTypeFixtures({
         typeName: name,
         message: `'${name}' SO type is missing test fixtures for the new modelVersion '${current}'.`,
         fixHint: `Run with --fix to generate the template file '${path}', then populate it with sample documents.`,
-        docsAnchor: '#defining-model-versions',
       });
     }
   } else if (!isValidFixtureFile(fixtures, previous, current)) {
@@ -68,7 +66,6 @@ export async function getTypeFixtures({
       typeName: name,
       message: `The contents of '${path}' are invalid.`,
       fixHint: `Ensure the file contains a JSON object with a '${previous}' key (documents of type '${name}' on version ${previous}) and a '${current}' key (those documents after migration to ${current}), each holding a non-empty array.`,
-      docsAnchor: '#defining-model-versions',
     });
   } else {
     return fixtures;

@@ -15,6 +15,7 @@ import { CSV_CHARACTER_NONE } from '../../../../common';
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import {
   DEFAULT_COLUMN_PREFIX,
+  DEFAULT_TRIM_SPACES,
   validateDistinctCsvCharacter,
   validateEscapeCharacter,
   validateQuoteCharacter,
@@ -192,7 +193,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
           <FormattedMessage
             id="xpack.dataFederation.createDatasetForm.settingsTrimSpacesHelp"
             defaultMessage="{falseValue} by default"
-            values={{ falseValue: <EuiCode>false</EuiCode> }}
+            values={{ falseValue: <EuiCode>{DEFAULT_TRIM_SPACES}</EuiCode> }}
           />
         }
         fullWidth

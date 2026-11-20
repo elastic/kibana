@@ -6,12 +6,10 @@
  */
 
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
-import { isActionValid } from '@kbn/alerting-v2-rule-form';
 import { useCallback, useMemo } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
-import { THROTTLE_INTERVAL_PATTERN } from './constants';
+import { useForm } from 'react-hook-form';
 import { DEFAULT_FORM_STATE } from './constants';
-import { needsInterval, toFormState } from './form_utils';
+import { toFormState } from './form_utils';
 import type { ActionPolicyFormState } from './types';
 
 interface UseActionPolicyFormParams {
@@ -20,6 +18,10 @@ interface UseActionPolicyFormParams {
   onSubmitUpdate: (id: string, values: ActionPolicyFormState) => void;
 }
 
+/**
+ * Validation lives in the field rules of the form components, so `handleSubmit`
+ * only calls the submit callbacks once every mounted field is valid.
+ */
 export const useActionPolicyForm = ({
   initialValues,
   onSubmitCreate,
@@ -37,48 +39,6 @@ export const useActionPolicyForm = ({
     defaultValues,
   });
 
-  const [
-    name,
-    destinations,
-    groupingMode,
-    groupBy,
-    throttleStrategy,
-    throttleInterval,
-    inlineActions,
-  ] = useWatch({
-    control: methods.control,
-    name: [
-      'name',
-      'destinations',
-      'groupingMode',
-      'groupBy',
-      'throttleStrategy',
-      'throttleInterval',
-      'inlineActions',
-    ],
-  });
-
-  const isSubmitEnabled = useMemo(() => {
-    const hasName = name.trim().length > 0;
-    const hasDestinations = destinations.length > 0 || inlineActions.length > 0;
-    const allInlineActionsValid = inlineActions.every(isActionValid);
-    const hasValidGroupBy = groupingMode === 'per_field' ? groupBy.length > 0 : true;
-    const hasValidInterval =
-      !needsInterval(throttleStrategy) || THROTTLE_INTERVAL_PATTERN.test(throttleInterval);
-
-    return (
-      hasName && hasDestinations && allInlineActionsValid && hasValidGroupBy && hasValidInterval
-    );
-  }, [
-    destinations.length,
-    groupBy.length,
-    groupingMode,
-    inlineActions,
-    name,
-    throttleStrategy,
-    throttleInterval,
-  ]);
-
   const onSubmitValid = useCallback(
     (values: ActionPolicyFormState) => {
       if (initialValues) {
@@ -95,7 +55,6 @@ export const useActionPolicyForm = ({
   return {
     methods,
     isEditMode,
-    isSubmitEnabled,
     handleSubmit,
   };
 };

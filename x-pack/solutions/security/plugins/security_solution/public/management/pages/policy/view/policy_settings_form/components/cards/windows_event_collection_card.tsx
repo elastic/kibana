@@ -6,83 +6,17 @@
  */
 
 import React, { memo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import type { EventFormOption } from '../event_collection_card';
 import { EventCollectionCard } from '../event_collection_card';
 import type { PolicyFormComponentCommonProps } from '../../types';
+import { POLICY_EVENT_COLLECTION_LABELS } from '../../../../../../../../common/endpoint/models/policy_settings_ui_labels';
 
-const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.WINDOWS>> = [
-  {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.credentialAccess',
-      {
-        defaultMessage: 'API',
-      }
-    ),
-    protectionField: 'credential_access',
-  },
-  {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.dllDriverLoad',
-      {
-        defaultMessage: 'DLL and Driver Load',
-      }
-    ),
-    protectionField: 'dll_and_driver_load',
-  },
-  {
-    name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.dns', {
-      defaultMessage: 'DNS',
-    }),
-    protectionField: 'dns',
-  },
-  {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.file',
-      {
-        defaultMessage: 'File',
-      }
-    ),
-    protectionField: 'file',
-  },
-  {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.network',
-      {
-        defaultMessage: 'Network',
-      }
-    ),
-    protectionField: 'network',
-  },
-  {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.process',
-      {
-        defaultMessage: 'Process',
-      }
-    ),
-    protectionField: 'process',
-  },
-  {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.registry',
-      {
-        defaultMessage: 'Registry',
-      }
-    ),
-    protectionField: 'registry',
-  },
-  {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.security',
-      {
-        defaultMessage: 'Security',
-      }
-    ),
-    protectionField: 'security',
-  },
-];
+const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.WINDOWS>> =
+  POLICY_EVENT_COLLECTION_LABELS.windows.map(({ field, label }) => ({
+    name: label,
+    protectionField: field,
+  }));
 
 export type WindowsEventCollectionCardProps = PolicyFormComponentCommonProps;
 

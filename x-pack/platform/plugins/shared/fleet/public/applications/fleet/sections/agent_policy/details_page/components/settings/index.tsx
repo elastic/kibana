@@ -276,6 +276,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                         isLoading={isLoading}
                         isDisabled={
                           !hasAllAgentPoliciesPrivileges ||
+                          agentPolicy.supports_agentless ||
                           isLoading ||
                           Object.keys(validation).length > 0 ||
                           hasAdvancedSettingsErrors ||

@@ -17,8 +17,11 @@ export type JsonValue =
   | JsonValue[]
   | { [key: string]: JsonValue };
 
+// ThreatQ documents no length limit for indicator or attribute values; query strings must admit any value the write actions accept.
+const MAX_VALUE_LENGTH = 10_000;
+
 const queryValue = (depth: number): z.ZodType<JsonValue> => {
-  const scalar = z.union([z.string().max(2000), z.number(), z.boolean(), z.null()]);
+  const scalar = z.union([z.string().max(MAX_VALUE_LENGTH), z.number(), z.boolean(), z.null()]);
   if (depth === 0) return scalar;
   const child = queryValue(depth - 1);
   return z.union([
@@ -179,8 +182,10 @@ export const CreateIndicatorInputSchema = lazySchema(() =>
     value: z
       .string()
       .min(1)
-      .max(2000)
-      .describe('Indicator value, for example example.com or 192.0.2.1.'),
+      .max(MAX_VALUE_LENGTH)
+      .describe(
+        `Indicator value, for example example.com or 192.0.2.1; at most ${MAX_VALUE_LENGTH} characters.`
+      ),
     typeId: IdSchema.describe(
       'Indicator type ID from listIndicatorTypes; do not assume IDs are the same across instances.'
     ),
@@ -213,9 +218,9 @@ export const AddAttributeInputSchema = lazySchema(() =>
     value: z
       .string()
       .min(1)
-      .max(10000)
+      .max(MAX_VALUE_LENGTH)
       .describe(
-        'Attribute value, for example High or a triage finding; at most 10,000 characters.'
+        `Attribute value, for example High or a triage finding; at most ${MAX_VALUE_LENGTH} characters.`
       ),
     sources: SourcesSchema.optional(),
   })

@@ -91,10 +91,20 @@ describe('system-create-alertzero-proposal forwarding', () => {
     expect(forwarded.autoApprove).toBe(true);
   });
 
+  it('forwards a proposal id to the gate, next to the origin the bridge stamps', async () => {
+    const forwarded = await runBridge({
+      ...MINIMAL_INPUTS,
+      proposalId: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+    });
+
+    expect(forwarded.proposalId).toBe('6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50');
+    expect(forwarded.origin).toBe('alertzero');
+  });
+
   // The failure this is really guarding: `''` reaching a `boolean` or `object`
   // field fails the gate's trigger validation, so an omitted optional input
   // would take down a run that has nothing wrong with it.
-  it.each(['actionInput', 'title', 'impact', 'confidence', 'expiresIn'])(
+  it.each(['actionInput', 'title', 'impact', 'confidence', 'expiresIn', 'proposalId'])(
     'leaves an omitted %s unset rather than blank',
     async (field) => {
       const forwarded = await runBridge(MINIMAL_INPUTS);

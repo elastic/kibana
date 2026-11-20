@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import type { SignificantEventsServer } from '../../../types';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import type { GetScopedClients } from '../../../routes/types';
@@ -14,6 +15,7 @@ import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_c
 import { updateEventStatusToolHandler } from './handler';
 import {
   createEventStatusUpdateTool,
+  eventStatusUpdateSchema,
   SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID,
 } from './tool';
 
@@ -30,7 +32,7 @@ jest.mock('./handler', () => ({
 }));
 
 describe('event_status_update tool', () => {
-  const telemetry = { trackAgentToolEventStatusUpdate: jest.fn() };
+  const telemetry = {};
 
   it('uses expected tool id', () => {
     const tool = createEventStatusUpdateTool({
@@ -41,6 +43,11 @@ describe('event_status_update tool', () => {
     });
 
     expect(tool.id).toBe(SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID);
+  });
+
+  it('does not let the caller set recovering, which only the status reconciliation writes', () => {
+    expect(eventStatusUpdateSchema.shape.status.safeParse('recovering').success).toBe(false);
+    expect(eventStatusUpdateSchema.shape.status.safeParse('inactive').success).toBe(true);
   });
 
   it('returns success result', async () => {
@@ -54,7 +61,7 @@ describe('event_status_update tool', () => {
     });
 
     const getScopedClients = jest.fn().mockResolvedValue({
-      getEventClient: jest.fn().mockReturnValue({}),
+      getEventSearchClient: jest.fn().mockReturnValue({}),
       getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
       licensing: {},
       uiSettingsClient: {},
@@ -67,13 +74,27 @@ describe('event_status_update tool', () => {
       telemetry: telemetry as never,
     });
 
+    const context = createMockToolContext();
+    setWorkflowEventChainContext(context.request, {
+      depth: 0,
+      sourceExecutionId: 'workflow-run-1',
+    });
     const result = await invokeHandler(
       tool as never,
-      { event_id: 'e1', status: 'inactive', assessment_note: 'Recovered after rollback' },
-      createMockToolContext()
+      {
+        event_id: 'e1',
+        status: 'inactive',
+        close_reason: 'resolved',
+        assessment_note: 'Recovered after rollback',
+      },
+      context
     );
     expect(updateEventStatusToolHandler).toHaveBeenCalledWith(
-      expect.objectContaining({ assessmentNote: 'Recovered after rollback' })
+      expect.objectContaining({
+        closeReason: 'resolved',
+        assessmentNote: 'Recovered after rollback',
+        workflowExecutionId: 'workflow-run-1',
+      })
     );
 
     if ('results' in result) {

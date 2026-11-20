@@ -19,9 +19,10 @@ import {
 import type {
   AiIndexDest,
   AiIndexFeedbackAnalysis,
-  AiIndexHttpItem,
+  AiIndexItem,
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
+import type { AiIndexDreamingConfig } from '../../common/dreaming';
 import { isIndexPattern } from '../../common/ai_index_dest';
 import { AI_INDEX_ID_PATTERN } from '../../common/validation';
 import { createSpaceDslFilter } from '../utils/space_filter';
@@ -33,24 +34,43 @@ import {
   AiIndexIdConflictError,
   AiIndexAlreadyExistsError,
 } from './errors';
-import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
+import type {
+  AiIndexDocument,
+  AiIndexStorageClient,
+  StoredAiIndexDocument,
+  StoredDreamingConfig,
+} from './storage';
 import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
 import { buildTraceQueries } from './trace_queries';
 import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 
+const withoutLegacyEdges = (dreaming: StoredDreamingConfig): AiIndexDreamingConfig => {
+  if (!dreaming.entities || !('edges' in dreaming.entities)) {
+    return dreaming;
+  }
+  const { edges: _legacyEdges, ...entities } = dreaming.entities;
+  return { ...dreaming, entities };
+};
+
 /** Resolves the identity a pre-upgrade document carries implicitly, in its `_id` and its absence of a space. */
-const toAiIndexDocument = (source: StoredAiIndexDocument, docId: string): AiIndexDocument => ({
+const toAiIndexDocument = (
+  { dreaming, ...source }: StoredAiIndexDocument,
+  docId: string
+): AiIndexDocument => ({
   ...source,
+  ...(dreaming !== undefined && { dreaming: withoutLegacyEdges(dreaming) }),
   id: source.id ?? docId,
   space: source.space ?? DEFAULT_SPACE_ID,
 });
 
-const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
+const toAiIndexItem = (document: AiIndexDocument): AiIndexItem => ({
   id: document.id,
   ...(document.description !== undefined && { description: document.description }),
   ...(document.feedback_analysis !== undefined && {
     feedback_analysis: document.feedback_analysis,
   }),
+  ...(document.dreaming !== undefined && { dreaming: document.dreaming }),
+  ...(document.memory_enabled !== undefined && { memory_enabled: document.memory_enabled }),
   managed: document.managed ?? false,
   dest: document.dest,
   automations: document.automations,
@@ -67,6 +87,19 @@ const mergeManagedAiIndex = (
 ): AiIndexDocument => ({
   ...document,
   dest: registration.dest,
+  memory_enabled: registration.memory_enabled,
+});
+
+const withoutIgnoredProperties = ({
+  memory_enabled: _memoryEnabled,
+  ...properties
+}: AiIndexProperties): AiIndexProperties => properties;
+
+const keptFields = (
+  existing: AiIndexDocument | undefined
+): Pick<AiIndexDocument, 'dreaming' | 'memory_enabled'> => ({
+  ...(existing?.dreaming !== undefined && { dreaming: existing.dreaming }),
+  ...(existing?.memory_enabled !== undefined && { memory_enabled: existing.memory_enabled }),
 });
 
 const ADD_AUTOMATION_CONFLICT_RETRIES = 2;
@@ -146,7 +179,7 @@ export class AiIndexService {
     await this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...properties, id: aiIndexId, space: spaceId, managed: false },
+      { ...withoutIgnoredProperties(properties), id: aiIndexId, space: spaceId, managed: false },
       undefined
     );
   }
@@ -172,7 +205,13 @@ export class AiIndexService {
     return this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...properties, id: aiIndexId, space: spaceId, managed: false },
+      {
+        ...withoutIgnoredProperties(properties),
+        ...keptFields(existing?.document),
+        id: aiIndexId,
+        space: spaceId,
+        managed: false,
+      },
       existing
     );
   }
@@ -199,7 +238,13 @@ export class AiIndexService {
     return this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...properties, id: aiIndexId, space: spaceId, managed: true },
+      {
+        ...withoutIgnoredProperties(properties),
+        ...keptFields(existing?.document),
+        id: aiIndexId,
+        space: spaceId,
+        managed: true,
+      },
       existing,
       { docId: buildManagedAiIndexDocId(spaceId, aiIndexId) }
     );
@@ -280,14 +325,32 @@ export class AiIndexService {
     await this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...existing.document, feedback_analysis: feedbackAnalysis },
+      {
+        ...existing.document,
+        feedback_analysis: feedbackAnalysis,
+      },
       existing
     );
 
     return feedbackAnalysis;
   }
 
-  async get(aiIndexId: string, spaceId: string): Promise<AiIndexHttpItem> {
+  /** Replaces the dreaming config of an AI index, managed or not, leaving the rest untouched. */
+  async setDreaming(
+    aiIndexId: string,
+    spaceId: string,
+    dreaming: AiIndexDreamingConfig
+  ): Promise<AiIndexDreamingConfig> {
+    const existing = await this.findDocument(aiIndexId, spaceId);
+    if (!existing) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
+    await this.writeDocument(aiIndexId, spaceId, { ...existing.document, dreaming }, existing);
+
+    return dreaming;
+  }
+
+  async get(aiIndexId: string, spaceId: string): Promise<AiIndexItem> {
     const existing = await this.findDocument(aiIndexId, spaceId);
     if (existing) {
       return this.toItem(existing.document);
@@ -366,7 +429,46 @@ export class AiIndexService {
     );
   }
 
-  async list(spaceId: string): Promise<AiIndexHttpItem[]> {
+  /** Detaches a workflow automation from an AI index, retrying on concurrent writes. */
+  async removeAutomation(
+    aiIndexId: string,
+    spaceId: string,
+    automation: { type: 'workflow'; value: string }
+  ): Promise<'removed' | 'not_attached'> {
+    return pRetry(
+      async () => {
+        const existing = await this.findDocument(aiIndexId, spaceId);
+        if (!existing) {
+          throw new AiIndexNotFoundError(aiIndexId);
+        }
+        const automations = existing.document.automations.filter(
+          (entry) => entry.type !== automation.type || entry.value !== automation.value
+        );
+        if (automations.length === existing.document.automations.length) {
+          return 'not_attached';
+        }
+
+        await this.writeDocument(
+          aiIndexId,
+          spaceId,
+          { ...existing.document, automations },
+          existing
+        );
+
+        return 'removed';
+      },
+      {
+        retries: ADD_AUTOMATION_CONFLICT_RETRIES,
+        onFailedAttempt: (error) => {
+          if (!(error instanceof AiIndexConflictError)) {
+            throw error;
+          }
+        },
+      }
+    );
+  }
+
+  async list(spaceId: string): Promise<AiIndexItem[]> {
     const items = await this.searchSpace(spaceId);
     const missingManagedIds =
       this.managedBootstrap
@@ -416,7 +518,7 @@ export class AiIndexService {
     }
   }
 
-  private async searchSpace(spaceId: string): Promise<AiIndexHttpItem[]> {
+  private async searchSpace(spaceId: string): Promise<AiIndexItem[]> {
     const response = await this.storageClient.search({
       size: MAX_AI_INDICES,
       track_total_hits: false,
@@ -434,7 +536,7 @@ export class AiIndexService {
   }
 
   /** Managed documents are resolved against their registration on read; user-owned ones are returned as stored. */
-  private toItem(document: AiIndexDocument): AiIndexHttpItem {
+  private toItem(document: AiIndexDocument): AiIndexItem {
     const registration = document.managed
       ? this.managedBootstrap?.getRegistration(document.id)
       : undefined;

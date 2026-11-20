@@ -15,8 +15,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { waitFor } from '@testing-library/dom';
-import { act, screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -160,6 +159,26 @@ describe('ESQLEditor', () => {
     expect(queryByTestId('ESQLEditor-footer')).toBeInTheDocument();
   });
 
+  it('contains the footer inside the outline shell when hasOutline is set', () => {
+    const { getByTestId, queryByTestId } = renderWithI18n(
+      renderESQLEditorComponent({ ...props, hasOutline: true })
+    );
+
+    expect(queryByTestId('ESQLEditor-outline')).toBeInTheDocument();
+    expect(getByTestId('ESQLEditor-outline')).toContainElement(getByTestId('ESQLEditor-footer'));
+    expect(getByTestId('ESQLEditor-outline')).toContainElement(getByTestId('ESQLEditor'));
+  });
+
+  it('keeps the search button outside the outline shell', () => {
+    const { getByTestId } = renderWithI18n(
+      renderESQLEditorComponent({ ...props, hasOutline: true, editorIsInline: true })
+    );
+
+    expect(getByTestId('ESQLEditor-outline')).not.toContainElement(
+      getByTestId('ESQLEditor-run-query-button')
+    );
+  });
+
   it('should render the doc icon if the displayDocumentationAsFlyout is true', async () => {
     const newProps = {
       ...props,
@@ -171,14 +190,21 @@ describe('ESQLEditor', () => {
   });
 
   it('should render correctly if editorIsInline prop is set to true', async () => {
+    const onTextLangQuerySubmit = jest.fn();
     const newProps = {
       ...props,
       editorIsInline: true,
+      onTextLangQuerySubmit,
     };
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
 
     const runQueryButton = queryByTestId('ESQLEditor-run-query-button');
     expect(runQueryButton).toBeInTheDocument(); // Assert it exists
+
+    if (runQueryButton) {
+      await userEvent.click(runQueryButton);
+      expect(onTextLangQuerySubmit).toHaveBeenCalledTimes(1);
+    }
   });
 
   it('should not render the run query button if the hideRunQueryButton prop is set to true and editorIsInline prop is set to true', async () => {

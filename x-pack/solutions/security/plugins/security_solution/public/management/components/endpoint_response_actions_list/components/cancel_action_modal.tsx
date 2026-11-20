@@ -44,6 +44,7 @@ import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translation
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { ActionDetails } from '../../../../../common/endpoint/types';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { getAgentActionState } from '../../response_action/response_action_results/utils';
 
 /** Endpoint metadata `capabilities` required for a host to support the `cancel` response action */
 const CANCEL_REQUIRED_CAPABILITIES = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY.cancel;
@@ -55,7 +56,7 @@ interface ResponseActionPendingInfo {
 
 const getResponseActionPendingInfo = (action: ActionDetails): ResponseActionPendingInfo => {
   const pendingAgentIds = action.agents.filter(
-    (agentId) => !action.agentState[agentId].isCompleted
+    (agentId) => !getAgentActionState(action, agentId).isCompleted
   );
 
   return {
@@ -235,7 +236,7 @@ export const CancelActionModal = memo<CancelActionModalProps>(
       }
 
       const selectionOptions = action.agents.reduce<EuiSelectableOption[]>((acc, agentId) => {
-        if (action.agentState[agentId].isCompleted) {
+        if (getAgentActionState(action, agentId).isCompleted) {
           return acc;
         }
 
@@ -289,9 +290,7 @@ export const CancelActionModal = memo<CancelActionModalProps>(
         </EuiFormRow>
       );
     }, [
-      action.agentState,
-      action.agents,
-      action.hosts,
+      action,
       cancelApiBody.endpoint_ids,
       doesAgentSupportCancel,
       isMultiAgentAction,

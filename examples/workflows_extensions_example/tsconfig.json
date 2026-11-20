@@ -27,6 +27,7 @@
     "@kbn/core-security-common",
     "@kbn/mock-idp-utils",
     "@kbn/es",
-    "@kbn/test-es-server"
+    "@kbn/test-es-server",
+    "@kbn/workflows-yaml"
   ]
 }

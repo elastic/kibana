@@ -14,7 +14,7 @@ import type {
   IEventLogService,
   IValidatedEvent,
 } from '@kbn/event-log-plugin/server';
-import type { ActionPolicyEventAction } from '../../dispatcher/steps/constants';
+import type { ActionPolicyEventAction } from './constants';
 import type { AlertingServerSetupDependencies } from '../../../types';
 import { EsServiceInternalToken } from '../es_service/tokens';
 import { LoggerServiceToken, type LoggerServiceContract } from '../logger_service/logger_service';
@@ -39,7 +39,7 @@ export interface FindActionPolicyExecutionEventsParams {
   policyIds?: string[];
   ruleIds?: string[];
   mandatoryRuleIds?: string[];
-  episodeIds?: string[];
+  alertIds?: string[];
 }
 
 export interface FindActionPolicyExecutionEventsResult {
@@ -86,7 +86,7 @@ export class EventLogService implements EventLogServiceContract {
     policyIds,
     ruleIds,
     mandatoryRuleIds,
-    episodeIds,
+    alertIds,
   }: FindActionPolicyExecutionEventsParams): Promise<FindActionPolicyExecutionEventsResult> {
     const body = buildFindActionPolicyEventsQuery({
       spaceId,
@@ -97,7 +97,7 @@ export class EventLogService implements EventLogServiceContract {
       policyIds,
       ruleIds,
       mandatoryRuleIds,
-      episodeIds,
+      alertIds,
       page,
       perPage,
     });

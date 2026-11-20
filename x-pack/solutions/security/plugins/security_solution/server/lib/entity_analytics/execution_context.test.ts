@@ -10,11 +10,11 @@ import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution
 describe('buildEaExecutionContext', () => {
   it('returns an execution context tagged as security_solution', () => {
     expect(
-      buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.RISK_SCORING_TASK, 'risk-scoring-task-id')
+      buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.LEAD_GENERATION_TASK, 'lead-gen-task-id')
     ).toEqual({
       type: 'security_solution',
-      name: 'entity_analytics:risk_scoring_task',
-      id: 'risk-scoring-task-id',
+      name: 'entity_analytics:lead_generation_task',
+      id: 'lead-gen-task-id',
     });
   });
 
@@ -29,11 +29,11 @@ describe('buildEaExecutionContext', () => {
 
   it('returns independent contexts for calls with identical labels', () => {
     const first = buildEaExecutionContext(
-      EA_EXECUTION_CONTEXT_NAMES.RISK_SCORING_TASK,
+      EA_EXECUTION_CONTEXT_NAMES.LEAD_GENERATION_TASK,
       'shared-id'
     );
     const second = buildEaExecutionContext(
-      EA_EXECUTION_CONTEXT_NAMES.RISK_SCORING_TASK,
+      EA_EXECUTION_CONTEXT_NAMES.LEAD_GENERATION_TASK,
       'shared-id'
     );
     expect(first).not.toBe(second);

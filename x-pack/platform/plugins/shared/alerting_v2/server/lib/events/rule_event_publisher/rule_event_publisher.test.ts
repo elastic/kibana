@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { createRuleResponse } from '../../test_utils';
 import type { EventBus } from '../event_bus';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
 import { createRuleEventPublisher } from './rule_event_publisher.mock';
@@ -23,49 +23,52 @@ import {
 describe('RuleEventPublisher', () => {
   let publisher: RuleEventPublisher;
   let eventBus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
-  let request: KibanaRequest;
+  let context: AlertingPublisherContext;
 
   beforeEach(() => {
     ({ publisher, eventBus } = createRuleEventPublisher());
-    request = httpServerMock.createKibanaRequest();
+    context = {
+      request: httpServerMock.createKibanaRequest(),
+      origin: { actor: 'internal', channel: 'api' },
+    };
   });
 
   const cases = [
     {
       name: 'emitRuleCreated',
       type: RULE_CREATED_EVENT_TYPE,
-      emit: (p: RuleEventPublisher, r: KibanaRequest, rules: EventRule[]) =>
-        p.emitRuleCreated(r, rules),
+      emit: (p: RuleEventPublisher, c: AlertingPublisherContext, rules: EventRule[]) =>
+        p.emitRuleCreated(c, rules),
     },
     {
       name: 'emitRuleUpdated',
       type: RULE_UPDATED_EVENT_TYPE,
-      emit: (p: RuleEventPublisher, r: KibanaRequest, rules: EventRule[]) =>
-        p.emitRuleUpdated(r, rules),
+      emit: (p: RuleEventPublisher, c: AlertingPublisherContext, rules: EventRule[]) =>
+        p.emitRuleUpdated(c, rules),
     },
     {
       name: 'emitRuleDeleted',
       type: RULE_DELETED_EVENT_TYPE,
-      emit: (p: RuleEventPublisher, r: KibanaRequest, rules: EventRule[]) =>
-        p.emitRuleDeleted(r, rules),
+      emit: (p: RuleEventPublisher, c: AlertingPublisherContext, rules: EventRule[]) =>
+        p.emitRuleDeleted(c, rules),
     },
     {
       name: 'emitRuleEnabled',
       type: RULE_ENABLED_EVENT_TYPE,
-      emit: (p: RuleEventPublisher, r: KibanaRequest, rules: EventRule[]) =>
-        p.emitRuleEnabled(r, rules),
+      emit: (p: RuleEventPublisher, c: AlertingPublisherContext, rules: EventRule[]) =>
+        p.emitRuleEnabled(c, rules),
     },
     {
       name: 'emitRuleDisabled',
       type: RULE_DISABLED_EVENT_TYPE,
-      emit: (p: RuleEventPublisher, r: KibanaRequest, rules: EventRule[]) =>
-        p.emitRuleDisabled(r, rules),
+      emit: (p: RuleEventPublisher, c: AlertingPublisherContext, rules: EventRule[]) =>
+        p.emitRuleDisabled(c, rules),
     },
   ];
 
   describe.each(cases)('$name', ({ type, emit }) => {
-    it('emits the matching event type with a { ruleId, spaceId } envelope and no correlationId for a single rule', () => {
-      emit(publisher, request, [{ ruleId: 'rule-1', spaceId: 'space-1' }]);
+    it('emits the matching event type with a { ruleId, spaceId } envelope and no correlationId for a single rule, forwarding the publisher context as is', () => {
+      emit(publisher, context, [{ ruleId: 'rule-1', spaceId: 'space-1' }]);
 
       expect(eventBus.publish).toHaveBeenCalledTimes(1);
       expect(eventBus.publish).toHaveBeenCalledWith(
@@ -76,7 +79,7 @@ describe('RuleEventPublisher', () => {
             spaceId: 'space-1',
           },
         },
-        { request }
+        context
       );
       const [singleEvent] = eventBus.publish.mock.calls[0];
       expect((singleEvent.payload as RuleEventPayload).correlationId).toBeUndefined();
@@ -88,7 +91,7 @@ describe('RuleEventPublisher', () => {
         version: 3,
         metadata: { name: 'rule-1' },
       } as EventRule['rule'];
-      emit(publisher, request, [{ ruleId: 'rule-1', spaceId: 'space-1', rule }]);
+      emit(publisher, context, [{ ruleId: 'rule-1', spaceId: 'space-1', rule }]);
 
       expect(eventBus.publish.mock.calls[0][0].payload).toEqual(
         expect.objectContaining({ ruleId: 'rule-1', spaceId: 'space-1', rule })
@@ -96,7 +99,7 @@ describe('RuleEventPublisher', () => {
     });
 
     it('emits one event per rule and shares a single correlationId across the batch', () => {
-      emit(publisher, request, [
+      emit(publisher, context, [
         { ruleId: 'rule-1', spaceId: 'space-1' },
         { ruleId: 'rule-2', spaceId: 'space-1' },
       ]);
@@ -124,9 +127,22 @@ describe('RuleEventPublisher', () => {
     });
 
     it('emits nothing for an empty array', () => {
-      emit(publisher, request, []);
+      emit(publisher, context, []);
 
       expect(eventBus.publish).not.toHaveBeenCalled();
     });
+  });
+
+  it('copies prevRule onto a rule.updated payload and omits it when absent', () => {
+    const prevRule = createRuleResponse({ id: 'rule-1' });
+    publisher.emitRuleUpdated(context, [
+      { ruleId: 'rule-1', spaceId: 'space-1', prevRule },
+      { ruleId: 'rule-2', spaceId: 'space-1' },
+    ]);
+
+    const [firstEvent] = eventBus.publish.mock.calls[0];
+    const [secondEvent] = eventBus.publish.mock.calls[1];
+    expect((firstEvent.payload as RuleEventPayload).prevRule).toEqual(prevRule);
+    expect(secondEvent.payload as RuleEventPayload).not.toHaveProperty('prevRule');
   });
 });

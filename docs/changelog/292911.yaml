@@ -1,7 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/292911
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: "Fix rules created or enabled by a workflow failing after the API key is revoked"

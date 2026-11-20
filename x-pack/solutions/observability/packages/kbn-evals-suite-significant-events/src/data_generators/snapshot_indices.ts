@@ -15,7 +15,6 @@ const DISCOVERIES_TEMP_INDEX_PREFIX = 'sigevents-discoveries';
 const DETECTIONS_TEMP_INDEX_PREFIX = 'sigevents-detections';
 export const DISCOVERIES_DATA_STREAM = `.significant_events-discoveries`;
 export const DETECTIONS_DATA_STREAM = `.significant_events-detections`;
-export const EVENTS_DATA_STREAM = '.significant_events-events';
 export const RULE_EVENTS_DATA_STREAM = '.rule-events';
 export const KNOWLEDGE_INDICATORS_DATA_STREAM = '.significant_events-knowledge_indicators';
 export const FEATURES_TEMP_INDEX_PATTERN = `${FEATURES_TEMP_INDEX_PREFIX}-*`;

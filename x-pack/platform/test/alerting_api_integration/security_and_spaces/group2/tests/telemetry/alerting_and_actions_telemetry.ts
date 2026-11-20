@@ -331,7 +331,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
               threshold: [0],
               searchType: 'esqlQuery',
               esqlQuery: {
-                esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+                esql: 'from kibana-alerting-test-data | stats c = count(date) | where c < 0',
               },
               timeField: 'date_epoch_millis',
             },

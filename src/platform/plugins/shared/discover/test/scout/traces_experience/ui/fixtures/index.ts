@@ -47,6 +47,7 @@ export {
   DEEP_TRACE,
   OTEL_SERVICE,
 } from './constants';
+export type { DiscoverPageObjects } from '../../../common/ui/fixtures';
 export { setupTracesExperience, teardownTracesExperience } from './setup';
 export { openServiceFlyoutFromAboutSection, expectTracesExperienceEnabled } from './helpers';
 export {

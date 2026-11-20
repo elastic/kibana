@@ -1067,8 +1067,6 @@ describe('common utils', () => {
   });
 
   describe('flattenCommentSavedObject', () => {
-    // mockCaseComments[0] is a legacy `user`-typed comment, a migrated attachment type, so the
-    // stored `comment` field is upgraded to unified `data.content` on read.
     type LegacyCommentAttributes = Extract<
       (typeof mockCaseComments)[0]['attributes'],
       { comment: string }

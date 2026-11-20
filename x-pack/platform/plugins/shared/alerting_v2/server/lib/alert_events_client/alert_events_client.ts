@@ -9,15 +9,32 @@ import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import { inject, injectable } from 'inversify';
-import type { CreateAlertEventData, CreateAlertEventResponse } from '@kbn/alerting-v2-schemas';
+import { createSignalEventInternalDataSchema } from '@kbn/alerting-v2-schemas';
+import type {
+  AlertEventSeverity,
+  CreateAlertEventData,
+  CreateAlertEventResponse,
+  CreateSignalEventData,
+  CreateSignalEventResponse,
+} from '@kbn/alerting-v2-schemas';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
   alertEventStatus,
   alertEpisodeStatus,
   alertEventType,
   ALERT_EVENTS_RESOURCE_KEY,
+  type AlertEpisodeStatus,
   type AlertEventDocument,
 } from '../../resources/datastreams/alert_events';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
+import {
+  AlertStatusChangedEventPublisher,
+  type AlertStatusChangedEventPublisherContract,
+} from '../events/alert_status_changed_event_publisher/alert_status_changed_event_publisher';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 import {
   ResourceManager,
   type ResourceManagerContract,
@@ -49,11 +66,17 @@ export function getValueByDottedPath(obj: unknown, path: string): unknown {
  * Computes `group_hash` in priority order:
  *   1. Explicit `fingerprint`
  *   2. `fingerprint_fields` — keys/paths resolved only under `data` (missing → "")
- *   3. `rule_id` (schema guarantees one of the three)
+ *   3. `rule_id` (Create Alert's schema guarantees one of the three)
+ *   4. Neither of the above, which only a signal can send: one series per source
  *
  * Always includes `spaceId` and `source` so series keys cannot collide across spaces or sources.
  */
-export function getGroupHash(event: CreateAlertEventData, spaceId: string): string {
+export function getGroupHash(
+  event: Pick<CreateAlertEventData, 'source' | 'fingerprint' | 'fingerprint_fields' | 'data'> & {
+    rule_id?: string;
+  },
+  spaceId: string
+): string {
   const { source } = event;
 
   if (event.fingerprint) {
@@ -71,18 +94,34 @@ export function getGroupHash(event: CreateAlertEventData, spaceId: string): stri
     return sha256(`${spaceId}:${source}:${JSON.stringify(pairs)}`);
   }
 
-  // Schema requires fingerprint, fingerprint_fields, or rule_id.
-  return sha256(`${spaceId}:${source}:${event.rule_id}`);
+  if (event.rule_id) {
+    return sha256(`${spaceId}:${source}:${event.rule_id}`);
+  }
+
+  return sha256(`${spaceId}:${source}`);
+}
+
+interface ResolvedEpisode {
+  readonly episodeId: string;
+  /** Last status of the series, or `null` when it has none yet. */
+  readonly previousStatus: AlertEpisodeStatus | null;
 }
 
 @injectable()
 export class AlertEventsClient {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(RequestSpaceIdToken) private readonly spaceId: string,
-    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract
-  ) {}
+    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract,
+    @inject(AlertStatusChangedEventPublisher)
+    private readonly alertStatusChangedPublisher: AlertStatusChangedEventPublisherContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('events');
+  }
 
   public async createAlertEvent(
     event: CreateAlertEventData,
@@ -92,7 +131,11 @@ export class AlertEventsClient {
     const groupHash = getGroupHash(event, this.spaceId);
 
     const episodeStatus = event.alert_status ?? alertEpisodeStatus.active;
-    const episodeId = await this.resolveEpisodeId(groupHash, episodeStatus, abortSignal);
+    const { episodeId, previousStatus } = await this.resolveEpisode(
+      groupHash,
+      episodeStatus,
+      abortSignal
+    );
 
     const status =
       episodeStatus === alertEpisodeStatus.inactive ||
@@ -129,7 +172,7 @@ export class AlertEventsClient {
     await this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY);
 
     // `refresh: 'wait_for'` ensures the written doc is visible to the next
-    // resolveEpisodeId query when events for the same series arrive back-to-back.
+    // resolveEpisode query when events for the same series arrive back-to-back.
     const { errors } = await this.storageService.bulkIndexDocs({
       index: ALERT_EVENTS_DATA_STREAM,
       docs: [doc],
@@ -144,41 +187,143 @@ export class AlertEventsClient {
       });
     }
 
+    // Same as the rule executor: only a genuine status change fires the trigger.
+    if (previousStatus !== episodeStatus) {
+      await this.publishAlertStatusChange({
+        source,
+        groupHash,
+        episodeId,
+        status: episodeStatus,
+        previousStatus,
+        // An inactive alert reports no severity, even when the writer sent one.
+        severity: episodeStatus === alertEpisodeStatus.inactive ? null : event.severity ?? null,
+      });
+    }
+
     return {
       group_hash: groupHash,
-      episode_id: episodeId,
+      alert_id: episodeId,
     };
   }
 
-  private async resolveEpisodeId(
+  /**
+   * Stores an observation-only `signal` event. A signal has no lifecycle, so there is no
+   * episode lookup, no `alert` object and no status change publish. It is stored as
+   * `breached` unless the caller sends a `status`, and `type: 'signal'` keeps it away from
+   * the dispatcher.
+   */
+  public async createSignalEvent(event: CreateSignalEventData): Promise<CreateSignalEventResponse> {
+    // Validate here as well as in the workflow step, so direct callers of the client
+    // cannot store a lifecycle status or a rule id. Any source is accepted, because only the
+    // workflow step, the external surface, reserves the `elastic` prefix.
+    const validation = createSignalEventInternalDataSchema.safeParse(event);
+    if (!validation.success) {
+      throw Boom.badRequest(`Invalid signal event: ${validation.error.message}`);
+    }
+
+    const groupHash = getGroupHash(event, this.spaceId);
+
+    const doc: AlertEventDocument = {
+      ...(event.timestamp != null ? { '@timestamp': event.timestamp } : {}),
+      scheduled_timestamp: event.timestamp ?? new Date().toISOString(),
+      group_hash: groupHash,
+      data: event.data ?? {},
+      status: event.status ?? alertEventStatus.breached,
+      source: event.source,
+      type: alertEventType.signal,
+      space_id: this.spaceId,
+      ...(event.severity != null ? { severity: event.severity } : {}),
+    };
+
+    // The doc may omit `@timestamp`, so the ingest pipeline must be in place before writing.
+    await this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY);
+
+    // No `refresh: 'wait_for'` as in Create Alert: that is there so the next episode lookup
+    // sees the write, and a signal has no lookup.
+    const { errors } = await this.storageService.bulkIndexDocs({
+      index: ALERT_EVENTS_DATA_STREAM,
+      docs: [doc],
+    });
+
+    if (errors.length > 0) {
+      const first = errors[0];
+      throw Boom.badData(`Failed to persist signal event: ${first.message}`, {
+        code: first.code,
+        details: first.details,
+      });
+    }
+
+    return { group_hash: groupHash };
+  }
+
+  /**
+   * Publishes the status change of a stored alert event. The write already
+   * succeeded, so a failure here is logged rather than thrown.
+   */
+  private async publishAlertStatusChange({
+    source,
+    groupHash,
+    episodeId,
+    status,
+    previousStatus,
+    severity,
+  }: {
+    source: string;
+    groupHash: string;
+    episodeId: string;
+    status: AlertEpisodeStatus;
+    previousStatus: AlertEpisodeStatus | null;
+    severity: AlertEventSeverity | null;
+  }): Promise<void> {
+    try {
+      await this.alertStatusChangedPublisher.publishAlertStatusChanges([
+        {
+          spaceId: this.spaceId,
+          source,
+          alert: { id: episodeId, groupHash, status, previousStatus, severity },
+          rule: null,
+          execution: null,
+        },
+      ]);
+    } catch (error) {
+      this.logger.warn({
+        message: 'Failed to publish alert status change',
+        error,
+        code: ALERTING_LOG_CODES.EVENTS_ALERT_STATUS_CHANGED_PUBLISH_FAILED,
+        labels: { space_id: this.spaceId, group_hash: groupHash, alert_id: episodeId },
+      });
+    }
+  }
+
+  private async resolveEpisode(
     groupHash: string,
-    nextStatus: string,
+    nextStatus: AlertEpisodeStatus,
     abortSignal?: AbortSignal
-  ): Promise<string> {
-    const rows = await this.queryService.executeQueryRows<{
+  ): Promise<ResolvedEpisode> {
+    const rows = await this.queryService.executeQuery<{
       last_episode_id: string;
-      last_episode_status: string;
+      last_episode_status: AlertEpisodeStatus;
     }>({
       query: `FROM ${ALERT_EVENTS_DATA_STREAM}
-          | WHERE type == "alert" AND group_hash == "${groupHash}" AND episode.status IS NOT NULL
-          | STATS last_episode_id = LAST(episode.id, @timestamp),
-                  last_episode_status = LAST(episode.status, @timestamp)
+          | WHERE type == "alert" AND group_hash == "${groupHash}" AND alert.status IS NOT NULL
+          | STATS last_episode_id = LAST(alert.id, @timestamp),
+                  last_episode_status = LAST(alert.status, @timestamp)
             BY group_hash
           | KEEP last_episode_id, last_episode_status
           | LIMIT 1`,
       abortSignal,
     });
 
-    if (rows.length === 0 || !rows[0].last_episode_id) {
-      return uuidv4();
+    const [row] = rows;
+    const previousStatus = row?.last_episode_status ?? null;
+
+    if (!row?.last_episode_id) {
+      return { episodeId: uuidv4(), previousStatus };
     }
 
-    const { last_episode_id: lastEpisodeId, last_episode_status: lastEpisodeStatus } = rows[0];
-
     const isNewLifecycle =
-      lastEpisodeStatus === alertEpisodeStatus.inactive &&
-      nextStatus !== alertEpisodeStatus.inactive;
+      previousStatus === alertEpisodeStatus.inactive && nextStatus !== alertEpisodeStatus.inactive;
 
-    return isNewLifecycle ? uuidv4() : lastEpisodeId;
+    return { episodeId: isNewLifecycle ? uuidv4() : row.last_episode_id, previousStatus };
   }
 }

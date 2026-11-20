@@ -29,10 +29,21 @@ export interface RuleEventPayload {
    */
   readonly rule?: RuleResponse;
   /**
+   * The stored `metadata.template.id`, when the rule was created from a rule
+   * template. Carried on the event because the public {@link RuleResponse}
+   * deliberately omits it while telemetry still reports it.
+   */
+  readonly templateId?: string;
+  /**
    * Shared id linking events emitted by the same bulk operation. Only present
    * for bulk emits.
    */
   readonly correlationId?: string;
+  /**
+   * Rule as it was stored before the operation. Present only for `rule.updated`,
+   * and only when the pre-update state is available.
+   */
+  readonly prevRule?: RuleResponse;
 }
 
 /**

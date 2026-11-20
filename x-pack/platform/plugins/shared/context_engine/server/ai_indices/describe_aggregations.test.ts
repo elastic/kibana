@@ -14,7 +14,7 @@ import {
   MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS,
 } from '../../common/constants';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
-import { buildAiIndexSpaceFilter } from '../../common/space_filter';
+import { buildAiIndexReadFilter, buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import type { AiIndexField } from './types';
 
@@ -32,6 +32,8 @@ const esResponseError = (statusCode: number, type: string) =>
 
 const LIFECYCLE =
   '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n| WHERE expires_at IS NULL OR expires_at > NOW()';
+const MEMORY_EXCLUSION =
+  '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")';
 
 const emptyResponse = { columns: [], values: [] };
 
@@ -87,6 +89,7 @@ describe('describeAiIndexAggregations', () => {
       query: [
         'FROM ai-index-idx-* METADATA _id, _index',
         LIFECYCLE,
+        MEMORY_EXCLUSION,
         '| WHERE type IS NOT NULL',
         '| STATS count = COUNT(*) BY type',
         '| SORT count DESC, type ASC',
@@ -99,6 +102,7 @@ describe('describeAiIndexAggregations', () => {
       query: [
         'FROM ai-index-idx-* METADATA _id, _index',
         LIFECYCLE,
+        MEMORY_EXCLUSION,
         '| MV_EXPAND tags',
         '| WHERE tags IS NOT NULL',
         '| STATS count = COUNT(*) BY tags',
@@ -111,6 +115,18 @@ describe('describeAiIndexAggregations', () => {
     for (const query of queries()) {
       expect(Parser.parse(query).errors).toEqual([]);
     }
+  });
+
+  it('scopes the counts to the user when given', async () => {
+    await describeAiIndexAggregations({
+      ...params,
+      userId: 'alice',
+      fields: [field('type', true), field('tags', true)],
+    });
+
+    const filter = buildAiIndexReadFilter({ spaceId: 'team-a', userId: 'alice' });
+    expect(esqlQuery).toHaveBeenNthCalledWith(1, expect.objectContaining({ filter }));
+    expect(esqlQuery).toHaveBeenNthCalledWith(2, expect.objectContaining({ filter }));
   });
 
   it('collapses a data stream to the newest revision before counting', async () => {

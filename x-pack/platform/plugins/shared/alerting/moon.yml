@@ -67,6 +67,7 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/alerting-state-types'
   - '@kbn/core-security-server'
+  - '@kbn/core-user-profile-server'
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-http-server'
   - '@kbn/core-spaces-common'
@@ -81,6 +82,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/es-types'
+  - '@kbn/es-errors'
   - '@kbn/lazy-object'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/config'
@@ -92,12 +94,15 @@ dependsOn:
   - '@kbn/cps-server-utils'
   - '@kbn/cps-utils'
   - '@kbn/core-saved-objects-common'
+  - '@kbn/workflows-extensions'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - server/**/*
@@ -106,6 +111,4 @@ fileGroups:
     - common/**/*
     - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

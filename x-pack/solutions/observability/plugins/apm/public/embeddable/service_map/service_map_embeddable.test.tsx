@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { BehaviorSubject } from 'rxjs';
@@ -18,6 +18,22 @@ import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
 import * as useServiceMapHook from '../../components/app/service_map/use_service_map';
 import * as urlParamHelpers from '../../context/url_params_context/helpers';
 import { LicenseContext } from '../../context/license/license_context';
+import { TimeRangeIdContextProvider } from '../../context/time_range_id/time_range_id_context';
+import { useTimeRangeId } from '../../context/time_range_id/use_time_range_id';
+
+const mockServiceMapGraph = jest.fn();
+jest.mock('../../components/app/service_map/graph', () => ({
+  ServiceMapGraph: (props: Record<string, unknown>) => {
+    mockServiceMapGraph(props);
+    return (
+      <>
+        {props.fullMapHref ? <a href={props.fullMapHref as string}>View in Service map</a> : null}
+        <button data-test-subj="serviceMapFitViewButton">Fit view</button>
+      </>
+    );
+  },
+  ContextualServiceMapGraph: () => null,
+}));
 
 jest.mock('../../context/time_range_metadata/time_range_metadata_context', () => {
   const actual = jest.requireActual(
@@ -352,6 +368,58 @@ describe('ServiceMapEmbeddable', () => {
         })
       );
     });
+
+    it('re-resolves start and end when a relative range is refreshed', () => {
+      const initialWindow = {
+        start: '2026-10-05T10:00:00.000Z',
+        end: '2026-10-05T10:30:00.000Z',
+      };
+      const refreshedWindow = {
+        start: '2026-10-05T10:05:00.000Z',
+        end: '2026-10-05T10:35:00.000Z',
+      };
+      let currentWindow = initialWindow;
+      mockGetDateRange.mockImplementation(() => currentWindow);
+
+      function RefreshHarness() {
+        const { incrementTimeRangeId } = useTimeRangeId();
+        return (
+          <>
+            <button type="button" onClick={incrementTimeRangeId}>
+              Refresh
+            </button>
+            <ServiceMapEmbeddable {...defaultProps} rangeFrom="now-30m" rangeTo="now" />
+          </>
+        );
+      }
+
+      render(
+        <TimeRangeIdContextProvider>
+          <ApmEmbeddableContext deps={mockDeps} rangeFrom="now-30m" rangeTo="now">
+            <LicenseContext.Provider value={platinumLicense}>
+              <RefreshHarness />
+            </LicenseContext.Provider>
+          </ApmEmbeddableContext>
+        </TimeRangeIdContextProvider>
+      );
+
+      expect(mockUseServiceMap).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          start: initialWindow.start,
+          end: initialWindow.end,
+        })
+      );
+
+      currentWindow = refreshedWindow;
+      fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+
+      expect(mockUseServiceMap).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          start: refreshedWindow.start,
+          end: refreshedWindow.end,
+        })
+      );
+    });
   });
 
   describe('onEmptyStateChange callback', () => {
@@ -524,6 +592,37 @@ describe('ServiceMapEmbeddable', () => {
       });
       renderEmbeddable({ onRendered });
       expect(onRendered).toHaveBeenCalledWith(true);
+    });
+  });
+
+  describe('non-interactive mode', () => {
+    const dataWithNodes = {
+      nodes: [
+        {
+          id: 'node-1',
+          data: { id: 'node-1', label: 'service-a', isService: true as const },
+          position: { x: 0, y: 0 },
+          type: 'service',
+        },
+      ],
+      edges: [],
+      nodesCount: 1,
+      tracesCount: 10,
+    };
+
+    beforeEach(() => {
+      mockServiceMapGraph.mockClear();
+      mockUseServiceMap.mockReturnValue({
+        data: dataWithNodes,
+        status: FETCH_STATUS.SUCCESS,
+      });
+    });
+
+    it('passes isInteractive=false to ServiceMapGraph when viewMode is non-interactive', () => {
+      renderEmbeddable({ viewMode: 'non-interactive' });
+
+      const lastProps = mockServiceMapGraph.mock.calls.at(-1)?.[0];
+      expect(lastProps?.isInteractive).toBe(false);
     });
   });
 });
