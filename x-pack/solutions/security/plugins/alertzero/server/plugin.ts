@@ -52,8 +52,12 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
-import { ensureFingerprintIndexMapping } from './context_engine/ensure_fingerprint_index';
-import { registerInvestigationsAiIndex } from './context_engine/register_investigations_ai_index';
+import { ALERTZERO_AI_INDICES, type AlertZeroAiIndexId } from './context_engine/ai_index_registry';
+import { registerAiIndices } from './context_engine/register_ai_indices';
+import {
+  installSpaceScopedIndexTemplates,
+  type AiIndexWriteGates,
+} from './context_engine/write_gate';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
 import { WatchesService } from './services/watches/watches_service';
@@ -153,21 +157,16 @@ export class AlertZeroPlugin
     this.threatIntelSupplyWorkflowInstaller = installer;
   };
 
-  /**
-   * False while the fingerprint template install is in flight, and after it fails.
-   * `start` cannot return a promise, so the matcher reads this as it changes.
-   */
-  private fingerprintWritesAllowed = true;
+  /** Unset when the config kill switch is off; every index is then writable. */
+  private aiIndexWriteGates?: AiIndexWriteGates<AlertZeroAiIndexId>;
 
-  private readonly alertZeroStartContract = (): AlertZeroPluginStart => {
-    const plugin = this;
-    return {
-      registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
-      get attackFingerprintWritesAllowed() {
-        return plugin.fingerprintWritesAllowed;
-      },
-    };
-  };
+  private readonly isAiIndexWritable = (aiIndexId: AlertZeroAiIndexId): boolean =>
+    this.aiIndexWriteGates?.isWritable(aiIndexId) ?? true;
+
+  private readonly alertZeroStartContract = (): AlertZeroPluginStart => ({
+    registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
+    isAiIndexWritable: this.isAiIndexWritable,
+  });
 
   setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
@@ -201,7 +200,7 @@ export class AlertZeroPlugin
     // Missing runtime dependencies must not make installed workflows eligible for orphan cleanup.
     registerOwner({ workflowsExtensions });
     if (contextEngine) {
-      registerInvestigationsAiIndex({ contextEngine });
+      registerAiIndices({ contextEngine });
     }
     // Outside the optional-plugin guard below: the browser offers this step whenever AlertZero is
     // enabled, and an unregistered step type fails the run before `on-failure: continue` applies.
@@ -373,17 +372,11 @@ export class AlertZeroPlugin
       return this.alertZeroStartContract();
     }
 
-    // Plugin start cannot return a promise. Writes stay refused until this settles, so a
-    // worker that runs in that gap reviews every attack and does not auto-create the index.
-    this.fingerprintWritesAllowed = false;
-    void ensureFingerprintIndexMapping(core.elasticsearch.client.asInternalUser, this.logger).then(
-      (allowed) => {
-        this.fingerprintWritesAllowed = allowed;
-      },
-      () => {
-        this.fingerprintWritesAllowed = false;
-      }
-    );
+    this.aiIndexWriteGates = installSpaceScopedIndexTemplates({
+      aiIndices: ALERTZERO_AI_INDICES,
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    });
 
     this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
 

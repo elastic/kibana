@@ -15,7 +15,7 @@ import { replaySession, REPLAY_SIZES } from './replay/edot_browser_replay';
 
 export type { BrowserProfileId } from './browser_profiles';
 export type { HealthProfileName } from './health_profiles';
-export type { EdotBrowserClientOptions } from './edot_browser_client';
+export type { EdotBrowserClientOptions, EdotBrowserUser } from './edot_browser_client';
 export type { EdotBrowserSpanDocument } from './edot_browser_span';
 export type {
   EdotBrowserDocument,

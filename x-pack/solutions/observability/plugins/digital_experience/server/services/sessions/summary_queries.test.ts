@@ -160,6 +160,15 @@ describe('sessionSummaryQuery', () => {
     );
   });
 
+  it('shows a signed-in user by name before their id, which EDOT Browser always writes', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+    const userEval = query.slice(query.indexOf(`${attributeColumn('user')} = COALESCE(`));
+
+    expect(userEval.indexOf('raw_attributes_user_full_name')).toBeLessThan(
+      userEval.indexOf('raw_attributes_user_id')
+    );
+  });
+
   it('rates each web vital from its own column, against the thresholds as floats store them', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
 

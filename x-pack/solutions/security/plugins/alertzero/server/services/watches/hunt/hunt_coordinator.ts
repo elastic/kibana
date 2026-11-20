@@ -16,7 +16,6 @@ import type {
   HuntIncompleteReason,
   HuntIoc,
 } from '@kbn/alertzero-common';
-import type { HuntScopeResolution } from '@kbn/alertzero-common';
 import {
   completedSuccessfully,
   FINAL_WHEN_NOTHING_SEARCHABLE,
@@ -30,6 +29,9 @@ import type { Tier2TargetSource } from './common/resolve_tier2_targets';
 import { generateRecommendations } from './common/build_recommendations';
 import { selectHuntCallModel } from './common/select_hunt_call_model';
 import { buildHuntHeadline, buildHuntNarrative } from './common/build_hunt_narrative';
+import { unsearchedGaps } from './common/unsearched_patterns';
+import { blockedScopeGuidance } from './common/blocked_scope_guidance';
+import { isBlockedByPolicyOnly } from './common/partition_hunt_universe';
 import type { HuntNarrativeContext } from './common/build_hunt_narrative';
 import { isTier1SearchableIoc } from './tier1/attribute_hits';
 import { loadReportHuntContext, MAX_HUNT_REPORT_TEXT_CHARS } from './common/load_report_context';
@@ -82,10 +84,13 @@ export interface HuntCoordinatorParams {
   spaceId: string;
   /**
    * The hunt universe: the space's Security Solution default data view patterns,
-   * exclusions included. Tier 1 searches exactly this list; the caller reads it from the
+   * exclusions included. Tier 1 searches this list minus unresolved local names; the caller reads
+   * it from the
    * `securitySolution:defaultIndex` setting.
    */
   indexPatterns: string[];
+  /** Default data view entries removed by policy (dot-prefixed names), echoed into the scope. */
+  policySkippedPatterns?: string[];
   /** Cross-project search is on: unqualified patterns in the universe reach linked projects. */
   crossProjectSearch?: boolean;
   text?: string;
@@ -115,7 +120,8 @@ export interface HuntCoordinatorCoreResult {
   report_id?: string;
   run_id: string;
   /**
-   * What Tier 1 searched: the hunt universe, exclusions included, never an alerts index.
+   * What Tier 1 searched: the hunt universe, exclusions included; dot-prefixed names are never
+   * included.
    * Empty when the scope was blocked, when resolution failed, or when the run stopped
    * before a scope existed.
    */
@@ -377,33 +383,6 @@ const buildArticleContext = (
 };
 
 /**
- * What to tell the caller when the scope is blocked, keyed on why. `_resolve/index` is
- * cluster-wide and privilege-scoped, so the wording talks about what is visible to this
- * hunt rather than what exists in a space.
- */
-const blockedScopeGuidance = ({
-  resolution,
-  indexPatterns,
-}: {
-  resolution: HuntScopeResolution;
-  indexPatterns: string[];
-}): { message: string; nextStep: string } => {
-  const checked = indexPatterns.join(', ');
-  if (resolution === 'blocked:discovery_failed') {
-    return {
-      message: `Hunt scope resolution failed, so no index was searched (checked: ${checked}).`,
-      nextStep:
-        "Check Elasticsearch connectivity and the calling user's index privileges, then retry.",
-    };
-  }
-  return {
-    message: `No index in the space's default data view is visible to this hunt (checked: ${checked}).`,
-    nextStep:
-      "Ingest data into an index the space's Security Solution default data view covers, or adjust the `securitySolution:defaultIndex` setting.",
-  };
-};
-
-/**
  * Whether Tier 2 sits this run out before any target is chosen, and why. Checked in order:
  *
  * 1. `never` always wins: `configured_never`.
@@ -585,6 +564,7 @@ const huntCoordinatorCore = async (
     text: callerText,
     run_id,
     indexPatterns,
+    policySkippedPatterns,
     crossProjectSearch = false,
     trigger,
   } = params;
@@ -719,6 +699,7 @@ const huntCoordinatorCore = async (
       esClient,
       spaceId,
       indexPatterns,
+      policySkippedPatterns,
       crossProjectSearch,
       report: scopeReport,
       logger,
@@ -768,10 +749,8 @@ const huntCoordinatorCore = async (
   // visible to this hunt, so there is nothing to search and the caller must not write
   // hunt evidence.
   if (scope.status === 'blocked') {
-    const { message, nextStep } = blockedScopeGuidance({
-      resolution: scope.resolution,
-      indexPatterns,
-    });
+    const { message, nextStep } = blockedScopeGuidance(scope, indexPatterns);
+    narrativeContext.blockedByPolicyOnly = isBlockedByPolicyOnly(scope);
     return {
       status: 'blocked',
       report_id: reportId,
@@ -805,6 +784,16 @@ const huntCoordinatorCore = async (
     };
   }
 
+  // Names the scope dropped from the search: the run never looked there, so it is not a clean
+  // search, and the same data view reproduces it. One final gap carries them.
+  const scopeGaps = unsearchedGaps(scope, indexPatterns);
+  // No `message` below names the dropped index on its own. The hunt child quotes `message` as
+  // the gap that retired the report, so the scope gap goes on it, as a sentence of its own.
+  const withScopeGap = (message: string): string => {
+    if (scopeGaps.length === 0) return message;
+    return `${/[.!?]$/.test(message) ? message : `${message}.`} ${scopeGaps[0].detail}`;
+  };
+
   const tier1Raw = await huntForThreat(esClient, {
     scope: {
       search_patterns: scope.index_patterns,
@@ -826,6 +815,7 @@ const huntCoordinatorCore = async (
   // applies to every return below, whether or not Tier 2 ran.
   const runGaps = (readReportText: boolean) => [
     ...inputGaps(readReportText),
+    ...scopeGaps,
     ...(tier1Raw.incomplete ?? []),
   ];
 
@@ -909,7 +899,7 @@ const huntCoordinatorCore = async (
     // already has): on this path it's the only place `nothing_searched` and a
     // requested-but-unavailable Tier 2 reach the wire at all, since `next_step` here
     // is a fixed string rather than one assembled from the gaps.
-    const coordinatorOwnGaps = [...inputGaps(readReportText), ...skipGaps];
+    const coordinatorOwnGaps = [...inputGaps(readReportText), ...scopeGaps, ...skipGaps];
     return {
       status: 'tier1_only',
       report_id: reportId,
@@ -922,7 +912,7 @@ const huntCoordinatorCore = async (
       tier1,
       tier2_skipped_reason: reason,
       ...(surfaceSkipDetail && skipDetail ? { tier2_skip_detail: skipDetail } : {}),
-      message,
+      message: withScopeGap(message),
       next_step: nextStep,
       has_confirmed_hit: tier1Raw.has_confirmed_hit,
       completeness,
@@ -962,7 +952,7 @@ const huntCoordinatorCore = async (
     });
     const noTextGaps = [...runGaps(false), ...skipGaps];
     const completeness = huntCompletenessOf(noTextGaps);
-    const coordinatorOwnGaps = [...inputGaps(false), ...skipGaps];
+    const coordinatorOwnGaps = [...inputGaps(false), ...scopeGaps, ...skipGaps];
     return {
       status: 'tier2_only_skipped',
       report_id: reportId,
@@ -974,7 +964,9 @@ const huntCoordinatorCore = async (
       actionable_indices: scope.actionable_indices,
       tier1,
       tier2_skipped_reason: 'no_report_text',
-      message: `IOC Hunt: ${tier1Raw.status}. Behavior Hunt skipped (no report text).`,
+      message: withScopeGap(
+        `IOC Hunt: ${tier1Raw.status}. Behavior Hunt skipped (no report text).`
+      ),
       next_step:
         'Behavior Hunt needs report text. Pass `text` explicitly or use a `report_id` whose `content.body_text` has been ingested.',
       has_confirmed_hit: tier1Raw.has_confirmed_hit,
@@ -1115,7 +1107,7 @@ const huntCoordinatorCore = async (
   const gaps = [...runGaps(true), ...tier2Gaps, ...ownGaps];
   // The coordinator's own gaps, not a copy of `tier1.incomplete` / `tier2.incomplete`
   // (the caller already has both of those).
-  const coordinatorOwnGaps = [...inputGaps(true), ...ownGaps];
+  const coordinatorOwnGaps = [...inputGaps(true), ...scopeGaps, ...ownGaps];
   // Both tiers ran, so `completed_successfully` is no longer a hardcoded `true`: it
   // follows the gaps each tier reported. A deterministic gap still retires the report,
   // because re-running reproduces it exactly and would re-spend the generation budget
@@ -1172,10 +1164,11 @@ const huntCoordinatorCore = async (
     actionable_indices: scope.actionable_indices,
     tier1,
     tier2,
-    message:
+    message: withScopeGap(
       `IOC Hunt: ${tier1Raw.status}. Behavior Hunt: ${tier2Raw.status} ` +
-      `(${tier2Raw.behaviors.length} proposed` +
-      `${gaps.length > 0 ? `, ${gaps.length} coverage gap(s)` : ''}).`,
+        `(${tier2Raw.behaviors.length} proposed` +
+        `${gaps.length > 0 ? `, ${gaps.length} coverage gap(s)` : ''}).`
+    ),
     next_step:
       tier2Raw.status === 'behaviors_proposed'
         ? gaps.length > 0
@@ -1261,7 +1254,7 @@ export const huntCoordinator = async (
     unavailable.length > 0 ? { ...coreResult, unavailable_model_tiers: unavailable } : coreResult;
   return {
     ...core,
-    headline: buildHuntHeadline(core),
+    headline: buildHuntHeadline(core, narrativeContext),
     narrative: buildHuntNarrative(core, narrativeContext),
   };
 };
