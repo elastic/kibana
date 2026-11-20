@@ -14,6 +14,7 @@ import { getSignalVariantFields, getSignalVariantPreferredFields } from './types
 import type { SignalTemplate } from './types';
 
 const SIGNAL_FIELD_QUERY_TIMEOUT_MS = 30_000;
+const SIGNAL_FIELD_QUERY_LIMIT = 10_000;
 
 export interface SignalFieldPresence {
   dataset: string;
@@ -34,7 +35,8 @@ const buildSignalFieldQuery = (
 | WHERE @timestamp > NOW() - 1 hour
     AND data_stream.dataset IN (${formatDatasetList(datasets)})
 | STATS ${aggregations}
-  BY data_stream.dataset, orchestrator.cluster.name`;
+  BY data_stream.dataset, orchestrator.cluster.name
+| LIMIT ${SIGNAL_FIELD_QUERY_LIMIT}`;
 };
 
 /** Checks every applicable signal field with one last-hour ES|QL query. */
@@ -50,7 +52,7 @@ export const checkSignalFields = async ({
   datasets: ReadonlyArray<string | null>;
   templates: readonly SignalTemplate[];
   signal?: AbortSignal;
-}): Promise<SignalFieldPresence[]> => {
+}): Promise<{ presence: SignalFieldPresence[]; truncated: boolean }> => {
   const sourceDatasets = new Set(
     datasets.filter((dataset): dataset is string => typeof dataset === 'string')
   );
@@ -59,7 +61,7 @@ export const checkSignalFields = async ({
     return variants.length > 0 ? [{ ...template, variants }] : [];
   });
   if (applicableTemplates.length === 0) {
-    return [];
+    return { presence: [], truncated: false };
   }
 
   const fields = [
@@ -90,10 +92,10 @@ export const checkSignalFields = async ({
     const datasetPosition = columnPositions.get('data_stream.dataset');
     const clusterPosition = columnPositions.get('orchestrator.cluster.name');
     if (datasetPosition === undefined || clusterPosition === undefined) {
-      return [];
+      return { presence: [], truncated: false };
     }
 
-    return response.values.flatMap((values): SignalFieldPresence[] => {
+    const presence = response.values.flatMap((values): SignalFieldPresence[] => {
       const dataset = values[datasetPosition];
       const cluster = values[clusterPosition];
       if (typeof dataset !== 'string') {
@@ -114,6 +116,7 @@ export const checkSignalFields = async ({
         },
       ];
     });
+    return { presence, truncated: response.values.length === SIGNAL_FIELD_QUERY_LIMIT };
   } finally {
     deadline.dispose();
   }

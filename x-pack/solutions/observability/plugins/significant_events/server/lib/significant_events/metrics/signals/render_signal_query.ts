@@ -6,11 +6,10 @@
  */
 
 import { toFromSourceQuery } from '@kbn/nightshift-shared';
-import { conditionToESQL, type Condition } from '@kbn/streamlang';
 import { quoteEsqlString } from '../entity_rows/helpers';
 import { WORKLOAD_OWNER_DERIVATION } from '../kubernetes/workloads';
 import { CLUSTER_FIELD } from './plan_signal_checks';
-import type { SignalTemplateVariant } from './types';
+import type { SignalClusterExclusion, SignalTemplateVariant } from './types';
 
 const WORKLOAD_KIND_BY_SUBTYPE: Readonly<Record<string, string>> = {
   'k8s.deployment': 'deployment',
@@ -34,6 +33,13 @@ const buildVariantFilter = (variants: readonly SignalTemplateVariant[]): string 
   );
   return clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`;
 };
+
+const renderClusterExclusion = ({ names, unclustered }: SignalClusterExclusion): string[] => [
+  ...(names.length > 0
+    ? [`NOT COALESCE(${CLUSTER_FIELD} IN (${names.map(quoteEsqlString).join(', ')}), FALSE)`]
+    : []),
+  ...(unclustered ? [`${CLUSTER_FIELD} IS NOT NULL`] : []),
+];
 
 // Averages each variant per group and uses the first eligible schema.
 const renderMergedAverage = (
@@ -148,14 +154,14 @@ const renderAggregation = (variants: readonly SignalTemplateVariant[], groupBy: 
 export const renderSignalQuery = ({
   esql,
   subtype,
-  scope,
+  excludedClusters,
   breakdown,
   window,
   variants,
 }: {
   esql: string;
   subtype: string;
-  scope?: Condition;
+  excludedClusters?: SignalClusterExclusion;
   breakdown: readonly string[];
   window: string;
   variants: readonly SignalTemplateVariant[];
@@ -169,7 +175,7 @@ export const renderSignalQuery = ({
     : [...breakdown, ...(variant.additionalBreakdown ?? [])];
   const filters = [
     `@timestamp >= NOW() - ${window}`,
-    ...(scope ? [conditionToESQL(scope)] : []),
+    ...(excludedClusters ? renderClusterExclusion(excludedClusters) : []),
     buildVariantFilter(variants),
   ];
   const workloadPipeline = workloadKind

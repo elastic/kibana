@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { Condition } from '@kbn/streamlang';
-
 export type SignalSchema = 'ecs' | 'otel';
 export type SignalDirection = 'higher_is_worse' | 'lower_is_worse';
 export type SignalComparison = '>' | '>=' | '<' | '==';
@@ -95,12 +93,17 @@ export interface SignalMeasurement {
   source: SignalSource;
 }
 
+export interface SignalClusterExclusion {
+  names: string[];
+  unclustered: boolean;
+}
+
 export interface SignalCheck {
   signal: string;
   type_ki_id: string;
   subtype: string;
   measurements: SignalMeasurement[];
-  scope?: Condition;
+  excluded_clusters?: SignalClusterExclusion;
   breakdown: string[];
   window: string;
   direction: SignalDirection;

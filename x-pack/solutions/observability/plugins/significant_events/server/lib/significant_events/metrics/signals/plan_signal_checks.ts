@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { Condition } from '@kbn/streamlang';
 import type { SignalFieldPresence } from './check_signal_fields';
 import { getSignalVariantFields, getSignalVariantPreferredFields } from './types';
-import type { SignalFormulaKind, SignalTemplate, SignalTemplateVariant } from './types';
+import type {
+  SignalClusterExclusion,
+  SignalFormulaKind,
+  SignalTemplate,
+  SignalTemplateVariant,
+} from './types';
 
 export const CLUSTER_FIELD = 'orchestrator.cluster.name';
 
@@ -22,7 +26,7 @@ const MERGEABLE_KINDS: ReadonlySet<SignalFormulaKind> = new Set([
 export interface SignalCheckPlan {
   /** Variants in preference order, OpenTelemetry first. */
   variants: SignalTemplateVariant[];
-  scope?: Condition;
+  excludedClusters?: SignalClusterExclusion;
 }
 
 const hasVariantFields = (presence: SignalFieldPresence, variant: SignalTemplateVariant): boolean =>
@@ -81,25 +85,14 @@ const assignVariantsToClusters = (
   });
 };
 
-// Comparisons render as COALESCE(..., FALSE), so the NOT keeps rows without a cluster name.
 const buildClusterExclusion = (
   clusters: ReadonlyArray<string | undefined>
-): Condition | undefined => {
-  const names = clusters.filter((cluster): cluster is string => cluster !== undefined);
-  const excludeNamed: Condition | undefined =
-    names.length === 0
-      ? undefined
-      : {
-          not:
-            names.length === 1
-              ? { field: CLUSTER_FIELD, eq: names[0] }
-              : { or: names.map((name) => ({ field: CLUSTER_FIELD, eq: name })) },
-        };
-  if (!clusters.includes(undefined)) {
-    return excludeNamed;
+): SignalClusterExclusion | undefined => {
+  if (clusters.length === 0) {
+    return undefined;
   }
-  const requireCluster: Condition = { field: CLUSTER_FIELD, exists: true };
-  return excludeNamed ? { and: [requireCluster, excludeNamed] } : requireCluster;
+  const names = clusters.filter((cluster): cluster is string => cluster !== undefined);
+  return { names, unclustered: clusters.includes(undefined) };
 };
 
 /**
@@ -110,7 +103,8 @@ const buildClusterExclusion = (
  */
 export const planSignalChecks = (
   template: SignalTemplate,
-  fieldPresence: readonly SignalFieldPresence[]
+  fieldPresence: readonly SignalFieldPresence[],
+  fieldPresenceTruncated: boolean
 ): SignalCheckPlan[] => {
   const variants = [...template.variants]
     .sort(byPreference)
@@ -121,13 +115,19 @@ export const planSignalChecks = (
   if (canMergePerEntity(variants)) {
     return [{ variants }];
   }
+  if (fieldPresenceTruncated) {
+    return variants.map((variant) => ({ variants: [variant] }));
+  }
 
   const assignments = assignVariantsToClusters(variants, fieldPresence);
   // Each variant excludes every cluster won by another variant.
   return assignments.map((assignment) => {
-    const scope = buildClusterExclusion(
+    const excludedClusters = buildClusterExclusion(
       assignments.filter((other) => other !== assignment).flatMap(({ clusters }) => clusters)
     );
-    return { variants: [assignment.variant], ...(scope ? { scope } : {}) };
+    return {
+      variants: [assignment.variant],
+      ...(excludedClusters ? { excludedClusters } : {}),
+    };
   });
 };

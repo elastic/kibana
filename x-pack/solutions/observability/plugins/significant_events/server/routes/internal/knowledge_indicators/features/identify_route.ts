@@ -491,7 +491,7 @@ const getMetricsSignalChecksRoute = createServerRoute({
       path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     })
   ),
-  handler: async ({ params, request, getScopedClients, server }) => {
+  handler: async ({ params, request, getScopedClients, server, logger }) => {
     const scopedClients = await getScopedClients({ request });
     const { streamDataEsClient, sourcesClient, licensing } = scopedClients;
 
@@ -511,19 +511,27 @@ const getMetricsSignalChecksRoute = createServerRoute({
     ]);
     const typeKIs = features.filter(isMetricsTypeKnowledgeIndicator);
     const templates = getApplicableSignalTemplates(typeKIs, SIGNAL_TEMPLATES);
-    const fieldPresence = await checkSignalFields({
+    const { presence: fieldPresence, truncated: fieldPresenceTruncated } = await checkSignalFields({
       esClient: streamDataEsClient,
       esql: source.esql,
       datasets,
       templates,
       signal: requestSignal,
     });
+    if (fieldPresenceTruncated) {
+      logger
+        .get('features_identification', 'metrics_signal_checks', source.id)
+        .warn(
+          `Signal field presence probe reached its limit for source [${source.id}]; cluster exclusions were skipped.`
+        );
+    }
 
     return buildSignalChecks({
       esql: source.esql,
       typeKIs,
       templates,
       fieldPresence,
+      fieldPresenceTruncated,
     });
   },
 });

@@ -51,11 +51,13 @@ export const buildSignalChecks = ({
   typeKIs,
   templates,
   fieldPresence,
+  fieldPresenceTruncated,
 }: {
   esql: string;
   typeKIs: readonly MetricsTypeKnowledgeIndicator[];
   templates: readonly SignalTemplate[];
   fieldPresence: readonly SignalFieldPresence[];
+  fieldPresenceTruncated: boolean;
 }): { checks: SignalCheck[]; skipped: SkippedSignal[] } => {
   const checks: SignalCheck[] = [];
   const skipped: SkippedSignal[] = [];
@@ -77,18 +79,18 @@ export const buildSignalChecks = ({
         skip('The type KI has no breakdown fields.');
         continue;
       }
-      const plans = planSignalChecks(template, fieldPresence);
+      const plans = planSignalChecks(template, fieldPresence, fieldPresenceTruncated);
       if (plans.length === 0) {
         skip('No ECS or OTel template field has data in the last hour.');
         continue;
       }
 
-      for (const { variants, scope } of plans) {
+      for (const { variants, excludedClusters } of plans) {
         const [{ direction, comparison, threshold }] = variants;
         const { breakdown: resolvedBreakdown, esqlPreview } = renderSignalQuery({
           esql,
           subtype: typeKI.subtype,
-          scope,
+          excludedClusters,
           breakdown,
           window: template.window,
           variants,
@@ -104,7 +106,7 @@ export const buildSignalChecks = ({
             formula,
             source,
           })),
-          ...(scope ? { scope } : {}),
+          ...(excludedClusters ? { excluded_clusters: excludedClusters } : {}),
           breakdown: resolvedBreakdown,
           window: template.window,
           direction,
