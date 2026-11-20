@@ -11,6 +11,19 @@ import type { ConnectorResponse } from '@kbn/actions-plugin/common/routes/connec
 export const SANDBOX_CONNECTORS_API_PATH = '/internal/nightshift/sandbox_connectors';
 export const SANDBOX_CONNECTOR_TYPES_API_PATH = '/internal/nightshift/sandbox_connector_types';
 
+/**
+ * The sub-actions Nightshift enables on the Elasticsearch connectors it creates, so the sandbox can
+ * query them with `kbn-tool connector`. All of them read; `request` only allows GET.
+ */
+export const ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS: readonly string[] = [
+  'search',
+  'esql',
+  'listIndices',
+  'getMapping',
+  'request',
+  'getClusterInfo',
+];
+
 /** A Kibana connector the investigation agent can use from its sandbox */
 export type SandboxConnector = Pick<
   ConnectorResponse,

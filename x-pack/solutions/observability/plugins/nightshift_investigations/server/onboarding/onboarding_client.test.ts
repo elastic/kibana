@@ -13,6 +13,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS } from '../../common/sandbox_connectors';
 import { createOnboardingClient, OnboardingUnavailableError } from './onboarding_client';
 
 const ES_URL = 'https://es.example.com:9243';
@@ -147,7 +148,7 @@ describe('createOnboardingClient', () => {
       options: { id: expect.any(String) },
       action: expect.objectContaining({
         actionTypeId: '.elasticsearch',
-        config: { url: ES_URL, selectedActions: ['_test'] },
+        config: { url: ES_URL, selectedActions: [...ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS] },
         secrets: { authType: 'api_key_header', Authorization: 'ApiKey ZW5j' },
       }),
     });

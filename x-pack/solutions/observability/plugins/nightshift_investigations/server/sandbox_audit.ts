@@ -12,6 +12,8 @@ import type {
   ReadFileResult,
   RunCommandParams,
   RunCommandResult,
+  SandboxCallbackHandler,
+  SandboxCallbackRequest,
   SandboxPluginStart,
   SandboxRpcInfo,
   SandboxRpcResult,
@@ -69,6 +71,11 @@ export interface AuditedSandboxSession {
   readonly sessionKey: object;
   readonly isReset: boolean;
   runCommand(params: RunCommandParams): Promise<RunCommandResult>;
+  /** Runs a command whose processes can call back into Kibana; every callback is audited too. */
+  runCommandWithCallbacks(
+    params: RunCommandParams,
+    onCallback: SandboxCallbackHandler
+  ): Promise<RunCommandResult>;
   readFiles(requests: Array<{ path: string; maxReadBytes?: number }>): Promise<ReadFileResult[]>;
   writeFiles(files: Array<{ path: string; content: Buffer }>): Promise<WriteFileResult[]>;
   mkdirs(paths: string[]): Promise<boolean[]>;
@@ -89,9 +96,12 @@ export interface NightshiftSandboxStart {
   ): AuditedSandboxSession;
 }
 
+const isCommandMethod = (method: string): boolean =>
+  method.endsWith('/RunCommand') || method.endsWith('/RunCommandBidi');
+
 /** Process-level RPCs run commands; the others move files. */
 const category = (method: string): 'process' | 'file' =>
-  method.endsWith('/RunCommand') ? 'process' : 'file';
+  isCommandMethod(method) ? 'process' : 'file';
 
 /**
  * The ECS types of the operation, so a query for file writes (`creation` or `change`) finds the
@@ -99,7 +109,7 @@ const category = (method: string): 'process' | 'file' =>
  * sandbox knows which.
  */
 const types = (method: string): Array<'start' | 'access' | 'creation' | 'change'> => {
-  if (method.endsWith('/RunCommand')) return ['start'];
+  if (isCommandMethod(method)) return ['start'];
   if (method.endsWith('/WriteFiles')) return ['creation', 'change'];
   if (method.endsWith('/Mkdirs')) return ['creation'];
   return ['access'];
@@ -112,6 +122,53 @@ const types = (method: string): Array<'start' | 'access' | 'creation' | 'change'
  * audit pipeline writes Kibana's own request id to `http.request.id` and would overwrite it.
  * Kibana's debug log and sandbox-api use the same name, so one search finds every record of a call.
  */
+const callerFields = (caller: SandboxCaller, spaceId?: string) => ({
+  kibana: {
+    ...(spaceId ? { space_id: spaceId } : {}),
+    sandbox_caller:
+      caller.type === 'tool'
+        ? {
+            plugin_id: PLUGIN_ID,
+            type: 'tool',
+            id: caller.toolId,
+            execution_id: caller.toolCallId,
+          }
+        : caller.type === 'workflow_step'
+        ? {
+            plugin_id: PLUGIN_ID,
+            type: 'workflow_step',
+            id: caller.stepType,
+            ...(caller.workflowExecutionId ? { execution_id: caller.workflowExecutionId } : {}),
+          }
+        : { plugin_id: PLUGIN_ID, type: 'findings_recorder', id: 'final_pass' },
+  },
+  ...(caller.type === 'workflow_step' ? { labels: { step_id: caller.stepId } } : {}),
+});
+
+/**
+ * The audit event of one call a sandbox command made back into Kibana. The tool or connector it
+ * ran writes its own events too; this one ties them to the command that asked.
+ */
+const callbackAuditEvent = (
+  { target }: SandboxCallbackRequest,
+  outcome: 'success' | 'failure',
+  caller: SandboxCaller,
+  spaceId?: string
+) => ({
+  message:
+    target.type === 'tool'
+      ? `Sandbox command called tool ${target.toolId}`
+      : `Sandbox command called sub-action ${target.subAction} of connector ${target.connectorId}`,
+  event: { action: 'sandbox_callback', category: ['process'], type: ['access'], outcome },
+  ...callerFields(caller, spaceId),
+  sandbox: {
+    callback:
+      target.type === 'tool'
+        ? { tool_id: target.toolId }
+        : { connector_id: target.connectorId, sub_action: target.subAction },
+  },
+});
+
 const auditEvent = (rpc: SandboxRpcInfo, caller: SandboxCaller, spaceId?: string) => {
   const outcome: 'success' | 'failure' = rpc.statusCode === 'OK' ? 'success' : 'failure';
   return {
@@ -123,26 +180,7 @@ const auditEvent = (rpc: SandboxRpcInfo, caller: SandboxCaller, spaceId?: string
       outcome,
       duration: rpc.durationNs,
     },
-    kibana: {
-      ...(spaceId ? { space_id: spaceId } : {}),
-      sandbox_caller:
-        caller.type === 'tool'
-          ? {
-              plugin_id: PLUGIN_ID,
-              type: 'tool',
-              id: caller.toolId,
-              execution_id: caller.toolCallId,
-            }
-          : caller.type === 'workflow_step'
-          ? {
-              plugin_id: PLUGIN_ID,
-              type: 'workflow_step',
-              id: caller.stepType,
-              ...(caller.workflowExecutionId ? { execution_id: caller.workflowExecutionId } : {}),
-            }
-          : { plugin_id: PLUGIN_ID, type: 'findings_recorder', id: 'final_pass' },
-    },
-    ...(caller.type === 'workflow_step' ? { labels: { step_id: caller.stepId } } : {}),
+    ...callerFields(caller, spaceId),
     sandbox: {
       conversation_id: rpc.conversationId,
       ...(rpc.requestId ? { proxy_request_id: rpc.requestId } : {}),
@@ -183,7 +221,7 @@ export const auditedSandboxSession = ({
   spaceId?: string;
   logger: Logger;
 }): AuditedSandboxSession => {
-  const record = (rpc: SandboxRpcInfo) => {
+  const log = (event: Parameters<AuditLogger['log']>[0]) => {
     if (!audit.enabled) return;
     // An audit failure must not fail the sandbox call, but it must not pass unnoticed either. The
     // request-scoped logger writes asynchronously, so its failure is a rejection, not a throw.
@@ -194,11 +232,25 @@ export const auditedSandboxSession = ({
         }`
       );
     try {
-      Promise.resolve(audit.log(auditEvent(rpc, caller, spaceId))).catch(warn);
+      Promise.resolve(audit.log(event)).catch(warn);
     } catch (err) {
       warn(err);
     }
   };
+  const record = (rpc: SandboxRpcInfo) => log(auditEvent(rpc, caller, spaceId));
+
+  const auditedCallbacks =
+    (onCallback: SandboxCallbackHandler): SandboxCallbackHandler =>
+    async (request) => {
+      try {
+        const result = await onCallback(request);
+        log(callbackAuditEvent(request, result.ok ? 'success' : 'failure', caller, spaceId));
+        return result;
+      } catch (err) {
+        log(callbackAuditEvent(request, 'failure', caller, spaceId));
+        throw err;
+      }
+    };
 
   const audited = async <T>(call: () => Promise<SandboxRpcResult<T>>): Promise<T> => {
     try {
@@ -217,6 +269,8 @@ export const auditedSandboxSession = ({
       return session.isReset;
     },
     runCommand: (params) => audited(() => session.runCommand(params)),
+    runCommandWithCallbacks: (params, onCallback) =>
+      audited(() => session.runCommandWithCallbacks(params, auditedCallbacks(onCallback))),
     readFiles: (requests) => audited(() => session.readFiles(requests)),
     writeFiles: (files) => audited(() => session.writeFiles(files)),
     mkdirs: (paths) => audited(() => session.mkdirs(paths)),

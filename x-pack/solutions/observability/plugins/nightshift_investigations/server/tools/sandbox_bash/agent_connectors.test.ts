@@ -86,11 +86,16 @@ describe('listAgentConnectors', () => {
     expect(result).toEqual([{ id: 'slack-1', name: 'My Slack', actionTypeId: '.slack' }]);
   });
 
-  it('exposes only id, name and actionTypeId, never config or secrets', async () => {
+  it('exposes only id, name, actionTypeId and selectedActions, never other config or secrets', async () => {
     const result = await listAgentConnectors(createCallContext(['slack-1']), getActionsClient);
 
     expect(result).toHaveLength(1);
-    expect(Object.keys(result[0]).sort()).toEqual(['actionTypeId', 'id', 'name']);
+    expect(Object.keys(result[0]).sort()).toEqual([
+      'actionTypeId',
+      'id',
+      'name',
+      'selectedActions',
+    ]);
     expect(JSON.stringify(result)).not.toContain(SECRET_WEBHOOK_URL);
     expect(JSON.stringify(result)).not.toContain('webhookUrl');
     expect(JSON.stringify(result)).not.toContain('isMissingSecrets');

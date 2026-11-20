@@ -11,9 +11,24 @@ import type { AgentConnector, ActionsClient } from './agent_connectors';
 import { listAgentConnectors } from './agent_connectors';
 import type { SandboxCallContext } from './tool_utils';
 import { CONNECTOR_DOCS, CONNECTOR_DOCS_ROOT, CONNECTOR_MANIFEST_PATH } from './connector_docs';
+import { KIBANA_TOOLS_MANIFEST_PATH } from './kibana_callbacks';
+import { getCallableSubActionNames } from './kibana_tools_manifest';
 
-const renderConnectorSection = (connector: AgentConnector): string =>
-  `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`;
+const renderConnectorSection = (connector: AgentConnector): string => {
+  const heading = `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`;
+  const subActions = getCallableSubActionNames(connector);
+  const howToCall =
+    subActions.length > 0
+      ? `Call from Python with \`kibana.connectors["${
+          connector.id
+        }"].<sub_action>(...)\` (sub-actions: ${subActions
+          .map((name) => `\`${name}\``)
+          .join(
+            ', '
+          )}; \`kibana.search_tools("<what you need>")\` shows their parameters, see ${KIBANA_TOOLS_MANIFEST_PATH}).`
+      : 'No sub-actions: pass this id as the `connector_id` of the bash command.';
+  return `${heading}\n\n${howToCall}`;
+};
 
 const renderGuidesSection = (): string[] => [
   '',
@@ -43,8 +58,16 @@ export const writeConnectorManifest = async ({
   const sections: string[] = [
     '# Sandbox Connectors',
     '',
-    'Connector credentials are never stored in this sandbox. To use a connector, pass its id as the',
-    '`connector_id` parameter of the bash tool. For that single command only, the environment contains:',
+    'Connector credentials are never stored in this sandbox.',
+    '',
+    '**Always call a connector that has sub-actions from Python with the `kibana_sdk` module**',
+    `(\`from kibana_sdk import kibana\`, as ${KIBANA_TOOLS_MANIFEST_PATH} describes). Kibana runs the`,
+    "request with the connector's credentials, and the parsed result stays in Python. Do not pass",
+    '`connector_id` or use `curl` for such a connector. Each connector below says whether it has',
+    'sub-actions.',
+    '',
+    'Only for a connector without sub-actions, pass its id as the `connector_id` parameter of the',
+    'bash tool. For that single command only, the environment contains:',
     '',
     '- `CONNECTOR_ID`, `CONNECTOR_TYPE`',
     '- `CONNECTOR_CONFIG_<KEY>` for each connector setting (e.g. `CONNECTOR_CONFIG_APIURL`)',

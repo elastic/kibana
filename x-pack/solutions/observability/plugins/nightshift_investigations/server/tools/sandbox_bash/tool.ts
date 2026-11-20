@@ -6,19 +6,22 @@
  */
 
 import { randomUUID } from 'crypto';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecretEnvKey } from '@kbn/sandbox-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AuditedSandboxSession, NightshiftSandboxStart } from '../../sandbox_audit';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import { redactSecrets } from './connector_credentials';
 import { getConversationId, getSandboxCallContext, getSandboxCaller } from './tool_utils';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from './view_file_tool';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
+import { KIBANA_TOOLS_MANIFEST_PATH, createSandboxCallbackHandler } from './kibana_callbacks';
 import type { SandboxAllowlistClient } from '../../sandbox_allowlist';
+import type { SandboxToolRegistry } from './sandbox_callable_tools';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
@@ -65,40 +68,46 @@ const capOutput = async (
 const RESOURCE_EXHAUSTED_HINT =
   ' The output was too large for the sandbox transport; redirect it to a file, then grep or summarize it.';
 
-const sandboxBashSchema = z.object({
-  command: z
-    .string()
-    .describe('Bash command to execute in the sandbox (runs as: bash -c <command>)'),
-  working_directory: z
-    .string()
-    .optional()
-    .describe('Working directory inside the sandbox (default: /workspace)'),
-  env: z
-    .record(z.string(), z.string())
-    .optional()
-    .describe('Additional environment variables to set for this command'),
-  timeout_seconds: z
-    .number()
-    .optional()
-    .describe(
-      `Timeout in seconds; 0 or omitted uses ${MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS}s, which is also the maximum`
-    ),
-  connector_id: z
-    .string()
-    .optional()
-    .describe(
-      'Connector whose credentials this command needs (see /workspace/connectors.md). Its config and auth headers are exposed to this command only, as CONNECTOR_CONFIG_<KEY> / CONNECTOR_HEADER_<NAME> environment variables, and are gone when the command exits.'
-    ),
-});
+const sandboxBashSchema = lazySchema(() =>
+  z.object({
+    command: z
+      .string()
+      .describe('Bash command to execute in the sandbox (runs as: bash -c <command>)'),
+    working_directory: z
+      .string()
+      .optional()
+      .describe('Working directory inside the sandbox (default: /workspace)'),
+    env: z
+      .record(z.string(), z.string())
+      .optional()
+      .describe('Additional environment variables to set for this command'),
+    timeout_seconds: z
+      .number()
+      .optional()
+      .describe(
+        `Timeout in seconds; 0 or omitted uses ${MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS}s, which is also the maximum`
+      ),
+    connector_id: z
+      .string()
+      .optional()
+      .describe(
+        'Only for a connector without kbn-tool sub-actions (see /workspace/connectors.md): the connector whose credentials this command needs. Its config and auth headers are exposed to this command only, as CONNECTOR_CONFIG_<KEY> / CONNECTOR_HEADER_<NAME> environment variables, and are gone when the command exits. Call a connector with sub-actions with `kbn-tool connector` instead.'
+      ),
+  })
+);
 
 export const createSandboxBashTool = ({
   getSandboxStart,
+  getActions,
+  getToolRegistry,
   sandboxWorkspaceManager,
   resolveConnectorCredentials,
   sandboxAllowlistClient,
   logger,
 }: {
   getSandboxStart: () => NightshiftSandboxStart | undefined;
+  getActions: () => ActionsPluginStart | undefined;
+  getToolRegistry: (request: KibanaRequest) => Promise<SandboxToolRegistry | undefined>;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
   sandboxAllowlistClient?: Pick<SandboxAllowlistClient, 'getHostsForCommand'>;
@@ -107,7 +116,10 @@ export const createSandboxBashTool = ({
   id: SANDBOX_BASH_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace. To call an external service through a Kibana connector, read /workspace/connectors.md and pass the connector id as `connector_id`: the connector credentials are then available to that single command as CONNECTOR_* environment variables (e.g. `curl -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" "$CONNECTOR_CONFIG_APIURL/..."`).',
+    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace.' +
+    ' Always make requests to a Kibana connector that has sub-actions, Elasticsearch included, from Python with the generated SDK, for example `import sys; sys.path.insert(0, "/workspace"); from kibana_sdk import kibana; rows = kibana.esql("FROM logs-* | STATS c = COUNT(*) BY service.name")` (`kibana.help()` lists every connector and sub-action): Kibana runs the request with the connector credentials and the parsed result stays in Python, so aggregate there and print only what you need. The `kbn-tool` CLI behind it also works from shell. See ' +
+    KIBANA_TOOLS_MANIFEST_PATH +
+    ' for every connector sub-action and tool it can call. Only for a connector without sub-actions (see /workspace/connectors.md), pass its id as `connector_id`: its credentials are then available to that single command as CONNECTOR_* environment variables.',
   tags: ['sandbox', 'bash'],
   schema: sandboxBashSchema,
   annotations: {
@@ -224,17 +236,25 @@ export const createSandboxBashTool = ({
         ...credentialEnv,
       };
 
-      const result = await session.runCommand({
-        command,
-        directory: working_directory,
-        env: mergedEnv,
-        ...(secretEnvKeys.length > 0 ? { secret_env_keys: secretEnvKeys } : {}),
-        ...(spaceAllowedHosts.length > 0 ? { allowed_hosts: spaceAllowedHosts } : {}),
-        timeout_seconds:
-          timeout_seconds && timeout_seconds > 0
-            ? Math.min(timeout_seconds, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS)
-            : MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS,
-      });
+      const result = await session.runCommandWithCallbacks(
+        {
+          command,
+          directory: working_directory,
+          env: mergedEnv,
+          ...(secretEnvKeys.length > 0 ? { secret_env_keys: secretEnvKeys } : {}),
+          ...(spaceAllowedHosts.length > 0 ? { allowed_hosts: spaceAllowedHosts } : {}),
+          timeout_seconds:
+            timeout_seconds && timeout_seconds > 0
+              ? Math.min(timeout_seconds, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS)
+              : MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS,
+        },
+        createSandboxCallbackHandler({
+          runner: context.runner,
+          callContext,
+          actions: getActions(),
+          toolRegistry: await getToolRegistry(context.request),
+        })
+      );
 
       const { exit_code, timed_out } = result;
       const stdout = await capOutput(session, 'stdout', redactSecrets(result.stdout, secretValues));

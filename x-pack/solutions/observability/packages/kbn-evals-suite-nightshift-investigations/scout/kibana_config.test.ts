@@ -11,6 +11,7 @@ import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getConfigFromFiles } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
+import { ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS } from '@kbn/nightshift-investigations-plugin/common';
 import { CONNECTOR_SETS } from '../evals/investigation/connector_sets';
 
 it('resolves credentials from the environment and preserves other preconfigured connectors', () => {
@@ -46,7 +47,10 @@ it('resolves credentials from the environment and preserves other preconfigured 
       elasticsearch: {
         name: 'elasticsearch',
         actionTypeId: '.elasticsearch',
-        config: { url: 'https://es.example.com', selectedActions: ['_test'] },
+        config: {
+          url: 'https://es.example.com',
+          selectedActions: [...ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS],
+        },
         secrets: { authType: 'api_key_header', Authorization: 'ApiKey remote-key' },
       },
     });

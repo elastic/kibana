@@ -6,6 +6,7 @@
  */
 
 import type { KbnClient } from '@kbn/scout';
+import { ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS } from '@kbn/nightshift-investigations-plugin/common';
 import { ORCABENCH_ES_CONNECTOR_ID } from './connector_sets';
 
 /** The name the investigator sees for the ORCA connector, as an operator would name it. */
@@ -26,7 +27,7 @@ export const saveOrcaConnector = async (
   const path = `/api/actions/connector/${ORCABENCH_ES_CONNECTOR_ID}`;
   const connector = {
     name: ORCABENCH_ES_CONNECTOR_NAME,
-    config: { url, selectedActions: ['_test'] },
+    config: { url, selectedActions: [...ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS] },
     secrets: { authType: 'api_key_header', Authorization: `ApiKey ${apiKey}` },
   };
   const request = async (method: 'GET' | 'POST' | 'PUT', body?: object) => {

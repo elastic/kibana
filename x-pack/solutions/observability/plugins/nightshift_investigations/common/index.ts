@@ -180,6 +180,7 @@ export {
 export {
   SANDBOX_CONNECTORS_API_PATH,
   SANDBOX_CONNECTOR_TYPES_API_PATH,
+  ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS,
   type SandboxConnector,
   type GetSandboxConnectorsResponse,
   type SandboxConnectorType,

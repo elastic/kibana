@@ -13,6 +13,7 @@ import type {
   FileMetadata,
   ReadFileResult,
   WriteFileResult,
+  SandboxCallbackHandler,
 } from './grpc_client';
 import type { SandboxRpcResult } from './rpc';
 import { SandboxRpcError, sandboxRpcLogMeta } from './rpc';
@@ -71,6 +72,16 @@ export interface SandboxSession {
   /** Runs a shell command inside the sandbox pod and streams stdout/stderr. */
   runCommand(params: RunCommandParams): Promise<SandboxRpcResult<RunCommandResult>>;
 
+  /**
+   * Runs a shell command whose processes can call back into Kibana through `kbn-tool`.
+   * `onCallback` answers each call and decides what the sandbox may run. When sandbox-api does not
+   * support callbacks, the command runs without them and `kbn-tool` reports that.
+   */
+  runCommandWithCallbacks(
+    params: RunCommandParams,
+    onCallback: SandboxCallbackHandler
+  ): Promise<SandboxRpcResult<RunCommandResult>>;
+
   /** Reads one or more files from the sandbox pod's filesystem. */
   readFiles(
     requests: Array<{ path: string; maxReadBytes?: number }>
@@ -115,6 +126,23 @@ export class SandboxSessionImpl implements SandboxSession {
 
   async runCommand(params: RunCommandParams): Promise<SandboxRpcResult<RunCommandResult>> {
     return this.execute(() => this.apiClient.runCommand(this.sessionId, params));
+  }
+
+  async runCommandWithCallbacks(
+    params: RunCommandParams,
+    onCallback: SandboxCallbackHandler
+  ): Promise<SandboxRpcResult<RunCommandResult>> {
+    return this.execute(async () => {
+      try {
+        return await this.apiClient.runCommandWithCallbacks(this.sessionId, params, onCallback);
+      } catch (err) {
+        // sandbox-api refuses an unknown method before the command runs, so running it again
+        // without callbacks cannot run it twice.
+        if ((err as { code?: number })?.code !== 12 /* UNIMPLEMENTED */) throw err;
+        this.logger.debug('sandbox-api does not support callbacks; running the command without');
+        return this.apiClient.runCommand(this.sessionId, params);
+      }
+    });
   }
 
   async readFiles(

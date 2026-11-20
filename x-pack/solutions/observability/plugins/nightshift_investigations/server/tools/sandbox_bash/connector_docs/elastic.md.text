@@ -2,19 +2,41 @@
 
 Use for: querying cluster telemetry (logs, metrics, traces) with ES|QL or the REST API.
 
-Query Elasticsearch by passing an Elasticsearch connector's `connector_id` to
-`nightshift_sandbox_bash`. Take it from `/workspace/connectors.md`: an External
-Elasticsearch (`.elasticsearch`) connector, or an HTTP (`.http`) connector whose URL is an
-Elasticsearch cluster. If several fit, pick the one for the cluster the question is about. If
-none is listed, Elasticsearch is not reachable: say so instead of guessing credentials.
+Take an Elasticsearch connector id from `/workspace/connectors.md`: an External Elasticsearch
+(`.elasticsearch`) connector, or an HTTP (`.http`) connector whose URL is an Elasticsearch cluster.
+If several fit, pick the one for the cluster the question is about. If none is listed,
+Elasticsearch is not reachable: say so instead of guessing credentials.
 
-Credentials are not stored here: for that single command only, the environment contains
+## Always query from Python with `kibana_sdk`
 
-- `CONNECTOR_CONFIG_URL` — Elasticsearch URL
-- `CONNECTOR_HEADER_AUTHORIZATION` — full Authorization header value (`ApiKey <key>`)
+Make every request to an External Elasticsearch connector from Python with the `kibana_sdk`
+module, inside `nightshift_sandbox_bash`. Kibana runs the request with the connector's
+credentials, so do not pass `connector_id` to the command and do not use `curl` or `kbn-tool` for
+these connectors. Parameters come from `kibana.search_tools("<keywords>", detail="full")`.
 
-Reference those variables directly and never hard-code their values. A command that omits
-`connector_id` gets no credentials and cannot reach Elasticsearch.
+```python
+import sys; sys.path.insert(0, "/workspace")
+from kibana_sdk import kibana
+es = kibana.connectors["<connector-id>"]   # the id from /workspace/connectors.md
+```
+
+- ES|QL: `es.esql(query="...")` returns a list of row dicts.
+- Query DSL searches and aggregations: `es.search(index="...", query={...}, size=0, aggs={...})`.
+- Any GET API, such as `_remote/info`, `_resolve/index`, `_field_caps` or `_cat/...`:
+  `es.request(path="/...", queryParams={...})`.
+- Indices and data streams by pattern: `es.list_indices(pattern="logs-*")`. A key that cannot list
+  indices or read `/_remote/info` is refused with `security_exception`; `es.request` on
+  `/_resolve/index/<pattern>` still works for it, so use that to discover data streams.
+- The fields of one index: `es.get_mapping(index="...", fields=["..."])`.
+
+A call that Elasticsearch or Kibana refuses raises `KibanaError` with the reason, for example an
+ES|QL `Unknown column`. Read it and fix the query instead of treating the call as empty; do not
+wrap calls in a bare `except`.
+
+Only an HTTP (`.http`) connector, which has no sub-actions, still needs the old way: pass its
+`connector_id` to `nightshift_sandbox_bash`, and for that single command the environment holds
+`CONNECTOR_CONFIG_URL` and `CONNECTOR_HEADER_AUTHORIZATION` (the full `ApiKey <key>` header) for
+`curl --fail-with-body -sS --max-time 120`. Never print or hard-code those values.
 
 Telemetry usually lives in `logs-*`, `metrics-*` and `traces-*`, locally or on remote clusters, but
 what a cluster holds depends on how it was set up. Start there and check what is available, as
@@ -25,32 +47,32 @@ shown below, before querying.
 - Replace `logs-*` in the examples below with the indices you found, or those the custom context names.
 - The "Local Elasticsearch" connector reaches only its own project and may not call `GET /` or
   `GET /_remote/info`; skip the remote steps below for it. With any other connector:
-  - Before your first query, list the cluster's remotes with `GET /_remote/info`, even when local
-    indices look relevant: many deployments keep little locally and hold production telemetry on
-    remote clusters named by cloud, region or team (for example `prod-aws-us-east-1`). Skip it
-    only when the space's custom context already names the remotes to use.
+  - Before your first query, list the cluster's remotes with `request` on `/_remote/info`, even
+    when local indices look relevant: many deployments keep little locally and hold production
+    telemetry on remote clusters named by cloud, region or team (for example `prod-aws-us-east-1`).
+    Skip it only when the space's custom context already names the remotes to use.
   - Never conclude that telemetry is unavailable from local indices alone. If the cluster has
     remotes, check the ones matching the incident's region, team or service (for example
-    `GET /_resolve/index/<remote>:*<service>*`) and name the clusters you checked.
+    `request` on `/_resolve/index/<remote>:*<service>*`) and name the clusters you checked.
 - Name each remote explicitly as `remote:index`; never use wildcard remote names in
-  `_resolve/cluster`, `_resolve/index` or searches. To check many remotes, query them in parallel
-  with a short per-request timeout, as in the last example below: a sequential loop over dozens of
-  remotes exceeds the sandbox command timeout and returns nothing.
+  `_resolve/cluster`, `_resolve/index` or searches. To check many remotes, query them in parallel,
+  as in the last example below: a sequential loop over dozens of remotes exceeds the sandbox
+  command timeout and returns nothing. One script runs at most 8 calls at a time.
 - Query a specific data stream, not a broad `logs-*`: on large clusters a broad pattern scans
-  every data stream and times out. Find candidates with
-  `GET /_resolve/index/<remote>:logs-*<keyword>*`, then query the one you need. The response has
+  every data stream and times out. Find candidates with `request` on
+  `/_resolve/index/<remote>:logs-*<keyword>*`, then query the one you need. The response has
   three arrays, `indices`, `aliases` and `data_streams`: read all three and don't filter to one,
   because a data stream's backing indices are not listed under `indices`.
-- Add `?format=txt` to `_query` for a compact text table instead of JSON. Build the body with
-  `jq -n --arg q '<ES|QL>' '{query: $q}' | curl … -d @-` so the query needs no JSON escaping,
-  and put regexes (`GROK`, `RLIKE`) in triple-quoted `"""…"""` strings so backslashes stay
-  literal.
-- Bound every telemetry query with a `@timestamp` range and every curl with `--max-time 120`.
-  If a query times out, filter on a structured field (`data_stream.dataset`, `host.name`) before
-  any text match, or split the window into hours or days.
-- Never hide a failure: no `2>/dev/null`, `|| true`, or piping a response straight into `jq`.
-  A failed request then looks like no data. Check for `.error` first.
-- The sandbox has `jq` and `python3`; there is no `python`.
+- Put ES|QL regexes (`GROK`, `RLIKE`) in triple-quoted `"""…"""` Python strings so backslashes
+  stay literal.
+- Bound every telemetry query with a `@timestamp` range. If a query times out, filter on a
+  structured field (`data_stream.dataset`, `host.name`) before any text match, or split the window
+  into hours or days.
+- Never hide a failure: print the `KibanaError` text, never `except: pass` or an empty result for
+  an error. A failed request then looks like no data.
+- Do the work in the script: loop over services, windows or remotes, join and aggregate the rows
+  in Python, and print only a compact result, instead of one command per query and instead of
+  copying rows through the conversation. The sandbox has `python3`; there is no `python`.
 - Common ES|QL mistakes: `LIKE` wildcards are `*`, not `%`; string comparisons are
   case-sensitive; use `MATCH_PHRASE(message, "…")` for text; count conditionally with
   `COUNT(*) WHERE …`; `first` and `last` are reserved; convert fields with conflicting types with
@@ -59,37 +81,42 @@ shown below, before querying.
   (compare with `TO_INTEGER(…)`); integer division truncates, so write `100.0 * a / b`; `==` and
   `!=` never match null, so count nulls with `IS NULL`; quote field names containing `/` or `-`
   in backticks; without `LIMIT`, results stop at 1000 rows.
-- Before querying a field, check which streams map it with
-  `_field_caps?fields=<field>&include_unmapped=true`: the response then lists the indices for
-  each type, including `unmapped`. `Unknown column [x]` means no index in the `FROM` pattern
-  maps `x`: pick another stream instead of retrying. Prefer `_count` or ES|QL `STATS` for
-  totals and a small `LIMIT` for raw documents.
+- Before querying a field, check which streams map it with `request` on `/_field_caps` and
+  `"queryParams": {"fields": "<field>", "include_unmapped": true}`: the response then lists the
+  indices for each type, including `unmapped`. `Unknown column [x]` means no index in the `FROM`
+  pattern maps `x`: pick another stream instead of retrying. Prefer ES|QL `STATS` for totals and a
+  small `LIMIT` for raw documents.
 
-```bash
-# connector_id must be set on every one of these commands
-curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
-  "$CONNECTOR_CONFIG_URL/_remote/info"
+```python
+import sys; sys.path.insert(0, "/workspace")
+from concurrent.futures import ThreadPoolExecutor
+from kibana_sdk import kibana, KibanaError
 
-curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
-  -H "Content-Type: application/json" \
-  "$CONNECTOR_CONFIG_URL/_query?format=txt" \
-  -d '{"query":"FROM logs-* | WHERE @timestamp >= \"2026-01-01T00:00:00Z\" AND @timestamp < \"2026-01-01T01:00:00Z\" | STATS count = COUNT(*) BY service.name | SORT count DESC | LIMIT 20"}'
+es = kibana.connectors["<connector-id>"]   # from /workspace/connectors.md
+
+# First look, in one call: the remotes (a read-only key may be refused) and the data streams
+try:
+    print("remotes:", list(es.request(path="/_remote/info")))
+except KibanaError as error:
+    print("remotes unavailable:", str(error)[:200])
+print([stream["name"] for stream in es.request(path="/_resolve/index/*")["data_streams"]][:80])
+
+rows = es.esql(query="FROM logs-* | WHERE @timestamp >= \"2026-01-01T00:00:00Z\" AND @timestamp < \"2026-01-01T01:00:00Z\" | STATS count = COUNT(*) BY service.name | SORT count DESC | LIMIT 20")
+print(rows)
 
 # Find the data streams that match a keyword on one remote
-curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
-  "$CONNECTOR_CONFIG_URL/_resolve/index/<remote>:logs-*nginx*"
+print(es.request(path="/_resolve/index/<remote>:logs-*nginx*"))
 
-# Count one data stream on every remote whose name starts with <prefix>, 8 at a time, each line
-# prefixed with its remote; failed requests print their error
-q() {
-  curl --fail-with-body -sS --max-time 30 -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
-    -H "Content-Type: application/json" "$CONNECTOR_CONFIG_URL/_query?format=txt" \
-    -d "{\"query\":\"FROM $1:logs-nginx.error-* | WHERE @timestamp >= \\\"2026-01-01T00:00:00Z\\\" AND @timestamp < \\\"2026-01-01T06:00:00Z\\\" | STATS count = COUNT(*)\"}" \
-    2>&1 | sed "s/^/$1\t/"
-}
-export -f q
-curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
-  "$CONNECTOR_CONFIG_URL/_remote/info" | jq -r 'keys[] | select(startswith("<prefix>"))' \
-  | xargs -P 8 -n 1 bash -c 'q "$0"'
+# Count one data stream on every remote whose name starts with <prefix>, 8 at a time; a failed
+# request keeps its error next to its remote
+def count(remote):
+    try:
+        return remote, es.esql(query=f"FROM {remote}:logs-nginx.error-* | WHERE @timestamp >= \"2026-01-01T00:00:00Z\" AND @timestamp < \"2026-01-01T06:00:00Z\" | STATS count = COUNT(*)")
+    except KibanaError as error:
+        return remote, f"error: {error}"
+
+remotes = [name for name in es.request(path="/_remote/info") if name.startswith("<prefix>")]
+with ThreadPoolExecutor(8) as pool:
+    for remote, result in pool.map(count, remotes):
+        print(remote, result)
 ```
-

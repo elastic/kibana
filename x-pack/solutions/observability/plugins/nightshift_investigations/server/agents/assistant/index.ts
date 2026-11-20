@@ -30,9 +30,10 @@ Your sandbox workspace documents everything you can use. Read a file with
 the same turn:
 - \`/workspace/.connector-docs/elastic.md\`: how to query Elasticsearch through an Elasticsearch
   connector, including indices and remote clusters.
-- \`/workspace/connectors.md\`: every connector and secret you may call, Elasticsearch ones included,
-  and how their credentials reach a \`${SANDBOX_BASH_TOOL_ID}\` command. Never guess credentials or
-  endpoints.
+- \`/workspace/connectors.md\`: every connector and secret you may call, Elasticsearch ones included.
+  Always call a connector that has sub-actions from Python with \`kibana.connectors["<id>"]\` (module
+  \`kibana_sdk\`) inside a \`${SANDBOX_BASH_TOOL_ID}\` command, as \`/workspace/kibana_tools.md\` describes; pass
+  \`connector_id\` only for a connector without sub-actions. Never guess credentials or endpoints.
   It also lists usage guides under \`/workspace/.connector-docs/\` (GitHub, New Relic) with
   API recipes and access options; read one when you need that service.
 - Slack is not a sandbox connector. Read it with \`${SLACK_READ_TOOL_ID}\`, which can only read:

@@ -238,6 +238,22 @@ describe('ORCA telemetry evidence', () => {
     ).toBe(true);
   });
   it.each([
+    'count\n14268',
+    'service.name,count\ncheckout,1203',
+    '@timestamp,message\n2026-04-19T16:30:00.000Z,timeout',
+    '{"count":14268,"service.name":"checkout"}\n{"count":0,"service.name":"cart"}',
+  ])('accepts kbn-tool connector calls and their csv or ndjson rows: %s', (stdout) => {
+    const step = {
+      ...call,
+      params: {
+        command: `jq -n '{query: $q}' | kbn-tool connector orcabench-es esql --format csv --params -`,
+      },
+      results: [{ ...call.results[0], data: { stdout, exit_code: 0 } }],
+    };
+    expect(hasOrcaTelemetryQuery([{ steps: [step] }])).toBe(true);
+  });
+
+  it.each([
     { ...call, tool_id: 'execute_api' },
     { ...call, params: { ...call.params, connector_id: 'another-cluster' } },
     { ...call, params: { ...call.params, connector_id: 'orcabench-es-0123456789ab' } },
@@ -269,6 +285,19 @@ describe('ORCA telemetry evidence', () => {
       ...call,
       results: [{ ...call.results[0], data: { stdout: '{"values":[[14268]]}', exit_code: 1 } }],
     },
+    {
+      ...call,
+      params: { command: "kbn-tool connector another-cluster esql --params '{}'" },
+    },
+    {
+      ...call,
+      params: { command: 'kbn-tool connector orcabench-es-0123456789ab esql --format csv' },
+    },
+    ...['count\n0', 'service.name,count\ncheckout,0', '{"count":0}'].map((stdout) => ({
+      ...call,
+      params: { command: 'kbn-tool connector orcabench-es esql --format csv' },
+      results: [{ ...call.results[0], data: { stdout, exit_code: 0 } }],
+    })),
   ])('rejects other connectors, empty data and masked failures: %j', (step) => {
     expect(hasOrcaTelemetryQuery([{ steps: [step] }])).toBe(false);
   });

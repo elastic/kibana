@@ -9,6 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS } from '../../common/sandbox_connectors';
 import { OnboardingUnavailableError } from './errors';
 import {
   createLocalElasticsearchConnector,
@@ -125,7 +126,7 @@ describe('createLocalElasticsearchConnector', () => {
       action: {
         actionTypeId: '.elasticsearch',
         name: 'Local Elasticsearch',
-        config: { url: URL, selectedActions: ['_test'] },
+        config: { url: URL, selectedActions: [...ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS] },
         secrets: { authType: 'api_key_header', Authorization: 'ApiKey ZW5jb2RlZA==' },
       },
     });

@@ -399,6 +399,155 @@ function deserializeMkdirsResponse(buf: Buffer): boolean[] {
 }
 
 // ---------------------------------------------------------------------------
+// RunCommandBidi
+// ---------------------------------------------------------------------------
+
+/** What a process in the sandbox asked to call through `kbn-tool`. */
+export type SandboxCallbackTarget =
+  | { type: 'tool'; toolId: string }
+  | { type: 'connector'; connectorId: string; subAction: string };
+
+export interface SandboxCallbackRequest {
+  target: SandboxCallbackTarget;
+  params: Record<string, unknown>;
+}
+
+export type SandboxCallbackResult =
+  | { ok: true; result: unknown }
+  | { ok: false; errorMessage: string };
+
+/** Answers one callback. It decides what the sandbox may call. */
+export type SandboxCallbackHandler = (
+  request: SandboxCallbackRequest
+) => Promise<SandboxCallbackResult>;
+
+/**
+ * Largest callback result sent back to the sandbox. It stays well under the 4 MiB gRPC message
+ * limit that sandbox-api and the pod enforce.
+ */
+export const MAX_CALLBACK_RESULT_BYTES = 2 * 1024 * 1024;
+
+type ServerMessage =
+  | { type: 'callback_request'; requestId: string; request: SandboxCallbackRequest | string }
+  | { type: 'result'; result: RunCommandResult }
+  | { type: 'unknown' };
+
+/** Calls `onField` for each field of a protobuf message, with a number or a length-delimited buffer. */
+function forEachField(buf: Buffer, onField: (field: number, value: number | Buffer) => void): void {
+  let offset = 0;
+  while (offset < buf.length) {
+    const { value: tag, bytesRead: tb } = decodeVarint(buf, offset);
+    offset += tb;
+    const field = tag >>> 3;
+    const wireType = tag & 0x7;
+    if (wireType === 0) {
+      const { value, bytesRead: vb } = decodeVarint(buf, offset);
+      offset += vb;
+      onField(field, value);
+    } else if (wireType === 2) {
+      const { value: len, bytesRead: lb } = decodeVarint(buf, offset);
+      offset += lb;
+      onField(field, buf.subarray(offset, offset + len));
+      offset += len;
+    } else if (wireType === 1) {
+      offset += 8;
+    } else if (wireType === 5) {
+      offset += 4;
+    } else {
+      throw new Error(`unsupported protobuf wire type ${wireType}`);
+    }
+  }
+}
+
+const bufferField = (value: number | Buffer): Buffer =>
+  Buffer.isBuffer(value) ? value : Buffer.alloc(0);
+
+// CallbackRequest: 1=request_id, 2=tool{1=tool_id}, 3=connector{1=connector_id, 2=sub_action},
+// 4=params_json. The request is a string when it cannot be used, describing why.
+function deserializeCallbackRequest(buf: Buffer): {
+  requestId: string;
+  request: SandboxCallbackRequest | string;
+} {
+  let requestId = '';
+  let target: SandboxCallbackTarget | undefined;
+  let paramsJson = '';
+  forEachField(buf, (field, value) => {
+    if (field === 1) requestId = bufferField(value).toString('utf8');
+    else if (field === 2) {
+      let toolId = '';
+      forEachField(bufferField(value), (f, v) => {
+        if (f === 1) toolId = bufferField(v).toString('utf8');
+      });
+      target = { type: 'tool', toolId };
+    } else if (field === 3) {
+      let connectorId = '';
+      let subAction = '';
+      forEachField(bufferField(value), (f, v) => {
+        if (f === 1) connectorId = bufferField(v).toString('utf8');
+        else if (f === 2) subAction = bufferField(v).toString('utf8');
+      });
+      target = { type: 'connector', connectorId, subAction };
+    } else if (field === 4) paramsJson = bufferField(value).toString('utf8');
+  });
+
+  if (!target) return { requestId, request: 'The callback names neither a tool nor a connector.' };
+  let params: unknown;
+  try {
+    params = paramsJson ? JSON.parse(paramsJson) : {};
+  } catch {
+    return { requestId, request: 'The callback parameters are not valid JSON.' };
+  }
+  if (typeof params !== 'object' || params === null || Array.isArray(params)) {
+    return { requestId, request: 'The callback parameters must be a JSON object.' };
+  }
+  return { requestId, request: { target, params: params as Record<string, unknown> } };
+}
+
+// RunCommandServerMessage: oneof { CallbackRequest callback_request=1; RunCommandResponse result=2; }
+export function deserializeRunCommandServerMessage(buf: Buffer): ServerMessage {
+  let message: ServerMessage = { type: 'unknown' };
+  forEachField(buf, (field, value) => {
+    if (field === 1) {
+      message = { type: 'callback_request', ...deserializeCallbackRequest(bufferField(value)) };
+    } else if (field === 2) {
+      message = { type: 'result', result: deserializeRunCommandResponse(bufferField(value)) };
+    }
+  });
+  return message;
+}
+
+// RunCommandClientMessage: oneof { RunCommandRequest command=1; CallbackResponse callback_response=2; }
+export function serializeRunCommandClientCommand(req: RunCommandRequestProto): Buffer {
+  return encodeNestedMessage(1, serializeRunCommandRequest(req));
+}
+
+// CallbackResponse: 1=request_id, 2=ok, 3=result_json, 4=error_message
+export function serializeRunCommandClientCallbackResponse(
+  requestId: string,
+  result: SandboxCallbackResult
+): Buffer {
+  const response = result.ok
+    ? Buffer.concat([
+        encodeStringField(1, requestId),
+        encodeVarintField(2, 1),
+        encodeBytesField(3, Buffer.from(JSON.stringify(result.result ?? null), 'utf8')),
+      ])
+    : Buffer.concat([encodeStringField(1, requestId), encodeStringField(4, result.errorMessage)]);
+  return encodeNestedMessage(2, response);
+}
+
+/** Bounds a callback result so the response fits in a gRPC message. */
+const boundCallbackResult = (result: SandboxCallbackResult): SandboxCallbackResult => {
+  if (!result.ok) return result;
+  const size = Buffer.byteLength(JSON.stringify(result.result ?? null), 'utf8');
+  if (size <= MAX_CALLBACK_RESULT_BYTES) return result;
+  return {
+    ok: false,
+    errorMessage: `The result is ${size} bytes, more than the ${MAX_CALLBACK_RESULT_BYTES} bytes a callback can return. Ask for fewer rows or fields.`,
+  };
+};
+
+// ---------------------------------------------------------------------------
 // SandboxApiClient — one shared gRPC connection to sandbox-api.
 // Each method takes a conversationId injected as x-conversation-id metadata.
 // ---------------------------------------------------------------------------
@@ -451,6 +600,15 @@ const sandboxServiceDef: grpc.ServiceDefinition<any> = {
     responseSerialize: (res: Buffer) => res,
     responseDeserialize: (buf: Buffer) => deserializeMkdirsResponse(buf),
   },
+  runCommandBidi: {
+    path: '/sandbox.SandboxService/RunCommandBidi',
+    requestStream: true,
+    responseStream: true,
+    requestSerialize: (message: Buffer) => message,
+    requestDeserialize: (buf: Buffer) => buf,
+    responseSerialize: (res: Buffer) => res,
+    responseDeserialize: (buf: Buffer) => deserializeRunCommandServerMessage(buf),
+  },
 };
 
 const SandboxServiceConstructor = grpc.makeClientConstructor(sandboxServiceDef, 'SandboxService');
@@ -472,6 +630,11 @@ const MAX_REQUEST_ID_LENGTH = 128;
 
 type SandboxRpcMethod = 'runCommand' | 'statFiles' | 'readFiles' | 'writeFiles' | 'mkdirs';
 
+type BidiRpc = (
+  metadata: grpc.Metadata,
+  options: grpc.CallOptions
+) => grpc.ClientDuplexStream<Buffer, ServerMessage>;
+
 type UnaryRpc<TRequest, TResponse> = (
   request: TRequest,
   metadata: grpc.Metadata,
@@ -480,6 +643,23 @@ type UnaryRpc<TRequest, TResponse> = (
 ) => grpc.ClientUnaryCall;
 
 const statusName = (code: number): string => grpc.status[code] ?? String(code);
+
+const toRunCommandRequest = (params: RunCommandParams): RunCommandRequestProto => ({
+  command: params.command,
+  directory: params.directory ?? '',
+  env: params.env ?? {},
+  timeout_seconds: params.timeout_seconds ?? 0,
+  task_group_id: '',
+  secret_env_keys: params.secret_env_keys ?? [],
+  allowed_hosts: params.allowed_hosts ?? [],
+});
+
+const commandDeadlineMs = (params: RunCommandParams): number =>
+  (params.timeout_seconds && params.timeout_seconds > 0
+    ? params.timeout_seconds
+    : DEFAULT_COMMAND_TIMEOUT_SECONDS) *
+    1_000 +
+  COMMAND_DEADLINE_MARGIN_MS;
 
 /**
  * Reads the request id the proxy echoes back. The proxy appends its own value to one a client
@@ -638,24 +818,112 @@ export class SandboxApiClient {
     conversationId: string,
     params: RunCommandParams
   ): Promise<SandboxRpcResult<RunCommandResult>> {
-    const timeoutSeconds =
-      params.timeout_seconds && params.timeout_seconds > 0
-        ? params.timeout_seconds
-        : DEFAULT_COMMAND_TIMEOUT_SECONDS;
     return this.invoke(
       'runCommand',
-      {
-        command: params.command,
-        directory: params.directory ?? '',
-        env: params.env ?? {},
-        timeout_seconds: params.timeout_seconds ?? 0,
-        task_group_id: '',
-        secret_env_keys: params.secret_env_keys ?? [],
-        allowed_hosts: params.allowed_hosts ?? [],
-      } satisfies RunCommandRequestProto,
+      toRunCommandRequest(params),
       conversationId,
-      timeoutSeconds * 1_000 + COMMAND_DEADLINE_MARGIN_MS
+      commandDeadlineMs(params)
     );
+  }
+
+  /**
+   * Runs a command like {@link runCommand} and answers the calls its processes make through
+   * `kbn-tool` with `onCallback`. Callbacks run concurrently; the command waits for each answer.
+   * Rejects with gRPC `UNIMPLEMENTED` when sandbox-api does not support callbacks yet, before the
+   * command runs.
+   */
+  runCommandWithCallbacks(
+    conversationId: string,
+    params: RunCommandParams,
+    onCallback: SandboxCallbackHandler
+  ): Promise<SandboxRpcResult<RunCommandResult>> {
+    const rpcMethod = sandboxServiceDef.runCommandBidi.path.slice(1);
+    const rpc = (this.client as unknown as { runCommandBidi: BidiRpc }).runCommandBidi;
+
+    return new Promise<SandboxRpcResult<RunCommandResult>>((resolve, reject) => {
+      const startedAt = process.hrtime.bigint();
+      let requestId: string | undefined;
+      let result: RunCommandResult | undefined;
+      let streamError: grpc.ServiceError | undefined;
+      let settled = false;
+
+      const call = rpc.call(
+        this.client,
+        this.metadata(conversationId),
+        this.callOptions(commandDeadlineMs(params))
+      );
+
+      const answer = async (callbackId: string, request: SandboxCallbackRequest | string) => {
+        let callbackResult: SandboxCallbackResult;
+        if (typeof request === 'string') {
+          callbackResult = { ok: false, errorMessage: request };
+        } else {
+          try {
+            callbackResult = boundCallbackResult(await onCallback(request));
+          } catch (err) {
+            callbackResult = {
+              ok: false,
+              errorMessage: err instanceof Error ? err.message : String(err),
+            };
+          }
+        }
+        if (settled || result) return;
+        call.write(serializeRunCommandClientCallbackResponse(callbackId, callbackResult));
+      };
+
+      const settle = (code: number, trailers?: grpc.Metadata, details?: string) => {
+        if (settled) return;
+        settled = true;
+        const failed = code !== grpc.status.OK || !result;
+        const info: SandboxRpcInfo = {
+          requestId: requestId ?? getRequestId(trailers),
+          conversationId,
+          method: rpcMethod,
+          statusCode: statusName(failed && code === grpc.status.OK ? grpc.status.INTERNAL : code),
+          durationNs: Number(process.hrtime.bigint() - startedAt),
+        };
+        this.logger.debug(
+          `Sandbox RPC ${rpcMethod} finished with gRPC status ${info.statusCode}`,
+          sandboxRpcLogMeta(info)
+        );
+        if (!failed && result) {
+          resolve({ value: result, rpc: info });
+          return;
+        }
+        reject(
+          new SandboxRpcError(
+            info,
+            streamError ??
+              Object.assign(
+                new Error(
+                  code === grpc.status.OK
+                    ? 'The sandbox ended the command stream without a result'
+                    : `${code} ${statusName(code)}: ${details ?? ''}`
+                ),
+                { code: code === grpc.status.OK ? grpc.status.INTERNAL : code, details }
+              )
+          )
+        );
+      };
+
+      call.on('metadata', (metadata) => {
+        requestId = getRequestId(metadata);
+      });
+      call.on('data', (message: ServerMessage) => {
+        if (message.type === 'result') {
+          result = message.result;
+          call.end();
+        } else if (message.type === 'callback_request') {
+          void answer(message.requestId, message.request);
+        }
+      });
+      call.on('error', (err: grpc.ServiceError) => {
+        streamError = err;
+      });
+      call.on('status', (status) => settle(status.code, status.metadata, status.details));
+
+      call.write(serializeRunCommandClientCommand(toRunCommandRequest(params)));
+    });
   }
 
   async statFiles(
