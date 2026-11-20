@@ -244,6 +244,10 @@ describe('compareCmd exit codes', () => {
     const outcome = await runCompare(GATE);
 
     // Averaging all 3 target repetitions would give 1/3 against 1 on every example and trip.
+    // With the shared repetition every score is 1 on both sides, so the slice is binary and
+    // McNemar finds no discordant pair (p = 1). That is a checked, unchanged row: passed. An
+    // all-equal continuous slice (e.g. 0.5 against 0.5) has no p-value and exits inconclusive,
+    // as in the --regression-evaluators test above.
     expect(outcome).toEqual({ exitCode: 0 });
   });
 
