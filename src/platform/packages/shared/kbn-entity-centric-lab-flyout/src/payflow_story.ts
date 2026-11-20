@@ -42,6 +42,7 @@ import type {
   TraceSpan,
   TracesTabData,
 } from './fake_entity_tabs';
+import { podPhaseSeries } from './kind_templates';
 import { INCIDENT_DEPLOY_TIME_MS, INCIDENT_X_DOMAIN } from './time_domain';
 // `chaos_mode` imports `STORY_CLICKABLE_NAMES` from this file but only
 // reads it inside function bodies, so this back-reference resolves at
@@ -1005,6 +1006,9 @@ const paymentsPodMetrics: MetricsTabData = {
         },
       ],
     },
+    // Same phase heatmap as other pods. This flyout is curated, so it does
+    // not pick up the series added in the shared pod template.
+    podPhaseSeries('unhealthy'),
   ],
   otherMetrics: [],
 };

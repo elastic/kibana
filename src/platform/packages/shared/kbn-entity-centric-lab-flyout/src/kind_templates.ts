@@ -386,6 +386,49 @@ const series = (
   points: INCIDENT_X_DOMAIN.map((x, i) => ({ x, y: ys[i] ?? ys[ys.length - 1] ?? 0 })),
 });
 
+/**
+ * Pod phase indexes for the status heatmap. Running, Pending, and Failed are
+ * the phases the demo series steps through. Succeeded and Unknown stay in
+ * the scale so a later point can land on them.
+ */
+const POD_PHASE_LABELS = ['Running', 'Pending', 'Failed', 'Succeeded', 'Unknown'] as const;
+
+const podPhaseIndex = (label: (typeof POD_PHASE_LABELS)[number]): number =>
+  POD_PHASE_LABELS.indexOf(label);
+
+/**
+ * Phase over time for the status heatmap. Healthy pods leave Pending once
+ * scheduled and stay Running. At-risk pods stall in Pending around the
+ * deploy, then recover. Unhealthy pods go Pending and then Failed.
+ */
+const podPhaseTrend = (h: EntityHealthVariant): number[] => {
+  const running = podPhaseIndex('Running');
+  const pending = podPhaseIndex('Pending');
+  const failed = podPhaseIndex('Failed');
+  const points = Array.from({ length: INCIDENT_X_DOMAIN.length }, () => running);
+  points[0] = pending;
+  points[1] = pending;
+  if (h === 'atRisk') {
+    for (let i = 16; i <= 19; i++) points[i] = pending;
+  }
+  if (h === 'unhealthy') {
+    points[16] = pending;
+    points[17] = pending;
+    for (let i = 18; i < points.length; i++) points[i] = failed;
+  }
+  return points;
+};
+
+export const podPhaseSeries = (h: EntityHealthVariant): MetricSeries => ({
+  id: 'phase',
+  label: 'Phase',
+  unit: '',
+  description:
+    'Pod phase over the selected time range: Running, Succeeded, Pending, Failed, or Unknown.',
+  yLabels: POD_PHASE_LABELS,
+  series: [series('phase', 'Phase', podPhaseTrend(h))],
+});
+
 const log = (
   id: string,
   timestamp: string,
@@ -1955,6 +1998,7 @@ const buildPodTemplate = (
   // the {category} + {sub-type} convention used by every other
   // multi-type kind (Host + Bare-metal, cloud + AWS EC2 Instance,
   // database + Postgres, …).
+  const isPod = kubernetesTagFromTypeLabel(typeLabel, 'kubernetes.pod') === 'kubernetes.pod';
   const tags: EntityTag[] = [
     { label: 'Kubernetes', color: 'hollow' },
     { label: kubernetesTagFromTypeLabel(typeLabel, 'kubernetes.pod'), color: 'hollow' },
@@ -2034,6 +2078,23 @@ const buildPodTemplate = (
     ],
     details: [
       { id: 'podName', label: 'Pod name', value: name },
+      // Inventory enrichment replaces this with the pod's real phase and
+      // reason (for example "Failed (OOMKilled)"). Present here so a pod
+      // flyout still has the row when that enrichment is not wired.
+      ...(isPod
+        ? [
+            {
+              id: 'phase',
+              label: 'Phase',
+              value: pick(
+                h,
+                'Running',
+                'Pending (ContainerCreating)',
+                'Failed (OOMKilled)'
+              ),
+            },
+          ]
+        : []),
       { id: 'namespace', label: 'Namespace', value: 'payments' },
       { id: 'node', label: 'Node', value: 'node-prod-eu-04' },
       { id: 'image', label: 'Container image', value: 'registry/payments-service:v1.8.2' },
@@ -2069,6 +2130,9 @@ const buildPodTemplate = (
         description: 'How many times containers have restarted.',
         series: [series('restarts', 'Restarts', trendFor(h, 0, 4, 36))],
       },
+      // Phase is a pod status. Containers and deployments share this
+      // builder but do not have a Kubernetes pod phase.
+      ...(isPod ? [podPhaseSeries(h)] : []),
     ],
     otherMetrics: [
       {

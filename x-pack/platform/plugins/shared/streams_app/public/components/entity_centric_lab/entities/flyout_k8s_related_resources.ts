@@ -12,6 +12,7 @@ import {
 } from '@kbn/entity-centric-lab-flyout';
 import type { Entity } from './fake_entities';
 import type { EntityDetailRow } from '@kbn/entity-centric-lab-flyout';
+import { podPhaseWithReason } from './bucket_metrics';
 import {
   findK8sInventoryEntityByContext,
   getK8sContextValue,
@@ -80,10 +81,27 @@ export const enrichK8sFlyoutOverviewDetails = (
     deployment: getK8sContextValue(entity, 'deployment'),
     pod: getK8sContextValue(entity, 'pod'),
   };
-  return rows.map((row) => {
-    const patched = patchById[row.id];
-    return patched ? { ...row, value: patched } : row;
+  const patched = rows.map((row) => {
+    const next = patchById[row.id];
+    return next ? { ...row, value: next } : row;
   });
+  if (entity.subType !== 'Pods') {
+    return patched;
+  }
+  // Every pod shows its phase and, when Kubernetes has one, the reason.
+  // Same phase as the header badge, so the two cannot disagree.
+  // The incident pod's whole story is an OOM kill. Keep that reason instead
+  // of a hashed one so the metadata matches the summary and the alerts.
+  const phaseValue =
+    entity.name === 'payments-pod-7f9b2'
+      ? 'Failed (OOMKilled)'
+      : podPhaseWithReason(entity.name, entity.health);
+  const phaseRow: EntityDetailRow = { id: 'phase', label: 'Phase', value: phaseValue };
+  if (patched.some((row) => row.id === 'phase')) {
+    return patched.map((row) => (row.id === 'phase' ? { ...row, value: phaseValue } : row));
+  }
+  const insertAt = Math.min(1, patched.length);
+  return [...patched.slice(0, insertAt), phaseRow, ...patched.slice(insertAt)];
 };
 
 export const buildK8sFlyoutRelatedResources = (

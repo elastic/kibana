@@ -2948,12 +2948,12 @@ const AllEntitiesViewInner = ({
           hiddenPanelIds: dashboard.hiddenPanelIds ?? new Set(),
         }}
         resourceName={entityName}
-        rangeFrom={rangeFrom}
-        rangeTo={rangeTo}
+        rangeFrom={flyoutTimeRange.from}
+        rangeTo={flyoutTimeRange.to}
         directSavedObjectId={dashboard.savedObjectId}
       />
     ),
-    [rangeFrom, rangeTo]
+    [flyoutTimeRange.from, flyoutTimeRange.to]
   );
 
   // `agentBuilder` is an *optional* start dep on Streams — when it's

@@ -33,6 +33,7 @@ export { KubernetesEventsTab, generatePodKubernetesEvents } from './src/kubernet
 export type { KubernetesPodEvent } from './src/kubernetes_events_tab';
 export { labThing } from './src/lab_terminology';
 export { formatIncidentTick } from './src/time_domain';
+export { FlyoutTimeRangeProvider } from './src/time_range_context';
 export {
   alertRowToStableAlertUuid,
   alertRowToStableRuleUuid,

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AnthropicIcon, OpenAiIcon } from './ai_provider_icons';
 import { AwsEc2Icon, AwsLambdaIcon, AwsS3Icon, type AwsServiceIconComponent } from './aws_service_icons';
 
 /** EUI icon id, or an AWS service mark, for a known entity type label. */
@@ -66,10 +67,11 @@ const TYPE_LOGOS: Readonly<Record<string, EntityTypeIcon>> = {
   vm: 'compute',
   envoy: 'globe',
 
+  // Product marks. EUI does not ship these.
+  openai: OpenAiIcon,
+  anthropic: AnthropicIcon,
   // No product mark ships in EUI for these types. Closest glyphs so every
   // type still has an icon in the list, the hex map, and the flyout.
-  openai: 'sparkles',
-  anthropic: 'machineLearningApp',
   vault: 'lock',
   jenkins: 'console',
   'custom worker': 'wrench',

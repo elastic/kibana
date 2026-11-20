@@ -24,7 +24,7 @@ import {
   type AlertsActiveOverride,
   type EntityKind,
 } from './kind_templates';
-import { INCIDENT_X_DOMAIN } from './time_domain';
+import { INCIDENT_DEPLOY_INDEX, INCIDENT_X_DOMAIN } from './time_domain';
 
 export interface MetricSeriesPoint {
   readonly x: number;
@@ -38,6 +38,12 @@ export interface MetricSeries {
   readonly description: string;
   /** Threshold line drawn as a dotted reference (e.g. SLO target). Optional. */
   readonly threshold?: number;
+  /**
+   * Status heatmap. Point `y` is an index into this list (for example pod
+   * phase: Running, Pending, Failed). When set, the chart draws one colored
+   * rectangle per time bucket instead of a line.
+   */
+  readonly yLabels?: readonly string[];
   /** One or more named series rendered in the same chart. */
   readonly series: ReadonlyArray<{
     readonly id: string;
@@ -331,17 +337,113 @@ const stampMaintenanceWindows = (
   };
 };
 
+/**
+ * The header badge is the pod's phase right now. The canned trend can
+ * recover to Running after a blip, so the heatmap would end on a different
+ * color than the badge. Rewrite the tail so the last rectangle matches the
+ * badge. When that tail is almost the whole series, land the change at the
+ * deploy instead of repainting the history.
+ */
+const alignPhaseSeriesToCurrent = (
+  tabs: EntityTabsData,
+  currentPhase: string | undefined
+): EntityTabsData => {
+  if (!currentPhase) return tabs;
+  let changed = false;
+  const goldenSignals = tabs.metrics.goldenSignals.map((metric) => {
+    if (metric.id !== 'phase' || !metric.yLabels) return metric;
+    const target = metric.yLabels.indexOf(currentPhase);
+    if (target < 0) return metric;
+    const series = metric.series.map((line, lineIndex) => {
+      if (lineIndex !== 0 || line.points.length === 0) return line;
+      const lastY = line.points[line.points.length - 1].y;
+      if (lastY === target) return line;
+      let trailingStart = line.points.length - 1;
+      while (trailingStart > 0 && line.points[trailingStart - 1].y === lastY) {
+        trailingStart -= 1;
+      }
+      const flipFrom = trailingStart <= 2 ? INCIDENT_DEPLOY_INDEX : trailingStart;
+      changed = true;
+      return {
+        ...line,
+        points: line.points.map((point, index) =>
+          index >= flipFrom ? { ...point, y: target } : point
+        ),
+      };
+    });
+    if (series.every((line, index) => line === metric.series[index])) return metric;
+    return { ...metric, series };
+  });
+  return changed ? { ...tabs, metrics: { ...tabs.metrics, goldenSignals } } : tabs;
+};
+
+/**
+ * Entities without a kind template still carry the inventory's alert
+ * count. `null` means no rules are configured, so the Alerts tab must
+ * not fall back to the generic 16-alert mock.
+ */
+const withInventoryAlerts = (
+  tabs: EntityTabsData,
+  alertsActiveOverride: AlertsActiveOverride | undefined
+): EntityTabsData => {
+  if (alertsActiveOverride === undefined) return tabs;
+  if (alertsActiveOverride === null) {
+    return {
+      ...tabs,
+      alerts: {
+        activeCount: 0,
+        totalCount: 0,
+        overTime: tabs.alerts.overTime.map((point) => ({ x: point.x, y: 0 })),
+        details: [],
+        rulesConfigured: false,
+      },
+    };
+  }
+  const source = tabs.alerts.details;
+  const details: AlertRow[] = Array.from({ length: alertsActiveOverride }, (_, index) => {
+    const row = source[index % Math.max(source.length, 1)];
+    if (!row) {
+      return {
+        id: `alert-${index + 1}`,
+        status: 'Active',
+        triggeredAt: '',
+        ruleName: 'Alert',
+        reason: '',
+      };
+    }
+    return index < source.length ? row : { ...row, id: `${row.id}-copy-${index}` };
+  });
+  const recovered = Math.max(tabs.alerts.totalCount - tabs.alerts.activeCount, 0);
+  return {
+    ...tabs,
+    alerts: {
+      ...tabs.alerts,
+      activeCount: alertsActiveOverride,
+      totalCount: Math.max(alertsActiveOverride + recovered, alertsActiveOverride),
+      details,
+      overTime:
+        alertsActiveOverride === 0
+          ? tabs.alerts.overTime.map((point) => ({ x: point.x, y: 0 }))
+          : tabs.alerts.overTime,
+    },
+  };
+};
+
 export const buildFakeEntityTabsData = (
   entityName: string,
   entityType?: string,
   entityHealth?: string,
   alertsActiveOverride?: AlertsActiveOverride,
   /** Active alerts inside a maintenance window. Stamped onto the first N rows. */
-  inMaintenance?: number
+  inMaintenance?: number,
+  /** Current pod phase label (the header badge). The phase heatmap ends on it. */
+  currentPodPhase?: string
 ): EntityTabsData => {
+  const finish = (tabs: EntityTabsData): EntityTabsData =>
+    alignPhaseSeriesToCurrent(stampMaintenanceWindows(tabs, inMaintenance), currentPodPhase);
   const storyTabs = getStoryTabsData(entityName);
   if (storyTabs) {
-    return stampMaintenanceWindows(storyTabs, inMaintenance);
+    return finish(storyTabs);
   }
   const kind: EntityKind | undefined = entityTypeToKind(entityType) ?? inferEntityKind(entityName);
   // Same chaos-mode override as `buildFakeEntityOverview` — flips the
@@ -360,9 +462,9 @@ export const buildFakeEntityTabsData = (
     alertsActiveOverride
   );
   if (kindTemplate) {
-    return stampMaintenanceWindows(kindTemplate.tabs, inMaintenance);
+    return finish(kindTemplate.tabs);
   }
-  return stampMaintenanceWindows(buildGenericEntityTabsData(entityName), inMaintenance);
+  return finish(withInventoryAlerts(buildGenericEntityTabsData(entityName), alertsActiveOverride));
 };
 
 const buildGenericEntityTabsData = (entityName: string): EntityTabsData => ({

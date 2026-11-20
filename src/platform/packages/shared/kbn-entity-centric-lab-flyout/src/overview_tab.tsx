@@ -234,6 +234,12 @@ export const OverviewTab = ({
                 <MetricChartCard series={primaryC} events={events} />
               </>
             ) : null}
+            {metrics.goldenSignals.slice(3).map((extra) => (
+              <React.Fragment key={extra.id}>
+                <EuiSpacer size="xs" />
+                <MetricChartCard series={extra} events={events} />
+              </React.Fragment>
+            ))}
           </>
         ) : null}
 

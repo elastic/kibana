@@ -67,6 +67,7 @@ import {
   ProcessesTab,
   KubernetesEventsTab,
   labThing,
+  FlyoutTimeRangeProvider,
   alertRowToStableRuleUuid,
   entityTypeToKind,
   inferEntityKind,
@@ -437,7 +438,8 @@ const EntityDetailPageInner = () => {
         entityType,
         entityHealth,
         alertsActiveOverride,
-        entity ? entityInMaintenanceCount(entity) : undefined
+        entity ? entityInMaintenanceCount(entity) : undefined,
+        podPhaseBadgeForEntity(entity)?.label
       ),
     [entityName, entityType, entityHealth, alertsActiveOverride, entity]
   );
@@ -1358,6 +1360,7 @@ const EntityDetailPageInner = () => {
                 <EuiSpacer size="s" />
               </>
             )}
+            <FlyoutTimeRangeProvider from={rangeFrom} to={rangeTo}>
             <PageTabContent
               activeTab={activeTab}
               activeTabLabel={visibleTabs.find((tab) => tab.id === activeTab)?.label ?? activeTab}
@@ -1376,6 +1379,7 @@ const EntityDetailPageInner = () => {
               onPreviewDashboard={dashboardStyleVariation === 'listWithPreview' ? setDashboardPreview : undefined}
               hostedApmServiceNames={hostedApmServiceNames}
             />
+            </FlyoutTimeRangeProvider>
           </EuiPanel>
         </StreamsAppPageTemplate.Body>
         <VariationSwitcher />
@@ -1402,6 +1406,7 @@ const EntityDetailPageInner = () => {
           alertsInMaintenance={entityInMaintenanceCount(childEntity)}
           podPhaseBadge={podPhaseBadgeForEntity(childEntity)}
           timeRange={{ from: rangeFrom, to: rangeTo }}
+          onTimeRangeChange={({ from, to }) => handleTimeChange({ start: from, end: to })}
           hideAiSummary={isPhase1}
           hideOwnership={isPhase1}
           hideEvents={isPhase1}

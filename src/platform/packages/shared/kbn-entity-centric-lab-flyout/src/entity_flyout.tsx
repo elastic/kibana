@@ -45,6 +45,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useEntityFlyoutServices } from './services_context';
+import { FlyoutTimeRangeProvider } from './time_range_context';
 import { labThing } from './lab_terminology';
 import { OverviewTab } from './overview_tab';
 import { LogsTab } from './logs_tab';
@@ -698,9 +699,17 @@ export const EntityFlyout = ({
         entityType,
         effectiveHealth,
         alertsActiveCount,
-        alertsInMaintenance
+        alertsInMaintenance,
+        podPhaseBadge?.label
       ),
-    [entityName, entityType, effectiveHealth, alertsActiveCount, alertsInMaintenance]
+    [
+      entityName,
+      entityType,
+      effectiveHealth,
+      alertsActiveCount,
+      alertsInMaintenance,
+      podPhaseBadge?.label,
+    ]
   );
 
   // Resolved label honoured everywhere the entity reads as text. The
@@ -1296,6 +1305,7 @@ export const EntityFlyout = ({
     dashboardPreview && session !== 'inherit' && session !== 'never' ? 'l' : size;
 
   return (
+    <FlyoutTimeRangeProvider from={dateStart} to={dateEnd}>
     <EuiFlyoutResizable
       // No overlay mask: the flyout stays non-modal so the page behind it
       // (e.g. the service map) remains visible and clickable — clicking
@@ -1537,6 +1547,7 @@ export const EntityFlyout = ({
                     { start: 'now-3d', end: 'now', label: 'Last 3 days' },
                   ]}
                   updateButtonProps={{ iconOnly: true, fill: false, color: 'text' }}
+                  data-test-subj="entityCentricLabFlyoutTimePicker"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -1613,6 +1624,7 @@ export const EntityFlyout = ({
         </>
       )}
     </EuiFlyoutResizable>
+    </FlyoutTimeRangeProvider>
   );
 };
 

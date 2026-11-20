@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.24';
+export const PROTOTYPE_VERSION = '1.25';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-11-20',
+    summary:
+      'Pod phase over time, a flyout time range that updates the content, and alert counts that match the inventory.',
+    details:
+      'Kubernetes pods show phase as colored rectangles over time in Golden signals. The series ends on the current phase, and the last rectangle stays fully visible. Pod details include the phase and reason, such as Failed (OOMKilled), on every pod. The flyout time picker shifts charts, logs, alerts, and embedded dashboards into the selected range. Hex tooltips use the entity type icon. Networking entities with no alert rules show No alerts set up in the flyout instead of a fake alert list; entities with zero firing alerts show 0. OpenAI and Anthropic use their own marks. Bump to v1.25.',
+  },
   {
     date: '2026-11-20',
     summary:

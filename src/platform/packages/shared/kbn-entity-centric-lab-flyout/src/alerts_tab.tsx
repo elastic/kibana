@@ -33,7 +33,8 @@ import { Axis, Chart, LineSeries, Position, ScaleType, Settings } from '@elastic
 import { useEntityFlyoutServices } from './services_context';
 import type { AlertNotificationSuppression, AlertRow, AlertsTabData } from './fake_entity_tabs';
 import { alertRowToStableRuleUuid } from './alert_row_ids';
-import { formatIncidentTick } from './time_domain';
+import { formatIncidentTick, windowLabeledTimes, windowPoints } from './time_domain';
+import { useResolvedFlyoutTimeRange } from './time_range_context';
 
 interface AlertsTabProps {
   readonly alerts: AlertsTabData;
@@ -356,7 +357,27 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
     density,
   } = useEntityFlyoutServices();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
+  const timeRange = useResolvedFlyoutTimeRange();
+  const overTime = useMemo(
+    () => (timeRange ? windowPoints(alerts.overTime, timeRange) : alerts.overTime),
+    [alerts.overTime, timeRange]
+  );
+  const details = useMemo(
+    () =>
+      timeRange
+        ? windowLabeledTimes(
+            alerts.details,
+            (row) => row.triggeredAt,
+            (row, triggeredAt) => ({ ...row, triggeredAt }),
+            timeRange
+          )
+        : alerts.details,
+    [alerts.details, timeRange]
+  );
   const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  useEffect(() => {
+    setPagination((prev) => (prev.pageIndex === 0 ? prev : { ...prev, pageIndex: 0 }));
+  }, [timeRange?.startMs, timeRange?.endMs]);
   const [selectedAlertRow, setSelectedAlertRow] = useState<AlertRow | null>(null);
   const [selectedRuleRow, setSelectedRuleRow] = useState<AlertRow | null>(null);
 
@@ -408,8 +429,8 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
   );
 
   const pageOfItems = useMemo(
-    () => alerts.details.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize),
-    [alerts.details, pageIndex, pageSize]
+    () => details.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize),
+    [details, pageIndex, pageSize]
   );
 
   const columns = useMemo<Array<EuiBasicTableColumn<AlertRow>>>(
@@ -632,7 +653,14 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
             <EuiSpacer size="s" />
             <div style={{ height: 140 }} data-test-subj="entityCentricLabAlertsOverTimeChart">
               <Chart>
-                <Settings baseTheme={chartBaseTheme} locale={i18n.getLocale()} showLegend={false} />
+                <Settings
+                  baseTheme={chartBaseTheme}
+                  locale={i18n.getLocale()}
+                  showLegend={false}
+                  xDomain={
+                    timeRange ? { min: timeRange.startMs, max: timeRange.endMs } : undefined
+                  }
+                />
                 <Axis
                   id="alerts-over-time-x"
                   position={Position.Bottom}
@@ -646,7 +674,7 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
                   yScaleType={ScaleType.Linear}
                   xAccessor="x"
                   yAccessors={['y']}
-                  data={alerts.overTime as Array<{ x: number; y: number }>}
+                  data={overTime as Array<{ x: number; y: number }>}
                   color={euiTheme.colors.vis.euiColorVis0}
                   // Pin time axis to UTC so the alert-count climb at 02:47:31
                   // UTC lines up with the AI summary copy and log timestamps.
@@ -694,8 +722,8 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
             'Showing {start}-{end} of {total} {total, plural, one {Alert} other {Alerts}}',
           values: {
             start: pageIndex * pageSize + 1,
-            end: Math.min((pageIndex + 1) * pageSize, alerts.details.length),
-            total: alerts.details.length,
+            end: Math.min((pageIndex + 1) * pageSize, details.length),
+            total: details.length,
           },
         })}
       </EuiText>
@@ -710,7 +738,7 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
           pagination={{
             pageIndex,
             pageSize,
-            totalItemCount: alerts.details.length,
+            totalItemCount: details.length,
             pageSizeOptions: [10, 25, 50],
           }}
           onChange={({ page }: Criteria<AlertRow>) => {

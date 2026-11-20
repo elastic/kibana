@@ -2158,6 +2158,37 @@ export const resolvePodPhaseForEntity = (
   entityHealth?: EntityHealthHint
 ): MetricReading => resolveMetricReading(entityName, podPhaseMetric(), 'last', entityHealth);
 
+/**
+ * Container reason that explains a non-running phase. Stable per pod so the
+ * flyout metadata does not change on reload.
+ */
+const POD_PHASE_REASONS: Record<string, readonly string[]> = {
+  succeeded: ['Completed'],
+  pending: ['ContainerCreating', 'ImagePullBackOff', 'Unschedulable'],
+  failed: ['OOMKilled', 'Error', 'Evicted'],
+  unknown: ['NodeLost'],
+};
+
+/**
+ * Metadata value for a pod: the same phase as the header badge, plus the
+ * container reason when there is one. Example: `Failed (OOMKilled)`.
+ */
+export const podPhaseWithReason = (
+  entityName: string,
+  entityHealth?: EntityHealthHint
+): string => {
+  const reading = resolvePodPhaseForEntity(entityName, entityHealth);
+  const reasons = POD_PHASE_REASONS[reading.categoryId ?? ''] ?? [];
+  if (reasons.length === 0) {
+    return reading.displayValue;
+  }
+  const index = Math.min(
+    reasons.length - 1,
+    Math.floor(unitHash(entityName, 'phase-reason', 'last') * reasons.length)
+  );
+  return `${reading.displayValue} (${reasons[index]})`;
+};
+
 export const podPhaseBadgeForEntity = (
   entity:
     | {

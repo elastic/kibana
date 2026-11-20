@@ -838,7 +838,11 @@ const MetricTileTooltip = ({
   const contextEntryCount = showK8sContext ? getK8sPopoverContext(entity).length : 0;
   const effectiveStat = effectiveStatForMetric(metric, statId);
   const metricTitle = hexMapLegendMetricLabel(metric, effectiveStat);
-  const categoryIcon = getCategoryDescriptor(entity.category)?.icon ?? 'package';
+  const typeLabel = inventoryEntityTypeLabel(entity);
+  // Same mark as the group header. The category glyph (folder for Storage)
+  // is only the fallback when the type has no logo.
+  const typeIcon =
+    entityTypeLogo(typeLabel) ?? getCategoryDescriptor(entity.category)?.icon ?? 'package';
   const lineColor = fillColor ?? solidToneColor(reading.tone, euiTheme);
   const sparkline =
     metric.kind === 'categorical'
@@ -1018,7 +1022,7 @@ const MetricTileTooltip = ({
         }}
       >
         <div style={{ marginTop: 2, flexShrink: 0 }}>
-          <EuiIcon type={categoryIcon} size="l" color="text" />
+          <EuiIcon type={typeIcon} size="l" />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
@@ -1027,7 +1031,7 @@ const MetricTileTooltip = ({
               color: tooltipSubduedColor,
             }}
           >
-            {inventoryEntityTypeLabel(entity)}
+            {typeLabel}
           </div>
           <div
             style={{

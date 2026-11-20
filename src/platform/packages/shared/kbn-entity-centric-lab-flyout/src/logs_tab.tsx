@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -36,6 +36,8 @@ import { i18n } from '@kbn/i18n';
 import type { LogRow, LogSeverity } from './fake_entity_tabs';
 import { LogDocumentFlyout } from './log_document_flyout';
 import { useEntityFlyoutServices } from './services_context';
+import { windowLabeledTimes } from './time_domain';
+import { useResolvedFlyoutTimeRange } from './time_range_context';
 
 interface LogsTabProps {
   readonly entityName: string;
@@ -71,6 +73,22 @@ export const LogsTab = ({ entityName, logs, flyoutType = 'overlay' }: LogsTabPro
   const { euiTheme } = useEuiTheme();
   const { density: serviceDensity } = useEntityFlyoutServices();
   const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
+  const timeRange = useResolvedFlyoutTimeRange();
+  const rangedLogs = useMemo(
+    () =>
+      timeRange
+        ? windowLabeledTimes(
+            logs,
+            (row) => row.timestamp,
+            (row, timestamp) => ({ ...row, timestamp }),
+            timeRange
+          )
+        : logs,
+    [logs, timeRange]
+  );
+  useEffect(() => {
+    setPagination((prev) => (prev.pageIndex === 0 ? prev : { ...prev, pageIndex: 0 }));
+  }, [timeRange?.startMs, timeRange?.endMs]);
   const [searchText, setSearchText] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
@@ -99,7 +117,7 @@ export const LogsTab = ({ entityName, logs, flyoutType = 'overlay' }: LogsTabPro
   );
 
   const filteredLogs = useMemo(() => {
-    let result = [...logs];
+    let result = [...rangedLogs];
     if (showSelectedOnly && selectedIds.size > 0) {
       result = result.filter((row) => selectedIds.has(row.id));
     }
@@ -113,7 +131,7 @@ export const LogsTab = ({ entityName, logs, flyoutType = 'overlay' }: LogsTabPro
       );
     }
     return result;
-  }, [logs, searchText, showSelectedOnly, selectedIds]);
+  }, [rangedLogs, searchText, showSelectedOnly, selectedIds]);
 
   const findMatchCount = useMemo(() => {
     if (!findText.trim()) return 0;

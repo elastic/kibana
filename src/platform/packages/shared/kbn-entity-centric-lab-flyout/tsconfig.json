@@ -11,6 +11,7 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-browser",
     "@kbn/core-notifications-browser",
-    "@kbn/charts-plugin"
+    "@kbn/charts-plugin",
+    "@kbn/datemath"
   ]
 }
