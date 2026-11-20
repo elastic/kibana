@@ -9,6 +9,9 @@
 
 jest.mock('../../affected-packages/index.ts', () => ({
   ALWAYS_RUN_JEST_INTEGRATION_CONFIGS: [
+    'x-pack/platform/plugins/shared/alerting/server/registry_checks/jest.integration.config.js',
+    'x-pack/platform/plugins/shared/actions/server/registry_checks/jest.integration.config.js',
+    'x-pack/platform/plugins/shared/task_manager/server/registry_checks/jest.integration.config.js',
     'src/core/packages/core/server/integration_tests/exposed_config_keys/jest.integration.config.js',
   ],
   CRITICAL_FILES_JEST_INTEGRATION_TESTS: ['CRITICAL_INT'],
@@ -36,16 +39,21 @@ const context = (
 });
 
 describe('filterJestIntegrationConfigsByAffected', () => {
-  it('runs the exposed-config check when no affected package owns it', () => {
+  it('runs registry checks when no affected package owns them', () => {
     const exposedConfig =
       'src/core/packages/core/server/integration_tests/exposed_config_keys/jest.integration.config.js';
+    const registryConfigs = [
+      'x-pack/platform/plugins/shared/alerting/server/registry_checks/jest.integration.config.js',
+      'x-pack/platform/plugins/shared/actions/server/registry_checks/jest.integration.config.js',
+      'x-pack/platform/plugins/shared/task_manager/server/registry_checks/jest.integration.config.js',
+    ];
     const unrelatedConfig = 'other/jest.integration.config.js';
     expect(
       filterJestIntegrationConfigsByAffected(
-        [unrelatedConfig, exposedConfig],
+        [unrelatedConfig, ...registryConfigs, exposedConfig],
         context([], ['x-pack/platform/plugins/shared/fleet/server/config.ts'])
       )
-    ).toEqual([exposedConfig]);
+    ).toEqual([...registryConfigs, exposedConfig]);
   });
 
   it('keeps package-selected configs while comparing Moon integration selection', () => {

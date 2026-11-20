@@ -326,8 +326,13 @@ function getBranchesStructure(
   for (const branch of branches) {
     const entries = recursiveGetSchemaStructure(branch, path, options);
     const nested = entries.filter((entry) => entry.path.length > path.length);
+    const description = branch.describe();
+    const flags = description.flags as { presence?: string; only?: boolean } | undefined;
+    const isEmptyBranch =
+      flags?.presence === 'forbidden' ||
+      (flags?.only && description.allow?.length === 1 && description.allow[0] === null);
     for (const entry of entries) {
-      if (entry.path.length === path.length) {
+      if (entry.path.length === path.length && !isEmptyBranch) {
         parentTypes.push(...entry.type.split('|'));
       }
     }
@@ -354,9 +359,7 @@ function getBranchesStructure(
     }
   }
 
-  const valueParentTypes = [
-    ...new Set(parentTypes.filter((type) => type !== 'never' && type !== 'null')),
-  ];
+  const valueParentTypes = [...new Set(parentTypes)];
   const parentEntries: SchemaStructureEntry[] = valueParentTypes.length
     ? [{ path, type: valueParentTypes.join('|') }]
     : [];

@@ -970,6 +970,28 @@ describe('schema structure with expandBranches', () => {
     ]);
   });
 
+  test('keeps string literals named never and null at the parent path', () => {
+    const literalBranches = schema.object({
+      neverString: schema.oneOf([
+        schema.object({ enabled: schema.boolean() }),
+        schema.literal('never'),
+        schema.never(),
+      ]),
+      nullString: schema.oneOf([
+        schema.object({ enabled: schema.boolean() }),
+        schema.literal('null'),
+        schema.literal(null),
+      ]),
+    });
+
+    expect(literalBranches.getSchemaStructure({ expandBranches: true })).toEqual([
+      { path: ['neverString'], type: 'never' },
+      { path: ['neverString', 'enabled'], type: 'boolean|never' },
+      { path: ['nullString'], type: 'null' },
+      { path: ['nullString', 'enabled'], type: 'boolean|never' },
+    ]);
+  });
+
   test('keeps literal dotted keys apart from nested paths', () => {
     const dottedKeys = schema.object({
       dotted: schema.conditional(
