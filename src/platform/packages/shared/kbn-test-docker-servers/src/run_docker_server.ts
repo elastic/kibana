@@ -111,7 +111,8 @@ async function dockerRun(server: DockerServer, log: ToolingLog): Promise<string>
     return res.stdout.trim();
   } catch (error) {
     if (error?.exitCode === 125 && error?.message?.includes('port is already allocated')) {
-      throw new Error(`
+      throw new Error(
+        `
         [docker:${name}] Another process is already listening on port ${port}.
 
         When this happens on CI it is usually because the port number isn't taking into
@@ -125,7 +126,8 @@ async function dockerRun(server: DockerServer, log: ToolingLog): Promise<string>
          1. make sure that there aren't other test runs in progress
          2. run \`docker ps\` to see the containers running
          3. if one of them lists that it is using port ${port} then kill it with \`docker kill "container ID"\`
-      `);
+      `.trim()
+      );
     }
 
     throw error;
