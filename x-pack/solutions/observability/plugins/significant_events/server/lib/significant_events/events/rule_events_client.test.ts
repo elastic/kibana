@@ -182,6 +182,7 @@ describe('findDetectionsWrittenByRun', () => {
       'WHERE FIELD_EXTRACT(data, "workflow_execution_id") == "execution-1"'
     );
     expect(lastQuery(query)).toContain('EVAL data_json = JSON_EXTRACT(_source, "$.data")');
+    expect(lastQuery(query)).toContain('KEEP _source, data_json');
   });
 
   it('skips an unparseable row and a malformed signal while keeping the valid pairs', async () => {

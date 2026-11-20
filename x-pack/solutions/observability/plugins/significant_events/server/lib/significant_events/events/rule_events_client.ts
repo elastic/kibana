@@ -780,7 +780,7 @@ export class RuleEventsClient {
       )
         .sort(['@timestamp', 'DESC'])
         .limit(limit + 1)
-        .keep('data_json'),
+        .keep('_source', 'data_json'),
       fields: ['data_json'],
     });
     const truncated = rows.length > limit;
