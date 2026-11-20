@@ -72,6 +72,7 @@ const buildParams = ({
     } as ExperimentalFeatures,
     uiSettingsClient: {
       get: jest.fn((key: string) => (key === WORKFLOWS_UI_SETTING_ID ? workflowsUiEnabled : true)),
+      isDeclared: jest.fn(() => true),
     } as unknown as IUiSettingsClient,
     license: { hasAtLeast: jest.fn().mockReturnValue(true) } as unknown as ILicense,
     upselling: {

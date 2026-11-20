@@ -127,7 +127,27 @@ describe('ApplicationLinksUpdater', () => {
       const links: AppLinkItems = [{ ...link, uiSettingRequired: 'showBeta' }];
 
       const params = createMockParams({
-        uiSettingsClient: { get: jest.fn(() => false) } as unknown as IUiSettingsClient,
+        uiSettingsClient: {
+          get: jest.fn(() => false),
+          isDeclared: jest.fn(() => true),
+        } as unknown as IUiSettingsClient,
+      });
+
+      const result = appLinks.processAppLinks(links, params);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should filter out a link is setting is not even declared', () => {
+      const links: AppLinkItems = [{ ...link, uiSettingRequired: 'showBeta' }];
+
+      const params = createMockParams({
+        uiSettingsClient: {
+          get: jest.fn(() => {
+            throw new Error('Invalid Setting');
+          }),
+          isDeclared: jest.fn(() => false),
+        } as unknown as IUiSettingsClient,
       });
 
       const result = appLinks.processAppLinks(links, params);
