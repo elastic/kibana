@@ -130,6 +130,15 @@ describe('useAgentSendState', () => {
     expect(result.current.isBoundAgentForbidden).toBe(true);
   });
 
+  it('forbids a bound agent found by its id when it is not in the list, such as a hidden one', () => {
+    setState({ listed: false, byId: { service_account_id: 'sa-1' }, invokeBoundAgents: false });
+
+    const { result } = renderHook(() => useAgentSendState('agent-1'));
+
+    expect(result.current.agentExists).toBe(true);
+    expect(result.current.isBoundAgentForbidden).toBe(true);
+  });
+
   it('allows an agent bound to a service account when the user can invoke it', () => {
     setState({ byId: { service_account_id: 'sa-1' }, invokeBoundAgents: true });
 

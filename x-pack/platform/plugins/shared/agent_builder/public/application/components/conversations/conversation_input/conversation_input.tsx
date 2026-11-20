@@ -29,7 +29,7 @@ import { useConversationId } from '../../../context/conversation/use_conversatio
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useCurrentUser } from '../../../hooks/use_current_user';
 import { labels } from '../../../utils/i18n';
-import { useInputDraft } from '../../../hooks/use_input_draft';
+import { toDraftContent, useInputDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
@@ -180,10 +180,14 @@ const InputContainer: React.FC<
   );
 };
 
+export type TakeInputDraft = () => string | null;
+
 interface ConversationInputProps {
   onSubmit?: () => void;
   onEditorFocus?: () => void;
   onSubmitOverride?: (message: string) => void;
+  onUploadingChange?: (isUploading: boolean) => void;
+  takeDraftRef?: React.MutableRefObject<TakeInputDraft | null>;
 }
 
 const disabledPlaceholder = (agentId?: string) =>
@@ -233,6 +237,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   onSubmit,
   onEditorFocus,
   onSubmitOverride,
+  onUploadingChange,
+  takeDraftRef,
 }) => {
   const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
 
@@ -324,6 +330,40 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       messageEditorController,
     });
 
+  const isUploading = uploadingNames.size > 0;
+  useEffect(() => {
+    onUploadingChange?.(isUploading);
+    return () => onUploadingChange?.(false);
+  }, [isUploading, onUploadingChange]);
+
+  useEffect(() => {
+    if (!takeDraftRef) return;
+    const takeDraft: TakeInputDraft = () => {
+      // The pending save is dropped: it would write the text back after it was taken.
+      if (saveDraftDebounceRef.current) {
+        clearTimeout(saveDraftDebounceRef.current);
+        saveDraftDebounceRef.current = null;
+      }
+      // Read from the editor, since text put there by a restored draft or an initial message never
+      // went through the change handler. A command badge that can't be serialized falls back to the
+      // last content the handler saw.
+      let content = lastEditorContentRef.current;
+      try {
+        content = messageEditorControllerRef.current?.getContent() ?? content;
+      } catch (err) {
+        if (!(err instanceof CommandBadgeSerializationError)) throw err;
+      }
+      const draftContent = toDraftContent(content);
+      lastEditorContentRef.current = '';
+      clearDraft();
+      return draftContent;
+    };
+    takeDraftRef.current = takeDraft;
+    return () => {
+      if (takeDraftRef.current === takeDraft) takeDraftRef.current = null;
+    };
+  }, [takeDraftRef, clearDraft]);
+
   const { agentExists, isAgentDeleted, isBoundAgentForbidden, isAgentModelLoading } =
     useAgentSendState(agentId);
   const isInputDisabled =
@@ -343,7 +383,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     isBoundAgentForbidden ||
     isAgentModelLoading ||
     isAwaitingPrompt ||
-    uploadingNames.size > 0;
+    isUploading;
 
   const placeholder = isAgentDeleted
     ? disabledPlaceholder(agentId)

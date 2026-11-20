@@ -29,6 +29,15 @@ const getDraftKey = (
       }`
     : null;
 
+/**
+ * What of the typed content is kept as a draft: without image links, since uploaded images are not
+ * restored with it, and nothing at all when only whitespace is left.
+ */
+export const toDraftContent = (content: string): string | null => {
+  const stripped = content.replace(IMAGE_LINK_RE, '');
+  return stripped.trim() ? stripped : null;
+};
+
 const getFromStorage = (key: string): string | null => {
   try {
     return sessionStorage.getItem(key);
@@ -68,9 +77,9 @@ export const useInputDraft = ({
   const saveDraft = useCallback(
     (content: string) => {
       if (!key) return;
-      const stripped = content.replace(IMAGE_LINK_RE, '');
-      if (stripped.trim()) {
-        writeToStorage(key, stripped);
+      const draftContent = toDraftContent(content);
+      if (draftContent) {
+        writeToStorage(key, draftContent);
       } else {
         removeFromStorage(key);
       }

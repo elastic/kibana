@@ -156,6 +156,33 @@ describe('useSubmitMessage', () => {
     await waitFor(() => expect(result.current.second.isCreatingConversation).toBe(false));
   });
 
+  it('creates one conversation when two submits come before the controls rerender', async () => {
+    setState({});
+    let resolveCreate: (value: typeof created) => void = () => {};
+    create.mockReturnValue(new Promise((resolve) => (resolveCreate = resolve)));
+    const { result } = renderHook(
+      () => ({ input: useSubmitMessage(), starters: useSubmitMessage() }),
+      { wrapper }
+    );
+
+    let pending: Promise<void>[] = [];
+    act(() => {
+      pending = [
+        result.current.starters.submitMessage('from a starter'),
+        result.current.input.submitMessage('from the input'),
+      ];
+    });
+    resolveCreate(created);
+    await act(() => Promise.all(pending));
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(sendMessage).toHaveBeenCalledWith({
+      message: 'from a starter',
+      conversationId: 'conv-1',
+    });
+  });
+
   it('switches the embedded conversation by state instead of navigating', async () => {
     setState({ isEmbeddedContext: true });
     const { result } = renderHook(() => useSubmitMessage(), { wrapper });

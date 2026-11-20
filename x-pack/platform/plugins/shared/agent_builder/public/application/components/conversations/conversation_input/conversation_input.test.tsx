@@ -157,6 +157,7 @@ jest.mock('../../../hooks/use_input_draft', () => ({
   useInputDraft: jest
     .fn()
     .mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft: jest.fn() }),
+  toDraftContent: (content: string) => (content.trim() ? content : null),
 }));
 jest.mock('../../../context/active_space_context', () => ({
   useActiveSpaceId: jest.fn().mockReturnValue('default'),
@@ -294,6 +295,64 @@ describe('ConversationInput', () => {
     expect(onSubmitOverride).toHaveBeenCalledWith('hello agent');
     expect(submitMessage).not.toHaveBeenCalled();
     expect(editorController.clear).toHaveBeenCalledTimes(1);
+  });
+
+  describe('giving the typed text to controls that start a conversation without sending it', () => {
+    const saveDraft = jest.fn();
+    const clearDraft = jest.fn();
+    let takeDraftRef: React.MutableRefObject<(() => string | null) | null>;
+
+    const typeText = (text: string) => {
+      editorController.getContent.mockReturnValue(text);
+      const [options] = mockedUseMessageEditor.mock.calls[0];
+      act(() => options?.onContentChange?.());
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      saveDraft.mockReset();
+      clearDraft.mockReset();
+      mockedUseInputDraft.mockReturnValue({ draft: null, saveDraft, clearDraft });
+      takeDraftRef = { current: null };
+      renderInput(<ConversationInput takeDraftRef={takeDraftRef} />);
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('gives the text as it is now, before the draft has been saved', () => {
+      typeText('typed a moment ago');
+
+      expect(saveDraft).not.toHaveBeenCalled();
+      expect(takeDraftRef.current?.()).toBe('typed a moment ago');
+    });
+
+    it('does not save the text again after it was taken', () => {
+      typeText('typed a moment ago');
+
+      takeDraftRef.current?.();
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      expect(saveDraft).not.toHaveBeenCalled();
+      expect(clearDraft).toHaveBeenCalledTimes(1);
+    });
+
+    it('gives text that did not come from typing, such as a restored draft', () => {
+      editorController.getContent.mockReturnValue('restored draft');
+
+      expect(takeDraftRef.current?.()).toBe('restored draft');
+    });
+
+    it('gives nothing when the input is empty or only whitespace is typed', () => {
+      editorController.getContent.mockReturnValue('');
+      expect(takeDraftRef.current?.()).toBeNull();
+
+      typeText('   ');
+      expect(takeDraftRef.current?.()).toBeNull();
+    });
   });
 
   it('routes to submitMessage when no override is provided', () => {

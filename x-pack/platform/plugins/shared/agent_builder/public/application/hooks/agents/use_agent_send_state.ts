@@ -27,15 +27,13 @@ export const useAgentSendState = (agentId: string | undefined) => {
   );
   const agentExists = isAgentIdValid || Boolean(agentById);
 
-  // An agent bound to a service account can only be invoked with the dedicated privilege; the
-  // server refuses the request, so the composer says why up front instead of failing on send.
   const { invokeBoundAgents } = useUiPrivileges();
   const { agent: currentAgent } = useAgentBuilderAgentById(isAgentIdValid ? agentId : undefined);
-  const isBoundAgentForbidden = Boolean(currentAgent?.service_account_id) && !invokeBoundAgents;
+  const agent = currentAgent ?? agentById ?? undefined;
+
+  const isBoundAgentForbidden = Boolean(agent?.service_account_id) && !invokeBoundAgents;
 
   const isAgentDeleted = !agentExists && !isLoadingAgentById && isFetched && Boolean(agentId);
-
-  const agent = currentAgent ?? agentById ?? undefined;
 
   return { agent, agentExists, isAgentDeleted, isBoundAgentForbidden, isAgentModelLoading };
 };

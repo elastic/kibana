@@ -6,9 +6,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, type UseEuiTheme } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { TakeInputDraft } from './conversation_input/conversation_input';
 import { ConversationInput } from './conversation_input/conversation_input';
 import { ConversationStartersList, useConversationStarters } from './conversation_starters';
 import {
@@ -176,7 +177,12 @@ export const NewConversationPrompt: React.FC<{}> = () => {
   const [sizerEl, setSizerEl] = useState<HTMLSpanElement | null>(null);
   const fitsOnOneLine = useNowrapFitsContainer(headingEl, sizerEl);
   const wrapAndCenter = !fitsOnOneLine;
-  const { starters, onSelect, isDisabled } = useConversationStarters();
+  const [isInputUploading, setIsInputUploading] = useState(false);
+  const takeInputDraftRef = useRef<TakeInputDraft | null>(null);
+  const { starters, onSelect, isDisabled } = useConversationStarters({
+    isInputUploading,
+    takeInputDraftRef,
+  });
   const hasStarters = starters.length > 0;
 
   const greeting = greetingMessage ?? (
@@ -223,7 +229,10 @@ export const NewConversationPrompt: React.FC<{}> = () => {
           !hasStarters && inputPaddingStyles,
         ]}
       >
-        <ConversationInput />
+        <ConversationInput
+          onUploadingChange={setIsInputUploading}
+          takeDraftRef={takeInputDraftRef}
+        />
       </EuiFlexItem>
       {hasStarters && (
         <EuiFlexItem

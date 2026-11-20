@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -62,15 +63,15 @@ apiTest.describe(
       async ({ asAdmin }) => {
         const agent = {
           ...mockAgent,
-          id: 'test-agent-with-starters',
+          id: `test-agent-with-starters-${randomUUID()}`,
           conversation_starters: [{ label: 'Top errors' }, { label: 'Plain label' }],
         };
         const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
           body: agent,
           responseType: 'json',
         });
-        createdAgentIds.push(agent.id);
         expect(response).toHaveStatusCode(200);
+        createdAgentIds.push(agent.id);
         expect(response.body.conversation_starters).toStrictEqual(agent.conversation_starters);
 
         const getResponse = await asAdmin.get(`${API_AGENT_BUILDER}/agents/${agent.id}`, {
@@ -84,15 +85,21 @@ apiTest.describe(
     apiTest(
       'POST /api/agent_builder/agents rejects more than 3 conversation starters',
       async ({ asAdmin }) => {
+        const id = `test-agent-too-many-starters-${randomUUID()}`;
+        createdAgentIds.push(id);
+
         const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
           body: {
             ...mockAgent,
-            id: 'test-agent-too-many-starters',
+            id,
             conversation_starters: ['a', 'b', 'c', 'd'].map((label) => ({ label })),
           },
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(400);
+        expect(String((response.body as { message?: string }).message ?? '')).toContain(
+          'conversation_starters'
+        );
       }
     );
 

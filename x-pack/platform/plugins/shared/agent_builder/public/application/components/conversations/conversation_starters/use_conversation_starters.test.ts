@@ -171,6 +171,69 @@ describe('useConversationStarters', () => {
     });
   });
 
+  describe('with the message input giving the text typed in it', () => {
+    const takeInputDraft = jest.fn();
+
+    const renderWithInput = () =>
+      renderHook(() =>
+        useConversationStarters({
+          takeInputDraftRef: { current: takeInputDraft },
+        })
+      );
+
+    beforeEach(() => {
+      takeInputDraft.mockReset();
+      takeNewChatDraft.mockReturnValue('stale saved text');
+      submitCreatesConversation();
+    });
+
+    it('moves the live text, not the saved draft that may lag behind it', () => {
+      takeInputDraft.mockReturnValue('live text');
+      const { result } = renderWithInput();
+
+      act(() => {
+        result.current.onSelect({ label: 'first' });
+      });
+
+      expect(saveDraftTo).toHaveBeenCalledWith('conv-1', 'live text');
+      expect(takeNewChatDraft).not.toHaveBeenCalled();
+    });
+
+    it('moves nothing when the input is empty, even if an older draft is still saved', () => {
+      takeInputDraft.mockReturnValue(null);
+      const { result } = renderWithInput();
+
+      act(() => {
+        result.current.onSelect({ label: 'first' });
+      });
+
+      expect(saveDraftTo).not.toHaveBeenCalled();
+    });
+
+    it('does not take the text when the conversation cannot be created', () => {
+      submitMessage.mockReset();
+      const { result } = renderWithInput();
+
+      act(() => {
+        result.current.onSelect({ label: 'first' });
+      });
+
+      expect(takeInputDraft).not.toHaveBeenCalled();
+    });
+
+    it('uses the saved draft when the input has not given a way to take its text', () => {
+      const { result } = renderHook(() =>
+        useConversationStarters({ takeInputDraftRef: { current: null } })
+      );
+
+      act(() => {
+        result.current.onSelect({ label: 'first' });
+      });
+
+      expect(saveDraftTo).toHaveBeenCalledWith('conv-1', 'stale saved text');
+    });
+  });
+
   it('stores no draft in the new conversation when nothing was typed', () => {
     takeNewChatDraft.mockReturnValue(null);
     submitCreatesConversation();
@@ -190,6 +253,18 @@ describe('useConversationStarters', () => {
 
     expect(mockUseAgentSendState).toHaveBeenCalledWith('agent-1');
     expect(result.current.isDisabled).toBe(true);
+  });
+
+  it('is disabled while the message input uploads an image', () => {
+    const { result } = renderHook(() => useConversationStarters({ isInputUploading: true }));
+
+    expect(result.current.isDisabled).toBe(true);
+  });
+
+  it('is enabled when nothing is loading, being created or uploaded', () => {
+    const { result } = renderHook(() => useConversationStarters({ isInputUploading: false }));
+
+    expect(result.current.isDisabled).toBe(false);
   });
 
   it('is disabled while a conversation is being created', () => {

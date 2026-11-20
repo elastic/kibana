@@ -61,6 +61,10 @@ export const useSubmitMessage = () => {
         throw new Error('agentId is required to start a conversation');
       }
 
+      if (queryClient.isMutating({ mutationKey: mutationKeys.createConversation }) > 0) {
+        return;
+      }
+
       let created;
       try {
         created = await createConversation(agentId);
@@ -83,6 +87,7 @@ export const useSubmitMessage = () => {
       conversationId,
       sendMessage,
       agentId,
+      queryClient,
       createConversation,
       isEmbeddedContext,
       setConversationId,
