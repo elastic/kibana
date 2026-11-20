@@ -125,7 +125,7 @@ ALTER ROLE db_datareader ADD MEMBER kibana_reader;
 
 To query other databases with three-part names, create a user for the login in each of those databases as well.
 
-The **Query** action enforces read-only access in the connector by accepting only `SELECT` and `WITH` statements. It also rejects multiple statements and common write forms such as `INSERT`, `UPDATE`, `DELETE`, `DROP`, `EXEC`, and `SELECT ... INTO`. The check doesn't cover every way to change data in T-SQL, so don't rely on it alone. Use **List Tables** and **Describe Table** for schema discovery.
+The **Query** action enforces read-only access in the connector by accepting only `SELECT` and `WITH` statements. It also rejects statements separated by a semicolon, and common write and session-changing forms such as `INSERT`, `UPDATE`, `DELETE`, `DROP`, `EXEC`, `SELECT ... INTO`, `BEGIN`, `SET`, and `USE`. T-SQL doesn't require a semicolon between statements, so the check can't catch every second statement. The check doesn't cover every way to change data in T-SQL, so don't rely on it alone. Use **List Tables** and **Describe Table** for schema discovery.
 
 ::::{warning}
 The check in the connector is not a security guarantee. Prompt injection and similar techniques can bypass it. The only reliable protection is granting the login read-only permissions. Treat the check as defense in depth, not a substitute for least-privilege credentials.

@@ -350,6 +350,18 @@ describe('MicrosoftSqlServer', () => {
       'SELECT 1 RECONFIGURE',
       'SELECT 1 DISABLE TRIGGER trg ON dbo.Customers',
       'SELECT 1 ENABLE TRIGGER trg ON dbo.Customers',
+      // Session state the pool would otherwise carry into the next request, and other writes.
+      'SELECT 1 BEGIN TRAN',
+      'SELECT 1 SET IMPLICIT_TRANSACTIONS ON',
+      'SELECT 1 SET ROWCOUNT 1',
+      'SELECT 1 USE master',
+      'SELECT 1 DENY SELECT ON dbo.Customers TO someone',
+      'SELECT 1 GRANT SELECT ON dbo.Customers TO someone',
+      'SELECT 1 REVOKE SELECT ON dbo.Customers FROM someone',
+      "SELECT 1 WRITETEXT dbo.Docs.Body @ptr 'x'",
+      "SELECT 1 UPDATETEXT dbo.Docs.Body @ptr 0 0 'x'",
+      'SELECT 1 RECEIVE TOP (1) * FROM dbo.Queue',
+      'SELECT 1 RECEIVE * FROM dbo.Queue',
     ])('rejects the T-SQL write form %j before leasing a connection', async (sql) => {
       const { pool } = makePool({});
       const ctx = makeContext(pool);
@@ -370,9 +382,17 @@ describe('MicrosoftSqlServer', () => {
       'SELECT 1 /* outer /* nested INSERT */ still a comment */',
       'SELECT 1 -- INSERT INTO Customers\nFROM dbo.Orders',
       'SELECT [odd]]name] FROM dbo.Settings',
-      // Words that are only commands in a specific form are ordinary column names and aliases.
-      'SELECT Use, Enable, Disable, Deny, Grant, Revoke, Backup, Restore, Kill FROM dbo.Flags',
-      'SELECT Backup AS Restore FROM dbo.Jobs WHERE Enable = 1',
+      // Command words in quoted identifiers and literals are data. Enable, Disable and Receive are not reserved.
+      'SELECT [Use], [Set], [Begin], [Kill], [Backup], [Grant] FROM dbo.Flags',
+      'SELECT "Set", "Deny" FROM dbo.Flags',
+      "SELECT 'BEGIN TRAN; SET ROWCOUNT 1; USE master' AS note",
+      'SELECT Enable, Disable, Receive FROM dbo.Flags',
+      'SELECT Receive FROM dbo.Inbox',
+      'SELECT usecounts, use_count, offset, settings FROM dbo.Stats',
+      // Query hints and grouping sets contain USE and SET but are reads.
+      "SELECT * FROM dbo.Orders OPTION (USE HINT('FORCE_LEGACY_CARDINALITY_ESTIMATION'))",
+      "SELECT * FROM dbo.Orders OPTION (USE PLAN N'<ShowPlanXML/>')",
+      'SELECT Region, City, COUNT(*) FROM dbo.Sales GROUP BY GROUPING SETS ((Region), (City))',
       'SELECT 1 -- DROP TABLE x\r\nFROM dbo.Orders',
     ])('allows a keyword inside a literal, quoted identifier, or comment: %j', async (sql) => {
       const { pool } = makePool({ rows: rowsOf(1) });

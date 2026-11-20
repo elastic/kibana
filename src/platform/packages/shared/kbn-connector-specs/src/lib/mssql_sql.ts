@@ -25,12 +25,14 @@ export const DEFAULT_SCHEMA = 'dbo';
 export const TSQL_WRITE_PATTERN =
   /\b(INTO|EXEC|EXECUTE|INSERT|MERGE|OPENROWSET|OPENQUERY|OPENDATASOURCE|WAITFOR)\b/i;
 
-// Server-level T-SQL commands that self-managed SQL Server accepts after a SELECT in the same batch with no
-// semicolon. Only unambiguous forms are listed so common column names (use, enable, deny, backup) are not
-// rejected: bare keywords that are never identifiers, plus commands matched together with their next token.
-// GRANT/DENY/REVOKE and USE are not listed; database permissions are the real control for those.
+// T-SQL statements that can follow a SELECT in the same batch with no semicolon and change server, session or data
+// state: server commands, permission changes, transactions, session settings, database switches, and the legacy
+// text-column writes. Everything except ENABLE/DISABLE and RECEIVE is a T-SQL reserved word, so it cannot be an
+// unquoted column or alias (quoted ones are blanked before the scan) and is matched bare. The exceptions are
+// matched in their statement forms. `USE HINT` / `USE PLAN` are valid query hints and stay allowed. Best-effort:
+// a RECEIVE that names columns instead of `*` or TOP is not caught.
 export const MSSQL_SERVER_COMMAND_PATTERN =
-  /\b(SHUTDOWN|DBCC|RECONFIGURE|KILL\s+(?:\d+|STATS|QUERY)|(?:BACKUP|RESTORE)\s+(?:DATABASE|LOG|CERTIFICATE|MASTER|SERVICE|SYMMETRIC)|(?:DISABLE|ENABLE)\s+TRIGGER)\b/i;
+  /\b(?:SHUTDOWN|DBCC|RECONFIGURE|KILL|BACKUP|RESTORE|DENY|GRANT|REVOKE|BEGIN|SET|USE(?!\s+(?:HINT|PLAN)\b)|WRITETEXT|UPDATETEXT|(?:DISABLE|ENABLE)\s+TRIGGER)\b|\bRECEIVE\s+(?:TOP\b|\*)/i;
 
 // Write guard for the SQL Server connector: the shared T-SQL write tokens plus the server-level commands above.
 export const MSSQL_READ_GUARD_PATTERN = new RegExp(

@@ -193,6 +193,41 @@ describe('mssqlClientType', () => {
       expect(lastPoolOptions()).toMatchObject({ server: '2001:db8::1' });
     });
 
+    describe('connection reset on acquire', () => {
+      const getValidate = async (): Promise<(connection: unknown) => Promise<boolean>> => {
+        await mssqlClientType.build(makeCtx());
+        const pool = lastPoolOptions().pool as { validate: (c: unknown) => Promise<boolean> };
+        return pool.validate;
+      };
+
+      it('resets the pooled connection so session state cannot leak into the next request', async () => {
+        const validate = await getValidate();
+        const reset = jest.fn((callback: (err?: Error | null) => void) => callback(null));
+
+        await expect(validate({ closed: false, hasError: false, reset })).resolves.toBe(true);
+        expect(reset).toHaveBeenCalledTimes(1);
+      });
+
+      it('rejects a connection whose reset fails so the pool replaces it', async () => {
+        const validate = await getValidate();
+        const reset = (callback: (err?: Error | null) => void) =>
+          callback(new Error('socket closed'));
+
+        await expect(validate({ closed: false, hasError: false, reset })).resolves.toBe(false);
+      });
+
+      it.each([
+        ['closed', { closed: true, hasError: false }],
+        ['errored', { closed: false, hasError: true }],
+      ])('rejects a %s connection without resetting it', async (_label, state) => {
+        const validate = await getValidate();
+        const reset = jest.fn();
+
+        await expect(validate({ ...state, reset })).resolves.toBe(false);
+        expect(reset).not.toHaveBeenCalled();
+      });
+    });
+
     it('uses the merged per-host policy, not the global one, to decide certificate trust', async () => {
       // Global settings say "none" but the host-specific override resolved to full verification.
       const networkSettings = makeNetworkSettings({
