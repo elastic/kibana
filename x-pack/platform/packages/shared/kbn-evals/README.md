@@ -234,10 +234,17 @@ fewer models, list it under `specModelGroups` in
 ```jsonc
 {
   "id": "significant-events",
-  "weeklyEisModelGroups": ["eis/openai-gpt-5.4", "eis/anthropic-claude-4.6-opus", "eis/openai-gpt-5.4-mini"],
+  "weeklyEisModelGroups": [
+    "eis/openai-gpt-5.4",
+    "eis/anthropic-claude-4.6-opus",
+    "eis/openai-gpt-5.4-mini"
+  ],
   "specModelGroups": [
     { "files": ["evals/discovery/discovery.spec.ts"], "models": ["eis/openai-gpt-5.4"] },
-    { "files": ["evals/ki_feature_extraction/ki_feature_extraction.spec.ts"], "models": ["eis/openai-gpt-5.4-mini"] }
+    {
+      "files": ["evals/ki_feature_extraction/ki_feature_extraction.spec.ts"],
+      "models": ["eis/openai-gpt-5.4-mini"]
+    }
   ]
 }
 ```
@@ -286,20 +293,20 @@ Run a suite on any branch without a PR:
 2. Click **New build**, select branch/commit
 3. Add environment variables:
 
-| Variable                          | Required           | Description                                                                                                  |
-| --------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `EVAL_SUITE_ID`                   | yes                | Suite id from `evals.suites.json`. Comma-separate to run several suites                                      |
-| `EVAL_MODEL_GROUPS`               | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,openrouter/openai-gpt-5.4`                            |
-| `EVAL_INCLUDE_EIS_MODELS`         | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
-| `EVAL_CONNECTOR_ID`               | no                 | LLM-as-judge connector override                                                                              |
-| `EVAL_SERVER_CONFIG_SET`          | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
-| `EVAL_SCOUT_ARCH` / `EVAL_SCOUT_DOMAIN` | some suites  | From `scoutArch` / `scoutDomain` in `evals.suites.json` (default `stateful` / `classic`)                     |
-| `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
-| `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
-| `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
-| `EVAL_CONCURRENCY`                | no                 | Examples each experiment runs at once (same as `--concurrency`)                                              |
-| `EVAL_SPACE_IDS`                  | no                 | Comma-separated spaces to assign datasets and scores to (same as `--space-ids`)                              |
-| `EVAL_SLACK_NOTIFICATION_CHANNEL` | no                 | Slack channel or member ID to send the triage to. If unset, no Slack notification is sent for on-demand runs |
+| Variable                                | Required           | Description                                                                                                  |
+| --------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `EVAL_SUITE_ID`                         | yes                | Suite id from `evals.suites.json`. Comma-separate to run several suites                                      |
+| `EVAL_MODEL_GROUPS`                     | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,openrouter/openai-gpt-5.4`                            |
+| `EVAL_INCLUDE_EIS_MODELS`               | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
+| `EVAL_CONNECTOR_ID`                     | no                 | LLM-as-judge connector override                                                                              |
+| `EVAL_SERVER_CONFIG_SET`                | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
+| `EVAL_SCOUT_ARCH` / `EVAL_SCOUT_DOMAIN` | some suites        | From `scoutArch` / `scoutDomain` in `evals.suites.json` (default `stateful` / `classic`)                     |
+| `KIBANA_BUILD_ID`                       | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
+| `EVAL_GREP`                             | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
+| `EVAL_REPETITIONS`                      | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
+| `EVAL_CONCURRENCY`                      | no                 | Examples each experiment runs at once (same as `--concurrency`)                                              |
+| `EVAL_SPACE_IDS`                        | no                 | Comma-separated spaces to assign datasets and scores to (same as `--space-ids`)                              |
+| `EVAL_SLACK_NOTIFICATION_CHANNEL`       | no                 | Slack channel or member ID to send the triage to. If unset, no Slack notification is sent for on-demand runs |
 
 Example (single suite):
 
@@ -345,23 +352,23 @@ Under `--fail-on-regression` with `--repetition-policy mean`, both runs also ave
 
 The gated and un-gated reports can disagree on a p-value for two reasons. First, the gate trims both sides to the shared repetition count (above), so unequal repetition counts change the per-example scores it tests. Second, under `--repetition-policy mean` Wilcoxon rows in the gated run are re-tested on differences rounded to 1e-9, so differences that are equal on paper (`1 - 2/3` and `1/3`) get tied ranks instead of being split by floating-point roundoff. The un-gated report runs the shared test as is, on the unrounded differences. For a pass/fail evaluator with repetitions, each example's score becomes a pass fraction (0, 1/3, 2/3, 1), which is not binary, so both paths use Wilcoxon on those fractions; with `--repetition-policy median` the per-example score stays 0 or 1 and the row is tested with McNemar.
 
-**Multiplicity correction (default under the gate).** A comparison tests many evaluators at once, so at α = 0.05 a few false "significant" flags are expected by chance. With `--fail-on-regression` (or `--multiplicity-correction`) the p-values of all comparisons in the run (every dataset × evaluator with a p-value) are adjusted with the Holm-Bonferroni step-down procedure. Without the gate, reports use raw p-values by default, so they agree with the evals UI and compare route, which do not adjust yet. Reports show both the raw `p-value` and the `Adj. p-value`; the `Sig` / `Significant` column, the outcome and the regression gate use the adjusted value. The family is always every comparison in the run: `--regression-evaluators` and `--min-pairs` narrow what the gate can trip on, not the number of hypotheses the adjustment accounts for, so the gate and the report judge the same adjusted p-values. Pass `--no-multiplicity-correction` to judge the gate on raw p-values too (the adjusted column is then omitted).
+**Multiplicity correction (default under the gate).** A comparison tests many evaluators at once, so at α = 0.05 a few false "significant" flags are expected by chance. With `--fail-on-regression` (or `--multiplicity-correction`) the p-values of all comparisons in the run (every dataset × evaluator with a p-value, except rows identical in every pair, which cannot be significant and would only inflate the others) are adjusted with the Holm-Bonferroni step-down procedure. Without the gate, reports use raw p-values by default, so they agree with the evals UI and compare route, which do not adjust yet. Reports show both the raw `p-value` and the `Adj. p-value`; the `Sig` / `Significant` column, the outcome and the regression gate use the adjusted value. The family is always every comparison in the run: `--regression-evaluators` and `--min-pairs` narrow what the gate can trip on, not the number of hypotheses the adjustment accounts for, so the gate and the report judge the same adjusted p-values. Pass `--no-multiplicity-correction` to judge the gate on raw p-values too (the adjusted column is then omitted).
 
 **Regression gate.** `compare` never fails on its own. Add `--fail-on-regression` to make it exit non-zero when any gated evaluator shows a statistically significant change in the worse direction:
 
-| Flag                           | Description                                                                                                                                                                                  |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--fail-on-regression`         | Exit with a failure if an evaluator is significantly worse (adjusted p < 0.05, unless `--no-multiplicity-correction`). Improvements, non-significant drops and neutral evaluators never trip. |
-| `--regression-evaluators a,b`  | Comma-separated evaluator names that can trip the gate (default: all). Names absent from the comparison log a warning; if none match, the run fails rather than pass vacuously. Requires `--fail-on-regression`. |
+| Flag                           | Description                                                                                                                                                                                                                               |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--fail-on-regression`         | Exit with a failure if an evaluator is significantly worse (adjusted p < 0.05, unless `--no-multiplicity-correction`). Improvements, non-significant drops and neutral evaluators never trip.                                             |
+| `--regression-evaluators a,b`  | Comma-separated evaluator names that can trip the gate (default: all). Names absent from the comparison log a warning; if none match, the run fails rather than pass vacuously. Requires `--fail-on-regression`.                          |
 | `--min-pairs <n>`              | Minimum paired examples for an evaluator to be gated (default: 10). Evaluators below it are listed as `insufficient pairs`, can't trip the gate, and are called out in a warning: they were not checked. Requires `--fail-on-regression`. |
-| `--multiplicity-correction`    | Holm-Bonferroni adjust p-values. On by default with `--fail-on-regression`; pass it to get adjusted values in a report without the gate.                                                     |
-| `--no-multiplicity-correction` | Use raw p-values, also under `--fail-on-regression`.                                                                                                                                         |
+| `--multiplicity-correction`    | Holm-Bonferroni adjust p-values. On by default with `--fail-on-regression`; pass it to get adjusted values in a report without the gate.                                                                                                  |
+| `--no-multiplicity-correction` | Use raw p-values, also under `--fail-on-regression`.                                                                                                                                                                                      |
 
 Exit codes (with `--fail-on-regression`):
 
-- **0, passed**: at least one evaluator comparison was actually checked and none got significantly worse. The `Regression gate passed` line says how many were checked out of how many were in scope (`N of M evaluator comparison(s) checked`). An evaluator whose scores are identical in every pair counts as checked and unchanged, even though a paired test has no p-value on all-zero differences (equal means are not enough: the pairs themselves must match). Any `insufficient pairs`, `no usable p-value`, `underpowered` or direction-conflict warning means those evaluators were not checked, not that they passed.
+- **0, passed**: at least one evaluator comparison was actually checked and none got significantly worse. The `Regression gate passed` line says how many were checked out of how many were in scope (`N of M evaluator comparison(s) checked`). An evaluator whose scores are identical in every pair, numeric or pass/fail, counts as checked and unchanged: it is never untestable, underpowered or a regression, and it is left out of the Holm family so it does not raise the other rows' adjusted p-values (equal means are not enough: the pairs themselves must match). Any `insufficient pairs`, `no usable p-value`, `underpowered` or direction-conflict warning means those evaluators were not checked, not that they passed.
 - **1, usage or unexpected error**: bad flags (including `--min-pairs` or `--regression-evaluators` without `--fail-on-regression`), Kibana unreachable, the evals plugin disabled, a failed request while looking up the baseline or reading scores (a server error, a timeout, a suite larger than the score read limit), and similar. Never a regression verdict, and never mistaken for "no baseline" or "no scores".
-- **2, inconclusive or not evaluated**: the gate could not rule regressions in or out, so it fails instead of passing silently. This happens when no baseline is found on `--baseline-branch`, when there are no scores, no overlapping datasets or no paired scores to compare, when the comparison returns no results, when `--regression-evaluators` matches no evaluator, and when nothing was checkable (every row has too few pairs, no usable p-value or is underpowered, or only neutral evaluators are in scope; rows identical in every pair do count as checkable).
+- **2, inconclusive or not evaluated**: the gate could not rule regressions in or out, so it fails instead of passing silently. This happens when no baseline is found on `--baseline-branch`, when there are no scores, no overlapping datasets or no paired scores to compare, when the comparison returns no results, when `--regression-evaluators` matches no evaluator, and when nothing was checkable (every row has too few pairs, no usable p-value or is underpowered, or only neutral evaluators are in scope; rows identical in every pair, of any score type, do count as checkable).
 - **3, significant regression**: `Regression gate tripped`, listing each regressed dataset / evaluator with delta, raw (and adjusted) p-value, the test used and the number of pairs.
 
 The direction of a change is the one the row's test measured: the mean difference for the paired t-test, the discordant pairs for McNemar (which follow the mean for pass/fail scores), and the signed-rank sum for Wilcoxon. Wilcoxon is rank-based, so a few large drops can lower the mean while most pairs improve, or the reverse. Such a row shows `Mixed` in the markdown Outcome column (and a yellow `(mixed)` diff in the terminal report), cannot trip the gate, is not counted as checked and is listed in a warning to inspect by hand.
@@ -407,12 +414,12 @@ The hook reads a config JSON on stdin and prints `{ "env"?: Record<string, strin
 
 Give the suite its own Vault secret with `vaultSecret`, so rotating its credentials never rewrites the general config other suites read. The hook then reads that secret instead of the general config:
 
-| Where                        | Hook input                                                                                    |
-| ---------------------------- | --------------------------------------------------------------------------------------------- |
-| CI (`run_suite.sh`)          | `kv/ci-shared/kbn-evals/<vaultSecret>` in the ci-prod Vault                                   |
-| `--profile dev-vault`        | `secret/kibana-issues/dev/kbn-evals/<vaultSecret>` in the dev Vault                           |
-| `--profile <file profile>`   | `config.<profile>.json`, which holds the suite's blocks next to the general keys              |
-| No `vaultSecret` (any place) | The general config (`--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI)                 |
+| Where                        | Hook input                                                                       |
+| ---------------------------- | -------------------------------------------------------------------------------- |
+| CI (`run_suite.sh`)          | `kv/ci-shared/kbn-evals/<vaultSecret>` in the ci-prod Vault                      |
+| `--profile dev-vault`        | `secret/kibana-issues/dev/kbn-evals/<vaultSecret>` in the dev Vault              |
+| `--profile <file profile>`   | `config.<profile>.json`, which holds the suite's blocks next to the general keys |
+| No `vaultSecret` (any place) | The general config (`--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI)    |
 
 CI forwards the initial hook input as `KBN_EVALS_SCOUT_HOOK_CONFIG_B64`. The native `evals run`
 command reuses it when no datasets profile is selected, so both hook invocations see the same

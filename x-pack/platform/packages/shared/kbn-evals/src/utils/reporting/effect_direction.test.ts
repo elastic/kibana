@@ -9,6 +9,7 @@ import { compareScores as compareSlices } from '@kbn/evals-common';
 import type { PairedScore } from '@kbn/evals-common';
 import { attachEffectSigns, getEffectDirection, signedRankSum } from './effect_direction';
 import { applyHolmCorrection } from './holm_correction';
+import { attachIdenticalPairs } from './identical_pairs';
 import { evaluateRegressionGate } from './regression_gate';
 
 const compareScores = (pairs: PairedScore[]) =>
@@ -55,7 +56,7 @@ const swapArms = (pairs: PairedScore[]): PairedScore[] =>
   }));
 
 const compare = (pairs: PairedScore[]) =>
-  attachEffectSigns(applyHolmCorrection(compareScores(pairs)), pairs);
+  attachEffectSigns(applyHolmCorrection(attachIdenticalPairs(compareScores(pairs), pairs)), pairs);
 
 describe('signedRankSum', () => {
   it('drops zero differences and averages tied ranks', () => {

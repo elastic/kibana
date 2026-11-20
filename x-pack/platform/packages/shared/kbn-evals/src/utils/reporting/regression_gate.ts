@@ -8,7 +8,7 @@
 import type { ComparisonResult } from '@kbn/evals-common';
 import { getEffectDirection } from './effect_direction';
 import type { WithEffectSign } from './effect_direction';
-import { getEffectivePValue, holmBonferroniAdjust } from './holm_correction';
+import { getEffectivePValue, holmBonferroniAdjust, isInHolmFamily } from './holm_correction';
 import type { CorrectableComparisonResult } from './holm_correction';
 import type { WithIdenticalPairs } from './identical_pairs';
 import { minimumReachablePValue } from './reachable_p_value';
@@ -96,13 +96,13 @@ const toFinite = (value: number | null | undefined): number | null =>
  * every other row kept its result. Without a correction that is just the floor.
  */
 const bestReachableEffectivePValue = (
-  result: CorrectableComparisonResult,
-  results: readonly CorrectableComparisonResult[]
+  result: WithIdenticalPairs<CorrectableComparisonResult>,
+  results: ReadonlyArray<WithIdenticalPairs<CorrectableComparisonResult>>
 ): number => {
   const floor = minimumReachablePValue(result.hypothesisTest.id, result.sampleSize);
   if (result.adjustedPValue === undefined) return floor;
 
-  const family = results.filter((row) => toFinite(row.pValue) !== null);
+  const family = results.filter(isInHolmFamily);
   const index = family.indexOf(result);
   // Without the row in its family no floor is substituted and an underpowered row would count as
   // checked, so a caller passing a copy must fail loudly.
@@ -116,9 +116,10 @@ const bestReachableEffectivePValue = (
  * measured a change in the worse direction, and its effective (Holm-adjusted when applied)
  * p-value is below `significanceThreshold`. Significant rows where the test and the mean
  * disagree on the direction cannot trip and are not counted as checked, and neither are rows that
- * could not have reached significance at all. A row whose pairs are all identical has no p-value
- * (the paired test is undefined on all-zero differences) but is checked and unchanged, so it can
- * never trip or be underpowered. With no checked row the status is `inconclusive`, never `passed`.
+ * could not have reached significance at all. A row whose pairs are all identical, of any score
+ * type, is checked and unchanged whatever its p-value (numeric tests have none, McNemar gives 1), so
+ * it can never trip, be untestable or be underpowered, and it stays out of the Holm family. With no
+ * checked row the status is `inconclusive`, never `passed`.
  */
 export const evaluateRegressionGate = ({
   results,
@@ -158,16 +159,14 @@ export const evaluateRegressionGate = ({
       continue;
     }
 
-    const pValue = toFinite(result.pValue);
-    // Nothing changed in any pair and the test has no p-value (numeric scores), so the row is
-    // never untestable or underpowered. A null-p row is already outside the Holm family, so it does
-    // not distort the other rows' adjusted p-values or reachable floors. Pass/fail rows keep their
-    // McNemar p = 1 and the usual floor handling.
-    if (pValue === null && result.allPairsIdentical === true) {
+    // Nothing changed in any pair: nothing to be significant about, so the row is never untestable
+    // or underpowered, whatever its test's p-value or floor.
+    if (result.allPairsIdentical === true) {
       checked += 1;
       continue;
     }
 
+    const pValue = toFinite(result.pValue);
     const effectivePValue = toFinite(getEffectivePValue(result));
     if (pValue === null || effectivePValue === null) {
       untestable.push({

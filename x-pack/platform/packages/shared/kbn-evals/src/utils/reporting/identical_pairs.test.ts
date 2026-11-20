@@ -66,6 +66,6 @@ describe('attachIdenticalPairs', () => {
   it('leaves the flag unset for a slice with no pairs', () => {
     const [result] = attachIdenticalPairs([row('d', 'none')], []);
 
-    expect(result.allPairsIdentical).toBeUndefined();
+    expect(result).toHaveProperty('allPairsIdentical', undefined);
   });
 });

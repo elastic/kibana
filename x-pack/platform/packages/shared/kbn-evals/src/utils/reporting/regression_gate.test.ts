@@ -6,8 +6,8 @@
  */
 
 import type { ComparisonResult } from '@kbn/evals-common';
-import { applyHolmCorrection } from './holm_correction';
-import { evaluateRegressionGate, formatRegressionGateReport } from './regression_gate';
+import { applyHolmCorrection, countHolmFamily } from './holm_correction';
+import { evaluateRegressionGate as evaluate, formatRegressionGateReport } from './regression_gate';
 
 const side = (mean: number) => ({ mean, used: 10, missing: 0, stability: null });
 
@@ -25,6 +25,19 @@ const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult
   hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 5 },
   ...overrides,
 });
+
+type GateInput = Parameters<typeof evaluate>[0];
+
+// The gate requires the identical-pairs flag; plain rows here have none, so default it to unset.
+const evaluateRegressionGate = ({
+  results,
+  ...rest
+}: Omit<GateInput, 'results'> & {
+  results: ReadonlyArray<
+    Omit<GateInput['results'][number], 'allPairsIdentical'> & { allPairsIdentical?: boolean }
+  >;
+}) =>
+  evaluate({ ...rest, results: results.map((row) => ({ allPairsIdentical: undefined, ...row })) });
 
 describe('evaluateRegressionGate', () => {
   it('trips on a significant drop in a higher-is-better evaluator', () => {
@@ -414,35 +427,55 @@ describe('evaluateRegressionGate with identical pairs', () => {
     expect(decision.untestable).toEqual([]);
   });
 
-  it('leaves an identical pass/fail row on its McNemar p-value and the usual floor', () => {
-    const passFail = (sampleSize: number) => ({
-      ...makeResult({
-        evaluatorName: `PassFail${sampleSize}`,
-        sampleSize,
-        target: side(1),
-        baseline: side(1),
-        pValue: 1,
-        metricType: 'binary',
-        hypothesisTest: { id: 'mcnemar', method: 'exact', statistic: 0 },
-      }),
-      allPairsIdentical: true,
+  const passFail = (sampleSize: number, overrides: Partial<ComparisonResult> = {}) => ({
+    ...makeResult({
+      evaluatorName: `PassFail${sampleSize}`,
+      sampleSize,
+      target: side(1),
+      baseline: side(1),
+      pValue: 1,
+      metricType: 'binary',
+      hypothesisTest: { id: 'mcnemar', method: 'exact', statistic: 0 },
+      ...overrides,
+    }),
+    allPairsIdentical: true,
+  });
+
+  it('counts an identical pass/fail row as checked, never underpowered, and keeps it out of the family', () => {
+    const others = Array.from({ length: 39 }, (_, i) =>
+      makeResult({ evaluatorName: `E${i}`, sampleSize: 30, pValue: 0.5 })
+    );
+    const withIdentical = applyHolmCorrection([...others, passFail(5)]);
+    const withoutIdentical = applyHolmCorrection(others);
+
+    const decision = evaluateRegressionGate({ results: withIdentical, minPairs: 5 });
+
+    expect(decision.status).toBe('passed');
+    expect(decision.checked).toBe(40);
+    expect(decision.underpowered).toEqual([]);
+    expect(decision.untestable).toEqual([]);
+    expect(countHolmFamily(withIdentical)).toBe(39);
+    expect(withIdentical[39].adjustedPValue).toBeNull();
+    expect(withIdentical.slice(0, 39).map(({ adjustedPValue }) => adjustedPValue)).toEqual(
+      withoutIdentical.map(({ adjustedPValue }) => adjustedPValue)
+    );
+  });
+
+  it('counts an identical row with a non-null p-value (median path) as checked', () => {
+    const decision = evaluateRegressionGate({
+      results: [identical({ pValue: 0.01, hypothesisTest: { id: 'paired_t', statistic: 0 } })],
     });
 
-    const decision = evaluateRegressionGate({ results: applyHolmCorrection([passFail(20)]) });
     expect(decision.status).toBe('passed');
     expect(decision.checked).toBe(1);
+    expect(decision.regressions).toEqual([]);
+  });
 
-    const family = applyHolmCorrection([
-      ...Array.from({ length: 39 }, (_, i) =>
-        makeResult({ evaluatorName: `E${i}`, sampleSize: 30, pValue: 0.5 })
-      ),
-      passFail(5),
-    ]);
-    expect(
-      evaluateRegressionGate({ results: family, minPairs: 5 }).underpowered.map(
-        ({ evaluatorName }) => evaluatorName
-      )
-    ).toEqual(['PassFail5']);
+  it('keeps an identical pass/fail row below --min-pairs as insufficient pairs', () => {
+    const decision = evaluateRegressionGate({ results: [passFail(3)] });
+
+    expect(decision.status).toBe('inconclusive');
+    expect(decision.insufficientPairs).toHaveLength(1);
   });
 });
 

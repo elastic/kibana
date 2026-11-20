@@ -456,11 +456,10 @@ export const compareCmd = {
     // Holm runs over every comparison in this run (all datasets x evaluators), so the family is
     // the full set of hypotheses the report shows. Gate scoping does not shrink it: the gate is
     // judged on the same adjusted p-values the report prints.
-    const results = attachIdenticalPairs(
-      attachEffectSigns(
-        multiplicityCorrection ? applyHolmCorrection(comparisonResults) : comparisonResults,
-        pairs
-      ),
+    // Identical rows are flagged before the correction so they stay out of the Holm family.
+    const identicalFlagged = attachIdenticalPairs(comparisonResults, pairs);
+    const results = attachEffectSigns(
+      multiplicityCorrection ? applyHolmCorrection(identicalFlagged) : identicalFlagged,
       pairs
     );
 

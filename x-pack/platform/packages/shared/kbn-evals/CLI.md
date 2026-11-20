@@ -87,8 +87,8 @@ node scripts/evals start --skip-init --suite agent-builder
 | `--concurrency <n>`              |           | Examples each experiment runs at once (default 5; a spec's own value wins)      |
 | `--space-ids <ids>`              |           | Comma-separated spaces to assign datasets and scores to (see [Spaces](#spaces)) |
 | `--skip-server`                  |           | Skip EDOT/Scout/EIS startup (use existing services)                             |
-| `--scout-arch <arch>`            |           | Scout `--arch` (`stateful`/`serverless`); defaults to the suite's `scoutArch`  |
-| `--scout-domain <domain>`        |           | Scout `--domain` (e.g. `observability_complete`); defaults to the suite's      |
+| `--scout-arch <arch>`            |           | Scout `--arch` (`stateful`/`serverless`); defaults to the suite's `scoutArch`   |
+| `--scout-domain <domain>`        |           | Scout `--domain` (e.g. `observability_complete`); defaults to the suite's       |
 | `--skip-init`                    |           | Skip automatic config and connector setup                                       |
 | `--dry-run`                      |           | Print configuration and exit without running                                    |
 
@@ -222,16 +222,16 @@ node scripts/evals compare <target-run-id> <baseline-run-id>
 node scripts/evals compare <run-id> --baseline-branch main --suite <suite-id> --fail-on-regression
 ```
 
-| Flag                           | Description                                                                                                  |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `--repetition-policy`          | `mean` (default) or `median` compares one score per example, aggregated over its repetitions. |
-| `--fail-on-regression`         | Exit 3 if any evaluator is significantly worse (direction-aware), 2 if the gate was inconclusive or not evaluated |
-| `--regression-evaluators a,b`  | Only these evaluators can trip the gate (default: all). Requires `--fail-on-regression`                      |
+| Flag                           | Description                                                                                                                                                                                              |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--repetition-policy`          | `mean` (default) or `median` compares one score per example, aggregated over its repetitions.                                                                                                            |
+| `--fail-on-regression`         | Exit 3 if any evaluator is significantly worse (direction-aware), 2 if the gate was inconclusive or not evaluated                                                                                        |
+| `--regression-evaluators a,b`  | Only these evaluators can trip the gate (default: all). Requires `--fail-on-regression`                                                                                                                  |
 | `--min-pairs <n>`              | Evaluators with fewer paired examples (repetitions averaged over the count both runs share) are reported as "insufficient pairs" and cannot trip the gate (default: 10). Requires `--fail-on-regression` |
-| `--multiplicity-correction`    | Holm-Bonferroni adjust p-values across all comparisons in the run. On by default with `--fail-on-regression`, off otherwise (to match the evals UI) |
-| `--no-multiplicity-correction` | Judge significance on raw p-values, also under `--fail-on-regression` |
+| `--multiplicity-correction`    | Holm-Bonferroni adjust p-values across all comparisons in the run. On by default with `--fail-on-regression`, off otherwise (to match the evals UI)                                                      |
+| `--no-multiplicity-correction` | Judge significance on raw p-values, also under `--fail-on-regression`                                                                                                                                    |
 
-Exit codes with `--fail-on-regression`: 0 = passed, 1 = usage or unexpected error (bad flags, Kibana unreachable, a failed request), 2 = inconclusive or not evaluated (no baseline, no scores or pairs, nothing checkable — too few pairs, no p-value (unless every pair is identical, which counts as checked and unchanged), or too few pairs to reach significance after Holm — no evaluator matched), 3 = significant regression. See the [README](./README.md#14-comparing-experiments-and-gating-on-regressions) for details.
+Exit codes with `--fail-on-regression`: 0 = passed, 1 = usage or unexpected error (bad flags, Kibana unreachable, a failed request), 2 = inconclusive or not evaluated (no baseline, no scores or pairs, nothing checkable — too few pairs, no p-value, or too few pairs to reach significance after Holm; a row identical in every pair, numeric or pass/fail, counts as checked and unchanged — no evaluator matched), 3 = significant regression. See the [README](./README.md#14-comparing-experiments-and-gating-on-regressions) for details.
 
 Rows marked `N*` have examples with a different number of valid repetitions in the two runs, or null scores. See the evals plugin README for the details.
 

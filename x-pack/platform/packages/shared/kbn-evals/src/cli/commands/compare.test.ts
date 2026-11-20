@@ -182,13 +182,15 @@ describe('compareCmd exit codes', () => {
     expect(await runCompare(GATE)).toEqual({ exitCode: 0 });
   });
 
-  it('stays inconclusive when the means are equal but the pairs differ', async () => {
+  it('passes through the normal p-value path when the means are equal but the pairs differ', async () => {
     // Alternating +0.2 / -0.2 against 0.5: equal means, and a symmetric rank sum, but not identical.
+    // The row has a real, non-significant p-value, so it is tested and checked (exit 0) rather than
+    // short-circuited as identical.
     const swing = (sign: number) => (index: number) =>
       0.5 + sign * 0.2 * (index % 2 === 0 ? 1 : -1);
     stubScores(experiment(TARGET, swing(1)), experiment(BASELINE, swing(-1)));
 
-    expect((await runCompare(GATE)).exitCode).not.toBe(GATE_REGRESSION_EXIT_CODE);
+    expect(await runCompare(GATE)).toEqual({ exitCode: 0 });
   });
 
   it('trips on a real regression next to an identical numeric evaluator', async () => {
