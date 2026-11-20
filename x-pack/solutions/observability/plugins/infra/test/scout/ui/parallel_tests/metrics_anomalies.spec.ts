@@ -33,136 +33,132 @@ const setAnomalyThreshold = async (kbnClient: KbnClient, anomalyThreshold: numbe
 };
 
 // The anomaly results depend on stateful-only ML jobs recreated from the archived fixture.
-test.describe(
-  'Metrics UI Anomaly Flyout',
-  { tag: tags.stateful.classic },
-  () => {
-    test.beforeEach(async ({ browserAuth, kbnClient, page }) => {
-      // Repair state left by a previously interrupted run, and isolate tests that mutate
-      // the shared default source configuration.
-      await setAnomalyThreshold(kbnClient, DEFAULT_ANOMALY_THRESHOLD);
-      await page.clock.install({ time: new Date('2021-05-24T00:00:00.000Z') });
-      await browserAuth.loginAsAdmin();
-    });
+test.describe('Metrics UI Anomaly Flyout', { tag: tags.stateful.classic }, () => {
+  test.beforeEach(async ({ browserAuth, kbnClient, page }) => {
+    // Repair state left by a previously interrupted run, and isolate tests that mutate
+    // the shared default source configuration.
+    await setAnomalyThreshold(kbnClient, DEFAULT_ANOMALY_THRESHOLD);
+    await page.clock.install({ time: new Date('2021-05-24T00:00:00.000Z') });
+    await browserAuth.loginAsAdmin();
+  });
 
-    test('shows both the Hosts and Kubernetes job cards on the inventory page', async ({
-      pageObjects: { inventoryPage, anomalyFlyoutPage },
-    }) => {
-      await inventoryPage.goToPage();
-      await anomalyFlyoutPage.open();
+  test('shows both the Hosts and Kubernetes job cards on the inventory page', async ({
+    pageObjects: { inventoryPage, anomalyFlyoutPage },
+  }) => {
+    await inventoryPage.goToPage();
+    await anomalyFlyoutPage.open();
 
-      await expect(anomalyFlyoutPage.hostsJobCard).toBeVisible();
-      await expect(anomalyFlyoutPage.k8sJobCard).toBeVisible();
-    });
+    await expect(anomalyFlyoutPage.hostsJobCard).toBeVisible();
+    await expect(anomalyFlyoutPage.k8sJobCard).toBeVisible();
+  });
 
-    test('shows only the Hosts job card on the hosts view', async ({
-      pageObjects: { hostsPage, anomalyFlyoutPage },
-    }) => {
-      await hostsPage.goToPage({ from: DATE_WITH_HOSTS_DATA_FROM, to: DATE_WITH_HOSTS_DATA_TO });
-      await anomalyFlyoutPage.open();
+  test('shows only the Hosts job card on the hosts view', async ({
+    pageObjects: { hostsPage, anomalyFlyoutPage },
+  }) => {
+    await hostsPage.goToPage({ from: DATE_WITH_HOSTS_DATA_FROM, to: DATE_WITH_HOSTS_DATA_TO });
+    await anomalyFlyoutPage.open();
 
-      await expect(anomalyFlyoutPage.hostsJobCard).toBeVisible();
-      await expect(anomalyFlyoutPage.k8sJobCard).toBeHidden();
-    });
+    await expect(anomalyFlyoutPage.hostsJobCard).toBeVisible();
+    await expect(anomalyFlyoutPage.k8sJobCard).toBeHidden();
+  });
 
-    test('shows no anomalies for the default (recent) time range', async ({
-      pageObjects: { inventoryPage, anomalyFlyoutPage },
-    }) => {
-      await inventoryPage.goToPage();
-      await anomalyFlyoutPage.open();
-      await anomalyFlyoutPage.goToAnomaliesTab();
+  test('shows no anomalies for the default (recent) time range', async ({
+    pageObjects: { inventoryPage, anomalyFlyoutPage },
+  }) => {
+    await inventoryPage.goToPage();
+    await anomalyFlyoutPage.open();
+    await anomalyFlyoutPage.goToAnomaliesTab();
 
-      await anomalyFlyoutPage.selectHostsJobType();
-      await expect(anomalyFlyoutPage.noAnomaliesMessage).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+    await anomalyFlyoutPage.selectHostsJobType();
+    await expect(anomalyFlyoutPage.noAnomaliesMessage).toBeVisible({ timeout: EXTENDED_TIMEOUT });
 
-      await anomalyFlyoutPage.selectK8sJobType();
-      await expect(anomalyFlyoutPage.noAnomaliesMessage).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+    await anomalyFlyoutPage.selectK8sJobType();
+    await expect(anomalyFlyoutPage.noAnomaliesMessage).toBeVisible({ timeout: EXTENDED_TIMEOUT });
 
-      await anomalyFlyoutPage.close();
-    });
+    await anomalyFlyoutPage.close();
+  });
 
-    test('lists the archived host and pod anomalies at the default threshold', async ({
-      kbnClient,
-      pageObjects: { inventoryPage, anomalyFlyoutPage },
-    }) => {
-      await setAnomalyThreshold(kbnClient, DEFAULT_ANOMALY_THRESHOLD);
+  test('lists the archived host and pod anomalies at the default threshold', async ({
+    kbnClient,
+    pageObjects: { inventoryPage, anomalyFlyoutPage },
+  }) => {
+    await setAnomalyThreshold(kbnClient, DEFAULT_ANOMALY_THRESHOLD);
 
-      await inventoryPage.goToPage();
-      await anomalyFlyoutPage.open();
-      await anomalyFlyoutPage.goToAnomaliesTab();
+    await inventoryPage.goToPage();
+    await anomalyFlyoutPage.open();
+    await anomalyFlyoutPage.goToAnomaliesTab();
 
-      await anomalyFlyoutPage.selectHostsJobType();
-      await anomalyFlyoutPage.setStartDate(ANOMALIES_DATE_WITH_DATA);
-      await anomalyFlyoutPage.expectAnomalyCount(2);
+    await anomalyFlyoutPage.selectHostsJobType();
+    await anomalyFlyoutPage.setStartDate(ANOMALIES_DATE_WITH_DATA);
+    await anomalyFlyoutPage.expectAnomalyCount(2);
 
-      await anomalyFlyoutPage.selectK8sJobType();
-      await anomalyFlyoutPage.expectAnomalyCount(1);
+    await anomalyFlyoutPage.selectK8sJobType();
+    await anomalyFlyoutPage.expectAnomalyCount(1);
 
-      await anomalyFlyoutPage.close();
-    });
+    await anomalyFlyoutPage.close();
+  });
 
-    test('shows no anomalies once the start date is moved past the data', async ({
-      kbnClient,
-      pageObjects: { inventoryPage, anomalyFlyoutPage },
-    }) => {
-      await setAnomalyThreshold(kbnClient, DEFAULT_ANOMALY_THRESHOLD);
+  test('shows no anomalies once the start date is moved past the data', async ({
+    kbnClient,
+    pageObjects: { inventoryPage, anomalyFlyoutPage },
+  }) => {
+    await setAnomalyThreshold(kbnClient, DEFAULT_ANOMALY_THRESHOLD);
 
-      await inventoryPage.goToPage();
-      await anomalyFlyoutPage.open();
-      await anomalyFlyoutPage.goToAnomaliesTab();
+    await inventoryPage.goToPage();
+    await anomalyFlyoutPage.open();
+    await anomalyFlyoutPage.goToAnomaliesTab();
 
-      await anomalyFlyoutPage.selectHostsJobType();
-      await anomalyFlyoutPage.setStartDate(ANOMALIES_DATE_WITHOUT_DATA);
-      await expect(anomalyFlyoutPage.noAnomaliesMessage).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+    await anomalyFlyoutPage.selectHostsJobType();
+    await anomalyFlyoutPage.setStartDate(ANOMALIES_DATE_WITHOUT_DATA);
+    await expect(anomalyFlyoutPage.noAnomaliesMessage).toBeVisible({ timeout: EXTENDED_TIMEOUT });
 
-      await anomalyFlyoutPage.selectK8sJobType();
-      await expect(anomalyFlyoutPage.noAnomaliesMessage).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+    await anomalyFlyoutPage.selectK8sJobType();
+    await expect(anomalyFlyoutPage.noAnomaliesMessage).toBeVisible({ timeout: EXTENDED_TIMEOUT });
 
-      await anomalyFlyoutPage.close();
-    });
+    await anomalyFlyoutPage.close();
+  });
 
-    test('lists more anomalies when the anomaly threshold is lowered', async ({
-      kbnClient,
-      pageObjects: { inventoryPage, anomalyFlyoutPage },
-    }) => {
-      await setAnomalyThreshold(kbnClient, LOWERED_ANOMALY_THRESHOLD);
+  test('lists more anomalies when the anomaly threshold is lowered', async ({
+    kbnClient,
+    pageObjects: { inventoryPage, anomalyFlyoutPage },
+  }) => {
+    await setAnomalyThreshold(kbnClient, LOWERED_ANOMALY_THRESHOLD);
 
-      await inventoryPage.goToPage();
-      await anomalyFlyoutPage.open();
-      await anomalyFlyoutPage.goToAnomaliesTab();
+    await inventoryPage.goToPage();
+    await anomalyFlyoutPage.open();
+    await anomalyFlyoutPage.goToAnomaliesTab();
 
-      await anomalyFlyoutPage.selectHostsJobType();
-      await anomalyFlyoutPage.setStartDate(ANOMALIES_DATE_WITH_DATA);
-      await anomalyFlyoutPage.expectAnomalyCount(4);
+    await anomalyFlyoutPage.selectHostsJobType();
+    await anomalyFlyoutPage.setStartDate(ANOMALIES_DATE_WITH_DATA);
+    await anomalyFlyoutPage.expectAnomalyCount(4);
 
-      await anomalyFlyoutPage.selectK8sJobType();
-      await anomalyFlyoutPage.expectAnomalyCount(3);
+    await anomalyFlyoutPage.selectK8sJobType();
+    await anomalyFlyoutPage.expectAnomalyCount(3);
 
-      await anomalyFlyoutPage.close();
-    });
+    await anomalyFlyoutPage.close();
+  });
 
-    test("navigates to the affected hosts from an anomaly's action menu", async ({
-      page,
-      kbnClient,
-      pageObjects: { inventoryPage, anomalyFlyoutPage },
-    }) => {
-      await setAnomalyThreshold(kbnClient, LOWERED_ANOMALY_THRESHOLD);
+  test("navigates to the affected hosts from an anomaly's action menu", async ({
+    page,
+    kbnClient,
+    pageObjects: { inventoryPage, anomalyFlyoutPage },
+  }) => {
+    await setAnomalyThreshold(kbnClient, LOWERED_ANOMALY_THRESHOLD);
 
-      await inventoryPage.goToPage();
-      await anomalyFlyoutPage.open();
-      await anomalyFlyoutPage.goToAnomaliesTab();
+    await inventoryPage.goToPage();
+    await anomalyFlyoutPage.open();
+    await anomalyFlyoutPage.goToAnomaliesTab();
 
-      await anomalyFlyoutPage.selectHostsJobType();
-      await anomalyFlyoutPage.setStartDate(ANOMALIES_DATE_WITH_DATA);
+    await anomalyFlyoutPage.selectHostsJobType();
+    await anomalyFlyoutPage.setStartDate(ANOMALIES_DATE_WITH_DATA);
 
-      const hostName = await anomalyFlyoutPage.getFirstNodeName();
-      await anomalyFlyoutPage.clickShowAffectedHosts();
+    const hostName = await anomalyFlyoutPage.getFirstNodeName();
+    await anomalyFlyoutPage.clickShowAffectedHosts();
 
-      // The action links to the Hosts view with a `host.name` terms filter for the anomaly's
-      // influencer; the filter is rison-encoded into the URL, so assert on the decoded form.
-      await expect
-        .poll(() => decodeURIComponent(page.url()), { timeout: EXTENDED_TIMEOUT })
-        .toContain(`query:(terms:(host.name:!(${hostName})))`);
-    });
-  }
-);
+    // The action links to the Hosts view with a `host.name` terms filter for the anomaly's
+    // influencer; the filter is rison-encoded into the URL, so assert on the decoded form.
+    await expect
+      .poll(() => decodeURIComponent(page.url()), { timeout: EXTENDED_TIMEOUT })
+      .toContain(`query:(terms:(host.name:!(${hostName})))`);
+  });
+});
