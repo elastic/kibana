@@ -46,8 +46,16 @@ const toClientError = (failures: SourceFailure[]) =>
     ? forbidden(NO_ACCESS_MESSAGE)
     : internal(LOAD_FAILED_MESSAGE);
 
-const byPageLoadsThenName = (a: ApplicationSummary, b: ApplicationSummary): number =>
-  b.pageLoads.count - a.pageLoads.count || a.serviceName.localeCompare(b.serviceName);
+/** Web rows sort by page loads and mobile rows by sessions; web rows come first. */
+const byActivityThenName = (a: ApplicationSummary, b: ApplicationSummary): number => {
+  if (a.source === 'mobile' && b.source === 'mobile') {
+    return b.sessions.count - a.sessions.count || a.serviceName.localeCompare(b.serviceName);
+  }
+  if (a.source === 'mobile' || b.source === 'mobile') {
+    return a.source === 'mobile' ? 1 : -1;
+  }
+  return b.pageLoads.count - a.pageLoads.count || a.serviceName.localeCompare(b.serviceName);
+};
 
 /**
  * Merges the applications of each source; a source whose search fails is left out and listed in
@@ -60,8 +68,10 @@ export const getApplications = async ({
   histogram,
   getOtelApplications,
   getClassicApplications,
+  getMobileApplications,
   hasPartialOtelAccess,
   hasPartialClassicAccess,
+  hasPartialMobileAccess,
   logger,
 }: {
   /** The page loads buckets every source was searched with. */
@@ -69,12 +79,15 @@ export const getApplications = async ({
   getOtelApplications: ApplicationsFetcher;
   /** Undefined when the Classic source is not available (serverless). */
   getClassicApplications?: ApplicationsFetcher;
+  /** EDOT Android and iOS applications; left out by callers that don't list them. */
+  getMobileApplications?: ApplicationsFetcher;
   /**
    * Resolves to `true` when the user can't read every index of the source; never rejects. Ignored
    * when the source read the sessions index.
    */
   hasPartialOtelAccess?: AccessCheck;
   hasPartialClassicAccess?: AccessCheck;
+  hasPartialMobileAccess?: AccessCheck;
   logger: Logger;
 }): Promise<ApplicationsResponse> => {
   const sources: Array<{
@@ -93,6 +106,13 @@ export const getApplications = async ({
       source: APPLICATION_SOURCE.classic,
       fetch: getClassicApplications,
       checkAccess: hasPartialClassicAccess,
+    });
+  }
+  if (getMobileApplications) {
+    sources.push({
+      source: APPLICATION_SOURCE.mobile,
+      fetch: getMobileApplications,
+      checkAccess: hasPartialMobileAccess,
     });
   }
 
@@ -115,7 +135,10 @@ export const getApplications = async ({
     if (result.status === 'fulfilled') {
       const { source } = sources[index];
       loaded.push(result.value);
-      pageLoadsOverTime[source] = result.value.pageLoadsOverTime;
+      // Mobile applications have no page loads: the chart stays web-only.
+      if (source !== APPLICATION_SOURCE.mobile) {
+        pageLoadsOverTime[source] = result.value.pageLoadsOverTime;
+      }
       if (source === APPLICATION_SOURCE.otel) {
         sessionsOverTime = result.value.sessionsOverTime;
       }
@@ -136,7 +159,7 @@ export const getApplications = async ({
   failures.forEach((failure) => logger.warn(describeFailure(failure)));
 
   return {
-    applications: loaded.flatMap(({ applications }) => applications).sort(byPageLoadsThenName),
+    applications: loaded.flatMap(({ applications }) => applications).sort(byActivityThenName),
     environments: sortEnvironments(loaded.flatMap(({ environments }) => environments)),
     pageLoadsOverTime,
     sessionsOverTime,

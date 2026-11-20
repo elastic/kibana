@@ -10,12 +10,14 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { getClassicApplications } from './classic/get_classic_applications';
 import { hasPartialReadAccess } from './get_partial_access';
+import { getMobileApplications } from './mobile/get_mobile_applications';
 import { getOtelApplicationsFromBestSource } from './otel/get_otel_applications_source';
 import { APPLICATIONS_ENDPOINT, applicationsRouteRepository } from './route';
 
 jest.mock('./classic/get_classic_applications');
 jest.mock('./otel/get_otel_applications_source');
 jest.mock('./get_partial_access');
+jest.mock('./mobile/get_mobile_applications');
 jest.mock('./classic/create_apm_event_client');
 
 const mockedPartialAccess = jest.mocked(hasPartialReadAccess);
@@ -88,6 +90,41 @@ describe('GET /internal/digital_experience/applications', () => {
       pageLoadsOverTime: [],
       sessionsOverTime: null,
     });
+    jest.mocked(getMobileApplications).mockResolvedValue({
+      applications: [],
+      environments: [],
+      pageLoadsOverTime: [],
+      sessionsOverTime: null,
+    });
+  });
+
+  it('queries the mobile source, on serverless too', async () => {
+    jest.mocked(getMobileApplications).mockResolvedValue({
+      applications: [
+        {
+          serviceName: 'shop-mobile',
+          source: 'mobile',
+          environments: [],
+          platforms: ['android'],
+          latestRelease: '1.0.0',
+          sessions: { count: 3 },
+          users: { count: 2 },
+          crashFreeSessions: { value: null, previous: null, delta: null },
+          errorRate: 0.5,
+          lastSeen: null,
+        },
+      ],
+      environments: [],
+      pageLoadsOverTime: [],
+      sessionsOverTime: null,
+    });
+
+    const response = await runHandler({ isServerless: true }).result;
+
+    expect(jest.mocked(getMobileApplications)).toHaveBeenCalledWith(
+      expect.objectContaining({ start: Date.parse(START), end: Date.parse(END) })
+    );
+    expect(response.applications).toHaveLength(1);
   });
 
   it('queries both sources on stateful', async () => {
@@ -183,14 +220,14 @@ describe('GET /internal/digital_experience/applications', () => {
     expect(getApmIndices).not.toHaveBeenCalled();
   });
 
-  it('reads the APM indices once and checks the access of both sources', async () => {
+  it('reads the APM indices once and checks the access of every source', async () => {
     mockedPartialAccess.mockResolvedValue(true);
 
     const { result, getApmIndices } = runHandler({ isServerless: false });
     const response = await result;
 
-    expect(mockedPartialAccess).toHaveBeenCalledTimes(2);
-    const [[otelCheck], [classicCheck]] = mockedPartialAccess.mock.calls;
+    expect(mockedPartialAccess).toHaveBeenCalledTimes(3);
+    const [[otelCheck], [classicCheck], [mobileCheck]] = mockedPartialAccess.mock.calls;
     await expect(otelCheck.getIndices()).resolves.toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
     expect(otelCheck.ignoredPatterns).toBeUndefined();
     await expect(classicCheck.getIndices()).resolves.toEqual([
@@ -199,16 +236,17 @@ describe('GET /internal/digital_experience/applications', () => {
       'traces-apm*',
     ]);
     expect(classicCheck.ignoredPatterns).toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
+    await expect(mobileCheck.getIndices()).resolves.toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
     expect(getApmIndices).toHaveBeenCalledTimes(1);
-    expect(response.partiallyAvailableSources).toEqual(['otel', 'classic']);
+    expect(response.partiallyAvailableSources).toEqual(['otel', 'classic', 'mobile']);
   });
 
-  it('only checks the OTel access on serverless', async () => {
+  it('checks the OTel and mobile access, not the Classic one, on serverless', async () => {
     mockedPartialAccess.mockResolvedValue(false);
 
     const response = await runHandler({ isServerless: true }).result;
 
-    expect(mockedPartialAccess).toHaveBeenCalledTimes(1);
+    expect(mockedPartialAccess).toHaveBeenCalledTimes(2);
     expect(response.partiallyAvailableSources).toEqual([]);
   });
 

@@ -75,6 +75,9 @@ export const SOURCE_LABELS: Record<ApplicationSource, string> = {
   classic: i18n.translate('xpack.digitalExperience.applications.source.classic', {
     defaultMessage: 'Classic RUM',
   }),
+  mobile: i18n.translate('xpack.digitalExperience.applications.source.mobile', {
+    defaultMessage: 'Mobile',
+  }),
 };
 
 export const ANONYMOUS_USER = i18n.translate(

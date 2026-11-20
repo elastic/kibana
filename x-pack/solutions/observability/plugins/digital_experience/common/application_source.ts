@@ -7,8 +7,9 @@
 
 import type { ApplicationSource } from './types/applications';
 
-/** Where an application's data comes from: EDOT Browser or the Classic RUM agent. */
+/** Where an application's data comes from: EDOT Browser, the Classic RUM agent or EDOT mobile. */
 export const APPLICATION_SOURCE = {
   otel: 'otel',
   classic: 'classic',
+  mobile: 'mobile',
 } as const satisfies Record<ApplicationSource, ApplicationSource>;

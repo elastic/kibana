@@ -6,7 +6,7 @@
  */
 
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
-import type { ApplicationSummary, TimeSeriesPoint } from '../../../../common/types/applications';
+import type { TimeSeriesPoint, WebApplicationSummary } from '../../../../common/types/applications';
 import { bucketKeys, ratio, toLastSeen } from '../../../lib/helpers/aggregations';
 import { toHttpRequests } from '../../../lib/helpers/http_requests';
 import { toWebVitals, type VitalAggregation } from '../../../lib/helpers/web_vitals';
@@ -44,7 +44,7 @@ export const toSessionsApplication = ({
   fcp,
   ttfb,
   lastSeen,
-}: SessionsBucket): ApplicationSummary => ({
+}: SessionsBucket): WebApplicationSummary => ({
   serviceName: key,
   source: APPLICATION_SOURCE.otel,
   environments: bucketKeys(environments),

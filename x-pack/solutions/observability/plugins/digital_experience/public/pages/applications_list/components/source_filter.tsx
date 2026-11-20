@@ -20,31 +20,42 @@ const SOURCE_LABEL = i18n.translate('xpack.digitalExperience.sourceFilter.label'
 
 const ALL_SOURCES = 'all';
 
-const OPTIONS = [
-  {
-    value: ALL_SOURCES,
-    label: i18n.translate('xpack.digitalExperience.sourceFilter.all', {
-      defaultMessage: 'All sources',
-    }),
-  },
+const ALL_OPTION = {
+  value: ALL_SOURCES,
+  label: i18n.translate('xpack.digitalExperience.sourceFilter.all', {
+    defaultMessage: 'All sources',
+  }),
+};
+
+const WEB_OPTIONS = [
   { value: APPLICATION_SOURCE.otel, label: SOURCE_LABELS.otel },
   { value: APPLICATION_SOURCE.classic, label: SOURCE_LABELS.classic },
 ];
 
-/** Source filter: EDOT Browser, Classic RUM or both (`undefined`). */
+const MOBILE_OPTION = { value: APPLICATION_SOURCE.mobile, label: SOURCE_LABELS.mobile };
+
+/** Source filter: EDOT Browser, Classic RUM, Mobile or all (`undefined`). */
 export function SourceFilter({
   selected,
   onChange,
+  hasClassicSource = true,
 }: {
   selected: ApplicationSource | undefined;
   onChange: (source: ApplicationSource | undefined) => void;
+  /** False on serverless, which has no Classic RUM data. */
+  hasClassicSource?: boolean;
 }) {
+  const options = [
+    ALL_OPTION,
+    ...(hasClassicSource ? WEB_OPTIONS : [WEB_OPTIONS[0]]),
+    MOBILE_OPTION,
+  ];
   return (
     <SingleSelectFilter
       data-test-subj="digitalExperienceSourceFilter"
       ebtElement={APPLICATIONS_LIST_EBT_ELEMENTS.SOURCE_FILTER}
       label={SOURCE_LABEL}
-      options={OPTIONS}
+      options={options}
       selected={selected ?? ALL_SOURCES}
       isActive={selected !== undefined}
       onChange={(value) => onChange(applicationSourceRt.is(value) ? value : undefined)}

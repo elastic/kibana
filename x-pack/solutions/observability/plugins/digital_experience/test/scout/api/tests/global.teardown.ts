@@ -6,6 +6,7 @@
  */
 
 import { globalTeardownHook } from '@kbn/scout-oblt';
+import { deleteMobileData } from '../../common/fixtures/mobile_data';
 import { deleteOtelRumData } from '../../common/fixtures/otel_rum_data';
 import { deleteTimeZoneData } from '../../common/fixtures/time_zone_data';
 import { FLAG_RESET_OVERRIDE } from '../../feature_flag';
@@ -19,6 +20,7 @@ globalTeardownHook(
   async ({ esClient }) => {
     await deleteOtelRumData(esClient);
     await deleteTimeZoneData(esClient);
+    await deleteMobileData(esClient);
   }
 );
 

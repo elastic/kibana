@@ -16,6 +16,7 @@ import type { ApmIndices } from './classic/create_apm_event_client';
 import { createApmEventClient } from './classic/create_apm_event_client';
 import { getClassicApplications } from './classic/get_classic_applications';
 import { getOtelApplicationsFromBestSource } from './otel/get_otel_applications_source';
+import { getMobileApplications } from './mobile/get_mobile_applications';
 import { getHistogramInterval } from '../../lib/helpers/time_series';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
 import { START_AFTER_END_ISSUE, isStartBeforeEnd, timeRangeShape, timeZoneShape } from '../params';
@@ -121,6 +122,16 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
           logger,
         }),
       getClassicApplications: getClassic,
+      getMobileApplications: () =>
+        getMobileApplications({ esClient, start, end, environment, signal }),
+      hasPartialMobileAccess: () =>
+        hasPartialReadAccess({
+          esClient,
+          internalEsClient,
+          getIndices: async () => [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
+          signal,
+          logger,
+        }),
       hasPartialOtelAccess: () =>
         hasPartialReadAccess({
           esClient,

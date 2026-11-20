@@ -20,7 +20,7 @@ const option = (value: string) =>
   screen.getByTestId(`digitalExperienceSourceFilterOption-${value}`);
 
 describe('SourceFilter', () => {
-  it('lists every source and both together', () => {
+  it('lists every source and all of them together', () => {
     renderFilter();
 
     // Not the accessible names: EUI adds screen-reader instructions to them.
@@ -28,9 +28,11 @@ describe('SourceFilter', () => {
       'all',
       'otel',
       'classic',
+      'mobile',
     ]);
     expect(screen.getByText('EDOT Browser')).toBeInTheDocument();
     expect(screen.getByText('Classic RUM')).toBeInTheDocument();
+    expect(screen.getByText('Mobile')).toBeInTheDocument();
   });
 
   it('checks "All sources" when no source is selected', () => {

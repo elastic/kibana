@@ -6,6 +6,7 @@
  */
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
+import type { WebApplicationSummary } from '../../../../common/types/applications';
 import { getClassicApplications } from './get_classic_applications';
 
 // All samples rated good: every sample is up to both thresholds.
@@ -89,7 +90,7 @@ describe('getClassicApplications', () => {
     ]);
 
     const {
-      applications: [{ httpRequests }],
+      applications: [application],
     } = await getClassicApplications({
       apmEventClient,
       start: 1,
@@ -97,7 +98,12 @@ describe('getClassicApplications', () => {
       histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
-    expect(httpRequests).toEqual({ count: 0, failedCount: 0, failedRatio: null });
+    expect(application).toMatchObject({ source: 'classic' });
+    expect((application as WebApplicationSummary).httpRequests).toEqual({
+      count: 0,
+      failedCount: 0,
+      failedRatio: null,
+    });
   });
 
   it('filters by RUM agent, time range and measured documents, with a bounded terms aggregation', async () => {

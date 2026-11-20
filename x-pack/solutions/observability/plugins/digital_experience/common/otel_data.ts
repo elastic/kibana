@@ -13,6 +13,12 @@ export const OTEL_TRACES_INDEX = 'traces-*.otel-*';
 export const BROWSER_SDK_LANGUAGE = 'webjs';
 
 /**
+ * `resource.attributes.telemetry.sdk.name` of the mobile SDKs. Not `telemetry.sdk.language`: `java`
+ * also matches backend services in the same indices.
+ */
+export const MOBILE_SDK_NAMES = ['android', 'iOS'] as const;
+
+/**
  * An attribute as stored in the OTel indices, e.g. `attributes.session.id`. Queries can use the
  * unprefixed name, which the templates' passthrough objects resolve to the highest-priority
  * scope that maps it; the session summaries group by the stored fields so that a scope mapping

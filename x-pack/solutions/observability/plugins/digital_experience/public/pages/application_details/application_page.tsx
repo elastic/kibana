@@ -30,6 +30,7 @@ import { ErrorsTab } from '../errors/errors_tab';
 import { NetworkTab } from '../network/network_tab';
 import { ReportsTab } from '../reports/reports_tab';
 import { SessionsTab } from '../sessions/sessions_tab';
+import { MobileOverview } from './mobile_overview/mobile_overview';
 import { OtelOverview } from './otel_overview/otel_overview';
 
 const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
@@ -54,7 +55,6 @@ const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
  */
 const tabsOf = (source: ApplicationSource): readonly ApplicationTabId[] =>
   source === APPLICATION_SOURCE.otel ? APPLICATION_TAB_IDS : ['overview'];
-
 const sessionsUnavailablePrompt = (
   <EuiEmptyPrompt
     data-test-subj="digitalExperienceSessionsUnavailable"
@@ -180,12 +180,16 @@ export function ApplicationPage({
     { text: APPLICATION_TAB_LABELS[selectedTab] },
   ]);
 
-  const renderOverview = () =>
-    source === APPLICATION_SOURCE.otel ? (
+  const renderOverview = () => {
+    if (source === APPLICATION_SOURCE.mobile) {
+      return withPagePadding(<MobileOverview serviceName={serviceName} />);
+    }
+    return source === APPLICATION_SOURCE.otel ? (
       withPagePadding(<OtelOverview serviceName={serviceName} />)
     ) : (
       <ClassicRumOverview serviceName={serviceName} />
     );
+  };
 
   const renderSessions = () =>
     withPagePadding(

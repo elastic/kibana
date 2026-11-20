@@ -9,9 +9,10 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 import { forbidden } from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
-  ApplicationSource,
   ApplicationSummary,
   TimeSeriesPoint,
+  WebApplicationSource,
+  WebApplicationSummary,
 } from '../../../common/types/applications';
 import { getApplications as getApplicationsWithHistogram } from './get_applications';
 
@@ -23,9 +24,9 @@ const getApplications = (
 
 const app = (
   serviceName: string,
-  source: ApplicationSource,
+  source: WebApplicationSource,
   pageLoads: number
-): ApplicationSummary => ({
+): WebApplicationSummary => ({
   serviceName,
   source,
   environments: [],

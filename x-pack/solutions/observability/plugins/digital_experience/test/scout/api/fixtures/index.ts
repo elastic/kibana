@@ -5,16 +5,32 @@
  * 2.0.
  */
 
-import type { ApplicationSource, ApplicationSummary } from '../../../../common/types/applications';
+import type {
+  ApplicationSummary,
+  MobileApplicationSummary,
+  WebApplicationSource,
+  WebApplicationSummary,
+} from '../../../../common/types/applications';
 
 export * as testData from './constants';
 
 /** The row of one application and source, so assertions ignore data other suites may add. */
-export const findApplication = (
+export function findApplication(
   applications: ApplicationSummary[],
   serviceName: string,
-  source: ApplicationSource
-): ApplicationSummary | undefined =>
-  applications.find(
+  source: WebApplicationSource
+): WebApplicationSummary | undefined;
+export function findApplication(
+  applications: ApplicationSummary[],
+  serviceName: string,
+  source: 'mobile'
+): MobileApplicationSummary | undefined;
+export function findApplication(
+  applications: ApplicationSummary[],
+  serviceName: string,
+  source: ApplicationSummary['source']
+): ApplicationSummary | undefined {
+  return applications.find(
     (application) => application.serviceName === serviceName && application.source === source
   );
+}

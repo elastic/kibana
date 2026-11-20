@@ -6,12 +6,31 @@
  */
 
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
-import type { ApplicationSource, ApplicationSummary } from '../../../../common/types/applications';
+import type {
+  ApplicationSource,
+  ApplicationSummary,
+  MobileApplicationSummary,
+  WebApplicationSummary,
+} from '../../../../common/types/applications';
 
 /** A list row: an application, flagged when its name also has Classic RUM data. */
-export interface ApplicationRow extends ApplicationSummary {
-  hasClassicData: boolean;
-}
+export type ApplicationRow = WebApplicationSummary & { hasClassicData: boolean };
+
+/** The mobile applications of `applications`, which have their own table and columns. */
+export const mobileApplicationsMatching = ({
+  applications,
+  search,
+}: {
+  applications: ApplicationSummary[];
+  search: string;
+}): MobileApplicationSummary[] => {
+  const term = search.trim().toLowerCase();
+  return applications.filter(
+    (app): app is MobileApplicationSummary =>
+      app.source === APPLICATION_SOURCE.mobile &&
+      (!term || app.serviceName.toLowerCase().includes(term))
+  );
+};
 
 interface ApplicationFilters {
   applications: ApplicationSummary[];
@@ -46,6 +65,7 @@ export const filterApplications = (filters: ApplicationFilters): ApplicationRow[
   const classicNames = namesOf(APPLICATION_SOURCE.classic);
 
   return applicationsMatching(filters)
+    .filter((app): app is WebApplicationSummary => app.source !== APPLICATION_SOURCE.mobile)
     .filter(
       (app) =>
         source !== undefined ||

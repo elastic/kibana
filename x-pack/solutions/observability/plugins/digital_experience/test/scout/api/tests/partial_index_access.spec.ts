@@ -84,7 +84,8 @@ apiTest.describe(
         const { unavailableSources, partiallyAvailableSources } =
           response.body as ApplicationsResponse;
         expect(unavailableSources).toStrictEqual([]);
-        expect(partiallyAvailableSources).toStrictEqual(['otel']);
+        // Mobile reads the same OTel indices, so it is partial too.
+        expect(partiallyAvailableSources).toStrictEqual(['otel', 'mobile']);
       }
     );
 

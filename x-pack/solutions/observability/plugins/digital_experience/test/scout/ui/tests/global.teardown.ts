@@ -6,6 +6,7 @@
  */
 
 import { globalTeardownHook } from '@kbn/scout-oblt';
+import { deleteMobileData } from '../../common/fixtures/mobile_data';
 import { deleteOtelRumData } from '../../common/fixtures/otel_rum_data';
 import { deleteSessionsData } from '../../common/fixtures/sessions_data';
 import { FLAG_RESET_OVERRIDE } from '../../feature_flag';
@@ -18,6 +19,7 @@ globalTeardownHook(
   { tag: DIGITAL_EXPERIENCE_TAGS },
   async ({ esClient, kbnClient }) => {
     await deleteOtelRumData(esClient);
+    await deleteMobileData(esClient);
     await deleteSessionsData(esClient, kbnClient);
   }
 );

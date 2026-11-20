@@ -6,14 +6,14 @@
  */
 
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
-import type { ApplicationSummary } from '../../../../common/types/applications';
+import type { WebApplicationSummary } from '../../../../common/types/applications';
 import { bucketKeys, ratio, toLastSeen } from '../../../lib/helpers/aggregations';
 import { toHttpRequests } from '../../../lib/helpers/http_requests';
 import { toWebVitals } from '../../../lib/helpers/web_vitals';
 import type { ClassicBucket } from './search_responses';
 
 /** One application from its bucket. */
-export const toApplication = (bucket: ClassicBucket): ApplicationSummary => {
+export const toApplication = (bucket: ClassicBucket): WebApplicationSummary => {
   const failedRequests = bucket.httpFailure.doc_count;
   const requests = bucket.httpSuccess.doc_count + failedRequests;
   return {

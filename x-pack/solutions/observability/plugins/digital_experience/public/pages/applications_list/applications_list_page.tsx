@@ -37,6 +37,7 @@ import type {
   ApplicationSource,
   PageLoadsOverTime,
   VitalRatings,
+  WebApplicationSource,
 } from '../../../common/types/applications';
 import type { CoreWebVital, VitalRating } from '../../../common/core_web_vitals';
 import { CORE_WEB_VITAL, getVitalRating } from '../../../common/core_web_vitals';
@@ -65,7 +66,12 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { useVisibleColumns } from '../../hooks/use_visible_columns';
 import { APPLICATIONS_LABEL, LAST_SEEN_LABEL, SOURCE_LABELS } from '../../labels';
 import type { ApplicationRow } from './utils/filter_applications';
-import { applicationsMatching, filterApplications } from './utils/filter_applications';
+import {
+  applicationsMatching,
+  filterApplications,
+  mobileApplicationsMatching,
+} from './utils/filter_applications';
+import { MobileApplicationsTable } from './components/mobile_applications_table';
 import {
   pageLoadsOfSources,
   sessionsOfSource,
@@ -396,7 +402,7 @@ const HIDDEN_BY_DEFAULT: OptionalColumnId[] = ['fcp', 'ttfb', 'jsErrors'];
 
 const HIDDEN_COLUMNS_STORAGE_KEY = 'xpack.digitalExperience.applications.hiddenColumns';
 
-const NO_PAGE_LOADS: Pick<PageLoadsOverTime, ApplicationSource> = { otel: [], classic: [] };
+const NO_PAGE_LOADS: Pick<PageLoadsOverTime, WebApplicationSource> = { otel: [], classic: [] };
 
 export function ApplicationsListPage() {
   const { application, ux } = useKibanaServices();
@@ -431,11 +437,19 @@ export function ApplicationsListPage() {
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!response && !error);
 
-  // Serverless has no ux plugin and no Classic RUM data; known on the first render, so the filter
-  // row doesn't change once the data loads.
-  const canFilterBySource = ux !== undefined;
-  // A source in the URL is ignored where the filter isn't shown, so it can't hide every row.
-  const selectedSource = canFilterBySource ? sourceFilter : undefined;
+  // Serverless has no ux plugin and no Classic RUM data, so its filter offers EDOT Browser and
+  // Mobile only; a Classic RUM source in the URL is ignored there, so it can't hide every row.
+  const hasClassicSource = ux !== undefined;
+  const selectedSource =
+    sourceFilter === APPLICATION_SOURCE.classic && !hasClassicSource ? undefined : sourceFilter;
+  const isMobileSelected = selectedSource === APPLICATION_SOURCE.mobile;
+  const mobileItems = useMemo(
+    () =>
+      selectedSource === undefined || isMobileSelected
+        ? mobileApplicationsMatching({ applications: response?.applications ?? [], search })
+        : [],
+    [response, selectedSource, isMobileSelected, search]
+  );
 
   const items = useMemo(
     () =>
@@ -670,16 +684,20 @@ export function ApplicationsListPage() {
             <EuiSpacer size="m" />
           </>
         )}
-        <ApplicationsSummaryPanel summary={summary} isLoading={isLoading} />
-        <EuiSpacer size="m" />
-        <PageLoadsChart
-          pageLoads={pageLoadsOverTime}
-          sessions={sessionsOverTime}
-          histogram={response?.pageLoadsOverTime.histogram}
-          isLoading={isLoading}
-          onTimeRangeSelect={setTimeRange}
-        />
-        <EuiSpacer size="m" />
+        {!isMobileSelected && (
+          <>
+            <ApplicationsSummaryPanel summary={summary} isLoading={isLoading} />
+            <EuiSpacer size="m" />
+            <PageLoadsChart
+              pageLoads={pageLoadsOverTime}
+              sessions={sessionsOverTime}
+              histogram={response?.pageLoadsOverTime.histogram}
+              isLoading={isLoading}
+              onTimeRangeSelect={setTimeRange}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiFilterGroup>
@@ -689,9 +707,11 @@ export function ApplicationsListPage() {
                 onChange={setEnvironment}
                 isLoading={isLoading}
               />
-              {canFilterBySource && (
-                <SourceFilter selected={sourceFilter} onChange={setSourceFilter} />
-              )}
+              <SourceFilter
+                selected={selectedSource}
+                onChange={setSourceFilter}
+                hasClassicSource={hasClassicSource}
+              />
             </EuiFilterGroup>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -714,21 +734,43 @@ export function ApplicationsListPage() {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiInMemoryTable<ApplicationRow>
-          data-test-subj="digitalExperienceApplicationsTable"
-          tableCaption={APPLICATIONS_LABEL}
-          items={items}
-          itemId={getRowId}
-          columns={columns}
-          // Many columns: they keep their width and the table scrolls sideways instead of squeezing.
-          tableLayout="auto"
-          scrollableInline
-          stickyScrollbar
-          pagination={true}
-          sorting={SORT_BY_PAGE_LOADS}
-          loading={isLoading}
-          noItemsMessage={getNoItemsMessage()}
-        />
+        {!isMobileSelected && (items.length > 0 || mobileItems.length === 0) && (
+          <EuiInMemoryTable<ApplicationRow>
+            data-test-subj="digitalExperienceApplicationsTable"
+            tableCaption={APPLICATIONS_LABEL}
+            items={items}
+            itemId={getRowId}
+            columns={columns}
+            // Many columns: they keep their width and the table scrolls sideways instead of squeezing.
+            tableLayout="auto"
+            scrollableInline
+            stickyScrollbar
+            pagination={true}
+            sorting={SORT_BY_PAGE_LOADS}
+            loading={isLoading}
+            noItemsMessage={getNoItemsMessage()}
+          />
+        )}
+        {mobileItems.length > 0 && (
+          <>
+            {items.length > 0 && <EuiSpacer size="l" />}
+            <MobileApplicationsTable
+              items={mobileItems}
+              searchTerm={searchTerm}
+              isLoading={isLoading}
+            />
+          </>
+        )}
+        {isMobileSelected && mobileItems.length === 0 && (
+          <EuiInMemoryTable<ApplicationRow>
+            data-test-subj="digitalExperienceApplicationsTable"
+            tableCaption={APPLICATIONS_LABEL}
+            items={[]}
+            columns={columns}
+            loading={isLoading}
+            noItemsMessage={getNoItemsMessage()}
+          />
+        )}
       </EuiPageSection>
     </>
   );

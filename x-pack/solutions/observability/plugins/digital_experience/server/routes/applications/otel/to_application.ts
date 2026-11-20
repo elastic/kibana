@@ -6,7 +6,7 @@
  */
 
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
-import type { ApplicationSummary } from '../../../../common/types/applications';
+import type { WebApplicationSummary } from '../../../../common/types/applications';
 import { ratio, toLastSeen } from '../../../lib/helpers/aggregations';
 import { toHttpRequests } from '../../../lib/helpers/http_requests';
 import { toWebVitals } from '../../../lib/helpers/web_vitals';
@@ -14,7 +14,7 @@ import { environmentsOf } from '../../../lib/otel/environments';
 import type { LogsBucket, SpansBucket } from './search_responses';
 
 /** One application from its logs bucket and, when it made HTTP requests, its spans bucket. */
-export const toApplication = (logs: LogsBucket, spans?: SpansBucket): ApplicationSummary => ({
+export const toApplication = (logs: LogsBucket, spans?: SpansBucket): WebApplicationSummary => ({
   serviceName: logs.key,
   source: APPLICATION_SOURCE.otel,
   environments: environmentsOf(logs, spans),

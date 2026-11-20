@@ -74,6 +74,12 @@ export const DIGITAL_EXPERIENCE_EBT_ELEMENTS = {
   INSTRUMENTATION_DOCS_LINK: 'instrumentationDocsLink',
 } as const;
 
+export const MOBILE_APPLICATION_EBT_ELEMENTS = {
+  PLATFORM_FILTER: 'mobilePlatformFilter',
+  RELEASE_FILTER: 'mobileReleaseFilter',
+  PANEL_DISCOVER_LINK: 'mobilePanelDiscoverLink',
+} as const;
+
 export const APPLICATIONS_LIST_EBT_ELEMENTS = {
   APPLICATION_LINK: 'applicationLink',
   DOCS_LINK: 'applicationsDocsLink',

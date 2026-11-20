@@ -12,6 +12,8 @@ import type {
   ApplicationSummary,
   PageLoadsOverTime,
   TimeSeriesPoint,
+  WebApplicationSource,
+  WebApplicationSummary,
 } from '../../../../common/types/applications';
 
 export interface ApplicationsSummary {
@@ -33,19 +35,19 @@ export interface ApplicationsSummary {
 const ratio = (numerator: number, denominator: number): number | null =>
   denominator > 0 ? numerator / denominator : null;
 
-const hasPoorCoreWebVitals = ({ webVitals: { lcp, inp, cls } }: ApplicationSummary): boolean =>
+const hasPoorCoreWebVitals = ({ webVitals: { lcp, inp, cls } }: WebApplicationSummary): boolean =>
   (lcp.p75Ms !== null && getVitalRating(CORE_WEB_VITAL.lcp, lcp.p75Ms) === 'poor') ||
   (inp.p75Ms !== null && getVitalRating(CORE_WEB_VITAL.inp, inp.p75Ms) === 'poor') ||
   (cls.p75 !== null && getVitalRating(CORE_WEB_VITAL.cls, cls.p75) === 'poor');
 
-const countNames = (applications: ApplicationSummary[]): number =>
+const countNames = (applications: Array<{ serviceName: string }>): number =>
   new Set(applications.map(({ serviceName }) => serviceName)).size;
 
 /**
  * The sessions of the rows that count them. Only EDOT Browser rows read from the sessions index do,
  * and all of them do or none, as they come from one source, so Classic RUM rows have none to add.
  */
-const countSessions = (applications: ApplicationSummary[]): number | null => {
+const countSessions = (applications: WebApplicationSummary[]): number | null => {
   const counts = applications.flatMap(({ sessions }) => (sessions ? [sessions.count] : []));
   return counts.length > 0 ? counts.reduce((total, count) => total + count, 0) : null;
 };
@@ -54,8 +56,15 @@ const countSessions = (applications: ApplicationSummary[]): number | null => {
  * The totals of every source's rows, for the summary above the table; a name with data in both
  * sources counts as one application.
  */
-export const summarizeApplications = (applications: ApplicationSummary[]): ApplicationsSummary => {
-  const total = (count: (application: ApplicationSummary) => number) =>
+export const summarizeApplications = (
+  allApplications: ApplicationSummary[]
+): ApplicationsSummary => {
+  // Mobile applications have no page loads, vitals or HTTP requests to total.
+  const applications = allApplications.filter(
+    (application): application is WebApplicationSummary =>
+      application.source !== APPLICATION_SOURCE.mobile
+  );
+  const total = (count: (application: WebApplicationSummary) => number) =>
     applications.reduce((sum, application) => sum + count(application), 0);
 
   const pageLoads = total(({ pageLoads: { count } }) => count);
@@ -82,13 +91,19 @@ export const summarizeApplications = (applications: ApplicationSummary[]): Appli
 export const sessionsOfSource = (
   sessionsOverTime: TimeSeriesPoint[] | null,
   source: ApplicationSource | undefined
-): TimeSeriesPoint[] | null => (source === APPLICATION_SOURCE.classic ? null : sessionsOverTime);
+): TimeSeriesPoint[] | null =>
+  source === APPLICATION_SOURCE.classic || source === APPLICATION_SOURCE.mobile
+    ? null
+    : sessionsOverTime;
 
 /** Page loads over time of one source, or of both added up when no source is selected. */
 export const pageLoadsOfSources = (
-  pageLoadsOverTime: Pick<PageLoadsOverTime, ApplicationSource>,
+  pageLoadsOverTime: Pick<PageLoadsOverTime, WebApplicationSource>,
   source: ApplicationSource | undefined
 ): TimeSeriesPoint[] => {
+  if (source === APPLICATION_SOURCE.mobile) {
+    return [];
+  }
   if (source) {
     return pageLoadsOverTime[source];
   }

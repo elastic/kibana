@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-/** `otel` is EDOT Browser data, `classic` is data written by the RUM agent. */
-export type ApplicationSource = 'otel' | 'classic';
+/** The sources of web applications: `otel` is EDOT Browser data, `classic` is the RUM agent's. */
+export type WebApplicationSource = 'otel' | 'classic';
+
+/** `mobile` is EDOT Android and iOS data, shown only with the mobile feature flag on. */
+export type ApplicationSource = WebApplicationSource | 'mobile';
+
+/** The mobile platforms, told apart by `telemetry.sdk.name`. */
+export type MobilePlatform = 'android' | 'ios';
 
 /**
  * The tabs of an application's page, in display order. The Overview is the page at the
@@ -65,10 +71,10 @@ export interface HttpRequests {
   failedRatio: number | null;
 }
 
-/** One application of one source, over the requested time range and environment. */
-export interface ApplicationSummary {
+/** One web application of one source, over the requested time range and environment. */
+export interface WebApplicationSummary {
   serviceName: string;
-  source: ApplicationSource;
+  source: WebApplicationSource;
   /** Environments the application reported in the time range, up to 10; empty when none is set. */
   environments: string[];
   pageLoads: { count: number };
@@ -88,6 +94,36 @@ export interface ApplicationSummary {
   /** Time of the latest document in the range (ISO 8601), `null` when unknown. */
   lastSeen: string | null;
 }
+
+/** A value of the current period against the previous period of equal length. */
+export interface ComparedValue {
+  /** `null` when there is not enough data. */
+  value: number | null;
+  previous: number | null;
+  /** `value - previous`, `null` when either is missing. */
+  delta: number | null;
+}
+
+/** One mobile application (EDOT Android and iOS, React Native on top), keyed on `service.name`. */
+export interface MobileApplicationSummary {
+  serviceName: string;
+  source: 'mobile';
+  environments: string[];
+  /** Platforms the application reported, sorted. */
+  platforms: MobilePlatform[];
+  /** Normalized `service.version` with the most sessions in the last 24 hours, `null` if none. */
+  latestRelease: string | null;
+  sessions: { count: number };
+  /** Distinct `app.installation.id`. */
+  users: { count: number };
+  /** Share of sessions without a crash, 0 to 1; `null` until a crash is defined (#64). */
+  crashFreeSessions: ComparedValue;
+  /** Exceptions per session, `null` without sessions. */
+  errorRate: number | null;
+  lastSeen: string | null;
+}
+
+export type ApplicationSummary = WebApplicationSummary | MobileApplicationSummary;
 
 export interface ApplicationsResponse {
   applications: ApplicationSummary[];

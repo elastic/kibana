@@ -17,7 +17,7 @@ import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useDigitalExperienceRouter } from '../../hooks/use_digital_experience_router';
 import { digitalExperienceRouter } from '../../routes';
-import type { ApplicationSummary } from '../../../common/types/applications';
+import type { ApplicationSummary, WebApplicationSummary } from '../../../common/types/applications';
 import { TimeRangePicker } from '../../components/time_range_picker';
 import { EnvironmentFilter } from '../../components/environment_filter';
 import { SourceFilter } from './components/source_filter';
@@ -80,7 +80,7 @@ const app = ({
   sessions = null as number | null,
 }: Partial<{
   serviceName: string;
-  source: ApplicationSummary['source'];
+  source: WebApplicationSummary['source'];
   pageLoads: number;
   sessions: number | null;
   lcp: number | null;
@@ -89,7 +89,7 @@ const app = ({
   fcp: number | null;
   ttfb: number | null;
   httpRequests: { count: number; failedCount: number };
-}> = {}): ApplicationSummary => ({
+}> = {}): WebApplicationSummary => ({
   serviceName,
   source,
   environments: [],
@@ -163,6 +163,47 @@ beforeEach(() => {
   mockEnvironment();
   mockSourceFilter();
   jest.mocked(useDigitalExperienceRouter).mockReturnValue(digitalExperienceRouter);
+});
+
+const mobileApp = (): ApplicationSummary => ({
+  serviceName: 'shop-mobile',
+  source: 'mobile',
+  environments: [],
+  platforms: ['android', 'ios'],
+  latestRelease: '1.2.3',
+  sessions: { count: 7 },
+  users: { count: 3 },
+  crashFreeSessions: { value: null, previous: null, delta: null },
+  errorRate: 0.25,
+  lastSeen: '2021-01-18T12:25:00.000Z',
+});
+
+describe('ApplicationsListPage mobile applications', () => {
+  it('lists the mobile applications in their own table', async () => {
+    respondWith([mobileApp()]);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+    expect(screen.getByTestId('digitalExperienceMobileLatestRelease')).toHaveTextContent('1.2.3');
+    expect(screen.getByTestId('digitalExperienceMobileSessions')).toHaveTextContent('7');
+    expect(screen.getByTestId('digitalExperienceMobileCrashFree')).toHaveTextContent(
+      'Not enough data'
+    );
+    expect(screen.getByTestId('digitalExperienceMobileApplicationLink')).toHaveAttribute(
+      'href',
+      '/app/digital_experience/shop-mobile?rangeFrom=now-15m&rangeTo=now&source=mobile'
+    );
+  });
+
+  it('shows only the mobile table with the Mobile source', async () => {
+    mockSourceFilter('mobile');
+    respondWith([app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 }), mobileApp()]);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+    expect(screen.queryByTestId('digitalExperienceApplicationsTable')).toBeNull();
+    expect(screen.queryByText('web-app')).toBeNull();
+  });
 });
 
 describe('ApplicationsListPage', () => {
@@ -466,7 +507,7 @@ describe('ApplicationsListPage', () => {
     expect(screen.getByTestId('digitalExperienceSummary-sessions')).toHaveTextContent('—');
   });
 
-  it('ignores a source in the URL where the source filter is not shown', async () => {
+  it('ignores a Classic RUM source in the URL on serverless, which has no Classic RUM data', async () => {
     mockSourceFilter('classic');
     respondWith([app({ serviceName: 'shop', source: 'otel' })]);
     renderPage({ isServerless: true });
@@ -584,12 +625,15 @@ describe('ApplicationsListPage', () => {
     expect(setSourceFilter).toHaveBeenCalledWith('otel');
   });
 
-  it('has no source filter on serverless, which has no Classic RUM data', async () => {
+  it('leaves Classic RUM out of the source filter on serverless, which has no Classic RUM data', async () => {
     respondWith([app({ source: 'otel' })]);
     renderPage({ isServerless: true });
     await screen.findByTestId('digitalExperienceApplicationLink');
 
-    expect(SourceFilter).not.toHaveBeenCalled();
+    expect(SourceFilter).toHaveBeenLastCalledWith(
+      expect.objectContaining({ hasClassicSource: false }),
+      expect.anything()
+    );
   });
 
   it('searches the names, and says when nothing matches', async () => {

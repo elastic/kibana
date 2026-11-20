@@ -13,6 +13,7 @@ import type { ApplicationSource } from '../../common/types/applications';
 export const applicationSourceRt = t.union([
   t.literal(APPLICATION_SOURCE.otel),
   t.literal(APPLICATION_SOURCE.classic),
+  t.literal(APPLICATION_SOURCE.mobile),
 ]);
 
 export const DEFAULT_APPLICATION_SOURCE: ApplicationSource = APPLICATION_SOURCE.classic;
