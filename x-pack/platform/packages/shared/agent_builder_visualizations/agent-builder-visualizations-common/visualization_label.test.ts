@@ -104,13 +104,15 @@ describe('getVisualizationLabel', () => {
     );
   });
 
-  it('puts the query on one line and truncates it at a character boundary', () => {
-    const label = getVisualizationLabel(
-      lens({ type: 'mystery' }, `FROM logs\n| WHERE message == "${'😀'.repeat(60)}"`)
-    );
-    expect(Array.from(label ?? '')).toHaveLength(50);
-    expect(label).toMatch(/^FROM logs \| WHERE message == "(😀)+…$/u);
-  });
+  it.each([['😀'], ['🇵🇱'], ['e\u0301']])(
+    'puts the query on one line and truncates it at a grapheme boundary for %s',
+    (grapheme) => {
+      const label = getVisualizationLabel(
+        lens({ type: 'mystery' }, `FROM logs\n| WHERE message == "${grapheme.repeat(60)}"`)
+      );
+      expect(label).toBe(`FROM logs | WHERE message == "${grapheme.repeat(19)}…`);
+    }
+  );
 
   it('returns undefined for untitled static custom content', () => {
     expect(

@@ -79,7 +79,7 @@ const getQueryLabel = (data: VisualizationAttachmentData): string | undefined =>
   if (!singleLine) {
     return undefined;
   }
-  const characters = Array.from(singleLine);
+  const characters = Array.from(new Intl.Segmenter().segment(singleLine), ({ segment }) => segment);
   return characters.length > MAX_QUERY_LABEL_LENGTH
     ? `${characters
         .slice(0, MAX_QUERY_LABEL_LENGTH - 1)
