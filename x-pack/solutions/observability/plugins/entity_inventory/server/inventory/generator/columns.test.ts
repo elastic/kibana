@@ -188,4 +188,106 @@ describe('planColumnNames', () => {
       ],
     ]);
   });
+
+  it('omits rate metrics from KEEP under FROM while keeping them under TS', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...k8sNodeFixture,
+      dynamic: {
+        sources: [
+          {
+            indexPattern: 'metrics-host.network-*',
+            metrics: [
+              { name: 'cpu', field: 'system.cpu.pct', agg: 'last' },
+              { name: 'network_bytes', field: 'host.network.bytes', agg: 'sum_rate' },
+            ],
+          },
+        ],
+      },
+    };
+    const plans = planSources(definition, probeAllAs(definition, true));
+    const columns = buildColumns(definition, plans, resolveIdentityPlan(definition));
+    const [tsPlan, fromPlan] = plans;
+
+    expect(planColumnNames(columns, tsPlan)).toEqual([
+      'entity.id',
+      'kubernetes.node.name',
+      'cpu',
+      'network_bytes',
+      'last_seen',
+    ]);
+    expect(planColumnNames(columns, fromPlan)).toEqual([
+      'entity.id',
+      'kubernetes.node.name',
+      'cpu',
+      'last_seen',
+    ]);
+  });
+});
+
+describe('buildColumns with metrics', () => {
+  it('records metric columns with kind, agg, and unit', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...k8sNodeFixture,
+      dynamic: {
+        sources: [
+          {
+            indexPattern: 'metrics-*',
+            metrics: [
+              { name: 'cpu', field: 'system.cpu.pct', agg: 'last', unit: 'percent' },
+            ],
+          },
+        ],
+      },
+    };
+    expect(columnsOf(definition).filter(({ kind }) => kind === 'metric')).toEqual([
+      {
+        name: 'cpu',
+        kind: 'metric',
+        fieldByPlan: { 0: 'system.cpu.pct' },
+        agg: 'last',
+        unit: 'percent',
+      },
+    ]);
+  });
+
+  it('throws when a metric name collides with an attribute', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...k8sNodeFixture,
+      dynamic: {
+        sources: [
+          {
+            indexPattern: 'metrics-a-*',
+            attributes: [{ name: 'cpu', field: 'host.os.name' }],
+            metrics: [{ name: 'cpu', field: 'system.cpu.pct', agg: 'last' }],
+          },
+        ],
+      },
+    };
+    expect(() => columnsOf(definition)).toThrow(InventoryDefinitionError);
+    expect(() => columnsOf(definition)).toThrow(
+      'metric name "cpu" collides with an attribute of definition "k8s.node"'
+    );
+  });
+
+  it('throws when the same metric name disagrees on agg or unit across plans', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...k8sNodeFixture,
+      dynamic: {
+        sources: [
+          {
+            indexPattern: 'metrics-a-*',
+            metrics: [{ name: 'cpu', field: 'system.cpu.pct', agg: 'last', unit: 'percent' }],
+          },
+          {
+            indexPattern: 'metrics-b-*',
+            metrics: [{ name: 'cpu', field: 'host.cpu.pct', agg: 'avg', unit: 'percent' }],
+          },
+        ],
+      },
+    };
+    expect(() => columnsOf(definition)).toThrow(InventoryDefinitionError);
+    expect(() => columnsOf(definition)).toThrow(
+      'metric "cpu" must keep the same agg and unit across plans of definition "k8s.node"'
+    );
+  });
 });

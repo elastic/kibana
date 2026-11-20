@@ -11,6 +11,7 @@ import {
   isCountMetricAgg,
   isRateMetricAgg,
   listMetricsUnsupportedOnEngine,
+  listSkippedMetricsOnPlan,
   overTimeInnerAgg,
 } from './utils';
 
@@ -94,5 +95,39 @@ describe('overTimeInnerAgg', () => {
     ['SUM', '`bytes`', 'SUM(SUM_OVER_TIME(`bytes`))'],
   ] as const)('builds %s(%s_OVER_TIME(field))', (agg, field, expected) => {
     expect(overTimeInnerAgg(agg, field)).toBe(expected);
+  });
+});
+
+describe('listSkippedMetricsOnPlan', () => {
+  const planBase = {
+    indexPattern: 'metrics-host.network-*',
+    metrics: [
+      metric('last', 'cpu'),
+      metric('sum_rate', 'bytes_in'),
+      metric('avg_rate', 'bytes_out'),
+    ],
+  };
+
+  it('returns the stable A3 shape for rates under FROM', () => {
+    expect(listSkippedMetricsOnPlan({ ...planBase, engine: 'FROM' })).toEqual([
+      {
+        indexPattern: 'metrics-host.network-*',
+        engine: 'FROM',
+        column: 'bytes_in',
+        field: 'field.bytes_in',
+        agg: 'sum_rate',
+      },
+      {
+        indexPattern: 'metrics-host.network-*',
+        engine: 'FROM',
+        column: 'bytes_out',
+        field: 'field.bytes_out',
+        agg: 'avg_rate',
+      },
+    ]);
+  });
+
+  it('returns no skipped metrics under TS', () => {
+    expect(listSkippedMetricsOnPlan({ ...planBase, engine: 'TS' })).toEqual([]);
   });
 });

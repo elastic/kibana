@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { DynamicAttribute, DynamicMetric } from '@kbn/entity-store/common';
+import type {
+  DynamicAttribute,
+  DynamicMetric,
+  DynamicMetricAgg,
+} from '@kbn/entity-store/common';
 import type { NamedParams, QueryEngine } from '../../../common';
 
 /** What the probe found behind one source's pattern. */
@@ -45,6 +49,19 @@ export interface TimeWindow {
 export interface GeneratedQuery {
   esql: string;
   params: NamedParams;
+}
+
+/**
+ * A metric the generator skipped for a plan because the engine cannot compute it (rates under
+ * `FROM`). Stable shape for A3 to surface without re-deriving engine rules.
+ */
+export interface SkippedMetricOnPlan {
+  indexPattern: string;
+  engine: QueryEngine;
+  /** Output column name (= metric `name`). */
+  column: string;
+  field: string;
+  agg: DynamicMetricAgg;
 }
 
 /** The most plans a definition may expand to, since each plan is a concurrent query. */

@@ -7,6 +7,7 @@
 
 import type { DynamicMetric, DynamicMetricAgg } from '@kbn/entity-store/common';
 import type { QueryEngine } from '../../../../common';
+import type { QueryPlan, SkippedMetricOnPlan } from '../types';
 
 const COUNT_AGGS: ReadonlySet<DynamicMetricAgg> = new Set(['count', 'count_distinct']);
 const RATE_AGGS: ReadonlySet<DynamicMetricAgg> = new Set([
@@ -31,6 +32,17 @@ export const listMetricsUnsupportedOnEngine = (
   metrics: readonly DynamicMetric[],
   engine: QueryEngine
 ): DynamicMetric[] => metrics.filter(({ agg }) => !canEngineComputeMetricAgg(engine, agg));
+
+export const listSkippedMetricsOnPlan = (
+  plan: Pick<QueryPlan, 'indexPattern' | 'engine' | 'metrics'>
+): SkippedMetricOnPlan[] =>
+  listMetricsUnsupportedOnEngine(plan.metrics, plan.engine).map(({ name, field, agg }) => ({
+    indexPattern: plan.indexPattern,
+    engine: plan.engine,
+    column: name,
+    field,
+    agg,
+  }));
 
 /** ES|QL over-time form used under `TS`: `AGG(AGG_OVER_TIME(field))`. */
 export const overTimeInnerAgg = (agg: 'AVG' | 'MIN' | 'MAX' | 'SUM', field: string): string =>
