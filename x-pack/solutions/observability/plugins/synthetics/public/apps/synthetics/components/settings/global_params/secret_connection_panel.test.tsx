@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { SecretConnectionPanel } from './secret_connection_panel';
+
+// Every case mounts the whole panel and most wait out the 400 ms preview debounce in real time.
+jest.setTimeout(20_000);
 
 const mockGet = jest.fn();
 const mockPut = jest.fn();
@@ -53,6 +56,17 @@ const openEditFlyout = async () => {
   await screen.findByTestId('syntheticsSecretConnectionFlyout');
 };
 
+// The typed text lives in the top-level panel: pasting costs one flyout render, typing one per character.
+const pasteHost = async (value: string) => {
+  await userEvent.click(hostsInput());
+  await userEvent.paste(value);
+};
+
+const addHost = async (value: string) => {
+  await pasteHost(value);
+  await userEvent.keyboard('{enter}');
+};
+
 describe('SecretConnectionPanel allowed monitor hosts', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -65,7 +79,7 @@ describe('SecretConnectionPanel allowed monitor hosts', () => {
   it('does not save while the host being entered is invalid, and keeps it visible', async () => {
     await openEditFlyout();
 
-    await userEvent.type(hostsInput(), 'https://api.example.com{enter}');
+    await addHost('https://api.example.com');
 
     expect(await screen.findByText(INVALID_HOST_ERROR)).toBeInTheDocument();
     expect(hostsInput()).toHaveValue('https://api.example.com');
@@ -79,7 +93,7 @@ describe('SecretConnectionPanel allowed monitor hosts', () => {
   it('saves a valid host that was typed but not confirmed with Enter', async () => {
     await openEditFlyout();
 
-    await userEvent.type(hostsInput(), 'API.Example.com');
+    await pasteHost('API.Example.com');
     await userEvent.click(screen.getByTestId('syntheticsVaultSaveConnection'));
 
     await waitFor(() => expect(mockPut).toHaveBeenCalledTimes(1));
@@ -89,7 +103,7 @@ describe('SecretConnectionPanel allowed monitor hosts', () => {
 
   it('does not carry a host error over to the next flyout', async () => {
     await openEditFlyout();
-    await userEvent.type(hostsInput(), 'https://api.example.com{enter}');
+    await addHost('https://api.example.com');
     expect(await screen.findByText(INVALID_HOST_ERROR)).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
@@ -125,7 +139,7 @@ describe('SecretConnectionPanel allowed monitor hosts', () => {
       });
       await openEditFlyout();
 
-      await userEvent.type(hostsInput(), 'api.example.com{enter}');
+      await addHost('api.example.com');
 
       const callout = await screen.findByTestId('syntheticsVaultAffectedMonitorsCallout');
       expect(callout).toHaveTextContent('3 monitors will report down');
@@ -142,7 +156,7 @@ describe('SecretConnectionPanel allowed monitor hosts', () => {
       mockPreview.mockResolvedValue({ monitors: [{ name: 'checkout', reason: 'host' }], total: 1 });
       await openEditFlyout();
 
-      await userEvent.type(hostsInput(), 'API.example.com');
+      await pasteHost('API.example.com');
 
       const callout = await screen.findByTestId('syntheticsVaultAffectedMonitorsCallout');
       expect(callout).toHaveTextContent('checkout (other host)');
@@ -154,10 +168,10 @@ describe('SecretConnectionPanel allowed monitor hosts', () => {
 
     it('adds the typed host to the confirmed ones, once', async () => {
       await openEditFlyout();
-      await userEvent.type(hostsInput(), 'a.example.com{enter}');
+      await addHost('a.example.com');
       await waitFor(() => expect(mockPreview).toHaveBeenCalled());
 
-      await userEvent.type(hostsInput(), 'b.example.com');
+      await pasteHost('b.example.com');
       await waitFor(() =>
         expect(mockPreview).toHaveBeenLastCalledWith({
           name: 'prod',
@@ -168,19 +182,25 @@ describe('SecretConnectionPanel allowed monitor hosts', () => {
 
     it('does not ask for text that is not a host yet', async () => {
       await openEditFlyout();
+      // Typed character by character on purpose: each half-typed host must stay unasked for.
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      try {
+        await user.type(hostsInput(), 'https://api');
+        await user.clear(hostsInput());
+        await user.type(hostsInput(), '2001:db8:');
 
-      await userEvent.type(hostsInput(), 'https://api');
-      await userEvent.clear(hostsInput());
-      await userEvent.type(hostsInput(), '2001:db8:');
-
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      expect(mockPreview).not.toHaveBeenCalled();
+        act(() => jest.advanceTimersByTime(600));
+        expect(mockPreview).not.toHaveBeenCalled();
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('says when no existing monitor is affected', async () => {
       await openEditFlyout();
 
-      await userEvent.type(hostsInput(), 'api.example.com{enter}');
+      await addHost('api.example.com');
 
       expect(await screen.findByTestId('syntheticsVaultAffectedMonitorsNone')).toBeInTheDocument();
       expect(
@@ -192,7 +212,7 @@ describe('SecretConnectionPanel allowed monitor hosts', () => {
       mockPreview.mockRejectedValue(new Error('boom'));
       await openEditFlyout();
 
-      await userEvent.type(hostsInput(), 'api.example.com{enter}');
+      await addHost('api.example.com');
 
       expect(
         await screen.findByTestId('syntheticsVaultAffectedMonitorsFailed')
