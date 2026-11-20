@@ -6,7 +6,11 @@
  */
 
 import type { KibanaRole } from '@kbn/scout-security';
-import { getEndpointSecurityPolicyManagerArtifactRole } from '../../../../../scripts/endpoint/common/roles_users';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
+import {
+  getEndpointSecurityPolicyManager,
+  getEndpointSecurityPolicyManagerArtifactRole,
+} from '../../../../../scripts/endpoint/common/roles_users';
 
 const toKibanaRole = (
   role: ReturnType<typeof getEndpointSecurityPolicyManagerArtifactRole>
@@ -29,3 +33,27 @@ const toKibanaRole = (
 
 export const getArtifactRole = (privilegePrefix: string, access: 'read' | 'none'): KibanaRole =>
   toKibanaRole(getEndpointSecurityPolicyManagerArtifactRole(privilegePrefix, access));
+
+/** Policy manager with write on the artifact type but without `global_artifact_management_all`. */
+export const getArtifactWriteRoleWithoutGlobalManagement = (
+  privilegePrefix: string
+): KibanaRole => {
+  const role = toKibanaRole(getEndpointSecurityPolicyManager());
+  const [entry] = role.kibana;
+  const featureId =
+    Object.keys(entry.feature).find((feature) => feature.startsWith('siem')) ?? SECURITY_FEATURE_ID;
+  const siemPrivileges = entry.feature[featureId].filter(
+    (privilege) =>
+      privilege !== 'global_artifact_management_all' && privilege !== `${privilegePrefix}all`
+  );
+
+  return {
+    ...role,
+    kibana: [
+      {
+        ...entry,
+        feature: { ...entry.feature, [featureId]: [...siemPrivileges, `${privilegePrefix}all`] },
+      },
+    ],
+  };
+};

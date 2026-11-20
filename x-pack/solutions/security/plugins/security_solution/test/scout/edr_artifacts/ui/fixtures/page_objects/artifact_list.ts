@@ -67,6 +67,10 @@ export class ArtifactListPage {
     return this.page.testSubj.locator(`${pagePrefix}-card-description`);
   }
 
+  cardEffectScope(pagePrefix: string): Locator {
+    return this.page.testSubj.locator(`${pagePrefix}-card-subHeader-effectScope-value`);
+  }
+
   cardActionsButton(pagePrefix: string): Locator {
     return this.page.testSubj.locator(`${pagePrefix}-card-header-actions-button`);
   }

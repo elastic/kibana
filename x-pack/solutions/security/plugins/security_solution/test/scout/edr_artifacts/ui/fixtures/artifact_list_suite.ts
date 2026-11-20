@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '.';
 import type { ArtifactTabCase } from './artifact_tabs_test_data';
-import { getArtifactRole } from './roles';
+import { getArtifactRole, getArtifactWriteRoleWithoutGlobalManagement } from './roles';
 
 export const ARTIFACT_LIST_PAGE_TAGS = [
   ...tags.stateful.classic,
@@ -29,6 +29,13 @@ export const ARTIFACT_LIST_PAGE_LOCAL_TAGS = ARTIFACT_LIST_PAGE_TAGS.filter((tag
 const STATEFUL_ONLY_REASON =
   'There is no serverless role that can read artifacts without write privilege';
 
+// Create + edit + delete after a role login. Precautionary, not measured
+// flake; the shorter policy-tab ALL path uses 90s.
+const WRITE_FLOW_TIMEOUT_MS = 120_000;
+
+const NARROW_WRITE_STATEFUL_ONLY_REASON =
+  'The Cypress original checked the write role without global artifact management on ESS only';
+
 /**
  * Administration list-page RBAC for one artifact type. Call from the same
  * spec file that already owns that agnostic list id so WRITE create cannot
@@ -45,7 +52,7 @@ const STATEFUL_ONLY_REASON =
  */
 export const describeArtifactListPage = (
   artifact: ArtifactTabCase,
-  options?: { tag?: string[] }
+  options?: { tag?: string[]; writeWithoutGlobalArtifactManagement?: boolean }
 ): void => {
   const { pagePrefix } = artifact;
   const editedName = `${artifact.artifactName} edited`;
@@ -136,9 +143,7 @@ export const describeArtifactListPage = (
       spaceTest(
         `WRITE user can create, update, and delete`,
         async ({ browserAuth, pageObjects }) => {
-          // Create + edit + delete after a role login. Precautionary, not
-          // measured flake; the shorter policy-tab ALL path uses 90s.
-          spaceTest.setTimeout(120_000);
+          spaceTest.setTimeout(WRITE_FLOW_TIMEOUT_MS);
 
           await browserAuth.loginAsEndpointPolicyManager();
           await pageObjects.artifactListPage.goto(artifact.urlPath);
@@ -188,6 +193,62 @@ export const describeArtifactListPage = (
           });
         }
       );
+
+      if (options?.writeWithoutGlobalArtifactManagement) {
+        spaceTest(
+          `WRITE user without global artifact management can create, update, and delete`,
+          async ({ browserAuth, pageObjects, config }) => {
+            spaceTest.skip(Boolean(config.serverless), NARROW_WRITE_STATEFUL_ONLY_REASON);
+            spaceTest.setTimeout(WRITE_FLOW_TIMEOUT_MS);
+
+            await browserAuth.loginWithCustomRole(
+              getArtifactWriteRoleWithoutGlobalManagement(artifact.privilegePrefix)
+            );
+            await pageObjects.artifactListPage.goto(artifact.urlPath);
+            await pageObjects.artifactListPage.waitForEmpty(pagePrefix);
+            await expect(
+              pageObjects.artifactListPage.emptyStateAddButton(pagePrefix)
+            ).toBeVisible();
+
+            await spaceTest.step('create from the empty state', async () => {
+              await pageObjects.artifactListPage.openCreateFromEmpty(pagePrefix);
+              await pageObjects.policyArtifactsPage.fillCreateForm(artifact.kind);
+              await pageObjects.artifactListPage.submitFlyout(pagePrefix);
+              await expect(pageObjects.artifactListPage.cardTitle(pagePrefix)).toContainText(
+                artifact.artifactName
+              );
+              // Without global artifact management the form defaults to per-policy.
+              await expect(pageObjects.artifactListPage.cardEffectScope(pagePrefix)).toHaveText(
+                'Applied to 0 policies'
+              );
+              await pageObjects.toasts.dismissAll();
+            });
+
+            await spaceTest.step('update name and description', async () => {
+              await pageObjects.artifactListPage.openEdit(pagePrefix);
+              await pageObjects.policyArtifactsPage.fillNameAndDescription(
+                artifact.kind,
+                editedName,
+                editedDescription
+              );
+              await pageObjects.artifactListPage.submitFlyout(pagePrefix);
+              await expect(pageObjects.artifactListPage.cardTitle(pagePrefix)).toContainText(
+                editedName
+              );
+              await expect(pageObjects.artifactListPage.cardDescription(pagePrefix)).toHaveText(
+                editedDescription
+              );
+              await pageObjects.toasts.dismissAll();
+            });
+
+            await spaceTest.step('delete the artifact', async () => {
+              await pageObjects.artifactListPage.deleteArtifact(pagePrefix);
+              await expect(pageObjects.artifactListPage.card(pagePrefix)).toHaveCount(0);
+              await expect(pageObjects.artifactListPage.emptyState(pagePrefix)).toBeVisible();
+            });
+          }
+        );
+      }
 
       const { updateCriteria } = artifact;
       if (updateCriteria) {
