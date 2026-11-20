@@ -15,24 +15,24 @@ import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { timeoutSignal } from '@kbn/std';
 import { getCodeOwnersEntries, getOwningTeamsForPath } from '@kbn/code-owners';
-import type { DriftReportEntry } from '../src/test/vendor_api/detect_drift';
-import { detectDrift } from '../src/test/vendor_api/detect_drift';
+import type { DriftReportEntry } from '../src/test/vendor_api/drift/detect_drift';
+import { detectDrift } from '../src/test/vendor_api/drift/detect_drift';
 import {
   findConnector,
   findVendorApiDirectory,
   listConnectors,
 } from '../src/test/vendor_api/find_connector';
-import { createGhIssueTracker } from '../src/test/vendor_api/gh_issue_tracker';
-import { inspectVendorApi } from '../src/test/vendor_api/inspect_vendor_api';
+import { createGhIssueTracker } from '../src/test/vendor_api/drift/gh_issue_tracker';
+import { inspectVendorApi } from '../src/test/vendor_api/inspect/inspect_vendor_api';
 import type { MarkdownSourceFormat, ProtocolFormat } from '../src/test/vendor_api/manifest';
 import {
   markdownSourceFormatSchema,
   protocolSourceFormatSchema,
   SOURCE_NAME_PATTERN,
 } from '../src/test/vendor_api/manifest';
-import { createSpecCache } from '../src/test/vendor_api/spec_cache';
-import { surfaceDrift } from '../src/test/vendor_api/surface_drift';
-import { updateVendorApi } from '../src/test/vendor_api/update_vendor_api';
+import { createSpecCache } from '../src/test/vendor_api/spec/spec_cache';
+import { surfaceDrift } from '../src/test/vendor_api/drift/surface_drift';
+import { updateVendorApi } from '../src/test/vendor_api/record/update_vendor_api';
 
 const SPEC_CACHE = path.join(REPO_ROOT, 'data', 'connector_vendor_api');
 const DRIFT_REPORT = path.join(REPO_ROOT, 'target', 'connector_vendor_api', 'drift.json');
@@ -162,7 +162,15 @@ run(
       for (const { connector, directory } of connectors) {
         try {
           // Uncached, so the vendor's latest spec is compared.
-          const drift = await detectDrift({ connector, directory, fetchText, now, log });
+          const drift = await detectDrift({
+            connector,
+            directory,
+            fetchText,
+            now,
+            log,
+            // The connector's folder, for links in its issue
+            folder: path.relative(REPO_ROOT, path.dirname(directory)),
+          });
           log.info(`${drift.connector}: ${drift.outcome} (${drift.verdict})`);
           report.push(drift);
         } catch (error) {

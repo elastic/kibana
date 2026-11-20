@@ -39,17 +39,17 @@ const renderRulesTab = (props: TestProps) => {
   };
 };
 
-const getRuleNames = () =>
+// `hidden: true` skips the computed-visibility filter, which dominates these polled reads.
+const getRows = () =>
   within(screen.getByTestId('searchBoostRulesTable'))
-    .getAllByRole('row')
-    .slice(1)
-    .map((row) => within(row).getAllByRole('cell')[0].textContent);
+    .getAllByRole('row', { hidden: true })
+    .slice(1);
 
-const getPriorities = () =>
-  within(screen.getByTestId('searchBoostRulesTable'))
-    .getAllByRole('row')
-    .slice(1)
-    .map((row) => Number(within(row).getAllByRole('cell')[3].textContent));
+const getCells = (row: HTMLElement) => within(row).getAllByRole('cell', { hidden: true });
+
+const getRuleNames = () => getRows().map((row) => getCells(row)[0].textContent);
+
+const getPriorities = () => getRows().map((row) => Number(getCells(row)[3].textContent));
 
 const waitForCount = (text: string) =>
   waitFor(() => expect(screen.getByTestId('searchBoostRulesCount')).toHaveTextContent(text));

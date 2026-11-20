@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HUNT_COVERAGE_AI_INDEX_DEST } from '../../../../../common/step_types/package_report';
+import { KNOWLEDGE_INDICATOR_AI_INDEX_DEST } from '../../../../../common/ai_indices';
 import { buildCoverageSubject } from './coverage_ki_id';
 import type { CoverageSubject, CoverageWriteResult } from './types';
 
@@ -61,7 +61,7 @@ export const createCoverageWriter = ({
   /** Already bound to this run's request by the caller; see the step's own dependency. */
   isContextEngineEnabled: () => Promise<boolean>;
 }): ((subjects: CoverageSubject[]) => Promise<CoverageWriteResult>) => {
-  const { value: backingIndex } = HUNT_COVERAGE_AI_INDEX_DEST;
+  const { value: backingIndex } = KNOWLEDGE_INDICATOR_AI_INDEX_DEST;
 
   return async (subjects) => {
     const written: CoverageWriteResult['written'] = [];
