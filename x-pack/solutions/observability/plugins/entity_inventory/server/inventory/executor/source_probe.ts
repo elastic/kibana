@@ -11,8 +11,6 @@ import type { GeneratedQuery } from '../generator';
 import { isVerificationError, toSourceError } from './errors/source_error';
 import { executeEsql } from './esql_client';
 import type { EsqlQueryResult, EsqlStats } from './esql_client';
-import { settleTimed } from './settle_timed';
-import type { TimedOutcome } from './settle_timed';
 
 // The only question the executor asks Elasticsearch before the list queries. On purpose it makes
 // no metadata calls (no resolve-index, `_has_privileges` or field capabilities) and never learns a
@@ -42,9 +40,8 @@ type ProbeOutcome =
   | { failed: false; hasTimeSeries: boolean }
   | { failed: true; status: number | null; reason: string };
 
-/** How the probe query ran: its wall time and stats. */
+/** How the probe query ran: its stats. */
 export interface ProbeExecution {
-  wallMs: number;
   /** Null when the probe threw. */
   stats: EsqlStats | null;
   /** Null when the probe threw. */
@@ -78,12 +75,12 @@ const fromError = (pattern: string, error: unknown): ProbeOutcome => {
   return { failed: true, status, reason };
 };
 
-const toExecution = ({ outcome, wallMs }: TimedOutcome<EsqlQueryResult>): ProbeExecution => {
+const toExecution = (outcome: PromiseSettledResult<EsqlQueryResult>): ProbeExecution => {
   if (outcome.status === 'rejected') {
-    return { wallMs, stats: null, isPartial: null };
+    return { stats: null, isPartial: null };
   }
   const { stats, isPartial } = outcome.value;
-  return { wallMs, stats, isPartial };
+  return { stats, isPartial };
 };
 
 /**
@@ -99,13 +96,12 @@ export const probeSources = async (
   // Build every probe before sending any, so a pattern that throws cannot leave earlier requests
   // in flight with no rejection handler.
   const probes = unique.map((pattern) => buildProbeQuery(pattern));
-  const settled = await Promise.all(
-    probes.map((probe) => settleTimed(() => executeEsql(client, probe, { signal })))
+  const settled = await Promise.allSettled(
+    probes.map((probe) => executeEsql(client, probe, { signal }))
   );
   return new Map(
     unique.map((pattern, position): [string, ProbeResult] => {
-      const timed = settled[position];
-      const { outcome } = timed;
+      const outcome = settled[position];
       return [
         pattern,
         {
@@ -113,7 +109,7 @@ export const probeSources = async (
             ? fromResponse(outcome.value)
             : fromError(pattern, outcome.reason)),
           query: probes[position],
-          execution: toExecution(timed),
+          execution: toExecution(outcome),
         },
       ];
     })

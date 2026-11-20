@@ -27,7 +27,6 @@ const probeResponse = (type?: string) => ({
 
 // How a probe ran when Elasticsearch answered without execution metadata, or threw.
 const answered = {
-  wallMs: expect.any(Number),
   stats: {
     took: null,
     documentsFound: null,
@@ -42,7 +41,6 @@ const answered = {
   isPartial: false,
 };
 const threw = {
-  wallMs: expect.any(Number),
   stats: null,
   isPartial: null,
 };
@@ -227,30 +225,21 @@ describe('probeSources', () => {
     );
   });
 
-  it('times each probe from its sending to its settling', async () => {
-    jest.useFakeTimers();
-    try {
-      const client = setup(async (query) => {
-        jest.advanceTimersByTime(patternOf(query) === 'logs-*' ? 30 : 10);
-        if (patternOf(query) === 'logs-*') {
-          throw responseError(503, 'unavailable_shards_exception', 'no shard available');
-        }
-        return { ...probeResponse('date'), took: 7, is_partial: true };
-      });
+  it('keeps the stats and partial flag of each probe that answered', async () => {
+    const client = setup(async (query) => {
+      if (patternOf(query) === 'logs-*') {
+        throw responseError(503, 'unavailable_shards_exception', 'no shard available');
+      }
+      return { ...probeResponse('date'), took: 7, is_partial: true };
+    });
 
-      const results = await probeSources(client, ['metrics-*', 'logs-*']);
+    const results = await probeSources(client, ['metrics-*', 'logs-*']);
 
-      // The mock advances the fake clock synchronously as each probe is sent, so the first probe's
-      // wall time also includes the second's 30ms. An artefact of the mock, not production behaviour.
-      expect(results.get('metrics-*')?.execution).toMatchObject({
-        wallMs: 40,
-        stats: { took: 7 },
-        isPartial: true,
-      });
-      expect(results.get('logs-*')?.execution).toMatchObject({ wallMs: 30, stats: null });
-    } finally {
-      jest.useRealTimers();
-    }
+    expect(results.get('metrics-*')?.execution).toMatchObject({
+      stats: { took: 7 },
+      isPartial: true,
+    });
+    expect(results.get('logs-*')?.execution).toMatchObject({ stats: null, isPartial: null });
   });
 
   it('passes the abort signal to every probe', async () => {

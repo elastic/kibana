@@ -45,7 +45,6 @@ export const NO_TIME_SERIES_PROBE: ListProbeDiagnostic = {
   esql: 'TS logs-app | LIMIT 1',
   params: [],
   outcome: 'no_time_series',
-  wallMs: 2.5,
   ...NO_STATS,
 };
 
@@ -56,7 +55,6 @@ export const PROBES_FIXTURE: ListProbeDiagnostic[] = [
     esql: 'TS metrics-* | LIMIT 1',
     params: [],
     outcome: 'time_series',
-    wallMs: 4.25,
     took: 3,
   },
   {
@@ -64,7 +62,6 @@ export const PROBES_FIXTURE: ListProbeDiagnostic[] = [
     esql: 'TS traces-* | LIMIT 1',
     params: [],
     outcome: 'failed',
-    wallMs: 1.5,
     ...NO_STATS,
   },
   NO_TIME_SERIES_PROBE,
@@ -78,7 +75,6 @@ export const QUERIES_FIXTURE: ListQueryDiagnostic[] = [
     esql: 'TS metrics-* | STATS BY host.name',
     params: [{ from: '2026-11-19T10:00:00.000Z' }],
     rowCount: 120,
-    wallMs: 41.5,
     took: 38,
   },
   {
@@ -87,7 +83,6 @@ export const QUERIES_FIXTURE: ListQueryDiagnostic[] = [
     esql: 'FROM logs-* | STATS BY host.name',
     params: [],
     rowCount: 0,
-    wallMs: 12.75,
     took: null,
     documentsFound: null,
     valuesLoaded: null,

@@ -17,8 +17,6 @@ export {
 } from './output';
 export { probeSources } from './source_probe';
 export type { ProbeExecution, ProbeResult } from './source_probe';
-export { settleTimed } from './settle_timed';
-export type { TimedOutcome } from './settle_timed';
 export { interpretPlanResult } from './plan_result';
 export type { PlanAvailability } from './plan_result';
 export type { MergeResult, PlanResult } from './types';

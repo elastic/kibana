@@ -756,7 +756,6 @@ describe('InventoryService.list diagnostics', () => {
       shards: null,
       isPartial: false,
       rowCount: 1,
-      wallMs: expect.any(Number),
     });
   });
 
@@ -821,7 +820,7 @@ describe('InventoryService.list diagnostics', () => {
     expect(response.timings.totalMs).toBe(400);
   });
 
-  it('splits the call into phases and times each probe and plan query', async () => {
+  it('splits the call into phases', async () => {
     jest.useFakeTimers({ now: new Date('2026-11-01T12:00:00.000Z') });
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     // Each request advances the clock as it is sent; requests of one phase are sent together.
@@ -836,7 +835,7 @@ describe('InventoryService.list diagnostics', () => {
         : esqlResponse(OTEL_COLUMNS, []);
     });
 
-    const { timings, queries, probes } = await service.list({
+    const { timings } = await service.list({
       type: 'k8s.deployment',
       window: WINDOW,
       limit: 10,
@@ -850,14 +849,6 @@ describe('InventoryService.list diagnostics', () => {
       processingMs: 0,
       totalMs: 330,
     });
-    expect(probes.map(({ indexPattern, wallMs }) => ({ indexPattern, wallMs }))).toEqual([
-      { indexPattern: STATE_PATTERN, wallMs: 30 },
-      { indexPattern: OTEL_PATTERN, wallMs: 20 },
-    ]);
-    expect(queries.map(({ indexPattern, wallMs }) => ({ indexPattern, wallMs }))).toEqual([
-      { indexPattern: STATE_PATTERN, wallMs: 300 },
-      { indexPattern: OTEL_PATTERN, wallMs: 200 },
-    ]);
   });
 
   it('lists every probe with its outcome, text and stats', async () => {
@@ -888,7 +879,6 @@ describe('InventoryService.list diagnostics', () => {
       esql: sentProbes[1],
       params: expect.any(Array),
       outcome: 'no_time_series',
-      wallMs: expect.any(Number),
       took: 1,
       documentsFound: 0,
       valuesLoaded: null,

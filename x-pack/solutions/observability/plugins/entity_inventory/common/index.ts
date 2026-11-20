@@ -113,8 +113,6 @@ export interface ListQueryDiagnostic extends QueryExecutionStats {
   esql: string;
   params: NamedParams;
   rowCount: number;
-  /** Time from sending the query to its settling, in fractional milliseconds, measured by Kibana. */
-  wallMs: number;
 }
 
 /**
@@ -129,8 +127,6 @@ export interface ListProbeDiagnostic extends QueryExecutionStats {
   esql: string;
   params: NamedParams;
   outcome: ProbeOutcomeKind;
-  /** Time from sending the probe to its settling, in fractional milliseconds, measured by Kibana. */
-  wallMs: number;
 }
 
 /**

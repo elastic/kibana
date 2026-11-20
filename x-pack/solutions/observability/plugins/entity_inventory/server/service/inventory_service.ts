@@ -33,18 +33,11 @@ import {
   orderRows,
   planRowLimit,
   probeSources,
-  settleTimed,
   summarizeResults,
   toEsqlRequestBody,
   toSourceError,
 } from '../inventory/executor';
-import type {
-  EsqlQueryResult,
-  EsqlStats,
-  PlanResult,
-  ProbeResult,
-  TimedOutcome,
-} from '../inventory/executor';
+import type { EsqlQueryResult, EsqlStats, PlanResult, ProbeResult } from '../inventory/executor';
 import {
   buildColumns,
   ENTITY_ID_COLUMN,
@@ -128,9 +121,9 @@ const toExecutionStats = (stats: EsqlStats | null): ExecutionStats => {
 const toQueryDiagnostic = (
   { indexPattern, engine }: QueryPlan,
   { esql, params }: GeneratedQuery,
-  { outcome, wallMs }: TimedOutcome<EsqlQueryResult>
+  outcome: PromiseSettledResult<EsqlQueryResult>
 ): ListQueryDiagnostic => {
-  const base = { indexPattern, engine, esql, params, wallMs };
+  const base = { indexPattern, engine, esql, params };
   if (outcome.status === 'rejected') {
     return { ...base, ...NO_EXECUTION_STATS, rowCount: 0, isPartial: null };
   }
@@ -148,14 +141,13 @@ const toProbeOutcome = (probe: ProbeResult): ListProbeDiagnostic['outcome'] => {
 const toProbeDiagnostic = (indexPattern: string, probe: ProbeResult): ListProbeDiagnostic => {
   const {
     query: { esql, params },
-    execution: { wallMs, stats, isPartial },
+    execution: { stats, isPartial },
   } = probe;
   return {
     indexPattern,
     esql,
     params,
     outcome: toProbeOutcome(probe),
-    wallMs,
     ...toExecutionStats(stats),
     isPartial,
   };
@@ -225,11 +217,10 @@ export class InventoryService {
     const plannedAtMs = performance.now();
 
     // Settled, not raced: one failing source must not hide the rows of the others.
-    const timedOutcomes = await Promise.all(
-      queries.map((query) => settleTimed(() => executeEsql(this.esClient, query, { signal })))
+    const outcomes = await Promise.allSettled(
+      queries.map((query) => executeEsql(this.esClient, query, { signal }))
     );
     const queriedAtMs = performance.now();
-    const outcomes = timedOutcomes.map(({ outcome }) => outcome);
 
     const errors: SourceError[] = [...probeErrors];
     const unavailableColumns: UnavailableColumn[] = [];
@@ -272,8 +263,8 @@ export class InventoryService {
       rows,
       provenance: restrictProvenance(merged.provenance, rows),
       truncated,
-      queries: timedOutcomes.map((timed, planIndex) =>
-        toQueryDiagnostic(plans[planIndex], queries[planIndex], timed)
+      queries: outcomes.map((outcome, planIndex) =>
+        toQueryDiagnostic(plans[planIndex], queries[planIndex], outcome)
       ),
       probes: [...probes].map(([indexPattern, probe]) => toProbeDiagnostic(indexPattern, probe)),
       timings: {
