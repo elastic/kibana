@@ -530,9 +530,11 @@ export class ActionsPlugin
       inMemoryConnectors: this.inMemoryConnectors,
       getConnectorEventEmitter: () => this.connectorEventEmitter,
     });
-    registerConnectorEventTopics((topic) => {
-      core.pubsub.registerTopic(topic);
-    });
+    if (actionsConfigUtils.isInboundEventsEnabled()) {
+      registerConnectorEventTopics((topic) => {
+        core.pubsub.registerTopic(topic);
+      });
+    }
     defineRoutes({
       getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',
       router,

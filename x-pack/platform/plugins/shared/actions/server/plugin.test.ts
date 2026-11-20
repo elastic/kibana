@@ -39,6 +39,7 @@ import {
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../common';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import { slack2HitlAction } from '@kbn/connector-topics';
 import { getConnectorType } from './fixtures';
 import {
   CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
@@ -46,6 +47,7 @@ import {
 } from './constants/saved_objects';
 import { LeasePool } from './lib';
 import { defaultInboundEventsLimitConfigs } from './config';
+import { registerConnectorEventTopics } from './inbound/register_connector_event_topics';
 
 function getConfig(overrides = {}) {
   return {
@@ -222,6 +224,36 @@ describe('Actions Plugin', () => {
       expect(() => setupContract.registerConnectorEventEmitter({ emit: jest.fn() })).toThrow(
         /only one emitter is supported/
       );
+    });
+
+    it('does not register connector event topics while inbound events are disabled', async () => {
+      await plugin.setup(coreSetup, pluginsSetup);
+
+      expect(coreSetup.pubsub.registerTopic).not.toHaveBeenCalled();
+    });
+
+    it('registers connector event topics when inbound events are enabled', async () => {
+      const enabledPlugin = new ActionsPlugin(
+        coreMock.createPluginInitializerContext<ActionsConfig>(
+          getConfig({
+            inboundEvents: {
+              enabled: true,
+              maxBodyBytes: new ByteSizeValue(1024 * 1024),
+              maxEmitted: 25,
+              ...defaultInboundEventsLimitConfigs,
+            },
+          })
+        )
+      );
+      const topics = registerConnectorEventTopics(jest.fn());
+
+      await enabledPlugin.setup(coreSetup, pluginsSetup);
+
+      const registeredNames = coreSetup.pubsub.registerTopic.mock.calls.map(
+        ([topic]) => topic.name
+      );
+      expect(registeredNames).toEqual([...topics.keys()]);
+      expect(registeredNames).not.toContain(slack2HitlAction.name);
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {
