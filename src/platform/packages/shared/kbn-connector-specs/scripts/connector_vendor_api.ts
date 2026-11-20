@@ -15,20 +15,24 @@ import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { timeoutSignal } from '@kbn/std';
 import { getCodeOwnersEntries, getOwningTeamsForPath } from '@kbn/code-owners';
-import type { DriftReportEntry } from '../src/test/vendor_api/detect_drift';
-import { detectDrift } from '../src/test/vendor_api/detect_drift';
+import type { DriftReportEntry } from '../src/test/vendor_api/drift/detect_drift';
+import { detectDrift } from '../src/test/vendor_api/drift/detect_drift';
 import {
   findConnector,
   findVendorApiDirectory,
   listConnectors,
 } from '../src/test/vendor_api/find_connector';
-import { createGhIssueTracker } from '../src/test/vendor_api/gh_issue_tracker';
-import { inspectVendorApi } from '../src/test/vendor_api/inspect_vendor_api';
-import type { MarkdownSourceFormat } from '../src/test/vendor_api/manifest';
-import { markdownSourceFormatSchema, SOURCE_NAME_PATTERN } from '../src/test/vendor_api/manifest';
-import { createSpecCache } from '../src/test/vendor_api/spec_cache';
-import { surfaceDrift } from '../src/test/vendor_api/surface_drift';
-import { updateVendorApi } from '../src/test/vendor_api/update_vendor_api';
+import { createGhIssueTracker } from '../src/test/vendor_api/drift/gh_issue_tracker';
+import { inspectVendorApi } from '../src/test/vendor_api/inspect/inspect_vendor_api';
+import type { MarkdownSourceFormat, ProtocolFormat } from '../src/test/vendor_api/manifest';
+import {
+  markdownSourceFormatSchema,
+  protocolSourceFormatSchema,
+  SOURCE_NAME_PATTERN,
+} from '../src/test/vendor_api/manifest';
+import { createSpecCache } from '../src/test/vendor_api/spec/spec_cache';
+import { surfaceDrift } from '../src/test/vendor_api/drift/surface_drift';
+import { updateVendorApi } from '../src/test/vendor_api/record/update_vendor_api';
 
 const SPEC_CACHE = path.join(REPO_ROOT, 'data', 'connector_vendor_api');
 const DRIFT_REPORT = path.join(REPO_ROOT, 'target', 'connector_vendor_api', 'drift.json');
@@ -50,25 +54,25 @@ const parseNamed = (option: string, flag: string, value: string): [string, strin
   return [name, flag.slice(separator + 1)];
 };
 
-const parseFormat = (flag: string): [string, MarkdownSourceFormat] => {
+const parseFormat = (flag: string): [string, MarkdownSourceFormat | ProtocolFormat] => {
   const [name, format] = parseNamed('format', flag, 'format');
-  const parsed = markdownSourceFormatSchema.safeParse(format);
+  const options = [...markdownSourceFormatSchema.options, ...protocolSourceFormatSchema.options];
+  const parsed = markdownSourceFormatSchema.or(protocolSourceFormatSchema).safeParse(format);
   if (!parsed.success) {
-    throw createFlagError(
-      `--format takes ${markdownSourceFormatSchema.options.join(' or ')}, got "${format}"`
-    );
+    throw createFlagError(`--format takes ${options.join(', ')}, got "${format}"`);
   }
   return [name, parsed.data];
 };
 
-// Repeated `--pages name=prefix` flags add up to one list per source.
-const groupPages = (flags: readonly string[]): Record<string, string[]> => {
-  const pages: Record<string, string[]> = {};
+// Repeated `--pages name=prefix`, `--endpoint name=url` and `--tool name=url` flags add up to one
+// list per source.
+const groupByName = (option: string, value: string, flags: readonly string[]) => {
+  const groups: Record<string, string[]> = {};
   for (const flag of flags) {
-    const [name, prefix] = parseNamed('pages', flag, 'prefix');
-    pages[name] = [...(pages[name] ?? []), prefix];
+    const [name, item] = parseNamed(option, flag, value);
+    groups[name] = [...(groups[name] ?? []), item];
   }
-  return pages;
+  return groups;
 };
 
 const writeJson = async (file: string, value: unknown): Promise<void> => {
@@ -99,7 +103,18 @@ run(
     const formats = Object.fromEntries(
       (flagsReader.arrayOfStrings('format') ?? []).map(parseFormat)
     );
-    const pages = groupPages(flagsReader.arrayOfStrings('pages') ?? []);
+    const pages = groupByName('pages', 'prefix', flagsReader.arrayOfStrings('pages') ?? []);
+    const endpoints = groupByName('endpoint', 'url', flagsReader.arrayOfStrings('endpoint') ?? []);
+    const tools = groupByName('tool', 'url', flagsReader.arrayOfStrings('tool') ?? []);
+    const captureFiles = Object.fromEntries(
+      (flagsReader.arrayOfStrings('capture') ?? []).map((flag) =>
+        parseNamed('capture', flag, 'file')
+      )
+    );
+    const notes = Object.fromEntries(
+      (flagsReader.arrayOfStrings('note') ?? []).map((flag) => parseNamed('note', flag, 'text'))
+    );
+    const captureFlagsGiven = Object.keys(captureFiles).length + Object.keys(notes).length > 0;
     const now = () => new Date();
     const cache = createSpecCache({ directory: SPEC_CACHE, fetchText, refresh, now, log });
 
@@ -145,8 +160,19 @@ run(
     }
 
     if (flagsReader.boolean('drift')) {
-      if (check || refresh || flagsReader.boolean('inspect') || Object.keys(sources).length > 0) {
-        throw createFlagError('--drift always fetches the latest specs and writes no artifacts');
+      const sourceFlagsGiven = [sources, formats, pages, endpoints, tools].some(
+        (flags) => Object.keys(flags).length > 0
+      );
+      if (
+        check ||
+        refresh ||
+        flagsReader.boolean('inspect') ||
+        sourceFlagsGiven ||
+        captureFlagsGiven
+      ) {
+        throw createFlagError(
+          '--drift always fetches the latest specs of the manifest sources and writes no artifacts'
+        );
       }
       const driftedId = flagsReader.string('connector');
       const connectors = driftedId
@@ -158,7 +184,15 @@ run(
       for (const { connector, directory } of connectors) {
         try {
           // Uncached, so the vendor's latest spec is compared.
-          const drift = await detectDrift({ connector, directory, fetchText, now, log });
+          const drift = await detectDrift({
+            connector,
+            directory,
+            fetchText,
+            now,
+            log,
+            // The connector's folder, for links in its issue
+            folder: path.relative(REPO_ROOT, path.dirname(directory)),
+          });
           log.info(`${drift.connector}: ${drift.outcome} (${drift.verdict})`);
           report.push(drift);
         } catch (error) {
@@ -176,6 +210,11 @@ run(
     if (flagsReader.boolean('inspect')) {
       if (check) {
         throw createFlagError('--inspect checks nothing; leave out --check');
+      }
+      if (captureFlagsGiven) {
+        throw createFlagError(
+          '--inspect skips captured sources and writes no snapshots; record with --capture and --note instead'
+        );
       }
       const inspectedId = flagsReader.string('connector');
       const directory = inspectedId ? await findVendorApiDirectory(inspectedId) : undefined;
@@ -205,6 +244,22 @@ run(
     }
 
     const id = flagsReader.requiredString('connector');
+    if (check && captureFlagsGiven) {
+      throw createFlagError('--check writes nothing, so it takes no --capture or --note');
+    }
+    const captures = Object.fromEntries(
+      await Promise.all(
+        Object.entries(captureFiles).map(async ([name, file]) => {
+          try {
+            return [name, await fs.readFile(path.resolve(file), 'utf8')] as const;
+          } catch (error) {
+            throw createFlagError(
+              `--capture ${name}=${file}: ${error instanceof Error ? error.message : String(error)}`
+            );
+          }
+        })
+      )
+    );
     const { connector, directory } = await findConnector(id);
     if (Object.keys(sources).length === 0 && !existsSync(path.join(directory, 'manifest.json'))) {
       throw createFlagError(
@@ -217,6 +272,10 @@ run(
       sources,
       formats,
       pages,
+      endpoints,
+      tools,
+      captures,
+      notes,
       refresh,
       check,
       fetchText: cache.fetchText,
@@ -262,6 +321,10 @@ run(
         'source',
         'format',
         'pages',
+        'endpoint',
+        'tool',
+        'capture',
+        'note',
         'operation',
         'grep',
         'depth',
@@ -275,9 +338,20 @@ run(
                      or --drift)
         --source     name=url of a vendor spec to add or move; repeatable. Loads every source.
         --format     name=format of a source that is a Markdown API reference, whose url is its
-                     llms.txt index: databricks-markdown or brave-markdown. Kept in manifest.json.
+                     llms.txt index: databricks-markdown or brave-markdown. Or graphql, whose url
+                     serves SDL or an introspection result, or mcp, whose url serves a tools/list
+                     result. Kept in manifest.json.
+        --endpoint   name=url the connector calls for a graphql or mcp source; repeatable. Kept in
+                     manifest.json.
         --pages      name=prefix of the reference pages to fetch, absolute or relative to the
                      index, such as an API group's folder; repeatable. Kept in manifest.json.
+        --tool       name=url of one tool document of an mcp source, absolute or relative to its
+                     url, for a vendor that publishes a document per tool rather than a tools/list
+                     result; repeatable. Kept in manifest.json.
+        --capture    name=file of a document the source's url only serves with credentials, fetched
+                     by hand. Records against it, replaces the source's snapshot and marks the
+                     source captured, so it is never fetched; needs a note
+        --note       name=text of the source's note in manifest.json, such as what capturing it took
         --refresh    Fetch every source URL again, instead of using the specs fetched before
         --check     Write nothing; fail if artifacts would change or problems are found
         --inspect    List the operations of the --source specs, or of the connector's manifest

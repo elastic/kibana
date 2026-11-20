@@ -22,7 +22,7 @@ import { fromMetricAPItoLensState } from '../../../columns/metric';
 import { getValueColumn } from '../../../columns/esql_column';
 import { addLayerColumn, generateLayer } from '../../../utils';
 import { fromBucketLensApiToLensState } from '../../../columns/buckets';
-import { getAccessorName, inferDatatypeFromColor } from '../helpers';
+import { getAccessorName, inferColumnDatatype } from '../helpers';
 import {
   METRIC_ACCESSOR_PREFIX,
   ROW_ACCESSOR_PREFIX,
@@ -43,7 +43,7 @@ export function buildFormBasedLayer(
 
   // First, convert ALL metrics and collect them with their IDs
   const metricsConverted = config.metrics.map(
-    (metric) => fromMetricAPItoLensState(metric, inferDatatypeFromColor(metric.color, 'number')) // Infer datatype from color config for last_value operations
+    (metric) => fromMetricAPItoLensState(metric, inferColumnDatatype(metric, 'number')) // Infer datatype from color config for last_value operations
   );
   const { metricColumns, referencesColumns } = processMetricColumnsWithReferences(
     metricsConverted,
@@ -91,14 +91,14 @@ export function getValueColumns(config: DatatableConfigESQL) {
       getValueColumn(
         getAccessorName(ROW_ACCESSOR_PREFIX, index),
         row,
-        inferDatatypeFromColor(row.color, 'string')
+        inferColumnDatatype(row, 'string')
       )
     ),
     ...(config.metrics ?? []).map((metric, index) =>
       getValueColumn(
         getAccessorName(METRIC_ACCESSOR_PREFIX, index),
         metric,
-        inferDatatypeFromColor(metric.color, 'number'),
+        inferColumnDatatype(metric, 'number'),
         true
       )
     ),

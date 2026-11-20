@@ -282,6 +282,7 @@
     {
       "id": "entity-analytics-v2",
       "name": "Security Entity Analytics V2",
+      "slackChannel": "#security-entity-analytics-alerts",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.v2.config.ts",
       "tags": [
         "security",

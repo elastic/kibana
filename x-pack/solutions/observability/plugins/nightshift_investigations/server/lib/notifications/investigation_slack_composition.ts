@@ -102,6 +102,8 @@ interface Finding {
   label: string;
   lead: string;
   detail: string;
+  /** Kept whole after the detail is cut, so a long detail cannot drop it. */
+  tail?: string;
 }
 
 const findingsOf = ({ summary, verdict, impact }: NotifiableInvestigation): Finding[] => {
@@ -115,7 +117,8 @@ const findingsOf = ({ summary, verdict, impact }: NotifiableInvestigation): Find
       ? {
           label: 'Impact',
           lead: impacted.lead,
-          detail: [impacted.rest, affected].filter(Boolean).join('\n\n'),
+          detail: impacted.rest,
+          tail: affected,
         }
       : affected
       ? { label: 'Impact', lead: affected, detail: '' }
@@ -156,7 +159,7 @@ const leadNodes = (findings: Finding[]): ComponentsNode[] =>
     );
 
 const RESULT_SECTION =
-  /\*\*Result:?\*\*:?\s*([\s\S]*?)(?=\s+\*\*[Tt]ested:?\*\*:?|\n\s*\*\*[A-Z][a-z]+(?::\*\*|\*\*:)|$)/i;
+  /\*\*Result:?\*\*:?\s*([\s\S]*?)(?=\s+\*\*[Tt]ested:?\*\*:?|\n\s*\*\*[A-Z][a-z]+(?: [a-z]+)*(?::\*\*|\*\*:)|$)/i;
 const TESTED_SECTION = /\*\*Tested:?\*\*:?[^\n]*(?:\n|$)/gi;
 
 const hypothesisDetail = (reason: string): string => {
@@ -193,15 +196,44 @@ const hypothesesNodes = (
   return [markdown(serializeMarkdown([md.paragraph(md.strong('Hypotheses')), ...items]))];
 };
 
+const proposalsNodes = (
+  recommendations: NonNullable<NotifiableInvestigation['recommendations']>
+): ComponentsNode[] => {
+  if (recommendations.length === 0) {
+    return [];
+  }
+  const items = recommendations.map(({ title, impact, confidence }) => {
+    const levels = [
+      impact && `${capitalize(impact)} impact`,
+      confidence && `${capitalize(confidence)} confidence`,
+    ].filter(Boolean);
+    return md.paragraph(
+      md.strong(clampSlackText(oneLine(title), MAX_CANDIDATE_LENGTH)),
+      ...(levels.length > 0 ? [' ', md.emphasis(`(${levels.join(' · ')})`)] : [])
+    );
+  });
+  return [
+    markdown(
+      serializeMarkdown([
+        md.paragraph(md.strong('Proposed actions')),
+        md.list(items, { ordered: true }),
+      ])
+    ),
+  ];
+};
+
 const detailsSection = (
   findings: Finding[],
-  hypotheses: NotifiableInvestigation['hypotheses']
+  hypotheses: NotifiableInvestigation['hypotheses'],
+  recommendations: NotifiableInvestigation['recommendations']
 ): ComponentsNode[] => {
   const groups: ComponentsNode[][] = [
     ...findings
-      .filter(({ detail }) => detail)
-      .map(({ label, detail }) => {
-        const text = truncateAtSentence(detail, MAX_DETAIL_LENGTH);
+      .filter(({ detail, tail }) => detail || tail)
+      .map(({ label, detail, tail }) => {
+        const text = [truncateAtSentence(detail, MAX_DETAIL_LENGTH), tail]
+          .filter(Boolean)
+          .join('\n\n');
         return [
           markdown(
             serializeMarkdown([
@@ -212,6 +244,7 @@ const detailsSection = (
         ];
       }),
     hypothesesNodes(hypotheses ?? []),
+    proposalsNodes(recommendations ?? []),
   ].filter((group) => group.length > 0);
   return groups.length > 0
     ? [
@@ -293,7 +326,7 @@ export const buildInvestigationSlackComposition = ({
       automation
     ),
     ...leadNodes(findings),
-    ...detailsSection(findings, investigation.hypotheses),
+    ...detailsSection(findings, investigation.hypotheses, investigation.recommendations),
     openInvestigation(url),
   ];
 };

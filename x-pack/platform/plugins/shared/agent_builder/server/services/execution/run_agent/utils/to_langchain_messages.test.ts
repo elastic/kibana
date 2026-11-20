@@ -42,6 +42,7 @@ import type { ProcessedConversation } from './prepare_conversation';
 import { attachmentTypeInstructions } from '../prompts/utils/attachments';
 import {
   T0,
+  T1,
   abortedExec0Timeline,
   attachmentEventFixture,
   completedRoundTimeline,
@@ -51,6 +52,8 @@ import {
   pausedRoundTimeline,
   pausedThenInterruptedResumeTimeline,
   processedCustomEventFixture,
+  terminatedExecutionEvents,
+  userMessageEvent,
   roundsOfTimeline,
   timelineFromRounds,
   type ProcessedConversationRound,
@@ -1444,6 +1447,33 @@ describe('prepareMessages', () => {
       expect(String(messages[0].content)).toContain('note');
       expect(String(messages[0].content).match(/<conversation_event /g)).toHaveLength(1);
     });
+
+    it('renders a steer its run never read as earlier context, not a user turn', async () => {
+      const unread = {
+        id: 'steer-1',
+        type: TimelineEventType.userMessage,
+        created_at: T0,
+        actor: { type: 'user', id: 'u', username: 'sid' },
+        data: makeRoundInput('use a table'),
+        unread_steer: true,
+      } as unknown as ProcessedTimelineEvent;
+      const messages = await prepareMessages({
+        conversation: {
+          timeline: [unread],
+          nextInput: makeRoundInput('next'),
+          attachmentTypes: [],
+          attachmentStateManager: createAttachmentStateManager([], {
+            getTypeDefinition: () => undefined,
+          }),
+        } as ProcessedConversation,
+      });
+      expect(messages).toHaveLength(2);
+      const content = String(messages[0].content);
+      expect(content).toContain('<system_notice>');
+      expect(content).toContain('ended before reading it');
+      expect(content).toContain('<user_message>use a table</user_message>');
+      expect(String(messages[1].content)).toBe('next');
+    });
   });
 
   describe('background execution notices (from round steps)', () => {
@@ -1529,6 +1559,63 @@ describe('prepareMessages', () => {
         (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
       );
       expect(noticeMessages).toHaveLength(0);
+    });
+  });
+
+  describe('dynamic tool definitions after compaction', () => {
+    const compactionSummary: CompactionSummary = {
+      summarized_round_count: 1,
+      created_at: '2024-01-01T00:00:00.000Z',
+      token_count: 100,
+      structured_data: {
+        discussion_summary: 'User loaded a skill.',
+        user_intent: 'Use the skill',
+        key_topics: [],
+        outcomes_and_decisions: [],
+        agent_actions: [],
+        entities: [],
+        unanswered_questions: [],
+        tool_calls_summary: [],
+      },
+    };
+    const definition = {
+      tool_id: 'platform.core.cases',
+      description: 'Search cases',
+      parameters: { type: 'object' as const },
+    };
+
+    it('re-injects the definitions right after the summary', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput: makeRoundInput('follow-up') }),
+        compactionSummary,
+        dynamicToolDefinitions: [definition],
+      });
+
+      // compaction user + compaction assistant + definitions notice + nextInput user
+      expect(result).toHaveLength(4);
+      expect(isHumanMessage(result[2])).toBe(true);
+      expect(result[2].content).toContain('<dynamic_tools>');
+      expect(result[2].content).toContain(JSON.stringify(definition));
+    });
+
+    it('renders no notice when there are no definitions', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput: makeRoundInput('follow-up') }),
+        compactionSummary,
+        dynamicToolDefinitions: [],
+      });
+
+      expect(result).toHaveLength(3);
+      expect(result.some((msg) => String(msg.content).includes('<dynamic_tools>'))).toBe(false);
+    });
+
+    it('renders no notice without a compaction summary', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput: makeRoundInput('follow-up') }),
+        dynamicToolDefinitions: [definition],
+      });
+
+      expect(result.some((msg) => String(msg.content).includes('<dynamic_tools>'))).toBe(false);
     });
   });
 });
@@ -1913,6 +2000,38 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
       expect(types.at(-2)).toBe('human');
       expect(String(messages.at(-2)?.content)).toContain('<system_notice>');
       expect(String(messages.at(-1)?.content)).toContain('bye');
+    });
+
+    it('renders a steer read by an interrupted run with its text, in that round', async () => {
+      const delivered: ConversationRoundStep = {
+        type: ConversationRoundStepType.deliveredMessage,
+        event_id: 'read',
+        author: { type: 'user', id: 'u1' },
+        is_run_owner: true,
+        message: 'text of read',
+        delivered_at: T0,
+        cycle: 1,
+      } as ConversationRoundStep;
+      const events: TimelineEvent[] = [
+        ...failedExec0Timeline('r1', [delivered], T0),
+        userMessageEvent('r2', T1),
+        ...terminatedExecutionEvents({
+          roundId: 'r2',
+          createdAt: T1,
+          steps: [],
+          outcome: { type: 'responded', response: { message: 'done' } },
+        }),
+      ];
+
+      const messages = await prepareMessages({
+        conversation: conversationOf(processedTimeline(events)),
+      });
+
+      const contents = messages.map((message) => String(message.content));
+      expect(contents.filter((content) => content.includes('text of read'))).toHaveLength(1);
+      expect(contents.findIndex((content) => content.includes('text of read'))).toBeLessThan(
+        contents.findIndex((content) => content.includes('done'))
+      );
     });
 
     it('end to end: a confirmation-blocked call + prompt_response + failed setup-window resume renders the call as interrupted', async () => {

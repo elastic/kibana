@@ -8,7 +8,8 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/core-security-server';
 import type {
-  AiIndexHttpItem,
+  AiIndexItem,
+  AiIndexReadScope,
   DescribeAiIndexResponse,
   QueryAiIndicesRequest,
   QueryAiIndicesResponse,
@@ -24,13 +25,13 @@ import type { AiIndexService } from './service';
 export interface AiIndexDataReadServiceApi {
   query(request: QueryAiIndicesRequest): Promise<QueryAiIndicesResponse>;
   /** Throws `AiIndexNotFoundError` for an unknown id, `AiIndexNotReadableError` when the caller cannot read the backing index. */
-  describe(id: string): Promise<DescribeAiIndexResponse>;
+  describe(id: string, scope?: AiIndexReadScope): Promise<DescribeAiIndexResponse>;
   /**
    * The AI Indices registered in this space whose backing index the caller can read. An empty
    * backing index still counts. Left out when the caller cannot read it, or when the check itself
    * failed. `ids` limits which entries are checked.
    */
-  list(ids?: string[]): Promise<AiIndexHttpItem[]>;
+  list(ids?: string[]): Promise<AiIndexItem[]>;
 }
 
 export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
@@ -59,7 +60,7 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
   }
 
   /** Throws unless the caller can read the backing index. */
-  private async assertReadable(aiIndex: AiIndexHttpItem): Promise<void> {
+  private async assertReadable(aiIndex: AiIndexItem): Promise<void> {
     const { esClient, logger } = this.deps;
     const [{ failure }] = await probeAiIndices({ esClient, aiIndices: [aiIndex], logger });
     if (failure === undefined) {
@@ -71,7 +72,7 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
     throw new Error(`AI index '${aiIndex.id}' is not available: ${failure.reason}`);
   }
 
-  async describe(id: string): Promise<DescribeAiIndexResponse> {
+  async describe(id: string, { userId }: AiIndexReadScope = {}): Promise<DescribeAiIndexResponse> {
     const { esClient, spaceId, auditLogger, aiIndexService, isMemoryEnabled } = this.deps;
     try {
       const [aiIndex, includeMemory] = await Promise.all([
@@ -79,7 +80,13 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
         isMemoryEnabled(),
       ]);
       await this.assertReadable(aiIndex);
-      const response = await describeAiIndex({ esClient, aiIndex, spaceId, includeMemory });
+      const response = await describeAiIndex({
+        esClient,
+        aiIndex,
+        spaceId,
+        userId,
+        includeMemory,
+      });
       auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DESCRIBE, id }));
       return { response };
     } catch (error) {
@@ -88,7 +95,7 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
     }
   }
 
-  async list(ids?: string[]): Promise<AiIndexHttpItem[]> {
+  async list(ids?: string[]): Promise<AiIndexItem[]> {
     const { esClient, spaceId, auditLogger, aiIndexService, logger } = this.deps;
     try {
       const registry = await aiIndexService.list(spaceId);

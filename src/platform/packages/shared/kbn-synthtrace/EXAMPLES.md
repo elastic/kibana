@@ -13,6 +13,7 @@ This document contains all usage examples for `@kbn/synthtrace`. See the [README
   - [Combined Scenarios](#combined-scenarios)
   - [Specialized Scenarios](#specialized-scenarios)
   - [Digital Experience Scenarios](#digital-experience-scenarios)
+  - [Synthetics Scenarios](#synthetics-scenarios)
   - [SRE Incident Scenarios](#sre-incident-scenarios)
 - [Advanced Usage Examples](#advanced-usage-examples)
 
@@ -901,8 +902,10 @@ node scripts/synthtrace agent_config --live
 
 These scenarios generate browser and mobile Real User Monitoring data for Digital Experience. EDOT Browser data is OTel-native, as stored by the Elasticsearch exporter, with no APM enrichment:
 
-- `logs-generic.otel-default`: `browser.navigation`, `browser.navigation_timing`, `browser.resource_timing`, `browser.web_vital` (LCP, INP, CLS, FCP, TTFB), `browser.user_action.click` and `exception` events
-- `traces-generic.otel-default`: fetch/XHR `CLIENT` spans
+- `logs-browser.otel-default`: `browser.navigation`, `browser.navigation_timing`, `browser.resource_timing`, `browser.web_vital` (LCP, INP, CLS, FCP, TTFB), `browser.user_action.click`, `browser.frustration.*` and `exception` events
+- `traces-browser.otel-default`: fetch/XHR `CLIENT` spans
+
+EDOT Browser data has a dataset of its own, as proposed in elastic/observability-dev#6361, so that its index can be sorted by session. `digital_experience_browser` and `digital_experience_mixed` install the `synthtrace-logs-browser.otel` and `synthtrace-traces-browser.otel` index templates, built from the cluster's `logs-otel@template` and `traces-otel@template`, which sort them by `service.name`, `session.id` and `@timestamp` (latest first). In code and Scout tests, call `otelEsClient.installBrowserIndexTemplates()` for the same sort; without it, the data streams take the OTel templates' host and time sort. A data stream created before the templates keeps its sort until it rolls over. EDOT React Native data stays in `logs-generic.otel-default` and `traces-generic.otel-default`.
 
 Non-zero timings and web vital values always have a fractional part, so dynamic mapping types them as `float`. Like EDOT Browser, timings of phases that didn't happen are written as `0`.
 
@@ -916,8 +919,10 @@ The data is written through the `otelEsClient`, which indexes documents as-is. I
 - `includeRawAttribution` (boolean, default `false`): writes the web-vitals attribution as a JSON string body on `browser.web_vital` events, as the web-vitals instrumentation does when its experimental `includeRawAttribution` option is on.
 - `environments` (boolean, default `false`): spreads every app over its own environments, with their share of the traffic, instead of the single `Synthtrace: <scenario>` environment. See `digital_experience_browser` for the environments of each app. In `digital_experience_mixed`, the classic RUM app then runs in `production`.
 - `edgeCases` (boolean, default `false`): adds what is far from the usual to the browser apps, to see how the views cope with it: URLs of thousands of characters, stack traces of dozens of frames and one over 8,191 characters, errors with no type, with no stack trace and with an empty one, more than 100 distinct stack traces for one app, browsers that EDOT Browser can't identify, and clicks with no selector. The mobile apps of `digital_experience_mixed` don't have any.
+- `signedInRate` (number from 0 to 1, default each app's share, see `digital_experience_browser`): share of the browser sessions with a signed-in user in every app. With `withSessionId=false`, every session is anonymous.
+- `frustration` (boolean, default `true`): reports rage, dead and error clicks in the browser sessions, like EDOT Browser does by default. With `withSessionId=false`, there are none.
 - `scale` (number, default `1`): multiplies the number of sessions per minute of every app. Fractions of a session add up over time, so a scale below 1 thins out every app in proportion.
-- `seed` (string or number, default the start of the run, `--from` in milliseconds): makes the data reproducible. Every session, with its session, trace and span IDs, browser, page views and events, derives from the seed, its app and its number since the epoch, so the same seed generates the same sessions at the same times, however the time range is split into batches, workers or live batches. The scenarios log the seed they use. Without a seed, runs that start at a different time generate different data, while runs with the same absolute `--from` generate the same sessions. `digital_experience_mixed` generates the browser and mobile apps from the same default seed, so don't run it together with `digital_experience_browser` or `digital_experience_mobile` in one synthtrace invocation. Sessions are spread evenly over time. The classic RUM page loads of `digital_experience_mixed` take their timings from the seed too, but not their document IDs.
+- `seed` (string or number, default the start of the run, `--from` in milliseconds): makes the data reproducible. Every session, with its session, trace and span IDs, browser, page views and events, derives from the seed, its app and its number since the epoch, so the same seed generates the same sessions at the same times, however the time range is split into batches, workers or live batches. The scenarios log the seed they use. Without a seed, runs that start at a different time generate different data, while runs with the same absolute `--from` generate the same sessions. `digital_experience_mixed` generates the browser and mobile apps from the same default seed, so don't run it together with `digital_experience_browser`, `digital_experience_mobile` or `digital_experience_mobile_native` in one synthtrace invocation. Sessions are spread evenly over time. The classic RUM page loads of `digital_experience_mixed` take their timings from the seed too, but not their document IDs.
 
 #### `digital_experience_browser`
 
@@ -946,6 +951,10 @@ The data is shaped to fill the views of the Digital Experience application detai
 
 With session IDs, most sessions are a single visit in a new tab. About 15% are a second visit to a session that is still running, in the same tab or in another one. Another 15% come back after the previous session expired: the tab kept sending background requests with `browser.tab.id` but no `session.id`, and the new session points to the expired one with `session.previous_id`. Each session has one `session.start` log. Earlier visits can be up to an hour and a half before the end of their session, so at the start of a run, where data before `--from` is cut off, some sessions have no `session.start` and some `session.previous_id` values point to nothing.
 
+A share of the sessions has a signed-in user, written the way EDOT Browser's `setUser()` ([elastic-otel-rum-js#125](https://github.com/elastic/elastic-otel-rum-js/pull/125)) writes it on every log and span: `attributes.user.id`, `user.email` and `user.full_name` (some users have no email or name), and `elastic.user.account` in `support-center-web` and `docs-web`, the B2B apps. The share is 35% of the sessions of `storefront-web`, 80% of `checkout-web`, 20% of `media-portal-web`, 75% of `support-center-web` and 10% of `docs-web`. Users come back, a few of them for most of the sessions of an app, and about a fifth of the signed-in sessions start anonymous and sign in on their second page load. A tab keeps its user once its session expires, so the session that follows is signed in from the start.
+
+Clicks that show a user struggling are reported the way EDOT Browser's frustration detection ([elastic-otel-rum-js#191](https://github.com/elastic/elastic-otel-rum-js/pull/191)) reports them: `browser.frustration.rage_click`, `dead_click` and `error_click` logs with the clicked element's `browser.css_selector`, `browser.tag_name`, `browser.page.x` and `.y`, and `url.full`, timestamped with the first click. Rage clicks repeat a click 3 to 7 times, each within 300 ms of the previous one (the repeated clicks are `browser.user_action.click` logs too), and carry `browser.frustration.click_count`. Dead clicks fire no request. Error clicks are followed by an uncaught exception within a second, or by the failure of the request they fired, and carry its `exception.type` and `exception.message`. The worse the app's health, the more of them: a click turns into a rage click with a probability of 1% in a healthy app and 10% in a critical one, before its repeats are added, and a click that fires no request is dead with a probability of 2% and 12%.
+
 **Usage:**
 
 ```sh
@@ -955,13 +964,14 @@ node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scen
 node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts environments=true
 node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts edgeCases=true,scale=3
 node scripts/synthtrace digital_experience_browser --from=2026-10-16T12:00:00Z --to=2026-10-16T13:00:00Z --scenarioOpts seed=my-seed
+node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts signedInRate=1
 ```
 
 #### `digital_experience_mixed`
 
-Generates the `digital_experience_browser` and `digital_experience_mobile` apps plus a classic Elastic APM RUM (`rum-js`) app in `traces-apm.rum-default`. The mobile apps run on Android and iOS (`field-service-mobile` on Android only), with the `app.launch` and screen spans that some of them create themselves, so it doesn't take the `platform` and `withManualSpans` options of `digital_experience_mobile`. The classic app is named `storefront-web` like one of the OTel apps, so that lists that match classic and OTel apps by name can show them together. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics. Page loads end within the time range, so the first ones of a run may start a few seconds before `--from`.
+Generates the `digital_experience_browser`, `digital_experience_mobile` and `digital_experience_mobile_native` apps plus a classic Elastic APM RUM (`rum-js`) app in `traces-apm.rum-default`. The mobile apps run on Android and iOS (`field-service-mobile` and `trailmap-android` on Android only, `ride-ios` on iOS only), the React Native ones with the `app.launch` and screen spans that some of them create themselves, so it doesn't take the `platform` and `withManualSpans` options of the mobile scenarios. The classic app is named `storefront-web` like one of the OTel apps, so that lists that match classic and OTel apps by name can show them together. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics. Page loads end within the time range, so the first ones of a run may start a few seconds before `--from`.
 
-It already includes the browser and mobile apps, so don't run it together with `digital_experience_browser` or `digital_experience_mobile` in one synthtrace invocation: with the same `--from`, they share their default seed and index the same sessions twice.
+It already includes the browser and mobile apps, so don't run it together with `digital_experience_browser`, `digital_experience_mobile` or `digital_experience_mobile_native` in one synthtrace invocation: with the same `--from`, they share their default seed and index the same sessions twice.
 
 **Usage:**
 
@@ -976,7 +986,9 @@ Generates EDOT React Native data, as `@elastic/otel-react-native` records it thr
 - `traces-generic.otel-default`: HTTP `CLIENT` spans (OkHttp on Android, named `GET <host[:port]>`, or `GET REDACTED:REDACTED@<host[:port]>` for a URL with user info; URLSession on iOS, named `GET <host>`), iOS `<screen> - view appearing` spans, and the `app.launch` and screen spans that some apps create themselves with the bridge's `startSpan()` (`INTERNAL`, scope `@elastic/otel-react-native`)
 - `logs-generic.otel-default`: `app.crash`, `app.widget.click` and iOS `device.app.lifecycle` events, ERROR logs of the bridge's `emitLog()`, and the `exception` span events of failed HTTP requests
 
-Every span and log carries the `session.id` of its session, lowercase on Android and uppercase on iOS, and `network.connection.type`, except the `exception` span events: like the Elasticsearch exporter stores them, they only have the exception attributes and link to their request span through `trace_id` and `span_id`. The platforms differ like the SDKs do: EDOT Android writes HTTP errors as `error.type` and crashes when they happen, while EDOT iOS adds an `exception` span event to 4xx/5xx requests and reports crashes as `FATAL` on the next launch, with the time of the crash in `observed_timestamp` and an excerpt of the PLCrashReporter report as `exception.stacktrace`. A crash loses the spans still running, such as the screen span and pending requests, and what the SDK hadn't exported yet: spans of the last second on Android, spans and logs of up to the last 5 seconds on iOS. Neither SDK writes a React Native marker, a launch span or Android screen spans; tell mobile apps apart by `telemetry.sdk.name` (`android` or `iOS`).
+Every span and log carries the `session.id` of its session, lowercase on Android and uppercase on iOS, and `network.connection.type`, except the `exception` span events: like the Elasticsearch exporter stores them, they only have the exception attributes and link to their request span through `trace_id` and `span_id`. The platforms differ like the SDKs do: EDOT Android writes HTTP errors as `error.type` and crashes when they happen, while EDOT iOS adds an `exception` span event to 4xx/5xx requests and reports crashes as `FATAL` on the next launch, with the time of the crash in `observed_timestamp` and an excerpt of the PLCrashReporter report as `exception.stacktrace`. A crash loses the spans still running, such as the screen span and pending requests, and what the SDK hadn't exported yet: spans of the last second on Android, spans and logs of up to the last 5 seconds on iOS. Neither SDK writes a React Native marker, a launch span or Android screen spans; tell mobile apps apart by `telemetry.distro.name` (`elastic`) and `os.name` (`Android`, `iOS` or `iPadOS`). `os.type` can't tell the platforms apart: it is `linux` on Android and `darwin` on iOS.
+
+The `telemetry.*` resource attributes follow the format both SDKs are moving to, not the one EDOT Android 1.10.0 and EDOT iOS 2.3.0 emit: the upstream `telemetry.sdk.name` (`opentelemetry`) and SDK version, with `telemetry.distro.name` `elastic` and the EDOT version as `telemetry.distro.version`. Those releases still emit the legacy `telemetry.sdk.name` (`android` or `iOS`) with the EDOT version as `telemetry.sdk.version`, and no `telemetry.distro.name`, so a filter on `telemetry.distro.name` misses their data.
 
 | `service.name`              | Health   | Notes                                                                 |
 | --------------------------- | -------- | --------------------------------------------------------------------- |
@@ -1002,6 +1014,15 @@ Some sessions have a second visit: the user leaves the app and comes back within
 node scripts/synthtrace digital_experience_mobile --from=now-30m --to=now
 node scripts/synthtrace digital_experience_mobile --live --scenarioOpts platform=ios
 node scripts/synthtrace digital_experience_mobile --from=now-1h --to=now --scenarioOpts withManualSpans=false,seed=my-seed
+```
+
+#### `digital_experience_mobile_native`
+
+Generates EDOT Android and EDOT iOS data of three native apps (`trailmap-android` on Android only, `ride-ios` on iOS only, and `transit-companion` on both platforms) with the signal names proposed for the SDKs: `session.start`/`session.end`, `elastic.app.start`, `elastic.app.screen.load` spans, `app.screen.click`, ANR and hang logs (`elastic.error.kind`), handled `exception` events, crashes reported on the next launch, and backend SERVER spans. Each app has three versions, and the newest crashes more, starts slower and rolls out over the first hours of the run. Unlike the React Native scenarios, sessions start at their time, from `--from` on, and are written as they go, each document once the SDK would send it (a span once it ends, a crash once the next launch reports it): every session has its `session.start`, sessions are spread evenly over the run whatever their length, and those still running at `--to` are cut off there, `session.end` included. As with the SDKs, a crash can lose a screen load span whose requests were already exported, which then point to a parent that was never sent, and a backend SERVER span that had ended is written even when its client span was lost with the crash. Native iOS crash reports show crashes in the app's own code, with no Hermes frames. Backend SERVER spans share the app's configured environment. The apps' own logs, taps and spans have native scopes (the app ID, `co.elastic.otel.mobile.interactions`), not the React Native ones. Takes `platform`, `scale` and `seed`, as `digital_experience_mobile` does.
+
+```sh
+node scripts/synthtrace digital_experience_mobile_native --from=now-30m --to=now
+node scripts/synthtrace digital_experience_mobile_native --live --scenarioOpts platform=ios
 ```
 
 #### Smaller `digital_experience_mobile` scenarios
@@ -1030,6 +1051,102 @@ node scripts/synthtrace digital_experience_mobile_single_installation --from=now
 node scripts/synthtrace digital_experience_mobile_single_session --from=now-30m --to=now --scenarioOpts platform=ios,health=critical
 node scripts/synthtrace digital_experience_mobile_minimal_app --from=now-30m --to=now
 ```
+
+### Synthetics Scenarios
+
+These scenarios generate check results for Synthetics monitors, so that the Synthetics Overview, Monitors and monitor details pages have data to show.
+
+#### `synthetics_overview`
+
+Generates a mix of HTTP, TCP, ICMP and browser monitors on an existing private location: mostly healthy, plus flapping, always down, and recently failing monitors. HTTP checks carry a status code and response headers, and failed ones a response body. Browser checks are complete journeys with steps, and a failed check fails its second step.
+
+The scenario creates the monitor configurations through the Kibana API in `bootstrap`, and writes the matching check documents. The monitors carry the tag `synthtrace-synthetics_overview`. A re-run deletes the monitors with that tag and creates them again, with the same IDs. The documents of earlier runs stay in Elasticsearch.
+
+**Prerequisite: a private location.** The scenario does not create one, so create it first. It only needs a Fleet agent policy. No Elastic Agent has to run, because synthtrace writes the check documents itself.
+
+- In Kibana: create an agent policy in Fleet, then go to **Synthetics > Settings > Private locations > Add location** and select that policy.
+- Or, to also enroll a real agent, run `node x-pack/scripts/synthetics_private_location.js`. It needs Docker and a Fleet Server configuration in `kibana.yml`, described in the [package README](../../../../../x-pack/packages/kbn-synthetics-private-location/README.md).
+
+With one private location in the Kibana space, the scenario finds it itself. With several, it stops and lists them, because it does not choose for you. Pass the one to use as `privateLocationId` and `privateLocationLabel`, which you can read from:
+
+```sh
+curl -s -u elastic:changeme -H 'elastic-api-version: 2023-10-31' \
+  http://localhost:5601/api/synthetics/private_locations
+```
+
+**Options:**
+
+- `privateLocationId` (string, optional): ID of the private location. Give it together with `privateLocationLabel`, or leave both out.
+- `privateLocationLabel` (string, optional): label of the private location.
+- `monitors` (number, default `8`): number of monitors. Types and outcome patterns cycle through the same sequence.
+- `seed` (string, default `synthtrace`): makes the data reproducible.
+- `spaceId` (string, default `default`): Kibana space to create the monitors in. Monitor ids include the space, so the same scenario in another space creates its own monitors.
+- `deleteMonitorsOnExit` (boolean, default `false`): delete the monitors when the run ends. Reliable for historical runs only; see [Cleaning up](#synthetics-scenarios).
+
+**Usage:**
+
+The scenario calls the Kibana API, so pass `--kibana` when Kibana is not at the default address:
+
+```sh
+node scripts/synthtrace synthetics_overview --from=now-24h --to=now \
+  --target=http://elastic:changeme@localhost:9200 \
+  --kibana=http://elastic:changeme@localhost:5601
+
+node scripts/synthtrace synthetics_overview --live \
+  --target=http://elastic:changeme@localhost:9200 \
+  --kibana=http://elastic:changeme@localhost:5601
+```
+
+To choose the private location when there are several:
+
+```sh
+node scripts/synthtrace synthetics_overview --from=now-24h --to=now \
+  --target=http://elastic:changeme@localhost:9200 \
+  --kibana=http://elastic:changeme@localhost:5601 \
+  --scenarioOpts.privateLocationId=<id> \
+  --scenarioOpts.privateLocationLabel="<label>"
+```
+
+**Notes:**
+
+- Do not use `--clean`: it deletes every `synthetics-*` data stream, not only the data of this scenario.
+- Backfilled data does not appear in the "Last 10 test runs" table of the monitor Overview page. For a monitor younger than 30 days, the page starts its time range at the monitor's `created_at`, and the scenario creates the monitors when it runs, after the backfilled checks. The History page, the Overview and Monitors pages, and the charts show the data. To fill the table, run the scenario with `--live`: it recreates the monitors, and its checks are newer than their creation.
+- With `--from` and `--to`, a check is written at every schedule interval of each monitor (3 minutes for HTTP and TCP, 5 for ICMP, 10 for browser). With `--live`, it is written at the same interval, and the first one is a minute before the start of the run. Outcomes follow the monitor's pattern as the run goes on: flapping monitors keep changing status, and a monitor with a recent outage is down for the whole run.
+- Failed HTTP monitors show "Failed to run steps" instead of a steps list on their step pages. This is how Synthetics treats HTTP monitors.
+
+**Cleaning up:**
+
+The scenario leaves two things behind: the monitors in Kibana and the check documents in Elasticsearch. Both carry the tag `synthtrace-synthetics_overview`. The monitors of a run live in its Kibana space, and the check documents carry `meta.space_id`, so cleanup is limited to that space. The private location, its agent policy and any agent are not created by the scenario, and are not removed.
+
+Nothing is deleted unless you ask for it, so you can look at the data after a run. A new run replaces the monitors of the previous one (same IDs, no duplicates) but keeps the documents, which pile up until you delete them. If an Elastic Agent is enrolled in the agent policy of the private location, it runs the monitors for real, against their made-up targets, and its results mix with the generated ones.
+
+To have the monitors deleted automatically when a historical run (`--from` and `--to`) finishes, start it with `--scenarioOpts.deleteMonitorsOnExit=true`. Then only the documents are left to delete: skip to step 3. A live run only deletes them if it shuts down cleanly after Ctrl+C, which is not guaranteed (a second Ctrl+C, or a worker that does not stop in time, skips it). Don't rely on it for a live run.
+
+Otherwise, and after every live run, clean up in this order:
+
+1. Stop any live run, so that nothing is written after the documents are deleted.
+2. Delete the monitors with the API (this needs `jq`), unless the run did it when it ended. `SPACE` is the `spaceId` of the run (`default` when you did not set one). The default space has no path prefix; any other space is under `/s/$SPACE`:
+
+   ```sh
+   KBN=http://localhost:5601; AUTH=elastic:changeme; SPACE=default
+   PREFIX=; [ "$SPACE" = default ] || PREFIX=/s/$SPACE
+   IDS=$(curl -s -u "$AUTH" "$KBN$PREFIX/api/synthetics/monitors?tags=synthtrace-synthetics_overview&perPage=1000" \
+     -H 'elastic-api-version: 2023-10-31' | jq -c '{ids: [.monitors[] | (.config_id // .id)]}')
+   curl -s -u "$AUTH" -X POST "$KBN$PREFIX/api/synthetics/monitors/_bulk_delete" \
+     -H 'elastic-api-version: 2023-10-31' -H 'kbn-xsrf: true' \
+     -H 'Content-Type: application/json' -d "$IDS"
+   ```
+
+3. Delete the check documents of that space. The tag is the same in every space, so the query also filters on `meta.space_id`. `SPACE` is the `spaceId` of the run. The first line keeps a value you already set, and otherwise uses `default`, so this step works on its own when you skipped step 2. The response has the number of deleted documents:
+
+   ```sh
+   SPACE=${SPACE:-default}
+   curl -s -u elastic:changeme -X POST "http://localhost:9200/synthetics-*/_delete_by_query?refresh=true" \
+     -H 'Content-Type: application/json' \
+     -d "{\"query\":{\"bool\":{\"filter\":[{\"term\":{\"tags\":\"synthtrace-synthetics_overview\"}},{\"term\":{\"meta.space_id\":\"$SPACE\"}}]}}}"
+   ```
+
+To check the result, `GET <kibana>/api/synthetics/monitors?tags=synthtrace-synthetics_overview` in that space should report a `total` of `0`, and `POST <elasticsearch>/synthetics-*/_count` with the same query should return a `count` of `0`.
 
 ### SRE Incident Scenarios
 

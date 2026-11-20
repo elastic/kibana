@@ -10,7 +10,7 @@ import { parseDeclarativeConnectorSpec } from './parse_declarative_connector_spe
 import { DeclarativeConnectorSpecError } from './types';
 
 const minimalSpec = (requestYaml: string): string => `schemaVersion: 1
-id: .declarative-test
+id: .test
 version: 1.0.0
 metadata:
   displayName: Test
@@ -41,7 +41,7 @@ describe('parseDeclarativeConnectorSpec', () => {
   it('parses the AbuseIPDB catalog contract', () => {
     const parsed = parseDeclarativeConnectorSpec(loadFixture('abuseipdb-1.1.0.yaml'));
 
-    expect(parsed.id).toBe('.declarative-abuseipdb');
+    expect(parsed.id).toBe('.abuseipdb');
     expect(parsed.version).toBe('1.1.0');
     expect(Object.keys(parsed.actions).sort()).toEqual(['checkIp', 'reportIp']);
     expect(parsed.auth.types[0]).toEqual({
@@ -116,6 +116,38 @@ describe('parseDeclarativeConnectorSpec', () => {
       path: /ping`);
 
     expect(() => parseDeclarativeConnectorSpec(raw)).not.toThrow();
+  });
+
+  it('parses a raw Link response header mapping', () => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com/users
+      response:
+        outputKey: users
+        linkHeader:
+          outputKey: link`);
+
+    expect(parseDeclarativeConnectorSpec(raw).actions.ping.request.response).toEqual({
+      outputKey: 'users',
+      linkHeader: { outputKey: 'link' },
+    });
+  });
+
+  it.each(['retry', 'pagination'])('rejects removed request option %s', (option) => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com/users
+      ${option}: {}`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
+  });
+
+  it('rejects removed rateLimitHeaders response mapping', () => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com/users
+      response:
+        rateLimitHeaders:
+          remaining: x-rate-limit-remaining`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
   });
 
   describe('JSON schema validation', () => {

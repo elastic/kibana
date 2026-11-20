@@ -97,17 +97,18 @@ export interface EpisodeLookup {
   spaceId: string;
 }
 
-const UNKNOWN = 'unknown';
+/** Placeholder a classic snapshot records for an alert field the alert document lacks. */
+export const UNKNOWN_ALERT_FIELD = 'unknown';
 
 const buildClassicSnapshot = (alert: Record<string, unknown>): AlertSnapshot =>
   parseAlertSnapshot(alert) ??
   alertSnapshotSchema.parse({
     id: alert[ALERT_UUID],
-    rule_id: alert[ALERT_RULE_UUID] ?? UNKNOWN,
-    rule_name: alert[ALERT_RULE_NAME] ?? UNKNOWN,
-    rule_type_id: alert[ALERT_RULE_TYPE_ID] ?? UNKNOWN,
-    rule_category: alert[ALERT_RULE_CATEGORY] ?? UNKNOWN,
-    status: alert[ALERT_STATUS] ?? UNKNOWN,
+    rule_id: alert[ALERT_RULE_UUID] ?? UNKNOWN_ALERT_FIELD,
+    rule_name: alert[ALERT_RULE_NAME] ?? UNKNOWN_ALERT_FIELD,
+    rule_type_id: alert[ALERT_RULE_TYPE_ID] ?? UNKNOWN_ALERT_FIELD,
+    rule_category: alert[ALERT_RULE_CATEGORY] ?? UNKNOWN_ALERT_FIELD,
+    status: alert[ALERT_STATUS] ?? UNKNOWN_ALERT_FIELD,
     start: alert[ALERT_START] ?? alert[TIMESTAMP],
   });
 

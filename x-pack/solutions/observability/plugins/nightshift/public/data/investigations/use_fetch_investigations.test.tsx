@@ -86,7 +86,7 @@ describe('useFetchInvestigations', () => {
       '/internal/investigations/investigations',
       expect.objectContaining({
         query: {
-          sort_field: 'created_at',
+          sort_field: 'updated_at',
           sort_order: 'desc',
           in_progress: true,
           page: 1,
@@ -111,7 +111,7 @@ describe('useFetchInvestigations', () => {
       '/internal/investigations/investigations',
       expect.objectContaining({
         query: {
-          sort_field: 'created_at',
+          sort_field: 'updated_at',
           sort_order: 'desc',
           in_progress: false,
           status: 'open',
