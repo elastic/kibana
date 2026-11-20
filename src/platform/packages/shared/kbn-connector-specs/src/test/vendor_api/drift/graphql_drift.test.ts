@@ -94,6 +94,7 @@ describe('diffGraphQLSchemas, beyond the fields of a root field', () => {
       interface Node { id: ID }
       interface Extra { id: ID }
       type Item implements Node & Extra { id: ID }
+      type Cog implements Node { id: ID }
       type Person { name: String }
       type Team { name: String }
       type Robot { name: String }
@@ -108,10 +109,39 @@ describe('diffGraphQLSchemas, beyond the fields of a root field', () => {
       [
         'QUERY owner breaking response-property-one-of-added Owner',
         'QUERY owner non-breaking response-property-one-of-removed Owner',
-        // Item is one of the types a Node can be
-        'QUERY node breaking response-property-one-of-added Item',
+        // A new type implementing Node widens it, though Item started to implement another
+        // interface, which no root field returns
+        'QUERY node breaking response-property-one-of-added Node',
       ].sort()
     );
+  });
+
+  it('reports an interface by the types it can be, whether an existing type starts to implement it or not', () => {
+    const query = 'type Query { node: Node, other: Other }';
+    const base = `${query}
+      interface Node { id: ID }
+      interface Other { id: ID }
+      type Item implements Node { id: ID }
+      type Old implements Other { id: ID }`;
+    const rootFields = [
+      { method: 'query', path: 'node' },
+      { method: 'query', path: 'other' },
+    ];
+    // An existing type starts to implement Node, and Item stops
+    expect(
+      summary(
+        base,
+        `${query}
+        interface Node { id: ID }
+        interface Other { id: ID }
+        type Item { id: ID }
+        type Old implements Other & Node { id: ID }`,
+        rootFields
+      )
+    ).toEqual([
+      'QUERY node breaking response-property-one-of-added Node',
+      'QUERY node non-breaking response-property-one-of-removed Node',
+    ]);
   });
 
   it('reports a type that changed kind', () => {
@@ -215,6 +245,8 @@ describe('resolveGraphQLFieldUse', () => {
       selectedFields: ['Item.color', 'Item.name', 'Item.owner', 'User.email'],
       sent: ['Query.items(ids:)', 'Query.items(state:)'],
       sentTypes: ['State'],
+      sentValues: [],
+      omitted: [],
     });
   });
 
@@ -300,6 +332,43 @@ describe('resolveGraphQLFieldUse', () => {
     });
   });
 
+  it('finds the enum values an action sends, and the arguments some selection leaves out', () => {
+    const use = resolveGraphQLFieldUse(
+      before,
+      { method: 'query', path: 'items' },
+      {
+        read: [],
+        copied: [],
+        returned: [],
+        sent: ['state', 'limit'],
+        values: ['state=OPEN', 'limit=not an enum', 'ids/items=1'],
+        // One call sends every argument and another only `ids`; the field below has none
+        occurrences: ['(ids,limit,state)', '(ids)', 'owner()'],
+      }
+    );
+
+    expect(use).toMatchObject({
+      sentValues: ['State.OPEN'],
+      omitted: ['Query.items(limit:)', 'Query.items(state:)'],
+    });
+  });
+
+  it('keeps every field a response key was aliased to, as calls may differ', () => {
+    expect(
+      resolveGraphQLFieldUse(
+        before,
+        { method: 'query', path: 'items' },
+        {
+          read: ['items/label'],
+          copied: [],
+          returned: [],
+          selected: ['name', 'size'],
+          aliased: ['label=name', 'label=size'],
+        }
+      )
+    ).toMatchObject({ read: ['Item.name', 'Item.size'] });
+  });
+
   it('says whether an action uses what a change names', () => {
     const use = resolveGraphQLFieldUse(
       before,
@@ -335,6 +404,8 @@ describe('resolveGraphQLFieldUse', () => {
       selectedFields: ['Item.legacy'],
       sent: [],
       sentTypes: [],
+      sentValues: [],
+      omitted: [],
     };
     const uses = (id: string, coordinate: string) => usesCoordinate(use, { id, coordinate });
     expect(uses('response-property-deprecated', 'Item.legacy')).toBe(true);
@@ -343,6 +414,22 @@ describe('resolveGraphQLFieldUse', () => {
     // What a union can be concerns the actions getting it
     expect(uses('response-property-one-of-added', 'Owner')).toBe(true);
     expect(uses('response-property-one-of-added', 'Other')).toBe(false);
+  });
+
+  it('concerns an action by the enum value it sends, not by the enum', () => {
+    const use = {
+      read: [],
+      passed: [],
+      types: [],
+      selectedFields: [],
+      sent: ['Query.items(state:)'],
+      sentTypes: ['State'],
+      sentValues: ['State.OPEN'],
+      omitted: [],
+    };
+    const id = 'request-property-enum-value-deprecated';
+    expect(usesCoordinate(use, { id, coordinate: 'State.OPEN' })).toBe(true);
+    expect(usesCoordinate(use, { id, coordinate: 'State.CLOSED' })).toBe(false);
   });
 });
 

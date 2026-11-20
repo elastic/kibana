@@ -369,6 +369,8 @@ describe('renderDriftIssue', () => {
           selectedFields: [],
           sent: [],
           sentTypes: [],
+          sentValues: [],
+          omitted: [],
         },
       },
     });
@@ -479,6 +481,8 @@ describe('renderDriftIssue', () => {
                 selectedFields: ['Item.name'],
                 sent: [],
                 sentTypes: [],
+                sentValues: [],
+                omitted: [],
               },
             },
           },
@@ -488,7 +492,10 @@ describe('renderDriftIssue', () => {
     );
 
     expect(body).toContain(
-      'Vendor response has changed, but Connector is not using changed fields'
+      'GraphQL: Vendor response has changed, but Connector is not using changed fields'
+    );
+    expect(body).toContain(
+      'REST: Vendor response has changed, but Connector is not using changed fields'
     );
     expect(body).not.toContain('passing along the entire changed response');
   });

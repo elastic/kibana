@@ -32,6 +32,17 @@ export interface FieldUse {
    * can be traced to the field.
    */
   readonly aliased: Set<string>;
+  /**
+   * GraphQL only: the enum values and other strings sent as arguments, as `argument path=value`,
+   * the path as in `sent`. The schema says which of them are enum values.
+   */
+  readonly values: Set<string>;
+  /**
+   * GraphQL only: each time the query selects a field, the arguments it sent to it, as
+   * `field path(argument,argument)`, with the root field at the path `''`. A field selected
+   * twice, or in several queries, is there once for each different set.
+   */
+  readonly occurrences: Set<string>;
 }
 
 export const createFieldUse = (): FieldUse => ({
@@ -41,6 +52,8 @@ export const createFieldUse = (): FieldUse => ({
   sent: new Set(),
   selected: new Set(),
   aliased: new Set(),
+  values: new Set(),
+  occurrences: new Set(),
 });
 
 // Properties that every object answers, or that runtimes and test tools ask for; not fields.

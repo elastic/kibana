@@ -566,6 +566,8 @@ describe('recordActions with a GraphQL spec', () => {
       returned: [],
       sent: ['ids', 'ids/items'],
       selected: ['items', 'items/id', 'name'],
+      values: ['ids/items=1'],
+      occurrences: ['(ids)', 'items()', 'items/id()', 'name()'],
     });
     expect(recording.fieldUse?.archiveItem['api MUTATION archiveItem']).toEqual({
       read: [],
@@ -573,6 +575,7 @@ describe('recordActions with a GraphQL spec', () => {
       returned: [''],
       sent: ['itemId', 'options', 'options/reason'],
       selected: ['id', 'name'],
+      occurrences: ['(itemId,options)', 'id()', 'name()'],
     });
   });
 });
@@ -634,6 +637,12 @@ describe('recordActions with GraphQL aliases, fragments, nested arguments and GE
       // The key a handler reads, and the field it stands for
       aliased: ['label=name'],
       sent: ['updates(limit:)', 'updates(source:)'],
+    });
+    // The enum value sent, and what each selection of a field sent, so a default that applies
+    // when an argument is left out can be told from one that doesn't
+    expect(use('aliased')).toMatchObject({
+      values: ['updates(source:)=X'],
+      occurrences: ['()', 'name()', 'updates(limit,source)'],
     });
     expect(use('rootFragment')).toMatchObject({ selected: ['id'] });
     expect(use('variables')).toMatchObject({ sent: ['updates(limit:)'] });

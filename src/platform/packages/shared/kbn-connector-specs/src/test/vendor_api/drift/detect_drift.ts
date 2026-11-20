@@ -358,10 +358,11 @@ export const reviewOfChange = (
         if ((property !== undefined || isEnumValueDeprecation(change)) && tracked) {
           return usesProperty(action, source, change, property ?? '');
         }
-        // A default only matters to a caller that leaves the argument out.
+        // A default only matters to a call that selects the field and leaves the argument out,
+        // which is not the same as an action that never sends it.
         if (tracked && isDefaultChange(change)) {
           const use = action.graphqlUse?.[`${source} ${change.operation}`];
-          return use === undefined || !use.sent.includes(change.coordinate ?? '');
+          return use === undefined || use.omitted.includes(change.coordinate ?? '');
         }
         return !verifiedBy(change, passing, tracked);
       })
@@ -699,6 +700,8 @@ const mergeFieldUse = (
       sent: Set<string>;
       selected: Set<string>;
       aliased: Set<string>;
+      values: Set<string>;
+      occurrences: Set<string>;
     }
   > = {};
   for (const byOperation of uses) {
@@ -710,6 +713,8 @@ const mergeFieldUse = (
         sent: new Set(),
         selected: new Set(),
         aliased: new Set(),
+        values: new Set(),
+        occurrences: new Set(),
       });
       use.read.forEach((field) => entry.read.add(field));
       use.copied.forEach((field) => entry.copied.add(field));
@@ -717,20 +722,26 @@ const mergeFieldUse = (
       use.sent?.forEach((field) => entry.sent.add(field));
       use.selected?.forEach((field) => entry.selected.add(field));
       use.aliased?.forEach((field) => entry.aliased.add(field));
+      use.values?.forEach((field) => entry.values.add(field));
+      use.occurrences?.forEach((field) => entry.occurrences.add(field));
     }
   }
   return Object.fromEntries(
-    Object.entries(merged).map(([key, { read, copied, returned, sent, selected, aliased }]) => [
-      key,
-      {
-        read: [...read].sort(),
-        copied: [...copied].sort(),
-        returned: [...returned].sort(),
-        ...(sent.size > 0 ? { sent: [...sent].sort() } : {}),
-        ...(selected.size > 0 ? { selected: [...selected].sort() } : {}),
-        ...(aliased.size > 0 ? { aliased: [...aliased].sort() } : {}),
-      },
-    ])
+    Object.entries(merged).map(
+      ([key, { read, copied, returned, sent, selected, aliased, values, occurrences }]) => [
+        key,
+        {
+          read: [...read].sort(),
+          copied: [...copied].sort(),
+          returned: [...returned].sort(),
+          ...(sent.size > 0 ? { sent: [...sent].sort() } : {}),
+          ...(selected.size > 0 ? { selected: [...selected].sort() } : {}),
+          ...(aliased.size > 0 ? { aliased: [...aliased].sort() } : {}),
+          ...(values.size > 0 ? { values: [...values].sort() } : {}),
+          ...(occurrences.size > 0 ? { occurrences: [...occurrences].sort() } : {}),
+        },
+      ]
+    )
   );
 };
 

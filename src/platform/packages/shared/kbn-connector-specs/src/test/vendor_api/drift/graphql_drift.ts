@@ -56,6 +56,10 @@ export interface GraphQLFieldUse {
   readonly sent: readonly string[];
   /** The input types and enums of what it sends. */
   readonly sentTypes: readonly string[];
+  /** The enum values it sends, as `State.OPEN`. */
+  readonly sentValues: readonly string[];
+  /** The arguments, by coordinate, that some selection of their field leaves out. */
+  readonly omitted: readonly string[];
 }
 
 const schemas = new Map<string, GraphQLSchema>();
@@ -128,12 +132,12 @@ const inputTypesOf = (
 const COORDINATE = /\b([A-Za-z_]\w*)\.([A-Za-z_]\w*)(?:\(([A-Za-z_]\w*):\))?/;
 
 // What a type is, rather than one of its fields, is described without a coordinate, such as
-// `Robot was added to union type Owner.`; the type is its coordinate.
+// `Robot was added to union type Owner.`; the type is its coordinate. An interface is compared by
+// the types it can be, below, as graphql-js names it only when an existing type starts to
+// implement it, and not when a new one does.
 const TYPE_CHANGES: Readonly<Record<string, RegExp>> = {
   TYPE_ADDED_TO_UNION: /union type (\w+)\.$/,
   TYPE_REMOVED_FROM_UNION: /union type (\w+)\.$/,
-  IMPLEMENTED_INTERFACE_ADDED: /implemented by (\w+)\.$/,
-  IMPLEMENTED_INTERFACE_REMOVED: /^(\w+) no longer implements/,
   TYPE_CHANGED_KIND: /^(\w+) changed from/,
 };
 
@@ -206,10 +210,8 @@ const classify = (
         ? { kind: 'breaking', id: 'request-property-enum-value-removed' }
         : { kind: 'non-breaking', id: 'response-property-enum-value-removed' };
     case 'TYPE_ADDED_TO_UNION':
-    case 'IMPLEMENTED_INTERFACE_ADDED':
       return { kind: 'breaking', id: 'response-property-one-of-added' };
     case 'TYPE_REMOVED_FROM_UNION':
-    case 'IMPLEMENTED_INTERFACE_REMOVED':
       return { kind: 'non-breaking', id: 'response-property-one-of-removed' };
     default:
       // Removed types and directive changes show through the fields that used them.
@@ -319,6 +321,39 @@ export const diffGraphQLSchemas = (
       if (classified) {
         add(classified.kind, classified.id, classified.text ?? description, coordinate, operations);
       }
+    }
+  }
+
+  // An interface can be a new type when one starts to implement it, which widens what a response
+  // returning the interface holds; the interface, not the implementing type, is what changed.
+  for (const typeName of new Set(roots.flatMap(({ responses }) => [...responses]))) {
+    const [was, is] = [before.getType(typeName), after.getType(typeName)];
+    if (!isInterfaceType(was) || !isInterfaceType(is)) {
+      continue;
+    }
+    const [previous, latest] = [membersOf(before, was), membersOf(after, is)];
+    const operations = operationsOf(roots.filter(({ responses }) => responses.has(typeName)));
+    const [added, removed] = [
+      latest.filter((name) => !previous.includes(name)),
+      previous.filter((name) => !latest.includes(name)),
+    ];
+    if (added.length > 0) {
+      add(
+        'breaking',
+        'response-property-one-of-added',
+        `${added.join(', ')} can now be the interface \`${typeName}\``,
+        typeName,
+        operations
+      );
+    }
+    if (removed.length > 0) {
+      add(
+        'non-breaking',
+        'response-property-one-of-removed',
+        `${removed.join(', ')} can no longer be the interface \`${typeName}\``,
+        typeName,
+        operations
+      );
     }
   }
 
@@ -444,32 +479,48 @@ interface Resolved {
 }
 
 // `items/label=items/name` pairs: where the response key a handler reads is another field's name.
-const aliasesOf = (aliased: readonly string[] = []): ReadonlyMap<string, string> =>
-  new Map(
-    aliased.flatMap((entry) => {
-      const [responsePath, name] = entry.split('=');
-      return name === undefined ? [] : [[responsePath, name] as const];
-    })
-  );
+// Calls of one action may alias a key to different fields, so a key has all of them.
+const aliasesOf = (aliased: readonly string[] = []): ReadonlyMap<string, readonly string[]> => {
+  const aliases = new Map<string, string[]>();
+  for (const entry of aliased) {
+    const [responsePath, name] = entry.split('=');
+    if (name === undefined) {
+      continue;
+    }
+    const names = aliases.get(responsePath) ?? [];
+    if (!names.includes(name)) {
+      names.push(name);
+    }
+    aliases.set(responsePath, names);
+  }
+  return aliases;
+};
 
-// Follows a field use path (`items/name`, array elements as `items`) from a type.
-const resolvePath = (
+// Follows a field use path (`items/name`, array elements as `items`) from a type, to each field
+// it can mean.
+const resolvePaths = (
   schema: GraphQLSchema,
   start: GraphQLType,
   path: string,
   // Selection paths name fields only, so lists are stepped into by themselves.
   unwrapLists = false,
   // Read paths go by the keys of the response, which are aliases where the query gave one.
-  aliases?: ReadonlyMap<string, string>
-): Resolved | undefined => {
-  let resolved: Resolved = { type: start, selectionPath: '' };
-  let responsePath = '';
-  for (const segment of path === '' ? [] : path.split('/')) {
+  aliases?: ReadonlyMap<string, readonly string[]>
+): Resolved[] => {
+  const segments = path === '' ? [] : path.split('/');
+  const walk = (resolved: Resolved, index: number, responsePath: string): Resolved[] => {
+    if (index === segments.length) {
+      return [resolved];
+    }
+    const segment = segments[index];
     let current = unwrap(resolved.type);
     // An array element is `items` only while the type is a list, so a field of that name isn't.
     if (isListType(current) && segment === 'items' && !unwrapLists) {
-      resolved = { type: current.ofType, selectionPath: resolved.selectionPath };
-      continue;
+      return walk(
+        { type: current.ofType, selectionPath: resolved.selectionPath },
+        index + 1,
+        responsePath
+      );
     }
     while (unwrapLists && isListType(current)) {
       current = unwrap(current.ofType);
@@ -482,22 +533,29 @@ const resolvePath = (
       : isInterfaceType(named)
       ? [named, ...schema.getPossibleTypes(named)]
       : [named];
-    responsePath = responsePath ? `${responsePath}/${segment}` : segment;
-    const name = aliases?.get(responsePath) ?? segment;
-    const owner = candidates.find((candidate) => Object.hasOwn(fieldsOf(candidate), name));
-    if (!owner) {
-      return undefined;
-    }
-    resolved = {
-      type: fieldsOf(owner)[name].type,
-      coordinate: `${owner.name}.${name}`,
-      parent: owner,
-      field: name,
-      selectionPath: resolved.selectionPath ? `${resolved.selectionPath}/${name}` : name,
-    };
-  }
-  return resolved;
+    const keyPath = responsePath ? `${responsePath}/${segment}` : segment;
+    return (aliases?.get(keyPath) ?? [segment]).flatMap((name) => {
+      const owner = candidates.find((candidate) => Object.hasOwn(fieldsOf(candidate), name));
+      return owner
+        ? walk(
+            {
+              type: fieldsOf(owner)[name].type,
+              coordinate: `${owner.name}.${name}`,
+              parent: owner,
+              field: name,
+              selectionPath: resolved.selectionPath ? `${resolved.selectionPath}/${name}` : name,
+            },
+            index + 1,
+            keyPath
+          )
+        : [];
+    });
+  };
+  return walk({ type: start, selectionPath: '' }, 0, '');
 };
+
+const resolvePath = (...args: Parameters<typeof resolvePaths>): Resolved | undefined =>
+  resolvePaths(...args)[0];
 
 /** Resolves the field use an action recorded for a root field to schema coordinates. */
 export const resolveGraphQLFieldUse = (
@@ -512,36 +570,32 @@ export const resolveGraphQLFieldUse = (
     return undefined;
   }
   const aliases = aliasesOf(use.aliased);
-  const resolvedRead = use.read.flatMap((path) => {
-    const resolved = resolvePath(schema, field.type, path, false, aliases);
-    return resolved?.coordinate ? [resolved] : [];
-  });
+  const withCoordinate = (path: string) =>
+    resolvePaths(schema, field.type, path, false, aliases).filter(({ coordinate }) => coordinate);
+  const resolvedRead = use.read.flatMap(withCoordinate);
   // A GraphQL response has only the fields the query selects, so those are what passes along.
   const selected = (use.selected ?? []).flatMap((path) => {
     const resolved = resolvePath(schema, field.type, path, true);
     return resolved?.coordinate ? [{ path, ...resolved }] : [];
   });
   const passedPaths = [...use.copied, ...use.returned];
-  const resolvedPassed = passedPaths.flatMap((path) => {
-    const resolved = resolvePath(schema, field.type, path, false, aliases);
-    if (!resolved) {
-      return [];
-    }
-    const prefix = resolved.selectionPath;
-    const under = selected.filter((candidate) => prefix === '' || within(candidate.path, prefix));
-    return [...(resolved.coordinate ? [resolved] : []), ...under];
-  });
+  const resolvedPassed = passedPaths.flatMap((path) =>
+    resolvePaths(schema, field.type, path, false, aliases).flatMap((resolved) => {
+      const prefix = resolved.selectionPath;
+      const under = selected.filter((candidate) => prefix === '' || within(candidate.path, prefix));
+      return [...(resolved.coordinate ? [resolved] : []), ...under];
+    })
+  );
   // Without a recorded selection, everything the passed types reach could be in the response.
   const reached =
     use.selected === undefined
-      ? passedPaths.flatMap((path) => {
-          const resolved = resolvePath(schema, field.type, path, false, aliases);
-          return resolved
-            ? [...outputTypesFrom(schema, getNamedType(resolved.type))].filter(
-                (name) => !isScalarType(schema.getType(name))
-              )
-            : [];
-        })
+      ? passedPaths.flatMap((path) =>
+          resolvePaths(schema, field.type, path, false, aliases).flatMap((resolved) =>
+            [...outputTypesFrom(schema, getNamedType(resolved.type))].filter(
+              (name) => !isScalarType(schema.getType(name))
+            )
+          )
+        )
       : [];
   const read = resolvedRead.flatMap(({ coordinate }) => (coordinate ? [coordinate] : []));
   const passed = [
@@ -596,6 +650,36 @@ export const resolveGraphQLFieldUse = (
       }
     }
   }
+  // The strings sent at a path whose type is an enum, when they are values of it.
+  const sentValues = (use.values ?? []).flatMap((entry) => {
+    const separator = entry.indexOf('=');
+    const resolved = resolveSent(entry.slice(0, separator));
+    const named = resolved ? getNamedType(resolved.type) : undefined;
+    const value = entry.slice(separator + 1);
+    return isEnumType(named) && named.getValue(value) ? [`${named.name}.${value}`] : [];
+  });
+  // The arguments a selection of a field leaves out, by what each selection recorded sending.
+  const omitted = (use.occurrences ?? []).flatMap((occurrence) => {
+    const [, fieldPath, argumentNames] = /^(.*)\((.*)\)$/.exec(occurrence) ?? [];
+    if (argumentNames === undefined) {
+      return [];
+    }
+    const present = argumentNames.split(',');
+    const selection =
+      fieldPath === '' ? undefined : resolvePath(schema, field.type, fieldPath, true);
+    const owner =
+      fieldPath === ''
+        ? { coordinate: `${rootType.name}.${rootField.path}`, args: field.args }
+        : selection?.parent && selection.field
+        ? {
+            coordinate: `${selection.parent.name}.${selection.field}`,
+            args: argsOf(fieldsOf(selection.parent)[selection.field]),
+          }
+        : undefined;
+    return (owner?.args ?? [])
+      .filter(({ name }) => !present.includes(name))
+      .map(({ name }) => `${owner?.coordinate}(${name}:)`);
+  });
   const unique = (values: readonly string[]) => [...new Set(values)].sort();
   return {
     read: unique(read),
@@ -604,6 +688,8 @@ export const resolveGraphQLFieldUse = (
     selectedFields: unique(selectedFields),
     sent: unique(sent),
     sentTypes: unique(sentTypes),
+    sentValues: unique(sentValues),
+    omitted: unique(omitted),
   };
 };
 
@@ -618,6 +704,10 @@ export const usesCoordinate = (
   // An enum value is no field; it concerns the actions sending or getting that enum.
   const [typeName] = coordinate.split('.');
   const isEnumValue = id.includes('enum-value');
+  if (id === 'request-property-enum-value-deprecated') {
+    // Whether it is the value that was sent, not just the enum
+    return use.sentValues.includes(coordinate);
+  }
   if (id.startsWith('request-') || id.startsWith('new-')) {
     return use.sent.includes(coordinate) || (isEnumValue && use.sentTypes.includes(typeName));
   }
@@ -711,24 +801,27 @@ export const compareGraphQLFields = (
   return [
     ...(rootChanges.length > 0 ? [{ field: rootField.path, changes: rootChanges }] : []),
     ...fields.flatMap((field) => {
-      const previous = resolvePath(before, was.type, field, false, aliases);
-      if (!previous?.coordinate || !previous.parent || !previous.field) {
-        return [];
-      }
-      const latestParent = after.getType(previous.parent.name);
-      const latest = latestParent ? fieldsOf(latestParent)[previous.field] : undefined;
-      if (!latest) {
-        return [{ field, changes: ['not in the latest spec'] }];
-      }
-      const changes = changesOfType([previous.type, latest.type], [before, after]);
-      const wasField = fieldsOf(previous.parent)[previous.field];
-      if (
-        deprecationReasonOf(latest) !== undefined &&
-        deprecationReasonOf(wasField) === undefined
-      ) {
-        changes.push('deprecated');
-      }
-      return changes.length > 0 ? [{ field, changes }] : [];
+      const changes = resolvePaths(before, was.type, field, false, aliases).flatMap((previous) => {
+        if (!previous.coordinate || !previous.parent || !previous.field) {
+          return [];
+        }
+        const latestParent = after.getType(previous.parent.name);
+        const latest = latestParent ? fieldsOf(latestParent)[previous.field] : undefined;
+        if (!latest) {
+          return ['not in the latest spec'];
+        }
+        const found = changesOfType([previous.type, latest.type], [before, after]);
+        const wasField = fieldsOf(previous.parent)[previous.field];
+        if (
+          deprecationReasonOf(latest) !== undefined &&
+          deprecationReasonOf(wasField) === undefined
+        ) {
+          found.push('deprecated');
+        }
+        return found;
+      });
+      const unique = [...new Set(changes)];
+      return unique.length > 0 ? [{ field, changes: unique }] : [];
     }),
   ];
 };

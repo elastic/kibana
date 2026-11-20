@@ -671,7 +671,7 @@ describe('reviewOfChange', () => {
   });
 
   it('reviews a changed GraphQL default for the callers that leave the argument out', () => {
-    const graphqlAction = (name: string, sent: string[]) =>
+    const graphqlAction = (name: string, omitted: string[]) =>
       action(name, 'QUERY items', {
         graphqlUse: {
           'main QUERY items': {
@@ -679,8 +679,10 @@ describe('reviewOfChange', () => {
             passed: [],
             types: [],
             selectedFields: [],
-            sent,
+            sent: [],
             sentTypes: [],
+            sentValues: [],
+            omitted,
           },
         },
       });
@@ -689,8 +691,10 @@ describe('reviewOfChange', () => {
       verdict: 'healthy',
       latestProblems: [],
       actions: [
-        graphqlAction('leavesOut', []),
-        graphqlAction('sends', ['Query.items(limit:)']),
+        // Some call of it leaves the argument out, whatever the others send
+        graphqlAction('leavesOut', ['Query.items(limit:)']),
+        // Every call sends it, or never selects the field the default belongs to
+        graphqlAction('sends', []),
         action('untracked', 'QUERY items', { tracked: false }),
       ],
     };
@@ -702,8 +706,8 @@ describe('reviewOfChange', () => {
       coordinate: 'Query.items(limit:)',
     };
 
-    // A mock accepts either default, so passing proves nothing; one that sends the argument is
-    // not affected
+    // A mock accepts either default, so passing proves nothing; one whose calls all send the
+    // argument is not affected
     expect(reviewOfChange(healthy)('main', defaultChange)).toEqual({
       needsReview: true,
       actions: ['leavesOut', 'untracked'],

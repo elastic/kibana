@@ -232,22 +232,35 @@ export const statusOf = (
     });
     const notUsingChanged =
       'Vendor response has changed, but Connector is not using changed fields';
+    // An action calling both says which kind of response each statement is about.
+    const labeled = (protocol: string, sentence: string) =>
+      graphqlResponses.length > 0 && restResponses.length > 0
+        ? `${protocol}: ${sentence}`
+        : sentence;
     const sentences = [
       ...(notable.some(({ change }) => isRequestChange(change.id))
         ? ["Vendor request has changed, and Connector's requests still match it"]
         : []),
       ...(graphqlResponses.length === 0
         ? []
-        : [passedChanged.length > 0 ? passingAlong(passedChanged) : notUsingChanged]),
+        : [
+            labeled(
+              'GraphQL',
+              passedChanged.length > 0 ? passingAlong(passedChanged) : notUsingChanged
+            ),
+          ]),
       ...(restResponses.length === 0
         ? []
-        : passedAlong.includes('')
-        ? [
-            'Vendor response has changed, and Connector is passing along the entire changed response',
-          ]
-        : passedAlong.length > 0
-        ? ['Vendor response has changed, and Connector is passing along parts of it as they are']
-        : [notUsingChanged]),
+        : [
+            labeled(
+              'REST',
+              passedAlong.includes('')
+                ? 'Vendor response has changed, and Connector is passing along the entire changed response'
+                : passedAlong.length > 0
+                ? 'Vendor response has changed, and Connector is passing along parts of it as they are'
+                : notUsingChanged
+            ),
+          ]),
     ];
     return passes(
       'passes',

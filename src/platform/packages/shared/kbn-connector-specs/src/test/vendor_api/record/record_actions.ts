@@ -75,6 +75,10 @@ export interface RecordedFieldUse {
   readonly selected?: readonly string[];
   /** GraphQL only: the fields its queries select under an alias, as `path=field`; left out when none. */
   readonly aliased?: readonly string[];
+  /** GraphQL only: the enum values and strings its queries send as arguments; left out when none. */
+  readonly values?: readonly string[];
+  /** GraphQL only: the arguments each selection of a field sent; left out when none. */
+  readonly occurrences?: readonly string[];
 }
 
 export interface RequestedPath {
@@ -535,6 +539,10 @@ export const recordActions = async ({
                     ...(use.sent.size > 0 ? { sent: sortedList(use.sent) } : {}),
                     ...(use.selected.size > 0 ? { selected: sortedList(use.selected) } : {}),
                     ...(use.aliased.size > 0 ? { aliased: sortedList(use.aliased) } : {}),
+                    ...(use.values.size > 0 ? { values: sortedList(use.values) } : {}),
+                    ...(use.occurrences.size > 0
+                      ? { occurrences: sortedList(use.occurrences) }
+                      : {}),
                   },
                 ])
               ),

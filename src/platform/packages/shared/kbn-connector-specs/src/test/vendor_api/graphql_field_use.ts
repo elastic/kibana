@@ -47,6 +47,19 @@ const operationOf = (
 };
 
 // Records the fields of an argument value as `sent`, through the variables it refers to.
+// Records the strings an argument is sent as `values`; the schema says which are enum values.
+const recordSentValues = (value: unknown, use: FieldUse, path: string): void => {
+  if (typeof value === 'string') {
+    use.values.add(`${path}=${value}`);
+  } else if (Array.isArray(value)) {
+    value.forEach((item) => recordSentValues(item, use, `${path}/items`));
+  } else if (isRecord(value)) {
+    for (const [key, item] of Object.entries(value)) {
+      recordSentValues(item, use, `${path}/${key}`);
+    }
+  }
+};
+
 const recordArgument = (
   value: ValueNode,
   variables: Readonly<Record<string, unknown>>,
@@ -56,6 +69,10 @@ const recordArgument = (
   switch (value.kind) {
     case Kind.VARIABLE:
       recordSentFields(variables[value.name.value], use, path);
+      recordSentValues(variables[value.name.value], use, path);
+      return;
+    case Kind.ENUM:
+      use.values.add(`${path}=${value.value}`);
       return;
     case Kind.OBJECT:
       for (const field of value.fields) {
@@ -96,6 +113,9 @@ const fieldsOf = (
       : [];
   });
 
+const argumentNamesOf = (selection: FieldNode): string =>
+  [...new Set((selection.arguments ?? []).map(({ name }) => name.value))].sort().join(',');
+
 interface QueryContext {
   readonly fragments: ReadonlyMap<string, FragmentDefinitionNode>;
   readonly variables: Readonly<Record<string, unknown>>;
@@ -132,6 +152,7 @@ const recordSelection = (
       use.sent.add(sent);
       recordArgument(argument.value, variables, use, sent);
     }
+    use.occurrences.add(`${fieldPath}(${argumentNamesOf(selection)})`);
     recordSelection(selection.selectionSet, context, fieldPath, keyPath);
   }
 };
@@ -174,6 +195,7 @@ export const trackGraphQLFieldUse = (
       use.sent.add(argument.name.value);
       recordArgument(argument.value, variables, use, argument.name.value);
     }
+    use.occurrences.add(`(${argumentNamesOf(selection)})`);
     recordSelection(selection.selectionSet, { fragments, variables, use }, '', '');
     const key = selection.alias?.value ?? selection.name.value;
     if (key in results) {
