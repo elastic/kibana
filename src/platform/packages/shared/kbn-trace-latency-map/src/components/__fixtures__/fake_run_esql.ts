@@ -86,6 +86,25 @@ export interface FakeOperation extends LatencyMapOperation {
   pattern: Pattern;
 }
 
+/** `0, 1, …, length - 1`, so cells can be walked without mutable counters. */
+const range = (length: number) => Array.from({ length }, (_, i) => i);
+
+/**
+ * Sums pattern cells into one count (a cell never fails more than it has spans) and scales
+ * the sum to the sampled share, failures clamped to the scaled spans as in the real STATS.
+ */
+const totalCounts = (cells: CellCounts[], share: number): CellCounts => {
+  const total = cells.reduce(
+    (sum, cell) => ({
+      spans: sum.spans + cell.spans,
+      failed: sum.failed + Math.min(cell.spans, cell.failed),
+    }),
+    { spans: 0, failed: 0 }
+  );
+  const spans = Math.round(total.spans * share);
+  return { spans, failed: Math.min(spans, Math.round(total.failed * share)) };
+};
+
 /**
  * A runner that answers the map's queries from a pattern, without Elasticsearch: the statistics
  * query with the statistics above, the grid queries with the pattern, and the operation
@@ -126,32 +145,24 @@ export function createFakeRunEsql({
       } as ESQLSearchResponse;
     }
     // The sampled part of a large range reads a share of the spans: scale the pattern down.
+    // `| SAMPLE 0.004` carries the probability as its one number; the capture is that share.
     const share = query.includes('SAMPLE') ? Number(/SAMPLE ([\d.]+)/.exec(query)![1]) : 1;
     if (query.includes('BY service.name, operation, yi')) {
       const random = createRandom(7);
-      const steps = 60;
-      const values: Array<Array<string | number>> = [];
-      for (const operation of scoped) {
-        for (let yi = 0; yi < LATENCY_MAP_ROWS; yi++) {
-          let rowSpans = 0;
-          let rowFailed = 0;
-          for (let step = 0; step < steps; step++) {
-            const cell = operation.pattern(step / steps, yi, random);
-            rowSpans += cell.spans;
-            rowFailed += Math.min(cell.spans, cell.failed);
-          }
-          const scaledSpans = Math.round(rowSpans * share);
-          if (scaledSpans > 0) {
-            values.push([
-              operation.service,
-              operation.name,
-              yi,
-              scaledSpans,
-              Math.min(scaledSpans, Math.round(rowFailed * share)),
-            ]);
-          }
-        }
-      }
+      // The histogram has no time axis: the pattern is read across the range in fixed steps.
+      const steps = range(60);
+      const values = scoped.flatMap((operation) =>
+        range(LATENCY_MAP_ROWS).flatMap((yi): Array<Array<string | number>> => {
+          const row = totalCounts(
+            steps.map((step) => operation.pattern(step / steps.length, yi, random)),
+            share
+          );
+          // Elasticsearch returns no row for an empty group, and neither does the fake.
+          return row.spans > 0
+            ? [[operation.service, operation.name, yi, row.spans, row.failed]]
+            : [];
+        })
+      );
       return {
         columns: [
           { name: 'service.name', type: 'keyword' },
@@ -161,24 +172,21 @@ export function createFakeRunEsql({
         values,
       } as ESQLSearchResponse;
     }
+    // The grid query bins time as `EVAL xi = TO_INTEGER((TO_LONG(@timestamp) - <from>) / <binMs>)`
+    // (buildLatencyGridQuery): the divisor is the bin width, which sets the column count here.
     const binMs = Number(/TO_LONG\(@timestamp\) - \d+\) \/ (\d+)/.exec(query)?.[1] ?? 60_000);
     const bins = Math.ceil(3_600_000 / binMs);
     const random = createRandom(7);
-    const values: number[][] = [];
-    for (let xi = 0; xi < bins; xi++) {
-      for (let yi = 0; yi < LATENCY_MAP_ROWS; yi++) {
-        let cellSpans = 0;
-        let cellFailed = 0;
-        for (const operation of scoped) {
-          const cell = operation.pattern(xi / bins, yi, random);
-          cellSpans += cell.spans;
-          cellFailed += Math.min(cell.spans, cell.failed);
-        }
-        const scaledSpans = Math.round(cellSpans * share);
-        if (scaledSpans > 0)
-          values.push([xi, yi, scaledSpans, Math.min(scaledSpans, Math.round(cellFailed * share))]);
-      }
-    }
+    const values = range(bins).flatMap((xi) =>
+      range(LATENCY_MAP_ROWS).flatMap((yi): number[][] => {
+        const cell = totalCounts(
+          scoped.map((operation) => operation.pattern(xi / bins, yi, random)),
+          share
+        );
+        // Elasticsearch returns no row for an empty group, and neither does the fake.
+        return cell.spans > 0 ? [[xi, yi, cell.spans, cell.failed]] : [];
+      })
+    );
     return {
       columns: ['xi', 'yi', 'spans', 'failed'].map((name) => ({ name, type: 'long' })),
       values,
