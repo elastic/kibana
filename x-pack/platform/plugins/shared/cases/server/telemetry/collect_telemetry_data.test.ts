@@ -19,6 +19,7 @@ import { getUserActionsTelemetryData } from './queries/user_actions';
 import { getTemplatesTelemetryData } from './queries/templates';
 import { getFieldLibraryTelemetryData } from './queries/field_definitions';
 import { getWorkflowsTelemetryData } from './queries/workflows';
+import { getCaseAgeTelemetryData } from './queries/case_age';
 
 jest.mock('./queries/alerts');
 jest.mock('./queries/cases');
@@ -31,6 +32,7 @@ jest.mock('./queries/user_actions');
 jest.mock('./queries/templates');
 jest.mock('./queries/field_definitions');
 jest.mock('./queries/workflows');
+jest.mock('./queries/case_age');
 
 const getAlertsMock = getAlertsTelemetryData as jest.Mock;
 const getCasesMock = getCasesTelemetryData as jest.Mock;
@@ -43,6 +45,7 @@ const getUserActionsMock = getUserActionsTelemetryData as jest.Mock;
 const getTemplatesMock = getTemplatesTelemetryData as jest.Mock;
 const getFieldLibraryMock = getFieldLibraryTelemetryData as jest.Mock;
 const getWorkflowsMock = getWorkflowsTelemetryData as jest.Mock;
+const getCaseAgeMock = getCaseAgeTelemetryData as jest.Mock;
 
 const preExistingAreas = {
   cases: getCasesMock,
@@ -115,6 +118,22 @@ const expectedWorkflows = {
   main: workflowsScope,
 };
 
+const caseAgeStats = {
+  total: 2,
+  p50: 3600,
+  p90: 86400,
+  buckets: { upTo1h: 0, upTo1d: 1, upTo7d: 1, upTo30d: 0, upTo90d: 0, over90d: 0 },
+};
+
+const caseAgeScope = { closed: caseAgeStats, open: caseAgeStats, inProgress: caseAgeStats };
+
+const expectedCaseAge = {
+  all: caseAgeScope,
+  sec: caseAgeScope,
+  obs: caseAgeScope,
+  main: caseAgeScope,
+};
+
 describe('collectTelemetryData', () => {
   const logger = loggingSystemMock.createLogger();
   const savedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsRepositoryMock.create());
@@ -140,19 +159,22 @@ describe('collectTelemetryData', () => {
       main: populatedFieldLibraryScope,
     });
     getWorkflowsMock.mockResolvedValue(expectedWorkflows);
+    getCaseAgeMock.mockResolvedValue(expectedCaseAge);
   });
 
-  it('reports templates, field library, and workflows alongside every pre-existing area', async () => {
+  it('reports templates, field library, workflows, and case age alongside every pre-existing area', async () => {
     const result = await collect();
 
     expect(getTemplatesMock).toHaveBeenCalledWith({ savedObjectsClient, logger });
     expect(getFieldLibraryMock).toHaveBeenCalledWith({ savedObjectsClient, logger });
     expect(getWorkflowsMock).toHaveBeenCalledWith({ savedObjectsClient, logger });
+    expect(getCaseAgeMock).toHaveBeenCalledWith({ savedObjectsClient, logger });
     expect(result).toStrictEqual({
       ...preExistingPayload(),
       templates: expectedTemplates,
       fieldLibrary: expectedFieldLibrary,
       workflows: expectedWorkflows,
+      caseAge: expectedCaseAge,
     });
   });
 
@@ -171,6 +193,7 @@ describe('collectTelemetryData', () => {
         ...preExistingPayload(),
         fieldLibrary: expectedFieldLibrary,
         workflows: expectedWorkflows,
+        caseAge: expectedCaseAge,
       });
     });
 
@@ -195,6 +218,7 @@ describe('collectTelemetryData', () => {
         ...preExistingPayload(),
         templates: expectedTemplates,
         workflows: expectedWorkflows,
+        caseAge: expectedCaseAge,
       });
     });
   });
@@ -213,6 +237,7 @@ describe('collectTelemetryData', () => {
         ...preExistingPayload(),
         templates: expectedTemplates,
         fieldLibrary: expectedFieldLibrary,
+        caseAge: expectedCaseAge,
       });
     });
 
@@ -220,6 +245,30 @@ describe('collectTelemetryData', () => {
       await collect();
 
       expect(logger.debug).toHaveBeenCalledWith('Failed collecting Cases workflows telemetry data');
+    });
+  });
+
+  describe('when the case age query fails', () => {
+    beforeEach(() => {
+      getCaseAgeMock.mockRejectedValue(new Error('case age boom'));
+    });
+
+    it('omits only the case age key, leaving every other area intact', async () => {
+      const result = await collect();
+
+      // Absent, not zeroed: zeroed would be indistinguishable from a deployment with no cases.
+      expect(result).toStrictEqual({
+        ...preExistingPayload(),
+        templates: expectedTemplates,
+        fieldLibrary: expectedFieldLibrary,
+        workflows: expectedWorkflows,
+      });
+    });
+
+    it('logs the failure', async () => {
+      await collect();
+
+      expect(logger.debug).toHaveBeenCalledWith('Failed collecting Cases case age telemetry data');
     });
   });
 
@@ -243,6 +292,7 @@ describe('collectTelemetryData', () => {
       expect(getTemplatesMock).toHaveBeenCalled();
       expect(getFieldLibraryMock).toHaveBeenCalled();
       expect(getWorkflowsMock).toHaveBeenCalled();
+      expect(getCaseAgeMock).toHaveBeenCalled();
       expect(result).toStrictEqual({});
     });
 

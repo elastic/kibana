@@ -19,7 +19,8 @@ import {
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
-import type { CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
+import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import type { CaseAgeStats, CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
 import {
   buildUnifiedAlertReq,
   getPostCaseRequest,
@@ -29,6 +30,7 @@ import {
   deleteAllCaseItems,
   deleteFieldDefinitions,
   createCase,
+  updateCase,
   getSpaceUrlPrefix,
   getTelemetry,
   runTelemetryTask,
@@ -785,6 +787,90 @@ steps:
               configurationsWithWorkflowTags: 0,
             },
           });
+        });
+      });
+    });
+
+    describe('case age', () => {
+      /**
+       * Drops the stored snapshot, which `deleteAllCaseItems` leaves behind and the collector
+       * serves verbatim. Without this the retry below can pass on the PREVIOUS run's snapshot
+       * before the task overwrites it, so the assertions would hold even against a broken query.
+       */
+      const deleteTelemetrySnapshot = async () => {
+        await es.deleteByQuery({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          q: `type:${CASE_TELEMETRY_SAVED_OBJECT}`,
+          wait_for_completion: true,
+          refresh: true,
+          conflicts: 'proceed',
+        });
+      };
+
+      // Every case here is seconds old, so all of them must land in the first bucket.
+      const expectFreshCases = (stats: CaseAgeStats, total: number) => {
+        expect(stats.total).toBe(total);
+        expect(stats.buckets).toEqual({
+          upTo1h: total,
+          upTo1d: 0,
+          upTo7d: 0,
+          upTo30d: 0,
+          upTo90d: 0,
+          over90d: 0,
+        });
+        expect(stats.p50).toBeGreaterThanOrEqual(0);
+        expect(stats.p50).toBeLessThan(60 * 60);
+        expect(stats.p90).toBeGreaterThanOrEqual(stats.p50);
+        expect(stats.p90).toBeLessThan(60 * 60);
+      };
+
+      it('should report the case age snapshot', async () => {
+        const [closedCase, inProgressCase] = await Promise.all([
+          createCase(supertest, getPostCaseRequest({ owner: 'securitySolution' })),
+          createCase(supertest, getPostCaseRequest({ owner: 'securitySolution' })),
+          createCase(supertest, getPostCaseRequest({ owner: 'securitySolution' })),
+          createCase(supertest, getPostCaseRequest({ owner: 'cases' })),
+        ]);
+
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              { id: closedCase.id, version: closedCase.version, status: CaseStatuses.closed },
+              {
+                id: inProgressCase.id,
+                version: inProgressCase.version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          },
+        });
+
+        await deleteTelemetrySnapshot();
+        await runTelemetryTask(supertest);
+
+        await retry.try(async () => {
+          const res = await getTelemetry(supertest);
+          const { caseAge } = getCasesTelemetry(res);
+
+          // Collection omits this key when the query fails, so check it before the details.
+          expect(caseAge).toBeDefined();
+
+          expectFreshCases(caseAge.all.closed, 1);
+          expectFreshCases(caseAge.all.open, 2);
+          expectFreshCases(caseAge.all.inProgress, 1);
+
+          expectFreshCases(caseAge.sec.closed, 1);
+          expectFreshCases(caseAge.sec.open, 1);
+          expectFreshCases(caseAge.sec.inProgress, 1);
+
+          expectFreshCases(caseAge.main.closed, 0);
+          expectFreshCases(caseAge.main.open, 1);
+          expectFreshCases(caseAge.main.inProgress, 0);
+
+          expectFreshCases(caseAge.obs.closed, 0);
+          expectFreshCases(caseAge.obs.open, 0);
+          expectFreshCases(caseAge.obs.inProgress, 0);
         });
       });
     });
