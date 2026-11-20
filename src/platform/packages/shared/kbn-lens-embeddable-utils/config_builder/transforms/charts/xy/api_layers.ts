@@ -16,6 +16,7 @@ import {
 import type {
   EsqlEventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
+  PointStyleProps,
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import type {
@@ -387,6 +388,26 @@ export function buildAPIReferenceLinesLayer(
   };
 }
 
+const toApiAnnotationAppearance = (annotation: Pick<PointStyleProps, 'color' | 'isHidden'>) => ({
+  color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
+  ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
+});
+
+const toApiIconAndLine = (
+  annotation: Pick<PointStyleProps, 'icon' | 'lineWidth' | 'lineStyle'>
+) => ({
+  ...(annotation.icon ? { icon: getAnnotationIconAPIName(annotation.icon) } : {}),
+  // lineWidth isn't allowed to be zero, so the truthy check is valid here
+  ...(annotation.lineWidth || annotation.lineStyle
+    ? {
+        line: {
+          stroke_width: annotation.lineWidth ? annotation.lineWidth : 1,
+          stroke_dash: annotation.lineStyle ? annotation.lineStyle : 'solid',
+        },
+      }
+    : {}),
+});
+
 function buildAPIEsqlAnnotation(
   annotation: EsqlEventAnnotationConfig
 ): Extract<AnnotationLayerByValueType['events'][number], { type: 'esql' }> {
@@ -397,8 +418,7 @@ function buildAPIEsqlAnnotation(
     ...(annotation.timeField ? { time_field: annotation.timeField } : {}),
     ...(annotation.extraColumns?.length ? { extra_columns: annotation.extraColumns } : {}),
     ...(annotation.label ? { label: annotation.label } : {}),
-    color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
-    ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
+    ...toApiAnnotationAppearance(annotation),
   };
   if ('endTimeColumn' in annotation) {
     return {
@@ -418,16 +438,7 @@ function buildAPIEsqlAnnotation(
           },
         }
       : {}),
-    ...(annotation.icon ? { icon: getAnnotationIconAPIName(annotation.icon) } : {}),
-    // lineWidth isn't allowed to be zero, so the truthy check is valid here
-    ...(annotation.lineWidth || annotation.lineStyle
-      ? {
-          line: {
-            stroke_width: annotation.lineWidth ? annotation.lineWidth : 1,
-            stroke_dash: annotation.lineStyle ? annotation.lineStyle : 'solid',
-          },
-        }
-      : {}),
+    ...toApiIconAndLine(annotation),
   };
 }
 
@@ -554,19 +565,9 @@ export function buildAPIAnnotationsLayer(
 
           time_field: annotation.timeField!,
           ...(annotation.extraFields ? { extra_fields: annotation.extraFields } : {}),
-          color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
-          ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
+          ...toApiAnnotationAppearance(annotation),
           ...getTextConfigurationForQueryAnnotation(annotation),
-          ...(annotation.icon ? { icon: getAnnotationIconAPIName(annotation.icon) } : {}),
-          // lineWidth isn't allowed to be zero, so the truthy check is valid here
-          ...(annotation.lineWidth || annotation.lineStyle
-            ? {
-                line: {
-                  stroke_width: annotation.lineWidth ? annotation.lineWidth : 1,
-                  stroke_dash: annotation.lineStyle ? annotation.lineStyle : 'solid',
-                },
-              }
-            : {}),
+          ...toApiIconAndLine(annotation),
         };
       }
       return buildAPIManualAnnotation(annotation);
@@ -584,9 +585,8 @@ function buildAPIManualAnnotation(
         from: annotation.key.timestamp,
         to: annotation.key.endTimestamp,
       },
-      color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
+      ...toApiAnnotationAppearance(annotation),
       fill: annotation.outside ? 'outside' : 'inside',
-      ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
       ...(annotation.label ? { label: annotation.label } : {}),
     };
   }
@@ -594,22 +594,13 @@ function buildAPIManualAnnotation(
   return {
     type: 'point',
     timestamp: annotation.key.timestamp,
-    color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
-    ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
+    ...toApiAnnotationAppearance(annotation),
     ...(annotation.textVisibility != null
       ? {
           text: { visible: annotation.textVisibility },
         }
       : {}),
     ...(annotation.label ? { label: annotation.label } : {}),
-    ...(annotation.icon ? { icon: getAnnotationIconAPIName(annotation.icon) } : {}),
-    ...(annotation.lineWidth || annotation.lineStyle
-      ? {
-          line: {
-            stroke_width: annotation.lineWidth ? annotation.lineWidth : 1,
-            stroke_dash: annotation.lineStyle ? annotation.lineStyle : 'solid',
-          },
-        }
-      : {}),
+    ...toApiIconAndLine(annotation),
   };
 }

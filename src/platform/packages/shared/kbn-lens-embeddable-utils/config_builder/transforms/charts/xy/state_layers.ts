@@ -18,7 +18,7 @@ import type {
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
-import type { EsqlEventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { EsqlEventAnnotationConfig, PointStyleProps } from '@kbn/event-annotation-common';
 import { getValueColumn } from '../../columns/esql_column';
 import { toLensStateFilterLanguage } from '../../columns/filter';
 import type {
@@ -154,11 +154,7 @@ function buildByValueAnnotationLayer(
             endTimestamp: String(annotation.interval.to),
           },
           outside: annotation.fill === 'outside',
-          ...(annotation.color && !isAutoColor(annotation.color)
-            ? { color: annotation.color.color }
-            : {}),
-          label: annotation.label ?? DEFAULT_API_ANNOTATION_LABEL,
-          ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
+          ...toStateAnnotationAppearance(annotation),
         };
       }
       if (annotation.type === 'point') {
@@ -169,17 +165,8 @@ function buildByValueAnnotationLayer(
             type: 'point_in_time',
             timestamp: String(annotation.timestamp),
           },
-          ...(annotation.color && !isAutoColor(annotation.color)
-            ? { color: annotation.color.color }
-            : {}),
-          label: annotation.label ?? DEFAULT_API_ANNOTATION_LABEL,
-          ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
-          ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
-          ...(annotation.icon ? { icon: annotationIconCompat.toState(annotation.icon) } : {}),
-          ...(annotation.line?.stroke_width != null
-            ? { lineWidth: annotation.line.stroke_width }
-            : {}),
-          ...(annotation.line?.stroke_dash ? { lineStyle: annotation.line.stroke_dash } : {}),
+          ...toStateAnnotationAppearance(annotation),
+          ...toStatePointStyle(annotation),
         };
       }
       if (annotation.type === 'esql') {
@@ -193,20 +180,11 @@ function buildByValueAnnotationLayer(
           query: annotation.query.expression,
           language: toLensStateFilterLanguage(annotation.query.language),
         },
-        label: annotation.label ?? DEFAULT_API_ANNOTATION_LABEL,
-        ...(annotation.color && !isAutoColor(annotation.color)
-          ? { color: annotation.color.color }
-          : {}),
-        ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
+        ...toStateAnnotationAppearance(annotation),
         timeField: annotation.time_field,
         ...(annotation.extra_fields ? { extraFields: annotation.extra_fields } : {}),
-        ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
+        ...toStatePointStyle(annotation),
         ...(annotation.text?.field ? { textField: annotation.text.field } : {}),
-        ...(annotation.icon ? { icon: annotationIconCompat.toState(annotation.icon) } : {}),
-        ...(annotation.line?.stroke_width != null
-          ? { lineWidth: annotation.line.stroke_width }
-          : {}),
-        ...(annotation.line?.stroke_dash ? { lineStyle: annotation.line.stroke_dash } : {}),
         key: {
           type: 'point_in_time',
         },
@@ -216,6 +194,25 @@ function buildByValueAnnotationLayer(
 }
 
 type APIEsqlAnnotation = Extract<AnnotationLayerByValueType['events'][number], { type: 'esql' }>;
+type APIPointAnnotation = Extract<AnnotationLayerByValueType['events'][number], { type: 'point' }>;
+
+const toStateAnnotationAppearance = (
+  annotation: Pick<APIPointAnnotation, 'label' | 'color' | 'visible'>
+): Pick<PointStyleProps, 'label' | 'color' | 'isHidden'> => ({
+  label: annotation.label ?? DEFAULT_API_ANNOTATION_LABEL,
+  ...(annotation.color && !isAutoColor(annotation.color) ? { color: annotation.color.color } : {}),
+  ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
+});
+
+// Text column and field bindings differ per annotation kind, so only the shared part lives here.
+const toStatePointStyle = (
+  annotation: Pick<APIPointAnnotation, 'icon' | 'line'> & { text?: { visible?: boolean } }
+): Pick<PointStyleProps, 'textVisibility' | 'icon' | 'lineWidth' | 'lineStyle'> => ({
+  ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
+  ...(annotation.icon ? { icon: annotationIconCompat.toState(annotation.icon) } : {}),
+  ...(annotation.line?.stroke_width != null ? { lineWidth: annotation.line.stroke_width } : {}),
+  ...(annotation.line?.stroke_dash ? { lineStyle: annotation.line.stroke_dash } : {}),
+});
 
 function buildStateEsqlAnnotation(
   annotation: APIEsqlAnnotation,
@@ -229,11 +226,7 @@ function buildStateEsqlAnnotation(
     ...(annotation.time_field ? { timeField: annotation.time_field } : {}),
     ...(annotation.extra_columns ? { extraColumns: annotation.extra_columns } : {}),
     ...(annotation.text?.column ? { textColumn: annotation.text.column } : {}),
-    label: annotation.label ?? DEFAULT_API_ANNOTATION_LABEL,
-    ...(annotation.color && !isAutoColor(annotation.color)
-      ? { color: annotation.color.color }
-      : {}),
-    ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
+    ...toStateAnnotationAppearance(annotation),
   };
   if ('end_time_column' in annotation) {
     return {
@@ -246,10 +239,7 @@ function buildStateEsqlAnnotation(
   return {
     ...common,
     key: { type: 'point_in_time' },
-    ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
-    ...(annotation.icon ? { icon: annotationIconCompat.toState(annotation.icon) } : {}),
-    ...(annotation.line?.stroke_width != null ? { lineWidth: annotation.line.stroke_width } : {}),
-    ...(annotation.line?.stroke_dash ? { lineStyle: annotation.line.stroke_dash } : {}),
+    ...toStatePointStyle(annotation),
   };
 }
 
