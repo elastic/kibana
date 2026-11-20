@@ -2782,9 +2782,16 @@ describe('Authenticator', () => {
         const client = elasticsearchServiceMock.createScopedClusterClient();
         client.asCurrentUser.security.authenticate.mockResponse(user);
         mockOptions.clusterClient.asScoped.mockReturnValue(client);
-        await expect(authenticator.authenticate(request)).resolves.toMatchObject({
+        const authenticationResult = await authenticator.authenticate(request);
+        expect(authenticationResult).toMatchObject({
           user: expect.objectContaining({ username: user.username }),
         });
+        const authenticatedUser = authenticationResult.user;
+        if (!authenticatedUser) {
+          throw new Error('HTTP authentication did not return a user.');
+        }
+        expect(authenticatedUser.authentication_provider.type).toBe('http');
+        mockOptions.getCurrentUser.mockReturnValue(authenticatedUser);
         authenticateSession.mockClear();
 
         await expect(authenticator.reauthenticate(request, request.headers)).resolves.toBeNull();
