@@ -734,6 +734,67 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
       expect(hasAgentlessGrant(permissions?.['package-policy-mixed_mode_pkg'])).toBe(true);
     });
+
+    // A policy with an eligible input and a default-only input: every ENABLED input must qualify,
+    // and disabled inputs must be ignored.
+    const buildMixedInputsPackagePolicy = (defaultInputEnabled: boolean): PackagePolicy =>
+      ({
+        id: 'package-policy-mixed_mode_pkg',
+        name: 'agentless-test-policy',
+        namespace: 'test',
+        enabled: true,
+        supports_agentless: true,
+        package: { name: 'mixed_mode_pkg', version: '1.0.0', title: 'mixed_mode_pkg' },
+        inputs: [
+          {
+            type: 'httpjson',
+            policy_template: 'agentless_tmpl',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-agentless',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'mixed_mode_pkg.logs' },
+              },
+            ],
+          },
+          {
+            type: 'httpjson',
+            policy_template: 'default_tmpl',
+            enabled: defaultInputEnabled,
+            streams: [
+              {
+                id: 'stream-default',
+                enabled: defaultInputEnabled,
+                data_stream: { type: 'logs', dataset: 'mixed_mode_pkg.default' },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      } as PackagePolicy);
+
+    it('does NOT grant agentless-* permissions when any enabled input is not agentless-eligible', async () => {
+      const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildMixedInputsPackagePolicy(true),
+      ]);
+
+      expect(hasAgentlessGrant(permissions?.['package-policy-mixed_mode_pkg'])).toBe(false);
+    });
+
+    it('grants agentless-* permissions when the only non-eligible input is disabled', async () => {
+      const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildMixedInputsPackagePolicy(false),
+      ]);
+
+      expect(hasAgentlessGrant(permissions?.['package-policy-mixed_mode_pkg'])).toBe(true);
+    });
   });
 
   describe('role descriptor names', () => {
