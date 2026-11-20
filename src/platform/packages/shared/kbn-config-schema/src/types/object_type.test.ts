@@ -1105,6 +1105,22 @@ describe('schema structure with expandBranches', () => {
       { path: ['auth', 'token'], type: 'string|never' },
     ]);
   });
+
+  test('merges parent path types from nested branch schemas into one entry', () => {
+    const nestedSchema = schema.object({
+      setting: schema.conditional(
+        schema.contextRef('dev'),
+        true,
+        schema.oneOf([schema.object({ enabled: schema.boolean() }), schema.string()]),
+        schema.number()
+      ),
+    });
+
+    expect(nestedSchema.getSchemaStructure({ expandBranches: true })).toEqual([
+      { path: ['setting'], type: 'string|number' },
+      { path: ['setting', 'enabled'], type: 'boolean|never' },
+    ]);
+  });
 });
 
 describe('#extendsDeep', () => {

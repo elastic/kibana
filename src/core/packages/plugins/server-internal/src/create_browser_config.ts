@@ -59,22 +59,25 @@ export function getExposedConfigKeys<T = unknown>(
   return flattenedConfigSchema;
 }
 
+/**
+ * A path whose descriptor is still an object when the path ends is a leaf (such as a record) that the descriptor
+ * picks keys from. The schema doesn't say which keys or values that leaf holds, so it counts as exposed. The empty
+ * root path of a config schema with no keys holds nothing, so it does not.
+ */
 function checkIsPathExposed<T = unknown>(
   path: string[],
   descriptor: ExposedToBrowserDescriptor<T>
-) {
-  let isExposed = false;
+): boolean {
+  if (!path.length) {
+    return false;
+  }
   for (const key of path) {
-    // Traverse the path to see if it is exposed or not
     const exposedConfig = descriptor[key as keyof ExposedToBrowserDescriptor<T>];
     if (exposedConfig && typeof exposedConfig === 'object') {
       descriptor = exposedConfig;
       continue;
     }
-    if (exposedConfig === true) {
-      isExposed = true;
-    }
-    break;
+    return exposedConfig === true;
   }
-  return isExposed;
+  return true;
 }

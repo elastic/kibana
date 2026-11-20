@@ -245,4 +245,41 @@ describe('createBrowserConfig and getExposedConfigKeys', () => {
       exposedConfigKeys: { 'oneOf.exposed1': 'string|number' },
     });
   });
+
+  it('lists a leaf branch that a partial selector picks keys from', () => {
+    const configSchema = schema.object({
+      settings: schema.conditional(
+        schema.contextRef('serverless'),
+        true,
+        schema.object({ enabled: schema.boolean() }),
+        schema.recordOf(schema.string(), schema.string())
+      ),
+    });
+    const descriptor: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
+      schema: configSchema,
+      exposeToBrowser: {
+        settings: { enabled: true },
+      },
+    };
+
+    const result = getBrowserConfigAndExposedKeys(
+      { settings: { enabled: 'from-record', other: 'value' } },
+      descriptor
+    );
+    expect(result).toEqual({
+      browserConfig: { settings: { enabled: 'from-record' } },
+      exposedConfigKeys: { settings: 'record', 'settings.enabled': 'boolean|never' },
+    });
+  });
+
+  it('lists nothing for a config schema without keys', () => {
+    const configSchema = schema.object({});
+    const descriptor: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
+      schema: configSchema,
+      exposeToBrowser: {},
+    };
+
+    const result = getBrowserConfigAndExposedKeys({}, descriptor);
+    expect(result).toEqual({ browserConfig: {}, exposedConfigKeys: {} });
+  });
 });

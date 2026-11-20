@@ -384,9 +384,10 @@ function getBranchSchemas(internalSchema: Schema): Schema[] {
  * Merges the nested keys of every branch of a conditional or alternatives schema.
  *
  * Returns an empty array when no branch has nested keys, so the caller falls back to a single leaf entry.
- * A key gets `never` added to its type when one of the branches cannot hold it. A leaf branch that can hold a
- * value (such as a record) keeps its own entry at the parent path, so it stays distinct from the nested keys.
- * A `null` or `never` leaf branch holds no value, so it only adds `never` to the nested keys.
+ * A key gets `never` added to its type when one of the branches cannot hold it. A branch that can hold a value at
+ * the parent path (such as a record, or a nested branch schema with a scalar branch) adds its type to a single
+ * parent entry, so it stays distinct from the nested keys. A `null` or `never` value holds nothing, so it only adds
+ * `never` to the nested keys.
  */
 function getBranchesStructure(
   internalSchema: Schema,
@@ -395,25 +396,31 @@ function getBranchesStructure(
 ): SchemaStructureEntry[] {
   const branches = getBranchSchemas(internalSchema);
 
-  const objectBranches: SchemaStructureEntry[][] = [];
-  const leafTypes: string[] = [];
+  const nestedBranches: SchemaStructureEntry[][] = [];
+  const parentTypes: string[] = [];
+  let leafBranchCount = 0;
   for (const branch of branches) {
     const entries = recursiveGetSchemaStructure(branch, path, options);
-    const [firstEntry] = entries;
-    if (entries.length === 1 && firstEntry.path.length === path.length) {
-      leafTypes.push(...firstEntry.type.split('|'));
+    const nested = entries.filter((entry) => entry.path.length > path.length);
+    for (const entry of entries) {
+      if (entry.path.length === path.length) {
+        parentTypes.push(...entry.type.split('|'));
+      }
+    }
+    if (nested.length) {
+      nestedBranches.push(nested);
     } else {
-      objectBranches.push(entries);
+      leafBranchCount++;
     }
   }
 
-  if (!objectBranches.length) {
+  if (!nestedBranches.length) {
     return [];
   }
 
   // Keyed by the serialized segments, so a literal `a.b` key doesn't merge with the nested `a` -> `b` path.
   const typesByPath = new Map<string, { path: string[]; types: string[]; branchCount: number }>();
-  for (const entries of objectBranches) {
+  for (const entries of nestedBranches) {
     for (const { path: entryPath, type } of entries) {
       const pathKey = JSON.stringify(entryPath);
       const existing = typesByPath.get(pathKey) ?? { path: entryPath, types: [], branchCount: 0 };
@@ -423,15 +430,15 @@ function getBranchesStructure(
     }
   }
 
-  const valueLeafTypes = [
-    ...new Set(leafTypes.filter((type) => type !== 'never' && type !== 'null')),
+  const valueParentTypes = [
+    ...new Set(parentTypes.filter((type) => type !== 'never' && type !== 'null')),
   ];
-  const parentEntries: SchemaStructureEntry[] = valueLeafTypes.length
-    ? [{ path, type: valueLeafTypes.join('|') }]
+  const parentEntries: SchemaStructureEntry[] = valueParentTypes.length
+    ? [{ path, type: valueParentTypes.join('|') }]
     : [];
 
   const nestedEntries = [...typesByPath.values()].map(({ path: entryPath, types, branchCount }) => {
-    const isMissingFromBranch = branchCount < objectBranches.length || leafTypes.length > 0;
+    const isMissingFromBranch = branchCount < nestedBranches.length || leafBranchCount > 0;
     const allTypes = isMissingFromBranch ? [...types, 'never'] : types;
     return { path: entryPath, type: [...new Set(allTypes)].join('|') };
   });
