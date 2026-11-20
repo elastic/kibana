@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getLensConfigLabel } from './visualization_label';
+import type { ChartVisualizationAttachmentData } from './visualization_types';
+import { getLensConfigLabel, getVisualizationLabel } from './visualization_label';
 
 describe('getLensConfigLabel', () => {
   it.each([
@@ -75,5 +76,49 @@ describe('getLensConfigLabel', () => {
     ],
   ])('returns undefined for %s', (_case, config) => {
     expect(getLensConfigLabel(config)).toBeUndefined();
+  });
+});
+
+describe('getVisualizationLabel', () => {
+  const metric = { type: 'metric', metrics: [{ type: 'primary', column: 'Total' }] };
+  const lens = (
+    visualization: Record<string, unknown>,
+    esql = 'FROM logs | STATS Total = COUNT(*)'
+  ): ChartVisualizationAttachmentData => ({ query: 'total logs', visualization, esql });
+
+  it('prefers the title', () => {
+    expect(getVisualizationLabel(lens({ ...metric, title: 'Requests' }))).toBe('Requests');
+  });
+
+  it('uses the Lens measure when untitled, with or without an explicit renderer', () => {
+    expect(getVisualizationLabel(lens(metric))).toBe('Total');
+    expect(getVisualizationLabel({ ...lens(metric), renderer: 'lens' })).toBe('Total');
+  });
+
+  it('falls back to the ES|QL query when there is no title or measure', () => {
+    expect(getVisualizationLabel(lens({ type: 'mystery' }))).toBe(
+      'FROM logs | STATS Total = COUNT(*)'
+    );
+    expect(getVisualizationLabel({ ...lens(metric), renderer: 'vega' })).toBe(
+      'FROM logs | STATS Total = COUNT(*)'
+    );
+  });
+
+  it('puts the query on one line and truncates it at a character boundary', () => {
+    const label = getVisualizationLabel(
+      lens({ type: 'mystery' }, `FROM logs\n| WHERE message == "${'😀'.repeat(60)}"`)
+    );
+    expect(Array.from(label ?? '')).toHaveLength(50);
+    expect(label).toMatch(/^FROM logs \| WHERE message == "(😀)+…$/u);
+  });
+
+  it('returns undefined for untitled static custom content', () => {
+    expect(
+      getVisualizationLabel({
+        query: 'a note',
+        renderer: 'custom_content',
+        visualization: { template: '<p>Hi</p>' },
+      })
+    ).toBeUndefined();
   });
 });

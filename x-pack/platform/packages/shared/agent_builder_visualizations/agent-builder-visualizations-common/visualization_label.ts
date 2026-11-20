@@ -79,8 +79,12 @@ const getQueryLabel = (data: VisualizationAttachmentData): string | undefined =>
   if (!singleLine) {
     return undefined;
   }
-  return singleLine.length > MAX_QUERY_LABEL_LENGTH
-    ? `${singleLine.slice(0, MAX_QUERY_LABEL_LENGTH - 1).trimEnd()}…`
+  const characters = Array.from(singleLine);
+  return characters.length > MAX_QUERY_LABEL_LENGTH
+    ? `${characters
+        .slice(0, MAX_QUERY_LABEL_LENGTH - 1)
+        .join('')
+        .trimEnd()}…`
     : singleLine;
 };
 
