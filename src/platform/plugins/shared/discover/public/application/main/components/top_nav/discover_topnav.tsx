@@ -392,16 +392,13 @@ export const DiscoverTopNav = ({
     Boolean(tab.autoFocusVisor && tab.skipInitialFetch)
   );
 
-  // The prompt the tab was opened with is sent once: the flag is cleared as soon as it is read,
-  // so a stopped or failed generation is not sent again when the tab is revisited
-  const hasPendingPrompt = useCurrentTabSelector((tab) => Boolean(tab.autoSubmitVisor));
-  const [autoSubmitVisor] = useState(hasPendingPrompt);
+  // The prompt the tab was opened with is sent once: the flag is cleared when the visor sends it,
+  // so a stopped or failed generation is not sent again when the visor mounts again
+  const autoSubmitVisor = useCurrentTabSelector((tab) => Boolean(tab.autoSubmitVisor));
   const setAutoSubmitVisor = useCurrentTabAction(internalStateActions.setAutoSubmitVisor);
-  useEffect(() => {
-    if (autoSubmitVisor) {
-      dispatch(setAutoSubmitVisor({ autoSubmitVisor: false }));
-    }
-  }, [autoSubmitVisor, dispatch, setAutoSubmitVisor]);
+  const onAutoSubmitVisor = useCallback(() => {
+    dispatch(setAutoSubmitVisor({ autoSubmitVisor: false }));
+  }, [dispatch, setAutoSubmitVisor]);
 
   const askAi = useAskAi();
 
@@ -472,6 +469,7 @@ export const DiscoverTopNav = ({
         onVisorInitialStateChange={onVisorInitialStateChange}
         autoFocusVisor={autoFocusVisor}
         autoSubmitVisor={autoSubmitVisor}
+        onAutoSubmitVisor={onAutoSubmitVisor}
         esqlVariablesConfig={
           isEsqlMode
             ? {

@@ -27,7 +27,8 @@ export const clearInferenceConnectorCache = (): void => {
 
 export interface NlSubmitOptions {
   // Applies the result directly even when the host reviews generated queries, for a prompt that
-  // arrived with the editor and so has no query of the user's to protect yet
+  // arrived with the editor and so has no query of the user's to protect yet. The review still
+  // applies if the query is edited while the request runs
   skipReview?: boolean;
 }
 
@@ -56,6 +57,9 @@ export const useNlGeneration = ({
   const [isNlLoading, setIsNlLoading] = useState(false);
   const [hasConnector, setHasConnector] = useState<boolean | undefined>(hasInferenceConnector);
   const abortControllerRef = useRef<AbortController | null>(null);
+  // What the editor shows now, to compare with the query a request was sent with once it settles
+  const latestQueryRef = useRef(query);
+  latestQueryRef.current = query;
 
   useEffect(() => {
     if (!isNlToEsqlEnabled || !esql) return;
@@ -122,7 +126,10 @@ export const useNlGeneration = ({
             undefined,
             result.content.length
           );
-          if (onNlResult && !skipReview) {
+          // Edits made to the query while the request ran would be lost by applying the result
+          // directly, so in that case it goes through the review after all
+          const applyDirectly = skipReview && latestQueryRef.current === query;
+          if (onNlResult && !applyDirectly) {
             // The prompt stays until the generated query is kept
             onNlResult(result.content, { onAccept: () => setNlValue(''), onReject: onNlReject });
           } else {

@@ -10,7 +10,7 @@
 import type { ComponentProps } from 'react';
 import React, { useContext, useEffect } from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverTopNavProps } from './discover_topnav';
 import { DataSourceType } from '../../../../../common/data_sources';
@@ -42,6 +42,7 @@ const MockAggregateQueryTopNavMenu = (props: AggregateQueryTopNavMenuProps) => {
     disableSubmitAction,
     showDatePicker,
     autoSubmitVisor,
+    onAutoSubmitVisor,
   } = props;
 
   return (
@@ -69,6 +70,9 @@ const MockAggregateQueryTopNavMenu = (props: AggregateQueryTopNavMenuProps) => {
         }
       >
         Submit
+      </button>
+      <button data-test-subj="mock-auto-submit-visor" onClick={onAutoSubmitVisor}>
+        Auto submit visor
       </button>
     </div>
   );
@@ -295,7 +299,7 @@ describe('Discover topnav component', () => {
     });
   });
 
-  test('sends the prompt the tab was opened with only on the first mount', async () => {
+  test('keeps asking to send the prompt the tab was opened with until the visor sends it', async () => {
     const { toolkit, props } = await setup();
     const tabId = toolkit.getCurrentTab().id;
     toolkit.internalState.dispatch(
@@ -304,15 +308,23 @@ describe('Discover topnav component', () => {
 
     const { unmount } = renderTestComponent({ toolkit, props });
 
-    await waitFor(() => expect(toolkit.getCurrentTab().autoSubmitVisor).toBe(false));
     expect(screen.getByTestId('aggregate-query-top-nav-menu')).toHaveAttribute(
       'data-auto-submit-visor',
       'true'
     );
 
+    // Leaving before the visor could send it, e.g. while it still loads, keeps the prompt pending
     unmount();
     renderTestComponent({ toolkit, props });
 
+    expect(screen.getByTestId('aggregate-query-top-nav-menu')).toHaveAttribute(
+      'data-auto-submit-visor',
+      'true'
+    );
+
+    fireEvent.click(screen.getByTestId('mock-auto-submit-visor'));
+
+    await waitFor(() => expect(toolkit.getCurrentTab().autoSubmitVisor).toBe(false));
     expect(screen.getByTestId('aggregate-query-top-nav-menu')).toHaveAttribute(
       'data-auto-submit-visor',
       'false'

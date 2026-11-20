@@ -65,7 +65,7 @@ import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
 import type { ISessionService, PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { FilterableSource } from '@kbn/data-source';
-import type { ESQLControlVariable, ESQLQueryStats } from '@kbn/esql-types';
+import { QuerySource, type ESQLControlVariable, type ESQLQueryStats } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
@@ -304,6 +304,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * generated query without the review step.
    */
   autoSubmitVisor?: boolean;
+  /**
+   * Called when the visor sends the restored prompt, so the host can drop its `autoSubmitVisor` request.
+   */
+  onAutoSubmitVisor?: () => void;
 
   /**
    * Optional configuration for ES|QL variables.
@@ -947,8 +951,8 @@ export const QueryBarTopRow = React.memo(
     );
 
     const propsOnTextLangQueryChange = props.onTextLangQueryChange;
-    const onVisorUpdateAndSubmit = useCallback(
-      (newEsqlQuery: string) => {
+    const onVisorUpdateAndSubmit = useCallback<QuickSearchVisorProps['onUpdateAndSubmitQuery']>(
+      (newEsqlQuery, source) => {
         if (isSubmitDisabled) return;
         const aggregateQuery = { esql: newEsqlQuery } as AggregateQuery;
         propsOnTextLangQueryChange(aggregateQuery);
@@ -957,7 +961,9 @@ export const QueryBarTopRow = React.memo(
             query: aggregateQuery as unknown as Query | QT,
             dateRange: dateRangeRef.current,
           },
-          QuerySubmitTrigger.QUICK_SEARCH
+          source === QuerySource.QUICK_SEARCH_NL
+            ? QuerySubmitTrigger.QUICK_SEARCH_NL
+            : QuerySubmitTrigger.QUICK_SEARCH
         );
       },
       [isSubmitDisabled, propsOnTextLangQueryChange, onSubmit]
@@ -1663,6 +1669,7 @@ export const QueryBarTopRow = React.memo(
                     onInitialStateChange={props.onVisorInitialStateChange}
                     autoFocus={props.autoFocusVisor}
                     autoSubmit={props.autoSubmitVisor}
+                    onAutoSubmit={props.onAutoSubmitVisor}
                   />
                 </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}

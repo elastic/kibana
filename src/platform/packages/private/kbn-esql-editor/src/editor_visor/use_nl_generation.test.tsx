@@ -125,6 +125,39 @@ describe('useNlGeneration', () => {
     expect(result.current.nlValue).toBe('');
   });
 
+  it('onNlSubmit reviews the result despite skipReview when the query changed meanwhile', async () => {
+    const onNlResult = jest.fn();
+    let resolveRequest: (value: { content: string }) => void = () => {};
+    (coreStart.http.post as jest.Mock).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveRequest = resolve;
+        })
+    );
+
+    const { result, rerender } = renderHook(
+      ({ query }: { query: string }) =>
+        useControlledNlGeneration({ ...defaultParams, query, onNlResult }),
+      { wrapper: createWrapper(), initialProps: { query: 'FROM test_index' } }
+    );
+
+    act(() => result.current.setNlValue('show me logs'));
+    act(() => {
+      result.current.onNlSubmit({ skipReview: true });
+    });
+    rerender({ query: 'FROM test_index | LIMIT 5' });
+    await act(async () => {
+      resolveRequest({ content: 'FROM logs | LIMIT 10' });
+    });
+
+    expect(onNlResult).toHaveBeenCalledWith(
+      'FROM logs | LIMIT 10',
+      expect.objectContaining({ onAccept: expect.any(Function) })
+    );
+    expect(defaultParams.onUpdateAndSubmitQuery).not.toHaveBeenCalled();
+    expect(result.current.nlValue).toBe('show me logs');
+  });
+
   it('onNlSubmit shows the server error message on failure', async () => {
     (coreStart.http.post as jest.Mock).mockRejectedValue({
       body: { message: 'Connector unavailable', statusCode: 503 },
