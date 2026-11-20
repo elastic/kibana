@@ -13,10 +13,15 @@ import {
   hasVisitedGettingStarted,
 } from './components/getting_started_redirect';
 import { SearchHomepagePage } from './components/search_homepage/search_homepage';
+import { SearchWebCrawlsPage } from './components/web_crawls/web_crawls';
+import { WEB_CRAWLS_ROUTE } from './home_config';
 
 export const HomepageRouter = () => {
   return (
     <Routes>
+      <Route path={WEB_CRAWLS_ROUTE}>
+        <SearchWebCrawlsPage />
+      </Route>
       <Route
         render={() =>
           hasVisitedGettingStarted() ? <SearchHomepagePage /> : <GettingStartedRedirect />

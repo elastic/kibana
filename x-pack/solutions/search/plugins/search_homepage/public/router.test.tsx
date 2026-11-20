@@ -19,14 +19,18 @@ jest.mock('./components/search_homepage/search_homepage', () => ({
   SearchHomepagePage: () => <div data-test-subj="searchHomepagePage" />,
 }));
 
+jest.mock('./components/web_crawls/web_crawls', () => ({
+  SearchWebCrawlsPage: () => <div data-test-subj="searchWebCrawlsPage" />,
+}));
+
 const mockUseKibana = useKibana as jest.Mock;
 
 describe('HomepageRouter', () => {
   const { application } = coreMock.createStart();
 
-  const renderRouter = () =>
+  const renderRouter = (path = '/') =>
     render(
-      <Router history={createMemoryHistory()}>
+      <Router history={createMemoryHistory({ initialEntries: [path] })}>
         <HomepageRouter />
       </Router>
     );
@@ -51,6 +55,14 @@ describe('HomepageRouter', () => {
 
     expect(application.navigateToApp).not.toHaveBeenCalled();
     expect(screen.getByTestId('searchHomepagePage')).toBeInTheDocument();
+  });
+
+  it('renders the web crawls page on its route, without the getting started redirect', () => {
+    renderRouter('/web_crawls');
+
+    expect(application.navigateToApp).not.toHaveBeenCalled();
+    expect(screen.getByTestId('searchWebCrawlsPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('searchHomepagePage')).not.toBeInTheDocument();
   });
 
   it('renders the home page without redirecting when local storage is unavailable', () => {

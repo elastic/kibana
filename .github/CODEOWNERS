@@ -1345,6 +1345,7 @@ x-pack/platform/plugins/shared/streams_app @elastic/streams-ui
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/platform/plugins/shared/usage_api @elastic/kibana-core
+x-pack/platform/plugins/shared/web_crawler @elastic/search-ml-ux
 x-pack/platform/plugins/shared/workflows_execution_engine @elastic/workflows-eng
 x-pack/platform/plugins/shared/workflows_extensions @elastic/workflows-eng
 x-pack/platform/plugins/shared/workflows_management @elastic/workflows-eng

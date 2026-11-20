@@ -21,7 +21,8 @@
     ],
     "optionalPlugins": [
       "agentBuilder",
-      "cloud"
+      "cloud",
+      "webCrawler"
     ]
   }
 }

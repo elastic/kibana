@@ -45,6 +45,7 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/core-security-browser-mocks",
     "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/core-user-profile-browser-mocks"
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/web-crawler-plugin"
   ]
 }

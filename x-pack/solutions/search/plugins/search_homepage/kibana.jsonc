@@ -19,6 +19,7 @@
       "console",
       "searchNavigation",
       "usageCollection",
+      "webCrawler",
     ],
     "requiredBundles": [
       "kibanaReact"

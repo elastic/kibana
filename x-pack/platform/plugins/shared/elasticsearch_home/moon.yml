@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/core-security-browser-mocks'
   - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/core-user-profile-browser-mocks'
+  - '@kbn/web-crawler-plugin'
 tags:
   - plugin
   - prod

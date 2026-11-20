@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import { BehaviorSubject } from 'rxjs';
+import type {
+  AppMountParameters,
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+} from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
+import { WEB_CRAWLS_DEEP_LINK_ID, WEB_CRAWLS_ROUTE } from './home_config';
 import type {
   SearchHomepageAppPluginStartDependencies,
   SearchHomepageServicesContextDeps,
@@ -17,6 +25,8 @@ import type {
 export class SearchHomepagePlugin
   implements Plugin<void, void, {}, SearchHomepageAppPluginStartDependencies>
 {
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+
   public setup(core: CoreSetup<SearchHomepageAppPluginStartDependencies>) {
     core.application.register({
       id: PLUGIN_ID,
@@ -35,9 +45,25 @@ export class SearchHomepagePlugin
         return renderApp(coreStart, startDeps, element);
       },
       order: 0,
+      updater$: this.appUpdater$,
       visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
     });
   }
 
-  public start() {}
+  public start(core: CoreStart, { webCrawler }: SearchHomepageAppPluginStartDependencies) {
+    if (webCrawler) {
+      this.appUpdater$.next(() => ({
+        deepLinks: [
+          {
+            id: WEB_CRAWLS_DEEP_LINK_ID,
+            path: WEB_CRAWLS_ROUTE,
+            title: i18n.translate('xpack.searchHomepage.webCrawls.linkTitle', {
+              defaultMessage: 'Web crawls',
+            }),
+            visibleIn: ['globalSearch', 'projectSideNav'],
+          },
+        ],
+      }));
+    }
+  }
 }
