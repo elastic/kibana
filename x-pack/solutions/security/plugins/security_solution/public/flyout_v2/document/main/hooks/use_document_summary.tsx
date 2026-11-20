@@ -16,6 +16,7 @@ import {
   useFetchAnonymizationFields,
 } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
+import { ALERT_AI_SUMMARY_INFERENCE_FEATURE_ID } from '../../../../../common/constants';
 import { useFetchDocumentSummary } from './use_fetch_document_summary';
 import { useBulkUpdateDocumentSummary } from './use_bulk_update_document_summary';
 
@@ -134,6 +135,7 @@ export const useDocumentSummary = ({
 }: UseDocumentSummaryParams): UseDocumentSummaryResult => {
   const { abortStream, sendMessage } = useChatComplete({
     connectorId: defaultConnectorId,
+    featureId: ALERT_AI_SUMMARY_INFERENCE_FEATURE_ID,
   });
 
   const { data: anonymizationFields, isFetched: isFetchedAnonymizationFields } =

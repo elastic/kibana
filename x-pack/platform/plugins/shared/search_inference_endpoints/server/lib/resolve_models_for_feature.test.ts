@@ -378,6 +378,66 @@ describe('resolveModelsForFeature', () => {
     });
   });
 
+  it('does not look the default up when it is a known connector the saved override left out', async () => {
+    const resolved = inferenceConnector('feature-ep');
+    const knownDefault = inferenceConnector('default');
+    getForFeature.mockResolvedValue({
+      endpoints: [resolved],
+      warnings: [],
+      soEntryFound: true,
+    });
+    getConnectorList.mockResolvedValue([resolved, knownDefault]);
+
+    const result = await resolve({ defaultConnectorId: 'default' });
+
+    expect(getConnectorById).not.toHaveBeenCalled();
+    expect(result.connectors).toEqual([resolved]);
+  });
+
+  it.each(['NO_DEFAULT_CONNECTOR', 'NO_DEFAULT_MODEL'])(
+    'does not look the default up for a saved override when the setting is the %s sentinel',
+    async (sentinel) => {
+      const resolved = inferenceConnector('feature-ep');
+      getForFeature.mockResolvedValue({
+        endpoints: [resolved],
+        warnings: [],
+        soEntryFound: true,
+      });
+      getConnectorList.mockResolvedValue([resolved]);
+
+      const result = await resolve({ defaultConnectorId: sentinel });
+
+      expect(getConnectorById).not.toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(result.connectors).toEqual([resolved]);
+    }
+  );
+
+  it('does not look the default up when the setting is the NO_DEFAULT_MODEL sentinel and there is no saved override', async () => {
+    const recommended = inferenceConnector('rec');
+    getForFeature.mockResolvedValue({
+      endpoints: [recommended],
+      warnings: [],
+      soEntryFound: false,
+    });
+    getConnectorList.mockResolvedValue([recommended]);
+
+    const result = await resolve({ defaultConnectorId: 'NO_DEFAULT_MODEL' });
+
+    expect(getConnectorById).not.toHaveBeenCalled();
+    expect(result.connectors).toEqual([{ ...recommended, isRecommended: true }]);
+  });
+
+  it('returns an empty list when defaultConnectorOnly is set with the NO_DEFAULT_MODEL sentinel', async () => {
+    const result = await resolve({
+      defaultConnectorId: 'NO_DEFAULT_MODEL',
+      defaultConnectorOnly: true,
+    });
+
+    expect(getConnectorById).not.toHaveBeenCalled();
+    expect(result).toEqual({ connectors: [], warnings: [], soEntryFound: false });
+  });
+
   it('flags the default connector in a saved override that already contains it', async () => {
     const other = inferenceConnector('other-ep');
     const defaultInOverride = inferenceConnector('default');
