@@ -731,10 +731,16 @@ NIGHTSHIFT_WRITEUP_BASELINE_PROMPT=merge-base \
 ```
 
 Replies are cached under `data/nightshift_writeup/cache/` by round, model, prompt and
-repetition, so a re-run only makes judge calls; delete that folder to regenerate. One
-repetition per round is usually enough to compare prompts, since averaging over rounds evens out a
-single reply's randomness. Use `--repetitions 2` or more before replacing a golden, which is decided
-per round, or when two prompts are only a few words apart.
+repetition, so a re-run only makes judge calls; delete that folder to regenerate. Use
+`--repetitions 2` or more before replacing a golden, which is decided per round, or when two
+prompts are only a few words apart.
+
+How big a margin means something: a PR run that didn't change the prompt compared the same prompt
+against itself ([build 2151](https://buildkite.com/elastic/kibana-evals-pr-llm-evals/builds/2151))
+and came out 41–27, from sampling and judge noise alone. On the 20-round ORCA set that's about 70
+votes, and a sign test only clears p < 0.05 from about 43–25. Treat that as a floor, not a pass
+mark: votes on the same round aren't independent, so the real noise is wider. A change that should
+matter needs a clearly bigger margin, or `--repetitions 2` and a second look, before it counts.
 
 ### Judge agreement
 
