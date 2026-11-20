@@ -10,11 +10,14 @@ import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { isNumericType } from '@kbn/esql-language';
+import { ControlValuesSource } from '@kbn/controls-constants';
 
 import { RangeSliderEditorOptions } from '../controls/data_controls/range_slider/components/editor/range_slider_editor_options';
 import { dataViewsService } from '../services/kibana_services';
 import { RANGE_SLIDER_ACTION } from './constants';
 import type { CreateControlTypeAction } from './control_panel_actions';
+import { getESQLColumnType } from './get_esql_column_type';
 import { createDataControlOfType } from './create_data_control_panel_action';
 
 const isFieldCompatible = (field: DataViewField) => {
@@ -32,7 +35,20 @@ export const createRangeSliderControlAction =
         i18n.translate('controls.rangeSlider.displayName', {
           defaultMessage: 'Range slider',
         }),
-      isCompatible: async ({ state: { data_view_id: dataViewId, field_name: fieldName } }) => {
+      isCompatible: async ({
+        embeddable,
+        state: {
+          data_view_id: dataViewId,
+          field_name: fieldName,
+          values_source: valuesSource,
+          esql_query: esqlQuery,
+        },
+      }) => {
+        // ES|QL columns can be computed by the query, so they don't need to exist in the data view
+        if (valuesSource === ControlValuesSource.ESQL) {
+          if (!esqlQuery || !fieldName) return false;
+          return isNumericType(await getESQLColumnType(esqlQuery, embeddable));
+        }
         if (!dataViewId || !fieldName) return false;
         const dataView = await dataViewsService.get(dataViewId);
         const field = dataView.getFieldByName(fieldName);

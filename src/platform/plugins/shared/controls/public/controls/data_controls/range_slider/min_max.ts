@@ -73,7 +73,9 @@ export function minMax$({
         const dataView = dataViews?.[0];
         const dataViewField =
           dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
-        if (!dataView || !dataViewField) {
+        // ES|QL columns can be computed by the query, so they may not exist as a field in the data view
+        const isESQL = valuesSource === ControlValuesSource.ESQL;
+        if (!dataView || (!dataViewField && !isESQL)) {
           return { max: undefined, min: undefined };
         }
 
@@ -139,7 +141,8 @@ export async function getMinMax({
 }: {
   abortSignal: AbortSignal;
   dataView: DataView;
-  field: DataViewField;
+  /** Not required for ES|QL queries, since the column is defined by the query itself */
+  field?: DataViewField;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   timeRange?: TimeRange;
@@ -165,6 +168,8 @@ export async function getMinMax({
       throw error;
     }
   }
+
+  if (!field) return { min: undefined, max: undefined };
 
   const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('size', 0);
