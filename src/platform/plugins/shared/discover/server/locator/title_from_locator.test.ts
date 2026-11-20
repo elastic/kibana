@@ -12,6 +12,7 @@ import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { LocatorServicesDeps as Services } from '.';
 import type { DiscoverAppLocatorParams } from '../../common';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
@@ -57,6 +58,7 @@ beforeAll(async () => {
     searchSourceStart,
     savedObjects: soClient,
     uiSettings: uiSettingsClient,
+    dataViewsService: {} as DataViewsService,
   };
 
   const soClientGet = soClient.get;
