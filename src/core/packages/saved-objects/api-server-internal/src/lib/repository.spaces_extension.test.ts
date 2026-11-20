@@ -996,6 +996,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
     describe(`#get`, () => {
       test(`calls authorizeGet with the current namespace`, async () => {
         setupAuthorizeFunc(mockSecurityExt.authorizeGet, 'fully_authorized');
+        mockSecurityExt.redactNamespaces.mockImplementation(({ savedObject }) => savedObject);
         const type = CUSTOM_INDEX_TYPE;
         const id = 'some-id';
 
@@ -1044,6 +1045,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
 
       test(`calls authorizeBulkGet with the current namespace`, async () => {
         setupAuthorizeFunc(mockSecurityExt.authorizeBulkGet, 'fully_authorized');
+        mockSecurityExt.redactNamespaces.mockImplementation(({ savedObject }) => savedObject);
         await bulkGetSuccess(client, repository, registry, [obj1, obj2]);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);

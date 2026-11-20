@@ -82,5 +82,6 @@ export const performGet = async <T>(
   return await migrationHelper.migrateAndDecryptStorageDocument({
     document,
     typeMap: authorizationResult?.typeMap,
+    includeAcl: internalOptions.includeAcl,
   });
 };

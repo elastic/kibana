@@ -459,6 +459,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
     it(`only attempts to decrypt and strip attributes for types that are encryptable`, async () => {
       mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false);
       mockEncryptionExt.isEncryptableType.mockReturnValueOnce(true);
+      mockEncryptionExt.decryptOrStripResponseAttributes.mockImplementation(async (obj) => obj);
       const getId = (type: string, id: string) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
       await bulkGetSuccess(client, repository, registry, [nonEncryptedSO, encryptedSO], {
         namespace,
@@ -708,6 +709,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
 
     it(`only attempts to decrypt and strip attributes for types that are encryptable`, async () => {
       mockEncryptionExt.isEncryptableType.mockReturnValueOnce(true);
+      mockEncryptionExt.decryptOrStripResponseAttributes.mockImplementation(async (obj) => obj);
       await findSuccess(
         client,
         repository,

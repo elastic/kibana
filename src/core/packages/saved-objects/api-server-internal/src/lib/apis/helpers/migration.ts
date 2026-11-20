@@ -14,8 +14,10 @@ import {
   type AuthorizationTypeMap,
   type SavedObject,
 } from '@kbn/core-saved-objects-server';
+import type { StoredAcl } from '@kbn/ols';
 import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
 import type { IEncryptionHelper } from './encryption';
+import { projectAcl } from '../utils/acl';
 
 export type IMigrationHelper = PublicMethodsOf<MigrationHelper>;
 
@@ -56,14 +58,20 @@ export class MigrationHelper {
     return this.migrator.migrateDocument(document, { allowDowngrade: true, allowSkipClone: true });
   }
 
+  /**
+   * Migrate and decrypt the given SO document fetched from the index. A model version can set an
+   * ACL, so the result leaves it out again unless `includeAcl` is set.
+   */
   async migrateAndDecryptStorageDocument<T, A extends string>({
     document,
     typeMap,
     originalAttributes,
+    includeAcl = false,
   }: {
     document: SavedObjectUnsanitizedDoc<T> | SavedObject<T>;
     typeMap: AuthorizationTypeMap<A> | undefined;
     originalAttributes?: T;
+    includeAcl?: boolean;
   }): Promise<SavedObject<T>> {
     const downgrade = this.migrator.getDocumentMigrator().isDowngradeRequired(document);
 
@@ -90,10 +98,7 @@ export class MigrationHelper {
       );
     };
 
-    if (downgrade) {
-      return migrate(await decrypt(document));
-    } else {
-      return await decrypt(migrate(document));
-    }
+    const result = downgrade ? migrate(await decrypt(document)) : await decrypt(migrate(document));
+    return projectAcl<SavedObject<T> & { acl?: StoredAcl }>(result, includeAcl);
   }
 }

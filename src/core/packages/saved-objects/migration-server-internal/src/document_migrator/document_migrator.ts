@@ -19,7 +19,10 @@ import type {
   DocumentMigrateOptions,
   IsDowngradeRequiredOptions,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  modelVersionToVirtualVersion,
+  readAclFromRawSource,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type { ActiveMigrations } from './types';
 import { maxVersion } from './pipelines/utils';
 import { buildActiveMigrations } from './build_active_migrations';
@@ -28,16 +31,17 @@ import { downgradeRequired } from './utils';
 import { TransformType } from './types';
 
 /**
- * Puts the stored ACL back when a transform dropped it or set it to `null`. Transforms, such as
- * migrations and encrypted saved object wrappers, often rebuild a document without knowing about
- * the ACL, so a rewrite would otherwise remove it. A model version can still set a new ACL, but it
- * cannot clear one.
+ * Puts the stored ACL back when a transform dropped it, set it to `null`, or set one with no values.
+ * Transforms, such as migrations and encrypted saved object wrappers, often rebuild a document
+ * without knowing about the ACL, so a rewrite would otherwise remove it. A model version can still
+ * set a new ACL, but it cannot clear one. The check uses the serializer's reader, so an ACL counts as
+ * removed when a reread of the written document would find none.
  */
 const keepAcl = <R extends { document: SavedObjectUnsanitizedDoc }>(
   storedAcl: SavedObjectUnsanitizedDoc['acl'],
   result: R
 ): R =>
-  storedAcl != null && result.document.acl == null
+  storedAcl != null && readAclFromRawSource({ acl: result.document.acl }) === undefined
     ? { ...result, document: { ...result.document, acl: storedAcl } }
     : result;
 

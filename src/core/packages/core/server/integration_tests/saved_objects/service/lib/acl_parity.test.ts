@@ -34,8 +34,16 @@ import {
 const TYPE = 'acl_parity';
 /** A type whose only model version rebuilds every document without its ACL. */
 const REBUILD_TYPE = 'acl_parity_rebuild';
+/** A type whose only model version sets an ACL, the way a conversion from legacy access fields would. */
+const SET_TYPE = 'acl_parity_set';
 const TITLE = 'fixture';
 const OWNER_ID = 'u_owner';
+const MIGRATION_ACL: StoredAcl = {
+  version: [1],
+  owner: { type: ['user'], id: [OWNER_ID] },
+  general: { access: ['none'] },
+  entries: [],
+};
 
 /**
  * Levels a fixture's expectations are checked at. `manage` stands for access management.
@@ -154,6 +162,23 @@ describe('ACL storage in Saved Objects', () => {
         },
       },
     });
+    setup.savedObjects.registerType({
+      name: SET_TYPE,
+      hidden: false,
+      namespaceType: 'multiple-isolated',
+      mappings: { dynamic: false, properties: { title: { type: 'text' } } },
+      modelVersions: {
+        1: {
+          changes: [
+            {
+              type: 'unsafe_transform',
+              transformFn: (typeSafeGuard) =>
+                typeSafeGuard((doc) => ({ document: { ...doc, acl: MIGRATION_ACL } })),
+            },
+          ],
+        },
+      },
+    });
     const start = await root.start();
     esClient = start.elasticsearch.client.asInternalUser;
     repository = start.savedObjects.createInternalRepository();
@@ -215,6 +240,36 @@ describe('ACL storage in Saved Objects', () => {
     const { saved_objects: objects } = await repository.find({ type: TYPE, perPage: 1000 });
     expect(objects.length).toBe(indexableFixtures.length);
     expect(objects.filter((object) => 'acl' in object)).toEqual([]);
+  });
+
+  it('leaves out an ACL that a read-time migration sets, unless the caller asks for it', async () => {
+    // Written by an older node: no ACL, at the version before the model version that sets one.
+    const id = 'migrated-on-read';
+    await indexFixture(id, {}, { type: SET_TYPE, typeMigrationVersion: '10.0.0' });
+
+    expect(await repository.get(SET_TYPE, id)).not.toHaveProperty('acl');
+    const { saved_objects: bulkGot } = await repository.bulkGet([{ type: SET_TYPE, id }]);
+    expect(bulkGot[0]).not.toHaveProperty('acl');
+    expect((await repository.resolve(SET_TYPE, id)).saved_object).not.toHaveProperty('acl');
+    const { saved_objects: found } = await repository.find({ type: SET_TYPE });
+    expect(found).toHaveLength(1);
+    expect(found[0]).not.toHaveProperty('acl');
+    const { hits } = await repository.search({
+      type: SET_TYPE,
+      namespaces: ['default'],
+      query: { match_all: {} },
+    });
+    expect(hits.hits).toHaveLength(1);
+    expect(hits.hits[0]._source).not.toHaveProperty('acl');
+
+    expect((await repository.get(SET_TYPE, id, {}, { includeAcl: true })).acl).toEqual(
+      MIGRATION_ACL
+    );
+    const { saved_objects: foundWithAcl } = await repository.find(
+      { type: SET_TYPE },
+      { includeAcl: true }
+    );
+    expect(foundWithAcl[0].acl).toEqual(MIGRATION_ACL);
   });
 
   it('returns the same ACL from find with fields as from get, dotted root keys included', async () => {

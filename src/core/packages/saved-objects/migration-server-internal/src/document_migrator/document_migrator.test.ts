@@ -1883,6 +1883,42 @@ describe('DocumentMigrator', () => {
       expect(actual.acl).toEqual(storedAcl);
     });
 
+    it('puts the stored ACL back when a migration sets an ACL with no values', () => {
+      const migrator = createMigrator({
+        name: 'dog',
+        modelVersions: {
+          1: {
+            changes: [
+              {
+                type: 'unsafe_transform',
+                transformFn: (typeSafeGuard) =>
+                  typeSafeGuard((doc) => ({
+                    document: {
+                      ...doc,
+                      acl: {
+                        version: [],
+                        owner: { type: [], id: [] },
+                        general: { access: [] },
+                        entries: [],
+                      },
+                    },
+                  })),
+              },
+            ],
+          },
+        },
+      });
+      const actual = migrator.migrate({
+        id: 'smelly',
+        type: 'dog',
+        attributes: {},
+        references: [],
+        typeMigrationVersion: '10.0.0',
+        acl: storedAcl,
+      });
+      expect(actual.acl).toEqual(storedAcl);
+    });
+
     it('keeps the stored ACL when it downgrades a document', () => {
       const migrator = createMigrator({
         name: 'dog',

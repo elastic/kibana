@@ -76,7 +76,9 @@ function getSimpleQueryStringTypeFields(
     if (field.indexOf('.') !== -1) {
       throw new Error(`rootSearchFields entry "${field}" is invalid: cannot contain "." character`);
     }
-    if (matchesAclField(field)) {
+    // Elasticsearch removes a boost such as `^2` before it expands the field pattern.
+    const [pattern] = field.split('^');
+    if (matchesAclField(pattern)) {
       throw new Error(`rootSearchFields entry "${field}" is invalid: cannot search the ACL`);
     }
   });

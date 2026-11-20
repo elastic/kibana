@@ -38,6 +38,7 @@ import {
   removeAclFromTopHits,
 } from '../search';
 import { includedFields } from '../utils';
+import { projectAcl } from './utils/acl';
 
 export interface PerformFindParams {
   options: SavedObjectsFindOptions;
@@ -288,11 +289,15 @@ export const performFind = async <T = unknown, A = unknown>(
           redactTypeMap
         );
       } else if (disableExtensions) {
-        migrated = migrationHelper.migrateStorageDocument(rawObject);
+        migrated = projectAcl(
+          migrationHelper.migrateStorageDocument(rawObject),
+          internalOptions.includeAcl
+        );
       } else {
         migrated = await migrationHelper.migrateAndDecryptStorageDocument({
           document: rawObject,
           typeMap: redactTypeMap,
+          includeAcl: internalOptions.includeAcl,
         });
       }
 

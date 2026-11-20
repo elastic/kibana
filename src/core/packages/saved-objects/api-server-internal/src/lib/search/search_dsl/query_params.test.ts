@@ -586,7 +586,7 @@ describe('#getQueryParams', () => {
           });
         });
 
-        it.each(['acl', '*', 'a*'])(
+        it.each(['acl', '*', 'a*', 'acl^3', 'a*^2', '*^2'])(
           'throws an error if a raw search field reaches the stored ACL: %s',
           (rootSearchField) => {
             expect(() =>
@@ -601,6 +601,12 @@ describe('#getQueryParams', () => {
             );
           }
         );
+
+        it('accepts a boosted raw search field that does not reach the stored ACL', () => {
+          expect(() =>
+            getQueryParams({ registry, search, rootSearchFields: ['_id^2'], mappings })
+          ).not.toThrow();
+        });
 
         it('includes specified search fields for appropriate type/s', () => {
           test({ searchFields: ['title'] });

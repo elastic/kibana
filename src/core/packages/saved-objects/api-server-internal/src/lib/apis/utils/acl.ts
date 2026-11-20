@@ -11,10 +11,11 @@ import type { StoredAcl } from '@kbn/ols';
 
 /**
  * Leaves an object's stored ACL out of a repository result, unless the caller asked for it with
- * `includeAcl`. The two converters from raw documents call it, so it is the only place that decides
- * whether a result carries an ACL.
+ * `includeAcl`. The two converters from raw documents call it, and so do read-time migrations,
+ * because a model version can set an ACL. It is the only place that decides whether a result
+ * carries an ACL.
  *
- * @param object A saved object converted from a raw document, with its stored ACL if it has one.
+ * @param object A saved object, with its ACL if it has one.
  * @param includeAcl Whether the caller asked for the ACL.
  * @returns The object, without `acl` unless `includeAcl` is set.
  */
