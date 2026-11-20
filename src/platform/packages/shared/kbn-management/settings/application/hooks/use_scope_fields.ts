@@ -7,18 +7,68 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useCallback } from 'react';
 import type { Query } from '@elastic/eui';
 import type { FieldDefinition } from '@kbn/management-settings-types';
 import { useFields } from './use_fields';
 
 /**
  * React hook which retrieves the fields for each scope (`namespace` and `global`)
- * and returns two collections of {@link FieldDefinition} objects.
- * @param query The {@link Query} to execute for filtering the fields.
- * @returns Two arrays of {@link FieldDefinition} objects.
+ * and returns every {@link FieldDefinition} in each scope along with the subset that matches the
+ * query.
+ * @param options.query The {@link Query} to execute for filtering the fields.
+ * @param options.includeGlobal When false, global settings are not fetched, and the global field
+ * collections are empty.
+ * @returns An object with the all and filtered {@link FieldDefinition} arrays for each scope, a
+ * loading flag, the error if either scope failed to load, and a function that fetches the failed
+ * scopes again.
  */
-export const useScopeFields = (query?: Query): [FieldDefinition[], FieldDefinition[]] => {
-  const spaceFields = useFields('namespace', query);
-  const globalFields = useFields('global', query);
-  return [spaceFields, globalFields];
+export const useScopeFields = ({
+  query,
+  includeGlobal,
+}: {
+  query?: Query;
+  includeGlobal: boolean;
+}): {
+  spaceAllFields: FieldDefinition[];
+  spaceFilteredFields: FieldDefinition[];
+  globalAllFields: FieldDefinition[];
+  globalFilteredFields: FieldDefinition[];
+  isLoading: boolean;
+  error?: Error;
+  retry: () => void;
+} => {
+  const {
+    allFields: spaceAllFields,
+    filteredFields: spaceFilteredFields,
+    isLoading: spaceLoading,
+    error: spaceError,
+    retry: retrySpace,
+  } = useFields('namespace', query);
+  const {
+    allFields: globalAllFields,
+    filteredFields: globalFilteredFields,
+    isLoading: globalLoading,
+    error: globalError,
+    retry: retryGlobal,
+  } = useFields('global', query, includeGlobal);
+
+  const retry = useCallback(() => {
+    if (spaceError) {
+      retrySpace();
+    }
+    if (globalError) {
+      retryGlobal();
+    }
+  }, [spaceError, globalError, retrySpace, retryGlobal]);
+
+  return {
+    spaceAllFields,
+    spaceFilteredFields,
+    globalAllFields,
+    globalFilteredFields,
+    isLoading: spaceLoading || globalLoading,
+    error: spaceError ?? globalError,
+    retry,
+  };
 };

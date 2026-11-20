@@ -8,7 +8,7 @@
  */
 
 import type { FC, PropsWithChildren } from 'react';
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 
 import {
   FormProvider,
@@ -17,8 +17,12 @@ import {
   type FormServices,
 } from '@kbn/management-settings-components-form';
 import type { SettingsCapabilities, UiSettingMetadata } from '@kbn/management-settings-types';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { normalizeSettings } from '@kbn/management-settings-utilities';
+import type {
+  IUiSettingsClient,
+  IUiSettingsMetadataClient,
+  UiSettingsMetadataState,
+} from '@kbn/core-ui-settings-browser';
+import { mergeSettingDefinitions, normalizeSettings } from '@kbn/management-settings-utilities';
 import type { Subscription } from 'rxjs';
 import type { ApplicationStart, ScopedHistory } from '@kbn/core-application-browser';
 import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
@@ -33,9 +37,15 @@ import type { Space } from '@kbn/spaces-plugin/common';
 import type { SolutionView } from '@kbn/spaces-plugin/common';
 
 export interface Services {
+  metadataClient: Pick<IUiSettingsMetadataClient, 'getAll'>;
+  /**
+   * Merges the loaded definitions with the current values from the scope's client, and drops
+   * the settings that the page doesn't show.
+   */
   getAllowlistedSettings: (
     scope: UiSettingsScope,
-    solution: SolutionView | undefined
+    solution: SolutionView | undefined,
+    definitions: UiSettingsMetadataState
   ) => Record<string, UiSettingMetadata>;
   getSections: (scope: UiSettingsScope) => RegistryEntry[];
   getToastsService: () => ToastsStart;
@@ -61,6 +71,7 @@ export interface KibanaDependencies {
       IUiSettingsClient,
       'getAll' | 'isCustom' | 'isOverridden' | 'getUpdate$' | 'validateValue'
     >;
+    metadata: IUiSettingsMetadataClient;
   };
   history: ScopedHistory;
   sectionRegistry: SectionRegistryStart;
@@ -91,6 +102,7 @@ export const SettingsApplicationProvider: FC<PropsWithChildren<SettingsApplicati
     showReloadPagePrompt,
     links,
     showDanger,
+    metadataClient,
     getAllowlistedSettings,
     getSections,
     getCapabilities,
@@ -107,6 +119,7 @@ export const SettingsApplicationProvider: FC<PropsWithChildren<SettingsApplicati
   return (
     <SettingsApplicationContext.Provider
       value={{
+        metadataClient,
         getAllowlistedSettings,
         getSections,
         getToastsService,
@@ -148,82 +161,101 @@ export const SettingsApplicationKibanaProvider: FC<
     chrome,
     spaces,
   } = dependencies;
-  const { client, globalClient } = settings;
+  const { client, globalClient, metadata } = settings;
 
-  const getScopeClient = (scope: UiSettingsScope) => {
-    return scope === 'namespace' ? client : globalClient;
-  };
+  // The settings hooks depend on these services, so a new identity on each render would fetch the
+  // setting definitions again.
+  const services = useMemo<Services>(() => {
+    const getScopeClient = (scope: UiSettingsScope) => {
+      return scope === 'namespace' ? client : globalClient;
+    };
 
-  const getAllowlistedSettings = (scope: UiSettingsScope, solution: SolutionView | undefined) => {
-    const { filterSettings } = application.capabilities;
-    const scopeClient = getScopeClient(scope);
-    const rawSettings = Object.fromEntries(
-      Object.entries(scopeClient.getAll()).filter(
-        ([settingId, settingDef]) =>
-          !settingDef.readonly &&
-          !client.isCustom(settingId) &&
-          (!filterSettings.bySolutionView ||
-            !solution ||
-            !settingDef.solutionViews ||
-            settingDef.solutionViews.includes(solution))
-      )
-    );
-    return normalizeSettings(rawSettings);
-  };
+    const getAllowlistedSettings = (
+      scope: UiSettingsScope,
+      solution: SolutionView | undefined,
+      definitions: UiSettingsMetadataState
+    ) => {
+      const { filterSettings } = application.capabilities;
+      const allSettings = mergeSettingDefinitions(definitions, getScopeClient(scope).getAll());
+      const rawSettings = Object.fromEntries(
+        Object.entries(allSettings).filter(
+          ([settingId, settingDef]) =>
+            !settingDef.readonly &&
+            !client.isCustom(settingId) &&
+            (!filterSettings.bySolutionView ||
+              !solution ||
+              !settingDef.solutionViews ||
+              settingDef.solutionViews.includes(solution))
+        )
+      );
+      return normalizeSettings(rawSettings);
+    };
 
-  const getSections = (scope: UiSettingsScope) => {
-    return scope === 'namespace'
-      ? sectionRegistry.getSpacesSections()
-      : sectionRegistry.getGlobalSections();
-  };
+    const getSections = (scope: UiSettingsScope) => {
+      return scope === 'namespace'
+        ? sectionRegistry.getSpacesSections()
+        : sectionRegistry.getGlobalSections();
+    };
 
-  const getCapabilities = () => {
-    const { advancedSettings, globalSettings, filterSettings } = application.capabilities;
+    const getCapabilities = () => {
+      const { advancedSettings, globalSettings, filterSettings } = application.capabilities;
+      return {
+        spaceSettings: {
+          show: advancedSettings.show as boolean,
+          save: advancedSettings.save as boolean,
+        },
+        globalSettings: {
+          show: globalSettings.show as boolean,
+          save: globalSettings.save as boolean,
+        },
+        filterSettings: {
+          bySolutionView: filterSettings.bySolutionView as boolean,
+        },
+      };
+    };
+
+    const isCustomSetting = (key: string, scope: UiSettingsScope) => {
+      const scopeClient = getScopeClient(scope);
+      return scopeClient.isCustom(key);
+    };
+
+    const isOverriddenSetting = (key: string, scope: UiSettingsScope) => {
+      const scopeClient = getScopeClient(scope);
+      return scopeClient.isOverridden(key);
+    };
+
+    const subscribeToUpdates = (fn: () => void, scope: UiSettingsScope) => {
+      const scopeClient = getScopeClient(scope);
+      return scopeClient.getUpdate$().subscribe(fn);
+    };
+
     return {
-      spaceSettings: {
-        show: advancedSettings.show as boolean,
-        save: advancedSettings.save as boolean,
-      },
-      globalSettings: {
-        show: globalSettings.show as boolean,
-        save: globalSettings.save as boolean,
-      },
-      filterSettings: {
-        bySolutionView: filterSettings.bySolutionView as boolean,
+      metadataClient: metadata,
+      getAllowlistedSettings,
+      getSections,
+      getToastsService: () => notifications.toasts,
+      getCapabilities,
+      setBadge: (badge: ChromeBadge) => chrome.setBadge(badge),
+      isCustomSetting,
+      isOverriddenSetting,
+      subscribeToUpdates,
+      addUrlToHistory: (url: string) => history.replace({ pathname: '', search: url }),
+      getActiveSpace: spaces.getActiveSpace,
+      subscribeToActiveSpace: (fn: () => void) => {
+        return spaces.getActiveSpace$().subscribe(fn);
       },
     };
-  };
-
-  const isCustomSetting = (key: string, scope: UiSettingsScope) => {
-    const scopeClient = getScopeClient(scope);
-    return scopeClient.isCustom(key);
-  };
-
-  const isOverriddenSetting = (key: string, scope: UiSettingsScope) => {
-    const scopeClient = getScopeClient(scope);
-    return scopeClient.isOverridden(key);
-  };
-
-  const subscribeToUpdates = (fn: () => void, scope: UiSettingsScope) => {
-    const scopeClient = getScopeClient(scope);
-    return scopeClient.getUpdate$().subscribe(fn);
-  };
-
-  const services: Services = {
-    getAllowlistedSettings,
-    getSections,
-    getToastsService: () => notifications.toasts,
-    getCapabilities,
-    setBadge: (badge: ChromeBadge) => chrome.setBadge(badge),
-    isCustomSetting,
-    isOverriddenSetting,
-    subscribeToUpdates,
-    addUrlToHistory: (url: string) => history.replace({ pathname: '', search: url }),
-    getActiveSpace: spaces.getActiveSpace,
-    subscribeToActiveSpace: (fn: () => void) => {
-      return spaces.getActiveSpace$().subscribe(fn);
-    },
-  };
+  }, [
+    client,
+    globalClient,
+    metadata,
+    application,
+    sectionRegistry,
+    notifications,
+    chrome,
+    history,
+    spaces,
+  ]);
 
   return (
     <SettingsApplicationContext.Provider value={services}>

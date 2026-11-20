@@ -17,6 +17,7 @@ import {
   getSettingsMock,
 } from '@kbn/management-settings-utilities/mocks/settings.mock';
 import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { UiSettingMetadata } from '@kbn/management-settings-types';
 import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
 import { SettingsApplication as Component } from '../application';
 import { SettingsApplicationProvider } from '../services';
@@ -42,8 +43,18 @@ const getSettingsApplicationStory = ({ hasGlobalSettings }: StoryProps) => (
   <SettingsApplicationProvider
     showDanger={action('showDanger')}
     links={{ deprecationKey: 'link/to/deprecation/docs' }}
-    getAllowlistedSettings={(scope: UiSettingsScope) =>
-      scope === 'namespace' ? getSettingsMock() : hasGlobalSettings ? getGlobalSettingsMock() : {}
+    metadataClient={{
+      getAll: (scope: UiSettingsScope) =>
+        Promise.resolve(
+          scope === 'namespace'
+            ? getSettingsMock()
+            : hasGlobalSettings
+            ? getGlobalSettingsMock()
+            : {}
+        ),
+    }}
+    getAllowlistedSettings={(_scope, _solution, definitions) =>
+      definitions as Record<string, UiSettingMetadata>
     }
     getSections={() => []}
     // @ts-ignore

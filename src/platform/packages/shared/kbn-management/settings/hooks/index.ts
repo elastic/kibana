@@ -8,6 +8,16 @@
  */
 
 export { useEditableSettings } from './use_editable_settings';
+export { useSettingDefinitions } from './use_setting_definitions';
+export {
+  SettingDefinitionsLoadError,
+  DATA_TEST_SUBJ_SETTING_DEFINITIONS_RETRY,
+} from './setting_definitions_load_error';
+export type { SettingDefinitionsLoadErrorProps } from './setting_definitions_load_error';
+export type {
+  UseSettingDefinitionsParams,
+  UseSettingDefinitionsResult,
+} from './use_setting_definitions';
 export type {
   SaveAllResult,
   UseEditableSettingsParams,

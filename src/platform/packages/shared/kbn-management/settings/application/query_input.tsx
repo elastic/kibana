@@ -8,13 +8,30 @@
  */
 
 import type { EuiSearchBarProps } from '@elastic/eui';
-import { EuiFormErrorText, EuiSearchBar, Query } from '@elastic/eui';
+import { EuiFilterButton, EuiFormErrorText, EuiSearchBar, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getCategoryName } from '@kbn/management-settings-utilities';
 import React, { useState } from 'react';
 
 export const DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR = 'settingsSearchBar';
+export const DATA_TEST_SUBJ_DISABLED_CATEGORY_FILTER = 'settingsDisabledCategoryFilter';
 export const CATEGORY_FIELD = 'categories';
+
+const categoryFilterLabel = i18n.translate('management.settings.categorySearchLabel', {
+  defaultMessage: 'Category',
+});
+
+// EuiSearchBar can't disable a field value selection filter, so a disabled button stands in for it.
+const DisabledCategoryFilter = () => (
+  <EuiFilterButton
+    hasActiveFilters={false}
+    iconType="chevronSingleDown"
+    isDisabled
+    data-test-subj={DATA_TEST_SUBJ_DISABLED_CATEGORY_FILTER}
+  >
+    {categoryFilterLabel}
+  </EuiFilterButton>
+);
 
 /**
  * Props for a {@link QueryInput} component.
@@ -23,6 +40,8 @@ export interface QueryInputProps {
   categories: string[];
   query?: Query;
   onQueryChange: (query?: Query) => void;
+  /** Disables the search box and the filters, for example while the settings load. */
+  isDisabled?: boolean;
 }
 
 export const parseErrorMsg = i18n.translate(
@@ -33,7 +52,12 @@ export const parseErrorMsg = i18n.translate(
 /**
  * Component for displaying a {@link EuiSearchBar} component for filtering settings and setting categories.
  */
-export const QueryInput = ({ categories: categoryList, query, onQueryChange }: QueryInputProps) => {
+export const QueryInput = ({
+  categories: categoryList,
+  query,
+  onQueryChange,
+  isDisabled = false,
+}: QueryInputProps) => {
   const [queryError, setQueryError] = useState<string | null>(null);
 
   const categories = categoryList.map((category) => ({
@@ -43,23 +67,24 @@ export const QueryInput = ({ categories: categoryList, query, onQueryChange }: Q
 
   const box = {
     incremental: true,
+    disabled: isDisabled,
     'data-test-subj': DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR,
     placeholder: i18n.translate('management.settings.searchBarPlaceholder', {
       defaultMessage: 'Search advanced settings',
     }),
   };
 
-  const filters = [
-    {
-      type: 'field_value_selection' as const,
-      field: CATEGORY_FIELD,
-      name: i18n.translate('management.settings.categorySearchLabel', {
-        defaultMessage: 'Category',
-      }),
-      multiSelect: 'or' as const,
-      options: categories,
-    },
-  ];
+  const filters: EuiSearchBarProps['filters'] = isDisabled
+    ? [{ type: 'custom_component', component: DisabledCategoryFilter }]
+    : [
+        {
+          type: 'field_value_selection',
+          field: CATEGORY_FIELD,
+          name: categoryFilterLabel,
+          multiSelect: 'or',
+          options: categories,
+        },
+      ];
 
   const onChange: EuiSearchBarProps['onChange'] = ({ query: newQuery, error }) => {
     if (error) {
