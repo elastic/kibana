@@ -26,6 +26,7 @@ import {
   isExecutionStartedEvent,
   isExecutionTerminatedEvent,
   isMessageChunkEvent,
+  isModelReasoningChunkEvent,
   isMessageDeliveredEvent,
   isInterimAnswerEvent,
   isRoundCompleteEvent,
@@ -139,6 +140,7 @@ export const deliverCallbackEvents = ({
         filter(
           (event) =>
             !isMessageChunkEvent(event) &&
+            !isModelReasoningChunkEvent(event) &&
             !isExecutionStartedEvent(event) &&
             // These notifications are included in the completed round's steps.
             !isMessageDeliveredEvent(event) &&
