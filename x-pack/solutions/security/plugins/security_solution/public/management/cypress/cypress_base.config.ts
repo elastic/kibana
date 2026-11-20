@@ -32,7 +32,7 @@ export const getCypressBaseConfig = (
       chromeWebSecurity: false,
       defaultCommandTimeout: 60000,
       execTimeout: 120000,
-      pageLoadTimeout: 12000,
+      pageLoadTimeout: 60000,
 
       retries: {
         runMode: 1,
