@@ -61,6 +61,31 @@ describe('checkLicense()', () => {
   });
 });
 
+describe('isTrial()', () => {
+  let license: Subject<ILicense>;
+  let licenseState: ILicenseState;
+
+  beforeEach(() => {
+    license = new Subject();
+    licenseState = new LicenseState(license);
+  });
+
+  test('should return false when license not defined', () => {
+    expect(licenseState.isTrial()).toBe(false);
+  });
+
+  test('should return true for a trial license', () => {
+    license.next(licensingMock.createLicense({ license: { type: 'trial' } }));
+    expect(licenseState.isTrial()).toBe(true);
+  });
+
+  test('should follow license changes', () => {
+    license.next(licensingMock.createLicense({ license: { type: 'trial' } }));
+    license.next(licensingMock.createLicense({ license: { type: 'enterprise' } }));
+    expect(licenseState.isTrial()).toBe(false);
+  });
+});
+
 describe('isLicenseValidForActionType', () => {
   let license: Subject<ILicense>;
   let licenseState: ILicenseState;

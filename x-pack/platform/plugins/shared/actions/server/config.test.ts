@@ -364,9 +364,9 @@ describe('config validation', () => {
     result = configSchema.validate(config);
     expect(result.email?.domain_allowlist).toEqual([]);
 
-    config.email = { domain_allowlist: ['a.com', 'b.c.com', 'd.e.f.com'] };
+    config.email = { domain_allowlist: ['a.com', 'b.c.com', 'd.e.f.example.com'] };
     result = configSchema.validate(config);
-    expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.com']);
+    expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.example.com']);
   });
 
   describe('email.recipient_allowlist', () => {
@@ -392,15 +392,46 @@ describe('config validation', () => {
 
     test('validates email config with recipient_allowlist', () => {
       config.email = {
-        recipient_allowlist: ['*.bar@a.com', 'foo.*@b.com', '*@d.e.f.com'],
+        recipient_allowlist: ['*.bar@a.example.com', 'foo.*@b.example.com', '*@d.e.f.example.com'],
       };
 
       const result = configSchema.validate(config);
       expect(result.email?.recipient_allowlist).toEqual([
-        '*.bar@a.com',
-        'foo.*@b.com',
-        '*@d.e.f.com',
+        '*.bar@a.example.com',
+        'foo.*@b.example.com',
+        '*@d.e.f.example.com',
       ]);
+    });
+  });
+
+  describe('email.recipient_allowlist_in_trial', () => {
+    test('validates email config with only recipient_allowlist_in_trial', () => {
+      const result = configSchema.validate({
+        email: { recipient_allowlist_in_trial: ['user@a.example.com'] },
+      });
+      expect(result.email?.recipient_allowlist_in_trial).toEqual(['user@a.example.com']);
+    });
+
+    test('can be used with recipient_allowlist', () => {
+      const result = configSchema.validate({
+        email: {
+          recipient_allowlist: ['*@a.example.com'],
+          recipient_allowlist_in_trial: ['user@a.example.com'],
+        },
+      });
+      expect(result.email?.recipient_allowlist).toEqual(['*@a.example.com']);
+      expect(result.email?.recipient_allowlist_in_trial).toEqual(['user@a.example.com']);
+    });
+
+    test('can be used with domain_allowlist', () => {
+      const result = configSchema.validate({
+        email: {
+          domain_allowlist: ['a.com'],
+          recipient_allowlist_in_trial: ['user@a.example.com'],
+        },
+      });
+      expect(result.email?.domain_allowlist).toEqual(['a.com']);
+      expect(result.email?.recipient_allowlist_in_trial).toEqual(['user@a.example.com']);
     });
   });
 
@@ -479,7 +510,7 @@ describe('config validation', () => {
 
     config.email = {
       domain_allowlist: ['a.com'],
-      recipient_allowlist: ['*.bar@a.com'],
+      recipient_allowlist: ['*.bar@a.example.com'],
     };
     expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
       `"[email]: email.domain_allowlist and email.recipient_allowlist can not be used at the same time"`
