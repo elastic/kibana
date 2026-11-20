@@ -6,12 +6,9 @@
  */
 
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
   DASHBOARD_PANEL_ATTACHMENT_TYPE,
-  findPanelById,
-  type DashboardPanelAttachmentData,
-  isDashboardAttachment,
   isDashboardPanelAttachment,
 } from '@kbn/agent-builder-dashboards-common';
 import {
@@ -28,6 +25,7 @@ import {
   type PanelContentAttempt,
   type RequestPanelType,
 } from '@kbn/dashboard-agent-authoring';
+import { resolvePointedPanel } from '../../resolve_pointed_panel';
 
 const PANEL_TYPE_BY_RENDERER: Readonly<Record<VisualizationRenderer, RequestPanelType>> = {
   lens: 'vis',
@@ -75,7 +73,14 @@ export const createAttachmentPanelResolver = ({
     }
 
     if (isDashboardPanelAttachment(record)) {
-      return resolveDashboardPanelPointer(record, attachments, fail);
+      // The copy is taken from the dashboard attachment's latest persisted version, so changes made
+      // earlier in the same tool call are not reflected.
+      const resolution = resolvePointedPanel(attachments, attachmentId);
+      if ('error' in resolution) {
+        return fail(resolution.error);
+      }
+      const { panel } = resolution;
+      return { type: 'success', panelContent: { type: panel.type, config: panel.config } };
     }
 
     if (record.type !== VISUALIZATION_ATTACHMENT_TYPE) {
@@ -96,40 +101,4 @@ export const createAttachmentPanelResolver = ({
       ...(isCustomContentVisualization(data) ? { heightHint: data.visualization.height } : {}),
     };
   };
-};
-
-/**
- * A pointer names a panel on a dashboard attachment. The copy is taken from that attachment's
- * latest persisted version, so changes made earlier in the same tool call are not reflected.
- */
-const resolveDashboardPanelPointer = (
-  pointer: VersionedAttachment<
-    typeof DASHBOARD_PANEL_ATTACHMENT_TYPE,
-    DashboardPanelAttachmentData
-  >,
-  attachments: AttachmentStateManager,
-  fail: (error: string) => PanelContentAttempt
-): PanelContentAttempt => {
-  const pointerData = getLatestVersion(pointer)?.data;
-  if (!pointerData) {
-    return fail(`Panel pointer "${pointer.id}" has no readable data.`);
-  }
-
-  const { dashboard_attachment_id: dashboardAttachmentId, panel_id: panelId } = pointerData;
-  const dashboard = attachments.getAttachmentRecord(dashboardAttachmentId);
-  if (!dashboard || !isDashboardAttachment(dashboard)) {
-    return fail(
-      `Panel pointer "${pointer.id}" names dashboard attachment "${dashboardAttachmentId}", which is not in this conversation.`
-    );
-  }
-
-  const dashboardData = getLatestVersion(dashboard)?.data;
-  const panel = dashboardData ? findPanelById(dashboardData.panels, panelId) : undefined;
-  if (!panel) {
-    return fail(
-      `Panel "${panelId}" no longer exists on dashboard attachment "${dashboardAttachmentId}". Tell the user instead of recreating it.`
-    );
-  }
-
-  return { type: 'success', panelContent: { type: panel.type, config: panel.config } };
 };
