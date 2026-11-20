@@ -81,12 +81,12 @@ const featuresIdentification = parse(
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(30);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(31);
     expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
   });
 
   it('reports only the written rule uuids in the discovery output schema', () => {
-    const schema = requireStep(discovery, 'run_discovery_agent').with?.schema;
+    const schema = requireStep(discovery, 'build_agent_answer_schema').with?.schema;
     const properties = schema?.properties;
 
     // Nothing reads per-event outcomes from the agent: discovery starts no investigation.
