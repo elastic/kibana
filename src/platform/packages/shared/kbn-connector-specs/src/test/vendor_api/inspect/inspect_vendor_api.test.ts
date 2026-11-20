@@ -396,8 +396,62 @@ actions:
     expect(warnings).toEqual([]);
     expect(output).toContain('/things');
     expect(problems).toEqual([
-      `v1 is captured from ${SPEC_URL} in manifest.json; to move it, delete its snapshot and record with --source v1=${SWAGGER_URL}`,
+      `v1 is captured from ${SPEC_URL} in manifest.json. To capture it again from ${SWAGGER_URL}, delete its snapshot and record with --source v1=${SWAGGER_URL}. If ${SWAGGER_URL} is public, remove "captured" from v1 in manifest.json first, or drift checks will skip it`,
     ]);
+  });
+
+  describe('with a URL given in place of a source of the manifest', () => {
+    const captured = (extra: Record<string, unknown> = {}) =>
+      fs.writeFile(
+        path.join(directory, 'manifest.json'),
+        JSON.stringify({
+          sources: {
+            v1: {
+              format: 'openapi',
+              url: SPEC_URL,
+              captured: true,
+              note: 'Captured with credentials.',
+              fetchedAt: '2026-10-08T00:00:00.000Z',
+              ...extra,
+            },
+          },
+          operations: {},
+        })
+      );
+
+    it('leaves the overlay alone, as the source the manifest records was not loaded', async () => {
+      await captured();
+      await fs.writeFile(
+        path.join(directory, 'overlay.yaml'),
+        `overlay: 1.0.0
+info: { title: Corrections, version: 1.0.0 }
+actions:
+  - target: $.paths['/things'].get
+    update: { summary: Lists things }
+  - target: $.paths['/gone'].get
+    update: { summary: Gone }
+`
+      );
+      const warnings: string[] = [];
+
+      const { output } = await inspect({
+        sources: { v1: SWAGGER_URL },
+        directory,
+        log: { info: () => {}, warning: (message) => warnings.push(message) },
+      });
+
+      // It still applies to what is inspected, but whether it is stale can't be told
+      expect(output).toContain('Lists things');
+      expect(warnings).toEqual([]);
+    });
+
+    it('does not read it as the kind of document the captured one was', async () => {
+      await captured({ format: 'brave-markdown', pages: ['api/'] });
+
+      const { output } = await inspect({ sources: { v1: SWAGGER_URL }, directory });
+
+      expect(output).toContain('/things');
+    });
   });
 
   it('does not move a source the manifest has to another URL', async () => {

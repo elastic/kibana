@@ -111,7 +111,10 @@ export const inspectVendorApi = async ({
   const added: Record<string, ManifestSource> = {};
   for (const [name, url] of Object.entries(urls)) {
     const known = manifest?.sources[name];
-    const declaredFormat = formatFlags[name] ?? known?.format;
+    // A captured source's format and pages describe the document that was captured, not one given
+    // in its place, which may be another kind of document.
+    const describes = known !== undefined && !(known.captured && known.url !== url);
+    const declaredFormat = formatFlags[name] ?? (describes ? known?.format : undefined);
     if (isProtocolFormat(declaredFormat)) {
       log.warning(
         `Skipping ${name}: --inspect reads OpenAPI operations, and it is ${declaredFormat}`
@@ -126,7 +129,7 @@ export const inspectVendorApi = async ({
       );
       continue;
     }
-    const pages = pageFlags[name] ?? known?.pages;
+    const pages = pageFlags[name] ?? (describes ? known?.pages : undefined);
     if (!isMarkdownFormat(declaredFormat) && pages !== undefined) {
       throw new Error(`${name}: --pages only applies to Markdown references; pass --format`);
     }
@@ -139,7 +142,7 @@ export const inspectVendorApi = async ({
     if (known && known.url !== url) {
       problems.push(
         known.captured
-          ? `${name} is captured from ${known.url} in ${MANIFEST}; to move it, delete its snapshot and record with --source ${name}=${url}`
+          ? `${name} is captured from ${known.url} in ${MANIFEST}. To capture it again from ${url}, delete its snapshot and record with --source ${name}=${url}. If ${url} is public, remove "captured" from ${name} in ${MANIFEST} first, or drift checks will skip it`
           : `${name} is ${known.url} in ${MANIFEST}; to move it, record with --source ${name}=${url}`
       );
     } else if (directory && !known) {
@@ -152,9 +155,11 @@ export const inspectVendorApi = async ({
       };
     }
   }
-  // An overlay action may target a source that --source left out, so it only counts as stale when
-  // every source is loaded.
-  const loadsEverySource = Object.keys(manifest?.sources ?? {}).every((name) => name in loaded);
+  // An overlay action may target a source that --source left out, or one given another URL than
+  // the manifest's, so it only counts as stale when every source is loaded from its own URL.
+  const loadsEverySource = Object.entries(manifest?.sources ?? {}).every(
+    ([name, { url }]) => name in loaded && urls[name] === url
+  );
   const documents = applyOverlayToSources(loaded, overlay, loadsEverySource ? log : SILENT_LOG);
   const manifestUpdated = directory !== undefined && Object.keys(added).length > 0;
   if (directory && manifestUpdated) {
