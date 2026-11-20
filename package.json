@@ -1610,7 +1610,7 @@
     "monaco-yaml": "5.5.1",
     "mongodb": "7.9.1",
     "mongodb-connection-string-url": "7.0.3",
-    "mssql": "12.7.13",
+    "mssql": "12.7.14",
     "murmurhash": "2.0.1",
     "mustache": "4.2.0",
     "mysql2": "3.24.3",
