@@ -605,6 +605,11 @@ describe('getResearchAgentPrompt', () => {
 
   describe('bash_tool capability', () => {
     const bashLine = 'run a bash command in a sandboxed shell';
+    const tableRenderer = {
+      type: 'table',
+      payloadSchema: z.object({ columns: z.array(z.string()) }),
+      getAgentDescription: () => 'Renders a dataset as an interactive table.',
+    };
     const withCapability = (bashTool: boolean) => ({
       instructions: '',
       aiIndices: [],
@@ -632,6 +637,28 @@ describe('getResearchAgentPrompt', () => {
       expect(prompt).toContain('## FILESYSTEM (VFS)');
       expect(prompt).toContain('read_file');
       expect(prompt).toContain('list_files');
+    });
+
+    it('keeps the render-payload workflow when the flag and the capability are on', async () => {
+      const prompt = await systemPrompt({
+        configuration: withCapability(true),
+        renderers: [tableRenderer],
+        experimentalFeatures: { aiIndices: false, bash: true, skills: false },
+      });
+
+      expect(prompt).toContain('Use the bash tool to write the payload');
+    });
+
+    it('drops the render-payload workflow along with bash when the capability is off', async () => {
+      const prompt = await systemPrompt({
+        configuration: withCapability(false),
+        renderers: [tableRenderer],
+        experimentalFeatures: { aiIndices: false, bash: true, skills: false },
+      });
+
+      expect(prompt).not.toContain(bashLine);
+      expect(prompt).not.toContain('Use the bash tool to write the payload');
+      expect(prompt).not.toContain('#### type: "table"');
     });
 
     it('does not list bash when the flag is off', async () => {

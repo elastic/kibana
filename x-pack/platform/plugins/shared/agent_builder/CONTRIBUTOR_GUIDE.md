@@ -377,7 +377,7 @@ What keeps working:
 
 #### `bash_tool`
 
-With `bash_tool: { enabled: false }`, the agent does not get the virtual filesystem `bash` tool, and the FILESYSTEM section of its system prompt no longer lists it. Use it for an agent that works on files through its own tools, because the `bash` tool's `/workspace` is the Agent Builder virtual filesystem, not whatever filesystem those tools edit. `read_file` and `list_files` stay on. The capability only matters when the `bash` experimental feature is on, since the tool does not exist otherwise.
+With `bash_tool: { enabled: false }`, the agent does not get the virtual filesystem `bash` tool, and its system prompt no longer lists it in the FILESYSTEM section or tells it to write render payloads with it (renderers are left out of the CUSTOM RENDERING section). Use it for an agent that works on files through its own tools, because the `bash` tool's `/workspace` is the Agent Builder virtual filesystem, not whatever filesystem those tools edit. `read_file` and `list_files` stay on. The capability only matters when the `bash` experimental feature is on, since the tool does not exist otherwise.
 
 #### Adding a new key
 

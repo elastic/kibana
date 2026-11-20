@@ -146,9 +146,12 @@ const getAgentSystemMessage = async ({
     conversationMetadataWritable
   );
 
+  // The same per-run availability gates the FILESYSTEM section and the render-payload workflow.
+  const bashEnabled = experimentalFeatures.bash && bashTool;
+
   const customRenderingSection = getCustomRenderingSection(
     attachmentTools,
-    renderRenderersPrompt(renderers, { bashEnabled: experimentalFeatures.bash })
+    renderRenderersPrompt(renderers, { bashEnabled })
   );
 
   // An agent with no skills gets no skill tools, so it gets none of the skill instructions either.
@@ -232,7 +235,7 @@ ${
   customRenderingSection ? '- Use custom rendering when appropriate.\n' : ''
 }- Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
 
-${getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash && bashTool })}
+${getFileSystemInstructions({ bashEnabled })}
 
 ${experimentalFeatures.dynamicTools ? getDynamicToolsInstructions() : ''}
 
