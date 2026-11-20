@@ -14,7 +14,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import { configureStore } from 'redux-toolkit-v1';
 import { createKibanaContextProviderMock } from './kibana_react.mock';
-import { timelineReducer } from '../store/timeline/reducer';
+import { timelineReducer } from '../../../timelines/store/embedded/reducer';
 
 interface Props {
   children: React.ReactNode;

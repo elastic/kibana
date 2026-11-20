@@ -14,7 +14,7 @@ import { isEmpty } from 'lodash';
 import { useDispatch } from 'react-redux-v7';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { NotificationsStart } from '@kbn/core/public';
+import type { NotificationsStart, CoreStart } from '@kbn/core/public';
 import {
   ADD_TO_TIMELINE,
   ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE,
@@ -23,11 +23,12 @@ import {
 } from '@kbn/securitysolution-timeline-components';
 import type { HoverActionComponentProps } from '@kbn/securitysolution-timeline-components';
 import type { DataProvider } from '@kbn/securitysolution-timeline-common';
-import type { TimelinesStartServices } from '../../..';
-import { TimelineId } from '../../../store/timeline';
-import { addProviderToTimeline } from '../../../store/timeline/actions';
-import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
-import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
+import { TimelineId } from '../../../../common/types/timeline';
+import { addProviderToTimeline } from '../../store/embedded/actions';
+import { stopPropagationAndPreventDefault } from '../../../common/utils/accessibility';
+import { useAddToTimeline } from './use_add_to_timeline';
+
+type TimelinesStartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 
 export const ADD_TO_TIMELINE_KEYBOARD_SHORTCUT = 'a';
 

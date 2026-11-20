@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { z } from '@kbn/zod/v4';
 
 import type { DocLinks } from '@kbn/doc-links';
@@ -16,7 +14,7 @@ import { loadYaml } from '@kbn/yaml-loader';
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../constants';
 import { isValidDuration } from '../services/validate_duration';
 
-import type { SettingsConfig } from './types';
+import type { SettingsDefinition } from './types';
 
 export const zodStringWithDurationValidation = z
   .string()
@@ -46,16 +44,14 @@ export const zodStringWithYamlValidation = z.string().refine(
   }
 );
 
-export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): SettingsConfig[] => [
+export const getAgentPolicyAdvancedSettings = (
+  docLinks?: DocLinks['fleet']
+): SettingsDefinition[] => [
   {
     name: 'agent.limits.go_max_procs',
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.goMaxProcsTitle', {
       defaultMessage: 'Limit CPU usage',
     }),
-    description: () =>
-      i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.goMaxProcsDescription', {
-        defaultMessage: 'Limits the maximum number of CPUs that can be executing simultaneously.',
-      }),
     learnMoreLink: docLinks?.agentPolicyLimitCpu,
     api_field: {
       name: 'agent_limits_go_max_procs',
@@ -69,10 +65,6 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutTitle', {
       defaultMessage: 'Agent binary download timeout',
     }),
-    description: () =>
-      i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutDescription', {
-        defaultMessage: 'Timeout for downloading the agent binary.',
-      }),
     learnMoreLink: docLinks?.agentDownloadTimeout,
     api_field: {
       name: 'agent_download_timeout',
@@ -92,13 +84,6 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
         defaultMessage: 'Agent binary target directory',
       }
     ),
-    description: () =>
-      i18n.translate(
-        'xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryDescription',
-        {
-          defaultMessage: 'The disk path to which the agent binary will be downloaded.',
-        }
-      ),
     learnMoreLink: docLinks?.elasticAgentStandaloneDownload,
     schema: z.string(),
     example_value: '/tmp/test',
@@ -115,13 +100,6 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
         defaultMessage: 'Agent logging metrics period',
       }
     ),
-    description: () =>
-      i18n.translate(
-        'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingMetricsPeriodDescription',
-        {
-          defaultMessage: 'The frequency of logging the internal Elastic Agent metrics.',
-        }
-      ),
     learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: zodStringWithDurationValidation,
     example_value: '10m',
@@ -131,13 +109,6 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelTitle', {
       defaultMessage: 'Agent logging level',
     }),
-    description: ({ renderer }) => (
-      <FormattedMessage
-        id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelDescription"
-        defaultMessage="Sets the log level for all the agents on the policy. The default log level is {level}."
-        values={{ level: renderer.renderCode(DEFAULT_LOG_LEVEL) }}
-      />
-    ),
     api_field: {
       name: 'agent_logging_level',
     },
@@ -150,12 +121,6 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingToFilesTitle', {
       defaultMessage: 'Agent logging to files',
     }),
-    description: () => (
-      <FormattedMessage
-        id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingToFilesDescription"
-        defaultMessage="Enables logging to rotating files."
-      />
-    ),
     api_field: {
       name: 'agent_logging_to_files',
     },
@@ -168,12 +133,6 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileSizeTitle', {
       defaultMessage: 'Agent logging file size limit',
     }),
-    description: () => (
-      <FormattedMessage
-        id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileSizeDescription"
-        defaultMessage="Configure log file size limit in bytes. If limit is reached, log file will be automatically rotated."
-      />
-    ),
     api_field: {
       name: 'agent_logging_files_rotateeverybytes',
     },
@@ -186,12 +145,6 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileLimitTitle', {
       defaultMessage: 'Agent logging number of files',
     }),
-    description: () => (
-      <FormattedMessage
-        id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileLimitDescription"
-        defaultMessage="Number of rotated log files to keep. Oldest files will be deleted first."
-      />
-    ),
     api_field: {
       name: 'agent_logging_files_keepfiles',
     },
@@ -207,12 +160,6 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
         defaultMessage: 'Agent logging file rotation interval',
       }
     ),
-    description: () => (
-      <FormattedMessage
-        id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalDescription"
-        defaultMessage="Enable log file rotation on time intervals in addition to size-based rotation, i.e. 1s, 1m , 1h, 24h."
-      />
-    ),
     api_field: {
       name: 'agent_logging_files_interval',
     },
@@ -225,12 +172,6 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeTitle', {
       defaultMessage: 'Monitoring runtime (experimental)',
     }),
-    description: () => (
-      <FormattedMessage
-        id="xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeDescription"
-        defaultMessage="Change how the Beat inputs used for Elastic Agent self-monitored are executed."
-      />
-    ),
     api_field: {
       name: 'agent_monitoring_runtime_experimental',
     },
@@ -271,14 +212,6 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.disablePolicyChangeAcksTitle', {
       defaultMessage: 'Disable policy change acknowledgments',
     }),
-    description: () =>
-      i18n.translate(
-        'xpack.fleet.settings.agentPolicyAdvanced.disablePolicyChangeAcksDescription',
-        {
-          defaultMessage:
-            'Disable policy change acknowlegements from the Elastic Agent to Fleet. Policy changes will be communicated through regular checkins.',
-        }
-      ),
     api_field: {
       name: 'agent_features_disable_policy_change_acks_enabled',
     },
@@ -295,11 +228,6 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.includeTagsInEventsTitle', {
       defaultMessage: 'Include agent tags in events',
     }),
-    description: () =>
-      i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.includeTagsInEventsDescription', {
-        defaultMessage:
-          'When enabled, agent tags are forwarded to all event documents collected by the agent, allowing filtering by tags in Discover, dashboards, and alerts.',
-      }),
     api_field: {
       name: 'agent_features_include_tags_in_events_enabled',
     },
@@ -315,12 +243,6 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.internalYamlSettingsTitle', {
       defaultMessage: 'Advanced internal YAML settings',
     }),
-    description: () => (
-      <FormattedMessage
-        id="xpack.fleet.settings.agentPolicyAdvanced.internalYamlSettingsDescription"
-        defaultMessage="Control advanced agent internal settings and feature flags. No stability guarantee is provided for these settings."
-      />
-    ),
     api_field: {
       name: 'agent_internal',
     },
