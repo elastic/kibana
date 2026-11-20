@@ -52,6 +52,8 @@ const baseSchema = schema.object<SavedObjectSanitizedDocSchema>({
       accessMode: schema.oneOf([schema.literal('write_restricted'), schema.literal('default')]),
     })
   ),
+  // `@kbn/ols` and the mapping check ACLs, and callers cannot set one through a write.
+  acl: schema.maybe(schema.any()),
   attributes: schema.recordOf(schema.string(), schema.maybe(schema.any())),
 });
 

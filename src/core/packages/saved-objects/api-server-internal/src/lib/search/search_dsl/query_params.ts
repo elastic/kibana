@@ -17,6 +17,7 @@ import {
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { estypes } from '@elastic/elasticsearch';
 import { getReferencesFilter } from './references_filter';
+import { matchesAclField } from '../../utils/acl_field';
 
 type KueryNode = any;
 
@@ -32,9 +33,33 @@ function getTypes(registry: ISavedObjectTypeRegistry, type?: string | string[]) 
 }
 
 /**
+ * The `simple_query_string` field patterns that a search in all fields uses instead of `*`, which
+ * would also find objects by their owner or grantees: the requested types' attributes, and every
+ * core root field except the stored ACL. A document holds only its own type's attributes, and
+ * `find` returns only the requested types, so the other types' fields could never match.
+ */
+function getAllFieldsExceptAcl(
+  registry: ISavedObjectTypeRegistry,
+  mappings: IndexMapping,
+  types: string[]
+): string[] {
+  const typeFields = types.flatMap((type) => [type, `${type}.*`]);
+  const rootFields = Object.entries(mappings.properties ?? {}).flatMap(([name, field]) => {
+    if (registry.getType(name) || matchesAclField(name)) {
+      return [];
+    }
+    const hasSubfields = 'properties' in field || 'fields' in field;
+    return hasSubfields ? [name, `${name}.*`] : [name];
+  });
+  return [...typeFields, ...rootFields];
+}
+
+/**
  *  Get the field params based on the types, searchFields, and rootSearchFields
  */
 function getSimpleQueryStringTypeFields(
+  registry: ISavedObjectTypeRegistry,
+  mappings: IndexMapping,
   types: string[],
   searchFields: string[] = [],
   rootSearchFields: string[] = []
@@ -42,7 +67,7 @@ function getSimpleQueryStringTypeFields(
   if (!searchFields.length && !rootSearchFields.length) {
     return {
       lenient: true,
-      fields: ['*'],
+      fields: getAllFieldsExceptAcl(registry, mappings, types),
     };
   }
 
@@ -50,6 +75,11 @@ function getSimpleQueryStringTypeFields(
   fields.forEach((field) => {
     if (field.indexOf('.') !== -1) {
       throw new Error(`rootSearchFields entry "${field}" is invalid: cannot contain "." character`);
+    }
+    // Elasticsearch removes a boost such as `^2` before it expands the field pattern.
+    const [pattern] = field.split('^');
+    if (matchesAclField(pattern)) {
+      throw new Error(`rootSearchFields entry "${field}" is invalid: cannot search the ACL`);
     }
   });
 
@@ -251,6 +281,8 @@ export function getQueryParams({
 
     const simpleQueryStringClause = useSimpleQueryStringClause
       ? getSimpleQueryStringClause({
+          registry,
+          mappings,
           search,
           searchFields: simpleQuerySearchFields,
           types,
@@ -464,12 +496,16 @@ const getNestedQueryStringClause = ({
 };
 
 const getSimpleQueryStringClause = ({
+  registry,
+  mappings,
   search,
   types,
   searchFields,
   rootSearchFields,
   defaultSearchOperator,
 }: {
+  registry: ISavedObjectTypeRegistry;
+  mappings: IndexMapping;
   search: string;
   types: string[];
   searchFields?: string[];
@@ -480,7 +516,13 @@ const getSimpleQueryStringClause = ({
     {
       simple_query_string: {
         query: search,
-        ...getSimpleQueryStringTypeFields(types, searchFields, rootSearchFields),
+        ...getSimpleQueryStringTypeFields(
+          registry,
+          mappings,
+          types,
+          searchFields,
+          rootSearchFields
+        ),
         ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
       },
     },

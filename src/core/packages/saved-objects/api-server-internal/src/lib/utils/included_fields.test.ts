@@ -36,6 +36,12 @@ describe('getRootFields', () => {
 describe('includedFields', () => {
   const rootFields = getRootFields();
 
+  it('adds the stored ACL, which `getRootFields` leaves out, only when asked', () => {
+    expect(rootFields).not.toContain('acl');
+    expect(includedFields('config', 'foo')).not.toContain('acl');
+    expect(includedFields('config', 'foo', true)).toEqual(['config.foo', ...rootFields, 'acl']);
+  });
+
   it('returns undefined if fields are not provided', () => {
     expect(includedFields()).toBe(undefined);
   });

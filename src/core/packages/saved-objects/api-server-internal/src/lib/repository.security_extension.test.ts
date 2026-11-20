@@ -799,6 +799,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         status: 'partially_authorized',
         typeMap: Object.freeze(new Map([[type, authRecord]])),
       });
+      mockSecurityExt.redactNamespaces.mockImplementation(({ savedObject }) => savedObject);
 
       await findSuccess(client, repository, { type, namespaces: [namespace, 'ns-1'] });
       expect(mockGetSearchDsl.mock.calls[0].length).toBe(3); // Find success verifies this is called once, this should always pass

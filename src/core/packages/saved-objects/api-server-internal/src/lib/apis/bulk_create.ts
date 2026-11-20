@@ -16,6 +16,8 @@ import {
   type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { readAclFromRawSource } from '@kbn/core-saved-objects-base-server-internal';
+import type { StoredAcl } from '@kbn/ols';
 import {
   type SavedObjectsCreateOptions,
   type SavedObjectsBulkCreateObject,
@@ -248,6 +250,7 @@ export const performBulkCreate = async <T>(
         let existingOriginId: string | undefined;
         let versionProperties;
         let accessControl: SavedObjectAccessControl | undefined;
+        let existingAcl: StoredAcl | undefined;
         const {
           esRequestIndex,
           object: { initialNamespaces, version, ...object },
@@ -272,6 +275,11 @@ export const performBulkCreate = async <T>(
           versionProperties = getExpectedVersionProperties(version);
           existingOriginId = existingDocument?._source?.originId;
           accessControl = existingDocument?._source?.accessControl;
+          // An overwrite keeps the stored ACL. Callers cannot set an ACL through bulk create. The
+          // preflight reads only multi-namespace objects, so an overwrite of any other object (the
+          // branch below) carries no ACL: a type that stores ACLs has to be multi-namespace until
+          // those overwrites read the existing document.
+          existingAcl = readAclFromRawSource(existingDocument?._source);
         } else {
           if (registry.isSingleNamespace(object.type)) {
             savedObjectNamespace = initialNamespaces
@@ -304,6 +312,7 @@ export const performBulkCreate = async <T>(
           ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
           managed: setManaged({ optionsManaged, objectManaged: object.managed }),
           ...(accessControlToWrite && { accessControl: accessControlToWrite }),
+          ...(existingAcl && { acl: existingAcl }),
           updated_at: time,
           created_at: time,
           ...(createdBy && { created_by: createdBy }),

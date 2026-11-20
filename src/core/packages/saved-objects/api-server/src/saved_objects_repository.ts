@@ -8,6 +8,7 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { StoredAcl } from '@kbn/ols';
 import type { SavedObjectsRawDocSource } from '..';
 import type {
   SavedObjectsBaseOptions,
@@ -34,6 +35,7 @@ import type {
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
+  SavedObjectsFindResult,
   SavedObjectsCreateOptions,
   SavedObjectsCheckConflictsObject,
   SavedObjectsBulkUpdateObject,
@@ -72,7 +74,45 @@ export interface SavedObjectsFindInternalOptions {
    * This disableExtensions internal option preserves that behavior.
    */
   disableExtensions?: boolean;
+  /**
+   * Whether each result includes the object's stored ACL for object-level security (OLS) as `acl`.
+   * Only repository callers can set it, so the Saved Objects client, its HTTP APIs, and exports
+   * never return an ACL.
+   */
+  includeAcl?: boolean;
 }
+
+/**
+ * Internal-only options for the `get` operation.
+ *
+ * @internal
+ */
+export interface SavedObjectsGetInternalOptions {
+  /**
+   * Whether the result includes the object's stored ACL for object-level security (OLS) as `acl`.
+   * See {@link SavedObjectsFindInternalOptions.includeAcl}.
+   */
+  includeAcl?: boolean;
+}
+
+/**
+ * A saved object with its stored ACL for object-level security (OLS), as Elasticsearch indexed it.
+ * Repository APIs return it only when the caller sets `includeAcl`. An object without an ACL has no
+ * `acl`.
+ *
+ * @internal
+ */
+export type SavedObjectWithAcl<T = unknown> = SavedObject<T> & { acl?: StoredAcl };
+
+/**
+ * A find response whose objects include their stored ACL, when the caller sets `includeAcl`.
+ *
+ * @internal
+ */
+export type SavedObjectsFindResponseWithAcl<T = unknown, A = unknown> = Omit<
+  SavedObjectsFindResponse<T, A>,
+  'saved_objects'
+> & { saved_objects: Array<SavedObjectsFindResult<T> & { acl?: StoredAcl }> };
 
 /**
  * The savedObjects repository contract.
@@ -185,6 +225,10 @@ export interface ISavedObjectsRepository {
    */
   find<T = unknown, A = unknown>(
     options: SavedObjectsFindOptions,
+    internalOptions: SavedObjectsFindInternalOptions & { includeAcl: true }
+  ): Promise<SavedObjectsFindResponseWithAcl<T, A>>;
+  find<T = unknown, A = unknown>(
+    options: SavedObjectsFindOptions,
     internalOptions?: SavedObjectsFindInternalOptions
   ): Promise<SavedObjectsFindResponse<T, A>>;
 
@@ -261,12 +305,20 @@ export interface ISavedObjectsRepository {
    * @param {object} [options={}] {@link SavedObjectsGetOptions} - options for the get operation
    * @property {string} [options.migrationVersionCompatibility]
    * @property {string} [options.namespace]
+   * @param {object} [internalOptions] {@link SavedObjectsGetInternalOptions} - internal-only options for the get operation
    * @returns {promise} - { id, type, version, attributes }
    */
   get<T = unknown>(
     type: string,
     id: string,
-    options?: SavedObjectsGetOptions
+    options: SavedObjectsGetOptions | undefined,
+    internalOptions: SavedObjectsGetInternalOptions & { includeAcl: true }
+  ): Promise<SavedObjectWithAcl<T>>;
+  get<T = unknown>(
+    type: string,
+    id: string,
+    options?: SavedObjectsGetOptions,
+    internalOptions?: SavedObjectsGetInternalOptions
   ): Promise<SavedObject<T>>;
 
   /**

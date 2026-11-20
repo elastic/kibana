@@ -9,6 +9,7 @@
 
 import _ from 'lodash';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import type { StoredAcl } from '@kbn/ols';
 import { SavedObjectsSerializer } from './serializer';
 import { encodeVersion } from '../version';
 import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';
@@ -1501,5 +1502,74 @@ describe('#generateRawLegacyUrlAliasId', () => {
       const id = namespaceAgnosticSerializer.generateRawLegacyUrlAliasId('foo', 'bar', 'baz');
       expect(id).toEqual(expected);
     });
+  });
+});
+
+describe('the stored ACL', () => {
+  const ADDED_AT = '2026-01-01T00:00:00.000Z';
+  const STORED_ACL: StoredAcl = {
+    version: [1],
+    owner: { type: ['user'], id: ['u_owner'] },
+    general: { access: ['view', 'none'] },
+    entries: [{ type: ['user'], id: ['u_alice'], access: ['edit'], added_at: [ADDED_AT] }],
+  };
+  const rawDoc = (source: Record<string, unknown>): SavedObjectsRawDoc => ({
+    _id: 'foo:bar',
+    _source: { type: 'foo', foo: {}, ...source } as SavedObjectsRawDoc['_source'],
+  });
+
+  it('reads the ACL from the `acl` object, dotted root keys, and arrays', () => {
+    const actual = namespaceAgnosticSerializer.rawToSavedObject(
+      rawDoc({
+        acl: {
+          version: 1,
+          owner: { type: 'user' },
+          general: { access: ['view', 'none'] },
+          entries: [{ type: 'user', id: 'u_alice', access: 'edit', added_at: ADDED_AT }],
+        },
+        'acl.owner.id': 'u_owner',
+      })
+    );
+    expect(actual.acl).toEqual(STORED_ACL);
+  });
+
+  it('reads the ACL for every type, whether or not access control is enabled', () => {
+    const source = { acl: { version: 1, owner: { type: 'user', id: 'u_owner' } } };
+    expect(accessControlDisabledSerializer.rawToSavedObject(rawDoc(source)).acl).toBeDefined();
+    expect(singleNamespaceSerializer.rawToSavedObject(rawDoc(source)).acl).toBeDefined();
+  });
+
+  it.each([
+    ['no ACL', {}],
+    ['an empty ACL object', { acl: {} }],
+    ['a null ACL', { acl: null }],
+  ])('reads no ACL from a document with %s', (description, source) => {
+    expect(namespaceAgnosticSerializer.rawToSavedObject(rawDoc(source))).not.toHaveProperty('acl');
+  });
+
+  it('writes the ACL as one `acl` object that indexes to the same values', () => {
+    const actual = namespaceAgnosticSerializer.savedObjectToRaw({
+      type: 'foo',
+      id: 'bar',
+      attributes: {},
+      references: [],
+      acl: STORED_ACL,
+    });
+    expect(actual._source.acl).toEqual({
+      version: 1,
+      owner: { type: 'user', id: 'u_owner' },
+      general: { access: ['view', 'none'] },
+      entries: [{ type: 'user', id: 'u_alice', access: 'edit', added_at: ADDED_AT }],
+    });
+    expect(Object.keys(actual._source).filter((key) => key.startsWith('acl.'))).toEqual([]);
+  });
+
+  it('keeps the ACL through a round trip', () => {
+    const saved = namespaceAgnosticSerializer.rawToSavedObject(
+      rawDoc({ acl: { version: 1, owner: { type: 'user' } }, 'acl.owner.id': 'u_owner' })
+    );
+    const raw = namespaceAgnosticSerializer.savedObjectToRaw(saved);
+    expect(namespaceAgnosticSerializer.rawToSavedObject(raw).acl).toEqual(saved.acl);
+    expect(raw._source).not.toHaveProperty(['acl.owner.id']);
   });
 });

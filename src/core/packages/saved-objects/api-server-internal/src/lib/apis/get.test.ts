@@ -273,10 +273,9 @@ describe('#get', () => {
     });
 
     it('migrates the fetched document', async () => {
-      migrator.migrateDocument.mockReturnValueOnce(
-        'migrated' as unknown as ReturnType<typeof migrator.migrateDocument>
-      );
-      await expect(getSuccess(client, repository, registry, type, id)).resolves.toBe('migrated');
+      const migrated = { id: 'migrated' } as unknown as ReturnType<typeof migrator.migrateDocument>;
+      migrator.migrateDocument.mockReturnValueOnce(migrated);
+      await expect(getSuccess(client, repository, registry, type, id)).resolves.toBe(migrated);
       expect(migrator.migrateDocument).toHaveBeenCalledTimes(1);
       expectMigrationArgs({
         id,

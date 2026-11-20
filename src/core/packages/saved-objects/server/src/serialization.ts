@@ -9,6 +9,7 @@
 
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-api-server';
+import type { StoredAcl } from '@kbn/ols';
 import type { SavedObjectReference, SavedObjectsRawDocSource } from '..';
 
 /**
@@ -97,6 +98,13 @@ export interface SavedObjectDoc<T = unknown> {
   originId?: string;
   managed?: boolean;
   accessControl?: SavedObjectAccessControl;
+  /**
+   * The object's stored ACL for object-level security (OLS), as Elasticsearch indexes it. Repository
+   * APIs leave it out of their results unless the caller asks for it. Only this stored shape, with
+   * every field an array, writes correctly: a value in the `Acl` shape must be converted first, or
+   * it loses its version and reads back as invalid.
+   */
+  acl?: StoredAcl;
 }
 
 /**

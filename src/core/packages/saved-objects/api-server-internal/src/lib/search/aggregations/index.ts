@@ -8,3 +8,4 @@
  */
 
 export { validateAndConvertAggregations } from './validation';
+export { hasTopHits, removeAclFromTopHits } from './remove_acl_from_top_hits';
