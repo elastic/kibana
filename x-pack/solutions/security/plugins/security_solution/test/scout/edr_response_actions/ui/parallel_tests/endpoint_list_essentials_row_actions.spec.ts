@@ -13,7 +13,7 @@ import { PARALLEL_HOST_SEED_TIMEOUT_MS, requireHost } from '../../common/get_fil
 // Local only: the seeder needs the file-realm system-indices user, which Cloud serverless does not have.
 spaceTest.describe(
   'Endpoint list row actions on Security Essentials',
-  { tag: ['@local-serverless-security_essentials'] },
+  { tag: ['@local-serverless-security_essentials', '@local-serverless-security_complete'] },
   () => {
     let seeded: SeededEndpointHosts | undefined;
 
