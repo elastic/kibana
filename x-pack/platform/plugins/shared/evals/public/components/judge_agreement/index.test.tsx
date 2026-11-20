@@ -20,6 +20,7 @@ const binary = (overrides: Partial<BinaryAgreement> = {}): BinaryAgreement => ({
   n: 54,
   confusion: { tp: 30, fp: 4, fn: 3, tn: 17 },
   rawAgreement: 0.87,
+  rawAgreementInterval: { low: 0.75, high: 0.94 },
   kappa: 0.71,
   kappaInterval: { low: 0.58, high: 0.82 },
   precision: 0.88,

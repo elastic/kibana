@@ -274,7 +274,9 @@ export const ReviewQueueDetailPage: React.FC = () => {
                     size="s"
                     title={i18n.SUBMIT_ERROR_TITLE}
                   >
-                    {isHttpFetchError(submit.error) ? submit.error.body?.message : null}
+                    {isHttpFetchError(submit.error)
+                      ? (submit.error.body as { message?: string } | undefined)?.message
+                      : null}
                   </EuiCallOut>
                 </>
               ) : null}
