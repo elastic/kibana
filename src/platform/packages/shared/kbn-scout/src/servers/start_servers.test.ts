@@ -115,8 +115,13 @@ describe('startServers', () => {
 
   it('registers the signal hook before anything starts and stops a container that is still starting', async () => {
     let shutdownHook: () => Promise<void> = async () => {};
-    registerServerShutdownMock.mockImplementation((_procs, hook) => {
-      shutdownHook = hook;
+    registerServerShutdownMock.mockImplementation((_procs, hook, onSignal) => {
+      // what exit-hook does on a signal: mark it, tear the managed processes down, run the hook
+      shutdownHook = async () => {
+        onSignal?.();
+        await procs.teardown('SIGTERM');
+        await hook();
+      };
       return removeShutdownHook;
     });
     const containersStopped = jest.fn();
@@ -200,8 +205,13 @@ describe('startServers', () => {
 
   it('treats an Elasticsearch exit caused by the signal as part of the interrupt', async () => {
     let shutdownHook: () => Promise<void> = async () => {};
-    registerServerShutdownMock.mockImplementation((_procs, hook) => {
-      shutdownHook = hook;
+    registerServerShutdownMock.mockImplementation((_procs, hook, onSignal) => {
+      // what exit-hook does on a signal: mark it, tear the managed processes down, run the hook
+      shutdownHook = async () => {
+        onSignal?.();
+        await procs.teardown('SIGTERM');
+        await hook();
+      };
       return removeShutdownHook;
     });
     let esEarlyExit: (msg: string) => void = () => {};

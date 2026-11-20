@@ -56,6 +56,16 @@ export function toDockerServer(name: string, spec: DockerServerSpec): DockerServ
   };
 }
 
+/** Whether the container is still running, per `docker inspect`; false when it cannot be inspected. */
+export async function isDockerContainerRunning(containerId: string): Promise<boolean> {
+  try {
+    const { stdout } = await execa('docker', ['inspect', '-f', '{{.State.Running}}', containerId]);
+    return stdout.trim() === 'true';
+  } catch {
+    return false;
+  }
+}
+
 export async function isDockerImageAvailableLocally(image: string): Promise<boolean> {
   try {
     const { stdout } = await execa('docker', ['images', '-q', image]);
@@ -205,11 +215,7 @@ function ignoreGoneContainer(containerId: string, error: Error) {
   }
 }
 
-/**
- * Pulls (unless cached and `preferCached`), runs and waits for one docker server, the same way the
- * FTR `dockerServers` service does, but without any test-runner lifecycle: the caller owns the
- * returned `stop()`. Fails, and stops the container, if the readiness condition is not met in time.
- */
+/** Pulls (unless cached), runs and waits for one docker server; the caller owns the returned `stop()`. */
 export async function runDockerServer(
   server: DockerServer,
   { log, onUnexpectedExit, signal }: RunDockerServerOptions
@@ -252,7 +258,19 @@ export async function runDockerServer(
     onAbort();
   }
   const runningSub = observeContainerRunning(name, containerId, log).subscribe({
-    error: (error) => {
+    error: async (error) => {
+      if (stopped) {
+        return;
+      }
+      // `docker wait` failing is not the same as the container exiting: when it is a monitor
+      // problem (a daemon hiccup) and the container is still running, keep going.
+      const monitorFailed = !/unexpectedly exitted/.test(error?.message ?? '');
+      if (monitorFailed && (await isDockerContainerRunning(containerId))) {
+        log.warning(
+          `[docker:${name}] lost the container monitor (${error.message}); the container is still running`
+        );
+        return;
+      }
       if (stopped) {
         return;
       }

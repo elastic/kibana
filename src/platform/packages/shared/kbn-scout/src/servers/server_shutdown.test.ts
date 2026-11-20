@@ -82,13 +82,19 @@ describe('registerServerShutdown', () => {
     const stderrSpy = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
     const before = process.listeners('SIGINT');
 
-    const remove = registerServerShutdown({ teardown: jest.fn() }, jest.fn());
+    const onSignal = jest.fn();
+    const remove = registerServerShutdown({ teardown: jest.fn() }, jest.fn(), onSignal);
     const added = process.listeners('SIGINT').filter((l) => !before.includes(l));
     // exit-hook's own listener may be added too; ours is the one that counts signals
     expect(added.length).toBeGreaterThanOrEqual(1);
     const ours = added[added.length - 1] as (signal: NodeJS.Signals) => void;
 
     ours('SIGINT');
+    expect(exitSpy).not.toHaveBeenCalled();
+    expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('send SIGINT again'));
+
+    // a different signal is not a request to skip the shutdown
+    ours('SIGTERM');
     expect(exitSpy).not.toHaveBeenCalled();
 
     ours('SIGINT');

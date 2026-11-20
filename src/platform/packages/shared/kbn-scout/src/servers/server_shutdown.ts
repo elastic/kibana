@@ -29,25 +29,35 @@ export const shutdownServers = async (
 /** Holds process exit until both managed processes and Elasticsearch stop. */
 export const registerServerShutdown = (
   procs: Pick<ProcRunner, 'teardown'>,
-  shutdownEs: () => Promise<void>
+  shutdownEs: () => Promise<void>,
+  /** Runs as soon as the signal is handled, before any teardown starts. */
+  onSignal?: () => void
 ): (() => void) => {
-  const removeShutdownHook = asyncExitHook(() => shutdownServers(procs, shutdownEs), {
-    wait: SHUTDOWN_TIMEOUT_MS,
-  });
+  const removeShutdownHook = asyncExitHook(
+    () => {
+      onSignal?.();
+      return shutdownServers(procs, shutdownEs);
+    },
+    { wait: SHUTDOWN_TIMEOUT_MS }
+  );
 
   // exit-hook listens with `once`. Keep another listener after it fires so execa's signal-exit
-  // does not re-raise SIGTERM/SIGINT before the asynchronous shutdown completes. A second signal
-  // means the user does not want to wait for it (a hung docker daemon, a slow cluster stop):
-  // exit right away, like the default signal handling would.
-  let signals = 0;
+  // does not re-raise SIGTERM/SIGINT before the asynchronous shutdown completes. The same signal
+  // a second time means the user does not want to wait for it (a hung docker daemon, a slow
+  // cluster stop): exit right away, like the default signal handling would. Only the same
+  // signal: a SIGTERM followed by a SIGINT (a supervisor cancelling, then a user) is not a
+  // request to leave containers behind.
+  const signals: Partial<Record<NodeJS.Signals, number>> = {};
   const keepSignalListener = (signal: NodeJS.Signals) => {
-    signals += 1;
-    if (signals > 1) {
+    signals[signal] = (signals[signal] ?? 0) + 1;
+    if (signals[signal] === 1) {
       process.stderr.write(
-        `\nReceived ${signal} again, exiting without waiting for the shutdown\n`
+        `\nReceived ${signal}, shutting the servers down (send ${signal} again to exit without waiting)\n`
       );
-      process.exit(signal === 'SIGINT' ? 130 : 143);
+      return;
     }
+    process.stderr.write(`\nReceived ${signal} again, exiting without waiting for the shutdown\n`);
+    process.exit(signal === 'SIGINT' ? 130 : 143);
   };
   process.on('SIGTERM', keepSignalListener);
   process.on('SIGINT', keepSignalListener);

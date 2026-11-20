@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DockerServerSpec } from '@kbn/test-docker-servers';
 import { runDockerServer } from '@kbn/test-docker-servers';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { Config } from './configs';
@@ -20,7 +21,7 @@ jest.mock('@kbn/test-docker-servers', () => ({
 const runDockerServerMock = runDockerServer as jest.Mock;
 const log = new ToolingLog({ level: 'silent', writeTo: process.stdout });
 
-const configWith = (dockerServers: Record<string, unknown> | undefined) =>
+const configWith = (dockerServers: Record<string, DockerServerSpec> | undefined) =>
   ({ get: (key: string) => (key === 'dockerServers' ? dockerServers : undefined) } as Config);
 
 const spec = (enabled: boolean) => ({

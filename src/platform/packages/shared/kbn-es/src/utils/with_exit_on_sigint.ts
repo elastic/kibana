@@ -9,15 +9,12 @@
 
 import { gracefulExit } from 'exit-hook';
 
-/**
- * Runs a polling loop that would otherwise continue until its timeout even if SIGINT is signaled,
- * exiting on SIGINT while it runs. Through exit-hook, not `process.exit()`: whoever started the
- * cluster may have registered an asynchronous shutdown hook (e.g. Scout stopping its docker
- * containers), and `process.exit()` skips those; with no hooks registered this is the plain exit
- * it always was. Only while the loop runs: left registered, the listener would cut every later
- * shutdown short the same way.
- */
+/** Runs a polling loop that would otherwise outlive a SIGINT, exiting on SIGINT only while it runs. */
 export async function withExitOnSigint<T>(fn: () => Promise<T>): Promise<T> {
+  // Through exit-hook, not `process.exit()`: whoever started the cluster may have registered an
+  // asynchronous shutdown hook (e.g. Scout stopping its docker containers), which `process.exit()`
+  // skips; with no hooks registered this is the plain exit it always was. Only while the loop
+  // runs: left registered, the listener would cut every later shutdown short the same way.
   const exitOnSigint = () => gracefulExit();
   process.on('SIGINT', exitOnSigint);
   try {

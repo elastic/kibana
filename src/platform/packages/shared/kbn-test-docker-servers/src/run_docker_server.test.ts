@@ -26,6 +26,10 @@ interface FakeDocker {
   pullProc?: Promise<{ stdout: string }> & { kill: () => void };
   /** Simulates a terminal Ctrl-C reaching the `docker wait` monitor itself (exit code 130). */
   interruptMonitor: () => void;
+  /** Simulates `docker wait` failing for a reason other than the container exiting. */
+  failMonitor: () => void;
+  /** What `docker inspect` reports for the container's running state. */
+  inspectRunning: boolean;
 }
 
 function fakeDocker({
@@ -53,6 +57,8 @@ function fakeDocker({
     rejectWait(
       Object.assign(new Error('Command failed with exit code 130: docker wait'), { exitCode: 130 })
     );
+  const failMonitor = () =>
+    rejectWait(Object.assign(new Error('error during connect: EOF'), { exitCode: 1 }));
   // the runner handles this rejection; avoid an unhandled-rejection warning when nobody awaits it
   waitProc.catch(() => {});
 
@@ -71,6 +77,8 @@ function fakeDocker({
         return Object.assign(Promise.resolve({ stdout: '' }), { stdout, stderr });
       case 'wait':
         return waitProc;
+      case 'inspect':
+        return Promise.resolve({ stdout: fake.inspectRunning ? 'true\n' : 'false\n' });
       case 'kill':
         stdout.end();
         stderr.end();
@@ -86,6 +94,8 @@ function fakeDocker({
     stderr,
     exitContainer: (code: number) => resolveWait({ stdout: `${code}\n` }),
     interruptMonitor,
+    failMonitor,
+    inspectRunning: true,
   };
   return fake;
 }
@@ -307,6 +317,40 @@ describe('runDockerServer', () => {
     docker.interruptMonitor();
     await new Promise((resolve) => setImmediate(resolve));
     expect(onUnexpectedExit).not.toHaveBeenCalled();
+
+    await running.stop();
+  });
+
+  it('does not report a container exit when the monitor failed but the container is still running', async () => {
+    const docker = fakeDocker({ cached: true });
+    const onUnexpectedExit = jest.fn();
+
+    const pending = runDockerServer(server, { log, onUnexpectedExit });
+    await new Promise((resolve) => setImmediate(resolve));
+    docker.stdout.write('package manifests loaded\n');
+    const running = await pending;
+
+    docker.failMonitor();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(onUnexpectedExit).not.toHaveBeenCalled();
+    expect(dockerCall(docker.calls, 'inspect')).toHaveLength(1);
+
+    await running.stop();
+  });
+
+  it('reports a monitor failure as an exit when the container is gone', async () => {
+    const docker = fakeDocker({ cached: true });
+    docker.inspectRunning = false;
+    const onUnexpectedExit = jest.fn();
+
+    const pending = runDockerServer(server, { log, onUnexpectedExit });
+    await new Promise((resolve) => setImmediate(resolve));
+    docker.stdout.write('package manifests loaded\n');
+    const running = await pending;
+
+    docker.failMonitor();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(onUnexpectedExit).toHaveBeenCalledTimes(1);
 
     await running.stop();
   });

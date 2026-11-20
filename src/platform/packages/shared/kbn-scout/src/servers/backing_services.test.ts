@@ -42,6 +42,19 @@ describe('resolveRunOutcome', () => {
     expect(resolveRunOutcome({ ...base, interrupted: false, runError: error })).toBe('interrupted');
   });
 
+  it('reports an early exit ahead of the abort its teardown caused', () => {
+    const abort = new Error('start aborted');
+    abort.name = 'AbortError';
+    expect(() =>
+      resolveRunOutcome({
+        ...base,
+        interrupted: false,
+        earlyExitError: new Error('ES exitted unexpectedly'),
+        runError: abort,
+      })
+    ).toThrow('ES exitted unexpectedly');
+  });
+
   it('reports an early exit ahead of the run error it caused', () => {
     expect(() =>
       resolveRunOutcome({
