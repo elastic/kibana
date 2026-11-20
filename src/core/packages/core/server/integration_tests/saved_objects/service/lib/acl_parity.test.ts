@@ -247,20 +247,35 @@ describe('ACL storage in Saved Objects', () => {
     const id = 'migrated-on-read';
     await indexFixture(id, {}, { type: SET_TYPE, typeMigrationVersion: '10.0.0' });
 
-    expect(await repository.get(SET_TYPE, id)).not.toHaveProperty('acl');
     const { saved_objects: bulkGot } = await repository.bulkGet([{ type: SET_TYPE, id }]);
-    expect(bulkGot[0]).not.toHaveProperty('acl');
-    expect((await repository.resolve(SET_TYPE, id)).saved_object).not.toHaveProperty('acl');
     const { saved_objects: found } = await repository.find({ type: SET_TYPE });
-    expect(found).toHaveLength(1);
-    expect(found[0]).not.toHaveProperty('acl');
+    const { saved_objects: foundWithoutExtensions } = await repository.find(
+      { type: SET_TYPE },
+      { disableExtensions: true }
+    );
     const { hits } = await repository.search({
       type: SET_TYPE,
       namespaces: ['default'],
       query: { match_all: {} },
     });
-    expect(hits.hits).toHaveLength(1);
-    expect(hits.hits[0]._source).not.toHaveProperty('acl');
+    const results: Record<string, object | undefined> = {
+      get: await repository.get(SET_TYPE, id),
+      bulkGet: bulkGot[0],
+      resolve: (await repository.resolve(SET_TYPE, id)).saved_object,
+      find: found[0],
+      'find without extensions': foundWithoutExtensions[0],
+      search: hits.hits[0]?._source,
+    };
+
+    // Each read must have run the model version, or a missing `acl` would prove nothing.
+    for (const [read, result] of Object.entries(results)) {
+      const { typeMigrationVersion } = (result ?? {}) as { typeMigrationVersion?: string };
+      expect({ read, typeMigrationVersion }).toEqual({
+        read,
+        typeMigrationVersion: '10.1.0',
+      });
+      expect({ read, acl: result && 'acl' in result }).toEqual({ read, acl: false });
+    }
 
     expect((await repository.get(SET_TYPE, id, {}, { includeAcl: true })).acl).toEqual(
       MIGRATION_ACL
@@ -270,6 +285,11 @@ describe('ACL storage in Saved Objects', () => {
       { includeAcl: true }
     );
     expect(foundWithAcl[0].acl).toEqual(MIGRATION_ACL);
+    const { saved_objects: foundWithAclWithoutExtensions } = await repository.find(
+      { type: SET_TYPE },
+      { includeAcl: true, disableExtensions: true }
+    );
+    expect(foundWithAclWithoutExtensions[0].acl).toEqual(MIGRATION_ACL);
   });
 
   it('returns the same ACL from find with fields as from get, dotted root keys included', async () => {
