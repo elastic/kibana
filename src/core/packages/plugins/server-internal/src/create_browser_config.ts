@@ -52,8 +52,13 @@ export function getExposedConfigKeys<T = unknown>(
   const schemaStructure = schema.getSchemaStructure({ expandBranches: true });
   const flattenedConfigSchema: Record<string, string> = {};
   for (const { path, type } of schemaStructure) {
-    if (checkIsPathExposed(path, exposeToBrowser)) {
-      flattenedConfigSchema[path.join('.')] = type;
+    const exposure = getPathExposure(path, exposeToBrowser);
+    if (exposure) {
+      const escapedPath = path.map((segment) =>
+        segment.replace(/\\/g, '\\\\').replace(/\./g, '\\.')
+      );
+      flattenedConfigSchema[escapedPath.join('.')] =
+        exposure === true ? type : `${type} [selected: ${serializeSelector(exposure)}]`;
     }
   }
   return flattenedConfigSchema;
@@ -61,13 +66,13 @@ export function getExposedConfigKeys<T = unknown>(
 
 /**
  * A path whose descriptor is still an object when the path ends is a leaf (such as a record) that the descriptor
- * picks keys from. The schema doesn't say which keys or values that leaf holds, so it counts as exposed. The empty
- * root path of a config schema with no keys holds nothing, so it does not.
+ * picks keys from. Preserve that selector so changes to an opaque leaf are visible to the CI allow-list.
+ * The empty root path of a config schema with no keys holds nothing.
  */
-function checkIsPathExposed<T = unknown>(
+function getPathExposure<T = unknown>(
   path: string[],
   descriptor: ExposedToBrowserDescriptor<T>
-): boolean {
+): boolean | ExposedToBrowserDescriptor<T> {
   if (!path.length) {
     return false;
   }
@@ -79,5 +84,16 @@ function checkIsPathExposed<T = unknown>(
     }
     return exposedConfig === true;
   }
-  return true;
+  return descriptor;
+}
+
+function serializeSelector(selector: object): string {
+  return JSON.stringify(selector, (_key, value: unknown) => {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return Object.fromEntries(
+        Object.entries(value).sort(([left], [right]) => left.localeCompare(right))
+      );
+    }
+    return value;
+  });
 }
