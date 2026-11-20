@@ -11,6 +11,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { deriveChromeColors } from '@kbn/core-user-settings-common';
 
 import { UserProfile, useUserProfileForm, validateAvatarInitials } from './user_profile';
 import { UserProfileAPIClient } from '..';
@@ -412,17 +413,22 @@ describe('useUserProfileForm', () => {
       );
 
       expect(screen.queryByText(/unsaved change/)).not.toBeInTheDocument();
+      expect(screen.getByRole('switch', { name: 'Custom appearance' })).not.toBeChecked();
 
-      await userEvent.type(
-        screen.getByTestId('euiColorPickerAnchor userProfile-chromeColor'),
-        '#0B64DD'
-      );
+      await userEvent.click(screen.getByRole('switch', { name: 'Custom appearance' }));
+
+      expect(screen.queryByText(/unsaved change/)).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('userProfileChromeColorOption-#010101'));
 
       expect(await screen.findByText('1 unsaved change')).toBeInTheDocument();
+      expect(screen.getByTestId('userProfileChromeColorInput-chromeColorLight')).not.toBeVisible();
+      expect(screen.getByTestId('userProfileChromeColorInput-chromeColorDark')).not.toBeVisible();
     });
 
-    it('should display the chrome color picker, previews and per mode overrides', () => {
+    it('should display read-only mode colors and unlock custom colors from Edit', async () => {
       const data: UserProfileData = { userSettings: { chromeColor: '#0B64DD' } };
+      const { light, dark } = deriveChromeColors('#0B64DD');
 
       render(
         coreStart.rendering.addContext(
@@ -440,13 +446,111 @@ describe('useUserProfileForm', () => {
         )
       );
 
-      // EuiColorPicker appends the provided `data-test-subj` to its own anchor test subject.
+      expect(screen.getByTestId('userProfileCustomAppearance')).toBeInTheDocument();
+      expect(screen.getByRole('switch', { name: 'Custom appearance' })).toBeChecked();
+      expect(screen.getByTestId('userProfile-chromeColor')).toBeInTheDocument();
+
+      const lightInput = screen.getByTestId('userProfileChromeColorInput-chromeColorLight');
+      const darkInput = screen.getByTestId('userProfileChromeColorInput-chromeColorDark');
+      expect(lightInput).toHaveValue(light);
+      expect(darkInput).toHaveValue(dark);
+      expect(lightInput).toHaveAttribute('readonly');
+      expect(darkInput).toHaveAttribute('readonly');
+      expect(screen.queryByTestId('userProfileChromeColorAdvanced')).not.toBeInTheDocument();
       expect(
-        screen.getByTestId('euiColorPickerAnchor userProfile-chromeColor')
+        screen.queryByTestId('euiColorPickerAnchor userProfile-chromeColorLight')
+      ).not.toBeInTheDocument();
+
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Edit light and dark mode colors' })
+      );
+
+      expect(
+        screen.getByRole('button', { name: 'Done editing light and dark mode colors' })
       ).toBeInTheDocument();
-      expect(screen.getByTestId('userProfileChromeColorPreviewLight')).toBeInTheDocument();
-      expect(screen.getByTestId('userProfileChromeColorPreviewDark')).toBeInTheDocument();
-      expect(screen.getByTestId('userProfileChromeColorAdvanced')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('euiColorPickerAnchor userProfile-chromeColorLight')
+      ).toBeEnabled();
+      expect(screen.getByTestId('euiColorPickerAnchor userProfile-chromeColorDark')).toBeEnabled();
+      expect(lightInput).toHaveAttribute('readonly');
+      expect(darkInput).toHaveAttribute('readonly');
+    });
+
+    it('should clear chrome colors and ask to save when custom appearance is turned off', async () => {
+      const data: UserProfileData = {
+        userSettings: {
+          chromeColor: '#0B64DD',
+          chromeColorLight: '#ECF1F9',
+          chromeColorDark: '#07101F',
+        },
+      };
+
+      render(
+        coreStart.rendering.addContext(
+          <Providers
+            services={coreStart}
+            history={history}
+            authc={authc}
+            securityApiClients={{
+              userProfiles: new UserProfileAPIClient(coreStart.http),
+              users: new UserAPIClient(coreStart.http),
+            }}
+          >
+            <UserProfile user={mockAuthenticatedUser()} data={data} />
+          </Providers>
+        )
+      );
+
+      expect(screen.queryByText(/unsaved change/)).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('switch', { name: 'Custom appearance' }));
+
+      expect(screen.getByRole('switch', { name: 'Custom appearance' })).not.toBeChecked();
+      expect(screen.getByTestId('userProfile-chromeColor')).not.toBeVisible();
+      expect(await screen.findByText('3 unsaved changes')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('switch', { name: 'Custom appearance' }));
+
+      expect(screen.getByRole('switch', { name: 'Custom appearance' })).toBeChecked();
+      expect(screen.getByTestId('userProfile-chromeColor')).toBeVisible();
+      expect(screen.queryByText(/unsaved change/)).not.toBeInTheDocument();
+    });
+
+    it('should save cleared chrome colors when custom appearance is turned off', async () => {
+      const data: UserProfileData = {
+        userSettings: {
+          chromeColor: '#0B64DD',
+          chromeColorLight: '#ECF1F9',
+          chromeColorDark: '#07101F',
+        },
+      };
+
+      render(
+        coreStart.rendering.addContext(
+          <Providers
+            services={coreStart}
+            history={history}
+            authc={authc}
+            securityApiClients={{
+              userProfiles: new UserProfileAPIClient(coreStart.http),
+              users: new UserAPIClient(coreStart.http),
+            }}
+          >
+            <UserProfile user={mockAuthenticatedUser()} data={data} />
+          </Providers>
+        )
+      );
+
+      await userEvent.click(screen.getByRole('switch', { name: 'Custom appearance' }));
+      await userEvent.click(screen.getByTestId('saveProfileChangesButton'));
+
+      expect(profileUpdateBody().userSettings).toEqual(
+        expect.objectContaining({
+          chromeColor: '',
+          chromeColorLight: '',
+          chromeColorDark: '',
+        })
+      );
     });
 
     it('should display if the User is not a cloud user', () => {
