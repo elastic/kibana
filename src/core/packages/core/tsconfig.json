@@ -78,6 +78,7 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-http-resources-server",
     "@kbn/core-plugins-server-internal",
+    "@kbn/core-rendering-server-internal",
     "@kbn/core-root-server-internal",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-router-server-internal",
