@@ -134,6 +134,8 @@ function setSections({
   sections,
   hasActiveInvestigations = false,
   activeInvestigationCount,
+  hasOpenInvestigationsInSpace,
+  areSpaceInvestigationsLoading = false,
   isInitialLoading = false,
   isFetching = false,
   areSeverityCountsLoading = false,
@@ -142,6 +144,9 @@ function setSections({
   sections: InvestigationSectionState[];
   hasActiveInvestigations?: boolean;
   activeInvestigationCount?: number;
+  /** Defaults to whether the mocked sections hold any rows (window or not). */
+  hasOpenInvestigationsInSpace?: boolean;
+  areSpaceInvestigationsLoading?: boolean;
   isInitialLoading?: boolean;
   isFetching?: boolean;
   areSeverityCountsLoading?: boolean;
@@ -158,6 +163,7 @@ function setSections({
   };
   const resolvedActiveCount =
     activeInvestigationCount ?? (hasActiveInvestigations ? sectionTotal('in-progress') : 0);
+  const totalCount = sections.reduce((sum, section) => sum + section.total, 0);
   mockUseInvestigationSections.mockReturnValue({
     sections,
     severityCounts,
@@ -169,9 +175,11 @@ function setSections({
     hasSeverityCountsError,
     hasActiveInvestigations: hasActiveInvestigations || resolvedActiveCount > 0,
     activeInvestigationCount: resolvedActiveCount,
+    hasOpenInvestigationsInSpace: hasOpenInvestigationsInSpace ?? totalCount > 0,
+    areSpaceInvestigationsLoading,
     isInitialLoading,
     isFetching,
-    totalCount: sections.reduce((sum, section) => sum + section.total, 0),
+    totalCount,
     loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
     refetchAll,
   });
@@ -507,7 +515,7 @@ describe('NightshiftApp', () => {
   });
 
   it('shows a single empty state when there are no investigations', () => {
-    setSections({ sections: defaultSections() });
+    setSections({ sections: defaultSections(), hasOpenInvestigationsInSpace: false });
 
     renderApp();
 
@@ -521,19 +529,35 @@ describe('NightshiftApp', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('keeps search and time range when the window is empty but the space has investigations', () => {
+    setSections({
+      sections: defaultSections(),
+      hasOpenInvestigationsInSpace: true,
+    });
+
+    renderApp();
+
+    expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
+      'No open investigations'
+    );
+    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toBeInTheDocument();
+  });
+
   it('keeps filters mounted when clearing an empty-result query', async () => {
     setSections({
       sections: defaultSections({
         'in-progress': { investigations: [investigation], total: 1 },
       }),
       hasActiveInvestigations: true,
+      hasOpenInvestigationsInSpace: true,
     });
     renderApp();
 
     fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
       target: { value: 'zzz' },
     });
-    setSections({ sections: defaultSections() });
+    setSections({ sections: defaultSections(), hasOpenInvestigationsInSpace: true });
 
     await waitFor(() =>
       expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(

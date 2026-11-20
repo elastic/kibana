@@ -90,9 +90,6 @@ export function NightshiftApp({
   );
   const hasReportedHomepageView = useRef(false);
   const reportedSearchQuery = useRef<string | undefined>(undefined);
-  // Filtered totals go to zero on a no-match search; remember unfiltered availability so clearing
-  // that query does not unmount the filters (and drop search focus) before the unfiltered list returns.
-  const hadUnfilteredInvestigationsRef = useRef(false);
 
   // Read filter state from URL so it survives navigation and is shareable.
   const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
@@ -120,6 +117,8 @@ export function NightshiftApp({
     areSeverityCountsStale,
     hasSeverityCountsError,
     activeInvestigationCount,
+    hasOpenInvestigationsInSpace,
+    areSpaceInvestigationsLoading,
     isInitialLoading,
     isFetching,
     totalCount,
@@ -132,23 +131,15 @@ export function NightshiftApp({
   });
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (debouncedSearchQuery || isInitialLoading || isFetching) {
-      return;
-    }
-    if (sections.some((section) => section.isPreviousData)) {
-      return;
-    }
-    hadUnfilteredInvestigationsRef.current = totalCount > 0;
-  }, [debouncedSearchQuery, isFetching, isInitialLoading, sections, totalCount]);
-
-  // Hide search and time range together when the space has no open investigations in the window.
-  // Keep them mounted through filtered-empty clears so search focus is not dropped.
+  // Hide search + time range only when the space has no open investigations at all. A narrow
+  // window that empties the list must keep both — the time filter caused that empty state.
+  // Show while the space probe loads so we do not flash-hide when older investigations exist.
+  // Keep mounted when a search is active (including no-match) so clearing does not drop focus.
   const showInvestigationsFilters =
     Boolean(searchQuery) ||
     Boolean(debouncedSearchQuery) ||
-    totalCount > 0 ||
-    hadUnfilteredInvestigationsRef.current;
+    hasOpenInvestigationsInSpace ||
+    areSpaceInvestigationsLoading;
 
   // A tile scrolls to its section, so it is only actionable while the list is rendering that
   // section — which the list, not the count, decides.

@@ -111,12 +111,37 @@ const renderSections = (query?: string) =>
 describe('useInvestigationSections', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    httpGet.mockResolvedValue({ critical: 3, high: 1, medium: 0, low: 2 });
+    httpGet.mockImplementation((url: string) => {
+      if (String(url).includes('_severity_counts')) {
+        return Promise.resolve({ critical: 3, high: 1, medium: 0, low: 2 });
+      }
+      return Promise.resolve({
+        results: [],
+        pagination: { total: 2, page: 1, per_page: 1 },
+      });
+    });
     mockUseKibana.mockReturnValue({
       services: { http: { get: httpGet }, agenticInvestigations: {} },
     });
     mockUseFetchInvestigations.mockImplementation((params) =>
       params.inProgress ? sectionResult({ ids: ['running-a', 'running-b'] }) : sectionResult()
+    );
+  });
+
+  it('reports whether the space has open investigations outside the landing window', async () => {
+    const { result } = renderSections();
+
+    await waitFor(() => expect(result.current.hasOpenInvestigationsInSpace).toBe(true));
+    expect(result.current.areSpaceInvestigationsLoading).toBe(false);
+    expect(httpGet).toHaveBeenCalledWith(
+      '/internal/investigations/investigations',
+      expect.objectContaining({
+        query: expect.objectContaining({
+          status: 'open',
+          page: 1,
+          per_page: 1,
+        }),
+      })
     );
   });
 
@@ -192,7 +217,13 @@ describe('useInvestigationSections', () => {
   });
 
   it('fetches a no-search severity baseline while a query is active', async () => {
-    httpGet.mockImplementation((_url, options) => {
+    httpGet.mockImplementation((url, options) => {
+      if (!String(url).includes('_severity_counts')) {
+        return Promise.resolve({
+          results: [],
+          pagination: { total: 2, page: 1, per_page: 1 },
+        });
+      }
       const requestQuery = options?.query as { query?: string } | undefined;
       if (requestQuery?.query) {
         return Promise.resolve({ critical: 0, high: 1, medium: 0, low: 9 });
@@ -225,11 +256,18 @@ describe('useInvestigationSections', () => {
 
     await waitFor(() => expect(result.current.severityCounts.critical).toBe(3));
     expect(result.current.unfilteredSeverityCounts).toEqual(result.current.severityCounts);
-    expect(httpGet).toHaveBeenCalledTimes(1);
+    // Window severity counts + space-wide open-investigation probe.
+    expect(httpGet).toHaveBeenCalledTimes(2);
   });
 
   it('falls back to filtered counts when the no-search baseline fails', async () => {
-    httpGet.mockImplementation((_url, options) => {
+    httpGet.mockImplementation((url, options) => {
+      if (!String(url).includes('_severity_counts')) {
+        return Promise.resolve({
+          results: [],
+          pagination: { total: 0, page: 1, per_page: 1 },
+        });
+      }
       const requestQuery = options?.query as { query?: string } | undefined;
       if (requestQuery?.query) {
         return Promise.resolve({ critical: 0, high: 1, medium: 0, low: 9 });
@@ -403,6 +441,7 @@ describe('useInvestigationSections', () => {
     expect(refetchBySeverity.medium).toHaveBeenCalledTimes(1);
     expect(refetchBySeverity.low).toHaveBeenCalledTimes(1);
     expect(refetchBySeverity.none).toHaveBeenCalledTimes(1);
-    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
+    // Severity counts + space-wide open-investigation probe.
+    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(2));
   });
 });
