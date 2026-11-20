@@ -8,6 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
+  formatKnowledgeExperimentName,
   KNOWLEDGE_INDICES,
   LEGACY_WIKI_AI_INDEX_DEST,
   restoreKnowledge,
@@ -41,7 +42,10 @@ const createSource = (hitsByIndex: Record<string, unknown[]>, missingIndices: st
     helpers: {
       async *scrollSearch({ index }: { index: string }) {
         if (missingIndices.includes(index)) {
-          throw Object.assign(new Error(`no such index [${index}]`), { statusCode: 404 });
+          throw Object.assign(new Error(`no such index [${index}]`), {
+            statusCode: 404,
+            body: { error: { type: 'index_not_found_exception' } },
+          });
         }
         yield { body: { hits: { hits: hitsByIndex[index] ?? [] } } };
       },
@@ -65,6 +69,17 @@ describe('selectedKnowledge', () => {
     expect(() => selectedKnowledge('cortex')).toThrow(
       'Unknown NIGHTSHIFT_KNOWLEDGE systems: cortex'
     );
+  });
+});
+
+describe('formatKnowledgeExperimentName', () => {
+  it('keeps the base name when knowledge is off and suffixes the selection when on', () => {
+    expect(formatKnowledgeExperimentName('Nightshift graded investigation traces', 'none')).toBe(
+      'Nightshift graded investigation traces'
+    );
+    expect(
+      formatKnowledgeExperimentName('Nightshift graded investigation traces', 'memory,wiki')
+    ).toBe('Nightshift graded investigation traces (knowledge: memory,wiki)');
   });
 });
 
@@ -93,14 +108,16 @@ describe('toTargetSpace', () => {
 });
 
 describe('restoreKnowledge', () => {
-  it('touches nothing when every switch is off', async () => {
+  it('clears every system in the eval space and skips the source when every switch is off', async () => {
     const esClient = createTarget();
     const createSourceClient = jest.fn();
     expect(
       await restoreKnowledge({ esClient, log, systems: [], env: ENV, createSourceClient })
     ).toEqual({ knowledge: 'none' });
     expect(createSourceClient).not.toHaveBeenCalled();
-    expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+    expect(esClient.deleteByQuery.mock.calls.map(([params]) => params.index)).toEqual(
+      Object.values(KNOWLEDGE_INDICES)
+    );
   });
 
   it('clears every system in the eval space and writes only the selected ones', async () => {
@@ -164,7 +181,7 @@ describe('restoreKnowledge', () => {
     });
   });
 
-  it('fails before clearing anything when the source space has no documents', async () => {
+  it('fails before clearing anything when the source space has no documents, including when both wiki and legacy cortex indices are missing', async () => {
     const esClient = createTarget();
     await expect(
       restoreKnowledge({
@@ -172,10 +189,60 @@ describe('restoreKnowledge', () => {
         log,
         systems: ['wiki'],
         env: ENV,
-        createSourceClient: () => createSource({}),
+        createSourceClient: () =>
+          createSource({}, [KNOWLEDGE_INDICES.wiki, LEGACY_WIKI_AI_INDEX_DEST]),
       })
     ).rejects.toThrow('no wiki documents in space ops');
     expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+  });
+
+  it('rethrows a 404 that is not an index_not_found_exception', async () => {
+    const esClient = createTarget();
+    const routeNotFound = Object.assign(new Error('Not Found'), {
+      statusCode: 404,
+      body: { error: { type: 'no_handler_found_exception' } },
+    });
+    const source = {
+      helpers: {
+        async *scrollSearch() {
+          throw routeNotFound;
+        },
+      },
+      close: jest.fn(),
+    } as unknown as Client;
+
+    await expect(
+      restoreKnowledge({
+        esClient,
+        log,
+        systems: ['wiki'],
+        env: ENV,
+        createSourceClient: () => source,
+      })
+    ).rejects.toThrow('Not Found');
+    expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+  });
+
+  it('scopes cleanup and restored document ids to a non-default targetSpaceId', async () => {
+    const esClient = createTarget();
+    const source = createSource({ [KNOWLEDGE_INDICES.memory]: [memoryHit] });
+
+    await restoreKnowledge({
+      esClient,
+      log,
+      systems: ['memory'],
+      targetSpaceId: 'sre',
+      env: ENV,
+      createSourceClient: () => source,
+    });
+
+    for (const [params] of esClient.deleteByQuery.mock.calls) {
+      expect(params.query).toEqual({ term: { 'attributes.space_id': 'sre' } });
+    }
+    expect(esClient.bulk.mock.calls[0][0].operations).toEqual([
+      { index: { _index: KNOWLEDGE_INDICES.memory, _id: 'sre:memory_checkout-latency' } },
+      toTargetSpace(memoryHit, 'ops', 'sre').source,
+    ]);
   });
 
   it('fails when a document is rejected on write', async () => {
