@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { EmbeddableFeatureBadge } from './info_badges';
@@ -22,7 +22,7 @@ describe('EmbeddableFeatureBadge', () => {
     expect(screen.queryByText('0')).not.toBeInTheDocument();
   });
 
-  it('should render the message in the popover', async () => {
+  it('should render the message in the popover', () => {
     render(
       <EmbeddableFeatureBadge
         messages={[
@@ -38,8 +38,8 @@ describe('EmbeddableFeatureBadge', () => {
       />
     );
     expect(screen.getByText('1')).toBeInTheDocument();
-    await userEvent.click(screen.getByText('1'));
-    expect(await screen.findByText('Long text')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('lns-feature-badges-trigger'));
+    expect(screen.getByText('Long text')).toBeInTheDocument();
   });
 
   it('should have an accessible label describing the badge', () => {

@@ -45,6 +45,7 @@ import type {
   GetExecutionParams,
   GetExecutionStepsParams,
   GetLibraryHealthResponse,
+  GetLinkedRulesResponse,
   GetSchemaParams,
   GetWorkflowExecutionsParams,
   GetWorkflowStepExecutionsParams,
@@ -64,6 +65,7 @@ import type {
   WorkflowExecutionLogsResponse,
   WorkflowsConfig,
 } from './types';
+import type { WorkflowsCreateRouteTemplate } from '../navigation/create_route_state';
 
 const BASE = '/api/workflows';
 const INTERNAL_BASE = '/internal/workflows';
@@ -364,6 +366,13 @@ export class WorkflowApi {
     });
   }
 
+  async getLinkedRules(ids: string[]): Promise<GetLinkedRulesResponse> {
+    return this.http.post(`${INTERNAL_BASE}/_linked_rules`, {
+      body: JSON.stringify({ ids }),
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
   // ---------------------------------------------------------------------------
   // Workflow Template library
   // ---------------------------------------------------------------------------
@@ -412,6 +421,26 @@ export class WorkflowApi {
       body: JSON.stringify({ yaml, values }),
       version: INTERNAL_API_VERSION,
     });
+  }
+
+  /**
+   * Creates a workflow from YAML edited after "Remix with AI", recording the
+   * template it started from.
+   */
+  async createWorkflowFromTemplateRemix({
+    yaml,
+    template,
+  }: {
+    yaml: string;
+    template: WorkflowsCreateRouteTemplate;
+  }): Promise<WorkflowDetailDto> {
+    return this.http.post(
+      `${INTERNAL_BASE}/library/templates/${encodeURIComponent(template.slug)}/remix`,
+      {
+        body: JSON.stringify({ yaml, version: template.version }),
+        version: INTERNAL_API_VERSION,
+      }
+    );
   }
 
   async restoreWorkflowVersion(

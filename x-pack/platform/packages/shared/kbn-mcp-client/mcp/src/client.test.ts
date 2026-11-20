@@ -346,6 +346,17 @@ describe('McpClient', () => {
       );
     });
 
+    it('keeps the original error as cause', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      const error = new Error('Request timed out');
+      mockClient.connect.mockRejectedValue(error);
+
+      await expect(client.connect()).rejects.toMatchObject({
+        message: 'Error connecting to MCP server: Request timed out',
+        cause: error,
+      });
+    });
+
     it('handles non-Error objects', async () => {
       const client = new McpClient(mockLogger, clientDetails);
       mockClient.connect.mockRejectedValue('String error');

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { allocateBudget } from './allocate_budget';
+import { allocateBudget, getBatchKey } from './allocate_budget';
 import { IN_FLIGHT_CEILING, TRIAGE_EXEC_TAG_PREFIX } from './constants';
 import type { RuleAllocation, SweepSkipReason, TriageAlert } from './types';
 
@@ -35,8 +35,8 @@ export interface BatchPlan {
 }
 
 /**
- * Decides which rules get a batch. A claimed alert links its rule to a batch through its
- * `az:triage_exec:<id>` tag, so a rule is live if any of its claimed alerts names a live execution.
+ * Decides which rules (or detections of a name-overriding rule) get a batch. A claimed alert links its batch through its
+ * `az:triage_exec:<id>` tag, so a batch key is live if any of its claimed alerts names a live execution.
  * A claim whose batch is gone, or that never recorded one, is reclaimed and the alert re-planned.
  * Nothing is reclaimed when the live list could not be read, because every claim would look stale.
  */
@@ -58,12 +58,12 @@ export const planBatches = ({
     };
   }
 
-  const liveRuleIds = new Set<string>();
+  const liveBatchKeys = new Set<string>();
   const reclaimAlertIds: string[] = [];
   const reclaimedInWindow: TriageAlert[] = [];
   for (const alert of claimed) {
     if (getExecutionIds(alert).some((id) => liveExecutionIds.has(id))) {
-      liveRuleIds.add(alert.ruleId);
+      liveBatchKeys.add(getBatchKey(alert));
       continue;
     }
     reclaimAlertIds.push(alert.id);
@@ -86,7 +86,7 @@ export const planBatches = ({
   }
 
   const candidates = [...pending, ...reclaimedInWindow].filter(
-    ({ ruleId }) => !liveRuleIds.has(ruleId)
+    (alert) => !liveBatchKeys.has(getBatchKey(alert))
   );
   if (candidates.length === 0) {
     return { ...base, skipReason: 'nothing_pending' };

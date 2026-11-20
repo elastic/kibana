@@ -44,7 +44,6 @@ const SubscriptionStatusScenario = ({
       getPrivilegedUrls: async () => ({
         billingUrl: isBillingAdmin ? `${baseUrl}/billing` : undefined,
       }),
-      getUrls: () => ({ baseUrl }),
     };
     resolveServerlessStatus({ cloud, csp, region }).then((resolved) => {
       if (isCurrent) setStatus(resolved);

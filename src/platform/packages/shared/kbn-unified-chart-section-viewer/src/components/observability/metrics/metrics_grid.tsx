@@ -45,7 +45,6 @@ import {
 } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
-import { useFetchExemplars } from './hooks/use_fetch_exemplars';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
 
@@ -91,6 +90,7 @@ export type MetricsGridProps = Pick<
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   metricItems: ParsedMetricItem[];
   whereStatements?: string[];
+  metadataFields?: string[];
   userSource?: string;
   getUserMessages?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['userMessages'];
   getDescription?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['description'];
@@ -106,11 +106,6 @@ export type MetricsGridProps = Pick<
    *
    */
   isTabSelected: boolean;
-  /**
-   * `ChartsGrid` hides an inactive grid with CSS rather than unmounting it, so per-chart
-   * fetches that should pause while hidden (exemplars) need this flag explicitly.
-   */
-  isComponentVisible: boolean;
   /** Min/max fetched for the visible histogram charts. Empty until the heatmaps flag is on. */
   histogramBounds?: HistogramBoundsByMetricKey;
   histogramBoundsLoading?: boolean;
@@ -129,6 +124,7 @@ export const MetricsGrid = ({
   actions,
   dimensions,
   whereStatements,
+  metadataFields,
   userSource,
   services,
   columns,
@@ -138,7 +134,6 @@ export const MetricsGrid = ({
   getUserMessages,
   getDescription,
   isTabSelected,
-  isComponentVisible,
   histogramBounds = EMPTY_HISTOGRAM_BOUNDS,
   histogramBoundsLoading = false,
 }: MetricsGridProps) => {
@@ -283,13 +278,13 @@ export const MetricsGrid = ({
                   onViewDetails={handleViewDetails}
                   searchTerm={searchTerm}
                   whereStatements={whereStatements}
+                  metadataFields={metadataFields}
                   userSource={userSource}
                   description={getDescription?.(metricItem)}
                   userMessages={getUserMessages ? getUserMessages(metricItem) : undefined}
                   profileId={profileId}
                   gridSettings={gridSettings}
                   onMetricExplored={onMetricExplored}
-                  isComponentVisible={isComponentVisible}
                   histogramBounds={histogramBounds}
                   histogramBoundsLoading={histogramBoundsLoading}
                 />
@@ -329,12 +324,12 @@ interface ChartItemProps
   onViewDetails: (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => void;
   description?: string;
   whereStatements?: string[];
+  metadataFields?: string[];
   userSource?: string;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
   gridSettings: MetricsGridSettings;
   onMetricExplored?: (metricUniqueKey: string) => void;
-  isComponentVisible: boolean;
   histogramBounds: HistogramBoundsByMetricKey;
   histogramBoundsLoading: boolean;
 }
@@ -358,6 +353,7 @@ const ChartItem = React.memo(
     isSelected,
     searchTerm,
     whereStatements,
+    metadataFields,
     userSource,
     description,
     onFocusCell,
@@ -366,7 +362,6 @@ const ChartItem = React.memo(
     profileId,
     gridSettings,
     onMetricExplored,
-    isComponentVisible,
     histogramBounds,
     histogramBoundsLoading,
   }: ChartItemProps) => {
@@ -375,6 +370,7 @@ const ChartItem = React.memo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
       [euiTheme.colors.vis]
     );
+    const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
 
     const recordExploredMetric = useCallback<React.MouseEventHandler<HTMLDivElement>>(
       (event) => {
@@ -396,18 +392,6 @@ const ChartItem = React.memo(
       metricItem.dimensionFields
     );
 
-    const exemplars = useFetchExemplars({
-      fetchParams,
-      services,
-      metricItem,
-      whereStatements,
-      originalSource: userSource,
-      profileId,
-      isComponentVisible,
-    });
-    // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
-    void exemplars;
-
     const { shouldRenderHistogram, boundsError, distributionQuery, heatmapConfig } =
       useHistogramHeatmap({
         metricItem,
@@ -415,9 +399,12 @@ const ChartItem = React.memo(
         histogramBounds,
         histogramBoundsLoading,
         whereStatements,
+        metadataFields,
         originalSource: userSource,
         histogramVisualization: gridSettings.histogramVisualization,
         description,
+        seriesColor: color,
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
       });
 
     const esqlQuery = useMemo(() => {
@@ -431,6 +418,7 @@ const ChartItem = React.memo(
             metricItem,
             splitAccessors: applicableDimensions.map((dim) => dim.name),
             whereStatements,
+            metadataFields,
             originalSource: userSource,
             gridSettings,
           })
@@ -441,6 +429,7 @@ const ChartItem = React.memo(
       metricItem,
       applicableDimensions,
       whereStatements,
+      metadataFields,
       userSource,
       gridSettings,
     ]);
@@ -450,7 +439,6 @@ const ChartItem = React.memo(
       return instrument ? getAggregationLabel({ instrument, gridSettings }) : undefined;
     }, [metricItem.metricTypes, gridSettings]);
 
-    const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const chartLayers = useChartLayers({
       dimensions: applicableDimensions,
       metricItem,

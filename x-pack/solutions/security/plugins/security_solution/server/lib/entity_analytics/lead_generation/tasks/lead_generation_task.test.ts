@@ -24,8 +24,8 @@ jest.mock('../utils', () => ({
 jest.mock('../../risk_score/risk_score_data_client', () => ({
   RiskScoreDataClient: jest.fn().mockImplementation(() => ({})),
 }));
-jest.mock('../../risk_score/tasks/helpers', () => ({
-  buildScopedInternalSavedObjectsClientUnsafe: jest.fn().mockReturnValue({}),
+jest.mock('../../utils/internal_saved_objects_client', () => ({
+  buildNamespacedInternalSavedObjectsClientUnsafe: jest.fn().mockReturnValue({}),
 }));
 
 import { loggingSystemMock, httpServerMock } from '@kbn/core/server/mocks';

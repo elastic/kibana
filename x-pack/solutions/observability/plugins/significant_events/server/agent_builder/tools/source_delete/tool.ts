@@ -27,11 +27,12 @@ export const createSourceDeleteTool = ({
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: SourceToolDeps): BuiltinToolDefinition<typeof sourceDeleteSchema> => ({
   id: NIGHTSHIFT_SOURCE_DELETE_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
-    Delete a Nightshift source of the current space. This cannot be undone. It deletes the source's
+    Delete a nightshift source of the current space. This cannot be undone. It deletes the source's
     ES|QL view and, as when a source is deleted in the UI, cleans up what belongs to it: its
     Knowledge Indicators and rules, and cancels any running onboarding.
 
@@ -81,16 +82,19 @@ export const createSourceDeleteTool = ({
   availability: createSignificantEventsAvailability({
     server,
     logger,
-    requireManagePrivilege: true,
+    requireSourceChangePrivilege: true,
   }),
-  handler: async ({ source: slugOrId }, { request }) =>
+  handler: async ({ source: slugOrId }, { request, runContext }) =>
     runSourceTool({
       action: 'delete source',
-      privilege: 'manage',
+      privilege: 'changeSources',
+      toolId: NIGHTSHIFT_SOURCE_DELETE_TOOL_ID,
       request,
+      runContext,
       getScopedClients,
       server,
       logger,
+      telemetry,
       run: async ({ sourcesClient }) => {
         const { id, slug, title } = await resolveSource(sourcesClient, slugOrId);
         await sourcesClient.delete(id);

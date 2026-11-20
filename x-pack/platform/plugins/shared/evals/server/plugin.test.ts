@@ -30,7 +30,10 @@ const RCA_QUALITY: RegisteredEvaluatorDefinition = {
 
 describe('EvalsPlugin', () => {
   const setup = (enabled = true) => {
-    const plugin = new EvalsPlugin(coreMock.createPluginInitializerContext({ enabled }));
+    // The mock context doesn't apply schema defaults, so the mode is set explicitly.
+    const plugin = new EvalsPlugin(
+      coreMock.createPluginInitializerContext({ enabled, mode: 'full' })
+    );
     const setupContract = plugin.setup(coreMock.createSetup(), {
       features: featuresPluginMock.createSetup(),
       encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),

@@ -58,8 +58,8 @@ export const AddMetadataPinToRow = ({
       });
 
   const ariaLabel = isPinned
-    ? i18n.translate('xpack.infra.metadata.pinnedAriaLabel', {
-        defaultMessage: 'Pinned {fieldName}',
+    ? i18n.translate('xpack.infra.metadataEmbeddable.unpinField.ariaLabel', {
+        defaultMessage: 'Unpin {fieldName}',
         values: { fieldName },
       })
     : i18n.translate('xpack.infra.metadataEmbeddable.pinField.ariaLabel', {
@@ -69,7 +69,8 @@ export const AddMetadataPinToRow = ({
 
   return (
     <span className={showOnRowHoverCss}>
-      <EuiToolTip content={tooltipContent}>
+      {/* The button's aria-label already names the action and the field */}
+      <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
         <EuiButtonIcon
           size="s"
           color="primary"

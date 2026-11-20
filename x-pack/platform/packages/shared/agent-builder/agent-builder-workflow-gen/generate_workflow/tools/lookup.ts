@@ -100,5 +100,6 @@ export const lookupTriggerDefinitions = async (
 ): Promise<unknown> =>
   lookupTriggerDefinitionsForAgent({
     registeredTriggers: await api.getRegisteredTriggers(),
+    triggerSchemaOptions: api.getTriggerSchemaOptions(),
     triggerType: args.triggerType,
   });

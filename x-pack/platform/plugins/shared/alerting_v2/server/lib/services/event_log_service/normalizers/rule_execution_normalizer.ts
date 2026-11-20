@@ -13,7 +13,7 @@ import type { RuleExecution, RuleExecutionError, RuleExecutionOutcome } from '..
 /**
  * Task id layout: `<TASK_ID_TYPE_NAMESPACE>:<TASK_ID_TYPE_NAME>:<spaceId>:<ruleId>`.
  *
- * Rule ids are user-supplied (`CreateRuleParams.id` accepts an arbitrary
+ * Rule ids are user-supplied (`CreateRuleData.id` accepts an arbitrary
  * string) and may legally contain `:`. Space ids cannot (Kibana restricts
  * them to `^[a-z0-9_-]+$`). So we anchor the parse on the *prefix* — the
  * first three segments are fixed-shape (namespace, name, spaceId) — and

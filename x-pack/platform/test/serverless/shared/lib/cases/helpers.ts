@@ -47,15 +47,18 @@ export const createAndNavigateToCase = async (
   owner: string
 ) => {
   const cases = getService('cases');
-
-  const header = getPageObject('header');
-
-  await navigateToCasesApp(getPageObject, getService, owner);
+  const common = getPageObject('common');
+  const testSubjects = getService('testSubjects');
+  const app = owner === SECURITY_SOLUTION_OWNER ? 'securitySolution' : 'observability';
 
   const theCase = await cases.api.createCase({ owner });
-  await cases.casesTable.waitForCasesToBeListed();
-  await cases.casesTable.goToFirstListedCase();
-  await header.waitUntilLoadingHasFinished();
+  await common.navigateToUrlWithBrowserHistory(app, `/cases/${theCase.id}`);
+  await cases.common.waitForCaseViewToLoad();
+  await cases.common.assertCaseTitle(theCase.title);
+  // The attributes sidebar resolves the case's users after the header renders, and swapping its
+  // spinner for the loaded panels reflows every field below it, dropping a click already in flight.
+  await testSubjects.existOrFail('case-view-participants-field-panel');
+  await testSubjects.missingOrFail('case-view-assignees-field-panel-loading', { timeout: 60_000 });
 
   return theCase;
 };

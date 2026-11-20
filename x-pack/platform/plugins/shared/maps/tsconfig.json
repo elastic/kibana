@@ -87,6 +87,7 @@
     "@kbn/managed-content-badge",
     "@kbn/presentation-publishing",
     "@kbn/esql-utils",
+    "@kbn/geo-precision",
     "@kbn/apm-data-view",
     "@kbn/shared-ux-utility",
     "@kbn/react-kibana-context-render",
@@ -105,7 +106,8 @@
     "@kbn/cps",
     "@kbn/kql",
     "@kbn/cps-utils",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/test-jest-helpers"
   ],
   "exclude": [
     "target/**/*"

@@ -90,8 +90,17 @@ const overlapsExclusion = (rawCandidate: string, exclusion: string): boolean =>
  * exact cluster string. A local pattern never reaches a remote cluster, and a
  * cluster the scope does not reach stays refused. A `::` selector
  * (`logs-*::failures`) is never allowed.
+ *
+ * With `crossProjectSearch` an unqualified candidate also has to clear its `*:` twin: the
+ * search fans it out to every routed project, so a project-qualified exclusion applies to it
+ * even though it names no project. Without it an unqualified candidate stays local, as
+ * cross-cluster search keeps it.
  */
-export const isIndexPatternAllowed = (candidate: string, allowedPatterns: string[]): boolean => {
+export const isIndexPatternAllowed = (
+  candidate: string,
+  allowedPatterns: string[],
+  { crossProjectSearch = false }: { crossProjectSearch?: boolean } = {}
+): boolean => {
   if (!candidate || allowedPatterns.length === 0) return false;
   // A generated exclusion is not a source; only positive entries can be named outright.
   const { exclude, cluster, index } = parseIndexScopeEntry(candidate);
@@ -110,5 +119,12 @@ export const isIndexPatternAllowed = (candidate: string, allowedPatterns: string
     .map((entry) => entry.index);
   const contained =
     positives.includes(index) || buildMatchesRequired(positives)(index.replace(/\*/g, 'x'));
-  return contained && !exclusions.some((exclusion) => overlapsExclusion(index, exclusion));
+  if (!contained || exclusions.some((exclusion) => overlapsExclusion(index, exclusion))) {
+    return false;
+  }
+  return (
+    cluster !== undefined ||
+    !crossProjectSearch ||
+    isIndexPatternAllowed(`*:${candidate}`, allowedPatterns)
+  );
 };

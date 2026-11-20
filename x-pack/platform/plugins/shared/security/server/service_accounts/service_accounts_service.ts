@@ -26,6 +26,7 @@ import {
   WorkloadBindingStore,
 } from './bindings';
 import { SERVICE_ACCOUNT_CREDENTIAL_TYPE, ServiceAccountCredentialStore } from './credentials';
+import type { EsServiceAccountsOptions } from './es_service_accounts';
 import { EsServiceAccounts } from './es_service_accounts';
 import { ServiceAccountsManagement } from './service_accounts_management';
 import type {
@@ -55,6 +56,8 @@ export interface ServiceAccountsServiceStartParams {
   canEncrypt: boolean;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   getCurrentUserProfileId: (request: KibanaRequest) => Promise<string | null>;
+  /** Reads user profiles by uid. Only the Elasticsearch backend uses it, to name account creators. */
+  getUserProfiles: EsServiceAccountsOptions['getUserProfiles'];
   getSpaceId: (request: KibanaRequest) => string;
   /** What Core knows about the workload types plugins register. */
   workloadTypes: CoreSecurityDelegateServiceAccounts;
@@ -81,6 +84,7 @@ export class ServiceAccountsService {
     canEncrypt,
     getCurrentUser,
     getCurrentUserProfileId,
+    getUserProfiles,
     getSpaceId,
     workloadTypes,
   }: ServiceAccountsServiceStartParams): ServiceAccountsServiceStart | null {
@@ -146,6 +150,7 @@ export class ServiceAccountsService {
         canEncrypt,
         getCurrentUser,
         getCurrentUserProfileId,
+        getUserProfiles,
       });
     }
 

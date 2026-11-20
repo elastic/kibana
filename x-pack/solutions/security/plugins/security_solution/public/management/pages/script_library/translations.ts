@@ -9,13 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 export const SCRIPT_LIBRARY_LABELS = Object.freeze({
   // page labels
-  pageTitle: i18n.translate('xpack.securitySolution.scriptLibrary.pageTitle', {
-    defaultMessage: 'Script Library',
-  }),
-  pageAboutInfo: i18n.translate('xpack.securitySolution.scriptLibrary.pageAboutInfo', {
-    defaultMessage:
-      'Upload and manage scripts to use with the runscript response action on endpoints protected by Elastic Defend.',
-  }),
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.scriptLibrary.pageAddButtonTitle', {
     defaultMessage: 'Upload script',
   }),

@@ -8,9 +8,10 @@
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { BULK_FILTER_MAX_RESOURCES, BULK_QUERY_SAMPLE_SIZE } from '@kbn/alerting-v2-schemas';
+import type { RuleChangeHistorySnapshot } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { coreMock } from '@kbn/core/server/mocks';
+import { createConfigServiceMock } from '../services/config_service/config_service.mock';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
@@ -32,6 +33,7 @@ import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_ev
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
 import type { CreateRulesClientOptions } from './types';
+import { createRuleChangesHistoryClientMock } from '../rule_changes_history/rule_changes_history_client.mock';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams } from './types';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
@@ -100,6 +102,7 @@ describe('RulesClient', () => {
   let rulesSavedObjectService: RulesSavedObjectServiceMock;
   let ruleEventPublisher: RuleEventPublisher;
   let artifactTypeRegistry: ArtifactTypeRegistry;
+  let ruleChangesHistoryClient: ReturnType<typeof createRuleChangesHistoryClientMock>;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -112,6 +115,7 @@ describe('RulesClient', () => {
     artifactTypeRegistry = new ArtifactTypeRegistry();
     registerBuiltinArtifactTypes(artifactTypeRegistry);
     ({ publisher: ruleEventPublisher } = createRuleEventPublisher());
+    ruleChangesHistoryClient = createRuleChangesHistoryClientMock();
     jest.spyOn(ruleEventPublisher, 'emitRuleCreated');
     jest.spyOn(ruleEventPublisher, 'emitRuleUpdated');
     jest.spyOn(ruleEventPublisher, 'emitRuleDeleted');
@@ -168,22 +172,19 @@ describe('RulesClient', () => {
       },
     };
 
-    const pluginConfigAccessor =
-      coreMock.createPluginInitializerContext<PluginConfig>(config).config;
-
     return new RulesClient(
       clientRequest,
       rulesSavedObjectService,
       taskManager,
       userService,
       'space-1',
-      pluginConfigAccessor,
+      createConfigServiceMock(config),
       rulesSavedObjectService,
       ruleEventPublisher,
       loggerService,
       artifactTypeRegistry,
-      'user',
-      rulesClientOptions
+      { actor: 'user', options: rulesClientOptions },
+      ruleChangesHistoryClient
     );
   }
 
@@ -192,8 +193,7 @@ describe('RulesClient', () => {
       const client = createClient();
 
       const res = await client.createRule({
-        data: baseCreateData,
-        options: { id: 'rule-id-1' },
+        data: { ...baseCreateData, id: 'rule-id-1' },
       });
 
       expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
@@ -235,8 +235,8 @@ describe('RulesClient', () => {
       const client = createClient();
 
       const res = await client.createRule({
-        data: baseCreateData,
-        options: { id: 'rule-id-template', template: { id: 'template-1' } },
+        data: { ...baseCreateData, id: 'rule-id-template' },
+        options: { template: { id: 'template-1' } },
       });
 
       expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
@@ -262,30 +262,28 @@ describe('RulesClient', () => {
       ).rejects.toMatchObject({ output: { statusCode: 400 } });
     });
 
-    it('creates a disabled rule SO and does not schedule a task when options.enabled is false', async () => {
+    it('creates a disabled rule SO and does not schedule a task when the body sets enabled=false', async () => {
       const client = createClient();
 
       const res = await client.createRule({
-        data: baseCreateData,
-        options: { id: 'rule-id-disabled', enabled: false },
+        data: { ...baseCreateData, id: 'rule-id-body-disabled', enabled: false },
       });
 
       expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
         expect.objectContaining({
-          id: 'rule-id-disabled',
+          id: 'rule-id-body-disabled',
           attrs: expect.objectContaining({ enabled: false }),
         }),
       ]);
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
-      expect(res).toEqual(expect.objectContaining({ id: 'rule-id-disabled', enabled: false }));
+      expect(res).toEqual(expect.objectContaining({ id: 'rule-id-body-disabled', enabled: false }));
     });
 
-    it('defaults to an enabled rule when options.enabled is omitted', async () => {
+    it('defaults to an enabled rule when the body omits enabled', async () => {
       const client = createClient();
 
       const res = await client.createRule({
-        data: baseCreateData,
-        options: { id: 'rule-id-default-enabled' },
+        data: { ...baseCreateData, id: 'rule-id-default-enabled' },
       });
 
       expect(res).toEqual(
@@ -302,8 +300,8 @@ describe('RulesClient', () => {
           artifacts: [
             { id: 'dash-1', type: 'dashboard', data: { dashboard_id: 'so-dashboard-1' } },
           ],
+          id: 'rule-id-dash',
         },
-        options: { id: 'rule-id-dash' },
       });
 
       expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
@@ -363,8 +361,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.createRule({
-          data: baseCreateData,
-          options: { id: 'rule-id-3' },
+          data: { ...baseCreateData, id: 'rule-id-3' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 500 },
@@ -382,8 +379,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.createRule({
-          data: baseCreateData,
-          options: { id: 'rule-id-orphan' },
+          data: { ...baseCreateData, id: 'rule-id-orphan' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 500 },
@@ -417,8 +413,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.createRule({
-          data: baseCreateData,
-          options: { id: 'rule-id-4' },
+          data: { ...baseCreateData, id: 'rule-id-4' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
@@ -436,8 +431,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.createRule({
-          data: baseCreateData,
-          options: { id: 'rule-id-forbidden' },
+          data: { ...baseCreateData, id: 'rule-id-forbidden' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 403 },
@@ -452,8 +446,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.createRule({
-          data: baseCreateData,
-          options: { id: 'rule-id-es' },
+          data: { ...baseCreateData, id: 'rule-id-es' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 503 },
@@ -467,8 +460,8 @@ describe('RulesClient', () => {
         data: {
           ...baseCreateData,
           metadata: { name: 'rule-with-desc', description: 'My description' },
+          id: 'rule-id-desc',
         },
-        options: { id: 'rule-id-desc' },
       });
 
       expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
@@ -494,8 +487,8 @@ describe('RulesClient', () => {
           data: {
             ...baseCreateData,
             query: { base: 'FROM |' },
+            id: 'rule-id-5',
           },
-          options: { id: 'rule-id-5' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
@@ -657,6 +650,12 @@ describe('RulesClient', () => {
       ]);
       expect(rulesSavedObjectService.bulkDelete).toHaveBeenCalledWith(['rule-on']);
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-on']);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          labels: { code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED },
+        })
+      );
       expect(res.items).toHaveLength(1);
       expect(res.items[0].id).toBe('rule-off');
       expect(res.errors).toEqual([
@@ -2021,6 +2020,139 @@ describe('RulesClient', () => {
     });
   });
 
+  describe('restoreRule', () => {
+    const snapshot = {
+      ...baseCreateData,
+      metadata: { name: 'restored' },
+      id: 'rule-id-1',
+      version: 2,
+      enabled: true,
+      created_by: { profile_uid: 'snapshot-creator' },
+      created_at: '2024-01-01T00:00:00.000Z',
+      updated_by: { profile_uid: 'snapshot-updater' },
+      updated_at: '2024-02-01T00:00:00.000Z',
+    };
+
+    const mockSnapshot = (ruleSnapshot: RuleChangeHistorySnapshot = snapshot) => {
+      ruleChangesHistoryClient.getRuleSnapshot.mockResolvedValueOnce({
+        ruleId: 'rule-id-1',
+        snapshot: ruleSnapshot,
+      });
+    };
+
+    const mockExistingRule = (overrides: Partial<RuleSavedObjectAttributes> = {}) => {
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-1',
+        attributes: {
+          ...baseSoAttrs,
+          version: 5,
+          enabled: false,
+          createdBy: { profile_uid: 'current-creator' },
+          createdAt: '2024-06-01T00:00:00.000Z',
+          metadata: { name: 'current', template: { id: 'template-1' } },
+          ...overrides,
+        },
+        version: 'WzEsMV0=',
+      });
+      rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-1' });
+    };
+
+    it('applies the snapshot configuration and enabled state, bumps the version and keeps creation and template', async () => {
+      const client = createClient();
+      mockExistingRule();
+
+      mockSnapshot();
+      const rule = await client.restoreRule({ changeId: 'change-1' });
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalledWith({
+        id: 'rule-id-1',
+        attrs: expect.objectContaining({
+          metadata: expect.objectContaining({ name: 'restored', template: { id: 'template-1' } }),
+          version: 6,
+          enabled: true,
+          createdBy: { profile_uid: 'current-creator' },
+          createdAt: '2024-06-01T00:00:00.000Z',
+          updatedBy: { profile_uid: 'elastic_profile_uid' },
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        }),
+        version: 'WzEsMV0=',
+        references: [],
+      });
+      expect(rule).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-1',
+          version: 6,
+          enabled: true,
+          metadata: expect.objectContaining({ name: 'restored' }),
+        })
+      );
+      expect(ruleChangesHistoryClient.getRuleSnapshot).toHaveBeenCalledWith({
+        eventId: 'change-1',
+      });
+      expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(expect.any(Object), [
+        expect.objectContaining({
+          ruleId: 'rule-id-1',
+          rule,
+          prevRule: expect.objectContaining({ version: 5 }),
+        }),
+      ]);
+    });
+
+    it('throws RULE_CHANGE_NOT_FOUND without reading the rule when the change does not exist', async () => {
+      const client = createClient();
+      ruleChangesHistoryClient.getRuleSnapshot.mockRejectedValueOnce(
+        Boom.notFound('Rule change with event id "missing" not found', {
+          code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND,
+        })
+      );
+
+      await expect(client.restoreRule({ changeId: 'missing' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND },
+      });
+      expect(rulesSavedObjectService.get).not.toHaveBeenCalled();
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('throws RULE_NOT_FOUND when the rule was deleted', async () => {
+      const client = createClient();
+      rulesSavedObjectService.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, 'rule-id-1')
+      );
+
+      mockSnapshot();
+      await expect(client.restoreRule({ changeId: 'change-1' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: ALERTING_ERROR_CODES.RULE_NOT_FOUND },
+      });
+    });
+
+    it('throws INVALID_RULE_DATA when the snapshot has keys the current schema does not know', async () => {
+      const client = createClient();
+
+      const snapshotWithFutureField = { ...snapshot, future_field: true };
+      mockSnapshot(snapshotWithFutureField);
+
+      await expect(client.restoreRule({ changeId: 'change-1' })).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: { code: ALERTING_ERROR_CODES.INVALID_RULE_DATA, details: { context: 'restore' } },
+      });
+      expect(rulesSavedObjectService.get).not.toHaveBeenCalled();
+    });
+
+    it('throws IMMUTABLE_FIELDS_CHANGED when the snapshot kind differs from the rule', async () => {
+      const client = createClient();
+      mockExistingRule({ kind: 'signal', recovery: undefined, no_data: undefined });
+
+      mockSnapshot();
+      await expect(client.restoreRule({ changeId: 'change-1' })).rejects.toMatchObject({
+        output: { statusCode: 409 },
+        data: { code: ALERTING_ERROR_CODES.IMMUTABLE_FIELDS_CHANGED },
+      });
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getRule', () => {
     it('returns a rule by id', async () => {
       const client = createClient();
@@ -2852,6 +2984,12 @@ describe('RulesClient', () => {
         { id: 'rule-2', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },
       ]);
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          labels: { code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT },
+        })
+      );
     });
 
     it('surfaces TASK_MANAGER_DRIFT for per-task failures in the bulkRemove statuses (no throw)', async () => {
@@ -3040,6 +3178,12 @@ describe('RulesClient', () => {
 
       expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-1', 'task:rule-2']);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          labels: { code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED },
+        })
+      );
       expect(res.affected_count).toBe(0);
       expect(res.errors).toEqual([
         { id: 'rule-1', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },
@@ -3299,10 +3443,17 @@ describe('RulesClient', () => {
 
       // Rotation updates the existing task in place (preserving its schedule
       // interval) and regenerates the key while invalidating the old one.
+      // `includeRunningTasks` keeps the rotation independent of the rule's run
+      // cadence: a task that is mid-run rotates instead of being skipped.
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         ['task:fallback'],
         { interval: '5m' },
-        expect.objectContaining({ request, regenerateApiKey: true, cloneApiKey: true })
+        expect.objectContaining({
+          request,
+          regenerateApiKey: true,
+          cloneApiKey: true,
+          includeRunningTasks: true,
+        })
       );
 
       // Only audit metadata is stamped — no rule state is changed.
@@ -3333,6 +3484,8 @@ describe('RulesClient', () => {
           }),
         ]
       );
+      const [, [rotated]] = (ruleEventPublisher.emitRuleUpdated as jest.Mock).mock.calls[0];
+      expect(rotated.prevRule).toEqual(expect.objectContaining({ id: 'rule-1' }));
 
       expect(res).toEqual({ affected_count: 1, errors: [] });
     });
@@ -3396,8 +3549,10 @@ describe('RulesClient', () => {
       rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
         { id: 'rule-1', attributes: baseSoAttrs, version: 'v1' },
       ]);
-      // A running task is skipped by bulkUpdateSchedules — absent from both
-      // `tasks` and `errors`. Its real status is then observed via bulkGet.
+      // `includeRunningTasks` means a mid-run task is normally rotated, but it can
+      // still be skipped if it moved into `running` after the update read it.
+      // A skipped task is absent from both `tasks` and `errors`, so its real
+      // status is then observed via bulkGet.
       taskManager.bulkUpdateSchedules.mockResolvedValueOnce(rotationResult([]));
       taskManager.bulkGet.mockResolvedValueOnce(
         taskStatusResult([{ id: 'task:fallback', status: 'running' }])
@@ -4065,7 +4220,7 @@ describe('RulesClient', () => {
       ]);
 
       await expect(
-        client.createRule({ data: baseCreateData, options: { id: 'rule-dup' } })
+        client.createRule({ data: { ...baseCreateData, id: 'rule-dup' } })
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
         data: {
@@ -4261,7 +4416,7 @@ describe('RulesClient', () => {
       it('emits ruleCreated after createRule', async () => {
         const client = createClient();
 
-        await client.createRule({ data: workflowCreateData, options: { id: 'rule-id-wf-1' } });
+        await client.createRule({ data: { ...workflowCreateData, id: 'rule-id-wf-1' } });
 
         expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
           { request, origin: { actor: 'user', channel: 'api' } },
@@ -4280,7 +4435,7 @@ describe('RulesClient', () => {
         });
         const client = createClient(undefined, { clientRequest: uiRequest });
 
-        await client.createRule({ data: workflowCreateData, options: { id: 'rule-id-wf-ui' } });
+        await client.createRule({ data: { ...workflowCreateData, id: 'rule-id-wf-ui' } });
 
         expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
           { request: uiRequest, origin: { actor: 'user', channel: 'ui', app: 'discover' } },
@@ -4291,7 +4446,7 @@ describe('RulesClient', () => {
       it('emits ruleCreated with the app configured by the calling plugin', async () => {
         const client = createClient(undefined, { rulesClientOptions: { app: 'nightshift' } });
 
-        await client.createRule({ data: workflowCreateData, options: { id: 'rule-id-wf-app' } });
+        await client.createRule({ data: { ...workflowCreateData, id: 'rule-id-wf-app' } });
 
         expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
           { request, origin: { actor: 'user', channel: 'api', app: 'nightshift' } },
@@ -4303,7 +4458,7 @@ describe('RulesClient', () => {
         const fakeRequest = { ...request, isFakeRequest: true };
         const client = createClient(undefined, { clientRequest: fakeRequest });
 
-        await client.createRule({ data: workflowCreateData, options: { id: 'rule-id-wf-sys' } });
+        await client.createRule({ data: { ...workflowCreateData, id: 'rule-id-wf-sys' } });
 
         expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
           { request: fakeRequest, origin: { actor: 'user', channel: 'system' } },
@@ -4395,8 +4550,32 @@ describe('RulesClient', () => {
             }),
           ]
         );
+        const [, [emitted]] = (ruleEventPublisher.emitRuleUpdated as jest.Mock).mock.calls[0];
+        expect(emitted.prevRule).toEqual(expect.objectContaining({ version: 4 }));
         const { attrs: savedAttrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(savedAttrs.version).toBe(5);
+      });
+
+      it('emits the pre-update rule on a name and schedule PATCH', async () => {
+        const client = createClient();
+        mockGetExistingRule('rule-id-wf-fields');
+
+        await client.updateRule({
+          id: 'rule-id-wf-fields',
+          data: { metadata: { name: 'renamed' }, schedule: { every: '5m' } },
+        });
+
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(
+          { request, origin: { actor: 'user', channel: 'api' } },
+          [
+            expect.objectContaining({
+              ruleId: 'rule-id-wf-fields',
+              prevRule: expect.objectContaining({
+                metadata: expect.objectContaining({ name: 'rule-1' }),
+              }),
+            }),
+          ]
+        );
       });
 
       it('emits only ruleUpdated for a content update on a disabled rule (no lifecycle event via the update path)', async () => {
@@ -4765,7 +4944,7 @@ describe('RulesClient', () => {
     it('emits ruleCreated carrying the created rule with sequence 1', async () => {
       const client = createClient();
 
-      await client.createRule({ data: baseCreateData, options: { id: 'rule-ch-create' } });
+      await client.createRule({ data: { ...baseCreateData, id: 'rule-ch-create' } });
 
       expect(firstEmit(ruleEventPublisher.emitRuleCreated as jest.Mock)).toEqual([
         expect.objectContaining({
@@ -4936,7 +5115,7 @@ describe('RulesClient', () => {
         rulesSavedObjectService.getTotalScheduledPerMinute.mockResolvedValueOnce(1);
 
         await expect(
-          client.createRule({ data: baseCreateData, options: { enabled: false } })
+          client.createRule({ data: { ...baseCreateData, enabled: false } })
         ).resolves.toBeDefined();
 
         expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalled();

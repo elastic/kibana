@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { installAutomationTemplateHandler } from './handler';
@@ -60,6 +61,19 @@ describe('install_automation_template schema', () => {
       expect(parsed.data.bodyMaxChars).toBeUndefined();
     }
     expect(createTool().confirmation).toBeUndefined();
+  });
+
+  it('caps maxDocuments at 2,000', () => {
+    const base = {
+      template: 'document_orchestration',
+      name: 'flight-activity-docs',
+      sourceIndex: 'loyalty-docs',
+      titleField: 'title',
+      bodyField: 'body',
+    };
+
+    expect(schema.safeParse({ ...base, maxDocuments: 2000 }).success).toBe(true);
+    expect(schema.safeParse({ ...base, maxDocuments: 2001 }).success).toBe(false);
   });
 
   it('rejects index metadata arguments on a document install', () => {
@@ -357,6 +371,11 @@ describe('install_automation_template unit profile arguments', () => {
     ).toBe(true);
   });
 
+  it('caps maxUnits at 2,000', () => {
+    expect(schema.safeParse({ ...base, maxUnits: 2000 }).success).toBe(true);
+    expect(schema.safeParse({ ...base, maxUnits: 2001 }).success).toBe(false);
+  });
+
   it('bounds the metric fields', () => {
     const eleven = Array.from({ length: 11 }, (_, i) => `metric_${i}`);
     expect(schema.safeParse({ ...base, metricFields: eleven }).success).toBe(false);
@@ -472,5 +491,46 @@ describe('install_automation_template handler arguments', () => {
       name: 'loyalty-index-metadata',
       sources: [{ index: 'loyalty-docs', categoryField: 'tier' }],
     });
+  });
+
+  it('reports an error with diagnostics when the installed workflow is invalid', async () => {
+    installHandlerMock.mockResolvedValueOnce({
+      aiIndexId: 'my-ai-index',
+      workflowId: 'wf-saved',
+      status: 'saved_and_attached',
+      replaced: false,
+      valid: false,
+      validationErrors: ['Unknown connector id'],
+    } as never);
+
+    const result = (await runTool({
+      template: 'index_metadata',
+      name: 'loyalty-index-metadata',
+      sourceIndex: 'loyalty-docs',
+      categoryField: 'tier',
+    })) as { results: Array<{ type: string; data: { message?: string } }> };
+
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data.message).toContain('invalid');
+    expect(result.results[0].data.message).toContain('Unknown connector id');
+  });
+
+  it('reports success when the installed workflow is valid', async () => {
+    installHandlerMock.mockResolvedValueOnce({
+      aiIndexId: 'my-ai-index',
+      workflowId: 'wf-saved',
+      status: 'saved_and_attached',
+      replaced: false,
+    } as never);
+
+    const result = (await runTool({
+      template: 'index_metadata',
+      name: 'loyalty-index-metadata',
+      sourceIndex: 'loyalty-docs',
+      categoryField: 'tier',
+    })) as { results: Array<{ type: string; data: { message?: string } }> };
+
+    expect(result.results[0].type).toBe(ToolResultType.other);
   });
 });

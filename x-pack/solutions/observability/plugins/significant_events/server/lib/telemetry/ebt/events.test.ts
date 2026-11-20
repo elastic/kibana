@@ -1,0 +1,120 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import * as eventTypes from './events';
+import {
+  agentBuilderKnowledgeIndicatorCreatedEventType,
+  agentToolEventCreateEventType,
+  agentToolEventSearchEventType,
+  agentToolEventWriteEventType,
+  agentToolFailedEventType,
+  agentToolKiIdentificationStartedEventType,
+  detectionScanEventType,
+  discoveryTriggeredEventType,
+  eventStatusChangedEventType,
+  knowledgeIndicatorEventsGeneratedEventType,
+  knowledgeIndicatorFeaturesIdentifiedEventType,
+  knowledgeIndicatorQueriesGenerationFailedEventType,
+  onboardingScheduledEventType,
+} from './events';
+
+const isOptional = (field: { _meta?: { optional?: boolean } }) => field._meta?.optional === true;
+
+describe('EBT event types', () => {
+  it('uses the expected wire names', () => {
+    const wireNames = Object.fromEntries(
+      Object.entries(eventTypes).map(([name, { eventType }]) => [name, eventType])
+    );
+
+    expect(wireNames).toEqual({
+      agentBuilderKnowledgeIndicatorCreatedEventType:
+        'nightshift-agent-builder-knowledge-indicator-created',
+      agentToolEventCreateEventType: 'nightshift-agent-tool-event-create',
+      agentToolEventSearchEventType: 'nightshift-agent-tool-event-search',
+      agentToolEventWriteEventType: 'nightshift-agent-tool-event-write',
+      agentToolFailedEventType: 'nightshift-agent-tool-failed',
+      agentToolKiIdentificationStartedEventType: 'nightshift-agent-tool-ki-identification-started',
+      detectionScanEventType: 'nightshift-detection-scan',
+      discoveryCompletedEventType: 'nightshift-significant-events-discovery-completed',
+      discoveryStartedEventType: 'nightshift-significant-events-discovery-started',
+      discoveryTriggeredEventType: 'nightshift-significant-events-discovery-triggered',
+      eventStatusChangedEventType: 'nightshift-event-status-changed',
+      knowledgeIndicatorEventsGeneratedEventType: 'nightshift-significant-events-queries-generated',
+      knowledgeIndicatorFeaturesIdentifiedEventType: 'nightshift-features-identified',
+      knowledgeIndicatorQueriesGenerationFailedEventType:
+        'nightshift-significant-events-queries-generation-failed',
+      onboardingScheduledEventType: 'nightshift-onboarding-scheduled',
+    });
+  });
+
+  it.each([
+    agentBuilderKnowledgeIndicatorCreatedEventType,
+    agentToolEventCreateEventType,
+    agentToolEventSearchEventType,
+    agentToolEventWriteEventType,
+    agentToolFailedEventType,
+    agentToolKiIdentificationStartedEventType,
+    detectionScanEventType,
+    discoveryTriggeredEventType,
+    eventStatusChangedEventType,
+    knowledgeIndicatorEventsGeneratedEventType,
+    knowledgeIndicatorFeaturesIdentifiedEventType,
+    knowledgeIndicatorQueriesGenerationFailedEventType,
+    onboardingScheduledEventType,
+  ])('$eventType registers the CPS target context', ({ schema }) => {
+    expect(isOptional(schema.space_id)).toBe(false);
+    expect(isOptional(schema.target_cluster_scope)).toBe(true);
+    expect(isOptional(schema.target_cluster_ids)).toBe(true);
+    expect(isOptional(schema.target_cluster_ids_complete)).toBe(true);
+  });
+
+  it('event-status-changed requires the full alert identity', () => {
+    const {
+      alert_source: source,
+      fingerprint,
+      space_id: spaceId,
+    } = eventStatusChangedEventType.schema;
+
+    [source, fingerprint, spaceId].forEach((field) => expect(isOptional(field)).toBe(false));
+  });
+
+  it.each([agentToolEventCreateEventType, agentToolEventWriteEventType])(
+    '$eventType lets a failed create omit the series identity',
+    ({ schema }) => {
+      const {
+        alert_source: source,
+        space_id: spaceId,
+        fingerprint,
+        group_hash: groupHash,
+      } = schema;
+
+      [source, spaceId].forEach((field) => expect(isOptional(field)).toBe(false));
+      [fingerprint, groupHash].forEach((field) => expect(isOptional(field)).toBe(true));
+    }
+  );
+
+  it('lets a failed knowledge indicator create omit the id but not the space', () => {
+    const { space_id: spaceId, knowledge_indicator_id: id } =
+      agentBuilderKnowledgeIndicatorCreatedEventType.schema;
+
+    expect(isOptional(spaceId)).toBe(false);
+    expect(isOptional(id)).toBe(true);
+  });
+
+  it('carries no free text on a failed tool call', () => {
+    expect(Object.keys(agentToolFailedEventType.schema)).not.toContain('error_message');
+    expect(Object.values(agentToolFailedEventType.schema).map(({ type }) => type)).not.toContain(
+      'text'
+    );
+  });
+
+  it('lets a query generation failure omit the connector when model resolution failed', () => {
+    expect(isOptional(knowledgeIndicatorQueriesGenerationFailedEventType.schema.connector_id)).toBe(
+      true
+    );
+  });
+});

@@ -9,16 +9,17 @@
 
 import type React from 'react';
 import type { EuiThemeShape, EuiButtonIconProps, EuiButtonEmptyProps } from '@elastic/eui';
-import type { Table, CellContext, Row } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode, LeafNode } from '../../store_provider';
+import type { CascadeTable, CascadeTableCellContext, CascadeTableRow } from '../../lib/core/table';
 import type {
   CascadeVirtualizerProps,
-  CascadeRootVirtualizerReturnValue,
+  CascadeVirtualizerReturnValue,
 } from '../../lib/core/virtualizer';
-import type { ChildVirtualizerController } from '../../lib/core/virtualizer/child_virtualizer_controller';
+import type { ChildVirtualizerController } from '../../lib/core/virtualizer/types';
 import type { DataCascadeImplRef, DataCascadeRestorableState } from '../../lib/core/api';
 import type { SelectionDropdownProps } from './data_cascade_header/group_selection_combobox/selection_dropdown';
+import type { StickyHeaderExtensionPointContextValue } from './data_cascade_row/components/cascade_row_header_extension_point';
 
 /**
  * Sizing options for the cascade components, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
@@ -64,10 +65,16 @@ export interface CascadeRowCellRendererProps<G extends GroupNode, L extends Leaf
   nodePathMap: Record<string, string>;
   virtualizerController: ChildVirtualizerController;
   rowIndex: number;
+  /**
+   * Stable inline header host for content rendered with `createPortal`, including before the header pins.
+   * This allows the child to maintain its React tree relationship with the portaled content,
+   * ensuring state updates trigger proper re-renders.
+   */
+  stickyHeaderExtensionPoint: StickyHeaderExtensionPointContextValue;
 }
 
 export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>
-  extends CellContext<G, unknown> {
+  extends Pick<CascadeTableCellContext<G, unknown>, 'row'> {
   /**
    * Size of the row cell
    */
@@ -80,7 +87,7 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
    * Callback invoked when a leaf node gets collapsed, possibly to clean up any data associated with the leaf node or cancel any pending requests if necessary.
    */
   onCascadeLeafNodeCollapsed?: (args: OnCascadeLeafNodeCollapsedArgs<G>) => void;
-  getVirtualizer: () => CascadeRootVirtualizerReturnValue;
+  getVirtualizer: () => CascadeVirtualizerReturnValue;
   /**
    * Render prop function that provides the leaf node data when available, which can be used to render the content we'd to display with the data received.
    */
@@ -137,7 +144,7 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
   /**
    * The row instance for the cascade row.
    */
-  rowInstance: Row<G>;
+  rowInstance: CascadeTableRow<G>;
   /**
    * The row header title slot for the cascade row.
    */
@@ -170,7 +177,7 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
 export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNode>
   extends Omit<CascadeRowHeaderPrimitiveProps<G, L>, 'isGroupNode'> {
   /**
-   * Ref that provides a reference to the DOM element that will be used to portal the active sticky header.
+   * Ref that provides a reference to the DOM element that will be used to portal the active sticky group node header.
    */
   activeStickyRenderSlotRef: React.RefObject<HTMLDivElement | null>;
   /**
@@ -178,13 +185,18 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
    */
   isMobile: boolean;
   /**
-   * Denotes if the row is sticky.
+   * Denotes if the row is the sticky candidate, i.e. the nearest expanded ancestor of the first visible row.
    */
   isActiveSticky: boolean;
   /**
+   * Whether the inline header sticks while scrolling.
+   * Default is true.
+   */
+  enableStickyGroupHeader?: boolean;
+  /**
    * Ref that provides a reference to the DOM element that renders the cascade row.
    */
-  innerRef: React.LegacyRef<HTMLDivElement>;
+  innerRef: React.Ref<HTMLDivElement>;
   /**
    * The virtual row for the cascade row.
    */
@@ -196,7 +208,7 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
   /**
    * Accessor for the parent cascade virtualizer instance.
    */
-  getVirtualizer: () => CascadeRootVirtualizerReturnValue;
+  getVirtualizer: () => CascadeVirtualizerReturnValue;
 }
 
 export type DataCascadeRowCellProps<G extends GroupNode, L extends LeafNode> = Pick<
@@ -221,7 +233,7 @@ export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<
 
 export interface CascadeHeaderPrimitiveProps<G extends GroupNode> {
   id: string;
-  tableInstance: Table<G>;
+  tableInstance: CascadeTable<G>;
   onCascadeGroupingChange?: SelectionDropdownProps['onSelectionChange'];
   customTableHeader?: (props: {
     availableColumns: string[];

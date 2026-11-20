@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MarkerType } from '@xyflow/react';
+import type { MarkerType } from '@xyflow/react';
 import type {
   Connection,
   ConnectionNode,
@@ -122,7 +122,7 @@ export function toDisplayName(id: string): string {
  */
 export function createEdgeMarker(color: string = DEFAULT_EDGE_COLOR): EdgeMarker {
   return {
-    type: MarkerType.ArrowClosed,
+    type: 'arrowclosed' as MarkerType.ArrowClosed,
     width: DEFAULT_MARKER_SIZE,
     height: DEFAULT_MARKER_SIZE,
     color,

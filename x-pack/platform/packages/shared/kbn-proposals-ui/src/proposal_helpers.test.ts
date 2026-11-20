@@ -142,6 +142,21 @@ describe('getProposalCaption', () => {
     ).toBe(`Configure • High impact • Expired on ${formattedDeadline}`);
   });
 
+  it('omits the deadline once someone has decided, since it no longer applies', () => {
+    expect(
+      getProposalCaption(
+        proposal({
+          category: 'configure',
+          impact: 'high',
+          expiresAt: '2999-01-05T17:00:00.000Z',
+          decision: 'approved',
+          status: 'succeeded',
+        }),
+        { includeRiskDetails: true }
+      )
+    ).toBe('Configure • High impact');
+  });
+
   it('omits the deadline segment entirely when the proposal carries no expiresAt', () => {
     expect(
       getProposalCaption(proposal({ category: 'configure', impact: 'high' }), {
@@ -162,7 +177,7 @@ describe('getProposalDecision', () => {
     // a decision that plainly exists.
     expect(
       getProposalDecision(proposal({ decision: 'approved', status: 'succeeded' }))
-    ).toMatchObject({ status: 'applied', actorName: 'Someone' });
+    ).toMatchObject({ status: 'applied', actorName: 'Unknown user' });
   });
 
   it('passes decidedAt through as undefined rather than inventing one when the record has none', () => {

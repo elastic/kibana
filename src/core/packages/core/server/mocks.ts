@@ -22,7 +22,11 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreLifecycleMock, coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
-import type { SharedGlobalConfig, PluginInitializerContext } from '@kbn/core-plugins-server';
+import type {
+  SharedGlobalConfig,
+  PluginInitializerContext,
+  PluginInitialization,
+} from '@kbn/core-plugins-server';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
@@ -85,8 +89,12 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
   return mock;
 }
 
-export type PluginInitializerContextMock<T> = Omit<PluginInitializerContext<T>, 'config'> & {
+export type PluginInitializerContextMock<T> = Omit<
+  PluginInitializerContext<T>,
+  'config' | 'initialization'
+> & {
   config: MockedPluginInitializerConfig<T>;
+  initialization: jest.Mocked<PluginInitialization>;
 };
 
 function pluginInitializerContextMock<T>(config: T = {} as T) {
@@ -115,6 +123,9 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
     },
     config: pluginInitializerContextConfigMock<T>(config),
     node: nodeServiceMock.createInternalPrebootContract(),
+    initialization: {
+      initialize: jest.fn().mockResolvedValue(undefined),
+    },
   };
 
   return mock;
