@@ -12,7 +12,7 @@ import type { Observable } from 'rxjs';
 import { BubbleSeries, PointShape, type ScaleContinuousType } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import { getAccessorByDimension } from '@kbn/chart-expressions-common';
-import type { CommonXYDataLayerConfig, XScaleType, XYOverlay, XYOverlayPoint } from '../../common';
+import type { CommonXYDataLayerConfig, XScaleType, XYOverlay, XYOverlayDatum } from '../../common';
 import { XScaleTypes } from '../../common/constants';
 import { getSeriesXScaleType, getSeriesYScaleType, type GroupsConfiguration } from '../helpers';
 import type { OverlayPointClickEvent } from '../types';
@@ -40,18 +40,14 @@ export const useOverlays = (overlays$?: Observable<readonly XYOverlay[]>): reado
   return overlays;
 };
 
-/** Maps a chart element click to the overlay point it hit, if any. */
+/** Maps a chart element click to the overlay it hit, if any. The chart hands back the original datum object. */
 export const getClickedOverlayPoint = (
   overlays: readonly XYOverlay[],
   specId: string,
-  datum: unknown
+  datum: XYOverlayDatum
 ): OverlayPointClickEvent['data'] | undefined => {
   const overlay = overlays.find((candidate) => getOverlaySpecId(candidate) === specId);
-  if (!overlay) {
-    return undefined;
-  }
-  const point = overlay.points.find((candidate) => candidate === datum);
-  return point ? { overlayId: overlay.id, layerId: overlay.layerId, pointId: point.id } : undefined;
+  return overlay ? { overlayId: overlay.id, layerId: overlay.layerId, datum } : undefined;
 };
 
 export interface OverlaySeriesConfig {
@@ -112,16 +108,16 @@ export const OverlayPoints = ({
       {getOverlaySeriesConfigs(overlays, yAxesConfiguration, dataLayers, defaultXScaleType).map(
         ({ overlay, groupId, xScaleType, yScaleType }) => {
           return (
-            <BubbleSeries<XYOverlayPoint>
+            <BubbleSeries<XYOverlayDatum>
               key={getOverlaySpecId(overlay)}
               id={getOverlaySpecId(overlay)}
               name={overlay.title}
               groupId={groupId}
               xScaleType={xScaleType}
               yScaleType={yScaleType}
-              xAccessor="x"
-              yAccessors={['y']}
-              data={[...overlay.points]}
+              xAccessor={overlay.xAccessor}
+              yAccessors={[overlay.yAccessor]}
+              data={overlay.data}
               hideInLegend
               color={color}
               bubbleSeriesStyle={{

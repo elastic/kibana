@@ -42,15 +42,13 @@ const exemplarsProvider: LensXYOverlayProvider = {
     return {
       type: 'points',
       title: 'Exemplars',
-      points: rows.map((row, index) => ({
-        id: `exemplar-${index}`,
-        x: Date.parse(String(row['@timestamp'])),
-        y: Number(row.value),
-      })),
+      data: rows,
+      xAccessor: (row) => Date.parse(String(row['@timestamp'])),
+      yAccessor: 'value',
     };
   },
-  onPointClick: ({ pointId }) => {
-    // open a flyout, navigate, ...
+  onPointClick: ({ datum }) => {
+    // `datum` is the clicked row: open a flyout, navigate, ...
   },
 };
 
@@ -107,10 +105,12 @@ also exposes `timeRange`, `filters`, `queries`, `esqlVariables` and `abortSignal
 build their own requests. `filters` and `queries` follow the same rules as `executeEsql`: they're
 empty when the layer ignores global filters.
 
-Each returned point needs a stable `id`, which Lens passes back on click, and `x` / `y` values in the
-chart's coordinates. On time charts `x` is a timestamp in milliseconds. Points are bound to the Y axis
-of the layer they were fetched for, and use the same X and Y scales as the layer. The overlay is
-dropped if that layer isn't drawn or has a categorical X axis.
+Return the rows to draw in `data`, for example the rows from `executeEsql`, and tell Lens where to read
+the coordinates with `xAccessor` and `yAccessor`. Each accessor is a column name, or a function for
+values that need converting. On time charts `x` must be a timestamp in milliseconds, so ES|QL dates,
+which are ISO strings, need a function such as `(row) => Date.parse(String(row['@timestamp']))`.
+Points are bound to the Y axis of the layer they were fetched for, and use the same X and Y scales as
+the layer. The overlay is dropped if that layer isn't drawn or has a categorical X axis.
 
 Lens draws at most 1,000 points per overlay. Extra points are dropped, and the chart shows a warning
 badge. Query only what you plan to draw.
@@ -118,10 +118,9 @@ badge. Query only what you plan to draw.
 ### `onPointClick(event)`
 
 Optional. Called when the user clicks a point of the provider's overlay, with `providerId`, `layerId`
-and the point's `pointId`. Keep your own map from point id to data, as the exemplars example does.
-Bound that map: replace a layer's entries on each `fetchOverlay` instead of adding to them, because
-dashboards refresh charts repeatedly. Clicks aren't dispatched when the host disables the chart's
-triggers.
+and `datum`: the clicked row, the same object the provider returned in `data`. Put everything the
+click needs in the row, so the provider doesn't have to keep state between `fetchOverlay` and the
+click. Clicks aren't dispatched when the host disables the chart's triggers.
 
 Open UI through core services, for example `core.overlays.openFlyout`, so it works on every surface
 and not only inside your own app.

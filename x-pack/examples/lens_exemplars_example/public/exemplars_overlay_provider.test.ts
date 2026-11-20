@@ -65,7 +65,7 @@ describe('exemplars overlay provider', () => {
           'WHERE bytes IS NOT NULL',
           'SORT bytes DESC',
           'LIMIT 30',
-          'EVAL value = bytes',
+          'EVAL value = bytes, simulated_exemplar = true',
         ].join('\n| '),
         simulated: true,
       });
@@ -122,65 +122,58 @@ describe('exemplars overlay provider', () => {
     });
   });
 
-  const fetchContext = (executeEsql: jest.Mock, abortSignal = new AbortController().signal) => ({
+  const fetchContext = (executeEsql: jest.Mock) => ({
     layer: { layerId: 'layer1', esql: LOGS_QUERY },
     filters: [],
     queries: [],
-    abortSignal,
+    abortSignal: new AbortController().signal,
     executeEsql,
   });
 
-  it('draws valid rows and opens the clicked exemplar', async () => {
-    const onExemplarClick = jest.fn();
-    const provider = createExemplarsOverlayProvider({ onExemplarClick, isEnabled: () => true });
+  it('draws the valid rows as returned by the query', async () => {
+    const provider = createExemplarsOverlayProvider({
+      onExemplarClick: jest.fn(),
+      isEnabled: () => true,
+    });
 
     const overlay = await provider.fetchOverlay(fetchContext(jest.fn().mockResolvedValue(table)));
 
     expect(overlay).toEqual({
       type: 'points',
       title: 'Simulated exemplars',
-      points: [{ id: 'exemplar-0', x: Date.parse('2026-11-10T10:00:00.000Z'), y: 1200 }],
+      data: [table.rows[0]],
+      xAccessor: expect.any(Function),
+      yAccessor: 'value',
     });
+    expect(overlay?.data[0]).toBe(table.rows[0]);
+    const { xAccessor } = overlay ?? {};
+    expect(typeof xAccessor === 'function' && xAccessor(table.rows[0])).toBe(
+      Date.parse('2026-11-10T10:00:00.000Z')
+    );
+  });
+
+  it('opens the clicked row without the simulated flag column', () => {
+    const onExemplarClick = jest.fn();
+    const provider = createExemplarsOverlayProvider({ onExemplarClick, isEnabled: () => true });
 
     provider.onPointClick?.({
       providerId: provider.id,
       layerId: 'layer1',
-      pointId: 'exemplar-0',
+      datum: { value: 1200, request: '/a', simulated_exemplar: true },
     });
 
-    expect(onExemplarClick).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'exemplar-0', value: 1200, simulated: true })
-    );
-  });
-
-  it('keeps only the exemplars of the latest load of a layer', async () => {
-    const onExemplarClick = jest.fn();
-    const provider = createExemplarsOverlayProvider({ onExemplarClick, isEnabled: () => true });
-    const refreshedTable: Datatable = {
-      ...table,
-      rows: [{ '@timestamp': '2026-11-10T11:00:00.000Z', value: 300 }],
-    };
-
-    await provider.fetchOverlay(fetchContext(jest.fn().mockResolvedValue(table)));
-    await provider.fetchOverlay(fetchContext(jest.fn().mockResolvedValue(refreshedTable)));
-    provider.onPointClick?.({ providerId: provider.id, layerId: 'layer1', pointId: 'exemplar-0' });
-
-    expect(onExemplarClick).toHaveBeenCalledWith(expect.objectContaining({ value: 300 }));
-  });
-
-  it('ignores the result of a cancelled load', async () => {
-    const onExemplarClick = jest.fn();
-    const provider = createExemplarsOverlayProvider({ onExemplarClick, isEnabled: () => true });
-    const abortController = new AbortController();
-    const executeEsql = jest.fn().mockImplementation(async () => {
-      abortController.abort();
-      return table;
+    expect(onExemplarClick).toHaveBeenCalledWith({
+      simulated: true,
+      fields: { value: 1200, request: '/a' },
     });
+  });
 
-    const overlay = await provider.fetchOverlay(fetchContext(executeEsql, abortController.signal));
-    provider.onPointClick?.({ providerId: provider.id, layerId: 'layer1', pointId: 'exemplar-0' });
+  it('treats rows without the simulated flag as real exemplars', () => {
+    const onExemplarClick = jest.fn();
+    const provider = createExemplarsOverlayProvider({ onExemplarClick, isEnabled: () => true });
 
-    expect(overlay).toBeUndefined();
-    expect(onExemplarClick).not.toHaveBeenCalled();
+    provider.onPointClick?.({ providerId: provider.id, layerId: 'layer1', datum: { value: 42 } });
+
+    expect(onExemplarClick).toHaveBeenCalledWith({ simulated: false, fields: { value: 42 } });
   });
 });

@@ -54,7 +54,9 @@ const provider: LensXYOverlayProvider = {
     return {
       type: 'points',
       title: 'Exemplars',
-      points: rows.map(() => ({ id: 'a', x: 1, y: 2 })),
+      data: rows,
+      xAccessor: '@timestamp',
+      yAccessor: 'value',
     };
   },
 };

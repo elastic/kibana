@@ -9,8 +9,8 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import {
   queryHasStatsCommand,
   queryHasTsSourceCommand,
+  type LensXYOverlayDatum,
   type LensXYOverlayProvider,
-  type LensXYOverlayPoint,
 } from '@kbn/lens-common';
 
 export const EXEMPLARS_APP_ID = 'lens_exemplars_example';
@@ -28,16 +28,19 @@ const EXEMPLARS_LIMIT = 200;
 const SIMULATED_EXEMPLARS_LIMIT = 30;
 const TIMESTAMP_COLUMN = '@timestamp';
 const VALUE_COLUMN = 'value';
+const SIMULATED_COLUMN = 'simulated_exemplar';
 const AGGREGATED_FIELD_REGEX =
   /\bSTATS\b[\s\S]*?\b(?:AVG|SUM|MIN|MAX|MEDIAN)\s*\(\s*([\w.@]+)\s*\)/i;
 
 export interface Exemplar {
-  readonly id: string;
-  readonly timestamp: string;
-  readonly value: number;
   readonly simulated: boolean;
-  readonly fields: Readonly<Record<string, unknown>>;
+  readonly fields: Readonly<LensXYOverlayDatum>;
 }
+
+const getTimestamp = (row: LensXYOverlayDatum): number => Date.parse(String(row[TIMESTAMP_COLUMN]));
+
+const isDrawable = (row: LensXYOverlayDatum): boolean =>
+  !Number.isNaN(getTimestamp(row)) && !Number.isNaN(Number(row[VALUE_COLUMN]));
 
 interface ExemplarsQuery {
   readonly esql: string;
@@ -46,7 +49,8 @@ interface ExemplarsQuery {
 
 /**
  * Real exemplars come from `SET exemplars` on `TS ... | STATS` queries. Any other query gets
- * simulated exemplars: the largest raw samples of the aggregated field, renamed to `value`.
+ * simulated exemplars: the largest raw samples of the aggregated field, renamed to `value` and
+ * flagged with a `simulated_exemplar` column so the rows can be drawn and clicked as returned.
  */
 export const getExemplarsQuery = (esql: string): ExemplarsQuery | undefined => {
   if (queryHasTsSourceCommand(esql)) {
@@ -62,7 +66,7 @@ export const getExemplarsQuery = (esql: string): ExemplarsQuery | undefined => {
       `WHERE ${field} IS NOT NULL`,
       `SORT ${field} DESC`,
       `LIMIT ${SIMULATED_EXEMPLARS_LIMIT}`,
-      `EVAL ${VALUE_COLUMN} = ${field}`,
+      `EVAL ${VALUE_COLUMN} = ${field}, ${SIMULATED_COLUMN} = true`,
     ].join('\n| '),
     simulated: true,
   };
@@ -79,9 +83,6 @@ export const createExemplarsOverlayProvider = ({
   onExemplarClick,
   isEnabled,
 }: CreateExemplarsOverlayProviderParams): LensXYOverlayProvider => {
-  // Only the exemplars drawn by the latest load of each layer are kept, so memory stays bounded on refresh.
-  const exemplarsByLayer = new Map<string, ReadonlyMap<string, Exemplar>>();
-
   return {
     id: EXEMPLARS_OVERLAY_PROVIDER_ID,
     isApplicable: ({ executionContext }, { esql }) => {
@@ -94,7 +95,7 @@ export const createExemplarsOverlayProvider = ({
       );
     },
 
-    fetchOverlay: async ({ layer, executeEsql, abortSignal }) => {
+    fetchOverlay: async ({ layer, executeEsql }) => {
       const query = getExemplarsQuery(layer.esql);
       if (!query) {
         return undefined;
@@ -105,36 +106,19 @@ export const createExemplarsOverlayProvider = ({
         description:
           'This request queries Elasticsearch to fetch the exemplars drawn on the chart.',
       });
-      if (abortSignal.aborted) {
-        return undefined;
-      }
-
-      const exemplars = new Map<string, Exemplar>();
-      const points: LensXYOverlayPoint[] = [];
-      for (const row of rows) {
-        const timestamp = String(row[TIMESTAMP_COLUMN]);
-        const x = Date.parse(timestamp);
-        const value = Number(row[VALUE_COLUMN]);
-        if (Number.isNaN(x) || Number.isNaN(value)) {
-          continue;
-        }
-        const id = `exemplar-${points.length}`;
-        exemplars.set(id, { id, timestamp, value, simulated: query.simulated, fields: row });
-        points.push({ id, x, y: value });
-      }
-      exemplarsByLayer.set(layer.layerId, exemplars);
 
       return {
         type: 'points',
         title,
-        points,
+        data: rows.filter(isDrawable),
+        // ES|QL returns dates as ISO strings, while time charts expect milliseconds.
+        xAccessor: getTimestamp,
+        yAccessor: VALUE_COLUMN,
       };
     },
-    onPointClick: ({ layerId, pointId }) => {
-      const exemplar = exemplarsByLayer.get(layerId)?.get(pointId);
-      if (exemplar) {
-        onExemplarClick(exemplar);
-      }
+    onPointClick: ({ datum }) => {
+      const { [SIMULATED_COLUMN]: simulated, ...fields } = datum;
+      onExemplarClick({ simulated: simulated === true, fields });
     },
   };
 };

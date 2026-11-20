@@ -50,11 +50,9 @@ const createExemplarsOverlayProvider = (
     return {
       type: 'points',
       title: 'Exemplars',
-      points: rows.map((row) => ({
-        id: String(row.trace_id),
-        x: Number(row['@timestamp']),
-        y: Number(row.value),
-      })),
+      data: rows,
+      xAccessor: '@timestamp',
+      yAccessor: 'value',
     };
   },
   ...overrides,
@@ -211,9 +209,12 @@ describe('Lens XY overlay providers', () => {
           title: 'Exemplars',
           providerId: 'observability.exemplars',
           layerId: 'metrics',
-          points: [{ id: 'abc', x: 1000, y: 42 }],
+          data: exemplarsTable.rows,
+          xAccessor: '@timestamp',
+          yAccessor: 'value',
         },
       ]);
+      expect(overlays[0].data[0]).toBe(exemplarsTable.rows[0]);
     });
 
     it('isolates a failing provider from the others', async () => {
@@ -253,13 +254,18 @@ describe('Lens XY overlay providers', () => {
     });
 
     it('caps the points of an overlay and reports the truncation', async () => {
-      const points = Array.from({ length: MAX_XY_OVERLAY_POINTS + 5 }, (_, index) => ({
-        id: `p${index}`,
+      const data = Array.from({ length: MAX_XY_OVERLAY_POINTS + 5 }, (_, index) => ({
         x: index,
         y: index,
       }));
       const crowded = createExemplarsOverlayProvider({
-        fetchOverlay: async () => ({ type: 'points', title: 'Crowded', points }),
+        fetchOverlay: async () => ({
+          type: 'points',
+          title: 'Crowded',
+          data,
+          xAccessor: 'x',
+          yAccessor: 'y',
+        }),
       });
 
       const { overlays, truncations } = await runActiveProviders({
@@ -267,7 +273,7 @@ describe('Lens XY overlay providers', () => {
         ...createRunContext(jest.fn()),
       });
 
-      expect(overlays[0].points).toHaveLength(MAX_XY_OVERLAY_POINTS);
+      expect(overlays[0].data).toHaveLength(MAX_XY_OVERLAY_POINTS);
       expect(truncations).toEqual([
         {
           providerId: 'observability.exemplars',
@@ -283,7 +289,11 @@ describe('Lens XY overlay providers', () => {
       const onPointClick = jest.fn();
       const registry = createXYOverlayProviderRegistry();
       registry.register(createExemplarsOverlayProvider({ onPointClick }));
-      const event = { providerId: 'observability.exemplars', layerId: 'metrics', pointId: 'abc' };
+      const event = {
+        providerId: 'observability.exemplars',
+        layerId: 'metrics',
+        datum: exemplarsTable.rows[0],
+      };
 
       dispatchOverlayPointClick(registry, event);
 

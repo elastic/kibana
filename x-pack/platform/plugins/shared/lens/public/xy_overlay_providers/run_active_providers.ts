@@ -79,17 +79,17 @@ export const runActiveProviders = async ({
     if (!result.value) {
       return;
     }
-    const { points } = result.value;
-    if (points.length > MAX_XY_OVERLAY_POINTS) {
+    const { data } = result.value;
+    if (data.length > MAX_XY_OVERLAY_POINTS) {
       truncations.push({
         providerId: provider.id,
         layerId: layer.layerId,
-        pointCount: points.length,
+        pointCount: data.length,
       });
     }
     overlays.push({
       ...result.value,
-      points: points.slice(0, MAX_XY_OVERLAY_POINTS),
+      data: data.slice(0, MAX_XY_OVERLAY_POINTS),
       providerId: provider.id,
       layerId: layer.layerId,
     });

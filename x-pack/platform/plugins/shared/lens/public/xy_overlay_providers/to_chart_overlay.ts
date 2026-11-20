@@ -17,5 +17,15 @@ export const toChartOverlay = ({
   providerId,
   layerId,
   title,
-  points,
-}: LensXYOverlay): XYOverlay => ({ type, id: providerId, layerId, title, points });
+  data,
+  xAccessor,
+  yAccessor,
+}: LensXYOverlay): XYOverlay => ({
+  type,
+  id: providerId,
+  layerId,
+  title,
+  data,
+  xAccessor,
+  yAccessor,
+});

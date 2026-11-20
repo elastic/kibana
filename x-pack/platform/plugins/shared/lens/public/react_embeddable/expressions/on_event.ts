@@ -40,11 +40,11 @@ export const prepareEventHandler =
     addLog(`onEvent$`);
 
     if (isLensOverlayPointClickEvent(event)) {
-      const { overlayId, layerId, pointId } = event.data;
+      const { overlayId, layerId, datum } = event.data;
       dispatchOverlayPointClick(xyOverlayProviderRegistry, {
         providerId: overlayId,
         layerId,
-        pointId,
+        datum,
       });
       return;
     }

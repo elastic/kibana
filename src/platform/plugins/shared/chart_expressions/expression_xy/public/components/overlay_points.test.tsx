@@ -15,14 +15,16 @@ import { XScaleTypes } from '../../common/constants';
 import type { GroupsConfiguration } from '../helpers';
 import { getClickedOverlayPoint, getOverlaySeriesConfigs, useOverlays } from './overlay_points';
 
-const point = { id: 'trace-1', x: 1000, y: 42 };
+const point = { trace_id: 'trace-1', '@timestamp': 1000, value: 42 };
 
 const overlay: XYOverlay = {
   type: 'points',
   id: 'observability.exemplars',
   layerId: 'metrics',
   title: 'Exemplars',
-  points: [point],
+  data: [point],
+  xAccessor: '@timestamp',
+  yAccessor: 'value',
 };
 
 const yAxesConfiguration: GroupsConfiguration = [
@@ -105,10 +107,19 @@ describe('overlay points', () => {
     ).toEqual([]);
   });
 
-  it('maps a click on an overlay point to its ids', () => {
-    expect(
-      getClickedOverlayPoint([overlay], 'xy-overlay-observability.exemplars-metrics', point)
-    ).toEqual({ overlayId: 'observability.exemplars', layerId: 'metrics', pointId: 'trace-1' });
+  it('hands back the clicked datum itself', () => {
+    const clicked = getClickedOverlayPoint(
+      [overlay],
+      'xy-overlay-observability.exemplars-metrics',
+      point
+    );
+
+    expect(clicked).toEqual({
+      overlayId: 'observability.exemplars',
+      layerId: 'metrics',
+      datum: point,
+    });
+    expect(clicked?.datum).toBe(point);
   });
 
   it('ignores clicks on regular series', () => {

@@ -9,6 +9,7 @@
 
 import type { CustomAnnotationTooltip } from '@elastic/charts';
 import type { Observable } from 'rxjs';
+import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import type {
   ManualPointEventAnnotationArgs,
@@ -18,11 +19,9 @@ import type { AvailableAnnotationIcon } from '@kbn/event-annotation-common';
 import type { XY_VIS_RENDERER } from '../constants';
 import type { AllowedXYOverrides, XYProps } from './expression_functions';
 
-export interface XYOverlayPoint {
-  readonly id: string;
-  readonly x: number;
-  readonly y: number;
-}
+export type XYOverlayDatum = DatatableRow;
+
+export type XYOverlayAccessor = string | ((datum: XYOverlayDatum) => number);
 
 /**
  * Points drawn over the chart on the Y axis of the data layer `layerId`.
@@ -33,7 +32,9 @@ export interface XYPointsOverlay {
   readonly id: string;
   readonly layerId: string;
   readonly title: string;
-  readonly points: readonly XYOverlayPoint[];
+  readonly data: XYOverlayDatum[];
+  readonly xAccessor: XYOverlayAccessor;
+  readonly yAccessor: XYOverlayAccessor;
 }
 
 export type XYOverlay = XYPointsOverlay;

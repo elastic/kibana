@@ -20,6 +20,7 @@ import type {
 } from '@kbn/embeddable-plugin/public';
 import type { ExpressionsServiceStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { XYOverlayDatum } from '../common';
 
 export interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -59,7 +60,7 @@ export interface AnnotationClickEvent {
 
 export interface OverlayPointClickEvent {
   name: 'overlayPointClick';
-  data: { overlayId: string; layerId: string; pointId: string };
+  data: { overlayId: string; layerId: string; datum: XYOverlayDatum };
 }
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;

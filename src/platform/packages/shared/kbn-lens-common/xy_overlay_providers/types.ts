@@ -10,7 +10,7 @@
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/common';
 
 /**
  * Narrow, stable view of an XY chart layer exposed to overlay providers, so they never read Lens internal state.
@@ -57,12 +57,11 @@ export interface LensXYOverlayFetchContext {
   readonly executeEsql: (esql: string, meta: LensXYOverlayRequestMeta) => Promise<Datatable>;
 }
 
-export interface LensXYOverlayPoint {
-  /** Stable id, sent back on click so the provider can resolve its own data. */
-  readonly id: string;
-  readonly x: number;
-  readonly y: number;
-}
+/** A row of overlay data, drawn as is and sent back untouched on click. */
+export type LensXYOverlayDatum = DatatableRow;
+
+/** Reads a coordinate from a datum: a column name, or a function for values that need converting. */
+export type LensXYOverlayAccessor = string | ((datum: LensXYOverlayDatum) => number);
 
 /**
  * Points drawn over an XY chart, bound to the Y axis of the layer they belong to.
@@ -72,7 +71,10 @@ export interface LensXYPointsOverlay {
   readonly providerId: string;
   readonly layerId: string;
   readonly title: string;
-  readonly points: readonly LensXYOverlayPoint[];
+  readonly data: LensXYOverlayDatum[];
+  /** On time charts, must read a timestamp in milliseconds. */
+  readonly xAccessor: LensXYOverlayAccessor;
+  readonly yAccessor: LensXYOverlayAccessor;
 }
 
 export type LensXYOverlay = LensXYPointsOverlay;
@@ -83,7 +85,8 @@ export type LensXYOverlayData = Omit<LensXYOverlay, 'providerId' | 'layerId'>;
 export interface LensXYOverlayPointClickEvent {
   readonly providerId: string;
   readonly layerId: string;
-  readonly pointId: string;
+  /** The clicked datum, the same object the provider returned in `data`. */
+  readonly datum: LensXYOverlayDatum;
 }
 
 /**

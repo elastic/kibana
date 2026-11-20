@@ -325,7 +325,8 @@ export type {
   LensXYOverlayData,
   LensXYOverlayRequestMeta,
   LensXYOverlayProvidersConfig,
-  LensXYOverlayPoint,
+  LensXYOverlayAccessor,
+  LensXYOverlayDatum,
   LensXYOverlayPointClickEvent,
   LensXYPointsOverlay,
 } from './xy_overlay_providers/types';
