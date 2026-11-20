@@ -1,0 +1,871 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "bb19f37a594d5af-0bafa8f6f53c36e",
+      "title": "[NON-MKI] Workflow service accounts: authorization executes with selected read-only roles instead of the creator privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_authorization.spec.ts",
+        "line": 22,
+        "column": 42
+      }
+    },
+    {
+      "id": "bb19f37a594d5af-8b306c062b34b0d",
+      "title": "[NON-MKI] Workflow service accounts: authorization runs the saved definition as its bound account and rejects modified test YAML",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_authorization.spec.ts",
+        "line": 48,
+        "column": 23
+      }
+    },
+    {
+      "id": "bb19f37a594d5af-d34e1a28b6218bb",
+      "title": "[NON-MKI] Workflow service accounts: authorization rejects service-account step tests even with unchanged saved YAML",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_authorization.spec.ts",
+        "line": 89,
+        "column": 47
+      }
+    },
+    {
+      "id": "bb19f37a594d5af-d1fbbdfb3982208",
+      "title": "[NON-MKI] Workflow service accounts: authorization allows an executor to run but prevents definition edits without manage_security",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_authorization.spec.ts",
+        "line": 129,
+        "column": 58
+      }
+    },
+    {
+      "id": "adcb5f2fa763f40-5ae91a7ca96dad0",
+      "title": "[NON-MKI] Workflow service accounts: deletion returns conflict when force-deleting an unbound workflow with a paused execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
+        "line": 37,
+        "column": 20
+      }
+    },
+    {
+      "id": "adcb5f2fa763f40-4d18ff7d6c6cfc1",
+      "title": "[NON-MKI] Workflow service accounts: deletion returns conflict when force-deleting a bound workflow with a paused execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
+        "line": 37,
+        "column": 20
+      }
+    },
+    {
+      "id": "adcb5f2fa763f40-bf7fd3cf2aa301c",
+      "title": "[NON-MKI] Workflow service accounts: deletion returns conflict when deleting a bound workflow with a paused execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
+        "line": 37,
+        "column": 20
+      }
+    },
+    {
+      "id": "adcb5f2fa763f40-771f38bee58eb84",
+      "title": "[NON-MKI] Workflow service accounts: deletion cleanup continues after one failure and tolerates already deleted workflows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
+        "line": 75,
+        "column": 15
+      }
+    },
+    {
+      "id": "adcb5f2fa763f40-1116744522f8ed2",
+      "title": "[NON-MKI] Workflow service accounts: deletion cleanup removes a workflow left paused for input",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
+        "line": 102,
+        "column": 26
+      }
+    },
+    {
+      "id": "793cea78b0d82b3-327473e6c8d99f1",
+      "title": "[NON-MKI] Workflow service accounts: events SA continuation audit: binding failure dispatches the failure handler",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_events.spec.ts",
+        "line": 22,
+        "column": 42
+      }
+    },
+    {
+      "id": "dd0f70a38015ff7-18bcf07788d040a",
+      "title": "[NON-MKI] Workflow service accounts: import clone and bulk import create independent bindings, and overwrite can unbind",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_import.spec.ts",
+        "line": 17,
+        "column": 42
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-12d030eca4b386e",
+      "title": "Managed child service account inheritance sync allowlisted variable child inherits the worker SA after approval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 213,
+        "column": 34
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-e4b30bc81ba2ec5",
+      "title": "Managed child service account inheritance sync variable child outside the allowlist never starts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 240,
+        "column": 8
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-034b8de40a3339e",
+      "title": "Managed child service account inheritance async allowlisted variable child inherits the worker SA after approval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 213,
+        "column": 34
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-62d2b7d6869aa13",
+      "title": "Managed child service account inheritance async variable child outside the allowlist never starts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 240,
+        "column": 8
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-c5e441f1a41ca17",
+      "title": "Managed child service account inheritance sync tag-authorized child inherits after approval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 302,
+        "column": 28
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-c164b3ebe94074e",
+      "title": "Managed child service account inheritance sync tag-authorized child without matching tags never starts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 320,
+        "column": 28
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-b58b7f4023dc344",
+      "title": "Managed child service account inheritance async tag-authorized child inherits after approval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 302,
+        "column": 28
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-929067496a52f4b",
+      "title": "Managed child service account inheritance async tag-authorized child without matching tags never starts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 320,
+        "column": 28
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-8765f2244f778b0",
+      "title": "Managed child service account inheritance sync field-only tag removal revokes child delegation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 343,
+        "column": 24
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-282afc38e2cae47",
+      "title": "Managed child service account inheritance async field-only tag removal revokes child delegation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 343,
+        "column": 24
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-c8d21ac3fd6381c",
+      "title": "Managed child service account inheritance requires superuser privileges for global example mutations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 378,
+        "column": 18
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-9ae50459c071803",
+      "title": "Managed child service account inheritance cleans up waiting inherited executions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 435,
+        "column": 25
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-c993ba319744694",
+      "title": "Managed child service account inheritance sync managed child retains inherited identity through wait and resume",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 465,
+        "column": 16
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-b2b13e6d22cb235",
+      "title": "Managed child service account inheritance async managed child retains inherited identity through wait and resume",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 465,
+        "column": 16
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-222eed9d8a167b8",
+      "title": "Managed child service account inheritance sync global managed child inherits a per-space binding through resume",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 519,
+        "column": 13
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-4bacce4af425027",
+      "title": "Managed child service account inheritance async global managed child inherits a per-space binding through resume",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 519,
+        "column": 13
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-07b71b31be80be7",
+      "title": "Managed child service account inheritance sync workflow-level fallback inherits the parent service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 554,
+        "column": 30
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-144a23756c75ca3",
+      "title": "Managed child service account inheritance async workflow-level fallback inherits the parent service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 554,
+        "column": 30
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-7e7c5d48449eea9",
+      "title": "Managed child service account inheritance blocks uninstall while an inherited child is active (global=false)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 577,
+        "column": 32
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-35624f0ecea7ac8",
+      "title": "Managed child service account inheritance blocks uninstall while an inherited child is active (global=true)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 577,
+        "column": 32
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-faac11070b63b86",
+      "title": "Managed child service account inheritance uses the latest installed child without a revision approval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 620,
+        "column": 19
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-cfa756a5ff8713f",
+      "title": "Managed child service account inheritance rejects unmanaged children before creating a delegated execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 643,
+        "column": 23
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-2aefd948ea79efe",
+      "title": "Managed child service account inheritance requires explicit override and leaves the child binding unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 657,
+        "column": 26
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-7b4dff94182dbbc",
+      "title": "Managed child service account inheritance rejects inheritance without a parent service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 687,
+        "column": 16
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-55412dfefd455b6",
+      "title": "Managed child service account inheritance refuses a standalone run of an unconditional inherit parent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 695,
+        "column": 67
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-e00fef506afb33c",
+      "title": "Managed child service account inheritance default preserves the original caller rather than inheriting implicitly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 710,
+        "column": 78
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-56180236d81bc21",
+      "title": "Managed child service account inheritance nested inheritance keeps the root binding and rejects an unmanaged grandchild",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 721,
+        "column": 9
+      }
+    },
+    {
+      "id": "01a4199ad09f0a1-8b95c3e65d48171",
+      "title": "Managed child service account inheritance changing the root binding while an async child waits fails closed on resume",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 752,
+        "column": 34
+      }
+    },
+    {
+      "id": "1b174bc0425ad86-5875365e562f516",
+      "title": "[NON-MKI] Workflow service accounts: parent/child execution permissions a read-only child cannot inherit its parent write permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_nested_permissions.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "7b259defc6e51ed-e383abb79f31e60",
+      "title": "[NON-MKI] Workflow service accounts: nested SA continuation audit: unbound child approval does not change parent identity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_nested.spec.ts",
+        "line": 26,
+        "column": 32
+      }
+    },
+    {
+      "id": "7b259defc6e51ed-c107efc34634030",
+      "title": "[NON-MKI] Workflow service accounts: nested SA continuation audit: bound child approval does not change parent identity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_nested.spec.ts",
+        "line": 26,
+        "column": 32
+      }
+    },
+    {
+      "id": "7b259defc6e51ed-e0d62fb9b7ac166",
+      "title": "[NON-MKI] Workflow service accounts: nested a nested child selects its own account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_nested.spec.ts",
+        "line": 79,
+        "column": 17
+      }
+    },
+    {
+      "id": "b9c547a24c7d067-7077e78e01d0ae9",
+      "title": "[NON-MKI] Workflow service accounts: approval/resume permissions retains read-only permissions after approval by an administrator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume_permissions.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "f1ed018c741020d-8a2ee97083faa6a",
+      "title": "[NON-MKI] Workflow service accounts: resume resumes with the original service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
+        "line": 22,
+        "column": 42
+      }
+    },
+    {
+      "id": "f1ed018c741020d-9239e5951f0d821",
+      "title": "[NON-MKI] Workflow service accounts: resume runs and resumes a bound workflow using API-key credentials",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
+        "line": 30,
+        "column": 13
+      }
+    },
+    {
+      "id": "f1ed018c741020d-fa618ccea035340",
+      "title": "[NON-MKI] Workflow service accounts: resume fails resume after rebind without executing the next step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
+        "line": 63,
+        "column": 24
+      }
+    },
+    {
+      "id": "f1ed018c741020d-60e2d68c7d018b3",
+      "title": "[NON-MKI] Workflow service accounts: resume reports a resume identity failure to Task Manager as a user error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
+        "line": 87,
+        "column": 13
+      }
+    },
+    {
+      "id": "f1ed018c741020d-c9a7ffbcf5c5b73",
+      "title": "[NON-MKI] Workflow service accounts: resume SA continuation audit: timer retains the bound identity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
+        "line": 120,
+        "column": 15
+      }
+    },
+    {
+      "id": "f1ed018c741020d-ae654bf07dbf2c9",
+      "title": "[NON-MKI] Workflow service accounts: resume SA continuation audit: retry retains the bound identity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
+        "line": 120,
+        "column": 15
+      }
+    },
+    {
+      "id": "c96ef484687a1ef-a9727b01da67762",
+      "title": "[NON-MKI] Workflow service accounts: scheduled execution permissions scheduled execution cannot use the scheduler privileges to write",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_scheduling_permissions.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "5ea2a14d2011dba-6721e5abba14999",
+      "title": "[NON-MKI] Workflow service accounts: scheduling scheduled execution uses its service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_scheduling.spec.ts",
+        "line": 22,
+        "column": 42
+      }
+    },
+    {
+      "id": "5ea2a14d2011dba-2b32e9d42379a96",
+      "title": "[NON-MKI] Workflow service accounts: scheduling SA continuation audit: queued execution retains its identity on promotion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_scheduling.spec.ts",
+        "line": 44,
+        "column": 25
+      }
+    },
+    {
+      "id": "5ea2a14d2011dba-cc0fb18874bf620",
+      "title": "[NON-MKI] Workflow service accounts: scheduling SA continuation audit: queued execution rejects a changed binding",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_scheduling.spec.ts",
+        "line": 44,
+        "column": 25
+      }
+    },
+    {
+      "id": "c22ef376444aa38-2647bd7237752b5",
+      "title": "[NON-MKI] Workflow service accounts: step-test space isolation permits an authorized target run but denies direct access from the source space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_step_test_spaces.spec.ts",
+        "line": 121,
+        "column": 19
+      }
+    },
+    {
+      "id": "c22ef376444aa38-c7f2ce07721e19d",
+      "title": "[NON-MKI] Workflow service accounts: step-test space isolation keeps workflow.execute step tests in the request space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_step_test_spaces.spec.ts",
+        "line": 152,
+        "column": 30
+      }
+    },
+    {
+      "id": "c22ef376444aa38-3b09c1d4dcfb9d6",
+      "title": "[NON-MKI] Workflow service accounts: step-test space isolation keeps workflow.executeAsync step tests in the request space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_step_test_spaces.spec.ts",
+        "line": 152,
+        "column": 30
+      }
+    },
+    {
+      "id": "c22ef376444aa38-94d08ab601218c0",
+      "title": "[NON-MKI] Workflow service accounts: step-test space isolation preserves ordinary step-test inputs and context overrides",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_step_test_spaces.spec.ts",
+        "line": 186,
+        "column": 18
+      }
+    },
+    {
+      "id": "e30d156c3f1d29d-736986d363c917f",
+      "title": "[NON-MKI] Workflow service accounts: telemetry reports runAs user for a workflow without run_as",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_telemetry.spec.ts",
+        "line": 82,
+        "column": 72
+      }
+    },
+    {
+      "id": "e30d156c3f1d29d-48340c557db82a1",
+      "title": "[NON-MKI] Workflow service accounts: telemetry reports runAs service_account for a workflow bound by its own run_as",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_telemetry.spec.ts",
+        "line": 83,
+        "column": 74
+      }
+    },
+    {
+      "id": "e30d156c3f1d29d-988d01018136eed",
+      "title": "[NON-MKI] Workflow service accounts: telemetry reports workflows bound by their own run_as in the security usage collector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_telemetry.spec.ts",
+        "line": 95,
+        "column": 74
+      }
+    },
+    {
+      "id": "8b35aaaa58bffd4-4cc04927fa6d692",
+      "title": "[NON-MKI] Workflow service accounts: bound workload names for other callers names and links a private workflow for a security admin who cannot open it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_workload_names_permissions.spec.ts",
+        "line": 103,
+        "column": 9
+      }
+    },
+    {
+      "id": "8b35aaaa58bffd4-05163fdd73c4920",
+      "title": "[NON-MKI] Workflow service accounts: bound workload names for other callers tells a caller without manage_security nothing about the bound workloads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_workload_names_permissions.spec.ts",
+        "line": 122,
+        "column": 76
+      }
+    },
+    {
+      "id": "d93e3c5486815c5-dc6eae335248224",
+      "title": "[NON-MKI] Workflow service accounts: bound workload names names and links a bound workflow in its space when listing and refusing a delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_workload_names.spec.ts",
+        "line": 33,
+        "column": 80
+      }
+    }
+  ]
+}

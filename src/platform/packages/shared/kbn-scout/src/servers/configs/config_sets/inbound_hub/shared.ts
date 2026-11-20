@@ -15,6 +15,6 @@ export const inboundHubServerArgs = [
   '--xpack.actions.inboundEvents.enabled=true',
   `--plugin-path=${resolve(
     REPO_ROOT,
-    'x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector'
+    'x-pack/platform/test_plugins/workflows_inbound_hub/plugins/inbound_hub_connector'
   )}`,
 ];
