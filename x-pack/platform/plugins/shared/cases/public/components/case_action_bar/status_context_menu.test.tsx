@@ -97,7 +97,8 @@ describe('StatusContextMenu', () => {
     await userEvent.click(
       within(screen.getByTestId('case-status-badge-popover-button-open')).getByRole('button')
     );
-    expect(screen.queryByTestId('case-view-status-dropdown-open')).not.toBeInTheDocument();
+    expect(await screen.findByText('Change status')).toBeInTheDocument();
+    expect(screen.queryAllByRole('menuitem')).toHaveLength(0);
 
     expect(onStatusChanged).not.toHaveBeenCalled();
   });
@@ -137,6 +138,7 @@ describe('StatusContextMenu', () => {
     await userEvent.click(
       within(screen.getByTestId('case-status-badge-popover-button-open')).getByRole('button')
     );
+    expect(await screen.findByText('Change status')).toBeInTheDocument();
     expect(screen.queryAllByRole('menuitem')).toHaveLength(0);
   });
 

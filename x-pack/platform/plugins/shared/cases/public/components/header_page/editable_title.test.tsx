@@ -25,11 +25,6 @@ describe('EditableTitle', () => {
     jest.clearAllMocks();
   });
 
-  it('renders', () => {
-    renderWithTestingProviders(<EditableTitle {...defaultProps} />);
-    expect(screen.getByText('Test title')).toBeInTheDocument();
-  });
-
   const startEditing = async () => {
     await userEvent.click(screen.getByTestId('editable-title-header-value'));
   };
@@ -41,6 +36,11 @@ describe('EditableTitle', () => {
       await userEvent.paste(value);
     }
   };
+
+  it('renders', () => {
+    renderWithTestingProviders(<EditableTitle {...defaultProps} />);
+    expect(screen.getByText('Test title')).toBeInTheDocument();
+  });
 
   it('inline edit defaults to readOnly when the user does not have the edit permissions', () => {
     renderWithTestingProviders(<EditableTitle {...defaultProps} />, {

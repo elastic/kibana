@@ -24,7 +24,7 @@ describe('Mapping', () => {
 
   test('it shows mapping form group', () => {
     renderWithTestingProviders(<Mapping {...props} />);
-    expect(screen.getAllByTestId('static-mappings')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('static-mappings').length).toBeGreaterThan(0);
   });
 
   test('correctly maps fields', () => {

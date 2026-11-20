@@ -50,7 +50,7 @@ describe('CreateCaseModal', () => {
   it('Closing modal calls onCloseCaseModal', async () => {
     renderWithTestingProviders(<CreateCaseModal {...defaultProps} />);
 
-    await userEvent.click(screen.getByLabelText('Closes this modal window'));
+    await userEvent.click(screen.getByRole('button', { name: 'Closes this modal window' }));
     expect(onCloseCaseModal).toHaveBeenCalled();
   });
 

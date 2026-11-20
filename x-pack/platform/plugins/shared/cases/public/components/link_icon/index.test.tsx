@@ -20,7 +20,7 @@ describe('LinkIcon', () => {
 
   test('it renders', () => {
     renderWithTestingProviders(
-      <LinkIcon onClick={onClick} iconSide="right" iconSize="xxl" iconType="warning">
+      <LinkIcon onClick={onClick} iconType="warning">
         {'Test link'}
       </LinkIcon>
     );
@@ -40,14 +40,13 @@ describe('LinkIcon', () => {
   });
 
   test('it renders an icon', () => {
-    const { container } = renderWithTestingProviders(
+    renderWithTestingProviders(
       <LinkIcon onClick={onClick} iconType="warning">
         {'Test link'}
       </LinkIcon>
     );
 
-    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
-    expect(container.querySelector('[data-euiicon-type]')).toBeInTheDocument();
+    expect(screen.getByRole('button')).toContainHTML('data-euiicon-type="warning"');
   });
 
   test('it positions the icon to the right when iconSide is right', () => {
