@@ -51,6 +51,7 @@ import { visitNestedSteps } from '../definition/definition_utils';
 import type { VisitNestedStepEntry, WorkflowStep } from '../definition/definition_utils';
 import { getElasticsearchConnectors } from '../spec/elasticsearch';
 import { getKibanaConnectors } from '../spec/kibana';
+import { resolveKibanaStepTypeAlias } from '../spec/kibana/aliases';
 import {
   ElasticsearchRequestStepInputSchema,
   KibanaRequestStepInputSchema,
@@ -484,8 +485,10 @@ describe('managedWorkflowDefinitions', () => {
         if (!step.type.startsWith('elasticsearch.') && !step.type.startsWith('kibana.')) {
           return;
         }
+        // The editor accepts the legacy Kibana type names, such as `kibana.getCaseDefaultSpace`.
+        const stepType = resolveKibanaStepTypeAlias(step.type);
         const paramsSchema =
-          requestStepParamsSchemas.get(step.type) ?? connectorsByType.get(step.type)?.paramsSchema;
+          requestStepParamsSchemas.get(stepType) ?? connectorsByType.get(stepType)?.paramsSchema;
         if (!paramsSchema) {
           failures.push({
             path,
@@ -496,13 +499,17 @@ describe('managedWorkflowDefinitions', () => {
         }
 
         const params = (step as { with?: unknown }).with;
-        const result = paramsSchema.safeParse(params ?? {});
+        // An absent `with` is `{}`, but an explicit `with: null` is kept: the editor rejects it for
+        // schemas that accept `{}`.
+        const result = paramsSchema.safeParse(params === undefined ? {} : params);
         if (result.success) {
           return;
         }
 
+        // The issue paths are relative to `with`. Rooting them at the step keeps a template that
+        // supplies the whole `with` (`with: "${{ inputs.request }}"`) skippable, as in the editor.
         const survivingIssues = result.error.issues.filter(
-          (issue) => !isIssueOnTemplateValue(issue, params)
+          (issue) => !isIssueOnTemplateValue(issue, { with: params }, ['with'])
         );
 
         if (survivingIssues.length > 0) {

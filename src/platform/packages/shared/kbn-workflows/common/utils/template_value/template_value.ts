@@ -69,10 +69,13 @@ type ValidationIssue = ZodError['issues'][number];
  * value is expected, so it can't be judged before the template renders. `root` is the parsed value
  * the issue paths point into.
  *
- * An `invalid_union` issue sits on the union's own path, so the value there is the whole object and
- * never a template. Its `errors` hold one list of issues per branch, with paths relative to the
- * union. The union is satisfied when one branch fails on templates alone, so the issue is dropped
- * then. Unions nest, hence the recursion.
+ * An issue on a template value is dropped, whatever its code. That covers a discriminated union that
+ * cannot pick a branch: zod reports `invalid_union` on the discriminator with no branch errors.
+ *
+ * An `invalid_union` issue on a larger object sits on the union's own path, where the value is never
+ * a template. Its `errors` hold one list of issues per branch, with paths relative to the union. The
+ * union is satisfied when one branch fails on templates alone, so the issue is dropped then. Unions
+ * nest, hence the recursion.
  */
 export function isIssueOnTemplateValue(
   issue: ValidationIssue,
@@ -80,15 +83,18 @@ export function isIssueOnTemplateValue(
   basePath: ReadonlyArray<PropertyKey> = []
 ): boolean {
   const path = [...basePath, ...(issue.path ?? [])];
+  if (path.length > 0 && isTemplateAt(root, path)) {
+    return true;
+  }
   if (issue.code === 'invalid_union') {
     return issue.errors.some((branchIssues) =>
       branchIssues.every((branchIssue) => isIssueOnTemplateValue(branchIssue, root, path))
     );
   }
-  if (path.length === 0) {
-    return false;
-  }
+  return false;
+}
 
+const isTemplateAt = (root: unknown, path: ReadonlyArray<PropertyKey>): boolean => {
   let value: unknown = root;
   for (const segment of path) {
     if (value == null || typeof value !== 'object') {
@@ -97,4 +103,4 @@ export function isIssueOnTemplateValue(
     value = (value as Record<PropertyKey, unknown>)[segment];
   }
   return isTemplateValue(value);
-}
+};

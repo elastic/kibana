@@ -54,6 +54,17 @@ describe('isIssueOnTemplateValue', () => {
     expect(isIssueOnTemplateValue(root[0], 'x')).toBe(false);
   });
 
+  it('treats a template that supplies the whole value as a template, given a base path', () => {
+    const issues = issuesOf(z.object({ reason }), '${{ inputs.request }}');
+
+    expect(issues).toHaveLength(1);
+    expect(issues[0].path).toEqual([]);
+    expect(isIssueOnTemplateValue(issues[0], { with: '${{ inputs.request }}' }, ['with'])).toBe(
+      true
+    );
+    expect(isIssueOnTemplateValue(issues[0], { with: 'plain' }, ['with'])).toBe(false);
+  });
+
   describe('invalid_union', () => {
     const byIds = z.object({ reason, ids: z.array(z.string()) });
     const byQuery = z.object({ reason, query: z.record(z.string(), z.unknown()) });
@@ -81,6 +92,31 @@ describe('isIssueOnTemplateValue', () => {
     it('is false when every branch also fails on something concrete', () => {
       const value = { with: { reason: '{{ inputs.reason }}' } };
       const issues = issuesOf(schema, value);
+
+      expect(isIssueOnTemplateValue(issues[0], value)).toBe(false);
+    });
+
+    it('is true for a discriminated union whose templated discriminator picks no branch', () => {
+      // zod reports `invalid_union` on the discriminator with no branch errors at all.
+      const discriminated = z.object({
+        with: z.discriminatedUnion('type', [
+          z.object({ type: z.literal('a'), x: z.string() }),
+          z.object({ type: z.literal('b'), y: z.string() }),
+        ]),
+      });
+      const value = { with: { type: '{{ inputs.type }}', x: 'x' } };
+      const issues = issuesOf(discriminated, value);
+
+      expect(issues[0].code).toBe('invalid_union');
+      expect(isIssueOnTemplateValue(issues[0], value)).toBe(true);
+    });
+
+    it('is false for a discriminated union with a concrete discriminator that matches no branch', () => {
+      const discriminated = z.object({
+        with: z.discriminatedUnion('type', [z.object({ type: z.literal('a') })]),
+      });
+      const value = { with: { type: 'c' } };
+      const issues = issuesOf(discriminated, value);
 
       expect(isIssueOnTemplateValue(issues[0], value)).toBe(false);
     });
