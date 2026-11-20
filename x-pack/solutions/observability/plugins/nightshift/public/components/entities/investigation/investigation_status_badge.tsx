@@ -331,6 +331,18 @@ export function AiGradientBadge({
           border: ${euiTheme.border.width.thin} solid transparent;
         `;
 
+  // Own span (not `.euiBadge__text`): EuiBadge skips that wrapper for numeric `0`.
+  // Forced-colors: gradients drop out — fall back to CanvasText so the count stays visible.
+  const labelSpanCss = css`
+    ${labelCss}
+
+    @media (forced-colors: active) {
+      background: none !important;
+      color: CanvasText !important;
+      -webkit-text-fill-color: CanvasText !important;
+    }
+  `;
+
   return (
     <>
       <SvgAiGradientDefs gradientId={gradientId} colors={colors} />
@@ -344,14 +356,10 @@ export function AiGradientBadge({
           plateCss,
           css`
             border-radius: ${euiTheme.size.l};
-
-            .euiBadge__text {
-              ${labelCss}
-            }
           `,
         ]}
       >
-        {children}
+        <span css={labelSpanCss}>{children}</span>
       </EuiBadge>
     </>
   );
