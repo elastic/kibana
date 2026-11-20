@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { useMemo } from 'react';
 import { ALERT_AI_SUMMARY_INFERENCE_FEATURE_ID } from '../../../common/constants';
@@ -16,19 +17,26 @@ import { useKibana } from '../lib/kibana';
  * connectors. The alert AI summary has its own inference feature, so a model assigned only to the
  * AI Assistant does not change which model the summary uses.
  *
- * The flyout has no model picker, so it uses the first usable entry of the list, which the server
- * orders: the admin's saved models in their order, otherwise the global default first (also when it
- * is a stack connector alias of an endpoint), otherwise the platform default chat endpoint.
+ * The flyout has no model picker. When an admin saved models for the feature, the first usable one
+ * is used, in their order. Otherwise the entry the server flagged as the default is used (also when
+ * the setting is a stack connector alias of an endpoint), and when nothing is flagged the list is
+ * the unselected catalog, so the usual fallback priority applies (Elastic-managed, then OpenAI).
  */
 export const useDefaultAIConnectorId = () => {
-  const { http, notifications } = useKibana().services;
+  const { http, notifications, settings } = useKibana().services;
 
-  const { data: connectors, isLoading } = useLoadConnectors({
+  const {
+    data: connectors,
+    isLoading,
+    soEntryFound,
+  } = useLoadConnectors({
     http,
     toasts: notifications.toasts,
     featureId: ALERT_AI_SUMMARY_INFERENCE_FEATURE_ID,
   });
-  const defaultConnectorId = connectors?.find((connector) => !connector.isMissingSecrets)?.id;
+  const defaultConnectorId = soEntryFound
+    ? connectors?.find((connector) => !connector.isMissingSecrets)?.id
+    : getDefaultConnector(connectors, settings)?.id;
 
   return useMemo(
     () => ({
