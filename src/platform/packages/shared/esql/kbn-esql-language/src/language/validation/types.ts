@@ -11,9 +11,11 @@ import type { EditorError } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../../commands/registry/types';
 import type { ESQLPolicy } from '../../commands/registry/types';
 import type { ESQLMessage } from '../../commands';
+import type { NamedSubquery } from '../../commands/definitions/utils/named_subqueries';
 
 export interface ReferenceMaps {
   sources: Set<string>;
+  namedSubqueries?: readonly NamedSubquery[];
   columns: Map<string, ESQLColumnData>;
   policies: Map<string, ESQLPolicy>;
   query: string;

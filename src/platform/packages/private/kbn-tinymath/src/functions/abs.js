@@ -10,7 +10,7 @@
 /**
  * Calculates the absolute value of a number. For arrays, the function will be applied index-wise to each element.
  * @param {(number|number[])} a a number or an array of numbers
- * @return {(number|number[])} The absolute value of `a`. Returns an array with the the absolute values of each element if `a` is an array.
+ * @return {(number|number[])} The absolute value of `a`. Returns an array with the absolute values of each element if `a` is an array.
  *
  * @example
  * abs(-1) // returns 1
