@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { z, inlineRootJsonSchemaRef } from '@kbn/zod/v4';
-import type { ZodType } from '@kbn/zod/v4';
+import { inlineRootJsonSchemaRef } from '@kbn/zod/v4';
 
 interface FieldDescription {
   name: string;
@@ -16,48 +15,32 @@ interface FieldDescription {
 }
 
 /**
- * Extracts a human-readable list of field descriptions from a Zod object schema
- * using the public `z.toJSONSchema()` API.
+ * Extracts a human-readable list of field descriptions from a JSON Schema object.
  *
  * Used to describe connector sub-action parameters to the agent LLM.
  */
-export function describeZodSchema(schema: ZodType): FieldDescription[] {
-  if (!schema) {
+export function describeJsonSchema(jsonSchema: Record<string, unknown>): FieldDescription[] {
+  const resolved = inlineRootJsonSchemaRef(jsonSchema);
+  if (resolved.type !== 'object' || !resolved.properties) {
     return [];
   }
 
-  try {
-    const jsonSchema = inlineRootJsonSchemaRef(z.toJSONSchema(schema) as Record<string, unknown>);
-    if (jsonSchema.type !== 'object' || !jsonSchema.properties) {
-      return [];
-    }
+  const properties = resolved.properties as Record<
+    string,
+    { type?: string; description?: string; default?: unknown }
+  >;
+  const required = new Set((resolved.required as string[]) ?? []);
 
-    const properties = jsonSchema.properties as Record<
-      string,
-      { type?: string; description?: string; default?: unknown }
-    >;
-    const required = new Set((jsonSchema.required as string[]) ?? []);
-
-    return Object.entries(properties).map(([name, prop]) => ({
-      name,
-      type: prop.type ?? 'unknown',
-      // A field is required for the caller only if it's in `required` AND has no default value
-      required: required.has(name) && !('default' in prop),
-      description: prop.description ?? undefined,
-    }));
-  } catch {
-    return [];
-  }
+  return Object.entries(properties).map(([name, prop]) => ({
+    name,
+    type: prop.type ?? 'unknown',
+    // A field is required for the caller only if it's in `required` AND has no default value
+    required: required.has(name) && !('default' in prop),
+    description: prop.description ?? undefined,
+  }));
 }
 
-/**
- * Formats a Zod schema into a multi-line parameter summary string for LLM consumption.
- *
- * Example output:
- *   "- query (string, required): Search query to find messages\n- inChannel (string, optional): Channel name"
- */
-export function formatSchemaForLlm(schema: ZodType): string {
-  const fields = describeZodSchema(schema);
+const formatFieldsForLlm = (fields: FieldDescription[]): string => {
   if (fields.length === 0) {
     return 'No parameters';
   }
@@ -69,4 +52,9 @@ export function formatSchemaForLlm(schema: ZodType): string {
       return `- ${field.name} (${field.type}, ${requiredLabel})${desc}`;
     })
     .join('\n');
+};
+
+/** Formats a serialized JSON Schema into a multi-line parameter summary string for the LLM. */
+export function formatJsonSchemaForLlm(jsonSchema: Record<string, unknown>): string {
+  return formatFieldsForLlm(describeJsonSchema(jsonSchema));
 }

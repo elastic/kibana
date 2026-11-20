@@ -7,6 +7,7 @@
 
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import { z } from '@kbn/zod/v4';
 import type { ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionTypeRegistry } from './action_type_registry';
@@ -1023,6 +1024,58 @@ describe('actionTypeRegistry', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
 
       expect(actionTypeRegistry.getSpec('unknown')).toBeUndefined();
+    });
+  });
+
+  describe('list() with includeSpecSummary', () => {
+    const spec = {
+      metadata: {
+        id: 'spec-backed',
+        displayName: 'Spec backed',
+        description: 'A spec type',
+        minimumLicense: 'basic',
+        supportedFeatureIds: [],
+      },
+      auth: null,
+      schema: null,
+      actions: { listThings: { isTool: true, input: z.object({}), handler: async () => ({}) } },
+      test: { handler: async () => ({}), enabled: false },
+    } as unknown as ConnectorSpec;
+
+    const setup = () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      registry.register(getConnectorType({ id: 'spec-backed', spec }));
+      registry.register(getConnectorType({ id: 'stack-type' }));
+      return registry;
+    };
+
+    it('attaches a summary to spec-backed types only', () => {
+      const types = setup().list({ includeSpecSummary: true });
+
+      expect(types.find(({ id }) => id === 'spec-backed')?.specSummary).toEqual(
+        expect.objectContaining({
+          id: 'spec-backed',
+          displayName: 'Spec backed',
+          actions: [{ name: 'listThings', isTool: true, scope: 'read' }],
+        })
+      );
+      expect(types.find(({ id }) => id === 'stack-type')?.specSummary).toBeUndefined();
+    });
+
+    it('omits summaries by default', () => {
+      expect(
+        setup()
+          .list()
+          .every(({ specSummary }) => specSummary === undefined)
+      ).toBe(true);
+    });
+
+    it('limits the list to typeId', () => {
+      const types = setup().list({ includeSpecSummary: true, typeId: 'spec-backed' });
+
+      expect(types.map(({ id }) => id)).toEqual(['spec-backed']);
+      expect(types[0].specSummary).toBeDefined();
     });
   });
 

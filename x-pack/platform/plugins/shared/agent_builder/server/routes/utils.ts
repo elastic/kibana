@@ -6,11 +6,9 @@
  */
 
 import type { Connector } from '@kbn/actions-plugin/server';
-import {
-  filterActionsBySelection,
-  getConnectorSpec,
-  type SelectedActions,
-} from '@kbn/connector-specs';
+import type { ConnectorSpecSummaryProvider } from '@kbn/agent-builder-server';
+import { filterSpecActionsBySelection } from '@kbn/agent-builder-server';
+import type { SelectedActions } from '@kbn/connector-specs';
 import type { ConnectorItem, ConnectorSubAction, OAuthStatus } from '../../common/http_api/tools';
 
 export const getTechnicalPreviewWarning = (featureName: string) => {
@@ -33,22 +31,27 @@ export const getSSEResponseHeaders = (): Record<string, string> => ({
   'X-Accel-Buffering': 'no',
 });
 
-export const getConnectorSubActions = (
-  actionTypeId: string,
-  selectedActions?: SelectedActions
-): ConnectorSubAction[] => {
-  const spec = getConnectorSpec(actionTypeId);
+export const getConnectorSubActions = ({
+  actionTypeId,
+  selectedActions,
+  specProvider,
+}: {
+  actionTypeId: string;
+  selectedActions?: SelectedActions;
+  specProvider: ConnectorSpecSummaryProvider;
+}): ConnectorSubAction[] => {
+  const spec = specProvider.getSpec(actionTypeId);
   if (!spec) return [];
 
-  return filterActionsBySelection(spec.actions, selectedActions).map(([name, action]) => ({
-    name,
-    description: action.description,
-  }));
+  return filterSpecActionsBySelection(spec.actions, selectedActions).map(
+    ({ name, description }) => ({ name, description })
+  );
 };
 
 export const toConnectorItem = (
   connector: Connector,
-  options?: {
+  options: {
+    specProvider: ConnectorSpecSummaryProvider;
     oauthStatus?: OAuthStatus;
   }
 ): ConnectorItem => {
@@ -64,7 +67,11 @@ export const toConnectorItem = (
     isConnectorTypeDeprecated: connector.isConnectorTypeDeprecated,
     config: connector.config,
     authMode: connector.authMode,
-    oauthStatus: options?.oauthStatus,
-    subActions: getConnectorSubActions(connector.actionTypeId, selectedActions),
+    oauthStatus: options.oauthStatus,
+    subActions: getConnectorSubActions({
+      actionTypeId: connector.actionTypeId,
+      selectedActions,
+      specProvider: options.specProvider,
+    }),
   };
 };

@@ -25,6 +25,7 @@ import type {
   ActionTypeSecrets,
   InMemoryConnector,
 } from './types';
+import { serializeSpecSummary } from './specs_client/lib/serialize_spec_summary';
 import { isSandboxCapableConnectorType } from './application/connector/lib/is_sandbox_capable_connector';
 
 export interface ActionTypeRegistryOpts {
@@ -40,6 +41,8 @@ interface ListOpts {
   featureId?: string;
   exposeValidation?: boolean;
   sandboxCapableOnly?: boolean;
+  includeSpecSummary?: boolean;
+  typeId?: string;
 }
 
 export class ActionTypeRegistry {
@@ -279,9 +282,12 @@ export class ActionTypeRegistry {
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
   public list(
-    { featureId, exposeValidation, sandboxCapableOnly }: ListOpts = { exposeValidation: false }
+    { featureId, exposeValidation, sandboxCapableOnly, includeSpecSummary, typeId }: ListOpts = {
+      exposeValidation: false,
+    }
   ): CommonActionType[] {
     return Array.from(this.actionTypes)
+      .filter(([actionTypeId]) => (typeId ? actionTypeId === typeId : true))
       .filter(([_, actionType]) => {
         return featureId ? actionType.supportedFeatureIds.includes(featureId) : true;
       })
@@ -311,7 +317,11 @@ export class ActionTypeRegistry {
         description: actionType.description,
         isExperimental: actionType.isExperimental,
         isTestable: Boolean(actionType.isTestable),
-      }));
+      }))
+      .map((type) => {
+        const spec = includeSpecSummary ? this.getSpec(type.id) : undefined;
+        return spec ? { ...type, specSummary: serializeSpecSummary({ spec, type }) } : type;
+      });
   }
 
   /**

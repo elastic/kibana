@@ -7,11 +7,11 @@
 
 import type { Logger } from '@kbn/logging';
 import type { AgentsStart } from '@kbn/agent-builder-server';
+import { createConnectorSpecProvider } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
-import { getConnectorSpec } from '@kbn/connector-specs';
 import {
   CONNECTOR_SETUP_ATTACHMENT_TYPE,
   connectorSetupAttachmentDataSchema,
@@ -24,6 +24,15 @@ interface ConnectorSetupAttachmentTypeDeps {
   getActionsStart: () => Promise<ActionsPluginStart>;
   logger: Logger;
 }
+
+const resolveDisplayName = (
+  actionsStart: ActionsPluginStart,
+  connectorType: string,
+  connectorTypeName: string | undefined
+): string =>
+  connectorTypeName ??
+  createConnectorSpecProvider({ actionsStart }).getSpec(connectorType)?.displayName ??
+  connectorType;
 
 /**
  * Server-side definition for the `connector_setup` attachment type.
@@ -52,7 +61,10 @@ export const createConnectorSetupAttachmentType = ({
     // use its real type. The agent can't call types without a spec (they only work in Workflows).
     const actionsClient = await (await getActionsStart()).getActionsClientWithRequest(request);
     const { actionTypeId } = await actionsClient.get({ id: connectorId });
-    if (!isChatCallableConnectorType(actionTypeId)) {
+    const specProvider = createConnectorSpecProvider({
+      actionsStart: await getActionsStart(),
+    });
+    if (!isChatCallableConnectorType(actionTypeId, specProvider)) {
       return;
     }
     const agentsStart = await getAgentsStart();
@@ -81,11 +93,14 @@ export const createConnectorSetupAttachmentType = ({
   },
   format: (attachment) => {
     return {
-      getRepresentation: () => {
+      getRepresentation: async () => {
         const { connector_type: connectorType, connector_type_name: connectorTypeName } =
           attachment.data;
-        const spec = getConnectorSpec(connectorType);
-        const displayName = connectorTypeName ?? spec?.metadata.displayName ?? connectorType;
+        const displayName = resolveDisplayName(
+          await getActionsStart(),
+          connectorType,
+          connectorTypeName
+        );
         const value = [
           `Connector setup card shown to the user for: ${displayName} (${connectorType}).`,
           'The user enters configuration and secrets in the connector form; those never appear in chat.',
@@ -96,15 +111,18 @@ export const createConnectorSetupAttachmentType = ({
       },
     };
   },
-  toSurfaceComposition: (
+  toSurfaceComposition: async (
     {
       data: { connector_type: connectorType, connector_type_name: connectorTypeName, reason },
       origin,
     },
     { agentId }
   ) => {
-    const displayName =
-      connectorTypeName ?? getConnectorSpec(connectorType)?.metadata.displayName ?? connectorType;
+    const displayName = resolveDisplayName(
+      await getActionsStart(),
+      connectorType,
+      connectorTypeName
+    );
 
     const text =
       reason ||

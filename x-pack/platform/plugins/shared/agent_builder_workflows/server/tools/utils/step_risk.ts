@@ -9,7 +9,7 @@ import { esManifest } from '@elastic/schemas/es/tools/manifest.js';
 import { kibanaManifest } from '@elastic/schemas/kibana/tools/manifest.js';
 import type { ApiTarget, AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
 import { isApiAutoApproved } from '@kbn/agent-builder-common';
-import { getConnectorSpec } from '@kbn/connector-specs';
+import type { ConnectorSpecSummaryProvider } from '@kbn/agent-builder-server';
 import { LineCounter, parseDocument, stringify, visit } from 'yaml';
 import { buildWorkflowLookup, type StepInfo } from '@kbn/workflows-yaml';
 
@@ -110,19 +110,26 @@ const fromRegistry = (
  * Connector-backed steps are typed `<connectorType>.<actionName>`. The spec
  * classifies each action as `read` / `write` / `destroy`; an omitted scope fails closed.
  */
-const fromConnectorSpec = (stepType: string): StepRisk | undefined => {
+const fromConnectorSpec = (
+  stepType: string,
+  specProvider: ConnectorSpecSummaryProvider
+): StepRisk | undefined => {
   const [connectorType, ...action] = stepType.split('.');
-  const scope = getConnectorSpec(`.${connectorType}`)?.actions?.[action.join('.')]?.scope;
+  const spec = specProvider.getSpec(`.${connectorType}`);
+  const scope = spec?.actions.find(({ name }) => name === action.join('.'))?.scope;
   return scope && { safe: scope === 'read', destructive: scope === 'destroy' };
 };
 
-const fromRegistries = (stepType: string): StepRisk | undefined => {
+const fromRegistries = (
+  stepType: string,
+  specProvider: ConnectorSpecSummaryProvider
+): StepRisk | undefined => {
   if (stepType.startsWith(ES_STEP_PREFIX)) {
     return fromRegistry('elasticsearch', esEntries.get(stepType.slice(ES_STEP_PREFIX.length)));
   }
   const kibanaApi = KIBANA_STEP_APIS.get(stepType);
   return kibanaApi === undefined
-    ? fromConnectorSpec(stepType)
+    ? fromConnectorSpec(stepType, specProvider)
     : fromRegistry('kibana', kibanaEntries.get(kibanaApi));
 };
 
@@ -130,8 +137,10 @@ const fromRegistries = (stepType: string): StepRisk | undefined => {
  * Classifies a step type with the same `destructive` flag `execute_api` uses, so
  * both tools ask for confirmation on the same operations. Unknown steps fail closed.
  */
-export const getStepRisk = (stepType: string): StepRisk =>
-  HANDWRITTEN_RISKS.get(stepType) ?? fromRegistries(stepType) ?? UNSAFE;
+export const getStepRisk = (
+  stepType: string,
+  specProvider: ConnectorSpecSummaryProvider
+): StepRisk => HANDWRITTEN_RISKS.get(stepType) ?? fromRegistries(stepType, specProvider) ?? UNSAFE;
 
 const WAIT_STEPS_WITH_CHANNELS = new Set(['waitForInput', 'waitForApproval']);
 
@@ -139,10 +148,13 @@ const WAIT_STEPS_WITH_CHANNELS = new Set(['waitForInput', 'waitForApproval']);
  * Classifies one step. A wait step with `channels` sends messages through connectors
  * before it pauses, so it asks like a connector step.
  */
-const getRiskOf = ({ stepType, stepYamlNode }: StepInfo): StepRisk =>
+const getRiskOf = (
+  { stepType, stepYamlNode }: StepInfo,
+  specProvider: ConnectorSpecSummaryProvider
+): StepRisk =>
   WAIT_STEPS_WITH_CHANNELS.has(stepType) && stepYamlNode.hasIn(['with', 'channels'])
     ? UNSAFE
-    : getStepRisk(stepType);
+    : getStepRisk(stepType, specProvider);
 
 export interface UnsafeStep {
   step: StepInfo;
@@ -155,10 +167,11 @@ export interface UnsafeStep {
  */
 export const findUnsafeSteps = (
   steps: StepInfo[],
-  interactivity: InteractivityConfig
+  interactivity: InteractivityConfig,
+  specProvider: ConnectorSpecSummaryProvider
 ): UnsafeStep[] =>
   steps
-    .map((step) => ({ step, risk: getRiskOf(step) }))
+    .map((step) => ({ step, risk: getRiskOf(step, specProvider) }))
     .filter(
       ({ risk }) => !risk.safe && !(risk.api && isApiAutoApproved({ interactivity, ...risk.api }))
     );

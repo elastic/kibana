@@ -8,6 +8,7 @@
 import type { SUB_FEATURE, ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import type { ConnectorSpecSummary } from './connector_spec';
 
 export type SubFeature = keyof typeof SUB_FEATURE;
 export type ActionTypeSource = keyof typeof ACTION_TYPE_SOURCES;
@@ -36,6 +37,8 @@ export interface ActionType {
   description?: string;
   isExperimental?: boolean;
   isTestable?: boolean;
+  /** Only on spec-backed types, and only when listed with `includeSpecSummary`. */
+  specSummary?: ConnectorSpecSummary;
 }
 
 export enum InvalidEmailReason {

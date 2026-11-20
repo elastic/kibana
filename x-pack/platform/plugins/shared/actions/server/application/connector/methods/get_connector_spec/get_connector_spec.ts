@@ -13,7 +13,6 @@ import type { GetConnectorSpecParams, GetConnectorSpecResult } from './types';
 export async function getConnectorSpecAsJsonSchema({
   context,
   id,
-  configurationUtilities,
 }: GetConnectorSpecParams): Promise<GetConnectorSpecResult> {
   try {
     await context.authorization.ensureAuthorized({ operation: 'get' });
@@ -28,7 +27,7 @@ export async function getConnectorSpecAsJsonSchema({
   }
 
   const registered = getRegisteredSpec(context.actionTypeRegistry, id);
-  const detail = serializeSpecDetail(registered, configurationUtilities);
+  const detail = serializeSpecDetail(registered, context.actionTypeRegistry.getUtils());
 
   return {
     metadata: registered.spec.metadata,

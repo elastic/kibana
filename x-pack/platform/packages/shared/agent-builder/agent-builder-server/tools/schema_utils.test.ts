@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import { describeZodSchema, formatSchemaForLlm } from './schema_utils';
+import { describeJsonSchema, formatJsonSchemaForLlm } from './schema_utils';
 
-describe('describeZodSchema', () => {
+describe('describeJsonSchema', () => {
   it('extracts field names, types, required/optional, and descriptions', () => {
-    const schema = z.object({
-      query: z.string().describe('The search query'),
-      count: z.number().optional().describe('Max results'),
+    const fields = describeJsonSchema({
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'The search query' },
+        count: { type: 'number', description: 'Max results' },
+      },
+      required: ['query'],
     });
-
-    const fields = describeZodSchema(schema);
 
     expect(fields).toEqual([
       { name: 'query', type: 'string', required: true, description: 'The search query' },
@@ -23,62 +24,72 @@ describe('describeZodSchema', () => {
     ]);
   });
 
-  it('returns empty array for non-object schemas', () => {
-    const schema = z.string();
-    const fields = describeZodSchema(schema);
-    expect(fields).toEqual([]);
+  it('returns an empty array for non-object schemas', () => {
+    expect(describeJsonSchema({ type: 'string' })).toEqual([]);
+  });
+
+  it('returns an empty array for an object schema without properties', () => {
+    expect(describeJsonSchema({ type: 'object' })).toEqual([]);
   });
 
   it('handles schemas with no descriptions', () => {
-    const schema = z.object({
-      name: z.string(),
+    const fields = describeJsonSchema({
+      type: 'object',
+      properties: { name: { type: 'string' } },
+      required: ['name'],
     });
 
-    const fields = describeZodSchema(schema);
-    expect(fields).toHaveLength(1);
-    expect(fields[0].name).toBe('name');
-    expect(fields[0].required).toBe(true);
+    expect(fields).toEqual([{ name: 'name', type: 'string', required: true }]);
   });
 
-  it('unwraps fields with defaults to the underlying type', () => {
-    const schema = z.object({
-      limit: z.number().default(10).describe('Page size'),
+  it('treats a required field with a default as optional', () => {
+    const fields = describeJsonSchema({
+      type: 'object',
+      properties: { limit: { type: 'number', default: 10, description: 'Page size' } },
+      required: ['limit'],
     });
 
-    const fields = describeZodSchema(schema);
-    expect(fields).toHaveLength(1);
-    expect(fields[0].type).toBe('number');
     expect(fields[0].required).toBe(false);
   });
 
-  it('handles nullable fields', () => {
-    const schema = z.object({
-      tag: z.string().nullable().describe('Optional tag'),
+  it('falls back to "unknown" when a field has no type', () => {
+    const fields = describeJsonSchema({
+      type: 'object',
+      properties: { anything: {} },
     });
 
-    const fields = describeZodSchema(schema);
-    expect(fields).toHaveLength(1);
-    expect(fields[0].name).toBe('tag');
+    expect(fields[0].type).toBe('unknown');
+  });
+
+  it('resolves a root $ref before reading properties', () => {
+    const fields = describeJsonSchema({
+      $ref: '#/$defs/Input',
+      $defs: {
+        Input: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
+      },
+    });
+
+    expect(fields).toEqual([{ name: 'id', type: 'string', required: true }]);
   });
 });
 
-describe('formatSchemaForLlm', () => {
+describe('formatJsonSchemaForLlm', () => {
   it('formats fields into a multi-line string', () => {
-    const schema = z.object({
-      query: z.string().describe('Search query'),
-      limit: z.number().optional().describe('Max results'),
+    const result = formatJsonSchemaForLlm({
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query' },
+        limit: { type: 'number', description: 'Max results' },
+      },
+      required: ['query'],
     });
 
-    const result = formatSchemaForLlm(schema);
-
-    expect(result).toContain('- query (string, required): Search query');
-    expect(result).toContain('- limit (number, optional): Max results');
-    expect(result).toContain('\n');
+    expect(result).toBe(
+      '- query (string, required): Search query\n- limit (number, optional): Max results'
+    );
   });
 
   it('returns "No parameters" for empty object schemas', () => {
-    const schema = z.object({});
-    const result = formatSchemaForLlm(schema);
-    expect(result).toBe('No parameters');
+    expect(formatJsonSchemaForLlm({ type: 'object', properties: {} })).toBe('No parameters');
   });
 });
