@@ -57,6 +57,13 @@ Item:
   properties: { name: { type: string } }
 `;
 
+// A captured document is loaded on its own, so it can't reference models.yaml.
+const selfContainedSpecYaml = (version: string) =>
+  specYaml(version).replace(
+    "{ $ref: 'models.yaml#/Item' }",
+    '{ type: object, properties: { name: { type: string } } }'
+  );
+
 const connector: ConnectorSpec = {
   metadata: {
     id: '.example',
@@ -519,25 +526,42 @@ actions:
       await expect(update({ pages: { main: ['api/'] } })).rejects.toThrow('main is captured');
     });
 
-    it('can be captured again by deleting the snapshot and recording without --refresh', async () => {
-      await fs.rm(path.join(directory, 'snapshots/main.openapi.json'));
+    it('is captured again from the document passed with --capture, without fetching it', async () => {
+      const { changed } = await update({
+        sources: { main: 'https://specs.example.com/other.yaml' },
+        captures: { main: selfContainedSpecYaml('2.0') },
+      });
 
-      await expect(update({ refresh: true })).rejects.toThrow(
-        "main is captured but has no snapshot, and --refresh doesn't fetch captured sources"
-      );
       expect(fetched).toEqual([]);
-
-      documents['https://specs.example.com/other.yaml'] = specYaml('2.0');
-      await update({ sources: { main: 'https://specs.example.com/other.yaml' } });
-
-      expect(fetched).toContain('https://specs.example.com/other.yaml');
+      // The capture inlines the item schema the old snapshot referenced.
+      expect(changed).toEqual(
+        expect.arrayContaining(['manifest.json', 'snapshots/main.openapi.json'])
+      );
       expect((await readJson('manifest.json')).sources.main).toMatchObject({
         url: 'https://specs.example.com/other.yaml',
         captured: true,
         apiVersion: '2.0',
+        note: NOTE,
       });
     });
 
+    it('is never fetched when its snapshot is missing, with or without --refresh', async () => {
+      await fs.rm(path.join(directory, 'snapshots/main.openapi.json'));
+
+      for (const refresh of [false, true]) {
+        await expect(update({ refresh })).rejects.toThrow(
+          'main is captured but has no snapshot; capture it again with --capture main=<file>'
+        );
+      }
+      expect(fetched).toEqual([]);
+    });
+
+    it('only loads the document it was captured from', async () => {
+      await expect(update({ captures: { main: specYaml('2.0') } })).rejects.toThrow(
+        `main is captured from one document, but loading it also needs ${MODELS_URL}`
+      );
+      expect(fetched).toEqual([]);
+    });
     it('still judges the overlay of the OpenAPI sources it sits next to', async () => {
       // A captured MCP source can't match an overlay action, so it can't hide that one is stale.
       const manifest = await readJson('manifest.json');
@@ -571,6 +595,39 @@ actions:
       expect(warnings).toEqual([
         'overlay.yaml action 0 matches nothing in any source; the vendor may have fixed it',
       ]);
+    });
+  });
+
+  describe('capturing a source', () => {
+    beforeEach(async () => {
+      await update({ sources: { main: SPEC_URL } });
+      fetched = [];
+    });
+
+    it('marks it captured, with the note passed alongside', async () => {
+      await update({
+        captures: { main: selfContainedSpecYaml('2.0') },
+        notes: { main: 'Fetched with an API token from a trial account.' },
+      });
+
+      expect(fetched).toEqual([]);
+      expect((await readJson('manifest.json')).sources.main).toMatchObject({
+        captured: true,
+        apiVersion: '2.0',
+        note: 'Fetched with an API token from a trial account.',
+      });
+    });
+
+    it('needs a note saying what capturing it took', async () => {
+      await expect(update({ captures: { main: selfContainedSpecYaml('2.0') } })).rejects.toThrow(
+        '--capture marks main captured, which needs a note saying what capturing it took; pass --note main="..."'
+      );
+    });
+
+    it('only captures a source the manifest or --source names', async () => {
+      await expect(
+        update({ captures: { other: specYaml('2.0') }, notes: { other: 'Captured.' } })
+      ).rejects.toThrow('there is no source "other"');
     });
   });
 

@@ -159,9 +159,10 @@ export const loadVendorSpecs = async ({
     const snapshot = latest && !captured ? undefined : await read(snapshotFile(name, format));
     if (captured && snapshot === undefined) {
       // It only answers to credentials, so loading it from its URL would fail with a 401.
+      const file = snapshotFile(name, format);
       throw new Error(
-        `${name} is captured, but ${snapshotFile(name, format)} is missing. Capture it again, as ` +
-          'the README describes.'
+        `${name} is captured, but ${file} is missing. Capture it again with ` +
+          `node scripts/connector_vendor_api --connector <id> --capture ${name}=<file>.`
       );
     }
     if (isProtocolFormat(format)) {
