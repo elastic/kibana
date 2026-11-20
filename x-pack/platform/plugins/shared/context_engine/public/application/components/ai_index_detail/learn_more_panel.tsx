@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiIcon,
+  EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -26,6 +36,12 @@ export const LearnMorePanel = () => {
     services: { docLinks },
   } = useKibana();
   const { aiIndices, sources, memory } = docLinks.links.contextEngine;
+  const { euiTheme } = useEuiTheme();
+  const externalIconStyle = css({ marginInlineStart: euiTheme.size.xs });
+  const opensInNewTabLabel = i18n.translate(
+    'xpack.contextEngine.aiIndexDetail.overview.learnMore.opensInNewTab',
+    { defaultMessage: '(opens in a new tab or window)' }
+  );
 
   const cards: LearnMoreCard[] = [
     {
@@ -38,7 +54,7 @@ export const LearnMorePanel = () => {
         'xpack.contextEngine.aiIndexDetail.overview.learnMore.aiIndexDescription',
         {
           defaultMessage:
-            'How Context Engine turns your data into knowledge documents that agents retrieve.',
+            'How Context turns your data into knowledge documents that agents retrieve.',
         }
       ),
       href: aiIndices,
@@ -53,7 +69,7 @@ export const LearnMorePanel = () => {
         'xpack.contextEngine.aiIndexDetail.overview.learnMore.sourcesDescription',
         {
           defaultMessage:
-            'Point Context Engine at indices or connectors so it can write knowledge documents.',
+            'Point Context at indices or connectors so it can write knowledge documents.',
         }
       ),
       href: sources,
@@ -88,7 +104,15 @@ export const LearnMorePanel = () => {
             <EuiCard
               layout="horizontal"
               icon={<EuiIcon type={iconType} size="l" color="primary" aria-hidden={true} />}
-              title={title}
+              title={
+                <>
+                  {title}
+                  <EuiIcon type="external" size="s" css={externalIconStyle} aria-hidden={true} />
+                  <EuiScreenReaderOnly>
+                    <span>{opensInNewTabLabel}</span>
+                  </EuiScreenReaderOnly>
+                </>
+              }
               titleSize="xs"
               titleElement="h3"
               description={description}

@@ -292,7 +292,7 @@ export const AiIndexDetailPage = () => {
       {showOnboardingPanel && (
         <>
           <ConnectAgentPanel prompt={onboardingPrompt} />
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
         </>
       )}
       {aiIndex && (
@@ -306,7 +306,7 @@ export const AiIndexDetailPage = () => {
             isMemoryEnabled={isMemoryEnabled}
             isLoading={isKiSummaryLoading}
           />
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
         </>
       )}
       {/* Wait for the summary, so the chart column does not pop in next to Recent documents. */}
@@ -326,7 +326,7 @@ export const AiIndexDetailPage = () => {
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
         </>
       )}
       <AutomationsSection

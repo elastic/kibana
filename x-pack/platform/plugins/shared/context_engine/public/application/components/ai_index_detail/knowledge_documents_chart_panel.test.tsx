@@ -83,6 +83,7 @@ describe('KnowledgeDocumentsChartPanel', () => {
     expect(screen.queryByTestId('contextOverviewDocumentsChartEmpty')).not.toBeInTheDocument();
     const countAxis = mockAxisProps.mock.calls.find(([props]) => props.id === 'count')?.[0];
     expect(countAxis.domain).toBeUndefined();
+    expect(countAxis.maximumFractionDigits).toBe(0);
   });
 
   it('labels days as UTC dates on the axis and in the tooltip', () => {

@@ -84,7 +84,7 @@ export const FailedAutomationRunsCallout = ({ workflowIds }: FailedAutomationRun
           </p>
         }
       />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
     </>
   );
 };

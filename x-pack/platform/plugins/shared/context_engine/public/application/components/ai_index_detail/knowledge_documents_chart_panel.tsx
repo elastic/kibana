@@ -98,7 +98,8 @@ export const KnowledgeDocumentsChartPanel = ({ aiIndexId }: KnowledgeDocumentsCh
           <Axis
             id="count"
             position={Position.Left}
-            integersOnly
+            // Counts are whole documents. `integersOnly` is deprecated and ignored for tick labels.
+            maximumFractionDigits={0}
             // All zero: keep the zero line at the bottom with only 0 and 1 as labels.
             ticks={hasAddedDocuments ? 4 : 1}
             domain={hasAddedDocuments ? undefined : EMPTY_COUNT_DOMAIN}

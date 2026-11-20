@@ -43,5 +43,6 @@ describe('LearnMorePanel', () => {
     const link = within(card).getByRole('link');
     expect(link).toHaveAttribute('href', href);
     expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAccessibleName(`${title} (opens in a new tab or window)`);
   });
 });
