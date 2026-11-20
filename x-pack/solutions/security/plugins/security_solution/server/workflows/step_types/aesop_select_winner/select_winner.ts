@@ -13,6 +13,7 @@ import type {
 
 type Input = z.output<typeof aesopSelectWinnerInputSchema>;
 type Output = z.output<typeof aesopSelectWinnerOutputSchema>;
+type Selection = Omit<Output, 'primary_means'>;
 type Arm = Input['comparison']['comparisons'][number];
 type ArmResult = Arm['results'][number];
 
@@ -140,7 +141,7 @@ const noWinner = (
   tied: PrimaryScore[] = [],
   tiebreak: PrimaryScore | null = null,
   alpha = 0
-): Output => ({
+): Selection => ({
   winner_index: -1,
   winner_target_id: null,
   beats_baseline: false,
@@ -156,7 +157,7 @@ const noWinner = (
   reasons,
 });
 
-export const selectWinner = (input: Input): Output => {
+const select = (input: Input): Selection => {
   const { comparisons } = input.comparison;
   const {
     primary_evaluator: primary,
@@ -254,3 +255,15 @@ export const selectWinner = (input: Input): Output => {
     reasons,
   };
 };
+
+/**
+ * Every arm's primary mean sits next to the selection so a caller can compare two arms of the
+ * same run (a refine round's rewrite against the previous best), not only an arm and the baseline.
+ */
+export const selectWinner = (input: Input): Output => ({
+  ...select(input),
+  primary_means: input.comparison.comparisons.map((arm, index) => {
+    const score = scorePrimary(arm, index, input.primary_evaluator);
+    return typeof score === 'string' ? null : score.meanTarget;
+  }),
+});

@@ -283,10 +283,26 @@ steps:
           round_won: '${{ steps.evaluate.output.clear_winner == true }}'
           rewrite_best: '${{ steps.evaluate.output.best_variant_index == "1" }}'
           round_mean: '${{ steps.evaluate.output.best_mean | plus: 0 }}'
-          # Against the previous best's mean from the round (or A/B) that
-          # picked it: each run re-scores the baseline, so this is the gain
-          # between two runs, reported next to that run's own p-value.
-          gain: '${{ steps.evaluate.output.best_mean | plus: 0 | minus: variables.current_mean }}'
+          round_previous_mean: "{{ steps.evaluate.output.variant_means | default: '' | split: ',' | first }}"
+
+      # The gain is the best arm over the previous best (variant 0) as scored
+      # in this same run. Run-to-run noise is as large as the gains a round
+      # looks for, so the mean from the run that picked the previous best is
+      # used only when variant 0 got no score this round.
+      - name: resolve_gain_base
+        type: data.set
+        if: '${{ variables.evaluated == true }}'
+        with:
+          gain_base: >-
+            {% if variables.round_previous_mean != blank %}{{ variables.round_previous_mean }}{% else %}{{ variables.current_mean }}{% endif %}
+          gain_basis: >-
+            {% if variables.round_previous_mean != blank %}same_run{% else %}previous_run{% endif %}
+
+      - name: resolve_gain
+        type: data.set
+        if: '${{ variables.evaluated == true }}'
+        with:
+          gain: '${{ variables.round_mean | minus: variables.gain_base }}'
 
       - name: resolve_stop
         type: data.set
@@ -313,7 +329,7 @@ steps:
             type: aesop.refine_round
             title: 'AESOP refine round {{ variables.rounds }} for {{ inputs.skill_id | default: inputs.new_skill_name | default: "a new skill" }}'
             description: >-
-              Round {{ variables.rounds }} of at most {{ consts.MAX_ROUNDS }}: {% if variables.evaluated == true %}the best arm scored {{ steps.evaluate.output.best_mean }} against a baseline of {{ steps.evaluate.output.baseline_mean }} (p={{ steps.evaluate.output.best_p_value | default: 'n/a' }}, n={{ steps.evaluate.output.sample_size }}); {% if variables.rewrite_best == true %}the rewrite beat the previous best{% else %}the previous best held{% endif %}.{% else %}no A/B ran.{% endif %} {% if variables.stop_reason != blank %}Stopped: {{ variables.stop_reason }}.{% endif %}
+              Round {{ variables.rounds }} of at most {{ consts.MAX_ROUNDS }}: {% if variables.evaluated == true %}the best arm scored {{ steps.evaluate.output.best_mean | round: 3 }} against a baseline of {{ steps.evaluate.output.baseline_mean | round: 3 }} (p={{ steps.evaluate.output.best_p_value | default: 'n/a' }}, n={{ steps.evaluate.output.sample_size }}); {% if variables.rewrite_best == true %}the rewrite beat the previous best by {{ variables.gain | round: 3 }}{% else %}the previous best held{% endif %}.{% else %}no A/B ran.{% endif %} {% if variables.stop_reason != blank %}Stopped: {{ variables.stop_reason }}.{% endif %}
             content: >-
               {% if variables.rewrite_ok == true %}{{ variables.rewrite_changes }}
 
@@ -333,13 +349,17 @@ steps:
               failures_used: '{{ steps.collect_failures.output.failures | size }}'
               mentions_reference_count: '{{ steps.collect_failures.output.mentions_reference_count | default: 0 }}'
               evaluated: '{{ variables.evaluated }}'
-              baseline_mean: "{% if variables.evaluated == true %}{{ steps.evaluate.output.baseline_mean }}{% endif %}"
-              best_mean: "{% if variables.evaluated == true %}{{ steps.evaluate.output.best_mean }}{% endif %}"
+              # Means and gain to 3 places, the precision a round can resolve;
+              # the p-value is kept whole since small ones would round to 0.
+              baseline_mean: "{% if variables.evaluated == true %}{{ steps.evaluate.output.baseline_mean | round: 3 }}{% endif %}"
+              best_mean: "{% if variables.evaluated == true %}{{ steps.evaluate.output.best_mean | round: 3 }}{% endif %}"
+              previous_mean: "{% if variables.evaluated == true %}{{ variables.gain_base | round: 3 }}{% endif %}"
+              gain_basis: "{% if variables.evaluated == true %}{{ variables.gain_basis }}{% endif %}"
               best_p_value: "{% if variables.evaluated == true %}{{ steps.evaluate.output.best_p_value }}{% endif %}"
               best_experiment_id: "{% if variables.evaluated == true %}{{ steps.evaluate.output.best_experiment_id }}{% endif %}"
               baseline_experiment_id: "{% if variables.evaluated == true %}{{ steps.evaluate.output.baseline_experiment_id }}{% endif %}"
               rewrite_best: "{% if variables.evaluated == true %}{{ variables.rewrite_best }}{% endif %}"
-              gain: "{% if variables.evaluated == true %}{{ variables.gain }}{% endif %}"
+              gain: "{% if variables.evaluated == true %}{{ variables.gain | round: 3 }}{% endif %}"
               stop_reason: '{{ variables.stop_reason }}'
               dataset_id: '{{ inputs.dataset_id }}'
               workflow_execution_id: '{{ execution.id }}'

@@ -67,6 +67,11 @@ outputs:
     type: string
   - name: best_improvement
     type: string
+  # The primary mean of every input variant in input order, comma-separated,
+  # empty for a variant that was not scored. The refine reads its previous
+  # best's mean from here, so a round's gain is measured within one run.
+  - name: variant_means
+    type: string
   - name: sample_size
     type: string
   - name: clear_winner
@@ -206,6 +211,7 @@ steps:
       tie_proposed: false
       best_variant: ''
       best_content: ''
+      variant_means: ''
       refine: false
       base_skill_id: "{{ inputs.base_skill_id | default: inputs.skill_id | default: '' }}"
       live_readonly: false
@@ -522,6 +528,14 @@ steps:
     if: '${{ variables.best_variant != blank and variables.best_variant != "live" }}'
     with:
       best_content: '{{ inputs.variants[variables.best_variant] }}'
+
+  # arm_variant_indexes and primary_means share the comparison order.
+  - name: resolve_variant_means
+    type: data.set
+    if: '${{ steps.resolve_comparison.output.compared == true }}'
+    with:
+      variant_means: >-
+        {%- for variant in inputs.variants -%}{%- assign marker = forloop.index0 | append: '' -%}{%- assign mean = '' -%}{%- for arm in variables.arm_variant_indexes -%}{%- if arm == marker -%}{%- assign mean = steps.winner.output.primary_means[forloop.index0] -%}{%- endif -%}{%- endfor -%}{%- unless forloop.first -%},{%- endunless -%}{{ mean }}{%- endfor -%}
 
   # A tie has no winner, so the arm a tie approval deploys is the tiebreak arm:
   # the tied arm with the highest mean (the lowest index on equal means),
@@ -1064,6 +1078,7 @@ steps:
       baseline_mean: "{{ steps.winner.output.best.baseline_mean | default: '' }}"
       best_p_value: "{{ steps.winner.output.best.p_value | default: '' }}"
       best_improvement: "{{ steps.winner.output.best.improvement | default: '' }}"
+      variant_means: '{{ variables.variant_means }}'
       sample_size: "{{ steps.winner.output.best.sample_size | default: '' }}"
       clear_winner: '${{ variables.deploy_candidate == true or variables.tie_proposed == true }}'
       is_tie: '${{ variables.is_tie == true }}'

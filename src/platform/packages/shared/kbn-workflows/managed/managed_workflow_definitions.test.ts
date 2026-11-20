@@ -80,6 +80,7 @@ import {
   type WorkerSettingsDefaults,
 } from './definitions/alertzero/worker_settings_defaults';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
+import { createWorkflowLiquidEngine } from '../common/utils/create_workflow_liquid_engine/create_workflow_liquid_engine';
 import { WorkflowSchemaBase } from '../spec/schema';
 
 const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
@@ -315,10 +316,10 @@ it.each([
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '5:fa71b87b'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '7:2ce58cc9'],
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '6:063c014a'],
-  [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '15:5df3a16b'],
+  [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '16:35587e1c'],
   [AESOP_DRIFT_MONITOR_WORKFLOW_ID, AESOP_DRIFT_MONITOR_YAML, '12:0fea1d55'],
   [AESOP_EXPLORER_WORKFLOW_ID, AESOP_EXPLORER_YAML, '13:7a836836'],
-  [AESOP_REFINE_WORKFLOW_ID, AESOP_REFINE_YAML, '3:b00ee031'],
+  [AESOP_REFINE_WORKFLOW_ID, AESOP_REFINE_YAML, '4:b92be66d'],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
   (workflowId, inputs, expectedFingerprint) => {
@@ -692,6 +693,18 @@ describe('managedWorkflowDefinitions', () => {
         }
       );
 
+      // The arms are in run order (live first, a variant whose run scored
+      // nothing is missing), so each variant finds its mean by its marker.
+      it('reports each variant mean in input order, empty for an unscored variant', () => {
+        const template = stepsByName().get('resolve_variant_means')?.with?.variant_means;
+        const rendered = createWorkflowLiquidEngine().parseAndRenderSync(template, {
+          inputs: { variants: ['a', 'b', 'c'] },
+          variables: { arm_variant_indexes: ['live', '2', '0'] },
+          steps: { winner: { output: { primary_means: [0.5, 0.42, 0.3] } } },
+        });
+        expect(rendered).toBe('0.3,,0.42');
+      });
+
       it('hands the refine the best arm, by content and experiment', () => {
         const step = stepsByName().get('start_refine');
         expect(step?.if).toContain('variables.refine == true');
@@ -733,6 +746,20 @@ describe('managedWorkflowDefinitions', () => {
         expect(step?.if).toContain('variables.final_reason == "win"');
         expect(step?.with?.inputs?.allow_refine).toBe(false);
         expect(step?.with?.inputs).not.toHaveProperty('propose');
+      });
+
+      // Each A/B re-scores the baseline and run-to-run noise is as large as
+      // a round's gain, so the gain compares two arms of the same run.
+      it('measures the gain against the previous best as scored in the same round', () => {
+        expect(byName.get('resolve_round')?.with?.round_previous_mean).toContain(
+          'steps.evaluate.output.variant_means'
+        );
+        expect(byName.get('resolve_gain_base')?.with?.gain_base).toMatch(
+          /round_previous_mean != blank %}\{\{ variables\.round_previous_mean/
+        );
+        expect(byName.get('resolve_gain')?.with?.gain).toContain(
+          'variables.round_mean | minus: variables.gain_base'
+        );
       });
 
       it('caps the loop at three rounds', () => {

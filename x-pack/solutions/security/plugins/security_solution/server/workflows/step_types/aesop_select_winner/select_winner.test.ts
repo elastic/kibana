@@ -759,4 +759,22 @@ describe('selectWinner', () => {
       expect(selectWinner(build([arm('a', codePass)])).best).toBeNull();
     });
   });
+
+  describe('primary_means', () => {
+    it('reports every arm in order, rejected arms included, null without a primary score', () => {
+      const result = selectWinner(
+        build([
+          arm('a', [row({ evaluatorName: 'correctness', meanTarget: 0.4 }), ...codePass]),
+          arm('b', [
+            row({ evaluatorName: 'correctness', meanTarget: 0.9 }),
+            row({ evaluatorName: 'esql-compile', meanBaseline: 1, meanTarget: 0.5 }),
+          ]),
+          arm('c', codePass),
+        ])
+      );
+
+      expect(result.rejected.map(({ target_id: id }) => id)).toEqual(['b', 'c']);
+      expect(result.primary_means).toEqual([0.4, 0.9, null]);
+    });
+  });
 });

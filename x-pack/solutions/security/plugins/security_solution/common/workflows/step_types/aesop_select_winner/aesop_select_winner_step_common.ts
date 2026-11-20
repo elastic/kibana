@@ -130,6 +130,11 @@ export const aesopSelectWinnerOutputSchema = lazySchema(() =>
       .describe(
         'Primary evaluator numbers of the arm with the largest gain among the arms that were not rejected, whether or not it beats the baseline; null when every arm was rejected'
       ),
+    primary_means: z
+      .array(z.number().nullable())
+      .describe(
+        'Primary evaluator mean of every arm, in comparison.comparisons order and rejected arms included; null for an arm without a comparable primary score'
+      ),
     rejected: z.array(
       z.object({
         target_id: z.string(),
