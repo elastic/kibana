@@ -23,6 +23,8 @@ export {
   toQueryList,
 } from './visualization_types';
 
+export { getLensConfigLabel, getVisualizationLabel } from './visualization_label';
+
 export {
   buildVegaSavedVis,
   extractVegaSpecFromSavedVis,
