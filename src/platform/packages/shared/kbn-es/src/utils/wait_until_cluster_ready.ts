@@ -10,6 +10,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { gracefulExit } from 'exit-hook';
 const DEFAULT_READY_TIMEOUT = 120 * 1000; // 2 minutes
 
 export type ClusterReadyStatus = 'green' | 'yellow';
@@ -35,19 +36,18 @@ export async function waitUntilClusterReady({
   log,
   readyTimeout = DEFAULT_READY_TIMEOUT,
 }: WaitOptions) {
-  const attempt = 0;
-  const start = Date.now();
-
-  // The loop would continue until timeout even if SIGINT is signaled, so force exit while it
-  // runs. Only while it runs: left registered, it would cut short the graceful shutdown of
-  // whoever started the cluster (process.exit skips their asynchronous exit hooks).
-  const forceExitOnSigint = () => process.exit();
-  process.on('SIGINT', forceExitOnSigint);
+  // The loop would continue until timeout even if SIGINT is signaled, so exit while it runs.
+  // Through exit-hook, not `process.exit()`: whoever started the cluster may have registered an
+  // asynchronous shutdown hook (e.g. Scout stopping its docker containers), and `process.exit()`
+  // skips those. With no hooks registered this is the plain exit it always was. Only while the
+  // loop runs: left registered, the listener would cut every later shutdown short the same way.
+  const exitOnSigint = () => gracefulExit();
+  process.on('SIGINT', exitOnSigint);
 
   try {
-    await pollUntilReady({ client, expectedStatus, log, readyTimeout, start, attempt });
+    await pollUntilReady({ client, expectedStatus, log, readyTimeout });
   } finally {
-    process.off('SIGINT', forceExitOnSigint);
+    process.off('SIGINT', exitOnSigint);
   }
 }
 
@@ -56,9 +56,10 @@ async function pollUntilReady({
   expectedStatus,
   log,
   readyTimeout,
-  start,
-  attempt,
-}: Required<WaitOptions> & { start: number; attempt: number }) {
+}: Required<WaitOptions>) {
+  let attempt = 0;
+  const start = Date.now();
+
   log.info(`waiting for ES cluster to report a ${expectedStatus} status`);
 
   const isReady = checkStatus(expectedStatus);

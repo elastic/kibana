@@ -22,6 +22,8 @@ interface FakeDocker {
   stderr: PassThrough;
   /** Simulates the container exiting on its own with the given code. */
   exitContainer: (code: number) => void;
+  /** Replace the `docker pull` child process, e.g. with one that only settles when killed. */
+  pullProc?: Promise<{ stdout: string }> & { kill: () => void };
 }
 
 function fakeDocker({
@@ -54,6 +56,7 @@ function fakeDocker({
       case 'images':
         return Promise.resolve({ stdout: cached ? 'sha256:abc' : '' });
       case 'pull':
+        return fake.pullProc ?? Object.assign(Promise.resolve({ stdout: '' }), { kill: () => {} });
       case 'rm':
         return Promise.resolve({ stdout: '' });
       case 'run':
@@ -71,12 +74,13 @@ function fakeDocker({
     }
   });
 
-  return {
+  const fake: FakeDocker = {
     calls,
     stdout,
     stderr,
     exitContainer: (code: number) => resolveWait({ stdout: `${code}\n` }),
   };
+  return fake;
 }
 
 const server = toDockerServer('registry', {
@@ -196,6 +200,33 @@ describe('runDockerServer', () => {
     expect(dockerCall(docker.calls, 'kill')).toEqual([['kill', 'container-1']]);
     expect(dockerCall(docker.calls, 'rm')).toEqual([['rm', 'container-1']]);
     expect(onUnexpectedExit).not.toHaveBeenCalled();
+  });
+
+  it('kills a pull in progress when aborted, and never runs the container', async () => {
+    const docker = fakeDocker({ cached: false });
+    const pullKilled = jest.fn();
+    let rejectPull: (error: Error) => void = () => {};
+    docker.pullProc = Object.assign(
+      new Promise<{ stdout: string }>((_, reject) => {
+        rejectPull = reject;
+      }),
+      {
+        kill: () => {
+          pullKilled();
+          rejectPull(Object.assign(new Error('killed'), { killed: true }));
+        },
+      }
+    );
+    docker.pullProc.catch(() => {});
+    const abortCtrl = new AbortController();
+
+    const pending = runDockerServer(server, { log, signal: abortCtrl.signal });
+    await new Promise((resolve) => setImmediate(resolve));
+    abortCtrl.abort();
+
+    await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+    expect(pullKilled).toHaveBeenCalledTimes(1);
+    expect(dockerCall(docker.calls, 'run')).toHaveLength(0);
   });
 
   it('does not run the container when the signal is already aborted', async () => {

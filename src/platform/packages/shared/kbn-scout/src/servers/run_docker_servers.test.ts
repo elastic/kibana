@@ -92,6 +92,30 @@ describe('runDockerServers', () => {
     expect(stopRegistry).toHaveBeenCalledTimes(1);
   });
 
+  it('aborts the other starts as soon as one fails', async () => {
+    const abortedSignals: string[] = [];
+    runDockerServerMock.mockImplementation(async (server, { signal }) => {
+      if (server.name === 'broken') {
+        throw new Error('no such image');
+      }
+      await new Promise<void>((resolve) => {
+        signal.addEventListener('abort', () => {
+          abortedSignals.push(server.name);
+          resolve();
+        });
+      });
+      const error = new Error('start aborted');
+      error.name = 'AbortError';
+      throw error;
+    });
+
+    await expect(
+      runDockerServers({ config: configWith({ slow: spec(true), broken: spec(true) }), log })
+    ).rejects.toThrow('no such image');
+
+    expect(abortedSignals).toEqual(['slow']);
+  });
+
   it('surfaces the startup failure even when stopping the other servers fails too', async () => {
     runDockerServerMock.mockImplementation(async (server) => {
       if (server.name === 'broken') {

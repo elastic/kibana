@@ -55,16 +55,29 @@ export async function runDockerServers({
 
   log.info(`scout: starting docker server(s): ${servers.map((s) => s.name).join(', ')}`);
 
+  // One failed start aborts the others right away, instead of waiting for them to become ready
+  // or time out; the caller's signal aborts them all the same way.
+  const abortOthers = new AbortController();
+  const onCallerAbort = () => abortOthers.abort();
+  signal?.addEventListener('abort', onCallerAbort, { once: true });
+  if (signal?.aborted) {
+    abortOthers.abort();
+  }
+
   const results = await Promise.allSettled(
     servers.map((server) =>
       runDockerServer(server, {
         log,
-        signal,
+        signal: abortOthers.signal,
         onUnexpectedExit: (error) =>
           onEarlyExit?.(`[docker:${server.name}] container exited unexpectedly: ${error.message}`),
+      }).catch((error) => {
+        abortOthers.abort();
+        throw error;
       })
     )
   );
+  signal?.removeEventListener('abort', onCallerAbort);
 
   const running: RunningDockerServer[] = [];
   const failures: unknown[] = [];
@@ -77,7 +90,9 @@ export async function runDockerServers({
   }
 
   const stop: StopDockerServers = async () => {
-    log.info(`scout: stopping docker server(s): ${running.map((s) => s.name).join(', ')}`);
+    if (running.length > 0) {
+      log.info(`scout: stopping docker server(s): ${running.map((s) => s.name).join(', ')}`);
+    }
     const stopResults = await Promise.allSettled(running.map((server) => server.stop()));
     const stopFailures = stopResults.flatMap((result, i) =>
       result.status === 'rejected' ? [{ name: running[i].name, reason: result.reason }] : []
@@ -91,9 +106,12 @@ export async function runDockerServers({
   };
 
   if (failures.length > 0) {
-    // Stop errors are logged above; the startup failure is the one worth surfacing.
+    // Stop errors are logged above; the startup failure is the one worth surfacing, and the
+    // aborts it caused in the other servers are consequences, not the cause.
     await stop().catch(() => {});
-    throw failures[0];
+    throw (
+      failures.find((error) => (error as { name?: string })?.name !== 'AbortError') ?? failures[0]
+    );
   }
 
   return stop;

@@ -65,6 +65,24 @@ export async function isDockerImageAvailableLocally(image: string): Promise<bool
   }
 }
 
+/** `docker pull`, killed as soon as `signal` aborts so a shutdown does not wait for a slow pull. */
+async function dockerPull(server: DockerServer, log: ToolingLog, signal?: AbortSignal) {
+  const pull = execa('docker', ['pull', server.image]);
+  const onAbort = () => pull.kill('SIGTERM');
+  signal?.addEventListener('abort', onAbort, { once: true });
+  try {
+    await pull;
+  } catch (error) {
+    if (signal?.aborted) {
+      log.info(`[docker:${server.name}] pull cancelled`);
+      throw abortError(server.name);
+    }
+    throw error;
+  } finally {
+    signal?.removeEventListener('abort', onAbort);
+  }
+}
+
 async function dockerRun(server: DockerServer, log: ToolingLog): Promise<string> {
   const { args, name, image, port, portInContainer } = server;
   try {
@@ -202,7 +220,11 @@ export async function runDockerServer(
     log.info(`[docker:${name}] skipping pull of docker image "${image}"`);
   } else {
     log.info(`[docker:${name}] pulling docker image "${image}"`);
-    await execa('docker', ['pull', image]);
+    await dockerPull(server, log, signal);
+  }
+
+  if (signal?.aborted) {
+    throw abortError(name);
   }
 
   const containerId = await dockerRun(server, log);
