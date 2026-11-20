@@ -2297,6 +2297,7 @@ describe('extract_iocs — version numbers are not IPs', () => {
         `${WITH_TOKEN}\nversion 9[.]2[.]1[.]6`,
       ],
       ['a five-part number in a socket', 'firmware 1.3.4.2.1:8080'],
+      ['a five-part number before a mask', 'Firmware build 1.3.4.2.1/24 is affected'],
       ['a slash between two versions (no cidr)', 'Firmware versions 2.1.0.3/2.1.0.4'],
     ])('%s', (label, text) => {
       const result = extractIocs({ text });
@@ -2501,5 +2502,47 @@ describe('extract_iocs — version numbers are not IPs', () => {
     test('a real IP directly in a comma list after a vers token is dropped (declared cost)', () => {
       expect(ipsOf('vers:generic/<=9.1.1.0, 185.220.101.4')).toEqual([]);
     });
+  });
+});
+
+// Report text is untrusted and extraction runs on the Kibana event loop. Each input below takes
+// well under a second when the per-match checks read a bounded window, and ten seconds or more
+// when one reads the whole line. Jest does not time out a synchronous test, so the bound is
+// asserted.
+describe('extract_iocs — long single-line input stays linear', () => {
+  const MAX_ELAPSED_MS = 5_000;
+  const timedExtract = (text: string) => {
+    const startedAt = performance.now();
+    const result = extractIocs({ text });
+    return { result, elapsedMs: performance.now() - startedAt };
+  };
+
+  test('a run of vers: tokens with no terminator', () => {
+    const { result, elapsedMs } = timedExtract('vers:a/'.repeat(20_000));
+    expect(result.iocs).toEqual([]);
+    expect(elapsedMs).toBeLessThan(MAX_ELAPSED_MS);
+  });
+
+  test('a long word run before an angle-bracketed address', () => {
+    const { result, elapsedMs } = timedExtract(`${'a'.repeat(150_000)} <actor@evil-corp.com>`);
+    expect(emailValues(result)).toEqual(['actor@evil-corp.com']);
+    expect(elapsedMs).toBeLessThan(MAX_ELAPSED_MS);
+  });
+
+  test.each<[string, string]>([
+    ['angle-bracketed', '<actor@evil-corp.com> '],
+    ['quoted', '"actor@evil-corp.com" '],
+  ])('many %s addresses on one line', (_label, token) => {
+    const { result, elapsedMs } = timedExtract(token.repeat(18_000));
+    expect(emailValues(result)).toEqual(['actor@evil-corp.com']);
+    expect(elapsedMs).toBeLessThan(MAX_ELAPSED_MS);
+  });
+
+  test('a long comma-joined run of a marked value', () => {
+    const { result, elapsedMs } = timedExtract(
+      `vers:generic/<=9.2.1.6 C2 ${'9.2.1.6, '.repeat(4_000)}`
+    );
+    expect(ipValues(result)).toEqual(['9.2.1.6']);
+    expect(elapsedMs).toBeLessThan(MAX_ELAPSED_MS);
   });
 });

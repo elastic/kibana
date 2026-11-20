@@ -212,22 +212,32 @@ const EMAIL_PATTERN = /\b[a-z0-9._%+\-]+@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+
 // messageid or msgid (Message-ID, Resent-Message-ID, InternetMessageId, postfix `message-id=`,
 // sendmail `msgid=`), followed by an optional closing quote, `:` or `=`, optional whitespace
 // and an optional opening quote.
-const ID_HEADER_BEFORE_TOKEN = /[\w-]*(?:message[-_]?id|msgid)["']?[ \t]*[:=][ \t]*["']?$/i;
+const ID_HEADER_BEFORE_TOKEN = /(?:message[-_]?id|msgid)["']?[ \t]*[:=][ \t]*["']?$/i;
 // A header whose bracketed tokens are all message IDs.
 const ID_LIST_HEADER_AT_LINE_START = /^[ \t]*(?:in-reply-to|references)[ \t]*:/i;
+// A mail header line is at most 998 characters (RFC 5322 section 2.1.1). Only that much text on
+// either side of a match is read, which also keeps a long line of addresses linear: the report
+// text is untrusted and this runs once per email match.
+const MAX_ID_HEADER_LINE_CHARS = 998;
 
 /**
  * True when the email match at `[start, end)` sits inside a token a mail Message-ID header
  * introduces. Same line only: a folded header whose ID is on the next line is not recognized.
+ * Only MAX_ID_HEADER_LINE_CHARS on either side of the match are read, so on a longer line the
+ * `References:` list rule stops applying that far from the line start and quotes are paired
+ * inside the window. A missed ID is then extracted as an address, as it was before this rule.
  * The check runs on the enclosing `<...>` or `"..."` token, not on the match, because an ID
  * local part can hold characters EMAIL_PATTERN stops at (`=`), so the match may start mid-token.
  */
 const isMessageIdToken = (text: string, start: number, end: number): boolean => {
-  const lineStart = text.lastIndexOf('\n', start - 1) + 1;
-  const nextNewline = text.indexOf('\n', end);
-  const lineEnd = nextNewline === -1 ? text.length : nextNewline;
-  const before = text.slice(lineStart, start);
-  const after = text.slice(end, lineEnd);
+  const windowStart = Math.max(0, start - MAX_ID_HEADER_LINE_CHARS);
+  const lookBehind = text.slice(windowStart, start);
+  const newlineBefore = lookBehind.lastIndexOf('\n');
+  const before = lookBehind.slice(newlineBefore + 1);
+  const hasLineStart = newlineBefore !== -1 || windowStart === 0;
+  const lookAhead = text.slice(end, end + MAX_ID_HEADER_LINE_CHARS);
+  const newlineAfter = lookAhead.indexOf('\n');
+  const after = newlineAfter === -1 ? lookAhead : lookAhead.slice(0, newlineAfter);
 
   let tokenStartInLine = -1;
   let isAngle = false;
@@ -245,7 +255,7 @@ const isMessageIdToken = (text: string, start: number, end: number): boolean => 
 
   const beforeToken = before.slice(0, tokenStartInLine);
   if (ID_HEADER_BEFORE_TOKEN.test(beforeToken)) return true;
-  return isAngle && ID_LIST_HEADER_AT_LINE_START.test(text.slice(lineStart, lineEnd));
+  return isAngle && hasLineStart && ID_LIST_HEADER_AT_LINE_START.test(before);
 };
 
 /** Tier and basis for an email match, or `null` when it is not an address (rules 1 and 3 of PASS 1). */
@@ -271,9 +281,10 @@ const classifyEmail = ({
 };
 
 // CIDR: IPv4/mask (defang already applied before this runs). A mask followed by a dot and a
-// digit is not a range (`2.1.0.3/2.1.0.4` is two versions).
+// digit is not a range (`2.1.0.3/2.1.0.4` is two versions). The leading boundary matches
+// IP_PATTERN's, so `1.3.4.2.1/24` does not yield `3.4.2.1/24`.
 const CIDR_PATTERN =
-  /\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\/(?:3[0-2]|[12]?\d)\b(?!\.\d)/g;
+  /(?<!\d\.)\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\/(?:3[0-2]|[12]?\d)\b(?!\.\d)/g;
 
 // Crypto wallets — MUST run before hash.
 // BTC legacy: starts with 1 or 3, base58, 26-34 chars.
@@ -990,27 +1001,39 @@ interface VersionSpans {
   readonly markedValues: ReadonlySet<string>;
 }
 
+/** End of the `vers:` token whose `vers:scheme/` prefix ends at `from`, list continuation included. */
+const versionSpanEnd = (text: string, from: number): number => {
+  let end = from;
+  // Token: runs to whitespace, comma, semicolon, `)`, `]` or a quote. `<` and `>` are part of
+  // a constraint. It runs past `|` only when a comparison character follows.
+  while (end < text.length && !VERS_TOKEN_TERMINATOR.test(text[end])) {
+    if (text[end] === '|' && !VERS_COMPARISON_CHARS.includes(text[end + 1] ?? ' ')) break;
+    end++;
+  }
+  // List continuation: bare dotted numbers after `,` on the same line.
+  for (;;) {
+    VERS_LIST_CONTINUATION.lastIndex = end;
+    if (!VERS_LIST_CONTINUATION.test(text)) break;
+    end = VERS_LIST_CONTINUATION.lastIndex;
+  }
+  return end;
+};
+
 const collectVersionSpans = (text: string): VersionSpans => {
   const spans: Span[] = [];
   const markedValues = new Set<string>();
+  let coveredTo = 0;
   for (const match of text.matchAll(VERS_TOKEN_START)) {
     const start = match.index ?? 0;
-    let end = start + match[0].length;
-    // Token: runs to whitespace, comma, semicolon, `)`, `]` or a quote. `<` and `>` are part of
-    // a constraint. It runs past `|` only when a comparison character follows.
-    while (end < text.length && !VERS_TOKEN_TERMINATOR.test(text[end])) {
-      if (text[end] === '|' && !VERS_COMPARISON_CHARS.includes(text[end + 1] ?? ' ')) break;
-      end++;
-    }
-    // List continuation: bare dotted numbers after `,` on the same line.
-    for (;;) {
-      VERS_LIST_CONTINUATION.lastIndex = end;
-      if (!VERS_LIST_CONTINUATION.test(text)) break;
-      end = VERS_LIST_CONTINUATION.lastIndex;
-    }
-    spans.push([start, end]);
-    for (const quad of text.slice(start, end).match(new RegExp(IP_PATTERN.source, 'g')) ?? []) {
-      markedValues.add(quad);
+    // A `vers:` inside the previous token (`vers:a/vers:b/...`) ends where that token ends, so
+    // its span is already recorded. Skipping it keeps a run of them linear.
+    if (start >= coveredTo) {
+      const end = versionSpanEnd(text, start + match[0].length);
+      spans.push([start, end]);
+      coveredTo = end;
+      for (const quad of text.slice(start, end).match(new RegExp(IP_PATTERN.source, 'g')) ?? []) {
+        markedValues.add(quad);
+      }
     }
   }
   return { spans, markedValues };
@@ -1024,6 +1047,9 @@ const VERSION_WORD_BEFORE =
 const QUAD_JOINED_BEFORE =
   /(\d{1,3}(?:\.\d{1,3}){3})(?:[ \t]+and[ \t]+(?:prior|earlier|later|below|above))?(?:[ \t]*[,/][ \t]*|[ \t]+(?:and|or|through|to)[ \t]+)$/i;
 const MAX_VERSION_JOIN_DEPTH = 50;
+// Version wording and a joined occurrence sit directly before the value, in well under this many
+// characters. Reading no further back keeps a long line of occurrences linear.
+const VERSION_CONTEXT_LOOKBEHIND_CHARS = 96;
 
 /**
  * True when the occurrence at `offset` reads as a version: version wording before it, a
@@ -1032,7 +1058,9 @@ const MAX_VERSION_JOIN_DEPTH = 50;
  * line only. Wording is only trusted for a value the report already marked with a `vers:` token.
  */
 const isVersionContext = (text: string, offset: number, depth = 0): boolean => {
-  const lineStart = text.lastIndexOf('\n', offset - 1) + 1;
+  const windowStart = Math.max(0, offset - VERSION_CONTEXT_LOOKBEHIND_CHARS);
+  const lookBehind = text.slice(windowStart, offset);
+  const lineStart = windowStart + lookBehind.lastIndexOf('\n') + 1;
   const before = text.slice(lineStart, offset);
   if (VERSION_WORD_BEFORE.test(before)) return true;
   if (/(?:<=|>=|≤|≥)$/.test(before)) return true;
