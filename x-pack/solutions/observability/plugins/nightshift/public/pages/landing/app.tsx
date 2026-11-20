@@ -109,20 +109,19 @@ export function NightshiftApp({
 
   // Read filter state from URL so it survives navigation and is shareable.
   const rawSearchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
-  // Cap the input display to the list API max (surrogate-safe) so a shared overlong `q=` is usable.
-  const searchQuery = useMemo(
-    () => (rawSearchQuery != null ? truncateInvestigationsSearch(rawSearchQuery) : undefined),
-    [rawSearchQuery]
-  );
-  // Trim first, then cap — matching the list API (`z.string().trim().max(256)`). Slicing before
-  // trim would drop the last character of a leading-space + 256-char shared search.
-  const trimmedSearchQuery = useMemo(() => {
-    const trimmed = rawSearchQuery?.trim();
-    if (!trimmed) {
+  // In-length values keep raw text so spaces can be typed. Overlong shared `q=` values are
+  // normalized once (trim, then surrogate-safe cap) so the input and the request agree.
+  const searchQuery = useMemo(() => {
+    if (rawSearchQuery == null) {
       return undefined;
     }
-    return truncateInvestigationsSearch(trimmed);
+    if (rawSearchQuery.length > MAX_INVESTIGATIONS_SEARCH_LENGTH) {
+      return truncateInvestigationsSearch(rawSearchQuery.trim()) || undefined;
+    }
+    return rawSearchQuery;
   }, [rawSearchQuery]);
+  // The API rejects a whitespace-only query, so only the trimmed term filters.
+  const trimmedSearchQuery = searchQuery?.trim() || undefined;
   const debouncedSearchQuery = useDebouncedValue(
     trimmedSearchQuery,
     INVESTIGATIONS_SEARCH_DEBOUNCE_MS

@@ -621,7 +621,7 @@ describe('NightshiftApp', () => {
     );
   });
 
-  it('applies the search length cap after trimming a shared URL term', () => {
+  it('normalizes an overlong shared search once for the input and the request', () => {
     setSections({
       sections: defaultSections({
         'in-progress': { investigations: [investigation], total: 1 },
@@ -630,11 +630,14 @@ describe('NightshiftApp', () => {
       hasOpenInvestigationsInSpace: true,
     });
 
-    // Leading space + 256 chars: truncate-before-trim would drop the last character.
-    renderApp({ initialEntries: [`/?q=${encodeURIComponent(` ${'a'.repeat(256)}`)}`] });
+    // Leading spaces push the real term past the max if truncated before trimming.
+    renderApp({
+      initialEntries: [`/?q=${encodeURIComponent(`${' '.repeat(256)}checkout`)}`],
+    });
 
+    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toHaveValue('checkout');
     expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
-      expect.objectContaining({ query: 'a'.repeat(256) })
+      expect.objectContaining({ query: 'checkout' })
     );
   });
 
