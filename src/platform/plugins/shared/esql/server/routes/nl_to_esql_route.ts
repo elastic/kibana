@@ -9,7 +9,6 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
-import { generateEsql, generateEsqlCompletion } from '@kbn/agent-builder-genai-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { EsqlServerPluginStart } from '../types';
 import { createScopedModel, resolveConnectorId } from './helpers';
@@ -82,6 +81,12 @@ export const registerNLtoESQLRoute = (
             body: { message: 'Inference plugin is unavailable.' },
           });
         }
+
+        // Load after the inference guard: @kbn/agent-builder-genai-utils pulls in
+        // inference-plugin code and must not run when that package is omitted.
+        const { generateEsql, generateEsqlCompletion } = await import(
+          '@kbn/agent-builder-genai-utils'
+        );
 
         const connectorId = await resolveConnectorId({
           inference,

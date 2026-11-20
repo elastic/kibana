@@ -10,12 +10,16 @@
 import type { IRouter } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { registerKbnClientSoRoutes } from './kbn_client_so';
-import { registerTaskManagerRoutes } from './task_manager';
 
-export const registerRoutes = (
+/**
+ * Registers FTR APIs only when Task Manager is available. Task Manager routes are
+ * loaded lazily so `@kbn/task-manager-plugin` is not required when the package is omitted.
+ */
+export const registerRoutes = async (
   router: IRouter,
   getTaskManager: () => TaskManagerStartContract | undefined
-) => {
+): Promise<void> => {
   registerKbnClientSoRoutes(router);
+  const { registerTaskManagerRoutes } = await import('./task_manager');
   registerTaskManagerRoutes(router, getTaskManager);
 };

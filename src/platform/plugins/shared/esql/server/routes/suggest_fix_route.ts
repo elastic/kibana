@@ -10,7 +10,6 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { SUGGEST_FIX_ROUTE } from '@kbn/esql-types';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { EsqlServerPluginStart } from '../types';
 import { createScopedModel, resolveConnectorId } from './helpers';
 
@@ -65,6 +64,10 @@ export const registerSuggestFixRoute = (
             body: { message: 'Inference plugin is unavailable.' },
           });
         }
+
+        // Load after the inference guard: @kbn/agent-builder-genai-utils pulls in
+        // inference-plugin code and must not run when that package is omitted.
+        const { generateEsql } = await import('@kbn/agent-builder-genai-utils');
 
         const connectorId = await resolveConnectorId({
           inference,

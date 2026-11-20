@@ -8,15 +8,22 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import { registerRoutes } from './routes';
 import type { ConfigType } from './config';
+
+interface FtrApisSetupDeps {
+  taskManager?: TaskManagerSetupContract;
+}
 
 interface FtrApisStartDeps {
   taskManager?: TaskManagerStartContract;
 }
 
-export class FtrApisPlugin implements Plugin<void, void, {}, FtrApisStartDeps> {
+export class FtrApisPlugin implements Plugin<void, void, FtrApisSetupDeps, FtrApisStartDeps> {
   private readonly config: ConfigType;
   private taskManagerStart?: TaskManagerStartContract;
 
@@ -24,11 +31,16 @@ export class FtrApisPlugin implements Plugin<void, void, {}, FtrApisStartDeps> {
     this.config = initializerContext.config.get<ConfigType>();
   }
 
-  public setup({ http }: CoreSetup) {
-    const router = http.createRouter();
-    if (!this.config.disableApis) {
-      registerRoutes(router, () => this.taskManagerStart);
+  public async setup({ http }: CoreSetup, { taskManager }: FtrApisSetupDeps) {
+    // Task Manager is a required dependency of Security. Without it, privilege checks on the
+    // FTR Saved Objects routes are not enforced — keep those routes unregistered (same as when
+    // ftrApis itself used to be disabled by a required taskManager edge).
+    if (this.config.disableApis || !taskManager) {
+      return;
     }
+
+    const router = http.createRouter();
+    await registerRoutes(router, () => this.taskManagerStart);
   }
 
   public start(_core: CoreStart, { taskManager }: FtrApisStartDeps) {
