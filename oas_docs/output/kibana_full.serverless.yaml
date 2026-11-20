@@ -1739,6 +1739,26 @@ paths:
                       type: array
                   required:
                     - tools
+                conversation_starters:
+                  description: Optional conversation starters shown on the new conversation empty state. At most 3 are shown.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      label:
+                        description: Short text shown on the conversation starter card.
+                        maxLength: 30
+                        minLength: 1
+                        type: string
+                      prompt:
+                        description: Message sent when the card is clicked. When omitted, the label is sent.
+                        maxLength: 1000
+                        minLength: 1
+                        type: string
+                    required:
+                      - label
+                  maxItems: 3
+                  type: array
                 description:
                   description: Description of what the agent does.
                   maxLength: 2000
@@ -2301,6 +2321,26 @@ paths:
                         type: string
                       maxItems: 100
                       type: array
+                conversation_starters:
+                  description: Updated conversation starters. An empty list removes all starters. At most 3 are shown.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      label:
+                        description: Short text shown on the conversation starter card.
+                        maxLength: 30
+                        minLength: 1
+                        type: string
+                      prompt:
+                        description: Message sent when the card is clicked. When omitted, the label is sent.
+                        maxLength: 1000
+                        minLength: 1
+                        type: string
+                    required:
+                      - label
+                  maxItems: 3
+                  type: array
                 description:
                   description: Updated description of what the agent does.
                   maxLength: 2000
