@@ -153,6 +153,18 @@ describe('mssqlClientType', () => {
       });
     });
 
+    it.each([
+      ['disabled', false],
+      ['required', true],
+      [undefined, true],
+    ])('maps config.ssl %p to encrypt %p', async (ssl, encrypt) => {
+      await mssqlClientType.build(
+        makeCtx({ config: { host: 'sql.internal', port: 1433, database: 'prod', ssl } })
+      );
+
+      expect(lastPoolOptions().options).toMatchObject({ encrypt });
+    });
+
     it('resolves TLS per host and port so customHostSettings overrides apply', async () => {
       const buildTlsOptions = jest.fn().mockReturnValue({ rejectUnauthorized: true });
       const ctx = makeCtx({ platform: { resolveSrvHosts: jest.fn(), buildTlsOptions } });

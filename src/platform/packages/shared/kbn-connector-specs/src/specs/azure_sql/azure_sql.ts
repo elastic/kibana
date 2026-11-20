@@ -30,13 +30,18 @@
  */
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import { getResponseLimit } from '../../lib/clients/mssql_response_limit';
+import type { ConnectorSpec } from '../../connector_spec';
+import { assertReadOnly, SELECT_OR_WITH_PREFIX } from '../../lib/generic_db_connector';
 import {
-  assertReadOnly,
-  escapeLikePattern,
-  SELECT_OR_WITH_PREFIX,
-} from '../../lib/generic_db_connector';
+  blankNonCode,
+  DEFAULT_SCHEMA,
+  escapeSearchTerm,
+  MAX_MAX_ROWS,
+  quoteIdentifier,
+  resolveMaxRows,
+  runSql,
+  TSQL_WRITE_PATTERN,
+} from '../../lib/mssql_sql';
 import {
   type DescribeTableInput,
   DescribeTableInputSchema,
@@ -50,162 +55,6 @@ import {
   type SearchRowsInput,
   SearchRowsInputSchema,
 } from './types';
-
-const DEFAULT_MAX_ROWS = 100;
-const MAX_MAX_ROWS = 1000;
-const DEFAULT_SCHEMA = 'dbo';
-
-// T-SQL write paths the shared MySQL-oriented guard misses: SELECT ... INTO, procedure calls (T-SQL allows a
-// second statement without a semicolon), INSERT/MERGE without INTO, and linked-server or ad hoc remote access.
-// This is a best-effort backstop, not exhaustive; least-privilege database credentials are the real control.
-const TSQL_WRITE_PATTERN =
-  /\b(INTO|EXEC|EXECUTE|INSERT|MERGE|OPENROWSET|OPENQUERY|OPENDATASOURCE|WAITFOR)\b/i;
-
-// Replaces comments, string literals, and quoted identifiers with a space so the write-token scan only sees SQL
-// tokens. A keyword inside a literal or [identifier] is not a statement, and a comment is whitespace to T-SQL
-// (`DROP/**/TABLE` is `DROP TABLE`). Only the check sees this text; the original SQL is what runs. Block comments
-// nest in T-SQL, so an unmatched `*/` can only leave extra text visible to the scan, never hide any.
-const blankNonCode = (sql: string): string => {
-  let out = '';
-  let i = 0;
-  while (i < sql.length) {
-    const char = sql[i];
-    const next = sql[i + 1];
-
-    if (char === '-' && next === '-') {
-      const end = sql.indexOf('\n', i);
-      i = end === -1 ? sql.length : end;
-      out += ' ';
-    } else if (char === '/' && next === '*') {
-      let depth = 1;
-      i += 2;
-      while (i < sql.length && depth > 0) {
-        if (sql[i] === '/' && sql[i + 1] === '*') {
-          depth++;
-          i += 2;
-        } else if (sql[i] === '*' && sql[i + 1] === '/') {
-          depth--;
-          i += 2;
-        } else {
-          i++;
-        }
-      }
-      out += ' ';
-    } else if (char === "'" || char === '"' || char === '[') {
-      const close = char === '[' ? ']' : char;
-      i++;
-      while (i < sql.length) {
-        if (sql[i] === close && sql[i + 1] === close) {
-          i += 2; // a doubled delimiter is an escaped delimiter ('' "" ]])
-        } else if (sql[i] === close) {
-          i++;
-          break;
-        } else {
-          i++;
-        }
-      }
-      out += ' ';
-    } else {
-      out += char;
-      i++;
-    }
-  }
-  return out;
-};
-
-interface SqlResult {
-  rows: Array<Record<string, unknown>>;
-  rowCount: number;
-  /** Rows changed by each statement, as reported by SQL Server (relevant for writes). */
-  rowsAffected: number[];
-  truncated: boolean;
-}
-
-// Matches the Actions default for xpack.actions.maxResponseContentLength when the client did not record one.
-const DEFAULT_MAX_CONTENT_LENGTH = 1024 * 1024;
-
-const rowByteLength = (row: Record<string, unknown>): number =>
-  Buffer.byteLength(JSON.stringify(row), 'utf8');
-
-// mssql reports our own cancellation as a "Canceled." error; anything else is a real failure.
-const isCancellation = (err: Error): boolean =>
-  (err as { code?: string }).code === 'ECANCEL' || err.message === 'Canceled.';
-
-/**
- * Streams rows so memory stays bounded: rows are retained only until `maxRows` or the Actions maximum
- * response size is reached, then the result is flagged as truncated. With `cancelOnLimit` the request is
- * cancelled at that point (reads); without it the statement runs to completion and the rest of the output
- * is discarded (writes must not be rolled back just to cap what is returned).
- * A single row is fully buffered by the driver before it is seen here, so one very large value cannot be
- * prevented from being read, only from being retained.
- */
-const runSql = async (
-  ctx: ActionContext,
-  sql: string,
-  {
-    params = {},
-    maxRows = DEFAULT_MAX_ROWS,
-    cancelOnLimit = true,
-  }: { params?: Record<string, string>; maxRows?: number; cancelOnLimit?: boolean } = {}
-): Promise<SqlResult> => {
-  const pool = await ctx.getClient('mssql');
-  const maxContentLength = getResponseLimit(pool) ?? DEFAULT_MAX_CONTENT_LENGTH;
-  const request = pool.request();
-  request.stream = true;
-  Object.entries(params).forEach(([name, value]) => request.input(name, value));
-
-  return new Promise<SqlResult>((resolve, reject) => {
-    const rows: Array<Record<string, unknown>> = [];
-    let retainedBytes = 0;
-    let truncated = false;
-    let cancelled = false;
-    let firstError: Error | undefined;
-
-    request.on('row', (row: Record<string, unknown>) => {
-      if (truncated) return;
-      const rowBytes = rowByteLength(row);
-      if (rows.length >= maxRows || retainedBytes + rowBytes > maxContentLength) {
-        truncated = true;
-        if (cancelOnLimit) {
-          cancelled = true;
-          request.cancel();
-        }
-        return;
-      }
-      rows.push(row);
-      retainedBytes += rowBytes;
-    });
-    // In stream mode `done` always follows `error`, so settle there.
-    request.on('error', (err: Error) => {
-      if (cancelled && isCancellation(err)) return;
-      firstError = firstError ?? err;
-    });
-    request.on('done', (summary: { rowsAffected?: number[] }) => {
-      if (firstError) {
-        reject(firstError);
-        return;
-      }
-      resolve({
-        rows,
-        rowCount: rows.length,
-        rowsAffected: summary?.rowsAffected ?? [],
-        truncated,
-      });
-    });
-    // Driver failures raised before any event fires (e.g. an unsupported parameter) reject this promise
-    // instead; without consuming it the rejection is unhandled and this call would never settle.
-    void request.query(sql).catch(reject);
-  });
-};
-
-// Quotes a T-SQL identifier as [name], doubling any closing bracket.
-const quoteIdentifier = (identifier: string): string => `[${identifier.replace(/\]/g, ']]')}]`;
-
-// T-SQL LIKE also treats [ as a wildcard, which the shared escape (! % _) does not cover.
-const escapeSearchTerm = (term: string): string =>
-  escapeLikePattern(term.toLowerCase(), false).replace(/\[/g, '![');
-
-const resolveMaxRows = (maxRows?: number): number => maxRows ?? DEFAULT_MAX_ROWS;
 
 export const AzureSql: ConnectorSpec = {
   metadata: {
