@@ -435,6 +435,7 @@ export const LOCAL_STORAGE_KEYS = {
   casesGlobalFieldColumns: 'cases.list.globalFieldColumns',
   casesTableFiltersConfig: 'cases.list.tableFiltersConfig',
   casesViewMode: 'cases.list.viewMode',
+  casesKpiTilesDisplay: 'cases.list.kpiTilesDisplay',
   casesTableState: 'cases.list.state',
   templatesTableState: 'cases.templates.list.state',
   templatesYamlEditorCreateState: 'cases.templates.yaml.editor.create',

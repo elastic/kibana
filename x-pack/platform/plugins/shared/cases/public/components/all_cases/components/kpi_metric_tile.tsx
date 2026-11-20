@@ -6,42 +6,117 @@
  */
 
 import React from 'react';
-import { EuiIconTip, EuiLoadingSpinner, EuiStat } from '@elastic/eui';
+import { EuiIconTip, EuiLoadingSpinner, EuiStat, EuiText } from '@elastic/eui';
 import prettyMilliseconds from 'pretty-ms';
 import type { KpiMetricFormat } from '../../../../common/constants';
-import type { KpiMetricThreshold } from '../../../../common/types/domain';
-import { KPI_METRIC_ERROR_ARIA_LABEL } from '../translations';
+import type {
+  KpiMetricDirection,
+  KpiMetricThreshold,
+  KpiMetricThresholdUnit,
+} from '../../../../common/types/domain';
+import {
+  KPI_METRIC_CHANGE,
+  KPI_METRIC_DURATION_DAYS,
+  KPI_METRIC_DURATION_HOURS,
+  KPI_METRIC_DURATION_MINUTES,
+  KPI_METRIC_ERROR_ARIA_LABEL,
+} from '../translations';
 
 const PRETTY_MS_OPTIONS = { compact: true, verbose: false } as const;
 const SECONDS_TO_MS = 1000;
 const EMPTY_VALUE = '-';
+
+const DURATION_UNITS: Record<
+  KpiMetricThresholdUnit,
+  { seconds: number; format: (value: string) => string }
+> = {
+  m: { seconds: 60, format: KPI_METRIC_DURATION_MINUTES },
+  h: { seconds: 3600, format: KPI_METRIC_DURATION_HOURS },
+  d: { seconds: 86400, format: KPI_METRIC_DURATION_DAYS },
+};
 
 export interface KpiMetricTileProps {
   label: string;
   value: number | null | undefined;
   format: KpiMetricFormat;
   threshold?: KpiMetricThreshold;
+  /**
+   * The value of the period of equal length directly before the selected range
+   */
+  previousValue?: number | null;
+  direction?: KpiMetricDirection;
   isLoading: boolean;
   /**
    * When set, the tile shows the empty state and the message in a tooltip.
    */
   errorMessage?: string;
+  /**
+   * When set, the tile shows an info icon next to the label with this text in a tooltip.
+   */
+  dateHint?: string;
   dataTestSubj: string;
 }
 
+/**
+ * Formats a metric value. A duration with a unit shows in that unit, otherwise in the largest unit.
+ */
 export const formatKpiMetricValue = (
   value: number | null | undefined,
-  format: KpiMetricFormat
+  format: KpiMetricFormat,
+  unit?: KpiMetricThresholdUnit
 ): string => {
   if (value == null) {
     return EMPTY_VALUE;
+  }
+
+  if (format === 'duration' && unit != null) {
+    const { seconds, format: formatDuration } = DURATION_UNITS[unit];
+    return formatDuration(
+      (value / seconds).toLocaleString(undefined, { maximumFractionDigits: 1 })
+    );
   }
 
   if (format === 'duration') {
     return prettyMilliseconds(value * SECONDS_TO_MS, PRETTY_MS_OPTIONS);
   }
 
+  if (format === 'percent') {
+    return `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`;
+  }
+
   return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+};
+
+export const formatKpiChangePercent = (changePercent: number): string => {
+  const sign = changePercent > 0 ? '+' : '';
+  return `${sign}${changePercent.toLocaleString(undefined, { maximumFractionDigits: 0 })}%`;
+};
+
+/**
+ * Returns the change from the previous value in percent, or undefined when no comparison is possible.
+ */
+export const getKpiChangePercent = (
+  value: number | null | undefined,
+  previousValue: number | null | undefined
+): number | undefined => {
+  if (value == null || previousValue == null || previousValue === 0) {
+    return;
+  }
+
+  return ((value - previousValue) / Math.abs(previousValue)) * 100;
+};
+
+export const getKpiChangeColor = (
+  changePercent: number,
+  direction?: KpiMetricDirection
+): 'success' | 'danger' | 'subdued' => {
+  if (direction == null || changePercent === 0) {
+    return 'subdued';
+  }
+
+  const isBetter = direction === 'higher_is_better' ? changePercent > 0 : changePercent < 0;
+
+  return isBetter ? 'success' : 'danger';
 };
 
 export const getKpiThresholdColor = (
@@ -58,32 +133,71 @@ export const getKpiThresholdColor = (
   return isBreached ? 'danger' : 'success';
 };
 
+/**
+ * The label of a KPI tile, with the date hint and the error icons when they are set.
+ */
+export const KpiMetricTileDescription: React.FC<
+  Pick<KpiMetricTileProps, 'label' | 'errorMessage' | 'dateHint' | 'dataTestSubj'>
+> = ({ label, errorMessage, dateHint, dataTestSubj }) => (
+  <>
+    {label}
+    {dateHint != null && (
+      <>
+        {' '}
+        <EuiIconTip
+          type="info"
+          color="subdued"
+          content={dateHint}
+          iconProps={{ 'data-test-subj': `${dataTestSubj}-date-hint` }}
+        />
+      </>
+    )}
+    {errorMessage != null && (
+      <>
+        {' '}
+        <EuiIconTip
+          type="warning"
+          color="subdued"
+          content={errorMessage}
+          aria-label={KPI_METRIC_ERROR_ARIA_LABEL}
+        />
+      </>
+    )}
+  </>
+);
+KpiMetricTileDescription.displayName = 'KpiMetricTileDescription';
+
 const KpiMetricTileComponent: React.FC<KpiMetricTileProps> = ({
   label,
   value,
   format,
   threshold,
+  previousValue,
+  direction,
   isLoading,
   errorMessage,
+  dateHint,
   dataTestSubj,
 }) => {
   const hasError = errorMessage != null;
+  const changePercent =
+    hasError || isLoading ? undefined : getKpiChangePercent(value, previousValue);
 
-  const description = hasError ? (
-    <>
-      {label}{' '}
-      <EuiIconTip
-        type="warning"
-        color="subdued"
-        content={errorMessage}
-        aria-label={KPI_METRIC_ERROR_ARIA_LABEL}
+  const description =
+    hasError || dateHint != null ? (
+      <KpiMetricTileDescription
+        label={label}
+        errorMessage={errorMessage}
+        dateHint={dateHint}
+        dataTestSubj={dataTestSubj}
       />
-    </>
-  ) : (
-    label
-  );
+    ) : (
+      label
+    );
 
-  let title: React.ReactNode = hasError ? EMPTY_VALUE : formatKpiMetricValue(value, format);
+  let title: React.ReactNode = hasError
+    ? EMPTY_VALUE
+    : formatKpiMetricValue(value, format, threshold?.unit);
 
   if (isLoading) {
     title = <EuiLoadingSpinner data-test-subj={`${dataTestSubj}-loading-spinner`} />;
@@ -97,7 +211,17 @@ const KpiMetricTileComponent: React.FC<KpiMetricTileProps> = ({
       titleColor={hasError ? 'subdued' : getKpiThresholdColor(value, threshold)}
       titleSize="xs"
       text-align="left"
-    />
+    >
+      {changePercent != null && (
+        <EuiText
+          size="xs"
+          color={getKpiChangeColor(changePercent, direction)}
+          data-test-subj={`${dataTestSubj}-change`}
+        >
+          {KPI_METRIC_CHANGE(formatKpiChangePercent(changePercent))}
+        </EuiText>
+      )}
+    </EuiStat>
   );
 };
 KpiMetricTileComponent.displayName = 'KpiMetricTile';

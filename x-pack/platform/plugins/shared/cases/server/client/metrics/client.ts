@@ -62,7 +62,7 @@ export const createMetricsSubClient = (
       getCasesMetrics(params, casesClient, clientArgs),
     getStatusTotalsByType: (params: CasesStatusRequest) =>
       getStatusTotalsByType(params, clientArgs),
-    getKpiMetrics: (params: KpiMetricsRequest) => getKpiMetrics(params, clientArgs),
+    getKpiMetrics: (params: KpiMetricsRequest) => getKpiMetrics(params, clientArgs, casesClient),
     previewKpiMetric: (params: KpiMetricPreviewRequest) => previewKpiMetric(params, clientArgs),
   };
 

@@ -6,15 +6,23 @@
  */
 
 import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { renderWithTestingProviders } from '../../../common/mock';
 import type { KpiMetricResult } from '../../../../common/types/api';
-import type { KpiMetricConfiguration, KpiMetricThreshold } from '../../../../common/types/domain';
+import type {
+  CustomKpiMetricConfiguration,
+  KpiMetricConfiguration,
+  KpiMetricThreshold,
+} from '../../../../common/types/domain';
 import { CasesMetrics } from './cases_metrics';
-import { getKpiThresholdColor } from './kpi_metric_tile';
+import { getKpiChangeColor, getKpiChangePercent, getKpiThresholdColor } from './kpi_metric_tile';
 
 jest.mock('pretty-ms', () => jest.fn().mockReturnValue('2ms'));
+
+const CLOSE_DATE_TEXT =
+  'Filtered by the case close date. Open cases are not counted. The case table uses the created date.';
 
 describe('Cases metrics', () => {
   const props = {
@@ -87,6 +95,90 @@ describe('Cases metrics', () => {
       expect(screen.queryByTestId('cases-kpi-tiles')).not.toBeInTheDocument();
     });
 
+    describe('collapse', () => {
+      const kpiProps = {
+        ...props,
+        kpiMetrics: [customMetric('m1')],
+        kpiResults: [{ id: 'm1', type: 'value', format: 'number', value: 1 } as KpiMetricResult],
+        isAnalyticsEnabled: true,
+      };
+
+      beforeEach(() => {
+        localStorage.clear();
+      });
+
+      it('hides and shows the tiles with the control', async () => {
+        renderWithTestingProviders(<CasesMetrics {...kpiProps} />);
+
+        const toggle = await screen.findByTestId('cases-kpi-tiles-toggle');
+        expect(toggle).toHaveTextContent('Hide metrics');
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
+        expect(toggle).toHaveAttribute('aria-controls');
+
+        await userEvent.click(toggle);
+
+        expect(screen.queryByTestId('cases-kpi-tiles')).not.toBeInTheDocument();
+        expect(screen.getByTestId('cases-kpi-tiles-toggle')).toHaveTextContent('Show metrics');
+        expect(screen.getByTestId('cases-kpi-tiles-toggle')).toHaveAttribute(
+          'aria-expanded',
+          'false'
+        );
+
+        await userEvent.click(screen.getByTestId('cases-kpi-tiles-toggle'));
+
+        expect(await screen.findByTestId('cases-kpi-tiles')).toBeInTheDocument();
+      });
+
+      it('keeps the choice after a remount', async () => {
+        const { unmount } = renderWithTestingProviders(<CasesMetrics {...kpiProps} />);
+
+        await userEvent.click(await screen.findByTestId('cases-kpi-tiles-toggle'));
+        unmount();
+
+        renderWithTestingProviders(<CasesMetrics {...kpiProps} />);
+
+        expect(await screen.findByTestId('cases-kpi-tiles-toggle')).toHaveTextContent(
+          'Show metrics'
+        );
+        expect(screen.queryByTestId('cases-kpi-tiles')).not.toBeInTheDocument();
+      });
+
+      it('starts collapsed with the team default collapsed and no user choice', async () => {
+        renderWithTestingProviders(<CasesMetrics {...kpiProps} kpiTilesDisplay="collapsed" />);
+
+        expect(await screen.findByTestId('cases-kpi-tiles-toggle')).toHaveTextContent(
+          'Show metrics'
+        );
+        expect(screen.queryByTestId('cases-kpi-tiles')).not.toBeInTheDocument();
+      });
+
+      it('uses the user choice over the team default', async () => {
+        const { unmount } = renderWithTestingProviders(
+          <CasesMetrics {...kpiProps} kpiTilesDisplay="collapsed" />
+        );
+
+        await userEvent.click(await screen.findByTestId('cases-kpi-tiles-toggle'));
+        expect(await screen.findByTestId('cases-kpi-tiles')).toBeInTheDocument();
+        unmount();
+
+        renderWithTestingProviders(<CasesMetrics {...kpiProps} kpiTilesDisplay="collapsed" />);
+
+        expect(await screen.findByTestId('cases-kpi-tiles')).toBeInTheDocument();
+      });
+
+      it('has no control with no saved list', () => {
+        renderWithTestingProviders(<CasesMetrics {...props} />);
+
+        expect(screen.queryByTestId('cases-kpi-tiles-toggle')).not.toBeInTheDocument();
+      });
+
+      it('has no control with an empty list', () => {
+        renderWithTestingProviders(<CasesMetrics {...props} kpiMetrics={[]} />);
+
+        expect(screen.queryByTestId('cases-kpi-tiles-toggle')).not.toBeInTheDocument();
+      });
+    });
+
     it('renders 8 tiles from the saved list', async () => {
       const kpiMetrics = Array.from({ length: 8 }, (_, index) => customMetric(`m${index}`));
       const kpiResults: KpiMetricResult[] = kpiMetrics.map(({ id }, index) => ({
@@ -122,6 +214,53 @@ describe('Cases metrics', () => {
 
       expect(
         within(await screen.findByTestId('cases-kpi-tile-p1')).getByText('130')
+      ).toBeInTheDocument();
+    });
+
+    it('reads the predefined alert tiles from the metric results', async () => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[
+            {
+              id: 'tta',
+              kind: 'predefined',
+              predefinedId: 'alert_time_to_acknowledge_median',
+              display: 'value',
+            },
+          ]}
+          kpiResults={[
+            { id: 'tta', type: 'value', format: 'duration', value: 101, previousValue: 101 },
+          ]}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      const tile = await screen.findByTestId('cases-kpi-tile-tta');
+
+      expect(within(tile).getByText('Median time to acknowledge an alert')).toBeInTheDocument();
+      expect(within(tile).getByText('2ms')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-kpi-tile-tta-change')).toBeInTheDocument();
+    });
+
+    it('shows an empty predefined alert tile when analytics is disabled', async () => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[
+            {
+              id: 'tta',
+              kind: 'predefined',
+              predefinedId: 'alert_time_to_acknowledge_avg',
+              display: 'value',
+            },
+          ]}
+          isAnalyticsEnabled={false}
+        />
+      );
+
+      expect(
+        within(await screen.findByTestId('cases-kpi-tile-tta')).getByText('-')
       ).toBeInTheDocument();
     });
 
@@ -181,6 +320,320 @@ describe('Cases metrics', () => {
       expect(within(screen.getByTestId('cases-kpi-tile-c1')).queryByText('11')).toBeNull();
     });
 
+    it('shows the acknowledge rule in the info icon of an alert tile', async () => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[
+            {
+              id: 'tta',
+              kind: 'predefined',
+              predefinedId: 'alert_time_to_acknowledge_avg',
+              display: 'value',
+            },
+          ]}
+          kpiResults={[{ id: 'tta', type: 'value', format: 'duration', value: 101 }]}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      await userEvent.hover(await screen.findByTestId('cases-kpi-tile-tta-date-hint'));
+
+      expect(
+        await screen.findByText(/Time from the alert start to the first assignment or In progress/)
+      ).toBeInTheDocument();
+    });
+
+    it.each([
+      ['assigned' as const, /first assignment after the alert was added/],
+      ['in_progress' as const, /first In progress status after the alert was added/],
+      ['assigned_or_in_progress' as const, /first assignment or In progress status/],
+    ])('shows the text of the trigger %s in the info icon', async (acknowledgeTrigger, text) => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[
+            {
+              id: 'tta',
+              kind: 'predefined',
+              predefinedId: 'alert_time_to_acknowledge_avg',
+              display: 'value',
+              acknowledgeTrigger,
+            },
+          ]}
+          kpiResults={[{ id: 'tta', type: 'value', format: 'duration', value: 101 }]}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      await userEvent.hover(await screen.findByTestId('cases-kpi-tile-tta-date-hint'));
+
+      expect(await screen.findByText(text)).toBeInTheDocument();
+    });
+
+    it('shows the same close date sentence on a custom tile and on an alert tile', async () => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[
+            {
+              id: 'c1',
+              kind: 'custom',
+              label: 'Time to resolve',
+              index: 'cases',
+              query: '',
+              display: 'value',
+              dateField: 'closed_at',
+            },
+            {
+              id: 'tta',
+              kind: 'predefined',
+              predefinedId: 'alert_time_to_acknowledge_avg',
+              display: 'value',
+              dateBasis: 'case_closed_at',
+            },
+          ]}
+          kpiResults={[
+            { id: 'c1', type: 'value', format: 'duration', value: 101 },
+            { id: 'tta', type: 'value', format: 'duration', value: 101 },
+          ]}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      await userEvent.hover(await screen.findByTestId('cases-kpi-tile-c1-date-hint'));
+      expect(await screen.findByText(CLOSE_DATE_TEXT)).toBeInTheDocument();
+      await userEvent.unhover(screen.getByTestId('cases-kpi-tile-c1-date-hint'));
+
+      await userEvent.hover(screen.getByTestId('cases-kpi-tile-tta-date-hint'));
+      expect(
+        await screen.findByText(
+          (content) =>
+            content.includes('first assignment or In progress') && content.endsWith(CLOSE_DATE_TEXT)
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('adds the sentence that each case counts once to the info icon', async () => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[
+            {
+              id: 'tta',
+              kind: 'predefined',
+              predefinedId: 'alert_time_to_acknowledge_avg',
+              display: 'value',
+              aggregateBy: 'case',
+            },
+          ]}
+          kpiResults={[{ id: 'tta', type: 'value', format: 'duration', value: 101 }]}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      await userEvent.hover(await screen.findByTestId('cases-kpi-tile-tta-date-hint'));
+
+      expect(await screen.findByText(/Each case counts once\./)).toBeInTheDocument();
+    });
+
+    it('adds the sentence that the case query scopes the tile to the info icon', async () => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[
+            {
+              id: 'tta',
+              kind: 'predefined',
+              predefinedId: 'alert_time_to_acknowledge_avg',
+              display: 'value',
+              caseQuery: 'case.category: "Network"',
+            },
+          ]}
+          kpiResults={[{ id: 'tta', type: 'value', format: 'duration', value: 101 }]}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      await userEvent.hover(await screen.findByTestId('cases-kpi-tile-tta-date-hint'));
+
+      expect(
+        await screen.findByText(/Only cases that match the case query are counted\./)
+      ).toBeInTheDocument();
+    });
+
+    it('shows the date hint for a custom tile with the closed date', async () => {
+      const closedDateMetric: CustomKpiMetricConfiguration = {
+        id: 'c1',
+        kind: 'custom',
+        label: 'Closed by elastic',
+        index: 'cases',
+        query: 'case.closed_by.username: elastic',
+        display: 'value',
+        dateField: 'closed_at',
+      };
+
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[closedDateMetric]}
+          kpiResults={[{ id: 'c1', type: 'value', format: 'number', value: 9 }]}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      await userEvent.hover(await screen.findByTestId('cases-kpi-tile-c1-date-hint'));
+
+      expect(await screen.findByText(CLOSE_DATE_TEXT)).toBeInTheDocument();
+    });
+
+    it('shows no date hint for a tile with the default date', async () => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[
+            customMetric('c1'),
+            { id: 'p1', kind: 'predefined', predefinedId: 'closed_cases', display: 'value' },
+          ]}
+          kpiResults={[{ id: 'c1', type: 'value', format: 'number', value: 7 }]}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      expect(await screen.findByTestId('cases-kpi-tile-c1')).toBeInTheDocument();
+      expect(screen.queryByTestId('cases-kpi-tile-c1-date-hint')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cases-kpi-tile-p1-date-hint')).not.toBeInTheDocument();
+    });
+
+    describe('duration unit', () => {
+      const durationMetric = (
+        id: string,
+        threshold: KpiMetricThreshold
+      ): CustomKpiMetricConfiguration => ({
+        id,
+        kind: 'custom',
+        label: `Metric ${id}`,
+        index: 'cases',
+        query: '',
+        display: 'value',
+        aggregation: { type: 'median', field: 'case.time_to_resolve' },
+        threshold,
+      });
+
+      it('shows the value in the threshold unit with the threshold color', async () => {
+        renderWithTestingProviders(
+          <CasesMetrics
+            {...props}
+            kpiMetrics={[durationMetric('d1', { comparator: 'above', value: 86400, unit: 'h' })]}
+            kpiResults={[{ id: 'd1', type: 'value', format: 'duration', value: 137752 }]}
+            isAnalyticsEnabled={true}
+          />
+        );
+
+        const title = within(await screen.findByTestId('cases-kpi-tile-d1')).getByText('38.3 h');
+
+        expect(title.className).toMatch(/danger/);
+      });
+
+      it('shows the same change in percent with and without a unit', async () => {
+        renderWithTestingProviders(
+          <CasesMetrics
+            {...props}
+            kpiMetrics={[
+              {
+                ...durationMetric('unit', { comparator: 'above', value: 86400, unit: 'h' }),
+                direction: 'lower_is_better',
+              },
+              {
+                ...durationMetric('noUnit', { comparator: 'above', value: 86400 }),
+                direction: 'lower_is_better',
+              },
+            ]}
+            kpiResults={[
+              {
+                id: 'unit',
+                type: 'value',
+                format: 'duration',
+                value: 137752,
+                previousValue: 86400,
+              },
+              {
+                id: 'noUnit',
+                type: 'value',
+                format: 'duration',
+                value: 137752,
+                previousValue: 86400,
+              },
+            ]}
+            isAnalyticsEnabled={true}
+          />
+        );
+
+        expect(await screen.findByTestId('cases-kpi-tile-unit-change')).toHaveTextContent(
+          '+59% vs. previous period'
+        );
+        expect(screen.getByTestId('cases-kpi-tile-noUnit-change')).toHaveTextContent(
+          '+59% vs. previous period'
+        );
+      });
+    });
+
+    describe('breakdown', () => {
+      const breakdownMetric: CustomKpiMetricConfiguration = {
+        id: 'severity',
+        kind: 'custom',
+        label: 'Cases by severity',
+        index: 'cases',
+        query: '',
+        display: 'value',
+        groupBy: { field: 'case.severity' },
+      };
+
+      it('shows the breakdown tile for a custom metric with a group-by field', async () => {
+        renderWithTestingProviders(
+          <CasesMetrics
+            {...props}
+            kpiMetrics={[breakdownMetric]}
+            kpiResults={[
+              {
+                id: 'severity',
+                type: 'breakdown',
+                field: 'case.severity',
+                total: 22,
+                buckets: [
+                  { key: 'critical', count: 12 },
+                  { key: 'high', count: 10 },
+                ],
+                otherCount: 0,
+                missingCount: 0,
+              },
+            ]}
+            isAnalyticsEnabled={true}
+          />
+        );
+
+        const tile = await screen.findByTestId('cases-kpi-tile-severity');
+        expect(within(tile).getByText('22')).toBeInTheDocument();
+        expect(within(tile).getByText('Critical')).toBeInTheDocument();
+        expect(within(tile).getByText('High')).toBeInTheDocument();
+      });
+
+      it('shows the error tile for a failed breakdown metric', async () => {
+        renderWithTestingProviders(
+          <CasesMetrics
+            {...props}
+            kpiMetrics={[breakdownMetric]}
+            kpiResults={[{ id: 'severity', type: 'error', message: 'bad field' }]}
+            isAnalyticsEnabled={true}
+          />
+        );
+
+        const tile = await screen.findByTestId('cases-kpi-tile-severity');
+        expect(within(tile).getByText('-')).toBeInTheDocument();
+        expect(within(tile).queryByText('Critical')).not.toBeInTheDocument();
+      });
+    });
+
     it('shows an empty custom tile when analytics is disabled', async () => {
       renderWithTestingProviders(
         <CasesMetrics {...props} kpiMetrics={[customMetric('c1')]} isAnalyticsEnabled={false} />
@@ -189,6 +642,60 @@ describe('Cases metrics', () => {
       expect(
         within(await screen.findByTestId('cases-kpi-tile-c1')).getByText('-')
       ).toBeInTheDocument();
+    });
+
+    describe('previous period', () => {
+      it('shows the change from the previous period', async () => {
+        renderWithTestingProviders(
+          <CasesMetrics
+            {...props}
+            kpiMetrics={[{ ...customMetric('c1'), direction: 'lower_is_better' }]}
+            kpiResults={[
+              { id: 'c1', type: 'value', format: 'number', value: 12, previousValue: 10 },
+            ]}
+            isAnalyticsEnabled={true}
+          />
+        );
+
+        expect(await screen.findByTestId('cases-kpi-tile-c1-change')).toHaveTextContent(
+          '+20% vs. previous period'
+        );
+      });
+
+      it('does not show a change when the previous value is zero or missing', async () => {
+        renderWithTestingProviders(
+          <CasesMetrics
+            {...props}
+            kpiMetrics={[customMetric('zero'), customMetric('missing')]}
+            kpiResults={[
+              { id: 'zero', type: 'value', format: 'number', value: 3, previousValue: 0 },
+              { id: 'missing', type: 'value', format: 'number', value: 3 },
+            ]}
+            isAnalyticsEnabled={true}
+          />
+        );
+
+        expect(await screen.findByTestId('cases-kpi-tile-zero')).toBeInTheDocument();
+        expect(screen.queryByTestId('cases-kpi-tile-zero-change')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('cases-kpi-tile-missing-change')).not.toBeInTheDocument();
+      });
+
+      it('calculates the change in percent', () => {
+        expect(getKpiChangePercent(12, 10)).toBe(20);
+        expect(getKpiChangePercent(5, 10)).toBe(-50);
+        expect(getKpiChangePercent(5, 0)).toBeUndefined();
+        expect(getKpiChangePercent(null, 10)).toBeUndefined();
+        expect(getKpiChangePercent(5, null)).toBeUndefined();
+      });
+
+      it('colors the change with the direction of the metric', () => {
+        expect(getKpiChangeColor(20, 'higher_is_better')).toBe('success');
+        expect(getKpiChangeColor(-20, 'higher_is_better')).toBe('danger');
+        expect(getKpiChangeColor(20, 'lower_is_better')).toBe('danger');
+        expect(getKpiChangeColor(-20, 'lower_is_better')).toBe('success');
+        expect(getKpiChangeColor(0, 'lower_is_better')).toBe('subdued');
+        expect(getKpiChangeColor(20)).toBe('subdued');
+      });
     });
   });
 });

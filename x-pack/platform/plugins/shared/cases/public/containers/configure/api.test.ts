@@ -72,12 +72,23 @@ describe('Case Configuration API', () => {
 
     test('keeps the KPI metrics of the configuration', async () => {
       const metrics = {
+        casesListDisplay: 'collapsed' as const,
         casesList: [
           {
             id: 'metric-1',
             kind: 'predefined' as const,
             predefinedId: 'open_cases',
             display: 'value' as const,
+          },
+          {
+            id: 'metric-3',
+            kind: 'predefined' as const,
+            predefinedId: 'alert_time_to_acknowledge_avg',
+            display: 'value' as const,
+            acknowledgeTrigger: 'assigned' as const,
+            aggregateBy: 'case' as const,
+            dateBasis: 'case_closed_at' as const,
+            caseQuery: 'case.category: "IR"',
           },
           {
             id: 'metric-2',

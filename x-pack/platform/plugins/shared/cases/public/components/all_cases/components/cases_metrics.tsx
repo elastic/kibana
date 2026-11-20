@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiButtonEmpty,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,22 +17,41 @@ import {
   EuiPanel,
   EuiStat,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import prettyMilliseconds from 'pretty-ms';
+import { LOCAL_STORAGE_KEYS, isAnalyticsPredefinedKpiMetric } from '../../../../common/constants';
 import type { KpiMetricResult } from '../../../../common/types/api';
-import type { KpiMetricConfiguration } from '../../../../common/types/domain';
+import type {
+  CustomKpiMetricConfiguration,
+  KpiAcknowledgeTrigger,
+  KpiMetricConfiguration,
+  KpiTilesDisplay,
+} from '../../../../common/types/domain';
 import { CaseStatuses } from '../../../../common/types/domain';
+import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import { StatusStats } from '../../status/status_stats';
 import { statuses } from '../../status/config';
 import {
   ATTC_DESCRIPTION,
   ATTC_STAT,
   ATTC_STAT_INFO_ARIA_LABEL,
+  HIDE_KPI_METRICS,
+  SHOW_KPI_METRICS,
   KPI_METRIC_ANALYTICS_DISABLED,
+  KPI_METRIC_ALERT_ACKNOWLEDGE_ASSIGNED_HINT,
+  KPI_METRIC_ALERT_ACKNOWLEDGE_HINT,
+  KPI_METRIC_ALERT_ACKNOWLEDGE_IN_PROGRESS_HINT,
+  KPI_METRIC_ALERT_CASE_QUERY_HINT,
+  KPI_METRIC_ALERT_EACH_CASE_ONCE_HINT,
+  KPI_METRIC_CLOSED_DATE_HINT,
   KPI_METRIC_UNKNOWN,
 } from '../translations';
+import { PREDEFINED_LABELS } from '../../kpi_metrics/translations';
 import type { KpiMetricTileProps } from './kpi_metric_tile';
 import { KpiMetricTile } from './kpi_metric_tile';
+import type { KpiBreakdownTileProps } from './kpi_breakdown_tile';
+import { KpiBreakdownTile } from './kpi_breakdown_tile';
 
 const PRETTY_MS_OPTIONS = { compact: true, verbose: false } as const;
 const MTTR_MULTIPLIER = 1000;
@@ -51,12 +71,16 @@ export interface CasesMetricsProps {
    * The saved case list metrics. With no saved list, the bar shows the four default stats.
    */
   kpiMetrics?: KpiMetricConfiguration[];
+  /**
+   * The team default of the start state of the tiles. A choice of the user in this browser wins.
+   */
+  kpiTilesDisplay?: KpiTilesDisplay;
   kpiResults?: KpiMetricResult[];
   isLoadingKpiResults?: boolean;
   isAnalyticsEnabled?: boolean;
 }
 
-type KpiTileValues = Omit<KpiMetricTileProps, 'threshold' | 'dataTestSubj'>;
+type KpiTileValues = Omit<KpiMetricTileProps, 'threshold' | 'direction' | 'dataTestSubj'>;
 
 const getPredefinedTileValues = (
   predefinedId: string,
@@ -97,22 +121,18 @@ const getPredefinedTileValues = (
   }
 };
 
-const getKpiTileValues = (
-  metric: KpiMetricConfiguration,
-  props: CasesMetricsProps
+const getResultTileValues = (
+  metricId: string,
+  label: string,
+  { kpiResults, isLoadingKpiResults = false, isAnalyticsEnabled = false }: CasesMetricsProps
 ): KpiTileValues => {
-  if (metric.kind === 'predefined') {
-    return getPredefinedTileValues(metric.predefinedId, props);
-  }
-
-  const { kpiResults, isLoadingKpiResults = false, isAnalyticsEnabled = false } = props;
-  const base = { label: metric.label, value: null, format: 'number' as const };
+  const base = { label, value: null, format: 'number' as const };
 
   if (!isAnalyticsEnabled) {
     return { ...base, isLoading: false, errorMessage: KPI_METRIC_ANALYTICS_DISABLED };
   }
 
-  const result = kpiResults?.find(({ id }) => id === metric.id);
+  const result = kpiResults?.find(({ id }) => id === metricId);
 
   if (result == null) {
     return { ...base, isLoading: isLoadingKpiResults };
@@ -122,18 +142,115 @@ const getKpiTileValues = (
     return { ...base, isLoading: isLoadingKpiResults, errorMessage: result.message };
   }
 
+  if (result.type === 'breakdown') {
+    return { ...base, isLoading: isLoadingKpiResults, errorMessage: KPI_METRIC_UNKNOWN };
+  }
+
   return {
     ...base,
     value: result.value,
+    previousValue: result.previousValue,
     format: result.format,
     isLoading: isLoadingKpiResults,
   };
 };
 
+type KpiBreakdownTileValues = Pick<
+  KpiBreakdownTileProps,
+  'label' | 'result' | 'isLoading' | 'errorMessage'
+>;
+
+const getBreakdownTileValues = (
+  { id, label }: CustomKpiMetricConfiguration,
+  { kpiResults, isLoadingKpiResults = false, isAnalyticsEnabled = false }: CasesMetricsProps
+): KpiBreakdownTileValues => {
+  if (!isAnalyticsEnabled) {
+    return { label, isLoading: false, errorMessage: KPI_METRIC_ANALYTICS_DISABLED };
+  }
+
+  const result = kpiResults?.find((kpiResult) => kpiResult.id === id);
+
+  if (result?.type === 'error') {
+    return { label, isLoading: isLoadingKpiResults, errorMessage: result.message };
+  }
+
+  if (result != null && result.type !== 'breakdown') {
+    return { label, isLoading: isLoadingKpiResults, errorMessage: KPI_METRIC_UNKNOWN };
+  }
+
+  return { label, result, isLoading: isLoadingKpiResults };
+};
+
+const getAcknowledgeRuleHint = (trigger?: KpiAcknowledgeTrigger): string => {
+  if (trigger === 'assigned') {
+    return KPI_METRIC_ALERT_ACKNOWLEDGE_ASSIGNED_HINT;
+  }
+
+  return trigger === 'in_progress'
+    ? KPI_METRIC_ALERT_ACKNOWLEDGE_IN_PROGRESS_HINT
+    : KPI_METRIC_ALERT_ACKNOWLEDGE_HINT;
+};
+
+const getDateHint = (metric: KpiMetricConfiguration): string | undefined => {
+  if (metric.kind === 'custom') {
+    return metric.dateField === 'closed_at' ? KPI_METRIC_CLOSED_DATE_HINT : undefined;
+  }
+
+  if (!isAnalyticsPredefinedKpiMetric(metric.predefinedId)) {
+    return;
+  }
+
+  return [
+    getAcknowledgeRuleHint(metric.acknowledgeTrigger),
+    ...(metric.caseQuery != null && metric.caseQuery.trim() !== ''
+      ? [KPI_METRIC_ALERT_CASE_QUERY_HINT]
+      : []),
+    ...(metric.aggregateBy === 'case' ? [KPI_METRIC_ALERT_EACH_CASE_ONCE_HINT] : []),
+    ...(metric.dateBasis === 'case_closed_at' ? [KPI_METRIC_CLOSED_DATE_HINT] : []),
+  ].join(' ');
+};
+
+const getKpiTileValues = (
+  metric: KpiMetricConfiguration,
+  props: CasesMetricsProps
+): KpiTileValues => {
+  if (metric.kind === 'custom') {
+    return getResultTileValues(metric.id, metric.label, props);
+  }
+
+  if (isAnalyticsPredefinedKpiMetric(metric.predefinedId)) {
+    return getResultTileValues(
+      metric.id,
+      PREDEFINED_LABELS[metric.predefinedId] ?? metric.predefinedId,
+      props
+    );
+  }
+
+  return getPredefinedTileValues(metric.predefinedId, props);
+};
+
 const CasesMetricsComponent: React.FC<CasesMetricsProps> = (props) => {
-  const { countOpenCases, countInProgressCases, countClosedCases, mttr, isLoading, kpiMetrics } =
-    props;
+  const {
+    countOpenCases,
+    countInProgressCases,
+    countClosedCases,
+    mttr,
+    isLoading,
+    kpiMetrics,
+    kpiTilesDisplay,
+  } = props;
   const { euiTheme } = useEuiTheme();
+  const tilesId = useGeneratedHtmlId({ prefix: 'casesKpiTiles' });
+  // null means that the user made no choice in this browser, so the team default applies
+  const [userTilesDisplay, setTilesDisplay] = useCasesLocalStorage<KpiTilesDisplay | null>(
+    LOCAL_STORAGE_KEYS.casesKpiTilesDisplay,
+    null
+  );
+  const isExpanded = (userTilesDisplay ?? kpiTilesDisplay ?? 'expanded') !== 'collapsed';
+  const toggleTiles = useCallback(
+    () => setTilesDisplay(isExpanded ? 'collapsed' : 'expanded'),
+    [isExpanded, setTilesDisplay]
+  );
 
   const mttrValue = useMemo(
     () => (mttr != null ? prettyMilliseconds(mttr * MTTR_MULTIPLIER, PRETTY_MS_OPTIONS) : '-'),
@@ -154,17 +271,46 @@ const CasesMetricsComponent: React.FC<CasesMetricsProps> = (props) => {
 
     return (
       <EuiPanel hasBorder paddingSize="m" grow={false} css={panelStyles}>
-        <EuiFlexGrid columns={KPI_TILES_PER_ROW} data-test-subj="cases-kpi-tiles">
-          {kpiMetrics.map((metric) => (
-            <EuiFlexItem key={metric.id}>
-              <KpiMetricTile
-                {...getKpiTileValues(metric, props)}
-                threshold={metric.threshold}
-                dataTestSubj={`cases-kpi-tile-${metric.id}`}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
+        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+              onClick={toggleTiles}
+              aria-expanded={isExpanded}
+              aria-controls={tilesId}
+              data-test-subj="cases-kpi-tiles-toggle"
+            >
+              {isExpanded ? HIDE_KPI_METRICS : SHOW_KPI_METRICS}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <div id={tilesId}>
+          {isExpanded && (
+            <EuiFlexGrid columns={KPI_TILES_PER_ROW} data-test-subj="cases-kpi-tiles">
+              {kpiMetrics.map((metric) => (
+                <EuiFlexItem key={metric.id}>
+                  {metric.kind === 'custom' && metric.groupBy != null ? (
+                    <KpiBreakdownTile
+                      {...getBreakdownTileValues(metric, props)}
+                      direction={metric.direction}
+                      dateHint={getDateHint(metric)}
+                      dataTestSubj={`cases-kpi-tile-${metric.id}`}
+                    />
+                  ) : (
+                    <KpiMetricTile
+                      {...getKpiTileValues(metric, props)}
+                      threshold={metric.threshold}
+                      direction={metric.direction}
+                      dateHint={getDateHint(metric)}
+                      dataTestSubj={`cases-kpi-tile-${metric.id}`}
+                    />
+                  )}
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGrid>
+          )}
+        </div>
       </EuiPanel>
     );
   }

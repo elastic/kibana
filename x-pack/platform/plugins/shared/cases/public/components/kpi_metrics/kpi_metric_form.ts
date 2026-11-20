@@ -5,38 +5,116 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import type { KpiFieldType, KpiMetricIndex } from '../../../common/constants';
 import {
+  DEFAULT_KPI_BREAKDOWN_SIZE,
   KPI_FIELD_CATALOG,
+  MAX_KPI_BREAKDOWN_SIZE,
   MAX_METRIC_LABEL_LENGTH,
   MAX_METRIC_QUERY_LENGTH,
   PREDEFINED_KPI_METRIC_IDS,
   getKpiField,
+  getPredefinedKpiMetric,
+  isAnalyticsPredefinedKpiMetric,
 } from '../../../common/constants';
 import type { KpiMetricRequest } from '../../../common/types/api';
-import type { KpiMetricAggregationType } from '../../../common/types/domain';
+import { isKpiExtendedKeywordField } from '../../../common/utils/kpi_metrics';
+import type {
+  KpiAcknowledgeTrigger,
+  KpiAggregateBy,
+  KpiDateBasis,
+  KpiMetricAggregationType,
+  KpiMetricDateField,
+  KpiMetricDirection,
+  KpiMetricThreshold,
+  KpiMetricThresholdUnit,
+} from '../../../common/types/domain';
 import * as i18n from './translations';
 
 export type ThresholdComparatorOption = 'none' | 'above' | 'below';
+export type DirectionOption = 'none' | KpiMetricDirection;
 
 export interface KpiMetricFormState {
   kind: 'predefined' | 'custom';
   predefinedId: string;
   label: string;
   index: KpiMetricIndex;
+  dateField: KpiMetricDateField;
   query: string;
   aggregationType: KpiMetricAggregationType;
   field: string;
+  percent: boolean;
   thresholdComparator: ThresholdComparatorOption;
+  /**
+   * The threshold in the selected unit for a duration metric, otherwise the raw value
+   */
   thresholdValue: string;
+  thresholdUnit: KpiMetricThresholdUnit;
+  direction: DirectionOption;
+  /**
+   * The breakdown field of a count. An empty string means no grouping.
+   */
+  groupByField: string;
+  groupBySize: string;
+  /**
+   * The acknowledge trigger of an alert metric
+   */
+  acknowledgeTrigger: KpiAcknowledgeTrigger;
+  /**
+   * The value of an alert metric for each alert or for each case
+   */
+  aggregateBy: KpiAggregateBy;
+  /**
+   * The date that the date range of an alert metric applies to
+   */
+  dateBasis: KpiDateBasis;
+  /**
+   * The KQL on the case fields of an alert metric. An empty string means no case query.
+   */
+  caseQuery: string;
 }
+
+export const DEFAULT_ACKNOWLEDGE_TRIGGER: KpiAcknowledgeTrigger = 'assigned_or_in_progress';
+export const DEFAULT_AGGREGATE_BY: KpiAggregateBy = 'alert';
+export const DEFAULT_DATE_BASIS: KpiDateBasis = 'attached_at';
 
 export interface KpiMetricFormErrors {
   label?: string;
   query?: string;
+  caseQuery?: string;
   field?: string;
   thresholdValue?: string;
+  groupByField?: string;
+  groupBySize?: string;
 }
+
+/**
+ * Returns the keyword catalog fields of the index, the fields that a breakdown can group by.
+ */
+export const getGroupByFieldOptions = (index: KpiMetricIndex): string[] =>
+  KPI_FIELD_CATALOG[index].filter(({ type }) => type === 'keyword').map(({ field }) => field);
+
+export const isAlertMetric = ({ kind, predefinedId }: KpiMetricFormState): boolean =>
+  kind === 'predefined' && isAnalyticsPredefinedKpiMetric(predefinedId);
+
+export const isBreakdownMetric = (state: KpiMetricFormState): boolean =>
+  state.kind === 'custom' && state.aggregationType === 'count' && state.groupByField !== '';
+
+const isGroupByFieldAllowed = ({ index, groupByField }: KpiMetricFormState): boolean =>
+  getGroupByFieldOptions(index).includes(groupByField) ||
+  (index === 'cases' && isKpiExtendedKeywordField(groupByField));
+
+const toGroupBySize = (value: string): number | undefined => {
+  const size = Number(value);
+
+  return value.trim() !== '' &&
+    Number.isInteger(size) &&
+    size >= 1 &&
+    size <= MAX_KPI_BREAKDOWN_SIZE
+    ? size
+    : undefined;
+};
 
 export const getFieldTypeForAggregation = (
   aggregationType: KpiMetricAggregationType
@@ -59,19 +137,96 @@ export const getFieldOptions = (
     .map(({ field }) => field);
 };
 
+const isDurationField = (state: KpiMetricFormState): boolean =>
+  state.kind === 'custom' &&
+  state.aggregationType !== 'count' &&
+  state.aggregationType !== 'cardinality' &&
+  getKpiField(state.index, state.field)?.unit === 's';
+
+export const isDurationMetric = (state: KpiMetricFormState): boolean =>
+  state.kind === 'predefined'
+    ? getPredefinedKpiMetric(state.predefinedId)?.format === 'duration'
+    : isDurationField(state);
+
+const DEFAULT_THRESHOLD_UNIT: KpiMetricThresholdUnit = 'h';
+
+const SECONDS_PER_THRESHOLD_UNIT: Record<KpiMetricThresholdUnit, number> = {
+  m: 60,
+  h: 3600,
+  d: 86400,
+};
+
+const THRESHOLD_UNITS_LARGEST_FIRST: readonly KpiMetricThresholdUnit[] = ['d', 'h', 'm'];
+
+const toThresholdSeconds = (value: number, unit: KpiMetricThresholdUnit): number =>
+  Math.round(value * SECONDS_PER_THRESHOLD_UNIT[unit]);
+
+const fromThresholdSeconds = (seconds: number, unit: KpiMetricThresholdUnit): number =>
+  seconds / SECONDS_PER_THRESHOLD_UNIT[unit];
+
+/**
+ * Returns the largest unit that shows the seconds as a whole number, or minutes when no unit does.
+ */
+const getThresholdUnitForSeconds = (seconds: number): KpiMetricThresholdUnit =>
+  THRESHOLD_UNITS_LARGEST_FIRST.find((unit) =>
+    Number.isInteger(fromThresholdSeconds(seconds, unit))
+  ) ?? 'm';
+
+const withThreshold = (
+  state: KpiMetricFormState,
+  threshold?: KpiMetricThreshold
+): KpiMetricFormState => {
+  if (threshold == null) {
+    return state;
+  }
+
+  if (!isDurationMetric(state)) {
+    return { ...state, thresholdValue: String(threshold.value) };
+  }
+
+  const thresholdUnit = threshold.unit ?? getThresholdUnitForSeconds(threshold.value);
+
+  return {
+    ...state,
+    thresholdUnit,
+    thresholdValue: String(fromThresholdSeconds(threshold.value, thresholdUnit)),
+  };
+};
+
+const toPredefinedFormState = (
+  base: KpiMetricFormState,
+  metric: Extract<KpiMetricRequest, { kind: 'predefined' }>
+): KpiMetricFormState => ({
+  ...base,
+  kind: 'predefined',
+  predefinedId: metric.predefinedId,
+  acknowledgeTrigger: metric.acknowledgeTrigger ?? DEFAULT_ACKNOWLEDGE_TRIGGER,
+  aggregateBy: metric.aggregateBy ?? DEFAULT_AGGREGATE_BY,
+  dateBasis: metric.dateBasis ?? DEFAULT_DATE_BASIS,
+  caseQuery: metric.caseQuery ?? '',
+});
+
 export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetricFormState => {
-  const thresholdComparator = metric?.threshold?.comparator ?? 'none';
-  const thresholdValue = metric?.threshold != null ? String(metric.threshold.value) : '';
   const base: KpiMetricFormState = {
     kind: 'custom',
     predefinedId: PREDEFINED_KPI_METRIC_IDS[0],
     label: '',
     index: 'cases',
+    dateField: 'created_at',
     query: '',
     aggregationType: 'count',
     field: '',
-    thresholdComparator,
-    thresholdValue,
+    percent: false,
+    thresholdComparator: metric?.threshold?.comparator ?? 'none',
+    thresholdValue: '',
+    thresholdUnit: DEFAULT_THRESHOLD_UNIT,
+    direction: metric?.direction ?? 'none',
+    groupByField: '',
+    groupBySize: String(DEFAULT_KPI_BREAKDOWN_SIZE),
+    acknowledgeTrigger: DEFAULT_ACKNOWLEDGE_TRIGGER,
+    aggregateBy: DEFAULT_AGGREGATE_BY,
+    dateBasis: DEFAULT_DATE_BASIS,
+    caseQuery: '',
   };
 
   if (metric == null) {
@@ -79,28 +234,61 @@ export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetri
   }
 
   if (metric.kind === 'predefined') {
-    return { ...base, kind: 'predefined', predefinedId: metric.predefinedId };
+    return withThreshold(toPredefinedFormState(base, metric), metric.threshold);
   }
 
-  return {
-    ...base,
-    label: metric.label,
-    index: metric.index,
-    query: metric.query,
-    aggregationType: metric.aggregation?.type ?? 'count',
-    field: metric.aggregation?.field ?? '',
-  };
+  return withThreshold(
+    {
+      ...base,
+      label: metric.label,
+      index: metric.index,
+      dateField: metric.dateField ?? 'created_at',
+      query: metric.query,
+      aggregationType: metric.aggregation?.type ?? 'count',
+      field: metric.aggregation?.field ?? '',
+      percent: metric.percent ?? false,
+      groupByField: metric.groupBy?.field ?? '',
+      groupBySize: String(metric.groupBy?.size ?? DEFAULT_KPI_BREAKDOWN_SIZE),
+    },
+    metric.threshold
+  );
+};
+
+const validateGroupBy = (state: KpiMetricFormState): KpiMetricFormErrors => ({
+  ...(!isGroupByFieldAllowed(state) && { groupByField: i18n.GROUP_BY_FIELD_ERROR }),
+  ...(toGroupBySize(state.groupBySize) == null && { groupBySize: i18n.GROUP_BY_SIZE_ERROR }),
+});
+
+const validateCaseQuery = (caseQuery: string): string | undefined => {
+  if (caseQuery.length > MAX_METRIC_QUERY_LENGTH) {
+    return i18n.MAX_LENGTH_ERROR(MAX_METRIC_QUERY_LENGTH);
+  }
+
+  try {
+    fromKueryExpression(caseQuery);
+  } catch (error) {
+    return i18n.CASE_QUERY_INVALID;
+  }
 };
 
 export const validateKpiMetricForm = (state: KpiMetricFormState): KpiMetricFormErrors => {
-  const errors: KpiMetricFormErrors = {};
+  const isBreakdown = isBreakdownMetric(state);
+  const errors: KpiMetricFormErrors = isBreakdown ? validateGroupBy(state) : {};
 
-  if (state.thresholdComparator !== 'none' && !Number.isFinite(parseFloat(state.thresholdValue))) {
-    errors.thresholdValue = i18n.THRESHOLD_VALUE;
+  if (state.thresholdComparator !== 'none' && !isBreakdown) {
+    const thresholdValue = parseFloat(state.thresholdValue);
+
+    if (!Number.isFinite(thresholdValue)) {
+      errors.thresholdValue = i18n.THRESHOLD_VALUE;
+    } else if (thresholdValue < 0 && isDurationMetric(state)) {
+      errors.thresholdValue = i18n.THRESHOLD_VALUE_NON_NEGATIVE;
+    }
   }
 
   if (state.kind === 'predefined') {
-    return errors;
+    const caseQueryError = isAlertMetric(state) ? validateCaseQuery(state.caseQuery) : undefined;
+
+    return caseQueryError != null ? { ...errors, caseQuery: caseQueryError } : errors;
   }
 
   if (state.label.trim() === '') {
@@ -123,47 +311,99 @@ export const validateKpiMetricForm = (state: KpiMetricFormState): KpiMetricFormE
   return errors;
 };
 
-export const isDurationField = (state: KpiMetricFormState): boolean =>
-  state.kind === 'custom' &&
-  state.aggregationType !== 'count' &&
-  state.aggregationType !== 'cardinality' &&
-  getKpiField(state.index, state.field)?.unit === 's';
+const toThreshold = (state: KpiMetricFormState): KpiMetricThreshold | undefined => {
+  if (state.thresholdComparator === 'none') {
+    return;
+  }
+
+  const value = parseFloat(state.thresholdValue);
+
+  if (!isDurationMetric(state)) {
+    return { comparator: state.thresholdComparator, value };
+  }
+
+  return {
+    comparator: state.thresholdComparator,
+    value: toThresholdSeconds(value, state.thresholdUnit),
+    unit: state.thresholdUnit,
+  };
+};
 
 /**
- * Builds the request metric from the form. Keeps the id, the display, and the fields that the form
- * does not edit of an edited metric.
+ * Returns the options of an alert metric. The trigger, the per-case mode, and the date basis are written when
+ * they are not the default, or when the saved metric already had them. The case query is written when it is not empty.
+ */
+const toAlertOptions = (
+  state: KpiMetricFormState,
+  existing?: KpiMetricRequest | null
+): Partial<Extract<KpiMetricRequest, { kind: 'predefined' }>> => {
+  if (!isAlertMetric(state)) {
+    return {};
+  }
+
+  const saved =
+    existing?.kind === 'predefined' && existing.predefinedId === state.predefinedId
+      ? existing
+      : undefined;
+
+  return {
+    ...((saved?.aggregateBy != null || state.aggregateBy !== DEFAULT_AGGREGATE_BY) && {
+      aggregateBy: state.aggregateBy,
+    }),
+    ...((saved?.dateBasis != null || state.dateBasis !== DEFAULT_DATE_BASIS) && {
+      dateBasis: state.dateBasis,
+    }),
+    ...(state.caseQuery.trim() !== '' && { caseQuery: state.caseQuery.trim() }),
+    ...((saved?.acknowledgeTrigger != null ||
+      state.acknowledgeTrigger !== DEFAULT_ACKNOWLEDGE_TRIGGER) && {
+      acknowledgeTrigger: state.acknowledgeTrigger,
+    }),
+  };
+};
+
+/**
+ * Builds the request metric from the form. Keeps the id and the display of an edited metric.
+ * A breakdown has no percent and no threshold.
  */
 export const toKpiMetricRequest = (
   state: KpiMetricFormState,
   existing?: KpiMetricRequest | null
 ): KpiMetricRequest => {
-  const threshold =
-    state.thresholdComparator === 'none'
-      ? undefined
-      : { comparator: state.thresholdComparator, value: parseFloat(state.thresholdValue) };
+  const isBreakdown = isBreakdownMetric(state);
+  const threshold = isBreakdown ? undefined : toThreshold(state);
   const base = {
     ...(existing?.id != null && { id: existing.id }),
     display: existing?.display ?? ('value' as const),
     ...(threshold != null && { threshold }),
-    ...(existing?.direction != null && { direction: existing.direction }),
+    ...(state.direction !== 'none' && { direction: state.direction }),
   };
 
   if (state.kind === 'predefined') {
-    return { ...base, kind: 'predefined', predefinedId: state.predefinedId };
+    return {
+      ...base,
+      kind: 'predefined',
+      predefinedId: state.predefinedId,
+      ...toAlertOptions(state, existing),
+    };
   }
-
-  const existingCustom = existing?.kind === 'custom' ? existing : undefined;
 
   return {
     ...base,
-    ...(existingCustom?.percent != null && { percent: existingCustom.percent }),
-    ...(existingCustom?.groupBy != null && { groupBy: existingCustom.groupBy }),
+    ...(isBreakdown && {
+      groupBy: {
+        field: state.groupByField,
+        size: toGroupBySize(state.groupBySize) ?? DEFAULT_KPI_BREAKDOWN_SIZE,
+      },
+    }),
     kind: 'custom',
     label: state.label.trim(),
     index: state.index,
+    ...(state.index === 'cases' &&
+      state.dateField === 'closed_at' && { dateField: 'closed_at' as const }),
     query: state.query,
     ...(state.aggregationType !== 'count' && {
       aggregation: { type: state.aggregationType, field: state.field },
     }),
+    ...(state.aggregationType === 'count' && state.percent && !isBreakdown && { percent: true }),
   };
 };

@@ -11,6 +11,7 @@ import { CustomFieldTypes } from '../custom_field/v1';
 import {
   ConfigurationAttributesSchema,
   ConfigurationSchema,
+  KpiMetricsConfigurationSchema,
   CustomFieldConfigurationWithoutTypeSchema,
   TemplateConfigurationSchema,
   TextCustomFieldConfigurationSchema,
@@ -141,6 +142,105 @@ describe('configure', () => {
       const result = ConfigurationAttributesSchema.safeParse({ ...defaultRequest, foo: 'bar' });
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('keeps the date field of a custom metric', () => {
+      const request = {
+        ...defaultRequest,
+        metrics: {
+          casesList: [
+            {
+              id: 'metric-1',
+              kind: 'custom',
+              label: 'Closed cases',
+              index: 'cases',
+              query: 'case.status: closed',
+              display: 'value',
+              dateField: 'closed_at',
+            },
+          ],
+        },
+      };
+      const result = ConfigurationAttributesSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
+    });
+
+    it('keeps the group-by size of a custom metric', () => {
+      const request = {
+        ...defaultRequest,
+        metrics: {
+          casesList: [
+            {
+              id: 'metric-1',
+              kind: 'custom',
+              label: 'Cases by tag',
+              index: 'cases',
+              query: '',
+              display: 'value',
+              groupBy: { field: 'case.tags', size: 3 },
+            },
+          ],
+        },
+      };
+      const result = ConfigurationAttributesSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
+    });
+
+    it('keeps the unit of a metric threshold', () => {
+      const request = {
+        ...defaultRequest,
+        metrics: {
+          casesList: [
+            {
+              id: 'metric-1',
+              kind: 'predefined',
+              predefinedId: 'average_time_to_close',
+              display: 'value',
+              threshold: { comparator: 'above', value: 86400, unit: 'd' },
+            },
+          ],
+        },
+      };
+      const result = ConfigurationAttributesSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
+    });
+
+    it('keeps the options of an alert metric', () => {
+      const request = {
+        ...defaultRequest,
+        metrics: {
+          casesList: [
+            {
+              id: 'metric-1',
+              kind: 'predefined',
+              predefinedId: 'alert_time_to_acknowledge_median',
+              display: 'value',
+              acknowledgeTrigger: 'in_progress',
+              aggregateBy: 'case',
+              dateBasis: 'case_closed_at',
+              caseQuery: 'case.category: "IR"',
+            },
+          ],
+        },
+      };
+      const result = ConfigurationAttributesSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
+    });
+  });
+
+  describe('KpiMetricsConfigurationSchema', () => {
+    it('keeps the default display of the KPI tiles', () => {
+      expect(
+        KpiMetricsConfigurationSchema.safeParse({ casesListDisplay: 'collapsed' }).data
+      ).toStrictEqual({ casesListDisplay: 'collapsed' });
+      expect(KpiMetricsConfigurationSchema.safeParse({}).data).toStrictEqual({});
+      expect(KpiMetricsConfigurationSchema.safeParse({ casesListDisplay: 'hidden' }).success).toBe(
+        false
+      );
     });
   });
 

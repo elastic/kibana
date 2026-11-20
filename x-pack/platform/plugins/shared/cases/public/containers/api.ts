@@ -44,7 +44,6 @@ import type {
   CaseUsers,
   CasesFindResponseUI,
   CasesUI,
-  FilterOptions,
   CaseUICustomField,
   SimilarCasesProps,
   CasesSimilarResponseUI,
@@ -114,13 +113,12 @@ import {
   decodeCaseResolveResponse,
   decodeSingleCaseMetricsResponse,
   decodeCasesWithUpdateSummaryResponse,
-  constructAssigneesFilter,
-  constructReportersFilter,
   decodeCaseUserActionStatsResponse,
-  constructCustomFieldsFilter,
   decodeFindAllAttachedAlertsResponse,
   decodeUnifiedAttachmentsResponse,
+  buildCasesSearchFilters,
 } from './utils';
+import type { KpiMetricsCaseFiltersBody } from './utils';
 import { decodeCasesSearchResponse, decodeCasesSimilarResponse } from '../api/decoders';
 import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
 
@@ -191,15 +189,16 @@ export const getCategories = async ({
 };
 
 export const getKpiMetrics = async ({
-  owner,
-  from,
-  to,
   signal,
-}: KpiMetricsRequest & { signal?: AbortSignal }): Promise<KpiMetricsResponse> =>
+  ...request
+}: Omit<KpiMetricsRequest, 'filters'> & {
+  filters?: KpiMetricsCaseFiltersBody;
+  signal?: AbortSignal;
+}): Promise<KpiMetricsResponse> =>
   KibanaServices.get().http.fetch<KpiMetricsResponse>(INTERNAL_KPI_METRICS_URL, {
-    method: 'GET',
+    method: 'POST',
     signal,
-    query: { owner, ...(from != null && { from }), ...(to != null && { to }) },
+    body: JSON.stringify(request),
   });
 
 export const previewKpiMetric = async (
@@ -307,19 +306,6 @@ export const getCaseUserActionsStats = async (
   return convertToCamelCase(decodeCaseUserActionStatsResponse(response));
 };
 
-const removeOptionFromFilter = ({
-  filterKey,
-  filterOptions,
-  optionToBeRemoved,
-}: {
-  filterKey: keyof FilterOptions;
-  filterOptions: string[];
-  optionToBeRemoved: string;
-}) => {
-  const resultingFilterOptions = filterOptions.filter((option) => option !== optionToBeRemoved);
-  return resultingFilterOptions.length === 0 ? {} : { [filterKey]: resultingFilterOptions };
-};
-
 export const getCases = async ({
   filterOptions = {
     search: '',
@@ -345,27 +331,7 @@ export const getCases = async ({
   signal,
 }: FetchCasesProps): Promise<CasesFindResponseUI> => {
   const body = {
-    ...removeOptionFromFilter({
-      filterKey: 'status',
-      filterOptions: filterOptions.status,
-      optionToBeRemoved: 'all',
-    }),
-    ...removeOptionFromFilter({
-      filterKey: 'severity',
-      filterOptions: filterOptions.severity,
-      optionToBeRemoved: 'all',
-    }),
-    ...constructAssigneesFilter(filterOptions.assignees),
-    ...constructReportersFilter(filterOptions.reporters),
-    ...(filterOptions.tags.length > 0 ? { tags: filterOptions.tags } : {}),
-    ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
-    ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
-    ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
-    ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
-    ...constructCustomFieldsFilter(filterOptions.customFields),
-    ...(filterOptions.extendedFieldFilters && filterOptions.extendedFieldFilters.length > 0
-      ? { extendedFieldFilters: filterOptions.extendedFieldFilters }
-      : {}),
+    ...buildCasesSearchFilters(filterOptions),
     ...(filterOptions.from ? { from: filterOptions.from } : {}),
     ...(filterOptions.to ? { to: filterOptions.to } : {}),
     ...queryParams,

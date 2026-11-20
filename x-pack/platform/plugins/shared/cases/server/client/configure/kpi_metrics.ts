@@ -24,10 +24,11 @@ export const assignKpiMetricIds = (
     return;
   }
 
-  const { casesList, caseDetails } = metrics;
+  const { casesList, caseDetails, casesListDisplay } = metrics;
 
   return {
     ...(casesList !== undefined && { casesList: assignIds(casesList) }),
     ...(caseDetails !== undefined && { caseDetails: assignIds(caseDetails) }),
+    ...(casesListDisplay !== undefined && { casesListDisplay }),
   };
 };

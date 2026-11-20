@@ -8,19 +8,28 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { KpiMetricFormat } from '../../../../common/constants';
 import { getKpiField } from '../../../../common/constants';
-import type { KpiMetricErrorResult, KpiMetricResult } from '../../../../common/types/api';
+import type {
+  KpiMetricBreakdownResult,
+  KpiMetricErrorResult,
+  KpiMetricResult,
+} from '../../../../common/types/api';
 import type {
   CustomKpiMetricConfiguration,
   KpiMetricAggregationType,
 } from '../../../../common/types/domain';
-import { KPI_METRIC_VALUE_AGG } from './query_builder';
+import { KPI_METRIC_MISSING_AGG, KPI_METRIC_VALUE_AGG } from './query_builder';
 
 const MEDIAN_KEY = '50.0';
 
 export const getKpiMetricFormat = ({
   index,
   aggregation,
-}: Pick<CustomKpiMetricConfiguration, 'index' | 'aggregation'>): KpiMetricFormat => {
+  percent,
+}: Pick<CustomKpiMetricConfiguration, 'index' | 'aggregation' | 'percent'>): KpiMetricFormat => {
+  if (percent === true) {
+    return 'percent';
+  }
+
   if (
     aggregation?.field == null ||
     aggregation.type === 'count' ||
@@ -67,19 +76,68 @@ const readAggregateValue = (
   return 'value' in aggregate && typeof aggregate.value === 'number' ? aggregate.value : null;
 };
 
+const readPercentValue = (response: estypes.MsearchMultiSearchItem): number | null => {
+  const total = readTotalHits(response);
+  const matches = response.aggregations?.[KPI_METRIC_VALUE_AGG];
+
+  if (total === 0 || matches == null || !('doc_count' in matches)) {
+    return null;
+  }
+
+  return (matches.doc_count / total) * 100;
+};
+
 /**
  * Reads the value of one metric from its search response.
  */
 export const readKpiMetricValue = (
-  { aggregation }: Pick<CustomKpiMetricConfiguration, 'aggregation'>,
+  { aggregation, percent }: Pick<CustomKpiMetricConfiguration, 'aggregation' | 'percent'>,
   response: estypes.MsearchMultiSearchItem
 ): number | null => {
+  if (percent === true) {
+    return readPercentValue(response);
+  }
+
   if (aggregation == null || aggregation.type === 'count') {
     return readTotalHits(response);
   }
 
   return readAggregateValue(response.aggregations?.[KPI_METRIC_VALUE_AGG], aggregation.type);
 };
+
+export type KpiBreakdownValues = Pick<
+  KpiMetricBreakdownResult,
+  'total' | 'buckets' | 'otherCount' | 'missingCount'
+>;
+
+const readDocCount = (aggregate: estypes.AggregationsAggregate | undefined): number =>
+  aggregate != null && 'doc_count' in aggregate && typeof aggregate.doc_count === 'number'
+    ? aggregate.doc_count
+    : 0;
+
+/**
+ * Reads the buckets, the "Other" count, and the "No value" count of a breakdown metric.
+ */
+export const readKpiBreakdown = (response: estypes.MsearchMultiSearchItem): KpiBreakdownValues => {
+  const terms = response.aggregations?.[KPI_METRIC_VALUE_AGG];
+  const hasBuckets = terms != null && 'buckets' in terms && Array.isArray(terms.buckets);
+  const buckets: estypes.AggregationsStringTermsBucket[] = hasBuckets ? terms.buckets : [];
+  const otherCount =
+    terms != null && 'sum_other_doc_count' in terms ? terms.sum_other_doc_count ?? 0 : 0;
+
+  return {
+    total: readTotalHits(response),
+    buckets: buckets.map(({ key, doc_count: count }) => ({ key: String(key), count })),
+    otherCount,
+    missingCount: readDocCount(response.aggregations?.[KPI_METRIC_MISSING_AGG]),
+  };
+};
+
+/**
+ * Returns true when the search timed out or a shard failed, so the hits and the aggregations can be partial.
+ */
+export const isIncompleteKpiSearchResponse = (response: estypes.MsearchMultiSearchItem): boolean =>
+  response.timed_out || response._shards.failed > 0;
 
 /**
  * Maps one msearch response item to the typed result of its metric.
@@ -96,8 +154,17 @@ export const mapKpiSearchResponse = (
     return toKpiMetricError(metric.id, response.error.reason ?? 'The metric search failed.');
   }
 
-  if (response.timed_out || response._shards.failed > 0) {
+  if (isIncompleteKpiSearchResponse(response)) {
     return toKpiMetricError(metric.id, 'The metric search returned incomplete results.');
+  }
+
+  if (metric.groupBy != null) {
+    return {
+      id: metric.id,
+      type: 'breakdown',
+      field: metric.groupBy.field,
+      ...readKpiBreakdown(response),
+    };
   }
 
   return {

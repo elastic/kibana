@@ -492,44 +492,13 @@ export class CasesService {
      */
     statsOptions?: { filter?: KueryNode };
   }): Promise<CasesMapWithPageInfo & { searchStats?: CasesSearchStats }> {
-    const caseIdsByAttachmentSearch = await this.getCaseIdsByAttachmentSearch(
-      namespaces,
-      caseOptions.search,
-      caseOptions.searchFields
-    );
-    const searchQuery = constructSearchQuery({
-      search: caseOptions.search,
-      searchFields: caseOptions.searchFields,
-      caseIds: caseIdsByAttachmentSearch,
-      extendedFieldFilters,
-      fieldLabelFilters,
-    });
-
-    const filterQuery = caseOptions.filter ? toElasticsearchQuery(caseOptions.filter) : undefined;
-    const query = mergeSearchQuery(searchQuery, filterQuery);
-
-    const extendedFieldRuntimeMappings =
-      extendedFieldFilters && extendedFieldFilters.length > 0
-        ? buildExtendedFieldRuntimeMappings(extendedFieldFilters)
-        : {};
-
-    const fieldLabelRuntimeMappings =
-      fieldLabelFilters && fieldLabelFilters.length > 0
-        ? buildFieldLabelRuntimeMappings(fieldLabelFilters)
-        : {};
-
-    const allValuesRuntimeMappings =
-      caseOptions.search && caseOptions.searchFields?.includes(EF_ALL_VALUES_FIELD)
-        ? buildAllExtendedFieldValuesRuntimeMapping()
-        : {};
-
-    const runtimeMappings = {
-      ...extendedFieldRuntimeMappings,
-      ...fieldLabelRuntimeMappings,
-      ...allValuesRuntimeMappings,
-    };
-
-    const hasRuntimeMappings = Object.keys(runtimeMappings).length > 0;
+    const { searchQuery, query, runtimeMappings, hasRuntimeMappings } =
+      await this.buildCaseListSearch({
+        caseOptions,
+        namespaces,
+        extendedFieldFilters,
+        fieldLabelFilters,
+      });
 
     const [cases, searchStats] = await Promise.all([
       this.searchCases({
@@ -593,6 +562,108 @@ export class CasesService {
       perPage: caseOptions.perPage ?? DEFAULT_PER_PAGE,
       total,
       ...(searchStats !== undefined ? { searchStats } : {}),
+    };
+  }
+
+  /**
+   * Returns the ids of the cases that match the case list search, up to `maxIds`, and the total number of matches.
+   */
+  public async searchCaseIds({
+    caseOptions,
+    namespaces,
+    extendedFieldFilters,
+    fieldLabelFilters,
+    maxIds,
+  }: {
+    caseOptions: SavedObjectFindOptionsKueryNode;
+    namespaces: string[];
+    extendedFieldFilters?: ResolvedExtendedFieldFilter[][];
+    fieldLabelFilters?: ResolvedFieldLabelFilter[];
+    maxIds: number;
+  }): Promise<{ ids: string[]; total: number }> {
+    const { query, runtimeMappings, hasRuntimeMappings } = await this.buildCaseListSearch({
+      caseOptions,
+      namespaces,
+      extendedFieldFilters,
+      fieldLabelFilters,
+    });
+
+    const response = await this.searchCases({
+      type: [CASE_SAVED_OBJECT],
+      namespaces,
+      query,
+      ...(hasRuntimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+      size: maxIds,
+      _source: false,
+      track_total_hits: true,
+    });
+
+    const ids = response.hits.hits.flatMap(({ _id: rawId }) =>
+      rawId != null && rawId.startsWith(`${CASE_SAVED_OBJECT}:`) ? [rawId.split(':')[1]] : []
+    );
+    const { total } = response.hits;
+
+    return { ids, total: typeof total === 'object' ? total.value : total ?? 0 };
+  }
+
+  private async buildCaseListSearch({
+    caseOptions,
+    namespaces,
+    extendedFieldFilters,
+    fieldLabelFilters,
+  }: {
+    caseOptions: SavedObjectFindOptionsKueryNode;
+    namespaces: string[];
+    extendedFieldFilters?: ResolvedExtendedFieldFilter[][];
+    fieldLabelFilters?: ResolvedFieldLabelFilter[];
+  }): Promise<{
+    searchQuery?: estypes.QueryDslQueryContainer;
+    query?: estypes.QueryDslQueryContainer;
+    runtimeMappings: estypes.MappingRuntimeFields;
+    hasRuntimeMappings: boolean;
+  }> {
+    const caseIdsByAttachmentSearch = await this.getCaseIdsByAttachmentSearch(
+      namespaces,
+      caseOptions.search,
+      caseOptions.searchFields
+    );
+    const searchQuery = constructSearchQuery({
+      search: caseOptions.search,
+      searchFields: caseOptions.searchFields,
+      caseIds: caseIdsByAttachmentSearch,
+      extendedFieldFilters,
+      fieldLabelFilters,
+    });
+
+    const filterQuery = caseOptions.filter ? toElasticsearchQuery(caseOptions.filter) : undefined;
+    const query = mergeSearchQuery(searchQuery, filterQuery);
+
+    const extendedFieldRuntimeMappings =
+      extendedFieldFilters && extendedFieldFilters.length > 0
+        ? buildExtendedFieldRuntimeMappings(extendedFieldFilters)
+        : {};
+
+    const fieldLabelRuntimeMappings =
+      fieldLabelFilters && fieldLabelFilters.length > 0
+        ? buildFieldLabelRuntimeMappings(fieldLabelFilters)
+        : {};
+
+    const allValuesRuntimeMappings =
+      caseOptions.search && caseOptions.searchFields?.includes(EF_ALL_VALUES_FIELD)
+        ? buildAllExtendedFieldValuesRuntimeMapping()
+        : {};
+
+    const runtimeMappings = {
+      ...extendedFieldRuntimeMappings,
+      ...fieldLabelRuntimeMappings,
+      ...allValuesRuntimeMappings,
+    };
+
+    return {
+      searchQuery,
+      query,
+      runtimeMappings,
+      hasRuntimeMappings: Object.keys(runtimeMappings).length > 0,
     };
   }
 

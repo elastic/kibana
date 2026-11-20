@@ -185,9 +185,100 @@ export const KPI_METRIC_ANALYTICS_DISABLED = i18n.translate(
   }
 );
 
+export const HIDE_KPI_METRICS = i18n.translate('xpack.cases.casesStats.hideKpiMetrics', {
+  defaultMessage: 'Hide metrics',
+});
+
+export const SHOW_KPI_METRICS = i18n.translate('xpack.cases.casesStats.showKpiMetrics', {
+  defaultMessage: 'Show metrics',
+});
+
 export const KPI_METRIC_UNKNOWN = i18n.translate('xpack.cases.casesStats.kpiMetricUnknown', {
   defaultMessage: 'This metric is not available.',
 });
+
+export const KPI_METRIC_CLOSED_DATE_HINT = i18n.translate(
+  'xpack.cases.casesStats.kpiMetricClosedDateHint',
+  {
+    defaultMessage:
+      'Filtered by the case close date. Open cases are not counted. The case table uses the created date.',
+  }
+);
+
+export const KPI_METRIC_ALERT_ACKNOWLEDGE_HINT = i18n.translate(
+  'xpack.cases.casesStats.kpiMetricAlertAcknowledgeHint',
+  {
+    defaultMessage:
+      'Time from the alert start to the first assignment or In progress status after the alert was added to the case. Alerts that are not acknowledged yet are not counted. Reopened cases are not handled separately.',
+  }
+);
+
+export const KPI_METRIC_ALERT_CASE_QUERY_HINT = i18n.translate(
+  'xpack.cases.casesStats.kpiMetricAlertCaseQueryHint',
+  {
+    defaultMessage: 'Only cases that match the case query are counted.',
+  }
+);
+
+export const KPI_METRIC_ALERT_EACH_CASE_ONCE_HINT = i18n.translate(
+  'xpack.cases.casesStats.kpiMetricAlertEachCaseOnceHint',
+  {
+    defaultMessage: 'Each case counts once.',
+  }
+);
+
+export const KPI_METRIC_ALERT_ACKNOWLEDGE_ASSIGNED_HINT = i18n.translate(
+  'xpack.cases.casesStats.kpiMetricAlertAcknowledgeAssignedHint',
+  {
+    defaultMessage:
+      'Time from the alert start to the first assignment after the alert was added to the case. Alerts that are not acknowledged yet are not counted. Reopened cases are not handled separately.',
+  }
+);
+
+export const KPI_METRIC_ALERT_ACKNOWLEDGE_IN_PROGRESS_HINT = i18n.translate(
+  'xpack.cases.casesStats.kpiMetricAlertAcknowledgeInProgressHint',
+  {
+    defaultMessage:
+      'Time from the alert start to the first In progress status after the alert was added to the case. Alerts that are not acknowledged yet are not counted. Reopened cases are not handled separately.',
+  }
+);
+
+export const KPI_METRIC_DURATION_MINUTES = (value: string) =>
+  i18n.translate('xpack.cases.casesStats.kpiMetricDurationMinutes', {
+    values: { value },
+    defaultMessage: '{value} min',
+  });
+
+export const KPI_METRIC_DURATION_HOURS = (value: string) =>
+  i18n.translate('xpack.cases.casesStats.kpiMetricDurationHours', {
+    values: { value },
+    defaultMessage: '{value} h',
+  });
+
+export const KPI_METRIC_DURATION_DAYS = (value: string) =>
+  i18n.translate('xpack.cases.casesStats.kpiMetricDurationDays', {
+    values: { value },
+    defaultMessage: '{value} d',
+  });
+
+export const KPI_METRIC_CHANGE = (change: string) =>
+  i18n.translate('xpack.cases.casesStats.kpiMetricChange', {
+    values: { change },
+    defaultMessage: '{change} vs. previous period',
+  });
+
+export const KPI_BREAKDOWN_OTHER = i18n.translate('xpack.cases.casesStats.kpiBreakdownOther', {
+  defaultMessage: 'Other',
+});
+
+export const KPI_BREAKDOWN_NO_VALUE = i18n.translate('xpack.cases.casesStats.kpiBreakdownNoValue', {
+  defaultMessage: 'No value',
+});
+
+export const KPI_BREAKDOWN_EMPTY = i18n.translate('xpack.cases.casesStats.kpiBreakdownEmpty', {
+  defaultMessage: 'No data',
+});
+
 export const FILTER_ASSIGNEES_ARIA_LABEL = i18n.translate(
   'xpack.cases.allCasesView.filterAssigneesAriaLabel',
   {

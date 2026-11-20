@@ -7,6 +7,7 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CaseStatuses } from '../../../common/types/domain';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
@@ -214,5 +215,59 @@ describe('buildCaseDoc', () => {
   it('emits extended_fields as undefined when absent (keeps the doc small)', () => {
     const doc = buildCaseDoc(fullCaseSO({ extended_fields: undefined }));
     expect(doc.case.extended_fields).toBeUndefined();
+  });
+
+  describe('status-history fields', () => {
+    const closedCaseSO = fullCaseSO({
+      status: CasePersistedStatus.CLOSED,
+      created_at: '2026-05-01T00:00:00.000Z',
+      updated_at: '2026-05-01T03:00:00.000Z',
+    });
+
+    it('omits the fields when no status changes are supplied', () => {
+      const doc = buildCaseDoc(closedCaseSO);
+
+      expect(doc.case).not.toHaveProperty('active_time_open');
+      expect(doc.case).not.toHaveProperty('time_to_pickup');
+      expect(doc.case).not.toHaveProperty('reopen_count');
+    });
+
+    it('calculates the fields from the status changes', () => {
+      const doc = buildCaseDoc(closedCaseSO, [
+        { status: CaseStatuses['in-progress'], timestamp: '2026-05-01T01:00:00.000Z' },
+        { status: CaseStatuses.closed, timestamp: '2026-05-01T03:00:00.000Z' },
+      ]);
+
+      expect(doc.case).toMatchObject({
+        active_time_open: 10800,
+        time_to_pickup: 3600,
+        reopen_count: 0,
+      });
+    });
+
+    it('closes the history with the current status when its user action is not indexed yet', () => {
+      const doc = buildCaseDoc(closedCaseSO, [
+        { status: CaseStatuses['in-progress'], timestamp: '2026-05-01T01:00:00.000Z' },
+      ]);
+
+      expect(doc.case).toMatchObject({
+        active_time_open: 10800,
+        time_to_pickup: 3600,
+        reopen_count: 0,
+      });
+    });
+
+    it('counts a reopen that only the current status shows', () => {
+      const doc = buildCaseDoc(
+        fullCaseSO({
+          status: CasePersistedStatus.OPEN,
+          created_at: '2026-05-01T00:00:00.000Z',
+          updated_at: '2026-05-04T03:00:00.000Z',
+        }),
+        [{ status: CaseStatuses.closed, timestamp: '2026-05-01T02:00:00.000Z' }]
+      );
+
+      expect(doc.case.reopen_count).toBe(1);
+    });
   });
 });

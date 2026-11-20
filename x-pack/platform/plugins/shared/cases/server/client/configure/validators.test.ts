@@ -442,6 +442,67 @@ describe('validators', () => {
       ).not.toThrow();
     });
 
+    describe('alert metric options', () => {
+      const alertMetric = {
+        kind: 'predefined' as const,
+        predefinedId: 'alert_time_to_acknowledge_avg',
+        display: 'value' as const,
+      };
+
+      it('does not throw for an alert metric with all four options', () => {
+        expect(() =>
+          validateKpiMetricsInRequest({
+            metrics: {
+              casesList: [
+                {
+                  ...alertMetric,
+                  acknowledgeTrigger: 'assigned_or_in_progress',
+                  aggregateBy: 'case',
+                  dateBasis: 'case_closed_at',
+                  caseQuery: 'case.category: "IR"',
+                },
+              ],
+            },
+          })
+        ).not.toThrow();
+      });
+
+      it('does not throw for an alert metric with no option', () => {
+        expect(() =>
+          validateKpiMetricsInRequest({ metrics: { casesList: [alertMetric] } })
+        ).not.toThrow();
+      });
+
+      it('throws for an option on another predefined metric', () => {
+        expect(() =>
+          validateKpiMetricsInRequest({
+            metrics: {
+              casesList: [
+                {
+                  kind: 'predefined',
+                  predefinedId: 'open_cases',
+                  display: 'value',
+                  aggregateBy: 'case',
+                },
+              ],
+            },
+          })
+        ).toThrow(
+          /"open_cases": The options aggregateBy are only for the alert time to acknowledge metrics/
+        );
+      });
+
+      it('throws for a case query that does not parse', () => {
+        expect(() =>
+          validateKpiMetricsInRequest({
+            metrics: {
+              casesList: [{ ...alertMetric, caseQuery: 'case.category: "IR" or (case.status: *' }],
+            },
+          })
+        ).toThrow(/"alert_time_to_acknowledge_avg": The KQL query is not valid/);
+      });
+    });
+
     it('throws for a KQL syntax error', () => {
       expect(() =>
         validateKpiMetricsInRequest({
@@ -473,6 +534,16 @@ describe('validators', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"Invalid KPI metrics in request: \\"Critical cases\\": The avg aggregation needs a numeric field. case.status is not a numeric field."`
+      );
+    });
+
+    it('throws for a group-by field that is not a keyword field', () => {
+      expect(() =>
+        validateKpiMetricsInRequest({
+          metrics: { casesList: [{ ...customMetric, groupBy: { field: 'case.duration' } }] },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid KPI metrics in request: \\"Critical cases\\": The breakdown needs a keyword field of the cases index. case.duration is not allowed."`
       );
     });
 

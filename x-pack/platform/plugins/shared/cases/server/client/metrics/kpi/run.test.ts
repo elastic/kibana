@@ -7,10 +7,11 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { CustomKpiMetricConfiguration } from '../../../../common/types/domain';
-import { KPI_METRIC_VALUE_AGG } from './query_builder';
+import { KPI_METRIC_MISSING_AGG, KPI_METRIC_VALUE_AGG } from './query_builder';
 import { runKpiMetrics } from './run';
 
 const context = { spaceId: 'space-a', owner: 'securitySolution' };
+const rangeContext = { ...context, from: 'now-30d', to: 'now' };
 
 const createMetric = (
   overrides: Partial<CustomKpiMetricConfiguration> = {}
@@ -157,5 +158,240 @@ describe('runKpiMetrics', () => {
       { id: 'a', type: 'error', message: 'The metric search failed.' },
       { id: 'b', type: 'error', message: 'The metric search failed.' },
     ]);
+  });
+
+  describe('previous period', () => {
+    it('runs each metric for the previous period in the same msearch', async () => {
+      const msearch = jest
+        .fn()
+        .mockResolvedValue([
+          createResponse(12),
+          createResponse(5, { [KPI_METRIC_VALUE_AGG]: { value: 3600 } }),
+          createResponse(10),
+          createResponse(4, { [KPI_METRIC_VALUE_AGG]: { value: 7200 } }),
+        ]);
+
+      const results = await runKpiMetrics({
+        metrics: [
+          createMetric({ id: 'count' }),
+          createMetric({ id: 'avg', aggregation: { type: 'avg', field: 'case.time_to_resolve' } }),
+        ],
+        context: rangeContext,
+        reader: { msearch },
+      });
+
+      expect(msearch).toHaveBeenCalledTimes(1);
+      expect(msearch.mock.calls[0][0]).toHaveLength(4);
+      expect(results).toEqual([
+        { id: 'count', type: 'value', format: 'number', value: 12, previousValue: 10 },
+        { id: 'avg', type: 'value', format: 'duration', value: 3600, previousValue: 7200 },
+      ]);
+    });
+
+    it('keeps the forced filters and uses an absolute range in the previous search', async () => {
+      const msearch = jest.fn().mockResolvedValue([createResponse(1), createResponse(2)]);
+
+      await runKpiMetrics({
+        metrics: [createMetric({ query: 'space_id: * or owner: *' })],
+        context: rangeContext,
+        reader: { msearch },
+      });
+
+      const [, previousRequest] = msearch.mock.calls[0][0];
+      const filter = previousRequest.body.query.bool.filter;
+
+      expect(filter).toEqual(
+        expect.arrayContaining([
+          { term: { space_id: 'space-a' } },
+          { term: { owner: 'securitySolution' } },
+        ])
+      );
+      expect(filter[2].range['case.created_at'].gte).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(filter[2].range['case.created_at'].lte).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    });
+
+    it('puts the range of the previous search on case.closed_at for the closed date', async () => {
+      const msearch = jest.fn().mockResolvedValue([createResponse(9), createResponse(6)]);
+
+      const results = await runKpiMetrics({
+        metrics: [createMetric({ id: 'closed', dateField: 'closed_at' })],
+        context: rangeContext,
+        reader: { msearch },
+      });
+
+      const [request, previousRequest] = msearch.mock.calls[0][0];
+      const previousFilter = previousRequest.body.query.bool.filter;
+
+      expect(request.body.query.bool.filter[2]).toEqual({
+        range: { 'case.closed_at': { gte: 'now-30d', lte: 'now' } },
+      });
+      expect(previousFilter[2].range).not.toHaveProperty('case.created_at');
+      expect(previousFilter[2].range['case.closed_at'].gte).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(previousFilter[2].range['case.closed_at'].lte).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(results).toEqual([
+        { id: 'closed', type: 'value', format: 'number', value: 9, previousValue: 6 },
+      ]);
+    });
+
+    it('gives a null previous value when the previous search fails', async () => {
+      const msearch = jest
+        .fn()
+        .mockResolvedValue([
+          createResponse(3),
+          { status: 400, error: { type: 'search_phase_execution_exception', reason: 'bad' } },
+        ]);
+
+      const results = await runKpiMetrics({
+        metrics: [createMetric({ id: 'a' })],
+        context: rangeContext,
+        reader: { msearch },
+      });
+
+      expect(results).toEqual([
+        { id: 'a', type: 'value', format: 'number', value: 3, previousValue: null },
+      ]);
+    });
+
+    it('gives a null previous value when the previous search is timed out or shard-failed', async () => {
+      const msearch = jest
+        .fn()
+        .mockResolvedValue([
+          createResponse(3),
+          createResponse(5),
+          { ...createResponse(2), timed_out: true },
+          { ...createResponse(4), _shards: { total: 2, successful: 1, failed: 1 } },
+        ]);
+
+      const results = await runKpiMetrics({
+        metrics: [createMetric({ id: 'timed-out' }), createMetric({ id: 'shard-failed' })],
+        context: rangeContext,
+        reader: { msearch },
+      });
+
+      expect(results).toEqual([
+        { id: 'timed-out', type: 'value', format: 'number', value: 3, previousValue: null },
+        { id: 'shard-failed', type: 'value', format: 'number', value: 5, previousValue: null },
+      ]);
+    });
+
+    it('does not run the previous period when the range has no start', async () => {
+      const msearch = jest.fn().mockResolvedValue([createResponse(3)]);
+
+      const results = await runKpiMetrics({
+        metrics: [createMetric({ id: 'a' })],
+        context: { ...context, to: 'now' },
+        reader: { msearch },
+      });
+
+      expect(msearch.mock.calls[0][0]).toHaveLength(1);
+      expect(results).toEqual([{ id: 'a', type: 'value', format: 'number', value: 3 }]);
+    });
+  });
+
+  describe('breakdown previous counts', () => {
+    const breakdownMetric = createMetric({
+      id: 'severity',
+      query: '',
+      groupBy: { field: 'case.severity' },
+    });
+
+    const createBreakdownResponse = (
+      buckets: Array<{ key: string; doc_count: number }>,
+      otherCount: number
+    ) =>
+      createResponse(
+        buckets.reduce((total, { doc_count: count }) => total + count, otherCount),
+        {
+          [KPI_METRIC_VALUE_AGG]: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: otherCount,
+            buckets,
+          },
+          [KPI_METRIC_MISSING_AGG]: { doc_count: 0 },
+        }
+      );
+
+    const currentResponse = createBreakdownResponse(
+      [
+        { key: 'critical', doc_count: 12 },
+        { key: 'high', doc_count: 10 },
+      ],
+      0
+    );
+
+    const runWithPrevious = (previousResponse: estypes.MsearchResponseItem) =>
+      runKpiMetrics({
+        metrics: [breakdownMetric],
+        context: rangeContext,
+        reader: { msearch: jest.fn().mockResolvedValue([currentResponse, previousResponse]) },
+      });
+
+    it('gives a key in the previous buckets its previous count', async () => {
+      const [result] = await runWithPrevious(
+        createBreakdownResponse(
+          [
+            { key: 'high', doc_count: 12 },
+            { key: 'critical', doc_count: 8 },
+          ],
+          0
+        )
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'breakdown',
+          buckets: [
+            { key: 'critical', count: 12, previousCount: 8 },
+            { key: 'high', count: 10, previousCount: 12 },
+          ],
+        })
+      );
+    });
+
+    it('gives an absent key 0 when the previous other count is 0', async () => {
+      const [result] = await runWithPrevious(
+        createBreakdownResponse([{ key: 'critical', doc_count: 8 }], 0)
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          buckets: [
+            { key: 'critical', count: 12, previousCount: 8 },
+            { key: 'high', count: 10, previousCount: 0 },
+          ],
+        })
+      );
+    });
+
+    it('gives an absent key null when the previous other count is more than 0', async () => {
+      const [result] = await runWithPrevious(
+        createBreakdownResponse([{ key: 'critical', doc_count: 8 }], 4)
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          buckets: [
+            { key: 'critical', count: 12, previousCount: 8 },
+            { key: 'high', count: 10, previousCount: null },
+          ],
+        })
+      );
+    });
+
+    it('gives no previous counts when the previous search is incomplete', async () => {
+      const [result] = await runWithPrevious({
+        ...createBreakdownResponse([{ key: 'critical', doc_count: 8 }], 0),
+        timed_out: true,
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          buckets: [
+            { key: 'critical', count: 12 },
+            { key: 'high', count: 10 },
+          ],
+        })
+      );
+    });
   });
 });
