@@ -6,11 +6,7 @@
  */
 
 import { BuilderTypeRegistry } from './builder_type_registry';
-import {
-  SEQUENCE_BUILDER_TYPE,
-  THRESHOLD_BUILDER_TYPE,
-  registerBuiltinBuilderTypes,
-} from './register_builtin_builder_types';
+import { registerBuiltinBuilderTypes } from './register_builtin_builder_types';
 
 describe('registerBuiltinBuilderTypes', () => {
   let registry: BuilderTypeRegistry;
@@ -20,16 +16,16 @@ describe('registerBuiltinBuilderTypes', () => {
     registerBuiltinBuilderTypes(registry);
   });
 
-  it('registers the threshold builder', () => {
-    expect(registry.get(THRESHOLD_BUILDER_TYPE)).toEqual({ type: THRESHOLD_BUILDER_TYPE });
+  it('registers the threshold builder under the id clients send', () => {
+    expect(registry.get('threshold')).toEqual({ type: 'threshold' });
   });
 
-  it('registers the sequence builder', () => {
-    expect(registry.get(SEQUENCE_BUILDER_TYPE)).toEqual({ type: SEQUENCE_BUILDER_TYPE });
+  it('registers the sequence builder under the id clients send', () => {
+    expect(registry.get('sequence')).toEqual({ type: 'sequence' });
   });
 
   it('prevents a plugin from re-registering a built-in type', () => {
-    expect(() => registry.register({ type: THRESHOLD_BUILDER_TYPE })).toThrow(/already registered/);
+    expect(() => registry.register({ type: 'threshold' })).toThrow(/already registered/);
   });
 
   it('throws when applied twice to the same registry', () => {
