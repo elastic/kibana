@@ -260,6 +260,7 @@ export const slack2SlashCommand = {
   eventSchema: SlackSlashCommandEventSchema,
 } as const satisfies ConnectorEventTopicDefinition;
 
+/** Not a bus topic. The bridge resumes the paused workflow, and `spaceId` is the workflow space. */
 export const slack2HitlAction = {
   name: 'slack2.hitl_action',
   eventSchema: SlackHitlActionEventSchema,
