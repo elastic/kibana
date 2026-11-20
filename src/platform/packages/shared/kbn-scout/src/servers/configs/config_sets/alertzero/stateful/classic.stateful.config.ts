@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { buildEisServerConfig } from '../shared';
+import { buildEisServerConfig } from '../../shared/eis';
 
 const ENABLE_EXPERIMENTAL_ARG = '--xpack.securitySolution.enableExperimental=';
 const REQUIRED_EXPERIMENTAL_FEATURES = ['endpointForensicAnalysisSkill'];

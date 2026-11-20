@@ -23,6 +23,7 @@ import {
   resetWorker,
   updateWorker,
   withAlertZeroEnabledInSpace,
+  withPlaceholderModel,
 } from '../fixtures';
 
 const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
@@ -225,33 +226,25 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
     'refuses to enable a worker that has no service account',
     async ({ apiClient, samlAuth }) => {
       const api = await getAdminApi(apiClient, samlAuth);
-      // The model gate runs before the service-account check, so on a stack without a model the
-      // enable is refused as `noModel` and this spec cannot reach the guard it exists for. Skip
-      // with that reason instead of asserting whatever 4xx comes back first.
-      //
-      // A test-owned placeholder connector cannot unblock it: the gate resolves endpoints
-      // through the inference plugin (`getForFeature`), which only counts an endpoint once
-      // `fetchConnectors` can read it back — either an ES inference endpoint
-      // (`esClient.inference.get`) or a real chat-completion connector. Creating a placeholder
-      // `.inference` connector via the Actions API runs the connector's pre-save hook, which
-      // `PUT`s the endpoint into ES with a real provider (`elastic` needs the EIS inference
-      // URL, `elasticsearch` needs a deployed model) — neither exists on a connector-free
-      // stack, so the create is rejected before the connector ever lists. The skip stays.
-      apiTest.skip(
-        (await listChatCompletionConnectors(api)).length === 0,
-        'no preconfigured chat-completion AI connector on this stack; the model gate refuses the enable before the service-account check, so this guard is unreachable'
-      );
-      // Do not trust spec order: another spec may have left an account bound to this worker.
-      await resetWorker(api, WORKER_ID);
-      const before = await getWorker(api, WORKER_ID);
-      expect(before.settings.serviceAccountId).toBeUndefined();
+      // The model gate runs before the service-account check, so a stack without a model would
+      // refuse the enable as `noModel` before reaching this guard. A placeholder model clears the
+      // gate; the rejected enable never starts a run, so it is never called.
+      const restoreModel = await withPlaceholderModel(api);
+      try {
+        // Do not trust spec order: another spec may have left an account bound to this worker.
+        await resetWorker(api, WORKER_ID);
+        const before = await getWorker(api, WORKER_ID);
+        expect(before.settings.serviceAccountId).toBeUndefined();
 
-      const response = await patchWorker(api, WORKER_ID, { enabled: true });
-      expect(response.statusCode).toBe(400);
-      expect((response.body as { message?: string }).message).toBe(
-        `Cannot apply a worker that is enabled without a service account to worker "${WORKER_ID}"`
-      );
-      expect((await getWorker(api, WORKER_ID)).enabled).toBe(false);
+        const response = await patchWorker(api, WORKER_ID, { enabled: true });
+        expect(response.statusCode).toBe(400);
+        expect((response.body as { message?: string }).message).toBe(
+          `Cannot apply a worker that is enabled without a service account to worker "${WORKER_ID}"`
+        );
+        expect((await getWorker(api, WORKER_ID)).enabled).toBe(false);
+      } finally {
+        await restoreModel();
+      }
     }
   );
 

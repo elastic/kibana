@@ -8,7 +8,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { getAgentBuilderSmokeEisModels } from './eis_models';
+import { getEisConnectorModels } from './eis_models';
 
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'),
@@ -17,7 +17,7 @@ jest.mock('fs', () => ({
 
 jest.mock('@kbn/repo-info', () => ({ REPO_ROOT: '/repo' }));
 
-describe('getAgentBuilderSmokeEisModels', () => {
+describe('getEisConnectorModels', () => {
   const model = (modelId: string, properties?: string[]) => ({
     inferenceId: `${modelId}-chat_completion`,
     modelId,
@@ -38,7 +38,7 @@ describe('getAgentBuilderSmokeEisModels', () => {
       })
     );
 
-    expect(getAgentBuilderSmokeEisModels()).toEqual([eligible]);
+    expect(getEisConnectorModels()).toEqual([eligible]);
   });
 
   it('throws when discovery found models but none are eligible', () => {
@@ -48,7 +48,7 @@ describe('getAgentBuilderSmokeEisModels', () => {
         JSON.stringify({ models: [model('untagged'), model('other', ['other'])] })
       );
 
-    expect(() => getAgentBuilderSmokeEisModels()).toThrow(
+    expect(() => getEisConnectorModels()).toThrow(
       'None of the 2 EIS models in /repo/target/eis_models.json are tagged "kibana-connector"'
     );
   });
@@ -58,6 +58,6 @@ describe('getAgentBuilderSmokeEisModels', () => {
       throw new Error('ENOENT');
     });
 
-    expect(getAgentBuilderSmokeEisModels()).toEqual([]);
+    expect(getEisConnectorModels()).toEqual([]);
   });
 });

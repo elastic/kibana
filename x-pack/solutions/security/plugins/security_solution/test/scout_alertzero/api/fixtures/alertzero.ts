@@ -17,6 +17,7 @@ import type {
   Ad2IndexedAlert,
   Ad2IndexedRawEvent,
 } from '@kbn/evals-suite-attack-discovery-agent-builder';
+import { ALERTZERO_INFERENCE_PARENT_FEATURE_ID } from '@kbn/alertzero-common';
 import { ATTACK_SCENARIO_KEY, DRAIN_TIMEOUT_MS } from './constants';
 import { ok, pollUntil } from './kbn';
 import type { AlertZeroApi } from './kbn';
@@ -257,6 +258,147 @@ export const resetWorker = async (api: AlertZeroApi, workerId: string): Promise<
   }
 };
 
+const INFERENCE_SETTINGS_URL = '/internal/search_inference_endpoints/settings';
+
+interface InferenceFeatureSetting {
+  feature_id: string;
+  endpoints: Array<{ id: string; parameters?: Record<string, unknown> }>;
+}
+
+/**
+ * Makes the space resolve an AI model without a real one, for specs that need the worker enable
+ * gate passed but never call a model: a placeholder `.gen-ai` connector (no pre-save hook, so it
+ * creates on a connector-free stack) assigned to the AlertZero parent inference feature. An
+ * existing parent assignment is kept. The returned callback restores the original assignments
+ * and deletes the connector.
+ */
+export const withPlaceholderModel = async (api: AlertZeroApi): Promise<() => Promise<void>> => {
+  const { id: connectorId } = ok(
+    await api.public<{ id: string }>('POST', '/api/actions/connector', {
+      body: {
+        name: `scout-alertzero-placeholder-${Date.now()}`,
+        connector_type_id: '.gen-ai',
+        config: {
+          apiProvider: 'OpenAI',
+          apiUrl: 'https://example.invalid/v1',
+          defaultModel: 'gpt-4',
+        },
+        secrets: { apiKey: 'scout-placeholder' },
+      },
+    }),
+    'create placeholder connector'
+  );
+  const deleteConnector = async () => {
+    const response = await api.public(
+      'DELETE',
+      `/api/actions/connector/${encodeURIComponent(connectorId)}`
+    );
+    if (response.statusCode >= 300 && response.statusCode !== 404) {
+      throw new Error(
+        `delete placeholder connector failed: ${response.statusCode} ${JSON.stringify(
+          response.body
+        )}`
+      );
+    }
+  };
+
+  let features: InferenceFeatureSetting[];
+  try {
+    features =
+      ok(
+        await api.internal<{ data?: { features?: InferenceFeatureSetting[] } }>(
+          'GET',
+          INFERENCE_SETTINGS_URL
+        ),
+        'read inference settings'
+      ).data?.features ?? [];
+    const parent = features.find(
+      ({ feature_id: featureId }) => featureId === ALERTZERO_INFERENCE_PARENT_FEATURE_ID
+    );
+    if (parent && parent.endpoints.length > 0) {
+      return deleteConnector;
+    }
+    ok(
+      await api.internal('PUT', INFERENCE_SETTINGS_URL, {
+        body: {
+          features: [
+            ...features.filter(
+              ({ feature_id: featureId }) => featureId !== ALERTZERO_INFERENCE_PARENT_FEATURE_ID
+            ),
+            { feature_id: ALERTZERO_INFERENCE_PARENT_FEATURE_ID, endpoints: [{ id: connectorId }] },
+          ],
+        },
+      }),
+      'assign placeholder model'
+    );
+  } catch (error) {
+    await deleteConnector().catch(() => undefined); // best-effort; the setup error is the real one
+    throw error;
+  }
+
+  return async () => {
+    try {
+      ok(
+        await api.internal('PUT', INFERENCE_SETTINGS_URL, { body: { features } }),
+        'restore inference settings'
+      );
+    } finally {
+      await deleteConnector();
+    }
+  };
+};
+
+/** What `restoreWorkerBaseline` puts back: the state a suite found the worker in. */
+export interface WorkerBaseline {
+  workerId: string;
+  enabled: boolean;
+  autonomy: string;
+  serviceAccountId?: string;
+}
+
+export const captureWorkerBaseline = async (
+  api: AlertZeroApi,
+  workerId: string
+): Promise<WorkerBaseline> => {
+  const worker = await getWorker(api, workerId);
+  return {
+    workerId,
+    enabled: worker.enabled,
+    autonomy: worker.settings.autonomy,
+    serviceAccountId: worker.settings.serviceAccountId,
+  };
+};
+
+/**
+ * Puts a worker back the way `captureWorkerBaseline` found it, after `resetWorker` left it
+ * disabled and unbound. Settings first (account and autonomy), then the enable, because enabling
+ * a worker without an account is rejected. An enable here starts a real run; the worker was
+ * enabled before the suite, so that run is the restored state, not one to cancel.
+ */
+export const restoreWorkerBaseline = async (
+  api: AlertZeroApi,
+  baseline: WorkerBaseline
+): Promise<void> => {
+  const { workerId } = baseline;
+  const current = await getWorker(api, workerId);
+  const settings: Record<string, unknown> = {};
+  if (current.settings.autonomy !== baseline.autonomy) {
+    settings.autonomy = baseline.autonomy;
+  }
+  if (current.settings.serviceAccountId !== baseline.serviceAccountId) {
+    settings.serviceAccountId = baseline.serviceAccountId ?? null;
+  }
+  if (Object.keys(settings).length > 0) {
+    await updateWorker(api, workerId, {
+      settingsRevision: current.settingsRevision ?? null,
+      settings,
+    });
+  }
+  if (baseline.enabled && !current.enabled) {
+    await updateWorker(api, workerId, { enabled: true });
+  }
+};
+
 interface ExecutionStep {
   stepId: string;
   stepType?: string;
@@ -444,26 +586,30 @@ export const listExecutions = (
 ): Promise<Array<{ id: string; status: string }>> => listExecutionPage(api, workflowId, 1);
 
 /**
- * Every execution id of the workflow, paged until a short page. This is the baseline teardown
- * compares against, so a truncated read would make an older in-flight run look like this
- * suite's and get cancelled. Throws instead of truncating once the result window is exhausted.
+ * Every execution of the workflow, paged until a short page. Throws instead of truncating once
+ * the result window is exhausted: both callers would misread a truncated list.
  */
-export const listExecutionIds = async (
+const listAllExecutions = async (
   api: AlertZeroApi,
   workflowId: string
-): Promise<string[]> => {
-  const ids: string[] = [];
+): Promise<Array<{ id: string; status: string }>> => {
+  const runs: Array<{ id: string; status: string }> = [];
   for (let page = 1; page <= EXECUTIONS_MAX_PAGE; page++) {
-    const runs = await listExecutionPage(api, workflowId, page);
-    ids.push(...runs.map((run) => run.id));
-    if (runs.length < EXECUTIONS_PAGE_SIZE) return ids;
+    const pageRuns = await listExecutionPage(api, workflowId, page);
+    runs.push(...pageRuns);
+    if (pageRuns.length < EXECUTIONS_PAGE_SIZE) return runs;
   }
   throw new Error(
-    `${workflowId} has more than ${
-      EXECUTIONS_PAGE_SIZE * EXECUTIONS_MAX_PAGE
-    } executions; cannot baseline them`
+    `${workflowId} has more than ${EXECUTIONS_PAGE_SIZE * EXECUTIONS_MAX_PAGE} executions`
   );
 };
+
+/**
+ * Every execution id of the workflow. This is the baseline teardown compares against, so a
+ * truncated read would make an older in-flight run look like this suite's and get cancelled.
+ */
+export const listExecutionIds = async (api: AlertZeroApi, workflowId: string): Promise<string[]> =>
+  (await listAllExecutions(api, workflowId)).map(({ id }) => id);
 
 export const isTerminalExecutionStatus = (status: string): boolean =>
   TERMINAL_EXECUTION_STATUSES.includes(status);
@@ -481,9 +627,9 @@ export const cancelNewExecutions = async (
   knownIds: readonly string[],
   { timeoutMs = DRAIN_TIMEOUT_MS }: { timeoutMs?: number } = {}
 ): Promise<void> => {
-  // Newest page only: runs started after the baseline sort first, so they are on page 1.
+  // Every page: a fan-out of newer runs can push an older run this suite started past page 1.
   const inFlightNew = async () =>
-    (await listExecutions(api, workflowId)).filter(
+    (await listAllExecutions(api, workflowId)).filter(
       (run) => !knownIds.includes(run.id) && !isTerminalExecutionStatus(run.status)
     );
   for (const run of await inFlightNew()) {

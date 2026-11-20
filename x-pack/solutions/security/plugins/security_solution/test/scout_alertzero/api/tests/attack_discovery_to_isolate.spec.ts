@@ -17,6 +17,7 @@ import {
   assertExecutionCompleted,
   apiTest,
   cancelNewExecutions,
+  captureWorkerBaseline,
   cleanupKnowledgeIndicators,
   tags,
   testData,
@@ -33,6 +34,7 @@ import {
   pollForRunProposal,
   pollUntil,
   resetWorker,
+  restoreWorkerBaseline,
   seedAttackScenario,
   updateWorker,
   withAlertZeroEnabledInSpace,
@@ -41,7 +43,7 @@ import {
   waitForExecutionStatus,
   waitForNewExecution,
 } from '../fixtures';
-import type { RunReferences, SeededScenario } from '../fixtures';
+import type { RunReferences, SeededScenario, WorkerBaseline } from '../fixtures';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 
 const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
@@ -200,6 +202,13 @@ apiTest.describe(
     let restoreAlertZero: (() => Promise<void>) | undefined;
     // Set when beforeAll skipped the suite before changing any state; teardown has nothing to undo.
     let skippedBeforeSetup = false;
+    // Both shared workers as this suite found them (enabled, account, autonomy). Teardown resets
+    // them, deletes this suite's account, then puts these back, so a worker another suite or an
+    // operator left configured is not handed back disabled and unbound.
+    const workerBaselines: WorkerBaseline[] = [];
+    // Bounds teardown's Investigation scan: nothing updated before the suite started is its own.
+    // Backdated by a minute because `updated_at` is stamped by the server's clock, not this one.
+    const suiteStartedAt = new Date(Date.now() - 60_000);
 
     apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
       // Guard: this flow is LLM-dependent end to end. When the stack was booted without a
@@ -222,6 +231,9 @@ apiTest.describe(
         headers: cookieHeader,
         spaceId: 'default',
       });
+      for (const workerId of [WORKER_ID, FORENSICS_WORKER_ID]) {
+        workerBaselines.push(await captureWorkerBaseline(api, workerId));
+      }
     });
 
     apiTest.afterAll(async ({ apiClient, samlAuth, esClient, config }) => {
@@ -300,18 +312,29 @@ apiTest.describe(
       // behind the approved proposal is captured during the run — the rest point at seed data
       // this teardown removes. The captured id is deleted too (idempotent) in case discovery's
       // read raced its deletion.
+      // The captured id gets its own step, so a failed discovery read cannot leak it.
+      await attempt(async () => {
+        if (api && investigationId) await deleteInvestigation(api, investigationId);
+      });
       await attempt(async () => {
         if (!api) {
           return;
         }
-        const discovered = await discoverRunInvestigations(api, scenario?.entityNames ?? []);
-        for (const id of new Set([...discovered, ...(investigationId ? [investigationId] : [])])) {
+        const discovered = await discoverRunInvestigations(api, scenario?.entityNames ?? [], {
+          since: suiteStartedAt,
+        });
+        for (const id of discovered.filter((candidate) => candidate !== investigationId)) {
           await deleteInvestigation(api, id);
         }
       });
       await attempt(async () => {
         if (api && serviceAccountId) await deleteServiceAccount(api, serviceAccountId);
       });
+      for (const baseline of workerBaselines) {
+        await attempt(async () => {
+          if (api) await restoreWorkerBaseline(api, baseline);
+        });
+      }
       // The flow's own business records, deleted after the runs that maintain them settled: the
       // attack fingerprint and forensics handoff indicator in the control indexes, then the
       // Attack Discovery alert they were discovered through. All point at telemetry and a host
@@ -388,7 +411,9 @@ apiTest.describe(
         const beforeSave = await getWorker(api, WORKER_ID);
         await updateWorker(api, WORKER_ID, {
           settingsRevision: beforeSave.settingsRevision ?? null,
-          settings: { serviceAccountId },
+          // Pinned, not inherited: under `supervised` the handoff would be auto-approved and no
+          // proposal would ever park for the approvals below.
+          settings: { serviceAccountId, autonomy: 'manual' },
         });
         // The install is confirmed by the settings write, but it surfaces through the SML indexer
         // asynchronously, so the catalog read can still lag it. Poll (bounded) for a workflow
@@ -412,7 +437,8 @@ apiTest.describe(
         const forensicsBeforeSave = await getWorker(api, FORENSICS_WORKER_ID);
         await updateWorker(api, FORENSICS_WORKER_ID, {
           settingsRevision: forensicsBeforeSave.settingsRevision ?? null,
-          settings: { serviceAccountId },
+          // Same reason: `supervised` would auto-approve the Isolate proposal.
+          settings: { serviceAccountId, autonomy: 'manual' },
         });
         await pollUntil(
           `worker ${FORENSICS_WORKER_ID} to have a workflow installed`,

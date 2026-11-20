@@ -16,6 +16,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 import type { ScoutServerConfig } from '../../../../types';
 import { defaultConfig } from '../default/stateful/base.config';
+import { getEisConnectorModels } from './eis_models';
 
 // Elastic Inference Service QA base URL (Elasticsearch Cloud Connected Mode).
 const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
@@ -95,35 +96,8 @@ const loadStaticPreconfiguredConnectors = ({
   return getConnectorsFromKibanaDevYml();
 };
 
-interface DiscoveredModel {
-  inferenceId: string;
-  modelId: string;
-  metadata?: {
-    heuristics?: {
-      properties?: string[];
-    };
-  };
-}
-
-const EIS_MODELS_PATH = resolve(REPO_ROOT, 'target/eis_models.json');
-
-const getPreDiscoveredEisModels = (): DiscoveredModel[] => {
-  if (!existsSync(EIS_MODELS_PATH)) {
-    return [];
-  }
-  try {
-    const data = JSON.parse(readFileSync(EIS_MODELS_PATH, 'utf8')) as {
-      models?: DiscoveredModel[];
-    };
-    const models = data.models ?? [];
-    return models.filter((model) => !model.metadata?.heuristics?.properties?.includes('efficient'));
-  } catch {
-    return [];
-  }
-};
-
 const buildEisPreconfiguredConnectors = (): Record<string, unknown> => {
-  const models = getPreDiscoveredEisModels();
+  const models = getEisConnectorModels();
   const connectors: Record<string, unknown> = {};
 
   for (const model of models) {
@@ -149,11 +123,11 @@ const buildEisPreconfiguredConnectors = (): Record<string, unknown> => {
  * Kibana merges static preconfigured connectors (from env or `config/kibana.dev.yml`) with
  * connectors derived from `target/eis_models.json`.
  *
- * `required: true` preserves this set's contract: on CI without `${AI_CONNECTORS_ENV}` the
- * config throws rather than silently booting without connectors. `required: false` lets other
- * config sets reuse the EIS wiring opportunistically: when no connector source exists the
- * fragment falls back to plain `defaultConfig`, so the stack boots without inference
- * connectors and LLM-dependent tests can skip themselves.
+ * `required: true` (agent_builder_smoke): on CI without `${AI_CONNECTORS_ENV}` the config
+ * throws rather than silently booting without connectors. `required: false` (alertzero) uses the
+ * EIS wiring opportunistically: when no connector source exists it falls back to plain
+ * `defaultConfig`, so the stack boots without inference connectors and LLM-dependent tests can
+ * skip themselves.
  */
 export const buildEisServerConfig = ({ required }: { required: boolean }): ScoutServerConfig => {
   const preconfiguredConnectors = {

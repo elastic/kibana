@@ -11,7 +11,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-interface DiscoveredEisModel {
+export interface DiscoveredEisModel {
   inferenceId: string;
   modelId: string;
   metadata?: {
@@ -38,7 +38,7 @@ const readDiscoveredEisModels = (): DiscoveredEisModel[] => {
  * Discovered EIS models tagged `kibana-connector`, excluding `efficient` and `ocr-only`.
  * Returns [] when the artifact is missing; throws when it lists models but none qualify.
  */
-export const getAgentBuilderSmokeEisModels = (): DiscoveredEisModel[] => {
+export const getEisConnectorModels = (): DiscoveredEisModel[] => {
   const discovered = readDiscoveredEisModels();
 
   const eligible = discovered.filter(({ metadata }) => {

@@ -32,14 +32,19 @@ export const deleteInvestigation = async (api: AlertZeroApi, id: string): Promis
  * captured during the run; a spec that fails between two proposals — or a review that opened an
  * extra investigation on a failed fingerprint join — otherwise leaves conversations behind that
  * point at seed data the teardown removes. The list route cannot filter by content, so this
- * pages every conversation of the space and matches each one's serialized fields against the
- * run's entity names: names minted per run are a precise key, and a conversation of another run
- * (or a user's own) never contains them. Public conversations only — a workflow's own
- * Investigation is created public so the gate can read it back.
+ * reads each conversation and matches its serialized fields against the run's entity names:
+ * names minted per run are a precise key, and a conversation of another run (or a user's own)
+ * never contains them. Public conversations only — a workflow's own Investigation is created
+ * public so the gate can read it back.
+ *
+ * The list is newest `updated_at` first, so the scan stops at the first conversation last
+ * updated before `since` (the run's start): nothing older can be this run's. That bounds the
+ * per-conversation reads to the run's window instead of the space's whole history.
  */
 export const discoverRunInvestigations = async (
   api: AlertZeroApi,
-  entityNames: readonly string[]
+  entityNames: readonly string[],
+  { since }: { since: Date }
 ): Promise<string[]> => {
   if (entityNames.length === 0) {
     return [];
@@ -48,14 +53,21 @@ export const discoverRunInvestigations = async (
   const ids: string[] = [];
   for (let page = 1; ; page++) {
     const response = ok(
-      await api.public<{ results?: Array<{ id: string }>; pagination?: { total?: number } }>(
+      await api.public<{
+        results?: Array<{ id: string; updated_at?: string }>;
+        pagination?: { total?: number };
+      }>(
         'GET',
-        `${CONVERSATIONS_URL}?page=${page}&per_page=${CONVERSATIONS_PAGE_SIZE}`
+        `${CONVERSATIONS_URL}?page=${page}&per_page=${CONVERSATIONS_PAGE_SIZE}&sort_order=desc`
       ),
       `list investigations page ${page}`
     );
     const results = response.results ?? [];
     for (const conversation of results) {
+      // A missing timestamp is read, not skipped: it cannot prove the conversation is older.
+      if (conversation.updated_at && new Date(conversation.updated_at) < since) {
+        return ids;
+      }
       const detail = await api.public(
         `GET`,
         `${CONVERSATIONS_URL}/${encodeURIComponent(conversation.id)}`
