@@ -33,6 +33,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_STORAGE_PROVIDERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
@@ -372,6 +373,18 @@ export const getPolicyProtectionUpdatesPath = (
   location?: Partial<PolicyDetailsArtifactsPageLocation>
 ) => {
   return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  })}${appendSearch(
+    querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
+  )}`;
+};
+
+export const getPolicyStorageProvidersPath = (
+  policyId: string,
+  location?: Partial<PolicyDetailsArtifactsPageLocation>
+) => {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_STORAGE_PROVIDERS_PATH, {
     tabName: AdministrationSubTab.policies,
     policyId,
   })}${appendSearch(

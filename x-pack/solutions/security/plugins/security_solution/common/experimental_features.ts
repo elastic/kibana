@@ -81,6 +81,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointKillProcessDescendants: true,
 
   /**
+   * Export `get-file` / `memory-dump` output to external storage for Elastic Defend
+   * Release: 9.7
+   */
+  responseActionsEndpointFileExport: false,
+
+  /**
    * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
    * (Fleet remote output) is visible from the managing cluster's Kibana.
    * Release: 9.5

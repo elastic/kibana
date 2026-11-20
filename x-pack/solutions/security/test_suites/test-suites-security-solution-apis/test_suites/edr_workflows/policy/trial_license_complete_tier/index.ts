@@ -52,5 +52,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     });
 
     loadTestFile(require.resolve('./datastream_index_creation'));
+    loadTestFile(require.resolve('./export_providers'));
   });
 }

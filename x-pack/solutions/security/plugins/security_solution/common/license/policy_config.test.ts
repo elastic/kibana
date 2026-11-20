@@ -21,6 +21,7 @@ import {
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { PolicyConfig } from '../endpoint/types';
 import { ProtectionModes } from '../endpoint/types';
+import { setExportProviders } from '../endpoint/models/export_providers';
 
 describe('policy_config and licenses', () => {
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
@@ -1380,6 +1381,59 @@ describe('policy_config and licenses', () => {
         expect(stripped.windows.attack_surface_reduction).not.toHaveProperty(
           'registry_credential_hardening'
         );
+        expect(isEndpointPolicyValidForLicense(stripped, license)).toBe(true);
+      }
+    });
+  });
+
+  describe('export providers license gating', () => {
+    const withExportProviders = (policy: PolicyConfig): PolicyConfig =>
+      setExportProviders(policy, [
+        { id: 'azure-1', type: 'azure_blob', account_name: 'myaccount', container: 'my-container' },
+      ]);
+
+    it('allows a policy with export providers with an Enterprise license', () => {
+      expect(
+        isEndpointPolicyValidForLicense(withExportProviders(policyFactory()), Enterprise)
+      ).toBe(true);
+    });
+
+    it('allows a policy without export providers below Enterprise', () => {
+      expect(
+        isEndpointPolicyValidForLicense(policyFactoryWithoutPaidEnterpriseFeatures(), Platinum)
+      ).toBe(true);
+      expect(isEndpointPolicyValidForLicense(policyFactoryWithoutPaidFeatures(), Gold)).toBe(true);
+      expect(isEndpointPolicyValidForLicense(policyFactoryWithoutPaidFeatures(), Basic)).toBe(true);
+    });
+
+    it.each([
+      ['Platinum', Platinum, policyFactoryWithoutPaidEnterpriseFeatures],
+      ['Gold', Gold, policyFactoryWithoutPaidFeatures],
+      ['Basic', Basic, policyFactoryWithoutPaidFeatures],
+    ])(
+      'is invalid when export providers are configured with a %s license',
+      (_, license, createPolicy) => {
+        expect(isEndpointPolicyValidForLicense(withExportProviders(createPolicy()), license)).toBe(
+          false
+        );
+      }
+    );
+
+    it('removes export providers below Enterprise and keeps them for Enterprise', () => {
+      const policy = withExportProviders(policyFactory());
+
+      const enterprisePolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Enterprise);
+      expect(enterprisePolicy.windows.response_actions?.export_providers).toEqual(
+        policy.windows.response_actions?.export_providers
+      );
+      expect(isEndpointPolicyValidForLicense(enterprisePolicy, Enterprise)).toBe(true);
+
+      for (const license of [Platinum, Gold, Basic]) {
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(policy, license);
+
+        expect(stripped.windows).not.toHaveProperty('response_actions');
+        expect(stripped.mac).not.toHaveProperty('response_actions');
+        expect(stripped.linux).not.toHaveProperty('response_actions');
         expect(isEndpointPolicyValidForLicense(stripped, license)).toBe(true);
       }
     });

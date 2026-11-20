@@ -18,6 +18,7 @@ import {
   policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
 import { hasCustomYaraSignaturesAdvancedSettings } from '../endpoint/models/policy_config_helpers';
+import { hasExportProviders } from '../endpoint/models/export_providers';
 
 function isEndpointMalwarePolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
   if (isAtLeast(license, 'platinum')) {
@@ -372,6 +373,14 @@ function isEndpointRegistryCredentialHardeningPolicyValidForLicense(
   return true;
 }
 
+function isEndpointExportProvidersValidForLicense(policy: PolicyConfig, license: ILicense | null) {
+  if (isAtLeast(license, 'enterprise')) {
+    return true;
+  }
+
+  return !hasExportProviders(policy);
+}
+
 function isEndpointProtectionUpdatesValidForLicense(
   policy: PolicyConfig,
   license: ILicense | null
@@ -403,6 +412,7 @@ export const isEndpointPolicyValidForLicense = (
     isEndpointDeviceControlPolicyValidForLicense(policy, license) &&
     isEndpointCustomYaraSignaturesPolicyValidForLicense(policy, license) &&
     isEndpointRegistryCredentialHardeningPolicyValidForLicense(policy, license) &&
+    isEndpointExportProvidersValidForLicense(policy, license) &&
     isEndpointProtectionUpdatesValidForLicense(policy, license)
   );
 };

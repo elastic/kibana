@@ -16,6 +16,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import type { AllowlistFields } from './filterlists/types';
 import type { PolicyConfig, PolicyData, SafeEndpointEvent } from '../../../common/endpoint/types';
+import { removeExportProviders } from '../../../common/endpoint/models/export_providers';
 import type { ITelemetryReceiver } from './receiver';
 import type {
   AnyObject,
@@ -283,11 +284,20 @@ export const createUsageCounterLabel = (labelList: string[]): string => labelLis
 /**
  * Resiliantly handles an edge case where the endpoint config details are not present
  *
- * @returns the endpoint policy configuration
+ * @returns a copy of the endpoint policy configuration without export providers
  */
 export const extractEndpointPolicyConfig = (policyData: PolicyData | null) => {
   const epPolicyConfig = policyData?.inputs[0]?.config?.policy;
-  return epPolicyConfig ? epPolicyConfig : null;
+
+  if (!epPolicyConfig) {
+    return null;
+  }
+
+  // Export providers name the customer's storage accounts and containers, so they are never sent.
+  // `value` is checked too: a stored policy can lack it.
+  return epPolicyConfig.value
+    ? { ...epPolicyConfig, value: removeExportProviders(epPolicyConfig.value) }
+    : { ...epPolicyConfig };
 };
 
 export const addDefaultAdvancedPolicyConfigSettings = (policyConfig: PolicyConfig) => {

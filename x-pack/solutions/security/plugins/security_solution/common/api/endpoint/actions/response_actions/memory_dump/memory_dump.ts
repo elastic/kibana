@@ -7,53 +7,64 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { DeepMutable } from '../../../../../endpoint/types';
-import { BaseActionRequestSchema } from '../../..';
+import { BaseActionRequestSchema, ExportParameterSchema } from '../../..';
 
 export const MemoryDumpActionRequestSchema = {
-  body: schema.object({
-    ...BaseActionRequestSchema,
-    parameters: schema.object(
-      {
-        type: schema.oneOf([
-          schema.literal('process'),
-          schema.literal('kernel'),
-          schema.literal('raw'),
-        ]),
-        pid: schema.maybe(schema.number({ min: 1 })),
-        entity_id: schema.maybe(
-          schema.string({
-            minLength: 1,
-            maxLength: 256,
-            validate: (value) => {
-              if (!value.trim().length) {
-                return `entity_id cannot be an empty string`;
-              }
-            },
-          })
-        ),
-      },
-      {
-        validate: (parameters) => {
-          if (
-            (parameters.type === 'kernel' || parameters.type === 'raw') &&
-            (parameters.pid || parameters.entity_id)
-          ) {
-            return '"pid" and "entity_id" parameters only supported for type of "process"';
-          }
-
-          if (parameters.type === 'process') {
-            if (!parameters.pid && !parameters.entity_id) {
-              return 'Type of "process" requires either "pid" or "entity_id"';
-            }
-
-            if (parameters.pid !== undefined && parameters.entity_id !== undefined) {
-              return 'Type of "process" cannot have both "pid" and "entity_id"';
-            }
-          }
+  body: schema.object(
+    {
+      ...BaseActionRequestSchema,
+      parameters: schema.object(
+        {
+          type: schema.oneOf([
+            schema.literal('process'),
+            schema.literal('kernel'),
+            schema.literal('raw'),
+          ]),
+          pid: schema.maybe(schema.number({ min: 1 })),
+          entity_id: schema.maybe(
+            schema.string({
+              minLength: 1,
+              maxLength: 256,
+              validate: (value) => {
+                if (!value.trim().length) {
+                  return `entity_id cannot be an empty string`;
+                }
+              },
+            })
+          ),
+          export: ExportParameterSchema,
         },
-      }
-    ),
-  }),
+        {
+          validate: (parameters) => {
+            if (
+              (parameters.type === 'kernel' || parameters.type === 'raw') &&
+              (parameters.pid || parameters.entity_id)
+            ) {
+              return '"pid" and "entity_id" parameters only supported for type of "process"';
+            }
+
+            if (parameters.type === 'process') {
+              if (!parameters.pid && !parameters.entity_id) {
+                return 'Type of "process" requires either "pid" or "entity_id"';
+              }
+
+              if (parameters.pid !== undefined && parameters.entity_id !== undefined) {
+                return 'Type of "process" cannot have both "pid" and "entity_id"';
+              }
+            }
+          },
+        }
+      ),
+    },
+    {
+      validate: (bodyContent) => {
+        // An exported file goes to a single blob, so it cannot be shared by several hosts in one action
+        if (bodyContent.parameters.export !== undefined && bodyContent.endpoint_ids.length > 1) {
+          return '[parameters.export]: export supports one host per request';
+        }
+      },
+    }
+  ),
 };
 
 export type MemoryDumpActionRequestBody = DeepMutable<

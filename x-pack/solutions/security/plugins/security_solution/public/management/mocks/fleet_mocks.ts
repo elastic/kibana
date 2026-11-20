@@ -424,7 +424,7 @@ export const fleetGetAgentStatusHttpMock =
   ]);
 
 export type FleetPutEndpointPackagePolicyHttpMockInterface = ResponseProvidersInterface<{
-  updateEndpointPolicy: () => UpdatePolicyResponse;
+  updateEndpointPolicy: (options: HttpFetchOptionsWithPath) => UpdatePolicyResponse;
 }>;
 export const fleetPutEndpointPackagePolicyHttpMock =
   httpHandlerMockFactory<FleetPutEndpointPackagePolicyHttpMockInterface>([
@@ -432,9 +432,13 @@ export const fleetPutEndpointPackagePolicyHttpMock =
       id: 'updateEndpointPolicy',
       path: PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN,
       method: 'put',
-      handler: ({ body }) => {
+      handler: ({ path, body }) => {
+        // Like Fleet, respond with the updated policy under the id from the URL (the body has none)
         const updatedPolicy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy(
-          JSON.parse(body as string)
+          {
+            ...JSON.parse(body as string),
+            id: path.split('/').pop(),
+          }
         );
 
         return {

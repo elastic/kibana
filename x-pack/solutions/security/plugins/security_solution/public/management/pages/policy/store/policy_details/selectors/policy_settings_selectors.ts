@@ -26,6 +26,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_CUSTOM_YARA_SIGNATURES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_STORAGE_PROVIDERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH,
 } from '../../../../../common/constants';
@@ -40,6 +41,7 @@ import {
   isOnBlocklistsView,
   isOnCustomYaraSignaturesView,
   isOnProtectionUpdatesView,
+  isOnStorageProvidersView,
   isOnEndpointExceptionsView,
 } from './policy_common_selectors';
 
@@ -108,7 +110,8 @@ export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) =>
   isOnBlocklistsView(state) ||
   isOnCustomYaraSignaturesView(state) ||
   isOnEndpointExceptionsView(state) ||
-  isOnProtectionUpdatesView(state);
+  isOnProtectionUpdatesView(state) ||
+  isOnStorageProvidersView(state);
 
 /** Returns the license info fetched from the license service */
 export const license = (state: Immutable<PolicyDetailsState>) => {
@@ -131,6 +134,7 @@ export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => strin
           MANAGEMENT_ROUTING_POLICY_DETAILS_CUSTOM_YARA_SIGNATURES_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_STORAGE_PROVIDERS_PATH,
         ],
         exact: true,
       })?.params?.policyId ?? ''
