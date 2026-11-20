@@ -36,6 +36,8 @@ const renderSection = ({
   entityType?: InventoryType;
 }) => {
   const inventoryApi = createScenarioEntityInventoryApiClient({ scenario });
+  // Installed before `render` so a request made on mount is counted, and calls through.
+  const getEntities = jest.spyOn(inventoryApi, 'getEntities');
   const history = createMemoryHistory();
   const section = (
     <I18nProvider>
@@ -53,7 +55,7 @@ const renderSection = ({
     </I18nProvider>
   );
   const { rerender, unmount } = render(section);
-  return { rerenderSection: () => rerender(section), unmount, inventoryApi };
+  return { rerenderSection: () => rerender(section), unmount, getEntities };
 };
 
 describe('EntitySection', () => {
@@ -109,17 +111,17 @@ describe('EntitySection', () => {
     });
 
     it('does not request its list, and shows the skeleton with no count, until it is near the viewport', async () => {
-      const { inventoryApi } = renderSection({ scenario: 'normal', onTruncatedChange: jest.fn() });
-      const getEntities = jest.spyOn(inventoryApi, 'getEntities');
+      const { getEntities } = renderSection({ scenario: 'normal', onTruncatedChange: jest.fn() });
 
+      expect(getEntities).not.toHaveBeenCalled();
       expect(await screen.findByTestId('entityInventoryTableSkeleton')).toBeInTheDocument();
       expect(screen.queryByTestId('entityInventoryTypeSectionCount')).not.toBeInTheDocument();
       expect(getEntities).not.toHaveBeenCalled();
     });
 
     it('requests its list once when it comes near the viewport, and shows the count', async () => {
-      const { inventoryApi } = renderSection({ scenario: 'normal', onTruncatedChange: jest.fn() });
-      const getEntities = jest.spyOn(inventoryApi, 'getEntities');
+      const { getEntities } = renderSection({ scenario: 'normal', onTruncatedChange: jest.fn() });
+      expect(getEntities).not.toHaveBeenCalled();
 
       act(() => observer.setIntersecting(screen.getByTestId('entityInventoryTypeSection'), true));
 
@@ -129,8 +131,8 @@ describe('EntitySection', () => {
     });
 
     it('keeps its list, without another request, when it scrolls out of range and back', async () => {
-      const { inventoryApi } = renderSection({ scenario: 'normal', onTruncatedChange: jest.fn() });
-      const getEntities = jest.spyOn(inventoryApi, 'getEntities');
+      const { getEntities } = renderSection({ scenario: 'normal', onTruncatedChange: jest.fn() });
+      expect(getEntities).not.toHaveBeenCalled();
       const section = screen.getByTestId('entityInventoryTypeSection');
       act(() => observer.setIntersecting(section, true));
       expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
