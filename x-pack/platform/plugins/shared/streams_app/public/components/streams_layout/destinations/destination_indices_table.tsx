@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  euiTextTruncate,
   formatNumber,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -68,8 +69,15 @@ import type {
 } from './state_machines/destinations_state_machine';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-// The index name takes the spare width; stat columns keep a fixed width and never wrap.
+// The index name takes the spare width and grows to fit the name, with a tooltip showing the full
+// name; when the table is wider than its container it scrolls sideways. Stat columns keep a fixed
+// width and never wrap.
+const NAME_COLUMN_MIN_WIDTH = '100px';
+const NAME_COLUMN_MAX_WIDTH = '250px';
 const STAT_COLUMN_WIDTH = '120px';
+const truncateStyles = css`
+  ${euiTextTruncate()}
+`;
 const noWrapStyles = css`
   white-space: nowrap;
 `;
@@ -258,13 +266,22 @@ export const DestinationIndicesTable = ({
         }),
         sortable: true,
         truncateText: true,
+        minWidth: NAME_COLUMN_MIN_WIDTH,
+        maxWidth: NAME_COLUMN_MAX_WIDTH,
         render: (name: string) => (
-          <EuiLink
-            data-test-subj="streamsDestinationIndexLink"
-            {...indexLinkProps(name, 'overview')}
+          <EuiToolTip
+            content={name}
+            display="block"
+            anchorProps={{ css: truncateStyles }}
+            disableScreenReaderOutput
           >
-            {name}
-          </EuiLink>
+            <EuiLink
+              data-test-subj="streamsDestinationIndexLink"
+              {...indexLinkProps(name, 'overview')}
+            >
+              {name}
+            </EuiLink>
+          </EuiToolTip>
         ),
       },
       {
@@ -523,7 +540,8 @@ export const DestinationIndicesTable = ({
       <EuiBasicTable
         compressed
         responsiveBreakpoint={false}
-        tableLayout="fixed"
+        tableLayout="auto"
+        scrollableInline
         tableCaption={i18n.translate('xpack.streams.destinations.indices.tableCaption', {
           defaultMessage: 'Indices targeted by this destination',
         })}

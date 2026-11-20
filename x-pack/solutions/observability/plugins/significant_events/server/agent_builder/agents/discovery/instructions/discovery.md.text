@@ -95,7 +95,7 @@ signal's evidence, verdict, and topology must come from a result you have read i
   and wait for the response; never batch it with KI search or ES|QL. Run the KI searches once per run
   and do not re-run queries after grouping.
 - `platform_sig_events_event_search` — retrieves active events for routing.
-- `platform_sig_events_events_write` — writes events once per run (Step 6), plus at most one extra call for items returned `held_by_deactivation`. `<field_rules>` covers the rest of the payload contract.
+- `platform_sig_events_events_write` — writes events once per run (Step 6), plus at most one extra call for items returned `held_by_deactivation` or `rule_held_by_event`. `<field_rules>` covers the rest of the payload contract.
 
 Example: `load_skill`
 ```json
@@ -323,7 +323,8 @@ stored ones from the compact search result. Both are required on the write paylo
   never individual signal prose.**
 - 4 search calls maximum (2 phases × up to 2 pages each). Each matching phase may inspect page 1 and
   at most one additional page. No additional calls outside the two phases. The one exception: for
-  each accepted continuation, call it with `view: "full"` and `event_ids: [that event_id]` to read
+  each accepted continuation, and for each holder you re-send a held rule to (Step 6), call it with
+  `view: "full"` and `event_ids: [that event_id]` to read
   the event's stored signal descriptions and verdicts, which the compact view never returns; while
   `signals_has_more` is true, repeat with `signals_page + 1`, up to 5 pages. Severity rates over
   what was read; signals beyond the fifth page are unmeasured. A `full` read never informs a
@@ -379,6 +380,9 @@ until both searches have returned.
 
 1. Call `platform_sig_events_event_search` once with all distinct remaining `rule_uuids`. Omit `slugs`.
 2. A detection rule-matches an event only when `events[].signal_rule_uuids` includes its rule.
+   A live event in the detection's `classifier.live_events` already holds its rule: it is the route
+   unless the `<incident_matching>` pre-checks reject the detection, and Topology Match never takes
+   the rule to another event.
 3. A rule in `signal_rule_uuids` identifies a candidate event.
    - **Recovery.** A recovery detection (`refutes`, or an empty `inconclusive`) for that rule that meets the recovery checklist
      in `<eligibility>` is accepted onto it without the pairwise check; read the candidate's stored
@@ -573,6 +577,7 @@ rules were written.
    | `skipped`, `existing_active_event` (returns `existing_event_id`) | no | yes |
    | `skipped`, `unchanged_outcome` — a successful no-op; the stored title and hypothesis stay | no | yes |
    | `skipped`, `held_by_deactivation` (returns the closed series' `assessment_note`, `deactivated_at`) | only as **Held by deactivation** says | yes (the detection was judged); if you write it again, that second result decides |
+   | `skipped`, `rule_held_by_event` (returns `existing_event_id`, `held_rules`) | only as **Rule held by another event** says | only when its re-send is `written: true` or `unchanged_outcome` |
    | `bulk_error` | once, unchanged | only if the retry succeeds |
    | `unknown_event_id` | no; do not rerun routing, pick another event, reuse the ID, or drop it into a new event | no |
    | `superseded` — another writer changed the event first | no | no |
@@ -598,6 +603,16 @@ rules were written.
    timeouts → leave it unwritten. The same note and the description is service-b refusals → reopen.
    Note "recovered after the deploy" and the error is back → reopen. Note "false alarm, but check if
    it returns" → reopen.
+
+   **Rule held by another event.** A live event already confirms a rule of this item, so the rule
+   belongs on that event; `held_rules` names each held rule and its holder. In the one extra call
+   (shared with the reopened items above, never retried, results matched as above) send:
+   1. One item per holder: `event_id` set to that holder and this cycle's signals for the rules it
+      holds, built per Step 4 item 5 after a `full` read of the holder.
+   2. The item's unheld rules, if any, as one item routed as before.
+   A re-send is handled when it is `written: true` or `unchanged_outcome`. Any other result, a rule
+   left out of the call, or a failed call leaves its rules out of `written_rule_uuids`. Never choose
+   another event for a held rule or open a new event for it.
 
    Rules left out of `written_rule_uuids` are routed again by the next discovery cycle.
 

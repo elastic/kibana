@@ -51,6 +51,16 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   CLEAR_FILTERS: 'clearFilters',
   /** The user closes the filters flyout without applying what they picked. */
   CANCEL_FILTERS: 'cancelFilters',
+  /** The user opens the details of a request, an error or folded requests in a page visit. */
+  EXPAND_ACTIVITY: 'expandActivity',
+  /** The user leaves for the distributed trace of a request. */
+  VIEW_TRACE: 'viewTrace',
+  /** The user opens the raw events behind a page in Discover. */
+  OPEN_IN_DISCOVER: 'openInDiscover',
+  /** The user shows or hides the sessions list beside a session. */
+  TOGGLE_SESSIONS_LIST: 'toggleSessionsList',
+  /** The user moves to another page of a list. */
+  CHANGE_PAGE: 'changePage',
 } as const;
 
 /*
@@ -129,4 +139,13 @@ export const SESSIONS_EBT_ELEMENTS = {
   DOCS_LINK: 'sessionsDocsLink',
   COLUMN_SELECTOR: 'sessionsColumnSelector',
   SESSION_NOT_FOUND_BACK: 'sessionNotFoundBack',
+  ACTIVITY_KIND_FILTER: 'sessionActivityKindFilter',
+  ACTIVITY_SEARCH: 'sessionActivitySearch',
+  ACTIVITY_ROW: 'sessionActivityRow',
+  ACTIVITY_SHOW_ALL: 'sessionActivityShowAll',
+  TRACE_LINK: 'sessionTraceLink',
+  RAIL_SESSION: 'sessionsRailSession',
+  RAIL_HIDE: 'sessionsRailHide',
+  RAIL_EDIT_FILTERS: 'sessionsRailEditFilters',
+  RAIL_PAGE: 'sessionsRailPage',
 } as const;
