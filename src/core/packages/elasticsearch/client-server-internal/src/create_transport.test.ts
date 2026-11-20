@@ -653,6 +653,8 @@ describe('createTransport', () => {
       expect(transportRequestMock).toHaveBeenCalledTimes(2);
       expect(transportRequestMock.mock.calls[0][1]?.headers).toEqual({ authorization: 'per-call' });
       expect(transportRequestMock.mock.calls[1][1]?.headers).toEqual({ authorization: 'per-call' });
+      await transport.request(requestParams);
+      expect(transportRequestMock.mock.calls[2][1]?.headers).toEqual({ authorization: 'renewed' });
     });
 
     it('updates the headers for next requests in case of `retry`', async () => {
