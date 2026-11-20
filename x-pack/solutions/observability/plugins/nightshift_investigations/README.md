@@ -345,6 +345,8 @@ Investigations are public conversations, and Agent Builder lets anyone who can c
 
 With `create`, the route creates the investigation as the identity that runs the Slack workflow. The new investigation has the thread as its subject, claimed so that concurrent creates for one thread agree on one investigation. The thread's status message is recorded on that subject as `slack.status_message_ts`.
 
+The subject's summary is the message that started the thread, as plain text, not the automation's name. Its `slack.permalink` opens the thread in Slack's web client (`https://app.slack.com/client/<T>/<C>/thread/<C>-<ts>`), since Slack's documented message link needs the workspace domain, which events don't carry. A thread recorded without a link gets one on its next `_slack_thread` call.
+
 The Slack connector delivers each event at least once. The workflow passes Slack's event id as `event_id` and its own execution id as `execution_id`, and the route records both on the thread's subject in `slack.seen_events` (the latest 50). An event another execution already recorded is answered with `duplicate: true`, and the workflow skips it; the same execution asking again, for example on a retried step, is not a duplicate. A run whose investigation failed calls the route again with `release_event: true`, which removes the event as recorded for that execution, so a redelivery of the event is handled. The workflow runs one call per thread at a time, so two deliveries of one event cannot race each other.
 
 ## Sandbox connectors
