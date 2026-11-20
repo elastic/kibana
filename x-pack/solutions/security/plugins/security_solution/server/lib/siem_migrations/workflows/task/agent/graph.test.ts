@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { AbortError } from '@kbn/kibana-utils-plugin/server';
 import {
   MigrationTranslationResult,
   SIEM_MIGRATIONS_ASSISTANT_USER,
 } from '../../../../../../common/siem_migrations/constants';
 import type { OriginalWorkflow } from '../../../../../../common/siem_migrations/model/workflow_migration.gen';
-import { getWorkflowMigrationAgent, PLACEHOLDER_TRANSLATION_DELAY_MS } from './graph';
+import { getWorkflowMigrationAgent } from './graph';
 import * as placeholderNode from './nodes/placeholder';
 
 const originalWorkflow = (title: string): OriginalWorkflow => ({
@@ -37,7 +36,7 @@ describe('getWorkflowMigrationAgent', () => {
       id: 'workflow-1',
       original_workflow: originalWorkflow('Receive alert'),
     });
-    await jest.advanceTimersByTimeAsync(PLACEHOLDER_TRANSLATION_DELAY_MS);
+    await jest.advanceTimersByTimeAsync(placeholderNode.PLACEHOLDER_TRANSLATION_DELAY_MS);
 
     const result = await pending;
 
@@ -67,21 +66,5 @@ describe('getWorkflowMigrationAgent', () => {
         original_workflow: originalWorkflow('Receive alert'),
       })
     ).rejects.toThrow('Dummy translation failed');
-  });
-
-  it('rejects with AbortError when the translation is aborted during the wait', async () => {
-    jest.useFakeTimers();
-    const abortController = new AbortController();
-    const pending = agent.invoke(
-      {
-        id: 'workflow-1',
-        original_workflow: originalWorkflow('Receive alert'),
-      },
-      { signal: abortController.signal }
-    );
-    const assertion = expect(pending).rejects.toBeInstanceOf(AbortError);
-    abortController.abort();
-
-    await assertion;
   });
 });

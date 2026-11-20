@@ -47,7 +47,7 @@ export class WorkflowMigrationTaskRunner extends SiemMigrationTaskRunner<
     super(migrationId, vendor, request, startedBy, abortController, data, logger, dependencies);
   }
 
-  /** Resolves the selected connector and installs the placeholder translation function. */
+  /** Resolves the selected connector and installs the placeholder translation graph. */
   public async setup(connectorId: string): Promise<void> {
     const model = await this.actionsClientChat.createModel({
       connectorId,

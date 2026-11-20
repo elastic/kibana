@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { RunnableConfig } from '@langchain/core/runnables';
 import type { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import type { MigrationComments } from '../../../../../../common/siem_migrations/model/common.gen';
 import type {
   ElasticWorkflow,
   OriginalWorkflow,
 } from '../../../../../../common/siem_migrations/model/workflow_migration.gen';
+import type { migrateWorkflowState } from './state';
 
 export interface WorkflowMigrationTaskInput {
   id: string;
@@ -24,12 +24,7 @@ export interface WorkflowMigrationTaskOutput {
   comments: MigrationComments;
 }
 
+export type MigrateWorkflowState = typeof migrateWorkflowState.State;
+
 /** Placeholder config until the real translation graph needs invocation options. */
 export type MigrateWorkflowConfigSchema = Record<string, never>;
-
-export interface WorkflowMigrationAgent {
-  invoke: (
-    input: WorkflowMigrationTaskInput,
-    config?: RunnableConfig<MigrateWorkflowConfigSchema>
-  ) => Promise<WorkflowMigrationTaskOutput>;
-}

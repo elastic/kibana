@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-/** Empty translation step tests can replace to simulate a failure. */
-export const placeholderNoOpNode = (): Promise<void> => Promise.resolve();
+/** How long the placeholder waits so a stop request can abort the graph. */
+export const PLACEHOLDER_TRANSLATION_DELAY_MS = 3_000;
+
+/** Waits so stop can abort the graph. Tests replace this to simulate a failure. */
+export const placeholderNoOpNode = (): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, PLACEHOLDER_TRANSLATION_DELAY_MS);
+  });

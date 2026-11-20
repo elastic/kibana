@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import type { RunnableConfig } from '@langchain/core/runnables';
-import { AbortError } from '@kbn/kibana-utils-plugin/server';
+import { END, START, StateGraph } from '@langchain/langgraph';
 import { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import { generateAssistantComment } from '../../../common/task/util/comments';
 import * as placeholderNode from './nodes/placeholder';
-import type {
-  MigrateWorkflowConfigSchema,
-  WorkflowMigrationAgent,
-  WorkflowMigrationTaskInput,
-  WorkflowMigrationTaskOutput,
-} from './types';
-
-/** How long the placeholder waits so a stop request can abort it. */
-export const PLACEHOLDER_TRANSLATION_DELAY_MS = 3_000;
+import { migrateWorkflowState } from './state';
+import type { MigrateWorkflowState } from './types';
 
 const quoteYaml = (value: string): string => JSON.stringify(value);
 
@@ -38,47 +30,20 @@ const buildPlaceholderWorkflowYaml = (title: string): string =>
     `      message: ${quoteYaml(`Placeholder translation for ${title}`)}`,
   ].join('\n');
 
-const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
-  new Promise((resolve, reject) => {
-    if (signal?.aborted) {
-      reject(new AbortError());
-      return;
-    }
-    const onAbort = () => {
-      clearTimeout(timer);
-      reject(new AbortError());
-    };
-    const timer = setTimeout(() => {
-      signal?.removeEventListener('abort', onAbort);
-      resolve();
-    }, ms);
-    signal?.addEventListener('abort', onAbort, { once: true });
-  });
-
-/**
- * Placeholder translation graph. It records the selected model name and does not call the model.
- */
-export const getWorkflowMigrationAgent = ({
-  modelName,
-}: {
-  modelName?: string;
-}): WorkflowMigrationAgent => ({
-  invoke: async (
-    input: WorkflowMigrationTaskInput,
-    config?: RunnableConfig<MigrateWorkflowConfigSchema>
-  ): Promise<WorkflowMigrationTaskOutput> => {
+const getPlaceholderTranslationNode =
+  (modelName?: string) =>
+  async (state: MigrateWorkflowState): Promise<Partial<MigrateWorkflowState>> => {
     await placeholderNode.placeholderNoOpNode();
-    await sleep(PLACEHOLDER_TRANSLATION_DELAY_MS, config?.signal);
 
     const modelLabel =
       modelName && modelName.length > 0 ? modelName : 'the connector default model';
     return {
       elastic_workflow: {
-        title: input.original_workflow.title,
-        ...(input.original_workflow.description
-          ? { description: input.original_workflow.description }
+        title: state.original_workflow.title,
+        ...(state.original_workflow.description
+          ? { description: state.original_workflow.description }
           : {}),
-        yaml: buildPlaceholderWorkflowYaml(input.original_workflow.title),
+        yaml: buildPlaceholderWorkflowYaml(state.original_workflow.title),
       },
       translation_result: MigrationTranslationResult.FULL,
       comments: [
@@ -87,5 +52,17 @@ export const getWorkflowMigrationAgent = ({
         ),
       ],
     };
-  },
-});
+  };
+
+/**
+ * Placeholder translation graph. It records the selected model name and does not call the model.
+ */
+export const getWorkflowMigrationAgent = ({ modelName }: { modelName?: string }) => {
+  const graph = new StateGraph(migrateWorkflowState)
+    .addNode('placeholderTranslation', getPlaceholderTranslationNode(modelName))
+    .addEdge(START, 'placeholderTranslation')
+    .addEdge('placeholderTranslation', END)
+    .compile();
+  graph.name = 'Workflow Migration Graph';
+  return graph;
+};
