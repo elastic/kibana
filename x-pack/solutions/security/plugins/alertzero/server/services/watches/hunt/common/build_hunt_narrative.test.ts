@@ -636,19 +636,29 @@ describe('buildHuntNarrative when no search ran', () => {
 
   const noIocs = 'The report has nothing IOC Hunt could search';
 
+  // The shape the coordinator returns when resolving the scope throws.
+  const scopeFailure = (overrides: Partial<HuntCoordinatorCoreResult> = {}) =>
+    result({
+      status: 'tier1_only',
+      index_patterns: [],
+      tier2_targets: [],
+      tier2_target_sources: [],
+      tier2_skipped_reason: 'no_searchable_input',
+      tier1: tier1({ status: 'no_searchable_terms' }),
+      completeness: 'incomplete_retryable',
+      completed_successfully: false,
+      ...overrides,
+    });
+
   it('says Hunt Watch could not work out which indices to search when scope resolution failed', () => {
-    const narrative = buildHuntNarrative(
-      result({
-        status: 'tier1_only',
-        index_patterns: [],
-        tier2_targets: [],
-        tier2_target_sources: [],
-        tier1: tier1({ status: 'no_searchable_terms' }),
-        completeness: 'incomplete_final',
-      }),
-      ctx
+    expect(buildHuntNarrative(scopeFailure(), { ...ctx, scopeResolutionFailed: true })).toBe(
+      `### Hunt Watch searched nothing for this report\nHunt Watch could not work out which indices to search. ${NOT_CLEAN} The report stays eligible for a later sweep.\n\n_Hunt run \`run-1\`._`
     );
-    expect(narrative).toBe(expectedText('Hunt Watch could not work out which indices to search.'));
+  });
+
+  it('does not read empty index patterns alone as a scope failure', () => {
+    const narrative = buildHuntNarrative(scopeFailure({ completeness: 'incomplete_final' }), ctx);
+    expect(narrative).not.toContain('searched nothing for this report');
   });
 
   describe('the Behavior Hunt clause, with nothing for IOC Hunt to search', () => {
@@ -706,6 +716,11 @@ describe('buildHuntNarrative when no search ran', () => {
         '9: no_searchable_input',
         { tier2_skipped_reason: 'no_searchable_input' as const },
         'the report gave Behavior Hunt nothing to work from',
+      ],
+      [
+        '11: behaviors derived and none passed ATT&CK catalog validation',
+        { tier2: tier2([], { status: 'no_behaviors_validated' }) },
+        'Behavior Hunt derived behaviors from the report, but none survived ATT&CK catalog validation',
       ],
       [
         '10: Behavior Hunt ran clean and found no behavior',

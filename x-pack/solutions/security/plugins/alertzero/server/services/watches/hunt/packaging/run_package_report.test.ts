@@ -587,8 +587,12 @@ describe('runPackageReport', () => {
         expect(result.status).toBe('packaged');
         if (result.status !== 'packaged') return;
         expect(result.dismiss).toBe(false);
-        expect(result.closureSummary).toContain('Leaving the Investigation open');
-        expect(result.closureSummary).not.toContain('searched nothing');
+        expect(result.closureSummary).toBe(
+          'Hunt for report ' +
+            reportId +
+            ' found no confirmed hits, but no search ran. Leaving the Investigation open: it still has a pending or executing Proposal from an earlier run.'
+        );
+        expect(result.closureSummary).not.toContain('part of the report could not be searched');
       });
 
       it('keeps the existing text for a retired run whose gaps do not include it', async () => {

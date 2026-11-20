@@ -142,9 +142,12 @@ const buildNoHitClosureSummary = ({
       dismissHold === 'open_proposal'
         ? 'it still has a pending or executing Proposal from an earlier run.'
         : 'could not verify whether it has an open Proposal.';
-    return `${found}${
-      retired ? ', but part of the report could not be searched' : ''
-    }. Leaving the Investigation open: ${held}`;
+    const unsearchedClause = nothingSearched
+      ? ', but no search ran'
+      : retired
+      ? ', but part of the report could not be searched'
+      : '';
+    return `${found}${unsearchedClause}. Leaving the Investigation open: ${held}`;
   }
   if (!retired) {
     return `${found}. Closing: nothing in this environment matched the report at the confirming-index bar.`;

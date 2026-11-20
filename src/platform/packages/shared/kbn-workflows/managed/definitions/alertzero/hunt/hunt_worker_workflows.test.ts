@@ -1685,11 +1685,15 @@ describe('Hunt Watch worker: a retired_incomplete hunt', () => {
     };
 
     it('closes with a short message that is not a clean result and says how to replay', () => {
-      expect(conclusion(retiredContext('retired_incomplete', [nothingSearched]))).toBe(
+      const context = retiredContext('retired_incomplete', [nothingSearched]);
+      context.steps.package_report.output.summary =
+        'No confirmed hits, so packaging closed this Investigation as other rather than benign, because no search ran and the report is retired without one.';
+
+      expect(conclusion(context)).toBe(
         [
           '### Hunt Watch run completed: nothing was searched',
           '- **Report:** `rpt-1`',
-          '- **Packaging:** Closed this Investigation as benign.',
+          '- **Packaging:** No confirmed hits, so packaging closed this Investigation as other rather than benign, because no search ran and the report is retired without one.',
           '- **What this means:** no search ran, so this says nothing about whether the environment is clean. The report will not be swept again on its own; a manual run targeting this report replays it.',
           '- **Run:** `exec-1` ([full per-stage detail](https://kibana/exec-1))',
         ].join('\n')
@@ -1777,6 +1781,16 @@ describe('Hunt Watch packaging summary for a settled no-hit run', () => {
     expect(summary('retired_incomplete')).toBe(
       'No confirmed hits, so packaging closed this Investigation as other rather than benign, because part of the report could not be searched and the report is retired without a full search; recorded 3 coverage knowledge items for Detection Watch.'
     );
+  });
+
+  it('says no search ran, not that part of the report could not be searched, when nothing was searched', () => {
+    const text = summary('retired_incomplete', [
+      { reason: 'nothing_searched', detail: 'nothing reached the environment' },
+    ]);
+    expect(text).toBe(
+      'No confirmed hits, so packaging closed this Investigation as other rather than benign, because no search ran and the report is retired without one; recorded 3 coverage knowledge items for Detection Watch.'
+    );
+    expect(text).not.toContain('names what was not searched');
   });
 
   it('keeps the clean wording for a successful run', () => {

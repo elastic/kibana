@@ -26,6 +26,8 @@ export interface HuntNarrativeContext {
   reportTitle?: string;
   /** The scope was blocked because the default data view held only hidden or alerts indices. */
   blockedByPolicyOnly?: boolean;
+  /** Resolving the index scope threw, so no search of any kind ran and no gap was recorded. */
+  scopeResolutionFailed?: boolean;
 }
 
 const MAX_BEHAVIORS_NARRATED = 8;
@@ -432,12 +434,6 @@ const hasNothingSearchedGap = (result: HuntCoordinatorCoreResult): boolean =>
     ...(result.tier2?.incomplete ?? []),
   ].some(({ reason }) => reason === 'nothing_searched');
 
-/** Scope resolution threw before any search: no gap is recorded, and no index was ever resolved. */
-const isScopeResolutionFailure = (result: HuntCoordinatorCoreResult): boolean =>
-  result.tier1.status === 'no_searchable_terms' &&
-  result.index_patterns.length === 0 &&
-  !hasNothingSearchedGap(result);
-
 const describeNothingSearchedIocs = (result: HuntCoordinatorCoreResult): string => {
   const excluded = result.excluded_report_iocs?.count ?? 0;
   return excluded > 0
@@ -463,6 +459,9 @@ const describeNothingSearchedBehaviors = (result: HuntCoordinatorCoreResult): st
   if (tier2 && tier2.behaviors.length === 0 && (tier2.incomplete?.length ?? 0) > 0) {
     return 'Behavior Hunt could not derive a searchable behavior from the report';
   }
+  if (tier2?.status === 'no_behaviors_validated') {
+    return 'Behavior Hunt derived behaviors from the report, but none survived ATT&CK catalog validation';
+  }
   switch (result.tier2_skipped_reason) {
     case 'configured_never':
       return 'Behavior Hunt was turned off for this run';
@@ -478,7 +477,11 @@ const describeNothingSearchedBehaviors = (result: HuntCoordinatorCoreResult): st
       return 'Behavior Hunt failed before running a query';
     case 'no_searchable_input':
       return 'the report gave Behavior Hunt nothing to work from';
-    default:
+    case undefined:
+    case 'no_environment_hits':
+    case 'scope_blocked':
+    case 'report_not_found':
+    case 'extraction_pending':
       return 'Behavior Hunt found no behavior in the report to search for';
   }
 };
@@ -487,10 +490,14 @@ const describeNothingSearchedBehaviors = (result: HuntCoordinatorCoreResult): st
  * The short form for a hunt whose searches returned nothing because none ran. It names the reason
  * once and makes no statement about retries or the raw error, which the Investigation carries.
  */
-const buildNothingSearchedNarrative = (result: HuntCoordinatorCoreResult): string => {
-  const reason = isScopeResolutionFailure(result)
-    ? 'Hunt Watch could not work out which indices to search.'
-    : `${describeNothingSearchedIocs(result)}, and ${describeNothingSearchedBehaviors(result)}.`;
+const buildNothingSearchedNarrative = (
+  result: HuntCoordinatorCoreResult,
+  ctx: HuntNarrativeContext
+): string => {
+  const reason =
+    ctx.scopeResolutionFailed === true
+      ? 'Hunt Watch could not work out which indices to search.'
+      : `${describeNothingSearchedIocs(result)}, and ${describeNothingSearchedBehaviors(result)}.`;
   const retry =
     result.completeness === 'incomplete_retryable'
       ? ' The report stays eligible for a later sweep.'
@@ -561,9 +568,9 @@ export const buildHuntNarrative = (
     !terminal &&
     result.report_id &&
     !result.has_confirmed_hit &&
-    (hasNothingSearchedGap(result) || isScopeResolutionFailure(result))
+    (hasNothingSearchedGap(result) || ctx.scopeResolutionFailed === true)
   ) {
-    return buildNothingSearchedNarrative(result);
+    return buildNothingSearchedNarrative(result, ctx);
   }
   const { heading, summary } = describeOutcome(result, ctx);
   const blocks: string[] = [`### ${heading}`, summary];
