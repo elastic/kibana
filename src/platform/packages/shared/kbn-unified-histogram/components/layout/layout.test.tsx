@@ -248,6 +248,35 @@ describe('Layout', () => {
       expect(screen.queryByTestId('unifiedHistogramChartContainer')).not.toBeInTheDocument();
     });
 
+    it('injects comparison availability into its child', () => {
+      const Child = ({
+        isHistogramComparisonAvailable,
+      }: {
+        isHistogramComparisonAvailable?: boolean;
+      }) => (
+        <div
+          data-test-subj="comparisonAvailability"
+          data-available={String(isHistogramComparisonAvailable)}
+        />
+      );
+
+      renderWithI18n(
+        <UnifiedHistogramLayout
+          unifiedHistogramChart={<div />}
+          chart={{ timeInterval: 'auto', hidden: false }}
+          isChartAvailable
+          isHistogramComparisonAvailable={false}
+        >
+          <Child />
+        </UnifiedHistogramLayout>
+      );
+
+      expect(screen.getByTestId('comparisonAvailability')).toHaveAttribute(
+        'data-available',
+        'false'
+      );
+    });
+
     it('should render the hidden chart placeholder when layout mode is ResizableLayoutMode.Static and chart is undefined', async () => {
       const { setBreakpoint } = await mountComponent({ chart: null });
 

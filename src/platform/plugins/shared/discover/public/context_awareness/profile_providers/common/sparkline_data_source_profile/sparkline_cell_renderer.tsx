@@ -19,14 +19,23 @@ import type { ProfileProviderServices } from '../../profile_provider_services';
 interface SparklineRendererProps {
   charts: ChartsPluginStart;
   values: unknown;
+  isSelected?: boolean;
 }
 
 const isNumberArray = (values: unknown): values is number[] =>
   Array.isArray(values) && values.every((item) => typeof item === 'number');
 
-export const SparklineRenderer: FC<SparklineRendererProps> = ({ charts, values }) => {
+export const SparklineRenderer: FC<SparklineRendererProps> = ({
+  charts,
+  values,
+  isSelected = false,
+}) => {
   const typedValues = useMemo(() => (isNumberArray(values) ? values : undefined), [values]);
-  return typedValues === undefined ? '-' : <SparklineChart charts={charts} values={typedValues} />;
+  return typedValues === undefined ? (
+    '-'
+  ) : (
+    <SparklineChart charts={charts} values={typedValues} isSelected={isSelected} />
+  );
 };
 
 export const SparklineCellRenderer: FC<
@@ -34,8 +43,9 @@ export const SparklineCellRenderer: FC<
     services: ProfileProviderServices;
     density: DataGridDensity | undefined;
     isDetails: boolean;
+    isSelected?: boolean;
   }
-> = ({ services, row, columnId, density, setCellProps, isDetails }) => {
+> = ({ services, row, columnId, density, setCellProps, isDetails, isSelected = false }) => {
   const { euiTheme } = useEuiTheme();
   const cellPadding = getDataGridDensityPadding(euiTheme, density ?? DataGridDensity.COMPACT);
 
@@ -66,7 +76,11 @@ export const SparklineCellRenderer: FC<
           ...(isDetails && { height: detailsHeight, bottom: 'auto' }),
         }}
       >
-        <SparklineRenderer charts={services.charts} values={row.flattened[columnId]} />
+        <SparklineRenderer
+          charts={services.charts}
+          values={row.flattened[columnId]}
+          isSelected={isSelected}
+        />
       </div>
     </>
   );

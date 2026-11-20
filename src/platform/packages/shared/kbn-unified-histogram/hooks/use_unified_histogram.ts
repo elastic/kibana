@@ -22,6 +22,7 @@ import type {
   UnifiedHistogramStateService,
 } from '../services/state_service';
 import { checkChartAvailability } from '../components/chart';
+import { chartSupportsHistogramComparison } from '../components/chart/histogram_comparison';
 import type { UnifiedHistogramLayoutProps } from '../components/layout/layout';
 import { useServicesBootstrap } from './use_services_bootstrap';
 
@@ -131,6 +132,10 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     chart,
     dataSource: fetchParams?.dataSource,
   });
+  const isHistogramComparisonAvailable = chartSupportsHistogramComparison(
+    isChartAvailable,
+    lensVisServiceState?.visContext?.attributes
+  );
 
   useEffect(() => {
     if (!isChartAvailable) {
@@ -147,6 +152,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
           fetchParams,
           chart,
           isChartAvailable,
+          isHistogramComparisonAvailable,
           lensVisService,
           lensVisServiceState,
         }
@@ -160,12 +166,14 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     stateProps,
     chart,
     isChartAvailable,
+    isHistogramComparisonAvailable,
   ]);
 
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({
       chart,
       isChartAvailable,
+      isHistogramComparisonAvailable,
       hits: stateProps.hits,
       topPanelHeight: stateProps.topPanelHeight,
       onTopPanelHeightChange: stateProps.onTopPanelHeightChange,
@@ -173,6 +181,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     [
       chart,
       isChartAvailable,
+      isHistogramComparisonAvailable,
       stateProps.hits,
       stateProps.onTopPanelHeightChange,
       stateProps.topPanelHeight,
