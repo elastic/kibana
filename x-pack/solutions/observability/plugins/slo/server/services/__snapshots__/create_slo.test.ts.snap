@@ -55,15 +55,9 @@ Array [
         },
       },
       Object {
-        "date_index_name": Object {
-          "date_formats": Array [
-            "UNIX_MS",
-            "ISO8601",
-            "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
-          ],
-          "date_rounding": "d",
-          "field": "@timestamp",
-          "index_name_prefix": ".slo-observability.sli-v3.6.",
+        "pipeline": Object {
+          "description": "Route to the time-based SLI index",
+          "name": ".slo-observability.sli.routing-v3.6",
         },
       },
       Object {

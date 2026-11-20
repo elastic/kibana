@@ -13,6 +13,7 @@ export * from './bulk_purge_rollup_data';
 export * from './get_slo';
 export * from './historical_summary_client';
 export * from './resource_installer';
+export * from './resource_install_state';
 export * from './burn_rates_client';
 export * from './slo_definition_repository';
 export * from './transform_manager';
