@@ -407,8 +407,8 @@ export const allowedExperimentalValues = Object.freeze({
   siemRuleMigrationsAgentBuilderEnabled: true,
 
   /**
-   * AESOP prototype: A/B a skill variant through evals, deploy it on approval,
-   * and monitor it for drift.
+   * AESOP prototype (Ayenson, SSRN 6438922): A/B a skill variant through evals,
+   * deploy it on approval, and monitor it for drift.
    */
   aesopPrototypeEnabled: false,
 });
