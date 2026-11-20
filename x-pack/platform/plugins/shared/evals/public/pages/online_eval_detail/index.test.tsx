@@ -86,13 +86,14 @@ const parsedConfig = {
 
 const renderPage = (entry = '/online/workflow-1') => {
   const history = createMemoryHistory({ initialEntries: [entry] });
-  return render(
+  const result = render(
     <Router history={history}>
       <Route path="/online/:workflowId">
         <OnlineEvalDetailPage />
       </Route>
     </Router>
   );
+  return { ...result, history };
 };
 
 describe('OnlineEvalDetailPage', () => {
@@ -254,6 +255,49 @@ describe('OnlineEvalDetailPage', () => {
         version: API_VERSIONS.internal.v1,
       });
     });
+  });
+
+  it('requests page 1 when the URL window changes while a later page is selected', async () => {
+    const scoreRow = {
+      '@timestamp': '2026-07-03T14:00:00.000Z',
+      monitor: { id: 'workflow-1', name: '[online-eval] quality monitor' },
+      trace_id: 'trace-123',
+      evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
+      score: { name: 'factuality', value: 0.9, label: 'pass' },
+    };
+    httpGet.mockImplementation(async (url: string) =>
+      url === EVALS_ONLINE_SCORES_URL
+        ? { total: 100, data: [scoreRow] }
+        : { evaluators: [{ name: 'correctness', version: '1.0.0', kind: 'llm' }] }
+    );
+    const { history } = renderPage('/online/workflow-1?from=now-1h&to=now&metric=factuality');
+
+    fireEvent.click(await screen.findByTestId('pagination-button-2'));
+    await waitFor(() => {
+      expect(httpGet).toHaveBeenCalledWith(
+        EVALS_ONLINE_SCORES_URL,
+        expect.objectContaining({ query: expect.objectContaining({ page: 3 }) })
+      );
+    });
+    httpGet.mockClear();
+
+    history.push('/online/workflow-1?from=now-24h&to=now&metric=relevance');
+
+    await waitFor(() => {
+      expect(httpGet).toHaveBeenCalledWith(EVALS_ONLINE_SCORES_URL, {
+        query: {
+          monitor_id: 'workflow-1',
+          page: 1,
+          per_page: 25,
+          from: 'now-24h',
+          to: 'now',
+          score_name: 'relevance',
+        },
+        version: API_VERSIONS.internal.v1,
+      });
+    });
+    const scoreRequests = httpGet.mock.calls.filter(([url]) => url === EVALS_ONLINE_SCORES_URL);
+    expect(scoreRequests).toHaveLength(1);
   });
 
   it('opens the trace waterfall flyout when trace id is clicked', async () => {

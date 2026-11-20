@@ -266,6 +266,13 @@ export const OnlineEvalDetailPage: React.FC = () => {
   }>();
   const { canManage } = useEvalsPermissions();
   const [pageIndex, setPageIndex] = useState(0);
+  const [pageWindow, setPageWindow] = useState(scoreWindow);
+  if (pageWindow !== scoreWindow) {
+    // Reset during render (not in an effect) so a drill-down link that changes the window or
+    // metric never fetches the previously selected page of the new results.
+    setPageWindow(scoreWindow);
+    setPageIndex(0);
+  }
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDataViewLoading, setIsDataViewLoading] = useState(true);
