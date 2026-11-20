@@ -218,8 +218,11 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
   Program(program: hbs.AST.Program) {
     this.blockParamNames.unshift(program.blockParams);
-    super.Program(program);
-    this.blockParamNames.shift();
+    try {
+      super.Program(program);
+    } finally {
+      this.blockParamNames.shift();
+    }
   }
 
   MustacheStatement(mustache: hbs.AST.MustacheStatement) {
@@ -718,16 +721,15 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       if (shiftContext) this.contexts.unshift(nextContext);
       this.blockParamValues.unshift(runtimeOptions.blockParams || []);
 
-      // execute child program
-      const result = this.resolveNodes(program).join('');
-
-      // unstash parent program data
-      this.blockParamValues.shift();
-      if (shiftContext) this.contexts.shift();
-      this.runtimeOptions = tmpRuntimeOptions;
-
-      // return result of child program
-      return result;
+      try {
+        // execute child program and return its result
+        return this.resolveNodes(program).join('');
+      } finally {
+        // unstash parent program data, also when the child program throws
+        this.blockParamValues.shift();
+        if (shiftContext) this.contexts.shift();
+        this.runtimeOptions = tmpRuntimeOptions;
+      }
     };
 
     prog.blockParams = program.blockParams?.length ?? 0;
@@ -776,17 +778,17 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const currentOutput = this.output;
     this.output = [];
 
-    if (Array.isArray(nodes)) {
-      this.acceptArray(nodes);
-    } else {
-      this.accept(nodes);
+    try {
+      if (Array.isArray(nodes)) {
+        this.acceptArray(nodes);
+      } else {
+        this.accept(nodes);
+      }
+
+      return this.output;
+    } finally {
+      this.output = currentOutput;
     }
-
-    const result = this.output;
-
-    this.output = currentOutput;
-
-    return result;
   }
 
   private get context() {

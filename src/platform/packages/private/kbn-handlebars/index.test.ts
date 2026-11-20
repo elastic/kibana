@@ -826,3 +826,45 @@ describe('blocks', () => {
     });
   });
 });
+
+describe('rendering after an error', () => {
+  const boom = (value: string) => {
+    if (value === 'bad') throw new Error('boom');
+    return value;
+  };
+
+  forEachCompileFunctionName((compileName) => {
+    it(`should not leak block params into the next render after a helper throws for #${compileName}`, () => {
+      const render = Handlebars[compileName](
+        '{{#each items as |item|}}{{boom item}}{{/each}}|{{item}}'
+      );
+      const helpers = { boom };
+
+      expect(() => render({ items: ['bad'], item: 'top' }, { helpers })).toThrow('boom');
+      expect(render({ items: [], item: 'top' }, { helpers })).toEqual('|top');
+    });
+
+    it(`should not leak block params into the next render after a value fails to convert to a string for #${compileName}`, () => {
+      const render = Handlebars[compileName]('{{#each items as |item|}}{{item}}{{/each}}|{{item}}');
+
+      expect(() => render({ items: [Object.create(null)], item: 'top' })).toThrow(TypeError);
+      expect(render({ items: [], item: 'top' })).toEqual('|top');
+    });
+  });
+
+  it('should keep rendering the rest of the template when a helper catches an error from its block', () => {
+    expectTemplate(
+      '{{name}}|{{#try}}{{#with obj}}{{#each items as |item|}}{{boom item}}{{/each}}{{/with}}{{/try}}|{{name}}|{{item}}'
+    )
+      .withInput({ obj: { items: ['bad'] }, name: 'top', item: 'root item' })
+      .withHelper('boom', boom)
+      .withHelper('try', function (this: object, options: HelperOptions) {
+        try {
+          return options.fn(this);
+        } catch (error) {
+          return 'caught';
+        }
+      })
+      .toCompileTo('top|caught|top|root item');
+  });
+});
