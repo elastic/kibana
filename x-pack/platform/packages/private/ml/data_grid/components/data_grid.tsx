@@ -116,6 +116,7 @@ export const DataGrid: FC<Props> = memo(
     const {
       chartsVisible,
       chartsButtonVisible,
+      chartsStatus = 'complete',
       ccsWarning,
       columnsWithCharts,
       dataTestSubj,
@@ -336,6 +337,7 @@ export const DataGrid: FC<Props> = memo(
                             >
                               <EuiButtonEmpty
                                 aria-pressed={chartsVisible === true}
+                                aria-busy={chartsVisible === true && chartsStatus !== 'complete'}
                                 className={`euiDataGrid__controlBtn${
                                   chartsVisible === true ? ' euiDataGrid__controlBtn--active' : ''
                                 }`}
@@ -376,6 +378,7 @@ export const DataGrid: FC<Props> = memo(
 function pickProps(props: Props) {
   return [
     props.columnsWithCharts,
+    props.chartsStatus,
     props.dataTestSubj,
     props.errorMessage,
     props.invalidSortingColumnns,

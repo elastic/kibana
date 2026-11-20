@@ -561,11 +561,9 @@ export class DataFrameAnalyticsPage {
     // Let histogram loading finish before interacting with cells, whether it succeeds
     // or reports an error. The histogram test step verifies chart success separately.
     if ((await histogramButton.getAttribute('aria-pressed')) === 'true') {
-      const histogramChart = this.page.testSubj.locator(`mlDataGridChart-${columnId}`);
-      const histogramError = this.page.testSubj
-        .locator('globalToastList')
-        .getByText('An error occurred fetching the histogram charts data', { exact: false });
-      await histogramChart.or(histogramError).waitFor({ state: 'visible' });
+      await histogramButton
+        .and(this.page.locator('[aria-busy="false"]'))
+        .waitFor({ state: 'visible' });
     }
 
     const featureImportanceCell = dataGrid.locator(
