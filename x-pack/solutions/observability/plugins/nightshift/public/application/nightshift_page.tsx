@@ -36,6 +36,7 @@ import {
   useInvestigatorServiceAccount,
 } from '../data/service_accounts/use_investigator_service_account';
 import { useDeveloperMode } from '../hooks/use_developer_mode';
+import { useIsMobile, usePageSectionPaddingSize } from '../hooks/use_is_mobile';
 import { useKibana } from '../hooks/use_kibana';
 import {
   DETECTION_TAB_IDS,
@@ -161,6 +162,10 @@ export const DetectionRoute = ({
 
 export function NightshiftPage(): React.ReactElement | null {
   const { euiTheme } = useEuiTheme();
+  // Below the tablet breakpoint the detection workspace stacks and scrolls as one page; it only
+  // fills the viewport and scrolls its panes on its own on larger screens.
+  const isMobile = useIsMobile();
+  const sectionPaddingSize = usePageSectionPaddingSize();
   const {
     application,
     executionContext,
@@ -361,6 +366,7 @@ export function NightshiftPage(): React.ReactElement | null {
     return null;
   }
 
+  const isDetectionWorkspaceFixedHeight = isDetectionPage && !isMobile;
   const pageBackground = getNightshiftPageBackground(euiTheme.colors);
   const pageBackgroundCss = css`
     background: ${pageBackground};
@@ -380,6 +386,7 @@ export function NightshiftPage(): React.ReactElement | null {
           component="div"
           color="transparent"
           restrictWidth={ONBOARDING_MAX_WIDTH}
+          paddingSize={sectionPaddingSize}
         >
           {isSetupPending ? (
             <EuiFlexGroup justifyContent="center" data-test-subj="nightshiftSetupLoading">
@@ -401,7 +408,7 @@ export function NightshiftPage(): React.ReactElement | null {
       data-test-subj="nightshiftPage"
       restrictWidth={false}
       css={
-        isDetectionPage
+        isDetectionWorkspaceFixedHeight
           ? css`
               height: 100%;
               min-height: 0;
@@ -413,14 +420,14 @@ export function NightshiftPage(): React.ReactElement | null {
         paddingSize: 'none',
         css: css`
           background: ${pageBackground};
-          ${isDetectionPage
+          ${isDetectionWorkspaceFixedHeight
             ? `
             min-height: 0;
             overflow: hidden;
           `
             : ''}
         `,
-        ...(isDetectionPage
+        ...(isDetectionWorkspaceFixedHeight
           ? {
               contentProps: {
                 css: css`
@@ -511,6 +518,7 @@ export function NightshiftPage(): React.ReactElement | null {
           <EuiPageTemplate.Section
             component="div"
             color="transparent"
+            paddingSize={sectionPaddingSize}
             restrictWidth={
               canUseAutomationsPage
                 ? false
