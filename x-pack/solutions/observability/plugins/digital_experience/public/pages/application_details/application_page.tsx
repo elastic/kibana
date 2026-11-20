@@ -159,10 +159,9 @@ export function ApplicationPage({
   const { overviewHref, overviewPath, errorsHref, networkHref, reportsHref, sessionsHref } =
     useApplicationLinks(serviceName, source);
   const shareAction = useShareAction({ serviceName, source, tab: selectedTab });
-  // Classic RUM has no Errors, Network or Reports tab, so their URLs are replaced by the Overview's.
-  const isUnsupportedTab =
-    source !== APPLICATION_SOURCE.otel &&
-    (selectedTab === 'errors' || selectedTab === 'network' || selectedTab === 'reports');
+  // Classic RUM only has the Overview (and Sessions' unavailable prompt); any other tab's URL is
+  // replaced by the Overview's, so a new EDOT-only tab needs no entry here.
+  const isUnsupportedTab = selectedTab !== 'sessions' && !tabsOf(source).includes(selectedTab);
   useEffect(() => {
     if (isUnsupportedTab) {
       history.replace(overviewPath);

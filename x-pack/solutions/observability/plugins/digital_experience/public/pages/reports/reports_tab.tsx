@@ -25,7 +25,7 @@ export function ReportsTab() {
       <EuiText color="subdued" size="s">
         <p>{DESCRIPTION}</p>
       </EuiText>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiFlexGrid columns={3} gutterSize="m">
         {REPORT_TEMPLATES.map(({ id, title, description, iconType, isAvailable }) => (
           <EuiFlexItem key={id}>
