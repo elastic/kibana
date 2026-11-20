@@ -21,19 +21,18 @@ import {
 const INDEX = 'nightshift-detection-known-failures';
 const SOURCES_PATH = 'internal/nightshift/sources';
 const QUERIES_PATH = 'internal/significant_events/queries';
+const RULES_PATH = 'api/alerting/v2/rules';
+const KI_TITLE = 'Upstream timeouts';
 const KNOWLEDGE_INDICATOR_ID = 'known-failures-scout-timeouts';
 const MINUTE_MS = 60_000;
-/** A rule runs when created and every 5 minutes; a row is read once its window has settled. */
-const SIGNAL_TIMEOUT_MS = 10 * MINUTE_MS;
+/**
+ * The knowledge indicator write runs the reconcile workflow (30 s wait), the rule runs when created
+ * and every 5 minutes, and a row is read once its window has settled.
+ */
+const SIGNAL_TIMEOUT_MS = 11 * MINUTE_MS;
 /** The rule runs every 5 minutes, so a tick a minute is enough to see its row soon after. */
 const POLL_INTERVAL_MS = MINUTE_MS;
 const SETUP_TIMEOUT_MS = 3 * MINUTE_MS;
-
-interface ReconcileResponse {
-  status: 'completed' | 'busy';
-  created?: number;
-  failures?: unknown[];
-}
 
 /**
  * Two timeouts a minute for six hours, then 25 a minute for the last 40 minutes, and on into the
@@ -129,7 +128,7 @@ apiTest.describe(
         responseType: 'json',
         body: {
           source_id: sourceId,
-          title: 'Upstream timeouts',
+          title: KI_TITLE,
           description: 'Calls upstream time out',
           severity_score: 70,
           esql: { query: `FROM ${source.body.source.view_name} | WHERE message : "timeout"` },
@@ -157,21 +156,9 @@ apiTest.describe(
       async ({ apiClient, esClient }) => {
         apiTest.setTimeout(SIGNAL_TIMEOUT_MS + 2 * MINUTE_MS);
 
-        const first = await apiClient.post<ReconcileResponse>(RECONCILE_RULES_PATH, {
-          headers,
-          body: {},
-          responseType: 'json',
-        });
-        expect(first.body).toMatchObject({ status: 'completed', failures: [] });
-        // The rules already match the knowledge indicators, whoever created them first: this
-        // call or the workflow the write triggered.
-        const second = await apiClient.post<ReconcileResponse>(RECONCILE_RULES_PATH, {
-          headers,
-          body: {},
-          responseType: 'json',
-        });
-        expect(second.body).toMatchObject({ status: 'completed', created: 0, failures: [] });
-
+        // The knowledge indicator write runs the reconcile workflow, which creates the rule as the
+        // detection account. The test can't call the route for it: Alerting v2 creates an API key
+        // for each rule, which a UIAM user's limited-by credentials refuse.
         const signal = await tickUntilSignal({ apiClient, esClient, headers, sourceId });
 
         expect(signal).toMatchObject({
@@ -185,6 +172,16 @@ apiTest.describe(
             details: { ki_id: KNOWLEDGE_INDICATOR_ID, change_point_type: 'step_change' },
           },
         });
+        // Written by the managed rule the workflow created for the knowledge indicator.
+        const rules = await apiClient.get(`${RULES_PATH}?per_page=100`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(rules).toHaveStatusCode(200);
+        const rule = (rules.body.items as Array<{ id: string; metadata: { name: string } }>).find(
+          ({ id }) => id === signal?.data.rule_id
+        );
+        expect(rule?.metadata.name).toContain(KI_TITLE);
       }
     );
   }

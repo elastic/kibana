@@ -21,6 +21,10 @@ export const servers: ScoutServerConfig = {
       '--xpack.nightshiftDetection.enabled=true',
       // The engine runs only as the detection service account, which needs the feature on.
       '--xpack.security.serviceAccounts.enabled=true',
+      // Alerting v2 grants an API key per rule. Under UIAM the service account gets one only
+      // through a Task Manager UIAM key, as in the inbound_hub config set.
+      '--xpack.task_manager.grant_uiam_api_keys=true',
+      '--feature_flags.overrides.taskManager.provisionUiamApiKeys=true',
     ],
   },
 };
