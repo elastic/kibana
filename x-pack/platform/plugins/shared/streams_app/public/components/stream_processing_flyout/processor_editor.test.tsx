@@ -46,6 +46,7 @@ const renderEditor = ({
 }: Partial<React.ComponentProps<typeof ProcessorEditor>> & { fetchCheck?: jest.Mock } = {}) => {
   const onCommit = jest.fn();
   const onCancel = jest.fn();
+  const onChange = jest.fn();
   render(
     <EuiProvider>
       <ProcessorEditor
@@ -56,11 +57,12 @@ const renderEditor = ({
         componentIds={new Set(['add-fields-1'])}
         onCommit={onCommit}
         onCancel={onCancel}
+        onChange={onChange}
         {...props}
       />
     </EuiProvider>
   );
-  return { onCommit, onCancel, fetchCheck };
+  return { onCommit, onCancel, onChange, fetchCheck };
 };
 
 /** Sets the path combo box in two synchronous events; typing it re-renders per keystroke. */
@@ -222,6 +224,56 @@ describe('ProcessorEditor', () => {
     fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
       target: { value: 'core' },
     });
+    await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorCancel'));
+    expect(mockOpenConfirm).toHaveBeenCalled();
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it('reports that the processor changed once a field is edited, not before', () => {
+    const { onChange } = renderEditor();
+    expect(onChange).not.toHaveBeenCalled();
+
+    fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
+      target: { value: 'core' },
+    });
+    expect(onChange).toHaveBeenCalled();
+  });
+
+  it('reports that the processor changed once its signals are edited', () => {
+    const { onChange } = renderEditor({
+      telemetry: ['logs', 'metrics'],
+      step: {
+        ...savedStep,
+        processor: { ...savedStep.processor, supported_telemetry: ['logs', 'metrics'] },
+      },
+    });
+    expect(onChange).not.toHaveBeenCalled();
+
+    removeSignal('Metrics', screen.getByTestId('streamsProcessingFlyoutEditorSignals'));
+    expect(onChange).toHaveBeenCalled();
+  });
+
+  it('counts JSON that does not parse yet as a change, so cancelling asks first', async () => {
+    mockOpenConfirm.mockResolvedValue(false);
+    const { onChange, onCancel } = renderEditor({
+      catalogue: {
+        ...catalogue,
+        definitions: catalogue.definitions.map((definition) =>
+          definition.type === 'add_fields'
+            ? {
+                ...definition,
+                fields: [{ name: 'payload', type: 'literal', literal_kinds: ['object'] }],
+              }
+            : definition
+        ),
+      },
+    });
+
+    fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-payload'), {
+      target: { value: '{"team":' },
+    });
+    expect(onChange).toHaveBeenCalled();
+
     await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorCancel'));
     expect(mockOpenConfirm).toHaveBeenCalled();
     expect(onCancel).not.toHaveBeenCalled();

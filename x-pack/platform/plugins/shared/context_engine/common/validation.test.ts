@@ -8,7 +8,7 @@
 import {
   parseIntervalMinutes,
   parseRelativeFromMinutes,
-  validateAbsoluteSignalWindow,
+  validateIsoDate,
   validateNonBlank,
   validateFeedbackAnalysisInterval,
   validateRelativeSignalWindow,
@@ -86,13 +86,13 @@ describe('validateNonBlank', () => {
   });
 });
 
-describe('validateAbsoluteSignalWindow', () => {
+describe('validateIsoDate', () => {
   it('accepts an ISO date', () => {
-    expect(validateAbsoluteSignalWindow('2026-01-31T00:00:00.000Z')).toBeUndefined();
+    expect(validateIsoDate('2026-01-31T00:00:00.000Z')).toBeUndefined();
   });
 
   it('rejects an unparseable date', () => {
-    expect(validateAbsoluteSignalWindow('last tuesday')).toMatch(/ISO 8601/);
+    expect(validateIsoDate('last tuesday')).toMatch(/ISO 8601/);
   });
 });
 
