@@ -5,23 +5,59 @@
  * 2.0.
  */
 
+import { MAX_BUILDER_TYPE_LENGTH } from '@kbn/alerting-v2-schemas';
 import { BuilderTypeRegistry } from './builder_type_registry';
-import { registerBuiltinBuilderTypes } from './register_builtin_builder_types';
 
 describe('BuilderTypeRegistry', () => {
-  it('rejects an empty type and a duplicate registration', () => {
-    const registry = new BuilderTypeRegistry();
+  let registry: BuilderTypeRegistry;
+
+  beforeEach(() => {
+    registry = new BuilderTypeRegistry();
+  });
+
+  it('rejects a blank type', () => {
     expect(() => registry.register({ type: ' ' })).toThrow(/non-empty/);
+  });
 
+  it('rejects a type longer than the schemas allow', () => {
+    const type = 'a'.repeat(MAX_BUILDER_TYPE_LENGTH + 1);
+
+    expect(() => registry.register({ type })).toThrow(/exceeds the maximum length/);
+  });
+
+  it('registers a type of the maximum allowed length', () => {
+    const type = 'a'.repeat(MAX_BUILDER_TYPE_LENGTH);
+
+    registry.register({ type });
+
+    expect(registry.get(type)).toEqual({ type });
+  });
+
+  it('trims the type it stores', () => {
     registry.register({ type: '  custom  ' });
-    expect(registry.get('custom')).toEqual({ type: 'custom' });
-    expect(registry.get('  custom  ')).toEqual({ type: 'custom' });
-    expect(() => registry.register({ type: 'custom' })).toThrow(/already registered/);
 
-    registerBuiltinBuilderTypes(registry);
-    expect(registry.get('threshold')?.type).toBe('threshold');
-    expect(registry.get('sequence')?.type).toBe('sequence');
-    expect(() => registry.register({ type: ' threshold ' })).toThrow(/already registered/);
-    expect(() => registerBuiltinBuilderTypes(registry)).toThrow(/already registered/);
+    expect(registry.get('custom')).toEqual({ type: 'custom' });
+  });
+
+  it('trims the type it looks up', () => {
+    registry.register({ type: 'custom' });
+
+    expect(registry.get('  custom  ')).toEqual({ type: 'custom' });
+  });
+
+  it('rejects a duplicate registration', () => {
+    registry.register({ type: 'custom' });
+
+    expect(() => registry.register({ type: 'custom' })).toThrow(/already registered/);
+  });
+
+  it('rejects a duplicate registration that differs only by surrounding whitespace', () => {
+    registry.register({ type: 'custom' });
+
+    expect(() => registry.register({ type: ' custom ' })).toThrow(/already registered/);
+  });
+
+  it('returns undefined for a type that was never registered', () => {
+    expect(registry.get('custom')).toBeUndefined();
   });
 });

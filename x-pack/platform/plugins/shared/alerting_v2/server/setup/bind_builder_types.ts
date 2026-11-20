@@ -14,7 +14,8 @@ import { BuilderTypeRegistry, registerBuiltinBuilderTypes } from '../lib/builder
  * Solution plugins register their own types via `AlertingServerSetup.registerBuilderType`.
  */
 export function bindBuilderTypes({ bind }: ContainerModuleLoadOptions) {
-  bind(OnSetup).toConstantValue((container) => {
-    registerBuiltinBuilderTypes(container.get(BuilderTypeRegistry));
-  });
+  bind(OnSetup).toResolvedValue(
+    (registry) => () => registerBuiltinBuilderTypes(registry),
+    [BuilderTypeRegistry]
+  );
 }

@@ -6,6 +6,7 @@
  */
 
 import { injectable } from 'inversify';
+import { MAX_BUILDER_TYPE_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { BuilderTypeDefinition } from './types';
 
 @injectable()
@@ -16,6 +17,11 @@ export class BuilderTypeRegistry {
     const type = definition.type.trim();
     if (!type) {
       throw new Error('Builder type must be a non-empty string');
+    }
+    if (type.length > MAX_BUILDER_TYPE_LENGTH) {
+      throw new Error(
+        `Builder type "${type}" exceeds the maximum length of ${MAX_BUILDER_TYPE_LENGTH} characters`
+      );
     }
     if (this.types.has(type)) {
       throw new Error(`Builder type "${type}" is already registered`);

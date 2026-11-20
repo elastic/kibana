@@ -10,7 +10,6 @@ import type { BuilderTypeRegistry } from './builder_type_registry';
 export const THRESHOLD_BUILDER_TYPE = 'threshold';
 export const SEQUENCE_BUILDER_TYPE = 'sequence';
 
-/** Registers the builders Kibana ships. Sequence has no create card; it still saves through the API. */
 export const registerBuiltinBuilderTypes = (registry: BuilderTypeRegistry): void => {
   registry.register({ type: THRESHOLD_BUILDER_TYPE });
   registry.register({ type: SEQUENCE_BUILDER_TYPE });

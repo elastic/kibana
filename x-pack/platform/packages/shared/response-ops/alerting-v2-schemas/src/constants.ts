@@ -74,6 +74,9 @@ export const MAX_BULK_ITEMS = 100;
 /** Maximum length for human-readable name fields (rule name, action policy name). */
 export const MAX_NAME_LENGTH = 256;
 
+/** Maximum length for a rule builder type. Enforced by the rule write schemas and by `registerBuilderType`. */
+export const MAX_BUILDER_TYPE_LENGTH = 64;
+
 /**
  * Maximum length for episode attachment display labels (`episode.label`).
  * Sized for `{ruleName} alert for {groupName}` where each name is at most

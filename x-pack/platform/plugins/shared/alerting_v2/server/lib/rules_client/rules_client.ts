@@ -833,6 +833,7 @@ export class RulesClient {
     if (parsed.artifacts !== undefined) {
       this.artifactTypeRegistry.validate(parsed.artifacts ?? undefined);
     }
+    this.assertBuilderType(parsed.metadata?.builder?.type);
 
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
@@ -860,8 +861,6 @@ export class RulesClient {
       updatedAt: nowIso,
       version: this.getNextVersion(existingAttrs.version),
     });
-
-    this.assertBuilderType(nextAttrs.metadata.builder_type);
 
     validateMergedRuleAttributes(id, nextAttrs);
 

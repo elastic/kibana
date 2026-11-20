@@ -1155,7 +1155,7 @@ describe('RulesClient', () => {
       expect(res.metadata.description).toBe('New description');
     });
 
-    it('rejects a name-only update of an unregistered builder type', async () => {
+    it('allows a name-only update of a rule whose builder type is no longer registered', async () => {
       const client = createClient();
 
       rulesSavedObjectService.get.mockResolvedValueOnce({
@@ -1166,11 +1166,36 @@ describe('RulesClient', () => {
         version: 'WzEsMV0=',
         id: 'rule-id-unknown-builder',
       });
+      rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-unknown-builder' });
+
+      await client.updateRule({
+        id: 'rule-id-unknown-builder',
+        data: { metadata: { description: 'Rename only' } },
+      });
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'rule-id-unknown-builder',
+          attrs: expect.objectContaining({
+            metadata: expect.objectContaining({ builder_type: 'not-a-builder' }),
+          }),
+        })
+      );
+    });
+
+    it('rejects an update that sets an unregistered builder type', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        attributes: baseSoAttrs,
+        version: 'WzEsMV0=',
+        id: 'rule-id-set-unknown-builder',
+      });
 
       await expect(
         client.updateRule({
-          id: 'rule-id-unknown-builder',
-          data: { metadata: { description: 'Rename only' } },
+          id: 'rule-id-set-unknown-builder',
+          data: { metadata: { builder: { type: 'not-a-builder' } } },
         })
       ).rejects.toMatchObject({
         isBoom: true,

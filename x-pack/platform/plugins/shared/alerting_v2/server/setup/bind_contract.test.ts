@@ -80,6 +80,14 @@ describe('bindContract', () => {
     });
   });
 
+  it('makes a type passed to registerBuilderType resolvable from the shared registry', () => {
+    const setup = container.get(AlertingSetupToken);
+
+    setup.registerBuilderType({ type: 'custom' });
+
+    expect(container.get(BuilderTypeRegistry).get('custom')).toEqual({ type: 'custom' });
+  });
+
   it('registers the opt-in passed to enableAlertStatusChanged', async () => {
     const setup = container.get(AlertingSetupToken);
     const optIns = container.get(AlertStatusChangedOptIns);
