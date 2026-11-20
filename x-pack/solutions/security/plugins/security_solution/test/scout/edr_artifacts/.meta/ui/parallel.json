@@ -1,5 +1,5 @@
 {
-  "sha1": "2ebe539869e4dcccbe9b4b26ced6153f55b0198c",
+  "sha1": "92e9285f927ad9286d7a88e4bf945b97aaf8dbef",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -367,7 +367,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 71,
+        "line": 72,
         "column": 54
       }
     },
@@ -381,7 +381,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 83,
+        "line": 84,
         "column": 9
       }
     },
@@ -395,7 +395,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 90,
+        "line": 91,
         "column": 29
       }
     },
@@ -409,8 +409,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 115,
-        "column": 55
+        "line": 158,
+        "column": 25
       }
     },
     {
@@ -505,7 +505,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 71,
+        "line": 72,
         "column": 54
       }
     },
@@ -521,7 +521,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 83,
+        "line": 84,
         "column": 9
       }
     },
@@ -537,7 +537,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 90,
+        "line": 91,
         "column": 29
       }
     },
@@ -553,8 +553,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 115,
-        "column": 55
+        "line": 158,
+        "column": 25
       }
     },
     {
@@ -569,8 +569,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 153,
-        "column": 25
+        "line": 165,
+        "column": 23
       }
     },
     {
@@ -585,8 +585,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 204,
-        "column": 31
+        "line": 187,
+        "column": 11
       }
     },
     {
@@ -761,7 +761,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 71,
+        "line": 72,
         "column": 54
       }
     },
@@ -777,7 +777,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 83,
+        "line": 84,
         "column": 9
       }
     },
@@ -793,7 +793,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 90,
+        "line": 91,
         "column": 29
       }
     },
@@ -809,8 +809,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 115,
-        "column": 55
+        "line": 158,
+        "column": 25
       }
     },
     {
