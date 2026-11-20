@@ -44,7 +44,11 @@ addOrReplaceArg(
   })
 );
 addOrReplaceArg(kbnServerArgs, 'xpack.security.authc.selector.enabled', 'false');
-addOrReplaceArg(kbnServerArgs, 'elasticsearch.hosts', 'https://localhost:9220');
+addOrReplaceArg(
+  kbnServerArgs,
+  'elasticsearch.hosts',
+  `https://localhost:${defaultConfig.servers.elasticsearch.port}`
+);
 addOrReplaceArg(kbnServerArgs, 'elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
 addOrReplaceArg(kbnServerArgs, 'server.ssl.clientAuthentication', 'optional');
 

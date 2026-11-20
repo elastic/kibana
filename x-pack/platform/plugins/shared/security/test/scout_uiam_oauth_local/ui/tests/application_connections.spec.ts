@@ -16,8 +16,6 @@ import {
   uniqueClientName,
 } from '../fixtures/oauth_seed';
 
-const MCP_RESOURCE = 'http://localhost:5620/api/agent_builder/mcp';
-
 test.describe(
   '[NON-MKI] Security — Application Connections management',
   { tag: ['@local-serverless-security_complete'] },
@@ -28,7 +26,8 @@ test.describe(
     const revokedConnectionIds: string[] = [];
     let expiredConnectionId: string;
 
-    test.beforeAll(async ({ apiClient, samlAuth, config: { organizationId } }) => {
+    test.beforeAll(async ({ apiClient, samlAuth, kbnUrl, config: { organizationId } }) => {
+      const mcpResource = kbnUrl.get('/api/agent_builder/mcp');
       authHeaders = await createUiamAuthHeaders(samlAuth);
 
       const meResponse = await apiClient.get('internal/security/me', {
@@ -53,7 +52,7 @@ test.describe(
           clientId,
           organizationId: organizationId!,
           userId,
-          resource: MCP_RESOURCE,
+          resource: mcpResource,
           name: `scout connection ${index}`,
           scopes: ['all'],
         });
@@ -73,7 +72,7 @@ test.describe(
           clientId,
           organizationId: organizationId!,
           userId,
-          resource: MCP_RESOURCE,
+          resource: mcpResource,
           name: `scout revoked connection ${index}`,
           scopes: ['all'],
           revoked: true,
@@ -92,7 +91,7 @@ test.describe(
         clientId,
         organizationId: organizationId!,
         userId,
-        resource: MCP_RESOURCE,
+        resource: mcpResource,
         name: 'scout expired connection',
         scopes: ['all'],
         expired: true,
