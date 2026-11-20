@@ -261,14 +261,21 @@ export const updateVendorApi = async ({
     }
   }
   for (const name of Object.keys(captures)) {
-    if ((notes[name] ?? previous?.sources[name]?.note) === undefined) {
+    const known = previous?.sources[name];
+    // The note of a source captured before says what capturing it took; any other note doesn't.
+    if (notes[name] === undefined && !known?.captured) {
       throw new Error(
         `--capture marks ${name} captured, which needs a note saying what capturing it took; pass --note ${name}="..."`
       );
     }
-    if ((toolFlags[name] ?? previous?.sources[name]?.tools) !== undefined) {
+    if ((toolFlags[name] ?? known?.tools) !== undefined) {
       throw new Error(
         `${name} is assembled from --tool documents, which are fetched without credentials; --capture takes a single document`
+      );
+    }
+    if (isMarkdownFormat(formatFlags[name] ?? known?.format)) {
+      throw new Error(
+        `${name} is a Markdown reference, read from an index and the pages it links to; --capture takes a single document`
       );
     }
   }

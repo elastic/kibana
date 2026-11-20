@@ -765,6 +765,53 @@ describe('protocol sources', () => {
       expect(await offlineCheck(mcpConnector)).toEqual({ changed: [], problems: [] });
     });
 
+    it('captures an MCP connector from a tools/list document, without a manifest or a fetch', async () => {
+      const neverFetch = async (url: string): Promise<string> => {
+        throw new Error(`Tried to fetch ${url}`);
+      };
+
+      const { changed, problems } = await updateVendorApi({
+        connector: mcpConnector,
+        directory,
+        sources: { main: MCP_SPEC_URL },
+        formats: { main: 'mcp' },
+        endpoints: { main: [MCP_ENDPOINT] },
+        captures: { main: JSON.stringify({ tools }) },
+        notes: { main: 'tools/list called with a developer token.' },
+        fetchText: neverFetch,
+        now,
+        log,
+      });
+
+      expect(problems).toEqual([]);
+      expect([...changed].sort()).toEqual([
+        'manifest.json',
+        path.join('snapshots', 'main.mcp.json'),
+      ]);
+      expect((await manifestOf()).sources.main).toMatchObject({
+        format: 'mcp',
+        url: MCP_SPEC_URL,
+        endpoints: [MCP_ENDPOINT],
+        captured: true,
+        note: 'tools/list called with a developer token.',
+      });
+      expect((await manifestOf()).operations).toEqual({
+        search: [{ source: 'main', name: 'tools/call search' }],
+      });
+      // The snapshot is usable on its own: offline and on a refresh, nothing is fetched.
+      expect(await offlineCheck(mcpConnector)).toEqual({ changed: [], problems: [] });
+      await expect(
+        updateVendorApi({
+          connector: mcpConnector,
+          directory,
+          refresh: true,
+          fetchText: neverFetch,
+          now,
+          log,
+        })
+      ).resolves.toMatchObject({ changed: [], problems: [] });
+    });
+
     it('keeps the tool documents of an MCP source in the manifest, and reads them again on a refresh', async () => {
       const TOOLS_URL = 'https://specs.example.com/tools/';
       documents = Object.fromEntries(

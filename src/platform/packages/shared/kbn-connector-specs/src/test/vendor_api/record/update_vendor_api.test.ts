@@ -624,6 +624,30 @@ actions:
       );
     });
 
+    it('does not take the note of a source that was not captured', async () => {
+      const manifest = await readJson('manifest.json');
+      manifest.sources.main.note = 'Pinned to the 2026 release.';
+      await fs.writeFile(
+        path.join(directory, 'manifest.json'),
+        serializeManifest(parseManifest(JSON.stringify(manifest)))
+      );
+
+      await expect(update({ captures: { main: selfContainedSpecYaml('2.0') } })).rejects.toThrow(
+        '--capture marks main captured, which needs a note'
+      );
+    });
+
+    it('does not capture a Markdown reference, which is read page by page', async () => {
+      await expect(
+        update({
+          formats: { main: 'brave-markdown' },
+          captures: { main: '# Reference' },
+          notes: { main: 'Captured.' },
+        })
+      ).rejects.toThrow('main is a Markdown reference');
+      expect(fetched).toEqual([]);
+    });
+
     it('only captures a source the manifest or --source names', async () => {
       await expect(
         update({ captures: { other: specYaml('2.0') }, notes: { other: 'Captured.' } })
