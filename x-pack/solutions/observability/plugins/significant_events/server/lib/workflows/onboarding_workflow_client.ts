@@ -286,6 +286,14 @@ const getConsumedExtractionDays = (execution: WorkflowExecutionDto | null): stri
 const isBudgetAllowed = (output: unknown): output is { allowed: true } =>
   typeof output === 'object' && output !== null && 'allowed' in output && output.allowed === true;
 
+const hasBothStepsEnabled = (inputs: unknown): boolean =>
+  typeof inputs === 'object' &&
+  inputs !== null &&
+  'skipFeatures' in inputs &&
+  inputs.skipFeatures === false &&
+  'skipQueries' in inputs &&
+  inputs.skipQueries === false;
+
 /** How long a cancel waits for the source's runs to stop. */
 const CANCEL_WAIT_TIMEOUT_MS = 30_000;
 const CANCEL_WAIT_POLL_INTERVAL_MS = 1_000;
@@ -795,6 +803,27 @@ export class SignificantEventsKIsOnboardingClient {
       request
     );
     return results[0];
+  }
+
+  /**
+   * Whether an execution ran both onboarding steps. The Sources page bulk actions start runs that
+   * only identify features or only generate queries on the same workflow, so a run being the
+   * newest of a source does not mean the source was fully onboarded. A run without readable inputs
+   * does not count. The execution list leaves the inputs out, hence the single read.
+   */
+  async isFullOnboardingRun({
+    id,
+    request,
+  }: {
+    id: string;
+    request: KibanaRequest;
+  }): Promise<boolean> {
+    const execution = await this.workflowExecutionService.getExecution({
+      request,
+      id,
+      spaceId: request.spaceId,
+    });
+    return hasBothStepsEnabled(execution?.context?.inputs);
   }
 
   private async resolveSourceSlug({

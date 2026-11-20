@@ -37,6 +37,7 @@ interface OnboardingClient {
   getLatestExecution?: (
     args: ISourceRunIdentity & { request: KibanaRequest }
   ) => Promise<WorkflowExecutionListItemDto | undefined>;
+  isFullOnboardingRun?: (args: { id: string; request: KibanaRequest }) => Promise<boolean>;
 }
 
 type CatalogKiClient = Pick<
@@ -249,7 +250,12 @@ export async function reconcileSourceRevision({
     const latestRun = cancelledRunsOfPreviousRevision
       ? undefined
       : await loadLatestExecution(sourceToSchedule);
-    if (latestRun && isRunOfRevision(latestRun, sourceToSchedule.esql_updated_at)) {
+    // A bulk action can start a run of one step only, which does not onboard the source.
+    if (
+      latestRun &&
+      isRunOfRevision(latestRun, sourceToSchedule.esql_updated_at) &&
+      (await onboardingClient?.isFullOnboardingRun?.({ id: latestRun.id, request }))
+    ) {
       // Recorded as the reservation only once it completed, so later runs (a denied one, say)
       // cannot make the source look unscheduled again. A run that is going may still fail or be
       // cancelled, and a reservation would then keep the query from ever being onboarded: it is

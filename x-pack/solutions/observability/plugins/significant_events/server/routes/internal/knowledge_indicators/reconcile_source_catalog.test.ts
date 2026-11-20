@@ -791,6 +791,7 @@ describe('durable source revision reconciliation', () => {
       cancelBySource: jest.fn(async () => null),
       getNonTerminalExecutions: jest.fn().mockResolvedValue([]),
       getLatestExecution: jest.fn().mockResolvedValue(undefined),
+      isFullOnboardingRun: jest.fn().mockResolvedValue(true),
     };
     const sourcesClient = { get: jest.fn(async () => ({ source })) } as unknown as SourcesClient;
     const reconcile = async () => {
@@ -1006,6 +1007,29 @@ describe('durable source revision reconciliation', () => {
 
       expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
       expect(state.onboardingReservedAt).toBe(Date.parse('2026-11-17T12:32:30.000Z'));
+    });
+
+    it('waits for a going run that only does one step, then schedules the full onboarding', async () => {
+      const { reconcile, state, onboardingClient, scheduleSourceOnboarding } = setupNewSource();
+      const partialRun = {
+        ...runningExecution('source-slug'),
+        startedAt: '2026-11-17T12:32:30.000Z',
+      };
+      onboardingClient.isFullOnboardingRun.mockResolvedValue(false);
+      onboardingClient.getLatestExecution.mockResolvedValue(partialRun);
+      onboardingClient.getNonTerminalExecutions.mockResolvedValue([partialRun]);
+
+      await expect(reconcile()).rejects.toThrow('previous onboarding');
+
+      onboardingClient.getLatestExecution.mockResolvedValue({
+        ...partialRun,
+        status: ExecutionStatus.COMPLETED,
+      });
+      onboardingClient.getNonTerminalExecutions.mockResolvedValue([]);
+      await reconcile();
+
+      expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+      expect(state.onboardingReservedAt).not.toBe(Date.parse(partialRun.startedAt));
     });
 
     it('waits for a run it just cancelled instead of taking it for a run of the new query', async () => {

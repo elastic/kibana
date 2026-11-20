@@ -842,6 +842,24 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
   });
 
+  describe('isFullOnboardingRun', () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    it.each([
+      [{ skipFeatures: false, skipQueries: false }, true],
+      [{ skipFeatures: true, skipQueries: false }, false],
+      [{ skipFeatures: false, skipQueries: true }, false],
+      [{ skipFeatures: false }, false],
+      [undefined, false],
+    ])('reads the run inputs %j as %s', async (inputs, expected) => {
+      const { client } = createClient({
+        getWorkflowExecution: jest.fn(async () => ({ context: { inputs } })),
+      });
+
+      await expect(client.isFullOnboardingRun({ id: 'run-1', request })).resolves.toBe(expected);
+    });
+  });
+
   describe('cancelBySource and the extraction limit', () => {
     const request = httpServerMock.createKibanaRequest();
     const budgetStep = (stepId: string, output: unknown, startedAt: string) => ({
