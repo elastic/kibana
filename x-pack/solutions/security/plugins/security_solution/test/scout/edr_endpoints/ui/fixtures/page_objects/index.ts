@@ -8,9 +8,11 @@
 import type { ScoutPage, SecurityPageObjects } from '@kbn/scout-security';
 import { createLazyPageObject } from '@kbn/scout-security';
 import { EndpointDetailsInsightsPage } from './endpoint_details_insights';
+import { EndpointListEmptyStatePage } from './endpoint_list_empty_state';
 
 export interface EndpointsPageObjects extends SecurityPageObjects {
   endpointDetailsInsights: EndpointDetailsInsightsPage;
+  endpointListEmptyState: EndpointListEmptyStatePage;
 }
 
 export const extendPageObjects = (
@@ -19,4 +21,5 @@ export const extendPageObjects = (
 ): EndpointsPageObjects => ({
   ...pageObjects,
   endpointDetailsInsights: createLazyPageObject(EndpointDetailsInsightsPage, page),
+  endpointListEmptyState: createLazyPageObject(EndpointListEmptyStatePage, page),
 });

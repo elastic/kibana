@@ -32,3 +32,4 @@ export const spaceTest = spaceBaseTest.extend<
 });
 
 export { tags } from '@kbn/scout-security';
+export { FEATURE_PRIVILEGES, getEndpointListRole } from './roles';
