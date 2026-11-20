@@ -14,7 +14,13 @@
         "source": "rest"
       }
     ],
-    "getServices": [],
+    "getServices": [
+      {
+        "method": "get",
+        "path": "/shodan/services",
+        "source": "rest"
+      }
+    ],
     "searchHosts": [
       {
         "method": "get",
@@ -42,14 +48,5 @@
       "format": "openapi",
       "url": "https://developer.shodan.io/api/openapi.json"
     }
-  },
-  "unmatched": {
-    "getServices": [
-      {
-        "method": "get",
-        "path": "/shodan/services",
-        "reason": "Documented in Shodan's REST API reference (https://developer.shodan.io/api, \"List all services that Shodan crawls\") but missing from its OpenAPI document, which lists /shodan/ports and /shodan/protocols only"
-      }
-    ]
   }
 }
