@@ -14,8 +14,8 @@
  * @param {(any|any[])} b the value to return if `cond` is false
  * @return {(any|any[])} `a` if `cond` is true, otherwise `b`. TinyMath evaluates both `a` and `b` first, so an error in either one stops the expression. For example, `ifelse(5 < 6, 1, 1 / 0)` throws `'Cannot divide by 0'`. Comparing arrays gives one boolean. `ifelse` therefore picks one value for the whole array, not one per element.
  * @throws `'Condition clause is of the wrong type'` if `cond` is not a boolean
- * @throws `'Missing a value'` if `a` is not provided
- * @throws `'Missing b value'` if `b` is not provided
+ * @throws `'Missing a value'` if `a` is not provided or is null
+ * @throws `'Missing b value'` if `b` is not provided or is null
  * @example
  * ifelse(5 > 6, 1, 0) // returns 0
  * ifelse(1 == 1, 7, 5) // returns 7

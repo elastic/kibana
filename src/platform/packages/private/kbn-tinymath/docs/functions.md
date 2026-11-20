@@ -1,5 +1,5 @@
 # TinyMath Functions
-This document provides detailed information about the functions available in Tinymath and lists what parameters each function accepts, the return value of that function, and examples of how each function behaves. Most of the functions below accept arrays and apply JavaScript Math methods to each element of that array. For the functions that accept multiple arrays as parameters, the function generally does calculation index by index. Any function below can be wrapped by another function as long as the return type of the inner function matches the acceptable parameter type of the outer function. An expression can't contain an array directly, so the examples with arrays show what each function returns for array values from the data that the expression runs on.
+This document provides detailed information about the functions available in Tinymath and lists what parameters each function accepts, the return value of that function, and examples of how each function behaves. Most of the functions below accept arrays and apply JavaScript Math methods to each element of that array. For the functions that accept multiple arrays as parameters, the function generally does calculation index by index. Any function below can be wrapped by another function as long as the return type of the inner function matches the acceptable parameter type of the outer function. An expression can't contain an array directly, so the examples with arrays show what each function returns for array values from the data that the expression runs on. If a value isn't a number, such as null, most functions return `NaN` instead of running. The exceptions are `count`, `defaults`, `first`, `ifelse`, `last`, `size`, and `unique`.
 
 ## _abs(_ _a_ _)_
 Calculates the absolute value of a number. For arrays, the function will be applied index-wise to each element.
@@ -79,7 +79,7 @@ Restricts a value to a given range. Returns `min` if the value is below it, `max
 | min | <code>number</code> \| <code>Array.&lt;number&gt;</code> | The minimum value this function returns. |
 | max | <code>number</code> \| <code>Array.&lt;number&gt;</code> | The maximum value this function returns. |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The closest value between `min` (inclusive) and `max` (inclusive). Returns an array with values greater than or equal to `min` and less than or equal to `max` at each index if `a`, `min`, or `max` is an array. If you leave out `min` or `max`, the result is `NaN`, or an array of `NaN` values if `a` is an array. If `a` and `min` are both arrays and `max` is a number, each element of the result is `NaN`.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The closest value between `min` (inclusive) and `max` (inclusive). Returns an array with values greater than or equal to `min` and less than or equal to `max` at each index if `a`, `min`, or `max` is an array. If you leave out `min` or `max`, the result is `NaN`, or an array of `NaN` values if `a` or `min` is an array. If `a` and `min` are both arrays and `max` is a number, each element of the result is `NaN`.  
 **Throws**:
 
 - `'Array length mismatch'` if `a`, `min`, or `max` are arrays of different lengths
@@ -180,8 +180,8 @@ Returns one of two values, depending on a condition.
 **Throws**:
 
 - `'Condition clause is of the wrong type'` if `cond` is not a boolean
-- `'Missing a value'` if `a` is not provided
-- `'Missing b value'` if `b` is not provided
+- `'Missing a value'` if `a` is not provided or is null
+- `'Missing b value'` if `b` is not provided or is null
 
 **Example**  
 ```js
@@ -290,15 +290,15 @@ cube([3, 4, 5]) // returns [27, 64, 125]
 ```
 ***
 ## _defaults(_ _a_,  _b_ _)_
-Replaces null or undefined values with a fallback value. For arrays, the function will be applied index-wise to each element.
+Replaces null values with a fallback value. For arrays, the function will be applied index-wise to each element and also replaces undefined elements, such as the value of a row that doesn&#x27;t have the column.
 
 
 | Param | Type | Description |
 | --- | --- | --- |
-| a | <code>any</code> \| <code>Array.&lt;any&gt;</code> | a value or an array of values that can include null or undefined values |
-| b | <code>any</code> | the value to use in place of null or undefined |
+| a | <code>any</code> \| <code>Array.&lt;any&gt;</code> | a value or an array of values that can include null |
+| b | <code>any</code> | the value to use in place of null |
 
-**Returns**: <code>any</code> \| <code>Array.&lt;any&gt;</code> - `a` if it isn't null or undefined, otherwise `b`. Returns an array with `b` in place of each null or undefined element if `a` is an array.  
+**Returns**: <code>any</code> \| <code>Array.&lt;any&gt;</code> - `a` if it isn't null, otherwise `b`. Returns an array with `b` in place of each null or undefined element if `a` is an array.  
 **Example**  
 ```js
 defaults(5, 1) // returns 5
@@ -659,7 +659,7 @@ radtodeg([0, 1.5707963267948966, 3.141592653589793, 6.283185307179586]) // retur
 ```
 ***
 ## _random(_ _a_,  _b_ _)_
-Generates a random number within the given range where the lower bound is inclusive and the upper bound is exclusive. If no numbers are passed in, it will return a number between 0 and 1. If only one number is passed in, it will return a number between 0 and the number passed in. If both bounds are equal, it returns that value.
+Generates a random number within the given range where the lower bound is inclusive and the upper bound is exclusive. If no numbers are passed in, it will return a number between 0 and 1. If only one number is passed in, it will return a number between 0 and the number passed in. If both bounds are the same finite number, as in `random(0)` or `random(5, 5)`, it returns that number.
 
 
 | Param | Type | Description |
@@ -700,7 +700,7 @@ range([1, 9], 4, [3, 5]) // returns [range([1, 4, 3]), range([9, 4, 5])] = [3, 5
 ```
 ***
 ## _round(_ _a_,  _b_ _)_
-Rounds a number to the nearest integer by default, or to a number of decimal places if you pass `b`. For arrays, the function will be applied index-wise to each element.
+Rounds a number to the nearest integer by default, or to a number of decimal places if you pass `b`. A value exactly halfway rounds toward positive infinity. For arrays, the function will be applied index-wise to each element.
 
 
 | Param | Type | Description |
@@ -715,6 +715,8 @@ round(1.2) // returns 1
 round(-10.51) // returns -11
 round(-10.1, 2) // returns -10.1
 round(10.93745987, 4) // returns 10.9375
+round(2.5) // returns 3
+round(-2.5) // returns -2
 round([2.9234, 5.1234, 3.5234, 4.49234324], 2) // returns [2.92, 5.12, 3.52, 4.49]
 ```
 ***

@@ -17,7 +17,7 @@ const findClamp = (a, min, max) => {
  * @param {(number|number[])} a a number or an array of numbers
  * @param {(number|number[])} min The minimum value this function returns.
  * @param {(number|number[])} max The maximum value this function returns.
- * @return {(number|number[])} The closest value between `min` (inclusive) and `max` (inclusive). Returns an array with values greater than or equal to `min` and less than or equal to `max` at each index if `a`, `min`, or `max` is an array. If you leave out `min` or `max`, the result is `NaN`, or an array of `NaN` values if `a` is an array. If `a` and `min` are both arrays and `max` is a number, each element of the result is `NaN`.
+ * @return {(number|number[])} The closest value between `min` (inclusive) and `max` (inclusive). Returns an array with values greater than or equal to `min` and less than or equal to `max` at each index if `a`, `min`, or `max` is an array. If you leave out `min` or `max`, the result is `NaN`, or an array of `NaN` values if `a` or `min` is an array. If `a` and `min` are both arrays and `max` is a number, each element of the result is `NaN`.
  * @throws `'Array length mismatch'` if `a`, `min`, or `max` are arrays of different lengths
  * @throws `'Min must be less than max'` if `max` is less than `min`
  *
