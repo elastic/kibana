@@ -36,4 +36,12 @@ describe('replaceVars(str, args, vars)', () => {
     const template = `# {{ ${emptyLabel}.d.raw }} {{ ${emptyLabel}.d.raw }}`;
     expect(replaceVars(template, args, vars)).toEqual('# 100 100');
   });
+
+  test('escapes array values the same way as string values', () => {
+    const vars = {
+      count: { last: { formatted: 'value=42' }, data: { formatted: [['Nov 20', 'value=42']] } },
+    };
+    const template = '`{{count.last.formatted}}` `{{count.data.formatted}}`';
+    expect(replaceVars(template, {}, vars)).toEqual('`value&#x3D;42` `Nov 20,value&#x3D;42`');
+  });
 });
