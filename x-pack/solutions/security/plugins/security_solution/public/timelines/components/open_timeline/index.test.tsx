@@ -219,6 +219,11 @@ describe('StatefulOpenTimeline', () => {
 
       expect(mockNavigateToUrl).toHaveBeenCalledTimes(1);
       expect(mockNavigateToUrl).toHaveBeenCalledWith(`/timelines/${TimelineTypeEnum.template}`);
+      await waitFor(() => {
+        expect(mockFetchAllTimeline).toHaveBeenLastCalledWith(
+          expect.objectContaining({ timelineType: TimelineTypeEnum.template })
+        );
+      });
     });
 
     test("should selecting correct timelines' filter", () => {
