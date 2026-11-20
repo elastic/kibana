@@ -17,6 +17,7 @@ import { expect } from '@kbn/scout/ui';
  */
 export class DataFrameAnalyticsPage {
   private readonly codeEditor: KibanaCodeEditorWrapper;
+  private histogramRequestFinished?: Promise<void>;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
@@ -31,6 +32,21 @@ export class DataFrameAnalyticsPage {
           response.request().postData()?.includes(requestBodyFragment) === true),
       { timeout: 30_000 }
     );
+  }
+
+  private waitForHistogramRequest(): Promise<void> {
+    if (this.histogramRequestFinished === undefined) {
+      const histogramRequestUrl = (url: string) => url.includes('/get_field_histograms/');
+      this.histogramRequestFinished = Promise.race([
+        this.page
+          .waitForResponse((response) => histogramRequestUrl(response.url()))
+          .then(() => undefined),
+        this.page
+          .waitForEvent('requestfailed', (request) => histogramRequestUrl(request.url()))
+          .then(() => undefined),
+      ]);
+    }
+    return this.histogramRequestFinished;
   }
 
   // ── Navigation ────────────────────────────────────────────────────────────
@@ -530,6 +546,10 @@ export class DataFrameAnalyticsPage {
 
     // The histogram toggle stays disabled until `chartsVisible` resolves from the row count.
     const histogramButton = this.page.testSubj.locator('mlExplorationDataGridHistogramButton');
+    const histogramRequestFinished =
+      (await histogramButton.getAttribute('aria-pressed')) === 'true'
+        ? this.waitForHistogramRequest()
+        : undefined;
     await expect(histogramButton).toBeEnabled();
 
     // Wait for any FI cell and capture exact row + column ids so the locator is unique
@@ -558,9 +578,8 @@ export class DataFrameAnalyticsPage {
       columnId: string;
     };
 
-    // With the charts on, the header cell is only final once its chart has rendered.
     if ((await histogramButton.getAttribute('aria-pressed')) === 'true') {
-      await this.page.testSubj.locator(`mlDataGridChart-${columnId}`).waitFor({ state: 'visible' });
+      await (histogramRequestFinished ?? this.waitForHistogramRequest());
     }
 
     const featureImportanceCell = dataGrid.locator(
