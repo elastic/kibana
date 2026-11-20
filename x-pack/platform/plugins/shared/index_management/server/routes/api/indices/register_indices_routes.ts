@@ -13,12 +13,14 @@ import { registerGetRoute } from './register_get_route';
 import { registerVectorCountRoute } from './register_vector_count_route';
 
 import { registerIndicesGet } from './indices_get';
+import { registerUserStatusPrivilegeRoutes } from './register_user_status_route';
 
 export function registerIndicesRoutes(dependencies: RouteDependencies) {
   registerListRoute(dependencies);
   registerReloadRoute(dependencies);
   registerGetRoute(dependencies);
   registerIndicesGet(dependencies);
+  registerUserStatusPrivilegeRoutes(dependencies);
 
   if (dependencies.config.isVectorCountEnabled) {
     registerVectorCountRoute(dependencies);

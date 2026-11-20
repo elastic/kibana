@@ -8,11 +8,21 @@
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import type {
+  EsqlQueryResponse,
   IndicesStatsIndicesStats,
   IndicesStatsResponse,
   MappingProperty,
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
+import { lastValueFrom } from 'rxjs';
+import { ES_SEARCH_STRATEGY, ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import type {
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchGeneric,
+} from '@kbn/search-types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ReindexService } from '@kbn/reindex-service-plugin/public';
@@ -55,14 +65,17 @@ import type {
 } from '../../../common';
 import type { SnapshotRepositoriesInfo } from '../../../common/types/snapshot_repositories';
 import { buildIndexDocCountQuery, toIndexDocCounts } from '../../../common/lib';
+import type { Error as EsUiError, SendRequestResponse } from '../../shared_imports';
 import { useRequest, sendRequest } from './use_request';
-import { esRequest, runForIndexChunks, sendEsRequest } from './es_request';
+import { EsRequestError, esRequest, runForIndexChunks, sendEsRequest } from './es_request';
 import { httpService } from './http';
 import type { UiMetricService } from './ui_metric';
 import type { FieldFromIndicesRequest } from '../../../common';
 import type { Fields } from '../components/mappings_editor/types';
 import type { UserStartPrivilegesResponse } from '../../../server/lib/types';
 import { indexDataEnricher } from '../../services';
+
+type IndexDocCountRequest = IKibanaSearchRequest<{ query: string; allow_partial_results: boolean }>;
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
@@ -592,27 +605,35 @@ export function loadIndex(indexName: string) {
   });
 }
 
-const queryIndexDocCounts = async (
-  client: EsClient,
+export const fetchIndexDocCounts = async (
+  search: ISearchGeneric,
   indexNames: string[],
   signal?: AbortSignal
 ): Promise<Record<string, number>> => {
-  const result = await client.esql.query(
-    {
-      query: buildIndexDocCountQuery(indexNames),
-      // return partial results instead of failing the whole request when some shards are unavailable
-      allow_partial_results: true,
-    },
-    { signal }
+  const { rawResponse } = await lastValueFrom(
+    search<IndexDocCountRequest, IKibanaSearchResponse<EsqlQueryResponse>>(
+      {
+        params: {
+          query: buildIndexDocCountQuery(indexNames),
+          // return partial results instead of failing the whole request when some shards are unavailable
+          allow_partial_results: true,
+        },
+      },
+      { abortSignal: signal, strategy: ESQL_SEARCH_STRATEGY }
+    )
   );
-  return toIndexDocCounts(result, indexNames);
+  return toIndexDocCounts(rawResponse, indexNames);
 };
 
-export const fetchIndexDocCounts = (indexNames: string[], signal?: AbortSignal) =>
-  esRequest((client) => queryIndexDocCounts(client, indexNames, signal));
-
-export async function loadIndexDocCount(indexName: string) {
-  return sendEsRequest((client) => queryIndexDocCounts(client, [indexName]));
+export async function loadIndexDocCount(
+  search: ISearchGeneric,
+  indexName: string
+): Promise<SendRequestResponse<Record<string, number>, EsUiError>> {
+  try {
+    return { data: await fetchIndexDocCounts(search, [indexName]), error: null };
+  } catch (error) {
+    return { data: null, error: new EsRequestError(error).body };
+  }
 }
 
 export async function loadIndexVectorCount(indexName: string) {
@@ -678,23 +699,29 @@ export function createIndex(indexName: string, indexMode?: string) {
   );
 }
 
-export function useLoadIndexDocumentsSample(indexName: string) {
+export function useLoadIndexDocumentsSample(search: ISearchGeneric, indexName: string) {
   return useQuery<{ results: SearchHit[] }, Error>({
     queryKey: ['indexDocumentsSample', indexName],
-    queryFn: () =>
-      esRequest(async (client) => {
-        const response = await client.search({
-          index: indexName,
-          size: DEFAULT_DOCUMENT_PAGE_SIZE,
-          track_total_hits: false,
-          _source: {
-            includes: ['*', '_inference_fields'],
+    queryFn: async ({ signal }) => {
+      const { rawResponse } = await lastValueFrom(
+        search<IEsSearchRequest, IEsSearchResponse>(
+          {
+            params: {
+              index: indexName,
+              size: DEFAULT_DOCUMENT_PAGE_SIZE,
+              track_total_hits: false,
+              _source: {
+                includes: ['*', '_inference_fields'],
+              },
+              fields: ['*'],
+              sort: [{ _doc: { order: 'desc' } }],
+            },
           },
-          fields: ['*'],
-          sort: [{ _doc: { order: 'desc' } }],
-        });
-        return { results: response.hits.hits };
-      }),
+          { abortSignal: signal, strategy: ES_SEARCH_STRATEGY }
+        )
+      );
+      return { results: rawResponse.hits.hits };
+    },
   });
 }
 
@@ -740,19 +767,8 @@ export const getReindexStatus = (sourceIndexName: string) => {
 };
 
 export const useUserPrivileges = (indexName: string) => {
-  return useQuery<UserStartPrivilegesResponse, Error>({
-    queryKey: ['indexUserPrivileges', indexName],
-    queryFn: () =>
-      esRequest(async (client) => {
-        const response = await client.security.hasPrivileges({
-          index: [{ names: [indexName], privileges: ['manage', 'delete'] }],
-        });
-        return {
-          privileges: {
-            canManageIndex: response.index?.[indexName]?.manage ?? false,
-            canDeleteDocuments: response.index?.[indexName]?.delete ?? false,
-          },
-        };
-      }),
+  return useRequest<UserStartPrivilegesResponse>({
+    path: `${API_BASE_PATH}/start_privileges/${encodeURIComponent(indexName)}`,
+    method: 'get',
   });
 };

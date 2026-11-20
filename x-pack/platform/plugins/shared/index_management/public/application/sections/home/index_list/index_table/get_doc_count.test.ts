@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { fetchIndexDocCounts } from '../../../../services/api';
+import { createSearchMock } from '../../../../services/search.mock';
 import { docCountApi, RequestResultType } from './get_doc_count';
 
 jest.mock('../../../../services/api', () => ({
@@ -13,6 +15,7 @@ jest.mock('../../../../services/api', () => ({
 }));
 
 const fetchIndexDocCountsMock = jest.mocked(fetchIndexDocCounts);
+const search = createSearchMock(httpServiceMock.createSetupContract());
 
 const flushPromises = async () => {
   // Ensure we flush any chained microtasks created by Promises in rxjs operators.
@@ -45,7 +48,7 @@ describe('docCountApi', () => {
   it('buffers requests within 100ms and posts a single batched request', async () => {
     fetchIndexDocCountsMock.mockResolvedValue({});
 
-    const api = docCountApi();
+    const api = docCountApi(search);
 
     const emissions: Array<Record<string, any>> = [];
     const sub = api.getObservable().subscribe((v) => emissions.push(v));
@@ -58,6 +61,7 @@ describe('docCountApi', () => {
 
     expect(fetchIndexDocCountsMock).toHaveBeenCalledTimes(1);
     expect(fetchIndexDocCountsMock).toHaveBeenCalledWith(
+      search,
       ['index-a', 'index-b'],
       expect.any(AbortSignal)
     );
@@ -76,7 +80,7 @@ describe('docCountApi', () => {
       .mockResolvedValueOnce({ 'index-a': 1 })
       .mockResolvedValueOnce({ 'index-b': 2 });
 
-    const api = docCountApi();
+    const api = docCountApi(search);
 
     const emissions: Array<Record<string, any>> = [];
     const sub = api.getObservable().subscribe((v) => emissions.push(v));
@@ -106,7 +110,7 @@ describe('docCountApi', () => {
       .mockResolvedValueOnce({ 'index-a': 3 })
       .mockRejectedValueOnce(new Error('boom'));
 
-    const api = docCountApi();
+    const api = docCountApi(search);
 
     const emissions: Array<Record<string, any>> = [];
     const sub = api.getObservable().subscribe((v) => emissions.push(v));
@@ -133,7 +137,7 @@ describe('docCountApi', () => {
   it('replays the latest accumulated map to a late subscriber without issuing a new request', async () => {
     fetchIndexDocCountsMock.mockResolvedValue({ 'index-a': 42 });
 
-    const api = docCountApi();
+    const api = docCountApi(search);
 
     // Early subscriber triggers the first batch.
     const earlyEmissions: Array<Record<string, any>> = [];
@@ -168,7 +172,7 @@ describe('docCountApi', () => {
     const d = deferred<Record<string, number>>();
     fetchIndexDocCountsMock.mockReturnValue(d.promise);
 
-    const api = docCountApi();
+    const api = docCountApi(search);
 
     const emissions: Array<Record<string, any>> = [];
     const sub = api.getObservable().subscribe((v) => emissions.push(v));
@@ -178,7 +182,7 @@ describe('docCountApi', () => {
     await flushPromises();
 
     expect(fetchIndexDocCountsMock).toHaveBeenCalledTimes(1);
-    const signal = fetchIndexDocCountsMock.mock.calls[0]?.[1];
+    const signal = fetchIndexDocCountsMock.mock.calls[0]?.[2];
     expect(signal).toBeInstanceOf(AbortSignal);
 
     api.abort();

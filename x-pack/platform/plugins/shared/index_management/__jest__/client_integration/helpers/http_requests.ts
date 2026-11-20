@@ -282,40 +282,37 @@ const registerHttpRequestMockHelpers = (
 
   const setUserStartPrivilegesResponse = (
     indexName: string,
-    response?: {
-      privileges: { canManageIndex: boolean; canDeleteDocuments?: boolean };
-    },
+    response?: HttpResponse,
     error?: ResponseError
-  ) =>
-    mockEsResponse(
-      'POST',
-      '_security/user/_has_privileges',
-      {
-        index: {
-          [indexName]: {
-            manage: response?.privileges.canManageIndex ?? false,
-            delete: response?.privileges.canDeleteDocuments ?? false,
-          },
-        },
-      },
+  ) => {
+    mockResponse(
+      'GET',
+      `${API_BASE_PATH}/start_privileges/${encodeURIComponent(indexName)}`,
+      response,
       error
     );
+  };
 
   const setLoadIndexDocumentsSampleResponse = (
     indexName: string,
     response?: { results: unknown[] },
     error?: ResponseError
   ) =>
-    mockEsResponse(
+    mockResponse(
       'POST',
-      `${indexName}/_search`,
-      { hits: { hits: response?.results ?? [] } },
+      '/internal/search/es',
+      { rawResponse: { hits: { hits: response?.results ?? [] } } },
       error
     );
 
   /** `response` maps index names to their document counts. */
   const setLoadIndexDocCountResponse = (response?: Record<string, number>, error?: ResponseError) =>
-    mockEsResponse('POST', '_query', toEsqlDocCountResponse(response), error);
+    mockResponse(
+      'POST',
+      '/internal/search/esql',
+      { rawResponse: toEsqlDocCountResponse(response) },
+      error
+    );
 
   setLoadIndexDocCountResponse({});
 

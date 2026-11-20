@@ -42,6 +42,7 @@ import { AppContextProvider } from '../../../public/application/app_context';
 import { httpService } from '../../../public/application/services/http';
 import { esClientService } from '../../../public/application/services/es_client';
 import { createEsClientMock } from '../../../public/application/services/es_client.mock';
+import { createDataMock } from '../../../public/application/services/search.mock';
 import { breadcrumbService } from '../../../public/application/services/breadcrumbs';
 import { documentationService } from '../../../public/application/services/documentation';
 import { NotificationService } from '../../../public/application/services/notification';
@@ -111,6 +112,7 @@ const createAppDependencies = (httpSetup: HttpSetup): AppDependencies => {
       cloud: cloudMock.createSetup(),
       reindexService: { reindexService: new ReindexService(httpSetup) },
       esClient: createEsClientMock(httpSetup),
+      data: createDataMock(httpSetup),
     },
     // Default stateful configuration
     config: {

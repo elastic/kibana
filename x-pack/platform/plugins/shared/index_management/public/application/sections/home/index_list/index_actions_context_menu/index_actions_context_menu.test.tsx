@@ -75,6 +75,7 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
       streams: undefined,
       reindexService: {} as unknown as AppDependencies['plugins']['reindexService'],
       esClient: {} as unknown as AppDependencies['plugins']['esClient'],
+      data: {} as unknown as AppDependencies['plugins']['data'],
     },
     services: {
       // Only actions are used here

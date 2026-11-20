@@ -10,6 +10,7 @@
 import API from '@elastic/elasticsearch/lib/api/index';
 import { coreMock } from '@kbn/core/public/mocks';
 import { EsClientPlugin } from '../plugin';
+import { bulkApi } from './bulk';
 import type { EsClient } from './types';
 
 const ELASTICSEARCH_WARNING = '299 Elasticsearch-9.0.0 "this request accesses system indices"';
@@ -47,25 +48,24 @@ const fetchError = (status: number, body?: object) => {
 const { signal } = new AbortController();
 
 describe('WHEN using the elasticsearch-js client through the proxy', () => {
-  it('SHOULD expose every elasticsearch-js API', async () => {
+  it('SHOULD expose only the enabled elasticsearch-js APIs', async () => {
     const { client } = await setup();
-    const apiNames = Object.keys(Object.getOwnPropertyDescriptors(API.prototype)).filter(
-      (name) => name !== 'constructor'
-    );
+    const enabledApiNames = ['count', 'delete', 'get', 'indices'];
+    const apiNames = Object.keys(Object.getOwnPropertyDescriptors(API.prototype));
 
-    expect(apiNames.length).toBeGreaterThan(0);
-    expect(apiNames.filter((name) => !(name in client))).toEqual([]);
+    expect(enabledApiNames.filter((name) => !apiNames.includes(name))).toEqual([]);
+    expect(Object.keys(client).sort()).toEqual([...enabledApiNames, 'transport'].sort());
   });
 
-  it('SHOULD send searches as POST requests with a JSON body', async () => {
+  it('SHOULD send queries as POST requests with a JSON body', async () => {
     const { client, fetch } = await setup();
-    fetch.mockResolvedValue(okResponse({ hits: { hits: [] } }));
+    fetch.mockResolvedValue(okResponse({ count: 0 }));
 
-    const response = await client.search({ index: 'my-index', query: { match_all: {} } });
+    const response = await client.count({ index: 'my-index', query: { match_all: {} } });
 
-    expect(response).toEqual({ hits: { hits: [] } });
+    expect(response).toEqual({ count: 0 });
     expect(fetch).toHaveBeenCalledWith(
-      '/internal/es_client/my-index/_search',
+      '/internal/es_client/my-index/_count',
       expect.objectContaining({
         method: 'POST',
         body: '{"query":{"match_all":{}}}',
@@ -108,9 +108,9 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
     ],
     [
       'send list query parameters as comma-separated values',
-      (client) => client.search({ index: 'my-index', _source_includes: ['a', 'b'] }),
-      '/my-index/_search',
-      { query: { _source_includes: 'a,b' } },
+      (client) => client.count({ index: 'my-index', expand_wildcards: ['open', 'hidden'] }),
+      '/my-index/_count',
+      { query: { expand_wildcards: 'open,hidden' } },
     ],
     [
       'call namespaced APIs',
@@ -127,18 +127,18 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
     [
       'let the caller replace the product origin regardless of header case',
       (client) =>
-        client.search({ index: 'my-index' }, { headers: { 'X-Elastic-Product-Origin': '' } }),
-      '/my-index/_search',
+        client.count({ index: 'my-index' }, { headers: { 'X-Elastic-Product-Origin': '' } }),
+      '/my-index/_count',
       { headers: { 'x-elastic-product-origin': '' } },
     ],
     [
       'pass abort signals and normalize the content type header',
       (client) =>
-        client.search(
+        client.count(
           { index: 'my-index' },
           { signal, headers: { 'content-type': 'application/vnd.elasticsearch+json' } }
         ),
-      '/my-index/_search',
+      '/my-index/_count',
       {
         signal,
         headers: { ...KIBANA_ORIGIN, 'Content-Type': 'application/vnd.elasticsearch+json' },
@@ -147,7 +147,7 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
     [
       'send bulk operations as ndjson',
       (client) =>
-        client.bulk({
+        bulkApi.call(client, {
           index: 'my-index',
           refresh: true,
           operations: [{ index: { _id: '1' } }, { message: 'hello' }],
@@ -162,26 +162,26 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
     ],
     [
       'send a string bulk body as is to the root bulk API',
-      (client) => client.bulk({ body: '{"delete":{"_index":"my-index","_id":"1"}}\n' }),
+      (client) => bulkApi.call(client, { body: '{"delete":{"_index":"my-index","_id":"1"}}\n' }),
       '/_bulk',
       { body: '{"delete":{"_index":"my-index","_id":"1"}}\n', query: {} },
     ],
     [
       'send string bulk lines as is',
       (client) =>
-        client.bulk<string>({
+        bulkApi.call(client, {
           operations: ['{"delete":{"_id":"1"}}', { delete: { _id: '2' } }],
         }),
       '/_bulk',
       { body: '{"delete":{"_id":"1"}}\n{"delete":{"_id":"2"}}\n' },
     ],
-    [
-      'send multi-search bodies as ndjson',
-      (client) =>
-        client.msearch({ searches: [{ index: 'my-index' }, { query: { match_all: {} } }] }),
-      '/_msearch',
-      { body: '{"index":"my-index"}\n{"query":{"match_all":{}}}\n', headers: NDJSON },
-    ],
+    // [
+    //   'send multi-search bodies as ndjson',
+    //   (client) =>
+    //     client.msearch({ searches: [{ index: 'my-index' }, { query: { match_all: {} } }] }),
+    //   '/_msearch',
+    //   { body: '{"index":"my-index"}\n{"query":{"match_all":{}}}\n', headers: NDJSON },
+    // ],
     [
       'merge string and object query strings of raw requests, skipping undefined values',
       (client) =>
@@ -268,7 +268,7 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
     ],
     [
       'bulk calls without operations',
-      (client) => client.bulk({ index: 'my-index' }),
+      (client) => bulkApi.call(client, { index: 'my-index' }),
       'Missing required parameter [operations]',
     ],
     [
@@ -349,7 +349,11 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
       const { client, fetch } = await setup();
       fetch.mockResolvedValue(okResponse({ errors: false, items: [], took: 1 }));
 
-      const result = await client.bulk({ operations: [{ delete: { _id: '1' } }] }, { meta: true });
+      const result = await bulkApi.call(
+        client,
+        { operations: [{ delete: { _id: '1' } }] },
+        { meta: true }
+      );
 
       expect(result).toMatchObject({ statusCode: 200, body: { errors: false } });
     });
@@ -466,7 +470,7 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
       const error = fetchError(403, { error: { type: 'security_exception' } });
       fetch.mockRejectedValue(error);
 
-      await expect(client.search({ index: 'secret' })).rejects.toBe(error);
+      await expect(client.count({ index: 'secret' })).rejects.toBe(error);
     });
 
     it('SHOULD resolve with the error body WHEN the status is ignored', async () => {
@@ -486,7 +490,7 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
       });
       fetch.mockRejectedValue(error);
 
-      await expect(client.search({ index: 'my-index' })).rejects.toBe(error);
+      await expect(client.count({ index: 'my-index' })).rejects.toBe(error);
     });
   });
 });

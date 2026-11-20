@@ -18,6 +18,7 @@ import {
   scan,
   shareReplay,
 } from 'rxjs';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { fetchIndexDocCounts } from '../../../../services/api';
 
 export type DocCountResult =
@@ -31,7 +32,7 @@ export enum RequestResultType {
 
 export type DocCountApi = ReturnType<typeof docCountApi>;
 
-export const docCountApi = () => {
+export const docCountApi = (search: ISearchGeneric) => {
   const subj = new Subject<string>();
   const abortController = new AbortController();
 
@@ -46,7 +47,7 @@ export const docCountApi = () => {
     filter((indices) => indices.length > 0),
     // make a request for each batch of indices
     concatMap((indexNames) =>
-      from(fetchIndexDocCounts(indexNames, abortController.signal)).pipe(
+      from(fetchIndexDocCounts(search, indexNames, abortController.signal)).pipe(
         map(
           (response): RequestResult => ({ type: RequestResultType.Success, indexNames, response })
         ),

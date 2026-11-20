@@ -11,7 +11,7 @@ import { expect } from '@kbn/scout/api';
 import { buildIndexDocCountQuery, toIndexDocCounts } from '../../../../../common/lib';
 import { apiTest, testData } from '../../fixtures';
 
-const { COMMON_HEADERS, ES_CLIENT_API_VERSION, ES_CLIENT_PROXY_PATH } = testData;
+const { COMMON_HEADERS, ESQL_SEARCH_PATH, SEARCH_API_VERSION } = testData;
 
 const INDEX_PREFIX = 'index-management-api-doc-count-';
 
@@ -35,9 +35,9 @@ const deleteSuiteIndices = async (esClient: EsClient) => {
   }
 };
 
-// Sends the browser's doc count query through the Elasticsearch proxy.
+// Sends the browser's doc count query through the data plugin's ES|QL search strategy.
 apiTest.describe(
-  'Index doc count through the Elasticsearch proxy',
+  'Index doc count through the ES|QL search strategy',
   { tag: tags.stateful.classic },
   () => {
     let credentials: RoleApiCredentials;
@@ -55,20 +55,19 @@ apiTest.describe(
     });
 
     const getDocCounts = async (apiClient: ApiClientFixture, indexNames: string[]) => {
-      const response = await apiClient.post(
-        `${ES_CLIENT_PROXY_PATH}/_query?allow_partial_results=true`,
-        {
-          headers: {
-            ...COMMON_HEADERS,
-            ...credentials.apiKeyHeader,
-            'elastic-api-version': ES_CLIENT_API_VERSION,
-          },
-          responseType: 'json',
-          body: JSON.stringify({ query: buildIndexDocCountQuery(indexNames) }),
-        }
-      );
+      const response = await apiClient.post(ESQL_SEARCH_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...credentials.apiKeyHeader,
+          'elastic-api-version': SEARCH_API_VERSION,
+        },
+        responseType: 'json',
+        body: JSON.stringify({
+          params: { query: buildIndexDocCountQuery(indexNames), allow_partial_results: true },
+        }),
+      });
       expect(response).toHaveStatusCode(200);
-      return toIndexDocCounts(response.body, indexNames);
+      return toIndexDocCounts(response.body.rawResponse, indexNames);
     };
 
     apiTest(

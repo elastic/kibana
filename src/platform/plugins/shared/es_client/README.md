@@ -36,14 +36,13 @@ This means **any authenticated Kibana user can call any Elasticsearch API their 
 
 ## Browser usage
 
-The plugin contract has one method, `getClient()`. It resolves with the [elasticsearch-js](https://github.com/elastic/elasticsearch-js) API surface, sending every call through the proxy, so browser code calls Elasticsearch the same way server code uses core's Elasticsearch client. The client code is loaded on first use and the same instance is returned afterwards.
+The plugin contract has one method, `getClient()`. It resolves with a subset of the [elasticsearch-js](https://github.com/elastic/elasticsearch-js) API surface, sending every call through the proxy, so browser code calls Elasticsearch the same way server code uses core's Elasticsearch client. The client code is loaded on first use and the same instance is returned afterwards.
+
+The enabled APIs are `count`, `delete`, `get` and `indices`. Use `transport.request` for any other Elasticsearch API. The other generated API modules are commented out in `public/es_client/create_es_client.ts`; to enable one, uncomment it there and add its name to `EnabledApiName` in `public/es_client/types.ts`.
 
 ```ts
 const client = await plugins.esClient.getClient();
-const { hits } = await client.search({ index: 'my-index', query: { match_all: {} } });
 const exists = await client.indices.exists({ index: 'my-index' });
-await client.bulk({ index: 'my-index', operations: [{ index: {} }, { message: 'hello' }] });
-
 // Status, headers and warnings
 const { body, statusCode, warnings } = await client.count({ index: 'my-index' }, { meta: true });
 
@@ -66,6 +65,6 @@ It is built from the client's generated API modules, not its `Client` class, whi
 - Requests send `x-elastic-product-origin: kibana`, as core's server client does. Pass the header in `headers` to replace it.
 - Supported request options are `headers`, `signal`, `querystring`, `ignore`, `meta` and `asStream`.
 - `helpers`, `child()`, `close()` and diagnostics are not available, and `transport` only implements `request`.
-- `bulk` is reimplemented in this plugin because the generated module loads the Node transport.
+- `bulk` is reimplemented in this plugin (`public/es_client/bulk.ts`) because the generated module loads the Node transport. It is disabled like the other APIs; to enable it, uncomment it in `create_es_client.ts` and the `bulk` member of `EsClient` in `types.ts`.
 
 When Elasticsearch answers `401`, for example because the user's access token expired, Kibana refreshes the credentials and retries the request once, for every method. If the retry still fails, the `401` is returned; in the browser, Kibana's session handling treats it as an expired session and logs the user out.

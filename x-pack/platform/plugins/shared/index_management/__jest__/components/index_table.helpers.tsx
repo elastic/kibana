@@ -32,6 +32,7 @@ import { NotificationService } from '../../public/application/services/notificat
 import { httpService } from '../../public/application/services/http';
 import { esClientService } from '../../public/application/services/es_client';
 import { createEsClientMock } from '../../public/application/services/es_client.mock';
+import { createDataMock } from '../../public/application/services/search.mock';
 import { setUiMetricService } from '../../public/application/services/api';
 import { indexManagementStore } from '../../public/application/store';
 import { setExtensionsService } from '../../public/application/store/selectors/extension_service';
@@ -209,6 +210,7 @@ export const renderIndexApp = async (options?: {
     },
     plugins: {
       reindexService: {},
+      data: createDataMock(httpSetup),
     },
     url: urlServiceMock,
     // Default stateful configuration

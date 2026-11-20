@@ -66,7 +66,10 @@ type WithEsClientResults<TNamespace> = {
   [TKey in keyof TNamespace]: WithEsClientResult<TNamespace[TKey]>;
 };
 
-type ApiMembers = Pick<API, Exclude<Extract<keyof API, string>, 'bulk' | 'transport'>>;
+/** The elasticsearch-js APIs the client exposes. The others are disabled in `create_es_client.ts`. */
+type EnabledApiName = 'count' | 'delete' | 'get' | 'indices';
+
+type ApiMembers = Pick<API, EnabledApiName>;
 
 type EsClientApi = {
   [TKey in keyof ApiMembers]: ApiMembers[TKey] extends (...args: never[]) => unknown
@@ -79,7 +82,7 @@ export interface EsClientContext {
   transport: EsClientTransport;
 }
 
-type BulkApi = <TDocument = unknown, TPartialDocument = Partial<TDocument>>(
+export type BulkApi = <TDocument = unknown, TPartialDocument = Partial<TDocument>>(
   this: EsClientContext,
   params: BulkRequest<TDocument, TPartialDocument>,
   options?: TransportRequestOptions
@@ -92,5 +95,5 @@ type BulkApi = <TDocument = unknown, TPartialDocument = Partial<TDocument>>(
 export type EsClient = EsClientApi & {
   // The generated API methods require `this.transport` to be an elasticsearch-js `Transport`.
   readonly transport: EsClientTransport & Transport;
-  bulk: WithEsClientResult<BulkApi>;
+  // bulk: WithEsClientResult<BulkApi>;
 };

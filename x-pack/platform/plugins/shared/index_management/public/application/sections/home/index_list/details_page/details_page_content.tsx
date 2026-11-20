@@ -84,7 +84,13 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
       application: { capabilities },
     },
     config: { enableIndexStats },
-    plugins: { console: consolePlugin, ml },
+    plugins: {
+      console: consolePlugin,
+      ml,
+      data: {
+        search: { search: dataSearch },
+      },
+    },
     services: { extensionsService, notificationService },
     url,
   } = useAppContext();
@@ -97,7 +103,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     isLoading: isDocumentsSampleLoading,
     error: documentsSampleError,
     refetch: refetchDocumentsSample,
-  } = useLoadIndexDocumentsSample(index.name);
+  } = useLoadIndexDocumentsSample(dataSearch, index.name);
 
   const tabs = useMemo(() => {
     const sortedTabs: IndexDetailsTab[] = [

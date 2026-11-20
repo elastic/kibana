@@ -75,6 +75,6 @@ describe('WHEN using the browser Elasticsearch client plugin', () => {
     await expect(contract.getClient()).rejects.toThrow('Loading chunk failed');
     const client = await contract.getClient();
 
-    expect(client.search).toEqual(expect.any(Function));
+    expect(client.count).toEqual(expect.any(Function));
   });
 });
