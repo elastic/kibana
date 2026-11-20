@@ -23,7 +23,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { MgetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { MgetResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
@@ -43,6 +43,10 @@ import type {
 } from '../../client/alerts/types';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import type { CasesEventBus } from '../../events/event_bus';
+
+const ALERT_GROUP_ID = 'kibana.alert.group.id';
+const ALERT_BUILDING_BLOCK_TYPE = 'kibana.alert.building_block_type';
+const ALERT_ORIGINAL_TIME = 'kibana.alert.original_time';
 
 export class AlertService {
   constructor(
@@ -81,6 +85,88 @@ export class AlertService {
 
       throw createCaseError({
         message: `Failed to execute aggregations [${aggregationNames.join(',')}]: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  /** Reads `fields` of the given alert documents with the user's index privileges. */
+  public async getAlertFields({
+    alerts,
+    fields,
+  }: {
+    alerts: AlertIdIndex[];
+    fields: string[];
+  }): Promise<Array<SearchHit<unknown>>> {
+    try {
+      const { ids, indices } = AlertService.getUniqueIdsIndices(alerts);
+
+      const res = await this.scopedClusterClient.search({
+        index: indices,
+        ignore_unavailable: true,
+        query: { ids: { values: ids } },
+        size: ids.length,
+        _source: false,
+        fields,
+      });
+
+      return res.hits.hits;
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to read alert fields: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  /**
+   * Earliest `kibana.alert.original_time` of the building-block alerts in each EQL sequence group,
+   * searched in the indices of `alerts`. Groups without building blocks are left out.
+   */
+  public async getSequenceStartTimes({
+    alerts,
+    groupIds,
+  }: {
+    alerts: AlertIdIndex[];
+    groupIds: string[];
+  }): Promise<Map<string, string>> {
+    try {
+      const { indices } = AlertService.getUniqueIdsIndices(alerts);
+
+      const res = await this.scopedClusterClient.search<
+        unknown,
+        { groups: { buckets: Array<{ key: string; start: { value: number | null } }> } }
+      >({
+        index: indices,
+        ignore_unavailable: true,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { terms: { [ALERT_GROUP_ID]: groupIds } },
+              { exists: { field: ALERT_BUILDING_BLOCK_TYPE } },
+            ],
+          },
+        },
+        aggregations: {
+          groups: {
+            terms: { field: ALERT_GROUP_ID, size: groupIds.length },
+            aggregations: { start: { min: { field: ALERT_ORIGINAL_TIME } } },
+          },
+        },
+      });
+
+      return new Map(
+        (res.aggregations?.groups.buckets ?? []).flatMap(
+          ({ key, start }): Array<[string, string]> =>
+            start.value === null ? [] : [[key, new Date(start.value).toISOString()]]
+        )
+      );
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to read sequence start times: ${error}`,
         error,
         logger: this.logger,
       });

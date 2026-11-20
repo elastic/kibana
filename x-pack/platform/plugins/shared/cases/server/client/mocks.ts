@@ -120,6 +120,7 @@ const createMetricsSubClientMock = (): MetricsSubClientMock => {
     getCaseMetrics: jest.fn(),
     getCasesMetrics: jest.fn(),
     getStatusTotalsByType: jest.fn(),
+    getIncidentTimelineAlerts: jest.fn(),
   });
 };
 

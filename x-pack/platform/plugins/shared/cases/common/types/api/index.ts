@@ -20,6 +20,7 @@ export * from './custom_field/latest';
 export * from './observable/latest';
 export * from './template/latest';
 export * from './field_definition/latest';
+export * from './incident_timeline/latest';
 export type * from './workflow/latest';
 
 // V1

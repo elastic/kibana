@@ -35,6 +35,7 @@ import type { ConfigType } from '../../config';
 import { getTemplateRoutes } from './templates';
 import { getFieldDefinitionRoutes } from './field_definitions';
 import { createRunWorkflowRoute } from './internal/run_workflow';
+import { getIncidentTimelineAlertsRoute } from './internal/get_incident_timeline_alerts';
 
 export const getInternalRoutes = (
   userProfileService: UserProfileService,
@@ -70,4 +71,5 @@ export const getInternalRoutes = (
     ...getTemplateRoutes(config),
     ...getFieldDefinitionRoutes(config),
     ...(workflowRun ? [createRunWorkflowRoute(workflowRun)] : []),
+    ...(config.incidentTimeline.enabled ? [getIncidentTimelineAlertsRoute] : []),
   ] as CaseRoute[];

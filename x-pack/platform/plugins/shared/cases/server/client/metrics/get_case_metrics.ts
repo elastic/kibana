@@ -58,7 +58,7 @@ export const getCaseMetrics = async (
   }
 };
 
-const checkAuthorization = async (caseId: string, clientArgs: CasesClientArgs) => {
+export const checkAuthorization = async (caseId: string, clientArgs: CasesClientArgs) => {
   const {
     services: { caseService },
     authorization,
