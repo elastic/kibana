@@ -177,7 +177,9 @@ export interface BuildkiteTriggerBuildParams {
 }
 
 export interface BuildkiteWaitStep {
-  wait: string;
+  wait: string | null;
+  key?: string;
+  depends_on?: string | string[];
   if?: string;
   allow_dependency_failure?: boolean;
   continue_on_failure?: boolean;

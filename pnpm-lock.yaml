@@ -529,16 +529,16 @@ importers:
         version: 18.0.1(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@kbn/aad-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/aad
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad
       '@kbn/access-control-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin
+        version: link:x-pack/platform/test_plugins/spaces_api_integration/common/plugins/access_control_test_plugin
       '@kbn/actions-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/actions
       '@kbn/actions-simulators-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/actions_simulators
       '@kbn/actions-types':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-actions-types
@@ -583,7 +583,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/agent_builder_sml
       '@kbn/agent-builder-sml-test-types-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/agent_builder_sml/plugins/sml_test_types
+        version: link:x-pack/platform/test_plugins/agent_builder_sml_test_types
       '@kbn/agent-builder-tools-base':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base
@@ -673,7 +673,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-aiops-utils
       '@kbn/alerting-api-integration-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/alerts
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts
       '@kbn/alerting-comparators':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-alerting-comparators
@@ -682,7 +682,7 @@ importers:
         version: link:x-pack/examples/alerting_example
       '@kbn/alerting-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_with_es_ssl/plugins/alerts
+        version: link:x-pack/platform/test_plugins/response_ops/functional_with_es_ssl/alerts
       '@kbn/alerting-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/alerting
@@ -727,7 +727,7 @@ importers:
         version: link:x-pack/solutions/observability/packages/kbn-alerts-grouping
       '@kbn/alerts-restricted-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts_restricted
       '@kbn/alerts-ui-shared':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-alerts-ui-shared
@@ -745,10 +745,10 @@ importers:
         version: link:src/platform/packages/private/analytics/utils/analytics_collection_utils
       '@kbn/analytics-ftr-helpers-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/analytics/plugins/analytics_ftr_helpers
+        version: link:src/platform/test_plugins/analytics/analytics_ftr_helpers
       '@kbn/analytics-plugin-a-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/analytics/plugins/analytics_plugin_a
+        version: link:src/platform/test_plugins/analytics/analytics_plugin_a
       '@kbn/announcement-banner':
         specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/display/kbn-announcement-banner
@@ -805,13 +805,13 @@ importers:
         version: link:src/core/packages/chrome/app-header
       '@kbn/app-link-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/app_link_test
+        version: link:src/platform/test_plugins/plugin_functional/app_link_test
       '@kbn/app-menu':
         specifier: workspace:*
         version: link:src/core/packages/chrome/app-menu/app-menu
       '@kbn/application-usage-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/usage_collection/plugins/application_usage_test
+        version: link:x-pack/platform/test_plugins/usage_collection/application_usage_test
       '@kbn/as-code-dashboard-schema':
         specifier: workspace:*
         version: link:src/platform/packages/shared/as-code/dashboard-schema
@@ -856,7 +856,7 @@ importers:
         version: link:x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common
       '@kbn/audit-log-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/audit_log
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/audit_log
       '@kbn/automatic-import-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/automatic_import
@@ -883,7 +883,7 @@ importers:
         version: link:x-pack/platform/plugins/private/canvas
       '@kbn/cases-api-integration-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cases_api_integration/common/plugins/cases
+        version: link:x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases
       '@kbn/cases-components':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-cases-components
@@ -952,7 +952,7 @@ importers:
         version: link:x-pack/platform/plugins/private/cloud_integrations/cloud_full_story
       '@kbn/cloud-integration-saml-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cloud_integration/plugins/saml_provider
+        version: link:x-pack/platform/test_plugins/cloud_integration/saml_provider
       '@kbn/cloud-links-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/cloud_integrations/cloud_links
@@ -1126,7 +1126,7 @@ importers:
         version: link:src/core/packages/analytics/server-internal
       '@kbn/core-app-status-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_app_status
+        version: link:src/platform/test_plugins/plugin_functional/core_app_status
       '@kbn/core-application-browser':
         specifier: workspace:*
         version: link:src/core/packages/application/browser
@@ -1348,7 +1348,7 @@ importers:
         version: link:src/core/packages/feature-flags/server-mocks
       '@kbn/core-history-block-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_history_block
+        version: link:src/platform/test_plugins/plugin_functional/core_history_block
       '@kbn/core-http-browser':
         specifier: workspace:*
         version: link:src/core/packages/http/browser
@@ -1363,7 +1363,7 @@ importers:
         version: link:src/core/packages/http/context-server-internal
       '@kbn/core-http-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_http
+        version: link:src/platform/test_plugins/plugin_functional/core_http
       '@kbn/core-http-rate-limiter-browser-internal':
         specifier: workspace:*
         version: link:src/core/packages/http/rate-limiter-browser-internal
@@ -1474,40 +1474,40 @@ importers:
         version: link:src/core/packages/overlays/browser-internal
       '@kbn/core-plugin-a-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_a
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_a
       '@kbn/core-plugin-appleave-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_appleave
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_appleave
       '@kbn/core-plugin-b-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_b
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_b
       '@kbn/core-plugin-chromeless-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_chromeless
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_chromeless
       '@kbn/core-plugin-deep-links-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_deep_links
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_deep_links
       '@kbn/core-plugin-deprecations-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_deprecations
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_deprecations
       '@kbn/core-plugin-dynamic-resolving-a':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_dynamic_resolving_a
+        version: link:src/platform/test_plugins/plugin_functional/core_dynamic_resolving_a
       '@kbn/core-plugin-dynamic-resolving-b':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_dynamic_resolving_b
+        version: link:src/platform/test_plugins/plugin_functional/core_dynamic_resolving_b
       '@kbn/core-plugin-execution-context-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_execution_context
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_execution_context
       '@kbn/core-plugin-helpmenu-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_helpmenu
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_helpmenu
       '@kbn/core-plugin-initializer-context-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context
+        version: link:src/platform/test_plugins/node_roles_functional/core_plugin_initializer_context
       '@kbn/core-plugin-route-timeouts-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_route_timeouts
       '@kbn/core-plugins-base-server-internal':
         specifier: workspace:*
         version: link:src/core/packages/plugins/base-server-internal
@@ -1552,7 +1552,7 @@ importers:
         version: link:src/core/packages/pricing/server-internal
       '@kbn/core-provider-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_provider_plugin
+        version: link:src/platform/test_plugins/plugin_functional/core_provider_plugin
       '@kbn/core-rendering-browser':
         specifier: workspace:*
         version: link:src/core/packages/rendering/browser
@@ -1831,7 +1831,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/data_quality
       '@kbn/data-search-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/data_search
+        version: link:src/platform/test_plugins/data_search
       '@kbn/data-service':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-data-service
@@ -2038,10 +2038,10 @@ importers:
         version: link:x-pack/platform/plugins/shared/elastic_console
       '@kbn/elasticsearch-client-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin
+        version: link:src/platform/test_plugins/plugin_functional/elasticsearch_client_plugin
       '@kbn/elasticsearch-client-xpack-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client
+        version: link:x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client
       '@kbn/elasticsearch-home':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/elasticsearch_home
@@ -2110,7 +2110,7 @@ importers:
         version: link:examples/eso_model_version_example
       '@kbn/eso-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin
+        version: link:x-pack/platform/test_plugins/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin
       '@kbn/esql':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/esql
@@ -2185,7 +2185,7 @@ importers:
         version: link:src/platform/plugins/private/event_annotation
       '@kbn/event-log-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/event_log
+        version: link:x-pack/platform/test_plugins/response_ops/plugin_api_integration/event_log
       '@kbn/event-log-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/event_log
@@ -2242,16 +2242,16 @@ importers:
         version: link:examples/feature_flags_example
       '@kbn/feature-usage-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test
+        version: link:x-pack/platform/test_plugins/plugin_api_integration/plugins/feature_usage_test
       '@kbn/features-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/features
       '@kbn/features-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/features_provider
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/features_provider
       '@kbn/fec-alerts-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_execution_context/plugins/alerts
+        version: link:x-pack/platform/test_plugins/functional_execution_context/alerts
       '@kbn/feedback-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/feedback
@@ -2317,7 +2317,7 @@ importers:
         version: link:src/platform/packages/shared/shared-ux/flyout/template
       '@kbn/foo-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin
+        version: link:x-pack/platform/test_plugins/ui_capabilities/common/plugins/foo_plugin
       '@kbn/fs':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-fs
@@ -2329,7 +2329,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-ftr-llm-proxy
       '@kbn/functional-with-es-ssl-cases-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_with_es_ssl/plugins/cases
+        version: link:x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases
       '@kbn/gen-ai-settings-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/gen_ai_settings
@@ -2383,7 +2383,7 @@ importers:
         version: link:src/platform/packages/private/kbn-hapi-mocks
       '@kbn/hardening-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/hardening
+        version: link:src/platform/test_plugins/plugin_functional/plugins/hardening
       '@kbn/health-gateway-server':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-health-gateway-server
@@ -2413,7 +2413,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-i18n-react
       '@kbn/iframe-embedded-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_embedded/plugins/iframe_embedded
+        version: link:x-pack/platform/test_plugins/functional_embedded/iframe_embedded
       '@kbn/image-embeddable-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/image_embeddable
@@ -2503,7 +2503,7 @@ importers:
         version: link:src/platform/plugins/private/interactive_setup
       '@kbn/interactive-setup-test-endpoints-plugin':
         specifier: workspace:*
-        version: link:src/platform/plugins/private/interactive_setup/test/plugins/test_endpoints
+        version: link:src/platform/test_plugins/interactive_setup_test_endpoints
       '@kbn/intercepts-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/intercepts
@@ -2539,16 +2539,16 @@ importers:
         version: link:x-pack/platform/packages/private/ml/json_schemas
       '@kbn/kbn-health-gateway-status-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/health_gateway/plugins/status
+        version: link:src/platform/test_plugins/health_gateway/status
       '@kbn/kbn-top-nav-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/kbn_top_nav
+        version: link:src/platform/test_plugins/plugin_functional/kbn_top_nav
       '@kbn/kbn-tp-custom-visualizations-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations
+        version: link:src/platform/test_plugins/kbn_tp_custom_visualizations
       '@kbn/kbn-tp-run-pipeline-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline
+        version: link:src/platform/test_plugins/interpreter_functional/kbn_tp_run_pipeline
       '@kbn/key-value-metadata-table':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-key-value-metadata-table
@@ -2557,7 +2557,7 @@ importers:
         version: link:x-pack/platform/packages/shared/kbn-kibana-api-cli
       '@kbn/kibana-cors-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_cors/plugins/kibana_cors_test
+        version: link:x-pack/platform/test_plugins/functional_cors/plugins/kibana_cors_test
       '@kbn/kibana-overview-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/kibana_overview
@@ -2857,7 +2857,7 @@ importers:
         version: link:src/platform/plugins/shared/newsfeed
       '@kbn/newsfeed-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/common/plugins/newsfeed
+        version: link:src/platform/test_plugins/common/newsfeed
       '@kbn/nightshift-ai':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-nightshift-ai
@@ -2920,7 +2920,7 @@ importers:
         version: link:x-pack/solutions/observability/packages/alerting-test-data
       '@kbn/observability-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cases_api_integration/common/plugins/observability
+        version: link:x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability
       '@kbn/observability-get-padded-alert-time-range-util':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/get-padded-alert-time-range-util
@@ -2956,10 +2956,10 @@ importers:
         version: link:src/platform/packages/shared/kbn-occ
       '@kbn/oidc-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/oidc_provider
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/oidc_provider
       '@kbn/open-telemetry-instrumented-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/common/plugins/otel_metrics
+        version: link:src/platform/test_plugins/otel_metrics
       '@kbn/openapi-common':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-openapi-common
@@ -3100,7 +3100,7 @@ importers:
         version: link:x-pack/platform/plugins/private/remote_clusters
       '@kbn/rendering-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/rendering_plugin
+        version: link:src/platform/test_plugins/plugin_functional/rendering_plugin
       '@kbn/repo-info':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-repo-info
@@ -3133,7 +3133,7 @@ importers:
         version: link:src/platform/packages/private/kbn-reporting/export_types/png_common
       '@kbn/reporting-fixture':
         specifier: workspace:*
-        version: link:x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture
+        version: link:x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_fixture
       '@kbn/reporting-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/reporting
@@ -3145,7 +3145,7 @@ importers:
         version: link:src/platform/packages/private/kbn-reporting/server
       '@kbn/reporting-test-routes':
         specifier: workspace:*
-        version: link:x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes
+        version: link:x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_test_routes
       '@kbn/resizable-layout':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-resizable-layout
@@ -3247,25 +3247,25 @@ importers:
         version: link:src/platform/packages/shared/kbn-safer-lodash-set
       '@kbn/saml-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/saml_provider
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/saml_provider
       '@kbn/sample-data-ingest':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/sample_data_ingest
       '@kbn/sample-task-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin
+        version: link:x-pack/platform/test_plugins/response_ops/plugin_api_integration/sample_task_plugin
       '@kbn/sandbox-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/sandbox
       '@kbn/saved-object-export-transforms-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_object_export_transforms
+        version: link:src/platform/test_plugins/plugin_functional/saved_object_export_transforms
       '@kbn/saved-object-import-warnings-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_object_import_warnings
+        version: link:src/platform/test_plugins/plugin_functional/saved_object_import_warnings
       '@kbn/saved-object-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin
+        version: link:x-pack/platform/test_plugins/saved_object_api_integration/common/plugins/saved_object_test_plugin
       '@kbn/saved-objects-example-plugin':
         specifier: workspace:*
         version: link:examples/saved_objects
@@ -3274,10 +3274,10 @@ importers:
         version: link:src/platform/plugins/shared/saved_objects_finder
       '@kbn/saved-objects-hidden-from-http-apis-type-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type
+        version: link:src/platform/test_plugins/plugin_functional/saved_objects_hidden_from_http_apis_type
       '@kbn/saved-objects-hidden-type-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_objects_hidden_type
+        version: link:src/platform/test_plugins/plugin_functional/saved_objects_hidden_type
       '@kbn/saved-objects-management-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/saved_objects_management
@@ -3358,7 +3358,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/search_inference_endpoints
       '@kbn/search-inference-endpoints-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/search_inference_endpoints/plugins/search_inference_endpoints_fixture
+        version: link:x-pack/platform/test_plugins/search_inference_endpoints_fixtures
       '@kbn/search-navigation':
         specifier: workspace:*
         version: link:x-pack/solutions/search/plugins/search_navigation
@@ -3439,7 +3439,7 @@ importers:
         version: link:x-pack/solutions/security/packages/features
       '@kbn/security-solution-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cases_api_integration/common/plugins/security_solution
+        version: link:x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution
       '@kbn/security-solution-navigation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/navigation
@@ -3460,7 +3460,7 @@ importers:
         version: link:x-pack/solutions/security/packages/upselling
       '@kbn/security-test-endpoints-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_functional/plugins/test_endpoints
+        version: link:x-pack/platform/test_plugins/security_functional/plugins/test_endpoints
       '@kbn/security-ui-components':
         specifier: workspace:*
         version: link:x-pack/platform/packages/private/security/ui_components
@@ -3571,10 +3571,10 @@ importers:
         version: link:src/platform/packages/shared/serverless/settings/vectordb_project
       '@kbn/service-accounts-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/service_accounts
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/service_accounts
       '@kbn/session-notifications-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/session_notifications
+        version: link:src/platform/test_plugins/plugin_functional/session_notifications
       '@kbn/session-view-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/security/plugins/session_view
@@ -3748,7 +3748,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/spaces
       '@kbn/spaces-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin
+        version: link:x-pack/platform/test_plugins/spaces_api_integration/common/plugins/spaces_test_plugin
       '@kbn/sse-example-plugin':
         specifier: workspace:*
         version: link:examples/sse_example
@@ -3769,16 +3769,16 @@ importers:
         version: link:x-pack/platform/plugins/shared/stack_connectors
       '@kbn/stack-management-usage-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/usage_collection/plugins/stack_management_usage_test
+        version: link:x-pack/platform/test_plugins/usage_collection/stack_management_usage_test
       '@kbn/state-containers-examples-plugin':
         specifier: workspace:*
         version: link:examples/state_containers_examples
       '@kbn/status-plugin-a-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/server_integration/plugins/status_plugin_a
+        version: link:src/platform/test_plugins/server_integration/status_plugin_a
       '@kbn/status-plugin-b-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/server_integration/plugins/status_plugin_b
+        version: link:src/platform/test_plugins/server_integration/status_plugin_b
       '@kbn/std':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-std
@@ -3814,16 +3814,16 @@ importers:
         version: link:x-pack/platform/plugins/private/task_manager_dependencies
       '@kbn/task-manager-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/task_manager_fixture
       '@kbn/task-manager-performance-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance
+        version: link:x-pack/platform/test_plugins/response_ops/plugin_api_perf/task_manager_performance
       '@kbn/task-manager-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/task_manager
       '@kbn/task-manager-service-accounts-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/task_manager/plugins/service_accounts
+        version: link:x-pack/platform/test_plugins/response_ops/task_manager/service_accounts
       '@kbn/telemetry':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-telemetry
@@ -3844,10 +3844,10 @@ importers:
         version: link:src/platform/plugins/shared/telemetry
       '@kbn/telemetry-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/telemetry
+        version: link:src/platform/test_plugins/plugin_functional/telemetry
       '@kbn/test-feature-usage-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/licensing_plugin/plugins/test_feature_usage
+        version: link:x-pack/platform/test_plugins/licensing_plugin/plugins/test_feature_usage
       '@kbn/testing-embedded-lens-plugin':
         specifier: workspace:*
         version: link:x-pack/examples/testing_embedded_lens
@@ -3940,7 +3940,7 @@ importers:
         version: link:src/platform/kbn-ui/react-assembly
       '@kbn/ui-settings-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/ui_settings_plugin
+        version: link:src/platform/test_plugins/plugin_functional/ui_settings_plugin
       '@kbn/ui-shared-deps-npm':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ui-shared-deps-npm
@@ -4021,7 +4021,7 @@ importers:
         version: link:src/platform/plugins/shared/usage_collection
       '@kbn/usage-collection-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/usage_collection
+        version: link:src/platform/test_plugins/plugin_functional/usage_collection
       '@kbn/use-observable':
         specifier: workspace:*
         version: link:src/platform/packages/shared/react/use_observable
@@ -4039,10 +4039,10 @@ importers:
         version: link:examples/user_profile_examples
       '@kbn/user-profiles-consumer-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/user_profiles_consumer
       '@kbn/user-storage-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/user_storage/plugins/user_storage_test
+        version: link:src/platform/test_plugins/user_storage
       '@kbn/utility-types':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-utility-types
@@ -5144,7 +5144,7 @@ importers:
         version: 29.6.3
       '@kbn/alerting-api-integration-helpers':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/packages/helpers
+        version: link:x-pack/platform/packages/shared/test/response_ops/alerting-api-integration-helpers
       '@kbn/ambient-common-types':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ambient-common-types
@@ -5432,7 +5432,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-design-tools
       '@kbn/detections-response-ftr-services':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response
+        version: link:x-pack/solutions/security/test_helpers/detections-response-ftr-services
       '@kbn/dev':
         specifier: workspace:*
         version: link:src/dev
@@ -5624,7 +5624,7 @@ importers:
         version: link:packages/kbn-find-used-node-modules
       '@kbn/fleet-plugin-cypress':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/fleet/cypress
+        version: link:x-pack/platform/plugins/shared/fleet-cypress
       '@kbn/ftr-benchmarks':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-ftr-benchmarks
@@ -5747,7 +5747,7 @@ importers:
         version: link:src/platform/packages/private/kbn-optimizer-webpack-helpers
       '@kbn/osquery-plugin-cypress':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/osquery/cypress
+        version: link:x-pack/platform/packages/private/osquery-plugin-cypress
       '@kbn/otel-demo':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-otel-demo
@@ -5834,7 +5834,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-scout-synthtrace
       '@kbn/security-api-integration-helpers':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/packages/helpers
+        version: link:x-pack/platform/test_plugins/security_api_integration/packages/helpers
       '@kbn/security-evals-alerts-snapshot':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot
@@ -5960,7 +5960,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-test-subj-selector
       '@kbn/test-suites-security-solution-apis':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/security_solution_api_integration
+        version: link:x-pack/solutions/security/test_suites/test-suites-security-solution-apis
       '@kbn/test-suites-src':
         specifier: workspace:*
         version: link:src/platform/test
@@ -5981,7 +5981,7 @@ importers:
         version: link:x-pack/solutions/security/test
       '@kbn/test-suites-xpack-security-endpoint':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/security_solution_endpoint
+        version: link:x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint
       '@kbn/test-suites-xpack-vectordb':
         specifier: workspace:*
         version: link:x-pack/solutions/vectordb/test
@@ -8599,8 +8599,6 @@ importers:
 
   src/platform/plugins/private/interactive_setup: {}
 
-  src/platform/plugins/private/interactive_setup/test/plugins/test_endpoints: {}
-
   src/platform/plugins/private/kibana_overview: {}
 
   src/platform/plugins/private/kibana_usage_collection: {}
@@ -8765,85 +8763,87 @@ importers:
 
   src/platform/test: {}
 
-  src/platform/test/analytics/plugins/analytics_ftr_helpers: {}
+  src/platform/test_plugins/analytics/analytics_ftr_helpers: {}
 
-  src/platform/test/analytics/plugins/analytics_plugin_a: {}
+  src/platform/test_plugins/analytics/analytics_plugin_a: {}
 
-  src/platform/test/common/plugins/newsfeed: {}
+  src/platform/test_plugins/common/newsfeed: {}
 
-  src/platform/test/common/plugins/otel_metrics: {}
+  src/platform/test_plugins/data_search: {}
 
-  src/platform/test/health_gateway/plugins/status: {}
+  src/platform/test_plugins/health_gateway/status: {}
 
-  src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline: {}
+  src/platform/test_plugins/interactive_setup_test_endpoints: {}
 
-  src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context: {}
+  src/platform/test_plugins/interpreter_functional/kbn_tp_run_pipeline: {}
 
-  src/platform/test/plugin_functional/plugins/app_link_test: {}
+  src/platform/test_plugins/kbn_tp_custom_visualizations: {}
 
-  src/platform/test/plugin_functional/plugins/core_app_status: {}
+  src/platform/test_plugins/node_roles_functional/core_plugin_initializer_context: {}
 
-  src/platform/test/plugin_functional/plugins/core_dynamic_resolving_a: {}
+  src/platform/test_plugins/otel_metrics: {}
 
-  src/platform/test/plugin_functional/plugins/core_dynamic_resolving_b: {}
+  src/platform/test_plugins/plugin_functional/app_link_test: {}
 
-  src/platform/test/plugin_functional/plugins/core_history_block: {}
+  src/platform/test_plugins/plugin_functional/core_app_status: {}
 
-  src/platform/test/plugin_functional/plugins/core_http: {}
+  src/platform/test_plugins/plugin_functional/core_dynamic_resolving_a: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_a: {}
+  src/platform/test_plugins/plugin_functional/core_dynamic_resolving_b: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_appleave: {}
+  src/platform/test_plugins/plugin_functional/core_history_block: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_b: {}
+  src/platform/test_plugins/plugin_functional/core_http: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_chromeless: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_a: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_deep_links: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_appleave: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_deprecations: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_b: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_execution_context: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_chromeless: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_helpmenu: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_deep_links: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_deprecations: {}
 
-  src/platform/test/plugin_functional/plugins/core_provider_plugin: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_execution_context: {}
 
-  src/platform/test/plugin_functional/plugins/data_search: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_helpmenu: {}
 
-  src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_route_timeouts: {}
 
-  src/platform/test/plugin_functional/plugins/hardening: {}
+  src/platform/test_plugins/plugin_functional/core_provider_plugin: {}
 
-  src/platform/test/plugin_functional/plugins/kbn_top_nav: {}
+  src/platform/test_plugins/plugin_functional/elasticsearch_client_plugin: {}
 
-  src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations: {}
+  src/platform/test_plugins/plugin_functional/kbn_top_nav: {}
 
-  src/platform/test/plugin_functional/plugins/rendering_plugin: {}
+  src/platform/test_plugins/plugin_functional/plugins/hardening: {}
 
-  src/platform/test/plugin_functional/plugins/saved_object_export_transforms: {}
+  src/platform/test_plugins/plugin_functional/rendering_plugin: {}
 
-  src/platform/test/plugin_functional/plugins/saved_object_import_warnings: {}
+  src/platform/test_plugins/plugin_functional/saved_object_export_transforms: {}
 
-  src/platform/test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type: {}
+  src/platform/test_plugins/plugin_functional/saved_object_import_warnings: {}
 
-  src/platform/test/plugin_functional/plugins/saved_objects_hidden_type: {}
+  src/platform/test_plugins/plugin_functional/saved_objects_hidden_from_http_apis_type: {}
 
-  src/platform/test/plugin_functional/plugins/session_notifications: {}
+  src/platform/test_plugins/plugin_functional/saved_objects_hidden_type: {}
 
-  src/platform/test/plugin_functional/plugins/telemetry: {}
+  src/platform/test_plugins/plugin_functional/session_notifications: {}
 
-  src/platform/test/plugin_functional/plugins/ui_settings_plugin: {}
+  src/platform/test_plugins/plugin_functional/telemetry: {}
 
-  src/platform/test/plugin_functional/plugins/usage_collection: {}
+  src/platform/test_plugins/plugin_functional/ui_settings_plugin: {}
 
-  src/platform/test/server_integration/plugins/status_plugin_a: {}
+  src/platform/test_plugins/plugin_functional/usage_collection: {}
 
-  src/platform/test/server_integration/plugins/status_plugin_b: {}
+  src/platform/test_plugins/server_integration/status_plugin_a: {}
 
-  src/platform/test/user_storage/plugins/user_storage_test: {}
+  src/platform/test_plugins/server_integration/status_plugin_b: {}
+
+  src/platform/test_plugins/user_storage: {}
 
   src/setup_node_env: {}
 
@@ -8948,6 +8948,8 @@ importers:
   x-pack/platform/packages/private/ml/url_state: {}
 
   x-pack/platform/packages/private/ml/validators: {}
+
+  x-pack/platform/packages/private/osquery-plugin-cypress: {}
 
   x-pack/platform/packages/private/rollup: {}
 
@@ -9261,6 +9263,8 @@ importers:
 
   x-pack/platform/packages/shared/security/plugin_types_server: {}
 
+  x-pack/platform/packages/shared/test/response_ops/alerting-api-integration-helpers: {}
+
   x-pack/platform/plugins/private/ai_anonymization_settings: {}
 
   x-pack/platform/plugins/private/banners: {}
@@ -9431,7 +9435,7 @@ importers:
 
   x-pack/platform/plugins/shared/fleet: {}
 
-  x-pack/platform/plugins/shared/fleet/cypress: {}
+  x-pack/platform/plugins/shared/fleet-cypress: {}
 
   x-pack/platform/plugins/shared/global_search: {}
 
@@ -9475,8 +9479,6 @@ importers:
 
   x-pack/platform/plugins/shared/osquery: {}
 
-  x-pack/platform/plugins/shared/osquery/cypress: {}
-
   x-pack/platform/plugins/shared/proposals: {}
 
   x-pack/platform/plugins/shared/query_activity: {}
@@ -9519,87 +9521,85 @@ importers:
 
   x-pack/platform/test: {}
 
-  x-pack/platform/test/agent_builder_sml/plugins/sml_test_types: {}
+  x-pack/platform/test_plugins/agent_builder_sml_test_types: {}
 
-  x-pack/platform/test/alerting_api_integration/common/plugins/aad: {}
+  x-pack/platform/test_plugins/cloud_integration/saml_provider: {}
 
-  x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators: {}
+  x-pack/platform/test_plugins/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin: {}
 
-  x-pack/platform/test/alerting_api_integration/common/plugins/alerts: {}
+  x-pack/platform/test_plugins/functional_cors/plugins/kibana_cors_test: {}
 
-  x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted: {}
+  x-pack/platform/test_plugins/functional_embedded/iframe_embedded: {}
 
-  x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture: {}
+  x-pack/platform/test_plugins/functional_execution_context/alerts: {}
 
-  x-pack/platform/test/alerting_api_integration/packages/helpers: {}
+  x-pack/platform/test_plugins/licensing_plugin/plugins/test_feature_usage: {}
 
-  x-pack/platform/test/cases_api_integration/common/plugins/cases: {}
+  x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client: {}
 
-  x-pack/platform/test/cases_api_integration/common/plugins/observability: {}
+  x-pack/platform/test_plugins/plugin_api_integration/plugins/feature_usage_test: {}
 
-  x-pack/platform/test/cases_api_integration/common/plugins/security_solution: {}
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad: {}
 
-  x-pack/platform/test/cloud_integration/plugins/saml_provider: {}
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/actions_simulators: {}
 
-  x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin: {}
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts: {}
 
-  x-pack/platform/test/functional_cors/plugins/kibana_cors_test: {}
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts_restricted: {}
 
-  x-pack/platform/test/functional_embedded/plugins/iframe_embedded: {}
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/task_manager_fixture: {}
 
-  x-pack/platform/test/functional_execution_context/plugins/alerts: {}
+  x-pack/platform/test_plugins/response_ops/functional_with_es_ssl/alerts: {}
 
-  x-pack/platform/test/functional_with_es_ssl/plugins/alerts: {}
+  x-pack/platform/test_plugins/response_ops/plugin_api_integration/event_log: {}
 
-  x-pack/platform/test/functional_with_es_ssl/plugins/cases: {}
+  x-pack/platform/test_plugins/response_ops/plugin_api_integration/sample_task_plugin: {}
 
-  x-pack/platform/test/licensing_plugin/plugins/test_feature_usage: {}
+  x-pack/platform/test_plugins/response_ops/plugin_api_perf/task_manager_performance: {}
 
-  x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client: {}
+  x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_fixture: {}
 
-  x-pack/platform/test/plugin_api_integration/plugins/event_log: {}
+  x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_test_routes: {}
 
-  x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test: {}
+  x-pack/platform/test_plugins/response_ops/task_manager/service_accounts: {}
 
-  x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin: {}
+  x-pack/platform/test_plugins/saved_object_api_integration/common/plugins/saved_object_test_plugin: {}
 
-  x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance: {}
+  x-pack/platform/test_plugins/search_inference_endpoints_fixtures: {}
 
-  x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture: {}
+  x-pack/platform/test_plugins/security_api_integration/packages/helpers: {}
 
-  x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes: {}
+  x-pack/platform/test_plugins/security_api_integration/plugins/audit_log: {}
 
-  x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin: {}
+  x-pack/platform/test_plugins/security_api_integration/plugins/features_provider: {}
 
-  x-pack/platform/test/search_inference_endpoints/plugins/search_inference_endpoints_fixture: {}
+  x-pack/platform/test_plugins/security_api_integration/plugins/oidc_provider: {}
 
-  x-pack/platform/test/security_api_integration/packages/helpers: {}
+  x-pack/platform/test_plugins/security_api_integration/plugins/saml_provider: {}
 
-  x-pack/platform/test/security_api_integration/plugins/audit_log: {}
+  x-pack/platform/test_plugins/security_api_integration/plugins/service_accounts: {}
 
-  x-pack/platform/test/security_api_integration/plugins/features_provider: {}
+  x-pack/platform/test_plugins/security_api_integration/plugins/user_profiles_consumer: {}
 
-  x-pack/platform/test/security_api_integration/plugins/oidc_provider: {}
+  x-pack/platform/test_plugins/security_functional/plugins/test_endpoints: {}
 
-  x-pack/platform/test/security_api_integration/plugins/saml_provider: {}
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases: {}
 
-  x-pack/platform/test/security_api_integration/plugins/service_accounts: {}
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability: {}
 
-  x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer: {}
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution: {}
 
-  x-pack/platform/test/security_functional/plugins/test_endpoints: {}
+  x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases: {}
 
-  x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin: {}
+  x-pack/platform/test_plugins/spaces_api_integration/common/plugins/access_control_test_plugin: {}
 
-  x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin: {}
+  x-pack/platform/test_plugins/spaces_api_integration/common/plugins/spaces_test_plugin: {}
 
-  x-pack/platform/test/task_manager/plugins/service_accounts: {}
+  x-pack/platform/test_plugins/ui_capabilities/common/plugins/foo_plugin: {}
 
-  x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin: {}
+  x-pack/platform/test_plugins/usage_collection/application_usage_test: {}
 
-  x-pack/platform/test/usage_collection/plugins/application_usage_test: {}
-
-  x-pack/platform/test/usage_collection/plugins/stack_management_usage_test: {}
+  x-pack/platform/test_plugins/usage_collection/stack_management_usage_test: {}
 
   x-pack/solutions/observability/packages/alert-details: {}
 
@@ -9839,6 +9839,8 @@ importers:
 
   x-pack/solutions/security/packages/kbn-securitysolution-utils: {}
 
+  x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint: {}
+
   x-pack/solutions/security/packages/navigation: {}
 
   x-pack/solutions/security/packages/security-ai-prompts: {}
@@ -9891,13 +9893,11 @@ importers:
 
   x-pack/solutions/security/test: {}
 
-  x-pack/solutions/security/test/security_solution_api_integration: {}
-
-  x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response: {}
-
-  x-pack/solutions/security/test/security_solution_endpoint: {}
+  x-pack/solutions/security/test_helpers/detections-response-ftr-services: {}
 
   x-pack/solutions/security/test_plugins/resolver_test: {}
+
+  x-pack/solutions/security/test_suites/test-suites-security-solution-apis: {}
 
   x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding: {}
 

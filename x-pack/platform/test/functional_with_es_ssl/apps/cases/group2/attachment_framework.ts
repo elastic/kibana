@@ -216,7 +216,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     /**
-     * The UI of the cases fixture plugin is in x-pack/platform/test/functional_with_es_ssl/plugins/cases/public/application.tsx
+     * The UI of the cases fixture plugin is in x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases/public/application.tsx
      */
     describe('Attachment hooks', () => {
       const TOTAL_OWNERS = ['cases', 'securitySolution', 'observability'];
