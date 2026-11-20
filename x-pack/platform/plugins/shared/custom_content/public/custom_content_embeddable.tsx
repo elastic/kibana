@@ -556,16 +556,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             filterManager,
             uiActions,
             embeddable: api,
-          }).catch((error: unknown) => {
-            // A click that asks for nothing valid is dropped quietly; this is something that broke.
-            core.notifications.toasts.addError(
-              error instanceof Error ? error : new Error(String(error)),
-              {
-                title: i18n.translate('xpack.customContent.interactionError', {
-                  defaultMessage: 'Could not apply the filter',
-                }),
-              }
-            );
           });
         }, []);
 

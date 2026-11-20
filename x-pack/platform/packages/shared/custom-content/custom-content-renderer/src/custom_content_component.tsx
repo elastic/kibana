@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { useCustomContentHtml } from './use_custom_content_html';
@@ -132,13 +132,11 @@ export const CustomContentComponent = ({
   const hasInteractions = isInteractive && onInteraction !== undefined;
   // The listener outlives renders, so it reads what is current instead of closing over it.
   const latest = useLatest({ columns, onInteraction, interactionActions });
-  const detachListener = useRef<(() => void) | undefined>();
 
-  // A new srcDoc is a new document, so the listener is attached on every load.
+  // A new srcDoc is a new document, so the listener is attached on every load. It belongs to that
+  // document and goes with it, on a reload and when the frame is removed: nothing removes it.
   const attachListener = useCallback(
     (event: React.SyntheticEvent<HTMLIFrameElement>) => {
-      detachListener.current?.();
-      detachListener.current = undefined;
       if (!hasInteractions) return;
 
       const frameDocument = event.currentTarget.contentDocument;
@@ -154,13 +152,9 @@ export const CustomContentComponent = ({
       };
       // Through the prototype, so nothing in the frame can replace the method (DOM clobbering).
       EventTarget.prototype.addEventListener.call(frameDocument, 'click', onClick);
-      detachListener.current = () =>
-        EventTarget.prototype.removeEventListener.call(frameDocument, 'click', onClick);
     },
     [hasInteractions, latest]
   );
-
-  useEffect(() => () => detachListener.current?.(), []);
 
   const wrapperCss = useMemo(
     () =>

@@ -115,7 +115,7 @@ An element of the template can add a filter to the dashboard when it is clicked.
 
 Kibana does the rest: the renderer's click listener (`readInteraction`, in `@kbn/custom-content-renderer`) validates the request, and the plugin (`runInteraction`) builds the filter with `generateFilters`, as Discover does, and applies it through the `ON_APPLY_FILTER` trigger, so it shows as an ordinary filter pill that the viewer can remove. Nothing is saved with the dashboard.
 
-A request that is not valid is dropped without a message: an unknown action, a column the queries did not return, an empty or oversized value, an unknown operator, or a click that did not come from the user. A failure while applying a valid one shows an error toast.
+A request that is not valid is dropped without a message: an unknown action, a column the queries did not return, an empty or oversized value, an unknown operator, or a click that did not come from the user.
 
 An action is a new member of `CustomContentInteraction`, a parser in `PARSERS` (`interactions.ts`) and a case in `runInteraction` (`run_interaction.ts`); the compiler refuses to build until all three exist. A host lists the actions it runs in `interactionActions`.
 

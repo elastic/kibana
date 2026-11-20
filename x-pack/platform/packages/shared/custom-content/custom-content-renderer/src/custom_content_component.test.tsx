@@ -141,17 +141,25 @@ describe('CustomContentComponent', () => {
       });
     };
 
-    it('attaches no listener when the host does not listen', () => {
+    // Whether the component put a click listener on the document of the frame.
+    const hasClickListener = (iframe: HTMLIFrameElement) => {
       const addEventListener = jest.spyOn(EventTarget.prototype, 'addEventListener');
-      const { iframe } = mountWithColumns(undefined);
       iframe.contentDocument!.body.replaceChildren(iframe.contentDocument!.createElement('button'));
       fireEvent.load(iframe);
-      const clickListeners = addEventListener.mock.calls.filter(
+      const listening = addEventListener.mock.calls.some(
         ([type], index) =>
           type === 'click' && addEventListener.mock.contexts[index] === iframe.contentDocument
       );
       addEventListener.mockRestore();
-      expect(clickListeners).toHaveLength(0);
+      return listening;
+    };
+
+    it('attaches no listener when the host does not listen', () => {
+      expect(hasClickListener(mountWithColumns(undefined).iframe)).toBe(false);
+    });
+
+    it('listens when the host does', () => {
+      expect(hasClickListener(mountWithColumns(jest.fn()).iframe)).toBe(true);
     });
 
     it('reports a click on an element that declares a valid filter', () => {
@@ -187,9 +195,10 @@ describe('CustomContentComponent', () => {
       expect(onInteraction).not.toHaveBeenCalled();
     });
 
-    it('never offers interactions in a non-interactive view', () => {
+    it('never offers interactions in a non-interactive view, even when the host asks', () => {
       const { iframe } = mountWithColumns(jest.fn(), { isInteractive: false });
       expect(iframe.getAttribute('sandbox')).toBe('');
+      expect(hasClickListener(iframe)).toBe(false);
     });
   });
 
