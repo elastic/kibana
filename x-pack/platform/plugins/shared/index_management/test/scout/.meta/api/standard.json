@@ -1,5 +1,5 @@
 {
-  "sha1": "0a5a461ece2240e6ab2b5bf7b0769a7f7aebaec4",
+  "sha1": "930b78353aa9585df69b7e7c16444116cd4c6061",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1587,104 +1587,6 @@
       }
     },
     {
-      "id": "7613ebd9f75262b-62977dd4510b0b7",
-      "title": "Indices actions API closes an index",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 42,
-        "column": 5
-      }
-    },
-    {
-      "id": "7613ebd9f75262b-0a04c7987afe818",
-      "title": "Indices actions API opens an index",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 46,
-        "column": 27
-      }
-    },
-    {
-      "id": "7613ebd9f75262b-8396764f9e9d483",
-      "title": "Indices actions API flushes an index",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 51,
-        "column": 5
-      }
-    },
-    {
-      "id": "7613ebd9f75262b-99e466688ae25c8",
-      "title": "Indices actions API refreshes an index",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 54,
-        "column": 12
-      }
-    },
-    {
-      "id": "7613ebd9f75262b-6d158f8f9ce5043",
-      "title": "Indices actions API force merges an index",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 61,
-        "column": 47
-      }
-    },
-    {
-      "id": "7613ebd9f75262b-b3d3b4a4df3d28e",
-      "title": "Indices actions API force merges an index into a given number of segments",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 62,
-        "column": 27
-      }
-    },
-    {
-      "id": "7613ebd9f75262b-29807207d6c5043",
-      "title": "Indices actions API clears the cache of an index",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 67,
-        "column": 12
-      }
-    },
-    {
       "id": "5b9400cc2b5ac41-7622450c87a8eaf",
       "title": "Indices API lists the indices with the expected properties",
       "expectedStatus": "passed",
@@ -1700,7 +1602,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
-        "line": 72,
+        "line": 71,
         "column": 52
       }
     },
@@ -1720,7 +1622,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
-        "line": 84,
+        "line": 83,
         "column": 83
       }
     },
@@ -1740,7 +1642,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
-        "line": 97,
+        "line": 96,
         "column": 12
       }
     },
@@ -1760,7 +1662,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
-        "line": 110,
+        "line": 109,
         "column": 12
       }
     },
@@ -1780,128 +1682,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
-        "line": 117,
+        "line": 116,
         "column": 66
-      }
-    },
-    {
-      "id": "5b9400cc2b5ac41-5251881f1db01ee",
-      "title": "Indices API creates an index with an index mode",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
-        "line": 127,
-        "column": 16
-      }
-    },
-    {
-      "id": "5b9400cc2b5ac41-fd8162de844ea72",
-      "title": "Indices API creates an index without an index mode",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
-        "line": 138,
-        "column": 27
-      }
-    },
-    {
-      "id": "5b9400cc2b5ac41-ece3d41158ad677",
-      "title": "Indices API rejects creating an index without a name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
-        "line": 148,
-        "column": 16
-      }
-    },
-    {
-      "id": "5b9400cc2b5ac41-bba886f9b08053c",
-      "title": "Indices API rejects creating an index that already exists",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
-        "line": 157,
-        "column": 11
-      }
-    },
-    {
-      "id": "5b9400cc2b5ac41-9b7bcef5c44562d",
-      "title": "Indices API deletes an index",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
-        "line": 164,
-        "column": 12
-      }
-    },
-    {
-      "id": "5b9400cc2b5ac41-12a0837c46a91d8",
-      "title": "Indices API rejects a delete without an index name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices.spec.ts",
-        "line": 178,
-        "column": 11
       }
     },
     {
@@ -1925,46 +1707,6 @@
       }
     },
     {
-      "id": "3e4bbc639f7c6a1-0ed5dae4856215b",
-      "title": "Index mappings API updates the index mappings",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/mappings.spec.ts",
-        "line": 43,
-        "column": 22
-      }
-    },
-    {
-      "id": "7c26d4e0968650c-7e68688cf71feef",
-      "title": "Index settings API fetches an index settings",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/settings.spec.ts",
-        "line": 128,
-        "column": 27
-      }
-    },
-    {
       "id": "7c26d4e0968650c-2dd5e0f4c39b838",
       "title": "Index settings API updates an index settings",
       "expectedStatus": "passed",
@@ -1980,8 +1722,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/settings.spec.ts",
-        "line": 142,
-        "column": 27
+        "line": 36,
+        "column": 72
       }
     },
     {
@@ -2034,20 +1776,6 @@
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories_local.spec.ts",
         "line": 43,
         "column": 22
-      }
-    },
-    {
-      "id": "2484050f9b304f8-7df2dea7167201b",
-      "title": "Index stats API fetches the index stats",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/stats.spec.ts",
-        "line": 57,
-        "column": 66
       }
     }
   ]
