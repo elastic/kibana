@@ -8,17 +8,17 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
 /**
  * Narrow, stable view of an XY chart layer exposed to overlay providers, so they never read Lens internal state.
+ * Only ES|QL layers are exposed: form-based layers are never passed to providers.
  */
 export interface LensXYOverlayLayer {
   readonly layerId: string;
-  /** ES|QL query of the layer; undefined for form-based layers. */
-  readonly esql?: string;
+  readonly esql: string;
 }
 
 /**
@@ -44,8 +44,10 @@ export interface LensXYOverlayRequestMeta {
 export interface LensXYOverlayFetchContext {
   readonly layer: LensXYOverlayLayer;
   readonly timeRange?: TimeRange;
-  readonly filters?: readonly Filter[];
-  readonly query?: Query | AggregateQuery;
+  /** Filters applied to the layer: empty when the layer ignores global filters. */
+  readonly filters: readonly Filter[];
+  /** KQL / Lucene queries applied to the layer: empty when the layer ignores global filters. */
+  readonly queries: readonly Query[];
   readonly esqlVariables?: readonly ESQLControlVariable[];
   readonly abortSignal: AbortSignal;
   /**

@@ -9,10 +9,12 @@
 
 import React, { useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
-import { BubbleSeries, PointShape, ScaleType } from '@elastic/charts';
+import { BubbleSeries, PointShape, type ScaleContinuousType } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
-import type { XYOverlay, XYOverlayPoint } from '../../common';
-import type { GroupsConfiguration } from '../helpers';
+import { getAccessorByDimension } from '@kbn/chart-expressions-common';
+import type { CommonXYDataLayerConfig, XScaleType, XYOverlay, XYOverlayPoint } from '../../common';
+import { XScaleTypes } from '../../common/constants';
+import { getSeriesXScaleType, getSeriesYScaleType, type GroupsConfiguration } from '../helpers';
 import type { OverlayPointClickEvent } from '../types';
 
 const OVERLAY_SPEC_ID_PREFIX = 'xy-overlay';
@@ -52,57 +54,90 @@ export const getClickedOverlayPoint = (
   return point ? { overlayId: overlay.id, layerId: overlay.layerId, pointId: point.id } : undefined;
 };
 
-/** Pairs each overlay with the Y axis group of its layer, dropping overlays whose layer is not drawn. */
-export const getOverlaysWithAxisGroup = (
+export interface OverlaySeriesConfig {
+  overlay: XYOverlay;
+  groupId: string;
+  xScaleType: XScaleType;
+  yScaleType: ScaleContinuousType;
+}
+
+/**
+ * Pairs each overlay with the Y axis group and the scales of its layer, mirroring the layer's own series.
+ * Overlays are dropped when their layer is not drawn or has a categorical X axis, where numeric `x` values cannot be placed.
+ */
+export const getOverlaySeriesConfigs = (
   overlays: readonly XYOverlay[],
-  yAxesConfiguration: GroupsConfiguration
-): Array<{ overlay: XYOverlay; groupId: string }> =>
+  yAxesConfiguration: GroupsConfiguration,
+  dataLayers: readonly CommonXYDataLayerConfig[],
+  defaultXScaleType: XScaleType
+): OverlaySeriesConfig[] =>
   overlays.flatMap((overlay) => {
+    const layer = dataLayers.find(({ layerId }) => layerId === overlay.layerId);
     const axis = yAxesConfiguration.find(({ series }) =>
-      series.some(({ layer }) => layer === overlay.layerId)
+      series.some(({ layer: layerId }) => layerId === overlay.layerId)
     );
-    return axis ? [{ overlay, groupId: axis.groupId }] : [];
+    const series = axis?.series.find(({ layer: layerId }) => layerId === overlay.layerId);
+    if (!layer || !axis || !series) {
+      return [];
+    }
+    const { table, xAccessor } = layer;
+    const xColumnId = xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined;
+    const xScaleType = getSeriesXScaleType(layer, xColumnId, defaultXScaleType);
+    if (xScaleType === XScaleTypes.ORDINAL) {
+      return [];
+    }
+    const columnFormatId = table.columns.find(({ id }) => id === series.accessor)?.meta.params?.id;
+    const yScaleType = getSeriesYScaleType(axis, columnFormatId);
+    return [{ overlay, groupId: axis.groupId, xScaleType, yScaleType }];
   });
 
 interface OverlayPointsProps {
   overlays: readonly XYOverlay[];
   yAxesConfiguration: GroupsConfiguration;
-  isTimeVis: boolean;
+  dataLayers: readonly CommonXYDataLayerConfig[];
+  defaultXScaleType: XScaleType;
 }
 
-export const OverlayPoints = ({ overlays, yAxesConfiguration, isTimeVis }: OverlayPointsProps) => {
+export const OverlayPoints = ({
+  overlays,
+  yAxesConfiguration,
+  dataLayers,
+  defaultXScaleType,
+}: OverlayPointsProps) => {
   const { euiTheme } = useEuiTheme();
   const color = euiTheme.colors.vis.euiColorVis6;
 
   return (
     <>
-      {getOverlaysWithAxisGroup(overlays, yAxesConfiguration).map(({ overlay, groupId }) => {
-        return (
-          <BubbleSeries<XYOverlayPoint>
-            key={getOverlaySpecId(overlay)}
-            id={getOverlaySpecId(overlay)}
-            name={overlay.title}
-            groupId={groupId}
-            xScaleType={isTimeVis ? ScaleType.Time : ScaleType.Linear}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={['y']}
-            data={[...overlay.points]}
-            hideInLegend
-            color={color}
-            bubbleSeriesStyle={{
-              point: {
-                shape: PointShape.Diamond,
-                radius: 6,
-                strokeWidth: 1,
-                fill: color,
-                stroke: euiTheme.colors.emptyShade,
-                opacity: 1,
-              },
-            }}
-          />
-        );
-      })}
+      {getOverlaySeriesConfigs(overlays, yAxesConfiguration, dataLayers, defaultXScaleType).map(
+        ({ overlay, groupId, xScaleType, yScaleType }) => {
+          return (
+            <BubbleSeries<XYOverlayPoint>
+              key={getOverlaySpecId(overlay)}
+              id={getOverlaySpecId(overlay)}
+              name={overlay.title}
+              groupId={groupId}
+              xScaleType={xScaleType}
+              yScaleType={yScaleType}
+              xAccessor="x"
+              yAccessors={['y']}
+              data={[...overlay.points]}
+              hideInLegend
+              color={color}
+              bubbleSeriesStyle={{
+                point: {
+                  shape: PointShape.Diamond,
+                  radius: 6,
+                  strokeWidth: 1,
+                  fill: color,
+                  stroke: euiTheme.colors.emptyShade,
+                  opacity: 1,
+                },
+              }}
+            />
+          );
+        }
+      )}
     </>
   );
 };

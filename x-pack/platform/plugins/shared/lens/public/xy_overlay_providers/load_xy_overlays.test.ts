@@ -43,10 +43,13 @@ const createAttributes = (ignoreGlobalFilters: boolean) =>
     },
   } as unknown as LensRuntimeState['attributes']);
 
+const fetchContextSpy = jest.fn();
+
 const provider: LensXYOverlayProvider = {
   id: 'test.exemplars',
   isApplicable: () => true,
-  fetchOverlay: async ({ executeEsql }) => {
+  fetchOverlay: async ({ executeEsql, filters, queries }) => {
+    fetchContextSpy({ filters, queries });
     const { rows } = await executeEsql('SET exemplars=true;', { title: 'Exemplars' });
     return {
       type: 'points',
@@ -82,6 +85,8 @@ const load = async (ignoreGlobalFilters: boolean) => {
 };
 
 describe('loadXYOverlays', () => {
+  beforeEach(() => fetchContextSpy.mockClear());
+
   it('runs provider queries with the chart search scope, session and inspector', async () => {
     const { esql, result, requestsAdapter } = await load(false);
 
@@ -115,5 +120,37 @@ describe('loadXYOverlays', () => {
       }),
       expect.anything()
     );
+  });
+
+  it('hands providers the filters and queries applied to the layer', async () => {
+    await load(false);
+    expect(fetchContextSpy).toHaveBeenLastCalledWith({ filters: FILTERS, queries: [KQL] });
+
+    await load(true);
+    expect(fetchContextSpy).toHaveBeenLastCalledWith({ filters: [], queries: [] });
+  });
+
+  it('reports a throwing rule as a failure', async () => {
+    const esql = jest.fn();
+    const registry = createXYOverlayProviderRegistry();
+    registry.register({
+      ...provider,
+      isApplicable: () => {
+        throw new Error('boom');
+      },
+    });
+
+    const result = await loadXYOverlays({
+      registry,
+      attributes: createAttributes(false),
+      searchContext: { filters: [], query: [] },
+      abortSignal: new AbortController().signal,
+      data: { search: { esql } } as unknown as DataPublicPluginStart,
+    });
+
+    expect(esql).not.toHaveBeenCalled();
+    expect(result.failures).toEqual([
+      { providerId: 'test.exemplars', layerId: 'layer1', error: new Error('boom') },
+    ]);
   });
 });

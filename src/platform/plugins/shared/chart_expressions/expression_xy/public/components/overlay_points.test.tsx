@@ -9,10 +9,11 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { act, renderHook } from '@testing-library/react';
-import { Position } from '@elastic/charts';
-import type { XYOverlay } from '../../common';
+import { Position, ScaleType } from '@elastic/charts';
+import type { CommonXYDataLayerConfig, XYOverlay } from '../../common';
+import { XScaleTypes } from '../../common/constants';
 import type { GroupsConfiguration } from '../helpers';
-import { getClickedOverlayPoint, getOverlaysWithAxisGroup, useOverlays } from './overlay_points';
+import { getClickedOverlayPoint, getOverlaySeriesConfigs, useOverlays } from './overlay_points';
 
 const point = { id: 'trace-1', x: 1000, y: 42 };
 
@@ -28,6 +29,21 @@ const yAxesConfiguration: GroupsConfiguration = [
   { groupId: 'left', position: Position.Left, series: [{ layer: 'metrics', accessor: 'avg' }] },
 ];
 
+const createLayer = (
+  overrides: Partial<CommonXYDataLayerConfig> = {},
+  formatId = 'number'
+): CommonXYDataLayerConfig =>
+  ({
+    layerId: 'metrics',
+    xAccessor: 'timestamp',
+    table: {
+      type: 'datatable',
+      rows: [],
+      columns: [{ id: 'avg', name: 'avg', meta: { type: 'number', params: { id: formatId } } }],
+    },
+    ...overrides,
+  } as CommonXYDataLayerConfig);
+
 describe('overlay points', () => {
   it('follows the overlays pushed after the first render', () => {
     const overlays$ = new BehaviorSubject<readonly XYOverlay[]>([]);
@@ -39,15 +55,53 @@ describe('overlay points', () => {
     expect(result.current).toEqual([overlay]);
   });
 
-  it('binds each overlay to the axis of its layer', () => {
-    expect(getOverlaysWithAxisGroup([overlay], yAxesConfiguration)).toEqual([
-      { overlay, groupId: 'left' },
+  it('binds each overlay to the axis and scales of its layer', () => {
+    expect(
+      getOverlaySeriesConfigs([overlay], yAxesConfiguration, [createLayer()], XScaleTypes.TIME)
+    ).toEqual([
+      { overlay, groupId: 'left', xScaleType: XScaleTypes.TIME, yScaleType: ScaleType.Linear },
     ]);
+  });
+
+  it('follows the scale type of the Y axis', () => {
+    const [{ yScaleType }] = getOverlaySeriesConfigs(
+      [overlay],
+      [{ ...yAxesConfiguration[0], scaleType: 'log' }],
+      [createLayer()],
+      XScaleTypes.TIME
+    );
+    expect(yScaleType).toBe(ScaleType.Log);
+  });
+
+  it('uses the binary scale on linear axes of bytes columns', () => {
+    const [{ yScaleType }] = getOverlaySeriesConfigs(
+      [overlay],
+      yAxesConfiguration,
+      [createLayer({}, 'bytes')],
+      XScaleTypes.TIME
+    );
+    expect(yScaleType).toBe(ScaleType.LinearBinary);
   });
 
   it('skips overlays whose layer is not on any axis', () => {
     expect(
-      getOverlaysWithAxisGroup([{ ...overlay, layerId: 'unknown' }], yAxesConfiguration)
+      getOverlaySeriesConfigs(
+        [{ ...overlay, layerId: 'unknown' }],
+        yAxesConfiguration,
+        [createLayer()],
+        XScaleTypes.TIME
+      )
+    ).toEqual([]);
+  });
+
+  it('skips overlays on a categorical X axis', () => {
+    expect(
+      getOverlaySeriesConfigs(
+        [overlay],
+        yAxesConfiguration,
+        [createLayer({ xScaleType: XScaleTypes.ORDINAL })],
+        XScaleTypes.TIME
+      )
     ).toEqual([]);
   });
 

@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/expressions-plugin'
   - '@kbn/react-kibana-context-render'
+  - '@kbn/react-kibana-mount'
   - '@kbn/ui-callout'
 tags:
   - plugin

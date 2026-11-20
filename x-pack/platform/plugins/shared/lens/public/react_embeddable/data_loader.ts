@@ -47,7 +47,13 @@ import {
   getMergedSearchContext,
   type MergedSearchContext,
 } from './expressions/merged_search_context';
-import { getXYOverlayProviderFailureMessage, loadXYOverlays } from '../xy_overlay_providers';
+import {
+  getXYOverlayProviderFailureMessage,
+  getXYOverlayTruncationMessage,
+  isXYOverlayProviderMessageId,
+  loadXYOverlays,
+  toChartOverlay,
+} from '../xy_overlay_providers';
 import { getLogError } from './expressions/telemetry';
 import { getUsedDataViews } from './expressions/update_data_views';
 import {
@@ -170,6 +176,7 @@ export function loadEmbeddableData(
     updateValidationErrors,
     updateWarnings,
     discardRuntimeMessages,
+    removeUserMessages,
     updateMessages,
   } = buildUserMessagesHelpers(
     api,
@@ -222,7 +229,10 @@ export function loadEmbeddableData(
     lastOverlaysInput = { state, searchContext };
     const abortController = new AbortController();
     overlaysAbortController = abortController;
-    const { overlays, failures } = await loadXYOverlays({
+    if (removeUserMessages(isXYOverlayProviderMessageId)) {
+      updateMessages(getUserMessages('embeddableBadge'));
+    }
+    const { overlays, failures, truncations } = await loadXYOverlays({
       registry: services.xyOverlayProviderRegistry,
       attributes: state.attributes,
       executionContext: getExecutionContext(),
@@ -236,9 +246,12 @@ export function loadEmbeddableData(
     if (abortController.signal.aborted) {
       return;
     }
-    overlays$.next(overlays.map(({ providerId, ...overlay }) => ({ ...overlay, id: providerId })));
-    if (failures.length) {
-      addUserMessages(failures.map(getXYOverlayProviderFailureMessage));
+    overlays$.next(overlays.map(toChartOverlay));
+    if (failures.length || truncations.length) {
+      addUserMessages([
+        ...failures.map(getXYOverlayProviderFailureMessage),
+        ...truncations.map(getXYOverlayTruncationMessage),
+      ]);
       updateMessages(getUserMessages('embeddableBadge'));
     }
   };

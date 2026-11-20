@@ -122,15 +122,19 @@ describe('exemplars overlay provider', () => {
     });
   });
 
+  const fetchContext = (executeEsql: jest.Mock, abortSignal = new AbortController().signal) => ({
+    layer: { layerId: 'layer1', esql: LOGS_QUERY },
+    filters: [],
+    queries: [],
+    abortSignal,
+    executeEsql,
+  });
+
   it('draws valid rows and opens the clicked exemplar', async () => {
     const onExemplarClick = jest.fn();
     const provider = createExemplarsOverlayProvider({ onExemplarClick, isEnabled: () => true });
 
-    const overlay = await provider.fetchOverlay({
-      layer: { layerId: 'layer1', esql: LOGS_QUERY },
-      abortSignal: new AbortController().signal,
-      executeEsql: jest.fn().mockResolvedValue(table),
-    });
+    const overlay = await provider.fetchOverlay(fetchContext(jest.fn().mockResolvedValue(table)));
 
     expect(overlay).toEqual({
       type: 'points',
@@ -147,5 +151,36 @@ describe('exemplars overlay provider', () => {
     expect(onExemplarClick).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'exemplar-0', value: 1200, simulated: true })
     );
+  });
+
+  it('keeps only the exemplars of the latest load of a layer', async () => {
+    const onExemplarClick = jest.fn();
+    const provider = createExemplarsOverlayProvider({ onExemplarClick, isEnabled: () => true });
+    const refreshedTable: Datatable = {
+      ...table,
+      rows: [{ '@timestamp': '2026-11-10T11:00:00.000Z', value: 300 }],
+    };
+
+    await provider.fetchOverlay(fetchContext(jest.fn().mockResolvedValue(table)));
+    await provider.fetchOverlay(fetchContext(jest.fn().mockResolvedValue(refreshedTable)));
+    provider.onPointClick?.({ providerId: provider.id, layerId: 'layer1', pointId: 'exemplar-0' });
+
+    expect(onExemplarClick).toHaveBeenCalledWith(expect.objectContaining({ value: 300 }));
+  });
+
+  it('ignores the result of a cancelled load', async () => {
+    const onExemplarClick = jest.fn();
+    const provider = createExemplarsOverlayProvider({ onExemplarClick, isEnabled: () => true });
+    const abortController = new AbortController();
+    const executeEsql = jest.fn().mockImplementation(async () => {
+      abortController.abort();
+      return table;
+    });
+
+    const overlay = await provider.fetchOverlay(fetchContext(executeEsql, abortController.signal));
+    provider.onPointClick?.({ providerId: provider.id, layerId: 'layer1', pointId: 'exemplar-0' });
+
+    expect(overlay).toBeUndefined();
+    expect(onExemplarClick).not.toHaveBeenCalled();
   });
 });

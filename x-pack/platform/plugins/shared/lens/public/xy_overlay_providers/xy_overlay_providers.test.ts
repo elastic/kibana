@@ -18,6 +18,7 @@ import {
   createXYOverlayProviderRegistry,
   dispatchOverlayPointClick,
   getXYOverlayMatchContext,
+  MAX_XY_OVERLAY_POINTS,
   resolveActiveProviders,
   runActiveProviders,
 } from '.';
@@ -40,7 +41,6 @@ const createExemplarsOverlayProvider = (
   id: 'observability.exemplars',
   isApplicable: ({ executionContext }, { esql }) =>
     executionContext?.name === 'discover' &&
-    esql !== undefined &&
     queryHasTsSourceCommand(esql) &&
     queryHasStatsCommand(esql),
   fetchOverlay: async ({ layer, executeEsql }) => {
@@ -131,14 +131,19 @@ describe('Lens XY overlay providers', () => {
       const context = getContext({ metrics: TS_QUERY, logs: 'FROM logs-* | LIMIT 10' });
 
       expect(
-        resolveActiveProviders({ providers, context }).map(({ layer }) => layer.layerId)
+        resolveActiveProviders({ providers, context }).activeProviders.map(
+          ({ layer }) => layer.layerId
+        )
       ).toEqual(['metrics']);
     });
 
     it('respects surface rules', () => {
       const context = getContext({ metrics: TS_QUERY }, 'dashboards');
 
-      expect(resolveActiveProviders({ providers, context })).toEqual([]);
+      expect(resolveActiveProviders({ providers, context })).toEqual({
+        activeProviders: [],
+        failures: [],
+      });
     });
 
     it('lets the host turn a provider off at runtime', () => {
@@ -150,10 +155,10 @@ describe('Lens XY overlay providers', () => {
           context,
           runtimeConfig: { 'observability.exemplars': false },
         })
-      ).toEqual([]);
+      ).toEqual({ activeProviders: [], failures: [] });
     });
 
-    it('treats a throwing rule as not applicable', () => {
+    it('skips a throwing rule and reports it as a failure', () => {
       const throwing = createExemplarsOverlayProvider({
         isApplicable: () => {
           throw new Error('boom');
@@ -162,7 +167,12 @@ describe('Lens XY overlay providers', () => {
 
       expect(
         resolveActiveProviders({ providers: [throwing], context: getContext({ a: TS_QUERY }) })
-      ).toEqual([]);
+      ).toEqual({
+        activeProviders: [],
+        failures: [
+          { providerId: 'observability.exemplars', layerId: 'a', error: new Error('boom') },
+        ],
+      });
     });
   });
 
@@ -176,6 +186,8 @@ describe('Lens XY overlay providers', () => {
       abortSignal,
       getFetchContext: (fetchLayer: LensXYOverlayLayer): LensXYOverlayFetchContext => ({
         layer: fetchLayer,
+        filters: [],
+        queries: [],
         abortSignal,
         executeEsql,
       }),
@@ -237,7 +249,32 @@ describe('Lens XY overlay providers', () => {
         ...createRunContext(jest.fn().mockResolvedValue(exemplarsTable), abortController.signal),
       });
 
-      expect(result).toEqual({ overlays: [], failures: [] });
+      expect(result).toEqual({ overlays: [], failures: [], truncations: [] });
+    });
+
+    it('caps the points of an overlay and reports the truncation', async () => {
+      const points = Array.from({ length: MAX_XY_OVERLAY_POINTS + 5 }, (_, index) => ({
+        id: `p${index}`,
+        x: index,
+        y: index,
+      }));
+      const crowded = createExemplarsOverlayProvider({
+        fetchOverlay: async () => ({ type: 'points', title: 'Crowded', points }),
+      });
+
+      const { overlays, truncations } = await runActiveProviders({
+        activeProviders: [{ provider: crowded, layer }],
+        ...createRunContext(jest.fn()),
+      });
+
+      expect(overlays[0].points).toHaveLength(MAX_XY_OVERLAY_POINTS);
+      expect(truncations).toEqual([
+        {
+          providerId: 'observability.exemplars',
+          layerId: 'metrics',
+          pointCount: MAX_XY_OVERLAY_POINTS + 5,
+        },
+      ]);
     });
   });
 

@@ -14,6 +14,7 @@ import {
   type LensXYOverlayProvidersConfig,
   type MinimalLensAttributes,
 } from '@kbn/lens-common';
+import { toError, type XYOverlayProviderFailure } from './run_active_providers';
 
 export interface ActiveXYOverlayProvider {
   readonly provider: LensXYOverlayProvider;
@@ -42,22 +43,16 @@ export const getXYOverlayMatchContext = ({
   return { layers, executionContext };
 };
 
-const isApplicableSafely = (
-  provider: LensXYOverlayProvider,
-  context: LensXYOverlayMatchContext,
-  layer: LensXYOverlayLayer
-): boolean => {
-  try {
-    return provider.isApplicable(context, layer);
-  } catch {
-    return false;
-  }
-};
-
 interface ResolveActiveProvidersParams {
   readonly providers: readonly LensXYOverlayProvider[];
   readonly context: LensXYOverlayMatchContext;
   readonly runtimeConfig?: LensXYOverlayProvidersConfig;
+}
+
+export interface ResolvedXYOverlayProviders {
+  readonly activeProviders: ActiveXYOverlayProvider[];
+  /** Providers whose `isApplicable` threw; they are skipped for that layer. */
+  readonly failures: XYOverlayProviderFailure[];
 }
 
 /** Returns every provider/layer pair whose rules match the chart, in registration order. */
@@ -65,11 +60,24 @@ export const resolveActiveProviders = ({
   providers,
   context,
   runtimeConfig,
-}: ResolveActiveProvidersParams): ActiveXYOverlayProvider[] =>
-  providers
-    .filter(({ id }) => runtimeConfig?.[id] !== false)
-    .flatMap((provider) =>
-      context.layers
-        .filter((layer) => isApplicableSafely(provider, context, layer))
-        .map((layer) => ({ provider, layer }))
-    );
+}: ResolveActiveProvidersParams): ResolvedXYOverlayProviders => {
+  const activeProviders: ActiveXYOverlayProvider[] = [];
+  const failures: XYOverlayProviderFailure[] = [];
+
+  for (const provider of providers) {
+    if (runtimeConfig?.[provider.id] === false) {
+      continue;
+    }
+    for (const layer of context.layers) {
+      try {
+        if (provider.isApplicable(context, layer)) {
+          activeProviders.push({ provider, layer });
+        }
+      } catch (error) {
+        failures.push({ providerId: provider.id, layerId: layer.layerId, error: toError(error) });
+      }
+    }
+  }
+
+  return { activeProviders, failures };
+};

@@ -27,6 +27,7 @@ import {
   resolveAxisFormatPolicies,
 } from '../axis_format_policy';
 
+// Lens is the only writer of this variable, so the observable's values are trusted without a runtime check.
 const getOverlays$ = (value: unknown): Observable<readonly XYOverlay[]> | undefined =>
   isObservable(value) ? (value as Observable<readonly XYOverlay[]>) : undefined;
 

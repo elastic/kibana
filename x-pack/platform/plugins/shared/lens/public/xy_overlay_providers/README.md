@@ -15,6 +15,8 @@ embeds Lens.
 
 - **XY charts only.** XY charts (`lnsXY`) are the only Lens charts that render overlays, so Lens
   never evaluates providers for other visualizations.
+- **ES|QL layers only.** Only ES|QL layers are passed to providers. Form-based layers, built from
+  the field picker, are skipped.
 - **Points only.** `fetchOverlay` returns a points overlay today. Other overlay shapes would be added
   to the `LensXYOverlay` union.
 - **Additive only.** A provider can't change the chart's own data, columns or saved state.
@@ -31,7 +33,7 @@ import type { LensXYOverlayProvider } from '@kbn/lens-common';
 const exemplarsProvider: LensXYOverlayProvider = {
   id: 'myPlugin.exemplars',
   isApplicable: ({ executionContext }, { esql }) =>
-    executionContext?.type === 'dashboard' && esql !== undefined && esql.includes('STATS'),
+    executionContext?.type === 'dashboard' && esql.includes('STATS'),
   fetchOverlay: async ({ layer, executeEsql }) => {
     const { rows } = await executeEsql(`SET exemplars={"limit": 200};\n${layer.esql}`, {
       title: 'Exemplars',
@@ -66,13 +68,14 @@ throws.
 
 ### `isApplicable(context, layer)`
 
-Called once per layer of every XY chart Lens renders, on every chart load. Return `true` to fetch an
-overlay for that layer. It must be synchronous and cheap: dashboards render many charts, and each
-match costs at least one extra query. A rule that throws is treated as `false`.
+Called once per ES|QL layer of every XY chart Lens renders, on every chart load. Return `true` to
+fetch an overlay for that layer. It must be synchronous and cheap: dashboards render many charts, and
+each match costs at least one extra query. A rule that throws skips the provider for that layer, and
+the chart shows a warning badge that names the provider and the error.
 
 - `layer.layerId` is the id of the layer.
-- `layer.esql` is the ES|QL query of the layer, or `undefined` for form-based layers.
-- `context.layers` lists every layer of the chart.
+- `layer.esql` is the ES|QL query of the layer.
+- `context.layers` lists every ES|QL layer of the chart.
 - `context.executionContext` identifies the surface rendering the chart. Match on its `type`:
 
 | Surface | `executionContext.type` |
@@ -100,18 +103,25 @@ chart:
 - the chart's abort signal, so a superseded load cancels it.
 
 The request is listed in the chart Inspector under `meta.title` and `meta.description`. The context
-also exposes `timeRange`, `filters`, `query`, `esqlVariables` and `abortSignal` for providers that
-build their own requests.
+also exposes `timeRange`, `filters`, `queries`, `esqlVariables` and `abortSignal` for providers that
+build their own requests. `filters` and `queries` follow the same rules as `executeEsql`: they're
+empty when the layer ignores global filters.
 
 Each returned point needs a stable `id`, which Lens passes back on click, and `x` / `y` values in the
 chart's coordinates. On time charts `x` is a timestamp in milliseconds. Points are bound to the Y axis
-of the layer they were fetched for. If that layer isn't drawn, the overlay is dropped.
+of the layer they were fetched for, and use the same X and Y scales as the layer. The overlay is
+dropped if that layer isn't drawn or has a categorical X axis.
+
+Lens draws at most 1,000 points per overlay. Extra points are dropped, and the chart shows a warning
+badge. Query only what you plan to draw.
 
 ### `onPointClick(event)`
 
 Optional. Called when the user clicks a point of the provider's overlay, with `providerId`, `layerId`
 and the point's `pointId`. Keep your own map from point id to data, as the exemplars example does.
-Clicks aren't dispatched when the host disables the chart's triggers.
+Bound that map: replace a layer's entries on each `fetchOverlay` instead of adding to them, because
+dashboards refresh charts repeatedly. Clicks aren't dispatched when the host disables the chart's
+triggers.
 
 Open UI through core services, for example `core.overlays.openFlyout`, so it works on every surface
 and not only inside your own app.
@@ -121,7 +131,8 @@ and not only inside your own app.
 - Overlays never delay the chart: they're fetched after the base data has rendered.
 - On every chart reload Lens drops the previous overlays and fetches new ones.
 - Providers run independently. A rejected `fetchOverlay` doesn't affect other providers or the chart.
-  The chart shows a warning badge that names the provider and the error.
+  The chart shows a warning badge that names the provider and the error. The badge is cleared on the
+  next overlay load.
 - Results of a load that was superseded or aborted are discarded.
 
 ## Turning providers off from the host

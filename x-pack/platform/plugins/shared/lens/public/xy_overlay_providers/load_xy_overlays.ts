@@ -30,7 +30,7 @@ import type { XYOverlayProviderRegistry } from './provider_registry';
 import { getXYOverlayMatchContext, resolveActiveProviders } from './resolve_active_providers';
 import { runActiveProviders, type XYOverlaysRunResult } from './run_active_providers';
 
-const EMPTY_RESULT: XYOverlaysRunResult = { overlays: [], failures: [] };
+const EMPTY_RESULT: XYOverlaysRunResult = { overlays: [], failures: [], truncations: [] };
 
 interface XYOverlaysSearchContext {
   readonly timeRange?: TimeRange;
@@ -77,33 +77,42 @@ export const loadXYOverlays = async ({
   if (!context) {
     return EMPTY_RESULT;
   }
-  const activeProviders = resolveActiveProviders({
+  const { activeProviders, failures } = resolveActiveProviders({
     providers: registry.getAll(),
     context,
     runtimeConfig,
   });
   if (!activeProviders.length) {
-    return EMPTY_RESULT;
+    return { ...EMPTY_RESULT, failures };
   }
 
   const { timeRange, filters, query, esqlVariables, projectRouting, isApproximate } = searchContext;
   const kqlQueries = query.filter((entry): entry is Query => !isOfAggregateQueryType(entry));
+
+  const getLayerScope = (layer: LensXYOverlayLayer) => {
+    const textBasedLayer = getTextBasedLayer(attributes, layer);
+    const ignoreGlobalFilters = Boolean(textBasedLayer?.ignoreGlobalFilters);
+    return {
+      timeField: textBasedLayer?.timeField,
+      filters: ignoreGlobalFilters ? [] : filters,
+      queries: ignoreGlobalFilters ? [] : kqlQueries,
+    };
+  };
 
   const executeEsql = async (
     esql: string,
     layer: LensXYOverlayLayer,
     { title, description }: LensXYOverlayRequestMeta
   ): Promise<Datatable> => {
-    const textBasedLayer = getTextBasedLayer(attributes, layer);
-    const ignoreGlobalFilters = Boolean(textBasedLayer?.ignoreGlobalFilters);
+    const { timeField, filters: layerFilters, queries } = getLayerScope(layer);
     const { datatable } = await data.search.esql(
       {
         query: esql,
         kibanaQueryContext: {
           timeRange,
-          timeField: textBasedLayer?.timeField,
-          kibanaFilters: ignoreGlobalFilters ? [] : filters,
-          kqlQuery: ignoreGlobalFilters ? undefined : kqlQueries,
+          timeField,
+          kibanaFilters: layerFilters,
+          kqlQuery: queries.length ? queries : undefined,
           esqlVariables,
         },
         approximation: isApproximate,
@@ -126,17 +135,24 @@ export const loadXYOverlays = async ({
     return datatable;
   };
 
-  return runActiveProviders({
+  const result = await runActiveProviders({
     activeProviders,
     abortSignal,
-    getFetchContext: (layer) => ({
-      layer,
-      timeRange,
-      filters,
-      query: kqlQueries[0],
-      esqlVariables,
-      abortSignal,
-      executeEsql: (esql, meta) => executeEsql(esql, layer, meta),
-    }),
+    getFetchContext: (layer) => {
+      const { filters: layerFilters, queries } = getLayerScope(layer);
+      return {
+        layer,
+        timeRange,
+        filters: layerFilters,
+        queries,
+        esqlVariables,
+        abortSignal,
+        executeEsql: (esql, meta) => executeEsql(esql, layer, meta),
+      };
+    },
   });
+  if (abortSignal.aborted) {
+    return EMPTY_RESULT;
+  }
+  return { ...result, failures: [...failures, ...result.failures] };
 };

@@ -79,8 +79,8 @@ export const createExemplarsOverlayProvider = ({
   onExemplarClick,
   isEnabled,
 }: CreateExemplarsOverlayProviderParams): LensXYOverlayProvider => {
-  const exemplarsById = new Map<string, Exemplar>();
-  let nextId = 0;
+  // Only the exemplars drawn by the latest load of each layer are kept, so memory stays bounded on refresh.
+  const exemplarsByLayer = new Map<string, ReadonlyMap<string, Exemplar>>();
 
   return {
     id: EXEMPLARS_OVERLAY_PROVIDER_ID,
@@ -89,14 +89,13 @@ export const createExemplarsOverlayProvider = ({
         isEnabled() &&
         executionContext?.type !== undefined &&
         SUPPORTED_SURFACE_TYPES.has(executionContext.type) &&
-        esql !== undefined &&
         queryHasStatsCommand(esql) &&
         getExemplarsQuery(esql) !== undefined
       );
     },
 
-    fetchOverlay: async ({ layer, executeEsql }) => {
-      const query = layer.esql ? getExemplarsQuery(layer.esql) : undefined;
+    fetchOverlay: async ({ layer, executeEsql, abortSignal }) => {
+      const query = getExemplarsQuery(layer.esql);
       if (!query) {
         return undefined;
       }
@@ -106,18 +105,24 @@ export const createExemplarsOverlayProvider = ({
         description:
           'This request queries Elasticsearch to fetch the exemplars drawn on the chart.',
       });
+      if (abortSignal.aborted) {
+        return undefined;
+      }
 
-      const points = rows.flatMap((row): LensXYOverlayPoint[] => {
+      const exemplars = new Map<string, Exemplar>();
+      const points: LensXYOverlayPoint[] = [];
+      for (const row of rows) {
         const timestamp = String(row[TIMESTAMP_COLUMN]);
         const x = Date.parse(timestamp);
         const value = Number(row[VALUE_COLUMN]);
         if (Number.isNaN(x) || Number.isNaN(value)) {
-          return [];
+          continue;
         }
-        const id = `exemplar-${nextId++}`;
-        exemplarsById.set(id, { id, timestamp, value, simulated: query.simulated, fields: row });
-        return [{ id, x, y: value }];
-      });
+        const id = `exemplar-${points.length}`;
+        exemplars.set(id, { id, timestamp, value, simulated: query.simulated, fields: row });
+        points.push({ id, x, y: value });
+      }
+      exemplarsByLayer.set(layer.layerId, exemplars);
 
       return {
         type: 'points',
@@ -125,8 +130,8 @@ export const createExemplarsOverlayProvider = ({
         points,
       };
     },
-    onPointClick: ({ pointId }) => {
-      const exemplar = exemplarsById.get(pointId);
+    onPointClick: ({ layerId, pointId }) => {
+      const exemplar = exemplarsByLayer.get(layerId)?.get(pointId);
       if (exemplar) {
         onExemplarClick(exemplar);
       }

@@ -20,9 +20,17 @@ export interface XYOverlayProviderFailure {
   readonly error: Error;
 }
 
+export interface XYOverlayTruncation {
+  readonly providerId: string;
+  readonly layerId: string;
+  readonly pointCount: number;
+}
+
 export interface XYOverlaysRunResult {
   readonly overlays: readonly LensXYOverlay[];
   readonly failures: readonly XYOverlayProviderFailure[];
+  /** Overlays that returned more than `MAX_XY_OVERLAY_POINTS` points and were cut to that limit. */
+  readonly truncations: readonly XYOverlayTruncation[];
 }
 
 interface RunActiveProvidersParams {
@@ -31,7 +39,10 @@ interface RunActiveProvidersParams {
   readonly getFetchContext: (layer: LensXYOverlayLayer) => LensXYOverlayFetchContext;
 }
 
-const toError = (reason: unknown): Error =>
+/** Maximum number of points drawn per overlay; every point is an extra mark on the chart. */
+export const MAX_XY_OVERLAY_POINTS = 1000;
+
+export const toError = (reason: unknown): Error =>
   reason instanceof Error ? reason : new Error(String(reason));
 
 /**
@@ -48,11 +59,12 @@ export const runActiveProviders = async ({
   );
 
   if (abortSignal.aborted) {
-    return { overlays: [], failures: [] };
+    return { overlays: [], failures: [], truncations: [] };
   }
 
   const overlays: LensXYOverlay[] = [];
   const failures: XYOverlayProviderFailure[] = [];
+  const truncations: XYOverlayTruncation[] = [];
 
   settled.forEach((result, index) => {
     const { provider, layer } = activeProviders[index];
@@ -64,12 +76,26 @@ export const runActiveProviders = async ({
       });
       return;
     }
-    if (result.value) {
-      overlays.push({ ...result.value, providerId: provider.id, layerId: layer.layerId });
+    if (!result.value) {
+      return;
     }
+    const { points } = result.value;
+    if (points.length > MAX_XY_OVERLAY_POINTS) {
+      truncations.push({
+        providerId: provider.id,
+        layerId: layer.layerId,
+        pointCount: points.length,
+      });
+    }
+    overlays.push({
+      ...result.value,
+      points: points.slice(0, MAX_XY_OVERLAY_POINTS),
+      providerId: provider.id,
+      layerId: layer.layerId,
+    });
   });
 
-  return { overlays, failures };
+  return { overlays, failures, truncations };
 };
 
 /** Routes a click on an overlay point to the provider that owns it. */

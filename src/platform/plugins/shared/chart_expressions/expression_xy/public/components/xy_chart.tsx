@@ -1156,7 +1156,8 @@ export function XYChart({
               <OverlayPoints
                 overlays={overlays}
                 yAxesConfiguration={yAxesConfiguration}
-                isTimeVis={isTimeVis}
+                dataLayers={dataLayers}
+                defaultXScaleType={defaultXScaleType}
               />
             ) : null}
             {referenceLineLayers.length ? (

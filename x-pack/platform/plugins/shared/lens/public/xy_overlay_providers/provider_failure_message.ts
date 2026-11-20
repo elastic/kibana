@@ -7,7 +7,36 @@
 
 import { i18n } from '@kbn/i18n';
 import type { UserMessage } from '@kbn/lens-common';
-import type { XYOverlayProviderFailure } from './run_active_providers';
+import {
+  MAX_XY_OVERLAY_POINTS,
+  type XYOverlayProviderFailure,
+  type XYOverlayTruncation,
+} from './run_active_providers';
+
+const MESSAGE_ID_PREFIX = 'lens-xy-overlay-provider-';
+
+/** Tells apart the messages added for XY overlays, so they can be cleared on every overlay load. */
+export const isXYOverlayProviderMessageId = (uniqueId: string): boolean =>
+  uniqueId.startsWith(MESSAGE_ID_PREFIX);
+
+/** Non-blocking badge shown when an overlay returned more points than Lens draws. */
+export const getXYOverlayTruncationMessage = ({
+  providerId,
+  layerId,
+  pointCount,
+}: XYOverlayTruncation): UserMessage => ({
+  uniqueId: `${MESSAGE_ID_PREFIX}truncation-${providerId}-${layerId}`,
+  severity: 'warning',
+  fixableInEditor: false,
+  displayLocations: [{ id: 'embeddableBadge' }],
+  shortMessage: i18n.translate('xpack.lens.xyOverlayProviders.truncation.shortMessage', {
+    defaultMessage: 'Some chart details are incomplete',
+  }),
+  longMessage: i18n.translate('xpack.lens.xyOverlayProviders.truncation.longMessage', {
+    defaultMessage: 'The "{providerId}" overlay shows the first {limit} of {pointCount} points.',
+    values: { providerId, limit: MAX_XY_OVERLAY_POINTS, pointCount },
+  }),
+});
 
 /** Non-blocking badge shown when an XY overlay could not be loaded. */
 export const getXYOverlayProviderFailureMessage = ({
@@ -15,7 +44,7 @@ export const getXYOverlayProviderFailureMessage = ({
   layerId,
   error,
 }: XYOverlayProviderFailure): UserMessage => ({
-  uniqueId: `lens-xy-overlay-provider-failure-${providerId}-${layerId}`,
+  uniqueId: `${MESSAGE_ID_PREFIX}failure-${providerId}-${layerId}`,
   severity: 'warning',
   fixableInEditor: false,
   displayLocations: [{ id: 'embeddableBadge' }],

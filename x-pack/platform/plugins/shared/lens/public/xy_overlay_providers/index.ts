@@ -8,8 +8,24 @@
 export { createXYOverlayProviderRegistry } from './provider_registry';
 export type { XYOverlayProviderRegistry } from './provider_registry';
 export { getXYOverlayMatchContext, resolveActiveProviders } from './resolve_active_providers';
-export type { ActiveXYOverlayProvider } from './resolve_active_providers';
-export { runActiveProviders, dispatchOverlayPointClick } from './run_active_providers';
-export type { XYOverlayProviderFailure, XYOverlaysRunResult } from './run_active_providers';
+export type {
+  ActiveXYOverlayProvider,
+  ResolvedXYOverlayProviders,
+} from './resolve_active_providers';
+export {
+  runActiveProviders,
+  dispatchOverlayPointClick,
+  MAX_XY_OVERLAY_POINTS,
+} from './run_active_providers';
+export type {
+  XYOverlayProviderFailure,
+  XYOverlayTruncation,
+  XYOverlaysRunResult,
+} from './run_active_providers';
 export { loadXYOverlays } from './load_xy_overlays';
-export { getXYOverlayProviderFailureMessage } from './provider_failure_message';
+export {
+  getXYOverlayProviderFailureMessage,
+  getXYOverlayTruncationMessage,
+  isXYOverlayProviderMessageId,
+} from './provider_failure_message';
+export { toChartOverlay } from './to_chart_overlay';
