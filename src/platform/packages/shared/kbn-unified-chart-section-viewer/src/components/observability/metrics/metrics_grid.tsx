@@ -45,6 +45,7 @@ import {
 } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
+import { METRICS_GRID_EXECUTION_CONTEXT } from './utils/execution_context';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
 
@@ -526,6 +527,7 @@ const ChartItem = React.memo(
           quickActionIds={METRICS_QUICK_ACTION_IDS}
           userMessages={userMessages}
           profileId={profileId}
+          executionContext={METRICS_GRID_EXECUTION_CONTEXT}
         />
       </A11yGridCell>
     );

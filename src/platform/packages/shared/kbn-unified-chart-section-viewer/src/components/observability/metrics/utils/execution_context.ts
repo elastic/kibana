@@ -14,6 +14,15 @@ import type {
 } from './execution_context_enums';
 
 /**
+ * Identifies the Metrics grid charts in the execution context passed to Lens,
+ * so Lens XY overlay providers can tell them apart from other Discover charts.
+ */
+export const METRICS_GRID_EXECUTION_CONTEXT: Pick<KibanaExecutionContext, 'type' | 'name'> = {
+  type: 'discover',
+  name: 'metrics_grid',
+};
+
+/**
  * Returns execution context options for spreading into search calls.
  * When `meta` is provided it is forwarded to `executionContext.meta`,
  * which the server-side pipeline flattens onto the APM transaction as `kibana_meta_*` labels.
