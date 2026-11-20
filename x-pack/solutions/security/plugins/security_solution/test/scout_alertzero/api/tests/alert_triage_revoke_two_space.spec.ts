@@ -54,21 +54,23 @@ const ANALYST_ROLE: KibanaRole = {
 
 /**
  * Creates the space's alerts index as the alerting framework does on its first alert: a backing
- * index behind the space alias. The mapping is copied from the default space's index, so
- * `kibana.alert.workflow_tags` is a keyword and the revoke's exact tag search behaves as in a
- * deployment. A write to the bare alias name would auto-create an index that maps it as text.
+ * index behind the space alias. The mapping comes from the security alerts index template, which
+ * Kibana installs at start, so `kibana.alert.workflow_tags` is a keyword and the revoke's exact tag
+ * search behaves as in a deployment. A write to the bare alias name would auto-create an index that
+ * maps it as text, and `POST api/detection_engine/index` creates no alias for a new space. The
+ * simulation needs no concrete index, so it works before anything wrote to the default space.
  */
 const createAlertsIndex = async (esClient: EsClient, spaceId: string) => {
-  // Read through the alias: the default backing index may have rolled over on a deployment.
-  const mappings = await esClient.indices.getMapping({ index: alertsIndex('default') });
-  const [defaultIndex] = Object.keys(mappings);
-  const settings = await esClient.indices.getSettings({ index: defaultIndex });
+  const { template } = await esClient.indices.simulateIndexTemplate({
+    name: '.internal.alerts-security.alerts-default-000001',
+  });
   await esClient.indices.create({
     index: `.internal.alerts-security.alerts-${spaceId}-000001`,
     aliases: { [alertsIndex(spaceId)]: { is_write_index: true, is_hidden: true } },
-    // The alerts mapping has more fields than the default limit.
-    settings: { hidden: true, mapping: settings[defaultIndex].settings?.index?.mapping },
-    mappings: mappings[defaultIndex].mappings,
+    // The alerts mapping has more fields than the default limit. The default space's lifecycle
+    // policy is left out: its rollover alias names the default space.
+    settings: { hidden: true, mapping: template.settings?.index?.mapping },
+    mappings: template.mappings,
   });
 };
 
