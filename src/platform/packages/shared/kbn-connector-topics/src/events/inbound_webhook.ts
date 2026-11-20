@@ -8,6 +8,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
+import type { ConnectorEventTopicDefinition } from './connector_event_topic';
 
 const InboundWebhookReceivedEventSchema = lazySchema(() =>
   z.object({
@@ -16,6 +17,6 @@ const InboundWebhookReceivedEventSchema = lazySchema(() =>
 );
 
 export const inboundWebhookReceived = {
-  name: 'inboundWebhook.received' as const,
+  name: 'inboundWebhook.received',
   eventSchema: InboundWebhookReceivedEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;

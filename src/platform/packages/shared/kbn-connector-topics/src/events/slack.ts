@@ -8,6 +8,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
+import type { ConnectorEventTopicDefinition } from './connector_event_topic';
 
 export const SLACK_EVENT_ID_MAX = 128;
 export const SLACK_EVENT_NAME_MAX = 256;
@@ -215,51 +216,51 @@ const SlackHitlActionEventSchema = lazySchema(() =>
 );
 
 export const slack2Message = {
-  name: 'slack2.message' as const,
+  name: 'slack2.message',
   eventSchema: SlackMessageEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const slack2AppMention = {
-  name: 'slack2.app_mention' as const,
+  name: 'slack2.app_mention',
   eventSchema: SlackAppMentionEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const slack2ReactionAdded = {
-  name: 'slack2.reaction_added' as const,
+  name: 'slack2.reaction_added',
   eventSchema: SlackReactionAddedEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const slack2FileShared = {
-  name: 'slack2.file_shared' as const,
+  name: 'slack2.file_shared',
   eventSchema: SlackFileSharedEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const slack2FilePublic = {
-  name: 'slack2.file_public' as const,
+  name: 'slack2.file_public',
   eventSchema: SlackFilePublicEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const slack2ChannelCreated = {
-  name: 'slack2.channel_created' as const,
+  name: 'slack2.channel_created',
   eventSchema: SlackChannelCreatedEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const slack2TeamJoin = {
-  name: 'slack2.team_join' as const,
+  name: 'slack2.team_join',
   eventSchema: SlackTeamJoinEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const slack2MemberJoinedChannel = {
-  name: 'slack2.member_joined_channel' as const,
+  name: 'slack2.member_joined_channel',
   eventSchema: SlackMemberJoinedChannelEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const slack2SlashCommand = {
-  name: 'slack2.slash_command' as const,
+  name: 'slack2.slash_command',
   eventSchema: SlackSlashCommandEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const slack2HitlAction = {
-  name: 'slack2.hitl_action' as const,
+  name: 'slack2.hitl_action',
   eventSchema: SlackHitlActionEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;

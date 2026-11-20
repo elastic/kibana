@@ -8,6 +8,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
+import type { ConnectorEventTopicDefinition } from './connector_event_topic';
 
 export const TEAMS_ID_MAX = 1024;
 
@@ -58,26 +59,26 @@ const TeamMemberAddedEventSchema = lazySchema(() =>
 );
 
 export const microsoftTeamsChannelMessage = {
-  name: 'microsoft-teams.channel_message' as const,
+  name: 'microsoft-teams.channel_message',
   eventSchema: ChannelMessageEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const microsoftTeamsChatMessage = {
-  name: 'microsoft-teams.chat_message' as const,
+  name: 'microsoft-teams.chat_message',
   eventSchema: ChatMessageEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const microsoftTeamsChannelCreated = {
-  name: 'microsoft-teams.channel_created' as const,
+  name: 'microsoft-teams.channel_created',
   eventSchema: ChannelCreatedEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const microsoftTeamsChatCreated = {
-  name: 'microsoft-teams.chat_created' as const,
+  name: 'microsoft-teams.chat_created',
   eventSchema: ChatCreatedEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const microsoftTeamsTeamMemberAdded = {
-  name: 'microsoft-teams.team_member_added' as const,
+  name: 'microsoft-teams.team_member_added',
   eventSchema: TeamMemberAddedEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;

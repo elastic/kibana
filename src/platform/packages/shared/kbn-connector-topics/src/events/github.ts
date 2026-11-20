@@ -8,6 +8,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
+import type { ConnectorEventTopicDefinition } from './connector_event_topic';
 
 const identifier = () => z.number().int().nonnegative();
 
@@ -234,41 +235,41 @@ const GithubCheckRunEventSchema = lazySchema(() =>
 );
 
 export const githubIssues = {
-  name: 'github.issues' as const,
+  name: 'github.issues',
   eventSchema: GithubIssuesEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const githubIssueComment = {
-  name: 'github.issue_comment' as const,
+  name: 'github.issue_comment',
   eventSchema: GithubIssueCommentEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const githubPullRequest = {
-  name: 'github.pull_request' as const,
+  name: 'github.pull_request',
   eventSchema: GithubPullRequestEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const githubPullRequestReview = {
-  name: 'github.pull_request_review' as const,
+  name: 'github.pull_request_review',
   eventSchema: GithubPullRequestReviewEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const githubPush = {
-  name: 'github.push' as const,
+  name: 'github.push',
   eventSchema: GithubPushEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const githubRelease = {
-  name: 'github.release' as const,
+  name: 'github.release',
   eventSchema: GithubReleaseEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const githubDeploymentStatus = {
-  name: 'github.deployment_status' as const,
+  name: 'github.deployment_status',
   eventSchema: GithubDeploymentStatusEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const githubCheckRun = {
-  name: 'github.check_run' as const,
+  name: 'github.check_run',
   eventSchema: GithubCheckRunEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;

@@ -8,6 +8,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
+import type { ConnectorEventTopicDefinition } from './connector_event_topic';
 
 export const SERVICENOW_ID_MAX = 128;
 export const SERVICENOW_VALUE_MAX = 1024;
@@ -103,31 +104,31 @@ const ChangeApprovalStateChangedEventSchema = lazySchema(() =>
 );
 
 export const servicenowSearchIncidentCreated = {
-  name: 'servicenow_search.incident_created' as const,
+  name: 'servicenow_search.incident_created',
   eventSchema: IncidentCreatedEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const servicenowSearchIncidentUpdated = {
-  name: 'servicenow_search.incident_updated' as const,
+  name: 'servicenow_search.incident_updated',
   eventSchema: IncidentUpdatedEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const servicenowSearchIncidentResolved = {
-  name: 'servicenow_search.incident_resolved' as const,
+  name: 'servicenow_search.incident_resolved',
   eventSchema: IncidentResolvedEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const servicenowSearchCommentAdded = {
-  name: 'servicenow_search.comment_added' as const,
+  name: 'servicenow_search.comment_added',
   eventSchema: JournalEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const servicenowSearchWorkNoteAdded = {
-  name: 'servicenow_search.work_note_added' as const,
+  name: 'servicenow_search.work_note_added',
   eventSchema: JournalEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
 
 export const servicenowSearchChangeApprovalStateChanged = {
-  name: 'servicenow_search.change_approval_state_changed' as const,
+  name: 'servicenow_search.change_approval_state_changed',
   eventSchema: ChangeApprovalStateChangedEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;

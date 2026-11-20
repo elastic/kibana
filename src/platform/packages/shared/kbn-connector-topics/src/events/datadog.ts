@@ -8,6 +8,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
+import type { ConnectorEventTopicDefinition } from './connector_event_topic';
 
 const DatadogAlertEventSchema = lazySchema(() =>
   z.object({
@@ -35,6 +36,6 @@ const DatadogAlertEventSchema = lazySchema(() =>
 );
 
 export const datadogAlert = {
-  name: 'datadog.alert' as const,
+  name: 'datadog.alert',
   eventSchema: DatadogAlertEventSchema,
-};
+} as const satisfies ConnectorEventTopicDefinition;
