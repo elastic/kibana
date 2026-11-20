@@ -84,4 +84,31 @@ describe('waitUntilClusterReady', () => {
       waitUntilClusterReady({ client, log, expectedStatus: 'yellow', readyTimeout: 1000 })
     ).rejects.toThrow('ES cluster failed to come online with the 1 second timeout');
   });
+
+  test(`forces exit on SIGINT only while waiting, and removes that listener afterwards`, async () => {
+    const listenersBefore = process.listenerCount('SIGINT');
+    let listenersWhileWaiting = 0;
+    health.mockImplementationOnce(async () => {
+      listenersWhileWaiting = process.listenerCount('SIGINT');
+      return { status: 'green' };
+    });
+    const client = new Client({});
+
+    await waitUntilClusterReady({ client, log, expectedStatus: 'green' });
+
+    expect(listenersWhileWaiting).toBe(listenersBefore + 1);
+    expect(process.listenerCount('SIGINT')).toBe(listenersBefore);
+  });
+
+  test(`removes the SIGINT listener when the wait times out`, async () => {
+    const listenersBefore = process.listenerCount('SIGINT');
+    health.mockImplementation(() => Promise.reject(new Error('foo')));
+    const client = new Client({});
+
+    await expect(
+      waitUntilClusterReady({ client, log, expectedStatus: 'yellow', readyTimeout: 0 })
+    ).rejects.toThrow('ES cluster failed to come online');
+
+    expect(process.listenerCount('SIGINT')).toBe(listenersBefore);
+  });
 });

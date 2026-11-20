@@ -28,10 +28,13 @@ export async function runDockerServers({
   config,
   log,
   onEarlyExit,
+  signal,
 }: {
   config: Config;
   log: ToolingLog;
   onEarlyExit?: (msg: string) => void;
+  /** Aborting while the servers are starting stops them and rejects (see `runDockerServer`). */
+  signal?: AbortSignal;
 }): Promise<StopDockerServers> {
   const specs: Record<string, DockerServerSpec> = config.get('dockerServers') ?? {};
   const servers = Object.entries(specs)
@@ -56,6 +59,7 @@ export async function runDockerServers({
     servers.map((server) =>
       runDockerServer(server, {
         log,
+        signal,
         onUnexpectedExit: (error) =>
           onEarlyExit?.(`[docker:${server.name}] container exited unexpectedly: ${error.message}`),
       })
@@ -73,6 +77,7 @@ export async function runDockerServers({
   }
 
   const stop: StopDockerServers = async () => {
+    log.info(`scout: stopping docker server(s): ${running.map((s) => s.name).join(', ')}`);
     const stopResults = await Promise.allSettled(running.map((server) => server.stop()));
     const stopFailures = stopResults.flatMap((result, i) =>
       result.status === 'rejected' ? [{ name: running[i].name, reason: result.reason }] : []

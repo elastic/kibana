@@ -34,6 +34,17 @@ export interface RunDockerServerOptions {
   log: ToolingLog;
   /** Called if the container exits on its own while it is supposed to be running. */
   onUnexpectedExit?: (error: Error) => void;
+  /**
+   * Aborting while the start is in progress (pull, run, readiness wait) stops the container and
+   * rejects with an `AbortError`, so a shutdown signal never leaves a half-started container behind.
+   */
+  signal?: AbortSignal;
+}
+
+function abortError(name: string) {
+  const error = new Error(`[docker:${name}] start aborted`);
+  error.name = 'AbortError';
+  return error;
 }
 
 /** Turns a named entry of a `dockerServers` config into the spec `runDockerServer` takes. */
@@ -179,9 +190,13 @@ function ignoreGoneContainer(containerId: string, error: unknown) {
  */
 export async function runDockerServer(
   server: DockerServer,
-  { log, onUnexpectedExit }: RunDockerServerOptions
+  { log, onUnexpectedExit, signal }: RunDockerServerOptions
 ): Promise<RunningDockerServer> {
   const { image, name } = server;
+
+  if (signal?.aborted) {
+    throw abortError(name);
+  }
 
   if (server.preferCached && (await isDockerImageAvailableLocally(image))) {
     log.info(`[docker:${name}] skipping pull of docker image "${image}"`);
@@ -198,12 +213,18 @@ export async function runDockerServer(
   // push the logs from the container to our logger, and expose an observable of those lines
   const logLine$ = observeContainerLogs(name, containerId, log);
 
-  // ensure container stays running, report if it exits on its own
+  // ensure container stays running, report if it exits on its own; an abort during the start
+  // takes the same exit so the container is stopped below
   let rejectOnExit: (error: Error) => void = () => {};
   const exited = new Promise<never>((_, reject) => {
     rejectOnExit = reject;
   });
   exited.catch(() => {}); // only observed while waiting for readiness below
+  const onAbort = () => rejectOnExit(abortError(name));
+  signal?.addEventListener('abort', onAbort, { once: true });
+  if (signal?.aborted) {
+    onAbort();
+  }
   const runningSub = observeContainerRunning(name, containerId, log).subscribe({
     error: (error) => {
       if (stopped) {
@@ -228,10 +249,12 @@ export async function runDockerServer(
     abort$.next();
     abort$.complete();
 
+    log.info(`[docker:${name}] stopping container [id=${containerId}]`);
     try {
       await execa('docker', ['kill', containerId]);
     } catch (error) {
       ignoreGoneContainer(containerId, error);
+      log.debug(`[docker:${name}] container was already stopped`);
     }
     // we don't remove the containers on CI because removing them causes the
     // network list to be updated and aborts all in-flight requests in Chrome.
@@ -249,6 +272,7 @@ export async function runDockerServer(
       Rx.race(logLine$.pipe(Rx.ignoreElements()), Rx.timer(LOG_DRAIN_TIMEOUT_MS)),
       { defaultValue: undefined }
     );
+    log.info(`[docker:${name}] container stopped`);
   };
 
   try {
@@ -258,6 +282,8 @@ export async function runDockerServer(
   } catch (error) {
     await stop();
     throw error;
+  } finally {
+    signal?.removeEventListener('abort', onAbort);
   }
   starting = false;
 

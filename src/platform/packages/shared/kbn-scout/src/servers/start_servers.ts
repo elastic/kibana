@@ -39,28 +39,47 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     const config = await loadServersConfig(options.testTarget, log, configRootDir);
     const pwGrepTag = getPlaywrightGrepTag(options.testTarget);
 
-    // Stops whatever backing service is up at the time: the docker servers first, Elasticsearch
-    // too once it has started. `once`, so the exit hook, an early exit and the normal shutdown
-    // cannot run it twice.
-    let shutdownBackingServices: () => Promise<void> = async () => {};
+    // Stops whatever backing service is up at the time, and is re-pointed as they come up:
+    // while the docker servers are starting it aborts that start (which stops their containers),
+    // then it stops the docker servers, then Elasticsearch too. `once`, so the exit hook, an
+    // early exit and the normal shutdown cannot run it twice.
+    const abortDockerStart = new AbortController();
+    let dockerStartup: Promise<() => Promise<void>> | undefined;
+    let shutdownBackingServices: () => Promise<void> = once(async () => {
+      abortDockerStart.abort();
+      await dockerStartup?.catch(() => {});
+    });
+
+    // Registered before anything starts: a SIGINT/SIGTERM during the registry readiness wait or
+    // the Elasticsearch boot must not leave a detached container holding its port.
+    const removeShutdownHook = registerServerShutdown(procs, () => shutdownBackingServices());
 
     // A backing service died on its own (e.g. the registry container got OOM-killed). Kibana
-    // would keep serving against it, so take everything down instead.
+    // would keep serving against it, so take everything down instead, and report that exit
+    // rather than whatever the teardown makes fail next.
+    let earlyExitError: Error | undefined;
     const onEarlyExit = (msg: string) => {
       log.error(msg);
+      log.info('scout: a backing service exited; shutting the servers down');
+      earlyExitError = earlyExitError ?? new Error(msg);
       process.exitCode = 1;
       shutdownServers(procs, shutdownBackingServices).catch((error) => log.error(error));
     };
 
-    // Docker-backed services (e.g. the Fleet package registry) must be up before Kibana boots,
-    // otherwise Fleet setup falls back to retrying against a registry that is not there yet.
-    const stopDockerServers = await runDockerServers({ config, log, onEarlyExit });
-    shutdownBackingServices = once(stopDockerServers);
-
-    let removeShutdownHook = () => {};
     let startupError: unknown;
 
     try {
+      // Docker-backed services (e.g. the Fleet package registry) must be up before Kibana boots,
+      // otherwise Fleet setup falls back to retrying against a registry that is not there yet.
+      dockerStartup = runDockerServers({
+        config,
+        log,
+        onEarlyExit,
+        signal: abortDockerStart.signal,
+      });
+      const stopDockerServers = await dockerStartup;
+      shutdownBackingServices = once(stopDockerServers);
+
       const shutdownEs = once(
         await runElasticsearch({
           config,
@@ -77,7 +96,6 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
           await stopDockerServers();
         }
       });
-      removeShutdownHook = registerServerShutdown(procs, shutdownBackingServices);
 
       await ensureDefaultSpaceNPRE(config, log);
 
@@ -121,17 +139,18 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     // Whatever failed, do not leave a detached container holding its port for the next run.
     let shutdownError: unknown;
     try {
+      log.info('scout: shutting down backing services');
       await shutdownBackingServices();
     } catch (error) {
       shutdownError = error;
     }
     removeShutdownHook();
 
-    if (startupError !== undefined) {
+    if (startupError !== undefined || earlyExitError !== undefined) {
       if (shutdownError !== undefined) {
         log.error(`shutdown after a failed start also failed: ${shutdownError}`);
       }
-      throw startupError;
+      throw earlyExitError ?? startupError;
     }
     if (shutdownError !== undefined) {
       throw shutdownError;

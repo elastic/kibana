@@ -14,6 +14,7 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { pickLevelFromFlags } from '@kbn/tooling-log';
+import { once } from 'lodash';
 import { basename, isAbsolute, relative, resolve } from 'path';
 import { silence } from '../../common';
 import {
@@ -24,6 +25,7 @@ import {
 } from '../../servers';
 import { getConfigRootDir, loadServersConfig } from '../../servers/configs';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
+import { registerServerShutdown } from '../../servers/server_shutdown';
 import type { ScoutPlaywrightProjects } from '../types';
 import { getPlaywrightLimitOptions } from '../tags';
 import { execFilePromise, getPlaywrightGrepTag, withKibanaSwcRegister } from '../utils';
@@ -132,12 +134,31 @@ async function runLocalServersAndTests(
     abortCtrl.abort();
   };
 
-  let shutdownEs;
-  let stopDockerServers;
+  let shutdownEs: (() => Promise<void>) | undefined;
+  let stopDockerServers: (() => Promise<void>) | undefined;
+  let dockerStartup: Promise<() => Promise<void>> | undefined;
+
+  // Runs once, from the signal hook or from the `finally` below, whichever comes first. A signal
+  // while the docker servers are still starting aborts that start, which stops their containers.
+  const shutdownBackingServices = once(async () => {
+    abortCtrl.abort();
+    await dockerStartup?.catch(() => {});
+    try {
+      if (shutdownEs) {
+        await shutdownEs();
+      }
+    } finally {
+      if (stopDockerServers) {
+        await stopDockerServers();
+      }
+    }
+  });
+  const removeShutdownHook = registerServerShutdown(procs, shutdownBackingServices);
 
   try {
     // Docker-backed services (e.g. the Fleet package registry) must be up before Kibana boots.
-    stopDockerServers = await runDockerServers({ config, log, onEarlyExit });
+    dockerStartup = runDockerServers({ config, log, onEarlyExit, signal: abortCtrl.signal });
+    stopDockerServers = await dockerStartup;
 
     shutdownEs = await runElasticsearch({
       onEarlyExit,
@@ -169,13 +190,9 @@ async function runLocalServersAndTests(
       await procs.stop('kibana');
     } finally {
       try {
-        if (shutdownEs) {
-          await shutdownEs();
-        }
+        await shutdownBackingServices();
       } finally {
-        if (stopDockerServers) {
-          await stopDockerServers();
-        }
+        removeShutdownHook();
       }
     }
   }

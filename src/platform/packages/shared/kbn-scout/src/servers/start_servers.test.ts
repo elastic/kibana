@@ -104,6 +104,60 @@ describe('startServers', () => {
     await expect(startServers(log, options)).rejects.toThrow('kibana down');
   });
 
+  it('registers the signal hook before anything starts and stops a container that is still starting', async () => {
+    let shutdownHook: () => Promise<void> = async () => {};
+    registerServerShutdownMock.mockImplementation((_procs, hook) => {
+      shutdownHook = hook;
+      return removeShutdownHook;
+    });
+    const containersStopped = jest.fn();
+    // the docker start only settles once it is aborted, like a readiness wait cut short by a signal
+    runDockerServersMock.mockImplementation(
+      ({ signal }) =>
+        new Promise((_, reject) => {
+          signal.addEventListener('abort', () => {
+            containersStopped();
+            const error = new Error('[docker:registry] start aborted');
+            error.name = 'AbortError';
+            reject(error);
+          });
+        })
+    );
+
+    const pending = startServers(log, options);
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(registerServerShutdownMock).toHaveBeenCalledTimes(1);
+    expect(runElasticsearchMock).not.toHaveBeenCalled();
+
+    await shutdownHook();
+    expect(containersStopped).toHaveBeenCalledTimes(1);
+
+    await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+    expect(runElasticsearchMock).not.toHaveBeenCalled();
+    expect(removeShutdownHook).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports the container exit, not the Kibana start it interrupts', async () => {
+    let onEarlyExit: (msg: string) => void = () => {};
+    runDockerServersMock.mockImplementation(async ({ onEarlyExit: handler }) => {
+      onEarlyExit = handler;
+      return stopDockerServers;
+    });
+    shutdownServersMock.mockImplementation(async (_procs, shutdownBackingServices) => {
+      await shutdownBackingServices();
+    });
+    runKibanaServerMock.mockImplementation(async () => {
+      onEarlyExit('[docker:registry] container exited unexpectedly: exit code 137');
+      throw new Error('kibana exited before it was ready');
+    });
+
+    await expect(startServers(log, options)).rejects.toThrow(
+      '[docker:registry] container exited unexpectedly: exit code 137'
+    );
+    expect(stopDockerServers).toHaveBeenCalledTimes(1);
+    expect(shutdownEs).toHaveBeenCalledTimes(1);
+  });
+
   it('shuts the servers down when a docker server exits on its own', async () => {
     let onEarlyExit: (msg: string) => void = () => {};
     runDockerServersMock.mockImplementation(async ({ onEarlyExit: handler }) => {
@@ -117,7 +171,10 @@ describe('startServers', () => {
       onEarlyExit('[docker:registry] container exited unexpectedly');
     });
 
-    await startServers(log, options);
+    // the exit is reported as the run's failure, not swallowed by the normal shutdown
+    await expect(startServers(log, options)).rejects.toThrow(
+      '[docker:registry] container exited unexpectedly'
+    );
 
     expect(shutdownServersMock).toHaveBeenCalledWith(procs, expect.any(Function));
     expect(shutdownEs).toHaveBeenCalledTimes(1);

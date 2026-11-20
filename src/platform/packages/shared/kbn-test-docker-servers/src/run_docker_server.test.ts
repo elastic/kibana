@@ -180,6 +180,35 @@ describe('runDockerServer', () => {
     expect(onUnexpectedExit).not.toHaveBeenCalled();
   });
 
+  it('stops the container and rejects when aborted during the readiness wait', async () => {
+    const docker = fakeDocker({ cached: true });
+    const onUnexpectedExit = jest.fn();
+    const abortCtrl = new AbortController();
+
+    const pending = runDockerServer(
+      { ...server, waitForLogLineTimeoutMs: 60_000 },
+      { log, onUnexpectedExit, signal: abortCtrl.signal }
+    );
+    await new Promise((resolve) => setImmediate(resolve));
+    abortCtrl.abort();
+
+    await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+    expect(dockerCall(docker.calls, 'kill')).toEqual([['kill', 'container-1']]);
+    expect(dockerCall(docker.calls, 'rm')).toEqual([['rm', 'container-1']]);
+    expect(onUnexpectedExit).not.toHaveBeenCalled();
+  });
+
+  it('does not run the container when the signal is already aborted', async () => {
+    const docker = fakeDocker({ cached: true });
+    const abortCtrl = new AbortController();
+    abortCtrl.abort();
+
+    await expect(runDockerServer(server, { log, signal: abortCtrl.signal })).rejects.toMatchObject({
+      name: 'AbortError',
+    });
+    expect(dockerCall(docker.calls, 'run')).toHaveLength(0);
+  });
+
   it('still removes a container that had already exited when stop() runs', async () => {
     const docker = fakeDocker({ cached: true, killError: 'Container container-1 is not running' });
 

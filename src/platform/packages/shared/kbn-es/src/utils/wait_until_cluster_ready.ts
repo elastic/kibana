@@ -35,12 +35,30 @@ export async function waitUntilClusterReady({
   log,
   readyTimeout = DEFAULT_READY_TIMEOUT,
 }: WaitOptions) {
-  let attempt = 0;
+  const attempt = 0;
   const start = Date.now();
 
-  // The loop will continue until timeout even if SIGINT is signaled, so force exit
-  process.on('SIGINT', () => process.exit());
+  // The loop would continue until timeout even if SIGINT is signaled, so force exit while it
+  // runs. Only while it runs: left registered, it would cut short the graceful shutdown of
+  // whoever started the cluster (process.exit skips their asynchronous exit hooks).
+  const forceExitOnSigint = () => process.exit();
+  process.on('SIGINT', forceExitOnSigint);
 
+  try {
+    await pollUntilReady({ client, expectedStatus, log, readyTimeout, start, attempt });
+  } finally {
+    process.off('SIGINT', forceExitOnSigint);
+  }
+}
+
+async function pollUntilReady({
+  client,
+  expectedStatus,
+  log,
+  readyTimeout,
+  start,
+  attempt,
+}: Required<WaitOptions> & { start: number; attempt: number }) {
   log.info(`waiting for ES cluster to report a ${expectedStatus} status`);
 
   const isReady = checkStatus(expectedStatus);
