@@ -74,4 +74,19 @@ describe('buildExecutionCompareUrl', () => {
       'https://kb.example.com/app/management/ai/evals/compare?type=execution&baseline=base%3A%3Asuite%3A%3Amodel&target=target%3A%3Asuite%3A%3Amodel'
     );
   });
+
+  it('carries a repetition policy other than the default', () => {
+    const executions = {
+      kibanaUrl: 'https://kb.example.com',
+      baselineExecutionId: 'base',
+      targetExecutionId: 'target',
+    };
+
+    expect(buildExecutionCompareUrl({ ...executions, repetitionPolicy: 'median' })).toBe(
+      'https://kb.example.com/app/management/ai/evals/compare?type=execution&baseline=base&target=target&repetition_policy=median'
+    );
+    expect(buildExecutionCompareUrl({ ...executions, repetitionPolicy: 'mean' })).not.toContain(
+      'repetition_policy'
+    );
+  });
 });

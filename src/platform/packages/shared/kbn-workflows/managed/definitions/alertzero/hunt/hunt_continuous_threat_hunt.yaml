@@ -186,10 +186,10 @@ steps:
       # write_run_conclusion below no-op'ing on an empty conversation id).
       # Otherwise: hunt not succeeding is `failed`; packaging returning
       # `run_incomplete` is `partial`; anything else is `completed`. That includes `retired_incomplete`:
-      # the hunt stamped the report after a gap no rerun can close, packaging closed the Investigation,
-      # and nothing is left to retry, so the branch counts as completed (the conclusion says what was
-      # not searched). Only the unlisted-status fall-through is relied on, so a stale Worker degrades
-      # the same way.
+      # the hunt stamped the report after a gap no rerun can close, packaging closed the Investigation
+      # (no hit) or packaged the hit, and nothing is left to retry, so the branch counts as completed
+      # (the conclusion says what was not searched). Only the unlisted-status fall-through is relied
+      # on, so a stale Worker degrades the same way.
       - name: resolve_run_outcome
         type: data.set
         with:
@@ -244,7 +244,7 @@ steps:
               - **Report:** `{{ foreach.item }}`
               - **Hunt:** {{ steps.hunt.output.headline }}. {{ steps.hunt.output.reason }}
               - **Packaging:** {{ steps.package_report.output.summary | strip }}
-              - **What this means:** no confirmed hits, but part of the report could not be searched. The report will not be swept again on its own; a manual run targeting this report replays it.
+              - **What this means:** {% if steps.hunt.output.hit == true %}confirmed hit(s) were packaged, but{% else %}no confirmed hits, but{% endif %} part of the report could not be searched. The report will not be swept again on its own; a manual run targeting this report replays it.
               {% elsif steps.resolve_run_outcome.output.outcome == 'completed' -%}
               ### Hunt Watch run completed
               - **Report:** `{{ foreach.item }}`
@@ -255,13 +255,13 @@ steps:
               - **Report:** `{{ foreach.item }}`
               - **Hunt:** {{ steps.hunt.output.headline }}. {{ steps.hunt.output.reason }}
               - **Packaging:** {% if steps.package_report.output.status == 'run_incomplete' %}did not complete. {{ steps.package_report.output.reason }}.{% else %}{{ steps.package_report.output.summary | strip }}{% endif %}
-              - **What this means:** the findings above are real, but part of the search did not run. Whether this report gets hunted again is stated in the hunt reason above: a gap that may clear keeps it eligible for a later sweep, while a gap that reproduces retires it having never been fully searched. The Investigation closes once every proposal from this run has been decided; a later sweep reopens it if it finds more.
+              - **What this means:** the findings above are real, but part of the search did not run. Whether this report gets hunted again is stated in the hunt reason above. The Investigation closes once every proposal from this run has been decided; a later sweep reopens it if it finds more.
               {% elsif steps.resolve_run_outcome.output.outcome == 'partial' -%}
               ### Hunt Watch run partial: packaging did not complete
               - **Report:** `{{ foreach.item }}`
-              - **Hunt:** {{ steps.hunt.output.headline }}.
+              - **Hunt:** {{ steps.hunt.output.headline }}.{% if steps.hunt.output.status == 'retired_incomplete' %} {{ steps.hunt.output.reason }}{% endif %}
               - **Packaging:** did not complete. {{ steps.package_report.output.reason }}.
-              - **What this means:** no proposals were created from this run. The hunt evidence was recorded, so the report will not be re-hunted automatically; the Investigation stays open for a manual rerun or review.
+              - **What this means:** packaging stopped early, so some or all proposals from this run may be missing. The hunt evidence was recorded, so the report will not be re-hunted automatically; the Investigation stays open for a manual rerun or review.
               {% else -%}
               ### Hunt Watch run failed: the hunt did not complete
               - **Report:** `{{ foreach.item }}`

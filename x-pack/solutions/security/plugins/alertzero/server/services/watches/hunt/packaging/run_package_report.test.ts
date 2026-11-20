@@ -616,7 +616,7 @@ describe('runPackageReport', () => {
       expect(result.status === 'packaged' && result.dismiss).toBe(false);
     });
 
-    it('sends a confirmed hit through the SSE path, as it does for partial', async () => {
+    it('sends a confirmed hit through the SSE path and names the gaps', async () => {
       const result = await runPackageReport({
         spaceId: 'default',
         reportId,
@@ -632,7 +632,39 @@ describe('runPackageReport', () => {
 
       expect(result.status === 'packaged' && result.dismiss).toBe(false);
       expect(result.status === 'packaged' && result.proposals.length).toBeGreaterThan(0);
+      const [subjects] = writeCoverageKis.mock.calls[0];
+      expect(subjects[0].investigationSummary).toContain(
+        'left part of the report unsearched; the report is retired without a full search'
+      );
+      expect(subjects[0].investigationSummary).toContain('Not searched:');
+      // The Investigation's own summary, written when its Proposals settle.
+      expect(result.status === 'packaged' && result.closureSummary).toMatch(
+        /Confirmed hit\..* 2 gaps left part of the report unsearched, so the report is retired without a full search\. Not searched: T9999 \(unknown technique id\), input truncated\.$/
+      );
     });
+
+    it.each(['partial', 'success'] as const)(
+      'names no gap on a confirmed hit whose hunt ended %s, even if some arrive',
+      async (huntStatus) => {
+        const result = await runPackageReport({
+          spaceId: 'default',
+          reportId,
+          investigationConversationId: conversationId,
+          runId,
+          huntStatus,
+          hasConfirmedHit: true,
+          attachments: [sseAttachment({ hit: true, hostName: 'h1' })],
+          expectedSseCount: 1,
+          coordinator: { coverageGaps: gaps },
+          deps: deps({ writeCoverageKis }),
+        });
+
+        const [subjects] = writeCoverageKis.mock.calls[0];
+        expect(subjects[0].investigationSummary).not.toContain('Not searched');
+        expect(subjects[0].investigationSummary).not.toContain('retired without a full search');
+        expect(result.status === 'packaged' && result.closureSummary).not.toContain('unsearched');
+      }
+    );
 
     it('does not name gaps on a successful run even if some arrive', async () => {
       await runPackageReport({
