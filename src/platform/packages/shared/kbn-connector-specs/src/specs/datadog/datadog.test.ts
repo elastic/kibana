@@ -183,23 +183,23 @@ describe('Datadog', () => {
       expect(mockClient.defaults.auth).toBeUndefined();
     });
 
-    it('should fail with an actionable error when the connector uses no authentication', async () => {
+    it('should fail when the connector uses no authentication', async () => {
       const noAuthContext = {
         ...mockContext,
         secrets: { authType: 'none' },
       } as unknown as ActionContext;
 
       await expect(Datadog.actions.listMonitors.handler(noAuthContext, {})).rejects.toThrow(
-        'Datadog connector has no API Key or Application Key'
+        'Datadog connector requires API Key and Application Key'
       );
       expect(mockClient.get).not.toHaveBeenCalled();
     });
 
-    it('should fail with an actionable error when the connector has no secrets', async () => {
+    it('should fail when the connector has no secrets', async () => {
       const noSecretsContext = { ...mockContext, secrets: undefined } as unknown as ActionContext;
 
       await expect(Datadog.actions.listMonitors.handler(noSecretsContext, {})).rejects.toThrow(
-        'Datadog connector has no API Key or Application Key'
+        'Datadog connector requires API Key and Application Key'
       );
     });
   });
