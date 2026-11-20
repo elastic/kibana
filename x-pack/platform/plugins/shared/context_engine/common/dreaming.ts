@@ -117,9 +117,27 @@ export type DreamingTypesConfig = Pick<
   'facts' | 'entities' | 'relationships'
 >;
 
-/** Response of `GET` and `PUT /internal/context_engine/ai_index/{aiIndexId}/dreaming`. */
+/** Latest execution used for the dreaming last-run link, plus whether any dreaming workflow is still running. */
+export interface DreamingLastRun {
+  started_at: string;
+  status: string;
+  workflow_id: string;
+  execution_id: string;
+  /** Whether any dreaming workflow has an execution that has not finished. */
+  is_running: boolean;
+}
+
+/** Response of `GET` and `PUT /internal/context_engine/ai_index/{aiIndexId}/dreaming`; `last_run` only on `GET`. */
 export interface GetAiIndexDreamingResponse {
   dreaming: AiIndexDreamingConfig;
+  last_run?: DreamingLastRun;
+}
+
+/** Response of `POST /internal/context_engine/ai_index/{aiIndexId}/dreaming/run`. */
+export interface RunAiIndexDreamingResponse {
+  executions: Array<{ workflow_id: string; execution_id: string }>;
+  /** Ids of the workflows that failed to start. */
+  failed: string[];
 }
 
 /** The dreaming config of an AI index that never configured it. */

@@ -71,6 +71,7 @@ registerAiIndexRoutes({
   getActions: jest.fn(),
   getAgentBuilder: jest.fn(),
   getWorkflowsManagementApi: jest.fn(),
+  getDreamingScheduleService: jest.fn(),
   getSpaces: jest.fn(),
 });
 

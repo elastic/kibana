@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { dreamingConfigSchema } from './dreaming_schema';
+import {
+  dreamingConfigSchema,
+  getDreamingResponseSchema,
+  runDreamingResponseSchema,
+} from './dreaming_schema';
 
 const config = {
   enabled: true,
@@ -96,6 +100,56 @@ describe('dreamingConfigSchema', () => {
   it('bounds the instructions', () => {
     expect(() =>
       dreamingConfigSchema.validate({ ...config, instructions: 'x'.repeat(8193) })
+    ).toThrow();
+  });
+});
+
+describe('getDreamingResponseSchema', () => {
+  const schema = getDreamingResponseSchema();
+
+  it('accepts dreaming without last_run', () => {
+    expect(schema.validate({ dreaming: { enabled: false } })).toEqual({
+      dreaming: { enabled: false },
+    });
+  });
+
+  it('accepts dreaming with last_run', () => {
+    const body = {
+      dreaming: { enabled: true, facts: [{ type: 'note' }] },
+      last_run: {
+        started_at: '2026-11-01T12:00:00.000Z',
+        status: 'running',
+        workflow_id: 'system-context-engine-dreaming-support',
+        execution_id: 'exec-1',
+        is_running: true,
+      },
+    };
+    expect(schema.validate(body)).toEqual(body);
+  });
+});
+
+describe('runDreamingResponseSchema', () => {
+  const schema = runDreamingResponseSchema();
+
+  it('accepts started executions and failures', () => {
+    const body = {
+      executions: [{ workflow_id: 'wf-1', execution_id: 'exec-1' }],
+      failed: ['wf-2'],
+    };
+    expect(schema.validate(body)).toEqual(body);
+  });
+
+  it('bounds the executions list', () => {
+    expect(() =>
+      schema.validate({
+        executions: [
+          { workflow_id: 'a', execution_id: '1' },
+          { workflow_id: 'b', execution_id: '2' },
+          { workflow_id: 'c', execution_id: '3' },
+          { workflow_id: 'd', execution_id: '4' },
+        ],
+        failed: [],
+      })
     ).toThrow();
   });
 });

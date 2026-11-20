@@ -27,6 +27,7 @@ const ebtElement = {
   aiIndexDetailPageTracesPanel: 'contextEngine.aiIndexDetailPage.tracesPanel',
   aiIndexDetailPageSourcesPanel: 'contextEngine.aiIndexDetailPage.sourcesPanel',
   aiIndexDetailPageAutomationsPanel: 'contextEngine.aiIndexDetailPage.automationsPanel',
+  aiIndexDetailPageDreamingPanel: 'contextEngine.aiIndexDetailPage.dreamingPanel',
   aiIndexDetailPageSignalsPanel: 'contextEngine.aiIndexDetailPage.signalsPanel',
   aiIndexDetailPageListKiPanel: 'contextEngine.aiIndexDetailPage.listKiPanel',
   viewKiPage: 'contextEngine.viewKiPage',
@@ -82,6 +83,9 @@ const ebtAction = {
     CREATE_CONNECTOR: 'create_connector',
     TOGGLE_CONNECTOR: 'toggle_connector',
     REMOVE_SOURCE: 'remove_source',
+  },
+  dreaming: {
+    RUN_NOW: 'run_dreaming',
   },
   automations: {
     SUGGEST: 'suggest_automation',

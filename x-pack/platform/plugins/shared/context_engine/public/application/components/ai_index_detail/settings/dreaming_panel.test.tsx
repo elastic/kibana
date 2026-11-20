@@ -19,6 +19,12 @@ import { DreamingPanel } from './dreaming_panel';
 jest.mock('../../../hooks/use_ai_index_dreaming', () => ({ useAiIndexDreaming: jest.fn() }));
 jest.mock('../../../hooks/use_save_dreaming_config', () => ({ useSaveDreamingConfig: jest.fn() }));
 jest.mock('../../../hooks/use_dreaming_templates', () => ({ useDreamingTemplates: jest.fn() }));
+jest.mock('../../../hooks/use_run_dreaming', () => ({
+  useRunDreaming: () => ({ runDreaming: jest.fn(), isLoading: false }),
+}));
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsCapabilities: () => ({ canExecuteWorkflow: true }),
+}));
 const navigateToContextEngine = jest.fn();
 jest.mock('../../../hooks/use_navigation', () => ({
   useNavigation: () => ({ navigateToContextEngine }),
@@ -59,7 +65,7 @@ const renderPanel = (
   { aiIndex, dreaming }: ReturnType<typeof aiIndexWith>,
   isLoading: boolean = false
 ) => {
-  jest.mocked(useAiIndexDreaming).mockReturnValue({ dreaming, isLoading });
+  jest.mocked(useAiIndexDreaming).mockReturnValue({ dreaming, lastRun: undefined, isLoading });
   return render(
     <I18nProvider>
       <EuiProvider>
@@ -217,6 +223,13 @@ describe('DreamingPanel', () => {
 
     expect(screen.getByTestId('contextDreamingConfigFact-policy')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexDreamingSave')).not.toBeInTheDocument();
+  });
+
+  it('shows the runs section when dreaming is set up', () => {
+    renderPanel(aiIndexWith(factsOnly));
+
+    expect(screen.getByTestId('contextAiIndexDreamingRunsSection')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDreamingRunNow')).toBeInTheDocument();
   });
 
   it('lets a managed AI index’s dreaming be edited', () => {

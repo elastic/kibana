@@ -38,6 +38,27 @@ describe('useSaveDreamingConfig', () => {
     expect(queryClient.getQueryData(contextEngineQueryKeys.aiIndex.dreaming('support'))).toEqual({
       dreaming,
     });
+
+    const lastRun = {
+      started_at: '2026-11-01T00:00:00.000Z',
+      status: 'completed',
+      workflow_id: 'wf-1',
+      execution_id: 'exec-1',
+      is_running: false,
+    };
+    queryClient.setQueryData(contextEngineQueryKeys.aiIndex.dreaming('support'), {
+      dreaming: { enabled: false },
+      last_run: lastRun,
+    });
+
+    await act(async () => {
+      await result.current.saveConfig({ aiIndexId: 'support', config: dreaming });
+    });
+
+    expect(queryClient.getQueryData(contextEngineQueryKeys.aiIndex.dreaming('support'))).toEqual({
+      dreaming,
+      last_run: lastRun,
+    });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
       queryKey: contextEngineQueryKeys.aiIndex.detail('support'),
     });

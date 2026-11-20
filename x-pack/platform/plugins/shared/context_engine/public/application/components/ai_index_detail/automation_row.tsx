@@ -11,7 +11,6 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiPopover,
@@ -19,8 +18,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
-import { FormattedRelative } from '@kbn/i18n-react';
-import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
@@ -38,6 +35,7 @@ import { ItemRow } from '../item_row';
 import { ItemRowIcon } from '../item_row_icon';
 import { AutomationDeleteConfirmModal } from './automation_delete_confirm_modal';
 import { WorkflowYamlPreviewFlyout } from './workflow_yaml_preview_flyout';
+import { WorkflowLastExecution } from './workflow_last_execution';
 
 const runLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.automations.runAction', {
   defaultMessage: 'Run',
@@ -45,112 +43,6 @@ const runLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.automations.r
 const runningLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.automations.running', {
   defaultMessage: 'Running. Open the execution.',
 });
-const statusIcon = (
-  status: ExecutionStatus
-): { type: string; color: 'success' | 'danger' | 'subdued'; label: string } | undefined => {
-  switch (status) {
-    case ExecutionStatus.COMPLETED:
-      return {
-        type: 'checkCircleFill',
-        color: 'success',
-        label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.status.completed', {
-          defaultMessage: 'Succeeded',
-        }),
-      };
-    case ExecutionStatus.FAILED:
-      return {
-        type: 'errorFill',
-        color: 'danger',
-        label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.status.failed', {
-          defaultMessage: 'Failed',
-        }),
-      };
-    case ExecutionStatus.TIMED_OUT:
-      return {
-        type: 'errorFill',
-        color: 'danger',
-        label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.status.timedOut', {
-          defaultMessage: 'Timed out',
-        }),
-      };
-    case ExecutionStatus.CANCELLED:
-      return {
-        type: 'minusCircle',
-        color: 'subdued',
-        label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.status.cancelled', {
-          defaultMessage: 'Cancelled',
-        }),
-      };
-    case ExecutionStatus.SKIPPED:
-      return {
-        type: 'minusCircle',
-        color: 'subdued',
-        label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.status.skipped', {
-          defaultMessage: 'Skipped',
-        }),
-      };
-    default:
-      return undefined;
-  }
-};
-
-const LastExecution = ({
-  execution,
-  href,
-}: {
-  execution: WorkflowExecutionListItemDto | null;
-  href?: string;
-}) => {
-  if (!execution) {
-    return (
-      <EuiText size="xs" color="subdued" data-test-subj="contextAutomationLastExecution">
-        {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.neverRun', {
-          defaultMessage: 'Never run',
-        })}
-      </EuiText>
-    );
-  }
-  const icon = statusIcon(execution.status);
-  const when = execution.startedAt ? (
-    <FormattedRelative value={new Date(execution.startedAt)} />
-  ) : (
-    icon?.label
-  );
-  return (
-    <EuiFlexGroup
-      gutterSize="xs"
-      alignItems="center"
-      responsive={false}
-      data-test-subj="contextAutomationLastExecution"
-    >
-      {icon ? (
-        <EuiFlexItem grow={false}>
-          <EuiIconTip
-            type={icon.type}
-            color={icon.color}
-            size="s"
-            content={icon.label}
-            aria-label={icon.label}
-            iconProps={{
-              'data-test-subj': `contextAutomationLastExecutionStatus-${execution.status}`,
-            }}
-          />
-        </EuiFlexItem>
-      ) : null}
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued" className="eui-textTruncate">
-          {href ? (
-            <EuiLink href={href} color="text">
-              {when}
-            </EuiLink>
-          ) : (
-            when
-          )}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
 
 interface AutomationRowProps {
   automation: AiIndexAutomation;
@@ -349,7 +241,16 @@ export const AutomationRow = ({
             </EuiFlexItem>
           ) : hasWorkflowDefinition && latest.execution !== undefined ? (
             <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-              <LastExecution execution={latest.execution} href={latestExecutionHref} />
+              {latest.execution ? (
+                <WorkflowLastExecution
+                  status={latest.execution.status}
+                  startedAt={latest.execution.startedAt}
+                  href={latestExecutionHref}
+                  data-test-subj="contextAutomationLastExecution"
+                />
+              ) : (
+                <WorkflowLastExecution data-test-subj="contextAutomationLastExecution" />
+              )}
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>

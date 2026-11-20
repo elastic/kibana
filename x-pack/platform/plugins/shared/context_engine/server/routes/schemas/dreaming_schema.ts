@@ -21,7 +21,14 @@ import {
   RESERVED_ENTITY_ATTRIBUTE_KEYS,
   validateDreamingTypes,
 } from '../../../common/dreaming';
+import { MAX_AI_INDEX_AUTOMATION_LENGTH } from '../../../common/constants';
 import { validateDreamingInterval } from '../../../common/validation';
+
+const MAX_DREAMING_RUN_STARTED = 3;
+const MAX_DREAMING_RUN_FAILURES = 3;
+const MAX_WORKFLOW_EXECUTION_ID_LENGTH = 256;
+const MAX_WORKFLOW_EXECUTION_STATUS_LENGTH = 32;
+const MAX_WORKFLOW_EXECUTION_TIMESTAMP_LENGTH = 64;
 
 const validateType = (value: string): string | undefined =>
   DREAMING_TYPE_PATTERN.test(value)
@@ -163,7 +170,49 @@ export const dreamingConfigSchema = schema.object(
   }
 );
 
+const dreamingLastRunSchema = schema.object({
+  started_at: schema.string({
+    maxLength: MAX_WORKFLOW_EXECUTION_TIMESTAMP_LENGTH,
+    meta: { description: 'When the latest dreaming run started.' },
+  }),
+  status: schema.string({
+    maxLength: MAX_WORKFLOW_EXECUTION_STATUS_LENGTH,
+    meta: { description: 'Status of the latest dreaming run.' },
+  }),
+  workflow_id: schema.string({
+    maxLength: MAX_AI_INDEX_AUTOMATION_LENGTH,
+    meta: { description: 'Workflow the latest run belongs to.' },
+  }),
+  execution_id: schema.string({
+    maxLength: MAX_WORKFLOW_EXECUTION_ID_LENGTH,
+    meta: { description: 'Execution id of the latest run.' },
+  }),
+  is_running: schema.boolean({
+    meta: { description: 'Whether any dreaming workflow is still running.' },
+  }),
+});
+
 export const dreamingResponseSchema = () =>
   schema.object({
     dreaming: dreamingConfigSchema,
+  });
+
+export const getDreamingResponseSchema = () =>
+  schema.object({
+    dreaming: dreamingConfigSchema,
+    last_run: schema.maybe(dreamingLastRunSchema),
+  });
+
+export const runDreamingResponseSchema = () =>
+  schema.object({
+    executions: schema.arrayOf(
+      schema.object({
+        workflow_id: schema.string({ maxLength: MAX_AI_INDEX_AUTOMATION_LENGTH }),
+        execution_id: schema.string({ maxLength: MAX_WORKFLOW_EXECUTION_ID_LENGTH }),
+      }),
+      { maxSize: MAX_DREAMING_RUN_STARTED }
+    ),
+    failed: schema.arrayOf(schema.string({ maxLength: MAX_AI_INDEX_AUTOMATION_LENGTH }), {
+      maxSize: MAX_DREAMING_RUN_FAILURES,
+    }),
   });

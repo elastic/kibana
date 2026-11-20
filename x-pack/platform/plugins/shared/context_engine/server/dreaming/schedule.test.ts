@@ -18,6 +18,8 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import type { AiIndexService } from '../ai_indices/service';
 import type { DreamingWorkflowsApi } from './schedule';
+import { DreamingNotSetUpError } from './dreaming_not_set_up_error';
+import { DreamingRunNothingStartedError } from './dreaming_run_nothing_started_error';
 import {
   createDreamingScheduleService,
   dreamingWorkflowIdFor,
@@ -63,10 +65,13 @@ describe('shouldDream', () => {
 });
 
 describe('createDreamingScheduleService', () => {
-  let client: jest.Mocked<Pick<PluginScopedManagedWorkflowsApi, 'install' | 'uninstall'>>;
+  let client: jest.Mocked<
+    Pick<PluginScopedManagedWorkflowsApi, 'install' | 'uninstall' | 'execute'>
+  >;
   let workflowsManagement: {
     updateWorkflow: jest.Mock;
     cancelAllActiveWorkflowExecutions: jest.Mock;
+    getWorkflowExecutions: jest.Mock;
   };
   let aiIndexService: jest.Mocked<Pick<AiIndexService, 'addAutomation' | 'removeAutomation'>>;
   let request: KibanaRequest;
@@ -83,10 +88,12 @@ describe('createDreamingScheduleService', () => {
     client = {
       install: jest.fn().mockResolvedValue(undefined),
       uninstall: jest.fn().mockResolvedValue(undefined),
+      execute: jest.fn(),
     };
     workflowsManagement = {
       updateWorkflow: jest.fn().mockResolvedValue(undefined),
       cancelAllActiveWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
+      getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [] }),
     };
     aiIndexService = {
       addAutomation: jest.fn().mockResolvedValue('attached'),
@@ -360,5 +367,135 @@ describe('createDreamingScheduleService', () => {
       createService(workflowsManagement).remove({ aiIndexId: 'support', spaceId: SPACE, request })
     ).rejects.toThrow('cluster unavailable');
     expect(workflowsManagement.cancelAllActiveWorkflowExecutions).not.toHaveBeenCalled();
+  });
+
+  describe('getLastRun', () => {
+    it('omits last run when dreaming is not set up', async () => {
+      const service = createService(workflowsManagement);
+      await expect(
+        service.getLastRun({
+          aiIndex: aiIndex({ dreaming: { enabled: false } }),
+          spaceId: SPACE,
+          request,
+        })
+      ).resolves.toBeUndefined();
+      expect(workflowsManagement.getWorkflowExecutions).not.toHaveBeenCalled();
+    });
+
+    it('links last run to the main dreaming workflow when a newer trace run exists', async () => {
+      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
+      const traceId = traceDreamingWorkflowIdFor('support', SPACE);
+      const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
+      workflowsManagement.getWorkflowExecutions.mockImplementation(({ workflowId, statuses }) => {
+        if (workflowId === dreamingId && !statuses) {
+          return Promise.resolve({
+            results: [
+              { id: 'exec-dreaming', status: 'completed', startedAt: '2026-11-01T10:00:00.000Z' },
+            ],
+          });
+        }
+        if (workflowId === traceId && !statuses) {
+          return Promise.resolve({
+            results: [
+              { id: 'exec-trace', status: 'running', startedAt: '2026-11-01T12:00:00.000Z' },
+            ],
+          });
+        }
+        if (workflowId === traceId && statuses) {
+          return Promise.resolve({
+            results: [
+              { id: 'exec-trace', status: 'running', startedAt: '2026-11-01T12:00:00.000Z' },
+            ],
+          });
+        }
+        if (workflowId === relationshipsId && !statuses) {
+          return Promise.resolve({
+            results: [
+              {
+                id: 'exec-relationships',
+                status: 'completed',
+                startedAt: '2026-11-01T12:05:00.000Z',
+              },
+            ],
+          });
+        }
+        return Promise.resolve({ results: [] });
+      });
+
+      const lastRun = await createService(workflowsManagement).getLastRun({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(lastRun).toEqual({
+        started_at: '2026-11-01T10:00:00.000Z',
+        status: 'completed',
+        workflow_id: dreamingId,
+        execution_id: 'exec-dreaming',
+        is_running: true,
+      });
+    });
+
+    it('omits last run when lookup fails', async () => {
+      workflowsManagement.getWorkflowExecutions.mockRejectedValue(new Error('forbidden'));
+
+      await expect(
+        createService(workflowsManagement).getLastRun({
+          aiIndex: aiIndex(),
+          spaceId: SPACE,
+          request,
+        })
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('run', () => {
+    it('rejects when dreaming is not set up', async () => {
+      await expect(
+        createService(workflowsManagement).run({
+          aiIndex: aiIndex({ dreaming: { enabled: true } }),
+          spaceId: SPACE,
+          request,
+        })
+      ).rejects.toBeInstanceOf(DreamingNotSetUpError);
+    });
+
+    it('starts all three workflows and returns partial failures', async () => {
+      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
+      const traceId = traceDreamingWorkflowIdFor('support', SPACE);
+      const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
+      client.execute
+        .mockResolvedValueOnce('exec-dreaming')
+        .mockRejectedValueOnce(new Error('Cannot start: running executions'))
+        .mockResolvedValueOnce('exec-relationships');
+
+      const result = await createService(workflowsManagement).run({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(client.execute).toHaveBeenCalledTimes(3);
+      expect(result).toEqual({
+        executions: [
+          { workflow_id: dreamingId, execution_id: 'exec-dreaming' },
+          { workflow_id: relationshipsId, execution_id: 'exec-relationships' },
+        ],
+        failed: [traceId],
+      });
+    });
+
+    it('throws when no workflow could be started', async () => {
+      client.execute.mockRejectedValue(new Error('running executions'));
+
+      await expect(
+        createService(workflowsManagement).run({
+          aiIndex: aiIndex(),
+          spaceId: SPACE,
+          request,
+        })
+      ).rejects.toBeInstanceOf(DreamingRunNothingStartedError);
+    });
   });
 });

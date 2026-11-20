@@ -300,7 +300,7 @@ export const DreamingConfigEditor = ({
           </EuiFlexItem>
         ))}
       </Section>
-      <EuiSpacer size="l" />
+      <EuiHorizontalRule margin="l" />
       <EuiSwitch
         label={i18n.translate('xpack.contextEngine.dreamingConfig.entitiesSwitch', {
           defaultMessage: 'Also learn entities',

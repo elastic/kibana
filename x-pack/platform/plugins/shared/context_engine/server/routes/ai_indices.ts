@@ -30,6 +30,7 @@ import {
   AI_INDEX_DESCRIBE_PATH,
   AI_INDEX_DREAMING_PATH,
   DREAMING_TEMPLATES_PATH,
+  AI_INDEX_DREAMING_RUN_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
   AI_INDEX_KI_GROUPS_PATH,
@@ -57,8 +58,14 @@ import type {
   RestoreKiResponse,
   UpdateKiResponse,
 } from '../../common/http_api/knowledge_indicators';
-import { DREAMING_DISABLED, type GetAiIndexDreamingResponse } from '../../common/dreaming';
+import {
+  DREAMING_DISABLED,
+  type GetAiIndexDreamingResponse,
+  type RunAiIndexDreamingResponse,
+} from '../../common/dreaming';
 import type { ListDreamingTemplatesResponse } from '../../common/dreaming_templates';
+import { DreamingNotSetUpError } from '../dreaming/dreaming_not_set_up_error';
+import type { DreamingScheduleService } from '../dreaming/schedule';
 import { apiPrivileges } from '../../common/features';
 import {
   InvalidAiIndexDestError,
@@ -124,7 +131,12 @@ import {
   deleteKiResponseSchema,
   restoreKiResponseSchema,
 } from './schemas/ai_indices_schema';
-import { dreamingConfigSchema, dreamingResponseSchema } from './schemas/dreaming_schema';
+import {
+  dreamingConfigSchema,
+  dreamingResponseSchema,
+  getDreamingResponseSchema,
+  runDreamingResponseSchema,
+} from './schemas/dreaming_schema';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiWriteTelemetry } from '../step_types/helpers';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
@@ -204,7 +216,8 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, log
     error instanceof AiIndexAlreadyExistsError ||
     error instanceof AiIndexIdConflictError ||
     error instanceof KiConflictError ||
-    error instanceof KiDeletedError
+    error instanceof KiDeletedError ||
+    error instanceof DreamingNotSetUpError
   ) {
     return response.conflict({ body: { message: error.message } });
   }
@@ -241,6 +254,7 @@ export const registerAiIndexRoutes = ({
   getActions,
   getAgentBuilder,
   getWorkflowsManagementApi,
+  getDreamingScheduleService,
   getSpaces,
   analyticsService,
 }: {
@@ -257,6 +271,7 @@ export const registerAiIndexRoutes = ({
   getActions: () => Promise<ActionsPluginStart>;
   getAgentBuilder: () => Promise<AgentBuilderPluginStart | undefined>;
   getWorkflowsManagementApi: () => Promise<DeleteWorkflowsApi | undefined>;
+  getDreamingScheduleService: () => DreamingScheduleService;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
   analyticsService: ContextEngineAnalyticsService;
 }) => {
@@ -1187,7 +1202,7 @@ export const registerAiIndexRoutes = ({
         validate: {
           request: { params: aiIndexIdParamsSchema },
           response: {
-            200: { body: dreamingResponseSchema },
+            200: { body: getDreamingResponseSchema },
             404: { body: errorResponseSchema },
           },
         },
@@ -1199,8 +1214,17 @@ export const registerAiIndexRoutes = ({
         const { aiIndexId } = request.params;
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
-          const { dreaming } = await getAiIndexService().get(aiIndexId, spaceId);
-          const body: GetAiIndexDreamingResponse = { dreaming: dreaming ?? DREAMING_DISABLED };
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
+          const dreaming = aiIndex.dreaming ?? DREAMING_DISABLED;
+          const lastRun = await getDreamingScheduleService().getLastRun({
+            aiIndex,
+            spaceId,
+            request,
+          });
+          const body: GetAiIndexDreamingResponse = {
+            dreaming,
+            ...(lastRun !== undefined && { last_run: lastRun }),
+          };
           return response.ok({ body });
         } catch (error) {
           return handleAiIndexError(error, response, logger);
@@ -1244,6 +1268,52 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
           await notifySaved({ aiIndexId, spaceId, request, previous, saved: ['dreaming'] });
           const body: GetAiIndexDreamingResponse = { dreaming };
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId, error })
+          );
+          return handleAiIndexError(error, response, logger);
+        }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: AI_INDEX_DREAMING_RUN_PATH,
+      security: WRITE_SECURITY,
+      access: 'internal',
+      summary: 'Run dreaming workflows for an AI Index now',
+      description:
+        'Starts the dreaming, trace dreaming and relationships workflows for an AI Index using its saved configuration. Returns a 404 response while the global memory setting is off.',
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        validate: {
+          request: { params: aiIndexIdParamsSchema },
+          response: {
+            200: { body: runDreamingResponseSchema },
+            404: { body: errorResponseSchema },
+            409: { body: errorResponseSchema },
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        if (!(await isMemoryEnabled(request))) {
+          return response.notFound({ body: { message: MEMORY_DISABLED_MESSAGE } });
+        }
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId } = request.params;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        try {
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
+          const body: RunAiIndexDreamingResponse = await getDreamingScheduleService().run({
+            aiIndex,
+            spaceId,
+            request,
+          });
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(

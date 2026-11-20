@@ -29,6 +29,8 @@ describe('createDreamingChangeHandler', () => {
   const scheduleService: jest.Mocked<DreamingScheduleService> = {
     reconcile: jest.fn().mockResolvedValue(undefined),
     remove: jest.fn().mockResolvedValue(undefined),
+    getLastRun: jest.fn().mockResolvedValue(undefined),
+    run: jest.fn(),
   };
   const notifier = new AiIndexChangeNotifier(loggingSystemMock.createLogger());
   let dreamingAvailable: boolean;

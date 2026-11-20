@@ -272,7 +272,11 @@ describe('AiIndexDetailPage', () => {
     mockUseFeedbackLoopEnabled.mockReturnValue(true);
     mockUseListKi.mockImplementation(() => defaultListKiMock);
     mockUseMemoryEnabled.mockReturnValue(true);
-    mockUseAiIndexDreaming.mockReturnValue({ dreaming: undefined, isLoading: false });
+    mockUseAiIndexDreaming.mockReturnValue({
+      dreaming: undefined,
+      lastRun: undefined,
+      isLoading: false,
+    });
   });
 
   afterEach(() => {
@@ -442,7 +446,11 @@ describe('AiIndexDetailPage', () => {
   });
 
   it('opens the dreaming settings from the Settings tab when memory is globally enabled', async () => {
-    mockUseAiIndexDreaming.mockReturnValue({ dreaming: preferenceDreaming, isLoading: false });
+    mockUseAiIndexDreaming.mockReturnValue({
+      dreaming: preferenceDreaming,
+      lastRun: undefined,
+      isLoading: false,
+    });
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
 

@@ -35,7 +35,13 @@ export const useSaveDreamingConfig = () => {
   >({
     mutationFn: ({ aiIndexId, config }) => setAiIndexDreaming(http, { aiIndexId, config }),
     onSuccess: (data, { aiIndexId }) => {
-      queryClient.setQueryData(contextEngineQueryKeys.aiIndex.dreaming(aiIndexId), data);
+      const previous = queryClient.getQueryData<GetAiIndexDreamingResponse>(
+        contextEngineQueryKeys.aiIndex.dreaming(aiIndexId)
+      );
+      queryClient.setQueryData(contextEngineQueryKeys.aiIndex.dreaming(aiIndexId), {
+        ...data,
+        ...(previous?.last_run !== undefined ? { last_run: previous.last_run } : {}),
+      });
       queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.aiIndex.detail(aiIndexId) });
       queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.aiIndex.list() });
     },
