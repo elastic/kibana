@@ -7,7 +7,6 @@
 
 import {
   CONVERSATION_STARTER_LABEL_MAX_LENGTH,
-  CONVERSATION_STARTER_PROMPT_MAX_LENGTH,
   MAX_CONVERSATION_STARTERS,
 } from '@kbn/agent-builder-common';
 import { conversationStartersSchema } from './conversation_starters_schema';
@@ -15,12 +14,8 @@ import { conversationStartersSchema } from './conversation_starters_schema';
 describe('conversationStartersSchema', () => {
   const startersSchema = conversationStartersSchema({ description: 'Starters.' });
 
-  it('accepts a label on its own', () => {
-    expect(startersSchema.validate([{ label: 'first' }])).toEqual([{ label: 'first' }]);
-  });
-
-  it('accepts a label with a prompt', () => {
-    const starters = [{ label: 'Top errors', prompt: 'Show me the top 10 errors this week' }];
+  it('accepts a list of starters', () => {
+    const starters = [{ label: 'first' }, { label: 'second' }];
 
     expect(startersSchema.validate(starters)).toEqual(starters);
   });
@@ -52,7 +47,11 @@ describe('conversationStartersSchema', () => {
   });
 
   it('rejects a starter without a label', () => {
-    expect(() => startersSchema.validate([{ prompt: 'only a prompt' }])).toThrow();
+    expect(() => startersSchema.validate([{}])).toThrow();
+  });
+
+  it('rejects fields it does not know, such as a separate prompt', () => {
+    expect(() => startersSchema.validate([{ label: 'first', prompt: 'something else' }])).toThrow();
   });
 
   describe('label', () => {
@@ -74,30 +73,6 @@ describe('conversationStartersSchema', () => {
 
     it('rejects a label made only of whitespace', () => {
       expect(() => startersSchema.validate([{ label: '   ' }])).toThrow(
-        'Conversation starter text must not be blank.'
-      );
-    });
-  });
-
-  describe('prompt', () => {
-    it('accepts a prompt of the maximum length', () => {
-      const starters = [
-        { label: 'first', prompt: 'a'.repeat(CONVERSATION_STARTER_PROMPT_MAX_LENGTH) },
-      ];
-
-      expect(startersSchema.validate(starters)).toEqual(starters);
-    });
-
-    it('rejects a prompt longer than the maximum length', () => {
-      expect(() =>
-        startersSchema.validate([
-          { label: 'first', prompt: 'a'.repeat(CONVERSATION_STARTER_PROMPT_MAX_LENGTH + 1) },
-        ])
-      ).toThrow(`maximum length of [${CONVERSATION_STARTER_PROMPT_MAX_LENGTH}]`);
-    });
-
-    it('rejects a prompt made only of whitespace', () => {
-      expect(() => startersSchema.validate([{ label: 'first', prompt: '   ' }])).toThrow(
         'Conversation starter text must not be blank.'
       );
     });

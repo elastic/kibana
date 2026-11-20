@@ -40,17 +40,15 @@ export const agentBuilderDefaultAiIndexId = 'elastic';
 export const kiRetrievalSkillId = 'ki-retrieval';
 
 /**
- * A conversation starter: a card on the new conversation empty state that sends a message when clicked.
+ * A conversation starter: a card on the new conversation empty state that sends its label as the
+ * message when clicked. It is an object so that more fields can be added later without breaking
+ * the API.
  */
 export interface ConversationStarter {
   /**
-   * Short text shown on the card.
+   * Short text shown on the card, and sent as the message when the card is clicked.
    */
   label: string;
-  /**
-   * Message sent when the card is clicked. Defaults to the label.
-   */
-  prompt?: string;
 }
 
 /**

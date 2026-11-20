@@ -11,7 +11,6 @@ import {
   agentIdRegexp,
   agentIdMaxLength,
   CONVERSATION_STARTER_LABEL_MAX_LENGTH,
-  CONVERSATION_STARTER_PROMPT_MAX_LENGTH,
   MAX_CONVERSATION_STARTERS,
 } from './agent_ids';
 import { protectedNamespaces } from '../base/namespaces';
@@ -140,19 +139,15 @@ describe('validateConversationStarters', () => {
     expect(validateConversationStarters([])).toBeUndefined();
   });
 
-  test('returns undefined for valid starters, with or without a prompt', () => {
+  test('returns undefined for valid starters', () => {
     expect(
-      validateConversationStarters([
-        { label: 'Top errors', prompt: 'Show me the top errors' },
-        { label: 'Other' },
-      ])
+      validateConversationStarters([{ label: 'Top errors' }, { label: 'Other' }])
     ).toBeUndefined();
   });
 
-  test('accepts the maximum number of starters and the maximum lengths', () => {
+  test('accepts the maximum number of starters and the maximum label length', () => {
     const starters = Array.from({ length: MAX_CONVERSATION_STARTERS }, (_, index) => ({
       label: `${index}`.padEnd(CONVERSATION_STARTER_LABEL_MAX_LENGTH, 'a'),
-      prompt: 'p'.repeat(CONVERSATION_STARTER_PROMPT_MAX_LENGTH),
     }));
 
     expect(validateConversationStarters(starters)).toBeUndefined();
@@ -181,22 +176,6 @@ describe('validateConversationStarters', () => {
       ])
     ).toBe(
       `The label of conversation starter 1 is limited to ${CONVERSATION_STARTER_LABEL_MAX_LENGTH} characters.`
-    );
-  });
-
-  test('rejects a blank prompt', () => {
-    expect(validateConversationStarters([{ label: 'fine', prompt: '  ' }])).toBe(
-      'The prompt of conversation starter 1 must not be blank.'
-    );
-  });
-
-  test('rejects a prompt that is too long', () => {
-    expect(
-      validateConversationStarters([
-        { label: 'fine', prompt: 'a'.repeat(CONVERSATION_STARTER_PROMPT_MAX_LENGTH + 1) },
-      ])
-    ).toBe(
-      `The prompt of conversation starter 1 is limited to ${CONVERSATION_STARTER_PROMPT_MAX_LENGTH} characters.`
     );
   });
 });

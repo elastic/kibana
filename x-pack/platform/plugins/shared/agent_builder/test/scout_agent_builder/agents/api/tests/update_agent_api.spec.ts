@@ -96,23 +96,17 @@ apiTest.describe(
       expect(response.body.labels).toStrictEqual(['alpha', 'beta', 'gamma']);
     });
 
-    apiTest(
-      'updates conversation_starters with a label and an optional prompt',
-      async ({ asAdmin }) => {
-        const id = await createAgent(asAdmin);
-        const conversationStarters = [
-          { label: 'Top errors', prompt: 'Show me the top 10 errors from the last 24 hours' },
-          { label: 'Plain label' },
-        ];
+    apiTest('updates conversation_starters', async ({ asAdmin }) => {
+      const id = await createAgent(asAdmin);
+      const conversationStarters = [{ label: 'Top errors' }, { label: 'Plain label' }];
 
-        const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
-          body: { conversation_starters: conversationStarters },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(200);
-        expect(response.body.conversation_starters).toStrictEqual(conversationStarters);
-      }
-    );
+      const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
+        body: { conversation_starters: conversationStarters },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.conversation_starters).toStrictEqual(conversationStarters);
+    });
 
     apiTest('removes all conversation_starters with an empty list', async ({ asAdmin }) => {
       const id = await createAgent(asAdmin, { conversation_starters: [{ label: 'Remove me' }] });
@@ -126,7 +120,7 @@ apiTest.describe(
     });
 
     apiTest('keeps conversation_starters when other fields are updated', async ({ asAdmin }) => {
-      const conversationStarters = [{ label: 'Keep me', prompt: 'Keep this prompt too' }];
+      const conversationStarters = [{ label: 'Keep me' }];
       const id = await createAgent(asAdmin, { conversation_starters: conversationStarters });
 
       const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
@@ -140,7 +134,10 @@ apiTest.describe(
     [
       { description: 'a label longer than 30 characters', starters: [{ label: 'a'.repeat(31) }] },
       { description: 'a blank label', starters: [{ label: '   ' }] },
-      { description: 'a blank prompt', starters: [{ label: 'Top errors', prompt: '   ' }] },
+      {
+        description: 'a separate prompt, which is not supported',
+        starters: [{ label: 'Top errors', prompt: 'Show me the top errors' }],
+      },
       { description: 'a plain string instead of an object', starters: ['Top errors'] },
       {
         description: 'more than 3 conversation starters',

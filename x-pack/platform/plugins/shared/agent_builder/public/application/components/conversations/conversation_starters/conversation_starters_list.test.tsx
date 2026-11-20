@@ -39,22 +39,9 @@ describe('ConversationStartersList', () => {
     expect(screen.getByText('second')).toBeInTheDocument();
   });
 
-  it('shows the label and not the prompt', () => {
-    render(
-      <ConversationStartersList
-        starters={[{ label: 'Top errors', prompt: 'Show me the top 10 errors' }]}
-        onSelect={jest.fn()}
-      />,
-      { wrapper }
-    );
-
-    expect(screen.getByText('Top errors')).toBeInTheDocument();
-    expect(screen.queryByText('Show me the top 10 errors')).not.toBeInTheDocument();
-  });
-
   it('calls onSelect with the starter when a card is clicked', () => {
     const onSelect = jest.fn();
-    const starter = { label: 'Top errors', prompt: 'Show me the top 10 errors' };
+    const starter = { label: 'Top errors' };
     render(
       <ConversationStartersList starters={[{ label: 'other' }, starter]} onSelect={onSelect} />,
       {
@@ -71,7 +58,7 @@ describe('ConversationStartersList', () => {
   it('tags each card for click telemetry with its position and not its text', () => {
     render(
       <ConversationStartersList
-        starters={[{ label: 'first' }, { label: 'second', prompt: 'secret prompt' }]}
+        starters={[{ label: 'first' }, { label: 'second' }]}
         onSelect={jest.fn()}
       />,
       { wrapper }
@@ -83,7 +70,7 @@ describe('ConversationStartersList', () => {
     expect(first).toHaveAttribute('data-ebt-element', 'agentBuilder.pageContent');
     expect(first).toHaveAttribute('data-ebt-detail', '1');
     expect(second).toHaveAttribute('data-ebt-detail', '2');
-    expect(second.outerHTML).not.toContain('secret prompt');
+    expect(second.getAttribute('data-ebt-detail')).not.toContain('second');
   });
 
   it('reports clicks in the flyout under the flyout element', () => {

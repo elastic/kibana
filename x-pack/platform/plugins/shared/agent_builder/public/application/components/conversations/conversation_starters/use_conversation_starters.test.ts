@@ -62,7 +62,7 @@ describe('useConversationStarters', () => {
     mockSendState({
       agent: {
         id: 'agent-1',
-        conversation_starters: [{ label: 'first' }, { label: 'second', prompt: 'Second prompt' }],
+        conversation_starters: [{ label: 'first' }, { label: 'second' }],
       } as never,
     });
     mockUseActiveSpaceId.mockReturnValue('default');
@@ -76,10 +76,7 @@ describe('useConversationStarters', () => {
     const { result } = renderHook(() => useConversationStarters());
 
     expect(mockUseAgentSendState).toHaveBeenCalledWith('agent-1');
-    expect(result.current.starters).toEqual([
-      { label: 'first' },
-      { label: 'second', prompt: 'Second prompt' },
-    ]);
+    expect(result.current.starters).toEqual([{ label: 'first' }, { label: 'second' }]);
   });
 
   it('returns no starters while the agent is not found yet', () => {
@@ -114,7 +111,7 @@ describe('useConversationStarters', () => {
     expect(result.current.starters).toEqual([]);
   });
 
-  it('sends the label of a starter without a prompt', () => {
+  it('sends the label of the starter as the message', () => {
     const { result } = renderHook(() => useConversationStarters());
 
     act(() => {
@@ -122,16 +119,6 @@ describe('useConversationStarters', () => {
     });
 
     expect(submitMessage).toHaveBeenCalledWith('first', expect.any(Object));
-  });
-
-  it('sends the prompt of a starter instead of its label', () => {
-    const { result } = renderHook(() => useConversationStarters());
-
-    act(() => {
-      result.current.onSelect({ label: 'second', prompt: 'Second prompt' });
-    });
-
-    expect(submitMessage).toHaveBeenCalledWith('Second prompt', expect.any(Object));
   });
 
   it('carries drafts over for the current user and agent', () => {

@@ -19,7 +19,6 @@ export const AGENT_NAME_MAX_LENGTH = 256;
 export const AGENT_DESCRIPTION_MAX_LENGTH = 2000;
 export const MAX_CONVERSATION_STARTERS = 3;
 export const CONVERSATION_STARTER_LABEL_MAX_LENGTH = 30;
-export const CONVERSATION_STARTER_PROMPT_MAX_LENGTH = 1000;
 
 export const validateAgentId = ({
   agentId,
@@ -60,19 +59,13 @@ export const validateConversationStarters = (
   if (starters.length > MAX_CONVERSATION_STARTERS) {
     return `Agents are limited to ${MAX_CONVERSATION_STARTERS} conversation starters.`;
   }
-  for (const [index, { label, prompt }] of starters.entries()) {
+  for (const [index, { label }] of starters.entries()) {
     const position = index + 1;
     if (label.trim().length === 0) {
       return `The label of conversation starter ${position} must not be blank.`;
     }
     if (label.length > CONVERSATION_STARTER_LABEL_MAX_LENGTH) {
       return `The label of conversation starter ${position} is limited to ${CONVERSATION_STARTER_LABEL_MAX_LENGTH} characters.`;
-    }
-    if (prompt !== undefined && prompt.trim().length === 0) {
-      return `The prompt of conversation starter ${position} must not be blank.`;
-    }
-    if (prompt !== undefined && prompt.length > CONVERSATION_STARTER_PROMPT_MAX_LENGTH) {
-      return `The prompt of conversation starter ${position} is limited to ${CONVERSATION_STARTER_PROMPT_MAX_LENGTH} characters.`;
     }
   }
   return undefined;

@@ -46,7 +46,6 @@ export {
   AGENT_DESCRIPTION_MAX_LENGTH,
   MAX_CONVERSATION_STARTERS,
   CONVERSATION_STARTER_LABEL_MAX_LENGTH,
-  CONVERSATION_STARTER_PROMPT_MAX_LENGTH,
   validateAgentId,
   validateConversationStarters,
 } from './agent_ids';

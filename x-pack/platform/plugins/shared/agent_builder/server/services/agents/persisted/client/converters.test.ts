@@ -207,14 +207,11 @@ describe('fromEs', () => {
 
   it('converts conversation_starters from the document', () => {
     const document = getSampleDoc();
-    document._source!.conversation_starters = [
-      { label: 'first' },
-      { label: 'second', prompt: 'Second prompt' },
-    ];
+    document._source!.conversation_starters = [{ label: 'first' }, { label: 'second' }];
 
     expect(fromEs(document).conversation_starters).toEqual([
       { label: 'first' },
-      { label: 'second', prompt: 'Second prompt' },
+      { label: 'second' },
     ]);
   });
 
@@ -486,7 +483,7 @@ describe('createRequestToEs', () => {
       id: 'id',
       name: 'name',
       description: 'description',
-      conversation_starters: [{ label: 'first' }, { label: 'second', prompt: 'Second prompt' }],
+      conversation_starters: [{ label: 'first' }, { label: 'second' }],
       configuration: { tools: [] },
     };
 
@@ -497,10 +494,7 @@ describe('createRequestToEs', () => {
       creationDate: new Date(),
     });
 
-    expect(docProperties.conversation_starters).toEqual([
-      { label: 'first' },
-      { label: 'second', prompt: 'Second prompt' },
-    ]);
+    expect(docProperties.conversation_starters).toEqual([{ label: 'first' }, { label: 'second' }]);
   });
 
   describe('approvals', () => {
@@ -664,10 +658,10 @@ describe('updateRequestToEs', () => {
 
     it('replaces the stored conversation_starters', () => {
       const result = update(getCurrentProps([{ label: 'old' }]), {
-        conversation_starters: [{ label: 'new', prompt: 'New prompt' }],
+        conversation_starters: [{ label: 'new' }],
       });
 
-      expect(result.conversation_starters).toEqual([{ label: 'new', prompt: 'New prompt' }]);
+      expect(result.conversation_starters).toEqual([{ label: 'new' }]);
     });
 
     it('keeps the stored conversation_starters when the update omits them', () => {

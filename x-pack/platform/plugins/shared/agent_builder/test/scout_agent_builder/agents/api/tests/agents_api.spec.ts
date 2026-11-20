@@ -63,10 +63,7 @@ apiTest.describe(
         const agent = {
           ...mockAgent,
           id: 'test-agent-with-starters',
-          conversation_starters: [
-            { label: 'Top errors', prompt: 'Show me the top 10 errors from the last 24 hours' },
-            { label: 'Plain label' },
-          ],
+          conversation_starters: [{ label: 'Top errors' }, { label: 'Plain label' }],
         };
         const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
           body: agent,

@@ -40,12 +40,9 @@ describe('toInternalDefinition', () => {
   it('passes the declared conversation starters through', async () => {
     const internal = await convert({
       ...baseDefinition,
-      conversation_starters: [{ label: 'first' }, { label: 'second', prompt: 'Second prompt' }],
+      conversation_starters: [{ label: 'first' }, { label: 'second' }],
     });
-    expect(internal.conversation_starters).toEqual([
-      { label: 'first' },
-      { label: 'second', prompt: 'Second prompt' },
-    ]);
+    expect(internal.conversation_starters).toEqual([{ label: 'first' }, { label: 'second' }]);
   });
 
   it('keeps the auto-approval defaults declared by the definition', async () => {

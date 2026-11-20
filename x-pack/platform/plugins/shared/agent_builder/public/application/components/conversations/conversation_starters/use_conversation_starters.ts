@@ -44,8 +44,8 @@ export const useConversationStarters = () => {
   );
 
   const onSelect = useCallback(
-    ({ label, prompt }: ConversationStarter) => {
-      void submitMessage(prompt ?? label, {
+    ({ label }: ConversationStarter) => {
+      void submitMessage(label, {
         // What was typed isn't sent: it moves to the input of the conversation that starts. It stays
         // where it is if the conversation can't be created.
         onConversationCreated: (conversationId) => {

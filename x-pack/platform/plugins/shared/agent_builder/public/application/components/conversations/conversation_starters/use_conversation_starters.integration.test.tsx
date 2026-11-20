@@ -35,7 +35,7 @@ jest.mock('../../../context/conversation/conversation_context');
 const agentWithStarters = {
   id: 'agent-1',
   name: 'Agent',
-  conversation_starters: [{ label: 'Top errors', prompt: 'Show me the top errors' }],
+  conversation_starters: [{ label: 'Top errors' }],
 };
 
 describe('useConversationStarters with the real agent hooks', () => {
@@ -72,11 +72,7 @@ describe('useConversationStarters with the real agent hooks', () => {
 
     const { result } = renderHook(() => useConversationStarters(), { wrapper });
 
-    await waitFor(() =>
-      expect(result.current.starters).toEqual([
-        { label: 'Top errors', prompt: 'Show me the top errors' },
-      ])
-    );
+    await waitFor(() => expect(result.current.starters).toEqual([{ label: 'Top errors' }]));
     // The agent is also fetched by id, as the message input does, to check whether it is bound to a
     // service account.
     expect(get).toHaveBeenCalledWith('agent-1');
@@ -87,11 +83,7 @@ describe('useConversationStarters with the real agent hooks', () => {
 
     const { result } = renderHook(() => useConversationStarters(), { wrapper });
 
-    await waitFor(() =>
-      expect(result.current.starters).toEqual([
-        { label: 'Top errors', prompt: 'Show me the top errors' },
-      ])
-    );
+    await waitFor(() => expect(result.current.starters).toEqual([{ label: 'Top errors' }]));
     expect(get).toHaveBeenCalledWith('agent-1');
   });
 

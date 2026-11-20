@@ -21,37 +21,16 @@ describe('resolveConversationStarters', () => {
     expect(resolveConversationStarters({ agentStarters: [] })).toEqual([]);
   });
 
-  it('keeps the prompt of a starter', () => {
-    expect(
-      resolveConversationStarters({
-        agentStarters: [{ label: 'Top errors', prompt: 'Show me the top 10 errors' }],
-      })
-    ).toEqual([{ label: 'Top errors', prompt: 'Show me the top 10 errors' }]);
-  });
-
-  it('trims labels and prompts and drops a prompt that is blank', () => {
-    expect(
-      resolveConversationStarters({
-        agentStarters: [
-          { label: '  a  ', prompt: '  send this  ' },
-          { label: 'b', prompt: '   ' },
-        ],
-      })
-    ).toEqual([{ label: 'a', prompt: 'send this' }, { label: 'b' }]);
+  it('trims labels', () => {
+    expect(resolveConversationStarters({ agentStarters: labels('  a  ', 'b') })).toEqual(
+      labels('a', 'b')
+    );
   });
 
   it('drops starters without a label and repeated labels, keeping the first', () => {
     expect(
-      resolveConversationStarters({
-        agentStarters: [
-          { label: 'a', prompt: 'first' },
-          { label: '' },
-          { label: '   ' },
-          { label: 'a', prompt: 'second' },
-          { label: 'b' },
-        ],
-      })
-    ).toEqual([{ label: 'a', prompt: 'first' }, { label: 'b' }]);
+      resolveConversationStarters({ agentStarters: labels('a', '', '   ', 'a', 'b') })
+    ).toEqual(labels('a', 'b'));
   });
 
   it('keeps at most three starters', () => {

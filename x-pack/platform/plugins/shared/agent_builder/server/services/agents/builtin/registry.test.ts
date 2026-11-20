@@ -57,7 +57,7 @@ describe('BuiltinAgentRegistry', () => {
 
   describe('register with conversation starters', () => {
     it('should register an agent with valid conversation starters', () => {
-      const conversationStarters = [{ label: 'Top errors', prompt: 'Show me the top errors' }];
+      const conversationStarters = [{ label: 'Top errors' }];
 
       registry.register({ ...mockAgent, conversation_starters: conversationStarters });
 
