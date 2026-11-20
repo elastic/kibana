@@ -18,12 +18,15 @@ const AID = '0123456789abcdef0123456789abcdef';
 
 // Not offered to agents: actions that run code or change the RTR library or quarantined files, that weaken
 // protection (an allow-listing IOC, custom IOA rules), that undo a response (lifting containment), change
-// host group policy assignment or delete detections, or kill a process; and rtrRetrieveFile, whose result is
-// the whole file archive as base64 (up to about 1.4 MB), too large for a model context and of no use to it.
+// host group policy assignment or delete detections, or kill a process; rtrRetrieveFile, whose result is
+// the whole file archive as base64 (up to about 1.4 MB), too large for a model context and of no use to it;
+// and the sandbox submissions, which are billable, cannot be deleted and send data to Falcon Sandbox.
 // Offered: containHost (protective, reversible by an analyst, the host keeps its Falcon cloud link),
 // updateAlert and updateCase (triage metadata, reversible, comments are additive), createScan (protective,
 // quarantine is opt-in and reversible) and stopNgSiemSearch (only cancels a search job).
 const NOT_FOR_AGENTS = [
+  'detonateUrl',
+  'detonateFile',
   'rtrRetrieveFile',
   'uploadRTRFile',
   'deleteRTRFile',
@@ -83,14 +86,11 @@ describe('CrowdStrike Falcon agent exposure and read retries', () => {
     }
   });
 
-  it('tells agents to confirm sandbox submissions with the user', () => {
-    expect(Crowdstrike2.skill).toContain(
-      'Confirm with the user before detonateUrl or detonateFile'
-    );
-  });
-
-  it('tells agents that a detonation is called again with submission_id while it is not complete', () => {
-    expect(Crowdstrike2.skill).toContain('when `complete` is false');
+  it('does not mention actions that are not offered to agents in the skill', () => {
+    for (const name of NOT_FOR_AGENTS) {
+      expect(Crowdstrike2.skill).not.toContain(`\`${name}\``);
+      expect(Crowdstrike2.skill).not.toMatch(new RegExp(`\\b${name}\\b`));
+    }
   });
 
   it('reports a host that only appears in the batch init reply with its errors as not complete', () => {

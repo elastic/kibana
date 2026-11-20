@@ -72,7 +72,9 @@ export const intelActions: ConnectorSpec['actions'] = {
     },
   },
   detonateUrl: {
-    isTool: true,
+    // Not offered to agents: each submission is billable, cannot be deleted and sends the URL to
+    // Falcon Sandbox.
+    isTool: false,
     scope: 'write',
     description:
       'Detonate a URL in Falcon Sandbox. Returns verdict and threat_score; when complete is false, call again with submission_id.',
@@ -85,7 +87,9 @@ export const intelActions: ConnectorSpec['actions'] = {
     },
   },
   detonateFile: {
-    isTool: true,
+    // Not offered to agents: each submission is billable, cannot be deleted and sends the file to
+    // Falcon Sandbox.
+    isTool: false,
     scope: 'write',
     description:
       'Detonate a file in Falcon Sandbox: content_base64 with file_name, up to 1 MiB, or the sha256 of a sample in Falcon. When complete is false, call again with submission_id.',

@@ -589,6 +589,36 @@ describe('CrowdStrike Falcon connector', () => {
       expect(result).toMatchObject({ resources: [], device_count: 2, next_offset: null });
     });
 
+    it('findHostsByIndicator reports device_count null when the count is unknown on a later page', async () => {
+      const { result } = await run(
+        'findHostsByIndicator',
+        { type: 'sha256', value: SHA, offset: '0:1450837263' },
+        [
+          ok({ meta: { pagination: { limit: 2, offset: '' } }, resources: [] }),
+          fail(400, 'count lookup refused'),
+        ]
+      );
+      expect(result).toMatchObject({ resources: [], device_count: null, next_offset: null });
+    });
+
+    it('findHostsByIndicator uses the page size as the count only for a single complete page', async () => {
+      const single = await run('findHostsByIndicator', { type: 'sha256', value: SHA }, [
+        ok({ meta: { pagination: { limit: 100, offset: '' } }, resources: [AID, AID2] }),
+        fail(400, 'count lookup refused'),
+      ]);
+      expect(single.result).toMatchObject({ device_count: 2, next_offset: null });
+
+      const firstOfMany = await run(
+        'findHostsByIndicator',
+        { type: 'sha256', value: SHA, limit: 2 },
+        [
+          ok({ meta: { pagination: { limit: 2, offset: '0:9' } }, resources: [AID, AID2] }),
+          fail(400, 'count lookup refused'),
+        ]
+      );
+      expect(firstOfMany.result).toMatchObject({ device_count: null, next_offset: '0:9' });
+    });
+
     it('findHostsByIndicator pages with the cursor Falcon returns in meta.pagination.offset', async () => {
       // Live US-2: this route ignores a numeric offset and returns an opaque cursor, empty on the last page.
       const first = await run(

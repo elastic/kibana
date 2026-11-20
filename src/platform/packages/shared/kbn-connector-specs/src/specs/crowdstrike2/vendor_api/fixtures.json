@@ -1,0 +1,172 @@
+{
+  "batchActiveResponderExecuteRTR": {
+    "input": {
+      "command": "ps",
+      "timeout": 1
+    }
+  },
+  "batchAdminExecuteRTR": {
+    "input": {
+      "command": "put test.txt",
+      "timeout": 1
+    }
+  },
+  "createIOARule": {
+    "input": {
+      "field_values": [
+        {
+          "name": "ImageFilename",
+          "label": "Image Filename",
+          "type": "excludable",
+          "value": ".*contract-mock\\.exe",
+          "values": [
+            {
+              "label": "include",
+              "value": ".*contract-mock\\.exe"
+            }
+          ]
+        }
+      ],
+      "description": "contract mock",
+      "comment": "contract mock"
+    }
+  },
+  "detonateFile": {
+    "input": {
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "timeout": 0
+    }
+  },
+  "detonateUrl": {
+    "input": {
+      "url": "https://example.com/a",
+      "timeout": 0
+    }
+  },
+  "executeRTRCommand": {
+    "input": {
+      "command": "ls C:\\",
+      "timeout": 1
+    },
+    "queries": [
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/real-time-response/combined/batch-init-session/v1"
+      }
+    ]
+  },
+  "findHostsByIndicator": {
+    "input": {
+      "type": "domain",
+      "value": "example.com"
+    }
+  },
+  "getAgentDetails": {
+    "queries": [
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/devices/entities/devices/v2"
+      }
+    ]
+  },
+  "getAlertDetails": {
+    "queries": [
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/alerts/entities/alerts/v2"
+      }
+    ]
+  },
+  "getCaseDetails": {
+    "queries": [
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/cases/entities/cases/v2"
+      }
+    ]
+  },
+  "listQuarantinedFiles": {
+    "queries": [
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/quarantine/entities/quarantined-files/GET/v1"
+      }
+    ]
+  },
+  "rtrKillProcess": {
+    "input": {
+      "timeout": 1
+    }
+  },
+  "rtrListProcesses": {
+    "queries": [
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/real-time-response/entities/sessions/v1"
+      },
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/real-time-response/entities/command/v1"
+      },
+      {
+        "source": "falcon",
+        "method": "DELETE",
+        "path": "/real-time-response/entities/sessions/v1"
+      }
+    ],
+    "input": {
+      "timeout": 1
+    }
+  },
+  "rtrRetrieveFile": {
+    "input": {
+      "timeout": 1
+    }
+  },
+  "startNgSiemSearch": {
+    "input": {
+      "query": "#event_simpleName=ProcessRollup2 | head(100)",
+      "start": "24h"
+    },
+    "queries": [
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/humio/api/v1/repositories/{repository}/queryjobs"
+      }
+    ]
+  },
+  "updateAlert": {
+    "input": {
+      "status": "in_progress"
+    }
+  },
+  "updateCase": {
+    "input": {
+      "status": "in_progress"
+    }
+  },
+  "uploadIOC": {
+    "input": {
+      "indicators": [
+        {
+          "type": "sha256",
+          "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "action": "detect",
+          "platforms": [
+            "windows"
+          ],
+          "severity": "low",
+          "applied_globally": true
+        }
+      ]
+    }
+  }
+}

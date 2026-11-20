@@ -29,6 +29,7 @@ const TokenUrlSchema = lazySchema(() =>
       (value) => isAllowedFalconUrl(value, /^\/oauth2\/token$/),
       'Enter the HTTPS token URL of your Falcon cloud, ending in /oauth2/token, without credentials, query parameters or a fragment.'
     )
+    .default('https://api.crowdstrike.com/oauth2/token')
 );
 
 const configSchema = lazySchema(() =>
@@ -137,15 +138,13 @@ export const Crowdstrike2: ConnectorSpec = {
     '- Contain: check `getAgentOnlineStatus`, call `containHost`, then poll `getAgentDetails` until `containment_state` is `contained`. An offline host is contained when it reconnects.',
     '- Indicators: `findHostsByIndicator` lists the hosts that saw a hash, domain or IP; `getFileReputation` and `getUrlReputation` give the verdict.',
     '- Cases: `searchCases`, `getCaseDetails`, `updateCase`, `addCaseTags`, `removeCaseTags`. Cases have no comments: comment on the alert.',
-    '- RTR: `executeRTRCommand` runs read-only commands; `rtrListProcesses` lists processes; `rtrRetrieveFile` collects one file. When a host result has `complete: false`, poll `cloud_request_id` with `getRTRCommandStatus` and the same tier.',
+    '- RTR: `executeRTRCommand` runs read-only commands; `rtrListProcesses` lists processes. When a host result has `complete: false`, poll `cloud_request_id` with `getRTRCommandStatus` and the same tier.',
     '- Next-Gen SIEM: `startNgSiemSearch` returns `id`; call `getNgSiemSearchResults` every 2 seconds or more until `done` is true, then page `events`.',
-    '- Sandbox: `detonateFile` or `detonateUrl`; when `complete` is false, call again with `submission_id`.',
     '',
     'Rules:',
     '- Lists return one page: continue with `offset: next_offset`, or `after: next_after` where offered; null means the last page.',
     "- FQL quotes values with single quotes, for example hostname:'web-01'; + is AND, a comma is OR.",
     '- Confirm with the user before any action that changes Falcon or a host: containHost, updateAlert, updateCase, the case tag actions, createScan.',
-    '- Confirm with the user before detonateUrl or detonateFile: a sandbox submission is billable, cannot be deleted, and sends the URL or file to Falcon Sandbox.',
     '- Change actions return `outcomes` per item: `requested`, `skipped` (already in that state) or `notFound`.',
     '- A 403 names the API client scope the action needs.',
   ].join('\n'),

@@ -38,6 +38,9 @@ const unique = (ids: string[]) => [...new Set(ids)];
 /** Session deletes sent at the same time when a batch is closed (a batch can hold 10,000 hosts). */
 const SESSION_DELETE_CONCURRENCY = 10;
 
+/** Time after which closing a batch's sessions stops starting new deletes. */
+const SESSION_CLEANUP_BUDGET_MS = 30_000;
+
 interface BatchSession {
   batchId: string;
   openedAt: number;
@@ -231,7 +234,18 @@ const closeBatchSessions = async (
       : [];
   });
   const ids = unique(sessionIds);
+  // Cleanup is best effort: after the time budget no new deletes start, so a large batch still
+  // returns its results in time. Falcon ends the sessions left open after 10 minutes idle.
+  const deadline = timing.now() + SESSION_CLEANUP_BUDGET_MS;
   for (let start = 0; start < ids.length; start += SESSION_DELETE_CONCURRENCY) {
+    if (start > 0 && timing.now() >= deadline) {
+      ctx.log.warn(
+        `Left ${
+          ids.length - start
+        } Real Time Response sessions open after the cleanup time budget; Falcon ends them after 10 minutes idle.`
+      );
+      return;
+    }
     await Promise.all(
       ids
         .slice(start, start + SESSION_DELETE_CONCURRENCY)
@@ -385,21 +399,28 @@ export const retrieveFile = async (
   const timeout = input.timeout ?? 60;
   const scope = SCOPES.rtrWrite;
   if (input.batch_get_cmd_req_id) {
-    let resumed: RetrievedFile | undefined;
+    // Only the session Falcon reports for this retrieval and device is closed afterwards; a
+    // caller-supplied session_id is never deleted (it may belong to something else).
+    let falconSessionId: string | undefined;
+    let keepSession = false;
     try {
-      resumed = await awaitFile(
+      const resumed = await awaitFile(
         ctx,
         input,
         input.batch_get_cmd_req_id,
         input.session_id,
         timeout,
-        scope
+        scope,
+        undefined,
+        (id) => {
+          falconSessionId = id;
+        }
       );
+      keepSession = !resumed.complete;
       return resumed;
     } finally {
-      const sessionId = resumed?.session_id ?? input.session_id;
-      if (resumed?.complete !== false && sessionId) {
-        await deleteSession(ctx, sessionId, scope);
+      if (!keepSession && falconSessionId) {
+        await deleteSession(ctx, falconSessionId, scope);
       }
     }
   }
@@ -467,7 +488,8 @@ const awaitFile = async (
   sessionId: string | undefined,
   timeout: number,
   scope: string,
-  beforeDownload?: () => Promise<void>
+  beforeDownload?: () => Promise<void>,
+  onFalconSession?: (sessionId: string) => void
 ): Promise<RetrievedFile> => {
   const deadline = timing.now() + timeout * 1000;
   let file;
@@ -488,6 +510,9 @@ const awaitFile = async (
   }
   if (!file) {
     return { complete: false, session_id: sessionId, batch_get_cmd_req_id: requestId };
+  }
+  if (typeof file.session_id === 'string' && file.session_id) {
+    onFalconSession?.(file.session_id);
   }
   if (file.size !== undefined && file.size > MAX_FILE_BYTES) {
     throw new Error(

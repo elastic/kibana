@@ -299,6 +299,9 @@ export const alertAndIocActions: ConnectorSpec['actions'] = {
       } catch (error) {
         ctx.log.debug(`Falcon device count lookup failed: ${(error as Error).message}`);
       }
+      // Without Falcon's count or total, the page size is the count only when this first page is
+      // also the last one; otherwise the count is unknown (null), never a guess.
+      const onlyPage = !input.offset && page.next_offset === null;
       return {
         ...page,
         device_count:
@@ -306,7 +309,9 @@ export const alertAndIocActions: ConnectorSpec['actions'] = {
             ? deviceCount
             : typeof total === 'number'
             ? total
-            : resources.length,
+            : onlyPage
+            ? resources.length
+            : null,
       };
     },
   },

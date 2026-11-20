@@ -1,0 +1,68 @@
+overlay: 1.0.0
+info:
+  title: CrowdStrike Falcon API corrections
+  version: 1.0.0
+actions:
+  - target: $.servers
+    description: >-
+      The console export names only the API host of the cloud it was downloaded from
+      (api.us-2.crowdstrike.com), but every Falcon cloud serves the same API from its own host
+      (https://developer.crowdstrike.com/api-reference/overview/), and the connector takes the
+      cloud as config.
+    update:
+      - url: https://api.crowdstrike.com
+      - url: https://api.us-3.crowdstrike.com
+      - url: https://api.eu-1.crowdstrike.com
+      - url: https://api.laggar.gcw.crowdstrike.com
+      - url: https://api.us-gov-2.crowdstrike.mil
+  - target: $.components.schemas['domain.BatchInitSessionRequest'].required[?@ == 'existing_batch_id']
+    description: >-
+      existing_batch_id is only for adding hosts to an open batch. Batch sessions started without it
+      on a live Falcon tenant (2026-11-18: executeRTRCommand, batchActiveResponderExecuteRTR,
+      batchAdminExecuteRTR, rtrRetrieveFile) returned a new batch_id.
+    remove: true
+  - target: $.components.schemas['domain.InitRequest'].required[?@ == 'origin']
+    description: >-
+      Single-host sessions started without origin on a live Falcon tenant (2026-11-18:
+      rtrListProcesses, rtrKillProcess) returned a session_id.
+    remove: true
+  - target: $.components.schemas['entities.ODSScanRequest'].required
+    description: >-
+      The export marks every property required, but scans started on a live Falcon tenant
+      (2026-11-18) with only hosts, cpu_priority, description, file_paths, max_duration,
+      pause_duration, quarantine and the ML levels returned a scan id; Falcon sets initiated_from
+      itself (cloud_adhoc).
+    remove: true
+  - target: $.paths['/humio/api/v1/repositories/{repository}/queryjobs/{id}'].get.parameters
+    description: >-
+      The export leaves out the paging parameters of a query job's results, which a live Falcon
+      tenant accepted on 2026-11-18 (getNgSiemSearchResults returned 5 events with
+      paginationLimit and paginationOffset).
+    update:
+      - name: paginationLimit
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: paginationOffset
+        in: query
+        required: false
+        schema:
+          type: integer
+  - target: $.components.schemas['domain.CommandExecuteRequest'].required[?@ == 'id']
+    description: >-
+      id only orders commands within a session. Commands sent without it on a live Falcon tenant
+      (2026-11-18: rtrListProcesses ps, rtrKillProcess kill) ran and returned a cloud_request_id.
+    remove: true
+  - target: $.components.schemas['domain.BatchGetCommandRequest'].required[?@ == 'optional_hosts']
+    description: >-
+      optional_hosts narrows the batch to some of its hosts, as its name says; without it the
+      command applies to every host of the batch, as for the batch command routes
+      (https://developer.crowdstrike.com/api-reference/collections/real-time-response/).
+    remove: true
+  - target: $.components.schemas['operations.CaseFieldChanges'].required
+    description: >-
+      The export marks every field required, but the operation "Updates given fields on the
+      specified case" (https://developer.crowdstrike.com/api-reference/collections/case-management/),
+      so a change sends only the fields it changes.
+    remove: true

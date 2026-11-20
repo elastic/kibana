@@ -614,9 +614,106 @@ describe('CrowdStrike Falcon Real Time Response', () => {
       ).resolves.toEqual({ complete: false, session_id: 's1', batch_get_cmd_req_id: 'bgc-1' });
       expect(calls().some((c) => c.method === 'DELETE' || c.method === 'POST')).toBe(false);
     });
+
+    it('never deletes the caller-supplied session when a resumed poll fails', async () => {
+      const { ctx, calls } = makeCtx([
+        { status: 400, data: { errors: [{ code: 400, message: 'bad request id' }] } },
+      ]);
+      await expect(
+        retrieveFile(ctx, {
+          device_id: AID,
+          file_path: 'C:\\x',
+          batch_get_cmd_req_id: 'bgc-other',
+          session_id: 'someone-elses-session',
+        })
+      ).rejects.toThrow('bad request id');
+      expect(calls().filter((c) => c.method === 'DELETE')).toEqual([]);
+    });
+
+    it('closes only the session Falcon reports for the retrieval, not the one the caller passed', async () => {
+      const archive = Uint8Array.from(Buffer.from('7z'));
+      const { ctx, calls } = makeCtx([
+        {
+          data: {
+            resources: { [AID]: { session_id: 'falcon-s', sha256: SHA, name: 'b.txt', size: 2 } },
+          },
+        },
+        { data: archive.buffer },
+        { status: 204, data: null },
+      ]);
+      await expect(
+        retrieveFile(ctx, {
+          device_id: AID,
+          file_path: 'C:\\b.txt',
+          batch_get_cmd_req_id: 'bgc-1',
+          session_id: 'caller-s',
+        })
+      ).resolves.toMatchObject({ complete: true, session_id: 'falcon-s' });
+      expect(
+        calls()
+          .filter((c) => c.method === 'DELETE')
+          .map((c) => c.params)
+      ).toEqual([{ session_id: 'falcon-s' }]);
+    });
+
+    it('deletes nothing on resume when Falcon reports no session for the file', async () => {
+      const archive = Uint8Array.from(Buffer.from('7z'));
+      const { ctx, calls } = makeCtx([
+        { data: { resources: { [AID]: { sha256: SHA, name: 'b.txt', size: 2 } } } },
+        { data: archive.buffer },
+      ]);
+      await expect(
+        retrieveFile(ctx, {
+          device_id: AID,
+          file_path: 'C:\\b.txt',
+          batch_get_cmd_req_id: 'bgc-1',
+          session_id: 'caller-s',
+        })
+      ).resolves.toMatchObject({ complete: true });
+      expect(calls().filter((c) => c.method === 'DELETE')).toEqual([]);
+    });
   });
 
   describe('closing batch sessions', () => {
+    it('stops starting deletes after the cleanup time budget and still returns the results', async () => {
+      const ids = Array.from({ length: 25 }, (_, i) => i.toString(16).padStart(32, '0'));
+      const hosts = Object.fromEntries(
+        ids.map((id, i) => [id, { session_id: `s${i}`, errors: [] }])
+      );
+      const combined = Object.fromEntries(
+        ids.map((id, i) => [
+          id,
+          { session_id: `s${i}`, complete: true, stdout: 'ok', stderr: '', errors: [] },
+        ])
+      );
+      const { ctx, request } = makeCtx([]);
+      request.mockImplementation(async (config: { url: string; method: string }) => {
+        if (config.url.endsWith('/batch-init-session/v1')) {
+          return {
+            status: 201,
+            headers: {},
+            data: { batch_id: 'b', resources: hosts, errors: [] },
+          };
+        }
+        if (config.url.endsWith('/batch-command/v1')) {
+          return {
+            status: 201,
+            headers: {},
+            data: { combined: { resources: combined }, errors: [] },
+          };
+        }
+        now += 40_000; // every delete is slow
+        return { status: 204, headers: {}, data: null };
+      });
+      const result = await runBatchCommand(ctx, 'read_only', { endpoint_ids: ids, command: 'ls' });
+      const deletes = request.mock.calls.filter(([config]) => config.method === 'DELETE');
+      expect(deletes).toHaveLength(10);
+      expect(result.results).toHaveLength(25);
+      expect(ctx.log.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Left 15 Real Time Response sessions open')
+      );
+    });
+
     it('deletes the sessions of a large batch at most 10 at a time', async () => {
       const ids = Array.from({ length: 25 }, (_, i) => i.toString(16).padStart(32, '0'));
       const hosts = Object.fromEntries(

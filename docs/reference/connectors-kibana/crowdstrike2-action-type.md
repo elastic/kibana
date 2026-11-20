@@ -29,7 +29,7 @@ API URL
 :   The HTTPS base URL of the Falcon API. Used only when the Falcon cloud is Custom. The host must be allowed by the {{kib}} `xpack.actions.allowedHosts` setting.
 
 Token URL
-:   The API URL of your Falcon cloud followed by `/oauth2/token`, for example `https://api.us-2.crowdstrike.com/oauth2/token`. {{kib}} sends the client ID and secret to this URL to get an access token, so enter only the token URL of your Falcon cloud. When the token URL is not on the host of the selected Falcon cloud, every action fails with an error that names both hosts.
+:   The API URL of your Falcon cloud followed by `/oauth2/token`, for example `https://api.us-2.crowdstrike.com/oauth2/token`. It defaults to the US-1 token URL, `https://api.crowdstrike.com/oauth2/token`; change it when your Falcon cloud is another one. {{kib}} sends the client ID and secret to this URL to get an access token, so enter only the token URL of your Falcon cloud. When the token URL is not on the host of the selected Falcon cloud, actions fail: usually with an error that names both hosts, but a token URL of another Falcon cloud can also be refused by that cloud while {{kib}} requests the token, and then the error is an OAuth error (for example 401) that does not name the hosts. In either case, check that the token URL and the Falcon cloud match.
 
 Client ID
 :   The client ID of a Falcon API client.
@@ -103,7 +103,7 @@ The CrowdStrike Falcon connector exposes the following actions. List and search 
 :   Delete custom IOCs by ID, with an optional audit comment. An IOC that no longer exists is not an error: it is reported as `notFound` in `outcomes`, and the others as `requested`.
 
 `findHostsByIndicator`
-:   Find the hosts that observed an indicator, with the number of hosts. Falcon pages this list with an opaque cursor: `next_offset` is a string (for example `0:1450837263`); pass it as `offset` to get the next page. It is `null` on the last page.
+:   Find the hosts that observed an indicator, with the number of hosts. Falcon pages this list with an opaque cursor: `next_offset` is a string (for example `0:1450837263`); pass it as `offset` to get the next page. It is `null` on the last page. `device_count` is `null` when Falcon's host count cannot be read and the list has more than one page.
 
 `listIOARules`
 :   List custom IOA rule groups with their rules, by FQL filter, free text and sort. A rule is identified by its `instance_id` (Falcon returns no rule `id`). A deleted rule stays in the group's `rules` with `deleted: true` and is removed from `rule_ids`.
@@ -136,7 +136,7 @@ The CrowdStrike Falcon connector exposes the following actions. List and search 
 :   List the custom RTR scripts in the Falcon cloud, for use with `runscript -CloudFile`.
 
 `rtrRetrieveFile` _(not yet available)_
-:   Collect one file (up to 1 MiB) from a host. Returns the archive Falcon produces as base64, with its name, SHA256 and size. When the file is not ready within the timeout, the result has `complete: false` with `batch_get_cmd_req_id` and `session_id`; call the action again with the same `device_id` and `file_path` and those two values to keep waiting for the same file instead of starting a new collection.
+:   Collect one file (up to 1 MiB) from a host. Returns the archive Falcon produces as base64, with its name, SHA256 and size. When the file is not ready within the timeout, the result has `complete: false` with `batch_get_cmd_req_id` and `session_id`; call the action again with the same `device_id` and `file_path` and those two values to keep waiting for the same file instead of starting a new collection. A resumed call closes only the session that Falcon reports for that retrieval and host, never a `session_id` it was given.
 
 `rtrKillProcess` _(not yet available)_
 :   Kill a process on a host by process ID.
@@ -182,10 +182,10 @@ The CrowdStrike Falcon connector exposes the following actions. List and search 
 `getUrlReputation`
 :   Look up a URL or domain in Falcon Intelligence.
 
-`detonateUrl`
+`detonateUrl` _(not yet available)_
 :   Submit a URL to Falcon Sandbox and return the verdict, threat score and report summary when it is ready.
 
-`detonateFile`
+`detonateFile` _(not yet available)_
 :   Detonate a file (uploaded as base64, up to 1 MiB, or a sample already in Falcon) in Falcon Sandbox.
 
 `spotlightSearchVulnerability`
@@ -230,7 +230,7 @@ Earlier runscript commands
 :   The earlier connector ran `runscript` through Execute RTR command. In this connector, `executeRTRCommand` (read-only) accepts only read-only commands and rejects `runscript`. Use `batchActiveResponderExecuteRTR` or `batchAdminExecuteRTR` instead, for example with the command `runscript -CloudFile='<script name>'`, and use a connector whose API client holds that tier's scope.
 
 Real Time Response sessions
-:   Real Time Response sessions are opened and closed by the connector. Batch sessions, used by `executeRTRCommand`, `batchActiveResponderExecuteRTR`, `batchAdminExecuteRTR` and `rtrRetrieveFile`, open one session per host; the connector deletes each host's session when that host's command completes or fails (`rtrRetrieveFile`: when the file is returned or the action fails). Single-host sessions, used by `rtrKillProcess` and `rtrListProcesses`, are deleted when the command completes or fails. A session is kept when the command is still running at the timeout (so that its status can be read; `rtrRetrieveFile`: while the file is still being prepared) or when the host is offline and the command is queued for it (deleting the session would drop the queued command); Falcon closes a kept session after 10 minutes without activity. A failed delete is only logged and does not fail the action. The batch and session IDs in the results (`batch_id`, `session_id`) are for audit only, except that `rtrRetrieveFile` takes back the `session_id` and `batch_get_cmd_req_id` of a result that was not complete. Sessions of a large batch are deleted 10 at a time.
+:   Real Time Response sessions are opened and closed by the connector. Batch sessions, used by `executeRTRCommand`, `batchActiveResponderExecuteRTR`, `batchAdminExecuteRTR` and `rtrRetrieveFile`, open one session per host; the connector deletes each host's session when that host's command completes or fails (`rtrRetrieveFile`: when the file is returned or the action fails). Single-host sessions, used by `rtrKillProcess` and `rtrListProcesses`, are deleted when the command completes or fails. A session is kept when the command is still running at the timeout (so that its status can be read; `rtrRetrieveFile`: while the file is still being prepared) or when the host is offline and the command is queued for it (deleting the session would drop the queued command); Falcon closes a kept session after 10 minutes without activity. A failed delete is only logged and does not fail the action. The batch and session IDs in the results (`batch_id`, `session_id`) are for audit only, except that `rtrRetrieveFile` takes back the `session_id` and `batch_get_cmd_req_id` of a result that was not complete. Sessions of a large batch are deleted 10 at a time, for at most 30 seconds in total; sessions left open after that are closed by Falcon after 10 minutes without activity.
 
 Real Time Response timeout
 :   Real Time Response commands wait 30 seconds by default (60 seconds for `rtrRetrieveFile`) and at most 300 seconds (Falcon's 5-minute maximum). A command that is still running at the timeout returns a request ID (`cloud_request_id`) per host; read its result with `getRTRCommandStatus`.
