@@ -12,7 +12,9 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiLoadingSpinner,
+  EuiScreenReaderOnly,
   EuiSwitch,
+  EuiText,
   EuiToolTip,
   type Criteria,
   type EuiBasicTableColumn,
@@ -159,9 +161,18 @@ export const AutomationsTable = ({
           }
           return [];
         });
-        return destinations.length > 0
-          ? i18n.formatList('unit', [...new Set(destinations)])
-          : listLabels.noDestination;
+        if (destinations.length > 0) {
+          return i18n.formatList('unit', [...new Set(destinations)]);
+        }
+
+        return (
+          <EuiText size="s" color="subdued">
+            <span aria-hidden>—</span>
+            <EuiScreenReaderOnly>
+              <span>{listLabels.noDestination}</span>
+            </EuiScreenReaderOnly>
+          </EuiText>
+        );
       },
     },
     {

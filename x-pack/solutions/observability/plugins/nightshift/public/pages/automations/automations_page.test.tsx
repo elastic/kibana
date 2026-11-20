@@ -645,7 +645,8 @@ describe('AutomationsPage', () => {
 
       const scheduleRow = within(rowOf('Daily report'));
       expect(scheduleRow.getByText('Scheduled')).toBeVisible();
-      expect(scheduleRow.getByText('No destination')).toBeVisible();
+      const emptyDestination = scheduleRow.getByRole('cell', { name: 'No destination' });
+      expect(within(emptyDestination).getByText('—')).toBeVisible();
       expect(scheduleRow.getByText('No runs recorded')).toBeVisible();
 
       const slackRow = within(rowOf('Investigate Slack messages'));
