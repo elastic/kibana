@@ -31,6 +31,7 @@ export const BANNED_NODE_MODULES: ReadonlySet<string> = new Set([
   '@elastic/eui',
   '@elastic/charts',
   '@emotion/react',
+  'react-use',
 ]);
 
 const relative = (absolute: string): string => Path.relative(REPO_ROOT, absolute);

@@ -29718,7 +29718,6 @@
     "xpack.evals.compareExperiments.flyoutTitle": "Scores pour chaque exemple",
     "xpack.evals.compareExperiments.flyoutTraceBaseline": "Afficher la trace (référence)",
     "xpack.evals.compareExperiments.flyoutTraceTarget": "Afficher la trace (cible)",
-    "xpack.evals.compareExperiments.flyoutUnpairedHint": "Cet exemple n’existe que dans une seule expérience et est exclu de la comparaison statistique",
     "xpack.evals.compareExperiments.loadingLabel": "Chargement de la comparaison…",
     "xpack.evals.compareExperiments.metricType.binary": "scores de réussite/échec",
     "xpack.evals.compareExperiments.metricType.continuousBounded": "scores dans [0, 1]",

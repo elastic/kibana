@@ -27,6 +27,7 @@ import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
 import type { JsonModeSettings } from '@kbn/unified-data-table';
 import { isDiscoverSessionEsqlTab } from './type_guards';
+import { migrateLegacyQuery } from '../migrate_legacy_query';
 
 // "Stored" names the saved tab format, not a persistence step:
 // `toStored…` maps API fields to that format and `fromStored…` maps it back.
@@ -130,7 +131,8 @@ export const fromStoredSearchAndTable = (
     : {
         ...apiTab,
         ...(sampleSize && { sample_size: Math.max(10, sampleSize) }),
-        ...(query && { query: fromStoredClassicQuery(query) }),
+        // Skip a missing query (undefined) and a null one from imported objects, but keep a legacy ''
+        ...(query != null && { query: fromStoredClassicQuery(migrateLegacyQuery(query)) }),
         filters: fromStoredFilters(filter) ?? [],
         data_source: fromStoredDataView(index),
         view_mode: viewMode ?? VIEW_MODE.DOCUMENT_LEVEL,
