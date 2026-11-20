@@ -58,33 +58,11 @@ describe('serializeInferenceDocuments', () => {
     });
   });
 
-  it('nests a prefix with several children and keeps the names recoverable', () => {
-    expect(
-      serialize([
-        {
-          _id: 'a',
-          fields: {
-            'kubernetes.pod.name': 'p',
-            'kubernetes.pod.uid': 'u',
-            'kubernetes.namespace': 'n',
-            'cloud.provider': 'gcp',
-            'error.stack_trace': 'trace',
-            'error.stack_trace.lines': 3,
-          },
-        },
-      ]).groups[0].documents[0].fields
-    ).toEqual({
-      kubernetes: { pod: { name: 'p', uid: 'u' }, namespace: 'n' },
-      'cloud.provider': 'gcp',
-      error: { stack_trace: 'trace', 'stack_trace.lines': 3 },
-    });
-  });
-
   it('drops a sub-field that repeats the value of its parent', () => {
     expect(
       serialize([
         { _id: 'a', fields: { 'host.name': 'h', 'host.name.text': 'h', 'host.name.length': 1 } },
       ]).groups[0].documents[0].fields
-    ).toEqual({ host: { name: 'h', 'name.length': 1 } });
+    ).toEqual({ 'host.name': 'h', 'host.name.length': 1 });
   });
 });

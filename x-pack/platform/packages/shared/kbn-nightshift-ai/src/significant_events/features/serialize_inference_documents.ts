@@ -100,39 +100,6 @@ const groupDocuments = (documents: InferenceDocument[]): InferenceDocument[][] =
   return best.partitions;
 };
 
-// A prefix that is also a field, or has a single child, stays a dotted key so that joining the
-// keys with `.` restores the field name.
-const nestFields = (fields: Fields): Fields => {
-  const nest = (entries: Array<[string[], unknown]>): Fields => {
-    const bySegment = new Map<string, Array<[string[], unknown]>>();
-    for (const [[head, ...rest], value] of entries) {
-      bySegment.set(head, [...(bySegment.get(head) ?? []), [rest, value]]);
-    }
-    const nested: Fields = {};
-    for (const [segment, children] of bySegment) {
-      const leaf = children.find(([rest]) => rest.length === 0);
-      const descendants = children.filter(([rest]) => rest.length > 0);
-      if (leaf) {
-        nested[segment] = leaf[1];
-      }
-      if (descendants.length === 0) {
-        continue;
-      }
-      const subtree = nest(descendants);
-      const subtreeEntries = Object.entries(subtree);
-      if (leaf || subtreeEntries.length === 1) {
-        for (const [key, value] of subtreeEntries) {
-          nested[`${segment}.${key}`] = value;
-        }
-      } else {
-        nested[segment] = subtree;
-      }
-    }
-    return nested;
-  };
-  return nest(Object.entries(fields).map(([key, value]) => [key.split('.'), value]));
-};
-
 /**
  * Serializes sample documents for the feature identification prompt without repeating what they have in common.
  */
@@ -146,13 +113,13 @@ export const serializeInferenceDocuments = (documents: InferenceDocument[]): str
   const groups = groupDocuments(remaining).map((partition): SerializedGroup => {
     const { shared: groupShared, documents: groupDocs } = extractSharedFields(partition);
     return {
-      ...(Object.keys(groupShared).length > 0 ? { shared_fields: nestFields(groupShared) } : {}),
-      documents: groupDocs.map(({ _id, fields }) => ({ _id, fields: nestFields(fields) })),
+      ...(Object.keys(groupShared).length > 0 ? { shared_fields: groupShared } : {}),
+      documents: groupDocs.map(({ _id, fields }) => ({ _id, fields })),
     };
   });
 
   const serialized: SerializedDocuments = {
-    ...(Object.keys(shared).length > 0 ? { shared_fields: nestFields(shared) } : {}),
+    ...(Object.keys(shared).length > 0 ? { shared_fields: shared } : {}),
     groups,
   };
   return JSON.stringify(serialized);
