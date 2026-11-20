@@ -25,6 +25,7 @@ import {
   EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE,
   evalsRemoteKibanaConfigSavedObjectType,
 } from './saved_objects/remote_kibana_config';
+import { evalsReviewQueueSavedObjectType } from './saved_objects/review_queue';
 import type {
   EvalsRequestHandlerContext,
   EvalsPluginSetup,
@@ -159,6 +160,7 @@ export class EvalsPlugin
     coreSetup.dataStreams.registerDataStream(onlineScoresDataStreamDefinition);
 
     coreSetup.savedObjects.registerType(evalsRemoteKibanaConfigSavedObjectType);
+    coreSetup.savedObjects.registerType(evalsReviewQueueSavedObjectType);
     encryptedSavedObjects.registerType({
       type: EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE,
       attributesToEncrypt: new Set(['apiKey']),
