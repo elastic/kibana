@@ -150,6 +150,9 @@ const controlsGroupStyles = {
       }
 
       .kbnFlexPanel--resizeHandle {
+        // temporarily disable drag resizing - see https://github.com/elastic/kibana/pull/304232#discussion_r4641036545
+        display: none;
+
         height: 100%;
         width: ${euiTheme.size.m};
         right: 1px;
