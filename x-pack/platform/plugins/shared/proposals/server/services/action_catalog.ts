@@ -20,6 +20,7 @@ export interface ActionCatalogWorkflowsClient {
   getWorkflows(
     params: {
       tags: string[];
+      enabled: boolean[];
       page: number;
       size: number;
       managedFilter: ActionCatalogManagedFilter;
@@ -108,7 +109,8 @@ export class ActionCatalog {
     // server-side inside getWorkflows.
     for (;;) {
       const response = await workflows.getWorkflows(
-        { tags: [ACTION_WORKFLOW_TAG], page, size: PAGE_SIZE, managedFilter },
+        // Disabled workflows are left out: a proposal for one could only fail once approved.
+        { tags: [ACTION_WORKFLOW_TAG], enabled: [true], page, size: PAGE_SIZE, managedFilter },
         spaceId,
         request
       );

@@ -282,12 +282,12 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
   });
 
   const update = service.update.bind(service);
-  jest.spyOn(service, 'update').mockImplementation(async (params, spaceId) => {
+  jest.spyOn(service, 'update').mockImplementation(async (params, spaceId, caller) => {
     if (failingStatus !== undefined && params.status === failingStatus) {
       failingStatus = undefined;
       throw new Error(`Failed to write status ${params.status}`);
     }
-    return update(params, spaceId);
+    return update(params, spaceId, caller);
   });
 
   const privileges: ProposalPrivilegesChecker = {

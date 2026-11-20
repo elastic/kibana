@@ -19,7 +19,7 @@ import {
   isTerminalStatus,
 } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { ActionMetadata, WorkflowExecutionDto } from '@kbn/workflows';
+import type { ActionMetadata, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
 import {
   DEFAULT_PROPOSAL_TITLE,
@@ -106,12 +106,17 @@ export interface UpdateProposalParams {
   dismissReason?: DismissReason;
   rationale?: string;
   executionError?: string;
-  /**
-   * The workflow run writing this update, as whoever it runs as. When it settles an action
-   * (`succeeded`/`failed`), the action's own execution is looked up among this run's children
-   * and stamped as `actionExecutionId`.
-   */
-  writtenBy?: { executionId: string; request: KibanaRequest };
+}
+
+/**
+ * The workflow run writing a gate update, as whoever it runs as. When the update settles an
+ * action (`succeeded`/`failed`), the action's own execution is looked up among this run's
+ * children and stamped as `actionExecutionId`.
+ */
+export interface ProposalUpdateCaller {
+  workflowId: string;
+  executionId: string;
+  request: KibanaRequest;
 }
 
 export interface ProposalsServiceDeps {
@@ -719,7 +724,11 @@ export class ProposalsService {
    * so a second approver cannot reattribute the first one's call. Both live
    * here rather than in the workflow YAML so they hold for every caller.
    */
-  async update(params: UpdateProposalParams, spaceId: string): Promise<Proposal> {
+  async update(
+    params: UpdateProposalParams,
+    spaceId: string,
+    caller: ProposalUpdateCaller
+  ): Promise<Proposal> {
     const stored = await this.load(params.id, spaceId);
 
     // This is the gate workflow's entry point, behind `proposals.updateProposal`
@@ -733,24 +742,29 @@ export class ProposalsService {
       );
     }
 
-    const actionExecutionId = await this.findActionExecutionId(stored.proposal, params, spaceId);
+    const actionExecutionId = await this.findActionExecutionId(
+      stored.proposal,
+      params.status,
+      caller,
+      spaceId
+    );
     return this.applyUpdate(stored, { ...params, actionExecutionId });
   }
 
   /**
-   * The action workflow run started by `writtenBy`, if this update settles one. The resolve run
+   * The action workflow run started by `caller`, if this update settles one. The resolve run
    * executes the action as a direct child, so it is the newest child of that run whose workflow
    * is the proposal's action. Best-effort: an unreadable run only costs the link, so it is logged
    * rather than failing a settle the action has already earned.
    */
   private async findActionExecutionId(
     proposal: Proposal,
-    { status, writtenBy }: UpdateProposalParams,
+    status: ProposalStatus | undefined,
+    caller: ProposalUpdateCaller,
     spaceId: string
   ): Promise<string | undefined> {
     const { actionWorkflowId, actionExecutionId } = proposal;
     if (
-      !writtenBy ||
       !actionWorkflowId ||
       actionExecutionId !== undefined ||
       (status !== 'succeeded' && status !== 'failed')
@@ -760,7 +774,7 @@ export class ProposalsService {
     try {
       const children = await this.deps
         .getWorkflowsApi()
-        .getChildWorkflowExecutions(writtenBy.executionId, spaceId, writtenBy.request);
+        .getChildWorkflowExecutions(caller.executionId, spaceId, caller.request);
       return children.filter(({ workflowId }) => workflowId === actionWorkflowId).at(-1)
         ?.executionId;
     } catch (error) {
@@ -776,7 +790,7 @@ export class ProposalsService {
   /** `update` against a record already loaded, written under that load's sequence number. */
   private async applyUpdate(
     { proposal, seqNo, primaryTerm }: StoredProposal,
-    params: Omit<UpdateProposalParams, 'writtenBy'> & { actionExecutionId?: string }
+    params: UpdateProposalParams & { actionExecutionId?: string }
   ): Promise<Proposal> {
     const { id } = params;
 
@@ -1429,8 +1443,9 @@ export class ProposalsService {
 
   /**
    * Refuses an action a proposal could never run: a workflow that cannot be read in the space,
-   * or an `actionInput` its manual trigger does not accept. For a caller that starts the gate
-   * workflow and would otherwise only see the gate fail after it answered.
+   * is disabled, is not an action workflow (no valid `consts.actionMetadata`), or does not
+   * accept `actionInput` on its manual trigger. For a caller that starts the gate workflow and
+   * would otherwise only see the gate fail after it answered.
    */
   async assertActionProposable(
     actionWorkflowId: string,
@@ -1438,10 +1453,21 @@ export class ProposalsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<void> {
-    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId, request);
-    if (!definition) {
+    const workflow = await this.fetchActionWorkflow(actionWorkflowId, spaceId, request);
+    const definition = workflow?.definition as ActionWorkflowDefinition | null | undefined;
+    if (!workflow || !definition) {
       throw new ProposalInvalidActionInputError(
         `Action workflow [${actionWorkflowId}] does not exist in this space or cannot be read`
+      );
+    }
+    if (!workflow.enabled) {
+      throw new ProposalInvalidActionInputError(
+        `Action workflow [${actionWorkflowId}] is disabled`
+      );
+    }
+    if (!this.readActionMetadata(actionWorkflowId, definition)) {
+      throw new ProposalInvalidActionInputError(
+        `Workflow [${actionWorkflowId}] is not an action workflow: it declares no valid consts.actionMetadata`
       );
     }
     this.assertActionInputValid(actionWorkflowId, definition, actionInput);
@@ -1502,11 +1528,20 @@ export class ProposalsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<ActionWorkflowDefinition | undefined> {
+    const workflow = await this.fetchActionWorkflow(actionWorkflowId, spaceId, request);
+    return (workflow?.definition ?? undefined) as ActionWorkflowDefinition | undefined;
+  }
+
+  private async fetchActionWorkflow(
+    actionWorkflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto | undefined> {
     try {
       const workflow = await this.deps
         .getWorkflowsApi()
         .getWorkflow(actionWorkflowId, spaceId, request);
-      return workflow?.definition as ActionWorkflowDefinition | undefined;
+      return workflow ?? undefined;
     } catch (error) {
       this.deps.logger.warn(
         `Failed to read action workflow [${actionWorkflowId}]: ${

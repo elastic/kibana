@@ -23,6 +23,9 @@ import type { ProposalPrivilegesChecker } from './check_proposal_privileges';
 import type { ProposalsService } from './proposals_service';
 import { ProposalInvalidActionInputError } from './errors';
 
+/** `triggeredBy` of every gate run this plugin starts on a caller's behalf. */
+export const PROPOSALS_TRIGGER_SOURCE = 'proposals';
+
 export const DEFAULT_PROPOSAL_WAIT = { timeoutMs: 5000, intervalMs: 500 } as const;
 
 /** What a caller says about a proposal; the conversation it belongs to is given separately. */
@@ -193,6 +196,10 @@ export const createProposalCreator = ({
         ...(actionWorkflowId !== undefined && { actionWorkflowId }),
         ...(actionInput !== undefined && { actionInput }),
       },
+      // Not `manual`: the engine evaluates a `${{ }}` input of a manual run as an expression, and
+      // these inputs are model-written. Our own source keeps them literal, so what was validated
+      // above is what the approver sees and what runs.
+      triggeredBy: PROPOSALS_TRIGGER_SOURCE,
       // The gate parks on the analyst's decision; only its start is awaited.
       waitForCompletion: false,
     });

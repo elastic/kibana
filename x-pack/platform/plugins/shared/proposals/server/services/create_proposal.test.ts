@@ -65,6 +65,7 @@ describe('createProposalCreator', () => {
         comment: 'Re-create them.',
         origin: 'nightshift',
       },
+      triggeredBy: 'proposals',
       waitForCompletion: false,
     });
   });

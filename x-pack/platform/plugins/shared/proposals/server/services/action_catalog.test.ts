@@ -69,12 +69,12 @@ const page = (results: WorkflowListDto['results'], total = results.length): Work
 const request = httpServerMock.createKibanaRequest();
 
 describe('ActionCatalog', () => {
-  it('queries managed workflows tagged action (managed installs, not unmanaged)', async () => {
+  it('queries enabled managed workflows tagged action (managed installs, not unmanaged)', async () => {
     const { getWorkflows, client } = makeManagement([page([])]);
     const service = new ActionCatalog(() => client, logger);
     await service.list('default', request);
     expect(getWorkflows).toHaveBeenCalledWith(
-      expect.objectContaining({ tags: ['action'], managedFilter: 'managed' }),
+      expect.objectContaining({ tags: ['action'], enabled: [true], managedFilter: 'managed' }),
       'default',
       request
     );
