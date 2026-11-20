@@ -123,9 +123,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         afterEach(async () => {
           if (policyInfo) {
             await policyInfo.cleanup();
-
-            // @ts-expect-error forcing to undefined
-            policyInfo = undefined;
           }
         });
 
@@ -196,9 +193,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       afterEach(async () => {
         if (policyInfo) {
           await policyInfo.cleanup();
-
-          // @ts-expect-error forcing to undefined
-          policyInfo = undefined;
         }
       });
 
