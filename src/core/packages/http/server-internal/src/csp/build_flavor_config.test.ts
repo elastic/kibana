@@ -36,14 +36,23 @@ describe('getBuildFlavorCspConfig', () => {
     });
   });
 
-  it('skips the img-src defaults when csp.default_src is configured', () => {
+  it('copies csp.default_src into img-src instead of the defaults when csp.img_src is not configured', () => {
     const configured = cspConfig.schema.validate({ default_src: ['assets.example.test'] });
 
     expect(getBuildFlavorCspConfig('traditional', configured)).toEqual({
       font_src: [`'self'`, 'data:'],
-      img_src: [],
+      img_src: ['assets.example.test'],
       media_src: [`'self'`, 'kibana.estccdn.com'],
     });
+  });
+
+  it('prefers a configured csp.img_src over csp.default_src', () => {
+    const configured = cspConfig.schema.validate({
+      default_src: ['assets.example.test'],
+      img_src: ['logos.example.test'],
+    });
+
+    expect(getBuildFlavorCspConfig('traditional', configured).img_src).toEqual([]);
   });
 
   it('applies the img-src defaults when the config has no img_src key', () => {
@@ -100,11 +109,24 @@ describe('getBuildFlavorCspConfig', () => {
       expect(header.split('; ')).toEqual(
         expect.arrayContaining([
           `default-src 'self' assets.example.test`,
+          `img-src 'self' assets.example.test`,
           `font-src 'self' data:`,
           `media-src 'self' kibana.estccdn.com`,
         ])
       );
-      expect(header).not.toContain('img-src');
+    });
+
+    it('keeps the csp.default_src sources for images when another config adds an img-src', () => {
+      const configured = cspConfig.schema.validate({ default_src: ['assets.example.test'] });
+      const { header } = new CspConfig(
+        configured,
+        { img_src: ['cdn.example.test'] },
+        getBuildFlavorCspConfig('traditional', configured)
+      );
+
+      expect(header.split('; ')).toEqual(
+        expect.arrayContaining([`img-src 'self' cdn.example.test assets.example.test`])
+      );
     });
   });
 });

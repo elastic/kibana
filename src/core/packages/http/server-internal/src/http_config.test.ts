@@ -1010,7 +1010,7 @@ describe('HttpConfig', () => {
       expect(csp.header).not.toContain('https: http:');
     });
 
-    it('does not add an img-src directive on traditional when csp.default_src is configured', () => {
+    it('uses the csp.default_src sources for img-src on traditional when csp.img_src is not configured', () => {
       const { csp } = new HttpConfig(
         config.schema.validate({}, {}),
         cspConfig.schema.validate({ default_src: ['assets.example.test'] }),
@@ -1020,7 +1020,20 @@ describe('HttpConfig', () => {
       );
 
       expect(csp.header).toContain(`default-src 'self' assets.example.test`);
-      expect(csp.header).not.toContain('img-src');
+      expect(csp.header).toContain(`img-src 'self' assets.example.test;`);
+      expect(csp.header).not.toContain('https: http:');
+    });
+
+    it('keeps the csp.default_src sources for img-src alongside a configured CDN', () => {
+      const { csp } = new HttpConfig(
+        config.schema.validate({ cdn: { url: 'https://cdn.example.test' } }, {}),
+        cspConfig.schema.validate({ default_src: ['assets.example.test'] }),
+        ExternalUrlConfig.DEFAULT,
+        permissionsPolicyConfig.schema.validate({}),
+        'traditional'
+      );
+
+      expect(csp.header).toContain(`img-src 'self' cdn.example.test assets.example.test`);
     });
 
     it('defaults to the traditional flavor when none is given', () => {
