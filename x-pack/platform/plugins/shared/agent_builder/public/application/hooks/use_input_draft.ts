@@ -91,7 +91,28 @@ export const useInputDraft = ({
     if (key) removeFromStorage(key);
   }, [key]);
 
-  return { draft, saveDraft, clearDraft };
+  /** Keeps an unsent message for another conversation's composer, unless a draft already waits there. */
+  const keepUnsentFor = useCallback(
+    (
+      target: { agentId: string | undefined; conversationId: string | undefined },
+      content: string
+    ) => {
+      if (!username || !target.agentId) return;
+      const targetKey = buildKey(
+        spaceId,
+        sessionTag ?? 'default',
+        username,
+        target.agentId,
+        target.conversationId
+      );
+      if (getFromStorage(targetKey)) return;
+      // The image data is not kept with the draft, so its link would restore a phantom placeholder.
+      writeToStorage(targetKey, content.replace(IMAGE_LINK_RE, ''));
+    },
+    [spaceId, sessionTag, username]
+  );
+
+  return { draft, saveDraft, clearDraft, keepUnsentFor };
 };
 
 /**

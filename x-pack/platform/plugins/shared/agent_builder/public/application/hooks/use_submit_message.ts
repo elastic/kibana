@@ -26,6 +26,11 @@ import { appPaths } from '../utils/app_paths';
  * `isCreatingConversation` is true while any request creating a conversation is in flight, from this
  * hook or another one, so the input and the conversation starters hold submits for each other.
  */
+export interface SubmitMessageOptions {
+  /** Handles a rejection before streaming; return true to suppress the default toast. */
+  onRejected?: (error: unknown) => boolean;
+}
+
 export const useSubmitMessage = () => {
   const conversationId = useConversationId();
   const { sendMessage } = useConversationStream();
@@ -49,12 +54,9 @@ export const useSubmitMessage = () => {
     useIsMutating({ mutationKey: mutationKeys.createConversation }) > 0;
 
   const submitMessage = useCallback(
-    async (
-      message: string,
-      { onConversationCreated }: { onConversationCreated?: (conversationId: string) => void } = {}
-    ) => {
+    async (message: string, { onRejected }: SubmitMessageOptions = {}) => {
       if (conversationId) {
-        sendMessage({ message, conversationId });
+        sendMessage({ message, conversationId, ...(onRejected ? { onRejected } : {}) });
         return;
       }
       if (!agentId) {

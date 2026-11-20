@@ -15,7 +15,7 @@ import {
   euiShadowHover,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CHAT_MESSAGE_MAX_LENGTH } from '@kbn/agent-builder-common';
+import { CHAT_MESSAGE_MAX_LENGTH, STEER_MESSAGE_MAX_LENGTH } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -33,6 +33,7 @@ import { toDraftContent, useInputDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
+import { useSendSteer } from '../../../hooks/use_send_steer';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentSendState } from '../../../hooks/agents/use_agent_send_state';
 import {
@@ -190,6 +191,27 @@ interface ConversationInputProps {
   takeDraftRef?: React.MutableRefObject<TakeInputDraft | null>;
 }
 
+// A steer carries text only.
+const imageInSteerMessage = i18n.translate(
+  'xpack.agentBuilder.conversationInput.steer.imageNotSent',
+  {
+    defaultMessage:
+      "Images can't be sent to a running agent. Remove the image, or wait for the agent to finish.",
+  }
+);
+const steerTooLongMessage = i18n.translate('xpack.agentBuilder.conversationInput.steer.tooLong', {
+  defaultMessage:
+    'A message to a running agent can be at most {max} characters. Shorten it, or wait for the agent to finish.',
+  values: { max: STEER_MESSAGE_MAX_LENGTH },
+});
+const imagePasteWhileRunningMessage = i18n.translate(
+  'xpack.agentBuilder.conversationInput.steer.imagePasteRefused',
+  {
+    defaultMessage:
+      "Images can't be sent to a running agent. Wait for it to finish, then paste the image again.",
+  }
+);
+
 const disabledPlaceholder = (agentId?: string) =>
   i18n.translate('xpack.agentBuilder.conversationInput.textArea.disabledPlaceholder', {
     defaultMessage: 'Agent "{agentId}" has been deleted. Please start a new conversation.',
@@ -242,7 +264,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
 }) => {
   const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
 
-  const { isResponseLoading } = useConversationStream();
+  const { isResponseLoading, canCancel } = useConversationStream();
   const agentId = useAgentId();
   const conversationId = useConversationId();
 
@@ -251,7 +273,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   const spaceId = useActiveSpaceId();
   const { sessionTag } = useConversationContext();
 
-  const { draft, saveDraft, clearDraft } = useInputDraft({
+  const { draft, saveDraft, clearDraft, keepUnsentFor } = useInputDraft({
     spaceId,
     sessionTag,
     username,
@@ -274,6 +296,16 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   >(null);
   const saveDraftDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastEditorContentRef = useRef('');
+  // A late failure must find out where the composer is by then, and whether it still exists.
+  const shownRef = useRef({ agentId, conversationId });
+  shownRef.current = { agentId, conversationId };
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
   const handleContentChange = useCallback(() => {
     try {
       const content = messageEditorControllerRef.current?.getContent() ?? '';
@@ -323,12 +355,20 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   } = useConversationContext();
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
+  const { sendSteer, steerIfBusy, isUnansweredSteer, isSending: isSendingSteer } = useSendSteer();
+  const canSteer = canCancel && Boolean(conversationId) && !isAwaitingPrompt;
+  // Never mode posts to the team instead of steering, attachments included.
+  const willSteer = canSteer && triggerMode !== ChatTriggerMode.Never;
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
     useImageUpload({
       addErrorToast,
       messageEditorController,
     });
+  const refuseImagePaste = (): undefined => {
+    addErrorToast(imagePasteWhileRunningMessage);
+    return undefined;
+  };
 
   const isUploading = uploadingNames.size > 0;
   useEffect(() => {
@@ -376,7 +416,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   const isSubmitDisabled =
     messageEditorController.isEmpty ||
     isMessageTooLong ||
-    isResponseLoading ||
+    (isResponseLoading && !canSteer) ||
+    isSendingSteer ||
     isSendingUserMessage ||
     isCreatingConversation ||
     !agentExists ||
@@ -516,6 +557,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       saveDraftDebounceRef.current = null;
     }
 
+    // Never mode bypasses steering.
     if (triggerMode === ChatTriggerMode.Never) {
       sendUserMessage(content)
         .then(() => {
@@ -531,11 +573,63 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
         });
       return;
     }
+
+    const sentFrom = shownRef.current;
+    // Preserve newer drafts on failure.
+    const restoreUnsent = (unsent: string) => {
+      const shown = shownRef.current;
+      // The composer may show another conversation by now, or be gone: the text goes to the
+      // draft of the conversation it was sent to.
+      if (
+        !mountedRef.current ||
+        shown.conversationId !== sentFrom.conversationId ||
+        shown.agentId !== sentFrom.agentId
+      ) {
+        keepUnsentFor(sentFrom, unsent);
+        return;
+      }
+      if (lastEditorContentRef.current !== '') {
+        return;
+      }
+      lastEditorContentRef.current = unsent;
+      messageEditorControllerRef.current?.setContent(unsent);
+    };
+    // Both steer paths carry bounded text only; an image would travel as a bare reference.
+    const steerRefusal =
+      content.length > STEER_MESSAGE_MAX_LENGTH
+        ? steerTooLongMessage
+        : messageEditorController.getPlaceholderNames().length > 0
+        ? imageInSteerMessage
+        : undefined;
+
+    // Retry uncertain sends through steering, also after the run ends.
+    if (canSteer || isUnansweredSteer(content)) {
+      if (steerRefusal) {
+        addErrorToast(steerRefusal);
+        return;
+      }
+      // Cleared at the submit, as for an ordinary send, so edits made during the request are kept.
+      lastEditorContentRef.current = '';
+      clearDraft();
+      messageEditorController.clear();
+      markSent();
+      onSubmit?.();
+      sendSteer(content, { onUnsent: restoreUnsent }).then((sent) => {
+        if (!sent) {
+          restoreUnsent(content);
+        }
+      });
+      return;
+    }
     lastEditorContentRef.current = '';
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
-      submitMessage(content);
+      // A send refused as busy is steered instead, unless it carries what a steer cannot.
+      const steerable = steerRefusal === undefined && (attachments?.length ?? 0) === 0;
+      submitMessage(content, {
+        onRejected: steerIfBusy(content, { onUnsent: restoreUnsent, steerable }),
+      });
     }
     clearDraft();
     messageEditorController.clear();
@@ -583,7 +677,9 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
           placeholder={placeholder}
           ariaLabel={messageEditorAriaLabel}
           data-test-subj="agentBuilderConversationInputEditor"
-          onPasteFile={upsertAttachments ? handlePasteFile : undefined}
+          onPasteFile={
+            upsertAttachments ? (willSteer ? refuseImagePaste : handlePasteFile) : undefined
+          }
           onAfterInput={handleAfterInput}
           onHoveredPlaceholderChange={setHoveredImageName}
           uploadingNames={uploadingNames}
@@ -600,7 +696,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
         <InputActions
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
-          isSubmitting={isCreatingConversation || isSendingUserMessage}
+          isSubmitting={isCreatingConversation || isSendingUserMessage || isSendingSteer}
+          showSubmitWhileRunning={canSteer}
           showTriggerModeSelector={isTriggerModeSelectable}
           triggerMode={triggerMode}
           onTriggerModeChange={setTriggerMode}
