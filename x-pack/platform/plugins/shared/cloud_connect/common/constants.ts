@@ -20,3 +20,9 @@ export const CLOUD_CONNECT_API_KEY_TYPE = 'cloud-connect-api-key';
  * This UUID is fixed to ensure we always retrieve the same saved object
  */
 export const CLOUD_CONNECT_API_KEY_ID = '239feff0-7e11-4413-b800-f1f1621e9c69';
+
+/**
+ * Error code returned in `attributes.code` when the Kibana server can't reach the Cloud API
+ * (DNS failure, timeout, connection refused/reset, TLS handshake failure, etc.)
+ */
+export const CLOUD_API_UNREACHABLE = 'CLOUD_API_UNREACHABLE';

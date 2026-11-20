@@ -16,6 +16,13 @@ import type {
   SubscriptionResponse,
   UpdateClusterRequest,
 } from '../types';
+import { CLOUD_API_UNREACHABLE } from '../../common/constants';
+import {
+  describeCloudApiError,
+  getCloudApiUnauthorizedMessage,
+  getCloudApiUnreachableMessage,
+  isCloudApiNetworkError,
+} from './cloud_api_errors';
 
 export class CloudConnectClient {
   private axiosInstance: AxiosInstance;
@@ -85,14 +92,26 @@ export class CloudConnectClient {
         hasValidScope: true,
       };
     } catch (error) {
-      this.logger.error(`Failed to validate API key scope calling ${url}`, { error });
+      this.logger.error(
+        `Failed to validate API key scope calling ${url} (${describeCloudApiError(error)})`,
+        { error }
+      );
+
+      if (isCloudApiNetworkError(error)) {
+        return {
+          isClusterScoped: false,
+          hasValidScope: false,
+          errorCode: CLOUD_API_UNREACHABLE,
+          errorMessage: getCloudApiUnreachableMessage(url),
+        };
+      }
 
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
           return {
             isClusterScoped: false,
             hasValidScope: false,
-            errorMessage: 'Invalid or expired API key',
+            errorMessage: getCloudApiUnauthorizedMessage(url),
           };
         }
 
@@ -134,7 +153,12 @@ export class CloudConnectClient {
 
       return response.data;
     } catch (error) {
-      this.logger.error(`Failed to fetch cluster details for cluster ID: ${clusterId}`, { error });
+      this.logger.error(
+        `Failed to fetch cluster details for cluster ID: ${clusterId} (${describeCloudApiError(
+          error
+        )})`,
+        { error }
+      );
       throw error;
     }
   }
@@ -165,7 +189,10 @@ export class CloudConnectClient {
 
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to onboard cluster at /cloud-connected/clusters', { error });
+      this.logger.error(
+        `Failed to onboard cluster at /cloud-connected/clusters (${describeCloudApiError(error)})`,
+        { error }
+      );
       throw error;
     }
   }
@@ -198,7 +225,9 @@ export class CloudConnectClient {
       return response.data;
     } catch (error) {
       this.logger.error(
-        'Failed to onboard cluster with key generation at /cloud-connected/clusters?create_api_key=true',
+        `Failed to onboard cluster with key generation at /cloud-connected/clusters?create_api_key=true (${describeCloudApiError(
+          error
+        )})`,
         { error }
       );
       throw error;
@@ -230,7 +259,10 @@ export class CloudConnectClient {
 
       return response.data;
     } catch (error) {
-      this.logger.error(`Failed to update services for cluster ID: ${clusterId}`, { error });
+      this.logger.error(
+        `Failed to update services for cluster ID: ${clusterId} (${describeCloudApiError(error)})`,
+        { error }
+      );
       throw error;
     }
   }
@@ -251,7 +283,10 @@ export class CloudConnectClient {
 
       this.logger.debug(`Successfully deleted cluster from Cloud API: ${clusterId}`);
     } catch (error) {
-      this.logger.error(`Failed to delete cluster from Cloud API: ${clusterId}`, { error });
+      this.logger.error(
+        `Failed to delete cluster from Cloud API: ${clusterId} (${describeCloudApiError(error)})`,
+        { error }
+      );
       throw error;
     }
   }
@@ -282,9 +317,14 @@ export class CloudConnectClient {
 
       return response.data;
     } catch (error) {
-      this.logger.error(`Failed to fetch subscription for organization ID: ${organizationId}`, {
-        error,
-      });
+      this.logger.error(
+        `Failed to fetch subscription for organization ID: ${organizationId} (${describeCloudApiError(
+          error
+        )})`,
+        {
+          error,
+        }
+      );
       throw error;
     }
   }
@@ -311,7 +351,10 @@ export class CloudConnectClient {
 
       return response.data;
     } catch (error) {
-      this.logger.error(`Failed to rotate API key for cluster ID: ${clusterId}`, { error });
+      this.logger.error(
+        `Failed to rotate API key for cluster ID: ${clusterId} (${describeCloudApiError(error)})`,
+        { error }
+      );
       throw error;
     }
   }
@@ -345,7 +388,9 @@ export class CloudConnectClient {
       return response.data;
     } catch (error) {
       this.logger.error(
-        `Failed to rotate API key for service ${serviceKey} on cluster ID: ${clusterId}`,
+        `Failed to rotate API key for service ${serviceKey} on cluster ID: ${clusterId} (${describeCloudApiError(
+          error
+        )})`,
         { error }
       );
       throw error;

@@ -10,12 +10,19 @@ import type { IRouter, Logger } from '@kbn/core/server';
 import axios from 'axios';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { StartServicesAccessor } from '@kbn/core/server';
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH, CLOUD_API_UNREACHABLE } from '../../common/constants';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import type { OnboardClusterResponse } from '../types';
 import { getCurrentClusterData } from '../lib/cluster_info';
 import { createStorageService } from '../lib/create_storage_service';
 import { CLOUD_CONNECT_READ_SECURITY, CLOUD_CONNECT_MANAGE_SECURITY } from './route_security';
+import {
+  describeCloudApiError,
+  getCloudApiErrorUrl,
+  getCloudApiUnauthorizedMessage,
+  getCloudApiUnreachableMessage,
+  isCloudApiNetworkError,
+} from '../services/cloud_api_errors';
 
 const bodySchema = schema.object({
   apiKey: schema.string({ minLength: 1, maxLength: 1000 }),
@@ -114,6 +121,17 @@ export const registerAuthenticateRoute = ({
         if (!validationResult.hasValidScope) {
           const errorMessage = validationResult.errorMessage || 'Invalid API key';
           logger.warn(`API key validation failed: ${errorMessage}`);
+
+          if (validationResult.errorCode === CLOUD_API_UNREACHABLE) {
+            return response.customError({
+              statusCode: 502,
+              body: {
+                message: errorMessage,
+                attributes: { code: CLOUD_API_UNREACHABLE },
+              },
+            });
+          }
+
           return response.badRequest({
             body: {
               message: errorMessage,
@@ -169,7 +187,20 @@ export const registerAuthenticateRoute = ({
           },
         });
       } catch (error) {
-        logger.error('Failed to authenticate with Cloud Connect', { error });
+        logger.error(
+          `Failed to authenticate with Cloud Connect (${describeCloudApiError(error)})`,
+          { error }
+        );
+
+        if (isCloudApiNetworkError(error)) {
+          return response.customError({
+            statusCode: 502,
+            body: {
+              message: getCloudApiUnreachableMessage(getCloudApiErrorUrl(error, cloudApiUrl)),
+              attributes: { code: CLOUD_API_UNREACHABLE },
+            },
+          });
+        }
 
         if (axios.isAxiosError(error)) {
           const status = error.response?.status;
@@ -178,7 +209,7 @@ export const registerAuthenticateRoute = ({
           if (status === 401) {
             return response.unauthorized({
               body: {
-                message: 'Invalid or expired API key',
+                message: getCloudApiUnauthorizedMessage(getCloudApiErrorUrl(error, cloudApiUrl)),
               },
             });
           }
