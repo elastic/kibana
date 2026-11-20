@@ -42,7 +42,9 @@ export const handleSourceStatusError = (
   }
 
   const message = err instanceof Error ? err.message : String(err);
-  logger.warn(`Metric index status check did not complete for pattern "${metricAlias}": ${message}`);
+  logger.warn(
+    `Metric index status check did not complete for pattern "${metricAlias}": ${message}`
+  );
 
   return probeIncompleteStatus;
 };
