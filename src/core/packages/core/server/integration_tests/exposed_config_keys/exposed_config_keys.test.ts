@@ -132,7 +132,6 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'vis_type_vislib.readOnly (boolean?|never)',
   'vis_type_xy.readOnly (boolean?|never)',
   'vis_type_vega.enableExternalUrls (boolean?)',
-  'workflowsManagement.pages.enabled (boolean?)',
   'xpack.actions.auth.ears.enableExperimental (boolean?)',
   'xpack.actions.auth.ears.enabled (boolean?)',
   'xpack.actions.email.domain_allowlist (array?)',
@@ -173,6 +172,9 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'xpack.cloud.deployments_url (string?)',
   'xpack.cloud.is_elastic_staff_owned (boolean?)',
   'xpack.cloud.trial_end_date (string?)',
+  'xpack.cloud_integrations.experiments.launch_darkly.client_id (string)',
+  'xpack.cloud_integrations.experiments.launch_darkly.client_log_level (none?|error?|warn?|info?|debug?)',
+  'xpack.cloud_integrations.experiments.metadata_refresh_interval (duration?)',
   'xpack.cloud_integrations.full_story.org_id (string|string?)',
   // No PII. Just the list of event types we want to forward to FullStory.
   'xpack.cloud_integrations.full_story.eventTypesAllowlist (array?)',
@@ -252,7 +254,6 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'xpack.index_management.enableFailureStoreRetentionDisabling (boolean?|never)',
   'xpack.index_management.enableIndexMode (boolean?|never)',
   'xpack.index_management.enableVectorCount (boolean?|never)',
-  'xpack.index_management.showManagedDataStreamsByDefault (boolean?|never)',
   'xpack.intercepts.enabled (boolean?)',
   'xpack.license_management.ui.enabled (boolean?)',
   'xpack.maps.preserveDrawingBuffer (boolean?)',
@@ -371,14 +372,13 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'xpack.dataFederation.enabled (boolean?)',
   'xpack.dataFederation.workloadIdentityIssuerUrl (string?)',
   'xpack.mitreAttack.managedSourceEnabled (boolean?)',
+  'xpack.timelines.enableExperimental (array?)',
 
   /**
    * Plugins below are disabled by default. They are listed because this test force-enables every plugin.
    */
   'xpack.dataUsage.enableExperimental (array?)',
-  'xpack.entityInventoryApp.timeRangeLimit.disabled (boolean?)',
   'xpack.evals.enabled (boolean?)',
-  'xpack.evals.mode (runtime?|full?)',
   'xpack.inbox.enabled (boolean?)',
   'xpack.reporting.csv.maxRows (number?)',
   'xpack.reporting.csv.scroll.duration (string?)',
