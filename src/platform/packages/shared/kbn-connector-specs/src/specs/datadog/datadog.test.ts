@@ -190,7 +190,7 @@ describe('Datadog', () => {
       } as unknown as ActionContext;
 
       await expect(Datadog.actions.listMonitors.handler(noAuthContext, {})).rejects.toThrow(
-        'Datadog connector requires API Key and Application Key'
+        'The Datadog listMonitors action requires an API Key and Application Key'
       );
       expect(mockClient.get).not.toHaveBeenCalled();
     });
@@ -199,7 +199,7 @@ describe('Datadog', () => {
       const noSecretsContext = { ...mockContext, secrets: undefined } as unknown as ActionContext;
 
       await expect(Datadog.actions.listMonitors.handler(noSecretsContext, {})).rejects.toThrow(
-        'Datadog connector requires API Key and Application Key'
+        'The Datadog listMonitors action requires an API Key and Application Key'
       );
     });
   });
