@@ -102,11 +102,13 @@ const createWrapper = () => {
   return Wrapper;
 };
 
-const renderSections = (props: {
-  query?: string;
-  updatedAfter?: string;
-  updatedBefore?: string;
-} = {}) =>
+const renderSections = (
+  props: {
+    query?: string;
+    updatedAfter?: string;
+    updatedBefore?: string;
+  } = {}
+) =>
   renderHook(
     (hookProps: { query?: string; updatedAfter?: string; updatedBefore?: string }) =>
       useInvestigationSections(hookProps),
