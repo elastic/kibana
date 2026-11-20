@@ -368,7 +368,7 @@ export const useTopNavLinks = ({
             }),
         testId: 'discoverSaveButton',
         iconType: isEmbeddedEditor ? 'checkCircleFill' : 'save',
-        run: async () => {
+        run: () => {
           if (isEmbeddedEditor && services.embeddableEditor.isByValueEditor()) {
             transferBackToEditor();
           } else {

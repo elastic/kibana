@@ -74,6 +74,7 @@ describe('Serialization utils', () => {
   const apiStateByValue: DiscoverSessionEmbeddableByValueState = {
     title: 'test panel title',
     description: 'description',
+    hide_border: true,
     tabs: [
       {
         type: DiscoverTabType.Default,
@@ -182,6 +183,7 @@ describe('Serialization utils', () => {
 
       expect(Object.keys(deserializedState)).toContain('serializedSearchSource');
       expect(deserializedState.title).toEqual('test panel title');
+      expect(deserializedState.hide_border).toBe(true);
     });
 
     test('by value restores Metrics profile state from the saved search', async () => {
@@ -221,6 +223,7 @@ describe('Serialization utils', () => {
         ref_id: 'savedSearch',
         selected_tab_id: undefined,
         overrides: {},
+        hide_border: true,
       };
 
       const deserializedState = await deserializeState({
@@ -232,6 +235,7 @@ describe('Serialization utils', () => {
       expect(Object.keys(deserializedState)).toContain('savedObjectId');
       expect(deserializedState.savedObjectId).toBe('savedSearch');
       expect(deserializedState.title).toEqual('test panel title');
+      expect(deserializedState.hide_border).toBe(true);
     });
 
     test('by reference with panel overwrites', async () => {

@@ -75,7 +75,7 @@ const setup = async () => {
   return { getState: internalState.getState, runtimeStateManager, services, addNewTab };
 };
 
-/** Derives the panel tab the factory built from the by-value payload sent before this change. */
+/** Derives the panel tab from the legacy saved search by-value payload. */
 const getPanelTabFromSavedSearchPayload = async (
   params: Parameters<typeof selectTabSavedSearch>[0]
 ) => {
