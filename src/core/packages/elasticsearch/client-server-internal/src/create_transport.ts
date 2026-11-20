@@ -57,6 +57,9 @@ export type OnRequestHandler = (
 
 const noop = () => undefined;
 
+const normalizeHeaders = (headers: IncomingHttpHeaders): IncomingHttpHeaders =>
+  Object.fromEntries(Object.entries(headers).map(([name, value]) => [name.toLowerCase(), value]));
+
 export const createTransport = ({
   scoped = false,
   getExecutionContext = noop,
@@ -108,6 +111,9 @@ export const createTransport = ({
       };
 
       onRequest({ scoped }, params, opts, logger);
+      // HTTP header names are case-insensitive. Normalize before sending so the renewal handler
+      // sees the same effective authorization value as Elasticsearch.
+      opts.headers = normalizeHeaders(opts.headers ?? {});
 
       try {
         return (await super.request(params, opts)) as TransportResult<any, any>;
@@ -124,10 +130,10 @@ export const createTransport = ({
                 ...result.authHeaders,
               };
               const retryOpts = { ...opts };
-              retryOpts.headers = {
+              retryOpts.headers = normalizeHeaders({
                 ...this.headers,
                 ...options?.headers,
-              };
+              });
               return (await super.request(params, retryOpts)) as TransportResult<any, any>;
             }
           }

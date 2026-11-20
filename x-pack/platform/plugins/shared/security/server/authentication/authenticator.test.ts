@@ -3366,14 +3366,31 @@ describe('Authenticator', () => {
     );
 
     it('keeps incoming requests isolated even when they use the same token', async () => {
-      const other = httpServerMock.createKibanaRequest({ headers: originalHeaders });
+      const other = httpServerMock.createKibanaRequest({
+        headers: originalHeaders,
+        kibanaRequestState: {
+          requestId: 'other-request',
+          requestUuid: '123e4567-e89b-12d3-a456-426614174001',
+          startTime: Date.now(),
+        },
+      });
+      const otherRenewedHeaders = { authorization: 'Bearer other-new' };
+      authenticateSession.mockImplementation(async (incoming) =>
+        AuthenticationResult.succeeded(user, {
+          authHeaders: incoming.uuid === other.uuid ? otherRenewedHeaders : renewedHeaders,
+        })
+      );
       await Promise.all([
         authenticator.reauthenticate(request, originalHeaders),
         authenticator.reauthenticate(other, originalHeaders),
       ]);
       expect(authenticateSession).toHaveBeenCalledTimes(2);
       expect(mockOptions.authHeadersStorage.set).toHaveBeenCalledWith(request, renewedHeaders);
-      expect(mockOptions.authHeadersStorage.set).toHaveBeenCalledWith(other, renewedHeaders);
+      expect(mockOptions.authHeadersStorage.set).toHaveBeenCalledWith(other, otherRenewedHeaders);
+      expect(authenticator.getRequestCredentials(request)).toEqual(credentialsFor(renewedHeaders));
+      expect(authenticator.getRequestCredentials(other)).toEqual(
+        credentialsFor(otherRenewedHeaders)
+      );
     });
 
     it.each(['no session', 'different username', 'different profile', 'no headers', 'redirect'])(

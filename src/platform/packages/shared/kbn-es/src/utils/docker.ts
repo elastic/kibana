@@ -36,12 +36,7 @@ import {
   MOCK_IDP_UIAM_SERVICE_INTERNAL_URL,
 } from '@kbn/mock-idp-utils';
 
-import {
-  getUiamContainers,
-  initializeUiamContainers,
-  runUiamContainer,
-  UIAM_CONTAINERS,
-} from './docker_uiam';
+import { getUiamContainers, initializeUiamContainers, runUiamContainer } from './docker_uiam';
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { readStringSecrets } from './read_string_secrets';
 import { waitForSecurityIndex } from './wait_for_security_index';
@@ -601,9 +596,10 @@ export async function cleanUpDanglingContainers(log: ToolingLog) {
 
   try {
     const linkedNodes = getServerlessNodes('-linked', 10);
-    const serverlessContainerNames = SERVERLESS_NODES.concat(linkedNodes, UIAM_CONTAINERS).map(
-      ({ name }) => name
-    );
+    const serverlessContainerNames = SERVERLESS_NODES.concat(
+      linkedNodes,
+      getUiamContainers({ includeOAuth: true })
+    ).map(({ name }) => name);
 
     for (const name of serverlessContainerNames) {
       await execa('docker', ['container', 'rm', name, '--force']).catch(() => {
@@ -619,10 +615,10 @@ export async function cleanUpDanglingContainers(log: ToolingLog) {
 
 export async function detectRunningNodes(log: ToolingLog, options: BaseOptions) {
   const linkedNodes = getServerlessNodes('-linked', 10);
-  const namesCmd = SERVERLESS_NODES.concat(linkedNodes, UIAM_CONTAINERS).flatMap(({ name }) => [
-    '--filter',
-    `name=${name}`,
-  ]);
+  const namesCmd = SERVERLESS_NODES.concat(
+    linkedNodes,
+    getUiamContainers({ includeOAuth: true })
+  ).flatMap(({ name }) => ['--filter', `name=${name}`]);
 
   const { stdout } = await execa('docker', ['ps', '--quiet'].concat(namesCmd));
   const runningNodeIds = stdout.split(/\r?\n/).filter((s) => s);
@@ -1350,7 +1346,13 @@ export async function stopServerlessCluster(log: ToolingLog, nodes: string[]) {
 export function teardownServerlessClusterSync(log: ToolingLog, options: ServerlessOptions) {
   const imagesToKillContainersFor = [
     getServerlessImage(options),
-    ...(options.uiam ? UIAM_CONTAINERS.map(({ image }) => image) : []),
+    ...(options.uiam
+      ? [
+          ...new Set(
+            getUiamContainers({ includeOAuth: options.uiamOAuth }).map(({ image }) => image)
+          ),
+        ]
+      : []),
   ];
   const { stdout } = execa.commandSync(
     `docker ps --filter status=running ${imagesToKillContainersFor
