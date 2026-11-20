@@ -14,7 +14,7 @@ import { DocumentSummaryOptionsMenu } from './document_summary_options_menu';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDefaultAIConnectorId } from '../../../../common/hooks/use_default_ai_connector_id';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
-import { useOverviewSectionExpanded } from '../../../shared/hooks/use_overview_section_expanded';
+import { useOverviewSectionExpanded } from '../hooks/use_overview_section_expanded';
 import { useAnonymizationToggle } from '../hooks/use_anonymization_toggle';
 
 export const DOCUMENT_SUMMARY_SECTION_TEST_ID = 'document-flyout-ai-summary-section';

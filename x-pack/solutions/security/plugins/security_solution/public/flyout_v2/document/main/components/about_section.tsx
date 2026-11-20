@@ -12,7 +12,7 @@ import { ALERT_RULE_NAME, ALERT_RULE_UUID, EVENT_KIND } from '@kbn/rule-data-uti
 import { EventKind } from '../constants/event_kinds';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
-import { useOverviewSectionExpanded } from '../../../shared/hooks/use_overview_section_expanded';
+import { useOverviewSectionExpanded } from '../hooks/use_overview_section_expanded';
 import { isEcsAllowedValue } from '../utils/event_utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import {

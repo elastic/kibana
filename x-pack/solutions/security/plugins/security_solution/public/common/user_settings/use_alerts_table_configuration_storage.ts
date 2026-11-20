@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { USER_SETTINGS_KEYS } from '../../../common/user_settings/keys';
 import { useKibana } from '../lib/kibana';
@@ -60,14 +60,11 @@ export const useAlertsTableConfigurationStorage = (): IStorageWrapper | undefine
     EMPTY_CONFIGURATIONS
   );
 
+  // Refs are assigned during render so the stable adapter below always reads the latest state.
   const configurationsRef = useRef(configurations);
   const setConfigurationsRef = useRef(setConfigurations);
-  useEffect(() => {
-    configurationsRef.current = configurations;
-    setConfigurationsRef.current = setConfigurations;
-  });
-  // also keep the ref current during render, so a read in the same render pass is not stale
   configurationsRef.current = configurations;
+  setConfigurationsRef.current = setConfigurations;
 
   return useMemo<IStorageWrapper | undefined>(() => {
     if (!available) return undefined;
@@ -75,9 +72,8 @@ export const useAlertsTableConfigurationStorage = (): IStorageWrapper | undefine
     return {
       get: <T>(id: string) => {
         const saved = configurationsRef.current[id];
-        if (saved) return saved as T;
-        // tombstone: the configuration was reset, do not resurrect the legacy value
-        if (saved === '') return null as T;
+        // an empty string is a tombstone: the configuration was reset, do not resurrect the legacy value
+        if (saved !== undefined) return (saved || null) as T;
         return readLegacy(id) as T;
       },
       set: <T>(id: string, value: T) => {

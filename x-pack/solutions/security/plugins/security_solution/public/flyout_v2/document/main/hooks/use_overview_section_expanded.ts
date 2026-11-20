@@ -6,10 +6,9 @@
  */
 
 import { useCallback } from 'react';
-import { USER_SETTINGS_KEYS } from '../../../../common/user_settings/keys';
-import { useKibana } from '../../../common/lib/kibana';
-import { useUserSetting } from '../../../common/user_settings/use_user_setting';
-import { FLYOUT_STORAGE_KEYS } from '../../document/main/constants/local_storage';
+import { USER_SETTINGS_KEYS } from '../../../../../common/user_settings/keys';
+import { useUserSetting } from '../../../../common/user_settings/use_user_setting';
+import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 
 type SectionsState = Record<string, boolean>;
 
@@ -32,7 +31,6 @@ export const useOverviewSectionExpanded = ({
   sectionId,
   defaultValue,
 }: UseOverviewSectionExpandedParams): [boolean, (expanded: boolean) => void] => {
-  const { storage } = useKibana().services;
   const [sections, setSections] = useUserSetting<SectionsState>(
     USER_SETTINGS_KEYS.FLYOUT_OVERVIEW_SECTIONS,
     EMPTY_SECTIONS,
@@ -40,12 +38,7 @@ export const useOverviewSectionExpanded = ({
   );
 
   const id = sectionId.toLowerCase();
-  // Until the legacy map has been imported (it happens right after the first render), the
-  // legacy value is still the user's value: reading it here avoids a wrong initial state.
-  const legacy: SectionsState | null = storage.get(
-    FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS
-  );
-  const stored = sections[id] ?? legacy?.[id];
+  const stored = sections[id];
 
   const setExpanded = useCallback(
     (expanded: boolean) => {
@@ -54,5 +47,5 @@ export const useOverviewSectionExpanded = ({
     [id, setSections]
   );
 
-  return [stored !== undefined ? stored : defaultValue, setExpanded];
+  return [stored ?? defaultValue, setExpanded];
 };

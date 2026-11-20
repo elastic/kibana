@@ -14,7 +14,7 @@ import { EventKind } from '../constants/event_kinds';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
-import { useOverviewSectionExpanded } from '../../../shared/hooks/use_overview_section_expanded';
+import { useOverviewSectionExpanded } from '../hooks/use_overview_section_expanded';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';

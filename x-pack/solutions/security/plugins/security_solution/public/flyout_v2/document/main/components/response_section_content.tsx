@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
-import { useOverviewSectionExpanded } from '../../../shared/hooks/use_overview_section_expanded';
+import { useOverviewSectionExpanded } from '../hooks/use_overview_section_expanded';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { EventKind } from '../constants/event_kinds';
 import { RESPONSE_BUTTON_TEST_ID, RESPONSE_SECTION_TEST_ID } from './test_ids';

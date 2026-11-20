@@ -55,12 +55,12 @@ const DEFAULT_BASE_BACKOFF_MS = 500;
 const MAX_BACKOFF_MS = 10000;
 
 const getStatus = (error: unknown): number | undefined => {
-  const { res, body, statusCode } = error as {
-    res?: { status?: number };
+  const { response, body, statusCode } = error as {
+    response?: { status?: number };
     body?: { statusCode?: number };
     statusCode?: number;
   };
-  return res?.status ?? body?.statusCode ?? statusCode;
+  return response?.status ?? body?.statusCode ?? statusCode;
 };
 
 /** No status means the request never got a response (network error): retry. */
@@ -114,11 +114,7 @@ export class UserSettingsWriteQueue {
   public enqueue<T>(key: string, value: T): void {
     this.pending.set(key, value);
     this.changesSubject.next(key);
-    if (this.timer) clearTimeout(this.timer);
-    this.timer = setTimeout(() => {
-      this.timer = undefined;
-      void this.drain();
-    }, this.debounceMs);
+    this.schedule();
   }
 
   /** Sends everything now. Resolves when the queue is empty. */
@@ -130,15 +126,13 @@ export class UserSettingsWriteQueue {
     await this.drain();
   }
 
-  public hasWork(): boolean {
-    return this.pending.size > 0 || this.inFlight.size > 0;
-  }
-
-  public stop(): void {
+  /** (Re)starts the debounce timer. */
+  private schedule(): void {
     if (this.timer) clearTimeout(this.timer);
-    this.timer = undefined;
-    this.errorsSubject.complete();
-    this.changesSubject.complete();
+    this.timer = setTimeout(() => {
+      this.timer = undefined;
+      void this.drain();
+    }, this.debounceMs);
   }
 
   /** One drain loop at a time: this is what serializes writes. */
@@ -147,12 +141,7 @@ export class UserSettingsWriteQueue {
       this.draining = this.run().finally(() => {
         this.draining = undefined;
         // values enqueued while the last request was finishing
-        if (this.pending.size > 0 && !this.timer) {
-          this.timer = setTimeout(() => {
-            this.timer = undefined;
-            void this.drain();
-          }, this.debounceMs);
-        }
+        if (this.pending.size > 0 && !this.timer) this.schedule();
       });
     }
     return this.draining;

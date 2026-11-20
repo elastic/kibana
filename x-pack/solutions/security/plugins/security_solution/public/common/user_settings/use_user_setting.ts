@@ -40,14 +40,12 @@ const LOCAL_FALLBACK_PREFIX = 'securitySolution.userSettings.local.';
 /** Emits the key of every fallback write, so hooks re-render (the write queue is not involved). */
 const localChanges$ = new Subject<string>();
 
-export interface UseUserSettingOptions<T> {
+export interface UseUserSettingOptions {
   /**
-   * localStorage key this setting used before. When the server has no value yet, the legacy
-   * value is imported once (and the legacy key removed).
+   * localStorage key this setting used before, holding a value of the same shape. Until the server
+   * has a value, the legacy value is returned and imported once (and the legacy key removed).
    */
   legacyLocalStorageKey?: string;
-  /** Maps the raw legacy value to the new shape. Return `undefined` to skip the import. */
-  fromLegacy?: (raw: unknown) => T | undefined;
 }
 
 export type UserSettingSetter<T> = (next: T | ((previous: T) => T)) => void;
@@ -62,7 +60,7 @@ export type UserSettingSetter<T> = (next: T | ((previous: T) => T)) => void;
 export const useUserSetting = <T>(
   key: UserSettingsKey,
   defaultValue: T,
-  { legacyLocalStorageKey, fromLegacy }: UseUserSettingOptions<T> = {}
+  { legacyLocalStorageKey }: UseUserSettingOptions = {}
 ): [T, UserSettingSetter<T>] => {
   const { userStorage, storage } = useKibana().services;
   const queue = useMemo(() => getQueue(userStorage), [userStorage]);
@@ -72,32 +70,24 @@ export const useUserSetting = <T>(
   if (!isEqual(defaultRef.current, defaultValue)) defaultRef.current = defaultValue;
   const stableDefault = defaultRef.current;
 
+  // The legacy value is read once per mount. It stays the user's value until the server has one,
+  // so a first render after the migration does not start from the default.
+  const legacyRef = useRef<T | null | undefined>(undefined);
+  if (legacyRef.current === undefined) {
+    legacyRef.current = legacyLocalStorageKey ? storage.get(legacyLocalStorageKey) : null;
+  }
+
   const read = useCallback((): T => {
+    const legacy = legacyRef.current ?? undefined;
     if (!available) {
-      const local = storage.get(LOCAL_FALLBACK_PREFIX + key);
-      if (local != null) return local as T;
-      // no profile: the legacy value is still the user's value, keep reading it
-      const legacy = legacyLocalStorageKey ? storage.get(legacyLocalStorageKey) : null;
-      if (legacy != null) {
-        const mapped = fromLegacy ? fromLegacy(legacy) : (legacy as T);
-        if (mapped !== undefined) return mapped;
-      }
-      return stableDefault;
+      return storage.get(LOCAL_FALLBACK_PREFIX + key) ?? legacy ?? stableDefault;
     }
     const pending = queue.getPending<T>(key);
     if (pending !== undefined) return pending;
     // the real client returns the default itself; `?? stableDefault` also covers `peek` mocks that don't
-    return userStorage.peek<T>(key, stableDefault) ?? stableDefault;
-  }, [
-    available,
-    fromLegacy,
-    key,
-    legacyLocalStorageKey,
-    queue,
-    stableDefault,
-    storage,
-    userStorage,
-  ]);
+    const server = userStorage.peek<T>(key, stableDefault) ?? stableDefault;
+    return legacy !== undefined && isEqual(server, stableDefault) ? legacy : server;
+  }, [available, key, queue, stableDefault, storage, userStorage]);
 
   const value$ = useMemo(
     () =>
@@ -124,13 +114,11 @@ export const useUserSetting = <T>(
           queue.getPending(key) !== undefined
         )
           return;
-        const raw = storage.get(legacyLocalStorageKey);
-        if (raw == null) return;
-        const imported = fromLegacy ? fromLegacy(raw) : (raw as T);
-        if (imported !== undefined && !isEqual(imported, stableDefault)) {
-          queue.enqueue(key, imported);
-        }
+        const imported: T | null = storage.get(legacyLocalStorageKey);
+        if (imported == null) return;
+        if (!isEqual(imported, stableDefault)) queue.enqueue(key, imported);
         storage.remove(legacyLocalStorageKey);
+        legacyRef.current = null;
       })
       // read failures are reported by the core client on getHttpError$; keep the legacy value
       .catch(() => {});
@@ -138,20 +126,12 @@ export const useUserSetting = <T>(
     return () => {
       cancelled = true;
     };
-  }, [
-    available,
-    fromLegacy,
-    key,
-    legacyLocalStorageKey,
-    queue,
-    stableDefault,
-    storage,
-    userStorage,
-  ]);
+  }, [available, key, legacyLocalStorageKey, queue, stableDefault, storage, userStorage]);
 
   const setValue = useCallback<UserSettingSetter<T>>(
     (next) => {
       const resolved = typeof next === 'function' ? (next as (previous: T) => T)(read()) : next;
+      legacyRef.current = null;
       if (!available) {
         storage.set(LOCAL_FALLBACK_PREFIX + key, resolved);
         localChanges$.next(key);

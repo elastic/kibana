@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
-import { useOverviewSectionExpanded } from '../../../shared/hooks/use_overview_section_expanded';
+import { useOverviewSectionExpanded } from '../hooks/use_overview_section_expanded';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
