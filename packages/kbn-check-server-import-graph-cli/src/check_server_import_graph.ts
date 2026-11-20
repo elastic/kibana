@@ -29,6 +29,9 @@ import {
  */
 export const BANNED_NODE_MODULES: ReadonlySet<string> = new Set([
   '@elastic/eui',
+  '@emotion/react',
+  'react-use',
+  '@xyflow/react',
   '@reduxjs/toolkit',
 ]);
 

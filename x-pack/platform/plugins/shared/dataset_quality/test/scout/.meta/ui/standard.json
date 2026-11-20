@@ -1,5 +1,5 @@
 {
-  "sha1": "8642159c3378298d33824983fff4cfc78870e5e0",
+  "sha1": "972f541b38bbe845adf995dfb0933c90c5a7d271",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
-        "line": 87,
-        "column": 13
+        "line": 75,
+        "column": 48
       }
     },
     {
@@ -112,24 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
-        "line": 105,
-        "column": 7
-      }
-    },
-    {
-      "id": "d87fd2b522244fa-a1e6bc31b5d265e",
-      "title": "Dataset quality details integrations hides the dashboards action and links to the overview of a package without dashboards",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
-        "line": 128,
-        "column": 9
+        "line": 80,
+        "column": 24
       }
     },
     {
@@ -144,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
-        "line": 157,
-        "column": 9
+        "line": 113,
+        "column": 15
       }
     },
     {
@@ -160,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
-        "line": 173,
-        "column": 9
+        "line": 133,
+        "column": 10
       }
     },
     {
