@@ -466,6 +466,36 @@ describe('createTransport', () => {
       );
     });
 
+    it('lets a per-call header override mixed-case stored authorization', async () => {
+      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      handler.mockReturnValue({ type: 'notHandled' });
+      getUnauthorizedErrorHandler.mockReturnValue(handler);
+      const error = createUnauthorizedError();
+      transportRequestMock.mockRejectedValue(error);
+      const transportClass = createTransportClass();
+      const transport = new transportClass({
+        ...baseConstructorParams,
+        headers: {
+          authorization: 'Bearer old-lowercase',
+          Authorization: 'Bearer old-uppercase',
+        },
+      });
+
+      await expect(
+        transport.request(
+          { method: 'GET', path: '/' },
+          { headers: { authorization: 'Bearer explicit-override' } }
+        )
+      ).rejects.toBe(error);
+
+      expect(handler).toHaveBeenCalledWith(error, {
+        authorization: 'Bearer explicit-override',
+      });
+      expect(transportRequestMock.mock.calls[0][1]?.headers).toEqual({
+        authorization: 'Bearer explicit-override',
+      });
+    });
+
     it('retries the call if the handler returns `retry` and return result from the retry', async () => {
       const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
       handler.mockReturnValue({ type: 'retry', authHeaders: {} });
@@ -514,7 +544,7 @@ describe('createTransport', () => {
 
     it('updates the headers for the second internal call in case of `retry`', async () => {
       const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
-      handler.mockReturnValue({ type: 'retry', authHeaders: { authorization: 'retry' } });
+      handler.mockReturnValue({ type: 'retry', authHeaders: { Authorization: 'retry' } });
 
       getUnauthorizedErrorHandler.mockReturnValue(handler);
 
@@ -528,7 +558,11 @@ describe('createTransport', () => {
         })
         .mockResolvedValueOnce(retryResult);
 
-      const initialHeaders = { authorization: 'initial', foo: 'bar' };
+      const initialHeaders = {
+        authorization: 'old-lowercase',
+        Authorization: 'initial',
+        foo: 'bar',
+      };
       const transportClass = createTransportClass();
       const transport = new transportClass({ ...baseConstructorParams, headers: initialHeaders });
       const requestParams = { method: 'GET', path: '/' };
@@ -540,7 +574,7 @@ describe('createTransport', () => {
         1,
         requestParams,
         expect.objectContaining({
-          headers: initialHeaders,
+          headers: { authorization: 'initial', foo: 'bar' },
         })
       );
       expect(transportRequestMock).toHaveBeenNthCalledWith(
