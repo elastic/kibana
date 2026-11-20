@@ -6,6 +6,7 @@
  */
 
 import { randomBytes, randomUUID } from 'crypto';
+import type { MappingObjectProperty } from '@elastic/elasticsearch/lib/api/types';
 import { expect } from '@kbn/scout-security/api';
 import type { ApiClientFixture, EsClient, KibanaRole } from '@kbn/scout-security';
 import {
@@ -28,6 +29,7 @@ const SETUP_TIMEOUT_MS = 180_000;
 const TEST_TIMEOUT_MS = 180_000;
 const RUN_TIMEOUT_MS = 120_000;
 const WORKFLOW_READY_TIMEOUT_MS = 30_000;
+const TEMPLATE_READY_TIMEOUT_MS = 60_000;
 
 const RUN = Date.now();
 const SPACE_A = `scout-revoke-a-${RUN}`;
@@ -60,10 +62,27 @@ const ANALYST_ROLE: KibanaRole = {
  * maps it as text, and `POST api/detection_engine/index` creates no alias for a new space. The
  * simulation needs no concrete index, so it works before anything wrote to the default space.
  */
-const createAlertsIndex = async (esClient: EsClient, spaceId: string) => {
-  const { template } = await esClient.indices.simulateIndexTemplate({
-    name: '.internal.alerts-security.alerts-default-000001',
-  });
+type AlertsTemplate = Awaited<ReturnType<EsClient['indices']['simulateIndexTemplate']>>['template'];
+
+/** Kibana installs the template after start, so wait until the simulation resolves its mapping. */
+const readAlertsTemplate = async (esClient: EsClient): Promise<AlertsTemplate> => {
+  const deadline = Date.now() + TEMPLATE_READY_TIMEOUT_MS;
+  for (;;) {
+    const { template } = await esClient.indices.simulateIndexTemplate({
+      name: '.internal.alerts-security.alerts-default-000001',
+    });
+    const alertFields = (
+      template?.mappings?.properties?.kibana as MappingObjectProperty | undefined
+    )?.properties?.alert as MappingObjectProperty | undefined;
+    if (alertFields?.properties?.workflow_tags?.type === 'keyword') return template;
+    if (Date.now() > deadline) {
+      throw new Error('The security alerts index template was not installed in time');
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+};
+
+const createAlertsIndex = async (esClient: EsClient, template: AlertsTemplate, spaceId: string) => {
   await esClient.indices.create({
     index: `.internal.alerts-security.alerts-${spaceId}-000001`,
     aliases: { [alertsIndex(spaceId)]: { is_write_index: true, is_hidden: true } },
@@ -215,9 +234,10 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminHeaders = { ...cookieHeader, 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
 
+      const alertsTemplate = await readAlertsTemplate(esClient);
       for (const spaceId of [SPACE_A, SPACE_B]) {
         await apiServices.spaces.create({ id: spaceId, name: spaceId });
-        await createAlertsIndex(esClient, spaceId);
+        await createAlertsIndex(esClient, alertsTemplate, spaceId);
         await expect
           .poll(
             async () => {
