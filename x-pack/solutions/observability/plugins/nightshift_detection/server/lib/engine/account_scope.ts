@@ -23,7 +23,7 @@ import { EnabledSources, KnowledgeIndicators } from './tokens';
 const MAX_LISTED_SOURCES = 10_000;
 
 /** A container forked for one piece of work done as the space's detection service account. */
-export type AccountScopeContainer = ReturnType<CoreDiServiceStart['fork']>;
+type AccountScopeContainer = ReturnType<CoreDiServiceStart['fork']>;
 
 /**
  * Builds the scope a tick or a rule reconciliation runs in: it forks the container and binds what

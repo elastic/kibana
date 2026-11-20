@@ -34,9 +34,7 @@ const LOCK_WAIT_ATTEMPTS = 6;
 const LOCK_WAIT_INTERVAL_MS = 10_000;
 
 /** What a `_reconcile` call did: the reconciliation, or nothing because another one holds the space. */
-export type ReconcileRulesResponse =
-  | ({ status: 'completed' } & ReconcileRulesResult)
-  | { status: 'busy' };
+type ReconcileRulesResponse = ({ status: 'completed' } & ReconcileRulesResult) | { status: 'busy' };
 
 /**
  * Reconciles the space's managed rules as the account behind a request: it asks every strategy for
@@ -146,13 +144,12 @@ export class ScopedReconcileRunner {
                 .join('; ')}`
             );
           }
+          // Every resource is an alerting rule while that is the only kind.
           desired.push(
-            ...result.resources
-              .filter(({ kind }) => kind === 'alerting_rule')
-              .map((resource) => ({
-                strategy: { id: descriptor.id, name: descriptor.name },
-                resource,
-              }))
+            ...result.resources.map((resource) => ({
+              strategy: { id: descriptor.id, name: descriptor.name },
+              resource,
+            }))
           );
         } catch (error) {
           strategyErrors.push({ strategy: descriptor.id, message: getErrorMessage(error) });

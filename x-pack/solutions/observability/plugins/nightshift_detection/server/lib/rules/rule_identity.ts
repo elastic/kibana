@@ -21,13 +21,6 @@ export const MANAGED_RULE_TAG = 'detection_engine:managed';
 const STRATEGY_TAG_PREFIX = 'detection_engine:strategy:';
 const SOURCE_TAG_PREFIX = 'detection_engine:source:';
 
-/** Tags only their owners set: the engine's ownership tags and significant_events' source tag. */
-const RESERVED_TAG_PREFIXES = ['detection_engine:', 'nightshift:source:'];
-
-/** Whether a strategy must not set this tag itself. */
-export const isReservedTag = (tag: string): boolean =>
-  RESERVED_TAG_PREFIXES.some((prefix) => tag.startsWith(prefix));
-
 /** The tag of the rules a strategy owns. */
 export const getStrategyTag = (strategyId: string): string => `${STRATEGY_TAG_PREFIX}${strategyId}`;
 

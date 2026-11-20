@@ -6,8 +6,9 @@
  */
 
 import { isBoom } from '@hapi/boom';
+import { chunk } from 'lodash';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { BulkResponse, CreateRuleData } from '@kbn/alerting-v2-schemas';
+import { MAX_BULK_ITEMS, type BulkResponse, type CreateRuleData } from '@kbn/alerting-v2-schemas';
 import type { Logger } from '@kbn/core/server';
 import { Logger as CoreLogger } from '@kbn/core-di';
 import { inject, injectable } from 'inversify';
@@ -19,12 +20,8 @@ import {
   getManagedRuleName,
   getManagedRuleTags,
   getOwningStrategy,
-  isReservedTag,
 } from './rule_identity';
 import { DetectionRulesClient } from './rules_client_token';
-
-/** Rules per bulk call; Alerting v2 refuses more in one request. */
-const CHUNK_SIZE = 100;
 
 /** An `alerting_rule` resource and the strategy that wants it. */
 export interface StrategyAlertingRule {
@@ -60,7 +57,7 @@ interface DesiredRule {
 }
 
 /** What the reconciler will do, worked out from what exists and what is wanted. */
-export interface RuleChanges {
+interface RuleChanges {
   toDelete: string[];
   toCreate: DesiredRule[];
   toEnable: string[];
@@ -86,12 +83,7 @@ const toDesiredRule = ({
       metadata: {
         ...metadata,
         name: getManagedRuleName({ strategyName: strategy.name, title: metadata.name, ruleId: id }),
-        tags: [
-          // The engine's tags are its ownership record, and `nightshift:source:*` belongs to
-          // significant_events, which deletes those rules: a strategy may set neither.
-          ...(metadata.tags ?? []).filter((tag) => !isReservedTag(tag)),
-          ...getManagedRuleTags({ strategy: strategy.id, sourceId: resource.source_id }),
-        ],
+        tags: getManagedRuleTags({ strategy: strategy.id, sourceId: resource.source_id }),
       },
     },
   };
@@ -105,7 +97,7 @@ const toDesiredRule = ({
  * - A rule whose `enabled` differs is toggled; `paused` turns every rule off.
  * - A query is never edited: a changed query has a new id, so the old rule goes and a new one comes.
  */
-export const planRuleChanges = ({
+const planRuleChanges = ({
   existing,
   desired,
   paused,
@@ -146,11 +138,6 @@ export const planRuleChanges = ({
       .map(({ id }) => id),
   };
 };
-
-const toChunks = <T>(items: T[]): T[][] =>
-  Array.from({ length: Math.ceil(items.length / CHUNK_SIZE) }, (_, index) =>
-    items.slice(index * CHUNK_SIZE, (index + 1) * CHUNK_SIZE)
-  );
 
 /** Whether Alerting refused a create because the space's schedule budget is spent. */
 const isScheduleLimitError = (error: unknown): boolean =>
@@ -257,21 +244,21 @@ export class AlertingRuleReconciler {
     let changed = 0;
 
     // One chunk at a time, so a failure is reported against the rules of its own chunk.
-    for (const chunk of toChunks(ids)) {
+    for (const batch of chunk(ids, MAX_BULK_ITEMS)) {
       try {
-        const { errors } = await run(chunk);
+        const { errors } = await run(batch);
         // A rule already gone is what a delete wanted.
         const failed = errors.filter(
           ({ error }) =>
             operation !== 'delete' || error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND
         );
-        changed += chunk.length - errors.length;
+        changed += batch.length - errors.length;
         result.failures.push(
           ...failed.map(({ id, error }) => ({ rule_id: id, operation, message: error.message }))
         );
       } catch (error) {
         result.failures.push(
-          ...chunk.map((id) => ({ rule_id: id, operation, message: getErrorMessage(error) }))
+          ...batch.map((id) => ({ rule_id: id, operation, message: getErrorMessage(error) }))
         );
       }
     }
@@ -287,10 +274,10 @@ export class AlertingRuleReconciler {
     rules: DesiredRule[];
   }): Promise<void> {
     // One chunk at a time, so a failure is reported against the rules of its own chunk.
-    for (const chunk of toChunks(rules)) {
+    for (const batch of chunk(rules, MAX_BULK_ITEMS)) {
       try {
         const { items, errors } = await this.rulesClient.bulkCreateRules({
-          items: chunk.map(({ id, enabled, data }) => ({ ...data, id, enabled })),
+          items: batch.map(({ id, enabled, data }) => ({ ...data, id, enabled })),
         });
         result.created += items.length;
         // A rule another run created in between is what this one wanted.
@@ -298,7 +285,7 @@ export class AlertingRuleReconciler {
           ...errors
             .filter(({ error }) => error.code !== ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS)
             .map(({ index, error }) => ({
-              rule_id: chunk[index].id,
+              rule_id: batch[index].id,
               operation: 'create' as const,
               message: error.message,
             }))
@@ -306,12 +293,12 @@ export class AlertingRuleReconciler {
       } catch (error) {
         if (isScheduleLimitError(error)) {
           result.skipped.push(
-            ...chunk.map(({ id }) => ({ rule_id: id, reason: getErrorMessage(error) }))
+            ...batch.map(({ id }) => ({ rule_id: id, reason: getErrorMessage(error) }))
           );
           continue;
         }
         result.failures.push(
-          ...chunk.map(({ id }) => ({
+          ...batch.map(({ id }) => ({
             rule_id: id,
             operation: 'create' as const,
             message: getErrorMessage(error),

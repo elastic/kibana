@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, COMMON_HEADERS, RECONCILE_RULES_PATH, setNightshiftEnabled } from '../fixtures';
@@ -19,24 +18,6 @@ interface ReconcileResponse {
   deleted?: number;
   failures?: unknown[];
 }
-
-/** The reconcile workflow can hold the space for a moment after `_enable`. */
-const MAX_RECONCILE_ATTEMPTS = 5;
-
-/** Reconciles until no other reconciliation holds the space. */
-const reconcileUntilRun = async (apiClient: ApiClientFixture, headers: Record<string, string>) => {
-  for (let attempt = 1; ; attempt++) {
-    const response = await apiClient.post<ReconcileResponse>(RECONCILE_RULES_PATH, {
-      headers,
-      body: {},
-      responseType: 'json',
-    });
-    if (response.body?.status !== 'busy' || attempt === MAX_RECONCILE_ATTEMPTS) {
-      return response;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 1_000));
-  }
-};
 
 apiTest.describe(
   'POST /internal/nightshift/detection/rules/_reconcile',
@@ -91,7 +72,12 @@ apiTest.describe(
       expect(created).toHaveStatusCode(201);
       const ruleId: string = created.body.id;
 
-      const reconcile = await reconcileUntilRun(apiClient, headers);
+      // The route waits out a reconciliation the workflow may be running, so one call is enough.
+      const reconcile = await apiClient.post<ReconcileResponse>(RECONCILE_RULES_PATH, {
+        headers,
+        body: {},
+        responseType: 'json',
+      });
 
       expect(reconcile).toHaveStatusCode(200);
       expect(reconcile.body).toMatchObject({ status: 'completed', failures: [] });

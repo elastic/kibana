@@ -108,8 +108,14 @@ export interface AlertingRuleResource {
   source_id: string;
   /** Whether the rule should run; false for the rules of a disabled source. */
   enabled: boolean;
-  /** The rule as created. `metadata.name` is the strategy's title for it, without the prefix. */
-  data: CreateRuleData;
+  /**
+   * The rule as created. `metadata.name` is the strategy's title for it, without the prefix. No
+   * tags: the engine's are its ownership record, and `nightshift:source:*` belongs to
+   * significant_events, which deletes those rules.
+   */
+  data: Omit<CreateRuleData, 'metadata'> & {
+    metadata: Omit<CreateRuleData['metadata'], 'tags'>;
+  };
 }
 
 /**
