@@ -3365,42 +3365,54 @@ describe('Authenticator', () => {
       }
     );
 
-    it('keeps incoming requests isolated even when they use the same token', async () => {
-      const other = httpServerMock.createKibanaRequest({
-        headers: originalHeaders,
-        kibanaRequestState: {
-          requestId: 'other-request',
-          requestUuid: '123e4567-e89b-12d3-a456-426614174001',
-          startTime: Date.now(),
-        },
-      });
-      const otherRenewedHeaders = { authorization: 'Bearer other-new' };
-      const storedHeaders = { authorization: 'Bearer core-stored' };
-      const otherStoredHeaders = { authorization: 'Bearer core-stored' };
-      mockOptions.authHeadersStorage.set(request, storedHeaders);
-      mockOptions.authHeadersStorage.set(other, otherStoredHeaders);
-      expect(mockOptions.authHeadersStorage.get(request)).not.toBe(
-        mockOptions.authHeadersStorage.get(other)
-      );
-      mockOptions.authHeadersStorage.set.mockClear();
-      authenticateSession.mockImplementation(async (incoming) =>
-        AuthenticationResult.succeeded(user, {
-          authHeaders: incoming.uuid === other.uuid ? otherRenewedHeaders : renewedHeaders,
-        })
-      );
-      await Promise.all([
-        authenticator.reauthenticate(request, storedHeaders),
-        authenticator.reauthenticate(other, otherStoredHeaders),
-      ]);
-      expect(authenticateSession).toHaveBeenCalledTimes(2);
-      expect(mockOptions.authHeadersStorage.set).toHaveBeenCalledTimes(2);
-      expect(mockOptions.authHeadersStorage.set).toHaveBeenCalledWith(request, renewedHeaders);
-      expect(mockOptions.authHeadersStorage.set).toHaveBeenCalledWith(other, otherRenewedHeaders);
-      expect(authenticator.getRequestCredentials(request)).toEqual(credentialsFor(renewedHeaders));
-      expect(authenticator.getRequestCredentials(other)).toEqual(
-        credentialsFor(otherRenewedHeaders)
-      );
-    });
+    it.each([false, true])(
+      'keeps incoming requests isolated with the same token (Core storage: %s)',
+      async (withCoreStorage) => {
+        const other = httpServerMock.createKibanaRequest({
+          headers: { ...originalHeaders },
+          kibanaRequestState: {
+            requestId: 'other-request',
+            requestUuid: '123e4567-e89b-12d3-a456-426614174001',
+            startTime: Date.now(),
+          },
+        });
+        const otherRenewedHeaders = { authorization: 'Bearer other-new' };
+        const storedHeaders = { authorization: 'Bearer core-stored' };
+        const otherStoredHeaders = { authorization: 'Bearer core-stored' };
+        if (withCoreStorage) {
+          mockOptions.authHeadersStorage.set(request, storedHeaders);
+          mockOptions.authHeadersStorage.set(other, otherStoredHeaders);
+          expect(mockOptions.authHeadersStorage.get(request)).not.toBe(
+            mockOptions.authHeadersStorage.get(other)
+          );
+          mockOptions.authHeadersStorage.set.mockClear();
+        } else {
+          expect(request.headers).not.toBe(other.headers);
+        }
+        authenticateSession.mockImplementation(async (incoming) =>
+          AuthenticationResult.succeeded(user, {
+            authHeaders: incoming.uuid === other.uuid ? otherRenewedHeaders : renewedHeaders,
+          })
+        );
+        await Promise.all([
+          authenticator.reauthenticate(request, withCoreStorage ? storedHeaders : originalHeaders),
+          authenticator.reauthenticate(
+            other,
+            withCoreStorage ? otherStoredHeaders : originalHeaders
+          ),
+        ]);
+        expect(authenticateSession).toHaveBeenCalledTimes(2);
+        expect(mockOptions.authHeadersStorage.set).toHaveBeenCalledTimes(2);
+        expect(mockOptions.authHeadersStorage.set).toHaveBeenCalledWith(request, renewedHeaders);
+        expect(mockOptions.authHeadersStorage.set).toHaveBeenCalledWith(other, otherRenewedHeaders);
+        expect(authenticator.getRequestCredentials(request)).toEqual(
+          credentialsFor(renewedHeaders)
+        );
+        expect(authenticator.getRequestCredentials(other)).toEqual(
+          credentialsFor(otherRenewedHeaders)
+        );
+      }
+    );
 
     it.each(['no session', 'different username', 'different profile', 'no headers', 'redirect'])(
       'does not publish credentials for %s',
