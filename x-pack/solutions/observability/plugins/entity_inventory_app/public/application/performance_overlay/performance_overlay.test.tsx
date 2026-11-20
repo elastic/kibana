@@ -309,6 +309,37 @@ describe('PerformanceOverlay', () => {
     ]);
   });
 
+  it('shows a partial probe as Partial', async () => {
+    const { recorder } = renderOverlay(true);
+    const [probe] = PROBES_FIXTURE;
+    act(() =>
+      recorder.record({
+        route: 'host/_list',
+        startedAt: 0,
+        browserMs: 60,
+        status: 'ok',
+        serverMs: TIMINGS_FIXTURE.totalMs,
+        errorMessage: null,
+        list: {
+          queries: [],
+          probes: [{ ...probe, isPartial: true }],
+          timings: TIMINGS_FIXTURE,
+          truncated: false,
+          errors: [],
+          unavailableColumns: [],
+          rowCount: 0,
+        },
+      })
+    );
+
+    fireEvent.click(await screen.findByTestId('entityInventoryPerformanceBadge'));
+
+    const probes = await screen.findByTestId('entityInventoryPerformanceProbes');
+    expect(within(probes).getByTestId('entityInventoryPerformanceRowStatus')).toHaveTextContent(
+      /^Partial$/
+    );
+  });
+
   it('selects a list call from the history with its request button', async () => {
     const { recorder } = renderOverlay(true);
     act(() => {

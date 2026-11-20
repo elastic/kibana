@@ -268,8 +268,12 @@ const sharedDetailStats = ({
 const queryStatus = ({ isPartial }: ListQueryDiagnostic): RowStatus | null =>
   isPartial ? 'partial' : null;
 
-const probeStatus = ({ outcome }: ListProbeDiagnostic): RowStatus =>
-  outcome === 'failed' ? 'failed' : 'ok';
+const probeStatus = ({ outcome, isPartial }: ListProbeDiagnostic): RowStatus => {
+  if (outcome === 'failed') {
+    return 'failed';
+  }
+  return isPartial ? 'partial' : 'ok';
+};
 
 /** The plan queries of one `_list` call. */
 export const QueriesTable = ({ queries }: { queries: readonly ListQueryDiagnostic[] }) => (
