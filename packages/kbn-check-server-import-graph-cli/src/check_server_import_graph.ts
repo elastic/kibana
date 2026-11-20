@@ -32,6 +32,7 @@ export const BANNED_NODE_MODULES: ReadonlySet<string> = new Set([
   '@emotion/react',
   'react-use',
   '@xyflow/react',
+  'd3',
   '@reduxjs/toolkit',
   'redux-toolkit-v1',
 ]);
