@@ -142,7 +142,7 @@ describe('Events', () => {
   });
 
   test('it renders tooltip for truncatable message when it exists', async () => {
-    const { container } = render(
+    render(
       <TestProviders>
         <FormattedFieldValue
           contextId="test"
@@ -161,7 +161,7 @@ describe('Events', () => {
   });
 
   test('it does NOT render a tooltip for truncatable message when it is null', () => {
-    const { container } = render(
+    render(
       <TestProviders>
         <FormattedFieldValue
           contextId="test"
@@ -177,7 +177,7 @@ describe('Events', () => {
   });
 
   test('it does NOT render a tooltip for truncatable message when it is undefined', () => {
-    const { container } = render(
+    render(
       <TestProviders>
         <FormattedFieldValue
           contextId="test"
@@ -193,7 +193,7 @@ describe('Events', () => {
   });
 
   test('it does NOT render a tooltip for truncatable message when it is an empty string', () => {
-    const { container } = render(
+    render(
       <TestProviders>
         <FormattedFieldValue
           contextId="test"
@@ -224,7 +224,7 @@ describe('Events', () => {
   });
 
   test('it renders truncatable message text when fieldName is message with truncate prop', () => {
-    const { container } = render(
+    render(
       <TestProviders>
         <FormattedFieldValue
           contextId="test"
@@ -240,7 +240,7 @@ describe('Events', () => {
   });
 
   test('it does NOT render the truncatable message style when truncate is false', () => {
-    const { container } = render(
+    render(
       <TestProviders>
         <FormattedFieldValue
           eventId={mockTimelineData[0].ecs._id}
@@ -256,7 +256,7 @@ describe('Events', () => {
   });
 
   test('it renders a button to open the hosts details panel when fieldName is host.name, and a hostname is provided', () => {
-    const { container } = render(
+    render(
       <TestProviders>
         <FormattedFieldValue
           eventId={mockTimelineData[0].ecs._id}
@@ -271,7 +271,7 @@ describe('Events', () => {
   });
 
   test('it does NOT render a button to open the hosts details panel when fieldName is host.name, but a hostname is NOT provided', () => {
-    const { container } = render(
+    render(
       <TestProviders>
         <FormattedFieldValue
           eventId={mockTimelineData[0].ecs._id}

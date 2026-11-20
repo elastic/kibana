@@ -269,7 +269,7 @@ describe('UserHostWorkingDir', () => {
     });
 
     test('it renders `user.domain` field (by default) when userDomain is provided, and userDomainField is NOT specified as a prop', () => {
-      const { container } = render(
+      render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -289,7 +289,7 @@ describe('UserHostWorkingDir', () => {
     });
 
     test('it renders with an overridden field name when userDomain is provided, and userDomainField is also specified as a prop', () => {
-      const { container } = render(
+      render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -310,7 +310,7 @@ describe('UserHostWorkingDir', () => {
     });
 
     test('it renders a `user.name` field (by default) when userName is provided, and userNameField is NOT specified as a prop', () => {
-      const { container } = render(
+      render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -330,7 +330,7 @@ describe('UserHostWorkingDir', () => {
     });
 
     test('it renders with an overridden field name when userName is provided, and userNameField is also specified as a prop', () => {
-      const { container } = render(
+      render(
         <TestProviders>
           <div>
             <UserHostWorkingDir

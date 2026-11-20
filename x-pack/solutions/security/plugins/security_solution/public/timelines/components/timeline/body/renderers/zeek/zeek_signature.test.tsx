@@ -116,7 +116,7 @@ describe('ZeekSignature', () => {
     });
 
     test('should render', () => {
-      const { container } = render(
+      render(
         <TestProviders>
           <TotalVirusLinkSha value={'abc'} />
         </TestProviders>

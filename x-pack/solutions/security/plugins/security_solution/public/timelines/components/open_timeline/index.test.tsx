@@ -264,7 +264,7 @@ describe('StatefulOpenTimeline', () => {
     });
 
     test('it appends the word "with" to the Showing in Timelines message when the user enters a query', async () => {
-      renderOpenTimeline({ 'data-test-subj': undefined });
+      renderOpenTimeline();
 
       await enterQuery('   abcd   ');
 
@@ -274,7 +274,7 @@ describe('StatefulOpenTimeline', () => {
     });
 
     test('echos (renders) the query when the user enters a query', async () => {
-      renderOpenTimeline({ 'data-test-subj': undefined });
+      renderOpenTimeline();
 
       await enterQuery('   abcd   ');
 
@@ -286,7 +286,7 @@ describe('StatefulOpenTimeline', () => {
 
   describe('#focusInput', () => {
     test('focuses the input when the component mounts', async () => {
-      const { container } = renderOpenTimeline({ 'data-test-subj': undefined });
+      const { container } = renderOpenTimeline();
 
       await waitFor(() => {
         expect(
@@ -301,7 +301,7 @@ describe('StatefulOpenTimeline', () => {
     test.skip('it invokes addTimelinesToFavorites with the selected timelines when the button is clicked', async () => {
       const addTimelinesToFavorites = jest.fn();
 
-      const { container } = renderOpenTimeline({ 'data-test-subj': undefined });
+      const { container } = renderOpenTimeline();
 
       await waitFor(() => {
         fireEvent.click(getSelectAllCheckbox(container));
@@ -325,7 +325,7 @@ describe('StatefulOpenTimeline', () => {
 
   describe('#onDeleteSelected', () => {
     test('it invokes deleteTimelines with the selected timelines when the button is clicked', async () => {
-      renderOpenTimeline({ 'data-test-subj': undefined });
+      renderOpenTimeline();
 
       fireEvent.click(screen.getAllByTestId('euiCollapsedItemActionsButton')[0]);
       fireEvent.click(screen.getByTestId('delete-timeline'));

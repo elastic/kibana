@@ -93,7 +93,7 @@ describe('AuthSsh', () => {
     });
 
     test('it returns sshSignature if sshMethod is null', () => {
-      const { container } = render(
+      render(
         <AuthSsh
           scopeId="some_scope"
           contextId="[context-123]"
@@ -107,7 +107,7 @@ describe('AuthSsh', () => {
     });
 
     test('it returns sshMethod if sshSignature is null', () => {
-      const { container } = render(
+      render(
         <AuthSsh
           scopeId="some_scope"
           contextId="[context-123]"
