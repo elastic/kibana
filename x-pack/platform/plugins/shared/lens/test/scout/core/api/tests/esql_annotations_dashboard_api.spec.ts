@@ -67,6 +67,11 @@ const ESQL_RANGE_EVENT = {
   fill: 'outside',
 };
 
+const expectBadRequest = (response: { body: { statusCode?: number; message?: string } }) => {
+  expect(response.body.statusCode).toBe(400);
+  expect(typeof response.body.message).toBe('string');
+};
+
 const dashboardWithXyPanel = (dataLayer: object, events: object[]) => ({
   title: `ES|QL annotations - ${Date.now()} - ${Math.random()}`,
   panels: [
@@ -116,32 +121,50 @@ apiTest.describe('ES|QL annotations in dashboard panels', { tag: tags.deployment
     ]);
   });
 
-  apiTest('rejects ES|QL annotations on charts with data view layers', async ({ apiClient }) => {
-    const headers = { ...HEADERS, ...editorCredentials.apiKeyHeader };
-    const createWithEvent = (event: object) =>
-      apiClient.post(DASHBOARDS_API_PATH, {
-        headers,
-        body: dashboardWithXyPanel(DSL_DATA_LAYER, [event]),
-        responseType: 'json',
-      });
+  const createRequest = ({ dataLayer, event }: { dataLayer: object; event: object }) => ({
+    headers: { ...HEADERS, ...editorCredentials.apiKeyHeader },
+    body: dashboardWithXyPanel(dataLayer, [event]),
+    responseType: 'json' as const,
+  });
 
+  apiTest('rejects ES|QL annotations on charts with data view layers', async ({ apiClient }) => {
     // the same chart is valid with a manual annotation, so the rejection is about the event
-    const manual = await createWithEvent({ type: 'point', timestamp: '2015-09-21T12:00:00.000Z' });
+    const manual = await apiClient.post(
+      DASHBOARDS_API_PATH,
+      createRequest({
+        dataLayer: DSL_DATA_LAYER,
+        event: { type: 'point', timestamp: '2015-09-21T12:00:00.000Z' },
+      })
+    );
     expect(manual).toHaveStatusCode(201);
-    const esql = await createWithEvent(ESQL_POINT_EVENT);
+    const esql = await apiClient.post(
+      DASHBOARDS_API_PATH,
+      createRequest({
+        dataLayer: DSL_DATA_LAYER,
+        event: ESQL_POINT_EVENT,
+      })
+    );
     expect(esql).toHaveStatusCode(400);
+    expectBadRequest(esql);
   });
 
   apiTest('rejects point-only styling on ES|QL range annotations', async ({ apiClient }) => {
-    const headers = { ...HEADERS, ...editorCredentials.apiKeyHeader };
-    const createWithEvent = (event: object) =>
-      apiClient.post(DASHBOARDS_API_PATH, {
-        headers,
-        body: dashboardWithXyPanel(ESQL_DATA_LAYER, [event]),
-        responseType: 'json',
-      });
-
-    expect(await createWithEvent(ESQL_RANGE_EVENT)).toHaveStatusCode(201);
-    expect(await createWithEvent({ ...ESQL_RANGE_EVENT, icon: 'flag' })).toHaveStatusCode(400);
+    const valid = await apiClient.post(
+      DASHBOARDS_API_PATH,
+      createRequest({
+        dataLayer: ESQL_DATA_LAYER,
+        event: ESQL_RANGE_EVENT,
+      })
+    );
+    expect(valid).toHaveStatusCode(201);
+    const withIcon = await apiClient.post(
+      DASHBOARDS_API_PATH,
+      createRequest({
+        dataLayer: ESQL_DATA_LAYER,
+        event: { ...ESQL_RANGE_EVENT, icon: 'flag' },
+      })
+    );
+    expect(withIcon).toHaveStatusCode(400);
+    expectBadRequest(withIcon);
   });
 });

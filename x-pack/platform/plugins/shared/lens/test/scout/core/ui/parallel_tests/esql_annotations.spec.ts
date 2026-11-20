@@ -128,6 +128,7 @@ spaceTest.describe('Lens ES|QL annotations', { tag: '@local-stateful-classic' },
     async ({ pageObjects }) => {
       const { dashboard, lens } = pageObjects;
       const panelId = testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA;
+      const panel = dashboard.getPanelByEmbeddableId(panelId);
       await openInlineEditorAndWaitVisible(pageObjects, panelId);
 
       await lens.layers.createLayer('annotations', undefined, { annotationsAddDirectly: true });
@@ -142,6 +143,7 @@ spaceTest.describe('Lens ES|QL annotations', { tag: '@local-stateful-classic' },
       await lens.closeDimensionEditor();
 
       await expectEsqlChartToRender(dashboard, panelId);
+      await expect(panel.getByTestId('embeddableError')).toHaveCount(0);
       await cancelLensInlineEditorAndWaitClosed({ lens });
     }
   );

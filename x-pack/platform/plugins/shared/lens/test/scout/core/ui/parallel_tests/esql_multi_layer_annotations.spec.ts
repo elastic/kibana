@@ -47,6 +47,9 @@ spaceTest.describe(
       'combines ES|QL data with annotation and reference-line layers',
       async ({ page, pageObjects }) => {
         const { dashboard, lens } = pageObjects;
+        const dataPanel = dashboard.getPanelByEmbeddableId(
+          testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA
+        );
 
         await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
         await lens.layers.createLayer('annotations', undefined, { annotationsAddDirectly: true });
@@ -71,7 +74,7 @@ spaceTest.describe(
         );
 
         await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
-        await expect(page.testSubj.locator('xyVisAnnotationIcon')).toBeVisible();
+        await expect(dataPanel.getByTestId('xyVisAnnotationIcon')).toBeVisible();
 
         await applyLensInlineEditorAndWaitClosed({ lens });
         await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
@@ -85,7 +88,7 @@ spaceTest.describe(
         await page.reload();
         await dashboard.waitForRenderComplete();
         await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
-        await expect(page.testSubj.locator('xyVisAnnotationIcon')).toBeVisible();
+        await expect(dataPanel.getByTestId('xyVisAnnotationIcon')).toBeVisible();
 
         await dashboard.ensureEditMode();
         await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
@@ -200,6 +203,9 @@ spaceTest.describe(
       'edits, styles and duplicates annotations and reference lines',
       async ({ page, pageObjects }) => {
         const { dashboard, lens } = pageObjects;
+        const dataPanel = dashboard.getPanelByEmbeddableId(
+          testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA
+        );
 
         await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
 
@@ -225,8 +231,8 @@ spaceTest.describe(
         // to inline editing where no lnsWorkspace render counter exists).
         await lens.closeDimensionEditor();
         await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
-        await expect(page.testSubj.locator('xyVisAnnotationIcon')).toBeVisible();
-        await expect(page.testSubj.locator('xyVisAnnotationText')).toBeVisible();
+        await expect(dataPanel.getByTestId('xyVisAnnotationIcon')).toBeVisible();
+        await expect(dataPanel.getByTestId('xyVisAnnotationText')).toBeVisible();
 
         // Duplicating copies the exact same static date, so both annotations land on the
         // same point and render as one grouped icon.
@@ -237,7 +243,7 @@ spaceTest.describe(
         await expect(
           lens.dimensions.getDimensionTriggersLocator(ANNOTATIONS_DIMENSION)
         ).toHaveCount(2);
-        await expect(page.testSubj.locator('xyVisGroupedAnnotationIcon')).toHaveCount(1);
+        await expect(dataPanel.getByTestId('xyVisGroupedAnnotationIcon')).toHaveCount(1);
         await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
 
         // Reference line: set a custom static value and a below-fill style.

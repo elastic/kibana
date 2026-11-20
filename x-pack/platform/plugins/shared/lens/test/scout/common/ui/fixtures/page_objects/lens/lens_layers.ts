@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /**
@@ -200,9 +201,7 @@ export class LensLayers {
     if ((await toggle.getAttribute('aria-checked')) !== String(enabled)) {
       await toggle.click();
     }
-    await toggle
-      .and(this.page.locator(`[aria-checked="${enabled}"]`))
-      .waitFor({ state: 'visible' });
+    await expect(toggle).toHaveAttribute('aria-checked', String(enabled));
     await this.page.testSubj.click('lns-indexPattern-dimensionContainerBack');
     await this.page.testSubj.locator('lnsLayerSettingsFlyout').waitFor({ state: 'hidden' });
   }
