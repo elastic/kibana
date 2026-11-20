@@ -1,5 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License v 1"; you may not use this file except in compliance with, at
@@ -9,12 +16,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const ScriptsJavaScriptStepTypeId = 'code.javascript' as const;
 
-export const ConfigSchema = z.object({});
+export const ConfigSchema = lazySchema(() => z.object({}));
 
 export const CODE_TEMPLATE_MAX_CHARS = 1024 * 32; // 32 KB template in workflow YAML
 export const CODE_MAX_LENGTH_CHARS = 5 * 1024 * 1024; // 5 MB after Liquid template rendering
@@ -26,9 +33,11 @@ export const CODE_TEMPLATE_MAX_KB = CODE_TEMPLATE_MAX_CHARS / 1024;
 export const CODE_MAX_LENGTH_MB = CODE_MAX_LENGTH_CHARS / 1024 / 1024;
 export const CODE_EXECUTION_TIMEOUT_SECONDS = CODE_EXECUTION_TIMEOUT_MS / 1_000;
 
-export const InputSchema = z.object({
-  code: z.string().max(CODE_TEMPLATE_MAX_CHARS),
-});
+export const InputSchema = lazySchema(() =>
+  z.object({
+    code: z.string().max(CODE_TEMPLATE_MAX_CHARS),
+  })
+);
 
 export const OutputSchema = z.unknown();
 
