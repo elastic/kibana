@@ -293,9 +293,7 @@ export const standardPairs: ReferenceRule[] = [
  and event.provider: route53resolver.amazonaws.com
  and event.action: DeleteResolverQueryLogConfig 
  and event.outcome: success`,
-    threat: [
-      { technique: 'T1562', tactic: 'TA0005', subtechnique: 'Disable or Modify Cloud Logs' },
-    ],
+    threat: [{ technique: 'T1685', tactic: 'TA0112', subtechnique: 'Disable or Modify Cloud Log' }],
     severity: 'medium',
     tags: [
       'Domain: Cloud',
@@ -374,7 +372,7 @@ export const standardPairs: ReferenceRule[] = [
     description:
       "Identifies a Logging sink deletion in Google Cloud Platform (GCP). Every time a log entry arrives, Logging compares the log entry to the sinks in that resource. Each sink whose filter matches the log entry writes a copy of the log entry to the sink's export destination. An adversary may delete a Logging sink to evade detection.",
     query: `event.dataset:gcp.audit and event.action:google.logging.v*.ConfigServiceV*.DeleteSink and event.outcome:success`,
-    threat: [{ technique: 'T1562', tactic: 'TA0005' }],
+    threat: [{ technique: 'T1685', tactic: 'TA0112' }],
     severity: 'medium',
     tags: [
       'Domain: Cloud',

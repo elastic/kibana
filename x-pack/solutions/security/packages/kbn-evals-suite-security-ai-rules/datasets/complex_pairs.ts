@@ -119,7 +119,7 @@ not process.env_vars like~ "RUNNER_TRACKING_ID=github_*"`,
         tactic: 'TA0001',
         subtechnique: 'Compromise Software Dependencies and Development Tools',
       },
-      { technique: 'T1562', tactic: 'TA0005', subtechnique: 'Disable or Modify Tools' },
+      { technique: 'T1685', tactic: 'TA0112', subtechnique: 'Disable or Modify Tools' },
     ],
     severity: 'medium',
     tags: [

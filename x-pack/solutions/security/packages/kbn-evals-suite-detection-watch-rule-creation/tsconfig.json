@@ -16,6 +16,7 @@
     "@kbn/core",
     "@kbn/zod",
     "@kbn/inbox-common",
-    "@kbn/agent-builder-common"
+    "@kbn/agent-builder-common",
+    "@kbn/security-mitre-attack-server"
   ]
 }

@@ -55,13 +55,15 @@ export const hardCases: RuleCreationExample[] = [
     },
   },
 
-  // Hard 2 — T1562.008 (Impair Defenses: Disable or Modify Cloud Logs)
+  // Hard 2 — T1685.002 (Disable or Modify Tools: Disable or Modify Cloud Log)
   // AWS Route 53 resolver query log config deleted — removes DNS visibility.
+  // ATT&CK v19 revoked T1562.008 in favour of T1685.002. The id keeps the old technique
+  // so scores stay comparable across builds.
   // Adapted from: kbn-evals-suite-security-ai-rules — aws-route53-resolver-query-log-deletion
   {
     id: 'hard-t1562-008-aws-route53-log-deletion',
     input: {
-      technique: 'T1562.008',
+      technique: 'T1685.002',
       gap_description:
         'No rule for deletion of AWS Route 53 Resolver query log configurations. ' +
         'Attackers delete these configs to remove DNS-level visibility before exfiltration ' +
@@ -72,8 +74,8 @@ export const hardCases: RuleCreationExample[] = [
       confidence: 0.9,
     },
     output: {
-      mitreIds: ['T1562.008'],
-      optionalMitreIds: ['T1562'],
+      mitreIds: ['T1685.002'],
+      optionalMitreIds: ['T1685'],
       language: 'esql',
       esqlQuery: `FROM logs-aws.cloudtrail-*
 | WHERE event.provider == "route53resolver.amazonaws.com"
