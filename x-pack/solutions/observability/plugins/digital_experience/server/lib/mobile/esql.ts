@@ -6,11 +6,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsqlQuery } from '../../../common/mobile_panel';
+import type { ComposerQuery } from '@elastic/esql';
+import type { EsqlOutput, TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { ENVIRONMENT_FIELDS } from '../../../common/otel_data';
-import { toEsqlRows } from '../../services/sessions/summary_documents';
-import type { EsqlRow } from '../../services/sessions/summary_documents';
 import { environmentFilter } from '../helpers/environment';
 
 const UNKNOWN_INDEX = /Unknown index/;
@@ -23,18 +21,29 @@ export const isUnknownIndexError = (error: unknown): boolean => {
   return type === 'verification_exception' && UNKNOWN_INDEX.test(reason ?? '');
 };
 
-/** The rows of an ES|QL query, none when its indices don't exist. */
-export const runEsql = async (
-  esClient: ElasticsearchClient,
-  { query, params }: EsqlQuery,
-  filter: estypes.QueryDslQueryContainer,
-  signal?: AbortSignal
-): Promise<EsqlRow[]> => {
+/**
+ * The rows of a mobile ES|QL query, traced as `operationName`; none when its indices don't exist.
+ * A failed shard fails the query, as partial counts would pass for complete ones.
+ */
+export const runMobileEsql = async <TRow extends EsqlOutput>(
+  esClient: TracedElasticsearchClient,
+  operationName: string,
+  query: ComposerQuery,
+  filter: estypes.QueryDslQueryContainer
+): Promise<TRow[]> => {
+  const { query: esqlQuery, params } = query.toRequest();
   try {
-    return toEsqlRows(
-      // A failed shard fails the query: partial counts would pass for complete ones.
-      await esClient.esql.query({ query, params, filter, allow_partial_results: false }, { signal })
+    const { hits } = await esClient.esql<TRow, { transform: 'plain' }>(
+      operationName,
+      {
+        query: esqlQuery,
+        params: params as estypes.EsqlQueryRequest['params'],
+        filter,
+        allow_partial_results: false,
+      },
+      { transform: 'plain' }
     );
+    return hits;
   } catch (error) {
     if (isUnknownIndexError(error)) {
       return [];

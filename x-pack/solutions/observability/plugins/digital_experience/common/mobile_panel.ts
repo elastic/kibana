@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Builder, esql, type ComposerQuery } from '@elastic/esql';
 import {
   ENVIRONMENT_ALL_VALUE,
   ENVIRONMENT_NOT_DEFINED_VALUE,
@@ -12,9 +13,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '@kbn/apm-types';
-import { escapeStringValue } from '@kbn/esql-utils';
 import {
-  ENVIRONMENT_FIELDS,
   MOBILE_SDK_NAMES,
   OTEL_LOGS_INDEX,
   OTEL_TRACES_INDEX,
@@ -25,15 +24,6 @@ import type { ComparedValue, MobilePlatform } from './types/applications';
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
-
-/** The OTel indices the mobile SDKs write to, alongside backend services. */
-export const MOBILE_SOURCE_INDICES = `${OTEL_TRACES_INDEX},${OTEL_LOGS_INDEX}`;
-
-/**
- * Fields no index maps read as `null` instead of failing the query, e.g. `exception.type` where no
- * app ever threw, or every field on a cluster without mobile data.
- */
-export const NULLIFY_UNMAPPED_FIELDS = 'SET unmapped_fields = "NULLIFY";';
 
 /** The fields the mobile queries read, as stored in the OTel indices. */
 export const MOBILE_FIELDS = {
@@ -47,34 +37,8 @@ export const MOBILE_FIELDS = {
   environmentName: RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
 } as const;
 
-/** An ES|QL query and the values of its `?name` params. */
-export interface EsqlQuery {
-  query: string;
-  params: Array<Record<string, string>>;
-}
-
-/**
- * How a query writes a value: as a `?name` param for the routes, or as an escaped literal for
- * Discover, which takes the query text only.
- */
-export interface EsqlValues {
-  text: (name: string, value: string) => string;
-}
-
-/** Values written into the query, for Discover. */
-export const INLINE_VALUES: EsqlValues = { text: (_name, value) => escapeStringValue(value) };
-
-/** Values sent as params, which `params` collects for the request. */
-export const createParamValues = (): EsqlValues & { params: EsqlQuery['params'] } => {
-  const params: EsqlQuery['params'] = [];
-  return {
-    params,
-    text: (name, value) => {
-      params.push({ [name]: value });
-      return `?${name}`;
-    },
-  };
-};
+/** A mobile field as an ES|QL column. */
+export const mobileColumn = (field: keyof typeof MOBILE_FIELDS) => esql.col(MOBILE_FIELDS[field]);
 
 /** The filters every mobile panel applies, besides the time range and the environment. */
 export interface MobilePanelFilters {
@@ -118,87 +82,87 @@ export const toComparedValue = (
   delta: current !== null && previous !== null ? current - previous : null,
 });
 
-/** Mobile SDK documents: `telemetry.sdk.name`, as `telemetry.sdk.language` also matches backends. */
-export const MOBILE_SDK_CONDITION = `${MOBILE_FIELDS.sdkName} IN (${MOBILE_SDK_NAMES.map(
-  escapeStringValue
-).join(', ')})`;
-
-/** The mobile documents, then `commands`. */
-export const mobileDocumentsEsql = (commands: string[]): string =>
-  `${NULLIFY_UNMAPPED_FIELDS}\n${[
-    `FROM ${MOBILE_SOURCE_INDICES}`,
-    `WHERE ${MOBILE_SDK_CONDITION}`,
-    ...commands,
-  ].join('\n| ')}`;
-
-/** The ES|QL `WHERE` conditions of the filters; the time range and environment are applied apart. */
-export const mobilePanelConditions = (
-  { serviceName, platform, release }: MobilePanelFilters,
-  values: EsqlValues
-): string[] => [
-  `${MOBILE_FIELDS.serviceName} == ${values.text('service_name', serviceName)}`,
-  ...(platform
-    ? [`${MOBILE_FIELDS.sdkName} == ${escapeStringValue(SDK_NAME_BY_PLATFORM[platform])}`]
-    : []),
-  ...(release ? [`${MOBILE_FIELDS.serviceVersion} == ${values.text('release', release)}`] : []),
-];
-
-/** The ES|QL of a mobile panel: its documents, filtered, then `commands` (e.g. a `STATS`). */
-export const mobilePanelEsql = (
-  filters: MobilePanelFilters,
-  values: EsqlValues,
-  commands: string[] = []
-): string =>
-  mobileDocumentsEsql([
-    `WHERE ${mobilePanelConditions(filters, values).join(' AND ')}`,
-    ...commands,
+/** `field IN (values)`, the values as escaped string literals. */
+export const inValues = (field: keyof typeof MOBILE_FIELDS, values: readonly string[]) =>
+  Builder.expression.func.binary('in', [
+    mobileColumn(field),
+    Builder.expression.list.tuple({
+      values: values.map((value) => Builder.expression.literal.string(value)),
+    }),
   ]);
 
-/** Sessions, users and exceptions; an unmapped field counts 0. */
-export const MOBILE_KPI_STATS =
-  `STATS docs = COUNT(*),` +
-  ` sessions = COUNT_DISTINCT(${MOBILE_FIELDS.sessionId}),` +
-  ` users = COUNT_DISTINCT(${MOBILE_FIELDS.installationId}),` +
-  ` exceptions = COUNT(${MOBILE_FIELDS.exceptionType})`;
+/**
+ * The mobile SDK documents of the OTel indices: `telemetry.sdk.name`, as `telemetry.sdk.language`
+ * also matches backend services. Fields no index maps read as `null` instead of failing the query,
+ * e.g. `exception.type` where no app ever threw, or every field without mobile data.
+ */
+export const mobileDocuments = (): ComposerQuery =>
+  esql.from(OTEL_TRACES_INDEX, OTEL_LOGS_INDEX).addSetCommand('unmapped_fields', 'nullify')
+    .pipe`WHERE ${inValues('sdkName', MOBILE_SDK_NAMES)}`;
 
 /**
- * The ES|QL condition of the environment filter, as the routes apply it (`environmentFilter`):
- * either environment field, or "Not defined" for APM's sentinel or none of them;
- * `undefined` when it filters nothing.
+ * The documents of a mobile panel, filtered; the time range and environment are applied apart.
+ * Values from the request are params, which `inlineParams` writes into the query for Discover.
  */
-export const mobileEnvironmentCondition = (
-  environment: string | undefined,
-  values: EsqlValues
-): string | undefined => {
+export const mobilePanelQuery = ({ serviceName, platform, release }: MobilePanelFilters) => {
+  let query = mobileDocuments().pipe`WHERE ${mobileColumn('serviceName')} == ${{
+    service_name: serviceName,
+  }}`;
+  if (platform) {
+    query = query.pipe`WHERE ${mobileColumn('sdkName')} == ${SDK_NAME_BY_PLATFORM[platform]}`;
+  }
+  if (release) {
+    query = query.pipe`WHERE ${mobileColumn('serviceVersion')} == ${{ release }}`;
+  }
+  return query;
+};
+
+/** Sessions, users and exceptions; an unmapped field counts 0. */
+export const withKpiStats = (query: ComposerQuery): ComposerQuery =>
+  query.pipe`STATS docs = COUNT(*),
+    sessions = COUNT_DISTINCT(${mobileColumn('sessionId')}),
+    users = COUNT_DISTINCT(${mobileColumn('installationId')}),
+    exceptions = COUNT(${mobileColumn('exceptionType')})`;
+
+/**
+ * The documents in `environment`, as the routes' `environmentFilter` keeps them: either
+ * environment field, or "Not defined" for APM's sentinel or neither; all for all environments.
+ */
+export const withEnvironment = (
+  query: ComposerQuery,
+  environment: string | undefined
+): ComposerQuery => {
   if (!environment || environment === ENVIRONMENT_ALL_VALUE) {
-    return undefined;
+    return query;
   }
+  const environmentColumn = mobileColumn('environment');
+  const environmentNameColumn = mobileColumn('environmentName');
   if (environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
-    const sentinel = `${MOBILE_FIELDS.environment} == ${escapeStringValue(
-      ENVIRONMENT_NOT_DEFINED_VALUE
-    )}`;
-    const noEnvironment = ENVIRONMENT_FIELDS.map((field) => `${field} IS NULL`).join(' AND ');
-    return `(${sentinel} OR (${noEnvironment}))`;
+    return query.pipe`WHERE ${environmentColumn} == ${ENVIRONMENT_NOT_DEFINED_VALUE}
+      OR (${environmentColumn} IS NULL AND ${environmentNameColumn} IS NULL)`;
   }
-  const value = values.text('environment', environment);
-  return `(${ENVIRONMENT_FIELDS.map((field) => `${field} == ${value}`).join(' OR ')})`;
+  return query.pipe`WHERE ${environmentColumn} == ${environment}
+    OR ${environmentNameColumn} == ${environment}`;
 };
 
 /**
- * The ES|QL that Discover opens for a panel: the KPI statistics over time, with every filter,
- * the environment included as the routes apply it apart.
+ * The ES|QL that Discover opens for a panel: the KPI statistics over time with every filter, the
+ * environment included, and the values written into the text, as Discover takes no params.
  */
 export const mobilePanelDiscoverEsql = (
   filters: MobilePanelFilters,
   { bucket, environment }: { bucket: 'hour' | 'day'; environment?: string }
 ): string => {
-  const environmentCondition = mobileEnvironmentCondition(environment, INLINE_VALUES);
-  return mobilePanelEsql(filters, INLINE_VALUES, [
-    ...(environmentCondition ? [`WHERE ${environmentCondition}`] : []),
-    `STATS sessions = COUNT_DISTINCT(${MOBILE_FIELDS.sessionId}),` +
-      ` users = COUNT_DISTINCT(${MOBILE_FIELDS.installationId}),` +
-      ` exceptions = COUNT(${MOBILE_FIELDS.exceptionType})` +
-      ` BY bucket = BUCKET(@timestamp, 1 ${bucket})`,
-    'SORT bucket ASC',
-  ]);
+  const query = withEnvironment(mobilePanelQuery(filters), environment);
+  const sessions = mobileColumn('sessionId');
+  const users = mobileColumn('installationId');
+  const exceptions = mobileColumn('exceptionType');
+  // The bucket's unit is a keyword, not a value, so each has its own template.
+  const bucketed =
+    bucket === 'hour'
+      ? query.pipe`STATS sessions = COUNT_DISTINCT(${sessions}), users = COUNT_DISTINCT(${users}),
+          exceptions = COUNT(${exceptions}) BY bucket = BUCKET(@timestamp, 1 hour)`
+      : query.pipe`STATS sessions = COUNT_DISTINCT(${sessions}), users = COUNT_DISTINCT(${users}),
+          exceptions = COUNT(${exceptions}) BY bucket = BUCKET(@timestamp, 1 day)`;
+  return bucketed.pipe`SORT bucket ASC`.inlineParams().print();
 };

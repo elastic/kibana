@@ -16,3 +16,6 @@ export const MAX_ENVIRONMENT_LENGTH = 1024;
 
 /** Longest application name the routes accept, APM's `ignore_above` for `service.name`. */
 export const MAX_SERVICE_NAME_LENGTH = 1024;
+
+/** Longest mobile release the routes accept, as long as an application name. */
+export const MAX_RELEASE_LENGTH = MAX_SERVICE_NAME_LENGTH;

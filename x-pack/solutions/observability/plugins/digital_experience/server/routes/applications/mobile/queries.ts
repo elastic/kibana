@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { MOBILE_FIELDS, mobileDocumentsEsql } from '../../../../common/mobile_panel';
-import type { EsqlQuery } from '../../../../common/mobile_panel';
+import type { ComposerQuery } from '@elastic/esql';
+import { inValues, mobileColumn, mobileDocuments } from '../../../../common/mobile_panel';
 import { MOBILE_SDK_NAMES } from '../../../../common/otel_data';
-import { environmentsCommands, latestReleaseCommands } from '../../../lib/mobile/queries';
+import { withEnvironmentCounts, withLatestReleases } from '../../../lib/mobile/queries';
 import { MAX_APPLICATIONS_PER_SOURCE } from '../constants';
 
 /** Whether a `telemetry.sdk.name` is a mobile SDK; `java` and `swift` services are not. */
@@ -19,41 +19,22 @@ export const isMobileSdkName = (name: string | null | undefined): boolean =>
  * Sessions, users, exceptions, platforms (by SDK name) and last seen per application, most sessions
  * first; a metric whose field no index maps is 0.
  */
-export const applicationsQuery = (): EsqlQuery => ({
-  query: mobileDocumentsEsql([
-    `STATS sessions = COUNT_DISTINCT(${MOBILE_FIELDS.sessionId}),` +
-      ` users = COUNT_DISTINCT(${MOBILE_FIELDS.installationId}),` +
-      ` exceptions = COUNT(${MOBILE_FIELDS.exceptionType}),` +
-      ` platforms = VALUES(${MOBILE_FIELDS.sdkName}),` +
-      ` last_seen = MAX(@timestamp)` +
-      ` BY ${MOBILE_FIELDS.serviceName}`,
-    `SORT sessions DESC, ${MOBILE_FIELDS.serviceName} ASC`,
-    `LIMIT ${MAX_APPLICATIONS_PER_SOURCE}`,
-  ]),
-  params: [],
-});
+export const applicationsQuery = (): ComposerQuery =>
+  mobileDocuments().pipe`STATS sessions = COUNT_DISTINCT(${mobileColumn('sessionId')}),
+      users = COUNT_DISTINCT(${mobileColumn('installationId')}),
+      exceptions = COUNT(${mobileColumn('exceptionType')}),
+      platforms = VALUES(${mobileColumn('sdkName')}),
+      last_seen = MAX(@timestamp)
+    BY ${mobileColumn('serviceName')}`.pipe`SORT sessions DESC, ${mobileColumn('serviceName')} ASC`
+    .pipe`LIMIT ${MAX_APPLICATIONS_PER_SOURCE}`;
 
 /**
  * The latest release, the one with the most sessions, of each of `serviceNames` over the window
  * the query is run with.
  */
-export const latestReleasesQuery = (serviceNames: string[]): EsqlQuery => {
-  const names = serviceNames.map((serviceName, index) => ({
-    name: `service_${index}`,
-    value: serviceName,
-  }));
-  return {
-    query: mobileDocumentsEsql([
-      `WHERE ${MOBILE_FIELDS.serviceName} IN (${names.map(({ name }) => `?${name}`).join(', ')})`,
-      ...latestReleaseCommands(),
-      `LIMIT ${MAX_APPLICATIONS_PER_SOURCE}`,
-    ]),
-    params: names.map(({ name, value }) => ({ [name]: value })),
-  };
-};
+export const latestReleasesQuery = (serviceNames: string[]): ComposerQuery =>
+  withLatestReleases(mobileDocuments().pipe`WHERE ${inValues('serviceName', serviceNames)}`)
+    .pipe`LIMIT ${MAX_APPLICATIONS_PER_SOURCE}`;
 
 /** Every environment of the mobile applications, for the picker. */
-export const environmentsQuery = (): EsqlQuery => ({
-  query: mobileDocumentsEsql(environmentsCommands()),
-  params: [],
-});
+export const environmentsQuery = (): ComposerQuery => withEnvironmentCounts(mobileDocuments());

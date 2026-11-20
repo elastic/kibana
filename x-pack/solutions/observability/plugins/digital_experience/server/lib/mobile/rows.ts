@@ -5,55 +5,49 @@
  * 2.0.
  */
 
-import { PLATFORM_BY_SDK_NAME } from '../../../common/mobile_panel';
-import { ENVIRONMENT_FIELDS } from '../../../common/otel_data';
+import { castArray, compact, uniq } from 'lodash';
+import { MOBILE_FIELDS, PLATFORM_BY_SDK_NAME } from '../../../common/mobile_panel';
 import type { MobilePlatform } from '../../../common/types/applications';
-import type { EsqlRow } from '../../services/sessions/summary_documents';
 import { MAX_ENVIRONMENTS } from '../constants';
 import { withNotDefined } from '../helpers/environment';
 
-/** A numeric ES|QL value, 0 when missing. */
-export const toNumber = (value: unknown): number => (typeof value === 'number' ? value : 0);
-
-const asArray = <T>(value: T | T[] | null | undefined): T[] => {
-  if (value === null || value === undefined) {
-    return [];
-  }
-  return Array.isArray(value) ? value : [value];
+/**
+ * The rows of the mobile queries. A column every row has null for is dropped from the response,
+ * so any value can be missing.
+ */
+export type EnvironmentRow = {
+  docs: number;
+  [MOBILE_FIELDS.environment]: string | null;
+  [MOBILE_FIELDS.environmentName]: string | null;
 };
+export type ReleaseRow = { release: string | null; sessions: number };
+export type PlatformRow = { [MOBILE_FIELDS.sdkName]: string | null; docs: number };
 
 /** The platforms of `telemetry.sdk.name` values, sorted and without repeats; other SDKs are left out. */
-export const toPlatforms = (sdkNames: unknown): MobilePlatform[] => {
-  // A null group, e.g. of a document without the field, has no platform.
-  const platforms = asArray(sdkNames as unknown).flatMap((sdkName) => {
-    const platform =
-      typeof sdkName === 'string' ? PLATFORM_BY_SDK_NAME[sdkName.toLowerCase()] : undefined;
-    return platform ? [platform] : [];
-  });
-  return [...new Set(platforms)].sort();
-};
+export const toPlatforms = (sdkNames: string | Array<string | null> | null | undefined) =>
+  uniq(
+    compact(castArray(sdkNames)).flatMap((sdkName): MobilePlatform[] => {
+      const platform = PLATFORM_BY_SDK_NAME[sdkName.toLowerCase()];
+      return platform ? [platform] : [];
+    })
+  ).sort();
 
-/** The `release` of rows, in their order. */
-export const toReleases = (rows: EsqlRow[]): string[] =>
-  rows.flatMap(({ release }) => (typeof release === 'string' ? [release] : []));
+/** The releases of rows, in their order. */
+export const toReleases = (rows: ReleaseRow[]): string[] => compact(rows.map(({ release }) => release));
 
 /**
  * The environments of rows grouped by both environment fields, "Not defined" included when a row
  * has neither, as the web sources list them.
  */
-export const toEnvironments = (rows: EsqlRow[]): string[] => {
-  let notDefined = 0;
-  const names = new Set<string>();
-  rows.forEach((row) => {
-    const values = ENVIRONMENT_FIELDS.flatMap((field) => {
-      const value = row[field];
-      return typeof value === 'string' ? [value] : [];
-    });
-    if (values.length === 0) {
-      notDefined += toNumber(row.docs);
-    }
-    values.forEach((value) => names.add(value));
-  });
+export const toEnvironments = (rows: EnvironmentRow[]): string[] => {
+  const names = uniq(
+    rows.flatMap((row) => compact([row[MOBILE_FIELDS.environment], row[MOBILE_FIELDS.environmentName]]))
+  );
+  const notDefined = rows
+    .filter(
+      (row) => !row[MOBILE_FIELDS.environment] && !row[MOBILE_FIELDS.environmentName]
+    )
+    .reduce((total, { docs }) => total + (docs ?? 0), 0);
   // Rows come most used first, so the cap keeps the most used names, as the web sources' terms do.
-  return withNotDefined([...names].slice(0, MAX_ENVIRONMENTS), notDefined);
+  return withNotDefined(names.slice(0, MAX_ENVIRONMENTS), notDefined);
 };

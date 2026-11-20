@@ -18,6 +18,7 @@ import { getClassicApplications } from './classic/get_classic_applications';
 import { getOtelApplicationsFromBestSource } from './otel/get_otel_applications_source';
 import { getMobileApplications } from './mobile/get_mobile_applications';
 import { getHistogramInterval } from '../../lib/helpers/time_series';
+import { createDigitalExperienceTracedEsClient } from '../../lib/create_digital_experience_traced_es_client';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
 import { START_AFTER_END_ISSUE, isStartBeforeEnd, timeRangeShape, timeZoneShape } from '../params';
 
@@ -135,7 +136,16 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
         }),
       getClassicApplications: getClassic,
       getMobileApplications: () =>
-        getMobileApplications({ esClient, start, end, environment, signal }),
+        getMobileApplications({
+          esClient: createDigitalExperienceTracedEsClient({
+            client: esClient,
+            logger,
+            abortSignal: signal,
+          }),
+          start,
+          end,
+          environment,
+        }),
       hasPartialOtelAccess: hasPartialOtelIndicesAccess,
       // Mobile reads the same OTel indices, so it shares their one check.
       hasPartialMobileAccess: hasPartialOtelIndicesAccess,

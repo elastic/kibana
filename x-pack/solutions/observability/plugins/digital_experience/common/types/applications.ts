@@ -12,7 +12,9 @@ export type WebApplicationSource = 'otel' | 'classic';
 export type ApplicationSource = WebApplicationSource | 'mobile';
 
 /** The mobile platforms, told apart by `telemetry.sdk.name`. */
-export type MobilePlatform = 'android' | 'ios';
+export const MOBILE_PLATFORMS = ['android', 'ios'] as const;
+
+export type MobilePlatform = (typeof MOBILE_PLATFORMS)[number];
 
 /**
  * The tabs of an application's page, in display order. The Overview is the page at the

@@ -17,9 +17,12 @@ import {
   overviewFiltersParamIssue,
   readOverviewFilters,
 } from '../../common/overview_filters_param';
-import { MAX_ENVIRONMENT_LENGTH } from '../lib/constants';
+import { MAX_ENVIRONMENT_LENGTH, MAX_SERVICE_NAME_LENGTH } from '../lib/constants';
 
 const MAX_TIME_ZONE_LENGTH = 64;
+
+/** An application's `service.name` in a route's path, as long as APM indexes it. */
+export const serviceNameParam = () => z.string().min(1).max(MAX_SERVICE_NAME_LENGTH);
 
 /** The params of a route over a time range and an optional environment. */
 export const timeRangeShape = () => ({

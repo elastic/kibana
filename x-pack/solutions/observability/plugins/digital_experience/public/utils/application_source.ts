@@ -7,7 +7,8 @@
 
 import * as t from 'io-ts';
 import { APPLICATION_SOURCE } from '../../common/application_source';
-import type { ApplicationSource } from '../../common/types/applications';
+import { MOBILE_PLATFORMS } from '../../common/types/applications';
+import type { ApplicationSource, MobilePlatform } from '../../common/types/applications';
 
 /** An application source in the URL; the router replaces any other value (see `routes.tsx`). */
 export const applicationSourceRt = t.union([
@@ -19,4 +20,9 @@ export const applicationSourceRt = t.union([
 export const DEFAULT_APPLICATION_SOURCE: ApplicationSource = APPLICATION_SOURCE.classic;
 
 /** A mobile platform in the URL, for the mobile page's platform filter. */
-export const mobilePlatformRt = t.union([t.literal('android'), t.literal('ios')]);
+export const mobilePlatformRt = t.keyof(
+  Object.fromEntries(MOBILE_PLATFORMS.map((platform) => [platform, null])) as Record<
+    MobilePlatform,
+    null
+  >
+);

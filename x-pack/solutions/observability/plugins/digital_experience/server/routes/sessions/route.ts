@@ -38,6 +38,7 @@ import { getSessionsStatus } from '../../services/sessions/sessions_status';
 import { MAX_ENVIRONMENT_LENGTH } from '../../lib/constants';
 import { describeError } from '../../lib/helpers/errors';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
+import { serviceNameParam } from '../params';
 import { getSession } from './get_session';
 import { listSessions } from './list_sessions';
 
@@ -47,8 +48,6 @@ export const SESSIONS_LIST_ENDPOINT =
   'GET /internal/digital_experience/applications/{serviceName}/sessions';
 export const SESSION_DETAIL_ENDPOINT =
   'GET /internal/digital_experience/applications/{serviceName}/sessions/{sessionId}';
-
-const MAX_SERVICE_NAME_LENGTH = 1024;
 
 const NO_ACCESS_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.api.noAccess', {
   defaultMessage:
@@ -227,7 +226,6 @@ const enableRoute = createDigitalExperienceServerRoute({
   },
 });
 
-const serviceName = () => z.string().min(1).max(MAX_SERVICE_NAME_LENGTH);
 const facetValue = (maxLength: number) => z.string().min(1).max(maxLength).optional();
 const durationMs = () =>
   z.coerce.number().int().min(0).max(SESSIONS_LIST_MAX_DURATION_MS).optional();
@@ -238,7 +236,7 @@ const listRoute = createDigitalExperienceServerRoute({
   security: { authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read] } },
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: serviceName() }),
+      path: z.object({ serviceName: serviceNameParam() }),
       query: z
         .object({
           start: isoDateTime(),
@@ -310,7 +308,7 @@ const detailRoute = createDigitalExperienceServerRoute({
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        serviceName: serviceName(),
+        serviceName: serviceNameParam(),
         sessionId: z.string().min(1).max(SESSIONS_MAX_ID_LENGTH),
       }),
     })
