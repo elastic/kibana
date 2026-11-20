@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/inference-tracing'
   - '@kbn/repo-info'
+  - '@kbn/fs'
   - '@kbn/nightshift-decision-trees'
   - '@kbn/nightshift-investigations-plugin'
   - '@kbn/nightshift-shared'
@@ -37,6 +38,8 @@ dependsOn:
   - '@kbn/config'
   - '@kbn/config-schema'
   - '@kbn/std'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
 tags:
   - functional-tests
   - package

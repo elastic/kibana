@@ -238,7 +238,6 @@ overrides:
   chokidar: 3.5.3
   dompurify: 3.4.17
   esbuild: 0.28.1
-  fast-xml-parser: 5.5.7
   flatted: 3.4.2
   globby>fast-glob: 3.3.3
   guarded-fetch>undici: '>=7.29.1 <8.0.0'
@@ -258,11 +257,11 @@ overrides:
   '@babel/plugin-transform-typescript': 7.24.7
   '@bufbuild/protobuf': 2.5.2
   '@elastic/elasticsearch@9>@elastic/transport': 9.4.0
-  '@elastic/esql-definitions': 4.38.0
-  '@elastic/esql-grammar': 4.38.0
-  '@elastic/esql-promql-grammar': 4.38.0
-  '@elastic/esql-types': 4.38.0
-  '@elastic/pretty-printer': 4.38.0
+  '@elastic/esql-definitions': 4.41.0
+  '@elastic/esql-grammar': 4.41.0
+  '@elastic/esql-promql-grammar': 4.41.0
+  '@elastic/esql-types': 4.41.0
+  '@elastic/pretty-printer': 4.41.0
   '@emnapi/core': 1.11.1
   '@emnapi/runtime': 1.11.1
   '@paulirish/trace_engine>legacy-javascript': 0.0.3
@@ -295,6 +294,7 @@ overrides:
   nwsapi: 2.2.2
   react-focus-lock: 2.9.5
   react-focus-on: 3.9.1
+  refractor>prismjs: 1.30.0
   vega-crossfilter: 5.1.0
   vega-dataflow: 6.1.0
   vega-expression: 6.1.0
@@ -377,8 +377,8 @@ importers:
         specifier: 2.0.11
         version: 2.0.11(react-router-dom@5.3.4(react@18.2.0))(react@18.2.0)
       '@elastic/charts':
-        specifier: 73.3.2
-        version: 73.3.2(@types/react@18.2.79)(moment-timezone@0.6.6)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)
+        specifier: 73.4.1
+        version: 73.4.1(@types/react@18.2.79)(moment-timezone@0.6.6)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)
       '@elastic/datemath':
         specifier: 5.0.3
         version: 5.0.3(moment@2.31.0)
@@ -398,20 +398,23 @@ importers:
         specifier: 8.8.1
         version: 8.8.1
       '@elastic/esql':
-        specifier: 4.38.0
-        version: 4.38.0
+        specifier: 4.41.0
+        version: 4.41.0
       '@elastic/esql-definitions':
-        specifier: 4.38.0
-        version: 4.38.0
+        specifier: 4.41.0
+        version: 4.41.0
       '@elastic/eui':
-        specifier: 123.4.0
-        version: 123.4.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
+        specifier: 123.5.0
+        version: 123.5.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
       '@elastic/eui-illustrations':
         specifier: 1.1.0
         version: 1.1.0
       '@elastic/eui-theme-borealis':
         specifier: 8.2.0
         version: 8.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@elastic/eui-theme-common':
+        specifier: 10.2.0
+        version: 10.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/filesaver':
         specifier: 1.1.2
         version: 1.1.2
@@ -428,8 +431,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.38.0
-        version: 4.38.0(monaco-editor@0.56.0)
+        specifier: 4.40.0
+        version: 4.40.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -515,14 +518,14 @@ importers:
         specifier: 10.0.4
         version: 10.0.4
       '@hapi/hapi':
-        specifier: 21.4.10
-        version: 21.4.10
+        specifier: 21.4.13
+        version: 21.4.13
       '@hapi/inert':
-        specifier: 7.1.2
-        version: 7.1.2
+        specifier: 7.1.3
+        version: 7.1.3
       '@hapi/wreck':
-        specifier: 18.1.2
-        version: 18.1.2
+        specifier: 18.1.3
+        version: 18.1.3
       '@hello-pangea/dnd':
         specifier: 18.0.1
         version: 18.0.1(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -531,7 +534,7 @@ importers:
         version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad
       '@kbn/access-control-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin
+        version: link:x-pack/platform/test_plugins/spaces_api_integration/common/plugins/access_control_test_plugin
       '@kbn/actions-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/actions
@@ -607,6 +610,9 @@ importers:
       '@kbn/agentic-investigations-common':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-agentic-investigations-common
+      '@kbn/agentic-investigations-impact':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-agentic-investigations-impact
       '@kbn/agentic-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/agentic_investigations
@@ -744,10 +750,10 @@ importers:
         version: link:src/platform/packages/private/analytics/utils/analytics_collection_utils
       '@kbn/analytics-ftr-helpers-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/analytics/plugins/analytics_ftr_helpers
+        version: link:src/platform/test_plugins/analytics/analytics_ftr_helpers
       '@kbn/analytics-plugin-a-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/analytics/plugins/analytics_plugin_a
+        version: link:src/platform/test_plugins/analytics/analytics_plugin_a
       '@kbn/announcement-banner':
         specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/display/kbn-announcement-banner
@@ -804,13 +810,13 @@ importers:
         version: link:src/core/packages/chrome/app-header
       '@kbn/app-link-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/app_link_test
+        version: link:src/platform/test_plugins/plugin_functional/app_link_test
       '@kbn/app-menu':
         specifier: workspace:*
         version: link:src/core/packages/chrome/app-menu/app-menu
       '@kbn/application-usage-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/usage_collection/plugins/application_usage_test
+        version: link:x-pack/platform/test_plugins/usage_collection/application_usage_test
       '@kbn/as-code-dashboard-schema':
         specifier: workspace:*
         version: link:src/platform/packages/shared/as-code/dashboard-schema
@@ -855,7 +861,7 @@ importers:
         version: link:x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common
       '@kbn/audit-log-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/audit_log
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/audit_log
       '@kbn/automatic-import-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/automatic_import
@@ -951,7 +957,7 @@ importers:
         version: link:x-pack/platform/plugins/private/cloud_integrations/cloud_full_story
       '@kbn/cloud-integration-saml-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cloud_integration/plugins/saml_provider
+        version: link:x-pack/platform/test_plugins/cloud_integration/saml_provider
       '@kbn/cloud-links-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/cloud_integrations/cloud_links
@@ -976,6 +982,9 @@ importers:
       '@kbn/coloring':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-coloring
+      '@kbn/coloring-components':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-coloring-components
       '@kbn/config':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-config
@@ -1125,7 +1134,7 @@ importers:
         version: link:src/core/packages/analytics/server-internal
       '@kbn/core-app-status-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_app_status
+        version: link:src/platform/test_plugins/plugin_functional/core_app_status
       '@kbn/core-application-browser':
         specifier: workspace:*
         version: link:src/core/packages/application/browser
@@ -1347,7 +1356,7 @@ importers:
         version: link:src/core/packages/feature-flags/server-mocks
       '@kbn/core-history-block-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_history_block
+        version: link:src/platform/test_plugins/plugin_functional/core_history_block
       '@kbn/core-http-browser':
         specifier: workspace:*
         version: link:src/core/packages/http/browser
@@ -1362,7 +1371,7 @@ importers:
         version: link:src/core/packages/http/context-server-internal
       '@kbn/core-http-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_http
+        version: link:src/platform/test_plugins/plugin_functional/core_http
       '@kbn/core-http-rate-limiter-browser-internal':
         specifier: workspace:*
         version: link:src/core/packages/http/rate-limiter-browser-internal
@@ -1473,40 +1482,40 @@ importers:
         version: link:src/core/packages/overlays/browser-internal
       '@kbn/core-plugin-a-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_a
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_a
       '@kbn/core-plugin-appleave-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_appleave
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_appleave
       '@kbn/core-plugin-b-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_b
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_b
       '@kbn/core-plugin-chromeless-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_chromeless
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_chromeless
       '@kbn/core-plugin-deep-links-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_deep_links
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_deep_links
       '@kbn/core-plugin-deprecations-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_deprecations
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_deprecations
       '@kbn/core-plugin-dynamic-resolving-a':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_dynamic_resolving_a
+        version: link:src/platform/test_plugins/plugin_functional/core_dynamic_resolving_a
       '@kbn/core-plugin-dynamic-resolving-b':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_dynamic_resolving_b
+        version: link:src/platform/test_plugins/plugin_functional/core_dynamic_resolving_b
       '@kbn/core-plugin-execution-context-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_execution_context
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_execution_context
       '@kbn/core-plugin-helpmenu-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_helpmenu
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_helpmenu
       '@kbn/core-plugin-initializer-context-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context
+        version: link:src/platform/test_plugins/node_roles_functional/core_plugin_initializer_context
       '@kbn/core-plugin-route-timeouts-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_route_timeouts
       '@kbn/core-plugins-base-server-internal':
         specifier: workspace:*
         version: link:src/core/packages/plugins/base-server-internal
@@ -1551,7 +1560,7 @@ importers:
         version: link:src/core/packages/pricing/server-internal
       '@kbn/core-provider-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_provider_plugin
+        version: link:src/platform/test_plugins/plugin_functional/core_provider_plugin
       '@kbn/core-pubsub-server':
         specifier: workspace:*
         version: link:src/core/packages/pubsub/server
@@ -1798,6 +1807,9 @@ importers:
       '@kbn/dashboard-agent-authoring':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/dashboard-agent-authoring
+      '@kbn/dashboard-constants':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/dashboards/dashboard-constants
       '@kbn/dashboard-markdown':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/dashboard_markdown
@@ -2052,10 +2064,10 @@ importers:
         version: link:x-pack/platform/plugins/shared/elastic_console
       '@kbn/elasticsearch-client-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin
+        version: link:src/platform/test_plugins/plugin_functional/elasticsearch_client_plugin
       '@kbn/elasticsearch-client-xpack-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client
+        version: link:x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client
       '@kbn/elasticsearch-home':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/elasticsearch_home
@@ -2124,7 +2136,7 @@ importers:
         version: link:examples/eso_model_version_example
       '@kbn/eso-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin
+        version: link:x-pack/platform/test_plugins/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin
       '@kbn/esql':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/esql
@@ -2256,16 +2268,16 @@ importers:
         version: link:examples/feature_flags_example
       '@kbn/feature-usage-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test
+        version: link:x-pack/platform/test_plugins/plugin_api_integration/plugins/feature_usage_test
       '@kbn/features-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/features
       '@kbn/features-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/features_provider
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/features_provider
       '@kbn/fec-alerts-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_execution_context/plugins/alerts
+        version: link:x-pack/platform/test_plugins/functional_execution_context/alerts
       '@kbn/feedback-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/feedback
@@ -2331,7 +2343,7 @@ importers:
         version: link:src/platform/packages/shared/shared-ux/flyout/template
       '@kbn/foo-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin
+        version: link:x-pack/platform/test_plugins/ui_capabilities/common/plugins/foo_plugin
       '@kbn/fs':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-fs
@@ -2400,7 +2412,7 @@ importers:
         version: link:src/platform/packages/private/kbn-hapi-mocks
       '@kbn/hardening-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/hardening
+        version: link:src/platform/test_plugins/plugin_functional/plugins/hardening
       '@kbn/health-gateway-server':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-health-gateway-server
@@ -2430,7 +2442,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-i18n-react
       '@kbn/iframe-embedded-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_embedded/plugins/iframe_embedded
+        version: link:x-pack/platform/test_plugins/functional_embedded/iframe_embedded
       '@kbn/image-embeddable-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/image_embeddable
@@ -2520,7 +2532,7 @@ importers:
         version: link:src/platform/plugins/private/interactive_setup
       '@kbn/interactive-setup-test-endpoints-plugin':
         specifier: workspace:*
-        version: link:src/platform/plugins/private/interactive_setup/test/plugins/test_endpoints
+        version: link:src/platform/test_plugins/interactive_setup_test_endpoints
       '@kbn/intercepts-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/intercepts
@@ -2556,16 +2568,16 @@ importers:
         version: link:x-pack/platform/packages/private/ml/json_schemas
       '@kbn/kbn-health-gateway-status-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/health_gateway/plugins/status
+        version: link:src/platform/test_plugins/health_gateway/status
       '@kbn/kbn-top-nav-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/kbn_top_nav
+        version: link:src/platform/test_plugins/plugin_functional/kbn_top_nav
       '@kbn/kbn-tp-custom-visualizations-plugin':
         specifier: workspace:*
         version: link:src/platform/test_plugins/kbn_tp_custom_visualizations
       '@kbn/kbn-tp-run-pipeline-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline
+        version: link:src/platform/test_plugins/interpreter_functional/kbn_tp_run_pipeline
       '@kbn/key-value-metadata-table':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-key-value-metadata-table
@@ -2574,7 +2586,7 @@ importers:
         version: link:x-pack/platform/packages/shared/kbn-kibana-api-cli
       '@kbn/kibana-cors-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_cors/plugins/kibana_cors_test
+        version: link:x-pack/platform/test_plugins/functional_cors/plugins/kibana_cors_test
       '@kbn/kibana-overview-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/kibana_overview
@@ -2880,13 +2892,16 @@ importers:
         version: link:src/platform/plugins/shared/newsfeed
       '@kbn/newsfeed-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/common/plugins/newsfeed
+        version: link:src/platform/test_plugins/common/newsfeed
       '@kbn/nightshift-ai':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-nightshift-ai
       '@kbn/nightshift-decision-trees':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-nightshift-decision-trees
+      '@kbn/nightshift-detection-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/nightshift_detection
       '@kbn/nightshift-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/nightshift_investigations
@@ -2979,7 +2994,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-occ
       '@kbn/oidc-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/oidc_provider
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/oidc_provider
       '@kbn/ols':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-ols
@@ -3019,6 +3034,9 @@ importers:
       '@kbn/palettes':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-palettes
+      '@kbn/palettes-components':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-palettes-components
       '@kbn/panel-loader':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-panel-loader
@@ -3132,7 +3150,7 @@ importers:
         version: link:x-pack/platform/plugins/private/remote_clusters
       '@kbn/rendering-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/rendering_plugin
+        version: link:src/platform/test_plugins/plugin_functional/rendering_plugin
       '@kbn/repo-info':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-repo-info
@@ -3279,7 +3297,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-safer-lodash-set
       '@kbn/saml-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/saml_provider
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/saml_provider
       '@kbn/sample-data-ingest':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/sample_data_ingest
@@ -3291,13 +3309,13 @@ importers:
         version: link:x-pack/platform/plugins/shared/sandbox
       '@kbn/saved-object-export-transforms-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_object_export_transforms
+        version: link:src/platform/test_plugins/plugin_functional/saved_object_export_transforms
       '@kbn/saved-object-import-warnings-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_object_import_warnings
+        version: link:src/platform/test_plugins/plugin_functional/saved_object_import_warnings
       '@kbn/saved-object-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin
+        version: link:x-pack/platform/test_plugins/saved_object_api_integration/common/plugins/saved_object_test_plugin
       '@kbn/saved-objects-example-plugin':
         specifier: workspace:*
         version: link:examples/saved_objects
@@ -3306,10 +3324,10 @@ importers:
         version: link:src/platform/plugins/shared/saved_objects_finder
       '@kbn/saved-objects-hidden-from-http-apis-type-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type
+        version: link:src/platform/test_plugins/plugin_functional/saved_objects_hidden_from_http_apis_type
       '@kbn/saved-objects-hidden-type-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_objects_hidden_type
+        version: link:src/platform/test_plugins/plugin_functional/saved_objects_hidden_type
       '@kbn/saved-objects-management-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/saved_objects_management
@@ -3495,7 +3513,7 @@ importers:
         version: link:x-pack/solutions/security/packages/upselling
       '@kbn/security-test-endpoints-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_functional/plugins/test_endpoints
+        version: link:x-pack/platform/test_plugins/security_functional/plugins/test_endpoints
       '@kbn/security-ui-components':
         specifier: workspace:*
         version: link:x-pack/platform/packages/private/security/ui_components
@@ -3615,10 +3633,10 @@ importers:
         version: link:src/platform/packages/shared/serverless/settings/vectordb_project
       '@kbn/service-accounts-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/service_accounts
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/service_accounts
       '@kbn/session-notifications-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/session_notifications
+        version: link:src/platform/test_plugins/plugin_functional/session_notifications
       '@kbn/session-view-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/security/plugins/session_view
@@ -3792,7 +3810,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/spaces
       '@kbn/spaces-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin
+        version: link:x-pack/platform/test_plugins/spaces_api_integration/common/plugins/spaces_test_plugin
       '@kbn/sse-example-plugin':
         specifier: workspace:*
         version: link:examples/sse_example
@@ -3813,16 +3831,16 @@ importers:
         version: link:x-pack/platform/plugins/shared/stack_connectors
       '@kbn/stack-management-usage-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/usage_collection/plugins/stack_management_usage_test
+        version: link:x-pack/platform/test_plugins/usage_collection/stack_management_usage_test
       '@kbn/state-containers-examples-plugin':
         specifier: workspace:*
         version: link:examples/state_containers_examples
       '@kbn/status-plugin-a-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/server_integration/plugins/status_plugin_a
+        version: link:src/platform/test_plugins/server_integration/status_plugin_a
       '@kbn/status-plugin-b-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/server_integration/plugins/status_plugin_b
+        version: link:src/platform/test_plugins/server_integration/status_plugin_b
       '@kbn/std':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-std
@@ -3888,10 +3906,10 @@ importers:
         version: link:src/platform/plugins/shared/telemetry
       '@kbn/telemetry-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/telemetry
+        version: link:src/platform/test_plugins/plugin_functional/telemetry
       '@kbn/test-feature-usage-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/licensing_plugin/plugins/test_feature_usage
+        version: link:x-pack/platform/test_plugins/licensing_plugin/plugins/test_feature_usage
       '@kbn/testing-embedded-lens-plugin':
         specifier: workspace:*
         version: link:x-pack/examples/testing_embedded_lens
@@ -3987,7 +4005,7 @@ importers:
         version: link:src/platform/kbn-ui/react-assembly
       '@kbn/ui-settings-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/ui_settings_plugin
+        version: link:src/platform/test_plugins/plugin_functional/ui_settings_plugin
       '@kbn/ui-shared-deps-npm':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ui-shared-deps-npm
@@ -4068,7 +4086,7 @@ importers:
         version: link:src/platform/plugins/shared/usage_collection
       '@kbn/usage-collection-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/usage_collection
+        version: link:src/platform/test_plugins/plugin_functional/usage_collection
       '@kbn/use-observable':
         specifier: workspace:*
         version: link:src/platform/packages/shared/react/use_observable
@@ -4086,10 +4104,10 @@ importers:
         version: link:examples/user_profile_examples
       '@kbn/user-profiles-consumer-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/user_profiles_consumer
       '@kbn/user-storage-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/user_storage/plugins/user_storage_test
+        version: link:src/platform/test_plugins/user_storage
       '@kbn/utility-types':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-utility-types
@@ -4165,6 +4183,9 @@ importers:
       '@kbn/visualizations-common':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-visualizations-common
+      '@kbn/visualizations-components':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-visualizations-components
       '@kbn/visualizations-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/visualizations
@@ -4176,19 +4197,25 @@ importers:
         version: link:src/platform/packages/shared/kbn-workflows
       '@kbn/workflows-execution-engine':
         specifier: workspace:*
-        version: link:src/platform/plugins/shared/workflows_execution_engine
+        version: link:x-pack/platform/plugins/shared/workflows_execution_engine
       '@kbn/workflows-extensions':
         specifier: workspace:*
-        version: link:src/platform/plugins/shared/workflows_extensions
+        version: link:x-pack/platform/plugins/shared/workflows_extensions
       '@kbn/workflows-extensions-example':
         specifier: workspace:*
         version: link:examples/workflows_extensions_example
+      '@kbn/workflows-inbound-hub-test-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/test_plugins/workflows_inbound_hub/plugins/inbound_hub_connector
       '@kbn/workflows-library':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workflows-library
       '@kbn/workflows-management-plugin':
         specifier: workspace:*
-        version: link:src/platform/plugins/shared/workflows_management
+        version: link:x-pack/platform/plugins/shared/workflows_management
+      '@kbn/workflows-topics':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-workflows-topics
       '@kbn/workflows-ui':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workflows-ui
@@ -4215,7 +4242,7 @@ importers:
         version: 1.5.0(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))
       '@langchain/classic':
         specifier: 1.0.55
-        version: 1.0.55(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@smithy/signature-v4@5.7.4)(cheerio@1.0.0-rc.12)(google-auth-library@10.9.1(supports-color@10.2.2))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(peggy@5.1.0)(undici@7.30.1)(ws@8.22.0)
+        version: 1.0.55(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@smithy/signature-v4@5.7.4)(cheerio@1.0.0-rc.12)(google-auth-library@10.9.1(supports-color@10.2.2))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(peggy@5.1.0)(undici@7.30.2)(ws@8.22.0)
       '@langchain/core':
         specifier: 1.3.0
         version: 1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0)
@@ -4233,13 +4260,13 @@ importers:
         version: 1.2.1(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))
       '@langchain/openai':
         specifier: 1.7.0
-        version: 1.7.0(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.1)(ws@8.22.0)
+        version: 1.7.0(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.2)(ws@8.22.0)
       '@launchdarkly/node-server-sdk':
-        specifier: 9.14.3
-        version: 9.14.3(supports-color@10.2.2)
+        specifier: 9.16.3
+        version: 9.16.3(supports-color@10.2.2)
       '@launchdarkly/openfeature-node-server':
-        specifier: 2.0.11
-        version: 2.0.11(@launchdarkly/node-server-sdk@9.14.3(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+        specifier: 2.1.6
+        version: 2.1.6(@launchdarkly/node-server-sdk@9.16.3(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -4325,8 +4352,8 @@ importers:
         specifier: 0.223.0
         version: 0.223.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/instrumentation-http':
-        specifier: 0.223.0
-        version: 0.223.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
+        specifier: 0.223.2
+        version: 0.223.2(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/instrumentation-undici':
         specifier: 0.33.0
         version: 0.33.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
@@ -4379,8 +4406,8 @@ importers:
         specifier: 9.3.1
         version: 9.3.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@tanstack/react-virtual':
-        specifier: 3.13.12
-        version: 3.13.12(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 3.14.23
+        version: 3.14.23(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@turf/along':
         specifier: 6.0.1
         version: 6.0.1
@@ -4418,8 +4445,8 @@ importers:
         specifier: 6.0.0
         version: 6.0.0
       '@xyflow/react':
-        specifier: 12.12.0
-        version: 12.12.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 12.12.1
+        version: 12.12.1(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       adm-zip:
         specifier: 0.6.1
         version: 0.6.1
@@ -4455,7 +4482,7 @@ importers:
         version: 2.0.5
       brok:
         specifier: 6.0.0
-        version: 6.0.0(@hapi/hapi@21.4.10)
+        version: 6.0.0(@hapi/hapi@21.4.13)
       byte-size:
         specifier: 9.0.1
         version: 9.0.1
@@ -4469,8 +4496,8 @@ importers:
         specifier: 4.0.3
         version: 4.0.3
       cbor2:
-        specifier: 2.4.0
-        version: 2.4.0
+        specifier: 2.4.1
+        version: 2.4.1
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -4640,8 +4667,8 @@ importers:
         specifier: 29.7.0
         version: 29.7.0
       joi:
-        specifier: 18.3.1
-        version: 18.3.1
+        specifier: 18.3.2
+        version: 18.3.2
       joi-to-json:
         specifier: 5.0.0
         version: 5.0.0
@@ -4655,8 +4682,8 @@ importers:
         specifier: 3.1.1
         version: 3.1.1
       jsondiffpatch:
-        specifier: 0.7.6
-        version: 0.7.6
+        specifier: 0.7.7
+        version: 0.7.7
       jsonwebtoken:
         specifier: 9.0.2
         version: 9.0.2
@@ -4727,14 +4754,14 @@ importers:
         specifier: 5.5.1
         version: 5.5.1(monaco-editor@0.56.0)
       mongodb:
-        specifier: 6.21.0
-        version: 6.21.0(socks@2.8.10)
+        specifier: 7.9.1
+        version: 7.9.1(@mongodb-js/zstd@7.0.0)(socks@2.8.10)
       mongodb-connection-string-url:
-        specifier: 3.0.2
-        version: 3.0.2
+        specifier: 7.0.3
+        version: 7.0.3
       mssql:
-        specifier: 12.7.2
-        version: 12.7.2(supports-color@10.2.2)
+        specifier: 12.7.13
+        version: 12.7.13(supports-color@10.2.2)
       murmurhash:
         specifier: 2.0.1
         version: 2.0.1
@@ -4751,11 +4778,11 @@ importers:
         specifier: 2.7.0
         version: 2.7.0
       node-forge:
-        specifier: 1.4.2
-        version: 1.4.2
+        specifier: 1.4.3
+        version: 1.4.3
       nodemailer:
-        specifier: 10.3.0
-        version: 10.3.0
+        specifier: 10.3.1
+        version: 10.3.1
       normalize-path:
         specifier: 3.0.0
         version: 3.0.0
@@ -4784,8 +4811,8 @@ importers:
         specifier: 4.6.2
         version: 4.6.2
       papaparse:
-        specifier: 5.5.3
-        version: 5.5.3
+        specifier: 5.7.1
+        version: 5.7.1
       pbf:
         specifier: 3.2.1
         version: 3.2.1
@@ -4812,7 +4839,7 @@ importers:
         version: 2.1.0
       puppeteer:
         specifier: 25.12.0
-        version: 25.12.0(proxy-agent@8.0.2(supports-color@10.2.2))(yauzl@3.4.0)
+        version: 25.12.0(proxy-agent@8.0.3(supports-color@10.2.2))(yauzl@3.4.0)
       query-string:
         specifier: 9.5.1
         version: 9.5.1
@@ -4952,8 +4979,8 @@ importers:
         specifier: 3.0.5
         version: 3.0.5
       semver:
-        specifier: 7.8.5
-        version: 7.8.5
+        specifier: 7.8.6
+        version: 7.8.6
       snakecase-keys:
         specifier: 8.0.1
         version: 8.0.1
@@ -4975,6 +5002,9 @@ importers:
       symbol-observable:
         specifier: 4.0.0
         version: 4.0.0
+      tabbable:
+        specifier: 5.3.3
+        version: 5.3.3
       tar:
         specifier: 7.5.22
         version: 7.5.22
@@ -4997,8 +5027,8 @@ importers:
         specifier: 1.2.2
         version: 1.2.2(typescript-fsa@3.0.0)
       undici:
-        specifier: 7.30.1
-        version: 7.30.1
+        specifier: 7.30.2
+        version: 7.30.2
       unidiff:
         specifier: 1.0.4
         version: 1.0.4
@@ -5148,11 +5178,8 @@ importers:
         specifier: 4.0.0
         version: 4.0.0(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
       '@elastic/eui-test-helpers':
-        specifier: 2.3.0
-        version: 2.3.0(@playwright/test@1.64.1)
-      '@elastic/eui-theme-common':
-        specifier: 10.2.0
-        version: 10.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 2.4.0
+        version: 2.4.0(@playwright/test@1.64.1)
       '@elastic/makelogs':
         specifier: 6.1.1
         version: 6.1.1
@@ -5228,6 +5255,9 @@ importers:
       '@kbn/check-saved-objects-cli':
         specifier: workspace:*
         version: link:packages/kbn-check-saved-objects-cli
+      '@kbn/check-server-import-graph-cli':
+        specifier: workspace:*
+        version: link:packages/kbn-check-server-import-graph-cli
       '@kbn/ci-stats-core':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ci-stats-core
@@ -5473,7 +5503,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-design-tools
       '@kbn/detections-response-ftr-services':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response
+        version: link:x-pack/solutions/security/test_helpers/detections-response-ftr-services
       '@kbn/dev':
         specifier: workspace:*
         version: link:src/dev
@@ -5504,6 +5534,9 @@ importers:
       '@kbn/developer-toolbar-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/developer_toolbar
+      '@kbn/developer-toolbar-profilers-plugin':
+        specifier: workspace:*
+        version: link:src/platform/plugins/private/developer_toolbar_profilers
       '@kbn/docs-utils':
         specifier: workspace:*
         version: link:packages/kbn-docs-utils
@@ -5797,7 +5830,7 @@ importers:
         version: link:src/platform/packages/private/kbn-optimizer-webpack-helpers
       '@kbn/osquery-plugin-cypress':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/osquery/cypress
+        version: link:x-pack/platform/packages/private/osquery-plugin-cypress
       '@kbn/otel-demo':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-otel-demo
@@ -5890,7 +5923,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-scout-synthtrace
       '@kbn/security-api-integration-helpers':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/packages/helpers
+        version: link:x-pack/platform/test_plugins/security_api_integration/packages/helpers
       '@kbn/security-evals-alerts-snapshot':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot
@@ -6016,7 +6049,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-test-subj-selector
       '@kbn/test-suites-security-solution-apis':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/security_solution_api_integration
+        version: link:x-pack/solutions/security/test_suites/test-suites-security-solution-apis
       '@kbn/test-suites-src':
         specifier: workspace:*
         version: link:src/platform/test
@@ -6037,7 +6070,7 @@ importers:
         version: link:x-pack/solutions/security/test
       '@kbn/test-suites-xpack-security-endpoint':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/security_solution_endpoint
+        version: link:x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint
       '@kbn/test-suites-xpack-vectordb':
         specifier: workspace:*
         version: link:x-pack/solutions/vectordb/test
@@ -6665,9 +6698,6 @@ importers:
       has-ansi:
         specifier: 3.0.0
         version: 3.0.0
-      hdr-histogram-js:
-        specifier: 3.0.1
-        version: 3.0.1
       http-proxy:
         specifier: 1.18.1
         version: 1.18.1(debug@4.4.3(supports-color@10.2.2))
@@ -6724,7 +6754,7 @@ importers:
         version: 25.0.1(supports-color@10.2.2)
       lighthouse:
         specifier: 13.4.1
-        version: 13.4.1(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.223.0(@opentelemetry/api@1.9.1))(proxy-agent@8.0.2(supports-color@10.2.2))(supports-color@10.2.2)(yauzl@3.4.0)
+        version: 13.4.1(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.223.0(@opentelemetry/api@1.9.1))(proxy-agent@8.0.3(supports-color@10.2.2))(supports-color@10.2.2)(yauzl@3.4.0)
       lightningcss:
         specifier: 1.33.0
         version: 1.33.0
@@ -7025,6 +7055,8 @@ importers:
   packages/kbn-check-prod-native-modules-cli: {}
 
   packages/kbn-check-saved-objects-cli: {}
+
+  packages/kbn-check-server-import-graph-cli: {}
 
   packages/kbn-ci-stats-performance-metrics: {}
 
@@ -7950,6 +7982,8 @@ importers:
 
   src/platform/packages/shared/dashboard-markdown-schemas: {}
 
+  src/platform/packages/shared/dashboards/dashboard-constants: {}
+
   src/platform/packages/shared/dashboards/dashboards-selector: {}
 
   src/platform/packages/shared/deeplinks/agent_builder: {}
@@ -8054,6 +8088,8 @@ importers:
 
   src/platform/packages/shared/kbn-coloring: {}
 
+  src/platform/packages/shared/kbn-coloring-components: {}
+
   src/platform/packages/shared/kbn-config: {}
 
   src/platform/packages/shared/kbn-config-schema: {}
@@ -8070,11 +8106,11 @@ importers:
         specifier: ^17.0.2
         version: 17.0.2
       mongodb:
-        specifier: 6.21.0
-        version: 6.21.0(socks@2.8.10)
+        specifier: 7.9.1
+        version: 7.9.1(@mongodb-js/zstd@7.0.0)(socks@2.8.10)
       mongodb-connection-string-url:
-        specifier: 3.0.2
-        version: 3.0.2
+        specifier: 7.0.3
+        version: 7.0.3
 
   src/platform/packages/shared/kbn-content-management-utils: {}
 
@@ -8302,6 +8338,8 @@ importers:
 
   src/platform/packages/shared/kbn-palettes: {}
 
+  src/platform/packages/shared/kbn-palettes-components: {}
+
   src/platform/packages/shared/kbn-profiler: {}
 
   src/platform/packages/shared/kbn-profiling-utils: {}
@@ -8476,9 +8514,13 @@ importers:
 
   src/platform/packages/shared/kbn-visualizations-common: {}
 
+  src/platform/packages/shared/kbn-visualizations-components: {}
+
   src/platform/packages/shared/kbn-workflows: {}
 
   src/platform/packages/shared/kbn-workflows-library: {}
+
+  src/platform/packages/shared/kbn-workflows-topics: {}
 
   src/platform/packages/shared/kbn-workflows-ui: {}
 
@@ -8656,6 +8698,8 @@ importers:
 
   src/platform/plugins/private/dev_comments: {}
 
+  src/platform/plugins/private/developer_toolbar_profilers: {}
+
   src/platform/plugins/private/event_annotation: {}
 
   src/platform/plugins/private/event_annotation_listing: {}
@@ -8671,8 +8715,6 @@ importers:
   src/platform/plugins/private/inspect_component: {}
 
   src/platform/plugins/private/interactive_setup: {}
-
-  src/platform/plugins/private/interactive_setup/test/plugins/test_endpoints: {}
 
   src/platform/plugins/private/kibana_overview: {}
 
@@ -8830,93 +8872,95 @@ importers:
 
   src/platform/plugins/shared/visualizations: {}
 
-  src/platform/plugins/shared/workflows_execution_engine: {}
+  x-pack/platform/plugins/shared/workflows_execution_engine: {}
 
-  src/platform/plugins/shared/workflows_extensions: {}
+  x-pack/platform/plugins/shared/workflows_extensions: {}
 
-  src/platform/plugins/shared/workflows_management: {}
+  x-pack/platform/plugins/shared/workflows_management: {}
 
   src/platform/test: {}
 
-  src/platform/test/analytics/plugins/analytics_ftr_helpers: {}
+  src/platform/test_plugins/analytics/analytics_ftr_helpers: {}
 
-  src/platform/test/analytics/plugins/analytics_plugin_a: {}
+  src/platform/test_plugins/analytics/analytics_plugin_a: {}
 
-  src/platform/test/common/plugins/newsfeed: {}
-
-  src/platform/test/health_gateway/plugins/status: {}
-
-  src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline: {}
-
-  src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context: {}
-
-  src/platform/test/plugin_functional/plugins/app_link_test: {}
-
-  src/platform/test/plugin_functional/plugins/core_app_status: {}
-
-  src/platform/test/plugin_functional/plugins/core_dynamic_resolving_a: {}
-
-  src/platform/test/plugin_functional/plugins/core_dynamic_resolving_b: {}
-
-  src/platform/test/plugin_functional/plugins/core_history_block: {}
-
-  src/platform/test/plugin_functional/plugins/core_http: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_a: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_appleave: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_b: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_chromeless: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_deep_links: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_deprecations: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_execution_context: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_helpmenu: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts: {}
-
-  src/platform/test/plugin_functional/plugins/core_provider_plugin: {}
-
-  src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin: {}
-
-  src/platform/test/plugin_functional/plugins/hardening: {}
-
-  src/platform/test/plugin_functional/plugins/kbn_top_nav: {}
-
-  src/platform/test/plugin_functional/plugins/rendering_plugin: {}
-
-  src/platform/test/plugin_functional/plugins/saved_object_export_transforms: {}
-
-  src/platform/test/plugin_functional/plugins/saved_object_import_warnings: {}
-
-  src/platform/test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type: {}
-
-  src/platform/test/plugin_functional/plugins/saved_objects_hidden_type: {}
-
-  src/platform/test/plugin_functional/plugins/session_notifications: {}
-
-  src/platform/test/plugin_functional/plugins/telemetry: {}
-
-  src/platform/test/plugin_functional/plugins/ui_settings_plugin: {}
-
-  src/platform/test/plugin_functional/plugins/usage_collection: {}
-
-  src/platform/test/server_integration/plugins/status_plugin_a: {}
-
-  src/platform/test/server_integration/plugins/status_plugin_b: {}
-
-  src/platform/test/user_storage/plugins/user_storage_test: {}
+  src/platform/test_plugins/common/newsfeed: {}
 
   src/platform/test_plugins/data_search: {}
 
+  src/platform/test_plugins/health_gateway/status: {}
+
+  src/platform/test_plugins/interactive_setup_test_endpoints: {}
+
+  src/platform/test_plugins/interpreter_functional/kbn_tp_run_pipeline: {}
+
   src/platform/test_plugins/kbn_tp_custom_visualizations: {}
 
+  src/platform/test_plugins/node_roles_functional/core_plugin_initializer_context: {}
+
   src/platform/test_plugins/otel_metrics: {}
+
+  src/platform/test_plugins/plugin_functional/app_link_test: {}
+
+  src/platform/test_plugins/plugin_functional/core_app_status: {}
+
+  src/platform/test_plugins/plugin_functional/core_dynamic_resolving_a: {}
+
+  src/platform/test_plugins/plugin_functional/core_dynamic_resolving_b: {}
+
+  src/platform/test_plugins/plugin_functional/core_history_block: {}
+
+  src/platform/test_plugins/plugin_functional/core_http: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_a: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_appleave: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_b: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_chromeless: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_deep_links: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_deprecations: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_execution_context: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_helpmenu: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_route_timeouts: {}
+
+  src/platform/test_plugins/plugin_functional/core_provider_plugin: {}
+
+  src/platform/test_plugins/plugin_functional/elasticsearch_client_plugin: {}
+
+  src/platform/test_plugins/plugin_functional/kbn_top_nav: {}
+
+  src/platform/test_plugins/plugin_functional/plugins/hardening: {}
+
+  src/platform/test_plugins/plugin_functional/rendering_plugin: {}
+
+  src/platform/test_plugins/plugin_functional/saved_object_export_transforms: {}
+
+  src/platform/test_plugins/plugin_functional/saved_object_import_warnings: {}
+
+  src/platform/test_plugins/plugin_functional/saved_objects_hidden_from_http_apis_type: {}
+
+  src/platform/test_plugins/plugin_functional/saved_objects_hidden_type: {}
+
+  src/platform/test_plugins/plugin_functional/session_notifications: {}
+
+  src/platform/test_plugins/plugin_functional/telemetry: {}
+
+  src/platform/test_plugins/plugin_functional/ui_settings_plugin: {}
+
+  src/platform/test_plugins/plugin_functional/usage_collection: {}
+
+  src/platform/test_plugins/server_integration/status_plugin_a: {}
+
+  src/platform/test_plugins/server_integration/status_plugin_b: {}
+
+  src/platform/test_plugins/user_storage: {}
 
   src/setup_node_env: {}
 
@@ -9022,6 +9066,8 @@ importers:
 
   x-pack/platform/packages/private/ml/validators: {}
 
+  x-pack/platform/packages/private/osquery-plugin-cypress: {}
+
   x-pack/platform/packages/private/rollup: {}
 
   x-pack/platform/packages/private/security/authorization_core: {}
@@ -9119,6 +9165,8 @@ importers:
   x-pack/platform/packages/shared/isomer/isomer-theme: {}
 
   x-pack/platform/packages/shared/kbn-agentic-investigations-common: {}
+
+  x-pack/platform/packages/shared/kbn-agentic-investigations-impact: {}
 
   x-pack/platform/packages/shared/kbn-ai-assistant: {}
 
@@ -9556,8 +9604,6 @@ importers:
 
   x-pack/platform/plugins/shared/osquery: {}
 
-  x-pack/platform/plugins/shared/osquery/cypress: {}
-
   x-pack/platform/plugins/shared/proposals: {}
 
   x-pack/platform/plugins/shared/query_activity: {}
@@ -9600,51 +9646,23 @@ importers:
 
   x-pack/platform/test: {}
 
-  x-pack/platform/test/cloud_integration/plugins/saml_provider: {}
-
-  x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin: {}
-
-  x-pack/platform/test/functional_cors/plugins/kibana_cors_test: {}
-
-  x-pack/platform/test/functional_embedded/plugins/iframe_embedded: {}
-
-  x-pack/platform/test/functional_execution_context/plugins/alerts: {}
-
-  x-pack/platform/test/licensing_plugin/plugins/test_feature_usage: {}
-
-  x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client: {}
-
-  x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test: {}
-
-  x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin: {}
-
-  x-pack/platform/test/security_api_integration/packages/helpers: {}
-
-  x-pack/platform/test/security_api_integration/plugins/audit_log: {}
-
-  x-pack/platform/test/security_api_integration/plugins/features_provider: {}
-
-  x-pack/platform/test/security_api_integration/plugins/oidc_provider: {}
-
-  x-pack/platform/test/security_api_integration/plugins/saml_provider: {}
-
-  x-pack/platform/test/security_api_integration/plugins/service_accounts: {}
-
-  x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer: {}
-
-  x-pack/platform/test/security_functional/plugins/test_endpoints: {}
-
-  x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin: {}
-
-  x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin: {}
-
-  x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin: {}
-
-  x-pack/platform/test/usage_collection/plugins/application_usage_test: {}
-
-  x-pack/platform/test/usage_collection/plugins/stack_management_usage_test: {}
-
   x-pack/platform/test_plugins/agent_builder_sml_test_types: {}
+
+  x-pack/platform/test_plugins/cloud_integration/saml_provider: {}
+
+  x-pack/platform/test_plugins/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin: {}
+
+  x-pack/platform/test_plugins/functional_cors/plugins/kibana_cors_test: {}
+
+  x-pack/platform/test_plugins/functional_embedded/iframe_embedded: {}
+
+  x-pack/platform/test_plugins/functional_execution_context/alerts: {}
+
+  x-pack/platform/test_plugins/licensing_plugin/plugins/test_feature_usage: {}
+
+  x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client: {}
+
+  x-pack/platform/test_plugins/plugin_api_integration/plugins/feature_usage_test: {}
 
   x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad: {}
 
@@ -9670,7 +9688,25 @@ importers:
 
   x-pack/platform/test_plugins/response_ops/task_manager/service_accounts: {}
 
+  x-pack/platform/test_plugins/saved_object_api_integration/common/plugins/saved_object_test_plugin: {}
+
   x-pack/platform/test_plugins/search_inference_endpoints_fixtures: {}
+
+  x-pack/platform/test_plugins/security_api_integration/packages/helpers: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/audit_log: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/features_provider: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/oidc_provider: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/saml_provider: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/service_accounts: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/user_profiles_consumer: {}
+
+  x-pack/platform/test_plugins/security_functional/plugins/test_endpoints: {}
 
   x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases: {}
 
@@ -9679,6 +9715,18 @@ importers:
   x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution: {}
 
   x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases: {}
+
+  x-pack/platform/test_plugins/spaces_api_integration/common/plugins/access_control_test_plugin: {}
+
+  x-pack/platform/test_plugins/spaces_api_integration/common/plugins/spaces_test_plugin: {}
+
+  x-pack/platform/test_plugins/ui_capabilities/common/plugins/foo_plugin: {}
+
+  x-pack/platform/test_plugins/usage_collection/application_usage_test: {}
+
+  x-pack/platform/test_plugins/usage_collection/stack_management_usage_test: {}
+
+  x-pack/platform/test_plugins/workflows_inbound_hub/plugins/inbound_hub_connector: {}
 
   x-pack/solutions/observability/packages/alert-details: {}
 
@@ -9741,6 +9789,8 @@ importers:
   x-pack/solutions/observability/plugins/metrics_data_access: {}
 
   x-pack/solutions/observability/plugins/nightshift: {}
+
+  x-pack/solutions/observability/plugins/nightshift_detection: {}
 
   x-pack/solutions/observability/plugins/nightshift_investigations: {}
 
@@ -9916,6 +9966,8 @@ importers:
 
   x-pack/solutions/security/packages/kbn-securitysolution-utils: {}
 
+  x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint: {}
+
   x-pack/solutions/security/packages/navigation: {}
 
   x-pack/solutions/security/packages/security-ai-prompts: {}
@@ -9974,13 +10026,11 @@ importers:
 
   x-pack/solutions/security/test: {}
 
-  x-pack/solutions/security/test/security_solution_api_integration: {}
-
-  x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response: {}
-
-  x-pack/solutions/security/test/security_solution_endpoint: {}
+  x-pack/solutions/security/test_helpers/detections-response-ftr-services: {}
 
   x-pack/solutions/security/test_plugins/resolver_test: {}
+
+  x-pack/solutions/security/test_suites/test-suites-security-solution-apis: {}
 
   x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding: {}
 
@@ -10061,9 +10111,6 @@ packages:
 
   '@asamuzakjp/css-color@3.2.0':
     resolution: {integrity: sha512-K1A6z8tS3XsmCMM86xoWdn7Fkdn9m6RSVtocUrJYIwZnFVkng/PvkEoWtOWmP+Scc6saYWHWZYbndEEXxl24jw==}
-
-  '@assemblyscript/loader@0.19.23':
-    resolution: {integrity: sha512-ulkCYfFbYj01ie1MDOyxv2F6SpRN1TOj7fQxbP07D6HmeR+gr2JLSmINKjga2emB+b1L2KGrFKBTc+e00p54nw==}
 
   '@asyncapi/specs@6.11.1':
     resolution: {integrity: sha512-A3WBLqAKGoJ2+6FWFtpjBlCQ1oFCcs4GxF7zsIGvNqp/klGUHjlA3aAcZ9XMMpLGE8zPeYDz2x9FmO6DSuKraQ==}
@@ -11060,9 +11107,9 @@ packages:
     peerDependencies:
       postcss-selector-parser: ^7.1.1
 
-  '@cto.af/wtf8@0.0.6':
-    resolution: {integrity: sha512-xp/zbWLXuh2WBxi9tIc+Jep7BAwLu8ETTI8xN68ks10bxOBMISs/jcu9DBEkOeGXLaTKUbA0Y2Ficx/jmmPABg==}
-    engines: {node: '>=20'}
+  '@cto.af/wtf8@1.0.0':
+    resolution: {integrity: sha512-qI0XnZxcj/FmASB8XXWqG49bSIzu0I/02deAjhnTni9IZ7KMRVlh8EFLE+mmJlMA169lET6rTCFhEsZSjOwlhA==}
+    engines: {node: '>=22'}
 
   '@cypress/grep@5.1.0':
     resolution: {integrity: sha512-n/8m5g2AuZf4thHhuo+rp7Fgkfm06k0uM9NlP0GrfWE5vaIJJ+8U10SOtjVj9bapjYI7l9RZiT87XSBU3wBFOA==}
@@ -11151,8 +11198,8 @@ packages:
   '@elastic/app-search-javascript@8.13.0':
     resolution: {integrity: sha512-E1oV7eqHz0jbSd7mtbFDoP7aeosNORziCr3RLuIt2G2/ex/EnMLnL7Xz7yHzMHa0K9cvdRPW2458BR0JXYmKZQ==}
 
-  '@elastic/charts@73.3.2':
-    resolution: {integrity: sha512-Wr2fA24QdRwYgUiOkNiTHFkMPlFkVcVp9fwhn4pyKhFbk5C+/63OUF4zXnAu3wgITdv9dJLD7vWAoNjtwbFjeQ==}
+  '@elastic/charts@73.4.1':
+    resolution: {integrity: sha512-dJfbp+vnNHBNodnCd1hPeAixlzgtIEtyJd30WzJdiUGNv6aCN6KPnRa+DfdFPzHl31eUCqnHWFnTIAqQwL+pqg==}
     peerDependencies:
       moment: ^2.29.1
       moment-timezone: ^0.5.32
@@ -11208,35 +11255,35 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: 6.0.3
 
-  '@elastic/esql-ast@4.38.0':
-    resolution: {integrity: sha512-FmDI4o9K2vSG/uXsVmU9kVaCP0hlSAz7zgeNdVf7lpdgs5Mdh2Rav4KClICt7Lcy8qNSMK4QorKsNaqMbRebPw==}
+  '@elastic/esql-ast@4.41.0':
+    resolution: {integrity: sha512-D3MgRphE1ROwEUDtStjjxnXiidw/wOrw9pPNX+ipqQzxt3eVy9uqjJciuvVvr2Okd72viq01+DHloFHhKMe0Sg==}
 
-  '@elastic/esql-definitions@4.38.0':
-    resolution: {integrity: sha512-Q891U0Z3j8OZEZ/KiDYR2ft7kmL0BZicz1Hy+HGYbnZat7r2LXGV3ZgIwTOiPPsy0GtGtY2i/5BwxswyGRjLIA==}
+  '@elastic/esql-definitions@4.41.0':
+    resolution: {integrity: sha512-2TVc13DLwAlo6J2/fjdf1JXzDEyjXtPk/Qr8edmL9plLCnMt1kJ2Fg6+YRiUmGRrPILi3JneDEPp4S4tbXtEBA==}
 
-  '@elastic/esql-grammar@4.38.0':
-    resolution: {integrity: sha512-KY1YsOQ9H5ZWI363EGCaPQXS+iU6el8R23Gp188GZVjjJ/EmkiXH1hS8wmKDSjVdE5OF/FjZ1+3gwq/WpSMO4Q==}
+  '@elastic/esql-grammar@4.41.0':
+    resolution: {integrity: sha512-HwR39Qx0Kttv+V57F6tnKYr8Y5dV5AQttoeABrTV55PA5q1bXB63mx9TnwTWr0f0CTumj602TSsZOTwrHe0a+A==}
 
-  '@elastic/esql-parser@4.38.0':
-    resolution: {integrity: sha512-9OpUJshtUQgcj/gKsGLL7FeMdhuUPkXmYg5CbB9pEqmlyzQlUbuJaRMtpCJHkPQjiBADi9+bIOC4FpMep1Wqyw==}
+  '@elastic/esql-parser@4.41.0':
+    resolution: {integrity: sha512-1F7oS8mawb+No1MGiBEKYpMyeo4K2vqUUxk52kXhfKrjM47RWps1ZzbyF3Ur9FU3l588QlTZ/K8oAX2goHVOWA==}
 
-  '@elastic/esql-promql-grammar@4.38.0':
-    resolution: {integrity: sha512-xW+Ik+3C7+c2bxd0ZLCqe1F0Aeuv5mCcaL301S0ykjZJTIEz2ANdzXbBw+pzCjaAOzVNTb6alIx6H32LsniIkg==}
+  '@elastic/esql-promql-grammar@4.41.0':
+    resolution: {integrity: sha512-PYJo7p6k5ZywoNQa+Tj4Ha0mO+ErstM4o+SRzv/mBfwwAUhBlEFax6mOG3beEAMY9rnXt3N8l63nkDgi6dH2Qg==}
 
-  '@elastic/esql-traversal@4.38.0':
-    resolution: {integrity: sha512-cCLIyuHQAK9E52ep/mnOzbP86po74oyD3tXrVFXcTsNdxzyLu+hMtRyhTEWpJAot6JtSgaqO316UDk71MPPj8w==}
+  '@elastic/esql-traversal@4.41.0':
+    resolution: {integrity: sha512-o6U2HuY6IPSQvJqI6XqGIOUvhb2coMpZ3iM6o9pZeKmh6N6y2fEn0UA09Eck1Js1A2UimqjsiVrBiyUrg3/rRQ==}
 
-  '@elastic/esql-types@4.38.0':
-    resolution: {integrity: sha512-eS4Nrw4PD+v5DABvKdjfTaA8qTAWujA/h8Dn5hiyknNb6UwXt5fHLCXnDDXRf6XX7ec3ay8KgyQBhmnLJFQtgw==}
+  '@elastic/esql-types@4.41.0':
+    resolution: {integrity: sha512-vi3Fcx52dZdulkHTdz7BEEwJYrVpJyJq7v2Z2t+4QBJViUDcewT1SYZYgM2WowIZnJtZSOb/Ol1jqm6ihe7AnA==}
 
-  '@elastic/esql@4.38.0':
-    resolution: {integrity: sha512-SnGBlDGS4eGlhVE+ZOHhZ4shbB132DcbByKcvvUGLYlzB76Xj8wunPoQbVY9snJ7wtxG8y383bO5YWEIeK2/jA==}
+  '@elastic/esql@4.41.0':
+    resolution: {integrity: sha512-kyAlb/I6j9qSD5kjEhkFV2Dzk/pGbZzWasvTs3XLqV+isE8+jdTo0uFGeLUx5/i1pAQHlPa830RVI+kGPtdK+Q==}
 
   '@elastic/eui-illustrations@1.1.0':
     resolution: {integrity: sha512-xqOf5dcFmB0WylGy7w2aTJfHMIOjGxW1xops2WkxsfWEpqSFz4r0y4QCpGW+zEhRBVemWcB/lr3S+GoFqm+AFQ==}
 
-  '@elastic/eui-test-helpers@2.3.0':
-    resolution: {integrity: sha512-Ay2bNNG8BhhYnMVAbvAku8RapHEcIm2EToTCvWtdL0RkoJ8MR+unc6bdUFk7JBWoV/xqDGAK74cperRKEnJisA==}
+  '@elastic/eui-test-helpers@2.4.0':
+    resolution: {integrity: sha512-6x/H6rdmBk3q4H1OYPNgm4dR0aa8jMbBCJadlrYWVb1wdxDAdaiFPykD9mWm+H8K9YsAG8JqCQUbq2ySiHISEg==}
     peerDependencies:
       '@playwright/test': ^1.50.0
     peerDependenciesMeta:
@@ -11253,8 +11300,8 @@ packages:
       react: ^17.0 || ^18.0
       react-dom: ^17.0 || ^18.0
 
-  '@elastic/eui@123.4.0':
-    resolution: {integrity: sha512-U8WQzSUO9b2P+hblbl3zD5zlcgDNOQGc/X2c6a0zBL+3KAuFfg1bTwpFO4JgZsyMq9PCpxPrmnwPDL/1hFWrRw==}
+  '@elastic/eui@123.5.0':
+    resolution: {integrity: sha512-VMCxV/YLywoxYILqCWZLRtkiHJ8J7TM7djqLdnyf8mty6cFdr1a5rlbQY+EabDLKaPwqQODSZbHW66Qjqx6zRg==}
     engines: {node: 16.x || 18.x || >=20.x}
     peerDependencies:
       '@elastic/datemath': ^5.0.2
@@ -11302,8 +11349,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.38.0':
-    resolution: {integrity: sha512-bKvBxq9/u+QWg7HvLsrJphKhi34eKqxiSWSfeJ8O5Cgp1lca10pzCsBqelobzcJd2hQLVAb8EPCK7IySc4vbnA==}
+  '@elastic/monaco-esql@4.40.0':
+    resolution: {integrity: sha512-IrcrJP9C48FQpEOh2Im/GR/V+QUtPSKKYrnGrs1pkhbOAZTksBAWbXyCSJ1tOMoPjtmwr4LLgNFK5ZLS0lBV/A==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -11322,8 +11369,8 @@ packages:
     resolution: {integrity: sha512-/WCA7YiM855/QVxJIcNSiqw4/U5t0TFmPktbelcpT4e1NEosHRS7soQ7k7YMV21MlS2cnFcmvTq9fob59gs/Qw==}
     engines: {node: ^18.19.0 || >=20.6.0}
 
-  '@elastic/pretty-printer@4.38.0':
-    resolution: {integrity: sha512-vgQR/z09mIa0J6HOTVNXdQgFTi2wfqJDEF7QS1WjzektV+gIM+f0ugwLKQzqyyJNdzZUmFjhxIl7CWKcRFUuaA==}
+  '@elastic/pretty-printer@4.41.0':
+    resolution: {integrity: sha512-vLnEnpQbLzTojHf/dja/HR6VEoq/BHdI7nWIgFHYbwaj0aqRXD827qLyVKvjznLjcONeqtOrM64mMvLaR14L3Q==}
 
   '@elastic/prismjs-esql@4.28.0':
     resolution: {integrity: sha512-nl0x5VIZu1/duqOpcAYofBJBuqzuBJL3szSIytHtiNCDl4xgndnV5FR5D37r8OZmGY4M1nOYhKk2rZ/Iwl7XPA==}
@@ -11807,8 +11854,8 @@ packages:
     resolution: {integrity: sha512-A+po2d/dVoY7cYajycYI43ZbYMXukuopIsqCjh5QzsBCipDtdofHntljDlpccMjIfTy6UOkg+5KPriwYch2bXA==}
     engines: {node: '>=14.0.0'}
 
-  '@hapi/ammo@6.0.1':
-    resolution: {integrity: sha512-pmL+nPod4g58kXrMcsGLp05O2jF4P2Q3GiL8qYV7nKYEh3cGf+rV4P5Jyi2Uq0agGhVU63GtaSAfBEZOlrJn9w==}
+  '@hapi/ammo@6.0.2':
+    resolution: {integrity: sha512-YeVEkur58mIJ2wxIuIDGKDgpiNEmLOGswggGarZu/VORUPLBjOUPiaZSl2oFZGECqt3yPSNFBiHTwOQH51U+vA==}
 
   '@hapi/b64@6.0.1':
     resolution: {integrity: sha512-ZvjX4JQReUmBheeCq+S9YavcnMMHWqx3S0jHNXWIM1kQDxB9cyfSycpVvjfrKcIS8Mh5N3hmu/YKo4Iag9g2Kw==}
@@ -11851,8 +11898,8 @@ packages:
     resolution: {integrity: sha512-dvD8+Y/Okc0fh0blqaYCLIrcy0+1LqIhMr7hjk8elLQZ9mkw2hKFB9dFKuRfWf+1nvHpGlW+PwccqkdebynQbg==}
     engines: {node: '>=14.0.0'}
 
-  '@hapi/hapi@21.4.10':
-    resolution: {integrity: sha512-G0l7tch1/85Gkyasmmjvjam2IWbx/9zCp4AQx4nZ/nn/rrrmVmRvFejj2ZGe5j3wFZVCLt2+Zeg95ImFFom+7w==}
+  '@hapi/hapi@21.4.13':
+    resolution: {integrity: sha512-eupLASu8jIrFvo8yu+xK/C5v2kydqK7v43XIfBtFW4NrJKylud0sEhESoq7oYRe1uxOIiowJAz6mVYmCxC2w1g==}
     engines: {node: '>=14.15.0'}
 
   '@hapi/heavy@8.0.1':
@@ -11864,8 +11911,8 @@ packages:
   '@hapi/hoek@9.3.0':
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
 
-  '@hapi/inert@7.1.2':
-    resolution: {integrity: sha512-fr0XmsYTUhahIbioBemFlc+o4ro4bj1HPMKN3dG9m6XC+UkF9fdVYfb7uNoDj0vO+HdXendbKk6YEfZG9ToeTQ==}
+  '@hapi/inert@7.1.3':
+    resolution: {integrity: sha512-ohdCQ7CKoC+Tr9KzeU7o1AoDf0TnfIKPrEs6MYnvzbmDRhkZo4HPvIQGEibvSNFqSDuOQZ6quIB4Y3CGD3VE+g==}
 
   '@hapi/iron@7.0.1':
     resolution: {integrity: sha512-tEZnrOujKpS6jLKliyWBl3A9PaE+ppuL/+gkbyPPDb/l2KSKQyH4lhMkVb+sBhwN+qaxxlig01JRqB8dk/mPxQ==}
@@ -11877,8 +11924,8 @@ packages:
     resolution: {integrity: sha512-uv3dtYuB4IsNaha+tigWmN8mQw/O9Qzl5U26Gm4ZcJVtDdB1AVJOwX3X5wOX+A07qzpEZnOMBAm8jjSqGsU6Nw==}
     engines: {node: '>=14.0.0'}
 
-  '@hapi/pez@6.1.1':
-    resolution: {integrity: sha512-yg2OS1tC0S1sHXvhUtWsfRn6lrKl9jKtRhZ+EI0woOW/gqX5vM2PZ1459ypCvCYDRLJ9nIyueeEH5MJV1ZDqIg==}
+  '@hapi/pez@6.1.3':
+    resolution: {integrity: sha512-hit/Yb7jYv/rAKDMTJJIhPslxHgt9WxmFfUvZ97rHLsq+HpI6eQE6HbGhFE/fhOHT8llkRETcjJX4+7ut7GF3w==}
 
   '@hapi/pinpoint@2.0.1':
     resolution: {integrity: sha512-EKQmr16tM8s16vTT3cA5L0kZZcTMU5DUOZTuvpnY738m+jyP3JIUj+Mm1xc1rsLkGBQ/gVnfKYPwOmPg1tUR4Q==}
@@ -11895,8 +11942,8 @@ packages:
   '@hapi/statehood@8.2.1':
     resolution: {integrity: sha512-xf72TG/QINW26jUu+uL5H+crE1o8GplIgfPWwPZhnAGJzetIVAQEQYvzq+C0aEVHg5/lMMtQ+L9UryuSa5Yjkg==}
 
-  '@hapi/subtext@8.1.3':
-    resolution: {integrity: sha512-WTpEZQjBP3UJ3gGunNl3w5Ao1EOJsuu2vttZ2KEcG+csSLxc0dI6VIkl2md2jDlHiQ2ARAoqdSUScy05A/NHtA==}
+  '@hapi/subtext@8.1.5':
+    resolution: {integrity: sha512-VSoL75dYqMfs2URprWPu9RXdL/+c5pZ5L0siSa3ZKg0VQKGQn2Yncd05Jl/154VvVYO/ymrOW3TR/a9psp1+kA==}
 
   '@hapi/teamwork@6.0.1':
     resolution: {integrity: sha512-52OXRslUfYwXAOG8k58f2h2ngXYQGP0x5RPOo+eWA/FtyLgHjGMrE3+e9LSXP/0q2YfHAK5wj9aA9DTy1K+kyQ==}
@@ -11918,8 +11965,8 @@ packages:
   '@hapi/vise@5.0.1':
     resolution: {integrity: sha512-XZYWzzRtINQLedPYlIkSkUr7m5Ddwlu99V9elh8CSygXstfv3UnWIXT0QD+wmR0VAG34d2Vx3olqcEhRRoTu9A==}
 
-  '@hapi/wreck@18.1.2':
-    resolution: {integrity: sha512-3dMnV2pfhQiyEqu8DL3VBmxkdLiRDiiUDuG79Dp+UK1gL9ZxAfDOUhB6k3D5MLqcgJJ1IARyGFhwoc1NITr/pg==}
+  '@hapi/wreck@18.1.3':
+    resolution: {integrity: sha512-PZ1FQpk5DWbEFFYiHu/kCkWeSHwUhAxDSUdv6Zsp1qi2coUP22cnYQlp647KCSsCc4uFB4LOTsHo9f5k7vgtHg==}
 
   '@hello-pangea/dnd@18.0.1':
     resolution: {integrity: sha512-xojVWG8s/TGrKT1fC8K2tIWeejJYTAeJuj36zM//yEm/ZrnZUSFGS15BpO+jGZT1ybWvyXmeDJwPYb4dhWlbZQ==}
@@ -11947,8 +11994,8 @@ packages:
   '@hey-api/types@0.1.2':
     resolution: {integrity: sha512-uNNtiVAWL7XNrV/tFXx7GLY9lwaaDazx1173cGW3+UEaw4RUPsHEmiB4DSpcjNxMIcrctfz2sGKLnVx5PBG2RA==}
 
-  '@hono/node-server@2.1.5':
-    resolution: {integrity: sha512-MgP/I06GdvsilDspMk/qmRzpk8LOUStP6jFAbSRi40W09DhoyUn+Mj7eyKICPqeYKybOjVFLVIAQzvu1bfIa7Q==}
+  '@hono/node-server@2.1.8':
+    resolution: {integrity: sha512-jdf7FHh6A1lzjpHHQUgxsg2GeER2vMetnAOfeActzcoli6jamlK+NAwL6Dsr5Fl3BS3tYUQzCdtZjU8Qxv7bEA==}
     engines: {node: '>=20'}
     peerDependencies:
       hono: ^4 || ^5.0.0-0
@@ -12358,22 +12405,25 @@ packages:
     peerDependencies:
       '@langchain/core': 1.3.0
 
-  '@launchdarkly/js-sdk-common@2.29.0':
-    resolution: {integrity: sha512-WBW4ajbfJO6RGEB4Ax44d7/6jl/HhZOi61dNnCJ3HdHS5znwGV1eh8dUnRFISiIfnodWbpDRaVv4fG8QdKeFWw==}
+  '@launchdarkly/eventsource@0.2.3':
+    resolution: {integrity: sha512-rOB+mo0ikpUUZf8AFLIgT4eNdng3hO9cnPcLOiT6fqXt1U5KD/1RtJs7xv0KubFVvlWIeSYL4F63IZkQeGnuyA==}
 
-  '@launchdarkly/js-server-sdk-common@2.24.0':
-    resolution: {integrity: sha512-htPGkkvxiurlOoyNG6oKywg+dC/OV3uEt+Qg0QX2MVgK7VtAw24q1aXIFxItdJ+dS0IMLKbiOho1MQqKAS2btA==}
+  '@launchdarkly/js-sdk-common@2.32.1':
+    resolution: {integrity: sha512-hpEcEo1wDnyIjFYs80esEZLQpPuRhyCQYXYYC2+Cpmpb7fLYYcTbW3RLeyseqER6d9lZ9QnbB8TbR377AX4cww==}
 
-  '@launchdarkly/node-server-sdk@9.14.3':
-    resolution: {integrity: sha512-d0UbbtBqW5g+XjFNKv/JksQKr37B8cMG+ASyg0RlD/Af7YcSoqNScMto2oXHc8LQ9y6aiCd8VDoANgyWMhJ4cA==}
+  '@launchdarkly/js-server-sdk-common@2.26.3':
+    resolution: {integrity: sha512-uYC7sTCsXzUFmNTPGcfU8hyRGaSgzfxDaZIOXvCDgfac/IISdL+d5etItKrxwJoDN8KB9fa5gDX5EimKbLcQoA==}
 
-  '@launchdarkly/openfeature-js-server-common@2.0.6':
-    resolution: {integrity: sha512-1zXgkEyChB5OO43WGIIi4TaeMATqVOFYLkv+dijlLGlZIUyRgAZdfbWCr8Ssz+Jeq6aZ/cXOtub7SuEEHSxKjQ==}
+  '@launchdarkly/node-server-sdk@9.16.3':
+    resolution: {integrity: sha512-FBmS/rvE0zm46o2iz5F+0Ptj5ScihcSe1m326uPFOEIHBNx4ycRAnzZA9tOm/bVMHChAJZEh/VHhtnylpd/VAQ==}
+
+  '@launchdarkly/openfeature-js-server-common@2.2.2':
+    resolution: {integrity: sha512-dyW+M0iaF+fxX2g2teIwGKbzI9+gnJB2x+zdaMVojpvo1t5WYzFnrXNRG+oUHmzsIjAE37Ecf3sJz3GAO0N+7w==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@2.0.11':
-    resolution: {integrity: sha512-z949UpCpv3CHxq0URY5cTbfLAVZT1aoU1yQI+3Cr6SPplZ1i+ZIW0+amPUBc/jhXCr7Nzjh/rrWwl1jKIPigWQ==}
+  '@launchdarkly/openfeature-node-server@2.1.6':
+    resolution: {integrity: sha512-FOce6L3a6ZTPZTosxm0khTAxTZRda9Ol6zjwrzavcnuQv04Lmed5a6Mqy4c5/VCxOayYjIfUHah27YzfOgwjkA==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -12696,6 +12746,9 @@ packages:
     resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
     engines: {node: ^14.21.3 || >=16}
 
+  '@nodable/entities@3.1.0':
+    resolution: {integrity: sha512-LsS/DjHr+uDM647Gru/cA8+J3a3HfhttwCKLyuoyN7yXTFCxKBtSgMQBvrW9yNPa2/zDRUNuGPaH5QUFoa4arQ==}
+
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -12822,6 +12875,10 @@ packages:
     resolution: {integrity: sha512-Oepm6etVPFCn0VWB1t833iOTgz1eYBDUPxcrOR/XvwzD1+Ag9VzSPSrrKAFNJ/haatj+8CXbG47pZXvdNQKDJw==}
     engines: {node: '>=8.0.0'}
 
+  '@opentelemetry/api-logs@0.223.2':
+    resolution: {integrity: sha512-pKr/0bxkzNPhWKTqqSP2KtPVxqmC2oQrWjUjr4EDHrJCCiRkGIN52m2c7ILhCnQkYKmlTQBiESIEeyg0hlmotQ==}
+    engines: {node: '>=8.0.0'}
+
   '@opentelemetry/api@1.9.1':
     resolution: {integrity: sha512-gLyJlPHPZYdAk1JENA9LeHejZe1Ti77/pTeFm/nMXmQH/HFZlcS/O2XJB+L8fkbrNSqhdtlvjBVjxwUYanNH5Q==}
     engines: {node: '>=8.0.0'}
@@ -12840,6 +12897,12 @@ packages:
 
   '@opentelemetry/core@2.12.0':
     resolution: {integrity: sha512-1HsSAuvT4/my0QrXWsyXFdWjKaPeCHsismKZgEEIb8NK13LP6DrMRlsUbvD/0F9mDWK3xDom9AMv3IscxgOnOQ==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.0.0 <1.10.0'
+
+  '@opentelemetry/core@2.12.1':
+    resolution: {integrity: sha512-3hr6Pj0/G0oVgIGb97IVcw9BjZ6eudonKjrmQxw7JquyU/XmVbJelkmyoU0sT/OvHGkv+r1tcrwv8MbSX7aKHw==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
@@ -13000,8 +13063,8 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
 
-  '@opentelemetry/instrumentation-http@0.223.0':
-    resolution: {integrity: sha512-lQkvLeRjEHwDjc2NEEAPUlk4x/0qfjhbZh0U5d2/5rPPRQ7TNvMmOtd/ForpVVPGUBfhtEDrWhqumr7vLMjBtA==}
+  '@opentelemetry/instrumentation-http@0.223.2':
+    resolution: {integrity: sha512-e+NFYV7TCI5pandyE+lye03ReGSJRhVZcKDpkhUj4tJ9lciDS+ZxDp3G5YIxawN6La7wselxO7UZjJRas5wdsg==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
@@ -13158,6 +13221,12 @@ packages:
 
   '@opentelemetry/instrumentation@0.223.0':
     resolution: {integrity: sha512-tttBo88TbwK1zpsH6VeJoxLQopxOjW3cnrP50fsQJRZftkSKDDwjolXXBvow2jy0LKXlNRkDQh0NT6yI/q+BEQ==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': ^1.3.0
+
+  '@opentelemetry/instrumentation@0.223.2':
+    resolution: {integrity: sha512-2tRpOgQ91+wC2/h6IDt+dsQNuUlfUR+CVwABceAEtiWtON9JumZR6YQcYCsisNRTX942TnCjPDuBI0xxGgVLHQ==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
@@ -14632,8 +14701,8 @@ packages:
     peerDependencies:
       react: '>=18'
 
-  '@tanstack/react-virtual@3.13.12':
-    resolution: {integrity: sha512-Gd13QdxPSukP8ZrkbgS2RwoZseTTbQPLnQEn7HY/rqtM+8Zt95f7xKC7N0EsKs7aoz0WzZ+fditZux+F8EzYxA==}
+  '@tanstack/react-virtual@3.14.23':
+    resolution: {integrity: sha512-Oyy58qQwdaQieA+A4WUDtnh9D1rv5FZvGdw8og9Xeyh88V6HH94vMSyV5i9ATIbYNe9t5Ix0WXRo9NOTpHDkYw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
@@ -14645,8 +14714,8 @@ packages:
     resolution: {integrity: sha512-zQvlxSNi2qGM3L4jh85Z6hqMfdIR5qOfD9KHOU32nuKFJGN0RlJ7UvV1lsPb1fPVhpFYI0VP3jJGxLdLDpTKjQ==}
     engines: {node: '>=20'}
 
-  '@tanstack/virtual-core@3.13.12':
-    resolution: {integrity: sha512-1YBOJfRHV4sXUmWsFSf5rQor4Ss82G8dQWLRbnk3GA4jeP8hQt1hxXh0tmflpC0dz3VgEv/1+qwPyLeWkQuPFA==}
+  '@tanstack/virtual-core@3.19.8':
+    resolution: {integrity: sha512-Oz/SYBo/aVPyQkwtOw7Q23myITUgFIof2glQqydYJAPL6mH2SkJDkvDKZTklB+7gv5jGLZQhyTcd7SO1A1EODQ==}
 
   '@tediousjs/connection-string@1.1.0':
     resolution: {integrity: sha512-z9ZBWEG+8pIB5V1zYzlRPXx0oRJ5H7coPnMQK8EZOw03UTPI9Umn6viL36f5w+CuqkKsnCM50RVStpjZmR0Bng==}
@@ -15308,8 +15377,8 @@ packages:
   '@types/webidl-conversions@7.0.3':
     resolution: {integrity: sha512-CiJJvcRtIgzadHCYXw7dqEnMNRjhGZlYK05Mj9OyktqV8uVT8fD2BFOB7S1uwBE3Kj2Z+4UyPmFw/Ixgw/LAlA==}
 
-  '@types/whatwg-url@11.0.5':
-    resolution: {integrity: sha512-coYR071JRaHa+xoEvvYqvnIHaVqaYrLPbsufM9BF63HkwI5Lgmy2QR8Q5K/lYDYo5AK82wOvSOS0UsLTpTG7uQ==}
+  '@types/whatwg-url@13.0.0':
+    resolution: {integrity: sha512-N8WXpbE6Wgri7KUSvrmQcqrMllKZ9uxkYWMt+mCSGwNc0Hsw9VQTW7ApqI4XNrx6/SaM2QQJCzMPDEXE058s+Q==}
 
   '@types/ws@8.18.2':
     resolution: {integrity: sha512-67MQl+fpWKVTT1NYdnmo3U4sc/xPo/zQBncVnI74qmQa0z/b+1g6iYqNmGCPbxO+zz2aklb08a0oHfegiVd0/w==}
@@ -15702,8 +15771,8 @@ packages:
   '@xtuc/long@4.2.2':
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
 
-  '@xyflow/react@12.12.0':
-    resolution: {integrity: sha512-74oXI0Rgm1Eu33cHQAd74J6oVgCH9mbFyTVQbsGgp2kmWwh0HdtBr2VP04z8mbPD+M/xO69nqG5dDEt7/EN2rQ==}
+  '@xyflow/react@12.12.1':
+    resolution: {integrity: sha512-g41OHmP+GL5wDBQKpgYt8AF6RlB4CrABtiStXhCMqdItK6gPdSpsuDk8V0YtdyvIvMPTjDJvkuLkz0JbSYu5Cw==}
     peerDependencies:
       '@types/react': 18.2.79
       '@types/react-dom': 18.2.25
@@ -15715,8 +15784,8 @@ packages:
       '@types/react-dom':
         optional: true
 
-  '@xyflow/system@0.0.83':
-    resolution: {integrity: sha512-a//eDjez3WZF47aaPTfVUDD0OINOq+WVwBZCRTqG+m0a5euX8EwlJ4jMY1Wxz0Ocj4xOeekJ70V22Pq0ll8RJw==}
+  '@xyflow/system@0.0.84':
+    resolution: {integrity: sha512-96zfGFjH3oZ3T0MRdH4gJ0SlXuCIxbBuHVevZ4xry5UTxqjzjt010+LRdholgepq7jhrcaz1JNtzrETscwnkEA==}
 
   '@zip.js/zip.js@2.22.0':
     resolution: {integrity: sha512-QgkA+BSEPNR0C2l6xbSu5HDXieUxiuDK+Jx4ZeZlp22QO/qRUIF6JRXdxh4WlLiQUmnE/9aaGerlni+OY81wqg==}
@@ -16295,8 +16364,8 @@ packages:
     resolution: {integrity: sha512-NF+epuEdnUYVlGuhaxbbq+dvJttwLnGY+YixlXlME5KpQ5W3CnXA5cVTneY3SPbPDRkcjMbifrwmFYcClgOZeg==}
     engines: {node: '>= 0.8'}
 
-  basic-ftp@5.3.1:
-    resolution: {integrity: sha512-bopVNp6ugyA150DDuZfPFdt1KZ5a94ZDiwX4hMgZDzF+GttD80lEy8kj98kbyhLXnPvhtIo93mdnLIjpCAeeOw==}
+  basic-ftp@6.2.6:
+    resolution: {integrity: sha512-0EjZCaodOz6yiokv2JA1VyKGNdGxULZ+GGlPgG9tm4d+T/bHtX1hUch8CumDneBfpIbiSdn7TaCGwpM+gwsOlw==}
     engines: {node: '>=10.0.0'}
 
   bcrypt-pbkdf@1.0.2:
@@ -16448,9 +16517,9 @@ packages:
   bser@2.1.1:
     resolution: {integrity: sha512-gQxTNE/GAfIIrmHLUE3oJyp5FO6HRBfhjnw4/wMmA63ZGDJnWBmgY/lyQBpnDUkGmAhbSe39tx2d/iTOAfglwQ==}
 
-  bson@6.10.4:
-    resolution: {integrity: sha512-WIsKqkSC0ABoBJuT1LEX+2HEvNmNKKgnTAyd0fL8qzK4SH2i9NXg+t08YtdZp/V9IZ33cxe3iV4yM0qg8lMQng==}
-    engines: {node: '>=16.20.1'}
+  bson@7.3.4:
+    resolution: {integrity: sha512-eb33j2Ha6xgygjJ8bhI3sYaI9cLAbSaopZLRJQ5/rxk32XyBSoVVcbeHIzVGJx1SyQpyyoElkoEZgQrg+RVVoA==}
+    engines: {node: '>=20.19.0'}
 
   buffer-crc32@1.0.0:
     resolution: {integrity: sha512-Db1SbgBS/fg/392AblrMJk97KggmvYhr4pB5ZIMTWtaivCPMWLkmb7m21cJvpvgK+J3nsU2CmmixNBZx4vFj/w==}
@@ -16592,8 +16661,8 @@ packages:
   caseless@0.12.0:
     resolution: {integrity: sha512-4tYFyifaFfGacoiObjJegolkwSU4xQNGbVgUiNYVUxbQ2x2lUsFvY4hVgVzGiIe6WLOPqycWXA40l+PWsxthUw==}
 
-  cbor2@2.4.0:
-    resolution: {integrity: sha512-s6+CPoEI6tgwasK2cWMTXt5sy8Yxo4vgRmKgkJSCdKDL/0bHU3aYJoYeHRX7/oywKYA3bxcpqEYkXkrdHe0+0Q==}
+  cbor2@2.4.1:
+    resolution: {integrity: sha512-h4OqPnSvIEUNCxTNb9pwMZPKjhNKO9bkPwQJOR7d5oBIrZR/CO098atrLl4AkQmB1p3opCvo2UFt4fhRSWC/vQ==}
     engines: {node: '>=22'}
 
   ccount@1.1.0:
@@ -17667,11 +17736,11 @@ packages:
   defu@6.1.7:
     resolution: {integrity: sha512-7z22QmUWiQ/2d0KkdYmANbRUVABpZ9SNYyH5vx6PZ+nE5bcC0l7uFvEfHlyld/HcGBFTL536ClDt3DEcSlEJAQ==}
 
-  degenerator@7.0.1:
-    resolution: {integrity: sha512-ABErK0IefDSyHjlPH7WUEenIAX2rPPnrDcDM+TS3z3+zu9TfyKKi07BQM+8rmxpdE2y1v5fjjdoAS/x4D2U60w==}
+  degenerator@7.0.2:
+    resolution: {integrity: sha512-j47S7YEAqh4U3UR355ts14Ipq0Zgn+AaMRdJuoyF7Ry2eSazevFvaviLMp0iOXAq7/FiBs3/33UIkE7rWRoLWQ==}
     engines: {node: '>= 20'}
     peerDependencies:
-      quickjs-wasi: ^2.2.0
+      quickjs-wasi: ^3.0.0
 
   del@4.1.1:
     resolution: {integrity: sha512-QwGuEUouP2kVwQenAsOof5Fv8K9t3D8Ca8NxcXKrIpEHjTXK5J2nXLdP+ALI1cgv8wj7KuwBhTwBkOZSJKM5XQ==}
@@ -18442,8 +18511,8 @@ packages:
   exponential-backoff@3.1.3:
     resolution: {integrity: sha512-ZgEeZXj30q+I0EN+CbSSpIyPaJ5HVQD18Z1m+u1FXbAeT94mr1zw50q4q6jiiC447Nl/YTcIYSAftiGqetwXCA==}
 
-  express-rate-limit@8.7.0:
-    resolution: {integrity: sha512-hOwV7WOxXfjRpAM1DSJWZDXx3GhplwD8IfwuwvogD8i1Qnkgosw/H45s4ZnFAUHDAhPjlY9hLBvJhKmGMyY26g==}
+  express-rate-limit@8.7.4:
+    resolution: {integrity: sha512-LKBXzX700wz3zAGNNmVnjRI5mEbYkLv7UbMI4+9Xa+JPcg2UZh6AgY/2CZh9RrJjFM5ttC/N1lD+KzyFoZITCw==}
     engines: {node: '>= 16'}
     peerDependencies:
       express: '>= 4.11'
@@ -18528,11 +18597,11 @@ packages:
   fast-wrap-ansi@0.2.2:
     resolution: {integrity: sha512-7F2Fl+TjRSenLqlU3UjSH0iyqopqoZIu7eZVpEirP2g1GtWa2G/ecEmBdgz31+Mxr+ELclgg6sokpSFIQiZ02Q==}
 
-  fast-xml-builder@1.3.1:
-    resolution: {integrity: sha512-pIM/1n3ntFXKYrUZwW7QCK0gAW7XY+wzj1YMIV3tLDvPj/V+zTGJK5e3/4WJfwj0qWw2ElNXiTixda/R+3YSug==}
+  fast-xml-builder@1.3.2:
+    resolution: {integrity: sha512-OX91VSlShLPDgRZV7tk/YQ4l8tT75QziF5Ixg8g4PFbCVPjuTWwN+yQfAxLJ0dufJpprdOd6HlM74Jhd39TcBQ==}
 
-  fast-xml-parser@5.5.7:
-    resolution: {integrity: sha512-LteOsISQ2GEiDHZch6L9hB0+MLoYVLToR7xotrzU0opCICBkxOPgHAy1HxAvtxfJNXDJpgAsQN30mkrfpO2Prg==}
+  fast-xml-parser@5.12.1:
+    resolution: {integrity: sha512-wR8dO/fx+z8C5exuem1e7BKOWvjsuzvjS/tvA/Xu3Z1zQqJGcXrPzXbcAiaMgp2KjreEROcTkmnnisrcmJ2hYQ==}
     hasBin: true
 
   fastest-levenshtein@1.0.16:
@@ -18914,8 +18983,8 @@ packages:
   get-tsconfig@4.14.3:
     resolution: {integrity: sha512-++QEw4DIY7WGoukz+/+A/8dGYPT9l9yIadnmSgZ8Rjr3YVSVDipQSO9CdnJo9ePqFqUUqh+wk9uIaoiAwsiPkA==}
 
-  get-uri@8.0.1:
-    resolution: {integrity: sha512-/5N/P4Lrh0p/mDwlDRi7Y1+P2o/OyzZI3l6Iz1Ov6XXwwm1y3RlZLuo3gVgML99djrEDtV980bBxSuOeHLk8ww==}
+  get-uri@8.0.2:
+    resolution: {integrity: sha512-H1sU7ppM+Hdb+FJgOTaQ7SHiV7ogUgnb+VgZ55Dz3YzLqZ4bMAClcdveHYt56npM9M7eclEg1j92ZnmSOP9uhA==}
     engines: {node: '>= 20'}
 
   getopts@2.2.5:
@@ -19196,10 +19265,6 @@ packages:
   hat@0.0.3:
     resolution: {integrity: sha512-zpImx2GoKXy42fVDSEad2BPKuSQdLcqsCYa48K3zHSzM/ugWuYjLDr8IXxpVuL7uCLHw56eaiLxCRthhOzf5ug==}
 
-  hdr-histogram-js@3.0.1:
-    resolution: {integrity: sha512-l3GSdZL1Jr1C0kyb461tUjEdrRPZr8Qry7jByltf5JGrA0xvqOSrxRBfcrJqqV/AMEtqqhHhC6w8HW0gn76tRQ==}
-    engines: {node: '>=14'}
-
   he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
@@ -19220,8 +19285,8 @@ packages:
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
 
-  hono@4.13.13:
-    resolution: {integrity: sha512-CQ46U0ZkAGmbT/4UxdzzGJpacP2IeKgY4a5/tOI9AABbpOMfK739wfDXmv1usCk+3RkKj1hQy4/fjhiwa2xlrA==}
+  hono@4.13.19:
+    resolution: {integrity: sha512-KmXvQAXwcAHV+muzbIwoJ23niEB5nMoDVr9WcRkU8mvjUECm/1+7v4Jgp7P7a+H6MLFrh+vXrGonGrGS+RQfkA==}
     engines: {node: '>=16.9.0'}
 
   hookified@1.15.1:
@@ -19866,6 +19931,9 @@ packages:
     resolution: {integrity: sha512-mE00Gnza5EEB3Ds0HfMyllZzbBrmLOX3vfWoj9A9PEnTfratQ/BcaJOuMhnkhjXvb2+FkY3VuHqtAGpTPmglFQ==}
     engines: {node: '>=18'}
 
+  is-unsafe@2.0.3:
+    resolution: {integrity: sha512-ZBllczCCO267vgdFb6Tq3pv+LhHaCiGMdr+ZsuL+OopruAg7S+3ZDs1vD0RPC0uSrkjzbraxaGjtX1YBxjPeFQ==}
+
   is-url-superb@4.0.0:
     resolution: {integrity: sha512-GI+WjezhPPcbM+tqE9LnmsY5qqjwHzTvjJ36wxYX5ujNXefSUJ/T17r5bqDV8yLhcgB59KTPNOc9O9cmHTPWsA==}
     engines: {node: '>=10'}
@@ -20128,8 +20196,8 @@ packages:
   joi@17.13.9:
     resolution: {integrity: sha512-llFCT2rVtfwgBCaIqxtjim+iHqrgss4ONiGSYiiGH9jnjWq90ppSRffqmqKvwpa8W+YfILyQV6XyGcegXX2T4g==}
 
-  joi@18.3.1:
-    resolution: {integrity: sha512-mV9M4Llh4va3NT90p7KBtQhoZqjs8xLX7EWYE4y/GG3yLF6REbIBEHSUb0UX1JXRht2w5tiLSsvmpYc5akiqIw==}
+  joi@18.3.2:
+    resolution: {integrity: sha512-iUivApKYw5GpZmq2Sy6El99j7noo8QSUFZlyQtr3HCkosC/b5wKF6/Y3teiHIlaM8WI38sAT3P+51rB0lhAhJA==}
     engines: {node: '>= 20'}
 
   jose@6.2.12:
@@ -20259,8 +20327,8 @@ packages:
   jsonc-parser@3.3.1:
     resolution: {integrity: sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ==}
 
-  jsondiffpatch@0.7.6:
-    resolution: {integrity: sha512-zE9+AXFq+MkTolDor2Cw1nJzLC0aleqPkYf52Kb4Kn4mJcka/gFHpGI2JBVEJCfWOvBl0OoxZS+wuLdislQcqg==}
+  jsondiffpatch@0.7.7:
+    resolution: {integrity: sha512-C3375q+xluwQYS6Je613YqXpZhW9uSi2YFRR+8QTJVYhdk0GZiDr7HD9bXNrdV9PJCpmwsCgJM9ZXXESSZPCzA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
 
@@ -20387,10 +20455,6 @@ packages:
 
   launch-editor@2.14.2:
     resolution: {integrity: sha512-NHJEb30MGBCkmZXLZwz25t37QR4aY03ZzPYUJXOJaOa92uWwExI9SBQUuIznBYc1xkD7cJNGX7oc3Nl3sq2kQQ==}
-
-  launchdarkly-eventsource@2.3.0:
-    resolution: {integrity: sha512-q0uiciHQVFJLhVwE0/mJzBCiuw6mkBv9kB414IlHTZE1VEoU8pkwt9P2n6w6vyT7rDlA6xZm2LSTjdMBigqbjQ==}
-    engines: {node: '>=0.12.0'}
 
   lazy-ass@2.0.3:
     resolution: {integrity: sha512-/O3/DoQmI1XAhklDvF1dAjFf/epE8u3lzOZegQfLZ8G7Ud5bTRSZiFOpukHCu6jODrCA4gtIdwUCC7htxcDACA==}
@@ -21234,20 +21298,21 @@ packages:
     peerDependencies:
       monaco-editor: '>=0.36'
 
-  mongodb-connection-string-url@3.0.2:
-    resolution: {integrity: sha512-rMO7CGo/9BFwyZABcKAWL8UJwH/Kc2x0g72uhDWzG48URRax5TCIcJ7Rc3RZqffZzO/Gwff/jyKwCU9TN8gehA==}
+  mongodb-connection-string-url@7.0.3:
+    resolution: {integrity: sha512-5I/pX3C2gPEz1EDdYMdZwBx1b/jE/f+J+KItSUJ02uQZ66bbe7kHKjv2uqCHJWaMCagem3dyfWqoAcv+XYZ6aw==}
+    engines: {node: '>=20.19.0'}
 
-  mongodb@6.21.0:
-    resolution: {integrity: sha512-URyb/VXMjJ4da46OeSXg+puO39XH9DeQpWCslifrRn9JWugy0D+DvvBvkm2WxmHe61O/H19JM66p1z7RHVkZ6A==}
-    engines: {node: '>=16.20.1'}
+  mongodb@7.9.1:
+    resolution: {integrity: sha512-OWtk/bcf8tx4Qe6lB8OsMksOwGGhC2FH+zl5UNwE+L7uz2VQDhCcnJThAvInEaBrEDaSsUWlMRbuFR4/TjF44w==}
+    engines: {node: '>=20.19.0'}
     peerDependencies:
-      '@aws-sdk/credential-providers': ^3.188.0
-      '@mongodb-js/zstd': ^1.1.0 || ^2.0.0
-      gcp-metadata: ^5.2.0
-      kerberos: ^2.0.1
-      mongodb-client-encryption: '>=6.0.0 <7'
+      '@aws-sdk/credential-providers': ^3.806.0
+      '@mongodb-js/zstd': ^7.0.0
+      gcp-metadata: ^7.0.1
+      kerberos: ^7.0.0
+      mongodb-client-encryption: ^7.2.0
       snappy: ^7.3.2
-      socks: ^2.7.1
+      socks: ^2.8.6
     peerDependenciesMeta:
       '@aws-sdk/credential-providers':
         optional: true
@@ -21289,8 +21354,8 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  mssql@12.7.2:
-    resolution: {integrity: sha512-zhpPw+WXBWLw7d7J6Y0aWgQy0EV8HKDGNSvmkAjP8bSM4H41X0fweAeKWI+bg9Ri+JHCbsf/QScjmACBFcEo8A==}
+  mssql@12.7.13:
+    resolution: {integrity: sha512-RwNhOEU1A7vCbKmkZapbfLk31fKFByrEnK2eDPIw/rlloLUxNhuCcWj4CmXvyHiyjIjI0TMZWid20PAGoRX4xA==}
     engines: {node: '>=18.19.0'}
     hasBin: true
 
@@ -21423,8 +21488,8 @@ packages:
       encoding:
         optional: true
 
-  node-forge@1.4.2:
-    resolution: {integrity: sha512-rRtAR5XLJ8gCKd9du4qrKAsgCG1ObGP4gLeNJMa4vYSeq4bmBMOJk5IHkrviBV0q7uoAJlVd8HEQYQSVUb4FGQ==}
+  node-forge@1.4.3:
+    resolution: {integrity: sha512-P6wzfh6t70avmV8FrVEAd/36sOPJQ+hkaJVX1Laap9J/77m7M0eyozDvc8SwnDf4P7MP94gwbAAo0rg3YVXT+g==}
     engines: {node: '>= 6.13.0'}
 
   node-gyp-build@4.8.4:
@@ -21454,8 +21519,8 @@ packages:
     resolution: {integrity: sha512-X75ZN8DCLftGM5iKwoYLA3rjnrAEs97MkzvSd4q2746Tgpg8b8XWiBGiBG4ZpgcAqBgtgPHTiAc8ZMCvZuikDw==}
     engines: {node: '>=10'}
 
-  nodemailer@10.3.0:
-    resolution: {integrity: sha512-LsqM+Sxjap8BMgxQuVvABoEcm9ed2f3h2e0ohB7kV3sl9+4IaXlxC0DT8CQelg/S0he38gT4yT0RH1pvZxHf+A==}
+  nodemailer@10.3.1:
+    resolution: {integrity: sha512-uF0AFsJC07Y1vdW7p580DKAnh7rAO+4UPSSB3mDCPNDufoiaOebV6JmrzpxB14OjEEEiBsNdYoM2Y+fN8M7BBA==}
     engines: {node: '>=20.0.0'}
 
   nopt@4.0.3:
@@ -21808,15 +21873,15 @@ packages:
     resolution: {integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==}
     engines: {node: '>=6'}
 
-  pac-proxy-agent@9.1.0:
-    resolution: {integrity: sha512-1aU+1mpj3DrQPfo3gh+3Gap3G5x+axnMx1P/y0ZF2ch7kb2meyOCAH8K2k9d27ROsTE7TnAerzxqF9aon2jqnA==}
+  pac-proxy-agent@9.1.1:
+    resolution: {integrity: sha512-P30j9cFU4vcu9TKjSVAwdzb+tY8ktfAwsVvxFSXmsoe09I4yZV52JAO8Z/Fptpi9VWxFTluDgqzGfgvYJlTzjg==}
     engines: {node: '>= 20'}
 
-  pac-resolver@9.0.1:
-    resolution: {integrity: sha512-lJbS008tmkj08VhoM8Hzuv/VE5tK9MS0OIQ/7+s0lIF+BYhiQWFYzkSpML7lXs9iBu2jfmzBTLzhe9n6BX+dYw==}
+  pac-resolver@9.0.2:
+    resolution: {integrity: sha512-FyLebKd2X1SzQAc6P+AAgWRGnAgEAYEwn1oJucBIdQivJ50dV3Lndjqso4mebnHiLaYeHtVaDfSL33BJYLi7QA==}
     engines: {node: '>= 20'}
     peerDependencies:
-      quickjs-wasi: ^2.2.0
+      quickjs-wasi: ^3.0.0
 
   package-json-from-dist@1.0.1:
     resolution: {integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==}
@@ -21830,11 +21895,8 @@ packages:
   pako@2.2.0:
     resolution: {integrity: sha512-zJq6RP/5q+TO2OpFV3FHzlPnFjmkb7Nc99a5SNjJE+uu/PkpChs+NIZSSzbBoD+6kjiISXjfYdwj1ZRQ81dz/w==}
 
-  papaparse@5.5.3:
-    resolution: {integrity: sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A==}
-
-  papaparse@5.7.0:
-    resolution: {integrity: sha512-qBGxg/7Q3Kl9Wfhrz2Z74UnvnHTXLNG6jmKJFeBvP2+y4lV7So+7SR62+Zd47JvdrCkX+nDcnr0ObPzek/+6RA==}
+  papaparse@5.7.1:
+    resolution: {integrity: sha512-qOR+UDWv6D3hMxnWWOk0ZpBdCkd+kw5Yh7aXOaNSQU8A+73EA2bhW7EiUix/hY0yulUi5FRvt7PpYSI2VDvY0g==}
 
   param-case@3.0.4:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}
@@ -22242,8 +22304,8 @@ packages:
     resolution: {integrity: sha512-X5i1y9/8VuBMb9WU8zubTiLKnJG4lcKvL7eaCEVc/jpTe3aS74gCcBM6Yd1vvUDoTCXm4Y15obNS/16yB0FTaQ==}
     engines: {node: '>=10'}
 
-  prismjs@1.27.0:
-    resolution: {integrity: sha512-t13BGPUlFDR7wRB5kQDG4jjl7XeuH6jbJGt11JHPL96qwsEHNX2+68tFXqc1/k+/jALsbSWJKUOT/hcYAZ5LkA==}
+  prismjs@1.30.0:
+    resolution: {integrity: sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==}
     engines: {node: '>=6'}
 
   process-nextick-args@1.0.7:
@@ -22309,8 +22371,8 @@ packages:
       kerberos:
         optional: true
 
-  proxy-agent@8.0.2:
-    resolution: {integrity: sha512-idLLRewuemWd7GH/BDJzGiB0dWGfT2SQs3jy6NtZtGWU9uPTTSdeC1/cdbqLwgzhfv027daGFuXX426e2Eg20A==}
+  proxy-agent@8.0.3:
+    resolution: {integrity: sha512-SYjxPOWaz3CrRZxqgj3A/261L3ZSCcWzM0dFsxNP27m43/KiHWtUmtHZFsHvh7fn11E/SmBfcNsWcWqMhZ6fAw==}
     engines: {node: '>= 20'}
 
   proxy-disposable@1.0.0:
@@ -22396,8 +22458,8 @@ packages:
     resolution: {integrity: sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==}
     engines: {node: '>=10'}
 
-  quickjs-wasi@2.2.0:
-    resolution: {integrity: sha512-zQxXmQMrEoD3S+jQdYsloq4qAuaxKFHZj6hHqOYGwB2iQZH+q9e/lf5zQPXCKOk0WJuAjzRFbO4KwHIp2D05Iw==}
+  quickjs-wasi@3.7.0:
+    resolution: {integrity: sha512-6nOShBtCglrQL6yH+hptIfEdA1WlSmvY/Mm5Ypn9IvtsaDsrYIg8x+xoIXQt02w66a0f1eLTAj1lhfgAbJ4WVw==}
 
   quickselect@2.0.0:
     resolution: {integrity: sha512-RKJ22hX8mHe3Y6wH/N3wCM6BWtjaxIyyUIkpHOvfFnxdI4yD4tBXEBKSbriGujF6jnSVkJrffuo6vxACiSSxIw==}
@@ -23471,6 +23533,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  semver@7.8.6:
+    resolution: {integrity: sha512-9lpSSU4Mly3mrtruwLs1eLK6+gzbzqeBFwRNjIjE+9LuDpWdYctrQlQ3ej1Ilgi7gknpsTRnPoLP8DpCHqHIJw==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   send@0.19.2:
     resolution: {integrity: sha512-VMbMxbDeehAxpOtWJXlcUS5E8iXh6QmN+BkRX1GARS3wRaXEEgzCcB10gTQazO42tpNIya8xIyNx8fll1OFPrg==}
     engines: {node: '>= 0.8.0'}
@@ -23956,8 +24023,8 @@ packages:
     resolution: {integrity: sha512-1tB5mhVo7U+ETBKNf92xT4hrQa3pm0MZ0PQvuDnWgAAGHDsfp4lPSpiS6psrSiet87wyGPh9ft6wmhOMQ0hDiw==}
     engines: {node: '>=14.16'}
 
-  strnum@2.4.2:
-    resolution: {integrity: sha512-rDG3Ah4TV0k1hWvLSzkZtMmLN9+eS+h3knq4MP6A42Y3Yh5qGNnOUs1jJkoSr8FG5dsL28c7KgkIBzSEykqtuw==}
+  strnum@2.5.1:
+    resolution: {integrity: sha512-UM4nTLWzQiDBseVxUGxN0wJzIk0UU89Qi7pKXz9qISo+lhviJikTuikBsK/oFRlpvYHvSdz0TVoLyQ+sEpYwxA==}
 
   strtok3@10.3.5:
     resolution: {integrity: sha512-ki4hZQfh5rX0QDLLkOCj+h+CVNkqmp/CMf8v8kZpkNVK6jGQooMytqzLZYUVYIZcFZ6yDB70EfD8POcFXiF5oA==}
@@ -24331,9 +24398,9 @@ packages:
     resolution: {integrity: sha512-l7FvfAHlcmulp8kr+flpQZmVwtu7nfRV7NZujtN0OqES8EL4O4e0qqzL0DC5gAvx/ZC/9lk6rhcUwYvkBnBnYA==}
     engines: {node: '>=12'}
 
-  tr46@5.1.1:
-    resolution: {integrity: sha512-hdF5ZgjTqgAntKkklYw0R03MG2x/bSzTtkxmIRw/sTNV8YXsCJ1tfLAX23lhxhHJlEf3CRCOCGGWw3vI3GaSPw==}
-    engines: {node: '>=18'}
+  tr46@6.0.0:
+    resolution: {integrity: sha512-bLVMLPtstlZ4iMQHpFHTR7GAGj2jxi8Dg0s2h2MafAE4uSWF98FC/3MomU51iQAMf8/qDUbKWf5GxuvvVcXEhw==}
+    engines: {node: '>=20'}
 
   traverse@0.6.14:
     resolution: {integrity: sha512-CYRAVGfnSSe+4Wlof62oUH6y9fGwo0NNS84hMq76MTZtwXQU7Oqna9SgWfrCGj5JPUtHQudnIEt1BP7PInPkPQ==}
@@ -24574,12 +24641,12 @@ packages:
     resolution: {integrity: sha512-EvRlUt/QqAEvXdQeRMYUfwOQsfzpDztykrG2owGEE/rBOBoYv9uF39ZzsNDh4lTFHhTr2XOZjKkYgueD12ZmGA==}
     engines: {node: '>=18.17'}
 
-  undici@7.30.1:
-    resolution: {integrity: sha512-03KrMbjIFDWQR5RNPrSw3bd1r12JpyFQl9/yxjUbJtqkjmllqC5lFjZh6ujeuJCKr8EOQvRW872Oy/az+nLYxg==}
+  undici@7.30.2:
+    resolution: {integrity: sha512-mLyPQnHwUxaM/rideoK/+KL8DaAJLRl4aBCfmX444aCSLnIaomqPLtNRe2jdCYcsk5wZzXrDIQC8ZeYNRAYyIA==}
     engines: {node: '>=20.18.1'}
 
-  undici@8.11.2:
-    resolution: {integrity: sha512-u4UB2/IrKdU6lFxumHmmo1a3fCQO5tzQllRorfoRS63txhrB7xTpSn1PftwC4qEHkOaqP95fCWW4lJzwErwzhQ==}
+  undici@8.12.4:
+    resolution: {integrity: sha512-8Mx+uNKKER2bA4AdtedkqRbwUCIJFr2nJckXRe5yrDqzePqwLP7VNcctN8/XdmDSbF7mS+jJKIszlL+vbam1VA==}
     engines: {node: '>=22.19.0'}
 
   unherit@1.1.3:
@@ -25066,6 +25133,10 @@ packages:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
     engines: {node: '>=12'}
 
+  webidl-conversions@8.0.1:
+    resolution: {integrity: sha512-BMhLD/Sw+GbJC21C/UgyaZX41nPt8bUTg+jWyDeg7e7YN4xOM05YPSIXceACnXVtqyEw/LMClUQMtMZ+PGGpqQ==}
+    engines: {node: '>=20'}
+
   webpack-cli@5.1.4:
     resolution: {integrity: sha512-pIDJHIEI9LR0yxHXQ+Qh95k2EvXpWzZ5l+d+jIo+RdSm9MiHfzazIxwwni/p7+x4eJZuvG1AJwgC4TNQ7NRgsg==}
     engines: {node: '>=14.15.0'}
@@ -25143,9 +25214,9 @@ packages:
     resolution: {integrity: sha512-RKT8HExMpoYx4igMiVMY83lN6UeITKJlBQ+vR/8ZJ8OCdSiN3RwCq+9gH0+Xzj0+5IrM6i4j/6LuvzbZIQgEcQ==}
     engines: {node: '>=12'}
 
-  whatwg-url@14.2.0:
-    resolution: {integrity: sha512-De72GdQZzNTUBBChsXueQUnPKDkg/5A5zp7pFDuQAj5UFoENpiACU0wlCvzpAGnTkj++ihpKwKyYewn/XNUbKw==}
-    engines: {node: '>=18'}
+  whatwg-url@15.1.0:
+    resolution: {integrity: sha512-2ytDk0kiEj/yu90JOAp44PVPUkO9+jVhyf+SybKlRHSDlvOOZhdPIrr7xTH64l4WixO2cP+wQIcgujkGBPPz6g==}
+    engines: {node: '>=20'}
 
   whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
@@ -25539,7 +25610,7 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
       js-yaml: 5.4.2
-      undici: 8.11.2
+      undici: 8.12.4
 
   '@apidevtools/openapi-schemas@2.1.0': {}
 
@@ -25567,8 +25638,6 @@ snapshots:
       '@csstools/css-parser-algorithms': 3.0.5(@csstools/css-tokenizer@3.0.4)
       '@csstools/css-tokenizer': 3.0.4
       lru-cache: 10.4.3
-
-  '@assemblyscript/loader@0.19.23': {}
 
   '@asyncapi/specs@6.11.1':
     dependencies:
@@ -26946,7 +27015,7 @@ snapshots:
     dependencies:
       postcss-selector-parser: 7.1.6
 
-  '@cto.af/wtf8@0.0.6': {}
+  '@cto.af/wtf8@1.0.0': {}
 
   '@cypress/grep@5.1.0(@babel/core@7.29.7(supports-color@10.2.2))(cypress@15.12.0)(supports-color@10.2.2)':
     dependencies:
@@ -27069,7 +27138,7 @@ snapshots:
     dependencies:
       object-hash: 1.3.1
 
-  '@elastic/charts@73.3.2(@types/react@18.2.79)(moment-timezone@0.6.6)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)':
+  '@elastic/charts@73.4.1(@types/react@18.2.79)(moment-timezone@0.6.6)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)':
     dependencies:
       '@popperjs/core': 2.11.8
       '@reduxjs/toolkit': 2.12.0(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)
@@ -27171,63 +27240,63 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/esql-ast@4.38.0':
+  '@elastic/esql-ast@4.41.0':
     dependencies:
-      '@elastic/esql-definitions': 4.38.0
-      '@elastic/esql-grammar': 4.38.0
-      '@elastic/esql-promql-grammar': 4.38.0
-      '@elastic/esql-types': 4.38.0
+      '@elastic/esql-definitions': 4.41.0
+      '@elastic/esql-grammar': 4.41.0
+      '@elastic/esql-promql-grammar': 4.41.0
+      '@elastic/esql-types': 4.41.0
       tslib: 2.8.1
 
-  '@elastic/esql-definitions@4.38.0': {}
+  '@elastic/esql-definitions@4.41.0': {}
 
-  '@elastic/esql-grammar@4.38.0':
+  '@elastic/esql-grammar@4.41.0':
     dependencies:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-parser@4.38.0':
+  '@elastic/esql-parser@4.41.0':
     dependencies:
-      '@elastic/esql-ast': 4.38.0
-      '@elastic/esql-definitions': 4.38.0
-      '@elastic/esql-grammar': 4.38.0
-      '@elastic/esql-promql-grammar': 4.38.0
-      '@elastic/esql-traversal': 4.38.0
-      '@elastic/esql-types': 4.38.0
+      '@elastic/esql-ast': 4.41.0
+      '@elastic/esql-definitions': 4.41.0
+      '@elastic/esql-grammar': 4.41.0
+      '@elastic/esql-promql-grammar': 4.41.0
+      '@elastic/esql-traversal': 4.41.0
+      '@elastic/esql-types': 4.41.0
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-promql-grammar@4.38.0':
+  '@elastic/esql-promql-grammar@4.41.0':
     dependencies:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-traversal@4.38.0':
+  '@elastic/esql-traversal@4.41.0':
     dependencies:
-      '@elastic/esql-ast': 4.38.0
-      '@elastic/esql-types': 4.38.0
+      '@elastic/esql-ast': 4.41.0
+      '@elastic/esql-types': 4.41.0
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
-  '@elastic/esql-types@4.38.0': {}
+  '@elastic/esql-types@4.41.0': {}
 
-  '@elastic/esql@4.38.0':
+  '@elastic/esql@4.41.0':
     dependencies:
-      '@elastic/esql-ast': 4.38.0
-      '@elastic/esql-definitions': 4.38.0
-      '@elastic/esql-grammar': 4.38.0
-      '@elastic/esql-parser': 4.38.0
-      '@elastic/esql-promql-grammar': 4.38.0
-      '@elastic/esql-traversal': 4.38.0
-      '@elastic/esql-types': 4.38.0
-      '@elastic/pretty-printer': 4.38.0
+      '@elastic/esql-ast': 4.41.0
+      '@elastic/esql-definitions': 4.41.0
+      '@elastic/esql-grammar': 4.41.0
+      '@elastic/esql-parser': 4.41.0
+      '@elastic/esql-promql-grammar': 4.41.0
+      '@elastic/esql-traversal': 4.41.0
+      '@elastic/esql-types': 4.41.0
+      '@elastic/pretty-printer': 4.41.0
       antlr4: 4.13.2
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
   '@elastic/eui-illustrations@1.1.0': {}
 
-  '@elastic/eui-test-helpers@2.3.0(@playwright/test@1.64.1)':
+  '@elastic/eui-test-helpers@2.4.0(@playwright/test@1.64.1)':
     optionalDependencies:
       '@playwright/test': 1.64.1
 
@@ -27249,7 +27318,7 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@elastic/eui@123.4.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)':
+  '@elastic/eui@123.5.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)':
     dependencies:
       '@elastic/datemath': 5.0.3(moment@2.31.0)
       '@elastic/eui-theme-borealis': 8.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -27337,9 +27406,9 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.38.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.40.0(monaco-editor@0.56.0)':
     dependencies:
-      '@elastic/esql-definitions': 4.38.0
+      '@elastic/esql-definitions': 4.41.0
       monaco-editor: 0.56.0
 
   '@elastic/node-crypto@1.2.3': {}
@@ -27377,7 +27446,7 @@ snapshots:
       '@opentelemetry/instrumentation-grpc': 0.223.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/instrumentation-hapi': 0.69.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/instrumentation-host-metrics': 0.6.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
-      '@opentelemetry/instrumentation-http': 0.223.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
+      '@opentelemetry/instrumentation-http': 0.223.2(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/instrumentation-ioredis': 0.71.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/instrumentation-kafkajs': 0.32.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/instrumentation-knex': 0.67.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
@@ -27420,14 +27489,14 @@ snapshots:
       - encoding
       - supports-color
 
-  '@elastic/pretty-printer@4.38.0':
+  '@elastic/pretty-printer@4.41.0':
     dependencies:
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
   '@elastic/prismjs-esql@4.28.0':
     dependencies:
-      '@elastic/esql-definitions': 4.38.0
+      '@elastic/esql-definitions': 4.41.0
 
   '@elastic/react-search-ui-views@1.24.2(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)':
     dependencies:
@@ -27503,7 +27572,7 @@ snapshots:
   '@elastic/transport@8.11.0(supports-color@10.2.2)':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core': 2.12.1(@opentelemetry/api@1.9.1)
       debug: 4.4.3(supports-color@10.2.2)
       hpagent: 1.2.0
       ms: 2.1.3
@@ -27516,13 +27585,13 @@ snapshots:
   '@elastic/transport@9.4.0(supports-color@10.2.2)':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core': 2.12.1(@opentelemetry/api@1.9.1)
       debug: 4.4.3(supports-color@10.2.2)
       hpagent: 1.2.0
       ms: 2.1.3
       secure-json-parse: 4.1.0
       tslib: 2.8.1
-      undici: 7.30.1
+      undici: 7.30.2
     transitivePeerDependencies:
       - supports-color
 
@@ -27992,7 +28061,7 @@ snapshots:
     dependencies:
       '@hapi/hoek': 11.0.7
 
-  '@hapi/ammo@6.0.1':
+  '@hapi/ammo@6.0.2':
     dependencies:
       '@hapi/hoek': 11.0.7
 
@@ -28052,12 +28121,12 @@ snapshots:
       '@hapi/boom': 10.0.1
       '@hapi/hoek': 11.0.7
       '@hapi/validate': 2.0.1
-      '@hapi/wreck': 18.1.2
+      '@hapi/wreck': 18.1.3
 
-  '@hapi/hapi@21.4.10':
+  '@hapi/hapi@21.4.13':
     dependencies:
       '@hapi/accept': 6.0.3
-      '@hapi/ammo': 6.0.1
+      '@hapi/ammo': 6.0.2
       '@hapi/boom': 10.0.1
       '@hapi/bounce': 3.0.2
       '@hapi/call': 9.0.1
@@ -28070,7 +28139,7 @@ snapshots:
       '@hapi/shot': 6.0.3
       '@hapi/somever': 4.1.1
       '@hapi/statehood': 8.2.1
-      '@hapi/subtext': 8.1.3
+      '@hapi/subtext': 8.1.5
       '@hapi/teamwork': 6.0.1
       '@hapi/topo': 6.0.2
       '@hapi/validate': 2.0.1
@@ -28085,9 +28154,9 @@ snapshots:
 
   '@hapi/hoek@9.3.0': {}
 
-  '@hapi/inert@7.1.2':
+  '@hapi/inert@7.1.3':
     dependencies:
-      '@hapi/ammo': 6.0.1
+      '@hapi/ammo': 6.0.2
       '@hapi/boom': 10.0.1
       '@hapi/bounce': 3.0.2
       '@hapi/hoek': 11.0.7
@@ -28112,7 +28181,7 @@ snapshots:
       '@hapi/hoek': 11.0.7
       '@hapi/vise': 5.0.1
 
-  '@hapi/pez@6.1.1':
+  '@hapi/pez@6.1.3':
     dependencies:
       '@hapi/b64': 6.0.1
       '@hapi/boom': 10.0.1
@@ -28148,15 +28217,15 @@ snapshots:
       '@hapi/iron': 7.0.1
       '@hapi/validate': 2.0.1
 
-  '@hapi/subtext@8.1.3':
+  '@hapi/subtext@8.1.5':
     dependencies:
       '@hapi/boom': 10.0.1
       '@hapi/bourne': 3.0.0
       '@hapi/content': 6.0.3
       '@hapi/file': 3.0.0
       '@hapi/hoek': 11.0.7
-      '@hapi/pez': 6.1.1
-      '@hapi/wreck': 18.1.2
+      '@hapi/pez': 6.1.3
+      '@hapi/wreck': 18.1.3
 
   '@hapi/teamwork@6.0.1': {}
 
@@ -28179,7 +28248,7 @@ snapshots:
     dependencies:
       '@hapi/hoek': 11.0.7
 
-  '@hapi/wreck@18.1.2':
+  '@hapi/wreck@18.1.3':
     dependencies:
       '@hapi/boom': 10.0.1
       '@hapi/bourne': 3.0.0
@@ -28230,9 +28299,9 @@ snapshots:
 
   '@hey-api/types@0.1.2': {}
 
-  '@hono/node-server@2.1.5(hono@4.13.13)':
+  '@hono/node-server@2.1.8(hono@4.13.19)':
     dependencies:
-      hono: 4.13.13
+      hono: 4.13.19
 
   '@humanwhocodes/config-array@0.11.14(supports-color@10.2.2)':
     dependencies:
@@ -28666,10 +28735,10 @@ snapshots:
       '@aws-sdk/credential-provider-node': 3.972.88
       '@langchain/core': 1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0)
 
-  '@langchain/classic@1.0.55(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@smithy/signature-v4@5.7.4)(cheerio@1.0.0-rc.12)(google-auth-library@10.9.1(supports-color@10.2.2))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(peggy@5.1.0)(undici@7.30.1)(ws@8.22.0)':
+  '@langchain/classic@1.0.55(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@smithy/signature-v4@5.7.4)(cheerio@1.0.0-rc.12)(google-auth-library@10.9.1(supports-color@10.2.2))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(peggy@5.1.0)(undici@7.30.2)(ws@8.22.0)':
     dependencies:
       '@langchain/core': 1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0)
-      '@langchain/openai': 1.7.0(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.1)(ws@8.22.0)
+      '@langchain/openai': 1.7.0(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.2)(ws@8.22.0)
       '@langchain/textsplitters': 1.0.2(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))
       handlebars: 4.7.10
       js-yaml: 5.4.2
@@ -28757,11 +28826,11 @@ snapshots:
       - react
       - react-dom
 
-  '@langchain/openai@1.7.0(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.1)(ws@8.22.0)':
+  '@langchain/openai@1.7.0(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.2)(ws@8.22.0)':
     dependencies:
       '@langchain/core': 1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0)
       js-tiktoken: 1.0.21
-      openai: 7.42.0(@aws-sdk/credential-provider-node@3.972.88)(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.1)(ws@8.22.0)(zod@4.6.5)
+      openai: 7.42.0(@aws-sdk/credential-provider-node@3.972.88)(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.2)(ws@8.22.0)(zod@4.6.5)
       zod: 4.6.5
     transitivePeerDependencies:
       - '@aws-sdk/credential-provider-node'
@@ -28778,30 +28847,32 @@ snapshots:
       '@langchain/core': 1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0)
       js-tiktoken: 1.0.21
 
-  '@launchdarkly/js-sdk-common@2.29.0': {}
+  '@launchdarkly/eventsource@0.2.3': {}
 
-  '@launchdarkly/js-server-sdk-common@2.24.0':
+  '@launchdarkly/js-sdk-common@2.32.1': {}
+
+  '@launchdarkly/js-server-sdk-common@2.26.3':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.29.0
+      '@launchdarkly/js-sdk-common': 2.32.1
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.14.3(supports-color@10.2.2)':
+  '@launchdarkly/node-server-sdk@9.16.3(supports-color@10.2.2)':
     dependencies:
-      '@launchdarkly/js-server-sdk-common': 2.24.0
+      '@launchdarkly/eventsource': 0.2.3
+      '@launchdarkly/js-server-sdk-common': 2.26.3
       https-proxy-agent: 7.0.6(supports-color@10.2.2)
-      launchdarkly-eventsource: 2.3.0
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/openfeature-js-server-common@2.0.6(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-js-server-common@2.2.2(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.29.0
+      '@launchdarkly/js-sdk-common': 2.32.1
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
-  '@launchdarkly/openfeature-node-server@2.0.11(@launchdarkly/node-server-sdk@9.14.3(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-node-server@2.1.6(@launchdarkly/node-server-sdk@9.16.3(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.14.3(supports-color@10.2.2)
-      '@launchdarkly/openfeature-js-server-common': 2.0.6(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+      '@launchdarkly/node-server-sdk': 9.16.3(supports-color@10.2.2)
+      '@launchdarkly/openfeature-js-server-common': 2.2.2(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
   '@loaders.gl/core@3.4.7':
@@ -28961,7 +29032,7 @@ snapshots:
 
   '@modelcontextprotocol/sdk@1.32.1(@cfworker/json-schema@4.1.1)(supports-color@10.2.2)(zod@4.6.5)':
     dependencies:
-      '@hono/node-server': 2.1.5(hono@4.13.13)
+      '@hono/node-server': 2.1.8(hono@4.13.19)
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
       content-type: 1.0.5
@@ -28970,8 +29041,8 @@ snapshots:
       eventsource: 3.0.7
       eventsource-parser: 3.0.6
       express: 5.2.1(supports-color@10.2.2)
-      express-rate-limit: 8.7.0(express@5.2.1(supports-color@10.2.2))(supports-color@10.2.2)
-      hono: 4.13.13
+      express-rate-limit: 8.7.4(express@5.2.1(supports-color@10.2.2))(supports-color@10.2.2)
+      hono: 4.13.19
       jose: 6.2.12
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1
@@ -29135,6 +29206,8 @@ snapshots:
 
   '@noble/hashes@1.8.0': {}
 
+  '@nodable/entities@3.1.0': {}
+
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -29159,7 +29232,7 @@ snapshots:
       indent-string: 4.0.0
       lilconfig: 3.1.3
       minimatch: 10.2.6
-      semver: 7.8.5
+      semver: 7.8.6
       string-width: 4.2.3
       supports-color: 8.1.1
       tinyglobby: 0.2.17
@@ -29292,6 +29365,10 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.1
 
+  '@opentelemetry/api-logs@0.223.2':
+    dependencies:
+      '@opentelemetry/api': 1.9.1
+
   '@opentelemetry/api@1.9.1': {}
 
   '@opentelemetry/configuration@0.223.0(@opentelemetry/api@1.9.1)':
@@ -29305,6 +29382,11 @@ snapshots:
       '@opentelemetry/api': 1.9.1
 
   '@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/semantic-conventions': 1.43.0
+
+  '@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/semantic-conventions': 1.43.0
@@ -29515,11 +29597,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opentelemetry/instrumentation-http@0.223.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)':
+  '@opentelemetry/instrumentation-http@0.223.2(@opentelemetry/api@1.9.1)(supports-color@10.2.2)':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/instrumentation': 0.223.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
+      '@opentelemetry/core': 2.12.1(@opentelemetry/api@1.9.1)
+      '@opentelemetry/instrumentation': 0.223.2(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/semantic-conventions': 1.43.0
       forwarded-parse: 2.1.2
     transitivePeerDependencies:
@@ -29718,7 +29800,7 @@ snapshots:
   '@opentelemetry/instrumentation-undici@0.33.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core': 2.12.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/instrumentation': 0.223.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/semantic-conventions': 1.43.0
     transitivePeerDependencies:
@@ -29745,6 +29827,15 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/api-logs': 0.223.0
+      import-in-the-middle: 3.5.2
+      require-in-the-middle: 8.0.1(supports-color@10.2.2)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@opentelemetry/instrumentation@0.223.2(@opentelemetry/api@1.9.1)(supports-color@10.2.2)':
+    dependencies:
+      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/api-logs': 0.223.2
       import-in-the-middle: 3.5.2
       require-in-the-middle: 8.0.1(supports-color@10.2.2)
     transitivePeerDependencies:
@@ -30264,12 +30355,12 @@ snapshots:
 
   '@protobufjs/utf8@1.1.2': {}
 
-  '@puppeteer/browsers@3.2.3(proxy-agent@8.0.2(supports-color@10.2.2))(yauzl@3.4.0)':
+  '@puppeteer/browsers@3.2.3(proxy-agent@8.0.3(supports-color@10.2.2))(yauzl@3.4.0)':
     dependencies:
       modern-tar: 0.8.5
       yargs: 18.2.0
     optionalDependencies:
-      proxy-agent: 8.0.2(supports-color@10.2.2)
+      proxy-agent: 8.0.3(supports-color@10.2.2)
       yauzl: 3.4.0
 
   '@redocly/cli@2.64.1': {}
@@ -30343,7 +30434,7 @@ snapshots:
       es-toolkit: 1.52.0
       filesize: 11.0.25
       fs-extra: 11.4.1
-      semver: 7.8.5
+      semver: 7.8.6
       source-map: 0.7.6
     transitivePeerDependencies:
       - '@emnapi/core'
@@ -30565,28 +30656,28 @@ snapshots:
     dependencies:
       '@sentry/conventions': 0.16.0
 
-  '@sentry/node-core@10.75.3(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.220.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))':
+  '@sentry/node-core@10.75.3(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.220.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))':
     dependencies:
       '@sentry/conventions': 0.16.0
       '@sentry/core': 10.75.3
-      '@sentry/opentelemetry': 10.75.3(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))
+      '@sentry/opentelemetry': 10.75.3(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))
       import-in-the-middle: 3.5.2
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core': 2.12.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/exporter-trace-otlp-http': 0.223.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/instrumentation': 0.220.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.9.1)
 
-  '@sentry/node@10.75.3(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.223.0(@opentelemetry/api@1.9.1))(supports-color@10.2.2)':
+  '@sentry/node@10.75.3(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.223.0(@opentelemetry/api@1.9.1))(supports-color@10.2.2)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/instrumentation': 0.220.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.9.1)
       '@sentry/conventions': 0.16.0
       '@sentry/core': 10.75.3
-      '@sentry/node-core': 10.75.3(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.220.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))
-      '@sentry/opentelemetry': 10.75.3(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))
+      '@sentry/node-core': 10.75.3(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.220.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))
+      '@sentry/opentelemetry': 10.75.3(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))
       '@sentry/server-utils': 10.75.3
       import-in-the-middle: 3.5.2
     transitivePeerDependencies:
@@ -30594,10 +30685,10 @@ snapshots:
       - '@opentelemetry/exporter-trace-otlp-http'
       - supports-color
 
-  '@sentry/opentelemetry@10.75.3(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))':
+  '@sentry/opentelemetry@10.75.3(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core': 2.12.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.9.1)
       '@sentry/conventions': 0.16.0
       '@sentry/core': 10.75.3
@@ -30867,7 +30958,7 @@ snapshots:
       magic-string: 0.30.21
       path-browserify: 1.0.1
       process: 0.11.10
-      semver: 7.8.5
+      semver: 7.8.6
       storybook: 8.6.19(prettier@2.8.8)(supports-color@10.2.2)
       style-loader: 3.3.4(webpack@5.96.1)
       terser-webpack-plugin: 5.3.17(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack@5.96.1)
@@ -30911,7 +31002,7 @@ snapshots:
       jsdoc-type-pratt-parser: 4.8.0
       process: 0.11.10
       recast: 0.23.21
-      semver: 7.8.5
+      semver: 7.8.6
       util: 0.12.5
       ws: 8.22.0
     optionalDependencies:
@@ -30956,7 +31047,7 @@ snapshots:
       react-docgen: 7.1.1(supports-color@10.2.2)
       react-dom: 18.2.0(react@18.2.0)
       resolve: 1.22.13
-      semver: 7.8.5
+      semver: 7.8.6
       storybook: 8.6.19(prettier@2.8.8)(supports-color@10.2.2)
       tsconfig-paths: 4.2.0
       webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
@@ -31161,9 +31252,9 @@ snapshots:
     transitivePeerDependencies:
       - react-dom
 
-  '@tanstack/react-virtual@3.13.12(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@tanstack/react-virtual@3.14.23(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@tanstack/virtual-core': 3.13.12
+      '@tanstack/virtual-core': 3.19.8
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
@@ -31173,7 +31264,7 @@ snapshots:
     dependencies:
       '@tanstack/store': 0.11.2
 
-  '@tanstack/virtual-core@3.13.12': {}
+  '@tanstack/virtual-core@3.19.8': {}
 
   '@tediousjs/connection-string@1.1.0': {}
 
@@ -31546,7 +31637,7 @@ snapshots:
 
   '@types/hapi__cookie@12.0.5':
     dependencies:
-      '@hapi/hapi': 21.4.10
+      '@hapi/hapi': 21.4.13
       '@types/node': 24.10.13
       joi: 17.13.9
 
@@ -31951,7 +32042,7 @@ snapshots:
 
   '@types/webidl-conversions@7.0.3': {}
 
-  '@types/whatwg-url@11.0.5':
+  '@types/whatwg-url@13.0.0':
     dependencies:
       '@types/webidl-conversions': 7.0.3
 
@@ -32074,7 +32165,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.60.0
       debug: 4.4.3(supports-color@10.2.2)
       minimatch: 10.2.6
-      semver: 7.8.5
+      semver: 7.8.6
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@6.0.3)
       typescript: 6.0.3
@@ -32089,7 +32180,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.71.0
       debug: 4.4.3(supports-color@10.2.2)
       minimatch: 10.2.6
-      semver: 7.8.5
+      semver: 7.8.6
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@6.0.3)
       typescript: 6.0.3
@@ -32394,9 +32485,9 @@ snapshots:
 
   '@xtuc/long@4.2.2': {}
 
-  '@xyflow/react@12.12.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@xyflow/react@12.12.1(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@xyflow/system': 0.0.83
+      '@xyflow/system': 0.0.84
       classcat: 5.0.5
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -32407,7 +32498,7 @@ snapshots:
     transitivePeerDependencies:
       - immer
 
-  '@xyflow/system@0.0.83':
+  '@xyflow/system@0.0.84':
     dependencies:
       '@types/d3-drag': 3.0.7
       '@types/d3-interpolate': 3.0.4
@@ -33032,7 +33123,7 @@ snapshots:
     dependencies:
       safe-buffer: 5.1.2
 
-  basic-ftp@5.3.1: {}
+  basic-ftp@6.2.6: {}
 
   bcrypt-pbkdf@1.0.2:
     dependencies:
@@ -33151,9 +33242,9 @@ snapshots:
     dependencies:
       object.entries: 1.1.9
 
-  brok@6.0.0(@hapi/hapi@21.4.10):
+  brok@6.0.0(@hapi/hapi@21.4.13):
     dependencies:
-      '@hapi/hapi': 21.4.10
+      '@hapi/hapi': 21.4.13
       '@hapi/hoek': 11.0.7
       '@hapi/validate': 2.0.1
 
@@ -33233,7 +33324,7 @@ snapshots:
     dependencies:
       node-int64: 0.4.0
 
-  bson@6.10.4: {}
+  bson@7.3.4: {}
 
   buffer-crc32@1.0.0: {}
 
@@ -33393,9 +33484,9 @@ snapshots:
 
   caseless@0.12.0: {}
 
-  cbor2@2.4.0:
+  cbor2@2.4.1:
     dependencies:
-      '@cto.af/wtf8': 0.0.6
+      '@cto.af/wtf8': 1.0.0
 
   ccount@1.1.0: {}
 
@@ -33528,7 +33619,7 @@ snapshots:
       adm-zip: 0.6.1
       axios: 1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       compare-versions: 6.1.1
-      proxy-agent: 8.0.2(supports-color@10.2.2)
+      proxy-agent: 8.0.3(supports-color@10.2.2)
       proxy-from-env: 2.1.0
       tcp-port-used: 1.0.3(supports-color@10.2.2)
     transitivePeerDependencies:
@@ -33982,7 +34073,7 @@ snapshots:
       postcss-modules-scope: 3.2.1(postcss@8.5.28)
       postcss-modules-values: 4.0.0(postcss@8.5.28)
       postcss-value-parser: 4.2.0
-      semver: 7.8.5
+      semver: 7.8.6
     optionalDependencies:
       '@rspack/core': 2.1.8(@swc/helpers@0.5.19)
       webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
@@ -33996,7 +34087,7 @@ snapshots:
       postcss-modules-scope: 3.2.1(postcss@8.5.28)
       postcss-modules-values: 4.0.0(postcss@8.5.28)
       postcss-value-parser: 4.2.0
-      semver: 7.8.5
+      semver: 7.8.6
     optionalDependencies:
       '@rspack/core': 2.1.8(@swc/helpers@0.5.19)
       webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
@@ -34106,7 +34197,7 @@ snapshots:
       debug: 4.4.3(supports-color@10.2.2)
       lodash: 4.18.1
       mocha: 11.3.0
-      semver: 7.8.5
+      semver: 7.8.6
     transitivePeerDependencies:
       - supports-color
 
@@ -34517,12 +34608,12 @@ snapshots:
 
   defu@6.1.7: {}
 
-  degenerator@7.0.1(quickjs-wasi@2.2.0):
+  degenerator@7.0.2(quickjs-wasi@3.7.0):
     dependencies:
       ast-types: 0.13.4
       escodegen: 2.1.0
       esprima: 4.0.1
-      quickjs-wasi: 2.2.0
+      quickjs-wasi: 3.7.0
 
   del@4.1.1:
     dependencies:
@@ -34572,7 +34663,7 @@ snapshots:
       prompts: 2.4.2
       rechoir: 0.8.0
       safe-regex: 2.1.1
-      semver: 7.8.5
+      semver: 7.8.6
       tsconfig-paths-webpack-plugin: 4.2.0
       watskeburt: 4.2.3
 
@@ -34821,7 +34912,7 @@ snapshots:
     dependencies:
       '@elastic/ecs-pino-format': 1.5.0
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core': 2.12.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-metrics': 2.12.0(@opentelemetry/api@1.9.1)
       after-all-results: 2.0.0
       agentkeepalive: 4.6.0
@@ -34850,7 +34941,7 @@ snapshots:
       readable-stream: 3.6.2
       relative-microtime: 2.0.0
       require-in-the-middle: 8.0.1(supports-color@10.2.2)
-      semver: 7.8.5
+      semver: 7.8.6
       shallow-clone-shim: 2.0.0
       source-map: 0.8.0
       sql-summary: 1.0.1
@@ -35173,7 +35264,7 @@ snapshots:
   eslint-compat-utils@0.5.1(eslint@8.57.0(supports-color@10.2.2)):
     dependencies:
       eslint: 8.57.0(supports-color@10.2.2)
-      semver: 7.8.5
+      semver: 7.8.6
 
   eslint-config-prettier@9.1.0(eslint@8.57.0(supports-color@10.2.2)):
     dependencies:
@@ -35221,7 +35312,7 @@ snapshots:
     dependencies:
       fd-package-json: 1.2.0
       module-replacements: 2.3.2
-      semver: 7.8.5
+      semver: 7.8.6
 
   eslint-plugin-es-x@7.8.0(eslint@8.57.0(supports-color@10.2.2)):
     dependencies:
@@ -35323,7 +35414,7 @@ snapshots:
       globals: 15.15.0
       globrex: 0.1.2
       ignore: 5.3.2
-      semver: 7.8.5
+      semver: 7.8.6
     optionalDependencies:
       typescript: 6.0.3
 
@@ -35552,7 +35643,7 @@ snapshots:
 
   exponential-backoff@3.1.3: {}
 
-  express-rate-limit@8.7.0(express@5.2.1(supports-color@10.2.2))(supports-color@10.2.2):
+  express-rate-limit@8.7.4(express@5.2.1(supports-color@10.2.2))(supports-color@10.2.2):
     dependencies:
       debug: 4.4.3(supports-color@10.2.2)
       express: 5.2.1(supports-color@10.2.2)
@@ -35699,16 +35790,19 @@ snapshots:
     dependencies:
       fast-string-width: 3.0.2
 
-  fast-xml-builder@1.3.1:
+  fast-xml-builder@1.3.2:
     dependencies:
       path-expression-matcher: 1.6.2
       xml-naming: 0.3.0
 
-  fast-xml-parser@5.5.7:
+  fast-xml-parser@5.12.1:
     dependencies:
-      fast-xml-builder: 1.3.1
+      '@nodable/entities': 3.1.0
+      fast-xml-builder: 1.3.2
+      is-unsafe: 2.0.3
       path-expression-matcher: 1.6.2
-      strnum: 2.4.2
+      strnum: 2.5.1
+      xml-naming: 0.3.0
 
   fastest-levenshtein@1.0.16: {}
 
@@ -35950,7 +36044,7 @@ snapshots:
       minimatch: 3.1.5
       node-abort-controller: 3.1.1
       schema-utils: 3.3.0
-      semver: 7.8.5
+      semver: 7.8.6
       tapable: 2.3.3
       typescript: 6.0.3
       webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
@@ -36200,9 +36294,9 @@ snapshots:
     dependencies:
       resolve-pkg-maps: 1.0.0
 
-  get-uri@8.0.1(supports-color@10.2.2):
+  get-uri@8.0.2(supports-color@10.2.2):
     dependencies:
-      basic-ftp: 5.3.1
+      basic-ftp: 6.2.6
       data-uri-to-buffer: 8.0.0
       debug: 4.4.3(supports-color@10.2.2)
     transitivePeerDependencies:
@@ -36393,7 +36487,7 @@ snapshots:
   guarded-fetch@0.1.3:
     dependencies:
       ipaddr.js: 2.2.0
-      undici: 7.30.1
+      undici: 7.30.2
 
   handlebars@4.7.10:
     dependencies:
@@ -36617,12 +36711,6 @@ snapshots:
 
   hat@0.0.3: {}
 
-  hdr-histogram-js@3.0.1:
-    dependencies:
-      '@assemblyscript/loader': 0.19.23
-      base64-js: 1.5.1
-      pako: 1.0.11
-
   he@1.2.0: {}
 
   headers-polyfill@5.0.1:
@@ -36651,7 +36739,7 @@ snapshots:
     dependencies:
       react-is: 16.13.1
 
-  hono@4.13.13: {}
+  hono@4.13.19: {}
 
   hookified@1.15.1: {}
 
@@ -37299,6 +37387,8 @@ snapshots:
 
   is-unicode-supported@2.1.0: {}
 
+  is-unsafe@2.0.3: {}
+
   is-url-superb@4.0.0: {}
 
   is-url@1.2.4: {}
@@ -37370,7 +37460,7 @@ snapshots:
       '@babel/parser': 7.29.8
       '@istanbuljs/schema': 0.1.6
       istanbul-lib-coverage: 3.2.2
-      semver: 7.8.5
+      semver: 7.8.6
     transitivePeerDependencies:
       - supports-color
 
@@ -37677,7 +37767,7 @@ snapshots:
       jest-util: 29.7.0
       natural-compare: 1.4.0
       pretty-format: 29.7.0
-      semver: 7.8.5
+      semver: 7.8.6
     transitivePeerDependencies:
       - supports-color
 
@@ -37755,7 +37845,7 @@ snapshots:
       '@sideway/formula': 3.0.1
       '@sideway/pinpoint': 2.0.0
 
-  joi@18.3.1:
+  joi@18.3.2:
     dependencies:
       '@hapi/address': 5.1.1
       '@hapi/formula': 3.0.2
@@ -37890,7 +37980,7 @@ snapshots:
 
   jsonc-parser@3.3.1: {}
 
-  jsondiffpatch@0.7.6:
+  jsondiffpatch@0.7.7:
     dependencies:
       '@dmsnell/diff-match-patch': 1.1.0
 
@@ -37917,7 +38007,7 @@ snapshots:
       lodash.isstring: 4.0.1
       lodash.once: 4.1.1
       ms: 2.1.3
-      semver: 7.8.5
+      semver: 7.8.6
 
   jsprim@2.0.2:
     dependencies:
@@ -37945,12 +38035,12 @@ snapshots:
   just-bash@3.6.0(supports-color@10.2.2):
     dependencies:
       diff: 8.0.4
-      fast-xml-parser: 5.5.7
+      fast-xml-parser: 5.12.1
       file-type: 21.3.4(supports-color@10.2.2)
       guarded-fetch: 0.1.3
       ini: 6.0.0
       modern-tar: 0.7.7
-      papaparse: 5.7.0
+      papaparse: 5.7.1
       re2js: 1.4.0
       run: 2.1.3(typescript@6.0.3)
       seek-bzip: 2.0.0
@@ -38057,8 +38147,6 @@ snapshots:
       picocolors: 1.1.1
       shell-quote: 1.11.0
 
-  launchdarkly-eventsource@2.3.0: {}
-
   lazy-ass@2.0.3: {}
 
   lazystream@1.0.1:
@@ -38110,10 +38198,10 @@ snapshots:
 
   lighthouse-stack-packs@1.12.3: {}
 
-  lighthouse@13.4.1(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.223.0(@opentelemetry/api@1.9.1))(proxy-agent@8.0.2(supports-color@10.2.2))(supports-color@10.2.2)(yauzl@3.4.0):
+  lighthouse@13.4.1(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.223.0(@opentelemetry/api@1.9.1))(proxy-agent@8.0.3(supports-color@10.2.2))(supports-color@10.2.2)(yauzl@3.4.0):
     dependencies:
       '@paulirish/trace_engine': 0.0.65
-      '@sentry/node': 10.75.3(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.223.0(@opentelemetry/api@1.9.1))(supports-color@10.2.2)
+      '@sentry/node': 10.75.3(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.223.0(@opentelemetry/api@1.9.1))(supports-color@10.2.2)
       axe-core: 4.13.0
       chrome-launcher: 1.2.2(supports-color@10.2.2)
       configstore: 7.1.0
@@ -38129,7 +38217,7 @@ snapshots:
       lodash-es: 4.18.1
       lookup-closest-locale: 6.2.0
       open: 8.4.2
-      puppeteer-core: 25.12.0(proxy-agent@8.0.2(supports-color@10.2.2))(yauzl@3.4.0)
+      puppeteer-core: 25.12.0(proxy-agent@8.0.3(supports-color@10.2.2))(yauzl@3.4.0)
       robots-parser: 3.0.1
       speedline-core: 1.4.3
       third-party-web: 0.29.2
@@ -38406,7 +38494,7 @@ snapshots:
 
   make-dir@4.0.0:
     dependencies:
-      semver: 7.8.5
+      semver: 7.8.6
 
   makeerror@1.0.12:
     dependencies:
@@ -39161,17 +39249,18 @@ snapshots:
       vscode-uri: 3.2.0
       yaml: 2.9.1
 
-  mongodb-connection-string-url@3.0.2:
+  mongodb-connection-string-url@7.0.3:
     dependencies:
-      '@types/whatwg-url': 11.0.5
-      whatwg-url: 14.2.0
+      '@types/whatwg-url': 13.0.0
+      whatwg-url: 15.1.0
 
-  mongodb@6.21.0(socks@2.8.10):
+  mongodb@7.9.1(@mongodb-js/zstd@7.0.0)(socks@2.8.10):
     dependencies:
       '@mongodb-js/saslprep': 1.5.5
-      bson: 6.10.4
-      mongodb-connection-string-url: 3.0.2
+      bson: 7.3.4
+      mongodb-connection-string-url: 7.0.3
     optionalDependencies:
+      '@mongodb-js/zstd': 7.0.0
       socks: 2.8.10
 
   monitor-event-loop-delay@1.0.0: {}
@@ -39192,7 +39281,7 @@ snapshots:
 
   ms@2.1.3: {}
 
-  mssql@12.7.2(supports-color@10.2.2):
+  mssql@12.7.13(supports-color@10.2.2):
     dependencies:
       '@tediousjs/connection-string': 1.1.0
       commander: 11.1.0
@@ -39306,7 +39395,7 @@ snapshots:
 
   node-abi@3.96.0:
     dependencies:
-      semver: 7.8.5
+      semver: 7.8.6
     optional: true
 
   node-abort-controller@3.1.1: {}
@@ -39337,7 +39426,7 @@ snapshots:
     dependencies:
       whatwg-url: 5.0.0
 
-  node-forge@1.4.2: {}
+  node-forge@1.4.3: {}
 
   node-gyp-build@4.8.4:
     optional: true
@@ -39351,7 +39440,7 @@ snapshots:
       es6-promise: 4.2.8
       lodash: 4.18.1
       long: 5.3.2
-      node-forge: 1.4.2
+      node-forge: 1.4.3
       pako: 2.2.0
       process: 0.11.10
       uuid: 11.1.1
@@ -39398,7 +39487,7 @@ snapshots:
       util: 0.12.5
       vm-browserify: 1.1.2
 
-  nodemailer@10.3.0: {}
+  nodemailer@10.3.1: {}
 
   nopt@4.0.3:
     dependencies:
@@ -39416,7 +39505,7 @@ snapshots:
     dependencies:
       hosted-git-info: 4.1.0
       is-core-module: 2.17.0
-      semver: 7.8.5
+      semver: 7.8.6
       validate-npm-package-license: 3.0.4
 
   normalize-path@3.0.0: {}
@@ -39584,12 +39673,12 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  openai@7.42.0(@aws-sdk/credential-provider-node@3.972.88)(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.1)(ws@8.22.0)(zod@4.6.5):
+  openai@7.42.0(@aws-sdk/credential-provider-node@3.972.88)(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.2)(ws@8.22.0)(zod@4.6.5):
     optionalDependencies:
       '@aws-sdk/credential-provider-node': 3.972.88
       '@smithy/signature-v4': 5.7.4
       google-auth-library: 10.9.1(supports-color@10.2.2)
-      undici: 7.30.1
+      undici: 7.30.2
       ws: 8.22.0
       zod: 4.6.5
 
@@ -39822,25 +39911,25 @@ snapshots:
 
   p-try@2.2.0: {}
 
-  pac-proxy-agent@9.1.0(supports-color@10.2.2):
+  pac-proxy-agent@9.1.1(supports-color@10.2.2):
     dependencies:
       agent-base: 9.0.0
       debug: 4.4.3(supports-color@10.2.2)
-      get-uri: 8.0.1(supports-color@10.2.2)
+      get-uri: 8.0.2(supports-color@10.2.2)
       http-proxy-agent: 9.1.0(supports-color@10.2.2)
       https-proxy-agent: 9.1.0(supports-color@10.2.2)
-      pac-resolver: 9.0.1(quickjs-wasi@2.2.0)
-      quickjs-wasi: 2.2.0
+      pac-resolver: 9.0.2(quickjs-wasi@3.7.0)
+      quickjs-wasi: 3.7.0
       socks-proxy-agent: 10.1.0(supports-color@10.2.2)
     transitivePeerDependencies:
       - kerberos
       - supports-color
 
-  pac-resolver@9.0.1(quickjs-wasi@2.2.0):
+  pac-resolver@9.0.2(quickjs-wasi@3.7.0):
     dependencies:
-      degenerator: 7.0.1(quickjs-wasi@2.2.0)
+      degenerator: 7.0.2(quickjs-wasi@3.7.0)
       netmask: 2.1.1
-      quickjs-wasi: 2.2.0
+      quickjs-wasi: 3.7.0
 
   package-json-from-dist@1.0.1: {}
 
@@ -39850,9 +39939,7 @@ snapshots:
 
   pako@2.2.0: {}
 
-  papaparse@5.5.3: {}
-
-  papaparse@5.7.0: {}
+  papaparse@5.7.1: {}
 
   param-case@3.0.4:
     dependencies:
@@ -40263,7 +40350,7 @@ snapshots:
     dependencies:
       parse-ms: 2.1.0
 
-  prismjs@1.27.0: {}
+  prismjs@1.30.0: {}
 
   process-nextick-args@1.0.7: {}
 
@@ -40326,14 +40413,14 @@ snapshots:
 
   proxy-agent-negotiate@1.1.0: {}
 
-  proxy-agent@8.0.2(supports-color@10.2.2):
+  proxy-agent@8.0.3(supports-color@10.2.2):
     dependencies:
       agent-base: 9.0.0
       debug: 4.4.3(supports-color@10.2.2)
       http-proxy-agent: 9.1.0(supports-color@10.2.2)
       https-proxy-agent: 9.1.0(supports-color@10.2.2)
       lru-cache: 7.18.3
-      pac-proxy-agent: 9.1.0(supports-color@10.2.2)
+      pac-proxy-agent: 9.1.1(supports-color@10.2.2)
       proxy-from-env: 2.1.0
       socks-proxy-agent: 10.1.0(supports-color@10.2.2)
     transitivePeerDependencies:
@@ -40377,9 +40464,9 @@ snapshots:
 
   punycode@2.3.1: {}
 
-  puppeteer-core@25.12.0(proxy-agent@8.0.2(supports-color@10.2.2))(yauzl@3.4.0):
+  puppeteer-core@25.12.0(proxy-agent@8.0.3(supports-color@10.2.2))(yauzl@3.4.0):
     dependencies:
-      '@puppeteer/browsers': 3.2.3(proxy-agent@8.0.2(supports-color@10.2.2))(yauzl@3.4.0)
+      '@puppeteer/browsers': 3.2.3(proxy-agent@8.0.3(supports-color@10.2.2))(yauzl@3.4.0)
       chromium-bidi: 17.0.2(devtools-protocol@0.0.1687809)
       devtools-protocol: 0.0.1687809
       typed-query-selector: 2.12.3
@@ -40391,13 +40478,13 @@ snapshots:
       - utf-8-validate
       - yauzl
 
-  puppeteer@25.12.0(proxy-agent@8.0.2(supports-color@10.2.2))(yauzl@3.4.0):
+  puppeteer@25.12.0(proxy-agent@8.0.3(supports-color@10.2.2))(yauzl@3.4.0):
     dependencies:
-      '@puppeteer/browsers': 3.2.3(proxy-agent@8.0.2(supports-color@10.2.2))(yauzl@3.4.0)
+      '@puppeteer/browsers': 3.2.3(proxy-agent@8.0.3(supports-color@10.2.2))(yauzl@3.4.0)
       chromium-bidi: 17.0.2(devtools-protocol@0.0.1687809)
       devtools-protocol: 0.0.1687809
       lilconfig: 3.1.3
-      puppeteer-core: 25.12.0(proxy-agent@8.0.2(supports-color@10.2.2))(yauzl@3.4.0)
+      puppeteer-core: 25.12.0(proxy-agent@8.0.3(supports-color@10.2.2))(yauzl@3.4.0)
       typed-query-selector: 2.12.3
     transitivePeerDependencies:
       - bufferutil
@@ -40436,7 +40523,7 @@ snapshots:
 
   quick-lru@5.1.1: {}
 
-  quickjs-wasi@2.2.0: {}
+  quickjs-wasi@3.7.0: {}
 
   quickselect@2.0.0: {}
 
@@ -41064,7 +41151,7 @@ snapshots:
     dependencies:
       hastscript: 6.0.0
       parse-entities: 2.0.0
-      prismjs: 1.27.0
+      prismjs: 1.30.0
 
   regenerate-unicode-properties@10.3.0:
     dependencies:
@@ -41586,7 +41673,7 @@ snapshots:
       loader-utils: 2.0.4
       neo-async: 2.6.2
       schema-utils: 3.3.0
-      semver: 7.8.5
+      semver: 7.8.6
       webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
     optionalDependencies:
       sass: 1.104.0
@@ -41668,6 +41755,8 @@ snapshots:
   semver@7.7.4: {}
 
   semver@7.8.5: {}
+
+  semver@7.8.6: {}
 
   send@0.19.2(supports-color@10.2.2):
     dependencies:
@@ -42276,7 +42365,7 @@ snapshots:
 
   strip-json-comments@5.0.3: {}
 
-  strnum@2.4.2:
+  strnum@2.5.1:
     dependencies:
       anynum: 1.0.1
 
@@ -42737,7 +42826,7 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  tr46@5.1.1:
+  tr46@6.0.0:
     dependencies:
       punycode: 2.3.1
 
@@ -42987,9 +43076,9 @@ snapshots:
 
   undici@6.29.1: {}
 
-  undici@7.30.1: {}
+  undici@7.30.2: {}
 
-  undici@8.11.2: {}
+  undici@8.12.4: {}
 
   unherit@1.1.3:
     dependencies:
@@ -43633,6 +43722,8 @@ snapshots:
 
   webidl-conversions@7.0.0: {}
 
+  webidl-conversions@8.0.1: {}
+
   webpack-cli@5.1.4(webpack@5.96.1):
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
@@ -43734,10 +43825,10 @@ snapshots:
       tr46: 3.0.0
       webidl-conversions: 7.0.0
 
-  whatwg-url@14.2.0:
+  whatwg-url@15.1.0:
     dependencies:
-      tr46: 5.1.1
-      webidl-conversions: 7.0.0
+      tr46: 6.0.0
+      webidl-conversions: 8.0.1
 
   whatwg-url@5.0.0:
     dependencies:

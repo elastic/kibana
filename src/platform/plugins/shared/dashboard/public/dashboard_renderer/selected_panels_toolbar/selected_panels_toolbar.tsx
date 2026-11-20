@@ -35,6 +35,13 @@ const clearSelectionLabel = i18n.translate('dashboard.selectedPanelsToolbar.clea
   defaultMessage: 'Clear selection (Esc)',
 });
 
+const groupInSectionLabel = i18n.translate(
+  'dashboard.selectedPanelsToolbar.groupInSectionButtonLabel',
+  {
+    defaultMessage: 'Group into a section',
+  }
+);
+
 const copyToDashboardLabel = i18n.translate(
   'dashboard.selectedPanelsToolbar.copyToDashboardButtonLabel',
   {
@@ -67,6 +74,11 @@ export const SelectedPanelsToolbar = () => {
   const onRemove = useCallback(() => {
     if (dashboardApi.canRemovePanels && !dashboardApi.canRemovePanels()) return;
     dashboardApi.removePanels(dashboardApi.selectedPanelIds$.value);
+    dashboardApi.clearSelectedPanels();
+  }, [dashboardApi]);
+
+  const onGroupInSection = useCallback(() => {
+    dashboardApi.groupPanelsInSection(dashboardApi.selectedPanelIds$.value);
     dashboardApi.clearSelectedPanels();
   }, [dashboardApi]);
 
@@ -117,6 +129,19 @@ export const SelectedPanelsToolbar = () => {
           </EuiBadge>
         </EuiFlexItem>
         <div css={styles.divider} aria-hidden />
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={groupInSectionLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="section"
+              color="text"
+              size="s"
+              iconSize="m"
+              aria-label={groupInSectionLabel}
+              onClick={onGroupInSection}
+              data-test-subj="dashboardSelectedPanelsGroupInSection"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
         {showCopyToDashboard && (
           <EuiFlexItem grow={false}>
             <EuiToolTip

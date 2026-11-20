@@ -36,8 +36,8 @@ import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import { useIpPopover } from '../node/ips/ips';
 import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
 import { useEventDetailsPopover } from '../popovers/details/use_event_details_popover';
-import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
-import { analyzeDocuments } from '../node/label_node/analyze_documents';
+import type { DocumentAnalysisOutput } from '../node/event_node/analyze_documents';
+import { analyzeDocuments } from '../node/event_node/analyze_documents';
 import {
   ENTITY_ID,
   EVENT_ID,
@@ -52,13 +52,13 @@ import {
   addFilter,
 } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
-import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
+import { useEventNodeExpandPopover } from '../popovers/node_expand/use_event_node_expand_popover';
 import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
 } from '../popovers/primitives/list_graph_popover';
 import type { NodeProps, NodeViewModel } from '../types';
-import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
+import { isEventNode, isRelationshipNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
 import { useGraphFilters } from '../filters/use_graph_filters';
 import { getEntityTimelineFilter } from './entity_timeline_filters';
@@ -112,7 +112,7 @@ const useGraphPopovers = ({
     euidApi,
     onTelemetryEvent
   );
-  const labelExpandPopover = useLabelNodeExpandPopover(
+  const eventExpandPopover = useEventNodeExpandPopover(
     scopeId,
     onOpenEventPreview,
     onTelemetryEvent
@@ -129,14 +129,14 @@ const useGraphPopovers = ({
 
   const openPopoverCallback = useCallback(
     (cb: Function, ...args: unknown[]) => {
-      [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover, eventPopover].forEach(
+      [nodeExpandPopover, eventExpandPopover, ipPopover, countryFlagsPopover, eventPopover].forEach(
         ({ actions: { closePopover } }) => {
           closePopover();
         }
       );
       cb(...args);
     },
-    [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover, eventPopover]
+    [nodeExpandPopover, eventExpandPopover, ipPopover, countryFlagsPopover, eventPopover]
   );
 
   const createIpClickHandler = useCallback(
@@ -175,7 +175,7 @@ const useGraphPopovers = ({
 
   return {
     nodeExpandPopover,
-    labelExpandPopover,
+    eventExpandPopover,
     ipPopover,
     countryFlagsPopover,
     eventPopover,
@@ -648,7 +648,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
     const {
       nodeExpandPopover,
-      labelExpandPopover,
+      eventExpandPopover,
       ipPopover,
       countryFlagsPopover,
       eventPopover,
@@ -665,8 +665,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
-    const labelExpandButtonClickHandler = (...args: unknown[]) =>
-      openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
+    const eventExpandButtonClickHandler = (...args: unknown[]) =>
+      openPopoverCallback(eventExpandPopover.onNodeExpandButtonClick, ...args);
 
     // Converts a raw expand-popover itemsFn into the minimal NodeToolbarItem shape:
     // filters out separators and maps iconType + label + onClick + disabled + testSubject.
@@ -707,14 +707,14 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       [nodeItemsFn, toToolbarItemsFn]
     );
 
-    const { itemsFn: labelItemsFn } = labelExpandPopover;
-    const labelToolbarItemsFn = useMemo(
-      () => (labelItemsFn ? toToolbarItemsFn(labelItemsFn) : undefined),
-      [labelItemsFn, toToolbarItemsFn]
+    const { itemsFn: eventItemsFn } = eventExpandPopover;
+    const eventToolbarItemsFn = useMemo(
+      () => (eventItemsFn ? toToolbarItemsFn(eventItemsFn) : undefined),
+      [eventItemsFn, toToolbarItemsFn]
     );
     const isPopoverOpen = [
       nodeExpandPopover,
-      labelExpandPopover,
+      eventExpandPopover,
       ipPopover,
       countryFlagsPopover,
       eventPopover,
@@ -823,7 +823,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               ipClickHandler: createIpClickHandler(nodeIps),
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
             };
-          } else if (isLabelNode(node)) {
+          } else if (isEventNode(node)) {
             const nodeIps = node.ips || [];
             const nodeCountryCodes = node.countryCodes || [];
             const numEvents = node.uniqueEventsCount ?? 0;
@@ -841,8 +841,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               ...node,
               isOrigin: docEventIds.some((id) => originEventIdsSet.has(id)),
               isOriginAlert: docEventIds.some((id) => originAlertIdsSet.has(id)),
-              expandButtonClick: labelExpandButtonClickHandler,
-              toolbarItemsFn: labelToolbarItemsFn,
+              expandButtonClick: eventExpandButtonClickHandler,
+              toolbarItemsFn: eventToolbarItemsFn,
               ipClickHandler: createIpClickHandler(nodeIps),
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
               eventClickHandler: createEventClickHandler(analysis, text),
@@ -862,7 +862,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       );
       // Callbacks (expandButtonClick, ipClickHandler, etc.) are excluded from deps intentionally —
       // they are stable or recreated from memoized state and do not affect layout or node keys.
-      // nodeToolbarItemsFn and labelToolbarItemsFn ARE included: they capture euidApi which
+      // nodeToolbarItemsFn and eventToolbarItemsFn ARE included: they capture euidApi which
       // hydrates asynchronously; excluding them would leave nodes with a stale factory until an
       // unrelated dep (e.g. searchFilters) triggers a rebuild.
       // searchFilters IS included: when a filter is toggled the node list recomputes so
@@ -877,7 +877,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       relationshipNodeSources,
       searchFilters,
       nodeToolbarItemsFn,
-      labelToolbarItemsFn,
+      eventToolbarItemsFn,
     ]);
 
     const searchFilterCounter = useMemo(() => {
@@ -1048,7 +1048,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           </EuiFlexItem>
         </EuiFlexGroup>
         <nodeExpandPopover.PopoverComponent />
-        <labelExpandPopover.PopoverComponent />
+        <eventExpandPopover.PopoverComponent />
         <ipPopover.PopoverComponent />
         <countryFlagsPopover.PopoverComponent />
         <eventPopover.PopoverComponent />

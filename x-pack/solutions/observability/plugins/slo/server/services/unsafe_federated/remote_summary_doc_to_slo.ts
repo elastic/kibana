@@ -49,7 +49,7 @@ export function fromRemoteSummaryDocumentToSloDefinition(
   });
 
   if (!res.success) {
-    logger.debug(`Invalid remote stored summary SLO with id [${summaryDoc.slo.id}]`);
+    logger.debug(`Invalid remote stored summary SLO with ID [${summaryDoc.slo.id}]`);
     logger.debug(stringifyZodError(res.error));
 
     return undefined;
@@ -66,7 +66,7 @@ function getIndicator(summaryDoc: EsSummaryDocument, logger: Logger): Indicator 
 
   if (!res.success) {
     logger.debug(
-      `Invalid indicator from remote summary SLO id [${summaryDoc.slo.id}] - Fallback on dummy indicator`
+      `Invalid indicator from remote summary SLO ID [${summaryDoc.slo.id}] - Fallback on dummy indicator`
     );
     logger.debug(stringifyZodError(res.error));
 

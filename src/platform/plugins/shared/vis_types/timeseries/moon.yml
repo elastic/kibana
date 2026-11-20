@@ -52,7 +52,6 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/shared-ux-markdown'
   - '@kbn/react-kibana-context-render'
-  - '@kbn/palettes'
   - '@kbn/visualizations-common'
   - '@kbn/lens-common'
   - '@kbn/expression-xy-plugin'
@@ -61,6 +60,8 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/kql'
   - '@kbn/chart-icons'
+  - '@kbn/visualizations-components'
+  - '@kbn/palettes-components'
 tags:
   - plugin
   - prod

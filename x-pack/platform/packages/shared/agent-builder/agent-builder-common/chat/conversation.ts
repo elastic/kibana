@@ -7,7 +7,7 @@
 
 import type { JsonObject } from '@kbn/utility-types';
 import type { UserIdAndName, UserPrincipalType } from '../base/users';
-import type { ToolOrigin, ToolType } from '../tools/definition';
+import type { ToolDefinitionWithSchema, ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
 import type {
@@ -26,7 +26,7 @@ import type {
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
-import type { ActiveExecution, ConversationEvent } from './timeline_events';
+import type { ActiveExecution, ConversationEvent, EventActor } from './timeline_events';
 import type { ExecutionInterruption } from './events';
 import type { MetadataFieldValue } from '../templates';
 
@@ -113,6 +113,8 @@ export enum ConversationRoundStepType {
   subagentRosterUpdated = 'subagent_roster_updated',
   substitution = 'substitution',
   injectedContext = 'injected_context',
+  deliveredMessage = 'delivered_message',
+  interimAnswer = 'interim_answer',
 }
 
 // tool call step
@@ -329,6 +331,61 @@ export const isInjectedContextStep = (step: ConversationRoundStep): step is Inje
 /** Registration id of the skill pre-selection cycle hook; its `injected_context` steps carry it. */
 export const relevantSkillsHookId = 'relevant-skills';
 
+/** A delivered steer. The text is embedded so renderers need no event lookup. */
+export interface DeliveredMessageStepData {
+  /** The stamped `user_message` event. */
+  event_id: string;
+  author: EventActor;
+  /** True when the author is the run owner, whose credentials the run uses. */
+  is_run_owner: boolean;
+  message: string;
+  /** When the run picked the message up (ISO). */
+  delivered_at: string;
+  /** The cycle at whose check the message was picked up. */
+  cycle: number;
+  /** The tool call group that preceded the pickup, for placement. */
+  tool_call_group_id?: string;
+  /** Delivered after the preceding `interim_answer` step. */
+  after_answer?: boolean;
+}
+
+export type DeliveredMessageStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.deliveredMessage,
+  DeliveredMessageStepData
+>;
+
+export const createDeliveredMessageStep = (
+  data: DeliveredMessageStepData
+): DeliveredMessageStep => ({
+  type: ConversationRoundStepType.deliveredMessage,
+  ...data,
+});
+
+export const isDeliveredMessageStep = (
+  step: ConversationRoundStep
+): step is DeliveredMessageStep => {
+  return step.type === ConversationRoundStepType.deliveredMessage;
+};
+
+/** Preserves an answer shown before a steer continued the round; the response is the last answer. */
+export interface InterimAnswerStepData {
+  message: string;
+}
+
+export type InterimAnswerStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.interimAnswer,
+  InterimAnswerStepData
+>;
+
+export const createInterimAnswerStep = (data: InterimAnswerStepData): InterimAnswerStep => ({
+  type: ConversationRoundStepType.interimAnswer,
+  ...data,
+});
+
+export const isInterimAnswerStep = (step: ConversationRoundStep): step is InterimAnswerStep => {
+  return step.type === ConversationRoundStepType.interimAnswer;
+};
+
 export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
   ConversationRoundStepType.backgroundAgentComplete,
   BackgroundExecutionState
@@ -450,7 +507,9 @@ export type ConversationRoundStep =
   | PreExecutionWorkflowStep
   | SubagentRosterUpdatedStep
   | SubstitutionStep
-  | InjectedContextStep;
+  | InjectedContextStep
+  | DeliveredMessageStep
+  | InterimAnswerStep;
 
 /**
  * An entry in the active persistent-sub-agent roster.
@@ -758,6 +817,9 @@ export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
 /** Maximum accepted length for a user chat message (`input` / `message`) */
 export const CHAT_MESSAGE_MAX_LENGTH = 100_000;
 
+/** Maximum steer length in characters. */
+export const STEER_MESSAGE_MAX_LENGTH = 4_000;
+
 /** Maximum accepted length for a client-supplied conversation title */
 export const CONVERSATION_TITLE_MAX_LENGTH = 500;
 
@@ -1004,4 +1066,21 @@ export interface CompactionSummary {
    * `summarized_up_to` on write, for readers that predate it.
    */
   covered_round_ids?: string[];
+  /**
+   * Definitions of the dynamic tools registered when the summary was generated, re-injected after
+   * it since it hides the tool results that first carried them. Snapshotted rather than read
+   * live so the rendered notice stays identical until the next compaction: a tool loaded later
+   * is seen through its own tool result. Absent when no dynamic tool was registered.
+   */
+  dynamic_tools?: DynamicToolDefinition[];
+}
+
+/**
+ * A tool reachable through the `execute_dynamic_tool` meta-tool, as written into the transcript.
+ * `parameters` is the same JSON schema the provider receives for a natively bound tool.
+ */
+export interface DynamicToolDefinition {
+  tool_id: string;
+  description: string;
+  parameters: ToolDefinitionWithSchema['schema'];
 }

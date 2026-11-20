@@ -24,7 +24,7 @@ import {
   RISK_SCORE_NORM_FIELD,
   getEntityId,
 } from '../common';
-import type { QueryArgs, Row, SortDir, SortValue, TimeRange } from '../common';
+import type { QueryArgs, Row, SortDir, SortValue } from '../common';
 import { runEsqlQuery } from '../../queries/run_esql_query';
 import type { EsqlContext } from '../../queries/run_esql_query';
 import type { EsqlRunner } from './types';
@@ -165,11 +165,6 @@ export const buildLookupJoinClause = (concreteEntityIndexName: string): string =
     ...JOINED_FIELDS_UNMAPPED_ON_OLDER_INDICES.map((field) => `| EVAL ${field} = TO_STRING(null)`),
     `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``,
   ].join('\n');
-
-const TIME_RANGE_DAYS = { '24h': 1, '7d': 7, '30d': 30 } as const;
-
-/** One date-math start shared by every grid and tile query, so they agree; ES|QL still pushes it down. */
-export const buildLookback = (range: TimeRange): string => `NOW() - ${TIME_RANGE_DAYS[range]} days`;
 
 /** The order of every grid page, `field <dir> NULLS LAST, entity.id ASC`, and its limit. */
 export const buildSortSuffix = (field: string, direction: SortDir, limit: number): string[] => [

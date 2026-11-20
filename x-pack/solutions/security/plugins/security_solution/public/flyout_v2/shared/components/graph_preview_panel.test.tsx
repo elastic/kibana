@@ -57,7 +57,7 @@ const defaultProps = {
 };
 
 const dataWithNodes: GraphPreviewData = {
-  nodes: [{ id: 'node-1', color: 'primary', shape: 'ellipse' }],
+  nodes: [{ id: 'node-1', color: 'primary', kind: 'entity' }],
   edges: [],
 };
 

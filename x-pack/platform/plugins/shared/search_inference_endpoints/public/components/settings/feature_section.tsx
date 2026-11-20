@@ -19,12 +19,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
-import type { EndpointDeprecationInfo } from '../../types';
+import type { EndpointDeprecationInfo, EndpointEfforts } from '../../types';
 import { SubFeatureCard } from './sub_feature_card';
 
 interface FeatureSettingItem {
   endpointIds: string[];
   effectiveRecommendedEndpoints: string[];
+  efforts: EndpointEfforts;
+  effectiveRecommendedEfforts: EndpointEfforts;
   feature: InferenceFeatureConfig;
   hasSavedObject: boolean;
   isFeatureDirty: boolean;
@@ -35,6 +37,7 @@ interface FeatureSectionProps {
   parentDescription: string;
   features: FeatureSettingItem[];
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
+  onEffortsChange: (featureId: string, newEfforts: EndpointEfforts) => void;
   invalidEndpointIds: Set<string>;
   deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo>;
   isTechPreview?: boolean;
@@ -49,6 +52,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
   parentDescription,
   features,
   onEndpointsChange,
+  onEffortsChange,
   invalidEndpointIds,
   deprecatedEndpointsMap,
   isTechPreview = false,
@@ -108,6 +112,8 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
               ({
                 endpointIds,
                 effectiveRecommendedEndpoints,
+                efforts,
+                effectiveRecommendedEfforts,
                 feature,
                 hasSavedObject,
                 isFeatureDirty,
@@ -119,6 +125,9 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                     endpointIds={endpointIds}
                     effectiveRecommendedEndpoints={effectiveRecommendedEndpoints}
                     onEndpointsChange={onEndpointsChange}
+                    efforts={efforts}
+                    effectiveRecommendedEfforts={effectiveRecommendedEfforts}
+                    onEffortsChange={onEffortsChange}
                     invalidEndpointIds={invalidEndpointIds}
                     deprecatedEndpointsMap={deprecatedEndpointsMap}
                     hasSavedObject={hasSavedObject}
