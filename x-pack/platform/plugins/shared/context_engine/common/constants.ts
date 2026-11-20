@@ -27,6 +27,19 @@ export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
  * `PATCH`, `DELETE` and `_restore` still reach it.
  */
 export const AI_INDEX_KI_GROUPS_PATH = `${AI_INDEX_KI_LIST_PATH}/_groups`;
+export const SESSION_EVENTS_SAVE_PATH = `${PUBLIC_API_PATH}/memory/_save_event`;
+
+/** Shared bounds for session memory and session events HTTP routes. */
+export const MAX_MEMORY_ID_LENGTH = 256;
+export const MAX_MEMORY_USER_ID_LENGTH = 1024;
+export const MAX_MEMORY_AI_INDEX_IDS = 100;
+
+export const MAX_SESSION_EVENTS_BODY_BYTES = 10 * 1024 * 1024;
+export const MAX_SESSION_EVENTS_PER_REQUEST = 1000;
+export const MAX_SESSION_EVENT_TOOL_NAME_LENGTH = 256;
+export const MAX_SESSION_EVENT_TOOL_CALLS = 128;
+export const MAX_SESSION_EVENT_TIMESTAMP_LENGTH = 64;
+export const MAX_SESSION_EVENT_TEXT_LENGTH = 1024 * 1024;
 
 /** The most unique memory ids one forget call takes, which keeps its search under the result window. */
 export const MAX_SESSION_MEMORY_FORGET_IDS = 100;

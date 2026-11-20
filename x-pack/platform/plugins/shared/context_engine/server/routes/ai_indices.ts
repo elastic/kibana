@@ -127,7 +127,8 @@ import {
 import { dreamingConfigSchema, dreamingResponseSchema } from './schemas/dreaming_schema';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiWriteTelemetry } from '../step_types/helpers';
-import { withContextEngineFeatureFlag } from './with_feature_flag';
+import { CONTEXT_ENGINE_DOCS_NOTE } from './constants';
+import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
@@ -147,17 +148,12 @@ const DELETE_SECURITY: RouteSecurity = {
 const CONTEXT_ENGINE_DISABLED_NOTE =
   'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).';
 
-const CONTEXT_ENGINE_DOCS_NOTE =
-  '**For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**';
-
 const CONTEXT_ENGINE_DISABLED_DESCRIPTION = 'Context Engine is turned off in this space.';
 
 const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
   WorkflowsManagementOperationPrivileges.delete.every(
     (privilege) => request.authzResult?.[privilege] === true
   );
-
-const MEMORY_DISABLED_MESSAGE = 'Context Engine memory is turned off.';
 
 const toPublicAiIndex = ({
   dreaming: _dreaming,
