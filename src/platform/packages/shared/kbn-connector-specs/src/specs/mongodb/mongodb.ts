@@ -11,7 +11,7 @@
  * MongoDB Connector
  *
  * Provides read-only access to MongoDB collections using the native MongoDB
- * driver. Supports any MongoDB deployment reachable via a connection URI,
+ * driver. Supports MongoDB Server 4.4+ deployments reachable via a connection URI,
  * using mongodb:// or mongodb+srv://: replica sets, sharded clusters, or
  * standalone instances.
  *
@@ -26,7 +26,6 @@
  */
 
 import { escapeRegExp } from 'lodash';
-import { timeoutSignal } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type {
@@ -67,11 +66,17 @@ const DISALLOWED_OPERATORS = new Set(['$out', '$merge', '$function', '$accumulat
 // MongoDB v7 ignores client-level timeoutMS. This deadline covers pool checkout and every
 // cursor batch, and is cleared as soon as the operation settles.
 const withOperationTimeout = async <T>(run: (signal: AbortSignal) => Promise<T>): Promise<T> => {
-  const deadline = timeoutSignal(30_000);
+  const controller = new AbortController();
+  const timer = setTimeout(() => {
+    controller.abort(new DOMException('The operation was aborted due to timeout', 'TimeoutError'));
+  }, 30_000);
+  if (typeof timer === 'object') {
+    timer.unref();
+  }
   try {
-    return await run(deadline);
+    return await run(controller.signal);
   } finally {
-    deadline.dispose();
+    clearTimeout(timer);
   }
 };
 
@@ -238,7 +243,7 @@ export const MongoDBConnector: ConnectorSpec = {
           }),
           helpText: i18n.translate('connectorSpecs.mongodb.config.uri.helpText', {
             defaultMessage:
-              'Full MongoDB connection string. Supports mongodb:// and mongodb+srv:// schemes. ' +
+              'Full MongoDB connection string for MongoDB Server 4.4+. Supports mongodb:// and mongodb+srv:// schemes. ' +
               'Include the database name in the path (e.g. /mydb) to use it as the default for actions. ' +
               'Credentials are authenticated against the admin database by default; append ' +
               '?authSource=yourDbName to override.',
@@ -452,8 +457,8 @@ export const MongoDBConnector: ConnectorSpec = {
   skill: [
     '## MongoDB Connector',
     '',
-    'Provides access to MongoDB collections. Supports any deployment reachable',
-    'via a mongodb:// or mongodb+srv:// connection URI: replica sets, sharded',
+    'Provides access to MongoDB Server 4.4+ collections via a mongodb:// or',
+    'mongodb+srv:// connection URI: replica sets, sharded',
     'clusters, and standalone instances.',
     '',
     '### Discovery pattern',
