@@ -48,6 +48,7 @@ import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
 import { installImprovementsIndexTemplate } from './improvements/storage';
+import { createSessionMemoryService } from './session_memory/service';
 import { createSessionEventsService } from './session_events/service';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
@@ -421,6 +422,7 @@ export class ContextEnginePlugin
     });
     const signalsService = this.signalsService;
 
+    const sessionMemoryService = createSessionMemoryService(this.esClient);
     const sessionEventsService = createSessionEventsService(this.esClient);
 
     const improvementsLogger = this.logger.get('improvements');
@@ -496,6 +498,7 @@ export class ContextEnginePlugin
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
+      getSessionMemoryService: () => sessionMemoryService,
       getSessionEventsService: () => sessionEventsService,
     };
   }

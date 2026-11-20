@@ -12,7 +12,7 @@ import { isManagedProfileName } from '../common/managed_profiles';
 
 export const SEARCH_BOOST_PAGE_DESCRIPTION = i18n.translate('xpack.searchBoost.page.description', {
   defaultMessage:
-    'Balance search performance and cost for the indices and data streams in this project.',
+    'Project-wide defaults determine the search resources allocated to your indices and data streams. Create boost rules to override those defaults with a different boost profile for specific indices or data streams.',
 });
 
 export const MATCHING_INDICES_TITLE = i18n.translate('xpack.searchBoost.matchingIndicesTitle', {
@@ -74,6 +74,17 @@ export const getHiddenDataStreams = (count: number) =>
     values: { count },
   });
 
+export const LOADING_LABEL = i18n.translate('xpack.searchBoost.page.loading', {
+  defaultMessage: 'Loading boost settings…',
+});
+
+export const LOAD_ERROR_TITLE = i18n.translate('xpack.searchBoost.page.loadErrorTitle', {
+  defaultMessage: 'Unable to load boost settings',
+});
+
+export const TRY_AGAIN_LABEL = i18n.translate('xpack.searchBoost.page.tryAgain', {
+  defaultMessage: 'Try again',
+});
 export const PROJECT_DEFAULTS_TITLE = i18n.translate('xpack.searchBoost.projectDefaults.title', {
   defaultMessage: 'Project defaults',
 });
