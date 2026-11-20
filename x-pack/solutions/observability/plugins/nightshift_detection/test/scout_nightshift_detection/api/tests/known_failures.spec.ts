@@ -173,15 +173,12 @@ apiTest.describe(
           },
         });
         // Written by the managed rule the workflow created for the knowledge indicator.
-        const rules = await apiClient.get(`${RULES_PATH}?per_page=100`, {
+        const rule = await apiClient.get(`${RULES_PATH}/${signal?.data.rule_id}`, {
           headers,
           responseType: 'json',
         });
-        expect(rules).toHaveStatusCode(200);
-        const rule = (rules.body.items as Array<{ id: string; metadata: { name: string } }>).find(
-          ({ id }) => id === signal?.data.rule_id
-        );
-        expect(rule?.metadata.name).toContain(KI_TITLE);
+        expect(rule).toHaveStatusCode(200);
+        expect(rule.body.metadata.name).toContain(KI_TITLE);
       }
     );
   }

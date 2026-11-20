@@ -69,8 +69,9 @@ export function toReading({
     unit: 'count',
     title: knowledgeIndicator.title,
     description: knowledgeIndicator.description,
-    // Unscored knowledge indicators sit in the middle, neither raised nor buried.
-    importance: knowledgeIndicator.severity_score ?? 50,
+    // Unscored knowledge indicators sit in the middle, neither raised nor buried. The knowledge
+    // indicator write path stores any score, while the signal format only accepts 0 to 100.
+    importance: Math.min(100, Math.max(0, knowledgeIndicator.severity_score ?? 50)),
     evidence_esql: compileEvidenceQuery({
       esql: knowledgeIndicator.esql,
       from: data.change_at,

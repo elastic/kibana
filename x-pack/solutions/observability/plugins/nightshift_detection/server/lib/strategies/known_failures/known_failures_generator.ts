@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
 import type { QueryLink } from '@kbn/significant-events-schema';
-import { sortBy } from 'lodash';
+import { sortBy, uniq } from 'lodash';
 import type { RuleRow } from '../../rules/managed_rule_reader';
 import type { DetectionSignalGenerator, GenerateResult, GeneratorContext } from '../types';
 import { KNOWN_FAILURES_STRATEGY_ID } from './constants';

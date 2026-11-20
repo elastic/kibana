@@ -135,6 +135,17 @@ describe('toReading', () => {
     ).toMatchObject({ dropped: false });
   });
 
+  it('caps the importance of a knowledge indicator scored above 100', () => {
+    const reading = toReading({
+      knowledgeIndicator: { ...KNOWLEDGE_INDICATOR, severity_score: 150 },
+      row: ROW,
+      entity: ENTITY,
+      cpsEnabled: false,
+    });
+
+    expect(reading?.importance).toBe(100);
+  });
+
   it('gives nothing for a row without the columns the rule query keeps', () => {
     expect(
       toReading({
