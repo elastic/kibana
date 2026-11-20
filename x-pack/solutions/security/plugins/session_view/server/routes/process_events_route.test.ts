@@ -12,6 +12,7 @@ import {
   mockEvents,
   mockAlerts,
 } from '../../common/mocks/constants/session_view_process.mock';
+import { ALERT_ORIGINAL_TIME_PROPERTY } from '../../common/constants';
 import { getAlertsClientMockInstance } from './alerts_client_mock.test';
 import type { ProcessEvent } from '../../common';
 
@@ -106,6 +107,74 @@ describe('process_events_route.ts', () => {
       });
 
       expect(eventsWithoutOutput[0]._source).toEqual(mockEvents[mockEvents.length - 1]);
+    });
+
+    describe('alerts range', () => {
+      // An alert is raised after the process event that caused it. If the alert range stops at the last process
+      // event of a page, an alert newer than every event is never loaded and its process row shows no badge.
+      type RangeClause = { range?: Record<string, { gte: string; lte?: string }> };
+
+      const firstTimestamp = mockEvents[0]['@timestamp'];
+      const lastTimestamp = mockEvents[mockEvents.length - 1]['@timestamp'];
+
+      const fetchAndGetAlertsRange = async (
+        cursor: string | undefined,
+        forward: boolean,
+        pageSize?: number
+      ) => {
+        const client = elasticsearchServiceMock.createElasticsearchClient(getResponse());
+        const alertsClient = getAlertsClientMockInstance();
+        const find = jest.spyOn(alertsClient, 'find');
+
+        await fetchEventsAndScopedAlerts(
+          client,
+          alertsClient,
+          TEST_PROCESS_INDEX,
+          'mockId',
+          TEST_SESSION_START_TIME,
+          cursor,
+          forward,
+          pageSize
+        );
+
+        expect(find).toHaveBeenCalledTimes(1);
+        const { query } = find.mock.calls[0][0];
+        const { must } = (query as { bool: { must: RangeClause[] } }).bool;
+
+        return must.find((clause) => clause.range)?.range?.[ALERT_ORIGINAL_TIME_PROPERTY];
+      };
+
+      it('leaves the range open on the last page of the session', async () => {
+        // the page holds fewer events than requested, so no later process event exists
+        const range = await fetchAndGetAlertsRange(undefined, true);
+
+        expect(range).toEqual({ gte: firstTimestamp });
+      });
+
+      it('stops the range at the last event when more pages follow', async () => {
+        // the page is full, so later process events (and the alerts they cause) come with the next page
+        const range = await fetchAndGetAlertsRange(undefined, true, mockEvents.length);
+
+        expect(range).toEqual({ gte: firstTimestamp, lte: lastTimestamp });
+      });
+
+      it('extends a backward page up to its cursor when the cursor is newer than its last event', async () => {
+        // opened from an alert newer than every process event: the forward page is empty, so the
+        // backward page uses the alert time as its cursor
+        const cursor = '2021-11-23T15:25:06.510Z';
+        const range = await fetchAndGetAlertsRange(cursor, false);
+
+        expect(range).toEqual({
+          gte: mockEvents[mockEvents.length - 1]['@timestamp'],
+          lte: cursor,
+        });
+      });
+
+      it('stops a backward page at its last event when the cursor is not newer', async () => {
+        const range = await fetchAndGetAlertsRange(firstTimestamp, false);
+
+        expect(range?.lte).toBe(mockEvents[0]['@timestamp']);
+      });
     });
   });
 });
