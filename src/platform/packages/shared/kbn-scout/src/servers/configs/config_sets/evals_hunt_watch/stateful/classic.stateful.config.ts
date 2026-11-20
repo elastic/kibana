@@ -39,6 +39,10 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * Per-space `securitySolution:enableAlertZero` is set by this suite's preflight fixture, not by
  * server config, because it must be set per eval space (default, hunt-a, hunt-b, hunt-blocked)
  * rather than globally.
+ *
+ * AlertZero routes 404 outside a Security solution space, and a stateful stack creates its
+ * Default space with no solution. The preflight only converts `default` when CI=true, so
+ * `xpack.spaces.defaultSolution=security` makes it a Security space at boot on any throwaway stack.
  */
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,
@@ -47,6 +51,7 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
       '--xpack.security.serviceAccounts.enabled=true',
+      '--xpack.spaces.defaultSolution=security',
       '--xpack.fleet.packages.0.name=endpoint',
       '--xpack.fleet.packages.0.version=latest',
     ],
