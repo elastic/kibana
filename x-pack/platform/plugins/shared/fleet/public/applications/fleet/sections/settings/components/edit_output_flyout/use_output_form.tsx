@@ -1051,7 +1051,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
 
       const otelExporterParams: OtelExporterOutput = {
         otel_exporter_config_yaml: otelExporterConfigInput.value || null,
-        otel_disable_beatsauth: otelDisableBeatsauthInput.value ?? null,
+        // Only persist the toggle when the user changed it, so untouched forms keep it unset
+        otel_disable_beatsauth: otelDisableBeatsauthInput.hasChanged
+          ? otelDisableBeatsauthInput.value
+          : otelOutput?.otel_disable_beatsauth ?? null,
       };
 
       // the client SSL key of the Elasticsearch, remote Elasticsearch and Logstash outputs
@@ -1422,6 +1425,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     writeToStreams.value,
     otelExporterConfigInput.value,
     otelDisableBeatsauthInput.value,
+    otelDisableBeatsauthInput.hasChanged,
+    otelOutput?.otel_disable_beatsauth,
     caTrustedFingerprintInput.value,
     confirm,
     notifications.toasts,

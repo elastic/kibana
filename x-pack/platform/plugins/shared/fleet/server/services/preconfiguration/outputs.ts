@@ -641,10 +641,9 @@ async function isPreconfiguredOutputDifferentFromCurrent(
         existingOutput.otel_exporter_config_yaml,
         preconfiguredOutput.otel_exporter_config_yaml
       ) ||
-        isDifferent(
-          existingOutput.otel_disable_beatsauth,
-          preconfiguredOutput.otel_disable_beatsauth
-        ))) ||
+        // `false` and unset are equivalent for this flag
+        !!existingOutput.otel_disable_beatsauth !==
+          !!preconfiguredOutput.otel_disable_beatsauth)) ||
     // Kafka does not support proxies; proxy_id is always cleared on save (#267281)
     (existingOutput.type !== 'kafka' &&
       isDifferent(existingOutput.proxy_id, preconfiguredBeats.proxy_id)) ||
