@@ -53,6 +53,7 @@ if (!selection) {
   process.exit(1);
 }
 
+const isWeekly = process.env.KBN_EVALS_WEEKLY === '1';
 const extraArgs = (process.env.NIGHTSHIFT_EVAL_ARGS ?? '').split(/\s+/).filter(Boolean);
 
 console.log(
@@ -60,6 +61,7 @@ console.log(
     tasks: selection.tasks === 'all' ? Object.keys(taskConfigs) : selection.tasks,
     connectorIds: selection.connectorIds,
     taskConfigs,
+    mode: isWeekly ? 'weekly' : 'pr',
     extraArgs,
     // Only PR runs must not be silently re-run after a lost worker.
     preemptible: !isPr,

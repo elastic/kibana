@@ -19,6 +19,8 @@ const MODEL_LABEL_PREFIX = 'models:';
 const EIS_MODEL_PREFIX = 'eis/';
 const DEFAULT_TIMEOUT_IN_MINUTES = 90;
 
+export type NightshiftEvalMode = 'pr' | 'weekly';
+
 export interface NightshiftEvalDownload {
   // A gs:// path, copied to `dest` relative to the nightshift-evals checkout.
   src: string;
@@ -30,6 +32,7 @@ export interface NightshiftEvalTaskConfig {
   timeoutMinutes?: number;
   downloads?: NightshiftEvalDownload[];
   pr?: { args?: string[] };
+  weekly?: { args?: string[] };
 }
 
 export interface NightshiftEvalSelection {
@@ -91,7 +94,7 @@ export const parseNightshiftSelection = (githubPrLabels: string): NightshiftEval
   };
 };
 
-/** Same selection from the env of an on-demand build. */
+/** Same selection from the env of an on-demand or weekly build. */
 export const parseNightshiftSelectionFromEnv = (
   taskEnv: string,
   modelGroupsEnv: string
@@ -121,12 +124,14 @@ export const buildNightshiftEvalSteps = ({
   tasks,
   connectorIds,
   taskConfigs,
+  mode,
   extraArgs = [],
   preemptible,
 }: {
   tasks: string[];
   connectorIds: string[];
   taskConfigs: Record<string, NightshiftEvalTaskConfig>;
+  mode: NightshiftEvalMode;
   extraArgs?: string[];
   preemptible: boolean;
 }): string => {
@@ -141,7 +146,7 @@ export const buildNightshiftEvalSteps = ({
   const steps = tasks.flatMap((task) =>
     connectorIds.map((connectorId) => {
       const config = taskConfigs[task];
-      const args = [...(config.pr?.args ?? []), ...extraArgs];
+      const args = [...(config[mode]?.args ?? []), ...extraArgs];
       const key = `nightshift-evals-${normalizeBuildkiteKey(task)}-${
         normalizeBuildkiteKey(connectorId) || 'default'
       }`;
@@ -207,7 +212,7 @@ export const buildNightshiftEvalSteps = ({
     `    key: nightshift-evals`,
     `    steps:`,
     ...steps,
-    commentStep,
+    ...(mode === 'pr' ? [commentStep] : []),
   ].join('\n');
 };
 
