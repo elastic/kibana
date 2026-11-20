@@ -110,11 +110,13 @@ steps:
         with:
           report_ref: "threat-report:{{ foreach.item._id }}"
           # The clauses of the layer 2 `should`, as a JSON array. The connector schema only accepts
-          # a templated value at the top of `query.bool`, so every clause is built here:
+          # a templated value directly at `query.bool.should`, so every clause is built here:
           # the report's technique ids against the technique field, the same ids against the
           # sub-technique field, and one clause per distinct parent technique of a stored
           # sub-technique id, for rules tagged at the parent only (the alert carries the parent
           # in `technique.id` and no sub-technique of it in `technique.subtechnique.id`).
+          # The alert's threat array is flattened, so a rule that tags the parent alone under
+          # one tactic and the parent with a sub-technique under another is not parent-only.
           technique_clauses: >-
             [{"terms":{"kibana.alert.rule.threat.technique.id":{"index":{{ foreach.item._index | json }},"id":{{ foreach.item._id | json }},"path":"extracted.behaviors.technique_id"}}},
             {"terms":{"kibana.alert.rule.threat.technique.subtechnique.id":{"index":{{ foreach.item._index | json }},"id":{{ foreach.item._id | json }},"path":"extracted.behaviors.technique_id"}}}

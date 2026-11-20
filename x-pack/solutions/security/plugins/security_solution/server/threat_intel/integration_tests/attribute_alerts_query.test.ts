@@ -173,7 +173,9 @@ describe('attribute alerts to reports: layer 2 query against Elasticsearch', () 
     return (response.hits.total as { value: number }).value;
   };
 
-  // The query this workflow shipped with: the same filters and only the technique lookup.
+  // The version 3 baseline, kept on purpose: the query this workflow ran before sub-technique
+  // matching, with the same filters and only the technique lookup. It no longer exists in the
+  // YAML, and is here to prove that no report's count goes down.
   const countToday = async (reportName: string): Promise<number> => {
     const item = reportHits[reportName];
     const response = await esClient.search({
