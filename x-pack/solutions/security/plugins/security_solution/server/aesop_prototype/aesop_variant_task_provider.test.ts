@@ -86,7 +86,7 @@ describe('createAesopVariantTaskProvider', () => {
 
   describe('params.tool_ids', () => {
     const createToolContext = (params: Record<string, unknown>) => {
-      const callKibanaApi = jest.fn(async ({ method }: { method: string }) =>
+      const callKibanaApi = jest.fn().mockImplementation(async ({ method }: { method: string }) =>
         method === 'GET'
           ? {
               status: 200,
