@@ -514,10 +514,45 @@ describe('NightshiftApp', () => {
     expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
       'No open investigations'
     );
-    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationsSearchInput')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('nightshiftInvestigationsTimeRangePicker')
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
+  });
+
+  it('keeps filters mounted when clearing an empty-result query', async () => {
+    setSections({
+      sections: defaultSections({
+        'in-progress': { investigations: [investigation], total: 1 },
+      }),
+      hasActiveInvestigations: true,
+    });
+    renderApp();
+
+    fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
+      target: { value: 'zzz' },
+    });
+    setSections({ sections: defaultSections() });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
+        'No open investigations found'
+      )
+    );
+
+    // Leave totals at the filtered empty result so visibility cannot ride on totalCount.
+    fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
+      target: { value: '' },
+    });
+    // Wait past the 300 ms search debounce: without the unfiltered latch, filters would unmount here.
+    await new Promise((resolve) => {
+      window.setTimeout(resolve, 350);
+    });
+    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toBeInTheDocument();
   });
 
   it('does not scroll from a severity tile with no investigations', () => {

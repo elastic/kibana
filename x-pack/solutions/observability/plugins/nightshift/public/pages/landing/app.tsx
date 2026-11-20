@@ -90,6 +90,9 @@ export function NightshiftApp({
   );
   const hasReportedHomepageView = useRef(false);
   const reportedSearchQuery = useRef<string | undefined>(undefined);
+  // Filtered totals go to zero on a no-match search; remember unfiltered availability so clearing
+  // that query does not unmount the filters (and drop search focus) before the unfiltered list returns.
+  const hadUnfilteredInvestigationsRef = useRef(false);
 
   // Read filter state from URL so it survives navigation and is shareable.
   const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
@@ -128,6 +131,24 @@ export function NightshiftApp({
     updatedBefore: updatedWindow.updatedBefore,
   });
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (debouncedSearchQuery || isInitialLoading || isFetching) {
+      return;
+    }
+    if (sections.some((section) => section.isPreviousData)) {
+      return;
+    }
+    hadUnfilteredInvestigationsRef.current = totalCount > 0;
+  }, [debouncedSearchQuery, isFetching, isInitialLoading, sections, totalCount]);
+
+  // Hide search and time range together when the space has no open investigations in the window.
+  // Keep them mounted through filtered-empty clears so search focus is not dropped.
+  const showInvestigationsFilters =
+    Boolean(searchQuery) ||
+    Boolean(debouncedSearchQuery) ||
+    totalCount > 0 ||
+    hadUnfilteredInvestigationsRef.current;
 
   // A tile scrolls to its section, so it is only actionable while the list is rendering that
   // section — which the list, not the count, decides.
@@ -416,33 +437,37 @@ export function NightshiftApp({
         </>
       )}
 
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-        <EuiFlexItem grow>
-          <EuiFieldSearch
-            data-test-subj="nightshiftInvestigationsSearchInput"
-            placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
-              defaultMessage: 'Search',
-            })}
-            value={searchQuery ?? ''}
-            onChange={handleSearchChange}
-            isClearable
-            fullWidth
-            compressed
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <NightshiftTimeRangePicker
-            start={timeRange.from}
-            end={timeRange.to}
-            onChange={({ start, end }) => setTimeRange({ from: start, to: end })}
-            showRefreshButton
-            onRefresh={refreshWindow}
-            data-test-subj="nightshiftInvestigationsTimeRangePicker"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {showInvestigationsFilters && (
+        <>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+            <EuiFlexItem grow>
+              <EuiFieldSearch
+                data-test-subj="nightshiftInvestigationsSearchInput"
+                placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
+                  defaultMessage: 'Search',
+                })}
+                value={searchQuery ?? ''}
+                onChange={handleSearchChange}
+                isClearable
+                fullWidth
+                compressed
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <NightshiftTimeRangePicker
+                start={timeRange.from}
+                end={timeRange.to}
+                onChange={({ start, end }) => setTimeRange({ from: start, to: end })}
+                showRefreshButton
+                onRefresh={refreshWindow}
+                data-test-subj="nightshiftInvestigationsTimeRangePicker"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-      <EuiSpacer size="l" />
+          <EuiSpacer size="l" />
+        </>
+      )}
 
       <div
         css={css`
