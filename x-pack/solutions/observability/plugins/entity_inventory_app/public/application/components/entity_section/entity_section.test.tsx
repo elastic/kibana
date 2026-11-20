@@ -144,11 +144,18 @@ describe('EntitySection', () => {
       expect(getEntities).toHaveBeenCalledTimes(1);
     });
 
-    it('reports no truncation while it has not loaded', () => {
+    it('reports no truncation while it has not loaded, and reports it once it has', async () => {
       const onTruncatedChange = jest.fn();
-      renderSection({ scenario: 'truncated', onTruncatedChange });
+      const { getEntities } = renderSection({ scenario: 'truncated', onTruncatedChange });
 
+      // No request was made, so there is nothing that could report truncation yet.
+      expect(getEntities).not.toHaveBeenCalled();
       expect(onTruncatedChange).not.toHaveBeenCalled();
+
+      act(() => observer.setIntersecting(screen.getByTestId('entityInventoryTypeSection'), true));
+
+      await waitFor(() => expect(onTruncatedChange).toHaveBeenLastCalledWith(true));
+      expect(getEntities).toHaveBeenCalledTimes(1);
     });
   });
 });
