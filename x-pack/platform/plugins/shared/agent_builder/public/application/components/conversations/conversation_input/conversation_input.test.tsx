@@ -102,11 +102,13 @@ jest.mock('./input_actions', () => ({
   InputActions: ({
     showTriggerModeSelector,
     triggerMode,
+    isAutoTriggerModeAvailable,
     onTriggerModeChange,
     onMentionClick,
   }: {
     showTriggerModeSelector: boolean;
     triggerMode: string;
+    isAutoTriggerModeAvailable: boolean;
     onTriggerModeChange: (mode: string) => void;
     onMentionClick?: () => void;
   }) => (
@@ -120,6 +122,7 @@ jest.mock('./input_actions', () => ({
           value={triggerMode}
           onChange={(event) => onTriggerModeChange(event.target.value)}
         >
+          {isAutoTriggerModeAvailable && <option value="auto">Auto</option>}
           <option value="always">Ask agent</option>
           <option value="never">Skip agent</option>
         </select>
@@ -517,6 +520,29 @@ describe('ConversationInput', () => {
       expect(submitMessage).toHaveBeenCalledWith('hello agent');
       expect(sendUserMessage).not.toHaveBeenCalled();
     });
+
+    it('starts on Auto and lets the server decide, with the experimental flag on', () => {
+      mockedUseExperimentalFeatures.mockReturnValue(true);
+      mockedUseIsSharedConversation.mockReturnValue(true);
+      renderInput(<ConversationInput />);
+
+      expect(screen.getByTestId('mock-trigger-mode-selector')).toHaveValue('auto');
+
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(submitMessage).toHaveBeenCalledWith('hello agent', {
+        triggerMode: ChatTriggerMode.Auto,
+      });
+      expect(sendUserMessage).not.toHaveBeenCalled();
+    });
+
+    it('does not offer Auto with the experimental flag off', () => {
+      mockedUseIsSharedConversation.mockReturnValue(true);
+      renderInput(<ConversationInput />);
+
+      expect(screen.getByTestId('mock-trigger-mode-selector')).toHaveValue('always');
+      expect(screen.queryByRole('option', { name: 'Auto' })).not.toBeInTheDocument();
+    });
   });
 
   describe('mentions', () => {
@@ -611,7 +637,7 @@ describe('ConversationInput', () => {
 
         type(content);
 
-        expect(modeValue()).toHaveValue('always');
+        expect(modeValue()).toHaveValue('auto');
       });
 
       it('goes back to the earlier mode once the message stops starting with a mention', () => {
@@ -621,7 +647,7 @@ describe('ConversationInput', () => {
         expect(modeValue()).toHaveValue('never');
 
         type(`, talk to ${agent} please`);
-        expect(modeValue()).toHaveValue('always');
+        expect(modeValue()).toHaveValue('auto');
       });
 
       it('stops switching once the user flips the toggle by hand, until the message is sent', async () => {
@@ -687,7 +713,7 @@ describe('ConversationInput', () => {
         mockedUseConversationId.mockReturnValue('conv-2');
         rerenderInput(rerender);
 
-        expect(modeValue()).toHaveValue('always');
+        expect(modeValue()).toHaveValue('auto');
       });
 
       it('does not switch with the experimental flag off', () => {
@@ -886,6 +912,7 @@ describe('InputActions', () => {
         isSubmitting={false}
         showTriggerModeSelector
         triggerMode={ChatTriggerMode.Always}
+        isAutoTriggerModeAvailable={false}
         onTriggerModeChange={jest.fn()}
         {...props}
       />
@@ -911,6 +938,7 @@ describe('InputActions', () => {
         isSubmitting={false}
         showTriggerModeSelector
         triggerMode={ChatTriggerMode.Always}
+        isAutoTriggerModeAvailable={false}
         onTriggerModeChange={jest.fn()}
       />
     );
@@ -926,6 +954,7 @@ describe('InputActions', () => {
         isSubmitting={false}
         showTriggerModeSelector
         triggerMode={ChatTriggerMode.Never}
+        isAutoTriggerModeAvailable={false}
         onTriggerModeChange={jest.fn()}
       />
     );

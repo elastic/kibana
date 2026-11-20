@@ -13,7 +13,11 @@ import { ChatTriggerMode } from '../../../../../../common/http_api/chat';
 describe('TriggerModeSelector', () => {
   it('names the button after what it is for and the current mode', () => {
     render(
-      <TriggerModeSelector triggerMode={ChatTriggerMode.Never} onTriggerModeChange={jest.fn()} />
+      <TriggerModeSelector
+        triggerMode={ChatTriggerMode.Never}
+        isAutoAvailable={false}
+        onTriggerModeChange={jest.fn()}
+      />
     );
 
     expect(screen.getByTestId('agentBuilderTriggerModeSelectorButton')).toHaveAccessibleName(
@@ -23,7 +27,11 @@ describe('TriggerModeSelector', () => {
 
   it('marks the current mode as the selected option', async () => {
     render(
-      <TriggerModeSelector triggerMode={ChatTriggerMode.Never} onTriggerModeChange={jest.fn()} />
+      <TriggerModeSelector
+        triggerMode={ChatTriggerMode.Never}
+        isAutoAvailable={false}
+        onTriggerModeChange={jest.fn()}
+      />
     );
 
     fireEvent.click(screen.getByTestId('agentBuilderTriggerModeSelectorButton'));
@@ -43,6 +51,7 @@ describe('TriggerModeSelector', () => {
     render(
       <TriggerModeSelector
         triggerMode={ChatTriggerMode.Always}
+        isAutoAvailable={false}
         onTriggerModeChange={onTriggerModeChange}
       />
     );
@@ -54,5 +63,43 @@ describe('TriggerModeSelector', () => {
     await waitFor(() =>
       expect(screen.queryByTestId('agentBuilderTriggerModeSelectorList')).not.toBeInTheDocument()
     );
+  });
+
+  it('does not offer Auto when it is not available', async () => {
+    render(
+      <TriggerModeSelector
+        triggerMode={ChatTriggerMode.Always}
+        isAutoAvailable={false}
+        onTriggerModeChange={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('agentBuilderTriggerModeSelectorButton'));
+
+    await screen.findByRole('option', { name: 'Ask agent' });
+    expect(screen.queryByRole('option', { name: 'Auto' })).not.toBeInTheDocument();
+  });
+
+  it('offers Auto first when it is available, and can select it', async () => {
+    const onTriggerModeChange = jest.fn();
+    render(
+      <TriggerModeSelector
+        triggerMode={ChatTriggerMode.Always}
+        isAutoAvailable
+        onTriggerModeChange={onTriggerModeChange}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('agentBuilderTriggerModeSelectorButton'));
+
+    const options = await screen.findAllByRole('option');
+    expect(options.map((option) => option.textContent)).toEqual([
+      'Auto',
+      'Ask agent',
+      'Skip agent',
+    ]);
+
+    fireEvent.click(screen.getByTestId('agentBuilderTriggerModeOption-auto'));
+    expect(onTriggerModeChange).toHaveBeenCalledWith(ChatTriggerMode.Auto);
   });
 });

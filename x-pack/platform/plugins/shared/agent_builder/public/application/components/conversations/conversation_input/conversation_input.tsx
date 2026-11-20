@@ -263,6 +263,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     triggerMode,
     setTriggerMode,
     isSelectable: isTriggerModeSelectable,
+    isAutoAvailable: isAutoTriggerModeAvailable,
     updateLeadingMention,
     markSent,
     markCleared,
@@ -513,6 +514,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     lastEditorContentRef.current = '';
     if (onSubmitOverride) {
       onSubmitOverride(content);
+    } else if (triggerMode === ChatTriggerMode.Auto) {
+      submitMessage(content, { triggerMode });
     } else {
       submitMessage(content);
     }
@@ -582,6 +585,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
           isSubmitting={isCreatingConversation || isSendingUserMessage}
           showTriggerModeSelector={isTriggerModeSelectable}
           triggerMode={triggerMode}
+          isAutoTriggerModeAvailable={isAutoTriggerModeAvailable}
           onTriggerModeChange={setTriggerMode}
           onMentionClick={canMention ? handleMentionClick : undefined}
           isMentionDisabled={isInputDisabled}

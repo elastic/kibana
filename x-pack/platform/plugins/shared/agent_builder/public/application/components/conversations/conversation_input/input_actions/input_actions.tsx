@@ -31,6 +31,7 @@ interface InputActionsProps {
   isSubmitting: boolean;
   showTriggerModeSelector: boolean;
   triggerMode: ChatTriggerMode;
+  isAutoTriggerModeAvailable: boolean;
   onTriggerModeChange: (mode: ChatTriggerMode) => void;
   onMentionClick?: () => void;
   isMentionDisabled?: boolean;
@@ -42,6 +43,7 @@ export const InputActions: React.FC<InputActionsProps> = ({
   isSubmitting,
   showTriggerModeSelector,
   triggerMode,
+  isAutoTriggerModeAvailable,
   onTriggerModeChange,
   onMentionClick,
   isMentionDisabled = false,
@@ -91,6 +93,7 @@ export const InputActions: React.FC<InputActionsProps> = ({
               <EuiFlexItem grow={false}>
                 <TriggerModeSelector
                   triggerMode={triggerMode}
+                  isAutoAvailable={isAutoTriggerModeAvailable}
                   onTriggerModeChange={onTriggerModeChange}
                 />
               </EuiFlexItem>

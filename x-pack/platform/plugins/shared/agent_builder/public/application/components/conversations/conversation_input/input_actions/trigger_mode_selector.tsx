@@ -22,7 +22,7 @@ const triggerModeLabels: Readonly<Record<ChatTriggerMode, string>> = {
   ),
   [ChatTriggerMode.Auto]: i18n.translate(
     'xpack.agentBuilder.conversationInput.triggerModeSelector.autoAgent',
-    { defaultMessage: 'Agent decides' }
+    { defaultMessage: 'Auto' }
   ),
 };
 
@@ -41,18 +41,23 @@ const panelStyles = css`
   inline-size: min-content;
 `;
 
-const triggerModeOptions = [ChatTriggerMode.Always, ChatTriggerMode.Never] as const;
+const manualOptions = [ChatTriggerMode.Always, ChatTriggerMode.Never] as const;
+const optionsWithAuto = [ChatTriggerMode.Auto, ...manualOptions] as const;
 
 interface TriggerModeSelectorProps {
   triggerMode: ChatTriggerMode;
+  /** Offers "Auto", where the server decides whether the agent responds. */
+  isAutoAvailable: boolean;
   onTriggerModeChange: (mode: ChatTriggerMode) => void;
 }
 
 export const TriggerModeSelector: React.FC<TriggerModeSelectorProps> = ({
   triggerMode,
+  isAutoAvailable,
   onTriggerModeChange,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const triggerModeOptions = isAutoAvailable ? optionsWithAuto : manualOptions;
   const closePopover = () => setIsPopoverOpen(false);
 
   return (

@@ -10,14 +10,14 @@ import type { LeadingMention } from './mentions/get_leading_mention';
 
 export interface TriggerModeState {
   conversationId?: string;
-  selected: ChatTriggerMode;
+  /** The mode picked by hand or used for the last message. Unset until then. */
+  selected?: ChatTriggerMode;
   /** Set by a mention at the start of the message. Wins over `selected`. */
-  auto?: ChatTriggerMode;
+  fromMention?: ChatTriggerMode;
   isManualOverride: boolean;
 }
 
 export const INITIAL_TRIGGER_MODE_STATE: TriggerModeState = {
-  selected: ChatTriggerMode.Always,
   isManualOverride: false,
 };
 
@@ -38,21 +38,39 @@ const forConversation = (state: TriggerModeState, conversationId?: string): Trig
     ? state
     : { ...INITIAL_TRIGGER_MODE_STATE, conversationId };
 
-/** A choice only counts in the chat it was made in, and only while the toggle is shown. */
+/**
+ * A choice only counts in the chat it was made in, and only while the toggle is shown. With no
+ * choice yet, the toggle starts on "Auto" when it's available, else on "Ask agent".
+ */
 export const getTriggerMode = (
   state: TriggerModeState,
-  { conversationId, isSelectable }: { conversationId?: string; isSelectable: boolean }
-): ChatTriggerMode =>
-  !isSelectable || state.conversationId !== conversationId
-    ? ChatTriggerMode.Always
-    : state.auto ?? state.selected;
+  {
+    conversationId,
+    isSelectable,
+    isAutoAvailable,
+  }: { conversationId?: string; isSelectable: boolean; isAutoAvailable: boolean }
+): ChatTriggerMode => {
+  if (!isSelectable) {
+    return ChatTriggerMode.Always;
+  }
+
+  const defaultMode = isAutoAvailable ? ChatTriggerMode.Auto : ChatTriggerMode.Always;
+
+  if (state.conversationId !== conversationId) {
+    return defaultMode;
+  }
+
+  const mode = state.fromMention ?? state.selected ?? defaultMode;
+
+  return mode === ChatTriggerMode.Auto && !isAutoAvailable ? ChatTriggerMode.Always : mode;
+};
 
 /**
  * How the agent toggle changes:
  * - Typing: only a mention at the start of the message counts (spaces before it are ignored).
  *   - `@user` → "Skip agent" (`never`)
  *   - `@agent` → "Ask agent" (`always`)
- *   - mention removed → back to `selected`
+ *   - mention removed → back to `selected` ("Auto" or "Ask agent" when nothing was picked)
  *   - a mention later in the message changes nothing
  * - Manual flip: wins over mentions until the message is sent.
  * - Send: the mode used stays for the next message, and mentions switch it again.
@@ -72,31 +90,31 @@ export const triggerModeReducer = (
         return current;
       }
       const { leadingMention } = action;
-      const auto = leadingMention
+      const fromMention = leadingMention
         ? leadingMention.kind === 'user'
           ? ChatTriggerMode.Never
           : ChatTriggerMode.Always
         : undefined;
-      return current.auto === auto ? current : { ...current, auto };
+      return current.fromMention === fromMention ? current : { ...current, fromMention };
     }
     case 'manualChange':
       return {
         ...forConversation(state, action.conversationId),
         selected: action.mode,
-        auto: undefined,
+        fromMention: undefined,
         isManualOverride: true,
       };
     case 'sent':
       return {
         ...forConversation(state, action.conversationId),
         selected: action.mode,
-        auto: undefined,
+        fromMention: undefined,
         isManualOverride: false,
       };
     case 'cleared':
-      return state.auto === undefined && !state.isManualOverride
+      return state.fromMention === undefined && !state.isManualOverride
         ? state
-        : { ...state, auto: undefined, isManualOverride: false };
+        : { ...state, fromMention: undefined, isManualOverride: false };
     case 'reset':
       return INITIAL_TRIGGER_MODE_STATE;
   }

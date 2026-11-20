@@ -13,7 +13,7 @@ import {
 } from './trigger_mode_state';
 import type { TriggerModeAction, TriggerModeState } from './trigger_mode_state';
 
-const { Always, Never } = ChatTriggerMode;
+const { Always, Never, Auto } = ChatTriggerMode;
 const CONV = 'conv-1';
 
 const userMention = { id: 'u_julian_0', kind: 'user' as const };
@@ -22,8 +22,8 @@ const agentMention = { id: 'my-agent', kind: 'agent' as const };
 const run = (...actions: TriggerModeAction[]): TriggerModeState =>
   actions.reduce(triggerModeReducer, INITIAL_TRIGGER_MODE_STATE);
 
-const modeOf = (state: TriggerModeState, conversationId = CONV) =>
-  getTriggerMode(state, { conversationId, isSelectable: true });
+const modeOf = (state: TriggerModeState, conversationId = CONV, isAutoAvailable = false) =>
+  getTriggerMode(state, { conversationId, isSelectable: true, isAutoAvailable });
 
 const typed = (leadingMention?: typeof userMention | typeof agentMention): TriggerModeAction => ({
   type: 'contentChanged',
@@ -89,7 +89,7 @@ describe('trigger mode state', () => {
     });
 
     it('drops the automatic switch', () => {
-      expect(run(typed(userMention), flip(Always)).auto).toBeUndefined();
+      expect(run(typed(userMention), flip(Always)).fromMention).toBeUndefined();
     });
   });
 
@@ -127,7 +127,13 @@ describe('trigger mode state', () => {
 
       expect(modeOf(state, CONV)).toBe(Never);
       expect(modeOf(state, 'conv-2')).toBe(Always);
-      expect(getTriggerMode(state, { conversationId: undefined, isSelectable: true })).toBe(Always);
+      expect(
+        getTriggerMode(state, {
+          conversationId: undefined,
+          isSelectable: true,
+          isAutoAvailable: false,
+        })
+      ).toBe(Always);
     });
 
     it('starts fresh in another conversation', () => {
@@ -157,7 +163,37 @@ describe('trigger mode state', () => {
   it('always includes the agent when the toggle is not offered', () => {
     const state = run(flip(Never));
 
-    expect(getTriggerMode(state, { conversationId: CONV, isSelectable: false })).toBe(Always);
+    expect(
+      getTriggerMode(state, { conversationId: CONV, isSelectable: false, isAutoAvailable: true })
+    ).toBe(Always);
+  });
+
+  describe('when Auto is available', () => {
+    const autoModeOf = (state: TriggerModeState, conversationId = CONV) =>
+      modeOf(state, conversationId, true);
+
+    it('starts on Auto', () => {
+      expect(autoModeOf(INITIAL_TRIGGER_MODE_STATE)).toBe(Auto);
+      expect(autoModeOf(run(flip(Never)), 'conv-2')).toBe(Auto);
+    });
+
+    it('lets a leading mention switch the mode, and goes back to Auto when it is removed', () => {
+      expect(autoModeOf(run(typed(userMention)))).toBe(Never);
+      expect(autoModeOf(run(typed(agentMention)))).toBe(Always);
+      expect(autoModeOf(run(typed(userMention), typed()))).toBe(Auto);
+    });
+
+    it('keeps Auto when picked by hand, whatever is mentioned', () => {
+      expect(autoModeOf(run(flip(Auto), typed(userMention)))).toBe(Auto);
+    });
+
+    it('keeps a manual choice over Auto', () => {
+      expect(autoModeOf(run(flip(Always)))).toBe(Always);
+    });
+
+    it('falls back to asking the agent when Auto stops being available', () => {
+      expect(modeOf(run(flip(Auto)))).toBe(Always);
+    });
   });
 
   it('can be reset', () => {
