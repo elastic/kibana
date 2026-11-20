@@ -20,7 +20,9 @@ export const shutdownServers = async (
   shutdownEs: () => Promise<void>
 ): Promise<void> => {
   try {
-    // SIGTERM: a Playwright runner still writes its reports; ProcRunner falls back to SIGKILL
+    // SIGTERM so a managed process can finish cleanly. On a signal this is a request only:
+    // ProcRunner's own exit hook has already started a teardown with its default (SIGKILL) and a
+    // teardown in progress keeps its signal; the early-exit and normal-end paths do send SIGTERM.
     await procs.teardown('SIGTERM');
   } finally {
     await shutdownEs();
@@ -35,9 +37,15 @@ export const registerServerShutdown = (
   onSignal?: () => void
 ): (() => void) => {
   const removeShutdownHook = asyncExitHook(
-    () => {
+    async () => {
       onSignal?.();
-      return shutdownServers(procs, shutdownEs);
+      // exit-hook does not catch a rejecting hook: the process would die with an unhandled
+      // rejection instead of exiting with the signal's code once the other hooks are done
+      try {
+        await shutdownServers(procs, shutdownEs);
+      } catch (error) {
+        process.stderr.write(`\nshutdown after the signal failed: ${error?.message ?? error}\n`);
+      }
     },
     { wait: SHUTDOWN_TIMEOUT_MS }
   );

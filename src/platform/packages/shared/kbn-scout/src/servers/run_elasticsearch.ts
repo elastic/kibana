@@ -162,7 +162,13 @@ async function startEsNode({
     secureFiles: config.secureFiles,
   });
 
-  await cluster.start();
+  try {
+    await cluster.start();
+  } catch (error) {
+    // the process may be up without having become ready: nobody else holds its handle yet
+    await cluster.stop().catch((stopError) => log.error(stopError));
+    throw error;
+  }
 
   return cluster;
 }

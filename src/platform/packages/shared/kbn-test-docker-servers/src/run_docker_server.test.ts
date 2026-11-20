@@ -28,8 +28,8 @@ interface FakeDocker {
   interruptMonitor: () => void;
   /** Simulates `docker wait` failing for a reason other than the container exiting. */
   failMonitor: () => void;
-  /** What `docker inspect` reports for the container's running state. */
-  inspectRunning: boolean;
+  /** What `docker inspect` reports for the container's running state; `undefined` makes it fail. */
+  inspectRunning: boolean | undefined;
 }
 
 function fakeDocker({
@@ -82,6 +82,9 @@ function fakeDocker({
       case 'wait':
         return newWaitProc();
       case 'inspect':
+        if (fake.inspectRunning === undefined) {
+          return Promise.reject(new Error('error during connect: EOF'));
+        }
         return Promise.resolve({ stdout: fake.inspectRunning ? 'true\n' : 'false\n' });
       case 'kill':
         stdout.end();
@@ -375,6 +378,24 @@ describe('runDockerServer', () => {
     docker.exitContainer(137);
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(onUnexpectedExit).toHaveBeenCalledTimes(1);
+
+    await running.stop();
+  });
+
+  it('re-arms the monitor instead of reporting an exit when the daemon cannot be asked either', async () => {
+    const docker = fakeDocker({ cached: true });
+    docker.inspectRunning = undefined;
+    const onUnexpectedExit = jest.fn();
+
+    const pending = runDockerServer(server, { log, onUnexpectedExit });
+    await new Promise((resolve) => setImmediate(resolve));
+    docker.stdout.write('package manifests loaded\n');
+    const running = await pending;
+
+    docker.failMonitor();
+    await new Promise((resolve) => setTimeout(resolve, 1100));
+    expect(onUnexpectedExit).not.toHaveBeenCalled();
+    expect(dockerCall(docker.calls, 'wait')).toHaveLength(2);
 
     await running.stop();
   });

@@ -115,6 +115,11 @@ export function resolveRunOutcome({
   // consequences), then an early exit (its teardown aborts the start too), then the run's own
   // error.
   if (interrupted) {
+    if (shutdownError !== undefined) {
+      log.error(
+        `shutdown after the interrupt failed, something may be left running: ${shutdownError.message}`
+      );
+    }
     log.info(interruptedMessage);
     process.exitCode = SIGINT_EXIT_CODE;
     return 'interrupted';
