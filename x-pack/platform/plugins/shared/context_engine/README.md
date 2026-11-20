@@ -378,27 +378,20 @@ POST /api/context_engine/memory/_remember
 }
 ```
 
-`session_id` and `content` are required. `id` revises an existing memory: the revision
-replaces it in full and the id is not checked. Without it the route generates one.
-`ai_index_ids` names the AI indices dreaming promotes the memory into, and `attributes` is
-a map of string hints passed through to dreaming. `user_id` is the user the memory is
-about. It defaults to the caller's user profile. A caller without a profile and without
-`user_id` gets a 403.
+`session_id` and `content` are required. Pass `id` to revise an existing memory. The revision
+replaces the memory in full, and the route does not check whether the id exists. Without `id`,
+the route generates one. `ai_index_ids` lists the AI indices that dreaming promotes the memory
+into. `attributes` is a map of string hints for dreaming.
 
-The route answers `202` with `{ "id": "..." }` at once and writes in the background,
-because `semantic_text` inference runs inside the index request. The memory is searchable
-only once the write completes. A failed write is not reported in the response. It shows up
-in the Kibana logs and the audit log.
+The route returns `202` with `{ "id": "..." }` and writes the memory in the background, because
+`semantic_text` inference runs inside the index request. The memory becomes searchable after
+the background write completes. The route does not report a failed write in the response.
+Instead, it logs the error to the Kibana logs and writes a failure audit event.
 
-The route needs `contextEngine:write`. Naming another user in `user_id` also needs
-`contextEngine:manage_memory`, which is not part of All (403 without it). It returns a 404
-while `contextEngine:enabled` or the memory setting is off. Each AI index in `ai_index_ids`
-must exist in this space (404 otherwise), and the caller needs the Elasticsearch `write`
-privilege on its backing index (403 otherwise). A rejected request writes nothing.
-
-Each request writes one `memory_remember` audit event, when the background write finishes
-or the request is rejected. The event records the authenticated actor in `user.*`, the
-memory's user in `user.target.id`, and the memory in `kibana.saved_object`.
+The space comes from the request URL. The route returns 404 while `contextEngine:enabled` or
+the memory setting is off. Each AI index in `ai_index_ids` must exist in the request space, or
+the route returns 404. The caller must hold the Elasticsearch `write` privilege on each
+backing index, or the route returns 403. A rejected request writes nothing.
 
 ### Forget
 
@@ -429,13 +422,14 @@ memories. A caller without a user profile gets a 403.
 
 Naming another user in `user_id` also requires `contextEngine:manage_memory`. That privilege
 is not part of All, so an administrator must grant it. Without it, the request gets a 403
-and the attempt is audited as a failure. On `_forget`, when `user_id` does not match a
+and the route audits the attempt as a failure. On `_forget`, when `user_id` does not match a
 memory's owner, the route returns `not_found`.
 
-`_forget` writes one `memory_forget` audit event per unique id. Each event records the
-authenticated actor in `user.*`, the memory's owner in `user.target.id`, and the memory in
-`kibana.saved_object`. The route records rejected requests, `not_found`, `failed`, and
-Elasticsearch errors as failures.
+`_remember` writes one `memory_remember` audit event per request, when the background write
+finishes or when the route rejects the request. `_forget` writes one `memory_forget` audit
+event per unique id. Both events record the authenticated actor in `user.*`, the memory's
+owner in `user.target.id`, and the memory in `kibana.saved_object`. The routes record rejected
+requests, background write errors, `not_found`, `failed`, and Elasticsearch errors as failures.
 
 ## Improvements
 

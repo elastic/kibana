@@ -531,7 +531,7 @@ describe('session memory routes', () => {
         ]);
       });
 
-      it('audits and rethrows when checking AI index writability fails unexpectedly', async () => {
+      it('audits and rethrows when checking AI index writability fails', async () => {
         esClient.security.hasPrivileges.mockRejectedValueOnce(new Error('cluster_block'));
 
         await expect(callRoute(body)).rejects.toThrow('cluster_block');
@@ -687,7 +687,7 @@ describe('session memory routes', () => {
         ]);
       });
 
-      it('handles non-Error rejections safely with no unhandled rejection', async () => {
+      it('logs and audits non-Error rejections with no unhandled rejection', async () => {
         service.remember.mockReset();
         service.remember.mockRejectedValueOnce('raw rejection');
         const unhandled = jest.fn();

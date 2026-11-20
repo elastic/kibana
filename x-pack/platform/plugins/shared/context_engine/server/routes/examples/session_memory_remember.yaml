@@ -3,8 +3,8 @@ requestBody:
     application/json:
       examples:
         rememberRequestExample:
-          summary: "Remember a memory"
-          description: "Example request to store a memory of a session for the caller, to be promoted into an AI index"
+          summary: "Remember a session memory"
+          description: "Example request that stores a session memory for the caller and targets an AI index for dreaming"
           value:
             session_id: 8f3c2a1e
             ai_index_ids:
@@ -19,7 +19,7 @@ responses:
         examples:
           rememberResponseExample:
             summary: "Memory accepted"
-            description: "The memory is being written. It is searchable once the background write completes"
+            description: "The route accepted the memory and is writing it in the background. It becomes searchable after the write completes"
             value:
               id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
   403:
@@ -41,7 +41,7 @@ responses:
               error: Forbidden
               message: "Acting on the memory of another user requires the [contextEngine:manage_memory] privilege."
           aiIndexNotWritableExample:
-            summary: "An AI index the caller cannot write to"
+            summary: "AI index not writable"
             description: "The caller lacks the Elasticsearch `write` privilege on an AI index's backing index"
             value:
               statusCode: 403

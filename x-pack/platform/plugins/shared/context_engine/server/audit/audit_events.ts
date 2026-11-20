@@ -211,7 +211,10 @@ export interface SessionMemoryRememberAuditEventParams {
   error?: Error;
 }
 
-/** Audits one `_remember` request once its write finishes or is rejected; core adds the caller, the space and the request id. */
+/**
+ * Audits one `_remember` request when its write finishes or the route rejects it. Core adds the
+ * caller, the space, and the request id.
+ */
 export const sessionMemoryRememberAuditEvent = ({
   memoryId,
   sessionId,

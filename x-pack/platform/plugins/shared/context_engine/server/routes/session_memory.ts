@@ -52,7 +52,7 @@ const rememberBodySchema = schema.object({
       validate: validateNonBlank,
       meta: {
         description:
-          'The id of an existing memory to revise. The revision replaces the memory in full, and the id is not checked. Defaults to a new id.',
+          'The id of an existing memory to revise. The revision replaces the memory in full, and the route does not check whether the id exists. Omit this field to generate a new id.',
       },
     })
   ),
@@ -69,7 +69,7 @@ const rememberBodySchema = schema.object({
       validate: validateNonBlank,
       meta: {
         description:
-          "The user the memory is about. Defaults to the caller's user profile. Naming another user needs `contextEngine:manage_memory`.",
+          "The user the memory belongs to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`.",
       },
     })
   ),
@@ -84,7 +84,7 @@ const rememberBodySchema = schema.object({
         maxSize: MAX_MEMORY_AI_INDEX_IDS,
         meta: {
           description:
-            'The AI indices dreaming promotes the memory into. Each must exist in this space, and the caller needs the Elasticsearch `write` privilege on its backing index.',
+            'The AI indices that dreaming promotes the memory into. Each must exist in this space, and the caller requires the Elasticsearch `write` privilege on its backing index.',
         },
       }
     )
@@ -93,7 +93,9 @@ const rememberBodySchema = schema.object({
     minLength: 1,
     maxLength: MAX_KI_CONTENT_LENGTH,
     validate: validateNonBlank,
-    meta: { description: 'The memory text. It is indexed for semantic search.' },
+    meta: {
+      description: 'The memory text. Elasticsearch indexes this field for semantic search.',
+    },
   }),
   attributes: schema.maybe(
     schema.recordOf(
@@ -108,7 +110,7 @@ const rememberBodySchema = schema.object({
           Object.keys(attributes).length > MAX_SESSION_MEMORY_ATTRIBUTES
             ? `must have at most ${MAX_SESSION_MEMORY_ATTRIBUTES} attributes`
             : undefined,
-        meta: { description: 'String hints about the memory, passed through to dreaming.' },
+        meta: { description: 'String hints about the memory for dreaming.' },
       }
     )
   ),
@@ -197,7 +199,7 @@ const auditFailureForResult = (
   }
 };
 
-/** Registers the public session memory routes (`_remember` and `_forget`). */
+/** Registers the public `_remember` and `_forget` session memory routes. */
 export const registerSessionMemoryRoutes = ({
   router,
   getSpaces,
@@ -220,12 +222,12 @@ export const registerSessionMemoryRoutes = ({
       access: 'public',
       summary: 'Remember a session memory',
       description: [
-        'Writes one memory to the session memory store. Pass `id` to revise an existing memory; the revision replaces it in full.',
-        'Answers 202 with the memory id at once and writes in the background, because semantic indexing runs inside the write. The memory is searchable only once the background write completes.',
-        "The route needs the `contextEngine:write` privilege. Without `user_id` the memory belongs to the caller's user profile, and a caller without one gets a 403. Naming another user in `user_id` also needs `contextEngine:manage_memory`.",
-        'Each AI index in `ai_index_ids` must exist in this space, and the caller needs the Elasticsearch `write` privilege on its backing index. Otherwise the request is rejected and nothing is written.',
-        'Each request writes one `memory_remember` audit event, when the background write finishes or the request is rejected. A failed background write is not reported in the response. It shows up only in the Kibana logs and the audit log.',
-        'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off, or when an AI index in `ai_index_ids` does not exist.',
+        'Writes one memory to the session memory store. Pass `id` to revise an existing memory. The revision replaces the memory in full.',
+        'Returns 202 with the memory id and writes the memory in the background, because semantic indexing runs inside the write. The memory becomes searchable after the background write completes.',
+        "Requires the `contextEngine:write` privilege. Without `user_id`, the route writes the memory for the caller's user profile, and a caller without a user profile gets a 403. Naming another user in `user_id` also requires `contextEngine:manage_memory`.",
+        'Each AI index in `ai_index_ids` must exist in this space, and the caller requires the Elasticsearch `write` privilege on its backing index. Otherwise, the route rejects the request and writes nothing.',
+        'The route writes one `memory_remember` audit event per request, when the background write finishes or when it rejects the request. The route does not report a failed background write in the response. Instead, it logs the error to the Kibana logs and writes a failure audit event.',
+        'Returns a 404 response when `contextEngine:enabled` is off in this space, when memory is turned off, or when an AI index in `ai_index_ids` does not exist.',
         CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
       options: {
@@ -242,7 +244,7 @@ export const registerSessionMemoryRoutes = ({
             202: {
               body: rememberResponseSchema,
               description:
-                'The memory is being written. It is searchable once the write completes.',
+                'The route accepted the memory and is writing it in the background. It becomes searchable after the write completes.',
             },
             403: {
               body: errorResponseSchema,
