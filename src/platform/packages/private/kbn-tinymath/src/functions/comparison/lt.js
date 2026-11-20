@@ -10,7 +10,7 @@
 /**
  * Checks whether one value is less than another. For arrays, the function returns `true` only if every element is less.
  * @param {number|number[]} a a number or an array of numbers
- * @param {number|number[]} b a number, or an array of numbers with the same length as `a` if `a` is an array
+ * @param {number|number[]} b a number, or, if `a` is also an array, an array of numbers with the same length as `a`
  * @return {boolean} `true` if `a` is less than `b`, `false` otherwise. If `a` is an array, returns `true` only if every element of `a` is less than `b`, or less than the element at the same index of `b` if `b` is an array.
  * @throws `'Missing b value'` if `b` is not provided
  * @throws `'Array length mismatch'` if `a` and `b` are arrays of different lengths

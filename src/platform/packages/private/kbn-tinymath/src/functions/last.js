@@ -9,7 +9,7 @@
 
 /**
  * Returns the last element of an array. If anything other than an array is passed in, the input is returned.
- * @param {any[]} a array of any values
+ * @param {(any|any[])} a a value or an array of values
  * @return {*} The last element of `a`. Returns `a` if `a` is not an array.
  *
  * @example

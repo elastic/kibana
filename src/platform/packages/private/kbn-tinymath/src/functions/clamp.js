@@ -13,7 +13,7 @@ const findClamp = (a, min, max) => {
 };
 
 /**
- * Restricts a value to a given range. Returns `min` if the value is below it, `max` if the value is above it, and the value itself otherwise. To limit a value on one side only, use the `max` function for a lower limit or the `min` function for an upper limit.
+ * Restricts a value to a given range. Returns `min` if the value is below it, `max` if the value is above it, and the value itself otherwise. To limit a value on one side only, use the `max` function for a lower limit or the `min` function for an upper limit. For example, `max(value, 5)` returns at least 5, and `min(value, 5)` returns at most 5.
  * @param {(number|number[])} a a number or an array of numbers
  * @param {(number|number[])} min The minimum value this function returns.
  * @param {(number|number[])} max The maximum value this function returns.

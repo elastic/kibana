@@ -70,7 +70,7 @@ ceil([1.1, 2.2, 3.3]) // returns [2, 3, 4]
 ```
 ***
 ## _clamp(_ _a_,  _min_,  _max_ _)_
-Restricts a value to a given range. Returns `min` if the value is below it, `max` if the value is above it, and the value itself otherwise. To limit a value on one side only, use the `max` function for a lower limit or the `min` function for an upper limit.
+Restricts a value to a given range. Returns `min` if the value is below it, `max` if the value is above it, and the value itself otherwise. To limit a value on one side only, use the `max` function for a lower limit or the `min` function for an upper limit. For example, `max(value, 5)` returns at least 5, and `min(value, 5)` returns at most 5.
 
 
 | Param | Type | Description |
@@ -101,7 +101,7 @@ Checks whether two values are equal. For arrays, the function returns `true` onl
 | Param | Type | Description |
 | --- | --- | --- |
 | a | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number or an array of numbers |
-| b | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number, or an array of numbers with the same length as `a` if `a` is an array |
+| b | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number, or, if `a` is also an array, an array of numbers with the same length as `a` |
 
 **Returns**: <code>boolean</code> - `true` if `a` and `b` are equal, `false` otherwise. If `a` is an array, returns `true` only if every element of `a` equals `b`, or equals the element at the same index of `b` if `b` is an array.  
 **Throws**:
@@ -125,7 +125,7 @@ Checks whether one value is greater than another. For arrays, the function retur
 | Param | Type | Description |
 | --- | --- | --- |
 | a | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number or an array of numbers |
-| b | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number, or an array of numbers with the same length as `a` if `a` is an array |
+| b | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number, or, if `a` is also an array, an array of numbers with the same length as `a` |
 
 **Returns**: <code>boolean</code> - `true` if `a` is greater than `b`, `false` otherwise. If `a` is an array, returns `true` only if every element of `a` is greater than `b`, or greater than the element at the same index of `b` if `b` is an array.  
 **Throws**:
@@ -176,7 +176,7 @@ Returns one of two values, depending on a condition.
 | a | <code>any</code> \| <code>Array.&lt;any&gt;</code> | the value to return if `cond` is true |
 | b | <code>any</code> \| <code>Array.&lt;any&gt;</code> | the value to return if `cond` is false |
 
-**Returns**: <code>any</code> \| <code>Array.&lt;any&gt;</code> - `a` if `cond` is true, otherwise `b`. TinyMath evaluates both `a` and `b` first, so an error in either one stops the expression.  
+**Returns**: <code>any</code> \| <code>Array.&lt;any&gt;</code> - `a` if `cond` is true, otherwise `b`. TinyMath evaluates both `a` and `b` first, so an error in either one stops the expression. For example, `ifelse(5 < 6, 1, 1 / 0)` throws `'Cannot divide by 0'`. Comparing arrays gives one boolean. `ifelse` therefore picks one value for the whole array, not one per element.  
 **Throws**:
 
 - `'Condition clause is of the wrong type'` if `cond` is not a boolean
@@ -188,6 +188,7 @@ Returns one of two values, depending on a condition.
 ifelse(5 > 6, 1, 0) // returns 0
 ifelse(1 == 1, 7, 5) // returns 7
 ifelse(1 < 2, [1, 2, 3], [2, 3, 4]) // returns [1, 2, 3]
+ifelse(gt([0, 3], 1), 10, 20) // returns 20
 ```
 ***
 ## _lt(_ _a_,  _b_ _)_
@@ -197,7 +198,7 @@ Checks whether one value is less than another. For arrays, the function returns 
 | Param | Type | Description |
 | --- | --- | --- |
 | a | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number or an array of numbers |
-| b | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number, or an array of numbers with the same length as `a` if `a` is an array |
+| b | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number, or, if `a` is also an array, an array of numbers with the same length as `a` |
 
 **Returns**: <code>boolean</code> - `true` if `a` is less than `b`, `false` otherwise. If `a` is an array, returns `true` only if every element of `a` is less than `b`, or less than the element at the same index of `b` if `b` is an array.  
 **Throws**:
@@ -365,7 +366,7 @@ Returns the first element of an array. If anything other than an array is passed
 
 | Param | Type | Description |
 | --- | --- | --- |
-| a | <code>Array.&lt;any&gt;</code> | array of any values |
+| a | <code>any</code> \| <code>Array.&lt;any&gt;</code> | a value or an array of values |
 
 **Returns**: <code>\*</code> - The first element of `a`. Returns `a` if `a` is not an array.  
 **Example**  
@@ -412,7 +413,7 @@ Returns the last element of an array. If anything other than an array is passed 
 
 | Param | Type | Description |
 | --- | --- | --- |
-| a | <code>Array.&lt;any&gt;</code> | array of any values |
+| a | <code>any</code> \| <code>Array.&lt;any&gt;</code> | a value or an array of values |
 
 **Returns**: <code>\*</code> - The last element of `a`. Returns `a` if `a` is not an array.  
 **Example**  
@@ -452,7 +453,7 @@ Calculates the base 10 logarithm of a number. For arrays, the function will be a
 | --- | --- | --- |
 | a | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number or an array of numbers, `a` can't be negative |
 
-**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The logarithm of `a`. Returns an array with the logarithms base 10 of each element if `a` is an array.  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - The logarithm of `a`. Returns an array with the logarithms base 10 of each element if `a` is an array. The result can differ from the exact value in the last digits, as in `log(1000, 10)`, which returns `2.9999999999999996`.  
 **Throws**:
 
 - `'Must be greater than 0'` if `a` < 0
