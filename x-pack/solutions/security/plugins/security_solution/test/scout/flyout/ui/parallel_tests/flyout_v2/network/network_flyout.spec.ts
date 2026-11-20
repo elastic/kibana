@@ -43,7 +43,9 @@ spaceTest.describe(
     spaceTest(
       'clicking the source.ip value in the alerts table opens the network flyout v2',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
+        await pageObjects.alertsTablePage.navigate({
+          visibleColumns: ['kibana.alert.rule.name', 'source.ip'],
+        });
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
 
         // Click the IP value in the source.ip column.
