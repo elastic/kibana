@@ -28,7 +28,6 @@ export type QuickActionIds = [
   string?,
   string?,
   string?,
-  string?,
   string?
 ];
 
