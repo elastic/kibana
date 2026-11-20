@@ -44,6 +44,15 @@ const resetOnAcquire = (connection: PooledTdsConnection): boolean =>
     connection.reset((err) => resolve(!err));
   }) as unknown as boolean;
 
+// True only for a bare IPv6 literal. The URL parser validates IPv6 strictly; node's `net` is not allowed in this package.
+const isIPv6Literal = (host: string): boolean => {
+  try {
+    return new URL(`http://[${host}]`).hostname !== '';
+  } catch {
+    return false;
+  }
+};
+
 export const mssqlClientType: ClientTypeSpec<ConnectionPool> = {
   id: 'mssql',
 
@@ -62,7 +71,7 @@ export const mssqlClientType: ClientTypeSpec<ConnectionPool> = {
 
     // Merges the global xpack.actions.ssl settings with any matching customHostSettings entry for this host.
     // The lookup key is a URL (https://<host>:<port>), so an IPv6 literal must be bracketed to match its entry.
-    const tlsHostname = host.includes(':') && !host.startsWith('[') ? `[${host}]` : host;
+    const tlsHostname = isIPv6Literal(host) ? `[${host}]` : host;
     const tls = ctx.platform.buildTlsOptions([{ hostname: tlsHostname, port }], ctx.logger);
     if (tls.checkServerIdentity) {
       // tedious only exposes trustServerCertificate, so "certificate" mode (chain without hostname) cannot be honored.

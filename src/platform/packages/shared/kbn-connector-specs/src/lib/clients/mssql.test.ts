@@ -228,6 +228,21 @@ describe('mssqlClientType', () => {
       });
     });
 
+    it('leaves a colon-containing hostname that is not an IPv6 literal unbracketed', async () => {
+      const buildTlsOptions = jest.fn().mockReturnValue({ rejectUnauthorized: true });
+      const ctx = makeCtx({
+        config: { host: 'sql.example.com:1433', port: 1433, database: 'db' },
+        platform: { resolveSrvHosts: jest.fn(), buildTlsOptions },
+      });
+
+      await mssqlClientType.build(ctx);
+
+      expect(buildTlsOptions).toHaveBeenCalledWith(
+        [{ hostname: 'sql.example.com:1433', port: 1433 }],
+        ctx.logger
+      );
+    });
+
     it('uses the merged per-host policy, not the global one, to decide certificate trust', async () => {
       // Global settings say "none" but the host-specific override resolved to full verification.
       const networkSettings = makeNetworkSettings({
