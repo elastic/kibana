@@ -13,6 +13,7 @@ import type { ServiceMapSpan } from '../../../common/service_map/types';
 import { getServiceCallGraph } from './get_service_call_graph';
 import { getServiceGroupingAttributes } from './get_service_grouping_attributes';
 import { buildServiceGrouping } from './grouping/build_service_grouping';
+import { SERVICE_GROUPING_MIN_SERVICES } from './grouping/constants';
 import { getServiceMap } from './get_service_map';
 import type { IEnvOptions, ServiceMapGroupingOptions } from './get_service_map';
 import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
@@ -54,6 +55,20 @@ const spans: ServiceMapSpan[] = [
     spanDestinationServiceResource: 'cart-backend.default.svc:8080',
     destinationService: { serviceName: 'cart', agentName: 'nodejs' },
   },
+];
+
+/** Enough services for the map to be grouped, besides the two the sample of traces calls. */
+const groupedServicesData = Array.from({ length: SERVICE_GROUPING_MIN_SERVICES }, (_, index) => ({
+  [SERVICE_NAME]: `svc-${String(index).padStart(3, '0')}`,
+  [AGENT_NAME]: 'java',
+  [SERVICE_ENVIRONMENT]: 'production',
+}));
+
+/** The services the map draws with `groupedServicesData`, sorted. */
+const groupedServices = [
+  'cart',
+  'gateway',
+  ...groupedServicesData.map((service) => service[SERVICE_NAME]),
 ];
 
 const disabledGrouping: ServiceMapGroupingOptions = { enabled: false };
@@ -100,21 +115,23 @@ beforeEach(() => {
   fetchExitSpanSamplesMock.mockResolvedValue(spans);
   getServiceCallGraphMock.mockResolvedValue({});
   getServiceGroupingAttributesMock.mockResolvedValue({});
-  buildServiceGroupingMock.mockReturnValue(undefined);
+  buildServiceGroupingMock.mockReturnValue(builtGrouping);
 });
 
-const serviceGrouping: ServiceMapGrouping = {
-  services: ['cart', 'gateway'],
+const builtGrouping: Omit<ServiceMapGrouping, 'services'> = {
   automatic: 'calls',
   strategies: [
     {
       source: 'calls',
       passes: true,
       groups: [{ id: 'notConnected', kind: 'notConnected' }],
-      assignment: [0, 0],
+      assignment: groupedServices.map(() => 0),
     },
   ],
 };
+
+/** The grouping in the response for `groupedServicesData`. */
+const serviceGrouping: ServiceMapGrouping = { services: groupedServices, ...builtGrouping };
 
 describe('getServiceMap services', () => {
   it('gets the services as before when grouping is disabled', async () => {
@@ -165,11 +182,11 @@ describe('getServiceMap call graph', () => {
   });
 
   it('groups the services from the call graph and adds the grouping to the response', async () => {
+    getEnhancedServiceStatsMock.mockResolvedValue(groupedServicesData);
     const callGraph = {
       gateway: [{ destination: 'cart-backend.default.svc:8080', calls: 4 }],
     };
     getServiceCallGraphMock.mockResolvedValue(callGraph);
-    buildServiceGroupingMock.mockReturnValue(serviceGrouping);
     const { options, logger } = makeOptions({ grouping: enabledGrouping });
 
     const map = await getServiceMap(options);
@@ -177,24 +194,42 @@ describe('getServiceMap call graph', () => {
     expect(map).toEqual({
       spans,
       tracesCount: 1,
-      servicesData,
+      servicesData: groupedServicesData,
       anomalies: DEFAULT_ANOMALIES,
       serviceGrouping,
     });
-    expect(buildServiceGroupingMock).toHaveBeenCalledWith({ callGraph, spans, servicesData });
+    expect(buildServiceGroupingMock).toHaveBeenCalledWith({
+      callGraph,
+      spans,
+      services: groupedServices,
+      attributes: {},
+    });
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('leaves the grouping off the response when there is none to show', async () => {
-    const { options } = makeOptions({ grouping: enabledGrouping });
+  it(`groups a map from ${SERVICE_GROUPING_MIN_SERVICES} services`, async () => {
+    // The sample of traces adds `cart` and `gateway` to the services in the stats.
+    getEnhancedServiceStatsMock.mockResolvedValue(
+      groupedServicesData.slice(0, SERVICE_GROUPING_MIN_SERVICES - 3)
+    );
+    const smallMap = await getServiceMap(makeOptions({ grouping: enabledGrouping }).options);
 
-    const map = await getServiceMap(options);
+    expect(getServiceGroupingAttributesMock).not.toHaveBeenCalled();
+    expect(buildServiceGroupingMock).not.toHaveBeenCalled();
+    expect(smallMap).not.toHaveProperty('serviceGrouping');
 
-    expect(buildServiceGroupingMock).toHaveBeenCalled();
-    expect(map).not.toHaveProperty('serviceGrouping');
+    getEnhancedServiceStatsMock.mockResolvedValue(
+      groupedServicesData.slice(0, SERVICE_GROUPING_MIN_SERVICES - 2)
+    );
+    const largeMap = await getServiceMap(makeOptions({ grouping: enabledGrouping }).options);
+
+    expect(getServiceGroupingAttributesMock).toHaveBeenCalledTimes(1);
+    expect(buildServiceGroupingMock).toHaveBeenCalledTimes(1);
+    expect(largeMap).toHaveProperty('serviceGrouping');
   });
 
   it('returns the map when the call graph query fails', async () => {
+    getEnhancedServiceStatsMock.mockResolvedValue(groupedServicesData);
     getServiceCallGraphMock.mockRejectedValue(new Error('search failed'));
     const { options, logger } = makeOptions({ grouping: enabledGrouping });
 
@@ -203,7 +238,7 @@ describe('getServiceMap call graph', () => {
     expect(map).toEqual({
       spans,
       tracesCount: 1,
-      servicesData,
+      servicesData: groupedServicesData,
       anomalies: DEFAULT_ANOMALIES,
     });
     expect(buildServiceGroupingMock).not.toHaveBeenCalled();
@@ -215,6 +250,7 @@ describe('getServiceMap call graph', () => {
   });
 
   it('returns the map ungrouped and warns when grouping the services fails', async () => {
+    getEnhancedServiceStatsMock.mockResolvedValue(groupedServicesData);
     getServiceCallGraphMock.mockResolvedValue({
       gateway: [{ destination: 'cart', calls: 1 }],
     });
@@ -228,7 +264,7 @@ describe('getServiceMap call graph', () => {
     expect(map).toEqual({
       spans,
       tracesCount: 1,
-      servicesData,
+      servicesData: groupedServicesData,
       anomalies: DEFAULT_ANOMALIES,
     });
     expect(logger.warn).toHaveBeenCalledWith('Unable to group the services of the service map.', {
@@ -254,11 +290,13 @@ describe('getServiceMap grouping attributes', () => {
     expect(getServiceGroupingAttributesMock).not.toHaveBeenCalled();
   });
 
-  it('reads grouping attributes and leaves the map response unchanged', async () => {
-    getServiceGroupingAttributesMock.mockResolvedValue({
+  it('reads grouping attributes for the services the map draws and groups them by those', async () => {
+    getEnhancedServiceStatsMock.mockResolvedValue(groupedServicesData);
+    const attributes = {
       gateway: { serviceNamespace: 'shop', kubernetesNamespace: 'team-gateway' },
       cart: { kubernetesNamespace: 'team-cart' },
-    });
+    };
+    getServiceGroupingAttributesMock.mockResolvedValue(attributes);
     const { options, logger } = makeOptions({ grouping: enabledGrouping });
 
     const map = await getServiceMap(options);
@@ -266,17 +304,37 @@ describe('getServiceMap grouping attributes', () => {
     expect(map).toEqual({
       spans,
       tracesCount: 1,
-      servicesData,
+      servicesData: groupedServicesData,
       anomalies: DEFAULT_ANOMALIES,
+      serviceGrouping,
     });
     expect(getServiceGroupingAttributesMock).toHaveBeenCalledWith({
       ...options,
+      services: groupedServices,
       source: enabledGrouping.source,
     });
+    expect(buildServiceGroupingMock).toHaveBeenCalledWith(
+      expect.objectContaining({ services: groupedServices, attributes })
+    );
     expect(logger.info).not.toHaveBeenCalled();
   });
 
+  it('reads grouping attributes without waiting for the call graph', async () => {
+    getEnhancedServiceStatsMock.mockResolvedValue(groupedServicesData);
+    const callGraph = deferred<Awaited<ReturnType<typeof getServiceCallGraph>>>();
+    getServiceCallGraphMock.mockReturnValue(callGraph.promise);
+    const { options } = makeOptions({ grouping: enabledGrouping });
+
+    const map = getServiceMap(options);
+    await new Promise(setImmediate);
+
+    expect(getServiceGroupingAttributesMock).toHaveBeenCalled();
+    callGraph.resolve({});
+    await map;
+  });
+
   it('returns the map when grouping attributes fail', async () => {
+    getEnhancedServiceStatsMock.mockResolvedValue(groupedServicesData);
     getServiceGroupingAttributesMock.mockRejectedValue(new Error('search failed'));
     const { options, logger } = makeOptions({ grouping: enabledGrouping });
 
@@ -285,8 +343,9 @@ describe('getServiceMap grouping attributes', () => {
     expect(map).toEqual({
       spans,
       tracesCount: 1,
-      servicesData,
+      servicesData: groupedServicesData,
       anomalies: DEFAULT_ANOMALIES,
+      serviceGrouping,
     });
     expect(logger.debug).toHaveBeenCalledWith(
       'Unable to retrieve grouping attributes for service maps.',
@@ -294,3 +353,12 @@ describe('getServiceMap grouping attributes', () => {
     );
   });
 });
+
+/** A promise the test settles when it chooses. */
+function deferred<T>() {
+  let resolve: (value: T) => void = () => {};
+  const promise = new Promise<T>((settle) => {
+    resolve = settle;
+  });
+  return { promise, resolve: (value: T) => resolve(value) };
+}

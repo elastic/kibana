@@ -5,65 +5,73 @@
  * 2.0.
  */
 
-import type { ServiceMapGrouping } from '@kbn/apm-types';
-import { SERVICE_NAME } from '../../../../common/es_fields/apm';
-import type { ServiceMapSpan, ServicesResponse } from '../../../../common/service_map/types';
+import type {
+  AttributeGroupingSource,
+  ServiceGroupingStrategy,
+  ServiceMapGrouping,
+} from '@kbn/apm-types';
+import type { ServiceMapSpan } from '../../../../common/service_map/types';
 import type { ServiceCallGraph } from '../get_service_call_graph';
+import type {
+  ServiceGroupingAttributes,
+  ServiceGroupingAttributeValues,
+} from '../get_service_grouping_attributes';
 import { getCallGraphEdges } from './call_graph_edges';
-import { SERVICE_GROUPING_MIN_SERVICES } from './constants';
+import { groupServicesByAttribute } from './group_services_by_attribute';
 import { groupServicesByCalls } from './group_services_by_calls';
 import { matchCallGraphToServices } from './match_service_call_graph';
-import { compareNames } from './utils';
+
+/** The attributes services are grouped by, in the order their strategies are listed. */
+const ATTRIBUTE_STRATEGIES: ReadonlyArray<{
+  source: AttributeGroupingSource;
+  readValue: (values: ServiceGroupingAttributeValues) => string | undefined;
+}> = [
+  { source: 'service.namespace', readValue: ({ serviceNamespace }) => serviceNamespace },
+  { source: 'kubernetes.namespace', readValue: ({ kubernetesNamespace }) => kubernetesNamespace },
+];
 
 /**
- * Every grouping the map can show, for a map with enough services to need one. The map's services
- * are those the services query found plus those its sample of traces called or was called from,
- * as the map draws them.
+ * Every grouping the map can show. `services` is the sorted list from `getMapServices`, and every
+ * strategy's assignment indexes it.
  *
- * Grouping by calls is the only strategy so far. Until strategies are scored, it is the one shown
- * automatically and passes. With no calls between the map's services, every service is in the not
+ * Services are grouped by their calls, and by each attribute in `ATTRIBUTE_STRATEGIES` that any of
+ * them sets. Until strategies are scored, grouping by calls is the one shown automatically and the
+ * only one that passes. With no calls between the map's services, every service is in the not
  * connected group, which tells the user calls are missing rather than hiding the grouping.
  */
 export function buildServiceGrouping({
   callGraph,
   spans,
-  servicesData,
+  services,
+  attributes,
 }: {
   callGraph: ServiceCallGraph;
   spans: readonly ServiceMapSpan[];
-  servicesData: readonly ServicesResponse[];
-}): ServiceMapGrouping | undefined {
-  const services = getMapServices({ spans, servicesData });
-  if (services.length < SERVICE_GROUPING_MIN_SERVICES) {
-    return undefined;
-  }
-
+  services: readonly string[];
+  /** Labels of the drawn services. Missing when they could not be read. */
+  attributes?: ServiceGroupingAttributes;
+}): Omit<ServiceMapGrouping, 'services'> {
   const matched = matchCallGraphToServices({ callGraph, spans, serviceNames: services });
   const { edges, stats } = getCallGraphEdges({ callGraph: matched, services });
   const calls = groupServicesByCalls({ services, edges, stats });
+  const strategies: ServiceGroupingStrategy[] = [{ ...calls, passes: true }];
 
-  return {
-    services,
-    // placeholders until strategies are scored against each other
-    automatic: 'calls',
-    strategies: [{ ...calls, passes: true }],
-  };
-}
-
-/** The services the map draws, sorted, so every strategy's assignment indexes the same list. */
-function getMapServices({
-  spans,
-  servicesData,
-}: {
-  spans: readonly ServiceMapSpan[];
-  servicesData: readonly ServicesResponse[];
-}): string[] {
-  const services = new Set(servicesData.map((service) => service[SERVICE_NAME]));
-  for (const { serviceName, destinationService } of spans) {
-    services.add(serviceName);
-    if (destinationService) {
-      services.add(destinationService.serviceName);
+  for (const { source, readValue } of ATTRIBUTE_STRATEGIES) {
+    const valueOfService = (service: string) => {
+      const values = attributes?.[service];
+      return values ? readValue(values) : undefined;
+    };
+    if (services.some(valueOfService)) {
+      strategies.push({
+        ...groupServicesByAttribute({ source, services, valueOfService }),
+        passes: false,
+      });
     }
   }
-  return [...services].sort(compareNames);
+
+  return {
+    // placeholders until strategies are scored against each other
+    automatic: 'calls',
+    strategies,
+  };
 }

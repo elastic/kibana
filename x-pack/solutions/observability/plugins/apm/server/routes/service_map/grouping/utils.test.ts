@@ -5,12 +5,33 @@
  * 2.0.
  */
 
+import type { ServiceMapGroup } from '@kbn/apm-types';
 import type { WeightedEdge } from './types';
-import { compareNames, edgesBetween, groupSizes, verifyEdges } from './utils';
+import { assignGroups, compareNames, edgesBetween, groupSizes, verifyEdges } from './utils';
 
 describe('compareNames', () => {
   it('orders by code unit, uppercase before lowercase', () => {
     expect(['b', 'a', 'B', 'a-b', 'a_b'].sort(compareNames)).toEqual(['B', 'a', 'a-b', 'a_b', 'b']);
+  });
+});
+
+describe('assignGroups', () => {
+  it('lists each group once, in the order its first service appears, and indexes every service', () => {
+    const shared: ServiceMapGroup = { id: 'shared', kind: 'shared' };
+    const notConnected: ServiceMapGroup = { id: 'notConnected', kind: 'notConnected' };
+    const groupByService: Record<string, ServiceMapGroup> = {
+      a: notConnected,
+      b: shared,
+      c: notConnected,
+      d: { id: 'shared', kind: 'shared' },
+    };
+
+    expect(
+      assignGroups({
+        services: ['a', 'b', 'c', 'd'],
+        groupOf: (service) => groupByService[service],
+      })
+    ).toEqual({ groups: [notConnected, shared], assignment: [0, 1, 0, 1] });
   });
 });
 

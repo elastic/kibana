@@ -30,6 +30,19 @@ function makeLogger() {
   } as unknown as Logger;
 }
 
+/** The services the map draws in these tests. */
+const DRAWN_SERVICES = [
+  '__proto__',
+  'cart',
+  'checkout',
+  'constructor',
+  'ghost',
+  'ledger',
+  'legacy-batch',
+  'ops',
+  'toString',
+];
+
 const defaultSource: ServiceStatsSource = {
   documentType: ApmDocumentType.ServiceTransactionMetric,
   rollupInterval: RollupInterval.TenMinutes,
@@ -39,6 +52,7 @@ const defaultSource: ServiceStatsSource = {
 function makeOptions(
   overrides: Partial<
     IEnvOptions & {
+      services: readonly string[];
       maxNumberOfServices: number;
       savedServiceGroups?: SavedServiceGroup[];
       source: ServiceStatsSource;
@@ -51,6 +65,7 @@ function makeOptions(
     start: START,
     end: END,
     logger: makeLogger(),
+    services: DRAWN_SERVICES,
     maxNumberOfServices: 5000,
     searchAggregatedTransactions: true,
     config: {} as IEnvOptions['config'],
@@ -60,7 +75,7 @@ function makeOptions(
 }
 
 interface AttributeBucket {
-  key: { service?: string };
+  key: string;
   service_namespace?: { buckets: Array<{ key: string }> };
   kubernetes_namespace?: { buckets: Array<{ key: string }> };
 }
@@ -71,21 +86,20 @@ function bucket(
   kubernetesNamespace?: string
 ): AttributeBucket {
   return {
-    key: { service: name },
-    service_namespace: { buckets: serviceNamespace ? [{ key: serviceNamespace }] : [] },
+    key: name,
+    service_namespace: {
+      buckets: serviceNamespace !== undefined ? [{ key: serviceNamespace }] : [],
+    },
     kubernetes_namespace: {
-      buckets: kubernetesNamespace ? [{ key: kubernetesNamespace }] : [],
+      buckets: kubernetesNamespace !== undefined ? [{ key: kubernetesNamespace }] : [],
     },
   };
 }
 
-function namespacesPage(buckets: AttributeBucket[], afterKey?: { service: string }) {
+function namespacesPage(buckets: AttributeBucket[]) {
   return {
     aggregations: {
-      services: {
-        buckets,
-        ...(afterKey ? { after_key: afterKey } : {}),
-      },
+      services: { buckets },
     },
   };
 }
@@ -151,9 +165,24 @@ describe('getServiceGroupingAttributes', () => {
     expect(Object.getPrototypeOf(attributes)).toBeNull();
   });
 
-  it('reads transaction events over the map range with the map filters', async () => {
-    const serviceGroupKuery = 'service.name: "checkout"';
-    const kuery = 'agent.name: "java"';
+  it('treats a blank namespace as none, and keeps other values as stored', async () => {
+    const search: SearchMock = jest
+      .fn()
+      .mockResolvedValue(
+        namespacesPage([bucket('checkout', '', ' '), bucket('ledger', ' shop ', 'team-payment')])
+      );
+
+    const attributes = await getServiceGroupingAttributes(
+      makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
+    );
+
+    expect(attributes).toEqual({
+      checkout: {},
+      ledger: { serviceNamespace: ' shop ', kubernetesNamespace: 'team-payment' },
+    });
+  });
+
+  it('reads only the drawn services in the selected environment, without the kuery or filters', async () => {
     const search: SearchMock = jest
       .fn()
       .mockResolvedValue(namespacesPage([bucket('checkout', 'shop', 'team-checkout')]));
@@ -161,73 +190,72 @@ describe('getServiceGroupingAttributes', () => {
     await getServiceGroupingAttributes(
       makeOptions({
         apmEventClient: { search } as unknown as APMEventClient,
-        serviceGroupKuery,
-        kuery,
+        serviceGroupKuery: 'service.name: "checkout"',
+        kuery: 'agent.name: "java"',
+        esQuery: {
+          bool: {
+            must: [],
+            should: [],
+            filter: [{ term: { 'agent.name': 'java' } }],
+            must_not: [{ term: { 'service.name': 'cart' } }],
+          },
+        },
+        services: ['cart', 'checkout'],
       })
     );
 
+    expect(search).toHaveBeenCalledTimes(1);
     const call = getSearchCall(search, 0);
     expect(call.operationName).toBe('get_service_grouping_attributes_for_service_map');
     expect(call.params.apm.events).toEqual([ProcessorEvent.transaction]);
-    expect(call.params.query.bool.filter).toEqual([
-      ...rangeQuery(START, END),
-      ...environmentQuery('production'),
-      ...kqlQuery(serviceGroupKuery),
-      ...kqlQuery(kuery),
-    ]);
+    expect(call.params.query).toEqual({
+      bool: {
+        filter: [
+          ...rangeQuery(START, END),
+          ...environmentQuery('production'),
+          { terms: { 'service.name': ['cart', 'checkout'] } },
+        ],
+      },
+    });
     expect(call.params.aggs).toEqual({
       services: {
-        composite: {
-          size: 1000,
-          sources: [{ service: { terms: { field: 'service.name' } } }],
-        },
+        terms: { field: 'service.name', size: 2 },
         aggs: {
-          service_namespace: { terms: { field: 'service.namespace', size: 1 } },
-          kubernetes_namespace: { terms: { field: 'kubernetes.namespace', size: 1 } },
+          service_namespace: {
+            terms: { field: 'service.namespace', size: 1, exclude: expect.any(String) },
+          },
+          kubernetes_namespace: {
+            terms: { field: 'kubernetes.namespace', size: 1, exclude: expect.any(String) },
+          },
         },
       },
     });
   });
 
-  it('reads services in pages until a short page', async () => {
-    const full = Array.from({ length: 1000 }, (_, index) =>
-      bucket(`svc-${index}`, undefined, 'ns')
-    );
+  it('gives no labels to a drawn service the namespace query does not find', async () => {
     const search: SearchMock = jest
       .fn()
-      .mockResolvedValueOnce(namespacesPage(full, { service: 'svc-999' }))
-      .mockResolvedValueOnce(namespacesPage([bucket('last', undefined, 'ns')]));
-
-    const attributes = await getServiceGroupingAttributes(
-      makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
-    );
-
-    expect(search).toHaveBeenCalledTimes(2);
-    expect(getSearchCall(search, 1).params.aggs).toMatchObject({
-      services: { composite: { after: { service: 'svc-999' } } },
-    });
-    expect(attributes['svc-0']).toEqual({ kubernetesNamespace: 'ns' });
-    expect(attributes.last).toEqual({ kubernetesNamespace: 'ns' });
-    expect(Object.keys(attributes)).toHaveLength(1001);
-  });
-
-  it('stops at the map service limit', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValue(
-      namespacesPage(
-        Array.from({ length: 1000 }, (_, index) => bucket(`svc-${index}`, 'shop')),
-        { service: 'svc-999' }
-      )
-    );
+      .mockResolvedValue(namespacesPage([bucket('checkout', 'shop')]));
 
     const attributes = await getServiceGroupingAttributes(
       makeOptions({
         apmEventClient: { search } as unknown as APMEventClient,
-        maxNumberOfServices: 3,
+        services: ['cart', 'checkout'],
       })
     );
 
-    expect(search).toHaveBeenCalledTimes(1);
-    expect(Object.keys(attributes)).toEqual(['svc-0', 'svc-1', 'svc-2']);
+    expect(attributes).toEqual({ checkout: { serviceNamespace: 'shop' } });
+  });
+
+  it('does not search when the map draws no services', async () => {
+    const search: SearchMock = jest.fn();
+
+    const attributes = await getServiceGroupingAttributes(
+      makeOptions({ apmEventClient: { search } as unknown as APMEventClient, services: [] })
+    );
+
+    expect(search).not.toHaveBeenCalled();
+    expect(attributes).toEqual({});
   });
 
   it('keeps a service whose name is an object property', async () => {
@@ -484,7 +512,7 @@ describe('getServiceGroupingAttributes', () => {
     });
   });
 
-  it('lists a service that only appears through a saved group', async () => {
+  it('lists a drawn service that only a saved group finds', async () => {
     const frontend = savedGroup('g-frontend', 'Frontend', 'service.name: ghost');
     const search: SearchMock = jest.fn().mockImplementation(async (operationName: string) => {
       if (operationName === 'get_service_grouping_attributes_for_service_map') {
@@ -537,11 +565,11 @@ describe('getServiceGroupingAttributes', () => {
     );
   });
 
-  it('does not grow past the map service limit with saved-group-only services', async () => {
+  it('drops saved group members that the map does not draw', async () => {
     const frontend = savedGroup(
       'g-frontend',
       'Frontend',
-      'service.name: ghost or service.name: checkout'
+      'service.name: elsewhere or service.name: checkout'
     );
     const search: SearchMock = jest.fn().mockImplementation(async (operationName: string) => {
       if (operationName === 'get_service_grouping_attributes_for_service_map') {
@@ -549,7 +577,7 @@ describe('getServiceGroupingAttributes', () => {
       }
       return savedGroupsPage({
         'g-frontend': {
-          services: { buckets: [{ key: 'checkout' }, { key: 'ghost' }] },
+          services: { buckets: [{ key: 'checkout' }, { key: 'elsewhere' }] },
         },
       });
     });
@@ -557,16 +585,17 @@ describe('getServiceGroupingAttributes', () => {
     const attributes = await getServiceGroupingAttributes(
       makeOptions({
         apmEventClient: { search } as unknown as APMEventClient,
-        maxNumberOfServices: 2,
+        services: ['cart', 'checkout'],
         savedServiceGroups: [frontend],
       })
     );
 
-    expect(Object.keys(attributes)).toEqual(['checkout', 'cart']);
-    expect(attributes.checkout).toEqual({
-      serviceNamespace: 'shop',
-      savedGroups: [{ id: 'g-frontend', name: 'Frontend' }],
+    expect(attributes).toEqual({
+      checkout: {
+        serviceNamespace: 'shop',
+        savedGroups: [{ id: 'g-frontend', name: 'Frontend' }],
+      },
+      cart: { serviceNamespace: 'shop' },
     });
-    expect(attributes.ghost).toBeUndefined();
   });
 });

@@ -31,20 +31,33 @@
  *     --target=https://<ES_URL> \
  *     --kibana=https://<KIBANA_URL> \
  *     --apiKey=<ENCODED_API_KEY> \
- *     --from=now-2h --to=now \
+ *     --from=now-2h --to=now --uniqueIds \
  *     --scenarioOpts="services=2000,clusterSize=10,throughput=5"
+ *
+ * `--uniqueIds` is recommended: by default each synthtrace worker generates the same span ids, so calls
+ * between services are not matched to the transactions they start, and show as dependencies.
  *
  * scenarioOpts:
  *   services     — total number of services (default 2000)
  *   clusterSize  — services per cluster; first is the gateway, rest are backends (default 10)
  *   throughput   — gateway transactions per minute (default 5)
+ *   namespaces   — set `service.namespace` and `kubernetes.namespace` on each cluster's services
+ *                  (default false). `service.namespace` is `cluster-<n>`, one per cluster;
+ *                  `kubernetes.namespace` is `k8s-<n / 2>`, one per pair of clusters. Clusters 0
+ *                  and 1 set no `kubernetes.namespace`, and clusters 2 and 3 no
+ *                  `service.namespace`. For grouping the Service Map by namespace, which needs the
+ *                  `apm.serviceMapGroupingEnabled` feature flag:
+ *
+ *   node scripts/synthtrace.js \
+ *     x-pack/solutions/observability/plugins/apm/test/scenarios/many_otel_services_distributed.ts \
+ *     --from=now-2h --to=now --uniqueIds --scenarioOpts="services=500,namespaces=true"
  */
 
 import type { ApmFields, Instance } from '@kbn/synthtrace-client';
 import { apm } from '@kbn/synthtrace-client';
 import { random, times } from 'lodash';
 import type { Scenario } from '@kbn/synthtrace';
-import { getSynthtraceEnvironment, withClient, getNumberOpt } from '@kbn/synthtrace';
+import { getBooleanOpt, getSynthtraceEnvironment, withClient, getNumberOpt } from '@kbn/synthtrace';
 import { getRandomNameForIndex } from './helpers/random_names';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
@@ -59,7 +72,39 @@ const AGENT_VERSIONS: Record<string, string[]> = {
   php: ['1.1.0', '1.0.0', '0.9.0'],
 };
 
-function makeInstance(index: number): Instance {
+/** Clusters that set no `kubernetes.namespace`, and then clusters that set no `service.namespace`. */
+const CLUSTERS_WITHOUT_NAMESPACE = 2;
+/** Clusters that share one `kubernetes.namespace`. */
+const CLUSTERS_PER_KUBERNETES_NAMESPACE = 2;
+
+interface ClusterNamespaces {
+  serviceNamespace?: string;
+  kubernetesNamespace?: string;
+}
+
+/**
+ * The namespaces of a cluster's services. `service.namespace` follows the clusters, and
+ * `kubernetes.namespace` holds two clusters, so the two group services differently. The first
+ * clusters set no `kubernetes.namespace`, and the next ones no `service.namespace`.
+ */
+function namespacesOf(cluster: number): ClusterNamespaces {
+  const withoutKubernetesNamespace = cluster < CLUSTERS_WITHOUT_NAMESPACE;
+  const withoutServiceNamespace =
+    !withoutKubernetesNamespace && cluster < 2 * CLUSTERS_WITHOUT_NAMESPACE;
+  return {
+    ...(withoutServiceNamespace ? {} : { serviceNamespace: `cluster-${cluster}` }),
+    ...(withoutKubernetesNamespace
+      ? {}
+      : {
+          kubernetesNamespace: `k8s-${Math.floor(cluster / CLUSTERS_PER_KUBERNETES_NAMESPACE)}`,
+        }),
+  };
+}
+
+function makeInstance(
+  index: number,
+  { serviceNamespace, kubernetesNamespace }: ClusterNamespaces = {}
+): Instance {
   const language = LANGUAGES[index % LANGUAGES.length];
   const agentVersion = AGENT_VERSIONS[language][index % AGENT_VERSIONS[language].length];
   const agentName = index % 2 === 0 ? `opentelemetry/${language}` : `otlp/${language}/elastic`;
@@ -71,17 +116,28 @@ function makeInstance(index: number): Instance {
       agentName,
     })
     .instance(`instance-${index}`)
-    .defaults({ 'agent.version': agentVersion, 'service.language.name': language });
+    .defaults({
+      'agent.version': agentVersion,
+      'service.language.name': language,
+      ...(serviceNamespace ? { 'service.namespace': serviceNamespace } : {}),
+      ...(kubernetesNamespace ? { 'kubernetes.namespace': kubernetesNamespace } : {}),
+    });
 }
 
 const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
   const numServices = getNumberOpt(scenarioOpts, 'services', 2000);
   const clusterSize = getNumberOpt(scenarioOpts, 'clusterSize', 10);
   const throughput = getNumberOpt(scenarioOpts, 'throughput', 5);
+  const withNamespaces = getBooleanOpt(scenarioOpts, 'namespaces', false);
 
   return {
     generate: ({ range, clients: { apmEsClient } }) => {
-      const instances: Instance[] = times(numServices).map(makeInstance);
+      const instances: Instance[] = times(numServices).map((index) =>
+        makeInstance(
+          index,
+          withNamespaces ? namespacesOf(Math.floor(index / clusterSize)) : undefined
+        )
+      );
       const numClusters = Math.ceil(numServices / clusterSize);
 
       const gatewayIndex = (c: number) => c * clusterSize;
