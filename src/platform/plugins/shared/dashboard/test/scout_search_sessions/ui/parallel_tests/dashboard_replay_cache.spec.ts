@@ -60,7 +60,7 @@ spaceTest.describe('Dashboard replay cache', { tag: '@local-stateful-classic' },
       const results = await readResults(page, controls);
 
       expect(await countSearchesOnReturn(dashboard, network)).toBe(0);
-      expect(await readResults(page, controls)).toEqual(results);
+      expect(await readResults(page, controls)).toStrictEqual(results);
     }
   );
 
@@ -70,7 +70,7 @@ spaceTest.describe('Dashboard replay cache', { tag: '@local-stateful-classic' },
     const results = await readResults(page, controls);
 
     expect(await countSearchesOnReturn(dashboard, network)).toBe(0);
-    expect(await readResults(page, controls)).toEqual(results);
+    expect(await readResults(page, controls)).toStrictEqual(results);
   });
 
   spaceTest(
@@ -81,7 +81,7 @@ spaceTest.describe('Dashboard replay cache', { tag: '@local-stateful-classic' },
       const results = await readResults(page, controls);
 
       expect(await countSearchesOnReturn(dashboard, network)).toBe(0);
-      expect(await readResults(page, controls)).toEqual(results);
+      expect(await readResults(page, controls)).toStrictEqual(results);
     }
   );
 
@@ -98,7 +98,7 @@ spaceTest.describe('Dashboard replay cache', { tag: '@local-stateful-classic' },
       const results = await readResults(page, controls);
 
       expect(await countSearchesOnReturn(dashboard, network)).toBe(0);
-      expect(await readResults(page, controls)).toEqual(results);
+      expect(await readResults(page, controls)).toStrictEqual(results);
     }
   );
 });
