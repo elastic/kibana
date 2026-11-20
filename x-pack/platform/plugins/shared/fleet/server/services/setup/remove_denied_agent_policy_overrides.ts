@@ -47,8 +47,10 @@ export async function removeDeniedAgentPolicyOverrides(esClient: ElasticsearchCl
   });
 
   const policiesToClean: AgentPolicyToClean[] = [];
+  let scannedCount = 0;
   try {
     for await (const result of finder.find()) {
+      scannedCount += result.saved_objects.length;
       for (const so of result.saved_objects) {
         // With `fields`, a policy without `overrides` comes back with no `attributes` at all.
         if (!so.attributes?.overrides || so.attributes.status === agentPolicyStatuses.Inactive) {
@@ -63,6 +65,11 @@ export async function removeDeniedAgentPolicyOverrides(esClient: ElasticsearchCl
   } finally {
     await finder.close();
   }
+
+  // Every setup scans all agent policies, so this shows operators of large fleets what it costs
+  logger.debug(
+    `Scanned ${scannedCount} agent policies, ${policiesToClean.length} with disallowed overrides`
+  );
 
   if (policiesToClean.length === 0) {
     return;

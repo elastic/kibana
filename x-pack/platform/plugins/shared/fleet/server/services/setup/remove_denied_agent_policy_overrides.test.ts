@@ -144,6 +144,20 @@ describe('removeDeniedAgentPolicyOverrides', () => {
     );
   });
 
+  it('logs how many policies were scanned and how many need cleaning', async () => {
+    mockStoredPolicies(soClient, [
+      { id: 'clean', namespaces: ['default'], overrides: { 'agent.logging.level': 'debug' } },
+      { id: 'no-overrides', namespaces: ['default'] },
+      { id: 'stale', namespaces: ['default'], overrides: { receivers: {} } },
+    ]);
+
+    await removeDeniedAgentPolicyOverrides(esClient);
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Scanned 3 agent policies, 1 with disallowed overrides'
+    );
+  });
+
   it('does not update policies without denied overrides', async () => {
     mockStoredPolicies(soClient, [
       { id: 'no-overrides', namespaces: ['default'] },

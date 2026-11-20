@@ -1544,6 +1544,16 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
     expect(hasChanged).toBe(true);
   });
 
+  it('should not return hasChanged when cleaned-up overrides are empty on both sides', () => {
+    // A policy whose overrides only held denied keys: the config is sanitized to `{}` and so is
+    // the stored policy after the setup cleanup. Storing `null` instead would bump every start.
+    const { hasChanged } = comparePreconfiguredPolicyToCurrent(
+      { ...baseConfig, overrides: {} },
+      { ...basePackagePolicy, overrides: {} }
+    );
+    expect(hasChanged).toBe(false);
+  });
+
   it('should not return hasChanged when no top-level fields change', () => {
     const { hasChanged } = comparePreconfiguredPolicyToCurrent(
       {

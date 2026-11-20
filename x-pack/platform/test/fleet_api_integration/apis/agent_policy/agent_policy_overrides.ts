@@ -204,12 +204,9 @@ export default function (providerContext: FtrProviderContext) {
           refresh: 'wait_for',
         });
 
-        const { body } = await supertest
-          .post('/api/fleet/setup')
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
-        // The cleanup is non-fatal for setup, so its errors only show up here.
-        expect(JSON.stringify(body.nonFatalErrors)).not.to.contain('overrides');
+        // The cleanup is non-fatal for setup, so the tests below assert its result on the stored
+        // and the deployed policy instead.
+        await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'xxxx').expect(200);
       });
 
       it('should remove the denied keys from the stored policy', async () => {
