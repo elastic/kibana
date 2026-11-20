@@ -105,7 +105,6 @@ export function getIndexManagementDependencies({
       licensing: startDependencies.licensing,
       reindexService,
       esClient: startDependencies.esClient,
-      data: startDependencies.data,
     },
     services: {
       httpService,

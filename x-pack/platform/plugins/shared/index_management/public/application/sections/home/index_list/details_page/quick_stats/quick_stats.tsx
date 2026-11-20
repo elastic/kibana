@@ -40,11 +40,6 @@ export const QuickStats = ({ indexDetails }: Props) => {
   const isLarge = useIsWithinMinBreakpoint('xl');
   const {
     config: { enableSizeAndDocCount, enableVectorCount },
-    plugins: {
-      data: {
-        search: { search },
-      },
-    },
   } = useAppContext();
   const {
     name,
@@ -79,7 +74,7 @@ export const QuickStats = ({ indexDetails }: Props) => {
       return;
     }
     try {
-      const { data, error } = await loadIndexDocCount(search, name);
+      const { data, error } = await loadIndexDocCount(name);
       if (error || !data) {
         // Fall back to the metadata count (already available from the index stats response).
         // Only mark as an error when there's nothing to show.
@@ -108,7 +103,7 @@ export const QuickStats = ({ indexDetails }: Props) => {
         setDocCount({ isLoading: false, isError: true });
       }
     }
-  }, [search, name, isClosed, metadataDocCount]);
+  }, [name, isClosed, metadataDocCount]);
 
   useEffect(() => {
     fetchDocCount();

@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Route } from '@kbn/shared-ux-router';
 import qs from 'query-string';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { ISearchGeneric } from '@kbn/search-types';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { History, Location } from 'history';
 import type { IndicesListColumn } from '@kbn/index-management-shared-types';
@@ -279,7 +278,7 @@ interface IndexTableState {
 }
 
 export class IndexTable extends Component<IndexTableProps, IndexTableState> {
-  docCountApi?: DocCountApi;
+  docCountApi: DocCountApi;
 
   static getDerivedStateFromProps(
     props: IndexTableProps,
@@ -305,6 +304,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
   constructor(props: IndexTableProps) {
     super(props);
 
+    this.docCountApi = docCountApi(props.http);
     this.state = {
       selectedIndicesMap: {},
       selectionAnnouncement: '',
@@ -376,12 +376,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
     // navigating back to this tab would just show an empty list because the backing indices
     // would be hidden.
     this.props.filterChanged('');
-    this.docCountApi?.abort();
-  }
-
-  getDocCountApi(search: ISearchGeneric): DocCountApi {
-    this.docCountApi ??= docCountApi(search);
-    return this.docCountApi;
+    this.docCountApi.abort();
   }
 
   readURLParams(): {
@@ -764,8 +759,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
           const { services, config, core, plugins } = context;
           const { extensionsService } = services;
           const { application, http } = core;
-          const { share, data } = plugins;
-          const docCountApiInstance = this.getDocCountApi(data.search.search);
+          const { share } = plugins;
           const columnConfigs = getColumnConfigs({
             showIndexStats: config.enableIndexStats,
             showSizeAndDocCount: config.enableSizeAndDocCount,
@@ -775,7 +769,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
             location,
             application,
             http,
-            docCountApi: docCountApiInstance,
+            docCountApi: this.docCountApi,
           });
           const searchFilters = this.getFilters(extensionsService);
           const columnsCount = columnConfigs.length + 1;
@@ -832,7 +826,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
                           indexNames={Object.keys(selectedIndicesMap)}
                           isOnListView={true}
                           indicesListURLParams={location.search || ''}
-                          docCountApi={docCountApiInstance}
+                          docCountApi={this.docCountApi}
                           resetSelection={() => {
                             this.setState({ selectedIndicesMap: {} });
                           }}

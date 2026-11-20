@@ -7,8 +7,7 @@
 
 export const API_BASE_PATH = 'api/index_management';
 export const INTERNAL_API_BASE_PATH = 'internal/index_management';
-export const ESQL_SEARCH_PATH = 'internal/search/esql';
-export const SEARCH_API_VERSION = '1';
+
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',

@@ -8,21 +8,11 @@
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import type {
-  EsqlQueryResponse,
   IndicesStatsIndicesStats,
   IndicesStatsResponse,
   MappingProperty,
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
-import { lastValueFrom } from 'rxjs';
-import { ES_SEARCH_STRATEGY, ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import type {
-  IEsSearchRequest,
-  IEsSearchResponse,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchGeneric,
-} from '@kbn/search-types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ReindexService } from '@kbn/reindex-service-plugin/public';
@@ -30,7 +20,6 @@ import type { EsClient } from '@kbn/es-client-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import {
   API_BASE_PATH,
-  DEFAULT_DOCUMENT_PAGE_SIZE,
   INTERNAL_API_BASE_PATH,
   UIM_UPDATE_SETTINGS,
   UIM_INDEX_CLEAR_CACHE,
@@ -64,18 +53,14 @@ import type {
   MappingsResponse,
 } from '../../../common';
 import type { SnapshotRepositoriesInfo } from '../../../common/types/snapshot_repositories';
-import { buildIndexDocCountQuery, toIndexDocCounts } from '../../../common/lib';
-import type { Error as EsUiError, SendRequestResponse } from '../../shared_imports';
 import { useRequest, sendRequest } from './use_request';
-import { EsRequestError, esRequest, runForIndexChunks, sendEsRequest } from './es_request';
+import { esRequest, runForIndexChunks, sendEsRequest } from './es_request';
 import { httpService } from './http';
 import type { UiMetricService } from './ui_metric';
 import type { FieldFromIndicesRequest } from '../../../common';
 import type { Fields } from '../components/mappings_editor/types';
 import type { UserStartPrivilegesResponse } from '../../../server/lib/types';
 import { indexDataEnricher } from '../../services';
-
-type IndexDocCountRequest = IKibanaSearchRequest<{ query: string; allow_partial_results: boolean }>;
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
@@ -605,35 +590,12 @@ export function loadIndex(indexName: string) {
   });
 }
 
-export const fetchIndexDocCounts = async (
-  search: ISearchGeneric,
-  indexNames: string[],
-  signal?: AbortSignal
-): Promise<Record<string, number>> => {
-  const { rawResponse } = await lastValueFrom(
-    search<IndexDocCountRequest, IKibanaSearchResponse<EsqlQueryResponse>>(
-      {
-        params: {
-          query: buildIndexDocCountQuery(indexNames),
-          // return partial results instead of failing the whole request when some shards are unavailable
-          allow_partial_results: true,
-        },
-      },
-      { abortSignal: signal, strategy: ESQL_SEARCH_STRATEGY }
-    )
-  );
-  return toIndexDocCounts(rawResponse, indexNames);
-};
-
-export async function loadIndexDocCount(
-  search: ISearchGeneric,
-  indexName: string
-): Promise<SendRequestResponse<Record<string, number>, EsUiError>> {
-  try {
-    return { data: await fetchIndexDocCounts(search, [indexName]), error: null };
-  } catch (error) {
-    return { data: null, error: new EsRequestError(error).body };
-  }
+export async function loadIndexDocCount(indexName: string) {
+  return sendRequest<Record<string, number>>({
+    path: `${INTERNAL_API_BASE_PATH}/index_doc_count`,
+    method: 'post',
+    body: { indexNames: [indexName] },
+  });
 }
 
 export async function loadIndexVectorCount(indexName: string) {
@@ -699,29 +661,10 @@ export function createIndex(indexName: string, indexMode?: string) {
   );
 }
 
-export function useLoadIndexDocumentsSample(search: ISearchGeneric, indexName: string) {
-  return useQuery<{ results: SearchHit[] }, Error>({
-    queryKey: ['indexDocumentsSample', indexName],
-    queryFn: async ({ signal }) => {
-      const { rawResponse } = await lastValueFrom(
-        search<IEsSearchRequest, IEsSearchResponse>(
-          {
-            params: {
-              index: indexName,
-              size: DEFAULT_DOCUMENT_PAGE_SIZE,
-              track_total_hits: false,
-              _source: {
-                includes: ['*', '_inference_fields'],
-              },
-              fields: ['*'],
-              sort: [{ _doc: { order: 'desc' } }],
-            },
-          },
-          { abortSignal: signal, strategy: ES_SEARCH_STRATEGY }
-        )
-      );
-      return { results: rawResponse.hits.hits };
-    },
+export function useLoadIndexDocumentsSample(indexName: string) {
+  return useRequest<{ results: SearchHit[] }>({
+    path: `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(indexName)}/sample`,
+    method: 'get',
   });
 }
 

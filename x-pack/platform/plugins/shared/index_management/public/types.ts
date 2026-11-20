@@ -26,8 +26,6 @@ import type {
   ReindexServicePublicStart,
 } from '@kbn/reindex-service-plugin/public';
 import type { EsClientPluginSetup, EsClientPluginStart } from '@kbn/es-client-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-
 export interface IndexManagementStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
   i18n: I18nStart;
@@ -59,7 +57,6 @@ export interface StartDependencies {
   streams?: StreamsPluginStart;
   reindexService: ReindexServicePublicStart;
   esClient: EsClientPluginStart;
-  data: DataPublicPluginStart;
 }
 
 export interface ClientConfigType {

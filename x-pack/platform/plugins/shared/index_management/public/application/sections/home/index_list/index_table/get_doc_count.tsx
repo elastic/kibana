@@ -18,8 +18,8 @@ import {
   scan,
   shareReplay,
 } from 'rxjs';
-import type { ISearchGeneric } from '@kbn/search-types';
-import { fetchIndexDocCounts } from '../../../../services/api';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import { INTERNAL_API_BASE_PATH } from '../../../../../../common/constants';
 
 export type DocCountResult =
   | { status: RequestResultType.Success; count: number }
@@ -32,7 +32,7 @@ export enum RequestResultType {
 
 export type DocCountApi = ReturnType<typeof docCountApi>;
 
-export const docCountApi = (search: ISearchGeneric) => {
+export const docCountApi = (httpSetup: HttpSetup) => {
   const subj = new Subject<string>();
   const abortController = new AbortController();
 
@@ -47,7 +47,12 @@ export const docCountApi = (search: ISearchGeneric) => {
     filter((indices) => indices.length > 0),
     // make a request for each batch of indices
     concatMap((indexNames) =>
-      from(fetchIndexDocCounts(search, indexNames, abortController.signal)).pipe(
+      from(
+        httpSetup.post<Record<string, number>>(`${INTERNAL_API_BASE_PATH}/index_doc_count`, {
+          body: JSON.stringify({ indexNames }),
+          signal: abortController.signal,
+        })
+      ).pipe(
         map(
           (response): RequestResult => ({ type: RequestResultType.Success, indexNames, response })
         ),

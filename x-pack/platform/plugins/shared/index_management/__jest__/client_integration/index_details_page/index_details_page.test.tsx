@@ -90,7 +90,7 @@ describe('<IndexDetailsPage />', () => {
       testUserStartPrivilegesResponse
     );
     httpRequestsMockHelpers.setLoadIndexDocCountResponse({
-      [testIndexName]: testIndexMock.documents ?? 0,
+      [testIndexName]: testIndexMock.documents,
     });
   });
 

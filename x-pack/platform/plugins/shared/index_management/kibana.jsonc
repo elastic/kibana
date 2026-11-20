@@ -19,8 +19,7 @@
       "management",
       "features",
       "share",
-      "esClient",
-      "data"
+      "esClient"
     ],
     "optionalPlugins": [
       "security",

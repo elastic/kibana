@@ -31,6 +31,3 @@ export {
 } from './component_template_serialization';
 
 export { getPolicyType, serializeAsESPolicy, getESPolicyCreationApiCall } from './enrich_policies';
-
-export { quoteEsqlIndexName } from './quote_esql_index_name';
-export { buildIndexDocCountQuery, toIndexDocCounts } from './index_doc_count_query';

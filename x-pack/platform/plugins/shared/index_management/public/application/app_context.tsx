@@ -30,8 +30,6 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { ReindexServicePublicStart } from '@kbn/reindex-service-plugin/public';
 import type { EsClientPluginStart } from '@kbn/es-client-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-
 import type { EuiBreadcrumb } from '@elastic/eui';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -64,7 +62,6 @@ export interface AppDependencies {
     streams?: StreamsPluginStart;
     reindexService: ReindexServicePublicStart;
     esClient: EsClientPluginStart;
-    data: DataPublicPluginStart;
   };
   services: {
     uiMetricService: UiMetricService;

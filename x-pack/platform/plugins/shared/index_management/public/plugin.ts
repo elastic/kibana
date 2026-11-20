@@ -225,7 +225,6 @@ export class IndexMgmtUIPlugin
       licensing,
       reindexService,
       esClient,
-      data,
     } = plugins;
     const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
       core;
@@ -254,7 +253,6 @@ export class IndexMgmtUIPlugin
         licensing,
         reindexService,
         esClient,
-        data,
       },
       services: {
         extensionsService: this.extensionsService,
