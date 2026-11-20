@@ -30,6 +30,7 @@ import {
 export const BANNED_NODE_MODULES: ReadonlySet<string> = new Set([
   '@elastic/eui',
   '@emotion/react',
+  'react-intl',
   'react-use',
   '@xyflow/react',
   'd3',
