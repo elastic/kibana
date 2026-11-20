@@ -1,5 +1,5 @@
 {
-  "sha1": "81575da0cddb14509a174b5831b5fda6b46d1252",
+  "sha1": "8e66961bc67557571ef059d735028c2f9c910eec",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -27,6 +27,19 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/alert_flyout_results.spec.ts",
         "line": 55,
+        "column": 35
+      }
+    },
+    {
+      "id": "7586980fd1201f0-475aa8e6d9c6798",
+      "title": "Endpoint list row actions on Security Essentials shows the isolated host in the endpoint list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/endpoint_list_essentials_row_actions.spec.ts",
+        "line": 32,
         "column": 35
       }
     },
