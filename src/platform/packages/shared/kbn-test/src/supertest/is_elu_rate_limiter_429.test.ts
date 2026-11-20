@@ -28,6 +28,15 @@ describe('isEluRateLimiter429', () => {
     ).toBe(false);
   });
 
+  it('matches the elu policy name exactly', () => {
+    expect(isEluRateLimiter429({ status: 429, headers: { RateLimit: '"non-elu";r=0;t=30' } })).toBe(
+      false
+    );
+    expect(isEluRateLimiter429({ status: 429, headers: { RateLimit: '"elu";r=0;t=0' } })).toBe(
+      true
+    );
+  });
+
   it('does not rely on the response body', () => {
     expect(
       isEluRateLimiter429({ status: 429, headers: {}, text: 'Server is overloaded' } as never)

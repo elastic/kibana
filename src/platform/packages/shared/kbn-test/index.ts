@@ -68,7 +68,10 @@ export {
   isEluRateLimiter429,
   getEluRateLimiterRetryDelayMs,
 } from './src/supertest/kibana_supertest';
-export type { WrapKibanaSupertestAgentOptions } from './src/supertest/kibana_supertest';
+export type {
+  EluRetryInfo,
+  WrapKibanaSupertestAgentOptions,
+} from './src/supertest/kibana_supertest';
 
 export { getCallsites } from './src/callsites';
 

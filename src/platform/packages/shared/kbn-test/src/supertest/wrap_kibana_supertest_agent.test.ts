@@ -248,5 +248,89 @@ describe('wrapKibanaSupertestAgent', () => {
         await close();
       }
     });
+
+    it('reports each retry through onRetry', async () => {
+      let attempts = 0;
+      const { url, close } = await startServer((_req, res) => {
+        attempts++;
+        if (attempts < 3) {
+          overloaded(res);
+          return;
+        }
+        res.writeHead(200);
+        res.end();
+      });
+
+      try {
+        const onRetry = jest.fn();
+        await kibanaSupertest(url, undefined, { onRetry }).get('/ping').expect(200);
+        expect(onRetry).toHaveBeenCalledTimes(2);
+        expect(onRetry).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({ method: 'GET', attempt: 1 })
+        );
+        expect(onRetry).toHaveBeenNthCalledWith(2, expect.objectContaining({ attempt: 2 }));
+      } finally {
+        await close();
+      }
+    });
+
+    it('leaves the 429 visible for multipart bodies, which cannot be replayed', async () => {
+      let attempts = 0;
+      const { url, close } = await startServer((req, res) => {
+        attempts++;
+        req.resume();
+        req.on('end', () => overloaded(res));
+      });
+
+      try {
+        await expect(
+          kibanaSupertest(url)
+            .post('/import')
+            .attach('file', Buffer.from('x'), 'a.ndjson')
+            .expect(200)
+        ).rejects.toThrow();
+        expect(attempts).toBe(1);
+      } finally {
+        await close();
+      }
+    });
+
+    it('does not retry past the caller .timeout() deadline', async () => {
+      let attempts = 0;
+      const { url, close } = await startServer((_req, res) => {
+        attempts++;
+        overloaded(res, '1');
+      });
+
+      try {
+        await expect(kibanaSupertest(url).get('/').timeout(500).expect(200)).rejects.toThrow();
+        expect(attempts).toBe(1);
+      } finally {
+        await close();
+      }
+    });
+
+    it('does not resend a request aborted during the backoff', async () => {
+      let attempts = 0;
+      const { url, close } = await startServer((_req, res) => {
+        attempts++;
+        overloaded(res, '1');
+      });
+
+      try {
+        const request = kibanaSupertest(url).get('/');
+        const settled = request.then(
+          () => 'resolved',
+          (error: { code?: string }) => error.code
+        );
+        setTimeout(() => request.abort(), 300);
+        await expect(settled).resolves.toBe('ABORTED');
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+        expect(attempts).toBe(1);
+      } finally {
+        await close();
+      }
+    });
   });
 });
