@@ -77,11 +77,7 @@ import {
 import type { BackpressureReason } from './lib/backpressure_reason';
 import { createRunningAveragedStat } from './monitoring/task_run_calculators';
 import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
-import {
-  recordPollSkippedNoCapacity,
-  recordSlotTime,
-  TaskManagerCapacityMetrics,
-} from './otel/capacity_telemetry';
+import { recordTaskRun, TaskManagerCapacityMetrics } from './otel/capacity_telemetry';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import type { TaskExecutionControlService, TaskExecutionControlState } from './execution_control';
 
@@ -222,7 +218,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       this.currentCapacity = newCapacity;
     });
 
-    this.events$.subscribe((event) => recordSlotTime(event, this.definitions));
+    this.events$.subscribe((event) => recordTaskRun(event, this.definitions));
 
     const claimNudgeSuppressed$ = new BehaviorSubject(false);
 
@@ -306,7 +302,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.capacityMetrics = new TaskManagerCapacityMetrics({
       getConfiguredCapacity: () => startingCapacity,
       getEffectiveCapacity: () => this.currentCapacity,
-      getOccupiedCost: () => this.pool.usedCapacity,
     });
 
     this.taskClaiming = new TaskClaiming({
@@ -358,7 +353,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         }
         return capacity;
       },
-      onSkippedNoCapacity: recordPollSkippedNoCapacity,
       work: this.pollForWork,
     });
 

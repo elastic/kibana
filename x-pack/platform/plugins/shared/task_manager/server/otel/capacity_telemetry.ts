@@ -16,7 +16,6 @@ import type { TaskTypeDictionary } from '../task_type_dictionary';
 export interface CapacityProviders {
   getConfiguredCapacity: () => number;
   getEffectiveCapacity: () => number;
-  getOccupiedCost: () => number;
 }
 
 const meter = metrics.getMeter('kibana.task_manager');
@@ -28,40 +27,33 @@ const slotTime = meter.createCounter('kibana.task_manager.task_run.slot_time', {
   valueType: ValueType.DOUBLE,
 });
 
-const pollsSkipped = meter.createCounter('kibana.task_manager.poll.skipped_no_capacity.count', {
-  description: 'Number of polls skipped because the task pool had no available capacity.',
-  unit: '1',
+const taskRuns = meter.createCounter('kibana.task_manager.task_run.completed.count', {
+  description: 'Number of completed task runs, including failed ones.',
+  unit: '{run}',
   valueType: ValueType.INT,
 });
 
 const configured = meter.createObservableGauge('kibana.task_manager.capacity.configured', {
   description: 'Configured capacity, in normal-cost task slots, before backpressure.',
-  unit: '1',
+  unit: '{task}',
   valueType: ValueType.INT,
 });
 
 const effective = meter.createObservableGauge('kibana.task_manager.capacity.effective', {
   description: 'Capacity in force, in normal-cost task slots, after backpressure.',
-  unit: '1',
+  unit: '{task}',
   valueType: ValueType.INT,
 });
 
-const occupiedCost = meter.createObservableGauge('kibana.task_manager.capacity.occupied_cost', {
-  description: 'Sum of the costs of the tasks currently running in the pool.',
-  unit: '1',
-  valueType: ValueType.INT,
-});
-
-const capacityGauges = [configured, effective, occupiedCost];
+const capacityGauges = [configured, effective];
 
 export class TaskManagerCapacityMetrics {
   private readonly observe: BatchObservableCallback;
 
-  constructor({ getConfiguredCapacity, getEffectiveCapacity, getOccupiedCost }: CapacityProviders) {
+  constructor({ getConfiguredCapacity, getEffectiveCapacity }: CapacityProviders) {
     this.observe = (result) => {
       result.observe(configured, getConfiguredCapacity());
       result.observe(effective, getEffectiveCapacity());
-      result.observe(occupiedCost, getOccupiedCost());
     };
     meter.addBatchObservableCallback(this.observe, capacityGauges);
   }
@@ -71,17 +63,15 @@ export class TaskManagerCapacityMetrics {
   }
 }
 
-export const recordPollSkippedNoCapacity = (): void => {
-  pollsSkipped.add(1);
-};
-
-export const recordSlotTime = (
+export const recordTaskRun = (
   event: TaskEvent<unknown, unknown>,
   definitions: TaskTypeDictionary
 ): void => {
   if (!isTaskRunEvent(event) || !event.timing) return;
   const { task } = unwrap(event.event);
   const { start, stop } = event.timing;
+  const attributes = { 'task.type': task.taskType };
   const costWeight = getTaskCost(task, definitions) / TaskCost.Normal;
-  slotTime.add((costWeight * (stop - start)) / 1000, { 'task.type': task.taskType });
+  taskRuns.add(1, attributes);
+  slotTime.add((costWeight * (stop - start)) / 1000, attributes);
 };

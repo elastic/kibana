@@ -43,7 +43,7 @@ import { EsApiKeyStrategy } from './api_key_strategy';
 import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import { taskExecutionControlServiceMock } from './execution_control/task_execution_control_service.mock';
-import { recordPollSkippedNoCapacity, TaskManagerCapacityMetrics } from './otel/capacity_telemetry';
+import { TaskManagerCapacityMetrics } from './otel/capacity_telemetry';
 
 const resetInFlightTasksMock = resetInFlightTasksOwnedByThisNode as jest.MockedFunction<
   typeof resetInFlightTasksOwnedByThisNode
@@ -65,7 +65,6 @@ jest.mock('./constants', () => ({
 
 jest.mock('./otel/capacity_telemetry', () => ({
   ...jest.requireActual('./otel/capacity_telemetry'),
-  recordPollSkippedNoCapacity: jest.fn(),
   TaskManagerCapacityMetrics: jest.fn().mockImplementation(() => ({ stop: jest.fn() })),
 }));
 
@@ -602,55 +601,22 @@ describe('TaskPollingLifecycle', () => {
   });
 
   describe('capacity telemetry', () => {
-    test.each([
-      ['zero', 0],
-      ['negative', -2],
-    ])('counts a poll skipped for %s available capacity once', async (_, availableCapacity) => {
-      clock.restore();
-      (recordPollSkippedNoCapacity as jest.Mock).mockClear();
-      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() =>
-        Promise.resolve(
-          asOk({
-            docs: [],
-            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
-          })
-        )
-      );
-      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      const taskPollingLifecycle = new TaskPollingLifecycle({
-        ...taskManagerOpts,
-        elasticsearchAndSOAvailability$,
-      });
-      jest.spyOn(taskPollingLifecycle.pool, 'availableCapacity').mockReturnValue(availableCapacity);
-
-      elasticsearchAndSOAvailability$.next(true);
-      await retryUntil(
-        'poll skipped',
-        () => (recordPollSkippedNoCapacity as jest.Mock).mock.calls.length > 0
-      );
-
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
-      expect(recordPollSkippedNoCapacity).toHaveBeenCalledTimes(1);
-    });
-
-    test('creates capacity metrics whose providers follow the pool and backpressure', () => {
+    test('creates capacity metrics whose providers follow backpressure', () => {
       const errors$ = new Subject<Error>();
       const store = taskStoreMock.create({});
       (store as unknown as { errors$: Subject<Error> }).errors$ = errors$;
-      const lifecycle = new TaskPollingLifecycle({
+      new TaskPollingLifecycle({
         ...taskManagerOpts,
         taskStore: store,
         elasticsearchAndSOAvailability$: new Subject<boolean>(),
         startingCapacity: 20,
       });
-      const { getConfiguredCapacity, getEffectiveCapacity, getOccupiedCost } = (
+      const { getConfiguredCapacity, getEffectiveCapacity } = (
         TaskManagerCapacityMetrics as jest.Mock
       ).mock.lastCall![0];
-      jest.spyOn(lifecycle.pool, 'usedCapacity', 'get').mockReturnValue(6);
 
       expect(getConfiguredCapacity()).toEqual(20);
       expect(getEffectiveCapacity()).toEqual(20);
-      expect(getOccupiedCost()).toEqual(6);
 
       errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);

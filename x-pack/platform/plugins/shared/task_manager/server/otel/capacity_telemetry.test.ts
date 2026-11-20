@@ -14,12 +14,14 @@ import { asErr, asOk } from '../lib/result_type';
 import { TaskRunResult } from '../task_running';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
-import { recordSlotTime, TaskManagerCapacityMetrics } from './capacity_telemetry';
+import { recordTaskRun, TaskManagerCapacityMetrics } from './capacity_telemetry';
 
 const mockAdd = jest.fn();
 jest.mock('@opentelemetry/api', () => {
   const meter = {
-    createCounter: () => ({ add: (...args: unknown[]) => mockAdd(...args) }),
+    createCounter: (name: string) => ({
+      add: (value: number, attributes: unknown) => mockAdd(name, value, attributes),
+    }),
     createObservableGauge: (name: string) => ({ name }),
     addBatchObservableCallback: jest.fn(),
     removeBatchObservableCallback: jest.fn(),
@@ -38,10 +40,9 @@ describe('TaskManagerCapacityMetrics', () => {
     return result.observe.mock.calls.map(([gauge, value]) => [gauge.name, value]);
   };
 
-  const providers = (configured: number, effective: number, occupied: number) => ({
+  const providers = (configured: number, effective: number) => ({
     getConfiguredCapacity: () => configured,
     getEffectiveCapacity: () => effective,
-    getOccupiedCost: () => occupied,
   });
 
   beforeEach(() => {
@@ -50,25 +51,23 @@ describe('TaskManagerCapacityMetrics', () => {
   });
 
   test('observes its own providers', () => {
-    const first = new TaskManagerCapacityMetrics(providers(20, 16, 6));
-    const second = new TaskManagerCapacityMetrics(providers(40, 40, 0));
+    const first = new TaskManagerCapacityMetrics(providers(20, 16));
+    const second = new TaskManagerCapacityMetrics(providers(40, 40));
 
     expect(observedBy(addCallback.mock.calls[0][0])).toEqual([
       ['kibana.task_manager.capacity.configured', 20],
       ['kibana.task_manager.capacity.effective', 16],
-      ['kibana.task_manager.capacity.occupied_cost', 6],
     ]);
     expect(observedBy(addCallback.mock.calls[1][0])).toEqual([
       ['kibana.task_manager.capacity.configured', 40],
       ['kibana.task_manager.capacity.effective', 40],
-      ['kibana.task_manager.capacity.occupied_cost', 0],
     ]);
     first.stop();
     second.stop();
   });
 
   test('stop removes the callback it registered', () => {
-    const capacityMetrics = new TaskManagerCapacityMetrics(providers(20, 20, 0));
+    const capacityMetrics = new TaskManagerCapacityMetrics(providers(20, 20));
     const [callback, gauges] = addCallback.mock.calls[0];
 
     capacityMetrics.stop();
@@ -78,7 +77,7 @@ describe('TaskManagerCapacityMetrics', () => {
   });
 });
 
-describe('recordSlotTime', () => {
+describe('recordTaskRun', () => {
   const definitions = new TaskTypeDictionary(mockLogger());
   definitions.registerTaskDefinitions({
     normalTask: { title: 'normalTask', createTaskRunner: jest.fn() },
@@ -88,6 +87,13 @@ describe('recordSlotTime', () => {
   const timing = { start: 0, stop: 5000 };
 
   beforeEach(() => mockAdd.mockClear());
+
+  const added = (name: string) =>
+    mockAdd.mock.calls
+      .filter(([metric]) => metric === name)
+      .map(([, value, attrs]) => [value, attrs]);
+  const slotTimeOf = () => added('kibana.task_manager.task_run.slot_time');
+  const runsOf = () => added('kibana.task_manager.task_run.completed.count');
 
   const mockTask = (taskType: string, cost?: ConcreteTaskInstance['cost']) =>
     ({
@@ -114,48 +120,49 @@ describe('recordSlotTime', () => {
     isExpired: false,
   });
 
-  test('a normal task adds its duration in seconds', () => {
+  test('a normal task counts one run and adds its duration in seconds', () => {
     const task = mockTask('normalTask');
-    recordSlotTime(asTaskRunEvent(task.id, asOk(ranTask(task)), timing), definitions);
+    recordTaskRun(asTaskRunEvent(task.id, asOk(ranTask(task)), timing), definitions);
 
-    expect(mockAdd).toHaveBeenCalledTimes(1);
-    expect(mockAdd).toHaveBeenCalledWith(5, { 'task.type': 'normalTask' });
+    expect(runsOf()).toEqual([[1, { 'task.type': 'normalTask' }]]);
+    expect(slotTimeOf()).toEqual([[5, { 'task.type': 'normalTask' }]]);
   });
 
   test('a large task adds twice its duration in seconds', () => {
     const task = mockTask('largeTask');
-    recordSlotTime(asTaskRunEvent(task.id, asOk(ranTask(task)), timing), definitions);
+    recordTaskRun(asTaskRunEvent(task.id, asOk(ranTask(task)), timing), definitions);
 
-    expect(mockAdd).toHaveBeenCalledWith(10, { 'task.type': 'largeTask' });
+    expect(slotTimeOf()).toEqual([[10, { 'task.type': 'largeTask' }]]);
   });
 
   test('a per-instance cost overrides the definition cost', () => {
     const task = mockTask('normalTask', TaskCost.Tiny);
-    recordSlotTime(asTaskRunEvent(task.id, asOk(ranTask(task)), timing), definitions);
+    recordTaskRun(asTaskRunEvent(task.id, asOk(ranTask(task)), timing), definitions);
 
-    expect(mockAdd).toHaveBeenCalledWith(2.5, { 'task.type': 'normalTask' });
+    expect(slotTimeOf()).toEqual([[2.5, { 'task.type': 'normalTask' }]]);
   });
 
-  test('failed runs are counted', () => {
+  test('failed runs are counted in both', () => {
     const task = mockTask('largeTask');
-    recordSlotTime(
+    recordTaskRun(
       asTaskRunEvent(task.id, asErr({ ...ranTask(task), error: new Error('boom') }), timing),
       definitions
     );
 
-    expect(mockAdd).toHaveBeenCalledWith(10, { 'task.type': 'largeTask' });
+    expect(runsOf()).toEqual([[1, { 'task.type': 'largeTask' }]]);
+    expect(slotTimeOf()).toEqual([[10, { 'task.type': 'largeTask' }]]);
   });
 
   test('task run events without timing are ignored', () => {
     const task = mockTask('normalTask');
-    recordSlotTime(asTaskRunEvent(task.id, asOk(ranTask(task))), definitions);
+    recordTaskRun(asTaskRunEvent(task.id, asOk(ranTask(task))), definitions);
 
     expect(mockAdd).not.toHaveBeenCalled();
   });
 
   test('other event types are ignored', () => {
     const task = mockTask('normalTask');
-    recordSlotTime(asTaskClaimEvent(task.id, asOk(task), timing), definitions);
+    recordTaskRun(asTaskClaimEvent(task.id, asOk(task), timing), definitions);
 
     expect(mockAdd).not.toHaveBeenCalled();
   });
