@@ -103,6 +103,34 @@ ruleTester.run('@kbn/eslint/scout_require_tags', rule, {
         test.describe('suite', { ...baseOptions }, () => {});
       `,
     },
+    // Individually tagged test.fail declarations
+    {
+      code: dedent`
+        test.describe('suite', () => {
+          test.fail('works later', { tag: tags.stateful.classic }, () => {});
+        });
+      `,
+    },
+    // Runtime skip/fixme calls are not test declarations
+    {
+      code: dedent`
+        test.describe('suite', () => {
+          test('works', { tag: tags.stateful.classic }, () => {
+            test.skip(false, 'only on this branch');
+            test.fixme(true, 'known issue');
+          });
+        });
+      `,
+    },
+    // Fixture imports may use a custom local name
+    {
+      code: dedent`
+        import { significantEventsApiTest } from '../fixtures';
+        significantEventsApiTest.describe('suite', { tag: tags.stateful.classic }, () => {
+          significantEventsApiTest('works', () => {});
+        });
+      `,
+    },
   ],
   invalid: [
     {
@@ -171,6 +199,34 @@ ruleTester.run('@kbn/eslint/scout_require_tags', rule, {
           test('works', () => {
             expect(response).toMatchObject({ tag: 'example' });
           });
+        });
+      `,
+      errors: [{ messageId: 'missingTag' }],
+    },
+    // Named test callbacks do not provide tag options
+    {
+      code: dedent`
+        test.describe('suite', () => {
+          test('works', runCase);
+        });
+      `,
+      errors: [{ messageId: 'missingTag' }],
+    },
+    // test.fail declarations still require their own tag
+    {
+      code: dedent`
+        test.describe('suite', () => {
+          test.fail('works later', { timeout: 1000 }, () => {});
+        });
+      `,
+      errors: [{ messageId: 'missingTag' }],
+    },
+    // Custom fixture names are checked too
+    {
+      code: dedent`
+        import { significantEventsApiTest } from '../fixtures';
+        significantEventsApiTest.describe('suite', () => {
+          significantEventsApiTest('works', () => {});
         });
       `,
       errors: [{ messageId: 'missingTag' }],
