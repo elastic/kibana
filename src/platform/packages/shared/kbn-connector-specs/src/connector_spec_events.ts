@@ -56,8 +56,8 @@ export interface EventDefinition {
 }
 
 /** Maps a topic's event id and spoke schema onto a spec event. Title and description stay on the spec. */
-export const toConnectorSpecEvent = <TSchema extends z.ZodObject, TName extends string>(
-  definition: ConnectorEventTopicDefinition<TSchema, TName>,
+export const toConnectorSpecEvent = (
+  definition: ConnectorEventTopicDefinition,
   presentation: { readonly title: string; readonly description: string }
 ): EventDefinition => ({
   eventId: definition.name,
