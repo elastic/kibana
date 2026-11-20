@@ -13,22 +13,22 @@ const findClamp = (a, min, max) => {
 };
 
 /**
- * Restricts value to a given range and returns closed available value. If only min is provided, values are restricted to only a lower bound.
- * @param {...(number|number[])} a one or more numbers or arrays of numbers
- * @param {(number|number[])} min The minimum value this function will return.
- * @param {(number|number[])} max The maximum value this function will return.
- * @return {(number|number[])} The closest value between `min` (inclusive) and `max` (inclusive). Returns an array with values greater than or equal to `min` and less than or equal to `max` (if provided) at each index.
- * @throws `'Array length mismatch'` if `a`, `min`, and/or `max` are arrays of different lengths
+ * Restricts a value to a given range. Returns `min` if the value is below it, `max` if the value is above it, and the value itself otherwise. To limit a value on one side only, use the `max` function for a lower limit or the `min` function for an upper limit. For example, `max(value, 5)` returns at least 5, and `min(value, 5)` returns at most 5.
+ * @param {(number|number[])} a a number or an array of numbers
+ * @param {(number|number[])} min The minimum value this function returns.
+ * @param {(number|number[])} max The maximum value this function returns.
+ * @return {(number|number[])} The closest value between `min` (inclusive) and `max` (inclusive). Returns an array with values greater than or equal to `min` and less than or equal to `max` at each index if `a`, `min`, or `max` is an array. In an expression, if you leave out `min` or `max`, the result is `NaN`, or an array of `NaN` values if `a` or `min` is an array. If `a` and `min` are both arrays and `max` is a number, each element of the result is `NaN`.
+ * @throws `'Array length mismatch'` if `a`, `min`, or `max` are arrays of different lengths
  * @throws `'Min must be less than max'` if `max` is less than `min`
- * @throws `'Missing minimum value. You may want to use the 'max' function instead'` if min is not provided
- * @throws `'Missing maximum value. You may want to use the 'min' function instead'` if max is not provided
+ * @throws `'Missing minimum value. You may want to use the 'max' function instead'` if `min` is null and you call the function directly
+ * @throws `'Missing maximum value. You may want to use the 'min' function instead'` if `max` is null and you call the function directly
  *
  * @example
  * clamp(1, 2, 3) // returns 2
  * clamp([10, 20, 30, 40], 15, 25) // returns [15, 20, 25, 25]
  * clamp(10, [15, 2, 4, 20], 25) // returns [15, 10, 10, 20]
  * clamp(35, 10, [20, 30, 40, 50]) // returns [20, 30, 35, 35]
- * clamp([1, 9], 3, [4, 5]) // returns [clamp([1, 3, 4]), clamp([9, 3, 5])] = [3, 5]
+ * clamp([1, 9], 3, [4, 5]) // returns [clamp(1, 3, 4), clamp(9, 3, 5)] = [3, 5]
  */
 
 function clamp(a, min, max) {
