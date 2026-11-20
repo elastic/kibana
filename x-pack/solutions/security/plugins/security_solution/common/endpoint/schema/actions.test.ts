@@ -1572,6 +1572,71 @@ describe('actions schemas', () => {
     });
   });
 
+  describe.each([
+    [
+      'EndpointActionGetFileSchema',
+      (exportValue: string | number) =>
+        EndpointActionGetFileSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: { path: 'C:\\file.txt', export: exportValue },
+        }),
+    ],
+    [
+      'MemoryDumpActionRequestSchema',
+      (exportValue: string | number) =>
+        MemoryDumpActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: { type: 'kernel', export: exportValue },
+        }),
+    ],
+  ])('%s `export` parameter', (_schemaName, validateWithExport) => {
+    it.each([
+      ['a provider id', 'azure-1'],
+      ['a provider id of exactly 256 characters', 'a'.repeat(256)],
+    ])('should accept %s', (_description, exportValue) => {
+      expect(() => validateWithExport(exportValue)).not.toThrow();
+    });
+
+    it.each([
+      ['an empty string', ''],
+      ['a value longer than 256 characters', 'a'.repeat(257)],
+      ['a value that is not a string', 1],
+    ])('should reject %s', (_description, exportValue) => {
+      expect(() => validateWithExport(exportValue)).toThrow('[parameters.export]');
+    });
+
+    it('should reject a whitespace-only value', () => {
+      expect(() => validateWithExport('   ')).toThrow(
+        '[parameters.export]: export cannot be an empty string'
+      );
+    });
+  });
+
+  describe('EndpointActionGetFileSchema `export` parameter and agent type', () => {
+    it('should accept `export` together with `force` for agent type `endpoint`', () => {
+      expect(() => {
+        EndpointActionGetFileSchema.body.validate({
+          agent_type: 'endpoint',
+          endpoint_ids: ['endpoint_id'],
+          parameters: { path: 'C:\\locked.dat', force: true, export: 'azure-1' },
+        });
+      }).not.toThrow();
+    });
+
+    it.each(['sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])(
+      'should reject `export` with agent type `%s`',
+      (agentType) => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            agent_type: agentType,
+            endpoint_ids: ['endpoint_id'],
+            parameters: { path: 'C:\\file.txt', export: 'azure-1' },
+          });
+        }).toThrow(`[parameters.export]: is not valid with agent type of ${agentType}`);
+      }
+    );
+  });
+
   describe('maxLength bounds', () => {
     const charsOfLength = (length: number) => 'a'.repeat(length);
 
