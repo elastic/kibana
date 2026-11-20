@@ -12,7 +12,7 @@ import type { SignalFormulaKind, SignalTemplate, SignalTemplateVariant } from '.
 
 export const CLUSTER_FIELD = 'orchestrator.cluster.name';
 
-// Averages can be computed per schema side by side and merged with COALESCE in one query.
+// Averages can be computed per schema side by side and merged by preference in one query.
 const MERGEABLE_KINDS: ReadonlySet<SignalFormulaKind> = new Set([
   'average',
   'inverse_average',

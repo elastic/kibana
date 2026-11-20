@@ -113,7 +113,23 @@ describe('buildSignalChecks', () => {
     expect(check.scope).toBeUndefined();
     expect(check.esql_preview).toContain(`data_stream.dataset == "${ecs.dataset}"`);
     expect(check.esql_preview).toContain(`data_stream.dataset == "${otel.dataset}"`);
-    expect(check.esql_preview).toContain('signal_value = COALESCE(1 - average_0, average_1)');
+    expect(check.esql_preview).toContain(
+      'signal_value = CASE(samples_0 >= 5, 1 - average_0, average_1)'
+    );
+  });
+
+  it('builds an OOM check from restart data and ties its reason to the new restart level', () => {
+    const template = getTemplate('k8s.container.oom_killed');
+    const { checks } = build(['k8s.deployment'], template, [
+      {
+        dataset: 'kubernetes.state_container',
+        fields: new Set(['kubernetes.container.status.restarts']),
+      },
+    ]);
+
+    expect(checks).toHaveLength(1);
+    expect(checks[0].measurements.map(({ schema }) => schema)).toEqual(['ecs']);
+    expect(checks[0].esql_preview).toContain('| WHERE oom_level > min_restarts');
   });
 
   it('splits formulas that cannot merge by cluster and counts each cluster once', () => {

@@ -21,13 +21,11 @@ export interface SignalFieldPresence {
   fields: ReadonlySet<string>;
 }
 
-const buildSignalFieldQuery = (esql: string, templates: readonly SignalTemplate[]): string => {
-  const fields = [
-    ...new Set(templates.flatMap(({ variants }) => variants.flatMap(getSignalVariantFields))),
-  ];
-  const datasets = [
-    ...new Set(templates.flatMap(({ variants }) => variants.map(({ dataset }) => dataset))),
-  ];
+const buildSignalFieldQuery = (
+  esql: string,
+  fields: readonly string[],
+  datasets: readonly string[]
+): string => {
   const aggregations = fields
     .map((field, index) => `signal_${index} = COUNT(${field})`)
     .join(',\n');
@@ -69,11 +67,16 @@ export const checkSignalFields = async ({
       applicableTemplates.flatMap(({ variants }) => variants.flatMap(getSignalVariantFields))
     ),
   ];
+  const signalDatasets = [
+    ...new Set(
+      applicableTemplates.flatMap(({ variants }) => variants.map(({ dataset }) => dataset))
+    ),
+  ];
   const deadline = timeoutSignal(SIGNAL_FIELD_QUERY_TIMEOUT_MS);
   try {
     const requestSignal = signal ? AbortSignal.any([signal, deadline]) : deadline;
     const response = (await esClient.esql.query(
-      { query: buildSignalFieldQuery(esql, applicableTemplates) },
+      { query: buildSignalFieldQuery(esql, fields, signalDatasets) },
       { signal: requestSignal }
     )) as ESQLSearchResponse;
     const columnPositions = new Map(

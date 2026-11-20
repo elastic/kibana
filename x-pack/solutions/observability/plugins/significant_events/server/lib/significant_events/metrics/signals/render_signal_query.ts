@@ -35,10 +35,7 @@ const buildVariantFilter = (variants: readonly SignalTemplateVariant[]): string 
   return clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`;
 };
 
-/**
- * Averages each variant per group, then keeps the first non-null value, so every entity is
- * measured with its preferred schema. With one variant this is a plain average.
- */
+// Averages each variant per group and uses the first eligible schema.
 const renderMergedAverage = (
   variants: readonly SignalTemplateVariant[],
   groupBy: string,
@@ -58,12 +55,20 @@ const renderMergedAverage = (
           : [`samples_${index} = COUNT(${variant.field})${ownDataset}`]),
       ],
       value: variant.formulaKind === 'inverse_average' ? `1 - ${average}` : average,
-      hasValue: `${average} IS NOT NULL`,
+      hasValue:
+        minimumSampleCount === undefined
+          ? `${average} IS NOT NULL`
+          : `samples_${index} >= ${minimumSampleCount}`,
       samples: `samples_${index}`,
     };
   });
-  const value = merged ? `COALESCE(${arms.map((arm) => arm.value).join(', ')})` : arms[0].value;
   const lastArm = arms[arms.length - 1];
+  const value = merged
+    ? `CASE(${arms
+        .slice(0, -1)
+        .map((arm) => `${arm.hasValue}, ${arm.value}`)
+        .join(', ')}, ${lastArm.value})`
+    : arms[0].value;
   const samples = merged
     ? `CASE(${arms
         .slice(0, -1)
@@ -127,12 +132,14 @@ const renderAggregation = (variants: readonly SignalTemplateVariant[], groupBy: 
 | WHERE denominator_value > 0
 | EVAL signal_value = TO_DOUBLE(numerator_value) / TO_DOUBLE(denominator_value)`;
     case 'oom_killed_count':
-      return `| STATS max_restarts = MAX(${variant.field}),
-        min_restarts = MIN(${variant.field}),
-        matching_reasons = COUNT(${variant.reasonField})
+      // A reason belongs to the restart level it raised, so a stale reason at the first level does not count.
+      return `| STATS oom_samples = COUNT(*)
           WHERE ${variant.reasonField} == ${quoteEsqlString(variant.reasonValue)}
+  BY ${groupBy}, ${POD_INSTANCE_KEYS}, restart_level = ${variant.field}
+| STATS min_restarts = MIN(restart_level),
+        oom_level = MAX(restart_level) WHERE oom_samples > 0
   BY ${groupBy}, ${POD_INSTANCE_KEYS}
-| WHERE max_restarts - min_restarts > 0 AND matching_reasons > 0
+| WHERE oom_level > min_restarts
 | STATS signal_value = COUNT(*) BY ${groupBy}`;
   }
 };

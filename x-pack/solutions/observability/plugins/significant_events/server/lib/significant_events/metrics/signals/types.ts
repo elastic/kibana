@@ -65,13 +65,14 @@ export type SignalTemplateVariant = SignalTemplateVariantBase &
     | { formulaKind: 'oom_killed_count'; reasonField: string; reasonValue: string }
   );
 
-/** Returns every data field required to render a signal variant. */
+/** Returns the fields that must have data before a signal variant can run. */
 export const getSignalVariantFields = (variant: SignalTemplateVariant): string[] => {
   switch (variant.formulaKind) {
     case 'ratio':
       return [variant.field, variant.denominatorField];
     case 'oom_killed_count':
-      return [variant.field, variant.reasonField];
+      // The reason may be absent until a container terminates; previews nullify unmapped fields.
+      return [variant.field];
     default:
       return [variant.field];
   }

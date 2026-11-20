@@ -148,7 +148,8 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         schema: 'ecs',
         dataset: 'kubernetes.state_container',
         field: 'kubernetes.container.status.restarts',
-        formula: 'COUNT(containers with a restart delta and an OOMKilled reason)',
+        formula:
+          'COUNT(containers whose restart counter rose to a level that reports an OOMKilled reason)',
         formulaKind: 'oom_killed_count',
         reasonField: 'kubernetes.container.status.last_terminated_reason',
         reasonValue: 'OOMKilled',
@@ -161,7 +162,8 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         schema: 'otel',
         dataset: 'k8sclusterreceiver.otel',
         field: 'k8s.container.restarts',
-        formula: 'COUNT(containers with a restart delta and an OOMKilled reason)',
+        formula:
+          'COUNT(containers whose restart counter rose to a level that reports an OOMKilled reason)',
         formulaKind: 'oom_killed_count',
         reasonField: 'k8s.container.status.last_terminated_reason',
         reasonValue: 'OOMKilled',
@@ -170,7 +172,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
         threshold: 0,
         source: kubernetesOtelRule(
           'kubernetes_otel-oomkilled-containers',
-          'also requires a restart in the window; the reason field keeps its value after the event, so the template fires for old kills'
+          'requires the restart counter to rise within the window to a level that reports an OOMKilled reason'
         ),
       },
     ],
