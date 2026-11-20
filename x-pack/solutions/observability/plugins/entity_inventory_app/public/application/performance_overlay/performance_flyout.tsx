@@ -24,12 +24,19 @@ import {
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
+  useResizeObserver,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { ENTITY_INVENTORY_EBT_ACTIONS, ENTITY_INVENTORY_EBT_ELEMENTS } from '../../ebt_constants';
 import { EMPTY_VALUE, formatMs, formatRequest } from './format';
 import { ListCallDetail } from './list_call_detail';
-import { HISTORY_COLUMN_WIDTHS } from './column_widths';
+import {
+  FixedColumnWidthsContext,
+  HISTORY_COLUMN_WIDTHS,
+  TIME_COLUMN_WIDTH,
+  fixedWidth,
+  hasRoomForFixedColumnWidths,
+} from './column_widths';
 import type { RecordedCall, RecordedCallStatus } from './performance_recorder';
 import {
   CLEAR_BUTTON,
@@ -55,9 +62,11 @@ const numberCss = css`
   font-variant-numeric: tabular-nums;
 `;
 
-// A narrow flyout cuts a long request short instead of running it into the status.
+// A narrow flyout cuts a long request short instead of running it into the status, but always
+// keeps a few characters of it, so the link that selects the call never collapses to an ellipsis.
 const requestLinkCss = css`
   display: inline-block;
+  min-width: 8ch;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -67,12 +76,13 @@ const requestLinkCss = css`
 
 /** The history columns; a `_list` call's request selects it, from the keyboard too. */
 const historyColumns = (
-  onSelect: (id: number) => void
+  onSelect: (id: number) => void,
+  isFixed: boolean
 ): Array<EuiBasicTableColumn<RecordedCall>> => [
   {
     field: 'startedAt',
     name: HISTORY_COLUMNS.time,
-    width: '96px',
+    width: fixedWidth(isFixed, TIME_COLUMN_WIDTH),
     render: (startedAt: number) => (
       <span css={numberCss}>{new Date(startedAt).toLocaleTimeString()}</span>
     ),
@@ -102,7 +112,7 @@ const historyColumns = (
   {
     field: 'status',
     name: HISTORY_COLUMNS.status,
-    width: HISTORY_COLUMN_WIDTHS.status,
+    width: fixedWidth(isFixed, HISTORY_COLUMN_WIDTHS.status),
     render: (status: RecordedCallStatus, { errorMessage }: RecordedCall) => (
       <EuiHealth color={STATUS_COLORS[status]} title={errorMessage ?? undefined}>
         {STATUS_LABELS[status]}
@@ -112,20 +122,20 @@ const historyColumns = (
   {
     field: 'browserMs',
     name: HISTORY_COLUMNS.browser,
-    width: HISTORY_COLUMN_WIDTHS.browser,
+    width: fixedWidth(isFixed, HISTORY_COLUMN_WIDTHS.browser),
     align: 'right',
     render: (browserMs: number) => <span css={numberCss}>{formatMs(browserMs)}</span>,
   },
   {
     field: 'serverMs',
     name: HISTORY_COLUMNS.server,
-    width: HISTORY_COLUMN_WIDTHS.server,
+    width: fixedWidth(isFixed, HISTORY_COLUMN_WIDTHS.server),
     align: 'right',
     render: (serverMs: number | null) => <span css={numberCss}>{formatMs(serverMs)}</span>,
   },
   {
     name: HISTORY_COLUMNS.errors,
-    width: HISTORY_COLUMN_WIDTHS.errors,
+    width: fixedWidth(isFixed, HISTORY_COLUMN_WIDTHS.errors),
     align: 'right',
     render: ({ list }: RecordedCall) => {
       if (list === null) {
@@ -148,6 +158,9 @@ export const PerformanceFlyout = ({ calls, onClear, onClose }: PerformanceFlyout
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'entityInventoryPerformanceFlyoutTitle' });
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [body, setBody] = useState<HTMLDivElement | null>(null);
+  const { width: bodyWidth } = useResizeObserver(body, 'width');
+  const isFixed = hasRoomForFixedColumnWidths(bodyWidth);
   const selected =
     calls.find(({ id, list }) => id === selectedId && list !== null) ??
     calls.find(({ list }) => list !== null);
@@ -188,32 +201,36 @@ export const PerformanceFlyout = ({ calls, onClear, onClose }: PerformanceFlyout
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {selected?.list ? (
-          <ListCallDetail key={selected.id} call={selected} list={selected.list} />
-        ) : (
-          <EuiText size="s" color="subdued">
-            {NO_LIST_SELECTED}
-          </EuiText>
-        )}
-        <EuiSpacer size="l" />
-        <EuiTitle size="xxs">
-          <h3>{HISTORY_TITLE}</h3>
-        </EuiTitle>
-        <EuiSpacer size="xs" />
-        <div css={historyCss}>
-          <EuiBasicTable<RecordedCall>
-            tableCaption={HISTORY_TITLE}
-            items={[...calls]}
-            itemId="id"
-            columns={historyColumns(setSelectedId)}
-            noItemsMessage={NO_CALLS}
-            compressed
-            data-test-subj="entityInventoryPerformanceHistory"
-            rowProps={({ id }: RecordedCall) => ({
-              isSelected: id === selected?.id,
-              'data-test-subj': 'entityInventoryPerformanceHistoryRow',
-            })}
-          />
+        <div ref={setBody}>
+          <FixedColumnWidthsContext.Provider value={isFixed}>
+            {selected?.list ? (
+              <ListCallDetail key={selected.id} call={selected} list={selected.list} />
+            ) : (
+              <EuiText size="s" color="subdued">
+                {NO_LIST_SELECTED}
+              </EuiText>
+            )}
+            <EuiSpacer size="l" />
+            <EuiTitle size="xxs">
+              <h3>{HISTORY_TITLE}</h3>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            <div css={historyCss}>
+              <EuiBasicTable<RecordedCall>
+                tableCaption={HISTORY_TITLE}
+                items={[...calls]}
+                itemId="id"
+                columns={historyColumns(setSelectedId, isFixed)}
+                noItemsMessage={NO_CALLS}
+                compressed
+                data-test-subj="entityInventoryPerformanceHistory"
+                rowProps={({ id }: RecordedCall) => ({
+                  isSelected: id === selected?.id,
+                  'data-test-subj': 'entityInventoryPerformanceHistoryRow',
+                })}
+              />
+            </div>
+          </FixedColumnWidthsContext.Provider>
         </div>
       </EuiFlyoutBody>
     </EuiFlyout>

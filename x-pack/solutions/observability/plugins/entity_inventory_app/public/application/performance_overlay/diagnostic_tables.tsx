@@ -41,9 +41,12 @@ import {
 import {
   DETAIL_COLUMN_WIDTH,
   ES_TIME_COLUMN_WIDTH,
+  EXPANDER_COLUMN_WIDTH,
   PROBE_FILLER_WIDTH,
   QUERY_COLUMN_WIDTHS,
   STATUS_COLUMN_WIDTH,
+  fixedWidth,
+  useFixedColumnWidths,
 } from './column_widths';
 import {
   COLLAPSE_ROW,
@@ -94,10 +97,10 @@ const ROWS_EMITTED_FIELD = 'rows_emitted';
 
 const Numeric = ({ children }: { children: ReactNode }) => <span css={numberCss}>{children}</span>;
 
-/** A right-aligned, non-wrapping numeric column of a fixed width. */
+/** A right-aligned, non-wrapping numeric column, of a fixed width when one is given. */
 const numericColumn = <T extends Diagnostic>(
   name: string,
-  width: string,
+  width: string | undefined,
   render: (item: T) => string
 ): EuiBasicTableColumn<Row<T>> => ({
   name,
@@ -154,8 +157,8 @@ interface DiagnosticTableProps<T extends Diagnostic> {
   items: readonly T[];
   /** The one column between the status and the ES time. */
   detailColumn: EuiBasicTableColumn<Row<T>>;
-  /** Columns after the ES time. */
-  trailingColumns: Array<EuiBasicTableColumn<Row<T>>>;
+  /** Columns after the ES time, given whether the shared fixed widths apply. */
+  trailingColumns: (isFixed: boolean) => Array<EuiBasicTableColumn<Row<T>>>;
   /** The stats shown only in the expanded row. */
   detailStats: (item: T) => DetailItem[];
   /** Null shows no status: a query cannot tell success from failure without `errors[]`. */
@@ -171,6 +174,7 @@ const DiagnosticTable = <T extends Diagnostic>({
   detailStats,
   rowStatus,
 }: DiagnosticTableProps<T>) => {
+  const isFixed = useFixedColumnWidths();
   const rows: Array<Row<T>> = items.map((item, index) => ({ ...item, id: String(index) }));
   const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(() => new Set());
 
@@ -185,7 +189,7 @@ const DiagnosticTable = <T extends Diagnostic>({
 
   const columns: Array<EuiBasicTableColumn<Row<T>>> = [
     {
-      width: '32px',
+      width: EXPANDER_COLUMN_WIDTH,
       isExpander: true,
       name: (
         <EuiScreenReaderOnly>
@@ -226,15 +230,17 @@ const DiagnosticTable = <T extends Diagnostic>({
     },
     {
       name: TABLE_COLUMNS.status,
-      width: STATUS_COLUMN_WIDTH,
+      width: fixedWidth(isFixed, STATUS_COLUMN_WIDTH),
       render: (item: Row<T>) => {
         const status = rowStatus(item);
         return status === null ? null : <RowStatusBadge status={status} />;
       },
     },
-    { ...detailColumn, width: DETAIL_COLUMN_WIDTH },
-    numericColumn<T>(STAT_LABELS.esTime, ES_TIME_COLUMN_WIDTH, ({ took }) => formatMs(took)),
-    ...trailingColumns,
+    { ...detailColumn, width: fixedWidth(isFixed, DETAIL_COLUMN_WIDTH) },
+    numericColumn<T>(STAT_LABELS.esTime, fixedWidth(isFixed, ES_TIME_COLUMN_WIDTH), ({ took }) =>
+      formatMs(took)
+    ),
+    ...trailingColumns(isFixed),
   ];
 
   const itemIdToExpandedRowMap = Object.fromEntries(
@@ -288,20 +294,20 @@ export const QueriesTable = ({ queries }: { queries: readonly ListQueryDiagnosti
     caption={SECTION_TITLES.queries}
     items={queries}
     detailColumn={{ field: 'engine', name: TABLE_COLUMNS.engine }}
-    trailingColumns={[
+    trailingColumns={(isFixed) => [
       numericColumn<ListQueryDiagnostic>(
         STAT_LABELS.cpu,
-        QUERY_COLUMN_WIDTHS.cpuTime,
+        fixedWidth(isFixed, QUERY_COLUMN_WIDTHS.cpuTime),
         ({ cpuNanos }) => formatNanosAsMs(cpuNanos)
       ),
       numericColumn<ListQueryDiagnostic>(
         STAT_LABELS.documents,
-        QUERY_COLUMN_WIDTHS.docs,
+        fixedWidth(isFixed, QUERY_COLUMN_WIDTHS.docs),
         ({ documentsFound }) => formatCount(documentsFound, 'docs')
       ),
       numericColumn<ListQueryDiagnostic>(
         STAT_LABELS.rows,
-        QUERY_COLUMN_WIDTHS.rows,
+        fixedWidth(isFixed, QUERY_COLUMN_WIDTHS.rows),
         ({ rowCount }) => formatCount(rowCount, 'rows')
       ),
     ]}
@@ -320,7 +326,10 @@ export const ProbesTable = ({ probes }: { probes: readonly ListProbeDiagnostic[]
       name: TABLE_COLUMNS.plans,
       render: (outcome: ProbeOutcomeKind) => <span css={nowrapCss}>{PROBE_PLANS[outcome]}</span>,
     }}
-    trailingColumns={[{ name: '', width: PROBE_FILLER_WIDTH, render: () => null }]}
+    // The filler only keeps the alignment with the queries, so it goes with the fixed widths.
+    trailingColumns={(isFixed) =>
+      isFixed ? [{ name: '', width: PROBE_FILLER_WIDTH, render: () => null }] : []
+    }
     detailStats={(probe) => [
       { title: STAT_LABELS.cpu, description: formatNanosAsMs(probe.cpuNanos) },
       { title: STAT_LABELS.documents, description: formatCount(probe.documentsFound, 'docs') },

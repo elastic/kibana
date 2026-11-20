@@ -21,6 +21,14 @@ import {
 import { PerformanceOverlay } from './performance_overlay';
 import type { PerformanceRecorder } from './performance_recorder';
 import { createPerformanceRecorder } from './performance_recorder';
+import { FIXED_COLUMN_WIDTHS_MIN_PX } from './column_widths';
+
+// The flyout body width the resize observer reports, since jsdom lays nothing out; wide by default.
+let mockBodyWidth = FIXED_COLUMN_WIDTHS_MIN_PX;
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useResizeObserver: () => ({ width: mockBodyWidth, height: 0 }),
+}));
 
 const recordList = (recorder: PerformanceRecorder, browserMs: number) =>
   recorder.record({
@@ -67,6 +75,10 @@ const renderOverlay = (enabled: boolean) => {
 };
 
 describe('PerformanceOverlay', () => {
+  afterEach(() => {
+    mockBodyWidth = FIXED_COLUMN_WIDTHS_MIN_PX;
+  });
+
   it('renders nothing while the flag is off', () => {
     const { core, recorder } = renderOverlay(false);
     recordList(recorder, 60);
@@ -468,5 +480,70 @@ describe('PerformanceOverlay', () => {
     expect(
       screen.queryByTestId('entityInventoryPerformanceUnavailableColumns')
     ).not.toBeInTheDocument();
+  });
+
+  describe('column widths', () => {
+    const headerWidths = (testSubj: string) =>
+      within(screen.getByTestId(testSubj))
+        .getAllByRole('columnheader')
+        .map(({ style }) => style.width);
+
+    const openFlyout = async () => {
+      const { recorder } = renderOverlay(true);
+      act(() => {
+        recordList(recorder, 61.26);
+      });
+      fireEvent.click(await screen.findByTestId('entityInventoryPerformanceBadge'));
+    };
+
+    it('aligns the columns with fixed widths in a wide flyout', async () => {
+      await openFlyout();
+
+      expect(headerWidths('entityInventoryPerformanceHistory')).toEqual([
+        '96px',
+        '',
+        '168px',
+        '80px',
+        '88px',
+        '176px',
+      ]);
+      expect(headerWidths('entityInventoryPerformanceQueries')).toEqual([
+        '32px',
+        '',
+        '80px',
+        '88px',
+        '80px',
+        '88px',
+        '96px',
+        '80px',
+      ]);
+      expect(headerWidths('entityInventoryPerformanceProbes')).toEqual([
+        '32px',
+        '',
+        '80px',
+        '88px',
+        '80px',
+        '264px',
+      ]);
+    });
+
+    it('leaves the widths to the table in a narrow flyout, keeping the request selectable', async () => {
+      mockBodyWidth = FIXED_COLUMN_WIDTHS_MIN_PX - 1;
+      await openFlyout();
+
+      expect(headerWidths('entityInventoryPerformanceHistory')).toEqual(Array(6).fill(''));
+      expect(headerWidths('entityInventoryPerformanceQueries')).toEqual([
+        '32px',
+        ...Array(7).fill(''),
+      ]);
+      // The probes drop the filler that only aligned them with the queries.
+      expect(headerWidths('entityInventoryPerformanceProbes')).toEqual([
+        '32px',
+        ...Array(4).fill(''),
+      ]);
+      expect(screen.getByTestId('entityInventoryPerformanceHistorySelect')).toHaveTextContent(
+        'host list'
+      );
+    });
   });
 });
