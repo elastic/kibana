@@ -77,7 +77,7 @@ const setUp = (options?: ConstructorParameters<typeof InMemoryRulesClient>[0]) =
 };
 
 describe('AlertingRuleReconciler', () => {
-  it('creates a missing rule once, with the engine id, tags and name, and leaves it alone after', async () => {
+  it('creates a missing rule once, with the engine id and tags, and leaves it alone after', async () => {
     const { rulesClient, reconcile } = setUp();
     const rule = createRule();
 

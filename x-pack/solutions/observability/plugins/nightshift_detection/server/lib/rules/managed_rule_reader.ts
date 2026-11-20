@@ -72,9 +72,11 @@ export class ManagedRuleReader {
   }
 
   /**
-   * The rows the given rules wrote in `space_id` for runs scheduled in `[from, to)` (epoch
-   * milliseconds), newest first. Read with the engine's system client: `.rule-events` is not the
-   * account's to read, and the filter keeps the read to the space and its own rules.
+   * The rows the given rules wrote in `space_id` during `[from, to)` (epoch milliseconds), newest
+   * run first. The range is on `@timestamp`, the time `.rule-events` indexed the row, not on when
+   * the run was scheduled: a run that writes late is read by the next window instead of being lost.
+   * Read with the engine's system client: `.rule-events` is not the account's to read, and the
+   * filter keeps the read to the space and its own rules.
    */
   public async readRows({
     spaceId,
@@ -109,7 +111,7 @@ export class ManagedRuleReader {
               { terms: { 'rule.id': ruleIds } },
               {
                 range: {
-                  scheduled_timestamp: { gte: from, lt: to, format: 'epoch_millis' },
+                  '@timestamp': { gte: from, lt: to, format: 'epoch_millis' },
                 },
               },
             ],

@@ -193,9 +193,12 @@ export class AlertingRuleReconciler {
       strategy_errors: strategyErrors,
     };
 
-    // 1 and 2.
+    // 1.
+    const existing = await this.reader.listManaged();
+
+    // 2.
     const changes = planRuleChanges({
-      existing: await this.reader.listManaged(),
+      existing,
       desired: desired.map((rule) => toDesiredRule({ spaceId, rule })),
       paused,
       failedStrategies: new Set(strategyErrors.map(({ strategy }) => strategy)),

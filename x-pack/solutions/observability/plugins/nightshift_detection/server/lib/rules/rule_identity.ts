@@ -6,7 +6,7 @@
  */
 
 import { v5 as uuidv5 } from 'uuid';
-import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
+import { MAX_NAME_LENGTH, type CreateRuleData } from '@kbn/alerting-v2-schemas';
 
 /** Namespace of the engine's rule ids. Changing it gives every managed rule a new id. */
 const RULE_ID_NAMESPACE = 'e04d28ab-9856-4cf7-bda8-1341f14f17b5';
@@ -55,7 +55,11 @@ export const getManagedRuleTags = ({
   sourceId: string;
 }): string[] => [MANAGED_RULE_TAG, getStrategyTag(strategy), `${SOURCE_TAG_PREFIX}${sourceId}`];
 
-/** The name of a managed rule: the strategy, the strategy's title for it, and a short id. */
+/**
+ * The name of a managed rule: the strategy, the strategy's title for it, and a short id. A title can
+ * be twice as long as Alerting accepts for a name, so it is cut to fit and the short id, which tells
+ * apart rules with the same title, always stays at the end.
+ */
 export const getManagedRuleName = ({
   strategyName,
   title,
@@ -64,4 +68,10 @@ export const getManagedRuleName = ({
   strategyName: string;
   title: string;
   ruleId: string;
-}): string => `${strategyName}: ${title} (${ruleId.slice(0, 8)})`;
+}): string => {
+  const prefix = `${strategyName}: `;
+  const suffix = ` (${ruleId.slice(0, 8)})`;
+  const room = Math.max(MAX_NAME_LENGTH - prefix.length - suffix.length, 0);
+
+  return `${prefix}${title.slice(0, room)}${suffix}`;
+};
