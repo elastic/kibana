@@ -92,13 +92,16 @@ export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
     };
   }
 
+  const rowSource = resolveSource(hit);
+
   return {
     id: actionId,
     sourceType: 'live' as const,
     timestamp: get('@timestamp') as string,
     queryText,
     queryName: packName,
-    source: resolveSource(hit),
+    source: rowSource,
+    ...(rowSource === 'Workflow' ? { originVerified: source.origin?.verified === true } : {}),
     packName,
     packId,
     spaceId: get('space_id') as string | undefined,

@@ -108,6 +108,9 @@ components:
               description: 'Whether the live query was run manually, by a rule, or by a workflow. `Workflow` comes from an unverified request header and is for display only.'
               type: string
               enum: [Live, Rule, Workflow]
+            originVerified:
+              description: 'Set on `Workflow` rows only. Whether Kibana verified that the workflow run made the request. Always `false` until workflow runs can be verified.'
+              type: boolean
             actionId:
               description: 'The Fleet action ID for the live query.'
               type: string

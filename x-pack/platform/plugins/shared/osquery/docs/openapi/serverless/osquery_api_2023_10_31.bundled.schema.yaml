@@ -3136,6 +3136,11 @@ components:
               additionalProperties: true
               description: ECS mapping configuration used for the query.
               type: object
+            originVerified:
+              description: Set on `Workflow` rows only. Whether Kibana verified that the
+                workflow run made the request. Always `false` until workflow
+                runs can be verified.
+              type: boolean
             queriesTotal:
               description: The total number of sub-queries in the live action.
               type: integer

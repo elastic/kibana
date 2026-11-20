@@ -70,10 +70,19 @@ describe('useWorkflowOriginMetadata', () => {
       });
       expect(result.current).toEqual({
         type: 'button',
-        label: 'Started by a workflow run',
+        label: 'Started by a workflow run (unverified)',
         href: '/app/workflows/executions?executionId=a4cfc2a2-48d3-47f4-a4f7-c71da8f8d488',
         'data-test-subj': 'liveQueryDetailsWorkflowRunLink',
       });
+    });
+
+    it('should drop the unverified marker once the run is verified', () => {
+      mockServices();
+      const { result } = renderHook(() =>
+        useWorkflowOriginMetadata({ type: 'workflow', run_id: 'run-1', verified: true })
+      );
+
+      expect(result.current).toMatchObject({ type: 'button', label: 'Started by a workflow run' });
     });
 
     it('should URL-encode the run ID in the link', () => {
@@ -94,7 +103,7 @@ describe('useWorkflowOriginMetadata', () => {
       expect(getUrlForApp).not.toHaveBeenCalled();
       expect(result.current).toEqual({
         type: 'text',
-        label: 'Workflow run',
+        label: 'Workflow run (unverified)',
         value: 'a4cfc2a2-48d3-47f4-a4f7-c71da8f8d488',
         'data-test-subj': 'liveQueryDetailsWorkflowRun',
       });

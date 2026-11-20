@@ -177,6 +177,15 @@ export const LiveHistoryRow = lazySchema(() =>
           'Whether the live query was run manually, by a rule, or by a workflow. `Workflow` comes from an unverified request header and is for display only.'
         ),
       /**
+       * Set on `Workflow` rows only. Whether Kibana verified that the workflow run made the request. Always `false` until workflow runs can be verified.
+       */
+      originVerified: z
+        .boolean()
+        .optional()
+        .describe(
+          'Set on `Workflow` rows only. Whether Kibana verified that the workflow run made the request. Always `false` until workflow runs can be verified.'
+        ),
+      /**
        * The Fleet action ID for the live query.
        */
       actionId: z.string().optional().describe('The Fleet action ID for the live query.'),

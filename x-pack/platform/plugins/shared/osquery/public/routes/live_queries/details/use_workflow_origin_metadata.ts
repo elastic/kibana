@@ -18,21 +18,34 @@ const WORKFLOW_RUN_LABEL = i18n.translate('xpack.osquery.queryDetailsHeader.work
   defaultMessage: 'Workflow run',
 });
 
+const UNVERIFIED_WORKFLOW_RUN_LABEL = i18n.translate(
+  'xpack.osquery.queryDetailsHeader.unverifiedWorkflowRunLabel',
+  { defaultMessage: 'Workflow run (unverified)' }
+);
+
 const OPEN_WORKFLOW_RUN_LABEL = i18n.translate(
   'xpack.osquery.queryDetailsHeader.openWorkflowRunLabel',
   { defaultMessage: 'Started by a workflow run' }
+);
+
+const OPEN_UNVERIFIED_WORKFLOW_RUN_LABEL = i18n.translate(
+  'xpack.osquery.queryDetailsHeader.openUnverifiedWorkflowRunLabel',
+  { defaultMessage: 'Started by a workflow run (unverified)' }
 );
 
 /**
  * Header metadata item for a live query a workflow run started. It links to the run in the
  * Workflows Executions view, which opens a run from its ID alone (osquery stores no workflow ID).
  * Without access to the Workflows app, or with that view turned off, the run ID is shown as text.
+ * Until Kibana can verify runs (security-team#20085), anyone sending the internal-origin header
+ * can name any run, so an unverified origin says so instead of reading as fact.
  */
 export const useWorkflowOriginMetadata = (
   origin: LiveQueryDetailsItem['origin']
 ): AppHeaderMetadataItem | undefined => {
   const { application, settings } = useKibana().services;
   const runId = origin?.type === 'workflow' ? origin.run_id : undefined;
+  const isVerified = origin?.verified === true;
   const canOpenWorkflows = !!application.capabilities.navLinks?.[WORKFLOWS_APP_ID];
   const isExecutionsViewEnabled =
     settings?.globalClient?.get<boolean>(
@@ -48,7 +61,7 @@ export const useWorkflowOriginMetadata = (
     if (canOpenWorkflows && isExecutionsViewEnabled) {
       return {
         type: 'button',
-        label: OPEN_WORKFLOW_RUN_LABEL,
+        label: isVerified ? OPEN_WORKFLOW_RUN_LABEL : OPEN_UNVERIFIED_WORKFLOW_RUN_LABEL,
         href: application.getUrlForApp(WORKFLOWS_APP_ID, {
           path: `/executions?executionId=${encodeURIComponent(runId)}`,
         }),
@@ -58,9 +71,9 @@ export const useWorkflowOriginMetadata = (
 
     return {
       type: 'text',
-      label: WORKFLOW_RUN_LABEL,
+      label: isVerified ? WORKFLOW_RUN_LABEL : UNVERIFIED_WORKFLOW_RUN_LABEL,
       value: runId,
       'data-test-subj': 'liveQueryDetailsWorkflowRun',
     };
-  }, [application, canOpenWorkflows, isExecutionsViewEnabled, runId]);
+  }, [application, canOpenWorkflows, isExecutionsViewEnabled, isVerified, runId]);
 };

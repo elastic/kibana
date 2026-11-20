@@ -155,6 +155,25 @@ describe('mapLiveHitToRow', () => {
     ).toBe('Workflow');
   });
 
+  test.each([
+    [false, false],
+    [undefined, false],
+    [true, true],
+  ])('sets originVerified to %p → %p on Workflow rows', (verified, expected) => {
+    const row = mapLiveHitToRow({
+      _source: { origin: { type: 'workflow', run_id: 'run-1', verified } },
+    });
+
+    expect(row.originVerified).toBe(expected);
+  });
+
+  test('leaves originVerified unset on Live and Rule rows', () => {
+    expect(mapLiveHitToRow({ _source: {} })).not.toHaveProperty('originVerified');
+    expect(mapLiveHitToRow({ _source: { alert_ids: ['alert-1'] } })).not.toHaveProperty(
+      'originVerified'
+    );
+  });
+
   test('sets empty queryText for pack queries (multiple queries)', () => {
     const hit = {
       _source: {

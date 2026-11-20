@@ -26,6 +26,8 @@ interface UnifiedHistoryRowBase {
 export interface LiveHistoryRow extends UnifiedHistoryRowBase {
   sourceType: 'live';
   source: 'Live' | 'Rule' | 'Workflow';
+  /** Set on `Workflow` rows only: whether Kibana verified that the run made the request. */
+  originVerified?: boolean;
   actionId?: string;
   userId?: string;
   userProfileUid?: string;

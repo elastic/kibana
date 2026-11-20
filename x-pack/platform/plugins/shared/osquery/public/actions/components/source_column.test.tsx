@@ -19,4 +19,35 @@ describe('SourceBadge', () => {
       expect(screen.getByText(source)).toBeInTheDocument();
     }
   );
+
+  describe('workflow verification', () => {
+    it('should mark an unverified Workflow source', () => {
+      render(<SourceBadge source="Workflow" originVerified={false} />);
+
+      expect(screen.getByText('Workflow')).toBeInTheDocument();
+      expect(screen.getByTestId('sourceBadgeWorkflowUnverified')).toBeInTheDocument();
+    });
+
+    it('should treat a Workflow source without a verification flag as unverified', () => {
+      render(<SourceBadge source="Workflow" />);
+
+      expect(screen.getByTestId('sourceBadgeWorkflowUnverified')).toBeInTheDocument();
+    });
+
+    it('should not mark a verified Workflow source', () => {
+      render(<SourceBadge source="Workflow" originVerified />);
+
+      expect(screen.getByText('Workflow')).toBeInTheDocument();
+      expect(screen.queryByTestId('sourceBadgeWorkflowUnverified')).not.toBeInTheDocument();
+    });
+
+    it.each<UnifiedHistorySource>(['Live', 'Rule', 'Scheduled'])(
+      'should not mark the %s source',
+      (source) => {
+        render(<SourceBadge source={source} />);
+
+        expect(screen.queryByTestId('sourceBadgeWorkflowUnverified')).not.toBeInTheDocument();
+      }
+    );
+  });
 });

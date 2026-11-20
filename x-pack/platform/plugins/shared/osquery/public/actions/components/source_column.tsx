@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UnifiedHistorySource } from '../../../common/api/unified_history/types';
 
@@ -25,13 +25,45 @@ const SOURCE_LABELS: Record<UnifiedHistorySource, string> = {
   }),
 };
 
+export const UNVERIFIED_WORKFLOW_TOOLTIP = i18n.translate(
+  'xpack.osquery.liveQueryActions.table.sourceColumn.workflowUnverifiedTooltip',
+  {
+    defaultMessage:
+      'Not verified. The request named a workflow run, but Kibana cannot yet confirm that the run sent it.',
+  }
+);
+
+const UNVERIFIED_ICON_PROPS = { 'data-test-subj': 'sourceBadgeWorkflowUnverified' };
+
 interface SourceBadgeProps {
   source: UnifiedHistorySource;
+  /** Only read for `Workflow`: whether Kibana verified the run made the request. */
+  originVerified?: boolean;
 }
 
-const SourceBadgeComponent: React.FC<SourceBadgeProps> = ({ source }) => (
-  <EuiText size="s">{SOURCE_LABELS[source]}</EuiText>
-);
+const SourceBadgeComponent: React.FC<SourceBadgeProps> = ({ source, originVerified }) => {
+  if (source === 'Workflow' && !originVerified) {
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">{SOURCE_LABELS[source]}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            type="question"
+            color="subdued"
+            size="s"
+            content={UNVERIFIED_WORKFLOW_TOOLTIP}
+            aria-label={UNVERIFIED_WORKFLOW_TOOLTIP}
+            iconProps={UNVERIFIED_ICON_PROPS}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  return <EuiText size="s">{SOURCE_LABELS[source]}</EuiText>;
+};
 
 SourceBadgeComponent.displayName = 'SourceBadge';
 
