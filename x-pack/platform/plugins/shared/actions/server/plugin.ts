@@ -84,6 +84,7 @@ import { getActionsConfigurationUtilities } from './actions_config';
 import { defineRoutes } from './routes';
 import { setupInboundEvents, type ConnectorEventEmitter } from './inbound';
 import { registerConnectorEventTopics } from './inbound/register_connector_event_topics';
+import { setConnectorEventPublisher } from './inbound/publish_connector_event';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   initializeOAuthStateCleanupTask,
@@ -328,6 +329,8 @@ export class ActionsPlugin
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
   private connectorLifecycleListeners: ConnectorLifecycleListener[] = [];
   private connectorEventEmitter?: ConnectorEventEmitter;
+  /** Topics registered in setup. `start` publishes with this map. */
+  private connectorEventTopicsByEventId?: ReturnType<typeof registerConnectorEventTopics>;
   private skippedPreconfiguredConnectorIds: Set<string> = new Set();
   // Process-wide: a warm client must outlive a single action, and the per-action context is
   // discarded when the action returns, so the plugin instance owns the pool.
@@ -531,7 +534,7 @@ export class ActionsPlugin
       getConnectorEventEmitter: () => this.connectorEventEmitter,
     });
     if (actionsConfigUtils.isInboundEventsEnabled()) {
-      registerConnectorEventTopics((topic) => {
+      this.connectorEventTopicsByEventId = registerConnectorEventTopics((topic) => {
         core.pubsub.registerTopic(topic);
       });
     }
@@ -635,6 +638,11 @@ export class ActionsPlugin
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
+    setConnectorEventPublisher({
+      pubsub: core.pubsub,
+      logger: this.logger,
+      topics: this.connectorEventTopicsByEventId ?? new Map(),
+    });
     this.securityStart = plugins.security;
     if (this.actionsConfig.relay?.uiam?.enabled && !plugins.security?.authc.systemIdentity) {
       this.logger.warn(
@@ -1278,6 +1286,7 @@ export class ActionsPlugin
   };
 
   public stop() {
+    setConnectorEventPublisher(undefined);
     this.connectorCatalogFeatureFlagSubscription?.unsubscribe();
     this.connectorCatalogFeatureFlagSubscription = undefined;
     if (this.licenseState) {

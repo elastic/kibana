@@ -48,6 +48,7 @@ import {
 import { LeasePool } from './lib';
 import { defaultInboundEventsLimitConfigs } from './config';
 import { registerConnectorEventTopics } from './inbound/register_connector_event_topics';
+import { setConnectorEventPublisher } from './inbound/publish_connector_event';
 
 function getConfig(overrides = {}) {
   return {
@@ -119,6 +120,10 @@ const casesConnectorType = getConnectorType({
 });
 
 describe('Actions Plugin', () => {
+  afterEach(() => {
+    setConnectorEventPublisher(undefined);
+  });
+
   describe('setup()', () => {
     let context: PluginInitializerContext;
     let plugin: ActionsPlugin;
