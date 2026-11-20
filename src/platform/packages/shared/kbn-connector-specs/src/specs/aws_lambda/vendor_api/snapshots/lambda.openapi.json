@@ -1,6 +1,28 @@
 {
   "components": {
     "schemas": {
+      "AcceleratorConfig": {
+        "properties": {
+          "AcceleratorMemorySize": {
+            "$ref": "#/components/schemas/AcceleratorMemoryGB"
+          }
+        },
+        "required": [
+          "AcceleratorMemorySize"
+        ],
+        "type": "object"
+      },
+      "AcceleratorMemoryGB": {
+        "enum": [
+          3,
+          6,
+          12,
+          16,
+          24,
+          48
+        ],
+        "type": "integer"
+      },
       "ApplicationLogLevel": {
         "enum": [
           "TRACE",
@@ -338,6 +360,9 @@
       },
       "FunctionConfiguration": {
         "properties": {
+          "AcceleratorConfig": {
+            "$ref": "#/components/schemas/AcceleratorConfig"
+          },
           "Architectures": {
             "items": {
               "$ref": "#/components/schemas/Architecture"
@@ -463,6 +488,9 @@
           "Runtime": {
             "$ref": "#/components/schemas/Runtime"
           },
+          "RuntimeConfig": {
+            "$ref": "#/components/schemas/FunctionRuntimeConfig"
+          },
           "RuntimeVersionConfig": {
             "$ref": "#/components/schemas/RuntimeVersionConfig"
           },
@@ -512,6 +540,26 @@
             "$ref": "#/components/schemas/VpcConfigResponse"
           }
         },
+        "type": "object"
+      },
+      "FunctionRuntimeConfig": {
+        "properties": {
+          "RuntimeAlias": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "RuntimeArn": {
+            "maxLength": 2048,
+            "minLength": 48,
+            "pattern": "^arn:[a-z-]+:lambda:[a-z0-9-]+:\\d{12}:runtime/.+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "RuntimeArn",
+          "RuntimeAlias"
+        ],
         "type": "object"
       },
       "FunctionVersion": {
@@ -784,6 +832,7 @@
           "FunctionError.TooManyExtensions",
           "FunctionError.InitResourceExhausted",
           "DisallowedByVpcEncryptionControl",
+          "IncompatibleAcceleratorInstanceTypes",
           "DependencyError"
         ],
         "type": "string"
@@ -1023,9 +1072,21 @@
           "python3.15",
           "java8.al2023",
           "java11.al2023",
-          "java17.al2023"
+          "java17.al2023",
+          "custom"
         ],
         "type": "string"
+      },
+      "RuntimeAliasDeletedExceptionResponseContent": {
+        "properties": {
+          "Type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
       },
       "RuntimeVersionConfig": {
         "properties": {
@@ -1036,6 +1097,17 @@
             "maxLength": 2048,
             "minLength": 26,
             "pattern": "^((arn:(aws[a-zA-Z-]*):lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}::runtime:.+)|(arn:(aws[a-zA-Z-]*):lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:runtime/[A-Za-z0-9_.-]{1,128}/version/[A-Za-z0-9_.-]{1,128}))$",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RuntimeVersionDeletedExceptionResponseContent": {
+        "properties": {
+          "Type": {
+            "type": "string"
+          },
+          "message": {
             "type": "string"
           }
         },
@@ -1250,6 +1322,7 @@
           "FunctionError.InitResourceExhausted",
           "DisallowedByVpcEncryptionControl",
           "DrainingDurableExecutions",
+          "IncompatibleAcceleratorInstanceTypes",
           "DependencyError"
         ],
         "type": "string"
@@ -1778,6 +1851,12 @@
                     },
                     {
                       "$ref": "#/components/schemas/ResourceConflictExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RuntimeAliasDeletedExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RuntimeVersionDeletedExceptionResponseContent"
                     },
                     {
                       "$ref": "#/components/schemas/SnapStartNotReadyExceptionResponseContent"

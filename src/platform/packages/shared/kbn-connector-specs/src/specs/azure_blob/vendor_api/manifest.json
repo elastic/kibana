@@ -58,7 +58,7 @@
       "apiVersion": "2021-04-10",
       "fetchedAt": "2026-11-01T09:58:57.192Z",
       "format": "swagger",
-      "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/759a12cf1df0cefd32ecc0968a3f201b905c02e2/specification/storage/data-plane/BlobStorage/stable/2021-04-10/blob.json"
+      "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/storage/data-plane/BlobStorage/stable/2021-04-10/blob.json"
     }
   }
 }
