@@ -76,7 +76,7 @@ export const EvaluatorsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<{ notifications?: NotificationsStart }>();
   const toasts = services.notifications?.toasts;
-  const { canManage } = useEvalsPermissions();
+  const { canManage, canReview } = useEvalsPermissions();
   const { data, isLoading, error, refetch } = useEvaluators();
   const deleteEvaluator = useDeleteEvaluator();
   const [search, setSearch] = useState('');
@@ -355,6 +355,7 @@ export const EvaluatorsPage: React.FC = () => {
         <EvaluatorDetailFlyout
           evaluatorName={detailName}
           canEdit={canManage}
+          canReview={canReview}
           onEdit={() => {
             setEditor({ mode: 'edit', evaluatorName: detailName });
             setDetailName(null);

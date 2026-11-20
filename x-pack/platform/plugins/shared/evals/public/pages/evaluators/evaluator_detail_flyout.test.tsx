@@ -10,10 +10,13 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { I18nProvider } from '@kbn/i18n-react';
 import { EvaluatorDetailFlyout } from './evaluator_detail_flyout';
 import { useEvaluator } from '../../hooks/use_evaluators_api';
+import { useEvaluatorReviewAgreement } from '../../hooks/use_review_queues_api';
 
 jest.mock('../../hooks/use_evaluators_api');
+jest.mock('../../hooks/use_review_queues_api');
 
 const mockedUseEvaluator = jest.mocked(useEvaluator);
+const mockedUseAgreement = jest.mocked(useEvaluatorReviewAgreement);
 
 const JUDGE = {
   prompt: 'Rate {{{agent_response}}} against {{{expected}}}',
@@ -52,12 +55,14 @@ const renderFlyout = ({
   isLoading = false,
   error = null,
   canEdit = true,
+  canReview = false,
   onEdit = jest.fn(),
 }: {
   evaluator?: unknown;
   isLoading?: boolean;
   error?: unknown;
   canEdit?: boolean;
+  canReview?: boolean;
   onEdit?: () => void;
 } = {}) => {
   mockedUseEvaluator.mockReturnValue({
@@ -71,6 +76,7 @@ const renderFlyout = ({
       <EvaluatorDetailFlyout
         evaluatorName="tone-judge"
         canEdit={canEdit}
+        canReview={canReview}
         onEdit={onEdit}
         onClose={jest.fn()}
       />
@@ -321,6 +327,36 @@ describe('EvaluatorDetailFlyout', () => {
     fireEvent.click(screen.getByTestId('evalsEvaluatorDetailEdit'));
 
     expect(onEdit).toHaveBeenCalled();
+  });
+
+  describe('judge agreement badge', () => {
+    const agreement = {
+      data: {
+        binary: {
+          n: 54,
+          kappa: 0.71,
+          kappaInterval: { low: 0.58, high: 0.82 },
+        },
+      },
+    } as unknown as ReturnType<typeof useEvaluatorReviewAgreement>;
+
+    it('shows the agreement of the evaluator major version to a reviewer', () => {
+      mockedUseAgreement.mockReturnValue(agreement);
+      renderFlyout({ canReview: true });
+
+      expect(screen.getByTestId('evalsEvaluatorAgreementBadge')).toHaveTextContent(
+        'judge agreement: κ=0.71 [0.58, 0.82], n=54 (v1.x)'
+      );
+      expect(mockedUseAgreement).toHaveBeenCalledWith('tone-judge', '1.2.0');
+    });
+
+    it('is not requested without the review privilege', () => {
+      mockedUseAgreement.mockClear();
+      renderFlyout({ canReview: false });
+
+      expect(screen.queryByTestId('evalsEvaluatorAgreementBadge')).not.toBeInTheDocument();
+      expect(mockedUseAgreement).not.toHaveBeenCalled();
+    });
   });
 
   it('reports a failed load instead of rendering an empty shell', () => {
