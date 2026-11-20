@@ -9,6 +9,7 @@
 
 import { createContext } from 'react';
 import type { ViewMode } from '@kbn/presentation-publishing';
+import { ADD_TO_CHAT_ACTION_ID } from '../ui_actions/constants';
 
 export const EmbeddableRendererContext = createContext<
   | {
@@ -53,7 +54,7 @@ export const DEFAULT_QUICK_ACTIONS: QuickActions = {
     'CONVERT_LEGACY_MARKDOWN',
     'ACTION_FILTERS_NOTIFICATION',
     'ACTION_ESQL_NOTIFICATION',
-    'addPanelToChat',
+    ADD_TO_CHAT_ACTION_ID,
   ],
   view: [
     'clearControl',
@@ -64,6 +65,6 @@ export const DEFAULT_QUICK_ACTIONS: QuickActions = {
     'togglePanel',
     'ACTION_FILTERS_NOTIFICATION',
     'ACTION_ESQL_NOTIFICATION',
-    'addPanelToChat',
+    ADD_TO_CHAT_ACTION_ID,
   ],
 } as const;

@@ -24,12 +24,8 @@ import {
   type PendingDashboardPanelAttachment,
 } from '@kbn/agent-builder-dashboards-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
-import {
-  ADD_TO_CHAT_ACTION_ID,
-  type DashboardApi,
-  type DashboardStart,
-  type AddToChatActionContext,
-} from '@kbn/dashboard-plugin/public';
+import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
+import { ADD_TO_CHAT_ACTION_ID } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   apiHasParentApi,
@@ -38,6 +34,7 @@ import {
   apiPublishesEsql,
   apiPublishesTitle,
   getTitle,
+  type EmbeddableApiContext,
   type HasTypeDisplayName,
   type HasUniqueId,
 } from '@kbn/presentation-publishing';
@@ -108,7 +105,7 @@ const getPanelLabel = (embeddable: HasUniqueId, dashboardData: DashboardAttachme
 
 export const createAddToChatAction = (
   deps: AddToChatActionDeps
-): ActionDefinition<AddToChatActionContext> => {
+): ActionDefinition<EmbeddableApiContext> => {
   const { agentBuilder, analytics, canWriteDashboards, draftAttachmentId } = deps;
   const isCompatible = async (embeddable: unknown): Promise<boolean> => {
     if (
@@ -153,11 +150,17 @@ export const createAddToChatAction = (
         ? CUSTOM_CONTENT_EMBEDDABLE_TYPE
         : LENS_EMBEDDABLE_TYPE;
       const reportClicked = (chatState: AddToChatChatState) =>
-        reportAddToChatClicked(analytics, {
-          panel_type: panelType,
-          chat_state: chatState,
-          is_saved_dashboard: Boolean(dashboardApi.savedObjectId$.getValue()),
-        });
+        reportAddToChatClicked(
+          analytics,
+          {
+            panel_type: panelType,
+            chat_state: chatState,
+            is_saved_dashboard: Boolean(dashboardApi.savedObjectId$.getValue()),
+          },
+          chatState === 'new_conversation' || chatState === 'staged_attachment'
+            ? [DASHBOARD_ATTACHMENT_TYPE, DASHBOARD_PANEL_ATTACHMENT_TYPE]
+            : [DASHBOARD_PANEL_ATTACHMENT_TYPE]
+        );
       const buildDashboardAttachment = (
         id: string,
         origin: string | undefined

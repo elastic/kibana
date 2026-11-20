@@ -10,8 +10,8 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
   ENHANCE_DASHBOARD_ACTION_ID,
-  ADD_TO_CHAT_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
+import { ADD_TO_CHAT_ACTION_ID } from '@kbn/embeddable-plugin/public';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type {
   AgentBuilderDashboardsPluginPublicSetup,

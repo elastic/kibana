@@ -9,7 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { ActiveConversation, EmbeddableChatAccess } from '@kbn/agent-builder-browser';
-import type { Conversation } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_EVENT_TYPES, type Conversation } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -17,7 +17,8 @@ import {
   getDashboardPanelAttachmentId,
 } from '@kbn/agent-builder-dashboards-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
-import { ADD_TO_CHAT_ACTION_ID, type DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import { ADD_TO_CHAT_ACTION_ID } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { createCanvasDashboardRegistry, type IdGenerator } from '../attachment_types';
 import { DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED } from '../telemetry/event_types';
@@ -260,6 +261,10 @@ describe('createAddToChatAction', () => {
         chat_state: 'new_conversation',
         is_saved_dashboard: true,
       });
+      expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, {
+        pathway: 'dashboard_panel',
+        attachments: [DASHBOARD_ATTACHMENT_TYPE, DASHBOARD_PANEL_ATTACHMENT_TYPE],
+      });
     });
 
     it('points at the dashboard attachment linked to the open dashboard', async () => {
@@ -353,6 +358,10 @@ describe('createAddToChatAction', () => {
         DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED,
         expect.objectContaining({ chat_state: 'canvas' })
       );
+      expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, {
+        pathway: 'dashboard_panel',
+        attachments: [DASHBOARD_PANEL_ATTACHMENT_TYPE],
+      });
     });
 
     it('closes the canvas after adding the pointer so the chat input shows it', async () => {
