@@ -42,21 +42,9 @@ import {
   type HasUniqueId,
 } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { getDashboardsSkillBadge } from '../../common';
 import type { CanvasDashboard, CanvasDashboardRegistry, IdGenerator } from '../attachment_types';
 import { resolveDashboardAttachmentLink } from '../attachment_types/dashboard_integration/reconcile';
 import { reportAddToChatClicked, type AddToChatChatState } from '../telemetry';
-
-/**
- * Prefilled as a skill badge in the chat input so the user's first message loads the dashboards
- * skill. Skills are loaded by the model on request; without this the agent tends to
- * answer a panel request in chat instead of editing the panel.
- *
- * The separator is a non-breaking space: the editor is a contentEditable, where a trailing plain
- * space collapses and the caret lands against the badge. This is the same character the editor
- * inserts after a badge picked from the command menu.
- */
-export const ADD_TO_CHAT_INITIAL_MESSAGE = `${getDashboardsSkillBadge()} `;
 
 export interface AddToChatActionDeps {
   agentBuilder: Pick<
@@ -216,8 +204,6 @@ export const createAddToChatAction = (
         agentBuilder.openChat({
           newConversation: true,
           sessionTag: 'dashboard',
-          initialMessage: ADD_TO_CHAT_INITIAL_MESSAGE,
-          autoSendInitialMessage: false,
           attachments: [
             buildDashboardAttachment(draftAttachmentId.current, origin),
             buildPanelPointer(draftAttachmentId.current),

@@ -42,9 +42,10 @@ export const createDashboardPanelAttachmentType = (): AttachmentTypeDefinition<
   }),
   getAgentDescription: () =>
     `A dashboard panel attachment points at one panel of a dashboard attachment in this conversation: the user is referring to that panel in the message it is attached to. It carries no configuration; its text gives the exact calls for its panel.
-- The request of the message a pointer is attached to is about that panel, even when it does not mention it: apply it to the panel through \`${dashboardTools.generateDashboard}\` (load the dashboards skill first) instead of answering with the content in chat. A message with several pointers is about all of their panels.
+- The message a pointer is attached to is about that panel, even when it does not mention it. A message with several pointers is about all of their panels. Tell from the message what the user wants:
+  - A question about the panel or its data (what it shows, why a value looks the way it does, an error): read the panel with \`${dashboardTools.pointedPanel}\` and \`action: "read"\`, then answer in chat with whichever skill fits the question. Do not change the dashboard.
+  - A change to the panel: load the dashboards skill and edit the panel in place by its panel id through \`${dashboardTools.generateDashboard}\`. Never create a new visualization attachment or add a new panel to refine a panel that already exists. After editing, render only the dashboard attachment.
 - A pointer from an earlier message does not make later messages about its panel: handle a later message on its own, unless it mentions the panel or continues the same change.
-- Edit the panel in place by its panel id. Never create a new visualization attachment or add a new panel to refine a panel that already exists. After editing, render only the dashboard attachment.
 - To show the panel itself inline in the chat, use \`${dashboardTools.pointedPanel}\` with \`action: "show"\`; never regenerate it with the visualization creation tool.
 - If the panel no longer exists, tell the user instead of recreating it.`,
   getTools: () => [dashboardTools.pointedPanel],
@@ -69,13 +70,13 @@ const formatDashboardPanelAttachment = ({
   [
     `The user is referring to the panel ${
       label ? `"${label}" ` : ''
-    }(panelId: "${panelId}", type: ${panelType}) on the dashboard attachment "${dashboardAttachmentId}" in the message this is attached to. That message's request is about this panel: apply it to the panel; do not answer with the content in chat. Later messages are about this panel only when they mention it or continue the same change.`,
-    `- Edit: call \`${
+    }(panelId: "${panelId}", type: ${panelType}) on the dashboard attachment "${dashboardAttachmentId}" in the message this is attached to. That message is about this panel: answer a question about the panel or its data, or apply a requested change to the panel. Later messages are about this panel only when they mention it or continue the same change.`,
+    `- Change it (load the dashboards skill first): call \`${
       dashboardTools.generateDashboard
     }\` with \`dashboardId: "${dashboardAttachmentId}"\` and \`panels: [{ id: "${panelId}", content: { type: ${getEditContentType(
       panelType
     )}, query: <the change> } }]\`. The tool loads the panel's current config, so do not read the dashboard attachment first.`,
-    `- Inspect (what it shows, its config or ES|QL query): call \`${dashboardTools.pointedPanel}\` with \`panel_attachment_id: "${pointerId}"\` and \`action: "read"\`.`,
+    `- Answer a question about it (what it shows, its data, config or ES|QL query): first call \`${dashboardTools.pointedPanel}\` with \`panel_attachment_id: "${pointerId}"\` and \`action: "read"\`.`,
     `- Show it inline in the chat: call \`${dashboardTools.pointedPanel}\` with \`panel_attachment_id: "${pointerId}"\` and \`action: "show"\`, and render the visualization attachment it returns.`,
     `- Copy it (duplicate, section, another dashboard): add a panel with a new id and \`content: { type: "attachment", attachment_id: "${pointerId}" }\`; the tool copies the panel verbatim.`,
     ...(panelType === CUSTOM_CONTENT_EMBEDDABLE_TYPE ? [customContentHint] : []),

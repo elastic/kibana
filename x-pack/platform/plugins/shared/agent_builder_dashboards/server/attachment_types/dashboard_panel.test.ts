@@ -77,12 +77,13 @@ describe('createDashboardPanelAttachmentType', () => {
     expect(text).toContain('type: "attachment", attachment_id: "pointer-1"');
   });
 
-  it('tells the agent to apply the request to the panel instead of answering in chat', async () => {
+  it('scopes the message to the panel for both questions and changes', async () => {
     const text = await formatPointer(pointerData);
 
-    expect(text).toContain("That message's request is about this panel");
+    expect(text).toContain('That message is about this panel');
+    expect(text).toContain('answer a question about the panel or its data');
+    expect(text).toContain('Change it (load the dashboards skill first)');
     expect(text).toContain('Later messages are about this panel only when');
-    expect(text).toContain('do not answer with the content in chat');
     expect(text).not.toContain('This is a custom panel');
   });
 
@@ -102,11 +103,13 @@ describe('createDashboardPanelAttachmentType', () => {
     expect(text).not.toContain('""');
   });
 
-  it('describes the pointer as a reference that must be edited through the dashboard', () => {
+  it('routes questions to a read and changes through the dashboard', () => {
     const description = createDashboardPanelAttachmentType().getAgentDescription?.() ?? '';
 
+    expect(description).toContain('A question about the panel or its data');
+    expect(description).toContain('Do not change the dashboard');
     expect(description).toContain(dashboardTools.generateDashboard);
-    expect(description).toContain('Edit the panel in place by its panel id');
+    expect(description).toContain('edit the panel in place by its panel id');
     expect(description).toContain('A pointer from an earlier message does not make later messages');
     expect(description).toContain('Never create a new visualization attachment');
   });

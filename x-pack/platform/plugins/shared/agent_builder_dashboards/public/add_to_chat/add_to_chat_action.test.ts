@@ -21,11 +21,7 @@ import { ADD_TO_CHAT_ACTION_ID, type DashboardApi } from '@kbn/dashboard-plugin/
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { createCanvasDashboardRegistry, type IdGenerator } from '../attachment_types';
 import { DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED } from '../telemetry/event_types';
-import {
-  createAddToChatAction,
-  ADD_TO_CHAT_INITIAL_MESSAGE,
-  type AddToChatActionDeps,
-} from './add_to_chat_action';
+import { createAddToChatAction, type AddToChatActionDeps } from './add_to_chat_action';
 
 const DRAFT_ID = 'draft-attachment-id';
 const pointerId = (dashboardAttachmentId: string) =>
@@ -154,10 +150,6 @@ describe('createAddToChatAction', () => {
     expect(createAction().action.id).toBe(ADD_TO_CHAT_ACTION_ID);
   });
 
-  it('prefills the input with the dashboards skill badge and a caret-able separator', () => {
-    expect(ADD_TO_CHAT_INITIAL_MESSAGE).toBe('[/dashboards](skill://dashboards) ');
-  });
-
   describe('isCompatible', () => {
     it('accepts an ES|QL Lens panel of the dashboard open in the app, in edit mode', async () => {
       const { action, dashboardApi } = createAction();
@@ -254,8 +246,6 @@ describe('createAddToChatAction', () => {
       expect(openChat).toHaveBeenCalledWith({
         newConversation: true,
         sessionTag: 'dashboard',
-        initialMessage: ADD_TO_CHAT_INITIAL_MESSAGE,
-        autoSendInitialMessage: false,
         attachments: [
           expect.objectContaining({
             id: DRAFT_ID,
