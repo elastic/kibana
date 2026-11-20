@@ -24,7 +24,11 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_DOCTOR_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
 } from '../../constants';
-import { RuleCoverageWorkerExtras, RuleTuningWorkerExtras } from '../schemas';
+import {
+  RuleCoverageWorkerExtras,
+  RuleDoctorWorkerExtras,
+  RuleTuningWorkerExtras,
+} from '../schemas';
 import type { WorkerSettingsDeclaration } from './types';
 
 const RULE_TUNING_EXTRAS_DEFAULTS = RULE_TUNING_WORKER_SETTINGS_DEFAULTS.extras.defaultValue;
@@ -76,8 +80,13 @@ export const RULE_COVERAGE_SETTINGS: WorkerSettingsDeclaration<RuleCoverageWorke
   extras: { schema: RuleCoverageWorkerExtras, defaultValue: RULE_COVERAGE_DEFAULT_EXTRAS },
 };
 
-export const RULE_DOCTOR_SETTINGS: WorkerSettingsDeclaration = {
+export const RULE_DOCTOR_DEFAULT_EXTRAS: RuleDoctorWorkerExtras = {
+  ...RULE_DOCTOR_WORKER_SETTINGS_DEFAULTS.extras.defaultValue,
+};
+
+export const RULE_DOCTOR_SETTINGS: WorkerSettingsDeclaration<RuleDoctorWorkerExtras> = {
   workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_DOCTOR_ID,
   allowedAutonomyLevels: RULE_DOCTOR_WORKER_SETTINGS_DEFAULTS.allowedAutonomyLevels,
   scheduleInterval: RULE_DOCTOR_WORKER_SETTINGS_DEFAULTS.scheduleInterval,
+  extras: { schema: RuleDoctorWorkerExtras, defaultValue: RULE_DOCTOR_DEFAULT_EXTRAS },
 };

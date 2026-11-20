@@ -80,9 +80,10 @@ export const RULE_TUNING_WORKER_SETTINGS_DEFAULTS = {
 } as const satisfies WorkerSettingsDefaults;
 
 export const RULE_DOCTOR_WORKER_SETTINGS_DEFAULTS = {
-  // Every fix waits for an analyst, so there is no level that skips the gate yet.
-  allowedAutonomyLevels: ['manual'],
+  // Manual asks before each review. Both levels hold every fix for an analyst.
+  allowedAutonomyLevels: REVIEW_GATED_AUTONOMY_LEVELS,
   scheduleInterval: { defaultValue: '1h' },
+  extras: { defaultValue: { ruleOutcomes: 'failed_and_warning' } },
 } as const satisfies WorkerSettingsDefaults;
 
 export const RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS = {

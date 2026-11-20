@@ -1187,13 +1187,15 @@ describe('detection rule workflows', () => {
         const [trigger] = yaml.triggers as unknown as Array<{
           inputs: { properties: { actionInput: { properties: Record<string, unknown> } } };
         }>;
+        // The `doctored_` keys tag a Rule Doctor proposal and are never patched onto the rule.
         const editable = Object.keys(trigger.inputs.properties.actionInput.properties).filter(
-          (key) => key !== 'expected_revision'
+          (key) => key !== 'expected_revision' && !key.startsWith('doctored_')
         );
         const patch = String(patchStep.with?.patch);
 
         expect(patch).toMatch(/^\$\{\{ inputs\.actionInput \| pick: /);
         expect(patch).not.toContain('expected_revision');
+        expect(patch).not.toContain('doctored_');
         for (const key of editable) {
           expect(patch).toContain(`'${key}'`);
         }

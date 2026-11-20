@@ -14,8 +14,8 @@ import {
   upgradeStoredWorkerSettings,
 } from './worker_settings_defaults';
 import {
-  renderScheduledWorkerYaml,
-  type ScheduledWorkerTemplateValues,
+  renderRuleDoctorWorkerYaml,
+  type RuleDoctorWorkerTemplateValues,
 } from './worker_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
@@ -27,10 +27,10 @@ export const ALERTZERO_WORKER_DETECTION_RULE_DOCTOR_WORKFLOW = {
   id: ALERTZERO_WORKER_DETECTION_RULE_DOCTOR_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
-  yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
-    renderScheduledWorkerYaml(
+  version: 3,
+  yamlTemplate: (values: RuleDoctorWorkerTemplateValues): string =>
+    renderRuleDoctorWorkerYaml(
       DETECTION_RULE_DOCTOR_YAML,
       upgradeStoredWorkerSettings(RULE_DOCTOR_WORKER_SETTINGS_DEFAULTS, values)
     ),
-} as const satisfies ManagedWorkflowDefinition<ScheduledWorkerTemplateValues>;
+} as const satisfies ManagedWorkflowDefinition<RuleDoctorWorkerTemplateValues>;

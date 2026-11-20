@@ -314,6 +314,90 @@ describe('rule doctor review', () => {
     });
   });
 
+  describe('entry gate', () => {
+    const gate = review.step('entry_gate') as YamlStep & { condition: string };
+    const asks = (level?: string) =>
+      render(gate.condition.replace(/^\$/, ''), {
+        inputs: { autonomy_level: level },
+        steps: { create_investigation: { output: { conversation_id: 'c' } } },
+      });
+
+    it('asks before the review in manual mode, and when no level is given', () => {
+      expect(asks('manual')).toBe('true');
+      expect(asks()).toBe('true');
+    });
+
+    it('goes straight to the diagnosis in assisted mode', () => {
+      expect(asks('assisted')).toBe('false');
+    });
+
+    it('asks before the agent runs', () => {
+      const names = review.definition.steps.map(({ name }) => name);
+      expect(names.indexOf('entry_gate')).toBeLessThan(names.indexOf('diagnose_rule'));
+      expect(names.indexOf('entry_gate')).toBeGreaterThan(names.indexOf('create_investigation'));
+    });
+
+    it('names the rule and its error, and changes nothing by itself', () => {
+      const inputs = review.step('propose_entry').with?.inputs as Record<string, any>;
+      expect(inputs.actionWorkflowId).toBeUndefined();
+      expect(inputs.actionInput).toEqual({
+        doctored_rule_id: '{{ inputs.rule_uuid }}',
+        doctored_gate: 'entry',
+      });
+      const comment = render(inputs.comment, {
+        consts,
+        inputs: { rule_uuid: 'rule-1' },
+        workflow: { spaceId: 'default' },
+        steps: {
+          fetch_rule: { output: { name: 'My rule' } },
+          describe_symptom: { output: { text: 'Every run fails.' } },
+          classify: { output: { message: 'parsing_exception', warned: false } },
+        },
+      });
+      expect(comment).toContain('[My rule](/s/default/app/security/rules/id/rule-1)');
+      expect(comment).toContain('Last run error:');
+      expect(comment).toContain('parsing_exception');
+      expect(comment).toContain('leaves this rule alone for 30 days');
+    });
+
+    it.each([
+      ['dismissed', 'dismissed'],
+      ['approved', ''],
+      ['', 'expired'],
+    ])('maps a %s decision', (decision, expected) => {
+      const expression = (review.step('entry_decision') as YamlStep & { expression: string })
+        .expression;
+      expect(render(expression, { steps: { propose_entry: { output: { decision } } } })).toBe(
+        expected
+      );
+    });
+
+    it('stops the run without a diagnosis when the review is declined or unanswered', () => {
+      for (const name of ['stop_declined', 'stop_expired']) {
+        expect(review.step(name).type).toBe('workflow.output');
+      }
+      expect(review.step('post_entry_declined').with?.message).toContain('Review declined');
+    });
+
+    it('pauses a rule whose review was declined, whatever the reason', () => {
+      const declined = {
+        decidedAt: new Date().toISOString(),
+        dismissReason: 'no_reason',
+        title: 'Review broken rule',
+        actionInput: { doctored_rule_id: 'rule-1', doctored_gate: 'entry' },
+      };
+      const recall = (field: string) =>
+        render(review.step('recall_decisions').with?.[field], {
+          consts,
+          inputs: { rule_uuid: 'rule-1' },
+          steps: { past_proposals: { output: { proposals: [declined] } } },
+        });
+      expect(recall('paused_until')).not.toBe('');
+      // It was never a fix, so it is not listed as a dismissed one.
+      expect(recall('dismissed')).toBe('');
+    });
+  });
+
   describe('collect_facts', () => {
     it('reports whether each related integration is installed and on a policy', () => {
       const integrations = render(review.step('collect_facts').with?.integrations, {
@@ -858,7 +942,12 @@ describe('rule doctor review', () => {
 describe('rule doctor worker', () => {
   describe('resolve_failing_rules', () => {
     // Ids starting with "w" warned; the rest failed.
-    const ids = (ruleIds: string[], activeIds: string[], maxRules: number) =>
+    const ids = (
+      ruleIds: string[],
+      activeIds: string[],
+      maxRules: number,
+      pausedIds: string[] = []
+    ) =>
       render(worker.step('resolve_failing_rules').with?.ids, {
         steps: {
           list_failing_rules: {
@@ -872,6 +961,7 @@ describe('rule doctor worker', () => {
             },
           },
           collect_active_rules: { output: { keys: `,${activeIds.join(',')},` } },
+          collect_paused_rules: { output: { keys: `,${pausedIds.join(',')},` } },
           resolve_settings: { output: { max_rules: maxRules } },
         },
       });
@@ -894,6 +984,97 @@ describe('rule doctor worker', () => {
 
     it('fills the limit with failed rules before warnings', () => {
       expect(ids(['w1', 'a', 'w2', 'b'], [], 3)).toBe(',a,b,w1');
+    });
+
+    // A paused review exits at once, so its slot would be wasted on every sweep.
+    it('gives a paused rule no slot, so it cannot block a warning', () => {
+      expect(ids(['a', 'b', 'w1'], [], 2, ['a', 'b'])).toBe(',w1');
+    });
+  });
+
+  describe('collect_paused_rules', () => {
+    const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString();
+    const keys = (proposals: unknown[]) =>
+      render(worker.step('collect_paused_rules').with?.keys, {
+        consts: worker.definition.consts,
+        steps: { list_dismissed: { output: { proposals } } },
+      });
+    const dismissed = (rule: string, dismissReason: string, days = 1) => ({
+      dismissReason,
+      decidedAt: daysAgo(days),
+      actionInput: { doctored_rule_id: rule },
+    });
+
+    it('pauses rules dismissed as an accepted risk or handled elsewhere', () => {
+      const proposals = [dismissed('a', 'risk_accepted'), dismissed('b', 'handled_elsewhere')];
+      expect(keys(proposals)).toBe(',a,b,');
+    });
+
+    it('leaves other dismissals, old pauses and other workers alone', () => {
+      const proposals = [
+        dismissed('a', 'other'),
+        dismissed('b', 'risk_accepted', 31),
+        { dismissReason: 'risk_accepted', decidedAt: daysAgo(1), actionInput: { id: 'c' } },
+      ];
+      expect(keys(proposals)).toBe(',');
+    });
+
+    it('pauses a rule whose review was declined at the entry gate', () => {
+      const declined = {
+        dismissReason: 'no_reason',
+        decidedAt: daysAgo(1),
+        actionInput: { doctored_rule_id: 'a', doctored_gate: 'entry' },
+      };
+      expect(keys([declined])).toBe(',a,');
+    });
+
+    it('pauses nothing when the proposals could not be read', () => {
+      expect(keys([])).toBe(',');
+      expect(worker.step('list_dismissed')).toMatchObject({ 'on-failure': { continue: true } });
+    });
+
+    it('holds the same pause as the review', () => {
+      const { pause_reasons: reasons, pause_seconds: seconds } = worker.definition.consts;
+      expect(review.definition.consts).toMatchObject({
+        pause_reasons: reasons,
+        pause_seconds: seconds,
+      });
+    });
+
+    it('skips the freshness check for a paused rule', () => {
+      const active = render(
+        (worker.step('prepare_check').with?.active as string).replace(/^\$/, ''),
+        {
+          foreach: { item: { id: 'a' } },
+          steps: {
+            collect_active_rules: { output: { keys: ',' } },
+            collect_paused_rules: { output: { keys: ',a,' } },
+          },
+        }
+      );
+      expect(active).toBe('true');
+    });
+  });
+
+  describe('rule outcomes', () => {
+    const filter = (outcomes?: string) =>
+      render(worker.step('render_settings').with?.outcome_filter, {
+        consts: worker.definition.consts,
+        inputs: { rule_outcomes: outcomes },
+      });
+
+    it.each([
+      [undefined, '("failed" or "warning")'],
+      ['failed_and_warning', '("failed" or "warning")'],
+      ['failed', '"failed"'],
+      ['warning', '"warning"'],
+    ])('reviews %s rules', (outcomes, expected) => {
+      expect(filter(outcomes)).toBe(expected);
+    });
+
+    it('filters the rule list by the chosen outcomes', () => {
+      const query = worker.step('list_failing_rules').with?.query as Record<string, string>;
+      expect(query.filter).toContain('{{ steps.render_settings.output.outcome_filter }}');
     });
   });
 
@@ -934,6 +1115,16 @@ describe('rule doctor worker', () => {
     for (const name of ['run_failing_review', 'run_stale_review']) {
       expect(worker.step(name).with?.['workflow-id']).toBe(
         ALERTZERO_RULE_DOCTOR_REVIEW_WORKFLOW.id
+      );
+    }
+  });
+
+  it('forwards the autonomy level to every review, manual by default', () => {
+    for (const name of ['run_failing_review', 'run_stale_review']) {
+      const inputs = worker.step(name).with?.inputs as Record<string, string>;
+      expect(render(inputs.autonomy_level, { inputs: {} })).toBe('manual');
+      expect(render(inputs.autonomy_level, { inputs: { autonomy_level: 'assisted' } })).toBe(
+        'assisted'
       );
     }
   });

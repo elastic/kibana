@@ -367,7 +367,8 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   },
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_DOCTOR_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.ruleDoctor.intro', {
-      defaultMessage: 'Every fix to a rule waits for your approval.',
+      defaultMessage:
+        'Select whether this Worker diagnoses a broken rule on its own. Every fix to a rule always waits for your approval.',
     }),
     levels: [
       {
@@ -376,12 +377,29 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
           {
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.ruleDoctor.manual.workerValue',
-              '<worker> diagnoses each broken rule and checks its fix in a preview.'
+              '<worker> finds rules whose last run failed or warned, or whose data stopped arriving.'
             ),
           },
           {
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.ruleDoctor.manual.youValue',
+              '<you> approve before the Worker diagnoses a rule, and approve or decline each proposed fix.'
+            ),
+          },
+        ],
+      },
+      {
+        level: 'assisted',
+        facts: [
+          {
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleDoctor.assisted.workerValue',
+              '<worker> diagnoses each broken rule and checks its fix in a preview.'
+            ),
+          },
+          {
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleDoctor.assisted.youValue',
               '<you> approve or decline each proposed fix.'
             ),
           },

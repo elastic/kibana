@@ -153,7 +153,10 @@
       "defaults": {
         "workerId": "system-security-detection-rule-doctor",
         "autonomy": "manual",
-        "scheduleInterval": "1h"
+        "scheduleInterval": "1h",
+        "extras": {
+          "ruleOutcomes": "failed_and_warning"
+        }
       },
       "schema": {
         "kind": "object",
@@ -167,7 +170,8 @@
             "kind": "leaf",
             "type": "string",
             "enum": [
-              "manual"
+              "manual",
+              "assisted"
             ]
           },
           "scheduleInterval": {
@@ -175,6 +179,24 @@
             "type": "string",
             "maxLength": 6,
             "pattern": "^[1-9][0-9]*[mhd]$"
+          },
+          "extras": {
+            "kind": "object",
+            "fields": {
+              "ruleOutcomes": {
+                "kind": "leaf",
+                "type": "string",
+                "enum": [
+                  "failed_and_warning",
+                  "failed",
+                  "warning"
+                ]
+              }
+            },
+            "required": [
+              "ruleOutcomes"
+            ],
+            "additionalProperties": false
           },
           "serviceAccountId": {
             "kind": "leaf",
@@ -185,6 +207,7 @@
         },
         "required": [
           "autonomy",
+          "extras",
           "scheduleInterval",
           "workerId"
         ],

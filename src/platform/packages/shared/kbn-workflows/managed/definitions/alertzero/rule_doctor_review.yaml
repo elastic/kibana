@@ -2,7 +2,8 @@ version: "1"
 name: Detection Rule Doctor Review
 description: >
   Diagnoses one broken detection rule, proves a fix with rule preview, and records
-  it as a proposal on a new investigation. On approval the proposal gate applies the
+  it as a proposal on a new investigation. In manual mode an analyst first approves
+  the review itself. On approval the proposal gate applies the
   fix, and the review checks that the rule's next run is healthy. Launched per rule
   by the rule doctor sweep.
 enabled: true
@@ -11,7 +12,9 @@ tags:
   - detection-rule-doctor
 settings:
   # This run parks in WAITING_FOR_CHILD while the gate holds the decision (72h by
-  # default) and then waits for the rule's next run, so it stays above both.
+  # default) and then waits for the rule's next run, so it stays above both. In
+  # manual mode the entry gate and the fix gate can together outlast it; the run
+  # then times out and the next sweep asks again.
   timeout: "176h"
   # Keyed per rule so a later sweep cannot open a second gate for a rule whose
   # review is still pending: the rule keeps failing until the fix is approved.
@@ -41,6 +44,15 @@ triggers:
           type: string
           maxLength: 128
           description: Execution id of the sweep that launched this review. Traceability only.
+        autonomy_level:
+          type: string
+          enum: [manual, assisted]
+          maxLength: 16
+          default: manual
+          description: >-
+            Autonomy level of the dispatching worker. With "manual", an analyst must
+            approve the review before the doctor diagnoses the rule. With both levels,
+            an analyst must approve the proposed fix.
       required:
         - rule_uuid
         - symptom
@@ -52,6 +64,8 @@ outputs:
     type: string
   - name: paused
     type: boolean
+  - name: entry_decision
+    type: string
   - name: approved
     type: boolean
   - name: healed
@@ -239,7 +253,9 @@ steps:
         {%- assign until = 0 -%}
         {%- for proposal in steps.past_proposals.output.proposals -%}
         {%- assign reason = ',' | append: proposal.dismissReason | append: ',' -%}
-        {%- if proposal.actionInput.doctored_rule_id == inputs.rule_uuid and consts.pause_reasons contains reason -%}
+        {%- assign pausing = false -%}
+        {%- if consts.pause_reasons contains reason or proposal.actionInput.doctored_gate == 'entry' -%}{%- assign pausing = true -%}{%- endif -%}
+        {%- if proposal.actionInput.doctored_rule_id == inputs.rule_uuid and pausing -%}
         {%- assign ends = proposal.decidedAt | date: "%s" | plus: consts.pause_seconds -%}
         {%- if ends > now and ends > until -%}{%- assign until = ends -%}{%- endif -%}
         {%- endif -%}
@@ -254,7 +270,7 @@ steps:
       # with ":" has no value to show, such as a manual step.
       dismissed: |-
         {%- for proposal in steps.past_proposals.output.proposals -%}
-        {%- if proposal.actionInput.doctored_rule_id == inputs.rule_uuid %}
+        {%- if proposal.actionInput.doctored_rule_id == inputs.rule_uuid and proposal.actionInput.doctored_gate != 'entry' %}
         {%- assign valued = proposal.actionInput.doctored_fix | slice: -1 %}
         - {{ proposal.decidedAt | date: "%B %-d", "UTC" }}, "{{ proposal.title }}"{% if valued != blank and valued != ':' %} (`{{ proposal.actionInput.doctored_fix | truncate: 300 }}`){% endif %}, dismissed as {{ proposal.dismissReason | default: "no_reason" }}{% if proposal.rationale != blank %}: {{ proposal.rationale | truncate: 300 }}{% endif %}
         {%- endif -%}
@@ -262,7 +278,8 @@ steps:
 
   # Cluster trouble mostly clears by itself, so it gets a review only once the rule
   # failed several runs in a row. A rule whose fix was dismissed as an accepted
-  # risk or handled elsewhere is left alone for a while. Every other cause goes ahead.
+  # risk or handled elsewhere, or whose review was declined at the entry gate, is
+  # left alone for a while. Every other cause goes ahead.
   - name: gate
     type: data.set
     if: "${{ steps.classify.output.cause != null }}"
@@ -446,6 +463,114 @@ steps:
         - {{ hit._source.updated_at | date: "%B %-d", "UTC" }}: {{ hit._source.title }}
         {%- endfor %}
         {%- endif %}
+
+  # Manual mode only: ask before any work on this rule starts. Assisted mode goes
+  # directly to the diagnosis. The proposal has no action; its tags let later
+  # sweeps find a declined review and leave the rule alone.
+  - name: entry_gate
+    type: if
+    condition: >-
+      ${{ inputs.autonomy_level != 'assisted'
+        and steps.create_investigation.output.conversation_id != null }}
+    steps:
+      - name: propose_entry
+        type: workflow.execute
+        with:
+          workflow-id: system-create-alertzero-proposal
+          run-as-mode: inherit
+          inputs:
+            conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            title: Review broken rule
+            comment: |-
+              **Review this broken rule?**
+
+              **Rule:** [{{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)
+
+              **What is wrong**
+              {{ steps.describe_symptom.output.text }}
+              {%- if steps.classify.output.message != blank %}
+
+              Last run {% if steps.classify.output.warned == true %}warning{% else %}error{% endif %}:
+              ```
+              {{ steps.classify.output.message | truncate: 1000 }}
+              ```
+              {%- endif %}
+
+              **On approval**
+              If you approve, the doctor diagnoses the rule and checks a fix in a preview. It then makes one proposal: a fix to the rule, or a manual step. You must approve this second proposal before the rule changes. If you dismiss, the doctor leaves this rule alone for {{ consts.pause_seconds | divided_by: 86400 }} days.
+            actionInput:
+              doctored_rule_id: "{{ inputs.rule_uuid }}"
+              doctored_gate: entry
+            impact: low
+            # No action, so no inherited category, and the queue drops an
+            # uncategorised proposal.
+            category: configure
+
+      # Only an approval continues to the diagnosis. An expired proposal returns
+      # an empty decision, so the expression maps it to `expired`.
+      - name: entry_decision
+        type: switch
+        expression: "{% if steps.propose_entry.output.decision == 'dismissed' %}dismissed{% elsif steps.propose_entry.output.decision != 'approved' %}expired{% endif %}"
+        cases:
+          - match: dismissed
+            steps:
+              - name: post_entry_declined
+                type: ai.conversation.add_user_message
+                on-failure:
+                  continue: true
+                with:
+                  author_name: "{{ consts.author_name }}"
+                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  message: |-
+                    **Review declined**
+                    The review was dismissed before the doctor looked at the rule, so nothing was diagnosed or changed. The doctor leaves this rule alone until {{ "now" | date: "%s" | plus: consts.pause_seconds | date: "%B %-d", "UTC" }}.
+
+              - name: close_investigation_declined
+                type: ai.conversation.metadata.patch
+                with:
+                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  updates:
+                    status: closed
+                    close_reason: other
+                on-failure:
+                  continue: true
+
+              # workflow.output ends the run.
+              - name: stop_declined
+                type: workflow.output
+                status: completed
+                with:
+                  rule_uuid: "{{ inputs.rule_uuid }}"
+                  cause: "{{ steps.classify.output.cause }}"
+                  paused: false
+                  entry_decision: dismissed
+                  approved: false
+                  healed: false
+
+          # No answer. The investigation stays open, and the next sweep asks again.
+          - match: expired
+            steps:
+              - name: post_entry_expired
+                type: ai.conversation.add_user_message
+                on-failure:
+                  continue: true
+                with:
+                  author_name: "{{ consts.author_name }}"
+                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  message: |-
+                    **No decision**
+                    Nobody answered before the proposal expired, so the doctor did not look at the rule. The next sweep asks again.
+
+              - name: stop_expired
+                type: workflow.output
+                status: completed
+                with:
+                  rule_uuid: "{{ inputs.rule_uuid }}"
+                  cause: "{{ steps.classify.output.cause }}"
+                  paused: false
+                  entry_decision: expired
+                  approved: false
+                  healed: false
 
   - name: diagnose_rule
     type: ai.agent
@@ -1792,5 +1917,7 @@ steps:
       rule_uuid: "{{ inputs.rule_uuid }}"
       cause: "{{ steps.classify.output.cause }}"
       paused: "${{ steps.gate.output.paused == true }}"
+      # `approved` when an analyst approved the entry gate. Empty in assisted mode.
+      entry_decision: "{{ steps.propose_entry.output.decision }}"
       approved: "${{ steps.record_decision.output.approved == true }}"
       healed: "${{ steps.judge_followup.output.healed == true }}"

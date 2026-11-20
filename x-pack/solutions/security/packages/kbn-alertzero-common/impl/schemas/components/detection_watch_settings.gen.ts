@@ -72,3 +72,23 @@ export const RuleCoverageWorkerExtras = lazySchema(() =>
     .strict()
 );
 export type RuleCoverageWorkerExtras = z.infer<typeof RuleCoverageWorkerExtras>;
+
+/**
+ * Which rules the Rule Doctor sweep sends for review, by the outcome of their last run. Matches the doctor sweep's rule_outcomes input.
+ */
+export const RuleOutcomes = lazySchema(() => z.enum(['failed_and_warning', 'failed', 'warning']));
+export type RuleOutcomes = z.infer<typeof RuleOutcomes>;
+export type RuleOutcomesEnum = typeof RuleOutcomes.enum;
+export const RuleOutcomesEnum = RuleOutcomes.enum;
+
+/**
+ * Complete Worker-specific settings for the Rule Doctor Worker, owned by Detection Watch. Sent whole on write. A replacement missing a field is rejected.
+ */
+export const RuleDoctorWorkerExtras = lazySchema(() =>
+  z
+    .object({
+      ruleOutcomes: RuleOutcomes,
+    })
+    .strict()
+);
+export type RuleDoctorWorkerExtras = z.infer<typeof RuleDoctorWorkerExtras>;

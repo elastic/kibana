@@ -162,3 +162,18 @@ export const renderRuleCoverageWorkerYaml = (
     '__WORKER_EXTRAS__',
     JSON.stringify(values.extras)
   );
+
+export interface RuleDoctorWorkerTemplateValues extends ScheduledWorkerTemplateValues {
+  extras: {
+    ruleOutcomes: 'failed_and_warning' | 'failed' | 'warning';
+  };
+}
+
+export const renderRuleDoctorWorkerYaml = (
+  yaml: string,
+  values: RuleDoctorWorkerTemplateValues
+): string =>
+  renderScheduledWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_EXTRAS__',
+    JSON.stringify(values.extras)
+  );

@@ -35,9 +35,22 @@ triggers:
           minimum: 0
           maximum: 200
           description: Overrides how many healthy-looking rules one sweep checks for silent source data. 0 skips the check.
+        autonomy_level:
+          type: string
+          enum: [manual, assisted]
+          maxLength: 16
+          description: "Autonomy level of the dispatching worker, forwarded to every review it starts. Default: manual."
+        rule_outcomes:
+          type: string
+          enum: [failed_and_warning, failed, warning]
+          description: >-
+            Which rules to review, by the outcome of their last run. Defaults to both,
+            failed rules first. Rules over silent source data are checked either way.
       additionalProperties: false
 outputs:
   - name: failing_rules
+    type: number
+  - name: paused_rules
     type: number
   - name: freshness_checked
     type: number
@@ -47,6 +60,11 @@ consts:
   max_rules_per_sweep: 10
   stale_after_hours: 24
   max_freshness_checks: 100
+  rule_outcomes: failed_and_warning
+  # Keep in step with the review: it holds the same pause as its own backstop.
+  pause_reasons: ",risk_accepted,handled_elsewhere,"
+  pause_seconds: 2592000
+  past_proposals_size: 100
   no_rows: []
 steps:
   # Comparison operators cannot follow a filter chain, so every threshold is
@@ -58,6 +76,12 @@ steps:
         {%- assign hours = inputs.stale_after_hours | default: consts.stale_after_hours -%}
         {%- assign window = hours | times: 3600000 -%}
         {{ 'now' | date: '%s' | times: 1000 | minus: window }}
+      outcome_filter: >-
+        {%- case inputs.rule_outcomes | default: consts.rule_outcomes -%}
+        {%- when 'failed' -%}"failed"
+        {%- when 'warning' -%}"warning"
+        {%- else -%}("failed" or "warning")
+        {%- endcase -%}
 
   - name: resolve_settings
     type: data.set
@@ -86,6 +110,42 @@ steps:
     with:
       keys: ",{{ steps.list_active_reviews.output.results | default: consts.no_rows | map: 'concurrencyGroupKey' | join: ',' | remove: 'rule-doctor-review-' }},"
 
+  # A rule whose fix was dismissed as an accepted risk or handled elsewhere, or
+  # whose review an analyst declined at the entry gate, is left alone for a while. Dropping it here keeps it from taking a review slot on every
+  # sweep. Fails open: the review checks the same pause before it does anything.
+  - name: list_dismissed
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      query:
+        origin: alertzero
+        decision: dismissed
+        order: newest
+        size: "{{ consts.past_proposals_size }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "1"
+        x-elastic-internal-origin: kibana
+    on-failure:
+      continue: true
+
+  - name: collect_paused_rules
+    type: data.set
+    with:
+      keys: >-
+        {%- assign now = "now" | date: "%s" | plus: 0 -%}
+        ,
+        {%- for proposal in steps.list_dismissed.output.proposals -%}
+        {%- assign reason = ',' | append: proposal.dismissReason | append: ',' -%}
+        {%- assign pausing = false -%}
+        {%- if consts.pause_reasons contains reason or proposal.actionInput.doctored_gate == 'entry' -%}{%- assign pausing = true -%}{%- endif -%}
+        {%- if proposal.actionInput.doctored_rule_id != blank and pausing -%}
+        {%- assign ends = proposal.decidedAt | date: "%s" | plus: consts.pause_seconds -%}
+        {%- if ends > now -%}{{ proposal.actionInput.doctored_rule_id }},{%- endif -%}
+        {%- endif -%}
+        {%- endfor -%}
+
   # Pick one: enabled rules whose last run failed or warned. The run outcome is a
   # keyword on the rule saved object, so the filter runs in Elasticsearch.
   - name: list_failing_rules
@@ -96,7 +156,7 @@ steps:
       headers:
         elastic-api-version: "2023-10-31"
       query:
-        filter: 'alert.attributes.enabled: true and alert.attributes.lastRun.outcome: ("failed" or "warning")'
+        filter: "alert.attributes.enabled: true and alert.attributes.lastRun.outcome: {{ steps.render_settings.output.outcome_filter }}"
         per_page: 100
         sort_field: updated_at
         sort_order: desc
@@ -105,6 +165,7 @@ steps:
 
   # Rendered as `,id,id` because Liquid cannot build an array otherwise. Failed rules
   # take the slots first, so a crowd of warnings cannot push out a rule that is down.
+  # Paused rules and rules with a review in flight take no slot.
   - name: resolve_failing_rules
     type: data.set
     with:
@@ -116,6 +177,7 @@ steps:
         {%- if rule.execution_summary.last_execution.status == 'failed' -%}{%- assign failed = 1 -%}{%- endif -%}
         {%- if failed != wanted -%}{%- continue -%}{%- endif -%}
         {%- assign key = ',' | append: rule.id | append: ',' -%}
+        {%- if steps.collect_paused_rules.output.keys contains key -%}{%- continue -%}{%- endif -%}
         {%- unless steps.collect_active_rules.output.keys contains key -%}
         {%- if picked < steps.resolve_settings.output.max_rules -%},{{ rule.id }}{%- assign picked = picked | plus: 1 -%}{%- endif -%}
         {%- endunless -%}
@@ -137,6 +199,7 @@ steps:
           inputs:
             rule_uuid: "{{ foreach.item }}"
             symptom: run_failed
+            autonomy_level: "{{ inputs.autonomy_level | default: 'manual' }}"
             parent_run_id: "{{ execution.id }}"
 
   # Pick two: enabled rules whose last run succeeded. A rule over a source that went
@@ -172,7 +235,9 @@ steps:
         type: data.set
         with:
           # Rule ids are uuids, so a bare id cannot match part of another key.
-          active: "${{ steps.collect_active_rules.output.keys contains foreach.item.id }}"
+          active: >-
+            ${{ steps.collect_active_rules.output.keys contains foreach.item.id
+              or steps.collect_paused_rules.output.keys contains foreach.item.id }}
           timestamp_field: "{{ foreach.item.timestamp_override | default: '@timestamp' }}"
 
       - name: latest_event
@@ -215,6 +280,7 @@ steps:
           inputs:
             rule_uuid: "{{ foreach.item.id }}"
             symptom: data_stale
+            autonomy_level: "{{ inputs.autonomy_level | default: 'manual' }}"
             last_event_at: "{{ steps.judge_freshness.output.last_event_at }}"
             parent_run_id: "{{ execution.id }}"
 
@@ -227,6 +293,7 @@ steps:
     with:
       message: "Could not list this space's rules, so no rule was checked: {{ steps.list_failing_rules.error.message }}"
       failing_rules: 0
+      paused_rules: 0
       freshness_checked: 0
       lookup_failed: "${{ steps.list_active_reviews.error != null }}"
 
@@ -235,5 +302,6 @@ steps:
     status: completed
     with:
       failing_rules: "${{ steps.list_failing_rules.output.total | default: 0 }}"
+      paused_rules: "${{ steps.collect_paused_rules.output.keys | split: ',' | uniq | size | minus: 1 | at_least: 0 }}"
       freshness_checked: "${{ steps.list_healthy_rules.output.data | default: consts.no_rows | size }}"
       lookup_failed: "${{ steps.list_active_reviews.error != null }}"

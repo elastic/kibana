@@ -148,6 +148,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     settingsVersion: 1,
     autonomyLevel: 'manual',
     scheduleInterval: '1h',
+    extras: { ruleOutcomes: 'failed_and_warning' },
   },
   [ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID]: {
     settingsVersion: 1,

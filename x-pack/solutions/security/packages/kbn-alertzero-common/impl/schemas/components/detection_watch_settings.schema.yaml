@@ -83,3 +83,25 @@ components:
           $ref: '#/components/schemas/LookbackDays'
         maxGapsPerRun:
           $ref: '#/components/schemas/MaxGapsPerRun'
+
+    RuleOutcomes:
+      type: string
+      enum:
+        - failed_and_warning
+        - failed
+        - warning
+      description: >-
+        Which rules the Rule Doctor sweep sends for review, by the outcome of their last run.
+        Matches the doctor sweep's rule_outcomes input.
+
+    RuleDoctorWorkerExtras:
+      type: object
+      additionalProperties: false
+      description: >-
+        Complete Worker-specific settings for the Rule Doctor Worker, owned by Detection Watch.
+        Sent whole on write. A replacement missing a field is rejected.
+      required:
+        - ruleOutcomes
+      properties:
+        ruleOutcomes:
+          $ref: '#/components/schemas/RuleOutcomes'

@@ -20,10 +20,13 @@ consts:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
     scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
+    extras: __WORKER_EXTRAS__
 steps:
   - name: run_rule_doctor
     type: workflow.executeAsync
     with:
       workflow-id: system-security-rule-doctor-sweep
       run-as-mode: inherit
-      inputs: {}
+      inputs:
+        autonomy_level: "{{ consts.worker_settings.autonomy }}"
+        rule_outcomes: "{{ consts.worker_settings.extras.ruleOutcomes }}"

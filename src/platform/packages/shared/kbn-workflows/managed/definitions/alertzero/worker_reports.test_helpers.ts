@@ -144,6 +144,7 @@ const WORKER_TEMPLATE_VALUES: Partial<ManagedWorkflowTemplateValuesById> = {
   },
   [ALERTZERO_WORKER_DETECTION_RULE_DOCTOR_WORKFLOW_ID]: {
     autonomyLevel: 'manual',
+    extras: { ruleOutcomes: 'failed_and_warning' },
     scheduleInterval: '1h',
     settingsVersion: 1,
   },
