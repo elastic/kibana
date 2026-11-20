@@ -171,7 +171,9 @@ export const mobilePanelDiscoverEsql = (
   filters: MobilePanelFilters,
   { bucket, environment }: { bucket: 'hour' | 'day'; environment?: string }
 ): string => {
-  const query = withEnvironment(mobilePanelQuery(filters), environment);
+  // Discover's own time filter includes the end, so `?_tend` keeps the panel's `[start, end)`.
+  const query = withEnvironment(mobilePanelQuery(filters), environment)
+    .pipe`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`;
   const sessions = mobileColumn('sessionId');
   const users = mobileColumn('installationId');
   const exceptions = mobileColumn('exceptionType');
