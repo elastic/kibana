@@ -125,10 +125,12 @@ const toExecutionStats = (stats: EsqlStats | null): ExecutionStats => {
   };
 };
 
+/** The diagnostic of one plan query; `unusableReason` is why its answer was dropped, if it was. */
 const toQueryDiagnostic = (
   { indexPattern, engine }: QueryPlan,
   { esql, params }: GeneratedQuery,
-  { outcome, wallMs }: TimedOutcome<EsqlQueryResult>
+  { outcome, wallMs }: TimedOutcome<EsqlQueryResult>,
+  unusableReason: string | null
 ): ListQueryDiagnostic => {
   const base = { indexPattern, engine, esql, params, wallMs };
   if (outcome.status === 'rejected') {
@@ -142,7 +144,13 @@ const toQueryDiagnostic = (
     };
   }
   const { stats, isPartial } = outcome.value;
-  return { ...base, ...toExecutionStats(stats), rowCount: stats.rowCount, isPartial, error: null };
+  return {
+    ...base,
+    ...toExecutionStats(stats),
+    rowCount: stats.rowCount,
+    isPartial,
+    error: unusableReason === null ? null : { status: null, reason: unusableReason },
+  };
 };
 
 const toProbeOutcome = (probe: ProbeResult): ListProbeDiagnostic['outcome'] => {
@@ -242,6 +250,7 @@ export class InventoryService {
 
     const errors: SourceError[] = [...probeErrors];
     const unavailableColumns: UnavailableColumn[] = [];
+    const unusableReasons: Array<string | null> = plans.map(() => null);
     const results = outcomes.flatMap((outcome, planIndex): PlanResult[] => {
       const plan = plans[planIndex];
       if (outcome.status === 'rejected') {
@@ -259,11 +268,9 @@ export class InventoryService {
       }
       const { usable, reason, unavailableFields } = interpretPlanResult(result, identity, columns);
       if (!usable) {
-        errors.push({
-          indexPattern: plan.indexPattern,
-          status: null,
-          reason: reason ?? 'unusable',
-        });
+        const unusableReason = reason ?? 'unusable';
+        unusableReasons[planIndex] = unusableReason;
+        errors.push({ indexPattern: plan.indexPattern, status: null, reason: unusableReason });
         return [];
       }
       unavailableColumns.push(...toUnavailableColumns(plan, unavailableFields, columns));
@@ -283,7 +290,7 @@ export class InventoryService {
       truncated,
       took: Date.now() - startedAt,
       queries: timedOutcomes.map((timed, planIndex) =>
-        toQueryDiagnostic(plans[planIndex], queries[planIndex], timed)
+        toQueryDiagnostic(plans[planIndex], queries[planIndex], timed, unusableReasons[planIndex])
       ),
       probes: [...probes].map(([indexPattern, probe]) => toProbeDiagnostic(indexPattern, probe)),
       timings: {

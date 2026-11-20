@@ -115,7 +115,10 @@ export interface ListQueryDiagnostic extends QueryExecutionStats {
   rowCount: number;
   /** Time from sending the query to its settling, in fractional milliseconds, measured by Kibana. */
   wallMs: number;
-  /** Why the query failed; null when Elasticsearch answered. */
+  /**
+   * Why the query failed, or why its answer was dropped as unusable (`status` null, the reason
+   * reported in `errors`); null otherwise. A partial answer is flagged by `isPartial` only.
+   */
   error: Pick<SourceError, 'status' | 'reason'> | null;
 }
 
