@@ -154,9 +154,13 @@ export class CoverageChain {
         );
       }
       if (TerminalExecutionStatuses.includes(execution.status)) {
+        const result = execution.stepExecutions?.find(
+          (step) =>
+            (step.stepId === 'emit_result' || step.stepId === 'emit_failure') && step.output != null
+        );
         throw new Error(
           `Coverage chain ${parentId} ended ${execution.status} without ${stepId}: ${JSON.stringify(
-            execution.error ?? coverage?.output ?? 'no child dispatched'
+            execution.error ?? coverage?.output ?? result?.output ?? 'no child dispatched'
           )}`
         );
       }

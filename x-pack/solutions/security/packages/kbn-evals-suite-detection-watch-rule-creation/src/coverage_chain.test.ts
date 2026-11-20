@@ -98,6 +98,18 @@ const stack = ({ bound = true, verdict = 'no_coverage', identity = true, enabled
           ],
         };
       if (id === 'sweep') return { status: ExecutionStatus.COMPLETED };
+      if (id === 'review' && verdict === '')
+        return {
+          id,
+          status: ExecutionStatus.COMPLETED,
+          context: { parentWorkflowExecutionId: 'sweep' },
+          stepExecutions: [
+            {
+              stepId: 'emit_result',
+              output: { check_error: 'knowledge indicator has no content', ki_invalid: true },
+            },
+          ],
+        };
       if (id === 'review')
         return {
           id,
@@ -281,6 +293,13 @@ describe('CoverageChain', () => {
     const { chain } = stack({ verdict: 'covered_enabled' });
     await expect(chain.start(input, Date.now() + 2_000, 1)).rejects.toThrow(
       'so rule creation never ran'
+    );
+  });
+
+  it('names the review result when the review ends before any check', async () => {
+    const { chain } = stack({ verdict: '' });
+    await expect(chain.start(input, Date.now() + 2_000, 1)).rejects.toThrow(
+      'knowledge indicator has no content'
     );
   });
 

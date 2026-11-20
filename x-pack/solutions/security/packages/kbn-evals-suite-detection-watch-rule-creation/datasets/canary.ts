@@ -22,7 +22,9 @@ export const canaryDataset: RuleCreationExample[] = [
     input: {
       technique: 'T1059',
       gap_description: 'Any command execution activity',
-      evidence: '',
+      // Vague but not empty: the coverage review retires an indicator with no content
+      // before the check runs, so empty evidence would never reach the gate under test.
+      evidence: 'Some command activity may have happened somewhere.',
       confidence: 0.1,
     },
     output: {
