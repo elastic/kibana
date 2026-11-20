@@ -28,7 +28,7 @@ export interface CellDetailsProps {
   timeZone?: string;
 }
 
-/** The time window, duration range and counts of one cell: the tooltip, and the keyboard's readout. */
+/** The time window, duration range and counts of a cell or region: the tooltip, and the keyboard's readout. */
 export function CellDetails({
   fromMs,
   toMs,
