@@ -7,33 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { EuiButtonEmpty, useGeneratedHtmlId } from '@elastic/eui';
-import type { ExportReferencedObjectsResponse } from '@kbn/saved-objects-management-plugin/common';
 import type { ExportShareParameters } from '@kbn/share-plugin/public';
-import { downloadFileAs, useShareTypeContext } from '@kbn/share-plugin/public';
+import { useShareTypeContext } from '@kbn/share-plugin/public';
 
-import { DASHBOARD_API_PATH, DASHBOARD_API_VERSION } from '../../../../../common/constants';
-import { coreServices } from '../../../../services/kibana_services';
 import { exportReferencedObjectsStrings as strings } from './_export_referenced_objects_strings';
 import { ExportReferencedObjectsFlyout } from './export_referenced_objects_flyout';
-
-const exportDashboards = (ids: string[]) =>
-  coreServices.http.post<ExportReferencedObjectsResponse>(`${DASHBOARD_API_PATH}/_export`, {
-    version: DASHBOARD_API_VERSION,
-    body: JSON.stringify({ ids }),
-  });
-
-const downloadExport = (filename: string, content: string) =>
-  downloadFileAs(filename, { content, type: 'application/json' });
+import { downloadExport, exportDashboards } from './export_referenced_objects_api';
 
 const ExportReferencedObjectsShareFlyout = ({ closeFlyout }: { closeFlyout: () => void }) => {
   const { objectId } = useShareTypeContext('integration', 'exportDerivatives');
   const titleId = useGeneratedHtmlId({ prefix: 'exportReferencedObjectsTitle' });
+  const dashboardIds = useMemo(() => (objectId ? [objectId] : []), [objectId]);
   return (
     <ExportReferencedObjectsFlyout
-      dashboardId={objectId}
+      dashboardIds={dashboardIds}
       titleId={titleId}
       closeFlyout={closeFlyout}
       exportDashboards={exportDashboards}

@@ -19,6 +19,7 @@ import { coreServices } from '../services/kibana_services';
 import { DashboardListing } from './dashboard_listing';
 import type { DashboardListingProps, DashboardListingTab } from './types';
 import { openImportDashboardJsonFlyout } from './import_json/open_import_dashboard_json_flyout';
+import { openExportReferencedObjectsFlyout } from './export_referenced_objects/open_export_referenced_objects_flyout';
 
 const mockAppHeader = jest.fn().mockReturnValue(null);
 jest.mock('@kbn/app-header', () => ({
@@ -38,6 +39,12 @@ jest.mock('./import_json/open_import_dashboard_json_flyout', () => ({
 }));
 
 const mockOpenImportDashboardJsonFlyout = jest.mocked(openImportDashboardJsonFlyout);
+
+jest.mock('./export_referenced_objects/open_export_referenced_objects_flyout', () => ({
+  openExportReferencedObjectsFlyout: jest.fn(),
+}));
+
+const mockOpenExportReferencedObjectsFlyout = jest.mocked(openExportReferencedObjectsFlyout);
 
 /**
  * Mock the active-tab renderer because these tests verify Dashboard listing shell wiring.
@@ -332,5 +339,83 @@ describe('dashboard import', () => {
     const currentActiveTabProps = mockActiveTab.mock.calls[mockActiveTab.mock.calls.length - 1][0];
 
     expect(currentActiveTabProps.tabs[1].load).toBe(initialLoad);
+  });
+});
+
+describe('export with referenced objects', () => {
+  const getLastExportItem = () =>
+    mockAppHeader.mock.calls[mockAppHeader.mock.calls.length - 1][0].menu.items.find(
+      (item: { testId: string }) => item.testId === 'dashboardListingExportReferencedObjectsButton'
+    );
+
+  const selectDashboards = (ids: string[]) => {
+    const dashboardTab = mockActiveTab.mock.calls[mockActiveTab.mock.calls.length - 1][0].tabs[0];
+    const element = dashboardTab.render?.() as ReactElement;
+    act(() => {
+      element.props.onSelectionChange(ids);
+    });
+  };
+
+  beforeEach(() => {
+    jest.mocked(coreServices.featureFlags.useBooleanValue).mockReturnValue(true);
+    (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
+  });
+
+  afterEach(() => {
+    jest.mocked(coreServices.featureFlags.useBooleanValue).mockReset();
+    (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
+  });
+
+  test('is in the header and disabled until dashboards are selected', () => {
+    renderDashboardListing();
+
+    expect(getLastExportItem()).toMatchObject({
+      label: 'Export with referenced objects',
+      disableButton: true,
+    });
+  });
+
+  test('exports every selected dashboard', () => {
+    renderDashboardListing();
+    selectDashboards(['sales', 'web']);
+
+    const exportItem = getLastExportItem();
+    expect(exportItem).toMatchObject({
+      label: 'Export 2 dashboards with referenced objects',
+      disableButton: false,
+    });
+
+    const returnFocus = jest.fn();
+    act(() => {
+      exportItem.run({ returnFocus });
+    });
+
+    expect(mockOpenExportReferencedObjectsFlyout).toHaveBeenCalledWith({
+      dashboardIds: ['sales', 'web'],
+      returnFocus,
+    });
+  });
+
+  test('is absent while the feature flag is off', () => {
+    jest.mocked(coreServices.featureFlags.useBooleanValue).mockReturnValue(false);
+    renderDashboardListing();
+
+    expect(getLastExportItem()).toBeUndefined();
+  });
+
+  test('is absent for users who cannot select dashboards', () => {
+    (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
+    renderDashboardListing();
+
+    expect(getLastExportItem()).toBeUndefined();
+  });
+
+  test('is absent on registered tabs, which have no dashboards to select', () => {
+    renderDashboardListing(
+      { getTabs: () => [{ id: 'annotations', title: 'Annotations', getTableList: jest.fn() }] },
+      { initialEntries: ['/list/annotations'] }
+    );
+
+    expect(getLastExportItem()).toBeUndefined();
   });
 });

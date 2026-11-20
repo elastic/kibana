@@ -62,6 +62,7 @@ export class SavedObjectsManagementPlugin
           registry: this.apiBodyRegistry,
           request,
           roots,
+          exportSizeLimit: this.context.config.legacy.get().savedObjects.maxImportExportSize,
         }),
       importReferencedObjects: ({ client, objects, mode, decisions }) =>
         importReferencedObjects({

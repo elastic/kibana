@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { render } from '@testing-library/react';
 import type { ContentListClientProviderProps } from '@kbn/content-list-provider-client';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
@@ -34,8 +34,14 @@ jest.mock('./dashboard_content_list', () => ({
 }));
 
 const mockRefetch = jest.fn();
+// The list rebuilds its items on every render, as the recently viewed decoration does.
+const mockSelectedIds = ['sales', 'web'];
 jest.mock('@kbn/content-list', () => ({
   useContentListItems: () => ({ refetch: mockRefetch }),
+  useContentListSelection: () => ({
+    selectedIds: [...mockSelectedIds],
+    selectedItems: mockSelectedIds.map((id) => ({ id, title: id })),
+  }),
 }));
 
 jest.mock('./hooks/use_dashboard_listing_table', () => ({
@@ -142,4 +148,34 @@ test('refetches the list only after the import signal changes', () => {
   rerender(renderTab(true));
 
   expect(mockRefetch).toHaveBeenCalledTimes(1);
+});
+
+test('reports the selected dashboards once while the selection is unchanged', () => {
+  const onSelectionChange = jest.fn();
+  // Re-renders the tab on every report, as the listing does when it stores the selection.
+  const Listing = () => {
+    const [, setSelectedIds] = useState<string[]>([]);
+    const [tab] = toContentListPageTabs(
+      [{ id: DASHBOARD_APP_ID, title: 'Dashboards', getTableList: jest.fn() }],
+      {
+        goToDashboard: jest.fn(),
+        getDashboardUrl: jest.fn(),
+        onSelectionChange: (ids) => {
+          onSelectionChange(ids);
+          setSelectedIds(ids);
+        },
+        parentProps: {
+          onFetchSuccess: jest.fn(),
+          setPageDataTestSubject: jest.fn(),
+          showCreateButton: false,
+        },
+      }
+    );
+    return <>{tab.render?.()}</>;
+  };
+
+  render(<Listing />);
+
+  expect(onSelectionChange).toHaveBeenCalledTimes(1);
+  expect(onSelectionChange).toHaveBeenCalledWith(['sales', 'web']);
 });

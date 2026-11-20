@@ -9,7 +9,8 @@
 
 import { registerRoutesMock } from './plugin.test.mocks';
 import { SavedObjectsManagementPlugin } from './plugin';
-import { coreMock } from '@kbn/core/server/mocks';
+import { Readable } from 'stream';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { z } from '@kbn/zod';
 import type { ApiBodyEntry } from './types';
 
@@ -66,6 +67,46 @@ describe('SavedObjectsManagementPlugin', () => {
 
       expect(() => registerApiBodyEntry('my-type', createEntry())).toThrow(
         'An API body entry is already registered for saved object type [my-type]'
+      );
+    });
+  });
+
+  describe('#exportReferencedObjects', () => {
+    it('fails when the roots and the objects they reach go over maxImportExportSize', async () => {
+      const context = coreMock.createPluginInitializerContext();
+      const globalConfig = context.config.legacy.get();
+      context.config.legacy.get = () => ({
+        ...globalConfig,
+        savedObjects: { ...globalConfig.savedObjects, maxImportExportSize: 2 },
+      });
+      plugin = new SavedObjectsManagementPlugin(context);
+      await plugin.setup(coreMock.createSetup());
+      const coreStart = coreMock.createStart();
+      const exporter = coreStart.savedObjects.createExporter(
+        coreStart.savedObjects.getScopedClient(httpServerMock.createKibanaRequest())
+      );
+      jest.mocked(exporter.exportByObjects).mockResolvedValue(
+        Readable.from([
+          { type: 'dashboard', id: 'sales', attributes: {}, references: [] },
+          { type: 'index-pattern', id: 'logs', attributes: {}, references: [] },
+          { type: 'tag', id: 'team', attributes: {}, references: [] },
+          { exportedCount: 3, missingRefCount: 0, missingReferences: [] },
+        ])
+      );
+
+      const { exportReferencedObjects } = plugin.start(coreStart);
+
+      await expect(
+        exportReferencedObjects({
+          request: httpServerMock.createKibanaRequest(),
+          client: coreStart.savedObjects.getScopedClient(httpServerMock.createKibanaRequest()),
+          roots: [{ type: 'dashboard', id: 'sales' }],
+        })
+      ).rejects.toThrow(
+        expect.objectContaining({
+          type: 'export-size-exceeded',
+          message: expect.stringContaining("Can't export more than 2 objects."),
+        })
       );
     });
   });

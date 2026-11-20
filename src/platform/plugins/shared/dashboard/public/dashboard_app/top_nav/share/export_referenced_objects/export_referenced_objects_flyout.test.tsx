@@ -41,18 +41,18 @@ const httpError = (status: number, message: string) =>
   });
 
 const renderFlyout = ({
-  dashboardId = 'sales',
+  dashboardIds = ['sales'],
   exportDashboards = jest.fn().mockResolvedValue(EXPORT_RESPONSE),
   downloadExport = jest.fn(),
 }: {
-  dashboardId?: string;
+  dashboardIds?: string[];
   exportDashboards?: jest.Mock;
   downloadExport?: jest.Mock;
 } = {}) => {
   render(
     <I18nProvider>
       <ExportReferencedObjectsFlyout
-        dashboardId={dashboardId}
+        dashboardIds={dashboardIds}
         titleId="export-title"
         closeFlyout={jest.fn()}
         exportDashboards={exportDashboards}
@@ -138,6 +138,52 @@ describe('ExportReferencedObjectsFlyout', () => {
     expect(screen.getByRole('button', { name: 'Download' })).toBeDisabled();
   });
 
+  it('exports several dashboards at once, listing shared objects once and problems per dashboard', async () => {
+    const response: ExportReferencedObjectsResponse = {
+      objects: [
+        { type: 'dashboard', id: 'sales', data: { title: 'Sales' } },
+        { type: 'dashboard', id: 'ops', data: { title: 'Ops' } },
+        { type: 'index-pattern', id: 'logs', data: { name: 'Logs', index_pattern: 'logs-*' } },
+      ],
+      problems: [
+        {
+          type: 'index-pattern',
+          id: 'gone',
+          reason: 'not_found',
+          message: "Saved object [index-pattern/gone] is referenced but doesn't exist.",
+          roots: ['sales', 'ops'],
+        },
+        {
+          type: 'map',
+          id: 'legacy-map',
+          reason: 'unsupported_type',
+          message: "Saved objects of type [map] can't be exported.",
+          roots: ['ops'],
+        },
+      ],
+    };
+    const { exportDashboards, downloadExport } = renderFlyout({
+      dashboardIds: ['sales', 'ops'],
+      exportDashboards: jest.fn().mockResolvedValue(response),
+    });
+
+    const table = await screen.findByTestId('exportReferencedObjectsTable');
+    expect(exportDashboards).toHaveBeenCalledWith(['sales', 'ops']);
+    expect(screen.getByText('3 objects will be exported.')).toBeInTheDocument();
+    expect(within(table).getByText('Logs')).toBeInTheDocument();
+
+    const salesGroup = screen.getByTestId('exportReferencedObjectsProblems-sales');
+    expect(within(salesGroup).getByRole('heading', { name: 'Sales' })).toBeInTheDocument();
+    expect(within(salesGroup).getAllByRole('listitem')).toHaveLength(1);
+    const opsGroup = screen.getByTestId('exportReferencedObjectsProblems-ops');
+    expect(within(opsGroup).getByRole('heading', { name: 'Ops' })).toBeInTheDocument();
+    expect(within(opsGroup).getAllByRole('listitem')).toHaveLength(2);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Download' }));
+    expect(downloadExport).toHaveBeenCalledTimes(1);
+    expect(downloadExport).toHaveBeenCalledWith('export.json', JSON.stringify(response, null, 2));
+  });
+
   it("shows the server's message for a 4xx error", async () => {
     renderFlyout({
       exportDashboards: jest.fn().mockRejectedValue(httpError(400, 'Error fetching objects')),
@@ -164,6 +210,7 @@ describe('ExportReferencedObjectsFlyout', () => {
     render(
       <I18nProvider>
         <ExportReferencedObjectsFlyout
+          dashboardIds={[]}
           titleId="export-title"
           closeFlyout={jest.fn()}
           exportDashboards={exportDashboards}

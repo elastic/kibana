@@ -31,6 +31,8 @@ import { openImportDashboardJsonFlyout } from './import_json/open_import_dashboa
 import { importDashboardJsonStrings } from './import_json/_import_dashboard_json_strings';
 import { openImportReferencedObjectsFlyout } from './import_referenced_objects/open_import_referenced_objects_flyout';
 import { importReferencedObjectsStrings } from './import_referenced_objects/_import_referenced_objects_strings';
+import { openExportReferencedObjectsFlyout } from './export_referenced_objects/open_export_referenced_objects_flyout';
+import { exportReferencedObjectsStrings } from '../dashboard_app/top_nav/share/export_referenced_objects/_export_referenced_objects_strings';
 import { EXPORT_REFERENCED_OBJECTS_ENABLED_FLAG } from '../../common/constants';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { confirmCreateWithUnsaved } from './confirm_overlays';
@@ -58,6 +60,7 @@ export const DashboardListing = ({
 
   const [refreshListBouncer, setRefreshListBouncer] = useState(false);
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
+  const [selectedDashboardIds, setSelectedDashboardIds] = useState<string[]>([]);
 
   const tabs = useMemo(
     () =>
@@ -148,6 +151,7 @@ export const DashboardListing = ({
         useSessionStorageIntegration,
         initialFilter,
         refreshListBouncer,
+        onSelectionChange: setSelectedDashboardIds,
         parentProps: tabParentProps,
       }),
     [
@@ -198,7 +202,7 @@ export const DashboardListing = ({
   }, [goToDashboard, useSessionStorageIntegration]);
 
   const appMenu = useMemo<AppMenuConfig | undefined>(() => {
-    const { createNew } = getDashboardCapabilities();
+    const { createNew, showWriteControls } = getDashboardCapabilities();
     const secondaryCreateActions = getTabs
       ? getTabs()
           .filter((tab) => Boolean(tab.createAction))
@@ -237,42 +241,66 @@ export const DashboardListing = ({
                 : undefined,
           }
         : undefined,
-      items: createNew
-        ? [
-            {
-              id: 'importDashboardJson',
-              order: 0,
-              label: i18n.translate('dashboard.listing.importDashboardButtonLabel', {
-                defaultMessage: 'Import dashboard',
-              }),
-              iconType: 'upload',
-              testId: 'dashboardListingImportButton',
-              run: (params) => {
-                openImportDashboardJsonFlyout({
-                  onImportSuccess,
-                  returnFocus: params?.returnFocus,
-                });
+      items: [
+        ...(createNew
+          ? [
+              {
+                id: 'importDashboardJson',
+                order: 0,
+                label: i18n.translate('dashboard.listing.importDashboardButtonLabel', {
+                  defaultMessage: 'Import dashboard',
+                }),
+                iconType: 'upload',
+                testId: 'dashboardListingImportButton',
+                run: (params?: { returnFocus?: () => void }) => {
+                  openImportDashboardJsonFlyout({
+                    onImportSuccess,
+                    returnFocus: params?.returnFocus,
+                  });
+                },
               },
-            },
-            ...(isExportReferencedObjectsEnabled
-              ? [
-                  {
-                    id: 'importReferencedObjects',
-                    order: 1,
-                    label: importReferencedObjectsStrings.getMenuItemLabel(),
-                    iconType: 'download',
-                    testId: 'dashboardListingImportReferencedObjectsButton',
-                    run: (params?: { returnFocus?: () => void }) => {
-                      openImportReferencedObjectsFlyout({
-                        onImportComplete: onImportReferencedObjectsComplete,
-                        returnFocus: params?.returnFocus,
-                      });
+              ...(isExportReferencedObjectsEnabled
+                ? [
+                    {
+                      id: 'importReferencedObjects',
+                      order: 1,
+                      label: importReferencedObjectsStrings.getMenuItemLabel(),
+                      iconType: 'download',
+                      testId: 'dashboardListingImportReferencedObjectsButton',
+                      run: (params?: { returnFocus?: () => void }) => {
+                        openImportReferencedObjectsFlyout({
+                          onImportComplete: onImportReferencedObjectsComplete,
+                          returnFocus: params?.returnFocus,
+                        });
+                      },
                     },
-                  },
-                ]
-              : []),
-          ]
-        : [],
+                  ]
+                : []),
+            ]
+          : []),
+        // Only users who can select dashboards in the table can export a selection.
+        ...(isExportReferencedObjectsEnabled &&
+        showWriteControls &&
+        activeTabId === DASHBOARD_APP_ID
+          ? [
+              {
+                id: 'exportReferencedObjects',
+                order: 2,
+                label: exportReferencedObjectsStrings.getExportSelectedButtonLabel(
+                  selectedDashboardIds.length
+                ),
+                iconType: 'upload',
+                testId: 'dashboardListingExportReferencedObjectsButton',
+                disableButton: selectedDashboardIds.length === 0,
+                run: (params?: { returnFocus?: () => void }) =>
+                  openExportReferencedObjectsFlyout({
+                    dashboardIds: selectedDashboardIds,
+                    returnFocus: params?.returnFocus,
+                  }),
+              },
+            ]
+          : []),
+      ],
     };
   }, [
     onImportSuccess,
@@ -280,6 +308,8 @@ export const DashboardListing = ({
     getTabs,
     isExportReferencedObjectsEnabled,
     onImportReferencedObjectsComplete,
+    activeTabId,
+    selectedDashboardIds,
   ]);
 
   const sectionLabel = activeTabTitle ?? dashboardListingTitle;

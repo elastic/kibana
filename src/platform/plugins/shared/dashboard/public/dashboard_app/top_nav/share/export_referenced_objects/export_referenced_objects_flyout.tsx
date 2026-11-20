@@ -35,8 +35,8 @@ type ExportedObject = ExportReferencedObjectsResponse['objects'][number];
 type ExportProblem = ExportReferencedObjectsResponse['problems'][number];
 
 interface ExportReferencedObjectsFlyoutProps {
-  /** The saved dashboard to export, or undefined while it has never been saved. */
-  dashboardId?: string;
+  /** The saved dashboards to export; empty while the open dashboard has never been saved. */
+  dashboardIds: string[];
   titleId: string;
   closeFlyout: () => void;
   exportDashboards: (ids: string[]) => Promise<ExportReferencedObjectsResponse>;
@@ -65,7 +65,7 @@ const groupProblemsByRoot = (problems: ExportProblem[]): Map<string, ExportProbl
 };
 
 export const ExportReferencedObjectsFlyout = ({
-  dashboardId,
+  dashboardIds,
   titleId,
   closeFlyout,
   exportDashboards,
@@ -74,9 +74,9 @@ export const ExportReferencedObjectsFlyout = ({
   const [state, setState] = useState<ExportState>({ status: 'loading' });
 
   useEffect(() => {
-    if (!dashboardId) return;
+    if (dashboardIds.length === 0) return;
     let ignore = false;
-    exportDashboards([dashboardId]).then(
+    exportDashboards(dashboardIds).then(
       (response) => !ignore && setState({ status: 'loaded', response }),
       (error) =>
         !ignore &&
@@ -88,7 +88,7 @@ export const ExportReferencedObjectsFlyout = ({
     return () => {
       ignore = true;
     };
-  }, [dashboardId, exportDashboards]);
+  }, [dashboardIds, exportDashboards]);
 
   const response = state.status === 'loaded' ? state.response : undefined;
   const dashboardsById = new Map(
@@ -98,7 +98,7 @@ export const ExportReferencedObjectsFlyout = ({
   );
 
   const renderBody = () => {
-    if (!dashboardId) {
+    if (dashboardIds.length === 0) {
       return (
         <KbnWarningCallout
           title={strings.getUnsavedTitle()}
@@ -211,7 +211,9 @@ export const ExportReferencedObjectsFlyout = ({
               isDisabled={!response || response.objects.length === 0}
               onClick={() => {
                 if (!response) return;
-                const rootTitle = dashboardId && dashboardsById.get(dashboardId);
+                // One root names the file; several share a generic name.
+                const rootTitle =
+                  dashboardIds.length === 1 ? dashboardsById.get(dashboardIds[0]) : undefined;
                 downloadExport(
                   `${rootTitle ? getObjectTitle(rootTitle) : 'export'}.json`,
                   JSON.stringify(response, null, 2)

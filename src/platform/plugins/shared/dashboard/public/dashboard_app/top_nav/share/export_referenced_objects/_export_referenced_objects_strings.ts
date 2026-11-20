@@ -14,6 +14,14 @@ export const exportReferencedObjectsStrings = {
     i18n.translate('dashboard.exportReferencedObjects.menuItemLabel', {
       defaultMessage: 'Export with referenced objects',
     }),
+  getExportSelectedButtonLabel: (count: number) =>
+    count === 0
+      ? exportReferencedObjectsStrings.getMenuItemLabel()
+      : i18n.translate('dashboard.exportReferencedObjects.exportSelectedCountButtonLabel', {
+          defaultMessage:
+            'Export {count, plural, one {# dashboard} other {# dashboards}} with referenced objects',
+          values: { count },
+        }),
   getFlyoutTitle: () =>
     i18n.translate('dashboard.exportReferencedObjects.flyoutTitle', {
       defaultMessage: 'Export with referenced objects',

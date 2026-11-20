@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SavedObjectsExportError } from '@kbn/core/server';
 import type {
   ISavedObjectsExporter,
   KibanaRequest,
@@ -57,11 +58,13 @@ export const exportReferencedObjects = async ({
   registry,
   request,
   roots,
+  exportSizeLimit,
 }: {
   exporter: ISavedObjectsExporter;
   registry: ApiBodyRegistry;
   request: KibanaRequest;
   roots: SavedObjectTypeIdTuple[];
+  exportSizeLimit: number;
 }): Promise<ExportReferencedObjectsResponse> => {
   const stream = await exporter.exportByObjects({
     request,
@@ -71,6 +74,10 @@ export const exportReferencedObjects = async ({
   const exported: Array<SavedObject | SavedObjectsExportResultDetails> =
     await createPromiseFromStreams([stream, createConcatStream([])]);
   const savedObjects = exported.filter((item): item is SavedObject => !isExportDetails(item));
+  // Core caps only the roots, so the cap on the total is applied here.
+  if (savedObjects.length > exportSizeLimit) {
+    throw SavedObjectsExportError.exportSizeExceeded(exportSizeLimit);
+  }
   const missingReferences = exported.find(isExportDetails)?.missingReferences ?? [];
 
   const rootsByKey = getRootsByKey(roots, savedObjects);

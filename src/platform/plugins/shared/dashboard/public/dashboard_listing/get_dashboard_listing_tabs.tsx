@@ -13,7 +13,7 @@ import type { TableListTabParentProps } from '@kbn/content-management-tabbed-tab
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { ContentListClientProvider } from '@kbn/content-list-provider-client';
 import { i18n } from '@kbn/i18n';
-import { useContentListItems } from '@kbn/content-list';
+import { useContentListItems, useContentListSelection } from '@kbn/content-list';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
@@ -30,6 +30,8 @@ export type GetDashboardListingTabsParams = Pick<
   'goToDashboard' | 'getDashboardUrl' | 'useSessionStorageIntegration' | 'initialFilter' | 'getTabs'
 > & {
   refreshListBouncer?: boolean;
+  /** Receives the IDs of the selected dashboards, so the header can act on them. */
+  onSelectionChange?: (ids: string[]) => void;
 };
 
 type TabContentProps = Omit<GetDashboardListingTabsParams, 'getTabs'> & {
@@ -51,12 +53,28 @@ const RefetchOnImport = ({ signal }: { signal?: boolean }) => {
   return null;
 };
 
+const ReportSelection = ({ onChange }: { onChange: (ids: string[]) => void }) => {
+  const { selectedIds } = useContentListSelection();
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  // Compare by value: the list can rebuild the same selection on every render, and
+  // reporting it each time re-renders the listing in a loop.
+  const selectedIdsKey = JSON.stringify(selectedIds);
+  useEffect(() => {
+    onChangeRef.current(JSON.parse(selectedIdsKey));
+  }, [selectedIdsKey]);
+  useEffect(() => () => onChangeRef.current([]), []);
+  return null;
+};
+
 const DashboardsTabContent = ({
   goToDashboard,
   getDashboardUrl,
   useSessionStorageIntegration,
   initialFilter,
   refreshListBouncer,
+  onSelectionChange,
   parentProps,
 }: TabContentProps) => {
   const { setPageDataTestSubject, onFetchSuccess } = parentProps;
@@ -98,6 +116,7 @@ const DashboardsTabContent = ({
       onFetchSuccess={onFetchSuccess}
     >
       <RefetchOnImport signal={refreshListBouncer} />
+      {onSelectionChange && <ReportSelection onChange={onSelectionChange} />}
       <DashboardContentList
         emptyState={emptyState}
         goToDashboard={goToDashboard}
