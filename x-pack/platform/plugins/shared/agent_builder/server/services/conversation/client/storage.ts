@@ -71,6 +71,7 @@ const storageSettings = {
         dynamic: false,
         properties: {
           execution_id: types.keyword({}),
+          timeline_execution_id: types.keyword({}),
         },
       }),
       schema_version: types.long({}),

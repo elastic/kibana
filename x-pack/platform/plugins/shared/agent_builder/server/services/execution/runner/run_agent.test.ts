@@ -311,6 +311,7 @@ describe('runAgent', () => {
     const executionService: jest.Mocked<AgentExecutionService> = {
       executeAgent,
       maybeExecuteAgent: jest.fn(),
+      assertCanRunAgent: jest.fn(),
       getExecution: jest.fn(),
       abortExecution: jest.fn(),
       followExecution: jest.fn(),
