@@ -83,6 +83,8 @@ describe('Events', () => {
 
     await hoverTooltipAnchor(container);
 
+    // wait for the hover delay to elapse (the generic message tooltip opens) before checking absence
+    await screen.findByRole('tooltip');
     expect(screen.queryByTestId('dates-container')).not.toBeInTheDocument();
   });
 
@@ -104,9 +106,8 @@ describe('Events', () => {
       </TestProviders>
     );
 
-    await hoverTooltipAnchor(container);
-
-    expect(screen.queryByTestId('dates-container')).not.toBeInTheDocument();
+    // no tooltip wrapper at all is rendered for an unparsable date
+    expect(container.querySelector('.euiToolTipAnchor')).toBeNull();
   });
 
   test('it renders the value for a non-date field when the field is populated', () => {

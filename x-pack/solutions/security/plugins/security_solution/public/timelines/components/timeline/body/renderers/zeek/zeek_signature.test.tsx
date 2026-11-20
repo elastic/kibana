@@ -8,6 +8,7 @@
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
@@ -204,7 +205,7 @@ describe('ZeekSignature', () => {
     });
 
     describe('#TagTooltip', () => {
-      test('it passes the name of the field to the cell actions', () => {
+      test('it renders the name of the field in a tooltip', async () => {
         const field = 'zeek.notice';
         render(
           <TestProviders>
@@ -212,11 +213,9 @@ describe('ZeekSignature', () => {
           </TestProviders>
         );
 
-        expect(MockedSecurityCellActions).toHaveBeenCalledWith(
-          expect.objectContaining({ data: expect.objectContaining({ field }) }),
-          {}
-        );
-        expect(screen.getByText('the people you love')).toBeInTheDocument();
+        await userEvent.hover(screen.getByText('the people you love'));
+
+        expect(await screen.findByText(field)).toBeInTheDocument();
       });
     });
   });

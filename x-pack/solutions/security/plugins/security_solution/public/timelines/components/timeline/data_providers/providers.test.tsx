@@ -27,6 +27,9 @@ jest.mock('../../../../common/hooks/use_selector', () => ({
 }));
 
 describe('Providers', () => {
+  // EUI keeps the opening popover panel at `pointer-events: none` in jsdom (the animation never ends)
+  const menuUser = userEvent.setup({ pointerEventsCheck: 0 });
+
   const mockOnDataProviderRemoved = jest.spyOn(timelineActions, 'removeProvider');
 
   beforeEach(() => {
@@ -89,7 +92,7 @@ describe('Providers', () => {
       );
       await userEvent.click(screen.getAllByTestId('providerBadge')[0]);
 
-      await userEvent.click(screen.getByText(i18n.DELETE_DATA_PROVIDER));
+      await menuUser.click(screen.getByText(i18n.DELETE_DATA_PROVIDER));
       expect(mockOnDataProviderRemoved.mock.calls[0][0].providerId).toEqual('id-Provider 1');
     });
   });
@@ -114,7 +117,7 @@ describe('Providers', () => {
 
       await userEvent.click(screen.getAllByTestId('providerBadge')[0]);
 
-      await userEvent.click(screen.getByText(i18n.TEMPORARILY_DISABLE_DATA_PROVIDER));
+      await menuUser.click(screen.getByText(i18n.TEMPORARILY_DISABLE_DATA_PROVIDER));
       expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
         andProviderId: undefined,
         enabled: false,
@@ -145,7 +148,7 @@ describe('Providers', () => {
 
       await userEvent.click(screen.getAllByTestId('providerBadge')[0]);
 
-      await userEvent.click(screen.getByText(i18n.EXCLUDE_DATA_PROVIDER));
+      await menuUser.click(screen.getByText(i18n.EXCLUDE_DATA_PROVIDER));
 
       expect(mockOnToggleDataProviderExcluded.mock.calls[0][0]).toEqual({
         andProviderId: undefined,
@@ -227,7 +230,7 @@ describe('Providers', () => {
 
       await userEvent.click(screen.getAllByTestId('providerBadge')[1]);
 
-      await userEvent.click(screen.getByText(i18n.TEMPORARILY_DISABLE_DATA_PROVIDER));
+      await menuUser.click(screen.getByText(i18n.TEMPORARILY_DISABLE_DATA_PROVIDER));
 
       expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
         andProviderId: 'id-Provider 2',
@@ -259,7 +262,7 @@ describe('Providers', () => {
 
       await userEvent.click(screen.getAllByTestId('providerBadge')[1]);
 
-      await userEvent.click(screen.getByText(i18n.EXCLUDE_DATA_PROVIDER));
+      await menuUser.click(screen.getByText(i18n.EXCLUDE_DATA_PROVIDER));
 
       expect(mockOnToggleDataProviderExcluded.mock.calls[0][0]).toEqual({
         andProviderId: 'id-Provider 2',

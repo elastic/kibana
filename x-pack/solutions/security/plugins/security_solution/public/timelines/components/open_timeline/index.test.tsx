@@ -64,10 +64,21 @@ jest.mock('../../containers/all', () => {
   };
 });
 const mockNavigateTo = jest.fn();
+const mockNavigateToUrl = jest.fn();
 jest.mock('../../../common/lib/kibana', () => {
   const actual = jest.requireActual('../../../common/lib/kibana');
   return {
     ...actual,
+    useKibana: () => {
+      const kibana = actual.useKibana();
+      return {
+        ...kibana,
+        services: {
+          ...kibana.services,
+          application: { ...kibana.services.application, navigateToUrl: mockNavigateToUrl },
+        },
+      };
+    },
     useNavigation: () => ({
       getAppUrl: jest.fn(),
       navigateTo: mockNavigateTo,
@@ -79,8 +90,11 @@ jest.mock('../../../common/components/link_to', () => {
   const originalModule = jest.requireActual('../../../common/components/link_to');
   return {
     ...originalModule,
-    getTimelineTabsUrl: jest.fn(),
-    useFormatUrl: jest.fn().mockReturnValue({ formatUrl: jest.fn(), search: 'urlSearch' }),
+    getTimelineTabsUrl: jest.fn((tabName: string) => `/timelines/${tabName}`),
+    useFormatUrl: jest.fn().mockReturnValue({
+      formatUrl: jest.fn((url: string) => url),
+      search: 'urlSearch',
+    }),
   };
 });
 
@@ -101,6 +115,7 @@ describe('StatefulOpenTimeline', () => {
   const title = 'All Timelines / Open Timelines';
   let mockHistory: History[];
   const mockInstallPrepackagedTimelines = jest.fn();
+  const mockFetchAllTimeline = jest.fn();
 
   beforeEach(() => {
     (useParams as jest.Mock).mockReturnValue({
@@ -114,7 +129,7 @@ describe('StatefulOpenTimeline', () => {
     mockHistory = [];
     (useHistory as jest.Mock).mockReturnValue(mockHistory);
     (useGetAllTimeline as unknown as jest.Mock).mockReturnValue({
-      fetchAllTimeline: jest.fn(),
+      fetchAllTimeline: mockFetchAllTimeline,
       timelines: getAllTimeline('', mockOpenTimelineQueryResults.timeline ?? []),
       loading: false,
       totalCount: mockOpenTimelineQueryResults.totalCount,
@@ -193,24 +208,17 @@ describe('StatefulOpenTimeline', () => {
     });
 
     test("should land on correct templates' tab after switching tab", async () => {
-      (useParams as jest.Mock).mockReturnValue({
-        tabName: TimelineTypeEnum.template,
-        pageName: SecurityPageName.timelines,
-      });
-
       renderOpenTimeline();
 
       const templatesTab = screen.getByTestId(
         `timeline-${TimelineTabsStyle.tab}-${TimelineTypeEnum.template}`
       );
+      expect(templatesTab).toHaveAttribute('aria-selected', 'false');
+
       fireEvent.click(templatesTab);
 
-      await waitFor(() => {
-        expect(templatesTab).toHaveAttribute('aria-selected', 'true');
-      });
-      expect(
-        screen.getByTestId(`timeline-${TimelineTabsStyle.tab}-${TimelineTypeEnum.default}`)
-      ).toHaveAttribute('aria-selected', 'false');
+      expect(mockNavigateToUrl).toHaveBeenCalledTimes(1);
+      expect(mockNavigateToUrl).toHaveBeenCalledWith(`/timelines/${TimelineTypeEnum.template}`);
     });
 
     test("should selecting correct timelines' filter", () => {
@@ -261,6 +269,9 @@ describe('StatefulOpenTimeline', () => {
       await waitFor(() => {
         expect(screen.getByTestId('selectable-query-text')).toHaveTextContent('with "abcd"');
       });
+      expect(mockFetchAllTimeline).toHaveBeenLastCalledWith(
+        expect.objectContaining({ search: 'abcd' })
+      );
     });
 
     test('it appends the word "with" to the Showing in Timelines message when the user enters a query', async () => {
