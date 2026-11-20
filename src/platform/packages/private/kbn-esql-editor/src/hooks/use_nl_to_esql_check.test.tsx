@@ -98,4 +98,3 @@ describe('useNlToEsqlCheck', () => {
     expect(getLicenseMock).toHaveBeenCalledTimes(1);
   });
 });
-
