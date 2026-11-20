@@ -106,7 +106,7 @@ const buildClusterExclusion = (
  * Plans the checks for one template from the fields that have data.
  * Averages become one check that prefers OpenTelemetry per entity, so an entity reporting
  * only one schema is never dropped. Other formulas cannot be merged in one query; they get
- * one check per variant, and a later variant excludes the clusters an earlier one covers.
+ * one check per variant, and each variant excludes clusters won by every other variant.
  */
 export const planSignalChecks = (
   template: SignalTemplate,
@@ -123,10 +123,11 @@ export const planSignalChecks = (
   }
 
   const assignments = assignVariantsToClusters(variants, fieldPresence);
-  return assignments.map(({ variant }, index) => {
+  // Each variant excludes every cluster won by another variant.
+  return assignments.map((assignment) => {
     const scope = buildClusterExclusion(
-      assignments.slice(0, index).flatMap(({ clusters }) => clusters)
+      assignments.filter((other) => other !== assignment).flatMap(({ clusters }) => clusters)
     );
-    return { variants: [variant], ...(scope ? { scope } : {}) };
+    return { variants: [assignment.variant], ...(scope ? { scope } : {}) };
   });
 };

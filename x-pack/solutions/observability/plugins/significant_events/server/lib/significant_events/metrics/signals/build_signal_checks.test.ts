@@ -150,10 +150,28 @@ describe('buildSignalChecks', () => {
         cluster: 'cluster-a',
         fields: new Set(['k8s.container.restarts']),
       },
+      {
+        dataset: 'k8sclusterreceiver.otel',
+        cluster: 'cluster-b',
+        fields: new Set(['k8s.container.restarts', 'k8s.container.status.last_terminated_reason']),
+      },
     ]);
 
-    expect(preferredChecks).toHaveLength(1);
-    expect(preferredChecks[0].measurements.map(({ schema }) => schema)).toEqual(['ecs']);
+    expect(
+      preferredChecks.map(({ measurements, scope }) => ({
+        schema: measurements[0].schema,
+        scope,
+      }))
+    ).toEqual([
+      {
+        schema: 'otel',
+        scope: { not: { field: 'orchestrator.cluster.name', eq: 'cluster-a' } },
+      },
+      {
+        schema: 'ecs',
+        scope: { not: { field: 'orchestrator.cluster.name', eq: 'cluster-b' } },
+      },
+    ]);
   });
 
   it('splits formulas that cannot merge by cluster and counts each cluster once', () => {
@@ -170,7 +188,7 @@ describe('buildSignalChecks', () => {
     expect(
       checks.map(({ measurements, scope }) => ({ schema: measurements[0].schema, scope }))
     ).toEqual([
-      { schema: 'otel', scope: undefined },
+      { schema: 'otel', scope: { not: { field: 'orchestrator.cluster.name', eq: 'cluster-a' } } },
       { schema: 'ecs', scope: { not: { field: 'orchestrator.cluster.name', eq: 'cluster-b' } } },
     ]);
   });
