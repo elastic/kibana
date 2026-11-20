@@ -83,8 +83,9 @@ apiTest.describe('Elasticsearch proxy', { tag: tags.deploymentAgnostic }, () => 
 
   apiTest('accepts gzip-compressed bodies', async ({ apiClient }) => {
     const response = await apiClient.put(`${PROXY_PATH}/${TEST_INDEX}/_mapping`, {
-      headers: { ...headers, 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' },
-      body: gzipSync(JSON.stringify({ properties: { tag: { type: 'keyword' } } })),
+      // The API client JSON-serializes Buffer bodies sent as `application/json`, so use YAML.
+      headers: { ...headers, 'Content-Type': 'application/yaml', 'Content-Encoding': 'gzip' },
+      body: gzipSync('properties:\n  tag:\n    type: keyword\n'),
       responseType: 'json',
     });
     expect(response).toHaveStatusCode(200);
@@ -94,7 +95,7 @@ apiTest.describe('Elasticsearch proxy', { tag: tags.deploymentAgnostic }, () => 
   apiTest('keeps percent-encoded index lists', async ({ apiClient }) => {
     const indexList = encodeURIComponent(`${TEST_INDEX},${MISSING_INDEX}`);
     const response = await apiClient.get(
-      `${PROXY_PATH}/${indexList}/_settings?ignore_unavailable=true`,
+      `${PROXY_PATH}/${indexList}/_mapping?ignore_unavailable=true`,
       { headers, responseType: 'json' }
     );
     expect(response).toHaveStatusCode(200);
@@ -132,7 +133,7 @@ apiTest.describe('Elasticsearch proxy', { tag: tags.deploymentAgnostic }, () => 
   });
 
   apiTest('forwards the accept header and returns the content type', async ({ apiClient }) => {
-    const response = await apiClient.get(`${PROXY_PATH}/${TEST_INDEX}/_settings`, {
+    const response = await apiClient.get(`${PROXY_PATH}/${TEST_INDEX}/_mapping`, {
       headers: { ...headers, accept: 'application/yaml' },
       responseType: 'text',
     });

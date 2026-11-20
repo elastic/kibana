@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import type SemVer from 'semver/classes/semver';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type {
@@ -104,9 +104,10 @@ export interface AppDependencies {
   };
 }
 
-const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } },
-});
+const createQueryClient = () =>
+  new QueryClient({
+    defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } },
+  });
 
 export const AppContextProvider = ({
   children,
@@ -115,6 +116,7 @@ export const AppContextProvider = ({
   value: AppDependencies;
   children: React.ReactNode;
 }) => {
+  const [queryClient] = useState(createQueryClient);
   return (
     <AppContext.Provider value={value}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
