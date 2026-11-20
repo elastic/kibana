@@ -8,7 +8,9 @@
  */
 
 import { Container, LazyServiceIdentifier, type ServiceIdentifier } from 'inversify';
+import { Global } from './services/global';
 import { OnSetup, OnStart } from './services/plugin';
+import { SoftDependencies } from './services/soft_dependencies';
 import { KibanaContainerModule, type KibanaContainerModuleLoadOptions } from './module';
 
 function trigger(hook: typeof OnSetup | typeof OnStart, container: Container): void {
@@ -200,6 +202,70 @@ describe('KibanaContainerModule', () => {
 
       expect(() => trigger(OnStart, container)).not.toThrow();
       expect(onStartHandler).toHaveBeenCalledWith(expect.anything(), 'value', 'something');
+    });
+  });
+
+  describe('expose', () => {
+    it('should bind the service', () => {
+      options.expose(dependencyToken).toConstantValue('value');
+
+      expect(container.get(dependencyToken)).toBe('value');
+    });
+
+    it('should publish one global entry per exposed binding', () => {
+      options.expose(dependencyToken).toConstantValue('value1');
+      options.expose(dependencyToken).toConstantValue('value2');
+
+      expect(container.getAll(Global)).toEqual([dependencyToken, dependencyToken]);
+      expect(container.getAll(dependencyToken)).toEqual(['value1', 'value2']);
+    });
+  });
+
+  describe('collect', () => {
+    let exposed: string[];
+
+    beforeEach(() => {
+      exposed = [];
+      container.bind(SoftDependencies).toConstantValue({
+        get: jest.fn(),
+        getAll: jest.fn(<T>(serviceIdentifier: ServiceIdentifier<T>) =>
+          serviceIdentifier === token ? (exposed as T[]) : []
+        ),
+      });
+      container.bind(dependencyToken).toConstantValue('something');
+    });
+
+    it('should call the handler with every exposed service on start', () => {
+      const handler = jest.fn();
+      options.collect(token, dependencyToken, handler);
+      exposed.push('value1', 'value2');
+
+      trigger(OnSetup, container);
+      expect(handler).not.toHaveBeenCalled();
+
+      trigger(OnStart, container);
+      expect(handler).toHaveBeenCalledTimes(2);
+      expect(handler).toHaveBeenNthCalledWith(1, expect.anything(), 'value1', 'something');
+      expect(handler).toHaveBeenNthCalledWith(2, expect.anything(), 'value2', 'something');
+    });
+
+    it('should collect the exposed services rather than the local bindings', () => {
+      const handler = jest.fn();
+      options.collect(token, handler);
+      exposed.push('value');
+      container.bind(token).toConstantValue('local');
+
+      trigger(OnStart, container);
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler).toHaveBeenCalledWith(expect.anything(), 'value');
+    });
+
+    it('should not call the handler when nothing is exposed', () => {
+      const handler = jest.fn();
+      options.collect(token, handler);
+
+      expect(() => trigger(OnStart, container)).not.toThrow();
+      expect(handler).not.toHaveBeenCalled();
     });
   });
 

@@ -47,6 +47,7 @@ export class CoreInjectionService {
   }
 
   public start(): InternalCoreDiServiceStart {
+    this.module.start();
     const contract = {
       fork: this.fork,
       getContainer: this.getContainer,

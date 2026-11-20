@@ -26,7 +26,9 @@ import {
   type ServiceIdentifier,
 } from 'inversify';
 import { once, wrap } from 'lodash';
+import { Global } from './services/global';
 import { OnSetup, OnStart } from './services/plugin';
+import { SoftDependencies } from './services/soft_dependencies';
 
 /**
  * Extended container module options providing Kibana-specific features.
@@ -66,6 +68,33 @@ export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOpt
    * @param handler The handler to perform an action with the service instance.
    */
   onStart<T, A extends unknown[] = any[]>(
+    serviceIdentifier: ServiceIdentifier<T>,
+    ...args: [...dependencies: MapToResolvedValueInjectOptions<A>, handler: KibanaHandler<T, A>]
+  ): void;
+
+  /**
+   * Binds a service and publishes that binding to every other plugin.
+   * Each call publishes exactly one binding, so a token can be exposed several times.
+   * Other plugins resolve it via `SoftDependencies` at start or later.
+   * @example
+   * ```ts
+   * expose(Greeter).toConstantValue({ greet: () => 'hello' });
+   * ```
+   * @param serviceIdentifier The service identifier to bind and expose.
+   */
+  expose<T>(serviceIdentifier: ServiceIdentifier<T>): KibanaBindToFluentSyntax<T>;
+
+  /**
+   * Registers a handler that will be called once at the plugin's start against every binding of the service exposed by any enabled plugin, the current one included.
+   * @example
+   * ```ts
+   * collect(Widget, WidgetRegistry, (context, widget, registry) => registry.register(widget));
+   * ```
+   * @param serviceIdentifier The exposed service identifier to collect.
+   * @param dependencies Dependencies to resolve before calling the handler.
+   * @param handler The handler to perform an action with every exposed service instance.
+   */
+  collect<T, A extends unknown[] = any[]>(
     serviceIdentifier: ServiceIdentifier<T>,
     ...args: [...dependencies: MapToResolvedValueInjectOptions<A>, handler: KibanaHandler<T, A>]
   ): void;
@@ -309,8 +338,23 @@ function toKibanaContainerModuleLoadOptions(
     };
   }
 
+  const expose = ((serviceIdentifier) => {
+    options.bind(Global).toConstantValue(serviceIdentifier);
+
+    return bind(serviceIdentifier);
+  }) as KibanaContainerModuleLoadOptions['expose'];
+
+  function getCurrentBound<T>(container: Container, serviceIdentifier: ServiceIdentifier<T>): T[] {
+    return container.isCurrentBound(serviceIdentifier) ? container.getAll(serviceIdentifier) : [];
+  }
+
+  function getExposed<T>(container: Container, serviceIdentifier: ServiceIdentifier<T>): T[] {
+    return container.get(SoftDependencies).getAll(serviceIdentifier);
+  }
+
   function createHook(
-    hook: ServiceIdentifier<(container: Container) => void>
+    hook: ServiceIdentifier<(container: Container) => void>,
+    getInjectables: typeof getCurrentBound
   ): KibanaContainerModuleLoadOptions['onSetup'] | KibanaContainerModuleLoadOptions['onStart'] {
     return (serviceIdentifier, ...definition) => {
       const [dependencies, handler] = pop(definition);
@@ -318,13 +362,14 @@ function toKibanaContainerModuleLoadOptions(
       options
         .bind(hook)
         .toDynamicValue((context) => (container) => {
-          if (!container.isCurrentBound(serviceIdentifier)) {
+          const injectables = getInjectables(container, serviceIdentifier);
+          if (!injectables.length) {
             return;
           }
           const kibanaResolutionContext = toKibanaResolutionContext(context);
           const resolvedDependencies = resolveSync(context, dependencies);
 
-          container.getAll(serviceIdentifier).forEach((injectable) => {
+          injectables.forEach((injectable) => {
             handler(...([kibanaResolutionContext, injectable, ...resolvedDependencies] as const));
           });
         })
@@ -335,10 +380,12 @@ function toKibanaContainerModuleLoadOptions(
   return {
     ...options,
     bind,
+    collect: createHook(OnStart, getExposed),
+    expose,
     inject,
     onActivation,
-    onSetup: createHook(OnSetup),
-    onStart: createHook(OnStart),
+    onSetup: createHook(OnSetup, getCurrentBound),
+    onStart: createHook(OnStart, getCurrentBound),
   };
 }
 

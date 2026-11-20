@@ -7,9 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Container } from 'inversify';
+import { Container, type ServiceIdentifier } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import { OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
+import {
+  KibanaContainerModule,
+  type KibanaContainerModuleLoadOptions,
+  OnSetup,
+  OnStart,
+  Setup,
+  SoftDependencies,
+  Start,
+} from '@kbn/core-di';
 import { Fork, Global, Plugin, PluginModule } from './plugin';
 
 describe('PluginModule', () => {
@@ -202,6 +210,163 @@ describe('PluginModule', () => {
         plugin2Fork.bind(Global).toConstantValue('service6');
 
         expect(plugin2Fork.get('service5')).toEqual(['service6.1', 'service6.2']);
+      });
+    });
+  });
+
+  describe('SoftDependencies', () => {
+    const Greeter = Symbol.for('Greeter') as ServiceIdentifier<string>;
+    const Widget = Symbol.for('Widget') as ServiceIdentifier<string>;
+
+    let pluginModule: PluginModule;
+
+    function createPlugin(
+      id: PluginOpaqueId,
+      load: (options: KibanaContainerModuleLoadOptions) => void = () => {}
+    ): Container {
+      const plugin = root.get(Plugin)(id);
+      plugin.load(new KibanaContainerModule(load));
+
+      return plugin;
+    }
+
+    function setupAndStart(...plugins: Container[]): void {
+      plugins.forEach((plugin) => plugin.get(Setup));
+      pluginModule.start();
+      plugins.forEach((plugin) => plugin.get(Start));
+    }
+
+    beforeEach(() => {
+      root = new Container();
+      pluginModule = new PluginModule(root);
+      root.load(pluginModule);
+    });
+
+    describe('get', () => {
+      it('should return the service exposed by another plugin', () => {
+        const provider = createPlugin(token1, ({ expose }) => {
+          expose(Greeter).toConstantValue('hello');
+        });
+        const consumer = createPlugin(token2);
+        setupAndStart(provider, consumer);
+
+        expect(consumer.get(SoftDependencies).get(Greeter)).toBe('hello');
+      });
+
+      it('should return undefined when no plugin exposes the service', () => {
+        const consumer = createPlugin(token2);
+        setupAndStart(consumer);
+
+        expect(consumer.get(SoftDependencies).get(Greeter)).toBeUndefined();
+      });
+
+      it('should not return a service that is bound but not exposed', () => {
+        const provider = createPlugin(token1, ({ bind }) => {
+          bind(Greeter).toConstantValue('hello');
+        });
+        const consumer = createPlugin(token2);
+        setupAndStart(provider, consumer);
+
+        expect(consumer.get(SoftDependencies).get(Greeter)).toBeUndefined();
+      });
+
+      it('should resolve the service when the consumer was set up before the provider', () => {
+        const consumer = createPlugin(token2);
+        const provider = createPlugin(token1, ({ expose }) => {
+          expose(Greeter).toConstantValue('hello');
+        });
+        const softDependencies = consumer.get(SoftDependencies);
+        setupAndStart(consumer, provider);
+
+        expect(softDependencies.get(Greeter)).toBe('hello');
+      });
+
+      it('should throw before all plugins finished setup', () => {
+        const consumer = createPlugin(token2);
+        consumer.get(Setup);
+
+        expect(() => consumer.get(SoftDependencies).get(Greeter)).toThrow(
+          /Symbol\(Greeter\).*Resolve it at start or later/
+        );
+      });
+    });
+
+    describe('getAll', () => {
+      it('should return every exposed binding exactly once', () => {
+        const owner = createPlugin(token1, ({ expose }) => {
+          expose(Widget).toConstantValue('owner');
+        });
+        const contributor = createPlugin(token2, ({ expose }) => {
+          expose(Widget).toConstantValue('contributor.1');
+          expose(Widget).toConstantValue('contributor.2');
+        });
+        setupAndStart(owner, contributor);
+
+        expect(owner.get(SoftDependencies).getAll(Widget).sort()).toEqual([
+          'contributor.1',
+          'contributor.2',
+          'owner',
+        ]);
+      });
+
+      it('should return an empty list when no plugin exposes the service', () => {
+        const owner = createPlugin(token1);
+        setupAndStart(owner);
+
+        expect(owner.get(SoftDependencies).getAll(Widget)).toEqual([]);
+      });
+
+      it('should throw before all plugins finished setup', () => {
+        const owner = createPlugin(token1);
+        owner.get(Setup);
+
+        expect(() => owner.get(SoftDependencies).getAll(Widget)).toThrow(
+          /Symbol\(Widget\).*Resolve it at start or later/
+        );
+      });
+    });
+
+    describe('collect', () => {
+      it('should collect contributions from other plugins and the owner exactly once', () => {
+        const Registry = Symbol.for('Registry') as ServiceIdentifier<string[]>;
+        const owner = createPlugin(token1, ({ bind, collect, expose }) => {
+          bind(Registry).toConstantValue([]);
+          collect(Widget, Registry, (_context, widget, registry) => registry.push(widget));
+          expose(Widget).toConstantValue('owner');
+        });
+        const contributor1 = createPlugin(token2, ({ expose }) => {
+          expose(Widget).toConstantValue('contributor1');
+        });
+        const contributor2 = createPlugin(token3, ({ expose }) => {
+          expose(Widget).toConstantValue('contributor2');
+        });
+        setupAndStart(contributor1, owner, contributor2);
+
+        expect(owner.get(Registry).sort()).toEqual(['contributor1', 'contributor2', 'owner']);
+      });
+
+      it('should not call the handler when there are no contributions', () => {
+        const handler = jest.fn();
+        const owner = createPlugin(token1, ({ collect }) => {
+          collect(Widget, handler);
+        });
+        setupAndStart(owner);
+
+        expect(handler).not.toHaveBeenCalled();
+      });
+
+      it('should not collect contributions before start', () => {
+        const handler = jest.fn();
+        const owner = createPlugin(token1, ({ collect }) => {
+          collect(Widget, handler);
+        });
+        const contributor = createPlugin(token2, ({ expose }) => {
+          expose(Widget).toConstantValue('contributor');
+        });
+        owner.get(Setup);
+        contributor.get(Setup);
+
+        expect(handler).not.toHaveBeenCalled();
       });
     });
   });

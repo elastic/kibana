@@ -16,7 +16,15 @@ import {
   type ServiceIdentifier,
 } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import { createToken, OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
+import {
+  createToken,
+  Global,
+  OnSetup,
+  OnStart,
+  Setup,
+  SoftDependencies,
+  Start,
+} from '@kbn/core-di';
 
 type ScopeFactory = (id?: PluginOpaqueId) => Container;
 
@@ -28,10 +36,7 @@ type ScopeFactory = (id?: PluginOpaqueId) => Container;
  */
 const Context = Symbol('Context') as ServiceIdentifier<Container>;
 
-/**
- * The service identifier for the global service references.
- */
-export const Global = createToken<ServiceIdentifier>('Global');
+export { Global };
 
 /**
  * Current plugin scope identifier.
@@ -70,6 +75,7 @@ export class PluginModule extends ContainerModule {
     [OnStart as symbol]: new WeakSet<Container>(),
   };
   private bound = new WeakSet<Container>();
+  private started = false;
 
   constructor(root: Container, private readonly options?: Omit<ContainerOptions, 'parent'>) {
     super(({ bind, onActivation }) => {
@@ -77,6 +83,12 @@ export class PluginModule extends ContainerModule {
       bind(Fork).toDynamicValue(this.getForkFactory.bind(this)).inRequestScope();
       bind(OnSetup).toConstantValue(this.registerGlobals.bind(this));
       bind(Plugin).toDynamicValue(this.getPluginFactory.bind(this)).inRequestScope();
+      bind(SoftDependencies)
+        .toResolvedValue<[Container, Container | undefined]>(this.getSoftDependencies.bind(this), [
+          Container,
+          { serviceIdentifier: Context, optional: true },
+        ])
+        .inRequestScope();
       bind(Setup).toResolvedValue(this.getDefaultContract.bind(this)).inRequestScope();
       bind(Start).toResolvedValue(this.getDefaultContract.bind(this)).inRequestScope();
       onActivation(Global, this.onGlobalActivation.bind(this));
@@ -85,8 +97,40 @@ export class PluginModule extends ContainerModule {
     });
   }
 
+  /**
+   * Marks every plugin as set up, so `SoftDependencies` can resolve services exposed by any of them.
+   */
+  public start(): void {
+    this.started = true;
+  }
+
   protected getDefaultContract() {
     return undefined;
+  }
+
+  protected getSoftDependencies(origin: Container, context = origin): SoftDependencies {
+    const assertStarted = (serviceIdentifier: ServiceIdentifier) => {
+      if (!this.started) {
+        throw new Error(
+          `Cannot resolve soft dependency "${String(
+            serviceIdentifier
+          )}" before all plugins finished setup. Resolve it at start or later.`
+        );
+      }
+    };
+
+    return {
+      get: (serviceIdentifier) => {
+        assertStarted(serviceIdentifier);
+
+        return origin.get(serviceIdentifier, { optional: true });
+      },
+      getAll: (serviceIdentifier) => {
+        assertStarted(serviceIdentifier);
+
+        return context.getAll(serviceIdentifier, { optional: true });
+      },
+    };
   }
 
   protected onContractActivation<T>(

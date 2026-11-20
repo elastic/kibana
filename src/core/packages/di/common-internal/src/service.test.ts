@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const pluginModuleMock = {};
+const pluginModuleMock = { start: jest.fn() };
 
 jest.mock('./modules/plugin', () => ({
   ...jest.requireActual('./modules/plugin'),
-  PluginModule: jest.fn().mockReturnValue(pluginModuleMock),
+  PluginModule: jest.fn().mockImplementation(() => pluginModuleMock),
 }));
 
 import { Container } from 'inversify';
@@ -74,6 +74,10 @@ describe('CoreInjectionService', () => {
         fork: expect.any(Function),
         getContainer: expect.any(Function),
       });
+    });
+
+    it('should allow resolving soft dependencies', () => {
+      expect(pluginModuleMock.start).toHaveBeenCalled();
     });
 
     describe('fork', () => {
