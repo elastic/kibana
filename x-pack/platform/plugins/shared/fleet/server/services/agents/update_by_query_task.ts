@@ -25,11 +25,25 @@ export const UPDATE_BY_QUERY_POLL_INTERVAL_MS = 1000;
  * next to the retry that follows.
  */
 export const UPDATE_BY_QUERY_MAX_DURATION_MS = 10 * 60 * 1000;
+/**
+ * Longest a cancelled update by query is followed while it stops. A cancelled task stops at its
+ * next batch, so this is normally a second or two.
+ */
+export const UPDATE_BY_QUERY_CANCEL_WAIT_MS = 30 * 1000;
+
+const CANCELED_REASON = 'cancelled after exceeding the maximum duration';
 
 interface UpdateByQueryTaskOptions {
   pollIntervalMs?: number;
   maxDurationMs?: number;
+  cancelWaitMs?: number;
 }
+
+/**
+ * `canceled` is set when the update by query was cancelled before it went through all of its
+ * documents. The counters are then the partial outcome: the documents it did update stay updated.
+ */
+export type UpdateByQueryTaskResponse = UpdateByQueryResponse & { canceled?: string };
 
 /**
  * The final result of a finished task. `response` is what the task returned when it finished
@@ -40,9 +54,9 @@ const toUpdateByQueryResponse = (
   task: TasksGetResponse,
   taskId: string,
   logger: Logger
-): UpdateByQueryResponse => {
+): UpdateByQueryTaskResponse => {
   if (task.response) {
-    return task.response as UpdateByQueryResponse;
+    return task.response as UpdateByQueryTaskResponse;
   }
 
   logger.warn(
@@ -68,6 +82,11 @@ const toUpdateByQueryResponse = (
  *
  * Here the update runs as a task, and its result is read back from the tasks API, so a slow
  * update is waited for instead of lost. Reading the task is retried on transient errors.
+ *
+ * A task that runs past `maxDurationMs` is cancelled. The documents it already updated stay
+ * updated, and a retry that selects documents by what the update changed would skip them, so the
+ * cancelled task is followed until it stops and its partial outcome is returned with `canceled`
+ * set. The caller records that outcome, then retries the rest.
  */
 export async function updateByQueryAndWait(
   esClient: ElasticsearchClient,
@@ -75,8 +94,9 @@ export async function updateByQueryAndWait(
   {
     pollIntervalMs = UPDATE_BY_QUERY_POLL_INTERVAL_MS,
     maxDurationMs = UPDATE_BY_QUERY_MAX_DURATION_MS,
+    cancelWaitMs = UPDATE_BY_QUERY_CANCEL_WAIT_MS,
   }: UpdateByQueryTaskOptions = {}
-): Promise<UpdateByQueryResponse> {
+): Promise<UpdateByQueryTaskResponse> {
   const logger = appContextService.getLogger();
 
   const started = await esClient.updateByQuery({ ...request, wait_for_completion: false });
@@ -87,6 +107,7 @@ export async function updateByQueryAndWait(
 
   const taskId = String(started.task);
   const deadline = Date.now() + maxDurationMs;
+  let cancelRequestedAt: number | undefined;
 
   for (;;) {
     const task = await retryTransientEsErrors(
@@ -100,22 +121,33 @@ export async function updateByQueryAndWait(
           `Update by query task ${taskId} failed: ${JSON.stringify(task.error).slice(0, 1000)}`
         );
       }
-      return toUpdateByQueryResponse(task, taskId, logger);
+      const response = toUpdateByQueryResponse(task, taskId, logger);
+      return cancelRequestedAt === undefined
+        ? response
+        : { ...response, canceled: response.canceled ?? CANCELED_REASON };
     }
 
-    if (Date.now() >= deadline) {
-      logger.warn(
-        `Update by query task ${taskId} did not finish within ${maxDurationMs}ms, cancelling it`
-      );
-      try {
-        await esClient.tasks.cancel({ task_id: taskId });
-      } catch (error) {
-        logger.warn(`Could not cancel update by query task ${taskId}: ${error.message}`);
+    const taskStatus = JSON.stringify(task.task.status ?? {}).slice(0, 500);
+
+    if (cancelRequestedAt === undefined) {
+      if (Date.now() >= deadline) {
+        logger.warn(
+          `Update by query task ${taskId} did not finish within ${maxDurationMs}ms, cancelling it`
+        );
+        try {
+          await esClient.tasks.cancel({ task_id: taskId });
+          cancelRequestedAt = Date.now();
+        } catch (error) {
+          logger.warn(`Could not cancel update by query task ${taskId}: ${error.message}`);
+          throw new FleetError(
+            `Update by query task ${taskId} did not finish within ${maxDurationMs}ms, status: ${taskStatus}`
+          );
+        }
       }
+    } else if (Date.now() - cancelRequestedAt >= cancelWaitMs) {
+      // The outcome of this task is unknown, so there is nothing to hand to the caller to record.
       throw new FleetError(
-        `Update by query task ${taskId} did not finish within ${maxDurationMs}ms, status: ${JSON.stringify(
-          task.task.status ?? {}
-        ).slice(0, 500)}`
+        `Update by query task ${taskId} did not stop within ${cancelWaitMs}ms of being cancelled, status: ${taskStatus}`
       );
     }
 
