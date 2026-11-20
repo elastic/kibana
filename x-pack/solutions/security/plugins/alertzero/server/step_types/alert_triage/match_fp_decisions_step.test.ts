@@ -25,7 +25,7 @@ const source = (executable: string, severity = 'low') => ({
   'kibana.alert.rule.revision': 3,
   'kibana.alert.severity': severity,
   host: { os: { type: 'windows' } },
-  process: { executable, code_signature: { subject_name: 'Acme' } },
+  process: { executable, code_signature: { subject_name: 'Acme', trusted: true } },
 });
 
 const hashOf = (executable: string) =>
@@ -872,6 +872,108 @@ describe('triage match decisions step in on mode', () => {
       },
     });
     expect(closes()).toEqual([]);
+  });
+
+  describe('a signer in `on`', () => {
+    // The key keeps the signer's name and drops the hash, so only a trusted signer is acted on.
+    const signed = (trusted?: boolean) => {
+      const doc = source('C:\\x.exe');
+      return {
+        ...doc,
+        process: {
+          ...doc.process,
+          code_signature: {
+            subject_name: 'Acme',
+            ...(trusted === undefined ? {} : { trusted }),
+          },
+        },
+      };
+    };
+    const unsigned = () => ({
+      ...source('C:\\x.exe'),
+      process: { executable: 'C:\\x.exe', hash: { sha256: 'ab'.repeat(32) } },
+    });
+    const idFor = (doc: Record<string, unknown>) =>
+      decisionId(
+        'false_positive',
+        groupByStrictKey({ alerts: [{ id: 'x', doc }], spaceId: 'default' }).groups[0].hash
+      );
+
+    it.each([
+      ['not trusted', false],
+      ['missing its trust flag', undefined],
+    ])(
+      'only tags a match whose signer is %s, so a forged certificate closes nothing',
+      async (_label, trusted) => {
+        const doc = signed(trusted);
+        const id = idFor(doc);
+        const { run, tags, closes } = setup({
+          mode: 'on',
+          alerts: [['u', doc]],
+          decisions: { [id]: stored('false_positive') },
+        });
+
+        const { output } = await run();
+
+        expect(closes()).toEqual([]);
+        expect(tags()).toEqual([
+          { ids: ['u'], tags: { tags_to_add: [`az:would_close:${id}`], tags_to_remove: [] } },
+        ]);
+        expect(output).toEqual(expect.objectContaining({ closed: 0, held_in_shadow: 1 }));
+      }
+    );
+
+    it.each([
+      [false, 0, 1],
+      [true, 1, 0],
+    ])(
+      'reads the library signer trust from the dll: trusted %s closes %i and holds %i',
+      async (trusted, closed, held) => {
+        const doc = {
+          ...source('C:\\x.exe'),
+          event: { category: ['library'] },
+          dll: { path: 'C:\\lib\\a.dll', code_signature: { subject_name: 'Acme', trusted } },
+        };
+        const { run, closes } = setup({
+          mode: 'on',
+          alerts: [['l', doc]],
+          decisions: { [idFor(doc)]: stored('false_positive') },
+        });
+
+        const { output } = await run();
+
+        expect(closes()).toHaveLength(closed);
+        expect(output).toEqual(expect.objectContaining({ closed, held_in_shadow: held }));
+      }
+    );
+
+    it('closes a match on a trusted signer', async () => {
+      const doc = signed(true);
+      const { run, closes } = setup({
+        mode: 'on',
+        alerts: [['t', doc]],
+        decisions: { [idFor(doc)]: stored('false_positive') },
+      });
+
+      const { output } = await run();
+
+      expect(closes().map(({ signal_ids }) => signal_ids)).toEqual([['t']]);
+      expect(output).toEqual(expect.objectContaining({ closed: 1, held_in_shadow: 0 }));
+    });
+
+    it('closes a match on an unsigned binary, whose key carries the file hash instead', async () => {
+      const doc = unsigned();
+      const { run, closes } = setup({
+        mode: 'on',
+        alerts: [['h', doc]],
+        decisions: { [idFor(doc)]: stored('false_positive') },
+      });
+
+      const { output } = await run();
+
+      expect(closes().map(({ signal_ids }) => signal_ids)).toEqual([['h']]);
+      expect(output).toEqual(expect.objectContaining({ closed: 1, held_in_shadow: 0 }));
+    });
   });
 
   describe('a cloud key in `on`', () => {

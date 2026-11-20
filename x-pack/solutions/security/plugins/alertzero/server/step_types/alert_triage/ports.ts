@@ -14,6 +14,7 @@ import {
   TAG_CHUNK_SIZE,
   ALERT_SEVERITIES,
   BATCH_ALERT_CAP,
+  DECISION_SIGNER_TRUST_FIELDS,
   OPEN_ALERT_STATUSES,
   RULE_FETCH_LIMIT,
   TRIAGE_FAILED_TAG,
@@ -835,7 +836,11 @@ export const fetchDecisionCandidates = async (
     path: SIGNALS_SEARCH_PATH,
     body: {
       size: ALERT_FETCH_LIMIT,
-      _source: [...PATTERN_KEY_FIELDS, SEVERITY_FIELD],
+      _source: [
+        ...PATTERN_KEY_FIELDS,
+        SEVERITY_FIELD,
+        ...Object.values(DECISION_SIGNER_TRUST_FIELDS),
+      ],
       sort: [{ [ALERT_FIELDS.timestamp]: 'asc' }, { [ALERT_UUID_FIELD]: 'asc' }],
       query: {
         bool: {
@@ -862,8 +867,9 @@ export const fetchDecisionCandidates = async (
             // closed again: the analyst's act wins, and revoke still finds it by the tag.
             { prefix: { [ALERT_FIELDS.tags]: TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX } },
             // A match already tagged stays out in every mode, so later pages move past it. In `on`
-            // only a cloud match held in shadow carries this tag; read again, it would stay at the
-            // front of the oldest-first search every sweep.
+            // only a match held in shadow carries this tag (a cloud key, or a signer the alert does
+            // not mark as trusted); read again, it would stay at the front of the oldest-first
+            // search every sweep.
             { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_CLOSE_TAG_PREFIX } },
             { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_SKIP_TAG_PREFIX } },
             ...excludedByFilters(filters),
