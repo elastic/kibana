@@ -259,6 +259,9 @@ describe('StaleBindingReaper', () => {
         binding('later', { boundAt: new Date(createdAt + HOUR).toISOString() }),
         binding('within-skew', {
           boundAt: new Date(createdAt - BINDING_CLOCK_SKEW_TOLERANCE_MS).toISOString(),
+        }),
+        binding('past-skew', {
+          boundAt: new Date(createdAt - BINDING_CLOCK_SKEW_TOLERANCE_MS - 1).toISOString(),
         })
       );
       accounts.set('sa-1', {
@@ -268,7 +271,7 @@ describe('StaleBindingReaper', () => {
 
       await run();
 
-      expect(store.deleted).toEqual(['earlier']);
+      expect([...store.deleted].sort()).toEqual(['earlier', 'past-skew']);
       expect(auditedUnbinds()[0].message).toContain(
         'because the service account was deleted and created again since the bind'
       );
@@ -276,9 +279,19 @@ describe('StaleBindingReaper', () => {
       expect(backend.lookupAccountAsInternalUser).toHaveBeenCalledTimes(1);
     });
 
-    it('keeps a binding when a timestamp does not parse', async () => {
+    it('keeps a binding when its account creation time does not parse', async () => {
       store.add(binding('w-1'));
       accounts.set('sa-1', { status: 'present', credentialCreatedAt: 'not a date' });
+
+      await run();
+
+      expect(store.deleted).toEqual([]);
+    });
+
+    it('keeps a binding when its bind time does not parse', async () => {
+      // Sorts before the sweep cutoff, so the sweep still reads it.
+      store.add(binding('w-1', { boundAt: '2000-13-45T00:00:00.000Z' }));
+      accounts.set('sa-1', { status: 'present', credentialCreatedAt: new Date(NOW).toISOString() });
 
       await run();
 

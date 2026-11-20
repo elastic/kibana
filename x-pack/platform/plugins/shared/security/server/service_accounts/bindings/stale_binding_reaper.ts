@@ -21,7 +21,7 @@ import type { WorkloadBindingStore, WorkloadBindingVerification } from './worklo
 import type { ServiceAccountAuditReason } from '../../audit';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../../audit';
 import { getDetailedErrorMessage } from '../../errors';
-import { BINDING_CLOCK_SKEW_TOLERANCE_MS } from '../credentials';
+import { isBoundBeforeCredential } from '../credentials';
 import type { ServiceAccountLookup, ServiceAccountsBackend } from '../types';
 
 /** Scope of the meter that records what the stale binding cleanup does. */
@@ -455,14 +455,14 @@ export class StaleBindingReaper {
     }
 
     // Created after the bind means the binding was made for an earlier account with the same ID.
-    // The exchange refuses it for good. A timestamp that does not parse is no evidence either way.
+    // The exchange refuses it for good. A timestamp that does not parse is no evidence either way,
+    // so the binding is kept here even though the exchange refuses it.
     if (account?.status === 'present' && account.credentialCreatedAt !== undefined) {
-      const createdAt = Date.parse(account.credentialCreatedAt);
-      const bound = Date.parse(boundAt);
+      const { credentialCreatedAt } = account;
       if (
-        Number.isFinite(createdAt) &&
-        Number.isFinite(bound) &&
-        createdAt > bound + BINDING_CLOCK_SKEW_TOLERANCE_MS
+        Number.isFinite(Date.parse(credentialCreatedAt)) &&
+        Number.isFinite(Date.parse(boundAt)) &&
+        isBoundBeforeCredential(boundAt, credentialCreatedAt)
       ) {
         return 'service_account_recreated';
       }
