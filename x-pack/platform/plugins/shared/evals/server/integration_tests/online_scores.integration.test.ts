@@ -338,22 +338,24 @@ describe('online scores ingestion and listing integration', () => {
     let monitorCounter = 0;
 
     const seedScores = async (
-      docs: Array<{ value: number; spaceId?: string; metric?: string }>
+      docs: Array<{ value: number; spaceId?: string; spaceIds?: string[]; metric?: string }>
     ) => {
       const now = Date.now();
       await esClient.bulk({
         refresh: 'wait_for',
-        operations: docs.flatMap(({ value, spaceId = 'space-a', metric = 'factuality' }, i) => [
-          { create: { _index: EvaluationIndices.ONLINE_SCORES } },
-          {
-            '@timestamp': new Date(now - i * 1000).toISOString(),
-            space_ids: [spaceId],
-            monitor: { id: MONITOR_ID, name: 'Alert monitor' },
-            trace_id: `trace-${i}`,
-            evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
-            score: { name: metric, value, label: 'x' },
-          },
-        ]),
+        operations: docs.flatMap(
+          ({ value, spaceId = 'space-a', spaceIds, metric = 'factuality' }, i) => [
+            { create: { _index: EvaluationIndices.ONLINE_SCORES } },
+            {
+              '@timestamp': new Date(now - i * 1000).toISOString(),
+              space_ids: spaceIds ?? [spaceId],
+              monitor: { id: MONITOR_ID, name: 'Alert monitor' },
+              trace_id: `trace-${i}`,
+              evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
+              score: { name: metric, value, label: 'x' },
+            },
+          ]
+        ),
       });
     };
 
@@ -417,6 +419,19 @@ describe('online scores ingestion and listing integration', () => {
       expect(rows[0][0]).toBeCloseTo(0.3, 5);
       expect(rows[0][1]).toBe(3);
       expect(String(rows[0][2])).toContain(`/online/${MONITOR_ID}`);
+    });
+
+    it('counts documents that belong to several spaces for each of those spaces', async () => {
+      // Shared across space-a and space-b: the rule for space-a must see it, a multi-value
+      // `space_ids` is not matched by `==` or `IN`, only by MV_CONTAINS / `:`.
+      await seedScores([
+        { value: 0.1, spaceIds: ['space-a', 'space-b'] },
+        { value: 0.1, spaceIds: ['space-a', 'space-b'] },
+      ]);
+      const rows = await runRule(0.5, 'below', 5);
+      expect(rows).toHaveLength(1);
+      expect(rows[0][1]).toBe(5);
+      expect(rows[0][0]).toBeCloseTo((0.2 + 0.3 + 0.4 + 0.1 + 0.1) / 5, 5);
     });
 
     it('stays quiet when the average is above the threshold', async () => {

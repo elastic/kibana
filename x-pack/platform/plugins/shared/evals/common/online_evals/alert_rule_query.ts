@@ -72,9 +72,12 @@ export const buildOnlineEvalAlertEsql = ({
   const comparator = trigger === 'below' ? '<' : '>';
   return [
     `FROM ${EvaluationIndices.ONLINE_SCORES}`,
-    `| WHERE monitor.id == "${escapeEsqlString(monitorId)}" AND space_ids == "${escapeEsqlString(
+    // `space_ids` is multi-valued; `==` and `IN` only match single-valued docs, `MV_CONTAINS` matches both.
+    `| WHERE monitor.id == "${escapeEsqlString(
+      monitorId
+    )}" AND MV_CONTAINS(space_ids, "${escapeEsqlString(
       spaceId
-    )}" AND score.name == "${escapeEsqlString(metric)}"`,
+    )}") AND score.name == "${escapeEsqlString(metric)}"`,
     '| STATS avg_score = AVG(score.value), n = COUNT(*)',
     `| WHERE n >= ${Math.max(
       1,

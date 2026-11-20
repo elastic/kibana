@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EsQueryRuleParamsSchema } from '@kbn/response-ops-rule-params/es_query';
 import {
   buildOnlineEvalAlertDrillDownPath,
   buildOnlineEvalAlertEsql,
@@ -30,7 +31,7 @@ describe('alert_rule_query', () => {
       expect(buildOnlineEvalAlertEsql(baseOptions)).toBe(
         [
           'FROM .evaluation-online-scores',
-          '| WHERE monitor.id == "workflow-1" AND space_ids == "space-a" AND score.name == "factuality"',
+          '| WHERE monitor.id == "workflow-1" AND MV_CONTAINS(space_ids, "space-a") AND score.name == "factuality"',
           '| STATS avg_score = AVG(score.value), n = COUNT(*)',
           '| WHERE n >= 20 AND avg_score < 0.7',
         ].join('\n')
@@ -86,6 +87,17 @@ describe('alert_rule_query', () => {
         aggType: 'count',
         groupBy: 'all',
       });
+    });
+
+    it('produces params accepted by the .es-query rule params schema', () => {
+      expect(() =>
+        EsQueryRuleParamsSchema.validate(buildOnlineEvalAlertRuleParams(baseOptions))
+      ).not.toThrow();
+      expect(() =>
+        EsQueryRuleParamsSchema.validate(
+          buildOnlineEvalAlertRuleParams({ ...baseOptions, trigger: 'above', windowUnit: 'd' })
+        )
+      ).not.toThrow();
     });
   });
 
