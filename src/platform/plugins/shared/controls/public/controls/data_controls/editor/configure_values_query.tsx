@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
+import type { FilterableSource } from '@kbn/data-source';
 import { appendStatsByToQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
@@ -37,7 +38,7 @@ import { dataService } from '../../../services/kibana_services';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
 import { getControlsTimezone } from '../../utils';
 import type { DataControlEditorState } from './types';
-import { getDataViewIdFromESQLQuery } from '../../utils/get_data_view_id_from_esql_query';
+import { getSourceFromESQLQuery } from '../../utils/get_source_from_esql_query';
 import { DataControlEditorStrings } from '../data_control_constants';
 
 interface ConfigureValuesQueryProps {
@@ -48,6 +49,8 @@ interface ConfigureValuesQueryProps {
   esqlVariables?: ESQLControlVariable[];
   parentApi?: unknown;
   selectedControlType?: string;
+  // Called with the source that the query reads, once the query runs
+  onSourceDerived?: (source: FilterableSource) => void;
   // Re-opens the parent data control editor flyout. Used after the inner ESQL variable
   // control creation flyout closes
   reopenEditor?: (overrides?: Partial<DataControlEditorState>) => void;
@@ -61,6 +64,7 @@ export const ConfigureValuesQuery = ({
   esqlVariables = [],
   parentApi,
   selectedControlType,
+  onSourceDerived,
   reopenEditor,
 }: ConfigureValuesQueryProps) => {
   const [previewOptions, setPreviewOptions] = useState<string[] | number[]>([]);
@@ -107,11 +111,13 @@ export const ConfigureValuesQuery = ({
         updatePreviewOptionsAndColumns(result.values, [result.column]);
         setESQLQueryValidation(!hasNoResults);
 
+        const source = await getSourceFromESQLQuery(query, { parentApi });
         updateEditorState({
           esql_query: query,
           field_name: result.column.name,
-          data_view_id: await getDataViewIdFromESQLQuery(query, { parentApi }),
+          data_view_id: source.id,
         });
+        onSourceDerived?.(source);
       } else {
         updatePreviewOptionsAndColumns([], result.columns);
         setESQLQueryValidation(false);
@@ -120,6 +126,7 @@ export const ConfigureValuesQuery = ({
     [
       esqlVariables,
       parentApi,
+      onSourceDerived,
       setESQLQueryValidation,
       updatePreviewOptionsAndColumns,
       updateEditorState,

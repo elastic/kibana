@@ -44,6 +44,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import { triggers } from '@kbn/ui-actions-plugin/public';
 import { CONTROL_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { ControlValuesSource, DEFAULT_CONTROL_VALUES_SOURCE } from '@kbn/controls-constants';
+import type { FilterableSource } from '@kbn/data-source';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
 import { type CreateControlTypeAction } from '../../../actions/control_panel_actions';
@@ -251,23 +252,29 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     },
     error: fieldListError,
   } = useAsync(async () => {
-    if (!editorState.data_view_id) {
+    // The source of a query comes from the query, and is not always a data view
+    if (!editorState.data_view_id || editorState.values_source === ControlValuesSource.ESQL) {
       return;
     }
     const dataView = await dataViewsService.get(editorState.data_view_id);
     return {
       selectedDataView: dataView,
     };
-  }, [editorState.data_view_id]);
+  }, [editorState.data_view_id, editorState.values_source]);
+
+  const [esqlSource, setEsqlSource] = useState<FilterableSource>();
+  const selectedSource: FilterableSource | undefined = isESQLValuesSource
+    ? esqlSource
+    : selectedDataView;
 
   const CustomSettingsComponent = useMemo(() => {
     if (!selectedControlType) return;
     const CustomSettings =
       controlActionRegistry[selectedControlType]?.extension?.CustomOptionsComponent;
-    if (!CustomSettings || !selectedDataView || !editorState.field_name) return;
+    if (!CustomSettings || !selectedSource || !editorState.field_name) return;
 
     const field = editorState.field_name
-      ? selectedDataView?.getFieldByName(editorState.field_name)
+      ? selectedSource.getFieldByName(editorState.field_name)
       : undefined;
     if (!field) return;
 
@@ -282,7 +289,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         />
       </div>
     );
-  }, [selectedDataView, initialState, editorState, controlActionRegistry, selectedControlType]);
+  }, [selectedSource, initialState, editorState, controlActionRegistry, selectedControlType]);
 
   const valuesSourceValid = useMemo(() => {
     if (isESQLValuesSource) return esqlQueryValidation;
@@ -296,7 +303,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
       const nextEsqlQuery =
         nextSource === ControlValuesSource.ESQL && !editorState.esql_query
           ? DataControlEditorStrings.manageControl.dataSource.getDefaultValuesQuery(
-              selectedDataView,
+              selectedSource,
               editorState.field_name
             )
           : undefined;
@@ -306,7 +313,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         ...(nextEsqlQuery ? { esql_query: nextEsqlQuery } : {}),
       });
     },
-    [editorState, selectedDataView]
+    [editorState, selectedSource]
   );
   const esqlQueryNeedsRunning = useMemo(
     () => !valuesSourceValid && isESQLValuesSource,
@@ -464,6 +471,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               esqlVariables={parentESQLVariables}
               parentApi={parentApi}
               selectedControlType={selectedControlType}
+              onSourceDerived={setEsqlSource}
               reopenEditor={
                 reopenEditor
                   ? (esqlOverrides) =>

@@ -33,7 +33,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { appendStatsByToQuery, formatEsqlIdentifier, formatEsqlSources } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
-import { type StateComparators } from '@kbn/presentation-publishing';
+import { apiPublishesProjectRouting, type StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager, WithAllKeys } from '@kbn/presentation-publishing/state_manager/types';
 
@@ -43,7 +43,7 @@ import type { DataControlApi, DataControlFieldFormatter, ValuesSourceFetchPlan }
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 import { getESQLSingleColumnValues } from '../../../common/options_list';
 import { getControlsTimezone } from '../utils';
-import { getDataViewIdFromESQLQuery } from '../utils/get_data_view_id_from_esql_query';
+import { getSourceFromESQLQuery } from '../utils/get_source_from_esql_query';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
   ...defaultControlLabelComparators,
@@ -120,6 +120,8 @@ export const initializeDataControlManager = async <EditorState extends object = 
     rejectInitialDataSourceReady = reject;
   });
 
+  // The sources that the control derived from its own query, which `dataViewsService` does not have
+  const derivedSources = new Map<string, FilterableSource>();
   const dataSources$ = new BehaviorSubject<FilterableSource[] | undefined>(undefined);
   const field$ = new BehaviorSubject<FilterableField | undefined>(undefined);
   const defaultFieldFormatter = (toFormat: any) => String(toFormat);
@@ -140,7 +142,9 @@ export const initializeDataControlManager = async <EditorState extends object = 
       switchMap(async ([currentDataViewId]) => {
         let dataSource: FilterableSource | undefined;
         try {
-          dataSource = await dataViewsService.get(currentDataViewId ?? '');
+          dataSource =
+            derivedSources.get(currentDataViewId ?? '') ??
+            (await dataViewsService.get(currentDataViewId ?? ''));
           return { dataSource };
         } catch (error) {
           return { error };
@@ -242,6 +246,10 @@ export const initializeDataControlManager = async <EditorState extends object = 
     ? parentApi.esqlVariables$
     : new BehaviorSubject<ESQLControlVariable[]>([]);
 
+  const parentProjectRouting$ = apiPublishesProjectRouting(parentApi)
+    ? parentApi.projectRouting$
+    : new BehaviorSubject<string | undefined>(undefined);
+
   const esqlQueryDataSourceSubscription = combineLatest([
     dataControlStateManager.api.esqlQuery$,
     dataControlStateManager.api.valuesSource$,
@@ -253,6 +261,8 @@ export const initializeDataControlManager = async <EditorState extends object = 
         return next.every((v) => prevKeys.has(v.key));
       })
     ),
+    // The source of the query depends on the project routing
+    parentProjectRouting$,
   ]).subscribe(async ([query, valuesSource, esqlVariables]) => {
     if (valuesSource !== ControlValuesSource.ESQL) return;
     try {
@@ -263,8 +273,8 @@ export const initializeDataControlManager = async <EditorState extends object = 
           })
         );
       }
-      const dataViewId = await getDataViewIdFromESQLQuery(query, { parentApi });
-      if (!dataViewId) {
+      const source = await getSourceFromESQLQuery(query, { parentApi });
+      if (!source.id) {
         throw new Error(
           i18n.translate('controls.dataControl.esqlDataViewDeriveFailed', {
             defaultMessage: 'Could not derive a data view from the ES|QL query',
@@ -272,7 +282,8 @@ export const initializeDataControlManager = async <EditorState extends object = 
         );
       }
 
-      dataControlStateManager.api.setDataViewId(dataViewId);
+      derivedSources.set(source.id, source);
+      dataControlStateManager.api.setDataViewId(source.id);
       const result = await getESQLSingleColumnValues({
         query,
         search: dataService.search.search,
