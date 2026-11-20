@@ -13,11 +13,13 @@ import { z, lazySchema } from '@kbn/zod/v4';
 export const MAX_SOURCES = 16;
 /** Longest index pattern of a source. */
 export const MAX_INDEX_PATTERN_LENGTH = 256;
-/** Longest ES|QL filter of a source. */
+/** Longest ES|QL filter of a source or metric. */
 export const MAX_FILTER_LENGTH = 2000;
 /** Most attributes one source may declare. */
 export const MAX_ATTRIBUTES_PER_SOURCE = 32;
-/** Longest attribute name. */
+/** Most metrics one source may declare. */
+export const MAX_METRICS_PER_SOURCE = 32;
+/** Longest attribute or metric name. */
 export const MAX_ATTRIBUTE_NAME_LENGTH = 64;
 /** Longest literal field path. */
 export const MAX_FIELD_PATH_LENGTH = 512;
@@ -25,6 +27,31 @@ export const MAX_FIELD_PATH_LENGTH = 512;
 export const MAX_VALUE_LABELS = 64;
 /** Longest raw value or label in `valueLabels`. */
 export const MAX_VALUE_LABEL_LENGTH = 256;
+/** Aggregates a metric column may declare. */
+export const METRIC_AGGS = [
+  'avg',
+  'min',
+  'max',
+  'sum',
+  'count',
+  'count_distinct',
+  'last',
+  'sum_rate',
+  'max_rate',
+  'avg_rate',
+  'min_rate',
+] as const;
+
+/** Closed set of units the inventory client can format. */
+export const METRIC_UNITS = ['percent', 'ratio', 'bytes', 'ms', 's', 'count'] as const;
+
+const COUNT_AGGS: ReadonlySet<(typeof METRIC_AGGS)[number]> = new Set(['count', 'count_distinct']);
+const RATE_AGGS: ReadonlySet<(typeof METRIC_AGGS)[number]> = new Set([
+  'sum_rate',
+  'max_rate',
+  'avg_rate',
+  'min_rate',
+]);
 
 /** A mapped field path: dot-separated segments, no wildcards, expressions, quoting or whitespace. */
 export const LITERAL_FIELD_PATH_PATTERN = /^[A-Za-z0-9_@-]+(?:\.[A-Za-z0-9_@-]+)*$/;
@@ -45,8 +72,8 @@ export const literalFieldPathSchema = lazySchema(() =>
 );
 
 /**
- * An attribute name, which becomes an ES|QL column: a field path such as `host.arch`, so a column
- * can carry the OTel semantic convention name while each source reads its own field.
+ * An attribute or metric name, which becomes an ES|QL column: a field path such as `host.arch`, so a
+ * column can carry the OTel semantic convention name while each source reads its own field.
  */
 const attributeNameSchema = lazySchema(() =>
   z.string().min(1).max(MAX_ATTRIBUTE_NAME_LENGTH).regex(LITERAL_FIELD_PATH_PATTERN, {
@@ -62,6 +89,8 @@ const indexPatternSchema = lazySchema(() =>
 );
 
 const valueLabelStringSchema = lazySchema(() => z.string().min(1).max(MAX_VALUE_LABEL_LENGTH));
+
+const filterSchema = lazySchema(() => z.string().min(1).max(MAX_FILTER_LENGTH));
 
 /**
  * Maps raw values (stringified) to canonical labels, so an OTel numeric pod phase `"2"` and an ECS
@@ -89,8 +118,56 @@ export const dynamicAttributeSchema = lazySchema(() =>
 );
 
 /**
- * One index pattern, an optional filter and the attributes read from it. One pattern per source;
- * the same pattern may appear on several sources with different filters.
+ * One metric of a source: an aggregate of `field` per entity, shown under `name`. There is no
+ * per-metric label in this schema.
+ */
+export const dynamicMetricSchema = lazySchema(() =>
+  z
+    .strictObject({
+      // The output column and the merge key across sources: the same name on several sources is
+      // one column.
+      name: attributeNameSchema,
+      // The field the metric is read from in this source.
+      field: literalFieldPathSchema,
+      agg: z.enum(METRIC_AGGS),
+      // Opaque ES|QL boolean expression narrowing documents for this metric only. Validated for
+      // length here; the inventory generator canonicalises and places it.
+      filter: filterSchema.optional(),
+      // Applied after STATS as `m = m * scale [+ offset]`. Forbidden on count aggregates.
+      scale: z.number().finite().optional(),
+      // Applied after STATS (and after scale when both are set). Forbidden on count and rate aggs.
+      offset: z.number().finite().optional(),
+      // How the inventory client formats the value; closed set so list cells can render units.
+      unit: z.enum(METRIC_UNITS).optional(),
+    })
+    .superRefine(({ agg, scale, offset }, ctx) => {
+      if (COUNT_AGGS.has(agg) && scale !== undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['scale'],
+          message: `scale is not allowed on agg "${agg}"`,
+        });
+      }
+      if (COUNT_AGGS.has(agg) && offset !== undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['offset'],
+          message: `offset is not allowed on agg "${agg}"`,
+        });
+      }
+      if (RATE_AGGS.has(agg) && offset !== undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['offset'],
+          message: `offset is not allowed on rate agg "${agg}" (rate has a true zero)`,
+        });
+      }
+    })
+);
+
+/**
+ * One index pattern, an optional filter and the attributes and metrics read from it. One pattern
+ * per source; the same pattern may appear on several sources with different filters.
  */
 export const dynamicSourceSchema = lazySchema(() =>
   z
@@ -98,20 +175,42 @@ export const dynamicSourceSchema = lazySchema(() =>
       indexPattern: indexPatternSchema,
       // An opaque ES|QL boolean expression narrowing the source to this type's documents. The one
       // piece of ES|QL an author writes; validated for length only, placement is the generator's job.
-      filter: z.string().min(1).max(MAX_FILTER_LENGTH).optional(),
+      filter: filterSchema.optional(),
       attributes: z.array(dynamicAttributeSchema).max(MAX_ATTRIBUTES_PER_SOURCE).optional(),
+      // How many metrics this source declares — that is the registration cap. Concurrent query
+      // plan count is the generator's concern after probes, not a definition worst-case gate.
+      metrics: z.array(dynamicMetricSchema).max(MAX_METRICS_PER_SOURCE).optional(),
     })
-    .superRefine(({ attributes = [] }, ctx) => {
-      const seen = new Set<string>();
+    .superRefine(({ attributes = [], metrics = [] }, ctx) => {
+      const attributeNames = new Set<string>();
       attributes.forEach(({ name }, index) => {
-        if (seen.has(name)) {
+        if (attributeNames.has(name)) {
           ctx.addIssue({
             code: 'custom',
             path: ['attributes', index, 'name'],
             message: `attribute name "${name}" is already declared in this source; names are unique within a source`,
           });
         }
-        seen.add(name);
+        attributeNames.add(name);
+      });
+
+      const metricNames = new Set<string>();
+      metrics.forEach(({ name }, index) => {
+        if (metricNames.has(name)) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['metrics', index, 'name'],
+            message: `metric name "${name}" is already declared in this source; names are unique within a source`,
+          });
+        }
+        if (attributeNames.has(name)) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['metrics', index, 'name'],
+            message: `metric name "${name}" is already declared as an attribute in this source`,
+          });
+        }
+        metricNames.add(name);
       });
     })
 );
@@ -129,5 +228,11 @@ export type DynamicBlock = z.infer<typeof dynamicBlockSchema>;
 export type DynamicSource = z.infer<typeof dynamicSourceSchema>;
 /** One attribute of a `dynamic` source. */
 export type DynamicAttribute = z.infer<typeof dynamicAttributeSchema>;
+/** One metric of a `dynamic` source. */
+export type DynamicMetric = z.infer<typeof dynamicMetricSchema>;
 /** Raw value to canonical label map of a `dynamic` attribute. */
 export type DynamicValueLabels = z.infer<typeof dynamicValueLabelsSchema>;
+/** Aggregate of a dynamic metric. */
+export type DynamicMetricAgg = (typeof METRIC_AGGS)[number];
+/** Unit of a dynamic metric. */
+export type DynamicMetricUnit = (typeof METRIC_UNITS)[number];

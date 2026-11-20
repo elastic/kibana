@@ -206,13 +206,15 @@ dynamic: {
 - Sources: 1 to 16. A source is one index pattern (no commas or whitespace, at most 256 characters); several patterns are several sources. The same pattern may appear on several sources with different filters.
 - `filter`: optional opaque ES|QL boolean expression narrowing the source to this type's documents, at most 2000 characters. It is validated for length only; where it goes in the query is the generator's job.
 - Attributes: at most 32 per source. `name` is a field path such as `host.arch` or `os.type`, under the same rule as `field` but at most 64 characters, so a column can carry the OpenTelemetry semantic convention name while each source reads its own field. It is the output column and the merge key across sources, and is unique within a source. `field` is a literal field path (dot-separated segments of letters, digits, `_`, `@` and `-`; no wildcards, expressions, quoting or whitespace; at most 512 characters).
+- Metrics: at most 32 per source (how many metrics that source declares). Same `name` / `field` rules as attributes. Required `agg` is one of `avg`, `min`, `max`, `sum`, `count`, `count_distinct`, `last`, `sum_rate`, `max_rate`, `avg_rate`, `min_rate`. Optional `filter` (same opaque ES|QL boolean length rule as the source filter), `scale` / `offset` (finite; not on `count` / `count_distinct`; `offset` not on `*_rate`), and `unit` (`percent` | `ratio` | `bytes` | `ms` | `s` | `count`). There is no per-metric `label` and no `index_mode` / engine key: the inventory generator chooses classic vs TSDB ES|QL after probing. Empty `metrics: []` is allowed and means no metrics. Concurrent query-plan limits belong to the generator after probes, not to definition registration.
 - `valueLabels`: optional map from raw values (stringified) to canonical labels, at most 64 entries, keys and labels 1 to 256 characters. Unmapped values pass through.
-- Unknown keys are rejected on the block, each source and each attribute. Bounds are denial-of-service limits for HTTP input, not design limits.
+- Unknown keys are rejected on the block, each source, each attribute and each metric. Bounds are denial-of-service limits for HTTP input, not design limits.
 
-Two whole-definition rules apply only when `dynamic` is present, at both `entitySchema` and registration:
+Whole-definition rules apply only when `dynamic` is present, at both `entitySchema` and registration:
 
 - Servable identity: `identityField` is a single literal field, or one unconditional ranking branch of literal fields and separators whose `documentsFilter` is exactly the derived presence filter, with no field evaluations, no `skipTypePrepend` and at most eight distinct fields. The built-in `host` identity fits; `user` does not.
-- No attribute `field` may be an identity field.
+- No attribute or metric `field` may be an identity field.
+- No metric `field` or `name` may be an identity field, `entity.id`, or `last_seen`. Metric `name` may also not be any attribute name of the definition. The same metric `name` on several sources must keep the same `agg` and `unit`.
 
 ### Type names
 

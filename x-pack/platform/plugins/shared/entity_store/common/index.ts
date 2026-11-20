@@ -142,8 +142,16 @@ export {
   ENTITY_DEFINITION_TYPE_MAX_LENGTH,
 } from './domain/definitions/entity_schema';
 export type { EntityDefinitionManagedBy } from './domain/definitions/entity_schema';
-export type { DynamicAttribute, DynamicSource } from './domain/definitions/dynamic';
+export type {
+  DynamicAttribute,
+  DynamicMetric,
+  DynamicMetricAgg,
+  DynamicMetricUnit,
+  DynamicSource,
+} from './domain/definitions/dynamic';
 export {
+  METRIC_AGGS,
+  METRIC_UNITS,
   getIdentityCompositions,
   getIdentityFields,
   getPresenceFilter,
