@@ -118,7 +118,8 @@ export const inspectVendorApi = async ({
       );
       continue;
     }
-    if (known?.captured) {
+    // Only the captured URL is one the vendor wouldn't serve; one given in its place is inspected.
+    if (known?.captured && known.url === url) {
       log.warning(
         `Skipping ${name}: it is captured, so the vendor would not serve it to a plain fetch. ` +
           'Its snapshot has only the operations the connector calls.'
@@ -137,7 +138,9 @@ export const inspectVendorApi = async ({
     loaded[name] = document;
     if (known && known.url !== url) {
       problems.push(
-        `${name} is ${known.url} in ${MANIFEST}; to move it, record with --source ${name}=${url}`
+        known.captured
+          ? `${name} is captured from ${known.url} in ${MANIFEST}; to move it, delete its snapshot and record with --source ${name}=${url}`
+          : `${name} is ${known.url} in ${MANIFEST}; to move it, record with --source ${name}=${url}`
       );
     } else if (directory && !known) {
       added[name] = {

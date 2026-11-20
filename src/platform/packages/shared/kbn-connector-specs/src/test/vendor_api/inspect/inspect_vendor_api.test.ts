@@ -363,6 +363,43 @@ actions:
     expect(warnings).toEqual([expect.stringContaining('Skipping v1: it is captured')]);
   });
 
+  it('inspects a URL given in place of a captured source, which is not the one that was captured', async () => {
+    await fs.writeFile(
+      path.join(directory, 'manifest.json'),
+      JSON.stringify({
+        sources: {
+          v1: {
+            format: 'openapi',
+            url: SPEC_URL,
+            captured: true,
+            note: 'Captured with credentials.',
+            fetchedAt: '2026-10-08T00:00:00.000Z',
+          },
+        },
+        operations: {},
+      })
+    );
+    const fetched: string[] = [];
+    const warnings: string[] = [];
+
+    const { output, problems } = await inspect({
+      sources: { v1: SWAGGER_URL },
+      directory,
+      fetchText: async (url) => {
+        fetched.push(url);
+        return JSON.stringify(swagger);
+      },
+      log: { info: () => {}, warning: (message) => warnings.push(message) },
+    });
+
+    expect(fetched).toEqual([SWAGGER_URL]);
+    expect(warnings).toEqual([]);
+    expect(output).toContain('/things');
+    expect(problems).toEqual([
+      `v1 is captured from ${SPEC_URL} in manifest.json; to move it, delete its snapshot and record with --source v1=${SWAGGER_URL}`,
+    ]);
+  });
+
   it('does not move a source the manifest has to another URL', async () => {
     await inspect({ directory });
     const { manifestUpdated, problems } = await inspect({
