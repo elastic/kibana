@@ -14,6 +14,9 @@ import { COMMON_API_HEADERS } from '../fixtures/constants';
 // Matches global.setup.ts: a runtime flag override takes ~10s to reach every Cloud node.
 const RESUME_PROPAGATION_TIMEOUT_MS = 30_000;
 const RESUME_RETRY_INTERVAL_MS = 1_000;
+// Nodes other than the one handling a `_settings` override adopt it on their next config-overrides
+// poll, a 10s timer in core_app.ts, so only this window bounds convergence across every node.
+const OVERRIDE_PROPAGATION_MS = 12_000;
 
 export interface SignificantEventsTestApiService {
   runSignificantEventsDiscovery: () => Promise<{ executionId: string }>;
@@ -35,9 +38,9 @@ export function getSignificantEventsTestApiService({
   log: ScoutLogger;
 }): SignificantEventsTestApiService {
   // Suites should rely on global.setup.ts / global.teardown.ts for the default availability
-  // override. These helpers are only for intentional mid-test toggles (e.g. asserting a 403 when
-  // the flag is off) — do not wrap an entire describe in enable/disable, since that races with
-  // sibling suites if Playwright ever runs with workers > 1.
+  // override. These helpers are only for suites whose subject is the flag itself — do not wrap an
+  // entire describe in enable/disable, since that races with sibling suites if Playwright ever
+  // runs with workers > 1.
   const setAvailability = async (enabled: boolean) => {
     await kbnClient.request({
       path: '/internal/core/_settings',
@@ -49,6 +52,7 @@ export function getSignificantEventsTestApiService({
         },
       },
     });
+    await delay(OVERRIDE_PROPAGATION_MS);
   };
 
   return {
