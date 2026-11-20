@@ -11,6 +11,7 @@ import type { TaskLifecycleEvent } from '../polling_lifecycle';
 import type { TaskRun } from '../task_events';
 import { type SerializedHistogram, SimpleHistogram, MetricCounterService } from './lib';
 import type { ITaskMetricsAggregator } from './types';
+import { taskManagerMetricsTelemetry } from '../otel/task_metrics_telemetry';
 
 const HDR_HISTOGRAM_MAX = 30000; // 30 seconds
 const HDR_HISTOGRAM_BUCKET_SIZE = 100; // 100 millis
@@ -65,9 +66,12 @@ export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskCl
     }
     this.counter.increment(TaskClaimKeys.TOTAL);
 
+    let durationMs: number | undefined;
     if (taskEvent.timing) {
-      const durationInMs = taskEvent.timing.stop - taskEvent.timing.start;
-      this.durationHistogram.record(durationInMs);
+      durationMs = taskEvent.timing.stop - taskEvent.timing.start;
+      this.durationHistogram.record(durationMs);
     }
+
+    taskManagerMetricsTelemetry.recordTaskClaim({ success, durationMs });
   }
 }

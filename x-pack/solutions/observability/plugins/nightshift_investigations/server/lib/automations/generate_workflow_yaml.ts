@@ -7,6 +7,7 @@
 
 import { stringify } from 'yaml';
 import { IF_CONDITION_MAX_LENGTH } from '@kbn/workflows';
+import { SLACK_MESSAGE_EVENT_ID } from '@kbn/connector-specs';
 import {
   CLASSIC_ALERT_SOURCE,
   EXTERNAL_ALERT_SOURCE,
@@ -22,7 +23,6 @@ export const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
 
 const ALERT_TRIGGER_TYPE = 'alerting.v1.alertStatusChanged';
 const ALERT_V2_TRIGGER_TYPE = 'alerting.alertStatusChanged';
-const SLACK_MESSAGE_TRIGGER_TYPE = 'slack2.message';
 const AUTOMATION_TIMEOUT_MARGIN_SECONDS = 60;
 
 // Top-level messages only, since replies are handled by the managed Slack thread workflow. Edits
@@ -381,7 +381,7 @@ function generateSlackWorkflow(
     kind: 'slack' as const,
     triggers: [
       {
-        type: SLACK_MESSAGE_TRIGGER_TYPE,
+        type: SLACK_MESSAGE_EVENT_ID,
         'connector-id': ELASTIC_APPS_SLACK_CONNECTOR_ID,
         ...(condition ? { on: { condition } } : {}),
       },
@@ -395,7 +395,6 @@ function generateSlackWorkflow(
           subject_type: 'slack_thread',
           slack_thread: SLACK_THREAD,
           title: automation.name,
-          summary: automation.name,
           trigger_type: 'automatic',
           instructions: automation.execution.promptTemplate ?? '',
           message: SLACK_MESSAGE_PROMPT,

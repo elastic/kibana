@@ -59,7 +59,11 @@ export const registerHuntWorkerIndexCoverageRoute = ({
         try {
           const spaceId = getSpaceId(request);
           const esClient = huntEsClient({ getClusterClient, request });
-          const indexPatterns = await resolveHuntUniverse(context, logger);
+          const { patterns: indexPatterns, policySkipped } = await resolveHuntUniverse(
+            context,
+            logger,
+            isCpsEnabled()
+          );
           const { workflowId, serviceAccountId } = await getWorkersService().getHuntCoverageInputs(
             spaceId,
             request
@@ -70,6 +74,7 @@ export const registerHuntWorkerIndexCoverageRoute = ({
             request,
             spaceId,
             indexPatterns,
+            policySkippedPatterns: policySkipped,
             crossProjectSearch: isCpsEnabled(),
             workflowId,
             serviceAccountId,

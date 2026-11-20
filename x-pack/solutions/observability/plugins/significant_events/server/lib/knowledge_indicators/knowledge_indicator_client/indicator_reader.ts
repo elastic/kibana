@@ -291,38 +291,25 @@ export class IndicatorReader {
   }
 
   /**
-   * Pure ES|QL probe: returns the timestamp of the most recent **active**
-   * feature revision for a source (neither tombstoned nor excluded), optionally
-   * scoped to a set of feature types.
-   *
-   * Only active revisions are counted on purpose, so a `null` result reliably
-   * signals an empty active set for the requested types. `shouldIdentifyFeatures`
-   * relies on this in two ways: a `null` inferred result forces re-identification
-   * (empty or user-wiped set), while the computed-type timestamp drives the
-   * recency throttle.
+   * Returns the newest timestamp among active latest feature revisions for a
+   * source, optionally scoped to a set of feature types. A latest revision
+   * must be live, included, and unexpired to count.
    */
   async getLatestRevisionTimestamp(
     sourceId: string,
     options: { types?: string[] } = {}
   ): Promise<{ '@timestamp': string } | null> {
-    const featureTypesFilter = options.types?.length
-      ? inPredicate(FEATURE_TYPE, options.types)
-      : undefined;
+    const featureTypesFilter = inPredicate(FEATURE_TYPE, options.types ?? []);
     const where = combineWhere(
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
       inPredicate(SOURCE_ID, [sourceId])
     );
 
-    const docs = await this.revisionReader.fetchLatestRevisions(
+    const timestamp = await this.revisionReader.fetchLatestRevisionTimestamp(
       where,
       combineWhere(IS_NOT_DELETED, IS_NOT_EXCLUDED, IS_NOT_EXPIRED, featureTypesFilter)
     );
-    if (docs.length === 0) return null;
-
-    const latest = docs.reduce((best, current) =>
-      current['@timestamp'] > best['@timestamp'] ? current : best
-    );
-    return { '@timestamp': latest['@timestamp'] };
+    return timestamp === null ? null : { '@timestamp': timestamp };
   }
 
   async getQueryLinks(
