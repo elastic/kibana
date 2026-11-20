@@ -553,6 +553,23 @@ describe('LibraryFetcher.getTemplate', () => {
   });
 });
 
+describe('LibraryFetcher.getCachedTemplates', () => {
+  it('returns nothing before the first successful load', () => {
+    expect(buildFetcher().getCachedTemplates()).toBeUndefined();
+  });
+
+  it('returns the last validated catalog without fetching, even after the TTL expires', async () => {
+    queueRefresh(sampleManifest, sampleCatalog());
+    const fetcher = buildFetcher();
+    await fetcher.listTemplates();
+    mockedFetch.mockClear();
+    advanceClock(TTL_MS + 1);
+
+    expect(fetcher.getCachedTemplates()?.map((template) => template.slug)).toEqual(['demo']);
+    expect(mockedFetch).not.toHaveBeenCalled();
+  });
+});
+
 describe('LibraryFetcher.getHealth', () => {
   it('starts with no timestamps and no error', () => {
     const fetcher = buildFetcher();

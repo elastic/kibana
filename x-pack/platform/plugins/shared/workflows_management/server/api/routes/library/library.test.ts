@@ -60,6 +60,7 @@ describe('Library Routes', () => {
   let routeHandlers: Record<string, { handler: MockRouteHandler }>;
   let mockLibraryService: {
     listTemplates: jest.Mock;
+    getCachedTemplates: jest.Mock;
     getTemplate: jest.Mock;
     getHealth: jest.Mock;
   };
@@ -94,6 +95,7 @@ describe('Library Routes', () => {
     routeHandlers = {};
     mockLibraryService = {
       listTemplates: jest.fn(),
+      getCachedTemplates: jest.fn(),
       getTemplate: jest.fn(),
       getHealth: jest.fn(),
     };

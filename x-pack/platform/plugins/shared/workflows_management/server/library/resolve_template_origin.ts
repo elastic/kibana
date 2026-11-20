@@ -19,15 +19,15 @@ import type { LibraryService } from './library_service';
 export const CATALOG_LOOKUP_TIMEOUT_MS = 3_000;
 
 export interface ResolveTemplateOriginParams {
-  libraryService: Pick<LibraryService, 'listTemplates'>;
+  libraryService: Pick<LibraryService, 'listTemplates' | 'getCachedTemplates'>;
   logger: Logger;
   slug: string;
   version: string | undefined;
   origin: WorkflowTemplateOrigin;
 }
 
-// A stalled registry must not hold up the save: past the deadline, the refresh keeps
-// running in the background and fills the cache for the next lookup.
+// A stalled registry must not hold up the save: past the deadline, the lookup falls back to
+// the last validated catalog, and the refresh keeps running in the background.
 const listCatalogTemplates = async (
   libraryService: ResolveTemplateOriginParams['libraryService'],
   logger: Logger
@@ -41,19 +41,19 @@ const listCatalogTemplates = async (
       return result.value;
     }
     logger.debug(
-      `Template catalog lookup timed out after ${CATALOG_LOOKUP_TIMEOUT_MS}ms, storing the template origin as custom`
+      `Template catalog lookup timed out after ${CATALOG_LOOKUP_TIMEOUT_MS}ms, using the last cached catalog`
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    logger.debug(`Template catalog unavailable, storing the template origin as custom: ${message}`);
+    logger.debug(`Template catalog unavailable, using the last cached catalog: ${message}`);
   }
-  return undefined;
+  return libraryService.getCachedTemplates();
 };
 
 /**
  * Template origin to store on a workflow created from a template that may not be in the
- * catalog: the slug and version for a catalog template, otherwise `custom`, so values that
- * users choose never reach telemetry.
+ * catalog: the slug and version for a catalog template, otherwise `custom` (also when no
+ * catalog is available), so values that users choose never reach telemetry.
  */
 export const resolveTemplateOrigin = async ({
   libraryService,

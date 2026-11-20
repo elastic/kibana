@@ -26,6 +26,7 @@ const catalogRow: Template = {
 
 const buildLibraryService = (templates: Template[]) => ({
   listTemplates: jest.fn().mockResolvedValue(templates),
+  getCachedTemplates: jest.fn().mockReturnValue(templates),
 });
 
 describe('resolveTemplateOrigin', () => {
@@ -80,6 +81,7 @@ describe('resolveTemplateOrigin', () => {
       listTemplates: jest
         .fn()
         .mockRejectedValue(new LibraryFetchError('upstream down', 'unavailable', 'cdn')),
+      getCachedTemplates: jest.fn().mockReturnValue(undefined),
     };
 
     await expect(
@@ -103,10 +105,11 @@ describe('resolveTemplateOrigin', () => {
       jest.useRealTimers();
     });
 
-    it('stores the template as custom once the lookup deadline passes', async () => {
+    const resolveWithStalledRefresh = async (cachedTemplates: Template[] | undefined) => {
       const logger = loggerMock.create();
       const libraryService = {
         listTemplates: jest.fn(() => new Promise<Template[]>(() => {})),
+        getCachedTemplates: jest.fn().mockReturnValue(cachedTemplates),
       };
 
       const resolved = resolveTemplateOrigin({
@@ -118,8 +121,24 @@ describe('resolveTemplateOrigin', () => {
       });
       await jest.advanceTimersByTimeAsync(CATALOG_LOOKUP_TIMEOUT_MS);
 
-      await expect(resolved).resolves.toEqual({ templateSlug: 'custom', templateOrigin: 'remix' });
+      return { resolved: await resolved, logger };
+    };
+
+    it('falls back to the last cached catalog once the lookup deadline passes', async () => {
+      const { resolved, logger } = await resolveWithStalledRefresh([catalogRow]);
+
+      expect(resolved).toEqual({
+        templateSlug: 'triage-alerts',
+        templateVersion: '1.2.0',
+        templateOrigin: 'remix',
+      });
       expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('timed out'));
+    });
+
+    it('stores the template as custom when there is no cached catalog either', async () => {
+      const { resolved } = await resolveWithStalledRefresh(undefined);
+
+      expect(resolved).toEqual({ templateSlug: 'custom', templateOrigin: 'remix' });
     });
   });
 });
