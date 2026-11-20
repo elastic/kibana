@@ -126,7 +126,7 @@ const DATA_STREAMS_ARGS: typeof INDICES_ARGS = {
 };
 
 const meta: Meta<ProjectDefaultFlyoutProps> = {
-  title: 'Search boost/Project default flyout',
+  title: 'Search boost/Flyouts/Project default',
   component: ProjectDefaultFlyout,
   // Remount when the initial selection changes, so the controls take effect.
   render: (args) => (
