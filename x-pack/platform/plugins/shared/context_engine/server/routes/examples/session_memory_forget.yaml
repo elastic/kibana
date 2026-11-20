@@ -50,7 +50,7 @@ responses:
             value:
               statusCode: 403
               error: Forbidden
-              message: The caller has no user profile, so the request cannot be attributed to a user. Set `user_id`, log in to Kibana once to create a profile, or use an API key whose owner has one.
+              message: The caller has no user profile, so the request cannot be attributed to a user. Log in to Kibana once to create a profile, use an API key whose owner has one, or set `user_id` if you have the `contextEngine:manage_memory` privilege.
   404:
     content:
       application/json:

@@ -69,7 +69,7 @@ const rememberBodySchema = schema.object({
       validate: validateNonBlank,
       meta: {
         description:
-          "The user the memory belongs to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`.",
+          "The Kibana user profile UID that the memory belongs to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`.",
       },
     })
   ),
@@ -110,7 +110,9 @@ const rememberBodySchema = schema.object({
           Object.keys(attributes).length > MAX_SESSION_MEMORY_ATTRIBUTES
             ? `must have at most ${MAX_SESSION_MEMORY_ATTRIBUTES} attributes`
             : undefined,
-        meta: { description: 'String hints about the memory for dreaming.' },
+        meta: {
+          description: `String hints about the memory for dreaming. Accepts up to ${MAX_SESSION_MEMORY_ATTRIBUTES} entries, with non-blank keys of 1 to ${MAX_SESSION_MEMORY_ATTRIBUTE_KEY_LENGTH} characters.`,
+        },
       }
     )
   ),
@@ -131,7 +133,7 @@ const forgetBodySchema = schema.object({
       validate: validateNonBlank,
       meta: {
         description:
-          "The user the memories belong to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`. Memories of any other user return `not_found`.",
+          "The Kibana user profile UID that the memories belong to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`.",
       },
     })
   ),
@@ -162,7 +164,12 @@ const forgetResponseSchema = () =>
               schema.literal('not_found'),
               schema.literal('failed'),
             ],
-            { meta: { description: 'What happened to the memory.' } }
+            {
+              meta: {
+                description:
+                  'What happened to the memory: `forgotten` if a tombstone was written, `already_forgotten` if it was already tombstoned, `not_found` if it does not exist or belongs to another user or space, or `failed` if Elasticsearch rejected the tombstone.',
+              },
+            }
           ),
           error: schema.maybe(
             schema.string({
@@ -226,8 +233,8 @@ export const registerSessionMemoryRoutes = ({
         'Returns 202 with the memory id and writes the memory in the background, because semantic indexing runs inside the write. The memory becomes searchable after the background write completes.',
         "Requires the `contextEngine:write` privilege. Without `user_id`, the route writes the memory for the caller's user profile, and a caller without a user profile gets a 403. Naming another user in `user_id` also requires `contextEngine:manage_memory`.",
         'Each AI index in `ai_index_ids` must exist in this space, and the caller requires the Elasticsearch `write` privilege on its backing index. Otherwise, the route rejects the request and writes nothing.',
-        'The route writes one `memory_remember` audit event per request, when the background write finishes or when it rejects the request. The route does not report a failed background write in the response. Instead, it logs the error to the Kibana logs and writes a failure audit event.',
-        'Returns a 404 response when `contextEngine:enabled` is off in this space, when memory is turned off, or when an AI index in `ai_index_ids` does not exist.',
+        'After authorization, validation, and feature-flag checks pass, the route writes one `memory_remember` audit event per request, when the background write finishes or when it rejects the request. The route does not report a failed background write in the response. Instead, it logs the error to the Kibana logs and writes a failure audit event.',
+        'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off (`contextEngine:memoryEnabled`), or when an AI index in `ai_index_ids` does not exist.',
         CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
       options: {
@@ -365,10 +372,10 @@ export const registerSessionMemoryRoutes = ({
       access: 'public',
       summary: 'Forget session memories',
       description: [
+        'Forgets session memories by ID for the target user. The route reports a memory of another user or another space as `not_found`, so it does not reveal whether the memory exists.',
         "Requires the `contextEngine:write` privilege. Without `user_id`, the route forgets the caller's own memories, and a caller without a user profile gets a 403. Naming another user in `user_id` also requires `contextEngine:manage_memory`.",
-        'Forgets session memories by id for that user. The route reports a memory of another user or another space as `not_found`, so it does not reveal whether the memory exists.',
-        'Forgetting writes a tombstone so reads stop returning the memory, while Elasticsearch keeps its revisions until retention removes them. If Elasticsearch rejects a tombstone, the route returns `failed` with `error` and the caller can retry that id.',
-        'The route writes one `memory_forget` audit event per unique memory id. Forgetting still works when memory is turned off.',
+        'Forgetting writes a tombstone so reads stop returning the memory after the next Elasticsearch refresh, while Elasticsearch keeps its revisions until retention removes them. A read immediately after forgetting can still return the memory, and forgetting a memory right after writing it can return `not_found` until that write is visible. If Elasticsearch rejects a tombstone, the route returns `failed` with `error` and the caller can retry that ID.',
+        'After authorization, validation, and feature-flag checks pass, the route writes one `memory_forget` audit event per unique memory ID. Forgetting still works when memory is turned off.',
         'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).',
         CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),

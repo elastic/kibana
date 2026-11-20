@@ -23,7 +23,7 @@ export const MEMORY_WRITE_SECURITY: RouteSecurity = {
 export const MANAGE_MEMORY_REQUIRED_MESSAGE = `Acting on the memory of another user requires the [${apiPrivileges.manageMemory}] privilege.`;
 
 export const NO_PROFILE_MESSAGE =
-  'The caller has no user profile, so the request cannot be attributed to a user. Set `user_id`, log in to Kibana once to create a profile, or use an API key whose owner has one.';
+  'The caller has no user profile, so the request cannot be attributed to a user. Log in to Kibana once to create a profile, use an API key whose owner has one, or set `user_id` if you have the `contextEngine:manage_memory` privilege.';
 
 /** Creates an `Error` with `name: 'Forbidden'` for consistent audit logging. */
 export const forbiddenError = (message: string): Error =>

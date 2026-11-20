@@ -12,6 +12,17 @@ requestBody:
             content: checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy.
             attributes:
               incident: INC-4211
+        reviseRequestExample:
+          summary: "Revise an existing session memory"
+          description: "Example request that replaces an existing session memory by passing its `id`"
+          value:
+            id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+            session_id: 8f3c2a1e
+            ai_index_ids:
+              - ops-memory
+            content: checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy; mitigated by raising max_connections to 200.
+            attributes:
+              incident: INC-4211
 responses:
   202:
     content:
@@ -32,7 +43,7 @@ responses:
             value:
               statusCode: 403
               error: Forbidden
-              message: The caller has no user profile, so the request cannot be attributed to a user. Set `user_id`, log in to Kibana once to create a profile, or use an API key whose owner has one.
+              message: The caller has no user profile, so the request cannot be attributed to a user. Log in to Kibana once to create a profile, use an API key whose owner has one, or set `user_id` if you have the `contextEngine:manage_memory` privilege.
           manageMemoryRequiredExample:
             summary: "Missing manage memory privilege"
             description: "`user_id` names another user and the caller lacks `contextEngine:manage_memory`"
