@@ -221,6 +221,97 @@ describe('rule doctor review', () => {
     it('lets every other cause through at once', () => {
       expect(proceed('missing_field', 0)).toBe('true');
     });
+
+    it('leaves a paused rule alone', () => {
+      const paused = render((review.step('gate').with?.proceed as string).slice(1), {
+        consts,
+        steps: {
+          classify: { output: { cause: 'missing_field', failure_streak: 0 } },
+          recall_decisions: { output: { paused_until: '2026-12-01T00:00:00Z' } },
+        },
+      });
+      expect(paused).toBe('false');
+    });
+
+    // Dreaming can rewrite lessons, so a gate that read them could silence a rule.
+    it('never reads lessons', () => {
+      const gates = ['gate', 'recall_decisions', 'resolve_fix', 'judge_fix'].map((name) =>
+        JSON.stringify(review.step(name))
+      );
+      expect(gates.some((gate) => gate.includes('recall_lessons'))).toBe(false);
+    });
+  });
+
+  describe('recall_decisions', () => {
+    const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString();
+    const dismissed = (overrides: Record<string, unknown> = {}) => ({
+      title: 'Suppress repeated alerts',
+      decidedAt: daysAgo(1),
+      dismissReason: 'risk_accepted',
+      actionInput: { doctored_rule_id: 'rule-1', doctored_fix: 'lookback:now-15m' },
+      ...overrides,
+    });
+    const recall = (field: string, proposals: unknown[]) =>
+      render(review.step('recall_decisions').with?.[field], {
+        consts,
+        inputs: { rule_uuid: 'rule-1' },
+        steps: { past_proposals: { output: { proposals } } },
+      });
+
+    it.each(['risk_accepted', 'handled_elsewhere'])('pauses the rule after %s', (reason) => {
+      expect(recall('paused_until', [dismissed({ dismissReason: reason })])).not.toBe('');
+    });
+
+    it.each(['no_reason', 'other', 'duplicate', 'false_positive'])(
+      'does not pause the rule after %s',
+      (reason) => {
+        expect(recall('paused_until', [dismissed({ dismissReason: reason })])).toBe('');
+      }
+    );
+
+    it('ends the pause after 30 days', () => {
+      expect(recall('paused_until', [dismissed({ decidedAt: daysAgo(31) })])).toBe('');
+    });
+
+    it('ignores proposals for other rules and from other workers', () => {
+      const proposals = [
+        dismissed({ actionInput: { doctored_rule_id: 'rule-2', doctored_fix: 'query:a' } }),
+        dismissed({ actionInput: { id: 'rule-1' } }),
+      ];
+      expect(recall('paused_until', proposals)).toBe('');
+      expect(recall('dismissed_keys', proposals)).toBe('');
+      expect(recall('dismissed', proposals)).toBe('');
+    });
+
+    it('lists what was dismissed, with the reason', () => {
+      const list = recall('dismissed', [dismissed({ rationale: 'We want every alert' })]);
+      expect(list).toContain(
+        '"Suppress repeated alerts" (`lookback:now-15m`), dismissed as risk_accepted'
+      );
+      expect(list).toContain('We want every alert');
+    });
+
+    it('lists one dismissal per line, and no key for a manual step', () => {
+      const manual = dismissed({
+        title: 'Map the field as keyword',
+        actionInput: { doctored_rule_id: 'rule-1', doctored_fix: 'none:' },
+      });
+      const lines = recall('dismissed', [dismissed(), manual]).split('\n');
+      expect(lines).toHaveLength(2);
+      expect(lines[1]).toContain('"Map the field as keyword", dismissed as');
+    });
+
+    it('runs without past proposals', () => {
+      expect(recall('paused_until', [])).toBe('');
+      expect(recall('dismissed_keys', [])).toBe('');
+    });
+
+    it('reads only dismissed AlertZero proposals', () => {
+      expect(review.step('past_proposals').with?.query).toMatchObject({
+        origin: 'alertzero',
+        decision: 'dismissed',
+      });
+    });
   });
 
   describe('collect_facts', () => {
@@ -282,6 +373,38 @@ describe('rule doctor review', () => {
           list_data_views: { output: { data_view: dataViews } },
         },
       });
+
+    describe('dismissed fixes', () => {
+      const out = { fix_type: 'lookback', proposed_from: 'now-15m' };
+      const key = render(review.step('fix_key').with?.key, {
+        steps: { diagnose_rule: { output: { structured_output: out } } },
+      });
+      const resolve = (field: string, dismissedKeys: string) =>
+        render(review.step('resolve_fix').with?.[field], {
+          consts,
+          steps: {
+            diagnose_rule: { output: { structured_output: out } },
+            fetch_rule: { output: {} },
+            classify: { output: { cause: 'execution_gap' } },
+            fix_key: { output: { key } },
+            recall_decisions: { output: { dismissed_keys: dismissedKeys } },
+          },
+        });
+
+      it('keys a fix on its type and value', () => {
+        expect(key).toBe('lookback:now-15m');
+      });
+
+      it('refuses a fix people already dismissed', () => {
+        expect(resolve('fix_type', '§lookback:now-15m§')).toBe('none');
+        expect(resolve('repeat', '§lookback:now-15m§')).toBe('true');
+      });
+
+      it('keeps the same fix type with another value', () => {
+        expect(resolve('fix_type', '§lookback:now-150m§')).toBe('lookback');
+        expect(resolve('repeat', '§lookback:now-150m§')).toBe('');
+      });
+    });
 
     it.each(['query', 'timestamp_override', 'suppression'])('keeps a %s fix', (fix) => {
       expect(fixType({ fix_type: fix })).toBe(fix);
@@ -466,6 +589,16 @@ describe('rule doctor review', () => {
       expect(inputs.autoApprove).toBe(false);
     });
 
+    // Without the tags a later review cannot find the proposal, so it would repeat it.
+    it('tags every proposal with the rule and the fix', () => {
+      const arms = [...editArms, 'propose_disable', 'propose_ml_job', 'propose_manual'];
+      for (const name of arms) {
+        const inputs = review.step(name).with?.inputs as Record<string, any>;
+        expect(inputs.actionInput.doctored_rule_id).toBe('{{ inputs.rule_uuid }}');
+        expect(inputs.actionInput.doctored_fix).toBe('{{ steps.fix_key.output.key }}');
+      }
+    });
+
     it('disables a rule only through the gated disable action', () => {
       const inputs = review.step('propose_disable').with?.inputs as Record<string, any>;
       expect(inputs.actionWorkflowId).toBe(ALERTZERO_ACTION_DISABLE_RULE_WORKFLOW.id);
@@ -560,6 +693,124 @@ describe('rule doctor review', () => {
 
     it('does not wait for the next run of a disabled rule', () => {
       expect(review.step('wait_for_next_run').if).toContain("kind != 'disable'");
+    });
+  });
+
+  describe('memory', () => {
+    const outcome = (decision: Record<string, unknown>, followup: Record<string, unknown> = {}) =>
+      render(review.step('judge_outcome').with?.outcome, {
+        steps: { record_decision: { output: decision }, judge_followup: { output: followup } },
+      });
+
+    it.each([
+      [{ dismissed: true }, {}, 'dismissed'],
+      [{ approved: true, applied: true, kind: 'index' }, { healed: true }, 'healed'],
+      [{ approved: true, applied: true, kind: 'index' }, { ran_after_fix: true }, 'not_healed'],
+      [{ approved: true, applied: true, kind: 'index' }, {}, 'not_verified'],
+      [{ approved: true, applied: false, kind: 'index' }, {}, 'action_failed'],
+      [{ approved: true, kind: 'manual' }, {}, 'left_to_a_person'],
+      [{}, {}, 'undecided'],
+    ])('names the outcome %#', (decision, followup, expected) => {
+      expect(outcome(decision, followup)).toBe(expected);
+    });
+
+    // One AI index per space keeps a space's rule names and queries out of the others.
+    it('keeps notes and lessons in the space they came from', () => {
+      const written = review.step('write_memory').with?.ai_index_id;
+      expect(written).toBe('{{ consts.memory_index }}-{{ workflow.spaceId }}');
+      expect(review.step('recall_lessons').with?.index).toBe(
+        'ai-index-idx-{{ consts.memory_index }}-{{ workflow.spaceId }}'
+      );
+    });
+
+    it('writes a note dreaming can read', () => {
+      const ki = review.step('write_memory').with?.ki as Record<string, unknown>;
+      expect(ki.type).toBe('memory.session_fact');
+    });
+
+    it('never fails the review over a note or a lesson', () => {
+      for (const name of ['write_memory', 'recall_lessons', 'past_proposals', 'fetch_decision']) {
+        expect(review.step(name)).toMatchObject({ 'on-failure': { continue: true } });
+      }
+    });
+
+    // Actions run as the approver, who cannot write AI indices.
+    it('writes notes from the review only', () => {
+      const actions = [
+        ALERTZERO_ACTION_EDIT_RULE_WORKFLOW,
+        ALERTZERO_ACTION_DISABLE_RULE_WORKFLOW,
+        ALERTZERO_ACTION_START_ML_JOBS_WORKFLOW,
+      ];
+      expect(actions.some(({ yaml }) => yaml.includes('context-engine.'))).toBe(false);
+    });
+
+    describe('investigation notes', () => {
+      const note = (name: string, steps: Record<string, unknown>) =>
+        render(review.step(name).with?.message, { consts, steps });
+      const ending = (name: string, decision: Record<string, unknown> = {}) =>
+        note('post_outcome', {
+          judge_outcome: { output: { outcome: name } },
+          fetch_decision: { output: decision },
+          fix_key: { output: { key: 'lookback:now-15m' } },
+          resolve_proposal_kind: { output: { kind: 'lookback' } },
+        });
+
+      it('says what earlier reviews bring into this one', () => {
+        const message = note('post_recall', {
+          recall_decisions: { output: { dismissed: '- November 19, "Suppress", dismissed' } },
+          recall_lessons: {
+            output: { hits: { hits: [{ _source: { title: 'Index fix healed' } }] } },
+          },
+        });
+        expect(message).toContain('The doctor will not propose them again');
+        expect(message).toContain('Index fix healed');
+      });
+
+      it('says when a dismissal pauses the rule', () => {
+        expect(ending('dismissed', { dismissReason: 'risk_accepted' })).toContain(
+          'leaves this rule alone until'
+        );
+      });
+
+      it('says when a dismissal only blocks the fix', () => {
+        const message = ending('dismissed', { dismissReason: 'other', rationale: 'Wrong field' });
+        expect(message).toContain('dismissed as other: Wrong field');
+        expect(message).toContain('will not propose this fix for this rule again');
+      });
+
+      it.each([
+        ['action_failed', 'Fix not applied'],
+        ['left_to_a_person', 'Left to a person'],
+        ['undecided', 'No decision'],
+      ])('explains the %s ending', (name, heading) => {
+        expect(ending(name)).toContain(heading);
+      });
+
+      // post_followup already covers a fix that was applied.
+      it.each(['healed', 'not_healed', 'not_verified'])('leaves %s to the follow-up', (name) => {
+        expect(review.step('post_outcome').if).not.toContain(`'${name}'`);
+      });
+
+      it('says whether the note for later reviews was saved', () => {
+        expect(note('post_memory', { write_memory: { output: { id: 'a' } } })).toContain(
+          'Saved for later reviews'
+        );
+        expect(note('post_memory', { write_memory: { error: { message: 'denied' } } })).toContain(
+          'Note not saved'
+        );
+      });
+
+      it('never fails the review over a note', () => {
+        for (const name of ['post_recall', 'post_repeat_refused', 'post_outcome', 'post_memory']) {
+          expect(review.step(name)).toMatchObject({ 'on-failure': { continue: true } });
+        }
+      });
+    });
+
+    it('gives the agent lessons as hints', () => {
+      const message = review.step('diagnose_rule').with?.message as string;
+      expect(message).toContain('They are hints, not facts');
+      expect(message).toContain('Do not return the same fix again');
     });
   });
 

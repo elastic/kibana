@@ -50,6 +50,8 @@ outputs:
     type: string
   - name: cause
     type: string
+  - name: paused
+    type: boolean
   - name: approved
     type: boolean
   - name: healed
@@ -68,6 +70,13 @@ consts:
   cluster_failures_in_a_row: 3
   # The only causes where turning the rule off can be right: it can never find data.
   disable_causes: ",no_index,no_data,no_threat_index,no_data_view,"
+  # A dismissal for one of these reasons leaves the rule alone for 30 days.
+  pause_reasons: ",risk_accepted,handled_elsewhere,"
+  pause_seconds: 2592000
+  # The newest dismissed AlertZero proposals in the space that past decisions are read from.
+  past_proposals_size: 100
+  # One AI index per space, so the notes of one space never show in another.
+  memory_index: "security-rule-doctor"
 steps:
   - name: fetch_rule
     type: kibana.request
@@ -198,15 +207,71 @@ steps:
       # A warning means the rule still runs, which changes how the problem is put.
       warned: "${{ steps.fetch_rule.output.execution_summary.last_execution.status == 'partial failure' }}"
 
+  # What people decided on this rule's earlier fixes. Proposals are the record:
+  # Kibana owns them and no model can edit them, so only they gate the review.
+  # Fails open: without them the review runs as if there were none.
+  - name: past_proposals
+    type: kibana.request
+    if: "${{ steps.classify.output.cause != null }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      query:
+        origin: alertzero
+        decision: dismissed
+        order: newest
+        size: "{{ consts.past_proposals_size }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "1"
+        x-elastic-internal-origin: kibana
+    on-failure:
+      continue: true
+
+  # Only proposals this doctor raised for this rule count; Rule Tuning edits the
+  # same rules with the same action.
+  - name: recall_decisions
+    type: data.set
+    if: "${{ steps.classify.output.cause != null }}"
+    with:
+      paused_until: >-
+        {%- assign now = "now" | date: "%s" | plus: 0 -%}
+        {%- assign until = 0 -%}
+        {%- for proposal in steps.past_proposals.output.proposals -%}
+        {%- assign reason = ',' | append: proposal.dismissReason | append: ',' -%}
+        {%- if proposal.actionInput.doctored_rule_id == inputs.rule_uuid and consts.pause_reasons contains reason -%}
+        {%- assign ends = proposal.decidedAt | date: "%s" | plus: consts.pause_seconds -%}
+        {%- if ends > now and ends > until -%}{%- assign until = ends -%}{%- endif -%}
+        {%- endif -%}
+        {%- endfor -%}
+        {%- if until > 0 -%}{{ until | date: "%Y-%m-%dT%H:%M:%SZ", "UTC" }}{%- endif -%}
+      # `§key§` per dismissed fix, so a repeat is one `contains` check.
+      dismissed_keys: >-
+        {%- for proposal in steps.past_proposals.output.proposals -%}
+        {%- if proposal.actionInput.doctored_rule_id == inputs.rule_uuid and proposal.actionInput.doctored_fix != blank -%}§{{ proposal.actionInput.doctored_fix }}§{%- endif -%}
+        {%- endfor -%}
+      # A literal block: folding would join the list into one line. A key that ends
+      # with ":" has no value to show, such as a manual step.
+      dismissed: |-
+        {%- for proposal in steps.past_proposals.output.proposals -%}
+        {%- if proposal.actionInput.doctored_rule_id == inputs.rule_uuid %}
+        {%- assign valued = proposal.actionInput.doctored_fix | slice: -1 %}
+        - {{ proposal.decidedAt | date: "%B %-d", "UTC" }}, "{{ proposal.title }}"{% if valued != blank and valued != ':' %} (`{{ proposal.actionInput.doctored_fix | truncate: 300 }}`){% endif %}, dismissed as {{ proposal.dismissReason | default: "no_reason" }}{% if proposal.rationale != blank %}: {{ proposal.rationale | truncate: 300 }}{% endif %}
+        {%- endif -%}
+        {%- endfor -%}
+
   # Cluster trouble mostly clears by itself, so it gets a review only once the rule
-  # failed several runs in a row. Every other cause goes ahead.
+  # failed several runs in a row. A rule whose fix was dismissed as an accepted
+  # risk or handled elsewhere is left alone for a while. Every other cause goes ahead.
   - name: gate
     type: data.set
     if: "${{ steps.classify.output.cause != null }}"
     with:
+      paused: "${{ steps.recall_decisions.output.paused_until != blank }}"
       proceed: >-
-        ${{ steps.classify.output.cause != 'cluster_health'
-          or steps.classify.output.failure_streak >= consts.cluster_failures_in_a_row }}
+        ${{ steps.recall_decisions.output.paused_until == blank
+          and (steps.classify.output.cause != 'cluster_health'
+            or steps.classify.output.failure_streak >= consts.cluster_failures_in_a_row) }}
 
   # One plain sentence per cause, shared by the agent prompt and the proposal.
   - name: describe_symptom
@@ -299,6 +364,31 @@ steps:
         - {{ run.execution_start }} {{ run.outcome.status }}: {{ run.outcome.message | default: "no message" | truncate: 400 }}
         {%- endfor -%}
 
+  # Notes from earlier reviews in this space and the lessons dreaming drew from
+  # them. A model can rewrite them, so they only reach the agent as hints and never
+  # gate anything. Fails open: the index exists only after the first note.
+  - name: recall_lessons
+    type: elasticsearch.search
+    if: "${{ steps.gate.output.proceed == true }}"
+    with:
+      index: "ai-index-idx-{{ consts.memory_index }}-{{ workflow.spaceId }}"
+      ignore_unavailable: true
+      allow_no_indices: true
+      size: 10
+      _source: [type, title, content, updated_at]
+      query:
+        bool:
+          must_not:
+            - terms:
+                governance.lifecycle.status: [deleted, verification_failed]
+          # Whole patterns as phrases: single words such as "logs" are in every note.
+          must:
+            - query_string:
+                default_field: content
+                query: '"{{ inputs.rule_uuid }}"{% for pattern in steps.fetch_rule.output.index %} OR "{{ pattern }}"{% endfor %}{% for pattern in steps.fetch_rule.output.threat_index %} OR "{{ pattern }}"{% endfor %}'
+    on-failure:
+      continue: true
+
   - name: create_investigation
     type: ai.conversation.create
     if: "${{ steps.gate.output.proceed == true }}"
@@ -328,6 +418,34 @@ steps:
       render_inline: true
     on-failure:
       continue: true
+
+  # Says up front what earlier reviews bring into this one, so a reader can tell
+  # why the doctor avoided a fix or tried one first.
+  - name: post_recall
+    type: ai.conversation.add_user_message
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and (steps.recall_decisions.output.dismissed != blank
+          or steps.recall_lessons.output.hits.hits.size > 0) }}
+    on-failure:
+      continue: true
+    with:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        **What the doctor remembers**
+        {%- if steps.recall_decisions.output.dismissed != blank %}
+
+        Fixes people dismissed for this rule. The doctor will not propose them again:
+        {{ steps.recall_decisions.output.dismissed }}
+        {%- endif %}
+        {%- if steps.recall_lessons.output.hits.hits.size > 0 %}
+
+        Notes from earlier reviews in this space. The doctor uses them as hints and checks them first:
+        {%- for hit in steps.recall_lessons.output.hits.hits %}
+        - {{ hit._source.updated_at | date: "%B %-d", "UTC" }}: {{ hit._source.title }}
+        {%- endfor %}
+        {%- endif %}
 
   - name: diagnose_rule
     type: ai.agent
@@ -418,6 +536,19 @@ steps:
 
         Data views in this space:
         {{ steps.collect_facts.output.data_views | default: "none could be read" }}
+        {%- endif %}
+        {%- if steps.recall_decisions.output.dismissed != blank %}
+
+        Fixes people dismissed for this rule. Do not return the same fix again. If no
+        other fix applies, return "none" and say what must change first:
+        {{ steps.recall_decisions.output.dismissed }}
+        {%- endif %}
+        {%- if steps.recall_lessons.output.hits.hits.size > 0 %}
+
+        Notes from earlier reviews in this space. They are hints, not facts: check them before you rely on them.
+        {%- for hit in steps.recall_lessons.output.hits.hits %}
+        - {{ hit._source.updated_at | date: "%B %-d", "UTC" }}, {{ hit._source.title }}: {{ hit._source.content | truncate: 400 }}
+        {%- endfor %}
         {%- endif %}
       schema:
         # Omit the root type so Agent Builder wraps this union under a property.
@@ -661,6 +792,26 @@ steps:
                 enum: [rule_owner, cluster_admin, ml_admin, kibana_admin]
             required: [fix_type, title, diagnosis, evidence, confidence, recommendation, owner]
 
+  # The fix and its value as one string, so a later review can tell an exact repeat.
+  - name: fix_key
+    type: data.set
+    if: "${{ steps.diagnose_rule.output.structured_output != null }}"
+    with:
+      key: >-
+        {%- assign out = steps.diagnose_rule.output.structured_output -%}
+        {{ out.fix_type }}:
+        {%- case out.fix_type -%}
+        {%- when 'index' -%}{{ out.proposed_index | json }}
+        {%- when 'query' -%}{{ out.proposed_query }}
+        {%- when 'timestamp_override' -%}{{ out.proposed_timestamp_override }}
+        {%- when 'suppression' -%}{{ out.proposed_suppression | json }}
+        {%- when 'threat_index' -%}{{ out.proposed_threat_index | json }}
+        {%- when 'lookback' -%}{{ out.proposed_from }}
+        {%- when 'max_signals' -%}{{ out.proposed_max_signals }}
+        {%- when 'data_view' -%}{{ out.proposed_data_view_id }}
+        {%- when 'group_fields' -%}{{ out.proposed_group_fields | json }}
+        {%- endcase -%}
+
   # Each fix is checked against the rule it would change, and anything that does
   # not fit becomes a manual proposal. An index fix that repeats the current
   # patterns would preview clean as the worker while the rule's key still sees
@@ -670,16 +821,22 @@ steps:
     type: data.set
     if: "${{ steps.diagnose_rule.output.structured_output != null }}"
     with:
+      # Text, not a boolean: the key needs its markers, and an expression cannot build them.
+      repeat: >-
+        {%- assign key = '§' | append: steps.fix_key.output.key | append: '§' -%}
+        {%- if steps.diagnose_rule.output.structured_output.fix_type != 'none' and steps.recall_decisions.output.dismissed_keys contains key -%}true{%- endif -%}
       fix_type: >-
         {%- assign out = steps.diagnose_rule.output.structured_output -%}
         {%- assign fix = out.fix_type -%}
         {%- assign rule = steps.fetch_rule.output -%}
+        {%- assign key = '§' | append: steps.fix_key.output.key | append: '§' -%}
         {%- assign cause = ',' | append: steps.classify.output.cause | append: ',' -%}
         {%- assign current = rule.index | join: ',' -%}
         {%- assign proposed = out.proposed_index | join: ',' -%}
         {%- assign known_view = false -%}
         {%- for view in steps.list_data_views.output.data_view -%}{%- if view.id == out.proposed_data_view_id -%}{%- assign known_view = true -%}{%- endif -%}{%- endfor -%}
-        {%- if fix == 'index' -%}
+        {%- if fix != 'none' and steps.recall_decisions.output.dismissed_keys contains key -%}none
+        {%- elsif fix == 'index' -%}
         {%- if rule.data_view_id != blank or proposed == current -%}none{%- else -%}index{%- endif -%}
         {%- elsif fix == 'threat_index' -%}{%- if rule.type == 'threat_match' -%}threat_index{%- else -%}none{%- endif -%}
         {%- elsif fix == 'query' or fix == 'timestamp_override' or fix == 'suppression' -%}{{ fix }}
@@ -915,11 +1072,23 @@ steps:
         **What the doctor checked**
         {{ steps.diagnose_rule.output.structured_output.evidence }}
 
+  - name: post_repeat_refused
+    type: ai.conversation.add_user_message
+    if: "${{ steps.resolve_fix.output.repeat != blank }}"
+    on-failure:
+      continue: true
+    with:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        **Fix not proposed again**
+        The doctor came back with a fix people already dismissed for this rule: `{{ steps.fix_key.output.key | truncate: 500 }}`. It is not proposed again, so the proposal is a manual step.
+
   - name: compose_proposal
     type: data.set
     if: "${{ steps.diagnose_rule.output.structured_output != null }}"
     with:
-      title: '{{ steps.diagnose_rule.output.structured_output.title | default: "Fix broken rule" | truncate: 256, "" }}'
+      title: '{% if steps.resolve_fix.output.repeat != blank %}Dismissed before: {% endif %}{{ steps.diagnose_rule.output.structured_output.title | default: "Fix broken rule" | truncate: 230, "" }}'
       comment: |-
         **Rule:** [{{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)
 
@@ -1014,7 +1183,11 @@ steps:
 
         **Who should act:** {% case steps.diagnose_rule.output.structured_output.owner %}{% when 'cluster_admin' %}cluster admin{% when 'ml_admin' %}machine learning admin{% when 'kibana_admin' %}Kibana admin{% else %}rule owner{% if steps.classify.output.key_owner != blank %} (the rule's API key belongs to `{{ steps.classify.output.key_owner }}`){% endif %}{% endcase %}
         {%- endif %}
-        {%- if steps.resolve_fix.output.fix_type != 'none' and steps.resolve_fix.output.fix_type != blank %}
+        {%- if steps.resolve_fix.output.repeat != blank %}
+
+        The doctor came back with a fix people already dismissed for this rule, so it is not proposed again. Earlier decisions:
+        {{ steps.recall_decisions.output.dismissed }}
+        {%- elsif steps.resolve_fix.output.fix_type != 'none' and steps.resolve_fix.output.fix_type != blank %}
 
         The doctor found a possible fix, but it did not pass the preview check: {% if steps.judge_fix.output.proposed_error != blank %}{{ steps.judge_fix.output.proposed_error }}{% elsif steps.judge_fix.output.proposed_limit_reached == true %}the fixed rule {% if steps.classify.output.cause == 'alert_limit' %}still hit its alert limit of {{ steps.resolve_fix.output.max_signals | default: 100 }}.{% else %}hit its alert limit of {{ steps.resolve_fix.output.max_signals | default: 100 }}, so it matches far more than the rule did.{% endif %}{% elsif steps.resolve_fix.output.fix_type == 'group_fields' %}the new grouping fields hold no values in the rule's indices.{% elsif steps.judge_fix.output.proposed_last_event_at != blank %}the new indices have no events in the last {{ consts.fresh_within }}, the newest is from {{ steps.judge_fix.output.proposed_last_event_at | date: "%B %-d at %H:%M UTC", "UTC" }}.{% else %}the new indices have no events.{% endif %}
         {%- endif %}
@@ -1048,6 +1221,8 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  doctored_rule_id: "{{ inputs.rule_uuid }}"
+                  doctored_fix: "{{ steps.fix_key.output.key }}"
                   expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   index: "${{ steps.resolve_fix.output.index }}"
                 impact: medium
@@ -1068,6 +1243,8 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  doctored_rule_id: "{{ inputs.rule_uuid }}"
+                  doctored_fix: "{{ steps.fix_key.output.key }}"
                   expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   query: "{{ steps.resolve_fix.output.query }}"
                 impact: medium
@@ -1088,6 +1265,8 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  doctored_rule_id: "{{ inputs.rule_uuid }}"
+                  doctored_fix: "{{ steps.fix_key.output.key }}"
                   expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   alert_suppression: "${{ steps.resolve_fix.output.alert_suppression }}"
                 impact: medium
@@ -1108,6 +1287,8 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  doctored_rule_id: "{{ inputs.rule_uuid }}"
+                  doctored_fix: "{{ steps.fix_key.output.key }}"
                   expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   threat_index: "${{ steps.resolve_fix.output.threat_index }}"
                 impact: medium
@@ -1128,6 +1309,8 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  doctored_rule_id: "{{ inputs.rule_uuid }}"
+                  doctored_fix: "{{ steps.fix_key.output.key }}"
                   expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   timestamp_override: "{{ steps.resolve_fix.output.timestamp_override }}"
                 impact: low
@@ -1148,6 +1331,8 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  doctored_rule_id: "{{ inputs.rule_uuid }}"
+                  doctored_fix: "{{ steps.fix_key.output.key }}"
                   expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   from: "{{ steps.resolve_fix.output.from }}"
                 impact: low
@@ -1168,6 +1353,8 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  doctored_rule_id: "{{ inputs.rule_uuid }}"
+                  doctored_fix: "{{ steps.fix_key.output.key }}"
                   expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   max_signals: "${{ steps.resolve_fix.output.max_signals }}"
                 impact: low
@@ -1188,6 +1375,8 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  doctored_rule_id: "{{ inputs.rule_uuid }}"
+                  doctored_fix: "{{ steps.fix_key.output.key }}"
                   expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   data_view_id: "{{ steps.resolve_fix.output.data_view_id }}"
                 impact: medium
@@ -1210,6 +1399,8 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  doctored_rule_id: "{{ inputs.rule_uuid }}"
+                  doctored_fix: "{{ steps.fix_key.output.key }}"
                   expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   threshold: "${{ steps.fixed_threshold.output.threshold }}"
                   new_terms_fields: "${{ steps.fixed_new_terms.output.fields }}"
@@ -1231,6 +1422,8 @@ steps:
                 actionWorkflowId: system-alertzero-action-start-ml-jobs
                 actionInput:
                   job_ids: "${{ steps.fetch_rule.output.machine_learning_job_id }}"
+                  doctored_rule_id: "{{ inputs.rule_uuid }}"
+                  doctored_fix: "{{ steps.fix_key.output.key }}"
                 impact: medium
                 confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
                 autoApprove: false
@@ -1249,6 +1442,8 @@ steps:
                 actionWorkflowId: system-alertzero-action-disable-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  doctored_rule_id: "{{ inputs.rule_uuid }}"
+                  doctored_fix: "{{ steps.fix_key.output.key }}"
                   expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 impact: medium
@@ -1265,6 +1460,10 @@ steps:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
             title: "{{ steps.compose_proposal.output.title }}"
             comment: "{{ steps.compose_proposal.output.comment }}"
+            # No action reads it; it tells later reviews which rule and fix this was.
+            actionInput:
+              doctored_rule_id: "{{ inputs.rule_uuid }}"
+              doctored_fix: "{{ steps.fix_key.output.key }}"
             impact: low
             # No action, so no inherited category, and the queue drops an
             # uncategorised proposal.
@@ -1314,6 +1513,7 @@ steps:
           or steps.propose_disable.output.decision == 'dismissed'
           or steps.propose_manual.output.decision == 'dismissed' }}
       kind: "{{ steps.resolve_proposal_kind.output.kind }}"
+      proposal_id: "{{ steps.propose_index.output.proposalId | default: steps.propose_query.output.proposalId | default: steps.propose_timestamp_override.output.proposalId | default: steps.propose_suppression.output.proposalId | default: steps.propose_threat_index.output.proposalId | default: steps.propose_lookback.output.proposalId | default: steps.propose_max_signals.output.proposalId | default: steps.propose_data_view.output.proposalId | default: steps.propose_group_fields.output.proposalId | default: steps.propose_ml_job.output.proposalId | default: steps.propose_disable.output.proposalId | default: steps.propose_manual.output.proposalId }}"
       decided_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
 
   # A fix is only done when the rule's next real run is healthy. The preview proved
@@ -1447,11 +1647,150 @@ steps:
     on-failure:
       continue: true
 
+  # The gate output has no dismiss reason, and the note should say why.
+  - name: fetch_decision
+    type: kibana.request
+    if: "${{ steps.record_decision.output.dismissed == true and steps.record_decision.output.proposal_id != blank }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals/{{ steps.record_decision.output.proposal_id }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "1"
+        x-elastic-internal-origin: kibana
+    on-failure:
+      continue: true
+
+  - name: judge_outcome
+    type: data.set
+    if: "${{ steps.resolve_fix.output.fix_type != null }}"
+    with:
+      outcome: >-
+        {%- assign decision = steps.record_decision.output -%}
+        {%- if decision.dismissed == true -%}dismissed
+        {%- elsif decision.approved == true and decision.kind == 'manual' -%}left_to_a_person
+        {%- elsif decision.approved == true and decision.applied != true -%}action_failed
+        {%- elsif steps.judge_followup.output.healed == true -%}healed
+        {%- elsif decision.applied == true and steps.judge_followup.output.ran_after_fix == true -%}not_healed
+        {%- elsif decision.applied == true -%}not_verified
+        {%- else -%}undecided
+        {%- endif -%}
+
+  # The follow-up note covers a fix that was applied. This covers every other
+  # ending, and says what a dismissal changes for later reviews.
+  - name: post_outcome
+    type: ai.conversation.add_user_message
+    if: >-
+      ${{ steps.judge_outcome.output.outcome == 'dismissed'
+        or steps.judge_outcome.output.outcome == 'action_failed'
+        or steps.judge_outcome.output.outcome == 'left_to_a_person'
+        or steps.judge_outcome.output.outcome == 'undecided' }}
+    on-failure:
+      continue: true
+    with:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        {%- assign reason = steps.fetch_decision.output.dismissReason | default: 'no_reason' -%}
+        {%- assign marked = ',' | append: reason | append: ',' -%}
+        {%- case steps.judge_outcome.output.outcome -%}
+        {%- when 'dismissed' -%}
+        **Dismissed**
+        The proposal was dismissed as {{ reason }}{% if steps.fetch_decision.output.rationale != blank %}: {{ steps.fetch_decision.output.rationale | truncate: 500 }}{% endif %}.
+        {%- if consts.pause_reasons contains marked %}
+        The doctor leaves this rule alone until {{ "now" | date: "%s" | plus: consts.pause_seconds | date: "%B %-d", "UTC" }}.
+        {%- elsif steps.fix_key.output.key != blank and steps.resolve_proposal_kind.output.kind != 'manual' %}
+        The doctor will not propose this fix for this rule again. It reviews the rule again while the rule stays broken.
+        {%- else %}
+        The doctor reviews the rule again while the rule stays broken.
+        {%- endif %}
+        {%- when 'action_failed' -%}
+        **Fix not applied**
+        The proposal was approved, but the change could not be applied. The proposal shows the error. The next sweep reviews the rule again.
+        {%- when 'left_to_a_person' -%}
+        **Left to a person**
+        The manual step was approved. The doctor changed nothing, and it reviews the rule again while the rule stays broken.
+        {%- else -%}
+        **No decision**
+        Nobody decided before the proposal expired, so nothing changed. The next sweep reviews the rule again.
+        {%- endcase %}
+
+  # One note per review for the lessons index. Written by the review, never by an
+  # action: actions run as the approver, who cannot write AI indices. Notes are
+  # hints for later reviews, so failing to write one never fails the review.
+  - name: write_memory
+    type: context-engine.createKi
+    if: "${{ steps.judge_outcome.output.outcome != null }}"
+    with:
+      ai_index_id: "{{ consts.memory_index }}-{{ workflow.spaceId }}"
+      ki_id: "{{ execution.id }}"
+      ki:
+        type: memory.session_fact
+        title: '{{ steps.fetch_rule.output.name | truncate: 120 }}: {{ steps.diagnose_rule.output.structured_output.fix_type }} fix {{ steps.judge_outcome.output.outcome | replace: "_", " " }}'
+        description: "Rule Doctor review of one broken detection rule and what happened to its fix."
+        content: |-
+          Rule "{{ steps.fetch_rule.output.name }}" ({{ steps.fetch_rule.output.type }} rule, id {{ inputs.rule_uuid }}) was broken: {{ steps.describe_symptom.output.text }}
+          Cause: {{ steps.classify.output.cause }}.
+          Index patterns: {{ steps.fetch_rule.output.index | join: ", " | default: "none" }}{% if steps.fetch_rule.output.data_view_id != blank %}, data view {{ steps.fetch_rule.output.data_view_id }}{% endif %}.
+          The doctor proposed a {{ steps.diagnose_rule.output.structured_output.fix_type }} fix{% if steps.resolve_proposal_kind.output.kind == 'manual' %} as a manual step{% endif %}: {{ steps.diagnose_rule.output.structured_output.title }}.
+          {%- if steps.fix_key.output.key != blank %}
+          Fix: {{ steps.fix_key.output.key | truncate: 1000 }}
+          {%- endif %}
+          {%- case steps.judge_outcome.output.outcome %}
+          {%- when 'dismissed' %}
+          People dismissed it as {{ steps.fetch_decision.output.dismissReason | default: "no_reason" }}{% if steps.fetch_decision.output.rationale != blank %}: {{ steps.fetch_decision.output.rationale | truncate: 500 }}{% endif %}.
+          {%- when 'healed' %}
+          People approved it, and the rule's next run succeeded.
+          {%- when 'not_healed' %}
+          People approved it, but the rule's next run still reported {{ steps.judge_followup.output.status }}.
+          {%- when 'not_verified' %}
+          People approved it, but the rule did not run again before the review ended.
+          {%- when 'action_failed' %}
+          People approved it, but the change could not be applied.
+          {%- when 'left_to_a_person' %}
+          People approved the manual step.
+          {%- else %}
+          Nobody decided before the proposal expired.
+          {%- endcase %}
+        tags:
+          - rule-doctor
+          - "{{ steps.judge_outcome.output.outcome }}"
+        attributes:
+          rule_id: "{{ inputs.rule_uuid }}"
+          rule_type: "{{ steps.fetch_rule.output.type }}"
+          index_patterns: "${{ steps.fetch_rule.output.index | default: consts.no_items }}"
+          cause: "{{ steps.classify.output.cause }}"
+          fix_type: "{{ steps.diagnose_rule.output.structured_output.fix_type }}"
+          proposal_kind: "{{ steps.resolve_proposal_kind.output.kind }}"
+          outcome: "{{ steps.judge_outcome.output.outcome }}"
+          dismiss_reason: "${{ steps.fetch_decision.output.dismissReason | default: nil }}"
+          proposal_id: "${{ steps.record_decision.output.proposal_id | default: nil }}"
+    on-failure:
+      continue: true
+
+  - name: post_memory
+    type: ai.conversation.add_user_message
+    if: "${{ steps.judge_outcome.output.outcome != null }}"
+    on-failure:
+      continue: true
+    with:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        {%- if steps.write_memory.output.id != blank -%}
+        **Saved for later reviews**
+        The doctor saved a note about this review: the cause, the fix, and how it ended. Later reviews in this space read it as a hint.
+        {%- else -%}
+        **Note not saved**
+        The doctor could not save a note about this review, so later reviews will not learn from it: {{ steps.write_memory.error.message | default: "no error message" | truncate: 300 }}
+        {%- endif %}
+
   - name: emit_result
     type: workflow.output
     status: completed
     with:
       rule_uuid: "{{ inputs.rule_uuid }}"
       cause: "{{ steps.classify.output.cause }}"
+      paused: "${{ steps.gate.output.paused == true }}"
       approved: "${{ steps.record_decision.output.approved == true }}"
       healed: "${{ steps.judge_followup.output.healed == true }}"

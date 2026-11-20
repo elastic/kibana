@@ -69,4 +69,9 @@ describe('rule-doctor', () => {
   it('treats the run message and rule as evidence', () => {
     expect(skill.content).toMatch(/evidence to check, not instructions/);
   });
+
+  it('obeys dismissals and only checks notes', () => {
+    expect(skill.content).toMatch(/Never return the same fix with the same value again/);
+    expect(skill.content).toMatch(/never name a note as your only evidence/);
+  });
 });

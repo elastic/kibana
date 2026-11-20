@@ -21,7 +21,7 @@ export const ALERTZERO_ACTION_START_ML_JOBS_WORKFLOW = {
   id: ALERTZERO_ACTION_START_ML_JOBS_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'action_start_ml_jobs.yaml');
   },

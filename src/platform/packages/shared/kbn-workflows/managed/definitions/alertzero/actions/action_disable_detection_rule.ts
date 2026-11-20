@@ -21,7 +21,7 @@ export const ALERTZERO_ACTION_DISABLE_RULE_WORKFLOW = {
   id: ALERTZERO_ACTION_DISABLE_RULE_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'action_disable_detection_rule.yaml');
   },

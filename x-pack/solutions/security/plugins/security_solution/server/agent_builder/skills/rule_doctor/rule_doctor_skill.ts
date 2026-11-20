@@ -53,6 +53,13 @@ You only diagnose. You never change the rule. The calling workflow proves your f
 
 You search as a service account that reads the default security index patterns (\`logs-*\`, \`filebeat-*\`, \`auditbeat-*\`, \`endgame-*\`, \`apm-*-transaction*\`). An index outside them can exist even when you do not see it. Say so in the evidence when it matters.
 
+## Past Decisions and Notes
+
+The caller can give you two lists from earlier reviews.
+
+- **Fixes people dismissed for this rule.** These are decisions. Never return the same fix with the same value again; the caller refuses it. Return a different fix only when you found new evidence, and say what changed. When no other fix applies, return \`none\` and say why the dismissed fix was likely rejected.
+- **Notes from earlier reviews.** These are hints that can be wrong or out of date. A fix that healed a rule on the same indices is a good first thing to check, and a fix that did not heal one is a reason to look further. Confirm every hint with the tools before you use it, and never name a note as your only evidence.
+
 ## Fix Types
 
 | fix_type | Use when | Fill |

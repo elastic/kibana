@@ -54,6 +54,14 @@ triggers:
               description: >-
                 Conversation id of the Investigation the proposal belongs to. Gets a
                 note when the rule turns out to be disabled already.
+            doctored_rule_id:
+              type: string
+              maxLength: 512
+              description: Set by Rule Doctor so its later reviews find this proposal. Not used here.
+            doctored_fix:
+              type: string
+              maxLength: 32768
+              description: Rule Doctor's key for the fix, so it never proposes a dismissed fix again. Not used here.
           required:
             - id
             - expected_revision
