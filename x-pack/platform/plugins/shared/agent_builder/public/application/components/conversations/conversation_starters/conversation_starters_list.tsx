@@ -8,10 +8,9 @@
 import React from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
-  EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiPanel,
   euiFontSize,
   useEuiMemoizedStyles,
 } from '@elastic/eui';
@@ -35,27 +34,15 @@ const componentStyles = (euiThemeContext: UseEuiTheme) => {
       min-inline-size: 0;
       max-inline-size: 100%;
     `,
-    // An inline box, unlike a block one, doesn't inherit the underline EUI adds to the title on hover.
-    content: css`
-      display: inline-flex;
-      inline-size: 100%;
-      vertical-align: top;
-      align-items: center;
-      gap: ${euiTheme.size.xs};
+    card: css`
       padding: ${euiTheme.size.s} ${euiTheme.size.m};
-      text-align: left;
       font-size: ${fontSize};
       line-height: ${lineHeight};
       font-weight: ${euiTheme.font.weight.regular};
       color: ${euiTheme.colors.textParagraph};
     `,
-    iconSlot: css`
-      display: flex;
-      align-items: center;
-      flex-shrink: 0;
-    `,
     label: css`
-      min-inline-size: 0;
+      display: block;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -97,25 +84,16 @@ export const ConversationStartersList: React.FC<ConversationStartersListProps> =
     >
       {starters.map((starter) => (
         <EuiFlexItem key={starter.label} grow={false} css={styles.item}>
-          <EuiCard
+          <EuiPanel
             hasBorder
-            textAlign="left"
             paddingSize="none"
-            titleSize="xs"
-            titleElement="span"
-            title={
-              <span css={styles.content}>
-                <span css={styles.iconSlot}>
-                  {/* TODO: the design uses a plain diagonal arrow; swap "external" once EUI has one */}
-                  <EuiIcon type="external" size="s" color="text" aria-hidden />
-                </span>
-                <span css={styles.label}>{starter.label}</span>
-              </span>
-            }
-            isDisabled={isDisabled}
+            css={styles.card}
+            disabled={isDisabled}
             onClick={() => onSelect(starter)}
             data-test-subj="agentBuilderConversationStarter"
-          />
+          >
+            <span css={styles.label}>{starter.label}</span>
+          </EuiPanel>
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

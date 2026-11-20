@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useIsMutating, useMutation, useQueryClient } from '@kbn/react-query';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
@@ -23,7 +23,8 @@ import { appPaths } from '../utils/app_paths';
  * Single source of truth for "send this message". A new conversation is created on the server
  * first, so it exists, is cached and is in the sidebar before anything streams into it; then the
  * user is moved to it, by URL in the routed app or by state in the embeddable.
- * `isCreatingConversation` is true while that request is in flight, so the input can hold submits.
+ * `isCreatingConversation` is true while any request creating a conversation is in flight, from this
+ * hook or another one, so the input and the conversation starters hold submits for each other.
  */
 export const useSubmitMessage = () => {
   const conversationId = useConversationId();
@@ -35,7 +36,7 @@ export const useSubmitMessage = () => {
   const queryClient = useQueryClient();
   const { addErrorToast } = useToasts();
 
-  const { mutateAsync: createConversation, isLoading: isCreatingConversation } = useMutation({
+  const { mutateAsync: createConversation } = useMutation({
     mutationKey: mutationKeys.createConversation,
     mutationFn: (id: string) => conversationsService.create({ agentId: id }),
     onSuccess: (created) => {
@@ -44,6 +45,8 @@ export const useSubmitMessage = () => {
     },
     onError: (error) => addErrorToast({ title: formatAgentBuilderErrorMessage(error) }),
   });
+  const isCreatingConversation =
+    useIsMutating({ mutationKey: mutationKeys.createConversation }) > 0;
 
   const submitMessage = useCallback(
     async (

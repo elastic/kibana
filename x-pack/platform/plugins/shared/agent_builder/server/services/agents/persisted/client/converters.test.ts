@@ -207,7 +207,7 @@ describe('fromEs', () => {
 
   it('converts conversation_starters from the document', () => {
     const document = getSampleDoc();
-    document._source!.conversation_starter_items = [
+    document._source!.conversation_starters = [
       { label: 'first' },
       { label: 'second', prompt: 'Second prompt' },
     ];
@@ -220,7 +220,7 @@ describe('fromEs', () => {
 
   it('keeps an empty conversation_starters list', () => {
     const document = getSampleDoc();
-    document._source!.conversation_starter_items = [];
+    document._source!.conversation_starters = [];
 
     expect(fromEs(document).conversation_starters).toEqual([]);
   });
@@ -497,11 +497,10 @@ describe('createRequestToEs', () => {
       creationDate: new Date(),
     });
 
-    expect(docProperties.conversation_starter_items).toEqual([
+    expect(docProperties.conversation_starters).toEqual([
       { label: 'first' },
       { label: 'second', prompt: 'Second prompt' },
     ]);
-    expect(docProperties).not.toHaveProperty('conversation_starters');
   });
 
   describe('approvals', () => {
@@ -645,7 +644,7 @@ describe('updateRequestToEs', () => {
       name: 'name',
       description: 'description',
       space: 'space',
-      conversation_starter_items: conversationStarters,
+      conversation_starters: conversationStarters,
       config: { tools: [] },
       access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_id: 'test-user-id',
@@ -668,20 +667,19 @@ describe('updateRequestToEs', () => {
         conversation_starters: [{ label: 'new', prompt: 'New prompt' }],
       });
 
-      expect(result.conversation_starter_items).toEqual([{ label: 'new', prompt: 'New prompt' }]);
-      expect(result).not.toHaveProperty('conversation_starters');
+      expect(result.conversation_starters).toEqual([{ label: 'new', prompt: 'New prompt' }]);
     });
 
     it('keeps the stored conversation_starters when the update omits them', () => {
       const result = update(getCurrentProps([{ label: 'old' }]), { name: 'new name' });
 
-      expect(result.conversation_starter_items).toEqual([{ label: 'old' }]);
+      expect(result.conversation_starters).toEqual([{ label: 'old' }]);
     });
 
     it('stores an empty list to remove all conversation_starters', () => {
       const result = update(getCurrentProps([{ label: 'old' }]), { conversation_starters: [] });
 
-      expect(result.conversation_starter_items).toEqual([]);
+      expect(result.conversation_starters).toEqual([]);
     });
   });
 

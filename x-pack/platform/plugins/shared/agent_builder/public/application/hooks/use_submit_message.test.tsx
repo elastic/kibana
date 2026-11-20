@@ -131,6 +131,31 @@ describe('useSubmitMessage', () => {
     expect(sendMessage).toHaveBeenCalledWith({ message: 'hello', conversationId: 'conv-1' });
   });
 
+  it('shares the creating state between hooks, so one can hold the other', async () => {
+    setState({});
+    let resolveCreate: (value: typeof created) => void = () => {};
+    create.mockReturnValue(new Promise((resolve) => (resolveCreate = resolve)));
+    const { result } = renderHook(
+      () => ({ first: useSubmitMessage(), second: useSubmitMessage() }),
+      {
+        wrapper,
+      }
+    );
+    expect(result.current.second.isCreatingConversation).toBe(false);
+
+    let pending: Promise<void>;
+    act(() => {
+      pending = result.current.first.submitMessage('hello');
+    });
+
+    await waitFor(() => expect(result.current.second.isCreatingConversation).toBe(true));
+
+    resolveCreate(created);
+    await act(() => pending);
+
+    await waitFor(() => expect(result.current.second.isCreatingConversation).toBe(false));
+  });
+
   it('switches the embedded conversation by state instead of navigating', async () => {
     setState({ isEmbeddedContext: true });
     const { result } = renderHook(() => useSubmitMessage(), { wrapper });

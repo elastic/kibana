@@ -55,6 +55,37 @@ describe('BuiltinAgentRegistry', () => {
     });
   });
 
+  describe('register with conversation starters', () => {
+    it('should register an agent with valid conversation starters', () => {
+      const conversationStarters = [{ label: 'Top errors', prompt: 'Show me the top errors' }];
+
+      registry.register({ ...mockAgent, conversation_starters: conversationStarters });
+
+      expect(registry.get(mockAgent.id)?.conversation_starters).toEqual(conversationStarters);
+    });
+
+    it('should throw if the agent has more than 3 conversation starters', () => {
+      expect(() =>
+        registry.register({
+          ...mockAgent,
+          conversation_starters: ['a', 'b', 'c', 'd'].map((label) => ({ label })),
+        })
+      ).toThrow(
+        'Invalid conversation starters for agent "test-agent": Agents are limited to 3 conversation starters.'
+      );
+      expect(registry.has(mockAgent.id)).toBe(false);
+    });
+
+    it('should throw if a conversation starter label is too long', () => {
+      expect(() =>
+        registry.register({
+          ...mockAgent,
+          conversation_starters: [{ label: 'a'.repeat(31) }],
+        })
+      ).toThrow('The label of conversation starter 1 is limited to 30 characters.');
+    });
+  });
+
   describe('has', () => {
     it('should return true when agent exists', () => {
       registry.register(mockAgent);

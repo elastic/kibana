@@ -10,34 +10,13 @@ import { resolveConversationStarters } from './resolve_conversation_starters';
 const labels = (...values: string[]) => values.map((label) => ({ label }));
 
 describe('resolveConversationStarters', () => {
-  it('returns the agent starters when the consumer passes none', () => {
+  it('returns the agent starters', () => {
     expect(resolveConversationStarters({ agentStarters: labels('a', 'b') })).toEqual(
       labels('a', 'b')
     );
   });
 
-  it('uses the consumer starters instead of the agent starters', () => {
-    expect(
-      resolveConversationStarters({
-        consumerStarters: labels('app'),
-        agentStarters: labels('a', 'b', 'c'),
-      })
-    ).toEqual(labels('app'));
-  });
-
-  it('falls back to the agent starters when the consumer list is empty or blank', () => {
-    expect(
-      resolveConversationStarters({ consumerStarters: [], agentStarters: labels('a') })
-    ).toEqual(labels('a'));
-    expect(
-      resolveConversationStarters({
-        consumerStarters: labels('  ', ''),
-        agentStarters: labels('a'),
-      })
-    ).toEqual(labels('a'));
-  });
-
-  it('returns an empty list when neither source has starters', () => {
+  it('returns an empty list when the agent has no starters', () => {
     expect(resolveConversationStarters({})).toEqual([]);
     expect(resolveConversationStarters({ agentStarters: [] })).toEqual([]);
   });
@@ -76,10 +55,7 @@ describe('resolveConversationStarters', () => {
   });
 
   it('keeps at most three starters', () => {
-    expect(
-      resolveConversationStarters({ consumerStarters: labels('1', '2', '3', '4', '5') })
-    ).toEqual(labels('1', '2', '3'));
-    expect(resolveConversationStarters({ agentStarters: labels('1', '2', '3', '4') })).toEqual(
+    expect(resolveConversationStarters({ agentStarters: labels('1', '2', '3', '4', '5') })).toEqual(
       labels('1', '2', '3')
     );
   });

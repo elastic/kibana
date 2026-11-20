@@ -9,8 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useResolvedAgent } from '../../../hooks/agents/use_resolved_agent';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
-import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
-import { useAgentModel } from '../../../hooks/agents/use_agent_model';
+import { useAgentSendState } from '../../../hooks/agents/use_agent_send_state';
 import { useCurrentUser } from '../../../hooks/use_current_user';
 import { useCarryOverDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
@@ -20,8 +19,7 @@ import { useConversationStarters } from './use_conversation_starters';
 jest.mock('../../../hooks/agents/use_resolved_agent');
 jest.mock('../../../hooks/use_conversation');
 jest.mock('../../../hooks/use_submit_message');
-jest.mock('../../../hooks/use_ui_privileges');
-jest.mock('../../../hooks/agents/use_agent_model');
+jest.mock('../../../hooks/agents/use_agent_send_state');
 jest.mock('../../../hooks/use_current_user');
 jest.mock('../../../hooks/use_input_draft');
 jest.mock('../../../context/active_space_context');
@@ -30,8 +28,7 @@ jest.mock('../../../context/conversation/conversation_context');
 const mockUseResolvedAgent = jest.mocked(useResolvedAgent);
 const mockUseAgentId = jest.mocked(useAgentId);
 const mockUseSubmitMessage = jest.mocked(useSubmitMessage);
-const mockUseUiPrivileges = jest.mocked(useUiPrivileges);
-const mockUseAgentModel = jest.mocked(useAgentModel);
+const mockUseAgentSendState = jest.mocked(useAgentSendState);
 const mockUseCurrentUser = jest.mocked(useCurrentUser);
 const mockUseCarryOverDraft = jest.mocked(useCarryOverDraft);
 const mockUseActiveSpaceId = jest.mocked(useActiveSpaceId);
@@ -45,6 +42,16 @@ const mockAgent = (agent: Record<string, unknown> | undefined, isLoading = false
   mockUseResolvedAgent.mockReturnValue({ agent: agent as never, isLoading });
 };
 
+const mockSendState = (overrides: Partial<ReturnType<typeof useAgentSendState>> = {}) => {
+  mockUseAgentSendState.mockReturnValue({
+    agentExists: true,
+    isAgentDeleted: false,
+    isBoundAgentForbidden: false,
+    isAgentModelLoading: false,
+    ...overrides,
+  });
+};
+
 const submitCreatesConversation = (conversationId = 'conv-1') => {
   submitMessage.mockImplementation(
     (_message: string, options?: { onConversationCreated?: (id: string) => void }) =>
@@ -55,10 +62,10 @@ const submitCreatesConversation = (conversationId = 'conv-1') => {
 describe('useConversationStarters', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    submitMessage.mockReset();
     mockUseAgentId.mockReturnValue('agent-1');
     mockUseSubmitMessage.mockReturnValue({ submitMessage, isCreatingConversation: false });
-    mockUseUiPrivileges.mockReturnValue({ invokeBoundAgents: true } as never);
-    mockUseAgentModel.mockReturnValue({ isLoading: false, isLocked: false });
+    mockSendState();
     mockUseActiveSpaceId.mockReturnValue('default');
     mockUseConversationContext.mockReturnValue({ sessionTag: 'tag' } as never);
     mockUseCurrentUser.mockReturnValue({ currentUser: { user: { username: 'elastic' } } } as never);
@@ -80,6 +87,14 @@ describe('useConversationStarters', () => {
     ]);
   });
 
+  it('returns the starters even though isLoading stays true for an agent found in the list', () => {
+    mockAgent({ id: 'agent-1', conversation_starters: [{ label: 'first' }] }, true);
+
+    const { result } = renderHook(() => useConversationStarters());
+
+    expect(result.current.starters).toEqual([{ label: 'first' }]);
+  });
+
   it('returns no starters while the agent is loading', () => {
     mockAgent(undefined, true);
 
@@ -88,8 +103,8 @@ describe('useConversationStarters', () => {
     expect(result.current.starters).toEqual([]);
   });
 
-  it('returns no starters when the agent is not found', () => {
-    mockAgent(undefined);
+  it('returns no starters when the agent does not exist', () => {
+    mockSendState({ agentExists: false });
 
     const { result } = renderHook(() => useConversationStarters());
 
@@ -97,12 +112,7 @@ describe('useConversationStarters', () => {
   });
 
   it('returns no starters when the agent is bound and the user cannot invoke it', () => {
-    mockAgent({
-      id: 'agent-1',
-      service_account_id: 'sa-1',
-      conversation_starters: [{ label: 'first' }],
-    });
-    mockUseUiPrivileges.mockReturnValue({ invokeBoundAgents: false } as never);
+    mockSendState({ isBoundAgentForbidden: true });
 
     const { result } = renderHook(() => useConversationStarters());
 
@@ -174,6 +184,17 @@ describe('useConversationStarters', () => {
 
       expect(submitMessage).toHaveBeenCalledWith('first', expect.any(Object));
     });
+
+    it('keeps the typed text where it is when the conversation cannot be created', () => {
+      const { result } = renderHook(() => useConversationStarters());
+
+      act(() => {
+        result.current.onSelect({ label: 'first' });
+      });
+
+      expect(takeNewChatDraft).not.toHaveBeenCalled();
+      expect(saveDraftTo).not.toHaveBeenCalled();
+    });
   });
 
   it('stores no draft in the new conversation when nothing was typed', () => {
@@ -189,11 +210,11 @@ describe('useConversationStarters', () => {
   });
 
   it('is disabled while the agent model is loading', () => {
-    mockUseAgentModel.mockReturnValue({ isLoading: true, isLocked: false });
+    mockSendState({ isAgentModelLoading: true });
 
     const { result } = renderHook(() => useConversationStarters());
 
-    expect(mockUseAgentModel).toHaveBeenCalledWith('agent-1');
+    expect(mockUseAgentSendState).toHaveBeenCalledWith('agent-1');
     expect(result.current.isDisabled).toBe(true);
   });
 

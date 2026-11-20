@@ -7,6 +7,7 @@
 
 import { hasNamespaceName, isInProtectedNamespace } from '../base/namespaces';
 import { SELF_AGENT_ID } from './constants';
+import type { ConversationStarter } from './definition';
 
 // - Must start and end with letter or digit
 // - Can contain letters, digits, hyphens, underscores and dots
@@ -44,4 +45,35 @@ export const validateAgentId = ({
       return `Agent id is using a protected namespace.`;
     }
   }
+};
+
+/**
+ * Checks the conversation starters of an agent defined in code, with the same limits the agents API
+ * applies. Returns the reason they are invalid, or undefined when they are fine.
+ */
+export const validateConversationStarters = (
+  starters: readonly ConversationStarter[] | undefined
+): string | undefined => {
+  if (!starters) {
+    return undefined;
+  }
+  if (starters.length > MAX_CONVERSATION_STARTERS) {
+    return `Agents are limited to ${MAX_CONVERSATION_STARTERS} conversation starters.`;
+  }
+  for (const [index, { label, prompt }] of starters.entries()) {
+    const position = index + 1;
+    if (label.trim().length === 0) {
+      return `The label of conversation starter ${position} must not be blank.`;
+    }
+    if (label.length > CONVERSATION_STARTER_LABEL_MAX_LENGTH) {
+      return `The label of conversation starter ${position} is limited to ${CONVERSATION_STARTER_LABEL_MAX_LENGTH} characters.`;
+    }
+    if (prompt !== undefined && prompt.trim().length === 0) {
+      return `The prompt of conversation starter ${position} must not be blank.`;
+    }
+    if (prompt !== undefined && prompt.length > CONVERSATION_STARTER_PROMPT_MAX_LENGTH) {
+      return `The prompt of conversation starter ${position} is limited to ${CONVERSATION_STARTER_PROMPT_MAX_LENGTH} characters.`;
+    }
+  }
+  return undefined;
 };

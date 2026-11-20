@@ -29,7 +29,7 @@ const storageSettings = {
       space: types.keyword({}),
       description: types.text({}),
       labels: types.keyword({}),
-      conversation_starter_items: types.object({
+      conversation_starters: types.object({
         properties: {
           label: types.keyword({}),
         },
@@ -84,7 +84,7 @@ export interface AgentProperties {
   space: string;
   description: string;
   labels?: string[];
-  conversation_starter_items?: ConversationStarter[];
+  conversation_starters?: ConversationStarter[];
   avatar_color?: string;
   avatar_symbol?: string;
   created_by_id?: string;

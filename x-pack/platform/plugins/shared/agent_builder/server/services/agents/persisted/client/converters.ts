@@ -47,7 +47,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     name: document._source.name,
     description: document._source.description,
     labels: document._source.labels,
-    conversation_starters: document._source.conversation_starter_items,
+    conversation_starters: document._source.conversation_starters,
     avatar_color: document._source.avatar_color,
     avatar_symbol: document._source.avatar_symbol,
     access_control: normalizeAccessControl(document._source),
@@ -115,7 +115,7 @@ export const createRequestToEs = ({
     space,
     description: profile.description,
     labels: profile.labels,
-    conversation_starter_items: profile.conversation_starters,
+    conversation_starters: profile.conversation_starters,
     avatar_color: profile.avatar_color,
     avatar_symbol: profile.avatar_symbol,
     created_by_id: user.id,
@@ -157,7 +157,7 @@ export const updateRequestToEs = ({
   user?: UserIdAndName;
 }): AgentProperties => {
   const currentConfig = currentProps.configuration ?? currentProps.config;
-  const { configuration, access_control, conversation_starters, ...restUpdate } = update;
+  const { configuration, access_control, ...restUpdate } = update;
   const { approvals: nextApprovals, ...restConfiguration } = configuration ?? {};
   const currentAccessControl = normalizeAccessControl(currentProps);
 
@@ -173,9 +173,6 @@ export const updateRequestToEs = ({
   const updated: AgentProperties = {
     ...restCurrentProps,
     ...restUpdate,
-    ...(conversation_starters !== undefined && {
-      conversation_starter_items: conversation_starters,
-    }),
     id: agentId,
     access_control: access_control
       ? { ...currentAccessControl, access_mode: access_control.access_mode }

@@ -10,8 +10,7 @@ import type { ConversationStarter } from '@kbn/agent-builder-common';
 import { useResolvedAgent } from '../../../hooks/agents/use_resolved_agent';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
-import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
-import { useAgentModel } from '../../../hooks/agents/use_agent_model';
+import { useAgentSendState } from '../../../hooks/agents/use_agent_send_state';
 import { useCurrentUser } from '../../../hooks/use_current_user';
 import { useCarryOverDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
@@ -24,10 +23,11 @@ import { resolveConversationStarters } from './resolve_conversation_starters';
  */
 export const useConversationStarters = () => {
   const agentId = useAgentId();
-  const { agent, isLoading } = useResolvedAgent(agentId);
+  // Only `agent` is used: while it loads it is undefined, and `isLoading` stays true forever when the
+  // agent is found in the list, because react-query v4 reports it for the disabled by-id query too.
+  const { agent } = useResolvedAgent(agentId);
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
-  const { invokeBoundAgents } = useUiPrivileges();
-  const { isLoading: isAgentModelLoading } = useAgentModel(agentId);
+  const { agentExists, isBoundAgentForbidden, isAgentModelLoading } = useAgentSendState(agentId);
   const spaceId = useActiveSpaceId();
   const { sessionTag } = useConversationContext();
   const { currentUser } = useCurrentUser();
@@ -38,8 +38,7 @@ export const useConversationStarters = () => {
     agentId,
   });
 
-  const isBoundAgentForbidden = Boolean(agent?.service_account_id) && !invokeBoundAgents;
-  const canSend = Boolean(agent) && !isLoading && !isBoundAgentForbidden;
+  const canSend = agentExists && !isBoundAgentForbidden;
   const agentStarters = agent?.conversation_starters;
 
   const starters = useMemo(
@@ -49,10 +48,11 @@ export const useConversationStarters = () => {
 
   const onSelect = useCallback(
     ({ label, prompt }: ConversationStarter) => {
-      // What was typed isn't sent: it moves to the input of the conversation that starts.
-      const typedText = takeNewChatDraft();
       void submitMessage(prompt ?? label, {
+        // What was typed isn't sent: it moves to the input of the conversation that starts. It stays
+        // where it is if the conversation can't be created.
         onConversationCreated: (conversationId) => {
+          const typedText = takeNewChatDraft();
           if (typedText) saveDraftTo(conversationId, typedText);
         },
       });
