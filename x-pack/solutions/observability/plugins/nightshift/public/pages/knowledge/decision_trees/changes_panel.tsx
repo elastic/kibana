@@ -23,6 +23,43 @@ interface ChangesPanelProps {
   version: number;
 }
 
+const PREFIX_LABELS = {
+  nodeAdded: i18n.translate('xpack.nightshift.knowledge.decisionTrees.changes.nodeAddedPrefix', {
+    defaultMessage: '+ node',
+  }),
+  nodeRemoved: i18n.translate(
+    'xpack.nightshift.knowledge.decisionTrees.changes.nodeRemovedPrefix',
+    { defaultMessage: '- node' }
+  ),
+  nodeModified: i18n.translate(
+    'xpack.nightshift.knowledge.decisionTrees.changes.nodeModifiedPrefix',
+    { defaultMessage: '~ node' }
+  ),
+  edgeAdded: i18n.translate('xpack.nightshift.knowledge.decisionTrees.changes.edgeAddedPrefix', {
+    defaultMessage: '+ edge',
+  }),
+  edgeRemoved: i18n.translate(
+    'xpack.nightshift.knowledge.decisionTrees.changes.edgeRemovedPrefix',
+    { defaultMessage: '- edge' }
+  ),
+  edgeModified: i18n.translate(
+    'xpack.nightshift.knowledge.decisionTrees.changes.edgeModifiedPrefix',
+    { defaultMessage: '~ edge' }
+  ),
+};
+
+const NOW_CAUSAL_LABEL = i18n.translate(
+  'xpack.nightshift.knowledge.decisionTrees.changes.nowCausal',
+  {
+    defaultMessage: 'now causal',
+  }
+);
+
+const NO_LONGER_CAUSAL_LABEL = i18n.translate(
+  'xpack.nightshift.knowledge.decisionTrees.changes.noLongerCausal',
+  { defaultMessage: 'no longer causal' }
+);
+
 const DiffLine = ({ color, prefix, text }: { color: string; prefix: string; text: string }) => (
   <EuiText size="s">
     <EuiBadge color={color}>{prefix}</EuiBadge> {text}
@@ -106,19 +143,27 @@ const DiffContent = ({ diff }: { diff: DecisionTreeDiff }) => {
       <EuiFlexGroup direction="column" gutterSize="xs">
         {diff.nodes_added.map((node) => (
           <EuiFlexItem key={`node-add-${node.node_id}`} grow={false}>
-            <DiffLine color="success" prefix="+ node" text={`${node.node_id} — ${node.label}`} />
+            <DiffLine
+              color="success"
+              prefix={PREFIX_LABELS.nodeAdded}
+              text={`${node.node_id} — ${node.label}`}
+            />
           </EuiFlexItem>
         ))}
         {diff.nodes_removed.map((node) => (
           <EuiFlexItem key={`node-remove-${node.node_id}`} grow={false}>
-            <DiffLine color="danger" prefix="- node" text={`${node.node_id} — ${node.label}`} />
+            <DiffLine
+              color="danger"
+              prefix={PREFIX_LABELS.nodeRemoved}
+              text={`${node.node_id} — ${node.label}`}
+            />
           </EuiFlexItem>
         ))}
         {diff.nodes_modified.map((change) => (
           <EuiFlexItem key={`node-mod-${change.node_id}`} grow={false}>
             <DiffLine
               color="warning"
-              prefix="~ node"
+              prefix={PREFIX_LABELS.nodeModified}
               text={`${change.node_id} (${change.changed_fields.join(', ')})`}
             />
           </EuiFlexItem>
@@ -127,7 +172,7 @@ const DiffContent = ({ diff }: { diff: DecisionTreeDiff }) => {
           <EuiFlexItem key={`edge-add-${index}`} grow={false}>
             <DiffLine
               color="success"
-              prefix="+ edge"
+              prefix={PREFIX_LABELS.edgeAdded}
               text={`${edge.source_node_id} → ${edge.target_node_id} (${edge.condition})`}
             />
           </EuiFlexItem>
@@ -136,7 +181,7 @@ const DiffContent = ({ diff }: { diff: DecisionTreeDiff }) => {
           <EuiFlexItem key={`edge-remove-${index}`} grow={false}>
             <DiffLine
               color="danger"
-              prefix="- edge"
+              prefix={PREFIX_LABELS.edgeRemoved}
               text={`${edge.source_node_id} → ${edge.target_node_id} (${edge.condition})`}
             />
           </EuiFlexItem>
@@ -145,9 +190,9 @@ const DiffContent = ({ diff }: { diff: DecisionTreeDiff }) => {
           <EuiFlexItem key={`edge-mod-${index}`} grow={false}>
             <DiffLine
               color="warning"
-              prefix="~ edge"
+              prefix={PREFIX_LABELS.edgeModified}
               text={`${change.after.source_node_id} → ${change.after.target_node_id} (${
-                change.after.is_taken ? 'now causal' : 'no longer causal'
+                change.after.is_taken ? NOW_CAUSAL_LABEL : NO_LONGER_CAUSAL_LABEL
               })`}
             />
           </EuiFlexItem>

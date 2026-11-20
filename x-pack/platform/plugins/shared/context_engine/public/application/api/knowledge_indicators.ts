@@ -10,13 +10,17 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import {
   AI_INDEX_INTERNAL_API_VERSION,
   AI_INDEX_KI_BY_ID_PATH,
+  AI_INDEX_KI_GROUPS_PATH,
   AI_INDEX_KI_LIST_PATH,
   AI_INDEX_KI_RESTORE_PATH,
 } from '../../../common/constants';
 import type { KiLifecycleStatus } from '../../../common/step_types/ki';
+import type { KiStatus } from '../../../common/ki_lifecycle_status';
+import type { KiListSort } from '../../../common/ki_list_sort';
 import type {
   DeleteKiResponse,
   GetKiResponse,
+  ListKiGroupsResponse,
   ListKisResponse,
   RestoreKiResponse,
   UpdateKiBody,
@@ -27,22 +31,72 @@ interface ListKisArgs {
   aiIndexId: string;
   size?: number;
   type?: string;
+  excludeTypes?: string[];
   query?: string;
-  lifecycleStatus?: KiLifecycleStatus[];
+  status?: KiStatus[];
+  sort?: KiListSort;
   signal?: AbortSignal;
 }
 
 export const listKis = (
   http: HttpStart,
-  { aiIndexId, size, type, query, lifecycleStatus, signal }: ListKisArgs
+  { aiIndexId, size, type, excludeTypes, query, status, sort, signal }: ListKisArgs
 ): Promise<ListKisResponse> =>
   http.get<ListKisResponse>(buildPath(AI_INDEX_KI_LIST_PATH, { aiIndexId }), {
     version: AI_INDEX_INTERNAL_API_VERSION,
     query: {
       ...(size !== undefined ? { size } : {}),
       ...(type !== undefined ? { type } : {}),
+      ...(excludeTypes !== undefined && excludeTypes.length > 0
+        ? { exclude_types: excludeTypes }
+        : {}),
       ...(query !== undefined ? { query } : {}),
-      ...(lifecycleStatus !== undefined ? { lifecycle_status: lifecycleStatus } : {}),
+      ...(status !== undefined ? { status } : {}),
+      ...(sort !== undefined ? { sort } : {}),
+    },
+    ...(signal ? { signal } : {}),
+  });
+
+interface ListKiGroupsArgs {
+  aiIndexId: string;
+  maxGroups: number;
+  /** Exactly these types as groups (keeps the groups stable while the search changes). */
+  types?: string[];
+  /** Leaves these types out before grouping (the "Other" groups leave out the tile types). */
+  excludeTypes?: string[];
+  previewSize: number;
+  query?: string;
+  status: KiStatus[];
+  sort: KiListSort;
+  signal?: AbortSignal;
+}
+
+export const listKiGroups = (
+  http: HttpStart,
+  {
+    aiIndexId,
+    maxGroups,
+    types,
+    excludeTypes,
+    previewSize,
+    query,
+    status,
+    sort,
+    signal,
+  }: ListKiGroupsArgs
+): Promise<ListKiGroupsResponse> =>
+  http.get<ListKiGroupsResponse>(buildPath(AI_INDEX_KI_GROUPS_PATH, { aiIndexId }), {
+    version: AI_INDEX_INTERNAL_API_VERSION,
+    query: {
+      max_groups: maxGroups,
+      ...(types !== undefined && types.length > 0 ? { types } : {}),
+      ...(excludeTypes !== undefined && excludeTypes.length > 0
+        ? { exclude_types: excludeTypes }
+        : {}),
+      preview_size: previewSize,
+      ...(query !== undefined ? { query } : {}),
+      status,
+      sort,
     },
     ...(signal ? { signal } : {}),
   });

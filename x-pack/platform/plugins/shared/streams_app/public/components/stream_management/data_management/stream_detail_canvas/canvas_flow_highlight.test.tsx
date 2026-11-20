@@ -34,7 +34,7 @@ const destinationNode = (id: string): ClassicCanvasNode => ({
   id,
   type: DESTINATION_NODE_TYPE,
   position: { x: 0, y: 0 },
-  data: { title: id },
+  data: { title: id, hasSavedSource: true },
 });
 
 const edge = (source: string, target: string): ClassicCanvasEdge => ({

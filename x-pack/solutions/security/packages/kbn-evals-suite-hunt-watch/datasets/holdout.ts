@@ -90,6 +90,9 @@ export const holdoutDataset: HuntWatchExample[] = [
     // Same pin as the golden clean row: no hit, benign close, Investigation closed.
     id: 'holdout-clean-aws-iam-clean',
     cohort: 'holdout',
+    // Capability: `completed` needs the subject model to ground the Tier 2 query; weaker models
+    // end `partial` (coordinator incomplete_retryable). See `HuntGate`.
+    metadata: { gate: 'capability' },
     input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [CLEAN_HOLDOUT] },
     output: {
       expected: {

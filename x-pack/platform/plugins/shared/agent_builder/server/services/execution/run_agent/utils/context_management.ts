@@ -14,6 +14,7 @@ import {
   createSubstitutionStep,
 } from '@kbn/agent-builder-common';
 import type { AgentBuilderAnalytics, AgentEventEmitter } from '@kbn/agent-builder-server';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import {
@@ -56,6 +57,7 @@ export interface ContextManagementDeps extends VisibleContextDeps {
   analyticsService?: AgentBuilderAnalytics;
   agentId?: string;
   executionId?: string;
+  toolManager?: ToolManager;
 }
 
 /**
