@@ -70,6 +70,7 @@ export const TimingsTable = ({ browserMs, timings }: TimingsTableProps) => {
   const { definitionMs, planningMs, probesMs, queriesMs, processingMs, totalMs } = timings;
   const rows: TimingRow[] = [
     { id: 'roundTrip', label: TIMING_ROWS.roundTrip, indent: 0, ms: browserMs },
+    // Also covers Kibana's route handling (auth, validation) and building the response after the server's timings stop.
     { id: 'network', label: TIMING_ROWS.network, indent: 1, ms: browserMs - totalMs },
     { id: 'server', label: TIMING_ROWS.server, indent: 1, ms: totalMs },
     { id: 'definition', label: TIMING_ROWS.definition, indent: 2, ms: definitionMs },

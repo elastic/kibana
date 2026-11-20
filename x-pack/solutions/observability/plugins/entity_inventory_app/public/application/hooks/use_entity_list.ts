@@ -19,7 +19,6 @@ export const INITIAL_LIST_RESPONSE: ListResponse = {
   rows: [],
   provenance: {},
   truncated: false,
-  took: 0,
   queries: [],
   probes: [],
   timings: {

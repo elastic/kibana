@@ -16,7 +16,7 @@ export type RecordedCallStatus = 'ok' | 'error' | 'aborted';
 /** The diagnostics of one `_list` response; the rows are not kept. */
 export type ListCallDiagnostics = Pick<
   ListResponse,
-  'took' | 'queries' | 'probes' | 'timings' | 'truncated' | 'errors' | 'unavailableColumns'
+  'queries' | 'probes' | 'timings' | 'truncated' | 'errors' | 'unavailableColumns'
 > & {
   rowCount: number;
 };

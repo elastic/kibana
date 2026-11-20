@@ -167,8 +167,6 @@ export interface ListResponse {
   provenance: Provenance;
   /** True only when the row limit left rows out; a failed or partial plan is reported in `errors`. */
   truncated: boolean;
-  /** Wall time of the whole request in milliseconds, probes included. */
-  took: number;
   /** One entry per plan query sent, in plan order; probes are in `probes`. */
   queries: ListQueryDiagnostic[];
   /** One entry per distinct source pattern probed, in source order. */

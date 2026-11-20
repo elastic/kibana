@@ -26,7 +26,13 @@ import type {
   SourceError,
   UnavailableColumn,
 } from '@kbn/entity-inventory-plugin/common';
-import { OtherErrorsTable, ProbesTable, QueriesTable } from './diagnostic_tables';
+import {
+  OtherErrorsTable,
+  ProbesTable,
+  QueriesTable,
+  isProbeFailed,
+  isQueryFailed,
+} from './diagnostic_tables';
 import { formatCount, formatMs, formatRequest } from './format';
 import type { ListCallDiagnostics, RecordedCall } from './performance_recorder';
 import { ElasticsearchTable, TimingsTable } from './summary_tables';
@@ -56,24 +62,6 @@ const dedupeUnavailableColumns = (columns: readonly UnavailableColumn[]): Unavai
   ).values(),
 ];
 
-/**
- * A failed probe that carries no error of its own takes the reason of the response error reported
- * for its index pattern, so its row can show it.
- */
-const withProbeErrors = (
-  probes: readonly ListProbeDiagnostic[],
-  errors: readonly SourceError[]
-): ListProbeDiagnostic[] =>
-  probes.map((probe) => {
-    if (probe.error !== null || probe.outcome !== 'failed') {
-      return probe;
-    }
-    const reported = errors.find(({ indexPattern }) => indexPattern === probe.indexPattern);
-    return reported
-      ? { ...probe, error: { status: reported.status, reason: reported.reason } }
-      : probe;
-  });
-
 /** Response errors that no failed query or probe row accounts for, by index pattern. */
 const unattributedErrors = (
   errors: readonly SourceError[],
@@ -81,10 +69,8 @@ const unattributedErrors = (
   probes: readonly ListProbeDiagnostic[]
 ): SourceError[] => {
   const attributed = new Set([
-    ...queries.filter(({ error }) => error !== null).map(({ indexPattern }) => indexPattern),
-    ...probes
-      .filter(({ error, outcome }) => error !== null || outcome === 'failed')
-      .map(({ indexPattern }) => indexPattern),
+    ...queries.filter(isQueryFailed).map(({ indexPattern }) => indexPattern),
+    ...probes.filter(isProbeFailed).map(({ indexPattern }) => indexPattern),
   ]);
   return errors.filter(({ indexPattern }) => !attributed.has(indexPattern));
 };
@@ -127,8 +113,7 @@ export const ListCallDetail = ({ call, list }: ListCallDetailProps) => {
     prefix: 'entityInventoryPerformanceUnavailable',
   });
   const { browserMs, route, startedAt, status } = call;
-  const { timings, queries, rowCount, truncated, errors, unavailableColumns } = list;
-  const probes = withProbeErrors(list.probes, errors);
+  const { timings, queries, probes, rowCount, truncated, errors, unavailableColumns } = list;
   const otherErrors = unattributedErrors(errors, queries, probes);
   const unavailable = dedupeUnavailableColumns(unavailableColumns);
 

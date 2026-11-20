@@ -59,7 +59,6 @@ export const buildScenarioListResponse = (
   const base = {
     columns,
     provenance: {},
-    took: 0,
     queries: [],
     probes: [],
     timings: {

@@ -832,7 +832,7 @@ describe('InventoryService.list diagnostics', () => {
     expect(response.queries.map(({ indexPattern }) => indexPattern)).toEqual([OTEL_PATTERN]);
   });
 
-  it('reports took as the wall time of the whole call, probes included', async () => {
+  it('reports the wall time of the whole call, probes included, as timings.totalMs', async () => {
     jest.useFakeTimers({ now: new Date('2026-11-01T12:00:00.000Z') });
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     // Each probe and plan query takes 100ms of wall time: two probes, then two FROM queries.
@@ -848,7 +848,7 @@ describe('InventoryService.list diagnostics', () => {
 
     const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
 
-    expect(response.took).toBe(400);
+    expect(response.timings.totalMs).toBe(400);
   });
 
   it('splits the call into phases and times each probe and plan query', async () => {

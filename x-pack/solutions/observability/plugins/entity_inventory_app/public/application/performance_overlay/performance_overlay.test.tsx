@@ -14,6 +14,7 @@ import { ENTITY_INVENTORY_PERFORMANCE_OVERLAY_ENABLED } from '../../../common/fe
 import { createAppServicesMock, createCoreStartMock } from '../../mocks';
 import {
   ERRORS_FIXTURE,
+  NO_TIME_SERIES_PROBE,
   PROBES_FIXTURE,
   QUERIES_FIXTURE,
   TIMINGS_FIXTURE,
@@ -31,7 +32,6 @@ const recordList = (recorder: PerformanceRecorder, browserMs: number) =>
     serverMs: TIMINGS_FIXTURE.totalMs,
     errorMessage: null,
     list: {
-      took: 52,
       queries: QUERIES_FIXTURE,
       probes: PROBES_FIXTURE,
       timings: TIMINGS_FIXTURE,
@@ -245,7 +245,7 @@ describe('PerformanceOverlay', () => {
     const probeRows = within(probes)
       .getAllByRole('row')
       .filter((row) => within(row).queryByTestId('entityInventoryPerformanceRowExpand'));
-    expect(probeRows).toHaveLength(2);
+    expect(probeRows).toHaveLength(3);
     expect(
       within(probes)
         .getAllByRole('columnheader')
@@ -253,13 +253,16 @@ describe('PerformanceOverlay', () => {
     ).toEqual(['Details', 'Index pattern', 'Plans', 'Status', 'ES time']);
     expect(probeRows[0]).toHaveTextContent('metrics-*TS + FROMOK3.0 ms');
     expect(probeRows[1]).toHaveTextContent('traces-*NoneError');
+    expect(probeRows[2]).toHaveTextContent('logs-appFROM onlyOK');
     expect(within(probes).queryByTestId('entityInventoryPerformanceRowDetail')).toBeNull();
     fireEvent.click(within(probeRows[1]).getByTestId('entityInventoryPerformanceRowExpand'));
     expect(
       within(within(probes).getByTestId('entityInventoryPerformanceRowDetail')).getByTestId(
         'entityInventoryPerformanceRowErrorDetail'
       )
-    ).toHaveTextContent('ErrorNo index matches traces-*');
+    ).toHaveTextContent(
+      'Error 403security_exception: action [indices:data/read/esql] is unauthorized'
+    );
 
     // Only the error no query or probe row accounts for is listed apart.
     const otherErrors = within(screen.getByTestId('entityInventoryPerformanceOtherErrors'))
@@ -274,6 +277,97 @@ describe('PerformanceOverlay', () => {
     );
   });
 
+  it('shows a verification error of a no time-series probe as a note, not as an error', async () => {
+    const { recorder } = renderOverlay(true);
+    const partial = {
+      indexPattern: NO_TIME_SERIES_PROBE.indexPattern,
+      status: null,
+      reason: 'partial result: some shards or clusters did not answer, so rows may be missing',
+    };
+    act(() =>
+      recorder.record({
+        route: 'host/_list',
+        startedAt: 0,
+        browserMs: 60,
+        status: 'ok',
+        serverMs: TIMINGS_FIXTURE.totalMs,
+        errorMessage: null,
+        list: {
+          queries: [],
+          probes: [NO_TIME_SERIES_PROBE],
+          timings: TIMINGS_FIXTURE,
+          truncated: false,
+          errors: [partial],
+          unavailableColumns: [],
+          rowCount: 0,
+        },
+      })
+    );
+
+    fireEvent.click(await screen.findByTestId('entityInventoryPerformanceBadge'));
+
+    const probes = await screen.findByTestId('entityInventoryPerformanceProbes');
+    const [probeRow] = within(probes)
+      .getAllByRole('row')
+      .filter((row) => within(row).queryByTestId('entityInventoryPerformanceRowExpand'));
+    expect(probeRow).toHaveTextContent('logs-appFROM onlyOK');
+    expect(
+      within(probeRow).queryByTestId('entityInventoryPerformanceRowError')
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(within(probeRow).getByTestId('entityInventoryPerformanceRowExpand'));
+    const detail = within(probes).getByTestId('entityInventoryPerformanceRowDetail');
+    expect(
+      within(detail).queryByTestId('entityInventoryPerformanceRowErrorDetail')
+    ).not.toBeInTheDocument();
+    expect(within(detail).getByTestId('entityInventoryPerformanceRowNote')).toHaveTextContent(
+      'Elasticsearch: verification_exception: Found 1 problem'
+    );
+
+    // The probe does not account for the partial result of the same pattern.
+    const otherErrors = within(screen.getByTestId('entityInventoryPerformanceOtherErrors'))
+      .getAllByRole('row')
+      .slice(1);
+    expect(otherErrors.map((row) => row.textContent)).toEqual([
+      expect.stringMatching(/logs-app.*partial result/),
+    ]);
+  });
+
+  it('selects a list call from the history with its request button', async () => {
+    const { recorder } = renderOverlay(true);
+    act(() => {
+      recordList(recorder, 61.26);
+      recorder.record({
+        route: 'types',
+        startedAt: 0,
+        browserMs: 5,
+        status: 'ok',
+        serverMs: null,
+        errorMessage: null,
+        list: null,
+      });
+      recordList(recorder, 99.5);
+    });
+
+    fireEvent.click(await screen.findByTestId('entityInventoryPerformanceBadge'));
+
+    const subtitle = () => screen.getByTestId('entityInventoryPerformanceDetailSubtitle');
+    expect(await screen.findByTestId('entityInventoryPerformanceDetailSubtitle')).toHaveTextContent(
+      '99.5 ms round trip'
+    );
+
+    const historyRows = screen.getAllByTestId('entityInventoryPerformanceHistoryRow');
+    // A call without a list breakdown has nothing to select.
+    expect(
+      within(historyRows[1]).queryByTestId('entityInventoryPerformanceHistorySelect')
+    ).not.toBeInTheDocument();
+    const select = within(historyRows[2]).getByTestId('entityInventoryPerformanceHistorySelect');
+    expect(select.tagName).toBe('BUTTON');
+
+    fireEvent.click(select);
+    expect(subtitle()).toHaveTextContent('61.3 ms round trip');
+  });
+
   it('clamps query generation at zero when the probes outlast planning', async () => {
     const { recorder } = renderOverlay(true);
     act(() =>
@@ -285,7 +379,6 @@ describe('PerformanceOverlay', () => {
         serverMs: TIMINGS_FIXTURE.totalMs,
         errorMessage: null,
         list: {
-          took: 52,
           queries: [],
           probes: [],
           timings: { ...TIMINGS_FIXTURE, planningMs: 4.0, probesMs: 4.4 },
@@ -316,7 +409,6 @@ describe('PerformanceOverlay', () => {
         serverMs: TIMINGS_FIXTURE.totalMs,
         errorMessage: null,
         list: {
-          took: 52,
           queries: QUERIES_FIXTURE.slice(0, 1),
           probes: PROBES_FIXTURE.slice(0, 1),
           timings: TIMINGS_FIXTURE,
@@ -346,7 +438,6 @@ describe('PerformanceOverlay', () => {
         serverMs: TIMINGS_FIXTURE.totalMs,
         errorMessage: null,
         list: {
-          took: 52,
           queries: QUERIES_FIXTURE.slice(0, 1),
           probes: PROBES_FIXTURE.slice(0, 1),
           timings: TIMINGS_FIXTURE,

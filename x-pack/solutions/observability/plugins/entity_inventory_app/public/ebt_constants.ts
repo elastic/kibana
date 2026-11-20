@@ -19,6 +19,8 @@ export const ENTITY_INVENTORY_EBT_ACTIONS = {
   CLEAR_PERFORMANCE_HISTORY: 'clearPerformanceHistory',
   /** Developer expands or collapses a probe or query row of the performance overlay. */
   TOGGLE_PERFORMANCE_ROW: 'togglePerformanceRow',
+  /** Developer selects a recorded `_list` call to show its breakdown in the performance overlay. */
+  SELECT_PERFORMANCE_CALL: 'selectPerformanceCall',
 };
 
 /** EBT click `element` values: where in the entity inventory the click happened. */

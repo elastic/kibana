@@ -18,6 +18,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHealth,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -53,7 +54,10 @@ const numberCss = css`
   font-variant-numeric: tabular-nums;
 `;
 
-const HISTORY_TABLE_COLUMNS: Array<EuiBasicTableColumn<RecordedCall>> = [
+/** The history columns; a `_list` call's request selects it, from the keyboard too. */
+const historyColumns = (
+  onSelect: (id: number) => void
+): Array<EuiBasicTableColumn<RecordedCall>> => [
   {
     field: 'startedAt',
     name: HISTORY_COLUMNS.time,
@@ -66,7 +70,21 @@ const HISTORY_TABLE_COLUMNS: Array<EuiBasicTableColumn<RecordedCall>> = [
     field: 'route',
     name: HISTORY_COLUMNS.request,
     truncateText: true,
-    render: (route: string) => formatRequest(route),
+    render: (route: string, { id, list }: RecordedCall) =>
+      list ? (
+        <EuiLink
+          onClick={() => onSelect(id)}
+          data-test-subj="entityInventoryPerformanceHistorySelect"
+          {...getEbtProps({
+            action: ENTITY_INVENTORY_EBT_ACTIONS.SELECT_PERFORMANCE_CALL,
+            element: ENTITY_INVENTORY_EBT_ELEMENTS.PERFORMANCE_OVERLAY,
+          })}
+        >
+          {formatRequest(route)}
+        </EuiLink>
+      ) : (
+        formatRequest(route)
+      ),
   },
   {
     field: 'status',
@@ -174,13 +192,12 @@ export const PerformanceFlyout = ({ calls, onClear, onClose }: PerformanceFlyout
             tableCaption={HISTORY_TITLE}
             items={[...calls]}
             itemId="id"
-            columns={HISTORY_TABLE_COLUMNS}
+            columns={historyColumns(setSelectedId)}
             noItemsMessage={NO_CALLS}
             compressed
             data-test-subj="entityInventoryPerformanceHistory"
-            rowProps={({ id, list }: RecordedCall) => ({
+            rowProps={({ id }: RecordedCall) => ({
               isSelected: id === selected?.id,
-              onClick: list ? () => setSelectedId(id) : undefined,
               'data-test-subj': 'entityInventoryPerformanceHistoryRow',
             })}
           />

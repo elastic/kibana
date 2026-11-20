@@ -229,11 +229,10 @@ export class InventoryService {
    * reported in `errors[]`; neither fails the request. A partial result is also reported in
    * `errors[]` and its rows are kept. `truncated` is true only when the row limit left rows out.
    * `queries[]` lists every plan query sent and `probes[]` every probe, each with the stats
-   * Elasticsearch returned; `provenance` covers the returned rows only, `took` is the wall time of
-   * the whole call and `timings` splits it into phases with `performance.now()`.
+   * Elasticsearch returned; `provenance` covers the returned rows only, and `timings` gives the wall time
+   * of the whole call (`totalMs`) and of each phase, measured with `performance.now()`.
    */
   list = async ({ type, window, limit, signal }: ListRequest): Promise<ListResponse> => {
-    const startedAt = Date.now();
     const startedAtMs = performance.now();
     const definition = await this.getDynamicDefinition(type);
     const definedAtMs = performance.now();
@@ -288,7 +287,6 @@ export class InventoryService {
       rows,
       provenance: restrictProvenance(merged.provenance, rows),
       truncated,
-      took: Date.now() - startedAt,
       queries: timedOutcomes.map((timed, planIndex) =>
         toQueryDiagnostic(plans[planIndex], queries[planIndex], timed, unusableReasons[planIndex])
       ),

@@ -13,7 +13,6 @@ import type {
 import type { EntityInventoryApiClient, EntityInventoryRequestOptions } from './client';
 
 const toListDiagnostics = ({
-  took,
   queries,
   probes,
   timings,
@@ -22,7 +21,6 @@ const toListDiagnostics = ({
   errors,
   unavailableColumns,
 }: ListResponse): ListCallDiagnostics => ({
-  took,
   queries,
   probes,
   timings,

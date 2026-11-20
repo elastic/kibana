@@ -67,8 +67,9 @@ Response:
 | `rows` | At most `limit`, ordered by `last_seen` descending, ties by `entity.id`. Every row carries every column, null where no source produced a value. |
 | `provenance` | For each returned row's `entity.id`, the index pattern that supplied each attribute value. |
 | `truncated` | True only when the row limit left rows out: a plan was cut (returned `limit + 1` rows), or the merge holds more than `limit` rows. A failed or partial plan does not set it, since narrowing the request would not fix it; it is reported in `errors`. There is no `total`. |
-| `took` | Wall time of the request in milliseconds, probes included. |
-| `queries` | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, and Elasticsearch's `took`, `documentsFound` and `rowCount`. A failed query has null `took` and `documentsFound` and `rowCount` 0. Probes are not listed. |
+| `queries` | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, `wallMs` (Kibana's time from sending to parsed rows), `rowCount`, `isPartial`, `error`, and Elasticsearch's execution metadata: `took`, `documentsFound`, `valuesLoaded`, `rowsEmitted`, `cpuNanos`, `driverNanos`, `bytesRead`, `shards`. A failed query has null metadata, `rowCount` 0 and an `error`; a query whose answer was unusable also carries its reason in `error`. |
+| `probes` | One entry per distinct source pattern: `indexPattern`, `esql`, `params`, `outcome` (`time_series`, `no_time_series` or `failed`), `wallMs`, `isPartial`, `error` (a verification error included) and the same execution metadata as `queries`. |
+| `timings` | Server phases in fractional milliseconds: `definitionMs`, `planningMs` (probes and query generation), `probesMs` (part of `planningMs`), `queriesMs`, `processingMs` and `totalMs`, their sum. |
 | `errors` | `{ indexPattern, status, reason }` per source problem; never a stack. |
 | `unavailableColumns` | `{ column, indexPattern, field }` for an attribute no index behind that source's pattern maps; its value is null. |
 

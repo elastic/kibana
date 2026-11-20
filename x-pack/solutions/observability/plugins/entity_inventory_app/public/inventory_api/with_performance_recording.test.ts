@@ -22,7 +22,6 @@ const LIST_RESPONSE: ListResponse = {
   rows: [{ 'entity.id': 'host:a' }, { 'entity.id': 'host:b' }],
   provenance: {},
   truncated: true,
-  took: 52,
   queries: QUERIES_FIXTURE,
   probes: PROBES_FIXTURE,
   timings: TIMINGS_FIXTURE,
@@ -69,7 +68,6 @@ describe('withPerformanceRecording', () => {
         serverMs: TIMINGS_FIXTURE.totalMs,
         errorMessage: null,
         list: {
-          took: 52,
           queries: QUERIES_FIXTURE,
           probes: PROBES_FIXTURE,
           timings: TIMINGS_FIXTURE,

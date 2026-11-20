@@ -242,7 +242,8 @@ describe('probeSources', () => {
 
       const results = await probeSources(client, ['metrics-*', 'logs-*']);
 
-      // Both are sent before either settles, so the first waits for the second's 30ms too.
+      // The mock advances the fake clock synchronously as each probe is sent, so the first probe's
+      // wall time also includes the second's 30ms. An artefact of the mock, not production behaviour.
       expect(results.get('metrics-*')?.execution).toMatchObject({
         wallMs: 40,
         stats: { took: 7 },

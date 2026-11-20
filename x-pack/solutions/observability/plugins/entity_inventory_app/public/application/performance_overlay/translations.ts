@@ -322,6 +322,12 @@ export const ROW_ERROR_TITLE = (status: number | null): string =>
         values: { status },
       });
 
+export const PROBE_ERROR_NOTE = (reason: string): string =>
+  i18n.translate('xpack.entityInventoryApp.performanceOverlay.probeErrorNote', {
+    defaultMessage: 'Elasticsearch: {reason}',
+    values: { reason },
+  });
+
 export const ROW_PARTIAL_TITLE = i18n.translate(
   'xpack.entityInventoryApp.performanceOverlay.rowPartial.title',
   {

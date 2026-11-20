@@ -23,6 +23,33 @@ const STATS = {
   isPartial: false,
 };
 
+// A failed or errored request carries no stats.
+const NO_STATS = {
+  took: null,
+  documentsFound: null,
+  valuesLoaded: null,
+  rowsEmitted: null,
+  cpuNanos: null,
+  driverNanos: null,
+  bytesRead: null,
+  shards: null,
+  isPartial: null,
+};
+
+const TRACES_FORBIDDEN =
+  'security_exception: action [indices:data/read/esql] is unauthorized for user [elastic] on indices [traces-*]';
+
+/** A concrete index that is not time series: the probe fails verification, so only FROM runs. */
+export const NO_TIME_SERIES_PROBE: ListProbeDiagnostic = {
+  indexPattern: 'logs-app',
+  esql: 'TS logs-app | LIMIT 1',
+  params: [],
+  outcome: 'no_time_series',
+  wallMs: 2.5,
+  ...NO_STATS,
+  error: { status: 400, reason: 'verification_exception: Found 1 problem' },
+};
+
 export const PROBES_FIXTURE: ListProbeDiagnostic[] = [
   {
     ...STATS,
@@ -40,17 +67,10 @@ export const PROBES_FIXTURE: ListProbeDiagnostic[] = [
     params: [],
     outcome: 'failed',
     wallMs: 1.5,
-    took: null,
-    documentsFound: null,
-    valuesLoaded: null,
-    rowsEmitted: null,
-    cpuNanos: null,
-    driverNanos: null,
-    bytesRead: null,
-    shards: null,
-    isPartial: null,
-    error: null,
+    ...NO_STATS,
+    error: { status: 403, reason: TRACES_FORBIDDEN },
   },
+  NO_TIME_SERIES_PROBE,
 ];
 
 export const QUERIES_FIXTURE: ListQueryDiagnostic[] = [
@@ -87,7 +107,7 @@ export const QUERIES_FIXTURE: ListQueryDiagnostic[] = [
 
 export const ERRORS_FIXTURE: SourceError[] = [
   { indexPattern: 'logs-*', status: 400, reason: 'Unknown column [host.name]' },
-  { indexPattern: 'traces-*', status: null, reason: 'No index matches traces-*' },
+  { indexPattern: 'traces-*', status: 403, reason: TRACES_FORBIDDEN },
   { indexPattern: 'apm-*', status: 503, reason: 'Cluster unavailable' },
 ];
 

@@ -57,7 +57,6 @@ const smallList = (rows: InventoryRow[]): ListResponse => ({
   rows,
   provenance: {},
   truncated: false,
-  took: 0,
   queries: [],
   probes: [],
   timings: {
@@ -111,7 +110,6 @@ const WIDGET_LIST: ListResponse = {
   ],
   provenance: {},
   truncated: false,
-  took: 0,
   queries: [],
   probes: [],
   timings: {

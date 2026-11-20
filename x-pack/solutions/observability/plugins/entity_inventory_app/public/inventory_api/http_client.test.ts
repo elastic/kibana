@@ -16,7 +16,6 @@ const LIST_RESPONSE: ListResponse = {
   rows: [{ 'entity.id': 'host:a' }],
   provenance: {},
   truncated: false,
-  took: 0,
   queries: [],
   probes: [],
   timings: {
