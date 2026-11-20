@@ -144,7 +144,13 @@ export const ndjsonFormat = {
         querystring: dropNullColumns === undefined ? {} : { drop_null_columns: dropNullColumns },
         body,
       },
-      { ...options, asStream: true, meta: true, headers: { accept: 'application/x-ndjson' } }
+      {
+        ...options,
+        asStream: true,
+        meta: true,
+        // ES rejects a versioned Content-Type paired with an unversioned Accept.
+        headers: { accept: 'application/x-ndjson', 'content-type': 'application/json' },
+      }
     );
 
     if (result.statusCode >= 400) {

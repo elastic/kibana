@@ -86,7 +86,12 @@ describe('ndjsonFormat', () => {
         querystring: { drop_null_columns: true },
         body: { query: 'FROM logs-*', filter: { match_all: {} }, params: [1] },
       },
-      { ...options, asStream: true, meta: true, headers: { accept: 'application/x-ndjson' } }
+      {
+        ...options,
+        asStream: true,
+        meta: true,
+        headers: { accept: 'application/x-ndjson', 'content-type': 'application/json' },
+      }
     );
     expect(mockEsClient.esql.query).not.toHaveBeenCalled();
     expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
