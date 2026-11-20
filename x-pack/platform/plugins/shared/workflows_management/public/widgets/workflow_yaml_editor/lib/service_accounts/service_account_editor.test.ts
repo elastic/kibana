@@ -31,6 +31,7 @@ const setup = (markedYaml: string) => {
   const directory: jest.Mocked<ServiceAccountDirectory> = {
     isEnabled: jest.fn().mockReturnValue(true),
     get: jest.fn().mockResolvedValue(account),
+    lookup: jest.fn().mockResolvedValue({ status: 'found', account }),
     list: jest.fn().mockResolvedValue({ serviceAccounts: [account] }),
   };
   const editor = createServiceAccountEditor(directory);
