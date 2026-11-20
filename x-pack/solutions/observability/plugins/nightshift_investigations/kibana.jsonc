@@ -10,7 +10,7 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "nightshift_investigations"],
-    "requiredPlugins": ["nightshiftSources", "share", "isomer"],
+    "requiredPlugins": ["nightshiftSources", "share", "isomer", "taskManager"],
     "optionalPlugins": [
       "actions",
       "alerting",

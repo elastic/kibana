@@ -8,27 +8,52 @@
 import {
   agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
-  agentToolEventInvestigationAttachEventType,
-  agentToolEventStatusUpdateEventType,
+  agentToolEventSearchEventType,
   agentToolEventWriteEventType,
+  agentToolFailedEventType,
+  agentToolKiIdentificationStartedEventType,
+  detectionScanEventType,
+  discoveryTriggeredEventType,
   eventStatusChangedEventType,
+  knowledgeIndicatorEventsGeneratedEventType,
+  knowledgeIndicatorFeaturesIdentifiedEventType,
+  knowledgeIndicatorQueriesGenerationFailedEventType,
+  onboardingScheduledEventType,
 } from './events';
 
 const isOptional = (field: { _meta?: { optional?: boolean } }) => field._meta?.optional === true;
 
 describe('EBT event types', () => {
   it.each([
-    agentToolEventStatusUpdateEventType,
-    agentToolEventInvestigationAttachEventType,
+    agentBuilderKnowledgeIndicatorCreatedEventType,
+    agentToolEventCreateEventType,
+    agentToolEventSearchEventType,
+    agentToolEventWriteEventType,
+    agentToolFailedEventType,
+    agentToolKiIdentificationStartedEventType,
+    detectionScanEventType,
+    discoveryTriggeredEventType,
     eventStatusChangedEventType,
-  ])(
-    '$eventType requires the full alert identity on an event about an existing alert',
-    ({ schema }) => {
-      const { alert_source: source, fingerprint, space_id: spaceId } = schema;
+    knowledgeIndicatorEventsGeneratedEventType,
+    knowledgeIndicatorFeaturesIdentifiedEventType,
+    knowledgeIndicatorQueriesGenerationFailedEventType,
+    onboardingScheduledEventType,
+  ])('$eventType registers the CPS target context', ({ schema }) => {
+    expect(isOptional(schema.space_id)).toBe(false);
+    expect(isOptional(schema.target_cluster_scope)).toBe(true);
+    expect(isOptional(schema.target_cluster_ids)).toBe(true);
+    expect(isOptional(schema.target_cluster_ids_complete)).toBe(true);
+  });
 
-      [source, fingerprint, spaceId].forEach((field) => expect(isOptional(field)).toBe(false));
-    }
-  );
+  it('event-status-changed requires the full alert identity', () => {
+    const {
+      alert_source: source,
+      fingerprint,
+      space_id: spaceId,
+    } = eventStatusChangedEventType.schema;
+
+    [source, fingerprint, spaceId].forEach((field) => expect(isOptional(field)).toBe(false));
+  });
 
   it.each([agentToolEventCreateEventType, agentToolEventWriteEventType])(
     '$eventType lets a failed create omit the series identity',
@@ -51,5 +76,18 @@ describe('EBT event types', () => {
 
     expect(isOptional(spaceId)).toBe(false);
     expect(isOptional(id)).toBe(true);
+  });
+
+  it('carries no free text on a failed tool call', () => {
+    expect(Object.keys(agentToolFailedEventType.schema)).not.toContain('error_message');
+    expect(Object.values(agentToolFailedEventType.schema).map(({ type }) => type)).not.toContain(
+      'text'
+    );
+  });
+
+  it('lets a query generation failure omit the connector when model resolution failed', () => {
+    expect(isOptional(knowledgeIndicatorQueriesGenerationFailedEventType.schema.connector_id)).toBe(
+      true
+    );
   });
 });

@@ -8,7 +8,7 @@
 import type { KibanaUrl, SamlAuth, ScoutLogger } from '@kbn/scout-oblt';
 import { COMMON_HEADERS } from './constants';
 
-const RUN_QUOTAS_PATH = 'internal/significant_events/run_quotas';
+const RUN_QUOTAS_PATH = 'internal/nightshift/investigation_quotas';
 
 /**
  * Turns the deployment-wide daily investigation limits off for the run.
@@ -16,8 +16,8 @@ const RUN_QUOTAS_PATH = 'internal/significant_events/run_quotas';
  * The limits (`manual_investigation`, `total_investigation`) are counted per deployment per day,
  * and this suite's specs share one stack: together they start more investigations than the
  * defaults allow, so whichever spec runs last is refused with a `429` — which spec that is
- * depends on how the lane shards. The limits have their own coverage in `significant_events`;
- * nothing here asserts on them.
+ * depends on how the lane shards. The limits have their own coverage in
+ * `investigation_quotas.spec.ts`; nothing else here asserts on them.
  *
  * Plain `fetch` with the admin's session cookie, for the reason `createAdminRequester` gives:
  * `kbnClient` authenticates as the native superuser, which UIAM rejects on Serverless.
@@ -35,7 +35,7 @@ export const disableInvestigationRunLimits = async ({
   const response = await fetch(kbnUrl.get(`/${RUN_QUOTAS_PATH}`), {
     method: 'PUT',
     headers: { ...COMMON_HEADERS, ...cookieHeader, 'content-type': 'application/json' },
-    body: JSON.stringify({ investigationLimitsEnabled: false }),
+    body: JSON.stringify({ enabled: false }),
   });
   if (!response.ok) {
     throw new Error(`[PUT ${RUN_QUOTAS_PATH}] ${response.status}: ${await response.text()}`.trim());

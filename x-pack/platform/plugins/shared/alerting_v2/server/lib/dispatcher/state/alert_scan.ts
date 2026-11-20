@@ -9,14 +9,14 @@ import type { Alert } from '../types';
 
 /**
  * Result of the windowed candidate-alert scan (FetchAlertsStep): the fetched
- * rows plus whether the scan hit ESQL_QUERY_ROW_LIMIT and deferred a tail.
+ * rows plus whether the scan hit `dispatcher.run.alerts.max` and deferred a tail.
  */
 export class AlertScan {
   private static readonly EMPTY = new AlertScan([], false);
 
   private constructor(
     public readonly alerts: readonly Alert[],
-    /** True when the scan reached ESQL_QUERY_ROW_LIMIT and a tail was deferred. */
+    /** True when the scan reached `dispatcher.run.alerts.max` and a tail was deferred. */
     public readonly truncated: boolean
   ) {}
 

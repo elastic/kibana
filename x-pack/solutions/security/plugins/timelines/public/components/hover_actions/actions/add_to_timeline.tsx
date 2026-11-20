@@ -22,11 +22,11 @@ import {
   getAdditionalScreenReaderOnlyContext,
 } from '@kbn/securitysolution-timeline-components';
 import type { HoverActionComponentProps } from '@kbn/securitysolution-timeline-components';
+import type { DataProvider } from '@kbn/securitysolution-timeline-common';
 import type { TimelinesStartServices } from '../../..';
 import { TimelineId } from '../../../store/timeline';
 import { addProviderToTimeline } from '../../../store/timeline/actions';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
-import type { DataProvider } from '../../../../common/types';
 import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
 
 export const ADD_TO_TIMELINE_KEYBOARD_SHORTCUT = 'a';

@@ -20,6 +20,7 @@ import {
   getFieldCellActions,
   getFieldValueCellActions,
 } from '../../../doc_viewer_table/table_cell_actions';
+import { getEuiCellActions } from '../../../doc_viewer_table/table_grid/eui_data_grid_adapter';
 import type { AttributeField } from './attributes_overview';
 
 interface AttributesTableProps
@@ -79,35 +80,48 @@ export const AttributesTable = ({
     [fields, flattened, hit, dataView, fieldFormats, dataSource]
   );
 
-  const fieldCellActions = useMemo(
-    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn, columns }),
-    [rows, filter, onToggleColumn, isEsqlMode, columns]
+  const fieldCellActionDefinitions = useMemo(
+    () => getFieldCellActions({ onFilter: filter, onToggleColumn, columns }),
+    [filter, onToggleColumn, columns]
   );
-  const fieldValueCellActions = useMemo(
-    () => getFieldValueCellActions({ rows, isEsqlMode, toasts, onFilter: filter }),
-    [rows, toasts, filter, isEsqlMode]
+  const fieldValueCellActionDefinitions = useMemo(
+    () => getFieldValueCellActions({ toasts, onFilter: filter }),
+    [toasts, filter]
   );
 
-  const gridColumns: EuiDataGridProps['columns'] = [
-    {
-      id: 'name',
-      displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.nameColumn', {
-        defaultMessage: 'Field',
-      }),
-      actions: false,
-      visibleCellActions: 3,
-      cellActions: fieldCellActions,
-    },
-    {
-      id: 'value',
-      displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.valueColumn', {
-        defaultMessage: 'Value',
-      }),
-      actions: false,
-      visibleCellActions: 3,
-      cellActions: fieldValueCellActions,
-    },
-  ];
+  const gridColumns = useMemo<EuiDataGridProps['columns']>(
+    () => [
+      {
+        id: 'name',
+        displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.nameColumn', {
+          defaultMessage: 'Field',
+        }),
+        actions: false,
+        visibleCellActions: 3,
+        cellActions: getEuiCellActions({
+          definitions: fieldCellActionDefinitions,
+          rows,
+          getRowId: ({ name }) => name,
+          columnId: 'name',
+        }),
+      },
+      {
+        id: 'value',
+        displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.valueColumn', {
+          defaultMessage: 'Value',
+        }),
+        actions: false,
+        visibleCellActions: 3,
+        cellActions: getEuiCellActions({
+          definitions: fieldValueCellActionDefinitions,
+          rows,
+          getRowId: ({ name }) => name,
+          columnId: 'value',
+        }),
+      },
+    ],
+    [fieldCellActionDefinitions, fieldValueCellActionDefinitions, rows]
+  );
 
   return (
     <EuiDataGrid
@@ -116,16 +130,18 @@ export const AttributesTable = ({
       })}
       columns={gridColumns}
       rowCount={rows.length}
-      renderCellValue={({ rowIndex, columnId }) => (
-        <TableCell
-          searchTerm={searchTerm}
-          rows={rows}
-          rowIndex={rowIndex}
-          columnId={columnId}
-          isDetails={false}
-          isESQLMode={isEsqlMode}
-        />
-      )}
+      renderCellValue={({ rowIndex, columnId }) => {
+        const row = rows[rowIndex];
+        return row ? (
+          <TableCell
+            searchTerm={searchTerm}
+            row={row}
+            columnId={columnId}
+            isDetails={false}
+            isESQLMode={isEsqlMode}
+          />
+        ) : null;
+      }}
       columnVisibility={{
         visibleColumns: ['name', 'value'],
         setVisibleColumns: () => null,
