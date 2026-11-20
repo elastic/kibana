@@ -586,6 +586,28 @@ describe('createTransport', () => {
       );
     });
 
+    it('preserves a per-call authorization override after a mixed-case refresh', async () => {
+      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      handler.mockReturnValue({ type: 'retry', authHeaders: { Authorization: 'renewed' } });
+      getUnauthorizedErrorHandler.mockReturnValue(handler);
+      const error = createUnauthorizedError();
+      transportRequestMock.mockRejectedValueOnce(error).mockResolvedValueOnce({ body: 'ok' });
+      const transportClass = createTransportClass();
+      const transport = new transportClass({
+        ...baseConstructorParams,
+        headers: { Authorization: 'stored' },
+      });
+      const requestParams = { method: 'GET', path: '/' };
+
+      await expect(
+        transport.request(requestParams, { headers: { authorization: 'per-call' } })
+      ).resolves.toEqual({ body: 'ok' });
+
+      expect(transportRequestMock).toHaveBeenCalledTimes(2);
+      expect(transportRequestMock.mock.calls[0][1]?.headers).toEqual({ authorization: 'per-call' });
+      expect(transportRequestMock.mock.calls[1][1]?.headers).toEqual({ authorization: 'per-call' });
+    });
+
     it('updates the headers for next requests in case of `retry`', async () => {
       const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
       handler.mockReturnValue({ type: 'retry', authHeaders: { authorization: 'retry' } });
