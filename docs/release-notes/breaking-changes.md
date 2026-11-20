@@ -178,6 +178,17 @@ View [#280959]({{kib-pull}}280959).
 
 ## 9.4.0 [kibana-9.4.0-breaking-changes]
 
+$$$kibana-246359$$$
+::::{dropdown} Security API requests now limit the size of array fields
+**Details**<br> Kibana added maximum sizes to array fields in security API requests, including role definitions, API keys, role mappings, and user management. In particular, a role's `indices[].names` and `remote_indices[].names` arrays were limited to 100 entries, even though Elasticsearch accepts larger role definitions.
+
+**Impact**<br> Starting in 9.4.0, requests that create or update a role with more than 100 index names in one privilege entry fail validation in Kibana. Other security API requests can also fail when an array exceeds its new limit. Existing roles are not changed, but saving them through Kibana can fail.
+
+**Action**<br> Upgrade to 9.4.10 or later to allow up to 1,000 entries in each affected role array. For other security API arrays, reduce array sizes to the limits accepted by the API. Split requests into smaller batches only for bulk endpoints.
+
+View [#246359]({{kib-pull}}246359).
+::::
+
 $$$kibana-255122-9.4.0$$$
 ::::{dropdown} The `_source` field mode is now saved to the template index settings
 **Details**<br> The index and component template forms in **Index Management** previously saved the `_source` field mode (`stored` and `synthetic`) in the `mappings._source.mode` setting. This path is deprecated and has no effect in {{es}}. The form now uses the correct `settings.index.mapping.source.mode` setting. Other `_source` options (`enabled`, `includes`, and `excludes`) remain in mappings.
