@@ -6,6 +6,7 @@
  */
 
 import type { QueryKnowledgeIndicator } from '@kbn/significant-events-plugin/server';
+import { sortBy } from 'lodash';
 import type { RuleRow } from '../../rules/managed_rule_reader';
 import type { DetectionSignalGenerator, GenerateResult, GeneratorContext } from '../types';
 import { KNOWN_FAILURES_STRATEGY_ID } from './constants';
@@ -29,13 +30,13 @@ export class KnownFailuresGenerator implements DetectionSignalGenerator {
 
 /**
  * 1. Joins the strategy's enabled rules with the knowledge indicators they watch.
- * 2. Reads the rows those rules wrote for runs scheduled in the window, and keeps each rule's latest.
+ * 2. Reads the rows those rules wrote in the window, and keeps each rule's latest.
  */
 async function readActiveFailures(context: GeneratorContext): Promise<ActiveKnownFailure[]> {
   const { spaceId, window, rules, abortSignal } = context;
 
   // 1.
-  const knowledgeIndicatorByRuleId = await getWatchedKnowledgeIndicators(context);
+  const knowledgeIndicatorByRuleId = await readWatchedKnowledgeIndicators(context);
 
   // 2.
   const rows = await rules.readRows({
@@ -56,7 +57,7 @@ async function readActiveFailures(context: GeneratorContext): Promise<ActiveKnow
  * The knowledge indicator each enabled rule watches, by rule id, joined on the id the reconciler
  * gives the indicator's rule. A disabled rule, or an indicator without a rule, gives nothing.
  */
-async function getWatchedKnowledgeIndicators({
+async function readWatchedKnowledgeIndicators({
   spaceId,
   knowledge,
   rules,
@@ -68,8 +69,9 @@ async function getWatchedKnowledgeIndicators({
   ]);
   const enabledRuleIds = new Set(managedRules.filter(({ enabled }) => enabled).map(({ id }) => id));
 
+  // Two indicators with the same query share a rule id; sorted by id, the same one always wins.
   return new Map(
-    knowledgeIndicators
+    sortBy(knowledgeIndicators, 'id')
       .filter((knowledgeIndicator) => getUnwatchableReason(knowledgeIndicator) === undefined)
       .map((knowledgeIndicator): [string, QueryKnowledgeIndicator] => [
         getKnownFailureRuleId({ spaceId, knowledgeIndicator, cpsEnabled }),

@@ -6,7 +6,6 @@
  */
 
 import { Parser } from '@elastic/esql';
-import type { ESQLCommand } from '@elastic/esql/types';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { KNOWN_FAILURES_SETTINGS } from './constants';
 
@@ -14,7 +13,7 @@ const FILTER_ONLY_COMMANDS = new Set(['from', 'where']);
 
 /**
  * Whether a match knowledge indicator can be counted per minute: `FROM` and zero or more `WHERE`,
- * nothing else. A query that does not parse cannot (fail closed).
+ * nothing else, and no `SET` header. A query that does not parse cannot (fail closed).
  */
 export function canCompileKnownFailureQuery(esql: string): boolean {
   const trimmed = esql.trim();
@@ -24,13 +23,12 @@ export function canCompileKnownFailureQuery(esql: string): boolean {
 
   // `Parser.parse` never throws; syntax errors land in `errors`.
   const { root, errors } = Parser.parse(trimmed);
-  if (errors.length > 0) {
+  // A `SET` header lands in `root.header`, not in the commands, and could change how the query runs.
+  if (errors.length > 0 || root.header?.length) {
     return false;
   }
 
-  const names = (root.commands as ESQLCommand[]).map((command) =>
-    typeof command.name === 'string' ? command.name.toLowerCase() : ''
-  );
+  const names = root.commands.map((command) => command.name.toLowerCase());
   return names[0] === 'from' && names.every((name) => FILTER_ONLY_COMMANDS.has(name));
 }
 

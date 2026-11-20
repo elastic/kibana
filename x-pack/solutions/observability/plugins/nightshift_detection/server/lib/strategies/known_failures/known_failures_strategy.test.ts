@@ -62,11 +62,16 @@ describe('KnownFailuresStrategy', () => {
       ]);
     });
 
-    it('skips STATS knowledge indicators and queries that are more than FROM and WHERE', async () => {
+    it('skips STATS, non-filter, SET and overlong knowledge indicators', async () => {
       const { resources, skipped } = await new KnownFailuresStrategy().resources(
         createContext([
           createKnowledgeIndicator({ id: 'stats', query_type: 'stats' }),
           createKnowledgeIndicator({ id: 'sorted', esql: 'FROM logs-* | WHERE a == 1 | SORT b' }),
+          createKnowledgeIndicator({ id: 'set', esql: 'SET a = 1; FROM logs-* | WHERE a == 1' }),
+          createKnowledgeIndicator({
+            id: 'long',
+            esql: `FROM logs-* | WHERE message == "${'a'.repeat(9_500)}"`,
+          }),
         ])
       );
 
@@ -74,6 +79,8 @@ describe('KnownFailuresStrategy', () => {
       expect(skipped).toEqual([
         { source_id: 'source-1', reason: expect.stringContaining('[stats]') },
         { source_id: 'source-1', reason: expect.stringContaining('[sorted]') },
+        { source_id: 'source-1', reason: expect.stringContaining('[set]') },
+        { source_id: 'source-1', reason: expect.stringContaining('[long] is too long') },
       ]);
     });
 

@@ -60,6 +60,15 @@ function rejectOnAbort(signal: AbortSignal): Promise<never> {
   });
 }
 
+function memoizeKnowledgeIndicators(knowledge: KnowledgeIndicatorReader): KnowledgeIndicatorReader {
+  // Read once per tick, at the first window that asks: every window of every strategy gets the
+  // same knowledge, and a tick with nothing due reads none.
+  return {
+    listQueryKnowledgeIndicators: once(() => knowledge.listQueryKnowledgeIndicators()),
+    listFeatures: (params) => knowledge.listFeatures(params),
+  };
+}
+
 /**
  * One tick of the detection engine in one space: takes the space's run lock, runs every due
  * strategy over its window, stores the signals, and moves each strategy's generator state. It knows no
@@ -85,12 +94,7 @@ export class EngineRunner {
     @optional()
     private readonly cps: CPSServerSetup | undefined
   ) {
-    // Read once per tick, at the first window that asks: every window of every strategy gets the
-    // same knowledge, and a tick with nothing due reads none.
-    this.knowledge = {
-      listQueryKnowledgeIndicators: once(() => knowledge.listQueryKnowledgeIndicators()),
-      listFeatures: (params) => knowledge.listFeatures(params),
-    };
+    this.knowledge = memoizeKnowledgeIndicators(knowledge);
   }
 
   private readonly knowledge: KnowledgeIndicatorReader;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_ESQL_QUERY_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { QueryKnowledgeIndicator } from '@kbn/significant-events-plugin/server';
 import { computeRuleId } from '../../rules/rule_identity';
 import type { AlertingRuleResource } from '../types';
@@ -16,7 +17,8 @@ import { KNOWN_FAILURES_SETTINGS, KNOWN_FAILURES_STRATEGY_ID } from './constants
 
 /**
  * Why a knowledge indicator gets no Known failures rule, or `undefined` when it gets one. Only match
- * queries made of `FROM` and `WHERE` can be counted per minute.
+ * queries made of `FROM` and `WHERE` can be counted per minute, and only while the rule query stays
+ * within the rules API's length limit.
  */
 export function getUnwatchableReason(
   knowledgeIndicator: Pick<QueryKnowledgeIndicator, 'id' | 'query_type' | 'esql'>
@@ -26,6 +28,14 @@ export function getUnwatchableReason(
   }
   if (!canCompileKnownFailureQuery(knowledgeIndicator.esql)) {
     return `knowledge indicator [${knowledgeIndicator.id}] is not a FROM … | WHERE … query`;
+  }
+  // The rules API rejects a longer query. The cross-project form is the longest, so a query that
+  // fits it fits either way, and the rule id does not flip with the setting.
+  if (
+    compileKnownFailureQuery({ esql: knowledgeIndicator.esql, cpsEnabled: true }).length >
+    MAX_ESQL_QUERY_LENGTH
+  ) {
+    return `knowledge indicator [${knowledgeIndicator.id}] is too long to watch`;
   }
   return undefined;
 }
