@@ -23,11 +23,11 @@ export interface MobileSessionDocument {
   end_time: string;
   duration_ms: number;
   event_count: number;
-  /** `app.crash` events, which EDOT Android and EDOT iOS send on the next launch. */
+  /** `app.crash` events, or `crash` from EDOT iOS with legacy names. */
   crash_count: number;
   /** EDOT iOS view controller spans; EDOT Android records no screens by default. */
   screen_view_count: number;
-  /** `app.widget.click` events, which EDOT React Native records. */
+  /** `app.widget.click` events, from any SDK or app that records them. */
   tap_count: number;
   /** HTTP requests the app made with a known outcome, and the failed ones. */
   http_request_count: number;
@@ -36,7 +36,7 @@ export interface MobileSessionDocument {
   platform: MobilePlatform | null;
   environment: string | null;
   user: { key: string | null };
-  /** `installation_id` is a random id per install, so it counts users without an opt-in. */
+  /** `installation_id` is a random id per install, so it counts installs, a proxy for users. */
   app: { version: string | null; build_id: string | null; installation_id: string | null };
   device: { model: string | null; manufacturer: string | null };
   os: { name: string | null; version: string | null };

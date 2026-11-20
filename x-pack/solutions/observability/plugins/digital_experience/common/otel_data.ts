@@ -31,7 +31,7 @@ export type MobilePlatform = keyof typeof MOBILE_OS_NAMES;
 
 /** EDOT Android and EDOT iOS crash events; EDOT iOS names them `crash` with legacy names. */
 export const CRASH_EVENTS = ['app.crash', 'crash'] as const;
-/** The taps EDOT React Native records. */
+/** Taps, as EDOT React Native records them. */
 export const EVENT_WIDGET_CLICK = 'app.widget.click';
 /** The instrumentation scope of EDOT iOS view controller spans: one per screen shown. */
 export const VIEW_CONTROLLER_SCOPE = 'UIViewController';

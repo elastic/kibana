@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { OTEL_EVENT_NAME, TELEMETRY_SDK_NAME } from '@kbn/apm-types';
+import { OTEL_EVENT_NAME, TELEMETRY_SDK_LANGUAGE, TELEMETRY_SDK_NAME } from '@kbn/apm-types';
 import { escapeStringValue } from '@kbn/esql-utils';
 import {
+  BROWSER_SDK_LANGUAGE,
   CRASH_EVENTS,
   ELASTIC_DISTRO,
   EVENT_WIDGET_CLICK,
@@ -71,24 +72,48 @@ export const MOBILE_SESSION_ATTRIBUTE_GROUPS = {
   geo: ['countryIso', 'region', 'city'],
 } as const satisfies Record<string, readonly MobileSessionAttribute[]>;
 
+/**
+ * Both SDKs send a crash on the next launch, with that launch's app, OS and network, so a crash
+ * only decides the attributes of a session without any other event: a century back, it ranks
+ * below every other event the query reads.
+ */
+const ATTRIBUTE_RANK = `attribute_rank = CASE(is_crash, @timestamp - 100 years, @timestamp)`;
+
 const {
   seenEvals: SEEN_EVALS,
   stats: ATTRIBUTE_STATS,
   evals: ATTRIBUTE_EVALS,
-} = attributeQueryParts(MOBILE_SESSION_ATTRIBUTE_FIELDS, MOBILE_SESSION_ATTRIBUTE_GROUPS);
+} = attributeQueryParts(
+  MOBILE_SESSION_ATTRIBUTE_FIELDS,
+  MOBILE_SESSION_ATTRIBUTE_GROUPS,
+  'attribute_rank'
+);
+
+/** How late a crash may be sent after it happened, as the next launch sends it. */
+const MAX_CRASH_DELAY_HOURS = 24;
 
 /**
- * A crash sent more than the longest session after it happened: its session would be rebuilt from
- * too late to see its other events, and the partial summary would replace the full one.
+ * How far before its window a changed mobile session is rebuilt from: a crash sent up to
+ * `MAX_CRASH_DELAY_HOURS` late still sees every other event of its session.
+ */
+export const MOBILE_REBUILD_HOURS = SESSIONS_MAX_SESSION_HOURS + MAX_CRASH_DELAY_HOURS;
+
+/**
+ * A crash sent later than `MAX_CRASH_DELAY_HOURS`: its session's rebuild could start after its
+ * other events, and the partial summary would replace the full one.
  */
 const LATE_CRASH = `COALESCE(${OTEL_EVENT_NAME} IN (${texts(
   CRASH_EVENTS
-)}) AND TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP}) < @timestamp - ${SESSIONS_MAX_SESSION_HOURS} hours, false)`;
+)}) AND TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP}) < @timestamp - ${MAX_CRASH_DELAY_HOURS} hours, false)`;
 
-const MOBILE_SDK = `(${TELEMETRY_SDK_NAME} IN (${texts(MOBILE_SDK_NAMES)})
+const SDK_LANGUAGE = resourceAttributeField(TELEMETRY_SDK_LANGUAGE);
+
+// EDOT Browser is the Elastic distro too, and its resource could be enriched with the OS.
+const MOBILE_SDK = `(${resourceAttributeField(TELEMETRY_SDK_NAME)} IN (${texts(MOBILE_SDK_NAMES)})
     OR (${resourceAttributeField(TELEMETRY_DISTRO_NAME)} == ${escapeStringValue(ELASTIC_DISTRO)}
-      AND ${resourceAttributeField(OS_NAME)} IN (${texts(
-  Object.values(MOBILE_OS_NAMES).flat()
+      AND ${resourceAttributeField(OS_NAME)} IN (${texts(Object.values(MOBILE_OS_NAMES).flat())})
+      AND (${SDK_LANGUAGE} IS NULL OR ${SDK_LANGUAGE} != ${escapeStringValue(
+  BROWSER_SDK_LANGUAGE
 )})))`;
 
 /** The EDOT Android and EDOT iOS events with a session and an application, but late crashes. */
@@ -112,8 +137,8 @@ const MOBILE_SESSION_STATS: Stat[] = [
 
 /**
  * One row per session of `sessionIds`, rebuilt from its events since `?rebuild_from`: its counts,
- * times and latest attributes. A crash counts at the time it happened: EDOT iOS sends it on the
- * next launch with only its observed time set to the crash.
+ * times and latest attributes. A crash counts at the time it happened, the earlier of its two
+ * times: EDOT iOS sends it on the next launch with only its observed time set to the crash.
  */
 export const mobileSessionSummaryQuery: SummaryQueryOf = (
   { changedTo, rebuildFrom },
@@ -129,8 +154,9 @@ ${mobileSessionEvents('rebuild_from', 'changed_to')}
     VIEW_CONTROLLER_SCOPE
   )}, false),
        ${HTTP_REQUEST_EVALS},
+       ${ATTRIBUTE_RANK},
        ${SEEN_EVALS.join(',\n       ')}
-| EVAL event_time = CASE(is_crash, COALESCE(TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP}), @timestamp), @timestamp)
+| EVAL event_time = CASE(is_crash, LEAST(@timestamp, COALESCE(TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP}), @timestamp)), @timestamp)
 | STATS ${renderStats(MOBILE_SESSION_STATS, '        ')}
   BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}
 | EVAL ${ATTRIBUTE_EVALS.join(',\n       ')}

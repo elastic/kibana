@@ -191,13 +191,14 @@ export type Stat = readonly [column: string, aggregation: string];
 type AttributeFields = Readonly<Record<string, readonly string[]>>;
 
 /**
- * What reads each attribute from its group's latest event: the `seenEvals` that time each group,
- * the `stats` that keep its fields as they are on that event, and the `evals` that clean them
- * into attributes, the first of its fields with a value.
+ * What reads each attribute from its group's latest event by `rank`: the `seenEvals` that time
+ * each group, the `stats` that keep its fields as they are on that event, and the `evals` that
+ * clean them into attributes, the first of its fields with a value.
  */
 export const attributeQueryParts = <TFields extends AttributeFields>(
   fields: TFields,
-  groups: Readonly<Record<string, ReadonlyArray<keyof TFields & string>>>
+  groups: Readonly<Record<string, ReadonlyArray<keyof TFields & string>>>,
+  rank: string = '@timestamp'
 ): { seenEvals: string[]; stats: Stat[]; evals: string[] } => {
   const groupFields = (attributes: ReadonlyArray<keyof TFields & string>): string[] => [
     ...new Set(attributes.flatMap((attribute) => fields[attribute])),
@@ -209,7 +210,7 @@ export const attributeQueryParts = <TFields extends AttributeFields>(
       ([group, attributes]) =>
         `${seenColumn(group)} = CASE(${groupFields(attributes)
           .map((field) => `${field} IS NOT NULL`)
-          .join(' OR ')}, @timestamp, null)`
+          .join(' OR ')}, ${rank}, null)`
     ),
     // The fields are cleaned into attributes only once per session, after the last stage:
     // cleaning every event's fields took about 40% of the query.

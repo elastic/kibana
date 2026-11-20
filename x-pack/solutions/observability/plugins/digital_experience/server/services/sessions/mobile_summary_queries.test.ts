@@ -24,15 +24,21 @@ describe('mobileSessionEvents', () => {
   it('reads the EDOT Android and EDOT iOS events by SDK name, as Android’s language is java', () => {
     const events = mobileSessionEvents('changed_from', 'changed_to');
 
-    expect(events).toContain('telemetry.sdk.name IN ("android", "iOS")');
-    expect(events).not.toContain('telemetry.sdk.language');
+    expect(events).toContain('(resource.attributes.telemetry.sdk.name IN ("android", "iOS")');
+    expect(events).not.toContain('telemetry.sdk.language == "java"');
     expect(events).toContain('@timestamp >= ?changed_from AND @timestamp < ?changed_to');
     expect(events).toContain('attributes.session.id IS NOT NULL');
   });
 
   it('also reads them by the Elastic distro and a mobile OS, once the SDKs report upstream names', () => {
     expect(mobileSessionEvents('changed_from', 'changed_to')).toContain(
-      'OR (resource.attributes.telemetry.distro.name == "elastic"\n      AND resource.attributes.os.name IN ("Android", "iOS", "iPadOS"))'
+      'OR (resource.attributes.telemetry.distro.name == "elastic"\n      AND resource.attributes.os.name IN ("Android", "iOS", "iPadOS")'
+    );
+  });
+
+  it('leaves EDOT Browser out of the distro and OS match, as it is the Elastic distro too', () => {
+    expect(mobileSessionEvents('changed_from', 'changed_to')).toContain(
+      'AND (resource.attributes.telemetry.sdk.language IS NULL OR resource.attributes.telemetry.sdk.language != "webjs"))'
     );
   });
 
@@ -43,7 +49,7 @@ describe('mobileSessionEvents', () => {
   it('finds the changed sessions with the same filter', () => {
     const { query } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, mobileSessionEvents);
 
-    expect(query).toContain('telemetry.sdk.name IN ("android", "iOS")');
+    expect(query).toContain('resource.attributes.telemetry.sdk.name IN ("android", "iOS")');
     expect(query).toContain(LATE_CRASH);
   });
 });
@@ -65,12 +71,20 @@ describe('mobileSessionSummaryQuery', () => {
     ]);
   });
 
-  it('times a crash when it happened, which EDOT iOS only sends on the next launch', () => {
+  it('times a crash when it happened, the earlier of its two times', () => {
     expect(query).toContain(
-      'EVAL event_time = CASE(is_crash, COALESCE(TO_DATETIME(observed_timestamp), @timestamp), @timestamp)'
+      'EVAL event_time = CASE(is_crash, LEAST(@timestamp, COALESCE(TO_DATETIME(observed_timestamp), @timestamp)), @timestamp)'
     );
     expect(query).toContain('start_time = MIN(event_time)');
     expect(query).toContain('end_time = MAX(event_time)');
+  });
+
+  it('ranks crashes below every other event for the attributes, as the next launch sends them', () => {
+    expect(query).toContain('attribute_rank = CASE(is_crash, @timestamp - 100 years, @timestamp)');
+    Object.keys(MOBILE_SESSION_ATTRIBUTE_GROUPS).forEach((group) =>
+      expect(query).toMatch(new RegExp(`seen_${group} = CASE\\([^\\n]*, attribute_rank, null\\)`))
+    );
+    expect(query).not.toContain(', @timestamp, null)');
   });
 
   it('counts crashes, screen views, taps and HTTP requests', () => {

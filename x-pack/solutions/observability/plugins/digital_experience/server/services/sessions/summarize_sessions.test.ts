@@ -554,4 +554,17 @@ describe('summarizeSessions', () => {
     });
     expect(operations?.[1]).toMatchObject({ session: { id: 'a' }, crash_count: 0 });
   });
+
+  it('rebuilds mobile sessions from two days before the window, for crashes sent a day late', async () => {
+    const esClient = setUp();
+
+    await run(esClient, { platform: MOBILE_SESSIONS_PLATFORM });
+
+    const summaryCall = esClient.esql.query.mock.calls.find(([{ query }]) =>
+      query.includes('crash_count = COUNT')
+    );
+    expect(paramOf(summaryCall?.[0].params as estypes.EsqlNamedValue[], 'rebuild_from')).toBe(
+      new Date(UNTIL - 2 * MINUTE - 48 * HOUR).toISOString()
+    );
+  });
 });

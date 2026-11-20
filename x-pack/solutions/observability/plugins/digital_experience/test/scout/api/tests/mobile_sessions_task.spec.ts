@@ -28,12 +28,14 @@ const IOS_APP = 'dx-mobile-contract-ios';
 const ANDROID_APP = 'dx-mobile-contract-android';
 const UPSTREAM_ANDROID_APP = 'dx-mobile-contract-android-upstream';
 const BACKEND_APP = 'dx-mobile-contract-backend';
-const APPS = [IOS_APP, ANDROID_APP, UPSTREAM_ANDROID_APP, BACKEND_APP];
+const BROWSER_APP = 'dx-mobile-contract-browser';
+const APPS = [IOS_APP, ANDROID_APP, UPSTREAM_ANDROID_APP, BACKEND_APP, BROWSER_APP];
 const ENVIRONMENT = 'dx-mobile-contract-env';
 const IOS_SESSION = 'DX-MOBILE-IOS-SESSION-1';
 const ANDROID_SESSION = 'dx-mobile-android-session-1';
 const UPSTREAM_ANDROID_SESSION = 'dx-mobile-android-upstream-session-1';
 const BACKEND_SESSION = 'dx-mobile-backend-session-1';
+const BROWSER_SESSION = 'dx-mobile-browser-session-1';
 
 const SECOND_MS = 1000;
 const MINUTE_MS = 60 * SECOND_MS;
@@ -55,6 +57,16 @@ const iosResource = {
     'device.manufacturer': 'Apple',
     'os.name': 'iOS',
     'os.version': '18.1',
+  },
+};
+
+/** The next launch, which sends the crash: the app and the OS were updated in between. */
+const relaunchedIosResource = {
+  attributes: {
+    ...iosResource.attributes,
+    'service.version': '2.4.0',
+    'app.build_id': '240',
+    'os.version': '18.2',
   },
 };
 
@@ -96,11 +108,23 @@ const backendResource = {
   },
 };
 
+/** EDOT Browser in Safari on an iPhone: the Elastic distro and a mobile OS, but not an app. */
+const browserResource = {
+  attributes: {
+    'service.name': BROWSER_APP,
+    'telemetry.sdk.name': 'opentelemetry',
+    'telemetry.sdk.language': 'webjs',
+    'telemetry.distro.name': 'elastic',
+    'os.name': 'iOS',
+    'deployment.environment.name': ENVIRONMENT,
+  },
+};
+
 /**
- * Three mobile sessions and a backend one. The iOS session has two screen views, a tap, two
- * requests (a success and a 503) and a crash sent five minutes after it happened, as EDOT iOS does
- * on the next launch. The Android one has two taps and a crash sent two days late, which is left
- * out. The upstream Android one has a tap.
+ * Three mobile sessions, a backend one and a browser one. The iOS session has two screen views, a
+ * tap, two requests (a success and a 503) and a crash sent five minutes after it happened by the
+ * next launch, as EDOT iOS does, with that launch's newer app and OS. The Android one has two taps
+ * and a crash sent two days late, which is left out. The upstream Android one has a tap.
  */
 const buildEvents = (startMs: number) => {
   const at = (offsetMs: number) => new Date(startMs + offsetMs).toISOString();
@@ -154,7 +178,14 @@ const buildEvents = (startMs: number) => {
         'client.geo.country_iso_code': 'NL',
         'client.geo.city_name': 'Amsterdam',
       }),
-      log(iosResource, IOS_SESSION, 5 * MINUTE_MS, 'app.crash', {}, 40 * SECOND_MS),
+      log(
+        relaunchedIosResource,
+        IOS_SESSION,
+        5 * MINUTE_MS,
+        'app.crash',
+        { 'network.connection.type': 'cell' },
+        40 * SECOND_MS
+      ),
       log(androidResource, ANDROID_SESSION, 0, 'app.widget.click', {
         'network.connection.type': 'cell',
       }),
@@ -169,6 +200,7 @@ const buildEvents = (startMs: number) => {
       ),
       log(upstreamAndroidResource, UPSTREAM_ANDROID_SESSION, 0, 'app.widget.click'),
       log(backendResource, BACKEND_SESSION, 0, 'app.widget.click'),
+      log(browserResource, BROWSER_SESSION, 0, 'app.widget.click'),
     ],
     spans: [
       screenView(0, 'CatalogViewController'),
@@ -336,6 +368,7 @@ apiTest.describe(
           platform: 'android',
         });
         expect(await getSummary(esClient, BACKEND_SESSION)).toBeUndefined();
+        expect(await getSummary(esClient, BROWSER_SESSION)).toBeUndefined();
 
         await expect
           .poll(

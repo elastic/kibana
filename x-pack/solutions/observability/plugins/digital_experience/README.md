@@ -427,25 +427,30 @@ checkpoints as the browser one, and its own `MOBILE_SESSIONS_VERSION`, template 
 reads them yet. It reads events by `telemetry.sdk.name` (`android`, `iOS`) rather than the SDK
 language, as EDOT Android's is `java`, like any Java backend. Both SDKs are moving to the upstream
 `telemetry.sdk.*` values, so it also reads events with `telemetry.distro.name: elastic` and an
-`os.name` of `Android`, `iOS` or `iPadOS`. A summary has start/end time and duration, events,
+`os.name` of `Android`, `iOS` or `iPadOS`, but EDOT Browser's (`webjs`). A summary has start/end time and duration, events,
 crashes (`app.crash`, or `crash` from older EDOT iOS), screen views (EDOT iOS `UIViewController`
 spans), taps (`app.widget.click`), HTTP requests (once per span id, as both SDKs may send a span
 twice) and failed requests, the platform (`android` or `ios`, from the OS name), and the
 environment, user, app version, build and installation id, device model identifier, OS,
 connection type and geo attributes of its latest events (`MOBILE_SESSION_ATTRIBUTE_FIELDS`). The
-installation id is a random id per install that both SDKs send, so it counts users without the
-opt-in user id.
+installation id is a random id per install that both SDKs send, so it counts installs, a proxy for
+users that needs no opt-in user id.
 
 Mobile events arrive late more often than browser ones: both SDKs buffer them on disk while the
-device is offline, and send a crash on the next launch. EDOT iOS gives that crash the send time as
-its `@timestamp` and the crash time as its `observed_timestamp`, so a crash counts at its
-`observed_timestamp`, falling back to `@timestamp`. As events have no ingest time to query by, every
+device is offline, and send a crash on the next launch, with that launch's resource. A crash so
+ranks below every other event for the attributes. EDOT iOS gives it the send time as its
+`@timestamp` and the crash time as its `observed_timestamp`, so a crash counts at the earlier of
+the two. As events have no ingest time to query by, every
 hour, once the regular run has caught up, the task also rebuilds every session with an event in the
 24 hours before its checkpoint, with what is left of the run's time; a pass that doesn't finish
 carries on from where it stopped on the next runs, and one that fails keeps the regular run's
 progress. A pass rebuilds its sessions up to the regular run's checkpoint, not up to the end of
-its own window, so it never drops events the regular run has already summarized. A crash sent more than 24 hours after it happened is left out, as its session's rebuild
-would no longer see its other events and would replace the full summary with a partial one. Events
+its own window, so it never drops events the regular run has already summarized. A changed mobile
+session is rebuilt from 48 hours before its window rather than 24, the longest session and the
+latest crash, so a crash sent up to 24 hours late still sees all of its session; one sent later is
+left out, as its session's rebuild could miss its other events and replace the full summary with a
+partial one. The session ids decide what is read, so the range barely matters: 2 to 24 hours took
+the same time. Events
 that arrive more than 24 hours late are only summarized when another event of their session arrives.
 
 ### Enabling sessions

@@ -11,13 +11,18 @@ import {
   MOBILE_SESSIONS_TASK_TYPE,
   MOBILE_SESSIONS_VERSION,
   SESSIONS_INDEX,
+  SESSIONS_MAX_SESSION_HOURS,
   SESSIONS_TASK_ID,
   SESSIONS_TASK_TYPE,
   SESSIONS_VERSION,
 } from '../../../common/sessions';
 import { mobileSessionsIndexTemplate } from './mobile_sessions_index';
 import { toMobileSessionDocuments } from './mobile_summary_documents';
-import { mobileSessionEvents, mobileSessionSummaryQuery } from './mobile_summary_queries';
+import {
+  MOBILE_REBUILD_HOURS,
+  mobileSessionEvents,
+  mobileSessionSummaryQuery,
+} from './mobile_summary_queries';
 import { sessionsIndexTemplate, type SessionsIndex } from './sessions_index';
 import { toSessionDocuments, type EsqlRow } from './summary_documents';
 import {
@@ -49,6 +54,8 @@ export interface SessionsPlatform extends SessionsIndex {
   taskDescription: string;
   /** Rebuilds the recent sessions every so often, for a platform whose events arrive late. */
   reconcile: boolean;
+  /** How far before its window a changed session is rebuilt from. */
+  rebuildHours: number;
 }
 
 export const BROWSER_SESSIONS_PLATFORM: SessionsPlatform = {
@@ -66,6 +73,7 @@ export const BROWSER_SESSIONS_PLATFORM: SessionsPlatform = {
   taskDescription:
     'Summarizes the RUM sessions with new events into the Digital Experience sessions index.',
   reconcile: false,
+  rebuildHours: SESSIONS_MAX_SESSION_HOURS,
 };
 
 export const MOBILE_SESSIONS_PLATFORM: SessionsPlatform = {
@@ -83,6 +91,7 @@ export const MOBILE_SESSIONS_PLATFORM: SessionsPlatform = {
   taskDescription:
     'Summarizes the EDOT Android and EDOT iOS sessions with new events into the Digital Experience mobile sessions index.',
   reconcile: true,
+  rebuildHours: MOBILE_REBUILD_HOURS,
 };
 
 export const SESSIONS_PLATFORMS: readonly SessionsPlatform[] = [

@@ -12,7 +12,6 @@ import { chunk } from 'lodash';
 import {
   SESSIONS_LOOKBACK_DAYS,
   SESSIONS_MAX_ID_LENGTH,
-  SESSIONS_MAX_SESSION_HOURS,
   SESSIONS_SYNC_DELAY_SECONDS,
 } from '../../../common/sessions';
 import { stringsOf } from '../../lib/helpers/values';
@@ -311,8 +310,8 @@ export const windowTooLargeMessage = (sessions: number, timeLimitMs: number): st
 /**
  * Summarizes the sessions with events after the checkpoint, window by window, oldest first, until
  * it reaches the sync delay or runs out of time. Each window fetches the ids of its sessions, then
- * rebuilds them from up to the longest session before it, so a later window corrects the summaries
- * of an earlier one. The checkpoint only moves past a window once all of it is written.
+ * rebuilds them from the platform's `rebuildHours` before it, so a later window corrects the
+ * summaries of an earlier one. The checkpoint only moves past a window once all of it is written.
  */
 export const summarizeSessions = async ({
   platform,
@@ -361,7 +360,7 @@ export const summarizeSessions = async ({
           esClient,
           {
             changedTo: iso(Math.max(to, rebuildUntil ?? to)),
-            rebuildFrom: iso(Math.max(earliest, from - SESSIONS_MAX_SESSION_HOURS * HOUR_MS)),
+            rebuildFrom: iso(Math.max(earliest, from - platform.rebuildHours * HOUR_MS)),
           },
           ids,
           signal,
