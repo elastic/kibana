@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type {
@@ -15,6 +15,7 @@ import type {
   DataStreamsBoostProfile,
   IndicesBoostProfile,
 } from '../../../common/types';
+import { getManagedProfileMessage } from '../../translations';
 import type { ProjectDefaultFlyoutProps } from './project_default_flyout';
 import { ProjectDefaultFlyout } from './project_default_flyout';
 
@@ -140,6 +141,14 @@ describe('ProjectDefaultFlyout', () => {
     expect(radio).toHaveAccessibleDescription('');
   });
 
+  it('reads the description of a managed profile with its name', () => {
+    renderFlyout(dataStreamsProps);
+
+    expect(screen.getByRole('radio', { name: /Last 3 days/ })).toHaveAccessibleName(
+      `Last 3 days ${getManagedProfileMessage('data_streams_3d')?.description}`
+    );
+  });
+
   it('saves the chosen managed profile', async () => {
     const { onSave } = renderFlyout(dataStreamsProps);
 
@@ -215,6 +224,37 @@ describe('ProjectDefaultFlyout', () => {
     expect(
       await screen.findByText('Create an indices boost profile to use one here.')
     ).toBeInTheDocument();
+  });
+
+  it('shows why the select is disabled to keyboard users too', async () => {
+    renderFlyout({
+      profiles: profiles.filter(({ is_builtin: isBuiltin }) => isBuiltin),
+    });
+    const trigger = screen.getByTestId('searchBoostProjectDefaultNoCustomTrigger');
+
+    act(() => trigger.focus());
+
+    expect(
+      await screen.findByText('Create an indices boost profile to use one here.')
+    ).toBeInTheDocument();
+    expect(trigger).toHaveAccessibleDescription('Create an indices boost profile to use one here.');
+  });
+
+  it('turns off save when the selected profile is no longer offered', () => {
+    const { rerender } = render(
+      <ProjectDefaultFlyout {...defaultProps} selectedProfileName="catalog-fast" />
+    );
+    expect(screen.getByTestId('searchBoostProjectDefaultSave')).toBeEnabled();
+
+    rerender(
+      <ProjectDefaultFlyout
+        {...defaultProps}
+        profiles={profiles.filter(({ name }) => name !== 'catalog-fast')}
+        selectedProfileName="catalog-fast"
+      />
+    );
+
+    expect(screen.getByTestId('searchBoostProjectDefaultSave')).toBeDisabled();
   });
 
   it('calls back to create a profile and to close', async () => {

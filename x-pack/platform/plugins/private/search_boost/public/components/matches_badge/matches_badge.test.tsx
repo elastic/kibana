@@ -55,7 +55,8 @@ describe('MatchesBadge', () => {
 
     const badge = screen.getByTestId('matchesBadge');
     expect(badge).toHaveTextContent('0 indices');
-    expect(screen.queryByRole('button', { name: 'Show matches' })).not.toBeInTheDocument();
+    expect(badge.tagName).toBe('SPAN');
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(screen.queryByTestId('searchBoostMatchesPopover')).not.toBeInTheDocument();
   });
 });

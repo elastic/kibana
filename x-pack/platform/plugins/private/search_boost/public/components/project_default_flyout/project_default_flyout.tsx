@@ -116,6 +116,9 @@ export const ProjectDefaultFlyout = ({
   const isCustomChecked = option === 'custom';
   const selectedName = isCustomChecked ? customProfileName : managedProfileName;
   const selectedProfile = profiles.find(({ name }) => name === selectedName);
+  const isSelectionOffered = (isCustomChecked ? customProfiles : managedProfiles).some(
+    ({ name }) => name === selectedName
+  );
   const hasCustomProfiles = customProfiles.length > 0;
 
   const customProfileSelect = (
@@ -174,32 +177,34 @@ export const ProjectDefaultFlyout = ({
                       }))
                     }
                     label={
-                      <EuiFlexGroup
-                        component="span"
-                        gutterSize="s"
-                        alignItems="center"
-                        responsive={false}
-                      >
-                        <EuiFlexItem component="span" grow={false}>
-                          <strong>{message?.label ?? name}</strong>
-                        </EuiFlexItem>
-                        {name === DEFAULT_MANAGED_PROFILE_NAMES[type] ? (
+                      <>
+                        <EuiFlexGroup
+                          component="span"
+                          gutterSize="s"
+                          alignItems="center"
+                          responsive={false}
+                        >
                           <EuiFlexItem component="span" grow={false}>
-                            <EuiBadge data-test-subj="searchBoostProjectDefaultBadge">
-                              {DEFAULT_PROFILE_BADGE}
-                            </EuiBadge>
+                            <strong>{message?.label ?? name}</strong>
                           </EuiFlexItem>
+                          {name === DEFAULT_MANAGED_PROFILE_NAMES[type] ? (
+                            <EuiFlexItem component="span" grow={false}>
+                              <EuiBadge data-test-subj="searchBoostProjectDefaultBadge">
+                                {DEFAULT_PROFILE_BADGE}
+                              </EuiBadge>
+                            </EuiFlexItem>
+                          ) : null}
+                        </EuiFlexGroup>
+                        {message ? (
+                          <>
+                            <EuiSpacer size="xs" />
+                            <EuiText size="xs">{message.description}</EuiText>
+                          </>
                         ) : null}
-                      </EuiFlexGroup>
+                      </>
                     }
                     data-test-subj={`searchBoostProjectDefaultOption-${name}`}
-                  >
-                    {message ? (
-                      <EuiText size="xs">
-                        <p>{message.description}</p>
-                      </EuiText>
-                    ) : null}
-                  </EuiCheckableCard>
+                  />
                 </EuiFlexItem>
               );
             })}
@@ -241,7 +246,10 @@ export const ProjectDefaultFlyout = ({
                       display="block"
                       anchorProps={{ 'data-test-subj': 'searchBoostProjectDefaultNoCustomTooltip' }}
                     >
-                      {customProfileSelect}
+                      {/* The select is disabled, so this wrapper takes focus to show the tooltip. */}
+                      <div tabIndex={0} data-test-subj="searchBoostProjectDefaultNoCustomTrigger">
+                        {customProfileSelect}
+                      </div>
                     </EuiToolTip>
                   )}
                 </EuiFormRow>
@@ -275,9 +283,9 @@ export const ProjectDefaultFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              isDisabled={!selectedName}
+              isDisabled={!isSelectionOffered}
               onClick={() => {
-                if (selectedName) onSave(selectedName);
+                if (selectedName && isSelectionOffered) onSave(selectedName);
               }}
               data-test-subj="searchBoostProjectDefaultSave"
             >
