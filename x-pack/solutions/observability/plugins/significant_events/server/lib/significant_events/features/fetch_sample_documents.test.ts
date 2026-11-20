@@ -267,6 +267,7 @@ describe('fetchSampleDocuments', () => {
       size: 6,
       iteration: 1,
       logger,
+      signal: expect.any(AbortSignal),
     });
     expect(getRandomCall()).toEqual({
       esClient,
@@ -435,6 +436,39 @@ describe('fetchSampleDocuments', () => {
       'random-3',
       'random-4',
     ]);
+  });
+
+  it('aborts a stalled diverse arm at the sampling timeout and keeps the random documents', async () => {
+    getSampleDocumentsEsqlMock.mockResolvedValueOnce({
+      hits: [createHit('random-1')],
+      total: 1,
+    });
+    getDiverseSampleDocumentsMock.mockImplementationOnce(
+      ({ signal }) =>
+        new Promise((_, reject) => {
+          signal?.addEventListener('abort', () => reject(signal.reason));
+        })
+    );
+
+    const result = await fetchSampleDocuments({
+      esClient: {} as ElasticsearchClient,
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features: [],
+      logger,
+      size: 5,
+      entityFilteredRatio: 0,
+      diverseRatio: 0.4,
+      maxEntityFilters: 10,
+      samplingTimeoutMs: 10,
+      iteration: 1,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Diverse sampling query failed')
+    );
+    expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
   });
 
   it('falls back to random documents when entity-filtered ES|QL sampling fails', async () => {

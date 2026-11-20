@@ -37,6 +37,7 @@ import * as nextRunAtUtils from '../lib/get_next_run_at';
 import { configMock } from '../config.mock';
 import { EsApiKeyStrategy } from '../api_key_strategy';
 import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
+import { taskManagerMetricsTelemetry } from '../otel/task_metrics_telemetry';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import {
   InMemorySpanExporter,
@@ -2158,6 +2159,10 @@ describe('TaskManagerRunner', () => {
           },
         });
 
+        const recordTaskRunDelaySpy = jest
+          .spyOn(taskManagerMetricsTelemetry, 'recordTaskRunDelay')
+          .mockImplementation(() => {});
+
         jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         await runner.run();
 
@@ -2177,6 +2182,8 @@ describe('TaskManagerRunner', () => {
         expect(onTaskEvent).toHaveBeenCalledWith(
           asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
         );
+        expect(recordTaskRunDelaySpy).toHaveBeenCalledWith(expect.any(Number));
+        recordTaskRunDelaySpy.mockRestore();
       });
 
       test('emits TaskEvent when a recurring task is run successfully', async () => {

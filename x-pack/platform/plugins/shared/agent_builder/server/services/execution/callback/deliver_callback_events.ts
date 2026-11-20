@@ -26,6 +26,8 @@ import {
   isExecutionStartedEvent,
   isExecutionTerminatedEvent,
   isMessageChunkEvent,
+  isMessageDeliveredEvent,
+  isInterimAnswerEvent,
   isRoundCompleteEvent,
   isToolCallEvent,
   type ChatCallbackEvent,
@@ -138,6 +140,9 @@ export const deliverCallbackEvents = ({
           (event) =>
             !isMessageChunkEvent(event) &&
             !isExecutionStartedEvent(event) &&
+            // These notifications are included in the completed round's steps.
+            !isMessageDeliveredEvent(event) &&
+            !isInterimAnswerEvent(event) &&
             // The failure callback is the only terminal representation of a failed or aborted run.
             !isExecutionFailedEvent(event) &&
             !isExecutionAbortedEvent(event)
