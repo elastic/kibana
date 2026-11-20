@@ -146,7 +146,7 @@ That distinction is why `.alert-actions` stores both series-scoped and action-gr
 
 ## ES|QL views
 
-ES|QL views are registered as `optional: true`, which lets Kibana start even on clusters without ES|QL view support.
+A failed ES|QL view does not block Kibana startup or alerting tasks: the rule executor and the dispatcher wait only for the resources they name (`ResourceManager.waitForResources()`), and neither depends on a view. This lets Kibana run on clusters without ES|QL view support.
 
 | Key | View name | Summary |
 | --- | --- | --- |
