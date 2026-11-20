@@ -332,5 +332,51 @@ describe('wrapKibanaSupertestAgent', () => {
         await close();
       }
     });
+
+    it('reports retry urls without credentials', async () => {
+      let attempts = 0;
+      const { url, close } = await startServer((_req, res) => {
+        attempts++;
+        if (attempts === 1) {
+          overloaded(res);
+          return;
+        }
+        res.writeHead(200);
+        res.end();
+      });
+
+      try {
+        const onRetry = jest.fn();
+        const withAuth = url.replace('http://', 'http://elastic:changeme@');
+        await kibanaSupertest(withAuth, undefined, { onRetry }).get('/api/x').expect(200);
+        const [{ url: reported }] = onRetry.mock.calls[0];
+        expect(reported).toBe(`${url}/api/x`);
+        expect(reported).not.toContain('changeme');
+      } finally {
+        await close();
+      }
+    });
+
+    it('does not resend after the caller deadline passed during the backoff', async () => {
+      let attempts = 0;
+      const { url, close } = await startServer((_req, res) => {
+        attempts++;
+        overloaded(res);
+      });
+
+      try {
+        // stall the event loop so the backoff timer fires after the 400ms deadline
+        setTimeout(() => {
+          const until = Date.now() + 500;
+          while (Date.now() < until) {
+            // busy wait
+          }
+        }, 50);
+        await expect(kibanaSupertest(url).get('/').timeout(400).expect(200)).rejects.toThrow();
+        expect(attempts).toBe(1);
+      } finally {
+        await close();
+      }
+    });
   });
 });
