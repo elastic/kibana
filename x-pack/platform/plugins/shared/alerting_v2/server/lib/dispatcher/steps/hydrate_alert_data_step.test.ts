@@ -15,6 +15,7 @@ import type { Alert } from '../types';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import type { DispatcherTelemetryContract } from '../otel/dispatcher_telemetry';
 import {
   createAlert,
   createDispatcherConfigService,
@@ -29,8 +30,16 @@ const HYDRATION_TICK_BUDGET_BYTES =
 
 const createStep = (
   queryService: QueryServiceContract,
-  telemetry = createDispatcherTelemetryMock()
-) => new HydrateAlertDataStep(queryService, createDispatcherConfigService(), telemetry);
+  {
+    telemetry = createDispatcherTelemetryMock(),
+    maxResponseSize,
+  }: { telemetry?: DispatcherTelemetryContract; maxResponseSize?: string } = {}
+) =>
+  new HydrateAlertDataStep(
+    queryService,
+    createDispatcherConfigService({ run: { hydration: { maxResponseSize } } }),
+    telemetry
+  );
 
 const queriedIds = ({ esql }: DeeplyMockedApi<ElasticsearchClient>): string[][] =>
   esql.query.mock.calls.map(([{ query }]) =>
@@ -305,11 +314,7 @@ describe('HydrateAlertDataStep', () => {
   it('caps the response size at dispatcher.run.hydration.maxResponseSize', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateAlertDataStep(
-      queryService,
-      createDispatcherConfigService({ run: { hydration: { maxResponseSize: '10mb' } } }),
-      createDispatcherTelemetryMock()
-    );
+    const step = createStep(queryService, { maxResponseSize: '10mb' });
 
     mockEsClient.esql.query.mockResolvedValueOnce(createAlertDataResponse([]));
 
@@ -396,7 +401,7 @@ describe('HydrateAlertDataStep', () => {
       const { queryService, mockEsClient } = createQueryService();
       const { loggerService, mockLogger } = createLoggerService();
       const telemetry = createDispatcherTelemetryMock();
-      const step = createStep(queryService, telemetry);
+      const step = createStep(queryService, { telemetry });
 
       const alerts = ['ep-1', 'ep-2'].map((id) => createAlert({ alert_id: id }));
 
@@ -517,6 +522,49 @@ describe('HydrateAlertDataStep', () => {
       if (result.type !== 'continue') return;
       expect(result.data?.scan).toBeUndefined();
       expect(ids(result.data?.triage?.dispatchable)).toEqual(['ep-1', 'ep-2']);
+    });
+
+    it('derives the budget from dispatcher.run.hydration.maxResponseSize', async () => {
+      const { queryService, mockEsClient } = createQueryService();
+      const { loggerService, mockLogger } = createLoggerService();
+      const step = createStep(queryService, { maxResponseSize: '1mb' });
+
+      const alerts = [
+        alertAt('ep-1', 21, 's1'),
+        alertAt('ep-2', 22, 's2'),
+        alertAt('ep-3', 23, 's3'),
+      ];
+      // Each response fits the 1mb cap; together they pass half the 2mb budget.
+      const dataJson = `{"a":"${'x'.repeat(600_000)}"}`;
+
+      mockEsClient.esql.query
+        .mockRejectedValueOnce(responseTooLarge())
+        .mockRejectedValueOnce(responseTooLarge())
+        .mockResolvedValueOnce(createAlertDataResponse([{ alert_id: 'ep-1', data_json: dataJson }]))
+        .mockResolvedValueOnce(
+          createAlertDataResponse([{ alert_id: 'ep-2', data_json: dataJson }])
+        );
+
+      const result = await step.execute(
+        createDispatcherPipelineState({ alerts, dispatchable: alerts }),
+        loggerService
+      );
+
+      expect(queriedIds(mockEsClient)).toEqual([
+        ['ep-1', 'ep-2', 'ep-3'],
+        ['ep-1', 'ep-2'],
+        ['ep-1'],
+        ['ep-2'],
+      ]);
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') return;
+      expect(ids(result.data?.triage?.dispatchable)).toEqual(['ep-1', 'ep-2']);
+      expect(ids(result.data?.scan?.alerts)).toEqual(['ep-1', 'ep-2']);
+      const [message] = mockLogger.warn.mock.calls[0];
+      expect(typeof message === 'function' ? message() : message).toBe(
+        `alert data reached the ${HYDRATION_TICK_BUDGET_RESPONSES * 1024 * 1024} bytes tick ` +
+          'budget; 1 series (1 of 3 dispatchable alerts not hydrated) deferred to the next tick'
+      );
     });
 
     it('defers from the right position when the budget is reached in a later chunk', async () => {

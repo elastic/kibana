@@ -349,7 +349,7 @@ describe('alerting_v2 config schema', () => {
       ).toBe(10 * 1024 * 1024);
     });
 
-    it.each(['512b', '101mb'])('rejects %s, outside 1kb–100mb', (maxResponseSize) => {
+    it.each(['512kb', '101mb'])('rejects %s, outside 1mb–100mb', (maxResponseSize) => {
       expect(() =>
         configSchema.validate({ dispatcher: { run: { hydration: { maxResponseSize } } } })
       ).toThrow();
