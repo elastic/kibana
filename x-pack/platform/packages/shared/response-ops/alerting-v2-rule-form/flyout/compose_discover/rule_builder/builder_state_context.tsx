@@ -6,12 +6,7 @@
  */
 
 import React, { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
-import type { BuilderState } from './types';
-
-/** `origin: 'init'` marks a programmatic seed. Dirty-tracking callers must not treat it as a user edit. */
-export interface BuilderStateUpdateOptions {
-  origin?: 'init';
-}
+import type { BuilderState, BuilderStateUpdateOptions } from './types';
 
 interface BuilderStateContextValue {
   builderState: BuilderState;

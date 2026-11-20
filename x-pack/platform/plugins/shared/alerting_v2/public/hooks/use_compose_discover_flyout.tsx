@@ -11,7 +11,7 @@ import type {
   RuleFormServices,
 } from '@kbn/alerting-v2-rule-form';
 import { ESQLMenu, EsqlEditorActionsProvider, EsqlEditorActionsRegister } from '@kbn/esql/public';
-import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import { ComposeDiscoverFlyout } from '@kbn/alerting-v2-rule-form';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -22,7 +22,9 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { applyRuleBuilderRegistrations } from '../rule_builder_registration';
+import { ruleBuilderRegistry } from '../rule_builder_registry';
 import { getMinimumScheduleInterval } from '../kibana_services';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useAlertingLocators } from '../application/locator_context';
@@ -228,26 +230,40 @@ export const useComposeDiscoverFlyout = ({
     openSession('create');
   }, [openSession]);
 
+  useEffect(() => {
+    void applyRuleBuilderRegistrations();
+  }, []);
+
   const openCreateBuilderFlyout = useCallback(
     (type: string) => {
-      if (!RULE_BUILDER_REGISTRY[type]) {
-        notifications.toasts.addWarning({
-          title: i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.unknownBuilderTitle', {
-            defaultMessage: 'Unknown rule builder type',
-          }),
-          text: i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.unknownBuilderText', {
-            defaultMessage: 'No builder registered for type "{type}". Opening ES|QL mode instead.',
-            values: { type },
-          }),
-        });
-        openCreateFlyout();
+      const open = () => {
+        if (!ruleBuilderRegistry.has(type)) {
+          notifications.toasts.addWarning({
+            title: i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.unknownBuilderTitle', {
+              defaultMessage: 'Unknown rule builder type',
+            }),
+            text: i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.unknownBuilderText', {
+              defaultMessage:
+                'No builder registered for type "{type}". Opening ES|QL mode instead.',
+              values: { type },
+            }),
+          });
+          openCreateFlyout();
+          return;
+        }
+        setSource(NEW_SOURCE);
+        setFlyoutMode('create');
+        setBuilderType(type);
+        setInitialBuilderState(undefined);
+        openSession('create');
+      };
+
+      if (ruleBuilderRegistry.has(type)) {
+        open();
         return;
       }
-      setSource(NEW_SOURCE);
-      setFlyoutMode('create');
-      setBuilderType(type);
-      setInitialBuilderState(undefined);
-      openSession('create');
+
+      void applyRuleBuilderRegistrations().then(open);
     },
     [notifications.toasts, openCreateFlyout, openSession]
   );
@@ -329,6 +345,7 @@ export const useComposeDiscoverFlyout = ({
       stackedOnPicker={stackedOnPicker}
       services={ruleFormServices}
       builderType={builderType ?? undefined}
+      ruleBuilderRegistry={ruleBuilderRegistry}
       initialBuilderState={initialBuilderState}
       onSwitchToEsql={builderType ? requestSwitchToEsql : undefined}
       onCreateRule={(payload) =>

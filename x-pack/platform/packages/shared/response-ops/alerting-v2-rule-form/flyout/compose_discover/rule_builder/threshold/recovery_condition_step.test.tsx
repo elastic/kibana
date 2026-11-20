@@ -9,8 +9,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { FormProvider, useForm, useFormContext, useFormState } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { BuilderRecoveryForm } from './recovery_condition_step';
 import { BuilderStateProvider } from '../builder_state_context';
+import { BuilderRecoveryStepHost } from '../builder_step_host';
+import { thresholdRuleBuilder } from '../registry';
 import type { ThresholdFormValues } from './form_types';
 import { Aggregation, Comparator, DEFAULT_THRESHOLD_FORM_VALUES } from './form_types';
 import { buildRecoveryBlock } from './build_esql';
@@ -40,7 +41,11 @@ const defaultUiState = createInitialState({ mode: 'create' });
 const noopDispatch: React.Dispatch<ComposeDiscoverAction> = () => undefined;
 
 const renderRecoveryForm = () => (
-  <BuilderRecoveryForm state={defaultUiState} dispatch={noopDispatch} />
+  <BuilderRecoveryStepHost
+    definition={thresholdRuleBuilder}
+    state={defaultUiState}
+    dispatch={noopDispatch}
+  />
 );
 
 const Wrapper: React.FC<{
