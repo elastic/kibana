@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import styled from '@emotion/styled';
 
-import { isTab } from '@kbn/timelines-plugin/public';
+import { isTab } from '../../../common/utils/accessibility';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { DEFAULT_ALERTS_INDEX, DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 import { PageScope } from '../../../data_view_manager/constants';
