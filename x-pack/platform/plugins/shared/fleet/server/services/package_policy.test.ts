@@ -461,7 +461,7 @@ describe('Package policy service', () => {
     } as any);
     clearStaleInputsSpy = jest
       .spyOn(packagePolicyService as any, 'clearStaleInputsForVersions')
-      .mockResolvedValue({ cleared: false });
+      .mockResolvedValue({ cleared: false, failures: [] });
   });
 
   afterEach(() => {
@@ -5745,13 +5745,13 @@ describe('Package policy service', () => {
         });
       });
 
-      it('bumps the agent policies before throwing when clearing a stale cache partly failed', async () => {
+      it('bumps the agent policies and removes secrets before throwing when clearing a stale cache failed', async () => {
         const savedObjectsClient = createSavedObjectClientMock();
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         setupSOClientMocks(savedObjectsClient);
         clearStaleInputsSpy.mockResolvedValue({
           cleared: true,
-          failure: new Error('clear failed'),
+          failures: [{ id: generateSO().id, error: new Error('clear failed') }],
         });
 
         await expect(callUpdate(savedObjectsClient, elasticsearchClient)).rejects.toThrow(
@@ -7546,7 +7546,7 @@ describe('Package policy service', () => {
         },
         {
           when: 'a stale inputs_for_versions cache was cleared on the same package version',
-          setup: () => clearStaleInputsSpy.mockResolvedValue({ cleared: true }),
+          setup: () => clearStaleInputsSpy.mockResolvedValue({ cleared: true, failures: [] }),
           expected: false,
         },
         {
@@ -7569,21 +7569,17 @@ describe('Package policy service', () => {
         }
       );
 
-      it('bumps the agent policies before throwing when clearing a stale cache partly failed', async () => {
+      it('reports a failed cache clear per policy and still bumps the agent policies', async () => {
         clearStaleInputsSpy.mockResolvedValue({
           cleared: true,
-          failure: new Error('clear failed'),
+          failures: [{ id: 'package-policy-0', error: new Error('clear failed') }],
         });
 
-        await expect(bulkUpdateAndGetUnchangedFlags([{}])).rejects.toThrow('clear failed');
+        const { flags, failedIds } = await bulkUpdateAndGetUnchangedFlags([{}]);
 
+        expect(failedIds).toEqual(['package-policy-0']);
         // Without the cleared cache the flag would be true for this unchanged package policy.
-        expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.any(String),
-          expect.objectContaining({ agentVersionConditionsUnchanged: false })
-        );
+        expect(flags).toEqual([false]);
       });
 
       it('passes the updated package names to bumpRevision', async () => {
@@ -16977,7 +16973,7 @@ describe('clearStaleInputsForVersions()', () => {
       { packagePolicyId: 'c', packageInfo: conditionPackageInfo, assetsMap: noConditionAssetsMap },
     ]);
 
-    expect(result).toEqual({ cleared: true });
+    expect(result).toEqual({ cleared: true, failures: [] });
     expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(soClient.bulkGet.mock.calls[0][0]!.map((o) => o.id)).toEqual(['a', 'b']);
     expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
@@ -17013,9 +17009,9 @@ describe('clearStaleInputsForVersions()', () => {
     );
 
     expect(result.cleared).toBe(true);
-    expect(result.failure?.message).toEqual(
-      'Failed to clear inputs_for_versions of package policies [b]: Conflict'
-    );
+    expect(
+      result.failures.map(({ id, error }: { id: string; error: Error }) => [id, error.message])
+    ).toEqual([['b', 'Failed to clear inputs_for_versions of package policy [b]: Conflict']]);
   });
 
   it('does not write when no cache is stored', async () => {
@@ -17029,7 +17025,7 @@ describe('clearStaleInputsForVersions()', () => {
       },
     ]);
 
-    expect(result).toEqual({ cleared: false });
+    expect(result).toEqual({ cleared: false, failures: [] });
     expect(soClient.bulkUpdate).not.toHaveBeenCalled();
   });
 
@@ -17040,7 +17036,7 @@ describe('clearStaleInputsForVersions()', () => {
       { packagePolicyId: 'a', packageInfo: conditionPackageInfo, assetsMap: noConditionAssetsMap },
     ]);
 
-    expect(result).toEqual({ cleared: false });
+    expect(result).toEqual({ cleared: false, failures: [] });
     expect(soClient.bulkGet).not.toHaveBeenCalled();
   });
 
@@ -17058,7 +17054,7 @@ describe('clearStaleInputsForVersions()', () => {
       },
     ]);
 
-    expect(result).toEqual({ cleared: false });
+    expect(result).toEqual({ cleared: false, failures: [] });
     expect(soClient.bulkGet).not.toHaveBeenCalled();
   });
 });

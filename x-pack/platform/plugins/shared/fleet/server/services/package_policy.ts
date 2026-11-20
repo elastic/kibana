@@ -973,9 +973,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
    * An upgrade to a package that dropped its agent version condition leaves the `inputs_for_versions`
    * of the old version behind, so agents keep receiving the stale inputs and the agent policy keeps
    * its version conditions. Clears the cache of the given package policies whose package has no
-   * condition, with a single read and write. Returns whether any cache was cleared, and the error
-   * for the ones that failed (e.g. on a version conflict). The caller throws it only after the
-   * agent policies were recomputed, so the caches that were cleared are not left unrecomputed.
+   * condition, with a single read and write. Returns whether any cache was cleared, and the
+   * failures (e.g. on a version conflict). The callers report them only after the agent policies
+   * were recomputed, so the caches that were cleared are not left unrecomputed.
    */
   private async clearStaleInputsForVersions(
     soClient: SavedObjectsClientContract,
@@ -984,15 +984,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packageInfo: PackageInfo;
       assetsMap: PackagePolicyAssetsMap;
     }>
-  ): Promise<{ cleared: boolean; failure?: FleetError }> {
+  ): Promise<{ cleared: boolean; failures: Array<{ id: string; error: FleetError }> }> {
     if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
-      return { cleared: false };
+      return { cleared: false, failures: [] };
     }
     const withoutCondition = candidates.filter(
       ({ packageInfo, assetsMap }) => !hasAgentVersionCondition(packageInfo, assetsMap)
     );
     if (withoutCondition.length === 0) {
-      return { cleared: false };
+      return { cleared: false, failures: [] };
     }
     const savedObjectType = await getPackagePolicySavedObjectType();
     const { saved_objects: packagePolicySOs } = await soClient
@@ -1014,7 +1014,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         Object.keys(so.attributes?.inputs_for_versions ?? {}).length > 0
     );
     if (stale.length === 0) {
-      return { cleared: false };
+      return { cleared: false, failures: [] };
     }
     // Pass the version so a concurrent edit is not overwritten (conflicts show up as failed results).
     const { saved_objects: clearResults } = await soClient
@@ -1035,14 +1035,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const failedClears = clearResults.filter(isSavedObjectErrorResult);
     return {
       cleared: failedClears.length < stale.length,
-      failure:
-        failedClears.length > 0
-          ? new FleetError(
-              `Failed to clear inputs_for_versions of package policies ${failedClears
-                .map(({ id, error }) => `[${id}]: ${error.message}`)
-                .join(', ')}`
-            )
-          : undefined,
+      failures: failedClears.map(({ id, error }) => ({
+        id,
+        error: new FleetError(
+          `Failed to clear inputs_for_versions of package policy [${id}]: ${error.message}`
+        ),
+      })),
     };
   }
 
@@ -2184,7 +2182,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    const { cleared: clearedInputsForVersions, failure: clearFailure } =
+    const { cleared: clearedInputsForVersions, failures: clearFailures } =
       await this.clearStaleInputsForVersions(soClient, [
         { packagePolicyId: newPolicy.id, packageInfo: pkgInfo, assetsMap },
       ]);
@@ -2252,9 +2250,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // the secret can be deleted while the old compiled doc is still the latest revision
     // fleet-server reads.
     await Promise.all([bumpPromise, assetRemovePromise]);
-    if (clearFailure) {
-      throw clearFailure;
-    }
 
     // Cloud-connector secrets are shared across package policies and are not tracked in
     // `ingest-package-policies`, so `deleteSecretsIfNotReferenced` cannot see all consumers.
@@ -2283,6 +2278,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           agentPolicyIds: [...associatedPolicyIds],
         });
       }
+    }
+
+    // The cleanup above does not depend on the cache, so it runs before surfacing a failed clear.
+    if (clearFailures.length > 0) {
+      throw clearFailures[0].error;
     }
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, [packagePolicyUpdate], [oldPackagePolicy]);
@@ -2705,7 +2705,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       };
     };
     // A cleared cache changes the agent policies' conditions, so they must be recomputed.
-    const { cleared: clearedInputsForVersions, failure: clearFailure } =
+    const { cleared: clearedInputsForVersions, failures: clearFailures } =
       await this.clearStaleInputsForVersions(
         soClient,
         savedPolicies.map((updatedPolicy) => {
@@ -2798,9 +2798,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // The bump writes new .fleet-policies revisions that no longer reference the old secrets;
     // without sequencing, secrets can be deleted while old compiled docs still reference them.
     await Promise.all([bumpPromise, removeAssetPromise, installAssetsPromise]);
-    if (clearFailure) {
-      throw clearFailure;
-    }
 
     // When async, the new .fleet-policies docs are written by a deferred task — delay deletion.
     const willDeployAsync = computeWillDeployAsync(
@@ -2857,10 +2854,23 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
+    // A policy whose stale cache could not be cleared is reported as failed, so the caller can
+    // retry it, instead of aborting the whole bulk update.
+    clearFailures.forEach(({ id, error }) => {
+      logger.warn(
+        `Clearing inputs_for_versions of package policy [${id}] failed: ${error.message}`
+      );
+      failedPolicies.push({
+        packagePolicy: packagePolicyUpdates.find((p) => p.id === id)!,
+        error,
+      });
+    });
+    const clearFailedIds = new Set(clearFailures.map(({ id }) => id));
+
     let updatedPoliciesSuccess = updatedPolicies
       .filter(
         (policy): policy is SavedObject<PackagePolicySOAttributes> =>
-          !isSavedObjectErrorResult(policy)
+          !isSavedObjectErrorResult(policy) && !clearFailedIds.has(policy.id)
       )
       .map((soPolicy) => mapPackagePolicySavedObjectToPackagePolicy(soPolicy));
 
