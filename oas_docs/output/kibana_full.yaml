@@ -42226,6 +42226,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -42308,6 +42309,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -42507,6 +42509,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -42825,8 +42828,8 @@ paths:
           name: sortField
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 256
         - description: Sort order, ascending or descending
           in: query
           name: sortOrder
@@ -42847,8 +42850,8 @@ paths:
           name: kuery
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 10000
         - description: When false, exclude managed integration policies from the results. To manage these policies, use the managed integrations APIs.
           in: query
           name: showAgentless
@@ -43108,6 +43111,7 @@ paths:
                   items:
                     minLength: 0
                     type: string
+                    x-kibana-planned-max-length: 512
                   maxItems: 1000
                   type: array
                 ignoreMissing:
@@ -43200,6 +43204,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: 'Format for the response: simplified or legacy'
           in: query
           name: format
@@ -43302,6 +43307,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: 'Format for the response: simplified or legacy'
           in: query
           name: format
@@ -43401,6 +43407,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -43521,6 +43528,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: 'Format for the response: simplified or legacy'
           in: query
           name: format
@@ -43617,6 +43625,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: If true, returns the policy as a downloadable file
           in: query
           name: download
@@ -43736,6 +43745,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: If true, returns the policy as a downloadable file
           in: query
           name: download
@@ -43849,6 +43859,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -44098,6 +44109,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Filter by one or more agent policy IDs
           in: query
           name: policyIds
@@ -44106,6 +44118,7 @@ paths:
             items:
               minLength: 0
               type: string
+              x-kibana-planned-max-length: 512
             maxItems: 1000
             type: array
         - description: A KQL query string to filter results
@@ -44113,8 +44126,8 @@ paths:
           name: kuery
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 10000
       responses:
         '200':
           content:
@@ -44231,6 +44244,7 @@ paths:
             items:
               minLength: 0
               type: string
+              x-kibana-planned-max-length: 512
             maxItems: 10000
             type: array
         - description: Filter by integration package name
@@ -44240,6 +44254,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Filter by integration package version
           in: query
           name: pkgVersion
@@ -45754,8 +45769,8 @@ paths:
           name: kuery
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 10000
         - description: When true, include agentless agents in the results
           in: query
           name: showAgentless
@@ -45803,8 +45818,8 @@ paths:
           name: sortField
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 256
         - description: Sort order, ascending or descending
           in: query
           name: sortOrder
@@ -46334,6 +46349,7 @@ paths:
                   items:
                     minLength: 0
                     type: string
+                    x-kibana-planned-max-length: 512
                   maxItems: 1000
                   type: array
               required:
@@ -46425,6 +46441,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -46510,6 +46527,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: When true, include CPU and memory metrics in the response
           in: query
           name: withMetrics
@@ -47006,6 +47024,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -47024,6 +47043,7 @@ paths:
                   items:
                     minLength: 0
                     type: string
+                    x-kibana-planned-max-length: 255
                   maxItems: 10
                   type: array
                 user_provided_metadata:
@@ -47507,6 +47527,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -47684,6 +47705,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -47759,6 +47781,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -47812,6 +47835,7 @@ paths:
                       items:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       maxItems: 10
                       type: array
                 uri:
@@ -47899,6 +47923,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -47997,6 +48022,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -48012,6 +48038,7 @@ paths:
                 policy_id:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 512
               required:
                 - policy_id
       responses:
@@ -48088,6 +48115,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -48141,6 +48169,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -48368,6 +48397,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -48440,6 +48470,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -48512,6 +48543,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -48601,6 +48633,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -48934,6 +48967,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -49198,6 +49232,7 @@ paths:
                       items:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       maxItems: 10
                       type: array
                 uri:
@@ -49438,6 +49473,7 @@ paths:
                 policy_id:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 512
               required:
                 - policy_id
                 - agents
@@ -50127,12 +50163,14 @@ paths:
                   items:
                     minLength: 0
                     type: string
+                    x-kibana-planned-max-length: 255
                   maxItems: 10
                   type: array
                 tagsToRemove:
                   items:
                     minLength: 0
                     type: string
+                    x-kibana-planned-max-length: 255
                   maxItems: 10
                   type: array
               required:
@@ -50352,6 +50390,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -50428,6 +50467,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: The name of the uploaded file
           in: path
           name: fileName
@@ -50703,8 +50743,8 @@ paths:
           name: kuery
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 10000
         - description: When true, include tags from inactive agents
           in: query
           name: showInactive
@@ -50882,8 +50922,8 @@ paths:
           name: kuery
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 10000
       responses:
         '200':
           content:
@@ -51317,6 +51357,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: If true, forces deletion even if the cloud connector is in use.
           in: query
           name: force
@@ -51395,6 +51436,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -51562,6 +51604,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -51812,6 +51855,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: The page number for pagination.
           in: query
           name: page
@@ -54741,8 +54785,8 @@ paths:
           name: kuery
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 10000
       responses:
         '200':
           content:
@@ -55007,6 +55051,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: When false (default), invalidate the API key and mark the token as inactive. When true, also delete the token document.
           in: query
           name: forceDelete
@@ -55097,6 +55142,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -55433,6 +55479,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -56130,6 +56177,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -56270,6 +56318,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -56419,6 +56468,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -56886,6 +56936,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -56965,6 +57016,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -57079,6 +57131,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -57201,6 +57254,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -57292,6 +57346,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -57375,6 +57430,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -57388,6 +57444,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -57456,6 +57513,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -57541,6 +57599,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -57621,6 +57680,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -57714,6 +57774,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -57807,6 +57868,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -57921,6 +57983,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -58001,6 +58064,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -58065,6 +58129,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -58314,6 +58379,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -58513,6 +58579,7 @@ paths:
                         id:
                           minLength: 0
                           type: string
+                          x-kibana-planned-max-length: 512
                         is_default:
                           default: false
                           type: boolean
@@ -58524,10 +58591,12 @@ paths:
                         name:
                           minLength: 0
                           type: string
+                          x-kibana-planned-max-length: 255
                         proxy_id:
                           minLength: 0
                           nullable: true
                           type: string
+                          x-kibana-planned-max-length: 512
                         secrets:
                           additionalProperties: false
                           type: object
@@ -58544,6 +58613,7 @@ paths:
                                         id:
                                           minLength: 0
                                           type: string
+                                          x-kibana-planned-max-length: 512
                                       required:
                                         - id
                                     - type: string
@@ -58556,6 +58626,7 @@ paths:
                                         id:
                                           minLength: 0
                                           type: string
+                                          x-kibana-planned-max-length: 512
                                       required:
                                         - id
                                     - type: string
@@ -58568,6 +58639,7 @@ paths:
                                         id:
                                           minLength: 0
                                           type: string
+                                          x-kibana-planned-max-length: 512
                                       required:
                                         - id
                                     - type: string
@@ -58711,6 +58783,7 @@ paths:
                 id:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 512
                 is_default:
                   default: false
                   type: boolean
@@ -58722,10 +58795,12 @@ paths:
                 name:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 255
                 proxy_id:
                   minLength: 0
                   nullable: true
                   type: string
+                  x-kibana-planned-max-length: 512
                 secrets:
                   additionalProperties: false
                   type: object
@@ -58742,6 +58817,7 @@ paths:
                                 id:
                                   minLength: 0
                                   type: string
+                                  x-kibana-planned-max-length: 512
                               required:
                                 - id
                             - type: string
@@ -58754,6 +58830,7 @@ paths:
                                 id:
                                   minLength: 0
                                   type: string
+                                  x-kibana-planned-max-length: 512
                               required:
                                 - id
                             - type: string
@@ -58766,6 +58843,7 @@ paths:
                                 id:
                                   minLength: 0
                                   type: string
+                                  x-kibana-planned-max-length: 512
                               required:
                                 - id
                             - type: string
@@ -58849,6 +58927,7 @@ paths:
                       id:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 512
                       is_default:
                         default: false
                         type: boolean
@@ -58860,10 +58939,12 @@ paths:
                       name:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       proxy_id:
                         minLength: 0
                         nullable: true
                         type: string
+                        x-kibana-planned-max-length: 512
                       secrets:
                         additionalProperties: false
                         type: object
@@ -58880,6 +58961,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -58892,6 +58974,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -58904,6 +58987,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -59014,6 +59098,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -59096,6 +59181,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -59134,6 +59220,7 @@ paths:
                       id:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 512
                       is_default:
                         default: false
                         type: boolean
@@ -59145,10 +59232,12 @@ paths:
                       name:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       proxy_id:
                         minLength: 0
                         nullable: true
                         type: string
+                        x-kibana-planned-max-length: 512
                       secrets:
                         additionalProperties: false
                         type: object
@@ -59165,6 +59254,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -59177,6 +59267,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -59189,6 +59280,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -59309,6 +59401,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -59343,11 +59436,13 @@ paths:
                 name:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 255
                 proxy_id:
                   default: null
                   minLength: 0
                   nullable: true
                   type: string
+                  x-kibana-planned-max-length: 512
                 secrets:
                   additionalProperties: false
                   type: object
@@ -59364,6 +59459,7 @@ paths:
                                 id:
                                   minLength: 0
                                   type: string
+                                  x-kibana-planned-max-length: 512
                               required:
                                 - id
                             - type: string
@@ -59376,6 +59472,7 @@ paths:
                                 id:
                                   minLength: 0
                                   type: string
+                                  x-kibana-planned-max-length: 512
                               required:
                                 - id
                             - type: string
@@ -59388,6 +59485,7 @@ paths:
                                 id:
                                   minLength: 0
                                   type: string
+                                  x-kibana-planned-max-length: 512
                               required:
                                 - id
                             - type: string
@@ -59468,6 +59566,7 @@ paths:
                       id:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 512
                       is_default:
                         default: false
                         type: boolean
@@ -59479,10 +59578,12 @@ paths:
                       name:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       proxy_id:
                         minLength: 0
                         nullable: true
                         type: string
+                        x-kibana-planned-max-length: 512
                       secrets:
                         additionalProperties: false
                         type: object
@@ -59499,6 +59600,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -59511,6 +59613,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -59523,6 +59626,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -59652,6 +59756,7 @@ paths:
                 id:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 512
               required:
                 - id
       responses:
@@ -61944,6 +62049,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -62044,6 +62150,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -62153,6 +62260,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -62273,6 +62381,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -62366,8 +62475,8 @@ paths:
           name: sortField
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 256
         - description: Sort order, ascending or descending
           in: query
           name: sortOrder
@@ -62388,8 +62497,8 @@ paths:
           name: kuery
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 10000
         - description: 'Format for the response: simplified or legacy'
           in: query
           name: format
@@ -62669,6 +62778,7 @@ paths:
                   items:
                     minLength: 0
                     type: string
+                    x-kibana-planned-max-length: 512
                   maxItems: 1000
                   type: array
                 ignoreMissing:
@@ -62780,6 +62890,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: When true, delete the package policy even if it is managed
           in: query
           name: force
@@ -62859,6 +62970,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: 'Format for the response: simplified or legacy'
           in: query
           name: format
@@ -62978,6 +63090,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: 'Format for the response: simplified or legacy'
           in: query
           name: format
@@ -63549,12 +63662,14 @@ paths:
                         id:
                           minLength: 0
                           type: string
+                          x-kibana-planned-max-length: 512
                         is_preconfigured:
                           default: false
                           type: boolean
                         name:
                           minLength: 0
                           type: string
+                          x-kibana-planned-max-length: 255
                         proxy_headers:
                           additionalProperties:
                             anyOf:
@@ -63661,12 +63776,14 @@ paths:
                 id:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 512
                 is_preconfigured:
                   default: false
                   type: boolean
                 name:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 255
                 proxy_headers:
                   additionalProperties:
                     anyOf:
@@ -63713,12 +63830,14 @@ paths:
                       id:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 512
                       is_preconfigured:
                         default: false
                         type: boolean
                       name:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       proxy_headers:
                         additionalProperties:
                           anyOf:
@@ -63797,6 +63916,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -63879,6 +63999,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -63912,12 +64033,14 @@ paths:
                       id:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 512
                       is_preconfigured:
                         default: false
                         type: boolean
                       name:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       proxy_headers:
                         additionalProperties:
                           anyOf:
@@ -64006,6 +64129,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -64034,6 +64158,7 @@ paths:
                 name:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 255
                 proxy_headers:
                   additionalProperties:
                     anyOf:
@@ -64077,12 +64202,14 @@ paths:
                       id:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 512
                       is_preconfigured:
                         default: false
                         type: boolean
                       name:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       proxy_headers:
                         additionalProperties:
                           anyOf:
@@ -64165,6 +64292,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -65498,6 +65626,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -72168,6 +72297,7 @@ paths:
           name: taskId
           required: true
           schema:
+            maxLength: 1024
             type: string
       requestBody:
         content:
@@ -165951,13 +166081,14 @@ components:
           type: boolean
         kuery:
           description: KQL query to select enrollment tokens to delete.
-          minLength: 0
           type: string
+          x-kibana-planned-max-length: 10000
         tokenIds:
           description: List of enrollment token IDs to delete.
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 10000
           type: array
       title: bulk_delete_enrollment_api_keys_request
@@ -166024,12 +166155,14 @@ components:
             anyOf:
               - minLength: 0
                 type: string
+                x-kibana-planned-max-length: 512
               - additionalProperties: false
                 type: object
                 properties:
                   name:
                     minLength: 0
                     type: string
+                    x-kibana-planned-max-length: 512
                   prerelease:
                     type: boolean
                   version:
@@ -166132,6 +166265,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 1000
           minItems: 1
           type: array
@@ -166227,6 +166361,7 @@ components:
                 description: Package name to rollback
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 512
             required:
               - name
           maxItems: 1000
@@ -166259,6 +166394,7 @@ components:
               name:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 512
               version:
                 type: string
             required:
@@ -166341,6 +166477,7 @@ components:
               name:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 512
               version:
                 type: string
             required:
@@ -166838,11 +166975,12 @@ components:
       additionalProperties: false
       properties:
         description:
-          minLength: 0
           type: string
+          x-kibana-planned-max-length: 10000
         name:
           minLength: 1
           type: string
+          x-kibana-planned-max-length: 255
       required:
         - name
       title: copy_agent_policy_request
@@ -167155,6 +167293,7 @@ components:
         integrationName:
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 512
       required:
         - integrationName
         - datasets
@@ -167411,6 +167550,7 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 255
         cloud_connector_name:
           description: Transient field for cloud connector name during creation.
           maxLength: 255
@@ -167427,8 +167567,8 @@ components:
           type: boolean
         description:
           description: Package policy description
-          minLength: 0
           type: string
+          x-kibana-planned-max-length: 2048
         enabled:
           type: boolean
         force:
@@ -167443,6 +167583,7 @@ components:
                 description: The name of the custom field. Cannot contain spaces.
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 255
               value:
                 anyOf:
                   - type: string
@@ -167458,6 +167599,7 @@ components:
           description: Package policy unique identifier
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 255
         inputs:
           items:
             additionalProperties: false
@@ -167490,6 +167632,7 @@ components:
               id:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 512
               keep_enabled:
                 type: boolean
               migrate_from:
@@ -167559,6 +167702,7 @@ components:
                     id:
                       minLength: 0
                       type: string
+                      x-kibana-planned-max-length: 512
                     keep_enabled:
                       type: boolean
                     migrate_from:
@@ -167630,6 +167774,7 @@ components:
           description: Unique name for the package policy.
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 255
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
@@ -167638,6 +167783,7 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 255
         overrides:
           additionalProperties: false
           description: Override settings that are defined in the package policy. The override option should be used only in unusual circumstances and not as a routine procedure.
@@ -167658,17 +167804,20 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 255
         policy_ids:
           items:
             description: IDs of the agent policies that the package policy will be added to.
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 255
           maxItems: 1000
           type: array
         spaceIds:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 100
           type: array
         supports_agentless:
@@ -168165,6 +168314,7 @@ components:
           description: The ID of the agent policy
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 512
         force:
           description: bypass validation checks that can prevent agent policy deletion
           type: boolean
@@ -168222,6 +168372,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 1000
           type: array
       required:
@@ -168290,6 +168441,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 1000
           type: array
         packageVersion:
@@ -170982,9 +171134,11 @@ components:
               id:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 512
               type:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 256
             required:
               - id
               - type
@@ -171286,6 +171440,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 1000
           type: array
       required:
@@ -172535,6 +172690,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 100
           minItems: 1
           type: array
@@ -181755,15 +181911,17 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         description:
-          minLength: 0
           type: string
+          x-kibana-planned-max-length: 10000
         download_source_id:
           deprecated: true
           description: Use `download_source_ids` instead
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         download_source_ids:
           items:
             description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
@@ -181775,6 +181933,7 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         force:
           type: boolean
         global_data_tags:
@@ -181786,6 +181945,7 @@ components:
               name:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 255
               value:
                 anyOf:
                   - type: string
@@ -181802,6 +181962,7 @@ components:
         id:
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 512
         inactivity_timeout:
           default: 1209600
           minimum: 0
@@ -181877,11 +182038,13 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         monitoring_pprof_enabled:
           type: boolean
         name:
           minLength: 1
           type: string
+          x-kibana-planned-max-length: 255
         namespace:
           minLength: 1
           type: string
@@ -181932,6 +182095,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 100
           type: array
         supports_agentless:
@@ -182031,9 +182195,11 @@ components:
         name:
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 255
         policy_id:
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 512
       required:
         - policy_id
       title: new_enrollment_api_key
@@ -190237,7 +190403,8 @@ components:
         groupings:
           additionalProperties:
             anyOf:
-              - type: string
+              - maxLength: 1024
+                type: string
               - type: number
           type: object
         id:
@@ -192117,15 +192284,17 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         description:
-          minLength: 0
           type: string
+          x-kibana-planned-max-length: 10000
         download_source_id:
           deprecated: true
           description: Use `download_source_ids` instead
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         download_source_ids:
           items:
             description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
@@ -192137,6 +192306,7 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         force:
           type: boolean
         global_data_tags:
@@ -192148,6 +192318,7 @@ components:
               name:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 255
               value:
                 anyOf:
                   - type: string
@@ -192164,6 +192335,7 @@ components:
         id:
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 512
         inactivity_timeout:
           default: 1209600
           minimum: 0
@@ -192239,11 +192411,13 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         monitoring_pprof_enabled:
           type: boolean
         name:
           minLength: 1
           type: string
+          x-kibana-planned-max-length: 255
         namespace:
           minLength: 1
           type: string
@@ -192294,6 +192468,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 100
           type: array
         supports_agentless:
@@ -193148,6 +193323,7 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 255
         cloud_connector_name:
           description: Transient field for cloud connector name during creation.
           maxLength: 255
@@ -193161,8 +193337,8 @@ components:
           type: string
         description:
           description: Package policy description
-          minLength: 0
           type: string
+          x-kibana-planned-max-length: 2048
         enabled:
           type: boolean
         force:
@@ -193176,6 +193352,7 @@ components:
                 description: The name of the custom field. Cannot contain spaces.
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 255
               value:
                 anyOf:
                   - type: string
@@ -193219,6 +193396,7 @@ components:
               id:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 512
               keep_enabled:
                 type: boolean
               migrate_from:
@@ -193288,6 +193466,7 @@ components:
                     id:
                       minLength: 0
                       type: string
+                      x-kibana-planned-max-length: 512
                     keep_enabled:
                       type: boolean
                     migrate_from:
@@ -193358,6 +193537,7 @@ components:
         name:
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 255
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
@@ -193366,6 +193546,7 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 255
         overrides:
           additionalProperties: false
           description: Override settings that are defined in the package policy. The override option should be used only in unusual circumstances and not as a routine procedure.
@@ -193386,17 +193567,20 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 255
         policy_ids:
           items:
             description: IDs of the agent policies that the package policy will be added to.
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 255
           maxItems: 1000
           type: array
         spaceIds:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 100
           type: array
         supports_agentless:
@@ -193712,6 +193896,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 1000
           type: array
       required:
@@ -194192,6 +194377,11 @@ components:
                 - gray
               type: string
           description: The name of the palette to apply across the value range.
+        steps:
+          description: Number of color bands the palette is split into. Defaults to the chart's default band count.
+          maximum: 100
+          minimum: 1
+          type: integer
         type:
           enum:
             - distributed_palette
@@ -195631,23 +195821,14 @@ components:
         density:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableDensity'
         paging:
-          anyOf:
-            - enum:
-                - 10
-              type: number
-            - enum:
-                - 20
-              type: number
-            - enum:
-                - 30
-              type: number
-            - enum:
-                - 50
-              type: number
-            - enum:
-                - 100
-              type: number
           description: Rows per page. When set, pagination is enabled with the specified number of rows.
+          enum:
+            - 10
+            - 20
+            - 30
+            - 50
+            - 100
+          type: number
         row_numbers:
           additionalProperties: false
           description: Configuration for row numbers
@@ -201600,7 +201781,7 @@ components:
           type: object
           properties:
             visible:
-              default: false
+              default: true
               description: Show partial bucket indicators at time range edges
               type: boolean
     Kibana_HTTP_APIs_visXyStylingPoints:
