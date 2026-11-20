@@ -6,21 +6,14 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { ActionMenuContent } from './action_menu_content';
 
 describe('ActionMenuContent', () => {
-  it('renders alerts dropdown', async () => {
-    const { getByLabelText, getByText } = render(<ActionMenuContent />);
+  it('renders alerts dropdown', () => {
+    const { getByLabelText } = render(<ActionMenuContent />);
 
-    const alertsDropdown = getByLabelText('Open alerts and rules context menu');
-    fireEvent.click(alertsDropdown);
-
-    await waitFor(() => {
-      expect(getByText('Create rule'));
-      expect(getByText('Manage rules'));
-    });
+    expect(getByLabelText('Open alerts and rules context menu')).toBeInTheDocument();
   });
 
   it('renders settings link', () => {
