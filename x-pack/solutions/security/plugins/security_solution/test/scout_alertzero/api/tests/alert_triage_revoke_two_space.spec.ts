@@ -173,8 +173,12 @@ const readLifecycle = async (esClient: EsClient, id: string): Promise<string | u
  * decision and the alerts it closed. The decisions and alerts are seeded directly, so no model
  * and no sweep is needed. The checks are the ones the step's unit tests mock: which alerts index
  * the run searches, and whether a real analyst's credentials can delete a decision.
+ *
+ * Not serial, so a failure in one test does not skip the others. The tests run in file order in
+ * one worker; the first two change nothing, and the last deletes the decision. After a failure,
+ * Playwright starts a new worker, which seeds new spaces in `beforeAll`.
  */
-apiTest.describe.serial(
+apiTest.describe(
   'Alert Triage revoke decision - two spaces',
   { tag: [...tags.stateful.classic] },
   () => {
