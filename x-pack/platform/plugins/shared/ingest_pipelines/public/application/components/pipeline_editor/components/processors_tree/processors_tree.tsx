@@ -8,8 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React, { memo, useRef, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, keys, useEuiTheme } from '@elastic/eui';
-import type List from 'react-virtualized/dist/commonjs/List';
-import type WindowScroller from 'react-virtualized/dist/commonjs/WindowScroller';
+import type { ListImperativeAPI } from 'react-virtualized';
 import { css } from '@emotion/react';
 
 import { DropSpecialLocations } from '../../constants';
@@ -65,11 +64,10 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
   const styles = useStyles();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const sectionLabel = processorsTreeI18nTexts.getSectionLabel(baseSelector);
-  // These refs are created here so they can be shared with all
-  // recursively rendered trees. Their values should come from react-virtualized
-  // List component and WindowScroller component.
-  const windowScrollerRef = useRef<WindowScroller>(null);
-  const listRef = useRef<List>(null);
+  // This ref is created here so it can be shared with all
+  // recursively rendered trees. Its value should come from the react-virtualized
+  // List component.
+  const listRef = useRef<ListImperativeAPI>(null);
 
   useEffect(() => {
     const cancelMoveKbListener = (event: KeyboardEvent) => {
@@ -108,7 +106,6 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
     >
       <EuiFlexItem grow={false}>
         <PrivateTree
-          windowScrollerRef={windowScrollerRef}
           listRef={listRef}
           level={1}
           onAction={onAction}

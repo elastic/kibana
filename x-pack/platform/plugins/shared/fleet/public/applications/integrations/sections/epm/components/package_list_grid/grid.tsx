@@ -6,8 +6,7 @@
  */
 
 import React, { useRef, useEffect } from 'react';
-import ReactDOM from 'react-dom';
-import type { ListRowRenderer } from 'react-virtualized';
+import type { ListImperativeAPI, RowRendererParams } from 'react-virtualized';
 import { List as VirtualizedList, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 import { css } from '@emotion/react';
 import {
@@ -19,7 +18,6 @@ import {
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { WindowScroller } from 'react-virtualized';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
 import type { IntegrationCardItem } from '../../screens/home';
@@ -47,8 +45,8 @@ export const GridColumn = ({
   columnCount = 3,
   gutterSize = 'm',
 }: GridColumnProps) => {
-  const windowScrollerRef = useRef<WindowScroller>(null);
-  const listRef = useRef<VirtualizedList>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<ListImperativeAPI>(null);
   const rowMeasurementCache = useRef<CellMeasurerCache>(
     new CellMeasurerCache({
       fixedWidth: true,
@@ -56,24 +54,21 @@ export const GridColumn = ({
     })
   );
 
-  // Reset the row measurement cache, update position, and recompute row height when the list changes
+  // Reset the row measurement cache and recompute row height when the list changes
   useEffect(() => {
     rowMeasurementCache?.current?.clearAll();
-    windowScrollerRef.current?.updatePosition();
     listRef.current?.recomputeRowHeights(0);
   }, [list, columnCount, isLoading]);
 
   // Use to work on small screen when categories are loaded
   useEffect(() => {
-    const scrollerNode = windowScrollerRef.current;
-    if (!scrollerNode) return;
-    const element = ReactDOM.findDOMNode(scrollerNode) as Element | null;
-    if (!element?.parentElement) return;
+    const parentElement = containerRef.current?.parentElement;
+    if (!parentElement) return;
 
     const observer = new ResizeObserver(() => {
-      windowScrollerRef.current?.updatePosition();
+      listRef.current?.forceUpdateGrid();
     });
-    observer.observe(element.parentElement);
+    observer.observe(parentElement);
     return () => observer.disconnect();
   }, [list.length, columnCount, isLoading]);
 
@@ -119,7 +114,7 @@ export const GridColumn = ({
     );
   }
 
-  const rowRenderer: ListRowRenderer = ({ index, key, parent, style }) => {
+  const rowRenderer = ({ index, key, parent, style }: RowRendererParams) => {
     const items = list.slice(index * columnCount, index * columnCount + columnCount);
     return (
       <CellMeasurer
@@ -158,45 +153,38 @@ export const GridColumn = ({
   };
 
   return (
-    <WindowScroller
-      ref={windowScrollerRef}
-      scrollElement={
-        (scrollElementId && document.getElementById(scrollElementId)) ||
-        document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ||
-        window
-      }
-      onResize={() => {
-        rowMeasurementCache.current?.clearAll();
-      }}
-    >
-      {({ height, isScrolling, onChildScroll, scrollTop }) => (
-        <EuiAutoSizer disableHeight>
-          {({ width }) => (
-            <VirtualizedList
-              tabIndex={-1}
-              ref={listRef}
-              autoHeight
-              height={height}
-              isScrolling={isScrolling}
-              onScroll={onChildScroll}
-              overscanRowCount={2}
-              rowCount={Math.ceil(list.length / columnCount)}
-              deferredMeasurementCache={rowMeasurementCache.current}
-              rowHeight={rowMeasurementCache.current.rowHeight}
-              rowRenderer={rowRenderer}
-              scrollTop={scrollTop}
-              width={width}
-              // Prevent clipping of card shadows on hover
-              css={css`
+    <div ref={containerRef}>
+      <EuiAutoSizer
+        disableHeight
+        onResize={() => {
+          rowMeasurementCache.current?.clearAll();
+        }}
+      >
+        {({ width }) => (
+          <VirtualizedList
+            tabIndex={-1}
+            ref={listRef}
+            scrollElement={
+              (scrollElementId && document.getElementById(scrollElementId)) ||
+              document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ||
+              'window'
+            }
+            overscanRowCount={2}
+            rowCount={Math.ceil(list.length / columnCount)}
+            deferredMeasurementCache={rowMeasurementCache.current}
+            rowHeight={rowMeasurementCache.current.rowHeight}
+            rowRenderer={rowRenderer}
+            width={width}
+            // Prevent clipping of card shadows on hover
+            css={css`
+              overflow: visible !important;
+              .ReactVirtualized__Grid__innerScrollContainer {
                 overflow: visible !important;
-                .ReactVirtualized__Grid__innerScrollContainer {
-                  overflow: visible !important;
-                }
-              `}
-            />
-          )}
-        </EuiAutoSizer>
-      )}
-    </WindowScroller>
+              }
+            `}
+          />
+        )}
+      </EuiAutoSizer>
+    </div>
   );
 };
