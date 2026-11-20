@@ -13,10 +13,10 @@ import {
   EuiDescriptionList,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
@@ -270,29 +270,22 @@ export const SourceDetailsFlyout = ({
                   </EuiText>
                 </>
               )}
-              <EuiHorizontalRule />
-              <EuiText size="xs" color="danger">
-                <strong>
-                  {i18n.translate('xpack.streams.sources.dangerAreaLabel', {
-                    defaultMessage: 'Danger area',
-                  })}
-                </strong>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiButton
-                color="danger"
-                fill
-                size="s"
-                onClick={() => setIsConfirmingDelete(true)}
-                data-test-subj="streamsSourceDeleteButton"
-              >
-                {i18n.translate('xpack.streams.sources.deleteSourceButtonLabel', {
-                  defaultMessage: 'Delete source',
-                })}
-              </EuiButton>
             </>
           )}
         </EuiFlyoutBody>
+        {!readOnly && (
+          <EuiFlyoutFooter>
+            <EuiButton
+              color="danger"
+              onClick={() => setIsConfirmingDelete(true)}
+              data-test-subj="streamsSourceDeleteButton"
+            >
+              {i18n.translate('xpack.streams.sources.deleteSourceButtonLabel', {
+                defaultMessage: 'Delete source',
+              })}
+            </EuiButton>
+          </EuiFlyoutFooter>
+        )}
       </EuiFlyout>
       {isConfirmingDelete && (
         <DeleteSourcesConfirmation

@@ -11,7 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflow, WorkflowDetailDto } from '../..';
 import { storedWorkflowAccessControlSchema } from '../../common/access_control';
-import { pickWorkflowDocumentVersion } from '../../common/utils';
+import { parseTemplateOriginFields, pickWorkflowDocumentVersion } from '../../common/utils';
 import { GLOBAL_WORKFLOW_SPACE_ID, WORKFLOW_INDEX_NAME } from '../constants';
 import { buildWorkflowFilters } from '../lib/workflow_filters';
 import type { ManagedFilter } from '../lib/workflow_filters';
@@ -129,6 +129,7 @@ export class WorkflowRepository {
         ...(billable !== undefined ? { billable } : {}),
         ...(originManagedWorkflowId !== undefined ? { originManagedWorkflowId } : {}),
         ...(managedVersion !== undefined ? { managedVersion } : {}),
+        ...parseTemplateOriginFields(source),
         ...(workflowUid !== undefined ? { workflowUid } : {}),
         ...pickWorkflowDocumentVersion(source),
       };
@@ -482,6 +483,9 @@ export class WorkflowRepository {
       'managedBy',
       'originManagedWorkflowId',
       'managedVersion',
+      'templateSlug',
+      'templateVersion',
+      'templateOrigin',
       'workflowUid',
       'version',
     ];
@@ -559,6 +563,7 @@ export class WorkflowRepository {
         ...(typeof source.managedVersion === 'number'
           ? { managedVersion: source.managedVersion }
           : {}),
+        ...parseTemplateOriginFields(source),
         ...(typeof source.workflowUid === 'string' ? { workflowUid: source.workflowUid } : {}),
         ...pickWorkflowDocumentVersion(source),
       }));
