@@ -19,12 +19,22 @@ import type {
   StoredTombstone,
 } from './types';
 
+const assertScope = ({ space, userId }: SessionMemoryScope): void => {
+  if (space.trim() === '') {
+    throw new Error('Session memory scope requires a non-empty space');
+  }
+  if (userId.trim() === '') {
+    throw new Error('Session memory scope requires a non-empty userId');
+  }
+};
+
 // Every read and delete goes through this filter, so a memory in another space or of another user
 // behaves exactly like one that does not exist.
-const scopeFilter = ({ space, userId }: SessionMemoryScope): QueryDslQueryContainer[] => [
-  { term: { space } },
-  { term: { user_id: userId } },
-];
+const scopeFilter = (scope: SessionMemoryScope): QueryDslQueryContainer[] => {
+  assertScope(scope);
+  const { space, userId } = scope;
+  return [{ term: { space } }, { term: { user_id: userId } }];
+};
 
 const toErrorMessage = ({ type, reason, caused_by: cause }: ErrorCause): string => {
   const message = reason ?? type;
@@ -65,7 +75,9 @@ const toForgetResult = (
 export const createSessionMemoryService = (
   esClient: ElasticsearchClient
 ): SessionMemoryService => ({
-  remember: async ({ space, userId }, input) => {
+  remember: async (scope, input) => {
+    assertScope(scope);
+    const { space, userId } = scope;
     const { id = randomUUID(), sessionId, content, aiIndexIds = [], attributes = {} } = input;
     await esClient.index<StoredMemoryRevision>({
       index: SESSION_MEMORY_DATA_STREAM,
@@ -112,6 +124,7 @@ export const createSessionMemoryService = (
   },
 
   forget: async (scope, ids) => {
+    assertScope(scope);
     const uniqueIds = [...new Set(ids)];
     if (uniqueIds.length === 0) {
       return [];

@@ -263,4 +263,27 @@ describe('createSessionMemoryService', () => {
       expect(esClient.search).not.toHaveBeenCalled();
     });
   });
+
+  describe('scope validation', () => {
+    it.each([
+      ['empty space', { space: '', userId: 'jdoe' }, /space/],
+      ['blank space', { space: '   ', userId: 'jdoe' }, /space/],
+      ['empty userId', { space: 'default', userId: '' }, /userId/],
+      ['blank userId', { space: 'default', userId: '   ' }, /userId/],
+    ])(
+      'rejects %s on remember, get, and forget before calling Elasticsearch',
+      async (_, invalidScope, pattern) => {
+        await expect(
+          service.remember(invalidScope, { sessionId: 'session-1', content: 'note' })
+        ).rejects.toThrow(pattern);
+        await expect(service.get(invalidScope, 'memory-1')).rejects.toThrow(pattern);
+        await expect(service.forget(invalidScope, ['memory-1'])).rejects.toThrow(pattern);
+        await expect(service.forget(invalidScope, [])).rejects.toThrow(pattern);
+
+        expect(esClient.index).not.toHaveBeenCalled();
+        expect(esClient.search).not.toHaveBeenCalled();
+        expect(esClient.bulk).not.toHaveBeenCalled();
+      }
+    );
+  });
 });
