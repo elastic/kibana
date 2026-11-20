@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/restorable-state'
   - '@kbn/licensing-types'
+  - '@kbn/inference-plugin'
   - '@kbn/index-editor'
   - '@kbn/react-hooks'
   - '@kbn/kql'

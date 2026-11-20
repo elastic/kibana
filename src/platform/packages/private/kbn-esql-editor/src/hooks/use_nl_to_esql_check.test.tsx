@@ -31,10 +31,7 @@ describe('useNlToEsqlCheck', () => {
   const inferenceMock = {} as InferencePublicStart;
 
   const createWrapper =
-    (esqlService?: {
-      getLicense: typeof getLicenseMock;
-      inference?: InferencePublicStart;
-    }) =>
+    (esqlService?: { getLicense: typeof getLicenseMock; inference?: InferencePublicStart }) =>
     ({ children }: { children: React.ReactNode }) =>
       (
         <KibanaContextProvider services={{ core: coreStart, esql: esqlService }}>
