@@ -9,6 +9,8 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { SecretsPluginStart } from '@kbn/secrets-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -101,6 +103,8 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   licensing: LicensingPluginStart;
   spaces?: SpacesPluginStart;
+  security?: SecurityPluginStart;
+  secrets?: SecretsPluginStart;
 }
 
 export type ExecuteWorkflow = (

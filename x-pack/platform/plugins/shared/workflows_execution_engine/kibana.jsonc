@@ -20,6 +20,8 @@
       "usageApi",
       "cloud",
       "spaces",
+      "security",
+      "secrets",
     ],
   }
 }

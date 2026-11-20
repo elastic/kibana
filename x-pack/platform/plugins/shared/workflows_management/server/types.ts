@@ -28,7 +28,7 @@ import type {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
-import type { SecretsPluginStart } from '@kbn/secrets-plugin/server';
+import type { SecretsPluginSetup, SecretsPluginStart } from '@kbn/secrets-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { ServerlessServerSetup } from '@kbn/serverless/server/types';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -66,6 +66,8 @@ export interface WorkflowsServerPluginSetupDeps {
    * cross-cutting Inbox UI / MCP / API.
    */
   inbox?: InboxPluginSetup;
+  /** Optional secrets plugin. When present, Workflows adds the secrets API and privileges. */
+  secrets?: SecretsPluginSetup;
 }
 
 export interface WorkflowsServerPluginStartDeps {

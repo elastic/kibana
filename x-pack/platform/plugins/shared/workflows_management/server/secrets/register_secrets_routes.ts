@@ -14,7 +14,6 @@ import {
   secretNameParamsSchema,
 } from './route_schemas';
 import { SECRETS_LIST_SECURITY, SECRETS_MANAGE_SECURITY } from './route_security';
-import { INTERNAL_API_VERSION } from '../api/routes/utils/route_constants';
 import { withAvailabilityCheck } from '../api/routes/utils/with_availability_check';
 import type { WorkflowsRouter } from '../types';
 
@@ -30,75 +29,80 @@ export interface SecretsRouteDependencies {
 /**
  * Registers the routes that list, create, replace and delete workflow secrets.
  * No route returns a value.
+ * TODO: version these routes (`router.versioned`, `INTERNAL_API_VERSION`) like the other
+ * internal Workflows routes. They are unversioned during the POC so that Dev Tools can call them.
  */
 export const registerSecretsRoutes = ({
   router,
   getSecretsClient,
 }: SecretsRouteDependencies): void => {
-  router.versioned
-    .get({ path: SECRETS_PATH, access: 'internal', security: SECRETS_LIST_SECURITY })
-    .addVersion(
-      { version: INTERNAL_API_VERSION, validate: false },
-      withAvailabilityCheck(async (_context, request, response) => {
-        try {
-          const client = await getSecretsClient(request);
-          return response.ok({ body: { secrets: await client.list() } });
-        } catch (error) {
-          return handleSecretsRouteError({ response, error });
-        }
-      })
-    );
+  router.get(
+    {
+      path: SECRETS_PATH,
+      security: SECRETS_LIST_SECURITY,
+      options: { access: 'internal' },
+      validate: false,
+    },
+    withAvailabilityCheck(async (_context, request, response) => {
+      try {
+        const client = await getSecretsClient(request);
+        return response.ok({ body: { secrets: await client.list() } });
+      } catch (error) {
+        return handleSecretsRouteError({ response, error });
+      }
+    })
+  );
 
-  router.versioned
-    .post({ path: SECRETS_PATH, access: 'internal', security: SECRETS_MANAGE_SECURITY })
-    .addVersion(
-      {
-        version: INTERNAL_API_VERSION,
-        validate: { request: { body: createSecretBodySchema } },
-      },
-      withAvailabilityCheck(async (_context, request, response) => {
-        try {
-          const client = await getSecretsClient(request);
-          return response.ok({ body: await client.create(request.body) });
-        } catch (error) {
-          return handleSecretsRouteError({ response, error });
-        }
-      })
-    );
+  router.post(
+    {
+      path: SECRETS_PATH,
+      security: SECRETS_MANAGE_SECURITY,
+      options: { access: 'internal' },
+      validate: { body: createSecretBodySchema },
+    },
+    withAvailabilityCheck(async (_context, request, response) => {
+      try {
+        const client = await getSecretsClient(request);
+        return response.ok({ body: await client.create(request.body) });
+      } catch (error) {
+        return handleSecretsRouteError({ response, error });
+      }
+    })
+  );
 
-  router.versioned
-    .put({ path: SECRET_PATH, access: 'internal', security: SECRETS_MANAGE_SECURITY })
-    .addVersion(
-      {
-        version: INTERNAL_API_VERSION,
-        validate: { request: { params: secretNameParamsSchema, body: replaceSecretBodySchema } },
-      },
-      withAvailabilityCheck(async (_context, request, response) => {
-        try {
-          const client = await getSecretsClient(request);
-          const { name } = request.params;
-          return response.ok({ body: await client.replace({ name, ...request.body }) });
-        } catch (error) {
-          return handleSecretsRouteError({ response, error });
-        }
-      })
-    );
+  router.put(
+    {
+      path: SECRET_PATH,
+      security: SECRETS_MANAGE_SECURITY,
+      options: { access: 'internal' },
+      validate: { params: secretNameParamsSchema, body: replaceSecretBodySchema },
+    },
+    withAvailabilityCheck(async (_context, request, response) => {
+      try {
+        const client = await getSecretsClient(request);
+        const { name } = request.params;
+        return response.ok({ body: await client.replace({ name, ...request.body }) });
+      } catch (error) {
+        return handleSecretsRouteError({ response, error });
+      }
+    })
+  );
 
-  router.versioned
-    .delete({ path: SECRET_PATH, access: 'internal', security: SECRETS_MANAGE_SECURITY })
-    .addVersion(
-      {
-        version: INTERNAL_API_VERSION,
-        validate: { request: { params: secretNameParamsSchema } },
-      },
-      withAvailabilityCheck(async (_context, request, response) => {
-        try {
-          const client = await getSecretsClient(request);
-          await client.delete(request.params);
-          return response.noContent();
-        } catch (error) {
-          return handleSecretsRouteError({ response, error });
-        }
-      })
-    );
+  router.delete(
+    {
+      path: SECRET_PATH,
+      security: SECRETS_MANAGE_SECURITY,
+      options: { access: 'internal' },
+      validate: { params: secretNameParamsSchema },
+    },
+    withAvailabilityCheck(async (_context, request, response) => {
+      try {
+        const client = await getSecretsClient(request);
+        await client.delete(request.params);
+        return response.noContent();
+      } catch (error) {
+        return handleSecretsRouteError({ response, error });
+      }
+    })
+  );
 };

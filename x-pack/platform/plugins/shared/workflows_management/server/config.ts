@@ -77,13 +77,6 @@ const configSchema = schema.object({
   pages: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
-  /**
-   * Workflow secrets: the secrets API and its privileges. Off by default while the feature
-   * is in development. Enable with `workflowsManagement.secrets.enabled: true` in `kibana.yml`.
-   */
-  secrets: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-  }),
 });
 
 export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;

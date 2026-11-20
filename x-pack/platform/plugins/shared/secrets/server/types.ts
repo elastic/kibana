@@ -12,8 +12,11 @@ import type {
 import type { GetSecretsClientParams, SecretsClient } from '@kbn/secrets';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-/** Setup contract of the secrets plugin. Empty until a consumer needs something at setup. */
-export type SecretsPluginSetup = void;
+/**
+ * Setup contract of the secrets plugin. It has no members yet: dependants use its presence
+ * to know, at setup, that the plugin is enabled.
+ */
+export type SecretsPluginSetup = Record<string, never>;
 
 export interface SecretsPluginStart {
   /**

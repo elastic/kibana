@@ -12,4 +12,6 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
   return new SecretsPlugin(initializerContext);
 };
 
+export { config } from './config';
+export type { SecretsConfig } from './config';
 export type { SecretsPluginSetup, SecretsPluginStart } from './types';

@@ -51,6 +51,7 @@ export class SecretsPlugin
       this.logger.warn('Secrets are unavailable: Kibana has no saved objects encryption key.');
     }
     registerSecretType({ savedObjects, encryptedSavedObjects });
+    return {};
   }
 
   public start(

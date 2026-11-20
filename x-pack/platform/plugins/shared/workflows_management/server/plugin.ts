@@ -77,7 +77,7 @@ export class WorkflowsPlugin
 
     registerUISettings(core, plugins);
 
-    const { enabled: secretsEnabled } = this.config.secrets;
+    const secretsEnabled = plugins.secrets !== undefined;
 
     plugins.features?.registerKibanaFeature(
       getWorkflowsManagementFeatureConfig({

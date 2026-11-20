@@ -17,6 +17,7 @@ import {
   toExecutionError,
 } from './errors';
 import type { ConnectorExecutor } from '../connector_executor';
+import { maskSecrets } from '../secrets/secret_mask';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
@@ -147,8 +148,62 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     return this.step.name;
   }
 
-  public getInput(): Record<string, unknown> | Promise<Record<string, unknown>> {
+  /**
+   * Renders the input of the step. `secrets` is given only to a step that returns templates
+   * from `getSecretsTemplate`, and holds either the values or their masks.
+   */
+  public getInput(
+    secrets?: Record<string, string>
+  ): Record<string, unknown> | Promise<Record<string, unknown>> {
     return {};
+  }
+
+  /**
+   * The templates of this step in which `secrets.<name>` is resolved. A step type accepts
+   * secrets only by returning them here; by default it accepts none.
+   */
+  protected getSecretsTemplate(): unknown {
+    return undefined;
+  }
+
+  /**
+   * Returns the input to record and the input to run with. They are the same object unless
+   * the step references secrets: the recorded input then holds masks, and only the input to
+   * run with holds values. That one must never be saved, logged or returned.
+   */
+  private async prepareInput(): Promise<{
+    recordedInput: Record<string, unknown>;
+    runInput: Record<string, unknown>;
+  }> {
+    const { contextManager, isInputRecorded } = this.stepExecutionRuntime;
+    const { workflowSecrets } = contextManager.getDependencies();
+    const template = this.getSecretsTemplate();
+    const secretNames =
+      workflowSecrets && template !== undefined
+        ? contextManager.getReferencedSecretNames(template)
+        : [];
+
+    if (!workflowSecrets || secretNames.length === 0) {
+      if (isInputRecorded) {
+        const input = this.recordedInput();
+        return { recordedInput: input, runInput: input };
+      }
+      const input = await this.getInput();
+      this.stepExecutionRuntime.setInput(input);
+      return { recordedInput: input, runInput: input };
+    }
+
+    const secrets = await workflowSecrets.resolve({ names: secretNames });
+    let recordedInput: Record<string, unknown>;
+    if (isInputRecorded) {
+      recordedInput = this.recordedInput();
+    } else {
+      recordedInput = await this.getInput(maskSecrets(secretNames));
+      this.stepExecutionRuntime.setInput(recordedInput);
+    }
+    // The recorded input holds masks, so a resumed step renders its input again.
+    const runInput = await this.getInput(Object.fromEntries(secrets));
+    return { recordedInput, runInput };
   }
 
   /** Input recorded on the first entry of this step execution. */
@@ -183,13 +238,10 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
     let suspended = false;
     try {
-      if (this.stepExecutionRuntime.isInputRecorded) {
-        input = this.recordedInput();
-      } else {
-        input = await this.getInput();
-        this.stepExecutionRuntime.setInput(input);
-      }
-      const result = await this._run(input);
+      const { recordedInput, runInput } = await this.prepareInput();
+      // `input` is used after a failure, so it is the recorded one: it never holds a secret value.
+      input = recordedInput;
+      const result = await this._run(runInput);
 
       // Layer 2: Enforce output size limit before storing in execution state.
       // This is the generic catch-all that protects every step type against

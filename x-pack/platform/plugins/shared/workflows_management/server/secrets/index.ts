@@ -16,7 +16,7 @@ export { workflowSecretsSubFeature } from './secrets_sub_feature';
 /**
  * Sets up everything workflow secrets add to the plugin, except their privileges: those are
  * `workflowSecretsSubFeature`, which joins the feature registration.
- * Runs only with `workflowsManagement.secrets.enabled`.
+ * Runs only when the secrets plugin is enabled (`xpack.secrets.enabled`).
  */
 export const setupWorkflowSecrets = ({
   core,

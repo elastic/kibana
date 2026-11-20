@@ -24,6 +24,7 @@ import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_exec
 import { LogsRepository } from '../repositories/logs_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { createWorkflowSecretsResolver } from '../secrets/workflow_secrets_resolver';
 import { NodesFactory } from '../step/nodes_factory';
 import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
@@ -213,6 +214,14 @@ export async function setupDependencies(
     workflowsExecutionEngine,
     spaceId,
     request: fakeRequest,
+    workflowSecrets: dependencies.secretsStart
+      ? createWorkflowSecretsResolver({
+          request: fakeRequest,
+          spaceId,
+          secrets: dependencies.secretsStart,
+          authz: dependencies.security?.authz,
+        })
+      : undefined,
   };
 
   const stepExecutionRuntimeFactory = new StepExecutionRuntimeFactory({

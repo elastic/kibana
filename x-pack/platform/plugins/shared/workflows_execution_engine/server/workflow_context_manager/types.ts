@@ -8,6 +8,8 @@
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { SecretsPluginStart } from '@kbn/secrets-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { WorkflowRepository } from '@kbn/workflows';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -15,6 +17,7 @@ import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { WorkflowLogEvent } from '../repositories/logs_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { WorkflowSecretsResolver } from '../secrets/workflow_secrets_resolver';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 
 export interface ContextDependencies {
@@ -30,6 +33,10 @@ export interface ContextDependencies {
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
   spaceId?: string;
   request?: KibanaRequest;
+  security?: SecurityPluginStart;
+  secretsStart?: SecretsPluginStart;
+  /** The secrets of the current task run. Undefined when workflow secrets are off. */
+  workflowSecrets?: WorkflowSecretsResolver;
 }
 
 /**
