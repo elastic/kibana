@@ -143,7 +143,7 @@ describe('validateValues', () => {
 
   it('checks string, number and array constraints', () => {
     const custom: CatalogueNamedFieldDefinition[] = [
-      { type: 'string', name: 'name', min_length: 3, pattern: '^[a-z]+$' },
+      { type: 'string', name: 'name', min_length: 3, max_length: 5 },
       { type: 'integer', name: 'count', minimum: 1, maximum: 5 },
       { type: 'array', name: 'tags', items: { type: 'string' }, max_items: 1, unique_items: true },
     ];
@@ -152,53 +152,27 @@ describe('validateValues', () => {
       '/count': 'Must be at most 5',
       '/tags': 'Add at most 1 item',
     });
-    expect(validateValues(custom, { name: 'AB1', count: 1.5, tags: ['a', 'a'] }, context)).toEqual({
-      '/name': 'Must match the pattern ^[a-z]+$',
+    expect(
+      validateValues(custom, { name: 'abcdef', count: 1.5, tags: ['a', 'a'] }, context)
+    ).toEqual({
+      '/name': 'Enter at most 5 characters',
       '/count': 'Enter a whole number',
       '/tags': 'Add at most 1 item',
     });
   });
 
-  it('leaves a pattern this runtime cannot compile for the distributor to check', () => {
-    // Go accepts the inline flag; JavaScript does not.
+  it('leaves the pattern of a string and of a map key for the distributor to check', () => {
     const custom: CatalogueNamedFieldDefinition[] = [
-      { type: 'string', name: 'name', pattern: '(?i)^[a-z]+$' },
+      { type: 'string', name: 'name', pattern: '^[a-z]+$' },
       {
         type: 'map',
         name: 'labels',
-        key_pattern: '(?i)^[a-z]+$',
+        key_pattern: '^[a-z]+$',
         value_schema: { type: 'string' },
       },
     ];
 
     expect(validateValues(custom, { name: 'AB1', labels: { 'a b': 'c' } }, context)).toEqual({});
-  });
-
-  it('leaves a pattern that means something else in this runtime for the distributor', () => {
-    const errorOf = (pattern: string, value: string) =>
-      validateValues([{ type: 'string', name: 'name', pattern }], { name: value }, context)[
-        '/name'
-      ];
-
-    // Each is valid for the distributor and would turn the value down if read as JavaScript.
-    expect(errorOf('^[a-z]+\\z', 'abc')).toBeUndefined();
-    expect(errorOf('^[[:alpha:]]+$', 'abc')).toBeUndefined();
-    expect(errorOf('^\\Qa.b\\E$', 'a.b')).toBeUndefined();
-    // Unicode classes mean the same in both, so they are checked.
-    expect(errorOf('^\\p{L}+$', 'münchen')).toBeUndefined();
-    expect(errorOf('^\\p{L}+$', 'abc1')).toBe('Must match the pattern ^\\p{L}+$');
-  });
-
-  it('leaves a pattern that could stall this runtime, and a very long value, for the distributor', () => {
-    const errorOf = (pattern: string, value: string) =>
-      validateValues([{ type: 'string', name: 'name', pattern }], { name: value }, context)[
-        '/name'
-      ];
-    const started = Date.now();
-
-    expect(errorOf('^([a-z]+)+$', `${'a'.repeat(40)}!`)).toBeUndefined();
-    expect(errorOf('^[a-z]+$', `${'a'.repeat(2000)}!`)).toBeUndefined();
-    expect(Date.now() - started).toBeLessThan(1000);
   });
 
   it('does not check the formats the distributor does not check either', () => {
@@ -215,7 +189,6 @@ describe('validateValues', () => {
     const labels: CatalogueMapField & { name: string } = {
       type: 'map',
       name: 'labels',
-      key_pattern: '^[a-z_]+$',
       value_schema: { type: 'string', max_length: 4 },
       min_entries: 1,
       max_entries: 2,
@@ -227,11 +200,8 @@ describe('validateValues', () => {
       expect(validate({ team: 'core', tier: 'gold' })).toEqual({});
     });
 
-    it('asks for a key, then for one that matches the key pattern', () => {
-      expect(validate({ '': 'core', 'Team name': 'core' })).toEqual({
-        '/labels/': 'Enter a key',
-        '/labels/Team name': 'The key must match the pattern ^[a-z_]+$',
-      });
+    it('asks for a key', () => {
+      expect(validate({ '': 'core', 'Team name': 'core' })).toEqual({ '/labels/': 'Enter a key' });
     });
 
     it('asks for the value of an entry that has none, as it would not be written', () => {

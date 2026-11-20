@@ -133,6 +133,15 @@ test.describe('Stream canvas - processing', { tag: tags.serverless.observability
     await streams.processingFlyoutSave.click();
     const { unit } = (await saveRequest).postDataJSON();
 
+    // The summary reads the same for the field shape the catalogue no longer accepts, so the
+    // body is what tells them apart.
+    expect(unit.processors).toHaveLength(1);
+    const [processor] = unit.processors;
+    expect(processor).toMatchObject({ id: 'add-fields-1', type: 'add_fields' });
+    const fields = processor.config.find(({ name }: { name: string }) => name === 'fields');
+    expect(fields.value).toHaveLength(1);
+    expect(fields.value[0]).toMatchObject({ location: 'attributes', name: 'team', value: 'core' });
+    expect(fields.value[0]).not.toHaveProperty('path');
     expect(unit.pipelines).toContainEqual({
       id: `p-${SOURCE_ID}`,
       supported_telemetry: ['logs'],

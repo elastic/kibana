@@ -10,6 +10,7 @@ import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { StreamsUnit } from '@kbn/streams-schema';
+import { formatDiagnosticDetail } from '../component_definition_form';
 
 /** What the configuration service had to say about the processor, when it answered at all. */
 export type CheckOutcome =
@@ -27,9 +28,6 @@ export type CheckOutcome =
     }
   | { kind: 'failed'; message: string };
 
-const formatDetail = (value: StreamsUnit.DiagnosticDetail): string =>
-  typeof value === 'string' ? value : JSON.stringify(value);
-
 const DiagnosticDetails = ({ details }: { details: StreamsUnit.Diagnostic['details'] }) => {
   const entries = Object.entries(details ?? {});
   if (entries.length === 0) {
@@ -39,7 +37,7 @@ const DiagnosticDetails = ({ details }: { details: StreamsUnit.Diagnostic['detai
     <ul data-test-subj="streamsProcessingFlyoutEditorDiagnosticDetails">
       {entries.map(([name, value]) => (
         <li key={name}>
-          {name}: <code>{formatDetail(value)}</code>
+          {name}: <code>{formatDiagnosticDetail(value)}</code>
         </li>
       ))}
     </ul>

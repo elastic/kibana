@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiFieldText,
@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { CatalogueMapField } from '@kbn/streams-schema';
 import { mapKeyError } from '../client_validation';
 import { FieldControl } from '../field_control';
+import { toControlId } from '../field_helpers';
 import { useDefinitionFormContext } from '../form_context';
 import { createInitialItem } from '../serialize';
 import { useRowKeys } from '../use_row_keys';
@@ -37,9 +38,21 @@ interface MapRow {
 const rowsFromValue = (value: FormValue | undefined): MapRow[] =>
   isObjectValue(value) ? Object.entries(value).map(([key, item]) => ({ key, value: item })) : [];
 
+const duplicateKeyLabel = i18n.translate('xpack.streams.componentDefinitionForm.map.duplicateKey', {
+  defaultMessage: 'This key is already used',
+});
+
+/** Whether an earlier row has the key of this one. Rows without a key are asked for one instead. */
+const isDuplicateKey = (rows: readonly MapRow[], index: number): boolean =>
+  rows[index].key !== '' && rows.findIndex(({ key }) => key === rows[index].key) < index;
+
+/** Of rows with the same key the first is written, so typing a key that exists keeps its value. */
 const valueFromRows = (rows: readonly MapRow[]): ObjectValue => {
   const result: ObjectValue = {};
-  for (const row of rows) {
+  for (const [index, row] of rows.entries()) {
+    if (isDuplicateKey(rows, index)) {
+      continue;
+    }
     result[row.key] = row.value === undefined ? '' : row.value;
   }
   return result;
@@ -59,6 +72,15 @@ export function MapControl({ field, value, onChange, pointer, scope }: MapContro
   const rowKeys = useRowKeys(rows.length);
   const canAdd = field.max_entries === undefined || rows.length < field.max_entries;
 
+  // Only one of two rows with the same key can be written, so the form is not saved with both.
+  const { idPrefix, reportUnparsedInput } = context;
+  const controlId = toControlId(idPrefix, pointer);
+  const hasDuplicateKeys = rows.some((_, index) => isDuplicateKey(rows, index));
+  useEffect(() => {
+    reportUnparsedInput(controlId, hasDuplicateKeys);
+  }, [controlId, hasDuplicateKeys, reportUnparsedInput]);
+  useEffect(() => () => reportUnparsedInput(controlId, false), [controlId, reportUnparsedInput]);
+
   const update = (next: MapRow[]) => {
     setRows(next);
     onChange(valueFromRows(next));
@@ -70,7 +92,9 @@ export function MapControl({ field, value, onChange, pointer, scope }: MapContro
         <EuiPanel color="subdued" paddingSize="m" hasShadow={false}>
           {rows.map((row, index) => {
             const entryPointer = joinPointer(pointer, row.key);
-            const entryError = context.errors[entryPointer];
+            const isDuplicate = isDuplicateKey(rows, index);
+            // The pointer of a row with a key that is taken is that of the row that took it.
+            const entryError = isDuplicate ? duplicateKeyLabel : context.errors[entryPointer];
             return (
               <React.Fragment key={rowKeys.keys[index]}>
                 {index > 0 ? <EuiSpacer size="s" /> : null}
@@ -89,7 +113,8 @@ export function MapControl({ field, value, onChange, pointer, scope }: MapContro
                       })}
                       // The entry's error is about its key or its value; only the first marks the key.
                       isInvalid={
-                        entryError !== undefined && mapKeyError(field, row.key) !== undefined
+                        isDuplicate ||
+                        (entryError !== undefined && mapKeyError(row.key) !== undefined)
                       }
                       value={row.key}
                       onChange={(event) =>

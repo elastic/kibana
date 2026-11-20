@@ -168,6 +168,41 @@ describe('ComponentDefinitionForm', () => {
       expect(await screen.findByTestId('autocomplete-suggestion-host.name')).toBeTruthy();
       expect(screen.queryByTestId('autocomplete-suggestion-service.name')).toBeNull();
     });
+
+    it('suggests the paths of the location that shares the prefix of the path', async () => {
+      // The shape of `move_fields`: `new_name` is in `new_location`, not in `location`.
+      const locations = [{ value: 'attributes' }, { value: 'resource' }];
+      render(
+        <EuiProvider>
+          <ComponentDefinitionForm
+            definition={{
+              ...definitionOf('move_fields'),
+              fields: [
+                { name: 'location', type: 'enum', options: locations },
+                { name: 'name', type: 'path', path_set: 'keys' },
+                { name: 'new_location', type: 'enum', options: locations },
+                { name: 'new_name', type: 'path', path_set: 'keys' },
+              ],
+            }}
+            metadata={metadata}
+            telemetry={telemetry}
+            values={{ location: 'attributes', new_location: 'resource' }}
+            onChange={jest.fn()}
+          />
+        </EuiProvider>
+      );
+      const input = screen
+        .getByTestId('componentDefinitionFormPath-new_name')
+        .querySelector('input');
+      if (!input) {
+        throw new Error('Path combo box rendered without a search input');
+      }
+
+      await userEvent.click(input);
+
+      expect(await screen.findByTestId('autocomplete-suggestion-host.name')).toBeTruthy();
+      expect(screen.queryByTestId('autocomplete-suggestion-service.name')).toBeNull();
+    });
   });
 
   describe('a list of plain values', () => {
@@ -407,6 +442,37 @@ describe('ComponentDefinitionForm', () => {
       expect(lastCall(onValues)).toEqual({ labels: { owner: null } });
     });
 
+    it('keeps an entry when another row is given its key', () => {
+      const onValues = jest.fn();
+      const onUnparsedInputChange = jest.fn();
+      render(
+        <EuiProvider>
+          <ComponentDefinitionForm
+            definition={definition}
+            metadata={testCatalogue.metadata}
+            telemetry={telemetry}
+            values={{ labels: { team: 'core' } }}
+            onChange={onValues}
+            onUnparsedInputChange={onUnparsedInputChange}
+          />
+        </EuiProvider>
+      );
+
+      addEntry();
+      const [, second] = screen.getAllByTestId('componentDefinitionFormMapKey');
+      fireEvent.change(second, { target: { value: 'team' } });
+
+      expect(lastCall(onValues)).toEqual({ labels: { team: 'core' } });
+      expect(screen.getByText('This key is already used')).toBeTruthy();
+      expect(onUnparsedInputChange).toHaveBeenLastCalledWith(true);
+
+      fireEvent.change(second, { target: { value: 'owner' } });
+
+      expect(lastCall(onValues)).toEqual({ labels: { team: 'core', owner: '' } });
+      expect(screen.queryByText('This key is already used')).toBeNull();
+      expect(onUnparsedInputChange).toHaveBeenLastCalledWith(false);
+    });
+
     it('stops at the max_entries of the catalogue', () => {
       render(<Harness onValues={jest.fn()} definition={definition} />);
 
@@ -479,6 +545,37 @@ describe('ComponentDefinitionForm', () => {
   it('keeps the last required item', () => {
     render(<Harness onValues={jest.fn()} />);
     expect(screen.queryByTestId('componentDefinitionFormArrayRemove')).toBeNull();
+  });
+
+  describe('a list that is not required', () => {
+    // The shape of `write_patterns`: when it is there it has an item, but it need not be there.
+    const definition = {
+      ...definitionOf('set'),
+      fields: [
+        {
+          name: 'patterns',
+          type: 'array' as const,
+          min_items: 1,
+          items: { type: 'string' as const },
+        },
+      ],
+    };
+
+    it('lets its last item go, so the setting can be left out again', async () => {
+      const onValues = jest.fn();
+      render(
+        <Harness
+          onValues={onValues}
+          definition={definition}
+          initialValues={{ patterns: ['logs-*'] }}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('componentDefinitionFormArrayRemove'));
+
+      expect(lastCall(onValues)).toEqual({ patterns: [] });
+      expect(screen.queryByTestId('componentDefinitionFormArrayItem')).toBeNull();
+    });
   });
 
   it('does not cap a list the catalogue sets no max_items for', () => {

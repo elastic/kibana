@@ -157,6 +157,7 @@ export function FieldControl({
           onChange={onChange}
           pointer={pointer}
           scope={scope}
+          required={required}
         />
       );
     case 'map':

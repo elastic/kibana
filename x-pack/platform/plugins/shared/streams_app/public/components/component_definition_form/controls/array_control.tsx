@@ -73,14 +73,23 @@ interface ArrayControlProps {
   onChange: (value: FormValue | undefined) => void;
   pointer: string;
   scope: ObjectValue;
+  required: boolean;
 }
 
 /** A sortable list of items, laid out like the processing editor's Grok pattern list. */
-export function ArrayControl({ field, value, onChange, pointer, scope }: ArrayControlProps) {
+export function ArrayControl({
+  field,
+  value,
+  onChange,
+  pointer,
+  scope,
+  required,
+}: ArrayControlProps) {
   const context = useDefinitionFormContext();
   const items = useMemo(() => (Array.isArray(value) ? value : []), [value]);
   const rowKeys = useRowKeys(items.length);
-  const canRemove = items.length > (field.min_items ?? 0);
+  // A list that is not required can be emptied, which leaves the setting out again.
+  const canRemove = !required || items.length > (field.min_items ?? 0);
   const maxItems = field.max_items;
   const canAdd = maxItems === undefined || items.length < maxItems;
   // An item that already has a scope keeps its picker, so a scope the processor's signals no

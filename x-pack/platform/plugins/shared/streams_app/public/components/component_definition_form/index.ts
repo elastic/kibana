@@ -11,7 +11,7 @@ export {
 } from './component_definition_form';
 export type { ComponentReferenceOption } from './form_context';
 export { validateItemScopes, validateValues } from './client_validation';
-export { toFieldErrors } from './diagnostic_errors';
+export { formatDiagnosticDetail, toFieldErrors } from './diagnostic_errors';
 export { SignalPicker } from './controls/signal_picker';
 export {
   createInitialObject,

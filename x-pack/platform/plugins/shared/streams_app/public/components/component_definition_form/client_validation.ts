@@ -10,13 +10,12 @@ import { isEqual } from 'lodash';
 import type {
   CatalogueChoiceGroup,
   CatalogueFieldDefinition,
-  CatalogueMapField,
   CatalogueNamedFieldDefinition,
 } from '@kbn/streams-schema';
 import { resolveEnumOptions } from '../../services/component_catalogue';
 import { findChoiceGroup, isUnselectedChoice } from './choice_groups';
 import { isFieldAvailable, isFieldRequired } from './conditions';
-import { mapItemScopes, readItemScope, type FormContextValues } from './serialize';
+import { canonicalValue, mapItemScopes, readItemScope, type FormContextValues } from './serialize';
 import {
   isEmptyValue,
   isObjectValue,
@@ -39,11 +38,6 @@ const messages = {
     i18n.translate('xpack.streams.componentDefinitionForm.validation.maxLength', {
       defaultMessage: 'Enter at most {count, plural, one {# character} other {# characters}}',
       values: { count },
-    }),
-  pattern: (pattern: string) =>
-    i18n.translate('xpack.streams.componentDefinitionForm.validation.pattern', {
-      defaultMessage: 'Must match the pattern {pattern}',
-      values: { pattern },
     }),
   integer: i18n.translate('xpack.streams.componentDefinitionForm.validation.integer', {
     defaultMessage: 'Enter a whole number',
@@ -84,11 +78,6 @@ const messages = {
   keyRequired: i18n.translate('xpack.streams.componentDefinitionForm.validation.keyRequired', {
     defaultMessage: 'Enter a key',
   }),
-  keyPattern: (pattern: string) =>
-    i18n.translate('xpack.streams.componentDefinitionForm.validation.keyPattern', {
-      defaultMessage: 'The key must match the pattern {pattern}',
-      values: { pattern },
-    }),
   invalidOption: i18n.translate('xpack.streams.componentDefinitionForm.validation.invalidOption', {
     defaultMessage: 'Choose one of the available options',
   }),
@@ -123,61 +112,35 @@ export const validateItemScopes = (
   return errors;
 };
 
-/** A value longer than this is left for the distributor, to keep a check quick. */
-const MAX_PATTERN_INPUT_LENGTH = 1024;
-
 /**
- * A repeated group that itself repeats, such as `(a+)+`. The distributor matches in linear time,
- * but this runtime backtracks, and on such a pattern a short value can take seconds.
+ * What is wrong with the key of a map entry, if anything. A `key_pattern` is left for the
+ * distributor, as is the `pattern` of a string: it checks both and says the same.
  */
-const NESTED_REPETITION = /\((?:[^()\\]|\\.)*[+*}](?:[^()\\]|\\.)*\)[+*{]/;
-
-const compiledPatterns = new Map<string, RegExp | null>();
-
-/** The pattern compiled for this runtime, or `null` when it is left for the distributor. */
-const compilePattern = (pattern: string): RegExp | null => {
-  const known = compiledPatterns.get(pattern);
-  if (known !== undefined) {
-    return known;
-  }
-  let compiled: RegExp | null = null;
-  if (!NESTED_REPETITION.test(pattern)) {
-    try {
-      // Unicode mode turns down the syntax only the distributor knows, such as `\z`, instead of
-      // reading it as something else.
-      compiled = new RegExp(pattern, 'u');
-    } catch {
-      compiled = null;
-    }
-  }
-  compiledPatterns.set(pattern, compiled);
-  return compiled;
-};
-
-/**
- * Whether the value matches a pattern of the catalogue. The patterns are written for the
- * distributor, so one this runtime cannot check safely is left for the distributor.
- */
-const matchesPattern = (pattern: string, value: string): boolean => {
-  if (value.length > MAX_PATTERN_INPUT_LENGTH) {
-    return true;
-  }
-  return compilePattern(pattern)?.test(value) ?? true;
-};
-
-/** What is wrong with the key of a map entry, if anything. */
-export const mapKeyError = (field: CatalogueMapField, key: string): string | undefined => {
-  if (key === '') {
-    return messages.keyRequired;
-  }
-  return field.key_pattern !== undefined && !matchesPattern(field.key_pattern, key)
-    ? messages.keyPattern(field.key_pattern)
-    : undefined;
-};
+export const mapKeyError = (key: string): string | undefined =>
+  key === '' ? messages.keyRequired : undefined;
 
 /** A map without entries is not written, so a required one counts as missing. */
 const isEmptyMap = (field: CatalogueFieldDefinition, value: FormValue | undefined): boolean =>
   field.type === 'map' && isObjectValue(value) && Object.keys(value).length === 0;
+
+/**
+ * Asks for a value that would not be written, such as a map without entries, unless something
+ * inside it is already flagged. Without this the row would go missing without a word once saved.
+ */
+const requireWrittenValue = (
+  field: CatalogueFieldDefinition,
+  value: FormValue,
+  pointer: string,
+  context: FormContextValues,
+  errors: FieldErrors
+): void => {
+  const isFlagged = Object.keys(errors).some(
+    (key) => key === pointer || key.startsWith(`${pointer}/`)
+  );
+  if (!isFlagged && canonicalValue(field, value, context.telemetry) === undefined) {
+    errors[pointer] = messages.required;
+  }
+};
 
 const validateValue = (
   field: CatalogueFieldDefinition,
@@ -198,8 +161,6 @@ const validateValue = (
         errors[pointer] = messages.minLength(field.min_length);
       } else if (field.max_length !== undefined && value.length > field.max_length) {
         errors[pointer] = messages.maxLength(field.max_length);
-      } else if (field.pattern !== undefined && !matchesPattern(field.pattern, value)) {
-        errors[pointer] = messages.pattern(field.pattern);
       }
       return;
     }
@@ -254,6 +215,10 @@ const validateValue = (
           return;
         }
         validateValue(field.items, item, itemPointer, context, errors);
+        // An object row is written even when nothing in it is.
+        if (field.items.type !== 'object') {
+          requireWrittenValue(field.items, item, itemPointer, context, errors);
+        }
       });
       return;
     }
@@ -274,7 +239,7 @@ const validateValue = (
       for (const [key, item] of entries) {
         // A key has no pointer of its own; like the distributor, its error goes on the entry.
         const entryPointer = joinPointer(pointer, key);
-        const keyError = mapKeyError(field, key);
+        const keyError = mapKeyError(key);
         if (keyError !== undefined) {
           errors[entryPointer] = keyError;
         } else if (isEmptyValue(item)) {
@@ -282,6 +247,7 @@ const validateValue = (
           errors[entryPointer] = messages.required;
         } else {
           validateValue(field.value_schema, item, entryPointer, context, errors);
+          requireWrittenValue(field.value_schema, item, entryPointer, context, errors);
         }
       }
       return;

@@ -173,6 +173,16 @@ export function ProcessorEditor({
     setWarnedProcessor(undefined);
     setOutcome(undefined);
   };
+  // An edit takes the service's errors off the fields, but what no field could show has no other
+  // place, so it stays until the processor is checked again.
+  const clearOutcomeOnEdit = () => {
+    setWarnedProcessor(undefined);
+    setOutcome((current) =>
+      current?.kind === 'rejected' && current.unmatched.length > 0
+        ? { ...current, highlightedCount: 0 }
+        : undefined
+    );
+  };
 
   const confirmCancel = useDiscardConfirm(onCancel, {
     enabled: form.isDirty,
@@ -354,7 +364,7 @@ export function ProcessorEditor({
                       selected={signals}
                       error={form.signalsError}
                       onChange={(next) => {
-                        clearOutcome();
+                        clearOutcomeOnEdit();
                         form.setSignals(
                           form.signalOptions.filter((signal) => next.includes(signal))
                         );
@@ -388,7 +398,7 @@ export function ProcessorEditor({
                     errors={form.errors}
                     componentRefs={componentRefs}
                     onChange={(values) => {
-                      clearOutcome();
+                      clearOutcomeOnEdit();
                       form.setValues(values);
                     }}
                     onUnparsedInputChange={form.setHasUnparsedInput}

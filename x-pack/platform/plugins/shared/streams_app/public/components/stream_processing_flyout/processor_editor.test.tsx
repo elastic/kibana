@@ -695,6 +695,46 @@ describe('ProcessorEditor', () => {
       expect(within(callout).queryByText(/highlighted field/)).toBeNull();
     });
 
+    it('keeps what no field could show while the form is edited', async () => {
+      const message = 'unknown parameter legacy_option';
+      const fieldMessage = 'action must be one of upsert, update, insert';
+      renderEditor({
+        step: {
+          ...savedStep,
+          processor: {
+            ...savedStep.processor,
+            config: [...savedStep.processor.config, { name: 'legacy_option', value: true }],
+          },
+        },
+        fetchCheck: jest.fn().mockResolvedValue({
+          valid: false,
+          diagnostics: [
+            { severity: 'error', code: 'E029_UNKNOWN_CONFIG', message, path: '/config/1' },
+            {
+              severity: 'error',
+              code: 'E028_INVALID_CONFIG_TYPE',
+              message: fieldMessage,
+              path: '/config/0/value/0/action',
+            },
+          ],
+        }),
+      });
+      commitPath('other');
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+      const callout = await screen.findByTestId('streamsProcessingFlyoutEditorDiagnostics');
+      expect(within(callout).getByText('Fix the highlighted field above.')).toBeTruthy();
+
+      fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
+        target: { value: 'platform' },
+      });
+
+      const kept = screen.getByTestId('streamsProcessingFlyoutEditorDiagnostics');
+      expect(within(kept).getByText(message)).toBeTruthy();
+      // The edit took the error off the field, so there is no highlighted field to point at.
+      expect(within(kept).queryByText(/highlighted field/)).toBeNull();
+      expect(screen.queryByText(fieldMessage)).toBeNull();
+    });
+
     it('commits unchecked when the configuration service cannot be reached', async () => {
       const { onCommit } = renderEditor({
         fetchCheck: jest.fn().mockRejectedValue(httpError(502, 'Bad Gateway')),
