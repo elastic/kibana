@@ -430,6 +430,7 @@ export const STORE_FP_DECISIONS_SKIP_REASONS = [
   'denied',
   'storage_failure',
   'no_strict_keys',
+  'alerts_missing',
 ] as const;
 export type StoreFpDecisionsSkipReason = (typeof STORE_FP_DECISIONS_SKIP_REASONS)[number];
 

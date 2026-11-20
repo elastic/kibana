@@ -87,7 +87,15 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
         const { spaceId } = contextManager.getContext().workflow;
         const kind: FpDecisionKind =
           input.outcome === 'approved' ? 'false_positive' : 'do_not_propose';
-        const { alerts } = await loadAlertsByIds(contextManager, input.alert_ids);
+        const { alerts, missingAlertIds } = await loadAlertsByIds(contextManager, input.alert_ids);
+        // An unread alert may be one an analyst closed as a true positive, which would block its
+        // pattern, so an approval with any alert unread stores nothing. A dismissal needs no evidence.
+        if (kind === 'false_positive' && missingAlertIds.length > 0) {
+          logger.warn(
+            `${missingAlertIds.length} of ${input.alert_ids.length} approved alerts could not be read; no triage decision was stored`
+          );
+          return result('alerts_missing');
+        }
         const entries = alerts.map((doc) => ({ id: String(doc._id), doc }));
         // The approval keeps earlier closures, so an alert an analyst closed as a true positive can
         // be in the proposal. It is no evidence of a false positive, and its pattern is blocked.

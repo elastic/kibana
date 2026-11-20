@@ -184,6 +184,29 @@ describe('triage store decisions step', () => {
     expect(doc.attributes.space_id).toBe('team');
   });
 
+  it('stores no approval when an alert of the proposal cannot be read, since it may be a true positive', async () => {
+    const alerts = alertsOf([['a.exe', 3]]);
+    const { run, bulk } = setup({ alerts });
+
+    const { output } = await run({ alert_ids: [...alerts.map(({ _id }) => _id), 'unread'] });
+
+    expect(output).toEqual(expect.objectContaining({ skip_reason: 'alerts_missing', written: 0 }));
+    expect(bulk).not.toHaveBeenCalled();
+  });
+
+  it('still stores a dismissal when an alert cannot be read, because a dismissal needs no evidence', async () => {
+    const alerts = alertsOf([['a.exe', 1]]);
+    const { run, bulk } = setup({ alerts });
+
+    const { output } = await run({
+      outcome: 'dismissed',
+      alert_ids: [...alerts.map(({ _id }) => _id), 'unread'],
+    });
+
+    expect(output).toEqual(expect.objectContaining({ skip_reason: 'none', written: 1 }));
+    expect(bulk).toHaveBeenCalledTimes(1);
+  });
+
   it('stores nothing for a key that has an earlier true positive or inconclusive alert', async () => {
     const { run, bulk } = setup({
       alerts: alertsOf([
