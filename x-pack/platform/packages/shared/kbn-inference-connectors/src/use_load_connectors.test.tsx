@@ -86,4 +86,19 @@ describe('useLoadConnectors', () => {
     expect(result.current.second.soEntryFound).toBe(true);
     expect(http.get).toHaveBeenCalledTimes(1);
   });
+
+  it('returns the connectors array from refetch, like data', async () => {
+    const http = {
+      get: jest.fn().mockResolvedValue({ connectors: [connector], soEntryFound: true }),
+    } as unknown as HttpSetup;
+    const { result } = renderHook(() => useLoadConnectors({ http, featureId: 'feature' }), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.data).toHaveLength(1));
+
+    const refetched = await result.current.refetch();
+
+    expect(Array.isArray(refetched.data)).toBe(true);
+    expect(refetched.data?.[0].id).toBe('connector-1');
+  });
 });

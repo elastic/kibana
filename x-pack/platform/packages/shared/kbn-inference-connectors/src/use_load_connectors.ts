@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
 import type { UseQueryResult } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
@@ -80,9 +81,22 @@ export const useLoadConnectors = ({
     },
   });
 
+  const { refetch: refetchLoaded } = query;
+  // Keep the result of `refetch` shaped like `data`: the connectors array.
+  const refetch = useCallback<UseLoadConnectorsResult['refetch']>(
+    async (options) => {
+      const result = await refetchLoaded(options);
+      return { ...result, data: result.data?.connectors } as Awaited<
+        ReturnType<UseLoadConnectorsResult['refetch']>
+      >;
+    },
+    [refetchLoaded]
+  );
+
   return {
     ...query,
     data: query.data?.connectors,
+    refetch,
     soEntryFound: query.data?.soEntryFound ?? false,
   } as UseLoadConnectorsResult;
 };
