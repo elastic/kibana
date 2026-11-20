@@ -6,6 +6,7 @@
  */
 
 import { TRIAGE_ALERT_COST, TRIAGE_BATCH_OVERHEAD_COST } from '@kbn/alertzero-common';
+import type { Kind } from './pattern_key';
 
 /** Largest number of alerts one batch analyses. */
 export const BATCH_ALERT_CAP = 100;
@@ -158,4 +159,4 @@ export const DECISION_AUTO_CLOSE_SEVERITIES: readonly string[] = ['low', 'medium
 export const DECISION_SIGNER_TRUST_FIELDS: Readonly<Record<string, string>> = {
   process: 'process.code_signature.trusted',
   library: 'dll.code_signature.trusted',
-};
+} satisfies Partial<Record<Kind, string>>;

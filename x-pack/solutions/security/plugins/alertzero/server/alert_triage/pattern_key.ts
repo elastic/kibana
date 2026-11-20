@@ -33,7 +33,7 @@ export interface PatternKeys {
 }
 
 type PathKind = 'library' | 'registry' | 'file' | 'process';
-type Kind = PathKind | 'cloud';
+export type Kind = PathKind | 'cloud';
 
 /** Most specific first, process last: file, library and registry events also carry `process.executable`. */
 const KINDS: readonly PathKind[] = ['library', 'registry', 'file', 'process'];
