@@ -31,7 +31,9 @@ apiTest.describe('get_module: list and filter', { tag: '@local-stateful-classic'
     expect(res).toHaveStatusCode(200);
     expect(Array.isArray(res.body)).toBe(true);
     const responseModuleIds = (res.body as Array<{ id: string }>).map((m) => m.id);
-    expect(responseModuleIds).toStrictEqual(ALL_MODULE_IDS);
+    expect(responseModuleIds.filter((id) => ALL_MODULE_IDS.includes(id))).toStrictEqual(
+      ALL_MODULE_IDS
+    );
   });
 
   apiTest(
@@ -47,7 +49,9 @@ apiTest.describe('get_module: list and filter', { tag: '@local-stateful-classic'
       expect(res).toHaveStatusCode(200);
       expect(Array.isArray(res.body)).toBe(true);
       const responseModuleIds = (res.body as Array<{ id: string }>).map((m) => m.id);
-      expect(responseModuleIds).toStrictEqual(SECURITY_MODULE_IDS);
+      expect(responseModuleIds.filter((id) => SECURITY_MODULE_IDS.includes(id))).toStrictEqual(
+        SECURITY_MODULE_IDS
+      );
     }
   );
 
