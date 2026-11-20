@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { errors } from '@elastic/elasticsearch';
-
 import type { BuildFlavor } from '@kbn/config';
 import type {
   CustomBrandingSetup,
   ElasticsearchServiceSetup,
   HttpServiceSetup,
   HttpServiceStart,
+  IAuthHeadersStorage,
   IClusterClient,
   KibanaRequest,
   Logger,
@@ -35,8 +34,9 @@ import type { ProviderLoginAttempt } from './authenticator';
 import { Authenticator } from './authenticator';
 import { canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
+import { isTokenExpiredError } from './is_token_expired_error';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
-import { KIBANA_AUTH_FULL_HEADER, NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
+import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
@@ -99,6 +99,7 @@ export class AuthenticationService {
   private license!: SecurityLicense;
   private authenticator?: Authenticator;
   private session?: PublicMethodsOf<Session>;
+  private authHeadersStorage?: IAuthHeadersStorage;
 
   constructor(private readonly logger: Logger) {}
 
@@ -122,7 +123,7 @@ export class AuthenticationService {
       (config.authc.sortedProviders.length > 0 &&
         shouldProviderUseLoginForm(config.authc.sortedProviders[0].type));
 
-    http.registerAuth(async (request, response, t) => {
+    this.authHeadersStorage = http.registerAuth(async (request, response, t) => {
       if (!license.isLicenseAvailable()) {
         this.logger.error(
           `License information could not be obtained from Elasticsearch due to an error: ${
@@ -270,77 +271,39 @@ export class AuthenticationService {
       });
     });
 
-    elasticsearch.setUnauthorizedErrorHandler(async ({ error, request }, toolkit) => {
-      if (!this.authenticator) {
-        this.logger.error('Authentication sub-system is not fully initialized yet.');
-        return toolkit.notHandled();
-      }
-
-      if (!license.isLicenseAvailable() || !license.isEnabled()) {
-        this.logger.error(
-          `License is not available or does not support security features, re-authentication is not possible (available: ${license.isLicenseAvailable()}, enabled: ${license.isEnabled()}, unavailable reason: ${license.getUnavailableReason()}).`
-        );
-        return toolkit.notHandled();
-      }
-
-      // We can only re-authenticate if the original request failed because of the expired access token.
-      if (!isTokenExpiredError(error)) {
-        this.logger.error(
-          `Re-authentication is not possible for the following error: ${getDetailedErrorMessage(
-            error
-          )}.`
-        );
-        return toolkit.notHandled();
-      }
-
-      this.logger.debug(
-        `Re-authenticating request due to error: ${getDetailedErrorMessage(error)}`
-      );
-
-      let authenticationResult;
-      const originalHeaders = request.headers;
-      try {
-        // WORKAROUND: Due to BWC reasons Core mutates headers of the original request with authentication
-        // headers returned during authentication stage. We should remove these headers before re-authentication to not
-        // conflict with the HTTP authentication logic. Performance impact is negligible since this is not a hot path.
-        // Additionally, we explicitly include KIBANA_AUTH_FULL_HEADER header to skip any authentication optimizations
-        // and make sure re-authentication is performed in full scope.
-        (request.headers as Record<string, unknown>) = Object.fromEntries(
-          Object.entries(originalHeaders)
-            .filter(([headerName]) => headerName.toLowerCase() !== 'authorization')
-            .concat([[KIBANA_AUTH_FULL_HEADER, 'true']])
-        );
-        authenticationResult = await this.authenticator.reauthenticate(request);
-      } catch (err) {
-        this.logger.error(
-          `Re-authentication failed due to unexpected error: ${getDetailedErrorMessage(err)}.`
-        );
-        throw err;
-      } finally {
-        (request.headers as Record<string, unknown>) = originalHeaders;
-      }
-
-      if (authenticationResult.succeeded()) {
-        if (authenticationResult.authHeaders) {
-          this.logger.debug('Re-authentication succeeded');
-          return toolkit.retry({ authHeaders: authenticationResult.authHeaders });
+    elasticsearch.setUnauthorizedErrorHandler(
+      async ({ error, request, authHeaders: failedAuthHeaders }, toolkit) => {
+        if (!this.authenticator) {
+          this.logger.error('Authentication sub-system is not fully initialized yet.');
+          return toolkit.notHandled();
         }
 
-        this.logger.error(
-          'Re-authentication succeeded, but authentication headers are not available.'
-        );
-      } else if (authenticationResult.failed()) {
-        this.logger.error(
-          `Re-authentication failed due to: ${getDetailedErrorMessage(authenticationResult.error)}`
-        );
-      } else if (authenticationResult.redirected()) {
-        this.logger.error('Re-authentication failed since redirect is required.');
-      } else {
-        this.logger.debug('Re-authentication cannot be handled.');
-      }
+        if (!license.isLicenseAvailable() || !license.isEnabled()) {
+          this.logger.error(
+            `License is not available or does not support security features, re-authentication is not possible (available: ${license.isLicenseAvailable()}, enabled: ${license.isEnabled()}, unavailable reason: ${license.getUnavailableReason()}).`
+          );
+          return toolkit.notHandled();
+        }
 
-      return toolkit.notHandled();
-    });
+        if (!isTokenExpiredError(error)) {
+          this.logger.error(
+            `Re-authentication is not possible for the following error: ${getDetailedErrorMessage(
+              error
+            )}.`
+          );
+          return toolkit.notHandled();
+        }
+
+        this.logger.debug(
+          `Re-authenticating request due to error: ${getDetailedErrorMessage(error)}`
+        );
+
+        const credentials = await this.authenticator.reauthenticate(request, failedAuthHeaders);
+        return credentials
+          ? toolkit.retry({ authHeaders: credentials.authHeaders })
+          : toolkit.notHandled();
+      }
+    );
   }
 
   start({
@@ -360,23 +323,10 @@ export class AuthenticationService {
     uiam,
     userActivity,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
-    const apiKeys = new APIKeys({
-      clusterClient,
-      logger: this.logger.get('api-key'),
-      license: this.license,
-      applicationName,
-      kibanaFeatures,
-      buildFlavor,
-      uiam,
-    });
-
-    const uiamAPIKeys = uiam
-      ? new UiamAPIKeys({
-          logger: this.logger.get('api-key-uiam'),
-          license: this.license,
-          uiam,
-        })
-      : null;
+    const { authHeadersStorage } = this;
+    if (!authHeadersStorage) {
+      throw new Error('Authentication service must be set up before it is started.');
+    }
 
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
@@ -404,6 +354,7 @@ export class AuthenticationService {
         uiam: config.uiam,
       },
       getCurrentUser,
+      authHeadersStorage,
       featureUsageService,
       userProfileService,
       getServerBaseURL,
@@ -414,6 +365,26 @@ export class AuthenticationService {
       uiam,
       userActivity,
     }));
+
+    const apiKeys = new APIKeys({
+      clusterClient,
+      logger: this.logger.get('api-key'),
+      license: this.license,
+      applicationName,
+      kibanaFeatures,
+      buildFlavor,
+      uiam,
+      authenticator,
+    });
+
+    const uiamAPIKeys = uiam
+      ? new UiamAPIKeys({
+          logger: this.logger.get('api-key-uiam'),
+          license: this.license,
+          uiam,
+          authenticator,
+        })
+      : null;
 
     return {
       apiKeys: {
@@ -482,25 +453,4 @@ export class AuthenticationService {
       getCurrentUser,
     };
   }
-}
-
-/**
- * Checks if the provided error is caused by expired access token. The logic is based on the error
- * reason set by the Elasticsearch and error code set by the UIAM service and is covered by the FTR
- * and Scout API integration tests.
- * @param error Error returned by the Elasticsearch client when authentication fails.
- */
-function isTokenExpiredError(error: errors.ResponseError) {
-  // If the request failed because of expired access token it should always have 401 status code.
-  if (getErrorStatusCode(error) !== 401) {
-    return false;
-  }
-
-  // If expired the Elasticsearch native access token, it should properly set `reason` property.
-  if (error.body?.error?.reason === 'token expired') {
-    return true;
-  }
-
-  // If expired the UIAM access token, it should have `authentication_error_code` set to `0x7E0116`.
-  return error.body?.error?.caused_by?.authentication_error_code === '0x7E0116';
 }

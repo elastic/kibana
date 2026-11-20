@@ -31,7 +31,11 @@ import { Agent } from 'undici';
 import type { ArrayElement } from '@kbn/utility-types';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-import { SERVERLESS_UIAM_ENTRYPOINT_PATH, SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH } from '../paths';
+import {
+  SERVERLESS_UIAM_ENTRYPOINT_PATH,
+  SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH,
+  SERVERLESS_IDP_METADATA_PATH,
+} from '../paths';
 
 const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'docker.elastic.co';
 const COSMOS_DB_EMULATOR_DOCKER_REPO = `${COSMOS_DB_EMULATOR_DOCKER_REGISTRY}/kibana-ci/uiam-azure-cosmos-emulator`;
@@ -46,6 +50,7 @@ export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_PROMOTED_REPO}:latest-verified`
 const MAX_HEALTHCHECK_RETRIES = 30;
 
 const ENV_DEFAULTS = {
+  UIAM_OAUTH_SERVICE_PORT: '8444',
   UIAM_COSMOS_DB_UI_PORT: '8082',
   UIAM_APP_LOGGING_LEVEL: 'DEBUG',
   UIAM_LOGGING_LEVEL: 'INFO',
@@ -70,7 +75,44 @@ const SHARED_DOCKER_PARAMS = [
   '3s',
 ];
 
-export const UIAM_CONTAINERS = [
+/**
+ * Quarkus logging shared by every UIAM service container, so the `uiam` and `uiam-oauth`
+ * configurations cannot drift apart.
+ *
+ * `co.elastic.cloud.uiam` follows `UIAM_APP_LOGGING_LEVEL`, which defaults to INFO. The per-request
+ * credential extractors are pinned back to `UIAM_LOGGING_LEVEL` so that raising the category to
+ * DEBUG stays affordable: they log a stack trace on every inbound request, and on their own account
+ * for more than 100MB of `docker logs` output on a heavy spec file. `ClientCertificateExtractor` was
+ * replaced by `ClientSansExtractor` in elastic/uiam#2502; both are listed so a pinned older
+ * `UIAM_DOCKER_IMAGE` stays quiet too.
+ */
+const UIAM_QUARKUS_LOGGING_PARAMS: readonly string[] = [
+  '--env',
+  `quarkus.log.category."co".level=${env.UIAM_LOGGING_LEVEL}`,
+  '--env',
+  `quarkus.log.category."io".level=${env.UIAM_LOGGING_LEVEL}`,
+  '--env',
+  `quarkus.log.category."org".level=${env.UIAM_LOGGING_LEVEL}`,
+  '--env',
+  `quarkus.log.category."co.elastic.cloud.uiam".level=${env.UIAM_APP_LOGGING_LEVEL}`,
+  '--env',
+  `quarkus.log.category."co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor".level=${env.UIAM_LOGGING_LEVEL}`,
+  '--env',
+  `quarkus.log.category."co.elastic.cloud.uiam.app.authentication.ClientSansExtractor".level=${env.UIAM_LOGGING_LEVEL}`,
+  '--env',
+  'quarkus.log.console.json.enabled=false',
+  '--env',
+  `quarkus.log.level=${env.UIAM_LOGGING_LEVEL}`,
+];
+
+export interface UiamContainer {
+  name: string;
+  image: string;
+  params: string[];
+  cmdParams: string[];
+}
+
+const UIAM_BASE_CONTAINERS: UiamContainer[] = [
   {
     name: 'uiam-cosmosdb',
     image: process.env.UIAM_COSMOSDB_DOCKER_IMAGE || COSMOS_DB_EMULATOR_DEFAULT_IMAGE,
@@ -200,6 +242,200 @@ export const UIAM_CONTAINERS = [
     cmdParams: [],
   },
 ];
+
+const UIAM_OAUTH_CONTAINER: UiamContainer = {
+  name: 'uiam-oauth',
+  image: process.env.UIAM_DOCKER_IMAGE || UIAM_DEFAULT_IMAGE,
+  params: [
+    '--net',
+    'elastic',
+
+    // See note on the `uiam` container memory limits above.
+    '--memory',
+    '2g',
+    '--memory-swap',
+    '2g',
+
+    '--volume',
+    `${SERVERLESS_UIAM_ENTRYPOINT_PATH}:/opt/jboss/container/java/run/run-java-with-custom-ca.sh:z`,
+
+    '--volume',
+    `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/tmp/uiam_cosmosdb.pfx:z`,
+    '--volume',
+    `${CA_CERT_PATH}:/tmp/ca.crt:z`,
+    '--volume',
+    `${KBN_KEY_PATH}:/tmp/server.key:z`,
+    '--volume',
+    `${KBN_CERT_PATH}:/tmp/server.crt:z`,
+
+    '-p',
+    `127.0.0.1:${env.UIAM_OAUTH_SERVICE_PORT}:8443`, // UIAM OAuth HTTPS port
+
+    '--entrypoint',
+    '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
+
+    '--env',
+    'JAVA_OPTS_APPEND=-Xms256m -Xmx1g',
+
+    '--env',
+    'uiam.apikey.convert.validation.endpoint.enabled=false',
+    '--env',
+    'quarkus.tls.https.key-store.pem.0.cert=/tmp/server.crt',
+    '--env',
+    'quarkus.tls.https.key-store.pem.0.key=/tmp/server.key',
+    '--env',
+    'quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt',
+
+    '--env',
+    'quarkus.tls.esclient.key-store.pem.0.cert=/tmp/server.crt',
+    '--env',
+    'quarkus.tls.esclient.key-store.pem.0.key=/tmp/server.key',
+
+    '--env',
+    'quarkus.http.ssl.certificate.key-store-provider=JKS',
+    '--env',
+    'quarkus.http.ssl.certificate.trust-store-provider=SUN',
+    ...UIAM_QUARKUS_LOGGING_PARAMS,
+    '--env',
+    'quarkus.otel.sdk.disabled=true',
+    '--env',
+    'quarkus.profile=dev',
+    '--env',
+    'uiam.api_keys.decoder.prefixes=essu_dev',
+    '--env',
+    'uiam.api_keys.encoder.prefix=essu_dev',
+    '--env',
+    `uiam.cosmos.account.access_key=${MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY}`,
+    '--env',
+    `uiam.cosmos.account.endpoint=${MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL}`,
+    '--env',
+    `uiam.cosmos.container.apikey=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS}`,
+    '--env',
+    `uiam.cosmos.container.token_invalidation=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION}`,
+    '--env',
+    `uiam.cosmos.container.users=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS}`,
+    '--env',
+    `uiam.cosmos.database=${MOCK_IDP_UIAM_COSMOS_DB_NAME}`,
+    '--env',
+    'uiam.cosmos.gateway_connection_mode=true',
+    '--env',
+    `uiam.internal.shared.secrets=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+    '--env',
+    `uiam.tokens.jwt.signature.secrets=${MOCK_IDP_UIAM_SIGNING_SECRET}`,
+    '--env',
+    `uiam.tokens.jwt.signing.secret=${MOCK_IDP_UIAM_SIGNING_SECRET}`,
+
+    '--env',
+    'uiam.tokens.jwt.verify.clock.skew=PT2S',
+
+    '--env',
+    'UIAM_SERVICE_BOUNDARY=external',
+
+    '--env',
+    `uiam.oauth.base_url=https://localhost:${env.UIAM_OAUTH_SERVICE_PORT}`,
+    '--env',
+    `UIAM_OAUTH_BASE_URL=https://localhost:${env.UIAM_OAUTH_SERVICE_PORT}`,
+
+    '--env',
+    'uiam.tokens.refresh.grace_period=PT3S',
+
+    '--volume',
+    `${SERVERLESS_IDP_METADATA_PATH}:/tmp/mock-idp-metadata.xml:z`,
+    '--env',
+    'uiam.saml.idp.metadata=/tmp/mock-idp-metadata.xml',
+    '--env',
+    `uiam.saml.acs.url=https://localhost:${env.UIAM_OAUTH_SERVICE_PORT}/saml/consume`,
+
+    '--health-cmd',
+    'timeout 1 bash -c "</dev/tcp/localhost/8443"',
+  ],
+  cmdParams: [],
+};
+
+const TOKEN_EXPIRATION_PATTERN = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/;
+const TOKEN_EXPIRATION_MIN_SECONDS = 60;
+
+// UIAM exits on startup when the lifetime is out of range, which kbn-es would otherwise only
+// report as a container that never became healthy, minutes later.
+const assertTokenExpiration = (
+  expiration: string,
+  tokenType: 'ephemeral' | 'access',
+  maxSeconds = Infinity
+) => {
+  const match = TOKEN_EXPIRATION_PATTERN.exec(expiration);
+  const seconds = match
+    ? Number(match[1] ?? 0) * 3600 + Number(match[2] ?? 0) * 60 + Number(match[3] ?? 0)
+    : 0;
+  if (!Number.isFinite(seconds) || seconds < TOKEN_EXPIRATION_MIN_SECONDS || seconds > maxSeconds) {
+    const expected =
+      tokenType === 'ephemeral' ? 'from PT1M to PT5M, such as PT1M or PT90S' : 'of at least PT1M';
+    throw new Error(
+      `Invalid UIAM ${tokenType} token expiration [${expiration}]: expected an ISO-8601 duration ${expected}.`
+    );
+  }
+};
+
+const assertEphemeralTokenExpiration = (expiration: string) =>
+  assertTokenExpiration(expiration, 'ephemeral', 300);
+
+const assertAccessTokenExpiration = (expiration: string) =>
+  assertTokenExpiration(expiration, 'access');
+
+export interface GetUiamContainersOptions {
+  /** Include the UIAM OAuth container. */
+  includeOAuth?: boolean;
+  /**
+   * ISO-8601 lifetime of the ephemeral tokens UIAM issues, such as service account exchange
+   * tokens. UIAM accepts PT1M to PT5M and defaults to PT5M.
+   */
+  ephemeralTokenExpiration?: string;
+  /** ISO-8601 session access-token lifetime, at least PT1M. UIAM defaults to PT1H. */
+  accessTokenExpiration?: string;
+}
+
+/**
+ * Returns the list of UIAM containers to run.
+ */
+export function getUiamContainers({
+  includeOAuth = false,
+  ephemeralTokenExpiration,
+  accessTokenExpiration,
+}: GetUiamContainersOptions = {}): UiamContainer[] {
+  const containers = includeOAuth
+    ? [...UIAM_BASE_CONTAINERS, UIAM_OAUTH_CONTAINER]
+    : [...UIAM_BASE_CONTAINERS];
+  if (ephemeralTokenExpiration === undefined && accessTokenExpiration === undefined) {
+    return containers;
+  }
+
+  if (ephemeralTokenExpiration !== undefined) {
+    assertEphemeralTokenExpiration(ephemeralTokenExpiration);
+  }
+
+  if (accessTokenExpiration !== undefined) {
+    assertAccessTokenExpiration(accessTokenExpiration);
+  }
+
+  return containers.map((container) =>
+    container.name === 'uiam'
+      ? {
+          ...container,
+          params: [
+            ...container.params,
+            ...(ephemeralTokenExpiration
+              ? ['--env', `uiam.tokens.ephemeral.expiration=${ephemeralTokenExpiration}`]
+              : []),
+            ...(accessTokenExpiration
+              ? ['--env', `uiam.tokens.access.expiration=${accessTokenExpiration}`]
+              : []),
+          ],
+        }
+      : container
+  );
+}
+
+/** @deprecated Use {@link getUiamContainers} instead */
+export const UIAM_CONTAINERS = UIAM_BASE_CONTAINERS;
 
 /**
  * Run a single UIAM-related container.
