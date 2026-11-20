@@ -64,4 +64,139 @@ describe('wrapKibanaSupertestAgent', () => {
       );
     }
   });
+
+  describe('ELU 429 retries', () => {
+    const startServer = async (handler: http.RequestListener) => {
+      const server = http.createServer(handler);
+      await new Promise<void>((resolve) => server.listen(0, resolve));
+      const { port } = server.address() as { port: number };
+      const close = () =>
+        new Promise<void>((resolve, reject) =>
+          server.close((err) => (err ? reject(err) : resolve()))
+        );
+      return { url: `http://127.0.0.1:${port}`, close };
+    };
+
+    const overloaded = (res: http.ServerResponse) => {
+      res.writeHead(429, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          statusCode: 429,
+          error: 'Too Many Requests',
+          message: 'Server is overloaded',
+        })
+      );
+    };
+
+    it('sends the original request untouched when there is no 429 (json body keeps content-type)', async () => {
+      const seen: Array<{ contentType?: string; body: string }> = [];
+      const { url, close } = await startServer((req, res) => {
+        let body = '';
+        req.on('data', (chunk) => (body += chunk));
+        req.on('end', () => {
+          seen.push({ contentType: req.headers['content-type'], body });
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end('{}');
+        });
+      });
+
+      try {
+        await kibanaSupertest(url).post('/api/example').send({ a: 1 }).expect(200);
+        expect(seen).toEqual([{ contentType: 'application/json', body: '{"a":1}' }]);
+      } finally {
+        await close();
+      }
+    });
+
+    it('retries a 429 rejected by .expect() and replays headers and body', async () => {
+      const seen: Array<{ header?: string; body: string }> = [];
+      const { url, close } = await startServer((req, res) => {
+        let body = '';
+        req.on('data', (chunk) => (body += chunk));
+        req.on('end', () => {
+          seen.push({ header: req.headers['kbn-xsrf'] as string, body });
+          if (seen.length === 1) {
+            overloaded(res);
+            return;
+          }
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end('{"ok":true}');
+        });
+      });
+
+      try {
+        const { body } = await kibanaSupertest(url)
+          .post('/api/example')
+          .set('kbn-xsrf', 'true')
+          .send({ a: 1 })
+          .expect(200);
+
+        expect(body).toEqual({ ok: true });
+        expect(seen).toEqual([
+          { header: 'true', body: '{"a":1}' },
+          { header: 'true', body: '{"a":1}' },
+        ]);
+      } finally {
+        await close();
+      }
+    });
+
+    it('retries through .catch()', async () => {
+      let attempts = 0;
+      const { url, close } = await startServer((_req, res) => {
+        attempts++;
+        if (attempts === 1) {
+          overloaded(res);
+          return;
+        }
+        res.writeHead(200);
+        res.end();
+      });
+
+      try {
+        const response = await kibanaSupertest(url)
+          .get('/')
+          .expect(200)
+          .catch((error) => {
+            throw error;
+          });
+        expect(response.status).toBe(200);
+        expect(attempts).toBe(2);
+      } finally {
+        await close();
+      }
+    });
+
+    it('does not retry other failures', async () => {
+      let attempts = 0;
+      const { url, close } = await startServer((_req, res) => {
+        attempts++;
+        res.writeHead(404);
+        res.end();
+      });
+
+      try {
+        await expect(kibanaSupertest(url).get('/').expect(200)).rejects.toThrow();
+        expect(attempts).toBe(1);
+      } finally {
+        await close();
+      }
+    });
+
+    it('does not retry 429s that are not from the ELU rate limiter', async () => {
+      let attempts = 0;
+      const { url, close } = await startServer((_req, res) => {
+        attempts++;
+        res.writeHead(429, { 'Content-Type': 'application/json' });
+        res.end('{"message":"quota"}');
+      });
+
+      try {
+        await expect(kibanaSupertest(url).get('/').expect(200)).rejects.toThrow();
+        expect(attempts).toBe(1);
+      } finally {
+        await close();
+      }
+    });
+  });
 });

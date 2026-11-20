@@ -20,167 +20,102 @@ export type KibanaSupertestAgent = ReturnType<typeof supertest>;
 
 type SuperTestClient = supertest.SuperTest<SupertestTest>;
 
-type SupertestTestInternals = SupertestTest & {
-  header?: Record<string, string | string[] | undefined>;
-  qs?: Record<string, unknown>;
-  _data?: string | object;
-  _asserts?: Array<(res: SupertestResponse) => SupertestTest>;
-};
-
 export interface WrapKibanaSupertestAgentOptions {
   /** Total time budget for ELU 429 retries (default 120s, aligned with FTR `timeouts.try`). */
   maxRetryMs?: number;
 }
 
-interface RequestSnapshot {
-  method: string;
-  path: string;
-  query: Record<string, unknown> | undefined;
-  headers: Record<string, string | string[] | undefined>;
-  data: string | object | undefined;
-  asserts: Array<(res: SupertestResponse) => SupertestTest>;
+interface RecordedRequest {
+  verb: (typeof HTTP_VERBS)[number];
+  url: string;
+  /** Every chained call (`.set()`, `.send()`, `.expect()`, ...), replayed as-is on retry. */
+  calls: Array<{ method: string; args: unknown[] }>;
 }
 
 const HTTP_VERBS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'] as const;
 
-const HEADERS_TO_OMIT_ON_REBUILD = new Set(['content-length', 'host', 'transfer-encoding']);
-
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const asTestInternals = (test: SupertestTest): SupertestTestInternals =>
-  test as SupertestTestInternals;
+const replay = (agent: SuperTestClient, { verb, url, calls }: RecordedRequest): SupertestTest =>
+  calls.reduce<SupertestTest>(
+    (test, { method, args }) =>
+      (test as unknown as Record<string, (...a: unknown[]) => SupertestTest>)[method](...args),
+    agent[verb](url)
+  );
 
-const snapshotFromTest = (test: SupertestTest): RequestSnapshot => {
-  const internals = asTestInternals(test);
-  const url = new URL(test.url);
-
-  const query =
-    internals.qs && Object.keys(internals.qs).length > 0 ? { ...internals.qs } : undefined;
-
-  return {
-    method: test.method.toLowerCase(),
-    path: `${url.pathname}${url.search}`,
-    query,
-    headers: { ...(internals.header ?? {}) },
-    data: internals._data,
-    asserts: [...(internals._asserts ?? [])],
-  };
-};
-
-const rebuildTest = (agent: SuperTestClient, snapshot: RequestSnapshot): SupertestTest => {
-  const verb = snapshot.method as (typeof HTTP_VERBS)[number];
-  if (!HTTP_VERBS.includes(verb)) {
-    throw new Error(`Unsupported HTTP method for ELU retry: ${snapshot.method}`);
-  }
-
-  let request = agent[verb](snapshot.path);
-
-  if (snapshot.query) {
-    request = request.query(snapshot.query);
-  }
-
-  for (const [key, value] of Object.entries(snapshot.headers)) {
-    if (value === undefined || HEADERS_TO_OMIT_ON_REBUILD.has(key.toLowerCase())) {
-      continue;
-    }
-    request = request.set(key, Array.isArray(value) ? value.join(', ') : value);
-  }
-
-  if (snapshot.data !== undefined) {
-    request = request.send(snapshot.data);
-  }
-
-  if (snapshot.asserts.length) {
-    const internals = asTestInternals(request);
-    internals._asserts ??= [];
-    internals._asserts.push(...snapshot.asserts);
-  }
-
-  return request;
-};
-
+/**
+ * Runs the request once. A 429 is surfaced as `{ response }` even when an `.expect()` assertion
+ * rejected it, since supertest then reports an assertion error without `error.response`.
+ */
 const runTestOnce = (test: SupertestTest) =>
-  new Promise<SupertestResponse>((resolve, reject) => {
-    test.end((err, res) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(res);
-    });
+  new Promise<{ response?: SupertestResponse; error?: unknown }>((resolve) => {
+    test.end((error, response) => resolve({ response, error }));
   });
-
-const getErrorResponse = (error: unknown): EluRateLimitResponseLike | undefined =>
-  (error as { response?: EluRateLimitResponseLike })?.response;
 
 const runWithEluRetries = async (
   agent: SuperTestClient,
-  snapshot: RequestSnapshot,
+  firstTest: SupertestTest,
+  request: RecordedRequest,
   maxRetryMs: number
-) => {
+): Promise<SupertestResponse> => {
   const deadline = Date.now() + maxRetryMs;
-  let lastError: unknown;
+  let test = firstTest;
 
-  while (Date.now() < deadline) {
-    try {
-      return await runTestOnce(rebuildTest(agent, snapshot));
-    } catch (error) {
-      lastError = error;
-      const response = getErrorResponse(error);
-      if (!isEluRateLimiter429(response)) {
+  while (true) {
+    const { response, error } = await runTestOnce(test);
+    const errorResponse = (error as { response?: EluRateLimitResponseLike } | undefined)?.response;
+    const limited = response ?? errorResponse;
+
+    if (!isEluRateLimiter429(limited)) {
+      if (error) {
         throw error;
       }
-
-      const delay = getEluRateLimiterRetryDelayMs(response);
-      const remaining = deadline - Date.now();
-      if (remaining <= 0) {
-        break;
-      }
-      await sleep(Math.min(delay, remaining));
+      return response as SupertestResponse;
     }
-  }
 
-  throw lastError;
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) {
+      if (error) {
+        throw error;
+      }
+      return response as SupertestResponse;
+    }
+
+    await sleep(Math.min(getEluRateLimiterRetryDelayMs(limited), remaining));
+    test = replay(agent, request);
+  }
 };
 
 const wrapTest = (
   agent: SuperTestClient,
-  initialTest: SupertestTest,
+  test: SupertestTest,
+  request: RecordedRequest,
   maxRetryMs: number
-): SupertestTest => {
-  const state = { test: initialTest };
-
-  const handler: ProxyHandler<SupertestTest> = {
+): SupertestTest =>
+  new Proxy(test, {
     get(target, prop, receiver) {
-      if (prop === 'then') {
-        return (
-          onFulfilled?: (value: SupertestResponse) => unknown,
-          onRejected?: (reason: unknown) => unknown
-        ) => {
-          const snapshot = snapshotFromTest(state.test);
-          return runWithEluRetries(agent, snapshot, maxRetryMs).then(onFulfilled, onRejected);
-        };
+      if (prop === 'then' || prop === 'catch' || prop === 'finally') {
+        const settled = () => runWithEluRetries(agent, target, request, maxRetryMs);
+        return (...handlers: Array<(arg?: never) => unknown>) =>
+          (settled() as unknown as Record<string, (...a: unknown[]) => unknown>)[prop](...handlers);
       }
 
       const value = Reflect.get(target, prop, receiver);
-      if (typeof value === 'function') {
-        return (...args: unknown[]) => {
-          state.test = value.apply(state.test, args);
-          return wrapTest(agent, state.test, maxRetryMs);
-        };
+      if (typeof value !== 'function' || typeof prop !== 'string') {
+        return value;
       }
 
-      return value;
+      return (...args: unknown[]) => {
+        const result = value.apply(target, args);
+        // chainable calls return the same Test; anything else (e.g. `.end()`) passes through
+        if (result !== target) {
+          return result;
+        }
+        request.calls.push({ method: prop, args });
+        return receiver as SupertestTest;
+      };
     },
-  };
-
-  return new Proxy(initialTest, handler);
-};
-
-const wrapVerb =
-  (agent: SuperTestClient, verb: (typeof HTTP_VERBS)[number], maxRetryMs: number) =>
-  (url: string) =>
-    wrapTest(agent, agent[verb](url), maxRetryMs);
+  });
 
 /** Retries Kibana supertest requests when the ELU HTTP rate limiter returns 429. */
 export const wrapKibanaSupertestAgent = <T extends KibanaSupertestAgent>(
@@ -190,15 +125,15 @@ export const wrapKibanaSupertestAgent = <T extends KibanaSupertestAgent>(
   const maxRetryMs = options.maxRetryMs ?? 120_000;
   const requestAgent = agent as SuperTestClient;
 
-  const handler: ProxyHandler<T> = {
+  return new Proxy(agent, {
     get(target, prop, receiver) {
       if (typeof prop === 'string' && (HTTP_VERBS as readonly string[]).includes(prop)) {
-        return wrapVerb(requestAgent, prop as (typeof HTTP_VERBS)[number], maxRetryMs);
+        const verb = prop as (typeof HTTP_VERBS)[number];
+        return (url: string) =>
+          wrapTest(requestAgent, requestAgent[verb](url), { verb, url, calls: [] }, maxRetryMs);
       }
 
       return Reflect.get(target, prop, receiver);
     },
-  };
-
-  return new Proxy(agent, handler);
+  });
 };
