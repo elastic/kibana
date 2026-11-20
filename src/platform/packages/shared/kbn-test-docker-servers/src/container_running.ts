@@ -11,10 +11,15 @@ import execa from 'execa';
 import * as Rx from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-/**
- * Errors if the container exits on its own; completes when the watcher is unsubscribed (the
- * container is being stopped on purpose).
- */
+/** The container exited on its own; anything else the monitor errors with is a monitor problem. */
+export class ContainerExitError extends Error {
+  constructor(containerId: string, public readonly exitCode: number) {
+    super(`container [id=${containerId}] unexpectedly exitted with code ${exitCode}`);
+    this.name = 'ContainerExitError';
+  }
+}
+
+/** Errors when the container exits on its own; completes when the watcher is unsubscribed or ended by a signal. */
 export function observeContainerRunning(name: string, containerId: string, log: ToolingLog) {
   return new Rx.Observable((subscriber) => {
     log.debug(`[docker:${name}] watching container for exit status [${containerId}]`);
@@ -27,9 +32,7 @@ export function observeContainerRunning(name: string, containerId: string, log: 
         exitCode = Number.parseInt(stdout.trim(), 10);
 
         if (Number.isFinite(exitCode)) {
-          subscriber.error(
-            new Error(`container [id=${containerId}] unexpectedly exitted with code ${exitCode}`)
-          );
+          subscriber.error(new ContainerExitError(containerId, exitCode));
         } else {
           subscriber.error(
             new Error(`unable to parse exit code from output of "docker wait": ${stdout}`)

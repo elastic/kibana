@@ -201,6 +201,37 @@ describe('runDockerServer', () => {
     expect(onUnexpectedExit).not.toHaveBeenCalled();
   });
 
+  it('fails, and stops the container, when the log stream ends before the readiness line', async () => {
+    const docker = fakeDocker({ cached: true });
+
+    const pending = runDockerServer({ ...server, waitForLogLineTimeoutMs: 60_000 }, { log });
+    await new Promise((resolve) => setImmediate(resolve));
+    docker.stdout.write('loading...\n');
+    docker.stdout.end();
+    docker.stderr.end();
+
+    await expect(pending).rejects.toThrow('log stream ended before it was ready');
+    expect(dockerCall(docker.calls, 'kill')).toEqual([['kill', 'container-1']]);
+  });
+
+  it('reports an exit that lands together with the readiness line', async () => {
+    const docker = fakeDocker({ cached: true });
+    const onUnexpectedExit = jest.fn();
+
+    const pending = runDockerServer(server, { log, onUnexpectedExit });
+    await new Promise((resolve) => setImmediate(resolve));
+    docker.stdout.write('package manifests loaded\n');
+    docker.exitContainer(1);
+
+    // either the start rejects or, if it was already ready, the exit is reported: never neither
+    const outcome = await pending.then(
+      () => 'ready',
+      () => 'failed'
+    );
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(outcome === 'failed' || onUnexpectedExit.mock.calls.length === 1).toBe(true);
+  });
+
   it('stops the container and rejects when aborted during the readiness wait', async () => {
     const docker = fakeDocker({ cached: true });
     const onUnexpectedExit = jest.fn();

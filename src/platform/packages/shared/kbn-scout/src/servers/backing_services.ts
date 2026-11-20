@@ -113,8 +113,9 @@ export function resolveRunOutcome({
   shutdownError,
 }: RunOutcomeInput): 'ok' | 'interrupted' {
   // Precedence: the interrupt (a terminal Ctrl-C also reaches Elasticsearch and the docker
-  // monitor, whose exits are then consequences), then an early exit (its teardown aborts the
-  // start, so an AbortError can be its consequence too), then the run's own error.
+  // monitor, and the shutdown aborts a start in progress: those exits and aborts are
+  // consequences), then an early exit (its teardown aborts the start too), then the run's own
+  // error.
   if (interrupted) {
     log.info(interruptedMessage);
     process.exitCode = SIGINT_EXIT_CODE;
@@ -125,11 +126,6 @@ export function resolveRunOutcome({
   }
   if (earlyExitError !== undefined) {
     throw earlyExitError;
-  }
-  if (runError?.name === 'AbortError') {
-    log.info(interruptedMessage);
-    process.exitCode = SIGINT_EXIT_CODE;
-    return 'interrupted';
   }
   if (runError !== undefined) {
     throw runError;
@@ -188,6 +184,10 @@ export async function runWithBackingServices(
     await body({ onEarlyExit });
   } catch (error) {
     runError = asError(error);
+    if (!interrupted && earlyExitError === undefined) {
+      // say so now: the shutdown below may wait for an Elasticsearch boot to settle first
+      log.error(`scout: start failed, shutting the servers down: ${runError.message}`);
+    }
   }
 
   // Whatever failed, do not leave a detached container holding its port for the next run.

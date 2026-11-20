@@ -36,10 +36,12 @@ describe('resolveRunOutcome', () => {
     expect(process.exitCode).toBe(130);
   });
 
-  it('treats an aborted docker start as an interrupt', () => {
-    const error = new Error('start aborted');
+  it('reports an AbortError the run itself threw as a failure: only the signal hook interrupts', () => {
+    const error = new Error('fetch aborted');
     error.name = 'AbortError';
-    expect(resolveRunOutcome({ ...base, interrupted: false, runError: error })).toBe('interrupted');
+    expect(() => resolveRunOutcome({ ...base, interrupted: false, runError: error })).toThrow(
+      'fetch aborted'
+    );
   });
 
   it('reports an early exit ahead of the abort its teardown caused', () => {

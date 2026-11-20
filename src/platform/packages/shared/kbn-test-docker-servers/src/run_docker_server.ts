@@ -10,11 +10,11 @@
 import Url from 'url';
 import execa from 'execa';
 import * as Rx from 'rxjs';
-import { catchError, filter, map, take, takeUntil } from 'rxjs';
+import { catchError, filter, map, take, throwIfEmpty } from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { DockerServer, DockerServerSpec } from './define_docker_servers_config';
 import { observeContainerLogs } from './container_logs';
-import { observeContainerRunning } from './container_running';
+import { ContainerExitError, observeContainerRunning } from './container_running';
 
 const SECOND = 1000;
 const DEFAULT_WAIT_TIMEOUT_MS = 30 * SECOND;
@@ -174,38 +174,37 @@ async function waitUntilReady(
     return;
   }
 
-  // `abort$` tears the wait down (its timers included) when the caller gives up on the container.
-  await Rx.lastValueFrom(
-    Rx.merge(
-      waitFor === undefined
-        ? Rx.EMPTY
-        : firstWithTimeout(name, waitFor(server, logLine$), `waitFor() didn't emit anything`),
+  // The log stream ending before a match (the container died, the daemon dropped the attach) is
+  // not readiness. `abort$` tears the wait down, timers included, when the caller gives up.
+  const ready$ = Rx.merge(
+    waitFor === undefined
+      ? Rx.EMPTY
+      : firstWithTimeout(name, waitFor(server, logLine$), `waitFor() didn't emit anything`),
 
-      waitForLogLine === undefined
-        ? Rx.EMPTY
-        : firstWithTimeout(
-            name,
-            logLine$.pipe(
-              filter((line) =>
-                waitForLogLine instanceof RegExp
-                  ? waitForLogLine.test(line)
-                  : line.includes(waitForLogLine)
-              )
-            ),
-            `didn't find a log line matching "${waitForLogLine}"`,
-            waitForLogLineTimeoutMs
-          )
-    ).pipe(takeUntil(abort$)),
-    { defaultValue: undefined }
+    waitForLogLine === undefined
+      ? Rx.EMPTY
+      : firstWithTimeout(
+          name,
+          logLine$.pipe(
+            filter((line) =>
+              waitForLogLine instanceof RegExp
+                ? waitForLogLine.test(line)
+                : line.includes(waitForLogLine)
+            )
+          ),
+          `didn't find a log line matching "${waitForLogLine}"`,
+          waitForLogLineTimeoutMs
+        )
+  ).pipe(
+    throwIfEmpty(
+      () => new Error(`[docker:${name}] the container's log stream ended before it was ready`)
+    )
   );
+  await Rx.lastValueFrom(Rx.race(ready$, abort$.pipe(take(1))), { defaultValue: undefined });
 }
 
-/**
- * `docker kill` / `docker rm` on a container that is already gone is not an error here. The
- * daemon's wording changed case over versions ("Container ... is not running" became
- * "container ... is not running"), so match without it.
- */
-function ignoreGoneContainer(containerId: string, error: Error) {
+/** Rethrows unless the error says the container is already gone (the daemon's wording varies in case). */
+export function ignoreGoneContainer(containerId: string, error: Error) {
   const message = (error.message ?? '').toLowerCase();
   if (
     !message.includes(`container ${containerId} is not running`.toLowerCase()) &&
@@ -257,6 +256,7 @@ export async function runDockerServer(
   if (signal?.aborted) {
     onAbort();
   }
+  let exitDuringStart: Error | undefined;
   const runningSub = observeContainerRunning(name, containerId, log).subscribe({
     error: async (error) => {
       if (stopped) {
@@ -264,8 +264,7 @@ export async function runDockerServer(
       }
       // `docker wait` failing is not the same as the container exiting: when it is a monitor
       // problem (a daemon hiccup) and the container is still running, keep going.
-      const monitorFailed = !/unexpectedly exitted/.test(error?.message ?? '');
-      if (monitorFailed && (await isDockerContainerRunning(containerId))) {
+      if (!(error instanceof ContainerExitError) && (await isDockerContainerRunning(containerId))) {
         log.warning(
           `[docker:${name}] lost the container monitor (${error.message}); the container is still running`
         );
@@ -276,11 +275,13 @@ export async function runDockerServer(
       }
       log.error(`[docker:${name}] Error ensuring that the container is running`);
       log.error(error);
-      rejectOnExit(error);
-      // while starting, the rejection above already reports it to the caller
-      if (!starting) {
-        onUnexpectedExit?.(error);
+      if (starting) {
+        // reported to the caller by the readiness race, or right after it settles
+        exitDuringStart = error;
+        rejectOnExit(error);
+        return;
       }
+      onUnexpectedExit?.(error);
     },
   });
 
@@ -333,6 +334,10 @@ export async function runDockerServer(
     // a container that dies before the readiness line fails here, not after the wait timeout;
     // `stop()` aborts the wait so its timers do not keep the process alive
     await Promise.race([waitUntilReady(server, logLine$, log, abort$), exited]);
+    // an exit that landed just as the readiness race settled must not be lost between the two
+    if (exitDuringStart) {
+      throw exitDuringStart;
+    }
   } catch (error) {
     // the start failure is the one to report; a stop failure on top of it is logged
     await stop().catch((stopError) => {

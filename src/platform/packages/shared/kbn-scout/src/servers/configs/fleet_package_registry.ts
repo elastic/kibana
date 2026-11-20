@@ -7,16 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Opt-in for the Fleet package registry docker container in local Scout runs.
- *
- * The container is started by `runDockerServers` and Kibana is pointed at it through
- * `xpack.fleet.registryUrl`, so every Fleet package install goes to the image in
- * `FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE` (see `@kbn/test-docker-servers`) instead of the public
- * EPR. `FLEET_PACKAGE_REGISTRY_PORT` alone is not enough: CI exports it for every job, and
- * switching every Scout lane to the docker image is a separate decision. Set
- * `SCOUT_FLEET_PACKAGE_REGISTRY=true` as well, as the EPR image promotion pipeline does.
- */
+// Opt-in for the Fleet package registry docker container in local Scout runs: with
+// `SCOUT_FLEET_PACKAGE_REGISTRY=true` and `FLEET_PACKAGE_REGISTRY_PORT`, the container is started
+// and Kibana installs Fleet packages from it instead of the public EPR. The port alone is not
+// enough: CI exports it for every job, and switching every lane is a separate decision.
 import type { DockerServerSpec } from '@kbn/test-docker-servers';
 import { packageRegistryDocker } from '@kbn/test-docker-servers';
 import { createFailError } from '@kbn/dev-cli-errors';
@@ -46,8 +40,11 @@ export interface ScoutFleetPackageRegistry {
   error?: string;
 }
 
-const toDockerServer = (enabled: boolean, port: number | undefined): DockerServerSpec => ({
-  ...packageRegistryDocker,
+// the shared spec minus its own port-based `enabled`/`port`, which the rule above replaces
+const { enabled: _enabledByPort, port: _portFromEnv, ...registrySpec } = packageRegistryDocker;
+
+const registryDockerServer = (enabled: boolean, port: number | undefined): DockerServerSpec => ({
+  ...registrySpec,
   enabled,
   port: port ?? 0,
   // the `:lite` image takes a while to load its manifests on first boot
@@ -72,7 +69,12 @@ export function getFleetPackageRegistry(
   // carried as `error` and reported when the servers start.
   if (!optIn) {
     const port = validPort ? parsedPort : undefined;
-    return { enabled: false, port, kbnServerArgs: [], dockerServer: toDockerServer(false, port) };
+    return {
+      enabled: false,
+      port,
+      kbnServerArgs: [],
+      dockerServer: registryDockerServer(false, port),
+    };
   }
 
   if (parsedPort === undefined || !validPort) {
@@ -80,7 +82,7 @@ export function getFleetPackageRegistry(
       enabled: false,
       port: undefined,
       kbnServerArgs: [],
-      dockerServer: toDockerServer(false, undefined),
+      dockerServer: registryDockerServer(false, undefined),
       error:
         parsedPort === undefined
           ? `${SCOUT_FLEET_PACKAGE_REGISTRY_ENV} is set but ${FLEET_PACKAGE_REGISTRY_PORT_ENV} is not: ` +
@@ -93,7 +95,7 @@ export function getFleetPackageRegistry(
     enabled: true,
     port: parsedPort,
     kbnServerArgs: [`--xpack.fleet.registryUrl=http://localhost:${parsedPort}`],
-    dockerServer: toDockerServer(true, parsedPort),
+    dockerServer: registryDockerServer(true, parsedPort),
   };
 }
 
