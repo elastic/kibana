@@ -151,6 +151,7 @@ describe('digital experience mobile apps', () => {
       expect([...platforms].sort()).toEqual(['android', 'ios']);
       docs.forEach((doc) => {
         const resource = isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes;
+        expect(resource?.['telemetry.sdk.name']).toBe('opentelemetry');
         expect(resource?.['telemetry.distro.name']).toBe('elastic');
         expect(resource?.['telemetry.sdk.language']).not.toBe('webjs');
       });

@@ -20,6 +20,9 @@ import type {
 // The native SDK versions that `@elastic/otel-react-native` pins
 export const EDOT_ANDROID_VERSION = '1.10.0';
 export const EDOT_IOS_VERSION = '2.3.0';
+// The upstream SDKs that those versions are built on
+const OTEL_JAVA_VERSION = '1.66.0';
+const OTEL_SWIFT_VERSION = '2.3.0';
 
 const CLIENT_CLASSES: Readonly<
   Record<
@@ -31,13 +34,9 @@ const CLIENT_CLASSES: Readonly<
   ios: EdotIosClient,
 };
 
-// The upstream SDKs that those versions are built on
-const OTEL_JAVA_VERSION = '1.66.0';
-const OTEL_SWIFT_VERSION = '2.3.0';
-
 // The upstream SDK values, which replace the legacy `telemetry.sdk.name` of `android` and `iOS`;
-// a mobile app is told apart by `telemetry.distro.name` and `os.name`
-const TELEMETRY_SDK_ATTRIBUTES: Readonly<Record<MobilePlatform, Record<string, string>>> = {
+// a mobile app is told apart by `telemetry.distro.name` and its platform by `os.name`
+const TELEMETRY_ATTRIBUTES: Readonly<Record<MobilePlatform, Readonly<Record<string, string>>>> = {
   android: {
     'telemetry.sdk.name': 'opentelemetry',
     'telemetry.sdk.language': 'java',
@@ -104,14 +103,14 @@ export class EdotReactNativeApp {
         'app.build_id': createHash('sha256')
           .update(`${appId}-${serviceVersion}-${buildNumber}`)
           .digest('hex'),
-        ...TELEMETRY_SDK_ATTRIBUTES.android,
+        ...TELEMETRY_ATTRIBUTES.android,
       },
       ios: {
         ...service,
         // EDOT iOS writes `default` unless the app configures an environment
         'deployment.environment.name': environment ?? 'default',
         'app.build_id': String(buildNumber),
-        ...TELEMETRY_SDK_ATTRIBUTES.ios,
+        ...TELEMETRY_ATTRIBUTES.ios,
       },
     };
   }
