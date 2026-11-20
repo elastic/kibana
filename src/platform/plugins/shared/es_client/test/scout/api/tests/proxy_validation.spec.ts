@@ -25,7 +25,7 @@ apiTest.describe('Elasticsearch proxy request validation', { tag: tags.deploymen
   });
 
   apiTest('rejects unsupported API versions', async ({ apiClient }) => {
-    const response = await apiClient.get(`${PROXY_PATH}/${TEST_INDEX}/_count`, {
+    const response = await apiClient.get(`${PROXY_PATH}/${TEST_INDEX}/_mapping`, {
       headers: { ...headers, 'elastic-api-version': UNSUPPORTED_API_VERSION },
       responseType: 'json',
     });
@@ -37,7 +37,7 @@ apiTest.describe('Elasticsearch proxy request validation', { tag: tags.deploymen
     const { 'kbn-xsrf': _xsrf, ...headersWithoutXsrf } = headers;
 
     for (const method of ['post', 'put', 'delete'] as const) {
-      const response = await apiClient[method](`${PROXY_PATH}/${TEST_INDEX}/_doc/1`, {
+      const response = await apiClient[method](`${PROXY_PATH}/${TEST_INDEX}`, {
         headers: headersWithoutXsrf,
         responseType: 'json',
       });

@@ -23,8 +23,3 @@ export const INDEX_SCOPED_ROLE: ElasticsearchRoleDescriptor = {
   cluster: [],
   indices: [{ names: [`${TEST_INDEX}*`], privileges: ['all'] }],
 };
-
-export const CLUSTER_MONITOR_ROLE: ElasticsearchRoleDescriptor = {
-  cluster: ['monitor'],
-  indices: [],
-};

@@ -16,6 +16,7 @@ import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import { ES_CLIENT_BASE_PATH, PRODUCT_ORIGIN_HEADER } from '../../common';
 import { getRequestAbortedSignal } from '../lib/get_request_aborted_signal';
 import type { RouteDependencies } from '../types';
+import { isAllowedEsPath } from './es_path_access';
 
 export interface ProxyParams {
   path?: string;
@@ -129,6 +130,11 @@ export const createProxyHandler =
     const body =
       Buffer.isBuffer(request.body) && request.body.length > 0 ? request.body : undefined;
     const path = getEsPath(request.url);
+    if (!isAllowedEsPath(path)) {
+      return response.forbidden({
+        body: { message: `The Elasticsearch API [${path}] is not available through this proxy.` },
+      });
+    }
     const proxyBasePath = `${basePath.get(request)}${ES_CLIENT_BASE_PATH}`;
     const proxyHeaders = getProxyHeaders(request, body !== undefined);
 

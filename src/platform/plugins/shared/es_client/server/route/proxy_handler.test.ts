@@ -35,7 +35,7 @@ const setup = (requestOptions: RequestFixtureOptions<ProxyParams, unknown, Proxy
     body: esBody,
   });
   const request = httpServerMock.createKibanaRequest<ProxyParams, unknown, ProxyBody>({
-    path: '/internal/es_client/my-index/_search',
+    path: '/internal/es_client/my-index/_settings',
     headers: { 'content-type': 'application/json', cookie: 'sid=secret', host: 'kibana:5601' },
     ...requestOptions,
   });
@@ -59,12 +59,24 @@ describe('WHEN proxying a request to Elasticsearch', () => {
     expect(transportRequest).toHaveBeenCalledWith(
       expect.objectContaining({
         method: 'POST',
-        path: '/my-index/_search',
+        path: '/my-index/_settings',
         querystring: 'q=a%3Ab&pretty=',
       }),
       expect.anything()
     );
   });
+
+  it.each(['/internal/es_client/_security/_authenticate', '/internal/es_client/my-index/_search'])(
+    'SHOULD return 403 without calling Elasticsearch WHEN the path %s is not allowed',
+    async (path) => {
+      const { run, transportRequest } = setup({ path });
+
+      const response = await run();
+
+      expect(response.status).toBe(403);
+      expect(transportRequest).not.toHaveBeenCalled();
+    }
+  );
 
   it('SHOULD request a streamed response with a timeout and an abort signal', async () => {
     const { run, transportRequest } = setup();

@@ -26,26 +26,13 @@ apiTest.describe('Elasticsearch proxy authorization', { tag: tags.deploymentAgno
   });
 
   apiTest('returns the Elasticsearch 403 for indices outside the role', async ({ apiClient }) => {
-    const response = await apiClient.put(`${PROXY_PATH}/${FORBIDDEN_INDEX}/_doc/1`, {
+    const response = await apiClient.put(`${PROXY_PATH}/${FORBIDDEN_INDEX}`, {
       headers,
-      body: { message: 'not allowed' },
       responseType: 'json',
     });
     expect(response).toHaveStatusCode(403);
     expect(response.body.error.type).toBe('security_exception');
   });
-
-  apiTest(
-    'returns the Elasticsearch 403 for cluster APIs outside the role',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(`${PROXY_PATH}/_ingest/pipeline`, {
-        headers,
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(403);
-      expect(response.body.error.type).toBe('security_exception');
-    }
-  );
 
   apiTest('rejects unauthenticated requests', async ({ apiClient }) => {
     const response = await apiClient.get(PROXY_PATH, {
