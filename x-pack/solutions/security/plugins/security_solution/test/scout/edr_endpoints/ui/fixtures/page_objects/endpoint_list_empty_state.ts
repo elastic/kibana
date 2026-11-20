@@ -10,7 +10,6 @@ import type { Locator, ScoutPage } from '@kbn/scout-security';
 
 /**
  * Onboarding empty state of the endpoint list, shown when no Defend policy and no host exist.
- * Actions and locators only; the spec asserts.
  */
 export class EndpointListEmptyStatePage {
   readonly policyOnboardingInstructions: Locator;

@@ -1,5 +1,5 @@
 {
-  "sha1": "e1d5bcaa312d0d7bd04dd6d85357e5c2d1a5e2cc",
+  "sha1": "02d7d5837b5d943e9c1bacc3401921916e4828f2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -31,380 +31,380 @@
       }
     },
     {
-      "id": "d9877269c35ee7d-37ca3730c6e89e6",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management none, fleet none and integrations none",
+      "id": "eb07da8efcb56a1-f20f54a94f99891",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management all hides Add Elastic Defend with fleet none and integrations none",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-cf4ff5477cf38a4",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management none, fleet none and integrations read",
+      "id": "eb07da8efcb56a1-5ca53b744377b4f",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management all hides Add Elastic Defend with fleet none and integrations read",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-033642a6b6d3668",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management none, fleet none and integrations all",
+      "id": "eb07da8efcb56a1-7babaed7d3eb32c",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management all hides Add Elastic Defend with fleet none and integrations all",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-9d946cb33522f6a",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management none, fleet read and integrations none",
+      "id": "eb07da8efcb56a1-339ad7e024b8278",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management all hides Add Elastic Defend with fleet read and integrations none",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-f2684a29432a027",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management none, fleet read and integrations read",
+      "id": "eb07da8efcb56a1-72bb13b7c71d198",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management all hides Add Elastic Defend with fleet read and integrations read",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-739a6719de52b09",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management none, fleet read and integrations all",
+      "id": "eb07da8efcb56a1-de730255f009c0a",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management all hides Add Elastic Defend with fleet read and integrations all",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-9d48ec8725abf25",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management none, fleet all and integrations none",
+      "id": "eb07da8efcb56a1-5c6491677bfffc9",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management all hides Add Elastic Defend with fleet all and integrations none",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-4e5a6e477627d14",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management none, fleet all and integrations read",
+      "id": "eb07da8efcb56a1-eb19c28202b2a0f",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management all hides Add Elastic Defend with fleet all and integrations read",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-2408a62e560d182",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts shows Add Elastic Defend with policy management none, fleet all and integrations all",
+      "id": "eb07da8efcb56a1-01368aa593bc483",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management all shows Add Elastic Defend with fleet all and integrations all",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-9974a19b9a724e7",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management read, fleet none and integrations none",
+      "id": "eb07da8efcb56a1-8a06b0e01424006",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management none hides Add Elastic Defend with fleet none and integrations none",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-6a15e86fc26e1ea",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management read, fleet none and integrations read",
+      "id": "eb07da8efcb56a1-580d7472e903b0d",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management none hides Add Elastic Defend with fleet none and integrations read",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-0956d145c56a33d",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management read, fleet none and integrations all",
+      "id": "eb07da8efcb56a1-38c35d0570175bf",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management none hides Add Elastic Defend with fleet none and integrations all",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-45330513760f35a",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management read, fleet read and integrations none",
+      "id": "eb07da8efcb56a1-1ec66a63e7226ad",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management none hides Add Elastic Defend with fleet read and integrations none",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-ff9d51583e165ac",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management read, fleet read and integrations read",
+      "id": "eb07da8efcb56a1-163238cdc20d750",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management none hides Add Elastic Defend with fleet read and integrations read",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-279c2b8d711d31c",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management read, fleet read and integrations all",
+      "id": "eb07da8efcb56a1-e0a92f2783dea19",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management none hides Add Elastic Defend with fleet read and integrations all",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-58915134c5864bb",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management read, fleet all and integrations none",
+      "id": "eb07da8efcb56a1-be4c7b3aafa41d2",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management none hides Add Elastic Defend with fleet all and integrations none",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-1e4c4ecf327f8dc",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management read, fleet all and integrations read",
+      "id": "eb07da8efcb56a1-ee3863b21926f8f",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management none hides Add Elastic Defend with fleet all and integrations read",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-103c7617690114b",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts shows Add Elastic Defend with policy management read, fleet all and integrations all",
+      "id": "eb07da8efcb56a1-40c02a66718a002",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management none shows Add Elastic Defend with fleet all and integrations all",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-8b4e0c35a15ebe6",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management all, fleet none and integrations none",
+      "id": "eb07da8efcb56a1-c5dd6db215e3ee5",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management read hides Add Elastic Defend with fleet none and integrations none",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-3107aae93c2068e",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management all, fleet none and integrations read",
+      "id": "eb07da8efcb56a1-d838679d81d2459",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management read hides Add Elastic Defend with fleet none and integrations read",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-7a3aeb5b7721935",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management all, fleet none and integrations all",
+      "id": "eb07da8efcb56a1-f94d1b97f37e33a",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management read hides Add Elastic Defend with fleet none and integrations all",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-6cb2edaa09d99e1",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management all, fleet read and integrations none",
+      "id": "eb07da8efcb56a1-fb8c92d036f775a",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management read hides Add Elastic Defend with fleet read and integrations none",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-fdb2849476243fa",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management all, fleet read and integrations read",
+      "id": "eb07da8efcb56a1-8a00b9ba8096a17",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management read hides Add Elastic Defend with fleet read and integrations read",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-cf1bb95fecf6b3a",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management all, fleet read and integrations all",
+      "id": "eb07da8efcb56a1-130e4b98da3122b",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management read hides Add Elastic Defend with fleet read and integrations all",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-22a48729768eb5c",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management all, fleet all and integrations none",
+      "id": "eb07da8efcb56a1-0fc2fa7026a0959",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management read hides Add Elastic Defend with fleet all and integrations none",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-a2932ed3a3d2518",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts hides Add Elastic Defend with policy management all, fleet all and integrations read",
+      "id": "eb07da8efcb56a1-ebb5c637916fcc7",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management read hides Add Elastic Defend with fleet all and integrations read",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     },
     {
-      "id": "d9877269c35ee7d-a0b77c31e28bece",
-      "title": "Endpoint list RBAC with neither a Defend policy nor hosts shows Add Elastic Defend with policy management all, fleet all and integrations all",
+      "id": "eb07da8efcb56a1-1dd03321aea57fe",
+      "title": "Endpoint list RBAC with neither a Defend policy nor hosts, policy management read shows Add Elastic Defend with fleet all and integrations all",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_list_rbac_empty_state.spec.ts",
-        "line": 38,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/fixtures/endpoint_list_rbac_empty_state_suite.ts",
+        "line": 63,
         "column": 35
       }
     }

@@ -10,7 +10,7 @@ import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 export const FEATURE_PRIVILEGES = ['none', 'read', 'all'] as const;
 
-type FeaturePrivilege = (typeof FEATURE_PRIVILEGES)[number];
+export type FeaturePrivilege = (typeof FEATURE_PRIVILEGES)[number];
 
 interface EndpointListRoleOptions {
   readonly policyManagement: FeaturePrivilege;
