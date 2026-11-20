@@ -3657,12 +3657,12 @@ describe('Authenticator', () => {
       const request = httpServerMock.createKibanaRequest();
 
       // Regular authentication would invalidate this session and create one for the new user.
-      // Renewal leaves it alone, and the identity check rejects the new credentials.
+      // Renewal must fail instead, even if the request user matches the provider's user and
+      // neither has a profile ID, so only the session owner check can tell them apart.
+      const otherUser = mockAuthenticatedUser({ username: 'other-user', profile_uid: undefined });
+      mockOptions.getCurrentUser.mockReturnValue(otherUser);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
-        AuthenticationResult.succeeded(mockAuthenticatedUser({ username: 'other-user' }), {
-          state: newState,
-          authHeaders: newState,
-        })
+        AuthenticationResult.succeeded(otherUser, { state: newState, authHeaders: newState })
       );
       mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
@@ -3670,7 +3670,7 @@ describe('Authenticator', () => {
       await expect(authenticator.reauthenticate(request)).resolves.toBeNull();
 
       expect(loggingSystemMock.collect(mockOptions.loggers).error).toEqual([
-        ['Re-authentication changed the authenticated user identity.'],
+        ['Re-authentication failed due to: Provider returned a user other than the session owner.'],
       ]);
       expect(mockOptions.authHeadersStorage.set).not.toHaveBeenCalled();
       expect(mockOptions.session.create).not.toHaveBeenCalled();

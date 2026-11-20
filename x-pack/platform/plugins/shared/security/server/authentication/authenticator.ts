@@ -773,14 +773,16 @@ export class Authenticator {
       reauthenticate: true,
     });
     if (!authenticationResult.notHandled()) {
-      // Renewal must not switch the session to another user. Return before the session update:
-      // the identity check in updateSessionCredentials() then rejects this result. If the user
-      // really changed, the next regular request replaces the session and shows the notice.
+      // Renewal must not switch the session to another user, so it fails here, before the session
+      // update. If the user really changed, the next regular request replaces the session and
+      // shows the overwritten-session notice.
       if (
         authenticationResult.succeeded() &&
         authenticationResult.user?.username !== existingSessionValue.username
       ) {
-        return authenticationResult;
+        return AuthenticationResult.failed(
+          new Error('Provider returned a user other than the session owner.')
+        );
       }
 
       const sessionUpdateResult = await this.updateSessionValue(request, {
