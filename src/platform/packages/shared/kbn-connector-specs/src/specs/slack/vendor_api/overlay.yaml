@@ -143,3 +143,263 @@ actions:
       lists a scope named `none`.
     update:
       - slackAuth: []
+
+  - target: $.paths
+    description: >-
+      The spec predates assistant.search.context. https://docs.slack.dev/reference/methods/assistant.search.context
+      documents it as POST with a JSON or form body, `query` required, the user token scopes
+      search:read.files, search:read.im, search:read.mpim, search:read.private, search:read.public
+      and search:read.users, and results under `results` with a cursor in
+      `response_metadata.next_cursor`.
+    update:
+      /assistant.search.context:
+        post:
+          security:
+            - slackAuth:
+                - search:read.files
+                - search:read.im
+                - search:read.mpim
+                - search:read.private
+                - search:read.public
+                - search:read.users
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required: [query]
+                  properties:
+                    query:
+                      type: string
+                    action_token:
+                      type: string
+                    channel_types:
+                      type: array
+                      items:
+                        type: string
+                        enum: [public_channel, private_channel, mpim, im]
+                    content_types:
+                      type: array
+                      items:
+                        type: string
+                        enum: [messages, files, enterprise, channels, users]
+                    include_bots:
+                      type: boolean
+                    include_deleted_users:
+                      type: boolean
+                    before:
+                      type: integer
+                    after:
+                      type: integer
+                    include_context_messages:
+                      type: boolean
+                    context_channel_id:
+                      type: string
+                    cursor:
+                      type: string
+                    limit:
+                      type: integer
+                    sort:
+                      type: string
+                    sort_dir:
+                      type: string
+                    include_message_blocks:
+                      type: boolean
+                    highlight:
+                      type: boolean
+                    include_archived_channels:
+                      type: boolean
+                    disable_semantic_search:
+                      type: boolean
+          responses:
+            '200':
+              description: The search results, or `ok` false with an `error`
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    required: [ok]
+                    properties:
+                      ok:
+                        type: boolean
+                      error:
+                        type: string
+                      results:
+                        type: object
+                        properties:
+                          messages:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                author_name:
+                                  type: string
+                                author_user_id:
+                                  type: string
+                                team_id:
+                                  type: string
+                                channel_id:
+                                  type: string
+                                channel_name:
+                                  type: string
+                                message_ts:
+                                  type: string
+                                content:
+                                  type: string
+                                is_author_bot:
+                                  type: boolean
+                                permalink:
+                                  type: string
+                                blocks:
+                                  type: array
+                                  items:
+                                    type: object
+                                context_messages:
+                                  type: object
+                      response_metadata:
+                        type: object
+                        properties:
+                          next_cursor:
+                            type: string
+
+  - target: $.paths
+    description: >-
+      The spec predates Slack's v2 upload flow. https://docs.slack.dev/reference/methods/files.getUploadURLExternal
+      documents POST with the files:write scope, `filename` and `length` required, and
+      application/x-www-form-urlencoded as its only content type, answered with `upload_url` and
+      `file_id`.
+    update:
+      /files.getUploadURLExternal:
+        post:
+          security:
+            - slackAuth:
+                - files:write
+          requestBody:
+            required: true
+            content:
+              application/x-www-form-urlencoded:
+                schema:
+                  type: object
+                  required: [filename, length]
+                  properties:
+                    filename:
+                      type: string
+                    length:
+                      type: integer
+                    snippet_type:
+                      type: string
+                    alt_txt:
+                      type: string
+          responses:
+            '200':
+              description: The upload URL and file ID, or `ok` false with an `error`
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    required: [ok]
+                    properties:
+                      ok:
+                        type: boolean
+                      error:
+                        type: string
+                      upload_url:
+                        type: string
+                        format: uri
+                      file_id:
+                        type: string
+
+  - target: $.paths
+    description: >-
+      The spec predates Slack's v2 upload flow. https://docs.slack.dev/reference/methods/files.getUploadURLExternal
+      documents its second step: the file's bytes, raw or multipart, are posted to the `upload_url`
+      it returns, on files.slack.com, and a 200 means the upload succeeded. The URL is pre-signed
+      and opaque, so the path is matched as a whole.
+    update:
+      /upload/v1/{uploadId}:
+        post:
+          servers:
+            - url: https://files.slack.com
+          security: []
+          parameters:
+            - name: uploadId
+              in: path
+              required: true
+              schema:
+                type: string
+          requestBody:
+            required: true
+            content:
+              application/octet-stream:
+                schema:
+                  type: string
+                  format: binary
+              multipart/form-data:
+                schema:
+                  type: object
+          responses:
+            '200':
+              description: The upload succeeded
+
+  - target: $.paths
+    description: >-
+      The spec predates Slack's v2 upload flow. https://docs.slack.dev/reference/methods/files.completeUploadExternal
+      documents POST with the files:write scope, a JSON or form body with `files` (each an `id`
+      and an optional `title`) required, answered with the files shared.
+    update:
+      /files.completeUploadExternal:
+        post:
+          security:
+            - slackAuth:
+                - files:write
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required: [files]
+                  properties:
+                    files:
+                      type: array
+                      items:
+                        type: object
+                        required: [id]
+                        properties:
+                          id:
+                            type: string
+                          title:
+                            type: string
+                    channel_id:
+                      type: string
+                    thread_ts:
+                      type: string
+                    channels:
+                      type: string
+                    initial_comment:
+                      type: string
+                    blocks:
+                      type: string
+          responses:
+            '200':
+              description: The files completed, or `ok` false with an `error`
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    required: [ok]
+                    properties:
+                      ok:
+                        type: boolean
+                      error:
+                        type: string
+                      files:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            title:
+                              type: string

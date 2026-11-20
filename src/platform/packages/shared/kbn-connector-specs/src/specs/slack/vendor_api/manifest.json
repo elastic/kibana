@@ -195,7 +195,26 @@
         "source": "web"
       }
     ],
-    "searchMessages": [],
+    "searchMessages": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "empty_string",
+          "request": {
+            "cursorParam": "cursor",
+            "in": "body",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "results.messages",
+            "nextPath": "response_metadata.next_cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/assistant.search.context",
+        "source": "web"
+      }
+    ],
     "sendMessage": [
       {
         "method": "post",
@@ -210,7 +229,23 @@
         "source": "web"
       }
     ],
-    "uploadFile": [],
+    "uploadFile": [
+      {
+        "method": "post",
+        "path": "/files.completeUploadExternal",
+        "source": "web"
+      },
+      {
+        "method": "post",
+        "path": "/files.getUploadURLExternal",
+        "source": "web"
+      },
+      {
+        "method": "post",
+        "path": "/upload/v1/{uploadId}",
+        "source": "web"
+      }
+    ],
     "whoAmI": [
       {
         "method": "get",
@@ -226,21 +261,5 @@
       "format": "swagger",
       "url": "https://raw.githubusercontent.com/slackapi/slack-api-specs/master/web-api/slack_web_openapi_v2.json"
     }
-  },
-  "unmatched": {
-    "searchMessages": [
-      {
-        "method": "post",
-        "path": "/api/assistant.search.context",
-        "reason": "Missing from Slack's published OpenAPI spec; documented at https://docs.slack.dev/reference/methods/assistant.search.context"
-      }
-    ],
-    "uploadFile": [
-      {
-        "method": "post",
-        "path": "/api/files.getUploadURLExternal",
-        "reason": "Missing from Slack's published OpenAPI spec, as is files.completeUploadExternal, the flow's last step, which recording doesn't reach; documented at https://docs.slack.dev/reference/methods/files.getUploadURLExternal"
-      }
-    ]
   }
 }

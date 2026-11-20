@@ -1,5 +1,19 @@
 {
   "searchMessages": {
-    "queries": [{ "method": "POST", "path": "/api/assistant.search.context" }]
+    "queries": [{ "source": "web", "method": "POST", "path": "/assistant.search.context" }]
+  },
+  "uploadFile": {
+    "responses": [
+      {
+        "method": "POST",
+        "path": "/files.getUploadURLExternal",
+        "status": 200,
+        "body": {
+          "ok": true,
+          "upload_url": "https://files.slack.com/upload/v1/ABC123",
+          "file_id": "F123ABC456"
+        }
+      }
+    ]
   }
 }
