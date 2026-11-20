@@ -16,6 +16,13 @@ import { useFailedAutomationRuns } from '../../hooks/use_failed_automation_runs'
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { getWorkflowExecutionPath } from '../../utils/get_workflow_execution_path';
+import { AUTOMATIONS_PANEL_ID } from './automations_panel_id';
+
+const scrollToAutomations = () => {
+  document
+    .getElementById(AUTOMATIONS_PANEL_ID)
+    ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
 
 interface FailedAutomationRunsCalloutProps {
   /** Workflow ids of the automations shown on the page. */
@@ -69,18 +76,36 @@ export const FailedAutomationRunsCallout = ({ workflowIds }: FailedAutomationRun
                   }
                 )
               : name}{' '}
-            <EuiLink
-              href={runHref}
-              data-test-subj="contextOverviewFailedRunsViewRunLink"
-              {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageOverview,
-                action: CONTEXT_ENGINE_UI_EBT.action.overview.OPEN_FAILED_RUN,
-              })}
-            >
-              {i18n.translate('xpack.contextEngine.aiIndexDetail.overview.failedRuns.viewRunLink', {
-                defaultMessage: 'View run',
-              })}
-            </EuiLink>
+            {failedRuns.length > 1 ? (
+              // Several failures: the automation rows below list each one with its own run link.
+              <EuiLink
+                onClick={scrollToAutomations}
+                data-test-subj="contextOverviewFailedRunsViewAutomationsLink"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageOverview,
+                  action: CONTEXT_ENGINE_UI_EBT.action.overview.VIEW_FAILED_AUTOMATIONS,
+                })}
+              >
+                {i18n.translate(
+                  'xpack.contextEngine.aiIndexDetail.overview.failedRuns.viewAutomationsLink',
+                  { defaultMessage: 'View automations' }
+                )}
+              </EuiLink>
+            ) : (
+              <EuiLink
+                href={runHref}
+                data-test-subj="contextOverviewFailedRunsViewRunLink"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageOverview,
+                  action: CONTEXT_ENGINE_UI_EBT.action.overview.OPEN_FAILED_RUN,
+                })}
+              >
+                {i18n.translate(
+                  'xpack.contextEngine.aiIndexDetail.overview.failedRuns.viewRunLink',
+                  { defaultMessage: 'View run' }
+                )}
+              </EuiLink>
+            )}
           </p>
         }
       />

@@ -69,6 +69,7 @@ const ebtAction = {
     OPEN_RECENT_DOCUMENT: 'open_recent_document',
     VIEW_ALL_DOCUMENTS: 'view_all_documents',
     OPEN_FAILED_RUN: 'open_failed_run',
+    VIEW_FAILED_AUTOMATIONS: 'view_failed_automations',
   },
   description: {
     SAVE: 'save_description',

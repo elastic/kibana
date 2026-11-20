@@ -41,6 +41,7 @@ import { getVisibleAutomations, getVisibleWorkflowIds } from '../../utils/visibl
 import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 import { AiIndexDetailPanelEmptyState } from './ai_index_detail_panel_empty_prompt';
 import { AutomationRow } from './automation_row';
+import { AUTOMATIONS_PANEL_ID } from './automations_panel_id';
 
 /**
  * Builds the query string that tells the Workflows app to send its back button
@@ -221,7 +222,7 @@ export const AutomationsPanel = ({
   );
 
   return (
-    <EuiPanel hasBorder paddingSize="l">
+    <EuiPanel hasBorder paddingSize="l" id={AUTOMATIONS_PANEL_ID}>
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="s">

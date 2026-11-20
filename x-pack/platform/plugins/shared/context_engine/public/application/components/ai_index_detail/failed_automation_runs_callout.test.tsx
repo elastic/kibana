@@ -8,11 +8,12 @@
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ExecutionStatus } from '@kbn/workflows';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { FailedAutomationRun } from '../../hooks/use_failed_automation_runs';
 import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
+import { AUTOMATIONS_PANEL_ID } from './automations_panel_id';
 import { FailedAutomationRunsCallout } from './failed_automation_runs_callout';
 
 jest.mock('../../hooks/use_failed_automation_runs');
@@ -121,6 +122,28 @@ describe('FailedAutomationRunsCallout', () => {
     expect(screen.getByTestId('contextOverviewFailedRunsMessage')).toHaveTextContent(
       'wf-2: Timed out'
     );
+  });
+
+  it('links to the automations list instead of one run when several runs failed', () => {
+    mockUseFailedAutomationRuns.mockReturnValue([
+      failedRun('wf-1', 'connect ECONNREFUSED'),
+      failedRun('wf-2', 'Timed out'),
+    ]);
+    const automationsPanel = document.createElement('div');
+    automationsPanel.id = AUTOMATIONS_PANEL_ID;
+    automationsPanel.scrollIntoView = jest.fn();
+    document.body.appendChild(automationsPanel);
+
+    renderCallout();
+
+    expect(screen.queryByTestId('contextOverviewFailedRunsViewRunLink')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextOverviewFailedRunsViewAutomationsLink'));
+    expect(automationsPanel.scrollIntoView).toHaveBeenCalledWith({
+      behavior: 'smooth',
+      block: 'start',
+    });
+
+    automationsPanel.remove();
   });
 
   it('shows only the automation name when the run has no error message', () => {
