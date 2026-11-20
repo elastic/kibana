@@ -510,9 +510,15 @@ export function buildAPIAnnotationsLayer(
     throw new DataViewNotFoundError(layer.layerId);
   }
 
+  const esqlAnnotations = layer.annotations.filter(isEsqlAnnotationConfig);
+  const otherAnnotations = layer.annotations.filter(
+    (annotation): annotation is Exclude<typeof annotation, EsqlEventAnnotationConfig> =>
+      !isEsqlAnnotationConfig(annotation)
+  );
+
   // ES|QL annotations carry their own query, so their layers use the ES|QL layer schema,
   // which has no data view and no DSL query events.
-  if (layer.annotations.some(isEsqlAnnotationConfig)) {
+  if (esqlAnnotations.length > 0) {
     return {
       type: 'annotations',
       ignore_global_filters: layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
@@ -532,10 +538,7 @@ export function buildAPIAnnotationsLayer(
     type: 'annotations',
     ...(dataSource ? { data_source: dataSource } : {}),
     ignore_global_filters: layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
-    events: layer.annotations.map((annotation) => {
-      if (isEsqlAnnotationConfig(annotation)) {
-        throw new Error('ES|QL annotations are converted by the ES|QL layer branch above.');
-      }
+    events: otherAnnotations.map((annotation) => {
       if (isQueryAnnotationConfig(annotation)) {
         return {
           type: 'query',
