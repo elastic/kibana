@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FleetErrorResponse } from '../../common';
+import type { AgentVersionBlock, FleetErrorResponse } from '../../common';
 
 import type { PackageInfo, PackageListItem } from '../types';
 
@@ -34,6 +34,14 @@ export const isAssetVerificationError = (err?: FleetErrorResponse | RequestError
 
 export const isBreakingChangesNotAcknowledgedError = (err?: FleetErrorResponse | RequestError) =>
   err && 'attributes' in err && err.attributes?.type === 'breaking_changes_not_acknowledged';
+
+/** The agent version block of an error rejecting a change because of incompatible agents. */
+export const getAgentVersionBlockFromError = (
+  err?: FleetErrorResponse | RequestError
+): AgentVersionBlock | undefined =>
+  err && 'attributes' in err && err.attributes?.type === 'agent_version_incompatible'
+    ? err.attributes.agent_version_block
+    : undefined;
 
 export const getMissingAssetsFromError = (err?: FleetErrorResponse | RequestError) =>
   (err && 'attributes' in err && err.attributes?.missing_assets) || undefined;

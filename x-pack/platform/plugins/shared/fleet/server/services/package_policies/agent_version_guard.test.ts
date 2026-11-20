@@ -13,9 +13,12 @@ import { getAgentsByKuery } from '../agents';
 import {
   AGENT_VERSION_CONDITION_AGENTS_KUERY,
   assertAgentVersionCompatible,
+  createAgentVersionIncompatibleError,
   getAgentVersionBlockMessage,
   getAgentVersionBlocks,
   getAgentVersionGuardScope,
+  redactAgentVersionBlock,
+  redactAgentVersionIncompatibleError,
 } from './agent_version_guard';
 
 jest.mock('../app_context');
@@ -174,6 +177,21 @@ describe('agent_version_guard', () => {
       expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
     });
 
+    it('does not block when the agents cannot be queried', async () => {
+      const warn = jest.fn();
+      mockedAppContextService.getLogger.mockReturnValue({ warn } as never);
+      mockedGetAgentsByKuery.mockRejectedValue(new Error('expensive queries are not allowed'));
+
+      const blocks = await getAgentVersionBlocks([
+        { key: 'pp-1', pkgInfo: pkgInfo('^9.4.0'), agentPolicyIds: ['policy-1'] },
+      ]);
+
+      expect(blocks.size).toBe(0);
+      expect(warn).toHaveBeenCalledWith(
+        'Skipped the agent version check of aws_mq@2.3.0: failed to query agents: expensive queries are not allowed'
+      );
+    });
+
     it('does nothing when version-specific policies are disabled', async () => {
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({
         enableVersionSpecificPolicies: false,
@@ -250,7 +268,7 @@ describe('agent_version_guard', () => {
           { ...block, observed_versions: ['9.3.0'], min_version: '9.6.0' },
           'add'
         )
-      ).toContain('Upgrade the agents to 9.6.0 or later.');
+      ).toContain('Upgrade the agents to a version that satisfies it, such as 9.6.0.');
     });
 
     it('caps the number of listed versions', () => {
@@ -258,6 +276,55 @@ describe('agent_version_guard', () => {
       expect(
         getAgentVersionBlockMessage({ ...block, observed_versions: observedVersions }, 'add')
       ).toContain('8.9.0 and 2 more');
+    });
+
+    it('does not describe the agents of a redacted block', () => {
+      const message = getAgentVersionBlockMessage(
+        redactAgentVersionBlock({ ...block, min_version: '9.6.0' }),
+        'add'
+      );
+
+      expect(message).toContain(
+        "Cannot add azure_billing 1.13.0 to the selected agent policies: it requires agent version ~9.4.6 || ~9.5.3 || ^9.6.0, and some active agents don't satisfy it."
+      );
+      expect(message).not.toContain('9.4.8');
+      expect(message).not.toContain('9.6.0.');
+    });
+  });
+
+  describe('redactAgentVersionIncompatibleError', () => {
+    it('removes the agent inventory from the error', () => {
+      const error = createAgentVersionIncompatibleError(
+        {
+          package_name: 'aws_mq',
+          package_version: '2.3.0',
+          version_condition: '^9.4.0',
+          blocked_count: 2,
+          observed_versions: ['9.3.1'],
+          min_version: '9.4.0',
+        },
+        'upgrade'
+      );
+
+      const redacted = redactAgentVersionIncompatibleError(error);
+
+      expect(redacted).toBeInstanceOf(PackagePolicyAgentVersionIncompatibleError);
+      expect(redacted.message).not.toContain('9.3.1');
+      expect(redacted.message).toContain('Cannot upgrade aws_mq to 2.3.0');
+      expect((redacted as PackagePolicyAgentVersionIncompatibleError).attributes).toEqual({
+        type: 'agent_version_incompatible',
+        agent_version_block: {
+          package_name: 'aws_mq',
+          package_version: '2.3.0',
+          version_condition: '^9.4.0',
+        },
+      });
+    });
+
+    it('returns other errors unchanged', () => {
+      const error = new Error('boom');
+
+      expect(redactAgentVersionIncompatibleError(error)).toBe(error);
     });
   });
 

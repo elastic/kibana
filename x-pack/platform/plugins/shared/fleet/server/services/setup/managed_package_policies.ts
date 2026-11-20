@@ -373,7 +373,7 @@ async function upgradePackagePolicies(
             packagePolicy.id
           } to ${agentVersionBlock.package_name}@${agentVersionBlock.package_version}: ${
             agentVersionBlock.blocked_count
-          } active agents on ${agentVersionBlock.observed_versions.join(
+          } active agents on ${agentVersionBlock.observed_versions?.join(
             ', '
           )} don't satisfy its agent version condition ${agentVersionBlock.version_condition}`
         );

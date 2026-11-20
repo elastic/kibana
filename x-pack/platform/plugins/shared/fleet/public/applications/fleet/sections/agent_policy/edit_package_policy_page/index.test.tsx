@@ -720,6 +720,70 @@ describe('edit package policy page', () => {
       });
     });
 
+    it('asks to acknowledge an incompatibility reported by Fleet that the agent counts do not show', async () => {
+      // e.g. without the Agents Read privilege, the agent policies have no agent counts
+      (sendBulkGetAgentPolicies as MockFn).mockResolvedValue({
+        data: { items: [{ id: 'agent-policy-1', name: 'Agent policy 1' }] },
+      });
+      (sendUpdatePackagePolicy as MockFn).mockResolvedValueOnce({
+        error: {
+          statusCode: 400,
+          message: 'Cannot upgrade nginx to 1.4.0',
+          attributes: {
+            type: 'agent_version_incompatible',
+            agent_version_block: {
+              package_name: 'nginx',
+              package_version: '1.4.0',
+              version_condition: '^9.4.0',
+            },
+          },
+        },
+      });
+      (useUIExtension as MockFn)
+        .mockReturnValueOnce({
+          view: 'package-policy-edit',
+          useLatestPackageVersion: true,
+          Component: TestComponent,
+        })
+        .mockReturnValueOnce(undefined)
+        .mockReturnValueOnce({
+          view: 'package-policy-edit-tabs',
+          useLatestPackageVersion: true,
+          Component: TestComponent,
+        });
+      (sendUpgradePackagePolicyDryRun as MockFn).mockResolvedValue({
+        data: [{ diff: [mockPackagePolicy, mockPackagePolicyNewVersion] }],
+      });
+
+      render();
+
+      let upgradeBtn: HTMLElement;
+      await waitFor(() => {
+        upgradeBtn = renderResult.getByText(/Upgrade integration/).closest('button')!;
+        expect(upgradeBtn).not.toBeDisabled();
+      });
+      expect(renderResult.queryByTestId('incompatibleAgentVersionCallout')).toBeNull();
+
+      fireEvent.click(upgradeBtn!);
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('incompatibleAgentVersionCallout')).toBeInTheDocument();
+      });
+      expect(upgradeBtn!).toBeDisabled();
+
+      fireEvent.click(renderResult.getByTestId('acknowledgeAgentVersionIncompatibilityCheckbox'));
+      await waitFor(() => expect(upgradeBtn).not.toBeDisabled());
+      fireEvent.click(upgradeBtn!);
+
+      await waitFor(() => {
+        expect(sendUpdatePackagePolicy).toHaveBeenLastCalledWith(
+          'nginx-1',
+          expect.objectContaining({ acknowledge_agent_version_incompatibility: true }),
+          expect.anything()
+        );
+      });
+    });
+
     it('does not require an acknowledgement for other edits', async () => {
       render();
 

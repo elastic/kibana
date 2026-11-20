@@ -114,9 +114,10 @@ export interface AgentVersionBlock {
   package_name: string;
   package_version: string;
   version_condition: string;
-  blocked_count: number;
+  /** Omitted, with `observed_versions` and `min_version`, for callers that can't read agents. */
+  blocked_count?: number;
   /** The versions reported by the blocked agents. */
-  observed_versions: string[];
+  observed_versions?: string[];
   /** The lowest agent version satisfying the condition, when the blocked agents all run below it. */
   min_version?: string;
 }

@@ -517,14 +517,19 @@ describe('policy preconfiguration', () => {
       const logger = loggingSystemMock.create().get();
       jest.mocked(appContextService).getLogger.mockReturnValue(logger);
       mockedPackagePolicyService.create.mockRejectedValueOnce(
-        new PackagePolicyAgentVersionIncompatibleError('blocked by agents', {
-          package_name: 'test_package',
-          package_version: '3.0.0',
-          version_condition: '^9.4.0',
-          blocked_count: 1,
-          observed_versions: ['9.3.0'],
-        })
+        new PackagePolicyAgentVersionIncompatibleError(
+          'blocked by agents',
+          {
+            package_name: 'test_package',
+            package_version: '3.0.0',
+            version_condition: '^9.4.0',
+            blocked_count: 1,
+            observed_versions: ['9.3.0'],
+          },
+          'add'
+        )
       );
+      const spyBumpRevision = jest.spyOn(agentPolicy.agentPolicyService, 'bumpRevision');
 
       const { policies, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
         soClient,
@@ -555,6 +560,8 @@ describe('policy preconfiguration', () => {
       expect(policies.length).toEqual(1);
       expect(nonFatalErrors.length).toBe(0);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('blocked by agents'));
+      // Nothing was added, so the agent policy is unchanged
+      expect(spyBumpRevision).not.toHaveBeenCalled();
     });
 
     it('should install packages and configure agent policies successfully for deleted managed policies', async () => {

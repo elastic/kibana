@@ -45,7 +45,11 @@ import {
   CreatePackagePolicyResponseSchema,
 } from '../../types';
 import type { PackagePolicy } from '../../types';
-import { PackageBreakingChangesNotAcknowledgedError } from '../../errors';
+import {
+  PackageBreakingChangesNotAcknowledgedError,
+  PackagePolicyAgentVersionIncompatibleError,
+} from '../../errors';
+import { createAgentVersionIncompatibleError } from '../../services/package_policies/agent_version_guard';
 
 import { ListResponseSchema } from '../schema/utils';
 import {
@@ -132,6 +136,7 @@ jest.mock(
         upgrade: jest.fn(),
         bulkUpgrade: jest.fn(),
         getUpgradeDryRunDiff: jest.fn(),
+        getUpgradeDryRunDiffs: jest.fn(),
         enrichPolicyWithDefaultsFromPackage: jest
           .fn()
           .mockImplementation((soClient, newPolicy) => newPolicy),
@@ -947,6 +952,53 @@ describe('When calling package policy', () => {
       expect(validationResp).toEqual(expectedResponse);
     });
 
+    describe('when some agents are incompatible with the package', () => {
+      const agentVersionIncompatibleError = createAgentVersionIncompatibleError(
+        {
+          package_name: 'a-package',
+          package_version: '1.0.0',
+          version_condition: '^9.4.0',
+          blocked_count: 2,
+          observed_versions: ['9.3.1'],
+        },
+        'add'
+      );
+
+      beforeEach(async () => {
+        (
+          (await context.fleet).packagePolicyService
+            .asCurrentUser as jest.Mocked<PackagePolicyClient>
+        ).create.mockRejectedValue(agentVersionIncompatibleError);
+      });
+
+      it('returns the agents to users who can read agents', async () => {
+        const request = httpServerMock.createKibanaRequest({ body: testPackagePolicy });
+
+        await expect(createPackagePolicyHandler(context, request, response)).rejects.toBe(
+          agentVersionIncompatibleError
+        );
+      });
+
+      it('does not return the agents to users who cannot read agents', async () => {
+        (await context.fleet).authz.fleet.readAgents = false;
+        const request = httpServerMock.createKibanaRequest({ body: testPackagePolicy });
+
+        const promise = createPackagePolicyHandler(context, request, response);
+
+        await expect(promise).rejects.toBeInstanceOf(PackagePolicyAgentVersionIncompatibleError);
+        await expect(promise).rejects.toMatchObject({
+          message: expect.not.stringContaining('9.3.1'),
+          attributes: {
+            agent_version_block: {
+              package_name: 'a-package',
+              package_version: '1.0.0',
+              version_condition: '^9.4.0',
+            },
+          },
+        });
+      });
+    });
+
     describe('when disableAgentlessLegacyAPI is enabled', () => {
       const agentlessOnlyTemplate = {
         name: 'template',
@@ -1276,6 +1328,56 @@ describe('When calling package policy', () => {
           body: { message: 'Cannot upgrade test to 1.0.0' },
         });
       });
+
+      it('does not return the agents to users who cannot read agents', async () => {
+        (await context.fleet).authz.fleet.readAgents = false;
+        const agentVersionBlock = {
+          package_name: 'test',
+          package_version: '1.0.0',
+          version_condition: '^9.4.0',
+          blocked_count: 2,
+          observed_versions: ['9.3.1'],
+        };
+        packagePolicyServiceMock.bulkUpgrade.mockResolvedValue([
+          ...responseBody,
+          {
+            ...blockedItem,
+            body: {
+              message:
+                "Cannot upgrade test to 1.0.0: it requires agent version ^9.4.0, and 2 active agents on 9.3.1 don't satisfy it.",
+              attributes: {
+                type: 'agent_version_incompatible',
+                agent_version_block: agentVersionBlock,
+              },
+            },
+          },
+        ]);
+        const request = httpServerMock.createKibanaRequest({
+          body: { packagePolicyIds: ['1', '2'], acknowledge_breaking_changes: true },
+        });
+
+        await upgradePackagePolicyHandler(context, request, response);
+
+        expect(response.ok).toHaveBeenCalledWith({
+          body: [
+            ...responseBody,
+            expect.objectContaining({
+              body: {
+                message:
+                  "Cannot upgrade test to 1.0.0: it requires agent version ^9.4.0, and some active agents don't satisfy it. Those agents would stop collecting this integration's data. To proceed anyway, set acknowledge_agent_version_incompatibility to true.",
+                attributes: {
+                  type: 'agent_version_incompatible',
+                  agent_version_block: {
+                    package_name: 'test',
+                    package_version: '1.0.0',
+                    version_condition: '^9.4.0',
+                  },
+                },
+              },
+            }),
+          ],
+        });
+      });
     });
 
     describe('breaking changes', () => {
@@ -1469,8 +1571,7 @@ describe('When calling package policy', () => {
       };
       responseBody = [responseItem, responseItem];
 
-      packagePolicyServiceMock.getUpgradeDryRunDiff.mockResolvedValueOnce(responseBody[0]);
-      packagePolicyServiceMock.getUpgradeDryRunDiff.mockResolvedValueOnce(responseBody[1]);
+      packagePolicyServiceMock.getUpgradeDryRunDiffs.mockResolvedValue(responseBody);
     });
 
     it('should return valid response', async () => {
@@ -1495,10 +1596,9 @@ describe('When calling package policy', () => {
         },
       });
       await dryRunUpgradePackagePolicyHandler(context, request, response);
-      expect(packagePolicyServiceMock.getUpgradeDryRunDiff).toHaveBeenCalledWith(
+      expect(packagePolicyServiceMock.getUpgradeDryRunDiffs).toHaveBeenCalledWith(
         expect.anything(),
-        '1',
-        undefined,
+        ['1'],
         '2.3.0'
       );
     });
@@ -1510,8 +1610,56 @@ describe('When calling package policy', () => {
         },
       });
       await dryRunUpgradePackagePolicyHandler(context, request, response);
+      expect(packagePolicyServiceMock.getUpgradeDryRunDiffs).toHaveBeenCalledWith(
+        expect.anything(),
+        ['1', '2'],
+        undefined
+      );
       expect(response.ok).toHaveBeenCalledWith({
         body: responseBody,
+      });
+    });
+
+    describe('with an agent version block', () => {
+      const agentVersionBlock = {
+        package_name: 'a-package',
+        package_version: '1.1.0',
+        version_condition: '^9.4.0',
+        blocked_count: 2,
+        observed_versions: ['9.3.1'],
+        min_version: '9.4.0',
+      };
+
+      beforeEach(() => {
+        packagePolicyServiceMock.getUpgradeDryRunDiffs.mockResolvedValue([
+          { ...responseBody[0], agent_version_block: agentVersionBlock },
+        ]);
+      });
+
+      it('returns the agents to users who can read agents', async () => {
+        const request = httpServerMock.createKibanaRequest({ body: { packagePolicyIds: ['1'] } });
+        await dryRunUpgradePackagePolicyHandler(context, request, response);
+        expect(response.ok).toHaveBeenCalledWith({
+          body: [{ ...responseBody[0], agent_version_block: agentVersionBlock }],
+        });
+      });
+
+      it('does not return the agents to users who cannot read agents', async () => {
+        (await context.fleet).authz.fleet.readAgents = false;
+        const request = httpServerMock.createKibanaRequest({ body: { packagePolicyIds: ['1'] } });
+        await dryRunUpgradePackagePolicyHandler(context, request, response);
+        expect(response.ok).toHaveBeenCalledWith({
+          body: [
+            {
+              ...responseBody[0],
+              agent_version_block: {
+                package_name: 'a-package',
+                package_version: '1.1.0',
+                version_condition: '^9.4.0',
+              },
+            },
+          ],
+        });
       });
     });
 
@@ -1548,7 +1696,7 @@ describe('When calling package policy', () => {
       await expect(dryRunUpgradePackagePolicyHandler(context, request, response)).rejects.toThrow(
         /To upgrade managed integrations/
       );
-      expect(packagePolicyServiceMock.getUpgradeDryRunDiff).not.toHaveBeenCalled();
+      expect(packagePolicyServiceMock.getUpgradeDryRunDiffs).not.toHaveBeenCalled();
     });
   });
 });

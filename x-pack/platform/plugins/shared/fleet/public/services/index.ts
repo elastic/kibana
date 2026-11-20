@@ -49,6 +49,7 @@ export {
 export {
   isPackageUnverified,
   isVerificationError,
+  getAgentVersionBlockFromError,
   isAssetVerificationError,
   isBreakingChangesNotAcknowledgedError,
   getMissingAssetsFromError,

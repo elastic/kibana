@@ -239,7 +239,11 @@ export class AgentRollbackError extends FleetError {
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}
 export class PackagePolicyValidationError extends FleetError {}
 export class PackagePolicyAgentVersionIncompatibleError extends FleetError {
-  constructor(message: string, public readonly agentVersionBlock: AgentVersionBlock) {
+  constructor(
+    message: string,
+    public readonly agentVersionBlock: AgentVersionBlock,
+    public readonly operation: 'upgrade' | 'add'
+  ) {
     super(message);
     this.attributes = {
       type: 'agent_version_incompatible',

@@ -380,7 +380,12 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           )}`
       );
       const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
-      await addPreconfiguredPolicyPackages(esClient, policy!, packagePoliciesToAdd!, defaultOutput);
+      const addedPackagePoliciesCount = await addPreconfiguredPolicyPackages(
+        esClient,
+        policy!,
+        packagePoliciesToAdd!,
+        defaultOutput
+      );
       s?.end();
 
       logger.debug(
@@ -425,7 +430,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       }
 
       if (
-        packagePoliciesToAdd.length > 0 ||
+        addedPackagePoliciesCount > 0 ||
         packagePoliciesUpdates.length > 0 ||
         shouldAddIsManagedFlag
       ) {
@@ -486,7 +491,8 @@ async function addPreconfiguredPolicyPackages(
   }>,
   defaultOutput: Output,
   bumpAgentPolicyRevison = false
-) {
+): Promise<number> {
+  let addedCount = 0;
   // Cache package info objects so we don't waste lookup time on the latest package
   // every time we call `getPackageInfo`
   const packageInfoMap = new Map<string, PackageInfo>();
@@ -544,6 +550,7 @@ async function addPreconfiguredPolicyPackages(
           packageInfo,
         });
       }
+      addedCount++;
     } catch (error) {
       // A preconfigured package policy can't be acknowledged from kibana.yml: failing here would
       // fail Fleet setup on a configuration the operator can only fix by editing kibana.yml.
@@ -557,4 +564,6 @@ async function addPreconfiguredPolicyPackages(
         );
     }
   }
+
+  return addedCount;
 }

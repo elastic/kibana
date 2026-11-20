@@ -403,7 +403,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Upgrade a package policy',
-      description: 'Upgrade a package policy to a newer package version.',
+      description:
+        "Upgrade a package policy to a newer package version. When only some of the package policies can be upgraded, the response is a 200 with a result per package policy: check each item's `success` field. When none can be upgraded, the response is the first error.",
       options: {
         tags: ['oas-tag:Fleet package policies'],
       },
@@ -419,7 +420,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: UpgradePackagePoliciesRequestSchema,
           response: {
             200: {
-              description: 'OK: A successful request.',
+              description:
+                "OK: At least one package policy was upgraded. Items with `success: false` weren't upgraded, and their `body` explains why.",
               body: () => UpgradePackagePoliciesResponseBodySchema,
             },
             400: {

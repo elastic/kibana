@@ -60,6 +60,7 @@ import {
   sendTelemetryEvents,
 } from '../upgrade_sender';
 
+import type { AgentVersionGuardItem } from './agent_version_guard';
 import { getAgentVersionBlocks, getAgentVersionGuardScope } from './agent_version_guard';
 
 export async function _getUpgradePackagePolicyInfo({
@@ -537,19 +538,61 @@ export async function _packagePoliciesUpgrade({
   });
 }
 
-export async function _packagePoliciesGetUpgradeDryRunDiff({
-  soClient,
-  packagePolicyService,
-  id,
-  packagePolicy,
-  pkgVersion,
-}: {
+interface DryRunDiffArgs {
   soClient: SavedObjectsClientContract;
   packagePolicyService: PackagePolicyClient;
   id: string;
   packagePolicy?: PackagePolicy;
   pkgVersion?: string;
-}): Promise<UpgradePackagePolicyDryRunResponseItem> {
+}
+
+interface DryRunDiffWithGuardItem {
+  result: UpgradePackagePolicyDryRunResponseItem;
+  /** Set when the agent version guard applies to the upgrade. */
+  guardItem?: AgentVersionGuardItem;
+}
+
+/** The dry runs of `entries`, with their agent version blocks fetched with one agent query. */
+async function withAgentVersionBlocks(
+  entries: DryRunDiffWithGuardItem[]
+): Promise<UpgradePackagePolicyDryRunResponseItem[]> {
+  const blocks = await getAgentVersionBlocks(
+    entries.flatMap(({ guardItem }) => (guardItem ? [guardItem] : []))
+  );
+  return entries.map(({ result, guardItem }) => {
+    const agentVersionBlock = guardItem && blocks.get(guardItem.key);
+    return agentVersionBlock ? { ...result, agent_version_block: agentVersionBlock } : result;
+  });
+}
+
+export async function _packagePoliciesGetUpgradeDryRunDiff(
+  args: DryRunDiffArgs
+): Promise<UpgradePackagePolicyDryRunResponseItem> {
+  const [result] = await withAgentVersionBlocks([await getDryRunDiffWithGuardItem(args)]);
+  return result;
+}
+
+/** Same as {@link _packagePoliciesGetUpgradeDryRunDiff} for several package policies. */
+export async function _packagePoliciesGetUpgradeDryRunDiffs({
+  ids,
+  ...args
+}: Omit<DryRunDiffArgs, 'id' | 'packagePolicy'> & {
+  ids: string[];
+}): Promise<UpgradePackagePolicyDryRunResponseItem[]> {
+  const entries: DryRunDiffWithGuardItem[] = [];
+  for (const id of ids) {
+    entries.push(await getDryRunDiffWithGuardItem({ ...args, id }));
+  }
+  return withAgentVersionBlocks(entries);
+}
+
+async function getDryRunDiffWithGuardItem({
+  soClient,
+  packagePolicyService,
+  id,
+  packagePolicy,
+  pkgVersion,
+}: DryRunDiffArgs): Promise<DryRunDiffWithGuardItem> {
   try {
     let packageInfo: PackageInfo;
     let experimentalDataStreamFeatures;
@@ -583,23 +626,25 @@ export async function _packagePoliciesGetUpgradeDryRunDiff({
       oldPolicyIds: packagePolicy.policy_ids ?? [],
       newPolicyIds: packagePolicy.policy_ids ?? [],
     });
-    const agentVersionBlock = agentVersionGuardScope
-      ? (
-          await getAgentVersionBlocks([
-            {
+
+    return {
+      result: diff,
+      ...(agentVersionGuardScope
+        ? {
+            guardItem: {
               key: id,
               pkgInfo: packageInfo,
               agentPolicyIds: agentVersionGuardScope.agentPolicyIds,
             },
-          ])
-        ).get(id)
-      : undefined;
-
-    return agentVersionBlock ? { ...diff, agent_version_block: agentVersionBlock } : diff;
+          }
+        : {}),
+    };
   } catch (error) {
     return {
-      hasErrors: true,
-      ...fleetErrorToResponseOptions(error),
+      result: {
+        hasErrors: true,
+        ...fleetErrorToResponseOptions(error),
+      },
     };
   }
 }

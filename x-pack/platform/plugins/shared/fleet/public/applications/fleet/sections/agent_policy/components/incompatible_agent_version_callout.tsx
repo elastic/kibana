@@ -73,7 +73,7 @@ export const IncompatibleAgentVersionCallout: React.FC<{
             {minVersion ? (
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.StepSelectPolicy.incompatibleAgentVersionUpgrade"
-                defaultMessage="Upgrade them to {minVersion} or later first."
+                defaultMessage="Upgrade them first to a version that satisfies the condition, such as {minVersion}."
                 values={{ minVersion }}
               />
             ) : null}

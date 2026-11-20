@@ -43,6 +43,7 @@ import type {
   PostDeletePackagePoliciesResponse,
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
+  UpgradePackagePolicyResponseItem,
 } from '../../../common/types';
 import { isOnlyAgentlessIntegration } from '../../../common/services/agentless_policy_helper';
 import { logLegacyAgentlessWriteDeprecation } from '../../services/utils/agentless';
@@ -67,6 +68,11 @@ import {
   simplifiedPackagePolicytoNewPackagePolicy,
 } from '../../../common/services/simplified_package_policy_helper';
 import { runWithCache } from '../../services/epm/packages/cache';
+import {
+  getAgentVersionBlockMessage,
+  redactAgentVersionBlock,
+  redactAgentVersionIncompatibleError,
+} from '../../services/package_policies/agent_version_guard';
 
 import {
   alignInputsAndStreams,
@@ -405,7 +411,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         body: { message: error.message },
       });
     }
-    throw error;
+    throw fleetContext.authz.fleet.readAgents ? error : redactAgentVersionIncompatibleError(error);
   }
 };
 
@@ -602,7 +608,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         body: { message: error.message },
       });
     }
-    throw error;
+    throw fleetContext.authz.fleet.readAgents ? error : redactAgentVersionIncompatibleError(error);
   }
 };
 
@@ -714,7 +720,25 @@ const throwIfTargetsAgentlessPolicies = async (
   }
 };
 
-export const upgradePackagePolicyHandler: RequestHandler<
+const redactAgentVersionBlockOfResult = (
+  result: UpgradePackagePolicyResponseItem
+): UpgradePackagePolicyResponseItem => {
+  const agentVersionBlock = result.body?.attributes?.agent_version_block;
+  if (!result.body || !agentVersionBlock) {
+    return result;
+  }
+  const redactedBlock = redactAgentVersionBlock(agentVersionBlock);
+  return {
+    ...result,
+    body: {
+      ...result.body,
+      message: getAgentVersionBlockMessage(redactedBlock, 'upgrade'),
+      attributes: { ...result.body.attributes, agent_version_block: redactedBlock },
+    },
+  };
+};
+
+export const upgradePackagePolicyHandler: FleetRequestHandler<
   unknown,
   unknown,
   TypeOf<typeof UpgradePackagePoliciesRequestSchema.body>
@@ -736,7 +760,7 @@ export const upgradePackagePolicyHandler: RequestHandler<
     await assertPackagePoliciesUpgradeAcknowledged(packagePolicies);
   }
 
-  const body: UpgradePackagePolicyResponse = await packagePolicyService.bulkUpgrade(
+  const results: UpgradePackagePolicyResponse = await packagePolicyService.bulkUpgrade(
     soClient,
     esClient,
     packagePolicyIds,
@@ -746,6 +770,9 @@ export const upgradePackagePolicyHandler: RequestHandler<
         request.body.acknowledge_agent_version_incompatibility,
     }
   );
+  // The agent inventory is fetched as the internal user: only return it to users who can read agents.
+  const { authz } = await context.fleet;
+  const body = authz.fleet.readAgents ? results : results.map(redactAgentVersionBlockOfResult);
 
   // Mixed results are returned as a 200 with per-item results, so that one blocked package policy
   // does not hide the ones that were upgraded. When every item failed, the first error is returned
@@ -765,29 +792,33 @@ export const upgradePackagePolicyHandler: RequestHandler<
   });
 };
 
-export const dryRunUpgradePackagePolicyHandler: RequestHandler<
+export const dryRunUpgradePackagePolicyHandler: FleetRequestHandler<
   unknown,
   unknown,
   TypeOf<typeof DryRunPackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
+  const { authz } = await context.fleet;
 
-  const body: UpgradePackagePolicyDryRunResponse = [];
   const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
 
   await throwIfTargetsAgentlessPolicies(soClient, packagePolicyIds);
 
-  await runWithCache(async () => {
-    for (const id of packagePolicyIds) {
-      const result = await packagePolicyService.getUpgradeDryRunDiff(
-        soClient,
-        id,
-        undefined,
-        request.body.packageVersion
+  const results = await runWithCache(() =>
+    packagePolicyService.getUpgradeDryRunDiffs(
+      soClient,
+      packagePolicyIds,
+      request.body.packageVersion
+    )
+  );
+  // The agent inventory is fetched as the internal user: only return it to users who can read agents.
+  const body: UpgradePackagePolicyDryRunResponse = authz.fleet.readAgents
+    ? results
+    : results.map((result) =>
+        result.agent_version_block
+          ? { ...result, agent_version_block: redactAgentVersionBlock(result.agent_version_block) }
+          : result
       );
-      body.push(result);
-    }
-  });
 
   const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
 

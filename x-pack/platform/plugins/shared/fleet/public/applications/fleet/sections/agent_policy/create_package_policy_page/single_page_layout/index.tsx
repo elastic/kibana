@@ -245,6 +245,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     setCreateDatasetTemplates,
     acknowledgeAgentVersionIncompatibility,
     setAcknowledgeAgentVersionIncompatibility,
+    serverAgentVersionBlock,
   } = useOnSubmit({
     agentCount,
     packageInfo,
@@ -419,12 +420,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
     packageInfo,
-    agentPolicyData?.items
+    agentPolicyData?.items,
+    serverAgentVersionBlock
   );
   // The package policy can't be created on these agent policies without acknowledging that some
   // agents would stop collecting the integration's data
   const isAgentVersionAcknowledgementMissing =
     incompatibleAgentVersion.status !== 'NONE' &&
+    incompatibleAgentVersion.requiresAcknowledgement &&
     !isAgentlessSelected &&
     !acknowledgeAgentVersionIncompatibility;
 
@@ -909,7 +912,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           minVersion={incompatibleAgentVersion.minVersion}
           agentPolicyCount={incompatibleAgentVersion.agentPolicyCount}
           acknowledged={acknowledgeAgentVersionIncompatibility}
-          onAcknowledgeChange={setAcknowledgeAgentVersionIncompatibility}
+          onAcknowledgeChange={
+            incompatibleAgentVersion.requiresAcknowledgement
+              ? setAcknowledgeAgentVersionIncompatibility
+              : undefined
+          }
         />
       )}
 

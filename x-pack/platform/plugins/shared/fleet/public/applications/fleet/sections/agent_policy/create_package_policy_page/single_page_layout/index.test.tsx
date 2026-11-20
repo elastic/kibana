@@ -666,6 +666,62 @@ describe('When on the package policy create page', () => {
       }
     });
 
+    test('asks to acknowledge an incompatibility reported by Fleet that the agent counts do not show', async () => {
+      // e.g. without the Agents Read privilege, the agent policies have no agent counts
+      const packageInfo = getMockPackageInfo();
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
+        ...packageInfo,
+        data: {
+          ...packageInfo.data,
+          item: { ...packageInfo.data.item, conditions: { agent: { version: '^9.4.0' } } },
+        },
+      });
+      (sendCreatePackagePolicyForRq as jest.MockedFunction<any>).mockRejectedValueOnce({
+        statusCode: 400,
+        message: 'Cannot add nginx 1.3.0 to the selected agent policies',
+        attributes: {
+          type: 'agent_version_incompatible',
+          agent_version_block: {
+            package_name: 'nginx',
+            package_version: '1.3.0',
+            version_condition: '^9.4.0',
+          },
+        },
+      });
+      await act(async () => {
+        render('agent-policy-1');
+      });
+
+      let saveBtn: HTMLElement;
+      await waitFor(() => {
+        saveBtn = renderResult.getByText(/Save and continue/).closest('button')!;
+        expect(saveBtn).not.toBeDisabled();
+      });
+      expect(renderResult.queryByTestId('incompatibleAgentVersionCallout')).toBeNull();
+
+      await act(async () => {
+        fireEvent.click(saveBtn);
+      });
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('incompatibleAgentVersionCallout')).toBeInTheDocument();
+      });
+      expect(saveBtn!).toBeDisabled();
+
+      await act(async () => {
+        fireEvent.click(renderResult.getByTestId('acknowledgeAgentVersionIncompatibilityCheckbox'));
+      });
+      await waitFor(() => expect(saveBtn).not.toBeDisabled());
+      await act(async () => {
+        fireEvent.click(saveBtn);
+      });
+
+      expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenLastCalledWith(
+        expect.objectContaining({ acknowledge_agent_version_incompatibility: true }),
+        expect.anything()
+      );
+    });
+
     test('warns when the policy saved but its cloud connector could not record the template details', async () => {
       // The request helper reports the failed template-details write through the options it is handed;
       // the save itself succeeded, so the page must add a warning next to the success toast.

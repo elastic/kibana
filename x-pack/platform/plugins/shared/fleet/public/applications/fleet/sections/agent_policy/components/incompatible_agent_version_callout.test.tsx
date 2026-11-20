@@ -31,7 +31,9 @@ describe('IncompatibleAgentVersionCallout', () => {
     expect(callout).toHaveTextContent(
       "2 active agents on 9.3.1 would stop collecting this integration's data."
     );
-    expect(callout).toHaveTextContent('Upgrade them to 9.4.0 or later first.');
+    expect(callout).toHaveTextContent(
+      'Upgrade them first to a version that satisfies the condition, such as 9.4.0.'
+    );
   });
 
   it('words the warning for a single agent policy', () => {

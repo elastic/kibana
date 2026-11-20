@@ -284,21 +284,28 @@ export const AgentVersionBlockSchema = schema.object(
     package_name: schema.string(),
     package_version: schema.string(),
     version_condition: schema.string(),
-    blocked_count: schema.number({
-      meta: {
-        description:
-          "Number of active agents that don't satisfy the condition and would stop collecting the integration's data.",
-      },
-    }),
-    observed_versions: schema.arrayOf(schema.string(), {
-      maxSize: 1000,
-      meta: { description: 'Versions reported by those agents.' },
-    }),
+    blocked_count: schema.maybe(
+      schema.number({
+        meta: {
+          description:
+            "Number of active agents that don't satisfy the condition and would stop collecting the integration's data. Omitted when the user can't read agents.",
+        },
+      })
+    ),
+    observed_versions: schema.maybe(
+      schema.arrayOf(schema.string(), {
+        maxSize: 1000,
+        meta: {
+          description:
+            "Versions reported by those agents. Omitted when the user can't read agents.",
+        },
+      })
+    ),
     min_version: schema.maybe(
       schema.string({
         meta: {
           description:
-            'Lowest agent version satisfying the condition, when every blocked agent runs below it.',
+            "Lowest agent version satisfying the condition, when every blocked agent runs below it. Omitted when the user can't read agents.",
         },
       })
     ),

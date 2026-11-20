@@ -87,26 +87,41 @@ export async function getAgentVersionBlocks(
   const policyKueryById = new Map(
     guardedAgentPolicyIds.map((id) => [id, buildPolicyIdOrVariantsKuery(id)])
   );
-  const { aggregations } = await getAgentsByKuery(esClient, soClient, {
-    showInactive: false,
-    perPage: 0,
-    kuery: `(${[...policyKueryById.values()].join(
-      ' or '
-    )}) and ${AGENT_VERSION_CONDITION_AGENTS_KUERY}`,
-    aggregations: {
-      policies: {
-        filters: {
-          filters: Object.fromEntries(
-            [...policyKueryById].map(([id, kuery]) => [
-              id,
-              toElasticsearchQuery(fromKueryExpression(kuery)),
-            ])
-          ),
+  let aggregations: Awaited<ReturnType<typeof getAgentsByKuery>>['aggregations'];
+  try {
+    ({ aggregations } = await getAgentsByKuery(esClient, soClient, {
+      showInactive: false,
+      perPage: 0,
+      kuery: `(${[...policyKueryById.values()].join(
+        ' or '
+      )}) and ${AGENT_VERSION_CONDITION_AGENTS_KUERY}`,
+      aggregations: {
+        policies: {
+          filters: {
+            filters: Object.fromEntries(
+              [...policyKueryById].map(([id, kuery]) => [
+                id,
+                toElasticsearchQuery(fromKueryExpression(kuery)),
+              ])
+            ),
+          },
+          aggs: { versions: { terms: { field: 'agent.version', size: MAX_AGENT_VERSIONS } } },
         },
-        aggs: { versions: { terms: { field: 'agent.version', size: MAX_AGENT_VERSIONS } } },
       },
-    },
-  });
+    }));
+  } catch (error) {
+    // The guard is a safety net: when agents can't be queried (e.g. with
+    // `search.allow_expensive_queries: false`, which rejects the agent status runtime field and the
+    // version-specific policy wildcard), don't fail writes that are otherwise valid.
+    appContextService
+      .getLogger()
+      .warn(
+        `Skipped the agent version check of ${itemsWithCondition
+          .map(({ pkgInfo }) => `${pkgInfo.name}@${pkgInfo.version}`)
+          .join(', ')}: failed to query agents: ${error.message}`
+      );
+    return blocks;
+  }
   const buckets = (aggregations?.policies as AgentVersionAggregation | undefined)?.buckets ?? {};
 
   for (const {
@@ -159,24 +174,74 @@ export function getAgentVersionBlockMessage(
     min_version: minVersion,
   } = block;
 
-  const shownVersions = observedVersions.slice(0, MAX_VERSIONS_IN_MESSAGE).join(', ');
-  const hiddenVersions = observedVersions.length - MAX_VERSIONS_IN_MESSAGE;
-  const versions =
-    hiddenVersions > 0 ? `${shownVersions} and ${hiddenVersions} more` : shownVersions;
-
   const target =
     operation === 'upgrade'
       ? `upgrade ${pkgName} to ${pkgVersion}`
       : `add ${pkgName} ${pkgVersion} to the selected agent policies`;
-  const agents = blockedCount === 1 ? '1 active agent' : `${blockedCount} active agents`;
-  const verb = blockedCount === 1 ? "doesn't" : "don't";
+
+  let agents = "some active agents don't";
+  if (blockedCount !== undefined && observedVersions?.length) {
+    const shownVersions = observedVersions.slice(0, MAX_VERSIONS_IN_MESSAGE).join(', ');
+    const hiddenVersions = observedVersions.length - MAX_VERSIONS_IN_MESSAGE;
+    const versions =
+      hiddenVersions > 0 ? `${shownVersions} and ${hiddenVersions} more` : shownVersions;
+    agents =
+      blockedCount === 1
+        ? `1 active agent on ${versions} doesn't`
+        : `${blockedCount} active agents on ${versions} don't`;
+  }
 
   return [
-    `Cannot ${target}: it requires agent version ${versionCondition}, and ${agents} on ${versions} ${verb} satisfy it.`,
+    `Cannot ${target}: it requires agent version ${versionCondition}, and ${agents} satisfy it.`,
     `Those agents would stop collecting this integration's data.`,
-    ...(minVersion ? [`Upgrade the agents to ${minVersion} or later.`] : []),
+    ...(minVersion
+      ? [`Upgrade the agents to a version that satisfies it, such as ${minVersion}.`]
+      : []),
     `To proceed anyway, set acknowledge_agent_version_incompatibility to true.`,
   ].join(' ');
+}
+
+/** The error rejecting a change blocked by an {@link AgentVersionBlock}. */
+export function createAgentVersionIncompatibleError(
+  block: AgentVersionBlock,
+  operation: AgentVersionGuardOperation
+): PackagePolicyAgentVersionIncompatibleError {
+  return new PackagePolicyAgentVersionIncompatibleError(
+    getAgentVersionBlockMessage(block, operation),
+    block,
+    operation
+  );
+}
+
+/**
+ * The {@link AgentVersionBlock} without the agent inventory (agent count, versions and the
+ * upgrade target derived from them), for callers that can't read agents.
+ */
+export function redactAgentVersionBlock({
+  package_name: packageName,
+  package_version: packageVersion,
+  version_condition: versionCondition,
+}: AgentVersionBlock): AgentVersionBlock {
+  return {
+    package_name: packageName,
+    package_version: packageVersion,
+    version_condition: versionCondition,
+  };
+}
+
+/**
+ * `error` without the agent inventory when it is a
+ * {@link PackagePolicyAgentVersionIncompatibleError}, `error` itself otherwise.
+ */
+export function redactAgentVersionIncompatibleError<T>(
+  error: T
+): T | PackagePolicyAgentVersionIncompatibleError {
+  return error instanceof PackagePolicyAgentVersionIncompatibleError
+    ? createAgentVersionIncompatibleError(
+        redactAgentVersionBlock(error.agentVersionBlock),
+        error.operation
+      )
+    : error;
 }
 
 /**
@@ -196,10 +261,7 @@ export async function assertAgentVersionCompatible({
     'item'
   );
   if (block) {
-    throw new PackagePolicyAgentVersionIncompatibleError(
-      getAgentVersionBlockMessage(block, operation),
-      block
-    );
+    throw createAgentVersionIncompatibleError(block, operation);
   }
 }
 

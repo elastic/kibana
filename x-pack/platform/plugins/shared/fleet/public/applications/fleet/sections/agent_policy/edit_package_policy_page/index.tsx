@@ -56,7 +56,8 @@ import {
   type VarGroupSelection,
 } from '../create_package_policy_page/services';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo } from '../../../services';
+import type { AgentVersionBlock } from '../../../../../../common/types';
+import { getAgentVersionBlockFromError, pkgKeyFromPackageInfo } from '../../../services';
 
 import {
   getInheritedNamespace,
@@ -285,16 +286,28 @@ export const EditPackagePolicyForm = memo<{
     }
     return addedAgentPolicyIds.length ? addedAgentPolicies : selectedExistingPolicies;
   }, [isUpgrade, selectedExistingPolicies, addedAgentPolicyIds, addedAgentPoliciesData]);
+  // Set when Fleet rejected the change because some agents don't satisfy the package's agent
+  // version condition, so that it can be acknowledged even if the agent counts don't show it
+  const [serverAgentVersionBlock, setServerAgentVersionBlock] = useState<AgentVersionBlock>();
   const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
     packageInfo,
-    agentPoliciesToCheck
+    agentPoliciesToCheck,
+    serverAgentVersionBlock
   );
   const [acknowledgeAgentVersionIncompatibility, setAcknowledgeAgentVersionIncompatibility] =
     useState<boolean>(false);
-  const isAgentVersionAcknowledgementMissing =
+  const canAcknowledgeAgentVersionIncompatibility =
     requiresAgentVersionAcknowledgement &&
     incompatibleAgentVersion.status !== 'NONE' &&
-    !acknowledgeAgentVersionIncompatibility;
+    incompatibleAgentVersion.requiresAcknowledgement;
+  const isAgentVersionAcknowledgementMissing =
+    canAcknowledgeAgentVersionIncompatibility && !acknowledgeAgentVersionIncompatibility;
+  // An acknowledgement only applies to the agent policies and package version it was given for
+  const agentVersionGuardKey = `${packagePolicy.package?.version}|${addedAgentPolicyIds.join(',')}`;
+  useEffect(() => {
+    setAcknowledgeAgentVersionIncompatibility(false);
+    setServerAgentVersionBlock(undefined);
+  }, [agentVersionGuardKey]);
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
   const [impactedAgentCount, setImpactedAgentCount] = useState<number>(0);
@@ -486,6 +499,11 @@ export const EditPackagePolicyForm = memo<{
           ),
         });
       } else {
+        const agentVersionBlock = getAgentVersionBlockFromError(error);
+        if (agentVersionBlock) {
+          setServerAgentVersionBlock(agentVersionBlock);
+          setAcknowledgeAgentVersionIncompatibility(false);
+        }
         notifications.toasts.addError(error, {
           title: i18n.translate('xpack.fleet.editPackagePolicy.failedNotificationTitle', {
             defaultMessage: `Error updating ''{packagePolicyName}''`,
@@ -756,7 +774,7 @@ export const EditPackagePolicyForm = memo<{
                   agentPolicyCount={incompatibleAgentVersion.agentPolicyCount}
                   acknowledged={acknowledgeAgentVersionIncompatibility}
                   onAcknowledgeChange={
-                    requiresAgentVersionAcknowledgement
+                    canAcknowledgeAgentVersionIncompatibility
                       ? setAcknowledgeAgentVersionIncompatibility
                       : undefined
                   }

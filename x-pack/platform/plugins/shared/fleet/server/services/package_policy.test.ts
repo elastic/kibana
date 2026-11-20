@@ -17193,7 +17193,11 @@ describe('Package policy service agent version guard', () => {
     observed_versions: ['9.3.1'],
     min_version: '9.4.0',
   };
-  const blockedError = new PackagePolicyAgentVersionIncompatibleError('blocked', agentVersionBlock);
+  const blockedError = new PackagePolicyAgentVersionIncompatibleError(
+    'blocked',
+    agentVersionBlock,
+    'add'
+  );
   const esClient = () => elasticsearchServiceMock.createClusterClient().asInternalUser;
 
   beforeEach(() => {
@@ -17265,6 +17269,21 @@ describe('Package policy service agent version guard', () => {
           force: true,
         })
       ).rejects.toThrow(blockedError);
+    });
+
+    it('checks the agents only once the agent policies are found in the current space', async () => {
+      mockAgentPolicyService.get.mockReset().mockResolvedValue(null);
+
+      await expect(
+        packagePolicyService.create(
+          createSavedObjectClientMock(),
+          esClient(),
+          newPackagePolicy,
+          createOptions
+        )
+      ).rejects.toThrow('Agent policy not found');
+
+      expect(mockedAssertAgentVersionCompatible).not.toHaveBeenCalled();
     });
 
     it('skips the check when the incompatibility is acknowledged', async () => {

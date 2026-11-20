@@ -6,7 +6,9 @@
  */
 
 import type { AgentPolicy } from '../types';
-import type { PackageInfo } from '../../../../common/types';
+import type { AgentVersionBlock, PackageInfo } from '../../../../common/types';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
+import { ExperimentalFeaturesService } from '../../../services';
 
 import { getIncompatibleAgentVersionStatus } from './use_incompatible_agent_version_status';
 
@@ -23,6 +25,10 @@ const createPackageInfo = (agentVersionCondition?: string): PackageInfo =>
   } as unknown as PackageInfo);
 
 describe('getIncompatibleAgentVersionStatus', () => {
+  beforeEach(() => {
+    ExperimentalFeaturesService.init(allowedExperimentalValues);
+  });
+
   it('returns { status: NONE } when packageInfo is undefined', () => {
     const result = getIncompatibleAgentVersionStatus(undefined, []);
     expect(result).toEqual({ status: 'NONE' });
@@ -74,6 +80,7 @@ describe('getIncompatibleAgentVersionStatus', () => {
       observedVersions: ['7.17.0'],
       minVersion: '8.0.0',
       agentPolicyCount: 1,
+      requiresAcknowledgement: true,
     });
   });
 
@@ -91,6 +98,7 @@ describe('getIncompatibleAgentVersionStatus', () => {
       observedVersions: ['7.16.0', '7.17.0'],
       minVersion: '8.0.0',
       agentPolicyCount: 1,
+      requiresAcknowledgement: true,
     });
   });
 
@@ -109,6 +117,7 @@ describe('getIncompatibleAgentVersionStatus', () => {
       observedVersions: ['7.17.0'],
       minVersion: '8.0.0',
       agentPolicyCount: 2,
+      requiresAcknowledgement: true,
     });
   });
 
@@ -124,6 +133,7 @@ describe('getIncompatibleAgentVersionStatus', () => {
       observedVersions: ['7.16.0', '7.17.0'],
       minVersion: '8.0.0',
       agentPolicyCount: 2,
+      requiresAcknowledgement: true,
     });
   });
 
@@ -146,6 +156,7 @@ describe('getIncompatibleAgentVersionStatus', () => {
         observedVersions: ['7.17.0-SNAPSHOT'],
         minVersion: '8.0.0',
         agentPolicyCount: 1,
+        requiresAcknowledgement: true,
       });
     });
 
@@ -163,6 +174,7 @@ describe('getIncompatibleAgentVersionStatus', () => {
         observedVersions: ['7.17.0'],
         minVersion: '8.0.0',
         agentPolicyCount: 1,
+        requiresAcknowledgement: true,
       });
     });
 
@@ -202,6 +214,54 @@ describe('getIncompatibleAgentVersionStatus', () => {
       observedVersions: ['9.4.8'],
       minVersion: '9.6.0',
       agentPolicyCount: 1,
+      requiresAcknowledgement: true,
+    });
+  });
+  it('does not require an acknowledgement without version-specific policies', () => {
+    ExperimentalFeaturesService.init({
+      ...allowedExperimentalValues,
+      enableVersionSpecificPolicies: false,
+    });
+
+    const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=9.0.0'), [
+      createAgentPolicy([{ version: '8.19.0', count: 1 }]),
+    ]);
+
+    expect(result).toMatchObject({ status: 'ALL', requiresAcknowledgement: false });
+  });
+
+  describe('with the agent version block returned by Fleet', () => {
+    const serverAgentVersionBlock: AgentVersionBlock = {
+      package_name: 'test',
+      package_version: '1.0.0',
+      version_condition: '^9.4.0',
+    };
+
+    it('reports the incompatibility that the agent counts do not show', () => {
+      const result = getIncompatibleAgentVersionStatus(
+        createPackageInfo('^9.4.0'),
+        [createAgentPolicy(undefined)],
+        serverAgentVersionBlock
+      );
+
+      expect(result).toEqual({
+        status: 'SOME',
+        versionCondition: '^9.4.0',
+        blockedCount: undefined,
+        observedVersions: undefined,
+        agentPolicyCount: 1,
+        requiresAcknowledgement: true,
+      });
+    });
+
+    it('prefers the agent counts when they show the incompatibility', () => {
+      const result = getIncompatibleAgentVersionStatus(
+        createPackageInfo('^9.4.0'),
+        [createAgentPolicy([{ version: '9.3.0', count: 2 }])],
+        serverAgentVersionBlock
+      );
+
+      expect(result).toMatchObject({ status: 'ALL', blockedCount: 2 });
     });
   });
 });

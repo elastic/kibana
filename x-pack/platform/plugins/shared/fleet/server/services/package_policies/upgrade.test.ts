@@ -28,6 +28,7 @@ import {
   _getUpgradePackagePolicyInfo,
   _packagePoliciesBulkUpgrade,
   _packagePoliciesGetUpgradeDryRunDiff,
+  _packagePoliciesGetUpgradeDryRunDiffs,
   _packagePoliciesUpgrade,
 } from './upgrade';
 
@@ -351,6 +352,35 @@ describe('Upgrade', () => {
           pkgInfo: expect.objectContaining({ version: '1.0.2' }),
           agentPolicyIds: ['agent-policy-1'],
         }),
+      ]);
+    });
+
+    it('should check the agents of several package policies with a single query', async () => {
+      jest.mocked(getAgentVersionBlocks).mockClear();
+      const getPackagePolicy = jest.fn(
+        async (_soClient: unknown, id: string) =>
+          ({
+            id,
+            name: `test-${id}`,
+            package: { title: 'test', name: 'test', version: '1.0.1' },
+            namespace: 'default',
+            policy_ids: [`agent-policy-${id}`],
+            inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
+          } as any)
+      );
+
+      const res = await _packagePoliciesGetUpgradeDryRunDiffs({
+        ids: ['1', '2'],
+        soClient: savedObjectsClient,
+        packagePolicyService: { ...packagePolicyService, get: getPackagePolicy } as any,
+        pkgVersion: '1.0.2',
+      });
+
+      expect(res).toHaveLength(2);
+      expect(getAgentVersionBlocks).toHaveBeenCalledTimes(1);
+      expect(getAgentVersionBlocks).toHaveBeenCalledWith([
+        expect.objectContaining({ key: '1', agentPolicyIds: ['agent-policy-1'] }),
+        expect.objectContaining({ key: '2', agentPolicyIds: ['agent-policy-2'] }),
       ]);
     });
 

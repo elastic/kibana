@@ -256,6 +256,13 @@ export interface PackagePolicyClient {
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyDryRunResponseItem>;
 
+  /** Same as `getUpgradeDryRunDiff` for several package policies, with a single agent query. */
+  getUpgradeDryRunDiffs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    pkgVersion?: string
+  ): Promise<UpgradePackagePolicyDryRunResponseItem[]>;
+
   enrichPolicyWithDefaultsFromPackage(
     soClient: SavedObjectsClientContract,
     newPolicy: NewPackagePolicy

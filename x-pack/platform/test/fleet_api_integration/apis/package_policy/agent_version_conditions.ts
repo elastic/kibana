@@ -155,7 +155,9 @@ export default function (providerContext: FtrProviderContext) {
           min_version: '9.3.0',
         });
         expect(body.message).to.contain('1 active agent on 9.2.0');
-        expect(body.message).to.contain('Upgrade the agents to 9.3.0 or later.');
+        expect(body.message).to.contain(
+          'Upgrade the agents to a version that satisfies it, such as 9.3.0.'
+        );
       });
 
       it('creates the package policy when the incompatibility is acknowledged', async () => {
@@ -411,7 +413,9 @@ export default function (providerContext: FtrProviderContext) {
         const body = await upgradePackagePolicies([packagePolicyId], { expected: 400 });
 
         expect(body.message).to.contain('9.3.8');
-        expect(body.message).to.contain('Upgrade the agents to 9.4.0 or later.');
+        expect(body.message).to.contain(
+          'Upgrade the agents to a version that satisfies it, such as 9.4.0.'
+        );
       });
     });
 
@@ -463,6 +467,8 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({
             packages: [{ name: PKG_NAME, version: '1.1.0' }],
+            // 1.1.0 is not the latest version in the test registry
+            force: true,
             upgrade_package_policies: true,
           })
           .expect(200);

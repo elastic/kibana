@@ -122,7 +122,6 @@ import {
   CloudConnectorInvalidVarsError,
   CloudConnectorCreateError,
   CloudConnectorUpdateError,
-  PackagePolicyAgentVersionIncompatibleError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -241,12 +240,13 @@ import {
 import { updatePackagePolicySpaces } from './spaces/package_policy';
 import {
   _packagePoliciesGetUpgradeDryRunDiff,
+  _packagePoliciesGetUpgradeDryRunDiffs,
   _packagePoliciesBulkUpgrade,
   _packagePoliciesUpgrade,
 } from './package_policies/upgrade';
 import {
   assertAgentVersionCompatible,
-  getAgentVersionBlockMessage,
+  createAgentVersionIncompatibleError,
   getAgentVersionBlocks,
   getAgentVersionGuardScope,
 } from './package_policies/agent_version_guard';
@@ -644,14 +644,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     syncDataStreamTypeFromVar(packagePolicy);
     await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
 
-    if (basePkgInfo && !options.acknowledgeAgentVersionIncompatibility) {
-      await assertAgentVersionCompatible({
-        pkgInfo: basePkgInfo,
-        agentPolicyIds: packagePolicy.policy_ids,
-        operation: 'add',
-      });
-    }
-
     let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
       packagePolicy,
@@ -699,6 +691,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       throw new PackagePolicyValidationError(
         '`global_data_tags` can only be set on agentless integration policies'
       );
+    }
+
+    // After the agent policies are found in the caller's space: the guard looks them up in every
+    // space, and its error describes their agents.
+    if (basePkgInfo && !options.acknowledgeAgentVersionIncompatibility) {
+      await assertAgentVersionCompatible({
+        pkgInfo: basePkgInfo,
+        agentPolicyIds: enrichedPackagePolicy.policy_ids,
+        operation: 'add',
+      });
     }
 
     const spaceIds = agentPolicies.flatMap((ap) => ap.space_ids ?? []);
@@ -1141,10 +1143,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         const agentVersionBlock = agentVersionBlocks.get(packagePolicyId);
         if (agentVersionBlock) {
-          throw new PackagePolicyAgentVersionIncompatibleError(
-            getAgentVersionBlockMessage(agentVersionBlock, 'add'),
-            agentVersionBlock
-          );
+          throw createAgentVersionIncompatibleError(agentVersionBlock, 'add');
         }
 
         if (!packagePolicy.package) {
@@ -2394,9 +2393,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const agentVersionBlock = agentVersionBlocks.get(id);
         const agentVersionGuardScope = agentVersionGuardScopes.get(id);
         if (agentVersionBlock && agentVersionGuardScope) {
-          throw new PackagePolicyAgentVersionIncompatibleError(
-            getAgentVersionBlockMessage(agentVersionBlock, agentVersionGuardScope.operation),
-            agentVersionBlock
+          throw createAgentVersionIncompatibleError(
+            agentVersionBlock,
+            agentVersionGuardScope.operation
           );
         }
         let enrichedPackagePolicy: UpdatePackagePolicy;
@@ -3216,6 +3215,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       soClient,
       id,
       packagePolicy,
+      pkgVersion,
+    });
+  }
+
+  public async getUpgradeDryRunDiffs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    pkgVersion?: string
+  ): Promise<UpgradePackagePolicyDryRunResponseItem[]> {
+    return _packagePoliciesGetUpgradeDryRunDiffs({
+      packagePolicyService: this,
+      soClient,
+      ids,
       pkgVersion,
     });
   }
