@@ -75,7 +75,7 @@ describe('resolveTemplateOrigin', () => {
     ).resolves.toEqual({ templateSlug: 'custom', templateOrigin: 'import' });
   });
 
-  it('stores the template as custom when the catalog cannot be read', async () => {
+  it('stores the template as unresolved when no catalog can be read', async () => {
     const logger = loggerMock.create();
     const libraryService = {
       listTemplates: jest
@@ -92,7 +92,7 @@ describe('resolveTemplateOrigin', () => {
         version: '1.2.0',
         origin: 'remix',
       })
-    ).resolves.toEqual({ templateSlug: 'custom', templateOrigin: 'remix' });
+    ).resolves.toEqual({ templateSlug: 'unresolved', templateOrigin: 'remix' });
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('upstream down'));
   });
 
@@ -135,10 +135,10 @@ describe('resolveTemplateOrigin', () => {
       expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('timed out'));
     });
 
-    it('stores the template as custom when there is no cached catalog either', async () => {
+    it('stores the template as unresolved when there is no cached catalog either', async () => {
       const { resolved } = await resolveWithStalledRefresh(undefined);
 
-      expect(resolved).toEqual({ templateSlug: 'custom', templateOrigin: 'remix' });
+      expect(resolved).toEqual({ templateSlug: 'unresolved', templateOrigin: 'remix' });
     });
   });
 });

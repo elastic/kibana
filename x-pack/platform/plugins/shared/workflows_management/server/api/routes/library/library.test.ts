@@ -488,7 +488,7 @@ describe('Library Routes', () => {
       expect(response.ok).toHaveBeenCalledWith({ body: { workflowId: 'wf-3' } });
     });
 
-    it('should still install, as custom, when the catalog cannot be read', async () => {
+    it('should still install, as unresolved, when no catalog can be read', async () => {
       setToggle(true);
       mockLibraryService.listTemplates.mockRejectedValue(
         new LibraryFetchError('upstream down', 'unavailable')
@@ -503,7 +503,7 @@ describe('Library Routes', () => {
       await routeHandlers[`POST:${INSTALL_FROM_YAML_PATH}`].handler(mockContext, request, response);
 
       expect(mockApi.createWorkflow).toHaveBeenCalledWith(expect.anything(), 'default', request, {
-        templateOrigin: { templateSlug: 'custom', templateOrigin: 'import' },
+        templateOrigin: { templateSlug: 'unresolved', templateOrigin: 'import' },
       });
       expect(response.ok).toHaveBeenCalledWith({ body: { workflowId: 'wf-4' } });
     });

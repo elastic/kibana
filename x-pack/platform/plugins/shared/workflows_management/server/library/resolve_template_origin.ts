@@ -10,12 +10,13 @@ import { withTimeout } from '@kbn/std';
 import {
   CUSTOM_WORKFLOW_TEMPLATE_SLUG,
   type TemplateOriginFields,
+  UNRESOLVED_WORKFLOW_TEMPLATE_SLUG,
   type WorkflowTemplateOrigin,
 } from '@kbn/workflows';
 import type { Template } from '@kbn/workflows-library';
 import type { LibraryService } from './library_service';
 
-/** How long a save waits for the catalog before it stores the template origin as custom. */
+/** How long a save waits for a fresh catalog before it falls back to the cached one. */
 export const CATALOG_LOOKUP_TIMEOUT_MS = 3_000;
 
 export interface ResolveTemplateOriginParams {
@@ -52,8 +53,8 @@ const listCatalogTemplates = async (
 
 /**
  * Template origin to store on a workflow created from a template that may not be in the
- * catalog: the slug and version for a catalog template, otherwise `custom` (also when no
- * catalog is available), so values that users choose never reach telemetry.
+ * catalog: the slug and version for a catalog template, `custom` for any other template, and
+ * `unresolved` when no catalog was available, so values that users choose never reach telemetry.
  */
 export const resolveTemplateOrigin = async ({
   libraryService,
@@ -63,8 +64,11 @@ export const resolveTemplateOrigin = async ({
   origin,
 }: ResolveTemplateOriginParams): Promise<TemplateOriginFields> => {
   const templates = await listCatalogTemplates(libraryService, logger);
-  const catalogTemplate = templates?.find((template) => template.slug === slug);
+  if (!templates) {
+    return { templateSlug: UNRESOLVED_WORKFLOW_TEMPLATE_SLUG, templateOrigin: origin };
+  }
 
+  const catalogTemplate = templates.find((template) => template.slug === slug);
   if (!catalogTemplate) {
     return { templateSlug: CUSTOM_WORKFLOW_TEMPLATE_SLUG, templateOrigin: origin };
   }

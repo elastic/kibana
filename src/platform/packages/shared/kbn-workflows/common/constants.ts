@@ -53,6 +53,9 @@ export const WORKFLOW_TEMPLATE_ORIGINS = ['install', 'import', 'remix'] as const
 /** Template slug stored when the source template is not in the library catalog. */
 export const CUSTOM_WORKFLOW_TEMPLATE_SLUG = 'custom';
 
+/** Template slug stored when no catalog was available to check the source template against. */
+export const UNRESOLVED_WORKFLOW_TEMPLATE_SLUG = 'unresolved';
+
 /**
  * Global Advanced Setting gating the global Workflow Executions view
  * (`/app/workflows/executions`) and the execution flyout on workflow detail.
