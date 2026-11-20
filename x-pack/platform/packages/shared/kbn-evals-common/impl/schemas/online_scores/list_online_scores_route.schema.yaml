@@ -40,6 +40,7 @@ paths:
           description: Lower bound of the `@timestamp` range, as an ISO date or Elasticsearch date math (for example `now-1h`).
           schema:
             type: string
+            format: date-math
             maxLength: 64
         - in: query
           name: to
@@ -47,6 +48,7 @@ paths:
           description: Upper bound of the `@timestamp` range, as an ISO date or Elasticsearch date math (for example `now`).
           schema:
             type: string
+            format: date-math
             maxLength: 64
         - in: query
           name: score_name

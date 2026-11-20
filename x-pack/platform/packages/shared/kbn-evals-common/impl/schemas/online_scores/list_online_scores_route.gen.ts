@@ -15,6 +15,7 @@
  */
 
 import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
+import { isValidDateMath } from '@kbn/zod-helpers/v4';
 
 export const ListOnlineScoresRequestQuery = lazySchema(() =>
   z.object({
@@ -24,15 +25,33 @@ export const ListOnlineScoresRequestQuery = lazySchema(() =>
     /**
      * Lower bound of the `@timestamp` range, as an ISO date or Elasticsearch date math (for example `now-1h`).
      */
-    from: z.string().max(64).optional(),
+    from: z
+      .string()
+      .max(64)
+      .superRefine(isValidDateMath)
+      .optional()
+      .describe(
+        'Lower bound of the `@timestamp` range, as an ISO date or Elasticsearch date math (for example `now-1h`).'
+      ),
     /**
      * Upper bound of the `@timestamp` range, as an ISO date or Elasticsearch date math (for example `now`).
      */
-    to: z.string().max(64).optional(),
+    to: z
+      .string()
+      .max(64)
+      .superRefine(isValidDateMath)
+      .optional()
+      .describe(
+        'Upper bound of the `@timestamp` range, as an ISO date or Elasticsearch date math (for example `now`).'
+      ),
     /**
      * Only return scores with this `score.name`.
      */
-    score_name: z.string().max(256).optional(),
+    score_name: z
+      .string()
+      .max(256)
+      .optional()
+      .describe('Only return scores with this `score.name`.'),
   })
 );
 export type ListOnlineScoresRequestQuery = z.infer<typeof ListOnlineScoresRequestQuery>;
