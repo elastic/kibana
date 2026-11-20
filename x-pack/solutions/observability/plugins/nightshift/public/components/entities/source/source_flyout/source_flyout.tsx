@@ -174,7 +174,7 @@ export function SourceFlyout({
   return (
     <>
       <EuiFlyout
-        size="l"
+        size={isMobile ? 'fill' : 'l'}
         onClose={onClose}
         aria-labelledby={titleId}
         data-test-subj="significantEventsAppSourceFlyout"

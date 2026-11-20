@@ -149,7 +149,8 @@ export function KnowledgeIndicatorFeatureDetailsContent({
           {listItems.map((item, index) => (
             <React.Fragment key={item.title}>
               <EuiDescriptionList
-                type="column"
+                // Stacks titles above their values on a phone, where the columns are too narrow.
+                type="responsiveColumn"
                 columnWidths={[1, 2]}
                 compressed
                 listItems={[item]}
