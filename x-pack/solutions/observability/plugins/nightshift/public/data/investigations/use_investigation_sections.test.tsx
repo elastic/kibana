@@ -102,11 +102,19 @@ const createWrapper = () => {
   return Wrapper;
 };
 
-const renderSections = (query?: string) =>
-  renderHook((props: { query?: string }) => useInvestigationSections(props), {
-    initialProps: { query },
-    wrapper: createWrapper(),
-  });
+const renderSections = (props: {
+  query?: string;
+  updatedAfter?: string;
+  updatedBefore?: string;
+} = {}) =>
+  renderHook(
+    (hookProps: { query?: string; updatedAfter?: string; updatedBefore?: string }) =>
+      useInvestigationSections(hookProps),
+    {
+      initialProps: props,
+      wrapper: createWrapper(),
+    }
+  );
 
 describe('useInvestigationSections', () => {
   beforeEach(() => {
@@ -129,24 +137,73 @@ describe('useInvestigationSections', () => {
   });
 
   it('reports whether the space has open investigations outside the landing window', async () => {
-    const { result } = renderSections();
+    const { result } = renderSections({
+      query: 'checkout',
+      updatedAfter: '2026-01-01T00:00:00.000Z',
+      updatedBefore: '2026-01-02T00:00:00.000Z',
+    });
 
     await waitFor(() => expect(result.current.hasOpenInvestigationsInSpace).toBe(true));
     expect(result.current.areSpaceInvestigationsLoading).toBe(false);
-    expect(httpGet).toHaveBeenCalledWith(
-      '/internal/investigations/investigations',
-      expect.objectContaining({
-        query: expect.objectContaining({
-          status: 'open',
-          page: 1,
-          per_page: 1,
-        }),
-      })
+
+    const spaceProbeCall = httpGet.mock.calls.find(
+      ([url, options]) =>
+        String(url) === '/internal/investigations/investigations' &&
+        (options as { query?: { per_page?: number } } | undefined)?.query?.per_page === 1
     );
+    expect(spaceProbeCall).toBeDefined();
+    const probeQuery = (spaceProbeCall![1] as { query: Record<string, unknown> }).query;
+    expect(probeQuery).toEqual({
+      status: 'open',
+      page: 1,
+      per_page: 1,
+      sort_field: 'updated_at',
+      sort_order: 'desc',
+    });
+    expect(probeQuery).not.toHaveProperty('query');
+    expect(probeQuery).not.toHaveProperty('updated_after');
+    expect(probeQuery).not.toHaveProperty('updated_before');
+  });
+
+  it('keeps hasOpenInvestigationsInSpace true when the space probe fails', async () => {
+    httpGet.mockImplementation((url: string) => {
+      if (String(url).includes('_severity_counts')) {
+        return Promise.resolve({ critical: 0, high: 0, medium: 0, low: 0 });
+      }
+      if (String(url) === '/internal/investigations/investigations') {
+        return Promise.reject(new Error('probe failed'));
+      }
+      return Promise.resolve({
+        results: [],
+        pagination: { total: 0, page: 1, per_page: 1 },
+      });
+    });
+
+    const { result } = renderSections();
+
+    await waitFor(() => expect(result.current.areSpaceInvestigationsLoading).toBe(false));
+    expect(result.current.hasOpenInvestigationsInSpace).toBe(true);
+  });
+
+  it('sets hasOpenInvestigationsInSpace false only after a successful empty probe', async () => {
+    httpGet.mockImplementation((url: string) => {
+      if (String(url).includes('_severity_counts')) {
+        return Promise.resolve({ critical: 0, high: 0, medium: 0, low: 0 });
+      }
+      return Promise.resolve({
+        results: [],
+        pagination: { total: 0, page: 1, per_page: 1 },
+      });
+    });
+
+    const { result } = renderSections();
+
+    await waitFor(() => expect(result.current.areSpaceInvestigationsLoading).toBe(false));
+    expect(result.current.hasOpenInvestigationsInSpace).toBe(false);
   });
 
   it('fetches in progress, then each severity tier, then the investigations without a severity', () => {
-    const { result } = renderSections('checkout');
+    const { result } = renderSections({ query: 'checkout' });
 
     expect(
       mockUseFetchInvestigations.mock.calls
@@ -197,7 +254,7 @@ describe('useInvestigationSections', () => {
   });
 
   it('maps the shared severity counts onto the tiers for the tiles', async () => {
-    const { result } = renderSections('checkout');
+    const { result } = renderSections({ query: 'checkout' });
 
     await waitFor(() =>
       expect(result.current.severityCounts).toEqual({
@@ -231,7 +288,7 @@ describe('useInvestigationSections', () => {
       return Promise.resolve({ critical: 0, high: 4, medium: 2, low: 9 });
     });
 
-    const { result } = renderSections('tr');
+    const { result } = renderSections({ query: 'tr' });
 
     await waitFor(() =>
       expect(result.current.severityCounts).toEqual({
@@ -275,7 +332,7 @@ describe('useInvestigationSections', () => {
       return Promise.reject(new Error('baseline unavailable'));
     });
 
-    const { result } = renderSections('tr');
+    const { result } = renderSections({ query: 'tr' });
 
     await waitFor(() =>
       expect(result.current.severityCounts).toEqual({
@@ -313,7 +370,7 @@ describe('useInvestigationSections', () => {
       return params.severities?.[0] === 'none' ? sectionResult({ total: 4 }) : sectionResult();
     });
 
-    const { result } = renderSections('checkout');
+    const { result } = renderSections({ query: 'checkout' });
 
     // 1 running + 4 unrated: the tiers are empty because their sections are.
     await waitFor(() => expect(result.current.totalCount).toBe(5));
@@ -378,7 +435,7 @@ describe('useInvestigationSections', () => {
     mockUseFetchInvestigations.mockImplementation(
       withInProgress({ ids: ['running-a'], refetchCritical })
     );
-    const { rerender } = renderSections('checkout');
+    const { rerender } = renderSections({ query: 'checkout' });
 
     mockUseFetchInvestigations.mockImplementation(
       withInProgress({ ids: ['running-a', 'running-b'], refetchCritical })

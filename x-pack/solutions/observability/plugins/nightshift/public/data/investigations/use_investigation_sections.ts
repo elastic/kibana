@@ -67,8 +67,9 @@ export interface InvestigationSectionsResult {
   /** Running investigations per the API total (not capped by the in-progress page size). */
   activeInvestigationCount: number;
   /**
-   * True when the space has at least one open investigation in any time range (ignores the
-   * landing window and search). Used to keep filters usable when the window alone is empty.
+   * False only after a successful space-wide probe confirms there are no open investigations.
+   * True while loading, on probe error, or when at least one open investigation exists — so a
+   * failed probe cannot hide filters while the list may still show rows.
    */
   hasOpenInvestigationsInSpace: boolean;
   /** True until the space-wide open-investigation probe has settled. */
@@ -354,7 +355,8 @@ export const useInvestigationSections = ({
     hasSeverityCountsError: severityCountsQuery.isError,
     hasActiveInvestigations,
     activeInvestigationCount,
-    hasOpenInvestigationsInSpace: spaceOpenInvestigationsQuery.data === true,
+    // Treat unknown (loading / error) as "keep filters"; only a successful empty probe hides them.
+    hasOpenInvestigationsInSpace: spaceOpenInvestigationsQuery.data !== false,
     areSpaceInvestigationsLoading: spaceOpenInvestigationsQuery.isInitialLoading,
     isInitialLoading: sections.some((section) => section.isInitialLoading),
     isFetching: sections.some((section) => section.isFetching),

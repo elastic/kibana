@@ -66,6 +66,9 @@ function isSeverity(value: string | undefined): value is Severity {
 
 const INVESTIGATIONS_SEARCH_DEBOUNCE_MS = 300;
 
+/** Matches the shared investigations list API `query` max (`MAX_FILTER_TEXT_LENGTH`). */
+const MAX_INVESTIGATIONS_SEARCH_LENGTH = 256;
+
 export function NightshiftApp({
   hideDetectionSetupBanner = false,
   onStartInvestigation,
@@ -92,7 +95,11 @@ export function NightshiftApp({
   const reportedSearchQuery = useRef<string | undefined>(undefined);
 
   // Read filter state from URL so it survives navigation and is shareable.
-  const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
+  // Cap to the list API's query max so a shared overlong `q=` cannot fail every section request.
+  const searchQuery = useMemo(() => {
+    const raw = getNightshiftSearchQueryFromSearch(search);
+    return raw != null ? raw.slice(0, MAX_INVESTIGATIONS_SEARCH_LENGTH) : undefined;
+  }, [search]);
   // The input keeps the raw term so spaces can be typed, but the API rejects a whitespace-only
   // query, so only the trimmed term filters.
   const trimmedSearchQuery = searchQuery?.trim() || undefined;
@@ -252,7 +259,10 @@ export function NightshiftApp({
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const params = new URLSearchParams(history.location.search);
-      setNightshiftSearchQueryParam(params, e.target.value);
+      setNightshiftSearchQueryParam(
+        params,
+        e.target.value.slice(0, MAX_INVESTIGATIONS_SEARCH_LENGTH)
+      );
       history.replace({ search: params.toString() });
     },
     [history]
@@ -377,9 +387,27 @@ export function NightshiftApp({
     },
   });
 
-  if (!isInvestigationsAvailable || allFailed) {
-    const fatalError = sections.find((section) => section.error)?.error ?? null;
-    if (!isInvestigationsAvailable || isHttpNotFoundError(fatalError)) {
+  if (!isInvestigationsAvailable) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        color="warning"
+        iconType="warning"
+        css={css`
+          margin-top: ${euiTheme.size.l};
+        `}
+        title={i18n.translate('xpack.nightshift.investigations.unavailableTitle', {
+          defaultMessage: 'Investigations are not available in this deployment',
+        })}
+      />
+    );
+  }
+
+  const fatalError = sections.find((section) => section.error)?.error ?? null;
+  // A failed load with an active search must keep the filters mounted so the query can be cleared
+  // (Retry alone would resend the same rejected term). Without a search, keep the full-page error.
+  if (allFailed && !showInvestigationsFilters) {
+    if (isHttpNotFoundError(fatalError)) {
       return (
         <EuiCallOut
           announceOnMount
@@ -439,6 +467,7 @@ export function NightshiftApp({
                 })}
                 value={searchQuery ?? ''}
                 onChange={handleSearchChange}
+                maxLength={MAX_INVESTIGATIONS_SEARCH_LENGTH}
                 isClearable
                 fullWidth
                 compressed
@@ -460,39 +489,43 @@ export function NightshiftApp({
         </>
       )}
 
-      <div
-        css={css`
-          position: relative;
-        `}
-      >
-        <InvestigationSeverityTiles
-          severityCounts={severityCounts}
-          presentSeverities={presentSeverities}
-          scrollableSeverities={scrollableSeverities}
-          // The counts are their own query. Until they land (or are replaced after a filter
-          // change) a number would be a default 0 or the previous filter's, contradicting the
-          // rows below, so all four tiles show a skeleton and reveal together.
-          isLoading={
-            isInitialLoading ||
-            areSeverityCountsLoading ||
-            areSeverityCountsStale ||
-            areUnfilteredSeverityCountsLoading
-          }
-          onSeverityClick={handleSeverityClick}
-        />
+      {allFailed ? (
+        <LoadingErrorCallout onRetry={refetchAll} />
+      ) : (
+        <div
+          css={css`
+            position: relative;
+          `}
+        >
+          <InvestigationSeverityTiles
+            severityCounts={severityCounts}
+            presentSeverities={presentSeverities}
+            scrollableSeverities={scrollableSeverities}
+            // The counts are their own query. Until they land (or are replaced after a filter
+            // change) a number would be a default 0 or the previous filter's, contradicting the
+            // rows below, so all four tiles show a skeleton and reveal together.
+            isLoading={
+              isInitialLoading ||
+              areSeverityCountsLoading ||
+              areSeverityCountsStale ||
+              areUnfilteredSeverityCountsLoading
+            }
+            onSeverityClick={handleSeverityClick}
+          />
 
-        <EuiSpacer size="l" />
+          <EuiSpacer size="l" />
 
-        <InvestigationList
-          ref={sectionsRef}
-          sections={sections}
-          selectedInvestigationId={selectedInvestigationId}
-          onInvestigationClick={handleInvestigationClick}
-          onStartInvestigation={onStartInvestigation}
-          onCreateAutomation={onCreateAutomation}
-          hasActiveSearch={Boolean(trimmedSearchQuery)}
-        />
-      </div>
+          <InvestigationList
+            ref={sectionsRef}
+            sections={sections}
+            selectedInvestigationId={selectedInvestigationId}
+            onInvestigationClick={handleInvestigationClick}
+            onStartInvestigation={onStartInvestigation}
+            onCreateAutomation={onCreateAutomation}
+            hasActiveSearch={Boolean(trimmedSearchQuery)}
+          />
+        </div>
+      )}
     </EuiFlexGroup>
   );
 }
