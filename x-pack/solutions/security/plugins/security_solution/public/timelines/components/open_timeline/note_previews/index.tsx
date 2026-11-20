@@ -16,16 +16,13 @@ import {
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useDispatch } from 'react-redux-v7';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { userSelectedNotesForDeletion } from '../../../../notes';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import type { TimelineResultNote } from '../types';
 import { defaultToEmptyTag, getEmptyValue } from '../../../../common/components/empty_value';
@@ -41,7 +38,7 @@ import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../common/lib/teleme
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export const NotePreviewsContainer = styled.section`
-  padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
+  padding-top: ${({ theme }) => `${theme.euiTheme.size.s}`};
 `;
 
 NotePreviewsContainer.displayName = 'NotePreviewsContainer';
@@ -59,43 +56,20 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   const selectedPatterns = useSelectedPatterns(dataView);
 
   const { telemetry } = useKibana().services;
-  const { openFlyout } = useExpandableFlyoutApi();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openDocumentFlyoutFromPattern } = useFlyoutApi();
 
   const handleClick = useCallback(() => {
     const indexName = selectedPatterns.join(',');
-    if (enableNewFlyout) {
-      openDocumentFlyoutFromPattern({
-        documentId: eventId,
-        indexName,
-        origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
-      });
-    } else {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: timelineId,
-          },
-        },
-      });
-    }
+    openDocumentFlyoutFromPattern({
+      documentId: eventId,
+      indexName,
+      origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
+    });
     telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: timelineId,
       panel: 'right',
     });
-  }, [
-    eventId,
-    openFlyout,
-    selectedPatterns,
-    telemetry,
-    timelineId,
-    enableNewFlyout,
-    openDocumentFlyoutFromPattern,
-  ]);
+  }, [eventId, selectedPatterns, telemetry, timelineId, openDocumentFlyoutFromPattern]);
 
   return (
     <EuiToolTip content={i18n.TOGGLE_EXPAND_EVENT_DETAILS} disableScreenReaderOutput>

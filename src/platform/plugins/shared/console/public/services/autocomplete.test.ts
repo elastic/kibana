@@ -85,6 +85,31 @@ describe('AutocompleteInfo', () => {
     }
   });
 
+  it('emits the entities refresh generation only once the response has been loaded', async () => {
+    const http = { get: jest.fn().mockResolvedValue(entitiesResponse) };
+    const autocompleteInfo = new AutocompleteInfo();
+    autocompleteInfo.setup(http as unknown as HttpSetup);
+    const settings = createSettings();
+    const generations: number[] = [];
+    const subscription = autocompleteInfo.entitiesRefreshGeneration$.subscribe((generation) => {
+      generations.push(generation);
+      // The entity providers must already carry the response by the time this emits.
+      expect(Object.keys(autocompleteInfo.alias.perAliasIndexes)).toEqual(
+        generation > 0 ? ['_all'] : []
+      );
+    });
+
+    try {
+      autocompleteInfo.retrieve(settings, settings.getAutocomplete());
+      await flushAsync();
+
+      expect(generations).toEqual([0, 1]);
+    } finally {
+      subscription.unsubscribe();
+      autocompleteInfo.clearSubscriptions();
+    }
+  });
+
   it('does not increment the entities refresh generation when retrieve fails', async () => {
     const http = {
       get: jest

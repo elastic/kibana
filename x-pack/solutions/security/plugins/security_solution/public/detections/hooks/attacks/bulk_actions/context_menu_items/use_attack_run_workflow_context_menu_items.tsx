@@ -15,7 +15,8 @@ import type {
   BulkAttackContextMenuItems,
 } from '../types';
 
-export interface UseAttackRunWorkflowContextMenuItemsProps extends BaseAttackContextMenuItemsProps {
+export interface UseAttackRunWorkflowContextMenuItemsProps
+  extends Omit<BaseAttackContextMenuItemsProps, 'telemetrySource'> {
   /** Attacks to run the workflow against. Each must have an index to be eligible. */
   attacksForWorkflowRun: Omit<BaseAttackProps, 'relatedAlertIds'>[];
 }
@@ -23,7 +24,6 @@ export interface UseAttackRunWorkflowContextMenuItemsProps extends BaseAttackCon
 export const useAttackRunWorkflowContextMenuItems = ({
   attacksForWorkflowRun,
   closePopover,
-  telemetrySource,
 }: UseAttackRunWorkflowContextMenuItemsProps): BulkAttackContextMenuItems => {
   const attacksWithIndex = useMemo(
     () => attacksForWorkflowRun.filter((attack) => Boolean(attack.attackIndex)),
@@ -35,7 +35,7 @@ export const useAttackRunWorkflowContextMenuItems = ({
   // entry name the attack and render the button that reopens its flyout.
   const originAttackId = attacksWithIndex.length === 1 ? attacksWithIndex[0].attackId : undefined;
 
-  const bulkActionItems = useBulkAttackRunWorkflowItems({ telemetrySource, originAttackId });
+  const bulkActionItems = useBulkAttackRunWorkflowItems({ originAttackId });
 
   const attackItems = useMemo(
     () =>

@@ -86,6 +86,36 @@ describe('RulesAdapterV2', () => {
     jest.clearAllMocks();
   });
 
+  describe('findRuleEnabledStates', () => {
+    it('finds states by id in pages of at most 500', async () => {
+      const mock = makeRulesClientMock();
+      mock.findRules.mockImplementation(async ({ filter }: { filter: string }) => ({
+        items: [...filter.matchAll(/id: "([^"]+)"/g)].map(([, id]) => ({
+          id,
+          enabled: id !== 'rule-0',
+        })),
+      }));
+      const ids = Array.from({ length: 501 }, (_, index) => `rule-${index}`);
+      const result = await makeAdapter(mock).findRuleEnabledStates(ids);
+
+      expect(mock.findRules).toHaveBeenCalledTimes(2);
+      expect(mock.findRules.mock.calls[0][0]).toMatchObject({ perPage: 500 });
+      expect(mock.findRules.mock.calls[1][0]).toMatchObject({
+        filter: 'id: "rule-500"',
+        perPage: 1,
+      });
+      expect(result.size).toBe(501);
+      expect(result.get('rule-0')).toBe(false);
+      expect(result.get('rule-500')).toBe(true);
+    });
+
+    it('skips the lookup for an empty set', async () => {
+      const mock = makeRulesClientMock();
+      expect(await makeAdapter(mock).findRuleEnabledStates([])).toEqual(new Map());
+      expect(mock.findRules).not.toHaveBeenCalled();
+    });
+  });
+
   describe('v2 body mapping', () => {
     it('maps createRule body to metric-series signal shape', async () => {
       const mock = makeRulesClientMock();
@@ -94,6 +124,7 @@ describe('RulesAdapterV2', () => {
       await adapter.createRule('rule-1', createDefinition);
 
       const data = lastCreateCall(mock).data as {
+        id: string;
         kind: string;
         metadata: { name: string; tags: string[] };
         time_field: string;
@@ -114,7 +145,7 @@ describe('RulesAdapterV2', () => {
       });
       expect(data.grouping).toEqual({ fields: ['bucket'] });
       expectMetricSeriesBreach(data.query.base);
-      expect(lastCreateCall(mock).options).toEqual({ id: 'rule-1' });
+      expect(data.id).toBe('rule-1');
     });
 
     it('keeps the source id in the ownership tag, including dots', async () => {

@@ -11,7 +11,7 @@ import {
   isAllowedCycleHook,
   isAllowedSkillRegistration,
 } from './allow_lists';
-import { ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
+import { CONNECTORS_SKILLS_BASE_PATH, ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
 
 describe('isAllowedBuiltinTool', () => {
   it('allows namespaced Nightshift sandbox tool ids', () => {
@@ -72,6 +72,15 @@ describe('isAllowedSkillRegistration', () => {
     ).toBe(true);
   });
 
+  it('allows an unlisted skill from the connectors base path', () => {
+    expect(
+      isAllowedSkillRegistration({
+        id: 'platform.connectors.github',
+        basePath: CONNECTORS_SKILLS_BASE_PATH,
+      })
+    ).toBe(true);
+  });
+
   it('rejects an unlisted skill outside the elastic-skills base path', () => {
     expect(
       isAllowedSkillRegistration({ id: 'elasticsearch-esql', basePath: 'skills/search' })
@@ -80,6 +89,10 @@ describe('isAllowedSkillRegistration', () => {
 });
 
 describe('isAllowedCycleHook', () => {
+  it('allows the platform cycle hooks', () => {
+    expect(isAllowedCycleHook('relevant-skills')).toBe(true);
+  });
+
   it('rejects unlisted hook ids', () => {
     expect(isAllowedCycleHook('not-a-hook')).toBe(false);
     expect(isAllowedCycleHook('')).toBe(false);

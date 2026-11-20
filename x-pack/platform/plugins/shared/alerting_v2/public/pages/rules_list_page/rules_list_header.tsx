@@ -20,7 +20,6 @@ import {
   useAreAgentBuilderSkillsAvailable,
   useAgentBuilderSkillsRequirements,
 } from '../../hooks/use_are_agent_builder_skills_available';
-import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
 import { useV2RulesTabNewBadge } from '../../hooks/use_v2_rules_tab_new_badge';
 import { getCreateWithAgentTooltipText } from '../../components/rule_create_options/rule_create_options_panel';
 
@@ -32,35 +31,15 @@ const getRulesListMenu = ({
   onCreateRule,
   onCreateEsqlRule,
   onCreateWithAgent,
-  onBuildSequence,
-  showBuildSequence,
   createWithAgentDisabled,
   createWithAgentTooltipText,
 }: {
   onCreateRule: () => void;
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
-  onBuildSequence: () => void;
-  showBuildSequence: boolean;
   createWithAgentDisabled?: boolean;
   createWithAgentTooltipText?: string;
 }): AppHeaderMenu => ({
-  items: showBuildSequence
-    ? [
-        {
-          id: 'buildSequence',
-          label: i18n.translate('xpack.alertingV2.rulesList.buildSequenceButton', {
-            defaultMessage: 'Build a sequence (Experimental)',
-          }),
-          iconType: 'branch',
-          tooltipContent: i18n.translate('xpack.alertingV2.rulesList.buildSequenceTooltip', {
-            defaultMessage: 'Chain rules to detect multi-step alert patterns',
-          }),
-          testId: 'createSequenceRuleButton',
-          run: onBuildSequence,
-        },
-      ]
-    : [],
   primaryActionItem: {
     id: 'createRule',
     label: i18n.translate('xpack.alertingV2.rulesList.createRuleButton', {
@@ -108,7 +87,6 @@ export interface RulesListHeaderProps {
   onCreateRule: () => void;
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
-  onBuildSequence: () => void;
 }
 
 /**
@@ -121,7 +99,6 @@ export const RulesListHeader = ({
   onCreateRule,
   onCreateEsqlRule,
   onCreateWithAgent,
-  onBuildSequence,
 }: RulesListHeaderProps) => {
   const phase = useContentListPhase();
   const showHeaderMenu = canWrite && phase !== 'empty' && phase !== 'initialLoad';
@@ -130,7 +107,6 @@ export const RulesListHeader = ({
   const basePath = useService(CoreStart('http')).basePath;
   const { links } = useService(CoreStart('docLinks'));
   const hostTabs = useHostTabs();
-  const showBuildSequence = useAlertingV2ExperimentalFeatures();
   const createWithAgentDisabled = !useAreAgentBuilderSkillsAvailable();
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(
     useAgentBuilderSkillsRequirements()
@@ -184,8 +160,6 @@ export const RulesListHeader = ({
             onCreateRule,
             onCreateEsqlRule,
             onCreateWithAgent,
-            onBuildSequence,
-            showBuildSequence,
             createWithAgentDisabled,
             createWithAgentTooltipText,
           })
@@ -195,8 +169,6 @@ export const RulesListHeader = ({
       onCreateRule,
       onCreateEsqlRule,
       onCreateWithAgent,
-      onBuildSequence,
-      showBuildSequence,
       createWithAgentDisabled,
       createWithAgentTooltipText,
     ]

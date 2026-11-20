@@ -27,6 +27,16 @@ actions:
 
         ² On July 13, 2026, a new version of this API released on Elastic Cloud Serverless and introduced breaking changes. Refer to the [Elastic Cloud Serverless release notes](https://www.elastic.co/docs/release-notes/cloud-serverless/breaking-changes).
 
+        ## Stability
+
+        | 9.4 | 9.5 | Serverless |
+        | --- | --- | --- |
+        | Experimental | Generally available ¹ | Generally available ² |
+
+        ¹ This version introduces breaking changes. Refer to the [Kibana release notes](https://www.elastic.co/docs/release-notes/kibana/breaking-changes).
+
+        ² On July 13, 2026, a new version of this API released on Elastic Cloud Serverless and introduced breaking changes. Refer to the [Elastic Cloud Serverless release notes](https://www.elastic.co/docs/release-notes/cloud-serverless/breaking-changes).
+
         ## Get started
 
         Before you begin:

@@ -9,6 +9,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type {
+  FleetRequestHandler,
   DeleteOutputRequestSchema,
   GetLatestOutputHealthRequestSchema,
   GetOneOutputRequestSchema,
@@ -28,12 +29,16 @@ import { outputService } from '../../services/output';
 import { FleetUnauthorizedError } from '../../errors';
 import { agentPolicyService } from '../../services';
 import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
+import { sanitizeOutput } from '../utils/sanitize_settings_objects';
 
-export const getOutputsHandler: RequestHandler = async (context, request, response) => {
+export const getOutputsHandler: FleetRequestHandler = async (context, request, response) => {
+  const fleetContext = await context.fleet;
   const outputs = await outputService.list();
 
   const body: GetOutputsResponse = {
-    items: outputs.items,
+    items: fleetContext.authz.fleet.readSettings
+      ? outputs.items
+      : outputs.items.map((output) => sanitizeOutput(output)),
     page: outputs.page,
     perPage: outputs.perPage,
     total: outputs.total,
@@ -42,14 +47,15 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
   return response.ok({ body });
 };
 
-export const getOneOutputHandler: RequestHandler<
+export const getOneOutputHandler: FleetRequestHandler<
   TypeOf<typeof GetOneOutputRequestSchema.params>
 > = async (context, request, response) => {
   try {
+    const fleetContext = await context.fleet;
     const output = await outputService.get(request.params.outputId);
 
     const body: GetOneOutputResponse = {
-      item: output,
+      item: fleetContext.authz.fleet.readSettings ? output : sanitizeOutput(output),
     };
 
     return response.ok({ body });

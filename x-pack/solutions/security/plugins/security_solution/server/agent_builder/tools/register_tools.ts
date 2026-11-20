@@ -7,6 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
+import type { PageProfilingOptions } from '../../lib/entity_analytics/risk_score/maintainer/instrumentation/page_timing_types';
 import type { ExperimentalFeatures } from '../../../common';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
@@ -71,6 +72,7 @@ export const registerTools = (
   rulePreviewDeps: RunRulePreviewDeps,
   isServerless: boolean = false,
   kibanaVersion: string,
+  profiling: PageProfilingOptions,
   hasEncryptionKey: boolean = false
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
@@ -78,7 +80,7 @@ export const registerTools = (
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
-  agentBuilder.tools.register(buildRedirectUrlTool(core, experimentalFeatures));
+  agentBuilder.tools.register(buildRedirectUrlTool(core));
   agentBuilder.tools.register(getEntityTool(core, logger, ml, experimentalFeatures));
   agentBuilder.tools.register(
     getEntityGraphTool(core, logger, experimentalFeatures, productFeaturesService)
@@ -97,7 +99,7 @@ export const registerTools = (
   agentBuilder.tools.register(removeEntitiesFromWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(
-    setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion)
+    setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion, profiling)
   );
   agentBuilder.tools.register(updateWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(

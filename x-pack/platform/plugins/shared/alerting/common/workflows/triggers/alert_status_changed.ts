@@ -122,6 +122,19 @@ export const alertStatusChangedV1EventSchema = z
               }
             )
           ),
+        severity: z
+          .string()
+          .nullable()
+          .describe(
+            i18n.translate(
+              'xpack.alerting.workflowTriggers.alertStatusChanged.schema.alert.severity',
+              {
+                defaultMessage:
+                  'Severity of the alert (for example "critical" or "low") when the rule type sets one, which not all rule types do. ' +
+                  'Null when the rule type sets none, and always null for recovered alerts.',
+              }
+            )
+          ),
       })
       .strict()
       .describe(

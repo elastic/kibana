@@ -6,12 +6,12 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
-import type { DashboardFailure } from './utils';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 
 /**
  * Type-agnostic primitives for inline panel content resolution: the resolution
- * result, the failure helper, and the request fields shared by every panel type.
- * Each renderer contributes its own request shape (see `panels/<type>`),
+ * result and the request fields shared by every panel type.
+ * Each request kind contributes its own request shape (see `panels/<type>`),
  * and the panels barrel aggregates them into the `ResolvePanelContent` contract,
  * which the host implements and injects.
  */
@@ -24,14 +24,19 @@ export type PanelContentAttempt =
       type: 'success';
       panelContent: PanelContent;
       authoringNote?: string;
+      /** Pixel height the content needs, when the renderer estimated one for this call. */
+      heightHint?: number;
     }
   | {
       type: 'failure';
-      failure: DashboardFailure;
+      error: string;
     };
 
-/** Operations that can trigger inline panel resolution. */
-export type InlinePanelOperationType = 'add_section' | 'add_panels' | 'edit_panels';
+/** The pixel height a panel's content needs, for the layout step to size the panel by. */
+export interface PanelHeightHint {
+  panelId: string;
+  heightPx: number;
+}
 
 /** One-sentence note describing a chart authored during the current turn. */
 export interface PanelAuthoringNote {
@@ -40,27 +45,23 @@ export interface PanelAuthoringNote {
 }
 
 /**
- * Fields common to every panel resolution request, independent of renderer.
- * Per-renderer modules extend this with a `renderer` discriminator and their
+ * Fields common to every panel resolution request, independent of its kind.
+ * Each kind's module extends this with its `type` discriminator and its
  * own payload (e.g. `panels/vis` adds the natural-language / ES|QL fields).
  */
-export interface PanelResolutionRequestBase {
-  operationType: InlinePanelOperationType;
-  /** Human-facing identifier for failure attribution (panelId or the query). */
-  identifier: string;
-  /** Present when editing an existing panel; `edit_panels` has checked it matches the renderer. */
-  existingPanel?: AttachmentPanel;
-}
+/**
+ * Gives the values of the dashboard's ES|QL controls that the queries refer to, ready to bind. Lazy,
+ * since reading a control's value can take a request, so a panel asks only for what it runs.
+ * `anyVariable` is for a query that is not written yet, which can refer to any of them.
+ */
+export type ResolveEsqlVariables = (
+  queries: readonly string[],
+  options?: { anyVariable?: boolean }
+) => Promise<ESQLControlVariable[]>;
 
-export const createPanelFailureResult = (
-  type: DashboardFailure['type'],
-  identifier: string,
-  error: string
-): Extract<PanelContentAttempt, { type: 'failure' }> => ({
-  type: 'failure',
-  failure: {
-    type,
-    identifier,
-    error,
-  },
-});
+export interface PanelResolutionRequestBase {
+  /** Present when editing an existing panel; upsert has checked it is of the request's kind. */
+  existingPanel?: AttachmentPanel;
+  /** Gives the values of the dashboard's ES|QL controls that a query refers to (`?name`). */
+  resolveEsqlVariables?: ResolveEsqlVariables;
+}

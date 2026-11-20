@@ -372,9 +372,8 @@ describe('change_point_summary_series', () => {
       expect(esql.mock.calls[0][0].query).toContain('WHERE host == "a"');
       expect(esql.mock.calls[0][0].query).toContain('LIMIT 10000');
       expect(esql.mock.calls[0][0].query).not.toContain('CHANGE_POINT');
-      expect(esql.mock.calls[0][1]).toEqual(
-        expect.objectContaining({ dropNullColumns: true, sessionId: 'session-1' })
-      );
+      expect(esql.mock.calls[0][0]).toEqual(expect.objectContaining({ dropNullColumns: true }));
+      expect(esql.mock.calls[0][1]).toEqual(expect.objectContaining({ sessionId: 'session-1' }));
 
       for (const ready of readyStates) {
         expect(ready.status).toBe('ready');
@@ -443,7 +442,7 @@ describe('change_point_summary_series', () => {
 
       await load();
 
-      expect(esql.mock.calls[0][1]).toEqual(
+      expect(esql.mock.calls[0][0]).toEqual(
         expect.objectContaining({
           projectRouting: '_alias:_origin',
           approximation: true,

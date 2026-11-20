@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export { attachmentPanelInputSchema } from './attachment_source';
-export type { AttachmentPanelInput } from './attachment_source';
+export { parseVegaSpec } from './vis';
 export type { VisPanelResolutionRequest } from './vis';
 export type {
   CustomContentPanelAddRequest,
@@ -14,29 +13,24 @@ export type {
   CustomContentPanelResolutionRequest,
 } from './custom_content';
 export {
-  CONFIG_PANEL_TYPE_LIST,
-  addPanelsItemSchema,
-  addSectionPanelItemSchema,
   buildConfigPanelContent,
-  editPanelItemSchema,
-  findConfigPanelType,
-  findPanelRenderer,
-  getConfigPanelEditError,
-  getRendererEmbeddableType,
+  createPanelContentResolver,
+  findPanelKind,
+  getConfigPanelReferences,
+  getRequestPanelEmbeddableType,
+  getInlinePanelKindGuidance,
+  getPanelTypeSelection,
+  isRequestPanelType,
+  requiresRegisteredSchema,
+  upsertPanelContentSchema,
 } from './registry';
 export type {
-  AddPanelsItemInput,
-  ConfigPanelInput,
-  EditPanelItem,
-  EditPanelRequestInput,
-  NewPanelInput,
-  PanelRenderer,
-  PanelRequestInput,
+  ConfigPanelReference,
+  PanelKindExecutors,
   PanelResolutionRequest,
+  RequestPanelType,
   ResolvePanelContent,
+  UpsertPanelContent,
 } from './registry';
-export {
-  getPanelEditError,
-  toCreationResolutionRequest,
-  toEditResolutionRequest,
-} from './resolution_requests';
+export { planPanelContent } from './resolution_requests';
+export type { PanelContentSource } from './resolution_requests';

@@ -6,30 +6,39 @@
  */
 
 export {
-  dashboardOperationSchema,
-  executeDashboardOperations,
-  hasValidCreateMetadataOperations,
-} from './src/operations';
+  executeDashboardUpsert,
+  hasValidNewDashboardMetadata,
+  upsertDashboardSchema,
+} from './src/upsert';
+export type { DashboardUpsert, DashboardUpsertResult } from './src/upsert';
 
 export { arrangeDashboardLayout, buildLayoutPrompt, parseLayoutAnswer } from './src/layout';
 export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from './src/layout';
 
 export { getErrorMessage } from './src/utils';
+export type { DashboardFailure } from './src/utils';
 
-export { createPanelFailureResult } from './src/resolve_panel';
-export type {
-  InlinePanelOperationType,
-  PanelContent,
-  PanelContentAttempt,
-} from './src/resolve_panel';
+export type { PanelContent, PanelContentAttempt, ResolveEsqlVariables } from './src/resolve_panel';
 
 export type { DashboardValidationIssue, DashboardValidator } from './src/validate_dashboard';
 
-export { getRendererEmbeddableType } from './src/panels';
+export {
+  createPanelContentResolver,
+  getConfigPanelReferences,
+  getInlinePanelKindGuidance,
+  getPanelTypeSelection,
+  getRequestPanelEmbeddableType,
+  isRequestPanelType,
+  parseVegaSpec,
+  requiresRegisteredSchema,
+} from './src/panels';
 export type {
+  ConfigPanelReference,
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,
   CustomContentPanelResolutionRequest,
+  PanelKindExecutors,
+  RequestPanelType,
   ResolvePanelContent,
   VisPanelResolutionRequest,
 } from './src/panels';
@@ -38,4 +47,5 @@ export type {
   ControlFieldCapability,
   ResolveAttachmentPanel,
   ResolveControlFieldCapabilities,
+  ResolveEsqlControlColumnType,
 } from './src/types';

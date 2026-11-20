@@ -1,0 +1,7 @@
+summary: Every alert or event in the request is already attached to the case.
+value:
+  {
+    "error": "Conflict",
+    "message": "Every id in the request is already attached to case 293f1bfe-c4ab-4a0b-9a36-9fd4a1d7d2b1.",
+    "statusCode": 409
+  }

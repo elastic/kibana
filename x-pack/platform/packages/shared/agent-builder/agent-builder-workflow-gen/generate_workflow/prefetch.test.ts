@@ -22,12 +22,15 @@ const getAllConnectorsMock = getAllConnectors as jest.MockedFunction<typeof getA
 const buildApi = (
   overrides: Partial<{
     getAvailableConnectors: jest.Mock;
+    getTriggerSchemaOptions: jest.Mock;
   }> = {}
 ) =>
   ({
     getAvailableConnectors:
       overrides.getAvailableConnectors ??
       jest.fn().mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
+    getTriggerSchemaOptions:
+      overrides.getTriggerSchemaOptions ?? jest.fn().mockReturnValue({ includePageTrigger: false }),
   } as any);
 
 beforeEach(() => {
@@ -144,7 +147,7 @@ describe('prefetch helpers', () => {
 
   describe('prefetchTriggerDefinitions', () => {
     it('returns id/label/description for the built-in triggers', async () => {
-      const result = await prefetchTriggerDefinitions();
+      const result = await prefetchTriggerDefinitions({ api: buildApi() });
       const ids = result.map((t) => t.id);
       expect(ids).toEqual(expect.arrayContaining(['manual', 'scheduled', 'alert']));
       for (const def of result) {
@@ -152,6 +155,20 @@ describe('prefetch helpers', () => {
           expect.objectContaining({ id: expect.any(String), label: expect.any(String) })
         );
       }
+    });
+
+    it('includes the page trigger only with workflowsManagement.pages.enabled', async () => {
+      const ids = async (includePageTrigger: boolean) =>
+        (
+          await prefetchTriggerDefinitions({
+            api: buildApi({
+              getTriggerSchemaOptions: jest.fn().mockReturnValue({ includePageTrigger }),
+            }),
+          })
+        ).map((t) => t.id);
+
+      expect(await ids(false)).not.toContain('page');
+      expect(await ids(true)).toContain('page');
     });
   });
 });

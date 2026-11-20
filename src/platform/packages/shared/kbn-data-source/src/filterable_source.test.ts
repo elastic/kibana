@@ -14,6 +14,7 @@ import { buildEsQuery, buildPhraseFilter } from '@kbn/es-query';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { registerEsqlSourceInDataViewsCache } from './cache_adapter';
 import type { FilterableSource } from './filterable_source';
+import { getFilterableFieldSpec, isEsqlFilterableSource } from './filterable_source';
 import { DataViewSource } from './sources/data_view_source';
 import { EsqlSource } from './sources/esql_source';
 import { createMockDataViewsService } from './__mocks__/data_views_service.mock';
@@ -136,6 +137,17 @@ describe('toFilterableSource', () => {
       ]);
     });
 
+    it('looks a field up by name, as a data view does', async () => {
+      const source = await statsOnDataset('lookup-*', '@timestamp');
+
+      const filterable = await source.toFilterableSource();
+
+      expect(filterable.getFieldByName('host')).toBe(
+        filterable.fields.find(({ name }) => name === 'host')
+      );
+      expect(filterable.getFieldByName('missing')).toBeUndefined();
+    });
+
     it('adds the time field when the schema of the dataset lacks it', async () => {
       await EsqlSource.create({
         query: 'FROM lacks-time-*',
@@ -151,6 +163,15 @@ describe('toFilterableSource', () => {
       expect(fields.find(({ name }) => name === 'event.ingested')).toEqual(
         expect.objectContaining({ type: 'date', esTypes: ['date'] })
       );
+    });
+
+    it('is marked as an ES|QL source, which has no data view to load by its id', async () => {
+      const source = await statsOnDataset('kind-*');
+
+      const filterable = await source.toFilterableSource();
+
+      expect(filterable.kind).toBe('esql');
+      expect(isEsqlFilterableSource(filterable)).toBe(true);
     });
 
     it('has no fields while the schema of the dataset is unknown', async () => {
@@ -239,6 +260,37 @@ describe('toFilterableSource', () => {
       const filterable = await new DataViewSource(dataView).toFilterableSource();
 
       expect(filterable).toBe(dataView);
+    });
+
+    it('is not marked as an ES|QL source', async () => {
+      const dataView = new DataView({
+        spec: { id: 'dsl-id', title: 'logs-*', timeFieldName: '@timestamp', fields: {} },
+        fieldFormats: {} as DataView['fieldFormats'],
+      });
+
+      const filterable = await new DataViewSource(dataView).toFilterableSource();
+
+      expect(filterable.kind).toBeUndefined();
+      expect(isEsqlFilterableSource(filterable)).toBe(false);
+    });
+  });
+
+  describe('getFilterableFieldSpec', () => {
+    it('is the spec that the field has', () => {
+      const spec = { name: 'host', type: 'string', searchable: true, aggregatable: true };
+
+      expect(getFilterableFieldSpec({ name: 'host', type: 'string', toSpec: () => spec })).toBe(
+        spec
+      );
+    });
+
+    it('is a spec made of a field that has none, which needs both flags', () => {
+      expect(getFilterableFieldSpec({ name: 'host', type: 'string', aggregatable: true })).toEqual({
+        name: 'host',
+        type: 'string',
+        searchable: false,
+        aggregatable: true,
+      });
     });
   });
 });

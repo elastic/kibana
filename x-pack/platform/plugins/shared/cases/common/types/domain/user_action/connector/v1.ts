@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { CaseUserActionConnectorRt, CaseConnectorRt } from '../../connector/v1';
+import { z } from '@kbn/zod/v4';
+import { CaseUserActionConnectorSchema, CaseConnectorSchema } from '../../connector/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const ConnectorUserActionPayloadWithoutConnectorIdRt = rt.strict({
-  connector: CaseUserActionConnectorRt,
+export const ConnectorUserActionPayloadWithoutConnectorIdSchema = z.object({
+  connector: CaseUserActionConnectorSchema,
 });
 
-export const ConnectorUserActionPayloadRt = rt.strict({
-  connector: CaseConnectorRt,
+export const ConnectorUserActionPayloadSchema = z.object({
+  connector: CaseConnectorSchema,
 });
 
-export const ConnectorUserActionWithoutConnectorIdRt = rt.strict({
-  type: rt.literal(UserActionTypes.connector),
-  payload: ConnectorUserActionPayloadWithoutConnectorIdRt,
+export const ConnectorUserActionWithoutConnectorIdSchema = z.object({
+  type: z.literal(UserActionTypes.connector),
+  payload: ConnectorUserActionPayloadWithoutConnectorIdSchema,
 });
 
-export const ConnectorUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.connector),
-  payload: ConnectorUserActionPayloadRt,
+export const ConnectorUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.connector),
+  payload: ConnectorUserActionPayloadSchema,
 });

@@ -23,6 +23,7 @@ import {
 import { ObservabilityAlertAttachmentPayloadSchema } from '../../../../common/cases/attachments/alert';
 import {
   ALERT_DISPLAY_NAME,
+  ALERTS_COUNT,
   DELETE_ALERTS_SUCCESS_TOAST,
   REMOVED_ALERT_LABEL_TITLE,
   REMOVED_ALERTS_LABEL_TITLE,
@@ -108,6 +109,7 @@ export const getObservabilityAlertType = () =>
   defineAttachment({
     id: OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
     getLabel: () => ALERT_DISPLAY_NAME,
+    getCountLabel: ({ count }) => ALERTS_COUNT(count),
     getIcon: () => 'bell',
     getCreationActivity,
     getRemovalActivity,

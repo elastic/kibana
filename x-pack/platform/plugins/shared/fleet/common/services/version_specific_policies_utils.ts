@@ -228,7 +228,7 @@ export function buildPolicyIdsOrVariantsEsFilter(
 // policy_id exact-term path. No prefix is used so that the query remains compatible with
 // search.allow_expensive_queries:false; versioned policy_id values (e.g. policy-id#9.3)
 // without a policy_base_id can only arise in the narrow window of a mixed-version rollout,
-// and the startup backfill covers all pre-existing documents.
+// and the setup backfill covers all pre-existing documents.
 
 /**
  * KQL equivalent of {@link buildPolicyBaseIdWithFallbackEsFilter}: matches migrated documents via

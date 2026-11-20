@@ -123,11 +123,7 @@ describe('inboundEventsRoute', () => {
       connectorTypeId: 'webhook',
       connectorId: 'c1',
       spaceId: 'default',
-      requestId: request.id,
-      headers: request.headers,
-      query: request.query,
-      body: request.body,
-      remoteAddress: request.socket.remoteAddress,
+      request,
     });
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
     expect(getBooleanValue).toHaveBeenCalledWith(ACTIONS_INBOUND_EVENTS_ENABLED_FLAG, true);
@@ -184,8 +180,7 @@ describe('inboundEventsRoute', () => {
         connectorTypeId: '.slack2',
         connectorId: 'elastic-apps-slack',
         spaceId: 'space-a',
-        headers: expect.objectContaining({ authorization: `ApiKey ${apiKey}` }),
-        body: { type: 'event_callback' },
+        request,
       })
     );
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
@@ -209,12 +204,9 @@ describe('inboundEventsRoute', () => {
 
     await handler(routeContext(), request, res);
 
-    expect(ingest).toHaveBeenCalledWith(
-      expect.objectContaining({
-        remoteAddress: '203.0.113.8',
-        headers: expect.objectContaining({ 'x-forwarded-for': '198.51.100.1' }),
-      })
-    );
+    expect(ingest).toHaveBeenCalledWith(expect.objectContaining({ request }));
+    expect(request.socket.remoteAddress).toBe('203.0.113.8');
+    expect(request.headers['x-forwarded-for']).toBe('198.51.100.1');
   });
 
   it('maps forbidden ingest results to 403', async () => {

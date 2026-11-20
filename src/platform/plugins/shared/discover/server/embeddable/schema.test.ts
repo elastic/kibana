@@ -83,6 +83,13 @@ describe('by-value tab schema', () => {
     });
   });
 
+  it('keeps histogram visualization on a by-value metrics tab', () => {
+    expect(
+      parseByValueTab({ ...metricsTabInput, histogram_visualization: 'lnsHeatmap' })
+    ).toMatchObject({ histogram_visualization: 'lnsHeatmap' });
+    expect(() => parseByValueTab({ ...metricsTabInput, histogram_visualization: 'pie' })).toThrow();
+  });
+
   it('rejects a Metrics tab without its saved profile state', () => {
     expect(() =>
       parseByValueTab({

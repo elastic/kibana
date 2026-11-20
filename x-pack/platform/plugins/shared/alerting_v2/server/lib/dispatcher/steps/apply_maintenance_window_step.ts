@@ -8,6 +8,7 @@
 import type { MatcherContext } from '@kbn/alerting-v2-schemas';
 import { evaluateKql } from '@kbn/eval-kql';
 import { inject, injectable } from 'inversify';
+import { alertActionSubtype } from '../../../resources/datastreams/alert_actions';
 import type { MaintenanceWindowServiceContract } from '../../services/maintenance_window_service/maintenance_window_service';
 import { MaintenanceWindowServiceInternalToken } from '../../services/maintenance_window_service/tokens';
 import type { ActiveMaintenanceWindow } from '../../services/maintenance_window_service/types';
@@ -64,7 +65,13 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
       }
 
       const maintenanceWindow = findMatchingMaintenanceWindow(candidates, alert);
-      return maintenanceWindow ? maintenanceWindowReason(maintenanceWindow.id) : undefined;
+      return maintenanceWindow
+        ? {
+            reason: maintenanceWindowReason(maintenanceWindow.id),
+            action_subtype: alertActionSubtype.maintenance_window,
+            maintenance_window_id: maintenanceWindow.id,
+          }
+        : undefined;
     });
 
     if (newTriage === triage) {

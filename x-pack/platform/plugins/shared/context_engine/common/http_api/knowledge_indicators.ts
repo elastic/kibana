@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KiLifecycleStatus } from '../step_types/ki';
+import type { KiStatus } from '../ki_lifecycle_status';
 import type { KiTypeCount } from './ai_indices';
 import type { KiReferenceRelation } from '../step_types/ki';
 
@@ -16,7 +16,8 @@ export interface KiListItem {
   title?: string;
   updated_at?: string;
   expires_at?: string;
-  lifecycle_status?: KiLifecycleStatus;
+  /** Stored lifecycle status, or `expired` for active KIs past `expires_at`. */
+  status: KiStatus;
 }
 
 /** Unfiltered store stats. */
@@ -29,6 +30,22 @@ export interface ListKisResponse {
   kis: KiListItem[];
   total: number;
   summary: KiListSummary;
+}
+
+/** One KI type with its count and its first KIs in the requested sort. */
+export interface KiGroup {
+  type: string;
+  count: number;
+  kis: KiListItem[];
+}
+
+export interface ListKiGroupsResponse {
+  /** KIs that match the filters. */
+  total: number;
+  /** KIs that match the filters but are in none of the returned groups. */
+  total_other: number;
+  /** The biggest types, `count` descending, then `type` ascending. */
+  groups: KiGroup[];
 }
 
 export type KiJsonPrimitive = string | number | boolean | null;
@@ -73,4 +90,23 @@ export interface KiDocument {
 export interface GetKiResponse {
   id: string;
   document: KiDocument;
+}
+
+export interface UpdateKiBody {
+  ki: {
+    content: string;
+  };
+}
+
+export interface UpdateKiResponse {
+  id: string;
+  status: 'updated' | 'noop';
+}
+
+export interface DeleteKiResponse {
+  id: string;
+}
+
+export interface RestoreKiResponse {
+  id: string;
 }

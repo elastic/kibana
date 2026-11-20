@@ -8,7 +8,9 @@
  */
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import expect from '@kbn/expect';
 import { asyncMap } from '@kbn/std';
+import { DASHBOARD_GRID_MARGIN_SIZE } from '@kbn/dashboard-constants';
 import { FtrService } from '../../ftr_provider_context';
 
 const ACTION_SHOW_CONFIG_PANEL_SUBJ = 'embeddablePanelAction-ACTION_SHOW_CONFIG_PANEL';
@@ -24,8 +26,6 @@ const COPY_PANEL_TO_DATA_TEST_SUBJ = 'embeddablePanelAction-copyToDashboard';
 const SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-saveToLibrary';
 const UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-unlinkFromLibrary';
 const CONVERT_TO_LENS_TEST_SUBJ = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
-
-const DASHBOARD_MARGIN_SIZE = 8;
 
 export class DashboardPanelActionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -64,13 +64,13 @@ export class DashboardPanelActionsService extends FtrService {
 
     const additionalOffsetForFloatingHoverActions = 32;
 
-    return fixedHeaderHeight + DASHBOARD_MARGIN_SIZE + additionalOffsetForFloatingHoverActions;
+    return fixedHeaderHeight + DASHBOARD_GRID_MARGIN_SIZE + additionalOffsetForFloatingHoverActions;
   }
 
   async getCanvasContainerTopOffset() {
     return (
       (await (await this.find.byCssSelector('.canvasContainer')).getPosition()).y +
-      DASHBOARD_MARGIN_SIZE
+      DASHBOARD_GRID_MARGIN_SIZE
     );
   }
 
@@ -267,8 +267,11 @@ export class DashboardPanelActionsService extends FtrService {
   async saveToLibrary(newTitle = '', oldTitle = '') {
     this.log.debug(`saveToLibraryByTitle(${newTitle},${oldTitle})`);
     await this.clickPanelActionByTitle(SAVE_TO_LIBRARY_TEST_SUBJ, oldTitle);
-    await this.testSubjects.setValue('savedObjectTitle', newTitle, {
-      clearWithKeyboard: true,
+    await this.retry.try(async () => {
+      await this.testSubjects.setValue('savedObjectTitle', newTitle, {
+        clearWithKeyboard: true,
+      });
+      expect(await this.testSubjects.getAttribute('savedObjectTitle', 'value')).to.be(newTitle);
     });
     await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
     await this.testSubjects.existOrFail('addPanelToLibrarySuccess');

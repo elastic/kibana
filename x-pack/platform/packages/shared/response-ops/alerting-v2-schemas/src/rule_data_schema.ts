@@ -86,7 +86,7 @@ export type RuleKind = z.infer<typeof ruleKindSchema>;
 /** Metadata (required) */
 
 const METADATA_DESCRIPTION = 'Rule metadata.';
-const METADATA_NAME_DESCRIPTION = 'Rule name (must be unique within the space).';
+const METADATA_NAME_DESCRIPTION = 'Rule name.';
 const METADATA_DESCRIPTION_DESCRIPTION =
   'Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.';
 const METADATA_TAGS_DESCRIPTION = 'Tags for categorization, e.g. ["production", "infra"].';
@@ -716,10 +716,27 @@ const TIME_FIELD_DESCRIPTION =
  */
 const timeFieldSchema = lazySchema(() => z.string().min(1).max(MAX_FIELD_NAME_LENGTH));
 
-export const createRuleDataBaseSchema = lazySchema(() =>
+const ENABLED_DESCRIPTIONS = {
+  create:
+    'Whether the rule is enabled. Defaults to `true` when omitted. A disabled rule is saved but does not run until you enable it.',
+  put: 'Whether the rule is enabled. Unlike the other fields in this body, omitting it does not clear it. When the request creates the rule it defaults to `true`. When the request replaces an existing rule, omitting it keeps the current state and supplying it enables or disables the rule, the same as `_enable` or `_disable`. A disabled rule is saved but does not run until you enable it.',
+} as const;
+
+type RuleWriteApi = keyof typeof ENABLED_DESCRIPTIONS;
+
+/**
+ * Optional with no default because the meaning of "omitted"
+ * differs by outcome: on create it defaults to `true`, on replace it preserves
+ * the existing stored value.
+ */
+const enabledSchema = (api: RuleWriteApi) =>
+  z.boolean().optional().describe(ENABLED_DESCRIPTIONS[api]);
+
+const buildRuleDataBaseSchema = (api: RuleWriteApi) =>
   z
     .object({
       kind: ruleKindSchema,
+      enabled: enabledSchema(api),
       metadata: metadataSchema,
       time_field: timeFieldSchema.default(DEFAULT_TIME_FIELD).describe(TIME_FIELD_DESCRIPTION),
       schedule: scheduleSchema,
@@ -730,8 +747,9 @@ export const createRuleDataBaseSchema = lazySchema(() =>
       grouping: groupingSchema.optional(),
       artifacts: artifactsSchema.optional(),
     })
-    .strict()
-);
+    .strict();
+
+export const createRuleDataBaseSchema = lazySchema(() => buildRuleDataBaseSchema('create'));
 
 /** Cross-field validation predicates — shared between the CRUD API and the manage_rule tool. */
 
@@ -908,8 +926,20 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
       }
     });
 
+export const ruleIdSchema = lazySchema(() =>
+  entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`)
+);
+
 export const createRuleDataSchema = lazySchema(() =>
-  applyCreateRuleRefinements(createRuleDataBaseSchema).meta({
+  applyCreateRuleRefinements(
+    createRuleDataBaseSchema.extend({
+      id: ruleIdSchema
+        .optional()
+        .describe(
+          `Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, the request fails with HTTP 409 and the existing rule is not changed. ${ENTITY_ID_NOTE}`
+        ),
+    })
+  ).meta({
     id: 'alerting_new_rule',
   })
 );
@@ -918,22 +948,20 @@ export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
 
 /**
- * Request body schema for `PUT /api/alerting/v2/rules/{id}`. Adds an optional
- * `enabled` on top of the create-rule data. Left as a plain optional (no
- * schema-level default) because the meaning of "omitted" differs by outcome:
- * on create it defaults to `true`, on replace it preserves the existing
- * stored value — both handled in application code, not here.
+ * Request body schema for `PUT /api/alerting/v2/rules/{id}`: the create-rule
+ * data.
+ *
+ * `enabled` is deliberately the only field on PUT that is kept when omitted.
+ * Every other field follows replace semantics and is cleared when absent.
+ * It is lifecycle state, not definition: on create it defaults to `true`, on
+ * replace omitting it keeps the stored value and supplying it applies the same
+ * transition as `_enable` / `_disable`. The default lives in the client, not
+ * here, because "omitted" means different things on create and replace.
+ * PATCH does not accept it.
  */
-export const putRuleDataSchema = applyCreateRuleRefinements(
-  createRuleDataBaseSchema.extend({
-    enabled: z
-      .boolean()
-      .optional()
-      .describe(
-        'Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state.'
-      ),
-  })
-).meta({ id: 'alerting_put_rule' });
+export const putRuleDataSchema = applyCreateRuleRefinements(buildRuleDataBaseSchema('put')).meta({
+  id: 'alerting_put_rule',
+});
 
 export type PutRuleData = z.infer<typeof putRuleDataSchema>;
 
@@ -1001,16 +1029,11 @@ export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
 export const ruleResponseSchema = lazySchema(() =>
   createRuleDataBaseSchema
     .extend({
-      // `template` is server-managed: it is returned but not accepted on write.
-      metadata: metadataSchema
-        .extend({
-          template: z
-            .object({ id: z.string().describe('Id of the rule template.') })
-            .strict()
-            .optional()
-            .describe('The rule template this rule was created from.'),
-        })
-        .describe('Rule metadata.'),
+      // The rule-template link (`metadata.template` in storage) is deliberately not
+      // returned: its public shape is undecided, and a response-only key inside the
+      // strict `metadata` block would break a GET -> PUT round-trip. Lifecycle
+      // events and telemetry still read it from the saved object.
+      metadata: metadataSchema.describe('Rule metadata.'),
       id: z.string().describe('Unique rule identifier.'),
       version: z
         .number()
@@ -1048,9 +1071,13 @@ export const findRulesRequestSchema = lazySchema(() =>
         .describe(`The number of rules to return per page. Defaults to ${FIND_DEFAULT_PER_PAGE}.`),
       filter: z
         .string()
+        .trim()
+        .min(1)
         .max(MAX_KQL_LENGTH)
         .optional()
-        .describe('The filter to apply to the rules.'),
+        .describe(
+          'A KQL filter to apply to the rules. Supported fields: id, kind, enabled, metadata.name, metadata.description, metadata.tags, metadata.routing_tags. Cannot be empty. Omit it to list every rule.'
+        ),
       sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
       sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
       search: z
@@ -1135,20 +1162,23 @@ export const ruleRoutingTagsResponseSchema = lazySchema(() =>
 );
 
 export type RuleRoutingTagsResponse = z.infer<typeof ruleRoutingTagsResponseSchema>;
-
-export const ruleIdSchema = lazySchema(() =>
-  entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`)
-);
-
 /**
- * Response schema for `POST /api/alerting/v2/rules/_bulk_get`.
+ * Response schema for `POST /api/alerting/v2/rules/_bulk_get`. Like every other
+ * bulk route, a missing rule is a per-item error, not a request failure.
  */
 export const bulkGetRulesResponseSchema = lazySchema(() =>
   z
     .object({
       items: z
         .array(ruleResponseSchema)
-        .describe('The requested rules, in the same order as the requested ids.'),
+        .describe(
+          'The rules that were found, in the same order as the requested ids. Rules listed in `errors` are not included.'
+        ),
+      errors: z
+        .array(bulkErrorSchema)
+        .describe(
+          'Errors for rules that could not be returned, keyed by the requested `id`. A rule that does not exist is reported as `RULE_NOT_FOUND`. Empty when every requested rule was found.'
+        ),
     })
     .meta({ id: 'alerting_bulk_get_rules_response' })
 );
@@ -1157,8 +1187,8 @@ export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;
 
 /**
  * A single item in a bulk-create request: the create-rule body plus optional
- * client-supplied `id` and `enabled` (default true). Disabled rules are saved
- * and do not run until enabled.
+ * client-supplied `id`. `enabled` is the same optional field as on a single
+ * create; disabled rules are saved and do not run until enabled.
  */
 export const bulkCreateRuleItemSchema = lazySchema(() =>
   applyCreateRuleRefinements(
@@ -1166,13 +1196,7 @@ export const bulkCreateRuleItemSchema = lazySchema(() =>
       id: ruleIdSchema
         .optional()
         .describe(
-          'Optional rule ID. If omitted, Kibana generates one. IDs in the request must be unique.'
-        ),
-      enabled: z
-        .boolean()
-        .default(true)
-        .describe(
-          'If `true` (default), the rule runs on its schedule after creation. If `false`, the rule is saved but does not run until you enable it.'
+          `Optional rule ID. If omitted, Kibana generates one. IDs must be unique within the request. If a rule with this ID already exists, that item is reported in \`errors\` with the code \`RULE_ALREADY_EXISTS\` and the existing rule is not changed. ${ENTITY_ID_NOTE}`
         ),
     })
   ).meta({ id: 'alerting_bulk_create_rule_item' })
@@ -1208,6 +1232,30 @@ export const bulkCreateRulesRequestSchema = lazySchema(() =>
 export type BulkCreateRulesParams = z.input<typeof bulkCreateRulesRequestSchema>;
 
 /**
+ * A per-item error of `_bulk_create`. Items are addressed by their position in
+ * the request because an item need not carry an `id`; `id` is echoed only when
+ * the client supplied one, never generated for a rule that was not created.
+ */
+export const bulkCreateErrorSchema = lazySchema(() =>
+  bulkErrorSchema
+    .omit({ id: true })
+    .extend({
+      index: z
+        .number()
+        .int()
+        .min(0)
+        .describe('Zero-based position of the failed item in the request `items`.'),
+      id: z
+        .string()
+        .optional()
+        .describe('The client-supplied `id` of the failed item. Omitted when the item had none.'),
+    })
+    .meta({ id: 'alerting_bulk_create_error' })
+);
+
+export type BulkCreateError = z.infer<typeof bulkCreateErrorSchema>;
+
+/**
  * Response schema for `POST /api/alerting/v2/rules/_bulk_create`.
  * Successfully created rules are returned in `items`; per-item failures land
  * in `errors`. HTTP 200 even when some items fail (partial success).
@@ -1219,9 +1267,9 @@ export const bulkCreateRulesResponseSchema = lazySchema(() =>
         .array(ruleResponseSchema)
         .describe('Rules that were created. Rules listed in `errors` are not included.'),
       errors: z
-        .array(bulkErrorSchema)
+        .array(bulkCreateErrorSchema)
         .describe(
-          'Errors for rules that could not be created. Each entry includes the rule `id` and the error. Empty when every requested rule was created.'
+          'Errors for rules that could not be created. Each entry carries the `index` of the item in the request, its `id` when one was supplied, and the error. Empty when every requested rule was created.'
         ),
     })
     .meta({ id: 'alerting_bulk_create_rules_response' })

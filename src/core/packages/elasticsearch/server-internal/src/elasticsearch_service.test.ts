@@ -47,6 +47,7 @@ import { duration } from 'moment';
 import { isValidConnection } from './is_valid_connection';
 import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/nodes_version';
 import { pollEsNodesClockSkew } from './version_check/clock_skew';
+import type { NodesVersionCompatibility } from './version_check/nodes_version_compatibility';
 
 const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
   './version_check/nodes_version'
@@ -57,16 +58,12 @@ const isValidConnectionMock = isValidConnection as jest.Mock;
 const TICK = 10;
 const tick = (ticks = 1) => jest.advanceTimersByTime(TICK * ticks);
 const sleepWithFakeTimers = (durationMs: number, signal?: AbortSignal): Promise<void> =>
-  new Promise((resolve, reject) => {
+  new Promise((resolve) => {
     const timer = setTimeout(resolve, durationMs);
-    signal?.addEventListener(
-      'abort',
-      () => {
-        clearTimeout(timer);
-        reject(new Error('aborted'));
-      },
-      { once: true }
-    );
+    signal?.addEventListener('abort', () => {
+      clearTimeout(timer);
+      resolve();
+    });
   });
 
 const configService = configServiceMock.create();
@@ -122,9 +119,11 @@ beforeEach(() => {
 
   getClusterInfoMock.mockReturnValue(of({ cluster_uuid: 'test-cluster-uuid' }));
 
-  // @ts-expect-error TS does not get that `pollEsNodesVersion` is mocked
-  pollEsNodesVersionMocked.mockImplementation((options) =>
-    pollEsNodesVersionActual(options, { now: () => performance.now(), sleep: sleepWithFakeTimers })
+  jest.mocked(pollEsNodesVersionMocked).mockImplementation((options) =>
+    pollEsNodesVersionActual(options, {
+      now: () => performance.now(),
+      sleep: sleepWithFakeTimers,
+    })
   );
 });
 
@@ -506,6 +505,74 @@ describe('#stop', () => {
         })
       )
     );
+  });
+});
+
+describe('health check intervals', () => {
+  const pollWith = async (healthCheck: Record<string, unknown>) => {
+    mockConfig$.next({ ...mockConfig$.getValue(), healthCheck: { retry: 1, ...healthCheck } });
+    await elasticsearchService.setup(setupDeps);
+    return jest.mocked(pollEsNodesVersionMocked).mock.calls[0][0];
+  };
+
+  it('passes the configured delays to the poll', async () => {
+    expect(
+      await pollWith({
+        delay: duration(100),
+        startupDelay: duration(50),
+        onFailureDelay: duration(30),
+      })
+    ).toEqual(
+      expect.objectContaining({
+        healthCheckInterval: 100,
+        healthCheckStartupInterval: 50,
+        healthCheckFailureInterval: 30,
+      })
+    );
+  });
+
+  it('falls back to the regular delay for an unset or zero failure or startup delay', async () => {
+    expect(await pollWith({ delay: duration(100), startupDelay: duration(0) })).toEqual(
+      expect.objectContaining({
+        healthCheckInterval: 100,
+        healthCheckStartupInterval: 100,
+        healthCheckFailureInterval: 100,
+      })
+    );
+  });
+});
+
+describe('version compatibility logging', () => {
+  const compatibility: NodesVersionCompatibility = {
+    isCompatible: true,
+    kibanaVersion: '8.0.0',
+    incompatibleNodes: [],
+    warningNodes: [],
+  };
+  const emit = async (...compatibilities: NodesVersionCompatibility[]) => {
+    jest.mocked(pollEsNodesVersionMocked).mockImplementation(() => of(...compatibilities));
+    await elasticsearchService.setup(setupDeps);
+    return loggingSystemMock.collect(coreContext.logger).error;
+  };
+
+  it('logs each incompatibility the poll reports as an error', async () => {
+    expect(
+      await emit(compatibility, { ...compatibility, isCompatible: false, message: 'Too old' })
+    ).toEqual([['Too old']]);
+  });
+
+  it('logs a failed poll rather than leaving its error unhandled', async () => {
+    const failure = new Error('the poll failed');
+    jest.mocked(pollEsNodesVersionMocked).mockImplementation(() => throwError(() => failure));
+    await elasticsearchService.setup(setupDeps);
+
+    expect(loggingSystemMock.collect(coreContext.logger).error).toEqual([[failure]]);
+  });
+
+  it('does not log a compatible cluster that only warns', async () => {
+    expect(
+      await emit({ ...compatibility, message: 'Different patch version', warningNodes: [] })
+    ).toEqual([]);
   });
 });
 

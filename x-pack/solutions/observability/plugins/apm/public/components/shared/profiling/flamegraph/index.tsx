@@ -6,8 +6,8 @@
  */
 import { EuiSpacer } from '@elastic/eui';
 import type { ProfilingSchema } from '@kbn/profiling-utils';
-import React from 'react';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import React, { useEffect } from 'react';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { FlamegraphChart } from '../../charts/flamegraph';
 import { ProfilingFlamegraphLink } from './flamegraph_link';
@@ -20,6 +20,10 @@ interface Props {
   transactionName?: string;
   transactionType?: string;
   environment: string;
+  /** Rendered instead of the flamegraph when the service's transactions link to no profiling samples. */
+  fallback?: React.ReactNode;
+  /** Called once when the fallback first renders, so the parent can switch its schema selector. */
+  onFallback?: () => void;
   /** Undefined until a schema is selected, which the request waits for */
   schema?: ProfilingSchema;
 }
@@ -32,6 +36,8 @@ export function ProfilingFlamegraph({
   transactionName,
   transactionType,
   environment,
+  fallback,
+  onFallback,
   schema,
 }: Props) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -58,6 +64,19 @@ export function ProfilingFlamegraph({
     },
     [serviceName, start, end, kuery, transactionName, transactionType, environment, schema]
   );
+
+  const isFallback =
+    Boolean(fallback) && status === FETCH_STATUS.SUCCESS && (!data || data.TotalSamples === 0);
+
+  useEffect(() => {
+    if (isFallback) {
+      onFallback?.();
+    }
+  }, [isFallback, onFallback]);
+
+  if (isFallback) {
+    return <>{fallback}</>;
+  }
 
   return (
     <>

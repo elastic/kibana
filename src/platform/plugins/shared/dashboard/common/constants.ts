@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_GRID_COLUMN_COUNT } from './page_bundle_constants';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-constants';
 
 /** The base API path for public dashboard endpoints. */
 export const DASHBOARD_API_PATH = '/api/dashboards';
 export const DASHBOARD_API_VERSION = '2023-10-31';
+
+/** Change history actions the UI treats specially. */
+export const DASHBOARD_UNSAVED_CHANGES_ACTION = 'dashboard_unsaved_changes';
+export const DASHBOARD_DELETE_ACTION = 'dashboard_delete';
 
 /** The base API path for internal dashboard endpoints. */
 export const DASHBOARD_INTERNAL_API_PATH = '/internal/dashboards';
@@ -32,3 +36,5 @@ export const DEFAULT_DASHBOARD_OPTIONS = {
   sync_tooltips: false,
   use_margins: true,
 } as const;
+
+export const DASHBOARD_CHANGE_HISTORY_API_PATH = '/internal/dashboard/change_history' as const;

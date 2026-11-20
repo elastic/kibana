@@ -161,7 +161,10 @@ describe('reconcileSourceCatalog', () => {
 
   it('stops scheduling onboarding once the sweep budget is spent', async () => {
     const sources = ['a', 'b', 'c'].map((id) => makeSource({ id }));
-    const states = new Map<string, { revision?: string; onboardingScheduled: boolean }>();
+    const states = new Map<
+      string,
+      { revision?: string; onboardingScheduled: boolean; onboardingReservedAt?: number | null }
+    >();
     const sourceKnowledgeState: SourceKnowledgeStateClient = {
       runExclusive: jest.fn(async ({ sourceId, run }) => {
         const state = states.get(sourceId) ?? { revision: undefined, onboardingScheduled: false };
@@ -192,7 +195,7 @@ describe('reconcileSourceCatalog', () => {
 
     // One slot is taken by the run already going, so only one new source starts.
     expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
-    expect(states.get('a')?.onboardingScheduled).toBe(true);
+    expect(states.get('a')?.onboardingReservedAt).toEqual(expect.any(Number));
     expect(states.get('b')?.onboardingScheduled).toBe(false);
     expect(states.get('c')?.onboardingScheduled).toBe(false);
   });
@@ -622,11 +625,21 @@ describe('createSourceChangeListener', () => {
   const setup = () => {
     const enqueueReconciliation = jest.fn(async () => {});
     const ensurePeriodicReconciliation = jest.fn(async () => {});
+    const syncContinuousOnboarding = jest.fn(async () => {});
+    const syncScheduledDiscovery = jest.fn(async () => {});
     const listener = createSourceChangeListener({
       enqueueReconciliation,
       ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+      syncScheduledDiscovery,
     });
-    return { listener, enqueueReconciliation, ensurePeriodicReconciliation };
+    return {
+      listener,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+      syncScheduledDiscovery,
+    };
   };
 
   it.each<SourceChangeEvent>([
@@ -640,15 +653,42 @@ describe('createSourceChangeListener', () => {
       request,
     },
   ])('queues a $type change in its request space', async (event) => {
-    const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
-    const otherRequest = { spaceId: 'other' } as KibanaRequest;
-    await listener({ ...event, request: otherRequest });
+    const {
+      listener,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+      syncScheduledDiscovery,
+    } = setup();
+    await listener(event);
     expect(enqueueReconciliation).toHaveBeenCalledWith({
       sourceId: source.id,
       sourceSlug: source.slug,
-      request: otherRequest,
+      request,
     });
-    expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(otherRequest);
+    expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(request);
+    expect(syncContinuousOnboarding).toHaveBeenCalledWith(event);
+    expect(syncScheduledDiscovery).toHaveBeenCalledWith(event);
+  });
+
+  // Each branch installs or enables a workflow in the event's space, and Nightshift only runs in
+  // the default one — including for a write made through `getSourcesClient()` rather than a route.
+  it('ignores a change made outside the default space', async () => {
+    const {
+      listener,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+      syncScheduledDiscovery,
+    } = setup();
+    const otherRequest = { spaceId: 'marketing' } as KibanaRequest;
+
+    await listener({ type: 'created', source, request: otherRequest });
+
+    expect(enqueueReconciliation).not.toHaveBeenCalled();
+    expect(ensurePeriodicReconciliation).not.toHaveBeenCalled();
+    expect(syncContinuousOnboarding).not.toHaveBeenCalled();
+    expect(syncScheduledDiscovery).not.toHaveBeenCalled();
   });
 
   it('retains queued cleanup when periodic recovery setup fails', async () => {
@@ -669,8 +709,52 @@ describe('createSourceChangeListener', () => {
     expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(request);
   });
 
+  it('keeps reconciliation tasks when continuous onboarding sync fails', async () => {
+    const {
+      listener,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+      syncScheduledDiscovery,
+    } = setup();
+    syncContinuousOnboarding.mockRejectedValue(new Error('settings unavailable'));
+
+    await expect(listener({ type: 'created', source, request })).rejects.toThrow(
+      'settings unavailable'
+    );
+
+    expect(enqueueReconciliation).toHaveBeenCalledTimes(1);
+    expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(request);
+    expect(syncScheduledDiscovery).toHaveBeenCalledWith({ type: 'created', source, request });
+  });
+
+  it('keeps reconciliation tasks when scheduled discovery sync fails', async () => {
+    const {
+      listener,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+      syncScheduledDiscovery,
+    } = setup();
+    syncScheduledDiscovery.mockRejectedValue(new Error('settings unavailable'));
+
+    await expect(listener({ type: 'created', source, request })).rejects.toThrow(
+      'settings unavailable'
+    );
+
+    expect(enqueueReconciliation).toHaveBeenCalledTimes(1);
+    expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(request);
+    expect(syncContinuousOnboarding).toHaveBeenCalledWith({ type: 'created', source, request });
+  });
+
   it('ignores title changes that preserve the query and enabled flag', async () => {
-    const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
+    const {
+      listener,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+      syncScheduledDiscovery,
+    } = setup();
     await listener({
       type: 'updated',
       source: { ...source, title: 'Renamed' },
@@ -679,6 +763,8 @@ describe('createSourceChangeListener', () => {
     });
     expect(enqueueReconciliation).not.toHaveBeenCalled();
     expect(ensurePeriodicReconciliation).not.toHaveBeenCalled();
+    expect(syncContinuousOnboarding).not.toHaveBeenCalled();
+    expect(syncScheduledDiscovery).not.toHaveBeenCalled();
   });
 });
 
@@ -704,10 +790,11 @@ describe('durable source revision reconciliation', () => {
     const onboardingClient = {
       cancelBySource: jest.fn(async () => null),
       getNonTerminalExecutions: jest.fn().mockResolvedValue([]),
+      getLatestExecution: jest.fn().mockResolvedValue(undefined),
     };
     const sourcesClient = { get: jest.fn(async () => ({ source })) } as unknown as SourcesClient;
-    const reconcile = () =>
-      reconcileSourceRevision({
+    const reconcile = async () => {
+      const scheduleOnboarding = await reconcileSourceRevision({
         source,
         sourcesClient,
         kiClient,
@@ -716,6 +803,8 @@ describe('durable source revision reconciliation', () => {
         scheduleSourceOnboarding,
         request,
       });
+      await scheduleOnboarding?.();
+    };
     return {
       reconcile,
       source,
@@ -728,13 +817,30 @@ describe('durable source revision reconciliation', () => {
   };
 
   it('starts onboarding for a new source without deleting knowledge', async () => {
-    const { reconcile, state, scheduleSourceOnboarding, kiClient, source } = setup();
+    const { reconcile, state, scheduleSourceOnboarding, kiClient, source, onboardingClient } =
+      setup();
     state.revision = undefined;
     state.onboardingScheduled = false;
     await reconcile();
     expect(scheduleSourceOnboarding).toHaveBeenCalledWith(source);
     expect(kiClient.deleteIndicators).not.toHaveBeenCalled();
     expect(state.revision).toBe('revision-2');
+    expect(onboardingClient.getLatestExecution).not.toHaveBeenCalled();
+  });
+
+  it('clears an old reservation when the revision changes and schedules the new revision', async () => {
+    const { reconcile, state, checkpoint, scheduleSourceOnboarding, onboardingClient } = setup();
+    state.onboardingReservedAt = Date.now();
+
+    await reconcile();
+
+    expect(checkpoint).toHaveBeenCalledWith({
+      revision: 'revision-2',
+      onboardingScheduled: false,
+      onboardingReservedAt: null,
+    });
+    expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+    expect(onboardingClient.getLatestExecution).not.toHaveBeenCalled();
   });
 
   it('retries failed cleanup before scheduling the replacement exactly once', async () => {
@@ -747,7 +853,12 @@ describe('durable source revision reconciliation', () => {
     await reconcile();
     expect(kiClient.deleteIndicators).toHaveBeenCalledTimes(2);
     expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
-    expect(state).toEqual({ revision: 'revision-2', onboardingScheduled: true, lease: null });
+    expect(state).toMatchObject({
+      revision: 'revision-2',
+      onboardingScheduled: false,
+      lease: null,
+    });
+    expect(state.onboardingReservedAt).toEqual(expect.any(Number));
   });
 
   it('waits for cancellation to complete before queuing the replacement', async () => {
@@ -774,9 +885,77 @@ describe('durable source revision reconciliation', () => {
   });
 
   it('leaves onboarding pending when continuous onboarding is off', async () => {
-    const { reconcile, state, scheduleSourceOnboarding } = setup();
+    const { reconcile, state, checkpoint, scheduleSourceOnboarding } = setup();
     scheduleSourceOnboarding.mockResolvedValue(false);
     await reconcile();
     expect(state.onboardingScheduled).toBe(false);
+    expect(state.onboardingReservedAt).toBeNull();
+    expect(checkpoint).toHaveBeenCalledWith({ onboardingReservedAt: null });
+  });
+
+  it('starts no run for a source created disabled, and exactly one when it is first enabled', async () => {
+    const { reconcile, source, state, scheduleSourceOnboarding } = setup();
+    state.revision = undefined;
+    state.onboardingScheduled = false;
+    source.enabled = false;
+
+    await reconcile();
+    expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    expect(state).toMatchObject({ revision: 'revision-2', onboardingScheduled: false });
+
+    source.enabled = true;
+    await reconcile();
+    expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+    expect(state.onboardingReservedAt).toEqual(expect.any(Number));
+
+    await reconcile();
+    expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not schedule a fresh reservation', async () => {
+    const { reconcile, state, scheduleSourceOnboarding, onboardingClient } = setup();
+    state.revision = 'revision-2';
+    state.onboardingScheduled = false;
+    state.onboardingReservedAt = Date.now();
+
+    await reconcile();
+
+    expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    expect(onboardingClient.getLatestExecution).not.toHaveBeenCalled();
+  });
+
+  it('does not schedule a stale reservation with a later execution', async () => {
+    const { reconcile, state, scheduleSourceOnboarding, onboardingClient } = setup();
+    state.revision = 'revision-2';
+    state.onboardingScheduled = false;
+    state.onboardingReservedAt = Date.now() - 6 * 60_000;
+    onboardingClient.getLatestExecution.mockResolvedValue({
+      ...runningExecution('source-slug'),
+      startedAt: new Date().toISOString(),
+    });
+
+    await reconcile();
+
+    expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    expect(onboardingClient.getLatestExecution).toHaveBeenCalledTimes(1);
+    expect(onboardingClient.getLatestExecution).toHaveBeenCalledWith({
+      sourceId: 'source',
+      sourceSlug: 'source-slug',
+      request,
+    });
+  });
+
+  it('reschedules a stale reservation without a later execution', async () => {
+    const { reconcile, state, scheduleSourceOnboarding, onboardingClient } = setup();
+    const staleReservation = Date.now() - 6 * 60_000;
+    state.revision = 'revision-2';
+    state.onboardingScheduled = false;
+    state.onboardingReservedAt = staleReservation;
+
+    await reconcile();
+
+    expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+    expect(state.onboardingReservedAt).toBeGreaterThan(staleReservation);
+    expect(onboardingClient.getLatestExecution).toHaveBeenCalledTimes(1);
   });
 });

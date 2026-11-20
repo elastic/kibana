@@ -12,13 +12,19 @@ import {
   type ProfilingHostsFunctionsResponse,
   type ProfilingHostsSchemasResponse,
 } from '@kbn/apm-api-shared';
+import type {
+  BaseFlameGraph,
+  ProfilingSchemasAvailability,
+  TopNFunctions,
+} from '@kbn/profiling-utils';
+import { getProfilingScopeCandidates } from '../../../../common/profiling/hosts_scope';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { fetchFlamegraph } from '../fetch_flamegraph';
+import { fetchFirstScopeWithSamples } from '../fetch_first_scope_with_samples';
 import { fetchFunctions } from '../fetch_functions';
-import { getProfilingHostsSchemas } from '../get_profiling_schemas';
 import { getServiceCorrelationFields } from '../get_service_correlation_fields';
-import { getHostsProfilingEventsQuery } from '../profiling_queries';
+import { getProfilingEventsQueryFromKuery } from '../profiling_queries';
 import { toProfilingTimeRange } from '../utils';
 
 const profilingHostsFlamegraphRoute = createApmServerRoute({
@@ -37,7 +43,7 @@ const profilingHostsFlamegraphRoute = createApmServerRoute({
       const { start, end, environment, documentType, rollupInterval, kuery, schema } = params.query;
       const { serviceName } = params.path;
 
-      const { hostNames, containerIds } = await getServiceCorrelationFields({
+      const correlation = await getServiceCorrelationFields({
         apmEventClient,
         start,
         end,
@@ -47,28 +53,36 @@ const profilingHostsFlamegraphRoute = createApmServerRoute({
         rollupInterval,
       });
 
-      if (!hostNames.length && !containerIds.length) {
+      const candidates = getProfilingScopeCandidates(correlation);
+      if (candidates.length === 0) {
         return undefined;
       }
       const { startSeconds, endSeconds, totalSeconds } = toProfilingTimeRange({ start, end });
 
-      const flamegraph = await fetchFlamegraph({
-        profilingDataAccessStart,
-        core,
-        esClient: esClient.asCurrentUser,
-        totalSeconds,
-        query: getHostsProfilingEventsQuery({
-          start: startSeconds,
-          end: endSeconds,
-          kuery,
-          hostNames,
-          containerIds,
-        }),
-        schema,
-        abortSignal: getRequestAbortedSignal(resources.request.events.aborted$),
+      const match = await fetchFirstScopeWithSamples({
+        candidates,
+        kuery,
+        fetch: (scopedKuery: string): Promise<BaseFlameGraph> =>
+          fetchFlamegraph({
+            profilingDataAccessStart,
+            core,
+            esClient: esClient.asCurrentUser,
+            totalSeconds,
+            query: getProfilingEventsQueryFromKuery({
+              start: startSeconds,
+              end: endSeconds,
+              kuery: scopedKuery,
+            }),
+            schema,
+            abortSignal: getRequestAbortedSignal(resources.request.events.aborted$),
+          }),
+        hasSamples: (flamegraph: BaseFlameGraph): boolean => flamegraph.TotalSamples > 0,
       });
+      if (!match) {
+        return undefined;
+      }
 
-      return { flamegraph, hostNames, containerIds };
+      return { flamegraph: match.result, scope: match.candidate.scope, ...correlation };
     }
 
     return undefined;
@@ -101,7 +115,7 @@ const profilingHostsFunctionsRoute = createApmServerRoute({
       } = params.query;
       const { serviceName } = params.path;
 
-      const { hostNames, containerIds } = await getServiceCorrelationFields({
+      const correlation = await getServiceCorrelationFields({
         apmEventClient,
         start,
         end,
@@ -111,31 +125,39 @@ const profilingHostsFunctionsRoute = createApmServerRoute({
         rollupInterval,
       });
 
-      if (!hostNames.length && !containerIds.length) {
+      const candidates = getProfilingScopeCandidates(correlation);
+      if (candidates.length === 0) {
         return undefined;
       }
 
       const { startSeconds, endSeconds, totalSeconds } = toProfilingTimeRange({ start, end });
 
-      const functions = await fetchFunctions({
-        profilingDataAccessStart,
-        core,
-        esClient: esClient.asCurrentUser,
-        startIndex,
-        endIndex,
-        totalSeconds,
-        query: getHostsProfilingEventsQuery({
-          start: startSeconds,
-          end: endSeconds,
-          kuery,
-          hostNames,
-          containerIds,
-        }),
-        schema,
-        abortSignal: getRequestAbortedSignal(resources.request.events.aborted$),
+      const match = await fetchFirstScopeWithSamples({
+        candidates,
+        kuery,
+        fetch: (scopedKuery: string): Promise<TopNFunctions> =>
+          fetchFunctions({
+            profilingDataAccessStart,
+            core,
+            esClient: esClient.asCurrentUser,
+            startIndex,
+            endIndex,
+            totalSeconds,
+            query: getProfilingEventsQueryFromKuery({
+              start: startSeconds,
+              end: endSeconds,
+              kuery: scopedKuery,
+            }),
+            schema,
+            abortSignal: getRequestAbortedSignal(resources.request.events.aborted$),
+          }),
+        hasSamples: (functions: TopNFunctions): boolean => functions.TotalCount > 0,
       });
+      if (!match) {
+        return undefined;
+      }
 
-      return { functions, hostNames, containerIds };
+      return { functions: match.result, scope: match.candidate.scope, ...correlation };
     }
 
     return undefined;
@@ -162,8 +184,9 @@ const profilingHostsSchemasRoute = createApmServerRoute({
     const { start, end, environment, documentType, rollupInterval, kuery } = params.query;
     const { startSeconds, endSeconds } = toProfilingTimeRange({ start, end });
     const { serviceName } = params.path;
+    const abortSignal = getRequestAbortedSignal(resources.request.events.aborted$);
 
-    const { hostNames, containerIds } = await getServiceCorrelationFields({
+    const correlation = await getServiceCorrelationFields({
       apmEventClient,
       start,
       end,
@@ -173,16 +196,29 @@ const profilingHostsSchemasRoute = createApmServerRoute({
       rollupInterval,
     });
 
-    return getProfilingHostsSchemas({
-      profilingDataAccessStart,
-      esClient: esClient.asCurrentUser,
-      start: startSeconds,
-      end: endSeconds,
-      hostNames,
-      containerIds,
+    const candidates = getProfilingScopeCandidates(correlation);
+    if (candidates.length === 0) {
+      return { schemas: [] };
+    }
+
+    const match = await fetchFirstScopeWithSamples({
+      candidates,
       kuery,
-      abortSignal: getRequestAbortedSignal(resources.request.events.aborted$),
+      fetch: (scopedKuery: string): Promise<ProfilingSchemasAvailability> =>
+        profilingDataAccessStart.services.getAvailableSchemas({
+          esClient: esClient.asCurrentUser,
+          query: getProfilingEventsQueryFromKuery({
+            start: startSeconds,
+            end: endSeconds,
+            kuery: scopedKuery,
+          }),
+          abortSignal,
+        }),
+      hasSamples: (availability: ProfilingSchemasAvailability): boolean =>
+        availability.schemas.length > 0,
     });
+
+    return match?.result ?? { schemas: [] };
   },
 });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { buildPolicyBaseIdWithFallbackKuery } from '@kbn/fleet-plugin/common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
@@ -80,7 +81,7 @@ export const getEnrolledAgents = async (
         showInactive: true,
         perPage,
         page,
-        kuery: `policy_id:"${agentPolicyId}"`,
+        kuery: buildPolicyBaseIdWithFallbackKuery(agentPolicyId),
       });
     total = totalAgents ?? agents.length;
 

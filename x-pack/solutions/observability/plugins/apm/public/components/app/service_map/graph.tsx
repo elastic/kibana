@@ -50,6 +50,7 @@ import {
 } from './constants';
 import { getServiceMapViewTarget } from './get_service_map_view_target';
 import { ServiceNode } from '../../shared/service_map/service_node';
+import { ServiceGroupNode } from '../../shared/service_map/service_group_node';
 import { DependencyNode } from '../../shared/service_map/dependency_node';
 import { GroupedResourcesNode } from '../../shared/service_map/grouped_resources_node';
 import { ServiceMapEdge } from './service_map_edge';
@@ -57,6 +58,7 @@ import { useEdgeHighlighting } from './use_edge_highlighting';
 import { useReducedMotion } from './use_reduced_motion';
 import { useKeyboardNavigation } from './use_keyboard_navigation';
 import { MapPopover } from './popover';
+import { ServiceMapGroupingCountLine } from './service_map_grouping_count_line';
 import { ServiceMapMinimap } from './service_map_minimap';
 import {
   DEFAULT_SERVICE_MAP_VIEW_FILTERS,
@@ -84,6 +86,7 @@ import type { Environment } from '../../../../common/environment_rt';
 import { isEnvironmentDefined } from '../../../../common/environment_filter_values';
 import {
   isServiceNode,
+  isServiceGroupNode,
   type ServiceMapNode,
   type ServiceNodeData,
   type ServiceMapEdge as ServiceMapEdgeType,
@@ -94,14 +97,22 @@ import { SERVICE_FLYOUT_SOURCE_SERVICE_MAP } from '../../shared/service_flyout/c
 import type { ServiceFlyoutOptions } from '../../shared/service_flyout/types';
 import { useServiceMapFlyoutProps } from './use_service_map_flyout_props';
 import { ServiceMapDiagnosticButton } from './service_map_diagnostic_button';
+import { RequestFlyout } from '../../shared/request_flyout';
+import { useServiceMapEdgeFlyoutProps } from './use_service_map_edge_flyout_props';
 
 type ServiceMapServiceNode = Node<ServiceNodeData>;
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
+  serviceGroup: ServiceGroupNode,
   dependency: DependencyNode,
   groupedResources: GroupedResourcesNode,
 };
+
+/** Dependency / resource popovers only — closed service groups select without a popover (#300587 opens them). */
+function shouldOpenNodePopover(node: ServiceMapNode): boolean {
+  return !isServiceNode(node) && !isServiceGroupNode(node);
+}
 
 const edgeTypes: EdgeTypes = {
   default: ServiceMapEdge,
@@ -161,6 +172,8 @@ interface GraphProps {
    */
   rangeFrom?: string;
   rangeTo?: string;
+  /** Closed-groups count line rendered as a ReactFlow Panel overlay. */
+  groupingCountLine?: string;
 }
 
 function GraphInner({
@@ -190,6 +203,7 @@ function GraphInner({
   serviceGroupId,
   rangeFrom,
   rangeTo,
+  groupingCountLine,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
@@ -216,9 +230,10 @@ function GraphInner({
     start,
     end,
   });
-  const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
+  const [selectedEdgeForFlyout, setSelectedEdgeForFlyout] = useState<ServiceMapEdgeType | null>(
     null
   );
+  const edgeFlyoutConnection = useServiceMapEdgeFlyoutProps({ selectedEdgeForFlyout });
   const serviceMapId = useGeneratedHtmlId({ prefix: 'serviceMap' });
   const mapRegionRef = useRef<HTMLDivElement | null>(null);
 
@@ -291,8 +306,8 @@ function GraphInner({
   // Track the current selected node for use in layout effect without triggering re-layout
   const selectedNodeIdRef = useRef<string | null>(null);
   selectedNodeIdRef.current = selectedNodeId;
-  const selectedEdgeForPopoverRef = useRef<string | null>(null);
-  selectedEdgeForPopoverRef.current = selectedEdgeForPopover?.id ?? null;
+  const selectedEdgeForFlyoutRef = useRef<string | null>(null);
+  selectedEdgeForFlyoutRef.current = selectedEdgeForFlyout?.id ?? null;
   const selectedServiceNodeForFlyoutRef = useRef<ServiceMapServiceNode | null>(null);
   selectedServiceNodeForFlyoutRef.current = selectedServiceNodeForFlyout;
 
@@ -378,16 +393,35 @@ function GraphInner({
     onDagreLayoutFailure,
   });
 
+  const highlightedNodeIds = useMemo(() => {
+    if (!highlightedServiceNames?.length) {
+      return undefined;
+    }
+    const selected = new Set(highlightedServiceNames);
+    const ids = new Set<string>();
+    for (const node of nodesAfterFilters) {
+      if (isServiceNode(node) && selected.has(node.id)) {
+        ids.add(node.id);
+      } else if (
+        isServiceGroupNode(node) &&
+        node.data.memberServiceIds.some((memberId) => selected.has(memberId))
+      ) {
+        ids.add(node.id);
+      }
+    }
+    return ids;
+  }, [nodesAfterFilters, highlightedServiceNames]);
+
   const nodesWithContextHighlight = useMemo(
     () =>
       nodesAfterFilters.map((n) => {
-        if (!isServiceNode(n)) {
+        if (!isServiceNode(n) && !isServiceGroupNode(n)) {
           return n;
         }
-        const contextHighlight = Boolean(highlightedServiceNames?.includes(n.id));
+        const contextHighlight = Boolean(highlightedNodeIds?.has(n.id));
         return { ...n, data: { ...n.data, contextHighlight } };
       }),
-    [nodesAfterFilters, highlightedServiceNames]
+    [nodesAfterFilters, highlightedNodeIds]
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(nodesWithContextHighlight);
@@ -397,18 +431,18 @@ function GraphInner({
     setNodes(nodesWithContextHighlight);
 
     const highlightedEdges = applyEdgeHighlighting(edgesAfterFilters, {
-      selectedNodeId: selectedEdgeForPopoverRef.current ? null : selectedNodeIdRef.current,
-      selectedEdgeId: selectedEdgeForPopoverRef.current,
+      selectedNodeId: selectedEdgeForFlyoutRef.current ? null : selectedNodeIdRef.current,
+      selectedEdgeId: selectedEdgeForFlyoutRef.current,
     });
 
     const edgesWithContextHighlight =
-      highlightedServiceNames && highlightedServiceNames.length > 0
+      highlightedNodeIds && highlightedNodeIds.size > 0
         ? highlightedEdges.map((edge) => ({
             ...edge,
             data: {
               ...edge.data,
-              sourceContextHighlight: highlightedServiceNames.includes(edge.source),
-              targetContextHighlight: highlightedServiceNames.includes(edge.target),
+              sourceContextHighlight: highlightedNodeIds.has(edge.source),
+              targetContextHighlight: highlightedNodeIds.has(edge.target),
             },
           }))
         : highlightedEdges;
@@ -429,7 +463,7 @@ function GraphInner({
     handleFitView,
     applyEdgeHighlighting,
     nodesAfterFilters.length,
-    highlightedServiceNames,
+    highlightedNodeIds,
   ]);
 
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
@@ -444,9 +478,9 @@ function GraphInner({
           selectedEdgeId: null,
         })
       );
-      setSelectedNodeForPopover(newSelectedId && !isServiceNode(node) ? node : null);
+      setSelectedNodeForPopover(newSelectedId && shouldOpenNodePopover(node) ? node : null);
       setSelectedServiceNodeForFlyout(newSelectedId && isServiceNode(node) ? node : null);
-      setSelectedEdgeForPopover(null);
+      setSelectedEdgeForFlyout(null);
     },
     [setEdges, applyEdgeHighlighting]
   );
@@ -455,8 +489,8 @@ function GraphInner({
       setSelectedNodeId(null);
       setSelectedNodeForPopover(null);
       setSelectedServiceNodeForFlyout(null);
-      const newSelectedEdge = selectedEdgeForPopover?.id === edge.id ? null : edge;
-      setSelectedEdgeForPopover(newSelectedEdge);
+      const newSelectedEdge = selectedEdgeForFlyout?.id === edge.id ? null : edge;
+      setSelectedEdgeForFlyout(newSelectedEdge);
       setEdges((currentEdges) =>
         applyEdgeHighlighting(currentEdges, {
           selectedNodeId: null,
@@ -464,16 +498,18 @@ function GraphInner({
         })
       );
     },
-    [selectedEdgeForPopover, setEdges, applyEdgeHighlighting]
+    [selectedEdgeForFlyout, setEdges, applyEdgeHighlighting]
   );
 
   const handlePaneClick = useCallback(() => {
+    // Pane clicks don't close the service flyout or the edge flyout: both survive map interaction.
     if (selectedServiceNodeForFlyoutRef.current) return;
+    if (selectedEdgeForFlyoutRef.current) return;
 
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);
     setSelectedServiceNodeForFlyout(null);
-    setSelectedEdgeForPopover(null);
+    setSelectedEdgeForFlyout(null);
     setNodes((currentNodes) =>
       currentNodes.map((n) => ({
         ...n,
@@ -487,7 +523,7 @@ function GraphInner({
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);
     setSelectedServiceNodeForFlyout(null);
-    setSelectedEdgeForPopover(null);
+    setSelectedEdgeForFlyout(null);
     setNodes((currentNodes) =>
       currentNodes.map((n) => ({
         ...n,
@@ -504,6 +540,28 @@ function GraphInner({
       handlePopoverClose();
     }
   }, [nodesAfterFilters, selectedNodeId, handlePopoverClose]);
+
+  // An edge that cannot open a flyout is not left selected.
+  useEffect(() => {
+    if (selectedEdgeForFlyout && !edgeFlyoutConnection) {
+      handlePopoverClose();
+    }
+  }, [selectedEdgeForFlyout, edgeFlyoutConnection, handlePopoverClose]);
+
+  // Close the edge flyout when the source or the target of its edge is filtered out.
+  useEffect(() => {
+    if (!selectedEdgeForFlyout) return;
+    const { source, target } = selectedEdgeForFlyout;
+    const isHidden = nodesAfterFilters.some(
+      (n) => (n.id === source || n.id === target) && n.hidden
+    );
+    if (isHidden) handlePopoverClose();
+  }, [nodesAfterFilters, selectedEdgeForFlyout, handlePopoverClose]);
+
+  const requestFlyoutDeps = useMemo(
+    () => ({ core, share, lens, dataViews }),
+    [core, share, lens, dataViews]
+  );
 
   useEffect(() => {
     // Find-in-page (and its Cmd/Ctrl+K shortcut) only exists in the standalone view; when
@@ -544,19 +602,20 @@ function GraphInner({
   }, [isEmbedded]);
 
   const handleDragStart = useCallback(() => {
-    if (selectedNodeForPopover || selectedEdgeForPopover) {
+    // Only the node popover closes on drag: the flyouts survive panning.
+    if (selectedNodeForPopover) {
       handlePopoverClose();
     }
-  }, [selectedNodeForPopover, selectedEdgeForPopover, handlePopoverClose]);
+  }, [selectedNodeForPopover, handlePopoverClose]);
 
   // Handle node selection from keyboard navigation
   const handleKeyboardNodeSelect = useCallback(
     (node: ServiceMapNode | null) => {
       if (node) {
         setSelectedNodeId(node.id);
-        setSelectedNodeForPopover(!isServiceNode(node) ? node : null);
+        setSelectedNodeForPopover(shouldOpenNodePopover(node) ? node : null);
         setSelectedServiceNodeForFlyout(isServiceNode(node) ? node : null);
-        setSelectedEdgeForPopover(null);
+        setSelectedEdgeForFlyout(null);
         setEdges((currentEdges) =>
           applyEdgeHighlighting(currentEdges, {
             selectedNodeId: node.id,
@@ -577,7 +636,7 @@ function GraphInner({
         setSelectedNodeId(null);
         setSelectedNodeForPopover(null);
         setSelectedServiceNodeForFlyout(null);
-        setSelectedEdgeForPopover(edge);
+        setSelectedEdgeForFlyout(edge);
         setEdges((currentEdges) =>
           applyEdgeHighlighting(currentEdges, {
             selectedNodeId: null,
@@ -597,7 +656,7 @@ function GraphInner({
     edges,
     selectedNodeId,
     selectedNodeForPopover,
-    selectedEdgeForPopover,
+    selectedEdgeForFlyout,
     onNodeSelect: handleKeyboardNodeSelect,
     onEdgeSelect: handleKeyboardEdgeSelect,
     onPopoverClose: handlePopoverClose,
@@ -713,7 +772,7 @@ function GraphInner({
       'This is an interactive service map showing application services and their dependencies. ' +
       'Use Tab to navigate between service nodes. Use Arrow keys to move between adjacent nodes. ' +
       'Press Enter or Space to select a node and view its details including connections. ' +
-      'Press Escape to close the details popover. ' +
+      'Press Escape to close the details panel. ' +
       'When focus is in the map region or on the page background (no text field focused), press Command K or Control K to open find in page and focus the search field. ' +
       'The options panel and zoom controls in the top left allow you to filter, change layout, zoom in, zoom out, and fit the view.',
   });
@@ -926,6 +985,9 @@ function GraphInner({
                       highlightedServiceNames={highlightedServiceNames}
                     />
                   )}
+                  <ServiceMapDiagnosticButton
+                    selection={selectedServiceNodeForFlyout ?? undefined}
+                  />
                   <EuiPanel
                     hasBorder
                     hasShadow={false}
@@ -950,11 +1012,10 @@ function GraphInner({
                 </Panel>
               )}
               {showControls && <ServiceMapMinimap />}
-              <ServiceMapDiagnosticButton selection={selectedServiceNodeForFlyout ?? undefined} />
+              <ServiceMapGroupingCountLine countLine={groupingCountLine} />
             </ReactFlow>
             <MapPopover
               selectedNode={selectedNodeForPopover}
-              selectedEdge={selectedEdgeForPopover}
               focusedServiceName={serviceName}
               environment={environment}
               kuery={kuery}
@@ -973,6 +1034,17 @@ function GraphInner({
                 deps={{ core, share, lens, dataViews, alerting: plugins.alerting }}
                 filters={flyoutProps.filters}
                 telemetry={{ client: telemetry, source: flyoutSource }}
+                onClose={handlePopoverClose}
+              />
+            )}
+            {edgeFlyoutConnection && (
+              <RequestFlyout
+                key={selectedEdgeForFlyout?.id}
+                deps={requestFlyoutDeps}
+                connection={edgeFlyoutConnection}
+                environment={environment}
+                rangeFrom={rangeFrom ?? start}
+                rangeTo={rangeTo ?? end}
                 onClose={handlePopoverClose}
               />
             )}

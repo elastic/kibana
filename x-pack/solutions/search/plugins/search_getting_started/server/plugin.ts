@@ -8,24 +8,21 @@
 import type {
   CoreSetup,
   CoreStart,
+  Logger,
   Plugin,
   PluginInitializerContext,
-  Logger,
 } from '@kbn/core/server';
-import type { SearchGettingStartedSetupDependencies } from './types';
-import { registerSearchSkills } from './skills/register_search_skills';
+import { registerSearchApiKeysRoutes } from '@kbn/search-api-keys-server';
 
-export class SearchGettingStartedPlugin
-  implements Plugin<{}, {}, SearchGettingStartedSetupDependencies>
-{
+export class SearchGettingStartedPlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
 
-  constructor(initContext: PluginInitializerContext) {
-    this.logger = initContext.logger.get();
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
   }
 
-  public setup(_core: CoreSetup, plugins: SearchGettingStartedSetupDependencies) {
-    registerSearchSkills({ plugins, logger: this.logger });
+  public setup(core: CoreSetup) {
+    registerSearchApiKeysRoutes(core.http.createRouter(), this.logger);
     return {};
   }
 

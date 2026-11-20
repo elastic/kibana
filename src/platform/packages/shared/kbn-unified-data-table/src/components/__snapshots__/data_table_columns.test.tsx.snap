@@ -26,7 +26,9 @@ Array [
       "showMoveLeft": true,
       "showMoveRight": true,
     },
-    "cellActions": Array [],
+    "cellActions": Array [
+      [Function],
+    ],
     "display": <Memo(UnifiedDataTableSourceColumnHeader)
       columnDisplayName="Summary"
       headerRowHeight={5}
@@ -150,6 +152,7 @@ Array [
           "fields": Array [],
           "getColumn": [Function],
           "getColumns": [Function],
+          "getEmptyColumnNames": [Function],
           "getFilterableFields": [Function],
           "id": "mock-esql-source",
           "isPersisted": [Function],
@@ -962,6 +965,7 @@ Array [
           "fields": Array [],
           "getColumn": [Function],
           "getColumns": [Function],
+          "getEmptyColumnNames": [Function],
           "getFilterableFields": [Function],
           "id": "mock-esql-source",
           "isPersisted": [Function],
@@ -1178,6 +1182,7 @@ Array [
           "fields": Array [],
           "getColumn": [Function],
           "getColumns": [Function],
+          "getEmptyColumnNames": [Function],
           "getFilterableFields": [Function],
           "id": "mock-esql-source",
           "isPersisted": [Function],
@@ -2573,6 +2578,7 @@ Array [
           "fields": Array [],
           "getColumn": [Function],
           "getColumns": [Function],
+          "getEmptyColumnNames": [Function],
           "getFilterableFields": [Function],
           "id": "mock-esql-source",
           "isPersisted": [Function],
@@ -2788,6 +2794,7 @@ Array [
           "fields": Array [],
           "getColumn": [Function],
           "getColumns": [Function],
+          "getEmptyColumnNames": [Function],
           "getFilterableFields": [Function],
           "id": "mock-esql-source",
           "isPersisted": [Function],

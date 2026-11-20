@@ -24,6 +24,14 @@ const getEndpointLabel = (id: SourceEndpoint['id']): string => {
       return i18n.translate('xpack.streams.sources.tracesEndpointLabel', {
         defaultMessage: 'Traces endpoint',
       });
+    case 'bulk':
+      return i18n.translate('xpack.streams.sources.bulkEndpointLabel', {
+        defaultMessage: 'Bulk endpoint',
+      });
+    case 'bulkTarget':
+      return i18n.translate('xpack.streams.sources.bulkTargetEndpointLabel', {
+        defaultMessage: 'Bulk endpoint with a target index',
+      });
     default:
       return i18n.translate('xpack.streams.sources.endpointLabel', {
         defaultMessage: 'Endpoint',

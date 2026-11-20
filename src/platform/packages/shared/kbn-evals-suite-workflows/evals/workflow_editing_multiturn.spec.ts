@@ -36,7 +36,6 @@ import {
   createEditPreservationEvaluator,
   createLiquidCorrectnessEvaluator,
   createEfficiencyEvaluator,
-  createLatencyEvaluator,
   skipCompositeMode,
   skipInfraErrors,
   skipNegativeCases,
@@ -93,7 +92,6 @@ const evaluate = base.extend<
           {
             datasets: [dataset],
             task: async ({ input }) => {
-              const startMs = Date.now();
               const response = await chatClient.converseMultiTurn({
                 turns: input.turns.map((turn, idx) => ({
                   message: turn.instruction,
@@ -111,7 +109,6 @@ const evaluate = base.extend<
                     : {}),
                 })),
               });
-              const latencyMs = Date.now() - startMs;
 
               const taskOutput = {
                 messages: response.messages,
@@ -130,7 +127,8 @@ const evaluate = base.extend<
               return {
                 ...taskOutput,
                 resultYaml,
-                latencyMs,
+                // No single traceId across turns; the executor's task-span
+                // trace id (covering all turns) is used by trace-based evaluators.
               };
             },
           },
@@ -142,7 +140,7 @@ const evaluate = base.extend<
             skip(createEditPreservationEvaluator()),
             liquid,
             skip(skipCompositeMode(createEfficiencyEvaluator())),
-            skip(createLatencyEvaluator()),
+            skip(evaluators.traceBasedEvaluators.latency),
             skipInfraErrors(createCriteriaEvaluator({ evaluators })),
           ])
         );

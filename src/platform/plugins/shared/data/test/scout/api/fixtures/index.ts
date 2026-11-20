@@ -13,4 +13,4 @@ import { apiTest as baseApiTest } from '@kbn/scout';
 export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
 
 export { ESE_API_PATH, TEST_INDEX, TEST_DOC_ID, COMMON_HEADERS, FAKE_ASYNC_ID } from './constants';
-export { verifyErrorResponse, shardDelayAgg, waitFor } from './helpers';
+export { verifyErrorResponse, shardDelayAgg, stallQuery, waitFor } from './helpers';

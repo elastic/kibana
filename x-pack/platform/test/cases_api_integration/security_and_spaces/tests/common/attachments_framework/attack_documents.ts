@@ -6,7 +6,10 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID } from '@kbn/elastic-assistant-common';
+import {
+  ALERT_ATTACK_DISCOVERY_ALERT_IDS,
+  ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
+} from '@kbn/elastic-assistant-common';
 import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
@@ -95,19 +98,31 @@ export const indexAttackDocuments = async ({
   attackIds,
   adHocAttackIds = [],
   alertIds = [],
+  alertIdsByAttackId = {},
   spaceId = 'default',
 }: {
   es: Client;
   attackIds: string[];
   adHocAttackIds?: string[];
   alertIds?: string[];
+  /** Constituent alert ids to record on a scheduled attack, as a real discovery carries them. */
+  alertIdsByAttackId?: Record<string, string[]>;
   spaceId?: string;
 }): Promise<void> => {
   await ensureAttackIndex(es);
 
   await Promise.all([
     ...attackIds.map((id) =>
-      es.index({ index: ATTACK_ALIAS, id, document: buildAttackDocument(spaceId) })
+      es.index({
+        index: ATTACK_ALIAS,
+        id,
+        document: {
+          ...buildAttackDocument(spaceId),
+          ...(alertIdsByAttackId[id] != null
+            ? { [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: alertIdsByAttackId[id] }
+            : {}),
+        },
+      })
     ),
     ...adHocAttackIds.map((id) =>
       es.index({ index: AD_HOC_ATTACK_INDEX, id, document: buildAdHocAttackDocument(spaceId) })

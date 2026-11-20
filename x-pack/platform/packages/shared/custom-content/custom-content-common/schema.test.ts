@@ -8,14 +8,14 @@
 import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
+  CUSTOM_CONTENT_MAX_ESQL_QUERIES,
+  CUSTOM_CONTENT_MAX_ESQL_QUERIES_TOTAL_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
 } from './constants';
 import {
   customContentStateSchema,
   customContentPanelUpdateSchema,
-  readEsqlQuery,
-  toEsqlQueryState,
-  resolveEsqlQueryEdit,
+  customContentDataQueriesSchema,
 } from './schema';
 
 describe('customContentStateSchema', () => {
@@ -57,10 +57,30 @@ describe('customContentStateSchema', () => {
     ).toBe(false);
   });
 
-  it('rejects more than one esql_query', () => {
-    expect(customContentStateSchema.safeParse({ esql_query: ['FROM a', 'FROM b'] }).success).toBe(
-      false
+  it('accepts several esql_query entries up to the cap', () => {
+    const queries = Array.from({ length: CUSTOM_CONTENT_MAX_ESQL_QUERIES }, (_, i) => `FROM a${i}`);
+    expect(customContentStateSchema.safeParse({ esql_query: queries }).success).toBe(true);
+  });
+
+  it('rejects more esql_query entries than the cap', () => {
+    const queries = Array.from(
+      { length: CUSTOM_CONTENT_MAX_ESQL_QUERIES + 1 },
+      (_, i) => `FROM a${i}`
     );
+    expect(customContentStateSchema.safeParse({ esql_query: queries }).success).toBe(false);
+  });
+
+  it('rejects queries that are each within the limit but too long together', () => {
+    const half = CUSTOM_CONTENT_MAX_ESQL_QUERIES_TOTAL_LENGTH / 2;
+
+    expect(
+      customContentStateSchema.safeParse({ esql_query: ['a'.repeat(half), 'b'.repeat(half)] })
+        .success
+    ).toBe(true);
+    expect(
+      customContentStateSchema.safeParse({ esql_query: ['a'.repeat(half), 'b'.repeat(half + 1)] })
+        .success
+    ).toBe(false);
   });
 
   it('accepts an empty esql_query array', () => {
@@ -82,21 +102,41 @@ describe('customContentPanelUpdateSchema', () => {
     ).toBe(true);
   });
 
-  it('still requires at least one of prompt or esqlQuery', () => {
+  it('requires something to change', () => {
     expect(customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1' }).success).toBe(false);
   });
 
-  it('accepts an esqlQuery on its own', () => {
+  it('accepts removing every query on its own', () => {
     expect(
-      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', esqlQuery: 'FROM logs-*' })
+      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', removeAllQueries: true })
         .success
     ).toBe(true);
   });
 
-  it('accepts a null esqlQuery to clear the query', () => {
+  it('rejects removeAllQueries together with dataQueries', () => {
     expect(
-      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', esqlQuery: null }).success
-    ).toBe(true);
+      customContentPanelUpdateSchema.safeParse({
+        embeddable_id: 'p1',
+        removeAllQueries: true,
+        dataQueries: [{ esql: 'FROM logs' }],
+      }).success
+    ).toBe(false);
+  });
+
+  it.each([
+    [{ esqlQuery: 'FROM logs' }],
+    [{ esqlQuery: null, prompt: 'x' }],
+    [{ regenerateEsql: true }],
+    [{ index: 'logs' }],
+  ])('rejects the removed fields instead of dropping them: %j', (extra) => {
+    const result = customContentPanelUpdateSchema.safeParse({
+      embeddable_id: 'p1',
+      prompt: 'Show it',
+      ...extra,
+    });
+
+    expect(result.success).toBe(false);
+    expect(JSON.stringify(result)).toContain('is no longer accepted');
   });
 
   it('rejects a prompt exceeding CUSTOM_CONTENT_MAX_PROMPT_LENGTH', () => {
@@ -115,44 +155,77 @@ describe('customContentPanelUpdateSchema', () => {
   });
 });
 
-describe('esql_query accessors', () => {
-  it('round-trips a single query', () => {
-    expect(readEsqlQuery({ esql_query: toEsqlQueryState('FROM logs') })).toBe('FROM logs');
+describe('customContentDataQueriesSchema', () => {
+  it('accepts descriptions, supplied queries and empty entries', () => {
+    expect(
+      customContentDataQueriesSchema.safeParse([
+        { description: 'totals', index: 'logs' },
+        { esql: 'FROM logs | LIMIT 5' },
+        {},
+      ]).success
+    ).toBe(true);
   });
 
-  it('maps no query to an absent field rather than an empty array', () => {
-    expect(toEsqlQueryState(undefined)).toBeUndefined();
+  it('rejects an empty list and more data queries than a panel can hold', () => {
+    expect(customContentDataQueriesSchema.safeParse([]).success).toBe(false);
+    expect(
+      customContentDataQueriesSchema.safeParse(
+        Array.from({ length: CUSTOM_CONTENT_MAX_ESQL_QUERIES + 1 }, () => ({ esql: 'FROM x' }))
+      ).success
+    ).toBe(false);
   });
 
-  it('reads undefined from a panel with no query', () => {
-    expect(readEsqlQuery({})).toBeUndefined();
-    expect(readEsqlQuery({ esql_query: [] })).toBeUndefined();
+  it('bounds the text of a data query', () => {
+    expect(
+      customContentDataQueriesSchema.safeParse([
+        { description: 'a'.repeat(CUSTOM_CONTENT_MAX_PROMPT_LENGTH + 1) },
+      ]).success
+    ).toBe(false);
+    expect(
+      customContentDataQueriesSchema.safeParse([
+        { esql: 'a'.repeat(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH + 1) },
+      ]).success
+    ).toBe(false);
+    expect(customContentDataQueriesSchema.safeParse([{ index: 'a'.repeat(257) }]).success).toBe(
+      false
+    );
   });
 });
 
-describe('resolveEsqlQueryEdit', () => {
-  it('keeps the existing query when the edit omits it', () => {
-    expect(resolveEsqlQueryEdit(undefined, 'FROM logs')).toEqual({
-      query: 'FROM logs',
-      isChanging: false,
-    });
+describe('customContentDataQueriesSchema entries that would do nothing', () => {
+  it.each([
+    [[{ index: 'metrics-*' }]],
+    [[{ description: '   ' }]],
+    [[{ esql: '  ' }]],
+    [[{ esql: 'FROM logs', index: 'logs' }]],
+  ])('are rejected, so the call does not succeed on a no-op: %j', (entries) => {
+    expect(customContentDataQueriesSchema.safeParse(entries).success).toBe(false);
   });
 
-  it('clears the query on null', () => {
-    expect(resolveEsqlQueryEdit(null, 'FROM logs')).toEqual({ query: undefined, isChanging: true });
+  it('still accepts an empty entry, which keeps the query at its position', () => {
+    expect(customContentDataQueriesSchema.safeParse([{}, { description: 'totals' }]).success).toBe(
+      true
+    );
+  });
+});
+
+describe('customContentPanelUpdateSchema data queries', () => {
+  const parse = (input: Record<string, unknown>) =>
+    customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', ...input });
+
+  it('accepts data queries with a prompt', () => {
+    expect(parse({ prompt: 'Show it', dataQueries: [{ description: 'totals' }] }).success).toBe(
+      true
+    );
   });
 
-  it('replaces the query with a supplied one', () => {
-    expect(resolveEsqlQueryEdit('FROM metrics', 'FROM logs')).toEqual({
-      query: 'FROM metrics',
-      isChanging: true,
-    });
+  it('counts data queries as a change', () => {
+    expect(parse({ dataQueries: [{ esql: 'FROM logs' }] }).success).toBe(true);
   });
 
-  // Distinguishing these two is the point of `isChanging`: both end with no query, but only the
-  // second should make the resolver re-sample.
-  it('distinguishes an omitted edit on a query-less panel from an explicit clear', () => {
-    expect(resolveEsqlQueryEdit(undefined, undefined).isChanging).toBe(false);
-    expect(resolveEsqlQueryEdit(null, undefined).isChanging).toBe(true);
+  it('needs a prompt when a data query has a description', () => {
+    const result = parse({ dataQueries: [{ description: 'totals' }] });
+    expect(result.success).toBe(false);
+    expect(JSON.stringify(result)).toContain('needs a prompt');
   });
 });

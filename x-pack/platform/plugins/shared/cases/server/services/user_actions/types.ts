@@ -131,7 +131,9 @@ export interface BuilderParameters {
     parameters: { payload: WorkflowUserActionPayload };
   };
   bulkAttachments: {
-    parameters: { payload: { bulkAttachments: BulkAttachmentsPayload } };
+    parameters: {
+      payload: { bulkAttachments: BulkAttachmentsPayload };
+    };
   };
 }
 
@@ -429,6 +431,17 @@ export interface BulkCreateAttachmentUserAction
     owner: string;
     attachment: AttachmentRequestV2;
     savedObjectType?: AttachmentSavedObjectType;
+  }>;
+}
+
+export interface BulkCreateAttachmentBulkDeletionUserAction
+  extends CommonUserActionArgs,
+    IndexRefresh {
+  deletions: Array<{
+    attachmentType: string;
+    count: number;
+    /** The deleted attachments, audited one by one like a single attachment deletion. */
+    attachments: Array<{ id: string; savedObjectType: string }>;
   }>;
 }
 

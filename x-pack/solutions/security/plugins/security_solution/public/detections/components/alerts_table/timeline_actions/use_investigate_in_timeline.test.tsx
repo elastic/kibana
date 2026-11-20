@@ -18,7 +18,7 @@ import React from 'react';
 import { EuiPopover, EuiContextMenu } from '@elastic/eui';
 import * as timelineActions from '../../../../timelines/store/actions';
 import { getTimelineTemplate } from '../../../../timelines/containers/api';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/lib/kibana');

@@ -11,19 +11,26 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useNavigateToCanvasSearch } from '../../stream_management/data_management/stream_detail_canvas/use_navigate_to_canvas_search';
 import { CreateDestinationModal } from './create_destination_modal';
 import { DeleteDestinationConfirmation } from './delete_destination_confirmation';
-import { UnitDestinationFlyout } from './unit_destination_flyout';
 import { getDestinationSortableValue, DestinationsGrid } from './destinations_grid';
 import { DestinationsToolbar } from './destinations_toolbar';
 import { useDestinationsTable } from './destinations_context';
-import { LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
+import { getDestinationIndices } from './destination_models';
+import { getDestinationTypeLabel } from './destination_type_config';
 import type { DestinationViewModel } from './types';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { UnitReadOnlyCallout } from '../unit_read_only_callout';
 
 export const DestinationsTab = () => {
   const destinationsController = useDestinationsTable();
   const {
     destinations,
+    resolvedIndicesByDestination,
+    resolvedIndicesStatus,
+    resolvedIndicesError,
+    destinationDetailRefs,
+    showDestinationDetail,
+    hideDestinationDetail,
     query,
-    selectedDestination,
     isCreateModalOpen,
     isRefreshingUnit,
     isLoadingUnit,
@@ -40,11 +47,12 @@ export const DestinationsTab = () => {
     setVisibleColumnIds,
     openCreateModal,
     closeCreateModal,
-    openDestinationFlyout,
-    closeDestinationFlyout,
     deleteDestination,
     isUnitSaving,
   } = destinationsController;
+  const {
+    v2: { manage: canManage },
+  } = useStreamsPrivileges();
   const navigateToCanvasSearch = useNavigateToCanvasSearch();
   const showOnCanvas = useCallback(
     (destination: DestinationViewModel) => navigateToCanvasSearch(destination.name),
@@ -67,7 +75,18 @@ export const DestinationsTab = () => {
     return destinations.filter(
       (destination) =>
         (!normalizedQuery ||
-          [destination.name, destination.id, destination.index, LOCAL_ELASTICSEARCH_LABEL]
+          [
+            destination.name,
+            destination.id,
+            destination.description,
+            ...(destination.type === 'elasticsearch'
+              ? [...getDestinationIndices(destination), destination.mode]
+              : destination.type === 's3'
+              ? [destination.bucket]
+              : [destination.endpoint, ...Object.values(destination.indexBySignal)]),
+            destination.signals.join(' '),
+            getDestinationTypeLabel(destination.type),
+          ]
             .join(' ')
             .toLowerCase()
             .includes(normalizedQuery)) &&
@@ -82,12 +101,23 @@ export const DestinationsTab = () => {
     }
 
     return [...filteredDestinations].sort((a, b) => {
-      const order = getDestinationSortableValue(a, sort.id).localeCompare(
-        getDestinationSortableValue(b, sort.id)
+      const aValue = getDestinationSortableValue(
+        a,
+        sort.id,
+        resolvedIndicesByDestination.get(a.id)?.length ?? 0
       );
+      const bValue = getDestinationSortableValue(
+        b,
+        sort.id,
+        resolvedIndicesByDestination.get(b.id)?.length ?? 0
+      );
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sort.direction === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+      const order = String(aValue).localeCompare(String(bValue));
       return sort.direction === 'asc' ? order : -order;
     });
-  }, [filteredDestinations, sortingColumns]);
+  }, [filteredDestinations, resolvedIndicesByDestination, sortingColumns]);
 
   return (
     <>
@@ -102,6 +132,12 @@ export const DestinationsTab = () => {
       >
         <EuiFlexItem grow={false}>
           <EuiSpacer size="m" />
+          {!canManage && (
+            <>
+              <UnitReadOnlyCallout />
+              <EuiSpacer size="m" />
+            </>
+          )}
           <DestinationsToolbar
             query={query}
             selectedTypes={selectedTypes}
@@ -109,7 +145,7 @@ export const DestinationsTab = () => {
             onQueryChange={setQuery}
             onSelectedTypesChange={setSelectedTypes}
             onRefresh={refreshUnit}
-            onAddDestination={openCreateModal}
+            onAddDestination={canManage ? openCreateModal : undefined}
             isAddDisabled={isUnitSaving}
           />
           <EuiSpacer size="s" />
@@ -123,6 +159,12 @@ export const DestinationsTab = () => {
           <DestinationsGrid
             status={isLoadingUnit ? 'loading' : isUnitUnavailable ? 'unavailable' : 'ready'}
             destinations={sortedDestinations}
+            resolvedIndicesByDestination={resolvedIndicesByDestination}
+            resolvedIndicesStatus={resolvedIndicesStatus}
+            resolvedIndicesError={resolvedIndicesError}
+            destinationDetailRefs={destinationDetailRefs}
+            onShowDestinationDetail={showDestinationDetail}
+            onHideDestinationDetail={hideDestinationDetail}
             hasActiveFilters={query.trim().length > 0 || selectedTypes.length > 0}
             visibleColumns={visibleColumnIds}
             pagination={pagination}
@@ -130,13 +172,12 @@ export const DestinationsTab = () => {
             onVisibleColumnsChange={setVisibleColumnIds}
             onPaginationChange={setPagination}
             onSortingChange={setSortingColumns}
-            onOpenDestination={openDestinationFlyout}
             onShowOnCanvas={showOnCanvas}
-            onRequestDelete={setDestinationPendingDeletion}
+            onRequestDelete={canManage ? setDestinationPendingDeletion : undefined}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isCreateModalOpen && (
+      {canManage && isCreateModalOpen && (
         <CreateDestinationModal destinations={destinationsController} onClose={closeCreateModal} />
       )}
       {destinationPendingDeletion && (
@@ -144,18 +185,6 @@ export const DestinationsTab = () => {
           destinationName={destinationPendingDeletion.name}
           onCancel={cancelDeletion}
           onConfirm={confirmDeletion}
-        />
-      )}
-      {selectedDestination && (
-        <UnitDestinationFlyout
-          key={selectedDestination.id}
-          destinationName={selectedDestination.name}
-          onClose={closeDestinationFlyout}
-          isDeleteDisabled={isUnitSaving}
-          onDelete={() => {
-            destinationsController.deleteDestination(selectedDestination.id);
-            closeDestinationFlyout();
-          }}
         />
       )}
     </>

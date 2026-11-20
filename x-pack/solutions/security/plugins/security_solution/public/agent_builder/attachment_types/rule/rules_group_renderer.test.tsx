@@ -61,6 +61,49 @@ describe('createRulesGroupRenderer', () => {
     );
   });
 
+  it('renders nothing for a drafted rule', () => {
+    render(
+      <ul>
+        <Renderer attachments={[rule({ id: 'rule-draft' })]} />
+      </ul>
+    );
+
+    expect(screen.queryByRole('listitem')).not.toBeInTheDocument();
+    expect(getUrlForApp).not.toHaveBeenCalled();
+  });
+
+  it('ignores a drafted rule next to a saved rule', () => {
+    render(
+      <ul>
+        <Renderer attachments={[rule({ id: 'rule-draft' }), rule({ id: 'b', origin: 'r1' })]} />
+      </ul>
+    );
+
+    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    expect(screen.getByRole('button')).toBeInTheDocument();
+    expect(getUrlForApp).not.toHaveBeenCalled();
+  });
+
+  it('does not count a drafted rule in the collapsed rules row', () => {
+    render(
+      <ul>
+        <Renderer
+          attachments={[
+            rule({ id: 'rule-draft' }),
+            rule({ id: 'a', origin: 'r1' }),
+            rule({ id: 'b', origin: 'r2' }),
+          ]}
+        />
+      </ul>
+    );
+
+    expect(screen.getByText('2 rules')).toBeInTheDocument();
+    expect(getUrlForApp).toHaveBeenCalledWith(
+      'securitySolutionUI',
+      expect.objectContaining({ deepLinkId: 'rules', path: '/management' })
+    );
+  });
+
   it('collapses several rules into one row linking to rules management', () => {
     render(
       <ul>

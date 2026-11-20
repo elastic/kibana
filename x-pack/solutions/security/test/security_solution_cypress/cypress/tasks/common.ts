@@ -55,7 +55,10 @@ export const drop = (dropTarget: JQuery<HTMLElement>) => {
     .wait(300);
 };
 
-const getUserValue = (taskName: 'getFullname' | 'getUsername', role: string = 'admin') => {
+const getUserValue = (
+  taskName: 'getFullname' | 'getUsername' | 'getMessageAuthorName',
+  role: string = 'admin'
+) => {
   if (Cypress.env('IS_SERVERLESS')) {
     return cy.task(taskName, role);
   } else {
@@ -69,6 +72,11 @@ export const getFullname = (role: string = 'admin') => {
 
 export const getUsername = (role: string = 'admin') => {
   return getUserValue('getUsername', role);
+};
+
+/** Name shown on an assistant message: full name when set, otherwise username. */
+export const getMessageAuthorName = (role: string = 'admin') => {
+  return getUserValue('getMessageAuthorName', role);
 };
 
 export const reload = () => {

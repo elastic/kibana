@@ -14,6 +14,7 @@ import {
   type EscalationModalRenderProps,
   type OverviewSlotRenderProps,
   type LiveStateSlotRenderProps,
+  type SeveritySlotRenderProps,
   type TitleSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
 import { INVESTIGATION_TEMPLATE_ID, isInvestigationTitlePending } from '../../../../common';
@@ -144,6 +145,13 @@ export const investigationTemplate: TemplateDefinition = {
       }
     );
 
+    const LazySeverityPicker = makeLazyWithSharedClient<SeveritySlotRenderProps>(async () => {
+      const { ConnectedSeverityPicker } = await import(
+        '../../shared/connected_severity/connected_severity_picker'
+      );
+      return ConnectedSeverityPicker;
+    });
+
     const LazyInvestigationTitle = makeLazyWithSharedClient<TitleSlotRenderProps>(async () => {
       const { InvestigationTitle } = await import('./flyout/header_title');
       return InvestigationTitle;
@@ -204,6 +212,13 @@ export const investigationTemplate: TemplateDefinition = {
       renderAssignees,
       // The toggle itself disables when the user may not change the status.
       renderStatus,
+      // The picker itself shows a read-only badge when the user may not change the severity.
+      renderSeverity: (props) =>
+        React.createElement(
+          EscalationModalBoundary,
+          null,
+          React.createElement(LazySeverityPicker, props)
+        ),
       renderCloseInvestigationModal,
       renderOverview: (props) =>
         React.createElement(

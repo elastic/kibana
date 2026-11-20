@@ -2,7 +2,7 @@
 
 Discover reports product telemetry through three channels: custom EBT events, standard `performance_metric` events for durations, and `trackUiMetric` UI counters for legacy usage counts. EBT registrations live in [discover_ebt_manager_registrations.ts](./discover_ebt_manager_registrations.ts).
 
-All Discover EBT events can include the `discover_context` context provider. Its `discoverProfiles` field contains the active Discover context awareness profile IDs.
+All Discover EBT events can include the `discover_context` context provider. Its `discoverProfiles` field contains the active Discover context awareness profile IDs. Inherited telemetry labels are included, so a specialized logs profile also carries its parent profile id.
 
 ## Custom EBT events
 
@@ -39,26 +39,6 @@ Tracks field names extracted from submitted KQL and ES|QL queries.
 | ------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `eventName`  | `keyword`   | Query language analyzed: `kqlQuery` or `esqlQuery`.                                                                                   |
 | `fieldNames` | `keyword[]` | Field names found in the query. ECS fields are recorded by name, non-ECS fields as `<non-ecs>`, and free-text KQL as `__FREE_TEXT__`. |
-
-### `discover_query_performance`
-
-Tracks timing and request-shape metadata when Discover completes a main fetch request or a fetch-more request. The same fetches are also reported as standard `performance_metric` events.
-
-| Event name                     | Description                                      |
-| ------------------------------ | ------------------------------------------------ |
-| `discoverFetchAll`             | A main Discover fetch completed (table + chart). |
-| `discoverFetchAllRequestsOnly` | A main Discover fetch completed (table only).    |
-| `discoverFetchMore`            | A fetch-more request completed (table only).     |
-
-| Field                | Type                 | Description                                                                                              |
-| -------------------- | -------------------- | -------------------------------------------------------------------------------------------------------- |
-| `eventName`          | `keyword`            | Query performance action.                                                                                |
-| `duration`           | `integer`            | Fetch duration in milliseconds.                                                                          |
-| `queryRangeSeconds`  | `long`               | Absolute time range covered by the query, in seconds.                                                    |
-| `phraseQueryCount`   | `integer`            | Number of phrase queries found in inspected Elasticsearch requests.                                      |
-| `multiMatchTypes`    | `keyword[]`          | Multi-match query types found in inspected Elasticsearch requests.                                       |
-| `fetchType`          | `keyword`            | Fetch implementation: `fetchTextBased` for ES\|QL fetches, or `fetchDocuments` for classic mode fetches. |
-| `querySourceCommand` | `keyword` (optional) | ES\|QL source command, such as `FROM`, `TS`, or `PROMQL`; omitted when unavailable.                      |
 
 ### `discover_profile_resolved`
 
@@ -140,7 +120,7 @@ Tracks Discover session saves from a dashboard and tab switches inside embedded 
 
 ## Standard performance metrics
 
-These events are reported through `reportPerformanceMetricEvent` and use the shared `performance_metric` event type. Query performance fetches are also reported as the custom `discover_query_performance` EBT event described above.
+These events are reported through `reportPerformanceMetricEvent` and use the shared `performance_metric` event type.
 
 | Event name                     | Description                                      |
 | ------------------------------ | ------------------------------------------------ |
@@ -156,6 +136,8 @@ These events are reported through `reportPerformanceMetricEvent` and use the sha
 | `duration`               | `integer`              | Event duration in milliseconds.                                                                                                                                                                                     |
 | `meta.fetchType`         | `keyword` (optional)   | Fetch type. For `discoverSurroundingDocsFetch`: `all`, `predecessors`, `successors`, or `context`. For query performance events: `fetchTextBased` for ES\|QL fetches, or `fetchDocuments` for classic mode fetches. |
 | `meta.multi_match_types` | `keyword[]` (optional) | Multi-match query types found in inspected Elasticsearch requests for query performance events.                                                                                                                     |
+| `meta.query_source_command` | `keyword` (optional) | ES\|QL source command, such as `FROM`, `TS`, or `PROMQL`, for query performance events; omitted when unavailable. |
+| `meta.approximationApplied` | `boolean` (optional) | Whether the ES\|QL response contained approximate results, for query performance events. Always set for ES\|QL fetches (`false` when approximation was not applied); omitted for classic mode fetches. |
 | `key1`                   | `keyword` (optional)   | Set to `query_range_secs` for query performance events.                                                                                                                                                             |
 | `value1`                 | `long` (optional)      | Absolute time range covered by the query, in seconds, when `key1` is `query_range_secs`.                                                                                                                            |
 | `key2`                   | `keyword` (optional)   | Set to `phrase_query_count` for query performance events.                                                                                                                                                           |

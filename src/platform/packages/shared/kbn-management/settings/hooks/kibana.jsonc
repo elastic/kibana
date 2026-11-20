@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/management-settings-hooks",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

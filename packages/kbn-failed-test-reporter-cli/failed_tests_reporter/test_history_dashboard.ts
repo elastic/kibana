@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { computeTestID } from '@kbn/scout-reporting';
-
+import { getScoutTestId } from './failure_identity';
 import type { TestFailure } from './get_failures';
-import { getLocationFromClassname } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
 
 const DASHBOARD_URL = 'https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history';
@@ -18,24 +16,8 @@ const LINK_LABEL = 'Test history: [passes and failures over time]';
 
 const risonString = (value: string): string => `'${value.replace(/!/g, '!!').replace(/'/g, "!'")}'`;
 
-/** Link an FTR, Jest, or Scout failure to its test history in the test-event stream. */
-export const testHistoryDashboardUrl = (
-  failure: TestFailure | ScoutTestFailureExtended
-): string | undefined => {
-  let testId: string;
-
-  if ('id' in failure && failure.id) {
-    testId = failure.id;
-  } else if (failure.testType === 'ftr' || failure.testType === 'jest') {
-    const filePath =
-      failure.testType === 'jest' ? failure.location : getLocationFromClassname(failure.classname);
-    if (!filePath || !/\.[cm]?[jt]sx?$/.test(filePath) || !failure.name) return;
-
-    testId = computeTestID(filePath, failure.name);
-  } else {
-    return;
-  }
-
+/** The test history dashboard of one test id, over the last 30 days. */
+export const testHistoryUrl = (testId: string): string => {
   const globalState = '(time:(from:now-30d,to:now))';
   const appState = `(query:(language:kuery,query:${risonString(
     `test.id : ${JSON.stringify(testId)}`
@@ -43,6 +25,14 @@ export const testHistoryDashboardUrl = (
   return `${DASHBOARD_URL}?_g=${encodeURIComponent(globalState)}&_a=${encodeURIComponent(
     appState
   )}`;
+};
+
+/** Link an FTR, Jest, Cypress or Scout failure to its test history in the test-event stream. */
+export const testHistoryDashboardUrl = (
+  failure: TestFailure | ScoutTestFailureExtended
+): string | undefined => {
+  const testId = getScoutTestId(failure);
+  return testId ? testHistoryUrl(testId) : undefined;
 };
 
 /** Insert or refresh the dashboard link before the issue's machine-readable metadata. */

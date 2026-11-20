@@ -24,7 +24,6 @@ import {
   EuiFlexItem,
   EuiButtonGroup,
 } from '@elastic/eui';
-import type { CPSPluginStart } from '@kbn/cps/public/types';
 import { RuleTypeList } from './rule_type_list';
 import { TemplateList } from './template_list';
 import type { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
@@ -52,7 +51,7 @@ export interface RuleTypeModalProps {
   templatesLoadingMore: boolean;
   hasMoreTemplates: boolean;
   onLoadMoreTemplates: () => void;
-  cps?: CPSPluginStart;
+  showClassicBadge?: boolean;
 }
 
 export interface RuleTypeModalState {
@@ -115,7 +114,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
   templatesLoadingMore,
   hasMoreTemplates,
   onLoadMoreTemplates,
-  cps,
+  showClassicBadge = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
@@ -174,11 +173,13 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                       <h1>{ruleTypeModalTitle}</h1>
                     </EuiTitle>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow" data-test-subj="ruleTypeModalClassicBadge">
-                      {ruleTypeModalBadgeLabel}
-                    </EuiBadge>
-                  </EuiFlexItem>
+                  {showClassicBadge && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow" data-test-subj="ruleTypeModalClassicBadge">
+                        {ruleTypeModalBadgeLabel}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
                 <EuiFlexGroup alignItems="center">
@@ -239,7 +240,6 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                 selectedProducer={selectedProducer}
                 onClearFilters={onClearFilters}
                 showCategories={showCategories}
-                cps={cps}
               />
             ) : templatesLoading ? (
               loadingTemplatesPrompt

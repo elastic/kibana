@@ -51,6 +51,7 @@ export {
   getChangePointSeriesColumns,
   getChangePointByColumns,
   buildChangePointLineDataQuery,
+  narrowChangePointEsqlToEntity,
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlIdentifier,
   formatEsqlLiteral,
@@ -64,6 +65,7 @@ export {
   getAnySourceCommandFromESQLQuery,
 } from './utils/get_index_pattern_from_query';
 export type { ESQLIndexPatterns } from './utils/get_index_pattern_from_query';
+export { formatEsqlSources } from './utils/format_esql_sources';
 export { classifyESQLSource, isSingleSource } from './utils/classify_esql_source';
 export type { ESQLSourceKind } from './utils/classify_esql_source';
 export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';
@@ -77,6 +79,8 @@ export { appendWhereClauseToESQLQuery } from './utils/append_to_query/append_whe
 export { appendLimitToQuery } from './utils/append_to_query/append_limit';
 export { buildMetricsInfoQuery } from './utils/append_to_query/append_metrics_info';
 
+export { getESQLControlVariablesFromState } from './utils/get_esql_control_variables';
+export { castESQLValue } from './utils/cast_esql_value';
 export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
@@ -85,12 +89,21 @@ export {
   getStartEndParams,
   hasStartEndParams,
   getNamedParams,
+  getEsqlSearchParams,
 } from './utils/run_query';
+export {
+  hasGeotilePrecisionParam,
+  hasGeohexPrecisionParam,
+  hasGeohashPrecisionParam,
+  getGeoPrecisionParamValues,
+  type GeoPrecisionParams,
+} from './utils/geo_precision_params';
 export {
   isESQLColumnSortable,
   isESQLColumnGroupable,
   isESQLFieldGroupable,
 } from './utils/esql_fields_utils';
+export { getEsqlInspectorStats } from './utils/get_esql_inspector_stats';
 export { sanitazeESQLInput } from './utils/sanitaze_input';
 export { escapeEsqlColumnName } from '@kbn/esql-language';
 export { replaceESQLQueryIndexPattern } from './utils/replace_index_pattern';
@@ -120,7 +133,6 @@ export {
   type EsqlViewNameValidationError,
   type EsqlViewsClient,
 } from './utils/views';
-export { getEsqlControls, getAllEsqlControls, getVariableNamePrefix } from './utils/controls';
 export {
   getColumnsWithHighlights,
   type ESQLColumnsWithHighlights,

@@ -6,18 +6,29 @@
  */
 
 import expect from '@kbn/expect';
-import { MAX_BULK_DELETE_ATTACHMENTS } from '@kbn/cases-plugin/common/constants';
+import { getCaseBulkDeleteAttachmentsUrl } from '@kbn/cases-plugin/common/api';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  MAX_BULK_DELETE_ATTACHMENTS,
+} from '@kbn/cases-plugin/common/constants';
+import {
+  FILE_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common/constants/attachments';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   getPostCaseRequest,
   getUnifiedFilesAttachmentReq,
   postCaseReq,
+  postCommentAlertMultipleIdsReq,
   postCommentAlertReq,
   postCommentUserReq,
 } from '../../../../common/lib/mock';
 import {
   bulkCreateAttachments,
+  bulkDeleteAttachmentReferences,
   bulkDeleteAttachments,
   createAndUploadFile,
   createCase,
@@ -45,6 +56,35 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+
+  const getBulkAttachmentsUserActions = async (caseId: string) => {
+    const { userActions } = await findCaseUserActions({ supertest, caseID: caseId });
+    return userActions.filter(({ type }) => type === 'bulkAttachments');
+  };
+
+  const seedLegacyAlertAttachment = async ({ id, caseId }: { id: string; caseId: string }) => {
+    await es.index({
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      id: `${CASE_COMMENT_SAVED_OBJECT}:${id}`,
+      refresh: 'wait_for',
+      document: {
+        type: CASE_COMMENT_SAVED_OBJECT,
+        [CASE_COMMENT_SAVED_OBJECT]: {
+          ...postCommentAlertMultipleIdsReq,
+          created_at: '2024-01-01T00:00:00.000Z',
+          created_by: { username: 'elastic', full_name: null, email: null },
+          pushed_at: null,
+          pushed_by: null,
+          updated_at: null,
+          updated_by: null,
+        },
+        references: [{ type: 'cases', id: caseId, name: 'associated-cases' }],
+        namespaces: ['default'],
+        updated_at: '2024-01-01T00:00:00.000Z',
+        coreMigrationVersion: '8.8.0',
+      },
+    });
+  };
 
   describe('bulk_delete_attachments', () => {
     afterEach(async () => {
@@ -74,7 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(comments.length).to.eql(0);
     });
 
-    it('records a delete user action for each deleted attachment', async () => {
+    it('records one grouped delete user action per attachment type', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
 
       let theCase = await createComment({
@@ -93,11 +133,152 @@ export default ({ getService }: FtrProviderContext): void => {
       await bulkDeleteAttachments({ supertest, caseId: postedCase.id, savedObjectIds });
 
       const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
-      const deletions = userActions.filter(
+      const commentDeletions = userActions.filter(
         (userAction) => userAction.type === 'comment' && userAction.action === 'delete'
       );
+      const groupedDeletions = await getBulkAttachmentsUserActions(postedCase.id);
 
-      expect(deletions.length).to.eql(2);
+      expect(commentDeletions).to.eql([]);
+      expect(groupedDeletions.length).to.eql(2);
+      groupedDeletions.forEach(({ action, payload }) => {
+        expect(action).to.be('delete');
+        expect(payload).to.have.property('bulkAttachments');
+        expect('bulkAttachments' in payload ? payload.bulkAttachments.count : 0).to.be(1);
+      });
+    });
+
+    it('counts every alert of a grouped attachment', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const theCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentAlertMultipleIdsReq,
+      });
+
+      await bulkDeleteAttachments({
+        supertest,
+        caseId: postedCase.id,
+        savedObjectIds: [theCase.comments![0].id],
+      });
+
+      const groupedDeletions = await getBulkAttachmentsUserActions(postedCase.id);
+      expect(groupedDeletions.length).to.be(1);
+      expect(groupedDeletions[0].payload).to.eql({
+        bulkAttachments: { attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE, count: 2 },
+      });
+    });
+
+    describe('by attachment ids', () => {
+      it('keeps the other alerts of a grouped attachment', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertMultipleIdsReq,
+        });
+
+        await bulkDeleteAttachmentReferences({
+          supertest,
+          caseId: postedCase.id,
+          type: SECURITY_ALERT_ATTACHMENT_TYPE,
+          attachmentIds: ['test-id-1'],
+        });
+
+        const [attachment, ...rest] = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(rest).to.eql([]);
+        expect('alertId' in attachment ? attachment.alertId : undefined).to.eql(['test-id-2']);
+        expect('index' in attachment ? attachment.index : undefined).to.eql(['test-index-2']);
+        expect((await getCase({ supertest, caseId: postedCase.id })).totalAlerts).to.be(1);
+
+        const groupedDeletions = await getBulkAttachmentsUserActions(postedCase.id);
+        expect(groupedDeletions.length).to.be(1);
+        expect(groupedDeletions[0].payload).to.eql({
+          bulkAttachments: { attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE, count: 1 },
+        });
+      });
+
+      it('deletes an attachment when every alert it references is removed', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        await createComment({ supertest, caseId: postedCase.id, params: postCommentAlertReq });
+
+        await bulkDeleteAttachmentReferences({
+          supertest,
+          caseId: postedCase.id,
+          type: SECURITY_ALERT_ATTACHMENT_TYPE,
+          attachmentIds: ['test-id'],
+        });
+
+        expect(await getAllComments({ supertest, caseId: postedCase.id })).to.eql([]);
+        expect((await getCase({ supertest, caseId: postedCase.id })).totalAlerts).to.be(0);
+
+        const groupedDeletions = await getBulkAttachmentsUserActions(postedCase.id);
+        expect(groupedDeletions.length).to.be(1);
+        expect(groupedDeletions[0].payload).to.eql({
+          bulkAttachments: { attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE, count: 1 },
+        });
+      });
+
+      it('returns a 404 and changes nothing when an alert is not attached', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertMultipleIdsReq,
+        });
+
+        await bulkDeleteAttachmentReferences({
+          supertest,
+          caseId: postedCase.id,
+          type: SECURITY_ALERT_ATTACHMENT_TYPE,
+          attachmentIds: ['test-id-1', 'does-not-exist'],
+          expectedHttpCode: 404,
+        });
+
+        expect((await getCase({ supertest, caseId: postedCase.id })).totalAlerts).to.be(2);
+        expect(await getBulkAttachmentsUserActions(postedCase.id)).to.eql([]);
+      });
+
+      it('keeps the other alerts of a legacy grouped attachment', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        await seedLegacyAlertAttachment({ id: 'legacy-alerts', caseId: postedCase.id });
+
+        await bulkDeleteAttachmentReferences({
+          supertest,
+          caseId: postedCase.id,
+          type: SECURITY_ALERT_ATTACHMENT_TYPE,
+          attachmentIds: ['test-id-1'],
+        });
+
+        const [attachment, ...rest] = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(rest).to.eql([]);
+        expect(attachment.id).to.be('legacy-alerts');
+        expect('alertId' in attachment ? attachment.alertId : undefined).to.eql(['test-id-2']);
+        expect('index' in attachment ? attachment.index : undefined).to.eql(['test-index-2']);
+        expect((await getCase({ supertest, caseId: postedCase.id })).totalAlerts).to.be(1);
+      });
+
+      it('returns a 400 when the attachment ids are empty', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkDeleteAttachmentReferences({
+          supertest,
+          caseId: postedCase.id,
+          type: SECURITY_ALERT_ATTACHMENT_TYPE,
+          attachmentIds: [],
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('returns a 400 when both saved object ids and attachment ids are sent', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await supertest
+          .post(getCaseBulkDeleteAttachmentsUrl(postedCase.id))
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'foo')
+          .send({ ids: ['a'], type: SECURITY_ALERT_ATTACHMENT_TYPE, attachmentIds: ['b'] })
+          .expect(400);
+      });
     });
 
     it('updates the case attachment totals', async () => {
@@ -189,6 +370,77 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const comments = await getAllComments({ supertest, caseId: postedCase.id });
         expect(comments.length).to.eql(0);
+      });
+
+      describe('by file ids', () => {
+        const uploadCaseFile = async (caseId: string) => {
+          const { create } = await createAndUploadFile({
+            supertest,
+            createFileParams: {
+              name: 'testfile',
+              kind: SECURITY_SOLUTION_FILE_KIND,
+              mimeType: 'text/plain',
+              meta: { caseIds: [caseId], owner: ['securitySolution'] },
+            },
+            data: 'abc',
+          });
+          return create.file.id;
+        };
+
+        it('deletes attached files and files whose attachment was never created', async () => {
+          const postedCase = await createCase(
+            supertest,
+            getPostCaseRequest({ owner: 'securitySolution' })
+          );
+          const attachedFileId = await uploadCaseFile(postedCase.id);
+          const orphanFileId = await uploadCaseFile(postedCase.id);
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [
+              getUnifiedFilesAttachmentReq({
+                attachmentId: attachedFileId,
+                owner: 'securitySolution',
+              }),
+            ],
+          });
+
+          await bulkDeleteAttachmentReferences({
+            supertest,
+            caseId: postedCase.id,
+            type: FILE_ATTACHMENT_TYPE,
+            attachmentIds: [attachedFileId, orphanFileId],
+          });
+
+          const files = await listFiles({
+            supertest,
+            params: { kind: SECURITY_SOLUTION_FILE_KIND },
+          });
+          expect(await getAllComments({ supertest, caseId: postedCase.id })).to.eql([]);
+          expect(files.total).to.be(0);
+        });
+
+        it('returns a 404 and deletes nothing when a file is not attached', async () => {
+          const postedCase = await createCase(
+            supertest,
+            getPostCaseRequest({ owner: 'securitySolution' })
+          );
+          const fileId = await uploadCaseFile(postedCase.id);
+
+          await bulkDeleteAttachmentReferences({
+            supertest,
+            caseId: postedCase.id,
+            type: FILE_ATTACHMENT_TYPE,
+            attachmentIds: [fileId, 'does-not-exist'],
+            expectedHttpCode: 404,
+          });
+
+          const files = await listFiles({
+            supertest,
+            params: { kind: SECURITY_SOLUTION_FILE_KIND },
+          });
+          expect(files.total).to.be(1);
+        });
       });
     });
 
@@ -380,6 +632,37 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: secOnly, space: 'space1' },
         });
         expect(await unifiedAttachmentExists({ es, id: ownerlessId })).to.be(false);
+      });
+
+      it('returns a 403, not a 404, for an unattached alert on a case the user cannot access', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          superUserSpace1Auth
+        );
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: postCommentAlertMultipleIdsReq,
+          auth: superUserSpace1Auth,
+        });
+
+        await bulkDeleteAttachmentReferences({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          type: SECURITY_ALERT_ATTACHMENT_TYPE,
+          attachmentIds: ['test-id-1', 'does-not-exist'],
+          auth: { user: obsOnly, space: 'space1' },
+          expectedHttpCode: 403,
+        });
+
+        const theCase = await getCase({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          auth: superUserSpace1Auth,
+        });
+        expect(theCase.totalAlerts).to.be(2);
       });
 
       for (const user of [globalRead, secOnlyRead, noKibanaPrivileges]) {

@@ -32,6 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   getStepByNameFromNestedSteps,
+  getTriggerName,
   transformWorkflowToGraph,
   type WorkflowYaml,
 } from '@kbn/workflows';
@@ -50,6 +51,7 @@ import {
   WorkflowVisualEditorFlyout,
   type WorkflowVisualEditorFlyoutTarget,
 } from '../../components';
+import { useWorkflowsUiServices } from '../../context';
 import { useTemplate } from '../hooks/use_template';
 import { getCategoryLabel } from '../lib/category_labels';
 import { getWorkflowTypes } from '../lib/get_workflow_types';
@@ -84,12 +86,6 @@ const SOLUTION_ICONS: Record<string, IconType> = {
   security: 'logoSecurity',
   observability: 'logoObservability',
   search: 'logoElasticsearch',
-};
-
-const TRIGGER_LABEL: Record<string, string> = {
-  manual: 'Manual',
-  alert: 'Alert',
-  scheduled: 'Scheduled',
 };
 
 const capitalize = (value: string): string =>
@@ -164,10 +160,16 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
     () => (data ? renderTemplate({ template: data, values: previewValues }) : ''),
     [data, previewValues]
   );
+  const { workflowsExtensions } = useWorkflowsUiServices();
+  const getTriggerLabel = useCallback(
+    (triggerType: string) =>
+      getTriggerName(triggerType, workflowsExtensions.getTriggerDefinition(triggerType)?.title),
+    [workflowsExtensions]
+  );
   const workflow = useMemo(() => data?.body as WorkflowYaml | undefined, [data]);
   const transformed = useMemo(
-    () => (workflow ? transformWorkflowToGraph(workflow) : undefined),
-    [workflow]
+    () => (workflow ? transformWorkflowToGraph(workflow, getTriggerLabel) : undefined),
+    [workflow, getTriggerLabel]
   );
   const { stepTypes, triggerTypes } = useMemo(
     () => (data ? getWorkflowTypes(data.body) : { stepTypes: [], triggerTypes: [] }),
@@ -193,7 +195,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
       return {
         kind: 'trigger',
         triggerType: ref.triggerType,
-        triggerLabel: TRIGGER_LABEL[ref.triggerType] ?? ref.triggerType,
+        triggerLabel: getTriggerLabel(ref.triggerType),
         yamlSnippet: stringify({ triggers: [trigger] }).trimEnd(),
       };
     }
@@ -209,7 +211,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
       stepType: step.type,
       yamlSnippet: stringify([step]).trimEnd(),
     };
-  }, [selectedGraphStepId, transformed, workflow]);
+  }, [getTriggerLabel, selectedGraphStepId, transformed, workflow]);
 
   const renderStepIcon = useCallback<RenderStepIcon>(({ stepType, isTrigger, size, color }) => {
     return (
@@ -252,7 +254,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
     return (
       <KbnDangerCallout
         data-test-subj="workflowLibraryTemplateDetail-error"
-        title={i18n.translate('workflows.library.templateDetail.errorTitle', {
+        title={i18n.translate('workflowsUi.library.templateDetail.errorTitle', {
           defaultMessage: 'Unable to load this template',
         })}
       />
@@ -424,7 +426,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                 onClick={activeBack.onClick}
                 data-test-subj="workflowLibraryTemplateDetailBackButton"
               >
-                {i18n.translate('workflows.library.templateDetail.backTo', {
+                {i18n.translate('workflowsUi.library.templateDetail.backTo', {
                   defaultMessage: 'Back to {destination}',
                   values: { destination: activeBack.label },
                 })}
@@ -445,13 +447,13 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                 >
                   <EuiTitle size="m">
                     <h1>
-                      {i18n.translate('workflows.library.templateDetail.setupTitle', {
+                      {i18n.translate('workflowsUi.library.templateDetail.setupTitle', {
                         defaultMessage: 'Setup workflow',
                       })}
                     </h1>
                   </EuiTitle>
                   <EuiText size="s" color="subdued">
-                    {i18n.translate('workflows.library.templateDetail.setupSubtitle', {
+                    {i18n.translate('workflowsUi.library.templateDetail.setupSubtitle', {
                       defaultMessage: 'For {name}',
                       values: { name: metadata.name },
                     })}
@@ -510,9 +512,12 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                               data-test-subj="workflowLibraryTemplateDetail-solutions"
                             >
                               <span css={styles.infoLabel}>
-                                {i18n.translate('workflows.library.templateDetail.solutionsLabel', {
-                                  defaultMessage: 'Solutions',
-                                })}
+                                {i18n.translate(
+                                  'workflowsUi.library.templateDetail.solutionsLabel',
+                                  {
+                                    defaultMessage: 'Solutions',
+                                  }
+                                )}
                               </span>
                               <div css={styles.solutionRow}>
                                 {solutions.map((solution) => {
@@ -545,7 +550,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                               data-test-subj="workflowLibraryTemplateDetail-version"
                             >
                               <span css={styles.infoLabel}>
-                                {i18n.translate('workflows.library.templateDetail.versionLabel', {
+                                {i18n.translate('workflowsUi.library.templateDetail.versionLabel', {
                                   defaultMessage: 'Version',
                                 })}
                               </span>
@@ -571,7 +576,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                                   data-test-subj="workflowLibraryTemplateReportIssueLink"
                                 >
                                   {i18n.translate(
-                                    'workflows.library.templateDetail.reportIssueButtonLabel',
+                                    'workflowsUi.library.templateDetail.reportIssueButtonLabel',
                                     {
                                       defaultMessage: 'Report an issue with this template',
                                     }
@@ -589,7 +594,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                                   data-test-subj="workflowLibraryTemplateEditLink"
                                 >
                                   {i18n.translate(
-                                    'workflows.library.templateDetail.editTemplateButtonLabel',
+                                    'workflowsUi.library.templateDetail.editTemplateButtonLabel',
                                     {
                                       defaultMessage: 'Edit this template',
                                     }
@@ -629,7 +634,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
             css={css(previewShadow)}
             style={{ padding: `0 ${euiTheme.size.l}` }}
           >
-            {i18n.translate('workflows.library.templateDetail.previewTitle', {
+            {i18n.translate('workflowsUi.library.templateDetail.previewTitle', {
               defaultMessage: 'Preview',
             })}
           </EuiBadge>

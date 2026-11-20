@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
-import { groupHashSchema, tagsSchema } from './common';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { futureIsoDateTime, seriesIdSchema, tagsSchema } from './common';
 import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
 
 export const ALERT_EPISODE_STATUS = {
@@ -36,9 +36,11 @@ const snoozeActionSchema = lazySchema(() =>
   z
     .object({
       action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.SNOOZE).describe('Snoozes an alert.'),
-      snoozed_until: isoDateTime()
+      snoozed_until: futureIsoDateTime()
         .optional()
-        .describe('ISO datetime until which the alert should be snoozed.'),
+        .describe(
+          'ISO datetime until which the alert should be snoozed. Must be in the future. A past or current instant is rejected with 400. Omit for an indefinite snooze.'
+        ),
     })
     .strict()
     .meta({ id: 'alerting_snooze_alert_action' })
@@ -78,7 +80,7 @@ const deactivateActionSchema = lazySchema(() =>
 );
 
 /**
- * Action types that target an alert series as a whole, identified by `group_hash`.
+ * Action types that target an alert series as a whole, identified by `series_id`.
  */
 export const SERIES_ALERT_ACTION_TYPES = [
   ALERT_EPISODE_ACTION_TYPE.SNOOZE,
@@ -105,7 +107,12 @@ const tagEpisodeActionSchema = lazySchema(() =>
   z
     .object({
       action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.TAG).describe("Replaces an alert's tags."),
-      tags: tagsSchema.describe("Replaces the alert's tags. Send `[]` to clear."),
+      tags: tagsSchema
+        .min(1)
+        .nullable()
+        .describe(
+          "Replaces the alert's tags. Send `null` to clear them. An empty array is rejected."
+        ),
     })
     .strict()
     .meta({ id: 'alerting_tag_alert_action' })
@@ -178,8 +185,8 @@ export type CreateEpisodeAlertActionBody = z.infer<typeof createEpisodeAlertActi
 export const seriesAlertActionParamsSchema = lazySchema(() =>
   z
     .object({
-      group_hash: groupHashSchema.describe(
-        'Hash identifying the alert series to apply the action to.'
+      series_id: seriesIdSchema.describe(
+        'Identifier of the alert series to apply the action to, as returned in the `series_id` field of an alert.'
       ),
     })
     .strict()
@@ -274,15 +281,17 @@ export type CreateDeactivateEpisodeActionBody = z.infer<
 // body is an `{ items: [...] }` envelope of one item shape: the single-route
 // body fields plus the series/episode identifier. The envelope leaves room
 // for future request-level fields (e.g. dry_run) without a breaking change.
-const bulkGroupHashSchema = lazySchema(() =>
-  groupHashSchema.describe('Hash identifying the alert series to apply the action to.')
+const bulkSeriesIdSchema = lazySchema(() =>
+  seriesIdSchema.describe(
+    'Identifier of the alert series to apply the action to, as returned in the `series_id` field of an alert.'
+  )
 );
 
 const bulkEpisodeIdSchema = lazySchema(() =>
   z.string().min(1).max(ID_MAX_LENGTH).describe('Identifier of the alert to apply the action to.')
 );
 
-type BulkItemIdKey = 'alert_id' | 'group_hash';
+type BulkItemIdKey = 'alert_id' | 'series_id';
 
 /**
  * Builds a bulk body whose items each target a different alert or series:
@@ -329,14 +338,14 @@ const makeBulkActionBodySchema = <
 export const bulkSnoozeSeriesActionItemSchema = lazySchema(() =>
   snoozeActionSchema
     .omit({ action_type: true })
-    .extend({ group_hash: bulkGroupHashSchema })
+    .extend({ series_id: bulkSeriesIdSchema })
     .strict()
     .meta({ id: 'alerting_bulk_snooze_series_item' })
 );
 export type BulkSnoozeSeriesActionItem = z.infer<typeof bulkSnoozeSeriesActionItemSchema>;
 
 export const bulkSnoozeSeriesActionBodySchema = lazySchema(() =>
-  makeBulkActionBodySchema(bulkSnoozeSeriesActionItemSchema, 'snooze', 'group_hash').meta({
+  makeBulkActionBodySchema(bulkSnoozeSeriesActionItemSchema, 'snooze', 'series_id').meta({
     id: 'alerting_bulk_snooze_series_request',
   })
 );
@@ -345,14 +354,14 @@ export type BulkSnoozeSeriesActionBody = z.infer<typeof bulkSnoozeSeriesActionBo
 export const bulkUnsnoozeSeriesActionItemSchema = lazySchema(() =>
   unsnoozeActionSchema
     .omit({ action_type: true })
-    .extend({ group_hash: bulkGroupHashSchema })
+    .extend({ series_id: bulkSeriesIdSchema })
     .strict()
     .meta({ id: 'alerting_bulk_unsnooze_series_item' })
 );
 export type BulkUnsnoozeSeriesActionItem = z.infer<typeof bulkUnsnoozeSeriesActionItemSchema>;
 
 export const bulkUnsnoozeSeriesActionBodySchema = lazySchema(() =>
-  makeBulkActionBodySchema(bulkUnsnoozeSeriesActionItemSchema, 'unsnooze', 'group_hash').meta({
+  makeBulkActionBodySchema(bulkUnsnoozeSeriesActionItemSchema, 'unsnooze', 'series_id').meta({
     id: 'alerting_bulk_unsnooze_series_request',
   })
 );
@@ -460,7 +469,7 @@ export type BulkDeactivateEpisodeActionBody = z.infer<typeof bulkDeactivateEpiso
  * calling the client, so these are not request schemas.
  */
 export type BulkCreateSeriesAlertActionItemBody = CreateSeriesAlertActionBody & {
-  group_hash: string;
+  series_id: string;
 };
 export type BulkCreateEpisodeAlertActionItemBody = CreateEpisodeAlertActionBody & {
   alert_id: string;

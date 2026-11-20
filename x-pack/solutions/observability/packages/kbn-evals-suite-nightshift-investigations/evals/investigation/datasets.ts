@@ -45,7 +45,14 @@ export const loadInvestigationDataset = async (
     throw new Error('Choose either NIGHTSHIFT_DATASET_NAME or NIGHTSHIFT_EXAMPLES_FILE, not both');
   }
   if (!datasetName) return readInvestigationDataset(examplesFile);
+  return loadStoredInvestigationDataset(client, datasetName);
+};
 
+/** Loads a dataset stored on the evaluations cluster and validates its examples before any run. */
+export const loadStoredInvestigationDataset = async (
+  client: Pick<EvalsClient, 'getDatasetByName'>,
+  datasetName: string
+): Promise<EvaluationDataset<InvestigationExample>> => {
   const dataset = await client.getDatasetByName(datasetName);
   if (!dataset) throw new Error(`Investigation dataset not found: ${datasetName}`);
   const examples = z
@@ -63,12 +70,18 @@ export const loadInvestigationDataset = async (
   };
 };
 
+/** Reads and validates an examples file: a `nightshift/` dataset name and distinct case ids. */
+export const readInvestigationFile = (path: string): z.infer<typeof investigationFileSchema> => {
+  const file = investigationFileSchema.parse(JSON.parse(readFileSync(path, 'utf8')));
+  assertDistinctCaseIds(file.examples);
+  return file;
+};
+
 /** Loads a file dataset for ungraded investigations, preserving optional labels and metadata. */
 export const readInvestigationDataset = (
   path = process.env.NIGHTSHIFT_EXAMPLES_FILE ?? join(__dirname, 'synthetic.json')
 ): EvaluationDataset<InvestigationExample> => {
-  const file = investigationFileSchema.parse(JSON.parse(readFileSync(path, 'utf8')));
-  assertDistinctCaseIds(file.examples);
+  const file = readInvestigationFile(path);
   return {
     name: file.dataset,
     description: file.description ?? 'Ungraded investigations with complete agent traces.',

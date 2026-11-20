@@ -19,7 +19,7 @@ export const alertDeactivatedPayloadSchema = lazySchema(() =>
       .min(1)
       .max(1024)
       .describe(
-        i18n.translate('xpack.alertingVTwo.triggers.alertDeactivated.schema.reason', {
+        i18n.translate('xpack.alertingV2.triggers.alertDeactivated.schema.reason', {
           defaultMessage: 'Reason the alert was deactivated.',
         })
       ),
@@ -34,15 +34,15 @@ export const alertDeactivatedTriggerCommonDefinition: CommonTriggerDefinition<
   id: ALERT_DEACTIVATED_TRIGGER_ID,
   stability: 'tech_preview',
   eventSchema: alertDeactivatedPayloadSchema,
-  title: i18n.translate('xpack.alertingVTwo.workflowTriggers.alertDeactivated.title', {
+  title: i18n.translate('xpack.alertingV2.workflowTriggers.alertDeactivated.title', {
     defaultMessage: 'Alerting - Alert deactivated',
   }),
-  description: i18n.translate('xpack.alertingVTwo.workflowTriggers.alertDeactivated.description', {
+  description: i18n.translate('xpack.alertingV2.workflowTriggers.alertDeactivated.description', {
     defaultMessage: 'Emitted when an alert is deactivated.',
   }),
   documentation: {
     details: i18n.translate(
-      'xpack.alertingVTwo.workflowTriggers.alertDeactivated.documentation.details',
+      'xpack.alertingV2.workflowTriggers.alertDeactivated.documentation.details',
       {
         defaultMessage:
           'Emitted after an alert deactivate action is persisted. The payload includes event.reason alongside event.alertId, event.ruleId, and event.spaceId for trigger conditions.',

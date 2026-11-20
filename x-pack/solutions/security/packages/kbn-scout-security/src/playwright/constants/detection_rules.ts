@@ -34,6 +34,16 @@ export interface CustomQueryRule {
   interval?: string;
   investigation_fields?: { field_names: string[] };
   response_actions?: CustomQueryRuleResponseAction[];
+  threat?: Array<{
+    framework: string;
+    tactic: { id: string; name: string; reference: string };
+    technique?: Array<{
+      id: string;
+      name: string;
+      reference: string;
+      subtechnique?: Array<{ id: string; name: string; reference: string }>;
+    }>;
+  }>;
 }
 
 export interface ThreatMatchRule {

@@ -70,11 +70,12 @@ const checkReportSemanticTextEndpoints = async (
   } catch (err) {
     const status = err instanceof errors.ResponseError ? err.statusCode : undefined;
     if (status === 404) {
-      // The index is created lazily on first ingest; the template is already
-      // installed. Skip the check rather than retrying forever on a fresh install.
+      // `installIndexTemplates` creates the companion index after putting the
+      // template, so this 404 is unexpected on the normal boot path. Skip rather
+      // than retry forever if the index was deleted or ensure has not run yet.
       log.debug(
         `Threat reports index does not exist yet; skipping semantic_text ` +
-          `endpoint check until first report is indexed`
+          `endpoint check until the companion index is present`
       );
       return;
     }

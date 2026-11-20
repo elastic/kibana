@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
-export const BulkAttachmentsPayloadRt = rt.strict({
+export const BulkAttachmentsPayloadSchema = z.object({
   /** The unified attachment type, e.g. `security.alert` or `file`. */
-  attachmentType: rt.string,
-  count: rt.number,
+  attachmentType: z.string(),
+  /**
+   * The removed items, e.g. alerts or files, counted once each. An attachment that references
+   * nothing counts as 1 item.
+   */
+  count: z.number(),
 });
 
-export const BulkAttachmentsUserActionPayloadRt = rt.strict({
-  bulkAttachments: BulkAttachmentsPayloadRt,
+export const BulkAttachmentsUserActionPayloadSchema = z.object({
+  bulkAttachments: BulkAttachmentsPayloadSchema,
 });
 
-export const BulkAttachmentsUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.bulkAttachments),
-  payload: BulkAttachmentsUserActionPayloadRt,
+export const BulkAttachmentsUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.bulkAttachments),
+  payload: BulkAttachmentsUserActionPayloadSchema,
 });
 
-export type BulkAttachmentsPayload = rt.TypeOf<typeof BulkAttachmentsPayloadRt>;
+export type BulkAttachmentsPayload = z.infer<typeof BulkAttachmentsPayloadSchema>;

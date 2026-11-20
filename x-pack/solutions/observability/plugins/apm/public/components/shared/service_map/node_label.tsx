@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { useEuiTheme, transparentize, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { NODE_LABEL_MAX_WIDTH } from '../../../../common/service_map/constants';
 
 interface NodeLabelProps {
   label: string;
@@ -21,7 +22,7 @@ export const NodeLabel = memo(({ label, selected = false }: NodeLabelProps) => {
     font-size: ${euiTheme.size.m};
     color: ${selected ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
     font-family: ${euiTheme.font.family};
-    max-width: 220px;
+    max-width: ${NODE_LABEL_MAX_WIDTH}px;
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;

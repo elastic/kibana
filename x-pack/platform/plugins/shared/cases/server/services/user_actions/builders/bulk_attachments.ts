@@ -24,7 +24,7 @@ export class BulkAttachmentsUserActionBuilder extends UserActionBuilder {
     });
 
     const { attachmentType, count } = payload.bulkAttachments;
-    const noun = count === 1 ? 'attachment' : 'attachments';
+    const noun = count === 1 ? 'item' : 'items';
     const getMessage = (id?: string) =>
       `User deleted ${count} ${attachmentType} ${noun} from case id: ${caseId} - user action id: ${id}`;
 

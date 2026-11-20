@@ -24,6 +24,7 @@ import {
 import { createSystemIndicesEsClient } from '../ui/fixtures/system_indices_es_client';
 import { scopeKbnClientToSpace } from './scope_kbn_client_to_space';
 import { withMetadataTransformLock } from './with_metadata_transform_lock';
+import { runCleanups } from './run_cleanups';
 
 export interface SeededEndpointHost {
   readonly agentId: string;
@@ -48,6 +49,13 @@ interface SeedEndpointHostsParams {
   config: ScoutTestConfig;
   count: number;
   isolation: boolean;
+  /**
+   * Agent version written to the host metadata. When omitted, the generator picks a
+   * random 7.x/8.x version, which decides the host capabilities (get-file needs 8.6+).
+   * Pass `kibanaPackageJson.version`, as the Cypress loader does, for commands that
+   * need a capability.
+   */
+  agentVersion?: string;
 }
 
 const hostIdentity = (indexed: IndexedHostsAndAlertsResponse): SeededEndpointHost[] => {
@@ -74,6 +82,7 @@ export const seedEndpointHosts = async ({
   config,
   count,
   isolation,
+  agentVersion,
 }: SeedEndpointHostsParams): Promise<SeededEndpointHosts> => {
   const kbnClient = scopeKbnClientToSpace(rootKbnClient, spaceId);
   const systemEsClient = await createSystemIndicesEsClient(esClient, config);
@@ -86,32 +95,22 @@ export const seedEndpointHosts = async ({
     }
     cleanupStarted = true;
 
-    const failures: unknown[] = [];
-    if (indexed) {
-      try {
-        await deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, indexed);
-      } catch (error) {
-        failures.push(error);
-      }
-    }
-
-    try {
-      await systemEsClient.close();
-    } catch (error) {
-      failures.push(error);
-    }
-
-    if (failures.length === 1) {
-      throw failures[0];
-    }
-    if (failures.length > 1) {
-      throw new AggregateError(failures, 'Failed to clean up seeded endpoint hosts');
-    }
+    await runCleanups(
+      [
+        () =>
+          indexed ? deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, indexed) : undefined,
+        () => systemEsClient.close(),
+      ],
+      'Failed to clean up seeded endpoint hosts'
+    );
   };
 
   try {
     const DocGenerator = EndpointDocGenerator.custom({
-      CustomMetadataGenerator: EndpointMetadataGenerator.custom({ isolation }),
+      CustomMetadataGenerator: EndpointMetadataGenerator.custom({
+        isolation,
+        version: agentVersion,
+      }),
     });
 
     indexed = await withMetadataTransformLock(() =>
@@ -189,51 +188,38 @@ export const seedHostWithAlert = async ({
   let alertId: string | undefined;
   let createdRuleId: string | undefined;
 
-  const cleanup = async (): Promise<void> => {
-    const failures: unknown[] = [];
-    if (createdRuleId) {
-      try {
-        await scopedKbnClient.request({
-          method: 'DELETE',
-          path: `${DETECTION_ENGINE_RULES_URL}?id=${encodeURIComponent(createdRuleId)}`,
-          headers: {
-            'kbn-xsrf': 'scout',
-            ...PUBLIC_API_HEADERS,
-          },
-        });
-      } catch (error) {
-        failures.push(error);
-      }
-    }
-    try {
-      await systemEsClient.indices.delete({ index: eventsIndex, ignore_unavailable: true });
-    } catch (error) {
-      failures.push(error);
-    }
-    if (alertId) {
-      try {
-        await systemEsClient.delete({ index: alertsIndex, id: alertId, refresh: 'wait_for' });
-      } catch (error) {
-        failures.push(error);
-      }
-    }
-    try {
-      await systemEsClient.close();
-    } catch (error) {
-      failures.push(error);
-    }
-    try {
-      await seeded.cleanup();
-    } catch (error) {
-      failures.push(error);
-    }
-    if (failures.length === 1) {
-      throw failures[0];
-    }
-    if (failures.length > 1) {
-      throw new AggregateError(failures, 'Failed to clean up seeded host alert');
-    }
-  };
+  const cleanup = (): Promise<void> =>
+    runCleanups(
+      [
+        () =>
+          createdRuleId
+            ? scopedKbnClient.request({
+                method: 'DELETE',
+                path: `${DETECTION_ENGINE_RULES_URL}?id=${encodeURIComponent(createdRuleId)}`,
+                headers: {
+                  'kbn-xsrf': 'scout',
+                  ...PUBLIC_API_HEADERS,
+                },
+              })
+            : undefined,
+        () => systemEsClient.indices.delete({ index: eventsIndex, ignore_unavailable: true }),
+        () =>
+          // On serverless the alerts index is a data stream, which rejects a delete by id
+          // (only create ops are allowed). A delete by query works on both.
+          alertId
+            ? systemEsClient.deleteByQuery({
+                index: alertsIndex,
+                query: { ids: { values: [alertId] } },
+                conflicts: 'proceed',
+                ignore_unavailable: true,
+                refresh: true,
+              })
+            : undefined,
+        () => systemEsClient.close(),
+        () => seeded.cleanup(),
+      ],
+      'Failed to clean up seeded host alert'
+    );
 
   try {
     await systemEsClient.index({

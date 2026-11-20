@@ -7,7 +7,7 @@
 
 import type http from 'http';
 import type https from 'https';
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
 import {
@@ -97,7 +97,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       before(async () => {
         webhookServer = await getHttpsWebhookServer();
-        const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+        const availablePort = await getPort({ port: portNumbers(9000, 9100) });
         webhookServer.listen(availablePort);
         webhookSimulatorURL = `https://localhost:${availablePort}`;
       });

@@ -30,7 +30,13 @@ export interface ThreatReportApiResponse {
   severity?: { level?: string; score?: number };
   source?: { name?: string };
   extracted?: {
-    iocs?: Array<{ type?: string; value?: string; severity?: string; tier?: string }>;
+    iocs?: Array<{
+      type?: string;
+      value?: string;
+      severity?: string;
+      tier?: string;
+      deferred_unreviewed?: boolean;
+    }>;
     ttps?: { tactics?: string[]; techniques?: string[] };
     categories?: string[];
     diamond?: {

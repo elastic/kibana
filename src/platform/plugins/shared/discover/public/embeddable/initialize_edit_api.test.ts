@@ -92,7 +92,7 @@ describe('initialize edit api', () => {
           .mockResolvedValueOnce({ app: 'discover', path: '/mock-url', state: {} });
       }
 
-      mockedApi.dataViews$.next([currentDataView]);
+      mockedApi.dataSources$.next([currentDataView]);
       mockedApi.savedObjectId$.next(currentSavedObjectId);
 
       await waitOneTick();
@@ -185,7 +185,7 @@ describe('initialize edit api', () => {
       discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockReturnValue({
         navigateToEditor: mockedNavigate,
       });
-      mockedApi.dataViews$.next([dataViewMock]);
+      mockedApi.dataSources$.next([dataViewMock]);
       mockedApi.savedObjectId$.next('test-id');
 
       getLocationMock = jest.mocked(discoverServiceMock.locator.getLocation);
@@ -216,12 +216,51 @@ describe('initialize edit api', () => {
         path: '/mock-url-for-onedit',
         state: {
           embeddableId: 'test',
-          valueInput: undefined,
+          valueInput: {
+            discoverSessionTab: undefined,
+            dashboardControlGroupState: {},
+          },
           searchSessionId: undefined,
           originatingApp: 'dashboard',
           originatingPath: '/current-parent-path',
         },
       });
+    });
+
+    it('should pass the dashboard controls to Discover for by-reference embeddables', async () => {
+      const { type: _type, ...controlState } = mockControlState.panel1;
+      const dashboardControlState = {
+        ...controlState,
+        variable_name: 'host.name',
+        title: 'Host name',
+      };
+      mockedParentApi.children$.next({
+        panel1: createEsqlControlApi('panel1', dashboardControlState),
+      });
+      const editApi = initializeEditApi({
+        uuid: 'test',
+        parentApi: mockedParentApi,
+        partialApi: { ...mockedApi, getSelectedTabId: () => undefined },
+        isEditable: () => true,
+        discoverServices: discoverServiceMock,
+        getTitle: () => 'test-title',
+      });
+
+      await editApi?.onEdit();
+
+      expect(mockedNavigate).toHaveBeenCalledWith(
+        'discover',
+        expect.objectContaining({
+          state: expect.objectContaining({
+            valueInput: {
+              discoverSessionTab: undefined,
+              dashboardControlGroupState: {
+                panel1: { ...dashboardControlState, type: ESQL_CONTROL },
+              },
+            },
+          }),
+        })
+      );
     });
 
     it('should pass the selected tab id to the locator for by-reference embeddables', async () => {

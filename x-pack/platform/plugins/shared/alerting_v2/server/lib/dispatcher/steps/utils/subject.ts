@@ -13,6 +13,11 @@ export interface SubjectInput {
   space_id?: string | null;
 }
 
+/** A null or absent source counts as internal, for legacy action rows written without one. */
+export const isInternalSource = (
+  source: SubjectInput['source']
+): source is 'internal' | null | undefined => source == null || source === 'internal';
+
 /**
  * Returns the series identity subject for an alert.
  *
@@ -28,7 +33,7 @@ export interface SubjectInput {
  * rows whose subject is null, so the throws below are unreachable from query data.
  */
 export const alertSubject = ({ source, rule_id, space_id }: SubjectInput): string => {
-  if (source != null && source !== 'internal') {
+  if (!isInternalSource(source)) {
     if (space_id == null) {
       throw new Error(
         `alertSubject: external alert has no space_id (source=${JSON.stringify(source)})`

@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { resolveLatestEntitiesIndexName } from '@kbn/entity-store/server';
-import { transformEntityTypeToIconAndShape, compareConnectorNodes } from './utils';
+import { getEntityTypeIcon, compareConnectorNodes } from './utils';
 import { resolveEntitiesIndexName } from './enrichment_utils';
 
 jest.mock('@kbn/entity-store/server', () => ({
@@ -17,26 +17,23 @@ jest.mock('@kbn/entity-store/server', () => ({
 }));
 
 describe('utils', () => {
-  describe('transformEntityTypeToIconAndShape', () => {
-    it('should return empty object for undefined input', () => {
-      expect(transformEntityTypeToIconAndShape(undefined as unknown as string)).toEqual({});
+  describe('getEntityTypeIcon', () => {
+    it('should return undefined for undefined input', () => {
+      expect(getEntityTypeIcon(undefined as unknown as string)).toBeUndefined();
     });
 
-    it('should return empty object for null input', () => {
-      expect(transformEntityTypeToIconAndShape(null as unknown as string)).toEqual({});
+    it('should return undefined for null input', () => {
+      expect(getEntityTypeIcon(null as unknown as string)).toBeUndefined();
     });
 
     // Unknown or non-existent entity types
-    it('should return undefined icon and shape for entity types that do not match any mappings', () => {
+    it('should return undefined for entity types that do not match any mappings', () => {
       ['NonExistentType', 'Unknown', '123456', 'CustomEntityType'].forEach((type) => {
-        expect(transformEntityTypeToIconAndShape(type)).toEqual({
-          icon: undefined,
-          shape: undefined,
-        });
+        expect(getEntityTypeIcon(type)).toBeUndefined();
       });
     });
 
-    it('should correctly map user-related entity types to the user icon and ellipse shape', () => {
+    it('should correctly map user-related entity types to the user icon', () => {
       const userTypes = [
         'User',
         'user',
@@ -49,14 +46,11 @@ describe('utils', () => {
       ];
 
       userTypes.forEach((entityType) => {
-        expect(transformEntityTypeToIconAndShape(entityType)).toEqual({
-          icon: 'user',
-          shape: 'ellipse',
-        });
+        expect(getEntityTypeIcon(entityType)).toBe('user');
       });
     });
 
-    it('should correctly map database-related entity types to the database icon and rectangle shape', () => {
+    it('should correctly map database-related entity types to the database icon', () => {
       const databaseTypes = [
         'Database',
         'database',
@@ -69,21 +63,15 @@ describe('utils', () => {
       ];
 
       databaseTypes.forEach((entityType) => {
-        expect(transformEntityTypeToIconAndShape(entityType)).toEqual({
-          icon: 'database',
-          shape: 'rectangle',
-        });
+        expect(getEntityTypeIcon(entityType)).toBe('database');
       });
     });
 
-    it('should correctly map host-related entity types to the host icon and rectangle shape', () => {
+    it('should correctly map host-related entity types to the host icon', () => {
       const hostTypes = ['Host', 'Virtual Desktop', 'Virtual Workstation', 'Virtual Machine Image'];
 
       hostTypes.forEach((entityType) => {
-        expect(transformEntityTypeToIconAndShape(entityType)).toEqual({
-          icon: 'storage',
-          shape: 'hexagon',
-        });
+        expect(getEntityTypeIcon(entityType)).toBe('storage');
       });
     });
   });
@@ -144,24 +132,24 @@ describe('utils', () => {
   });
 
   describe('compareConnectorNodes', () => {
-    it('should sort relationship nodes before label nodes', () => {
-      const rel = { shape: 'relationship', label: 'Owns' };
-      const lbl = { shape: 'label', label: 'Action' };
+    it('should sort relationship nodes before event nodes', () => {
+      const rel = { kind: 'relationship', label: 'Owns' };
+      const lbl = { kind: 'event', label: 'Action' };
 
       expect(compareConnectorNodes(rel, lbl)).toBe(-1);
       expect(compareConnectorNodes(lbl, rel)).toBe(1);
     });
 
-    it('should sort alphabetically within the same shape type', () => {
-      const a = { shape: 'relationship', label: 'Accesses frequently' };
-      const b = { shape: 'relationship', label: 'Owns' };
+    it('should sort alphabetically within the same kind', () => {
+      const a = { kind: 'relationship', label: 'Accesses frequently' };
+      const b = { kind: 'relationship', label: 'Owns' };
 
       expect(compareConnectorNodes(a, b)).toBeLessThan(0);
       expect(compareConnectorNodes(b, a)).toBeGreaterThan(0);
     });
 
     it('should return 0 for identical nodes', () => {
-      const node = { shape: 'label', label: 'Same' };
+      const node = { kind: 'event', label: 'Same' };
 
       expect(compareConnectorNodes(node, node)).toBe(0);
     });
@@ -169,14 +157,14 @@ describe('utils', () => {
     it('should handle undefined values', () => {
       expect(compareConnectorNodes(undefined, undefined)).toBe(0);
       expect(
-        compareConnectorNodes({ shape: 'relationship', label: 'Owns' }, undefined)
+        compareConnectorNodes({ kind: 'relationship', label: 'Owns' }, undefined)
       ).toBeGreaterThan(0);
-      expect(compareConnectorNodes(undefined, { shape: 'label', label: 'Action' })).toBeLessThan(0);
+      expect(compareConnectorNodes(undefined, { kind: 'event', label: 'Action' })).toBeLessThan(0);
     });
 
     it('should treat missing label as empty string', () => {
-      const a = { shape: 'label' };
-      const b = { shape: 'label', label: 'Action' };
+      const a = { kind: 'event' };
+      const b = { kind: 'event', label: 'Action' };
 
       expect(compareConnectorNodes(a, b)).toBeLessThan(0);
     });

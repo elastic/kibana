@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/packages/shared/isomer/isomer
 dependsOn:
   - '@kbn/i18n'
+  - '@kbn/isomer-theme'
   - '@kbn/zod'
 tags:
   - shared-common
@@ -31,6 +32,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

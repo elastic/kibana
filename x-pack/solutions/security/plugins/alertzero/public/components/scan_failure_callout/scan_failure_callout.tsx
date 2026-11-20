@@ -13,6 +13,8 @@ import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useScanFailureDismissal } from '../../hooks/use_scan_failure_dismissal';
 import { useScanFailures } from '../../hooks/use_scan_failures';
+import type { UiErrorSurface } from '../../telemetry';
+import { useReportErrorShown } from '../../telemetry';
 import { ViewExecutionsLink } from '../view_executions_link/view_executions_link';
 import { SCAN_FAILURE_BODY, SCAN_FAILURE_TITLE, SCAN_FAILURE_UNKNOWN } from './translations';
 
@@ -20,12 +22,15 @@ const WORKER_NAMES = new Map<string, string>(
   SYSTEM_SECURITY_WORKER_CATALOG.map((entry) => [entry.id, entry.name])
 );
 
-interface ScanFailureCalloutProps {
+export interface ScanFailureCalloutProps {
+  /** The page the callout sits on, for telemetry. */
+  surface: Extract<UiErrorSurface, 'queue' | 'onboarding'>;
   /** Wraps the callout, so the wrapper is only rendered when the callout is. */
   wrapper?: (callout: JSX.Element) => JSX.Element;
 }
 
 export const ScanFailureCallout: React.FC<ScanFailureCalloutProps> = ({
+  surface,
   wrapper,
 }): JSX.Element | null => {
   const { data, isLoading, error } = useScanFailures();
@@ -34,21 +39,23 @@ export const ScanFailureCallout: React.FC<ScanFailureCalloutProps> = ({
     services: { application },
   } = useKibana<CoreStart>();
 
-  if (isLoading || error != null || data == null) {
-    return null;
-  }
-
   const dismissedAtMs = dismissedAt == null ? Number.NaN : Date.parse(dismissedAt);
   const isNew = (failedAt: string | null): boolean =>
     Number.isNaN(dismissedAtMs) || (failedAt != null && Date.parse(failedAt) > dismissedAtMs);
 
-  const workers = data.workers.flatMap((worker) => {
-    const name = WORKER_NAMES.get(worker.workerId);
-    return name == null || !isNew(worker.lastFailedAt) ? [] : [{ ...worker, name }];
-  });
-  const showUnknown = data.unknown && isNew(data.lastFailedAt);
+  const loaded = isLoading || error != null ? undefined : data;
+  const workers =
+    loaded?.workers.flatMap((worker) => {
+      const name = WORKER_NAMES.get(worker.workerId);
+      return name == null || !isNew(worker.lastFailedAt) ? [] : [{ ...worker, name }];
+    }) ?? [];
+  const showUnknown = loaded != null && loaded.unknown && isNew(loaded.lastFailedAt);
+  const isShown = workers.length > 0 || showUnknown;
 
-  if (workers.length === 0 && !showUnknown) {
+  // Before the early return, so the hook runs on every render.
+  useReportErrorShown({ errorClass: 'worker_scan_failed', isShown, surface });
+
+  if (!isShown) {
     return null;
   }
 

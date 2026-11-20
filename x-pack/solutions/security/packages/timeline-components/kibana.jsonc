@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/securitysolution-timeline-components",
+  "owner": [
+    "@elastic/security-investigations"
+  ],
+  "group": "security",
+  "visibility": "private"
+}

@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import {
+  EuiBadge,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,6 +30,7 @@ import {
   useAreAgentBuilderSkillsAvailable,
   useAgentBuilderSkillsRequirements,
 } from '../../hooks/use_are_agent_builder_skills_available';
+import { experimentalBadgeLabel } from '../experimental_badge';
 import rulesListEmptyIllustration from '../../assets/illustration-results-128.svg';
 
 export interface LegacyRuleTypeItem {
@@ -43,6 +45,7 @@ interface RuleCreateOptionsPanelProps {
   layout?: 'vertical' | 'horizontal';
   onCreateWithAgent: () => void;
   onCreateThresholdRule?: () => void;
+  onBuildSequence?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
 }
 
@@ -91,7 +94,26 @@ const THRESHOLD_RULE_DESCRIPTION = i18n.translate(
   }
 );
 
+const SEQUENCE_TITLE = i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.sequenceTitle', {
+  defaultMessage: 'Build a sequence',
+});
+const SEQUENCE_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.sequenceDescription',
+  { defaultMessage: 'Chain rules to detect multi-step alert patterns.' }
+);
+
 const noop = () => undefined;
+
+const SequenceTitleWithBadge = () => (
+  <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+    <EuiFlexItem grow={false}>{SEQUENCE_TITLE}</EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiBadge color="hollow" data-test-subj="createSequenceRuleExperimentalBadge">
+        {experimentalBadgeLabel}
+      </EuiBadge>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 /** Applied to the EuiCard in the flyout layout when the option is disabled. */
 const flyoutCardDisabledStyle = css({
@@ -254,6 +276,7 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
   onCreateThresholdRule,
+  onBuildSequence,
   legacyRuleTypes,
 }) => {
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
@@ -305,6 +328,22 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
             agentCard
           )}
         </EuiFlexItem>
+        {onBuildSequence && (
+          <EuiFlexItem>
+            <EuiCard
+              layout="horizontal"
+              display="plain"
+              titleElement="h3"
+              titleSize="xs"
+              hasBorder={true}
+              title={<SequenceTitleWithBadge />}
+              description={SEQUENCE_DESCRIPTION}
+              onClick={onBuildSequence}
+              icon={<EuiIcon type="branch" color="text" size="l" aria-hidden={true} />}
+              data-test-subj="createSequenceRuleCard"
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <RuleBuilderSectionDivider />
       <EuiCard

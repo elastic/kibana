@@ -49,5 +49,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/ui-chrome-layout",
     "@kbn/app-header",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-notifications-browser-mocks"
   ]
 }

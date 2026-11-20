@@ -8,6 +8,7 @@
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import type { EntityType } from '../../../../common/entity_analytics/types';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 
 /**
  * Raw identifier pair as emitted by the Security UI / skill and validated by
@@ -25,6 +26,10 @@ export interface EntityAttachmentIdentifier {
    * on `entity.id` returns the stored record.
    */
   entityStoreId?: string;
+  /**
+   * `resolved` opens the entity's flyout as a resolution group. Absent opens the single entity.
+   */
+  mode?: EntityViewMode;
 }
 
 /**

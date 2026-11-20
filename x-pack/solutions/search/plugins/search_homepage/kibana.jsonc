@@ -13,17 +13,12 @@
       "searchHomepage"
     ],
     "requiredPlugins": [
-      "share",
-      "licensing",
+      "elasticsearchHome",
     ],
     "optionalPlugins": [
-      "cloud",
       "console",
       "searchNavigation",
       "usageCollection",
-      "sampleDataIngest",
-      "dataViews",
-      "agentBuilder",
     ],
     "requiredBundles": [
       "kibanaReact"

@@ -19,15 +19,13 @@ import {
   MIGRATION_TYPE_DISAMBIGUATION_BLOCK,
   AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
 } from './rules/content';
-import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
+import { RULE_MIGRATION_SKILLS } from './rules/skill_catalog';
 
 export const automaticMigrationRulesUpdateMigrationSkill = defineSkillType({
-  id: RULE_MIGRATION_SKILLS.UPDATE,
-  name: RULE_MIGRATION_SKILLS.UPDATE,
+  id: RULE_MIGRATION_SKILLS.UPDATE.id,
+  name: RULE_MIGRATION_SKILLS.UPDATE.id,
   basePath: 'skills/security/siem_migrations',
-  description: `Rename an Automatic Rule Migration.
-
-Prompts for the new name and applies the change. Use when the user wants to rename a migration.`,
+  description: RULE_MIGRATION_SKILLS.UPDATE.description,
   content: `
 # Update an Automatic Rule Migration
 
@@ -70,7 +68,7 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 
 ${AUTOMATIC_MIGRATION_NAVIGATION_BLOCK}
 
-To check migration progress, route the user to the **${RULE_MIGRATION_SKILLS.SUMMARIZE}** skill.
+To check migration progress, route the user to the **${RULE_MIGRATION_SKILLS.SUMMARIZE.id}** skill.
 `,
   getRegistryTools: () => [
     SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
