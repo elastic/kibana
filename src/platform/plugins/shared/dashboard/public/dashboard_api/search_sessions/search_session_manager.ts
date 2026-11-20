@@ -106,7 +106,7 @@ export function initializeSearchSessionManager(
       // registered one, registering it again would evict the responses we are about to reuse.
       if (replay.hit && replay.sessionId === continuedSessionId) {
         replayCacheLastFetched$.next(replay.lastFetched);
-      } else if (replay.hit) {
+      } else {
         registerSearchSession(continuedSessionId);
       }
 

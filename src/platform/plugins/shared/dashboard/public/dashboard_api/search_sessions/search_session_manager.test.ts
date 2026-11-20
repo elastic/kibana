@@ -284,7 +284,7 @@ describe('Dashboard search sessions', () => {
     expect(session.start).not.toHaveBeenCalled();
   });
 
-  test('does not register an incoming editor session without a compatible registration', () => {
+  test('registers an incoming editor session without a compatible registration', () => {
     jest.mocked(session.getSessionId).mockReturnValue('editor-session');
     const { api } = setup({
       incomingEmbeddables: [
@@ -293,7 +293,11 @@ describe('Dashboard search sessions', () => {
     });
 
     expect(api.searchSessionId$.value).toBe('editor-session');
-    expect(replayCache.set).not.toHaveBeenCalled();
+    expect(api.replayCacheLastFetched$.value).toBeUndefined();
+    expect(replayCache.set).toHaveBeenCalledWith(
+      'dashboard:dashboard-id',
+      expect.objectContaining({ sessionId: 'editor-session' })
+    );
     expect(session.start).not.toHaveBeenCalled();
   });
 
