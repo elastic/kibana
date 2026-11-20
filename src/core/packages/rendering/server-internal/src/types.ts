@@ -82,12 +82,6 @@ export interface IRenderOptions {
    * `false` by default.
    */
   isAnonymousPage?: boolean;
-
-  /**
-   * @internal
-   * This is only used for integration tests that allow us to verify which config keys are exposed to the browser.
-   */
-  includeExposedConfigKeys?: boolean;
 }
 
 /** @internal */
