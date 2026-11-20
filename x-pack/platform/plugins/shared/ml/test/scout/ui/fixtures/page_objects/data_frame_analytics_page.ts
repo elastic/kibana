@@ -558,9 +558,14 @@ export class DataFrameAnalyticsPage {
       columnId: string;
     };
 
-    // With the charts on, the header cell is only final once its chart has rendered.
+    // Let histogram loading finish before interacting with cells, whether it succeeds
+    // or reports an error. The histogram test step verifies chart success separately.
     if ((await histogramButton.getAttribute('aria-pressed')) === 'true') {
-      await this.page.testSubj.locator(`mlDataGridChart-${columnId}`).waitFor({ state: 'visible' });
+      const histogramChart = this.page.testSubj.locator(`mlDataGridChart-${columnId}`);
+      const histogramError = this.page.testSubj
+        .locator('globalToastList')
+        .getByText('An error occurred fetching the histogram charts data', { exact: false });
+      await histogramChart.or(histogramError).waitFor({ state: 'visible' });
     }
 
     const featureImportanceCell = dataGrid.locator(
