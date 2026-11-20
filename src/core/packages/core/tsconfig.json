@@ -179,6 +179,7 @@
     "@kbn/core-user-activity-server-mocks",
     "@kbn/core-user-activity-server-internal",
     "@kbn/scout",
+    "@kbn/repo-packages",
   ],
   "exclude": [
     "target/**/*",
