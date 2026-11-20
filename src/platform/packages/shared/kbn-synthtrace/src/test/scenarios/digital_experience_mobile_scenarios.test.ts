@@ -279,12 +279,12 @@ describe('digital experience mobile scenarios', () => {
     });
 
     it('writes one platform only when asked to, and rejects options it does not know', async () => {
-      // Both SDKs write their name on every session start, unlike `os.type`, which Android lacks
-      const sdkNamesOfSessions = (platformDocs: OtelDocument[]) =>
+      // `os.name` tells the platforms apart; `os.type` is `linux` on Android and `darwin` on iOS
+      const osNamesOfSessions = (platformDocs: OtelDocument[]) =>
         new Set(
           platformDocs
             .filter((doc) => eventNameOf(doc) === EVENT_SESSION_START)
-            .map((doc) => resourceOf(doc)['telemetry.sdk.name'])
+            .map((doc) => resourceOf(doc)['os.name'])
         );
       const ios = await run(native, {
         scenarioOpts: { seed: 'native', platform: 'ios', scale: 0.25 },
@@ -296,8 +296,8 @@ describe('digital experience mobile scenarios', () => {
         from,
         to,
       });
-      expect(sdkNamesOfSessions(ios)).toEqual(new Set(['iOS']));
-      expect(sdkNamesOfSessions(android)).toEqual(new Set(['android']));
+      expect(osNamesOfSessions(ios)).toEqual(new Set(['iOS', 'iPadOS']));
+      expect(osNamesOfSessions(android)).toEqual(new Set(['Android']));
       await expect(
         run(native, { scenarioOpts: { withManualSpans: false }, from, to })
       ).rejects.toThrow('Unknown scenarioOpts: withManualSpans');

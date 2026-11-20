@@ -31,16 +31,26 @@ const CLIENT_CLASSES: Readonly<
   ios: EdotIosClient,
 };
 
+// The upstream SDKs that those versions are built on
+const OTEL_JAVA_VERSION = '1.66.0';
+const OTEL_SWIFT_VERSION = '2.3.0';
+
+// The upstream SDK values, which replace the legacy `telemetry.sdk.name` of `android` and `iOS`;
+// a mobile app is told apart by `telemetry.distro.name` and `os.name`
 const TELEMETRY_SDK_ATTRIBUTES: Readonly<Record<MobilePlatform, Record<string, string>>> = {
   android: {
-    'telemetry.sdk.name': 'android',
+    'telemetry.sdk.name': 'opentelemetry',
     'telemetry.sdk.language': 'java',
-    'telemetry.sdk.version': EDOT_ANDROID_VERSION,
+    'telemetry.sdk.version': OTEL_JAVA_VERSION,
+    'telemetry.distro.name': 'elastic',
+    'telemetry.distro.version': EDOT_ANDROID_VERSION,
   },
   ios: {
-    'telemetry.sdk.name': 'iOS',
+    'telemetry.sdk.name': 'opentelemetry',
     'telemetry.sdk.language': 'swift',
-    'telemetry.sdk.version': EDOT_IOS_VERSION,
+    'telemetry.sdk.version': OTEL_SWIFT_VERSION,
+    'telemetry.distro.name': 'elastic',
+    'telemetry.distro.version': EDOT_IOS_VERSION,
   },
 };
 

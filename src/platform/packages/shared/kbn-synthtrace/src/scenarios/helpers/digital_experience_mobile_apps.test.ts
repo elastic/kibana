@@ -67,8 +67,16 @@ const logsOf = (docs: EdotReactNativeDocument[]): OtelLogDocument[] =>
 const serviceOf = (doc: EdotReactNativeDocument) =>
   (isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes)?.['service.name'];
 
+const PLATFORM_BY_OS_NAME: Readonly<Record<string, string>> = {
+  Android: 'android',
+  iOS: 'ios',
+  iPadOS: 'ios',
+};
+
 const platformOf = (doc: EdotReactNativeDocument) =>
-  (isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes)?.['telemetry.sdk.name'];
+  PLATFORM_BY_OS_NAME[
+    String((isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes)?.['os.name'])
+  ];
 
 describe('digital experience mobile apps', () => {
   // A 30-minute run is enough for every app to show every signal, and shared by the tests
@@ -140,12 +148,11 @@ describe('digital experience mobile apps', () => {
 
     it('writes data of both platforms, and never as EDOT Browser', () => {
       const platforms = new Set(docs.map(platformOf));
-      expect([...platforms].sort()).toEqual(['android', 'iOS']);
+      expect([...platforms].sort()).toEqual(['android', 'ios']);
       docs.forEach((doc) => {
-        const language = (isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes)?.[
-          'telemetry.sdk.language'
-        ];
-        expect(language).not.toBe('webjs');
+        const resource = isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes;
+        expect(resource?.['telemetry.distro.name']).toBe('elastic');
+        expect(resource?.['telemetry.sdk.language']).not.toBe('webjs');
       });
     });
 
@@ -180,7 +187,7 @@ describe('digital experience mobile apps', () => {
 
     it('generates only one platform when asked to', () => {
       const iosDocs = collect({ platform: 'ios' });
-      expect(new Set(iosDocs.map(platformOf))).toEqual(new Set(['iOS']));
+      expect(new Set(iosDocs.map(platformOf))).toEqual(new Set(['ios']));
       // field-service-mobile is Android only
       expect(iosDocs.some((doc) => serviceOf(doc) === 'field-service-mobile')).toBe(false);
     });
