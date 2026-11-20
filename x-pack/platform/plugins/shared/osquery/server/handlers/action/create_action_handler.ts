@@ -17,7 +17,10 @@ import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { ACTIONS_INDEX, ACTION_EXPIRATION_WEEKS, QUERY_TIMEOUT } from '../../../common/constants';
-import { ensureActionsIndexMappings } from '../../create_indices/create_transforms_indices';
+import {
+  ensureActionsIndexMappings,
+  OriginMappingConflictError,
+} from '../../create_indices/create_transforms_indices';
 import type { ActionOrigin } from './action_origin';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
@@ -280,9 +283,12 @@ export const createActionHandler = async (
         // dynamically mapped origin fields. The response must match the stored document.
         delete osqueryAction.origin;
         const reason = mappingError instanceof Error ? mappingError.message : String(mappingError);
-        logger.warn(
-          `Osquery action ${osqueryAction.action_id}: origin mapping unavailable (${reason}); storing without origin`
-        );
+        const message = `Osquery action ${osqueryAction.action_id}: origin mapping unavailable (${reason}); storing without origin`;
+        if (mappingError instanceof OriginMappingConflictError) {
+          logger.debug(message);
+        } else {
+          logger.warn(message);
+        }
       }
     }
 

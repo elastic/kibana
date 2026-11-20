@@ -36,6 +36,13 @@ const ORIGIN_FIELD_TYPES = {
   'origin.verified': 'boolean',
 } as const;
 
+export class OriginMappingConflictError extends Error {
+  constructor(field: string, expectedType: string) {
+    super(`Expected ${field} to be mapped as ${expectedType}`);
+    this.name = 'OriginMappingConflictError';
+  }
+}
+
 const checkActionsOriginMappings = async (esClient: ElasticsearchClient): Promise<string[]> => {
   const fields = Object.keys(ORIGIN_FIELD_TYPES) as Array<keyof typeof ORIGIN_FIELD_TYPES>;
   const mappings = await esClient.indices.getFieldMapping({
@@ -53,7 +60,7 @@ const checkActionsOriginMappings = async (esClient: ElasticsearchClient): Promis
       if (!property) {
         missing = true;
       } else if (!('type' in property) || property.type !== expectedType) {
-        throw new Error(`Expected ${field} to be mapped as ${expectedType}`);
+        throw new OriginMappingConflictError(field, expectedType);
       }
     }
 
@@ -89,15 +96,26 @@ const setUpActionsIndex = async (esClient: ElasticsearchClient, logger: Logger):
   }
 };
 
-/** Confirms live origin keyword mappings, sharing attempts and caching only success per process. */
+/** Confirms live origin mappings, caching successes and permanent conflicts per process. */
 export const ensureActionsIndexMappings = (
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> => {
-  actionsIndexSetup ??= setUpActionsIndex(esClient, logger).catch((error) => {
-    actionsIndexSetup = undefined;
-    throw error;
-  });
+  if (!actionsIndexSetup) {
+    actionsIndexSetup = setUpActionsIndex(esClient, logger).catch((error) => {
+      if (error instanceof OriginMappingConflictError) {
+        logger.error(
+          `${error.message}; origin will not be recorded until the actions index is reindexed or its mapping is fixed`
+        );
+      } else {
+        actionsIndexSetup = undefined;
+      }
+
+      throw error;
+    });
+    // A permanent conflict stays cached even if the caller has already timed out.
+    void actionsIndexSetup.catch(() => {});
+  }
 
   return actionsIndexSetup;
 };

@@ -13,7 +13,10 @@ import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_interna
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { packSavedObjectType } from '../../../common/types';
 import { PACK_LOOKUP_FAILED, PACK_NOT_FOUND } from '../../../common/translations/errors';
-import { ensureActionsIndexMappings } from '../../create_indices/create_transforms_indices';
+import {
+  ensureActionsIndexMappings,
+  OriginMappingConflictError,
+} from '../../create_indices/create_transforms_indices';
 
 jest.mock('./create_queries', () => ({
   ...jest.requireActual('./create_queries'),
@@ -22,6 +25,7 @@ jest.mock('./create_queries', () => ({
 jest.mock('../../lib/parse_agent_groups');
 jest.mock('../../utils/get_internal_saved_object_client');
 jest.mock('../../create_indices/create_transforms_indices', () => ({
+  ...jest.requireActual('../../create_indices/create_transforms_indices'),
   ensureActionsIndexMappings: jest.fn().mockResolvedValue(undefined),
 }));
 
@@ -46,12 +50,14 @@ const buildOsqueryContext = ({
   bulk = jest.fn().mockResolvedValue({ errors: false, items: [] }),
   reportEvent = jest.fn(),
   warn = jest.fn(),
+  debug = jest.fn(),
 }: {
   bulkCreate?: jest.Mock;
   indicesExists?: jest.Mock;
   bulk?: jest.Mock;
   reportEvent?: jest.Mock;
   warn?: jest.Mock;
+  debug?: jest.Mock;
 } = {}) => {
   const esClient = {
     indices: { exists: indicesExists },
@@ -68,10 +74,10 @@ const buildOsqueryContext = ({
       getFleetActionsClient: () => ({ bulkCreate }),
     },
     telemetryEventsSender: { reportEvent },
-    logFactory: { get: jest.fn(() => ({ debug: jest.fn(), error: jest.fn(), warn })) },
+    logFactory: { get: jest.fn(() => ({ debug, error: jest.fn(), warn })) },
   } as unknown as OsqueryAppContext;
 
-  return { context, bulkCreate, bulk, indicesExists, reportEvent, warn };
+  return { context, bulkCreate, bulk, indicesExists, reportEvent, warn, debug };
 };
 
 describe('createActionHandler', () => {
@@ -159,6 +165,65 @@ describe('createActionHandler', () => {
       } finally {
         jest.useRealTimers();
       }
+    });
+
+    it('writes origin on the next action after a timed-out mapping check resolves', async () => {
+      jest.useFakeTimers();
+      try {
+        const { context, bulk } = buildOsqueryContext();
+        let resolveMappings: () => void = jest.fn();
+        const mappings = new Promise<void>((resolve) => {
+          resolveMappings = resolve;
+        });
+        mockedEnsureActionsIndexMappings
+          .mockReturnValueOnce(mappings)
+          .mockReturnValueOnce(mappings);
+
+        const pending = createActionHandler(
+          context,
+          { query: 'SELECT 1;', agent_ids: [TEST_AGENT] },
+          { dispatch: liveDispatch, origin: workflowOrigin }
+        );
+        await jest.advanceTimersByTimeAsync(ORIGIN_MAPPING_TIMEOUT_MS);
+        const first = await pending;
+
+        expect(bulk).toHaveBeenCalledTimes(1);
+        expect(bulk.mock.calls[0][0].operations[1]).not.toHaveProperty('origin');
+        expect(first.response).not.toHaveProperty('origin');
+
+        resolveMappings();
+        await mappings;
+        const second = await createActionHandler(
+          context,
+          { query: 'SELECT 1;', agent_ids: [TEST_AGENT] },
+          { dispatch: liveDispatch, origin: workflowOrigin }
+        );
+
+        expect(mockedEnsureActionsIndexMappings).toHaveBeenCalledTimes(2);
+        expect(bulk).toHaveBeenCalledTimes(2);
+        expect(bulk.mock.calls[1][0].operations[1]).toMatchObject({ origin: workflowOrigin });
+        expect(second.response.origin).toEqual(workflowOrigin);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('logs a mapping conflict at debug and writes the action without origin', async () => {
+      const { context, bulk, warn, debug } = buildOsqueryContext();
+      const error = new OriginMappingConflictError('origin.type', 'keyword');
+      mockedEnsureActionsIndexMappings.mockRejectedValueOnce(error);
+
+      const result = await createActionHandler(
+        context,
+        { query: 'SELECT 1;', agent_ids: [TEST_AGENT] },
+        { dispatch: liveDispatch, origin: workflowOrigin }
+      );
+
+      expect(bulk).toHaveBeenCalledTimes(1);
+      expect(bulk.mock.calls[0][0].operations[1]).not.toHaveProperty('origin');
+      expect(result.response).not.toHaveProperty('origin');
+      expect(debug).toHaveBeenCalledWith(expect.stringContaining(error.message));
+      expect(warn).not.toHaveBeenCalled();
     });
 
     it('writes no origin and skips the mapping check for a dispatch without one', async () => {

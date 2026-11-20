@@ -644,16 +644,25 @@ describe('createTransformIndices', () => {
       ['origin.run_id', 'text'],
       ['origin.verified', 'keyword'],
     ] as const)(
-      'rejects conflicting %s (%s) without trying to repair it',
+      'caches conflicting %s (%s) and logs it once without trying to repair it',
       async (field, conflictingType) => {
-        const { ensureActionsIndexMappings } = loadModule();
+        const { ensureActionsIndexMappings, OriginMappingConflictError } = loadModule();
+        const esClient = mockEsClient as unknown as ElasticsearchClient;
         mockEsClient.indices.getFieldMapping.mockResolvedValueOnce(
           originFieldMappings({ [field]: conflictingType })
         );
-        await expect(
-          ensureActionsIndexMappings(mockEsClient as unknown as ElasticsearchClient, logger)
-        ).rejects.toThrow(field);
+        const first = ensureActionsIndexMappings(esClient, logger);
+        await expect(first).rejects.toThrow(OriginMappingConflictError);
+        const second = ensureActionsIndexMappings(esClient, logger);
+        expect(second).toBe(first);
+        await expect(second).rejects.toThrow(field);
+        expect(mockEsClient.indices.getFieldMapping).toHaveBeenCalledTimes(1);
         expect(mockEsClient.indices.putMapping).not.toHaveBeenCalled();
+        expect(logger.error).toHaveBeenCalledTimes(1);
+        const expectedType = field === 'origin.verified' ? 'boolean' : 'keyword';
+        expect(logger.error).toHaveBeenCalledWith(
+          `Expected ${field} to be mapped as ${expectedType}; origin will not be recorded until the actions index is reindexed or its mapping is fixed`
+        );
       }
     );
 
