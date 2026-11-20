@@ -97,12 +97,14 @@ export const PageReduxStream: FC = () => {
       <EuiText>
         <p>
           This demonstrates integration of a single endpoint with streaming support with Redux
-          Toolkit. The server and client share actions created via `createSlice`. The server sends a
-          stream of NDJSON data to the client where each line is a redux action. The client then
-          applies these actions to its state. The package `@kbn/ml-response-stream` exposes a slice
-          of the state that can be used to start and cancel the stream. The `startStream` action is
-          implemented as an async thunk that starts the stream and then dispatches received actions
-          to the store. Hit &quot;Start development&quot; to trigger the bar chart race!
+          Toolkit. The server and client share plain action creators, so the server does not need to
+          load Redux Toolkit. The server sends a stream of NDJSON data to the client where each line
+          is a redux action. The client then applies these actions to its state through the
+          `extraReducers` of a slice created via `createSlice`. The package
+          `@kbn/ml-response-stream` exposes a slice of the state that can be used to start and
+          cancel the stream. The `startStream` action is implemented as an async thunk that starts
+          the stream and then dispatches received actions to the store. Hit &quot;Start
+          development&quot; to trigger the bar chart race!
         </p>
       </EuiText>
       <br />

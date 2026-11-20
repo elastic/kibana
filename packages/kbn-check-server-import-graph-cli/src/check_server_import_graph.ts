@@ -33,6 +33,7 @@ export const BANNED_NODE_MODULES: ReadonlySet<string> = new Set([
   'react-use',
   '@xyflow/react',
   '@reduxjs/toolkit',
+  'redux-toolkit-v1',
 ]);
 
 const relative = (absolute: string): string => Path.relative(REPO_ROOT, absolute);
