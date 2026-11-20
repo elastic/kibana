@@ -183,6 +183,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/core-user-storage-server-internal'
   - '@kbn/core-user-storage-common'
+  - '@kbn/repo-packages'
 tags:
   - core
   - package
