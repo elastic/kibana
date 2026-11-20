@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod';
 import { discoverSessionApiClassicTabBaseSchema, discoverSessionApiEsqlTabBaseSchema } from './tab';
 import { discoverSessionApiMetricsTabTypeStateSchema } from './metrics_tab';
+import { discoverSessionApiPresentationTabTypeStateSchema } from './presentation_tab';
 import { discoverSessionApiDefaultTabTypeStateSchema } from './session_data';
 
 const embeddableMetricsTabSchema = discoverSessionApiEsqlTabBaseSchema
@@ -20,6 +21,15 @@ const embeddableMetricsTabSchema = discoverSessionApiEsqlTabBaseSchema
       'An ES|QL tab with saved metrics grid settings. ' +
       'The dashboard panel stores these settings and restores them in Discover. ' +
       'The panel does not render the metrics grid.',
+  });
+
+const embeddablePresentationTabSchema = discoverSessionApiEsqlTabBaseSchema
+  .extend(discoverSessionApiPresentationTabTypeStateSchema.shape)
+  .meta({
+    title: 'Presentation tab',
+    description:
+      'An ES|QL tab that renders a custom HTML presentation. ' +
+      'The dashboard panel stores the tab type; the presentation UI is shown in Discover.',
   });
 
 /**
@@ -33,4 +43,5 @@ export const discoverSessionApiEmbeddableTabSchema = z.union([
     // extend() does not preserve object-level metadata.
     .meta({ ...discoverSessionApiEsqlTabBaseSchema.meta() }),
   embeddableMetricsTabSchema,
+  embeddablePresentationTabSchema,
 ]);

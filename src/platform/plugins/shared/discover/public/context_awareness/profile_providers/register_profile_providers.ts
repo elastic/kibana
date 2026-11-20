@@ -36,6 +36,7 @@ import type {
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
 import { createSecurityDataSourceProfileProvider } from './security/security_data_source_profile';
 import { createMetricsDataSourceProfileProvider } from './common/metrics_data_source_profile';
+import { createPresentationDataSourceProfileProvider } from './common/presentation_data_source_profile';
 import { createSparklineDataSourceProfileProvider } from './common/sparkline_data_source_profile';
 
 /**
@@ -125,6 +126,8 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
   createPatternsDataSourceProfileProvider(providerServices),
   createChangePointDataSourceProfileProvider(providerServices),
   createMetricsDataSourceProfileProvider(),
+  // Presentation matches a sentinel ES|QL marker; keep it before broader providers.
+  createPresentationDataSourceProfileProvider(),
   createDeprecationLogsDataSourceProfileProvider(),
   createSparklineDataSourceProfileProvider(providerServices),
   createSecurityDataSourceProfileProvider(providerServices),

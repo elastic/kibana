@@ -327,6 +327,37 @@ const SCHEMA_DISCOVER_SESSION_V19 = SCHEMA_DISCOVER_SESSION_V18.extends({
   tabs: schema.arrayOf(SCHEMA_TAB_V19, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
+const SCHEMA_TAB_TYPE_STATE_V20 = schema.oneOf([
+  schema.object({
+    type: schema.literal(DiscoverTabType.Metrics),
+    dimensions: schema.arrayOf(schema.string({ maxLength: 1000 }), {
+      maxSize: MAX_METRICS_TAB_DIMENSIONS,
+    }),
+    searchTerm: schema.string({ maxLength: 1000 }),
+    counterAggregation: SCHEMA_SIMPLE_AGGREGATION,
+    gaugeAggregation: SCHEMA_SIMPLE_AGGREGATION,
+    histogramPercentile: SCHEMA_HISTOGRAM_PERCENTILE,
+    gridSortField: schema.maybe(SCHEMA_METRICS_GRID_SORT_FIELD),
+    gridSortDirection: schema.maybe(SCHEMA_METRICS_GRID_SORT_DIRECTION),
+    histogramVisualization: schema.maybe(SCHEMA_HISTOGRAM_VISUALIZATION),
+  }),
+  schema.object({
+    type: schema.literal(DiscoverTabType.Presentation),
+  }),
+]);
+
+const SCHEMA_TAB_ATTRIBUTES_V20 = SCHEMA_TAB_ATTRIBUTES_V19.extends({
+  tabTypeState: schema.maybe(SCHEMA_TAB_TYPE_STATE_V20),
+});
+
+const SCHEMA_TAB_V20 = SCHEMA_TAB_V19.extends({
+  attributes: SCHEMA_TAB_ATTRIBUTES_V20,
+});
+
+const SCHEMA_DISCOVER_SESSION_V20 = SCHEMA_DISCOVER_SESSION_V19.extends({
+  tabs: schema.arrayOf(SCHEMA_TAB_V20, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
+});
+
 // Add new model versions here, which automatically registers them
 export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
   13: {
@@ -387,11 +418,18 @@ export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
       create: SCHEMA_DISCOVER_SESSION_V19,
     },
   },
+  20: {
+    changes: [],
+    schemas: {
+      forwardCompatibility: SCHEMA_DISCOVER_SESSION_V20.extends({}, { unknowns: 'ignore' }),
+      create: SCHEMA_DISCOVER_SESSION_V20,
+    },
+  },
 };
 
 // Set constants to the latest schemas, which updates derived types and content management
-export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V19;
-export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V19;
+export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V20;
+export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V20;
 
 export type DiscoverSessionTabAttributes = TypeOf<typeof SCHEMA_TAB_LATEST>['attributes'];
 export type DiscoverSessionTab = TypeOf<typeof SCHEMA_TAB_LATEST>;

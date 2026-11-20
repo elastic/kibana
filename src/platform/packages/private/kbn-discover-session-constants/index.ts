@@ -71,4 +71,6 @@ export enum UnifiedHistogramSuggestionType {
 export enum DiscoverTabType {
   Default = 'default',
   Metrics = 'metrics',
+  /** Custom HTML presentation deck rendered in place of the chart/table. */
+  Presentation = 'presentation',
 }

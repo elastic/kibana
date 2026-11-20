@@ -39,6 +39,8 @@ export const toStoredTabTypeState = (
           gridSortDirection: apiTabTypeState.grid_sort_direction,
         }),
       };
+    case DiscoverTabType.Presentation:
+      return { type: DiscoverTabType.Presentation };
   }
 };
 
@@ -68,5 +70,7 @@ export const fromStoredTabTypeState = (
           grid_sort_direction: tabTypeState.gridSortDirection,
         }),
       };
+    case DiscoverTabType.Presentation:
+      return { type: DiscoverTabType.Presentation };
   }
 };

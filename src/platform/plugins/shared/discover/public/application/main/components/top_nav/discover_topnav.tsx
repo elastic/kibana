@@ -54,6 +54,7 @@ import { useESQLVariables } from './use_esql_variables';
 import type { UpdateESQLQueryFn } from '../../../../context_awareness/types';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
+import { PRESENTATION_ESQL_MARKER } from '../../../../context_awareness/profile_providers/common/presentation_data_source_profile';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -381,6 +382,9 @@ export const DiscoverTopNav = ({
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
+  const isPresentationTab =
+    isOfAggregateQueryType(query) && query.esql.includes(PRESENTATION_ESQL_MARKER);
+
   return (
     <span>
       <DiscoverTopNavMenu
@@ -388,100 +392,102 @@ export const DiscoverTopNav = ({
         topNavMenu={topNavMenu}
         shareAction={shareAction}
       />
-      <SearchBar
-        useBackgroundSearchButton={
-          customizationContext.displayMode !== 'embedded' &&
-          services.data.search.isBackgroundSearchEnabled &&
-          !!services.capabilities.discover_v2.storeSearchSession
-        }
-        appName="discover"
-        indexPatterns={[dataView]}
-        onQuerySubmit={onQuerySubmit}
-        onCancel={onCancelClick}
-        isLoading={isLoading}
-        disableSubmitAction={disableEmptyEsqlSubmit}
-        onQueryChange={onQueryChange}
-        onSavedQueryIdChange={updateSavedQueryId}
-        disableSubscribingToGlobalDataServices={true}
-        query={query}
-        filters={filters}
-        dateRangeFrom={timeRangeRelative?.from}
-        dateRangeTo={timeRangeRelative?.to}
-        refreshInterval={refreshInterval?.value}
-        isRefreshPaused={refreshInterval?.pause}
-        savedQueryId={savedQuery}
-        screenTitle={persistedDiscoverSession?.title}
-        showDatePicker={datePicker}
-        enableDateRangePicker
-        allowSavingQueries
-        showSearchBar={true}
-        useDefaultBehaviors={true}
-        dataViewPickerOverride={
-          searchBarCustomization?.CustomDataViewPicker ? (
-            <searchBarCustomization.CustomDataViewPicker />
-          ) : undefined
-        }
-        dataViewPickerComponentProps={
-          shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
-        }
-        displayStyle="detached"
-        textBasedLanguageModeErrors={textBasedLanguageModeErrors}
-        textBasedLanguageModeWarning={esqlModeWarning}
-        enableResourceBrowser={isEsqlMode}
-        enableCreateView={isEsqlMode}
-        prependFilterBar={
-          searchBarCustomization?.PrependFilterBar ? (
-            <searchBarCustomization.PrependFilterBar />
-          ) : undefined
-        }
-        onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
-        draft={searchDraftUiState}
-        onDraftChange={onSearchDraftChange}
-        esqlEditorInitialState={esqlEditorUiState}
-        onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
-        visorInitialState={visorUiState}
-        onVisorInitialStateChange={onVisorInitialStateChange}
-        esqlVariablesConfig={
-          isEsqlMode
-            ? {
-                esqlVariables: esqlVariables ?? [],
-                onSaveControl,
-                controlsWrapper: (
-                  <ControlGroupRenderer
-                    query={query}
-                    onApiAvailable={setControlGroupApi}
-                    timeRange={timeRangeAbsolute}
-                    getCreationOptions={async (initialState) => {
-                      const initialChildControlState =
-                        getActivePanels() ?? initialState.initialChildControlState ?? {};
-                      return {
-                        initialState: {
-                          ...initialState,
-                          initialChildControlState,
-                        },
-                      };
-                    }}
-                    viewMode="edit"
-                  />
-                ),
-              }
-            : undefined
-        }
-        esqlQueryStats={esqlQueryStats}
-        onOpenQueryInNewTab={onOpenQueryInNewTab}
-        esqlApproximation={
-          isEsqlMode
-            ? {
-                isApproximate: esqlApproximation,
-                onChange: onUseApproximationChange,
-                additionalText: i18n.translate('discover.esqlApproximationToggle.additionalText', {
-                  defaultMessage: 'Only applies to queries that use one STATS command.',
-                }),
-                disabledReason: emptyEsqlQueryDisabledTooltip,
-              }
-            : undefined
-        }
-      />
+      {!isPresentationTab && (
+        <SearchBar
+          useBackgroundSearchButton={
+            customizationContext.displayMode !== 'embedded' &&
+            services.data.search.isBackgroundSearchEnabled &&
+            !!services.capabilities.discover_v2.storeSearchSession
+          }
+          appName="discover"
+          indexPatterns={[dataView]}
+          onQuerySubmit={onQuerySubmit}
+          onCancel={onCancelClick}
+          isLoading={isLoading}
+          disableSubmitAction={disableEmptyEsqlSubmit}
+          onQueryChange={onQueryChange}
+          onSavedQueryIdChange={updateSavedQueryId}
+          disableSubscribingToGlobalDataServices={true}
+          query={query}
+          filters={filters}
+          dateRangeFrom={timeRangeRelative?.from}
+          dateRangeTo={timeRangeRelative?.to}
+          refreshInterval={refreshInterval?.value}
+          isRefreshPaused={refreshInterval?.pause}
+          savedQueryId={savedQuery}
+          screenTitle={persistedDiscoverSession?.title}
+          showDatePicker={datePicker}
+          enableDateRangePicker
+          allowSavingQueries
+          showSearchBar={true}
+          useDefaultBehaviors={true}
+          dataViewPickerOverride={
+            searchBarCustomization?.CustomDataViewPicker ? (
+              <searchBarCustomization.CustomDataViewPicker />
+            ) : undefined
+          }
+          dataViewPickerComponentProps={
+            shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
+          }
+          displayStyle="detached"
+          textBasedLanguageModeErrors={textBasedLanguageModeErrors}
+          textBasedLanguageModeWarning={esqlModeWarning}
+          enableResourceBrowser={isEsqlMode}
+          enableCreateView={isEsqlMode}
+          prependFilterBar={
+            searchBarCustomization?.PrependFilterBar ? (
+              <searchBarCustomization.PrependFilterBar />
+            ) : undefined
+          }
+          onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
+          draft={searchDraftUiState}
+          onDraftChange={onSearchDraftChange}
+          esqlEditorInitialState={esqlEditorUiState}
+          onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
+          visorInitialState={visorUiState}
+          onVisorInitialStateChange={onVisorInitialStateChange}
+          esqlVariablesConfig={
+            isEsqlMode
+              ? {
+                  esqlVariables: esqlVariables ?? [],
+                  onSaveControl,
+                  controlsWrapper: (
+                    <ControlGroupRenderer
+                      query={query}
+                      onApiAvailable={setControlGroupApi}
+                      timeRange={timeRangeAbsolute}
+                      getCreationOptions={async (initialState) => {
+                        const initialChildControlState =
+                          getActivePanels() ?? initialState.initialChildControlState ?? {};
+                        return {
+                          initialState: {
+                            ...initialState,
+                            initialChildControlState,
+                          },
+                        };
+                      }}
+                      viewMode="edit"
+                    />
+                  ),
+                }
+              : undefined
+          }
+          esqlQueryStats={esqlQueryStats}
+          onOpenQueryInNewTab={onOpenQueryInNewTab}
+          esqlApproximation={
+            isEsqlMode
+              ? {
+                  isApproximate: esqlApproximation,
+                  onChange: onUseApproximationChange,
+                  additionalText: i18n.translate('discover.esqlApproximationToggle.additionalText', {
+                    defaultMessage: 'Only applies to queries that use one STATS command.',
+                  }),
+                  disabledReason: emptyEsqlQueryDisabledTooltip,
+                }
+              : undefined
+          }
+        />
+      )}
       {saveSessionModal.isOpen && (
         <DiscoverSessionSaveModalContainer
           initialCopyOnSave={saveSessionModal.initialCopyOnSave}

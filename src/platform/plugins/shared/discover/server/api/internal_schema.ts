@@ -14,6 +14,7 @@ import {
   discoverSessionApiDataSchema,
   discoverSessionApiEsqlTabSchema,
   discoverSessionApiMetricsTabSchema,
+  discoverSessionApiPresentationTabSchema,
 } from '@kbn/as-code-discover-schema';
 import { MAX_DISCOVER_SESSION_TABS } from '@kbn/discover-session-constants';
 import { MAX_SAVED_OBJECT_ID_LENGTH } from '@kbn/core-saved-objects-server';
@@ -30,6 +31,7 @@ const internalTabSchema = z.union([
   }),
   discoverSessionApiEsqlTabSchema,
   discoverSessionApiMetricsTabSchema,
+  discoverSessionApiPresentationTabSchema,
 ]);
 
 /** Uses the public session format while preserving inline Data View IDs for Discover. */

@@ -28,6 +28,7 @@ import { discoverSessionApiClassicTabBaseSchema, discoverSessionApiEsqlTabBaseSc
 import { visContextSchema } from './vis_context';
 import { discoverSessionApiControlPanelsSchema } from './control_panel';
 import { discoverSessionApiMetricsTabTypeStateSchema } from './metrics_tab';
+import { discoverSessionApiPresentationTabTypeStateSchema } from './presentation_tab';
 
 const discoverSessionTabPresentationSchema = z
   .object({
@@ -110,17 +111,26 @@ export const discoverSessionApiMetricsTabSchema = discoverSessionApiEsqlTabSchem
     description: 'An ES|QL tab with saved metrics grid settings.',
   });
 
+export const discoverSessionApiPresentationTabSchema = discoverSessionApiEsqlTabSchema
+  .extend(discoverSessionApiPresentationTabTypeStateSchema.shape)
+  .meta({
+    title: 'Presentation tab',
+    description:
+      'An ES|QL tab that renders a custom HTML presentation instead of the chart and table.',
+  });
+
 export const discoverSessionApiTabSchema = z
   .union([
     discoverSessionApiClassicTabSchema,
     discoverSessionApiEsqlTabSchema,
     discoverSessionApiMetricsTabSchema,
+    discoverSessionApiPresentationTabSchema,
   ])
   .meta({
     description:
       'A Discover tab definition. `data_source.type` identifies the data source; `type` identifies the tab type. ' +
       'The tab type describes the saved settings and does not change how Discover displays the tab. ' +
-      'Default tabs support data views and ES|QL; metrics tabs support only ES|QL.',
+      'Default tabs support data views and ES|QL; metrics and presentation tabs support only ES|QL.',
   });
 
 export const discoverSessionApiDataSchema = z

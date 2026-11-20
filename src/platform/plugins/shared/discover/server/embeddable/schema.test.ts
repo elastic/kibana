@@ -46,11 +46,21 @@ const metricsTabInput = {
   histogram_percentile: 'p99',
 } as const;
 
+const presentationTabInput = {
+  ...esqlTabInput,
+  type: DiscoverTabType.Presentation,
+  data_source: {
+    type: 'esql' as const,
+    query: 'ROW __discover_presentation = true',
+  },
+} as const;
+
 // A sample tab for every tab type. The exhaustive record makes a new tab type a type error until
 // it is covered here, and the parity tests below then require it in both schemas.
 const tabInputByTabType: Record<DiscoverTabType, object> = {
   [DiscoverTabType.Default]: esqlTabInput,
   [DiscoverTabType.Metrics]: metricsTabInput,
+  [DiscoverTabType.Presentation]: presentationTabInput,
 };
 
 const embeddableSchema = getDiscoverSessionEmbeddableSchema(mockGetDrilldownsSchema);

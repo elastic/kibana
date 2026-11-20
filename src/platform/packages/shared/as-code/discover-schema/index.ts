@@ -15,6 +15,7 @@ export {
   discoverSessionApiClassicTabSchema,
   discoverSessionApiEsqlTabSchema,
   discoverSessionApiMetricsTabSchema,
+  discoverSessionApiPresentationTabSchema,
   discoverSessionApiTabSchema,
   discoverSessionApiDataSchema,
 } from './src/schemas';
@@ -28,8 +29,10 @@ export type {
   DiscoverSessionApiClassicTab,
   DiscoverSessionApiEsqlTab,
   DiscoverSessionApiMetricsTab,
+  DiscoverSessionApiPresentationTab,
   DiscoverSessionApiTab,
   DiscoverSessionApiMetricsTabTypeState,
+  DiscoverSessionApiPresentationTabTypeState,
   DiscoverSessionApiTabTypeState,
   DiscoverSessionApiEmbeddableOverrides,
   DiscoverSessionApiEmbeddableTab,

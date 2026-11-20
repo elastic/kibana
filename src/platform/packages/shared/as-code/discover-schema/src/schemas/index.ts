@@ -19,6 +19,8 @@ export {
   discoverSessionApiClassicTabSchema,
   discoverSessionApiEsqlTabSchema,
   discoverSessionApiMetricsTabSchema,
+  discoverSessionApiPresentationTabSchema,
   discoverSessionApiTabSchema,
   discoverSessionApiDataSchema,
 } from './session_data';
+export { discoverSessionApiPresentationTabTypeStateSchema } from './presentation_tab';

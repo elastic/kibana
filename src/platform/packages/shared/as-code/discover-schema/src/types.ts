@@ -14,9 +14,11 @@ import type {
   discoverSessionApiDefaultTabTypeStateSchema,
   discoverSessionApiEsqlTabSchema,
   discoverSessionApiMetricsTabSchema,
+  discoverSessionApiPresentationTabSchema,
   discoverSessionApiTabSchema,
 } from './schemas/session_data';
 import type { discoverSessionApiMetricsTabTypeStateSchema } from './schemas/metrics_tab';
+import type { discoverSessionApiPresentationTabTypeStateSchema } from './schemas/presentation_tab';
 import type {
   discoverSessionApiClassicTabBaseSchema,
   discoverSessionApiEsqlTabBaseSchema,
@@ -41,16 +43,24 @@ export type DiscoverSessionApiTabBase = z.output<typeof discoverSessionApiTabBas
 export type DiscoverSessionApiData = z.output<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiClassicTab = z.output<typeof discoverSessionApiClassicTabSchema>;
 export type DiscoverSessionApiMetricsTab = z.output<typeof discoverSessionApiMetricsTabSchema>;
+export type DiscoverSessionApiPresentationTab = z.output<
+  typeof discoverSessionApiPresentationTabSchema
+>;
 export type DiscoverSessionApiEsqlTab =
   | z.output<typeof discoverSessionApiEsqlTabSchema>
-  | DiscoverSessionApiMetricsTab;
+  | DiscoverSessionApiMetricsTab
+  | DiscoverSessionApiPresentationTab;
 export type DiscoverSessionApiTab = z.output<typeof discoverSessionApiTabSchema>;
 export type DiscoverSessionApiMetricsTabTypeState = z.output<
   typeof discoverSessionApiMetricsTabTypeStateSchema
 >;
+export type DiscoverSessionApiPresentationTabTypeState = z.output<
+  typeof discoverSessionApiPresentationTabTypeStateSchema
+>;
 export type DiscoverSessionApiTabTypeState =
   | z.output<typeof discoverSessionApiDefaultTabTypeStateSchema>
-  | DiscoverSessionApiMetricsTabTypeState;
+  | DiscoverSessionApiMetricsTabTypeState
+  | DiscoverSessionApiPresentationTabTypeState;
 
 // Input types (before parsing — fields with defaults are optional)
 export type DiscoverSessionApiDataInput = z.input<typeof discoverSessionApiDataSchema>;
