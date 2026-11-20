@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { PointStyleProps } from '@kbn/event-annotation-common';
@@ -41,14 +42,16 @@ export const esqlEventAnnotation: ExpressionFunctionDefinition<
     defaultMessage: 'Configure an ES|QL annotation',
   }),
   args: {
-    id: queryPointEventAnnotation.args.id,
-    label: queryPointEventAnnotation.args.label,
-    color: queryPointEventAnnotation.args.color,
-    icon: queryPointEventAnnotation.args.icon,
-    lineStyle: queryPointEventAnnotation.args.lineStyle,
-    lineWidth: queryPointEventAnnotation.args.lineWidth,
-    textVisibility: queryPointEventAnnotation.args.textVisibility,
-    isHidden: queryPointEventAnnotation.args.isHidden,
+    ...pick(queryPointEventAnnotation.args, [
+      'id',
+      'label',
+      'color',
+      'icon',
+      'lineStyle',
+      'lineWidth',
+      'textVisibility',
+      'isHidden',
+    ]),
     outside: manualRangeEventAnnotation.args.outside,
     query: {
       types: ['string'],
