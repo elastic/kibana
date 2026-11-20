@@ -33,7 +33,7 @@ export const forbiddenError = (message: string): Error =>
 export const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
-/** Whether the request may act on the memory of `userId`: its own always, another user's only with `manage_memory`. */
+/** Returns true if `userId` matches `callerUserId` or the request has `manage_memory`. */
 export const canActOnUserMemory = (
   request: KibanaRequest,
   userId: string,
@@ -46,7 +46,7 @@ export type ResolvedMemoryUser =
 
 /**
  * Resolves the target user for a memory write route and checks whether the caller may act on it.
- * Fails when the caller has no profile (and omitted `user_id`) or targets another user without
+ * Fails when the caller has no profile and omits `user_id`, or targets another user without
  * `contextEngine:manage_memory`.
  */
 export const resolveMemoryUser = async ({
