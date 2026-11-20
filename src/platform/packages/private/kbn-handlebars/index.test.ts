@@ -833,6 +833,14 @@ describe('rendering after an error', () => {
     return value;
   };
 
+  const catchBlockError = function (this: object, options: HelperOptions) {
+    try {
+      return options.fn(this);
+    } catch (error) {
+      return 'caught';
+    }
+  };
+
   forEachCompileFunctionName((compileName) => {
     it(`should not leak block params into the next render after a helper throws for #${compileName}`, () => {
       const render = Handlebars[compileName](
@@ -858,13 +866,17 @@ describe('rendering after an error', () => {
     )
       .withInput({ obj: { items: ['bad'] }, name: 'top', item: 'root item' })
       .withHelper('boom', boom)
-      .withHelper('try', function (this: object, options: HelperOptions) {
-        try {
-          return options.fn(this);
-        } catch (error) {
-          return 'caught';
-        }
-      })
+      .withHelper('try', catchBlockError)
       .toCompileTo('top|caught|top|root item');
+  });
+
+  it('should restore the parent block data when a helper catches an error from its block', () => {
+    expectTemplate(
+      '{{#each outer}}{{#try}}{{#each ../items}}{{boom this}}{{/each}}{{/try}}|{{@index}}{{/each}}'
+    )
+      .withInput({ outer: ['a'], items: ['ok', 'bad'] })
+      .withHelper('boom', boom)
+      .withHelper('try', catchBlockError)
+      .toCompileTo('caught|0');
   });
 });
