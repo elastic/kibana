@@ -291,6 +291,49 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.validate.secrets).toBeDefined();
   });
 
+  describe('empty selectedActions', () => {
+    const eventsSpecFields: Partial<ConnectorSpec> = {
+      events: {
+        definitions: {
+          received: {
+            eventId: 'dualConnector.received',
+            title: 'Received',
+            description: 'Inbound event',
+            eventSchema: z4.object({ body: z4.unknown() }),
+          },
+        },
+        handleEvents: async () => ({ type: 'emit' as const, events: [] }),
+      },
+    };
+
+    it('allows no selected actions for a connector that receives events', () => {
+      const connectorType = createConnectorTypeFromSpec(
+        createMockSpec(eventsSpecFields),
+        mockActionsPlugin
+      );
+
+      expect(() =>
+        validateConfig(
+          connectorType,
+          { selectedActions: [] },
+          { configurationUtilities: mockActionsConfigUtils }
+        )
+      ).not.toThrow();
+    });
+
+    it('rejects no selected actions for a connector without events', () => {
+      const connectorType = createConnectorTypeFromSpec(createMockSpec(), mockActionsPlugin);
+
+      expect(() =>
+        validateConfig(
+          connectorType,
+          { selectedActions: [] },
+          { configurationUtilities: mockActionsConfigUtils }
+        )
+      ).toThrow('selectedActions must include at least one action when set.');
+    });
+  });
+
   it('omits the connector validator when the spec has no validateConnector', () => {
     const connectorType = createConnectorTypeFromSpec(createMockSpec(), mockActionsPlugin);
 

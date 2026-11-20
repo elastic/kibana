@@ -109,8 +109,15 @@ function getIconFromSpec(spec: ConnectorSpecResponse): IconType {
 
 const NO_AUTH_TYPE_ID = 'none';
 
+/**
+ * Whether the action selection is an empty custom list the form should reject. With Run actions
+ * off (auth type none), the form saves no actions on purpose.
+ */
+export const isMissingSelectedActions = (selectedActions: unknown, authType: unknown): boolean =>
+  authType !== NO_AUTH_TYPE_ID && Array.isArray(selectedActions) && selectedActions.length === 0;
+
 /** Hides one auth type option from the form's auth picker. */
-const hideAuthTypeInPicker = (schema: ConnectorZodSchema, authTypeId: string): void => {
+export const hideAuthTypeInPicker = (schema: ConnectorZodSchema, authTypeId: string): void => {
   const { secrets } = schema.shape;
   if (!('options' in secrets)) {
     return;
@@ -209,11 +216,8 @@ export function transformSpecToActionTypeModel(
                 defaultValue: null,
                 validations: [
                   {
-                    // With Run actions off, the form saves no actions on purpose.
                     validator: ({ value, form }) =>
-                      form.getFields()['secrets.authType']?.value !== NO_AUTH_TYPE_ID &&
-                      Array.isArray(value) &&
-                      (value as string[]).length === 0
+                      isMissingSelectedActions(value, form.getFields()['secrets.authType']?.value)
                         ? {
                             message: i18n.translate(
                               'alertsUIShared.connectorActionSelector.emptySelectionError',

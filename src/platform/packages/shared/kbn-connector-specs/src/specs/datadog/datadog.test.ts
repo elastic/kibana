@@ -83,6 +83,14 @@ describe('Datadog', () => {
     expect(types).toContain('none');
   });
 
+  it('should only allow no authentication with every action turned off', () => {
+    expect(Datadog.validateConnector?.({ selectedActions: [] }, { authType: 'none' })).toBeNull();
+    expect(
+      Datadog.validateConnector?.({ selectedActions: ['listMonitors'] }, { authType: 'none' })
+    ).toContain('can only receive events');
+    expect(Datadog.validateConnector?.({}, { authType: 'basic' })).toBeNull();
+  });
+
   it('should keep test.enabled true', () => {
     expect(Datadog.test?.enabled).toBe(true);
   });

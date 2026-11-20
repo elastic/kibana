@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { httpServiceMock, docLinksServiceMock } from '@kbn/core/public/mocks';
-import { connectorsSpecs } from '@kbn/connector-specs';
+import { connectorsSpecs, fromConnectorSpecSchema, getMeta } from '@kbn/connector-specs';
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import type { ConnectorSpecWireResponse } from '../apis/fetch_connector_spec';
 import {
   fetchConnectorSpec,
+  hideAuthTypeInPicker,
+  isMissingSelectedActions,
   transformSpecToActionTypeModel,
   type ConnectorSpecResponse,
 } from './action_type_model_utils';
@@ -318,6 +320,50 @@ describe('action_type_model_utils', () => {
         secrets: { apiKey: 'secret' },
       };
       expect(deserializer?.(noAuthInConfig)).toEqual(noAuthInConfig);
+    });
+  });
+
+  describe('hideAuthTypeInPicker', () => {
+    const getAuthOptionMeta = (schema: ReturnType<typeof fromConnectorSpecSchema>) => {
+      const secrets = schema?.shape.secrets as unknown as {
+        options: Array<{ shape: { authType: { value: string } } }>;
+      };
+      return Object.fromEntries(
+        secrets.options.map((option) => [
+          option.shape.authType.value,
+          getMeta(option as never) as Record<string, unknown>,
+        ])
+      );
+    };
+
+    it('marks only the given auth type as hidden in the picker', () => {
+      const schema = fromConnectorSpecSchema(
+        serializeConnectorSpec(connectorsSpecs.Datadog).schema
+      );
+      if (schema === undefined) {
+        throw new Error('Expected the Datadog spec schema to parse');
+      }
+
+      hideAuthTypeInPicker(schema, 'none');
+
+      const metaByAuthType = getAuthOptionMeta(schema);
+      expect(metaByAuthType.none.hideInPicker).toBe(true);
+      expect(metaByAuthType.basic.hideInPicker).toBeUndefined();
+    });
+  });
+
+  describe('isMissingSelectedActions', () => {
+    it('rejects an empty custom selection when the connector has credentials', () => {
+      expect(isMissingSelectedActions([], 'basic')).toBe(true);
+    });
+
+    it('allows an empty selection while auth is none', () => {
+      expect(isMissingSelectedActions([], 'none')).toBe(false);
+    });
+
+    it('allows All and non-empty selections', () => {
+      expect(isMissingSelectedActions(null, 'basic')).toBe(false);
+      expect(isMissingSelectedActions(['listMonitors'], 'basic')).toBe(false);
     });
   });
 
