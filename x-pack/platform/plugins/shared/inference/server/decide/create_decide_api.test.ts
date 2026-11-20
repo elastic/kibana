@@ -296,6 +296,26 @@ describe('createDecideApi', () => {
     expect(transportRequest).not.toHaveBeenCalled();
   });
 
+  it('throws an aborted error when masking fails after the caller aborted', async () => {
+    const { decide, regexWorker, transportRequest } = setup({ anonymizationRules: [emailRule] });
+    const controller = new AbortController();
+
+    jest.mocked(regexWorker.run).mockImplementation(async () => {
+      controller.abort();
+      throw new Error('regex failed');
+    });
+
+    const error = await decide({
+      input: 'Ask claudia@example.com',
+      inferenceId: 'my-decision',
+      abortSignal: controller.signal,
+      questions: [shouldRespond],
+    }).catch((thrown) => thrown);
+
+    expect(isInferenceRequestAbortedError(error)).toBe(true);
+    expect(transportRequest).not.toHaveBeenCalled();
+  });
+
   it('passes the abort signal to Elasticsearch and throws an aborted error when it fires', async () => {
     const { decide, transportRequest } = setup();
     const controller = new AbortController();

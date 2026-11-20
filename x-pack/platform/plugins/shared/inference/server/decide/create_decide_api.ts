@@ -51,12 +51,12 @@ const toInferenceError = ({
   error: Error;
   options: DecideOptions;
 }): Error => {
-  if (isInferenceError(error)) {
-    return error;
-  }
-
   if (abortSignal?.aborted || error instanceof errors.RequestAbortedError) {
     return createInferenceRequestAbortedError();
+  }
+
+  if (isInferenceError(error)) {
+    return error;
   }
 
   if (error instanceof errors.ResponseError) {
