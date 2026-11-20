@@ -1608,8 +1608,9 @@ describe('ai indices routes', () => {
       expect(esEsqlQuery.mock.calls[1][0].query).toContain(
         'FROM "ai-index-ds-customer_support" METADATA _id, _index'
       );
-      const [[{ body }]] = response.ok.mock.calls;
-      expect(body.buckets).toHaveLength(30);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { buckets: expect.objectContaining({ length: 30 }) },
+      });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({ action: 'ai_index_list', outcome: 'success' }),
