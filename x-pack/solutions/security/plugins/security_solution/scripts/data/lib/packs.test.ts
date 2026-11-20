@@ -359,10 +359,10 @@ describe.each([
   {
     packId: 'okta',
     pinnedHost: 'ADMIN-WS02',
-    // it-admin@corp.example also has a legitimate, differently-sourced session (192.0.2.10)
+    // it-admin@corp.example.cloud also has a legitimate, differently-sourced session (192.0.2.10)
     // earlier in the story; only the takeover-IP actions get the host pin.
     matches: (doc: Record<string, unknown>) =>
-      (doc.user as { name?: string } | undefined)?.name === 'it-admin@corp.example' &&
+      (doc.user as { name?: string } | undefined)?.name === 'it-admin@corp.example.cloud' &&
       (doc.source as { ip?: string } | undefined)?.ip === '192.0.2.50',
     expectedCount: 7,
   },

@@ -36,6 +36,7 @@ import {
   THREAT_INTEL_SOURCES_INDEX,
   THREAT_REPORTS_INDEX,
 } from './threat_intel_fixtures';
+import { isHuntEligibleIoc, isPlaceholderEmailIoc } from '@kbn/alertzero-common';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -440,6 +441,22 @@ describe('resolveHistoricThreatIntelWindow', () => {
 });
 
 describe('pack TI join contract', () => {
+  it('keeps every seeded email join IOC off the placeholder-email rule so seeded hunts stay eligible', () => {
+    const emails = Object.values(PACK_TI_SCENARIOS)
+      .flat()
+      .flatMap((scenario) => scenario.joinIocs)
+      .filter((ioc) => ioc.type === 'email');
+    expect(emails.length).toBeGreaterThan(0);
+
+    const offenders = emails
+      .filter(
+        (ioc) =>
+          isPlaceholderEmailIoc(ioc) || !isHuntEligibleIoc({ type: ioc.type, value: ioc.value })
+      )
+      .map((ioc) => ioc.value);
+    expect(offenders).toEqual([]);
+  });
+
   it('places every env-bound join IOC on mustard hunt ECS fields after pack enrich', async () => {
     const missing: string[] = [];
 
@@ -756,7 +773,7 @@ describe('aws-iam-clean scenario', () => {
       expect(doc.extracted?.iocs).toEqual([
         { type: 'ip', value: '203.0.113.60', defanged: '203[.]0[.]113[.]60' },
         { type: 'ip', value: '203.0.113.61', defanged: '203[.]0[.]113[.]61' },
-        { type: 'email', value: 'signin-watch@lab-demo.test' },
+        { type: 'email', value: 'signin-watch@lab-demo.elastic.dev' },
       ]);
       expect(doc.extracted?.threat_actors).toBeUndefined();
       expect(doc.extracted?.diamond).toBeUndefined();

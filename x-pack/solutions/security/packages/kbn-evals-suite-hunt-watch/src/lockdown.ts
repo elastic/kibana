@@ -32,7 +32,7 @@ export const FORBIDDEN_LITERALS: ReadonlyArray<string | RegExp> = [
   /192\.0\.2\.\d+/,
   /198\.51\.100\.\d+/,
   /203\.0\.113\.\d+/,
-  /[a-z0-9-]+@corp\.example/,
+  /[a-z0-9-]+@corp\.example\.cloud/,
   'dev-user',
   'dev-contractor-42',
   'escalated-role',

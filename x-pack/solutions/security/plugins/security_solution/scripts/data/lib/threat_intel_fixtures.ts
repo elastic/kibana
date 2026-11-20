@@ -272,7 +272,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         'Operators linked to a LAPSUS$-style identity campaign are actively abusing stolen Okta ' +
         'sessions from Russian IP 192[.]0[.]2[.]50 (192.0.2.50) against production tenants. They are ' +
         'resetting passwords, stripping MFA (user.mfa.factor.deactivate), and granting Super Admin to ' +
-        'finance and IT accounts including cfo@corp.example and it-admin@corp.example. Immediate ' +
+        'finance and IT accounts including cfo@corp.example.cloud and it-admin@corp.example.cloud. Immediate ' +
         'business impact includes system.api_token.create and privileged app group membership while ' +
         'payroll and ERP SSO remain exposed. The Super Admin grant and the API token creation both ' +
         "landed from it-admin's workstation ADMIN-WS02, where explorer.exe launched powershell.exe, " +
@@ -286,7 +286,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           title: 'Follow-up: Okta session replay still tied to finance SSO abuse',
           body:
             'A follow-up bulletin revisits stolen Okta sessions from 192[.]0[.]2[.]50 (192.0.2.50) ' +
-            'where operators continue targeting cfo@corp.example and it-admin@corp.example. Watch for ' +
+            'where operators continue targeting cfo@corp.example.cloud and it-admin@corp.example.cloud. Watch for ' +
             'user.mfa.factor.deactivate ahead of Super Admin grants and api token creation, both ' +
             'issued from workstation ADMIN-WS02, where powershell.exe spawned curl.exe to replay the ' +
             'session (T1059.001). Prior detections still map to ATT&CK T1078.004, ' +
@@ -297,7 +297,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           body:
             'Campaign analysts catalogued MFA strip sequences (user.mfa.factor.deactivate) before ' +
             'privileged role changes. Related infrastructure includes 192[.]0[.]2[.]50 (192.0.2.50) and ' +
-            'mailbox pivots into cfo@corp.example plus it-admin@corp.example, whose workstation ' +
+            'mailbox pivots into cfo@corp.example.cloud plus it-admin@corp.example.cloud, whose workstation ' +
             'ADMIN-WS02 issued the role change after powershell.exe spawned curl.exe against the ' +
             'Okta admin API (T1059.001). Map hunts to T1078.004, T1556, T1098, and T1136.003 ' +
             'when reviewing Okta admin audit trails.',
@@ -306,7 +306,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           title: 'Okta tenant hardening advisory after Russian IP session theft',
           body:
             'Hardening guidance after session theft from Russian IP space 192[.]0[.]2[.]50 (192.0.2.50). ' +
-            'Validate that cfo@corp.example and it-admin@corp.example cannot receive Super Admin without ' +
+            'Validate that cfo@corp.example.cloud and it-admin@corp.example.cloud cannot receive Super Admin without ' +
             'break-glass review, and alert on user.mfa.factor.deactivate from workstation ADMIN-WS02, ' +
             'including powershell.exe launching curl.exe (T1059.001). ' +
             'Coverage should include T1078.004, T1556, T1098, and T1136.003 across identity telemetry.',
@@ -315,7 +315,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           title: 'Threat research: LAPSUS$-style Okta privilege chains in enterprise tenants',
           body:
             'Research summary of LAPSUS$-style Okta privilege chains using 192[.]0[.]2[.]50 (192.0.2.50). ' +
-            'Observed mailbox and admin targets include cfo@corp.example and it-admin@corp.example, ' +
+            'Observed mailbox and admin targets include cfo@corp.example.cloud and it-admin@corp.example.cloud, ' +
             'operating from workstation ADMIN-WS02, where powershell.exe spawns curl.exe to reuse the ' +
             'session, with user.mfa.factor.deactivate as an early signal. ' +
             'Technique coverage: T1078.004, T1556, T1098, T1136.003, and T1059.001.',
@@ -324,8 +324,8 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           title: 'Okta API token creation spikes after stolen session reuse',
           body:
             'Operators reusing stolen sessions from 192[.]0[.]2[.]50 (192.0.2.50) were seen creating API ' +
-            'tokens from workstation ADMIN-WS02 after elevating cfo@corp.example and ' +
-            'it-admin@corp.example, driving the admin API with powershell.exe and curl.exe. ' +
+            'tokens from workstation ADMIN-WS02 after elevating cfo@corp.example.cloud and ' +
+            'it-admin@corp.example.cloud, driving the admin API with powershell.exe and curl.exe. ' +
             'Correlate user.mfa.factor.deactivate with Super Admin membership ' +
             'changes. Hunt ATT&CK T1078.004, T1556, T1098, T1136.003, and T1059.001 in okta.system logs.',
         },
@@ -333,7 +333,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           title: 'Detection coverage refresh for Okta Super Admin and MFA disable events',
           body:
             'Detection engineering refresh for Okta Super Admin abuse. Seed hunts with IP ' +
-            '192[.]0[.]2[.]50 (192.0.2.50), users cfo@corp.example and it-admin@corp.example, ' +
+            '192[.]0[.]2[.]50 (192.0.2.50), users cfo@corp.example.cloud and it-admin@corp.example.cloud, ' +
             'workstation ADMIN-WS02, the powershell.exe to curl.exe chain, and ' +
             'user.mfa.factor.deactivate. Retain ATT&CK mappings ' +
             'T1078.004, T1556, T1098, T1136.003, and T1059.001 for identity takeover playbooks.',
@@ -347,8 +347,8 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       articleUrl: 'https://www.elastic.co/security-labs/okta-and-lapsus-what-you-need-to-know',
       joinIocs: [
         { type: 'ip', value: '192.0.2.50', defanged: '192[.]0[.]2[.]50' },
-        { type: 'email', value: 'cfo@corp.example' },
-        { type: 'email', value: 'it-admin@corp.example' },
+        { type: 'email', value: 'cfo@corp.example.cloud' },
+        { type: 'email', value: 'it-admin@corp.example.cloud' },
       ],
       narrative: [
         'user.mfa.factor.deactivate',
@@ -377,7 +377,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         // Keep campaign/actor language explicit so enrich_taxonomy marks diamond_suitable.
         'Security researchers attribute a confirmed privilege-escalation campaign in AWS account ' +
         '123456789012 to the TA-DEMO-SHADOW-ADMIN intrusion set. Operators tied to TA-DEMO-SHADOW-ADMIN ' +
-        'compromised user dev-user@corp.example (source IP 192[.]0[.]2[.]30 / 192.0.2.30), ' +
+        'compromised user dev-user@corp.example.cloud (source IP 192[.]0[.]2[.]30 / 192.0.2.30), ' +
         'called sts.AssumeRole (event.provider sts.amazonaws.com, aws.cloudtrail.event_name AssumeRole) ' +
         'into escalated-role (ATT&CK T1078.004), attached AdministratorAccess, and staged access toward S3 ' +
         'bucket corp-prod-data. Follow-on activity from 192[.]0[.]2[.]31 (192.0.2.31) included GetSecretValue ' +
@@ -394,7 +394,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             // Keep the anchored actor name in this slot's body directly (mirrors scenario.body) so
             // enrich_taxonomy's diamond_suitable gate fires on the historic-01 doc, not just the live twin.
             'Retrospective for AWS account 123456789012 attributed to the TA-DEMO-SHADOW-ADMIN intrusion set, ' +
-            'where user dev-user (dev-user@corp.example) from ' +
+            'where user dev-user (dev-user@corp.example.cloud) from ' +
             '192[.]0[.]2[.]30 (192.0.2.30) called sts.AssumeRole (event.provider sts.amazonaws.com) into ' +
             'escalated-role (T1078.004), attached AdministratorAccess, and later reached bucket corp-prod-data. ' +
             'Secondary IP 192[.]0[.]2[.]31 (192.0.2.31) called GetSecretValue on prod/db-credentials and ' +
@@ -406,7 +406,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           body:
             'After privilege escalation in 123456789012, analysts saw GetSecretValue on ' +
             'prod/db-credentials from 192[.]0[.]2[.]31 (192.0.2.31) following sts.AssumeRole ' +
-            '(sts.amazonaws.com / AssumeRole, T1078.004) by dev-user@corp.example (dev-user) into ' +
+            '(sts.amazonaws.com / AssumeRole, T1078.004) by dev-user@corp.example.cloud (dev-user) into ' +
             'escalated-role at 192[.]0[.]2[.]30 (192.0.2.30). AdministratorAccess and StopLogging ' +
             '(T1562.008) preceded S3 staging on corp-prod-data. Run distinct hunts for T1078.004 and ' +
             'T1562.008; note T1098.001.',
@@ -416,7 +416,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           body:
             'Defense-evasion note for account 123456789012. Operators used StopLogging (T1562.008, ' +
             'event.action StopLogging) after sts.AssumeRole (T1078.004, event.provider sts.amazonaws.com) ' +
-            'into escalated-role and AdministratorAccess attach by dev-user / dev-user@corp.example from ' +
+            'into escalated-role and AdministratorAccess attach by dev-user / dev-user@corp.example.cloud from ' +
             '192[.]0[.]2[.]30 (192.0.2.30), with follow-on 192[.]0[.]2[.]31 (192.0.2.31) against ' +
             'prod/db-credentials and corp-prod-data. Prefer two ES|QL hunts: AssumeRole for T1078.004 and ' +
             'StopLogging for T1562.008. Also T1098.001.',
@@ -426,7 +426,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           body:
             'Playbook covering sts.AssumeRole (sts.amazonaws.com) into escalated-role in 123456789012 ' +
             'for T1078.004, plus StopLogging (T1562.008) after escalation. Seed with ' +
-            'dev-user@corp.example (dev-user), source IPs 192[.]0[.]2[.]30 (192.0.2.30) and ' +
+            'dev-user@corp.example.cloud (dev-user), source IPs 192[.]0[.]2[.]30 (192.0.2.30) and ' +
             '192[.]0[.]2[.]31 (192.0.2.31), AdministratorAccess attach, corp-prod-data access, ' +
             'prod/db-credentials reads. ATT&CK: T1078.004, T1562.008, T1098.001.',
         },
@@ -434,7 +434,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           title: 'S3 staging indicators after credential theft in AWS account 123456789012',
           body:
             'S3 staging indicators for corp-prod-data in account 123456789012 following credential ' +
-            'theft by dev-user@corp.example (dev-user), who used sts.AssumeRole (T1078.004) to reach ' +
+            'theft by dev-user@corp.example.cloud (dev-user), who used sts.AssumeRole (T1078.004) to reach ' +
             'escalated-role. Ingress IPs 192[.]0[.]2[.]30 (192.0.2.30) and 192[.]0[.]2[.]31 (192.0.2.31) ' +
             'align with AdministratorAccess, GetSecretValue on prod/db-credentials, and StopLogging ' +
             '(T1562.008). Cover T1078.004 and T1562.008 as primary CloudTrail hunts; also T1098.001.',
@@ -443,7 +443,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           title: 'AWS privilege-escalation IOC refresh for CloudTrail monitoring teams',
           body:
             'IOC refresh for CloudTrail monitors in 123456789012: 192[.]0[.]2[.]30 (192.0.2.30), ' +
-            '192[.]0[.]2[.]31 (192.0.2.31), dev-user@corp.example, short name dev-user, sts.AssumeRole ' +
+            '192[.]0[.]2[.]31 (192.0.2.31), dev-user@corp.example.cloud, short name dev-user, sts.AssumeRole ' +
             '(sts.amazonaws.com) into escalated-role for T1078.004, AdministratorAccess, corp-prod-data, ' +
             'prod/db-credentials, and StopLogging for T1562.008. Keep hunts aligned to T1078.004, ' +
             'T1562.008, and T1098.001.',
@@ -453,7 +453,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       joinIocs: [
         { type: 'ip', value: '192.0.2.30', defanged: '192[.]0[.]2[.]30' },
         { type: 'ip', value: '192.0.2.31', defanged: '192[.]0[.]2[.]31' },
-        { type: 'email', value: 'dev-user@corp.example' },
+        { type: 'email', value: 'dev-user@corp.example.cloud' },
         { type: 'user', value: 'dev-user' },
       ],
       narrative: [
@@ -516,7 +516,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         // Endpoint-led story (distinct from the primary aws-iam scenario's CloudTrail framing):
         // hunts the powershell.exe -> aws.exe process chain on WIN-ANALYST01 as the leading
         // indicator, with the resulting sts.AssumeRole call as confirmation.
-        'Endpoint telemetry on WIN-ANALYST01 shows dev-user (dev-user@corp.example), working from ' +
+        'Endpoint telemetry on WIN-ANALYST01 shows dev-user (dev-user@corp.example.cloud), working from ' +
         '192[.]0[.]2[.]30 (192.0.2.30) and 192[.]0[.]2[.]31 (192.0.2.31), launching powershell.exe, ' +
         'which spawns aws.exe to issue sts.AssumeRole into escalated-role within AWS account ' +
         '123456789012. Analysts attribute the activity to the TA-DEMO-SHADOW-ADMIN intrusion set. ' +
@@ -531,7 +531,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             // Keep the anchored actor name in this slot's body directly (mirrors scenario.body) so
             // enrich_taxonomy's diamond_suitable gate fires on the historic-01 doc, not just the live twin.
             'A follow-up note attributed to the TA-DEMO-SHADOW-ADMIN intrusion set describes dev-user ' +
-            '(dev-user@corp.example) at 192[.]0[.]2[.]30 (192.0.2.30) and 192[.]0[.]2[.]31 ' +
+            '(dev-user@corp.example.cloud) at 192[.]0[.]2[.]30 (192.0.2.30) and 192[.]0[.]2[.]31 ' +
             '(192.0.2.31) running powershell.exe on WIN-ANALYST01, which spawns aws.exe to call ' +
             'sts.AssumeRole into escalated-role in account 123456789012. Hunt the powershell.exe -> ' +
             'aws.exe chain (T1059.001) on WIN-ANALYST01 ahead of the AssumeRole call (T1078.004).',
@@ -541,7 +541,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           body:
             'Retrospective on WIN-ANALYST01 covering powershell.exe spawning aws.exe to escalate ' +
             'dev-user into escalated-role in account 123456789012. Source IPs 192[.]0[.]2[.]30 ' +
-            '(192.0.2.30) and 192[.]0[.]2[.]31 (192.0.2.31) align with dev-user@corp.example. ' +
+            '(192.0.2.30) and 192[.]0[.]2[.]31 (192.0.2.31) align with dev-user@corp.example.cloud. ' +
             'Technique: T1059.001 for the process chain, T1078.004 for the resulting AssumeRole.',
         },
         {
@@ -549,7 +549,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           body:
             'Playbook update for WIN-ANALYST01: watch for powershell.exe launching aws.exe ahead of ' +
             'sts.AssumeRole into escalated-role in account 123456789012. Seed with ' +
-            'dev-user@corp.example (dev-user), source IPs 192[.]0[.]2[.]30 (192.0.2.30) and ' +
+            'dev-user@corp.example.cloud (dev-user), source IPs 192[.]0[.]2[.]30 (192.0.2.30) and ' +
             '192[.]0[.]2[.]31 (192.0.2.31). ATT&CK: T1059.001, T1078.004.',
         },
         {
@@ -559,14 +559,14 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             'Telemetry refresh for WIN-ANALYST01 reminding hunters that powershell.exe spawning ' +
             'aws.exe (T1059.001) toward escalated-role in account 123456789012 precedes the ' +
             'sts.AssumeRole call (T1078.004): 192[.]0[.]2[.]30 (192.0.2.30), 192[.]0[.]2[.]31 ' +
-            '(192.0.2.31), dev-user@corp.example, short name dev-user.',
+            '(192.0.2.31), dev-user@corp.example.cloud, short name dev-user.',
         },
       ],
       articleUrl: 'https://www.elastic.co/security-labs/exploring-aws-sts-assumeroot',
       joinIocs: [
         { type: 'ip', value: '192.0.2.30', defanged: '192[.]0[.]2[.]30' },
         { type: 'ip', value: '192.0.2.31', defanged: '192[.]0[.]2[.]31' },
-        { type: 'email', value: 'dev-user@corp.example' },
+        { type: 'email', value: 'dev-user@corp.example.cloud' },
         { type: 'user', value: 'dev-user' },
       ],
       narrative: [
@@ -624,7 +624,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         // IOC digest without CloudTrail API/behavior hunt language so Tier 2 should not execute-hit.
         'This IOC digest lists infrastructure previously observed near AWS account 123456789012 for ' +
         'monitoring coverage. Track source IPs 192[.]0[.]2[.]30 (192.0.2.30) and 192[.]0[.]2[.]31 ' +
-        '(192.0.2.31), mailbox and short name for user dev-user@corp.example (dev-user), and related ' +
+        '(192.0.2.31), mailbox and short name for user dev-user@corp.example.cloud (dev-user), and related ' +
         'account identifiers. Apply as watchlist / indicator matching guidance only. This write-up does ' +
         'not describe API call sequences, role-assumption tradecraft, logging changes, or ATT&CK technique ' +
         'hunts, and it does not assert that customer production is under active compromise.',
@@ -633,14 +633,14 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           title: 'Watchlist refresh: ingress IPs for account 123456789012',
           body:
             'Watchlist refresh for AWS account 123456789012 covering ingress IPs 192[.]0[.]2[.]30 ' +
-            '(192.0.2.30) and 192[.]0[.]2[.]31 (192.0.2.31) plus mailbox dev-user@corp.example and ' +
+            '(192.0.2.30) and 192[.]0[.]2[.]31 (192.0.2.31) plus mailbox dev-user@corp.example.cloud and ' +
             'short name dev-user. Use for indicator matching and enrichment only.',
         },
         {
           title: 'Indicator bulletin: mailbox and IP join keys near 123456789012',
           body:
             'Indicator bulletin listing join keys near account 123456789012: 192[.]0[.]2[.]30 (192.0.2.30), ' +
-            '192[.]0[.]2[.]31 (192.0.2.31), and dev-user@corp.example (dev-user). No behavioral playbook ' +
+            '192[.]0[.]2[.]31 (192.0.2.31), and dev-user@corp.example.cloud (dev-user). No behavioral playbook ' +
             'is included in this digest.',
         },
         {
@@ -648,12 +648,12 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           body:
             'Network IOC note for enrichment teams: associate 192[.]0[.]2[.]30 (192.0.2.30) and ' +
             '192[.]0[.]2[.]31 (192.0.2.31) with identity context for 123456789012 and ' +
-            'dev-user@corp.example (dev-user) when pivoting historical telemetry.',
+            'dev-user@corp.example.cloud (dev-user) when pivoting historical telemetry.',
         },
         {
           title: 'Identity indicator card: dev-user near account 123456789012',
           body:
-            'Identity indicator card for short name dev-user / mailbox dev-user@corp.example near ' +
+            'Identity indicator card for short name dev-user / mailbox dev-user@corp.example.cloud near ' +
             'AWS account 123456789012. Correlate with previously listed IPs 192[.]0[.]2[.]30 (192.0.2.30) ' +
             'and 192[.]0[.]2[.]31 (192.0.2.31) for watchlisting.',
         },
@@ -662,11 +662,11 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       joinIocs: [
         { type: 'ip', value: '192.0.2.30', defanged: '192[.]0[.]2[.]30' },
         { type: 'ip', value: '192.0.2.31', defanged: '192[.]0[.]2[.]31' },
-        { type: 'email', value: 'dev-user@corp.example' },
+        { type: 'email', value: 'dev-user@corp.example.cloud' },
         { type: 'user', value: 'dev-user' },
       ],
       // Intentionally omit CloudTrail API / ATT&CK tokens so Tier 2 lacks executable evidence quotes.
-      narrative: ['123456789012', 'dev-user@corp.example', 'dev-user'],
+      narrative: ['123456789012', 'dev-user@corp.example.cloud', 'dev-user'],
       tags: ['threat-intel', 'pack:aws-iam', 'aws', 'cloud-security', 'ioc-only'],
       mitre: [],
       categories: ['cloud-security', 'insider-threat'],
@@ -690,7 +690,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         'within AWS account 123456789012 (ATT&CK T1078.004) without publishing the production ' +
         'ingress IPs used in the live environment. The write-up cites placeholder research ' +
         'indicators 198[.]51[.]100[.]40 (198.51.100.40) and 198[.]51[.]100[.]41 (198.51.100.41) ' +
-        'plus analyst mailbox research-analyst@lab.example so article parsers still see IP join ' +
+        'plus analyst mailbox research-analyst@lab.example.dev so article parsers still see IP join ' +
         'IOCs, but those values are not present in seeded CloudTrail. Hunt the AssumeRole ' +
         'behavior itself (event.action / aws.cloudtrail.event_name AssumeRole, event.provider ' +
         'sts.amazonaws.com) toward escalated-role and host WIN-ANALYST01 rather than matching ' +
@@ -701,7 +701,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           body:
             'Behavior note for account 123456789012 covering sts.AssumeRole into escalated-role ' +
             '(T1078.004). Placeholder research IPs 198[.]51[.]100[.]40 (198.51.100.40) and ' +
-            '198[.]51[.]100[.]41 (198.51.100.41) plus research-analyst@lab.example appear for ' +
+            '198[.]51[.]100[.]41 (198.51.100.41) plus research-analyst@lab.example.dev appear for ' +
             'article parsing only. Prefer hunting event.provider sts.amazonaws.com and ' +
             'aws.cloudtrail.event_name AssumeRole toward WIN-ANALYST01 over matching those IPs.',
         },
@@ -710,7 +710,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           body:
             'Brief on T1078.004 AssumeRole into escalated-role in 123456789012. Research ' +
             'indicators 198[.]51[.]100[.]40 (198.51.100.40), 198[.]51[.]100[.]41 (198.51.100.41), ' +
-            'and research-analyst@lab.example are narrative-only. Detect via AssumeRole ' +
+            'and research-analyst@lab.example.dev are narrative-only. Detect via AssumeRole ' +
             'behavior fields (event.provider sts.amazonaws.com) and host WIN-ANALYST01.',
         },
         {
@@ -718,7 +718,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           body:
             'Playbook for behavior-first AssumeRole hunts in account 123456789012 when reusable ' +
             'join IOCs are absent. Seed articles may cite 198[.]51[.]100[.]40 (198.51.100.40), ' +
-            '198[.]51[.]100[.]41 (198.51.100.41), and research-analyst@lab.example. Execute ES|QL ' +
+            '198[.]51[.]100[.]41 (198.51.100.41), and research-analyst@lab.example.dev. Execute ES|QL ' +
             'for AssumeRole / escalated-role / WIN-ANALYST01 via event.provider sts.amazonaws.com ' +
             '(T1078.004) instead of those IPs.',
         },
@@ -728,7 +728,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             'Telemetry refresh for account 123456789012 reminding hunters that sts.amazonaws.com ' +
             'AssumeRole events (aws.cloudtrail.event_name) toward escalated-role on WIN-ANALYST01 ' +
             'prove T1078.004 even when article IOCs are placeholders 198[.]51[.]100[.]40 ' +
-            '(198.51.100.40), 198[.]51[.]100[.]41 (198.51.100.41), and research-analyst@lab.example.',
+            '(198.51.100.40), 198[.]51[.]100[.]41 (198.51.100.41), and research-analyst@lab.example.dev.',
         },
       ],
       articleUrl: 'https://www.elastic.co/security-labs/exploring-aws-sts-assumeroot',
@@ -737,7 +737,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         // TEST-NET-2 decoys: required in article bodies, deliberately absent from pack ECS.
         { type: 'ip', value: '198.51.100.40', defanged: '198[.]51[.]100[.]40' },
         { type: 'ip', value: '198.51.100.41', defanged: '198[.]51[.]100[.]41' },
-        { type: 'email', value: 'research-analyst@lab.example' },
+        { type: 'email', value: 'research-analyst@lab.example.dev' },
       ],
       narrative: [
         '123456789012',
@@ -780,7 +780,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         'for console principals treasury-ops, ap-clerk-02, and payroll-batch, one guess per ' +
         'principal per hour, from two source IP addresses: 203[.]0[.]113[.]60 (203.0.113.60) ' +
         'and 203[.]0[.]113[.]61 (203.0.113.61). Direct sign-in questions to ' +
-        'signin-watch@lab-demo.test. No lockout was triggered and the console does not ' +
+        'signin-watch@lab-demo.elastic.dev. No lockout was triggered and the console does not ' +
         'enforce a second factor, so hunters should filter directly on the exact event name ' +
         'ConsoleLogin with a failed outcome, not by service or category. This maps to ATT&CK ' +
         'T1110.003 (password spraying).',
@@ -792,7 +792,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             'eu-central-1. ConsoleLogin failures repeat hourly for console principals ' +
             'treasury-ops, ap-clerk-02, and payroll-batch from two source IP addresses: ' +
             '203[.]0[.]113[.]60 (203.0.113.60) and 203[.]0[.]113[.]61 (203.0.113.61). Direct ' +
-            'sign-in questions to signin-watch@lab-demo.test. Hunters should filter on the ' +
+            'sign-in questions to signin-watch@lab-demo.elastic.dev. Hunters should filter on the ' +
             'exact event name ConsoleLogin with a failed outcome, not by service or category. ' +
             'Maps to ATT&CK T1110.003.',
         },
@@ -803,7 +803,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             '210987654321 continue to target console principals treasury-ops, ap-clerk-02, ' +
             'and payroll-batch. The two source IP addresses observed are ' +
             '203[.]0[.]113[.]60 (203.0.113.60) and 203[.]0[.]113[.]61 (203.0.113.61); contact ' +
-            'signin-watch@lab-demo.test with fresh sign-in reports. Filter on the exact event ' +
+            'signin-watch@lab-demo.elastic.dev with fresh sign-in reports. Filter on the exact event ' +
             'name ConsoleLogin with a failed outcome, not by service or category, to hunt the ' +
             'T1110.003 pattern.',
         },
@@ -814,7 +814,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             'and ap-clerk-02, plus payroll-batch, on AWS account 210987654321 (eu-central-1). ' +
             'ConsoleLogin failed repeatedly from source IP addresses 203[.]0[.]113[.]60 ' +
             '(203.0.113.60) and 203[.]0[.]113[.]61 (203.0.113.61); reach ' +
-            'signin-watch@lab-demo.test with sign-in questions. Filter directly on the exact ' +
+            'signin-watch@lab-demo.elastic.dev with sign-in questions. Filter directly on the exact ' +
             'event name ConsoleLogin with a failed outcome, never by service or category. ' +
             'ATT&CK T1110.003.',
         },
@@ -825,7 +825,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             'T1110.003 activity keeps failing ConsoleLogin sign-ins for console principals ' +
             'treasury-ops, ap-clerk-02, and payroll-batch from 203[.]0[.]113[.]60 ' +
             '(203.0.113.60) and 203[.]0[.]113[.]61 (203.0.113.61). Send sign-in reports to ' +
-            'signin-watch@lab-demo.test. Hunt the exact event name ConsoleLogin with a failed ' +
+            'signin-watch@lab-demo.elastic.dev. Hunt the exact event name ConsoleLogin with a failed ' +
             'outcome, not by service or category.',
         },
       ],
@@ -834,11 +834,12 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       joinIocs: [
         // TEST-NET-3 decoys: required in article bodies, deliberately absent from pack ECS.
         // Distinct range from aws-iam-behavior-only's TEST-NET-2 so the two reports do not
-        // correlate. Email uses the reserved .test TLD, not .example (which is a substring
-        // of seeded dev-user@corp.example and would ground a LIKE "*example*" query).
+        // correlate. Email uses a made-up label under .dev, not the example family: seeded
+        // dev-user@corp.example.cloud contains "example", which would ground a LIKE "*example*"
+        // query. Seed addresses need a real TLD so the placeholder-email rule never matches them.
         { type: 'ip', value: '203.0.113.60', defanged: '203[.]0[.]113[.]60' },
         { type: 'ip', value: '203.0.113.61', defanged: '203[.]0[.]113[.]61' },
-        { type: 'email', value: 'signin-watch@lab-demo.test' },
+        { type: 'email', value: 'signin-watch@lab-demo.elastic.dev' },
       ],
       narrative: [
         '210987654321',
@@ -959,9 +960,9 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       title: 'Recurring contractor IOCs in GitHub supply-chain reporting',
       body:
         'Background research note for situational awareness. Prior public reporting has mentioned ' +
-        'contractor-style accounts such as dev-contractor-42@corp.example (user dev-contractor-42) in ' +
+        'contractor-style accounts such as dev-contractor-42@corp.example.cloud (user dev-contractor-42) in ' +
         'GitHub org corp-example, source IP 192[.]0[.]2[.]70 (192.0.2.70), and invitee ' +
-        'malicious-actor-x@external.example as illustrative indicators. Historical write-ups also ' +
+        'malicious-actor-x@external.example.app as illustrative indicators. Historical write-ups also ' +
         'referenced making corp-example/payment-service public, deploy_key.create, secret-scanning ' +
         "alert dismissals, and fine-grained PATs, all issued from the contractor's build machine " +
         'DEV-BUILD03. No immediate incident response is requested; this catalogs previously reported ' +
@@ -972,7 +973,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           title: 'Supply-chain bulletin: contractor invite patterns in corp-example org',
           body:
             'Bulletin on contractor invites in org corp-example. Watch ' +
-            'dev-contractor-42@corp.example (dev-contractor-42), invitee malicious-actor-x@external.example, ' +
+            'dev-contractor-42@corp.example.cloud (dev-contractor-42), invitee malicious-actor-x@external.example.app, ' +
             'source IP 192[.]0[.]2[.]70 (192.0.2.70), and build machine DEV-BUILD03 near ' +
             'payment-service visibility changes and deploy_key.create. Optional hunts: T1567, T1098, ' +
             'T1195.',
@@ -981,7 +982,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           title: 'GitHub audit revisit: deploy_key.create around payment-service exposure',
           body:
             'Audit revisit for deploy_key.create when corp-example/payment-service exposure coincided ' +
-            'with dev-contractor-42@corp.example (dev-contractor-42) and malicious-actor-x@external.example ' +
+            'with dev-contractor-42@corp.example.cloud (dev-contractor-42) and malicious-actor-x@external.example.app ' +
             'from 192[.]0[.]2[.]70 (192.0.2.70), issued from DEV-BUILD03. Map github.audit to T1567, ' +
             'T1098, and T1195.',
         },
@@ -989,41 +990,41 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           title: 'PAT and secret-scanning dismissal patterns in contractor abuse reporting',
           body:
             'Reporting on fine-grained PATs and secret-scanning dismissals linked to ' +
-            'dev-contractor-42@corp.example (dev-contractor-42) in corp-example, IP ' +
+            'dev-contractor-42@corp.example.cloud (dev-contractor-42) in corp-example, IP ' +
             '192[.]0[.]2[.]70 (192.0.2.70), build machine DEV-BUILD03, and ' +
-            'malicious-actor-x@external.example. payment-service and deploy_key.create remain useful ' +
+            'malicious-actor-x@external.example.app. payment-service and deploy_key.create remain useful ' +
             'pivots for T1567, T1098, T1195.',
         },
         {
           title: 'Org hardening note after public flip of corp-example/payment-service',
           body:
             'Hardening note after corp-example/payment-service was made public. Review activity from ' +
-            'dev-contractor-42@corp.example (dev-contractor-42), malicious-actor-x@external.example, ' +
+            'dev-contractor-42@corp.example.cloud (dev-contractor-42), malicious-actor-x@external.example.app, ' +
             '192[.]0[.]2[.]70 (192.0.2.70), and build machine DEV-BUILD03, including deploy_key.create. ' +
             'Techniques T1567, T1098, T1195.',
         },
         {
           title: 'External invitee tracking for malicious-actor-x across GitHub orgs',
           body:
-            'Invitee tracking for malicious-actor-x@external.example alongside ' +
-            'dev-contractor-42@corp.example (dev-contractor-42) in corp-example. Correlate ' +
+            'Invitee tracking for malicious-actor-x@external.example.app alongside ' +
+            'dev-contractor-42@corp.example.cloud (dev-contractor-42) in corp-example. Correlate ' +
             '192[.]0[.]2[.]70 (192.0.2.70), build machine DEV-BUILD03, payment-service, and ' +
             'deploy_key.create. Hunt T1567, T1098, and T1195 in github.audit.',
         },
         {
           title: 'GitHub supply-chain IOC catalog refresh for optional hunting',
           body:
-            'IOC catalog refresh: 192[.]0[.]2[.]70 (192.0.2.70), dev-contractor-42@corp.example, ' +
-            'dev-contractor-42, malicious-actor-x@external.example, corp-example, payment-service, ' +
+            'IOC catalog refresh: 192[.]0[.]2[.]70 (192.0.2.70), dev-contractor-42@corp.example.cloud, ' +
+            'dev-contractor-42, malicious-actor-x@external.example.app, corp-example, payment-service, ' +
             'DEV-BUILD03, and deploy_key.create. Keep optional hunts on T1567, T1098, and T1195.',
         },
       ],
       articleUrl: 'https://www.elastic.co/security-labs/axios-supply-chain-compromise-detections',
       joinIocs: [
         { type: 'ip', value: '192.0.2.70', defanged: '192[.]0[.]2[.]70' },
-        { type: 'email', value: 'dev-contractor-42@corp.example' },
+        { type: 'email', value: 'dev-contractor-42@corp.example.cloud' },
         { type: 'user', value: 'dev-contractor-42' },
-        { type: 'email', value: 'malicious-actor-x@external.example' },
+        { type: 'email', value: 'malicious-actor-x@external.example.app' },
       ],
       narrative: [
         'corp-example',

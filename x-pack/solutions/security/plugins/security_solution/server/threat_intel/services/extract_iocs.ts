@@ -6,7 +6,7 @@
  */
 
 import { createHash } from 'crypto';
-import { isNonRoutableIPv4 } from '@kbn/alertzero-common';
+import { isNonRoutableIPv4, isPlaceholderEmailHost } from '@kbn/alertzero-common';
 import { type IocType, MAX_URL_LENGTH } from '../../../common/threat_intel';
 import { IANA_TLDS } from '../data/iana_tlds';
 import { IOC_NOISE_DOMAINS } from '../data/ioc_noise_domains';
@@ -90,7 +90,12 @@ export interface ExtractIocsResult {
 // ── Atomic patterns ────────────────────────────────────────────────────────────
 const HASH_PATTERN = /\b([a-f0-9]{32}|[a-f0-9]{40}|[a-f0-9]{64})\b/gi;
 // IPv4 dotted quad with octet bounds; IPv6 left out (false-positive prone).
-const IP_PATTERN = /\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\b/g;
+// Four parts of a longer dotted number are not an address: a quad preceded by a digit and a
+// dot, or followed by a dot and a digit, never matches (`3.0.4.2` inside `<=3.0.4.2.0` is a
+// version, not an IP). A sentence period (`at 185.220.101.4.`) still matches. The packet-capture
+// `host.port` form is the one exception; see `neutralizeCapturePorts`.
+const IP_PATTERN =
+  /(?<!\d\.)\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\b(?!\.\d)/g;
 // Domain: 2+ labels, last label 2+ alpha chars.
 const DOMAIN_PATTERN = /\b(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}\b/gi;
 // The terminal class excludes whitespace, angle brackets, and quotes. Sentence
@@ -202,9 +207,129 @@ const normalizeUrlCase = (url: string): string => {
 // local-part: printable non-whitespace non-@ chars
 const EMAIL_PATTERN = /\b[a-z0-9._%+\-]+@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z]{2,24}\b/gi;
 
-// CIDR: IPv4/mask (defang already applied before this runs)
+// Message-ID headers have the shape of an address (`<20261001.6272F1@mail.lab.test>`) but name
+// a message, not a mailbox. An ID header name is any name ending in message-id, message_id,
+// messageid or msgid (Message-ID, Resent-Message-ID, InternetMessageId, postfix `message-id=`,
+// sendmail `msgid=`), followed by an optional closing quote, `:` or `=`, optional whitespace
+// and an optional opening quote.
+const ID_HEADER_BEFORE_TOKEN = /(?:message[-_]?id|msgid)["']?[ \t]*[:=][ \t]*["']?$/i;
+// A line that is a References or In-Reply-To header and nothing but its bracketed tokens, which
+// are then all message IDs. Reports also use `References:` as a label, so a line with any other
+// text (`References: reported by <actor@evil.com>`) is not one. A line starts at the start of
+// the text or after `\n`.
+const ID_LIST_HEADER_LINE =
+  /(?<![^\n])[ \t]*(?:in-reply-to|references)[ \t]*:[ \t]*(?:<[^<>\s]+>[ \t\r,]*)+(?![^\n])/gi;
+// An ID token and the header name before it are short, so only this much text on either side of
+// a match is read (998 is the RFC 5322 line limit). The report text is untrusted and the check
+// runs once per email match, so reading the whole line would be quadratic on one long line.
+const MAX_ID_TOKEN_CONTEXT_CHARS = 998;
+
+/** Every ID list header line, in text order. One linear scan per extraction. */
+const collectIdListHeaderLines = (text: string): Span[] => {
+  const pattern = new RegExp(ID_LIST_HEADER_LINE.source, ID_LIST_HEADER_LINE.flags);
+  const lines: Span[] = [];
+  for (const match of matchesWithOffset(text, pattern)) {
+    lines.push([match.index, match.index + match[0].length]);
+  }
+  return lines;
+};
+
+/** True when `offset` is inside one of `spans`, which are sorted and do not overlap. */
+const isInsideSortedSpans = (spans: readonly Span[], offset: number): boolean => {
+  let low = 0;
+  let high = spans.length - 1;
+  while (low <= high) {
+    const middle = Math.floor((low + high) / 2);
+    const [spanStart, spanEnd] = spans[middle];
+    if (offset < spanStart) {
+      high = middle - 1;
+    } else if (offset >= spanEnd) {
+      low = middle + 1;
+    } else {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * True when the email match at `[start, end)` sits inside a token a mail Message-ID header
+ * introduces. Same line only: a folded header whose ID is on the next line is not recognized.
+ * The check runs on the enclosing `<...>` or `"..."` token, not on the match, because an ID
+ * local part can hold characters EMAIL_PATTERN stops at (`=`), so the match may start mid-token.
+ * The token is found from the nearest bracket or quote on each side, never by counting quotes
+ * back to the line start, so the result does not depend on where the window begins.
+ */
+const isMessageIdToken = (
+  text: string,
+  start: number,
+  end: number,
+  idListHeaderLines: readonly Span[]
+): boolean => {
+  const lookBehind = text.slice(Math.max(0, start - MAX_ID_TOKEN_CONTEXT_CHARS), start);
+  const before = lookBehind.slice(lookBehind.lastIndexOf('\n') + 1);
+  const lookAhead = text.slice(end, end + MAX_ID_TOKEN_CONTEXT_CHARS);
+  const newlineAfter = lookAhead.indexOf('\n');
+  const after = newlineAfter === -1 ? lookAhead : lookAhead.slice(0, newlineAfter);
+
+  const lt = before.lastIndexOf('<');
+  if (lt > before.lastIndexOf('>') && after.includes('>')) {
+    return (
+      ID_HEADER_BEFORE_TOKEN.test(before.slice(0, lt)) ||
+      isInsideSortedSpans(idListHeaderLines, start)
+    );
+  }
+
+  // A quoted token: the nearest quote on each side, with no whitespace between it and the match.
+  const openingQuote = before.lastIndexOf('"');
+  const closingQuote = after.indexOf('"');
+  return (
+    openingQuote !== -1 &&
+    closingQuote !== -1 &&
+    !/\s/.test(before.slice(openingQuote + 1)) &&
+    !/\s/.test(after.slice(0, closingQuote)) &&
+    ID_HEADER_BEFORE_TOKEN.test(before.slice(0, openingQuote))
+  );
+};
+
+/** Tier and basis for an email match, or `null` when it is not an address (rules 1 and 3 of PASS 1). */
+const classifyEmail = ({
+  refangedText,
+  start,
+  raw,
+  wasDefanged,
+  isAtSignDefanged,
+  idListHeaderLines,
+}: {
+  refangedText: string;
+  start: number;
+  raw: string;
+  wasDefanged: boolean;
+  /** The `@` of this occurrence was written `[@]` or `(at)` in the source. */
+  isAtSignDefanged: boolean;
+  idListHeaderLines: readonly Span[];
+}): { tier: IocTier; basis: string } | null => {
+  // A defanged `@` means the report is writing an address, whatever header precedes it. Defanged
+  // dots do not: phishing write-ups paste header blocks with every domain defanged
+  // (`Message-ID: <id@mail.evil[.]com>`), and those are still message IDs.
+  const isMessageId =
+    !isAtSignDefanged &&
+    isMessageIdToken(refangedText, start, start + raw.length, idListHeaderLines);
+  if (isMessageId) return null;
+  const host = raw.slice(raw.lastIndexOf('@') + 1);
+  if (isPlaceholderEmailHost(host)) return { tier: 'reference', basis: 'placeholder_email' };
+  if (!IANA_TLDS.has(host.slice(host.lastIndexOf('.') + 1))) return null;
+  // Defanged-in-source (the @ or a dot was rebuilt by refang) → discriminating, like a defanged domain.
+  return wasDefanged
+    ? { tier: 'discriminating', basis: 'defanged_source' }
+    : { tier: 'uncertain', basis: 'uncertain_default' };
+};
+
+// CIDR: IPv4/mask (defang already applied before this runs). A mask followed by a dot and a
+// digit is not a range (`2.1.0.3/2.1.0.4` is two versions). The leading boundary matches
+// IP_PATTERN's, so `1.3.4.2.1/24` does not yield `3.4.2.1/24`.
 const CIDR_PATTERN =
-  /\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\/(?:3[0-2]|[12]?\d)\b/g;
+  /(?<!\d\.)\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\/(?:3[0-2]|[12]?\d)\b(?!\.\d)/g;
 
 // Crypto wallets — MUST run before hash.
 // BTC legacy: starts with 1 or 3, base58, 26-34 chars.
@@ -220,7 +345,8 @@ const IPV4_OCTET = '(?:25[0-5]|2[0-4]\\d|[01]?\\d?\\d)';
 const IPV4 = `(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}`;
 const DOMAIN_LABEL = '[a-z0-9](?:[a-z0-9\\-]*[a-z0-9])?';
 const DOMAIN_HOST = `(?:${DOMAIN_LABEL}\\.)+[a-z]{2,24}`;
-const SOCKET_PATTERN = new RegExp(`\\b(${IPV4}|${DOMAIN_HOST}):(\\d{1,5})\\b`, 'gi');
+// The leading boundary matches IP_PATTERN's, so `1.3.4.2.1:8080` does not yield `3.4.2.1`.
+const SOCKET_PATTERN = new RegExp(`(?<!\\d\\.)\\b(${IPV4}|${DOMAIN_HOST}):(\\d{1,5})\\b`, 'gi');
 
 // ── Keep existing filter infrastructure ─────────────────────────────────────
 
@@ -663,7 +789,7 @@ const defangValue = (type: IocType, value: string, shouldDefang: boolean): strin
  * form. Exported so adjudication can locate canonical candidate values in the
  * same refanged view that extraction uses.
  */
-export const refang = (text: string): string =>
+const refangExceptAtSign = (text: string): string =>
   text
     // Bracket/paren/brace-wrapped dot
     .replace(/\[\.\]|\(\.\)|\{\.\}/g, '.')
@@ -675,9 +801,29 @@ export const refang = (text: string): string =>
     // Bracket-wrapped colon (after scheme separator already handled)
     .replace(/\[:\]/g, ':')
     // Obfuscated scheme prefix: hxxps?:// (any casing of the XX) → http(s)://
-    .replace(/hxxps?:\/\//gi, (m) => (m.toLowerCase().startsWith('hxxps') ? 'https://' : 'http://'))
-    // Email defang: [@] or (at) → @
-    .replace(/\[@\]|\(at\)/gi, '@');
+    .replace(/hxxps?:\/\//gi, (m) =>
+      m.toLowerCase().startsWith('hxxps') ? 'https://' : 'http://'
+    );
+
+/**
+ * The refanged text, plus the offset in it of every `@` rebuilt from `[@]` or `(at)`. The
+ * offsets let a caller ask whether the `@` of one match was defanged, at that occurrence.
+ */
+const refangWithAtOffsets = (
+  text: string
+): { refanged: string; defangedAtOffsets: ReadonlySet<number> } => {
+  const defangedAtOffsets = new Set<number>();
+  let removedChars = 0;
+  // Email defang: [@] or (at) → @. This is the last step, so the offsets are final.
+  const refanged = refangExceptAtSign(text).replace(/\[@\]|\(at\)/gi, (match, offset: number) => {
+    defangedAtOffsets.add(offset - removedChars);
+    removedChars += match.length - 1;
+    return '@';
+  });
+  return { refanged, defangedAtOffsets };
+};
+
+export const refang = (text: string): string => refangWithAtOffsets(text).refanged;
 
 /** Masking glyphs used in victim-domain redaction tables (e.g. aad****ie.com). */
 const REDACTION_GLYPHS = new Set(['*', '＊', '█', '●']);
@@ -878,6 +1024,125 @@ const sectionKindAtOffset = (
   return undefined;
 };
 
+// ── Packet-capture `host.port` ──────────────────────────────────────────────────
+// tcpdump and netstat write a socket as `10.0.0.5.51234`, which the longer-dotted-number rule
+// would otherwise reject. On a line carrying a capture marker the `.port` part is blanked out
+// (same length, so offsets are unchanged) and the quad is left to the ordinary passes. A marker:
+//   - the tcpdump protocol word (`IP ` / `IP6 `) directly before a `quad.port` token;
+//   - a tcpdump flow, `quad.port > quad.port:` with the trailing colon, anywhere on the line;
+//   - a BSD netstat row: a protocol column at the start of the line (`tcp`, `tcp4`, `udp6`,
+//     `tcp46`, lower case), the two queue counters, then a `quad.port` local address. Prose
+//     that only starts with `udp 4 ...` is not a row.
+// Without a marker the five-part rule wins. Solaris `netstat -an` rows (no protocol column) and
+// `ip.port -> ip.port` text without a marker yield no IP.
+const QUAD_PORT = new RegExp(`(?<!\\d\\.)\\b(${IPV4})(\\.\\d{1,5})\\b(?!\\.\\d)`, 'g');
+const TCPDUMP_PROTOCOL = new RegExp(`\\bIP6? ${IPV4}\\.\\d`);
+const TCPDUMP_FLOW = new RegExp(`${IPV4}\\.\\d{1,5}\\s*>\\s*${IPV4}\\.\\d{1,5}:`);
+const NETSTAT_ROW = new RegExp(
+  `^[ \\t]*(?:tcp|udp)(?:46|4|6)?[ \\t]+\\d+[ \\t]+\\d+[ \\t]+${IPV4}\\.\\d{1,5}(?![\\d.])`
+);
+
+const hasCaptureMarker = (line: string): boolean =>
+  TCPDUMP_PROTOCOL.test(line) || TCPDUMP_FLOW.test(line) || NETSTAT_ROW.test(line);
+
+const neutralizeCapturePorts = (text: string): string =>
+  text.replace(/^.*$/gm, (line) =>
+    hasCaptureMarker(line)
+      ? line.replace(
+          QUAD_PORT,
+          (_match, quad: string, port: string) => quad + ' '.repeat(port.length)
+        )
+      : line
+  );
+
+// ── Version numbers ─────────────────────────────────────────────────────────────
+// A `vers:` token is a version range specifier (`vers:intdot/>=8.2.0.1|<8.2.0.5`). Nothing inside
+// one is an indicator, bare numbers listed after one are more versions, and every dotted quad
+// found this way is a value the report itself marks as a version. Only these spans mark a value.
+const VERS_TOKEN_START = /(?<![A-Za-z0-9])vers:[A-Za-z0-9.+-]+\//gi;
+const VERS_TOKEN_TERMINATOR = /[\s,;)\]"']/;
+const VERS_COMPARISON_CHARS = '<>=!';
+const VERS_LIST_CONTINUATION = /[ \t]*,[ \t]*\d+(?:\.\d+)+(?![A-Za-z0-9_])/y;
+
+interface VersionSpans {
+  readonly spans: readonly Span[];
+  readonly markedValues: ReadonlySet<string>;
+}
+
+/** End of the `vers:` token whose `vers:scheme/` prefix ends at `from`, list continuation included. */
+const versionSpanEnd = (text: string, from: number): number => {
+  let end = from;
+  // Token: runs to whitespace, comma, semicolon, `)`, `]` or a quote. `<` and `>` are part of
+  // a constraint. It runs past `|` only when a comparison character follows.
+  while (end < text.length && !VERS_TOKEN_TERMINATOR.test(text[end])) {
+    if (text[end] === '|' && !VERS_COMPARISON_CHARS.includes(text[end + 1] ?? ' ')) break;
+    end++;
+  }
+  // List continuation: bare dotted numbers after `,` on the same line.
+  for (;;) {
+    VERS_LIST_CONTINUATION.lastIndex = end;
+    if (!VERS_LIST_CONTINUATION.test(text)) break;
+    end = VERS_LIST_CONTINUATION.lastIndex;
+  }
+  return end;
+};
+
+const collectVersionSpans = (text: string): VersionSpans => {
+  const spans: Span[] = [];
+  const markedValues = new Set<string>();
+  let coveredTo = 0;
+  for (const match of text.matchAll(VERS_TOKEN_START)) {
+    const start = match.index ?? 0;
+    // A `vers:` inside the previous token (`vers:a/vers:b/...`) ends where that token ends, so
+    // its span is already recorded. Skipping it keeps a run of them linear.
+    if (start >= coveredTo) {
+      const end = versionSpanEnd(text, start + match[0].length);
+      spans.push([start, end]);
+      coveredTo = end;
+      for (const quad of text.slice(start, end).match(new RegExp(IP_PATTERN.source, 'g')) ?? []) {
+        markedValues.add(quad);
+      }
+    }
+  }
+  return { spans, markedValues };
+};
+
+// Version wording before an occurrence: a version word (not preceded by a letter or digit, so
+// `product_version` counts and `server.` does not), then optionally a closing quote, `:` or `=`,
+// one filler word, and an opening quote or `(`, all on the same line.
+const VERSION_WORD_BEFORE =
+  /(?<![A-Za-z0-9])(?:versions?|ver\.)[ \t]*["']?[ \t]*[:=]?[ \t]*(?:(?:before|prior to|up to|through|from|between|including|below|above)[ \t]*)?["'(]?[ \t]*$/i;
+const QUAD_JOINED_BEFORE =
+  /(\d{1,3}(?:\.\d{1,3}){3})(?:[ \t]+and[ \t]+(?:prior|earlier|later|below|above))?(?:[ \t]*[,/][ \t]*|[ \t]+(?:and|or|through|to)[ \t]+)$/i;
+const MAX_VERSION_JOIN_DEPTH = 50;
+// Version wording and a joined occurrence sit directly before the value, in well under this many
+// characters. Reading no further back keeps a long line of occurrences linear.
+const VERSION_CONTEXT_LOOKBEHIND_CHARS = 96;
+
+/**
+ * True when the occurrence at `offset` reads as a version: version wording before it, a
+ * comparison operator touching it, or it is joined (`,`, `/`, `and`, `or`, `through`, `to`) to
+ * another occurrence that does. Reads `text` (the refanged text, not the masked remainder), same
+ * line only. Wording is only trusted for a value the report already marked with a `vers:` token.
+ */
+const isVersionContext = (text: string, offset: number, depth = 0): boolean => {
+  const windowStart = Math.max(0, offset - VERSION_CONTEXT_LOOKBEHIND_CHARS);
+  const lookBehind = text.slice(windowStart, offset);
+  const newlineBefore = lookBehind.lastIndexOf('\n');
+  const lineStart = windowStart + newlineBefore + 1;
+  const before = text.slice(lineStart, offset);
+  // When the window is cut mid-line, a match at its first character may be the tail of a longer
+  // word or number (`subversion`, `10.9.2.1.6`), so it does not count.
+  const isCutMidLine = newlineBefore === -1 && windowStart > 0 && text[windowStart - 1] !== '\n';
+  const isWholeMatch = (match: RegExpExecArray | null): match is RegExpExecArray =>
+    match !== null && (match.index > 0 || !isCutMidLine);
+  if (isWholeMatch(VERSION_WORD_BEFORE.exec(before))) return true;
+  if (/(?:<=|>=|≤|≥)$/.test(before)) return true;
+  if (depth >= MAX_VERSION_JOIN_DEPTH) return false;
+  const joined = QUAD_JOINED_BEFORE.exec(before);
+  return isWholeMatch(joined) && isVersionContext(text, lineStart + joined.index, depth + 1);
+};
+
 /**
  * Post-pass: override tier/tier_basis for IOCs that appear in a classified
  * section span. tier_heuristic is NEVER modified — it records the per-value
@@ -897,6 +1162,10 @@ const sectionKindAtOffset = (
  * References-section: → reference/references_section
  *   UNLESS already discriminating (defanged_source or ioc_section) — defanged value
  *   in a citation is still a real IOC.
+ *
+ * Placeholder emails (tier_basis 'placeholder_email') are exempt from both: an
+ * example address stays reference under an IOC heading, and its basis is not
+ * rewritten to references_section under a References heading.
  */
 /**
  * The tier/basis a containing section imposes, or `null` to keep the per-value
@@ -906,6 +1175,9 @@ const sectionOverrideFor = (
   ioc: WorkingIoc,
   kind: SectionKind
 ): { tier: IocTier; basis: string } | null => {
+  if (ioc.tier_basis === 'placeholder_email') {
+    return null;
+  }
   if (kind === 'ioc') {
     // Denylist / vendor_research reference stays — they are high-confidence noise.
     if (
@@ -945,7 +1217,9 @@ const applySectionOverrides = (iocs: readonly WorkingIoc[]): void => {
 
 export const extractIocs = ({ text, defang = true }: ExtractIocsParams): ExtractIocsResult => {
   // Pre-pass: recover defanged IOCs before regex matching.
-  const refangedText = refang(text);
+  // neutralizeCapturePorts keeps every offset, so defangedAtOffsets index refangedText too.
+  const { refanged, defangedAtOffsets } = refangWithAtOffsets(text);
+  const refangedText = neutralizeCapturePorts(refanged);
   const sectionSpans = classifySectionSpans(refangedText);
   const seen = new Set<string>();
   const iocByKey = new Map<string, WorkingIoc>();
@@ -956,7 +1230,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   // A domain present in refangedText but absent from the original text was
   // created BY refang, meaning the vendor deliberately defanged it — strongest
   // possible corroboration that it is a live indicator.
-  const originalLower = text.toLowerCase();
+  const originalLower = neutralizeCapturePorts(text).toLowerCase();
   const rawDomainsInOriginal = new Set(
     (originalLower.match(DOMAIN_PATTERN) ?? []).map((d) => d.toLowerCase())
   );
@@ -967,10 +1241,17 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   // (evil[.]com in "admin@evil[.]com and C2 evil[.]com") still surfaces correctly
   // because its standalone occurrence survives the masking.
   const emailSpans: Span[] = [];
+  // Addresses the report wrote with a defanged `@` at least once. That is enough to tier the
+  // value as defanged, whatever order its occurrences come in and even when a plain copy of
+  // the same text exists (a Message-ID, a header dump).
+  const emailsWithDefangedAt = new Set<string>();
   {
     const emailPat = new RegExp(EMAIL_PATTERN.source, EMAIL_PATTERN.flags);
-    for (const m of refangedText.matchAll(emailPat)) {
-      if (m.index !== undefined) emailSpans.push([m.index, m.index + m[0].length]);
+    for (const m of matchesWithOffset(refangedText, emailPat)) {
+      emailSpans.push([m.index, m.index + m[0].length]);
+      if (defangedAtOffsets.has(m.index + m[0].lastIndexOf('@'))) {
+        emailsWithDefangedAt.add(m[0].toLowerCase());
+      }
     }
   }
   const refangedTextNoEmails = maskConsumedSpans(refangedText, emailSpans);
@@ -1054,28 +1335,45 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
 
   // ── PASS 1: emails ────────────────────────────────────────────────────────
   // Full address is the indicator; host-domain is suppressed (mail provider noise).
+  // First rule that applies wins, and every match records its span in `consumed` so the
+  // host of a skipped match never resurfaces as a domain:
+  //   1. Message-ID token (`message-id=<id@host>`, `References: <a@b> <c@d>`) → nothing, unless
+  //      the report wrote its `@` defanged. A References or In-Reply-To line under an IOC
+  //      heading is not an ID list.
+  //   2. Placeholder host (`test@test.com`, `a@b.lab.test`) → reference/placeholder_email,
+  //      even when defanged. Runs before rule 3 because reserved TLDs are not in IANA_TLDS.
+  //   3. Host TLD is not a real TLD → nothing. Trade-off: a real address glued to the next
+  //      word (`actor@evil.comwill`) is lost rather than repaired, since the right cut point
+  //      is ambiguous (`.co`, `.com` and `.cool` are all TLDs).
+  //   4. Otherwise: discriminating if defanged in the source, else uncertain.
   {
     const pattern = new RegExp(EMAIL_PATTERN.source, EMAIL_PATTERN.flags);
+    const idListHeaderLines = collectIdListHeaderLines(refangedText);
     for (const match of matchesWithOffset(refangedText, pattern)) {
       const raw = match[0].toLowerCase();
       const idx = match.index;
       consumed.push([idx, idx + match[0].length]);
 
-      // Email tier: defanged-in-source → discriminating (like a defanged domain)
-      // We check if the @ was in the original text or reconstructed by refang.
-      const wasDefanged = !originalLower.includes(raw);
-      const tier: IocTier = wasDefanged ? 'discriminating' : 'uncertain';
-      const basis = wasDefanged ? 'defanged_source' : 'uncertain_default';
-
-      pushIoc({
-        type: 'email',
-        value: raw,
-        defanged: defangValue('email', raw, defang),
-        tier,
-        tier_heuristic: tier,
-        tier_basis: basis,
-        _offset: idx,
+      const verdict = classifyEmail({
+        refangedText,
+        isAtSignDefanged: defangedAtOffsets.has(idx + raw.lastIndexOf('@')),
+        start: idx,
+        raw,
+        wasDefanged: emailsWithDefangedAt.has(raw) || !originalLower.includes(raw),
+        idListHeaderLines:
+          sectionKindAtOffset(idx, sectionSpans) === 'ioc' ? [] : idListHeaderLines,
       });
+      if (verdict) {
+        pushIoc({
+          type: 'email',
+          value: raw,
+          defanged: defangValue('email', raw, defang),
+          tier: verdict.tier,
+          tier_heuristic: verdict.tier,
+          tier_basis: verdict.basis,
+          _offset: idx,
+        });
+      }
     }
   }
 
@@ -1154,6 +1452,22 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     }
   }
 
+  // ── Version spans ─────────────────────────────────────────────────────────
+  // `vers:` tokens and the comma lists continuing them are consumed before the CIDR, socket and
+  // bare-IP passes, and the dotted quads inside them are the values the report marks as versions.
+  const { spans: versionSpans, markedValues: markedVersionValues } =
+    collectVersionSpans(refangedText);
+  consumed.push(...versionSpans);
+
+  // A marked value is skipped only in a version context, never under an IOC heading, and never
+  // when the report wrote it defanged. An unmarked value is always emitted, whatever the words
+  // around it, and a marked value that also appears plainly (`C2 at 9.2.1.6`) is emitted.
+  const isMarkedVersionMention = (value: string, offset: number): boolean =>
+    markedVersionValues.has(value) &&
+    !defangedIps.has(value) &&
+    sectionKindAtOffset(offset, sectionSpans) !== 'ioc' &&
+    isVersionContext(refangedText, offset);
+
   // ── PASS 3: CIDRs ─────────────────────────────────────────────────────────
   // Emit cidr value AND derive bare network IP.
   {
@@ -1167,57 +1481,61 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
       const networkIp = raw.slice(0, slashIdx);
       const maskWidth = parseInt(raw.slice(slashIdx + 1), 10);
 
-      // CIDR tier: private and reserved space first, then mask width.
-      //
-      // Mask width alone put 10.20.0.0/16 in `contextual`, which the promote task
-      // admits, so an RFC1918 range became a live Indicator Match row and matched
-      // essentially all internal traffic. The bare IP derived just below was
-      // already classified `reference/private_ip`, so the two disagreed about the
-      // same network.
-      const isPrivateNetwork = isPrivateIp(networkIp);
-      const cidrTier: IocTier = isPrivateNetwork
-        ? 'reference'
-        : maskWidth >= 29
-        ? 'discriminating'
-        : 'contextual';
-      const cidrBasis = isPrivateNetwork
-        ? 'private_ip'
-        : maskWidth >= 29
-        ? 'cidr_narrow'
-        : 'cidr_broad';
+      // The network address decides: a marked version in a version context skips the range and
+      // its derived IP.
+      if (!isMarkedVersionMention(networkIp, idx)) {
+        // CIDR tier: private and reserved space first, then mask width.
+        //
+        // Mask width alone put 10.20.0.0/16 in `contextual`, which the promote task
+        // admits, so an RFC1918 range became a live Indicator Match row and matched
+        // essentially all internal traffic. The bare IP derived just below was
+        // already classified `reference/private_ip`, so the two disagreed about the
+        // same network.
+        const isPrivateNetwork = isPrivateIp(networkIp);
+        const cidrTier: IocTier = isPrivateNetwork
+          ? 'reference'
+          : maskWidth >= 29
+          ? 'discriminating'
+          : 'contextual';
+        const cidrBasis = isPrivateNetwork
+          ? 'private_ip'
+          : maskWidth >= 29
+          ? 'cidr_narrow'
+          : 'cidr_broad';
 
-      pushIoc({
-        type: 'cidr',
-        value: raw,
-        defanged: defangValue('cidr', raw, defang),
-        tier: cidrTier,
-        tier_heuristic: cidrTier,
-        tier_basis: cidrBasis,
-        _offset: idx,
-      });
+        pushIoc({
+          type: 'cidr',
+          value: raw,
+          defanged: defangValue('cidr', raw, defang),
+          tier: cidrTier,
+          tier_heuristic: cidrTier,
+          tier_basis: cidrBasis,
+          _offset: idx,
+        });
 
-      // Derived bare IP — private wins, then defanged-in-source, else uncertain.
-      let ipTier: IocTier;
-      let ipBasis: string;
-      if (isPrivateIp(networkIp)) {
-        ipTier = 'reference';
-        ipBasis = 'private_ip';
-      } else if (defangedIps.has(networkIp)) {
-        ipTier = 'discriminating';
-        ipBasis = 'defanged_source';
-      } else {
-        ipTier = 'uncertain';
-        ipBasis = 'uncertain_default';
+        // Derived bare IP — private wins, then defanged-in-source, else uncertain.
+        let ipTier: IocTier;
+        let ipBasis: string;
+        if (isPrivateIp(networkIp)) {
+          ipTier = 'reference';
+          ipBasis = 'private_ip';
+        } else if (defangedIps.has(networkIp)) {
+          ipTier = 'discriminating';
+          ipBasis = 'defanged_source';
+        } else {
+          ipTier = 'uncertain';
+          ipBasis = 'uncertain_default';
+        }
+        pushIoc({
+          type: 'ip',
+          value: networkIp,
+          defanged: defangValue('ip', networkIp, defang),
+          tier: ipTier,
+          tier_heuristic: ipTier,
+          tier_basis: ipBasis,
+          _offset: idx,
+        });
       }
-      pushIoc({
-        type: 'ip',
-        value: networkIp,
-        defanged: defangValue('ip', networkIp, defang),
-        tier: ipTier,
-        tier_heuristic: ipTier,
-        tier_basis: ipBasis,
-        _offset: idx,
-      });
     }
   }
 
@@ -1259,7 +1577,9 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
       const ipMatch =
         /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)$/.test(host);
 
-      if (ipMatch) {
+      if (ipMatch && isMarkedVersionMention(host, idx)) {
+        // A marked version followed by `:` (`version 9.2.2.1:2026-10-01`) is not a socket.
+      } else if (ipMatch) {
         let tier: IocTier;
         let basis: string;
         if (isPrivateIp(host)) {
@@ -1333,27 +1653,29 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     const pattern = new RegExp(IP_PATTERN.source, IP_PATTERN.flags);
     for (const match of matchesWithOffset(remainderText, pattern)) {
       const raw = match[0];
-      let tier: IocTier;
-      let basis: string;
-      if (isPrivateIp(raw)) {
-        tier = 'reference';
-        basis = 'private_ip';
-      } else if (defangedIps.has(raw)) {
-        tier = 'discriminating';
-        basis = 'defanged_source';
-      } else {
-        tier = 'uncertain';
-        basis = 'uncertain_default';
+      if (!isMarkedVersionMention(raw, match.index)) {
+        let tier: IocTier;
+        let basis: string;
+        if (isPrivateIp(raw)) {
+          tier = 'reference';
+          basis = 'private_ip';
+        } else if (defangedIps.has(raw)) {
+          tier = 'discriminating';
+          basis = 'defanged_source';
+        } else {
+          tier = 'uncertain';
+          basis = 'uncertain_default';
+        }
+        pushIoc({
+          type: 'ip',
+          value: raw,
+          defanged: defangValue('ip', raw, defang),
+          tier,
+          tier_heuristic: tier,
+          tier_basis: basis,
+          _offset: match.index,
+        });
       }
-      pushIoc({
-        type: 'ip',
-        value: raw,
-        defanged: defangValue('ip', raw, defang),
-        tier,
-        tier_heuristic: tier,
-        tier_basis: basis,
-        _offset: match.index,
-      });
     }
   }
 
