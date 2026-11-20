@@ -202,6 +202,7 @@ export { pluginModule as module };
 Plugins are not ordered relative to each other without a manifest edge, so `SoftDependencies` throws when it is used before every plugin finished setup.
 Inject it anywhere, but call `get` and `getAll` at start, in request handlers, or later.
 `get` throws when more than one plugin exposes the token. Use `getAll` or `collect` for tokens with several contributors.
+Do not call `getAll` for a token inside a request scope that also exposes that token with `Scope.expose`. There it returns only the request scope's bindings and hides the ones plugins exposed.
 
 ### Existing Plugins
 The `PluginSetup` and `PluginStart` injection tokens can be used to inject existing plugins without migrating or adapting them. This is similar to accessing plugin dependencies from the lifecycle methods.

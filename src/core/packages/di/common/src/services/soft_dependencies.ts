@@ -24,6 +24,7 @@ export interface SoftDependencies {
 
   /**
    * Every binding exposed for the token across all enabled plugins (empty when none).
+   * Inside a request scope that exposes the same token with `Scope.expose`, it returns only that scope's bindings.
    * Throws before all plugins finished setup.
    * @param serviceIdentifier The exposed service identifier.
    */
