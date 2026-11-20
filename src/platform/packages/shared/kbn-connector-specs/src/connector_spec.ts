@@ -372,6 +372,8 @@ export interface AuthTypeDef {
   isRecommended?: boolean;
   /** When true, excluded from the UI picker but kept in the validation schema for backwards compatibility with existing connectors. */
   isLegacy?: boolean;
+  /** When true, not offered in the auth picker. The connector form sets it instead, for example through the Outbound switch. */
+  hideInPicker?: boolean;
   isExperimental?: boolean;
   /** When true, this auth type may be used with sandbox credential injection. */
   supportsSandbox?: boolean;

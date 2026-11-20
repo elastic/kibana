@@ -143,6 +143,33 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
 
   const isFieldsetDisabled = formConfig.disabled || getMeta(schema).disabled;
 
+  // Options another control sets (hideInPicker) are left out of the picker. When that leaves a
+  // single option and it is selected, show its fields directly instead of one lone card.
+  const isHiddenInPicker = (option: (typeof options)[number]) =>
+    Boolean((getMeta(option) as Record<string, unknown>).hideInPicker);
+  const pickableOptions = options.filter((option) => !isHiddenInPicker(option));
+  const onlyPickableOption =
+    pickableOptions.length === 1 && pickableOptions.length < options.length
+      ? pickableOptions[0]
+      : undefined;
+  if (
+    onlyPickableOption &&
+    getDiscriminatorFieldValue(onlyPickableOption, discriminatorKey) === selectedOption
+  ) {
+    return (
+      <SingleOptionUnionWidget
+        options={[onlyPickableOption]}
+        path={rootPath}
+        schema={schema}
+        discriminatorKey={discriminatorKey}
+        fieldConfig={fieldConfig}
+        fieldProps={fieldProps}
+        formConfig={formConfig}
+        meta={meta}
+      />
+    );
+  }
+
   return (
     <EuiFormFieldset
       legend={{
@@ -165,7 +192,7 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
 
         // Neither is offered as a choice, but both still render while active so an existing
         // connector's credentials stay viewable.
-        if ((isLegacy || isKibanaManaged) && !isChecked) return null;
+        if ((isLegacy || isKibanaManaged || isHiddenInPicker(option)) && !isChecked) return null;
 
         // if the entire fieldset is disabled, ensure each option is also marked as disabled
         if (isFieldsetDisabled && optionMeta.disabled !== false) {
