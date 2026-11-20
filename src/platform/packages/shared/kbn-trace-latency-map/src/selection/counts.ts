@@ -57,35 +57,35 @@ export function getSelectionCounts({
   const lowRow = selection.minDuration <= 0 ? 0 : rowOf(selection.minDuration);
   const highRow = rowOf(selection.maxDuration);
 
-  let spans = 0;
-  let failed = 0;
-  let estimated = false;
-  grid.cells.forEach((cell) => {
-    const share =
-      overlap(fromEdge, toEdge, cell.xi, cell.xi + 1) *
-      overlap(lowRow, highRow, cell.yi, cell.yi + 1);
-    if (share < NEGLIGIBLE) return;
-    if (share < 1 - NEGLIGIBLE) estimated = true;
-    spans += cell.spans * share;
-    failed += cell.failed * share;
-  });
-  spans = Math.round(spans);
-  failed = Math.round(failed);
+  const totals = [...grid.cells.values()].reduce(
+    (sum, cell) => {
+      const share =
+        overlap(fromEdge, toEdge, cell.xi, cell.xi + 1) *
+        overlap(lowRow, highRow, cell.yi, cell.yi + 1);
+      if (share < NEGLIGIBLE) return sum;
+      return {
+        spans: sum.spans + cell.spans * share,
+        failed: sum.failed + cell.failed * share,
+        // A cell partially covered makes the counts an estimate.
+        estimated: sum.estimated || share < 1 - NEGLIGIBLE,
+      };
+    },
+    { spans: 0, failed: 0, estimated: false }
+  );
+  const spans = Math.round(totals.spans);
+  const failed = Math.round(totals.failed);
   // A selection about failures selects the failed spans only.
   return selection.failedOnly
-    ? { spans: failed, failed: 0, estimated }
-    : { spans, failed, estimated };
+    ? { spans: failed, failed: 0, estimated: totals.estimated }
+    : { spans, failed, estimated: totals.estimated };
 }
 
 /** The spans and failures of the whole map. */
 export function getGridTotals(grid: LatencyGrid): { spans: number; failed: number } {
-  let spans = 0;
-  let failed = 0;
-  grid.cells.forEach((cell) => {
-    spans += cell.spans;
-    failed += cell.failed;
-  });
-  return { spans, failed };
+  return [...grid.cells.values()].reduce(
+    (sum, cell) => ({ spans: sum.spans + cell.spans, failed: sum.failed + cell.failed }),
+    { spans: 0, failed: 0 }
+  );
 }
 
 /**
