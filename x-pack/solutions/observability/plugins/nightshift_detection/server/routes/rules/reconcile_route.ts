@@ -17,6 +17,12 @@ import { DETECTION_ENGINE_API_PATH } from '../constants';
 import { EngineRouteContext } from '../engine_route_context';
 
 /**
+ * A first reconciliation of a large space creates hundreds of rules in sequential chunks, which can
+ * outlast Kibana's default socket idle timeout (120 seconds); the workflow allows five minutes.
+ */
+const RECONCILE_IDLE_SOCKET_MS = 5 * 60_000;
+
+/**
  * Makes the space's managed alerting rules match what the strategies want now, as the space's
  * detection service account. Called by the rule reconcile workflow after knowledge or sources change.
  */
@@ -29,6 +35,7 @@ export class ReconcileRulesRoute extends BaseEngineRoute {
   };
   static options = {
     access: 'internal' as const,
+    timeout: { idleSocket: RECONCILE_IDLE_SOCKET_MS },
     summary: 'Reconcile the detection rules of this space',
     description:
       'Creates, deletes, enables and disables the alerting rules the detection strategies need in the space, and leaves every other rule alone. The space runs as its detection service account; a user is swapped for the account, any other service account is refused. Answers busy when another reconciliation holds the space.',

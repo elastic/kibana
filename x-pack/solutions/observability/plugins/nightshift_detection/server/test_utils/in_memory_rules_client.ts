@@ -99,15 +99,15 @@ export class InMemoryRulesClient {
   };
 
   public bulkDeleteRules = async ({ ids }: { ids: string[] }): Promise<BulkResponse> =>
-    this.applyToEach(ids, (id) => this.rules.delete(id));
+    this.applyToEach({ ids, apply: (id) => this.rules.delete(id) });
 
   public bulkEnableRules = async ({ ids }: { ids: string[] }): Promise<BulkResponse> =>
-    this.applyToEach(ids, (id) => this.setEnabled(id, true));
+    this.applyToEach({ ids, apply: (id) => this.setEnabled({ id, enabled: true }) });
 
   public bulkDisableRules = async ({ ids }: { ids: string[] }): Promise<BulkResponse> =>
-    this.applyToEach(ids, (id) => this.setEnabled(id, false));
+    this.applyToEach({ ids, apply: (id) => this.setEnabled({ id, enabled: false }) });
 
-  private setEnabled(id: string, enabled: boolean): boolean {
+  private setEnabled({ id, enabled }: { id: string; enabled: boolean }): boolean {
     const rule = this.rules.get(id);
     if (rule) {
       rule.enabled = enabled;
@@ -115,7 +115,13 @@ export class InMemoryRulesClient {
     return rule !== undefined;
   }
 
-  private applyToEach(ids: string[], apply: (id: string) => boolean): BulkResponse {
+  private applyToEach({
+    ids,
+    apply,
+  }: {
+    ids: string[];
+    apply: (id: string) => boolean;
+  }): BulkResponse {
     const missing = ids.filter((id) => !apply(id));
     return {
       affected_count: ids.length - missing.length,

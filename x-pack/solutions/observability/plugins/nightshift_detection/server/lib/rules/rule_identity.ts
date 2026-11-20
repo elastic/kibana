@@ -6,6 +6,7 @@
  */
 
 import { v5 as uuidv5 } from 'uuid';
+import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 
 /** Namespace of the engine's rule ids. Changing it gives every managed rule a new id. */
 const RULE_ID_NAMESPACE = 'e04d28ab-9856-4cf7-bda8-1341f14f17b5';
@@ -20,6 +21,13 @@ export const MANAGED_RULE_TAG = 'detection_engine:managed';
 const STRATEGY_TAG_PREFIX = 'detection_engine:strategy:';
 const SOURCE_TAG_PREFIX = 'detection_engine:source:';
 
+/** Tags only their owners set: the engine's ownership tags and significant_events' source tag. */
+const RESERVED_TAG_PREFIXES = ['detection_engine:', 'nightshift:source:'];
+
+/** Whether a strategy must not set this tag itself. */
+export const isReservedTag = (tag: string): boolean =>
+  RESERVED_TAG_PREFIXES.some((prefix) => tag.startsWith(prefix));
+
 /** The tag of the rules a strategy owns. */
 export const getStrategyTag = (strategyId: string): string => `${STRATEGY_TAG_PREFIX}${strategyId}`;
 
@@ -28,21 +36,22 @@ export const getOwningStrategy = (tags: string[]): string | undefined =>
   tags.find((tag) => tag.startsWith(STRATEGY_TAG_PREFIX))?.slice(STRATEGY_TAG_PREFIX.length);
 
 /**
- * The id of a managed rule. It hashes the final query, project routing included, so any change to
- * the query, its routing or its settings gives a new rule: the reconciler never edits a query, it
- * deletes the old rule and creates the new one.
+ * The id of a managed rule. It hashes everything the rule runs with (the final query, project
+ * routing included, its schedule, lookback and grouping), so any change to them gives a new rule:
+ * the reconciler never edits a rule, it deletes the old one and creates the new one. Name and tags
+ * are left out, since they don't change what the rule finds.
  */
 export const computeRuleId = ({
   spaceId,
   strategy,
   sourceId,
-  query,
+  rule,
 }: {
   spaceId: string;
   strategy: string;
   sourceId: string;
-  query: string;
-}): string => uuidv5(JSON.stringify([spaceId, strategy, sourceId, query]), RULE_ID_NAMESPACE);
+  rule: Omit<CreateRuleData, 'metadata'>;
+}): string => uuidv5(JSON.stringify([spaceId, strategy, sourceId, rule]), RULE_ID_NAMESPACE);
 
 /** The tags the engine puts on a managed rule, after the strategy's own. */
 export const getManagedRuleTags = ({

@@ -28,6 +28,7 @@ import { SpaceSetupLock } from '../lib/service_account/space_setup_lock';
 import { WorkflowInstaller } from '../lib/workflows/workflow_installer';
 import { DetectionSignalStore } from '../lib/signals/signal_store';
 import { DetectionStateClient, detectionStateSavedObjectType } from '../lib/state';
+import { DetectionStrategy } from '../lib/strategies/detection_strategy';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
 import { InMemorySavedObjectsRepository } from '../test_utils/in_memory_saved_objects_repository';
 import { DETECTION_ENGINE_WORKLOAD_TYPE } from '../lib/service_account/workload';
@@ -167,8 +168,24 @@ describe('module', () => {
   });
 
   // Same reason as the tick: the reconciler and its rule reader are bound in the fork.
-  it('reconciles rules through a forked scope', async () => {
+  it('reconciles rules through a forked scope and reports a strategy whose resources fail', async () => {
     const { container } = createContainer();
+    // Reported, the reconciler keeps the strategy's rules; dropped, it would delete them all.
+    container.bind(DetectionStrategy).toConstantValue({
+      descriptor: {
+        id: 'flaky',
+        version: 1,
+        name: 'Flaky',
+        description: 'Cannot read its knowledge',
+        cadence_minutes: 1,
+        settle_minutes: 0,
+        daily_new_event_cap: 1,
+      },
+      generator: {} as DetectionStrategy['generator'],
+      resources: async () => {
+        throw new Error('knowledge unreadable');
+      },
+    });
     await container.unbind(SpaceRulesLock);
     const lock: Pick<SpaceRulesLock, 'run'> = {
       run: async ({ callback }) => ({ ran: true, result: await callback() }),
@@ -181,7 +198,12 @@ describe('module', () => {
       abortSignal: new AbortController().signal,
     });
 
-    expect(result).toMatchObject({ status: 'completed', created: 0, failures: [] });
+    expect(result).toMatchObject({
+      status: 'completed',
+      created: 0,
+      failures: [],
+      strategy_errors: [{ strategy: 'flaky', message: 'knowledge unreadable' }],
+    });
   });
 
   it('gives every tick scope the signal store of its own request', async () => {

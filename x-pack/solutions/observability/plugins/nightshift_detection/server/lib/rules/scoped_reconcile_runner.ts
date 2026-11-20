@@ -24,6 +24,15 @@ import {
 import { ManagedRuleReader } from './managed_rule_reader';
 import { SpaceRulesLock } from './space_rules_lock';
 
+/**
+ * How long a call waits for a reconciliation already running in the space. The workflow cancels a
+ * run when a newer change comes in, but the cancelled run's call keeps the lock until it finishes,
+ * and it may have read the knowledge before that change. Waiting it out lets the newer run read
+ * what is there now instead of answering busy and leaving the change for the six-hour schedule.
+ */
+const LOCK_WAIT_ATTEMPTS = 6;
+const LOCK_WAIT_INTERVAL_MS = 10_000;
+
 /** What a `_reconcile` call did: the reconciliation, or nothing because another one holds the space. */
 export type ReconcileRulesResponse =
   | ({ status: 'completed' } & ReconcileRulesResult)
@@ -57,12 +66,21 @@ export class ScopedReconcileRunner {
     spaceId: string;
     abortSignal: AbortSignal;
   }): Promise<ReconcileRulesResponse> {
-    const outcome = await this.lock.run({
-      spaceId,
-      callback: () => this.reconcile({ accountRequest, spaceId, abortSignal }),
-    });
+    // An attempt at a time: each one waits for the previous holder to let go.
+    for (let attempt = 1; ; attempt++) {
+      const outcome = await this.lock.run({
+        spaceId,
+        callback: () => this.reconcile({ accountRequest, spaceId, abortSignal }),
+      });
 
-    return outcome.ran ? { status: 'completed', ...outcome.result } : { status: 'busy' };
+      if (outcome.ran) {
+        return { status: 'completed', ...outcome.result };
+      }
+      if (attempt === LOCK_WAIT_ATTEMPTS || abortSignal.aborted) {
+        return { status: 'busy' };
+      }
+      await new Promise((resolve) => setTimeout(resolve, LOCK_WAIT_INTERVAL_MS));
+    }
   }
 
   private async reconcile({

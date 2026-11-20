@@ -125,12 +125,10 @@ export interface DesiredResources {
 }
 
 /** What building a strategy's resources needs. */
-export type ResourceContext = Pick<
-  GeneratorContext,
-  'spaceId' | 'sources' | 'esClient' | 'abortSignal'
-> & {
+export interface ResourceContext
+  extends Pick<GeneratorContext, 'spaceId' | 'sources' | 'esClient' | 'abortSignal'> {
   /** The space's knowledge indicators, read as the detection service account. */
   knowledge: KnowledgeIndicatorReader;
   /** Whether cross-project search is on, so queries carry the project routing prefix. */
   cpsEnabled: boolean;
-};
+}

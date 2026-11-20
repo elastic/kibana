@@ -22,7 +22,7 @@ describe('createRulesStaleNotifier', () => {
       logger: loggingSystemMock.createLogger(),
     });
 
-    notify(REQUEST, EVENT);
+    notify({ request: REQUEST, event: EVENT });
     await flushPromises();
 
     expect(getWorkflowsClient).toHaveBeenCalledWith(REQUEST);
@@ -39,7 +39,7 @@ describe('createRulesStaleNotifier', () => {
       logger,
     });
 
-    expect(() => notify(REQUEST, EVENT)).not.toThrow();
+    expect(() => notify({ request: REQUEST, event: EVENT })).not.toThrow();
     await flushPromises();
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('workflows unavailable'));

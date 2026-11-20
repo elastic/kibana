@@ -19,6 +19,7 @@ import {
   getManagedRuleName,
   getManagedRuleTags,
   getOwningStrategy,
+  isReservedTag,
 } from './rule_identity';
 import { DetectionRulesClient } from './rules_client_token';
 
@@ -67,14 +68,15 @@ export interface RuleChanges {
 }
 
 /** Stamps a strategy's rule with the engine's id, ownership tags and name. */
-const toDesiredRule = (spaceId: string, { strategy, resource }: StrategyAlertingRule) => {
-  const id = computeRuleId({
-    spaceId,
-    strategy: strategy.id,
-    sourceId: resource.source_id,
-    query: resource.data.query.base,
-  });
-  const { metadata } = resource.data;
+const toDesiredRule = ({
+  spaceId,
+  rule: { strategy, resource },
+}: {
+  spaceId: string;
+  rule: StrategyAlertingRule;
+}) => {
+  const { metadata, ...rule } = resource.data;
+  const id = computeRuleId({ spaceId, strategy: strategy.id, sourceId: resource.source_id, rule });
 
   return {
     id,
@@ -85,7 +87,9 @@ const toDesiredRule = (spaceId: string, { strategy, resource }: StrategyAlerting
         ...metadata,
         name: getManagedRuleName({ strategyName: strategy.name, title: metadata.name, ruleId: id }),
         tags: [
-          ...(metadata.tags ?? []),
+          // The engine's tags are its ownership record, and `nightshift:source:*` belongs to
+          // significant_events, which deletes those rules: a strategy may set neither.
+          ...(metadata.tags ?? []).filter((tag) => !isReservedTag(tag)),
           ...getManagedRuleTags({ strategy: strategy.id, sourceId: resource.source_id }),
         ],
       },
@@ -205,22 +209,31 @@ export class AlertingRuleReconciler {
     // 1 and 2.
     const changes = planRuleChanges({
       existing: await this.reader.listManaged(),
-      desired: desired.map((rule) => toDesiredRule(spaceId, rule)),
+      desired: desired.map((rule) => toDesiredRule({ spaceId, rule })),
       paused,
       failedStrategies: new Set(strategyErrors.map(({ strategy }) => strategy)),
     });
 
     // 3 to 5. Sequential: deleting before creating is what frees the schedule budget.
-    result.deleted = await this.runBulk(result, 'delete', changes.toDelete, (ids) =>
-      this.rulesClient.bulkDeleteRules({ ids })
-    );
-    await this.create(result, changes.toCreate);
-    result.enabled = await this.runBulk(result, 'enable', changes.toEnable, (ids) =>
-      this.rulesClient.bulkEnableRules({ ids })
-    );
-    result.disabled = await this.runBulk(result, 'disable', changes.toDisable, (ids) =>
-      this.rulesClient.bulkDisableRules({ ids })
-    );
+    result.deleted = await this.runBulk({
+      result,
+      operation: 'delete',
+      ids: changes.toDelete,
+      run: (ids) => this.rulesClient.bulkDeleteRules({ ids }),
+    });
+    await this.create({ result, rules: changes.toCreate });
+    result.enabled = await this.runBulk({
+      result,
+      operation: 'enable',
+      ids: changes.toEnable,
+      run: (ids) => this.rulesClient.bulkEnableRules({ ids }),
+    });
+    result.disabled = await this.runBulk({
+      result,
+      operation: 'disable',
+      ids: changes.toDisable,
+      run: (ids) => this.rulesClient.bulkDisableRules({ ids }),
+    });
 
     this.logger.info(
       `Reconciled the detection rules of space [${spaceId}]: ${result.created} created, ${result.deleted} deleted, ${result.enabled} enabled, ${result.disabled} disabled, ${result.skipped.length} skipped, ${result.failures.length} failed, ${result.strategy_errors.length} strategies failed`
@@ -230,12 +243,17 @@ export class AlertingRuleReconciler {
   }
 
   /** Runs a by-id bulk operation chunk by chunk and returns how many rules it changed. */
-  private async runBulk(
-    result: ReconcileRulesResult,
-    operation: RuleOperation,
-    ids: string[],
-    run: (ids: string[]) => Promise<BulkResponse>
-  ): Promise<number> {
+  private async runBulk({
+    result,
+    operation,
+    ids,
+    run,
+  }: {
+    result: ReconcileRulesResult;
+    operation: RuleOperation;
+    ids: string[];
+    run: (ids: string[]) => Promise<BulkResponse>;
+  }): Promise<number> {
     let changed = 0;
 
     // One chunk at a time, so a failure is reported against the rules of its own chunk.
@@ -261,7 +279,13 @@ export class AlertingRuleReconciler {
     return changed;
   }
 
-  private async create(result: ReconcileRulesResult, rules: DesiredRule[]): Promise<void> {
+  private async create({
+    result,
+    rules,
+  }: {
+    result: ReconcileRulesResult;
+    rules: DesiredRule[];
+  }): Promise<void> {
     // One chunk at a time, so a failure is reported against the rules of its own chunk.
     for (const chunk of toChunks(rules)) {
       try {

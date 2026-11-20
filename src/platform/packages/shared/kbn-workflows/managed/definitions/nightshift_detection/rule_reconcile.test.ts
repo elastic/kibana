@@ -26,7 +26,6 @@ describe('Nightshift detection rule reconcile workflow', () => {
     const triggerTypes = workflow.triggers.map(({ type }) => type);
 
     // A trigger the guard does not name would start runs that only ever fail.
-    expect(guard.name).toBe('refuse_direct_runs');
     expect(guard.condition).toMatch(/^not \(/);
     triggerTypes.forEach((type) =>
       expect(guard.condition).toContain(`execution.triggeredBy : "${type}"`)

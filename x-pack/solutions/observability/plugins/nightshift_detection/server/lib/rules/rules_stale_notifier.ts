@@ -11,7 +11,7 @@ import { RULES_STALE_TRIGGER_ID, type RulesStaleEvent } from '../../../common/tr
 import { getErrorMessage } from '../errors/get_error_message';
 
 /** Tells the space of `request` that its detection rules are out of date. Never throws. */
-export type NotifyRulesStale = (request: KibanaRequest, event: RulesStaleEvent) => void;
+export type NotifyRulesStale = (params: { request: KibanaRequest; event: RulesStaleEvent }) => void;
 
 /**
  * Emits the rules stale trigger with the request that changed knowledge or sources, so the event
@@ -26,7 +26,7 @@ export function createRulesStaleNotifier({
   getWorkflowsClient: (request: KibanaRequest) => Promise<Pick<WorkflowsClient, 'emitEvent'>>;
   logger: Logger;
 }): NotifyRulesStale {
-  return (request, event) => {
+  return ({ request, event }) => {
     void getWorkflowsClient(request)
       .then((client) => client.emitEvent(RULES_STALE_TRIGGER_ID, event))
       .catch((error) => {

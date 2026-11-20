@@ -19,11 +19,13 @@ const STRATEGY = { id: 'known_failures', name: 'Known failures' };
 const createRule = ({
   sourceId = 'source-1',
   query = 'FROM logs | WHERE message : "timeout"',
+  lookback = '361m',
   enabled = true,
   strategy = STRATEGY,
 }: {
   sourceId?: string;
   query?: string;
+  lookback?: string;
   enabled?: boolean;
   strategy?: { id: string; name: string };
 } = {}): StrategyAlertingRule => ({
@@ -36,19 +38,21 @@ const createRule = ({
       kind: 'signal',
       metadata: { name: 'Timeouts' },
       time_field: '@timestamp',
-      schedule: { every: '5m', lookback: '361m' },
+      schedule: { every: '5m', lookback },
       query: { base: query },
     },
   },
 });
 
-const getRuleId = (rule: StrategyAlertingRule) =>
-  computeRuleId({
+const getRuleId = ({ strategy, resource }: StrategyAlertingRule) => {
+  const { metadata, ...rule } = resource.data;
+  return computeRuleId({
     spaceId: SPACE_ID,
-    strategy: rule.strategy.id,
-    sourceId: rule.resource.source_id,
-    query: rule.resource.data.query.base,
+    strategy: strategy.id,
+    sourceId: resource.source_id,
+    rule,
   });
+};
 
 const setUp = (options?: ConstructorParameters<typeof InMemoryRulesClient>[0]) => {
   const rulesClient = new InMemoryRulesClient(options);
@@ -96,10 +100,15 @@ describe('AlertingRuleReconciler', () => {
     });
   });
 
-  it('replaces the rule when the query changes, without editing it', async () => {
+  it.each([
+    [
+      'query',
+      createRule({ query: 'FROM logs | WHERE a' }),
+      createRule({ query: 'FROM logs | WHERE b' }),
+    ],
+    ['lookback', createRule({ lookback: '361m' }), createRule({ lookback: '721m' })],
+  ])('replaces the rule when its %s changes, without editing it', async (_, before, after) => {
     const { rulesClient, reconcile } = setUp();
-    const before = createRule({ query: 'FROM logs | WHERE a' });
-    const after = createRule({ query: 'FROM logs | WHERE b' });
     await reconcile([before]);
 
     await expect(reconcile([after])).resolves.toMatchObject({ created: 1, deleted: 1 });
@@ -171,16 +180,20 @@ describe('AlertingRuleReconciler', () => {
       createRule({ sourceId: `source-${index}` })
     );
     const { rulesClient, reconcile } = setUp({
-      failCreateOf: new Map([[getRuleId(rules[100]), 'create failed']]),
+      // The first chunk fails, so the second one proves the run goes on after a failure.
+      failCreateOf: new Map([[getRuleId(rules[0]), 'create failed']]),
     });
 
     const result = await reconcile(rules);
 
-    expect(result.created).toBe(100);
-    expect(result.failures).toEqual([
-      { rule_id: getRuleId(rules[100]), operation: 'create', message: 'create failed' },
-    ]);
-    expect(rulesClient.rules.size).toBe(100);
+    expect(result.created).toBe(1);
+    expect(result.failures).toHaveLength(100);
+    expect(result.failures[0]).toEqual({
+      rule_id: getRuleId(rules[0]),
+      operation: 'create',
+      message: 'create failed',
+    });
+    expect([...rulesClient.rules.keys()]).toEqual([getRuleId(rules[100])]);
   });
 
   it('never deletes a rule it does not manage', async () => {

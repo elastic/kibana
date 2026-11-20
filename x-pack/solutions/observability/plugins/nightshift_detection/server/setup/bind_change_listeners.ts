@@ -34,10 +34,10 @@ export function bindChangeListeners({ bind }: ContainerModuleLoadOptions): void 
     });
 
     significantEvents.onKnowledgeIndicatorsChange(({ request, sourceIds }) => {
-      notify(request, { reason: 'knowledge_indicators', source_ids: sourceIds });
+      notify({ request, event: { reason: 'knowledge_indicators', source_ids: sourceIds } });
     });
     nightshiftSources.onSourceChange(async ({ request, source }) => {
-      notify(request, { reason: 'sources', source_ids: [source.id] });
+      notify({ request, event: { reason: 'sources', source_ids: [source.id] } });
     });
   });
 }

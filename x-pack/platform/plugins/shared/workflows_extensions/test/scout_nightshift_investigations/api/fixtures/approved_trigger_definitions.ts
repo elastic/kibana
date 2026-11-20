@@ -229,6 +229,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: '470ea2e42d9ea0a7adb6da3d62f7d181e6e9a95469055f319635bcaf6cdfbe91',
   },
   {
+    id: 'nightshift-detection.rulesStale',
+    schemaHash: 'df56a4ea8b1617cd18cd175858f7729d4b0ea64e9b0b0698878a1bfbb27a275d',
+  },
+  {
     id: 'nightshift-investigations.completed',
     schemaHash: 'a6b68ad87d83616892d0932b99a4035aa3442ae2df9bc5ab2c05d2efe68fc049',
   },

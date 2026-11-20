@@ -88,7 +88,7 @@ apiTest.describe(
           query: { base: 'FROM logs-* | STATS count = COUNT(*)' },
         },
       });
-      expect(created).toHaveStatusCode(200);
+      expect(created).toHaveStatusCode(201);
       const ruleId: string = created.body.id;
 
       const reconcile = await reconcileUntilRun(apiClient, headers);
