@@ -105,6 +105,7 @@ export interface AssistantResponse {
 export enum ConversationRoundStepType {
   toolCall = 'tool_call',
   reasoning = 'reasoning',
+  modelReasoning = 'model_reasoning',
   compaction = 'compaction',
   backgroundAgentComplete = 'background_agent_complete',
   askUserQuestion = 'ask_user_question',
@@ -244,6 +245,30 @@ export type ReasoningStep = ConversationRoundStepMixin<
 
 export const isReasoningStep = (step: ConversationRoundStep): step is ReasoningStep => {
   return step.type === ConversationRoundStepType.reasoning;
+};
+
+/**
+ * Reasoning text emitted by the model provider for one LLM call.
+ */
+export interface ModelReasoningStepData {
+  /** plain text reasoning content, as returned by the provider */
+  reasoning: string;
+  /** when the LLM call produced tool calls, the corresponding tool call group ID */
+  tool_call_group_id?: string;
+}
+
+export type ModelReasoningStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.modelReasoning,
+  ModelReasoningStepData
+>;
+
+export const createModelReasoningStep = (data: ModelReasoningStepData): ModelReasoningStep => ({
+  type: ConversationRoundStepType.modelReasoning,
+  ...data,
+});
+
+export const isModelReasoningStep = (step: ConversationRoundStep): step is ModelReasoningStep => {
+  return step.type === ConversationRoundStepType.modelReasoning;
 };
 
 /**
@@ -500,6 +525,7 @@ export const isPreExecutionWorkflowStep = (
 export type ConversationRoundStep =
   | ToolCallStep
   | ReasoningStep
+  | ModelReasoningStep
   | CompactionStep
   | BackgroundAgentCompleteStep
   | AskUserQuestionStep
