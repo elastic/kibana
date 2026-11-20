@@ -35,9 +35,15 @@ const ALLOWED_KEYS_UPDATE_CLOUD = [
   'userSettings.locale',
   'userSettings.rememberSelectedSpace',
   'userSettings.lastSelectedSpaceId',
+  'userSettings.chromeColor',
+  'userSettings.chromeColorLight',
+  'userSettings.chromeColorDark',
 ] as const satisfies readonly UserProfileUpdatePaths[];
 
 const MAX_STRING_FIELD_LENGTH = 1024;
+
+/** Chrome colors are hex values (`#RRGGBB`); an empty string clears the setting. */
+const MAX_HEX_COLOR_LENGTH = 7;
 
 const MAX_USER_PROFILE_DATA_SIZE_BYTES = 1000 * 1024;
 
@@ -82,6 +88,9 @@ const userProfileUpdateSchema = schema.object({
       lastSelectedSpaceId: schema.maybe(
         schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH }))
       ),
+      chromeColor: schema.maybe(schema.string({ maxLength: MAX_HEX_COLOR_LENGTH })),
+      chromeColorLight: schema.maybe(schema.string({ maxLength: MAX_HEX_COLOR_LENGTH })),
+      chromeColorDark: schema.maybe(schema.string({ maxLength: MAX_HEX_COLOR_LENGTH })),
     })
   ),
 });
@@ -176,6 +185,17 @@ export function defineUpdateUserProfileDataRoute({
             statusCode: 400,
           });
         }
+      }
+
+      const { chromeColor, chromeColorLight, chromeColorDark } = userProfileData.userSettings ?? {};
+      const hasInvalidChromeColor = [chromeColor, chromeColorLight, chromeColorDark].some(
+        (color) => Boolean(color) && !isValidUserProfileAvatarColor(color!)
+      );
+      if (hasInvalidChromeColor) {
+        return response.customError({
+          body: 'Invalid hex color',
+          statusCode: 400,
+        });
       }
 
       const requestedLocale = userProfileData.userSettings?.locale;

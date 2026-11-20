@@ -16,6 +16,7 @@ export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_side
 export { Sidebar } from './src/sidebar';
 export { HeaderBreadcrumbsBadges, HeaderTopBanner, ChromelessHeader } from './src/shared';
 export { useHasInlineAppHeader } from './src/shared/chrome_hooks';
+export { ChromeColorModeProvider } from './src/shared/header_color_mode';
 export {
   HeaderActionButton,
   type HeaderActionButtonProps,

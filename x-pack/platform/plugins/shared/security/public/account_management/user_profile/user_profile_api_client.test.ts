@@ -100,6 +100,25 @@ describe('UserProfileAPIClient', () => {
     });
   });
 
+  it('emits only the written data on `dataUpdates$` after a partial update', async () => {
+    coreStart.http.get.mockResolvedValue({
+      data: { userSettings: { locale: 'de-DE', darkMode: 'light' } },
+    });
+    await apiClient.getCurrent({ dataPath: 'userSettings' });
+
+    const updates: unknown[] = [];
+    apiClient.dataUpdates$.subscribe((update) => updates.push(update));
+
+    await apiClient.partialUpdate({ userSettings: { chromeColorDark: '#0B64DD' } });
+
+    // The stored `darkMode` must not be part of the emission, or listeners would think it changed.
+    expect(updates).toEqual([{ userSettings: { chromeColorDark: '#0B64DD' } }]);
+    // The in-memory profile is still the merged result.
+    expect(await firstValueFrom(apiClient.userProfile$)).toEqual({
+      userSettings: { locale: 'de-DE', darkMode: 'light', chromeColorDark: '#0B64DD' },
+    });
+  });
+
   it('reverts the in-memory profile when a partial update fails', async () => {
     coreStart.http.get.mockResolvedValue({
       data: { userSettings: { locale: 'de-DE', darkMode: 'light' } },

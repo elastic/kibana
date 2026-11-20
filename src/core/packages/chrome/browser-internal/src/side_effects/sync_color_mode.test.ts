@@ -177,6 +177,18 @@ describe('syncColorMode', () => {
       expect(theme.setDarkMode).toHaveBeenLastCalledWith(false);
     });
 
+    it('keeps a session-only color mode when an unrelated setting is written', () => {
+      const { theme, dataUpdates$ } = setup({ serverDarkMode: false });
+
+      // e.g. the developer toolbar flips the theme for the session only...
+      theme.setDarkMode(true);
+      // ...and a later profile write that does not carry `darkMode` must not undo it.
+      dataUpdates$.next({ userSettings: { chromeColorDark: '#0B64DD' } });
+
+      expect(theme.setDarkMode).toHaveBeenCalledTimes(2);
+      expect(theme.setDarkMode).toHaveBeenLastCalledWith(true);
+    });
+
     it('ignores the user preference when the space setting is overridden', () => {
       const { theme, dataUpdates$ } = setup({ isOverridden: true });
 

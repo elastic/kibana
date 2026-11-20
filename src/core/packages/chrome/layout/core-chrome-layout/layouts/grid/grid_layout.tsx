@@ -12,6 +12,7 @@ import React from 'react';
 import type { ChromeLayoutConfig } from '@kbn/ui-chrome-layout';
 import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/ui-chrome-layout';
 import {
+  ChromeColorModeProvider,
   ChromeComponentsProvider,
   ClassicHeader,
   ChromeHeader,
@@ -35,6 +36,7 @@ import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
 import { KibanaGridLayoutGlobalStyles } from './kibana_grid_global_styles';
+import { useChromeBackground } from './use_chrome_background';
 
 const layoutConfigs: {
   classic: ChromeLayoutConfig;
@@ -72,7 +74,8 @@ export class GridLayout implements LayoutService {
    * Returns a layout component with the provided dependencies
    */
   public getComponent(): React.ComponentType {
-    const { application, overlays, http, docLinks, customBranding, notifications } = this.deps;
+    const { application, overlays, http, docLinks, customBranding, notifications, userProfile } =
+      this.deps;
 
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
@@ -97,6 +100,13 @@ export class GridLayout implements LayoutService {
 
       const layoutConfigKey = chromeStyle === 'classic' ? 'classic' : 'project';
 
+      // The user's custom chrome color only applies to the framed (project) layout, where the
+      // header and navigation are transparent and the chrome background shows around the app.
+      const chromeBackground = useChromeBackground(
+        userProfile,
+        chromeVisible && chromeStyle !== 'classic'
+      );
+
       const layoutConfig = {
         ...layoutConfigs[layoutConfigKey],
         sidebarWidth,
@@ -113,12 +123,20 @@ export class GridLayout implements LayoutService {
         if (chromeStyle === 'classic') {
           header = <ClassicHeader />;
         } else {
-          header = <ChromeHeader />;
+          header = (
+            <ChromeColorModeProvider colorMode={chromeBackground?.colorMode}>
+              <ChromeHeader />
+            </ChromeColorModeProvider>
+          );
           if (!hasInlineAppHeader && hasChromeAppHeaderContent) {
             applicationTopBar = <ChromeAppHeaderRenderer />;
           }
 
-          navigation = <GridLayoutProjectSideNav />;
+          navigation = (
+            <ChromeColorModeProvider colorMode={chromeBackground?.colorMode}>
+              <GridLayoutProjectSideNav />
+            </ChromeColorModeProvider>
+          );
         }
       }
 
@@ -137,6 +155,7 @@ export class GridLayout implements LayoutService {
               navigation={navigation}
               banner={banner}
               applicationTopBar={applicationTopBar}
+              background={chromeBackground?.background}
             >
               <>
                 {!chromeVisible && <ChromelessHeader />}

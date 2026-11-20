@@ -465,6 +465,70 @@ describe('Update profile routes', () => {
       expect(userProfileService.update).toHaveBeenCalledTimes(1);
     });
 
+    describe('chrome colors', () => {
+      beforeEach(() => {
+        session.get.mockResolvedValue({
+          error: null,
+          value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+        });
+        authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+      });
+
+      it('accepts valid hex colors and empty strings that clear the setting.', async () => {
+        const userSettings = {
+          chromeColor: '#0B64DD',
+          chromeColorLight: '#ECF1F9',
+          chromeColorDark: '',
+        };
+        await expect(
+          routeHandler(
+            getMockContext(),
+            httpServerMock.createKibanaRequest({ body: { userSettings } }),
+            kibanaResponseFactory
+          )
+        ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+        expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', { userSettings });
+      });
+
+      it.each(['chromeColor', 'chromeColorLight', 'chromeColorDark'])(
+        'rejects an invalid %s.',
+        async (key) => {
+          await expect(
+            routeHandler(
+              getMockContext(),
+              httpServerMock.createKibanaRequest({ body: { userSettings: { [key]: 'invalid' } } }),
+              kibanaResponseFactory
+            )
+          ).resolves.toEqual(expect.objectContaining({ status: 400 }));
+
+          expect(userProfileService.update).not.toHaveBeenCalled();
+        }
+      );
+
+      it('rejects colors exceeding the max length.', () => {
+        const bodySchema = (routeConfig.validate as any).body;
+        expect(() => bodySchema.validate({ userSettings: { chromeColor: '#0B64DD00' } })).toThrow(
+          /maximum length of \[7\]/
+        );
+      });
+
+      it('allows Elastic Cloud users to update the chrome colors.', async () => {
+        authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser({ elastic_cloud_user: true }));
+        const userSettings = { chromeColor: '#0B64DD', chromeColorDark: '#07101F' };
+
+        await expect(
+          routeHandler(
+            getMockContext(),
+            httpServerMock.createKibanaRequest({ body: { userSettings } }),
+            kibanaResponseFactory
+          )
+        ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+        expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', { userSettings });
+      });
+    });
+
     it('sanitizes an SVG avatar image before storing it.', async () => {
       session.get.mockResolvedValue({
         error: null,
