@@ -153,14 +153,33 @@ export interface PackTiScenario {
   historicAnchors?: PackTiHistoricAnchors;
 }
 
+/**
+ * Seeded articles that go through the real enrich workflow write their email join keys defanged
+ * only. A plain prose email is judged by the model, so a plain seed address would make a demo or
+ * eval hunt depend on a verdict; a defanged one is attributed deterministically
+ * (`discriminating` / `defanged_source`). The extractor treats an email as defanged only when the
+ * plain address is absent from the original text, so the plain value must never appear in a body.
+ */
+export const defangSeededEmails = (scenario: PackTiScenario, text: string): string =>
+  scenario.joinIocs.reduce(
+    (out, ioc) =>
+      ioc.type === 'email' && ioc.defanged ? out.split(ioc.value).join(ioc.defanged) : out,
+    text
+  );
+
 /** Flat list of strings that must appear in the RSS XML payload. */
 export const scenarioRssMustContain = (scenario: PackTiScenario): string[] => {
   const out: string[] = [];
   for (const ioc of scenario.joinIocs) {
-    out.push(ioc.value);
-    if (ioc.defanged) out.push(ioc.defanged);
+    // An email that has a defanged form is written only in that form.
+    if (ioc.type === 'email' && ioc.defanged) {
+      out.push(ioc.defanged);
+    } else {
+      out.push(ioc.value);
+      if (ioc.defanged) out.push(ioc.defanged);
+    }
   }
-  out.push(...scenario.narrative);
+  out.push(...scenario.narrative.map((token) => defangSeededEmails(scenario, token)));
   return out;
 };
 
@@ -347,8 +366,16 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       articleUrl: 'https://www.elastic.co/security-labs/okta-and-lapsus-what-you-need-to-know',
       joinIocs: [
         { type: 'ip', value: '192.0.2.50', defanged: '192[.]0[.]2[.]50' },
-        { type: 'email', value: 'cfo@corp.example.cloud' },
-        { type: 'email', value: 'it-admin@corp.example.cloud' },
+        {
+          type: 'email',
+          value: 'cfo@corp.example.cloud',
+          defanged: 'cfo[@]corp[.]example[.]cloud',
+        },
+        {
+          type: 'email',
+          value: 'it-admin@corp.example.cloud',
+          defanged: 'it-admin[@]corp[.]example[.]cloud',
+        },
       ],
       narrative: [
         'user.mfa.factor.deactivate',
@@ -453,7 +480,11 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       joinIocs: [
         { type: 'ip', value: '192.0.2.30', defanged: '192[.]0[.]2[.]30' },
         { type: 'ip', value: '192.0.2.31', defanged: '192[.]0[.]2[.]31' },
-        { type: 'email', value: 'dev-user@corp.example.cloud' },
+        {
+          type: 'email',
+          value: 'dev-user@corp.example.cloud',
+          defanged: 'dev-user[@]corp[.]example[.]cloud',
+        },
         { type: 'user', value: 'dev-user' },
       ],
       narrative: [
@@ -566,7 +597,11 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       joinIocs: [
         { type: 'ip', value: '192.0.2.30', defanged: '192[.]0[.]2[.]30' },
         { type: 'ip', value: '192.0.2.31', defanged: '192[.]0[.]2[.]31' },
-        { type: 'email', value: 'dev-user@corp.example.cloud' },
+        {
+          type: 'email',
+          value: 'dev-user@corp.example.cloud',
+          defanged: 'dev-user[@]corp[.]example[.]cloud',
+        },
         { type: 'user', value: 'dev-user' },
       ],
       narrative: [
@@ -662,7 +697,11 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       joinIocs: [
         { type: 'ip', value: '192.0.2.30', defanged: '192[.]0[.]2[.]30' },
         { type: 'ip', value: '192.0.2.31', defanged: '192[.]0[.]2[.]31' },
-        { type: 'email', value: 'dev-user@corp.example.cloud' },
+        {
+          type: 'email',
+          value: 'dev-user@corp.example.cloud',
+          defanged: 'dev-user[@]corp[.]example[.]cloud',
+        },
         { type: 'user', value: 'dev-user' },
       ],
       // Intentionally omit CloudTrail API / ATT&CK tokens so Tier 2 lacks executable evidence quotes.
@@ -737,7 +776,11 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         // TEST-NET-2 decoys: required in article bodies, deliberately absent from pack ECS.
         { type: 'ip', value: '198.51.100.40', defanged: '198[.]51[.]100[.]40' },
         { type: 'ip', value: '198.51.100.41', defanged: '198[.]51[.]100[.]41' },
-        { type: 'email', value: 'research-analyst@lab.example.dev' },
+        {
+          type: 'email',
+          value: 'research-analyst@lab.example.dev',
+          defanged: 'research-analyst[@]lab[.]example[.]dev',
+        },
       ],
       narrative: [
         '123456789012',
@@ -839,7 +882,11 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         // query. Seed addresses need a real TLD so the placeholder-email rule never matches them.
         { type: 'ip', value: '203.0.113.60', defanged: '203[.]0[.]113[.]60' },
         { type: 'ip', value: '203.0.113.61', defanged: '203[.]0[.]113[.]61' },
-        { type: 'email', value: 'signin-watch@lab-demo.seedbench.dev' },
+        {
+          type: 'email',
+          value: 'signin-watch@lab-demo.seedbench.dev',
+          defanged: 'signin-watch[@]lab-demo[.]seedbench[.]dev',
+        },
       ],
       narrative: [
         '210987654321',
@@ -1022,9 +1069,17 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       articleUrl: 'https://www.elastic.co/security-labs/axios-supply-chain-compromise-detections',
       joinIocs: [
         { type: 'ip', value: '192.0.2.70', defanged: '192[.]0[.]2[.]70' },
-        { type: 'email', value: 'dev-contractor-42@corp.example.cloud' },
+        {
+          type: 'email',
+          value: 'dev-contractor-42@corp.example.cloud',
+          defanged: 'dev-contractor-42[@]corp[.]example[.]cloud',
+        },
         { type: 'user', value: 'dev-contractor-42' },
-        { type: 'email', value: 'malicious-actor-x@external.example.app' },
+        {
+          type: 'email',
+          value: 'malicious-actor-x@external.example.app',
+          defanged: 'malicious-actor-x[@]external[.]example[.]app',
+        },
       ],
       narrative: [
         'corp-example',
@@ -1376,7 +1431,7 @@ export const buildPackArticleDataUrl = (
   article?: Pick<PackTiHistoricArticle, 'title' | 'body'>
 ): string => {
   const title = article?.title ?? scenario.title;
-  const body = article?.body ?? scenario.body;
+  const body = defangSeededEmails(scenario, article?.body ?? scenario.body);
   const mitreLine = scenario.mitre.length
     ? `<p><strong>Techniques:</strong> ${htmlEscape(scenario.mitre.join(', '))}</p>`
     : '';
@@ -1414,7 +1469,7 @@ export const buildPackRssDataUrl = ({
     throw new Error('buildPackRssDataUrl requires at least one report item');
   }
   const mitreLine = scenario.mitre.length ? ` Techniques: ${scenario.mitre.join(', ')}.` : '';
-  const description = `${scenario.body}${mitreLine}`;
+  const description = defangSeededEmails(scenario, `${scenario.body}${mitreLine}`);
   const articleLink = xmlEscape(scenario.articleUrl);
   const itemsXml = reportItems
     .map((item) => {
@@ -1490,7 +1545,7 @@ export const buildHistoricThreatReportDoc = ({
     reportsPerPack: isLive ? Math.max(itemIndex + 1, 1) : reportsPerPack,
   });
   const mitreLine = scenario.mitre.length ? ` Techniques: ${scenario.mitre.join(', ')}.` : '';
-  const bodyText = `${articleBody}${mitreLine}`;
+  const bodyText = defangSeededEmails(scenario, `${articleBody}${mitreLine}`);
   const sourceName = isLive
     ? scenario.name
     : resolveHistoricSourceName({ scenario, itemIndex, reportsPerPack });

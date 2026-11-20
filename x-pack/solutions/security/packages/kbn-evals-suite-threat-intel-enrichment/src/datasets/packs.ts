@@ -38,7 +38,7 @@ export const OKTA_PACK: ThreatIntelPack = {
     'Operators linked to a LAPSUS$-style identity campaign are actively abusing stolen Okta ' +
     'sessions from Russian IP 192[.]0[.]2[.]50 (192.0.2.50) against production tenants. They are ' +
     'resetting passwords, stripping MFA (user.mfa.factor.deactivate), and granting Super Admin to ' +
-    'finance and IT accounts including cfo@corp.example.cloud and it-admin@corp.example.cloud. Immediate ' +
+    'finance and IT accounts including cfo[@]corp[.]example[.]cloud and it-admin[@]corp[.]example[.]cloud. Immediate ' +
     'business impact includes system.api_token.create and privileged app group membership while ' +
     'payroll and ERP SSO remain exposed. This is an ongoing breach with ransomware-adjacent ' +
     'extortion risk; revoke sessions and lock down Super Admin immediately. Hunt ATT&CK ' +
@@ -51,7 +51,7 @@ export const AWS_IAM_PACK: ThreatIntelPack = {
   title: 'AWS IAM privilege escalation and credential theft in account 123456789012',
   body:
     'Security researchers documented a confirmed privilege-escalation campaign in AWS account ' +
-    '123456789012. Compromised user dev-user@corp.example.cloud (source IP 192[.]0[.]2[.]30 / 192.0.2.30) ' +
+    '123456789012. Compromised user dev-user[@]corp[.]example[.]cloud (source IP 192[.]0[.]2[.]30 / 192.0.2.30) ' +
     'attached AdministratorAccess, assumed escalated-role, and staged access toward S3 bucket ' +
     'corp-prod-data. Follow-on activity from 192[.]0[.]2[.]31 (192.0.2.31) included GetSecretValue ' +
     'on prod/db-credentials plus StopLogging and DeleteTrail for defense evasion. The campaign ' +
@@ -76,9 +76,9 @@ export const GITHUB_ACTIONS_PACK: ThreatIntelPack = {
   title: 'Recurring contractor IOCs in GitHub supply-chain reporting',
   body:
     'Background research note for situational awareness. Prior public reporting has mentioned ' +
-    'contractor-style accounts such as dev-contractor-42@corp.example.cloud (user dev-contractor-42) in ' +
+    'contractor-style accounts such as dev-contractor-42[@]corp[.]example[.]cloud (user dev-contractor-42) in ' +
     'GitHub org corp-example, source IP 192[.]0[.]2[.]70 (192.0.2.70), and invitee ' +
-    'malicious-actor-x@external.example.app as illustrative indicators. Historical write-ups also ' +
+    'malicious-actor-x[@]external[.]example[.]app as illustrative indicators. Historical write-ups also ' +
     'referenced making corp-example/payment-service public, deploy_key.create, secret-scanning ' +
     'alert dismissals, and fine-grained PATs. No immediate incident response is requested; this ' +
     'catalogs previously reported indicators for optional hunting. Related ATT&CK references: ' +

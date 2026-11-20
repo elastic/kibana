@@ -131,7 +131,7 @@ const isSameOrigin = (ioc: ExtractedIoc, articleUrl?: string): boolean => {
   return ioc.type === 'domain' && ioc.value.toLowerCase() === articleHost;
 };
 
-const SEMANTIC_CANDIDATE_TYPES: ReadonlySet<IocType> = new Set(['url', 'domain', 'hash']);
+const SEMANTIC_CANDIDATE_TYPES: ReadonlySet<IocType> = new Set(['url', 'domain', 'hash', 'email']);
 const isSemanticCandidateType = (type: IocType): boolean => SEMANTIC_CANDIDATE_TYPES.has(type);
 
 /**
@@ -143,11 +143,21 @@ const isSemanticCandidateType = (type: IocType): boolean => SEMANTIC_CANDIDATE_T
  */
 const PROSE_HASH_BASES: ReadonlySet<string> = new Set(['hash_high_entropy']);
 
+/**
+ * Email tier bases the extractor assigns from prose alone. A placeholder host
+ * (`placeholder_email`), an email written defanged (`defanged_source`) and one under an IOC
+ * heading (`ioc_section`) are decided by the value or its placement and keep their tier. Only a
+ * plain-prose address on a real domain goes to review: the same address is a phishing sender in
+ * one paragraph and a publisher's contact line in another, and only the text around it says which.
+ */
+const PROSE_EMAIL_BASES: ReadonlySet<string> = new Set(['uncertain_default']);
+
 /** Whether this IOC, at its extract-time tier and basis, is one the model pass judges. */
 const isSemanticCandidate = (ioc: ExtractedIoc): boolean =>
   isSemanticCandidateType(ioc.type) &&
   PROMOTABLE_TIERS.has(ioc.tier) &&
-  (ioc.type !== 'hash' || PROSE_HASH_BASES.has(ioc.tier_basis));
+  (ioc.type !== 'hash' || PROSE_HASH_BASES.has(ioc.tier_basis)) &&
+  (ioc.type !== 'email' || PROSE_EMAIL_BASES.has(ioc.tier_basis));
 
 const tierPriority = (tier: IocTier): number => {
   if (tier === 'discriminating') return 0;
@@ -410,7 +420,7 @@ export const reconcileIocAdjudication = (
         );
   }
 
-  // Deferred URL/domain/prose-hash candidates keep heuristic tiers in `iocs`, but
+  // Deferred URL/domain/prose-hash/prose-email candidates keep heuristic tiers in `iocs`, but
   // stay out of anchors / promotion until a model pass reviews them. Candidacy is
   // read off the pre-verdict output, since a verdict rewrites the basis. Correlation
   // hash is separate.

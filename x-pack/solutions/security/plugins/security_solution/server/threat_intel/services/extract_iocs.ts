@@ -29,13 +29,13 @@ export interface ExtractedIoc {
   tier_basis: string;
   port?: number;
   /**
-   * URL/domain/hash kept at a heuristic promotable tier because semantic review
+   * URL/domain/hash/email kept at a heuristic promotable tier because semantic review
    * did not run (batch budget / overflow). Promote must skip these; they are not
    * a model rejection.
    */
   deferred_unreviewed?: boolean;
   /**
-   * Source-text window around the best occurrence of this value (url/domain/hash),
+   * Source-text window around the best occurrence of this value (url/domain/hash/email),
    * for semantic adjudication to judge without re-finding the value in the
    * article. Prompt-only: stripped before the result reaches persistence.
    */
@@ -59,6 +59,12 @@ const CONTEXT_WINDOW_CHARS = 240;
 const ATTRIBUTION_CONTEXT_CUE =
   /\b(attacker|adversary|c2|c&c|payload|malware|downloaded|beacon|exfiltrat|command.?and.?control|infrastructure|dropper|staged)\b/i;
 
+// An email is judged on who the source says used it, so its attribution check also accepts the
+// words that introduce a phishing sender, a spoofed sender, a ransom or extortion contact and an
+// attacker-registered account. URLs, domains and hashes keep the cue set above.
+const EMAIL_ATTRIBUTION_CONTEXT_CUE =
+  /\b(?:phish\w*|sender|sent from|spoof\w*|lure|ransom\w*|extortion|registrant|registered)\b/i;
+
 const windowAround = (source: string, offset: number, length: number, radius: number): string =>
   source.slice(Math.max(0, offset - radius), Math.min(source.length, offset + length + radius));
 
@@ -66,13 +72,22 @@ const windowAround = (source: string, offset: number, length: number, radius: nu
 // would otherwise satisfy its own cue regardless of the surrounding prose, making
 // every occurrence of such a value look attributed and collapsing the tie-break
 // to "prefer the later occurrence" no matter which one actually has attribution.
-const hasAttributionCue = (source: string, offset: number, length: number): boolean => {
+const hasAttributionCue = (
+  source: string,
+  offset: number,
+  length: number,
+  type?: IocType
+): boolean => {
   const before = source.slice(Math.max(0, offset - CONTEXT_WINDOW_CHARS), offset);
   const after = source.slice(
     offset + length,
     Math.min(source.length, offset + length + CONTEXT_WINDOW_CHARS)
   );
-  return ATTRIBUTION_CONTEXT_CUE.test(before) || ATTRIBUTION_CONTEXT_CUE.test(after);
+  const cues =
+    type === 'email'
+      ? [ATTRIBUTION_CONTEXT_CUE, EMAIL_ATTRIBUTION_CONTEXT_CUE]
+      : [ATTRIBUTION_CONTEXT_CUE];
+  return cues.some((cue) => cue.test(before) || cue.test(after));
 };
 
 export interface ExtractIocsResult {
@@ -1175,11 +1190,11 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     }
   };
 
-  // Only url/domain/hash candidates ever reach semantic adjudication
+  // Only url/domain/hash/email candidates ever reach semantic adjudication
   // (isSemanticCandidate in adjudicate_iocs.ts), so only those need a context
   // window tracked across duplicate occurrences.
   const isContextCandidate = (ioc: WorkingIoc): boolean =>
-    ioc.type === 'url' || ioc.type === 'domain' || ioc.type === 'hash';
+    ioc.type === 'url' || ioc.type === 'domain' || ioc.type === 'hash' || ioc.type === 'email';
 
   const pushIoc = (ioc: WorkingIoc): WorkingIoc | undefined => {
     // An over-long value is not a usable indicator and it is actively harmful.
@@ -1198,7 +1213,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     if (existing) {
       recordSectionKind(existing, ioc._offset);
       if (isContextCandidate(ioc) && ioc._offset !== undefined) {
-        const cue = hasAttributionCue(refangedText, ioc._offset, ioc.value.length);
+        const cue = hasAttributionCue(refangedText, ioc._offset, ioc.value.length, ioc.type);
         const existingOffset = existing._offset;
         const existingCue = existing._hasAttributionCue ?? false;
         if (
@@ -1213,7 +1228,12 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
       return existing;
     }
     if (isContextCandidate(ioc) && ioc._offset !== undefined) {
-      ioc._hasAttributionCue = hasAttributionCue(refangedText, ioc._offset, ioc.value.length);
+      ioc._hasAttributionCue = hasAttributionCue(
+        refangedText,
+        ioc._offset,
+        ioc.value.length,
+        ioc.type
+      );
     }
     recordSectionKind(ioc, ioc._offset);
     seen.add(dedupKey);
@@ -1624,7 +1644,10 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   const cleanedIocs: ExtractedIoc[] = iocs.map(
     ({ _offset, _sectionKind, _hasAttributionCue, ...rest }) => ({
       ...rest,
-      ...(rest.type === 'url' || rest.type === 'domain' || rest.type === 'hash'
+      ...(rest.type === 'url' ||
+      rest.type === 'domain' ||
+      rest.type === 'hash' ||
+      rest.type === 'email'
         ? _offset !== undefined
           ? {
               context: windowAround(refangedText, _offset, rest.value.length, CONTEXT_WINDOW_CHARS),

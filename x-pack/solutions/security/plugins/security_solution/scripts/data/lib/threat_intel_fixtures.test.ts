@@ -21,6 +21,7 @@ import {
   buildPackRssCurrentReportItems,
   buildPackRssDataUrl,
   collectPackJoinFieldValues,
+  defangSeededEmails,
   PACK_TI_SCENARIOS,
   reportTimestampRatiosForPack,
   reportTimestampsForWindow,
@@ -37,6 +38,7 @@ import {
   THREAT_REPORTS_INDEX,
 } from './threat_intel_fixtures';
 import { isHuntEligibleIoc, isPlaceholderEmailIoc } from '@kbn/alertzero-common';
+import { extractIocs } from '../../../server/threat_intel/services/extract_iocs';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -107,7 +109,7 @@ describe('PACK_TI_SCENARIOS', () => {
       expect(new Set(titles).size).toEqual(titles.length);
       for (const article of scenario.historicArticles) {
         for (const token of scenarioRssMustContain(scenario)) {
-          expect(article.body).toContain(token);
+          expect(defangSeededEmails(scenario, article.body)).toContain(token);
         }
         expect(article.body).toMatch(/\d+\[\.\]\d+\[\.\]\d+\[\.\]\d+/);
       }
@@ -344,7 +346,9 @@ describe('buildHistoricThreatReportDoc', () => {
       kind: 'live',
     });
     expect(doc.content.title).toEqual(scenario.title);
-    expect(doc.content.body_text.startsWith(scenario.body)).toBe(true);
+    expect(doc.content.body_text.startsWith(defangSeededEmails(scenario, scenario.body))).toBe(
+      true
+    );
     expect(doc.source.name).toEqual(scenario.name);
     expect(doc.content.published_at).toEqual(doc['@timestamp']);
   });
@@ -437,6 +441,63 @@ describe('resolveHistoricThreatIntelWindow', () => {
         endMs: Date.parse('2026-07-22T18:00:00.000Z'),
       })
     ).toThrow(/wider than the 24h live reserve/);
+  });
+});
+
+describe('seeded article bodies and email join keys', () => {
+  const renderedBodies = (scenario: (typeof PACK_TI_SCENARIOS)[string][number]) => [
+    defangSeededEmails(scenario, scenario.body),
+    ...scenario.historicArticles.map((article) => defangSeededEmails(scenario, article.body)),
+    decodeURIComponent(
+      buildPackRssDataUrl({
+        scenario,
+        reportItems: buildPackRssCurrentReportItems({ endMs: Date.parse('2026-07-01T00:00:00Z') }),
+      }).replace(/^data:application\/rss\+xml;charset=utf-8,/, '')
+    ),
+    decodeURIComponent(
+      buildPackArticleDataUrl(scenario).replace(/^data:text\/html;charset=utf-8,/, '')
+    ),
+  ];
+
+  it('gives every email join key a defanged form', () => {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
+      for (const ioc of scenario.joinIocs.filter((entry) => entry.type === 'email')) {
+        expect(ioc.defanged).toBe(ioc.value.replace('@', '[@]').replace(/\./g, '[.]'));
+      }
+    }
+  });
+
+  it('never writes a plain email join key in a rendered body or feed', () => {
+    const offenders: string[] = [];
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
+      for (const email of scenario.joinIocs.filter((entry) => entry.type === 'email')) {
+        renderedBodies(scenario).forEach((body, index) => {
+          if (body.includes(email.value))
+            offenders.push(`${scenario.reportIdSlug}#${index}:${email.value}`);
+        });
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it('extracts every email join key at discriminating / defanged_source and none at uncertain', () => {
+    const problems: string[] = [];
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
+      const emails = scenario.joinIocs.filter((entry) => entry.type === 'email');
+      for (const body of renderedBodies(scenario)) {
+        const extracted = extractIocs({ text: body }).iocs.filter((ioc) => ioc.type === 'email');
+        for (const email of emails) {
+          const ioc = extracted.find((entry) => entry.value === email.value);
+          if (ioc && (ioc.tier !== 'discriminating' || ioc.tier_basis !== 'defanged_source')) {
+            problems.push(
+              `${scenario.reportIdSlug}:${email.value} -> ${ioc.tier}/${ioc.tier_basis}`
+            );
+          }
+        }
+        expect(extracted.filter((ioc) => ioc.tier === 'uncertain')).toEqual([]);
+      }
+    }
+    expect(problems).toEqual([]);
   });
 });
 
@@ -567,10 +628,10 @@ describe('aws-iam-clean scenario', () => {
   it('carries every scenarioRssMustContain token and a defanged IP in every slot', () => {
     const tokens = scenarioRssMustContain(scenario);
     const slots: Array<{ label: string; body: string }> = [
-      { label: 'scenario.body', body: scenario.body },
+      { label: 'scenario.body', body: defangSeededEmails(scenario, scenario.body) },
       ...scenario.historicArticles.map((article, n) => ({
         label: `historicArticles[${n}].body`,
-        body: article.body,
+        body: defangSeededEmails(scenario, article.body),
       })),
     ];
     const missing: string[] = [];
@@ -773,7 +834,11 @@ describe('aws-iam-clean scenario', () => {
       expect(doc.extracted?.iocs).toEqual([
         { type: 'ip', value: '203.0.113.60', defanged: '203[.]0[.]113[.]60' },
         { type: 'ip', value: '203.0.113.61', defanged: '203[.]0[.]113[.]61' },
-        { type: 'email', value: 'signin-watch@lab-demo.seedbench.dev' },
+        {
+          type: 'email',
+          value: 'signin-watch@lab-demo.seedbench.dev',
+          defanged: 'signin-watch[@]lab-demo[.]seedbench[.]dev',
+        },
       ]);
       expect(doc.extracted?.threat_actors).toBeUndefined();
       expect(doc.extracted?.diamond).toBeUndefined();
