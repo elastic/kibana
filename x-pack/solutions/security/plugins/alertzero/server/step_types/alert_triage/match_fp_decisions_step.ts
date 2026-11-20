@@ -113,6 +113,7 @@ const NOTHING = {
   held_in_shadow: 0,
   tag_failures: 0,
   notes_missing: 0,
+  left_for_notes: 0,
   deferred: 0,
   out_of_time: false,
 };
@@ -183,7 +184,10 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
          * Notes say on each alert why it was closed or kept out of analysis, so an analyst reading
          * the alert does not have to look the decision up. They are queued here and written once
          * for the whole step, in one pool: the notes route takes one note per call, so a pool per
-         * decision would leave most decisions waiting on one call each. A note that cannot be
+         * decision would leave most decisions waiting on one call each. A decision closes or skips
+         * only as many alerts as the sweep has notes left for: the rest stay untagged and take the
+         * normal path, so this sweep's planner may send them to analysis, and a later sweep matches
+         * those it did not. They are counted in `left_for_notes`. A note that cannot be
          * written never undoes the close: it is counted in `notes_missing`.
          */
         const noteJobs: Array<{ alertId: string; note: string }> = [];
@@ -309,8 +313,10 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
                   )
                 );
               }
-              const allowed = alertIds.slice(0, room.get(id));
-              totals.capped += alertIds.length - allowed.length;
+              const withinCap = alertIds.slice(0, room.get(id));
+              totals.capped += alertIds.length - withinCap.length;
+              const allowed = withinCap.slice(0, notesLeft);
+              totals.left_for_notes += withinCap.length - allowed.length;
               if (allowed.length === 0) continue;
               tagged = allowed;
               await tagInChunks(write, {
@@ -348,6 +354,9 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
               totals.deferred++;
               continue;
             }
+            const allowed = alertIds.slice(0, notesLeft);
+            totals.left_for_notes += alertIds.length - allowed.length;
+            if (allowed.length === 0) continue;
             try {
               if (!(await stillActive(id))) {
                 logger.info(
@@ -356,12 +365,12 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
                 continue;
               }
               await tagInChunks(write, {
-                alertIds,
+                alertIds: allowed,
                 add: [VERDICT_INCONCLUSIVE_TAG, `${TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX}${id}`],
                 remove: [],
               });
-              totals.skipped += alertIds.length;
-              queueNotes(id, alertIds, 'skipped');
+              totals.skipped += allowed.length;
+              queueNotes(id, allowed, 'skipped');
             } catch (error) {
               totals.tag_failures++;
               warn(`Could not tag the alerts of decision ${id}`, error);

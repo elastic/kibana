@@ -532,7 +532,12 @@ const matchFpDecisionsOutputSchema = lazySchema(() =>
     notes_missing: z
       .number()
       .describe(
-        'Alerts a decision closed or skipped that have no note: a failed write, or past the sweep limit.'
+        'Alerts a decision closed or skipped that have no note: a failed write, or past the time limit.'
+      ),
+    left_for_notes: z
+      .number()
+      .describe(
+        'Matches left untouched for the next sweep because the sweep had no notes left for them.'
       ),
     deferred: z
       .number()

@@ -127,7 +127,8 @@ export const TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX = 'az:closed_by_decision:';
 export const TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX = 'az:skipped_by_decision:';
 /**
  * Notes one sweep writes at most. Each note is one call and takes about a second, 20 at a time, so
- * this bounds the step to about a minute. Alerts past it are still closed or skipped, without a note.
+ * this bounds the step to about a minute. A decision closes or skips only as many alerts as notes are
+ * left; the rest stay untagged and take the normal path, and are counted in `left_for_notes`.
  */
 export const DECISION_NOTES_PER_SWEEP = 1000;
 /**

@@ -970,13 +970,13 @@ describe('triage match decisions step in on mode', () => {
     expect(notes()[0].note).toContain('dismissed by ana');
   });
 
-  it('stops writing notes past the sweep limit, and still keeps every alert out of analysis', async () => {
+  it('skips only as many alerts as the sweep has notes for, and leaves the rest untouched for the next sweep', async () => {
     const id = decisionId('do_not_propose', hashOf('C:\\x.exe'));
     const many = Array.from(
       { length: DECISION_NOTES_PER_SWEEP + 5 },
       (_unused, i): [string, Record<string, unknown>] => [`a${i}`, source('C:\\x.exe')]
     );
-    const { run, notes } = setup({
+    const { run, notes, tags } = setup({
       mode: 'on',
       alerts: many,
       decisions: { [id]: stored('do_not_propose') },
@@ -985,8 +985,49 @@ describe('triage match decisions step in on mode', () => {
     const { output } = await run();
 
     expect(notes()).toHaveLength(DECISION_NOTES_PER_SWEEP);
+    const tagged = tags().flatMap(({ ids }) => ids);
+    expect(tagged).toHaveLength(DECISION_NOTES_PER_SWEEP);
+    expect(tagged).not.toContain(`a${DECISION_NOTES_PER_SWEEP}`);
     expect(output).toEqual(
-      expect.objectContaining({ skipped: DECISION_NOTES_PER_SWEEP + 5, notes_missing: 5 })
+      expect.objectContaining({
+        skipped: DECISION_NOTES_PER_SWEEP,
+        left_for_notes: 5,
+        notes_missing: 0,
+      })
+    );
+  });
+
+  it('closes only as many alerts as the notes the skips left, so no closed alert goes without a note', async () => {
+    const skipId = decisionId('do_not_propose', hashOf('C:\\skip.exe'));
+    const closeId = decisionId('false_positive', hashOf('C:\\close.exe'));
+    const skips = DECISION_NOTES_PER_SWEEP - 200;
+    const alerts = [
+      ...Array.from({ length: skips }, (_unused, i): [string, Record<string, unknown>] => [
+        `s${i}`,
+        source('C:\\skip.exe'),
+      ]),
+      ...Array.from({ length: 300 }, (_unused, i): [string, Record<string, unknown>] => [
+        `c${i}`,
+        source('C:\\close.exe'),
+      ]),
+    ];
+    const { run, notes, closes } = setup({
+      mode: 'on',
+      alerts,
+      decisions: { [skipId]: stored('do_not_propose'), [closeId]: stored('false_positive') },
+    });
+
+    const { output } = await run();
+
+    expect(closes().flatMap(({ signal_ids }) => signal_ids)).toHaveLength(200);
+    expect(notes()).toHaveLength(DECISION_NOTES_PER_SWEEP);
+    expect(output).toEqual(
+      expect.objectContaining({
+        skipped: skips,
+        closed: 200,
+        left_for_notes: 100,
+        notes_missing: 0,
+      })
     );
   });
 
