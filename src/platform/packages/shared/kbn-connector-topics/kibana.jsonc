@@ -1,7 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/connector-topics",
-  "owner": ["@elastic/workflows-eng"],
+  "owner": ["@elastic/workflows-eng", "@elastic/response-ops"],
   "description": "Topic definitions for connector inbound events.",
   "group": "platform",
   "visibility": "shared"
