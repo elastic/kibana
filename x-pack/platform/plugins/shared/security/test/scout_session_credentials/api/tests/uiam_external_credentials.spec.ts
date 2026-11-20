@@ -44,6 +44,7 @@ apiTest.describe(
         expect(response.body.keys).toStrictEqual([]);
         expect(response.body.headersUnchanged).toBe(true);
         expect(response.body.snapshotExpired).toBe(true);
+        expect(response.body.failureTokenExpired).toBe(true);
         expect(response.body.cleanupComplete).toBe(true);
 
         const after = await apiClient.get('internal/security/me', {

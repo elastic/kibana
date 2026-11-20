@@ -64,4 +64,10 @@ describe('isTokenExpiredError', () => {
     expect(isTokenExpiredError(Boom.unauthorized('invalid credential'))).toBe(false);
     expect(isTokenExpiredError(new Error('token expired'))).toBe(false);
   });
+
+  it('rejects a UIAM error with a null JSON body', () => {
+    const error = Boom.unauthorized('empty UIAM error');
+    Object.assign(error.output, { payload: null });
+    expect(isTokenExpiredError(error)).toBe(false);
+  });
 });

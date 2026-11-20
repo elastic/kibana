@@ -13,9 +13,10 @@ import { UIAM_ERROR_CODES } from '@kbn/core-security-server';
 /** Detects expired native ES or UIAM access tokens, not other authentication errors. */
 export const isTokenExpiredError = (error: Error, grant = false): boolean => {
   if (Boom.isBoom(error)) {
-    const payload = error.output.payload as { error?: { code?: string } };
+    // UIAM keeps its parsed JSON body here, which can be `null`.
+    const payload = error.output.payload as { error?: { code?: string } } | null;
     return (
-      error.output.statusCode === 401 && payload.error?.code === UIAM_ERROR_CODES.TOKEN_EXPIRED
+      error.output.statusCode === 401 && payload?.error?.code === UIAM_ERROR_CODES.TOKEN_EXPIRED
     );
   }
 

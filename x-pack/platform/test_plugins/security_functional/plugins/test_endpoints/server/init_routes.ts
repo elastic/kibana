@@ -10,12 +10,13 @@ import Boom from '@hapi/boom';
 import { setTimeout as delay } from 'timers/promises';
 
 import { schema } from '@kbn/config-schema';
-import type {
-  CoreSetup,
-  CoreStart,
-  ElasticsearchClient,
-  KibanaRequest,
-  PluginInitializerContext,
+import {
+  type CoreSetup,
+  type CoreStart,
+  type ElasticsearchClient,
+  type KibanaRequest,
+  type PluginInitializerContext,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
@@ -489,7 +490,7 @@ export function initRoutes(
         await recovery.cleanup();
       }
 
-      const body = recovery.getResult();
+      const body = recovery.getResult(failure);
       if (failure) {
         return response.customError({
           statusCode: Boom.isBoom(failure) ? failure.output.statusCode : 500,
@@ -597,7 +598,21 @@ export function initRoutes(
     },
     async (_context, request, response) => {
       const [, { taskManager }] = await core.getStartServices();
-      await taskManager.removeIfExists(request.params.taskId);
+      const { taskId } = request.params;
+      try {
+        // Remove only tasks this plugin scheduled, never unrelated background tasks.
+        const { taskType } = await taskManager.get(taskId);
+        if (taskType !== authenticationTaskType) {
+          return response.forbidden({ body: { message: 'Only authentication test tasks.' } });
+        }
+      } catch (error) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+          return response.noContent();
+        }
+        throw error;
+      }
+
+      await taskManager.removeIfExists(taskId);
       return response.noContent();
     }
   );

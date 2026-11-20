@@ -13,6 +13,7 @@ export interface RecoveryResult {
   usernames: string[];
   headersUnchanged: boolean;
   snapshotExpired: boolean;
+  failureTokenExpired: boolean;
   cleanupComplete: boolean;
 }
 

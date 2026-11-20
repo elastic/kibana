@@ -6,11 +6,13 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
 import { setTimeout } from 'timers/promises';
 import { Agent, fetch } from 'undici';
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { CoreStart, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import { UIAM_ERROR_CODES } from '@kbn/core-security-server';
 import { MOCK_IDP_UIAM_SERVICE_URL, MOCK_IDP_UIAM_SHARED_SECRET } from '@kbn/mock-idp-utils';
 
 export const credentialRecoverySchema = schema.object({
@@ -46,8 +48,31 @@ interface RecoveryResult {
   keys: Array<Pick<GrantedKey, 'id' | 'backend'>>;
   usernames: string[];
   snapshotExpired: boolean;
+  failureTokenExpired: boolean;
   cleanupComplete: boolean;
   headersUnchanged: boolean;
+}
+
+/** Checks whether an ES or UIAM call, including an API key grant, failed on an expired token. */
+function isTokenExpiredError(error: unknown): boolean {
+  if (Boom.isBoom(error)) {
+    const payload = error.output.payload as { error?: { code?: string } } | null;
+    return (
+      error.output.statusCode === 401 && payload?.error?.code === UIAM_ERROR_CODES.TOKEN_EXPIRED
+    );
+  }
+
+  if (!(error instanceof errors.ResponseError)) {
+    return false;
+  }
+
+  // An API key grant reports the expired token as the cause of a 403.
+  const details = error.statusCode === 403 ? error.body?.error?.caused_by : error.body?.error;
+  return (
+    (error.statusCode === 401 || error.statusCode === 403) &&
+    (details?.reason === 'token expired' ||
+      details?.caused_by?.authentication_error_code === UIAM_ERROR_CODES.TOKEN_EXPIRED)
+  );
 }
 
 /** Waits for every operation before throwing, so cleanup sees all created resources. */
@@ -172,11 +197,13 @@ export class CredentialRecovery {
     }
   }
 
-  getResult(): RecoveryResult {
+  /** @param failure The error that ended the scenario, if any. */
+  getResult(failure?: Error): RecoveryResult {
     return {
       keys: this.keys.map(({ id, backend }) => ({ id, backend })),
       usernames: this.usernames,
       snapshotExpired: this.snapshotExpired,
+      failureTokenExpired: failure !== undefined && isTokenExpiredError(failure),
       cleanupComplete: this.cleanupComplete,
       headersUnchanged:
         this.request.headers === this.originalHeaders &&
@@ -198,12 +225,7 @@ export class CredentialRecovery {
       try {
         await this.snapshotClient.security.authenticate();
       } catch (error) {
-        if (
-          error instanceof errors.ResponseError &&
-          error.statusCode === 401 &&
-          (error.body?.error?.reason === 'token expired' ||
-            error.body?.error?.caused_by?.authentication_error_code === '0x7E0116')
-        ) {
+        if (isTokenExpiredError(error)) {
           this.snapshotExpired = true;
           return;
         }
