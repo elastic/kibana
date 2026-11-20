@@ -19,6 +19,7 @@ import {
   map,
   merge,
   mergeMap,
+  of,
   skip,
   startWith,
   tap,
@@ -90,7 +91,9 @@ export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
   initialPanels: DashboardState['panels'],
   initialPinnedPanels: DashboardState['pinned_panels'],
-  trackPanel: ReturnType<typeof initializeTrackPanel>['api']
+  trackPanel: ReturnType<typeof initializeTrackPanel>['api'],
+  /** When `true`, the grid is replaced by an awaiting screen, so grid panels are not rendered */
+  awaitingRequiredFilters$: Observable<boolean> = of(false)
 ) {
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
@@ -138,22 +141,28 @@ export function initializeLayoutManager(
     }
   });
 
-  /** Observable that publishes `true` when all children APIs are available */
-  const childrenLoading$ = combineLatest([children$, layout$, viewModeManager.api.viewMode$]).pipe(
-    map(([children, layout, viewMode]) => {
-      const renderedPanelCount = Object.keys(layout.panels).filter((uuid) => {
-        const sectionId = layout.panels[uuid].grid.sectionId;
-        return !(sectionId && isSectionCollapsed(sectionId)); // if a panel is collapseed, it does not render
-      }).length;
-      const expectedChildCount = renderedPanelCount + Object.keys(layout.pinnedPanels).length;
+  /**
+   * The ids of the children that are actually going to be rendered, which must match `DashboardViewport`:
+   * pinned panels are always rendered, while grid panels are not rendered when they sit in a collapsed
+   * section or while the grid is replaced by the awaiting screen.
+   */
+  const visibleChildren$ = combineLatest([layout$, awaitingRequiredFilters$]).pipe(
+    map(([{ panels, pinnedPanels }, awaitingRequiredFilters]) => {
+      const pinnedPanelIds = Object.keys(pinnedPanels); // always rendered
+      const gridPanelIds = awaitingRequiredFilters
+        ? [] // the grid is replaced by the awaiting screen
+        : Object.keys(panels).filter((uuid) => !isSectionCollapsed(panels[uuid].grid.sectionId));
+      return [...pinnedPanelIds, ...gridPanelIds];
+    })
+  );
 
-      const currentChildCount = Object.keys(children).filter((uuid) => {
-        const sectionId = layout.panels[uuid]?.grid.sectionId; // uuid might reference a pinned panel
-        return !(sectionId && isSectionCollapsed(sectionId)); // if a panel is collapsed, it should never trigger loading, even if the API exists
-      }).length;
-
-      return expectedChildCount !== currentChildCount;
-    }),
+  /** Observable that publishes `true` while the APIs of any visible child are not yet available */
+  const childrenLoading$ = combineLatest([
+    children$,
+    visibleChildren$,
+    viewModeManager.api.viewMode$,
+  ]).pipe(
+    map(([children, visibleChildren]) => visibleChildren.some((uuid) => !children[uuid])),
     distinctUntilChanged()
   );
 
@@ -576,6 +585,7 @@ export function initializeLayoutManager(
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       gridLayout$,
       childrenLoading$,
+      visibleChildren$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
 

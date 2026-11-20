@@ -113,11 +113,15 @@ export function getDashboardApi({
     viewModeManager.api.viewMode$
   );
 
+  // written by the filters manager, read by the layout manager to know which children are going to be rendered
+  const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(false);
+
   const layoutManager = initializeLayoutManager(
     viewModeManager,
     initialState.panels,
     initialState.pinned_panels,
-    trackPanel.api
+    trackPanel.api,
+    awaitingRequiredFilters$
   );
   childrenSubject$.next(layoutManager.api.children$);
 
@@ -150,7 +154,8 @@ export function getDashboardApi({
     unifiedSearchManager,
     layoutManager,
     settingsManager,
-    forcePublishOnReset$
+    forcePublishOnReset$,
+    awaitingRequiredFilters$
   );
   const projectRoutingManager = initializeProjectRoutingManager(
     initialState,

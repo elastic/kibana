@@ -37,11 +37,11 @@ export const initializeFiltersManager = (
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>,
   layoutManager: ReturnType<typeof initializeLayoutManager>,
   settingsManager: ReturnType<typeof initializeSettingsManager>,
-  forcePublish$: Subject<void>
+  forcePublish$: Subject<void>,
+  awaitingRequiredFilters$: BehaviorSubject<boolean>
 ) => {
   const publishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const unpublishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-  const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(false);
 
   const test = combineCompatibleChildrenApis<
     { awaitingRequiredFilters$?: BehaviorSubject<boolean> },
@@ -75,14 +75,8 @@ export const initializeFiltersManager = (
     awaitingRequiredFilters$.next(a);
   });
 
-  const childFiltersLoading$ = combineLatest([
-    layoutManager.internalApi.childrenLoading$,
-    awaitingRequiredFilters$,
-  ])
+  const childFiltersLoading$ = awaitingRequiredFilters$
     .pipe(
-      map(([childrenLoading, awaitingRequiredFilters]) => {
-        return childrenLoading ? awaitingRequiredFilters : false;
-      }),
       combineLatestWith(
         combineCompatibleChildrenApis<AppliesFilters, boolean>(
           { children$: layoutManager.api.children$ },
@@ -97,7 +91,7 @@ export const initializeFiltersManager = (
       )
     )
     .pipe(
-      map(([childrenLoading, filtersLoading]) => childrenLoading || filtersLoading),
+      map(([awaitingRequiredFilters, filtersLoading]) => awaitingRequiredFilters || filtersLoading),
       distinctUntilChanged()
     );
 
