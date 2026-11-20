@@ -40,6 +40,12 @@ function renderFlyout(
   return { refreshFlags };
 }
 
+/** The search box reacts to key presses, so `userEvent.clear` would not update the filter. */
+async function emptySearchBox(search: HTMLElement) {
+  await userEvent.click(search);
+  await userEvent.keyboard('{Control>}a{/Control}{Backspace}');
+}
+
 describe('FlagsFlyout', () => {
   test('shows the snapshot together with config and runtime overrides', async () => {
     const http = createHttp();
@@ -113,13 +119,17 @@ describe('FlagsFlyout', () => {
     await userEvent.type(search, 'type:boolean');
     await expectOnly(['alpha.flag']);
 
-    await userEvent.clear(search);
+    await emptySearchBox(search);
     await userEvent.type(search, 'source:runtime');
     await expectOnly(['gamma.flag']);
 
-    await userEvent.clear(search);
+    await emptySearchBox(search);
     await userEvent.type(search, 'needle');
     await expectOnly(['beta.flag']);
+
+    // Emptying the box shows every flag again.
+    await emptySearchBox(search);
+    await expectOnly(['alpha.flag', 'beta.flag', 'gamma.flag']);
   });
 
   test('lists evaluated flags when the provider snapshot is empty', async () => {
@@ -271,6 +281,8 @@ describe('FlagsFlyout', () => {
     await act(async () => {
       resolveReload({ runtimeOverrides: { 'string.flag': 'new' }, configOverrides: {} });
     });
+    // A duplicate blur commit queued during the reload would be sent only after it finished.
+    expect(http.put).toHaveBeenCalledTimes(1);
   });
 
   describe('rapid changes to one flag', () => {
@@ -483,6 +495,122 @@ describe('FlagsFlyout', () => {
 
       expect(await screen.findByText('Provider')).toBeInTheDocument();
       expect(screen.queryByText('Runtime override')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('saves are tracked per flag, outside the row', () => {
+    function setup(flags: Array<{ key: string; value: unknown }>) {
+      const http = createHttp();
+      http.post.mockResolvedValue({ flags });
+      http.delete.mockResolvedValue({ ok: true });
+      const puts: Array<{ resolve: () => void }> = [];
+      http.put.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            puts.push({ resolve: () => resolve({ ok: true }) });
+          }) as never
+      );
+      return { http, puts };
+    }
+    const option = (value: 'true' | 'false') =>
+      screen.getByTestId(`featureFlagsHelperValue-a.flag-${value}`);
+
+    test('a row that is filtered out and back keeps using the same queue', async () => {
+      const { http, puts } = setup([{ key: 'a.flag', value: false }]);
+      http.get.mockResolvedValue({ runtimeOverrides: {}, configOverrides: {} });
+      renderFlyout(http);
+      await screen.findByText('a.flag');
+
+      await userEvent.click(option('true'));
+      const search = screen.getByPlaceholderText('Search flags');
+      await userEvent.type(search, 'zzz');
+      await waitFor(() => expect(screen.queryByText('a.flag')).not.toBeInTheDocument());
+      await emptySearchBox(search);
+      await screen.findByText('a.flag');
+
+      // The new editor starts from the choice being saved and queues behind the request in flight.
+      expect(option('true')).toHaveAttribute('aria-pressed', 'true');
+      await userEvent.click(option('false'));
+      expect(http.put).toHaveBeenCalledTimes(1);
+
+      await act(async () => puts[0].resolve());
+      await waitFor(() => expect(http.put).toHaveBeenCalledTimes(2));
+      expect(http.put).toHaveBeenLastCalledWith('/internal/feature-flags/overrides/a.flag', {
+        body: JSON.stringify({ value: false }),
+      });
+      await act(async () => puts[1].resolve());
+    });
+
+    test('Clear all waits for a save in flight and drops queued choices', async () => {
+      const { http, puts } = setup([{ key: 'a.flag', value: false }]);
+      http.get.mockResolvedValue({ runtimeOverrides: {}, configOverrides: {} });
+      renderFlyout(http);
+      await screen.findByText('a.flag');
+
+      await userEvent.click(option('true'));
+      await userEvent.click(option('false'));
+      await userEvent.click(screen.getByTestId('featureFlagsHelperClearAll'));
+      expect(http.delete).not.toHaveBeenCalled();
+
+      await act(async () => puts[0].resolve());
+      await waitFor(() => expect(http.delete).toHaveBeenCalledTimes(1));
+      // The queued `false` must not be written after the DELETE.
+      expect(http.put).toHaveBeenCalledTimes(1);
+    });
+
+    test('clearing one flag waits for its save and drops queued choices', async () => {
+      const { http, puts } = setup([{ key: 'a.flag', value: true }]);
+      http.get.mockResolvedValue({
+        runtimeOverrides: { 'a.flag': true },
+        configOverrides: {},
+      });
+      renderFlyout(http);
+      await screen.findByText('a.flag');
+
+      await userEvent.click(option('false'));
+      await userEvent.click(option('true'));
+      await userEvent.click(screen.getByTestId('featureFlagsHelperReset-a.flag'));
+      expect(http.delete).not.toHaveBeenCalled();
+
+      await act(async () => puts[0].resolve());
+      await waitFor(() => expect(http.delete).toHaveBeenCalledTimes(1));
+      expect(http.put).toHaveBeenCalledTimes(1);
+    });
+
+    test('a reload from an earlier save does not replace a newer edit', async () => {
+      const http = createHttp();
+      http.post.mockResolvedValue({ flags: [{ key: 'string.flag', value: 'old' }] });
+      http.put.mockResolvedValue({ ok: true });
+      let resolveReload: (value: unknown) => void = () => {};
+      const reload = new Promise((resolve) => {
+        resolveReload = resolve;
+      });
+      http.get
+        .mockResolvedValueOnce({ runtimeOverrides: {}, configOverrides: {} })
+        // The reload after the first save is held while the user keeps typing.
+        .mockReturnValueOnce(reload as never)
+        .mockResolvedValue({ runtimeOverrides: { 'string.flag': 'ab' }, configOverrides: {} });
+      renderFlyout(http);
+      const field = await screen.findByTestId('featureFlagsHelperValue-string.flag');
+
+      await userEvent.clear(field);
+      await userEvent.type(field, 'a{Enter}');
+      await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+      await userEvent.type(field, 'b{Enter}');
+      expect(field).toHaveValue('ab');
+
+      await act(async () => {
+        resolveReload({ runtimeOverrides: { 'string.flag': 'a' }, configOverrides: {} });
+      });
+      // The stale reload would put the older value back, and blurring would then save it.
+      expect(field).toHaveValue('ab');
+      await waitFor(() => expect(http.put).toHaveBeenCalledTimes(2));
+      await userEvent.tab();
+
+      expect(http.put).toHaveBeenCalledTimes(2);
+      expect(http.put).toHaveBeenLastCalledWith('/internal/feature-flags/overrides/string.flag', {
+        body: JSON.stringify({ value: 'ab' }),
+      });
     });
   });
 

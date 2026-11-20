@@ -155,6 +155,40 @@ const searchSchema = {
   },
 } as const;
 
+/**
+ * Saves for one flag, kept by the flyout so they outlive the row editor. A row can unmount and
+ * come back (search, paging) while a save is still running, and clear actions need to see them.
+ */
+interface SaveQueue {
+  /** The newest choice made while a save was in flight. Only the latest is kept. */
+  queued: FeatureFlagValue | undefined;
+  /** The newest choice, whether it is in flight or queued. Used to drop repeated commits. */
+  requested: FeatureFlagValue | undefined;
+  /** The last value the server accepted, or the stored value before any save. */
+  confirmed: FeatureFlagValue;
+  /** Whether the server has a runtime override for the flag. */
+  overrideExists: boolean;
+  /** Set when a clear action takes over, so the run stops without reloading or marking saved. */
+  cancelled: boolean;
+  /** Settles when the whole run, including any queued saves, has finished. */
+  done: Promise<void>;
+}
+
+interface FlagSaves {
+  submit: (
+    flagKey: string,
+    value: FeatureFlagValue,
+    stored: { value: FeatureFlagValue; hasOverride: boolean }
+  ) => void;
+  /** The newest choice for a flag with a save in progress. */
+  getPending: (flagKey: string) => FeatureFlagValue | undefined;
+  /** The last value the server accepted for a flag with a save in progress. */
+  getConfirmed: (flagKey: string) => FeatureFlagValue | undefined;
+  hasSaveInProgress: (flagKey: string) => boolean;
+  /** Lets a save show or revert the choice in whichever editor is mounted for the flag. */
+  registerDraft: (flagKey: string, setDraft: (value: FeatureFlagValue) => void) => () => void;
+}
+
 const SAVED_INDICATOR_DURATION_MS = 1400;
 const fadeInOut = keyframes`
   0% {
@@ -348,18 +382,121 @@ export function FlagsFlyout({
         await refreshFlags();
         // Keep the message from a failed save that happened earlier in the same run.
         await load(true);
-        markSaved(flagKey);
       } catch {
         reportRowError(flagKey, saveFailedMessage(flagKey), rowSaveFailedMessage);
       }
     },
-    [load, markSaved, refreshFlags, reportRowError]
+    [load, refreshFlags, reportRowError]
+  );
+
+  const saveQueues = useRef(new Map<string, SaveQueue>());
+  const draftSetters = useRef(new Map<string, (value: FeatureFlagValue) => void>());
+
+  /** Runs one flag's saves one at a time, then reloads the table once. */
+  const runSaves = useCallback(
+    async (flagKey: string, queue: SaveQueue, first: FeatureFlagValue) => {
+      setSaving(flagKey, true);
+      let next: FeatureFlagValue | undefined = first;
+      let savedAny = false;
+      let lastSaved = false;
+      // A queued choice that matches what the server already accepted would be a duplicate request.
+      const takeQueued = () => {
+        const { queued, overrideExists, confirmed } = queue;
+        return overrideExists && Object.is(queued, confirmed) ? undefined : queued;
+      };
+      while (next !== undefined) {
+        while (next !== undefined) {
+          const value: FeatureFlagValue = next;
+          queue.queued = undefined;
+          lastSaved = await persistOverride(flagKey, value);
+          if (lastSaved) {
+            queue.confirmed = value;
+            queue.overrideExists = true;
+            savedAny = true;
+          }
+          next = takeQueued();
+          if (!lastSaved && next === undefined) {
+            // Nothing newer is waiting, so show the last value the server accepted.
+            draftSetters.current.get(flagKey)?.(queue.confirmed);
+          }
+        }
+        if (savedAny && !queue.cancelled) {
+          savedAny = false;
+          await settleOverride(flagKey);
+        }
+        next = takeQueued();
+      }
+      saveQueues.current.delete(flagKey);
+      setSaving(flagKey, false);
+      // Only once nothing newer is waiting does the latest choice count as saved.
+      if (lastSaved && !queue.cancelled) {
+        markSaved(flagKey);
+      }
+    },
+    [markSaved, persistOverride, setSaving, settleOverride]
+  );
+
+  const submitSave = useCallback<FlagSaves['submit']>(
+    (flagKey, value, stored) => {
+      const existing = saveQueues.current.get(flagKey);
+      if (existing) {
+        // Enter followed by blur, or a repeated click, asks for the same value again.
+        if (!Object.is(existing.requested, value)) {
+          existing.requested = value;
+          existing.queued = value;
+        }
+        return;
+      }
+      const queue: SaveQueue = {
+        queued: undefined,
+        requested: value,
+        confirmed: stored.value,
+        overrideExists: stored.hasOverride,
+        cancelled: false,
+        done: Promise.resolve(),
+      };
+      saveQueues.current.set(flagKey, queue);
+      queue.done = runSaves(flagKey, queue, value);
+    },
+    [runSaves]
+  );
+
+  /** Drops queued choices and waits for the save in flight, so a clear is not undone after it. */
+  const cancelSaves = useCallback(async (flagKeys?: string[]) => {
+    const queues = [...saveQueues.current.entries()]
+      .filter(([flagKey]) => flagKeys === undefined || flagKeys.includes(flagKey))
+      .map(([, queue]) => queue);
+    queues.forEach((queue) => {
+      queue.queued = undefined;
+      queue.requested = undefined;
+      queue.cancelled = true;
+    });
+    await Promise.all(queues.map((queue) => queue.done));
+  }, []);
+
+  const flagSaves = useMemo<FlagSaves>(
+    () => ({
+      submit: submitSave,
+      getPending: (flagKey) => saveQueues.current.get(flagKey)?.requested,
+      getConfirmed: (flagKey) => saveQueues.current.get(flagKey)?.confirmed,
+      hasSaveInProgress: (flagKey) => saveQueues.current.has(flagKey),
+      registerDraft: (flagKey, setDraft) => {
+        draftSetters.current.set(flagKey, setDraft);
+        return () => {
+          if (draftSetters.current.get(flagKey) === setDraft) {
+            draftSetters.current.delete(flagKey);
+          }
+        };
+      },
+    }),
+    [submitSave]
   );
 
   const resetOverride = useCallback(
     async (flagKey: string) => {
       setErrorMessage(undefined);
       setRowError(flagKey, undefined);
+      await cancelSaves([flagKey]);
       try {
         await http.delete(buildPath(`${FEATURE_FLAGS_OVERRIDES_API_PATH}/{flagKey}`, { flagKey }));
         await refreshFlags();
@@ -369,11 +506,12 @@ export function FlagsFlyout({
         reportRowError(flagKey, resetFailedMessage(flagKey), rowResetFailedMessage);
       }
     },
-    [http, load, markSaved, refreshFlags, reportRowError, setRowError]
+    [cancelSaves, http, load, markSaved, refreshFlags, reportRowError, setRowError]
   );
 
   const clearAll = useCallback(async () => {
     clearRowErrors();
+    await cancelSaves();
     try {
       await http.delete(FEATURE_FLAGS_OVERRIDES_API_PATH);
       await refreshFlags();
@@ -385,7 +523,7 @@ export function FlagsFlyout({
         })
       );
     }
-  }, [clearRowErrors, http, load, refreshFlags]);
+  }, [cancelSaves, clearRowErrors, http, load, refreshFlags]);
 
   const searchPlaceholder = i18n.translate('core.featureFlags.helper.searchPlaceholder', {
     defaultMessage: 'Search flags',
@@ -456,9 +594,8 @@ export function FlagsFlyout({
           savedSequence={savedKeys.get(row.key)}
           error={rowErrors.get(row.key)}
           onSavedAnimationEnd={() => clearSaved(row.key)}
-          onPersist={(value) => persistOverride(row.key, value)}
-          onSettled={() => settleOverride(row.key)}
-          onSavingChange={(saving) => setSaving(row.key, saving)}
+          isSaving={savingKeys.has(row.key)}
+          saves={flagSaves}
         />
       ),
     });
@@ -674,98 +811,44 @@ function OverrideEditor({
   savedSequence,
   error,
   onSavedAnimationEnd,
-  onPersist,
-  onSettled,
-  onSavingChange,
+  isSaving,
+  saves,
 }: {
   row: FlagRow;
   savedSequence: number | undefined;
   /** Why the last change to this flag failed. Shown in place of the saved check. */
   error: ReactNode | undefined;
   onSavedAnimationEnd: () => void;
-  /** Resolves to whether the server stored the override. */
-  onPersist: (value: FeatureFlagValue) => Promise<boolean>;
-  /** Called once a run of saves has finished, to refresh the flags and the table. */
-  onSettled: () => Promise<void>;
-  /** Reports when a run of saves starts and ends, so the row can show the pending override. */
-  onSavingChange: (saving: boolean) => void;
+  /** Whether a save for this flag is in progress. */
+  isSaving: boolean;
+  saves: FlagSaves;
 }) {
   const { euiTheme } = useEuiTheme();
-  const [draft, setDraft] = useState<FeatureFlagValue>(row.draft);
+  // A row that comes back while a save is running starts from the choice being saved.
+  const [draft, setDraft] = useState<FeatureFlagValue>(
+    () => saves.getPending(row.key) ?? row.draft
+  );
+  useEffect(() => saves.registerDraft(row.key, setDraft), [row.key, saves]);
   useEffect(() => {
-    setDraft(row.draft);
-  }, [row.draft, row.key]);
-
-  // Saves for one flag run one at a time. A newer choice made while one is in flight replaces any
-  // earlier queued choice, and an earlier save's result never touches the UI unless it matters:
-  // the table reloads once at the end, and a failure reverts to the last value the server accepted.
-  const isSaving = useRef(false);
-  const queuedValue = useRef<FeatureFlagValue | undefined>(undefined);
-  const requestedValue = useRef<FeatureFlagValue | undefined>(undefined);
-  const confirmedValue = useRef<FeatureFlagValue>(row.draft);
-  if (!isSaving.current) {
-    confirmedValue.current = row.draft;
-  }
-
-  const runSaves = async (first: FeatureFlagValue) => {
-    isSaving.current = true;
-    onSavingChange(true);
-    let next: FeatureFlagValue | undefined = first;
-    let savedAny = false;
-    let overrideExists = row.hasRuntimeOverride;
-    // A queued choice that matches what the server already accepted would be a duplicate request.
-    const takeQueued = () => {
-      const queued = queuedValue.current;
-      return overrideExists && Object.is(queued, confirmedValue.current) ? undefined : queued;
-    };
-    while (next !== undefined) {
-      while (next !== undefined) {
-        const value: FeatureFlagValue = next;
-        queuedValue.current = undefined;
-        const saved = await onPersist(value);
-        if (saved) {
-          confirmedValue.current = value;
-          overrideExists = true;
-          savedAny = true;
-        }
-        next = takeQueued();
-        if (!saved && next === undefined) {
-          // Nothing newer is waiting, so show the last value the server accepted.
-          setDraft(confirmedValue.current);
-        }
-      }
-      if (savedAny) {
-        savedAny = false;
-        await onSettled();
-      }
-      next = takeQueued();
+    // A reload from an earlier save must not replace a newer choice that is still being saved.
+    if (!isSaving) {
+      setDraft(row.draft);
     }
-    requestedValue.current = undefined;
-    isSaving.current = false;
-    onSavingChange(false);
-  };
+  }, [row.draft, row.key, isSaving]);
 
   const commit = (value: FeatureFlagValue | '', isExplicit: boolean = false) => {
     if (!isSaveableOverride(row.type, value)) {
       // invalid, revert to previous value
-      setDraft(isSaving.current ? confirmedValue.current : row.draft);
+      setDraft(saves.getConfirmed(row.key) ?? row.draft);
       return;
     }
-    // Enter followed by blur commits the same edit twice.
-    if (Object.is(requestedValue.current, value)) {
-      return;
+    if (!saves.hasSaveInProgress(row.key)) {
+      const needsOverride = (row.type === 'boolean' || isExplicit) && !row.hasRuntimeOverride;
+      if (Object.is(value, row.draft) && !needsOverride) {
+        return;
+      }
     }
-    if (isSaving.current) {
-      requestedValue.current = value;
-      queuedValue.current = value;
-      return;
-    }
-    const needsOverride = (row.type === 'boolean' || isExplicit) && !row.hasRuntimeOverride;
-    if (Object.is(value, row.draft) && !needsOverride) {
-      return;
-    }
-    requestedValue.current = value;
-    void runSaves(value);
+    saves.submit(row.key, value, { value: row.draft, hasOverride: row.hasRuntimeOverride });
   };
 
   return (
