@@ -25,6 +25,19 @@ export const DEFAULT_SCHEMA = 'dbo';
 export const TSQL_WRITE_PATTERN =
   /\b(INTO|EXEC|EXECUTE|INSERT|MERGE|OPENROWSET|OPENQUERY|OPENDATASOURCE|WAITFOR)\b/i;
 
+// Server-level T-SQL commands that self-managed SQL Server accepts after a SELECT in the same batch with no
+// semicolon. Only unambiguous forms are listed so common column names (use, enable, deny, backup) are not
+// rejected: bare keywords that are never identifiers, plus commands matched together with their next token.
+// GRANT/DENY/REVOKE and USE are not listed; database permissions are the real control for those.
+export const MSSQL_SERVER_COMMAND_PATTERN =
+  /\b(SHUTDOWN|DBCC|RECONFIGURE|KILL\s+(?:\d+|STATS|QUERY)|(?:BACKUP|RESTORE)\s+(?:DATABASE|LOG|CERTIFICATE|MASTER|SERVICE|SYMMETRIC)|(?:DISABLE|ENABLE)\s+TRIGGER)\b/i;
+
+// Write guard for the SQL Server connector: the shared T-SQL write tokens plus the server-level commands above.
+export const MSSQL_READ_GUARD_PATTERN = new RegExp(
+  `${TSQL_WRITE_PATTERN.source}|${MSSQL_SERVER_COMMAND_PATTERN.source}`,
+  'i'
+);
+
 // Replaces comments, string literals, and quoted identifiers with a space so the write-token scan only sees SQL
 // tokens. A keyword inside a literal or [identifier] is not a statement, and a comment is whitespace to T-SQL
 // (`DROP/**/TABLE` is `DROP TABLE`). Only the check sees this text; the original SQL is what runs. Block comments
@@ -37,8 +50,9 @@ export const blankNonCode = (sql: string): string => {
     const next = sql[i + 1];
 
     if (char === '-' && next === '-') {
-      const end = sql.indexOf('\n', i);
-      i = end === -1 ? sql.length : end;
+      // T-SQL ends a line comment at CR as well as LF, so `-- x\rDROP TABLE t` still runs the DROP.
+      const end = sql.slice(i).search(/[\r\n]/);
+      i = end === -1 ? sql.length : i + end;
       out += ' ';
     } else if (char === '/' && next === '*') {
       let depth = 1;
@@ -166,8 +180,12 @@ export const runSql = async (
 export const quoteIdentifier = (identifier: string): string =>
   `[${identifier.replace(/\]/g, ']]')}]`;
 
-// T-SQL LIKE also treats [ as a wildcard, which the shared escape (! % _) does not cover.
-export const escapeSearchTerm = (term: string): string =>
-  escapeLikePattern(term.toLowerCase(), false).replace(/\[/g, '![');
+// T-SQL LIKE also treats [ as a wildcard, which the shared escape (! % _) does not cover. Does not fold case, so a
+// caller can fold it in SQL (`LOWER(@pattern)`) and compare both sides under the server collation.
+export const escapeLikeTerm = (term: string): string =>
+  escapeLikePattern(term, false).replace(/\[/g, '![');
+
+// Variant that folds case in JavaScript, for callers that compare against `LOWER(column)` without folding the pattern.
+export const escapeSearchTerm = (term: string): string => escapeLikeTerm(term.toLowerCase());
 
 export const resolveMaxRows = (maxRows?: number): number => maxRows ?? DEFAULT_MAX_ROWS;

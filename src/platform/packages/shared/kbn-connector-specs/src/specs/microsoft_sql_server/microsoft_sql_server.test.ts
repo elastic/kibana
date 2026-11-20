@@ -341,6 +341,15 @@ describe('MicrosoftSqlServer', () => {
       "SELECT * FROM OPENROWSET('SQLNCLI', 'Server=x', 'SELECT 1')",
       "SELECT * FROM OPENQUERY(linked, 'SELECT 1')",
       "SELECT 1 WAITFOR DELAY '00:00:30'",
+      // Server-level commands a self-managed SQL Server runs after a SELECT with no semicolon.
+      'SELECT 1 SHUTDOWN WITH NOWAIT',
+      'SELECT 1 KILL 53',
+      "SELECT 1 BACKUP DATABASE x TO DISK = 'c:\\x.bak'",
+      "SELECT 1 RESTORE DATABASE x FROM DISK = 'c:\\x.bak'",
+      'SELECT 1 DBCC FREEPROCCACHE',
+      'SELECT 1 RECONFIGURE',
+      'SELECT 1 DISABLE TRIGGER trg ON dbo.Customers',
+      'SELECT 1 ENABLE TRIGGER trg ON dbo.Customers',
     ])('rejects the T-SQL write form %j before leasing a connection', async (sql) => {
       const { pool } = makePool({});
       const ctx = makeContext(pool);
@@ -361,6 +370,10 @@ describe('MicrosoftSqlServer', () => {
       'SELECT 1 /* outer /* nested INSERT */ still a comment */',
       'SELECT 1 -- INSERT INTO Customers\nFROM dbo.Orders',
       'SELECT [odd]]name] FROM dbo.Settings',
+      // Words that are only commands in a specific form are ordinary column names and aliases.
+      'SELECT Use, Enable, Disable, Deny, Grant, Revoke, Backup, Restore, Kill FROM dbo.Flags',
+      'SELECT Backup AS Restore FROM dbo.Jobs WHERE Enable = 1',
+      'SELECT 1 -- DROP TABLE x\r\nFROM dbo.Orders',
     ])('allows a keyword inside a literal, quoted identifier, or comment: %j', async (sql) => {
       const { pool } = makePool({ rows: rowsOf(1) });
 
@@ -381,6 +394,9 @@ describe('MicrosoftSqlServer', () => {
       "SELECT [it's] DELETE FROM Customers",
       "SELECT 'it''s' DELETE FROM Customers",
       'SELECT 1 /* a /* b */ */ DELETE FROM Customers',
+      // SQL Server ends a line comment at a bare CR, so the DROP runs even though it looks commented out.
+      'SELECT 1 -- note\rDROP TABLE dbo.Customers',
+      'SELECT 1 --\rDELETE FROM dbo.Customers',
     ])('still rejects a write hidden by comments or quoting: %j', async (sql) => {
       const { pool } = makePool({});
       const ctx = makeContext(pool);
@@ -493,9 +509,32 @@ describe('MicrosoftSqlServer', () => {
         table: 'Orders',
       });
 
-      expect(result).toEqual({ schema: 'dbo', table: 'Orders', columns, constraints, foreignKeys });
+      expect(result).toEqual({
+        schema: 'dbo',
+        table: 'Orders',
+        columns,
+        constraints,
+        foreignKeys,
+        truncated: false,
+      });
       expect(requests[0].input).toHaveBeenCalledWith('schema', 'dbo');
       expect(requests[0].input).toHaveBeenCalledWith('table', 'Orders');
+    });
+
+    it('reports truncation when any metadata query was cut off by the response limit', async () => {
+      // The small column row fits under the limit; the oversized constraint row does not.
+      const { pool } = makePool(
+        { rows: [{ name: 'Id' }] },
+        { rows: [{ name: `PK_${'x'.repeat(60)}` }] },
+        { rows: [] }
+      );
+      setResponseLimit(pool, 40);
+
+      const result = (await MicrosoftSqlServer.actions.describeTable.handler(makeContext(pool), {
+        table: 'Wide',
+      })) as { truncated: boolean };
+
+      expect(result.truncated).toBe(true);
     });
 
     it('bracket-quotes the name passed to OBJECT_ID so a "]" cannot break out', async () => {
@@ -530,10 +569,11 @@ describe('MicrosoftSqlServer', () => {
 
       const sql = requests[0].query.mock.calls[0][0] as string;
       expect(sql).toBe(
-        "SELECT TOP (101) * FROM [dbo].[Customers] WHERE LOWER([Name]) LIKE @pattern ESCAPE '!' " +
-          "OR LOWER([E]]mail]) LIKE @pattern ESCAPE '!'"
+        "SELECT TOP (101) * FROM [dbo].[Customers] WHERE LOWER([Name]) LIKE LOWER(@pattern) ESCAPE '!' " +
+          "OR LOWER([E]]mail]) LIKE LOWER(@pattern) ESCAPE '!'"
       );
-      expect(requests[0].input).toHaveBeenCalledWith('pattern', '%smith%');
+      // Case is folded by SQL Server under its collation, not in JavaScript.
+      expect(requests[0].input).toHaveBeenCalledWith('pattern', '%Smith%');
     });
 
     it('escapes LIKE wildcards in the search term, including [', async () => {

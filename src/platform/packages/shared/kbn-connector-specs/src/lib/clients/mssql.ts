@@ -42,7 +42,9 @@ export const mssqlClientType: ClientTypeSpec<ConnectionPool> = {
     const { timeout, maxContentLength } = ctx.networkSettings.getResponseSettings();
 
     // Merges the global xpack.actions.ssl settings with any matching customHostSettings entry for this host.
-    const tls = ctx.platform.buildTlsOptions([{ hostname: host, port }], ctx.logger);
+    // The lookup key is a URL (https://<host>:<port>), so an IPv6 literal must be bracketed to match its entry.
+    const tlsHostname = host.includes(':') && !host.startsWith('[') ? `[${host}]` : host;
+    const tls = ctx.platform.buildTlsOptions([{ hostname: tlsHostname, port }], ctx.logger);
     if (tls.checkServerIdentity) {
       // tedious only exposes trustServerCertificate, so "certificate" mode (chain without hostname) cannot be honored.
       ctx.logger.warn(

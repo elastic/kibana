@@ -31,12 +31,12 @@ import { assertReadOnly, SELECT_OR_WITH_PREFIX } from '../../lib/generic_db_conn
 import {
   blankNonCode,
   DEFAULT_SCHEMA,
-  escapeSearchTerm,
+  escapeLikeTerm,
   MAX_MAX_ROWS,
+  MSSQL_READ_GUARD_PATTERN,
   quoteIdentifier,
   resolveMaxRows,
   runSql,
-  TSQL_WRITE_PATTERN,
 } from '../../lib/mssql_sql';
 import {
   type DescribeTableInput,
@@ -172,7 +172,7 @@ export const MicrosoftSqlServer: ConnectorSpec = {
         'before writing queries.',
       input: QueryInputSchema,
       handler: async (ctx, input: QueryInput) => {
-        assertReadOnly(blankNonCode(input.sql), SELECT_OR_WITH_PREFIX, TSQL_WRITE_PATTERN);
+        assertReadOnly(blankNonCode(input.sql), SELECT_OR_WITH_PREFIX, MSSQL_READ_GUARD_PATTERN);
         return runSql(ctx, input.sql, { maxRows: resolveMaxRows(input.maxRows) });
       },
     },
@@ -220,7 +220,7 @@ export const MicrosoftSqlServer: ConnectorSpec = {
       description:
         'Describe a table or view in the connected database: returns columns (name, data type, length, precision, ' +
         'nullability, default), primary key and unique constraints, and foreign keys with the table and column they ' +
-        'reference. Use this before query or searchRows to discover available columns and build correct queries.',
+        'reference. truncated is true when the metadata was cut off by the response size limit and is incomplete. Use this before query or searchRows to discover available columns and build correct queries.',
       input: DescribeTableInputSchema,
       handler: async (ctx, input: DescribeTableInput) => {
         const schema = input.schema ?? DEFAULT_SCHEMA;
@@ -283,6 +283,7 @@ export const MicrosoftSqlServer: ConnectorSpec = {
           columns: columns.rows,
           constraints: constraints.rows,
           foreignKeys: foreignKeys.rows,
+          truncated: columns.truncated || constraints.truncated || foreignKeys.truncated,
         };
       },
     },
@@ -300,7 +301,7 @@ export const MicrosoftSqlServer: ConnectorSpec = {
       handler: async (ctx, input: SearchRowsInput) => {
         const schema = input.schema ?? DEFAULT_SCHEMA;
         const whereClause = input.columns
-          .map((col) => `LOWER(${quoteIdentifier(col)}) LIKE @pattern ESCAPE '!'`)
+          .map((col) => `LOWER(${quoteIdentifier(col)}) LIKE LOWER(@pattern) ESCAPE '!'`)
           .join(' OR ');
         const maxRows = resolveMaxRows(input.maxRows);
         // The cap is enforced while streaming; TOP also lets SQL Server stop reading early.
@@ -309,7 +310,7 @@ export const MicrosoftSqlServer: ConnectorSpec = {
             input.table
           )}` + ` WHERE ${whereClause}`;
         return runSql(ctx, sql, {
-          params: { pattern: `%${escapeSearchTerm(input.searchTerm)}%` },
+          params: { pattern: `%${escapeLikeTerm(input.searchTerm)}%` },
           maxRows,
         });
       },
@@ -321,8 +322,9 @@ export const MicrosoftSqlServer: ConnectorSpec = {
       description:
         'Execute any T-SQL statement against the SQL Server database. No restrictions — INSERT, UPDATE, DELETE, ' +
         'DROP, EXEC, and DDL are all permitted. Use only when the workflow explicitly requires a write or ' +
-        'destructive operation. Prefer query for read-only access. The statement always runs to completion; only ' +
-        'the first 1000 output rows are returned (truncated is true when more were produced).',
+        'destructive operation. Prefer query for read-only access. Reaching the output cap does not cancel the ' +
+        'statement, but the request timeout still applies: if a call times out, do not assume that no changes were ' +
+        'made. Only the first 1000 output rows are returned (truncated is true when more were produced).',
       input: ExecuteSqlInputSchema,
       handler: async (ctx, input: ExecuteSqlInput) =>
         runSql(ctx, input.sql, { maxRows: MAX_MAX_ROWS, cancelOnLimit: false }),
@@ -345,8 +347,7 @@ export const MicrosoftSqlServer: ConnectorSpec = {
     '',
     'Access to one SQL Server database (and, through three-part names, other databases the login can read). ' +
       'Read actions (`query`, `searchRows`, `listDatabases`, `listTables`, `describeTable`) are read-only and safe ' +
-      'to call freely. `executeSql` is unrestricted — use it only when a write or destructive operation is ' +
-      'explicitly required.',
+      'to call freely. This connector is read-only for agents; writes are not available.',
     '',
     '### Discovery pattern (schema unknown)',
     '1. `listDatabases` — only if the question names a database other than the connected one.',
@@ -355,17 +356,16 @@ export const MicrosoftSqlServer: ConnectorSpec = {
       'the table is not in `dbo`. It describes the connected database only.',
     '4. `query` or `searchRows` — read the data.',
     '',
-    '### Choosing between `query`, `searchRows`, and `executeSql`',
+    '### Choosing between `query` and `searchRows`',
     '- Prefer `query` for structured filtering, joins, aggregation, or anything expressible as a SELECT.',
     '- Prefer `searchRows` for broad text lookups across a known set of character columns.',
-    '- Use `executeSql` only for writes or DDL that the workflow explicitly requires.',
     '- Do not send `INFORMATION_SCHEMA` lookups to `query` when `listTables` or `describeTable` answers the question.',
     '',
     '### Gotchas',
     '- This is T-SQL, not MySQL: bound results with `SELECT TOP 100 ...` or `ORDER BY ... OFFSET 0 ROWS FETCH NEXT ' +
       '100 ROWS ONLY`. `LIMIT` is a syntax error. Quote identifiers with `[brackets]`, not backticks.',
-    '- `query` only allows SELECT and WITH — multi-statement SQL and write SQL are rejected; use `executeSql` for ' +
-      'writes.',
+    '- `query` only allows SELECT and WITH — multi-statement SQL and write SQL are rejected. Writes are not ' +
+      'available through this connector.',
     '- Results are capped at `maxRows` (default 100, max 1000) and at the maximum response size, so very wide rows ' +
       'can truncate earlier. When `truncated` is true, narrow the query with a WHERE clause or aggregate instead of ' +
       'raising `maxRows`.',

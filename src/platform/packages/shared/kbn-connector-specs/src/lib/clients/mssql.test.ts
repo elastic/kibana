@@ -177,6 +177,22 @@ describe('mssqlClientType', () => {
       );
     });
 
+    it('brackets an IPv6 literal for the TLS lookup but passes the bare address to the driver', async () => {
+      const buildTlsOptions = jest.fn().mockReturnValue({ rejectUnauthorized: true });
+      const ctx = makeCtx({
+        config: { host: '2001:db8::1', port: 1433, database: 'db' },
+        platform: { resolveSrvHosts: jest.fn(), buildTlsOptions },
+      });
+
+      await mssqlClientType.build(ctx);
+
+      expect(buildTlsOptions).toHaveBeenCalledWith(
+        [{ hostname: '[2001:db8::1]', port: 1433 }],
+        ctx.logger
+      );
+      expect(lastPoolOptions()).toMatchObject({ server: '2001:db8::1' });
+    });
+
     it('uses the merged per-host policy, not the global one, to decide certificate trust', async () => {
       // Global settings say "none" but the host-specific override resolved to full verification.
       const networkSettings = makeNetworkSettings({

@@ -103,7 +103,7 @@ Search Rows
     - **schema** (optional): The schema containing the table (default: `dbo`).
 
 Execute SQL _(not yet available)_
-:   Run any T-SQL statement against the database. This action has no restrictions. You can run `INSERT`, `UPDATE`, `DELETE`, `DROP`, `EXEC`, and data definition language (DDL) statements. Use it only when you explicitly need a write or destructive operation. The statement always runs to completion, and only the first 1,000 output rows are returned. Not exposed to AI agents; becomes usable when workflow support is added. Prefer **Query** for read-only access.
+:   Run any T-SQL statement against the database. This action has no restrictions. You can run `INSERT`, `UPDATE`, `DELETE`, `DROP`, `EXEC`, and data definition language (DDL) statements. Use it only when you explicitly need a write or destructive operation. Reaching the output cap does not cancel the statement, but the request timeout still applies. If a call times out, don't assume that no changes were made. Only the first 1,000 output rows are returned. Not exposed to AI agents; becomes usable when workflow support is added. Prefer **Query** for read-only access.
     - **sql** (required): The statement to run.
 
 ## Database user permissions [microsoft-sql-server-security]
