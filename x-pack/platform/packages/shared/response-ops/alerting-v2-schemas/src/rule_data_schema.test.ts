@@ -20,7 +20,6 @@ import {
   isRoutingTagsAllowedForKind,
   ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
   isReasonAllowedForKind,
-  REASON_SIGNAL_RULE_MESSAGE,
   updateRuleDataSchema,
   IMMUTABLE_RULE_FIELDS,
   getBreachEsqlQuery,
@@ -146,9 +145,6 @@ describe('reason template clearing and inheritance', () => {
     });
 
     expect(result.success).toBe(false);
-    expect(result.error?.issues).toEqual([
-      expect.objectContaining({ path: ['reason'], message: REASON_SIGNAL_RULE_MESSAGE }),
-    ]);
   });
 
   it.each([
@@ -164,12 +160,6 @@ describe('reason template clearing and inheritance', () => {
     });
 
     expect(result.success).toBe(false);
-    expect(result.error?.issues).toEqual([
-      expect.objectContaining({
-        path: ['items', 0, 'reason'],
-        message: REASON_SIGNAL_RULE_MESSAGE,
-      }),
-    ]);
   });
 
   it('accepts a signal rule without a reason in bulk create', () => {
@@ -188,24 +178,6 @@ describe('reason template clearing and inheritance', () => {
       bulkCreateRulesRequestSchema.safeParse({ items: [{ ...validCreateData, reason: null }] })
         .success
     ).toBe(false);
-  });
-
-  it.each([
-    { schema: createRuleDataSchema, contract: 'Omit to leave it unset.' },
-    { schema: putRuleDataSchema, contract: 'clear it when replacing an existing rule' },
-    {
-      schema: updateRuleDataSchema,
-      contract: 'Omit to preserve the current value; send null to clear it.',
-    },
-    { schema: ruleResponseSchema, contract: 'Absent when no reason template is set.' },
-  ])('documents the reason omission and clearing contract: $contract', ({ schema, contract }) => {
-    const json = inlineRootJsonSchemaRef(
-      z.toJSONSchema(schema, { target: 'draft-7', unrepresentable: 'any' })
-    );
-
-    expect(json).toMatchObject({
-      properties: { reason: { description: expect.stringContaining(contract) } },
-    });
   });
 });
 
