@@ -17,6 +17,8 @@ export class SearchProfilerPage {
   readonly jsonParseErrorToast: Locator;
   readonly noShardsNotification: Locator;
   readonly consolePanel: Locator;
+  readonly consoleTab: Locator;
+  readonly searchProfilerTab: Locator;
   readonly viewShardDetailsLink: Locator;
   readonly shardDetailsFlyoutCloseButton: Locator;
   readonly openCloseShardDetailsLink: Locator;
@@ -31,6 +33,8 @@ export class SearchProfilerPage {
     this.jsonParseErrorToast = this.page.testSubj.locator('jsonParseErrorToast');
     this.noShardsNotification = this.page.testSubj.locator('noShardsNotification');
     this.consolePanel = this.page.testSubj.locator('consolePanel');
+    this.consoleTab = this.page.getByRole('tab', { name: 'Console', exact: true });
+    this.searchProfilerTab = this.page.getByRole('tab', { name: 'Search Profiler', exact: true });
     this.viewShardDetailsLink = this.page.getByTestId('viewShardDetails');
     this.shardDetailsFlyoutCloseButton = this.page.getByTestId('euiFlyoutCloseButton');
     this.openCloseShardDetailsLink = this.page.getByTestId('openCloseShardDetails');
@@ -51,9 +55,14 @@ export class SearchProfilerPage {
     await this.container.waitFor();
   }
 
-  async gotoConsole() {
-    await this.page.gotoApp('dev_tools', { hash: 'console' });
+  async switchToConsole() {
+    await this.consoleTab.click();
     await this.consolePanel.waitFor({ state: 'visible' });
+  }
+
+  async switchToSearchProfiler() {
+    await this.searchProfilerTab.click();
+    await this.editor.waitFor({ state: 'visible' });
   }
 
   async waitForEditorToLoad() {

@@ -85,7 +85,7 @@ test.describe('Search Profiler query loading', { tag: testData.SEARCH_PROFILER_T
     { name: 'unfinished', query: '{ "query":' },
     { name: 'empty', query: '' },
   ]) {
-    test(`restores index and ${name} query after navigating away and back`, async ({
+    test(`restores index and ${name} query after switching Dev Tools tabs`, async ({
       pageObjects,
     }) => {
       await pageObjects.searchProfiler.goto();
@@ -96,8 +96,8 @@ test.describe('Search Profiler query loading', { tag: testData.SEARCH_PROFILER_T
       await expect(pageObjects.searchProfiler.indexInput).toHaveValue(PERSISTED_INDEX_NAME);
       await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(query);
 
-      await pageObjects.searchProfiler.gotoConsole();
-      await pageObjects.searchProfiler.goto();
+      await pageObjects.searchProfiler.switchToConsole();
+      await pageObjects.searchProfiler.switchToSearchProfiler();
 
       await expect(pageObjects.searchProfiler.indexInput).toHaveValue(PERSISTED_INDEX_NAME);
       await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(query);
