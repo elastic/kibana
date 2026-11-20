@@ -19,6 +19,12 @@ import {
 
 const UPDATED_DESCRIPTION = 'updated description';
 
+const FREQUENCY_UNIT_LABELS: Record<string, string> = {
+  s: 'seconds',
+  m: 'minutes',
+  h: 'hours',
+};
+
 const pivotConfig = getPivotTransformConfig('editing');
 const latestConfig: TransformRequest = {
   ...getLatestTransformConfig('editing'),
@@ -52,7 +58,9 @@ const assertEditFlyoutUpdates = async (
   const [, frequencyValue = '', frequencyUnit = 'm'] =
     /^(\d+)(s|m|h)$/.exec(String(config.frequency ?? '')) ?? [];
   await expect(input('Frequency')).toHaveValue(frequencyValue);
-  await expect(transformManagement.editFlyoutFrequencyUnitSelect).toHaveValue(frequencyUnit);
+  await expect(transformManagement.editFlyoutFrequencyUnitSelect).toHaveText(
+    FREQUENCY_UNIT_LABELS[frequencyUnit]
+  );
   await input('Frequency').fill('10');
 };
 
