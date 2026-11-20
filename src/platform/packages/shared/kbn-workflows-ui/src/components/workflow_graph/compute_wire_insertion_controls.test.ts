@@ -206,7 +206,7 @@ describe('computeWireInsertionControls', () => {
     expect(elseCtrl!.centre).toEqual({ x: 300, y: expectedPlusY });
   });
 
-  it('collapses trigger fan-in to a single wire control on the trunk below the bus', () => {
+  it('collapses trigger fan-in to a single wire control on the bus junction above the target', () => {
     const mergeNodes: Node[] = [
       {
         id: 'manual',
@@ -252,15 +252,17 @@ describe('computeWireInsertionControls', () => {
       insertionPoints: mergeInsertion,
       direction: 'TB',
     });
-    // One wire control on the trunk below the bus, centred between bus exit and target entry.
+    // One wire control on the bus junction, where the shared bus meets the trunk into the target.
     // No per-source branch-tail terminals.
     const branchTails = controls.filter((c) => c.id.startsWith('terminal:branch-tail:'));
     expect(branchTails).toHaveLength(0);
     const fanInWires = controls.filter((c) => c.id === 'wire:trigger-fanin:join');
     expect(fanInWires).toHaveLength(1);
-    // manual exits at y=48; alert exits at y=48. Bus Y = 48. Target entry at (210, 200).
-    // Control centre = midpoint of ({x:210,y:48}, {x:210,y:200}) = {x:210, y:124}.
-    expect(fanInWires[0].centre).toEqual({ x: 210, y: 124 });
+    // Target entry at (210, 200); the drawn bus is MERGE_BUS_TRUNK above it, not at the trigger exits.
+    expect(fanInWires[0].centre).toEqual({ x: 210, y: 200 - MERGE_BUS_TRUNK });
+    // The hover strip still owns the whole span from the lowest trigger exit to the target entry.
+    expect(fanInWires[0].segmentStart).toEqual({ x: 210, y: 48 });
+    expect(fanInWires[0].segmentEnd).toEqual({ x: 210, y: 200 });
     expect(fanInWires[0].insertContext).toEqual({ mode: 'prepend-step' });
     // No plain terminal stubs should be added for the trigger sources.
     expect(
@@ -272,6 +274,122 @@ describe('computeWireInsertionControls', () => {
           (c.insertContext as { stepName?: string }).stepName === undefined
       )
     ).toHaveLength(0);
+  });
+
+  describe('join-source edges', () => {
+    // Virtual join nodes are 1px-thick layout helpers along the main axis.
+    const joinNode = (
+      id: string,
+      direction: 'TB' | 'LR',
+      position: { x: number; y: number }
+    ): Node => ({
+      id,
+      type: 'bypassLane',
+      position,
+      width: direction === 'LR' ? 1 : 100,
+      height: direction === 'LR' ? 100 : 1,
+      data: {},
+    });
+    const forkNode: Node = {
+      id: 'inner',
+      type: 'step',
+      position: { x: 0, y: -100 },
+      width: 200,
+      height: 48,
+      data: { stepType: 'slack', label: 'inner' },
+    };
+    const joinInsertion: InsertionPoints = {
+      byNodeId: new Map([
+        ['inner', { step: { sourceNodeId: 'inner', stepName: 'inner-step', isTerminal: false } }],
+      ]),
+      topLevelStepNodeIds: ['inner'],
+    };
+    const forkNodeToJoinId = new Map([['inner', 'inner-join']]);
+
+    it.each([
+      {
+        direction: 'TB' as const,
+        // exit (50, 1) → entry (350, 200): the bus drops from the inner join's exit.
+        source: { x: 0, y: 0 },
+        target: { x: 300, y: 200 },
+        start: { x: 50, y: 1 },
+        centre: { x: 50, y: 1 + TERMINAL_STUB_PX },
+        busPoint: { x: 50, y: 200 - MERGE_BUS_TRUNK },
+      },
+      {
+        direction: 'LR' as const,
+        // exit (1, 50) → entry (300, 350): the bus runs right from the inner join's exit.
+        source: { x: 0, y: 0 },
+        target: { x: 300, y: 300 },
+        start: { x: 1, y: 50 },
+        centre: { x: 1 + TERMINAL_STUB_PX, y: 50 },
+        busPoint: { x: 300 - MERGE_BUS_TRUNK, y: 50 },
+      },
+    ])(
+      '$direction: a join → join merge edge puts the + on the source wire, above the merge bus',
+      ({ direction, source, target, start, centre, busPoint }) => {
+        const controls = computeWireInsertionControls({
+          nodes: [
+            forkNode,
+            joinNode('inner-join', direction, source),
+            joinNode('outer-join', direction, target),
+          ],
+          edges: [
+            {
+              id: 'inner-join:outer-join',
+              source: 'inner-join',
+              target: 'outer-join',
+              data: { isMerge: true },
+            },
+          ],
+          insertionPoints: joinInsertion,
+          direction,
+          forkNodeToJoinId,
+        });
+
+        const joinTail = controls.filter(
+          (c) => c.id === 'terminal:branch-tail:inner-join:outer-join'
+        );
+        expect(joinTail).toHaveLength(1);
+        expect(joinTail[0]).toMatchObject({
+          kind: 'wire',
+          centre,
+          segmentStart: start,
+          segmentEnd: busPoint,
+          insertContext: { mode: 'after', stepName: 'inner-step' },
+        });
+        // The join → outer-join wire is wired, so no dangling terminal is added for it.
+        expect(controls.filter((c) => c.kind === 'terminal')).toHaveLength(0);
+      }
+    );
+
+    it('keeps the segment midpoint for a join → next-step edge (not a merge)', () => {
+      const controls = computeWireInsertionControls({
+        nodes: [
+          forkNode,
+          joinNode('inner-join', 'TB', { x: 0, y: 0 }),
+          {
+            id: 'next',
+            type: 'step',
+            position: { x: 0, y: 100 },
+            width: 100,
+            height: 48,
+            data: { stepType: 'slack', label: 'next' },
+          },
+        ],
+        edges: [{ id: 'inner-join:next', source: 'inner-join', target: 'next' }],
+        insertionPoints: joinInsertion,
+        direction: 'TB',
+        forkNodeToJoinId,
+      });
+      const wire = controls.find((c) => c.id === 'wire:inner-join:next');
+      // exit (50, 1) → entry (50, 100)
+      expect(wire).toMatchObject({
+        kind: 'wire',
+        centre: { x: 50, y: 50.5 },
+        insertContext: { mode: 'after', stepName: 'inner-step' },
+      });
+    });
   });
 
   it('adds a terminal stub for the last node with the dashed + at the tip', () => {

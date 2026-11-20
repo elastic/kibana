@@ -166,9 +166,23 @@ interface R2Violation {
 
 interface R3Violation {
   ctrlId: string;
-  busY: number;
-  btnBottom: number;
+  busMain: number;
+  btnFarEdge: number;
 }
+
+interface R4Violation {
+  ctrlId: string;
+  centreCross: number;
+  wireCross: number;
+}
+
+/** Edge id behind a control id, for the two prefixes a per-edge control can carry. */
+const edgeIdOfControl = (ctrlId: string): string | undefined => {
+  const prefix = ['terminal:branch-tail:', 'wire:'].find((p) => ctrlId.startsWith(p));
+  return prefix ? ctrlId.slice(prefix.length) : undefined;
+};
+
+const ON_WIRE_TOLERANCE = 0.5;
 
 const checkPlacements = (
   controls: ReturnType<typeof computeWireInsertionControls>,
@@ -176,16 +190,30 @@ const checkPlacements = (
   edges: Edge[],
   direction: LayoutDirection = 'TB',
   chipClearance: number = WIRE_CONTROL_CLEARANCE
-): { r1: R1Violation[]; r2: R2Violation[]; r3: R3Violation[] } => {
+): { r1: R1Violation[]; r2: R2Violation[]; r3: R3Violation[]; r4: R4Violation[] } => {
   const byId = new Map(nodes.map((n) => [n.id, n]));
   const edgeById = new Map(edges.map((e) => [e.id, e]));
   const cards = cardNodes(nodes);
   const r1: R1Violation[] = [];
   const r2: R2Violation[] = [];
   const r3: R3Violation[] = [];
+  const r4: R4Violation[] = [];
 
   for (const ctrl of controls) {
     const btn = btnBox(ctrl.centre.x, ctrl.centre.y);
+
+    // R4: a control owned by a merge (fan-in) edge must sit on the drawn wire. The merge bus
+    // drops straight from the source exit, so the + must share the source's cross-axis
+    // coordinate (x in TB, y in LR) — a straight-line midpoint to the target is off the wire.
+    const ownerEdgeId = edgeIdOfControl(ctrl.id);
+    const ownerEdge = ownerEdgeId ? edgeById.get(ownerEdgeId) : undefined;
+    if ((ownerEdge?.data as { isMerge?: boolean } | undefined)?.isMerge === true) {
+      const centreCross = direction === 'LR' ? ctrl.centre.y : ctrl.centre.x;
+      const wireCross = direction === 'LR' ? ctrl.segmentStart.y : ctrl.segmentStart.x;
+      if (Math.abs(centreCross - wireCross) > ON_WIRE_TOLERANCE) {
+        r4.push({ ctrlId: ctrl.id, centreCross, wireCross });
+      }
+    }
 
     // R1: fork-head + must not overlap any card.
     // The fork-head + sits between the branch chip and the branch's first card.
@@ -222,16 +250,18 @@ const checkPlacements = (
         const tgt = byId.get(edge.target);
         if (tgt) {
           const tgtBounds = absoluteNodeBounds(tgt, byId);
-          const busY = tgtBounds.y - MERGE_BUS_TRUNK;
-          if (btn.b > busY - WIRE_CONTROL_CLEARANCE) {
-            r3.push({ ctrlId: ctrl.id, busY, btnBottom: btn.b });
+          // Main axis: y in TB, x in LR.
+          const busMain = (direction === 'LR' ? tgtBounds.x : tgtBounds.y) - MERGE_BUS_TRUNK;
+          const btnFarEdge = direction === 'LR' ? btn.r : btn.b;
+          if (btnFarEdge > busMain - WIRE_CONTROL_CLEARANCE) {
+            r3.push({ ctrlId: ctrl.id, busMain, btnFarEdge });
           }
         }
       }
     }
   }
 
-  return { r1, r2, r3 };
+  return { r1, r2, r3, r4 };
 };
 
 // ── fixtures ──────────────────────────────────────────────────────────────────
@@ -402,6 +432,47 @@ describe('wire control placement — R1/R2/R3 invariants', () => {
       expect(r3).toHaveLength(0);
     });
   });
+});
+
+describe('wire control placement — nested fork rejoin (join → join)', () => {
+  // `inner` is the last step of `outer`'s then-branch, so inner's join feeds outer's join.
+  // That edge is drawn as a merge bus: a drop from the inner join, then across to the outer
+  // join's column, so the two joins are offset on the cross axis.
+  const wf = minimal({
+    steps: [
+      {
+        name: 'outer',
+        type: 'if',
+        condition: 'true',
+        steps: [
+          { name: 'first', type: 'http' },
+          {
+            name: 'inner',
+            type: 'if',
+            condition: 'true',
+            steps: [{ name: 'inner-then', type: 'http' }],
+            else: [{ name: 'inner-else', type: 'http' }],
+          },
+        ],
+        else: [{ name: 'outer-else', type: 'http' }],
+      },
+    ] as unknown as WorkflowYaml['steps'],
+  });
+
+  it.each<[LayoutDirection]>([['TB'], ['LR']])(
+    '%s: the + on the inner join sits on its wire, above the outer merge bus',
+    (direction) => {
+      const { rfNodes, rfEdges, controls } = runLayout(wf, direction);
+      const joinTail = controls.find(({ id }) => id.endsWith('inner-join:outer-join'));
+      expect(joinTail?.id).toBe('terminal:branch-tail:inner-join:outer-join');
+      expect(joinTail?.kind).toBe('wire');
+      expect(joinTail?.insertContext).toEqual({ mode: 'after', stepName: 'inner' });
+
+      const { r3, r4 } = checkPlacements(controls, rfNodes, rfEdges, direction);
+      expect(r3).toHaveLength(0);
+      expect(r4).toHaveLength(0);
+    }
+  );
 });
 
 describe('wire control placement — LR fork-head invariants', () => {

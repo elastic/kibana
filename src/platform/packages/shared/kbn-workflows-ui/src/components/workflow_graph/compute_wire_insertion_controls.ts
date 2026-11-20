@@ -85,6 +85,29 @@ const terminalTip = (exit: WireSegmentPoint, direction: LayoutDirection): WireSe
     ? { x: exit.x + TERMINAL_STUB_PX, y: exit.y }
     : { x: exit.x, y: exit.y + TERMINAL_STUB_PX };
 
+/**
+ * Placement of the + on the wire that leaves a branch's last node (`start`) and runs into a
+ * merge bus drawn MERGE_BUS_TRUNK before the join entry (`end`): the + sits on the drop from
+ * `start`, and the owned segment ends at the bus.
+ *
+ * The stub length is clamped so the + stays above the bus. When the branch is short (rank gap
+ * = WORKFLOW_RANK_SEP = 70, bus at exit+50) the full TERMINAL_STUB_PX (75) would push the button
+ * past the bus, so use half the exit→bus distance instead, which keeps the button centred in
+ * the clear space above the bus. Long tails keep the full stub.
+ */
+const branchTailPlacement = (
+  start: WireSegmentPoint,
+  end: WireSegmentPoint,
+  direction: LayoutDirection
+): { readonly centre: WireSegmentPoint; readonly segmentEnd: WireSegmentPoint } => {
+  const startMain = direction === 'LR' ? start.x : start.y;
+  const busMain = (direction === 'LR' ? end.x : end.y) - MERGE_BUS_TRUNK;
+  const stub = Math.min(TERMINAL_STUB_PX, (busMain - startMain) / 2);
+  return direction === 'LR'
+    ? { centre: { x: start.x + stub, y: start.y }, segmentEnd: { x: busMain, y: start.y } }
+    : { centre: { x: start.x, y: start.y + stub }, segmentEnd: { x: start.x, y: busMain } };
+};
+
 const resolveInsertContext = (
   ports: NodePortTargets,
   sourceHandle: string | null | undefined
@@ -221,16 +244,32 @@ export function computeWireInsertionControls(args: {
           const tgtBounds = absoluteNodeBounds(tgtNode, byId);
           const s = nodeExitPoint(srcBounds, direction);
           const e = nodeEntryPoint(tgtBounds, direction);
-          controls.push({
-            id: `wire:${edge.id}`,
-            kind: 'wire',
-            centre: segmentMidpoint(s, e),
-            segmentStart: s,
-            segmentEnd: e,
-            insertContext: ctx,
-            fallbackStepName: fallbackStepNameFor(forkPorts ?? {}, srcNode),
-            direction,
-          });
+          if (isMergeEdge(edge)) {
+            // The block ends an outer branch: this edge is drawn as a merge bus into the outer
+            // join, so the + sits on the drop from this join's exit, like a step's branch tail.
+            const { centre, segmentEnd } = branchTailPlacement(s, e, direction);
+            controls.push({
+              id: `terminal:branch-tail:${edge.id}`,
+              kind: 'wire',
+              centre,
+              segmentStart: s,
+              segmentEnd,
+              insertContext: ctx,
+              fallbackStepName: fallbackStepNameFor(forkPorts ?? {}, srcNode),
+              direction,
+            });
+          } else {
+            controls.push({
+              id: `wire:${edge.id}`,
+              kind: 'wire',
+              centre: segmentMidpoint(s, e),
+              segmentStart: s,
+              segmentEnd: e,
+              insertContext: ctx,
+              fallbackStepName: fallbackStepNameFor(forkPorts ?? {}, srcNode),
+              direction,
+            });
+          }
         }
       }
     } else {
@@ -346,30 +385,14 @@ export function computeWireInsertionControls(args: {
           // bypass nodes have no insertion ports so they're filtered out naturally.
           // It connects a real step to the real rejoin, so it's mid-wire
           // (hover-only), not a dangling terminal — kind: 'wire'. Context: `after <leaf step>`.
-          //
-          // The stub length is clamped so the + button stays above the merge bus.
-          // The bus is drawn MERGE_BUS_TRUNK before the join entry. When the branch is
-          // short (rank gap = WORKFLOW_RANK_SEP = 70, bus at exit+50), the full
-          // TERMINAL_STUB_PX (75) would push the button past the bus. Use half the
-          // exit→bus distance instead, which keeps the button centred in the clear
-          // space above the bus. Long tails keep the full stub.
-          const startMain = direction === 'LR' ? start.x : start.y;
-          const endMain = direction === 'LR' ? end.x : end.y;
-          const busMain = endMain - MERGE_BUS_TRUNK;
-          const stub = Math.min(TERMINAL_STUB_PX, (busMain - startMain) / 2);
-          const tip =
-            direction === 'LR'
-              ? { x: start.x + stub, y: start.y }
-              : { x: start.x, y: start.y + stub };
           // The strip owns the whole wire down to the merge bus, not just the stub to the +.
-          const busPoint =
-            direction === 'LR' ? { x: busMain, y: start.y } : { x: start.x, y: busMain };
+          const { centre, segmentEnd } = branchTailPlacement(start, end, direction);
           controls.push({
             id: `terminal:branch-tail:${edge.id}`,
             kind: 'wire',
-            centre: tip,
+            centre,
             segmentStart: start,
-            segmentEnd: busPoint,
+            segmentEnd,
             insertContext,
             fallbackStepName: fallbackStepNameFor(ports, sourceNode),
             direction,
@@ -395,14 +418,19 @@ export function computeWireInsertionControls(args: {
   for (const edge of edges) emitEdgeControls(edge);
 
   // Emit single wire controls for trigger fan-in targets (one per multi-trigger fan-in).
-  // Positioned on the trunk segment from the bus (bottom of triggers) to the first step.
+  // The strip owns the span from the lowest trigger exit to the first step; the + sits on the bus
+  // junction, where the shared bus (drawn MERGE_BUS_TRUNK before the entry) meets the trunk.
   for (const [targetId, { busPos, entry, insertContext }] of triggerFanInBus) {
     const busPoint: WireSegmentPoint =
       direction === 'LR' ? { x: busPos, y: entry.y } : { x: entry.x, y: busPos };
+    const junction: WireSegmentPoint =
+      direction === 'LR'
+        ? { x: entry.x - MERGE_BUS_TRUNK, y: entry.y }
+        : { x: entry.x, y: entry.y - MERGE_BUS_TRUNK };
     controls.push({
       id: `wire:trigger-fanin:${targetId}`,
       kind: 'wire',
-      centre: segmentMidpoint(busPoint, entry),
+      centre: junction,
       segmentStart: busPoint,
       segmentEnd: entry,
       insertContext,
