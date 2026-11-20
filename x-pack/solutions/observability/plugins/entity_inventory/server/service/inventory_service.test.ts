@@ -615,11 +615,6 @@ describe('InventoryService.list', () => {
         },
       ],
     });
-    expect(response.queries[0]).toMatchObject({
-      indexPattern: STATE_PATTERN,
-      isPartial: true,
-      error: null,
-    });
   });
 
   it.each([
@@ -764,7 +759,6 @@ describe('InventoryService.list diagnostics', () => {
       isPartial: false,
       rowCount: 1,
       wallMs: expect.any(Number),
-      error: null,
     });
   });
 
@@ -787,33 +781,11 @@ describe('InventoryService.list diagnostics', () => {
       shards: null,
       isPartial: null,
       rowCount: 0,
-      error: { status: 400, reason: 'verification_exception: Unknown column [x]' },
     });
     expect(response.queries[1]).toMatchObject({
       indexPattern: OTEL_PATTERN,
       rowCount: 1,
-      error: null,
     });
-  });
-
-  it('gives a plan query whose answer was unusable the error reported in errors', async () => {
-    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
-    answerByPattern(esClient, {
-      [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [], { nullTyped: STATE_COLUMNS }),
-      [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, [otelRow('cart-api', '2026-11-01T10:02:00.000Z')]),
-    });
-
-    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
-
-    const reason = `no readable index behind "${STATE_PATTERN}" maps @timestamp`;
-    expect(response.errors).toEqual([{ indexPattern: STATE_PATTERN, status: null, reason }]);
-    expect(response.queries[0]).toMatchObject({
-      indexPattern: STATE_PATTERN,
-      took: 4,
-      isPartial: false,
-      error: { status: null, reason },
-    });
-    expect(response.queries[1]).toMatchObject({ indexPattern: OTEL_PATTERN, error: null });
   });
 
   it('leaves out the plan queries of a source whose probe failed', async () => {
@@ -890,7 +862,7 @@ describe('InventoryService.list diagnostics', () => {
     ]);
   });
 
-  it('lists every probe with its outcome, text and stats, a failed one with its error', async () => {
+  it('lists every probe with its outcome, text and stats', async () => {
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(
       esClient,
@@ -912,7 +884,6 @@ describe('InventoryService.list diagnostics', () => {
       outcome: 'failed',
       took: null,
       isPartial: null,
-      error: { status: 503, reason: 'timeout_exception: timed out' },
     });
     expect(probes[1]).toEqual({
       indexPattern: OTEL_PATTERN,
@@ -929,7 +900,6 @@ describe('InventoryService.list diagnostics', () => {
       bytesRead: null,
       shards: null,
       isPartial: false,
-      error: null,
     });
   });
 

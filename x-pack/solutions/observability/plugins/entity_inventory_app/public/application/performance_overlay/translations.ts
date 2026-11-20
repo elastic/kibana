@@ -307,26 +307,10 @@ export const SECTION_TITLES = {
   probes: i18n.translate('xpack.entityInventoryApp.performanceOverlay.section.probes', {
     defaultMessage: 'Probes',
   }),
-  otherErrors: i18n.translate('xpack.entityInventoryApp.performanceOverlay.section.otherErrors', {
-    defaultMessage: 'Other errors',
+  errors: i18n.translate('xpack.entityInventoryApp.performanceOverlay.section.errors', {
+    defaultMessage: 'Errors',
   }),
 } as const;
-
-export const ROW_ERROR_TITLE = (status: number | null): string =>
-  status === null
-    ? i18n.translate('xpack.entityInventoryApp.performanceOverlay.rowError.title', {
-        defaultMessage: 'Error',
-      })
-    : i18n.translate('xpack.entityInventoryApp.performanceOverlay.rowError.titleWithStatus', {
-        defaultMessage: 'Error {status}',
-        values: { status },
-      });
-
-export const PROBE_ERROR_NOTE = (reason: string): string =>
-  i18n.translate('xpack.entityInventoryApp.performanceOverlay.probeErrorNote', {
-    defaultMessage: 'Elasticsearch: {reason}',
-    values: { reason },
-  });
 
 export const ROW_PARTIAL_TITLE = i18n.translate(
   'xpack.entityInventoryApp.performanceOverlay.rowPartial.title',
@@ -348,8 +332,8 @@ export const ROW_STATUS = {
   partial: i18n.translate('xpack.entityInventoryApp.performanceOverlay.rowStatus.partial', {
     defaultMessage: 'Partial',
   }),
-  error: i18n.translate('xpack.entityInventoryApp.performanceOverlay.rowStatus.error', {
-    defaultMessage: 'Error',
+  failed: i18n.translate('xpack.entityInventoryApp.performanceOverlay.rowStatus.failed', {
+    defaultMessage: 'Failed',
   }),
 } as const;
 

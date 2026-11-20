@@ -20,19 +20,8 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type {
-  ListProbeDiagnostic,
-  ListQueryDiagnostic,
-  SourceError,
-  UnavailableColumn,
-} from '@kbn/entity-inventory-plugin/common';
-import {
-  OtherErrorsTable,
-  ProbesTable,
-  QueriesTable,
-  isProbeFailed,
-  isQueryFailed,
-} from './diagnostic_tables';
+import type { UnavailableColumn } from '@kbn/entity-inventory-plugin/common';
+import { ErrorsTable, ProbesTable, QueriesTable } from './diagnostic_tables';
 import { formatCount, formatMs, formatRequest } from './format';
 import type { ListCallDiagnostics, RecordedCall } from './performance_recorder';
 import { ElasticsearchTable, TimingsTable } from './summary_tables';
@@ -62,19 +51,6 @@ const dedupeUnavailableColumns = (columns: readonly UnavailableColumn[]): Unavai
   ).values(),
 ];
 
-/** Response errors that no failed query or probe row accounts for, by index pattern. */
-const unattributedErrors = (
-  errors: readonly SourceError[],
-  queries: readonly ListQueryDiagnostic[],
-  probes: readonly ListProbeDiagnostic[]
-): SourceError[] => {
-  const attributed = new Set([
-    ...queries.filter(isQueryFailed).map(({ indexPattern }) => indexPattern),
-    ...probes.filter(isProbeFailed).map(({ indexPattern }) => indexPattern),
-  ]);
-  return errors.filter(({ indexPattern }) => !attributed.has(indexPattern));
-};
-
 const Section = ({
   title,
   testSubj,
@@ -99,7 +75,7 @@ export interface ListCallDetailProps {
   list: ListCallDiagnostics;
 }
 
-/** Browser and server times of one `_list` call, and the stats and errors of each probe and query. */
+/** Browser and server times of one `_list` call, its errors, and the stats of each probe and query. */
 export const ListCallDetail = ({ call, list }: ListCallDetailProps) => {
   const { euiTheme } = useEuiTheme();
   // Below these widths a table would squeeze its labels, so the Elasticsearch table wraps under the timings.
@@ -114,7 +90,6 @@ export const ListCallDetail = ({ call, list }: ListCallDetailProps) => {
   });
   const { browserMs, route, startedAt, status } = call;
   const { timings, queries, probes, rowCount, truncated, errors, unavailableColumns } = list;
-  const otherErrors = unattributedErrors(errors, queries, probes);
   const unavailable = dedupeUnavailableColumns(unavailableColumns);
 
   const subtitle = [
@@ -154,6 +129,12 @@ export const ListCallDetail = ({ call, list }: ListCallDetailProps) => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      {errors.length > 0 && (
+        <Section title={SECTION_TITLES.errors} testSubj="entityInventoryPerformanceErrors">
+          <ErrorsTable errors={errors} />
+        </Section>
+      )}
+
       <Section title={SECTION_TITLES.queries} testSubj="entityInventoryPerformanceQueries">
         <QueriesTable queries={queries} />
       </Section>
@@ -161,15 +142,6 @@ export const ListCallDetail = ({ call, list }: ListCallDetailProps) => {
       <Section title={SECTION_TITLES.probes} testSubj="entityInventoryPerformanceProbes">
         <ProbesTable probes={probes} />
       </Section>
-
-      {otherErrors.length > 0 && (
-        <Section
-          title={SECTION_TITLES.otherErrors}
-          testSubj="entityInventoryPerformanceOtherErrors"
-        >
-          <OtherErrorsTable errors={otherErrors} />
-        </Section>
-      )}
 
       {unavailable.length > 0 && (
         <EuiAccordion

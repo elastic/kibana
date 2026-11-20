@@ -40,14 +40,12 @@ const answered = {
     rowCount: 0,
   },
   isPartial: false,
-  error: null,
 };
-const threw = (status: number | null, reason: string) => ({
+const threw = {
   wallMs: expect.any(Number),
   stats: null,
   isPartial: null,
-  error: { status, reason },
-});
+};
 
 const setup = (answer: (query: string) => Promise<Record<string, unknown>>) => {
   const client = elasticsearchServiceMock.createElasticsearchClient();
@@ -136,7 +134,7 @@ describe('probeSources', () => {
       failed: false,
       hasTimeSeries: false,
       query: buildProbeQuery('logs-app'),
-      execution: threw(400, 'verification_exception: Found 1 problem'),
+      execution: threw,
     });
   });
 
@@ -153,7 +151,7 @@ describe('probeSources', () => {
       status,
       reason: `${type}: ${reason}`,
       query: buildProbeQuery('metrics-*'),
-      execution: threw(status, `${type}: ${reason}`),
+      execution: threw,
     });
   });
 
@@ -167,7 +165,7 @@ describe('probeSources', () => {
       status: null,
       reason: 'connection reset',
       query: buildProbeQuery('metrics-*'),
-      execution: threw(null, 'connection reset'),
+      execution: threw,
     });
   });
 
@@ -181,7 +179,7 @@ describe('probeSources', () => {
       status: 400,
       reason: 'parsing_exception: verification_exception',
       query: buildProbeQuery('metrics-*'),
-      execution: threw(400, 'parsing_exception: verification_exception'),
+      execution: threw,
     });
   });
 
@@ -222,7 +220,7 @@ describe('probeSources', () => {
             status: 503,
             reason: 'unavailable_shards_exception: no shard available',
             query: buildProbeQuery('logs-*'),
-            execution: threw(503, 'unavailable_shards_exception: no shard available'),
+            execution: threw,
           },
         ],
       ])
@@ -248,7 +246,6 @@ describe('probeSources', () => {
         wallMs: 40,
         stats: { took: 7 },
         isPartial: true,
-        error: null,
       });
       expect(results.get('logs-*')?.execution).toMatchObject({ wallMs: 30, stats: null });
     } finally {

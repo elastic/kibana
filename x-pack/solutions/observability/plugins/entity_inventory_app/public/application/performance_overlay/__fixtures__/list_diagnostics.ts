@@ -23,7 +23,7 @@ const STATS = {
   isPartial: false,
 };
 
-// A failed or errored request carries no stats.
+// A request that threw carries no stats.
 const NO_STATS = {
   took: null,
   documentsFound: null,
@@ -47,7 +47,6 @@ export const NO_TIME_SERIES_PROBE: ListProbeDiagnostic = {
   outcome: 'no_time_series',
   wallMs: 2.5,
   ...NO_STATS,
-  error: { status: 400, reason: 'verification_exception: Found 1 problem' },
 };
 
 export const PROBES_FIXTURE: ListProbeDiagnostic[] = [
@@ -59,7 +58,6 @@ export const PROBES_FIXTURE: ListProbeDiagnostic[] = [
     outcome: 'time_series',
     wallMs: 4.25,
     took: 3,
-    error: null,
   },
   {
     indexPattern: 'traces-*',
@@ -68,7 +66,6 @@ export const PROBES_FIXTURE: ListProbeDiagnostic[] = [
     outcome: 'failed',
     wallMs: 1.5,
     ...NO_STATS,
-    error: { status: 403, reason: TRACES_FORBIDDEN },
   },
   NO_TIME_SERIES_PROBE,
 ];
@@ -83,7 +80,6 @@ export const QUERIES_FIXTURE: ListQueryDiagnostic[] = [
     rowCount: 120,
     wallMs: 41.5,
     took: 38,
-    error: null,
   },
   {
     indexPattern: 'logs-*',
@@ -101,7 +97,6 @@ export const QUERIES_FIXTURE: ListQueryDiagnostic[] = [
     bytesRead: null,
     shards: null,
     isPartial: null,
-    error: { status: 400, reason: 'Unknown column [host.name]' },
   },
 ];
 

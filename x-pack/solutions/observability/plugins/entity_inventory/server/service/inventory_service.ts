@@ -125,32 +125,17 @@ const toExecutionStats = (stats: EsqlStats | null): ExecutionStats => {
   };
 };
 
-/** The diagnostic of one plan query; `unusableReason` is why its answer was dropped, if it was. */
 const toQueryDiagnostic = (
   { indexPattern, engine }: QueryPlan,
   { esql, params }: GeneratedQuery,
-  { outcome, wallMs }: TimedOutcome<EsqlQueryResult>,
-  unusableReason: string | null
+  { outcome, wallMs }: TimedOutcome<EsqlQueryResult>
 ): ListQueryDiagnostic => {
   const base = { indexPattern, engine, esql, params, wallMs };
   if (outcome.status === 'rejected') {
-    const { status, reason } = toSourceError(indexPattern, outcome.reason);
-    return {
-      ...base,
-      ...NO_EXECUTION_STATS,
-      rowCount: 0,
-      isPartial: null,
-      error: { status, reason },
-    };
+    return { ...base, ...NO_EXECUTION_STATS, rowCount: 0, isPartial: null };
   }
   const { stats, isPartial } = outcome.value;
-  return {
-    ...base,
-    ...toExecutionStats(stats),
-    rowCount: stats.rowCount,
-    isPartial,
-    error: unusableReason === null ? null : { status: null, reason: unusableReason },
-  };
+  return { ...base, ...toExecutionStats(stats), rowCount: stats.rowCount, isPartial };
 };
 
 const toProbeOutcome = (probe: ProbeResult): ListProbeDiagnostic['outcome'] => {
@@ -163,7 +148,7 @@ const toProbeOutcome = (probe: ProbeResult): ListProbeDiagnostic['outcome'] => {
 const toProbeDiagnostic = (indexPattern: string, probe: ProbeResult): ListProbeDiagnostic => {
   const {
     query: { esql, params },
-    execution: { wallMs, stats, isPartial, error },
+    execution: { wallMs, stats, isPartial },
   } = probe;
   return {
     indexPattern,
@@ -173,7 +158,6 @@ const toProbeDiagnostic = (indexPattern: string, probe: ProbeResult): ListProbeD
     wallMs,
     ...toExecutionStats(stats),
     isPartial,
-    error,
   };
 };
 
@@ -249,7 +233,6 @@ export class InventoryService {
 
     const errors: SourceError[] = [...probeErrors];
     const unavailableColumns: UnavailableColumn[] = [];
-    const unusableReasons: Array<string | null> = plans.map(() => null);
     const results = outcomes.flatMap((outcome, planIndex): PlanResult[] => {
       const plan = plans[planIndex];
       if (outcome.status === 'rejected') {
@@ -267,9 +250,11 @@ export class InventoryService {
       }
       const { usable, reason, unavailableFields } = interpretPlanResult(result, identity, columns);
       if (!usable) {
-        const unusableReason = reason ?? 'unusable';
-        unusableReasons[planIndex] = unusableReason;
-        errors.push({ indexPattern: plan.indexPattern, status: null, reason: unusableReason });
+        errors.push({
+          indexPattern: plan.indexPattern,
+          status: null,
+          reason: reason ?? 'unusable',
+        });
         return [];
       }
       unavailableColumns.push(...toUnavailableColumns(plan, unavailableFields, columns));
@@ -288,7 +273,7 @@ export class InventoryService {
       provenance: restrictProvenance(merged.provenance, rows),
       truncated,
       queries: timedOutcomes.map((timed, planIndex) =>
-        toQueryDiagnostic(plans[planIndex], queries[planIndex], timed, unusableReasons[planIndex])
+        toQueryDiagnostic(plans[planIndex], queries[planIndex], timed)
       ),
       probes: [...probes].map(([indexPattern, probe]) => toProbeDiagnostic(indexPattern, probe)),
       timings: {

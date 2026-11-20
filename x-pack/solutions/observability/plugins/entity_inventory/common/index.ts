@@ -106,7 +106,7 @@ export interface QueryExecutionStats {
   isPartial: boolean | null;
 }
 
-/** One plan query sent to Elasticsearch; a failed query has null stats, `rowCount` 0 and an `error`. */
+/** One plan query sent to Elasticsearch; a failed query has null stats and `rowCount` 0 (see `errors`). */
 export interface ListQueryDiagnostic extends QueryExecutionStats {
   indexPattern: string;
   engine: QueryEngine;
@@ -115,11 +115,6 @@ export interface ListQueryDiagnostic extends QueryExecutionStats {
   rowCount: number;
   /** Time from sending the query to its settling, in fractional milliseconds, measured by Kibana. */
   wallMs: number;
-  /**
-   * Why the query failed, or why its answer was dropped as unusable (`status` null, the reason
-   * reported in `errors`); null otherwise. A partial answer is flagged by `isPartial` only.
-   */
-  error: Pick<SourceError, 'status' | 'reason'> | null;
 }
 
 /**
@@ -136,8 +131,6 @@ export interface ListProbeDiagnostic extends QueryExecutionStats {
   outcome: ProbeOutcomeKind;
   /** Time from sending the probe to its settling, in fractional milliseconds, measured by Kibana. */
   wallMs: number;
-  /** Why the probe threw, a verification error included; null when Elasticsearch answered. */
-  error: Pick<SourceError, 'status' | 'reason'> | null;
 }
 
 /**

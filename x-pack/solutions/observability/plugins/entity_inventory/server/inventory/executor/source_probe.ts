@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SourceError } from '../../../common';
 import { buildProbeQuery } from '../generator';
 import type { GeneratedQuery } from '../generator';
 import { isVerificationError, toSourceError } from './errors/source_error';
@@ -43,15 +42,13 @@ type ProbeOutcome =
   | { failed: false; hasTimeSeries: boolean }
   | { failed: true; status: number | null; reason: string };
 
-/** How the probe query ran: its wall time, and its stats or error. */
+/** How the probe query ran: its wall time and stats. */
 export interface ProbeExecution {
   wallMs: number;
   /** Null when the probe threw. */
   stats: EsqlStats | null;
   /** Null when the probe threw. */
   isPartial: boolean | null;
-  /** Why the probe threw, a verification error included; null when Elasticsearch answered. */
-  error: Pick<SourceError, 'status' | 'reason'> | null;
 }
 
 /**
@@ -81,16 +78,12 @@ const fromError = (pattern: string, error: unknown): ProbeOutcome => {
   return { failed: true, status, reason };
 };
 
-const toExecution = (
-  pattern: string,
-  { outcome, wallMs }: TimedOutcome<EsqlQueryResult>
-): ProbeExecution => {
+const toExecution = ({ outcome, wallMs }: TimedOutcome<EsqlQueryResult>): ProbeExecution => {
   if (outcome.status === 'rejected') {
-    const { status, reason } = toSourceError(pattern, outcome.reason);
-    return { wallMs, stats: null, isPartial: null, error: { status, reason } };
+    return { wallMs, stats: null, isPartial: null };
   }
   const { stats, isPartial } = outcome.value;
-  return { wallMs, stats, isPartial, error: null };
+  return { wallMs, stats, isPartial };
 };
 
 /**
@@ -120,7 +113,7 @@ export const probeSources = async (
             ? fromResponse(outcome.value)
             : fromError(pattern, outcome.reason)),
           query: probes[position],
-          execution: toExecution(pattern, timed),
+          execution: toExecution(timed),
         },
       ];
     })

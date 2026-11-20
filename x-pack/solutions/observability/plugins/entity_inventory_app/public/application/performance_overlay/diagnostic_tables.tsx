@@ -17,12 +17,11 @@ import {
   EuiDescriptionList,
   EuiScreenReaderOnly,
   EuiSpacer,
-  EuiText,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type {
   ListProbeDiagnostic,
   ListQueryDiagnostic,
@@ -43,9 +42,7 @@ import {
   COLLAPSE_ROW,
   EXPAND_ROW,
   NO,
-  PROBE_ERROR_NOTE,
   PROBE_PLANS,
-  ROW_ERROR_TITLE,
   ROW_PARTIAL_TITLE,
   ROW_STATUS,
   SECTION_TITLES,
@@ -58,15 +55,11 @@ type Diagnostic = QueryExecutionStats & {
   indexPattern: string;
   esql: string;
   params: ListQueryDiagnostic['params'];
-  error: Pick<SourceError, 'status' | 'reason'> | null;
 };
-
-type DiagnosticError = Diagnostic['error'];
 
 type Row<T extends Diagnostic> = T & { id: string };
 
-/** Whether a row's error is a failure, or only a note on how it ran. */
-type IsFailed<T extends Diagnostic> = (item: T) => boolean;
+type RowStatus = keyof typeof ROW_STATUS;
 
 interface DetailItem {
   title: string;
@@ -109,67 +102,28 @@ const numericColumn = <T extends Diagnostic>(
 const formatBoolean = (value: boolean | null): string =>
   value === null ? EMPTY_VALUE : value ? YES : NO;
 
-const RowStatusBadge = ({
-  failure,
-  isPartial,
-}: {
-  failure: DiagnosticError;
-  isPartial: Diagnostic['isPartial'];
-}) => {
-  if (failure) {
-    return (
-      <EuiToolTip content={failure.reason}>
-        <EuiBadge color="danger" tabIndex={0} data-test-subj="entityInventoryPerformanceRowError">
-          {ROW_STATUS.error}
-        </EuiBadge>
-      </EuiToolTip>
-    );
-  }
-  if (isPartial) {
-    return <EuiBadge color="warning">{ROW_STATUS.partial}</EuiBadge>;
-  }
-  return <EuiBadge color="hollow">{ROW_STATUS.ok}</EuiBadge>;
+const ROW_STATUS_COLORS: Record<RowStatus, string> = {
+  ok: 'hollow',
+  partial: 'warning',
+  failed: 'danger',
 };
 
-const RowDetail = ({
-  item,
-  isFailed,
-  stats,
-}: {
-  item: Diagnostic;
-  isFailed: boolean;
-  stats: DetailItem[];
-}) => {
+const RowStatusBadge = ({ status }: { status: RowStatus }) => (
+  <EuiBadge color={ROW_STATUS_COLORS[status]} data-test-subj="entityInventoryPerformanceRowStatus">
+    {ROW_STATUS[status]}
+  </EuiBadge>
+);
+
+const RowDetail = ({ item, stats }: { item: Diagnostic; stats: DetailItem[] }) => {
   const { euiTheme } = useEuiTheme();
-  const { error, isPartial, esql, params } = item;
-  const failure = isFailed ? error : null;
-  const note = isFailed ? null : error;
+  const { isPartial, esql, params } = item;
   const detailCss = css`
     width: 100%;
     padding: ${euiTheme.size.xs} 0;
   `;
   return (
     <div css={detailCss} data-test-subj="entityInventoryPerformanceRowDetail">
-      {failure && (
-        <>
-          <KbnDangerCallout
-            size="s"
-            title={ROW_ERROR_TITLE(failure.status)}
-            text={<p>{failure.reason}</p>}
-            data-test-subj="entityInventoryPerformanceRowErrorDetail"
-          />
-          <EuiSpacer size="s" />
-        </>
-      )}
-      {note && (
-        <>
-          <EuiText size="xs" color="subdued" data-test-subj="entityInventoryPerformanceRowNote">
-            <p>{PROBE_ERROR_NOTE(note.reason)}</p>
-          </EuiText>
-          <EuiSpacer size="s" />
-        </>
-      )}
-      {!failure && isPartial && (
+      {isPartial && (
         <>
           <KbnWarningCallout size="s" title={ROW_PARTIAL_TITLE} />
           <EuiSpacer size="s" />
@@ -197,17 +151,18 @@ interface DiagnosticTableProps<T extends Diagnostic> {
   trailingColumns: Array<EuiBasicTableColumn<Row<T>>>;
   /** The stats shown only in the expanded row. */
   detailStats: (item: T) => DetailItem[];
-  isFailed: IsFailed<T>;
+  /** Null shows no status: a query cannot tell success from failure without `errors[]`. */
+  rowStatus: (item: T) => RowStatus | null;
 }
 
-/** One row per probe or query, expandable to its error, the rest of its stats and its ES|QL. */
+/** One row per probe or query, expandable to the rest of its stats and its ES|QL. */
 const DiagnosticTable = <T extends Diagnostic>({
   caption,
   items,
   leadingColumns,
   trailingColumns,
   detailStats,
-  isFailed,
+  rowStatus,
 }: DiagnosticTableProps<T>) => {
   const rows: Array<Row<T>> = items.map((item, index) => ({ ...item, id: String(index) }));
   const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(() => new Set());
@@ -266,9 +221,10 @@ const DiagnosticTable = <T extends Diagnostic>({
     {
       name: TABLE_COLUMNS.status,
       width: '72px',
-      render: (item: Row<T>) => (
-        <RowStatusBadge failure={isFailed(item) ? item.error : null} isPartial={item.isPartial} />
-      ),
+      render: (item: Row<T>) => {
+        const status = rowStatus(item);
+        return status === null ? null : <RowStatusBadge status={status} />;
+      },
     },
     numericColumn<T>(STAT_LABELS.esTime, '80px', ({ took }) => formatMs(took)),
     ...trailingColumns,
@@ -277,10 +233,7 @@ const DiagnosticTable = <T extends Diagnostic>({
   const itemIdToExpandedRowMap = Object.fromEntries(
     rows
       .filter(({ id }) => expandedIds.has(id))
-      .map((row) => [
-        row.id,
-        <RowDetail item={row} isFailed={isFailed(row)} stats={detailStats(row)} />,
-      ])
+      .map((row) => [row.id, <RowDetail item={row} stats={detailStats(row)} />])
   );
 
   return (
@@ -311,13 +264,12 @@ const sharedDetailStats = ({
   { title: STAT_LABELS.partial, description: formatBoolean(isPartial) },
 ];
 
-/** A query that errored failed. */
-export const isQueryFailed = ({ error }: Pick<ListQueryDiagnostic, 'error'>): boolean =>
-  error !== null;
+// Why a query or probe failed is in the response's `errors`, not on its row.
+const queryStatus = ({ isPartial }: ListQueryDiagnostic): RowStatus | null =>
+  isPartial ? 'partial' : null;
 
-/** Only a failed probe is an error; a verification error is the normal "no time-series index" answer. */
-export const isProbeFailed = ({ outcome }: Pick<ListProbeDiagnostic, 'outcome'>): boolean =>
-  outcome === 'failed';
+const probeStatus = ({ outcome }: ListProbeDiagnostic): RowStatus =>
+  outcome === 'failed' ? 'failed' : 'ok';
 
 /** The plan queries of one `_list` call. */
 export const QueriesTable = ({ queries }: { queries: readonly ListQueryDiagnostic[] }) => (
@@ -337,7 +289,7 @@ export const QueriesTable = ({ queries }: { queries: readonly ListQueryDiagnosti
       ),
     ]}
     detailStats={sharedDetailStats}
-    isFailed={isQueryFailed}
+    rowStatus={queryStatus}
   />
 );
 
@@ -360,11 +312,11 @@ export const ProbesTable = ({ probes }: { probes: readonly ListProbeDiagnostic[]
       { title: STAT_LABELS.documents, description: formatCount(probe.documentsFound, 'docs') },
       ...sharedDetailStats(probe),
     ]}
-    isFailed={isProbeFailed}
+    rowStatus={probeStatus}
   />
 );
 
-const OTHER_ERROR_COLUMNS: Array<EuiBasicTableColumn<SourceError>> = [
+const ERROR_COLUMNS: Array<EuiBasicTableColumn<SourceError>> = [
   { field: 'indexPattern', name: TABLE_COLUMNS.indexPattern },
   {
     field: 'status',
@@ -375,12 +327,12 @@ const OTHER_ERROR_COLUMNS: Array<EuiBasicTableColumn<SourceError>> = [
   { field: 'reason', name: TABLE_COLUMNS.reason },
 ];
 
-/** Response errors no probe or query row accounts for. */
-export const OtherErrorsTable = ({ errors }: { errors: readonly SourceError[] }) => (
+/** The `errors` of one `_list` call, in response order. */
+export const ErrorsTable = ({ errors }: { errors: readonly SourceError[] }) => (
   <EuiBasicTable<SourceError>
-    tableCaption={SECTION_TITLES.otherErrors}
+    tableCaption={SECTION_TITLES.errors}
     items={[...errors]}
-    columns={OTHER_ERROR_COLUMNS}
+    columns={ERROR_COLUMNS}
     compressed
   />
 );
