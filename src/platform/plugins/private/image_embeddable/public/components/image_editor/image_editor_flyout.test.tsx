@@ -17,8 +17,19 @@ import { ImageViewerContext } from '../image_viewer';
 import type { ImageEditorFlyoutProps } from './image_editor_flyout';
 import { ImageEditorFlyout } from './image_editor_flyout';
 import { imageEmbeddableFileKind } from '../../imports';
+import { createValidateUrl } from '../../utils/validate_url';
 
 const validateUrl = jest.fn(() => ({ isValid: true }));
+
+const PNG_DATA_URL =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==';
+const SVG_DATA_URL = 'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=';
+
+// uses the real url validator, rather than the mock above
+const validateDataUrl = createValidateUrl({
+  validateUrl: (url: string) => new URL(url),
+  isInternalUrl: () => false,
+});
 
 beforeEach(() => {
   validateUrl.mockImplementation(() => ({ isValid: true }));
@@ -27,20 +38,23 @@ beforeEach(() => {
 const filesClient = createMockFilesClient();
 filesClient.getFileKind.mockImplementation(() => imageEmbeddableFileKind);
 
-const ImageEditor = (props: Partial<ImageEditorFlyoutProps>) => {
+const ImageEditor = (
+  props: Partial<ImageEditorFlyoutProps> & { validateUrl?: typeof validateDataUrl }
+) => {
+  const { validateUrl: validateUrlOverride, ...flyoutProps } = props;
   return (
     <I18nProvider>
       <FilesContext client={filesClient}>
         <ImageViewerContext.Provider
           value={{
             getImageDownloadHref: (fileId: string) => `https://elastic.co/${fileId}`,
-            validateUrl,
+            validateUrl: validateUrlOverride ?? validateUrl,
           }}
         >
           <ImageEditorFlyout
             onCancel={() => {}}
             onSave={() => {}}
-            {...props}
+            {...flyoutProps}
             ariaLabelledBy="imageEditorFlyout"
           />
         </ImageViewerContext.Provider>
@@ -125,6 +139,32 @@ test(`shouldn't be able to save if url is invalid`, async () => {
   validateUrl.mockImplementation(() => ({ isValid: false, error: 'error' }));
 
   const { getByTestId } = render(<ImageEditor initialImageConfig={initialImageConfig} />);
+
+  expect(getByTestId(`imageEmbeddableEditorSave`)).toBeDisabled();
+});
+
+test('should call onSave with a base64 data url', async () => {
+  const onSave = jest.fn();
+  const { getByText, getByTestId } = render(
+    <ImageEditor onSave={onSave} validateUrl={validateDataUrl} />
+  );
+
+  await userEvent.click(getByText('Use link'));
+  await userEvent.click(getByTestId(`imageEmbeddableEditorUrlInput`));
+  await userEvent.paste(PNG_DATA_URL);
+
+  await userEvent.click(getByTestId(`imageEmbeddableEditorSave`));
+  expect(onSave).toHaveBeenCalledWith(
+    expect.objectContaining({ src: { type: 'url', url: PNG_DATA_URL } })
+  );
+});
+
+test(`shouldn't be able to save an unsupported data url`, async () => {
+  const { getByText, getByTestId } = render(<ImageEditor validateUrl={validateDataUrl} />);
+
+  await userEvent.click(getByText('Use link'));
+  await userEvent.click(getByTestId(`imageEmbeddableEditorUrlInput`));
+  await userEvent.paste(SVG_DATA_URL);
 
   expect(getByTestId(`imageEmbeddableEditorSave`)).toBeDisabled();
 });
