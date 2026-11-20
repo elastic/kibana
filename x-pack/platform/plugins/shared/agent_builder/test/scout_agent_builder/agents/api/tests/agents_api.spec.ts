@@ -66,12 +66,13 @@ apiTest.describe(
           id: `test-agent-with-starters-${randomUUID()}`,
           conversation_starters: [{ label: 'Top errors' }, { label: 'Plain label' }],
         };
+        createdAgentIds.push(agent.id);
+
         const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
           body: agent,
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(200);
-        createdAgentIds.push(agent.id);
         expect(response.body.conversation_starters).toStrictEqual(agent.conversation_starters);
 
         const getResponse = await asAdmin.get(`${API_AGENT_BUILDER}/agents/${agent.id}`, {
@@ -85,7 +86,7 @@ apiTest.describe(
     apiTest(
       'POST /api/agent_builder/agents rejects more than 3 conversation starters',
       async ({ asAdmin }) => {
-        const id = `test-agent-too-many-starters-${randomUUID()}`;
+        const id = `test-starters-over-limit-${randomUUID()}`;
         createdAgentIds.push(id);
 
         const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
