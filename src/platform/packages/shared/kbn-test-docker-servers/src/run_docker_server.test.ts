@@ -24,6 +24,8 @@ interface FakeDocker {
   exitContainer: (code: number) => void;
   /** Replace the `docker pull` child process, e.g. with one that only settles when killed. */
   pullProc?: Promise<{ stdout: string }> & { kill: () => void };
+  /** Simulates a terminal Ctrl-C reaching the `docker wait` monitor itself (exit code 130). */
+  interruptMonitor: () => void;
 }
 
 function fakeDocker({
@@ -47,6 +49,10 @@ function fakeDocker({
     }),
     { kill: () => rejectWait(Object.assign(new Error('killed'), { killed: true })) }
   );
+  const interruptMonitor = () =>
+    rejectWait(
+      Object.assign(new Error('Command failed with exit code 130: docker wait'), { exitCode: 130 })
+    );
   // the runner handles this rejection; avoid an unhandled-rejection warning when nobody awaits it
   waitProc.catch(() => {});
 
@@ -79,6 +85,7 @@ function fakeDocker({
     stdout,
     stderr,
     exitContainer: (code: number) => resolveWait({ stdout: `${code}\n` }),
+    interruptMonitor,
   };
   return fake;
 }
@@ -286,6 +293,22 @@ describe('runDockerServer', () => {
 
     expect(dockerCall(docker.calls, 'kill')).toEqual([['kill', 'container-1']]);
     expect(dockerCall(docker.calls, 'rm')).toHaveLength(0);
+  });
+
+  it('does not report a container exit when the monitor itself was interrupted by a signal', async () => {
+    const docker = fakeDocker({ cached: true });
+    const onUnexpectedExit = jest.fn();
+
+    const pending = runDockerServer(server, { log, onUnexpectedExit });
+    await new Promise((resolve) => setImmediate(resolve));
+    docker.stdout.write('package manifests loaded\n');
+    const running = await pending;
+
+    docker.interruptMonitor();
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(onUnexpectedExit).not.toHaveBeenCalled();
+
+    await running.stop();
   });
 
   it('reports a container that exits on its own, but not one that was stopped', async () => {

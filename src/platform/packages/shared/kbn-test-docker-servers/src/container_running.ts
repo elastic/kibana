@@ -37,8 +37,10 @@ export function observeContainerRunning(name: string, containerId: string, log: 
         }
       })
       .catch((error) => {
-        if (error?.killed) {
-          // ignore errors thrown because the process was killed
+        if (error?.killed || error?.signal || error?.exitCode === 130 || error?.exitCode === 143) {
+          // The monitor itself was stopped: by us (`kill`), or by a signal that reached it as
+          // part of the process group (a terminal Ctrl-C exits `docker wait` with 130). That
+          // says nothing about the container, and the run is being shut down anyway.
           subscriber.complete();
           return;
         }
