@@ -19,6 +19,7 @@
  */
 import type { DockerServerSpec } from '@kbn/test-docker-servers';
 import { packageRegistryDocker } from '@kbn/test-docker-servers';
+import { createFailError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 export const SCOUT_FLEET_PACKAGE_REGISTRY_ENV = 'SCOUT_FLEET_PACKAGE_REGISTRY';
@@ -104,7 +105,8 @@ export function getFleetPackageRegistry(
 export function assertFleetPackageRegistry(log: ToolingLog, env: NodeJS.ProcessEnv = process.env) {
   const registry = getFleetPackageRegistry(env);
   if (registry.error) {
-    throw new Error(registry.error);
+    // a usage error: reported as such by the CLI, without a stack trace
+    throw createFailError(registry.error);
   }
   if (env[FLEET_PACKAGE_REGISTRY_PORT_ENV] && !registry.enabled) {
     log.info(
