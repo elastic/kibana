@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Socket } from 'net';
 import { Readable } from 'stream';
 import { errors } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { CoreKibanaRequest, ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
-import { createProxyHandler, getEsPath } from './proxy_handler';
+import { createProxyHandler, getEsPath, getProxyHeaders } from './proxy_handler';
 import type { ProxyBody, ProxyParams } from './proxy_handler';
 
 const setup = (requestOptions: RequestFixtureOptions<ProxyParams, unknown, ProxyBody> = {}) => {
@@ -369,20 +369,22 @@ describe('WHEN proxying a request to Elasticsearch', () => {
   });
 
   it('SHOULD use the first value of a repeated request header', async () => {
-    const { run, transportRequest, request } = setup();
-    const rawRequest = ensureRawRequest(request);
-    Object.assign(rawRequest.headers, { 'content-type': ['text/plain', 'application/json'] });
+    const { request } = setup();
 
-    await run(CoreKibanaRequest.from<ProxyParams, unknown, ProxyBody>(rawRequest));
+    const headers = getProxyHeaders(
+      { ...request, headers: { 'content-type': ['text/plain', 'application/json'] } },
+      false
+    );
 
-    expect(transportRequest.mock.calls[0][1]?.headers?.['content-type']).toBe('text/plain');
+    expect(headers['content-type']).toBe('text/plain');
   });
 
   it('SHOULD send x-forwarded headers WHEN the client address is known', async () => {
-    const { run, transportRequest, request } = setup();
-    Object.assign(ensureRawRequest(request), {
-      info: { remoteAddress: '10.0.0.1', remotePort: 51234, host: 'kibana:5601' },
-      server: { info: { protocol: 'https' } },
+    const socket = new Socket();
+    Object.defineProperty(socket, 'remoteAddress', { value: '10.0.0.1' });
+    const { run, transportRequest } = setup({
+      path: 'https://kibana:5601/internal/es_client/my-index/_settings',
+      socket,
     });
 
     await run();
@@ -390,11 +392,19 @@ describe('WHEN proxying a request to Elasticsearch', () => {
     expect(transportRequest.mock.calls[0][1]?.headers).toEqual(
       expect.objectContaining({
         'x-forwarded-for': '10.0.0.1',
-        'x-forwarded-port': '51234',
         'x-forwarded-proto': 'https',
         'x-forwarded-host': 'kibana:5601',
       })
     );
+  });
+
+  it('SHOULD not send x-forwarded headers WHEN the client address is unknown', async () => {
+    const { run, transportRequest } = setup();
+
+    await run();
+
+    const headerNames = Object.keys(transportRequest.mock.calls[0][1]?.headers ?? {});
+    expect(headerNames.filter((name) => name.startsWith('x-forwarded-'))).toEqual([]);
   });
 });
 

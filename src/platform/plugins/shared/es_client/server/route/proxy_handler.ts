@@ -12,7 +12,6 @@ import type { Readable } from 'stream';
 import { errors } from '@elastic/elasticsearch';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { Headers, KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
-import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import { ES_CLIENT_BASE_PATH, PRODUCT_ORIGIN_HEADER } from '../../common';
 import { getRequestAbortedSignal } from '../lib/get_request_aborted_signal';
 import type { RouteDependencies } from '../types';
@@ -72,12 +71,14 @@ export const getProxyHeaders = (request: KibanaRequest, hasBody: boolean): Incom
     }
   }
 
-  const { info, server } = ensureRawRequest(request);
-  if (info?.remoteAddress && info?.remotePort) {
-    proxyHeaders['x-forwarded-for'] = info.remoteAddress;
-    proxyHeaders['x-forwarded-port'] = String(info.remotePort);
-    proxyHeaders['x-forwarded-proto'] = server.info.protocol;
-    proxyHeaders['x-forwarded-host'] = info.host;
+  const {
+    socket: { remoteAddress },
+    url,
+  } = request;
+  if (remoteAddress) {
+    proxyHeaders['x-forwarded-for'] = remoteAddress;
+    proxyHeaders['x-forwarded-proto'] = url.protocol.replace(/:$/, '');
+    proxyHeaders['x-forwarded-host'] = url.host;
   }
 
   return proxyHeaders;
