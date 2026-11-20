@@ -84,6 +84,20 @@ describe('listWindowIds', () => {
     expect(closePointInTime).toHaveBeenCalledWith({ id: 'pit-1' });
   });
 
+  // Regression (Libra PRRT_kwDOAHeGUM65VpBn): ES can return a new PIT id on any search,
+  // the final empty page included; the next page and the close must use the latest id.
+  it('follows the pit_id each search returns, for paging and for the close', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce({ pit_id: 'pit-2', hits: { hits: [{ _id: 'a', sort: ['0'] }] } })
+      .mockResolvedValueOnce({ pit_id: 'pit-3', hits: { hits: [] } });
+    const client = clientWith(search);
+    await listWindowIds(client, 'idx', WINDOW);
+    expect(search.mock.calls[0][0].pit).toMatchObject({ id: 'pit-1' });
+    expect(search.mock.calls[1][0].pit).toMatchObject({ id: 'pit-2' });
+    expect(client.closePointInTime as jest.Mock).toHaveBeenCalledWith({ id: 'pit-3' });
+  });
+
   it('closes the PIT even when a search page throws', async () => {
     const search = jest.fn().mockRejectedValueOnce(new Error('search failed'));
     const client = clientWith(search);

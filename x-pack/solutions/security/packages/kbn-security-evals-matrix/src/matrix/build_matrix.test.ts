@@ -1769,10 +1769,10 @@ describe('round 8 regression: per-column self-judged and exclusion scoping', () 
                 // Every Relevance grade was rejected by judge policy...
                 excludedNonEis: 4,
                 excludedJudgelessOnly: true,
+                // Rejected docs never reach the aggregation, so Relevance is absent here...
                 evaluators: [
-                  // ...but the column reads only this code-only contract check.
+                  // ...and the column reads only this code-only contract check.
                   { evaluatorName: 'FinalAnswerPresent', mean: 1, count: 4 },
-                  { evaluatorName: 'Relevance', mean: 0, count: 0 },
                 ],
               },
             ],
@@ -1810,10 +1810,7 @@ describe('round 8 regression: per-column self-judged and exclusion scoping', () 
                 datasetName: 'alert',
                 excludedNonEis: 4,
                 excludedJudgelessOnly: true,
-                evaluators: [
-                  { evaluatorName: 'FinalAnswerPresent', mean: 1, count: 4 },
-                  { evaluatorName: 'Relevance', mean: 0, count: 0 },
-                ],
+                evaluators: [{ evaluatorName: 'FinalAnswerPresent', mean: 1, count: 4 }],
               },
             ],
           },
@@ -1825,6 +1822,54 @@ describe('round 8 regression: per-column self-judged and exclusion scoping', () 
     expect(cell.kind).toBe('excluded');
     if (cell.kind === 'excluded') expect(cell.reason).toBe('non-eis-judge');
   });
+
+  // Regression (Libra PRRT_kwDOAHeGUM65U7hw): the allowlist decides whether a column reads
+  // judged grades. Aggregation keeps only admitted scores, so a judged evaluator whose every
+  // grade was rejected is absent from the dataset and must not make the column look code-only.
+  it.each([
+    ['contract checks plus a judged evaluator', ['FinalAnswerPresent', 'Relevance']],
+    ['only a judged evaluator', ['Relevance']],
+  ])(
+    'excludes an allowlisted column (%s) whose every judged grade was rejected',
+    (_name, evaluators) => {
+      const allowlistCfg = parseMatrixConfig({
+        columns: [
+          {
+            id: 'rel',
+            label: 'Relevance',
+            suites: ['suite-a'],
+            examplePrefixes: ['alert'],
+            evaluators,
+            weight: 1,
+          },
+        ],
+        models: [{ id: 'model-x', label: 'Model X' }],
+      });
+      const rejected: AggregatedModelScores[] = [
+        {
+          modelId: 'model-x',
+          suites: [
+            {
+              suiteId: 'suite-a',
+              experimentId: 'run-9',
+              datasets: [
+                {
+                  datasetId: 'prefix:alert',
+                  datasetName: 'alert',
+                  excludedNonEis: 4,
+                  excludedJudgelessOnly: true,
+                  evaluators: [{ evaluatorName: 'FinalAnswerPresent', mean: 1, count: 4 }],
+                },
+              ],
+            },
+          ],
+        },
+      ];
+      const cell = buildMatrix(rejected, allowlistCfg).proprietary[0].cells.rel;
+      expect(cell.kind).toBe('excluded');
+      if (cell.kind === 'excluded') expect(cell.reason).toBe('non-eis-judge');
+    }
+  );
 
   it('renders a fully self-judged prefix run as excluded, not missing (R-libra-3)', () => {
     // The `!latest` all-self-judged rejection path (see query_matrix_scores) pushes

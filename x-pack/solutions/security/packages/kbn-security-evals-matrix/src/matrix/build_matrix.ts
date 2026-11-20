@@ -295,6 +295,9 @@ const CONTRACT_EVALUATORS = new Set([
   'SkillInvoked',
 ]);
 
+const allowlistReadsJudgedGrades = (allows: ReadonlySet<string> | undefined): boolean =>
+  allows === undefined || [...allows].some((name) => !CONTRACT_EVALUATORS.has(name));
+
 const columnSelfJudged = (
   modelScores: AggregatedModelScores,
   column: MatrixColumnConfig
@@ -711,31 +714,15 @@ const buildMatrixRow = (
                 .reduce((sum, dataset) => sum + (pick(dataset) || 0), 0)),
         0
       );
-    // Libra round: a column whose effective selection reads no judged (model-graded)
-    // evaluator — e.g. an allowlist of code-only contract checks such as
-    // `FinalAnswerPresent` — must not inherit judge-policy rejections recorded
-    // against other evaluators of the same datasets: its numeric mean rests on
-    // code-only checks that stay admitted under every judge policy, so rendering
-    // it `excluded:*` hides a valid, fully measured cell. Only apply the
-    // exclusion signals when some in-scope dataset carries a judged evaluator
-    // this column actually scores. (A suite rejected wholesale pushes
-    // `datasets: []`, leaving no evaluator record to inspect: the suite's fate
-    // IS the column's fate there, so the counts stay.)
+    // A column whose allowlist names only code-only contract checks (e.g.
+    // `FinalAnswerPresent`) keeps its score under every judge policy, so it must
+    // not inherit judge-policy rejections recorded against other evaluators of the
+    // same datasets. Decided from the allowlist: aggregated evaluators hold only
+    // admitted scores, so a judged evaluator whose every grade was rejected is
+    // absent there. (A suite rejected wholesale pushes `datasets: []`: its fate is
+    // the column's fate, so the counts stay.)
     const columnAllows = column.evaluators ? new Set(column.evaluators) : undefined;
-    const readsJudgedGrades = columnSuitesAll.some((suite) =>
-      suite.datasets.some(
-        (dataset) =>
-          (!columnDatasetIds || columnDatasetIds.has(dataset.datasetId)) &&
-          dataset.evaluators.some(
-            (e) =>
-              isQualityEvaluator(e) &&
-              !CONTRACT_EVALUATORS.has(e.evaluatorName) &&
-              (columnAllows
-                ? columnAllows.has(e.evaluatorName)
-                : !isExcludedEvaluator(e.evaluatorName, excludeEvaluators))
-          )
-      )
-    );
+    const readsJudgedGrades = allowlistReadsJudgedGrades(columnAllows);
     const canScopeToSelection = columnSuitesAll.every((suite) => suite.datasets.length > 0);
     const scopedExcludedSelfJudged = columnDatasetIds
       ? perDataset((dataset) => dataset.excludedSelfJudged ?? 0)
