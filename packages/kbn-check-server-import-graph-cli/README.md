@@ -1,6 +1,6 @@
 # @kbn/check-server-import-graph-cli
 
-Static check to prevent banned modules (currently `@elastic/eui` and `@elastic/charts`) from being imported through Kibana server's import graph. The banned set is a list (`BANNED_NODE_MODULES`), so other browser-only node modules can be added later.
+Static check to prevent banned modules (currently `@elastic/eui`, `@elastic/charts` and `@emotion/react`) from being imported through Kibana server's import graph. The banned set is a list (`BANNED_NODE_MODULES`), so other browser-only node modules can be added later.
 
 ```sh
 node scripts/check_server_import_graph

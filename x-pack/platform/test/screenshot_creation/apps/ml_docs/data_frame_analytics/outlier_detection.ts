@@ -14,7 +14,7 @@ import { LOGS_INDEX_PATTERN } from '..';
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const commonScreenshots = getService('commonScreenshots');
-  const transform = getService('transform');
+  const transform = getService('mlDocsTransform');
 
   const screenshotDirectories = ['ml_docs', 'data_frame_analytics'];
 
@@ -68,15 +68,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('transform screenshot', async () => {
       await ml.testExecution.logTestStep('navigate to transform list');
-      await transform.navigation.navigateTo();
+      await transform.navigateTo();
 
-      await transform.testExecution.logTestStep('open transform in wizard');
-      await transform.management.assertTransformListPageExists();
+      await ml.testExecution.logTestStep('open transform in wizard');
+      await transform.assertTransformListPageExists();
       await transform.table.refreshTransformList();
       await transform.table.filterWithSearchString(transformConfig.id, 1);
       await transform.table.assertTransformRowActions(transformConfig.id, false);
       await transform.table.clickTransformRowAction(transformConfig.id, 'Clone');
-      await transform.wizard.assertDefineStepActive();
+      await transform.assertDefineStepActive();
 
       await ml.testExecution.logTestStep('take screenshot');
       await commonScreenshots.takeScreenshot(
