@@ -33,6 +33,7 @@ const setupRoute = (update: jest.Mock) => {
     logger: loggingSystemMock.createLogger(),
     getSpaceId: () => 'default',
     getWorkersService: () => ({ update }),
+    isCpsEnabled: () => false,
   } as unknown as RouteDependencies);
 
   const handler = addVersion.mock.calls[0][1] as (
@@ -244,5 +245,37 @@ describe('registerUpdateWorkerRoute', () => {
     expect(update).toHaveBeenCalled();
     expect(response.forbidden).not.toHaveBeenCalled();
     expect(response.ok).toHaveBeenCalled();
+  });
+
+  it('hands the service a universe callback that returns the filtered patterns', async () => {
+    const update = jest.fn().mockResolvedValue({
+      outcome: 'updated',
+      response: { worker: { id: TRIAGE } },
+    });
+    const { handler } = setupRoute(update);
+    const base = createRouteContextMock() as { core: Promise<object> };
+    const context = {
+      ...base,
+      core: base.core.then((core) => ({
+        ...core,
+        uiSettings: {
+          client: {
+            get: jest.fn().mockResolvedValue(['logs-*', '.alerts-security.alerts-default']),
+          },
+        },
+      })),
+    };
+
+    await handler(
+      context,
+      httpServerMock.createKibanaRequest({
+        params: { workerId: TRIAGE },
+        body: { settingsRevision: 1, settings: { autonomy: 'manual' } },
+      }),
+      httpServerMock.createResponseFactory()
+    );
+
+    const getHuntUniverse = update.mock.calls[0].at(-1) as () => Promise<string[]>;
+    await expect(getHuntUniverse()).resolves.toEqual(['logs-*']);
   });
 });
