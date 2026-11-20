@@ -230,14 +230,11 @@ export const ThreatQ: ConnectorSpec = {
       input: SearchIndicatorsInputSchema,
       description:
         'Search indicators with ThreatQ criteria and filters for value, type, status, or score. Use this to check an IOC before enrichment. Returns one page with the original data and total fields.',
-      handler: async (
-        ctx,
-        { criteria, filters, fields, with: relationships, ...params }: SearchIndicatorsInput
-      ) =>
+      handler: async (ctx, { criteria, filters, fields, ...params }: SearchIndicatorsInput) =>
         request(ctx, {
           method: 'POST',
           url: '/indicators/query',
-          params: { ...params, with: relationships?.join(',') },
+          params,
           data: { criteria, filters, fields },
         }),
     },
@@ -249,25 +246,12 @@ export const ThreatQ: ConnectorSpec = {
         'Search the Threat Library by object type, including reports, malware, events, and adversaries. Returns the original result envelope, including total and nextCursorMark when present.',
       handler: async (
         ctx,
-        {
-          objectType,
-          criteria,
-          filters,
-          fields,
-          with: relationships,
-          cursorMark,
-          offset,
-          ...params
-        }: SearchObjectsInput
+        { objectType, criteria, filters, fields, cursorMark, offset, ...params }: SearchObjectsInput
       ) =>
         request(ctx, {
           method: 'POST',
           url: `/${objectType}/query`,
-          params: {
-            ...params,
-            ...(cursorMark ? { cursorMark } : { offset }),
-            with: relationships?.join(','),
-          },
+          params: { ...params, ...(cursorMark ? { cursorMark } : { offset }) },
           data: { criteria, filters, fields },
         }),
     },
@@ -404,13 +388,40 @@ export const ThreatQ: ConnectorSpec = {
       scope: 'write',
       input: AddTagsInputSchema,
       description:
-        'Add tags to an existing ThreatQ object, including custom object types. Use this to label investigation findings. Returns the tag records.',
-      handler: async (ctx, { objectType, objectId, tags }: AddTagsInput) =>
-        request(ctx, {
-          method: 'POST',
-          url: `/${objectType}/${objectId}/tags`,
-          data: tags.map((name) => ({ name })),
-        }),
+        'Add tags to an existing ThreatQ object, including custom object types. Use this to label investigation findings. Sends one request per tag and, if one fails, reports the tags already added and those not. Returns total and the tag records.',
+      handler: async (ctx, { objectType, objectId, tags }: AddTagsInput) => {
+        // ThreatQ takes one tag, `{ "name": "Tag Name" }`, per request.
+        const added: JsonValue[] = [];
+        for (const [index, name] of tags.entries()) {
+          let result: JsonValue;
+          try {
+            result = await request(ctx, {
+              method: 'POST',
+              url: `/${objectType}/${objectId}/tags`,
+              data: { name },
+            });
+          } catch (error) {
+            // Earlier tags are already on the object, so say which, to keep a retry from sending them again.
+            const quoted = (names: readonly string[]) => names.map((tag) => `"${tag}"`).join(', ');
+            const done = tags.slice(0, index);
+            throw new Error(
+              `${error instanceof Error ? error.message : String(error)} Failed on tag "${name}". ${
+                done.length > 0 ? `Already added: ${quoted(done)}.` : 'No tags were added.'
+              } Not added: ${quoted(tags.slice(index))}.`
+            );
+          }
+          const data =
+            typeof result === 'object' && result !== null && !Array.isArray(result)
+              ? result.data
+              : undefined;
+          if (Array.isArray(data)) {
+            added.push(...data);
+          } else if (data !== undefined) {
+            added.push(data);
+          }
+        }
+        return { total: added.length, data: added };
+      },
     },
     createObject: {
       isTool: false,
@@ -450,7 +461,8 @@ export const ThreatQ: ConnectorSpec = {
       description:
         'List installed ThreatQ plugins (operations), including their IDs and enabled state. Use getPlugin next to discover action names and supported object types. Returns one page of plugins and total.',
       handler: async (ctx, input: Pagination) =>
-        request(ctx, { method: 'GET', url: '/plugins', params: input }),
+        // The reference requires forceRefresh; `N` lists without running a plugin sync.
+        request(ctx, { method: 'GET', url: '/plugins', params: { ...input, forceRefresh: 'N' } }),
     },
     getPlugin: {
       isTool: true,
@@ -489,7 +501,7 @@ export const ThreatQ: ConnectorSpec = {
   skill: [
     '## ThreatQ investigation',
     '',
-    'Search an alert indicator, then use getIndicator to read its score, status, attributes, and sources.',
+    'Search an alert indicator, then use getIndicator to read its score, status, attributes, and sources. The search actions do not return related objects; read those with getIndicator, getObject, or getRelatedObjects and their with parameter.',
     'Use getRelatedObjects to find linked indicators, events, or adversaries; use getObject to read each result.',
     'For report details, use report. For report searches, use the endpoint name supported by the instance (the API reference lists reports). The with relationship names vary by ThreatQ version and installed object definitions.',
     'Use the IDs returned by listIndicatorStatuses and listIndicatorTypes before creating or updating indicators.',

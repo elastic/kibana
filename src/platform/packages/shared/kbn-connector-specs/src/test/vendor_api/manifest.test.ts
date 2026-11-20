@@ -137,6 +137,31 @@ describe('Markdown reference sources', () => {
   });
 });
 
+describe('Aglio reference sources', () => {
+  const withSource = (source: Record<string, unknown>) =>
+    JSON.stringify({
+      ...manifest,
+      sources: { docs: { fetchedAt: '2026-10-07T00:00:00Z', ...source } },
+    });
+
+  it('accepts an Aglio page as a source', () => {
+    const json = withSource({
+      format: 'threatq-html',
+      url: 'https://helpcenter.threatq.com/assets/HTML/api/ThreatQ_REST_API_Reference_v6.16.0.html',
+    });
+
+    expect(parseManifest(json).sources.docs.format).toBe('threatq-html');
+  });
+
+  it('takes no pages, which only Markdown references have', () => {
+    expect(() =>
+      parseManifest(
+        withSource({ format: 'threatq-html', url: 'https://x.com/a.html', pages: ['a/'] })
+      )
+    ).toThrow('only applies to Markdown references');
+  });
+});
+
 describe('fixtures', () => {
   it('converts response overrides to mock fixtures', () => {
     const fixtures = vendorApiFixturesSchema.parse({

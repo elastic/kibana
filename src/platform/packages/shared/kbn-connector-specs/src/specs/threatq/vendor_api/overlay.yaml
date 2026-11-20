@@ -1,0 +1,18 @@
+overlay: 1.0.0
+info:
+  title: ThreatQ REST API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/indicators'].post.requestBody.content['application/json'].schema.items.properties.type_id
+    description: >-
+      The reference types a request body from its example, and the example for POST /indicators
+      sends type_id as the string "10" while the response to it returns the integer 10. Both are
+      accepted, so the type isn't narrowed to the example's.
+    remove: true
+  - target: $.paths['/indicators'].post.requestBody.content['application/json'].schema.items.properties
+    description: type_id takes a string or an integer, as the example and the response of POST /indicators show.
+    update:
+      type_id:
+        oneOf:
+          - type: string
+          - type: integer

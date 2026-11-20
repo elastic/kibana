@@ -25,12 +25,14 @@ import type {
   ManifestOperation,
   ManifestPagination,
   ManifestSource,
+  AglioSourceFormat,
   MarkdownSourceFormat,
   ProtocolFormat,
   UnmatchedRequest,
   VendorApiManifest,
 } from '../manifest';
 import {
+  isAglioFormat,
   isMarkdownFormat,
   isNamedCall,
   isProtocolFormat,
@@ -69,8 +71,10 @@ export interface UpdateVendorApiOptions {
   readonly directory: string;
   /** Sources to add or point elsewhere, by name; the manifest's are kept otherwise. */
   readonly sources?: Readonly<Record<string, string>>;
-  /** Sources that are Markdown references, GraphQL or MCP, by name. */
-  readonly formats?: Readonly<Record<string, MarkdownSourceFormat | ProtocolFormat>>;
+  /** Sources that are Markdown or Aglio references, GraphQL or MCP, by name. */
+  readonly formats?: Readonly<
+    Record<string, MarkdownSourceFormat | AglioSourceFormat | ProtocolFormat>
+  >;
   /** Per GraphQL or MCP source, the URLs the connector calls; see `ManifestSource`. */
   readonly endpoints?: Readonly<Record<string, readonly string[]>>;
   /** Per Markdown reference, the URL prefixes of the pages to fetch; see `ManifestSource`. */
@@ -245,9 +249,12 @@ export const updateVendorApi = async ({
       );
     }
   }
-  const markdownFormatOf = (name: string): MarkdownSourceFormat | undefined => {
+  // The formats whose source can't be told from its document, so the loader has to be told.
+  const referenceFormatOf = (
+    name: string
+  ): MarkdownSourceFormat | AglioSourceFormat | undefined => {
     const format = formatFlags[name] ?? previous?.sources[name]?.format;
-    return isMarkdownFormat(format) ? format : undefined;
+    return isMarkdownFormat(format) || isAglioFormat(format) ? format : undefined;
   };
   const pagesOf = (name: string): readonly string[] | undefined =>
     pageFlags[name] ?? previous?.sources[name]?.pages;
@@ -281,14 +288,14 @@ export const updateVendorApi = async ({
     }
     const snapshot = fetchAll ? undefined : await read(snapshotFile(name, declaredFormat));
     if (snapshot === undefined) {
-      const markdownFormat = markdownFormatOf(name);
+      const referenceFormat = referenceFormatOf(name);
       const pages = pagesOf(name);
-      if (!markdownFormat && pages !== undefined) {
+      if (!isMarkdownFormat(referenceFormat) && pages !== undefined) {
         throw new Error(`${name}: --pages only applies to Markdown references; pass --format`);
       }
       log.info(`Loading ${name} from ${url}`);
       const { format, apiVersion, document } = await loadVendorSpec(url, fetchText, {
-        format: markdownFormat,
+        format: referenceFormat,
         pages,
       });
       formats[name] = format;

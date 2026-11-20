@@ -24,8 +24,13 @@ import {
 } from '../src/test/vendor_api/find_connector';
 import { createGhIssueTracker } from '../src/test/vendor_api/drift/gh_issue_tracker';
 import { inspectVendorApi } from '../src/test/vendor_api/inspect/inspect_vendor_api';
-import type { MarkdownSourceFormat, ProtocolFormat } from '../src/test/vendor_api/manifest';
+import type {
+  AglioSourceFormat,
+  MarkdownSourceFormat,
+  ProtocolFormat,
+} from '../src/test/vendor_api/manifest';
 import {
+  aglioSourceFormatSchema,
   markdownSourceFormatSchema,
   protocolSourceFormatSchema,
   SOURCE_NAME_PATTERN,
@@ -54,10 +59,19 @@ const parseNamed = (option: string, flag: string, value: string): [string, strin
   return [name, flag.slice(separator + 1)];
 };
 
-const parseFormat = (flag: string): [string, MarkdownSourceFormat | ProtocolFormat] => {
+const parseFormat = (
+  flag: string
+): [string, MarkdownSourceFormat | AglioSourceFormat | ProtocolFormat] => {
   const [name, format] = parseNamed('format', flag, 'format');
-  const options = [...markdownSourceFormatSchema.options, ...protocolSourceFormatSchema.options];
-  const parsed = markdownSourceFormatSchema.or(protocolSourceFormatSchema).safeParse(format);
+  const options = [
+    ...markdownSourceFormatSchema.options,
+    ...aglioSourceFormatSchema.options,
+    ...protocolSourceFormatSchema.options,
+  ];
+  const parsed = markdownSourceFormatSchema
+    .or(aglioSourceFormatSchema)
+    .or(protocolSourceFormatSchema)
+    .safeParse(format);
   if (!parsed.success) {
     throw createFlagError(`--format takes ${options.join(', ')}, got "${format}"`);
   }
@@ -289,9 +303,10 @@ run(
                      or --drift)
         --source     name=url of a vendor spec to add or move; repeatable. Loads every source.
         --format     name=format of a source that is a Markdown API reference, whose url is its
-                     llms.txt index: databricks-markdown or brave-markdown. Or graphql, whose url
-                     serves SDL or an introspection result, or mcp, whose url serves a tools/list
-                     result. Kept in manifest.json.
+                     llms.txt index: databricks-markdown or brave-markdown. Or one that is an Aglio
+                     page, whose url is that page: threatq-html. Or graphql, whose url serves SDL
+                     or an introspection result, or mcp, whose url serves a tools/list result.
+                     Kept in manifest.json.
         --endpoint   name=url the connector calls for a graphql or mcp source; repeatable. Kept in
                      manifest.json.
         --pages      name=prefix of the reference pages to fetch, absolute or relative to the
