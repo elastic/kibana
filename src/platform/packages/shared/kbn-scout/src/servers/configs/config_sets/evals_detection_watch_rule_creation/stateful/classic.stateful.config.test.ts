@@ -46,6 +46,10 @@ describe('evals_detection_watch_rule_creation config set', () => {
         'worker list and PATCH routes return 404 while AlertZero is off in the space',
       ],
       [
+        '--xpack.spaces.defaultSolution=security',
+        'AlertZero routes return 404 outside a Security solution space (#300822)',
+      ],
+      [
         '--xpack.proposals.enabled=true',
         'required plugin of alertzero, defaults false; dropping it cascade-disables alertzero',
       ],
