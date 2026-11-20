@@ -22,7 +22,11 @@ import {
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import { FormattedDate, FormattedRelative, FormattedTime } from '@kbn/i18n-react';
-import type { RuleLibraryListItem, RuleLibraryRefreshStatus } from '../types';
+import type {
+  RuleLibraryListItem,
+  RuleLibraryProviderType,
+  RuleLibraryRefreshStatus,
+} from '../types';
 import * as i18n from '../translations';
 
 const STATUS_LABEL: Record<RuleLibraryRefreshStatus, string> = {
@@ -76,26 +80,28 @@ const StatusIndicator = ({ status, error }: StatusIndicatorProps) => {
   );
 };
 
-interface ListCounts {
-  exceptionLists: number;
-  valueLists: number;
-}
+const PROVIDER_ICON: Record<RuleLibraryProviderType, string> = {
+  fleet: 'productFleet',
+  git: 'branch',
+  s3: 'logoAWS',
+};
 
-const getSummaryFacts = (
-  library: RuleLibraryListItem,
-  { exceptionLists, valueLists }: ListCounts
-): EuiDescriptionListProps['listItems'] => [
+const getSummaryFacts = (library: RuleLibraryListItem): EuiDescriptionListProps['listItems'] => [
   ...(library.version ? [{ title: i18n.FACT_VERSION, description: library.version }] : []),
-  ...(library.refreshStatus === 'never_refreshed'
-    ? []
-    : [{ title: i18n.FACT_RULES, description: library.ruleCount.toLocaleString() }]),
-  ...(exceptionLists > 0
-    ? [{ title: i18n.FACT_EXCEPTION_LISTS, description: exceptionLists.toLocaleString() }]
-    : []),
-  ...(valueLists > 0
-    ? [{ title: i18n.FACT_VALUE_LISTS, description: valueLists.toLocaleString() }]
-    : []),
-  { title: i18n.FACT_PROVIDER, description: library.provider },
+  {
+    title: i18n.FACT_PROVIDER,
+    description: (
+      <>
+        <EuiIcon
+          type={PROVIDER_ICON[library.provider]}
+          size="s"
+          css={{ verticalAlign: 'text-bottom' }}
+          aria-hidden={true}
+        />{' '}
+        {library.provider}
+      </>
+    ),
+  },
   ...(library.license ? [{ title: i18n.FACT_LICENSE, description: library.license }] : []),
   {
     title: i18n.FACT_SCOPE,
@@ -171,17 +177,11 @@ const FactsLine = ({ listItems }: { listItems: EuiDescriptionListProps['listItem
 
 interface LibraryHeaderProps {
   library: RuleLibraryListItem;
-  listCounts: ListCounts;
   canRefresh: boolean;
   onRefresh: (libraryId: string) => void;
 }
 
-export const LibraryHeader = ({
-  library,
-  listCounts,
-  canRefresh,
-  onRefresh,
-}: LibraryHeaderProps) => (
+export const LibraryHeader = ({ library, canRefresh, onRefresh }: LibraryHeaderProps) => (
   <EuiPanel hasBorder paddingSize="m" data-test-subj="ruleLibraryHeader">
     <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -198,7 +198,7 @@ export const LibraryHeader = ({
         ) : null}
         <EuiSpacer size="s" />
         <EuiFlexGroup direction="column" gutterSize="xs">
-          <FactsLine listItems={getSummaryFacts(library, listCounts)} />
+          <FactsLine listItems={getSummaryFacts(library)} />
           {library.sourceUrl ? <FactsLine listItems={getSourceFacts(library)} /> : null}
           <FactsLine listItems={getRefreshFacts(library)} />
         </EuiFlexGroup>

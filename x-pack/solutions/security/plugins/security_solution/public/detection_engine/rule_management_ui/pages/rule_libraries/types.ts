@@ -41,8 +41,15 @@ export interface LibraryRuleIntegration {
   title: string;
 }
 
+export interface LibraryRulesSort {
+  field: 'name' | 'severity' | 'riskScore';
+  direction: 'asc' | 'desc';
+}
+
 export interface LibraryRuleRow {
   id: string;
+  ruleId: string;
+  version: number;
   libraryId: string;
   name: string;
   description: string;

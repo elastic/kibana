@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { v4 as uuidv4 } from 'uuid';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { SecurityPageName } from '../../../../app/types';
 import { APP_UI_ID } from '../../../../../common';
@@ -24,30 +24,19 @@ import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/compone
 import { redirectToDetections } from '../../../common/helpers';
 import { AddLibraryFlyout } from './components/add_library_flyout';
 import { ALL_LIBRARIES_ID, LibrariesList } from './components/libraries_list';
-import { LibraryHeader } from './components/library_header';
-import { LibraryListsPlaceholder } from './components/library_lists_placeholder';
-import { LibraryNotRefreshed } from './components/library_not_refreshed';
-import { LibraryRulesTable } from './components/library_rules_table';
-import { LibraryTabs } from './components/library_tabs';
+import { LibraryBody } from './components/library_body';
+import { LibraryRuleFlyout } from './components/library_rule_flyout';
 import type { LibraryTab } from './components/library_tabs';
+import { DUMMY_EXCEPTION_LISTS, DUMMY_VALUE_LISTS } from './dummy_data';
+import { useInstallLibraryRules } from './use_install_library_rules';
+import { useLibraryRules } from './use_library_rules';
 import {
-  DUMMY_EXCEPTION_LISTS,
-  DUMMY_LIBRARIES,
-  DUMMY_RULES,
-  DUMMY_VALUE_LISTS,
-} from './dummy_data';
-import type { LibraryRuleRow, NewRuleLibraryInput, RuleLibraryListItem } from './types';
+  useInitialRuleLibrariesPageState,
+  useSyncRuleLibrariesUrlState,
+} from './use_rule_libraries_url_state';
+import { useRuleLibraries } from './use_rule_libraries';
+import type { LibraryRuleRow, NewRuleLibraryInput } from './types';
 import * as i18n from './translations';
-
-const FAKE_REFRESH_DURATION_MS = 1500;
-const FIRST_REFRESH_VERSION = '1.0.0';
-
-const getLibraryTitleFromUrl = (url: string): string =>
-  url
-    .replace(/\.git$/, '')
-    .split(/[/:]/)
-    .filter(Boolean)
-    .pop() ?? url;
 
 const RuleLibrariesPageComponent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -56,11 +45,13 @@ const RuleLibrariesPageComponent: React.FC = () => {
   const [{ isSignalIndexExists, isAuthenticated, hasEncryptionKey }] = useUserData();
   const { needsConfiguration: needsListsConfiguration } = useListsConfig();
 
-  const [libraries, setLibraries] = useState<readonly RuleLibraryListItem[]>(DUMMY_LIBRARIES);
-  const [rules, setRules] = useState<readonly LibraryRuleRow[]>(DUMMY_RULES);
-  const [selectedLibraryId, setSelectedLibraryId] = useState(ALL_LIBRARIES_ID);
-  const [selectedTab, setSelectedTab] = useState<LibraryTab>('rules');
+  const { libraries, isLoading, isError, isCreating, refreshLibraries, createLibrary } =
+    useRuleLibraries();
+  const initialState = useInitialRuleLibrariesPageState();
+  const [selectedLibraryId, setSelectedLibraryId] = useState(initialState.libraryId);
+  const [selectedTab, setSelectedTab] = useState<LibraryTab>(initialState.tab);
   const [isAddLibraryOpen, setIsAddLibraryOpen] = useState(false);
+  const [openedRule, setOpenedRule] = useState<LibraryRuleRow>();
 
   const isAllSelected = selectedLibraryId === ALL_LIBRARIES_ID;
   const selectedLibrary = libraries.find(({ id }) => id === selectedLibraryId);
@@ -73,70 +64,57 @@ const RuleLibrariesPageComponent: React.FC = () => {
   const inRefreshedLibrary = <T extends { libraryId: string }>(items: readonly T[]) =>
     inSelectedLibrary(items).filter(({ libraryId }) => refreshedLibraryIds.has(libraryId));
 
-  const visibleRules = inRefreshedLibrary(rules);
   const visibleExceptionLists = inRefreshedLibrary(DUMMY_EXCEPTION_LISTS);
   const visibleValueLists = inRefreshedLibrary(DUMMY_VALUE_LISTS);
-  const isSelectedLibraryNeverRefreshed = Boolean(selectedLibrary && !selectedLibrary.version);
   const activeTab =
     (selectedTab === 'exceptionLists' && visibleExceptionLists.length === 0) ||
     (selectedTab === 'valueLists' && visibleValueLists.length === 0)
       ? 'rules'
       : selectedTab;
 
-  const refreshLibraries = (libraryIds?: string[]) => {
-    const isTarget = ({ id }: RuleLibraryListItem) => !libraryIds || libraryIds.includes(id);
-    setLibraries((current) =>
-      current.map((library) =>
-        isTarget(library) ? { ...library, refreshStatus: 'refreshing' } : library
-      )
-    );
-    setTimeout(() => {
-      setLibraries((current) =>
-        current.map((library) =>
-          isTarget(library)
-            ? {
-                ...library,
-                refreshStatus: 'refreshed',
-                refreshedAt: new Date().toISOString(),
-                version: library.version ?? FIRST_REFRESH_VERSION,
-                ruleCount: library.version
-                  ? library.ruleCount
-                  : rules.filter(({ libraryId }) => libraryId === library.id).length,
-              }
-            : library
-        )
-      );
-    }, FAKE_REFRESH_DURATION_MS);
-  };
+  const { state: libraryRules, reset: resetLibraryRules } = useLibraryRules({
+    libraryId: isAllSelected ? undefined : selectedLibraryId,
+    enabled: isAllSelected || Boolean(selectedLibrary?.version),
+    initialState,
+  });
+  const { install, installAll, isInstalling } = useInstallLibraryRules();
 
-  const addLibrary = (input: NewRuleLibraryInput) => {
-    const id = uuidv4();
-    const newLibrary: RuleLibraryListItem = {
-      id,
-      group: 'custom',
-      title: getLibraryTitleFromUrl(input.url),
-      description: '',
-      icon: 'package',
-      provider: input.source === 's3' ? 's3' : 'git',
-      ruleCount: 0,
-      refreshStatus: 'never_refreshed',
-      owner: 'Custom',
-      license: '',
-      scope: input.scope,
-      sourceUrl: input.url.replace(/^https?:\/\//, ''),
-      branch: input.branch || undefined,
-    };
-    setLibraries((current) => [...current, newLibrary]);
-    setSelectedLibraryId(id);
-    setIsAddLibraryOpen(false);
-  };
+  const selectLibrary = useCallback(
+    (libraryId: string) => {
+      resetLibraryRules();
+      setSelectedLibraryId(libraryId);
+    },
+    [resetLibraryRules]
+  );
 
-  const installRules = (ruleIds: string[]) => {
-    setRules((current) =>
-      current.map((rule) =>
-        ruleIds.includes(rule.id) ? { ...rule, installState: 'installed' } : rule
-      )
-    );
+  // A library from the URL that does not exist, or is not visible here, is replaced by all libraries.
+  const isUnknownLibrary = !isLoading && !isError && !isAllSelected && !selectedLibrary;
+  useEffect(() => {
+    if (isUnknownLibrary) {
+      selectLibrary(ALL_LIBRARIES_ID);
+      setSelectedTab('rules');
+    }
+  }, [isUnknownLibrary, selectLibrary]);
+
+  useSyncRuleLibrariesUrlState(
+    {
+      libraryId: selectedLibraryId,
+      tab: activeTab,
+      search: libraryRules.query,
+      tags: libraryRules.tags,
+      tactics: libraryRules.tactics,
+      pageIndex: libraryRules.pagination.pageIndex,
+      pageSize: libraryRules.pagination.pageSize,
+    },
+    !isLoading && !isError && !isUnknownLibrary
+  );
+
+  const handleAddLibrary = async (input: NewRuleLibraryInput) => {
+    const libraryId = await createLibrary(input);
+    if (libraryId) {
+      selectLibrary(libraryId);
+      setIsAddLibraryOpen(false);
+    }
   };
 
   const menu = useMemo<AppHeaderMenu>(
@@ -169,8 +147,6 @@ const RuleLibrariesPageComponent: React.FC = () => {
     return null;
   }
 
-  const isAnyRefreshing = libraries.some(({ refreshStatus }) => refreshStatus === 'refreshing');
-
   return (
     <>
       <SecurityAppHeader
@@ -183,70 +159,64 @@ const RuleLibrariesPageComponent: React.FC = () => {
         <EuiSpacer size="s" />
         <NeedAdminForUpdateRulesCallOut />
         <MissingDetectionsPrivilegesCallOut />
-        <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem grow={false} css={{ width: euiTheme.base * 18 }}>
-            <LibrariesList
-              libraries={libraries}
-              selectedId={selectedLibraryId}
-              onSelect={setSelectedLibraryId}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {selectedLibrary ? (
-              <>
-                <LibraryHeader
-                  library={selectedLibrary}
-                  listCounts={{
-                    exceptionLists: visibleExceptionLists.length,
-                    valueLists: visibleValueLists.length,
-                  }}
-                  canRefresh={rulesPrivileges.edit}
-                  onRefresh={(libraryId) => refreshLibraries([libraryId])}
-                />
-                <EuiSpacer size="m" />
-              </>
-            ) : null}
-            <LibraryTabs
-              activeTab={activeTab}
-              counts={{
-                rules: visibleRules.length,
-                exceptionLists: visibleExceptionLists.length,
-                valueLists: visibleValueLists.length,
-              }}
-              onSelect={setSelectedTab}
-            />
-            {isSelectedLibraryNeverRefreshed && selectedLibrary ? (
-              <LibraryNotRefreshed
-                isRefreshing={selectedLibrary.refreshStatus === 'refreshing'}
-                canRefresh={rulesPrivileges.edit}
-                onRefresh={() => refreshLibraries([selectedLibrary.id])}
-              />
-            ) : null}
-            {!isSelectedLibraryNeverRefreshed && activeTab === 'rules' ? (
-              <LibraryRulesTable
-                key={selectedLibraryId}
-                rules={visibleRules}
+        {isLoading ? <EuiLoadingSpinner size="xl" data-test-subj="ruleLibrariesLoading" /> : null}
+        {isError ? (
+          <KbnDangerCallout
+            announceOnMount
+            title={i18n.LOAD_ERROR_TITLE}
+            data-test-subj="ruleLibrariesLoadError"
+          />
+        ) : null}
+        {!isLoading && !isError ? (
+          <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
+            <EuiFlexItem grow={false} css={{ width: euiTheme.base * 18 }}>
+              <LibrariesList
                 libraries={libraries}
-                canInstall={rulesPrivileges.edit}
-                canRefresh={rulesPrivileges.edit}
-                isRefreshingAll={isAnyRefreshing}
-                onRefreshAll={isAllSelected ? () => refreshLibraries() : undefined}
-                onInstall={installRules}
+                selectedId={selectedLibraryId}
+                onSelect={selectLibrary}
               />
-            ) : null}
-            {!isSelectedLibraryNeverRefreshed && activeTab !== 'rules' ? (
-              <LibraryListsPlaceholder
-                key={activeTab}
-                kind={activeTab}
-                rows={activeTab === 'exceptionLists' ? visibleExceptionLists : visibleValueLists}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <LibraryBody
                 libraries={libraries}
+                selectedLibrary={selectedLibrary}
+                selectedLibraryId={selectedLibraryId}
+                isAllSelected={isAllSelected}
+                rules={libraryRules}
+                exceptionLists={visibleExceptionLists}
+                valueLists={visibleValueLists}
+                activeTab={activeTab}
+                canEdit={rulesPrivileges.edit}
+                onSelectTab={setSelectedTab}
+                onRefresh={refreshLibraries}
+                isInstalling={isInstalling}
+                onInstall={install}
+                onInstallAll={installAll}
+                onOpenRule={setOpenedRule}
               />
-            ) : null}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
       </SecuritySolutionPageWrapper>
+      {openedRule ? (
+        <LibraryRuleFlyout
+          libraryId={openedRule.libraryId}
+          ruleId={openedRule.ruleId}
+          canInstall={rulesPrivileges.edit}
+          isInstalling={isInstalling}
+          onInstall={(rules, enable) => {
+            install(rules, enable);
+            setOpenedRule(undefined);
+          }}
+          onClose={() => setOpenedRule(undefined)}
+        />
+      ) : null}
       {isAddLibraryOpen ? (
-        <AddLibraryFlyout onAdd={addLibrary} onClose={() => setIsAddLibraryOpen(false)} />
+        <AddLibraryFlyout
+          isSubmitting={isCreating}
+          onAdd={handleAddLibrary}
+          onClose={() => setIsAddLibraryOpen(false)}
+        />
       ) : null}
       <SpyRoute pageName={SecurityPageName.rulesLibraries} />
     </>

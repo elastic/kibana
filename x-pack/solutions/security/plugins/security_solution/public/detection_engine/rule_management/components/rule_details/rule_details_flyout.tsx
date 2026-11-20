@@ -161,11 +161,11 @@ export function RuleDetailsFlyout({
 
 const DEFAULT_EXTRA_TABS: EuiTabbedContentTab[] = [];
 
-type RuleDetailsFlyoutContentProps = Omit<RuleDetailsFlyoutProps, 'id' | 'dataTestSubj'> & {
+export type RuleDetailsFlyoutContentProps = Omit<RuleDetailsFlyoutProps, 'id' | 'dataTestSubj'> & {
   titleId?: string;
 };
 
-function RuleDetailsFlyoutContent({
+export function RuleDetailsFlyoutContent({
   rule,
   ruleActions,
   subHeader,

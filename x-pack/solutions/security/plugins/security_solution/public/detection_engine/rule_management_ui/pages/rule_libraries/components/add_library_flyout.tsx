@@ -28,6 +28,9 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
+import type { ScanRuleLibraryResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { useScanRuleLibraryMutation } from '../../../../rule_management/api/hooks/prebuilt_rules/use_scan_rule_library_mutation';
+import { toLibraryConnection } from '../to_library_connection';
 import type {
   LibrarySource,
   NewRuleLibraryAuthType,
@@ -39,9 +42,6 @@ import * as i18n from '../translations';
 const MAX_TEXT_LENGTH = 256;
 const MAX_SECRET_LENGTH = 4096;
 const DEFAULT_SSH_USERNAME = 'git';
-const FAKE_CONNECTION_TEST_DURATION_MS = 1000;
-
-type ConnectionTestStatus = 'idle' | 'testing' | 'success' | 'failure';
 
 const INITIAL_INPUT: NewRuleLibraryInput = {
   scope: 'shared',
@@ -228,51 +228,91 @@ const AuthFields = ({ input, errors, showErrors, onChange }: AuthFieldsProps) =>
   );
 };
 
-const ConnectionTestResult = ({ status }: { status: ConnectionTestStatus }) => {
-  if (status === 'success') {
+const ScanResult = ({ result }: { result: ScanRuleLibraryResponseBody }) => {
+  if (!result.success) {
     return (
-      <>
-        <EuiSpacer size="s" />
-        <KbnSuccessCallout
-          announceOnMount
-          size="s"
-          title={i18n.TEST_CONNECTION_SUCCESS_TITLE}
-          text={<p>{i18n.TEST_CONNECTION_SUCCESS_BODY}</p>}
-        />
-      </>
+      <KbnDangerCallout
+        announceOnMount
+        size="s"
+        title={i18n.TEST_CONNECTION_FAILURE_TITLE}
+        text={<p>{result.error}</p>}
+        data-test-subj="addRuleLibraryScanFailure"
+      />
     );
   }
-  if (status === 'failure') {
-    return (
-      <>
-        <EuiSpacer size="s" />
+
+  return (
+    <KbnSuccessCallout
+      announceOnMount
+      size="s"
+      title={i18n.TEST_CONNECTION_SUCCESS_TITLE}
+      text={
+        <>
+          <p>{i18n.SCAN_RESULT(result.version, result.rule_count)}</p>
+          <p>
+            {result.manifest?.title
+              ? i18n.SCAN_MANIFEST_FOUND(result.manifest.title)
+              : result.manifest_error
+              ? i18n.SCAN_MANIFEST_ERROR(result.manifest_error)
+              : i18n.SCAN_NO_MANIFEST}
+          </p>
+        </>
+      }
+      data-test-subj="addRuleLibraryScanSuccess"
+    />
+  );
+};
+
+const ConnectionTestResult = ({
+  result,
+  error,
+}: {
+  result?: ScanRuleLibraryResponseBody;
+  error?: unknown;
+}) => {
+  if (!result && !error) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiSpacer size="s" />
+      {result ? (
+        <ScanResult result={result} />
+      ) : (
         <KbnDangerCallout
           announceOnMount
           size="s"
           title={i18n.TEST_CONNECTION_FAILURE_TITLE}
-          text={<p>{i18n.TEST_CONNECTION_FAILURE_BODY}</p>}
+          text={error instanceof Error ? <p>{error.message}</p> : undefined}
         />
-      </>
-    );
-  }
-  return null;
+      )}
+    </>
+  );
 };
 
 interface AddLibraryFlyoutProps {
-  onAdd: (input: NewRuleLibraryInput) => void;
+  isSubmitting: boolean;
+  onAdd: (input: NewRuleLibraryInput) => void | Promise<void>;
   onClose: () => void;
 }
 
-export const AddLibraryFlyout = ({ onAdd, onClose }: AddLibraryFlyoutProps) => {
+export const AddLibraryFlyout = ({ isSubmitting, onAdd, onClose }: AddLibraryFlyoutProps) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'addRuleLibraryFlyoutTitle' });
   const [input, setInput] = useState<NewRuleLibraryInput>(INITIAL_INPUT);
   const [showErrors, setShowErrors] = useState(false);
-  const [connectionTest, setConnectionTest] = useState<ConnectionTestStatus>('idle');
+  const {
+    mutate: scan,
+    data: scanResult,
+    error: scanError,
+    isLoading: isScanning,
+    reset: resetScan,
+  } = useScanRuleLibraryMutation();
 
   const update = (changes: Partial<NewRuleLibraryInput>) => {
     setInput((current) => ({ ...current, ...changes }));
     if (Object.keys(changes).some((key) => CONNECTION_FIELDS.includes(key))) {
-      setConnectionTest('idle');
+      resetScan();
     }
   };
 
@@ -303,12 +343,7 @@ export const AddLibraryFlyout = ({ onAdd, onClose }: AddLibraryFlyoutProps) => {
   const hasErrors = Object.values(errors).some(Boolean);
   const hasConnectionErrors = hasErrors;
 
-  const testConnection = () => {
-    setConnectionTest('testing');
-    setTimeout(() => {
-      setConnectionTest(input.url.includes('fail') ? 'failure' : 'success');
-    }, FAKE_CONNECTION_TEST_DURATION_MS);
-  };
+  const testConnection = () => scan(toLibraryConnection(input));
 
   const submit = () => {
     setShowErrors(true);
@@ -434,14 +469,14 @@ export const AddLibraryFlyout = ({ onAdd, onClose }: AddLibraryFlyoutProps) => {
           <EuiButton
             size="s"
             iconType="wifi"
-            isLoading={connectionTest === 'testing'}
+            isLoading={isScanning}
             isDisabled={hasConnectionErrors}
             onClick={testConnection}
             data-test-subj="addRuleLibraryTestConnection"
           >
             {i18n.TEST_CONNECTION}
           </EuiButton>
-          <ConnectionTestResult status={connectionTest} />
+          <ConnectionTestResult result={scanResult} error={scanError} />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -452,7 +487,13 @@ export const AddLibraryFlyout = ({ onAdd, onClose }: AddLibraryFlyoutProps) => {
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={submit} data-test-subj="addRuleLibrarySubmit">
+            <EuiButton
+              fill
+              isLoading={isSubmitting}
+              isDisabled={isSubmitting}
+              onClick={submit}
+              data-test-subj="addRuleLibrarySubmit"
+            >
               {i18n.ADD_LIBRARY}
             </EuiButton>
           </EuiFlexItem>

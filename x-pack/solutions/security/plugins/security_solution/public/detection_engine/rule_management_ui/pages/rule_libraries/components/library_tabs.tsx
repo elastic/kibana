@@ -39,7 +39,11 @@ export const LibraryTabs = ({ activeTab, counts, onSelect }: LibraryTabsProps) =
             key={tab}
             isSelected={activeTab === tab}
             onClick={() => onSelect(tab)}
-            append={<EuiNotificationBadge color="subdued">{counts[tab]}</EuiNotificationBadge>}
+            append={
+              <EuiNotificationBadge color="subdued">
+                {counts[tab].toLocaleString()}
+              </EuiNotificationBadge>
+            }
             data-test-subj={`ruleLibraryTab-${tab}`}
           >
             {TAB_LABELS[tab]}

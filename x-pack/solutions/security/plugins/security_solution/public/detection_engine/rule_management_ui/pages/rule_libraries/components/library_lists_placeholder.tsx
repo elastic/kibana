@@ -24,6 +24,8 @@ import type { LibraryListPlaceholderRow, RuleLibraryListItem } from '../types';
 import * as i18n from '../translations';
 
 interface LibraryListsPlaceholderProps {
+  // Whether to show which library each list comes from.
+  showLibrary: boolean;
   kind: 'exceptionLists' | 'valueLists';
   rows: readonly LibraryListPlaceholderRow[];
   libraries: readonly RuleLibraryListItem[];
@@ -54,6 +56,7 @@ const ListItemsPreview = ({ row }: { row: LibraryListPlaceholderRow }) => {
 };
 
 export const LibraryListsPlaceholder = ({
+  showLibrary,
   kind,
   rows,
   libraries,
@@ -99,7 +102,7 @@ export const LibraryListsPlaceholder = ({
                   <strong>{name}</strong>
                 </EuiText>
               </EuiFlexItem>
-              {library ? (
+              {library && showLibrary ? (
                 <EuiFlexItem grow={false}>
                   <RuleLibraryBadge
                     library={{ id: library.id, title: library.title, icon: library.icon }}

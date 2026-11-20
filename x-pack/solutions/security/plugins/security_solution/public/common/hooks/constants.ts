@@ -18,6 +18,7 @@ export const URL_PARAM_KEY = {
   timerange: 'timerange',
   pageFilter: 'pageFilters',
   rulesTable: 'rulesTable',
+  ruleLibraries: 'ruleLibraries',
   /** Canonical entity store id for host/user explore detail URLs (Rison-encoded). */
   entityId: 'entityId',
   /** Identity field map for entity resolution on explore detail URLs (Rison-encoded object). */

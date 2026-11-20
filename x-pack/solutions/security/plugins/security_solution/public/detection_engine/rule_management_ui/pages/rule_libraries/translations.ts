@@ -189,13 +189,6 @@ export const FACT_VERSION = i18n.translate(
   }
 );
 
-export const FACT_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.rulesLabel',
-  {
-    defaultMessage: 'Rules',
-  }
-);
-
 export const FACT_PROVIDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleLibraries.providerLabel',
   {
@@ -512,24 +505,10 @@ export const TEST_CONNECTION_SUCCESS_TITLE = i18n.translate(
   }
 );
 
-export const TEST_CONNECTION_SUCCESS_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.testConnectionSuccessDescription',
-  {
-    defaultMessage: 'The library source can be reached with these settings.',
-  }
-);
-
 export const TEST_CONNECTION_FAILURE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleLibraries.testConnectionFailureTitle',
   {
     defaultMessage: 'Connection failed',
-  }
-);
-
-export const TEST_CONNECTION_FAILURE_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.testConnectionFailureDescription',
-  {
-    defaultMessage: 'The library source could not be reached. Check the URL and credentials.',
   }
 );
 
@@ -667,20 +646,6 @@ export const FORM_GIT_SSH_URL_ERROR = i18n.translate(
   }
 );
 
-export const FACT_EXCEPTION_LISTS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.exceptionListsLabel',
-  {
-    defaultMessage: 'Exception lists',
-  }
-);
-
-export const FACT_VALUE_LISTS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.valueListsLabel',
-  {
-    defaultMessage: 'Value lists',
-  }
-);
-
 export const SEARCH_EXCEPTION_LISTS_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleLibraries.searchExceptionListsPlaceholder',
   {
@@ -759,6 +724,133 @@ export const LIBRARY_ROW_META_NEVER_REFRESHED = (provider: string) =>
       values: { provider },
     }
   );
+
+export const REFRESH_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.refreshErrorTitle',
+  {
+    defaultMessage: 'Failed to refresh rule libraries',
+  }
+);
+
+export const LOAD_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.loadErrorTitle',
+  {
+    defaultMessage: 'Failed to load rule libraries',
+  }
+);
+
+export const INSTALL_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.installErrorTitle',
+  {
+    defaultMessage: 'Failed to install rules',
+  }
+);
+
+export const LOAD_RULES_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.loadRulesErrorTitle',
+  {
+    defaultMessage: 'Failed to load rules',
+  }
+);
+
+export const INSTALL_SUCCESS = (count: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleLibraries.installSuccessTitle', {
+    defaultMessage: '{count, plural, one {Installed # rule} other {Installed # rules}}',
+    values: { count },
+  });
+
+export const MORE_TAGS = (count: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleLibraries.moreTagsLabel', {
+    defaultMessage: '+{count, number} more',
+    values: { count },
+  });
+
+export const INSTALL_WITHOUT_ENABLING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.installWithoutEnablingButtonLabel',
+  {
+    defaultMessage: 'Install without enabling',
+  }
+);
+
+export const INSTALL_AND_ENABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.installAndEnableButtonLabel',
+  {
+    defaultMessage: 'Install and enable',
+  }
+);
+
+export const LOADING_RULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.loadingRuleLabel',
+  {
+    defaultMessage: 'Loading rule',
+  }
+);
+
+export const LOAD_RULE_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.loadRuleErrorTitle',
+  {
+    defaultMessage: 'Failed to load the rule',
+  }
+);
+
+export const SCAN_RESULT = (version: string, ruleCount: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleLibraries.scanResultDescription', {
+    defaultMessage: 'Release {version} with {ruleCount, plural, one {# rule} other {# rules}}',
+    values: { version, ruleCount },
+  });
+
+export const SCAN_MANIFEST_FOUND = (title: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleLibraries.scanManifestFoundDescription',
+    {
+      defaultMessage: 'Manifest: {title}',
+      values: { title },
+    }
+  );
+
+export const SCAN_NO_MANIFEST = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.scanNoManifestDescription',
+  {
+    defaultMessage: 'No manifest was found, so the title and description will not be set.',
+  }
+);
+
+export const SCAN_MANIFEST_ERROR = (error: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleLibraries.scanManifestErrorDescription',
+    {
+      defaultMessage: 'The manifest could not be used: {error}',
+      values: { error },
+    }
+  );
+
+export const CREATE_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.createErrorTitle',
+  {
+    defaultMessage: 'Failed to add the library',
+  }
+);
+
+export const INSTALL_ALL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.installAllButtonLabel',
+  {
+    defaultMessage: 'Install all',
+  }
+);
+
+export const TACTIC_FILTER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.tacticFilterButtonLabel',
+  {
+    defaultMessage: 'MITRE tactic',
+  }
+);
+
+export const TACTIC_FILTER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.tacticFilterAriaLabel',
+  {
+    defaultMessage: 'Filter by MITRE ATT&CK tactic',
+  }
+);
 
 export const ALREADY_INSTALLED_TOOLTIP = (libraryTitle: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.ruleLibraries.alreadyInstalledTooltip', {
