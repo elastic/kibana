@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { registerInvestigationsAiIndex } from './register_investigations_ai_index';
+import { registerAiIndices } from './register_ai_indices';
 
-describe('registerInvestigationsAiIndex', () => {
-  it('registers the indicator AI index on the backing index Hunt writes to', () => {
+describe('registerAiIndices', () => {
+  it('registers every AlertZero AI index on the backing index Context Engine maps it to', () => {
     const registerAiIndex = jest.fn();
 
-    registerInvestigationsAiIndex({ contextEngine: { registerAiIndex } });
+    registerAiIndices({ contextEngine: { registerAiIndex } });
 
     expect(registerAiIndex).toHaveBeenCalledTimes(2);
     expect(registerAiIndex).toHaveBeenCalledWith(
@@ -28,5 +28,23 @@ describe('registerInvestigationsAiIndex', () => {
         memory_enabled: false,
       })
     );
+  });
+
+  it('registers each declared index with its own description', () => {
+    const registerAiIndex = jest.fn();
+
+    registerAiIndices({
+      contextEngine: { registerAiIndex },
+      aiIndices: [{ id: 'security-example', description: 'Example index.' }],
+    });
+
+    expect(registerAiIndex).toHaveBeenCalledWith('security-example', {
+      description: 'Example index.',
+      memory_enabled: false,
+      dest: { type: 'index', value: 'ai-index-idx-security-example' },
+      automations: [],
+      sources: [],
+      traces: [],
+    });
   });
 });
