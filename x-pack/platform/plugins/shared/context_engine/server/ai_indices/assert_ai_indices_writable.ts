@@ -30,8 +30,9 @@ export const assertAiIndicesWritable = async ({
   }
 
   const aiIndices = await Promise.all(uniqueIds.map((id) => aiIndexService.get(id, spaceId)));
+  const uniqueDests = [...new Set(aiIndices.map(({ dest }) => dest.value))];
   const { index } = await esClient.security.hasPrivileges({
-    index: [{ names: aiIndices.map(({ dest }) => dest.value), privileges: ['write'] }],
+    index: [{ names: uniqueDests, privileges: ['write'] }],
   });
 
   const notWritable = aiIndices.find(({ dest }) => index[dest.value]?.write !== true);

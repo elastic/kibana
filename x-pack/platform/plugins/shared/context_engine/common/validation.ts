@@ -103,6 +103,10 @@ export const validateRelativeSignalWindow = (value: string): string | undefined 
       })
     : undefined;
 
+/** Returns an error message when a string is empty or whitespace-only, or `undefined` when valid. */
+export const validateNonBlank = (value: string): string | undefined =>
+  value.trim().length > 0 ? undefined : 'must not be blank';
+
 /** Returns a translated error message for an invalid absolute signal window, or `undefined` when valid. */
 export const validateAbsoluteSignalWindow = (value: string): string | undefined =>
   Number.isNaN(Date.parse(value))

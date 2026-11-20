@@ -7,6 +7,7 @@
 
 import type { BulkResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { MAX_SESSION_MEMORY_FORGET_IDS } from '../../common/constants';
 import { SESSION_MEMORY_DATA_STREAM } from './data_streams';
 import { createSessionMemoryService } from './service';
 import type { StoredSessionMemory } from './types';
@@ -78,6 +79,7 @@ describe('createSessionMemoryService', () => {
       expect(esClient.index).toHaveBeenCalledWith({
         index: SESSION_MEMORY_DATA_STREAM,
         op_type: 'create',
+        require_data_stream: true,
         document: {
           '@timestamp': NOW.toISOString(),
           id: result.id,
@@ -131,6 +133,7 @@ describe('createSessionMemoryService', () => {
       expect(esClient.search).toHaveBeenCalledWith({
         index: SESSION_MEMORY_DATA_STREAM,
         ignore_unavailable: true,
+        allow_partial_search_results: false,
         query: {
           bool: {
             filter: [
@@ -164,12 +167,16 @@ describe('createSessionMemoryService', () => {
 
       await expect(
         service.forget(scope, ['memory-1', 'memory-2', 'memory-3', 'memory-1'])
-      ).resolves.toEqual({
-        'memory-1': 'forgotten',
-        'memory-2': 'already_forgotten',
-        'memory-3': 'not_found',
-      });
+      ).resolves.toEqual([
+        { id: 'memory-1', outcome: 'forgotten' },
+        { id: 'memory-2', outcome: 'already_forgotten' },
+        { id: 'memory-3', outcome: 'not_found' },
+      ]);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ allow_partial_search_results: false })
+      );
       expect(esClient.bulk).toHaveBeenCalledWith({
+        require_data_stream: true,
         operations: [
           { create: { _index: SESSION_MEMORY_DATA_STREAM } },
           {
@@ -185,28 +192,98 @@ describe('createSessionMemoryService', () => {
       });
     });
 
-    it('throws when Elasticsearch rejects a tombstone', async () => {
-      esClient.search.mockResolvedValue(searchResponse([storedMemory]));
+    it('reports a rejected tombstone with its cause and keeps every other outcome', async () => {
+      const otherMemory = { ...storedMemory, id: 'memory-4' };
+      esClient.search.mockResolvedValue(
+        searchResponse([storedMemory, otherMemory, forgottenMemory])
+      );
       esClient.bulk.mockResolvedValue(
         bulkResponse([
+          { create: { _index: '.ds-memory', status: 201 } },
           {
             create: {
               _index: '.ds-memory',
-              status: 400,
-              error: { type: 'document_parsing_exception', reason: 'failed to parse' },
+              status: 429,
+              error: {
+                type: 'es_rejected_execution_exception',
+                reason: 'rejected execution',
+                caused_by: { type: 'queue_full', reason: 'write queue full' },
+              },
             },
           },
         ])
       );
 
-      await expect(service.forget(scope, ['memory-1'])).rejects.toThrow(
-        'Failed to write to session memory: failed to parse'
+      await expect(
+        service.forget(scope, ['memory-1', 'memory-2', 'memory-3', 'memory-4'])
+      ).resolves.toEqual([
+        { id: 'memory-1', outcome: 'forgotten' },
+        { id: 'memory-2', outcome: 'already_forgotten' },
+        { id: 'memory-3', outcome: 'not_found' },
+        { id: 'memory-4', outcome: 'failed', error: 'rejected execution: write queue full' },
+      ]);
+    });
+
+    it('throws when the read fails', async () => {
+      esClient.search.mockRejectedValue(new Error('connection refused'));
+
+      await expect(service.forget(scope, ['memory-1'])).rejects.toThrow('connection refused');
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('throws before reading when given more ids than one call takes', async () => {
+      const ids = Array.from(
+        { length: MAX_SESSION_MEMORY_FORGET_IDS + 1 },
+        (_, index) => `memory-${index}`
+      );
+
+      await expect(service.forget(scope, ids)).rejects.toThrow(
+        `Cannot forget more than ${MAX_SESSION_MEMORY_FORGET_IDS} memories at once`
+      );
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('counts a repeated id once against the limit and reads one revision per id', async () => {
+      esClient.search.mockResolvedValue(searchResponse([]));
+      const ids = Array.from(
+        { length: MAX_SESSION_MEMORY_FORGET_IDS },
+        (_, index) => `memory-${index}`
+      );
+
+      const result = await service.forget(scope, [...ids, 'memory-0']);
+
+      expect(result).toHaveLength(MAX_SESSION_MEMORY_FORGET_IDS);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ size: MAX_SESSION_MEMORY_FORGET_IDS })
       );
     });
 
     it('does nothing for an empty list', async () => {
-      await expect(service.forget(scope, [])).resolves.toEqual({});
+      await expect(service.forget(scope, [])).resolves.toEqual([]);
       expect(esClient.search).not.toHaveBeenCalled();
     });
+  });
+
+  describe('scope validation', () => {
+    it.each([
+      ['empty space', { space: '', userId: 'jdoe' }, /space/],
+      ['blank space', { space: '   ', userId: 'jdoe' }, /space/],
+      ['empty userId', { space: 'default', userId: '' }, /userId/],
+      ['blank userId', { space: 'default', userId: '   ' }, /userId/],
+    ])(
+      'rejects %s on remember, get, and forget before calling Elasticsearch',
+      async (_, invalidScope, pattern) => {
+        await expect(
+          service.remember(invalidScope, { sessionId: 'session-1', content: 'note' })
+        ).rejects.toThrow(pattern);
+        await expect(service.get(invalidScope, 'memory-1')).rejects.toThrow(pattern);
+        await expect(service.forget(invalidScope, ['memory-1'])).rejects.toThrow(pattern);
+        await expect(service.forget(invalidScope, [])).rejects.toThrow(pattern);
+
+        expect(esClient.index).not.toHaveBeenCalled();
+        expect(esClient.search).not.toHaveBeenCalled();
+        expect(esClient.bulk).not.toHaveBeenCalled();
+      }
+    );
   });
 });

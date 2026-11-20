@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Logger as CoreLogger } from '@kbn/core-di';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { inject, injectable } from 'inversify';
+import { getErrorMessage } from '../errors/get_error_message';
 import { AvailabilityService } from '../availability/availability_service';
 import { DetectionSignalStore } from '../signals/signal_store';
 import { wrapReading } from '../signals/wrap_reading';
@@ -33,8 +34,10 @@ import { EnabledSources, RunContext } from './tokens';
  */
 export const RUN_BUDGET_MS = 4 * 60_000;
 
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+function assertRunOpen(runSignal: AbortSignal): void {
+  if (runSignal.aborted) {
+    throw new Error('the run ended before the result could be stored');
+  }
 }
 
 function createAbortError(signal: AbortSignal): Error {
@@ -153,6 +156,8 @@ export class EngineRunner {
     } finally {
       clearTimeout(budgetTimer);
       abortSignal?.removeEventListener('abort', abortRun);
+      // Ends the run for a generator that ignores its signal and comes back after the lock is free.
+      budget.abort('the run ended');
     }
   }
 
@@ -248,6 +253,10 @@ export class EngineRunner {
         return [wrapped.signal];
       });
 
+      // A generator that ignores its abort signal can come back after the run ended, when the lock
+      // is free and another node may be running this space. Nothing is stored or advanced from here.
+      assertRunOpen(runSignal);
+
       const { written, failures } = await this.signalStore.write(signals);
       result.signals = written;
 
@@ -263,6 +272,7 @@ export class EngineRunner {
         return result;
       }
 
+      assertRunOpen(runSignal);
       await this.state.advanceGeneratorState({ spaceId, strategyId, processedUntil: to });
     } catch (error) {
       result.error = getErrorMessage(error);

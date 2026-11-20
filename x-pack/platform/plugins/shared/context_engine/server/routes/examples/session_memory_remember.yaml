@@ -4,10 +4,9 @@ requestBody:
       examples:
         rememberRequestExample:
           summary: "Remember a memory"
-          description: "Example request to store a memory of a session for a user, to be promoted into an AI index"
+          description: "Example request to store a memory of a session for the caller, to be promoted into an AI index"
           value:
             session_id: 8f3c2a1e
-            user_id: jdoe
             ai_index_ids:
               - ops-memory
             content: checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy.
@@ -27,17 +26,38 @@ responses:
     content:
       application/json:
         examples:
-          noProfileExample:
+          noUserProfileExample:
             summary: "No user profile"
-            description: "The request has no user_id and the caller has no user profile"
+            description: "`user_id` is missing and the caller has no user profile"
             value:
               statusCode: 403
               error: Forbidden
-              message: "The caller has no user profile, so its memory cannot be attributed to a user. Set `user_id`, log in to Kibana once to create a profile, or use an API key whose owner has one."
+              message: The caller has no user profile, so the request cannot be attributed to a user. Set `user_id`, log in to Kibana once to create a profile, or use an API key whose owner has one.
+          manageMemoryRequiredExample:
+            summary: "Missing manage memory privilege"
+            description: "`user_id` names another user and the caller lacks `contextEngine:manage_memory`"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "Acting on the memory of another user requires the [contextEngine:manage_memory] privilege."
+          aiIndexNotWritableExample:
+            summary: "An AI index the caller cannot write to"
+            description: "The caller lacks the Elasticsearch `write` privilege on an AI index's backing index"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "AI index 'ops-memory' is not writable. Writing to it needs the Elasticsearch 'write' privilege on its backing index."
   404:
     content:
       application/json:
         examples:
+          contextEngineDisabledExample:
+            summary: "Context Engine turned off"
+            description: "Context Engine is turned off in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Not Found
           memoryDisabledExample:
             summary: "Memory turned off"
             description: "Context Engine memory is turned off"
@@ -47,7 +67,7 @@ responses:
               message: Context Engine memory is turned off.
           aiIndexNotFoundExample:
             summary: "AI index not found"
-            description: "An AI index in ai_index_ids does not exist in this space"
+            description: "An AI index in `ai_index_ids` does not exist in this space"
             value:
               statusCode: 404
               error: Not Found
@@ -62,8 +82,16 @@ x-codeSamples:
         -H "kbn-xsrf: true" \
         -d '{
           "session_id": "8f3c2a1e",
-          "user_id": "jdoe",
           "ai_index_ids": ["ops-memory"],
           "content": "checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy.",
           "attributes": { "incident": "INC-4211" }
         }'
+  - lang: Console
+    source: |
+      POST kbn:/api/context_engine/memory/_remember
+      {
+        "session_id": "8f3c2a1e",
+        "ai_index_ids": ["ops-memory"],
+        "content": "checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy.",
+        "attributes": { "incident": "INC-4211" }
+      }

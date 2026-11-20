@@ -14,50 +14,42 @@ import {
   AI_INDEX_API_VERSION,
   MAX_AI_INDEX_ID_LENGTH,
   MAX_KI_CONTENT_LENGTH,
-  MAX_SESSION_MEMORY_AI_INDEX_IDS,
+  MAX_MEMORY_AI_INDEX_IDS,
+  MAX_MEMORY_ID_LENGTH,
+  MAX_MEMORY_USER_ID_LENGTH,
   MAX_SESSION_MEMORY_ATTRIBUTES,
   MAX_SESSION_MEMORY_ATTRIBUTE_KEY_LENGTH,
   MAX_SESSION_MEMORY_ATTRIBUTE_VALUE_LENGTH,
   MAX_SESSION_MEMORY_FORGET_IDS,
-  MAX_SESSION_MEMORY_ID_LENGTH,
-  MAX_SESSION_MEMORY_SESSION_ID_LENGTH,
-  MAX_SESSION_MEMORY_USER_ID_LENGTH,
   SESSION_MEMORY_FORGET_PATH,
   SESSION_MEMORY_REMEMBER_PATH,
 } from '../../common/constants';
 import type {
   ForgetSessionMemoriesResponse,
+  ForgetSessionMemoryResult,
   RememberSessionMemoryResponse,
 } from '../../common/http_api/session_memory';
+import { validateAiIndexId, validateNonBlank } from '../../common/validation';
 import { assertAiIndicesWritable } from '../ai_indices/assert_ai_indices_writable';
 import { AiIndexNotFoundError, AiIndexNotWritableError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import {
-  SessionMemoryAuditAction,
-  sessionMemoryAuditEvent,
+  sessionMemoryForgetAuditEvent,
   sessionMemoryRememberAuditEvent,
 } from '../audit/audit_events';
 import type { SessionMemoryService } from '../session_memory/types';
 import { resolveSpaceId } from '../utils/resolve_space_id';
-import {
-  MANAGE_MEMORY_REQUIRED_MESSAGE,
-  MEMORY_WRITE_SECURITY,
-  canActOnUserMemory,
-} from './memory_user';
+import { CONTEXT_ENGINE_DOCS_NOTE } from './constants';
+import { MEMORY_WRITE_SECURITY, resolveMemoryUser, toError } from './memory_user';
 import { errorResponseSchema } from './schemas/ai_indices_schema';
 import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
-
-const NO_PROFILE_MESSAGE =
-  'The caller has no user profile, so its memory cannot be attributed to a user. Set `user_id`, log in to Kibana once to create a profile, or use an API key whose owner has one.';
-
-const forbidden = (message: string): Error =>
-  Object.assign(new Error(message), { name: 'Forbidden' });
 
 const rememberBodySchema = schema.object({
   id: schema.maybe(
     schema.string({
       minLength: 1,
-      maxLength: MAX_SESSION_MEMORY_ID_LENGTH,
+      maxLength: MAX_MEMORY_ID_LENGTH,
+      validate: validateNonBlank,
       meta: {
         description:
           'The id of an existing memory to revise. The revision replaces the memory in full, and the id is not checked. Defaults to a new id.',
@@ -66,13 +58,15 @@ const rememberBodySchema = schema.object({
   ),
   session_id: schema.string({
     minLength: 1,
-    maxLength: MAX_SESSION_MEMORY_SESSION_ID_LENGTH,
+    maxLength: MAX_MEMORY_ID_LENGTH,
+    validate: validateNonBlank,
     meta: { description: 'The session the memory comes from.' },
   }),
   user_id: schema.maybe(
     schema.string({
       minLength: 1,
-      maxLength: MAX_SESSION_MEMORY_USER_ID_LENGTH,
+      maxLength: MAX_MEMORY_USER_ID_LENGTH,
+      validate: validateNonBlank,
       meta: {
         description:
           "The user the memory is about. Defaults to the caller's user profile. Naming another user needs `contextEngine:manage_memory`.",
@@ -80,22 +74,34 @@ const rememberBodySchema = schema.object({
     })
   ),
   ai_index_ids: schema.maybe(
-    schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_AI_INDEX_ID_LENGTH }), {
-      maxSize: MAX_SESSION_MEMORY_AI_INDEX_IDS,
-      meta: {
-        description:
-          'The AI indices dreaming promotes the memory into. Each must exist in this space, and the caller needs the Elasticsearch `write` privilege on its backing index.',
-      },
-    })
+    schema.arrayOf(
+      schema.string({
+        minLength: 1,
+        maxLength: MAX_AI_INDEX_ID_LENGTH,
+        validate: validateAiIndexId,
+      }),
+      {
+        maxSize: MAX_MEMORY_AI_INDEX_IDS,
+        meta: {
+          description:
+            'The AI indices dreaming promotes the memory into. Each must exist in this space, and the caller needs the Elasticsearch `write` privilege on its backing index.',
+        },
+      }
+    )
   ),
   content: schema.string({
     minLength: 1,
     maxLength: MAX_KI_CONTENT_LENGTH,
+    validate: validateNonBlank,
     meta: { description: 'The memory text. It is indexed for semantic search.' },
   }),
   attributes: schema.maybe(
     schema.recordOf(
-      schema.string({ minLength: 1, maxLength: MAX_SESSION_MEMORY_ATTRIBUTE_KEY_LENGTH }),
+      schema.string({
+        minLength: 1,
+        maxLength: MAX_SESSION_MEMORY_ATTRIBUTE_KEY_LENGTH,
+        validate: validateNonBlank,
+      }),
       schema.string({ maxLength: MAX_SESSION_MEMORY_ATTRIBUTE_VALUE_LENGTH }),
       {
         validate: (attributes) =>
@@ -119,18 +125,26 @@ const forgetBodySchema = schema.object({
   user_id: schema.maybe(
     schema.string({
       minLength: 1,
-      maxLength: MAX_SESSION_MEMORY_USER_ID_LENGTH,
+      maxLength: MAX_MEMORY_USER_ID_LENGTH,
+      validate: validateNonBlank,
       meta: {
         description:
-          "The user the memories are about. Defaults to the caller's user profile. Naming another user needs `contextEngine:manage_memory`. A memory of any other user is reported as `not_found`.",
+          "The user the memories belong to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`. Memories of any other user return `not_found`.",
       },
     })
   ),
-  ids: schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_SESSION_MEMORY_ID_LENGTH }), {
-    minSize: 1,
-    maxSize: MAX_SESSION_MEMORY_FORGET_IDS,
-    meta: { description: 'The ids of the memories to forget. Duplicates are collapsed.' },
-  }),
+  ids: schema.arrayOf(
+    schema.string({
+      minLength: 1,
+      maxLength: MAX_MEMORY_ID_LENGTH,
+      validate: validateNonBlank,
+    }),
+    {
+      minSize: 1,
+      maxSize: MAX_SESSION_MEMORY_FORGET_IDS,
+      meta: { description: 'The ids of the memories to forget. The route collapses duplicates.' },
+    }
+  ),
 });
 
 const forgetResponseSchema = () =>
@@ -139,11 +153,22 @@ const forgetResponseSchema = () =>
       results: schema.arrayOf(
         schema.object({
           id: schema.string({ meta: { description: 'The memory id.' } }),
-          outcome: schema.oneOf([
-            schema.literal('forgotten'),
-            schema.literal('already_forgotten'),
-            schema.literal('not_found'),
-          ]),
+          outcome: schema.oneOf(
+            [
+              schema.literal('forgotten'),
+              schema.literal('already_forgotten'),
+              schema.literal('not_found'),
+              schema.literal('failed'),
+            ],
+            { meta: { description: 'What happened to the memory.' } }
+          ),
+          error: schema.maybe(
+            schema.string({
+              meta: {
+                description: 'Why the tombstone failed when `outcome` is `failed`.',
+              },
+            })
+          ),
         }),
         {
           maxSize: MAX_SESSION_MEMORY_FORGET_IDS,
@@ -154,6 +179,25 @@ const forgetResponseSchema = () =>
     { meta: { description: 'The outcome for every requested memory.' } }
   );
 
+const auditFailureForResult = (
+  result: ForgetSessionMemoryResult
+): 'not_found' | Error | undefined => {
+  switch (result.outcome) {
+    case 'forgotten':
+    case 'already_forgotten':
+      return undefined;
+    case 'not_found':
+      return 'not_found';
+    case 'failed':
+      return Object.assign(new Error(result.error), { name: 'failed' });
+    default: {
+      const exhaustive: never = result;
+      throw new Error(`Unsupported forget result: ${JSON.stringify(exhaustive)}`);
+    }
+  }
+};
+
+/** Registers the public session memory routes (`_remember` and `_forget`). */
 export const registerSessionMemoryRoutes = ({
   router,
   getSpaces,
@@ -180,8 +224,9 @@ export const registerSessionMemoryRoutes = ({
         'Answers 202 with the memory id at once and writes in the background, because semantic indexing runs inside the write. The memory is searchable only once the background write completes.',
         "The route needs the `contextEngine:write` privilege. Without `user_id` the memory belongs to the caller's user profile, and a caller without one gets a 403. Naming another user in `user_id` also needs `contextEngine:manage_memory`.",
         'Each AI index in `ai_index_ids` must exist in this space, and the caller needs the Elasticsearch `write` privilege on its backing index. Otherwise the request is rejected and nothing is written.',
-        'Each request writes one `memory_remember` audit event, when the background write finishes. A failed background write is not reported in the response. It shows up only in the Kibana logs and the audit log.',
+        'Each request writes one `memory_remember` audit event, when the background write finishes or the request is rejected. A failed background write is not reported in the response. It shows up only in the Kibana logs and the audit log.',
         'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off, or when an AI index in `ai_index_ids` does not exist.',
+        CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
@@ -227,17 +272,16 @@ export const registerSessionMemoryRoutes = ({
           content,
           attributes,
         } = request.body;
-        const space = resolveSpaceId(await getSpaces(), request);
+        const uniqueAiIndexIds = [...new Set(aiIndexIds)];
         const { security, elasticsearch, userProfile } = await ctx.core;
-        const callerUserId = (await userProfile.getCurrentProfileId()) ?? undefined;
-        const userId = requestedUserId ?? callerUserId;
         const revision = id !== undefined;
+        let targetUserId: string | undefined = requestedUserId;
 
         const audit = (outcome: { memoryId?: string; error?: Error }) =>
           security.audit.logger.log(
             sessionMemoryRememberAuditEvent({
               sessionId,
-              targetUserId: userId,
+              targetUserId,
               revision,
               ...outcome,
             })
@@ -247,20 +291,27 @@ export const registerSessionMemoryRoutes = ({
           return response[status]({ body: { message: error.message } });
         };
 
-        if (userId === undefined) {
-          return reject(forbidden(NO_PROFILE_MESSAGE), 'forbidden');
-        }
-
-        if (!canActOnUserMemory(request, userId, callerUserId)) {
-          return reject(forbidden(MANAGE_MEMORY_REQUIRED_MESSAGE), 'forbidden');
-        }
-
+        let resolvedUser: Awaited<ReturnType<typeof resolveMemoryUser>>;
         try {
+          resolvedUser = await resolveMemoryUser({ request, userProfile, requestedUserId });
+        } catch (error) {
+          audit({ memoryId: id, error: toError(error) });
+          throw error;
+        }
+        targetUserId = resolvedUser.userId;
+
+        if (!resolvedUser.ok) {
+          return reject(resolvedUser.error, 'forbidden');
+        }
+
+        let space: string;
+        try {
+          space = resolveSpaceId(await getSpaces(), request);
           await assertAiIndicesWritable({
             aiIndexService: getAiIndexService(),
             esClient: elasticsearch.client.asCurrentUser,
             spaceId: space,
-            aiIndexIds,
+            aiIndexIds: uniqueAiIndexIds,
           });
         } catch (error) {
           if (error instanceof AiIndexNotFoundError) {
@@ -269,22 +320,33 @@ export const registerSessionMemoryRoutes = ({
           if (error instanceof AiIndexNotWritableError) {
             return reject(error, 'forbidden');
           }
+          audit({ memoryId: id, error: toError(error) });
           throw error;
         }
 
-        const service = await getSessionMemoryService();
+        let service: SessionMemoryService;
+        try {
+          service = await getSessionMemoryService();
+        } catch (error) {
+          audit({ memoryId: id, error: toError(error) });
+          throw error;
+        }
+
         const memoryId = id ?? randomUUID();
 
         const writeInBackground = async () => {
           try {
             await service.remember(
-              { space, userId },
-              { id: memoryId, sessionId, content, aiIndexIds, attributes }
+              { space, userId: resolvedUser.userId },
+              { id: memoryId, sessionId, content, aiIndexIds: uniqueAiIndexIds, attributes }
             );
             audit({ memoryId });
           } catch (error) {
-            logger.error(`Failed to remember session memory [id=${memoryId}]: ${error.message}`);
-            audit({ memoryId, error });
+            const normalizedError = toError(error);
+            logger.error(
+              `Failed to remember session memory [id=${memoryId}]: ${normalizedError.message}`
+            );
+            audit({ memoryId, error: normalizedError });
           }
         };
         void writeInBackground();
@@ -301,11 +363,12 @@ export const registerSessionMemoryRoutes = ({
       access: 'public',
       summary: 'Forget session memories',
       description: [
-        "Requires the `contextEngine:write` privilege. Without `user_id` the route forgets the caller's own memories, and a caller without a user profile gets a 403. Naming another user in `user_id` also needs `contextEngine:manage_memory`.",
-        'Forgets session memories by id, for that user. A memory of another user or in another space is reported as `not_found`, as if it did not exist.',
-        'The memory stops being returned, but its revisions are kept until retention removes them.',
-        'Each memory is audited. Forgetting still works when memory is turned off.',
+        "Requires the `contextEngine:write` privilege. Without `user_id`, the route forgets the caller's own memories, and a caller without a user profile gets a 403. Naming another user in `user_id` also requires `contextEngine:manage_memory`.",
+        'Forgets session memories by id for that user. The route reports a memory of another user or another space as `not_found`, so it does not reveal whether the memory exists.',
+        'Forgetting writes a tombstone so reads stop returning the memory, while Elasticsearch keeps its revisions until retention removes them. If Elasticsearch rejects a tombstone, the route returns `failed` with `error` and the caller can retry that id.',
+        'The route writes one `memory_forget` audit event per unique memory id. Forgetting still works when memory is turned off.',
         'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).',
+        CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
@@ -339,49 +402,51 @@ export const registerSessionMemoryRoutes = ({
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const { user_id: requestedUserId, ids } = request.body;
-        const action = SessionMemoryAuditAction.FORGET;
         const uniqueIds = [...new Set(ids)];
         const { security, userProfile } = await ctx.core;
         const auditLogger = security.audit.logger;
-        const callerUserId = (await userProfile.getCurrentProfileId()) ?? undefined;
-        const userId = requestedUserId ?? callerUserId;
+        let targetUserId: string | undefined = requestedUserId;
 
-        if (userId === undefined) {
-          return response.forbidden({ body: { message: NO_PROFILE_MESSAGE } });
-        }
-
-        if (!canActOnUserMemory(request, userId, callerUserId)) {
-          const failure = forbidden(MANAGE_MEMORY_REQUIRED_MESSAGE);
+        const auditAll = (failure: Error) => {
           uniqueIds.forEach((memoryId) =>
-            auditLogger.log(
-              sessionMemoryAuditEvent({ action, memoryId, targetUserId: userId, failure })
-            )
+            auditLogger.log(sessionMemoryForgetAuditEvent({ memoryId, targetUserId, failure }))
           );
-          return response.forbidden({ body: { message: MANAGE_MEMORY_REQUIRED_MESSAGE } });
+        };
+
+        let resolvedUser: Awaited<ReturnType<typeof resolveMemoryUser>>;
+        try {
+          resolvedUser = await resolveMemoryUser({ request, userProfile, requestedUserId });
+        } catch (error) {
+          auditAll(toError(error));
+          throw error;
+        }
+        targetUserId = resolvedUser.userId;
+
+        if (!resolvedUser.ok) {
+          auditAll(resolvedUser.error);
+          return response.forbidden({ body: { message: resolvedUser.error.message } });
         }
 
-        const scope = { space: resolveSpaceId(await getSpaces(), request), userId };
+        const scope = {
+          space: resolveSpaceId(await getSpaces(), request),
+          userId: resolvedUser.userId,
+        };
 
         let body: ForgetSessionMemoriesResponse;
         try {
-          const outcomes = await (await getSessionMemoryService()).forget(scope, uniqueIds);
-          body = { results: uniqueIds.map((id) => ({ id, outcome: outcomes[id] })) };
+          const results = await (await getSessionMemoryService()).forget(scope, uniqueIds);
+          body = { results };
         } catch (error) {
-          uniqueIds.forEach((memoryId) =>
-            auditLogger.log(
-              sessionMemoryAuditEvent({ action, memoryId, targetUserId: userId, failure: error })
-            )
-          );
+          auditAll(toError(error));
           throw error;
         }
 
-        body.results.forEach(({ id: memoryId, outcome }) =>
+        body.results.forEach((result) =>
           auditLogger.log(
-            sessionMemoryAuditEvent({
-              action,
-              memoryId,
-              targetUserId: userId,
-              failure: outcome === 'not_found' ? 'not_found' : undefined,
+            sessionMemoryForgetAuditEvent({
+              memoryId: result.id,
+              targetUserId: resolvedUser.userId,
+              failure: auditFailureForResult(result),
             })
           )
         );
