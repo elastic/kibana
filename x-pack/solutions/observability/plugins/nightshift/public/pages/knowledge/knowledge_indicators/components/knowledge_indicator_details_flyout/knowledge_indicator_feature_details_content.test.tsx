@@ -54,11 +54,11 @@ const getSourceTitle = (sourceId: string) => `title:${sourceId}`;
 const setDeveloperMode = jest.fn();
 const onSelectInstance = jest.fn();
 
-const renderContent = (isDeveloperMode: boolean) => {
+const renderContent = (isDeveloperMode: boolean, renderedFeature: AggregatedFeature = feature) => {
   mockUseDeveloperMode.mockReturnValue({ isDeveloperMode, isSaving: false, setDeveloperMode });
   return render(
     <KnowledgeIndicatorFeatureDetailsContent
-      feature={feature}
+      feature={renderedFeature}
       getSourceTitle={getSourceTitle}
       onSelectInstance={onSelectInstance}
     />
@@ -101,6 +101,23 @@ describe('KnowledgeIndicatorFeatureDetailsContent', () => {
     expect(
       screen.queryByTestId('significantEventsAppFeatureDetailsFlyoutRawDocument')
     ).not.toBeInTheDocument();
+  });
+
+  it('renders scalar and flat array properties but not object properties', () => {
+    renderContent(false, {
+      ...feature,
+      properties: {
+        member_count: 3,
+        members: ['a', 'b', 'c'],
+        breakdown: ['host.name'],
+        nested: { x: 1 },
+      },
+    });
+
+    expect(screen.getByText('member_count').parentElement).toHaveTextContent('member_count 3');
+    expect(screen.getByText('members').parentElement).toHaveTextContent('members a, b, c');
+    expect(screen.getByText('breakdown').parentElement).toHaveTextContent('breakdown host.name');
+    expect(screen.queryByText('nested')).not.toBeInTheDocument();
   });
 
   it('lists every source only when the feature spans several', () => {

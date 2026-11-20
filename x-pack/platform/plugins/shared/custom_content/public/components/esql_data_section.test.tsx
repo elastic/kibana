@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('./esql_query_editor', () => ({
@@ -58,8 +58,30 @@ const threeQueries = [draft(1, 'FROM main'), draft(4, 'FROM a'), draft(9, 'FROM 
 // The tabs are named by their position, which Jest's generated ids make identical, so pick them by id.
 const tabTestSubj = (id: string) => `unifiedTabs_selectTabBtn_${id}`;
 
+const esqlToggle = () =>
+  within(screen.getByTestId('customContentEsqlSection')).getByRole('button', {
+    name: 'Data sources (ES|QL)',
+  });
+
 describe('EsqlDataSection', () => {
   beforeEach(() => jest.clearAllMocks());
+
+  describe('initial open state', () => {
+    it('starts open when a query has text', () => {
+      render(<EsqlDataSection {...defaultProps} />);
+      expect(esqlToggle()).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('starts closed when every query is blank', () => {
+      render(<EsqlDataSection {...defaultProps} queries={[draft(1, '   ')]} />);
+      expect(esqlToggle()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('starts open when asked to, even with a blank query', () => {
+      render(<EsqlDataSection {...defaultProps} queries={[draft(1, '')]} initialIsOpen={true} />);
+      expect(esqlToggle()).toHaveAttribute('aria-expanded', 'true');
+    });
+  });
 
   describe('with a single query', () => {
     // The bar is always there, so the layout does not shift when a second query is added.
