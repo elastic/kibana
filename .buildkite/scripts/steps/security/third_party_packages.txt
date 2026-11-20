@@ -75,3 +75,9 @@ bump-cli
 @oxlint/plugins
 @types/mssql
 monaco-marker-data-provider
+@opentelemetry/core
+@opentelemetry/resources
+@opentelemetry/sdk-metrics
+@opentelemetry/sdk-trace-base
+@opentelemetry/sdk-trace-node
+esbuild
