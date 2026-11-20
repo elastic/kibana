@@ -57,21 +57,22 @@ type GetServiceGroupingAttributesOptions = IEnvOptions & {
 export async function getServiceGroupingAttributes(
   options: GetServiceGroupingAttributesOptions
 ): Promise<ServiceGroupingAttributes> {
-  const [namespaces, savedGroupsByService] = await Promise.all([
+  const [namespacesByService, savedGroupsByService] = await Promise.all([
     getNamespaceAttributes(options),
     getSavedGroupMembership(options),
   ]);
 
+  const attributes = new Map<string, ServiceGroupingAttributeValues>(namespacesByService);
   // Membership is not scoped to the drawn services, so members that are not on the map are dropped.
   const drawn = new Set(options.services);
   for (const [serviceName, savedGroups] of savedGroupsByService) {
     if (!drawn.has(serviceName)) {
       continue;
     }
-    namespaces.set(serviceName, { ...namespaces.get(serviceName), savedGroups });
+    attributes.set(serviceName, { ...attributes.get(serviceName), savedGroups });
   }
 
-  return recordByService(namespaces);
+  return recordByService(attributes);
 }
 
 /**
@@ -85,9 +86,9 @@ export async function getServiceGroupingAttributes(
  * With every environment selected, a service deployed
  * in several of them gets the namespace of the one where it has the most transactions.
  *
- * The map's own time range is kept rather than the call graph's day: every drawn service was seen
- * in it, and a namespace does not change with the window. A service with no transaction events in
- * the range, for example under tail-based sampling, is not found.
+ * The map's own time range is kept rather than the call graph's fixed 24-hour window: every drawn
+ * service was seen in it, and a namespace does not change with the window. A service with no
+ * transaction events in the range, for example under tail-based sampling, is not found.
  */
 async function getNamespaceAttributes({
   apmEventClient,
@@ -95,10 +96,15 @@ async function getNamespaceAttributes({
   start,
   end,
   services,
-}: GetServiceGroupingAttributesOptions): Promise<Map<string, ServiceGroupingAttributeValues>> {
-  const attributes = new Map<string, ServiceGroupingAttributeValues>();
+}: GetServiceGroupingAttributesOptions): Promise<
+  Map<string, Omit<ServiceGroupingAttributeValues, 'savedGroups'>>
+> {
+  const namespacesByService = new Map<
+    string,
+    Omit<ServiceGroupingAttributeValues, 'savedGroups'>
+  >();
   if (services.length === 0) {
-    return attributes;
+    return namespacesByService;
   }
 
   // Each service takes at most 3 buckets: its own, and one for each namespace it sets. Under
@@ -130,13 +136,13 @@ async function getNamespaceAttributes({
   for (const bucket of response.aggregations?.services.buckets ?? []) {
     const serviceNamespace = bucket.service_namespace.buckets[0]?.key;
     const kubernetesNamespace = bucket.kubernetes_namespace.buckets[0]?.key;
-    attributes.set(String(bucket.key), {
+    namespacesByService.set(String(bucket.key), {
       ...(serviceNamespace != null ? { serviceNamespace: String(serviceNamespace) } : {}),
       ...(kubernetesNamespace != null ? { kubernetesNamespace: String(kubernetesNamespace) } : {}),
     });
   }
 
-  return attributes;
+  return namespacesByService;
 }
 
 /**
