@@ -9,6 +9,9 @@ module.exports = {
   preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/actions'],
+  testPathIgnorePatterns: [
+    '<rootDir>/x-pack/platform/plugins/shared/actions/server/registry_checks/',
+  ],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/actions',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [

@@ -397,9 +397,9 @@ const EXPECTED_ANONYMOUS_EXPOSED_CONFIG_KEYS = [
 const EXPECTED_PREBOOT_EXPOSED_CONFIG_KEYS: readonly string[] = [];
 
 const devOnlyPluginIds = new Set(
-  getPackages(REPO_ROOT)
-    .filter((pkg) => pkg.isPlugin() && pkg.isDevOnly())
-    .map((pkg) => pkg.manifest.plugin.id)
+  getPackages(REPO_ROOT).flatMap((pkg) =>
+    pkg.isPlugin() && pkg.isDevOnly() ? [pkg.manifest.plugin.id] : []
+  )
 );
 
 if (getFips() === 0) {
