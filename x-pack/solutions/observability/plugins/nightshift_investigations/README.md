@@ -345,6 +345,8 @@ Investigations are public conversations, and Agent Builder lets anyone who can c
 
 With `create`, the route creates the investigation as the identity that runs the Slack workflow. The new investigation has the thread as its subject, claimed so that concurrent creates for one thread agree on one investigation. The thread's status message is recorded on that subject as `slack.status_message_ts`.
 
+The subject's summary is the message that started the thread, as plain text, not the automation's name. Its `slack.permalink` opens the thread in Slack's web client (`https://app.slack.com/client/<T>/<C>/thread/<C>-<ts>`), since Slack's documented message link needs the workspace domain, which events don't carry. A thread recorded without a link gets one on its next `_slack_thread` call.
+
 The Slack connector delivers each event at least once. The workflow passes Slack's event id as `event_id` and its own execution id as `execution_id`, and the route records both on the thread's subject in `slack.seen_events` (the latest 50). An event another execution already recorded is answered with `duplicate: true`, and the workflow skips it; the same execution asking again, for example on a retried step, is not a duplicate. A run whose investigation failed calls the route again with `release_event: true`, which removes the event as recorded for that execution, so a redelivery of the event is handled. The workflow runs one call per thread at a time, so two deliveries of one event cannot race each other.
 
 ## Sandbox connectors
@@ -459,3 +461,36 @@ This is best effort: a process exit after a claim can leave delivery unconfirmed
 emission missing. Denied writes remain denied, cancellation is outside this sweep's scope, and a
 per-space schedule that cannot run requires its normal Workflows identity/scheduling issue to be
 repaired. There is no new watcher service, storage index, or engine hook.
+
+## Detection snapshot telemetry
+
+A Task Manager task (`nightshift-investigations:detection-snapshot-telemetry`) is scheduled when an
+administrator enables Nightshift, runs once a day, and is removed when the last space that has
+Nightshift is disabled. It shares its lifecycle, and the enabling administrator's credentials, with
+the source volume task of `nightshift_sources`. Each run sends one `nightshift-detection-snapshot`
+EBT event per space that has Nightshift set up. The event holds counts only: no rule name, tag,
+source name or connector name.
+
+| Field | Meaning |
+| --- | --- |
+| `rules_eligible` | Enabled Alerting v2 rules of kind `alert` in the space, read with the task's credentials. Classic rules are not counted. Significant Event rules are of kind `signal`, so they are not counted either. |
+| `rules_wired_in` | Eligible rules matched by the alert trigger of at least one enabled automation that has a workflow: its rule names, name pattern and tags, when its source filter admits `internal` alerts. A trigger without a rule filter wires in every rule. Severity filters are ignored, because they apply to an alert when it fires, not to a rule. |
+| `rules_truncated` | `true` when the space has more than 10,000 eligible rules; `rules_wired_in` then covers the first 10,000 by name. |
+| `automations_total`, `automations_enabled` | Automations in the space, of any trigger kind. |
+| `significant_event_rules`, `significant_event_rules_active` | Distinct rules backing a Query Knowledge Indicator, and how many of those rules exist and are enabled. |
+| `significant_events_total`, `significant_events_open` | Significant Events in the space by current status: all of them, and those that are `active` or `recovering`. |
+| `external_connectors_configured`, `external_connectors_active_24h` | Connectors of a type whose inbound events are translated into alerts, and how many of them belong to an alert source that wrote an alert in the past 24 hours. Today that is Datadog only. An alert does not name the connector that delivered it, so every connector of an active source counts as active. |
+| `external_sources_active_24h`, `external_alerts_24h` | Distinct `source` values and distinct alerts in `.rule-events` over the past 24 hours whose source is neither `internal` nor `elastic.*`. An alert that closes and fires again counts as a new alert. Any workflow can write such alerts, so an active source does not need a configured connector. An alert written with the `internal` source by a workflow is not counted as external. |
+| `significant_events_24h` | Distinct alerts in `.rule-events` over the past 24 hours with the `elastic.significant_events` source: activity, where `significant_events_open` is current state. |
+| `knowledge_indicators_features`, `knowledge_indicators_queries` | Knowledge Indicators that are not deleted; excluded and expired ones are counted. |
+| `memory_enabled`, `memory_pages` | Whether Semantic Memory is enabled in the deployment, and its active pages. `memory_pages` is absent when it is disabled. |
+| `custom_context_snippets`, `sandbox_allowlist_hosts` | Entries configured in Settings. |
+
+The Significant Events plugin contributes the Knowledge Indicator and Significant Event rule
+fields through `registerDetectionSnapshotContributor`; they are absent when that plugin is not
+installed or its read fails, in which case the rest of the event is still sent. A run costs a fixed
+number of queries per space, plus one query per 500 eligible rules when an automation filters by
+rule (none when no automation has an alert trigger, or one has no rule filter) and one per 500
+Significant Event rules. A space where any other read fails sends no event for that run, so a
+missing day is never a row of zeros. A run that times out reports the spaces it reached; the space a
+run starts from rotates daily, so a timeout does not skip the same spaces every day.

@@ -1,0 +1,619 @@
+{
+  "components": {
+    "schemas": {
+      "AccessDeniedExceptionResponseContent": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ArrayValue": {
+        "oneOf": [
+          {
+            "properties": {
+              "booleanValues": {
+                "items": {
+                  "nullable": true,
+                  "type": "boolean"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "booleanValues"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "longValues": {
+                "items": {
+                  "format": "int64",
+                  "nullable": true,
+                  "type": "integer"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "longValues"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "doubleValues": {
+                "items": {
+                  "format": "double",
+                  "nullable": true,
+                  "type": "number"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "doubleValues"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "stringValues": {
+                "items": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "stringValues"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "arrayValues": {
+                "items": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ArrayValue"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "arrayValues"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "BadRequestExceptionResponseContent": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ColumnMetadata": {
+        "properties": {
+          "arrayBaseColumnType": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "isAutoIncrement": {
+            "default": false,
+            "type": "boolean"
+          },
+          "isCaseSensitive": {
+            "default": false,
+            "type": "boolean"
+          },
+          "isCurrency": {
+            "default": false,
+            "type": "boolean"
+          },
+          "isSigned": {
+            "default": false,
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nullable": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "precision": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "scale": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "schemaName": {
+            "type": "string"
+          },
+          "tableName": {
+            "type": "string"
+          },
+          "type": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "typeName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DatabaseErrorExceptionResponseContent": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DatabaseNotFoundExceptionResponseContent": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DatabaseResumingExceptionResponseContent": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DecimalReturnType": {
+        "enum": [
+          "STRING",
+          "DOUBLE_OR_LONG"
+        ],
+        "type": "string"
+      },
+      "ExecuteStatementRequestContent": {
+        "properties": {
+          "continueAfterTimeout": {
+            "default": false,
+            "type": "boolean"
+          },
+          "database": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "formatRecordsAs": {
+            "$ref": "#/components/schemas/RecordsFormatType"
+          },
+          "includeResultMetadata": {
+            "default": false,
+            "type": "boolean"
+          },
+          "parameters": {
+            "items": {
+              "$ref": "#/components/schemas/SqlParameter"
+            },
+            "type": "array"
+          },
+          "resourceArn": {
+            "maxLength": 570,
+            "minLength": 11,
+            "type": "string"
+          },
+          "resultSetOptions": {
+            "$ref": "#/components/schemas/ResultSetOptions"
+          },
+          "schema": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "secretArn": {
+            "maxLength": 570,
+            "minLength": 11,
+            "type": "string"
+          },
+          "sql": {
+            "maxLength": 65536,
+            "type": "string"
+          },
+          "transactionId": {
+            "maxLength": 192,
+            "type": "string"
+          }
+        },
+        "required": [
+          "resourceArn",
+          "secretArn",
+          "sql"
+        ],
+        "type": "object"
+      },
+      "ExecuteStatementResponseContent": {
+        "properties": {
+          "columnMetadata": {
+            "items": {
+              "$ref": "#/components/schemas/ColumnMetadata"
+            },
+            "type": "array"
+          },
+          "formattedRecords": {
+            "type": "string"
+          },
+          "generatedFields": {
+            "items": {
+              "$ref": "#/components/schemas/Field"
+            },
+            "type": "array"
+          },
+          "numberOfRecordsUpdated": {
+            "default": 0,
+            "format": "int64",
+            "type": "integer"
+          },
+          "records": {
+            "items": {
+              "items": {
+                "$ref": "#/components/schemas/Field"
+              },
+              "type": "array"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Field": {
+        "oneOf": [
+          {
+            "properties": {
+              "isNull": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "isNull"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "booleanValue": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "booleanValue"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "longValue": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "longValue"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "doubleValue": {
+                "format": "double",
+                "type": "number"
+              }
+            },
+            "required": [
+              "doubleValue"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "stringValue": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "stringValue"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "blobValue": {
+                "format": "byte",
+                "type": "string"
+              }
+            },
+            "required": [
+              "blobValue"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "arrayValue": {
+                "$ref": "#/components/schemas/ArrayValue"
+              }
+            },
+            "required": [
+              "arrayValue"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "ForbiddenExceptionResponseContent": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HttpEndpointNotEnabledExceptionResponseContent": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidResourceStateExceptionResponseContent": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidSecretExceptionResponseContent": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LongReturnType": {
+        "enum": [
+          "STRING",
+          "LONG"
+        ],
+        "type": "string"
+      },
+      "RecordsFormatType": {
+        "enum": [
+          "NONE",
+          "JSON"
+        ],
+        "type": "string"
+      },
+      "ResultSetOptions": {
+        "properties": {
+          "decimalReturnType": {
+            "$ref": "#/components/schemas/DecimalReturnType"
+          },
+          "longReturnType": {
+            "$ref": "#/components/schemas/LongReturnType"
+          }
+        },
+        "type": "object"
+      },
+      "SecretsErrorExceptionResponseContent": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SqlParameter": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "typeHint": {
+            "$ref": "#/components/schemas/TypeHint"
+          },
+          "value": {
+            "$ref": "#/components/schemas/Field"
+          }
+        },
+        "type": "object"
+      },
+      "StatementTimeoutExceptionResponseContent": {
+        "properties": {
+          "dbConnectionId": {
+            "default": 0,
+            "format": "int64",
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TransactionNotFoundExceptionResponseContent": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TypeHint": {
+        "enum": [
+          "JSON",
+          "UUID",
+          "TIMESTAMP",
+          "DATE",
+          "TIME",
+          "DECIMAL"
+        ],
+        "type": "string"
+      },
+      "UnsupportedResultExceptionResponseContent": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "aws.auth.sigv4": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "AWS RDS DataService"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/Execute": {
+      "post": {
+        "operationId": "ExecuteStatement",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteStatementRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecuteStatementResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/BadRequestExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DatabaseErrorExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DatabaseResumingExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HttpEndpointNotEnabledExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidResourceStateExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidSecretExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SecretsErrorExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/StatementTimeoutExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedResultExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AccessDeniedExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ForbiddenExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/DatabaseNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TransactionNotFoundExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {},
+          "503": {},
+          "504": {}
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "aws.auth.sigv4": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://rds-data.{region}.amazonaws.com",
+      "variables": {
+        "region": {
+          "default": "us-east-1"
+        }
+      }
+    }
+  ]
+}

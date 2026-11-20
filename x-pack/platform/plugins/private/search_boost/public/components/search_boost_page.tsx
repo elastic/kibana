@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { AppHeader } from '@kbn/app-header';
-import { SEARCH_BOOST_APP_TITLE, SEARCH_BOOST_PAGE_DESCRIPTION } from '../translations';
+import { SEARCH_BOOST_APP_TITLE } from '../app_title';
+import { SEARCH_BOOST_PAGE_DESCRIPTION } from '../translations';
 
 export const SearchBoostPage = () => (
   <AppHeader
