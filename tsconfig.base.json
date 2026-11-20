@@ -1887,6 +1887,8 @@
       "@kbn/metrics-config/*": ["./src/platform/packages/private/opentelemetry/kbn-metrics-config/*"],
       "@kbn/metrics-data-access-plugin": ["./x-pack/solutions/observability/plugins/metrics_data_access"],
       "@kbn/metrics-data-access-plugin/*": ["./x-pack/solutions/observability/plugins/metrics_data_access/*"],
+      "@kbn/metrics-exemplars-plugin": ["./x-pack/platform/plugins/private/metrics_exemplars"],
+      "@kbn/metrics-exemplars-plugin/*": ["./x-pack/platform/plugins/private/metrics_exemplars/*"],
       "@kbn/migrator-test-kit": ["./src/platform/packages/private/kbn-migrator-test-kit"],
       "@kbn/migrator-test-kit/*": ["./src/platform/packages/private/kbn-migrator-test-kit/*"],
       "@kbn/mitre-attack-plugin": ["./x-pack/solutions/security/plugins/mitre_attack"],

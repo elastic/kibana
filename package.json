@@ -939,6 +939,7 @@
     "@kbn/metrics": "workspace:*",
     "@kbn/metrics-config": "workspace:*",
     "@kbn/metrics-data-access-plugin": "workspace:*",
+    "@kbn/metrics-exemplars-plugin": "workspace:*",
     "@kbn/mitre-attack-plugin": "workspace:*",
     "@kbn/ml-agg-utils": "workspace:*",
     "@kbn/ml-anomaly-utils": "workspace:*",

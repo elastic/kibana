@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elasti
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useCallback, useRef } from 'react';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { useLensProps, type ChartLensConfig } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
@@ -38,6 +39,7 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     profileId: string;
     id: string;
     isSelected: boolean;
+    executionContext?: Pick<KibanaExecutionContext, 'type' | 'name'>;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
@@ -63,6 +65,7 @@ export const Chart = ({
   profileId,
   id,
   isSelected,
+  executionContext,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -80,6 +83,7 @@ export const Chart = ({
     error,
     userMessages,
     profileId,
+    executionContext,
   });
 
   const handleFilter = useCallback<NonNullable<ChartProps['onFilter']>>(

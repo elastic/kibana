@@ -1437,6 +1437,7 @@ packages:
   - 'x-pack/platform/plugins/private/intercepts'
   - 'x-pack/platform/plugins/private/license_api_guard'
   - 'x-pack/platform/plugins/private/logstash'
+  - 'x-pack/platform/plugins/private/metrics_exemplars'
   - 'x-pack/platform/plugins/private/monitoring'
   - 'x-pack/platform/plugins/private/monitoring_collection'
   - 'x-pack/platform/plugins/private/observability_ai_assistant_management'

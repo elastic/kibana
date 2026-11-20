@@ -131,6 +131,7 @@ pageLoadAssetSize:
   maps: 1201
   mapsEms: 3256
   metricsDataAccess: 2418
+  metricsExemplars: 6000
   mitreAttack: 2022
   ml: 950
   monitoring: 22416

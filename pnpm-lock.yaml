@@ -2745,6 +2745,9 @@ importers:
       '@kbn/metrics-data-access-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/metrics_data_access
+      '@kbn/metrics-exemplars-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/metrics_exemplars
       '@kbn/mitre-attack-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/security/plugins/mitre_attack
@@ -9376,6 +9379,8 @@ importers:
   x-pack/platform/plugins/private/license_api_guard: {}
 
   x-pack/platform/plugins/private/logstash: {}
+
+  x-pack/platform/plugins/private/metrics_exemplars: {}
 
   x-pack/platform/plugins/private/monitoring: {}
 

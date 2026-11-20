@@ -1236,6 +1236,7 @@ x-pack/platform/plugins/private/indices_metadata @elastic/security-solution
 x-pack/platform/plugins/private/intercepts @elastic/appex-sharedux
 x-pack/platform/plugins/private/license_api_guard @elastic/kibana-management
 x-pack/platform/plugins/private/logstash @elastic/logstash
+x-pack/platform/plugins/private/metrics_exemplars @elastic/obs-signals-metrics-team
 x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring
 x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
 x-pack/platform/plugins/private/observability_ai_assistant_management @elastic/nightshift-context-and-research-team

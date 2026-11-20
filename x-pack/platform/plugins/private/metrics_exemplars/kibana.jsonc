@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/metrics-exemplars-plugin",
+  "owner": ["@elastic/obs-signals-metrics-team"],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Draws metric exemplars on Lens XY charts through the Lens XY overlay providers API.",
+  "plugin": {
+    "id": "metricsExemplars",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": ["lens"],
+    "requiredBundles": []
+  }
+}

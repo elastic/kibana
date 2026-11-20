@@ -337,6 +337,39 @@ describe('useLensProps', () => {
     expect(result.current?.lastReloadRequestTime).toBeGreaterThan(0);
   });
 
+  it('adds the surface type and name to the execution context', async () => {
+    const chartRef = createMockChartRef();
+    const { result } = renderHook(() =>
+      useLensProps({
+        chartId: 'testChartId',
+        lensConfig: defaultXyConfig,
+        services: servicesMock as UnifiedHistogramServices,
+        fetchParams,
+        discoverFetch$,
+        chartRef,
+        profileId: 'testProfileId',
+        executionContext: { type: 'discover', name: 'metrics_grid' },
+      })
+    );
+
+    act(() => {
+      discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
+    });
+
+    await waitFor(() => {
+      expect(result.current?.executionContext).toEqual({
+        type: 'discover',
+        name: 'metrics_grid',
+        description: 'metrics experience chart data',
+        meta: {
+          profile_id: 'testProfileId',
+          metric_id: 'testChartId',
+          metric_type: 'lnsXY',
+        },
+      });
+    });
+  });
+
   it('updates isApproximate when Fast mode changes', async () => {
     const chartRef = createMockChartRef();
     const approximateFetchParams = { ...fetchParams, isApproximate: true };
