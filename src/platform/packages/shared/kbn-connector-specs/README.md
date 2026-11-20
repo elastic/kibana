@@ -698,10 +698,10 @@ import type {
 
 ## Contract Tests
 
-`createContractContext` (in `src/test`) runs actions offline against the vendor's OpenAPI spec, using [`@kbn/connector-emulate`](../kbn-connector-emulate/README.md). The handler gets a real axios client, authenticated by the connector's own auth type, whose requests are validated and answered by the mock:
+`createContractContext` (in `src/test/vendor_api`) runs actions offline against the vendor's OpenAPI spec, using [`@kbn/connector-emulate`](../kbn-connector-emulate/README.md). The handler gets a real axios client, authenticated by the connector's own auth type, whose requests are validated and answered by the mock:
 
 ```typescript
-import { createContractContext } from '../../test/create_contract_context';
+import { createContractContext } from '../../test/vendor_api/create_contract_context';
 
 const { runAction, mock } = await createContractContext({
   connector: FirecrawlConnector,
@@ -766,7 +766,7 @@ The folder holds:
 
 Actions run with a connector config sampled from the connector's `schema`, required properties only, so optional settings such as custom base URLs keep their defaults. They run under each auth type in `auth.types`, with placeholder secrets, and the manifest lists the operations reached under any of them, so an action that only some auth types allow (such as Gmail's write actions, which Elastic-managed OAuth refuses) is still recorded.
 
-Connectors that can't have a vendor spec, such as ones that talk to a database driver instead of an HTTP API, are listed in `vendor_api_exemptions.json` at the package root, by `metadata.id` with a reason. Existing connectors without a `vendor_api` folder are simply not recorded yet; [#295688](https://github.com/elastic/kibana/issues/295688) backfills them.
+Connectors that can't have a vendor spec, such as ones that talk to a database driver instead of an HTTP API, are listed in `src/test/vendor_api/vendor_api_exemptions.json`, by `metadata.id` with a reason. Existing connectors without a `vendor_api` folder are simply not recorded yet; [#295688](https://github.com/elastic/kibana/issues/295688) backfills them.
 
 Recording checks each action's `scope`. A `read` action may only send `GET`, `HEAD` or `OPTIONS`, or call the operations its fixture lists in `queries`, so other tools (such as live verification) can rely on `scope: 'read'` meaning the action changes no vendor state.
 
@@ -866,7 +866,26 @@ node scripts/connector_vendor_api --connector monday_com \
 ```
 
 - A `graphql` source's URL serves SDL or an introspection result, and an `mcp` source's serves a `tools/list` result, wrapped in JSON-RPC or not. The URL is only read with `GET`, so a server that needs an introspection request or an MCP session, or credentials, is captured once and served from a file.
-- `--inspect` skips these sources, as it reads OpenAPI operations.
+- Where an MCP server's own `tools/list` needs a session or credentials but its vendor publishes a document per tool, `--tool name=url` pins those instead, as URLs absolute or relative to the source's URL. GitHub's server is an example: its repository publishes a definition per tool. This excerpt lists two of them, and a real source lists every tool the connector's actions call, as recording runs them all:
+
+  ```bash
+  node scripts/connector_vendor_api --connector github \
+    --source mcp=https://raw.githubusercontent.com/github/github-mcp-server/main/pkg/github/__toolsnaps__/ \
+    --format mcp=mcp --endpoint mcp=https://api.githubcopilot.com/mcp/ \
+    --tool mcp=get_me.snap --tool mcp=search_code.snap
+  ```
+
+  Every listed document must be fetched, so a tool the vendor stops publishing fails the source rather than leaving the snapshot quietly short of it. The source's own URL is then never read, and the tools are kept in the order they are listed.
+- Where the vendor publishes nothing at all and only serves the spec to a request carrying credentials, the source is **captured** once and committed as the snapshot. Fetch the document yourself, with credentials, save it to a file, and record against it with `--capture`, plus a `--note` saying what capturing it took:
+
+  ```bash
+  node scripts/connector_vendor_api --connector box \
+    --source mcp=https://mcp.box.com --format mcp=mcp --endpoint mcp=https://mcp.box.com \
+    --capture mcp=box_tools.json --note mcp="tools/list of mcp.box.com, called with a developer token"
+  ```
+
+  The file has to be the whole document, as the URL serves it: it is the only thing read, so a spec that `$ref`s other files fails, and a Markdown reference, read from an index and the pages it links to, can't be captured. A first capture needs `--note`; a capture again keeps the note unless `--note` replaces it. The source is marked `"captured": true` and is never fetched again: `--refresh` keeps the snapshot, and `--drift` reports the source as `pinned` instead of trying to fetch it, which would only answer 401 and open an issue every week. To refresh it, capture it again the same way; the new capture replaces the snapshot, and can also change the source's URL, format or endpoints. Without `--capture`, `--source`, `--format`, `--pages`, `--endpoint` and `--tool` can't change a captured source, as its snapshot was taken from the URL the manifest names. A server such as Box's, whose `tools/list` only answers to credentials, is pinned this way.
+- `--inspect` skips GraphQL and MCP sources, as it reads OpenAPI operations, and captured sources, as the vendor wouldn't serve them to a plain fetch.
 - A `read` action may call GraphQL queries and MCP tools annotated `readOnlyHint`. Anything else needs a `{ "name": "..." }` entry in the action's `queries` in `fixtures.json`, which says it changes no vendor state.
 - `--drift` classifies changes to the operations the connector calls, as `oasdiff` does for OpenAPI. A response that widens is breaking, as a connector reading it may not handle the new value: for GraphQL a new value of an enum a response can hold, or a new union member (`findSchemaChanges`), and for MCP a new output enum value. New optional input is non-breaking, as is a new value of an enum only requests send. An MCP tool losing its `readOnlyHint` is breaking, as read actions may only call read-only tools. Any other change to an MCP schema, such as a tighter bound, is treated as breaking.
 

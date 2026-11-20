@@ -6,7 +6,7 @@
  */
 
 import { MAX_STRING_LENGTH } from '@kbn/ml-server-schemas/constants';
-import { buildConfigPanelContent, getEditableEmbeddableTypes } from '..';
+import { buildConfigPanelContent, planPanelContent } from '..';
 import {
   anomalyChartsPanelConfigSchema,
   anomalySwimlaneConfigSchema,
@@ -71,18 +71,6 @@ describe('ml_anomaly_charts registry entry', () => {
           title: 'Anomaly charts of job-1',
         },
       });
-    });
-  });
-
-  describe('getEditableEmbeddableTypes', () => {
-    it('edits only anomaly charts panels', () => {
-      expect(
-        getEditableEmbeddableTypes({
-          source: 'config',
-          type: 'ml_anomaly_charts',
-          config: { job_ids: ['job-1'] },
-        })
-      ).toEqual(['ml_anomaly_charts']);
     });
   });
 });
@@ -158,20 +146,6 @@ describe('anomalySwimlaneConfigSchema', () => {
   });
 });
 
-describe('ml_anomaly_swimlane registry entry', () => {
-  describe('getEditableEmbeddableTypes', () => {
-    it('edits only swim lane panels', () => {
-      expect(
-        getEditableEmbeddableTypes({
-          source: 'config',
-          type: 'ml_anomaly_swimlane',
-          config: { job_ids: ['job-1'], swimlane_type: 'overall' },
-        })
-      ).toEqual(['ml_anomaly_swimlane']);
-    });
-  });
-});
-
 describe('singleMetricViewerConfigSchema', () => {
   it('accepts bounded selected_entities, function_description, and forecast_id', () => {
     expect(
@@ -209,16 +183,30 @@ describe('singleMetricViewerConfigSchema', () => {
   });
 });
 
-describe('ml_single_metric_viewer registry entry', () => {
-  describe('getEditableEmbeddableTypes', () => {
-    it('edits only single metric viewer panels', () => {
-      expect(
-        getEditableEmbeddableTypes({
-          source: 'config',
-          type: 'ml_single_metric_viewer',
+describe('ML panel edits', () => {
+  it.each([
+    ['ml_anomaly_charts', 'anomaly charts'],
+    ['ml_anomaly_swimlane', 'anomaly swim lane'],
+    ['ml_single_metric_viewer', 'single metric viewer'],
+  ])('rejects an edit of a %s panel with another type', (type, label) => {
+    expect(
+      planPanelContent({
+        id: 'panel-1',
+        content: {
+          type: 'markdown',
+          config: { content: 'new', settings: { open_links_in_new_tab: true } },
+        },
+        existingPanel: {
+          id: 'panel-1',
+          type,
           config: { job_ids: ['job-1'] },
-        })
-      ).toEqual(['ml_single_metric_viewer']);
+          grid: { x: 0, y: 0, w: 24, h: 15 },
+        },
+      })
+    ).toEqual({
+      error: expect.stringContaining(
+        `Panel "panel-1" is a ${label} panel. Edit it with type: "${type}".`
+      ),
     });
   });
 });
