@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { parse } from 'yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -21,6 +21,20 @@ const SECURITY_SUITES_DIR = 'x-pack/solutions/security/';
 // Security suites that live outside `x-pack/solutions/security/`. Empty today: every Security suite
 // is in that directory. Add an id here, not a path exception, when one is not.
 const EXTRA_SECURITY_SUITE_IDS: string[] = [];
+
+// Every `evals_*` set that is NOT Security. All other discovered sets must be built on
+// `evals_security`, so a new Security set that extends `evals_tracing` directly fails here instead
+// of silently running without token usage tracking. A new non-Security set must be added on purpose.
+const NON_SECURITY_CONFIG_SETS = [
+  'evals_tracing',
+  'evals_agent_builder',
+  'evals_alerting_v2',
+  'evals_nightshift_investigations',
+  // Platform-owned: the benchmark spans platform and security skills.
+  'evals_skill_selection',
+  'evals_workflows',
+  'evals_automatic_import',
+];
 
 const OVERRIDE_PREFIXES = [
   '--uiSettings.overrides.genAiSettings:tokenUsageTracking=',
@@ -170,6 +184,38 @@ describe('Security eval suites', () => {
       .forEach(({ serverConfigSet = DEFAULT_CONFIG_SET }) => {
         expect(existsSync(join(CONFIG_SETS_DIR, serverConfigSet, 'serverless'))).toBe(true);
       });
+  });
+
+  describe('every discovered evals_* config set', () => {
+    const configSets = readdirSync(CONFIG_SETS_DIR, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && entry.name.startsWith('evals_'))
+      .map(({ name }) => name)
+      .filter((name) => existsSync(join(CONFIG_SETS_DIR, name, `${STATEFUL_CONFIG}.ts`)))
+      .sort();
+    const securityConfigSets = configSets.filter(
+      (name) => !NON_SECURITY_CONFIG_SETS.includes(name)
+    );
+
+    it('discovers the config sets, and every listed non-Security set exists', () => {
+      expect(configSets).toEqual(expect.arrayContaining(['evals_security', 'evals_tracing']));
+      expect(NON_SECURITY_CONFIG_SETS.filter((name) => !configSets.includes(name))).toEqual([]);
+    });
+
+    // Catches a Security set that no pipeline file names (e.g. one only run by hand) and that
+    // extends `evals_tracing` directly, which would silently run without token usage tracking.
+    it.each(securityConfigSets)('%s enables token usage and tracing details', (configSet) => {
+      expectSecurityOverrides(configSet);
+    });
+
+    it.each(NON_SECURITY_CONFIG_SETS)('%s does not enable token usage tracking', (configSet) => {
+      expect(serverArgs(configSet).some((arg) => arg.includes('tokenUsageTracking'))).toBe(false);
+    });
+
+    it('only names config sets that exist in evals.suites.json', () => {
+      suites.forEach(({ serverConfigSet }) => {
+        if (serverConfigSet) expect(configSets).toContain(serverConfigSet);
+      });
+    });
   });
 
   it('keeps weekly pipeline overrides of a Security suite on a config set with the overrides', () => {

@@ -14,7 +14,7 @@ import Path from 'path';
 
 const SCRIPT = Path.join(__dirname, 'run_suite.sh');
 
-type Scenario = 'ok' | 'missing' | 'shardfail' | 'scrollfail' | 'budget';
+type Scenario = 'ok' | 'missing' | 'shardfail' | 'scrollfail' | 'budget' | 'nobudget';
 
 // Sources only the token usage functions from run_suite.sh and replaces es_curl with a stub that
 // records every request and answers according to the scenario.
@@ -61,6 +61,7 @@ es_curl() {
 # shellcheck disable=SC1091
 source ./fn.sh
 [[ "$SCENARIO" == budget ]] && export TOKEN_USAGE_EXPORT_BUDGET_SECONDS=0
+[[ "$SCENARIO" == nobudget ]] && export TOKEN_USAGE_EXPORT_BUDGET_SECONDS=0 TOKEN_USAGE_UPLOAD_BUDGET_SECONDS=0
 export_token_usage
 exit $?
 `;
@@ -143,10 +144,24 @@ describe('export_token_usage', () => {
     expect(output).toContain('time budget');
   });
 
-  it('counts the scroll cleanup and the upload against the budget', () => {
+  it('still uploads the pages collected when the scan budget runs out', () => {
+    const { calls, docs, output } = run('budget');
+
+    expect(docs).toBe(1);
+    expect(output).toContain('INCOMPLETE');
+    expect(calls.some((call) => call.startsWith('UPLOAD'))).toBe(true);
+  });
+
+  it('counts the scroll cleanup against the scan budget', () => {
     const { calls } = run('budget');
 
     expect(calls.some((call) => call.startsWith('DELETE'))).toBe(false);
+  });
+
+  it('skips the upload only when the upload budget is spent too', () => {
+    const { calls, output } = run('nobudget');
+
+    expect(output).toContain('before the upload');
     expect(calls.some((call) => call.startsWith('UPLOAD'))).toBe(false);
   });
 

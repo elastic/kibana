@@ -131,7 +131,11 @@ export_token_usage() {
   [[ -f .scout/servers/local.json ]] || return 0
   command -v buildkite-agent >/dev/null 2>&1 || return 0
   local es_url out_dir out_file scroll_id='' next_scroll_id hits pages=0 truncated=0 incomplete=0 first=1 max_pages=500 name_part artifact_name=''
-  local deadline=$((SECONDS + ${TOKEN_USAGE_EXPORT_BUDGET_SECONDS:-180})) remaining call_timeout
+  # The scan (paging and the scroll cleanup) and the upload have separate budgets: pages already
+  # collected must still be uploaded when the scan runs out of time, otherwise a slow ES turns a
+  # partial export into no artifact at all.
+  local deadline=$((SECONDS + ${TOKEN_USAGE_EXPORT_BUDGET_SECONDS:-180})) remaining call_timeout upload_deadline
+  upload_deadline=$((deadline + ${TOKEN_USAGE_UPLOAD_BUDGET_SECONDS:-30}))
   es_url="$(jq -r '.hosts.elasticsearch // empty' .scout/servers/local.json | sed -E 's:/*$::; s:^([a-z]+\://)[^/@]*@:\1:')"
   [[ -n "$es_url" ]] || return 0
   out_dir="target/token_usage"
@@ -204,7 +208,7 @@ export_token_usage() {
   fi
   echo "--- Token usage docs: $(wc -l <"$out_file") (by model)$( (( incomplete || truncated )) && echo ' - INCOMPLETE' )"
   jq -r '.model.model_id // "unknown"' "$out_file" | sort | uniq -c || true
-  remaining=$((deadline - SECONDS))
+  remaining=$((upload_deadline - SECONDS))
   if (( remaining <= 0 )); then
     echo "--- Token usage export hit its time budget before the upload; the artifact was not uploaded"
     return 0
