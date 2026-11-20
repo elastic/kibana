@@ -52,7 +52,7 @@ const createAttachments = (): MockAttachments => ({
 });
 
 const lensTarget = (chartType: SupportedChartType = SupportedChartType.XY) => ({
-  type: 'lens' as const,
+  type: 'vis' as const,
   chartType,
 });
 const vegaTarget = { type: 'vega' as const };
@@ -111,7 +111,7 @@ describe('createVisualizationTool schema', () => {
       true
     );
 
-    expect(schema.safeParse({ query: 'errors over time', target: { type: 'lens' } }).success).toBe(
+    expect(schema.safeParse({ query: 'errors over time', target: { type: 'vis' } }).success).toBe(
       false
     );
   });
@@ -135,7 +135,7 @@ describe('createVisualizationTool schema', () => {
     });
     expect(lens.success).toBe(true);
     if (lens.success) {
-      expect(lens.data.target).toMatchObject({ type: 'lens', esql: null });
+      expect(lens.data.target).toMatchObject({ type: 'vis', esql: null });
     }
 
     expect(

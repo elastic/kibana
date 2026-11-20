@@ -27,7 +27,7 @@ import {
  * module name, so `@elastic/eui/lib/...` is caught while the pure `@elastic/eui-theme-*` packages
  * are not.
  */
-export const BANNED_NODE_MODULES: ReadonlySet<string> = new Set(['@elastic/eui', 'd3']);
+export const BANNED_NODE_MODULES: ReadonlySet<string> = new Set(['@elastic/eui', '@emotion/react', 'd3']);
 
 const relative = (absolute: string): string => Path.relative(REPO_ROOT, absolute);
 

@@ -604,7 +604,7 @@ describe('FlyoutTemplate Header collapsed prop', () => {
   it('renders the title as a compact heading with its id regardless of scroll', () => {
     renderCollapsedHeader();
     const heading = screen.getByRole('heading', { name: 'Compact title' });
-    expect(heading.tagName).toBe('H3');
+    expect(heading.tagName).toBe('H2');
     expect(heading.id).toMatch(/^flyoutTemplateTitle/);
   });
 
@@ -631,7 +631,7 @@ describe('FlyoutTemplate Header collapsed prop', () => {
       </FlyoutTemplate>
     );
 
-    const heading = screen.getByRole('heading', { level: 3, name: 'Compact title' });
+    const heading = screen.getByRole('heading', { level: 2, name: 'Compact title' });
     expect(within(heading).getByRole('link', { name: 'Compact title' })).toHaveAttribute(
       'href',
       '#compact'
@@ -668,7 +668,7 @@ describe('FlyoutTemplate Header collapsed prop', () => {
     );
 
     const spinner = screen.getByTestId('flyoutHeaderTitleLoading');
-    expect(screen.getByRole('heading', { level: 3, name: 'Compact title' })).not.toContainElement(
+    expect(screen.getByRole('heading', { level: 2, name: 'Compact title' })).not.toContainElement(
       spinner
     );
   });
