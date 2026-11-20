@@ -226,7 +226,7 @@ export interface WrittenDetectionPair {
   rule_uuid: string;
 }
 
-interface RuleEventDataRow {
+interface RuleEventDataRow extends Record<string, unknown> {
   data_json: string;
 }
 
@@ -771,18 +771,19 @@ export class RuleEventsClient {
     workflowExecutionId: string;
     limit: number;
   }): Promise<{ pairs: WrittenDetectionPair[]; truncated: boolean }> {
-    const rows = await executeEsqlQuery<RuleEventDataRow>({
-      esClient: this.clients.esClient,
-      query: withDataJsonProjection(
-        buildBaseQuery(this.clients.space).where`FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
-          'workflow_execution_id'
-        )}) == ${esql.str(workflowExecutionId)}`
-      )
-        .sort(['@timestamp', 'DESC'])
-        .limit(limit + 1)
-        .keep('_source', 'data_json'),
-      fields: ['data_json'],
-    });
+    const rows = esqlToObjects<RuleEventDataRow>(
+      await queryEsql({
+        esClient: this.clients.esClient,
+        query: withDataJsonProjection(
+          buildBaseQuery(this.clients.space).where`FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
+            'workflow_execution_id'
+          )}) == ${esql.str(workflowExecutionId)}`
+        )
+          .sort(['@timestamp', 'DESC'])
+          .limit(limit + 1)
+          .keep('data_json'),
+      })
+    );
     const truncated = rows.length > limit;
     return {
       pairs: rows

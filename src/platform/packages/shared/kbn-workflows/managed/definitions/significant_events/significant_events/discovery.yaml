@@ -488,7 +488,7 @@ steps:
   - name: compute_stamp_rule_uuids
     type: data.set
     with:
-      stamp_rule_uuids: '${{ steps.resolve_written_detections.output.stamp_rule_uuids | default: steps.compute_written_rule_uuids.output.written_rule_uuids | default: [] }}'
+      stamp_rule_uuids: '{% if steps.resolve_written_detections.error == null %}{{ steps.resolve_written_detections.output.stamp_rule_uuids | json }}{% else %}{{ steps.compute_written_rule_uuids.output.written_rule_uuids | default: [] | json }}{% endif %}'
 
   # Size must be computed separately — comparison operators cannot follow a filter chain.
   - name: count_written_rules

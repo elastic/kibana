@@ -49,6 +49,12 @@ const sourceResponse = (rows: MockRow[]): ESQLSearchResponse =>
     ]),
   } as unknown as ESQLSearchResponse);
 
+const dataJsonResponse = (dataJsonRows: string[]): ESQLSearchResponse =>
+  ({
+    columns: [{ name: 'data_json', type: 'keyword' }],
+    values: dataJsonRows.map((dataJson) => [dataJson]),
+  } as unknown as ESQLSearchResponse);
+
 const countResponse = (total: number): ESQLSearchResponse =>
   ({
     columns: [{ name: 'total', type: 'long' }],
@@ -166,7 +172,7 @@ describe('findDetectionsWrittenByRun', () => {
         signals: [{ metadata: { detection_id: 'detection-a', rule_uuid: 'rule-a' } }],
       }),
     };
-    const { client, query } = createClient(async () => sourceResponse([row]));
+    const { client, query } = createClient(async () => dataJsonResponse([row.dataJson]));
 
     await expect(
       client.findDetectionsWrittenByRun({ workflowExecutionId: 'execution-1', limit: 1_000 })
@@ -182,7 +188,8 @@ describe('findDetectionsWrittenByRun', () => {
       'WHERE FIELD_EXTRACT(data, "workflow_execution_id") == "execution-1"'
     );
     expect(lastQuery(query)).toContain('EVAL data_json = JSON_EXTRACT(_source, "$.data")');
-    expect(lastQuery(query)).toContain('KEEP _source, data_json');
+    expect(lastQuery(query)).toContain('KEEP data_json');
+    expect(lastQuery(query)).not.toContain('KEEP _source');
   });
 
   it('skips an unparseable row and a malformed signal while keeping the valid pairs', async () => {
