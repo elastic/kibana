@@ -34,6 +34,17 @@ export class DataFrameAnalyticsPage {
     );
   }
 
+  private async waitForHistogramRequest(): Promise<boolean> {
+    try {
+      const response = await this.page.waitForResponse((response) =>
+        response.url().includes('/data_visualizer/get_field_histograms/')
+      );
+      return response.ok();
+    } catch {
+      return false;
+    }
+  }
+
   // ── Navigation ────────────────────────────────────────────────────────────
 
   async gotoJobList(): Promise<void> {
@@ -334,14 +345,7 @@ export class DataFrameAnalyticsPage {
     // Navigate directly rather than clicking the showOnHover table button; the button is
     // CSS-hidden until hover and its cross-app navigation is unreliable in Playwright.
     const rison = `(ml:(analysisType:${analysisType},jobId:${jobId}))`;
-    this.histogramRequestSucceeded = this.page
-      .waitForResponse((response) =>
-        response.url().includes('/data_visualizer/get_field_histograms/')
-      )
-      .then(
-        (response) => response.ok(),
-        () => false
-      );
+    this.histogramRequestSucceeded = this.waitForHistogramRequest();
     await this.page.goto(this.kbnUrl.app(`ml/data_frame_analytics/exploration?_g=${rison}`));
     await this.page.testSubj
       .locator('mlPageDataFrameAnalyticsExploration')
