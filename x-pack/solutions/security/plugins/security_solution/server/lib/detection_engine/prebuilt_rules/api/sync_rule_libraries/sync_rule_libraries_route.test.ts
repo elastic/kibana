@@ -6,31 +6,27 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import {
-  ensureLibraries,
-  refreshRuleLibraries,
-  type RefreshResult,
-} from '@kbn/security-rule-libraries';
-import { REFRESH_RULE_LIBRARIES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { ensureLibraries, syncRuleLibraries, type SyncResult } from '@kbn/security-rule-libraries';
+import { SYNC_RULE_LIBRARIES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { requestContextMock, requestMock, serverMock } from '../../../routes/__mocks__';
-import { refreshRuleLibrariesRoute } from './refresh_rule_libraries_route';
+import { syncRuleLibrariesRoute } from './sync_rule_libraries_route';
 
 jest.mock('@kbn/security-rule-libraries', () => ({
   ...jest.requireActual('@kbn/security-rule-libraries'),
   ensureLibraries: jest.fn(),
-  refreshRuleLibraries: jest.fn(),
+  syncRuleLibraries: jest.fn(),
 }));
 
-const refreshRequest = (body?: { library_ids?: string[] }) =>
+const syncRequest = (body?: { library_ids?: string[] }) =>
   requestMock.create({
     method: 'post',
-    path: REFRESH_RULE_LIBRARIES_URL,
+    path: SYNC_RULE_LIBRARIES_URL,
     body,
   });
 
-const communityResult: RefreshResult = {
+const communityResult: SyncResult = {
   id: 'elastic-community',
-  outcome: 'refreshed',
+  outcome: 'synced',
   version: '1.0.0',
   item_count: 3,
 };
@@ -48,7 +44,7 @@ const libraryObject = (id: string, spaceId?: string) => ({
   },
 });
 
-describe('refreshRuleLibrariesRoute', () => {
+describe('syncRuleLibrariesRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   const savedObjectsClient = savedObjectsClientMock.create();
@@ -69,83 +65,76 @@ describe('refreshRuleLibrariesRoute', () => {
       per_page: 1000,
       page: 1,
     });
-    refreshRuleLibrariesRoute(server.router, clients.logger);
+    syncRuleLibrariesRoute(server.router, clients.logger);
   });
 
-  it('refreshes the requested libraries', async () => {
-    jest.mocked(refreshRuleLibraries).mockResolvedValue({ results: [communityResult] });
+  it('syncs the requested libraries', async () => {
+    jest.mocked(syncRuleLibraries).mockResolvedValue({ results: [communityResult] });
 
     const response = await server.inject(
-      refreshRequest({ library_ids: ['elastic-community'] }),
+      syncRequest({ library_ids: ['elastic-community'] }),
       requestContextMock.convertContext(context)
     );
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({ results: [communityResult] });
-    const [params] = jest.mocked(refreshRuleLibraries).mock.calls[0];
+    const [params] = jest.mocked(syncRuleLibraries).mock.calls[0];
     expect(params.libraryIds).toEqual(['elastic-community']);
     expect(params.force).toBeUndefined();
   });
 
-  it('refreshes every library when no ids are given', async () => {
-    const elasticResult: RefreshResult = { id: 'elastic', outcome: 'up_to_date', version: '9.6.1' };
-    jest
-      .mocked(refreshRuleLibraries)
-      .mockResolvedValue({ results: [elasticResult, communityResult] });
+  it('syncs every library when no ids are given', async () => {
+    const elasticResult: SyncResult = { id: 'elastic', outcome: 'up_to_date', version: '9.6.1' };
+    jest.mocked(syncRuleLibraries).mockResolvedValue({ results: [elasticResult, communityResult] });
 
-    const response = await server.inject(
-      refreshRequest(),
-      requestContextMock.convertContext(context)
-    );
+    const response = await server.inject(syncRequest(), requestContextMock.convertContext(context));
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({ results: [elasticResult, communityResult] });
-    expect(jest.mocked(refreshRuleLibraries).mock.calls[0][0].libraryIds).toEqual([
+    expect(jest.mocked(syncRuleLibraries).mock.calls[0][0].libraryIds).toEqual([
       'elastic',
       'elastic-community',
       'custom-library',
     ]);
   });
 
-  it('refreshes a library that is not one of the built-in ones', async () => {
-    jest.mocked(refreshRuleLibraries).mockResolvedValue({
-      results: [{ id: 'custom-library', outcome: 'refreshed', version: '2.0.0' }],
+  it('syncs a library that is not one of the built-in ones', async () => {
+    jest.mocked(syncRuleLibraries).mockResolvedValue({
+      results: [{ id: 'custom-library', outcome: 'synced', version: '2.0.0' }],
     });
 
     const response = await server.inject(
-      refreshRequest({ library_ids: ['custom-library'] }),
+      syncRequest({ library_ids: ['custom-library'] }),
       requestContextMock.convertContext(context)
     );
 
     expect(response.status).toEqual(200);
-    expect(jest.mocked(refreshRuleLibraries).mock.calls[0][0].libraryIds).toEqual([
-      'custom-library',
-    ]);
+    expect(jest.mocked(syncRuleLibraries).mock.calls[0][0].libraryIds).toEqual(['custom-library']);
   });
 
   it('makes sure the built-in libraries exist before looking libraries up', async () => {
-    jest.mocked(refreshRuleLibraries).mockResolvedValue({ results: [] });
+    jest.mocked(syncRuleLibraries).mockResolvedValue({ results: [] });
 
-    await server.inject(refreshRequest(), requestContextMock.convertContext(context));
+    await server.inject(syncRequest(), requestContextMock.convertContext(context));
 
     expect(ensureLibraries).toHaveBeenCalledTimes(1);
   });
 
-  it('returns 404 for a library of another space, without refreshing any', async () => {
+  it('returns 404 for a library of another space, without syncing any', async () => {
     const response = await server.inject(
-      refreshRequest({ library_ids: ['elastic', 'their-library'] }),
+      syncRequest({ library_ids: ['elastic', 'their-library'] }),
       requestContextMock.convertContext(context)
     );
 
     expect(response.status).toEqual(404);
-    expect(refreshRuleLibraries).not.toHaveBeenCalled();
+    expect(syncRuleLibraries).not.toHaveBeenCalled();
   });
 
   it('reads library secrets only when encrypted saved objects are available', async () => {
-    jest.mocked(refreshRuleLibraries).mockResolvedValue({ results: [] });
+    jest.mocked(syncRuleLibraries).mockResolvedValue({ results: [] });
 
-    await server.inject(refreshRequest(), requestContextMock.convertContext(context));
-    expect(jest.mocked(refreshRuleLibraries).mock.calls[0][0].getSecret).toBeUndefined();
+    await server.inject(syncRequest(), requestContextMock.convertContext(context));
+    expect(jest.mocked(syncRuleLibraries).mock.calls[0][0].getSecret).toBeUndefined();
 
     const getDecryptedAsInternalUser = jest
       .fn()
@@ -156,14 +145,14 @@ describe('refreshRuleLibrariesRoute', () => {
       .mocked((await withSecrets.context.securitySolution).getEncryptedSavedObjectsClient)
       .mockReturnValue({ getDecryptedAsInternalUser } as never);
     const secretServer = serverMock.create();
-    refreshRuleLibrariesRoute(secretServer.router, withSecrets.clients.logger);
+    syncRuleLibrariesRoute(secretServer.router, withSecrets.clients.logger);
 
     await secretServer.inject(
-      refreshRequest(),
+      syncRequest(),
       requestContextMock.convertContext(withSecrets.context)
     );
 
-    const { getSecret } = jest.mocked(refreshRuleLibraries).mock.calls[1][0];
+    const { getSecret } = jest.mocked(syncRuleLibraries).mock.calls[1][0];
     await expect(getSecret?.('custom-library')).resolves.toBe('the-secret');
     expect(getDecryptedAsInternalUser).toHaveBeenCalledWith(
       'security-rule-library',
@@ -171,9 +160,9 @@ describe('refreshRuleLibrariesRoute', () => {
     );
   });
 
-  it('returns 404 for a library that does not exist, without refreshing any', async () => {
+  it('returns 404 for a library that does not exist, without syncing any', async () => {
     const response = await server.inject(
-      refreshRequest({ library_ids: ['elastic', 'nope'] }),
+      syncRequest({ library_ids: ['elastic', 'nope'] }),
       requestContextMock.convertContext(context)
     );
 
@@ -182,6 +171,6 @@ describe('refreshRuleLibrariesRoute', () => {
       message: 'Rule library "nope" not found',
       status_code: 404,
     });
-    expect(refreshRuleLibraries).not.toHaveBeenCalled();
+    expect(syncRuleLibraries).not.toHaveBeenCalled();
   });
 });

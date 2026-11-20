@@ -9,24 +9,24 @@ import { z, lazySchema, savedObjectId } from '@kbn/zod/v4';
 
 const MAX_LIBRARY_IDS = 100;
 
-export type RefreshRuleLibrariesRequestBody = z.infer<typeof RefreshRuleLibrariesRequestBody>;
-export const RefreshRuleLibrariesRequestBody = lazySchema(() =>
+export type SyncRuleLibrariesRequestBody = z.infer<typeof SyncRuleLibrariesRequestBody>;
+export const SyncRuleLibrariesRequestBody = lazySchema(() =>
   z
     .object({
-      // Omit to refresh every library.
+      // Omit to sync every library.
       library_ids: z.array(savedObjectId()).min(1).max(MAX_LIBRARY_IDS).optional(),
     })
     .nullable()
 );
 
-export interface RefreshRuleLibraryResult {
+export interface SyncRuleLibraryResult {
   id: string;
-  outcome: 'refreshed' | 'up_to_date' | 'skipped' | 'failed';
+  outcome: 'synced' | 'up_to_date' | 'skipped' | 'failed';
   version?: string;
   item_count?: number;
   error?: string;
 }
 
-export interface RefreshRuleLibrariesResponseBody {
-  results: RefreshRuleLibraryResult[];
+export interface SyncRuleLibrariesResponseBody {
+  results: SyncRuleLibraryResult[];
 }

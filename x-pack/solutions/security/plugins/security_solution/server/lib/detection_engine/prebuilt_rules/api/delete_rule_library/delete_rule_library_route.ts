@@ -9,26 +9,22 @@ import type { Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
-  REFRESH_RULE_LIBRARIES_URL,
-  RefreshRuleLibrariesRequestBody,
+  DELETE_RULE_LIBRARY_URL,
+  DeleteRuleLibraryRequestParams,
+  DeleteRuleLibraryRequestQuery,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
-import { refreshRuleLibrariesHandler } from './refresh_rule_libraries_handler';
+import { deleteRuleLibraryHandler } from './delete_rule_library_handler';
 
-export const refreshRuleLibrariesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const deleteRuleLibraryRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
-    .post({
+    .delete({
       access: 'internal',
-      path: REFRESH_RULE_LIBRARIES_URL,
+      path: DELETE_RULE_LIBRARY_URL,
       security: {
         authz: {
+          // Placeholder until the RFC defines the privilege for managing libraries, shared ones in particular.
           requiredPrivileges: [RULES_API_ALL],
-        },
-      },
-      options: {
-        timeout: {
-          idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },
       },
     })
@@ -37,11 +33,11 @@ export const refreshRuleLibrariesRoute = (router: SecuritySolutionPluginRouter, 
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(RefreshRuleLibrariesRequestBody),
+            params: buildRouteValidationWithZod(DeleteRuleLibraryRequestParams),
+            query: buildRouteValidationWithZod(DeleteRuleLibraryRequestQuery),
           },
         },
       },
-      (context, request, response) =>
-        refreshRuleLibrariesHandler(context, request, response, logger)
+      (context, request, response) => deleteRuleLibraryHandler(context, request, response, logger)
     );
 };

@@ -7,28 +7,24 @@
 
 import { useMutation } from '@kbn/react-query';
 import type { UseMutationOptions } from '@kbn/react-query';
-import type { RefreshRuleLibrariesResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { REFRESH_RULE_LIBRARIES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { refreshRuleLibraries } from '../../api';
+import type { DeleteRuleLibraryResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { DELETE_RULE_LIBRARY_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { deleteRuleLibrary } from '../../api';
 import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_prebuilt_rules_install_review_query';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateBrowseRuleLibraryQuery } from './use_browse_rule_library_query';
 import { useInvalidateFetchRuleLibrariesQuery } from './use_fetch_rule_libraries_query';
 import { useInvalidateFetchRuleLibraryTagsQuery } from './use_fetch_rule_library_tags_query';
 
-export const REFRESH_RULE_LIBRARIES_KEY = ['POST', REFRESH_RULE_LIBRARIES_URL];
-
-export interface UseRefreshRuleLibrariesParams {
-  // Omit to refresh every library.
-  libraryIds?: string[];
+export interface DeleteRuleLibraryParams {
+  libraryId: string;
+  keepRuleVersions: boolean;
 }
 
-export const useRefreshRuleLibrariesMutation = (
-  options?: UseMutationOptions<
-    RefreshRuleLibrariesResponseBody,
-    unknown,
-    UseRefreshRuleLibrariesParams
-  >
+export const DELETE_RULE_LIBRARY_KEY = ['DELETE', DELETE_RULE_LIBRARY_URL];
+
+export const useDeleteRuleLibraryMutation = (
+  options?: UseMutationOptions<DeleteRuleLibraryResponseBody, unknown, DeleteRuleLibraryParams>
 ) => {
   const invalidateRuleLibraries = useInvalidateFetchRuleLibrariesQuery();
   const invalidateBrowseRuleLibrary = useInvalidateBrowseRuleLibraryQuery();
@@ -36,11 +32,11 @@ export const useRefreshRuleLibrariesMutation = (
   const invalidatePrebuiltRulesStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
   const invalidateInstallReview = useInvalidateFetchPrebuiltRulesInstallReviewQuery();
 
-  return useMutation<RefreshRuleLibrariesResponseBody, unknown, UseRefreshRuleLibrariesParams>(
-    ({ libraryIds }) => refreshRuleLibraries(libraryIds),
+  return useMutation<DeleteRuleLibraryResponseBody, unknown, DeleteRuleLibraryParams>(
+    deleteRuleLibrary,
     {
       ...options,
-      mutationKey: REFRESH_RULE_LIBRARIES_KEY,
+      mutationKey: DELETE_RULE_LIBRARY_KEY,
       onSettled: (...args) => {
         invalidateRuleLibraries();
         invalidateBrowseRuleLibrary();

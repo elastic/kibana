@@ -15,20 +15,20 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   RULE_LIBRARY_SO_TYPE,
   ensureLibraries,
-  refreshRuleLibraries,
+  syncRuleLibraries,
 } from '@kbn/security-rule-libraries';
 import type { RuleLibraryAttributes } from '@kbn/security-rule-libraries';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type {
-  RefreshRuleLibrariesRequestBody,
-  RefreshRuleLibrariesResponseBody,
+  SyncRuleLibrariesRequestBody,
+  SyncRuleLibrariesResponseBody,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { findVisibleRuleLibraries } from '../../logic/rule_libraries/find_visible_rule_libraries';
 
-// A secret that cannot be decrypted, for example after the encryption key changed, is left out. The refresh
-// then fails for that library with the error of the host, and the other libraries still refresh.
+// A secret that cannot be decrypted, for example after the encryption key changed, is left out. The sync
+// then fails for that library with the error of the host, and the other libraries still sync.
 const readLibrarySecret = async (
   encryptedClient: EncryptedSavedObjectsClient,
   id: string,
@@ -46,12 +46,12 @@ const readLibrarySecret = async (
   }
 };
 
-export const refreshRuleLibrariesHandler = async (
+export const syncRuleLibrariesHandler = async (
   context: SecuritySolutionRequestHandlerContext,
-  request: KibanaRequest<unknown, unknown, RefreshRuleLibrariesRequestBody>,
+  request: KibanaRequest<unknown, unknown, SyncRuleLibrariesRequestBody>,
   response: KibanaResponseFactory,
   logger: Logger
-): Promise<IKibanaResponse<RefreshRuleLibrariesResponseBody>> => {
+): Promise<IKibanaResponse<SyncRuleLibrariesResponseBody>> => {
   const siemResponse = buildSiemResponse(response);
   const libraryIds = request.body?.library_ids;
 
@@ -78,7 +78,7 @@ export const refreshRuleLibrariesHandler = async (
     const { packages } = ctx.securitySolution.getInternalFleetServices();
     const encryptedClient = ctx.securitySolution.getEncryptedSavedObjectsClient();
 
-    const { results } = await refreshRuleLibraries({
+    const { results } = await syncRuleLibraries({
       client,
       packages,
       logger,
@@ -90,7 +90,7 @@ export const refreshRuleLibrariesHandler = async (
 
     return response.ok({ body: { results } });
   } catch (err) {
-    logger.error(`refreshRuleLibrariesHandler: Caught error:`, err);
+    logger.error(`syncRuleLibrariesHandler: Caught error:`, err);
     const error = transformError(err);
     return siemResponse.error({
       body: error.message,

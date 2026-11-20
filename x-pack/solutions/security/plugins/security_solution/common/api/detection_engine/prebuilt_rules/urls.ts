@@ -30,5 +30,6 @@ export const GET_RULE_LIBRARY_RULE_URL = `${BASE_URL}/libraries/rule` as const;
 export const LIST_RULE_LIBRARY_TAGS_URL = `${BASE_URL}/libraries/tags` as const;
 export const BROWSE_RULE_LIBRARY_URL = `${BASE_URL}/libraries/rules/_browse` as const;
 export const CREATE_RULE_LIBRARY_URL = `${BASE_URL}/libraries` as const;
+export const DELETE_RULE_LIBRARY_URL = `${BASE_URL}/libraries/{library_id}` as const;
 export const SCAN_RULE_LIBRARY_URL = `${BASE_URL}/libraries/_scan` as const;
-export const REFRESH_RULE_LIBRARIES_URL = `${BASE_URL}/libraries/_refresh` as const;
+export const SYNC_RULE_LIBRARIES_URL = `${BASE_URL}/libraries/_sync` as const;

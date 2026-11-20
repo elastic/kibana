@@ -56,17 +56,17 @@ export const LIBRARIES_LIST_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const REFRESH_NOW = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.refreshNowButtonLabel',
+export const SYNC_NOW = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.syncNowButtonLabel',
   {
-    defaultMessage: 'Refresh now',
+    defaultMessage: 'Sync now',
   }
 );
 
-export const REFRESH_ALL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.refreshAllButtonLabel',
+export const SYNC_ALL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.syncAllButtonLabel',
   {
-    defaultMessage: 'Refresh all',
+    defaultMessage: 'Sync all',
   }
 );
 
@@ -203,15 +203,15 @@ export const FACT_STATUS = i18n.translate(
   }
 );
 
-export const FACT_LAST_REFRESH = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.lastRefreshLabel',
+export const FACT_LAST_SYNC = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.lastSyncLabel',
   {
-    defaultMessage: 'Last refresh',
+    defaultMessage: 'Last sync',
   }
 );
 
-export const FACT_NEVER_REFRESHED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.neverRefreshedLabel',
+export const FACT_NEVER_SYNCED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.neverSyncedLabel',
   {
     defaultMessage: 'Never',
   }
@@ -252,24 +252,24 @@ export const FACT_SOURCE = i18n.translate(
   }
 );
 
-export const STATUS_REFRESHED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.statusRefreshedLabel',
+export const STATUS_SYNCED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.statusSyncedLabel',
   {
     defaultMessage: 'Up to date',
   }
 );
 
-export const STATUS_REFRESHING = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.statusRefreshingLabel',
+export const STATUS_SYNCING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.statusSyncingLabel',
   {
-    defaultMessage: 'Refreshing',
+    defaultMessage: 'Syncing',
   }
 );
 
-export const STATUS_REFRESH_FAILED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.statusRefreshFailedLabel',
+export const STATUS_SYNC_FAILED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.statusSyncFailedLabel',
   {
-    defaultMessage: 'Refresh failed',
+    defaultMessage: 'Sync failed',
   }
 );
 
@@ -695,40 +695,40 @@ export const FORM_GIT_SSH_URL_HELP = i18n.translate(
   }
 );
 
-export const STATUS_NEVER_REFRESHED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.statusNeverRefreshedLabel',
+export const STATUS_NEVER_SYNCED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.statusNeverSyncedLabel',
   {
-    defaultMessage: 'Not refreshed',
+    defaultMessage: 'Not synced',
   }
 );
 
-export const NOT_REFRESHED_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.notRefreshedTitle',
+export const NOT_SYNCED_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.notSyncedTitle',
   {
-    defaultMessage: "This library hasn't been refreshed yet",
+    defaultMessage: "This library hasn't been synced yet",
   }
 );
 
-export const NOT_REFRESHED_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.notRefreshedDescription',
+export const NOT_SYNCED_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.notSyncedDescription',
   {
-    defaultMessage: 'Refresh it to load its rules, exception lists and value lists.',
+    defaultMessage: 'Sync it to load its rules, exception lists and value lists.',
   }
 );
 
-export const LIBRARY_ROW_META_NEVER_REFRESHED = (provider: string) =>
+export const LIBRARY_ROW_META_NEVER_SYNCED = (provider: string) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.ruleLibraries.libraryRowMetaNeverRefreshedLabel',
+    'xpack.securitySolution.detectionEngine.ruleLibraries.libraryRowMetaNeverSyncedLabel',
     {
-      defaultMessage: '{provider} · Not refreshed',
+      defaultMessage: '{provider} · Not synced',
       values: { provider },
     }
   );
 
-export const REFRESH_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleLibraries.refreshErrorTitle',
+export const SYNC_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.syncErrorTitle',
   {
-    defaultMessage: 'Failed to refresh rule libraries',
+    defaultMessage: 'Failed to sync rule libraries',
   }
 );
 
@@ -870,8 +870,118 @@ export const SHOWING_LISTS = (count: number) =>
     values: { count },
   });
 
+export const LIBRARY_ROW_META_SYNCING = (provider: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleLibraries.libraryRowMetaSyncingLabel',
+    {
+      defaultMessage: '{provider} · Syncing…',
+      values: { provider },
+    }
+  );
+
 export const LIBRARY_ROW_META = (provider: string, version: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.ruleLibraries.libraryRowMetaLabel', {
     defaultMessage: '{provider} · v{version}',
     values: { provider, version },
   });
+
+export const REMOVE_LIBRARY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.removeLibraryButtonLabel',
+  {
+    defaultMessage: 'Remove library',
+  }
+);
+
+export const LIBRARY_ACTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.libraryActionsAriaLabel',
+  {
+    defaultMessage: 'Library actions',
+  }
+);
+
+export const REMOVE_LIBRARY_MODAL_TITLE = (title: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleLibraries.removeLibraryModalTitle', {
+    defaultMessage: 'Remove "{title}"?',
+    values: { title },
+  });
+
+export const REMOVE_LIBRARY_MODAL_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.removeLibraryModalDescription',
+  {
+    defaultMessage:
+      'The library and every version of its rules are removed from Kibana. Rules already installed from it stay installed, but can no longer be upgraded or compared with this library.',
+  }
+);
+
+export const REMOVE_SPACE_LIBRARY_MODAL_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.removeSpaceLibraryModalDescription',
+  {
+    defaultMessage:
+      'The library and its rules are removed from Kibana, except for the rule versions that installed rules are on. Those stay, so the installed rules can still be upgraded and compared. Rules already installed from the library stay installed.',
+  }
+);
+
+export const REMOVE_LIBRARY_CONFIRM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.removeLibraryConfirmButtonLabel',
+  {
+    defaultMessage: 'Remove library',
+  }
+);
+
+export const REMOVE_LIBRARY_CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.removeLibraryCancelButtonLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const REMOVE_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.removeErrorTitle',
+  {
+    defaultMessage: 'Failed to remove the library',
+  }
+);
+
+export const COLLAPSE_LIBRARIES_LIST = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.collapseLibrariesListAriaLabel',
+  {
+    defaultMessage: 'Collapse the library list',
+  }
+);
+
+export const EXPAND_LIBRARIES_LIST = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.expandLibrariesListAriaLabel',
+  {
+    defaultMessage: 'Expand the library list',
+  }
+);
+
+export const KEEP_RULE_VERSIONS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.keepRuleVersionsLabel',
+  {
+    defaultMessage:
+      'Keep historical rule versions, so rules installed from this library maintain their original version',
+  }
+);
+
+export const SHARED_LIBRARY_WARNING_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.sharedLibraryWarningTitle',
+  {
+    defaultMessage: 'This library is shared with every space',
+  }
+);
+
+export const SHARED_LIBRARY_WARNING_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.sharedLibraryWarningDescription',
+  {
+    defaultMessage:
+      'Rules may be installed from it in other spaces. Removing its rule versions means those rules can no longer be upgraded or compared. Keep historical rule versions to avoid this.',
+  }
+);
+
+export const GROUP_CUSTOM_SHARED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleLibraries.groupCustomSharedLabel',
+  {
+    defaultMessage: 'Custom (Shared)',
+  }
+);

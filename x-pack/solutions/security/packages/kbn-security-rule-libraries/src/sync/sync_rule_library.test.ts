@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RuleLibraryProvider } from '../providers/types';
 import type { RuleLibraryAttributes } from '../types';
-import { refreshRuleLibrary } from './refresh_rule_library';
+import { syncRuleLibrary } from './sync_rule_library';
 
 const logger = { info: jest.fn(), warn: jest.fn(), error: jest.fn() } as unknown as Logger;
 
@@ -22,7 +22,7 @@ const savedAttributes = (
   ...overrides,
 });
 
-describe('refreshRuleLibrary', () => {
+describe('syncRuleLibrary', () => {
   const get = jest.fn();
   const update = jest.fn();
   const bulkCreate = jest.fn();
@@ -58,9 +58,9 @@ describe('refreshRuleLibrary', () => {
       },
     });
 
-    const result = await refreshRuleLibrary({ client, provider, logger, id: 'custom' });
+    const result = await syncRuleLibrary({ client, provider, logger, id: 'custom' });
 
-    expect(result.outcome).toBe('refreshed');
+    expect(result.outcome).toBe('synced');
     expect(finalUpdate()).toEqual(
       expect.objectContaining({
         title: 'Elastic Community Rules',
@@ -69,7 +69,7 @@ describe('refreshRuleLibrary', () => {
         owner: { type: 'community' },
         images: [{ src: '/logo.svg' }],
         version: '1.0.0',
-        refresh_status: 'refreshed',
+        sync_status: 'synced',
       })
     );
   });
@@ -77,7 +77,7 @@ describe('refreshRuleLibrary', () => {
   it('stamps the library title on each rule it writes, so installed rules can show it', async () => {
     inspect.mockResolvedValue({ ruleCount: 1, manifest: { title: 'Elastic Community Rules' } });
 
-    await refreshRuleLibrary({ client, provider, logger, id: 'custom' });
+    await syncRuleLibrary({ client, provider, logger, id: 'custom' });
 
     const [objects] = bulkCreate.mock.calls[0];
     expect(objects[0].attributes).toEqual(
@@ -92,28 +92,28 @@ describe('refreshRuleLibrary', () => {
   it('keeps what was saved for a field the manifest does not have', async () => {
     inspect.mockResolvedValue({ ruleCount: 1, manifest: { license: 'Apache-2.0' } });
 
-    await refreshRuleLibrary({ client, provider, logger, id: 'custom' });
+    await syncRuleLibrary({ client, provider, logger, id: 'custom' });
 
     expect(finalUpdate()).toEqual(expect.objectContaining({ license: 'Apache-2.0' }));
     expect(finalUpdate()).not.toHaveProperty('title');
     expect(bulkCreate.mock.calls[0][0][0].attributes.library_title).toBe('rules-library');
   });
 
-  it('still refreshes a library whose manifest cannot be used', async () => {
+  it('still syncs a library whose manifest cannot be used', async () => {
     inspect.mockResolvedValue({ ruleCount: 1, manifestError: 'not valid YAML' });
 
-    const result = await refreshRuleLibrary({ client, provider, logger, id: 'custom' });
+    const result = await syncRuleLibrary({ client, provider, logger, id: 'custom' });
 
-    expect(result.outcome).toBe('refreshed');
+    expect(result.outcome).toBe('synced');
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('not valid YAML'));
   });
 
-  it('still refreshes a library whose manifest cannot be read', async () => {
+  it('still syncs a library whose manifest cannot be read', async () => {
     inspect.mockRejectedValue(new Error('connection reset'));
 
-    const result = await refreshRuleLibrary({ client, provider, logger, id: 'custom' });
+    const result = await syncRuleLibrary({ client, provider, logger, id: 'custom' });
 
-    expect(result.outcome).toBe('refreshed');
+    expect(result.outcome).toBe('synced');
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('connection reset'));
   });
 
@@ -123,7 +123,7 @@ describe('refreshRuleLibrary', () => {
       version: 'WzEsMV0=',
     });
 
-    await refreshRuleLibrary({ client, provider, logger, id: 'elastic' });
+    await syncRuleLibrary({ client, provider, logger, id: 'elastic' });
 
     expect(inspect).not.toHaveBeenCalled();
   });
@@ -131,7 +131,7 @@ describe('refreshRuleLibrary', () => {
   it('passes the decrypted secret to the manifest read and to reading the rules', async () => {
     inspect.mockResolvedValue({ ruleCount: 1 });
 
-    await refreshRuleLibrary({ client, provider, logger, id: 'custom', secret: 'token' });
+    await syncRuleLibrary({ client, provider, logger, id: 'custom', secret: 'token' });
 
     expect(inspect.mock.calls[0][0].secret).toBe('token');
     expect(readLatestItems.mock.calls[0][0].secret).toBe('token');

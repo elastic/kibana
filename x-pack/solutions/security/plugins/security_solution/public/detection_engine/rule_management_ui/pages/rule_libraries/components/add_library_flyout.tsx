@@ -44,7 +44,7 @@ const MAX_SECRET_LENGTH = 4096;
 const DEFAULT_SSH_USERNAME = 'git';
 
 const INITIAL_INPUT: NewRuleLibraryInput = {
-  scope: 'shared',
+  scope: 'space',
   source: 'git_http',
   url: '',
   branch: 'main',
@@ -114,8 +114,8 @@ const SOURCES: Record<LibrarySource, SourceConfig> = {
 const SOURCE_ORDER: LibrarySource[] = ['git_http', 'git_ssh', 's3'];
 
 const SCOPE_OPTIONS = [
-  { id: 'shared', label: i18n.FORM_SCOPE_SHARED_OPTION },
   { id: 'space', label: i18n.FORM_SCOPE_SPACE_OPTION },
+  { id: 'shared', label: i18n.FORM_SCOPE_SHARED_OPTION },
 ];
 
 interface FormErrors {

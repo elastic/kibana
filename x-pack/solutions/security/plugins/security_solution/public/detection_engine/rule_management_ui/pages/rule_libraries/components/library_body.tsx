@@ -13,7 +13,7 @@ import type { LibraryRulesState } from '../use_library_rules';
 import * as i18n from '../translations';
 import { LibraryHeader } from './library_header';
 import { LibraryListsPlaceholder } from './library_lists_placeholder';
-import { LibraryNotRefreshed } from './library_not_refreshed';
+import { LibraryNotSynced } from './library_not_synced';
 import { LibraryRulesTable } from './library_rules_table';
 import { LibraryTabs } from './library_tabs';
 import type { LibraryTab } from './library_tabs';
@@ -29,7 +29,8 @@ interface LibraryBodyProps {
   activeTab: LibraryTab;
   canEdit: boolean;
   onSelectTab: (tab: LibraryTab) => void;
-  onRefresh: (libraryIds?: string[]) => void;
+  onSync: (libraryIds?: string[]) => void;
+  onRemove: (libraryId: string) => void;
   isInstalling: boolean;
   onInstall: (rules: LibraryRuleRow[]) => void;
   onInstallAll: (libraryId: string) => void;
@@ -47,14 +48,15 @@ export const LibraryBody = ({
   activeTab,
   canEdit,
   onSelectTab,
-  onRefresh,
+  onSync,
+  onRemove,
   isInstalling,
   onInstall,
   onInstallAll,
   onOpenRule,
 }: LibraryBodyProps) => {
-  const isNeverRefreshed = Boolean(selectedLibrary && !selectedLibrary.version);
-  const isAnyRefreshing = libraries.some(({ refreshStatus }) => refreshStatus === 'refreshing');
+  const isNeverSynced = Boolean(selectedLibrary && !selectedLibrary.version);
+  const isAnySyncing = libraries.some(({ syncStatus }) => syncStatus === 'syncing');
 
   return (
     <>
@@ -62,8 +64,10 @@ export const LibraryBody = ({
         <>
           <LibraryHeader
             library={selectedLibrary}
-            canRefresh={canEdit}
-            onRefresh={(libraryId) => onRefresh([libraryId])}
+            canSync={canEdit}
+            canRemove={canEdit}
+            onSync={(libraryId) => onSync([libraryId])}
+            onRemove={onRemove}
           />
           <EuiSpacer size="m" />
         </>
@@ -77,21 +81,21 @@ export const LibraryBody = ({
         }}
         onSelect={onSelectTab}
       />
-      {isNeverRefreshed && selectedLibrary ? (
-        <LibraryNotRefreshed
-          isRefreshing={selectedLibrary.refreshStatus === 'refreshing'}
-          canRefresh={canEdit}
-          onRefresh={() => onRefresh([selectedLibrary.id])}
+      {isNeverSynced && selectedLibrary ? (
+        <LibraryNotSynced
+          isSyncing={selectedLibrary.syncStatus === 'syncing'}
+          canSync={canEdit}
+          onSync={() => onSync([selectedLibrary.id])}
         />
       ) : null}
-      {!isNeverRefreshed && activeTab === 'rules' && rules.isError ? (
+      {!isNeverSynced && activeTab === 'rules' && rules.isError ? (
         <KbnDangerCallout
           announceOnMount
           title={i18n.LOAD_RULES_ERROR_TITLE}
           data-test-subj="ruleLibraryRulesLoadError"
         />
       ) : null}
-      {!isNeverRefreshed && activeTab === 'rules' && !rules.isError ? (
+      {!isNeverSynced && activeTab === 'rules' && !rules.isError ? (
         <LibraryRulesTable
           key={selectedLibraryId}
           rules={rules.rules}
@@ -100,10 +104,10 @@ export const LibraryBody = ({
           libraries={libraries}
           showLibrary={isAllSelected}
           canInstall={canEdit}
-          canRefresh={canEdit}
-          isRefreshingAll={isAnyRefreshing}
+          canSync={canEdit}
+          isSyncingAll={isAnySyncing}
           isInstalling={isInstalling}
-          onRefreshAll={isAllSelected ? () => onRefresh() : undefined}
+          onSyncAll={isAllSelected ? () => onSync() : undefined}
           onInstall={onInstall}
           // Several libraries can have the same rule, so rules are installed all at once from one library.
           onInstallAll={isAllSelected ? undefined : () => onInstallAll(selectedLibraryId)}
@@ -121,7 +125,7 @@ export const LibraryBody = ({
           onSortChange={rules.onSortChange}
         />
       ) : null}
-      {!isNeverRefreshed && activeTab !== 'rules' ? (
+      {!isNeverSynced && activeTab !== 'rules' ? (
         <LibraryListsPlaceholder
           key={activeTab}
           showLibrary={isAllSelected}

@@ -48,7 +48,7 @@ export const createRuleLibraryHandler = async (
     const title = getLibraryTitleFromUrl(request.body.provider.url);
     const attributes: RuleLibraryAttributes = {
       name: id,
-      // Replaced by the title in the library's manifest when it is first refreshed.
+      // Replaced by the title in the library's manifest when it is first synced.
       title,
       provider: toLibraryAttributes(request.body),
       ...(secret ? { secret } : {}),

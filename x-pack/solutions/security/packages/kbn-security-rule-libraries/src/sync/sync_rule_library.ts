@@ -8,16 +8,16 @@
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { PREBUILT_RULE_SO_TYPE, RULE_LIBRARY_SO_TYPE, REFRESH_LOCK_TIMEOUT_MS } from '../constants';
+import { PREBUILT_RULE_SO_TYPE, RULE_LIBRARY_SO_TYPE, SYNC_LOCK_TIMEOUT_MS } from '../constants';
 import type { RuleLibraryProvider } from '../providers/types';
 import type {
   RuleLibraryAttributes,
   RuleLibraryItem,
-  RefreshResult,
+  SyncResult,
   LibraryVersionRef,
 } from '../types';
 
-export interface RefreshParams {
+export interface SyncParams {
   client: SavedObjectsClientContract;
   provider: RuleLibraryProvider;
   logger: Logger;
@@ -27,13 +27,10 @@ export interface RefreshParams {
   force?: boolean;
 }
 
-const isLocked = ({
-  refresh_status: status,
-  refresh_started_at: startedAt,
-}: RuleLibraryAttributes) =>
-  status === 'refreshing' &&
+const isLocked = ({ sync_status: status, sync_started_at: startedAt }: RuleLibraryAttributes) =>
+  status === 'syncing' &&
   startedAt !== undefined &&
-  Date.now() - new Date(startedAt).getTime() < REFRESH_LOCK_TIMEOUT_MS;
+  Date.now() - new Date(startedAt).getTime() < SYNC_LOCK_TIMEOUT_MS;
 
 type ManifestUpdate = Partial<
   Pick<RuleLibraryAttributes, 'title' | 'description' | 'license' | 'owner' | 'images'>
@@ -60,7 +57,7 @@ const readManifestUpdate = async (
       )
     );
   } catch (error) {
-    // The manifest only adds details, so a library that has no readable one still refreshes.
+    // The manifest only adds details, so a library that has no readable one still syncs.
     logger.warn(
       `Manifest of rule library "${library.name}" could not be read: ${
         error instanceof Error ? error.message : String(error)
@@ -97,14 +94,14 @@ const writeBatch = async (
   }
 };
 
-export const refreshRuleLibrary = async ({
+export const syncRuleLibrary = async ({
   client,
   provider,
   logger,
   id,
   secret,
   force = false,
-}: RefreshParams): Promise<RefreshResult> => {
+}: SyncParams): Promise<SyncResult> => {
   const library = await client.get<RuleLibraryAttributes>(RULE_LIBRARY_SO_TYPE, id);
   const { attributes } = library;
   if (isLocked(attributes)) return { id, outcome: 'skipped', version: attributes.version };
@@ -113,7 +110,7 @@ export const refreshRuleLibrary = async ({
     await client.update(
       RULE_LIBRARY_SO_TYPE,
       id,
-      { refresh_status: 'refreshing', refresh_started_at: new Date().toISOString() },
+      { sync_status: 'syncing', sync_started_at: new Date().toISOString() },
       { version: library.version }
     );
   } catch (error) {
@@ -129,14 +126,14 @@ export const refreshRuleLibrary = async ({
       { pinned: attributes.pinned_version }
     );
 
-    // A refreshed library with no items is retried; a parse miss should not stick.
+    // A synced library with no items is retried; a parse miss should not stick.
     const loaded =
       !force &&
       ref.version === attributes.version &&
-      attributes.refresh_status === 'refreshed' &&
+      attributes.sync_status === 'synced' &&
       (attributes.item_count ?? 0) > 0;
     if (loaded) {
-      await client.update(RULE_LIBRARY_SO_TYPE, id, { refresh_status: 'refreshed' });
+      await client.update(RULE_LIBRARY_SO_TYPE, id, { sync_status: 'synced' });
       return { id, outcome: 'up_to_date', version: ref.version, item_count: attributes.item_count };
     }
 
@@ -161,17 +158,17 @@ export const refreshRuleLibrary = async ({
       version: ref.version,
       ref: typeof ref.ref === 'string' ? ref.ref : undefined,
       item_count: count,
-      refresh_status: 'refreshed',
-      refreshed_at: new Date().toISOString(),
+      sync_status: 'synced',
+      synced_at: new Date().toISOString(),
       last_error: null,
     });
-    logger.info(`Rule library "${id}" refreshed to ${ref.version} (${count} rules)`);
-    return { id, outcome: 'refreshed', version: ref.version, item_count: count };
+    logger.info(`Rule library "${id}" synced to ${ref.version} (${count} rules)`);
+    return { id, outcome: 'synced', version: ref.version, item_count: count };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    logger.error(`Rule library "${id}" refresh failed: ${message}`);
+    logger.error(`Rule library "${id}" sync failed: ${message}`);
     await client.update(RULE_LIBRARY_SO_TYPE, id, {
-      refresh_status: 'refresh_failed',
+      sync_status: 'sync_failed',
       last_error: message,
     });
     return { id, outcome: 'failed', version: attributes.version, error: message };

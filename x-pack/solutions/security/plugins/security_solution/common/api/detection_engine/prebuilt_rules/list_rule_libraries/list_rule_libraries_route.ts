@@ -7,7 +7,7 @@
 
 export type RuleLibraryProviderType = 'fleet' | 'git' | 's3';
 export type RuleLibraryScope = 'shared' | 'space';
-export type RuleLibraryRefreshStatus = 'refreshed' | 'refreshing' | 'refresh_failed';
+export type RuleLibrarySyncStatus = 'synced' | 'syncing' | 'sync_failed';
 
 export interface RuleLibrarySummary {
   id: string;
@@ -19,10 +19,10 @@ export interface RuleLibrarySummary {
   owner_type?: string;
   license?: string;
   scope: RuleLibraryScope;
-  // Unset until the library is refreshed for the first time.
+  // Unset until the library is synced for the first time.
   version?: string;
-  refresh_status?: RuleLibraryRefreshStatus;
-  refreshed_at?: string;
+  sync_status?: RuleLibrarySyncStatus;
+  synced_at?: string;
   last_error?: string;
   // Distinct rule_ids in the library. Libraries store every version of a rule, so this is not the item count.
   rule_count: number;

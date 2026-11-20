@@ -24,8 +24,9 @@ import { getRuleLibraryRuleRoute } from './get_rule_library_rule/get_rule_librar
 import { listRuleLibraryTagsRoute } from './list_rule_library_tags/list_rule_library_tags_route';
 import { listRuleLibrariesRoute } from './list_rule_libraries/list_rule_libraries_route';
 import { createRuleLibraryRoute } from './create_rule_library/create_rule_library_route';
+import { deleteRuleLibraryRoute } from './delete_rule_library/delete_rule_library_route';
 import { scanRuleLibraryRoute } from './scan_rule_library/scan_rule_library_route';
-import { refreshRuleLibrariesRoute } from './refresh_rule_libraries/refresh_rule_libraries_route';
+import { syncRuleLibrariesRoute } from './sync_rule_libraries/sync_rule_libraries_route';
 
 export const registerPrebuiltRulesRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -54,6 +55,7 @@ export const registerPrebuiltRulesRoutes = (
     getRuleLibraryRuleRoute(router, logger);
     scanRuleLibraryRoute(router, logger);
     createRuleLibraryRoute(router, logger);
-    refreshRuleLibrariesRoute(router, logger);
+    deleteRuleLibraryRoute(router, logger);
+    syncRuleLibrariesRoute(router, logger);
   }
 };

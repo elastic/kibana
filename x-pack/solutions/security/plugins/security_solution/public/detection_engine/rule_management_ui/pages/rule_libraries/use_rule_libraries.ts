@@ -7,65 +7,88 @@
 
 import { useCallback, useMemo } from 'react';
 import { useCreateRuleLibraryMutation } from '../../../rule_management/api/hooks/prebuilt_rules/use_create_rule_library_mutation';
+import { useDeleteRuleLibraryMutation } from '../../../rule_management/api/hooks/prebuilt_rules/use_delete_rule_library_mutation';
 import { useFetchRuleLibrariesQuery } from '../../../rule_management/api/hooks/prebuilt_rules/use_fetch_rule_libraries_query';
-import { useRefreshRuleLibrariesMutation } from '../../../rule_management/api/hooks/prebuilt_rules/use_refresh_rule_libraries_mutation';
+import { useSyncRuleLibrariesMutation } from '../../../rule_management/api/hooks/prebuilt_rules/use_sync_rule_libraries_mutation';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { toRuleLibraryListItem } from './map_rule_library';
 import { toCreateLibraryRequest } from './to_library_connection';
 import type { NewRuleLibraryInput } from './types';
 import * as i18n from './translations';
 
-const POLL_WHILE_REFRESHING_MS = 3000;
+const POLL_WHILE_SYNCING_MS = 3000;
 
 export const useRuleLibraries = () => {
   const { addError } = useAppToasts();
   const { data, isLoading, isError } = useFetchRuleLibrariesQuery({
     refetchInterval: (response) =>
-      response?.libraries.some(({ refresh_status: status }) => status === 'refreshing')
-        ? POLL_WHILE_REFRESHING_MS
+      response?.libraries.some(({ sync_status: status }) => status === 'syncing')
+        ? POLL_WHILE_SYNCING_MS
         : false,
   });
   const {
-    mutate: refresh,
-    isLoading: isRefreshing,
+    mutate: sync,
+    isLoading: isSyncing,
     variables,
-  } = useRefreshRuleLibrariesMutation({
-    onError: (error) => addError(error, { title: i18n.REFRESH_ERROR_TITLE }),
+  } = useSyncRuleLibrariesMutation({
+    onError: (error) => addError(error, { title: i18n.SYNC_ERROR_TITLE }),
   });
   const { mutateAsync: create, isLoading: isCreating } = useCreateRuleLibraryMutation({
     onError: (error) => addError(error, { title: i18n.CREATE_ERROR_TITLE }),
   });
 
+  const { mutateAsync: remove, isLoading: isRemoving } = useDeleteRuleLibraryMutation({
+    onError: (error) => addError(error, { title: i18n.REMOVE_ERROR_TITLE }),
+  });
+
   const libraries = useMemo(() => {
     const items = (data?.libraries ?? []).map(toRuleLibraryListItem);
-    const refreshingIds = new Set(
-      isRefreshing ? variables?.libraryIds ?? items.map(({ id }) => id) : []
-    );
+    const syncingIds = new Set(isSyncing ? variables?.libraryIds ?? items.map(({ id }) => id) : []);
     return items.map((library) =>
-      refreshingIds.has(library.id) ? { ...library, refreshStatus: 'refreshing' as const } : library
+      syncingIds.has(library.id) ? { ...library, syncStatus: 'syncing' as const } : library
     );
-  }, [data, isRefreshing, variables]);
+  }, [data, isSyncing, variables]);
 
-  const refreshLibraries = useCallback(
-    (libraryIds?: string[]) => refresh({ libraryIds }),
-    [refresh]
-  );
+  const syncLibraries = useCallback((libraryIds?: string[]) => sync({ libraryIds }), [sync]);
 
-  // Creates the library and starts its first refresh, which reads its manifest and its rules.
+  // Creates the library and starts its first sync, which reads its manifest and its rules.
   // Resolves to the new id, or to nothing when it could not be created.
   const createLibrary = useCallback(
     async (input: NewRuleLibraryInput): Promise<string | undefined> => {
       try {
         const { id } = await create(toCreateLibraryRequest(input));
-        refresh({ libraryIds: [id] });
+        sync({ libraryIds: [id] });
         return id;
       } catch {
         // The failure is already reported by the mutation.
         return undefined;
       }
     },
-    [create, refresh]
+    [create, sync]
   );
 
-  return { libraries, isLoading, isError, isCreating, refreshLibraries, createLibrary };
+  // Resolves to whether the library was removed.
+  const removeLibrary = useCallback(
+    async (libraryId: string, keepRuleVersions: boolean): Promise<boolean> => {
+      try {
+        await remove({ libraryId, keepRuleVersions });
+        return true;
+      } catch {
+        // The failure is already reported by the mutation.
+        return false;
+      }
+    },
+    [remove]
+  );
+
+  return {
+    libraries,
+    isLoading,
+    isError,
+    isCreating,
+    isRemoving,
+    syncLibraries,
+    createLibrary,
+    removeLibrary,
+  };
 };

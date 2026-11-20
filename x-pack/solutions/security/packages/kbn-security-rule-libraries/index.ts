@@ -12,7 +12,7 @@ export {
   COMMUNITY_LIBRARY_ID,
   BATCH_SIZE,
   SCAN_MAX_RESPONSE_BYTES,
-  REFRESH_LOCK_TIMEOUT_MS,
+  SYNC_LOCK_TIMEOUT_MS,
 } from './src/constants';
 export { RULE_LIBRARY_DEFINITIONS } from './src/definitions';
 export { parseManifest, MAX_MANIFEST_BYTES, type RuleLibraryManifest } from './src/manifest';
@@ -28,13 +28,13 @@ export {
   type ItemBatch,
   type ProviderFactoryDeps,
 } from './src/providers';
-export { ensureLibraries, type EnsureParams } from './src/refresh/ensure_libraries';
-export { refreshRuleLibrary, type RefreshParams } from './src/refresh/refresh_rule_library';
+export { ensureLibraries, type EnsureParams } from './src/sync/ensure_libraries';
+export { syncRuleLibrary, type SyncParams } from './src/sync/sync_rule_library';
 export {
-  refreshRuleLibraries,
-  type RefreshRuleLibrariesParams,
-  type RefreshRuleLibrariesResult,
-} from './src/refresh/refresh_rule_libraries';
+  syncRuleLibraries,
+  type SyncRuleLibrariesParams,
+  type SyncRuleLibrariesResult,
+} from './src/sync/sync_rule_libraries';
 
 export type {
   AuthType,
@@ -48,7 +48,7 @@ export type {
   RuleLibraryItem,
   RuleLibraryOwner,
   RuleLibraryProviderConfig,
-  RefreshOutcome,
-  RefreshResult,
-  RefreshStatus,
+  SyncOutcome,
+  SyncResult,
+  SyncStatus,
 } from './src/types';

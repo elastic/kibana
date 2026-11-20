@@ -72,8 +72,8 @@ describe('listRuleLibrariesRoute', () => {
         title: 'Prebuilt Security Detection Rules',
         provider: { type: 'fleet' },
         version: '9.6.1',
-        refresh_status: 'refreshed',
-        refreshed_at: '2026-11-19T10:00:00.000Z',
+        sync_status: 'synced',
+        synced_at: '2026-11-19T10:00:00.000Z',
         item_count: 7000,
       }),
     ]);
@@ -86,7 +86,7 @@ describe('listRuleLibrariesRoute', () => {
         id: 'elastic',
         provider: 'fleet',
         version: '9.6.1',
-        refresh_status: 'refreshed',
+        sync_status: 'synced',
         rule_count: 2479,
         scope: 'shared',
       }),
@@ -114,14 +114,14 @@ describe('listRuleLibrariesRoute', () => {
     ]);
   });
 
-  it('leaves version and status unset for a library that was never refreshed', async () => {
+  it('leaves version and status unset for a library that was never synced', async () => {
     respondWith([libraryObject('elastic-community', { title: 'Elastic Community Rules' })]);
 
     const response = await server.inject(listRequest(), requestContextMock.convertContext(context));
 
     const [library] = response.body.libraries;
     expect(library.version).toBeUndefined();
-    expect(library.refresh_status).toBeUndefined();
+    expect(library.sync_status).toBeUndefined();
     expect(library.rule_count).toBe(0);
   });
 

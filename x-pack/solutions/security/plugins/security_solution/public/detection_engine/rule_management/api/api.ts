@@ -21,6 +21,7 @@ import type {
   BrowseRuleLibraryResponseBody,
   CreateRuleLibraryRequestBody,
   CreateRuleLibraryResponseBody,
+  DeleteRuleLibraryResponseBody,
   GetRuleLibraryRuleRequestQuery,
   GetRuleLibraryRuleResponseBody,
   ListRuleLibraryTagsResponseBody,
@@ -35,7 +36,7 @@ import type {
   PerformRuleUpgradeResponseBody,
   ReviewRuleDeprecationRequestBody,
   ReviewRuleDeprecationResponseBody,
-  RefreshRuleLibrariesResponseBody,
+  SyncRuleLibrariesResponseBody,
   RevertPrebuiltRulesRequest,
   RevertPrebuiltRulesResponseBody,
   ReviewRuleInstallationRequestBody,
@@ -47,6 +48,7 @@ import {
   BOOTSTRAP_EASE_RULES_URL,
   BROWSE_RULE_LIBRARY_URL,
   CREATE_RULE_LIBRARY_URL,
+  DELETE_RULE_LIBRARY_URL,
   GET_RULE_LIBRARY_RULE_URL,
   LIST_RULE_LIBRARY_TAGS_URL,
   SCAN_RULE_LIBRARY_URL,
@@ -56,7 +58,7 @@ import {
   PERFORM_RULE_INSTALLATION_URL,
   PERFORM_RULE_UPGRADE_URL,
   PREBUILT_RULES_STATUS_URL,
-  REFRESH_RULE_LIBRARIES_URL,
+  SYNC_RULE_LIBRARIES_URL,
   REVERT_PREBUILT_RULES_URL,
   REVIEW_RULE_DEPRECATION_URL,
   REVIEW_RULE_INSTALLATION_URL,
@@ -937,6 +939,22 @@ export const createRuleLibrary = async (
     body: JSON.stringify(body),
   });
 
+export const deleteRuleLibrary = async ({
+  libraryId,
+  keepRuleVersions,
+}: {
+  libraryId: string;
+  keepRuleVersions: boolean;
+}): Promise<DeleteRuleLibraryResponseBody> =>
+  KibanaServices.get().http.fetch(
+    DELETE_RULE_LIBRARY_URL.replace('{library_id}', encodeURIComponent(libraryId)),
+    {
+      method: 'DELETE',
+      version: '1',
+      query: { keep_rule_versions: keepRuleVersions },
+    }
+  );
+
 export const scanRuleLibrary = async (
   body: ScanRuleLibraryRequestBody
 ): Promise<ScanRuleLibraryResponseBody> =>
@@ -946,10 +964,10 @@ export const scanRuleLibrary = async (
     body: JSON.stringify(body),
   });
 
-export const refreshRuleLibraries = async (
+export const syncRuleLibraries = async (
   libraryIds?: string[]
-): Promise<RefreshRuleLibrariesResponseBody> =>
-  KibanaServices.get().http.fetch(REFRESH_RULE_LIBRARIES_URL, {
+): Promise<SyncRuleLibrariesResponseBody> =>
+  KibanaServices.get().http.fetch(SYNC_RULE_LIBRARIES_URL, {
     method: 'POST',
     version: '1',
     body: JSON.stringify({ library_ids: libraryIds }),

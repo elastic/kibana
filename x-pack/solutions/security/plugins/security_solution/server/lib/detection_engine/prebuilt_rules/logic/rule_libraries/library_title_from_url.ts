@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// A name for a library until its first refresh reads the real one from its manifest.
+// A name for a library until its first sync reads the real one from its manifest.
 export const getLibraryTitleFromUrl = (url: string): string =>
   url
     .replace(/\.git$/, '')

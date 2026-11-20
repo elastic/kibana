@@ -10,10 +10,10 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackageClient } from '@kbn/fleet-plugin/server';
 import { RULE_LIBRARY_SO_TYPE } from '../constants';
 import { createProvider } from '../providers';
-import type { RuleLibraryAttributes, RefreshResult } from '../types';
-import { refreshRuleLibrary } from './refresh_rule_library';
+import type { RuleLibraryAttributes, SyncResult } from '../types';
+import { syncRuleLibrary } from './sync_rule_library';
 
-export interface RefreshByIdParams {
+export interface SyncByIdParams {
   client: SavedObjectsClientContract;
   packages: PackageClient;
   logger: Logger;
@@ -22,16 +22,16 @@ export interface RefreshByIdParams {
   force?: boolean;
 }
 
-export const refreshLibraryById = async ({
+export const syncLibraryById = async ({
   client,
   packages,
   logger,
   id,
   getSecret,
   force,
-}: RefreshByIdParams): Promise<RefreshResult> => {
+}: SyncByIdParams): Promise<SyncResult> => {
   const { attributes } = await client.get<RuleLibraryAttributes>(RULE_LIBRARY_SO_TYPE, id);
   const provider = createProvider(attributes.provider.type, { logger, packages });
   const secret = await getSecret?.(id);
-  return refreshRuleLibrary({ client, provider, logger, id, secret, force });
+  return syncRuleLibrary({ client, provider, logger, id, secret, force });
 };

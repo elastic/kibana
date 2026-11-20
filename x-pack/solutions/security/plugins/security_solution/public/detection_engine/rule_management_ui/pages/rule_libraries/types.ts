@@ -10,11 +10,7 @@ import type { Severity } from '../../../../../common/api/detection_engine/model/
 export type RuleLibraryProviderType = 'fleet' | 'git' | 's3';
 export type RuleLibraryGroup = 'elastic' | 'custom';
 export type RuleLibraryScope = 'shared' | 'space';
-export type RuleLibraryRefreshStatus =
-  | 'never_refreshed'
-  | 'refreshed'
-  | 'refreshing'
-  | 'refresh_failed';
+export type RuleLibrarySyncStatus = 'never_synced' | 'synced' | 'syncing' | 'sync_failed';
 export type LibraryRuleInstallState = 'installable' | 'installed' | 'installed_from_other_library';
 
 export interface RuleLibraryListItem {
@@ -26,8 +22,8 @@ export interface RuleLibraryListItem {
   provider: RuleLibraryProviderType;
   version?: string;
   ruleCount: number;
-  refreshStatus: RuleLibraryRefreshStatus;
-  refreshedAt?: string;
+  syncStatus: RuleLibrarySyncStatus;
+  syncedAt?: string;
   lastError?: string;
   owner: string;
   license: string;

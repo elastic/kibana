@@ -156,10 +156,10 @@ interface LibraryRulesTableProps {
   // Whether to show which library each rule comes from. It is only worth it when several libraries are listed.
   showLibrary: boolean;
   canInstall: boolean;
-  canRefresh: boolean;
-  isRefreshingAll: boolean;
+  canSync: boolean;
+  isSyncingAll: boolean;
   isInstalling: boolean;
-  onRefreshAll?: () => void;
+  onSyncAll?: () => void;
   onInstall: (rules: LibraryRuleRow[]) => void;
   onInstallAll?: () => void;
   onOpenRule: (rule: LibraryRuleRow) => void;
@@ -183,10 +183,10 @@ export const LibraryRulesTable = ({
   libraries,
   showLibrary,
   canInstall,
-  canRefresh,
-  isRefreshingAll,
+  canSync,
+  isSyncingAll,
   isInstalling,
-  onRefreshAll,
+  onSyncAll,
   onInstall,
   onInstallAll,
   onOpenRule,
@@ -320,17 +320,17 @@ export const LibraryRulesTable = ({
             onSelectedTagsChanged={onTagsChange}
           />
         </EuiFlexItem>
-        {onRefreshAll ? (
+        {onSyncAll ? (
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
               iconType="refresh"
-              isLoading={isRefreshingAll}
-              isDisabled={!canRefresh}
-              onClick={onRefreshAll}
-              data-test-subj="refreshAllRuleLibrariesButton"
+              isLoading={isSyncingAll}
+              isDisabled={!canSync || isSyncingAll}
+              onClick={onSyncAll}
+              data-test-subj="syncAllRuleLibrariesButton"
             >
-              {i18n.REFRESH_ALL}
+              {i18n.SYNC_ALL}
             </EuiButton>
           </EuiFlexItem>
         ) : null}

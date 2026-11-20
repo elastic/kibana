@@ -41,18 +41,18 @@ describe('toRuleLibraryListItem', () => {
     expect(item.icon).toBe('package');
   });
 
-  it('treats a library without a refresh status as never refreshed', () => {
+  it('treats a library without a sync status as never synced', () => {
     const item = toRuleLibraryListItem(summary({}));
-    expect(item.refreshStatus).toBe('never_refreshed');
+    expect(item.syncStatus).toBe('never_synced');
     expect(item.version).toBeUndefined();
   });
 
-  it('keeps the refresh details of a refreshed library', () => {
+  it('keeps the sync details of a synced library', () => {
     const item = toRuleLibraryListItem(
       summary({
         version: '1.2.0',
-        refresh_status: 'refresh_failed',
-        refreshed_at: '2026-11-19T10:00:00.000Z',
+        sync_status: 'sync_failed',
+        synced_at: '2026-11-19T10:00:00.000Z',
         last_error: 'Authentication failed',
         rule_count: 10,
       })
@@ -60,8 +60,8 @@ describe('toRuleLibraryListItem', () => {
     expect(item).toEqual(
       expect.objectContaining({
         version: '1.2.0',
-        refreshStatus: 'refresh_failed',
-        refreshedAt: '2026-11-19T10:00:00.000Z',
+        syncStatus: 'sync_failed',
+        syncedAt: '2026-11-19T10:00:00.000Z',
         lastError: 'Authentication failed',
         ruleCount: 10,
       })

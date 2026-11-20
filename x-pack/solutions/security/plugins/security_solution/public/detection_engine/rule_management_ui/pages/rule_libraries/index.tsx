@@ -23,11 +23,17 @@ import { useListsConfig } from '../../../../detections/containers/detection_engi
 import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { redirectToDetections } from '../../../common/helpers';
 import { AddLibraryFlyout } from './components/add_library_flyout';
-import { ALL_LIBRARIES_ID, LibrariesList } from './components/libraries_list';
+import {
+  ALL_LIBRARIES_ID,
+  LibrariesList,
+  getLibrariesListWidth,
+} from './components/libraries_list';
 import { LibraryBody } from './components/library_body';
+import { RemoveLibraryModal } from './components/remove_library_modal';
 import { LibraryRuleFlyout } from './components/library_rule_flyout';
 import type { LibraryTab } from './components/library_tabs';
 import { DUMMY_EXCEPTION_LISTS, DUMMY_VALUE_LISTS } from './dummy_data';
+import { useLibrariesListCollapsed } from './use_libraries_list_collapsed';
 import { useInstallLibraryRules } from './use_install_library_rules';
 import { useLibraryRules } from './use_library_rules';
 import {
@@ -35,7 +41,7 @@ import {
   useSyncRuleLibrariesUrlState,
 } from './use_rule_libraries_url_state';
 import { useRuleLibraries } from './use_rule_libraries';
-import type { LibraryRuleRow, NewRuleLibraryInput } from './types';
+import type { LibraryRuleRow, NewRuleLibraryInput, RuleLibraryListItem } from './types';
 import * as i18n from './translations';
 
 const RuleLibrariesPageComponent: React.FC = () => {
@@ -45,27 +51,38 @@ const RuleLibrariesPageComponent: React.FC = () => {
   const [{ isSignalIndexExists, isAuthenticated, hasEncryptionKey }] = useUserData();
   const { needsConfiguration: needsListsConfiguration } = useListsConfig();
 
-  const { libraries, isLoading, isError, isCreating, refreshLibraries, createLibrary } =
-    useRuleLibraries();
+  const {
+    libraries,
+    isLoading,
+    isError,
+    isCreating,
+    isRemoving,
+    syncLibraries,
+    createLibrary,
+    removeLibrary,
+  } = useRuleLibraries();
+  const { isCollapsed: isListCollapsed, toggleCollapsed: toggleListCollapsed } =
+    useLibrariesListCollapsed();
   const initialState = useInitialRuleLibrariesPageState();
   const [selectedLibraryId, setSelectedLibraryId] = useState(initialState.libraryId);
   const [selectedTab, setSelectedTab] = useState<LibraryTab>(initialState.tab);
   const [isAddLibraryOpen, setIsAddLibraryOpen] = useState(false);
   const [openedRule, setOpenedRule] = useState<LibraryRuleRow>();
+  const [libraryToRemove, setLibraryToRemove] = useState<RuleLibraryListItem>();
 
   const isAllSelected = selectedLibraryId === ALL_LIBRARIES_ID;
   const selectedLibrary = libraries.find(({ id }) => id === selectedLibraryId);
   const inSelectedLibrary = <T extends { libraryId: string }>(items: readonly T[]) =>
     isAllSelected ? items : items.filter(({ libraryId }) => libraryId === selectedLibraryId);
 
-  const refreshedLibraryIds = new Set(
+  const syncedLibraryIds = new Set(
     libraries.filter(({ version }) => Boolean(version)).map(({ id }) => id)
   );
-  const inRefreshedLibrary = <T extends { libraryId: string }>(items: readonly T[]) =>
-    inSelectedLibrary(items).filter(({ libraryId }) => refreshedLibraryIds.has(libraryId));
+  const inSyncedLibrary = <T extends { libraryId: string }>(items: readonly T[]) =>
+    inSelectedLibrary(items).filter(({ libraryId }) => syncedLibraryIds.has(libraryId));
 
-  const visibleExceptionLists = inRefreshedLibrary(DUMMY_EXCEPTION_LISTS);
-  const visibleValueLists = inRefreshedLibrary(DUMMY_VALUE_LISTS);
+  const visibleExceptionLists = inSyncedLibrary(DUMMY_EXCEPTION_LISTS);
+  const visibleValueLists = inSyncedLibrary(DUMMY_VALUE_LISTS);
   const activeTab =
     (selectedTab === 'exceptionLists' && visibleExceptionLists.length === 0) ||
     (selectedTab === 'valueLists' && visibleValueLists.length === 0)
@@ -114,6 +131,16 @@ const RuleLibrariesPageComponent: React.FC = () => {
     if (libraryId) {
       selectLibrary(libraryId);
       setIsAddLibraryOpen(false);
+    }
+  };
+
+  const handleRemoveLibrary = async (keepRuleVersions: boolean) => {
+    if (!libraryToRemove) return;
+    const isRemoved = await removeLibrary(libraryToRemove.id, keepRuleVersions);
+    if (isRemoved) {
+      selectLibrary(ALL_LIBRARIES_ID);
+      setSelectedTab('rules');
+      setLibraryToRemove(undefined);
     }
   };
 
@@ -169,10 +196,15 @@ const RuleLibrariesPageComponent: React.FC = () => {
         ) : null}
         {!isLoading && !isError ? (
           <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
-            <EuiFlexItem grow={false} css={{ width: euiTheme.base * 18 }}>
+            <EuiFlexItem
+              grow={false}
+              css={{ width: getLibrariesListWidth(euiTheme, isListCollapsed) }}
+            >
               <LibrariesList
                 libraries={libraries}
                 selectedId={selectedLibraryId}
+                isCollapsed={isListCollapsed}
+                onToggleCollapsed={toggleListCollapsed}
                 onSelect={selectLibrary}
               />
             </EuiFlexItem>
@@ -188,7 +220,10 @@ const RuleLibrariesPageComponent: React.FC = () => {
                 activeTab={activeTab}
                 canEdit={rulesPrivileges.edit}
                 onSelectTab={setSelectedTab}
-                onRefresh={refreshLibraries}
+                onSync={syncLibraries}
+                onRemove={(libraryId) =>
+                  setLibraryToRemove(libraries.find(({ id }) => id === libraryId))
+                }
                 isInstalling={isInstalling}
                 onInstall={install}
                 onInstallAll={installAll}
@@ -211,6 +246,12 @@ const RuleLibrariesPageComponent: React.FC = () => {
           onClose={() => setOpenedRule(undefined)}
         />
       ) : null}
+      <RemoveLibraryModal
+        library={libraryToRemove}
+        isRemoving={isRemoving}
+        onConfirm={handleRemoveLibrary}
+        onCancel={() => setLibraryToRemove(undefined)}
+      />
       {isAddLibraryOpen ? (
         <AddLibraryFlyout
           isSubmitting={isCreating}

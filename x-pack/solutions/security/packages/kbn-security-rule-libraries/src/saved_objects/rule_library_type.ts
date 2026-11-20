@@ -71,15 +71,15 @@ const libraryV1 = schema.object(
     version: schema.maybe(str()),
     ref: schema.maybe(str()),
     previous_version: schema.maybe(str()),
-    refresh_status: schema.maybe(
+    sync_status: schema.maybe(
       schema.oneOf([
-        schema.literal('refreshed'),
-        schema.literal('refreshing'),
-        schema.literal('refresh_failed'),
+        schema.literal('synced'),
+        schema.literal('syncing'),
+        schema.literal('sync_failed'),
       ])
     ),
-    refresh_started_at: schema.maybe(str()),
-    refreshed_at: schema.maybe(str()),
+    sync_started_at: schema.maybe(str()),
+    synced_at: schema.maybe(str()),
     last_error: schema.maybe(schema.nullable(text())),
     item_count: schema.maybe(schema.number()),
   },
@@ -105,8 +105,8 @@ export const ruleLibraryType: SavedObjectsType = {
         },
       },
       version: { type: 'keyword' },
-      refresh_status: { type: 'keyword' },
-      refresh_started_at: { type: 'date' },
+      sync_status: { type: 'keyword' },
+      sync_started_at: { type: 'date' },
     },
   },
   modelVersions: {

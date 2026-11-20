@@ -11,11 +11,11 @@ import type { PackageClient } from '@kbn/fleet-plugin/server';
 import { COMMUNITY_LIBRARY_ID, ELASTIC_LIBRARY_ID } from '../constants';
 import { RULE_LIBRARY_DEFINITIONS } from '../definitions';
 import { ensureLibraries } from './ensure_libraries';
-import { refreshRuleLibraries } from './refresh_rule_libraries';
-import { refreshLibraryById } from './refresh_library_by_id';
+import { syncRuleLibraries } from './sync_rule_libraries';
+import { syncLibraryById } from './sync_library_by_id';
 
 jest.mock('./ensure_libraries');
-jest.mock('./refresh_library_by_id');
+jest.mock('./sync_library_by_id');
 
 const client = {
   update: jest.fn(),
@@ -24,7 +24,7 @@ const client = {
 const packages = {} as PackageClient;
 const logger = {} as Logger;
 
-describe('refreshRuleLibraries', () => {
+describe('syncRuleLibraries', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(client.find).mockResolvedValue({
@@ -35,12 +35,12 @@ describe('refreshRuleLibraries', () => {
       ],
     } as never);
     jest
-      .mocked(refreshLibraryById)
-      .mockImplementation(async ({ id }) => ({ id, outcome: 'refreshed', version: '1.0.0' }));
+      .mocked(syncLibraryById)
+      .mockImplementation(async ({ id }) => ({ id, outcome: 'synced', version: '1.0.0' }));
   });
 
-  it('refreshes every library that exists by default, the built-in ones first', async () => {
-    const { results } = await refreshRuleLibraries({ client, packages, logger });
+  it('syncs every library that exists by default, the built-in ones first', async () => {
+    const { results } = await syncRuleLibraries({ client, packages, logger });
 
     expect(results.map(({ id }) => id)).toEqual([
       ELASTIC_LIBRARY_ID,
@@ -49,8 +49,8 @@ describe('refreshRuleLibraries', () => {
     ]);
   });
 
-  it('refreshes a library that is not one of the built-in definitions when it is asked for', async () => {
-    const { results } = await refreshRuleLibraries({
+  it('syncs a library that is not one of the built-in definitions when it is asked for', async () => {
+    const { results } = await syncRuleLibraries({
       client,
       packages,
       logger,
@@ -61,10 +61,10 @@ describe('refreshRuleLibraries', () => {
     expect(client.find).not.toHaveBeenCalled();
   });
 
-  it('hands the secret lookup on to every refresh', async () => {
+  it('hands the secret lookup on to every sync', async () => {
     const getSecret = jest.fn();
 
-    await refreshRuleLibraries({
+    await syncRuleLibraries({
       client,
       packages,
       logger,
@@ -72,11 +72,11 @@ describe('refreshRuleLibraries', () => {
       getSecret,
     });
 
-    expect(refreshLibraryById).toHaveBeenCalledWith(expect.objectContaining({ getSecret }));
+    expect(syncLibraryById).toHaveBeenCalledWith(expect.objectContaining({ getSecret }));
   });
 
-  it('creates every library object but refreshes only the listed libraries', async () => {
-    const { results, elastic } = await refreshRuleLibraries({
+  it('creates every library object but syncs only the listed libraries', async () => {
+    const { results, elastic } = await syncRuleLibraries({
       client,
       packages,
       logger,

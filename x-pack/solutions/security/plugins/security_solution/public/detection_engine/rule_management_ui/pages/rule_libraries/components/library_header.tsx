@@ -22,29 +22,26 @@ import {
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import { FormattedDate, FormattedRelative, FormattedTime } from '@kbn/i18n-react';
-import type {
-  RuleLibraryListItem,
-  RuleLibraryProviderType,
-  RuleLibraryRefreshStatus,
-} from '../types';
+import type { RuleLibraryListItem, RuleLibraryProviderType, RuleLibrarySyncStatus } from '../types';
 import * as i18n from '../translations';
+import { LibraryActionsMenu } from './library_actions_menu';
 
-const STATUS_LABEL: Record<RuleLibraryRefreshStatus, string> = {
-  never_refreshed: i18n.STATUS_NEVER_REFRESHED,
-  refreshed: i18n.STATUS_REFRESHED,
-  refreshing: i18n.STATUS_REFRESHING,
-  refresh_failed: i18n.STATUS_REFRESH_FAILED,
+const STATUS_LABEL: Record<RuleLibrarySyncStatus, string> = {
+  never_synced: i18n.STATUS_NEVER_SYNCED,
+  synced: i18n.STATUS_SYNCED,
+  syncing: i18n.STATUS_SYNCING,
+  sync_failed: i18n.STATUS_SYNC_FAILED,
 };
 
 const STATUS_COLOR_TOKEN = {
-  never_refreshed: 'mediumShade',
-  refreshed: 'success',
-  refreshing: 'primary',
-  refresh_failed: 'danger',
+  never_synced: 'mediumShade',
+  synced: 'success',
+  syncing: 'primary',
+  sync_failed: 'danger',
 } as const;
 
 interface StatusIndicatorProps {
-  status: RuleLibraryRefreshStatus;
+  status: RuleLibrarySyncStatus;
   error?: string;
 }
 
@@ -69,7 +66,7 @@ const StatusIndicator = ({ status, error }: StatusIndicatorProps) => {
     </>
   );
 
-  if (status !== 'refresh_failed' || !error) {
+  if (status !== 'sync_failed' || !error) {
     return indicator;
   }
 
@@ -134,28 +131,28 @@ const getSourceFacts = ({
       ]
     : [];
 
-const getRefreshFacts = (library: RuleLibraryListItem): EuiDescriptionListProps['listItems'] => [
+const getSyncFacts = (library: RuleLibraryListItem): EuiDescriptionListProps['listItems'] => [
   {
     title: i18n.FACT_STATUS,
-    description: <StatusIndicator status={library.refreshStatus} error={library.lastError} />,
+    description: <StatusIndicator status={library.syncStatus} error={library.lastError} />,
   },
   {
-    title: i18n.FACT_LAST_REFRESH,
-    description: library.refreshedAt ? (
+    title: i18n.FACT_LAST_SYNC,
+    description: library.syncedAt ? (
       <EuiToolTip
         content={
           <>
-            <FormattedDate value={library.refreshedAt} year="numeric" month="short" day="2-digit" />{' '}
-            <FormattedTime value={library.refreshedAt} timeZoneName="short" />
+            <FormattedDate value={library.syncedAt} year="numeric" month="short" day="2-digit" />{' '}
+            <FormattedTime value={library.syncedAt} timeZoneName="short" />
           </>
         }
       >
         <span tabIndex={0}>
-          <FormattedRelative value={library.refreshedAt} />
+          <FormattedRelative value={library.syncedAt} />
         </span>
       </EuiToolTip>
     ) : (
-      i18n.FACT_NEVER_REFRESHED
+      i18n.FACT_NEVER_SYNCED
     ),
   },
 ];
@@ -177,11 +174,19 @@ const FactsLine = ({ listItems }: { listItems: EuiDescriptionListProps['listItem
 
 interface LibraryHeaderProps {
   library: RuleLibraryListItem;
-  canRefresh: boolean;
-  onRefresh: (libraryId: string) => void;
+  canSync: boolean;
+  canRemove: boolean;
+  onSync: (libraryId: string) => void;
+  onRemove: (libraryId: string) => void;
 }
 
-export const LibraryHeader = ({ library, canRefresh, onRefresh }: LibraryHeaderProps) => (
+export const LibraryHeader = ({
+  library,
+  canSync,
+  canRemove,
+  onSync,
+  onRemove,
+}: LibraryHeaderProps) => (
   <EuiPanel hasBorder paddingSize="m" data-test-subj="ruleLibraryHeader">
     <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -200,20 +205,29 @@ export const LibraryHeader = ({ library, canRefresh, onRefresh }: LibraryHeaderP
         <EuiFlexGroup direction="column" gutterSize="xs">
           <FactsLine listItems={getSummaryFacts(library)} />
           {library.sourceUrl ? <FactsLine listItems={getSourceFacts(library)} /> : null}
-          <FactsLine listItems={getRefreshFacts(library)} />
+          <FactsLine listItems={getSyncFacts(library)} />
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
-          iconType="refresh"
-          isLoading={library.refreshStatus === 'refreshing'}
-          isDisabled={!canRefresh}
-          onClick={() => onRefresh(library.id)}
-          data-test-subj="refreshRuleLibraryButton"
-        >
-          {i18n.REFRESH_NOW}
-        </EuiButton>
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              iconType="refresh"
+              isLoading={library.syncStatus === 'syncing'}
+              isDisabled={!canSync || library.syncStatus === 'syncing'}
+              onClick={() => onSync(library.id)}
+              data-test-subj="syncRuleLibraryButton"
+            >
+              {i18n.SYNC_NOW}
+            </EuiButton>
+          </EuiFlexItem>
+          {library.group === 'custom' ? (
+            <EuiFlexItem grow={false}>
+              <LibraryActionsMenu canRemove={canRemove} onRemove={() => onRemove(library.id)} />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>

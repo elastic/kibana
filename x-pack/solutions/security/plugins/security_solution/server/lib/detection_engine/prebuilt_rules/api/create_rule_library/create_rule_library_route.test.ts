@@ -49,7 +49,7 @@ describe('createRuleLibraryRoute', () => {
     );
   });
 
-  it('names the library after its address until the first refresh reads its manifest', async () => {
+  it('names the library after its address until the first sync reads its manifest', async () => {
     await inject(publicGit);
 
     expect(createdAttributes()).toEqual(
