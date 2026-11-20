@@ -71,24 +71,23 @@ describe('wrapKibanaSupertestAgent', () => {
       await new Promise<void>((resolve) => server.listen(0, resolve));
       const { port } = server.address() as { port: number };
       const close = () =>
-        new Promise<void>((resolve, reject) =>
-          server.close((err) => (err ? reject(err) : resolve()))
-        );
+        new Promise<void>((resolve, reject) => {
+          server.closeAllConnections();
+          server.close((err) => (err ? reject(err) : resolve()));
+        });
       return { url: `http://127.0.0.1:${port}`, close };
     };
 
-    const overloaded = (res: http.ServerResponse) => {
-      res.writeHead(429, { 'Content-Type': 'application/json' });
-      res.end(
-        JSON.stringify({
-          statusCode: 429,
-          error: 'Too Many Requests',
-          message: 'Server is overloaded',
-        })
-      );
+    const overloaded = (res: http.ServerResponse, retryAfter = '0') => {
+      res.writeHead(429, {
+        'Content-Type': 'text/plain',
+        'Retry-After': retryAfter,
+        RateLimit: `"elu";r=0;t=${retryAfter}`,
+      });
+      res.end('Server is overloaded');
     };
 
-    it('sends the original request untouched when there is no 429 (json body keeps content-type)', async () => {
+    it('sends the request untouched when there is no 429 (json body keeps content-type)', async () => {
       const seen: Array<{ contentType?: string; body: string }> = [];
       const { url, close } = await startServer((req, res) => {
         let body = '';
@@ -108,7 +107,7 @@ describe('wrapKibanaSupertestAgent', () => {
       }
     });
 
-    it('retries a 429 rejected by .expect() and replays headers and body', async () => {
+    it('retries a 429 rejected by .expect() and resends headers and body', async () => {
       const seen: Array<{ header?: string; body: string }> = [];
       const { url, close } = await startServer((req, res) => {
         let body = '';
@@ -141,7 +140,7 @@ describe('wrapKibanaSupertestAgent', () => {
       }
     });
 
-    it('retries through .catch()', async () => {
+    it('retries when using .end(callback)', async () => {
       let attempts = 0;
       const { url, close } = await startServer((_req, res) => {
         attempts++;
@@ -154,14 +153,65 @@ describe('wrapKibanaSupertestAgent', () => {
       });
 
       try {
-        const response = await kibanaSupertest(url)
-          .get('/')
-          .expect(200)
-          .catch((error) => {
-            throw error;
-          });
-        expect(response.status).toBe(200);
+        const status = await new Promise<number>((resolve, reject) => {
+          kibanaSupertest(url)
+            .get('/')
+            .end((err, res) => (err ? reject(err) : resolve(res.status)));
+        });
+        expect(status).toBe(200);
         expect(attempts).toBe(2);
+      } finally {
+        await close();
+      }
+    });
+
+    it('sends the request once when awaited twice', async () => {
+      let attempts = 0;
+      const { url, close } = await startServer((_req, res) => {
+        attempts++;
+        res.writeHead(200);
+        res.end();
+      });
+
+      try {
+        const request = kibanaSupertest(url).get('/');
+        await Promise.all([request, request]);
+        expect(attempts).toBe(1);
+      } finally {
+        await close();
+      }
+    });
+
+    it('settles an aborted in-flight request instead of hanging', async () => {
+      const { url, close } = await startServer(() => {
+        // never respond
+      });
+
+      try {
+        const request = kibanaSupertest(url).get('/');
+        const settled = request.then(
+          () => 'resolved',
+          (error: { code?: string }) => error.code
+        );
+        setTimeout(() => request.abort(), 100);
+        await expect(settled).resolves.toBe('ABORTED');
+      } finally {
+        await close();
+      }
+    });
+
+    it('does not retry when Retry-After exceeds the remaining budget', async () => {
+      let attempts = 0;
+      const { url, close } = await startServer((_req, res) => {
+        attempts++;
+        overloaded(res, '30');
+      });
+
+      try {
+        await expect(
+          kibanaSupertest(url, undefined, { maxRetryMs: 1000 }).get('/').expect(200)
+        ).rejects.toThrow();
+        expect(attempts).toBe(1);
       } finally {
         await close();
       }
@@ -171,7 +221,7 @@ describe('wrapKibanaSupertestAgent', () => {
       let attempts = 0;
       const { url, close } = await startServer((_req, res) => {
         attempts++;
-        res.writeHead(404);
+        res.writeHead(500);
         res.end();
       });
 
@@ -183,12 +233,12 @@ describe('wrapKibanaSupertestAgent', () => {
       }
     });
 
-    it('does not retry 429s that are not from the ELU rate limiter', async () => {
+    it('does not retry a 429 without the ELU RateLimit header, even with the overload message', async () => {
       let attempts = 0;
       const { url, close } = await startServer((_req, res) => {
         attempts++;
-        res.writeHead(429, { 'Content-Type': 'application/json' });
-        res.end('{"message":"quota"}');
+        res.writeHead(429, { 'Content-Type': 'text/plain' });
+        res.end('Server is overloaded');
       });
 
       try {

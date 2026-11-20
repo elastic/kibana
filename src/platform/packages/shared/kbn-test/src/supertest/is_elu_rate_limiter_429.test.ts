@@ -15,7 +15,6 @@ describe('isEluRateLimiter429', () => {
       isEluRateLimiter429({
         status: 429,
         headers: { RateLimit: '"elu";r=0;t=30' },
-        text: 'Server is overloaded',
       })
     ).toBe(true);
   });
@@ -25,8 +24,13 @@ describe('isEluRateLimiter429', () => {
       isEluRateLimiter429({
         status: 429,
         headers: { 'RateLimit-Limit': '100' },
-        text: 'Too Many Requests',
       })
+    ).toBe(false);
+  });
+
+  it('does not rely on the response body', () => {
+    expect(
+      isEluRateLimiter429({ status: 429, headers: {}, text: 'Server is overloaded' } as never)
     ).toBe(false);
   });
 
@@ -35,7 +39,6 @@ describe('isEluRateLimiter429', () => {
       isEluRateLimiter429({
         status: 503,
         headers: { RateLimit: '"elu";r=0;t=30' },
-        text: 'Server is overloaded',
       })
     ).toBe(false);
   });

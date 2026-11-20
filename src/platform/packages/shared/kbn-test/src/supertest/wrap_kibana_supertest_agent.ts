@@ -25,97 +25,61 @@ export interface WrapKibanaSupertestAgentOptions {
   maxRetryMs?: number;
 }
 
-interface RecordedRequest {
-  verb: (typeof HTTP_VERBS)[number];
-  url: string;
-  /** Every chained call (`.set()`, `.send()`, `.expect()`, ...), replayed as-is on retry. */
-  calls: Array<{ method: string; args: unknown[] }>;
-}
+/** superagent internals we rely on to delay and cancel the built-in resend. */
+type RetryableTest = SupertestTest & {
+  _retry: () => unknown;
+  _maxRetries?: number;
+  _aborted?: boolean;
+};
 
 const HTTP_VERBS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'] as const;
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const replay = (agent: SuperTestClient, { verb, url, calls }: RecordedRequest): SupertestTest =>
-  calls.reduce<SupertestTest>(
-    (test, { method, args }) =>
-      (test as unknown as Record<string, (...a: unknown[]) => SupertestTest>)[method](...args),
-    agent[verb](url)
-  );
-
 /**
- * Runs the request once. A 429 is surfaced as `{ response }` even when an `.expect()` assertion
- * rejected it, since supertest then reports an assertion error without `error.response`.
+ * Uses superagent's own resend (what `.retry()` does) on the same request object, so `.abort()`,
+ * `.end(cb)`, `.expect()` and awaiting more than once keep their usual behavior. Only ELU rate
+ * limiter 429s are retried, honoring `Retry-After` within `maxRetryMs`.
  */
-const runTestOnce = (test: SupertestTest) =>
-  new Promise<{ response?: SupertestResponse; error?: unknown }>((resolve) => {
-    test.end((error, response) => resolve({ response, error }));
-  });
+const retryOnEluRateLimit = (test: SupertestTest, maxRetryMs: number): SupertestTest => {
+  const internals = test as RetryableTest;
+  const originalRetry = internals._retry;
+  let firstLimitedAt: number | undefined;
+  let nextDelayMs = 0;
 
-const runWithEluRetries = async (
-  agent: SuperTestClient,
-  firstTest: SupertestTest,
-  request: RecordedRequest,
-  maxRetryMs: number
-): Promise<SupertestResponse> => {
-  const deadline = Date.now() + maxRetryMs;
-  let test = firstTest;
-
-  while (true) {
-    const { response, error } = await runTestOnce(test);
-    const errorResponse = (error as { response?: EluRateLimitResponseLike } | undefined)?.response;
-    const limited = response ?? errorResponse;
-
+  test.retry(Number.MAX_SAFE_INTEGER, (error, response) => {
+    const limited: EluRateLimitResponseLike | undefined =
+      response ?? (error as { response?: SupertestResponse } | undefined)?.response;
     if (!isEluRateLimiter429(limited)) {
-      if (error) {
-        throw error;
-      }
-      return response as SupertestResponse;
+      return false;
     }
 
-    const remaining = deadline - Date.now();
-    if (remaining <= 0) {
-      if (error) {
-        throw error;
-      }
-      return response as SupertestResponse;
+    const delayMs = getEluRateLimiterRetryDelayMs(limited);
+    const now = Date.now();
+    firstLimitedAt ??= now;
+    if (now + delayMs - firstLimitedAt > maxRetryMs) {
+      return false;
     }
 
-    await sleep(Math.min(getEluRateLimiterRetryDelayMs(limited), remaining));
-    test = replay(agent, request);
-  }
-};
-
-const wrapTest = (
-  agent: SuperTestClient,
-  test: SupertestTest,
-  request: RecordedRequest,
-  maxRetryMs: number
-): SupertestTest =>
-  new Proxy(test, {
-    get(target, prop, receiver) {
-      if (prop === 'then' || prop === 'catch' || prop === 'finally') {
-        const settled = () => runWithEluRetries(agent, target, request, maxRetryMs);
-        return (...handlers: Array<(arg?: never) => unknown>) =>
-          (settled() as unknown as Record<string, (...a: unknown[]) => unknown>)[prop](...handlers);
-      }
-
-      const value = Reflect.get(target, prop, receiver);
-      if (typeof value !== 'function' || typeof prop !== 'string') {
-        return value;
-      }
-
-      return (...args: unknown[]) => {
-        const result = value.apply(target, args);
-        // chainable calls return the same Test; anything else (e.g. `.end()`) passes through
-        if (result !== target) {
-          return result;
-        }
-        request.calls.push({ method: prop, args });
-        return receiver as SupertestTest;
-      };
-    },
+    nextDelayMs = delayMs;
+    return true;
   });
+
+  internals._retry = function delayedRetry() {
+    test.clearTimeout();
+    setTimeout(() => {
+      if (!internals._aborted) {
+        originalRetry.call(internals);
+      }
+    }, nextDelayMs);
+    return internals;
+  };
+
+  // superagent ignores `abort` while retries remain, which would leave an aborted request unsettled
+  test.on('abort', () => {
+    internals._maxRetries = 0;
+  });
+
+  return test;
+};
 
 /** Retries Kibana supertest requests when the ELU HTTP rate limiter returns 429. */
 export const wrapKibanaSupertestAgent = <T extends KibanaSupertestAgent>(
@@ -129,8 +93,7 @@ export const wrapKibanaSupertestAgent = <T extends KibanaSupertestAgent>(
     get(target, prop, receiver) {
       if (typeof prop === 'string' && (HTTP_VERBS as readonly string[]).includes(prop)) {
         const verb = prop as (typeof HTTP_VERBS)[number];
-        return (url: string) =>
-          wrapTest(requestAgent, requestAgent[verb](url), { verb, url, calls: [] }, maxRetryMs);
+        return (url: string) => retryOnEluRateLimit(requestAgent[verb](url), maxRetryMs);
       }
 
       return Reflect.get(target, prop, receiver);
