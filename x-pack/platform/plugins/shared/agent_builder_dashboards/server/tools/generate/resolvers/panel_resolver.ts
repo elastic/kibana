@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import type { ResolvePanelContent } from '@kbn/dashboard-agent-authoring';
+import {
+  createPanelContentResolver,
+  type ResolvePanelContent,
+} from '@kbn/dashboard-agent-authoring';
 import { createVisPanelResolver, type VisPanelResolverDeps } from './vis_panel_resolver';
 import { createCustomContentPanelResolver } from './custom_content_panel_resolver';
 
 /**
- * Default implementation of dashboard authoring's `ResolvePanelContent` seam:
- * routes each panel request to the resolver for its `renderer`.
+ * Default implementation of dashboard authoring's `ResolvePanelContent` seam: the executor of
+ * each request panel kind, keyed by its `type`.
  */
 export const createPanelResolver = (deps: VisPanelResolverDeps): ResolvePanelContent => {
   const resolveVisPanel = createVisPanelResolver(deps);
   const resolveCustomContentPanel = createCustomContentPanelResolver(deps);
 
-  return (request) =>
-    request.renderer === 'custom_content'
-      ? resolveCustomContentPanel(request)
-      : resolveVisPanel(request);
+  return createPanelContentResolver({
+    vis: resolveVisPanel,
+    vega: resolveVisPanel,
+    custom_content: resolveCustomContentPanel,
+  });
 };

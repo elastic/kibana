@@ -289,7 +289,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider<Provi
     }
 
     this.logger.debug('Login has been performed with OpenID Connect response.');
-    return AuthenticationResult.redirectTo(stateRedirectURL, {
+    return AuthenticationResult.redirectTo(this.getInternalRedirectURL(request, stateRedirectURL), {
       user: this.authenticationInfoToAuthenticatedUser(result.authentication),
       userProfileGrant: { type: 'accessToken', accessToken: result.access_token },
       state: {
@@ -504,7 +504,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider<Provi
       return this.initiateOIDCAuthentication(
         request,
         { realm: this.realm },
-        `${this.options.getRequestOriginalURL(request)}${originalURLHash}`
+        this.getRequestOriginalURLWithHash(request, originalURLHash)
       );
     }
 

@@ -64,6 +64,7 @@ describe('UiamAPIKeys', () => {
       grantApiKey: jest.fn(),
       revokeApiKey: jest.fn(),
       convertApiKeys: jest.fn(),
+      getApiKeyCreator: jest.fn(),
       exchangeOAuthToken: jest.fn(),
       createServiceAccount: jest.fn(),
       listServiceAccounts: jest.fn(),
@@ -81,6 +82,7 @@ describe('UiamAPIKeys', () => {
       revokeOAuthConnection: jest.fn(),
       deleteOAuthConnection: jest.fn(),
       resolveUsers: jest.fn(),
+      checkAuthorization: jest.fn(),
     };
 
     // Defaults to a session-authenticated user, which is not an API key and therefore still needs

@@ -12,6 +12,13 @@ import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common
 import type { AutomationBlockingLimit } from '../utils/filter_automations';
 import { globalLimitLabels } from './translations';
 
+const getBody = (group: AutomationBlockingLimit, limit: number): string => {
+  if (group === 'total_investigation') {
+    return limit === 0 ? globalLimitLabels.zeroTotalBody : globalLimitLabels.totalBody;
+  }
+  return limit === 0 ? globalLimitLabels.zeroBody : globalLimitLabels.body;
+};
+
 export const GlobalLimitCallout = ({
   group,
   limit,
@@ -29,7 +36,7 @@ export const GlobalLimitCallout = ({
         ? globalLimitLabels.getTotalTitle(limit)
         : globalLimitLabels.getTitle(limit)
     }
-    text={group === 'total_investigation' ? globalLimitLabels.totalBody : globalLimitLabels.body}
+    text={getBody(group, limit)}
     actionProps={
       settingsHref
         ? {

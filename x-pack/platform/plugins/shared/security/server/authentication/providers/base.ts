@@ -12,11 +12,14 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import { deepFreeze } from '@kbn/std';
+import { deepFreeze, isInternalURL } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser } from '../../../common';
-import { KIBANA_AUTH_FULL_HEADER } from '../../../common/constants';
+import {
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+  KIBANA_AUTH_FULL_HEADER,
+} from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import type { SessionValue } from '../../session_management';
 import type { UiamServicePublic } from '../../uiam';
@@ -76,6 +79,62 @@ const USER_PROPERTIES_NOT_AVAILABLE_IN_MIN_AUTHC_MODE = new Set([
   'lookup_realm',
   'authentication_type',
 ]);
+
+/**
+ * Marks the "minimal" authentication user proxy, so that callers can tell it apart without
+ * touching the properties that throw.
+ */
+const MINIMALLY_AUTHENTICATED_USER = Symbol('minimallyAuthenticatedUser');
+
+/**
+ * Checks whether the user comes from "minimal" authentication and lacks the realm, lookup realm,
+ * authentication type, and Elastic Cloud user properties.
+ */
+export const isMinimallyAuthenticatedUser = (user: AuthenticatedUser): boolean =>
+  (user as AuthenticatedUser & { [MINIMALLY_AUTHENTICATED_USER]?: boolean })[
+    MINIMALLY_AUTHENTICATED_USER
+  ] === true;
+
+/**
+ * Creates the user for a "minimal" authentication request from the session alone, without calling Elasticsearch.
+ */
+export const createMinimallyAuthenticatedUser = (session: SessionValue) => {
+  // We can retrieve only a portion of user properties from the session, and these are relatively safe to use without
+  // re-validation. However, `elastic_cloud_user`, `authentication_realm`, `lookup_realm`, `authentication_type`,
+  // and `roles` are not available in this mode, accessing them should throw an error. Currently, audit logs rely on
+  // `roles` property being present on the user object. We should probably refactor audit logs to avoid using `roles`
+  // property for minimally authenticated users and then remove this property altogether and throw for its access.
+  const minUserStub: Partial<AuthenticatedUser> = {
+    enabled: true,
+    username: session.username,
+    authentication_provider: session.provider,
+    profile_uid: session.userProfileId,
+    // TODO: Currently audit logs rely on `roles` property being present on the user object.
+    // We should probably refactor audit logs to avoid using `roles` property for minimally
+    // authenticated users and then remove this property altogether and throw for its access.
+    roles: [],
+    // Minimally-authenticated users are authenticated via session cookie, not HTTP credentials.
+    http_authentication_scheme: null,
+  };
+
+  return deepFreeze(
+    new Proxy(minUserStub as AuthenticatedUser, {
+      get: (target, prop, receiver) => {
+        if (prop === MINIMALLY_AUTHENTICATED_USER) {
+          return true;
+        }
+
+        const value = Reflect.get(target, prop, receiver);
+        if (USER_PROPERTIES_NOT_AVAILABLE_IN_MIN_AUTHC_MODE.has(prop.toString())) {
+          throw new Error(
+            `Property "${String(prop)}" is not available for minimally authenticated users.`
+          );
+        }
+        return value;
+      },
+    })
+  );
+};
 
 /**
  * Base class that all authentication providers should extend.
@@ -193,7 +252,7 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
       request.headers[KIBANA_AUTH_FULL_HEADER] !== 'true'
     ) {
       this.logger.debug(`Performing "minimal" authentication for request ${request.url.pathname}.`);
-      return this.getMinAuthenticationUserProxy(session);
+      return createMinimallyAuthenticatedUser(session);
     }
 
     return this.authenticationInfoToAuthenticatedUser(
@@ -204,6 +263,41 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
         .asScoped(authHeaders ? { headers: { ...request.headers, ...authHeaders } } : request)
         .asCurrentUser.security.authenticate()
     );
+  }
+
+  /**
+   * Returns the original request URL with the URL hash fragment captured on the client side and
+   * passed to the server via the `auth_url_hash` query string parameter.
+   * @param request Request instance.
+   * @param urlHash Value of the `auth_url_hash` query string parameter.
+   */
+  protected getRequestOriginalURLWithHash(request: KibanaRequest, urlHash: string) {
+    // The client-side capture URL app always sends either an empty string or a hash fragment.
+    const isURLHashFragment = urlHash === '' || urlHash.startsWith('#');
+    if (!isURLHashFragment) {
+      this.logger.warn(
+        `"${AUTH_URL_HASH_QUERY_STRING_PARAMETER}" is not a URL hash fragment and will be ignored.`
+      );
+    }
+
+    return this.getInternalRedirectURL(
+      request,
+      `${this.options.getRequestOriginalURL(request)}${isURLHashFragment ? urlHash : ''}`
+    );
+  }
+
+  /**
+   * Returns the specified URL if it's a Kibana internal URL, or the base path URL otherwise.
+   * @param request Request instance.
+   * @param redirectURL URL user is supposed to be redirected to.
+   */
+  protected getInternalRedirectURL(request: KibanaRequest, redirectURL: string) {
+    if (isInternalURL(redirectURL, this.options.basePath.serverBasePath)) {
+      return redirectURL;
+    }
+
+    this.logger.warn('Redirect URL is not a valid Kibana internal URL, using base path instead.');
+    return `${this.options.basePath.get(request)}/`;
   }
 
   /**
@@ -220,39 +314,5 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
         authenticationInfo.authentication_realm.name === ELASTIC_CLOUD_SSO_REALM_NAME,
       http_authentication_scheme: null,
     } as AuthenticatedUser);
-  }
-
-  private getMinAuthenticationUserProxy(session: SessionValue) {
-    // We can retrieve only a portion of user properties from the session, and these are relatively safe to use without
-    // re-validation. However, `elastic_cloud_user`, `authentication_realm`, `lookup_realm`, `authentication_type`,
-    // and `roles` are not available in this mode, accessing them should throw an error. Currently, audit logs rely on
-    // `roles` property being present on the user object. We should probably refactor audit logs to avoid using `roles`
-    // property for minimally authenticated users and then remove this property altogether and throw for its access.
-    const minUserStub: Partial<AuthenticatedUser> = {
-      enabled: true,
-      username: session.username,
-      authentication_provider: session.provider,
-      profile_uid: session.userProfileId,
-      // TODO: Currently audit logs rely on `roles` property being present on the user object.
-      // We should probably refactor audit logs to avoid using `roles` property for minimally
-      // authenticated users and then remove this property altogether and throw for its access.
-      roles: [],
-      // Minimally-authenticated users are authenticated via session cookie, not HTTP credentials.
-      http_authentication_scheme: null,
-    };
-
-    return deepFreeze(
-      new Proxy(minUserStub as AuthenticatedUser, {
-        get: (target, prop, receiver) => {
-          const value = Reflect.get(target, prop, receiver);
-          if (USER_PROPERTIES_NOT_AVAILABLE_IN_MIN_AUTHC_MODE.has(prop.toString())) {
-            throw new Error(
-              `Property "${String(prop)}" is not available for minimally authenticated users.`
-            );
-          }
-          return value;
-        },
-      })
-    );
   }
 }

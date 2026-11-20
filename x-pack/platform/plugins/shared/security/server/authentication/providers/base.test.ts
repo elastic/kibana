@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
-import { BaseAuthenticationProvider } from './base';
+import { BaseAuthenticationProvider, isMinimallyAuthenticatedUser } from './base';
 import {
   mockAuthenticationProviderOptions,
   type MockAuthenticationProviderOptions,
@@ -101,6 +101,15 @@ describe('BaseAuthenticationProvider', () => {
             `Property "${prop}" is not available for minimally authenticated users.`
           );
         }
+      });
+
+      it('marks the user proxy as minimally authenticated', async () => {
+        const session = sessionMock.createValue({ username: 'testuser' });
+        const request = createMinimalAuthcRequest();
+
+        const user = await provider.getUserPublic(request, undefined, session);
+
+        expect(isMinimallyAuthenticatedUser(user)).toBe(true);
       });
 
       it('returns a frozen user proxy', async () => {
@@ -200,6 +209,7 @@ describe('BaseAuthenticationProvider', () => {
 
         expect(mockOptions.client.asScoped).toHaveBeenCalled();
         expect(user.username).toBe(esUser.username);
+        expect(isMinimallyAuthenticatedUser(user)).toBe(false);
       });
 
       it('uses original request when no auth headers are provided', async () => {

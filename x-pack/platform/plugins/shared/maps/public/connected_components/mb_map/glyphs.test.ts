@@ -30,7 +30,7 @@ const mockedFetch = jest.spyOn(global, 'fetch');
 
 describe('EMS enabled', () => {
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     require('../../kibana_services').getEMSSettings = () => {
       return {
         getEMSFontLibraryUrl: () => {
@@ -93,7 +93,7 @@ describe('EMS enabled', () => {
 
 describe('EMS disabled', () => {
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     require('../../kibana_services').getEMSSettings = () => {
       return {
         getEMSFontLibraryUrl: () => {
