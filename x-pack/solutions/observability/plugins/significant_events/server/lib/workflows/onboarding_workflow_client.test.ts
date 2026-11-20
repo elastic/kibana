@@ -489,6 +489,79 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
   });
 
+  describe('a duplicate run dropped by the concurrency limit', () => {
+    // Reconciliation's run was dropped while the continuous onboarding run held the slot, so the
+    // newest execution of the source never ran. It must not hide the run that did.
+    const droppedAfterCompleted = () => {
+      const executions = [
+        {
+          id: 'dropped-duplicate',
+          status: ExecutionStatus.SKIPPED,
+          startedAt: '2026-11-19T08:17:48.000Z',
+          concurrencyGroupKey: onboardingKeyOf('logs.nginx'),
+        },
+        {
+          id: 'real-run',
+          status: ExecutionStatus.COMPLETED,
+          startedAt: '2026-11-19T08:17:45.000Z',
+          concurrencyGroupKey: onboardingKeyOf('logs.nginx'),
+        },
+      ];
+      // Like the list API: newest first, narrowed by the statuses the caller asks for, and one
+      // execution per group when the caller collapses by concurrency group key.
+      return jest.fn(
+        async ({ statuses, collapse }: { statuses?: ExecutionStatus[]; collapse?: string }) => {
+          const matching = executions.filter(
+            ({ status }) => statuses === undefined || statuses.includes(status)
+          );
+          return { results: collapse ? matching.slice(0, 1) : matching };
+        }
+      );
+    };
+
+    it('reports the run that executed for one source', async () => {
+      const { client } = createClient({ getWorkflowExecutions: droppedAfterCompleted() });
+
+      const result = await client.getStatus({ request: statusRequest, sourceId: 'logs.nginx' });
+
+      expect(result).toMatchObject({
+        status: SignificantEventsWorkflowStatus.Completed,
+        executionId: 'real-run',
+      });
+    });
+
+    it('reports the run that executed in the status of many sources', async () => {
+      const { client } = createClient({ getWorkflowExecutions: droppedAfterCompleted() });
+
+      const result = await client.getStatuses({
+        request: statusRequest,
+        sources: [{ id: 'logs.nginx', slug: slugOf('logs.nginx') }],
+      });
+
+      expect(result['logs.nginx']).toMatchObject({
+        status: SignificantEventsWorkflowStatus.Completed,
+        executionId: 'real-run',
+      });
+    });
+
+    it('leaves a source whose only run was dropped as not started', async () => {
+      const { client } = createClient({
+        getWorkflowExecutions: jest.fn(async ({ statuses }: { statuses?: ExecutionStatus[] }) => ({
+          results: [{ id: 'dropped-duplicate', status: ExecutionStatus.SKIPPED }].filter(
+            ({ status }) => statuses === undefined || statuses.includes(status)
+          ),
+        })),
+      });
+
+      const result = await client.getStatus({ request: statusRequest, sourceId: 'logs.nginx' });
+
+      expect(result).toEqual({
+        status: SignificantEventsWorkflowStatus.NotStarted,
+        executionId: null,
+      });
+    });
+  });
+
   describe('getStatuses', () => {
     const source = (id: string) => ({ id, slug: slugOf(id) });
 

@@ -255,6 +255,11 @@ export const parseSourceFromKiConcurrencyKey = (key: string): ISourceRunIdentity
 
 export const MAX_SOURCES_PER_QUERY = 10000;
 
+/**
+ * Every status but `skipped`. A skipped execution was dropped by the concurrency limit while another
+ * run held the slot, so it never ran: as the newest execution it would hide the run that did, and
+ * show a completed source as cancelled.
+ */
 const EXECUTED_STATUSES = Object.values(ExecutionStatus).filter(
   (status) => status !== ExecutionStatus.SKIPPED
 );
@@ -433,7 +438,10 @@ export class SignificantEventsKIsOnboardingClient {
     const result = await this.workflowExecutionService.getStatus({
       request,
       spaceId: request.spaceId,
-      queryParams: { concurrencyGroupKey: buildConcurrencyKey({ sourceId, sourceSlug: slug }) },
+      queryParams: {
+        concurrencyGroupKey: buildConcurrencyKey({ sourceId, sourceSlug: slug }),
+        statuses: EXECUTED_STATUSES,
+      },
       ignoreStartedBefore: queryUpdatedAt,
     });
 
@@ -726,10 +734,14 @@ export class SignificantEventsKIsOnboardingClient {
    * execution wins per source: a currently running execution has no
    * finishedAt, and sorting by finishedAt would hide it behind an older
    * completed run, breaking the "already running" classification.
+   *
+   * Skipped executions are left out, so a duplicate dropped by the concurrency limit neither hides
+   * the run that executed nor counts as an onboarding attempt in the eligibility check.
    */
   async getRecentExecutions(request: KibanaRequest): Promise<WorkflowExecutionListItemDto[]> {
     const { results } = await this.workflowExecutionService.getExecutions(
       {
+        statuses: EXECUTED_STATUSES,
         size: MAX_SOURCES_PER_QUERY,
         sortField: 'createdAt',
         sortOrder: 'desc',
