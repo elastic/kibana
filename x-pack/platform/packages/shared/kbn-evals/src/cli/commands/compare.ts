@@ -64,8 +64,9 @@ export const compareCmd = {
                                     Exit codes: 0 passed, 1 usage or unexpected error, 2
                                     inconclusive or not evaluated (no baseline, no scores or
                                     pairs, nothing checkable, no evaluator matched), 3
-                                    significant regression. Pairs per example: repetitions are
-                                    averaged over the count both runs share
+                                    significant regression. Pairs per example. With
+                                    --repetition-policy mean, repetitions are averaged over
+                                    the count both runs share
     --regression-evaluators         Comma-separated evaluator names that can trip the gate
                                     (default: all). Names absent from the
                                     comparison warn; if none match, the run fails.
