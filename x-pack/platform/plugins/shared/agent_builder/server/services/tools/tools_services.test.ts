@@ -45,6 +45,7 @@ describe('ToolsService', () => {
             opik_distributed_tracing: false,
           },
           decisionModel: {
+            triggerThreshold: 0.5,
             decisionModelTimeoutMs: 1000,
             fastModelTimeoutMs: 2000,
             unavailableTtlMs: 3600000,
@@ -70,6 +71,7 @@ describe('ToolsService', () => {
             opik_distributed_tracing: false,
           },
           decisionModel: {
+            triggerThreshold: 0.5,
             decisionModelTimeoutMs: 1000,
             fastModelTimeoutMs: 2000,
             unavailableTtlMs: 3600000,

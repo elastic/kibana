@@ -40,6 +40,7 @@ export const configSchema = schema.object({
    */
   decisionModel: schema.object({
     inferenceId: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
+    triggerThreshold: schema.number({ defaultValue: 0.5, min: 0, max: 1 }),
     /** How long the Elasticsearch `decision` task gets before the next provider is tried. */
     decisionModelTimeoutMs: schema.number({ defaultValue: 1000, min: 100, max: 30000 }),
     /** How long the fast model gets: an LLM call is slower than a decision model. */

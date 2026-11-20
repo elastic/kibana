@@ -38,12 +38,16 @@ import { conversePayloadSchema } from './chat';
 
 export const chatPayloadSchema = conversePayloadSchema.extends({
   trigger_mode: schema.oneOf(
-    [schema.literal(ChatTriggerMode.Always), schema.literal(ChatTriggerMode.Never)],
+    [
+      schema.literal(ChatTriggerMode.Always),
+      schema.literal(ChatTriggerMode.Never),
+      schema.literal(ChatTriggerMode.Auto),
+    ],
     {
       defaultValue: ChatTriggerMode.Always,
       meta: {
         description:
-          'Use never to append a user message without executing the agent. The message is added to the conversation named by conversation_id, or to a conversation created for it when conversation_id is omitted. Only conversation_id, input and attachments are read; the execution options are ignored.',
+          'Use never to append a user message without executing the agent. The message is added to the conversation named by conversation_id, or to a conversation created for it when conversation_id is omitted. Only conversation_id, input and attachments are read; the execution options are ignored. Use auto in a shared conversation to let a decision model choose whether the agent responds; it falls back to always when no decision is available.',
       },
     }
   ),

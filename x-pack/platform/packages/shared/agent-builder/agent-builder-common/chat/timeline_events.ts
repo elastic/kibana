@@ -78,11 +78,13 @@ export const getEventActorDisplayName = (actor: EventActor): string | undefined 
 
 /**
  * Whether a chat request executes the agent. `never` appends the user message to the conversation
- * and returns, leaving the execution options unused.
+ * and returns, leaving the execution options unused. `auto` lets a decision model choose between
+ * the two in a shared conversation, and behaves as `always` everywhere else.
  */
 export enum ChatTriggerMode {
   Always = 'always',
   Never = 'never',
+  Auto = 'auto',
 }
 
 /**
