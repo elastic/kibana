@@ -29,6 +29,7 @@ export class MetricsExemplarsPlugin
     lens.registerXYOverlayProvider(
       createExemplarsOverlayProvider({
         isEnabled: () => this.isExemplarsEnabled,
+        getActiveSolution: () => this.coreStart?.chrome.getActiveSolutionNavId() ?? null,
         onExemplarClick: (exemplar) => {
           void this.openExemplarFlyout(exemplar);
         },

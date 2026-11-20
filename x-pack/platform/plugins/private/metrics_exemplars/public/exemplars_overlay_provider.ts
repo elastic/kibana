@@ -6,7 +6,7 @@
  */
 
 import { EsqlQuery, isFunctionExpression, isIdentifier } from '@elastic/esql';
-import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { ChromeStart, KibanaExecutionContext } from '@kbn/core/public';
 import { SettingNames } from '@kbn/esql-language';
 import { i18n } from '@kbn/i18n';
 import {
@@ -28,6 +28,10 @@ const SUPPORTED_SURFACES: ReadonlyArray<Pick<KibanaExecutionContext, 'type' | 'n
   { type: 'discover', name: 'unified_histogram' },
   { type: 'dashboard' },
 ];
+
+type ActiveSolution = ReturnType<ChromeStart['getActiveSolutionNavId']>;
+
+const SUPPORTED_SOLUTIONS: readonly ActiveSolution[] = ['oblt'];
 
 const EXEMPLARS_LIMIT = 1000;
 
@@ -72,11 +76,13 @@ export const getExemplarsQuery = (esql: string): string =>
 interface CreateExemplarsOverlayProviderParams {
   /** Latest value of the feature flag; read on every chart load, so a change applies on the next reload. */
   readonly isEnabled: () => boolean;
+  readonly getActiveSolution: () => ActiveSolution;
   readonly onExemplarClick: (exemplar: Exemplar) => void;
 }
 
 export const createExemplarsOverlayProvider = ({
   isEnabled,
+  getActiveSolution,
   onExemplarClick,
 }: CreateExemplarsOverlayProviderParams): LensXYOverlayProvider => {
   /**
@@ -90,6 +96,7 @@ export const createExemplarsOverlayProvider = ({
     id: EXEMPLARS_OVERLAY_PROVIDER_ID,
     isApplicable: ({ executionContext }, { esql }) =>
       isEnabled() &&
+      SUPPORTED_SOLUTIONS.includes(getActiveSolution()) &&
       isSupportedSurface(executionContext) &&
       esql !== undefined &&
       isExemplarsQuery(esql),
