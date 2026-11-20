@@ -10,16 +10,21 @@ import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { buildAlertRecoveredFollowUpMessage } from '@kbn/nightshift-investigations-plugin/server/client/build_investigation_message';
 import type { InvestigationExample } from '../investigation/types';
 
+const ISO_DATE_TIME_WITH_ZONE =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})$/;
+
 const recoveryAlertSchema = lazySchema(() =>
   z.object({
     alertUuid: z.string().min(1).max(500),
     alertId: z.string().min(1).max(500),
     alertStart: z.string().max(100).optional(),
-    // The recovery time anchors what the agent may query, so a case without a real one is rejected.
+    // The recovery time anchors what the agent may query, so it must be a date-time with a timezone:
+    // a date alone would leave the cutoff to a guess.
     recoveredAt: z
       .string()
       .max(100)
-      .refine((value) => !Number.isNaN(Date.parse(value)), 'recoveredAt must be a date'),
+      .regex(ISO_DATE_TIME_WITH_ZONE, 'recoveredAt must be a date-time with a timezone')
+      .refine((value) => !Number.isNaN(Date.parse(value)), 'recoveredAt must be a real date'),
     ruleId: z.string().max(500).optional(),
     ruleName: z.string().max(500).optional(),
     ruleTypeId: z.string().max(500).optional(),

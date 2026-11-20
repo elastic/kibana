@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { EvidenceRound } from '@kbn/evals-plugin/server';
-import { recoveryCausalChecklistJudge } from './causal_checklist';
+import { recoveryCausalChecklistJudge, recoveryReferenceDataSchema } from './causal_checklist';
 import { recoveryEvidenceFamiliesJudge } from './evidence_families';
 import { recoveryRootCauseEvidenceJudge } from './root_cause_evidence';
 import { CAUSAL_STRATEGY_IDS, applyCitationRule } from './strategies';
@@ -50,6 +50,13 @@ const evaluate = (
     inferenceClient,
     log: loggingSystemMock.createLogger(),
   });
+
+describe('recoveryReferenceDataSchema', () => {
+  it('accepts a recovery that sends no reference data, which has no earlier round to pass', () => {
+    expect(recoveryReferenceDataSchema.safeParse(undefined).success).toBe(true);
+    expect(recoveryReferenceDataSchema.safeParse({ earlier_rounds: ['a'] }).success).toBe(true);
+  });
+});
 
 describe('applyCitationRule', () => {
   const ran = (id: string, step: number) => ({ id, status: 'ran' as const, step, note: '' });

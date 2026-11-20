@@ -26,8 +26,10 @@ import {
 export const RECOVERY_CHECKLIST_SCORE = 'recovery_checklist';
 
 /** The earlier rounds' answers the scored round is judged against, from the conversation. */
+// Defaults to an empty object: a recovery with no earlier round and no closing reasoning sends no
+// reference data, which must not make the evals service refuse the whole set.
 export const recoveryReferenceDataSchema = lazySchema(() =>
-  z.object({ earlier_rounds: z.array(z.string()).optional() })
+  z.object({ earlier_rounds: z.array(z.string()).optional() }).default({})
 );
 
 type RecoveryReferenceData = z.infer<typeof recoveryReferenceDataSchema>;

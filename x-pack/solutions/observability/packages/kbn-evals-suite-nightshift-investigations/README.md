@@ -335,11 +335,11 @@ route's 10,000-character limit. The earlier round (request, numbered steps, answ
 investigator as `context.earlier_round`, because it does not fit in that message; the eval cannot
 write a native two-round conversation.
 
-The `customer0-recovery` tag ends the agent's queries at the recovery time, which keeps a later
-re-fire or fix out of the verdict, and forbids it chat and incident records. Because those records
-are off limits here, the eval's evidence-families judge leaves that family out; the online judge, in
-production, counts it. `rca_anti_leakage` is excluded from this eval, since a recovery round is
-meant to read the alert's whole earlier lifetime.
+The `customer0-recovery` tag holds the agent to evidence from within an hour of the recovery, and
+forbids it chat and incident records. Because those records are off limits here, the eval's
+evidence-families judge leaves that family out; the online judge, in production, counts it.
+`rca_anti_leakage` is excluded from this eval: it scores evidence after the recovery as leakage,
+which the guardrail's extra hour allows and a recovery round is meant to read.
 
 The examples hold customer telemetry, so they are not in the repository. The dataset file is JSON
 with the shape the run validates:

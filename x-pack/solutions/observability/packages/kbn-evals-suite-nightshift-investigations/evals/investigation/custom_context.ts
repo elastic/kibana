@@ -30,11 +30,11 @@ export const RETROSPECTIVE_GUARDRAIL_CONTEXT =
 
 /**
  * Recovery cases replay the round that follows an alert's recovery. The recovery is in the past, so
- * the agent's present is the recovery time: queries end there, which keeps a later re-fire or fix out
- * of the verdict while leaving the alert's whole earlier lifetime in reach.
+ * the agent is held to the evidence that existed within an hour of it, which keeps a later
+ * re-fire or fix out of the verdict while leaving the alert's whole lifetime in reach.
  */
 export const RECOVERY_GUARDRAIL_CONTEXT =
-  "Evaluation guardrail: this alert recovered in the past. Treat the recovery's timestamp as the present: end every telemetry query at that timestamp, and use only evidence that existed then. Everything before it, including the alert's whole earlier lifetime, stays readable. Whether the alert re-opened after the recovery is unknown to you; say so instead of guessing. Do not read human discussion of this incident (Slack or chat threads, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the recovery. Code, commits, deploys and config changes from before the recovery are fair game.";
+  "Evaluation guardrail: this alert recovered in the past. Treat the recovery's timestamp as the present, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the recovery; the alert's whole earlier lifetime stays readable. Do not read human discussion of this incident (Slack or chat threads, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the recovery. Code, commits, deploys and config changes from before the recovery are fair game.";
 
 /** ORCA's environment is built on the upstream demo at this commit (paper, Appendix I). */
 export const ORCA_DEMO_COMMIT = 'fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733';

@@ -45,10 +45,15 @@ describe('readRecoveryExamplesFile', () => {
     ).toThrow();
   });
 
-  it('rejects a case without a real recovery time', () => {
+  it('rejects a case without a recovery date-time that has a timezone', () => {
     const { alert } = makeExample('a').input;
 
-    for (const recoveredAt of [undefined, 'sometime yesterday']) {
+    for (const recoveredAt of [
+      undefined,
+      'sometime yesterday',
+      '2026-11-12',
+      '2026-11-12T09:17:53',
+    ]) {
       const example = makeExample('a');
       example.input.alert = { ...alert, recoveredAt } as typeof alert;
 
