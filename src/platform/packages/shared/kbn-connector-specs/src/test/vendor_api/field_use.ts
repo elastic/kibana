@@ -26,6 +26,12 @@ export interface FieldUse {
    * elements; a GraphQL response has nothing else.
    */
   readonly selected: Set<string>;
+  /**
+   * GraphQL only: the fields the query selects under another name, as `alias path=field name`,
+   * the path being the response keys from the root field, so what a handler reads under an alias
+   * can be traced to the field.
+   */
+  readonly aliased: Set<string>;
 }
 
 export const createFieldUse = (): FieldUse => ({
@@ -34,6 +40,7 @@ export const createFieldUse = (): FieldUse => ({
   returned: new Set(),
   sent: new Set(),
   selected: new Set(),
+  aliased: new Set(),
 });
 
 // Properties that every object answers, or that runtimes and test tools ask for; not fields.

@@ -576,3 +576,71 @@ describe('recordActions with a GraphQL spec', () => {
     });
   });
 });
+
+describe('recordActions with GraphQL aliases, fragments, nested arguments and GET requests', () => {
+  const GRAPHQL = 'https://api.example.com/graphql';
+  const sdl = `
+    type Query { items(limit: Int): [Item!]! }
+    type Item { id: ID!, name: String!, updates(limit: Int = 5, source: Source): [String!] }
+    enum Source { X, Y }
+  `;
+  const post = (query: string, variables?: Record<string, unknown>) =>
+    action(z.object({}), async ({ client }) => {
+      const { data } = await client.post(GRAPHQL, { query, variables });
+      return data.data;
+    });
+  const graphqlConnector: ConnectorSpec = {
+    ...connector,
+    auth: { types: ['none'] },
+    actions: {
+      // Reads the response by the alias the query gave, and sends an argument below the root
+      aliased: action(z.object({}), async ({ client }) => {
+        const { data } = await client.post(GRAPHQL, {
+          query: 'query { items { label: name updates(limit: 2, source: X) } }',
+        });
+        return data.data.items.map(({ label }: { label: string }) => label);
+      }),
+      // The root field is selected under fragments, inline and named
+      rootFragment: post(
+        'query { ... on Query { ...Root } } fragment Root on Query { items { id } }'
+      ),
+      // The variables of a nested argument
+      variables: post('query Q($limit: Int) { items { updates(limit: $limit) } }', { limit: 3 }),
+      // A query in the URL of a GET
+      viaGet: action(z.object({}), async ({ client }) => {
+        const { data } = await client.get(GRAPHQL, {
+          params: {
+            query: 'query($limit: Int) { items(limit: $limit) { name } }',
+            variables: JSON.stringify({ limit: 1 }),
+          },
+        });
+        return data.data.items.map(({ name }: { name: string }) => name);
+      }),
+    },
+  };
+
+  it('records aliases, selections under root fragments, nested arguments and GET queries', async () => {
+    const recording = await recordActions({
+      connector: graphqlConnector,
+      specs: { api: { format: 'graphql', sdl, endpoints: [GRAPHQL] } },
+      trackFields: true,
+    });
+
+    expect(recording.findings).toEqual([]);
+    const use = (name: string) => recording.fieldUse?.[name]['api QUERY items'];
+    expect(use('aliased')).toMatchObject({
+      read: ['items', 'items/label'],
+      selected: ['name', 'updates'],
+      // The key a handler reads, and the field it stands for
+      aliased: ['label=name'],
+      sent: ['updates(limit:)', 'updates(source:)'],
+    });
+    expect(use('rootFragment')).toMatchObject({ selected: ['id'] });
+    expect(use('variables')).toMatchObject({ sent: ['updates(limit:)'] });
+    expect(use('viaGet')).toMatchObject({
+      read: ['items', 'items/name'],
+      selected: ['name'],
+      sent: ['limit'],
+    });
+  });
+});

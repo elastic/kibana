@@ -73,6 +73,8 @@ export interface RecordedFieldUse {
   readonly sent?: readonly string[];
   /** GraphQL only: the fields its queries select; left out when none. */
   readonly selected?: readonly string[];
+  /** GraphQL only: the fields its queries select under an alias, as `path=field`; left out when none. */
+  readonly aliased?: readonly string[];
 }
 
 export interface RequestedPath {
@@ -532,6 +534,7 @@ export const recordActions = async ({
                     returned: sortedList(use.returned),
                     ...(use.sent.size > 0 ? { sent: sortedList(use.sent) } : {}),
                     ...(use.selected.size > 0 ? { selected: sortedList(use.selected) } : {}),
+                    ...(use.aliased.size > 0 ? { aliased: sortedList(use.aliased) } : {}),
                   },
                 ])
               ),

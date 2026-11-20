@@ -754,8 +754,6 @@ GraphQL APIs are recorded against their schema: `--format name=graphql` marks th
 node scripts/connector_vendor_api --connector monday_com --source "v2=https://api.monday.com/v2/get_schema?format=sdl" --format v2=graphql --endpoint v2=https://api.monday.com/v2
 ```
 
-A GraphQL root field is recorded like an operation, with its operation type as the method and its name as the path (`{ "method": "query", "path": "items" }`), and field use splits each response by the root fields the query selects. GraphQL sources take no overlay corrections or pagination declarations yet, and `--inspect` doesn't read them.
-
 The folder holds:
 
 - `manifest.json`: the sources and the operations each action calls.
@@ -866,6 +864,7 @@ node scripts/connector_vendor_api --connector monday_com \
 ```
 
 - A `graphql` source's URL serves SDL or an introspection result, and an `mcp` source's serves a `tools/list` result, wrapped in JSON-RPC or not. The URL is only read with `GET`, so a server that needs an introspection request or an MCP session, or credentials, is captured once and served from a file.
+- GraphQL sources take no overlay corrections or pagination declarations yet.
 - `--inspect` skips these sources, as it reads OpenAPI operations.
 - A `read` action may call GraphQL queries and MCP tools annotated `readOnlyHint`. Anything else needs a `{ "name": "..." }` entry in the action's `queries` in `fixtures.json`, which says it changes no vendor state.
 - `--drift` classifies changes to the operations the connector calls, as `oasdiff` does for OpenAPI. A response that widens is breaking, as a connector reading it may not handle the new value: for GraphQL a new value of an enum a response can hold, or a new union member (`findSchemaChanges`), and for MCP a new output enum value. New optional input is non-breaking, as is a new value of an enum only requests send. An MCP tool losing its `readOnlyHint` is breaking, as read actions may only call read-only tools. Any other change to an MCP schema, such as a tighter bound, is treated as breaking.

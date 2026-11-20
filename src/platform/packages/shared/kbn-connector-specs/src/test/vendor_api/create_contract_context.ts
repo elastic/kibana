@@ -171,6 +171,20 @@ const parseJsonBody = (data: unknown): unknown => {
   }
 };
 
+// A GraphQL request carries its query in the body of a POST, and in the URL of a GET, with the
+// variables as JSON.
+const graphQLRequestOf = (method: string | undefined, body: unknown, url: URL): unknown => {
+  if (method?.toLowerCase() !== 'get') {
+    return body;
+  }
+  const variables = url.searchParams.get('variables');
+  return {
+    query: url.searchParams.get('query') ?? undefined,
+    operationName: url.searchParams.get('operationName') ?? undefined,
+    variables: variables === null ? undefined : parseJsonBody(variables),
+  };
+};
+
 // Not a jest mock, so the vendor API recorder can run outside jest.
 const silentLogger: Logger = {
   trace: () => {},
@@ -318,9 +332,14 @@ export const createContractContext = async ({
     }
     // A GraphQL response answers each root field the query selects, under its alias.
     if (isGraphQLOperation(matched)) {
+      const request = graphQLRequestOf(
+        response.config.method,
+        parseJsonBody(response.config.data),
+        new URL(client.getUri(response.config))
+      );
       return {
         ...response,
-        data: trackGraphQLFieldUse(response.data, parseJsonBody(response.config.data), (field) =>
+        data: trackGraphQLFieldUse(response.data, request, (field) =>
           trackFields({ ...field, source: matched.source })
         ),
       };

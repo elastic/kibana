@@ -670,6 +670,46 @@ describe('reviewOfChange', () => {
     });
   });
 
+  it('reviews a changed GraphQL default for the callers that leave the argument out', () => {
+    const graphqlAction = (name: string, sent: string[]) =>
+      action(name, 'QUERY items', {
+        graphqlUse: {
+          'main QUERY items': {
+            read: [],
+            passed: [],
+            types: [],
+            selectedFields: [],
+            sent,
+            sentTypes: [],
+          },
+        },
+      });
+    const healthy: Omit<ConnectorDrift, 'outcome'> = {
+      ...drift,
+      verdict: 'healthy',
+      latestProblems: [],
+      actions: [
+        graphqlAction('leavesOut', []),
+        graphqlAction('sends', ['Query.items(limit:)']),
+        action('untracked', 'QUERY items', { tracked: false }),
+      ],
+    };
+    const defaultChange: SpecChange = {
+      kind: 'breaking',
+      id: 'request-parameter-default-value-changed',
+      text: 'Query.items(limit:) has changed defaultValue from 100 to 1.',
+      operation: 'QUERY items',
+      coordinate: 'Query.items(limit:)',
+    };
+
+    // A mock accepts either default, so passing proves nothing; one that sends the argument is
+    // not affected
+    expect(reviewOfChange(healthy)('main', defaultChange)).toEqual({
+      needsReview: true,
+      actions: ['leavesOut', 'untracked'],
+    });
+  });
+
   it('verifies response changes by field use only for the callers it was tracked for', () => {
     expect(review('main', change('response-property-type-changed', 'POST /crawl'))).toEqual({
       needsReview: false,

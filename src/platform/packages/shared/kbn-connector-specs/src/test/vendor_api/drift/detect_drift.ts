@@ -314,6 +314,15 @@ const usesProperty = (
   );
 };
 
+// GraphQL only: the values of an enum are no property of its own, so what a deprecation of one
+// concerns is the actions that send or get the enum.
+const isEnumValueDeprecation = ({ id, coordinate }: SpecChange): boolean =>
+  coordinate !== undefined && /^(request|response)-property-enum-value-deprecated$/.test(id);
+
+// GraphQL only: a changed default of an argument.
+const isDefaultChange = ({ id, coordinate }: SpecChange): boolean =>
+  coordinate !== undefined && id.endsWith('-default-value-changed');
+
 /**
  * Per spec change, the actions calling its operation that need to review it, and whether it
  * needs review at all. Deprecations and sunsets do, unless a deprecated property is one the caller
@@ -346,8 +355,13 @@ export const reviewOfChange = (
       .filter((action) => {
         const passing = passesBoth(action);
         const tracked = passing && action.tracked === true;
-        if (property !== undefined && tracked) {
-          return usesProperty(action, source, change, property);
+        if ((property !== undefined || isEnumValueDeprecation(change)) && tracked) {
+          return usesProperty(action, source, change, property ?? '');
+        }
+        // A default only matters to a caller that leaves the argument out.
+        if (tracked && isDefaultChange(change)) {
+          const use = action.graphqlUse?.[`${source} ${change.operation}`];
+          return use === undefined || !use.sent.includes(change.coordinate ?? '');
         }
         return !verifiedBy(change, passing, tracked);
       })
@@ -684,6 +698,7 @@ const mergeFieldUse = (
       returned: Set<string>;
       sent: Set<string>;
       selected: Set<string>;
+      aliased: Set<string>;
     }
   > = {};
   for (const byOperation of uses) {
@@ -694,16 +709,18 @@ const mergeFieldUse = (
         returned: new Set(),
         sent: new Set(),
         selected: new Set(),
+        aliased: new Set(),
       });
       use.read.forEach((field) => entry.read.add(field));
       use.copied.forEach((field) => entry.copied.add(field));
       use.returned.forEach((field) => entry.returned.add(field));
       use.sent?.forEach((field) => entry.sent.add(field));
       use.selected?.forEach((field) => entry.selected.add(field));
+      use.aliased?.forEach((field) => entry.aliased.add(field));
     }
   }
   return Object.fromEntries(
-    Object.entries(merged).map(([key, { read, copied, returned, sent, selected }]) => [
+    Object.entries(merged).map(([key, { read, copied, returned, sent, selected, aliased }]) => [
       key,
       {
         read: [...read].sort(),
@@ -711,6 +728,7 @@ const mergeFieldUse = (
         returned: [...returned].sort(),
         ...(sent.size > 0 ? { sent: [...sent].sort() } : {}),
         ...(selected.size > 0 ? { selected: [...selected].sort() } : {}),
+        ...(aliased.size > 0 ? { aliased: [...aliased].sort() } : {}),
       },
     ])
   );
@@ -777,9 +795,13 @@ const describeAction = ({
     if (isGraphQL(source)) {
       const [committed, current] = [sdlOf(snapshotResult, source), sdlOf(latestResult, source)];
       return committed && current && fields.length > 0
-        ? compareGraphQLFields(committed, current, { method, path: opPath }, fields).map(
-            ({ field, changes }) => ({ operation, field, changes })
-          )
+        ? compareGraphQLFields(
+            committed,
+            current,
+            { method, path: opPath },
+            fields,
+            fieldUse[`${source} ${operation}`]?.aliased
+          ).map(({ field, changes }) => ({ operation, field, changes }))
         : [];
     }
     const [before, after] = [snapshotSpecs?.[source], latestSpecs?.[source]];

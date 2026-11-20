@@ -223,33 +223,35 @@ export const statusOf = (
   if (notable.length > 0 && action.tracked) {
     // Its operations changed in ways running it and its field use verify.
     const passedChanged = passedChangedOf(new Set());
-    const passedAlong = responses.flatMap(({ source, operation }) => {
+    // A GraphQL root field returned whole has only the fields the query selects, which the
+    // changed ones it passes along name, so only REST responses are judged by what is returned.
+    const restResponses = responses.filter(({ change }) => change.coordinate === undefined);
+    const passedAlong = restResponses.flatMap(({ source, operation }) => {
       const { copied = [], returned = [] } = action.fieldUse?.[`${source} ${operation}`] ?? {};
       return [...copied, ...returned];
     });
+    const notUsingChanged =
+      'Vendor response has changed, but Connector is not using changed fields';
     const sentences = [
       ...(notable.some(({ change }) => isRequestChange(change.id))
         ? ["Vendor request has changed, and Connector's requests still match it"]
         : []),
-      ...(responses.length === 0
+      ...(graphqlResponses.length === 0
         ? []
-        : graphqlResponses.length === responses.length
-        ? [
-            passedChanged.length > 0
-              ? passingAlong(passedChanged)
-              : 'Vendor response has changed, but Connector is not using changed fields',
-          ]
+        : [passedChanged.length > 0 ? passingAlong(passedChanged) : notUsingChanged]),
+      ...(restResponses.length === 0
+        ? []
         : passedAlong.includes('')
         ? [
             'Vendor response has changed, and Connector is passing along the entire changed response',
           ]
         : passedAlong.length > 0
         ? ['Vendor response has changed, and Connector is passing along parts of it as they are']
-        : ['Vendor response has changed, but Connector is not using changed fields']),
+        : [notUsingChanged]),
     ];
     return passes(
       'passes',
-      sentences.length > 0 ? `${sentences.join('. ')}.` : 'Vendor spec has changed'
+      sentences.length > 0 ? `${[...new Set(sentences)].join('. ')}.` : 'Vendor spec has changed'
     );
   }
   return passes('passes', changes.length > 0 ? plural(changes.length, 'non-breaking change') : '');

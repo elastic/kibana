@@ -74,6 +74,125 @@ describe('diffGraphQLSchemas', () => {
   });
 });
 
+describe('diffGraphQLSchemas, beyond the fields of a root field', () => {
+  const summary = (beforeSdl: string, afterSdl: string, rootFields: typeof roots) =>
+    diffGraphQLSchemas(beforeSdl, afterSdl, rootFields)
+      .map(({ kind, id, operation, coordinate }) => `${operation} ${kind} ${id} ${coordinate}`)
+      .sort();
+
+  it('attributes what a union or an interface can be to the roots whose response reaches it', () => {
+    const base = `
+      type Query { owner: Owner, node: Node }
+      interface Node { id: ID }
+      type Item implements Node { id: ID }
+      type Person { name: String }
+      type Team { name: String }
+      union Owner = Person | Team
+    `;
+    const changed = `
+      type Query { owner: Owner, node: Node }
+      interface Node { id: ID }
+      interface Extra { id: ID }
+      type Item implements Node & Extra { id: ID }
+      type Person { name: String }
+      type Team { name: String }
+      type Robot { name: String }
+      union Owner = Person | Robot
+    `;
+    expect(
+      summary(base, changed, [
+        { method: 'query', path: 'owner' },
+        { method: 'query', path: 'node' },
+      ])
+    ).toEqual(
+      [
+        'QUERY owner breaking response-property-one-of-added Owner',
+        'QUERY owner non-breaking response-property-one-of-removed Owner',
+        // Item is one of the types a Node can be
+        'QUERY node breaking response-property-one-of-added Item',
+      ].sort()
+    );
+  });
+
+  it('reports a type that changed kind', () => {
+    expect(
+      summary(
+        'type Query { thing: Thing } type Thing { id: ID }',
+        'type Query { thing: Thing } interface Thing { id: ID }',
+        [{ method: 'query', path: 'thing' }]
+      )
+    ).toEqual(['QUERY thing breaking response-property-type-changed Thing']);
+  });
+
+  it('attributes an enum that is sent and returned to the roots on each side', () => {
+    const query = `
+      type Query { status: Status }
+      type Mutation { setStatus(status: Status): Boolean }
+    `;
+    const rootFields = [
+      { method: 'query', path: 'status' },
+      { method: 'mutation', path: 'setStatus' },
+    ];
+    expect(
+      summary(`${query} enum Status { A B }`, `${query} enum Status { A B C }`, rootFields)
+    ).toEqual([
+      'MUTATION setStatus non-breaking request-property-enum-value-added Status.C',
+      'QUERY status breaking response-property-enum-value-added Status.C',
+    ]);
+    expect(
+      summary(`${query} enum Status { A B }`, `${query} enum Status { A }`, rootFields)
+    ).toEqual([
+      'MUTATION setStatus breaking request-property-enum-value-removed Status.B',
+      'QUERY status non-breaking response-property-enum-value-removed Status.B',
+    ]);
+  });
+
+  it('attributes the arguments of the fields below a root field to it', () => {
+    const base = `
+      type Query { items: [Item!]! }
+      type Item { id: ID, updates(limit: Int = 5, source: Source, old: Int): [String] }
+      enum Source { X }
+    `;
+    const changed = `
+      type Query { items: [Item!]! }
+      type Item {
+        id: ID
+        updates(limit: Int = 7, source: Source, old: Int @deprecated(reason: "no use"), q: String): [String]
+      }
+      enum Source { X Y }
+    `;
+    expect(summary(base, changed, [{ method: 'query', path: 'items' }])).toEqual(
+      [
+        'QUERY items breaking request-parameter-default-value-changed Item.updates(limit:)',
+        'QUERY items deprecation request-property-deprecated Item.updates(old:)',
+        // An enum only a nested argument takes is sent too
+        'QUERY items non-breaking request-property-enum-value-added Source.Y',
+        'QUERY items non-breaking new-optional-request-property Item.updates(q:)',
+      ].sort()
+    );
+  });
+
+  it('reports a deprecated enum value on each side it is used', () => {
+    const query = `
+      type Query { status: Status }
+      type Mutation { setStatus(status: Status): Boolean }
+    `;
+    expect(
+      summary(
+        `${query} enum Status { A B }`,
+        `${query} enum Status { A B @deprecated(reason: "retired") }`,
+        [
+          { method: 'query', path: 'status' },
+          { method: 'mutation', path: 'setStatus' },
+        ]
+      )
+    ).toEqual([
+      'MUTATION setStatus deprecation request-property-enum-value-deprecated Status.B',
+      'QUERY status deprecation response-property-enum-value-deprecated Status.B',
+    ]);
+  });
+});
+
 describe('resolveGraphQLFieldUse', () => {
   it('resolves read, passed and sent paths to schema coordinates', () => {
     expect(
@@ -93,6 +212,7 @@ describe('resolveGraphQLFieldUse', () => {
       // Only what the query selects under what it returns
       passed: ['Item.owner', 'User.email'],
       types: ['User'],
+      selectedFields: ['Item.color', 'Item.name', 'Item.owner', 'User.email'],
       sent: ['Query.items(ids:)', 'Query.items(state:)'],
       sentTypes: ['State'],
     });
@@ -106,6 +226,78 @@ describe('resolveGraphQLFieldUse', () => {
         { read: [], copied: [], returned: ['items/owner'] }
       )
     ).toMatchObject({ passed: ['Item.owner', 'User'] });
+  });
+
+  it('reads a field by the alias the query gave it', () => {
+    expect(
+      resolveGraphQLFieldUse(
+        before,
+        { method: 'query', path: 'items' },
+        {
+          read: ['items', 'items/label'],
+          copied: [],
+          returned: [],
+          selected: ['name'],
+          aliased: ['label=name'],
+        }
+      )
+    ).toMatchObject({ read: ['Item.name'] });
+  });
+
+  it('keeps a field named items from being taken for the elements of a list', () => {
+    const page = `
+      type Query { page: Page }
+      type Page { items: [Item!]!, cursor: String }
+      type Item { id: ID }
+    `;
+    // Returning `page.items` passes along the items, not the cursor beside them
+    expect(
+      resolveGraphQLFieldUse(
+        page,
+        { method: 'query', path: 'page' },
+        { read: [], copied: [], returned: ['items'], selected: ['cursor', 'items', 'items/id'] }
+      )
+    ).toMatchObject({ passed: ['Item.id', 'Page.items'] });
+  });
+
+  it('finds a field of an interface under the fragment on its type', () => {
+    const node = `
+      type Query { node: Node }
+      interface Node { id: ID }
+      type Item implements Node { id: ID, title: String }
+    `;
+    expect(
+      resolveGraphQLFieldUse(
+        node,
+        { method: 'query', path: 'node' },
+        { read: ['title'], copied: [], returned: [], selected: ['title'] }
+      )
+    ).toMatchObject({ read: ['Item.title'], selectedFields: ['Item.title'] });
+  });
+
+  it('resolves the arguments sent to the fields below the root field', () => {
+    const nested = `
+      type Query { items: [Item!]! }
+      type Item { id: ID, updates(limit: Int, source: Source): [String] }
+      enum Source { X }
+    `;
+    expect(
+      resolveGraphQLFieldUse(
+        nested,
+        { method: 'query', path: 'items' },
+        {
+          read: [],
+          copied: [],
+          returned: [],
+          sent: ['updates(limit:)', 'updates(source:)'],
+          selected: ['updates'],
+        }
+      )
+    ).toMatchObject({
+      sent: ['Item.updates(limit:)', 'Item.updates(source:)'],
+      sentTypes: ['Source'],
+      selectedFields: ['Item.updates'],
+    });
   });
 
   it('says whether an action uses what a change names', () => {
@@ -134,6 +326,24 @@ describe('resolveGraphQLFieldUse', () => {
     // It sends `opts`, but not `force`
     expect(uses('request-property-deprecated', 'Opts.force')).toBe(false);
   });
+
+  it('counts a deprecated field the query selects, though the handler never reads it', () => {
+    const use = {
+      read: [],
+      passed: [],
+      types: ['Owner'],
+      selectedFields: ['Item.legacy'],
+      sent: [],
+      sentTypes: [],
+    };
+    const uses = (id: string, coordinate: string) => usesCoordinate(use, { id, coordinate });
+    expect(uses('response-property-deprecated', 'Item.legacy')).toBe(true);
+    // Only a deprecation concerns it: removing a field it doesn't read breaks nothing it reads
+    expect(uses('response-property-removed', 'Item.legacy')).toBe(false);
+    // What a union can be concerns the actions getting it
+    expect(uses('response-property-one-of-added', 'Owner')).toBe(true);
+    expect(uses('response-property-one-of-added', 'Other')).toBe(false);
+  });
 });
 
 describe('compareGraphQLFields', () => {
@@ -148,6 +358,48 @@ describe('compareGraphQLFields', () => {
       { field: 'items/name', changes: ['can now be null', 'deprecated'] },
       { field: 'items/size', changes: ['not in the latest spec'] },
     ]);
+  });
+});
+
+describe("compareGraphQLFields, beyond a field's name", () => {
+  const compare = (beforeSdl: string, afterSdl: string, fields: string[]) =>
+    compareGraphQLFields(beforeSdl, afterSdl, { method: 'query', path: 'items' }, fields);
+
+  it('reports the values a read enum gained or lost, which leave its name as it was', () => {
+    const schema = (values: string) => `
+      type Query { items: [Item!]! }
+      enum Color { ${values} }
+      type Item { color: Color }
+    `;
+    expect(compare(schema('RED GREEN'), schema('RED GREEN BLUE'), ['items/color'])).toEqual([
+      { field: 'items/color', changes: ['enum value added: BLUE'] },
+    ]);
+    expect(compare(schema('RED GREEN'), schema('RED'), ['items/color'])).toEqual([
+      { field: 'items/color', changes: ['enum value removed: GREEN'] },
+    ]);
+  });
+
+  it('reports the types a read union gained', () => {
+    const schema = (members: string) => `
+      type Query { items: [Item!]! }
+      type Person { name: String }
+      type Robot { name: String }
+      union Owner = ${members}
+      type Item { owner: Owner }
+    `;
+    expect(compare(schema('Person'), schema('Person | Robot'), ['items/owner'])).toEqual([
+      { field: 'items/owner', changes: ['type added: Robot'] },
+    ]);
+  });
+
+  it('reports the shape of what the root field returns, as a handler reads it from there', () => {
+    const list = 'type Query { items: [Item!]! } type Item { name: String }';
+    const single = 'type Query { items: Item! } type Item { name: String }';
+    expect(compare(list, single, ['items/name'])).toEqual([
+      { field: 'items', changes: ['type [Item!]! → Item!'] },
+    ]);
+    // Nothing is read from it, so its shape doesn't concern the action
+    expect(compare(list, single, [])).toEqual([]);
   });
 });
 

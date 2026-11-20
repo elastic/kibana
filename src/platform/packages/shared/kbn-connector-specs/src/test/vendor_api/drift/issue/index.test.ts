@@ -362,7 +362,14 @@ describe('renderDriftIssue', () => {
       fieldUse: { [`api ${operation}`]: { read: [], copied: [], returned: [''] } },
       fieldChanges: [],
       graphqlUse: {
-        [`api ${operation}`]: { read: [], passed, types: [], sent: [], sentTypes: [] },
+        [`api ${operation}`]: {
+          read: [],
+          passed,
+          types: [],
+          selectedFields: [],
+          sent: [],
+          sentTypes: [],
+        },
       },
     });
     const change = (
@@ -414,6 +421,76 @@ describe('renderDriftIssue', () => {
     expect(body).toContain(
       "| `QUERY items`<br>`MUTATION delete_item` | Response field `Item.priority` | `getItem`, `deleteItem` | No, no action's query selects it |"
     );
+  });
+
+  it('judges what an action passes along from REST and GraphQL separately', () => {
+    const { body } = renderDriftIssue(
+      {
+        ...healthy,
+        outcome: 'refresh',
+        sources: {
+          main: {
+            status: 'changed',
+            changes: [
+              {
+                kind: 'breaking',
+                id: 'response-property-type-changed',
+                text: 'changed the type of the response property `size`',
+                operation: 'GET /items',
+              },
+            ],
+          },
+          api: {
+            status: 'changed',
+            format: 'graphql',
+            changes: [
+              {
+                kind: 'breaking',
+                id: 'response-property-type-changed',
+                text: 'Field Item.priority changed type from String! to Int!.',
+                operation: 'QUERY boards',
+                coordinate: 'Item.priority',
+              },
+            ],
+          },
+        },
+        actions: [
+          {
+            action: 'sync',
+            operations: [
+              { source: 'main', operation: 'GET /items', latest: { status: 'present' } },
+              { source: 'api', operation: 'QUERY boards', latest: { status: 'present' } },
+            ],
+            unmatched: [],
+            snapshotProblems: [],
+            latestProblems: [],
+            tracked: true,
+            // The GraphQL result is returned whole, but its query selects none of what changed
+            fieldUse: {
+              'main GET /items': { read: [], copied: [], returned: [] },
+              'api QUERY boards': { read: [], copied: [], returned: [''] },
+            },
+            fieldChanges: [],
+            graphqlUse: {
+              'api QUERY boards': {
+                read: [],
+                passed: ['Item.name'],
+                types: [],
+                selectedFields: ['Item.name'],
+                sent: [],
+                sentTypes: [],
+              },
+            },
+          },
+        ],
+      },
+      { owners: [] }
+    );
+
+    expect(body).toContain(
+      'Vendor response has changed, but Connector is not using changed fields'
+    );
+    expect(body).not.toContain('passing along the entire changed response');
   });
 
   it('lists the changed fields that passing actions read, and those that read none', () => {

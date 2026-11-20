@@ -50,6 +50,8 @@ export interface GraphQLFieldUse {
   readonly passed: readonly string[];
   /** The enums and other non-scalar types of the fields it reads or passes along. */
   readonly types: readonly string[];
+  /** The fields its queries select, whether or not the handler reads them. */
+  readonly selectedFields: readonly string[];
   /** The arguments and input fields it sends. */
   readonly sent: readonly string[];
   /** The input types and enums of what it sends. */
@@ -94,10 +96,23 @@ const outputTypesFrom = (schema: GraphQLSchema, start: GraphQLNamedType): Set<st
   return seen;
 };
 
-// The named types a root field's arguments reach through input fields.
-const inputTypesOf = (field: GraphQLField<unknown, unknown>): Set<string> => {
+// The named types the arguments of a root field, and of the fields below it, reach through input
+// fields: a query sends the arguments of every field it selects.
+const inputTypesOf = (
+  schema: GraphQLSchema,
+  field: GraphQLField<unknown, unknown>,
+  responses: ReadonlySet<string>
+): Set<string> => {
   const seen = new Set<string>();
   const queue = field.args.map((arg) => getNamedType(arg.type));
+  for (const name of responses) {
+    const type = schema.getType(name);
+    if (isObjectType(type) || isInterfaceType(type)) {
+      for (const below of Object.values(type.getFields())) {
+        queue.push(...below.args.map((arg) => getNamedType(arg.type)));
+      }
+    }
+  }
   for (let type = queue.pop(); type; type = queue.pop()) {
     if (!seen.has(type.name)) {
       seen.add(type.name);
@@ -111,6 +126,16 @@ const inputTypesOf = (field: GraphQLField<unknown, unknown>): Set<string> => {
 
 // `Field Item.name changed type …`, `Query.items(limit:) has …`, `Enum value State.C was …`.
 const COORDINATE = /\b([A-Za-z_]\w*)\.([A-Za-z_]\w*)(?:\(([A-Za-z_]\w*):\))?/;
+
+// What a type is, rather than one of its fields, is described without a coordinate, such as
+// `Robot was added to union type Owner.`; the type is its coordinate.
+const TYPE_CHANGES: Readonly<Record<string, RegExp>> = {
+  TYPE_ADDED_TO_UNION: /union type (\w+)\.$/,
+  TYPE_REMOVED_FROM_UNION: /union type (\w+)\.$/,
+  IMPLEMENTED_INTERFACE_ADDED: /implemented by (\w+)\.$/,
+  IMPLEMENTED_INTERFACE_REMOVED: /^(\w+) no longer implements/,
+  TYPE_CHANGED_KIND: /^(\w+) changed from/,
+};
 
 interface Classified {
   readonly kind: ChangeKind;
@@ -195,6 +220,8 @@ const classify = (
 const deprecationReasonOf = (field: { readonly deprecationReason?: string | null } | undefined) =>
   field?.deprecationReason ?? undefined;
 
+const argsOf = (field: Fields[string] | undefined) => (field && 'args' in field ? field.args : []);
+
 /**
  * The changes between two GraphQL schemas, each attributed to the root fields whose request or
  * response reaches what changed, with its schema coordinate. Both are expected to be trimmed to
@@ -209,14 +236,15 @@ export const diffGraphQLSchemas = (
   const after = schemaOf(afterSdl);
   const roots = rootFields.flatMap((rootField) => {
     const field = rootFieldOf(before, rootField);
+    const responses = field ? outputTypesFrom(before, getNamedType(field.type)) : new Set<string>();
     return field
       ? [
           {
             ...rootField,
             typeName: rootTypeOf(before, rootField.method)?.name,
             operation: `${rootField.method.toUpperCase()} ${rootField.path}`,
-            responses: outputTypesFrom(before, getNamedType(field.type)),
-            requests: inputTypesOf(field),
+            responses,
+            requests: inputTypesOf(before, field, responses),
           },
         ]
       : [];
@@ -234,7 +262,24 @@ export const diffGraphQLSchemas = (
     }
   };
 
+  const operationsOf = (reaching: readonly (typeof roots)[number][]) =>
+    reaching.map(({ operation }) => operation);
+
   for (const { type, description } of findSchemaChanges(before, after)) {
+    const changedType = TYPE_CHANGES[type]?.exec(description)?.[1];
+    if (changedType !== undefined) {
+      const classified = classify(type, 'response', changedType, false, false);
+      if (classified) {
+        add(
+          classified.kind,
+          classified.id,
+          classified.text ?? description,
+          changedType,
+          operationsOf(roots.filter(({ responses }) => responses.has(changedType)))
+        );
+      }
+      continue;
+    }
     const [, typeName, fieldName, argName] = description.match(COORDINATE) ?? [];
     if (typeName === undefined) {
       continue;
@@ -242,30 +287,38 @@ export const diffGraphQLSchemas = (
     const coordinate = `${typeName}.${fieldName}${argName ? `(${argName}:)` : ''}`;
     const rootOf = roots.find((root) => root.typeName === typeName && root.path === fieldName);
     const beforeType = before.getType(typeName) ?? after.getType(typeName);
-    // Arguments, input types and enums only sent are the request; the rest is the response.
     const requestRoots = roots.filter((root) => root.requests.has(typeName));
     const responseRoots = roots.filter((root) => root.responses.has(typeName));
-    const side: 'request' | 'response' =
-      argName !== undefined ||
-      (beforeType !== undefined && isInputObjectType(beforeType)) ||
-      (requestRoots.length > 0 && responseRoots.length === 0)
-        ? 'request'
-        : 'response';
-    const attached = rootOf
-      ? [rootOf.operation]
-      : (side === 'request' ? requestRoots : responseRoots).map(({ operation }) => operation);
+    // Where the change is: a root field's own type is the response and its arguments the request;
+    // the arguments of the fields below it are sent with the response they are selected for; input
+    // types are only sent; an enum may be sent and returned, and each is a change of its own.
+    const sides: Array<{ side: 'request' | 'response'; operations: string[] }> = rootOf
+      ? [{ side: argName === undefined ? 'response' : 'request', operations: [rootOf.operation] }]
+      : argName !== undefined
+      ? [{ side: 'request', operations: operationsOf(responseRoots) }]
+      : beforeType !== undefined && isInputObjectType(beforeType)
+      ? [{ side: 'request', operations: operationsOf(requestRoots) }]
+      : beforeType !== undefined && isEnumType(beforeType) && requestRoots.length > 0
+      ? [
+          { side: 'request', operations: operationsOf(requestRoots) },
+          ...(responseRoots.length > 0
+            ? [{ side: 'response' as const, operations: operationsOf(responseRoots) }]
+            : []),
+        ]
+      : [{ side: 'response', operations: operationsOf(responseRoots) }];
     const wasDeprecated =
       rootOf !== undefined && deprecationReasonOf(rootFieldOf(before, rootOf)) !== undefined;
-    const classified = classify(
-      type,
-      // A root field's own type is the response; its arguments are the request.
-      rootOf && argName === undefined ? 'response' : side,
-      coordinate,
-      rootOf !== undefined && argName === undefined,
-      wasDeprecated
-    );
-    if (classified) {
-      add(classified.kind, classified.id, classified.text ?? description, coordinate, attached);
+    for (const { side, operations } of sides) {
+      const classified = classify(
+        type,
+        side,
+        coordinate,
+        rootOf !== undefined && argName === undefined,
+        wasDeprecated
+      );
+      if (classified) {
+        add(classified.kind, classified.id, classified.text ?? description, coordinate, operations);
+      }
     }
   }
 
@@ -306,27 +359,64 @@ export const diffGraphQLSchemas = (
     if (!was || !is) {
       continue;
     }
-    const previousFields = fieldsOf(was);
-    for (const [name, field] of Object.entries(fieldsOf(is))) {
-      const reason = deprecationReasonOf(field);
-      if (reason === undefined || deprecationReasonOf(previousFields[name]) !== undefined) {
-        continue;
+    if (isEnumType(was) && isEnumType(is)) {
+      // An enum may be sent and returned, and a deprecated value concerns both.
+      for (const value of is.getValues()) {
+        const previous = was.getValue(value.name);
+        if (!previous || value.deprecationReason == null || previous.deprecationReason != null) {
+          continue;
+        }
+        const coordinate = `${typeName}.${value.name}`;
+        for (const side of ['request', 'response'] as const) {
+          add(
+            'deprecation',
+            `${side}-property-enum-value-deprecated`,
+            `${side} property \`${coordinate}\` deprecated: ${value.deprecationReason}`,
+            coordinate,
+            operationsOf(
+              roots.filter((root) =>
+                (side === 'request' ? root.requests : root.responses).has(typeName)
+              )
+            )
+          );
+        }
       }
+      continue;
+    }
+    const previousFields = fieldsOf(was);
+    const isInput = isInputObjectType(is);
+    for (const [name, field] of Object.entries(fieldsOf(is))) {
       if (!(name in previousFields)) {
         continue;
       }
-      const coordinate = `${typeName}.${name}`;
-      const isInput = isInputObjectType(is);
-      const operations = roots
-        .filter((root) => (isInput ? root.requests : root.responses).has(typeName))
-        .map(({ operation }) => operation);
-      add(
-        'deprecation',
-        isInput ? 'request-property-deprecated' : 'response-property-deprecated',
-        `${isInput ? 'request' : 'response'} property \`${coordinate}\` deprecated: ${reason}`,
-        coordinate,
-        operations
-      );
+      const reason = deprecationReasonOf(field);
+      if (reason !== undefined && deprecationReasonOf(previousFields[name]) === undefined) {
+        const coordinate = `${typeName}.${name}`;
+        add(
+          'deprecation',
+          isInput ? 'request-property-deprecated' : 'response-property-deprecated',
+          `${isInput ? 'request' : 'response'} property \`${coordinate}\` deprecated: ${reason}`,
+          coordinate,
+          operationsOf(
+            roots.filter((root) => (isInput ? root.requests : root.responses).has(typeName))
+          )
+        );
+      }
+      // The arguments of a field below the root are sent with the response it is selected for.
+      const [latestArgs, previousArgs] = [argsOf(field), argsOf(previousFields[name])];
+      for (const arg of latestArgs) {
+        const previous = previousArgs.find(({ name: argName }) => argName === arg.name);
+        if (previous && arg.deprecationReason && !previous.deprecationReason) {
+          const coordinate = `${typeName}.${name}(${arg.name}:)`;
+          add(
+            'deprecation',
+            'request-property-deprecated',
+            `request property \`${coordinate}\` deprecated: ${arg.deprecationReason}`,
+            coordinate,
+            operationsOf(roots.filter((root) => root.responses.has(typeName)))
+          );
+        }
+      }
     }
   }
   return changes;
@@ -349,7 +439,18 @@ interface Resolved {
   /** The type that field is on, and the field, to compare across schemas. */
   readonly parent?: GraphQLNamedType;
   readonly field?: string;
+  /** The names of the fields the path went through, without the list elements it steps into. */
+  readonly selectionPath: string;
 }
+
+// `items/label=items/name` pairs: where the response key a handler reads is another field's name.
+const aliasesOf = (aliased: readonly string[] = []): ReadonlyMap<string, string> =>
+  new Map(
+    aliased.flatMap((entry) => {
+      const [responsePath, name] = entry.split('=');
+      return name === undefined ? [] : [[responsePath, name] as const];
+    })
+  );
 
 // Follows a field use path (`items/name`, array elements as `items`) from a type.
 const resolvePath = (
@@ -357,29 +458,42 @@ const resolvePath = (
   start: GraphQLType,
   path: string,
   // Selection paths name fields only, so lists are stepped into by themselves.
-  unwrapLists = false
+  unwrapLists = false,
+  // Read paths go by the keys of the response, which are aliases where the query gave one.
+  aliases?: ReadonlyMap<string, string>
 ): Resolved | undefined => {
-  let resolved: Resolved = { type: start };
+  let resolved: Resolved = { type: start, selectionPath: '' };
+  let responsePath = '';
   for (const segment of path === '' ? [] : path.split('/')) {
     let current = unwrap(resolved.type);
+    // An array element is `items` only while the type is a list, so a field of that name isn't.
     if (isListType(current) && segment === 'items' && !unwrapLists) {
-      resolved = { type: current.ofType };
+      resolved = { type: current.ofType, selectionPath: resolved.selectionPath };
       continue;
     }
     while (unwrapLists && isListType(current)) {
       current = unwrap(current.ofType);
     }
     const named = getNamedType(current);
-    const candidates = isUnionType(named) ? named.getTypes() : [named];
-    const owner = candidates.find((candidate) => segment in fieldsOf(candidate));
+    // A query selects fields of an interface's or union's types under fragments, and the path
+    // doesn't say which.
+    const candidates = isUnionType(named)
+      ? named.getTypes()
+      : isInterfaceType(named)
+      ? [named, ...schema.getPossibleTypes(named)]
+      : [named];
+    responsePath = responsePath ? `${responsePath}/${segment}` : segment;
+    const name = aliases?.get(responsePath) ?? segment;
+    const owner = candidates.find((candidate) => Object.hasOwn(fieldsOf(candidate), name));
     if (!owner) {
       return undefined;
     }
     resolved = {
-      type: fieldsOf(owner)[segment].type,
-      coordinate: `${owner.name}.${segment}`,
+      type: fieldsOf(owner)[name].type,
+      coordinate: `${owner.name}.${name}`,
       parent: owner,
-      field: segment,
+      field: name,
+      selectionPath: resolved.selectionPath ? `${resolved.selectionPath}/${name}` : name,
     };
   }
   return resolved;
@@ -397,8 +511,9 @@ export const resolveGraphQLFieldUse = (
   if (!field || !rootType) {
     return undefined;
   }
+  const aliases = aliasesOf(use.aliased);
   const resolvedRead = use.read.flatMap((path) => {
-    const resolved = resolvePath(schema, field.type, path);
+    const resolved = resolvePath(schema, field.type, path, false, aliases);
     return resolved?.coordinate ? [resolved] : [];
   });
   // A GraphQL response has only the fields the query selects, so those are what passes along.
@@ -408,14 +523,11 @@ export const resolveGraphQLFieldUse = (
   });
   const passedPaths = [...use.copied, ...use.returned];
   const resolvedPassed = passedPaths.flatMap((path) => {
-    const resolved = resolvePath(schema, field.type, path);
+    const resolved = resolvePath(schema, field.type, path, false, aliases);
     if (!resolved) {
       return [];
     }
-    const prefix = path
-      .split('/')
-      .filter((segment) => segment !== 'items')
-      .join('/');
+    const prefix = resolved.selectionPath;
     const under = selected.filter((candidate) => prefix === '' || within(candidate.path, prefix));
     return [...(resolved.coordinate ? [resolved] : []), ...under];
   });
@@ -423,7 +535,7 @@ export const resolveGraphQLFieldUse = (
   const reached =
     use.selected === undefined
       ? passedPaths.flatMap((path) => {
-          const resolved = resolvePath(schema, field.type, path);
+          const resolved = resolvePath(schema, field.type, path, false, aliases);
           return resolved
             ? [...outputTypesFrom(schema, getNamedType(resolved.type))].filter(
                 (name) => !isScalarType(schema.getType(name))
@@ -441,20 +553,39 @@ export const resolveGraphQLFieldUse = (
     .map(({ type }) => getNamedType(type))
     .filter((named) => !isScalarType(named))
     .map(({ name }) => name);
-  // Arguments, then the input fields inside them.
+  const selectedFields = selected.flatMap(({ coordinate }) => (coordinate ? [coordinate] : []));
+  // What an argument, or an input field inside it, is, for the arguments of the root field and,
+  // as `items/updates(limit:)`, of the fields below it.
   const argumentsType = new Map(field.args.map((arg) => [arg.name, arg.type]));
-  const sent: string[] = [];
-  const sentTypes: string[] = [];
-  for (const path of use.sent ?? []) {
+  const resolveSent = (path: string): { type: GraphQLType; coordinate?: string } | undefined => {
+    const nested = /^(.+?)\((\w+):\)(?:\/(.*))?$/.exec(path);
+    if (nested) {
+      const [, fieldPath, argName, rest] = nested;
+      const owner = resolvePath(schema, field.type, fieldPath, true);
+      const ownerField =
+        owner?.parent && owner.field ? fieldsOf(owner.parent)[owner.field] : undefined;
+      const arg = argsOf(ownerField).find(({ name }) => name === argName);
+      if (!owner?.parent || !arg) {
+        return undefined;
+      }
+      const coordinate = `${owner.parent.name}.${owner.field}(${argName}:)`;
+      return rest === undefined
+        ? { type: arg.type, coordinate }
+        : resolvePath(schema, arg.type, rest);
+    }
     const [argName, ...rest] = path.split('/');
     const argType = argumentsType.get(argName);
     if (argType === undefined) {
-      continue;
+      return undefined;
     }
-    const resolved =
-      rest.length === 0
-        ? { type: argType, coordinate: `${rootType.name}.${rootField.path}(${argName}:)` }
-        : resolvePath(schema, argType, rest.join('/'));
+    return rest.length === 0
+      ? { type: argType, coordinate: `${rootType.name}.${rootField.path}(${argName}:)` }
+      : resolvePath(schema, argType, rest.join('/'));
+  };
+  const sent: string[] = [];
+  const sentTypes: string[] = [];
+  for (const path of use.sent ?? []) {
+    const resolved = resolveSent(path);
     if (resolved?.coordinate) {
       sent.push(resolved.coordinate);
     }
@@ -470,6 +601,7 @@ export const resolveGraphQLFieldUse = (
     read: unique(read),
     passed: unique(passed),
     types: unique(types),
+    selectedFields: unique(selectedFields),
     sent: unique(sent),
     sentTypes: unique(sentTypes),
   };
@@ -493,21 +625,80 @@ export const usesCoordinate = (
     use.read.includes(coordinate) ||
     use.passed.includes(coordinate) ||
     use.passed.includes(typeName) ||
-    (isEnumValue && use.types.includes(typeName))
+    (isEnumValue && use.types.includes(typeName)) ||
+    // What a union or an interface is has the type itself as its coordinate.
+    (!coordinate.includes('.') && use.types.includes(coordinate)) ||
+    // A deprecated field is one the query selects, whether or not the handler reads it, and
+    // removing it later makes the whole query invalid.
+    (id.endsWith('deprecated') && use.selectedFields.includes(coordinate))
   );
 };
 
 const describeType = (type: GraphQLType): string => String(type);
 
+const kindOf = (type: GraphQLNamedType): string =>
+  isEnumType(type)
+    ? 'enum'
+    : isUnionType(type)
+    ? 'union'
+    : isInterfaceType(type)
+    ? 'interface'
+    : isObjectType(type)
+    ? 'object'
+    : 'scalar';
+
+// The values of an enum, or the types an interface or a union can be.
+const membersOf = (schema: GraphQLSchema, type: GraphQLNamedType): string[] =>
+  isEnumType(type)
+    ? type.getValues().map(({ name }) => name)
+    : isUnionType(type) || isInterfaceType(type)
+    ? schema.getPossibleTypes(type).map(({ name }) => name)
+    : [];
+
+// How the type of a field an action reads changed: its shape, kind and what it can be, not just
+// its name, since a new enum value or union member leaves the type's name as it was.
+const changesOfType = (
+  [was, is]: readonly [GraphQLType, GraphQLType],
+  [before, after]: readonly [GraphQLSchema, GraphQLSchema]
+): string[] => {
+  const changes: string[] = [];
+  const [from, to] = [describeType(was), describeType(is)];
+  if (from !== to) {
+    changes.push(from === `${to}!` ? 'can now be null' : `type ${from} → ${to}`);
+  }
+  const [wasNamed, isNamed] = [getNamedType(was), getNamedType(is)];
+  if (wasNamed.name !== isNamed.name) {
+    return changes;
+  }
+  if (kindOf(wasNamed) !== kindOf(isNamed)) {
+    changes.push(`now ${kindOf(isNamed)}, was ${kindOf(wasNamed)}`);
+    return changes;
+  }
+  const [previous, latest] = [membersOf(before, wasNamed), membersOf(after, isNamed)];
+  const noun = isEnumType(isNamed) ? 'enum value' : 'type';
+  const added = latest.filter((member) => !previous.includes(member));
+  const removed = previous.filter((member) => !latest.includes(member));
+  if (added.length > 0) {
+    changes.push(`${noun}${added.length > 1 ? 's' : ''} added: ${added.join(', ')}`);
+  }
+  if (removed.length > 0) {
+    changes.push(`${noun}${removed.length > 1 ? 's' : ''} removed: ${removed.join(', ')}`);
+  }
+  return changes;
+};
+
 /**
  * The response fields an action reads from a root field whose schema differs between the
  * committed snapshot and the latest schema, with what changed, as `compareFields` reports them.
+ * The root field's own type is compared too, as what a handler reads from the result of
+ * `items` depends on whether that is a list.
  */
 export const compareGraphQLFields = (
   beforeSdl: string,
   afterSdl: string,
   rootField: GraphQLRootField,
-  fields: readonly string[]
+  fields: readonly string[],
+  aliased?: readonly string[]
 ): Array<{ field: string; changes: string[] }> => {
   const before = schemaOf(beforeSdl);
   const after = schemaOf(afterSdl);
@@ -515,25 +706,29 @@ export const compareGraphQLFields = (
   if (!was || !is) {
     return [];
   }
-  return fields.flatMap((field) => {
-    const previous = resolvePath(before, was.type, field);
-    if (!previous?.coordinate || !previous.parent || !previous.field) {
-      return [];
-    }
-    const latestParent = after.getType(previous.parent.name);
-    const latest = latestParent ? fieldsOf(latestParent)[previous.field] : undefined;
-    if (!latest) {
-      return [{ field, changes: ['not in the latest spec'] }];
-    }
-    const changes: string[] = [];
-    const [from, to] = [describeType(previous.type), describeType(latest.type)];
-    if (from !== to) {
-      changes.push(from === `${to}!` ? 'can now be null' : `type ${from} → ${to}`);
-    }
-    const wasField = fieldsOf(previous.parent)[previous.field];
-    if (deprecationReasonOf(latest) !== undefined && deprecationReasonOf(wasField) === undefined) {
-      changes.push('deprecated');
-    }
-    return changes.length > 0 ? [{ field, changes }] : [];
-  });
+  const aliases = aliasesOf(aliased);
+  const rootChanges = fields.length > 0 ? changesOfType([was.type, is.type], [before, after]) : [];
+  return [
+    ...(rootChanges.length > 0 ? [{ field: rootField.path, changes: rootChanges }] : []),
+    ...fields.flatMap((field) => {
+      const previous = resolvePath(before, was.type, field, false, aliases);
+      if (!previous?.coordinate || !previous.parent || !previous.field) {
+        return [];
+      }
+      const latestParent = after.getType(previous.parent.name);
+      const latest = latestParent ? fieldsOf(latestParent)[previous.field] : undefined;
+      if (!latest) {
+        return [{ field, changes: ['not in the latest spec'] }];
+      }
+      const changes = changesOfType([previous.type, latest.type], [before, after]);
+      const wasField = fieldsOf(previous.parent)[previous.field];
+      if (
+        deprecationReasonOf(latest) !== undefined &&
+        deprecationReasonOf(wasField) === undefined
+      ) {
+        changes.push('deprecated');
+      }
+      return changes.length > 0 ? [{ field, changes }] : [];
+    }),
+  ];
 };

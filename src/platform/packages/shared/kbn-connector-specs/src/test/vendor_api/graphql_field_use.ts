@@ -9,6 +9,7 @@
 
 import type {
   DocumentNode,
+  FieldNode,
   FragmentDefinitionNode,
   OperationDefinitionNode,
   SelectionSetNode,
@@ -74,31 +75,64 @@ const recordArgument = (
   }
 };
 
-// Records the fields a selection set selects, through fragments, as `selected` paths.
-const recordSelection = (
+// The fields a selection set selects, through inline fragments and fragment spreads, at the
+// root of the operation as anywhere below it.
+const fieldsOf = (
   selectionSet: SelectionSetNode | undefined,
   fragments: ReadonlyMap<string, FragmentDefinitionNode>,
-  use: FieldUse,
-  path: string,
   visited: ReadonlySet<string> = new Set()
-): void => {
-  for (const selection of selectionSet?.selections ?? []) {
+): FieldNode[] =>
+  (selectionSet?.selections ?? []).flatMap((selection) => {
     if (selection.kind === Kind.FIELD) {
-      if (selection.name.value.startsWith('__')) {
-        continue;
-      }
-      const fieldPath = path ? `${path}/${selection.name.value}` : selection.name.value;
-      use.selected.add(fieldPath);
-      recordSelection(selection.selectionSet, fragments, use, fieldPath, visited);
-    } else if (selection.kind === Kind.INLINE_FRAGMENT) {
-      recordSelection(selection.selectionSet, fragments, use, path, visited);
-    } else {
-      const name = selection.name.value;
-      const fragment = fragments.get(name);
-      if (fragment && !visited.has(name)) {
-        recordSelection(fragment.selectionSet, fragments, use, path, new Set([...visited, name]));
-      }
+      return [selection];
     }
+    if (selection.kind === Kind.INLINE_FRAGMENT) {
+      return fieldsOf(selection.selectionSet, fragments, visited);
+    }
+    const name = selection.name.value;
+    const fragment = fragments.get(name);
+    return fragment && !visited.has(name)
+      ? fieldsOf(fragment.selectionSet, fragments, new Set([...visited, name]))
+      : [];
+  });
+
+interface QueryContext {
+  readonly fragments: ReadonlyMap<string, FragmentDefinitionNode>;
+  readonly variables: Readonly<Record<string, unknown>>;
+  readonly use: FieldUse;
+}
+
+/**
+ * Records the fields a selection set selects as `selected` paths, by their names. A field selected
+ * under an alias is a response key, which is what a handler reads it by, so it is recorded as
+ * `aliased` too, and the arguments of fields below the root as `sent`, under the path of the field
+ * as `items/updates(limit:)`.
+ */
+const recordSelection = (
+  selectionSet: SelectionSetNode | undefined,
+  context: QueryContext,
+  path: string,
+  responsePath: string
+): void => {
+  const { fragments, variables, use } = context;
+  for (const selection of fieldsOf(selectionSet, fragments)) {
+    const name = selection.name.value;
+    if (name.startsWith('__')) {
+      continue;
+    }
+    const key = selection.alias?.value ?? name;
+    const fieldPath = path ? `${path}/${name}` : name;
+    const keyPath = responsePath ? `${responsePath}/${key}` : key;
+    use.selected.add(fieldPath);
+    if (key !== name) {
+      use.aliased.add(`${keyPath}=${name}`);
+    }
+    for (const argument of selection.arguments ?? []) {
+      const sent = `${fieldPath}(${argument.name.value}:)`;
+      use.sent.add(sent);
+      recordArgument(argument.value, variables, use, sent);
+    }
+    recordSelection(selection.selectionSet, context, fieldPath, keyPath);
   }
 };
 
@@ -130,9 +164,9 @@ export const trackGraphQLFieldUse = (
     )
   );
   const results: Record<string, unknown> = { ...response.data };
-  for (const selection of operation.selectionSet.selections) {
+  for (const selection of fieldsOf(operation.selectionSet, fragments)) {
     // Introspection fields aren't the vendor's operations.
-    if (selection.kind !== Kind.FIELD || selection.name.value.startsWith('__')) {
+    if (selection.name.value.startsWith('__')) {
       continue;
     }
     const use = fieldUseOf({ method: operation.operation, path: selection.name.value });
@@ -140,7 +174,7 @@ export const trackGraphQLFieldUse = (
       use.sent.add(argument.name.value);
       recordArgument(argument.value, variables, use, argument.name.value);
     }
-    recordSelection(selection.selectionSet, fragments, use, '');
+    recordSelection(selection.selectionSet, { fragments, variables, use }, '', '');
     const key = selection.alias?.value ?? selection.name.value;
     if (key in results) {
       results[key] = trackFieldUse(results[key], use);
