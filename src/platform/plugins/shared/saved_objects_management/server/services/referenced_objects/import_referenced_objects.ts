@@ -12,7 +12,10 @@ import type {
   ISavedObjectTypeRegistry,
   SavedObject,
   SavedObjectsClientContract,
+  SavedObjectsImportFailure,
+  SavedObjectsImportMissingReferencesError,
   SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
   SavedObjectTypeIdTuple,
 } from '@kbn/core/server';
 import { getCurrentVirtualVersion, isSavedObjectErrorResult } from '@kbn/core/server';
@@ -47,23 +50,86 @@ const findReusedKeys = async (
   return new Set(existing.filter((result) => !isSavedObjectErrorResult(result)).map(toKey));
 };
 
+type ImportWarning = ImportReferencedObjectsResponse['warnings'][number];
+type CoreResults = Required<Pick<SavedObjectsImportResponse, 'successResults' | 'errors'>>;
+
+type MissingReferencesFailure = SavedObjectsImportFailure & {
+  error: SavedObjectsImportMissingReferencesError;
+};
+
+const isMissingReferences = (
+  failure: SavedObjectsImportFailure
+): failure is MissingReferencesFailure => failure.error.type === 'missing_references';
+
+const addMissingReferenceWarnings = (
+  failures: MissingReferencesFailure[],
+  warnings: Map<string, ImportWarning>
+): void => {
+  failures.forEach(({ type, id, error }) => {
+    error.references.forEach((reference) => {
+      warnings.set(`${toKey({ type, id })}>${toKey(reference)}`, {
+        type: 'missing_reference',
+        from: { type, id },
+        reference: { type: reference.type, id: reference.id },
+      });
+    });
+  });
+};
+
+/** Retries objects through core, again with `ignoreMissingReferences` for those with missing references, since core writes nothing while any are missing. */
+const resolveIgnoringMissingReferences = async (
+  importer: ISavedObjectsImporter,
+  storedObjects: SavedObject[],
+  retries: SavedObjectsImportRetry[],
+  createNewCopies: boolean,
+  warnings: Map<string, ImportWarning>
+): Promise<CoreResults> => {
+  const resolve = (retried: SavedObjectsImportRetry[]) =>
+    importer.resolveImportErrors({
+      readStream: createListStream(storedObjects),
+      retries: retried,
+      createNewCopies,
+    });
+
+  const resolved = await resolve(retries);
+  const missing = (resolved.errors ?? []).filter(isMissingReferences);
+  if (missing.length === 0) {
+    return { successResults: resolved.successResults ?? [], errors: resolved.errors ?? [] };
+  }
+
+  addMissingReferenceWarnings(missing, warnings);
+  const missingKeys = new Set(missing.map(toKey));
+  const { successResults = [], errors = [] } = await resolve(
+    retries.map((retry) =>
+      missingKeys.has(toKey(retry)) ? { ...retry, ignoreMissingReferences: true } : retry
+    )
+  );
+  return { successResults, errors };
+};
+
 const writePendingObjects = async (
   importer: ISavedObjectsImporter,
   storedObjects: SavedObject[],
   createNewCopies: boolean,
-  { successResults = [], errors = [] }: SavedObjectsImportResponse
-): Promise<Required<Pick<SavedObjectsImportResponse, 'successResults' | 'errors'>>> => {
+  { successResults = [], errors = [] }: SavedObjectsImportResponse,
+  warnings: Map<string, ImportWarning>
+): Promise<CoreResults> => {
   // Core writes nothing while any object has a resolvable error, so SOM's flyout retries the rest.
   const hasPendingObjects = errors.some(({ error }) =>
     ['conflict', 'ambiguous_conflict', 'missing_references'].includes(error.type)
   );
-  if (!hasPendingObjects || successResults.length === 0) {
-    return { successResults: hasPendingObjects ? [] : successResults, errors };
+  if (!hasPendingObjects) {
+    return { successResults, errors };
   }
 
-  const resolved = await importer.resolveImportErrors({
-    readStream: createListStream(storedObjects),
-    retries: successResults.map(({ type, id, overwrite, destinationId, createNewCopy }) => ({
+  // Missing references don't block the import: those objects are retried and reported as warnings.
+  const missing = errors.filter(isMissingReferences);
+  addMissingReferenceWarnings(missing, warnings);
+  const missingKeys = new Set(missing.map(toKey));
+  const otherErrors = errors.filter((failure) => !isMissingReferences(failure));
+  // An object that also conflicts stays a conflict; core reports it again on the retry.
+  const retries: SavedObjectsImportRetry[] = [
+    ...successResults.map(({ type, id, overwrite, destinationId, createNewCopy }) => ({
       type,
       id,
       overwrite: overwrite ?? false,
@@ -71,12 +137,33 @@ const writePendingObjects = async (
       createNewCopy,
       replaceReferences: [],
     })),
+    ...missing.map(({ type, id, overwrite }) => ({
+      type,
+      id,
+      overwrite: overwrite ?? false,
+      replaceReferences: [],
+      ignoreMissingReferences: true,
+    })),
+  ];
+  if (retries.length === 0) {
+    return { successResults: [], errors: otherErrors };
+  }
+
+  const resolved = await resolveIgnoringMissingReferences(
+    importer,
+    storedObjects,
+    retries,
     // With new copies, core gives the retried objects new IDs again.
     createNewCopies,
-  });
+    warnings
+  );
+  // Objects retried for their missing references get their result from the retry.
   return {
-    successResults: resolved.successResults ?? [],
-    errors: [...errors, ...(resolved.errors ?? [])],
+    successResults: resolved.successResults,
+    errors: [
+      ...otherErrors.filter((failure) => !missingKeys.has(toKey(failure))),
+      ...resolved.errors,
+    ],
   };
 };
 
@@ -135,10 +222,7 @@ const toStoredObjects = (
 };
 
 const addCoreResults = (
-  {
-    successResults,
-    errors,
-  }: Required<Pick<SavedObjectsImportResponse, 'successResults' | 'errors'>>,
+  { successResults, errors }: CoreResults,
   results: Map<string, ImportResult>
 ): void => {
   successResults.forEach(({ type, id, destinationId, overwrite }) => {
@@ -176,7 +260,8 @@ const applyDecisions = async (
   decisions: Decision[],
   registry: ApiBodyRegistry,
   typeRegistry: ISavedObjectTypeRegistry,
-  results: Map<string, ImportResult>
+  results: Map<string, ImportResult>,
+  warnings: Map<string, ImportWarning>
 ): Promise<void> => {
   const overwrites = new Map<string, Decision>();
   decisions.forEach((decision) => {
@@ -196,22 +281,26 @@ const applyDecisions = async (
   );
   if (storedObjects.length === 0) return;
 
-  const { successResults = [], errors = [] } = await importer.resolveImportErrors({
-    readStream: createListStream(storedObjects),
-    retries: storedObjects.map(({ type, id }) => {
-      const decision = overwrites.get(toKey({ type, id }));
-      return {
-        type,
-        id,
-        overwrite: true,
-        // Core writes to the conflicting object, which can have another ID across spaces.
-        ...(decision?.destination_id && { destinationId: decision.destination_id }),
-        replaceReferences: [],
-      };
-    }),
-    createNewCopies: false,
-  });
-  addCoreResults({ successResults, errors }, results);
+  addCoreResults(
+    await resolveIgnoringMissingReferences(
+      importer,
+      storedObjects,
+      storedObjects.map(({ type, id }) => {
+        const decision = overwrites.get(toKey({ type, id }));
+        return {
+          type,
+          id,
+          overwrite: true,
+          // Core writes to the conflicting object, which can have another ID across spaces.
+          ...(decision?.destination_id && { destinationId: decision.destination_id }),
+          replaceReferences: [],
+        };
+      }),
+      false,
+      warnings
+    ),
+    results
+  );
 };
 
 /** Imports API bodies through core's importer, or with `decisions` resolves an earlier import's conflicts. */
@@ -230,9 +319,10 @@ export const importReferencedObjects = async ({
   typeRegistry: ISavedObjectTypeRegistry;
 }): Promise<ImportReferencedObjectsResponse> => {
   const results = new Map<string, ImportResult>();
+  const warnings = new Map<string, ImportWarning>();
 
   if (decisions) {
-    await applyDecisions(importer, objects, decisions, registry, typeRegistry, results);
+    await applyDecisions(importer, objects, decisions, registry, typeRegistry, results, warnings);
   } else {
     const createNewCopies = mode === 'new_copies';
     // Decided before validation, so an existing object is reused even if its exported body is invalid.
@@ -258,7 +348,7 @@ export const importReferencedObjects = async ({
         createNewCopies,
       });
       addCoreResults(
-        await writePendingObjects(importer, storedObjects, createNewCopies, imported),
+        await writePendingObjects(importer, storedObjects, createNewCopies, imported, warnings),
         results
       );
     }
@@ -269,6 +359,6 @@ export const importReferencedObjects = async ({
   return {
     success: orderedResults.every(({ status }) => status !== 'conflict' && status !== 'error'),
     results: orderedResults,
-    warnings: [],
+    warnings: [...warnings.values()],
   };
 };

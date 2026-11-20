@@ -46,9 +46,11 @@ import { importReferencedObjectsStrings as strings } from './_import_referenced_
 
 type ImportMode = ImportReferencedObjectsRequest['mode'];
 type ImportResult = ImportReferencedObjectsResponse['results'][number];
+type ImportWarning = ImportReferencedObjectsResponse['warnings'][number];
 type DecisionAction = NonNullable<ImportReferencedObjectsRequest['decisions']>[number]['action'];
 
 const toKey = ({ type, id }: SavedObjectTypeIdTuple) => `${type}:${id}`;
+const toWarningKey = ({ from, reference }: ImportWarning) => `${toKey(from)}>${toKey(reference)}`;
 
 const mergeResponses = (
   first: ImportReferencedObjectsResponse,
@@ -59,7 +61,12 @@ const mergeResponses = (
   return {
     success: results.every(({ status }) => status !== 'conflict' && status !== 'error'),
     results,
-    warnings: [...first.warnings, ...decided.warnings],
+    // An object retried by a decision can report the same missing reference again.
+    warnings: [
+      ...new Map(
+        [...first.warnings, ...decided.warnings].map((warning) => [toWarningKey(warning), warning])
+      ).values(),
+    ],
   };
 };
 
@@ -230,16 +237,19 @@ export const ImportReferencedObjectsFlyout = ({
     </>
   );
 
-  const renderResults = ({ success, results }: ImportReferencedObjectsResponse) => {
-    const importedCount = results.filter(
+  const renderResults = ({ success, results, warnings }: ImportReferencedObjectsResponse) => {
+    const imported = results.filter(
       ({ status }) => status === 'created' || status === 'overwritten'
-    ).length;
+    );
+    const importedKeys = new Set(imported.map(toKey));
+    // Only objects that were written can show a broken panel; a skipped or conflicting one is unchanged.
+    const importedWarnings = warnings.filter(({ from }) => importedKeys.has(toKey(from)));
     const reused = results.filter(({ status }) => status === 'reused');
     const Callout = success ? KbnSuccessCallout : KbnWarningCallout;
     return (
       <>
         <Callout
-          title={strings.getResultsSummary(importedCount, results.length, reused.length)}
+          title={strings.getResultsSummary(imported.length, results.length, reused.length)}
           data-test-subj="importReferencedObjectsSummary"
         />
         <EuiSpacer size="m" />
@@ -258,6 +268,22 @@ export const ImportReferencedObjectsFlyout = ({
                 ))}
               </ul>
             </KbnInfoCallout>
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {importedWarnings.length > 0 && (
+          <>
+            <KbnWarningCallout
+              title={strings.getWarningsTitle(importedWarnings.length)}
+              text={<p>{strings.getWarningsDescription()}</p>}
+              data-test-subj="importReferencedObjectsWarnings"
+            >
+              <ul>
+                {importedWarnings.map((warning) => (
+                  <li key={toWarningKey(warning)}>{strings.getMissingReferenceText(warning)}</li>
+                ))}
+              </ul>
+            </KbnWarningCallout>
             <EuiSpacer size="m" />
           </>
         )}

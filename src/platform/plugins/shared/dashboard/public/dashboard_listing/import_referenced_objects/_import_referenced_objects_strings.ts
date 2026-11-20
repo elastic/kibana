@@ -90,6 +90,31 @@ export const importReferencedObjectsStrings = {
       defaultMessage:
         'These objects already exist in this space, so the new copies point to them instead of copying them.',
     }),
+  getWarningsTitle: (count: number) =>
+    i18n.translate('dashboard.importReferencedObjects.warningsTitle', {
+      defaultMessage:
+        '{count, plural, one {# referenced object is missing} other {# referenced objects are missing}}',
+      values: { count },
+    }),
+  getWarningsDescription: () =>
+    i18n.translate('dashboard.importReferencedObjects.warningsDescription', {
+      defaultMessage:
+        'The objects that point to them were imported anyway, and the panels that use them show an error.',
+    }),
+  getMissingReferenceText: ({
+    from,
+    reference,
+  }: ImportReferencedObjectsResponse['warnings'][number]) =>
+    i18n.translate('dashboard.importReferencedObjects.missingReferenceText', {
+      defaultMessage:
+        '{fromType} {fromId} points to {referenceType} {referenceId}, which is in neither the file nor this space.',
+      values: {
+        fromType: from.type,
+        fromId: from.id,
+        referenceType: reference.type,
+        referenceId: reference.id,
+      },
+    }),
   getResultsTableCaption: () =>
     i18n.translate('dashboard.importReferencedObjects.resultsTableCaption', {
       defaultMessage: 'Import results',

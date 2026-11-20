@@ -144,6 +144,99 @@ describe('ImportReferencedObjectsFlyout', () => {
     ]);
   });
 
+  it('lists each missing reference with the results', async () => {
+    renderFlyout({
+      importObjects: jest.fn().mockResolvedValue({
+        success: true,
+        results: [{ type: 'dashboard', id: 'sales', destination_id: 'sales', status: 'created' }],
+        warnings: [
+          {
+            type: 'missing_reference',
+            from: { type: 'dashboard', id: 'sales' },
+            reference: { type: 'index-pattern', id: 'logs' },
+          },
+          {
+            type: 'missing_reference',
+            from: { type: 'dashboard', id: 'sales' },
+            reference: { type: 'search', id: 'errors' },
+          },
+        ],
+      } satisfies ImportReferencedObjectsResponse),
+    });
+
+    await chooseFile(EXPORT_FILE);
+    await userEvent.click(screen.getByRole('button', { name: 'Import' }));
+
+    expect(await screen.findByText('1 of 1 objects imported')).toBeInTheDocument();
+    const warnings = screen.getByTestId('importReferencedObjectsWarnings');
+    expect(within(warnings).getByText('2 referenced objects are missing')).toBeInTheDocument();
+    expect(
+      within(warnings)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent)
+    ).toEqual([
+      'dashboard sales points to index-pattern logs, which is in neither the file nor this space.',
+      'dashboard sales points to search errors, which is in neither the file nor this space.',
+    ]);
+  });
+
+  it('lists a missing reference once when both calls report it', async () => {
+    const warning = {
+      type: 'missing_reference' as const,
+      from: { type: 'dashboard', id: 'ops' },
+      reference: { type: 'index-pattern', id: 'logs' },
+    };
+    const importObjects = jest
+      .fn()
+      .mockResolvedValueOnce({
+        success: false,
+        results: [{ type: 'dashboard', id: 'ops', destination_id: 'ops', status: 'conflict' }],
+        warnings: [warning],
+      } satisfies ImportReferencedObjectsResponse)
+      .mockResolvedValueOnce({
+        success: true,
+        results: [{ type: 'dashboard', id: 'ops', destination_id: 'ops', status: 'overwritten' }],
+        warnings: [warning],
+      } satisfies ImportReferencedObjectsResponse);
+    renderFlyout({ importObjects });
+
+    await chooseFile(EXPORT_FILE);
+    await userEvent.click(screen.getByRole('button', { name: 'Import' }));
+    await userEvent.click(await screen.findByLabelText('Overwrite'));
+    await userEvent.click(screen.getByRole('button', { name: 'Finish import' }));
+
+    const warnings = await screen.findByTestId('importReferencedObjectsWarnings');
+    expect(within(warnings).getAllByRole('listitem')).toHaveLength(1);
+  });
+
+  it("doesn't list a missing reference of an object that was skipped", async () => {
+    const warning = {
+      type: 'missing_reference' as const,
+      from: { type: 'dashboard', id: 'ops' },
+      reference: { type: 'index-pattern', id: 'logs' },
+    };
+    const importObjects = jest
+      .fn()
+      .mockResolvedValueOnce({
+        success: false,
+        results: [{ type: 'dashboard', id: 'ops', destination_id: 'ops', status: 'conflict' }],
+        warnings: [warning],
+      } satisfies ImportReferencedObjectsResponse)
+      .mockResolvedValueOnce({
+        success: true,
+        results: [{ type: 'dashboard', id: 'ops', destination_id: 'ops', status: 'skipped' }],
+        warnings: [],
+      } satisfies ImportReferencedObjectsResponse);
+    renderFlyout({ importObjects });
+
+    await chooseFile(EXPORT_FILE);
+    await userEvent.click(screen.getByRole('button', { name: 'Import' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Finish import' }));
+
+    expect(await screen.findByTestId('importReferencedObjectsResults')).toBeInTheDocument();
+    expect(screen.queryByTestId('importReferencedObjectsWarnings')).not.toBeInTheDocument();
+  });
+
   it('asks for a decision on each conflict, then shows the results of both calls', async () => {
     const importObjects = jest
       .fn()
