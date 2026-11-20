@@ -141887,7 +141887,7 @@ paths:
           lang: Console
           source: |
             GET kbn:/api/vega?query=requests&per_page=10
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -142184,7 +142184,7 @@ paths:
                 "value": "{\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\n  // Applies the dashboard time range, query, and filters\n  data: {\n    url: {\n      %context%: true\n      %timefield%: timestamp\n      index: kibana_sample_data_logs\n      body: {\n        size: 0\n        aggs: { hours: { date_histogram: { field: \"timestamp\", fixed_interval: \"1h\" } } }\n      }\n    }\n    format: { property: \"aggregations.hours.buckets\" }\n  }\n  mark: line\n  encoding: {\n    x: { field: \"key\", type: \"temporal\", title: null }\n    y: { field: \"doc_count\", type: \"quantitative\", title: \"Requests\" }\n  }\n}"
               }
             }
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -142197,7 +142197,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Deletes a Vega library item by its ID.
+        Permanently deletes a Vega library item by its ID. Dashboards that link to the item by reference can no longer display the panel.
       operationId: delete-vega-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -142207,7 +142207,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The Vega library item ID, as returned by the create or search endpoints.
+        - description: The Vega library item ID, as returned by the create or search endpoints, or the ID you chose when you created the item with the upsert endpoint.
           in: path
           name: id
           required: true
@@ -142234,7 +142234,7 @@ paths:
           lang: Console
           source: |
             DELETE kbn:/api/vega/7c1d8e40-9b2f-11f0-a5c3-2f6e4b8d9a10
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -142246,10 +142246,10 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Returns a single Vega library item by its ID.
+        Returns the complete state of a Vega library item, including its spec, query, and filters.
       operationId: get-vega-id
       parameters:
-        - description: The Vega library item ID, as returned by the create or search endpoints.
+        - description: The Vega library item ID, as returned by the create or search endpoints, or the ID you chose when you created the item with the upsert endpoint.
           in: path
           name: id
           required: true
@@ -142395,7 +142395,7 @@ paths:
           lang: Console
           source: |
             GET kbn:/api/vega/7c1d8e40-9b2f-11f0-a5c3-2f6e4b8d9a10
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -142417,7 +142417,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The unique ID of the Vega library item to be created or updated.
+        - description: The unique ID of the Vega library item to create or update. A new ID must contain only lowercase letters, numbers, hyphens, and underscores.
           in: path
           name: id
           required: true
@@ -142917,7 +142917,7 @@ paths:
                 }
               ]
             }
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name

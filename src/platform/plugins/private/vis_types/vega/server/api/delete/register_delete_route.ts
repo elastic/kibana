@@ -31,7 +31,8 @@ export const registerDeleteRoute = (
     path: `${VEGA_API_PATH}/{id}`,
     summary: 'Delete a Vega library item',
     ...commonRouteConfig,
-    description: 'Deletes a Vega library item by its ID.',
+    description:
+      'Permanently deletes a Vega library item by its ID. Dashboards that link to the item by reference can no longer display the panel.',
   });
 
   deleteRoute.addVersion(

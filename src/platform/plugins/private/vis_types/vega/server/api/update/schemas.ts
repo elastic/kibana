@@ -14,7 +14,8 @@ import { VEGA_LIBRARY_ITEM_ID_DESCRIPTION } from '../constants';
 
 export const updateRequestParamsSchema = z.object({
   id: z.string().meta({
-    description: 'The unique ID of the Vega library item to be created or updated.',
+    description:
+      'The unique ID of the Vega library item to create or update. A new ID must contain only lowercase letters, numbers, hyphens, and underscores.',
   }),
 });
 

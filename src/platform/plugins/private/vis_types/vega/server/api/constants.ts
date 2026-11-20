@@ -13,17 +13,15 @@ export const VEGA_LIBRARY_ITEM_ID_DESCRIPTION =
 
 /** Used in request params `id` fields (read, update, delete). */
 export const VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION =
-  'The Vega library item ID, as returned by the create or search endpoints.';
+  'The Vega library item ID, as returned by the create or search endpoints, or the ID you chose when you created the item with the upsert endpoint.';
 
 export const commonRouteConfig = {
   access: 'public',
-  description:
-    'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
   options: {
     tags: ['oas-tag:Vega'],
     availability: {
-      stability: 'experimental',
-      since: '9.6.0',
+      stability: 'stable',
+      since: '9.7.0',
     },
   },
   security: {

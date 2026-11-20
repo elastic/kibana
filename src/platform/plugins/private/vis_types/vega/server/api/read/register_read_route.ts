@@ -27,7 +27,8 @@ export const registerReadRoute = (
     path: `${VEGA_API_PATH}/{id}`,
     summary: 'Get a Vega library item',
     ...commonRouteConfig,
-    description: 'Returns a single Vega library item by its ID.',
+    description:
+      'Returns the complete state of a Vega library item, including its spec, query, and filters.',
   });
 
   readRoute.addVersion(
