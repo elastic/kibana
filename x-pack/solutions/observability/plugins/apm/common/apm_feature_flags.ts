@@ -16,6 +16,7 @@ export enum ApmFeatureFlagName {
   SourcemapApiAvailable = 'sourcemapApiAvailable',
   StorageExplorerAvailable = 'storageExplorerAvailable',
   RuleFormV2Enabled = 'ruleFormV2Enabled',
+  ManagedTailSamplingAvailable = 'managedTailSamplingAvailable',
 }
 
 const apmFeatureFlagMap = {
@@ -41,6 +42,9 @@ const apmFeatureFlagMap = {
     default: true,
   },
   [ApmFeatureFlagName.RuleFormV2Enabled]: {
+    default: false,
+  },
+  [ApmFeatureFlagName.ManagedTailSamplingAvailable]: {
     default: false,
   },
 };

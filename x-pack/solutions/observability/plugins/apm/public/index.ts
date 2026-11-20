@@ -28,6 +28,7 @@ export interface ConfigSchema {
     // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingIntegrationAvailable: boolean;
     ruleFormV2Enabled: boolean;
+    managedTailSamplingAvailable: boolean;
   };
   serverless: {
     enabled: boolean;
