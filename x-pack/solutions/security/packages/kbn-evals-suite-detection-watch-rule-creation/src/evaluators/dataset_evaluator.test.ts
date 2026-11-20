@@ -149,6 +149,71 @@ describe('createMitreAccuracyEvaluator', () => {
     );
     expect(result.score).toBeLessThan(1);
   });
+
+  describe('sub-technique nested under its parent (canonical threat shape)', () => {
+    const nestedRule = (techniques: Array<{ id: string; subtechnique?: Array<{ id: string }> }>) =>
+      makeRule({ threat: [{ technique: techniques }] });
+
+    it('scores 1 when the required sub-technique is nested under its optional parent', async () => {
+      const result = await evaluator.evaluate(
+        makeArgs(nestedRule([{ id: 'T1053', subtechnique: [{ id: 'T1053.005' }] }]), {
+          mitreIds: ['T1053.005'],
+          optionalMitreIds: ['T1053'],
+        })
+      );
+      expect(result.score).toBe(1);
+      expect(result.metadata).toMatchObject({ precision: 1, recall: 1 });
+    });
+
+    it('still gives 0.5 recall credit when only the parent is tagged', async () => {
+      const result = await evaluator.evaluate(
+        makeArgs(nestedRule([{ id: 'T1053', subtechnique: [] }]), {
+          mitreIds: ['T1053.005'],
+          optionalMitreIds: ['T1053'],
+        })
+      );
+      expect(result.metadata).toMatchObject({ precision: 0.5, recall: 0.5 });
+      expect(result.score).toBe(0.5);
+    });
+
+    it('still penalises an unrelated extra technique next to the nested pair', async () => {
+      const result = await evaluator.evaluate(
+        makeArgs(
+          nestedRule([
+            { id: 'T1053', subtechnique: [{ id: 'T1053.005' }] },
+            { id: 'T1059', subtechnique: [] },
+          ]),
+          { mitreIds: ['T1053.005'], optionalMitreIds: ['T1053'] }
+        )
+      );
+      // T1053 is neutral; T1053.005 scores 1, T1059 scores 0 -> precision 0.5, recall 1.
+      expect(result.metadata).toMatchObject({ precision: 0.5, recall: 1 });
+      expect(result.score).toBeCloseTo(2 / 3);
+    });
+
+    it('does not penalise a sub-technique nested under a required parent', async () => {
+      const result = await evaluator.evaluate(
+        makeArgs(nestedRule([{ id: 'T1027', subtechnique: [{ id: 'T1027.010' }] }]), {
+          mitreIds: ['T1027'],
+        })
+      );
+      expect(result.score).toBe(1);
+    });
+
+    it('still penalises a sub-technique of a different parent than the required one', async () => {
+      const result = await evaluator.evaluate(
+        makeArgs(
+          nestedRule([
+            { id: 'T1027', subtechnique: [] },
+            { id: 'T1059', subtechnique: [{ id: 'T1059.001' }] },
+          ]),
+          { mitreIds: ['T1027'] }
+        )
+      );
+      expect(result.metadata).toMatchObject({ recall: 1 });
+      expect(result.score).toBeLessThan(1);
+    });
+  });
 });
 
 describe('createSeverityValidityEvaluator', () => {
