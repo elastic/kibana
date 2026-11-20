@@ -49,7 +49,7 @@ const setup = ({
 }: {
   stored?: CustomContextSnippet[];
   nightshiftEnabled?: boolean;
-  user?: { username: string; full_name?: string } | null;
+  user?: { username: string; full_name?: string; email?: string } | null;
   hasReadPrivilege?: boolean;
   withSecurityPlugin?: boolean;
 } = {}) => {
@@ -59,7 +59,7 @@ const setup = ({
   );
   jest
     .mocked(core.security.authc.getCurrentUser)
-    .mockReturnValue(user ? mockAuthenticatedUser({ full_name: '', ...user }) : null);
+    .mockReturnValue(user ? mockAuthenticatedUser({ full_name: '', email: '', ...user }) : null);
 
   const savedObjects = savedObjectsServiceMock.createStartContract();
   const soClient = savedObjectsClientMock.create();
@@ -194,7 +194,13 @@ describe('createCustomContextClient', () => {
     });
   });
 
-  it('falls back to the username, then to Unknown, for the author', async () => {
+  it('falls back to the email, then the username, then to Unknown, for the author', async () => {
+    const withEmail = setup({ user: { username: '12345', email: 'jdoe@example.com' } });
+    const byEmail = await withEmail.client.replace(withEmail.request, {
+      snippets: [{ text: 'a' }],
+    });
+    expect(byEmail.snippets[0].author_name).toBe('jdoe@example.com');
+
     const withUsername = setup({ user: { username: 'jdoe' } });
     const byUsername = await withUsername.client.replace(withUsername.request, {
       snippets: [{ text: 'a' }],

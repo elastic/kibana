@@ -7,7 +7,7 @@
 
 import { EuiBadge, EuiText } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import type { BrowserFields } from '../../../../common/containers/source';
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
@@ -36,12 +36,14 @@ const BadgeHighlighted = styled(EuiBadge)`
 BadgeHighlighted.displayName = 'BadgeHighlighted';
 
 const HighlightedBackground = styled.span`
-  background-color: ${(props) => props.theme.eui.euiColorLightShade};
+  background-color: ${(props) => props.theme.euiTheme.colors.lightShade};
 `;
 
 HighlightedBackground.displayName = 'HighlightedBackground';
 
-const EmptyContainer = styled.div<{ showSmallMsg: boolean }>`
+const EmptyContainer = styled('div', {
+  shouldForwardProp: (prop) => prop !== 'showSmallMsg',
+})<{ showSmallMsg: boolean }>`
   width: ${(props) => (props.showSmallMsg ? '60px' : 'auto')};
   align-items: center;
   display: flex;
@@ -53,7 +55,7 @@ const EmptyContainer = styled.div<{ showSmallMsg: boolean }>`
   ${(props) =>
     props.showSmallMsg
       ? `
-      border-right: 1px solid ${props.theme.eui.euiColorMediumShade};
+      border-right: 1px solid ${props.theme.euiTheme.colors.mediumShade};
       margin-right: 10px;
     `
       : `
