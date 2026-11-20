@@ -91,7 +91,9 @@ function serializeSelector(selector: object): string {
   return JSON.stringify(selector, (_key, value: unknown) => {
     if (value && typeof value === 'object' && !Array.isArray(value)) {
       return Object.fromEntries(
-        Object.entries(value).sort(([left], [right]) => left.localeCompare(right))
+        Object.entries(value)
+          .filter(([, selected]) => selected !== false)
+          .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
       );
     }
     return value;
