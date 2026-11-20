@@ -312,7 +312,10 @@ export async function runDockerServer(
     // `stop()` aborts the wait so its timers do not keep the process alive
     await Promise.race([waitUntilReady(server, logLine$, log, abort$), exited]);
   } catch (error) {
-    await stop();
+    // the start failure is the one to report; a stop failure on top of it is logged
+    await stop().catch((stopError) => {
+      log.error(`[docker:${name}] failed to stop after a failed start: ${stopError?.message}`);
+    });
     throw error;
   } finally {
     signal?.removeEventListener('abort', onAbort);

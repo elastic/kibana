@@ -69,7 +69,7 @@ describe('waitForSecurityIndex', () => {
   });
 
   test(`a SIGINT while waiting exits through exit-hook, and the listener is removed afterwards`, async () => {
-    const exitSpy = jest.spyOn(process, 'exit').mockImplementation((() => {}) as any);
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const listenersBefore = process.listeners('SIGINT');
     const client = {
       security: {

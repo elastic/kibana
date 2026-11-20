@@ -78,7 +78,7 @@ it('waits for managed process and Elasticsearch shutdown after SIGTERM', async (
 
 describe('registerServerShutdown', () => {
   it('lets the first signal run the shutdown and exits right away on the second one', () => {
-    const exitSpy = jest.spyOn(process, 'exit').mockImplementation((() => {}) as any);
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const stderrSpy = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
     const before = process.listeners('SIGINT');
 

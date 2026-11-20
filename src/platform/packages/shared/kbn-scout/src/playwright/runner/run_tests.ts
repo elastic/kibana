@@ -14,18 +14,13 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { pickLevelFromFlags } from '@kbn/tooling-log';
-import { once } from 'lodash';
 import { basename, isAbsolute, relative, resolve } from 'path';
 import { silence } from '../../common';
-import {
-  preCreateSecurityIndexesViaSamlAuth,
-  runDockerServers,
-  runElasticsearch,
-  runKibanaServer,
-} from '../../servers';
+import { preCreateSecurityIndexesViaSamlAuth, runKibanaServer } from '../../servers';
 import { asError } from '../../servers/as_error';
+import type { BackingServices } from '../../servers/backing_services';
+import { resolveRunOutcome, startBackingServices } from '../../servers/backing_services';
 import { getConfigRootDir, loadServersConfig } from '../../servers/configs';
-import { logFleetPackageRegistryHint } from '../../servers/configs/fleet_package_registry';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 import { registerServerShutdown } from '../../servers/server_shutdown';
 import type { ScoutPlaywrightProjects } from '../types';
@@ -126,77 +121,41 @@ async function runLocalServersAndTests(
   cmd: string,
   cmdArgs: string[],
   env: Record<string, string> = {}
-) {
+): Promise<'ok' | 'interrupted'> {
   const configRootDir = getConfigRootDir(options.configPath, options.testTarget);
   const config = await loadServersConfig(options.testTarget, log, configRootDir);
-  const abortDockerStart = new AbortController();
 
-  // A backing service (Elasticsearch, Kibana, a docker container) died on its own. Stop the run:
-  // the tests would otherwise fail one by one with opaque errors, and report this exit instead.
-  let earlyExitError: Error | undefined;
-  const onEarlyExit = (msg: string) => {
-    log.error(msg);
-    earlyExitError = earlyExitError ?? new Error(msg);
-    procs.teardown().catch((error) => log.error(error));
-  };
+  let backing: BackingServices | undefined;
+  const shutdownBackingServices = () => backing?.shutdown() ?? Promise.resolve();
 
-  let shutdownEs: (() => Promise<void>) | undefined;
-  let stopDockerServers: (() => Promise<void>) | undefined;
-  let dockerStartup: Promise<() => Promise<void>> | undefined;
-  let esStartup: Promise<() => Promise<void>> | undefined;
-
-  // Runs once, from the signal hook or from the teardown below, whichever comes first. A start
-  // still in progress is aborted (docker) or waited for (Elasticsearch) so nothing is left
-  // behind, then whatever came up is stopped.
-  const shutdownBackingServices = once(async () => {
-    abortDockerStart.abort();
-    await dockerStartup?.catch(() => {});
-    await esStartup?.catch(() => {});
-    const errors: Error[] = [];
-    const stop = async (fn?: () => Promise<void>) => {
-      try {
-        await fn?.();
-      } catch (error) {
-        errors.push(asError(error));
-      }
-    };
-    await stop(shutdownEs);
-    await stop(stopDockerServers);
-    if (errors.length > 0) {
-      throw errors[0];
-    }
-  });
+  // Registered before anything starts: a SIGINT/SIGTERM during the registry readiness wait or
+  // the Elasticsearch boot must not leave a detached container holding its port.
   let interrupted = false;
   const removeShutdownHook = registerServerShutdown(procs, () => {
     interrupted = true;
     return shutdownBackingServices();
   });
 
+  // A backing service (Elasticsearch, Kibana, a docker container) died on its own. Stop the run:
+  // the tests would otherwise fail one by one with opaque errors, and report this exit instead.
+  // SIGTERM, so the Playwright runner still writes its reports.
+  let earlyExitError: Error | undefined;
+  const onEarlyExit = (msg: string) => {
+    log.error(msg);
+    earlyExitError = earlyExitError ?? new Error(msg);
+    procs.teardown('SIGTERM').catch((error) => log.error(error));
+  };
+
   let runError: Error | undefined;
   try {
-    logFleetPackageRegistryHint(log);
-    // Docker-backed services (e.g. the Fleet package registry) and Elasticsearch do not depend
-    // on each other, so they start together; both must be up before Kibana boots.
-    dockerStartup = runDockerServers({
+    // Both must be up before Kibana boots.
+    backing = startBackingServices({
       config,
       log,
       onEarlyExit,
-      signal: abortDockerStart.signal,
-    }).then((stop) => {
-      stopDockerServers = stop;
-      return stop;
+      es: { esFrom: options.esFrom, logsDir: options.logsDir },
     });
-    esStartup = runElasticsearch({
-      onEarlyExit,
-      config,
-      log,
-      esFrom: options.esFrom,
-      logsDir: options.logsDir,
-    }).then((shutdown) => {
-      shutdownEs = shutdown;
-      return shutdown;
-    });
-    await Promise.all([dockerStartup, esStartup]);
+    await backing.ready;
 
     await runKibanaServer({
       procs,
@@ -224,22 +183,14 @@ async function runLocalServersAndTests(
   await shutdownBackingServices().catch((error) => shutdownErrors.push(asError(error)));
   removeShutdownHook();
 
-  if (earlyExitError !== undefined) {
-    throw earlyExitError;
-  }
-  // The run was interrupted by a signal: whatever the aborted step threw is not a failure to
-  // report; exit with the signal's code, as exit-hook does once its hooks are done.
-  if (interrupted || runError?.name === 'AbortError') {
-    log.info('scout: run interrupted');
-    process.exitCode = 130;
-    return;
-  }
-  if (runError !== undefined) {
-    throw runError;
-  }
-  if (shutdownErrors.length > 0) {
-    throw shutdownErrors[0];
-  }
+  return resolveRunOutcome({
+    log,
+    earlyExitError,
+    interrupted,
+    interruptedMessage: 'scout: run interrupted',
+    runError,
+    shutdownError: shutdownErrors[0],
+  });
 }
 
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
@@ -307,7 +258,18 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     }
 
     if (pwProject === 'local') {
-      await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs, pwEnv);
+      const outcome = await runLocalServersAndTests(
+        procs,
+        log,
+        options,
+        pwBinPath,
+        pwCmdArgs,
+        pwEnv
+      );
+      if (outcome === 'interrupted') {
+        // not a successful run to report
+        return;
+      }
     } else {
       await runPlaywrightTest(procs, pwBinPath, pwCmdArgs, pwEnv);
     }

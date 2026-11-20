@@ -85,6 +85,7 @@ export async function runElasticsearch(
     logsDir,
     config,
     preserveEsData: options.preserveEsData,
+    onEarlyExit: options.onEarlyExit,
   });
 
   // Start linked cluster for Cross Project Search after origin is ready

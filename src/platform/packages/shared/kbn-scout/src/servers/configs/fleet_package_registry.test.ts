@@ -8,7 +8,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { getFleetPackageRegistry, logFleetPackageRegistryHint } from './fleet_package_registry';
+import { assertFleetPackageRegistry, getFleetPackageRegistry } from './fleet_package_registry';
 
 describe('getFleetPackageRegistry', () => {
   it('is disabled when neither variable is set', () => {
@@ -66,19 +66,23 @@ describe('getFleetPackageRegistry', () => {
     expect(getFleetPackageRegistry({}).dockerServer).toMatchObject({ enabled: false });
   });
 
-  it('fails fast when the opt-in is set without a port', () => {
-    expect(() => getFleetPackageRegistry({ SCOUT_FLEET_PACKAGE_REGISTRY: 'true' })).toThrow(
-      /FLEET_PACKAGE_REGISTRY_PORT is not/
-    );
+  it('carries the error for an opt-in without a port instead of throwing at config load', () => {
+    expect(getFleetPackageRegistry({ SCOUT_FLEET_PACKAGE_REGISTRY: 'true' })).toMatchObject({
+      enabled: false,
+      error: expect.stringMatching(/FLEET_PACKAGE_REGISTRY_PORT is not/),
+    });
   });
 
-  it('fails fast on a port that is not a number when opted in', () => {
-    expect(() =>
+  it('carries the error for a port that is not a number when opted in', () => {
+    expect(
       getFleetPackageRegistry({
         FLEET_PACKAGE_REGISTRY_PORT: 'abc',
         SCOUT_FLEET_PACKAGE_REGISTRY: 'true',
       })
-    ).toThrow(/must be a valid port number/);
+    ).toMatchObject({
+      enabled: false,
+      error: expect.stringMatching(/must be a valid port number/),
+    });
   });
 
   it('ignores a bad port without the opt-in, so runs that never asked for the registry still boot', () => {
@@ -90,7 +94,7 @@ describe('getFleetPackageRegistry', () => {
   });
 });
 
-describe('logFleetPackageRegistryHint', () => {
+describe('assertFleetPackageRegistry', () => {
   const logWith = () => {
     const log = new ToolingLog({ level: 'silent', writeTo: process.stdout });
     const info = jest.spyOn(log, 'info');
@@ -99,7 +103,7 @@ describe('logFleetPackageRegistryHint', () => {
 
   it('explains why the registry is not started when only the port is set', () => {
     const { log, info } = logWith();
-    logFleetPackageRegistryHint(log, { FLEET_PACKAGE_REGISTRY_PORT: '6104' });
+    assertFleetPackageRegistry(log, { FLEET_PACKAGE_REGISTRY_PORT: '6104' });
     expect(info).toHaveBeenCalledWith(
       expect.stringContaining('SCOUT_FLEET_PACKAGE_REGISTRY is not')
     );
@@ -107,11 +111,18 @@ describe('logFleetPackageRegistryHint', () => {
 
   it('says nothing when the registry is enabled or the port is unset', () => {
     const { log, info } = logWith();
-    logFleetPackageRegistryHint(log, {
+    assertFleetPackageRegistry(log, {
       FLEET_PACKAGE_REGISTRY_PORT: '6104',
       SCOUT_FLEET_PACKAGE_REGISTRY: 'true',
     });
-    logFleetPackageRegistryHint(log, {});
+    assertFleetPackageRegistry(log, {});
     expect(info).not.toHaveBeenCalled();
+  });
+
+  it('throws when the opt-in cannot be honoured, right before the servers start', () => {
+    const { log } = logWith();
+    expect(() => assertFleetPackageRegistry(log, { SCOUT_FLEET_PACKAGE_REGISTRY: 'true' })).toThrow(
+      /FLEET_PACKAGE_REGISTRY_PORT is not/
+    );
   });
 });

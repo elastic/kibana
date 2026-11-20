@@ -38,6 +38,11 @@ export interface ScoutFleetPackageRegistry {
    * file and readiness line as the FTR Fleet suites, enabled per the rule above.
    */
   dockerServer: DockerServerSpec;
+  /**
+   * Why the opt-in cannot be honoured (no port, or not a port number). Reported when the servers
+   * start, through `assertFleetPackageRegistry`, so loading a config set never throws.
+   */
+  error?: string;
 }
 
 const toDockerServer = (enabled: boolean, port: number | undefined): DockerServerSpec => ({
@@ -62,23 +67,25 @@ export function getFleetPackageRegistry(
 
   // Without the opt-in the port is informational only (CI exports it for every job), so a bad
   // value must not break runs that never asked for the registry. This runs at module load of the
-  // base configs, i.e. for every Scout server start.
+  // base configs, which every config set imports, so it never throws: a misconfigured opt-in is
+  // carried as `error` and reported when the servers start.
   if (!optIn) {
     const port = validPort ? parsedPort : undefined;
     return { enabled: false, port, kbnServerArgs: [], dockerServer: toDockerServer(false, port) };
   }
 
-  if (parsedPort === undefined) {
-    throw new Error(
-      `${SCOUT_FLEET_PACKAGE_REGISTRY_ENV} is set but ${FLEET_PACKAGE_REGISTRY_PORT_ENV} is not: ` +
-        'the package registry container needs a host port to publish on'
-    );
-  }
-
-  if (!validPort) {
-    throw new Error(
-      `${FLEET_PACKAGE_REGISTRY_PORT_ENV} must be a valid port number, got "${rawPort}"`
-    );
+  if (parsedPort === undefined || !validPort) {
+    return {
+      enabled: false,
+      port: undefined,
+      kbnServerArgs: [],
+      dockerServer: toDockerServer(false, undefined),
+      error:
+        parsedPort === undefined
+          ? `${SCOUT_FLEET_PACKAGE_REGISTRY_ENV} is set but ${FLEET_PACKAGE_REGISTRY_PORT_ENV} is not: ` +
+            'the package registry container needs a host port to publish on'
+          : `${FLEET_PACKAGE_REGISTRY_PORT_ENV} must be a valid port number, got "${rawPort}"`,
+    };
   }
 
   return {
@@ -90,12 +97,16 @@ export function getFleetPackageRegistry(
 }
 
 /**
- * Before the docker servers start: say why the registry container is not going to run when the
- * port alone is set, since the port alone used to flip `dockerServers.registry.enabled` even
- * though nothing started the container.
+ * Before the docker servers start: fail on an opt-in that cannot be honoured, and say why the
+ * registry container is not going to run when the port alone is set (the port alone used to
+ * flip `dockerServers.registry.enabled` even though nothing started the container).
  */
-export function logFleetPackageRegistryHint(log: ToolingLog, env: NodeJS.ProcessEnv = process.env) {
-  if (env[FLEET_PACKAGE_REGISTRY_PORT_ENV] && !getFleetPackageRegistry(env).enabled) {
+export function assertFleetPackageRegistry(log: ToolingLog, env: NodeJS.ProcessEnv = process.env) {
+  const registry = getFleetPackageRegistry(env);
+  if (registry.error) {
+    throw new Error(registry.error);
+  }
+  if (env[FLEET_PACKAGE_REGISTRY_PORT_ENV] && !registry.enabled) {
     log.info(
       `scout: ${FLEET_PACKAGE_REGISTRY_PORT_ENV} is set but ${SCOUT_FLEET_PACKAGE_REGISTRY_ENV} is not; ` +
         'the Fleet package registry container is not started and Kibana installs packages from the public EPR'

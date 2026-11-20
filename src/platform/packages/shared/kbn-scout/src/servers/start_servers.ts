@@ -11,23 +11,17 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
-import { once } from 'lodash';
 import { silence } from '../common';
 import { getPlaywrightGrepTag } from '../playwright/utils';
 import { asError } from './as_error';
+import type { BackingServices } from './backing_services';
+import { resolveRunOutcome, startBackingServices } from './backing_services';
 import { getConfigRootDir, loadServersConfig } from './configs';
-import { logFleetPackageRegistryHint } from './configs/fleet_package_registry';
 import type { StartServerOptions } from './flags';
 import { preCreateSecurityIndexesViaSamlAuth } from './pre_create_security_indexes';
 import { ensureDefaultSpaceNPRE } from './ensure_default_space_npre';
-import type { StopDockerServers } from './run_docker_servers';
-import { runDockerServers } from './run_docker_servers';
-import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
 import { registerServerShutdown, shutdownServers } from './server_shutdown';
-
-/** Exit code of a run interrupted by SIGINT, the one exit-hook uses as well. */
-const SIGINT_EXIT_CODE = 130;
 
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
@@ -45,33 +39,8 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     const config = await loadServersConfig(options.testTarget, log, configRootDir);
     const pwGrepTag = getPlaywrightGrepTag(options.testTarget);
 
-    const abortDockerStart = new AbortController();
-    let dockerStartup: Promise<StopDockerServers> | undefined;
-    let esStartup: Promise<() => Promise<void>> | undefined;
-    let stopDockerServers: StopDockerServers | undefined;
-    let shutdownEs: (() => Promise<void>) | undefined;
-
-    // Runs once, from the signal hook, an early exit or the normal shutdown, whichever comes
-    // first. A start still in progress is aborted (docker) or waited for (Elasticsearch) so that
-    // nothing is left behind, then whatever came up is stopped.
-    const shutdownBackingServices = once(async () => {
-      abortDockerStart.abort();
-      await dockerStartup?.catch(() => {});
-      await esStartup?.catch(() => {});
-      const errors: Error[] = [];
-      const stop = async (fn?: () => Promise<void>) => {
-        try {
-          await fn?.();
-        } catch (error) {
-          errors.push(asError(error));
-        }
-      };
-      await stop(shutdownEs);
-      await stop(stopDockerServers);
-      if (errors.length > 0) {
-        throw errors[0];
-      }
-    });
+    let backing: BackingServices | undefined;
+    const shutdownBackingServices = () => backing?.shutdown() ?? Promise.resolve();
 
     // Registered before anything starts: a SIGINT/SIGTERM during the registry readiness wait or
     // the Elasticsearch boot must not leave a detached container holding its port.
@@ -93,34 +62,22 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       shutdownServers(procs, shutdownBackingServices).catch((error) => log.error(error));
     };
 
-    let startupError: Error | undefined;
+    let runError: Error | undefined;
 
     try {
-      logFleetPackageRegistryHint(log);
-      // Docker-backed services (e.g. the Fleet package registry) and Elasticsearch do not depend
-      // on each other, so they start together. Both must be up before Kibana boots, otherwise
-      // Fleet setup falls back to retrying against a registry that is not there yet.
-      dockerStartup = runDockerServers({
+      // Both must be up before Kibana boots, otherwise Fleet setup falls back to retrying
+      // against a registry that is not there yet.
+      backing = startBackingServices({
         config,
         log,
         onEarlyExit,
-        signal: abortDockerStart.signal,
-      }).then((stop) => {
-        stopDockerServers = stop;
-        return stop;
+        es: {
+          esFrom: options.esFrom,
+          preserveEsData: options.preserveEsData,
+          logsDir: options.logsDir,
+        },
       });
-      esStartup = runElasticsearch({
-        config,
-        log,
-        esFrom: options.esFrom,
-        preserveEsData: options.preserveEsData,
-        logsDir: options.logsDir,
-        onEarlyExit,
-      }).then((shutdown) => {
-        shutdownEs = once(shutdown);
-        return shutdownEs;
-      });
-      await Promise.all([dockerStartup, esStartup]);
+      await backing.ready;
 
       await ensureDefaultSpaceNPRE(config, log);
 
@@ -159,7 +116,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
 
       await procs.waitForAllToStop();
     } catch (error) {
-      startupError = asError(error);
+      runError = asError(error);
     }
 
     // Whatever failed, do not leave a detached container holding its port for the next run.
@@ -172,28 +129,13 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     }
     removeShutdownHook();
 
-    if (earlyExitError !== undefined) {
-      if (shutdownError !== undefined) {
-        log.error(`shutdown after a failed start also failed: ${shutdownError.message}`);
-      }
-      throw earlyExitError;
-    }
-    // The start was interrupted by a signal: whatever the aborted step threw (the docker start's
-    // AbortError, "ProcRunner is closing" from a Kibana start cut short) is not a failure to
-    // report; exit with the signal's code, as exit-hook does once its hooks are done.
-    if (interrupted || startupError?.name === 'AbortError') {
-      log.info('scout: server start interrupted');
-      process.exitCode = SIGINT_EXIT_CODE;
-      return;
-    }
-    if (startupError !== undefined) {
-      if (shutdownError !== undefined) {
-        log.error(`shutdown after a failed start also failed: ${shutdownError.message}`);
-      }
-      throw startupError;
-    }
-    if (shutdownError !== undefined) {
-      throw shutdownError;
-    }
+    resolveRunOutcome({
+      log,
+      earlyExitError,
+      interrupted,
+      interruptedMessage: 'scout: server start interrupted',
+      runError,
+      shutdownError,
+    });
   });
 }

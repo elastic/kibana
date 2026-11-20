@@ -89,7 +89,7 @@ describe('waitUntilClusterReady', () => {
   });
 
   test(`a SIGINT while waiting exits through exit-hook, so async shutdown hooks still run`, async () => {
-    const exitSpy = jest.spyOn(process, 'exit').mockImplementation((() => {}) as any);
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const listenersBefore = process.listeners('SIGINT');
     health.mockImplementationOnce(async () => {
       const added = process.listeners('SIGINT').filter((l) => !listenersBefore.includes(l));
