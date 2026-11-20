@@ -85,16 +85,7 @@
     "qs",
     // Imported by the kbn-ui and console packaging webpack configs, which live in packages
     // without their own dependency manifest, so knip attributes the import to those packages.
-    "clean-webpack-plugin",
-    // Peer dependencies of @prometheus-io/codemirror-promql (pulled in by monaco-promql).
-    // autoInstallPeers is disabled, so they must be declared at the root even though
-    // nothing in Kibana imports them directly.
-    "@codemirror/autocomplete",
-    "@codemirror/language",
-    "@codemirror/lint",
-    "@codemirror/state",
-    "@codemirror/view",
-    "@lezer/common"
+    "clean-webpack-plugin"
   ],
   "workspaces": {
     ".": {

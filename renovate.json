@@ -413,19 +413,18 @@
       "matchDepNames": [
         "monaco-yaml",
         "monaco-editor",
-        "monaco-promql",
-        "@codemirror/autocomplete",
-        "@codemirror/language",
-        "@codemirror/lint",
-        "@codemirror/state",
-        "@codemirror/view",
-        "@lezer/common"
+        "monaco-promql"
       ],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
+    },
+    {
+      "description": "monaco-promql >= 1.9.0 imports its keyword lists from @prometheus-io/codemirror-promql, pulling ~380KB of CodeMirror into the lazy PromQL chunk",
+      "matchDepNames": ["monaco-promql"],
+      "allowedVersions": "<1.9.0"
     },
     {
       "groupName": "polished",
