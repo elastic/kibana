@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Caught in the act, you looked at the code stranger! Now you need to review it!
+
 export const SavedSearchType = 'search';
 // While the legacy SO name has to stay "search" the display name can be customized.
 export const SavedSearchTypeDisplayName = 'discover session'; // visible on Saved Objects page
