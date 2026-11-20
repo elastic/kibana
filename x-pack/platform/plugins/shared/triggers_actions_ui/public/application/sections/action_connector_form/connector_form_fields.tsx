@@ -10,7 +10,11 @@ import React, { memo, Suspense, useContext } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiErrorBoundary } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { connectorTypeIsDual, getConnectorSpec } from '@kbn/connector-specs';
+import {
+  connectorTypeIsDual,
+  getConnectorSpec,
+  getOutboundToggleDefaultAuthTypeId,
+} from '@kbn/connector-specs';
 
 import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
@@ -24,19 +28,6 @@ import {
   OutboundFormSection,
   OutboundSectionTitle,
 } from './inbound_events_form_section';
-
-/** First auth type with credentials, when the spec also offers no authentication. */
-const getOutboundToggleDefaultAuthTypeId = (
-  actionTypeId: string | undefined
-): string | undefined => {
-  const authTypeIds = (getConnectorSpec(actionTypeId ?? '')?.auth?.types ?? []).map((authType) =>
-    typeof authType === 'string' ? authType : authType.type
-  );
-  if (!authTypeIds.includes('none')) {
-    return undefined;
-  }
-  return authTypeIds.find((authTypeId) => authTypeId !== 'none');
-};
 
 interface ConnectorFormFieldsProps {
   actionTypeModel: ActionTypeModel | null;
@@ -76,7 +67,9 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   const showDualInbound = isDual && isClusterInboundEventsEnabled && showInboundEvents;
   // Dual connectors that can run without credentials get an Outbound on/off switch.
   const outboundToggleAuthTypeId =
-    isDual && showInboundEvents ? getOutboundToggleDefaultAuthTypeId(actionTypeId) : undefined;
+    actionTypeId != null && showInboundEvents
+      ? getOutboundToggleDefaultAuthTypeId(getConnectorSpec(actionTypeId))
+      : undefined;
   const showSettingsSection =
     FieldsComponent !== null || settingsContent != null || showDualInbound;
   const showSettingsTitle =

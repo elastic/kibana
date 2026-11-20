@@ -14,7 +14,7 @@ import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/publ
 import type { IconType } from '@elastic/eui';
 import {
   getConnectorSpec,
-  isDualConnectorSpec,
+  getOutboundToggleDefaultAuthTypeId,
   isInboundOnlyConnectorSpec,
 } from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
@@ -159,18 +159,8 @@ export function transformSpecToActionTypeModel(
       }
       const connectorZodSchema: ConnectorZodSchema = parsedZodSchema;
       const specActions = spec.actions ?? [];
-      const authTypeIds = (registeredSpec?.auth?.types ?? []).map((authTypeDef) =>
-        typeof authTypeDef === 'string' ? authTypeDef : authTypeDef.type
-      );
-
-      // Dual connectors that also offer no authentication get an Outbound switch, which is the
-      // only way to choose it. Leave No authentication out of the auth picker for them.
-      if (
-        registeredSpec !== undefined &&
-        isDualConnectorSpec(registeredSpec) &&
-        authTypeIds.includes(NO_AUTH_TYPE_ID) &&
-        authTypeIds.some((authTypeId) => authTypeId !== NO_AUTH_TYPE_ID)
-      ) {
+      // Connectors with an Outbound switch choose No authentication only through the switch.
+      if (getOutboundToggleDefaultAuthTypeId(registeredSpec) !== undefined) {
         hideAuthTypeInPicker(connectorZodSchema, NO_AUTH_TYPE_ID);
       }
 
