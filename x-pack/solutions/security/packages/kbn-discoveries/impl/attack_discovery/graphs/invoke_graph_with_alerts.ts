@@ -8,6 +8,7 @@
 import type { Document } from '@langchain/core/documents';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
@@ -54,6 +55,11 @@ export interface InvokeAttackDiscoveryGraphWithAlertsParams {
   replacements?: Replacements;
   size?: number;
   start?: string;
+  /**
+   * Token-usage attribution for the graph's model calls. Callers that belong to a product with its
+   * own cost rollup set it; unset leaves the calls with the default attribution.
+   */
+  telemetryMetadata?: TelemetryMetadata;
 }
 
 export interface InvokeGraphResult {
@@ -90,6 +96,7 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
   replacements = {},
   size = 10,
   start,
+  telemetryMetadata,
 }: InvokeAttackDiscoveryGraphWithAlertsParams): Promise<InvokeGraphResult> => {
   const { action_type_id: actionTypeId, connector_id: connectorId, model } = apiConfig;
 
@@ -104,6 +111,7 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
     llmType,
     logger,
     model,
+    ...(telemetryMetadata != null ? { telemetryMetadata } : {}),
     temperature: 0,
     timeout: connectorTimeout,
     traceOptions: {
@@ -120,6 +128,7 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
     inferenceClient: isInferenceEndpoint ? inferenceClient : undefined,
     connectorId,
     logger,
+    ...(telemetryMetadata != null ? { telemetryMetadata } : {}),
     timeout: connectorTimeout,
   });
 

@@ -47,6 +47,12 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
+  describe('authz.uiam', () => {
+    it('is null (UIAM authorization requires the security plugin)', () => {
+      expect(implementation.authz.uiam).toBeNull();
+    });
+  });
+
   describe('audit.asScoped', () => {
     it('returns null', async () => {
       const logger = implementation.audit.asScoped({} as any);
@@ -82,6 +88,7 @@ describe('getDefaultSecurityImplementation', () => {
       'bindWorkload',
       'unbindWorkload',
       'getWorkloadBinding',
+      'getWorkloadServiceAccountSummary',
       'withScopedRequestForWorkload',
     ] as const)('%s rejects', async (method) => {
       await expect(

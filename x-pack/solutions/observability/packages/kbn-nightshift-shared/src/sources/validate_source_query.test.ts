@@ -8,6 +8,7 @@
 import {
   analyzeSourceQuery,
   getSourceCommandQuery,
+  getSourceLocalIndexExpressions,
   getSourceReadTargets,
   hasMultipleSourceIndices,
   validateSourceQuery,
@@ -106,6 +107,17 @@ describe('validateSourceQuery', () => {
       );
     });
 
+    it('a Nightshift source view inside a quoted list', () => {
+      expectRejected(
+        'FROM "logs-a,$.nightshift.sources.default.abc"',
+        'found "$.nightshift.sources.default.abc"'
+      );
+      expectRejected(
+        'FROM "logs-a,$.nightshift.sources.default.abc,-}"',
+        'found "$.nightshift.sources.default.abc"'
+      );
+    });
+
     it('a $ wildcard that overlaps the Nightshift source namespace', () => {
       expectRejected('FROM $.*', 'found "$.*"');
       expectRejected('FROM $.nightshift.*', 'found "$.nightshift.*"');
@@ -144,6 +156,7 @@ describe('source type', () => {
     expectType('FROM remote:metrics-logstash.node-*', 'metrics');
     expectType('TS remote:my-tsdb-*', 'metrics');
     expectType('FROM logs-*, -remote:*', 'logs');
+    expectType('FROM "logs-*,-remote:*"', 'logs');
     expectType('FROM logs-*, cluster:-traces-*', 'logs');
     expectType('FROM logs-foo.metrics-*', 'logs');
     // The `+01:00` form only parses quoted.
@@ -162,6 +175,7 @@ describe('source type', () => {
     expectTypeError('FROM *:*', 'Index "*:*" is an unscoped wildcard');
     expectTypeError('FROM "remote:*"', 'unscoped wildcard');
     expectTypeError('FROM `*`', 'unscoped wildcard');
+    expectTypeError('FROM "logs-a,*"', 'Index "*" is an unscoped wildcard');
   });
 
   it('rejects indices of more than one type', () => {
@@ -248,7 +262,63 @@ describe('getSourceReadTargets', () => {
     expect(getSourceReadTargets('FROM remote:<logs-{now/d}>')).toMatchObject({ hasRemote: true });
   });
 
+  it('reads each index of a quoted comma list on its own', () => {
+    // ES|QL reads `"a,b"` as two indices, so `has_privileges` must be asked about each one.
+    expect(
+      getSourceReadTargets('FROM "logs-team-a,logs-team-b-*,other:logs-*,-logs-team-a-old"')
+    ).toEqual({ indexPatterns: ['logs-team-a', 'logs-team-b-*'], hasRemote: true });
+  });
+
+  it('splits a quoted list that ends in a stray brace instead of reading it as one name', () => {
+    // A lookahead on `}` once kept every comma when any later part held one.
+    expect(getSourceReadTargets('FROM "logs-nginx,secret,-}"')).toEqual({
+      indexPatterns: ['logs-nginx', 'secret'],
+      hasRemote: false,
+    });
+    expect(getSourceReadTargets('FROM "logs-nginx,secret,x}*"')).toEqual({
+      indexPatterns: ['logs-nginx', 'secret', 'x}*'],
+      hasRemote: false,
+    });
+  });
+
+  it('keeps the comma of a date-math format inside a quoted list', () => {
+    expect(getSourceReadTargets('FROM "<logs-{now/d{yyyy,MM}}>,secret"')).toEqual({
+      indexPatterns: ['logs-*', 'secret'],
+      hasRemote: false,
+    });
+  });
+
+  it('has no target for a name that is only a selector', () => {
+    expect(getSourceReadTargets('FROM "::data"')).toEqual({ indexPatterns: [], hasRemote: false });
+  });
+
+  it('treats an exclusion in a quoted list like the unquoted one', () => {
+    expect(getSourceReadTargets('FROM "logs-*,-remote:*"')).toEqual({
+      indexPatterns: ['logs-*'],
+      hasRemote: false,
+    });
+  });
+
+  it('does not let a cluster prefix in one part of a quoted list hide the others', () => {
+    expect(getSourceReadTargets('FROM "secret-*,other:logs-*"')).toEqual({
+      indexPatterns: ['secret-*'],
+      hasRemote: true,
+    });
+  });
+
   it('throws on a query that does not parse', () => {
     expect(() => getSourceReadTargets('FROM')).toThrow('Invalid ES|QL query');
+  });
+});
+
+describe('getSourceLocalIndexExpressions', () => {
+  it('preserves exact local expressions', () => {
+    expect(
+      getSourceLocalIndexExpressions('FROM logs-*,-logs-archive-*,remote:logs-*,<logs-{now/d}>')
+    ).toEqual(['logs-*', '-logs-archive-*', '<logs-{now/d}>']);
+  });
+
+  it('returns no target for exclusions only', () => {
+    expect(getSourceLocalIndexExpressions('FROM remote:logs-*,-logs-local-*')).toEqual([]);
   });
 });

@@ -18,33 +18,46 @@ const formatValue = (value: unknown): string =>
 const truncate = (text: string): string =>
   text.length > MAX_SUMMARY_LENGTH ? `${text.slice(0, MAX_SUMMARY_LENGTH - 1)}…` : text;
 
-const summarizeAddFields = (processor: DraftProcessor): string | undefined => {
-  const fields = processor.config.find(({ name, telemetry }) => name === 'fields' && !telemetry);
-  if (!fields || !Array.isArray(fields.value)) {
-    return undefined;
-  }
-  return fields.value
-    .flatMap((item) => {
-      if (!isRecord(item)) {
-        return [];
-      }
-      const base = item.location ?? item.context;
-      const target = base
-        ? `${formatValue(base)}.${formatValue(item.path)}`
-        : formatValue(item.path);
-      const value =
-        item.ottl_value !== undefined
-          ? ` = ${formatValue(item.ottl_value)}`
-          : item.value !== undefined
-          ? ` = ${JSON.stringify(item.value)}`
-          : '';
-      return [`${formatValue(item.action ?? 'upsert')} ${target}${value}`];
-    })
-    .join('; ');
-};
+const unscopedEntry = (processor: DraftProcessor, entryName: string) =>
+  processor.config.find(({ name, telemetry }) => name === entryName && !telemetry);
+
+/**
+ * One line per write of a field-writing processor: `add_fields` names fields in a keyed
+ * location, `set` addresses them by path, optionally under a context or a location.
+ */
+const summarizeWrites =
+  (entryName: string) =>
+  (processor: DraftProcessor): string | undefined => {
+    const entry = unscopedEntry(processor, entryName);
+    if (!entry || !Array.isArray(entry.value)) {
+      return undefined;
+    }
+    const writes = entry.value
+      .flatMap((item) => {
+        if (!isRecord(item)) {
+          return [];
+        }
+        const base = item.location ?? item.context;
+        const field = formatValue(item.name ?? item.path);
+        const target = base ? `${formatValue(base)}.${field}` : field;
+        const value =
+          item.ottl_value !== undefined
+            ? ` = ${formatValue(item.ottl_value)}`
+            : item.value !== undefined
+            ? ` = ${JSON.stringify(item.value)}`
+            : '';
+        return [`${formatValue(item.action ?? 'upsert')} ${target}${value}`];
+      })
+      .join('; ');
+    const condition = unscopedEntry(processor, 'condition')?.value;
+    return typeof condition === 'string' && condition.length > 0
+      ? `${writes} if ${condition}`
+      : writes;
+  };
 
 const SUMMARIZERS: Record<string, (processor: DraftProcessor) => string | undefined> = {
-  add_fields: summarizeAddFields,
+  add_fields: summarizeWrites('fields'),
+  set: summarizeWrites('operations'),
 };
 
 /** One-line description of a processor's configuration for its card. */

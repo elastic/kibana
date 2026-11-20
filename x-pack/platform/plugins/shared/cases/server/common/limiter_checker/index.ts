@@ -30,15 +30,20 @@ export class AttachmentLimitChecker {
     ];
   }
 
-  public async validate(requests: AttachmentRequestV2[]) {
+  /**
+   * `replaced` are the stored attachments the requests overwrite. They already count toward the
+   * case total, so their items are subtracted to avoid counting them twice.
+   */
+  public async validate(requests: AttachmentRequestV2[], replaced: AttachmentRequestV2[] = []) {
     for (const limiter of this.limiters) {
       const itemsWithinRequests = limiter.countOfItemsInRequest(requests);
       const hasItemsInRequests = itemsWithinRequests > 0;
 
       const totalAfterRequests = async () => {
         const itemsWithinCase = await limiter.countOfItemsWithinCase(this.caseId);
+        const itemsBeingReplaced = limiter.countOfItemsInRequest(replaced);
 
-        return itemsWithinRequests + itemsWithinCase;
+        return itemsWithinRequests + itemsWithinCase - itemsBeingReplaced;
       };
 
       /**

@@ -11,7 +11,7 @@ value:
       label: my-toggle
       required: false
       type: toggle
-  extractObservables: true
+  extractObservables: false
   workflowTags:
     - soc-triage
     - enrichment

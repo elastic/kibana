@@ -13,7 +13,7 @@ import type { JsonSchema, OpenApiDocument } from './types';
 type Node = Record<string, unknown>;
 
 const OAUTH2 = 'Oauth2';
-const AUTHORIZATION_URL = 'https://accounts.google.com/o/oauth2/auth';
+export const AUTHORIZATION_URL = 'https://accounts.google.com/o/oauth2/auth';
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
 // Discovery schema keywords that mean the same in OpenAPI 3.0 schemas.

@@ -19,13 +19,7 @@ import {
 import type { TaskEvent, TaskRun } from '../task_events';
 import { asTaskRunEvent, TaskPersistence, asTaskManagerStatEvent } from '../task_events';
 import type { ConcreteTaskInstance, TaskEventLogger } from '../task';
-import {
-  getDeleteTaskRunResult,
-  TaskPriority,
-  TaskStatus,
-  TaskCost,
-  InstanceTaskCost,
-} from '../task';
+import { getDeleteTaskRunResult, TaskPriority, TaskStatus, TaskCost } from '../task';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import type { TaskDefinitionRegistry } from '../task_type_dictionary';
@@ -44,6 +38,7 @@ import * as nextRunAtUtils from '../lib/get_next_run_at';
 import { configMock } from '../config.mock';
 import { EsApiKeyStrategy } from '../api_key_strategy';
 import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
+import { taskManagerMetricsTelemetry } from '../otel/task_metrics_telemetry';
 import { asSpaceId } from '@kbn/core-spaces-common';
 
 const baseDelay = 5 * 60 * 1000;
@@ -196,7 +191,7 @@ describe('TaskManagerRunner', () => {
     describe('cost', () => {
       test('task instance cost takes precedence over task definition cost', async () => {
         const { runner } = await pendingStageSetup({
-          instance: { id: 'foo', taskType: 'bar', cost: InstanceTaskCost.Tiny },
+          instance: { id: 'foo', taskType: 'bar', cost: TaskCost.Tiny },
           definitions: {
             bar: {
               title: 'Bar!',
@@ -2160,6 +2155,10 @@ describe('TaskManagerRunner', () => {
           },
         });
 
+        const recordTaskRunDelaySpy = jest
+          .spyOn(taskManagerMetricsTelemetry, 'recordTaskRunDelay')
+          .mockImplementation(() => {});
+
         jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         await runner.run();
 
@@ -2179,6 +2178,8 @@ describe('TaskManagerRunner', () => {
         expect(onTaskEvent).toHaveBeenCalledWith(
           asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
         );
+        expect(recordTaskRunDelaySpy).toHaveBeenCalledWith(expect.any(Number));
+        recordTaskRunDelaySpy.mockRestore();
       });
 
       test('emits TaskEvent when a recurring task is run successfully', async () => {

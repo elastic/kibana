@@ -11,6 +11,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AutomaticImportSamplesIndexService } from './index_service';
 import type { AddSamplesToDataStreamParams } from './index_service';
+import { UPLOAD_SAMPLES_MAX_LINES } from '../../../common';
 
 // Mock the storage adapter
 jest.mock('./storage', () => {
@@ -245,7 +246,7 @@ describe('AutomaticImportSamplesIndexService', () => {
             ],
           },
         },
-        size: 500,
+        size: UPLOAD_SAMPLES_MAX_LINES,
         track_total_hits: false,
       });
 

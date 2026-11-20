@@ -7,7 +7,7 @@
 
 import { sortBy } from 'lodash/fp';
 import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { TableTabState } from '../tabs/table_tab';
 

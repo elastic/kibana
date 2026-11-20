@@ -223,8 +223,6 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
         scopeId={scopeId}
       />
       <GenericEntityFlyoutFooter
-        scopeId={scopeId}
-        isPreviewMode={false}
         entityId={entity.id}
         entityFields={fields}
         assetCriticalityLevel={assetCriticalityLevel}

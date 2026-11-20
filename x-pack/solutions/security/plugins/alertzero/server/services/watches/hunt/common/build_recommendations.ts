@@ -142,7 +142,7 @@ export const templateRecommendations = (result: HuntCoordinatorCoreResult): stri
     lines.push(
       `Review the confirmed indicator match involving ${hostsAndServices
         .slice(0, 5)
-        .join(', ')}; no behavioral query executed for this run, so start from Tier 1's matches.`
+        .join(', ')}; no behavioral query executed for this run, so start from IOC Hunt's matches.`
     );
   }
   if (lines.length === 0) {

@@ -384,6 +384,42 @@ describe('InvestigationsQueryService', () => {
       expect(filter).toContain('created_at >= 2026-01-01T00\\:00\\:00.000Z');
     });
 
+    it('pushes the last-modified window into the search filter', async () => {
+      const { service, client } = setup({ searchResults: [] });
+
+      await service.list(
+        request,
+        parseQuery({
+          updated_after: '2026-01-01T00:00:00.000Z',
+          updated_before: '2026-01-04T00:00:00.000Z',
+        })
+      );
+
+      const filter = searchFilter(client);
+      expect(filter).toContain('updated_at >= 2026-01-01T00\\:00\\:00.000Z');
+      expect(filter).toContain('updated_at <= 2026-01-04T00\\:00\\:00.000Z');
+    });
+
+    it('drops conversations modified outside the last-modified window', async () => {
+      const { service } = setup({
+        searchResults: [
+          conversation('old', { updated_at: '2025-12-30T00:00:00.000Z' }),
+          conversation('in', { updated_at: '2026-01-02T00:00:00.000Z' }),
+          conversation('future', { updated_at: '2026-01-09T00:00:00.000Z' }),
+        ],
+      });
+
+      const response = await service.list(
+        request,
+        parseQuery({
+          updated_after: '2026-01-01T00:00:00.000Z',
+          updated_before: '2026-01-04T00:00:00.000Z',
+        })
+      );
+
+      expect(response.results.map(({ id }) => id)).toEqual(['in']);
+    });
+
     it('pages, sorts, and hydrates only the requested page', async () => {
       const { service, subjectsService } = setup({
         searchResults: [
@@ -681,6 +717,30 @@ describe('InvestigationsQueryService', () => {
       const { results } = await service.list(request, parseQuery({ query: 'checkout' }));
 
       expect(results.map(({ id }) => id).sort()).toEqual(['summary', 'title', 'verdict']);
+    });
+
+    it('returns the assignees, leaving them out when nobody is assigned', async () => {
+      const { service } = setup({
+        searchResults: [
+          conversation('assigned', {
+            metadata: { status: 'open', assignees: ['uid-1', '', 'uid-2'] },
+            updated_at: '2026-01-03T00:00:00.000Z',
+          }),
+          conversation('cleared', {
+            metadata: { status: 'open', assignees: [] },
+            updated_at: '2026-01-02T00:00:00.000Z',
+          }),
+          conversation('never'),
+        ],
+      });
+
+      const { results } = await service.list(request, parseQuery());
+
+      expect(results.map(({ id, metadata }) => ({ id, metadata }))).toEqual([
+        { id: 'assigned', metadata: { status: 'open', assignees: ['uid-1', 'uid-2'] } },
+        { id: 'cleared', metadata: { status: 'open' } },
+        { id: 'never', metadata: { status: 'open' } },
+      ]);
     });
 
     it('reports a title Agent Builder has not generated yet and never matches text against it', async () => {

@@ -8,12 +8,9 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { Fragment, useMemo } from 'react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import {
-  type IdentityFields,
-  ecsSliceToFlattenedDocument,
-} from '../../../../flyout/document_details/shared/utils';
+import { ecsSliceToFlattenedDocument } from '../../../../flyout/document_details/shared/utils';
 import type { PageScope } from '../../../../data_view_manager/constants';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import type {
@@ -26,7 +23,24 @@ import { CellActionsRenderer } from '../../../../common/components/cell_actions/
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { ReputationLink, WhoIsLink } from '../../../../common/components/links';
 import * as i18n from '../details/translations';
-import { FlyoutLink } from '../../../../flyout/shared/components/flyout_link';
+import { FLYOUT_LINK_TEST_ID } from '../../../../flyout/shared/components/test_ids';
+import { OpenFlyoutLink } from '../../../../flyout_v2/shared/components/open_flyout_link';
+
+/**
+ * Wraps the host ECS slice in a minimal record, so `OpenFlyoutLink` can hand it to the host flyout,
+ * which derives the host's entity id (EUID) from it.
+ *
+ * Returns `undefined` when the host has no `host.id`: the EUID would then be derived from
+ * `host.name`, which never matches a stored host entity (they're identified by `host.id`). Without a
+ * record, the host flyout looks the entity up by `host.name` instead.
+ */
+const useHostRecord = (host: HostEcs): DataTableRecord | undefined =>
+  useMemo(() => {
+    const flattened = ecsSliceToFlattenedDocument('host', host);
+    const id = flattened['host.id'];
+    if (!id) return undefined;
+    return { id, raw: { _id: id, _index: '' }, flattened };
+  }, [host]);
 
 export const IpOverviewId = 'ip-overview';
 
@@ -86,7 +100,6 @@ interface HostIdRendererTypes {
   ipFilter?: string;
   noLink?: boolean;
   scopeId: string;
-  isFlyoutOpen: boolean;
 }
 
 export const HostIdRenderer = ({
@@ -95,26 +108,9 @@ export const HostIdRenderer = ({
   ipFilter,
   noLink,
   scopeId,
-  isFlyoutOpen,
 }: HostIdRendererTypes): React.ReactElement => {
-  const euidApi = useEntityStoreEuidApi();
   const hostName = host.name && host.name[0];
-  const identityFields = useMemo((): IdentityFields => {
-    if (euidApi?.euid) {
-      const built = euidApi.euid.getEntityIdentifiersFromDocument(
-        euidApi.getBuiltInEntityDefinition('host'),
-        ecsSliceToFlattenedDocument('host', host)
-      ) as IdentityFields | undefined;
-      if (built && Object.keys(built).length > 0) {
-        return built;
-      }
-      if (hostName != null) {
-        return { 'host.name': hostName };
-      }
-      return {};
-    }
-    return hostName != null ? { 'host.name': hostName } : {};
-  }, [euidApi, host, hostName]);
+  const hostRecord = useHostRecord(host);
   return host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
     <>
       {hostName != null ? (
@@ -127,15 +123,14 @@ export const HostIdRenderer = ({
             noLink ? (
               <>{id}</>
             ) : (
-              <FlyoutLink
-                field={'host.name'}
+              <OpenFlyoutLink
+                field="host.name"
                 value={hostName}
-                identityFields={identityFields}
-                scopeId={scopeId}
-                isFlyoutOpen={isFlyoutOpen}
+                hit={hostRecord}
+                data-test-subj={FLYOUT_LINK_TEST_ID}
               >
                 {id}
-              </FlyoutLink>
+              </OpenFlyoutLink>
             )
           }
         />
@@ -152,43 +147,23 @@ interface HostNameRendererTypes {
   scopeId: PageScope;
   host: HostEcs;
   ipFilter?: string;
-  isFlyoutOpen: boolean;
 }
 export const HostNameRenderer = ({
   scopeId,
   host,
   ipFilter,
-  isFlyoutOpen,
 }: HostNameRendererTypes): React.ReactElement => {
-  const euidApi = useEntityStoreEuidApi();
-  const hostNameFirst = host.name?.[0];
-  const identityFields = useMemo((): IdentityFields => {
-    if (euidApi?.euid) {
-      const built = euidApi.euid.getEntityIdentifiersFromDocument(
-        euidApi.getBuiltInEntityDefinition('host'),
-        ecsSliceToFlattenedDocument('host', host)
-      ) as IdentityFields | undefined;
-      if (built && Object.keys(built).length > 0) {
-        return built;
-      }
-      if (hostNameFirst != null) {
-        return { 'host.name': hostNameFirst };
-      }
-      return {};
-    }
-    return hostNameFirst != null ? { 'host.name': hostNameFirst } : {};
-  }, [euidApi, host, hostNameFirst]);
+  const hostRecord = useHostRecord(host);
   return host.name &&
     host.name[0] &&
     host.ip &&
     (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
     <CellActionsRenderer field={'host.name'} value={host.name[0]} scopeId={scopeId}>
-      <FlyoutLink
-        field={'host.name'}
+      <OpenFlyoutLink
+        field="host.name"
         value={host.name[0]}
-        identityFields={identityFields}
-        scopeId={scopeId}
-        isFlyoutOpen={isFlyoutOpen}
+        hit={hostRecord}
+        data-test-subj={FLYOUT_LINK_TEST_ID}
       />
     </CellActionsRenderer>
   ) : (

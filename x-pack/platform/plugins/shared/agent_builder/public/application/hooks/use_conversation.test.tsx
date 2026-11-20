@@ -106,7 +106,8 @@ describe('useConversation polling', () => {
       mutateSendMessage: jest.fn(),
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
-      cancelAllStreams: jest.fn(),
+      mutateAttach: jest.fn(),
+      detachAllStreams: jest.fn(),
     });
     mockUseStreamRecord.mockReturnValue({});
   });
@@ -159,6 +160,46 @@ describe('useConversation polling', () => {
     queryClient.clear();
   });
 
+  it('polls while a background sub-agent is pending on a recently written conversation', async () => {
+    mockGet.mockResolvedValue({
+      ...createFetchedConversation(privateAcl),
+      updated_at: new Date().toISOString(),
+      state: {
+        background_executions: { 'child-1': { execution_id: 'child-1', status: 'running' } },
+      },
+    });
+    const { queryClient, Wrapper } = createWrapper();
+
+    renderHook(() => useConversation(), { wrapper: Wrapper });
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
+    await advance(5_000);
+
+    expect(mockGet).toHaveBeenCalledTimes(2);
+
+    queryClient.clear();
+  });
+
+  it('stops polling for background work once the conversation has gone unwritten for longer than a run can last', async () => {
+    mockGet.mockResolvedValue({
+      ...createFetchedConversation(privateAcl),
+      updated_at: new Date(Date.now() - 31 * 60 * 1000).toISOString(),
+      state: {
+        background_executions: { 'child-1': { execution_id: 'child-1', status: 'running' } },
+      },
+    });
+    const { queryClient, Wrapper } = createWrapper();
+
+    renderHook(() => useConversation(), { wrapper: Wrapper });
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
+    await advance(10_000);
+
+    expect(mockGet).toHaveBeenCalledTimes(1);
+
+    queryClient.clear();
+  });
+
   it('polls a public conversation on every interval', async () => {
     mockGet.mockResolvedValue(createFetchedConversation(publicAcl));
     const { queryClient, Wrapper } = createWrapper();
@@ -205,7 +246,8 @@ describe('useConversation polling', () => {
       mutateSendMessage: jest.fn(),
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
-      cancelAllStreams: jest.fn(),
+      mutateAttach: jest.fn(),
+      detachAllStreams: jest.fn(),
     });
   };
 
@@ -287,7 +329,8 @@ describe('useConversationReadOnly', () => {
       mutateSendMessage: jest.fn(),
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
-      cancelAllStreams: jest.fn(),
+      mutateAttach: jest.fn(),
+      detachAllStreams: jest.fn(),
     });
 
   it('reports loading while an opened conversation is fetched for the first time', async () => {
