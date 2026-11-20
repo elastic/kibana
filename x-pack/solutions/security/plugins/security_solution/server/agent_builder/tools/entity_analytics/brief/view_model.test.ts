@@ -10,7 +10,18 @@ import type { EntityAnalyticsScope } from '../../../../../common/entity_analytic
 import type { EntityFacts } from './types';
 import type { CandidateEntities } from './read_entities';
 import type { VerifiedBrief } from './verify_draft';
-import { BriefViewModel, NO_PRIORITIES_LINE, QUIET_LINE, buildViewModel } from './view_model';
+import {
+  BriefViewModel,
+  NO_PRIORITIES_LINE,
+  NO_PRIORITIES_TITLE,
+  QUIET_LINE,
+  QUIET_TITLE,
+  buildViewModel,
+  factText,
+  getHeaderFacts,
+  getPriorityFacts,
+  getTitle,
+} from './view_model';
 
 const scope: EntityAnalyticsScope = {
   period: '7d',
@@ -134,7 +145,7 @@ describe('buildViewModel', () => {
         periodLabel: '7 days',
         spaceId: 'soc',
         focusTileTitle: 'Risk movers',
-        entityFilters: ['Risk level: High'],
+        entityFilters: [{ label: 'Risk level', value: 'High' }],
       },
       title: 'Alerts spread across hosts',
       summary: 'web_01 rose sharply',
@@ -170,8 +181,8 @@ describe('buildViewModel', () => {
   });
 
   it('notes the flagged entities the Entity Store did not have', () => {
-    expect(build({ entities: { ...entities, notFoundCount: 2 } }).notes).toContain(
-      '2 flagged entities were not found in the Entity Store.'
+    expect(build({ entities: { ...entities, notFoundCount: 2 } }).notChecked.notFound).toBe(
+      '2 flagged entities not found in the Entity Store'
     );
   });
 
@@ -247,22 +258,20 @@ describe('buildViewModel', () => {
   });
 
   it('notes that the anomalies could not be read', () => {
-    expect(build({ anomaliesFailed: true }).notes).toContain("Anomaly details couldn't be read.");
+    expect(build({ anomaliesFailed: true }).notChecked.unreadable).toContain('anomaly details');
   });
 
   it('notes that the alerts could not be read', () => {
-    expect(build({ alertsFailed: true }).notes).toContain("Alert details couldn't be read.");
+    expect(build({ alertsFailed: true }).notChecked.unreadable).toContain('alert details');
   });
 
   it('notes the tiles whose data could not be read', () => {
-    expect(build().notes).toEqual([
-      "Not checked, because the data couldn't be read: Entities with anomalies.",
-    ]);
+    expect(build().notChecked.unreadable).toEqual(['Entities with anomalies']);
   });
 
   it('states that the brief covers a sample when a tile sent fewer entities than it counts', () => {
     expect(build().scope.sample).toBe(
-      'Based on the 2 highest-ranked of at least 14 flagged entities.'
+      'Based on the 2 highest-ranked of at least 14 flagged entities'
     );
   });
 
@@ -275,5 +284,45 @@ describe('buildViewModel', () => {
     };
     expect(build({ scope: quiet, verified: undefined, facts: [] }).summary).toBe(QUIET_LINE);
     expect(build({ verified: undefined, facts: [] }).summary).toBe(NO_PRIORITIES_LINE);
+  });
+
+  it("titles a brief the model didn't title by what it found", () => {
+    const unverified = build({ verified: undefined, facts: [] });
+
+    expect(getTitle(build())).toBe('Alerts spread across hosts');
+    expect(getTitle(unverified)).toBe(NO_PRIORITIES_TITLE);
+    const quiet = { ...unverified, summary: QUIET_LINE };
+    expect(getTitle({ ...quiet, notChecked: { unreadable: [] } })).toBe(QUIET_TITLE);
+    expect(getTitle({ ...quiet, notChecked: { unreadable: ['Risk movers'] } })).toBe(
+      NO_PRIORITIES_TITLE
+    );
+  });
+
+  it('lists the header facts, with coverage and what was not included only when they apply', () => {
+    const headerFacts = getHeaderFacts(build({ entities: { ...entities, notFoundCount: 2 } })).map(
+      factText
+    );
+
+    expect(headerFacts).toEqual([
+      'Captured: 14 Oct 2026, 12:00 UTC',
+      'Time range: Last 7 days',
+      'Risk level: High',
+      'Attention tile: Risk movers',
+      'Space: soc',
+      'Coverage: Based on the 2 highest-ranked of at least 14 flagged entities; 2 flagged entities not found in the Entity Store',
+      "Not included: Entities with anomalies (data couldn't be loaded)",
+    ]);
+  });
+
+  it('puts first seen and the watchlists on one line, each only when known', () => {
+    const [priority] = build().priorities;
+
+    expect(
+      getPriorityFacts({ ...priority, firstSeen: '2 days ago', watchlists: ['A', 'B'] })
+    ).toEqual([
+      { key: 'First seen', value: '2 days ago' },
+      { key: 'Watchlist', value: 'A, B' },
+    ]);
+    expect(getPriorityFacts({ ...priority, firstSeen: undefined, watchlists: [] })).toEqual([]);
   });
 });

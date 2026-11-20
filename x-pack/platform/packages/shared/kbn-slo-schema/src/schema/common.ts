@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { ALL_VALUE, SLO_STATUS } from '../constants';
-import { MAX_DATE_STRING_LENGTH } from './limits';
+import { MAX_DATE_STRING_LENGTH, MAX_KEYWORD_LENGTH } from './limits';
 
 const allOrAnyString = z.union([z.literal(ALL_VALUE), z.string()]);
 
@@ -20,76 +20,97 @@ const allOrAnyStringOrArray = z.union([allOrAnyString, z.array(allOrAnyString)])
  * Decoding accepts any string `new Date()` can parse, not only strict
  * ISO 8601. Encoding always produces the ISO string form.
  */
-const dateType = z.codec(
-  z
-    .string()
-    .max(MAX_DATE_STRING_LENGTH)
-    .describe('A date string, for example 2023-01-12T10:03:19.000Z'),
-  z.instanceof(Date),
-  {
-    decode: (value, payload) => {
-      const decoded = new Date(value);
-      if (isNaN(decoded.getTime())) {
-        payload.issues.push({
-          code: 'custom',
-          message: `Invalid date: ${value}`,
-          input: value,
-        });
-        return z.NEVER;
-      }
-      return decoded;
-    },
-    encode: (date) => date.toISOString(),
-  }
+const dateType = lazySchema(() =>
+  z.codec(
+    z
+      .string()
+      .max(MAX_DATE_STRING_LENGTH)
+      .meta({ format: 'date-time' })
+      .describe('A date string, for example 2023-01-12T10:03:19.000Z'),
+    z.instanceof(Date),
+    {
+      decode: (value, payload) => {
+        const decoded = new Date(value);
+        if (isNaN(decoded.getTime())) {
+          payload.issues.push({
+            code: 'custom',
+            message: `Invalid date: ${value}`,
+            input: value,
+          });
+          return z.NEVER;
+        }
+        return decoded;
+      },
+      encode: (date) => date.toISOString(),
+    }
+  )
 );
 
-const errorBudgetSchema = z
-  .object({
-    initial: z.number().describe('The initial error budget, as 1 - objective'),
-    consumed: z
-      .number()
-      .describe('The error budget consummed, as a percentage of the initial value.'),
-    remaining: z
-      .number()
-      .describe('The error budget remaining, as a percentage of the initial value.'),
-    isEstimated: z
-      .boolean()
-      .describe(
-        'Only for SLO defined with occurrences budgeting method and calendar aligned time window.'
-      ),
-  })
-  .meta({ id: 'SLOErrorBudget' });
+const errorBudgetSchema = lazySchema(() =>
+  z
+    .object({
+      initial: z.number().describe('The initial error budget, as 1 - objective'),
+      consumed: z
+        .number()
+        .describe('The error budget consummed, as a percentage of the initial value.'),
+      remaining: z
+        .number()
+        .describe('The error budget remaining, as a percentage of the initial value.'),
+      isEstimated: z
+        .boolean()
+        .describe(
+          'Only for SLO defined with occurrences budgeting method and calendar aligned time window.'
+        ),
+    })
+    .meta({ id: 'SLOErrorBudget', additionalProperties: true })
+);
 
 const statusSchema = z.enum(SLO_STATUS).meta({ id: 'SLOSummaryStatus' });
 
-const summarySchema = z
-  .object({
-    status: statusSchema,
-    sliValue: z.number(),
-    errorBudget: errorBudgetSchema,
-    fiveMinuteBurnRate: z.number(),
-    oneHourBurnRate: z.number(),
-    oneDayBurnRate: z.number(),
-    summaryUpdatedAt: z.string().nullable().optional(),
-  })
-  .meta({ id: 'SLOSummary', description: 'The SLO computed data' });
-
-const groupingsSchema = z.record(z.string(), z.union([z.string(), z.number()]));
-
-const metaSchema = z.object({
-  synthetics: z
+const summarySchema = lazySchema(() =>
+  z
     .object({
-      monitorId: z.string(),
-      locationId: z.string(),
-      configId: z.string(),
+      status: statusSchema,
+      sliValue: z.number(),
+      errorBudget: errorBudgetSchema,
+      fiveMinuteBurnRate: z.number(),
+      oneHourBurnRate: z.number(),
+      oneDayBurnRate: z.number(),
+      summaryUpdatedAt: z.string().meta({ format: 'date-time' }).nullable().optional(),
     })
-    .optional(),
-});
+    .meta({ id: 'SLOSummary', description: 'The SLO computed data', additionalProperties: true })
+);
 
-const remoteSchema = z.object({
-  remoteName: z.string(),
-  kibanaUrl: z.string(),
-});
+const groupingsSchema = lazySchema(() =>
+  z.record(
+    z.string().max(MAX_KEYWORD_LENGTH),
+    z.union([z.string().max(MAX_KEYWORD_LENGTH), z.number()])
+  )
+);
+
+const metaSchema = lazySchema(() =>
+  z
+    .object({
+      synthetics: z
+        .object({
+          monitorId: z.string(),
+          locationId: z.string(),
+          configId: z.string(),
+        })
+        .meta({ additionalProperties: true })
+        .optional(),
+    })
+    .meta({ additionalProperties: true })
+);
+
+const remoteSchema = lazySchema(() =>
+  z
+    .object({
+      remoteName: z.string(),
+      kibanaUrl: z.string(),
+    })
+    .meta({ additionalProperties: true })
+);
 
 const groupSummarySchema = z.object({
   total: z.number(),

@@ -8,7 +8,7 @@
  */
 
 import type { RowControlRowProps } from '@kbn/discover-utils';
-import { createDegradedDocsControl, createStacktraceControl } from '@kbn/discover-utils';
+import { createDegradedDocsControl, createStacktraceControl } from '@kbn/discover-utils/components';
 import { retrieveMetadataColumns } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';

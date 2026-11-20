@@ -6,9 +6,11 @@
  */
 
 import { APP_LOAD_TIMEOUT_MS } from '@kbn/scout-security';
-import type { Locator, ScoutPage } from '@kbn/scout-security';
+import type { Locator, ScoutPage, SecurityPageObjects } from '@kbn/scout-security';
 
 const ENDPOINTS_APP_PATH = 'security/administration/endpoints';
+// Two global-search options link to ENDPOINTS_APP_PATH ("Assets / Endpoints" and its child page); this label picks the child.
+const ENDPOINTS_SEARCH_OPTION_LABEL = 'Assets / Endpoints / Endpoints';
 
 /**
  * Endpoint list (Manage > Endpoints). Actions only; the spec asserts.
@@ -30,11 +32,38 @@ export class EndpointListPage {
     await this.table.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
   }
 
+  /**
+   * Opens the list through the global search, without a page load, so in-memory state such
+   * as a running response console survives the navigation.
+   */
+  async openFromGlobalSearch(
+    chrome: SecurityPageObjects['chrome'],
+    spaceId: string
+  ): Promise<void> {
+    const spacePath = spaceId === 'default' ? '' : `/s/${spaceId}`;
+    await chrome.openSearch();
+    await chrome.search('endpoints');
+    await chrome
+      .getSearchOptionByUrl(`${spacePath}/app/${ENDPOINTS_APP_PATH}`)
+      .filter({ hasText: ENDPOINTS_SEARCH_OPTION_LABEL })
+      .click();
+    await this.table.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
+  }
+
   /** The table row whose hostname cell links to `hostname`. */
   rowFor(hostname: string): Locator {
     return this.table.getByRole('row').filter({
       has: this.page.testSubj.locator('hostnameCellLink').filter({ hasText: hostname }),
     });
+  }
+
+  agentStatusFor(hostname: string): Locator {
+    return this.rowFor(hostname).getByTestId('rowHostStatus-agentStatus');
+  }
+
+  /** The action status badge (for example "Isolated") in the row for `hostname`; absent when the host has none. */
+  actionStatusesFor(hostname: string): Locator {
+    return this.rowFor(hostname).getByTestId('rowHostStatus-actionStatuses');
   }
 
   /** Opens the row action menu for `hostname` and chooses Respond. */

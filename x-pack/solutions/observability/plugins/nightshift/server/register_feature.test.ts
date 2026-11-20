@@ -40,16 +40,16 @@ describe('registerNightshiftFeature', () => {
     ]);
   });
 
-  it('grants the Alerting v2 rule saved object as all with `all` and as read with `read`', () => {
+  it('grants the Alerting v2 rule and relay app connection saved objects as all with `all` and as read with `read`', () => {
     const { privileges } = getRegisteredFeature();
 
     expect(privileges?.all.savedObject).toEqual({
-      all: [NIGHTSHIFT_SOURCE_SO_TYPE, 'alerting_rule'],
+      all: [NIGHTSHIFT_SOURCE_SO_TYPE, 'alerting_rule', 'relay-app-connection'],
       read: [],
     });
     expect(privileges?.read.savedObject).toEqual({
       all: [],
-      read: [NIGHTSHIFT_SOURCE_SO_TYPE, 'alerting_rule'],
+      read: [NIGHTSHIFT_SOURCE_SO_TYPE, 'alerting_rule', 'relay-app-connection'],
     });
   });
 

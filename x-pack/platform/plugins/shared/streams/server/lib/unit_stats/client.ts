@@ -18,6 +18,8 @@ import {
   UNIT_STATS_DEFAULT_WINDOW_MS,
   UNIT_STATS_REQUEST_TIMEOUT_MS,
 } from './constants';
+import { getDestinationAuthFailures, getNoAuthFailures } from './destination_auth_failures';
+import { getDestinationDeliverySeries } from './destination_delivery_series';
 import { toSearchError } from './errors/search_errors';
 import { mostActionableFailure, STATS_ERROR_CODE, UnitStatsError } from './errors/unit_stats_error';
 import { toRows, type EsqlRow } from './mappers/esql_rows';
@@ -25,17 +27,28 @@ import {
   joinDestinationRows,
   mapDestinationStatsRows,
   noDestinationStats,
+  withAuthFailures,
 } from './mappers/map_destination_stats_result';
+import { withDeliverySeries } from './mappers/map_delivery_series';
 import { mapProcessorStatsRows, noProcessorStats } from './mappers/map_processor_stats_result';
+import { mapSourceStatsRows, noSourceStats } from './mappers/map_source_stats_result';
 import {
   buildDestinationRateQuery,
   buildDestinationSumsQuery,
 } from './query_builders/build_destination_stats_queries';
 import { buildProcessorSumsQuery } from './query_builders/build_processor_stats_queries';
+import { buildSourceRateQuery } from './query_builders/build_source_stats_queries';
 import { buildStreamProbeQuery } from './query_builders/build_stream_probe_query';
 import type { StatsQueryBaseParams } from './query_builders/filters';
+import {
+  defaultResults,
+  resolveQueryRefs,
+  type DestinationQueryRef,
+  type ProcessorQueryRef,
+  type QueryComponentRef,
+  type SourceQueryRef,
+} from './query_refs';
 import { getSeriesBucketMs } from './utils/series_bucket';
-import { validateDestination, validateProcessor } from './validate_components';
 
 /** The results of one kind, and the error when its queries failed. */
 interface KindOutcome<TResult> {
@@ -70,63 +83,43 @@ export class UnitStatsClient {
     const bucketMs = getSeriesBucketMs(Date.parse(window.end) - Date.parse(window.start));
     const baseParams: StatsQueryBaseParams = { unitId, window, configHash };
 
-    const destinationConfigs = new Map((unit.destinations ?? []).map((d) => [d.id, d]));
-    const processorConfigs = new Map((unit.processors ?? []).map((p) => [p.id, p]));
-
-    // Omitted: every destination and processor in the unit, if one request can hold them. A list,
-    // even an empty one, names exactly the components to answer for.
+    // Omitted: every destination, processor and source in the unit, if one request can hold them. A
+    // list, even an empty one, names exactly the components to answer for.
     const refs = request.components ?? this.getAllUnitRefs(unit);
 
-    const destinations: Record<string, StreamsUnit.StatsDestinationResult> = {};
-    const processors: Record<string, StreamsUnit.StatsProcessorResult> = {};
-    const queryableRefs: StreamsUnit.StatsComponentRef[] = [];
+    const { queryable, unqueryable } = resolveQueryRefs({ refs, unit });
+    const { destinations, processors, sources } = defaultResults({ refs, unqueryable, bucketMs });
 
-    for (const ref of refs) {
-      if (ref.kind === 'destination') {
-        const { result, queryable } = validateDestination({
-          config: destinationConfigs.get(ref.id),
-          bucketMs,
-        });
-        destinations[ref.id] = result;
-        if (queryable) queryableRefs.push(ref);
-      } else {
-        const { result, queryable } = validateProcessor({
-          config: processorConfigs.get(ref.id),
-        });
-        processors[ref.id] = result;
-        if (queryable) queryableRefs.push(ref);
-      }
-    }
-
-    const [destinationOutcome, processorOutcome] = await this.getComponentStats({
+    const [destinationOutcome, processorOutcome, sourceOutcome] = await this.getComponentStats({
       baseParams,
-      refs: queryableRefs,
+      refs: queryable,
       bucketMs,
     });
     Object.assign(destinations, destinationOutcome?.results);
     Object.assign(processors, processorOutcome?.results);
+    Object.assign(sources, sourceOutcome?.results);
 
     // Every kind that ran failed: there is nothing to return, so the request fails with the most
     // actionable error, and `createServerRoute` maps it to its HTTP status.
-    const failures = [destinationOutcome, processorOutcome].flatMap((outcome) =>
-      outcome?.error ? [outcome.error] : []
-    );
-    const ranKinds = [destinationOutcome, processorOutcome].filter(Boolean).length;
+    const outcomes = [destinationOutcome, processorOutcome, sourceOutcome];
+    const failures = outcomes.flatMap((outcome) => (outcome?.error ? [outcome.error] : []));
+    const ranKinds = outcomes.filter(Boolean).length;
     if (failures.length > 0 && failures.length === ranKinds) {
       throw mostActionableFailure(failures);
     }
 
     return {
-      components: { destinations, processors },
+      components: { destinations, processors, sources },
       meta: { window, ...(configHash ? { config_hash: configHash } : {}) },
     };
   }
 
-  /** Every destination and processor in the unit, as long as one request can name them all. */
+  /** Every destination, processor and source in the unit, as long as one request can name them all. */
   private getAllUnitRefs(unit: StreamsUnit.Configuration): StreamsUnit.StatsComponentRef[] {
     const refs = [
       ...(unit.destinations ?? []).map(({ id }) => ({ kind: 'destination' as const, id })),
       ...(unit.processors ?? []).map(({ id }) => ({ kind: 'processor' as const, id })),
+      ...(unit.sources ?? []).map(({ id }) => ({ kind: 'source' as const, id })),
     ];
     if (refs.length > MAX_STREAMS_UNIT_STATS_COMPONENTS) {
       throw new StatusError(
@@ -149,11 +142,12 @@ export class UnitStatsClient {
     bucketMs,
   }: {
     baseParams: StatsQueryBaseParams;
-    refs: StreamsUnit.StatsComponentRef[];
+    refs: QueryComponentRef[];
     bucketMs: number;
   }) {
-    const destinationIds = refs.flatMap(({ kind, id }) => (kind === 'destination' ? [id] : []));
-    const processorIds = refs.flatMap(({ kind, id }) => (kind === 'processor' ? [id] : []));
+    const destinations = refs.flatMap((ref) => (ref.kind === 'destination' ? [ref] : []));
+    const processors = refs.flatMap((ref) => (ref.kind === 'processor' ? [ref] : []));
+    const sources = refs.flatMap((ref) => (ref.kind === 'source' ? [ref] : []));
 
     if (refs.length === 0) return [];
 
@@ -165,20 +159,28 @@ export class UnitStatsClient {
       this.logFailure(failure, { unitId: baseParams.unitId, what });
 
       return [
-        destinationIds.length > 0
-          ? this.destinationFailure({ ids: destinationIds, bucketMs, failure })
+        destinations.length > 0
+          ? this.componentKindFailure({
+              refs: destinations,
+              failure,
+              noData: () => noDestinationStats(bucketMs),
+            })
           : undefined,
-        processorIds.length > 0 ? this.processorFailure({ ids: processorIds, failure }) : undefined,
+        processors.length > 0
+          ? this.componentKindFailure({ refs: processors, failure, noData: noProcessorStats })
+          : undefined,
+        sources.length > 0
+          ? this.componentKindFailure({ refs: sources, failure, noData: noSourceStats })
+          : undefined,
       ];
     }
 
     return Promise.all([
-      destinationIds.length > 0
-        ? this.getDestinationStats({ baseParams, ids: destinationIds, bucketMs })
+      destinations.length > 0
+        ? this.getDestinationStats({ baseParams, destinations, bucketMs })
         : undefined,
-      processorIds.length > 0
-        ? this.getProcessorStats({ baseParams, ids: processorIds })
-        : undefined,
+      processors.length > 0 ? this.getProcessorStats({ baseParams, processors }) : undefined,
+      sources.length > 0 ? this.getSourceStats({ baseParams, sources }) : undefined,
     ]);
   }
 
@@ -236,14 +238,15 @@ export class UnitStatsClient {
 
   private async getDestinationStats({
     baseParams,
-    ids,
+    destinations,
     bucketMs,
   }: {
     baseParams: StatsQueryBaseParams;
-    ids: string[];
+    destinations: DestinationQueryRef[];
     bucketMs: number;
   }): Promise<KindOutcome<StreamsUnit.StatsDestinationResult>> {
     const what = 'destination stats';
+    const ids = destinations.map(({ id }) => id);
 
     try {
       const [rateRows, sumsRows] = await Promise.all([
@@ -254,49 +257,89 @@ export class UnitStatsClient {
         rows: joinDestinationRows({ rateRows, sumsRows }),
         bucketMs,
       });
+      const results = Object.fromEntries(
+        ids.map((id) => [id, Object.hasOwn(mapped, id) ? mapped[id] : noDestinationStats(bucketMs)])
+      );
+
+      // The failed rate of each parent result decides which destinations to ask about their auth
+      // failures. A destination type whose queries fail is logged once, and its destinations keep
+      // their other stats, with the error beside them and no failure rates. The delivery series is
+      // for the destinations that ask for it, and does not depend on the rest, so it runs beside.
+      const [authFailures, deliverySeries] = await Promise.all([
+        getDestinationAuthFailures({
+          runQuery: (query) => this.runQuery(query),
+          baseParams,
+          destinations,
+          parentResults: results,
+        }),
+        getDestinationDeliverySeries({
+          runQuery: (query) => this.runQuery(query),
+          baseParams,
+          destinations: destinations.filter(({ include }) => include?.delivery_series),
+          bucketMs,
+        }),
+      ]);
+      const { failures } = authFailures;
+      const { series } = deliverySeries;
+      const toGroupErrors = (
+        groups: Array<{ types: string[]; ids: string[]; error: unknown }>,
+        about: string
+      ) =>
+        groups.flatMap(({ types, ids: failedIds, error }) => {
+          const failedWhat = `destination ${types.join(', ')} ${about}`;
+          const failure = toSearchError(error, failedWhat);
+          this.logFailure(failure, { unitId: baseParams.unitId, what: failedWhat });
+
+          return failedIds.map((id) => [id, failure.toStatsError()] as const);
+        });
+      // A destination has one error, and the later entry wins, so the one about the failures comes
+      // last: it is the one that hides rates.
+      const failureErrors = Object.fromEntries([
+        ...toGroupErrors(deliverySeries.failedGroups, 'delivery series'),
+        ...toGroupErrors(authFailures.failedGroups, 'authentication and authorization'),
+      ]);
 
       return {
         results: Object.fromEntries(
-          ids.map((id) => [
-            id,
-            Object.hasOwn(mapped, id) ? mapped[id] : noDestinationStats(bucketMs),
-          ])
+          destinations.map(({ id, type }) => {
+            const withFailures = withAuthFailures(
+              results[id],
+              Object.hasOwn(failures, id) ? failures[id] : getNoAuthFailures(type)
+            );
+
+            return [
+              id,
+              {
+                ...(Object.hasOwn(series, id)
+                  ? withDeliverySeries(withFailures, series[id])
+                  : withFailures),
+                ...(Object.hasOwn(failureErrors, id) ? { error: failureErrors[id] } : {}),
+              },
+            ];
+          })
         ),
       };
     } catch (error) {
       const failure = toSearchError(error, what);
       this.logFailure(failure, { unitId: baseParams.unitId, what });
 
-      return this.destinationFailure({ ids, bucketMs, failure });
+      return this.componentKindFailure({
+        refs: destinations,
+        failure,
+        noData: () => noDestinationStats(bucketMs),
+      });
     }
-  }
-
-  /** The same error on every destination, with no data. */
-  private destinationFailure({
-    ids,
-    bucketMs,
-    failure,
-  }: {
-    ids: string[];
-    bucketMs: number;
-    failure: UnitStatsError;
-  }): KindOutcome<StreamsUnit.StatsDestinationResult> {
-    return {
-      results: Object.fromEntries(
-        ids.map((id) => [id, { ...noDestinationStats(bucketMs), error: failure.toStatsError() }])
-      ),
-      error: failure,
-    };
   }
 
   private async getProcessorStats({
     baseParams,
-    ids,
+    processors,
   }: {
     baseParams: StatsQueryBaseParams;
-    ids: string[];
+    processors: ProcessorQueryRef[];
   }): Promise<KindOutcome<StreamsUnit.StatsProcessorResult>> {
     const what = 'processor stats';
+    const ids = processors.map(({ id }) => id);
 
     try {
       const rows = await this.runQuery(buildProcessorSumsQuery({ ...baseParams, ids }));
@@ -319,21 +362,50 @@ export class UnitStatsClient {
       const failure = toSearchError(error, what);
       this.logFailure(failure, { unitId: baseParams.unitId, what });
 
-      return this.processorFailure({ ids, failure });
+      return this.componentKindFailure({ refs: processors, failure, noData: noProcessorStats });
     }
   }
 
-  /** The same error on every processor, with no data. */
-  private processorFailure({
-    ids,
-    failure,
+  private async getSourceStats({
+    baseParams,
+    sources,
   }: {
-    ids: string[];
+    baseParams: StatsQueryBaseParams;
+    sources: SourceQueryRef[];
+  }): Promise<KindOutcome<StreamsUnit.StatsSourceResult>> {
+    const what = 'source stats';
+    const ids = sources.map(({ id }) => id);
+
+    try {
+      const rows = await this.runQuery(buildSourceRateQuery({ ...baseParams, ids }));
+      const mapped = mapSourceStatsRows({ rows });
+
+      return {
+        results: Object.fromEntries(
+          ids.map((id) => [id, Object.hasOwn(mapped, id) ? mapped[id] : noSourceStats()])
+        ),
+      };
+    } catch (error) {
+      const failure = toSearchError(error, what);
+      this.logFailure(failure, { unitId: baseParams.unitId, what });
+
+      return this.componentKindFailure({ refs: sources, failure, noData: noSourceStats });
+    }
+  }
+
+  /** The same error on every component of a kind, each with no data. */
+  private componentKindFailure<TResult extends object>({
+    refs,
+    failure,
+    noData,
+  }: {
+    refs: QueryComponentRef[];
     failure: UnitStatsError;
-  }): KindOutcome<StreamsUnit.StatsProcessorResult> {
+    noData: () => TResult;
+  }): KindOutcome<TResult> {
     return {
       results: Object.fromEntries(
-        ids.map((id) => [id, { ...noProcessorStats(), error: failure.toStatsError() }])
+        refs.map(({ id }) => [id, { ...noData(), error: failure.toStatsError() }])
       ),
       error: failure,
     };

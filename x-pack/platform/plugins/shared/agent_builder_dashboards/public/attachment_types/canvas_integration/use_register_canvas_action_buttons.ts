@@ -92,7 +92,7 @@ export const useRegisterCanvasActionButtons = ({
         label: i18n.translate(
           'xpack.agentBuilderDashboards.attachments.dashboard.canvasEditActionLabel',
           {
-            defaultMessage: 'Edit in Dashboards',
+            defaultMessage: 'Edit in Dashboard',
           }
         ),
         type: ActionButtonType.PRIMARY,
@@ -120,7 +120,7 @@ export const useRegisterCanvasActionButtons = ({
         }
       ),
       icon: 'save',
-      type: ActionButtonType.PRIMARY,
+      type: ActionButtonType.SECONDARY,
       disabled: isWriteActionDisabled,
       disabledReason,
       handler: async () => {

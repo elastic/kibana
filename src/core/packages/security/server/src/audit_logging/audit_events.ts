@@ -41,6 +41,16 @@ export interface AuditKibana {
     execution_id?: string;
   };
   /**
+   * What issued a sandbox RPC, as part of this event.
+   */
+  sandbox_caller?: {
+    plugin_id: string;
+    type: string;
+    id: string;
+    /** The run of the caller, when it has one, such as a tool call or a workflow run. */
+    execution_id?: string;
+  };
+  /**
    * Name of authentication provider associated with a login event.
    */
   authentication_provider?: string;

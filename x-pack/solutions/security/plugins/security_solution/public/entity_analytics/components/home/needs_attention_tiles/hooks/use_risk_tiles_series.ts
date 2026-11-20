@@ -8,7 +8,8 @@
 import { useMemo } from 'react';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { useTileQueryInputs } from './use_tile_query_inputs';
-import type { EntityFilters, TimeRange } from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
+import type { EntityFilters } from '../../entities_grid/common';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import {
   buildRiskTilesSeriesQuery,
@@ -31,6 +32,9 @@ interface RiskTilesSeriesOptions {
   /** The live counts, which replace the newest dot so each line ends on the number shown. */
   riskMoversCount: number;
   newlyHighCriticalCount: number;
+  /** True when each tile's count came back: a failed, timed-out or skipped count has no line to draw. */
+  riskMoversHasCount: boolean;
+  newlyHighCriticalHasCount: boolean;
   /** From each tile's delta hook (its `previous`): the delta's baseline, which starts the line. */
   riskMoversBaseline: number | undefined;
   newlyHighCriticalBaseline: number | undefined;
@@ -55,6 +59,8 @@ export const useRiskTilesSeries = ({
   newlyHighCriticalReachesBack,
   riskMoversCount,
   newlyHighCriticalCount,
+  riskMoversHasCount,
+  newlyHighCriticalHasCount,
   riskMoversBaseline,
   newlyHighCriticalBaseline,
 }: RiskTilesSeriesOptions): {
@@ -78,12 +84,12 @@ export const useRiskTilesSeries = ({
   const moversGate = getSeriesGate({
     isReady,
     reachesBack: riskMoversReachesBack,
-    count: riskMoversCount,
+    hasCount: riskMoversHasCount,
   });
   const newlyHighGate = getSeriesGate({
     isReady,
     reachesBack: newlyHighCriticalReachesBack,
-    count: newlyHighCriticalCount,
+    hasCount: newlyHighCriticalHasCount,
   });
   const { series, isFetching, isError } = useTileSeriesQuery({
     tileKey: 'riskTilesSeries',

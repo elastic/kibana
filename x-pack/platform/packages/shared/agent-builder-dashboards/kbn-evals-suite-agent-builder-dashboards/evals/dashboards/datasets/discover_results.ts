@@ -28,10 +28,10 @@ export const DASHBOARD_DISCOVER_RESULTS_EXAMPLES: DashboardDatasetExample[] = [
     controls: {
       requested: true,
       requestedFilters: [
-        { name: 'HTTP method', terms: ['method'], substitutes: [] },
-        { name: 'status code', terms: ['status'], substitutes: ['response'] },
-        { name: 'path', terms: ['path'], substitutes: ['request', 'url'] },
-        { name: 'HTTP version', terms: ['version'], substitutes: [] },
+        { name: 'HTTP method', substitutes: [] },
+        { name: 'status code', substitutes: ['response'] },
+        { name: 'path', substitutes: ['request', 'url'] },
+        { name: 'HTTP version', substitutes: [] },
       ],
     },
     structure: { panelCount: { min: 6 } },

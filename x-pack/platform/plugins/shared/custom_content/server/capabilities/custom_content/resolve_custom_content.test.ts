@@ -50,7 +50,7 @@ describe('resolveCustomContent', () => {
       state: { esql_query: ['FROM status'], template: '<p>written</p>' },
     });
     expect(resolver).toHaveBeenCalledWith(
-      expect.objectContaining({ prompt: 'A status board', esqlQuery: 'FROM status' })
+      expect.objectContaining({ prompt: 'A status board', esqlQueries: ['FROM status'] })
     );
   });
 
@@ -62,7 +62,7 @@ describe('resolveCustomContent', () => {
     await resolveCustomContent(document, resolver);
 
     expect(resolver).toHaveBeenCalledWith(
-      expect.objectContaining({ existingTemplate: '<b>old</b>', esqlQuery: undefined })
+      expect.objectContaining({ existingTemplate: '<b>old</b>', esqlQueries: [] })
     );
   });
 

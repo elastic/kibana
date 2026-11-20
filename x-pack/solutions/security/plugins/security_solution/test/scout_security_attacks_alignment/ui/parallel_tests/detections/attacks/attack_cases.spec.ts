@@ -50,8 +50,6 @@ import {
   ATTACK_TAKE_ACTION_ITEM_TEST_ID,
 } from '../../../fixtures/page_objects/attack_cases_page';
 
-const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout';
-
 const CASE_DESCRIPTION = 'Created by the Scout attack case-attachment test';
 
 // The narrative of the seeded attacks, from `apiServices.attackDiscovery.seedAttackData`. Both
@@ -188,11 +186,6 @@ spaceTest.describe(
       // behaviour.
       await page.setViewportSize({ width: 1920, height: 1080 });
       await apiServices.cases.cleanup.deleteAllCases(scoutSpace.id);
-      await scoutSpace.uiSettings.set({
-        // The attack attachment's navigation button supports both flyouts; pin the legacy one
-        // so this suite asserts the same flyout body as the rest of the attacks specs.
-        [ENABLE_NEW_FLYOUT_SETTING]: false,
-      });
       await browserAuth.loginAsPlatformEngineer();
     });
 
@@ -205,7 +198,6 @@ spaceTest.describe(
       }
 
       await apiServices.cases.cleanup.deleteAllCases(scoutSpace.id);
-      await scoutSpace.uiSettings.unset(ENABLE_NEW_FLYOUT_SETTING);
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

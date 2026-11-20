@@ -11,7 +11,6 @@ import type { StateDeclaration } from '@kbn/custom-app-common';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_SCRIPT_PATTERN,
-  readEsqlQuery,
 } from '@kbn/custom-content-common';
 import type { CustomContentTemplateResolver } from '@kbn/custom-content-server';
 
@@ -38,12 +37,12 @@ const collectPrompted = (node: GenericNode): GenericNode[] => [
   ...(node.children ?? []).flatMap(collectPrompted),
 ];
 
-/** The default of each value the query uses, so a query with parameters can be tried. */
+/** The default of each value the queries use, so queries with parameters can be tried. */
 const getSampleParams = (
-  query: string | undefined,
+  queries: readonly string[],
   state: Readonly<Record<string, StateDeclaration>>
 ): Params =>
-  Array.from(new Set(query ? getESQLQueryVariables(query) : [])).flatMap((name) => {
+  Array.from(new Set(queries.flatMap((query) => getESQLQueryVariables(query)))).flatMap((name) => {
     if (!(name in state)) return [];
     const { default: value } = state[name];
     // A list is tried with its first value, or an empty one: it is a sample of the data that is
@@ -86,13 +85,17 @@ export const resolveCustomContent = async (
   for (const node of prompted) {
     const { prompt, ...state } = node.state as State;
     try {
-      const query = readEsqlQuery(state);
-      const esqlParams = getSampleParams(query, document.state as Record<string, StateDeclaration>);
+      const queries = state.esql_query ?? [];
+      const esqlParams = getSampleParams(
+        queries,
+        document.state as Record<string, StateDeclaration>
+      );
       const { template, height } = await resolver({
         prompt: prompt as string,
-        esqlQuery: query,
+        esqlQueries: queries,
+        // The template is written again, so every query is sampled for its real columns.
+        changedQueries: queries.map(() => true),
         existingTemplate: state.template?.trim() ? state.template : undefined,
-        hasExistingQuery: false,
         ...(esqlParams.length > 0 ? { esqlParams } : {}),
       });
       if (CUSTOM_CONTENT_SCRIPT_PATTERN.test(template)) {

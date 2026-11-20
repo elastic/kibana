@@ -23,22 +23,15 @@ export {
   MAX_EVIDENCE_CHART_LABEL_LENGTH,
   MAX_EVIDENCE_CHART_POINTS,
   MAX_EVIDENCE_CHART_SERIES,
-  MAX_EVIDENCE_REFERENCES,
-  MAX_EVIDENCE_REFERENCE_URL_LENGTH,
   MAX_EVIDENCE_SHORT_TEXT_LENGTH,
   MAX_EVIDENCE_TEXT_LENGTH,
   evidenceChartSchema,
-  evidenceReferenceSchema,
   investigationEvidenceSchema,
-  isEvidenceLinkReference,
 } from './evidence';
 export type {
   EvidenceChart,
   EvidenceChartAnnotation,
   EvidenceChartSeries,
-  EvidenceLinkReference,
-  EvidenceQueryReference,
-  EvidenceReference,
   InvestigationEvidence,
 } from './evidence';
 
@@ -172,6 +165,7 @@ export { isInvestigationSeverity } from './investigations/severity';
 export { isInvestigationTitlePending } from './investigations/title';
 export {
   INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+  INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE,
   MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH,
   investigationRunFailedEventSchema,
 } from './investigations/run_failure';
@@ -220,6 +214,7 @@ export type {
   SetInvestigationSeverityResponse,
   InvestigationSeverityChangedEventData,
 } from './investigations/severity_change';
+export { INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE } from './investigations/severity_change';
 
 export {
   assignConversationRequestBodySchema,

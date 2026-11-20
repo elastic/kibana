@@ -392,14 +392,15 @@ function warnAboutDuplicateIds(primaryItems: MenuItem[], footerItems: MenuItem[]
 function warnAboutTooManyNewItems(primaryItems: MenuItem[], footerItems: MenuItem[]) {
   if (SKIP_WARNINGS) return;
 
-  const maxNewItemsPerLevel = 2;
+  const maxNewPrimaryItems = 3;
+  const maxNewSecondaryItemsPerParent = 2;
   const allMenuItems = [...primaryItems, ...footerItems];
   const newPrimaryItems: MenuItem[] = [];
   const isNew = (item: MenuItem | SecondaryMenuItem) => item.badgeType === 'new';
 
-  const getHiddenItems = (items: { label: string }[]) =>
+  const getHiddenItems = (items: { label: string }[], max: number) =>
     items
-      .slice(maxNewItemsPerLevel)
+      .slice(max)
       .map((item) => item.label)
       .join(', ');
 
@@ -413,14 +414,14 @@ function warnAboutTooManyNewItems(primaryItems: MenuItem[], footerItems: MenuIte
   });
 
   // Warn if too many new primary items
-  if (newPrimaryItems.length > maxNewItemsPerLevel) {
-    const hiddenItems = getHiddenItems(newPrimaryItems);
+  if (newPrimaryItems.length > maxNewPrimaryItems) {
+    const hiddenItems = getHiddenItems(newPrimaryItems, maxNewPrimaryItems);
     warnOnce(
-      `Max of ${maxNewItemsPerLevel} new primary items reached. The following will not show new indicators: ${hiddenItems}.`
+      `Max of ${maxNewPrimaryItems} new primary items reached. The following will not show new indicators: ${hiddenItems}.`
     );
   }
 
-  newPrimaryItems.slice(0, maxNewItemsPerLevel).forEach((item) => {
+  newPrimaryItems.slice(0, maxNewPrimaryItems).forEach((item) => {
     const isNewPrimaryItem = isNew(item);
     const hasNewSecondaryItems = item.sections?.some((section) => section.items.some(isNew));
 
@@ -434,8 +435,8 @@ function warnAboutTooManyNewItems(primaryItems: MenuItem[], footerItems: MenuIte
     // Warn if too many new secondary items per parent
     const newSecondaryItems =
       item.sections?.flatMap((section) => section.items.filter(isNew)) ?? [];
-    if (newSecondaryItems.length > maxNewItemsPerLevel) {
-      const hiddenItems = getHiddenItems(newSecondaryItems);
+    if (newSecondaryItems.length > maxNewSecondaryItemsPerParent) {
+      const hiddenItems = getHiddenItems(newSecondaryItems, maxNewSecondaryItemsPerParent);
       warnOnce(
         `Too many new secondary items in "${item.label}". The following will not show new badges: ${hiddenItems}.`
       );

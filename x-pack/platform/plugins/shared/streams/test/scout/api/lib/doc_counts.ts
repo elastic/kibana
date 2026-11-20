@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiClientFixture } from '@kbn/scout';
+import type { ApiClientFixture, EsClient } from '@kbn/scout';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
 
 export interface StreamDocCount {
@@ -20,6 +20,13 @@ export const lastHourRange = () => {
   const now = Date.now();
   return { start: now - 3_600_000, end: now + 60_000 };
 };
+
+/**
+ * Makes documents rejected into a stream's failure store searchable on every shard copy, which
+ * the rejected write does not do for the separate `.fs-*` indices behind `<stream>::failures`.
+ */
+export const refreshFailureStore = (esClient: EsClient, stream: string) =>
+  esClient.indices.refresh({ index: `${stream}::failures` });
 
 export const getDocCounts = (
   apiClient: ApiClientFixture,
@@ -36,8 +43,31 @@ export const getDocCounts = (
   });
 };
 
+export const postDocCounts = (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>,
+  kind: 'total' | 'ingestion' | 'degraded' | 'failed',
+  body: { streams: string[]; start?: number; end?: number }
+) =>
+  apiClient.post(`internal/streams/doc_counts/${kind}`, {
+    headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+    body,
+    responseType: 'json',
+  });
+
 export const findCount = (body: StreamDocCount[], stream: string) =>
   body.find((entry) => entry.stream === stream)?.count;
+
+const toStreamCounts = (
+  { statusCode, body }: { statusCode: number; body: unknown },
+  streams: string[]
+) => {
+  const counts = statusCode === 200 ? (body as StreamDocCount[]) : [];
+  return {
+    statusCode,
+    counts: Object.fromEntries(streams.map((stream) => [stream, findCount(counts, stream)])),
+  };
+};
 
 // Shaped for `expect.poll`: status and per-stream counts in one comparable value.
 export const getStreamCounts = async (
@@ -46,11 +76,13 @@ export const getStreamCounts = async (
   kind: 'total' | 'ingestion' | 'degraded' | 'failed',
   query: Record<string, string | number>,
   streams: string[]
-) => {
-  const response = await getDocCounts(apiClient, cookieHeader, kind, query);
-  const body = response.statusCode === 200 ? (response.body as StreamDocCount[]) : [];
-  return {
-    statusCode: response.statusCode,
-    counts: Object.fromEntries(streams.map((stream) => [stream, findCount(body, stream)])),
-  };
-};
+) => toStreamCounts(await getDocCounts(apiClient, cookieHeader, kind, query), streams);
+
+/** Like {@link getStreamCounts}, for the POST variant that takes the stream names in the body. */
+export const postStreamCounts = async (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>,
+  kind: 'total' | 'ingestion' | 'degraded' | 'failed',
+  body: { streams: string[]; start?: number; end?: number },
+  streams: string[]
+) => toStreamCounts(await postDocCounts(apiClient, cookieHeader, kind, body), streams);

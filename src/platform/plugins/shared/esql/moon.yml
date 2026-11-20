@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/esql-server-utils'
   - '@kbn/licensing-plugin'
+  - '@kbn/cloud-plugin'
   - '@kbn/projects-solutions-groups'
   - '@kbn/esql-language'
   - '@kbn/presentation-util'
@@ -69,6 +70,7 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/es-errors'
   - '@kbn/es-types'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod

@@ -18,6 +18,7 @@ import {
   createMockEndpointAppContextServiceStartContract,
 } from './mocks';
 import type { ResponseActionsClient } from './services';
+import { SavedObjectsClientFactory } from './services/saved_objects';
 
 // Keep the real `./services` module, but replace the response actions client factory so tests can
 // assert exactly what `getInternalResponseActionsClient()` hands it.
@@ -400,6 +401,27 @@ describe('test endpoint app context services', () => {
       expect(() => service.getTelemetryConfigProvider()).toThrow(
         EndpointAppContentServicesNotStartedError
       );
+    });
+  });
+
+  describe('after stop()', () => {
+    it('keeps serving the dependencies that rules and watchers still use while Kibana shuts down', async () => {
+      const service = new EndpointAppContextService();
+      const startContract = createMockEndpointAppContextServiceStartContract();
+      service.setup(createMockEndpointAppContextServiceSetupContract());
+      service.start({
+        ...startContract,
+        experimentalFeatures: {
+          ...startContract.experimentalFeatures,
+          endpointExceptionsMovedUnderManagement: false,
+        },
+      });
+
+      service.stop();
+
+      await expect(service.isEndpointExceptionsPerPolicyEnabled()).resolves.toBe(false);
+      expect(service.getInternalEsClient()).toBe(startContract.esClient);
+      expect(service.savedObjects).toBeInstanceOf(SavedObjectsClientFactory);
     });
   });
 });

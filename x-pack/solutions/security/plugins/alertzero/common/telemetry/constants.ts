@@ -213,7 +213,13 @@ export const RULE_COVERAGE_PROPOSAL_KINDS = [
 export type RuleCoverageProposalKind = (typeof RULE_COVERAGE_PROPOSAL_KINDS)[number];
 
 /** The Hunt child's result status for one report; `unknown` is any other value. */
-export const HUNT_REPORT_HUNT_STATUSES = ['success', 'partial', 'failed', 'unknown'] as const;
+export const HUNT_REPORT_HUNT_STATUSES = [
+  'success',
+  'partial',
+  'retired_incomplete',
+  'failed',
+  'unknown',
+] as const;
 
 export type HuntReportHuntStatus = (typeof HUNT_REPORT_HUNT_STATUSES)[number];
 

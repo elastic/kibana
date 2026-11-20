@@ -9,6 +9,7 @@
 
 /* eslint-disable max-classes-per-file*/
 
+import { timeoutSignal } from '@kbn/std';
 import { kibanaHeaders } from './client_headers';
 import { getFetchAgent } from '../../cli/utils/ssl';
 import { normalizeUrl } from '../utils/normalize_url';
@@ -58,6 +59,7 @@ export class KibanaClient {
 
     const { timeout, ...fetchOptions } = options;
     const normalizedUrl = normalizeUrl(url.toString());
+    const deadline = timeout ? timeoutSignal(timeout) : undefined;
     return fetch(normalizedUrl, {
       ...fetchOptions,
       headers: {
@@ -66,22 +68,26 @@ export class KibanaClient {
         ...fetchOptions.headers,
       },
       dispatcher: getFetchAgent(normalizedUrl),
-      signal: timeout ? AbortSignal.timeout(timeout) : undefined,
-    } as RequestInit).then(async (response) => {
-      if (options.ignore && options.ignore.includes(response.status)) {
-        return undefined;
-      }
+      signal: deadline,
+    } as RequestInit)
+      .then(async (response) => {
+        if (options.ignore && options.ignore.includes(response.status)) {
+          return undefined;
+        }
 
-      if (response.status >= 400) {
-        throw new KibanaClientHttpError(
-          `Response error for ${options.method?.toUpperCase() ?? 'GET'} ${normalizedUrl}`,
-          response.status,
-          await response.json().catch((error) => {
-            return undefined;
-          })
-        );
-      }
-      return response.json();
-    });
+        if (response.status >= 400) {
+          throw new KibanaClientHttpError(
+            `Response error for ${options.method?.toUpperCase() ?? 'GET'} ${normalizedUrl}`,
+            response.status,
+            await response.json().catch(() => {
+              return undefined;
+            })
+          );
+        }
+        return response.json();
+      })
+      .finally(() => {
+        deadline?.dispose();
+      });
   }
 }

@@ -7,7 +7,6 @@
 
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-  readEsqlQuery,
   type CustomContentState,
 } from '@kbn/custom-content-common';
 import type { GenericNode } from '@kbn/custom-app-registry';
@@ -22,14 +21,14 @@ export interface NewAppDocument {
 const USES_PERIOD = /\?_t(?:start|end)\b/;
 
 /**
- * The app that a custom content panel is: its template and its query, as the state of the one
- * embeddable of an app, which is the same panel. A query that uses the period gets the control of the period, as
- * the panel got it from the dashboard. It throws, with what is wrong, when the panel has no
+ * The app that a custom content panel is: its template and its queries, as the state of the one
+ * embeddable of an app, which is the same panel. A query that uses the period gets the control of the
+ * period, as the panel got it from the dashboard. It throws, with what is wrong, when the panel has no
  * template yet or what it holds is not something an app can.
  */
 export const customContentToDocument = (state: CustomContentState): NewAppDocument => {
   if (!state.template) throw new Error('This panel has no content yet.');
-  const query = readEsqlQuery(state);
+  const queries = state.esql_query ?? [];
 
   return {
     state: {},
@@ -38,7 +37,7 @@ export const customContentToDocument = (state: CustomContentState): NewAppDocume
       id: 'root',
       direction: 'vertical',
       children: [
-        ...(query !== undefined && USES_PERIOD.test(query)
+        ...(queries.some((query) => USES_PERIOD.test(query))
           ? [
               {
                 type: 'stack',

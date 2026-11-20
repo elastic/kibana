@@ -13,4 +13,6 @@ export interface SourceApplications {
   environments: string[];
   /** Page loads over the time range in the selected environment. */
   pageLoadsOverTime: TimeSeriesPoint[];
+  /** Sessions that started in each bucket, `null` when the source doesn't count sessions. */
+  sessionsOverTime: TimeSeriesPoint[] | null;
 }

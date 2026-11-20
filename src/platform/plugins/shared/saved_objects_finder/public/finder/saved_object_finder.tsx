@@ -91,6 +91,7 @@ interface BaseSavedObjectFinder {
   helpText?: string;
   tableCaption?: string;
   getTooltipText?: (item: SavedObjectFinderItem) => string | undefined;
+  typeIconSize?: 's' | 'm';
 }
 
 interface SavedObjectFinderFixedPage extends BaseSavedObjectFinder {
@@ -270,7 +271,7 @@ class SavedObjectFinderUiClass extends React.Component<
                   content={currentSavedObjectMetaData.name}
                   aria-label={currentSavedObjectMetaData.name}
                   type={iconType}
-                  size="s"
+                  size={this.props.typeIconSize ?? 's'}
                   data-test-subj="objectType"
                 />
               );
@@ -313,7 +314,6 @@ class SavedObjectFinderUiClass extends React.Component<
                     }
                   : undefined
               }
-              title={fullName}
               data-test-subj={`savedObjectTitle${(item.title || '').split(' ').join('-')}`}
             >
               {item.name}

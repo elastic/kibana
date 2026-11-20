@@ -1,9 +1,23 @@
 {
-  "sha1": "6d852d165dd42fd113b755e3668cbcf7e13768f7",
+  "sha1": "c475ba4bab3d236c8b037ef39501f88876ee924b",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "ac58ea0c6b1a540-45371c654422c99",
+      "title": "SyntheticsAlertOnNoData — ungrouped names every pending location by label and keeps the labels on recovery",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/alert_on_no_data_ungrouped.spec.ts",
+        "line": 56,
+        "column": 6
+      }
+    },
     {
       "id": "8c53aec116a7430-bbc5c122cb266d2",
       "title": "SyntheticsAlertOnNoData triggers pending alerts per location, transitions pending to down, and recovers pending to up",
@@ -940,6 +954,20 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_default_rule.spec.ts",
         "line": 479,
         "column": 31
+      }
+    },
+    {
+      "id": "2267aa8524fb3f7-9802ee71c6be203",
+      "title": "SyntheticsDefaultRules keeps actions added on the default rule when connector settings change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_default_rule.spec.ts",
+        "line": 561,
+        "column": 21
       }
     },
     {

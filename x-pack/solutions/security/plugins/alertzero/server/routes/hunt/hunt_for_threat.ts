@@ -14,6 +14,9 @@ import { resolveHuntScope } from '../../services/watches/hunt/common/resolve_ind
 import { huntForThreat } from '../../services/watches/hunt/tier1/hunt_for_threat';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
+import { unsearchedGaps } from '../../services/watches/hunt/common/unsearched_patterns';
+import { blockedScopeMessage } from './blocked_scope_message';
+import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 
 export const HUNT_FOR_THREAT_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_for_threat` as const;
@@ -23,7 +26,13 @@ export const HUNT_FOR_THREAT_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_for_threat`
  * view. A `blocked` scope is refused outright (409) so an empty universe never reads as
  * a clean zero-hit search.
  */
-export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
+export const registerHuntForThreatRoute = ({
+  router,
+  logger,
+  getSpaceId,
+  getClusterClient,
+  isCpsEnabled,
+}: RouteDependencies) => {
   router.versioned
     .post({
       path: HUNT_FOR_THREAT_URL,
@@ -33,7 +42,7 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ],
         },
       },
-      summary: 'Run Tier 1 deterministic hunt',
+      summary: 'Run IOC Hunt',
     })
     .addVersion(
       {
@@ -48,8 +57,12 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
         try {
           const { iocs, techniques, time_range, size } = request.body;
           const spaceId = getSpaceId(request);
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-          const indexPatterns = await resolveHuntUniverse(context, logger);
+          const esClient = huntEsClient({ getClusterClient, request });
+          const { patterns: indexPatterns, policySkipped } = await resolveHuntUniverse(
+            context,
+            logger,
+            isCpsEnabled()
+          );
 
           // `discovered` is the datasets stage 1 parsed for the report matcher; the wire
           // scope carries what they matched, not the list itself.
@@ -57,6 +70,8 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
             esClient,
             spaceId,
             indexPatterns,
+            policySkippedPatterns: policySkipped,
+            crossProjectSearch: isCpsEnabled(),
             logger,
           });
 
@@ -66,16 +81,11 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
             // coordinator chains Tier 1 into Tier 2 and a caller there reads the status
             // field either way, so a hard error would just be a status check wearing an
             // exception handler. This standalone route has no chain to read a body field
-            // from, so refusing outright is the more direct signal. See
-            // elastic/security-team#19741.
+            // from, so refusing outright is the more direct signal.
             return response.customError({
               statusCode: 409,
               body: {
-                message: `Hunt scope is blocked (${
-                  scope.resolution
-                }): nothing in the default data view is visible to this hunt (checked: ${indexPatterns.join(
-                  ', '
-                )})`,
+                message: blockedScopeMessage(scope, indexPatterns),
               },
             });
           }
@@ -96,7 +106,17 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
           // from `_source` for Tier 2 and are not part of the wire schema.
           const { sample_event_summaries: _summaries, ...wireResult } = result;
 
-          const body: HuntForThreatResponse = { scope, result: wireResult };
+          // A name the scope dropped was never searched. The coordinator records that as a gap;
+          // this route has no coordinator, so it goes on the IOC Hunt result itself.
+          const incomplete = [
+            ...unsearchedGaps(scope, indexPatterns),
+            ...(wireResult.incomplete ?? []),
+          ];
+
+          const body: HuntForThreatResponse = {
+            scope,
+            result: { ...wireResult, ...(incomplete.length > 0 ? { incomplete } : {}) },
+          };
           return response.ok({ body });
         } catch (err) {
           if (err instanceof InvalidHuntWindowError) {

@@ -11,7 +11,7 @@ import type { TextMatch, ActiveCommand, CommandDefinition } from './types';
  * Determines if the character at the given position is at a word boundary.
  * A word boundary is the start of the string or immediately after whitespace.
  */
-const isAtWordBoundary = (text: string, offset: number): boolean => {
+export const isAtWordBoundary = (text: string, offset: number): boolean => {
   if (offset === 0) {
     return true;
   }
