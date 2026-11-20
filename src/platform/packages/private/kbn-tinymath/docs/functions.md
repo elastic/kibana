@@ -448,7 +448,7 @@ log([2, 4, 8, 16, 32], 2) // returns [1, 2, 3, 4, 5]
 ```
 ***
 ## _log10(_ _a_ _)_
-Deprecated. Call `log(a, 10)` instead.
+Deprecated. Call `log(a, 10)` instead. Expressions can&#x27;t call `log10`, because function names can&#x27;t contain digits.
 
 
 | Param | Type | Description |
