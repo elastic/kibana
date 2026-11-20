@@ -2205,7 +2205,36 @@ describe('extract_iocs — example emails, Message-IDs and non-addresses', () =>
     });
   });
 
+  describe('Message-ID forms far into a long line yield no email and no domain', () => {
+    test.each<[string, string]>([
+      ['after a long quoted value', `"Subject":"${'word '.repeat(400)}"`],
+      ['after a long unquoted value', `"Size":${'1'.repeat(2000)}`],
+      ['after many short quoted fields', '"k":"v",'.repeat(300).slice(0, -1)],
+    ])('a quoted ID in a one-line JSON record %s', (_label, earlierFields) => {
+      const result = extractIocs({
+        text: `{${earlierFields},"InternetMessageId":"abc123@mail.evil-corp.com"}`,
+      });
+      expect(emailValues(result)).toEqual([]);
+      expect(domainValues(result)).toEqual([]);
+    });
+
+    test('every ID on a References line longer than a header line', () => {
+      const ids = Array.from({ length: 60 }, (_unused, i) => `<id${i}@mail.evil-corp.com>`);
+      const result = extractIocs({
+        text: `References: ${ids.join(' ')}\nFrom: <phish@evil-corp.com>`,
+      });
+      expect(emailValues(result)).toEqual(['phish@evil-corp.com']);
+    });
+  });
+
   describe('real addresses near ID headers are kept', () => {
+    test('an address after a quoted ID header name in prose', () => {
+      const result = extractIocs({
+        text: 'the "message-id=" field was forged and actor@evil-corp.com "replied" later',
+      });
+      expect(emailValues(result)).toEqual(['actor@evil-corp.com']);
+    });
+
     test('an address on the line after an ID header', () => {
       const result = extractIocs({
         text: 'In-Reply-To: <id1@mail.evil-corp.com>\nReach me at <actor@evil-corp.com>',
@@ -2499,6 +2528,10 @@ describe('extract_iocs — version numbers are not IPs', () => {
       expect(ipsOf(text)).toContain(expected);
     });
 
+    test('a marked value far after a word that only ends in "version"', () => {
+      expect(ipsOf(`${WITH_TOKEN}\nsubversion${' '.repeat(89)}9.2.1.6`)).toContain('9.2.1.6');
+    });
+
     test('a real IP directly in a comma list after a vers token is dropped (declared cost)', () => {
       expect(ipsOf('vers:generic/<=9.1.1.0, 185.220.101.4')).toEqual([]);
     });
@@ -2535,6 +2568,14 @@ describe('extract_iocs — long single-line input stays linear', () => {
   ])('many %s addresses on one line', (_label, token) => {
     const { result, elapsedMs } = timedExtract(token.repeat(18_000));
     expect(emailValues(result)).toEqual(['actor@evil-corp.com']);
+    expect(elapsedMs).toBeLessThan(MAX_ELAPSED_MS);
+  });
+
+  test('many References lines', () => {
+    const { result, elapsedMs } = timedExtract(
+      'References: <id1@mail.evil-corp.com>\n'.repeat(20_000)
+    );
+    expect(result.iocs).toEqual([]);
     expect(elapsedMs).toBeLessThan(MAX_ELAPSED_MS);
   });
 

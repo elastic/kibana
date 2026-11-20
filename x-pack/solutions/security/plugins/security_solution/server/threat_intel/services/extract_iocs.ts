@@ -213,49 +213,80 @@ const EMAIL_PATTERN = /\b[a-z0-9._%+\-]+@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+
 // sendmail `msgid=`), followed by an optional closing quote, `:` or `=`, optional whitespace
 // and an optional opening quote.
 const ID_HEADER_BEFORE_TOKEN = /(?:message[-_]?id|msgid)["']?[ \t]*[:=][ \t]*["']?$/i;
-// A header whose bracketed tokens are all message IDs.
-const ID_LIST_HEADER_AT_LINE_START = /^[ \t]*(?:in-reply-to|references)[ \t]*:/i;
-// A mail header line is at most 998 characters (RFC 5322 section 2.1.1). Only that much text on
-// either side of a match is read, which also keeps a long line of addresses linear: the report
-// text is untrusted and this runs once per email match.
-const MAX_ID_HEADER_LINE_CHARS = 998;
+// A line that opens with a header whose bracketed tokens are all message IDs. A line starts at
+// the start of the text or after `\n`.
+const ID_LIST_HEADER_LINE = /(?<![^\n])[ \t]*(?:in-reply-to|references)[ \t]*:[^\n]*/gi;
+// An ID token and the header name before it are short, so only this much text on either side of
+// a match is read (998 is the RFC 5322 line limit). The report text is untrusted and the check
+// runs once per email match, so reading the whole line would be quadratic on one long line.
+const MAX_ID_TOKEN_CONTEXT_CHARS = 998;
+
+/** Every ID list header line, in text order. One linear scan per extraction. */
+const collectIdListHeaderLines = (text: string): Span[] => {
+  const pattern = new RegExp(ID_LIST_HEADER_LINE.source, ID_LIST_HEADER_LINE.flags);
+  const lines: Span[] = [];
+  for (const match of matchesWithOffset(text, pattern)) {
+    lines.push([match.index, match.index + match[0].length]);
+  }
+  return lines;
+};
+
+/** True when `offset` is inside one of `spans`, which are sorted and do not overlap. */
+const isInsideSortedSpans = (spans: readonly Span[], offset: number): boolean => {
+  let low = 0;
+  let high = spans.length - 1;
+  while (low <= high) {
+    const middle = Math.floor((low + high) / 2);
+    const [spanStart, spanEnd] = spans[middle];
+    if (offset < spanStart) {
+      high = middle - 1;
+    } else if (offset >= spanEnd) {
+      low = middle + 1;
+    } else {
+      return true;
+    }
+  }
+  return false;
+};
 
 /**
  * True when the email match at `[start, end)` sits inside a token a mail Message-ID header
  * introduces. Same line only: a folded header whose ID is on the next line is not recognized.
- * Only MAX_ID_HEADER_LINE_CHARS on either side of the match are read, so on a longer line the
- * `References:` list rule stops applying that far from the line start and quotes are paired
- * inside the window. A missed ID is then extracted as an address, as it was before this rule.
  * The check runs on the enclosing `<...>` or `"..."` token, not on the match, because an ID
  * local part can hold characters EMAIL_PATTERN stops at (`=`), so the match may start mid-token.
+ * The token is found from the nearest bracket or quote on each side, never by counting quotes
+ * back to the line start, so the result does not depend on where the window begins.
  */
-const isMessageIdToken = (text: string, start: number, end: number): boolean => {
-  const windowStart = Math.max(0, start - MAX_ID_HEADER_LINE_CHARS);
-  const lookBehind = text.slice(windowStart, start);
-  const newlineBefore = lookBehind.lastIndexOf('\n');
-  const before = lookBehind.slice(newlineBefore + 1);
-  const hasLineStart = newlineBefore !== -1 || windowStart === 0;
-  const lookAhead = text.slice(end, end + MAX_ID_HEADER_LINE_CHARS);
+const isMessageIdToken = (
+  text: string,
+  start: number,
+  end: number,
+  idListHeaderLines: readonly Span[]
+): boolean => {
+  const lookBehind = text.slice(Math.max(0, start - MAX_ID_TOKEN_CONTEXT_CHARS), start);
+  const before = lookBehind.slice(lookBehind.lastIndexOf('\n') + 1);
+  const lookAhead = text.slice(end, end + MAX_ID_TOKEN_CONTEXT_CHARS);
   const newlineAfter = lookAhead.indexOf('\n');
   const after = newlineAfter === -1 ? lookAhead : lookAhead.slice(0, newlineAfter);
 
-  let tokenStartInLine = -1;
-  let isAngle = false;
   const lt = before.lastIndexOf('<');
   if (lt > before.lastIndexOf('>') && after.includes('>')) {
-    tokenStartInLine = lt;
-    isAngle = true;
-  } else {
-    const quotes = before.split('"').length - 1;
-    if (quotes % 2 === 1 && after.includes('"')) {
-      tokenStartInLine = before.lastIndexOf('"');
-    }
+    return (
+      ID_HEADER_BEFORE_TOKEN.test(before.slice(0, lt)) ||
+      isInsideSortedSpans(idListHeaderLines, start)
+    );
   }
-  if (tokenStartInLine === -1) return false;
 
-  const beforeToken = before.slice(0, tokenStartInLine);
-  if (ID_HEADER_BEFORE_TOKEN.test(beforeToken)) return true;
-  return isAngle && hasLineStart && ID_LIST_HEADER_AT_LINE_START.test(before);
+  // A quoted token: the nearest quote on each side, with no whitespace between it and the match.
+  const openingQuote = before.lastIndexOf('"');
+  const closingQuote = after.indexOf('"');
+  return (
+    openingQuote !== -1 &&
+    closingQuote !== -1 &&
+    !/\s/.test(before.slice(openingQuote + 1)) &&
+    !/\s/.test(after.slice(0, closingQuote)) &&
+    ID_HEADER_BEFORE_TOKEN.test(before.slice(0, openingQuote))
+  );
 };
 
 /** Tier and basis for an email match, or `null` when it is not an address (rules 1 and 3 of PASS 1). */
@@ -264,13 +295,15 @@ const classifyEmail = ({
   start,
   raw,
   wasDefanged,
+  idListHeaderLines,
 }: {
   refangedText: string;
   start: number;
   raw: string;
   wasDefanged: boolean;
+  idListHeaderLines: readonly Span[];
 }): { tier: IocTier; basis: string } | null => {
-  if (isMessageIdToken(refangedText, start, start + raw.length)) return null;
+  if (isMessageIdToken(refangedText, start, start + raw.length, idListHeaderLines)) return null;
   const host = raw.slice(raw.lastIndexOf('@') + 1);
   if (isPlaceholderEmailHost(host)) return { tier: 'reference', basis: 'placeholder_email' };
   if (!IANA_TLDS.has(host.slice(host.lastIndexOf('.') + 1))) return null;
@@ -1060,13 +1093,19 @@ const VERSION_CONTEXT_LOOKBEHIND_CHARS = 96;
 const isVersionContext = (text: string, offset: number, depth = 0): boolean => {
   const windowStart = Math.max(0, offset - VERSION_CONTEXT_LOOKBEHIND_CHARS);
   const lookBehind = text.slice(windowStart, offset);
-  const lineStart = windowStart + lookBehind.lastIndexOf('\n') + 1;
+  const newlineBefore = lookBehind.lastIndexOf('\n');
+  const lineStart = windowStart + newlineBefore + 1;
   const before = text.slice(lineStart, offset);
-  if (VERSION_WORD_BEFORE.test(before)) return true;
+  // When the window is cut mid-line, a match at its first character may be the tail of a longer
+  // word or number (`subversion`, `10.9.2.1.6`), so it does not count.
+  const isCutMidLine = newlineBefore === -1 && windowStart > 0 && text[windowStart - 1] !== '\n';
+  const isWholeMatch = (match: RegExpExecArray | null): match is RegExpExecArray =>
+    match !== null && (match.index > 0 || !isCutMidLine);
+  if (isWholeMatch(VERSION_WORD_BEFORE.exec(before))) return true;
   if (/(?:<=|>=|≤|≥)$/.test(before)) return true;
   if (depth >= MAX_VERSION_JOIN_DEPTH) return false;
   const joined = QUAD_JOINED_BEFORE.exec(before);
-  return joined !== null && isVersionContext(text, lineStart + joined.index, depth + 1);
+  return isWholeMatch(joined) && isVersionContext(text, lineStart + joined.index, depth + 1);
 };
 
 /**
@@ -1263,6 +1302,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   //   4. Otherwise: discriminating if defanged in the source, else uncertain.
   {
     const pattern = new RegExp(EMAIL_PATTERN.source, EMAIL_PATTERN.flags);
+    const idListHeaderLines = collectIdListHeaderLines(refangedText);
     for (const match of matchesWithOffset(refangedText, pattern)) {
       const raw = match[0].toLowerCase();
       const idx = match.index;
@@ -1273,6 +1313,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
         start: idx,
         raw,
         wasDefanged: !originalLower.includes(raw),
+        idListHeaderLines,
       });
       if (verdict) {
         pushIoc({
