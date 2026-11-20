@@ -11,6 +11,8 @@ import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indic
 import { KiViewer } from '../view/ki_viewer';
 import { ListKiBody } from './list_ki_body';
 import { ListKiFiltersRow } from './list_ki_filters_row';
+import { ListKiHeader } from './list_ki_header';
+import { ListKiTypeTiles } from './list_ki_type_tiles';
 import { useListKiPanel } from './use_list_ki_panel';
 import { useListKiPanelStyles } from './list_ki_panel_styles';
 
@@ -19,13 +21,14 @@ interface ListKiPanelProps {
   discoverHref?: string;
 }
 
-/** The Knowledge documents tab: filters row, then the grouped list next to the viewer. */
+/** The Knowledge documents tab: header, type tiles, filters row, then the list next to the viewer. */
 export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
   const {
     aiIndexId,
-    typeFilter,
-    summary,
-    onTypeFilterChange,
+    total,
+    tiles,
+    selection,
+    onToggleTile,
     statusFilter,
     onStatusFilterChange,
     sort,
@@ -49,6 +52,19 @@ export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
 
   return (
     <EuiPanel hasBorder paddingSize="l" css={styles.panel} data-test-subj="contextListKiPanel">
+      <ListKiHeader
+        total={total}
+        isLoading={isLoading}
+        hasError={Boolean(error)}
+        discoverHref={discoverHref}
+      />
+      <ListKiTypeTiles
+        tiles={tiles}
+        total={total}
+        selection={selection}
+        onToggleTile={onToggleTile}
+        isLoading={isLoading}
+      />
       <ListKiFiltersRow
         searchText={searchText}
         isSearchLoading={isRefetching}
@@ -58,9 +74,6 @@ export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
         onStatusFilterChange={onStatusFilterChange}
         sort={sort}
         onSortChange={onSortChange}
-        typeFilter={typeFilter}
-        summary={summary}
-        onTypeFilterChange={onTypeFilterChange}
       />
 
       <ListKiBody

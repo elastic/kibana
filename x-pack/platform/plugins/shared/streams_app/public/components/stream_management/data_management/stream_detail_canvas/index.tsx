@@ -32,6 +32,7 @@ import {
 } from '@xyflow/react';
 import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { usePageLeavePrompt } from '../../../../hooks/use_page_leave_prompt';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useUnitId } from '../../../../hooks/use_unit_id';
@@ -231,6 +232,7 @@ function StreamsCanvasInner() {
   } = useCanvasEvents();
   const unitDefinition = useCanvasUnitDefinition();
   const hasUnsavedChanges = useCanvasHasUnsavedChanges();
+  usePageLeavePrompt({ hasUnsavedChanges: hasUnsavedChanges && !readOnly });
   const isSaving = useCanvasIsSaving();
   const isSavingProcessing = useCanvasIsSavingProcessing();
   const routingStagedUnit = useCanvasRoutingStagedUnit();

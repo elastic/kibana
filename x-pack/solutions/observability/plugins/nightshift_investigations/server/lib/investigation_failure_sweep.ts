@@ -16,6 +16,7 @@ import {
 import type { GetTriggerEmitter } from '../types';
 import type { GetWorkflowsManagement } from '../routes/types';
 import { InvestigationNotFoundError } from '../client/errors';
+import { UNSUCCESSFUL_EXECUTION_STATUSES } from '../client/investigations_client';
 import type {
   InvestigationNotificationDeps,
   InvestigationNotificationSource,
@@ -136,7 +137,7 @@ const readFailureCandidates = (
     {
       request,
       includeManagedExecutions: true,
-      statuses: [ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT],
+      statuses: [...UNSUCCESSFUL_EXECUTION_STATUSES],
       executionTypes: [ExecutionType.PRODUCTION],
       finishedAfter,
       finishedBefore,

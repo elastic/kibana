@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, displayName, description, lazySchema } from '@kbn/zod';
 import {
   compositeSloIdSchema,
   compositeTagsSchema,
@@ -15,17 +15,19 @@ import {
   compositeMethodSchema,
 } from '../../../schema/composite_slo';
 
-const updateCompositeSLOBodySchema = z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
-  members: compositeSloMembersSchema.optional(),
-  compositeMethod: compositeMethodSchema.optional(),
-  timeWindow: compositeRollingTimeWindowSchema.optional(),
-  budgetingMethod: compositeOccurrencesBudgetingMethodSchema.optional(),
-  objective: compositeTargetSchema.optional(),
-  tags: compositeTagsSchema.optional(),
-  enabled: z.boolean().optional(),
-});
+const updateCompositeSLOBodySchema = lazySchema(() =>
+  z.object({
+    name: displayName().optional(),
+    description: description().optional(),
+    members: compositeSloMembersSchema.optional(),
+    compositeMethod: compositeMethodSchema.optional(),
+    timeWindow: compositeRollingTimeWindowSchema.optional(),
+    budgetingMethod: compositeOccurrencesBudgetingMethodSchema.optional(),
+    objective: compositeTargetSchema.optional(),
+    tags: compositeTagsSchema.optional(),
+    enabled: z.boolean().optional(),
+  })
+);
 
 const updateCompositeSLOParamsSchema = z.object({
   path: z.object({

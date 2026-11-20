@@ -36,12 +36,14 @@ import {
   MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
   MAX_AI_INDEX_USER_ID_LENGTH,
   MAX_KI_GROUP_PREVIEW_SIZE,
+  MAX_KI_EXCLUDE_TYPES,
   MAX_KI_GROUPS,
   MAX_KI_SEARCH_QUERY_LENGTH,
   MAX_KI_TYPE_FILTER_LENGTH,
   AI_INDEX_BY_ID_PATH,
   AI_INDEX_DESCRIBE_PATH,
   AI_INDEX_DREAMING_PATH,
+  DREAMING_TEMPLATES_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
   AI_INDEX_KI_GROUPS_PATH,
@@ -1324,7 +1326,7 @@ describe('ai indices routes', () => {
         expect(validateQuery({ exclude_types: ['faq', 'policy'] })).toEqual(
           expect.objectContaining({ exclude_types: ['faq', 'policy'] })
         );
-        const maxTypes = Array.from({ length: MAX_KI_GROUPS }, (_, i) => `t${i}`);
+        const maxTypes = Array.from({ length: MAX_KI_EXCLUDE_TYPES }, (_, i) => `t${i}`);
         expect(() => validateQuery({ exclude_types: maxTypes })).not.toThrow();
         expect(() => validateQuery({ exclude_types: [...maxTypes, 'one-more'] })).toThrow(
           '[exclude_types]'
@@ -1451,7 +1453,69 @@ describe('ai indices routes', () => {
         '[query]'
       );
       expect(() => validateQuery({ type: 'faq' })).toThrow();
-      expect(() => validateQuery({ exclude_types: 'faq' })).toThrow();
+    });
+
+    it('accepts exclude_types as a string or a bounded array of bounded strings', () => {
+      expect(validateQuery({ exclude_types: 'faq' })).toEqual(
+        expect.objectContaining({ exclude_types: 'faq' })
+      );
+      const maxTypes = Array.from({ length: MAX_KI_EXCLUDE_TYPES }, (_, i) => `t${i}`);
+      expect(() => validateQuery({ exclude_types: maxTypes })).not.toThrow();
+      expect(() => validateQuery({ exclude_types: [...maxTypes, 'one-more'] })).toThrow(
+        '[exclude_types]'
+      );
+      expect(() => validateQuery({ exclude_types: '' })).toThrow('[exclude_types]');
+      expect(() =>
+        validateQuery({ exclude_types: 'a'.repeat(MAX_KI_TYPE_FILTER_LENGTH + 1) })
+      ).toThrow('[exclude_types]');
+    });
+
+    it('passes exclude_types to the buckets query as params, a single value as a list', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(groupBuckets([[2, 'policy', 3, false]]))
+        .mockResolvedValueOnce(rows([]));
+
+      await callRoute('GET', AI_INDEX_KI_GROUPS_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        query: { max_groups: 10, preview_size: 1, exclude_types: 'faq', sort: 'updated' },
+      });
+
+      expect(esEsqlQuery.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining('WHERE (type IS NULL OR type NOT IN (?excludeType0))'),
+        params: [{ excludeType0: 'faq' }],
+      });
+    });
+
+    it('accepts types as a string or a bounded array of bounded strings', () => {
+      expect(validateQuery({ types: 'faq' })).toEqual(expect.objectContaining({ types: 'faq' }));
+      expect(() =>
+        validateQuery({ types: Array.from({ length: MAX_KI_GROUPS }, (_, i) => `t${i}`) })
+      ).not.toThrow();
+      expect(() =>
+        validateQuery({ types: Array.from({ length: MAX_KI_GROUPS + 1 }, (_, i) => `t${i}`) })
+      ).toThrow('[types]');
+      expect(() => validateQuery({ types: '' })).toThrow('[types]');
+      expect(() => validateQuery({ types: 'a'.repeat(257) })).toThrow('[types]');
+    });
+
+    it('passes the given types to the buckets query as params', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(groupBuckets([[2, 'faq', 3, false]]))
+        .mockResolvedValueOnce(rows([]));
+
+      await callRoute('GET', AI_INDEX_KI_GROUPS_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        query: { max_groups: 5, preview_size: 1, types: 'faq', sort: 'updated' },
+      });
+
+      expect(esEsqlQuery.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining('type IN (?groupType0)'),
+        params: [{ groupType0: 'faq' }],
+      });
     });
 
     it('returns the groups, reads as the current user and audits the read', async () => {
@@ -2841,6 +2905,10 @@ describe('ai indices routes', () => {
     };
 
     it('registers internal routes', () => {
+      expect(getRoute('GET', DREAMING_TEMPLATES_PATH).config.access).toBe('internal');
+      expect(getRoute('GET', DREAMING_TEMPLATES_PATH).config.security).toEqual({
+        authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
+      });
       expect(getRoute('GET', AI_INDEX_DREAMING_PATH).config.access).toBe('internal');
       expect(getRoute('PUT', AI_INDEX_DREAMING_PATH).config.access).toBe('internal');
     });
@@ -2848,6 +2916,7 @@ describe('ai indices routes', () => {
     it('returns 404 while the global memory setting is off', async () => {
       memoryFlagEnabled = false;
 
+      await callRoute('GET', DREAMING_TEMPLATES_PATH, {});
       await callRoute('GET', AI_INDEX_DREAMING_PATH, {
         params: { aiIndexId: 'customer_support' },
       });
@@ -2857,10 +2926,30 @@ describe('ai indices routes', () => {
       });
 
       expect(response.notFound.mock.calls).toEqual(
-        Array(2).fill([{ body: { message: 'Context Engine memory is turned off.' } }])
+        Array(3).fill([{ body: { message: 'Context Engine memory is turned off.' } }])
       );
       expect(aiIndexService.get).not.toHaveBeenCalled();
       expect(aiIndexService.setDreaming).not.toHaveBeenCalled();
+    });
+
+    describe('GET /internal/context_engine/dreaming_templates', () => {
+      it('returns the built-in example dreaming configs', async () => {
+        await callRoute('GET', DREAMING_TEMPLATES_PATH, {});
+
+        expect(response.ok).toHaveBeenCalledWith({
+          body: {
+            templates: expect.arrayContaining([
+              expect.objectContaining({
+                id: 'customer_support',
+                name: 'Customer support',
+                dreaming: expect.objectContaining({
+                  facts: expect.any(Array),
+                }),
+              }),
+            ]),
+          },
+        });
+      });
     });
 
     it('leaves the config and memory_enabled out of the public AI index', async () => {
