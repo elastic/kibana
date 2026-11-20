@@ -72,3 +72,13 @@ export const majorVersionOf = (version: string): number | undefined => {
   const major = /^v?(\d+)(?:\.|$)/.exec(version.trim())?.[1];
   return major === undefined ? undefined : Number(major);
 };
+
+/**
+ * Which queues pool together: semver versions share a line per major, anything else (`latest`,
+ * a date, a commit) is only ever pooled with itself, so a non-semver version never merges with a
+ * different one.
+ */
+export const versionLineKey = (version: string): string => {
+  const major = majorVersionOf(version);
+  return major === undefined ? `exact:${version.trim()}` : `major:${major}`;
+};
