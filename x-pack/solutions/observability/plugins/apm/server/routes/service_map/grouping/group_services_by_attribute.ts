@@ -6,7 +6,7 @@
  */
 
 import type { AttributeGroupingSource, ServiceGroupingStrategy } from '@kbn/apm-types';
-import { NO_ATTRIBUTE_GROUP_ID } from './constants';
+import { NO_VALUE_GROUP_ID } from './constants';
 import { assignGroups } from './utils';
 
 /**
@@ -33,7 +33,7 @@ export function groupServicesByAttribute({
       const value = valueOfService(service);
       return value
         ? { id: `${source}:${value}`, kind: 'attribute', attribute: source, value }
-        : { id: NO_ATTRIBUTE_GROUP_ID, kind: 'noAttribute', attribute: source };
+        : { id: NO_VALUE_GROUP_ID, kind: 'noValue', attribute: source };
     },
   });
 

@@ -27,12 +27,12 @@ export function formatServiceGroupName(group: ServiceMapGroup): string {
       return i18n.translate('xpack.apm.serviceMap.serviceGroup.notConnected', {
         defaultMessage: 'Not connected',
       });
-    case 'noAttribute':
-      return formatNoAttributeGroupName(group.attribute);
+    case 'noValue':
+      return formatNoValueGroupName(group.attribute);
   }
 }
 
-function formatNoAttributeGroupName(attribute: AttributeGroupingSource): string {
+function formatNoValueGroupName(attribute: AttributeGroupingSource): string {
   switch (attribute) {
     case 'service.namespace':
     case 'kubernetes.namespace':

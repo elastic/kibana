@@ -121,11 +121,9 @@ describe('buildServiceGrouping', () => {
         'service.namespace:team-3'
       );
       expect(groupOf(grouping, services, 'service.namespace', 'idle-unlabelled')?.kind).toBe(
-        'noAttribute'
+        'noValue'
       );
-      expect(groupOf(grouping, services, 'service.namespace', 'shared-1')?.kind).toBe(
-        'noAttribute'
-      );
+      expect(groupOf(grouping, services, 'service.namespace', 'shared-1')?.kind).toBe('noValue');
     });
 
     it('leaves the strategy out when no service sets a namespace', () => {
@@ -201,9 +199,7 @@ describe('buildServiceGrouping', () => {
       expect(groupOf(grouping, services, 'service.namespace', 'shared-0')?.id).toBe(
         'service.namespace:platform'
       );
-      expect(groupOf(grouping, services, 'kubernetes.namespace', 'shared-0')?.kind).toBe(
-        'noAttribute'
-      );
+      expect(groupOf(grouping, services, 'kubernetes.namespace', 'shared-0')?.kind).toBe('noValue');
     });
 
     it('leaves out only the strategy whose attribute no service sets', () => {

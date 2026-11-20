@@ -12,7 +12,7 @@ export const SERVICE_GROUPING_MIN_SERVICES = 100;
 
 export const SHARED_GROUP_ID = 'shared';
 export const NOT_CONNECTED_GROUP_ID = 'notConnected';
-export const NO_ATTRIBUTE_GROUP_ID = 'noAttribute';
+export const NO_VALUE_GROUP_ID = 'noValue';
 
 /** A service called by at least this share of the estate is shared. */
 export const SHARED_MIN_CALLER_SHARE = 0.25;

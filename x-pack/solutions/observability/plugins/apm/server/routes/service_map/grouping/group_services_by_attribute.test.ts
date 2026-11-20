@@ -42,7 +42,7 @@ describe('groupServicesByAttribute', () => {
           attribute: 'service.namespace',
           value: 'shop',
         },
-        { id: 'noAttribute', kind: 'noAttribute', attribute: 'service.namespace' },
+        { id: 'noValue', kind: 'noValue', attribute: 'service.namespace' },
         {
           id: 'service.namespace:payments',
           kind: 'attribute',
@@ -62,9 +62,7 @@ describe('groupServicesByAttribute', () => {
       valueOfService: (service) => (service === 'b' ? '' : undefined),
     });
 
-    expect(groups).toEqual([
-      { id: 'noAttribute', kind: 'noAttribute', attribute: 'service.namespace' },
-    ]);
+    expect(groups).toEqual([{ id: 'noValue', kind: 'noValue', attribute: 'service.namespace' }]);
     expect(assignment).toEqual([0, 0, 0]);
   });
 
@@ -72,10 +70,10 @@ describe('groupServicesByAttribute', () => {
     const { groups } = groupServicesByAttribute({
       source: 'service.namespace',
       services: ['a', 'b'],
-      valueOfService: (service) => (service === 'a' ? 'noAttribute' : undefined),
+      valueOfService: (service) => (service === 'a' ? 'noValue' : undefined),
     });
 
-    expect(groups.map(({ id }) => id)).toEqual(['service.namespace:noAttribute', 'noAttribute']);
+    expect(groups.map(({ id }) => id)).toEqual(['service.namespace:noValue', 'noValue']);
   });
 
   it('gives the same groups for the same input', () => {

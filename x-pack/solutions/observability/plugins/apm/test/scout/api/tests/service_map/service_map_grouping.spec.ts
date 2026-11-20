@@ -163,7 +163,7 @@ apiTest.describe(
           [`service.namespace:${SERVICE_MAP_GROUPING_PLATFORM_NAMESPACE}`]: sorted(
             SERVICE_MAP_GROUPING_PLATFORM
           ),
-          noAttribute: sorted(SERVICE_MAP_GROUPING_WITHOUT_NAMESPACE),
+          noValue: sorted(SERVICE_MAP_GROUPING_WITHOUT_NAMESPACE),
         });
       }
     );
@@ -190,7 +190,7 @@ apiTest.describe(
           [`kubernetes.namespace:${SERVICE_MAP_GROUPING_GATEWAY_KUBERNETES_NAMESPACE}`]: [
             SERVICE_MAP_GROUPING_GATEWAY,
           ],
-          noAttribute: sorted(SERVICE_MAP_GROUPING_WITHOUT_KUBERNETES_NAMESPACE),
+          noValue: sorted(SERVICE_MAP_GROUPING_WITHOUT_KUBERNETES_NAMESPACE),
         });
       }
     );

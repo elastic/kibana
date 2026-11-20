@@ -31,9 +31,7 @@ describe('formatServiceGroupName', () => {
     for (const attribute of attributes) {
       // `\S` matches any character that isn't whitespace, so the label can't be empty or blank.
       // The wording itself is product copy and free to change.
-      expect(formatServiceGroupName({ id: 'noAttribute', kind: 'noAttribute', attribute })).toMatch(
-        /\S/
-      );
+      expect(formatServiceGroupName({ id: 'noValue', kind: 'noValue', attribute })).toMatch(/\S/);
     }
   });
 });
