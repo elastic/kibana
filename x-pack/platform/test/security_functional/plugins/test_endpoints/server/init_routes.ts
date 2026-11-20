@@ -516,7 +516,8 @@ export function initRoutes(
       security: {
         authz: {
           enabled: false,
-          reason: 'Test endpoint exercising session recovery during Task Manager API key grants',
+          reason:
+            'Test endpoint checks the manage_security Elasticsearch privilege before scheduling tasks',
         },
       },
       validate: {
@@ -529,6 +530,14 @@ export function initRoutes(
       },
     },
     async (context, request, response) => {
+      const { elasticsearch } = await context.core;
+      const privileges = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
+        cluster: ['manage_security'],
+      });
+      if (!privileges.has_all_requested) {
+        return response.forbidden({ body: { message: 'manage_security is required.' } });
+      }
+
       const [, { taskManager }] = await core.getStartServices();
       const { waitMs, count, concurrent, authenticateFirst } = request.query;
       const tasks: Array<{ id: string; apiKeyId: string | undefined }> = [];
@@ -550,7 +559,6 @@ export function initRoutes(
         // Expire the token inside this request, after HTTP authentication has completed.
         await delay(waitMs);
         if (authenticateFirst) {
-          const { elasticsearch } = await context.core;
           await elasticsearch.client.asCurrentUser.security.authenticate();
         }
 

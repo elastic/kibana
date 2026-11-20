@@ -15,6 +15,15 @@ apiTest.describe(
   'Task scheduling with an expired session access token',
   { tag: ['@local-stateful-classic'] },
   () => {
+    apiTest('rejects task scheduling without manage_security', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+      const response = await apiClient.post('internal/test_endpoints/authentication/tasks', {
+        headers: { ...cookieHeader, 'kbn-xsrf': 'true' },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(403);
+    });
+
     for (const scenario of [
       { name: 'one grant', query: '', count: 1 },
       { name: 'sequential grants', query: '&count=3', count: 3 },

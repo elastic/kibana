@@ -76,6 +76,9 @@ export interface KibanaAsStreamOptions {
 
 const noop = () => undefined;
 
+const normalizeHeaders = (headers: IncomingHttpHeaders): IncomingHttpHeaders =>
+  Object.fromEntries(Object.entries(headers).map(([name, value]) => [name.toLowerCase(), value]));
+
 const isStreamBody = (body: unknown): body is NodeJS.ReadableStream => {
   return typeof body === 'object' && body !== null && !!isReadable(body as NodeJS.ReadableStream);
 };
@@ -197,6 +200,9 @@ export const createTransport = ({
       };
 
       onRequest({ scoped }, params, opts, logger);
+      // HTTP header names are case-insensitive. Normalize before sending so the renewal handler
+      // sees the same effective authorization value as Elasticsearch.
+      opts.headers = normalizeHeaders(opts.headers ?? {});
 
       const retryUnauthorizedRequest = async (error: UnauthorizedError) => {
         const unauthorizedErrorHandler = getUnauthorizedErrorHandler
@@ -210,10 +216,10 @@ export const createTransport = ({
               ...result.authHeaders,
             };
             const retryOpts = { ...opts };
-            retryOpts.headers = {
+            retryOpts.headers = normalizeHeaders({
               ...this.headers,
               ...options?.headers,
-            };
+            });
 
             const retryResponse = (await super.request(params, retryOpts)) as TransportResult<
               any,
