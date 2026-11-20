@@ -371,6 +371,25 @@ export function LatencyMap({
     [grid, timeGrid, stats, failedOnly]
   );
 
+  // What a keyboard region would commit: its bounds, with the counts of the cells it covers.
+  const describeRange = (range: CellRange) => {
+    const rangeSelection = geometry!.rangeToSelection(range);
+    const counts = getSelectionCounts({
+      grid: grid!,
+      timeGrid: timeGrid!,
+      stats: stats!,
+      selection: failedOnly ? { ...rangeSelection, failedOnly: true } : rangeSelection,
+    });
+    return {
+      fromMs: Date.parse(rangeSelection.from),
+      toMs: Date.parse(rangeSelection.to),
+      minDuration: rangeSelection.minDuration,
+      maxDuration: rangeSelection.maxDuration,
+      spans: counts.spans,
+      failed: counts.failed,
+    };
+  };
+
   // Over the selection's own bounds, which the host's condition uses, not over the cells it was
   // snapped to: after a resize those are not the same spans.
   const selectedCounts = useMemo(
@@ -537,6 +556,11 @@ export function LatencyMap({
     const result = reduceKeyboard(start, event, geometry.bins, geometry.rows);
     if (!result.handled) return;
     event.preventDefault();
+    if (result.action?.type === 'click') {
+      // The pointer's click, from the keyboard: Enter on the bare cursor opens the cell.
+      clickCell(result.action.cell);
+      return;
+    }
     if (result.action?.type === 'clear') {
       setKeyboard(undefined);
       if (displaySelection) commit(undefined);
@@ -683,7 +707,14 @@ export function LatencyMap({
     };
   }, []);
 
-  const keyboardCell = geometry && keyboard ? describeCell(keyboard.cursor) : undefined;
+  // The keyboard's readout: the cursor's cell or, while Shift is extending a region, the whole
+  // region - the bounds and counts that Enter would commit, as the summary will say them.
+  const keyboardCell =
+    geometry && keyboard
+      ? keyboard.anchor
+        ? describeRange(getKeyboardRange(keyboard))
+        : describeCell(keyboard.cursor)
+      : undefined;
   const summary = stats
     ? i18n.translate('traceLatencyMap.summary', {
         defaultMessage:
@@ -757,7 +788,7 @@ export function LatencyMap({
           tabIndex={0}
           aria-label={i18n.translate('traceLatencyMap.interactiveLabel', {
             defaultMessage:
-              'Latency map. Arrow keys move between cells, Shift and arrow keys select a region, Enter commits it, Escape clears.',
+              'Latency map. Arrow keys move between cells, Enter opens the cell, Shift and arrow keys select a region, Enter commits it, Escape clears.',
           })}
           aria-busy={isLoading}
           css={css`

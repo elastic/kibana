@@ -1148,6 +1148,34 @@ describe('LatencyMap', () => {
       expect(screen.getByTestId('traceLatencyMapAnnouncement')).toHaveTextContent(/20 spans/);
     });
 
+    it('reads out the whole region while Shift extends it: what Enter would commit', async () => {
+      renderMap({ selection: geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }) });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      // From the selection's first cell, Shift+Right covers both busy cells.
+      press(layer, 'ArrowRight', true);
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).toHaveTextContent('60 spans');
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).toHaveTextContent('10 failed');
+    });
+
+    it('opens the cell under the cursor with Enter, as the pointer click does', async () => {
+      const onCellClick = jest.fn();
+      renderMap({
+        selection: geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }),
+        onCellClick,
+      });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'ArrowRight');
+      press(layer, 'Enter');
+      expect(onCellClick).toHaveBeenCalledWith(expect.objectContaining({ spans: 20, failed: 0 }));
+      // A cell with nothing in it opens nothing, as with the pointer.
+      onCellClick.mockClear();
+      press(layer, 'ArrowRight');
+      press(layer, 'Enter');
+      expect(onCellClick).not.toHaveBeenCalled();
+    });
+
     it('does not hide the selection when the map is clicked into focus', async () => {
       const selection = geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 });
       renderMap({ selection });
