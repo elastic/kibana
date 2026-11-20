@@ -6,7 +6,33 @@
           "interval": 5,
           "unit": "MINUTES"
         }
-      }
+      },
+      "inputs": [
+        {
+          "search": {
+            "indices": ["logs-*"],
+            "query": {
+              "size": 0,
+              "query": {
+                "match_all": {}
+              }
+            }
+          }
+        }
+      ],
+      "triggers": [
+        {
+          "name": "Any hits",
+          "severity": "1",
+          "condition": {
+            "script": {
+              "source": "ctx.results[0].hits.total.value > 0",
+              "lang": "painless"
+            }
+          },
+          "actions": []
+        }
+      ]
     }
   },
   "runQuery": {
@@ -30,7 +56,7 @@
   "searchMonitors": {
     "queries": [
       {
-        "source": "core",
+        "source": "alerting",
         "method": "POST",
         "path": "/_plugins/_alerting/monitors/_search"
       }

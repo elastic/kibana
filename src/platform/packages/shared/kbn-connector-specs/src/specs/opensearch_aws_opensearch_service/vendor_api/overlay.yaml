@@ -5,33 +5,6 @@ info:
 actions:
   - target: $.paths
     description: >-
-      The spec doesn't cover the Alerting plugin. https://docs.opensearch.org/latest/observing-your-data/alerting/api/#search-monitors
-      documents monitor search, which takes a Query DSL body and only reads; the plugin registers it for
-      POST as well as GET (RestSearchMonitorAction in https://github.com/opensearch-project/alerting).
-    update:
-      /_plugins/_alerting/monitors/_search:
-        post:
-          requestBody:
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    query:
-                      type: object
-                    size:
-                      type: integer
-                    from:
-                      type: integer
-          responses:
-            '200':
-              description: Search results
-              content:
-                application/json:
-                  schema:
-                    type: object
-  - target: $.paths
-    description: >-
       The spec doesn't cover Security Analytics detectors.
       https://docs.opensearch.org/latest/security-analytics/api-tools/detector-api/#search-detector
       documents POST /_plugins/_security_analytics/detectors/_search, which takes a Query DSL body and only reads.
@@ -55,3 +28,51 @@ actions:
                 application/json:
                   schema:
                     type: object
+  - target: $.paths
+    description: >-
+      The spec's Security Analytics namespace has alerts and findings, but not acknowledging alerts.
+      https://docs.opensearch.org/latest/security-analytics/api-tools/alert-finding-api/#acknowledge-alerts
+      documents POST /_plugins/_security_analytics/detectors/{detector_id}/_acknowledge/alerts with the
+      alert IDs in "alerts", answered with the alerts acknowledged, failed and missing.
+    update:
+      /_plugins/_security_analytics/detectors/{detector_id}/_acknowledge/alerts:
+        post:
+          parameters:
+            - name: detector_id
+              in: path
+              required: true
+              schema:
+                type: string
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required:
+                    - alerts
+                  properties:
+                    alerts:
+                      type: array
+                      items:
+                        type: string
+          responses:
+            '200':
+              description: The alerts acknowledged, and those that failed or weren't found
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      acknowledged:
+                        type: array
+                        items:
+                          type: object
+                      failed:
+                        type: array
+                        items:
+                          type: object
+                      missing:
+                        type: array
+                        items:
+                          type: string

@@ -1,0 +1,6110 @@
+{
+  "components": {
+    "parameters": {
+      "alerting.acknowledge_alerts::path.monitor_id": {
+        "in": "path",
+        "name": "monitor_id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "alerting.create_monitor::query.if_primary_term": {
+        "in": "query",
+        "name": "if_primary_term",
+        "schema": {
+          "format": "int64",
+          "type": "integer"
+        }
+      },
+      "alerting.create_monitor::query.if_seq_no": {
+        "in": "query",
+        "name": "if_seq_no",
+        "schema": {
+          "$ref": "#/components/schemas/SequenceNumber"
+        }
+      },
+      "alerting.create_monitor::query.refresh": {
+        "in": "query",
+        "name": "refresh",
+        "schema": {
+          "$ref": "#/components/schemas/Refresh"
+        }
+      },
+      "alerting.delete_monitor::path.monitor_id": {
+        "in": "path",
+        "name": "monitor_id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "alerting.delete_monitor::query.refresh": {
+        "in": "query",
+        "name": "refresh",
+        "schema": {
+          "$ref": "#/components/schemas/Refresh"
+        }
+      },
+      "alerting.execute_monitor::path.monitor_id": {
+        "in": "path",
+        "name": "monitor_id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "alerting.execute_monitor::query.dryrun": {
+        "in": "query",
+        "name": "dryrun",
+        "schema": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "alerting.execute_monitor::query.period_end": {
+        "in": "query",
+        "name": "period_end",
+        "schema": {
+          "$ref": "#/components/schemas/Duration"
+        }
+      },
+      "alerting.get_alerts::query.alertState": {
+        "in": "query",
+        "name": "alertState",
+        "schema": {
+          "default": "ALL",
+          "type": "string"
+        }
+      },
+      "alerting.get_alerts::query.missing": {
+        "in": "query",
+        "name": "missing",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "alerting.get_alerts::query.monitorId": {
+        "in": "query",
+        "name": "monitorId",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "alerting.get_alerts::query.searchString": {
+        "in": "query",
+        "name": "searchString",
+        "schema": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "alerting.get_alerts::query.severityLevel": {
+        "in": "query",
+        "name": "severityLevel",
+        "schema": {
+          "default": "ALL",
+          "type": "string"
+        }
+      },
+      "alerting.get_alerts::query.size": {
+        "in": "query",
+        "name": "size",
+        "schema": {
+          "default": 20,
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "alerting.get_alerts::query.sortOrder": {
+        "in": "query",
+        "name": "sortOrder",
+        "schema": {
+          "$ref": "#/components/schemas/SortOrder",
+          "default": "asc"
+        }
+      },
+      "alerting.get_alerts::query.sortString": {
+        "in": "query",
+        "name": "sortString",
+        "schema": {
+          "default": "monitor_name.keyword",
+          "type": "string"
+        }
+      },
+      "alerting.get_alerts::query.startIndex": {
+        "in": "query",
+        "name": "startIndex",
+        "schema": {
+          "default": 0,
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "alerting.get_alerts::query.workflowIds": {
+        "in": "query",
+        "name": "workflowIds",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "alerting.get_monitor::path.monitor_id": {
+        "in": "path",
+        "name": "monitor_id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "alerting.get_monitor::query.version": {
+        "in": "query",
+        "name": "version",
+        "schema": {
+          "$ref": "#/components/schemas/VersionNumber"
+        }
+      },
+      "alerting.update_monitor::path.monitor_id": {
+        "in": "path",
+        "name": "monitor_id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "alerting.update_monitor::query.if_primary_term": {
+        "in": "query",
+        "name": "if_primary_term",
+        "schema": {
+          "format": "int64",
+          "type": "integer"
+        }
+      },
+      "alerting.update_monitor::query.if_seq_no": {
+        "in": "query",
+        "name": "if_seq_no",
+        "schema": {
+          "$ref": "#/components/schemas/SequenceNumber"
+        }
+      },
+      "alerting.update_monitor::query.refresh": {
+        "in": "query",
+        "name": "refresh",
+        "schema": {
+          "$ref": "#/components/schemas/Refresh"
+        }
+      }
+    },
+    "requestBodies": {
+      "alerting.acknowledge_alerts": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AcknowledgeAlertsRequest"
+            }
+          }
+        }
+      },
+      "alerting.create_monitor": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Monitor"
+            }
+          }
+        }
+      },
+      "alerting.search_monitors": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "additionalProperties": true,
+              "type": "object"
+            }
+          }
+        }
+      },
+      "alerting.update_monitor": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Monitor"
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "alerting.acknowledge_alerts@200": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AcknowledgeAlertsResponse"
+            }
+          }
+        }
+      },
+      "alerting.create_monitor@201": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MonitorResponse"
+            }
+          }
+        }
+      },
+      "alerting.delete_monitor@200": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DeleteMonitorResponse"
+            }
+          }
+        }
+      },
+      "alerting.execute_monitor@200": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ExecuteMonitorResponse"
+            }
+          }
+        }
+      },
+      "alerting.get_alerts@200": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/GetAlertsResponse"
+            }
+          }
+        }
+      },
+      "alerting.get_monitor@200": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/GetMonitorResponse"
+            }
+          }
+        }
+      },
+      "alerting.search_monitors@200": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SearchResultJsonValue"
+            }
+          }
+        }
+      },
+      "alerting.update_monitor@200": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MonitorResponse"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "AcknowledgeAlertsRequest": {
+        "properties": {
+          "alerts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "alerts"
+        ],
+        "type": "object"
+      },
+      "AcknowledgeAlertsResponse": {
+        "properties": {
+          "failed": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "success": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Action": {
+        "properties": {
+          "action_execution_policy": {
+            "$ref": "#/components/schemas/ActionExecutionPolicy"
+          },
+          "destination_id": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "message_template": {
+            "$ref": "#/components/schemas/ScriptTemplate"
+          },
+          "name": {
+            "type": "string"
+          },
+          "subject_template": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ScriptTemplate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "throttle": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Throttle"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "throttle_enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "destination_id",
+          "message_template",
+          "name"
+        ],
+        "type": "object"
+      },
+      "ActionExecutionPolicy": {
+        "properties": {
+          "action_execution_scope": {
+            "$ref": "#/components/schemas/ActionExecutionScope"
+          }
+        },
+        "type": "object"
+      },
+      "ActionExecutionScope": {
+        "properties": {
+          "per_alert": {
+            "$ref": "#/components/schemas/PerAlertActionScope"
+          },
+          "per_execution": {
+            "$ref": "#/components/schemas/PerExecutionActionScope"
+          }
+        },
+        "type": "object"
+      },
+      "ActionableAlertCategory": {
+        "enum": [
+          "COMPLETED",
+          "DEDUPED",
+          "NEW"
+        ],
+        "type": "string"
+      },
+      "AdjacencyMatrixAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBaseAdjacencyMatrixBucket"
+          }
+        ]
+      },
+      "AdjacencyMatrixBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketBase"
+          },
+          {
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "Aggregate": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/AdjacencyMatrixAggregate",
+            "title": "adjacency_matrix"
+          },
+          {
+            "$ref": "#/components/schemas/AutoDateHistogramAggregate",
+            "title": "auto_date_histogram"
+          },
+          {
+            "$ref": "#/components/schemas/AvgAggregate",
+            "title": "avg"
+          },
+          {
+            "$ref": "#/components/schemas/BoxPlotAggregate",
+            "title": "box_plot"
+          },
+          {
+            "$ref": "#/components/schemas/BucketMetricValueAggregate",
+            "title": "bucket_metric_value"
+          },
+          {
+            "$ref": "#/components/schemas/CardinalityAggregate",
+            "title": "cardinality"
+          },
+          {
+            "$ref": "#/components/schemas/ChildrenAggregate",
+            "title": "children"
+          },
+          {
+            "$ref": "#/components/schemas/CompositeAggregate",
+            "title": "composite"
+          },
+          {
+            "$ref": "#/components/schemas/DateHistogramAggregate",
+            "title": "date_histogram"
+          },
+          {
+            "$ref": "#/components/schemas/DateRangeAggregate",
+            "title": "date_range"
+          },
+          {
+            "$ref": "#/components/schemas/DerivativeAggregate",
+            "title": "derivative"
+          },
+          {
+            "$ref": "#/components/schemas/DoubleTermsAggregate",
+            "title": "dterms"
+          },
+          {
+            "$ref": "#/components/schemas/ExtendedStatsAggregate",
+            "title": "extended_stats"
+          },
+          {
+            "$ref": "#/components/schemas/ExtendedStatsBucketAggregate",
+            "title": "extended_stats_bucket"
+          },
+          {
+            "$ref": "#/components/schemas/FilterAggregate",
+            "title": "filter"
+          },
+          {
+            "$ref": "#/components/schemas/FiltersAggregate",
+            "title": "filters"
+          },
+          {
+            "$ref": "#/components/schemas/GeoBoundsAggregate",
+            "title": "geo_bounds"
+          },
+          {
+            "$ref": "#/components/schemas/GeoCentroidAggregate",
+            "title": "geo_centroid"
+          },
+          {
+            "$ref": "#/components/schemas/GeoDistanceAggregate",
+            "title": "geo_distance"
+          },
+          {
+            "$ref": "#/components/schemas/GeoHashGridAggregate",
+            "title": "geohash_grid"
+          },
+          {
+            "$ref": "#/components/schemas/GeoTileGridAggregate",
+            "title": "geotile_grid"
+          },
+          {
+            "$ref": "#/components/schemas/GlobalAggregate",
+            "title": "global"
+          },
+          {
+            "$ref": "#/components/schemas/HdrPercentilesAggregate",
+            "title": "hdr_percentiles"
+          },
+          {
+            "$ref": "#/components/schemas/HdrPercentileRanksAggregate",
+            "title": "hdr_percentile_ranks"
+          },
+          {
+            "$ref": "#/components/schemas/HistogramAggregate",
+            "title": "histogram"
+          },
+          {
+            "$ref": "#/components/schemas/IpRangeAggregate",
+            "title": "ip_range"
+          },
+          {
+            "$ref": "#/components/schemas/LongRareTermsAggregate",
+            "title": "lrareterms"
+          },
+          {
+            "$ref": "#/components/schemas/LongTermsAggregate",
+            "title": "lterms"
+          },
+          {
+            "$ref": "#/components/schemas/MatrixStatsAggregate",
+            "title": "matrix_stats"
+          },
+          {
+            "$ref": "#/components/schemas/MaxAggregate",
+            "title": "max"
+          },
+          {
+            "$ref": "#/components/schemas/MedianAbsoluteDeviationAggregate",
+            "title": "median_absolute_deviation"
+          },
+          {
+            "$ref": "#/components/schemas/MinAggregate",
+            "title": "min"
+          },
+          {
+            "$ref": "#/components/schemas/MissingAggregate",
+            "title": "missing"
+          },
+          {
+            "$ref": "#/components/schemas/MultiTermsAggregate",
+            "title": "multi_terms"
+          },
+          {
+            "$ref": "#/components/schemas/NestedAggregate",
+            "title": "nested"
+          },
+          {
+            "$ref": "#/components/schemas/ParentAggregate",
+            "title": "parent"
+          },
+          {
+            "$ref": "#/components/schemas/PercentilesBucketAggregate",
+            "title": "percentiles_bucket"
+          },
+          {
+            "$ref": "#/components/schemas/RangeAggregate",
+            "title": "range"
+          },
+          {
+            "$ref": "#/components/schemas/RateAggregate",
+            "title": "rate"
+          },
+          {
+            "$ref": "#/components/schemas/ReverseNestedAggregate",
+            "title": "reverse_nested"
+          },
+          {
+            "$ref": "#/components/schemas/SamplerAggregate",
+            "title": "sampler"
+          },
+          {
+            "$ref": "#/components/schemas/ScriptedMetricAggregate",
+            "title": "scripted_metric"
+          },
+          {
+            "$ref": "#/components/schemas/SignificantLongTermsAggregate",
+            "title": "siglterms"
+          },
+          {
+            "$ref": "#/components/schemas/SignificantStringTermsAggregate",
+            "title": "sigsterms"
+          },
+          {
+            "$ref": "#/components/schemas/CumulativeCardinalityAggregate",
+            "title": "simple_long_value"
+          },
+          {
+            "$ref": "#/components/schemas/SimpleValueAggregate",
+            "title": "simple_value"
+          },
+          {
+            "$ref": "#/components/schemas/StatsAggregate",
+            "title": "stats"
+          },
+          {
+            "$ref": "#/components/schemas/StatsBucketAggregate",
+            "title": "stats_bucket"
+          },
+          {
+            "$ref": "#/components/schemas/StringRareTermsAggregate",
+            "title": "srareterms"
+          },
+          {
+            "$ref": "#/components/schemas/StringTermsAggregate",
+            "title": "sterms"
+          },
+          {
+            "$ref": "#/components/schemas/SumAggregate",
+            "title": "sum"
+          },
+          {
+            "$ref": "#/components/schemas/TDigestPercentilesAggregate",
+            "title": "tdigest_percentiles"
+          },
+          {
+            "$ref": "#/components/schemas/TDigestPercentileRanksAggregate",
+            "title": "tdigest_percentile_ranks"
+          },
+          {
+            "$ref": "#/components/schemas/TTestAggregate",
+            "title": "t_test"
+          },
+          {
+            "$ref": "#/components/schemas/TopHitsAggregate",
+            "title": "top_hits"
+          },
+          {
+            "$ref": "#/components/schemas/UnsignedLongTermsAggregate",
+            "title": "ulterms"
+          },
+          {
+            "$ref": "#/components/schemas/UnmappedRareTermsAggregate",
+            "title": "umrareterms"
+          },
+          {
+            "$ref": "#/components/schemas/UnmappedSignificantTermsAggregate",
+            "title": "umsigterms"
+          },
+          {
+            "$ref": "#/components/schemas/UnmappedTermsAggregate",
+            "title": "umterms"
+          },
+          {
+            "$ref": "#/components/schemas/ValueCountAggregate",
+            "title": "value_count"
+          },
+          {
+            "$ref": "#/components/schemas/VariableWidthHistogramAggregate",
+            "title": "variable_width_histogram"
+          },
+          {
+            "$ref": "#/components/schemas/WeightedAvgAggregate",
+            "title": "weighted_avg"
+          }
+        ]
+      },
+      "AggregateBase": {
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        },
+        "type": "object"
+      },
+      "AggregationBreakdown": {
+        "properties": {
+          "build_aggregation": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "build_aggregation_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "build_leaf_collector": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "build_leaf_collector_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "collect": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "collect_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "initialize": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "initialize_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "post_collection": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "post_collection_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "reduce": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "reduce_count": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "build_aggregation",
+          "build_aggregation_count",
+          "build_leaf_collector",
+          "build_leaf_collector_count",
+          "collect",
+          "collect_count",
+          "initialize",
+          "initialize_count",
+          "reduce",
+          "reduce_count"
+        ],
+        "type": "object"
+      },
+      "AggregationProfile": {
+        "properties": {
+          "breakdown": {
+            "$ref": "#/components/schemas/AggregationBreakdown"
+          },
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/AggregationProfile"
+            },
+            "type": "array"
+          },
+          "debug": {
+            "$ref": "#/components/schemas/AggregationProfileDebug"
+          },
+          "description": {
+            "type": "string"
+          },
+          "time_in_nanos": {
+            "$ref": "#/components/schemas/DurationValueUnitNanos"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "breakdown",
+          "description",
+          "time_in_nanos",
+          "type"
+        ],
+        "type": "object"
+      },
+      "AggregationProfileDebug": {
+        "properties": {
+          "built_buckets": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "chars_fetched": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "collect_analyzed_count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "collect_analyzed_ns": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "collection_strategy": {
+            "type": "string"
+          },
+          "deferred_aggregators": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "delegate_debug": {
+            "$ref": "#/components/schemas/AggregationProfileDelegateDebug"
+          },
+          "empty_collectors_used": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "extract_count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "extract_ns": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "has_filter": {
+            "type": "boolean"
+          },
+          "map_reducer": {
+            "type": "string"
+          },
+          "numeric_collectors_used": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ordinals_collectors_overhead_too_high": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ordinals_collectors_used": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "result_strategy": {
+            "type": "string"
+          },
+          "segments_with_multi_valued_ords": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "segments_with_single_valued_ords": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "string_hashing_collectors_used": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "surviving_buckets": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total_buckets": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "values_fetched": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AggregationProfileDelegateDebug": {
+        "properties": {
+          "filters": {
+            "items": {
+              "$ref": "#/components/schemas/AggregationProfileDelegateDebugFilter"
+            },
+            "type": "array"
+          },
+          "segments_collected": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "segments_counted": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "segments_with_deleted_docs": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "segments_with_doc_count_field": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AggregationProfileDelegateDebugFilter": {
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "results_from_metadata": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "segments_counted_in_constant_time": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "specialized_for": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AggregationResultBucket": {
+        "properties": {
+          "bucket": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "bucket_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "parent_bucket_path": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Alert": {
+        "properties": {
+          "acknowledged_time": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/EpochTimeUnitMillis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "action_execution_results": {
+            "items": {
+              "$ref": "#/components/schemas/AlertActionExecutionResult"
+            },
+            "type": "array"
+          },
+          "agg_alert_content": {
+            "$ref": "#/components/schemas/AggregationResultBucket"
+          },
+          "alert_history": {
+            "items": {
+              "$ref": "#/components/schemas/AlertErrorEntry"
+            },
+            "type": "array"
+          },
+          "associated_alert_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "clusters": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "end_time": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/EpochTimeUnitMillis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error_message": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "execution_id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "finding_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "last_notification_time": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/EpochTimeUnitMillis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "monitor_id": {
+            "type": "string"
+          },
+          "monitor_name": {
+            "type": "string"
+          },
+          "monitor_user": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AlertingUser"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "monitor_version": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "related_doc_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "schema_version": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "start_time": {
+            "$ref": "#/components/schemas/EpochTimeUnitMillis"
+          },
+          "state": {
+            "$ref": "#/components/schemas/AlertState"
+          },
+          "trigger_id": {
+            "type": "string"
+          },
+          "trigger_name": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "workflow_id": {
+            "type": "string"
+          },
+          "workflow_name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AlertActionExecutionResult": {
+        "properties": {
+          "action_id": {
+            "type": "string"
+          },
+          "last_execution_time": {
+            "$ref": "#/components/schemas/EpochTimeUnitMillis"
+          },
+          "throttled_count": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AlertErrorEntry": {
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/EpochTimeUnitMillis"
+          }
+        },
+        "type": "object"
+      },
+      "AlertState": {
+        "enum": [
+          "ACKNOWLEDGED",
+          "ACTIVE",
+          "AUDIT",
+          "COMPLETED",
+          "DELETED",
+          "ERROR"
+        ],
+        "type": "string"
+      },
+      "AlertingUser": {
+        "properties": {
+          "backend_roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "custom_attribute_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "user_requested_tenant": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "ArrayPercentilesItem": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "value_as_string": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "type": "object"
+      },
+      "AssociatedWorkflow": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutoDateHistogramAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBaseDateHistogramBucket"
+          },
+          {
+            "properties": {
+              "interval": {
+                "$ref": "#/components/schemas/DurationLarge"
+              }
+            },
+            "required": [
+              "interval"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "AvgAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleMetricAggregateBase"
+          }
+        ]
+      },
+      "BoxPlotAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AggregateBase"
+          },
+          {
+            "properties": {
+              "lower": {
+                "format": "double",
+                "type": "number"
+              },
+              "lower_as_string": {
+                "type": "string"
+              },
+              "max": {
+                "format": "double",
+                "type": "number"
+              },
+              "max_as_string": {
+                "type": "string"
+              },
+              "min": {
+                "format": "double",
+                "type": "number"
+              },
+              "min_as_string": {
+                "type": "string"
+              },
+              "q1": {
+                "format": "double",
+                "type": "number"
+              },
+              "q1_as_string": {
+                "type": "string"
+              },
+              "q2": {
+                "format": "double",
+                "type": "number"
+              },
+              "q2_as_string": {
+                "type": "string"
+              },
+              "q3": {
+                "format": "double",
+                "type": "number"
+              },
+              "q3_as_string": {
+                "type": "string"
+              },
+              "upper": {
+                "format": "double",
+                "type": "number"
+              },
+              "upper_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "lower",
+              "max",
+              "min",
+              "q1",
+              "q2",
+              "q3",
+              "upper"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "BucketLevelTrigger": {
+        "properties": {
+          "bucket_level_trigger": {
+            "$ref": "#/components/schemas/BucketLevelTriggerBody"
+          }
+        },
+        "required": [
+          "bucket_level_trigger"
+        ],
+        "type": "object"
+      },
+      "BucketLevelTriggerBody": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            },
+            "type": "array"
+          },
+          "condition": {
+            "$ref": "#/components/schemas/BucketLevelTriggerCondition"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "actions",
+          "condition",
+          "name",
+          "severity"
+        ],
+        "type": "object"
+      },
+      "BucketLevelTriggerCondition": {
+        "properties": {
+          "buckets_path": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "gap_policy": {
+            "$ref": "#/components/schemas/GapPolicy"
+          },
+          "parent_bucket_path": {
+            "type": "string"
+          },
+          "script": {
+            "$ref": "#/components/schemas/PainlessScript"
+          }
+        },
+        "required": [
+          "buckets_path",
+          "parent_bucket_path",
+          "script"
+        ],
+        "type": "object"
+      },
+      "BucketMetricValueAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleMetricAggregateBase"
+          },
+          {
+            "properties": {
+              "keys": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "keys"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "Buckets": {
+        "oneOf": [
+          {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TBucket"
+            },
+            "title": "keyed",
+            "type": "object"
+          },
+          {
+            "items": {
+              "$ref": "#/components/schemas/TBucket"
+            },
+            "title": "array",
+            "type": "array"
+          }
+        ]
+      },
+      "CardinalityAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AggregateBase"
+          },
+          {
+            "properties": {
+              "value": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "value"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "ChildrenAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleBucketAggregateBase"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "ChronoUnit": {
+        "enum": [
+          "DAYS",
+          "HOURS",
+          "MINUTES",
+          "SECONDS"
+        ],
+        "type": "string"
+      },
+      "ClusterMetricApiType": {
+        "enum": [
+          "CAT_INDICES",
+          "CAT_PENDING_TASKS",
+          "CAT_RECOVERY",
+          "CAT_SHARDS",
+          "CAT_SNAPSHOTS",
+          "CAT_TASKS",
+          "CLUSTER_HEALTH",
+          "CLUSTER_SETTINGS",
+          "CLUSTER_STATS",
+          "NODES_STATS"
+        ],
+        "type": "string"
+      },
+      "ClusterMetricsInput": {
+        "properties": {
+          "uri": {
+            "$ref": "#/components/schemas/ClusterMetricsInputBody"
+          }
+        },
+        "required": [
+          "uri"
+        ],
+        "type": "object"
+      },
+      "ClusterMetricsInputBody": {
+        "properties": {
+          "api_type": {
+            "$ref": "#/components/schemas/ClusterMetricApiType"
+          },
+          "clusters": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "path": {
+            "type": "string"
+          },
+          "path_params": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ClusterStatistics": {
+        "properties": {
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "successful": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "skipped",
+          "successful",
+          "total"
+        ],
+        "type": "object"
+      },
+      "Collector": {
+        "properties": {
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/Collector"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "time_in_nanos": {
+            "$ref": "#/components/schemas/DurationValueUnitNanos"
+          }
+        },
+        "required": [
+          "name",
+          "reason",
+          "time_in_nanos"
+        ],
+        "type": "object"
+      },
+      "CompletionSuggest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SuggestBase"
+          },
+          {
+            "properties": {
+              "options": {
+                "oneOf": [
+                  {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/CompletionSuggestOption"
+                      },
+                      {
+                        "properties": {
+                          "_source": {
+                            "$ref": "#/components/schemas/TDocument"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    ]
+                  },
+                  {
+                    "items": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/CompletionSuggestOption"
+                        },
+                        {
+                          "properties": {
+                            "_source": {
+                              "$ref": "#/components/schemas/TDocument"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    "type": "array"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "options"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "CompletionSuggestOption": {
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "_index": {
+            "$ref": "#/components/schemas/IndexName"
+          },
+          "_routing": {
+            "$ref": "#/components/schemas/Routing"
+          },
+          "_score": {
+            "format": "float",
+            "type": "number"
+          },
+          "_source": {
+            "$ref": "#/components/schemas/TDocument"
+          },
+          "collate_match": {
+            "type": "boolean"
+          },
+          "contexts": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/Context"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "fields": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "score": {
+            "format": "float",
+            "type": "number"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "type": "object"
+      },
+      "CompositeAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBaseCompositeBucket"
+          },
+          {
+            "properties": {
+              "after_key": {
+                "$ref": "#/components/schemas/CompositeAggregateKey"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "CompositeAggregateKey": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/FieldValue"
+        },
+        "type": "object"
+      },
+      "CompositeBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketBase"
+          },
+          {
+            "properties": {
+              "key": {
+                "$ref": "#/components/schemas/CompositeAggregateKey"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "Context": {
+        "oneOf": [
+          {
+            "title": "category",
+            "type": "string"
+          },
+          {
+            "$ref": "#/components/schemas/GeoLocation",
+            "title": "location"
+          }
+        ]
+      },
+      "CoordsGeoBounds": {
+        "properties": {
+          "bottom": {
+            "format": "double",
+            "type": "number"
+          },
+          "left": {
+            "format": "double",
+            "type": "number"
+          },
+          "right": {
+            "format": "double",
+            "type": "number"
+          },
+          "top": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "bottom",
+          "left",
+          "right",
+          "top"
+        ],
+        "type": "object"
+      },
+      "Cron": {
+        "properties": {
+          "expression": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "expression",
+          "timezone"
+        ],
+        "type": "object"
+      },
+      "CronSchedule": {
+        "properties": {
+          "cron": {
+            "$ref": "#/components/schemas/Cron"
+          }
+        },
+        "required": [
+          "cron"
+        ],
+        "type": "object"
+      },
+      "CumulativeCardinalityAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AggregateBase"
+          },
+          {
+            "properties": {
+              "value": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "value_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "value"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "DataSources": {
+        "properties": {
+          "alerts_history_index": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "alerts_history_index_pattern": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "alerts_index": {
+            "type": "string"
+          },
+          "comments_index": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "comments_index_pattern": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "findings_enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "findings_index": {
+            "type": "string"
+          },
+          "findings_index_pattern": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "query_index": {
+            "type": "string"
+          },
+          "query_index_mappings_by_type": {
+            "additionalProperties": true,
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "DateHistogramAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBaseDateHistogramBucket"
+          }
+        ]
+      },
+      "DateHistogramBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketBase"
+          },
+          {
+            "properties": {
+              "key": {
+                "$ref": "#/components/schemas/EpochTimeUnitMillis"
+              },
+              "key_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "DateRangeAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RangeAggregateBase"
+          }
+        ]
+      },
+      "DeleteMonitorResponse": {
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "_version": {
+            "$ref": "#/components/schemas/VersionNumber"
+          }
+        },
+        "type": "object"
+      },
+      "DerivativeAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleMetricAggregateBase"
+          },
+          {
+            "properties": {
+              "normalized_value": {
+                "format": "double",
+                "type": "number"
+              },
+              "normalized_value_as_string": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "DocLevelInput": {
+        "properties": {
+          "doc_level_input": {
+            "$ref": "#/components/schemas/DocLevelInputBody"
+          }
+        },
+        "required": [
+          "doc_level_input"
+        ],
+        "type": "object"
+      },
+      "DocLevelInputBody": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "indices": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "queries": {
+            "items": {
+              "$ref": "#/components/schemas/DocLevelQuery"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "indices",
+          "queries"
+        ],
+        "type": "object"
+      },
+      "DocLevelQuery": {
+        "properties": {
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "type": "object"
+      },
+      "DocumentLevelTrigger": {
+        "properties": {
+          "document_level_trigger": {
+            "$ref": "#/components/schemas/DocumentLevelTriggerBody"
+          }
+        },
+        "required": [
+          "document_level_trigger"
+        ],
+        "type": "object"
+      },
+      "DocumentLevelTriggerBody": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            },
+            "type": "array"
+          },
+          "condition": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ScriptCondition"
+              }
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "actions",
+          "condition",
+          "name",
+          "severity"
+        ],
+        "type": "object"
+      },
+      "DoubleTermsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsAggregateBaseDoubleTermsBucket"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "DoubleTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsBucketBase"
+          },
+          {
+            "properties": {
+              "key": {
+                "format": "double",
+                "type": "number"
+              },
+              "key_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "Duration": {
+        "pattern": "^(?:(-1)|([0-9\\.]+)(?:d|h|m|s|ms|micros|nanos))$",
+        "type": "string"
+      },
+      "DurationLarge": {
+        "type": "string"
+      },
+      "DurationValueUnitNanos": {
+        "$ref": "#/components/schemas/UnitNanos"
+      },
+      "EpochTimeUnitMillis": {
+        "$ref": "#/components/schemas/UnitMillis"
+      },
+      "ErrorCause": {
+        "additionalProperties": {
+          "title": "metadata"
+        },
+        "properties": {
+          "caused_by": {
+            "$ref": "#/components/schemas/ErrorCause"
+          },
+          "header": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/StringOrStringArray"
+            },
+            "type": "object"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "root_cause": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorCause"
+            },
+            "type": "array"
+          },
+          "stack_trace": {
+            "type": "string"
+          },
+          "suppressed": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorCause"
+            },
+            "type": "array"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "ExecuteMonitorResponse": {
+        "properties": {
+          "error": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "input_results": {
+            "$ref": "#/components/schemas/InputRunResults"
+          },
+          "monitor_name": {
+            "type": "string"
+          },
+          "period_end": {
+            "$ref": "#/components/schemas/EpochTimeUnitMillis"
+          },
+          "period_start": {
+            "$ref": "#/components/schemas/EpochTimeUnitMillis"
+          },
+          "trigger_results": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TriggerResult"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "Explanation": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/Explanation"
+            },
+            "type": "array"
+          },
+          "value": {
+            "format": "float",
+            "type": "number"
+          }
+        },
+        "required": [
+          "description",
+          "value"
+        ],
+        "type": "object"
+      },
+      "ExtendedStatsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ExtendedStatsAggregateBase"
+          },
+          {
+            "properties": {},
+            "type": "object"
+          }
+        ]
+      },
+      "ExtendedStatsAggregateBase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/StatsAggregateBase"
+          },
+          {
+            "properties": {
+              "std_deviation": {
+                "oneOf": [
+                  {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "std_deviation_as_string": {
+                "type": "string"
+              },
+              "std_deviation_bounds": {
+                "$ref": "#/components/schemas/StandardDeviationBounds"
+              },
+              "std_deviation_bounds_as_string": {
+                "$ref": "#/components/schemas/StandardDeviationBoundsAsString"
+              },
+              "std_deviation_population": {
+                "oneOf": [
+                  {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "std_deviation_sampling": {
+                "oneOf": [
+                  {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "sum_of_squares": {
+                "oneOf": [
+                  {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "sum_of_squares_as_string": {
+                "type": "string"
+              },
+              "variance": {
+                "oneOf": [
+                  {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "variance_as_string": {
+                "type": "string"
+              },
+              "variance_population": {
+                "oneOf": [
+                  {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "variance_population_as_string": {
+                "type": "string"
+              },
+              "variance_sampling": {
+                "oneOf": [
+                  {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "variance_sampling_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "std_deviation",
+              "std_deviation_population",
+              "std_deviation_sampling",
+              "sum_of_squares",
+              "variance",
+              "variance_population",
+              "variance_sampling"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "ExtendedStatsBucketAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ExtendedStatsAggregateBase"
+          }
+        ]
+      },
+      "FetchProfile": {
+        "properties": {
+          "breakdown": {
+            "$ref": "#/components/schemas/FetchProfileBreakdown"
+          },
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/FetchProfile"
+            },
+            "type": "array"
+          },
+          "debug": {
+            "$ref": "#/components/schemas/FetchProfileDebug"
+          },
+          "description": {
+            "type": "string"
+          },
+          "time_in_nanos": {
+            "$ref": "#/components/schemas/DurationValueUnitNanos"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "breakdown",
+          "description",
+          "time_in_nanos",
+          "type"
+        ],
+        "type": "object"
+      },
+      "FetchProfileBreakdown": {
+        "properties": {
+          "load_source": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "load_source_count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "load_stored_fields": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "load_stored_fields_count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "next_reader": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "next_reader_count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "process": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "process_count": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FetchProfileDebug": {
+        "properties": {
+          "fast_path": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "stored_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Field": {
+        "type": "string"
+      },
+      "FieldValue": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "FilterAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleBucketAggregateBase"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "FiltersAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBaseFiltersBucket"
+          }
+        ]
+      },
+      "FiltersBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketBase"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "GapPolicy": {
+        "enum": [
+          "insert_zeros",
+          "skip"
+        ],
+        "type": "string"
+      },
+      "GeoBounds": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CoordsGeoBounds",
+            "title": "coords"
+          },
+          {
+            "$ref": "#/components/schemas/TopLeftBottomRightGeoBounds",
+            "title": "tlbr"
+          },
+          {
+            "$ref": "#/components/schemas/TopRightBottomLeftGeoBounds",
+            "title": "trbl"
+          },
+          {
+            "$ref": "#/components/schemas/WktGeoBounds",
+            "title": "wkt"
+          }
+        ]
+      },
+      "GeoBoundsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AggregateBase"
+          },
+          {
+            "properties": {
+              "bounds": {
+                "$ref": "#/components/schemas/GeoBounds"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "GeoCentroidAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AggregateBase"
+          },
+          {
+            "properties": {
+              "count": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "location": {
+                "$ref": "#/components/schemas/GeoLocation"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "GeoDistanceAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RangeAggregateBase"
+          }
+        ]
+      },
+      "GeoHash": {
+        "type": "string"
+      },
+      "GeoHashGridAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBaseGeoHashGridBucket"
+          }
+        ]
+      },
+      "GeoHashGridBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketBase"
+          },
+          {
+            "properties": {
+              "key": {
+                "$ref": "#/components/schemas/GeoHash"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "GeoHashLocation": {
+        "properties": {
+          "geohash": {
+            "$ref": "#/components/schemas/GeoHash"
+          }
+        },
+        "required": [
+          "geohash"
+        ],
+        "type": "object"
+      },
+      "GeoLocation": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/LatLonGeoLocation",
+            "title": "latlon"
+          },
+          {
+            "$ref": "#/components/schemas/GeoHashLocation",
+            "title": "geohash"
+          },
+          {
+            "items": {
+              "format": "double",
+              "type": "number"
+            },
+            "title": "coords",
+            "type": "array"
+          },
+          {
+            "title": "text",
+            "type": "string"
+          }
+        ]
+      },
+      "GeoTile": {
+        "type": "string"
+      },
+      "GeoTileGridAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBaseGeoTileGridBucket"
+          }
+        ]
+      },
+      "GeoTileGridBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketBase"
+          },
+          {
+            "properties": {
+              "key": {
+                "$ref": "#/components/schemas/GeoTile"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "GetAlertsResponse": {
+        "properties": {
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/Alert"
+            },
+            "type": "array"
+          },
+          "totalAlerts": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "GetMonitorResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IndexMetadata"
+          },
+          {
+            "properties": {
+              "associated_workflows": {
+                "items": {
+                  "$ref": "#/components/schemas/AssociatedWorkflow"
+                },
+                "type": "array"
+              },
+              "monitor": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Monitor"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "GlobalAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleBucketAggregateBase"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "HdrPercentileRanksAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PercentilesAggregateBase"
+          }
+        ]
+      },
+      "HdrPercentilesAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PercentilesAggregateBase"
+          }
+        ]
+      },
+      "HistogramAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBaseHistogramBucket"
+          }
+        ]
+      },
+      "HistogramBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketBase"
+          },
+          {
+            "properties": {
+              "key": {
+                "format": "double",
+                "type": "number"
+              },
+              "key_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "Hit": {
+        "additionalProperties": {
+          "title": "meta_fields"
+        },
+        "properties": {
+          "_explanation": {
+            "$ref": "#/components/schemas/Explanation"
+          },
+          "_id": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "_ignored": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "_index": {
+            "$ref": "#/components/schemas/IndexName"
+          },
+          "_nested": {
+            "$ref": "#/components/schemas/NestedIdentity"
+          },
+          "_node": {
+            "type": "string"
+          },
+          "_primary_term": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "_routing": {
+            "type": "string"
+          },
+          "_score": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "format": "double",
+                "type": "number"
+              }
+            ]
+          },
+          "_seq_no": {
+            "$ref": "#/components/schemas/SequenceNumber"
+          },
+          "_shard": {
+            "type": "string"
+          },
+          "_source": {
+            "$ref": "#/components/schemas/TDocument"
+          },
+          "_type": {
+            "$ref": "#/components/schemas/Type"
+          },
+          "_version": {
+            "$ref": "#/components/schemas/VersionNumber"
+          },
+          "fields": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "highlight": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "ignored_field_values": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "inner_hits": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/InnerHitsResult"
+            },
+            "type": "object"
+          },
+          "matched_queries": {
+            "oneOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "title": "names",
+                "type": "array"
+              },
+              {
+                "additionalProperties": {
+                  "format": "double",
+                  "type": "number"
+                },
+                "title": "scores",
+                "type": "object"
+              }
+            ]
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortResults"
+          }
+        },
+        "type": "object"
+      },
+      "HitsMetadata": {
+        "properties": {
+          "hits": {
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Hit"
+                },
+                {
+                  "properties": {
+                    "_source": {
+                      "$ref": "#/components/schemas/TDocument"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "max_score": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "format": "float",
+                "type": "number"
+              }
+            ]
+          },
+          "total": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TotalHits"
+              },
+              {
+                "format": "int64",
+                "type": "integer"
+              }
+            ]
+          }
+        },
+        "required": [
+          "hits",
+          "max_score"
+        ],
+        "type": "object"
+      },
+      "HitsMetadataJsonValue": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/HitsMetadata"
+          },
+          {
+            "properties": {
+              "hits": {
+                "items": {
+                  "properties": {
+                    "_source": {}
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "Id": {
+        "type": "string"
+      },
+      "IndexMetadata": {
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "_primary_term": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "_seq_no": {
+            "$ref": "#/components/schemas/SequenceNumber"
+          },
+          "_version": {
+            "$ref": "#/components/schemas/VersionNumber"
+          }
+        },
+        "type": "object"
+      },
+      "IndexName": {
+        "type": "string"
+      },
+      "InnerHitsResult": {
+        "properties": {
+          "hits": {
+            "$ref": "#/components/schemas/HitsMetadata"
+          }
+        },
+        "required": [
+          "hits"
+        ],
+        "type": "object"
+      },
+      "Input": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/SearchInput",
+            "title": "search"
+          },
+          {
+            "$ref": "#/components/schemas/DocLevelInput",
+            "title": "doc_level_input"
+          },
+          {
+            "$ref": "#/components/schemas/ClusterMetricsInput",
+            "title": "uri"
+          }
+        ]
+      },
+      "InputRunResults": {
+        "properties": {
+          "error": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "results": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "IntervalSchedule": {
+        "properties": {
+          "period": {
+            "$ref": "#/components/schemas/Period"
+          }
+        },
+        "required": [
+          "period"
+        ],
+        "type": "object"
+      },
+      "IpRangeAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBaseIpRangeBucket"
+          }
+        ]
+      },
+      "IpRangeBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketBase"
+          },
+          {
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "KeyedPercentiles": {
+        "additionalProperties": {
+          "oneOf": [
+            {
+              "format": "double",
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": "object"
+      },
+      "LatLonGeoLocation": {
+        "properties": {
+          "lat": {
+            "format": "double",
+            "type": "number"
+          },
+          "lon": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "lat",
+          "lon"
+        ],
+        "type": "object"
+      },
+      "LongRareTermsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBaseLongRareTermsBucket"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "LongRareTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketBase"
+          },
+          {
+            "properties": {
+              "key": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "key_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "LongTermsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsAggregateBaseLongTermsBucket"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "LongTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsBucketBase"
+          },
+          {
+            "properties": {
+              "key": {
+                "$ref": "#/components/schemas/LongTermsBucketKey"
+              },
+              "key_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "LongTermsBucketKey": {
+        "oneOf": [
+          {
+            "format": "int64",
+            "title": "signed",
+            "type": "integer"
+          },
+          {
+            "title": "unsigned",
+            "type": "string"
+          }
+        ]
+      },
+      "MatrixStatsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AggregateBase"
+          },
+          {
+            "properties": {
+              "doc_count": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "fields": {
+                "items": {
+                  "$ref": "#/components/schemas/MatrixStatsFields"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "doc_count"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "MatrixStatsFields": {
+        "properties": {
+          "correlation": {
+            "additionalProperties": {
+              "format": "double",
+              "type": "number"
+            },
+            "type": "object"
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "covariance": {
+            "additionalProperties": {
+              "format": "double",
+              "type": "number"
+            },
+            "type": "object"
+          },
+          "kurtosis": {
+            "format": "double",
+            "type": "number"
+          },
+          "mean": {
+            "format": "double",
+            "type": "number"
+          },
+          "name": {
+            "$ref": "#/components/schemas/Field"
+          },
+          "skewness": {
+            "format": "double",
+            "type": "number"
+          },
+          "variance": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "correlation",
+          "count",
+          "covariance",
+          "kurtosis",
+          "mean",
+          "name",
+          "skewness",
+          "variance"
+        ],
+        "type": "object"
+      },
+      "MaxAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleMetricAggregateBase"
+          }
+        ]
+      },
+      "MedianAbsoluteDeviationAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleMetricAggregateBase"
+          }
+        ]
+      },
+      "Metadata": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "MinAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleMetricAggregateBase"
+          }
+        ]
+      },
+      "MissingAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleBucketAggregateBase"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "Monitor": {
+        "properties": {
+          "data_sources": {
+            "$ref": "#/components/schemas/DataSources"
+          },
+          "delete_query_index_in_every_run": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "enabled_time": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/EpochTimeUnitMillis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/Input"
+            },
+            "type": "array"
+          },
+          "last_update_time": {
+            "$ref": "#/components/schemas/EpochTimeUnitMillis"
+          },
+          "monitor_type": {
+            "$ref": "#/components/schemas/MonitorType"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rbac_roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/Schedule"
+          },
+          "schema_version": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "should_create_single_alert_for_findings": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "triggers": {
+            "items": {
+              "$ref": "#/components/schemas/Trigger"
+            },
+            "type": "array"
+          },
+          "type": {
+            "const": "monitor",
+            "type": "string"
+          },
+          "ui_metadata": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "user": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AlertingUser"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "schedule"
+        ],
+        "type": "object"
+      },
+      "MonitorResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IndexMetadata"
+          },
+          {
+            "properties": {
+              "monitor": {
+                "$ref": "#/components/schemas/Monitor"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "MonitorType": {
+        "enum": [
+          "bucket_level_monitor",
+          "cluster_metrics_monitor",
+          "doc_level_monitor",
+          "query_level_monitor"
+        ],
+        "type": "string"
+      },
+      "MultiBucketAggregateBase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/TBucket"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/TBucket"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "MultiBucketAggregateBaseAdjacencyMatrixBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/AdjacencyMatrixBucket"
+                        },
+                        "title": "keyed",
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/AdjacencyMatrixBucket"
+                        },
+                        "title": "array",
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "MultiBucketAggregateBaseCompositeBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/CompositeBucket"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/CompositeBucket"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "MultiBucketAggregateBaseDateHistogramBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/DateHistogramBucket"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/DateHistogramBucket"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "MultiBucketAggregateBaseFiltersBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/FiltersBucket"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/FiltersBucket"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "MultiBucketAggregateBaseGeoHashGridBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/GeoHashGridBucket"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/GeoHashGridBucket"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "MultiBucketAggregateBaseGeoTileGridBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/GeoTileGridBucket"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/GeoTileGridBucket"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "MultiBucketAggregateBaseHistogramBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/HistogramBucket"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/HistogramBucket"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "MultiBucketAggregateBaseIpRangeBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/IpRangeBucket"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/IpRangeBucket"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "MultiBucketAggregateBaseLongRareTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/LongRareTermsBucket"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/LongRareTermsBucket"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "MultiBucketAggregateBaseRangeBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/RangeBucket"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/RangeBucket"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "MultiBucketAggregateBaseStringRareTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/StringRareTermsBucket"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/StringRareTermsBucket"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "MultiBucketAggregateBaseVariableWidthHistogramBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/VariableWidthHistogramBucket"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/VariableWidthHistogramBucket"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "MultiBucketAggregateBaseVoid": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/Void"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/Void"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "MultiBucketBase": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/Aggregate"
+        },
+        "properties": {
+          "doc_count": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "doc_count"
+        ],
+        "type": "object"
+      },
+      "MultiTermsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsAggregateBaseMultiTermsBucket"
+          }
+        ]
+      },
+      "MultiTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketBase"
+          },
+          {
+            "properties": {
+              "doc_count_error_upper_bound": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "key": {
+                "items": {
+                  "$ref": "#/components/schemas/FieldValue"
+                },
+                "type": "array"
+              },
+              "key_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "NestedAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleBucketAggregateBase"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "NestedIdentity": {
+        "properties": {
+          "_nested": {
+            "$ref": "#/components/schemas/NestedIdentity"
+          },
+          "field": {
+            "$ref": "#/components/schemas/Field"
+          },
+          "offset": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "field",
+          "offset"
+        ],
+        "type": "object"
+      },
+      "PainlessScript": {
+        "properties": {
+          "lang": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "source"
+        ],
+        "type": "object"
+      },
+      "ParentAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleBucketAggregateBase"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "PerAlertActionScope": {
+        "properties": {
+          "actionable_alerts": {
+            "items": {
+              "$ref": "#/components/schemas/ActionableAlertCategory"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PerExecutionActionScope": {
+        "type": "object"
+      },
+      "Percentiles": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/KeyedPercentiles",
+            "title": "keyed"
+          },
+          {
+            "items": {
+              "$ref": "#/components/schemas/ArrayPercentilesItem"
+            },
+            "title": "array",
+            "type": "array"
+          }
+        ]
+      },
+      "PercentilesAggregateBase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AggregateBase"
+          },
+          {
+            "properties": {
+              "values": {
+                "$ref": "#/components/schemas/Percentiles"
+              }
+            },
+            "required": [
+              "values"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "PercentilesBucketAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PercentilesAggregateBase"
+          }
+        ]
+      },
+      "Period": {
+        "properties": {
+          "interval": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/ChronoUnit"
+          }
+        },
+        "required": [
+          "interval",
+          "unit"
+        ],
+        "type": "object"
+      },
+      "PhaseTook": {
+        "properties": {
+          "can_match": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dfs_pre_query": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dfs_query": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "expand": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "fetch": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "query": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "can_match",
+          "dfs_pre_query",
+          "dfs_query",
+          "expand",
+          "fetch",
+          "query"
+        ],
+        "type": "object"
+      },
+      "PhraseSuggest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SuggestBase"
+          },
+          {
+            "properties": {
+              "options": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/PhraseSuggestOption"
+                  },
+                  {
+                    "items": {
+                      "$ref": "#/components/schemas/PhraseSuggestOption"
+                    },
+                    "type": "array"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "options"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "PhraseSuggestOption": {
+        "properties": {
+          "collate_match": {
+            "type": "boolean"
+          },
+          "highlighted": {
+            "type": "string"
+          },
+          "score": {
+            "format": "double",
+            "type": "number"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "score",
+          "text"
+        ],
+        "type": "object"
+      },
+      "ProcessorExecutionDetail": {
+        "properties": {
+          "duration_millis": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
+          },
+          "input_data": {},
+          "output_data": {},
+          "processor_name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Profile": {
+        "properties": {
+          "shards": {
+            "items": {
+              "$ref": "#/components/schemas/ShardProfile"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "shards"
+        ],
+        "type": "object"
+      },
+      "QueryBreakdown": {
+        "properties": {
+          "advance": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "advance_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "build_scorer": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "build_scorer_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "compute_max_score": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "compute_max_score_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "create_weight": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "create_weight_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "match": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "match_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "next_doc": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "next_doc_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "score": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "score_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "set_min_competitive_score": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "set_min_competitive_score_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shallow_advance": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "shallow_advance_count": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "advance",
+          "advance_count",
+          "build_scorer",
+          "build_scorer_count",
+          "compute_max_score",
+          "compute_max_score_count",
+          "create_weight",
+          "create_weight_count",
+          "match",
+          "match_count",
+          "next_doc",
+          "next_doc_count",
+          "score",
+          "score_count",
+          "set_min_competitive_score",
+          "set_min_competitive_score_count",
+          "shallow_advance",
+          "shallow_advance_count"
+        ],
+        "type": "object"
+      },
+      "QueryLevelTrigger": {
+        "properties": {
+          "query_level_trigger": {
+            "$ref": "#/components/schemas/QueryLevelTriggerBody"
+          }
+        },
+        "required": [
+          "query_level_trigger"
+        ],
+        "type": "object"
+      },
+      "QueryLevelTriggerBody": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            },
+            "type": "array"
+          },
+          "condition": {
+            "$ref": "#/components/schemas/ScriptCondition"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "actions",
+          "condition",
+          "name",
+          "severity"
+        ],
+        "type": "object"
+      },
+      "QueryProfile": {
+        "properties": {
+          "breakdown": {
+            "$ref": "#/components/schemas/QueryBreakdown"
+          },
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/QueryProfile"
+            },
+            "type": "array"
+          },
+          "description": {
+            "type": "string"
+          },
+          "time_in_nanos": {
+            "$ref": "#/components/schemas/DurationValueUnitNanos"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "breakdown",
+          "description",
+          "time_in_nanos",
+          "type"
+        ],
+        "type": "object"
+      },
+      "RangeAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RangeAggregateBase"
+          }
+        ]
+      },
+      "RangeAggregateBase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBaseRangeBucket"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "RangeBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketBase"
+          },
+          {
+            "properties": {
+              "from": {
+                "format": "double",
+                "type": "number"
+              },
+              "from_as_string": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "to": {
+                "format": "double",
+                "type": "number"
+              },
+              "to_as_string": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "RateAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AggregateBase"
+          },
+          {
+            "properties": {
+              "value": {
+                "format": "double",
+                "type": "number"
+              },
+              "value_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "value"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "Refresh": {
+        "oneOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "const": "false",
+            "type": "string"
+          },
+          {
+            "const": "true",
+            "type": "string"
+          },
+          {
+            "const": "wait_for",
+            "type": "string"
+          }
+        ]
+      },
+      "ReverseNestedAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleBucketAggregateBase"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "Routing": {
+        "type": "string"
+      },
+      "SamplerAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleBucketAggregateBase"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "Schedule": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/IntervalSchedule",
+            "title": "period"
+          },
+          {
+            "$ref": "#/components/schemas/CronSchedule",
+            "title": "cron"
+          }
+        ]
+      },
+      "ScriptCondition": {
+        "properties": {
+          "script": {
+            "$ref": "#/components/schemas/PainlessScript"
+          }
+        },
+        "required": [
+          "script"
+        ],
+        "type": "object"
+      },
+      "ScriptTemplate": {
+        "properties": {
+          "lang": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "source"
+        ],
+        "type": "object"
+      },
+      "ScriptedMetricAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AggregateBase"
+          },
+          {
+            "properties": {
+              "value": {}
+            },
+            "required": [
+              "value"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "ScrollId": {
+        "type": "string"
+      },
+      "SearchInput": {
+        "properties": {
+          "search": {
+            "$ref": "#/components/schemas/SearchInputBody"
+          }
+        },
+        "required": [
+          "search"
+        ],
+        "type": "object"
+      },
+      "SearchInputBody": {
+        "properties": {
+          "indices": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "query": {
+            "additionalProperties": true,
+            "type": "object"
+          }
+        },
+        "required": [
+          "indices",
+          "query"
+        ],
+        "type": "object"
+      },
+      "SearchProfile": {
+        "properties": {
+          "collector": {
+            "items": {
+              "$ref": "#/components/schemas/Collector"
+            },
+            "type": "array"
+          },
+          "query": {
+            "items": {
+              "$ref": "#/components/schemas/QueryProfile"
+            },
+            "type": "array"
+          },
+          "rewrite_time": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "collector",
+          "query",
+          "rewrite_time"
+        ],
+        "type": "object"
+      },
+      "SearchResult": {
+        "properties": {
+          "_clusters": {
+            "$ref": "#/components/schemas/ClusterStatistics"
+          },
+          "_scroll_id": {
+            "$ref": "#/components/schemas/ScrollId"
+          },
+          "_shards": {
+            "$ref": "#/components/schemas/ShardStatistics"
+          },
+          "aggregations": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Aggregate"
+            },
+            "type": "object"
+          },
+          "hits": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HitsMetadata"
+              },
+              {
+                "properties": {
+                  "hits": {
+                    "items": {
+                      "properties": {
+                        "_source": {
+                          "$ref": "#/components/schemas/TDocument"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            ]
+          },
+          "num_reduce_phases": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "phase_took": {
+            "$ref": "#/components/schemas/PhaseTook"
+          },
+          "pit_id": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "processor_results": {
+            "items": {
+              "$ref": "#/components/schemas/ProcessorExecutionDetail"
+            },
+            "type": "array"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/Profile"
+          },
+          "suggest": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/Suggest"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "terminated_early": {
+            "type": "boolean"
+          },
+          "timed_out": {
+            "type": "boolean"
+          },
+          "took": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "_shards",
+          "hits",
+          "timed_out",
+          "took"
+        ],
+        "type": "object"
+      },
+      "SearchResultJsonValue": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SearchResult"
+          },
+          {
+            "properties": {
+              "hits": {
+                "properties": {
+                  "hits": {
+                    "items": {
+                      "properties": {
+                        "_source": {}
+                      },
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              },
+              "suggest": {
+                "additionalProperties": {
+                  "items": {
+                    "oneOf": [
+                      {
+                        "properties": {
+                          "options": {
+                            "oneOf": [
+                              {
+                                "properties": {
+                                  "_source": {}
+                                },
+                                "type": "object"
+                              },
+                              {
+                                "items": {
+                                  "properties": {
+                                    "_source": {}
+                                  },
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              }
+                            ]
+                          }
+                        },
+                        "title": "completion",
+                        "type": "object"
+                      },
+                      {
+                        "$ref": "#/components/schemas/PhraseSuggest",
+                        "title": "phrase"
+                      },
+                      {
+                        "$ref": "#/components/schemas/TermSuggest",
+                        "title": "term"
+                      }
+                    ]
+                  },
+                  "type": "array"
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "SequenceNumber": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "ShardProfile": {
+        "properties": {
+          "aggregations": {
+            "items": {
+              "$ref": "#/components/schemas/AggregationProfile"
+            },
+            "type": "array"
+          },
+          "fetch": {
+            "$ref": "#/components/schemas/FetchProfile"
+          },
+          "id": {
+            "type": "string"
+          },
+          "searches": {
+            "items": {
+              "$ref": "#/components/schemas/SearchProfile"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "aggregations",
+          "id",
+          "searches"
+        ],
+        "type": "object"
+      },
+      "ShardSearchFailure": {
+        "properties": {
+          "index": {
+            "type": "string"
+          },
+          "node": {
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/ErrorCause"
+          },
+          "shard": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "reason",
+          "shard"
+        ],
+        "type": "object"
+      },
+      "ShardStatistics": {
+        "properties": {
+          "failed": {
+            "$ref": "#/components/schemas/uint"
+          },
+          "failures": {
+            "items": {
+              "$ref": "#/components/schemas/ShardSearchFailure"
+            },
+            "type": "array"
+          },
+          "skipped": {
+            "$ref": "#/components/schemas/uint"
+          },
+          "successful": {
+            "$ref": "#/components/schemas/uint"
+          },
+          "total": {
+            "$ref": "#/components/schemas/uint"
+          }
+        },
+        "required": [
+          "failed",
+          "successful",
+          "total"
+        ],
+        "type": "object"
+      },
+      "SignificantLongTermsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SignificantTermsAggregateBaseSignificantLongTermsBucket"
+          }
+        ]
+      },
+      "SignificantLongTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SignificantTermsBucketBase"
+          },
+          {
+            "properties": {
+              "key": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "key_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "SignificantStringTermsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SignificantTermsAggregateBaseSignificantStringTermsBucket"
+          }
+        ]
+      },
+      "SignificantStringTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SignificantTermsBucketBase"
+          },
+          {
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "SignificantTermsAggregateBase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBase"
+          },
+          {
+            "properties": {
+              "bg_count": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "doc_count": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "SignificantTermsAggregateBaseSignificantLongTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SignificantTermsAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/SignificantLongTermsBucket"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/SignificantLongTermsBucket"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "SignificantTermsAggregateBaseSignificantStringTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SignificantTermsAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/SignificantStringTermsBucket"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/SignificantStringTermsBucket"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "SignificantTermsAggregateBaseVoid": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SignificantTermsAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/Void"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/Void"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "SignificantTermsBucketBase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketBase"
+          },
+          {
+            "properties": {
+              "bg_count": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "score": {
+                "format": "double",
+                "type": "number"
+              }
+            },
+            "required": [
+              "bg_count",
+              "score"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "SimpleValueAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleMetricAggregateBase"
+          }
+        ]
+      },
+      "SingleBucketAggregateBase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AggregateBase"
+          },
+          {
+            "properties": {
+              "doc_count": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "doc_count"
+            ],
+            "type": "object"
+          }
+        ],
+        "type": "object",
+        "unevaluatedProperties": {
+          "$ref": "#/components/schemas/Aggregate",
+          "title": "aggregations"
+        }
+      },
+      "SingleMetricAggregateBase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AggregateBase"
+          },
+          {
+            "properties": {
+              "value": {
+                "oneOf": [
+                  {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "value_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "value"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "SortOrder": {
+        "enum": [
+          "asc",
+          "desc"
+        ],
+        "type": "string"
+      },
+      "SortResults": {
+        "items": {
+          "$ref": "#/components/schemas/FieldValue"
+        },
+        "type": "array"
+      },
+      "StandardDeviationBounds": {
+        "properties": {
+          "lower": {
+            "oneOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lower_population": {
+            "oneOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lower_sampling": {
+            "oneOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "upper": {
+            "oneOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "upper_population": {
+            "oneOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "upper_sampling": {
+            "oneOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "lower",
+          "lower_population",
+          "lower_sampling",
+          "upper",
+          "upper_population",
+          "upper_sampling"
+        ],
+        "type": "object"
+      },
+      "StandardDeviationBoundsAsString": {
+        "properties": {
+          "lower": {
+            "type": "string"
+          },
+          "lower_population": {
+            "type": "string"
+          },
+          "lower_sampling": {
+            "type": "string"
+          },
+          "upper": {
+            "type": "string"
+          },
+          "upper_population": {
+            "type": "string"
+          },
+          "upper_sampling": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "lower",
+          "lower_population",
+          "lower_sampling",
+          "upper",
+          "upper_population",
+          "upper_sampling"
+        ],
+        "type": "object"
+      },
+      "StatsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/StatsAggregateBase"
+          },
+          {
+            "properties": {},
+            "type": "object"
+          }
+        ]
+      },
+      "StatsAggregateBase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AggregateBase"
+          },
+          {
+            "properties": {
+              "avg": {
+                "oneOf": [
+                  {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "avg_as_string": {
+                "type": "string"
+              },
+              "count": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "max": {
+                "oneOf": [
+                  {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "max_as_string": {
+                "type": "string"
+              },
+              "min": {
+                "oneOf": [
+                  {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "min_as_string": {
+                "type": "string"
+              },
+              "sum": {
+                "format": "double",
+                "type": "number"
+              },
+              "sum_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "avg",
+              "count",
+              "max",
+              "min",
+              "sum"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "StatsBucketAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/StatsAggregateBase"
+          }
+        ]
+      },
+      "StringOrStringArray": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        ]
+      },
+      "StringRareTermsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBaseStringRareTermsBucket"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "StringRareTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketBase"
+          },
+          {
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "StringTermsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsAggregateBaseStringTermsBucket"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "StringTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsBucketBase"
+          },
+          {
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "Suggest": {
+        "oneOf": [
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompletionSuggest"
+              },
+              {
+                "properties": {
+                  "options": {
+                    "oneOf": [
+                      {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/CompletionSuggestOption"
+                          },
+                          {
+                            "properties": {
+                              "_source": {
+                                "$ref": "#/components/schemas/TDocument"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        ]
+                      },
+                      {
+                        "items": {
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/CompletionSuggestOption"
+                            },
+                            {
+                              "properties": {
+                                "_source": {
+                                  "$ref": "#/components/schemas/TDocument"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                },
+                "type": "object"
+              }
+            ],
+            "title": "completion"
+          },
+          {
+            "$ref": "#/components/schemas/PhraseSuggest",
+            "title": "phrase"
+          },
+          {
+            "$ref": "#/components/schemas/TermSuggest",
+            "title": "term"
+          }
+        ]
+      },
+      "SuggestBase": {
+        "properties": {
+          "length": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "length",
+          "offset",
+          "text"
+        ],
+        "type": "object"
+      },
+      "SumAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleMetricAggregateBase"
+          }
+        ]
+      },
+      "TBucket": {},
+      "TDigestPercentileRanksAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PercentilesAggregateBase"
+          }
+        ]
+      },
+      "TDigestPercentilesAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PercentilesAggregateBase"
+          }
+        ]
+      },
+      "TDocument": {},
+      "TTestAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AggregateBase"
+          },
+          {
+            "properties": {
+              "value": {
+                "oneOf": [
+                  {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "value_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "value"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "TermSuggest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SuggestBase"
+          },
+          {
+            "properties": {
+              "options": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TermSuggestOption"
+                  },
+                  {
+                    "items": {
+                      "$ref": "#/components/schemas/TermSuggestOption"
+                    },
+                    "type": "array"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "options"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "TermSuggestOption": {
+        "properties": {
+          "collate_match": {
+            "type": "boolean"
+          },
+          "freq": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "highlighted": {
+            "type": "string"
+          },
+          "score": {
+            "format": "double",
+            "type": "number"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "score",
+          "text"
+        ],
+        "type": "object"
+      },
+      "TermsAggregateBase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBase"
+          },
+          {
+            "properties": {
+              "doc_count_error_upper_bound": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "sum_other_doc_count": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "TermsAggregateBaseDoubleTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "items": {
+                  "$ref": "#/components/schemas/DoubleTermsBucket"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "TermsAggregateBaseLongTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "items": {
+                  "$ref": "#/components/schemas/LongTermsBucket"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "TermsAggregateBaseMultiTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Buckets"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "additionalProperties": {
+                          "$ref": "#/components/schemas/MultiTermsBucket"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/components/schemas/MultiTermsBucket"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "TermsAggregateBaseStringTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "items": {
+                  "$ref": "#/components/schemas/StringTermsBucket"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "TermsAggregateBaseUnsignedLongTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "items": {
+                  "$ref": "#/components/schemas/UnsignedLongTermsBucket"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "TermsAggregateBaseVoid": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsAggregateBase"
+          },
+          {
+            "properties": {
+              "buckets": {
+                "items": {
+                  "$ref": "#/components/schemas/Void"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "buckets"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "TermsBucketBase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketBase"
+          },
+          {
+            "properties": {
+              "doc_count_error_upper_bound": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "Throttle": {
+        "properties": {
+          "unit": {
+            "$ref": "#/components/schemas/ChronoUnit"
+          },
+          "value": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object"
+      },
+      "TopHitsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AggregateBase"
+          },
+          {
+            "properties": {
+              "hits": {
+                "$ref": "#/components/schemas/HitsMetadataJsonValue"
+              }
+            },
+            "required": [
+              "hits"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "TopLeftBottomRightGeoBounds": {
+        "properties": {
+          "bottom_right": {
+            "$ref": "#/components/schemas/GeoLocation"
+          },
+          "top_left": {
+            "$ref": "#/components/schemas/GeoLocation"
+          }
+        },
+        "required": [
+          "bottom_right",
+          "top_left"
+        ],
+        "type": "object"
+      },
+      "TopRightBottomLeftGeoBounds": {
+        "properties": {
+          "bottom_left": {
+            "$ref": "#/components/schemas/GeoLocation"
+          },
+          "top_right": {
+            "$ref": "#/components/schemas/GeoLocation"
+          }
+        },
+        "required": [
+          "bottom_left",
+          "top_right"
+        ],
+        "type": "object"
+      },
+      "TotalHits": {
+        "properties": {
+          "relation": {
+            "$ref": "#/components/schemas/TotalHitsRelation"
+          },
+          "value": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "relation",
+          "value"
+        ],
+        "type": "object"
+      },
+      "TotalHitsRelation": {
+        "oneOf": [
+          {
+            "const": "eq",
+            "type": "string"
+          },
+          {
+            "const": "gte",
+            "type": "string"
+          }
+        ]
+      },
+      "Trigger": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/QueryLevelTrigger",
+            "title": "query_level_trigger"
+          },
+          {
+            "$ref": "#/components/schemas/BucketLevelTrigger",
+            "title": "bucket_level_trigger"
+          },
+          {
+            "$ref": "#/components/schemas/DocumentLevelTrigger",
+            "title": "document_level_trigger"
+          },
+          {
+            "$ref": "#/components/schemas/QueryLevelTriggerBody",
+            "title": "inline_query_level_trigger"
+          }
+        ]
+      },
+      "TriggerResult": {
+        "properties": {
+          "action_results": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "cluster_results": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "error": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "triggered": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "Type": {
+        "type": "string"
+      },
+      "UnitMillis": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "UnitNanos": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "UnmappedRareTermsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBaseVoid"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "UnmappedSignificantTermsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SignificantTermsAggregateBaseVoid"
+          }
+        ]
+      },
+      "UnmappedTermsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsAggregateBaseVoid"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "UnsignedLongTermsAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsAggregateBaseUnsignedLongTermsBucket"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "UnsignedLongTermsBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TermsBucketBase"
+          },
+          {
+            "properties": {
+              "key": {
+                "type": "number"
+              },
+              "key_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "ValueCountAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleMetricAggregateBase"
+          }
+        ]
+      },
+      "VariableWidthHistogramAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketAggregateBaseVariableWidthHistogramBucket"
+          }
+        ]
+      },
+      "VariableWidthHistogramBucket": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiBucketBase"
+          },
+          {
+            "properties": {
+              "key": {
+                "format": "double",
+                "type": "number"
+              },
+              "key_as_string": {
+                "type": "string"
+              },
+              "max": {
+                "format": "double",
+                "type": "number"
+              },
+              "max_as_string": {
+                "type": "string"
+              },
+              "min": {
+                "format": "double",
+                "type": "number"
+              },
+              "min_as_string": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "max",
+              "min"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "VersionNumber": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "Void": {
+        "type": "object"
+      },
+      "WeightedAvgAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SingleMetricAggregateBase"
+          }
+        ]
+      },
+      "WktGeoBounds": {
+        "properties": {
+          "wkt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "wkt"
+        ],
+        "type": "object"
+      },
+      "uint": {
+        "type": "integer"
+      }
+    }
+  },
+  "info": {
+    "title": "OpenSearch Alerting API"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/_plugins/_alerting/monitors": {
+      "post": {
+        "operationId": "alerting.create_monitor.0",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/alerting.create_monitor::query.if_primary_term"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.create_monitor::query.if_seq_no"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.create_monitor::query.refresh"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/alerting.create_monitor"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/alerting.create_monitor@201"
+          }
+        }
+      }
+    },
+    "/_plugins/_alerting/monitors/_search": {
+      "post": {
+        "operationId": "alerting.search_monitors.1",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/alerting.search_monitors"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/alerting.search_monitors@200"
+          }
+        }
+      }
+    },
+    "/_plugins/_alerting/monitors/alerts": {
+      "get": {
+        "operationId": "alerting.get_alerts.0",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/alerting.get_alerts::query.alertState"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.get_alerts::query.missing"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.get_alerts::query.monitorId"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.get_alerts::query.searchString"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.get_alerts::query.severityLevel"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.get_alerts::query.size"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.get_alerts::query.sortOrder"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.get_alerts::query.sortString"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.get_alerts::query.startIndex"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.get_alerts::query.workflowIds"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/alerting.get_alerts@200"
+          }
+        }
+      }
+    },
+    "/_plugins/_alerting/monitors/{monitor_id}": {
+      "delete": {
+        "operationId": "alerting.delete_monitor.0",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/alerting.delete_monitor::path.monitor_id"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.delete_monitor::query.refresh"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/alerting.delete_monitor@200"
+          }
+        }
+      },
+      "get": {
+        "operationId": "alerting.get_monitor.0",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/alerting.get_monitor::path.monitor_id"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.get_monitor::query.version"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/alerting.get_monitor@200"
+          }
+        }
+      },
+      "put": {
+        "operationId": "alerting.update_monitor.0",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/alerting.update_monitor::path.monitor_id"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.update_monitor::query.if_primary_term"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.update_monitor::query.if_seq_no"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.update_monitor::query.refresh"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/alerting.update_monitor"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/alerting.update_monitor@200"
+          }
+        }
+      }
+    },
+    "/_plugins/_alerting/monitors/{monitor_id}/_acknowledge/alerts": {
+      "post": {
+        "operationId": "alerting.acknowledge_alerts.0",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/alerting.acknowledge_alerts::path.monitor_id"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/alerting.acknowledge_alerts"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/alerting.acknowledge_alerts@200"
+          }
+        }
+      }
+    },
+    "/_plugins/_alerting/monitors/{monitor_id}/_execute": {
+      "post": {
+        "operationId": "alerting.execute_monitor.0",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/alerting.execute_monitor::path.monitor_id"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.execute_monitor::query.dryrun"
+          },
+          {
+            "$ref": "#/components/parameters/alerting.execute_monitor::query.period_end"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/alerting.execute_monitor@200"
+          }
+        }
+      }
+    }
+  }
+}
