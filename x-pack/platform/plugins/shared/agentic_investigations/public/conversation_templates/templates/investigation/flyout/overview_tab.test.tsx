@@ -104,6 +104,56 @@ describe('InvestigationOverview', () => {
     );
   });
 
+  it('shows who started the investigation with the instructions it ran with', () => {
+    mockUseInvestigation.mockReturnValue({
+      data: {
+        ...investigation,
+        metadata: {
+          ...investigation.metadata,
+          automation: { id: 'automation-1', name: 'Payments alerts' },
+          automation_instructions: 'Check the payment service first.',
+        },
+      },
+    });
+
+    renderOverview();
+
+    const block = screen.getByTestId('investigationOverviewAutomation');
+    expect(block).toHaveTextContent('Started by');
+    expect(block).toHaveTextContent('Payments alerts');
+    expect(block).toHaveTextContent('Check the payment service first.');
+  });
+
+  it('shows the automation name without an instructions line when it had none', () => {
+    mockUseInvestigation.mockReturnValue({
+      data: {
+        ...investigation,
+        metadata: {
+          ...investigation.metadata,
+          automation: { id: 'automation-1', name: 'Payments alerts' },
+        },
+      },
+    });
+
+    renderOverview();
+
+    expect(screen.getByTestId('investigationOverviewAutomation')).toHaveTextContent(
+      'Payments alerts'
+    );
+    expect(
+      screen.queryByTestId('investigationOverviewAutomationInstructions')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows no "Started by" block for an investigation no automation started', () => {
+    mockUseInvestigation.mockReturnValue({ data: investigation });
+
+    renderOverview();
+
+    expect(screen.queryByTestId('investigationOverviewAutomation')).not.toBeInTheDocument();
+    expect(screen.queryByText('Started by')).not.toBeInTheDocument();
+  });
+
   it('leaves the hypothesis tree out without hypotheses', () => {
     mockUseInvestigation.mockReturnValue({ data: { ...investigation, hypotheses: undefined } });
 

@@ -21,6 +21,7 @@ import { ImpactContent } from '../../../../impact/attachments/impact_view';
 import { SubjectList } from '../../../../subjects/attachments/subject_view';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import { getInvestigationDisplayTitle } from '../to_view_model';
+import { AutomationStartedBy } from './automation_started_by';
 
 const readMetadataString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim().length > 0 ? value : undefined;
@@ -40,9 +41,16 @@ export const toOverviewSections = (
       impact.entities.length > 0);
   const hypotheses = investigation?.hypotheses?.hypotheses ?? [];
   const conclusion = readMetadataString(investigation?.metadata.verdict) ?? fallbackVerdict;
+  const automation = investigation?.metadata.automation;
 
   return {
     subjects: subjects.length > 0 ? <SubjectList subjects={subjects} /> : undefined,
+    automation: automation ? (
+      <AutomationStartedBy
+        name={automation.name}
+        instructions={readMetadataString(investigation?.metadata.automation_instructions)}
+      />
+    ) : undefined,
     impact: hasImpact ? (
       <ImpactContent
         summary={impact.summary}

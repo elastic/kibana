@@ -38,3 +38,13 @@ export const updatedAgoLabel = (age: React.ReactNode): React.ReactNode =>
     defaultMessage: 'Updated {age}',
     values: { age },
   });
+
+export const AUTOMATION_INSTRUCTIONS_SHOW_MORE = i18n.translate(
+  'xpack.agenticInvestigations.investigations.automation.instructionsShowMore',
+  { defaultMessage: 'Show more' }
+);
+
+export const AUTOMATION_INSTRUCTIONS_SHOW_LESS = i18n.translate(
+  'xpack.agenticInvestigations.investigations.automation.instructionsShowLess',
+  { defaultMessage: 'Show less' }
+);

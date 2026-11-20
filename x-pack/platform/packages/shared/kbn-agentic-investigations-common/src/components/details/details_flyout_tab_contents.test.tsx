@@ -173,6 +173,7 @@ describe('OverviewTab', () => {
         proposedActionsContent={<span>proposal</span>}
         sections={{
           subjects: <span>checkout alert</span>,
+          automation: <span>payments automation</span>,
           impact: <span>checkout is down</span>,
           conclusion: 'A **bad** deploy.',
           reasoning: <span>hypothesis tree</span>,
@@ -181,9 +182,18 @@ describe('OverviewTab', () => {
     );
 
     const headings = screen.getAllByRole('heading').map(({ textContent }) => textContent);
-    expect(headings).toEqual(["What's happened", 'Impact', 'Conclusion', 'Proposed actions']);
+    expect(headings).toEqual([
+      "What's happened",
+      'Started by',
+      'Impact',
+      'Conclusion',
+      'Proposed actions',
+    ]);
     expect(screen.queryByRole('heading', { name: 'Subject' })).not.toBeInTheDocument();
     expect(screen.getByTestId('investigationOverviewSubjects')).toHaveTextContent('checkout alert');
+    expect(screen.getByTestId('investigationOverviewAutomation')).toHaveTextContent(
+      'payments automation'
+    );
     expect(screen.getByTestId('groupedAttachmentsSection')).toBeInTheDocument();
     expect(screen.getByText('bad')).toBeInTheDocument();
     expect(screen.getByTestId('investigationOverviewReasoning')).toHaveTextContent(
@@ -237,6 +247,8 @@ describe('OverviewTab', () => {
     renderTab({ attachments: [] });
 
     expect(screen.queryByText('Subject')).not.toBeInTheDocument();
+    expect(screen.queryByText('Started by')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationOverviewAutomation')).not.toBeInTheDocument();
     expect(screen.queryByText('Impact')).not.toBeInTheDocument();
     expect(screen.queryByText('Conclusion')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationOverviewReasoning')).not.toBeInTheDocument();

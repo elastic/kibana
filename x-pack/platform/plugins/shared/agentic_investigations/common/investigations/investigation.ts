@@ -116,6 +116,10 @@ export interface InvestigationMetadata {
   verdict?: string;
   /** User profile uids of the assignees. Absent when nobody is assigned. */
   assignees?: string[];
+  /** The automation that started the investigation. Absent for investigations that no automation started. */
+  automation?: { id: string; name: string };
+  /** The instructions the automation ran with, as they were when it started. Absent when it had none. */
+  automation_instructions?: string;
 }
 
 /** What the investigation is about, one entry per subject. */

@@ -75,6 +75,9 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
         defaultMessage: 'Proposed actions',
       }
     ),
+    automation: i18n.translate('xpack.agenticInvestigations.detailsFlyout.sections.automation', {
+      defaultMessage: 'Started by',
+    }),
     impact: i18n.translate('xpack.agenticInvestigations.detailsFlyout.sections.impact', {
       defaultMessage: 'Impact',
     }),

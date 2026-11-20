@@ -708,12 +708,20 @@ export const toMetadata = (
   const summary = optionalText(metadata?.summary);
   const verdict = optionalText(metadata?.verdict);
   const assignees = optionalTextList(metadata?.assignees);
+  const automationId = optionalText(metadata?.automation_id);
+  const automationName = optionalText(metadata?.automation_name);
+  const automationInstructions = optionalText(metadata?.automation_instructions);
   return {
     status: metadata?.status === 'closed' ? 'closed' : 'open',
     ...(isInvestigationSeverity(severity) && { severity }),
     ...(summary !== undefined && { summary }),
     ...(verdict !== undefined && { verdict }),
     ...(assignees !== undefined && { assignees }),
+    ...(automationId !== undefined &&
+      automationName !== undefined && { automation: { id: automationId, name: automationName } }),
+    ...(automationInstructions !== undefined && {
+      automation_instructions: automationInstructions,
+    }),
   };
 };
 
