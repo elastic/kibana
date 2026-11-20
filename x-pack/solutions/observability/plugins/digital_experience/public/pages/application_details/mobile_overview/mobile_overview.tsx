@@ -7,11 +7,9 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  EuiEmptyPrompt,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
@@ -20,21 +18,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import type { MobilePlatform } from '../../../../common/types/applications';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
 import { EnvironmentFilter } from '../../../components/environment_filter';
 import { TimeRangePicker } from '../../../components/time_range_picker';
-import {
-  DIGITAL_EXPERIENCE_EBT_ELEMENTS,
-  MOBILE_APPLICATION_EBT_ELEMENTS,
-} from '../../../ebt_constants';
+import { MOBILE_APPLICATION_EBT_ELEMENTS } from '../../../ebt_constants';
+import { MobileOnboardingPrompt } from '../../../components/mobile_onboarding_prompt';
 import { useApiClient } from '../../../hooks/use_api_client';
+import { useDigitalExperienceParams } from '../../../hooks/use_digital_experience_params';
+import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
 import { useDiscoverHref } from '../../../hooks/use_discover_href';
 import { useEnvironment } from '../../../hooks/use_environment';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { EDOT_ANDROID_DOCS_URL, EDOT_IOS_DOCS_URL } from '../../../utils/doc_links';
+import { PLATFORM_LABELS } from '../../../labels';
+import { mobilePlatformRt } from '../../../utils/application_source';
 import { toTimeRangeQuery } from '../../../utils/time_range_query';
 import { MobilePanel } from './mobile_panel';
 
@@ -47,13 +45,6 @@ const ALL_PLATFORMS_LABEL = i18n.translate('xpack.digitalExperience.mobile.filte
 const ALL_RELEASES_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.allReleases', {
   defaultMessage: 'All releases',
 });
-
-const PLATFORM_LABELS: Record<MobilePlatform, string> = {
-  android: i18n.translate('xpack.digitalExperience.mobile.platform.android', {
-    defaultMessage: 'Android',
-  }),
-  ios: i18n.translate('xpack.digitalExperience.mobile.platform.ios', { defaultMessage: 'iOS' }),
-};
 
 /** The sections the sibling issues fill; each shows a placeholder until then. */
 export const MOBILE_SECTIONS = [
@@ -99,63 +90,14 @@ const COMING_SOON = i18n.translate('xpack.digitalExperience.mobile.section.comin
   defaultMessage: 'Coming soon',
 });
 
-const emptyPrompt = (
-  <EuiEmptyPrompt
-    data-test-subj="digitalExperienceMobileEmpty"
-    iconType="package"
-    title={
-      <h2>
-        {i18n.translate('xpack.digitalExperience.mobile.empty.title', {
-          defaultMessage: 'No mobile data for this application',
-        })}
-      </h2>
-    }
-    body={
-      <p>
-        {i18n.translate('xpack.digitalExperience.mobile.empty.body', {
-          defaultMessage:
-            'There is no data from EDOT Android or EDOT iOS for this application in the selected time range and filters. Try a wider time range, or instrument the application.',
-        })}
-      </p>
-    }
-    actions={
-      <EuiFlexGroup gutterSize="m" justifyContent="center" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            data-test-subj="digitalExperienceMobileAndroidDocsLink"
-            {...getEbtProps({
-              action: EBT_CLICK_ACTIONS.ADD_DATA,
-              element: DIGITAL_EXPERIENCE_EBT_ELEMENTS.INSTRUMENTATION_DOCS_LINK,
-            })}
-            href={EDOT_ANDROID_DOCS_URL}
-            target="_blank"
-            external
-          >
-            {i18n.translate('xpack.digitalExperience.mobile.empty.androidDocs', {
-              defaultMessage: 'Instrument with EDOT Android',
-            })}
-          </EuiLink>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            data-test-subj="digitalExperienceMobileIosDocsLink"
-            {...getEbtProps({
-              action: EBT_CLICK_ACTIONS.ADD_DATA,
-              element: DIGITAL_EXPERIENCE_EBT_ELEMENTS.INSTRUMENTATION_DOCS_LINK,
-            })}
-            href={EDOT_IOS_DOCS_URL}
-            target="_blank"
-            external
-          >
-            {i18n.translate('xpack.digitalExperience.mobile.empty.iosDocs', {
-              defaultMessage: 'Instrument with EDOT iOS',
-            })}
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    }
-  />
-);
+const NO_DATA_TITLE = i18n.translate('xpack.digitalExperience.mobile.empty.title', {
+  defaultMessage: 'No mobile data for this application',
+});
+
+const NO_DATA_BODY = i18n.translate('xpack.digitalExperience.mobile.empty.body', {
+  defaultMessage:
+    'There is no data from EDOT Android or EDOT iOS for this application in the selected time range and filters. Try a wider time range, or instrument the application.',
+});
 
 /** The mobile application page: filters, the KPI row and the sections the sibling issues fill. */
 export function MobileOverview({ serviceName }: { serviceName: string }) {
@@ -163,8 +105,14 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
   const { timeRange } = useTimeRange();
   const { environment, setEnvironment } = useEnvironment();
   const { formatNumber, formatPercent } = useFormatters();
-  const [platform, setPlatform] = useState<MobilePlatform | undefined>();
-  const [release, setRelease] = useState<string | undefined>();
+  // In the URL, so a reload or a shared link keeps them.
+  const {
+    query: { platform, release: releaseParam },
+  } = useDigitalExperienceParams('/{serviceName}');
+  const release = releaseParam || undefined;
+  const updateUrlQuery = useUpdateUrlQuery();
+  const setPlatform = (value: MobilePlatform | undefined) => updateUrlQuery({ platform: value });
+  const setRelease = (value: string | undefined) => updateUrlQuery({ release: value });
   const [isComparing, setIsComparing] = useState(false);
 
   const {
@@ -205,7 +153,6 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
     [kpis?.releases, release]
   );
 
-  const formatErrorRate = (value: number) => value.toFixed(2);
   const hasNoData = kpis !== undefined && !kpis.hasData;
 
   return (
@@ -228,9 +175,7 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
               options={platformOptions}
               selected={platform ?? ALL}
               isActive={platform !== undefined}
-              onChange={(value) =>
-                setPlatform(value === ALL ? undefined : (value as MobilePlatform))
-              }
+              onChange={(value) => setPlatform(mobilePlatformRt.is(value) ? value : undefined)}
             />
             <SingleSelectFilter
               data-test-subj="digitalExperienceMobileReleaseFilter"
@@ -263,7 +208,11 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {hasNoData ? (
-        emptyPrompt
+        <MobileOnboardingPrompt
+          data-test-subj="digitalExperienceMobileEmpty"
+          title={NO_DATA_TITLE}
+          body={NO_DATA_BODY}
+        />
       ) : (
         <>
           <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>
@@ -326,7 +275,7 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
                   defaultMessage: 'Exceptions per session in the time range.',
                 })}
                 value={kpis?.errorRate}
-                formatValue={formatErrorRate}
+                formatValue={formatNumber}
                 isComparing={isComparing}
                 isLoading={isLoading}
                 discoverHref={discoverHref}

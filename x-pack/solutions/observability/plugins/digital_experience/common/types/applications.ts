@@ -8,7 +8,7 @@
 /** The sources of web applications: `otel` is EDOT Browser data, `classic` is the RUM agent's. */
 export type WebApplicationSource = 'otel' | 'classic';
 
-/** `mobile` is EDOT Android and iOS data, shown only with the mobile feature flag on. */
+/** `mobile` is EDOT Android and iOS data, React Native included. */
 export type ApplicationSource = WebApplicationSource | 'mobile';
 
 /** The mobile platforms, told apart by `telemetry.sdk.name`. */

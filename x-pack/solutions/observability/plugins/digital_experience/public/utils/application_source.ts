@@ -17,3 +17,6 @@ export const applicationSourceRt = t.union([
 ]);
 
 export const DEFAULT_APPLICATION_SOURCE: ApplicationSource = APPLICATION_SOURCE.classic;
+
+/** A mobile platform in the URL, for the mobile page's platform filter. */
+export const mobilePlatformRt = t.union([t.literal('android'), t.literal('ios')]);

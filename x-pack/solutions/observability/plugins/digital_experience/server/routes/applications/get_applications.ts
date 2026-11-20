@@ -16,13 +16,21 @@ import type {
   HistogramBuckets,
   PageLoadsOverTime,
   TimeSeriesPoint,
+  WebApplicationSource,
 } from '../../../common/types/applications';
 import { sortEnvironments } from '../../lib/helpers/environment';
 import { describeError, isAccessDenied } from '../../lib/helpers/errors';
-import type { SourceApplications } from './types';
+import type { SourceApplications, WebSourceApplications } from './types';
 
 type ApplicationsFetcher = () => Promise<SourceApplications>;
+type WebApplicationsFetcher = () => Promise<WebSourceApplications>;
 type AccessCheck = () => Promise<boolean>;
+
+const isWebSource = (source: ApplicationSource): source is WebApplicationSource =>
+  source !== APPLICATION_SOURCE.mobile;
+
+const isWebResult = (value: SourceApplications): value is WebSourceApplications =>
+  'pageLoadsOverTime' in value;
 
 const NO_ACCESS_MESSAGE = i18n.translate('xpack.digitalExperience.applications.api.noAccess', {
   defaultMessage: "You don't have read access to the application data.",
@@ -76,9 +84,9 @@ export const getApplications = async ({
 }: {
   /** The page loads buckets every source was searched with. */
   histogram: HistogramBuckets;
-  getOtelApplications: ApplicationsFetcher;
+  getOtelApplications: WebApplicationsFetcher;
   /** Undefined when the Classic source is not available (serverless). */
-  getClassicApplications?: ApplicationsFetcher;
+  getClassicApplications?: WebApplicationsFetcher;
   /** EDOT Android and iOS applications; left out by callers that don't list them. */
   getMobileApplications?: ApplicationsFetcher;
   /**
@@ -92,7 +100,7 @@ export const getApplications = async ({
 }): Promise<ApplicationsResponse> => {
   const sources: Array<{
     source: ApplicationSource;
-    fetch: ApplicationsFetcher;
+    fetch: ApplicationsFetcher | WebApplicationsFetcher;
     checkAccess?: AccessCheck;
   }> = [
     {
@@ -134,17 +142,19 @@ export const getApplications = async ({
   results.forEach((result, index) => {
     if (result.status === 'fulfilled') {
       const { source } = sources[index];
-      loaded.push(result.value);
-      // Mobile applications have no page loads: the chart stays web-only.
-      if (source !== APPLICATION_SOURCE.mobile) {
-        pageLoadsOverTime[source] = result.value.pageLoadsOverTime;
+      const { value } = result;
+      loaded.push(value);
+      // Only the web sources have page loads, so the chart stays web-only.
+      const web = isWebSource(source) && isWebResult(value) ? value : null;
+      if (web && isWebSource(source)) {
+        pageLoadsOverTime[source] = web.pageLoadsOverTime;
       }
-      if (source === APPLICATION_SOURCE.otel) {
-        sessionsOverTime = result.value.sessionsOverTime;
+      if (web && source === APPLICATION_SOURCE.otel) {
+        sessionsOverTime = web.sessionsOverTime;
       }
       // The sessions index is summarized with the access of the user who enabled sessions, so when
       // it answered (the only source with sessions), the user's raw indices hide no rows.
-      if (partialAccess[index] && result.value.sessionsOverTime === null) {
+      if (partialAccess[index] && (web?.sessionsOverTime ?? null) === null) {
         partiallyAvailableSources.push(source);
       }
     } else {

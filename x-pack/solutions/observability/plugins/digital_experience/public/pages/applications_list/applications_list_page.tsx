@@ -72,6 +72,7 @@ import {
   mobileApplicationsMatching,
 } from './utils/filter_applications';
 import { MobileApplicationsTable } from './components/mobile_applications_table';
+import { MobileOnboardingPrompt } from '../../components/mobile_onboarding_prompt';
 import {
   pageLoadsOfSources,
   sessionsOfSource,
@@ -339,28 +340,79 @@ const NoApplicationsInEnvironmentPrompt = ({
   />
 );
 
-const UnavailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }) => (
-  <KbnWarningCallout
-    data-test-subj="digitalExperienceUnavailableSources"
-    size="s"
-    title={i18n.translate('xpack.digitalExperience.applications.unavailableSources', {
-      defaultMessage:
-        "Could not load the {sources} data, so it's missing from the applications, totals and chart.",
-      values: { sources: sources.map((source) => SOURCE_LABELS[source]).join(', ') },
-    })}
-  />
+const sourceNames = (sources: ApplicationSource[]): string =>
+  sources.map((source) => SOURCE_LABELS[source]).join(', ');
+
+/** Web sources are in the totals and the chart; mobile only has its table. */
+const UnavailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }) => {
+  const webSources = sources.filter((source) => source !== APPLICATION_SOURCE.mobile);
+  return (
+    <>
+      {webSources.length > 0 && (
+        <KbnWarningCallout
+          data-test-subj="digitalExperienceUnavailableSources"
+          size="s"
+          title={i18n.translate('xpack.digitalExperience.applications.unavailableSources', {
+            defaultMessage:
+              "Could not load the {sources} data, so it's missing from the applications, totals and chart.",
+            values: { sources: sourceNames(webSources) },
+          })}
+        />
+      )}
+      {sources.includes(APPLICATION_SOURCE.mobile) && (
+        <KbnWarningCallout
+          data-test-subj="digitalExperienceUnavailableMobile"
+          size="s"
+          title={i18n.translate('xpack.digitalExperience.applications.unavailableMobile', {
+            defaultMessage:
+              'Could not load the mobile data, so the mobile applications are missing.',
+          })}
+        />
+      )}
+    </>
+  );
+};
+
+const PartiallyAvailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }) => {
+  const webSources = sources.filter((source) => source !== APPLICATION_SOURCE.mobile);
+  return (
+    <>
+      {webSources.length > 0 && (
+        <KbnWarningCallout
+          data-test-subj="digitalExperiencePartiallyAvailableSources"
+          size="s"
+          title={i18n.translate('xpack.digitalExperience.applications.partiallyAvailableSources', {
+            defaultMessage:
+              "You can't read all of the {sources} indices, so the applications, totals and chart may be incomplete. Ask an administrator for read access to them.",
+            values: { sources: sourceNames(webSources) },
+          })}
+        />
+      )}
+      {sources.includes(APPLICATION_SOURCE.mobile) && (
+        <KbnWarningCallout
+          data-test-subj="digitalExperiencePartiallyAvailableMobile"
+          size="s"
+          title={i18n.translate('xpack.digitalExperience.applications.partiallyAvailableMobile', {
+            defaultMessage:
+              "You can't read all of the mobile indices, so the mobile applications may be incomplete. Ask an administrator for read access to them.",
+          })}
+        />
+      )}
+    </>
+  );
+};
+
+const NO_MOBILE_APPLICATIONS_TITLE = i18n.translate(
+  'xpack.digitalExperience.applications.mobileEmpty.title',
+  { defaultMessage: 'No mobile applications found' }
 );
 
-const PartiallyAvailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }) => (
-  <KbnWarningCallout
-    data-test-subj="digitalExperiencePartiallyAvailableSources"
-    size="s"
-    title={i18n.translate('xpack.digitalExperience.applications.partiallyAvailableSources', {
-      defaultMessage:
-        "You can't read all of the {sources} indices, so the applications, totals and chart may be incomplete. Ask an administrator for read access to them.",
-      values: { sources: sources.map((source) => SOURCE_LABELS[source]).join(', ') },
-    })}
-  />
+const NO_MOBILE_APPLICATIONS_BODY = i18n.translate(
+  'xpack.digitalExperience.applications.mobileEmpty.body',
+  {
+    defaultMessage:
+      'There is no EDOT Android or EDOT iOS data for the selected time range. Try a wider time range or instrument a mobile application.',
+  }
 );
 
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.applications.fetchError', {
@@ -492,7 +544,8 @@ export function ApplicationsListPage() {
     hiddenByDefault: HIDDEN_BY_DEFAULT,
   });
 
-  const getNoItemsMessage = () => {
+  // Without the source's own applications: no match, the environment prompt or its onboarding.
+  const getNoItemsMessage = (forMobile = false) => {
     if (isLoading) {
       return LOADING_MESSAGE;
     }
@@ -508,7 +561,10 @@ export function ApplicationsListPage() {
         />
       );
     }
-    if (response?.applications.length) {
+    const sourceApplications = (response?.applications ?? []).filter(
+      (app) => (app.source === APPLICATION_SOURCE.mobile) === forMobile
+    );
+    if (forMobile ? sourceApplications.length > 0 : response?.applications.length) {
       return NO_MATCHES_MESSAGE;
     }
     if (environment) {
@@ -518,8 +574,20 @@ export function ApplicationsListPage() {
         />
       );
     }
-    return noApplicationsPrompt;
+    return forMobile ? (
+      <MobileOnboardingPrompt
+        data-test-subj="digitalExperienceMobileApplicationsEmpty"
+        title={NO_MOBILE_APPLICATIONS_TITLE}
+        body={NO_MOBILE_APPLICATIONS_BODY}
+      />
+    ) : (
+      noApplicationsPrompt
+    );
   };
+
+  // The mobile table shows alone with the Mobile source, and below the web one with every source.
+  const showsWebTable = !isMobileSelected && (items.length > 0 || mobileItems.length === 0);
+  const showsMobileTable = isMobileSelected || mobileItems.length > 0;
 
   const columns = useMemo<Array<EuiBasicTableColumn<ApplicationRow>>>(() => {
     const applicationColumn: EuiBasicTableColumn<ApplicationRow> = {
@@ -725,16 +793,18 @@ export function ApplicationsListPage() {
               isClearable
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ColumnSelector
-              columns={OPTIONAL_COLUMNS}
-              visibleColumns={visibleColumns}
-              onChange={setVisibleColumns}
-            />
-          </EuiFlexItem>
+          {showsWebTable && (
+            <EuiFlexItem grow={false}>
+              <ColumnSelector
+                columns={OPTIONAL_COLUMNS}
+                visibleColumns={visibleColumns}
+                onChange={setVisibleColumns}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        {!isMobileSelected && (items.length > 0 || mobileItems.length === 0) && (
+        {showsWebTable && (
           <EuiInMemoryTable<ApplicationRow>
             data-test-subj="digitalExperienceApplicationsTable"
             tableCaption={APPLICATIONS_LABEL}
@@ -751,25 +821,16 @@ export function ApplicationsListPage() {
             noItemsMessage={getNoItemsMessage()}
           />
         )}
-        {mobileItems.length > 0 && (
+        {showsMobileTable && (
           <>
-            {items.length > 0 && <EuiSpacer size="l" />}
+            {showsWebTable && <EuiSpacer size="l" />}
             <MobileApplicationsTable
               items={mobileItems}
               searchTerm={searchTerm}
               isLoading={isLoading}
+              noItemsMessage={getNoItemsMessage(true)}
             />
           </>
-        )}
-        {isMobileSelected && mobileItems.length === 0 && (
-          <EuiInMemoryTable<ApplicationRow>
-            data-test-subj="digitalExperienceApplicationsTable"
-            tableCaption={APPLICATIONS_LABEL}
-            items={[]}
-            columns={columns}
-            loading={isLoading}
-            noItemsMessage={getNoItemsMessage()}
-          />
         )}
       </EuiPageSection>
     </>

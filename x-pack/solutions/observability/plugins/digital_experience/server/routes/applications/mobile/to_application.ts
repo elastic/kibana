@@ -5,57 +5,12 @@
  * 2.0.
  */
 
-import type {
-  MobileApplicationSummary,
-  MobilePlatform,
-} from '../../../../common/types/applications';
+import { MOBILE_FIELDS } from '../../../../common/mobile_panel';
+import type { MobileApplicationSummary } from '../../../../common/types/applications';
+import { toNumber, toPlatforms } from '../../../lib/mobile/rows';
 import type { EsqlRow } from '../../../services/sessions/summary_documents';
-import { normalizeVersion } from './normalize_version';
 
-const PLATFORM_BY_SDK_NAME: Readonly<Record<string, MobilePlatform>> = {
-  android: 'android',
-  ios: 'ios',
-};
-
-const asArray = <T>(value: T | T[] | null | undefined): T[] => {
-  if (value === null || value === undefined) {
-    return [];
-  }
-  return Array.isArray(value) ? value : [value];
-};
-
-const toNumber = (value: unknown): number => (typeof value === 'number' ? value : 0);
-
-/** The platforms of `telemetry.sdk.name` values, sorted and without repeats; other SDKs are left out. */
-export const toPlatforms = (sdkNames: unknown): MobilePlatform[] => {
-  const platforms = asArray(sdkNames as string | string[] | null).flatMap((sdkName) => {
-    const platform = PLATFORM_BY_SDK_NAME[sdkName.toLowerCase()];
-    return platform ? [platform] : [];
-  });
-  return [...new Set(platforms)].sort();
-};
-
-/**
- * The normalized version with the most sessions of one application; ties go to the higher version
- * name. A session on a version with two builds counts once per raw version, so builds add up.
- */
-export const latestRelease = (
-  releases: Array<{ version: string | null; sessions: number }>
-): string | null => {
-  const sessionsByRelease = new Map<string, number>();
-  releases.forEach(({ version, sessions }) => {
-    const release = version ? normalizeVersion(version) : '';
-    if (release) {
-      sessionsByRelease.set(release, (sessionsByRelease.get(release) ?? 0) + sessions);
-    }
-  });
-  const [top] = [...sessionsByRelease].sort(
-    ([versionA, a], [versionB, b]) =>
-      b - a || versionB.localeCompare(versionA, undefined, { numeric: true })
-  );
-  return top ? top[0] : null;
-};
-
+/** One row of `applicationsQuery` as an application of the list. */
 export const toApplication = (
   row: EsqlRow,
   { environments, latest }: { environments: string[]; latest: string | null }
@@ -63,7 +18,7 @@ export const toApplication = (
   const sessions = toNumber(row.sessions);
   const exceptions = toNumber(row.exceptions);
   return {
-    serviceName: String(row['service.name']),
+    serviceName: String(row[MOBILE_FIELDS.serviceName]),
     source: 'mobile',
     environments,
     platforms: toPlatforms(row.platforms),

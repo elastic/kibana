@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,28 +32,20 @@ import { useDigitalExperienceRouter } from '../../../hooks/use_digital_experienc
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { useListQuery } from '../../../hooks/use_list_query';
 import { useFormatters } from '../../../hooks/use_formatters';
-import { LAST_SEEN_LABEL, SESSIONS_LABEL } from '../../../labels';
+import type { Formatters } from '../../../hooks/use_formatters';
+import {
+  LAST_SEEN_LABEL,
+  NOT_ENOUGH_DATA_LABEL,
+  PLATFORM_LABELS,
+  SESSIONS_LABEL,
+  percentagePointsLabel,
+} from '../../../labels';
 import { applicationColumnPreset, metricColumnPreset } from '../../../utils/column_presets';
 
-const PLATFORM_ICONS: Record<MobilePlatform, { type: string; label: string }> = {
-  android: {
-    type: 'logoAndroid',
-    label: i18n.translate('xpack.digitalExperience.applications.mobile.platform.android', {
-      defaultMessage: 'Android',
-    }),
-  },
-  ios: {
-    type: 'logoApple',
-    label: i18n.translate('xpack.digitalExperience.applications.mobile.platform.ios', {
-      defaultMessage: 'iOS',
-    }),
-  },
+const PLATFORM_ICONS: Record<MobilePlatform, string> = {
+  android: 'logoAndroid',
+  ios: 'logoApple',
 };
-
-const NOT_ENOUGH_DATA = i18n.translate(
-  'xpack.digitalExperience.applications.mobile.notEnoughData',
-  { defaultMessage: 'Not enough data' }
-);
 
 const columnNames = {
   application: i18n.translate('xpack.digitalExperience.applications.mobile.applicationColumn', {
@@ -77,34 +70,39 @@ const columnNames = {
 
 const SORT_BY_SESSIONS = { sort: { field: 'sessions.count', direction: 'desc' } } as const;
 
-const formatPercentValue = (value: number): string => `${(value * 100).toFixed(1)}%`;
-
-const renderCrashFree = ({ value, delta }: ComparedValue) => {
-  if (value === null) {
-    return <span data-test-subj="digitalExperienceMobileCrashFree">{NOT_ENOUGH_DATA}</span>;
-  }
-  return (
-    <span data-test-subj="digitalExperienceMobileCrashFree">
-      {formatPercentValue(value)}
-      {delta !== null && ` (${delta >= 0 ? '+' : ''}${(delta * 100).toFixed(1)} pp)`}
-    </span>
-  );
-};
+const renderCrashFree =
+  ({ formatPercent, formatNumber }: Formatters) =>
+  ({ value, delta }: ComparedValue) => {
+    if (value === null) {
+      return <span data-test-subj="digitalExperienceMobileCrashFree">{NOT_ENOUGH_DATA_LABEL}</span>;
+    }
+    const points = delta === null ? null : `${delta >= 0 ? '+' : ''}${formatNumber(delta * 100)}`;
+    return (
+      <span data-test-subj="digitalExperienceMobileCrashFree">
+        {formatPercent(value)}
+        {points !== null && ` (${percentagePointsLabel(points)})`}
+      </span>
+    );
+  };
 
 /** The mobile applications, with the columns that suit them; sorted by sessions. */
 export function MobileApplicationsTable({
   items,
   searchTerm,
   isLoading,
+  noItemsMessage,
 }: {
   items: MobileApplicationSummary[];
   searchTerm: string;
   isLoading: boolean;
+  /** Shown instead of rows: loading, an error, no match or no mobile data. */
+  noItemsMessage: ReactNode;
 }) {
   const { application } = useKibanaServices();
   const router = useDigitalExperienceRouter();
   const listQuery = useListQuery();
-  const { formatNumber, formatDate } = useFormatters();
+  const formatters = useFormatters();
+  const { formatNumber, formatDate } = formatters;
 
   const columns = useMemo<Array<EuiBasicTableColumn<MobileApplicationSummary>>>(
     () => [
@@ -144,9 +142,9 @@ export function MobileApplicationsTable({
             {platforms.map((platform) => (
               <EuiFlexItem grow={false} key={platform}>
                 <EuiIcon
-                  type={PLATFORM_ICONS[platform].type}
-                  title={PLATFORM_ICONS[platform].label}
-                  aria-label={PLATFORM_ICONS[platform].label}
+                  type={PLATFORM_ICONS[platform]}
+                  title={PLATFORM_LABELS[platform]}
+                  aria-label={PLATFORM_LABELS[platform]}
                 />
               </EuiFlexItem>
             ))}
@@ -185,14 +183,14 @@ export function MobileApplicationsTable({
         field: 'crashFreeSessions',
         name: columnNames.crashFree,
         ...metricColumnPreset<MobileApplicationSummary>(),
-        render: renderCrashFree,
+        render: renderCrashFree(formatters),
       },
       {
         field: 'errorRate',
         name: columnNames.errorRate,
         sortable: true,
         ...metricColumnPreset<MobileApplicationSummary>(),
-        render: (rate: number | null) => (rate === null ? <EmptyCellValue /> : rate.toFixed(2)),
+        render: (rate: number | null) => (rate === null ? <EmptyCellValue /> : formatNumber(rate)),
       },
       {
         field: 'lastSeen',
@@ -207,7 +205,7 @@ export function MobileApplicationsTable({
           ),
       },
     ],
-    [application, router, listQuery, searchTerm, formatNumber, formatDate]
+    [application, router, listQuery, searchTerm, formatters, formatNumber, formatDate]
   );
 
   return (
@@ -222,6 +220,7 @@ export function MobileApplicationsTable({
       pagination={true}
       sorting={SORT_BY_SESSIONS}
       loading={isLoading}
+      noItemsMessage={noItemsMessage}
     />
   );
 }

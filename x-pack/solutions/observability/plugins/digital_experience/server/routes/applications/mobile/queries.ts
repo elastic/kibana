@@ -6,62 +6,52 @@
  */
 
 import {
-  MOBILE_SDK_NAMES,
-  OTEL_LOGS_INDEX,
-  OTEL_TRACES_INDEX,
-  attributeField,
-  resourceAttributeField,
-} from '../../../../common/otel_data';
+  EXCEPTIONS_METRIC,
+  MOBILE_FIELDS,
+  MOBILE_SDK_CONDITION,
+  MOBILE_SOURCE_INDICES,
+  SESSIONS_METRIC,
+  USERS_METRIC,
+  mobileStats,
+} from '../../../../common/mobile_panel';
+import type { MappedFields } from '../../../../common/mobile_panel';
+import { MOBILE_SDK_NAMES } from '../../../../common/otel_data';
+import { environmentsCommands, releasesCommands } from '../../../lib/mobile/queries';
 import { MAX_APPLICATIONS_PER_SOURCE } from '../constants';
-
-export const MOBILE_SOURCE_INDICES = `${OTEL_TRACES_INDEX},${OTEL_LOGS_INDEX}`;
-
-const SDK_NAME = resourceAttributeField('telemetry.sdk.name');
-const SESSION_ID = attributeField('session.id');
-const INSTALLATION_ID = resourceAttributeField('app.installation.id');
-const EXCEPTION_TYPE = attributeField('exception.type');
 
 /** Whether a `telemetry.sdk.name` is a mobile SDK; `java` and `swift` services are not. */
 export const isMobileSdkName = (name: string | null | undefined): boolean =>
   (MOBILE_SDK_NAMES as readonly string[]).includes(name ?? '');
 
-const mobileSdkFilter = `${SDK_NAME} IN (${MOBILE_SDK_NAMES.map((name) => `"${name}"`).join(
-  ', '
-)})`;
+const mobileDocuments = (commands: string[]): string =>
+  [`FROM ${MOBILE_SOURCE_INDICES}`, `WHERE ${MOBILE_SDK_CONDITION}`, ...commands].join('\n| ');
 
 /**
  * Sessions, users, exceptions, platforms (by SDK name) and last seen per application, most sessions
- * first.
+ * first; a metric whose field no index maps is 0.
  */
-export const applicationsQuery = (): string =>
-  [
-    `FROM ${MOBILE_SOURCE_INDICES}`,
-    `WHERE ${mobileSdkFilter}`,
-    `STATS sessions = COUNT_DISTINCT(${SESSION_ID}),` +
-      ` users = COUNT_DISTINCT(${INSTALLATION_ID}),` +
-      ` exceptions = COUNT(${EXCEPTION_TYPE}),` +
-      ` platforms = VALUES(${SDK_NAME}),` +
-      ` last_seen = MAX(@timestamp)` +
-      ` BY service.name`,
-    `SORT sessions DESC, service.name ASC`,
+export const applicationsQuery = (mapped: MappedFields): string =>
+  mobileDocuments([
+    ...mobileStats([SESSIONS_METRIC, USERS_METRIC, EXCEPTIONS_METRIC], mapped, {
+      extra: [`platforms = VALUES(${MOBILE_FIELDS.sdkName})`, 'last_seen = MAX(@timestamp)'],
+      by: MOBILE_FIELDS.serviceName,
+    }),
+    `SORT sessions DESC, ${MOBILE_FIELDS.serviceName} ASC`,
     `LIMIT ${MAX_APPLICATIONS_PER_SOURCE}`,
-  ].join('\n| ');
+  ]);
 
-/** Sessions per application and raw version over the window the query is run with. */
-export const releasesQuery = (): string =>
-  [
-    `FROM ${MOBILE_SOURCE_INDICES}`,
-    `WHERE ${mobileSdkFilter}`,
-    `STATS sessions = COUNT_DISTINCT(${SESSION_ID}) BY service.name, service.version`,
-    `LIMIT ${MAX_APPLICATIONS_PER_SOURCE * 10}`,
-  ].join('\n| ');
+/**
+ * Sessions per application and raw version over the window the query is run with; `undefined`
+ * when no index maps `service.version`.
+ */
+export const releasesQuery = (mapped: MappedFields): string | undefined => {
+  const commands = releasesCommands(mapped, {
+    by: [MOBILE_FIELDS.serviceName],
+    limit: MAX_APPLICATIONS_PER_SOURCE * 10,
+  });
+  return commands ? mobileDocuments(commands) : undefined;
+};
 
 /** Every environment of the mobile applications, for the picker. */
-export const environmentsQuery = (): string =>
-  [
-    `FROM ${MOBILE_SOURCE_INDICES}`,
-    `WHERE ${mobileSdkFilter}`,
-    `STATS docs = COUNT(*) BY service.environment`,
-    `SORT docs DESC`,
-    `LIMIT 100`,
-  ].join('\n| ');
+export const environmentsQuery = (mapped: MappedFields): string =>
+  mobileDocuments(environmentsCommands(mapped));

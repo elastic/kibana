@@ -105,6 +105,18 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
           })
       : undefined;
 
+    let otelAccessPromise: Promise<boolean> | undefined;
+    const hasPartialOtelIndicesAccess = () => {
+      otelAccessPromise ??= hasPartialReadAccess({
+        esClient,
+        internalEsClient,
+        getIndices: async () => [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
+        signal,
+        logger,
+      });
+      return otelAccessPromise;
+    };
+
     const { taskManager, sessionsReadable } = await getSessionsServices();
     return getApplications({
       histogram: { interval: histogram.interval, start, end },
@@ -124,22 +136,9 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
       getClassicApplications: getClassic,
       getMobileApplications: () =>
         getMobileApplications({ esClient, start, end, environment, signal }),
-      hasPartialMobileAccess: () =>
-        hasPartialReadAccess({
-          esClient,
-          internalEsClient,
-          getIndices: async () => [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
-          signal,
-          logger,
-        }),
-      hasPartialOtelAccess: () =>
-        hasPartialReadAccess({
-          esClient,
-          internalEsClient,
-          getIndices: async () => [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
-          signal,
-          logger,
-        }),
+      hasPartialOtelAccess: hasPartialOtelIndicesAccess,
+      // Mobile reads the same OTel indices, so it shares their one check.
+      hasPartialMobileAccess: hasPartialOtelIndicesAccess,
       hasPartialClassicAccess,
       logger,
     });

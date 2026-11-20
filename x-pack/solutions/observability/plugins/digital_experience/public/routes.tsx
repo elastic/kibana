@@ -9,7 +9,11 @@ import React from 'react';
 import * as t from 'io-ts';
 import type { RouteMap } from '@kbn/typed-react-router-config';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
-import { applicationSourceRt, DEFAULT_APPLICATION_SOURCE } from './utils/application_source';
+import {
+  applicationSourceRt,
+  DEFAULT_APPLICATION_SOURCE,
+  mobilePlatformRt,
+} from './utils/application_source';
 import { DigitalExperienceLayout } from './application/digital_experience_layout';
 import { useDigitalExperienceParams } from './hooks/use_digital_experience_params';
 import type { ApplicationTabId } from '../common/types/applications';
@@ -55,7 +59,11 @@ const digitalExperienceRoutes = {
         element: <Outlet />,
         params: t.type({
           path: t.type({ serviceName: t.string }),
-          query: t.type({ source: applicationSourceRt }),
+          query: t.intersection([
+            t.type({ source: applicationSourceRt }),
+            // The mobile page's platform and release filters.
+            t.partial({ platform: mobilePlatformRt, release: t.string }),
+          ]),
         }),
         // Links without a source open the Classic Overview.
         defaults: { query: { source: DEFAULT_APPLICATION_SOURCE } },

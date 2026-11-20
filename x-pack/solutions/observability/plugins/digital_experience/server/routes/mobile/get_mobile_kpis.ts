@@ -7,18 +7,29 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
-  MOBILE_KPI_STATS,
+  EXCEPTIONS_METRIC,
+  MOBILE_FIELDS,
+  SESSIONS_METRIC,
+  USERS_METRIC,
   getMobileTimeBucket,
   getPreviousPeriod,
   mobilePanelDiscoverEsql,
   mobilePanelEsql,
+  mobileStats,
   toComparedValue,
 } from '../../../common/mobile_panel';
 import type { MobilePanelFilters } from '../../../common/mobile_panel';
 import type { MobileKpisResponse } from '../../../common/types/mobile';
-import { runEsql, timeFilter } from '../applications/mobile/get_mobile_applications';
-import { normalizeVersion } from '../applications/mobile/normalize_version';
-import { toPlatforms } from '../applications/mobile/to_application';
+import { getMappedMobileFields, hasMobileData, runEsql, timeFilter } from '../../lib/mobile/esql';
+import { environmentsCommands, releasesCommands } from '../../lib/mobile/queries';
+import {
+  rankReleases,
+  toEnvironments,
+  toNumber,
+  toPlatforms,
+  toRelease,
+} from '../../lib/mobile/rows';
+import type { EsqlRow } from '../../services/sessions/summary_documents';
 
 export interface GetMobileKpisParams {
   esClient: ElasticsearchClient;
@@ -29,7 +40,14 @@ export interface GetMobileKpisParams {
   signal?: AbortSignal;
 }
 
-const toNumber = (value: unknown): number => (typeof value === 'number' ? value : 0);
+/** Distinct raw versions listed for the release picker. */
+const MAX_RELEASE_ROWS = 1000;
+
+const errorRateOf = (row: EsqlRow | undefined): number | null =>
+  row && toNumber(row.sessions) > 0 ? toNumber(row.exceptions) / toNumber(row.sessions) : null;
+
+const countOf = (row: EsqlRow | undefined, field: 'sessions' | 'users'): number | null =>
+  row ? toNumber(row[field]) : null;
 
 /** The KPI row of an application: the period's values against the period of equal length before. */
 export const getMobileKpis = async ({
@@ -40,42 +58,49 @@ export const getMobileKpis = async ({
   environment,
   signal,
 }: GetMobileKpisParams): Promise<MobileKpisResponse> => {
+  const mapped = await getMappedMobileFields(esClient, signal);
   const previous = getPreviousPeriod(start, end);
   const bucket = getMobileTimeBucket(start, end);
+  const esql = mobilePanelDiscoverEsql(filters, mapped, { bucket, environment });
+  if (!hasMobileData(mapped)) {
+    const noValue = toComparedValue(null, null);
+    return {
+      hasData: false,
+      sessions: noValue,
+      users: noValue,
+      crashFreeSessions: noValue,
+      errorRate: noValue,
+      platforms: [],
+      releases: [],
+      environments: [],
+      bucket,
+      esql,
+    };
+  }
+
   const { platform, release, ...application } = filters;
-  const statsQuery = mobilePanelEsql(filters, [MOBILE_KPI_STATS]);
+  const statsQuery = mobilePanelEsql(
+    filters,
+    mapped,
+    mobileStats([SESSIONS_METRIC, USERS_METRIC, EXCEPTIONS_METRIC], mapped)
+  );
   // The pickers list what the application reported, whatever the platform and release filters.
-  const optionsQuery = mobilePanelEsql(application, [
-    'STATS sessions = COUNT_DISTINCT(attributes.session.id) BY service.version, resource.attributes.telemetry.sdk.name',
-    'LIMIT 1000',
+  const releaseCommands = releasesCommands(mapped, { limit: MAX_RELEASE_ROWS });
+  const releasesQuery = releaseCommands && mobilePanelEsql(application, mapped, releaseCommands);
+  const platformsQuery = mobilePanelEsql(application, mapped, [
+    `STATS docs = COUNT(*) BY ${MOBILE_FIELDS.sdkName}`,
   ]);
+  const environmentsQuery = mobilePanelEsql(application, mapped, environmentsCommands(mapped));
 
-  const environmentsQuery = mobilePanelEsql(application, [
-    'STATS docs = COUNT(*) BY service.environment',
-    'SORT docs DESC',
-    'LIMIT 100',
-  ]);
-
-  const [[current], [before], optionRows, environmentRows] = await Promise.all([
+  const [[current], [before], releaseRows, platformRows, environmentRows] = await Promise.all([
     runEsql(esClient, statsQuery, timeFilter(start, end, environment), signal),
     runEsql(esClient, statsQuery, timeFilter(previous.start, previous.end, environment), signal),
-    runEsql(esClient, optionsQuery, timeFilter(start, end, environment), signal),
+    releasesQuery
+      ? runEsql(esClient, releasesQuery, timeFilter(start, end, environment), signal)
+      : Promise.resolve([]),
+    runEsql(esClient, platformsQuery, timeFilter(start, end, environment), signal),
     runEsql(esClient, environmentsQuery, timeFilter(start, end, undefined), signal),
   ]);
-
-  const sessionsByRelease = new Map<string, number>();
-  optionRows.forEach((row) => {
-    const version = row['service.version'];
-    if (typeof version === 'string' && normalizeVersion(version)) {
-      const name = normalizeVersion(version);
-      sessionsByRelease.set(name, (sessionsByRelease.get(name) ?? 0) + toNumber(row.sessions));
-    }
-  });
-
-  const errorRateOf = (row: typeof current | undefined): number | null =>
-    row && toNumber(row.sessions) > 0 ? toNumber(row.exceptions) / toNumber(row.sessions) : null;
-  const countOf = (row: typeof current | undefined, field: 'sessions' | 'users'): number | null =>
-    row ? toNumber(row[field]) : null;
 
   return {
     hasData: toNumber(current?.docs) > 0,
@@ -84,12 +109,10 @@ export const getMobileKpis = async ({
     // A crash isn't defined yet (#64) and session start doesn't reach the SDKs: not enough data.
     crashFreeSessions: toComparedValue(null, null),
     errorRate: toComparedValue(errorRateOf(current), errorRateOf(before)),
-    platforms: toPlatforms(optionRows.map((row) => row['resource.attributes.telemetry.sdk.name'])),
-    releases: [...sessionsByRelease].sort(([, a], [, b]) => b - a).map(([name]) => name),
-    environments: environmentRows.flatMap((row) =>
-      typeof row['service.environment'] === 'string' ? [row['service.environment']] : []
-    ),
+    platforms: toPlatforms(platformRows.map((row) => row[MOBILE_FIELDS.sdkName])),
+    releases: rankReleases(releaseRows.map(toRelease)),
+    environments: toEnvironments(environmentRows, mapped),
     bucket,
-    esql: mobilePanelDiscoverEsql({ ...application, platform, release }, bucket, environment),
+    esql,
   };
 };

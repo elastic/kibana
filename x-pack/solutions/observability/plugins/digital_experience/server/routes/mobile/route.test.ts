@@ -16,7 +16,18 @@ jest.mock('./get_mobile_kpis');
 const START = '2021-01-18T12:00:00.000Z';
 const END = '2021-01-18T13:00:00.000Z';
 
-const RESPONSE = { kpis: {} } as unknown as MobileKpisResponse;
+const RESPONSE: MobileKpisResponse = {
+  hasData: true,
+  sessions: { value: 7, previous: 5, delta: 2 },
+  users: { value: 3, previous: 3, delta: 0 },
+  crashFreeSessions: { value: null, previous: null, delta: null },
+  errorRate: { value: 0.5, previous: null, delta: null },
+  platforms: ['android', 'ios'],
+  releases: ['1.2.3'],
+  environments: ['production'],
+  bucket: 'hour',
+  esql: 'FROM traces-*.otel-*,logs-*.otel-*',
+};
 
 const esClient = { esql: { query: jest.fn() } };
 
@@ -70,5 +81,25 @@ describe('mobile KPIs route', () => {
         environment: 'production',
       })
     );
+  });
+
+  describe('params', () => {
+    const { params } = mobileRouteRepository[MOBILE_KPIS_ENDPOINT];
+    const schema = params as unknown as {
+      shape: { query: { safeParse: (query: unknown) => { success: boolean } } };
+    };
+    const isValid = (query: Record<string, string>) =>
+      schema.shape.query.safeParse({ start: START, end: END, ...query }).success;
+
+    it('accepts the platforms and a release', () => {
+      expect(isValid({ platform: 'android', release: '1.2.3' })).toBe(true);
+      expect(isValid({ platform: 'ios' })).toBe(true);
+    });
+
+    it('rejects a range that starts after it ends, an unknown platform and a too long release', () => {
+      expect(isValid({ start: END, end: START })).toBe(false);
+      expect(isValid({ platform: 'windows' })).toBe(false);
+      expect(isValid({ release: 'x'.repeat(1025) })).toBe(false);
+    });
   });
 });

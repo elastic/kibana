@@ -6,10 +6,14 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { MOBILE_FIELDS } from '../../../../common/mobile_panel';
 import { getMobileApplications } from './get_mobile_applications';
-import { normalizeVersion } from './normalize_version';
-import { applicationsQuery, isMobileSdkName } from './queries';
-import { latestRelease, toApplication, toPlatforms } from './to_application';
+import { applicationsQuery, isMobileSdkName, releasesQuery } from './queries';
+import { toApplication } from './to_application';
+
+const ALL_MAPPED = new Set<string>(Object.values(MOBILE_FIELDS));
+const without = (...fields: string[]) =>
+  new Set([...ALL_MAPPED].filter((field) => !fields.includes(field)));
 
 describe('isMobileSdkName', () => {
   it.each(['android', 'iOS'])('detects the %s SDK, which React Native apps run on', (name) => {
@@ -22,65 +26,38 @@ describe('isMobileSdkName', () => {
       expect(isMobileSdkName(name)).toBe(false);
     }
   );
+});
 
+describe('applicationsQuery', () => {
   it('queries by telemetry.sdk.name and never by the SDK language', () => {
-    const query = applicationsQuery();
+    const query = applicationsQuery(ALL_MAPPED);
 
     expect(query).toContain('resource.attributes.telemetry.sdk.name IN ("android", "iOS")');
     expect(query).not.toContain('telemetry.sdk.language');
   });
-});
 
-describe('normalizeVersion', () => {
-  it.each([
-    ['1.2.3', '1.2.3'],
-    ['1.2.3 (45)', '1.2.3'],
-    ['1.2.3+45', '1.2.3'],
-    ['1.2.3-beta.1 (7)', '1.2.3-beta.1'],
-    [' 2.0 ', '2.0'],
-  ])('turns %p into %p, so one release has one name', (raw, expected) => {
-    expect(normalizeVersion(raw)).toBe(expected);
+  it('takes the platforms from the SDK name, so iPads, which report `os.name: iPadOS`, count as iOS', () => {
+    const query = applicationsQuery(ALL_MAPPED);
+
+    expect(query).toContain('platforms = VALUES(resource.attributes.telemetry.sdk.name)');
+    expect(query).not.toContain('os.name');
+  });
+
+  it('leaves out a metric whose field no index maps, e.g. exceptions where no app threw', () => {
+    const query = applicationsQuery(without(MOBILE_FIELDS.exceptionType));
+
+    expect(query).not.toContain('exception.type');
+    expect(query).toContain('EVAL exceptions = 0');
   });
 });
 
-describe('latestRelease', () => {
-  it('is the normalized version with the most sessions, builds adding up', () => {
-    expect(
-      latestRelease([
-        { version: '1.0.0 (10)', sessions: 4 },
-        { version: '1.0.0 (11)', sessions: 4 },
-        { version: '1.1.0', sessions: 5 },
-      ])
-    ).toBe('1.0.0');
+describe('releasesQuery', () => {
+  it('keeps the most used versions first, so the cut drops the least used', () => {
+    expect(releasesQuery(ALL_MAPPED)).toContain('| SORT sessions DESC\n| LIMIT');
   });
 
-  it('breaks a tie with the higher version', () => {
-    expect(
-      latestRelease([
-        { version: '1.9.0', sessions: 2 },
-        { version: '1.10.0', sessions: 2 },
-      ])
-    ).toBe('1.10.0');
-  });
-
-  it('is null without a version', () => {
-    expect(latestRelease([])).toBeNull();
-    expect(latestRelease([{ version: null, sessions: 3 }])).toBeNull();
-  });
-});
-
-describe('toPlatforms', () => {
-  it('sorts the platforms of one or many SDK names and leaves out others', () => {
-    expect(toPlatforms(['iOS', 'android', 'java'])).toEqual(['android', 'ios']);
-    expect(toPlatforms('iOS')).toEqual(['ios']);
-    expect(toPlatforms(null)).toEqual([]);
-  });
-
-  it('is queried by SDK name, so iPads, which report `os.name: iPadOS`, count as iOS', () => {
-    expect(applicationsQuery()).toContain(
-      'platforms = VALUES(resource.attributes.telemetry.sdk.name)'
-    );
-    expect(applicationsQuery()).not.toContain('os.name');
+  it('is not run when no index maps service.version', () => {
+    expect(releasesQuery(without(MOBILE_FIELDS.serviceVersion))).toBeUndefined();
   });
 });
 
@@ -121,37 +98,65 @@ describe('toApplication', () => {
 });
 
 describe('getMobileApplications', () => {
-  const missingDataError = (reason: string) =>
-    Object.assign(new Error('verification_exception'), {
-      meta: { body: { error: { type: 'verification_exception', reason } } },
-    });
-
-  it('has no applications when no readable index has mobile data, instead of failing', async () => {
-    const query = jest
-      .fn()
-      .mockRejectedValue(
-        missingDataError('Found 1 problem\nline 2:9: Unknown column [resource.attributes.telemetry.sdk.name]')
-      );
-    const esClient = { esql: { query } } as unknown as ElasticsearchClient;
-
-    const result = await getMobileApplications({ esClient, start: 0, end: 3_600_000 });
-
-    expect(result.applications).toEqual([]);
-    expect(result.environments).toEqual([]);
-  });
-
-  it('fails on any other error, so the source is reported unavailable', async () => {
-    const query = jest.fn().mockRejectedValue(new Error('security_exception'));
-    const esClient = { esql: { query } } as unknown as ElasticsearchClient;
-
-    await expect(getMobileApplications({ esClient, start: 0, end: 3_600_000 })).rejects.toThrow(
-      'security_exception'
-    );
-  });
-
   const esql = (columns: string[], values: unknown[][]) => ({
     columns: columns.map((name) => ({ name, type: 'keyword' })),
     values,
+  });
+
+  const clientMapping = (mapped: Set<string>, query: jest.Mock) =>
+    ({
+      fieldCaps: jest
+        .fn()
+        .mockResolvedValue({ fields: Object.fromEntries([...mapped].map((field) => [field, {}])) }),
+      esql: { query },
+    } as unknown as ElasticsearchClient);
+
+  const range = {
+    start: Date.parse('2021-01-18T00:00:00.000Z'),
+    end: Date.parse('2021-01-19T00:00:00.000Z'),
+  };
+
+  it('has no applications, without querying, when no readable index has mobile data', async () => {
+    const query = jest.fn();
+
+    const result = await getMobileApplications({
+      esClient: clientMapping(new Set([MOBILE_FIELDS.serviceName]), query),
+      ...range,
+    });
+
+    expect(result).toEqual({ applications: [], environments: [] });
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('fails on a query error, so the source is reported unavailable', async () => {
+    const query = jest.fn().mockRejectedValue(new Error('security_exception'));
+
+    await expect(
+      getMobileApplications({ esClient: clientMapping(ALL_MAPPED, query), ...range })
+    ).rejects.toThrow('security_exception');
+  });
+
+  it('still lists the applications when no index maps exception.type', async () => {
+    const query = jest
+      .fn()
+      .mockResolvedValueOnce(
+        esql(
+          ['docs', 'sessions', 'users', 'platforms', 'last_seen', 'service.name', 'exceptions'],
+          [[9, 3, 2, 'android', '2021-01-18T12:00:00.000Z', 'trailmap-android', 0]]
+        )
+      )
+      .mockResolvedValueOnce(esql(['docs', 'sessions', 'service.name', 'service.version'], []))
+      .mockResolvedValueOnce(esql(['docs'], [[9]]));
+
+    const result = await getMobileApplications({
+      esClient: clientMapping(without(MOBILE_FIELDS.exceptionType), query),
+      ...range,
+    });
+
+    expect(query.mock.calls[0][0].query).not.toContain('exception.type');
+    expect(result.applications).toEqual([
+      expect.objectContaining({ serviceName: 'trailmap-android', errorRate: 0 }),
+    ]);
   });
 
   it('merges the application, release and environment queries', async () => {
@@ -159,29 +164,35 @@ describe('getMobileApplications', () => {
       .fn()
       .mockResolvedValueOnce(
         esql(
-          ['sessions', 'users', 'exceptions', 'platforms', 'last_seen', 'service.name'],
-          [[3, 2, 1, 'android', '2021-01-18T12:00:00.000Z', 'trailmap-android']]
+          ['docs', 'sessions', 'users', 'exceptions', 'platforms', 'last_seen', 'service.name'],
+          [[9, 3, 2, 1, 'android', '2021-01-18T12:00:00.000Z', 'trailmap-android']]
         )
       )
       .mockResolvedValueOnce(
         esql(
-          ['sessions', 'service.name', 'service.version'],
+          ['docs', 'sessions', 'service.name', 'service.version'],
           [
-            [1, 'trailmap-android', '1.0.0 (1)'],
-            [2, 'trailmap-android', '1.0.0 (2)'],
+            [4, 2, 'trailmap-android', '1.0.0 (2)'],
+            [2, 1, 'trailmap-android', '1.0.0 (1)'],
           ]
         )
       )
-      .mockResolvedValueOnce(esql(['docs', 'service.environment'], [[5, 'production']]));
-    const esClient = { esql: { query } } as unknown as ElasticsearchClient;
+      .mockResolvedValueOnce(
+        esql(
+          ['docs', 'service.environment', 'resource.attributes.deployment.environment.name'],
+          [
+            [5, 'production', null],
+            [4, null, null],
+          ]
+        )
+      );
 
     const result = await getMobileApplications({
-      esClient,
-      start: Date.parse('2021-01-18T00:00:00.000Z'),
-      end: Date.parse('2021-01-19T00:00:00.000Z'),
+      esClient: clientMapping(ALL_MAPPED, query),
+      ...range,
     });
 
-    expect(result.environments).toEqual(['production']);
+    expect(result.environments).toEqual(['production', 'ENVIRONMENT_NOT_DEFINED']);
     expect(result.applications).toEqual([
       expect.objectContaining({
         serviceName: 'trailmap-android',

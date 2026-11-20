@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { SESSIONS_LOOKBACK_DAYS } from '../common/sessions';
-import type { ApplicationSource } from '../common/types/applications';
+import type { ApplicationSource, MobilePlatform } from '../common/types/applications';
 
 export const DIGITAL_EXPERIENCE_LABEL = i18n.translate('xpack.digitalExperience.label', {
   defaultMessage: 'Digital experience',
@@ -90,3 +90,25 @@ export const UNKNOWN_PAGE = i18n.translate(
   'xpack.digitalExperience.sessionDetail.unknownPageLabel',
   { defaultMessage: 'Unknown page' }
 );
+
+export const PLATFORM_LABELS: Record<MobilePlatform, string> = {
+  android: i18n.translate('xpack.digitalExperience.mobile.platform.android', {
+    defaultMessage: 'Android',
+  }),
+  ios: i18n.translate('xpack.digitalExperience.mobile.platform.ios', { defaultMessage: 'iOS' }),
+};
+
+/** A mobile value that can't be computed yet, e.g. crash-free sessions until a crash is defined. */
+export const NOT_ENOUGH_DATA_LABEL = i18n.translate(
+  'xpack.digitalExperience.mobile.notEnoughData',
+  {
+    defaultMessage: 'Not enough data',
+  }
+);
+
+/** A change between two shares, in percentage points, e.g. "+1.5 pp". */
+export const percentagePointsLabel = (points: string): string =>
+  i18n.translate('xpack.digitalExperience.mobile.percentagePoints', {
+    defaultMessage: '{points} pp',
+    values: { points },
+  });

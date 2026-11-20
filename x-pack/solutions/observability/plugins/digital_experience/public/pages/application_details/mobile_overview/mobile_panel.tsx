@@ -26,11 +26,8 @@ import {
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
   MOBILE_APPLICATION_EBT_ELEMENTS,
 } from '../../../ebt_constants';
-
-export const NOT_ENOUGH_DATA_LABEL = i18n.translate(
-  'xpack.digitalExperience.mobile.panel.notEnoughData',
-  { defaultMessage: 'Not enough data' }
-);
+import { useFormatters } from '../../../hooks/use_formatters';
+import { NOT_ENOUGH_DATA_LABEL } from '../../../labels';
 
 const DISCOVER_LABEL = i18n.translate('xpack.digitalExperience.mobile.panel.openInDiscover', {
   defaultMessage: 'Open in Discover',
@@ -70,6 +67,7 @@ export function MobilePanel({
   'data-test-subj': dataTestSubj,
   children,
 }: MobilePanelProps) {
+  const { formatPercent } = useFormatters();
   const change = value ? relativeChange(value) : null;
   const renderValue = () => {
     if (isLoading) {
@@ -107,7 +105,7 @@ export function MobilePanel({
         {change !== null && (
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow" data-test-subj={`${dataTestSubj}Change`}>
-              {`${change >= 0 ? '+' : ''}${(change * 100).toFixed(1)}%`}
+              {`${change >= 0 ? '+' : ''}${formatPercent(change)}`}
             </EuiBadge>
           </EuiFlexItem>
         )}

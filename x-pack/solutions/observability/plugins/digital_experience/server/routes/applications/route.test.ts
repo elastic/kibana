@@ -90,12 +90,7 @@ describe('GET /internal/digital_experience/applications', () => {
       pageLoadsOverTime: [],
       sessionsOverTime: null,
     });
-    jest.mocked(getMobileApplications).mockResolvedValue({
-      applications: [],
-      environments: [],
-      pageLoadsOverTime: [],
-      sessionsOverTime: null,
-    });
+    jest.mocked(getMobileApplications).mockResolvedValue({ applications: [], environments: [] });
   });
 
   it('queries the mobile source, on serverless too', async () => {
@@ -115,8 +110,6 @@ describe('GET /internal/digital_experience/applications', () => {
         },
       ],
       environments: [],
-      pageLoadsOverTime: [],
-      sessionsOverTime: null,
     });
 
     const response = await runHandler({ isServerless: true }).result;
@@ -226,8 +219,9 @@ describe('GET /internal/digital_experience/applications', () => {
     const { result, getApmIndices } = runHandler({ isServerless: false });
     const response = await result;
 
-    expect(mockedPartialAccess).toHaveBeenCalledTimes(3);
-    const [[otelCheck], [classicCheck], [mobileCheck]] = mockedPartialAccess.mock.calls;
+    // Mobile reads the OTel indices, so it shares their check.
+    expect(mockedPartialAccess).toHaveBeenCalledTimes(2);
+    const [[otelCheck], [classicCheck]] = mockedPartialAccess.mock.calls;
     await expect(otelCheck.getIndices()).resolves.toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
     expect(otelCheck.ignoredPatterns).toBeUndefined();
     await expect(classicCheck.getIndices()).resolves.toEqual([
@@ -236,17 +230,16 @@ describe('GET /internal/digital_experience/applications', () => {
       'traces-apm*',
     ]);
     expect(classicCheck.ignoredPatterns).toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
-    await expect(mobileCheck.getIndices()).resolves.toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
     expect(getApmIndices).toHaveBeenCalledTimes(1);
     expect(response.partiallyAvailableSources).toEqual(['otel', 'classic', 'mobile']);
   });
 
-  it('checks the OTel and mobile access, not the Classic one, on serverless', async () => {
+  it('only checks the OTel access, which mobile shares, on serverless', async () => {
     mockedPartialAccess.mockResolvedValue(false);
 
     const response = await runHandler({ isServerless: true }).result;
 
-    expect(mockedPartialAccess).toHaveBeenCalledTimes(2);
+    expect(mockedPartialAccess).toHaveBeenCalledTimes(1);
     expect(response.partiallyAvailableSources).toEqual([]);
   });
 

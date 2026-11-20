@@ -21,6 +21,10 @@ describe('the query keys of the locator', () => {
     expect(locatorKeys).toEqual(expect.arrayContaining(Object.keys(sessionsListQueryRt.props)));
   });
 
+  it("include the mobile page's platform and release filters", () => {
+    expect(locatorKeys).toEqual(expect.arrayContaining(['platform', 'release']));
+  });
+
   it('include the params of the root route and the source', () => {
     expect(locatorKeys).toEqual(
       expect.arrayContaining(['rangeFrom', 'rangeTo', 'environment', 'sourceFilter', 'source'])

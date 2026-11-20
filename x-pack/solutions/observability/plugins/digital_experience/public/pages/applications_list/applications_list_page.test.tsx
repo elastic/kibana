@@ -195,6 +195,17 @@ describe('ApplicationsListPage mobile applications', () => {
     );
   });
 
+  it('links to the mobile setup docs, not EDOT Browser, with the Mobile source and no mobile data', async () => {
+    mockSourceFilter('mobile');
+    respondWith([app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 })]);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceMobileApplicationsEmpty')).toBeVisible();
+    expect(screen.getByTestId('digitalExperienceMobileAndroidDocsLink')).toBeVisible();
+    expect(screen.queryByTestId('digitalExperienceApplicationsDocsLink')).toBeNull();
+    expect(screen.queryByTestId('digitalExperienceApplicationsTable')).toBeNull();
+  });
+
   it('shows only the mobile table with the Mobile source', async () => {
     mockSourceFilter('mobile');
     respondWith([app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 }), mobileApp()]);
