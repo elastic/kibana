@@ -750,21 +750,21 @@ type RuleWriteApi = keyof typeof ENABLED_DESCRIPTIONS;
 const enabledSchema = (api: RuleWriteApi) =>
   z.boolean().optional().describe(ENABLED_DESCRIPTIONS[api]);
 
+const REASON_DESCRIPTIONS = {
+  create: `${REASON_DESCRIPTION} Omit to leave it unset. Null is not accepted.`,
+  put: `${REASON_DESCRIPTION} Omit to leave it unset on create or clear it when replacing an existing rule. Null is not accepted.`,
+} as const satisfies Record<RuleWriteApi, string>;
+
+const reasonSchemaFor = (api: RuleWriteApi) =>
+  reasonSchema.optional().describe(REASON_DESCRIPTIONS[api]);
+
 const buildRuleDataBaseSchema = (api: RuleWriteApi) =>
   z
     .object({
       kind: ruleKindSchema,
       enabled: enabledSchema(api),
       metadata: metadataSchema,
-      reason: reasonSchema
-        .optional()
-        .describe(
-          `${REASON_DESCRIPTION} ${
-            api === 'create'
-              ? 'Omit to leave it unset. Null is not accepted.'
-              : 'Omit to leave it unset on create or clear it when replacing an existing rule. Null is not accepted.'
-          }`
-        ),
+      reason: reasonSchemaFor(api),
       time_field: timeFieldSchema.default(DEFAULT_TIME_FIELD).describe(TIME_FIELD_DESCRIPTION),
       schedule: scheduleSchema,
       query: querySchema,
