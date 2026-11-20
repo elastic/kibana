@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { lazy, useMemo } from 'react';
+import React, { lazy, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionType } from '@kbn/actions-types';
 import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
@@ -21,7 +21,11 @@ import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { fromConnectorSpecSchema, narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs';
 import type { ConnectorZodSchema } from '@kbn/connector-specs';
 import { getMeta, setMeta } from '@kbn/connector-specs';
-import { UseField, type FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  UseField,
+  useFormData,
+  type FieldHook,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ConnectorActionSelector } from '../components/connector_action_selector';
 import type {
   ConnectorActionDef,
@@ -107,6 +111,8 @@ function getIconFromSpec(spec: ConnectorSpecResponse): IconType {
   return 'plugs';
 }
 
+const NO_AUTH_TYPE_ID = 'none';
+
 /**
  * Transforms a ConnectorSpecResponse into an ActionTypeModel.
  *
@@ -154,16 +160,44 @@ export function transformSpecToActionTypeModel(
         field: FieldHook<string[] | null>;
         actions: ConnectorActionDef[];
         readOnly?: boolean;
-      }) => (
-        <ConnectorActionSelector
-          value={field.value ?? null}
-          onChange={field.setValue}
-          actions={actions}
-          readOnly={readOnly}
-          allowNone={allowNoActions}
-          errorMessage={field.errors[0]?.message}
-        />
-      );
+      }) => {
+        const [{ secrets }] = useFormData<{ secrets?: { authType?: string } }>({
+          watch: ['secrets.authType'],
+        });
+        const authType = secrets?.authType;
+        const previousAuthTypeRef = useRef(authType);
+        const { value, setValue } = field;
+
+        // No authentication can only receive events, so it turns every action off.
+        // Leaving it turns them back on.
+        useEffect(() => {
+          const previousAuthType = previousAuthTypeRef.current;
+          previousAuthTypeRef.current = authType;
+          if (!allowNoActions || previousAuthType === authType) {
+            return;
+          }
+          if (authType === NO_AUTH_TYPE_ID) {
+            setValue([]);
+          } else if (
+            previousAuthType === NO_AUTH_TYPE_ID &&
+            Array.isArray(value) &&
+            value.length === 0
+          ) {
+            setValue(null);
+          }
+        }, [authType, setValue, value]);
+
+        return (
+          <ConnectorActionSelector
+            value={field.value ?? null}
+            onChange={field.setValue}
+            actions={actions}
+            readOnly={readOnly}
+            allowNone={allowNoActions}
+            errorMessage={field.errors[0]?.message}
+          />
+        );
+      };
 
       function SpecConnectorFormFields({ readOnly, isEdit, authMode }: ActionConnectorFieldsProps) {
         const narrowedSchema = useMemo(

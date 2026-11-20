@@ -106,6 +106,23 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
   const [isNoneMode, setIsNoneMode] = useState(
     allowNone && Array.isArray(rawSelected) && rawSelected.length === 0
   );
+  // Set before this component emits an empty Custom selection, so the sync below can tell
+  // it apart from an empty selection set from outside (for example by the auth type).
+  const isInternalChangeRef = useRef(false);
+  useEffect(() => {
+    const isInternalChange = isInternalChangeRef.current;
+    isInternalChangeRef.current = false;
+    if (rawSelected === null) {
+      setIsNoneMode(false);
+    } else if (
+      allowNone &&
+      !isInternalChange &&
+      Array.isArray(rawSelected) &&
+      rawSelected.length === 0
+    ) {
+      setIsNoneMode(true);
+    }
+  }, [allowNone, rawSelected]);
   const isAll = rawSelected === null;
   const mode: SelectionMode = isAll ? MODE_ALL : isNoneMode ? MODE_NONE : MODE_CUSTOM;
   const modeOptions = useMemo(
@@ -221,6 +238,7 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
       const offPageSelected = (rawSelectedRef.current ?? []).filter(
         (n) => !currentPageNames.has(n)
       );
+      isInternalChangeRef.current = true;
       onChange([...offPageSelected, ...newItems.map((a) => a.name)]);
     },
     [actions.length, onChange]
@@ -231,7 +249,10 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
     onChange([...allActionNames]);
   }, [allActionNames, onChange]);
 
-  const handleClearSelection = useCallback(() => onChange([]), [onChange]);
+  const handleClearSelection = useCallback(() => {
+    isInternalChangeRef.current = true;
+    onChange([]);
+  }, [onChange]);
 
   // Restrict to current page: getDerivedStateFromProps fires onSelectionChange for
   // any selected item absent from items, which would wipe off-page selections.
@@ -505,6 +526,7 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
                         setPageIndex(page.index);
                       }
                     }
+                    isInternalChangeRef.current = true;
                     onChange(selectionToRestore);
                   }}
                   pagination={{
