@@ -483,7 +483,7 @@ export const FINDINGS_JSON_SCHEMA = {
           reason: {
             type: 'string',
             description:
-              'Two Markdown lines: **Tested:** what was checked, against which signal and window, then **Result:** what the data showed, ending in Confirmed, Dismissed or Unresolved. Under 600 characters.',
+              'Two Markdown lines: **Tested:** what was checked, against which signal and window, then **Result:** what the data showed, ending in Confirmed, Dismissed or Unresolved. While the status is investigating, add a third line, **Settled by:** the observation that would refute or confirm it, as Refuted if <signal> <comparison> <threshold> in <window>; confirmed if <the opposite>. Under 700 characters.',
           },
           evidence: {
             type: 'array',

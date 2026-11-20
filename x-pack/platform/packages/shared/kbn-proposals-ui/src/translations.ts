@@ -136,4 +136,7 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   actionInputToggle: i18n.translate('xpack.proposals.approvalModal.actionDetails.inputToggle', {
     defaultMessage: 'Input parameters',
   }),
+  readOnlyDisabledReason: i18n.translate('xpack.proposals.approvalModal.readOnlyDisabledReason', {
+    defaultMessage: "You don't have the required privileges to apply or decline proposals.",
+  }),
 });

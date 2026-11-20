@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalModal, type ApprovalModalProps } from './approval_modal';
@@ -53,15 +53,26 @@ describe('ApprovalModal', () => {
     jest.clearAllMocks();
   });
 
-  it('keeps proposal details readable but prevents decisions in read-only mode', () => {
+  it('keeps proposal details readable but prevents decisions in read-only mode', async () => {
     renderModal({ readOnly: true });
     expect(screen.getByRole('dialog')).toHaveAccessibleName('Apply monitored exception');
-    expect(screen.getByTestId('approvalModal-confirm')).toBeDisabled();
-    expect(screen.getByTestId('approvalModal-dismiss')).toBeDisabled();
-    fireEvent.click(screen.getByTestId('approvalModal-confirm'));
-    fireEvent.click(screen.getByTestId('approvalModal-dismiss'));
+    const confirm = screen.getByTestId('approvalModal-confirm');
+    const dismiss = screen.getByTestId('approvalModal-dismiss');
+    expect(confirm).toHaveAttribute('aria-disabled', 'true');
+    expect(dismiss).toHaveAttribute('aria-disabled', 'true');
+    fireEvent.click(confirm);
+    fireEvent.click(dismiss);
     expect(baseProps.onConfirm).not.toHaveBeenCalled();
     expect(baseProps.onDismiss).not.toHaveBeenCalled();
+
+    act(() => dismiss.focus());
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      "You don't have the required privileges to apply or decline proposals."
+    );
+    act(() => confirm.focus());
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      "You don't have the required privileges to apply or decline proposals."
+    );
   });
 
   it('prevents declining if the modal becomes read-only while the decline form is open', () => {
@@ -71,7 +82,10 @@ describe('ApprovalModal', () => {
 
     rerender(<ApprovalModal {...baseProps} readOnly />);
 
-    expect(screen.getByTestId('approvalModal-confirm-decline')).toBeDisabled();
+    expect(screen.getByTestId('approvalModal-confirm-decline')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
     fireEvent.click(screen.getByTestId('approvalModal-confirm-decline'));
     expect(baseProps.onDismiss).not.toHaveBeenCalled();
   });

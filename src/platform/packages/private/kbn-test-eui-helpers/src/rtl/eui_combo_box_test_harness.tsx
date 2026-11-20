@@ -60,6 +60,13 @@ export class EuiComboBoxTestHarness {
     if (container.getAttribute('role') === 'combobox') return container;
 
     // Try within container first
+    // EuiComboBox renders `role="combobox"` and `aria-expanded` on the input it tags as `comboBoxSearchInput`,
+    // so resolve that element directly if possible
+    const searchInput = container.querySelector<HTMLElement>(
+      '[data-test-subj="comboBoxSearchInput"]'
+    );
+    if (searchInput) return searchInput;
+
     const inputWithin = within(container).queryByRole('combobox');
     if (inputWithin) return inputWithin;
 
@@ -67,6 +74,10 @@ export class EuiComboBoxTestHarness {
     const parent = container.parentElement;
     if (parent) {
       if (parent.getAttribute('role') === 'combobox') return parent;
+      const searchInputInParent = parent.querySelector<HTMLElement>(
+        '[data-test-subj="comboBoxSearchInput"]'
+      );
+      if (searchInputInParent) return searchInputInParent;
       const inputInParent = within(parent).queryByRole('combobox');
       if (inputInParent) return inputInParent;
     }

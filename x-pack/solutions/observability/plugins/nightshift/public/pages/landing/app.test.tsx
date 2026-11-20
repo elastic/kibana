@@ -754,6 +754,23 @@ describe('NightshiftApp', () => {
     );
   });
 
+  it('does not send a whitespace-only search term to the API', () => {
+    renderApp({ initialEntries: ['/?q=%20%20'] });
+
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: undefined })
+    );
+    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toHaveValue('  ');
+  });
+
+  it('sends the trimmed search term to the API', () => {
+    renderApp({ initialEntries: ['/?q=%20checkout%20'] });
+
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: 'checkout' })
+    );
+  });
+
   it('reports a search by length and result count, never by term', async () => {
     setSections({
       sections: defaultSections({

@@ -6,21 +6,21 @@
  */
 
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
-import type { PanelResolutionRequest } from './registry';
+import { isConfigPanelContent, type PanelResolutionRequest } from './registry';
 import {
   buildConfigPanelContent,
   createPanelContentResolver,
   getConfigPanelReferences,
-  getEditableEmbeddableTypes,
   getInlinePanelKindGuidance,
   getPanelTypeSelection,
+  planPanelContent,
   upsertPanelContentSchema,
 } from '.';
 
 describe('upsert panel content schema', () => {
-  it('routes a request without renderer to Lens content', () => {
+  it('keeps applyChartRules on Lens content', () => {
     const result = upsertPanelContentSchema.safeParse({
-      source: 'request',
+      type: 'vis',
       query: 'show total requests',
       applyChartRules: true,
     });
@@ -29,60 +29,76 @@ describe('upsert panel content schema', () => {
     expect(result.data).toHaveProperty('applyChartRules', true);
   });
 
-  it('rejects a by-value visualization config', () => {
+  it('rejects content without a type', () => {
+    expect(upsertPanelContentSchema.safeParse({ query: 'show total requests' }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects the former request shape, which names its kind as renderer', () => {
     expect(
       upsertPanelContentSchema.safeParse({
-        source: 'config',
-        type: 'vis',
-        config: { type: 'metric' },
+        source: 'request',
+        renderer: 'vega',
+        query: 'show total requests',
       }).success
     ).toBe(false);
   });
 
-  it('rejects the former config-source custom_content shape', () => {
-    expect(
-      upsertPanelContentSchema.safeParse({
-        source: 'config',
-        type: 'custom_content',
-        config: { prompt: 'Show a KPI card' },
-      }).success
-    ).toBe(false);
-  });
-
-  it('keeps esql, hasData, regenerateESQL and index and drops Lens-only fields on custom_content', () => {
+  it('drops a by-value config from vis content, which is generated from its query', () => {
     const result = upsertPanelContentSchema.safeParse({
-      source: 'request',
-      renderer: 'custom_content',
+      type: 'vis',
+      query: 'show total requests',
+      config: { type: 'metric' },
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data).not.toHaveProperty('config');
+  });
+
+  it('rejects vis content without a query', () => {
+    expect(
+      upsertPanelContentSchema.safeParse({ type: 'vis', config: { type: 'metric' } }).success
+    ).toBe(false);
+  });
+
+  it('treats custom_content content with a config as generated from its query', () => {
+    const { success, data } = upsertPanelContentSchema.safeParse({
+      type: 'custom_content',
+      config: { prompt: 'Show a KPI card' },
+    });
+
+    expect(success).toBe(true);
+    expect(data && isConfigPanelContent(data)).toBe(false);
+  });
+
+  it('keeps dataQueries and removeAllQueries on custom_content', () => {
+    const result = upsertPanelContentSchema.safeParse({
+      type: 'custom_content',
       query: 'Show a KPI card for total errors',
-      esql: 'FROM logs-* | STATS count = COUNT(*) BY service.name',
-      hasData: true,
-      regenerateESQL: true,
-      chartType: 'metric',
-      index: 'logs-*',
+      dataQueries: [{ description: 'total errors', index: 'logs-*' }],
+      removeAllQueries: false,
     });
 
     expect(result.success).toBe(true);
     expect(result.data).toMatchObject({
-      esql: 'FROM logs-* | STATS count = COUNT(*) BY service.name',
-      hasData: true,
-      regenerateESQL: true,
-      index: 'logs-*',
+      dataQueries: [{ description: 'total errors', index: 'logs-*' }],
+      removeAllQueries: false,
     });
-    expect(result.data).not.toHaveProperty('chartType');
   });
 
   it.each([
     ['a query-only', { query: 'Updated KPI' }],
-    ['an esql-only', { esql: 'FROM logs-* | STATS count = COUNT(*)' }],
-    ['a query-removing', { esql: null }],
-    ['a static-making', { hasData: false }],
-    ['a data-adding', { query: 'Add the error count', hasData: true, index: 'logs-*' }],
-    ['a regenerating', { query: 'Show errors by host', regenerateESQL: true }],
+    ['a data-query-only', { dataQueries: [{ esql: 'FROM logs-* | STATS count = COUNT(*)' }] }],
+    ['a static-making', { removeAllQueries: true }],
+    [
+      'a data-adding',
+      { query: 'Add the error count', dataQueries: [{}, { description: 'errors' }] },
+    ],
   ])('accepts %s custom_content content', (_, fields) => {
     expect(
       upsertPanelContentSchema.safeParse({
-        source: 'request',
-        renderer: 'custom_content',
+        type: 'custom_content',
         ...fields,
       }).success
     ).toBe(true);
@@ -94,9 +110,7 @@ describe('upsert panel content schema', () => {
     ['ml_anomaly_swimlane', { job_ids: ['job-1'], swimlane_type: 'overall' }],
     ['ml_single_metric_viewer', { job_ids: ['job-1'] }],
   ])('accepts %s config content', (type, config) => {
-    expect(upsertPanelContentSchema.safeParse({ source: 'config', type, config }).success).toBe(
-      true
-    );
+    expect(upsertPanelContentSchema.safeParse({ type, config }).success).toBe(true);
   });
 });
 
@@ -108,14 +122,31 @@ describe('by-value panel type registry', () => {
     });
   });
 
-  it('edits only panels of the same embeddable type', () => {
+  it('edits only panels of the same kind', () => {
     expect(
-      getEditableEmbeddableTypes({
-        source: 'config',
-        type: 'markdown',
-        config: { content: 'new', settings: { open_links_in_new_tab: true } },
+      planPanelContent({
+        id: 'panel-1',
+        content: {
+          type: 'markdown',
+          config: { content: 'new', settings: { open_links_in_new_tab: true } },
+        },
+        existingPanel: {
+          id: 'panel-1',
+          type: 'vega',
+          config: {
+            spec: JSON.stringify({
+              data: { url: { '%type%': 'esql', query: 'FROM logs' } },
+              mark: 'bar',
+            }),
+          },
+          grid: { x: 0, y: 0, w: 24, h: 15 },
+        },
       })
-    ).toEqual([MARKDOWN_EMBEDDABLE_TYPE]);
+    ).toEqual({
+      error: expect.stringMatching(
+        /^Panel "panel-1" is a Vega panel\. Edit it with type: "vega"\./
+      ),
+    });
   });
 });
 
@@ -146,7 +177,7 @@ describe('referenced config panel kinds', () => {
     ]);
     references.forEach(({ type, label, content }) => {
       expect(content.startsWith(`# ${label} panel config\n\n`)).toBe(true);
-      expect(content).toContain(`content: { source: "config", type: "${type}", config }`);
+      expect(content).toContain(`content: { type: "${type}", config }`);
       const [, json] = content.match(/\`\`\`json\n(.+)\n\`\`\`/s) ?? [];
       const jsonSchema = JSON.parse(json);
       expect(jsonSchema).not.toHaveProperty('$schema');
@@ -172,34 +203,34 @@ describe('createPanelContentResolver', () => {
     });
 
   const createExecutors = () => ({
-    lens: success('lens'),
+    vis: success('lens'),
     vega: success('vega'),
     custom_content: success('custom_content'),
   });
 
-  it('routes a request without renderer to the Lens executor', async () => {
+  it('routes a Lens request to the Lens executor', async () => {
     const executors = createExecutors();
-    const request = { nlQuery: 'total requests' } as PanelResolutionRequest;
+    const request: PanelResolutionRequest = { type: 'vis', nlQuery: 'total requests' };
 
     await createPanelContentResolver(executors)(request);
 
-    expect(executors.lens).toHaveBeenCalledWith(request);
+    expect(executors.vis).toHaveBeenCalledWith(request);
     expect(executors.vega).not.toHaveBeenCalled();
   });
 
-  it('routes a request to the executor of its renderer', async () => {
+  it('routes a request to the executor of its type', async () => {
     const executors = createExecutors();
     const request = {
-      renderer: 'custom_content',
+      type: 'custom_content',
       nlQuery: 'status board',
-      hasData: false,
+      removeAllQueries: true,
     } as PanelResolutionRequest;
 
     await expect(createPanelContentResolver(executors)(request)).resolves.toEqual(
       expect.objectContaining({ type: 'success' })
     );
     expect(executors.custom_content).toHaveBeenCalledWith(request);
-    expect(executors.lens).not.toHaveBeenCalled();
+    expect(executors.vis).not.toHaveBeenCalled();
   });
 });
 
@@ -208,11 +239,17 @@ describe('getInlinePanelKindGuidance', () => {
     expect(getInlinePanelKindGuidance()).toMatchInlineSnapshot(`
       "## Custom Content Panels
 
-      A custom content panel with live data does not need a query from you. Always set \`hasData\` when you create one, since there is no default: \`hasData: true\` (and \`index\` when you know it) and the server generates the query from \`query\`, then samples its schema before generating the template. \`hasData: false\` makes a static panel with no query — use that for banners, legends and notes, and never invent a query for them. Do not write the query yourself; pass \`esql\` only when the user supplied one verbatim. If the server cannot generate a query, the panel fails with an error naming the reason — fix the \`index\` or the description and retry rather than proceeding.
+      A custom content panel with live data does not need a query from you. When you create one, always say which kind it is, since there is no default: \`dataQueries\` for live data, or \`removeAllQueries: true\` for static content with no data. \`dataQueries\` lists the panel's queries by position, one entry per query, and the server generates each query from its \`description\` and samples its schema before generating the template. Set \`index\` on an entry when you know it. \`removeAllQueries: true\` makes a static panel — use that for banners, legends and notes, and never invent a query for them. Do not write a query yourself; give \`esql\` on an entry only when the user supplied one to use as it is. If the server cannot generate a query, the panel fails with an error naming the reason — fix the \`index\` or the description and retry rather than proceeding.
 
       To create one, set \`query\` to a concise description of what to display; the HTML template is generated server-side from it.
 
-      To edit one, list its id in \`panels\` with \`source: \\"request\\"\`, \`renderer: \\"custom_content\\"\`. Set \`query\` to the requested change; layout, copy and style edits (colors, sizes, wording) keep the current query. An edit that needs different data, such as \\"also show the average bytes\\", a new grouping or filter, or another time window, also needs \`regenerateESQL: true\`: without it the stored query is kept and the new data can never appear. The server then regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. The server refines the existing template."
+      To edit one, list its id in \`panels\` with \`type: \\"custom_content\\"\`. Set \`query\` to the requested change; layout, copy and style edits (colors, sizes, wording) keep the current queries, so send no \`dataQueries\`. An edit that needs different data, such as \\"also show the average bytes\\", a new grouping or filter, or another time window, also needs \`dataQueries\` with an entry at the position of the query to change: without it the stored query is kept and the new data can never appear. The server then regenerates that query from the \`description\`, keeping what the request does not change. \`removeAllQueries: true\` removes every query. The server refines the existing template.
+
+      ### Panels with several queries
+
+      When one panel needs data of more than one shape — headline numbers above a ranked list, say — send one \`dataQueries\` entry per query. The template reads the first as \`rows\` and the n-th as \`queries[n].rows\`. Each entry says what ONE query returns, not how it looks: \`{ description: \\"total requests and the number of 5xx errors, as one row\\", index: \\"logs-*\\" }\`, then \`{ description: \\"the five hosts with the most requests\\" }\`. \`query\` stays the layout and how each query is used. Keep a panel to a few queries (at most ten).
+
+      To edit a panel that has several queries, send \`dataQueries\` only for the ones you change, in position order: an entry with \`description\` regenerates that query, \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one. Queries you do not list are kept. They cannot be removed one at a time with this tool, and the panel's editor only lets the user remove the last query. To drop an earlier one, replace it with a different query (a new \`description\` or \`esql\`), or use \`removeAllQueries: true\` to remove them all. For a layout or style edit omit \`dataQueries\`: every query is kept."
     `);
   });
 });
@@ -220,10 +257,10 @@ describe('getInlinePanelKindGuidance', () => {
 describe('getPanelTypeSelection', () => {
   it('lists the panel kinds in priority order', () => {
     expect(getPanelTypeSelection()).toMatchInlineSnapshot(`
-      "1. **Lens** (\`renderer: \\"lens\\"\` or omitted) — metrics, time series, bar, line, pie, area, and data tables.
-      2. **Vega** (\`renderer: \\"vega\\"\`) — scatter/bubble plots, small multiples/faceting, layered or combination charts, or when the user asks for Vega.
-      3. **Markdown** (\`source: \\"config\\"\`, \`type: \\"markdown\\"\`) — static text, links, or notes with no data.
-      4. **Custom content** (\`renderer: \\"custom_content\\"\`) — a last resort for HTML/CSS layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or narrative text mixed with live data values, or when the user asks for a custom/HTML panel."
+      "1. **Lens** (\`type: \\"vis\\"\`) — metrics, time series, bar, line, pie, area, and data tables.
+      2. **Vega** (\`type: \\"vega\\"\`) — scatter/bubble plots, small multiples/faceting, layered or combination charts, custom encodings, or when the user asks for Vega.
+      3. **Markdown** (\`type: \\"markdown\\"\`) — static text, links, or notes with no data.
+      4. **Custom content** (\`type: \\"custom_content\\"\`) — a last resort for HTML/CSS layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or narrative text mixed with live data values, or when the user asks for a custom/HTML panel."
     `);
   });
 });

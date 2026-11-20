@@ -497,7 +497,7 @@ A recently expired proposal *does* reach a closed queue, through `decidedWithinH
 
 They do make **one narrow write**, because `waitForApproval` reconstructs its resume payload and discards everything but the boolean:
 
-```214:220:src/platform/plugins/shared/workflows_execution_engine/server/step/wait_for_approval_step/wait_for_approval_step.ts
+```214:220:x-pack/platform/plugins/shared/workflows_execution_engine/server/step/wait_for_approval_step/wait_for_approval_step.ts
       transformResumeInput: (input, respondedBy) => {
         const approved = input?.approved;
         return {

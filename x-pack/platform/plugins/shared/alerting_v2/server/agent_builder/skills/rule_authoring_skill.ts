@@ -7,18 +7,19 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
-import { internalTools } from '@kbn/agent-builder-common/tools';
 import {
   ACTION_POLICY_AUTHORING_SKILL_ID,
-  ALERTING_API_IDS,
   ALERTING_TOOL_IDS,
   ALERTING_V2_ENABLED_SETTING_ID,
   RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
 import type { AttachRuleToolDeps } from '../tools/attach_rule';
 import { attachRuleTool } from '../tools/attach_rule';
+import type { LinkRuleAndActionPolicyToolDeps } from '../tools/link_rule_and_action_policy';
+import { linkRuleAndActionPolicyTool } from '../tools/link_rule_and_action_policy';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
+import { generateRuleDiscoveryGuidance } from './rule_discovery_guidance';
 import {
   generateRuleOperationsDoc,
   generateRuleKindDoc,
@@ -30,7 +31,8 @@ import {
 } from './schema_to_skill_docs';
 
 type RuleAuthoringSkillDeps = ManageRuleToolDeps &
-  AttachRuleToolDeps & { availability: AvailabilityConfig };
+  AttachRuleToolDeps &
+  LinkRuleAndActionPolicyToolDeps & { availability: AvailabilityConfig };
 
 export const createRuleAuthoringSkill = (deps: RuleAuthoringSkillDeps) =>
   defineSkillType({
@@ -91,14 +93,7 @@ Do **not** use this skill for:
 ## Rule Discovery
 
 When a user asks about existing rules, read them with the Kibana API tools:
-- To list or search, call ${internalTools.describeApi} for \`${
-      ALERTING_API_IDS.listRules
-    }\` to confirm its params, then call ${internalTools.executeApi} with \`target: "kibana"\`.
-- Use \`search\` with keywords from the user's request. For a broad listing, omit \`search\`. Page with \`page\` and \`per_page\`.
-- To read a single rule, call ${internalTools.executeApi} for \`${
-      ALERTING_API_IDS.getRule
-    }\` with the rule \`id\`.
-- Summarize matches in plain language: name, kind, schedule, and query snippet.
+${generateRuleDiscoveryGuidance()}
 - Do **not** attach rules by default when only listing or comparing.
 - To inspect or edit a saved rule, attach it with ${
       ALERTING_TOOL_IDS.attachRule
@@ -182,6 +177,11 @@ After composing or modifying a rule, always render it inline for user review:
 where \`attachmentId\` is \`ruleAttachment.id\` and \`version\` is \`version\` from the ${
       ALERTING_TOOL_IDS.manageRule
     } tool result.
+If you then call \`${
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy
+    }\`, render the rule again with the \`ruleAttachment.version\` from the link tool result instead: the version from ${
+      ALERTING_TOOL_IDS.manageRule
+    } does not include the routing tag, and saving it would persist the rule untagged.
 
 ---
 
@@ -215,6 +215,12 @@ When the user wants alerts to recover only when a condition is met, to never rec
 When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status", "alert me when the data stops"), use \`set_no_data\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
 
 ### Notifications
-When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,
-    getInlineTools: () => [manageRuleTool(deps), attachRuleTool(deps)],
+When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md). To make an existing action policy attachment notify on this rule, call \`${
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy
+    }\`; never set \`routing_tags\` by hand for that.`,
+    getInlineTools: () => [
+      manageRuleTool(deps),
+      attachRuleTool(deps),
+      linkRuleAndActionPolicyTool(deps),
+    ],
   });
