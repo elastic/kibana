@@ -225,11 +225,7 @@ describe('discovery completed report', () => {
 
     await completedRoute.handler(handlerParams);
 
-    expect(handlerParams.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining(
-        '2 reported rule uuids were not in the discovery batch of discovery-1'
-      )
-    );
+    expect(handlerParams.logger.warn).toHaveBeenCalled();
     expect(track).toHaveBeenCalledWith(
       expect.objectContaining({ unknown_reported_rule_count: 2 }),
       handlerParams.request

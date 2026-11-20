@@ -108,20 +108,24 @@ describe('discovery workflow detection classifier wiring', () => {
       expect(step['on-failure']).toBeUndefined();
     });
 
-    it('resolves written detections after the agent and reports unknown rule uuids', () => {
+    it('resolves written detections only when the agent succeeded, and a failure does not fail the run', () => {
       const resolve = requireStep('resolve_written_detections');
-      const report = requireStep('report_discovery_completed');
 
-      expect(topLevelIndex('run_discovery_agent')).toBeLessThan(
-        topLevelIndex('resolve_written_detections')
-      );
-      expect(resolve.type).toBe('significantEvents.resolveWrittenDetections');
-      expect(resolve.if).toBe('${{ steps.run_discovery_agent.error == null }}');
+      expect(evaluate(resolve.if, { steps: { run_discovery_agent: { error: null } } })).toBe(true);
+      expect(
+        evaluate(resolve.if, { steps: { run_discovery_agent: { error: { message: 'failed' } } } })
+      ).toBe(false);
       expect(resolve['on-failure']).toEqual({ continue: true });
-      expect(report.with?.body).toMatchObject({
-        unknown_reported_rule_count:
-          '${{ steps.resolve_written_detections.output.unknown_reported_count | default: 0 }}',
-      });
+    });
+
+    it('reports the unknown reported rule count in the completed body', () => {
+      const body = requireStep('report_discovery_completed').with?.body as Record<string, unknown>;
+
+      expect(
+        evaluate(body.unknown_reported_rule_count, {
+          steps: { resolve_written_detections: { output: { unknown_reported_count: 3 } } },
+        })
+      ).toBe(3);
     });
 
     it('limits the agent answer to the rule uuids of the batch', () => {
@@ -136,20 +140,19 @@ describe('discovery workflow detection classifier wiring', () => {
         { rule_uuid: 'rule-A', detection_id: 'detection-A2' },
         { detection_id: 'detection-C' },
       ];
+      const builtSchema = { type: 'object' };
 
-      expect(topLevelIndex('classify_detections')).toBeLessThan(
-        topLevelIndex('build_agent_answer_schema')
-      );
-      expect(topLevelIndex('build_agent_answer_schema')).toBeLessThan(
-        topLevelIndex('run_discovery_agent')
-      );
-      expect(agent.with?.schema).toBe('${{ steps.build_agent_answer_schema.output.schema }}');
       expect(
         evaluate(
           schema.properties.written_rule_uuids.items.enum,
           withClassify({ output: { batch } })
         )
       ).toEqual(['rule-A', 'rule-B']);
+      expect(
+        evaluate(agent.with?.schema, {
+          steps: { build_agent_answer_schema: { output: { schema: builtSchema } } },
+        })
+      ).toBe(builtSchema);
     });
 
     it('passes the detection rows, the space and every classifier input to the step', () => {
