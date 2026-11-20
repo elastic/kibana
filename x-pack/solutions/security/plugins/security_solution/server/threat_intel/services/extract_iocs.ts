@@ -292,40 +292,29 @@ const isMessageIdToken = (
   );
 };
 
-/**
- * True when the report wrote the `@` of this match defanged (`actor[@]evil[.]com`). Only the
- * text touching the `@` is compared, from the last dot of the local part to the first dot of
- * the host, so a defanged dot on either side (`20261001[.]6272F1@mail[.]evil[.]com`) does not
- * count.
- */
-const isAtSignDefanged = (raw: string, originalLower: string): boolean => {
-  const at = raw.lastIndexOf('@');
-  const aroundAt = raw.slice(raw.lastIndexOf('.', at) + 1, raw.indexOf('.', at));
-  return !originalLower.includes(aroundAt);
-};
-
 /** Tier and basis for an email match, or `null` when it is not an address (rules 1 and 3 of PASS 1). */
 const classifyEmail = ({
   refangedText,
-  originalLower,
   start,
   raw,
   wasDefanged,
+  isAtSignDefanged,
   idListHeaderLines,
 }: {
   refangedText: string;
-  originalLower: string;
   start: number;
   raw: string;
   wasDefanged: boolean;
+  /** The `@` of this occurrence was written `[@]` or `(at)` in the source. */
+  isAtSignDefanged: boolean;
   idListHeaderLines: readonly Span[];
 }): { tier: IocTier; basis: string } | null => {
   // A defanged `@` means the report is writing an address, whatever header precedes it. Defanged
   // dots do not: phishing write-ups paste header blocks with every domain defanged
   // (`Message-ID: <id@mail.evil[.]com>`), and those are still message IDs.
   const isMessageId =
-    isMessageIdToken(refangedText, start, start + raw.length, idListHeaderLines) &&
-    !isAtSignDefanged(raw, originalLower);
+    !isAtSignDefanged &&
+    isMessageIdToken(refangedText, start, start + raw.length, idListHeaderLines);
   if (isMessageId) return null;
   const host = raw.slice(raw.lastIndexOf('@') + 1);
   if (isPlaceholderEmailHost(host)) return { tier: 'reference', basis: 'placeholder_email' };
@@ -800,7 +789,7 @@ const defangValue = (type: IocType, value: string, shouldDefang: boolean): strin
  * form. Exported so adjudication can locate canonical candidate values in the
  * same refanged view that extraction uses.
  */
-export const refang = (text: string): string =>
+const refangExceptAtSign = (text: string): string =>
   text
     // Bracket/paren/brace-wrapped dot
     .replace(/\[\.\]|\(\.\)|\{\.\}/g, '.')
@@ -812,9 +801,29 @@ export const refang = (text: string): string =>
     // Bracket-wrapped colon (after scheme separator already handled)
     .replace(/\[:\]/g, ':')
     // Obfuscated scheme prefix: hxxps?:// (any casing of the XX) → http(s)://
-    .replace(/hxxps?:\/\//gi, (m) => (m.toLowerCase().startsWith('hxxps') ? 'https://' : 'http://'))
-    // Email defang: [@] or (at) → @
-    .replace(/\[@\]|\(at\)/gi, '@');
+    .replace(/hxxps?:\/\//gi, (m) =>
+      m.toLowerCase().startsWith('hxxps') ? 'https://' : 'http://'
+    );
+
+/**
+ * The refanged text, plus the offset in it of every `@` rebuilt from `[@]` or `(at)`. The
+ * offsets let a caller ask whether the `@` of one match was defanged, at that occurrence.
+ */
+const refangWithAtOffsets = (
+  text: string
+): { refanged: string; defangedAtOffsets: ReadonlySet<number> } => {
+  const defangedAtOffsets = new Set<number>();
+  let removedChars = 0;
+  // Email defang: [@] or (at) → @. This is the last step, so the offsets are final.
+  const refanged = refangExceptAtSign(text).replace(/\[@\]|\(at\)/gi, (match, offset: number) => {
+    defangedAtOffsets.add(offset - removedChars);
+    removedChars += match.length - 1;
+    return '@';
+  });
+  return { refanged, defangedAtOffsets };
+};
+
+export const refang = (text: string): string => refangWithAtOffsets(text).refanged;
 
 /** Masking glyphs used in victim-domain redaction tables (e.g. aad****ie.com). */
 const REDACTION_GLYPHS = new Set(['*', '＊', '█', '●']);
@@ -1208,7 +1217,9 @@ const applySectionOverrides = (iocs: readonly WorkingIoc[]): void => {
 
 export const extractIocs = ({ text, defang = true }: ExtractIocsParams): ExtractIocsResult => {
   // Pre-pass: recover defanged IOCs before regex matching.
-  const refangedText = neutralizeCapturePorts(refang(text));
+  // neutralizeCapturePorts keeps every offset, so defangedAtOffsets index refangedText too.
+  const { refanged, defangedAtOffsets } = refangWithAtOffsets(text);
+  const refangedText = neutralizeCapturePorts(refanged);
   const sectionSpans = classifySectionSpans(refangedText);
   const seen = new Set<string>();
   const iocByKey = new Map<string, WorkingIoc>();
@@ -1338,7 +1349,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
 
       const verdict = classifyEmail({
         refangedText,
-        originalLower,
+        isAtSignDefanged: defangedAtOffsets.has(idx + raw.lastIndexOf('@')),
         start: idx,
         raw,
         wasDefanged: !originalLower.includes(raw),

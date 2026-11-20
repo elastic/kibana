@@ -2265,6 +2265,33 @@ describe('extract_iocs — example emails, Message-IDs and non-addresses', () =>
       expect(emailValues(result)).toEqual(['first.last@evil-corp.com']);
     });
 
+    test('an (at) address after a Message-ID header is kept', () => {
+      const result = extractIocs({ text: 'Message-ID: <actor(at)evil-corp[.]com>' });
+      expect(emailValues(result)).toEqual(['actor@evil-corp.com']);
+    });
+
+    test('a defanged address is judged at its own occurrence, not by a similar plain one', () => {
+      const result = extractIocs({
+        text: 'Message-ID: <first[.]last[@]mail[.]evil-corp.com>\nContact other.last@mail.evil-corp.com',
+      });
+      expect(emailValues(result)).toEqual([
+        'first.last@mail.evil-corp.com',
+        'other.last@mail.evil-corp.com',
+      ]);
+    });
+
+    test('a plain ID stays dropped when a similar address is defanged elsewhere', () => {
+      const result = extractIocs({
+        text: 'Message-ID: <id1.last@mail.evil-corp.com>\nContact other[.]last[@]mail[.]evil-corp[.]com',
+      });
+      expect(emailValues(result)).toEqual(['other.last@mail.evil-corp.com']);
+    });
+
+    test('a header block with every @ defanged yields its ID as an address (known gap)', () => {
+      const result = extractIocs({ text: 'Message-ID: <abc123[@]mail[.]evil-corp[.]com>' });
+      expect(emailValues(result)).toEqual(['abc123@mail.evil-corp.com']);
+    });
+
     test('a lone plain address on a References line with no heading markup yields nothing (known gap)', () => {
       const result = extractIocs({
         text: 'Indicators of Compromise\nReferences: <actor@evil-corp.com>',
