@@ -2804,6 +2804,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/datadog/** @elastic/w
 
 # Connector vendor API contracts (must stay after the per-connector rules above)
 src/platform/packages/shared/kbn-connector-specs/src/specs/**/vendor_api/ @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/ @elastic/workflows-eng
 
 
 # Connector Workflow Tests
@@ -3309,6 +3310,7 @@ x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
 
 # AlertZero Worker settings contract
+# Keep this section below every AlertZero Worker section: CODEOWNERS uses the last match.
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/fixtures @elastic/alertzero-common-layer
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/test_helpers @elastic/alertzero-common-layer
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/worker_settings_compat.test.ts @elastic/alertzero-common-layer

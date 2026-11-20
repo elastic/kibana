@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { WellKnownWorkflowTriggerSource } from '@kbn/workflows';
+import type { WellKnownWorkflowTriggerSource, WorkflowTemplateOrigin } from '@kbn/workflows';
 
 /** Whose credentials a workflow execution runs with. */
 export type WorkflowExecutionRunAs = 'service_account' | 'user';
@@ -55,6 +55,19 @@ export interface BaseWorkflowExecutionTelemetryParams {
    * Registered managed workflow definition version, when this execution came from one
    */
   managedVersion?: number;
+  /**
+   * Workflow Template library slug the workflow was created from, or `custom` for a template
+   * outside the catalog
+   */
+  templateSlug?: string;
+  /**
+   * Version of the template the workflow was created from
+   */
+  templateVersion?: string;
+  /**
+   * How the workflow was created from the template: install, import, or remix
+   */
+  templateOrigin?: WorkflowTemplateOrigin;
   /**
    * Whose credentials the execution runs with: 'service_account' when it is bound to a service
    * account, 'user' when it runs as the user or API key that triggered or scheduled it.

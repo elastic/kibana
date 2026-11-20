@@ -1,5 +1,5 @@
 {
-  "sha1": "4cad9446c9f33647bdd17af6d2d25a6b1833850e",
+  "sha1": "adf1131fdf84cf7f6ce46bc46039d31e0d879dec",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -954,6 +954,20 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_default_rule.spec.ts",
         "line": 482,
         "column": 31
+      }
+    },
+    {
+      "id": "2267aa8524fb3f7-9802ee71c6be203",
+      "title": "SyntheticsDefaultRules keeps actions added on the default rule when connector settings change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_default_rule.spec.ts",
+        "line": 564,
+        "column": 21
       }
     },
     {
