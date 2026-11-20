@@ -880,6 +880,109 @@
           "ruletype_id"
         ]
       },
+      "api.RuleGroupV1": {
+        "properties": {
+          "comment": {
+            "type": "string"
+          },
+          "committed_on": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "created_on": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "customer_id": {
+            "type": "string"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "modified_by": {
+            "type": "string"
+          },
+          "modified_on": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string"
+          },
+          "rule_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/api.RuleV1"
+            },
+            "type": "array"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "comment",
+          "committed_on",
+          "created_by",
+          "created_on",
+          "customer_id",
+          "deleted",
+          "description",
+          "enabled",
+          "id",
+          "modified_by",
+          "modified_on",
+          "name",
+          "platform",
+          "rule_ids",
+          "rules",
+          "version"
+        ]
+      },
+      "api.RuleGroupsResponse": {
+        "properties": {
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/msaspec.Error"
+            },
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/msaspec.MetaInfo"
+          },
+          "resources": {
+            "items": {
+              "$ref": "#/components/schemas/api.RuleGroupV1"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "meta",
+          "resources"
+        ]
+      },
       "api.RuleUpdateV2": {
         "properties": {
           "description": {
@@ -1148,6 +1251,43 @@
         "required": [
           "meta",
           "resources"
+        ]
+      },
+      "client.SampleMetadataResponseV2": {
+        "properties": {
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/msaspec.Error"
+            },
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/msaspec.MetaInfo"
+          },
+          "resources": {
+            "items": {
+              "$ref": "#/components/schemas/client.SampleMetadataV2"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "errors",
+          "meta",
+          "resources"
+        ]
+      },
+      "client.SampleMetadataV2": {
+        "properties": {
+          "file_name": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sha256"
         ]
       },
       "detects.ExternalAlert": {
@@ -2770,6 +2910,35 @@
           "updated_timestamp"
         ]
       },
+      "domain.BatchExecuteCommandRequest": {
+        "properties": {
+          "base_command": {
+            "type": "string"
+          },
+          "batch_id": {
+            "type": "string"
+          },
+          "command_string": {
+            "type": "string"
+          },
+          "optional_hosts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "persist_all": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "base_command",
+          "batch_id",
+          "command_string",
+          "optional_hosts",
+          "persist_all"
+        ]
+      },
       "domain.BatchGetCmdStatusResponse": {
         "properties": {
           "errors": {
@@ -3274,6 +3443,27 @@
         },
         "required": [
           "resources"
+        ]
+      },
+      "domain.MultiCommandExecuteResponseWrapper": {
+        "properties": {
+          "combined": {
+            "$ref": "#/components/schemas/domain.MultiCommandExecuteResponse"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/msaspec.Error"
+            },
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/msaspec.MetaInfo"
+          }
+        },
+        "required": [
+          "combined",
+          "errors",
+          "meta"
         ]
       },
       "domain.MultiStatusSensorResponse": {
@@ -4353,6 +4543,43 @@
           "resources"
         ]
       },
+      "falconx.ActorSummary": {
+        "properties": {
+          "id": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          }
+        }
+      },
+      "falconx.Incident": {
+        "properties": {
+          "details": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "falconx.IntelSummaryReportV1": {
+        "properties": {
+          "actors": {
+            "items": {
+              "$ref": "#/components/schemas/falconx.ActorSummary"
+            },
+            "type": "array"
+          }
+        }
+      },
       "falconx.MetaInfo": {
         "properties": {
           "MetaInfo": {
@@ -4427,6 +4654,69 @@
             "type": "string"
           },
           "url": {
+            "type": "string"
+          }
+        }
+      },
+      "falconx.SandboxSummaryReportV1": {
+        "properties": {
+          "classification_tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "environment_description": {
+            "type": "string"
+          },
+          "environment_id": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "error_message": {
+            "type": "string"
+          },
+          "error_origin": {
+            "type": "string"
+          },
+          "error_type": {
+            "type": "string"
+          },
+          "file_type": {
+            "type": "string"
+          },
+          "incidents": {
+            "items": {
+              "$ref": "#/components/schemas/falconx.Incident"
+            },
+            "type": "array"
+          },
+          "network_settings": {
+            "type": "string"
+          },
+          "sample_flags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "submission_type": {
+            "type": "string"
+          },
+          "submit_name": {
+            "type": "string"
+          },
+          "submit_url": {
+            "type": "string"
+          },
+          "threat_score": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "verdict": {
             "type": "string"
           }
         }
@@ -4530,6 +4820,106 @@
           "resources": {
             "items": {
               "$ref": "#/components/schemas/falconx.SubmissionV1"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "errors",
+          "meta",
+          "resources"
+        ]
+      },
+      "falconx.SummaryReportV1": {
+        "properties": {
+          "cid": {
+            "type": "string"
+          },
+          "created_timestamp": {
+            "type": "string"
+          },
+          "has_recording": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "intel": {
+            "items": {
+              "$ref": "#/components/schemas/falconx.IntelSummaryReportV1"
+            },
+            "type": "array"
+          },
+          "ioc_report_broad_csv_artifact_id": {
+            "type": "string"
+          },
+          "ioc_report_broad_json_artifact_id": {
+            "type": "string"
+          },
+          "ioc_report_broad_maec_artifact_id": {
+            "type": "string"
+          },
+          "ioc_report_broad_stix_artifact_id": {
+            "type": "string"
+          },
+          "ioc_report_strict_csv_artifact_id": {
+            "type": "string"
+          },
+          "ioc_report_strict_json_artifact_id": {
+            "type": "string"
+          },
+          "ioc_report_strict_maec_artifact_id": {
+            "type": "string"
+          },
+          "ioc_report_strict_stix_artifact_id": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "sandbox": {
+            "items": {
+              "$ref": "#/components/schemas/falconx.SandboxSummaryReportV1"
+            },
+            "type": "array"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "user_name": {
+            "type": "string"
+          },
+          "user_tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "verdict": {
+            "type": "string"
+          }
+        }
+      },
+      "falconx.SummaryReportV1Response": {
+        "properties": {
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/msaspec.Error"
+            },
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/falconx.MetaInfo"
+          },
+          "resources": {
+            "items": {
+              "$ref": "#/components/schemas/falconx.SummaryReportV1"
             },
             "type": "array"
           }
@@ -4750,6 +5140,20 @@
           "message"
         ]
       },
+      "msa.AffectedEntity": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "path"
+        ]
+      },
       "msa.EntityActionRequestV2": {
         "properties": {
           "action_parameters": {
@@ -4858,6 +5262,30 @@
           "resources": {
             "items": {
               "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "errors",
+          "meta",
+          "resources"
+        ]
+      },
+      "msa.ReplyAffectedEntities": {
+        "properties": {
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/msaspec.Error"
+            },
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/msaspec.MetaInfo"
+          },
+          "resources": {
+            "items": {
+              "$ref": "#/components/schemas/msa.AffectedEntity"
             },
             "type": "array"
           }
@@ -8802,6 +9230,227 @@
         ]
       }
     },
+    "/devices/entities/devices-actions/v2": {
+      "post": {
+        "operationId": "PerformActionV2",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "action_name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/msa.EntityActionRequestV2"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyAffectedEntities"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyAffectedEntities"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyAffectedEntities"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-RetryAfter": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyAffectedEntities"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "devices:write"
+            ]
+          }
+        ]
+      }
+    },
     "/devices/entities/devices/v2": {
       "post": {
         "operationId": "PostDeviceDetailsV2",
@@ -9958,6 +10607,195 @@
           {
             "oauth2": [
               "self-service-ioa-exclusions:read"
+            ]
+          }
+        ]
+      }
+    },
+    "/falconx/entities/report-summaries/v1": {
+      "get": {
+        "operationId": "GetSummaryReports",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "ids",
+            "required": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/falconx.SummaryReportV1Response"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/falconx.SummaryReportV1Response"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-RetryAfter": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/falconx.SummaryReportV1Response"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "falconx-sandbox:read"
             ]
           }
         ]
@@ -11269,6 +12107,196 @@
           {
             "oauth2": [
               "falconx-indicators:read"
+            ]
+          }
+        ]
+      }
+    },
+    "/ioarules/entities/rule-groups/v1": {
+      "get": {
+        "operationId": "get-rule-groupsMixin0",
+        "parameters": [
+          {
+            "explode": true,
+            "in": "query",
+            "name": "ids",
+            "required": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/api.RuleGroupsResponse"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-RetryAfter": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "custom-ioa:read"
             ]
           }
         ]
@@ -14364,6 +15392,639 @@
         ]
       }
     },
+    "/real-time-response/combined/batch-active-responder-command/v1": {
+      "post": {
+        "operationId": "BatchActiveResponderCmd",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "timeout",
+            "schema": {
+              "default": 30,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeout_duration",
+            "schema": {
+              "default": "30s",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "host_timeout_duration",
+            "schema": {
+              "default": "tiny bit less than overall request timeout",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/domain.BatchExecuteCommandRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain.MultiCommandExecuteResponseWrapper"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain.APIError"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ErrorsOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-RetryAfter": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain.APIError"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "real-time-response:write"
+            ]
+          }
+        ]
+      }
+    },
+    "/real-time-response/combined/batch-admin-command/v1": {
+      "post": {
+        "operationId": "BatchAdminCmd",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "timeout",
+            "schema": {
+              "default": 30,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeout_duration",
+            "schema": {
+              "default": "30s",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "host_timeout_duration",
+            "schema": {
+              "default": "tiny bit less than overall request timeout",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/domain.BatchExecuteCommandRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain.MultiCommandExecuteResponseWrapper"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain.APIError"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ErrorsOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-RetryAfter": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain.APIError"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "real-time-response-admin:write"
+            ]
+          }
+        ]
+      }
+    },
+    "/real-time-response/combined/batch-command/v1": {
+      "post": {
+        "operationId": "BatchCmd",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "timeout",
+            "schema": {
+              "default": 30,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeout_duration",
+            "schema": {
+              "default": "30s",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "host_timeout_duration",
+            "schema": {
+              "default": "tiny bit less than overall request timeout",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/domain.BatchExecuteCommandRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain.MultiCommandExecuteResponseWrapper"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain.APIError"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ErrorsOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-RetryAfter": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain.APIError"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "real-time-response:read"
+            ]
+          }
+        ]
+      }
+    },
     "/real-time-response/combined/batch-get-command/v1": {
       "get": {
         "operationId": "BatchGetCmdStatus",
@@ -15878,6 +17539,273 @@
           {
             "oauth2": [
               "real-time-response:read"
+            ]
+          }
+        ]
+      }
+    },
+    "/real-time-response/entities/extracted-file-contents/v1": {
+      "get": {
+        "operationId": "RTR-GetExtractedFileContents",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sha256",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filename",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "integer"
+                  },
+                  "type": "array"
+                }
+              },
+              "application/x-7z-compressed": {
+                "schema": {
+                  "items": {
+                    "type": "integer"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain.APIError"
+                }
+              },
+              "application/x-7z-compressed": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain.APIError"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              },
+              "application/x-7z-compressed": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              },
+              "application/x-7z-compressed": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain.APIError"
+                }
+              },
+              "application/x-7z-compressed": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain.APIError"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              },
+              "application/x-7z-compressed": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-RetryAfter": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain.APIError"
+                }
+              },
+              "application/x-7z-compressed": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain.APIError"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "real-time-response:write"
             ]
           }
         ]
@@ -18003,6 +19931,212 @@
           {
             "oauth2": [
               "real-time-response-admin:write"
+            ]
+          }
+        ]
+      }
+    },
+    "/samples/entities/samples/v3": {
+      "post": {
+        "operationId": "UploadSampleV3",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  },
+                  "file_name": {
+                    "type": "string"
+                  },
+                  "is_confidential": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "sample": {
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sample",
+                  "file_name"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/client.SampleMetadataResponseV2"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/client.SampleMetadataResponseV2"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/msa.ReplyMetaOnly"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-RetryAfter": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/client.SampleMetadataResponseV2"
+                }
+              }
+            },
+            "headers": {
+              "X-CS-TRACEID": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "samplestore:write"
             ]
           }
         ]

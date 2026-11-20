@@ -47,6 +47,8 @@ export interface FalconRequest {
   responseType?: AxiosRequestConfig['responseType'];
   /** Retry 5xx too: only for reads and calls that are idempotent in effect. 429 is always retried. */
   retryServerErrors: boolean;
+  /** Attempts in all, 429 retries included (default MAX_ATTEMPTS); 1 sends the request once. */
+  maxAttempts?: number;
   /** API client scope named in a 403 error. */
   scope: string;
   /** Return a 404 to the caller instead of raising it (searches turn it into an empty page). */
@@ -321,12 +323,12 @@ export const falconRequest = async <T = FalconBody>(
     }
     const retryable =
       status === 429 || (request.retryServerErrors && SERVER_ERROR_STATUSES.includes(status));
-    if (retryable && attempt < MAX_ATTEMPTS) {
+    if (retryable && attempt < (request.maxAttempts ?? MAX_ATTEMPTS)) {
       const delay = retryDelayMs({ ...response.headers }, attempt);
       ctx.log.debug(
         `CrowdStrike Falcon answered ${status} on ${request.method} ${
           request.path
-        }; retry ${attempt} of ${MAX_ATTEMPTS - 1} in ${delay} ms`
+        }; retry ${attempt} of ${(request.maxAttempts ?? MAX_ATTEMPTS) - 1} in ${delay} ms`
       );
       attempt++;
       await timing.sleep(delay);

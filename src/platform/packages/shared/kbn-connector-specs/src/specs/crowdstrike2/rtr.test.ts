@@ -114,7 +114,7 @@ describe('CrowdStrike Falcon Real Time Response', () => {
           url: `${BASE}/entities/sessions/v1`,
           params: { session_id: 's1' },
           data: undefined,
-          timeout: 60_000,
+          timeout: 30_000,
         },
       ]);
       expect(result).toMatchObject({
@@ -276,14 +276,14 @@ describe('CrowdStrike Falcon Real Time Response', () => {
           url: `${BASE}/entities/sessions/v1`,
           params: { session_id: 's1' },
           data: undefined,
-          timeout: 60_000,
+          timeout: 30_000,
         },
         {
           method: 'DELETE',
           url: `${BASE}/entities/sessions/v1`,
           params: { session_id: 's4' },
           data: undefined,
-          timeout: 60_000,
+          timeout: 30_000,
         },
       ]);
       expect(result.results).toEqual([
@@ -498,7 +498,7 @@ describe('CrowdStrike Falcon Real Time Response', () => {
         url: `${BASE}/entities/sessions/v1`,
         params: { session_id: 's1' },
         data: undefined,
-        timeout: 60_000,
+        timeout: 30_000,
       });
       expect(calls()).toHaveLength(6);
     });
@@ -712,6 +712,47 @@ describe('CrowdStrike Falcon Real Time Response', () => {
       expect(ctx.log.warn).toHaveBeenCalledWith(
         expect.stringContaining('Left 15 Real Time Response sessions open')
       );
+    });
+
+    it('sends each cleanup delete once, with the time left in the budget as its timeout', async () => {
+      const ids = Array.from({ length: 2 }, (_, i) => i.toString(16).padStart(32, '0'));
+      const hosts = Object.fromEntries(
+        ids.map((id, i) => [id, { session_id: `s${i}`, errors: [] }])
+      );
+      const combined = Object.fromEntries(
+        ids.map((id, i) => [
+          id,
+          { session_id: `s${i}`, complete: true, stdout: 'ok', stderr: '', errors: [] },
+        ])
+      );
+      const { ctx, request } = makeCtx([]);
+      request.mockImplementation(async (config: { url: string; method: string }) => {
+        if (config.url.endsWith('/batch-init-session/v1')) {
+          return {
+            status: 201,
+            headers: {},
+            data: { batch_id: 'b', resources: hosts, errors: [] },
+          };
+        }
+        if (config.url.endsWith('/batch-command/v1')) {
+          now += 5_000;
+          return {
+            status: 201,
+            headers: {},
+            data: { combined: { resources: combined }, errors: [] },
+          };
+        }
+        // A rate-limited delete is not retried during cleanup.
+        return { status: 429, headers: {}, data: { errors: [{ message: 'rate limited' }] } };
+      });
+      const result = await runBatchCommand(ctx, 'read_only', { endpoint_ids: ids, command: 'ls' });
+      const deletes = request.mock.calls.filter(([config]) => config.method === 'DELETE');
+      expect(deletes).toHaveLength(2);
+      for (const [config] of deletes) {
+        expect(config.timeout).toBeLessThanOrEqual(30_000);
+        expect(config.timeout).toBeGreaterThanOrEqual(1_000);
+      }
+      expect(result.results).toHaveLength(2);
     });
 
     it('deletes the sessions of a large batch at most 10 at a time', async () => {

@@ -66,3 +66,26 @@ actions:
       specified case" (https://developer.crowdstrike.com/api-reference/collections/case-management/),
       so a change sends only the fields it changes.
     remove: true
+  - target: $.components.schemas['domain.BatchExecuteCommandRequest'].required[?@ == 'optional_hosts']
+    description: >-
+      optional_hosts narrows the command to some hosts of the batch, as its name says. Batch
+      commands sent without it on a live Falcon tenant (2026-11-18: executeRTRCommand ls,
+      batchActiveResponderExecuteRTR, batchAdminExecuteRTR) ran on every host of the batch.
+    remove: true
+  - target: $.components.schemas['domain.BatchExecuteCommandRequest'].required[?@ == 'persist_all']
+    description: >-
+      persist_all queues the command for offline hosts. The same live batch commands
+      (2026-11-18) were sent without it and ran.
+    remove: true
+  - target: $.components.schemas['api.RuleUpdateV2'].required
+    description: >-
+      The export marks every property of a rule update required, but a rule update sent on a live
+      Falcon tenant (2026-11-18: updateIOARule with only instance_id, rulegroup_version, enabled and
+      description) was accepted and changed only those fields, as the read-back showed.
+    remove: true
+  - target: $.components.schemas['api.RuleUpdateV2']
+    description: The fields a rule update needs, as accepted by the live tenant above.
+    update:
+      required:
+        - instance_id
+        - rulegroup_version

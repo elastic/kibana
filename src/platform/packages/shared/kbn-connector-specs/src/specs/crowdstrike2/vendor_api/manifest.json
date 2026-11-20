@@ -29,18 +29,43 @@
     "batchActiveResponderExecuteRTR": [
       {
         "method": "post",
+        "path": "/real-time-response/combined/batch-active-responder-command/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
         "path": "/real-time-response/combined/batch-init-session/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "delete",
+        "path": "/real-time-response/entities/sessions/v1",
         "source": "falcon"
       }
     ],
     "batchAdminExecuteRTR": [
       {
         "method": "post",
+        "path": "/real-time-response/combined/batch-admin-command/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
         "path": "/real-time-response/combined/batch-init-session/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "delete",
+        "path": "/real-time-response/entities/sessions/v1",
         "source": "falcon"
       }
     ],
     "containHost": [
+      {
+        "method": "post",
+        "path": "/devices/entities/devices-actions/v2",
+        "source": "falcon"
+      },
       {
         "method": "post",
         "path": "/devices/entities/devices/v2",
@@ -92,6 +117,11 @@
     "detonateFile": [
       {
         "method": "get",
+        "path": "/falconx/entities/report-summaries/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "get",
         "path": "/falconx/entities/submissions/v1",
         "source": "falcon"
       },
@@ -99,9 +129,19 @@
         "method": "post",
         "path": "/falconx/entities/submissions/v1",
         "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/samples/entities/samples/v3",
+        "source": "falcon"
       }
     ],
     "detonateUrl": [
+      {
+        "method": "get",
+        "path": "/falconx/entities/report-summaries/v1",
+        "source": "falcon"
+      },
       {
         "method": "get",
         "path": "/falconx/entities/submissions/v1",
@@ -116,7 +156,17 @@
     "executeRTRCommand": [
       {
         "method": "post",
+        "path": "/real-time-response/combined/batch-command/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
         "path": "/real-time-response/combined/batch-init-session/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "delete",
+        "path": "/real-time-response/entities/sessions/v1",
         "source": "falcon"
       }
     ],
@@ -291,6 +341,11 @@
     "liftContainment": [
       {
         "method": "post",
+        "path": "/devices/entities/devices-actions/v2",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
         "path": "/devices/entities/devices/v2",
         "source": "falcon"
       }
@@ -459,6 +514,17 @@
         "method": "post",
         "path": "/real-time-response/combined/batch-init-session/v1",
         "source": "falcon"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/real-time-response/entities/extracted-file-contents/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "delete",
+        "path": "/real-time-response/entities/sessions/v1",
+        "source": "falcon"
       }
     ],
     "searchAlerts": [
@@ -610,6 +676,11 @@
       }
     ],
     "updateIOARule": [
+      {
+        "method": "get",
+        "path": "/ioarules/entities/rule-groups/v1",
+        "source": "falcon"
+      },
       {
         "method": "patch",
         "path": "/ioarules/entities/rules/v2",

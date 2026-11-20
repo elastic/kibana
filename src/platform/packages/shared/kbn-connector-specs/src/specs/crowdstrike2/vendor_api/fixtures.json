@@ -2,14 +2,159 @@
   "batchActiveResponderExecuteRTR": {
     "input": {
       "command": "ps",
-      "timeout": 1
-    }
+      "timeout": 1,
+      "endpoint_ids": [
+        "0123456789abcdef0123456789abcdef"
+      ]
+    },
+    "responses": [
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/real-time-response/combined/batch-init-session/v1",
+        "status": 201,
+        "body": {
+          "batch_id": "contract-batch",
+          "resources": {
+            "0123456789abcdef0123456789abcdef": {
+              "aid": "0123456789abcdef0123456789abcdef",
+              "session_id": "contract-session",
+              "complete": true,
+              "offline_queued": false,
+              "query_time": 0.01,
+              "stdout": "ok",
+              "stderr": "",
+              "errors": []
+            }
+          },
+          "errors": [],
+          "meta": {
+            "query_time": 0.01,
+            "trace_id": "contract-trace"
+          }
+        }
+      },
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/real-time-response/combined/batch-active-responder-command/v1",
+        "status": 201,
+        "body": {
+          "combined": {
+            "resources": {
+              "0123456789abcdef0123456789abcdef": {
+                "aid": "0123456789abcdef0123456789abcdef",
+                "session_id": "contract-session",
+                "complete": true,
+                "offline_queued": false,
+                "query_time": 0.01,
+                "stdout": "ok",
+                "stderr": "",
+                "errors": []
+              }
+            }
+          },
+          "errors": [],
+          "meta": {
+            "query_time": 0.01,
+            "trace_id": "contract-trace"
+          }
+        }
+      }
+    ]
   },
   "batchAdminExecuteRTR": {
     "input": {
       "command": "put test.txt",
-      "timeout": 1
-    }
+      "timeout": 1,
+      "endpoint_ids": [
+        "0123456789abcdef0123456789abcdef"
+      ]
+    },
+    "responses": [
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/real-time-response/combined/batch-init-session/v1",
+        "status": 201,
+        "body": {
+          "batch_id": "contract-batch",
+          "resources": {
+            "0123456789abcdef0123456789abcdef": {
+              "aid": "0123456789abcdef0123456789abcdef",
+              "session_id": "contract-session",
+              "complete": true,
+              "offline_queued": false,
+              "query_time": 0.01,
+              "stdout": "ok",
+              "stderr": "",
+              "errors": []
+            }
+          },
+          "errors": [],
+          "meta": {
+            "query_time": 0.01,
+            "trace_id": "contract-trace"
+          }
+        }
+      },
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/real-time-response/combined/batch-admin-command/v1",
+        "status": 201,
+        "body": {
+          "combined": {
+            "resources": {
+              "0123456789abcdef0123456789abcdef": {
+                "aid": "0123456789abcdef0123456789abcdef",
+                "session_id": "contract-session",
+                "complete": true,
+                "offline_queued": false,
+                "query_time": 0.01,
+                "stdout": "ok",
+                "stderr": "",
+                "errors": []
+              }
+            }
+          },
+          "errors": [],
+          "meta": {
+            "query_time": 0.01,
+            "trace_id": "contract-trace"
+          }
+        }
+      }
+    ]
+  },
+  "containHost": {
+    "input": {
+      "ids": [
+        "0123456789abcdef0123456789abcdef"
+      ]
+    },
+    "responses": [
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/devices/entities/devices/v2",
+        "status": 200,
+        "body": {
+          "resources": [
+            {
+              "cid": "fedcba9876543210fedcba9876543210",
+              "device_id": "0123456789abcdef0123456789abcdef",
+              "containment_state": "normal"
+            }
+          ],
+          "errors": [],
+          "meta": {
+            "query_time": 0.01,
+            "trace_id": "contract-trace"
+          }
+        }
+      }
+    ]
   },
   "createIOARule": {
     "input": {
@@ -32,27 +177,177 @@
     }
   },
   "detonateFile": {
-    "input": {
-      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "timeout": 0
-    }
+    "input": [
+      {
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout": 0
+      },
+      {
+        "content_base64": "aGk=",
+        "file_name": "contract-mock.txt",
+        "timeout": 0
+      }
+    ],
+    "responses": [
+      {
+        "source": "falcon",
+        "method": "GET",
+        "path": "/falconx/entities/submissions/v1",
+        "status": 200,
+        "body": {
+          "resources": [
+            {
+              "id": "contract-submission",
+              "state": "success",
+              "sandbox": [
+                {
+                  "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                }
+              ]
+            }
+          ],
+          "errors": [],
+          "meta": {
+            "MetaInfo": {
+              "query_time": 0.01,
+              "trace_id": "contract-trace"
+            }
+          }
+        }
+      },
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/samples/entities/samples/v3",
+        "status": 200,
+        "body": {
+          "resources": [
+            {
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "file_name": "contract-mock.txt"
+            }
+          ],
+          "errors": [],
+          "meta": {
+            "query_time": 0.01,
+            "trace_id": "contract-trace"
+          }
+        }
+      }
+    ]
   },
   "detonateUrl": {
     "input": {
       "url": "https://example.com/a",
       "timeout": 0
-    }
+    },
+    "responses": [
+      {
+        "source": "falcon",
+        "method": "GET",
+        "path": "/falconx/entities/submissions/v1",
+        "status": 200,
+        "body": {
+          "resources": [
+            {
+              "id": "contract-submission",
+              "state": "success",
+              "sandbox": [
+                {
+                  "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                }
+              ]
+            }
+          ],
+          "errors": [],
+          "meta": {
+            "MetaInfo": {
+              "query_time": 0.01,
+              "trace_id": "contract-trace"
+            }
+          }
+        }
+      }
+    ]
   },
   "executeRTRCommand": {
     "input": {
       "command": "ls C:\\",
-      "timeout": 1
+      "timeout": 1,
+      "endpoint_ids": [
+        "0123456789abcdef0123456789abcdef"
+      ]
     },
     "queries": [
       {
         "source": "falcon",
         "method": "POST",
         "path": "/real-time-response/combined/batch-init-session/v1"
+      },
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/real-time-response/combined/batch-command/v1"
+      },
+      {
+        "source": "falcon",
+        "method": "DELETE",
+        "path": "/real-time-response/entities/sessions/v1"
+      }
+    ],
+    "responses": [
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/real-time-response/combined/batch-init-session/v1",
+        "status": 201,
+        "body": {
+          "batch_id": "contract-batch",
+          "resources": {
+            "0123456789abcdef0123456789abcdef": {
+              "aid": "0123456789abcdef0123456789abcdef",
+              "session_id": "contract-session",
+              "complete": true,
+              "offline_queued": false,
+              "query_time": 0.01,
+              "stdout": "ok",
+              "stderr": "",
+              "errors": []
+            }
+          },
+          "errors": [],
+          "meta": {
+            "query_time": 0.01,
+            "trace_id": "contract-trace"
+          }
+        }
+      },
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/real-time-response/combined/batch-command/v1",
+        "status": 201,
+        "body": {
+          "combined": {
+            "resources": {
+              "0123456789abcdef0123456789abcdef": {
+                "aid": "0123456789abcdef0123456789abcdef",
+                "session_id": "contract-session",
+                "complete": true,
+                "offline_queued": false,
+                "query_time": 0.01,
+                "stdout": "ok",
+                "stderr": "",
+                "errors": []
+              }
+            }
+          },
+          "errors": [],
+          "meta": {
+            "query_time": 0.01,
+            "trace_id": "contract-trace"
+          }
+        }
       }
     ]
   },
@@ -86,6 +381,35 @@
         "source": "falcon",
         "method": "POST",
         "path": "/cases/entities/cases/v2"
+      }
+    ]
+  },
+  "liftContainment": {
+    "input": {
+      "ids": [
+        "0123456789abcdef0123456789abcdef"
+      ]
+    },
+    "responses": [
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/devices/entities/devices/v2",
+        "status": 200,
+        "body": {
+          "resources": [
+            {
+              "cid": "fedcba9876543210fedcba9876543210",
+              "device_id": "0123456789abcdef0123456789abcdef",
+              "containment_state": "contained"
+            }
+          ],
+          "errors": [],
+          "meta": {
+            "query_time": 0.01,
+            "trace_id": "contract-trace"
+          }
+        }
       }
     ]
   },
@@ -127,8 +451,92 @@
   },
   "rtrRetrieveFile": {
     "input": {
+      "device_id": "0123456789abcdef0123456789abcdef",
+      "file_path": "C:\\contract-mock.txt",
       "timeout": 1
-    }
+    },
+    "responses": [
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/real-time-response/combined/batch-init-session/v1",
+        "status": 201,
+        "body": {
+          "batch_id": "contract-batch",
+          "resources": {
+            "0123456789abcdef0123456789abcdef": {
+              "aid": "0123456789abcdef0123456789abcdef",
+              "session_id": "contract-session",
+              "complete": true,
+              "offline_queued": false,
+              "query_time": 0.01,
+              "stdout": "ok",
+              "stderr": "",
+              "errors": []
+            }
+          },
+          "errors": [],
+          "meta": {
+            "query_time": 0.01,
+            "trace_id": "contract-trace"
+          }
+        }
+      },
+      {
+        "source": "falcon",
+        "method": "POST",
+        "path": "/real-time-response/combined/batch-get-command/v1",
+        "status": 201,
+        "body": {
+          "batch_get_cmd_req_id": "contract-request",
+          "combined": {
+            "resources": {
+              "0123456789abcdef0123456789abcdef": {
+                "aid": "0123456789abcdef0123456789abcdef",
+                "session_id": "contract-session",
+                "complete": true,
+                "offline_queued": false,
+                "query_time": 0.01,
+                "stdout": "ok",
+                "stderr": "",
+                "errors": []
+              }
+            }
+          },
+          "errors": [],
+          "meta": {
+            "query_time": 0.01,
+            "trace_id": "contract-trace"
+          }
+        }
+      },
+      {
+        "source": "falcon",
+        "method": "GET",
+        "path": "/real-time-response/combined/batch-get-command/v1",
+        "status": 200,
+        "body": {
+          "resources": {
+            "0123456789abcdef0123456789abcdef": {
+              "cloud_request_id": "contract-request",
+              "created_at": "2026-11-18T00:00:00Z",
+              "deleted_at": "2026-11-18T00:00:00Z",
+              "id": 1,
+              "name": "contract-mock.txt",
+              "session_id": "contract-session",
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "size": 2,
+              "updated_at": "2026-11-18T00:00:00Z"
+            }
+          },
+          "errors": [],
+          "meta": {
+            "query_time": 0.01,
+            "trace_id": "contract-trace"
+          }
+        }
+      }
+    ]
   },
   "startNgSiemSearch": {
     "input": {
@@ -151,6 +559,46 @@
   "updateCase": {
     "input": {
       "status": "in_progress"
+    }
+  },
+  "updateIOARule": {
+    "responses": [
+      {
+        "source": "falcon",
+        "method": "GET",
+        "path": "/ioarules/entities/rule-groups/v1",
+        "status": 200,
+        "body": {
+          "resources": [
+            {
+              "comment": "",
+              "committed_on": "2026-11-18T00:00:00Z",
+              "created_by": "contract-mock",
+              "created_on": "2026-11-18T00:00:00Z",
+              "customer_id": "fedcba9876543210fedcba9876543210",
+              "deleted": false,
+              "description": "",
+              "enabled": false,
+              "id": "contract-group",
+              "modified_by": "contract-mock",
+              "modified_on": "2026-11-18T00:00:00Z",
+              "name": "contract-mock",
+              "platform": "windows",
+              "rule_ids": [],
+              "rules": [],
+              "version": 3
+            }
+          ],
+          "errors": [],
+          "meta": {
+            "query_time": 0.01,
+            "trace_id": "contract-trace"
+          }
+        }
+      }
+    ],
+    "input": {
+      "enabled": true
     }
   },
   "uploadIOC": {

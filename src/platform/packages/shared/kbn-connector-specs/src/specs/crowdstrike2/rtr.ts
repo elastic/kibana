@@ -38,8 +38,11 @@ const unique = (ids: string[]) => [...new Set(ids)];
 /** Session deletes sent at the same time when a batch is closed (a batch can hold 10,000 hosts). */
 const SESSION_DELETE_CONCURRENCY = 10;
 
-/** Time after which closing a batch's sessions stops starting new deletes. */
+/** Time closing a batch's sessions may take: no delete starts or waits beyond it. */
 const SESSION_CLEANUP_BUDGET_MS = 30_000;
+
+/** Shortest timeout given to a cleanup delete, so the first wave is sent even near the budget. */
+const MIN_DELETE_TIMEOUT_MS = 1_000;
 
 interface BatchSession {
   batchId: string;
@@ -195,13 +198,20 @@ export interface SingleHostResult extends CommandStatus {
 }
 
 /** Deletes a single-host session; a failed delete is only logged (Falcon ends idle sessions). */
-const deleteSession = async (ctx: ActionContext, sessionId: string, scope: string) => {
+const deleteSession = async (
+  ctx: ActionContext,
+  sessionId: string,
+  scope: string,
+  /** Bounds a best-effort delete: its timeout in ms, sent once without retries. */
+  bound?: { timeoutMs: number }
+) => {
   try {
     await falconRequest(ctx, {
       method: 'DELETE',
       path: '/real-time-response/entities/sessions/v1',
       params: { session_id: sessionId },
-      retryServerErrors: true,
+      retryServerErrors: !bound,
+      ...(bound ? { timeout: bound.timeoutMs, maxAttempts: 1 } : {}),
       allowNotFound: true,
       scope,
     });
@@ -234,11 +244,13 @@ const closeBatchSessions = async (
       : [];
   });
   const ids = unique(sessionIds);
-  // Cleanup is best effort: after the time budget no new deletes start, so a large batch still
-  // returns its results in time. Falcon ends the sessions left open after 10 minutes idle.
+  // Cleanup is best effort and bounded: each delete is sent once, with the time left in the
+  // budget as its timeout, and no new deletes start after it, so a large batch still returns its
+  // results in time. Falcon ends the sessions left open after 10 minutes idle.
   const deadline = timing.now() + SESSION_CLEANUP_BUDGET_MS;
   for (let start = 0; start < ids.length; start += SESSION_DELETE_CONCURRENCY) {
-    if (start > 0 && timing.now() >= deadline) {
+    const timeLeft = deadline - timing.now();
+    if (start > 0 && timeLeft <= 0) {
       ctx.log.warn(
         `Left ${
           ids.length - start
@@ -249,7 +261,9 @@ const closeBatchSessions = async (
     await Promise.all(
       ids
         .slice(start, start + SESSION_DELETE_CONCURRENCY)
-        .map((id) => deleteSession(ctx, id, scope))
+        .map((id) =>
+          deleteSession(ctx, id, scope, { timeoutMs: Math.max(MIN_DELETE_TIMEOUT_MS, timeLeft) })
+        )
     );
   }
 };
@@ -525,7 +539,7 @@ const awaitFile = async (
     method: 'GET',
     path: '/real-time-response/entities/extracted-file-contents/v1',
     params: { session_id: file.session_id ?? sessionId, sha256: file.sha256, filename: fileName },
-    headers: { Accept: 'application/octet-stream' },
+    headers: { Accept: 'application/x-7z-compressed' },
     responseType: 'arraybuffer',
     retryServerErrors: true,
     scope,
