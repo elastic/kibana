@@ -30,11 +30,10 @@ const assertScope = ({ space, userId }: SessionMemoryScope): void => {
 
 // Every read and delete goes through this filter, so a memory in another space or of another user
 // behaves exactly like one that does not exist.
-const scopeFilter = (scope: SessionMemoryScope): QueryDslQueryContainer[] => {
-  assertScope(scope);
-  const { space, userId } = scope;
-  return [{ term: { space } }, { term: { user_id: userId } }];
-};
+const scopeFilter = ({ space, userId }: SessionMemoryScope): QueryDslQueryContainer[] => [
+  { term: { space } },
+  { term: { user_id: userId } },
+];
 
 const toErrorMessage = ({ type, reason, caused_by: cause }: ErrorCause): string => {
   const message = reason ?? type;
@@ -98,6 +97,7 @@ export const createSessionMemoryService = (
   },
 
   get: async (scope, id) => {
+    assertScope(scope);
     // A failed shard could hold the newest revision, a tombstone included, so a partial result is
     // an error rather than an older answer.
     const response = await esClient.search<StoredSessionMemory>({
