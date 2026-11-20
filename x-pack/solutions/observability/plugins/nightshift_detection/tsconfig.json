@@ -29,6 +29,7 @@
     "@kbn/nightshift-sources-plugin",
     "@kbn/scout-oblt",
     "@kbn/significant-events-plugin",
+    "@kbn/significant-events-schema",
     "@kbn/spaces-plugin",
     "@kbn/workflows",
     "@kbn/workflows-extensions",

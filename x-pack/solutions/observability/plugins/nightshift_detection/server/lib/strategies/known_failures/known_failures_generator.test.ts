@@ -5,40 +5,37 @@
  * 2.0.
  */
 
-import type { QueryKnowledgeIndicator } from '@kbn/significant-events-plugin/server';
+import type { QueryLink } from '@kbn/significant-events-schema';
 import type { GeneratorContext } from '../types';
 import { getKnownFailureRuleId } from './known_failure_rule';
 import { KnownFailuresGenerator } from './known_failures_generator';
 
 const WINDOW = { from: Date.UTC(2026, 10, 20, 10, 0), to: Date.UTC(2026, 10, 20, 10, 5) };
 
-const createKnowledgeIndicator = (id: string, esql: string): QueryKnowledgeIndicator => ({
-  id,
+const createLink = (id: string, esql: string): QueryLink => ({
+  query: { id, title: id, description: id, esql: { query: esql }, type: 'match' },
   source_id: 'source-1',
-  source_enabled: true,
-  title: id,
-  description: id,
-  esql,
-  query_type: 'match',
-  feature_ids: [],
+  rule_backed: false,
+  rule_id: `rule-${id}`,
 });
 
 describe('KnownFailuresGenerator', () => {
   // The join is the generator's only logic until the mapping lands: a wrong id reads another
   // indicator's rows, or none.
   it('reads the window of the enabled rules that watch a current knowledge indicator', async () => {
-    const watched = createKnowledgeIndicator('watched', 'FROM logs | WHERE message : "timeout"');
-    const offRule = createKnowledgeIndicator('off', 'FROM logs | WHERE message : "refused"');
-    const getId = (knowledgeIndicator: QueryKnowledgeIndicator) =>
-      getKnownFailureRuleId({ spaceId: 'default', knowledgeIndicator, cpsEnabled: false });
+    const watched = createLink('watched', 'FROM logs | WHERE message : "timeout"');
+    const offRule = createLink('off', 'FROM logs | WHERE message : "refused"');
+    const getId = (link: QueryLink) =>
+      getKnownFailureRuleId({ spaceId: 'default', link, cpsEnabled: false });
     const readRows = jest.fn().mockResolvedValue([]);
 
     await new KnownFailuresGenerator().generate({
       spaceId: 'default',
       window: WINDOW,
+      sources: [{ id: 'source-1', enabled: true }],
       cpsEnabled: false,
       abortSignal: new AbortController().signal,
-      knowledge: { listQueryKnowledgeIndicators: async () => [watched, offRule] },
+      knowledge: { listQueryLinks: async () => [watched, offRule] },
       rules: {
         listManaged: async () => [
           { id: getId(watched), enabled: true },

@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Logger as CoreLogger, PluginSetup } from '@kbn/core-di';
 import type { CPSServerSetup } from '@kbn/cps/server';
 import type { KnowledgeIndicatorReader } from '@kbn/significant-events-plugin/server';
-import { once } from 'lodash';
+import { memoize } from 'lodash';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { inject, injectable, optional } from 'inversify';
 import { getErrorMessage } from '../errors/get_error_message';
@@ -61,10 +61,13 @@ function rejectOnAbort(signal: AbortSignal): Promise<never> {
 }
 
 function memoizeKnowledgeIndicators(knowledge: KnowledgeIndicatorReader): KnowledgeIndicatorReader {
-  // Read once per tick, at the first window that asks: every window of every strategy gets the
-  // same knowledge, and a tick with nothing due reads none.
+  // Read once per tick and set of sources, at the first window that asks: every strategy asks for
+  // the tick's enabled sources, so they share one read, and a tick with nothing due reads none.
   return {
-    listQueryKnowledgeIndicators: once(() => knowledge.listQueryKnowledgeIndicators()),
+    listQueryLinks: memoize(
+      (params) => knowledge.listQueryLinks(params),
+      ({ sourceIds }) => JSON.stringify(sourceIds)
+    ),
     listFeatures: (params) => knowledge.listFeatures(params),
   };
 }

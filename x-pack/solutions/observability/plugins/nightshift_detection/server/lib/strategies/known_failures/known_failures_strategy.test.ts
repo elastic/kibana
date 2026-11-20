@@ -5,34 +5,42 @@
  * 2.0.
  */
 
-import type {
-  KnowledgeIndicatorReader,
-  QueryKnowledgeIndicator,
-} from '@kbn/significant-events-plugin/server';
+import type { KnowledgeIndicatorReader } from '@kbn/significant-events-plugin/server';
+import type { QueryLink, QueryType } from '@kbn/significant-events-schema';
 import type { ResourceContext } from '../types';
 import { getKnownFailureRuleId } from './known_failure_rule';
 import { KnownFailuresStrategy } from './known_failures_strategy';
 
-const createKnowledgeIndicator = (
-  overrides: Partial<QueryKnowledgeIndicator> = {}
-): QueryKnowledgeIndicator => ({
-  id: 'ki-1',
-  source_id: 'source-1',
-  source_enabled: true,
-  title: 'Checkout timeouts',
-  description: 'Checkout calls time out',
-  esql: 'FROM logs-* | WHERE service.name == "checkout" AND message : "timeout"',
-  query_type: 'match',
-  feature_ids: [],
-  ...overrides,
+const createLink = ({
+  id = 'ki-1',
+  sourceId = 'source-1',
+  title = 'Checkout timeouts',
+  esql = 'FROM logs-* | WHERE service.name == "checkout" AND message : "timeout"',
+  type = 'match',
+}: {
+  id?: string;
+  sourceId?: string;
+  title?: string;
+  esql?: string;
+  type?: QueryType;
+} = {}): QueryLink => ({
+  query: { id, title, description: 'Checkout calls time out', esql: { query: esql }, type },
+  source_id: sourceId,
+  rule_backed: false,
+  rule_id: `rule-${id}`,
 });
 
-const createContext = (knowledgeIndicators: QueryKnowledgeIndicator[]): ResourceContext =>
+const createContext = (
+  links: QueryLink[],
+  sources = [{ id: 'source-1', enabled: true }]
+): ResourceContext =>
   ({
     spaceId: 'default',
+    sources,
     cpsEnabled: false,
     knowledge: {
-      listQueryKnowledgeIndicators: async () => knowledgeIndicators,
+      listQueryLinks: async ({ sourceIds }) =>
+        links.filter(({ source_id: sourceId }) => sourceIds.includes(sourceId)),
     } as Partial<KnowledgeIndicatorReader>,
   } as unknown as ResourceContext);
 
@@ -40,7 +48,7 @@ describe('KnownFailuresStrategy', () => {
   describe('resources', () => {
     it('wants one change point rule per countable match knowledge indicator', async () => {
       const { resources, skipped } = await new KnownFailuresStrategy().resources(
-        createContext([createKnowledgeIndicator()])
+        createContext([createLink()])
       );
 
       expect(skipped).toEqual([]);
@@ -65,10 +73,10 @@ describe('KnownFailuresStrategy', () => {
     it('skips STATS, non-filter, SET and overlong knowledge indicators', async () => {
       const { resources, skipped } = await new KnownFailuresStrategy().resources(
         createContext([
-          createKnowledgeIndicator({ id: 'stats', query_type: 'stats' }),
-          createKnowledgeIndicator({ id: 'sorted', esql: 'FROM logs-* | WHERE a == 1 | SORT b' }),
-          createKnowledgeIndicator({ id: 'set', esql: 'SET a = 1; FROM logs-* | WHERE a == 1' }),
-          createKnowledgeIndicator({
+          createLink({ id: 'stats', type: 'stats' }),
+          createLink({ id: 'sorted', esql: 'FROM logs-* | WHERE a == 1 | SORT b' }),
+          createLink({ id: 'set', esql: 'SET a = 1; FROM logs-* | WHERE a == 1' }),
+          createLink({
             id: 'long',
             esql: `FROM logs-* | WHERE message == "${'a'.repeat(9_500)}"`,
           }),
@@ -86,7 +94,7 @@ describe('KnownFailuresStrategy', () => {
 
     it('keeps the rule of a disabled source, turned off', async () => {
       const { resources } = await new KnownFailuresStrategy().resources(
-        createContext([createKnowledgeIndicator({ source_enabled: false })])
+        createContext([createLink()], [{ id: 'source-1', enabled: false }])
       );
 
       expect(resources).toEqual([expect.objectContaining({ enabled: false })]);
@@ -94,7 +102,7 @@ describe('KnownFailuresStrategy', () => {
 
     it('routes the rule across projects when cross-project search is on', async () => {
       const { resources } = await new KnownFailuresStrategy().resources({
-        ...createContext([createKnowledgeIndicator()]),
+        ...createContext([createLink()]),
         cpsEnabled: true,
       });
 
@@ -105,18 +113,14 @@ describe('KnownFailuresStrategy', () => {
   // The generator finds a rule's rows by recomputing its id, so any input the rule depends on must
   // move it, and nothing else may.
   describe('getKnownFailureRuleId', () => {
-    const getId = (overrides: Partial<QueryKnowledgeIndicator>, cpsEnabled = false) =>
-      getKnownFailureRuleId({
-        spaceId: 'default',
-        knowledgeIndicator: createKnowledgeIndicator(overrides),
-        cpsEnabled,
-      });
+    const getId = (overrides: Parameters<typeof createLink>[0], cpsEnabled = false) =>
+      getKnownFailureRuleId({ spaceId: 'default', link: createLink(overrides), cpsEnabled });
 
     it('changes with the query, the source and the routing', () => {
       const id = getId({});
 
       expect(getId({ esql: 'FROM logs-* | WHERE message : "refused"' })).not.toBe(id);
-      expect(getId({ source_id: 'source-2' })).not.toBe(id);
+      expect(getId({ sourceId: 'source-2' })).not.toBe(id);
       expect(getId({}, true)).not.toBe(id);
     });
 

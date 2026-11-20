@@ -68,7 +68,7 @@ function createRunner({
     signals,
     { list: async () => [] },
     elasticsearchServiceMock.createElasticsearchClient(),
-    { listQueryKnowledgeIndicators: async () => [], listFeatures: async () => [] },
+    { listQueryLinks: async () => [], listFeatures: async () => [] },
     { listManaged: async () => [], readRows: async () => [] } as unknown as ManagedRuleReader,
     loggingSystemMock.createLogger(),
     undefined

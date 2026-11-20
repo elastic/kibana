@@ -6,7 +6,7 @@
  */
 
 import { MAX_ESQL_QUERY_LENGTH } from '@kbn/alerting-v2-schemas';
-import type { QueryKnowledgeIndicator } from '@kbn/significant-events-plugin/server';
+import type { QueryLink, StreamQuery } from '@kbn/significant-events-schema';
 import { computeRuleId } from '../../rules/rule_identity';
 import type { AlertingRuleResource } from '../types';
 import {
@@ -21,36 +21,36 @@ import { KNOWN_FAILURES_SETTINGS, KNOWN_FAILURES_STRATEGY_ID } from './constants
  * within the rules API's length limit.
  */
 export function getUnwatchableReason(
-  knowledgeIndicator: Pick<QueryKnowledgeIndicator, 'id' | 'query_type' | 'esql'>
+  query: Pick<StreamQuery, 'id' | 'type' | 'esql'>
 ): string | undefined {
-  if (knowledgeIndicator.query_type !== 'match') {
-    return `knowledge indicator [${knowledgeIndicator.id}] is a STATS query, which Known failures does not count yet`;
+  if (query.type !== 'match') {
+    return `knowledge indicator [${query.id}] is a STATS query, which Known failures does not count yet`;
   }
-  if (!canCompileKnownFailureQuery(knowledgeIndicator.esql)) {
-    return `knowledge indicator [${knowledgeIndicator.id}] is not a FROM … | WHERE … query`;
+  if (!canCompileKnownFailureQuery(query.esql.query)) {
+    return `knowledge indicator [${query.id}] is not a FROM … | WHERE … query`;
   }
   // The rules API rejects a longer query. The cross-project form is the longest, so a query that
   // fits it fits either way, and the rule id does not flip with the setting.
   if (
-    compileKnownFailureQuery({ esql: knowledgeIndicator.esql, cpsEnabled: true }).length >
+    compileKnownFailureQuery({ esql: query.esql.query, cpsEnabled: true }).length >
     MAX_ESQL_QUERY_LENGTH
   ) {
-    return `knowledge indicator [${knowledgeIndicator.id}] is too long to watch`;
+    return `knowledge indicator [${query.id}] is too long to watch`;
   }
   return undefined;
 }
 
 /** The rule that watches a countable knowledge indicator; the reconciler adds the engine's identity. */
 export function buildKnownFailureRule({
-  knowledgeIndicator,
+  query,
   cpsEnabled,
 }: {
-  knowledgeIndicator: Pick<QueryKnowledgeIndicator, 'title' | 'esql'>;
+  query: Pick<StreamQuery, 'title' | 'esql'>;
   cpsEnabled: boolean;
 }): AlertingRuleResource['data'] {
   return {
     kind: 'signal',
-    metadata: { name: knowledgeIndicator.title },
+    metadata: { name: query.title },
     time_field: '@timestamp',
     schedule: {
       every: `${KNOWN_FAILURES_SETTINGS.rule_every_minutes}m`,
@@ -64,7 +64,7 @@ export function buildKnownFailureRule({
     grouping: { fields: ['change_at'] },
     query: {
       base: compileKnownFailureQuery({
-        esql: knowledgeIndicator.esql,
+        esql: query.esql.query,
         cpsEnabled,
       }),
     },
@@ -74,18 +74,18 @@ export function buildKnownFailureRule({
 /** The id the reconciler gives the rule of a knowledge indicator, to find its rows again. */
 export function getKnownFailureRuleId({
   spaceId,
-  knowledgeIndicator,
+  link,
   cpsEnabled,
 }: {
   spaceId: string;
-  knowledgeIndicator: Pick<QueryKnowledgeIndicator, 'source_id' | 'title' | 'esql'>;
+  link: Pick<QueryLink, 'source_id' | 'query'>;
   cpsEnabled: boolean;
 }): string {
   // The reconciler's own id function, so the generator finds exactly the rule it created.
   return computeRuleId({
     spaceId,
     strategy: KNOWN_FAILURES_STRATEGY_ID,
-    sourceId: knowledgeIndicator.source_id,
-    data: buildKnownFailureRule({ knowledgeIndicator, cpsEnabled }),
+    sourceId: link.source_id,
+    data: buildKnownFailureRule({ query: link.query, cpsEnabled }),
   });
 }

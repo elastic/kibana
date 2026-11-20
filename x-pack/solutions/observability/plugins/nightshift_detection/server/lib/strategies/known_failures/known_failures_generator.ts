@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryKnowledgeIndicator } from '@kbn/significant-events-plugin/server';
+import type { QueryLink } from '@kbn/significant-events-schema';
 import { sortBy } from 'lodash';
 import type { RuleRow } from '../../rules/managed_rule_reader';
 import type { DetectionSignalGenerator, GenerateResult, GeneratorContext } from '../types';
@@ -55,27 +55,29 @@ async function readActiveFailures(context: GeneratorContext): Promise<ActiveKnow
 
 /**
  * The knowledge indicator each enabled rule watches, by rule id, joined on the id the reconciler
- * gives the indicator's rule. A disabled rule, or an indicator without a rule, gives nothing.
+ * gives the indicator's rule. Only the tick's enabled sources are read. A disabled rule, or an
+ * indicator without a rule, gives nothing.
  */
 async function readWatchedKnowledgeIndicators({
   spaceId,
+  sources,
   knowledge,
   rules,
   cpsEnabled,
-}: GeneratorContext): Promise<Map<string, QueryKnowledgeIndicator>> {
-  const [managedRules, knowledgeIndicators] = await Promise.all([
+}: GeneratorContext): Promise<Map<string, QueryLink>> {
+  const [managedRules, links] = await Promise.all([
     rules.listManaged({ strategy: KNOWN_FAILURES_STRATEGY_ID }),
-    knowledge.listQueryKnowledgeIndicators(),
+    knowledge.listQueryLinks({ sourceIds: sources.map(({ id }) => id) }),
   ]);
   const enabledRuleIds = new Set(managedRules.filter(({ enabled }) => enabled).map(({ id }) => id));
 
   // Two indicators with the same query share a rule id; sorted by id, the same one always wins.
   return new Map(
-    sortBy(knowledgeIndicators, 'id')
-      .filter((knowledgeIndicator) => getUnwatchableReason(knowledgeIndicator) === undefined)
-      .map((knowledgeIndicator): [string, QueryKnowledgeIndicator] => [
-        getKnownFailureRuleId({ spaceId, knowledgeIndicator, cpsEnabled }),
-        knowledgeIndicator,
+    sortBy(links, ({ query }) => query.id)
+      .filter(({ query }) => getUnwatchableReason(query) === undefined)
+      .map((link): [string, QueryLink] => [
+        getKnownFailureRuleId({ spaceId, link, cpsEnabled }),
+        link,
       ])
       .filter(([ruleId]) => enabledRuleIds.has(ruleId))
   );

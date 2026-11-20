@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { QueryKnowledgeIndicator } from '@kbn/significant-events-plugin/server';
+import type { QueryLink } from '@kbn/significant-events-schema';
 import type { RuleRow } from '../../rules/managed_rule_reader';
 import type { DetectionSignalReading } from '../types';
 
 /** The latest row of a Known failures rule in the window, with the knowledge indicator it watches. */
 export interface ActiveKnownFailure {
-  knowledgeIndicator: QueryKnowledgeIndicator;
+  knowledgeIndicator: QueryLink;
   row: RuleRow;
 }
 

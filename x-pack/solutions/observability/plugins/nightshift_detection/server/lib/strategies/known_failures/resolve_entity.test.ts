@@ -5,21 +5,27 @@
  * 2.0.
  */
 
-import type { KnowledgeIndicatorFeature } from '@kbn/significant-events-plugin/server';
+import type { Feature } from '@kbn/significant-events-schema';
 import { resolveEntity } from './resolve_entity';
 
-const createService = (id: string, name?: string): KnowledgeIndicatorFeature => ({
+const createService = (id: string, name?: string): Feature => ({
   id,
+  uuid: `uuid-${id}`,
   source_id: 'source-1',
   type: 'entity',
   subtype: 'service',
   title: `Service ${id}`,
+  description: '',
+  confidence: 90,
   properties: name ? { name } : {},
 });
 
-const resolve = (featureIds: string[], features: KnowledgeIndicatorFeature[]) =>
+const resolve = (featureIds: string[], features: Feature[]) =>
   resolveEntity({
-    knowledgeIndicator: { source_id: 'source-1', feature_ids: featureIds },
+    knowledgeIndicator: {
+      source_id: 'source-1',
+      query: { features: featureIds.map((id) => ({ id })) },
+    },
     features,
   });
 

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  KnowledgeIndicatorFeature,
-  QueryKnowledgeIndicator,
-} from '@kbn/significant-events-plugin/server';
+import type { Feature, QueryLink, StreamQuery } from '@kbn/significant-events-schema';
 import type { DetectionSignalReading } from '../types';
 
 /** The feature significant_events keeps for all the services of a source; it names no service. */
@@ -23,11 +20,11 @@ export function resolveEntity({
   knowledgeIndicator,
   features,
 }: {
-  knowledgeIndicator: Pick<QueryKnowledgeIndicator, 'source_id' | 'feature_ids'>;
+  knowledgeIndicator: Pick<QueryLink, 'source_id'> & { query: Pick<StreamQuery, 'features'> };
   /** Entity features; only those of the knowledge indicator's source count. */
-  features: KnowledgeIndicatorFeature[];
+  features: Feature[];
 }): DetectionSignalReading['entity'] {
-  const linked = new Set(knowledgeIndicator.feature_ids);
+  const linked = new Set((knowledgeIndicator.query.features ?? []).map(({ id }) => id));
   // Feature ids are unique within a source only.
   const services = features.filter(
     ({ id, source_id: sourceId, type, subtype }) =>

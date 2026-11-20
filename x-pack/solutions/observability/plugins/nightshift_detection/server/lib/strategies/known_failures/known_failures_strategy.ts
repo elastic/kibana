@@ -37,22 +37,27 @@ export class KnownFailuresStrategy implements DetectionStrategy {
    * One rule per countable match knowledge indicator, on while its source is enabled. A STATS
    * indicator, or one that is more than `FROM` and `WHERE`, is reported as skipped.
    */
-  public async resources({ knowledge, cpsEnabled }: ResourceContext): Promise<DesiredResources> {
-    const knowledgeIndicators = await knowledge.listQueryKnowledgeIndicators();
+  public async resources({
+    sources,
+    knowledge,
+    cpsEnabled,
+  }: ResourceContext): Promise<DesiredResources> {
+    const links = await knowledge.listQueryLinks({ sourceIds: sources.map(({ id }) => id) });
+    const enabledSourceIds = new Set(sources.filter(({ enabled }) => enabled).map(({ id }) => id));
     const result: DesiredResources = { resources: [], skipped: [] };
 
-    knowledgeIndicators.forEach((knowledgeIndicator) => {
-      const reason = getUnwatchableReason(knowledgeIndicator);
+    links.forEach(({ query, source_id: sourceId }) => {
+      const reason = getUnwatchableReason(query);
       if (reason) {
-        result.skipped.push({ source_id: knowledgeIndicator.source_id, reason });
+        result.skipped.push({ source_id: sourceId, reason });
         return;
       }
 
       result.resources.push({
         kind: 'alerting_rule',
-        source_id: knowledgeIndicator.source_id,
-        enabled: knowledgeIndicator.source_enabled,
-        data: buildKnownFailureRule({ knowledgeIndicator, cpsEnabled }),
+        source_id: sourceId,
+        enabled: enabledSourceIds.has(sourceId),
+        data: buildKnownFailureRule({ query, cpsEnabled }),
       });
     });
 
