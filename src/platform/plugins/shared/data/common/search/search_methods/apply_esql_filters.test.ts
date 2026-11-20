@@ -15,7 +15,7 @@ const query =
 
 const getFilter = (meta: Partial<Filter['meta']>): Filter => ({
   meta: {
-    esql: { type: 'string', esType: 'keyword' },
+    esql: true,
     key: 'size',
     type: FILTERS.PHRASE,
     params: { query: 'big' },
@@ -36,31 +36,24 @@ describe('applyEsqlFilters', () => {
     expect(applyEsqlFilters(query, [getFilter({ negate: true })])).toContain('!=');
   });
 
-  it('compares numeric and boolean columns without casting them to string', () => {
-    const numeric = getFilter({
-      key: 'requests',
-      esql: { type: 'number', esType: 'double' },
-      params: { query: 8037.66 },
-    });
-    const bool = getFilter({
-      key: 'requests',
-      esql: { type: 'boolean', esType: 'boolean' },
-      params: { query: true },
-    });
+  it('compares numbers and booleans without casting the column to string, as the value has the type', () => {
+    const numeric = getFilter({ key: 'requests', params: { query: 8037.66 } });
+    const bool = getFilter({ key: 'requests', params: { query: true } });
 
     expect(applyEsqlFilters(query, [numeric])).toMatch(/WHERE `requests` == 8037.66$/);
     expect(applyEsqlFilters(query, [bool])).toMatch(/WHERE `requests` == true$/);
+    expect(applyEsqlFilters(query, [numeric])).not.toContain('::string');
   });
 
-  it('supports several values with MV_CONTAINS, using the type of the column', () => {
+  it('supports several values with IN, as MATCH does not work on computed columns', () => {
     const filter = getFilter({ type: FILTERS.PHRASES, params: ['big', 'small'] });
+    const numbers = getFilter({ type: FILTERS.PHRASES, params: [1, 2.5] });
 
-    expect(applyEsqlFilters(query, [filter])).toMatch(
-      /WHERE MV_CONTAINS\(`size`, \["big", "small"\]::keyword\)$/
-    );
+    expect(applyEsqlFilters(query, [filter])).toMatch(/WHERE size IN \("big", "small"\)$/);
     expect(
       applyEsqlFilters(query, [{ ...filter, meta: { ...filter.meta, negate: true } }])
-    ).toMatch(/WHERE NOT MV_CONTAINS\(`size`, \["big", "small"\]::keyword\)$/);
+    ).toMatch(/WHERE NOT \(size IN \("big", "small"\)\)$/);
+    expect(applyEsqlFilters(query, [numbers])).toMatch(/WHERE size IN \(1, 2.5\)$/);
   });
 
   it('supports exists filters', () => {

@@ -435,16 +435,8 @@ function convertToDSLFilter(
  * Extract base properties from stored filter
  */
 /** Only condition filters can be ES|QL filters, the other types are DSL ones */
-function getEsqlProperty(storedFilter: StoredFilter): Pick<AsCodeConditionFilter, 'esql'> | {} {
-  const esql = storedFilter.meta?.esql as { type?: string; esType?: string } | undefined;
-  if (!esql) return {};
-  const { type, esType } = esql;
-  return {
-    esql: {
-      ...(type !== undefined ? { type } : {}),
-      ...(esType !== undefined ? { es_type: esType } : {}),
-    },
-  };
+function getEsqlProperty(storedFilter: StoredFilter): Pick<AsCodeConditionFilter, 'esql'> {
+  return storedFilter.meta?.esql === true ? { esql: true } : {};
 }
 
 function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter> {

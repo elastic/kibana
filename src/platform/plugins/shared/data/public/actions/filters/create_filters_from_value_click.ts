@@ -201,7 +201,7 @@ const createFilterFromRawColumnsESQL = async (column: DatatableColumn, value: Ra
     const dataView = await getEsqlDataView(indexPattern);
     return buildRawColumnFilter(fieldName, value, column, dataView).map((filter) => ({
       ...filter,
-      meta: { ...filter.meta, esql: { type: column.meta?.type, esType: column.meta?.esType } },
+      meta: { ...filter.meta, esql: true },
     }));
   }
 

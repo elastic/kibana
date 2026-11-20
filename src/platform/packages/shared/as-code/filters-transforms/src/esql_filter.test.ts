@@ -20,26 +20,24 @@ const getStoredFilter = (meta: Partial<StoredFilter['meta']> = {}): StoredFilter
     params: { query: 'large' },
     negate: false,
     disabled: false,
-    esql: { type: 'string', esType: 'keyword' },
+    esql: true,
     ...meta,
   },
   query: { match_phrase: { size_class: 'large' } },
 });
 
 describe('ES|QL filters', () => {
-  it('keeps the ES|QL column types when converting to the as code format', () => {
+  it('keeps the ES|QL marker when converting to the as code format', () => {
     const asCode = fromStoredFilter(getStoredFilter());
 
-    expect(asCode).toEqual(
-      expect.objectContaining({ esql: { type: 'string', es_type: 'keyword' } })
-    );
+    expect(asCode).toEqual(expect.objectContaining({ esql: true }));
     expect(asCodeFilterSchema.safeParse(asCode).success).toBe(true);
   });
 
-  it('keeps the ES|QL column types when converting back to a stored filter', () => {
+  it('keeps the ES|QL marker when converting back to a stored filter', () => {
     const stored = toStoredFilter(fromStoredFilter(getStoredFilter())!);
 
-    expect(stored?.meta.esql).toEqual({ type: 'string', esType: 'keyword' });
+    expect(stored?.meta.esql).toBe(true);
   });
 
   it('keeps the marker for exists and several values filters', () => {
@@ -57,10 +55,7 @@ describe('ES|QL filters', () => {
     };
 
     [exists, phrases].forEach((filter) => {
-      expect(toStoredFilter(fromStoredFilter(filter)!)?.meta.esql).toEqual({
-        type: 'string',
-        esType: 'keyword',
-      });
+      expect(toStoredFilter(fromStoredFilter(filter)!)?.meta.esql).toBe(true);
     });
   });
 
@@ -74,7 +69,7 @@ describe('ES|QL filters', () => {
 
   it('only keeps the marker on condition filters, the other types are DSL ones', () => {
     const custom: StoredFilter = {
-      meta: { type: 'custom', esql: { type: 'string' } },
+      meta: { type: 'custom', esql: true },
       query: { bool: { filter: [{ term: { host: 'a' } }] } },
     };
 

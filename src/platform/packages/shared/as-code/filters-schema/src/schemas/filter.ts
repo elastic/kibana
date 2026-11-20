@@ -214,17 +214,10 @@ export const asCodeConditionFilterSchema = lazySchema(() =>
     .extend({
       type: z.literal(ASCODE_FILTER_TYPE.CONDITION),
       condition: conditionSchema,
-      esql: z
-        .object({
-          type: z.string().optional().meta({ description: 'Kibana type of the column.' }),
-          es_type: z.string().optional().meta({ description: 'Elasticsearch type of the column.' }),
-        })
-        .strict()
-        .optional()
-        .meta({
-          description:
-            'Set when the filter is on a column created by an ES|QL query, which cannot be expressed as a DSL query. It is applied as a `WHERE` clause to the ES|QL queries that have the column, and it is ignored by the other queries.',
-        }),
+      esql: z.boolean().optional().meta({
+        description:
+          'When `true`, the filter is on a column created by an ES|QL query, which cannot be expressed as a DSL query. It is applied as a `WHERE` clause to the ES|QL queries that have the column, and it is ignored by the other queries.',
+      }),
     })
     .meta({
       description:

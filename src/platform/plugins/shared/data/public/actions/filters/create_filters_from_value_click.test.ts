@@ -346,7 +346,7 @@ describe('createFiltersFromClickEvent', () => {
         const filter = await createFilterESQL(table, 0, 0);
 
         expect(filter).toHaveLength(1);
-        expect(filter[0].meta.esql).toBeDefined();
+        expect(filter[0].meta.esql).toBe(true);
         expect(filter[0].query).toEqual({ match_phrase: { message: expect.anything() } });
       });
 
@@ -366,7 +366,7 @@ describe('createFiltersFromClickEvent', () => {
         const filter = await createFilterESQL(table, 0, 0);
 
         expect(filter).toHaveLength(1);
-        expect(filter[0].meta.esql).toBeDefined();
+        expect(filter[0].meta.esql).toBe(true);
         expect(filter[0].query).toEqual({ match_phrase: { message: expect.anything() } });
       });
 
@@ -468,7 +468,7 @@ describe('createFiltersFromClickEvent', () => {
           const filter = await createFilterESQL(table, 0, 0);
 
           expect(filter).toHaveLength(1);
-          expect(filter[0].meta.esql).toBeDefined();
+          expect(filter[0].meta.esql).toBe(true);
           expect(filter[0].query).toEqual({ match_phrase: { foo: 'USx' } });
         });
 

@@ -8,10 +8,24 @@
  */
 
 import { FILTERS, isEsqlFilter, isFilterDisabled, type Filter } from '@kbn/es-query';
-import { appendWhereClauseToESQLQuery, getComputedColumnsInOutput } from '@kbn/esql-utils';
+import {
+  appendToESQLQuery,
+  appendWhereClauseToESQLQuery,
+  escapeEsqlColumnName,
+  escapeStringValue,
+  getComputedColumnsInOutput,
+} from '@kbn/esql-utils';
+
+// The WHERE needs the type of the column, but the clicked value has it: it is a cell of that column.
+// Without a type the WHERE helper casts the column to string, which can't be compared with a number
+const getKibanaFieldType = (value: unknown) =>
+  typeof value === 'number' || typeof value === 'boolean' ? typeof value : 'string';
+
+const getEsqlLiteral = (value: unknown) =>
+  typeof value === 'string' ? escapeStringValue(value) : String(value);
 
 const applyEsqlFilter = (query: string, filter: Filter): string => {
-  const { key, negate = false, params, type, esql } = filter.meta;
+  const { key, negate = false, params, type } = filter.meta;
   if (!key) return query;
 
   if (type === FILTERS.EXISTS) {
@@ -20,14 +34,23 @@ const applyEsqlFilter = (query: string, filter: Filter): string => {
     );
   }
 
-  // phrase filters have the value in `params.query`, phrases ones have the list of values as `params`
-  const value =
-    type === FILTERS.PHRASES ? params : (params as { query?: unknown } | undefined)?.query;
+  if (type === FILTERS.PHRASES && Array.isArray(params)) {
+    // the WHERE helper uses MATCH for several values, which can't be used on computed columns
+    const inClause = `${escapeEsqlColumnName(key)} IN (${params.map(getEsqlLiteral).join(', ')})`;
+    return appendToESQLQuery(query, `| WHERE ${negate ? `NOT (${inClause})` : inClause}`);
+  }
+
+  const value = (params as { query?: unknown } | undefined)?.query;
   if (value === undefined) return query;
 
   return (
-    appendWhereClauseToESQLQuery(query, key, value, negate ? '-' : '+', esql?.type, esql?.esType) ??
-    query
+    appendWhereClauseToESQLQuery(
+      query,
+      key,
+      value,
+      negate ? '-' : '+',
+      getKibanaFieldType(value)
+    ) ?? query
   );
 };
 
