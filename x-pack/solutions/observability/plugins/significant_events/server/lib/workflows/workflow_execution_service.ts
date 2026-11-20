@@ -202,11 +202,19 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     request: KibanaRequest;
     concurrencyGroupKey: string;
   }): Promise<string | null> {
-    const [first] = await this.cancelActiveExecutions(args);
-    return first?.id ?? null;
+    const { executions, failures } = await this.cancelActiveExecutions(args);
+    if (failures.length > 0) {
+      throw failures[0];
+    }
+    return executions[0]?.id ?? null;
   }
 
-  /** Like {@link cancelActive}, and returns the executions it asked to stop. */
+  /**
+   * Like {@link cancelActive}, and returns the executions it asked to stop together with the cancel
+   * failures instead of throwing. A cancel can throw after the engine already marked the run (the
+   * wake task of a run that is mid-step is busy, say), so the caller needs the executions to act on
+   * them before it rethrows.
+   */
   async cancelActiveExecutions({
     spaceId,
     request,
@@ -215,7 +223,7 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     spaceId: string;
     request: KibanaRequest;
     concurrencyGroupKey: string;
-  }): Promise<WorkflowExecutionListItemDto[]> {
+  }): Promise<{ executions: WorkflowExecutionListItemDto[]; failures: unknown[] }> {
     const { results } = await this.getExecutions(
       {
         concurrencyGroupKey,
@@ -226,8 +234,15 @@ export class WorkflowExecutionService<TInput extends object = {}> {
       request
     );
     const active = results.filter((execution) => !isTerminalStatus(execution.status));
-    await Promise.all(active.map(({ id }) => this.cancelExecution({ id, spaceId, request })));
-    return active;
+    const outcomes = await Promise.allSettled(
+      active.map(({ id }) => this.cancelExecution({ id, spaceId, request }))
+    );
+    return {
+      executions: active,
+      failures: outcomes.flatMap((outcome) =>
+        outcome.status === 'rejected' ? [outcome.reason] : []
+      ),
+    };
   }
 
   async cancelLatest({

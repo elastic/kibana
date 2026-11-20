@@ -552,13 +552,19 @@ export class SignificantEventsKIsOnboardingClient {
     sourceSlug,
     request,
   }: ISourceRunIdentity & { request: KibanaRequest }): Promise<string | null> {
-    const cancelled = await this.workflowExecutionService.cancelActiveExecutions({
-      spaceId: request.spaceId,
-      request,
-      concurrencyGroupKey: buildConcurrencyKey({ sourceId, sourceSlug }),
-    });
-    // Before the sub-workflow cancels: one failing there must not leave the units unreleased.
+    const { executions: cancelled, failures } =
+      await this.workflowExecutionService.cancelActiveExecutions({
+        spaceId: request.spaceId,
+        request,
+        concurrencyGroupKey: buildConcurrencyKey({ sourceId, sourceSlug }),
+      });
+    // Before the sub-workflow cancels, and before a cancel failure is thrown: the engine can fail
+    // after it marked the run, and a retry no longer lists a run that has since ended cancelled, so
+    // the unit would never be released.
     await this.releaseConsumedExtractions({ executions: cancelled, request });
+    if (failures.length > 0) {
+      throw failures[0];
+    }
     await Promise.all(
       this.subWorkflowExecutionServices.map(({ service, concurrencyKeyPrefix }) =>
         service.cancelActive({
@@ -574,12 +580,6 @@ export class SignificantEventsKIsOnboardingClient {
     return cancelled[0]?.id ?? null;
   }
 
-  /**
-   * Gives back the `ki_extraction` unit of each cancelled run that consumed one, on the day it was
-   * consumed. A run consumed one when its budget step was allowed: a denied run, or one cancelled
-   * before reaching that step, took nothing. A failed release is logged and not thrown, because the
-   * cancel already happened and the cost is a source waiting for the next day's limit.
-   */
   /** Remembers a released run, and returns false when it was already released. */
   private markExtractionReleased(executionId: string): boolean {
     if (this.releasedExtractionRunIds.has(executionId)) {
@@ -594,6 +594,12 @@ export class SignificantEventsKIsOnboardingClient {
     return true;
   }
 
+  /**
+   * Gives back the `ki_extraction` unit of each cancelled run that consumed one, on the day it was
+   * consumed. A run consumed one when its budget step was allowed: a denied run, or one cancelled
+   * before reaching that step, took nothing. A failed release is logged and not thrown, because the
+   * cancel already happened and the cost is a source waiting for the next day's limit.
+   */
   private async releaseConsumedExtractions({
     executions,
     request,

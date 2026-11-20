@@ -996,6 +996,36 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       expect(release).toHaveBeenCalledTimes(1);
     });
 
+    it('gives the unit back and still throws when the engine fails the cancel after marking the run', async () => {
+      const release = jest.fn().mockResolvedValue(undefined);
+      const { client, managementApi } = createClient(
+        {
+          getWorkflowExecutions: jest.fn(async ({ workflowId }: { workflowId: string }) => ({
+            results:
+              workflowId === SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID
+                ? [{ id: 'logs', status: ExecutionStatus.RUNNING }]
+                : [],
+          })),
+          getWorkflowExecution: jest.fn(async () => ({
+            status: ExecutionStatus.RUNNING,
+            stepExecutions: [
+              budgetStep('check_budget', { allowed: true, limit: 3 }, '2026-11-17T12:00:00.000Z'),
+            ],
+          })),
+          cancelWorkflowExecution: jest.fn().mockRejectedValue(new Error('task is running')),
+        },
+        { releaseExtractionQuota: release }
+      );
+
+      await expect(
+        client.cancelBySource({ sourceId: 'nginx-id', sourceSlug: 'nginx', request })
+      ).rejects.toThrow('task is running');
+
+      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledTimes(1);
+      expect(release).toHaveBeenCalledTimes(1);
+      expect(release).toHaveBeenCalledWith({ date: '2026-11-17' });
+    });
+
     it('still cancels the run when the release fails', async () => {
       const release = jest.fn().mockRejectedValue(new Error('saved objects unavailable'));
 
