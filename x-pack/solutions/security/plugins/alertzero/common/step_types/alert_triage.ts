@@ -551,7 +551,7 @@ const matchFpDecisionsOutputSchema = lazySchema(() =>
     held_in_shadow: z
       .number()
       .describe(
-        'Matches on a cloud key or an untrusted signer that `on` only tagged, as shadow does: the alert goes to analysis.'
+        'Matches on a cloud key, an untrusted signer or a key with neither a signer nor a hash that `on` only tagged, as shadow does: the alert goes to analysis.'
       ),
     tag_failures: z
       .number()

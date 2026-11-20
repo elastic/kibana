@@ -974,6 +974,38 @@ describe('triage match decisions step in on mode', () => {
       expect(closes().map(({ signal_ids }) => signal_ids)).toEqual([['h']]);
       expect(output).toEqual(expect.objectContaining({ closed: 1, held_in_shadow: 0 }));
     });
+
+    // Such a key names only paths, so any binary put at an approved path would match it.
+    it.each([
+      ['an unsigned binary whose source sends no hash', { process: { executable: 'C:\\x.exe' } }],
+      [
+        'a registry key',
+        {
+          event: { category: ['registry'] },
+          registry: { path: 'HKLM\\Software\\Acme\\Run' },
+        },
+      ],
+      [
+        'a file key with no hash',
+        { event: { category: ['file'] }, file: { path: 'C:\\data\\a.txt' } },
+      ],
+    ])('only tags a match on %s, which has neither a signer nor a hash', async (_label, fields) => {
+      const doc = { ...source('C:\\x.exe'), process: { executable: 'C:\\x.exe' }, ...fields };
+      const id = idFor(doc);
+      const { run, tags, closes } = setup({
+        mode: 'on',
+        alerts: [['p', doc]],
+        decisions: { [id]: stored('false_positive') },
+      });
+
+      const { output } = await run();
+
+      expect(closes()).toEqual([]);
+      expect(tags()).toEqual([
+        { ids: ['p'], tags: { tags_to_add: [`az:would_close:${id}`], tags_to_remove: [] } },
+      ]);
+      expect(output).toEqual(expect.objectContaining({ closed: 0, held_in_shadow: 1 }));
+    });
   });
 
   describe('a cloud key in `on`', () => {

@@ -76,6 +76,8 @@ const MAX_PAGES = 10;
  *   covers, sized from shadow data.
  * - a key that names a signer the alert does not mark as trusted. The key leaves out the file hash
  *   when a signer is named, so without trust a forged certificate with the same subject would match.
+ * - a key with neither a signer nor a hash, such as a registry key or an alert whose source sends no
+ *   hash. It names only paths, so any binary put at an approved path would match.
  */
 const heldInShadowIds = (
   candidates: readonly MatchCandidate[],
@@ -89,12 +91,13 @@ const heldInShadowIds = (
         if (strict === undefined) return false;
         const { kind, values } = describePatternKey(strict);
         if (kind === 'cloud') return true;
-        const trustField = DECISION_SIGNER_TRUST_FIELDS[kind];
         const namesSigner = values.some(([field]) =>
           field.endsWith('.code_signature.subject_name')
         );
+        if (!namesSigner) return !values.some(([field]) => field.endsWith('.hash.sha256'));
+        const trustField = DECISION_SIGNER_TRUST_FIELDS[kind];
         // A signer of a kind with no known trust field is held too, so a new kind cannot skip the check.
-        return namesSigner && (trustField === undefined || getField(doc, trustField) !== true);
+        return trustField === undefined || getField(doc, trustField) !== true;
       })
       .map(({ id }) => id)
   );
@@ -142,8 +145,9 @@ const NOTHING = {
  * In `on` it acts. An approved match is tagged `az:closed_by_decision:<decision>` and closed as a
  * false positive, up to the decision's daily cap; the rest wait for the normal path. A dismissed
  * match is tagged `az:inconclusive` and `az:skipped_by_decision:<decision>`, so it is neither
- * analysed nor proposed. Neither calls a model. A match on a `cloud` key, or on a signer the alert
- * does not mark as trusted, is only tagged, as in shadow, and counted in `held_in_shadow`.
+ * analysed nor proposed. Neither calls a model. A match on a `cloud` key, on a signer the alert
+ * does not mark as trusted, or on a key with neither a signer nor a hash, is only tagged, as in
+ * shadow, and counted in `held_in_shadow`.
  *
  * It fails open. A step that cannot read the setting, the decisions or the alerts reports `failed`
  * and matches nothing, so every alert goes through analysis as before.
