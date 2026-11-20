@@ -326,6 +326,79 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
       })
     );
   });
+
+  it('skips a namespace template Elasticsearch rejects, and throws the rejection when strict', async () => {
+    mockedGetInstallation.mockResolvedValue({
+      namespace_customization_enabled_for: ['production'],
+      installed_es: [],
+    } as any);
+    const rejected = new errors.ResponseError({
+      body: {
+        error: {
+          type: 'illegal_argument_exception',
+          reason: 'invalid composite mappings for [logs-nginx.access@namespace.production]',
+        },
+      },
+      statusCode: 400,
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+    });
+    const esClient = makeEsClientWithTemplate();
+    esClient.indices.putIndexTemplate.mockRejectedValue(rejected);
+    const args = { soClient, esClient, packageName: 'nginx', packageInfo, dataStreams };
+
+    await expect(handleNamespaceTemplateRestoreAfterPackageInstall(args)).resolves.toBeUndefined();
+    await expect(
+      handleNamespaceTemplateRestoreAfterPackageInstall({ ...args, strict: true })
+    ).rejects.toBe(rejected);
+  });
+
+  it('when strict, throws the rejection only once the other data streams have stopped writing', async () => {
+    mockedGetInstallation.mockResolvedValue({
+      namespace_customization_enabled_for: ['production', 'staging'],
+      installed_es: [],
+    } as any);
+    const rejected = new errors.ResponseError({
+      body: { error: { type: 'illegal_argument_exception', reason: 'invalid composite mappings' } },
+      statusCode: 400,
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+    });
+    const esClient = makeEsClientWithTemplate();
+    const events: string[] = [];
+    let finishPendingWrite = () => {};
+    esClient.indices.putIndexTemplate.mockImplementation((async (params: { name: string }) => {
+      events.push(`put ${params.name}`);
+      if (params.name.startsWith('logs-nginx.access@')) throw rejected;
+      await new Promise<void>((resolve) => {
+        finishPendingWrite = resolve;
+      });
+      events.push(`done ${params.name}`);
+    }) as any);
+    const flush = () => new Promise((resolve) => setImmediate(resolve));
+
+    const restore = handleNamespaceTemplateRestoreAfterPackageInstall({
+      soClient,
+      esClient,
+      packageName: 'nginx',
+      packageInfo,
+      dataStreams: [...dataStreams, { dataset: 'nginx.error', type: 'logs' }] as any[],
+      strict: true,
+    }).catch((err) => {
+      events.push('rejected');
+      return err;
+    });
+    await flush();
+    finishPendingWrite();
+    await flush();
+
+    expect(await restore).toBe(rejected);
+    // The pending write finished before the rejection, and nothing was written after it.
+    expect(events.slice(-2)).toEqual(['done logs-nginx.error@namespace.production', 'rejected']);
+    expect(events).not.toContain('put logs-nginx.error@namespace.staging');
+  });
 });
 
 // ---------------------------------------------------------------------------

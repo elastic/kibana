@@ -153,6 +153,9 @@ function buildNamespaceTemplate({
 /**
  * Creates namespace-scoped index templates for every `(dataStream, namespace)` pair
  * and tracks them in `installed_es`. Returns the created template names.
+ *
+ * A template Elasticsearch rejects is skipped with a warning, unless `strict` is set: then
+ * the rejection is thrown, so a caller that must apply a change everywhere can roll it back.
  */
 async function createNamespaceTemplatesForPackage({
   soClient,
@@ -163,6 +166,7 @@ async function createNamespaceTemplatesForPackage({
   namespaces,
   logContext,
   signal,
+  strict = false,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -172,55 +176,75 @@ async function createNamespaceTemplatesForPackage({
   namespaces: string[];
   logContext: string;
   signal?: AbortSignal;
+  strict?: boolean;
 }): Promise<string[]> {
   if (dataStreams.length === 0 || namespaces.length === 0) {
     return [];
   }
   const logger = appContextService.getLogger();
   const updatedIndexTemplates: IndexTemplateEntry[] = [];
+  // With `strict`, the first error is held until every data stream has stopped writing. pMap
+  // rejects at once while the other data streams keep running, so a template built from a base
+  // read before the caller's rollback could otherwise be written after it.
+  let strictFailure: { error: unknown } | undefined;
+
+  const createForDataStream = async (dataStream: RegistryDataStream) => {
+    if (signal) throwIfAborted(signal);
+    const isOtelInputType = isOtelDataStream(dataStream, packageInfo);
+    const templateName = getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType);
+    const baseTemplate = await fetchIndexTemplate(esClient, templateName, logContext, signal);
+    if (!baseTemplate) return;
+
+    for (const namespace of namespaces) {
+      if (strictFailure) return;
+      const { name: nsName, template: nsTemplate } = buildNamespaceTemplate({
+        baseTemplate,
+        dataStream,
+        namespace,
+        templateName,
+        isOtelInputType,
+      });
+
+      try {
+        await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate }, { signal });
+        updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
+      } catch (err) {
+        if (
+          !strict &&
+          isResponseError(err) &&
+          err.statusCode === 400 &&
+          err.body?.error?.type === 'illegal_argument_exception'
+        ) {
+          // A pre-existing template at the same priority blocks creation (blocked_by_same_priority
+          // case from the pre-flight check). Log and continue so other templates are not affected.
+          logger.warn(
+            `[${logContext}] Skipping namespace template "${nsName}": ${
+              (err.body?.error?.reason as string | undefined) ?? 'illegal_argument_exception'
+            }. Check the pre-flight conflict warning for this namespace.`
+          );
+        } else {
+          throw err;
+        }
+      }
+    }
+  };
 
   await pMap(
     dataStreams,
     async (dataStream) => {
-      if (signal) throwIfAborted(signal);
-      const isOtelInputType = isOtelDataStream(dataStream, packageInfo);
-      const templateName = getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType);
-      const baseTemplate = await fetchIndexTemplate(esClient, templateName, logContext, signal);
-      if (!baseTemplate) return;
-
-      for (const namespace of namespaces) {
-        const { name: nsName, template: nsTemplate } = buildNamespaceTemplate({
-          baseTemplate,
-          dataStream,
-          namespace,
-          templateName,
-          isOtelInputType,
-        });
-
-        try {
-          await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate }, { signal });
-          updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
-        } catch (err) {
-          if (
-            isResponseError(err) &&
-            err.statusCode === 400 &&
-            err.body?.error?.type === 'illegal_argument_exception'
-          ) {
-            // A pre-existing template at the same priority blocks creation (blocked_by_same_priority
-            // case from the pre-flight check). Log and continue so other templates are not affected.
-            logger.warn(
-              `[${logContext}] Skipping namespace template "${nsName}": ${
-                (err.body?.error?.reason as string | undefined) ?? 'illegal_argument_exception'
-              }. Check the pre-flight conflict warning for this namespace.`
-            );
-          } else {
-            throw err;
-          }
-        }
+      if (!strict) return createForDataStream(dataStream);
+      if (strictFailure) return;
+      try {
+        await createForDataStream(dataStream);
+      } catch (error) {
+        strictFailure ??= { error };
       }
     },
     { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
   );
+  if (strictFailure) {
+    throw strictFailure.error;
+  }
 
   if (updatedIndexTemplates.length === 0) {
     return [];
@@ -356,6 +380,8 @@ async function deleteNamespaceTemplatesForPackage({
  * final step so namespace templates survive reinstalls and upgrades.
  *
  * On first install the opt-in list is empty, so this is a no-op.
+ *
+ * With `strict`, a namespace template Elasticsearch rejects is thrown instead of skipped.
  */
 export async function handleNamespaceTemplateRestoreAfterPackageInstall({
   soClient,
@@ -363,12 +389,14 @@ export async function handleNamespaceTemplateRestoreAfterPackageInstall({
   packageName,
   packageInfo,
   dataStreams,
+  strict = false,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   packageName: string;
   packageInfo: Pick<PackageInfo, 'policy_templates'>;
   dataStreams: RegistryDataStream[];
+  strict?: boolean;
 }) {
   if (dataStreams.length === 0) {
     return;
@@ -391,6 +419,7 @@ export async function handleNamespaceTemplateRestoreAfterPackageInstall({
     dataStreams,
     namespaces,
     logContext: 'handleNamespaceTemplateRestoreAfterPackageInstall',
+    strict,
   });
 
   await handleIlmSettingsRestoreAfterPackageInstall({

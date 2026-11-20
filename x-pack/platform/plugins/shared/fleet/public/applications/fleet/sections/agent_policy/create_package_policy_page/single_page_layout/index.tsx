@@ -87,6 +87,7 @@ import {
   type VarGroupSelection,
 } from '../services/var_group_helpers';
 import { applyNamespaceCustomizationChange } from '../services/apply_namespace_customization';
+import { applyLogsdbColumnarChange } from '../services/apply_logsdb_columnar';
 import { applyIlmPolicyChange } from '../services/apply_ilm_policy';
 
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
@@ -333,6 +334,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const namespaceCustomizationEnabledRef = useRef<boolean>(false);
   const ilmPolicyRef = useRef<string | undefined>(undefined);
   const namespaceCustomizationAppliedRef = useRef<string | undefined>(undefined);
+  // The columnar index mode picked on this page, applied through the package API once saved.
+  const [logsdbColumnar, setLogsdbColumnar] = useState<boolean | undefined>();
 
   // After policy save: sync the package's namespace_customization_enabled_for list, then its
   // ILM policy (deferred updates, applied as two separate API calls). The opt-in call must be
@@ -355,6 +358,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     ilmPolicyRef.current = undefined;
 
     void (async () => {
+      await applyLogsdbColumnarChange(
+        packageInfo.name,
+        packageInfo.version,
+        logsdbColumnar,
+        notifications,
+        packageInfo.title ?? packageInfo.name
+      );
       await applyNamespaceCustomizationChange(
         packageInfo.name,
         packageInfo.version,
@@ -375,7 +385,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         wasEnabled
       );
     })();
-  }, [savedPackagePolicy, packageInfo, installedNamespaceCustomizationEnabledFor, notifications]);
+  }, [
+    savedPackagePolicy,
+    packageInfo,
+    installedNamespaceCustomizationEnabledFor,
+    notifications,
+    logsdbColumnar,
+  ]);
 
   // Retrieve agent count
   const agentPolicyIds = agentPolicies.map((policy) => policy.id);
@@ -661,6 +677,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               !useCheckableCardsForSetupTechnologySelector ? setupTechnologySelector : undefined
             }
             hideInVarGroupOptions={hiddenVarGroupOptions}
+            logsdbColumnar={logsdbColumnar}
+            onLogsdbColumnarChange={!extensionView ? setLogsdbColumnar : undefined}
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
@@ -700,6 +718,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     [
       isPackageInfoLoading,
       isInitialized,
+      logsdbColumnar,
       packageInfo,
       agentPolicies,
       spaceSettings?.allowedNamespacePrefixes,
