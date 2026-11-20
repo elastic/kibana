@@ -9,4 +9,7 @@ module.exports = {
   preset: '@kbn/jest/jest_integration',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/actions'],
+  testPathIgnorePatterns: [
+    '<rootDir>/x-pack/platform/plugins/shared/actions/server/integration_tests/connector_types.test.ts',
+  ],
 };

@@ -8,12 +8,8 @@
  */
 
 jest.mock('../../affected-packages/index.ts', () => ({
-  ALWAYS_RUN_JEST_INTEGRATION_CONFIGS: [
-    'x-pack/platform/plugins/shared/alerting/server/registry_checks/jest.integration.config.js',
-    'x-pack/platform/plugins/shared/actions/server/registry_checks/jest.integration.config.js',
-    'x-pack/platform/plugins/shared/task_manager/server/registry_checks/jest.integration.config.js',
-    'src/core/packages/core/server/integration_tests/exposed_config_keys/jest.integration.config.js',
-  ],
+  ALWAYS_RUN_JEST_INTEGRATION_CONFIGS: jest.requireActual('../../affected-packages/const.ts')
+    .ALWAYS_RUN_JEST_INTEGRATION_CONFIGS,
   CRITICAL_FILES_JEST_INTEGRATION_TESTS: ['CRITICAL_INT'],
   CRITICAL_FILES_JEST_UNIT_TESTS: ['CRITICAL_UNIT'],
   getAffectedPackages: jest.fn(),

@@ -304,6 +304,20 @@ function getBranchSchemas(internalSchema: Schema): Schema[] {
   return branchTerms.flatMap(collect).filter((branch): branch is Schema => isSchema(branch));
 }
 
+/** Whether a branch can contribute a value at its own path. */
+function branchCanHoldValue(branch: Schema): boolean {
+  const description = branch.describe();
+  const flags = description.flags as { presence?: string; only?: boolean } | undefined;
+  if (flags?.presence === 'forbidden') {
+    return false;
+  }
+  if (flags?.only && description.allow?.length === 1 && description.allow[0] === null) {
+    return false;
+  }
+  const branches = getBranchSchemas(branch);
+  return branches.length === 0 || branches.some(branchCanHoldValue);
+}
+
 /**
  * Merges the nested keys of every branch of a conditional or alternatives schema.
  *
@@ -326,13 +340,9 @@ function getBranchesStructure(
   for (const branch of branches) {
     const entries = recursiveGetSchemaStructure(branch, path, options);
     const nested = entries.filter((entry) => entry.path.length > path.length);
-    const description = branch.describe();
-    const flags = description.flags as { presence?: string; only?: boolean } | undefined;
-    const isEmptyBranch =
-      flags?.presence === 'forbidden' ||
-      (flags?.only && description.allow?.length === 1 && description.allow[0] === null);
+    const hasParentValue = branchCanHoldValue(branch);
     for (const entry of entries) {
-      if (entry.path.length === path.length && !isEmptyBranch) {
+      if (entry.path.length === path.length && hasParentValue) {
         parentTypes.push(...entry.type.split('|'));
       }
     }

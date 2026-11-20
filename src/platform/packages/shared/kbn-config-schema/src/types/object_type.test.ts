@@ -992,6 +992,24 @@ describe('schema structure with expandBranches', () => {
     ]);
   });
 
+  test('omits conditional branches that can only hold null or never', () => {
+    const conditionalEmptyBranch = schema.object({
+      setting: schema.oneOf([
+        schema.object({ enabled: schema.boolean() }),
+        schema.conditional(
+          schema.contextRef('serverless'),
+          true,
+          schema.literal(null),
+          schema.never()
+        ),
+      ]),
+    });
+
+    expect(conditionalEmptyBranch.getSchemaStructure({ expandBranches: true })).toEqual([
+      { path: ['setting', 'enabled'], type: 'boolean|never' },
+    ]);
+  });
+
   test('keeps literal dotted keys apart from nested paths', () => {
     const dottedKeys = schema.object({
       dotted: schema.conditional(

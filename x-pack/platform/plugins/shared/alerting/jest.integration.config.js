@@ -9,4 +9,8 @@ module.exports = {
   preset: '@kbn/jest/jest_integration',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/alerting'],
+  testPathIgnorePatterns: [
+    '<rootDir>/x-pack/platform/plugins/shared/alerting/server/integration_tests/alert_as_data_fields.test.ts',
+    '<rootDir>/x-pack/platform/plugins/shared/alerting/server/integration_tests/serverless_upgrade_and_rollback_checks.test.ts',
+  ],
 };
