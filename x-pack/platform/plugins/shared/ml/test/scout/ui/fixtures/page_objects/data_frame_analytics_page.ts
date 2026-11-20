@@ -36,8 +36,8 @@ export class DataFrameAnalyticsPage {
 
   private async waitForHistogramRequest(): Promise<boolean> {
     try {
-      const response = await this.page.waitForResponse((response) =>
-        response.url().includes('/data_visualizer/get_field_histograms/')
+      const response = await this.page.waitForResponse((candidate) =>
+        candidate.url().includes('/data_visualizer/get_field_histograms/')
       );
       return response.ok();
     } catch {
