@@ -47,6 +47,7 @@ import {
   type OptionsListSuggestions,
 } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
+import { getControlsTimezone } from '../utils';
 import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
 import type { ESQLOptionsListRuntimeState } from './types';
 
@@ -210,6 +211,7 @@ export function initializeESQLControlManager(
                 signal,
                 timeRange,
                 esqlVariables: variablesInParent,
+                timezone: getControlsTimezone(),
               })
             );
           })

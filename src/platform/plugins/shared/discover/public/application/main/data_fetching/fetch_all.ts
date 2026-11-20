@@ -133,6 +133,7 @@ export function fetchAll(
           abortSignal: abortController.signal,
           inspectorAdapters,
           data,
+          uiSettings: services.uiSettings,
           scopedProfilesManager,
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
           esqlVariables: currentTab.esqlVariables,

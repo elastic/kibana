@@ -117,4 +117,27 @@ describe('getESQLSingleColumnValues', () => {
       expect.anything()
     );
   });
+
+  it('sends the time zone derived from the dateFormat:tz setting, and none when it is unset', async () => {
+    await getESQLSingleColumnValues({
+      query: 'FROM index | STATS BY column',
+      search: { esql: esqlMock },
+      esqlVariables: [],
+      timezone: 'America/New_York',
+    });
+    expect(esqlMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ timeZone: 'America/New_York' }),
+      expect.anything()
+    );
+
+    await getESQLSingleColumnValues({
+      query: 'FROM index | STATS BY column',
+      search: { esql: esqlMock },
+      esqlVariables: [],
+    });
+    expect(esqlMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ timeZone: undefined }),
+      expect.anything()
+    );
+  });
 });

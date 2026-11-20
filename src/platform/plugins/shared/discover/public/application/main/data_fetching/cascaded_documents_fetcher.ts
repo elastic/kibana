@@ -101,6 +101,7 @@ export class CascadedDocumentsFetcher {
         esqlVariables,
         esqlSource: currentEsqlSource,
         data: this.services.data,
+        uiSettings: this.services.uiSettings,
         abortSignal: abortController.signal,
         timeRange,
         scopedProfilesManager: this.scopedProfilesManager,

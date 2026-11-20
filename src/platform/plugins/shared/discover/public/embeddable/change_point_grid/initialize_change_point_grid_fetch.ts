@@ -106,6 +106,7 @@ export const initializeChangePointGridFetch = ({
         abortSignal: currentAbortController.signal,
         inspectorAdapters: {},
         data: discoverServices.data,
+        uiSettings: discoverServices.uiSettings,
         scopedProfilesManager,
         esqlVariables: searchRequest.esqlVariables,
         searchSessionId: searchRequest.searchSessionId,

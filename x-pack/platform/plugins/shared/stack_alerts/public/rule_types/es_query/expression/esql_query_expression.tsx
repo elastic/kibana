@@ -25,7 +25,8 @@ import {
   getProjectRoutingFromEsqlQuery,
   getSourceCommandQueryFromESQLQuery,
 } from '@kbn/esql-utils';
-import { type AggregateQuery } from '@kbn/es-query';
+import { type AggregateQuery, getTimeZoneFromSettings } from '@kbn/es-query';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
   firstFieldOption,
@@ -116,7 +117,7 @@ const keepRecommendedWarning = i18n.translate(
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data }) => {
-  const { http, isServerless, cps } = useTriggerUiActionServices();
+  const { http, isServerless, uiSettings, cps } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
   const isEdit = !!metadata?.isEdit;
 
@@ -217,9 +218,11 @@ export const EsqlQueryExpression: React.FC<
     setIsLoading(true);
     const { timeFilter, timeRange } = getTimeFilter(timeField, window);
 
+    const timezone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
     const { rawResponse } = await data.search.esql({
       query: esqlQuery.esql,
       dropNullColumns: true,
+      timeZone: timezone ? getTimeZoneFromSettings(timezone) : undefined,
       filter: timeFilter,
       kibanaQueryContext: { timeRange },
     });
@@ -258,6 +261,7 @@ export const EsqlQueryExpression: React.FC<
     currentRuleParams,
     esqlQuery,
     data.search,
+    uiSettings,
     timeField,
     isServerless,
     groupBy,

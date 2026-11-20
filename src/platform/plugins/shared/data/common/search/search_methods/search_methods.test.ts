@@ -118,22 +118,17 @@ describe('SearchMethodsService', () => {
       expect(rawResponse.values).toEqual([]);
     });
 
-    it('defaults locale from the getLocale dependency and lets params override it', async () => {
+    it('sends neither locale nor time zone unless the caller provides them', async () => {
       mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
-      service = new SearchMethodsService(mockSearch, {
-        getEsQueryConfig,
-        getLocale: () => 'fr-FR',
-      });
 
       await service.esql({ query: 'FROM logs' });
-      expect(mockSearch).toHaveBeenLastCalledWith(
-        { params: expect.objectContaining({ locale: 'fr-FR' }) },
-        expect.anything()
-      );
+      const { params: defaults } = mockSearch.mock.calls[0][0];
+      expect(defaults.locale).toBeUndefined();
+      expect(defaults.time_zone).toBeUndefined();
 
-      await service.esql({ query: 'FROM logs', locale: 'en-US' });
+      await service.esql({ query: 'FROM logs', locale: 'en-US', timeZone: 'Europe/Paris' });
       expect(mockSearch).toHaveBeenLastCalledWith(
-        { params: expect.objectContaining({ locale: 'en-US' }) },
+        { params: expect.objectContaining({ locale: 'en-US', time_zone: 'Europe/Paris' }) },
         expect.anything()
       );
     });
@@ -685,12 +680,6 @@ describe('SearchMethodsService', () => {
         mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
       });
 
-      it('defaults the time zone from advanced settings even with no context fields', async () => {
-        await service.esql({ query: 'FROM logs' });
-
-        expect(getRequestParams().time_zone).toBe('America/New_York');
-      });
-
       it('combines kibanaFilters, kqlQuery, and timeRange into the request filter', async () => {
         await service.esql({
           query: 'FROM logs',
@@ -769,12 +758,6 @@ describe('SearchMethodsService', () => {
         });
 
         expect(getRequestParams().filter).toBeUndefined();
-      });
-
-      it('prefers the timeZone from the caller', async () => {
-        await service.esql({ query: 'FROM logs', timeZone: 'Europe/Paris' });
-
-        expect(getRequestParams().time_zone).toBe('Europe/Paris');
       });
     });
   });

@@ -10,12 +10,7 @@
 import { lastValueFrom, takeWhile } from 'rxjs';
 import { castArray } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  buildEsQuery,
-  getTimeZoneFromSettings,
-  isOfQueryType,
-  type EsQueryConfig,
-} from '@kbn/es-query';
+import { buildEsQuery, isOfQueryType, type EsQueryConfig } from '@kbn/es-query';
 import { fixESQLQueryWithVariables, getEsqlInspectorStats, getNamedParams } from '@kbn/esql-utils';
 import type {
   ISearchMethods,
@@ -72,10 +67,6 @@ export interface SearchMethodsServiceDependencies {
    * `courier:customRequestPreference` advanced settings. Omit where those settings don't apply.
    */
   getRequestPreference?: () => string | undefined;
-  /**
-   * Resolves the locale sent with ES|QL requests when the caller does not provide one
-   */
-  getLocale?: () => string;
   /**
    * Resolves the project routing a request is actually sent with, given the caller's override.
    * Used to log the effective routing to Inspector. Omit where cross-project search doesn't apply.
@@ -597,10 +588,6 @@ export class SearchMethodsService implements ISearchMethods {
       query: esqlQuery,
       params: namedParams.length ? namedParams : undefined,
       filter: this.mergeEsqlFilters(contextFilter, params.filter),
-      timeZone:
-        params.timeZone ??
-        (esQueryConfig.dateFormatTZ ? getTimeZoneFromSettings(esQueryConfig.dateFormatTZ) : 'UTC'),
-      locale: params.locale ?? this.deps.getLocale?.(),
     };
   }
 

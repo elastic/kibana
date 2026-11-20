@@ -265,12 +265,12 @@ export interface IEsqlSearchParams extends BaseSearchParams {
   filter?: estypes.QueryDslQueryContainer | estypes.QueryDslQueryContainer[];
 
   /**
-   * Time zone for date calculations. Defaults to the `dateFormat:tz` advanced setting.
+   * Time zone for date calculations. Not sent when omitted, so Elasticsearch uses UTC.
    */
   timeZone?: string;
 
   /**
-   * Locale for string operations
+   * Locale for string operations. Not sent when omitted, so Elasticsearch uses its default.
    */
   locale?: string;
 

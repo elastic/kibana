@@ -17,6 +17,7 @@ import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService, dataViewsService } from '../../../services/kibana_services';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
+import { getControlsTimezone } from '../../utils';
 import { buildESQLPreFilter, getFetchContextFilters, getFetchContextTimeRange } from '../utils';
 import type { DataControlStateManager } from '../data_control_manager';
 
@@ -146,6 +147,7 @@ export async function hasNoEsqlResults({
     signal: abortSignal,
     search: dataService.search,
     esqlVariables: esqlVariables ?? [],
+    timezone: getControlsTimezone(),
   });
   if (!getESQLSingleColumnValues.isSuccess(result)) {
     throw result.errors[0];

@@ -12,8 +12,10 @@ import { i18n } from '@kbn/i18n';
 import type { ISearchMethods } from '@kbn/search-types';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import { getTimeZoneFromSettings, type Filter } from '@kbn/es-query';
 import { getSideEffectFunction, type KibanaContext } from '..';
+import { UI_SETTINGS } from '../../constants';
+import type { UiSettingsCommon } from '../..';
 import { getAbsoluteTimeRange } from '../../query/timefilter/get_time';
 
 declare global {
@@ -54,6 +56,7 @@ interface EsqlFnArguments {
 
 interface EsqlStartDependencies {
   searchService: ISearchMethods;
+  uiSettings: UiSettingsCommon;
 }
 
 export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
@@ -118,7 +121,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
       { query, timeField, locale, titleForInspector, descriptionForInspector, ignoreGlobalFilters },
       { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId, getExecutionContext }
     ) {
-      const { searchService } = await getStartDependencies(() => {
+      const { searchService, uiSettings } = await getStartDependencies(() => {
         const request = getKibanaRequest?.();
         if (!request) {
           throw new Error(
@@ -157,9 +160,12 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         timeRange = getAbsoluteTimeRange(timeRange, { forceNow: new Date(input.now) });
       }
 
+      const dateFormatTZ = await uiSettings.get<string>(UI_SETTINGS.DATEFORMAT_TZ);
+
       const { datatable } = await searchService.esql(
         {
           query,
+          timeZone: dateFormatTZ ? getTimeZoneFromSettings(dateFormatTZ) : 'UTC',
           locale,
           kibanaQueryContext: {
             timeRange,

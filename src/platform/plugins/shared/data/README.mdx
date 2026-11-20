@@ -248,7 +248,8 @@ When `kibanaQueryContext` is provided, the method:
 
 - combines `kibanaFilters`, `kqlQuery` (KQL or Lucene; ES|QL queries are ignored), and a range filter on `timeField` for `timeRange` with any raw DSL `filter` you pass. Without a `timeField`, the time range is only applied through the named params below.
 - adds the `?_tstart` and `?_tend` named params from `timeRange`, and the values of control variables used in the query, to `params`.
-- always defaults `timeZone` to the `dateFormat:tz` advanced setting when `timeZone` is not set.
+
+The method does not default `timeZone` or `locale`; Elasticsearch's defaults apply unless the caller passes them (for example `timeZone` from the `dateFormat:tz` advanced setting).
 
 
 ### Inspector Integration

@@ -74,8 +74,6 @@ export const getEsqlDocumentCountStats = async ({
       kibanaQueryContext: {
         timeRange: { from: new Date(earliest).toISOString(), to: new Date(latest).toISOString() },
       },
-      // The zero-fill below aligns bucket keys to UTC epoch multiples, so BUCKET() must too
-      timeZone: 'UTC',
     },
     { abortSignal: signal }
   );

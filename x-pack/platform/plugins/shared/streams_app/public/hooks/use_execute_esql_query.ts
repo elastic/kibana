@@ -7,6 +7,7 @@
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { getTimeZoneFromSettings } from '@kbn/es-query';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { buildEsqlFilter } from '@kbn/streams-plugin/public';
@@ -21,6 +22,7 @@ interface ExecuteEsqlParams {
   start?: number;
   end?: number;
   dropNullColumns?: boolean;
+  timezone?: string;
   /** Required so KQL → ES|QL `filter` respects Advanced Settings (e.g. `query:allowLeadingWildcards`). */
   uiSettings: IUiSettingsClient;
 }
@@ -41,6 +43,7 @@ export async function executeEsqlQuery({
   kuery,
   start,
   end,
+  timezone,
   uiSettings,
 }: ExecuteEsqlParams): Promise<ESQLSearchResponse> {
   const esQueryConfig = getEsQueryConfig(uiSettings);
@@ -50,6 +53,7 @@ export async function executeEsqlQuery({
     {
       query,
       dropNullColumns,
+      timeZone: timezone ? getTimeZoneFromSettings(timezone) : undefined,
       filter: combinedFilter,
       kibanaQueryContext: {
         timeRange:
