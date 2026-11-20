@@ -174,9 +174,8 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     }),
 
     // BEHAVIORS ------------------------------------------------------------
-    // Behaviors are reset periodically by the history snapshot feature
-    // The current reset implementation only resets lists and strings
-    // if we ever add a boolean, reset via snapshot needs to be updated
+    // Behaviors are written only through the CRUD API. The history snapshot copies them as-is
+    // and does not reset them on the latest index.
     managedValue({
       destination: 'entity.behaviors.rule_names',
       mapping: { type: 'keyword' },
