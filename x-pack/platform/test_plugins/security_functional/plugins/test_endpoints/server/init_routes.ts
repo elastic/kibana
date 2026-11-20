@@ -18,7 +18,7 @@ import {
   type PluginInitializerContext,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
+import type { Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import {
   ES_CLIENT_AUTHENTICATION_HEADER,
@@ -68,6 +68,21 @@ const getReceivedSelfCallHeaders = (headers: Headers, uiam: UiamAPIKeysType | nu
     attestation: headers[UIAM_INTERNAL_CALLER_ATTESTATION_HEADER] !== undefined,
   };
 };
+
+/**
+ * A fake request that carries `credential`, for the routes that act on behalf of one. Without a
+ * credential, the incoming request is used as it is.
+ */
+const withCredential = (
+  request: KibanaRequest,
+  { authcScheme = 'ApiKey', credential }: { authcScheme?: string; credential?: string }
+): KibanaRequest =>
+  credential
+    ? kibanaRequestFactory({
+        headers: { ...request.headers, authorization: `${authcScheme} ${credential}` },
+        path: request.url.pathname,
+      })
+    : request;
 
 export function initRoutes(
   initializerContext: PluginInitializerContext,
@@ -1388,19 +1403,7 @@ export function initRoutes(
           });
         }
 
-        let requestToUse = request;
-        if (credential) {
-          // Create a new request with the provided authentication header
-          const requestHeaders: Headers = {
-            ...request.headers,
-            authorization: `${authcScheme} ${credential}`,
-          };
-          const fakeRawRequest: FakeRawRequest = {
-            headers: requestHeaders,
-            path: request.url.pathname,
-          };
-          requestToUse = kibanaRequestFactory(fakeRawRequest);
-        }
+        const requestToUse = withCredential(request, { authcScheme, credential });
 
         const result = await security.authc.apiKeys.uiam.grant(requestToUse, {
           name,
@@ -1416,6 +1419,58 @@ export function initRoutes(
         return response.ok({ body: result });
       } catch (err) {
         logger.error(`Failed to grant UIAM API key: ${err}`, err);
+        return response.customError({
+          statusCode: 500,
+          body: { message: err.message },
+        });
+      }
+    }
+  );
+
+  // UIAM API Key Copy Route
+  router.post(
+    {
+      path: '/test_endpoints/uiam/api_keys/_copy',
+      validate: {
+        body: schema.object({
+          name: schema.string({ maxLength: 256 }),
+          // Omit both to copy the incoming request's own credential, the way the callers that copy
+          // on behalf of an end user do it.
+          authcScheme: schema.maybe(schema.string({ maxLength: 32 })),
+          credential: schema.maybe(schema.string({ maxLength: 4096 })),
+        }),
+      },
+      security: {
+        authc: {
+          enabled: 'optional',
+          reason:
+            'UIAM test endpoints may use explicit API key credentials instead of session auth',
+        },
+        authz: { enabled: false, reason: 'Test endpoint for UIAM API key operations' },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { name, authcScheme, credential } = request.body;
+        const [{ security }] = await core.getStartServices();
+
+        if (!security.authc.apiKeys.uiam) {
+          return response.badRequest({
+            body: { message: 'UIAM API keys service is not available' },
+          });
+        }
+
+        const requestToUse = withCredential(request, { authcScheme, credential });
+
+        const result = await security.authc.apiKeys.uiam.copy(requestToUse, { name });
+
+        if (!result) {
+          return response.badRequest({ body: { message: 'Failed to copy UIAM API key' } });
+        }
+
+        return response.ok({ body: result });
+      } catch (err) {
+        logger.error(`Failed to copy UIAM API key: ${err}`, err);
         return response.customError({
           statusCode: 500,
           body: { message: err.message },
@@ -1467,18 +1522,10 @@ export function initRoutes(
           credentialToUse = getUiamApiKeySecret(task.uiamApiKey);
         }
 
-        let requestToUse = request;
-        if (credentialToUse) {
-          const requestHeaders: Headers = {
-            ...request.headers,
-            authorization: `${authcScheme} ${credentialToUse}`,
-          };
-          const fakeRawRequest: FakeRawRequest = {
-            headers: requestHeaders,
-            path: request.url.pathname,
-          };
-          requestToUse = kibanaRequestFactory(fakeRawRequest);
-        }
+        const requestToUse = withCredential(request, {
+          authcScheme,
+          credential: credentialToUse,
+        });
 
         const result = await security.authc.apiKeys.uiam.invalidate(requestToUse, { id });
 

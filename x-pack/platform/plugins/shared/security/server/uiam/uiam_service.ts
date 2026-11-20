@@ -117,6 +117,13 @@ export interface GrantUiamApiKeyResponse {
   description: string;
 }
 
+const cloneApiKeyResponseSchema = lazySchema(() =>
+  z.object({ id: z.string().min(1), key: z.string().min(1), description: z.string() })
+);
+
+/** A cloned key is returned in the same shape as a granted one. */
+export type CloneUiamApiKeyResponse = z.infer<typeof cloneApiKeyResponseSchema>;
+
 /**
  * Represents a single key entry in the convert API keys request body.
  */
@@ -313,6 +320,21 @@ export interface UiamServicePublic {
     params: GrantUiamAPIKeyParams,
     clientAuthentication?: UiamClientAuthentication | null
   ): Promise<GrantUiamApiKeyResponse>;
+
+  /**
+   * Clones an internal UIAM API key. Unlike a key granted from another key, which belongs to that
+   * key, the clone keeps the creator of the key it copies. UIAM authenticates the call by Kibana's
+   * client certificate alone, so it carries neither the key's authorization nor client
+   * authentication. A key that can't be cloned, such as a revoked one, is refused with a 400. The
+   * clone has no expiration of its own: it expires when the key it copies does.
+   * @param authorization The `ApiKey` credential of the internal key to clone.
+   * @param params The name of the new key.
+   * @returns A promise that resolves to the cloned key's details.
+   */
+  cloneApiKey(
+    authorization: HTTPAuthorizationHeader,
+    params: { name: string }
+  ): Promise<CloneUiamApiKeyResponse>;
 
   /**
    * Exchanges an OAuth access token for an ephemeral UIAM token. Validates that the audience
@@ -843,6 +865,38 @@ export class UiamService implements UiamServicePublic {
 
       throw err;
     }
+  }
+
+  /**
+   * See {@link UiamServicePublic.cloneApiKey}.
+   */
+  async cloneApiKey(
+    authorization: HTTPAuthorizationHeader,
+    { name }: { name: string }
+  ): Promise<CloneUiamApiKeyResponse> {
+    this.#logger.debug('Attempting to clone an API key.');
+
+    // The key goes in the body, because the client certificate authenticates the call.
+    const requestOptions: RequestInit & { dispatcher?: Agent } = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'User-Agent': this.#userAgentHeader },
+      body: JSON.stringify({ api_key: authorization.credentials, description: name }),
+      dispatcher: this.#dispatcher,
+    };
+
+    const response = await UiamService.#parseUiamResponse(
+      await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_clone`, requestOptions)
+    );
+
+    const parsed = cloneApiKeyResponseSchema.safeParse(response);
+    if (!parsed.success) {
+      throw new Error(
+        `UIAM returned an unexpected response when cloning an API key: ${parsed.error.message}`
+      );
+    }
+
+    this.#logger.debug(`Successfully cloned an API key into the API key with id ${parsed.data.id}`);
+    return parsed.data;
   }
 
   /**

@@ -1394,6 +1394,66 @@ describe('UiamService', () => {
     });
   });
 
+  describe('#cloneApiKey', () => {
+    const source = new HTTPAuthorizationHeader('ApiKey', 'essu_source_key');
+
+    it('asks UIAM to clone the key, authenticated by the client certificate alone', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          id: 'clone-id',
+          key: 'essu_clone_key',
+          description: 'my-clone',
+          organization_id: 'org-id',
+          internal: true,
+          role_assignments: {},
+          creation_date: '2026-11-13T00:00:00Z',
+        }),
+      });
+
+      await expect(uiamService.cloneApiKey(source, { name: 'my-clone' })).resolves.toEqual({
+        id: 'clone-id',
+        key: 'essu_clone_key',
+        description: 'my-clone',
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_clone', {
+        method: 'POST',
+        // Neither the key's `Authorization` nor Kibana's shared secret is sent.
+        headers: { 'Content-Type': 'application/json', 'User-Agent': 'Kibana/9.0.0' },
+        body: JSON.stringify({ api_key: 'essu_source_key', description: 'my-clone' }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it.each([
+      ['no key', {}],
+      ['an empty key', { id: 'clone-id', key: '', description: 'my-clone' }],
+      ['an empty body', undefined],
+      ['a key that is not a string', { id: 'clone-id', key: 1, description: 'my-clone' }],
+    ])('rejects a response with %s', async (_, body) => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 200, json: async () => body });
+
+      await expect(uiamService.cloneApiKey(source, { name: 'my-clone' })).rejects.toThrow(
+        'UIAM returned an unexpected response when cloning an API key'
+      );
+    });
+
+    it('does not log the key it clones or the key it gets', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({ id: 'clone-id', key: 'essu_clone_key', description: 'my-clone' }),
+      });
+
+      await uiamService.cloneApiKey(source, { name: 'my-clone' });
+
+      const logged = JSON.stringify(uiamServiceLogger.debug.mock.calls);
+      expect(logged).not.toContain('essu_source_key');
+      expect(logged).not.toContain('essu_clone_key');
+    });
+  });
+
   describe('#revokeApiKey', () => {
     const createApiKeyRequest = () =>
       httpServerMock.createKibanaRequest({ headers: { authorization: 'ApiKey essu_api_key' } });

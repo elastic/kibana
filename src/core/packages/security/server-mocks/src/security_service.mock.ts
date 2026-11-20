@@ -163,6 +163,7 @@ const createRequestHandlerContextMock = () => {
         invalidate: jest.fn(),
         uiam: {
           grant: jest.fn(),
+          copy: jest.fn(),
           invalidate: jest.fn(),
           convert: jest.fn(),
         },

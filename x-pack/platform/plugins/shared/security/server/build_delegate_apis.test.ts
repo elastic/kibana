@@ -611,6 +611,17 @@ describe('buildSecurityApi', () => {
         expect(authc.apiKeys.uiam!.grant).toHaveBeenCalledWith(request, grantParams);
       });
 
+      it('should properly delegate copy to the service', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const copyParams = { name: 'test-key' };
+
+        await api.authc.apiKeys.uiam!.copy(request, copyParams);
+
+        expect(authc.apiKeys.uiam!.copy).toHaveBeenCalledTimes(1);
+        expect(authc.apiKeys.uiam!.copy).toHaveBeenCalledWith(request, copyParams);
+        expect(authc.apiKeys.uiam!.grant).not.toHaveBeenCalled();
+      });
+
       it('should properly delegate invalidate to the service', async () => {
         const request = httpServerMock.createKibanaRequest();
         const invalidateParams = {

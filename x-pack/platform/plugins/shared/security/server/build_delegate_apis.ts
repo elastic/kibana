@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type {
+  CopyUiamAPIKeyParams,
   CoreSecurityDelegateContract,
   GrantUiamAPIKeyParams,
   HTTPAuthorizationHeader,
@@ -127,6 +128,8 @@ export const buildSecurityApi = ({
           ? {
               grant: (request: KibanaRequest, grantUiamApiKeyParams: GrantUiamAPIKeyParams) =>
                 getAuthc().apiKeys.uiam!.grant(request, grantUiamApiKeyParams),
+              copy: (request: KibanaRequest, copyUiamApiKeyParams: CopyUiamAPIKeyParams) =>
+                getAuthc().apiKeys.uiam!.copy(request, copyUiamApiKeyParams),
               invalidate: (
                 request: KibanaRequest,
                 invalidateUiamApiKeyParams: InvalidateUiamAPIKeyParams

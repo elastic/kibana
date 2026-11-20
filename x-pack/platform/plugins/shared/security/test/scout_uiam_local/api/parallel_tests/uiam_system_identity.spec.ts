@@ -10,7 +10,6 @@ import { readFileSync } from 'node:fs';
 import { Agent, fetch } from 'undici';
 
 import { getKbnServerlessUiamCert, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-import type { KbnServerlessProjectType } from '@kbn/dev-utils';
 import {
   MOCK_IDP_UIAM_ORGANIZATION_ID,
   MOCK_IDP_UIAM_PROJECT_ID,
@@ -21,17 +20,9 @@ import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
-import { COMMON_UNSAFE_HEADERS } from '../fixtures';
+import { COMMON_UNSAFE_HEADERS, UIAM_PROJECT_TYPES } from '../fixtures';
 
 const UIAM_AUTHENTICATE_URL = `${MOCK_IDP_UIAM_SERVICE_URL}/uiam/api/v1/authentication/_authenticate`;
-
-/** Maps the `--serverless=` project type onto the one the UIAM certificates are named for. */
-const UIAM_PROJECT_TYPES: Readonly<Record<string, KbnServerlessProjectType>> = {
-  es: 'search',
-  oblt: 'observability',
-  security: 'security',
-  vectordb: 'vectordb',
-};
 
 /**
  * The certificate identity UIAM derives Kibana's project service account from: the `EIDENT.` DNS

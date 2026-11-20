@@ -20,4 +20,6 @@ export const UIAM_ERROR_CODES = {
   AUTHZ_DENY: '0x93B121',
   ES_API_KEY_NOT_CLOUD_USER: '0x357391',
   ES_API_KEY_CREATOR_NOT_MEMBER_OF_ORG: '0xBE2B58',
+  /** The caller did not authenticate as a project service account, as the clone endpoint requires. */
+  PROJECT_PRINCIPAL_REQUIRED: '0x9F3B1D',
 } as const;

@@ -24,6 +24,7 @@ export const apiKeysMock = {
       invalidateAsInternalUser: jest.fn(),
       uiam: {
         grant: jest.fn(),
+        copy: jest.fn(),
         invalidate: jest.fn(),
         convert: jest.fn(),
         getInternalCallerAttestationHeaders: jest.fn().mockReturnValue({}),

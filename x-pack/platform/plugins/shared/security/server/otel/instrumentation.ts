@@ -37,11 +37,22 @@ interface OAuthTokenExchangeAttributes extends BasicAttributes {
   oauthErrorCode?: string;
 }
 
+interface ApiKeyCopyFallbackAttributes {
+  /**
+   * Why UIAM refused the clone: it did not authenticate the call, did not accept Kibana as a
+   * project service account, or has no clone endpoint.
+   */
+  reason: 'client_not_authenticated' | 'client_not_service_account' | 'endpoint_not_found';
+}
+
+export type ApiKeyCopyFallbackReason = ApiKeyCopyFallbackAttributes['reason'];
+
 export type SecurityTelemetryAttributes = Partial<BasicAttributes> &
   Partial<PrivilegeRegistrationAttributes> &
   Partial<UserAuthenticationAttributes> &
   Partial<GetCurrentProfileAttributes> &
-  Partial<OAuthTokenExchangeAttributes>;
+  Partial<OAuthTokenExchangeAttributes> &
+  Partial<ApiKeyCopyFallbackAttributes>;
 
 class SecurityTelemetry {
   private readonly meter = metrics.getMeter('kibana.security');
@@ -55,6 +66,7 @@ class SecurityTelemetry {
   private readonly getCurrentProfileIdCounter: Counter<Attributes>;
   private readonly oauthTokenExchangeAttempts: Counter<Attributes>;
   private readonly oauthTokenExchangeDuration: Histogram<Attributes>;
+  private readonly apiKeyCopyFallbackCounter: Counter<Attributes>;
 
   // Adds more boundaries in 50-500ms range where most operations typically fall
   private readonly DEFAULT_BUCKET_BOUNDARIES = [
@@ -159,6 +171,13 @@ class SecurityTelemetry {
         },
       }
     );
+
+    this.apiKeyCopyFallbackCounter = this.meter.createCounter('auth.uiam.api_key_copy.fallbacks', {
+      description:
+        'Number of UIAM API key copies that fell back from clone to grant because UIAM refused the clone',
+      unit: '1',
+      valueType: ValueType.INT,
+    });
   }
 
   private transformAttributes<T extends SecurityTelemetryAttributes>(attributes: T): Attributes {
@@ -249,6 +268,12 @@ class SecurityTelemetry {
       this.transformAttributes<OAuthTokenExchangeAttributes>(attributes);
     this.oauthTokenExchangeAttempts.add(1, transformedAttributes);
     this.oauthTokenExchangeDuration.record(duration, transformedAttributes);
+  };
+
+  recordApiKeyCopyFallback = (attributes: ApiKeyCopyFallbackAttributes) => {
+    const transformedAttributes =
+      this.transformAttributes<ApiKeyCopyFallbackAttributes>(attributes);
+    this.apiKeyCopyFallbackCounter.add(1, transformedAttributes);
   };
 }
 
