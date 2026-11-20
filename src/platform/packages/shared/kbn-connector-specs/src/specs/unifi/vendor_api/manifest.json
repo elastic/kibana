@@ -340,6 +340,10 @@
       "apiVersion": "10.4.57",
       "fetchedAt": "2026-10-07T20:20:26.345Z",
       "format": "openapi",
+      "latest": {
+        "pattern": "/network/(v\\d+(?:\\.\\d+)+)",
+        "url": "https://developer.ui.com/network/"
+      },
       "note": "UniFi publishes a file per release and no URL for the latest. Refresh by moving the version.",
       "pinned": true,
       "url": "https://developer.ui.com/network/v10.4.57/openapi.json"
@@ -348,6 +352,10 @@
       "apiVersion": "0.0.0",
       "fetchedAt": "2026-10-07T20:20:26.347Z",
       "format": "openapi",
+      "latest": {
+        "pattern": "/protect/(v\\d+(?:\\.\\d+)+)",
+        "url": "https://developer.ui.com/protect/"
+      },
       "note": "UniFi publishes a file per release and no URL for the latest. Refresh by moving the version.",
       "pinned": true,
       "url": "https://developer.ui.com/protect/v7.1.87/openapi.json"

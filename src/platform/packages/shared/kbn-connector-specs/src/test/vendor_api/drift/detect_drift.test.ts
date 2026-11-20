@@ -514,6 +514,57 @@ components:
     });
   });
 
+  describe('with a page naming the latest version', () => {
+    const VERSIONED_URL = 'https://specs.example.com/v1/openapi.yaml';
+    const RELEASES_URL = 'https://specs.example.com/releases';
+
+    beforeEach(async () => {
+      const manifestFile = path.join(directory, 'manifest.json');
+      const manifest = JSON.parse(await fs.readFile(manifestFile, 'utf8'));
+      manifest.sources.main = {
+        ...manifest.sources.main,
+        url: VERSIONED_URL,
+        latest: { url: RELEASES_URL, pattern: '/(v\\d+)/' },
+      };
+      await fs.writeFile(manifestFile, JSON.stringify(manifest));
+      documents[VERSIONED_URL] = documents[SPEC_URL];
+    });
+
+    it('opens an issue when the vendor names a higher version than the URL', async () => {
+      documents[RELEASES_URL] = 'see /v1/ and /v2/';
+
+      const { sources, outcome } = await detect();
+
+      expect(sources.main).toMatchObject({
+        status: 'unchanged',
+        newerVersion: { current: 'v1', latest: 'v2' },
+      });
+      expect(outcome).toBe('issue');
+    });
+
+    it('raises nothing when the URL is at the highest version', async () => {
+      documents[RELEASES_URL] = 'see /v1/';
+
+      const { sources, outcome } = await detect();
+
+      expect(sources.main.newerVersion).toBeUndefined();
+      expect(outcome).toBe('none');
+    });
+
+    it('warns, and opens no issue, when the page cannot be read', async () => {
+      const warnings: string[] = [];
+
+      const { outcome } = await detect({
+        log: { info: () => {}, warning: (warning) => warnings.push(warning) },
+      });
+
+      expect(outcome).toBe('none');
+      expect(warnings).toEqual([
+        expect.stringContaining("couldn't check main for a newer version"),
+      ]);
+    });
+  });
+
   it('opens an issue when the latest spec does not load', async () => {
     delete documents[SPEC_URL];
 

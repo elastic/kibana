@@ -46,10 +46,14 @@ export const factsOf = (
     `| **Connector** | ${link(code(drift.connector), folder)} |`,
     `| **Result** | ${resultOf(drift.verdict, failing.length > 0)} |`,
   ];
-  for (const [source, { status, error, url, servers }] of Object.entries(drift.sources)) {
+  for (const [source, { status, error, url, servers, newerVersion }] of Object.entries(
+    drift.sources
+  )) {
     const latest = url ? `[Latest](${url})` : 'Latest';
-    const state =
-      status === 'unreachable' ? `unreachable: ${code(error ?? 'unknown error')}` : status;
+    const state = [
+      status === 'unreachable' ? `unreachable: ${code(error ?? 'unknown error')}` : status,
+      ...(newerVersion ? [`newer version ${code(newerVersion.latest)}`] : []),
+    ].join(', ');
     facts.push(
       `| **Vendor spec ${code(source)}** | ${latest} (${cell(state)}) · ${link(
         'Committed snapshot',

@@ -194,6 +194,18 @@ describe('MCP sources', () => {
     );
   });
 
+  it('accepts a latest page whose pattern finds a version in the URL, and rejects one that does not', () => {
+    const openapi = { format: 'openapi', url: 'https://vendor.example.com/v1.2/openapi.json' };
+    const latest = { url: 'https://vendor.example.com/', pattern: '/(v\\d+\\.\\d+)/' };
+
+    expect(parseManifest(withSource({ ...openapi, latest })).sources.mcp.latest).toEqual(latest);
+    for (const pattern of ['/(v\\d+\\.\\d+)/x', '/v\\d+\\.\\d+/', '(']) {
+      expect(() =>
+        parseManifest(withSource({ ...openapi, latest: { ...latest, pattern } }))
+      ).toThrow(/capture group that finds a version/);
+    }
+  });
+
   it('rejects a source that is both captured and pinned', () => {
     expect(() =>
       parseManifest(withSource({ ...mcp, captured: true, pinned: true, note: 'Both.' }))

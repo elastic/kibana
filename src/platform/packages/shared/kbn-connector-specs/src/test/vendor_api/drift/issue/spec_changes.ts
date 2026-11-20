@@ -31,7 +31,16 @@ export const changeList = (changes: readonly SpecChange[]): string[] => [
 export const specChanges = (drift: ConnectorDrift): string[] => {
   const notes: string[] = [];
   const rows: Array<{ source: string; change: SpecChange }> = [];
-  for (const [name, { status, error, changes }] of Object.entries(drift.sources)) {
+  for (const [name, { status, error, changes, newerVersion }] of Object.entries(drift.sources)) {
+    if (newerVersion) {
+      notes.push(
+        `- ${code(name)}: the vendor has published ${code(
+          newerVersion.latest
+        )}, and the source is at ${code(
+          newerVersion.current
+        )}. Move it with \`--source ${name}=<url>\`, which refreshes the snapshot and shows what the new version changes`
+      );
+    }
     if (status === 'unreachable') {
       notes.push(`- ${code(name)}: unreachable: ${code(error ?? 'unknown error')}`);
     } else if (status === 'changed' && changes === undefined) {

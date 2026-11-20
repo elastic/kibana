@@ -608,6 +608,9 @@ export const updateVendorApi = async ({
       ...(previous?.sources[name]?.pinned && previous.sources[name].url === urls[name]
         ? { pinned: true as const }
         : {}),
+      ...(previous?.sources[name]?.latest && previous.sources[name].url === urls[name]
+        ? { latest: previous.sources[name].latest }
+        : {}),
       ...(pages === undefined ? {} : { pages: [...pages] }),
       ...(apiVersion === undefined ? {} : { apiVersion }),
       fetchedAt: fetchedAt ?? now().toISOString(),

@@ -72,6 +72,16 @@ const sourceSchema = z
      * it means moving the URL. Needs a `note` saying why it can't follow the vendor.
      */
     pinned: z.literal(true).optional(),
+    /**
+     * Where to learn that the vendor has published a newer version than the one the source's URL
+     * names: a page or API response, and a pattern with one capture group that finds a version in
+     * it and in the URL, such as `/network/(v\d+(?:\.\d+)+)`. `--drift` fetches the page, takes
+     * the highest version it names and reports the source when that is above the URL's.
+     */
+    latest: z
+      .object({ url: z.url(), pattern: z.string().min(1) })
+      .strict()
+      .optional(),
     /** The spec's `info.version`, when it has one. */
     apiVersion: z.string().optional(),
     /** When the snapshot last changed, as an ISO date-time. */
@@ -101,6 +111,22 @@ const sourceSchema = z
     message: 'A pinned source needs a "note" saying why it can\'t follow the vendor',
     path: ['note'],
   })
+  .refine(
+    ({ latest, url }) => {
+      if (latest === undefined) {
+        return true;
+      }
+      try {
+        return new RegExp(latest.pattern).exec(url)?.[1] !== undefined;
+      } catch {
+        return false;
+      }
+    },
+    {
+      message: '"latest" needs a pattern with a capture group that finds a version in "url"',
+      path: ['latest'],
+    }
+  )
   .refine(({ pinned, captured }) => pinned === undefined || captured === undefined, {
     message: 'A source is captured or pinned, not both: a captured one is never fetched',
     path: ['pinned'],
