@@ -7,13 +7,13 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { listActionsTool } from './list_actions_tool';
-import type { ActionsService } from '../services/actions/actions_service';
+import type { ActionCatalogClient } from '@kbn/proposals-plugin/server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const request = httpServerMock.createKibanaRequest();
 const logger = () => ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() });
 
-const serviceWith = (list: jest.Mock) => ({ list } as Pick<ActionsService, 'list'>);
+const serviceWith = (list: jest.Mock) => ({ list } as ActionCatalogClient);
 
 const assertAlertZeroAccess = jest.fn().mockResolvedValue(undefined);
 
@@ -21,10 +21,7 @@ beforeEach(() => {
   assertAlertZeroAccess.mockReset().mockResolvedValue(undefined);
 });
 
-const run = async (
-  service: Pick<ActionsService, 'list'>,
-  input: { categories?: string[] } = {}
-) => {
+const run = async (service: ActionCatalogClient, input: { categories?: string[] } = {}) => {
   const tool = listActionsTool(() => service, assertAlertZeroAccess);
   const result = await tool.handler(input, {
     logger: logger(),
@@ -62,7 +59,7 @@ describe('listActionsTool', () => {
     });
     const result = await run(serviceWith(list));
     expect(assertAlertZeroAccess).toHaveBeenCalledWith(request, 'read');
-    expect(list).toHaveBeenCalledWith('space-a', request, undefined);
+    expect(list).toHaveBeenCalledWith('space-a', request, { categories: undefined });
     expect(result.results[0].type).toBe(ToolResultType.other);
     expect(result.results[0].data).toMatchObject({
       total: 2,
@@ -78,7 +75,7 @@ describe('listActionsTool', () => {
   it('forwards categories to the service and reports empty results explicitly', async () => {
     const list = jest.fn().mockResolvedValue({ actions: [], total: 0 });
     const result = await run(serviceWith(list), { categories: ['escalate'] });
-    expect(list).toHaveBeenCalledWith('space-a', request, ['escalate']);
+    expect(list).toHaveBeenCalledWith('space-a', request, { categories: ['escalate'] });
     expect(result.results[0].data).toMatchObject({
       total: 0,
       message: 'No actions found in categories: escalate.',

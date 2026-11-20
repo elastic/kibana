@@ -25,6 +25,8 @@ const storageSettings = {
       // Shapes vary per action workflow and are never the query surface.
       // Flattened keeps them queryable-enough without a per-action mapping.
       actionInput: types.flattened({}),
+      // The action workflow's own run, for linking to it. Never queried.
+      actionExecutionId: types.keyword({ index: false }),
 
       status: types.keyword({}),
       // Absent while awaiting, which is what `must_not exists` filters on.

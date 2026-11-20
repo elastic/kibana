@@ -9,8 +9,8 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { ActionCatalogClient } from '@kbn/proposals-plugin/server';
 import type { LoadAlertsStepDependencies } from './alert_triage/alert_triage_steps';
-import type { ActionsService } from '../services/actions/actions_service';
 import type { HuntServices } from '../services/watches/hunt/types';
 import {
   getTriageHeadroomStepDefinition,
@@ -50,7 +50,7 @@ export const registerStepDefinitions = ({
   logger,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
-  getActionsService: () => ActionsService;
+  getActionsService: () => ActionCatalogClient;
   getConversations: () => AgentBuilderPluginStart['conversations'];
   resolveChatModel: SummarizeInvestigationStepDependencies['resolveChatModel'];
   getProposals?: SummarizeInvestigationStepDependencies['getProposals'];

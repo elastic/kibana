@@ -190,6 +190,14 @@ export const proposalSchema = lazySchema(() =>
     actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
     /** Inputs for the action workflow. Frozen once the proposal is decided. */
     actionInput: boundedActionInput.optional(),
+    /**
+     * The action workflow's own execution, stamped when the run that executed
+     * it settles the proposal as `succeeded` or `failed`, so a reader can link
+     * to what actually ran. Absent until then, on a proposal with no action,
+     * and whenever that run could not be read back — best-effort, never a
+     * reason to fail the settle.
+     */
+    actionExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
 
     status: proposalStatusSchema,
     /** Absent while the proposal is still awaiting a human. */

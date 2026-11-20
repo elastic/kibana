@@ -603,10 +603,17 @@ describe('runFindingsPass', () => {
   });
 
   describe('proposals', () => {
-    const proposed = (titles: string[] = []) => ({
+    const proposed = (titles: string[] = [], actions: unknown[] = []) => ({
       listTitles: jest.fn().mockResolvedValue(titles),
+      listActions: jest.fn().mockResolvedValue(actions),
       propose: jest.fn().mockResolvedValue(undefined),
     });
+    const openIssue = {
+      workflowId: 'wf-open-issue',
+      name: 'Open GitHub issue',
+      approvalPolicy: 'always-gate',
+      inputSchema: { properties: { actionInput: { type: 'object' } } },
+    };
     const withProposals = {
       ...output,
       proposals: [
@@ -637,6 +644,85 @@ describe('runFindingsPass', () => {
           confidence: 'high',
         },
       });
+    });
+
+    it('lists the action workflows in the final prompt only', async () => {
+      const proposals = proposed([], [openIssue]);
+      const live = setup({ answers: [answerWith(withProposals)], proposals });
+      await run(live.deps, live.memory);
+      expect(proposals.listActions).not.toHaveBeenCalled();
+
+      const final = setup({ answers: [answerWith(withProposals)], proposals });
+      await run(final.deps, final.memory, { answer: 'Root cause: bad deploy' });
+
+      expect(proposals.listActions).toHaveBeenCalledWith({ request });
+      const { system } = final.chatComplete.mock.calls[0][0];
+      expect(system).toBe(
+        buildRecorderSystemPrompt({ final: true, actions: [openIssue as never] })
+      );
+      expect(system).toContain('wf-open-issue');
+    });
+
+    it('keeps the final prompt unchanged when the space has no action workflows', async () => {
+      const proposals = proposed();
+      const { deps, chatComplete, memory } = setup({
+        answers: [answerWith(withProposals)],
+        proposals,
+      });
+
+      await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+      expect(chatComplete.mock.calls[0][0].system).toBe(buildRecorderSystemPrompt({ final: true }));
+    });
+
+    it('runs only a listed action workflow, and does not write one naming an unlisted workflow', async () => {
+      const proposals = proposed([], [openIssue]);
+      const withActions = {
+        ...output,
+        proposals: [
+          {
+            title: 'Open an issue',
+            comment: 'File the regression.',
+            action_workflow_id: 'wf-open-issue',
+            action_input: { repo: 'checkout' },
+          },
+          {
+            title: 'Restart the pods',
+            comment: 'Restart them.',
+            action_workflow_id: 'wf-not-listed',
+            action_input: { namespace: 'prod' },
+          },
+        ],
+      };
+      const { deps, memory } = setup({ answers: [answerWith(withActions)], proposals });
+
+      await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+      expect(proposals.propose).toHaveBeenCalledWith({
+        request,
+        conversationId: 'c1',
+        proposal: {
+          title: 'Open an issue',
+          comment: 'File the regression.',
+          action_workflow_id: 'wf-open-issue',
+          action_input: { repo: 'checkout' },
+        },
+      });
+      expect(proposals.propose).toHaveBeenCalledTimes(1);
+      expect(deps.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('action workflow [wf-not-listed] is not offered')
+      );
+    });
+
+    it('proposes the rest when one proposal cannot be written', async () => {
+      const proposals = proposed();
+      proposals.propose.mockRejectedValueOnce(new Error('boom'));
+      const { deps, memory } = setup({ answers: [answerWith(withProposals)], proposals });
+
+      await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+      expect(proposals.propose).toHaveBeenCalledTimes(2);
+      expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
     });
 
     it('never proposes from a live pass', async () => {

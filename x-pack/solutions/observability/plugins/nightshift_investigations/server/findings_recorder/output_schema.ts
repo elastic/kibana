@@ -106,6 +106,8 @@ export const findingsOutputSchema = lazySchema(() => {
           comment: z.string().min(1),
           impact: z.string().optional(),
           confidence: z.string().optional(),
+          action_workflow_id: z.string().optional(),
+          action_input: z.record(z.string(), z.unknown()).optional(),
         })
       )
       .optional(),
@@ -201,12 +203,24 @@ export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefin
   return description ? { description } : undefined;
 };
 
+/** A proposal the final pass recorded, optionally carried out by an action workflow. */
+export interface RecordedProposal {
+  title: string;
+  comment: string;
+  impact?: string;
+  confidence?: string;
+  /** The action workflow that carries the proposal out once a person approves it. */
+  action_workflow_id?: string;
+  /** That workflow's `actionInput`. Present exactly when `action_workflow_id` is. */
+  action_input?: Record<string, unknown>;
+}
+
 /** A parsed record with its evidence trimmed to what the stores accept. */
 export type FindingsRecord = Omit<
   FindingsOutput,
   'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals'
 > & {
-  proposals?: Array<{ title: string; comment: string; impact?: string; confidence?: string }>;
+  proposals?: RecordedProposal[];
   /** `null` retracts the stored evidence. */
   impact_evidence?: InvestigationEvidence | null;
   impact_entities?: Array<{ name: string; type?: string; evidence?: InvestigationEvidence }>;
@@ -254,13 +268,19 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
       ? {
           proposals: rawProposals
             .slice(0, MAX_PROPOSALS)
-            .map(({ title, comment, impact, confidence }) => ({
+            .map(({ title, comment, impact, confidence, action_workflow_id, action_input }) => ({
               title: truncate(title.trim(), MAX_TITLE_LENGTH),
               comment: truncate(comment, MAX_COMMENT_LENGTH),
               // A value the proposal store does not know is left out, not sent to fail the write.
               ...(impact && proposalImpactSchema.safeParse(impact).success ? { impact } : {}),
               ...(confidence && proposalConfidenceSchema.safeParse(confidence).success
                 ? { confidence }
+                : {}),
+              ...(action_workflow_id?.trim()
+                ? {
+                    action_workflow_id: action_workflow_id.trim(),
+                    action_input: action_input ?? {},
+                  }
                 : {}),
             })),
         }
@@ -430,6 +450,17 @@ export const FINDINGS_JSON_SCHEMA = {
             type: 'string',
             enum: proposalConfidenceSchema.options,
             description: 'How strongly the findings support that this action resolves the issue.',
+          },
+          action_workflow_id: {
+            type: 'string',
+            description:
+              'Id of a workflow listed under Workflows that carries this action out once approved. Omit when none fits, or when none are listed.',
+          },
+          action_input: {
+            type: 'object',
+            additionalProperties: true,
+            description:
+              "The workflow's actionInput, filled to match its input schema. Only with action_workflow_id.",
           },
         },
         required: ['title', 'comment'],

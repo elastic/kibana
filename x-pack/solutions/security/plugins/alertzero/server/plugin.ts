@@ -18,6 +18,7 @@ import { chunk } from 'lodash';
 import type { Subscription } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import type { ActionCatalogClient } from '@kbn/proposals-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentService } from '@kbn/fleet-plugin/server';
 import {
@@ -66,7 +67,6 @@ import { createGetWorkerBlockingReasons } from './services/workers/worker_blocki
 import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { ScanFailuresService } from './services/scan_failures/scan_failures_service';
-import { ActionsService } from './services/actions/actions_service';
 import type { HuntServices } from './services/watches/hunt';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
 import { isSpaceSupported } from './lib/is_space_supported';
@@ -116,7 +116,7 @@ export class AlertZeroPlugin
 
   /** Created during `start`; routes resolve them lazily after managed-workflow initialization. */
   private watchesService?: WatchesService;
-  private actionsService?: ActionsService;
+  private actionsService?: ActionCatalogClient;
   private workersService?: WorkersService;
   private conversationProposalsService?: ConversationProposalsService;
   private proposals?: AlertZeroStartDependencies['proposals'];
@@ -414,13 +414,9 @@ export class AlertZeroPlugin
     );
 
     this.watchesService = new WatchesService();
-    this.actionsService = new ActionsService(
-      () =>
-        this.workflowsManagementApi
-          ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
-          : undefined,
-      this.logger
-    );
+    // The catalog is shared with every solution that proposes actions. AlertZero lists only the
+    // managed installs (the default), never the space's own workflows.
+    this.actionsService = { list: proposals.listActions };
     this.threatIntelSupplyService =
       management != null
         ? new ThreatIntelSupplyService({
@@ -485,7 +481,7 @@ export class AlertZeroPlugin
     return this.requireStarted(this.watchesService, 'Watches service');
   }
 
-  private requireActionsService(): ActionsService {
+  private requireActionsService(): ActionCatalogClient {
     return this.requireStarted(this.actionsService, 'Actions service');
   }
 

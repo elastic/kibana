@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ActionCatalogEntry } from '@kbn/proposals-common';
 import { RECORDER_RESULTS_DIR } from './constants';
 
 /**
@@ -97,16 +98,44 @@ const FILES = `
 
 You can read files in the investigation's workspace with \`recorder_read_file\` (path, optional offset and length). You cannot change anything. Tool results that were too long to be shown are stored in full under ${RECORDER_RESULTS_DIR}, and long command output the agent saved is under /workspace/.tool-output. Read only what you need to write accurate evidence, then give your answer with structuredOutput. The tools named nightshift_sandbox_* in the transcript are the agent's own and cannot be called: use recorder_read_file.`;
 
+/** A catalog entry as the prompt shows it: what the model needs to pick it and fill its input. */
+const describeAction = ({
+  workflowId,
+  name,
+  description,
+  impact,
+  inputSchema,
+}: ActionCatalogEntry) =>
+  `- ${name} (id: ${workflowId}${impact ? `, impact: ${impact}` : ''})${
+    description ? `: ${description}` : ''
+  }\n  input schema: ${JSON.stringify(inputSchema ?? {})}`;
+
+/**
+ * The workflows the space offers to carry an action out. Listed only on the final pass, the one
+ * that proposes, and only when there are any, so a space without them sees no change.
+ */
+const ACTIONS = (actions: readonly ActionCatalogEntry[]) => `
+
+## Workflows
+
+Someone in this space wrote workflows that carry actions out once a person approves them. When one of them carries out a proposal, set action_workflow_id to its id and fill action_input from what the findings show, matching its input schema (the properties of its actionInput): use only values the transcript supports, and leave an optional property out rather than guess it. Keep the comment, which says what the workflow will do and why. A proposal without a fitting workflow is a step the person carries out, and has no action_workflow_id.
+
+${actions.map(describeAction).join('\n')}`;
+
 /** The system prompt for a live pass, or for the final pass with or without workspace files. */
 export const buildRecorderSystemPrompt = ({
   final,
   files = false,
+  actions = [],
 }: {
   final: boolean;
   files?: boolean;
+  /** The action workflows a proposal can carry. Only the final pass proposes. */
+  actions?: readonly ActionCatalogEntry[];
 }): string => {
   if (!final) return LIVE_SYSTEM_PROMPT;
-  return files ? `${FINAL_RECORD(true)}${FILES}` : FINAL_RECORD(false);
+  const record = files ? `${FINAL_RECORD(true)}${FILES}` : FINAL_RECORD(false);
+  return actions.length > 0 ? `${record}${ACTIONS(actions)}` : record;
 };
 
 /** Asked while the agent is still working. */
