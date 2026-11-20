@@ -41,8 +41,9 @@ import {
 export const HYDRATION_TICK_BUDGET_RESPONSES = 2;
 
 /**
- * Share of the response cap a grown batch is projected to fill, assuming every row is as wide as
- * the widest row seen. The rest is headroom for JSON escaping and the `alert_id` column.
+ * Share of the response cap a grown batch is projected to fill, assuming every row takes as many
+ * response bytes as the widest row seen. The rest is headroom for the response envelope and for
+ * rows that encode larger than the longest `data_json` (more quotes or non-ASCII text).
  */
 export const BATCH_TARGET_SHARE = 0.8;
 
@@ -240,16 +241,21 @@ export class HydrateAlertDataStep implements DispatcherStep {
           continue;
         }
 
-        let widestRowBytes = 0;
+        let widestRow: RawAlertData | undefined;
+        let widestRowLength = -1;
         for (const row of batchRows) {
           rows.push(row);
-          const rowBytes = row.data_json?.length ?? 0;
-          hydratedBytes += rowBytes;
-          widestRowBytes = Math.max(widestRowBytes, rowBytes);
+          const rowLength = row.data_json?.length ?? 0;
+          hydratedBytes += rowLength;
+          if (rowLength > widestRowLength) {
+            widestRow = row;
+            widestRowLength = rowLength;
+          }
         }
         processed += batch.length;
 
-        // Rows without data project to Infinity, i.e. the row limit.
+        const widestRowBytes = widestRow ? encodedRowBytes(widestRow) : 0;
+        // An empty response projects to Infinity, i.e. the row limit.
         const projectedSize = Math.min(
           ESQL_QUERY_ROW_LIMIT,
           Math.floor((BATCH_TARGET_SHARE * this.maxResponseSizeBytes) / widestRowBytes)
@@ -303,6 +309,14 @@ function orderBySeries(
     alertIds: seriesIds.flatMap((ids) => [...ids]),
     firstSeriesSize: seriesIds[0]?.size ?? 0,
   };
+}
+
+/**
+ * Bytes a row takes in the ES|QL response `values` array. `data_json` comes back as an escaped
+ * JSON string, so quotes, backslashes and non-ASCII text make it larger than its `length`.
+ */
+function encodedRowBytes({ alert_id: alertId, data_json: dataJson }: RawAlertData): number {
+  return Buffer.byteLength(JSON.stringify([alertId, dataJson]));
 }
 
 function computeTimestampBounds(alerts: readonly Alert[]): TimestampBounds {

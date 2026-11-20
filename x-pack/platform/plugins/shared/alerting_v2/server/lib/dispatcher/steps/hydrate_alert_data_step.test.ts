@@ -497,11 +497,14 @@ describe('HydrateAlertDataStep', () => {
         mockEsClient.esql.query.mockReset();
       };
 
-      // A row this wide projects `idsPerQuery` ids into the target share of the cap.
-      const dataJsonProjecting = (idsPerQuery: number) =>
-        `{"a":"${'x'.repeat(
-          Math.floor((BATCH_TARGET_SHARE * MAX_RESPONSE_SIZE_BYTES) / idsPerQuery) - 8
-        )}"}`;
+      const targetRowBytes = (idsPerQuery: number) =>
+        Math.floor((BATCH_TARGET_SHARE * MAX_RESPONSE_SIZE_BYTES) / idsPerQuery);
+
+      // A row this wide in the response projects `idsPerQuery` ids into the target share of the cap.
+      const dataJsonProjecting = (idsPerQuery: number, alertId: string) => {
+        const overhead = Buffer.byteLength(JSON.stringify([alertId, '{"a":""}']));
+        return `{"a":"${'x'.repeat(targetRowBytes(idsPerQuery) - overhead)}"}`;
+      };
 
       it('starts from the learned batch size and grows it to the row limit when rows are empty', async () => {
         const { queryService, mockEsClient } = createQueryService();
@@ -526,7 +529,7 @@ describe('HydrateAlertDataStep', () => {
         await learnTwoIdsPerQuery(step, mockEsClient);
 
         mockEsClient.esql.query.mockResolvedValue(
-          createAlertDataResponse([{ alert_id: 'ep-0', data_json: dataJsonProjecting(2) }])
+          createAlertDataResponse([{ alert_id: 'ep-0', data_json: dataJsonProjecting(2, 'ep-0') }])
         );
         await step.execute(
           createDispatcherPipelineState({ dispatchable: alertsFrom(5, 6) }),
@@ -548,7 +551,7 @@ describe('HydrateAlertDataStep', () => {
         mockEsClient.esql.query.mockResolvedValue(
           createAlertDataResponse([
             { alert_id: 'ep-0', data_json: '{}' },
-            { alert_id: 'ep-00', data_json: dataJsonProjecting(4) },
+            { alert_id: 'ep-00', data_json: dataJsonProjecting(4, 'ep-00') },
           ])
         );
         await step.execute(
@@ -562,6 +565,36 @@ describe('HydrateAlertDataStep', () => {
           ['ep-11', 'ep-12', 'ep-13', 'ep-14'],
         ]);
       });
+
+      it.each([
+        ['escaped quotes', '\\"'],
+        ['non-ASCII text', 'é'],
+      ])(
+        'projects the batch size from the encoded row size, not the data_json length, with %s',
+        async (_, filler) => {
+          const { queryService, mockEsClient } = createQueryService();
+          const step = createStep(queryService, { maxResponseSize: '1mb' });
+          await learnTwoIdsPerQuery(step, mockEsClient);
+
+          // By length this row would project 4 ids per query; encoded, it takes about twice as many bytes.
+          const dataJson = `{"a":"${filler.repeat(
+            Math.floor((targetRowBytes(4) - 8) / filler.length)
+          )}"}`;
+          mockEsClient.esql.query.mockResolvedValue(
+            createAlertDataResponse([{ alert_id: 'ep-0', data_json: dataJson }])
+          );
+          await step.execute(
+            createDispatcherPipelineState({ dispatchable: alertsFrom(5, 6) }),
+            createLoggerService().loggerService
+          );
+
+          expect(queriedIds(mockEsClient)).toEqual([
+            ['ep-5', 'ep-6'],
+            ['ep-7', 'ep-8'],
+            ['ep-9', 'ep-10'],
+          ]);
+        }
+      );
     });
   });
 
