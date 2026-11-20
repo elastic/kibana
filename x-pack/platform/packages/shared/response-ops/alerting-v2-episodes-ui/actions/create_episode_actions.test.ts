@@ -22,6 +22,8 @@ import type { CanWriteEpisode } from '../utils/episode_write_privilege';
 import { createAddToCaseAction } from './add_to_case';
 import { ADD_TO_CASE_EPISODE_ACTION_ID } from './add_to_case_action_id';
 import { createEpisodeActions } from './create_episode_actions';
+import { createClassicEpisodeSource } from '../classic_alerts/create_classic_episode_source';
+import { CLASSIC_OPEN_IN_DISCOVER_ACTION_ID } from '../classic_alerts/open_in_discover';
 
 const writeAll = { canWriteNativeEpisodes: true, canWriteSourceEpisode: () => true };
 
@@ -132,6 +134,22 @@ describe('createEpisodeActions', () => {
       'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER',
       'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
     ]);
+  });
+
+  it('adds the classic Open in Discover action after the native one when the classic source is attached', () => {
+    const actions = buildActions({
+      ...writeAll,
+      additionalDataSource: createClassicEpisodeSource({ ruleTypeIds: ['test-type'] }),
+    });
+
+    expect(actions.map((a) => a.id).slice(-3)).toEqual([
+      'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER',
+      CLASSIC_OPEN_IN_DISCOVER_ACTION_ID,
+      'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
+    ]);
+    expect(
+      actions.find(({ id }) => id === CLASSIC_OPEN_IN_DISCOVER_ACTION_ID)?.enforcesOwnPrivileges
+    ).toBe(true);
   });
 });
 

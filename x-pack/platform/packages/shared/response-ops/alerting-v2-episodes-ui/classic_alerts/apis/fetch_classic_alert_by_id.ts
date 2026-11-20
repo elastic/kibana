@@ -18,9 +18,7 @@ export interface FetchClassicAlertByIdOptions extends BaseRacOptions {
 
 /**
  * Reads a single classic alert document by its alert uuid (RBAC enforced by
- * the RAC alerts API) so the classic alert fields flyout can be rendered from the
- * v2 episodes table. Returns the raw `kibana.alert.*` fields plus `_index` (used
- * to decide whether an observability details-page deep link applies).
+ * the RAC alerts API). Returns the raw alert document fields plus `_index` and `_id`.
  */
 export const fetchClassicAlertById = async ({
   ruleTypeIds,

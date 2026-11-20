@@ -15,6 +15,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { getBreachEsqlQuery, type FindRulesResponse } from '@kbn/alerting-v2-schemas';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { createEpisodeActions, type EpisodeAction } from '../actions';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import { useSourceWriteAccess } from './use_source_write_access';
@@ -22,6 +23,7 @@ import {
   canOpenDiscover,
   getDiscoverHrefForAlertEventsHistory,
   getDiscoverHrefForRuleAndAlertTimestamp,
+  type DataViewDiscoverLocatorParams,
 } from '../utils/discover_href_for_alert';
 
 type Rule = FindRulesResponse['items'][number];
@@ -75,6 +77,9 @@ export const useEpisodeActions = ({
         additionalDataSource,
         canWriteNativeEpisodes: canWriteAlerts,
         canWriteSourceEpisode,
+        discoverLocator: services.application.capabilities.discover_v2?.show
+          ? services.share.url.locators.get<DataViewDiscoverLocatorParams>(DISCOVER_APP_LOCATOR)
+          : undefined,
         isRuleAvailable: (ruleId) => Boolean(rulesCache[ruleId]),
         getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
           getDiscoverHrefForRuleAndAlertTimestamp({

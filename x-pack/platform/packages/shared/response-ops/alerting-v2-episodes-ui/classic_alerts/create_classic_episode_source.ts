@@ -15,6 +15,8 @@ import {
 } from '@kbn/rule-data-utils';
 import type { EpisodeDataSource, SeverityExtension } from '../types/episode_data_source';
 import { classicActionExtensions } from './action_extensions';
+import { createClassicOpenInDiscoverAction } from './open_in_discover';
+import { STACK_DISCOVER_LINK_RESOLVERS } from './utils/get_classic_alert_discover_target';
 import {
   EPISODE_SEVERITY_WARNING_LABEL,
   EPISODE_SEVERITY_MINOR_LABEL,
@@ -126,6 +128,17 @@ export const createClassicEpisodeSource = ({
     fetchClassicSearchFields({ ruleTypeIds, services, abortSignal }),
 
   actionExtensions: classicActionExtensions,
+
+  discoverLinkResolvers: STACK_DISCOVER_LINK_RESOLVERS,
+
+  // `additionalDataSource` is this source after the host merged in its own Discover resolvers.
+  createActions: (deps) => [
+    createClassicOpenInDiscoverAction({
+      ...deps,
+      ruleTypeIds,
+      resolvers: deps.additionalDataSource?.discoverLinkResolvers ?? STACK_DISCOVER_LINK_RESOLVERS,
+    }),
+  ],
 
   useWriteAccess: useClassicWriteAccess,
 

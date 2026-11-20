@@ -20,6 +20,7 @@ import type { HistogramBucketCount, TimeBucket } from '../utils/histogram_utils'
 import type { EpisodeAction } from '../actions/types';
 import type { EpisodeActionsDeps } from '../actions/create_episode_actions';
 import type { CanWriteEpisode } from '../utils/episode_write_privilege';
+import type { AlertDiscoverLinkResolvers } from '../utils/discover_href_for_alert';
 
 export interface EpisodeDataSourceServices {
   http: HttpStart;
@@ -135,6 +136,8 @@ export interface EpisodeDataSource {
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
   fetchSearchFields?: (params: EpisodeDataSourceBaseParams) => Promise<EpisodeSearchField[]>;
   actionExtensions?: Array<EpisodeActionExtension<any>>;
+  /** Discover resolvers by rule type id for this source's alerts; hosts may add their own. */
+  discoverLinkResolvers?: AlertDiscoverLinkResolvers;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
   /**
    * Resolves which of this source's alerts the user may modify. Called as a React hook, so it can

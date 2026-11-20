@@ -15,6 +15,8 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { DataViewDiscoverLocatorParams } from '../utils/discover_href_for_alert';
 import type { EpisodeActionExtension, EpisodeDataSource } from '../types/episode_data_source';
 import type { AlertEpisode } from '../queries/episodes_query';
 import { isSourceEpisode } from '../queries/episodes_query';
@@ -67,6 +69,9 @@ export interface EpisodeActionsDeps {
    * source's `useWriteAccess`.
    */
   canWriteSourceEpisode?: CanWriteEpisode;
+
+  /** Discover locator for classic (data view) links; undefined when the user cannot open Discover. */
+  discoverLocator?: LocatorPublic<DataViewDiscoverLocatorParams>;
 }
 
 export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] => {

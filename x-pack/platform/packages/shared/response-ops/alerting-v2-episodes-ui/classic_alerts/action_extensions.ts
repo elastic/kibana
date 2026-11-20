@@ -20,7 +20,7 @@ import { isEpisodeSnoozed } from '../utils/is_episode_snoozed';
 import type { ClassicAlertActionContext } from './utils/map_alert';
 import { getErrorMessage } from '../actions/helpers';
 
-const getActionContext = (episode: {
+export const getActionContext = (episode: {
   source_action_context?: unknown;
 }): ClassicAlertActionContext => episode.source_action_context as ClassicAlertActionContext;
 

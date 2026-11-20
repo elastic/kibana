@@ -10,6 +10,7 @@ import { act, render, screen } from '@testing-library/react';
 import { PluginStart } from '@kbn/core-di';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
+import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
 import { useAdditionalEpisodesDataSource } from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
 import {
   useAlertHost,
@@ -118,13 +119,42 @@ describe('AlertingV2AlertsProvider', () => {
     expect(seen.dataSource).toBe(dataSource);
   });
 
-  it('merges host actions into whichever source is used', () => {
-    const dataSource = { id: 'security' } as unknown as EpisodeDataSource;
-    const createActions = jest.fn(() => []);
+  it('appends host actions to the actions of whichever source is used', () => {
+    const sourceAction = { id: 'source-action' } as EpisodeAction;
+    const hostAction = { id: 'host-action' } as EpisodeAction;
+    const dataSource = {
+      id: 'security',
+      createActions: () => [sourceAction],
+    } as unknown as EpisodeDataSource;
 
-    renderProvider({ dataSource, createActions });
+    renderProvider({ dataSource, createActions: () => [hostAction] });
 
-    expect(seen.dataSource).toEqual({ id: 'security', createActions });
+    expect(seen.dataSource?.createActions?.({} as EpisodeActionsDeps)).toEqual([
+      sourceAction,
+      hostAction,
+    ]);
+  });
+
+  it('adds host Discover resolvers to the source resolvers, host winning per rule type', () => {
+    const sourceResolver = jest.fn();
+    const sourceSharedResolver = jest.fn();
+    const hostResolver = jest.fn();
+    const hostSharedResolver = jest.fn();
+    const dataSource = {
+      id: 'security',
+      discoverLinkResolvers: { 'source.rule': sourceResolver, 'shared.rule': sourceSharedResolver },
+    } as unknown as EpisodeDataSource;
+
+    renderProvider({
+      dataSource,
+      discoverLinkResolvers: { 'host.rule': hostResolver, 'shared.rule': hostSharedResolver },
+    });
+
+    expect(seen.dataSource?.discoverLinkResolvers).toEqual({
+      'source.rule': sourceResolver,
+      'shared.rule': hostSharedResolver,
+      'host.rule': hostResolver,
+    });
   });
 
   it('reports the write privilege to the alert components', () => {

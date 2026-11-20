@@ -33,6 +33,7 @@ import {
 } from '@kbn/alerting-v2-episodes-ui/context/alert_host_context';
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
 import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
+import type { AlertDiscoverLinkResolvers } from '@kbn/alerting-v2-episodes-ui/utils/discover_href_for_alert';
 import { LocatorProvider } from './locator_context';
 import { PrivilegeCheckProvider, type PrivilegeCheck } from './privilege_check_context';
 import { bindLocatorsToHost, getAlertingV2Locators } from './bind_locators_to_host';
@@ -59,12 +60,44 @@ export interface AlertingV2AlertsProviderProps {
   privilegeCheck?: PrivilegeCheck;
   dataSource?: EpisodeDataSource;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
+  /** Discover resolvers for the host's rule types, added to the source's own resolvers. */
+  discoverLinkResolvers?: AlertDiscoverLinkResolvers;
   children: React.ReactNode;
 }
 
 export interface InternalAlertsProviderProps extends AlertingV2AlertsProviderProps {
   container: Container;
 }
+
+type HostSourceExtensions = Pick<
+  AlertingV2AlertsProviderProps,
+  'createActions' | 'discoverLinkResolvers'
+>;
+
+/** Adds the host's actions and Discover resolvers to the source without dropping the source's own. */
+const mergeHostIntoSource = (
+  source: EpisodeDataSource,
+  { createActions, discoverLinkResolvers }: HostSourceExtensions
+): EpisodeDataSource => {
+  if (!createActions && !discoverLinkResolvers) return source;
+
+  const { createActions: sourceCreateActions, discoverLinkResolvers: sourceResolvers } = source;
+
+  return {
+    ...source,
+    ...(createActions
+      ? {
+          createActions: (deps: EpisodeActionsDeps) => [
+            ...(sourceCreateActions?.(deps) ?? []),
+            ...createActions(deps),
+          ],
+        }
+      : {}),
+    ...(discoverLinkResolvers
+      ? { discoverLinkResolvers: { ...sourceResolvers, ...discoverLinkResolvers } }
+      : {}),
+  };
+};
 
 const AlertHostScope = ({
   dataSource,
@@ -139,6 +172,7 @@ export const AlertingV2AlertsProvider = ({
   privilegeCheck,
   dataSource: dataSourceProp,
   createActions,
+  discoverLinkResolvers,
   children,
 }: InternalAlertsProviderProps) => {
   const [queryClient] = useState(() => new QueryClient());
@@ -148,10 +182,14 @@ export const AlertingV2AlertsProvider = ({
     return bindLocatorsToHost(getAlertingV2Locators(share), hostApp);
   }, [container, hostApp]);
 
-  const dataSource: EpisodeDataSource = useMemo(() => {
-    const source = dataSourceProp ?? CLASSIC_ALERTS_DATA_SOURCE;
-    return createActions ? { ...source, createActions } : source;
-  }, [dataSourceProp, createActions]);
+  const dataSource: EpisodeDataSource = useMemo(
+    () =>
+      mergeHostIntoSource(dataSourceProp ?? CLASSIC_ALERTS_DATA_SOURCE, {
+        createActions,
+        discoverLinkResolvers,
+      }),
+    [dataSourceProp, createActions, discoverLinkResolvers]
+  );
 
   const hrefs = useMemo(
     () => ({
