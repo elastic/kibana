@@ -116,8 +116,9 @@ export class WorkloadBindingStore {
    * Every binding must be in the same space, since they are written with one request.
    *
    * Resolves one outcome per binding, in the order given: a binding that could not be written
-   * fails on its own and leaves the others written. Rejects, having written nothing, when the
-   * write as a whole fails.
+   * fails on its own and leaves the others written. Rejects when the write as a whole fails. A
+   * rejection does not always mean nothing was written: a request that timed out or lost its
+   * connection may have written some, all or none of the bindings.
    */
   async bulkSet(
     attributes: ReadonlyArray<Omit<WorkloadBindingAttributes, 'bindingKey'>>
@@ -153,7 +154,8 @@ export class WorkloadBindingStore {
    * Removes the bindings, which must all be in the same space. Resolves one outcome per binding,
    * in the order given, with whether there was a binding to remove: removing one that is already
    * gone is not an error, since the caller's desired end state has been reached either way.
-   * Rejects, having removed nothing, when the delete as a whole fails.
+   * Rejects when the delete as a whole fails. As with {@link bulkSet}, a rejection after the
+   * request was sent may have removed some, all or none of the bindings.
    */
   async bulkDelete(
     coordinates: readonly WorkloadBindingCoordinates[]

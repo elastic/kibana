@@ -168,7 +168,11 @@ export type ServiceAccountWorkloadBindingChange =
  * @public
  */
 export interface ServiceAccountWorkloadBindingChangeError {
-  /** The HTTP status code the change would have failed with on its own, e.g. `403`. */
+  /**
+   * The HTTP status code the change would have failed with on its own, e.g. `403`. A status
+   * below 500 means the change was not applied. A status of 500 or above means it may or may not
+   * have been applied, for example when the write timed out after Elasticsearch received it.
+   */
   statusCode: number;
   message: string;
 }

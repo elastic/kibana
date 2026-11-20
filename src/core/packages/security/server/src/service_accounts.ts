@@ -150,6 +150,19 @@ export interface CoreServiceAccountsService {
    *
    * Changes are not applied atomically. A caller that needs its own records to agree with the
    * bindings reconciles them by the results.
+   *
+   * A change that failed with a status of 500 or above may still have been applied, so do not
+   * read it as "nothing changed". Every change can be retried safely: a bind writes the same
+   * binding again, and an unbind of a workload with no binding succeeds. To settle such a change,
+   * send it again, unchanged, until its result is not a server error. Retry with the same account:
+   * a write that timed out can still land after the retry, and then the last write wins.
+   *
+   * A caller that gives up instead, such as an import that skips the workloads whose bind failed,
+   * should unbind those workloads. Right after a timeout this is best effort, because the
+   * original write can still land after the unbind. Two things protect against a binding that is
+   * left behind: register `resolveWorkloads` for the workload type, so the stale binding cleanup
+   * removes bindings of workloads that do not exist, and pass `expectedServiceAccountId` to
+   * {@link withScopedRequestForWorkload}, so a workload never runs as an account it did not record.
    */
   bulkUpdateWorkloadBindings(
     request: KibanaRequest,
