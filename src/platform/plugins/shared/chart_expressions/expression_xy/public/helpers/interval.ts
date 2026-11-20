@@ -49,7 +49,8 @@ export function calculateMinInterval(
 
 /**
  * Returns a function computing where a bucket of the layer's X column ends, or `undefined` when the column has no known interval.
- * Date intervals follow the calendar in `timeZone`, so months, years and days across DST changes get their actual length.
+ * Date intervals follow the calendar in the time zone the buckets were computed in, `timeZone` when the column doesn't say,
+ * so months, years and days across DST changes get their actual length.
  */
 export const getLayerBucketEnd = (
   datatableUtilities: DatatableUtilitiesService,
@@ -60,10 +61,11 @@ export const getLayerBucketEnd = (
   if (!xColumn) {
     return undefined;
   }
-  const dateInterval = datatableUtilities.getDateHistogramMeta(xColumn)?.interval;
-  const dateDuration = dateInterval ? search.aggs.parseInterval(dateInterval) : null;
+  const dateMeta = datatableUtilities.getDateHistogramMeta(xColumn, { timeZone });
+  const dateDuration = dateMeta?.interval ? search.aggs.parseInterval(dateMeta.interval) : null;
   if (dateDuration) {
-    return (bucketStart) => moment.tz(bucketStart, timeZone).add(dateDuration).valueOf();
+    const bucketTimeZone = dateMeta?.timeZone ?? timeZone;
+    return (bucketStart) => moment.tz(bucketStart, bucketTimeZone).add(dateDuration).valueOf();
   }
   const numberInterval = datatableUtilities.getNumberHistogramInterval(xColumn);
   return typeof numberInterval === 'number'

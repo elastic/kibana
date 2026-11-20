@@ -140,6 +140,21 @@ describe('getLayerBucketEnd', () => {
     );
   });
 
+  it('follows the time zone the buckets were computed in over the display time zone', () => {
+    const layer = sampleArgs().args.layers[0] as DataLayerConfig;
+    layer.table.columns[2].meta = {
+      type: 'date',
+      source: 'esaggs',
+      sourceParams: {
+        type: 'date_histogram',
+        params: { used_interval: '1d', used_time_zone: 'UTC' },
+      },
+    };
+    expect(getEnd(layer, '2026-03-29T00:00:00.000Z', 'Europe/Rome')).toBe(
+      '2026-03-30T00:00:00.000Z'
+    );
+  });
+
   it('adds the interval of numeric buckets', () => {
     const bucketEnd = getLayerBucketEnd(datatableUtilities, createLayer({ interval: 5 }), 'UTC');
     expect(bucketEnd?.(10)).toBe(15);
