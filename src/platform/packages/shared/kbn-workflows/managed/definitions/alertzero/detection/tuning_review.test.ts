@@ -8,8 +8,8 @@
  */
 
 import { parse } from 'yaml';
-import { ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW } from '.';
-import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW } from '..';
+import { createWorkflowLiquidEngine } from '../../../../common/utils';
 
 /**
  * Guards the fail-closed handling of oversized exception recommendations.
@@ -58,7 +58,7 @@ const renderOverflow = (exceptionEntries: unknown): string =>
     consts: definition.consts,
   });
 
-describe('rule_tuning_review oversized exception handling', () => {
+describe('tuning_review oversized exception handling', () => {
   it('declares the platform bounds the platform exception schema enforces', () => {
     expect(MAX_ENTRIES).toBe(100);
     expect(MAX_VALUES).toBe(1000);
@@ -124,7 +124,7 @@ describe('rule_tuning_review oversized exception handling', () => {
  * the card (`attach_exception`) and the action input (`propose_exception`), so
  * the card always shows the name that approval creates.
  */
-describe('rule_tuning_review exception name', () => {
+describe('tuning_review exception name', () => {
   const NAME_STEP = 'build_exception_name';
   const NAME_OUTPUT = '{{ steps.build_exception_name.output.name }}';
   const RULE_NAME = 'Seeded rule for timestamp override backtest';
@@ -224,7 +224,7 @@ describe('rule_tuning_review exception name', () => {
   });
 });
 
-describe('rule_tuning_review schedule look-backs', () => {
+describe('tuning_review schedule look-backs', () => {
   const engine = createWorkflowLiquidEngine();
   const lookbacksTemplate = stepByName('compute_schedule_lookbacks')?.with?.lookbacks as string;
 
@@ -269,7 +269,7 @@ describe('rule_tuning_review schedule look-backs', () => {
   });
 });
 
-describe('rule_tuning_review applied threshold cardinality', () => {
+describe('tuning_review applied threshold cardinality', () => {
   const engine = createWorkflowLiquidEngine();
 
   // `flatten` does not descend into switch cases, so the threshold arm is read directly.
@@ -311,7 +311,7 @@ describe('rule_tuning_review applied threshold cardinality', () => {
   });
 });
 
-describe('rule_tuning_review proposal text', () => {
+describe('tuning_review proposal text', () => {
   const engine = createWorkflowLiquidEngine();
 
   // The steps that build the proposal text, run in workflow order with their `if`

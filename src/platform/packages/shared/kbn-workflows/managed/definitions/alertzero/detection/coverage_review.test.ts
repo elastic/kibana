@@ -16,8 +16,8 @@ import {
   ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
-} from '.';
-import { createWorkflowLiquidEngine } from '../../../common/utils';
+} from '..';
+import { createWorkflowLiquidEngine } from '../../../../common/utils';
 
 /**
  * The verdicts the detection-coverage skill may return. Duplicated here as a literal on

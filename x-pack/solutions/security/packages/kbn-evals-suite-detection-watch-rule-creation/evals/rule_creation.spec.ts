@@ -43,7 +43,7 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
       // would still report a pass. Probe once here and fail setup loudly instead.
       //
       // The probe input must be WINNABLE: the managed workflow's quality gate refuses
-      // catch-all gaps and confidence < 0.3 (see rule_creation.yaml), so a deliberately
+      // catch-all gaps and confidence < 0.3 (see coverage_rule_creation.yaml), so a deliberately
       // vague probe would be correctly declined, produce no agent turn, and prove nothing
       // about tracing. Verified 2026-08-31: the earlier low-confidence probe passed on an
       // execution that produced no rule at all.

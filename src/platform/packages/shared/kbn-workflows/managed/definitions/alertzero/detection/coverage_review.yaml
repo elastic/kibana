@@ -179,7 +179,7 @@ steps:
 
   # Write the indicator that started this review into the investigation, so the
   # analyst and any later agent see the same input. `ai.conversation.add_user_message`
-  # appends a user_message without running the investigation agent, as in rule_tuning_review.
+  # appends a user_message without running the investigation agent, as in tuning_review.
   # The text comes from Hunt, which reads data that an attacker can control, so the
   # message says that it is evidence and not instructions. The description and the
   # content are in code blocks, so markdown does not change them (`*/5 * * * *` loses
@@ -555,7 +555,7 @@ steps:
       # string length and the proposal comment caps at 8192 characters. The full
       # reasoning is on the investigation, written by post_reasoning. When that
       # write failed, the cut reasoning rides along here instead, as
-      # rule_tuning_review keeps the text of a failed note.
+      # tuning_review keeps the text of a failed note.
       summary_line: |-
         {% if steps.coverage_check.output.structured_output.rationale_summary != blank %}**Summary:** {{ steps.coverage_check.output.structured_output.rationale_summary | strip_newlines | truncate: 500 }}{% endif %}
         {%- if steps.post_reasoning.error != null and steps.coverage_check.output.structured_output.rationale != blank %}

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ManagedWorkflowDefinition } from '../../../types';
+import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 import {
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
-} from './constants';
-import type { ManagedWorkflowDefinition } from '../../types';
-import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
+} from '../constants';
 
 export const ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID = 'system-security-coverage-review';
 export const ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID = 'system-security-coverage-worker';
@@ -39,7 +39,7 @@ export const ALERTZERO_COVERAGE_WORKER_WORKFLOW = {
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 6,
   get yaml() {
-    return readManagedWorkflowYaml(__dirname, 'coverage_worker.yaml');
+    return readManagedWorkflowYaml(__dirname, 'coverage_sweep.yaml');
   },
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -61,7 +61,7 @@ export const ALERTZERO_RULE_TUNING_WORKER_WORKFLOW = {
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 34,
   get yaml() {
-    return readManagedWorkflowYaml(__dirname, 'rule_tuning_worker.yaml');
+    return readManagedWorkflowYaml(__dirname, 'tuning_sweep.yaml');
   },
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -72,7 +72,7 @@ export const ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW = {
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 36,
   get yaml() {
-    return readManagedWorkflowYaml(__dirname, 'rule_tuning_review.yaml');
+    return readManagedWorkflowYaml(__dirname, 'tuning_review.yaml');
   },
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -83,6 +83,6 @@ export const ALERTZERO_RULE_CREATION_WORKFLOW = {
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 7,
   get yaml() {
-    return readManagedWorkflowYaml(__dirname, 'rule_creation.yaml');
+    return readManagedWorkflowYaml(__dirname, 'coverage_rule_creation.yaml');
   },
 } as const satisfies ManagedWorkflowDefinition;

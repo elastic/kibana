@@ -89,7 +89,7 @@ steps:
 
   # Close the alerts. `conflicts: proceed` prevents one alert whose mapping
   # changed mid-request from aborting the close for the entire batch.
-  # `reason: false_positive` is the cross-Watch contract: rule_tuning_worker.yaml
+  # `reason: false_positive` is the cross-Watch contract: tuning_sweep.yaml
   # harvests on `kibana.alert.workflow_reason == "false_positive"`, so this value
   # must not change without coordinating with that Worker.
   - name: close_alerts

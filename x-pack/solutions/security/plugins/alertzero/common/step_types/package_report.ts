@@ -15,7 +15,7 @@ import { convergedProposalSchema, mintSuppressionSchema } from './resolve_propos
 
 export const PACKAGE_REPORT_STEP_ID = 'hunt.packageReport' as const;
 
-/** AI index Detection Watch's coverage sweep polls. Must stay in lockstep with coverage_worker.yaml. */
+/** AI index Detection Watch's coverage sweep polls. Must stay in lockstep with coverage_sweep.yaml. */
 export const HUNT_COVERAGE_AI_INDEX_ID = 'security-investigations' as const;
 
 // Context Engine owns how an AI index id maps to a backing store, so ask it rather than
