@@ -16,6 +16,7 @@ import type { ServerlessOptions, ServerlessProjectType } from './docker';
 import * as dockerUiam from './docker_uiam';
 import {
   DOCKER_IMG,
+  cleanUpDanglingContainers,
   detectRunningNodes,
   maybeCreateDockerNetwork,
   maybePullDockerImage,
@@ -441,6 +442,16 @@ describe('maybePullDockerImage()', () => {
   });
 });
 
+describe('cleanUpDanglingContainers()', () => {
+  test('removes the optional OAuth container left by a previous cluster', async () => {
+    execa.mockResolvedValue({ stdout: '' });
+
+    await cleanUpDanglingContainers(log);
+
+    expect(execa).toHaveBeenCalledWith('docker', ['container', 'rm', 'uiam-oauth', '--force']);
+  });
+});
+
 describe('detectRunningNodes()', () => {
   const nodes = ['es01', 'es02', 'es03'];
 
@@ -451,6 +462,7 @@ describe('detectRunningNodes()', () => {
 
     expect(execa.mock.calls).toHaveLength(1);
     expect(execa.mock.calls[0][1]).toEqual(expect.arrayContaining(['ps', '--quiet', '--filter']));
+    expect(execa.mock.calls[0][1]).toContain('name=uiam-oauth');
   });
 
   test('should kill nodes if detected and kill passed', async () => {
@@ -1022,13 +1034,13 @@ describe('runServerlessCluster()', () => {
 
     // docker version (1)
     // docker ps (1)
-    // docker container rm (8 = 3 for ES nodes, 3 for linked ES nodes, 2 for UIAM containers)
+    // docker container rm (9 = 3 ES nodes, 3 linked ES nodes, 3 UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (3)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(17);
+    expect(execa.mock.calls).toHaveLength(18);
 
     // UIAM containers should not be started when `--uiam` is not passed
     expect(runUiamContainerMock).not.toHaveBeenCalled();
@@ -1046,13 +1058,13 @@ describe('runServerlessCluster()', () => {
 
     // docker version (1)
     // docker ps (1)
-    // docker container rm (8 = 3 for ES nodes, 3 for linked ES nodes, 2 for UIAM containers)
+    // docker container rm (9 = 3 ES nodes, 3 linked ES nodes, 3 UIAM containers)
     // docker network create (1)
     // docker pull (3 = 1 for ES nodes, 2 for UIAM containers)
     // docker inspect (2 = image info call for ES nodes is memoized in the previous test, 2 for UIAM containers)
     // docker run (3)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(20);
+    expect(execa.mock.calls).toHaveLength(21);
 
     expect(runUiamContainerMock).toHaveBeenCalledTimes(2);
     expect(runUiamContainerMock).toHaveBeenCalledWith(
@@ -1214,12 +1226,12 @@ describe('runDockerContainer()', () => {
     await expect(runDockerContainer(log, {})).resolves.toBeUndefined();
     // docker version (1)
     // docker ps (1)
-    // docker container rm (8 = 3 for ES nodes, 3 for linked ES nodes, 2 for UIAM containers)
+    // docker container rm (9 = 3 ES nodes, 3 linked ES nodes, 3 UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (1)
-    expect(execa.mock.calls).toHaveLength(14);
+    expect(execa.mock.calls).toHaveLength(15);
   });
 });
 

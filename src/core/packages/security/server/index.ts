@@ -11,6 +11,7 @@ export type { SecurityServiceSetup, SecurityServiceStart } from './src/contracts
 export type { CoreAuthenticationService } from './src/authc';
 export type { CoreAuditService } from './src/audit';
 export type { AuthenticatedPrincipal } from '@kbn/core-security-common';
+export { UIAM_ERROR_CODES } from '@kbn/core-security-common';
 export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,

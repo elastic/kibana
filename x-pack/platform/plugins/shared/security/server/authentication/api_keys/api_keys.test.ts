@@ -8,6 +8,8 @@
 // eslint-disable-next-line import/order
 import { mockGetFakeKibanaRequest, mockValidateKibanaPrivileges } from './api_keys.test.mock';
 
+import { errors } from '@elastic/elasticsearch';
+
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -20,6 +22,7 @@ import type { SecurityLicense } from '../../../common';
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { licenseMock } from '../../../common/licensing/index.mock';
 import { uiamServiceMock } from '../../uiam/uiam_service.mock';
+import { authenticatorMock } from '../authenticator.mock';
 
 const encodeToBase64 = (str: string) => Buffer.from(str).toString('base64');
 
@@ -31,6 +34,7 @@ describe('API Keys', () => {
   >;
   let mockLicense: jest.Mocked<SecurityLicense>;
   let logger: Logger;
+  let authenticator: ReturnType<typeof authenticatorMock.create>;
   const roleDescriptors: { [key: string]: any } = { foo: true };
 
   beforeEach(() => {
@@ -45,8 +49,10 @@ describe('API Keys', () => {
     mockLicense.isEnabled.mockReturnValue(true);
 
     logger = loggingSystemMock.create().get('api-keys');
+    authenticator = authenticatorMock.create();
 
     apiKeys = new APIKeys({
+      authenticator,
       clusterClient: mockClusterClient,
       logger,
       license: mockLicense,
@@ -416,6 +422,88 @@ describe('API Keys', () => {
   });
 
   describe('grantAsInternalUser()', () => {
+    const expiredTokenError = () =>
+      new errors.ResponseError(
+        elasticsearchServiceMock.createApiResponse({
+          statusCode: 401,
+          body: { error: { type: 'security_exception', reason: 'token expired' } },
+        })
+      );
+    const requestWithToken = (token: string) =>
+      httpServerMock.createKibanaRequest({
+        headers: { authorization: `Bearer ${token}`, cookie: 'sid=session' },
+      });
+
+    it('retries once with reauthenticated credentials and reads published credentials for a later grant', async () => {
+      const request = requestWithToken('old');
+      const renewed = authenticatorMock.create().getRequestCredentials(requestWithToken('new'));
+      authenticator.reauthenticate.mockImplementation(async () => {
+        authenticator.getRequestCredentials.mockReturnValue(renewed);
+        return renewed;
+      });
+      const grant = mockClusterClient.asInternalUser.security.grantApiKey;
+      grant
+        .mockRejectedValueOnce(expiredTokenError())
+        .mockResponse({ id: 'key', api_key: 'secret', encoded: 'encoded', name: 'test' });
+
+      await apiKeys.grantAsInternalUser(request, { name: 'first', role_descriptors: {} });
+      await apiKeys.grantAsInternalUser(request, { name: 'second', role_descriptors: {} });
+
+      expect(grant.mock.calls.map(([params]) => params?.access_token)).toEqual([
+        'old',
+        'new',
+        'new',
+      ]);
+      expect(authenticator.reauthenticate).toHaveBeenCalledTimes(1);
+      expect(authenticator.reauthenticate).toHaveBeenCalledWith(
+        request,
+        expect.objectContaining({ authorization: 'Bearer old' })
+      );
+      expect(request.headers.authorization).toBe('Bearer old');
+    });
+
+    it('preserves the original operation error when Authenticator cannot reauthenticate', async () => {
+      const expired = expiredTokenError();
+      const grant = mockClusterClient.asInternalUser.security.grantApiKey;
+      grant.mockRejectedValue(expired);
+      await expect(
+        apiKeys.grantAsInternalUser(requestWithToken('old'), { name: 'test', role_descriptors: {} })
+      ).rejects.toBe(expired);
+      expect(grant).toHaveBeenCalledTimes(1);
+      expect(authenticator.reauthenticate).toHaveBeenCalledTimes(1);
+    });
+
+    it.each(['expired', 'denied'])(
+      'does not retry a second %s failure and logs the terminal error',
+      async (reason) => {
+        const retryError = reason === 'expired' ? expiredTokenError() : new Error('retry denied');
+        authenticator.reauthenticate.mockResolvedValue(
+          authenticatorMock.create().getRequestCredentials(requestWithToken('new'))
+        );
+        const grant = mockClusterClient.asInternalUser.security.grantApiKey;
+        grant.mockRejectedValueOnce(expiredTokenError()).mockRejectedValue(retryError);
+
+        await expect(
+          apiKeys.grantAsInternalUser(requestWithToken('old'), {
+            name: 'test',
+            role_descriptors: {},
+          })
+        ).rejects.toBe(retryError);
+        expect(grant).toHaveBeenCalledTimes(2);
+        expect(authenticator.reauthenticate).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledWith(`Failed to grant API key: ${retryError.message}`);
+      }
+    );
+
+    it('never reauthenticates for an unrelated grant error', async () => {
+      const denied = new Error('permission denied');
+      mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValue(denied);
+      await expect(
+        apiKeys.grantAsInternalUser(requestWithToken('old'), { name: 'test', role_descriptors: {} })
+      ).rejects.toBe(denied);
+      expect(authenticator.reauthenticate).not.toHaveBeenCalled();
+    });
+
     it('returns null when security feature is disabled', async () => {
       mockLicense.isEnabled.mockReturnValue(false);
       const result = await apiKeys.grantAsInternalUser(httpServerMock.createKibanaRequest(), {
@@ -629,6 +717,50 @@ describe('API Keys', () => {
     });
 
     describe('with UIAM', () => {
+      it('resolves client authentication from the request in an ES API key grant', async () => {
+        const mockUiam = uiamServiceMock.create();
+        // The UIAM service preserves the client authentication supplied with the request; see the
+        // `getClientAuthentication` tests in `uiam_service.test.ts`.
+        mockUiam.getClientAuthentication.mockReturnValue({
+          scheme: 'SharedSecret',
+          value: 'upstream-shared-secret',
+        });
+        const apiKeysWithUiam = new APIKeys({
+          authenticator,
+          clusterClient: mockClusterClient,
+          logger,
+          license: mockLicense,
+          applicationName: 'kibana-.kibana',
+          kibanaFeatures: [],
+          uiam: mockUiam,
+        });
+        mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+          id: '123',
+          name: 'key-name',
+          api_key: 'abc123',
+          encoded: 'utf8',
+        });
+        const request = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: 'Bearer essu_ephemeral_token',
+            'x-client-authentication': 'upstream-shared-secret',
+          },
+        });
+
+        await apiKeysWithUiam.grantAsInternalUser(request, {
+          name: 'test-key',
+          role_descriptors: {},
+        });
+
+        expect(mockUiam.getClientAuthentication).toHaveBeenCalledWith({ headers: request.headers });
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+          api_key: { name: 'test-key', role_descriptors: {} },
+          grant_type: 'access_token',
+          access_token: 'essu_ephemeral_token',
+          client_authentication: { scheme: 'SharedSecret', value: 'upstream-shared-secret' },
+        });
+      });
+
       it('uses UIAM client authentication when credentials are UIAM credentials', async () => {
         const mockUiam = uiamServiceMock.create();
         mockUiam.getClientAuthentication.mockReturnValue({
@@ -636,6 +768,7 @@ describe('API Keys', () => {
           value: 'uiam-shared-secret',
         });
         const apiKeysWithUiam = new APIKeys({
+          authenticator,
           clusterClient: mockClusterClient,
           logger,
           license: mockLicense,
@@ -693,6 +826,7 @@ describe('API Keys', () => {
           value: 'uiam-shared-secret',
         });
         const apiKeysWithUiam = new APIKeys({
+          authenticator,
           clusterClient: mockClusterClient,
           logger,
           license: mockLicense,
@@ -742,6 +876,7 @@ describe('API Keys', () => {
       it('uses es-client-authentication header when UIAM is configured but credentials are not UIAM credentials', async () => {
         const mockUiam = uiamServiceMock.create();
         const apiKeysWithUiam = new APIKeys({
+          authenticator,
           clusterClient: mockClusterClient,
           logger,
           license: mockLicense,

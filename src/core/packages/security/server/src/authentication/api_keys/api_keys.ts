@@ -65,7 +65,8 @@ export interface NativeAPIKeysType {
    */
   grantAsInternalUser(
     request: KibanaRequest,
-    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams
+    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
+    options?: GrantAPIKeyOptions
   ): Promise<GrantAPIKeyResult | null>;
 
   /**
@@ -140,6 +141,10 @@ export interface CreateCrossClusterAPIKeyParams {
       allow_restricted_indices?: boolean;
     }>;
   };
+}
+
+export interface GrantAPIKeyOptions {
+  refresh?: boolean | 'wait_for';
 }
 
 export interface GrantAPIKeyResult {
