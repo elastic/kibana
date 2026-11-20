@@ -15,6 +15,7 @@ import {
   DESTINATION_FIXED_INDEX_MODE_LABEL,
   DESTINATION_SIGNAL_LABELS,
 } from './destination_type_config';
+import { DestinationDetailsGrid } from './destination_details_grid';
 import type { RemoteElasticsearchDestinationViewModel } from './types';
 
 const ENDPOINT_LABEL = i18n.translate(
@@ -45,6 +46,8 @@ interface RemoteElasticsearchDestinationDetailsProps {
   destination: RemoteElasticsearchDestinationViewModel;
   showHeader?: boolean;
   titleId?: string;
+  /** A vertical `list`, as on the cards, or a two-column `grid`, as in the flyout panel. */
+  layout?: 'list' | 'grid';
 }
 
 const getRoutingItems = ({
@@ -68,23 +71,29 @@ export const RemoteElasticsearchDestinationDetails = ({
   destination,
   showHeader = false,
   titleId,
-}: RemoteElasticsearchDestinationDetailsProps) => (
-  <div data-test-subj="streamsRemoteElasticsearchDestinationDetails" css={detailsStyles}>
-    {showHeader && (
-      <>
-        <EuiTitle size="s">
-          <h2 id={titleId}>{destination.name}</h2>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-      </>
-    )}
-    <EuiDescriptionList
-      compressed
-      listItems={[
-        { title: ENDPOINT_LABEL, description: destination.endpoint },
-        ...getRoutingItems(destination),
-        { title: API_KEY_LABEL, description: CONFIGURED_LABEL },
-      ]}
-    />
-  </div>
-);
+  layout = 'list',
+}: RemoteElasticsearchDestinationDetailsProps) => {
+  const items = [
+    { title: ENDPOINT_LABEL, description: destination.endpoint },
+    ...getRoutingItems(destination),
+    { title: API_KEY_LABEL, description: CONFIGURED_LABEL },
+  ];
+
+  return (
+    <div data-test-subj="streamsRemoteElasticsearchDestinationDetails" css={detailsStyles}>
+      {showHeader && (
+        <>
+          <EuiTitle size="s">
+            <h2 id={titleId}>{destination.name}</h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {layout === 'grid' ? (
+        <DestinationDetailsGrid items={items} />
+      ) : (
+        <EuiDescriptionList compressed listItems={items} />
+      )}
+    </div>
+  );
+};

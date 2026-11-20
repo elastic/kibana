@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FilterableField } from '@kbn/data-source';
 import React from 'react';
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
@@ -19,7 +20,7 @@ interface ControlTypeContext {
 
 const mockIsCompatible = (
   { state: { field_name } }: ControlTypeContext,
-  isFieldCompatible: (field: DataViewField) => boolean
+  isFieldCompatible: (field: FilterableField) => boolean
 ) => {
   const field =
     stubFields.find((f) => f.name === field_name) ??
@@ -33,11 +34,11 @@ const mockIsCompatible = (
 };
 
 export const getMockedSearchControlFactory = (api: any): CreateControlTypeAction => {
-  const isFieldCompatible = (field: DataViewField) =>
-    field.aggregatable &&
-    field.searchable &&
-    field.spec.type === 'string' &&
-    (field.spec.esTypes ?? []).includes('text');
+  const isFieldCompatible = (field: FilterableField) =>
+    Boolean(field.aggregatable) &&
+    Boolean(field.searchable) &&
+    field.type === 'string' &&
+    (field.esTypes ?? []).includes('text');
   return {
     id: 'search',
     type: 'search',
@@ -55,9 +56,9 @@ export const getMockedSearchControlFactory = (api: any): CreateControlTypeAction
 };
 
 export const getMockedOptionsListControlFactory = (api: any): CreateControlTypeAction => {
-  const isFieldCompatible = (field: DataViewField) =>
-    field.aggregatable &&
-    !field.spec.scripted &&
+  const isFieldCompatible = (field: FilterableField) =>
+    Boolean(field.aggregatable) &&
+    !field.scripted &&
     ['string', 'boolean', 'ip', 'date', 'number'].includes(field.type);
 
   return {
@@ -80,7 +81,8 @@ export const getMockedOptionsListControlFactory = (api: any): CreateControlTypeA
 };
 
 export const getMockedRangeSliderControlFactory = (api: any): CreateControlTypeAction => {
-  const isFieldCompatible = (field: DataViewField) => field.aggregatable && field.type === 'number';
+  const isFieldCompatible = (field: FilterableField) =>
+    Boolean(field.aggregatable) && field.type === 'number';
   return {
     id: 'rangeSlider',
     type: 'rangeSlider',

@@ -646,6 +646,39 @@ describe('Partition', () => {
 
       expect(apiOutput.legend?.values).toEqual(['absolute']);
     });
+
+    it('should serialize waffle state with only unsupported legendStats as omitted legend.values', () => {
+      const state = structuredClone(waffleLegacyBasicState);
+      const { layers } = state.state.visualization as LensPartitionVisualizationState;
+      layers[0].legendStats = ['percent'];
+
+      const builder = new LensConfigBuilder(undefined, true);
+      const apiOutput = builder.toAPIFormat(state) as WaffleConfig;
+
+      expect(apiOutput.legend?.values).toBeUndefined();
+    });
+
+    it('should serialize waffle state with empty legendStats as omitted legend.values', () => {
+      const state = structuredClone(waffleLegacyBasicState);
+      const { layers } = state.state.visualization as LensPartitionVisualizationState;
+      layers[0].legendStats = [];
+
+      const builder = new LensConfigBuilder(undefined, true);
+      const apiOutput = builder.toAPIFormat(state) as WaffleConfig;
+
+      expect(apiOutput.legend?.values).toBeUndefined();
+    });
+
+    it('should serialize waffle state with the value stat among unsupported ones as legend.values: ["absolute"]', () => {
+      const state = structuredClone(waffleLegacyBasicState);
+      const { layers } = state.state.visualization as LensPartitionVisualizationState;
+      layers[0].legendStats = ['value', 'percent'];
+
+      const builder = new LensConfigBuilder(undefined, true);
+      const apiOutput = builder.toAPIFormat(state) as WaffleConfig;
+
+      expect(apiOutput.legend?.values).toEqual(['absolute']);
+    });
   });
 
   describe('legend position', () => {

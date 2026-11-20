@@ -52,6 +52,8 @@ export interface ProcessingFlyoutContext {
   /** Set until the machine has acted on `initialCreate`. */
   initialCreate?: { position: ProcessingStepPosition };
   hasChanges: boolean;
+  /** The processor open in the editor was changed, and the change is not committed yet. */
+  hasEditorChanges: boolean;
   diagnostics: ProcessingDiagnostic[];
   saveError?: string;
   nextKey: number;
@@ -62,6 +64,7 @@ export type ProcessingFlyoutEvent =
   | { type: 'step.create'; position?: ProcessingStepPosition }
   | { type: 'step.edit'; key: string }
   | { type: 'step.cancel' }
+  | { type: 'step.change' }
   | {
       type: 'step.commit';
       processor: DraftProcessor;
@@ -106,13 +109,19 @@ export const processingFlyoutMachine = setup({
     events: {} as ProcessingFlyoutEvent,
   },
   actions: {
-    openEditor: assign((_, params: { key?: string }) => ({ editingKey: params.key })),
+    openEditor: assign((_, params: { key?: string }) => ({
+      editingKey: params.key,
+      hasEditorChanges: false,
+    })),
     openCreator: assign((_, params: { position?: ProcessingStepPosition }) => ({
       editingKey: undefined,
       createPosition: params.position ?? SLOT_POSITION.end,
       initialCreate: undefined,
+      hasEditorChanges: false,
     })),
     closeEditor: assign({ editingKey: undefined }),
+    markEditorChanges: assign({ hasEditorChanges: true }),
+    clearEditorChanges: assign({ hasEditorChanges: false }),
     commitStep: assign(({ context, event }) => {
       if (event.type !== 'step.commit') {
         return {};
@@ -229,6 +238,7 @@ export const processingFlyoutMachine = setup({
     createPosition: SLOT_POSITION.end,
     initialCreate: input.initialCreate,
     hasChanges: false,
+    hasEditorChanges: false,
     diagnostics: [],
     saveError: undefined,
     nextKey: input.processors.length,
@@ -278,7 +288,9 @@ export const processingFlyoutMachine = setup({
       },
     },
     editing: {
+      exit: 'clearEditorChanges',
       on: {
+        'step.change': { actions: 'markEditorChanges' },
         'step.commit': { target: 'idle', actions: 'commitStep' },
         'step.cancel': { target: 'idle', actions: 'closeEditor' },
         'step.delete': [

@@ -76,9 +76,12 @@ function liveDataStream(
   };
 }
 
-function uploadedInstallation(name = 'my_integration'): SavedObject<Installation> {
+function uploadedInstallation(
+  name = 'my_integration',
+  installedEs: Installation['installed_es'] = []
+): SavedObject<Installation> {
   return {
-    attributes: { name, install_source: 'upload' },
+    attributes: { name, install_source: 'upload', installed_es: installedEs },
   } as SavedObject<Installation>;
 }
 
@@ -857,7 +860,7 @@ describe('validatePackageUpload', () => {
         })
       ).rejects.toEqual(
         expect.objectContaining({
-          message: expect.stringMatching(/must be migrated or removed/),
+          message: expect.stringMatching(/not owned by package/),
         })
       );
     });
@@ -890,7 +893,7 @@ describe('validatePackageUpload', () => {
         })
       ).rejects.toEqual(
         expect.objectContaining({
-          message: expect.stringMatching(/must be migrated or removed/),
+          message: expect.stringMatching(/not owned by package/),
         })
       );
 
@@ -925,7 +928,55 @@ describe('validatePackageUpload', () => {
       ).resolves.toBeUndefined();
     });
 
-    it('rejects a re-upload when a matching live stream has no owner', async () => {
+    it('allows a re-upload when a legacy stream has no _meta but uses a template installed by this package', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-my_integration.logs-default',
+            template: 'logs-my_integration.logs',
+          }),
+        ],
+      });
+
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: [],
+          savedObjectsClient: soClient,
+          installedPkg: uploadedInstallation('my_integration', [
+            { id: 'logs-my_integration.logs', type: ElasticsearchAssetType.indexTemplate },
+          ]),
+        })
+      ).resolves.toBeUndefined();
+    });
+
+    it('rejects a re-upload when a stream without _meta uses a template this package did not install', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-my_integration.logs-default',
+            template: 'logs',
+          }),
+        ],
+      });
+
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: [],
+          savedObjectsClient: soClient,
+          installedPkg: uploadedInstallation('my_integration', [
+            { id: 'logs-my_integration.logs', type: ElasticsearchAssetType.indexTemplate },
+          ]),
+        })
+      ).rejects.toEqual(
+        expect.objectContaining({
+          message: expect.stringMatching(/uses index template "logs"/),
+        })
+      );
+    });
+
+    it('does not match templates by prefix or by non-template assets', async () => {
       esClient.indices.getDataStream.mockResolvedValue({
         data_streams: [
           liveDataStream({
@@ -939,8 +990,63 @@ describe('validatePackageUpload', () => {
         packageInfo: validPackage,
         paths: [],
         savedObjectsClient: soClient,
-        installedPkg: uploadedInstallation(),
+        installedPkg: uploadedInstallation('my_integration', [
+          { id: 'logs-my_integration.logs@custom', type: ElasticsearchAssetType.indexTemplate },
+          { id: 'logs-my_integration.logs', type: ElasticsearchAssetType.ingestPipeline },
+        ]),
       });
+    });
+
+    it('rejects a re-upload when a stream is owned by another package even if the template matches', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-my_integration.logs-default',
+            template: 'logs-my_integration.logs',
+            _meta: { managed_by: 'fleet', managed: true, package: { name: 'nginx' } },
+          }),
+        ],
+      });
+
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: [],
+          savedObjectsClient: soClient,
+          installedPkg: uploadedInstallation('my_integration', [
+            { id: 'logs-my_integration.logs', type: ElasticsearchAssetType.indexTemplate },
+          ]),
+        })
+      ).rejects.toEqual(
+        expect.objectContaining({ message: expect.stringMatching(/_meta.package.name is "nginx"/) })
+      );
+    });
+
+    it('allows a re-upload when matching streams are owned through _meta and through the template', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-my_integration.logs-default',
+            template: 'logs-my_integration.logs',
+            _meta: { managed_by: 'fleet', managed: true, package: { name: 'my_integration' } },
+          }),
+          liveDataStream({
+            name: 'logs-my_integration.logs-prod',
+            template: 'logs-my_integration.logs',
+          }),
+        ],
+      });
+
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: [],
+          savedObjectsClient: soClient,
+          installedPkg: uploadedInstallation('my_integration', [
+            { id: 'logs-my_integration.logs', type: ElasticsearchAssetType.indexTemplate },
+          ]),
+        })
+      ).resolves.toBeUndefined();
     });
 
     it('rejects a re-upload when a matching live stream is owned by another package', async () => {

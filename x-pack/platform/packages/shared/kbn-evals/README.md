@@ -271,10 +271,10 @@ KBN_EVALS_WEEKLY=1 node $CI/get_fanout_matrix.js
 ```
 
 **Run it on real agents.** Start an [on-demand build](#13-on-demand-evals-buildkite) with
-`KBN_EVALS_WEEKLY=1` in the build environment. `KBN_EVALS_WEEKLY` also makes the notify step post
-to the suite's team Slack channel, so build from a branch name in `elastic/kibana` (not
-`refs/pull/<N>/head`) and leave `EVAL_SLACK_NOTIFICATION_CHANNEL` unset. Then no notify step is
-created.
+`KBN_EVALS_WEEKLY=1` in the build environment, from any branch other than `main`. On `main`,
+`KBN_EVALS_WEEKLY` makes the notify step post to the suite's team Slack channel, whether the run
+passes or fails. A build on another branch never posts to Slack; on `refs/pull/<N>/head` a failure
+is still posted as a comment on that PR.
 
 ---
 
