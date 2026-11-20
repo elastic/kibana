@@ -176,3 +176,19 @@ export const AGENT_BUILDER_TRACES_INDEX_PREFIX = 'traces-agent_builder.otel-';
 /** The Agent Builder OTel traces index name for a given Kibana space. */
 export const buildAgentBuilderTracesIndexName = (spaceId: string): string =>
   `${AGENT_BUILDER_TRACES_INDEX_PREFIX}${spaceId}`;
+
+/** Recall API (public): one ranked result over session events, session memory and AI indices. */
+export const MEMORY_RECALL_PATH = `${PUBLIC_API_PATH}/_recall`;
+export const MAX_RECALL_QUERY_LENGTH = 4096;
+export const MAX_RECALL_USER_ID_LENGTH = 512;
+export const MAX_RECALL_SESSION_ID_LENGTH = 512;
+export const MAX_RECALL_SESSION_IDS = 100;
+export const MIN_RECALL_MAX_TOKENS = 1000;
+export const MAX_RECALL_MAX_TOKENS = 25000;
+export const DEFAULT_RECALL_MAX_TOKENS = 6000;
+/** Candidates sent to the reranker, split across the included stores by weight. */
+export const RECALL_CANDIDATE_POOL = 100;
+export const RECALL_STORE_WEIGHTS = { session_events: 1, session_memory: 1, ai_index: 2 } as const;
+/** In `include.ai_index_ids`, every AI index the caller can read. */
+export const RECALL_ALL_AI_INDICES = '*';
+export const RECALL_RERANK_INFERENCE_ID = '.jina-reranker-v3';

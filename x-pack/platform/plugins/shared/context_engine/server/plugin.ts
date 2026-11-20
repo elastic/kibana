@@ -32,6 +32,7 @@ import type {
 import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
+import { registerMemoryRecallRoutes } from './routes/memory_recall';
 import { registerSignalRoutes } from './routes/signals';
 import type {
   FeedbackAnalysisScheduleService,
@@ -262,6 +263,12 @@ export class ContextEnginePlugin
       isGlobalSettingEnabled(request, CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID);
 
     const router = coreSetup.http.createRouter();
+    const getAiIndexDataReadService = (params: GetAiIndexDataReadServiceParams) => {
+      if (!this.createAiIndexDataReadService) {
+        throw new Error('AI index read service not available — plugin has not started');
+      }
+      return this.createAiIndexDataReadService(params);
+    };
     registerAiIndexRoutes({
       router,
       logger: this.logger.get('routes'),
@@ -269,12 +276,7 @@ export class ContextEnginePlugin
       getImprovementsService,
       aiIndexChanges: this.aiIndexChanges,
       isMemoryEnabled,
-      getAiIndexDataReadService: (params) => {
-        if (!this.createAiIndexDataReadService) {
-          throw new Error('AI index read service not available — plugin has not started');
-        }
-        return this.createAiIndexDataReadService(params);
-      },
+      getAiIndexDataReadService,
       getActions: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
@@ -339,6 +341,8 @@ export class ContextEnginePlugin
         checkReadPrivilege: checkContextEnginePrivilege(apiPrivileges.readContextEngine),
       },
     });
+
+    registerMemoryRecallRoutes({ router, getAiIndexDataReadService, analyticsService });
 
     // Read-only Signals routes (reads run as the current user, scoped to the active space).
     registerSignalRoutes({

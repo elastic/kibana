@@ -15,6 +15,7 @@ export const CONTEXT_ENGINE_EVENT_TYPES = {
   KiDelete: `${TELEMETRY_PREFIX}_ki_delete`,
   KiRestore: `${TELEMETRY_PREFIX}_ki_restore`,
   KiVerification: `${TELEMETRY_PREFIX}_ki_verification`,
+  MemoryRecall: `${TELEMETRY_PREFIX}_recall`,
 } as const;
 
 export type ContextEngineOutcome = 'success' | 'failure' | 'aborted';
@@ -166,10 +167,63 @@ const KI_VERIFICATION_EVENT: EventTypeOpts<ReportKiVerificationEventParams> = {
   schema: kiVerificationEventSchema,
 };
 
+export interface ReportMemoryRecallEventParams {
+  outcome: ContextEngineOutcome;
+  total_ms: number;
+  tokens_returned?: number;
+  candidates_reranked?: number;
+  error_type?: string;
+}
+
+const memoryRecallEventSchema: RootSchema<ReportMemoryRecallEventParams> = {
+  outcome: {
+    type: 'keyword',
+    _meta: {
+      description: 'The recall outcome: "success" or "failure".',
+      optional: false,
+    },
+  },
+  total_ms: {
+    type: 'long',
+    _meta: {
+      description: 'Time the recall took, in milliseconds.',
+      optional: false,
+    },
+  },
+  tokens_returned: {
+    type: 'long',
+    _meta: {
+      description: 'Estimated tokens in the returned results. Present on success.',
+      optional: true,
+    },
+  },
+  candidates_reranked: {
+    type: 'long',
+    _meta: {
+      description: 'Number of candidates sent to the reranker. Present on success.',
+      optional: true,
+    },
+  },
+  error_type: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Error type on failure: the error class name or workflow ExecutionError type; "unknown" otherwise.',
+      optional: true,
+    },
+  },
+};
+
+const MEMORY_RECALL_EVENT: EventTypeOpts<ReportMemoryRecallEventParams> = {
+  eventType: CONTEXT_ENGINE_EVENT_TYPES.MemoryRecall,
+  schema: memoryRecallEventSchema,
+};
+
 export const contextEngineServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   KI_CREATE_EVENT,
   KI_UPDATE_EVENT,
   KI_DELETE_EVENT,
   KI_RESTORE_EVENT,
   KI_VERIFICATION_EVENT,
+  MEMORY_RECALL_EVENT,
 ];
