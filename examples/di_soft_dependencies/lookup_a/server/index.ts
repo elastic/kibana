@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { KibanaContainerModule } from '@kbn/core-di';
-import { Route } from '@kbn/core-di-server';
+import { CoreStart, Route } from '@kbn/core-di-server';
 import { LookupAGreeter } from '@kbn/di-soft-dependencies-example-tokens';
 import { LookupStatusService, PLUGIN_ID } from '../common';
 import { StatusRoute } from './route';
@@ -19,7 +19,10 @@ export const config = {
 };
 
 const pluginModule = new KibanaContainerModule(({ bind, expose }) => {
-  expose(LookupAGreeter).toConstantValue({ greet: () => `hello from ${PLUGIN_ID} server` });
+  expose(LookupAGreeter).toResolvedValue(
+    (http) => ({ greet: () => `hello from ${PLUGIN_ID} server` }),
+    [CoreStart('http')]
+  );
   bind(LookupStatusService).toSelf().inRequestScope();
   bind(Route).toConstantValue(StatusRoute);
 });

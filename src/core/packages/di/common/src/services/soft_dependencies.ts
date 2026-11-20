@@ -17,7 +17,7 @@ import { createToken } from '../token';
 export interface SoftDependencies {
   /**
    * The service another plugin exposed, or undefined when no enabled plugin exposes it.
-   * Throws before all plugins finished setup.
+   * Throws until all plugins started, so call it in an `OnReady` hook, a request handler, or later.
    * @param serviceIdentifier The exposed service identifier.
    */
   get<T>(serviceIdentifier: ServiceIdentifier<T>): T | undefined;
@@ -25,7 +25,7 @@ export interface SoftDependencies {
   /**
    * Every binding exposed for the token across all enabled plugins (empty when none).
    * Inside a request scope that exposes the same token with `Scope.expose`, it returns only that scope's bindings.
-   * Throws before all plugins finished setup.
+   * Throws until all plugins started, so call it in an `OnReady` hook, a request handler, or later.
    * @param serviceIdentifier The exposed service identifier.
    */
   getAll<T>(serviceIdentifier: ServiceIdentifier<T>): T[];

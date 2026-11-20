@@ -127,7 +127,10 @@ In this case, the contract returned from the classic definition has precedence o
 
 
 ### Lifecycle Hooks
-It is possible to subscribe to the lifecycle events and run some initialization logic. This can be done via binding `OnSetup` or `OnStart` callbacks. It is allowed to bind multiple of the same kind.
+It is possible to subscribe to the lifecycle events and run some initialization logic. This can be done via binding `OnSetup`, `OnStart`, or `OnReady` callbacks. It is allowed to bind multiple of the same kind.
+
+`OnSetup` and `OnStart` run when the plugin sets up and starts.
+`OnReady` runs once per plugin after every plugin has started, so it is the first hook where [soft dependencies](#soft-dependencies) resolve.
 
 There is no dedicated teardown hook alike `stop` in the classic plugins.
 That's done in favor of the built-in [deactivation](https://inversify.io/docs/fundamentals/lifecycle/deactivation/) lifecycle hook.
@@ -184,7 +187,7 @@ class Welcome {
 }
 ```
 
-A registry owner collects every contribution at its start with `collect`, which has the same signature as `onStart`.
+A registry owner collects every contribution once all plugins started with `collect`, which has the same signature as `onStart`.
 Contributors only `expose` the owner's token and never reference the owner plugin:
 ```ts
 import { KibanaContainerModule } from '@kbn/core-di';
@@ -199,8 +202,9 @@ const pluginModule = new KibanaContainerModule(({ bind, collect }) => {
 export { pluginModule as module };
 ```
 
-Plugins are not ordered relative to each other without a manifest edge, so `SoftDependencies` throws when it is used before every plugin finished setup.
-Inject it anywhere, but call `get` and `getAll` at start, in request handlers, or later.
+Plugins are not ordered relative to each other without a manifest edge, and an exposed service can depend on start-only services such as `CoreStart('http')` of the plugin that exposes it.
+So `SoftDependencies` throws when it is used before every plugin has started.
+Inject it anywhere, but call `get` and `getAll` in an `OnReady` hook, in request handlers, or later.
 `get` throws when more than one plugin exposes the token. Use `getAll` or `collect` for tokens with several contributors.
 Do not call `getAll` for a token inside a request scope that also exposes that token with `Scope.expose`. There it returns only the request scope's bindings and hides the ones plugins exposed.
 

@@ -19,6 +19,7 @@ import type { PluginOpaqueId } from '@kbn/core-base-common';
 import {
   createToken,
   Global,
+  OnReady,
   OnSetup,
   OnStart,
   Setup,
@@ -75,9 +76,13 @@ export class PluginModule extends ContainerModule {
     [OnStart as symbol]: new WeakSet<Container>(),
   };
   private bound = new WeakSet<Container>();
-  private started = false;
+  private scopes = new Set<Container>();
+  private isReady = false;
 
-  constructor(root: Container, private readonly options?: Omit<ContainerOptions, 'parent'>) {
+  constructor(
+    private readonly root: Container,
+    private readonly options?: Omit<ContainerOptions, 'parent'>
+  ) {
     super(({ bind, onActivation }) => {
       bind(Container).toConstantValue(root);
       bind(Fork).toDynamicValue(this.getForkFactory.bind(this)).inRequestScope();
@@ -98,10 +103,18 @@ export class PluginModule extends ContainerModule {
   }
 
   /**
-   * Marks every plugin as set up, so `SoftDependencies` can resolve services exposed by any of them.
+   * Marks every plugin as started, so `SoftDependencies` can resolve services exposed by any of them, and runs each plugin's `OnReady` hooks once.
    */
-  public start(): void {
-    this.started = true;
+  public ready(): void {
+    this.isReady = true;
+    const scopes = [...this.scopes];
+    this.scopes.clear();
+
+    for (const scope of scopes) {
+      if (scope.isCurrentBound(OnReady)) {
+        scope.getAll(OnReady).forEach((callback) => callback(scope));
+      }
+    }
   }
 
   protected getDefaultContract() {
@@ -109,24 +122,24 @@ export class PluginModule extends ContainerModule {
   }
 
   protected getSoftDependencies(origin: Container, context = origin): SoftDependencies {
-    const assertStarted = (serviceIdentifier: ServiceIdentifier) => {
-      if (!this.started) {
+    const assertReady = (serviceIdentifier: ServiceIdentifier) => {
+      if (!this.isReady) {
         throw new Error(
           `Cannot resolve soft dependency "${String(
             serviceIdentifier
-          )}" before all plugins finished setup. Resolve it at start or later.`
+          )}" before all plugins started. Resolve it in an OnReady hook, a request handler, or later.`
         );
       }
     };
 
     return {
       get: (serviceIdentifier) => {
-        assertStarted(serviceIdentifier);
+        assertReady(serviceIdentifier);
 
         return origin.get(serviceIdentifier, { optional: true });
       },
       getAll: (serviceIdentifier) => {
-        assertStarted(serviceIdentifier);
+        assertReady(serviceIdentifier);
 
         return context.getAll(serviceIdentifier, { optional: true });
       },
@@ -225,6 +238,10 @@ export class PluginModule extends ContainerModule {
           .bind(id)
           .toConstantValue(scope)
           .onDeactivation(once(() => scope.unbindAllAsync()));
+
+        if (context === this.root) {
+          this.scopes.add(scope);
+        }
       }
 
       return context.get(id);

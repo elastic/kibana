@@ -27,7 +27,7 @@ import {
 } from 'inversify';
 import { once, wrap } from 'lodash';
 import { Global } from './services/global';
-import { OnSetup, OnStart } from './services/plugin';
+import { OnReady, OnSetup, OnStart } from './services/plugin';
 import { SoftDependencies } from './services/soft_dependencies';
 
 /**
@@ -75,7 +75,7 @@ export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOpt
   /**
    * Binds a service and publishes that binding to every other plugin.
    * Each call publishes exactly one binding, so a token can be exposed several times.
-   * Other plugins resolve it via `SoftDependencies` at start or later.
+   * Other plugins resolve it via `SoftDependencies` in an `OnReady` hook, a request handler, or later.
    * @example
    * ```ts
    * expose(Greeter).toConstantValue({ greet: () => 'hello' });
@@ -85,7 +85,7 @@ export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOpt
   expose<T>(serviceIdentifier: ServiceIdentifier<T>): KibanaBindToFluentSyntax<T>;
 
   /**
-   * Registers a handler that will be called once at the plugin's start against every binding of the service exposed by any enabled plugin, the current one included.
+   * Registers a handler that will be called once after all plugins started against every binding of the service exposed by any enabled plugin, the current one included.
    * @example
    * ```ts
    * collect(Widget, WidgetRegistry, (context, widget, registry) => registry.register(widget));
@@ -380,7 +380,7 @@ function toKibanaContainerModuleLoadOptions(
   return {
     ...options,
     bind,
-    collect: createHook(OnStart, getExposed),
+    collect: createHook(OnReady, getExposed),
     expose,
     inject,
     onActivation,

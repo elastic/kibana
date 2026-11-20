@@ -14,6 +14,7 @@ import {
   type CoreDiServiceStart,
   Scope,
   type ScopedContainer,
+  SoftDependencies,
 } from '@kbn/core-di';
 import {
   type CoreInjectionService,
@@ -28,12 +29,17 @@ function create(): jest.Mocked<PublicMethodsOf<CoreInjectionService>> {
   return lazyObject({
     setup: jest.fn(createInternalSetupContract),
     start: jest.fn(createInternalStartContract),
+    ready: jest.fn(),
   });
 }
 
 function createContainer(options?: ContainerOptions) {
   const container = new Container({ defaultScope: 'Singleton', ...options });
   container.bind(Container).toConstantValue(container);
+  container.bind(SoftDependencies).toConstantValue({
+    get: (serviceIdentifier) => container.get(serviceIdentifier, { optional: true }),
+    getAll: (serviceIdentifier) => container.getAll(serviceIdentifier, { optional: true }),
+  });
 
   for (const method of [
     'bind',

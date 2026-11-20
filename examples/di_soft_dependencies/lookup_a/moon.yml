@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core-di'
+  - '@kbn/core-di-browser'
   - '@kbn/core-di-server'
   - '@kbn/core-http-server'
   - '@kbn/di-soft-dependencies-example-tokens'

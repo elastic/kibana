@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaContainerModule, Logger, OnStart } from '@kbn/core-di';
+import { KibanaContainerModule, Logger, OnReady } from '@kbn/core-di';
 import { RegistryAEntry, RegistryBEntry } from '@kbn/di-soft-dependencies-example-tokens';
 import { PLUGIN_ID, Registry } from '../common';
 import { report } from './report';
@@ -21,7 +21,7 @@ const pluginModule = new KibanaContainerModule(({ bind, collect, expose }) => {
     label: `browser entry from ${PLUGIN_ID}`,
   });
   // Bound after `collect`, so the registry is filled when this hook runs.
-  bind(OnStart).toResolvedValue(
+  bind(OnReady).toResolvedValue(
     (registry, logger) => () => report(logger, registry.getStatus()),
     [Registry, Logger]
   );

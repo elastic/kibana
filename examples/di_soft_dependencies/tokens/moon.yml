@@ -21,7 +21,7 @@ dependsOn:
 tags:
   - shared-common
   - package
-  - prod
+  - dev
   - group-platform
   - private
 fileGroups:

@@ -9,11 +9,14 @@
 
 import { Container, LazyServiceIdentifier, type ServiceIdentifier } from 'inversify';
 import { Global } from './services/global';
-import { OnSetup, OnStart } from './services/plugin';
+import { OnReady, OnSetup, OnStart } from './services/plugin';
 import { SoftDependencies } from './services/soft_dependencies';
 import { KibanaContainerModule, type KibanaContainerModuleLoadOptions } from './module';
 
-function trigger(hook: typeof OnSetup | typeof OnStart, container: Container): void {
+function trigger(
+  hook: typeof OnSetup | typeof OnStart | typeof OnReady,
+  container: Container
+): void {
   return container.getAll(hook, { chained: true }).forEach((fn) => fn(container));
 }
 
@@ -235,15 +238,16 @@ describe('KibanaContainerModule', () => {
       container.bind(dependencyToken).toConstantValue('something');
     });
 
-    it('should call the handler with every exposed service on start', () => {
+    it('should call the handler with every exposed service once all plugins started', () => {
       const handler = jest.fn();
       options.collect(token, dependencyToken, handler);
       exposed.push('value1', 'value2');
 
       trigger(OnSetup, container);
+      trigger(OnStart, container);
       expect(handler).not.toHaveBeenCalled();
 
-      trigger(OnStart, container);
+      trigger(OnReady, container);
       expect(handler).toHaveBeenCalledTimes(2);
       expect(handler).toHaveBeenNthCalledWith(1, expect.anything(), 'value1', 'something');
       expect(handler).toHaveBeenNthCalledWith(2, expect.anything(), 'value2', 'something');
@@ -255,7 +259,7 @@ describe('KibanaContainerModule', () => {
       exposed.push('value');
       container.bind(token).toConstantValue('local');
 
-      trigger(OnStart, container);
+      trigger(OnReady, container);
       expect(handler).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledWith(expect.anything(), 'value');
     });
@@ -264,7 +268,7 @@ describe('KibanaContainerModule', () => {
       const handler = jest.fn();
       options.collect(token, handler);
 
-      expect(() => trigger(OnStart, container)).not.toThrow();
+      expect(() => trigger(OnReady, container)).not.toThrow();
       expect(handler).not.toHaveBeenCalled();
     });
   });

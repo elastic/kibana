@@ -10,10 +10,14 @@ Each plugin imports tokens from it and never from another plugin, so the TypeScr
 ## Lookup: `lookup_a` and `lookup_b`
 
 Each plugin exposes a greeter and uses the other plugin's greeter when that plugin is enabled.
+The greeter depends on `CoreStart('http')`, which exists only once its plugin has started, so the consumer resolves it in an `OnReady` hook or a request handler.
 
 ```ts
 // provider
-expose(LookupAGreeter).toConstantValue({ greet: () => 'hello from diSoftDepsLookupA' });
+expose(LookupAGreeter).toResolvedValue(
+  (http) => ({ greet: () => 'hello from diSoftDepsLookupA' }),
+  [CoreStart('http')]
+);
 
 // consumer
 constructor(@inject(SoftDependencies) private readonly softDependencies: SoftDependencies) {}
@@ -25,7 +29,7 @@ getStatus() {
 
 ## Registry: `registry_a` and `registry_b`
 
-Each plugin owns a registry that it fills at start, and contributes one entry to the other plugin's registry.
+Each plugin owns a registry that it fills once every plugin has started, and contributes one entry to the other plugin's registry.
 This is the shape of a registry like embeddable's: the owner defines the token in the tokens package, and contributors only expose entries for it.
 Each owner also exposes a built-in entry to its own token, which the registry collects once.
 
@@ -52,7 +56,7 @@ curl -u elastic:changeme http://localhost:5601/api/di_soft_deps/diSoftDepsLookup
 curl -u elastic:changeme http://localhost:5601/api/di_soft_deps/diSoftDepsRegistryA
 ```
 
-In the browser, every plugin logs its status with `console.info` at start and writes it to `window.__diSoftDeps[pluginId]`.
+In the browser, every plugin logs its status with `console.info` in an `OnReady` hook, once every plugin has started, and writes it to `window.__diSoftDeps[pluginId]`.
 
 Disable a plugin to see its peer fall back:
 

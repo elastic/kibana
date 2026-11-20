@@ -47,12 +47,18 @@ export class CoreInjectionService {
   }
 
   public start(): InternalCoreDiServiceStart {
-    this.module.start();
     const contract = {
       fork: this.fork,
       getContainer: this.getContainer,
     };
 
     return contract;
+  }
+
+  /**
+   * Runs once every plugin has started, unlocking `SoftDependencies` and running the plugins' `OnReady` hooks.
+   */
+  public ready(): void {
+    this.module.ready();
   }
 }
