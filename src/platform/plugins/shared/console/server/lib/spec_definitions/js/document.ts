@@ -21,17 +21,6 @@ export const document = (specService: SpecDefinitionsService) => {
     },
   });
 
-  specService.addEndpointDescription('put_script', {
-    methods: ['POST', 'PUT'],
-    patterns: ['_scripts/{lang}/{id}', '_scripts/{lang}/{id}/_create'],
-    url_components: {
-      lang: ['groovy', 'expressions'],
-    },
-    data_autocomplete_rules: {
-      script: '',
-    },
-  });
-
   specService.addEndpointDescription('termvectors', {
     data_autocomplete_rules: {
       fields: ['{field}'],
