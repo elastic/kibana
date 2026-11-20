@@ -313,6 +313,20 @@ describe('loadCatalogConnectorTypes', () => {
     expect(registry.has('.declarative-a')).toBe(false);
   });
 
+  it('does not read definitions or warn when the manifest arrives after the signal aborted', async () => {
+    const controller = new AbortController();
+    const storage = createStorage({ manifest: { raw: 'not json' } });
+    storage.getManifest.mockImplementation(async () => {
+      controller.abort();
+      return { raw: 'not json' } as never;
+    });
+
+    await expect(load(storage, controller.signal)).resolves.toBe(0);
+
+    expect(storage.getDefinitions).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
   it('registers nothing when the signal aborts while the reads are pending', async () => {
     const controller = new AbortController();
     const storage = createStorage({

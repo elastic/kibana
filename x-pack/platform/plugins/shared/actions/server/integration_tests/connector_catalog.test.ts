@@ -9,6 +9,7 @@ import type { IncomingHttpHeaders, Server } from 'http';
 import { createServer } from 'http';
 import type { AddressInfo } from 'net';
 import axios from 'axios';
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
@@ -83,7 +84,10 @@ describe('Connector catalog at start', () => {
         );
     } catch (error) {
       // The event log index is created lazily.
-      return [];
+      if (error instanceof errors.ResponseError && error.statusCode === 404) {
+        return [];
+      }
+      throw error;
     }
   };
 

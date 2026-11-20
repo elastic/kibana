@@ -69,6 +69,9 @@ export const loadCatalogConnectorTypes = async ({
   }
 
   const manifest = await storage.getManifest({ signal });
+  if (signal.aborted) {
+    return 0;
+  }
   if (!manifest) {
     return 0;
   }

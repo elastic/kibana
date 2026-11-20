@@ -158,6 +158,7 @@ describe('startConnectorCatalog', () => {
       resolveManifest(manifest);
       await jest.advanceTimersByTimeAsync(0);
 
+      expect(storage.getDefinitions).not.toHaveBeenCalled();
       expect(actionTypeRegistry.register).not.toHaveBeenCalled();
       expect(logger.info).not.toHaveBeenCalled();
     });

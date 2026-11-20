@@ -345,6 +345,7 @@ export class ActionsPlugin
   private connectorCatalogFeatureFlagSubscription?: Subscription;
   private connectorCatalog?: ConnectorCatalogHandle;
   private catalogReady: Promise<void> = Promise.resolve();
+  private isStopping = false;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -922,7 +923,7 @@ export class ActionsPlugin
       }).catch(() => {});
     }
 
-    void this.validateEnabledConnectorTypes(plugins, connectorCatalog.ready);
+    this.validateEnabledConnectorTypes(plugins, connectorCatalog.ready);
 
     this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
 
@@ -1242,17 +1243,25 @@ export class ActionsPlugin
     return handle;
   }
 
-  /** Warns about allowlisted connector types that are still not registered after the first catalog load. */
-  private validateEnabledConnectorTypes = async (
+  /** Checks the serverless connector type allowlist; catalog types are checked again after the catalog load. */
+  private validateEnabledConnectorTypes = (
     plugins: ActionsPluginsStart,
     catalogReady: Promise<void>
-  ): Promise<void> => {
+  ): void => {
     const { enabledActionTypes } = this.actionsConfig;
     if (
       !plugins.serverless ||
       enabledActionTypes.length === 0 ||
       enabledActionTypes[0] === AllowedHosts.Any
     ) {
+      return;
+    }
+
+    if (!this.actionsConfig.catalog.enabled) {
+      enabledActionTypes.forEach((connectorType) => {
+        // Throws error if action type doesn't exist
+        this.actionTypeRegistry?.get(connectorType);
+      });
       return;
     }
 
@@ -1263,8 +1272,18 @@ export class ActionsPlugin
       return;
     }
 
+    void this.warnAboutUnregisteredConnectorTypes(pendingTypes, catalogReady);
+  };
+
+  private warnAboutUnregisteredConnectorTypes = async (
+    pendingTypes: string[],
+    catalogReady: Promise<void>
+  ): Promise<void> => {
     // Catalog types register after start(), so check again once the load has ended.
     await catalogReady;
+    if (this.isStopping) {
+      return;
+    }
     const unavailableTypes = pendingTypes.filter(
       (connectorType) => !this.actionTypeRegistry?.has(connectorType)
     );
@@ -1336,6 +1355,7 @@ export class ActionsPlugin
   public stop() {
     this.connectorCatalogFeatureFlagSubscription?.unsubscribe();
     this.connectorCatalogFeatureFlagSubscription = undefined;
+    this.isStopping = true;
     this.connectorCatalog?.stop();
     if (this.licenseState) {
       this.licenseState.clean();

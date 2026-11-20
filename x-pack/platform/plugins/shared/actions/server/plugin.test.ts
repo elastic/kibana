@@ -626,7 +626,7 @@ describe('Actions Plugin', () => {
       };
     });
 
-    it('should warn when there is an invalid connector type in enabledActionTypes', async () => {
+    it('should throw when there is an invalid connector type in enabledActionTypes', async () => {
       const pluginSetup = await plugin.setup(coreSetup, {
         ...pluginsSetup,
         encryptedSavedObjects: {
@@ -640,14 +640,13 @@ describe('Actions Plugin', () => {
 
       pluginSetup.setEnabledConnectorTypes(['.server-log', 'non-existing']);
 
-      const pluginStart = plugin.start(coreStart, {
-        ...pluginsStart,
-        serverless: serverlessPluginMock.createStartContract(),
-      });
-      await pluginStart.whenCatalogReady();
-
-      expect(context.logger.get().warn).toHaveBeenCalledWith(
-        'Connector types [non-existing] in xpack.actions.enabledActionTypes are not registered.'
+      await expect(async () =>
+        plugin.start(coreStart, {
+          ...pluginsStart,
+          serverless: serverlessPluginMock.createStartContract(),
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Action type \\"non-existing\\" is not registered."`
       );
     });
 
@@ -810,6 +809,21 @@ describe('Actions Plugin', () => {
           );
         });
 
+        it('does not warn about a configured type when the plugin stops before the catalog load ends', async () => {
+          const read = Promise.withResolvers<object>();
+          getEsClient().get.mockReturnValue(read.promise);
+
+          await setupPlugin([SPEC_TYPE_ID]);
+          const pluginStart = startServerlessPlugin();
+          plugin.stop();
+          await pluginStart.whenCatalogReady();
+          await flush();
+
+          expect(context.logger.get().warn).not.toHaveBeenCalledWith(
+            expect.stringContaining('are not registered')
+          );
+        });
+
         it('warns about a configured type that is still missing after the catalog load', async () => {
           getEsClient().get.mockResolvedValue({
             _index: CONNECTOR_TYPE_CATALOG_INDEX,
@@ -831,6 +845,14 @@ describe('Actions Plugin', () => {
       describe('config off', () => {
         beforeEach(() => {
           coreStart.featureFlags.getBooleanValue$.mockReturnValue(of(true));
+        });
+
+        it('throws on start when a catalog type is in the allowlist', async () => {
+          await setupPlugin([SPEC_TYPE_ID], { catalogEnabled: false });
+
+          expect(() => startServerlessPlugin()).toThrow(
+            `Action type "${SPEC_TYPE_ID}" is not registered.`
+          );
         });
 
         it('does not call Elasticsearch for the catalog index, even when the flag is on', async () => {
