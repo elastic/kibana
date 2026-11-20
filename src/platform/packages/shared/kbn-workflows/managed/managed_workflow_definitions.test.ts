@@ -316,7 +316,7 @@ it.each([
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '5:fa71b87b'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '7:2ce58cc9'],
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '6:063c014a'],
-  [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '16:35587e1c'],
+  [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '17:09167b08'],
   [AESOP_DRIFT_MONITOR_WORKFLOW_ID, AESOP_DRIFT_MONITOR_YAML, '12:0fea1d55'],
   [AESOP_EXPLORER_WORKFLOW_ID, AESOP_EXPLORER_YAML, '13:7a836836'],
   [AESOP_REFINE_WORKFLOW_ID, AESOP_REFINE_YAML, '4:b92be66d'],
@@ -692,6 +692,39 @@ describe('managedWorkflowDefinitions', () => {
           expect(createVariant?.with?.body?.[field]).toContain('variables.variant_');
         }
       );
+
+      // The skills API caps a skill at five tool_ids: a variant keeps the
+      // first five and both skill arms get the rest through the converse call.
+      it('splits the base skill tools at the per-skill cap', () => {
+        const { with: live } = stepsByName().get('resolve_live_skill') ?? {};
+        const context = {
+          consts: { MAX_SKILL_TOOLS: 5 },
+          variables: { variant_tool_ids: [], variant_extra_tool_ids: [] },
+          steps: { get_live_skill: { output: { tool_ids: ['a', 'b', 'c', 'd', 'e', 'f'] } } },
+        };
+        const engine = createWorkflowLiquidEngine();
+        const evaluate = (expression: string) =>
+          engine.evalValueSync(expression.replace(/^\$\{\{|\}\}$/g, '').trim(), context);
+        expect(evaluate(live?.variant_tool_ids)).toEqual(['a', 'b', 'c', 'd', 'e']);
+        expect(evaluate(live?.variant_extra_tool_ids)).toEqual(['f']);
+      });
+
+      it('gives the live and variant arms the same extra tools', () => {
+        const steps = [...stepsByName().values()];
+        const variantRun = steps
+          .flatMap((step) => step.steps ?? [])
+          .find(({ name }) => name === 'variant_run');
+        expect(stepsByName().get('live_run')?.with?.params?.tool_ids).toContain(
+          'variables.variant_extra_tool_ids'
+        );
+        expect(variantRun?.with?.params?.tool_ids).toContain('variables.variant_extra_tool_ids');
+      });
+
+      it('compares only when a variant was scored', () => {
+        expect(stepsByName().get('resolve_can_compare')?.with?.can_compare).toContain(
+          'variables.variant_arm_count > 0'
+        );
+      });
 
       // The arms are in run order (live first, a variant whose run scored
       // nothing is missing), so each variant finds its mean by its marker.

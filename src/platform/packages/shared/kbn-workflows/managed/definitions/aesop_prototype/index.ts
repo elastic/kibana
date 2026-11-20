@@ -25,7 +25,7 @@ export const AESOP_REFINE_WORKFLOW_ID = 'system-security-aesop-refine';
 export const AESOP_AB_COMPARE_WORKFLOW = {
   id: AESOP_AB_COMPARE_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 16,
+  version: 17,
   billable: false,
   yaml: AESOP_AB_COMPARE_YAML,
   management: {

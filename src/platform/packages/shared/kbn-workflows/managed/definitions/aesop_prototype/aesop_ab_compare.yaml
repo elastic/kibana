@@ -37,6 +37,8 @@ consts:
   CODE_EVALUATORS: ['skill-secret-scanner', 'skill-prompt-injection']
   QUALITY_EVALUATORS: ['skill-pii', 'esql-compile', 'skill-index-resolves']
   CODE_TOLERANCE: 0.05
+  # The skills API caps a skill at this many tool_ids (maxToolsPerSkill).
+  MAX_SKILL_TOOLS: 5
 outputs:
   - name: baseline_experiment_id
     type: string
@@ -216,7 +218,10 @@ steps:
       base_skill_id: "{{ inputs.base_skill_id | default: inputs.skill_id | default: '' }}"
       live_readonly: false
       variant_tool_ids: []
+      variant_extra_tool_ids: []
       variant_referenced_content: []
+      variant_arm_count: 0
+      last_variant_error: ''
       shipped_proposal: false
 
   # ----------------------------------------------------------------------
@@ -246,7 +251,8 @@ steps:
     if: '${{ variables.base_skill_id != blank and steps.get_live_skill.error == null and steps.get_live_skill.output.id != null }}'
     with:
       live_readonly: '${{ variables.has_live_skill == true and steps.get_live_skill.output.readonly == true }}'
-      variant_tool_ids: '${{ steps.get_live_skill.output.tool_ids | default: variables.variant_tool_ids }}'
+      variant_tool_ids: '${{ steps.get_live_skill.output.tool_ids | default: variables.variant_tool_ids | slice: 0, consts.MAX_SKILL_TOOLS }}'
+      variant_extra_tool_ids: '${{ steps.get_live_skill.output.tool_ids | default: variables.variant_extra_tool_ids | slice: consts.MAX_SKILL_TOOLS, 1000 }}'
       variant_referenced_content: '${{ steps.get_live_skill.output.referenced_content | default: variables.variant_referenced_content }}'
 
   # ----------------------------------------------------------------------
@@ -320,6 +326,7 @@ steps:
       task_ref: 'security.aesopVariant'
       params:
         skill_id: '{{ inputs.skill_id }}'
+        tool_ids: '${{ variables.variant_extra_tool_ids }}'
       experiment_id: '${{ steps.live_start.output.experiment_id }}'
       execution_id: '${{ steps.live_start.output.execution_id }}'
       suite_id: 'aesop-prototype'
@@ -405,6 +412,12 @@ steps:
               and steps.create_variant.output.id != null
               and steps.create_variant.output.id != '' }}
 
+      - name: record_variant_error
+        type: data.set
+        if: '${{ steps.create_variant.error != null }}'
+        with:
+          last_variant_error: '{{ steps.create_variant.error.message | truncate: 500 }}'
+
       - name: variant_start
         type: ai.evals.startExperiment
         if: '${{ steps.resolve_variant.output.ok == true }}'
@@ -424,6 +437,7 @@ steps:
           task_ref: 'security.aesopVariant'
           params:
             skill_id: '{{ steps.create_variant.output.id }}'
+            tool_ids: '${{ variables.variant_extra_tool_ids }}'
           experiment_id: '${{ steps.variant_start.output.experiment_id }}'
           execution_id: '${{ steps.variant_start.output.execution_id }}'
           suite_id: 'aesop-prototype'
@@ -454,6 +468,7 @@ steps:
         with:
           experiment_ids: "${{ variables.experiment_ids | concat: variables.new_ids }}"
           arm_variant_indexes: "${{ variables.arm_variant_indexes | concat: variables.new_markers }}"
+          variant_arm_count: '${{ variables.variant_arm_count | plus: 1 }}'
 
   # ----------------------------------------------------------------------
   # Compare every arm against the baseline, then pick the winner.
@@ -468,7 +483,9 @@ steps:
   - name: resolve_can_compare
     type: data.set
     with:
-      can_compare: '${{ variables.baseline_scored == true and variables.arm_count > 0 }}'
+      # With no variant scored there is nothing to judge: the live skill would
+      # win alone and the rejection would blame candidates that never ran.
+      can_compare: '${{ variables.baseline_scored == true and variables.arm_count > 0 and variables.variant_arm_count > 0 }}'
 
   - name: compare
     type: ai.evals.compareExperiments
@@ -574,7 +591,7 @@ steps:
         ${{ steps.resolve_comparison.output.is_tie == true
           and steps.winner.output.tiebreak_beats_baseline == true }}
       reject_reason: >-
-        {% if steps.resolve_comparison.output.is_tie == true and steps.winner.output.tiebreak_beats_baseline != true %}The tied variants did not beat the no-skill baseline significantly. {% elsif steps.resolve_comparison.output.has_winner != true %}No variant won. {% elsif variables.winner_variant == 'live' %}The live skill outperformed every variant. {% elsif steps.winner.output.beats_baseline != true %}The best variant did not beat the no-skill baseline. {% endif %}{{ steps.winner.output.reasons | join: ' ' }}
+        {% if steps.resolve_comparison.output.is_tie == true and steps.winner.output.tiebreak_beats_baseline != true %}The tied variants did not beat the no-skill baseline significantly. {% elsif steps.resolve_comparison.output.has_winner != true %}No variant won. {% elsif variables.winner_variant == 'live' %}The live skill outperformed every scored variant. {% elsif steps.winner.output.beats_baseline != true %}The best variant did not beat the no-skill baseline. {% endif %}{% if variables.variant_arm_count < inputs.variants.size %}Only {{ variables.variant_arm_count }} of {{ inputs.variants.size }} variants were scored{% if variables.last_variant_error != blank %} (last error: {{ variables.last_variant_error }}){% endif %}. {% endif %}{{ steps.winner.output.reasons | join: ' ' }}
 
   # ----------------------------------------------------------------------
   # Rejection: no deployable winner, including a tie whose tiebreak arm did not
@@ -1085,4 +1102,4 @@ steps:
       refine_started: '${{ variables.refine == true and steps.start_refine.error == null }}'
       shipped_proposal: '${{ variables.shipped_proposal == true }}'
       skip_reason: >-
-        {% if steps.baseline_start.error != null %}The baseline experiment could not be started: {{ steps.baseline_start.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif variables.baseline_scored != true %}The baseline arm produced no scores; nothing to compare.{% elsif variables.live_failed == true %}The live skill arm produced no scores (is `{{ inputs.skill_id }}` a skill id?); the variants were not run, since they could not be compared with the live skill.{% elsif variables.arm_count < 1 %}No arm produced scores; nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.winner.error != null %}Picking the winner failed: {{ steps.winner.error.message }}{% elsif variables.propose != true %}Evaluate mode, nothing was proposed.{% if variables.reject_reason != blank %} {{ variables.reject_reason }}{% endif %}{% elsif variables.is_tie == true and steps.propose_tie_pick.error != null %}The tie proposal failed: {{ steps.propose_tie_pick.error.message }}{% elsif variables.is_tie == true and steps.resolve_decision.output.dismissed == true %}The tie proposal was dismissed; every tied arm was rejected.{% elsif variables.is_tie == true and variables.winner_variant == 'live' %}{% if steps.resolve_decision.output.approved == true %}Tied arms; the live skill has the highest mean, so approving the pick changed nothing.{% else %}Tied arms, nothing deployed; the analyst was asked to confirm keeping the live skill.{% endif %}{% elsif variables.deploy_candidate != true and variables.tie_deploy != true %}Rejected: {{ variables.reject_reason }}{% if variables.refine == true %} A refine pass was started from variant {{ variables.best_variant }}{% if steps.start_refine.error != null %}, but it failed to start: {{ steps.start_refine.error.message }}{% endif %}.{% endif %}{% elsif steps.propose_deploy.error != null %}The proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.resolve_decision.output.dismissed == true %}The proposal was dismissed.{% elsif steps.resolve_decision.output.approved != true %}The proposal was not decided.{% elsif variables.live_readonly == true %}{% if variables.shipped_proposal == true %}`{{ variables.target_skill_id }}` is a built-in (read-only) skill, so nothing was deployed; the approved winner and its diff were recorded for the owning team (knowledge indicator `shipped-proposal-{{ execution.id }}`).{% elsif steps.write_shipped_proposal_ki.error != null %}`{{ variables.target_skill_id }}` is a built-in (read-only) skill and the proposal for its owning team could not be recorded: {{ steps.write_shipped_proposal_ki.error.message }}{% endif %}{% elsif steps.resolve_prior_skill.output.prior_ok == false %}The current skill content could not be read or is too long to store for a rollback; nothing was changed.{% elsif steps.store_prior_content.error != null %}The prior content could not be stored, so nothing was changed: {{ steps.store_prior_content.error.message }}{% elsif steps.update_skill.error != null %}The update failed after approval: {{ steps.update_skill.error.message }}{% elsif steps.create_skill.error != null %}Creating the skill failed after approval: {{ steps.create_skill.error.message }}{% elsif steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}
+        {% if steps.baseline_start.error != null %}The baseline experiment could not be started: {{ steps.baseline_start.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif variables.baseline_scored != true %}The baseline arm produced no scores; nothing to compare.{% elsif variables.live_failed == true %}The live skill arm produced no scores (is `{{ inputs.skill_id }}` a skill id?); the variants were not run, since they could not be compared with the live skill.{% elsif variables.variant_arm_count < 1 %}No variant produced scores{% if variables.last_variant_error != blank %} (last error: {{ variables.last_variant_error }}){% endif %}; nothing was compared.{% elsif variables.arm_count < 1 %}No arm produced scores; nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.winner.error != null %}Picking the winner failed: {{ steps.winner.error.message }}{% elsif variables.propose != true %}Evaluate mode, nothing was proposed.{% if variables.reject_reason != blank %} {{ variables.reject_reason }}{% endif %}{% elsif variables.is_tie == true and steps.propose_tie_pick.error != null %}The tie proposal failed: {{ steps.propose_tie_pick.error.message }}{% elsif variables.is_tie == true and steps.resolve_decision.output.dismissed == true %}The tie proposal was dismissed; every tied arm was rejected.{% elsif variables.is_tie == true and variables.winner_variant == 'live' %}{% if steps.resolve_decision.output.approved == true %}Tied arms; the live skill has the highest mean, so approving the pick changed nothing.{% else %}Tied arms, nothing deployed; the analyst was asked to confirm keeping the live skill.{% endif %}{% elsif variables.deploy_candidate != true and variables.tie_deploy != true %}Rejected: {{ variables.reject_reason }}{% if variables.refine == true %} A refine pass was started from variant {{ variables.best_variant }}{% if steps.start_refine.error != null %}, but it failed to start: {{ steps.start_refine.error.message }}{% endif %}.{% endif %}{% elsif steps.propose_deploy.error != null %}The proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.resolve_decision.output.dismissed == true %}The proposal was dismissed.{% elsif steps.resolve_decision.output.approved != true %}The proposal was not decided.{% elsif variables.live_readonly == true %}{% if variables.shipped_proposal == true %}`{{ variables.target_skill_id }}` is a built-in (read-only) skill, so nothing was deployed; the approved winner and its diff were recorded for the owning team (knowledge indicator `shipped-proposal-{{ execution.id }}`).{% elsif steps.write_shipped_proposal_ki.error != null %}`{{ variables.target_skill_id }}` is a built-in (read-only) skill and the proposal for its owning team could not be recorded: {{ steps.write_shipped_proposal_ki.error.message }}{% endif %}{% elsif steps.resolve_prior_skill.output.prior_ok == false %}The current skill content could not be read or is too long to store for a rollback; nothing was changed.{% elsif steps.store_prior_content.error != null %}The prior content could not be stored, so nothing was changed: {{ steps.store_prior_content.error.message }}{% elsif steps.update_skill.error != null %}The update failed after approval: {{ steps.update_skill.error.message }}{% elsif steps.create_skill.error != null %}Creating the skill failed after approval: {{ steps.create_skill.error.message }}{% elsif steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}

@@ -84,6 +84,69 @@ describe('createAesopVariantTaskProvider', () => {
     }
   );
 
+  describe('params.tool_ids', () => {
+    const createToolContext = (params: Record<string, unknown>) => {
+      const callKibanaApi = jest.fn(async ({ method }: { method: string }) =>
+        method === 'GET'
+          ? {
+              status: 200,
+              headers: {},
+              body: {
+                configuration: { tools: [{ tool_ids: ['platform.core.execute_esql', 'other'] }] },
+              },
+            }
+          : { status: 200, headers: {}, body: { conversation_id: 'conv-1', response: {} } }
+      );
+      return createContext({ params, callKibanaApi });
+    };
+    const converseCall = (callKibanaApi: jest.Mock) =>
+      callKibanaApi.mock.calls.find(([call]) => call.method === 'POST')[0];
+
+    it('adds the tools to the agent own tools for the arm', async () => {
+      const { context, callKibanaApi } = createToolContext({
+        skill_id: 'triage-v2',
+        tool_ids: ['platform.core.cases', 'platform.core.execute_esql'],
+      });
+
+      await provider.run(context);
+
+      expect(callKibanaApi.mock.calls[0][0].path).toBe('/api/agent_builder/agents/agent-1');
+      expect(converseCall(callKibanaApi).body.configuration_overrides).toEqual({
+        skill_ids: ['triage-v2'],
+        tools: [{ tool_ids: ['platform.core.execute_esql', 'other', 'platform.core.cases'] }],
+      });
+    });
+
+    it.each([[[]], [undefined], ['platform.core.cases'], [[3, '']]])(
+      'leaves the agent tools alone for tool_ids %p',
+      async (toolIds) => {
+        const { context, callKibanaApi } = createToolContext({
+          skill_id: 'triage-v2',
+          tool_ids: toolIds,
+        });
+
+        await provider.run(context);
+
+        expect(callKibanaApi).toHaveBeenCalledTimes(1);
+        expect(converseCall(callKibanaApi).body.configuration_overrides).toEqual({
+          skill_ids: ['triage-v2'],
+        });
+      }
+    );
+
+    it('gives the no-skill baseline no extra tools', async () => {
+      const { context, callKibanaApi } = createToolContext({
+        no_skill: true,
+        tool_ids: ['platform.core.cases'],
+      });
+
+      await provider.run(context);
+
+      expect(callKibanaApi).toHaveBeenCalledTimes(1);
+      expect(converseCall(callKibanaApi).body.configuration_overrides.tools).toBeUndefined();
+    });
+  });
+
   it('requires an agent id', async () => {
     const { context } = createContext({ agentId: undefined, params: { no_skill: true } });
 
