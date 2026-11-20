@@ -996,53 +996,50 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     if (withoutCondition.length === 0) {
       return false;
     }
+    const logger = appContextService.getLogger();
     const savedObjectType = await getPackagePolicySavedObjectType();
-    const { saved_objects: packagePolicySOs } = await soClient
-      .bulkGet<PackagePolicySOAttributes>(
+    // Runs after the package policies were saved: failing here would skip deploying them.
+    try {
+      const { saved_objects: packagePolicySOs } = await soClient.bulkGet<PackagePolicySOAttributes>(
         withoutCondition.map(({ packagePolicyId }) => ({
           type: savedObjectType,
           id: packagePolicyId,
           fields: ['inputs_for_versions'],
         }))
-      )
-      .catch(
-        catchAndSetErrorStackTrace.withMessage(
-          'attempt to read inputs_for_versions of package policy saved objects failed'
-        )
       );
-    const stale = packagePolicySOs.filter(
-      (so): so is SavedObject<PackagePolicySOAttributes> =>
-        !isSavedObjectErrorResult(so) &&
-        Object.keys(so.attributes?.inputs_for_versions ?? {}).length > 0
-    );
-    if (stale.length === 0) {
-      return false;
-    }
-    // Pass the version so a concurrent edit is not overwritten.
-    const { saved_objects: clearResults } = await soClient
-      .bulkUpdate<PackagePolicySOAttributes>(
+      const stale = packagePolicySOs.filter(
+        (so): so is SavedObject<PackagePolicySOAttributes> =>
+          !isSavedObjectErrorResult(so) &&
+          Object.keys(so.attributes?.inputs_for_versions ?? {}).length > 0
+      );
+      if (stale.length === 0) {
+        return false;
+      }
+      // Pass the version so a concurrent edit is not overwritten.
+      const { saved_objects: clearResults } = await soClient.bulkUpdate<PackagePolicySOAttributes>(
         stale.map(({ id, version }) => ({
           type: savedObjectType,
           id,
           attributes: { inputs_for_versions: {} },
           version,
         }))
-      )
-      .catch(
-        catchAndSetErrorStackTrace.withMessage(
-          'attempt to clear inputs_for_versions of package policy saved objects failed'
-        )
       );
-    // Bulk operations report per object failures in the results instead of rejecting.
-    const failedClears = clearResults.filter(isSavedObjectErrorResult);
-    for (const { id, error } of failedClears) {
-      appContextService
-        .getLogger()
-        .warn(
+      // Bulk operations report per object failures in the results instead of rejecting.
+      const failedClears = clearResults.filter(isSavedObjectErrorResult);
+      for (const { id, error } of failedClears) {
+        logger.warn(
           `Failed to clear the stale inputs_for_versions of package policy [${id}], it is cleared on its next update: ${error.message}`
         );
+      }
+      return failedClears.length < stale.length;
+    } catch (error) {
+      logger.warn(
+        `Failed to clear the stale inputs_for_versions of package policies [${withoutCondition
+          .map(({ packagePolicyId }) => packagePolicyId)
+          .join(', ')}], they are cleared on their next update: ${error.message}`
+      );
+      return false;
     }
-    return failedClears.length < stale.length;
   }
 
   private async bumpAgentPoliciesRevision(

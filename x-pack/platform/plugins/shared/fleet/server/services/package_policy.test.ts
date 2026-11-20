@@ -16976,6 +16976,37 @@ describe('clearStaleInputsForVersions()', () => {
     expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
   });
 
+  it('logs and returns false instead of throwing when the read rejects', async () => {
+    const soClient = makeSoClient({ a: { '9.5': [] } });
+    soClient.bulkGet.mockRejectedValue(new Error('ES down'));
+
+    const result = await clear(soClient, [
+      {
+        packagePolicyId: 'a',
+        packageInfo: noConditionPackageInfo,
+        assetsMap: noConditionAssetsMap,
+      },
+    ]);
+
+    expect(result).toBe(false);
+    expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+  });
+
+  it('logs and returns false instead of throwing when the write rejects', async () => {
+    const soClient = makeSoClient({ a: { '9.5': [] } });
+    soClient.bulkUpdate.mockRejectedValue(new Error('ES down'));
+
+    const result = await clear(soClient, [
+      {
+        packagePolicyId: 'a',
+        packageInfo: noConditionPackageInfo,
+        assetsMap: noConditionAssetsMap,
+      },
+    ]);
+
+    expect(result).toBe(false);
+  });
+
   it('does not write when no cache is stored', async () => {
     const soClient = makeSoClient({ a: {} });
 

@@ -509,6 +509,11 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         expect(before.item.has_agent_version_conditions).to.eql(true);
         expect(Object.keys(await getInputsForVersions()).length).to.be.greaterThan(0);
+        // Let the agent settle on its version-specific policy first, otherwise the reassignment
+        // to it can race with the reassignment back to the base policy that the upgrade triggers.
+        await retry.tryForTime(20000, async () => {
+          expect(await getAgentPolicyId()).to.contain('#');
+        });
 
         const { body: upgradeResponse } = await supertest
           .post(`/api/fleet/package_policies/upgrade`)
