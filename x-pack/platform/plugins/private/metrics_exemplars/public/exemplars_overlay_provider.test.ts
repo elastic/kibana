@@ -84,6 +84,7 @@ describe('getExemplarsQuery', () => {
 describe('createExemplarsOverlayProvider', () => {
   const provider = createExemplarsOverlayProvider({
     isEnabled: () => true,
+    getActiveSolution: () => 'oblt',
     onExemplarClick: jest.fn(),
   });
 
@@ -118,6 +119,7 @@ describe('createExemplarsOverlayProvider', () => {
       let isEnabled = false;
       const flaggedProvider = createExemplarsOverlayProvider({
         isEnabled: () => isEnabled,
+        getActiveSolution: () => 'oblt',
         onExemplarClick: jest.fn(),
       });
       const context = getContext(METRICS_GRID_CONTEXT);
@@ -126,12 +128,28 @@ describe('createExemplarsOverlayProvider', () => {
       isEnabled = true;
       expect(flaggedProvider.isApplicable(context, context.layers[0])).toBe(true);
     });
+
+    it.each([
+      ['a Security space or project', 'security'],
+      ['a Search space or project', 'es'],
+      ['a classic space', null],
+    ] as const)('does not apply in %s', (_, solution) => {
+      const solutionProvider = createExemplarsOverlayProvider({
+        isEnabled: () => true,
+        getActiveSolution: () => solution,
+        onExemplarClick: jest.fn(),
+      });
+      const context = getContext(METRICS_GRID_CONTEXT);
+
+      expect(solutionProvider.isApplicable(context, context.layers[0])).toBe(false);
+    });
   });
 
   it('fetches exemplars, draws valid rows and opens the clicked exemplar', async () => {
     const onExemplarClick = jest.fn();
     const clickableProvider = createExemplarsOverlayProvider({
       isEnabled: () => true,
+      getActiveSolution: () => 'oblt',
       onExemplarClick,
     });
     const executeEsql = jest.fn().mockResolvedValue(table);
