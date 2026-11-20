@@ -22,12 +22,14 @@ const pointerData: DashboardPanelAttachmentData = {
   panel_type: LENS_EMBEDDABLE_TYPE,
 };
 
+const POINTER_ID = 'pointer-1';
+
 const formatContext = { request: {}, spaceId: 'default' } as unknown as AttachmentFormatContext;
 
 const formatPointer = async (data: DashboardPanelAttachmentData): Promise<string> => {
   const definition = createDashboardPanelAttachmentType();
   const attachment: DashboardPanelAttachment = {
-    id: 'platform.dashboard.panel-panel-1',
+    id: POINTER_ID,
     type: DASHBOARD_PANEL_ATTACHMENT_TYPE,
     data,
   };
@@ -64,15 +66,15 @@ describe('createDashboardPanelAttachmentType', () => {
     expect(text).toContain(`panel "CPU usage" (panelId: "panel-1", type: ${LENS_EMBEDDABLE_TYPE})`);
     expect(text).toContain('dashboard attachment "dashboard-attachment-1"');
     expect(text).toContain(dashboardTools.generateDashboard);
+    expect(text).toContain('dashboardId: "dashboard-attachment-1"');
     expect(text).toContain(
       '`panels: [{ id: "panel-1", content: { type: "vis", query: <the change> } }]`'
     );
     expect(text).toContain('do not read the dashboard attachment first');
     expect(text).toContain(dashboardTools.pointedPanel);
-    expect(text).toContain('action: "read"');
-    expect(text).toContain('type: "attachment", attachment_id: "platform.dashboard.panel-panel-1"');
-    expect(text).toContain('action: "show"');
-    expect(text).toContain('platform.dashboard.panel-panel-1');
+    expect(text).toContain('panel_attachment_id: "pointer-1"` and `action: "read"');
+    expect(text).toContain('panel_attachment_id: "pointer-1"` and `action: "show"');
+    expect(text).toContain('type: "attachment", attachment_id: "pointer-1"');
   });
 
   it('tells the agent to apply the request to the panel instead of answering in chat', async () => {
@@ -103,7 +105,7 @@ describe('createDashboardPanelAttachmentType', () => {
     const description = createDashboardPanelAttachmentType().getAgentDescription?.() ?? '';
 
     expect(description).toContain(dashboardTools.generateDashboard);
-    expect(description).toContain("`panels` entry with the panel's id");
+    expect(description).toContain('Edit the panel in place by its panel id');
     expect(description).toContain('Never create a new visualization attachment');
   });
 });

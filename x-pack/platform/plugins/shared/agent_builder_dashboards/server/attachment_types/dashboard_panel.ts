@@ -9,8 +9,7 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import {
   DASHBOARD_PANEL_ATTACHMENT_TYPE,
   dashboardPanelAttachmentDataSchema,
-  getDashboardPanelAttachmentId,
-  type DashboardPanelAttachmentData,
+  type DashboardPanelAttachment,
 } from '@kbn/agent-builder-dashboards-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { getRequestPanelContentType } from '@kbn/dashboard-agent-authoring';
@@ -20,11 +19,12 @@ import { dashboardTools } from '../../common';
  * Creates the definition for the dashboard panel pointer attachment type.
  *
  * The attachment only names a panel on a dashboard attachment; `format` cannot read other
- * attachments, so the text tells the agent how to edit the panel and how to read just that panel.
+ * attachments. The agent description holds the rules for every pointer, and each pointer's text
+ * spells out the calls for its own panel.
  */
 export const createDashboardPanelAttachmentType = (): AttachmentTypeDefinition<
   typeof DASHBOARD_PANEL_ATTACHMENT_TYPE,
-  DashboardPanelAttachmentData
+  DashboardPanelAttachment['data']
 > => ({
   id: DASHBOARD_PANEL_ATTACHMENT_TYPE,
   isReadonly: true,
@@ -37,16 +37,19 @@ export const createDashboardPanelAttachmentType = (): AttachmentTypeDefinition<
   format: (attachment) => ({
     getRepresentation: () => ({
       type: 'text',
-      value: formatDashboardPanelAttachment(attachment.data),
+      value: formatDashboardPanelAttachment(attachment),
     }),
   }),
   getAgentDescription: () =>
-    `A dashboard panel attachment is a pointer to one panel on a dashboard attachment in this conversation; it means the user is referring to that panel. Treat requests made while it is attached as requests about that panel: create, generate, fill or change the panel through the dashboard tool instead of answering with the content in chat. It carries no configuration, and you do not need to read the dashboard attachment to work with the panel. To change the panel, load the dashboards skill and call \`${dashboardTools.generateDashboard}\` with that dashboard attachment id as \`dashboardAttachmentId\` and a \`panels\` entry with the panel's id and \`content: { type: <the panel's kind, "vis" for a Lens panel or "custom_content" for a custom panel>, query: <the change> }\`; the tool loads the panel's current config itself. To inspect the panel (what it shows, its config or ES|QL query), call \`${dashboardTools.pointedPanel}\` with the pointer's attachment id and \`action: "read"\`. This attachment's id is a valid \`type: "attachment"\` panel input wherever one is accepted; the tool copies the panel verbatim, so use it for any copy of the panel (duplicate, add to a section, add to another dashboard). Never create a new visualization attachment to refine a panel that already exists on the dashboard. After editing, render only the dashboard attachment. To show the panel itself inline in the chat (the user asks to see, paint or preview it here, or wants it as a visualization), call \`${dashboardTools.pointedPanel}\` with the pointer's attachment id and \`action: "show"\`, and render the visualization attachment it returns; never regenerate the panel with the visualization creation tool.`,
+    `A dashboard panel attachment points at one panel of a dashboard attachment in this conversation: the user is referring to that panel. It carries no configuration; its text gives the exact calls for its panel.
+- Requests made while it is attached are about that panel, even when they do not mention it: apply them to the panel through \`${dashboardTools.generateDashboard}\` (load the dashboards skill first) instead of answering with the content in chat.
+- Edit the panel in place by its panel id. Never create a new visualization attachment or add a new panel to refine a panel that already exists. After editing, render only the dashboard attachment.
+- To show the panel itself inline in the chat, use \`${dashboardTools.pointedPanel}\` with \`action: "show"\`; never regenerate it with the visualization creation tool.
+- If the panel no longer exists, tell the user instead of recreating it.`,
   getTools: () => [dashboardTools.pointedPanel],
 });
 
-const customContentHint = `This is a custom panel: an HTML template, optionally driven by one or more ES|QL queries, generated server-side. To fill or change it, set \`query\` to what the panel should show, and follow the dashboards skill's custom content guidance when the edit needs different data; never write the template yourself and never paste the content into the chat instead.
-`;
+const customContentHint = `This is a custom panel: an HTML template, optionally driven by one or more ES|QL queries, generated server-side. To fill or change it, set \`query\` to what the panel should show, and follow the dashboards skill's custom content guidance when the edit needs different data; never write the template yourself and never paste the content into the chat instead.`;
 
 const getEditContentType = (panelType: string): string => {
   const contentType = getRequestPanelContentType(panelType);
@@ -54,35 +57,25 @@ const getEditContentType = (panelType: string): string => {
 };
 
 const formatDashboardPanelAttachment = ({
-  dashboard_attachment_id: dashboardAttachmentId,
-  panel_id: panelId,
-  label,
-  panel_type: panelType,
-}: DashboardPanelAttachmentData): string =>
-  `The user is referring to the panel ${
-    label ? `"${label}" ` : ''
-  }(panelId: "${panelId}", type: ${panelType}) on the dashboard attachment "${dashboardAttachmentId}".
-Whatever the user asks for while this is attached is about this panel: apply it to the panel through \`${
-    dashboardTools.generateDashboard
-  }\` (load the dashboards skill first); do not answer with the content in chat or author a new visualization for it (to only show it inline, see below).
-Edit it with \`${
-    dashboardTools.generateDashboard
-  }\` using \`dashboardAttachmentId: "${dashboardAttachmentId}"\` and \`panels: [{ id: "${panelId}", content: { type: ${getEditContentType(
-    panelType
-  )}, query: <the change> } }]\`; the tool loads the panel's current config, so do not read the dashboard attachment first.
-To inspect the panel (what it shows, its config or ES|QL query), call \`${
-    dashboardTools.pointedPanel
-  }\` with \`panel_attachment_id: "${getDashboardPanelAttachmentId(
-    panelId
-  )}"\` and \`action: "read"\`.
-${
-  panelType === CUSTOM_CONTENT_EMBEDDABLE_TYPE ? customContentHint : ''
-}To copy it anywhere (duplicate, section, another dashboard), add a panel with a new id and \`content: { type: "attachment", attachment_id: "${getDashboardPanelAttachmentId(
-    panelId
-  )}" }\`; the tool copies the panel verbatim.
-To show the panel inline in the chat, call \`${
-    dashboardTools.pointedPanel
-  }\` with \`panel_attachment_id: "${getDashboardPanelAttachmentId(
-    panelId
-  )}"\` and \`action: "show"\`, and render the visualization attachment it returns.
-If the panel no longer exists on that dashboard, tell the user instead of recreating it.`;
+  id: pointerId,
+  data: {
+    dashboard_attachment_id: dashboardAttachmentId,
+    panel_id: panelId,
+    label,
+    panel_type: panelType,
+  },
+}: DashboardPanelAttachment): string =>
+  [
+    `The user is referring to the panel ${
+      label ? `"${label}" ` : ''
+    }(panelId: "${panelId}", type: ${panelType}) on the dashboard attachment "${dashboardAttachmentId}". Whatever the user asks while this is attached is about this panel: apply it to the panel; do not answer with the content in chat.`,
+    `- Edit: call \`${
+      dashboardTools.generateDashboard
+    }\` with \`dashboardId: "${dashboardAttachmentId}"\` and \`panels: [{ id: "${panelId}", content: { type: ${getEditContentType(
+      panelType
+    )}, query: <the change> } }]\`. The tool loads the panel's current config, so do not read the dashboard attachment first.`,
+    `- Inspect (what it shows, its config or ES|QL query): call \`${dashboardTools.pointedPanel}\` with \`panel_attachment_id: "${pointerId}"\` and \`action: "read"\`.`,
+    `- Show it inline in the chat: call \`${dashboardTools.pointedPanel}\` with \`panel_attachment_id: "${pointerId}"\` and \`action: "show"\`, and render the visualization attachment it returns.`,
+    `- Copy it (duplicate, section, another dashboard): add a panel with a new id and \`content: { type: "attachment", attachment_id: "${pointerId}" }\`; the tool copies the panel verbatim.`,
+    ...(panelType === CUSTOM_CONTENT_EMBEDDABLE_TYPE ? [customContentHint] : []),
+  ].join('\n');

@@ -47,7 +47,7 @@ For an existing dashboard:
 Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels, so for Lens and Vega panels pass the exact known \`index\` and describe the measure, fields, and filters in \`query\`; for custom content panels, set it on each \`dataQueries\` entry. Omit \`index\` only when the source is unknown and discovery is needed. Do not write the \`esql\` of a \`dataQueries\` entry yourself; set it only to a query the user supplied (see Custom Content Panels). Edits of existing panels receive the original configuration and queries automatically through the panel id.
 
 - Lens, Vega, and custom content panels (\`type: "vis"\`, \`"vega"\` or \`"custom_content"\`) are generated server-side from a natural-language \`query\` — this is the only way to make a **new** generated panel.
-- Use \`type: "attachment"\` to place a visualization that \`${platformCoreTools.createVisualization}\` already returned in this conversation, or to copy a panel a dashboard panel pointer (\`platform.dashboard.panel-<panelId>\`) names. The tool copies the panel verbatim. A generated panel would be a **new**, different panel instead.
+- Use \`type: "attachment"\` to place a visualization that \`${platformCoreTools.createVisualization}\` already returned in this conversation, or to copy the panel a dashboard panel pointer names (\`attachment_id\` is the pointer's attachment id). The tool copies the panel verbatim. A generated panel would be a **new**, different panel instead.
 - Markdown and ML anomaly panels are authored by value, with their \`type\` and \`config\`. ${panelConfigReferenceGuidance}
 
 ## Panel Type Selection

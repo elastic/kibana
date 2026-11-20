@@ -24,15 +24,10 @@ A dashboard request follows three stages: resolve inputs, generate (which also p
 
 ## Panel Pointers
 
-- A \`${DASHBOARD_PANEL_ATTACHMENT_TYPE}\` attachment means the user is referring to that one panel. It names a \`dashboard_attachment_id\` and a \`panel_id\` and carries no configuration.
+A \`${DASHBOARD_PANEL_ATTACHMENT_TYPE}\` attachment means the user is referring to one panel of a dashboard attachment. Its text gives the exact calls to edit, inspect, show and copy that panel.
 - A request made while a pointer is attached is a request to change that panel, even when it does not mention the panel ("create a simple SVG of a dog", "show requests per host"). Apply it to the panel; never answer with the content in chat. For an empty custom panel, the request describes what the panel should show: pass it as the \`query\` of a \`type: "custom_content"\` panel content.
-- Edit the panel with ${dashboardTools.generateDashboard}, passing the pointer's \`dashboard_attachment_id\` as \`dashboardAttachmentId\` and a \`panels\` entry whose \`id\` is the pointer's \`panel_id\` and whose content is \`{ type: <the panel's kind>, query: <the change> }\`: \`"vis"\` for a Lens panel, \`"custom_content"\` for a custom panel. The tool loads the panel's current config from the dashboard attachment, so do not read the dashboard attachment first.
-- To inspect the pointed panel (to answer a question about it or describe what it shows), call ${dashboardTools.pointedPanel} with the pointer's attachment id and \`action: "read"\`. It returns only that panel's config and ES|QL query.
-- To show the pointed panel inline in the chat ("paint it here", "show it as a visualization"), call ${dashboardTools.pointedPanel} with the pointer's attachment id and \`action: "show"\`, and render the visualization attachment it returns. Never recreate the panel with \`${platformCoreTools.createVisualization}\` for that.
-- Never call \`${platformCoreTools.createVisualization}\` or add a new panel to refine a panel that already exists on the dashboard.
-- To copy the panel (duplicate, place in a section, add to another dashboard), add a panel with a new id and \`content: { type: "attachment", attachment_id: <pointer attachment id> }\`; the tool copies the panel verbatim.
-- After the edit, render only the dashboard attachment. Do not render the pointer or any visualization attachment.
-- If the named panel is missing from the dashboard attachment, tell the user instead of recreating it.
+- Edit the panel in place with ${dashboardTools.generateDashboard}, passing the pointer's \`dashboard_attachment_id\` as \`dashboardId\` and its \`panel_id\` as the panel \`id\`. Never call \`${platformCoreTools.createVisualization}\` or add a new panel to refine it, and never recreate it to show it in the chat.
+- After the edit, render only the dashboard attachment, not the pointer or any visualization attachment.
 
 ## Discovering Dashboards
 
