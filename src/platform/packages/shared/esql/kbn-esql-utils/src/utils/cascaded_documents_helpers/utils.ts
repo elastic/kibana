@@ -15,9 +15,13 @@ import type {
   ESQLAstExpression,
   ESQLFunction,
   ESQLCommand,
+  ESQLColumn,
   ESQLLiteral,
 } from '@elastic/esql/types';
 import type { FieldSummary } from '@kbn/esql-language';
+// the helper is not re-exported from the package root, and inlining a second wildcard matcher
+// would only duplicate the escaping this one already gets right
+import { matchesWildcardPattern } from '@kbn/esql-language/src/commands/definitions/utils/regex';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getFieldDefinitionFromArg, getFieldTerminals, type Terminal } from '../esql_fields_utils';
 import {
@@ -134,6 +138,55 @@ export function getESQLQueryDataSourceCommand(
 export function getStatsCommandRuntimeFields(esqlQuery: EsqlQuery) {
   const querySummary = getQuerySummaryPerCommandType(esqlQuery.print(), 'stats');
   return querySummary.map((command) => command.newColumns);
+}
+
+/**
+ * Reports whether the column node targets the provided column name, honouring the wildcard patterns
+ * KEEP and DROP accept. A quoted column is compared literally, because backticks make an asterisk
+ * part of the name rather than a pattern.
+ */
+const columnNodeTargets = (node: ESQLColumn, columnName: string): boolean => {
+  const nodeName = node.parts.join('.');
+
+  // a pattern without an asterisk only matches the name it spells out,
+  // so the plain column case needs no separate comparison
+  return node.quoted ? nodeName === columnName : matchesWildcardPattern(nodeName, columnName);
+};
+
+/**
+ * Reports whether a column the command at `fromCommandIndex` produced fails to reach the end of the
+ * query, because a later KEEP leaves it out or a later DROP names it.
+ *
+ * Knowing this matters because the query is the only place it can be read from. A column the query
+ * projected away is absent from every result row, and an aggregate that held null for every group is
+ * equally absent once the search drops its all null columns, so the records alone cannot tell the two
+ * apart.
+ */
+export function isColumnStrippedFromOutput(
+  esqlQuery: EsqlQuery,
+  fromCommandIndex: number,
+  columnName: string
+): boolean {
+  const targetColumnName = removeBackticks(columnName);
+
+  // a column the query stripped stays stripped, a later KEEP cannot bring it back,
+  // so the first command that removes it settles the question
+  return esqlQuery.ast.commands.slice(fromCommandIndex + 1).some((cmd) => {
+    if (cmd.name !== 'keep' && cmd.name !== 'drop') {
+      return false;
+    }
+
+    let targeted = false;
+
+    Walker.walk(cmd, {
+      visitColumn: (node) => {
+        targeted ||= columnNodeTargets(node, targetColumnName);
+      },
+    });
+
+    // DROP names the columns it removes, while KEEP names the only columns it lets through
+    return cmd.name === 'drop' ? targeted : !targeted;
+  });
 }
 
 /**
@@ -290,6 +343,15 @@ const buildAggregateValueLiteral = (value: string | number) => {
 
 export interface ValuesAggregateFilterArgs {
   /**
+   * the query the cascade experience is driven from, consulted to tell whether an aggregate still
+   * reaches the end of the query
+   */
+  editorQuery: EsqlQuery;
+  /**
+   * index of the stats command that declares the aggregates within the query's commands
+   */
+  operatingStatsCommandIndex: number;
+  /**
    * summary of the stats command that declares the aggregates displayed for the cascade row
    */
   statsSummary: StatsCommandSummary;
@@ -311,6 +373,8 @@ export interface ValuesAggregateFilterArgs {
  * in the row the user expanded.
  */
 export const buildValuesAggregateFilterExpressions = ({
+  editorQuery,
+  operatingStatsCommandIndex,
   statsSummary,
   nodeAggregatedValues,
   dataViewFields,
@@ -337,6 +401,13 @@ export const buildValuesAggregateFilterExpressions = ({
       if (!isColumn(valuesArgument)) {
         // we only support field values passed as arguments to the aggregate function,
         // filtering on the result of an expression would require evaluating the expression per document
+        return filters;
+      }
+
+      if (isColumnStrippedFromOutput(editorQuery, operatingStatsCommandIndex, aggregate.field)) {
+        // the query projects this aggregate away, so the row never displayed it. Its absence says
+        // nothing about the documents behind the row, which is the opposite of what an aggregate
+        // the query kept says when it holds no value, so these documents stay unconstrained.
         return filters;
       }
 
