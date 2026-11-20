@@ -95,8 +95,10 @@ export interface AlertCounts {
    * identity is undercounted.
    */
   byEntityId: Record<string, number>;
-  /** The query sent, or null when none could be built; a failure is reported in `errors`. */
+  /** The query sent, or null when none could be built; see `errors` for why. */
   query: ListQueryDiagnostic | null;
+  /** Why counts are missing or incomplete, kept apart from the list's `errors[]`, which are about rows. */
+  errors: SourceError[];
 }
 
 /** One row per entity seen in the window, merged across the type's sources. */

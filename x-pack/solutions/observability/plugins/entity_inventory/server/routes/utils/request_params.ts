@@ -28,14 +28,26 @@ export const dateRangeRefinement = {
   path: ['to'],
 };
 
-// The body of `_list` and `_plan`, shared so the two routes accept exactly the same requests.
+// The body of `_plan`: the window and row limit shared by every list-shaped request.
+export const planRequestBodySchema = lazySchema(() =>
+  z
+    .object({
+      from: instantParam,
+      to: instantParam,
+      limit: listLimitParam,
+    })
+    .strict()
+    .refine(isFromEarlierThanTo, dateRangeRefinement)
+);
+
+// The body of `_list`: the `_plan` body plus the opt-in alert counts.
 export const listRequestBodySchema = lazySchema(() =>
   z
     .object({
       from: instantParam,
       to: instantParam,
       limit: listLimitParam,
-      // Also count the active alerts of each entity; read by `_list`, ignored by `_plan`.
+      // Also count the active alerts of each entity.
       includeAlertCounts: z.boolean().default(false),
     })
     .strict()

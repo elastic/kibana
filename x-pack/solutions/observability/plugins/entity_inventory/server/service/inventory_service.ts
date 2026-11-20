@@ -16,7 +16,6 @@ import type {
   ListQueryDiagnostic,
   ListResponse,
   PlanResponse,
-  Provenance,
   SourceError,
   UnavailableColumn,
 } from '../../common';
@@ -83,7 +82,7 @@ const toUnavailableColumns = (
   });
 
 const toQueryDiagnostic = (
-  { indexPattern, engine }: QueryPlan,
+  { indexPattern, engine }: Pick<QueryPlan, 'indexPattern' | 'engine'>,
   { esql, params }: GeneratedQuery,
   outcome: PromiseSettledResult<EsqlQueryResult>
 ): ListQueryDiagnostic => {
@@ -105,27 +104,19 @@ const toQueryDiagnostic = (
 const toResponseColumns = (columns: OutputColumn[]): InventoryTypeColumn[] =>
   columns.map(({ name, kind }) => ({ name, kind }));
 
-const restrictProvenance = (provenance: Provenance, rows: InventoryRow[]): Provenance =>
+// Keeps the entries of `byEntityId` whose entity id is the `entity.id` of one of the returned rows.
+const restrictToRows = <T>(
+  byEntityId: Record<string, T>,
+  rows: InventoryRow[]
+): Record<string, T> =>
   Object.fromEntries(
     rows.flatMap((row) => {
       const entityId = row[ENTITY_ID_COLUMN];
-      return typeof entityId === 'string' && entityId in provenance
-        ? [[entityId, provenance[entityId]]]
+      return typeof entityId === 'string' && entityId in byEntityId
+        ? [[entityId, byEntityId[entityId]]]
         : [];
     })
   );
-
-const restrictAlertCounts = (alertCounts: AlertCounts, rows: InventoryRow[]): AlertCounts => ({
-  ...alertCounts,
-  byEntityId: Object.fromEntries(
-    rows.flatMap((row) => {
-      const entityId = row[ENTITY_ID_COLUMN];
-      return typeof entityId === 'string' && entityId in alertCounts.byEntityId
-        ? [[entityId, alertCounts.byEntityId[entityId]]]
-        : [];
-    })
-  ),
-});
 
 export class InventoryService {
   constructor(
@@ -173,7 +164,7 @@ export class InventoryService {
     type,
     window,
     limit,
-    includeAlertCounts = false,
+    includeAlertCounts,
     signal,
   }: ListRequest): Promise<ListResponse> => {
     const startedAt = Date.now();
@@ -186,7 +177,7 @@ export class InventoryService {
     );
 
     // Settled, not raced: one failing source must not hide the rows of the others. The alert count
-    // query runs beside the list queries, and its failure is reported like a failed source.
+    // query runs beside the list queries, and its failure is reported in `alertCounts.errors`.
     const [outcomes, alerts] = await Promise.all([
       Promise.allSettled(queries.map((query) => executeEsql(this.esClient, query, { signal }))),
       includeAlertCounts ? this.countClassicAlerts(definition, signal) : undefined,
@@ -226,14 +217,11 @@ export class InventoryService {
     const ordered = orderRows(merged.rows);
     const { truncated } = summarizeResults(results, limit, ordered.length);
     const rows = fillColumns(applyLimit(ordered, limit), columns);
-    if (alerts) {
-      errors.push(...alerts.errors);
-    }
 
     return {
       columns: toResponseColumns(columns),
       rows,
-      provenance: restrictProvenance(merged.provenance, rows),
+      provenance: restrictToRows(merged.provenance, rows),
       truncated,
       took: Date.now() - startedAt,
       queries: outcomes.map((outcome, planIndex) =>
@@ -241,47 +229,47 @@ export class InventoryService {
       ),
       errors,
       unavailableColumns,
-      ...(alerts ? { alertCounts: restrictAlertCounts(alerts.alertCounts, rows) } : {}),
+      ...(alerts
+        ? { alertCounts: { ...alerts, byEntityId: restrictToRows(alerts.byEntityId, rows) } }
+        : {}),
     };
   };
 
   /**
    * Counts the active classic alerts of every entity of the definition's type with one query. A
    * definition whose identity cannot be read from an alert, or a query that fails, is reported in
-   * `errors` and leaves the counts empty; it never fails the request.
+   * `errors` and leaves the counts empty; nothing here fails the request.
    */
   private countClassicAlerts = async (
     definition: RegisteredEntityDefinition,
     signal: AbortSignal | undefined
-  ): Promise<{ alertCounts: AlertCounts; errors: SourceError[] }> => {
+  ): Promise<AlertCounts> => {
     let query: GeneratedQuery;
     try {
       query = buildClassicAlertCountQuery(definition, this.spaceId);
     } catch (error) {
       if (error.name !== 'InventoryDefinitionError') {
-        throw error;
+        this.logger.error(
+          `Entity inventory could not build the alert count query: ${error.message}`
+        );
       }
       return {
-        alertCounts: { byEntityId: {}, query: null },
+        byEntityId: {},
+        query: null,
         errors: [{ indexPattern: CLASSIC_ALERT_INDICES, status: null, reason: error.message }],
       };
     }
 
     const [outcome] = await Promise.allSettled([executeEsql(this.esClient, query, { signal })]);
     const diagnostic = toQueryDiagnostic(
-      {
-        index: 0,
-        sourceIndex: 0,
-        indexPattern: CLASSIC_ALERT_INDICES,
-        attributes: [],
-        engine: 'FROM',
-      },
+      { indexPattern: CLASSIC_ALERT_INDICES, engine: 'FROM' },
       query,
       outcome
     );
     if (outcome.status === 'rejected') {
       return {
-        alertCounts: { byEntityId: {}, query: diagnostic },
+        byEntityId: {},
+        query: diagnostic,
         errors: [toSourceError(CLASSIC_ALERT_INDICES, outcome.reason)],
       };
     }
@@ -309,7 +297,7 @@ export class InventoryService {
         return typeof entityId === 'string' && typeof count === 'number' ? [[entityId, count]] : [];
       })
     );
-    return { alertCounts: { byEntityId, query: diagnostic }, errors };
+    return { byEntityId, query: diagnostic, errors };
   };
 
   /**

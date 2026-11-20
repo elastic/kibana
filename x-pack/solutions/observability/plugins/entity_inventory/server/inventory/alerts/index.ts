@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { toClassicAlertDefinition, CLASSIC_ALERT_GROUPING_PREFIX } from './alert_identity';
 export {
   buildClassicAlertCountQuery,
   CLASSIC_ALERT_INDICES,

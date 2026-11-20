@@ -1012,10 +1012,11 @@ describe('InventoryService.list with includeAlertCounts', () => {
     // An entity the list did not return is left out.
     expect(alertCounts?.byEntityId).toEqual({ [CART]: 2 });
     expect(alertCounts?.query).toMatchObject({ engine: 'FROM', rowCount: 2, took: 3 });
+    expect(alertCounts?.errors).toEqual([]);
     expect(errors).toEqual([]);
   });
 
-  it('reports a failed alert query in errors and still returns the entities', async () => {
+  it('reports a failed alert query in alertCounts.errors and still returns the entities', async () => {
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answer(esClient, esError(503, 'search_phase_execution_exception', 'shards failed'));
 
@@ -1028,15 +1029,16 @@ describe('InventoryService.list with includeAlertCounts', () => {
 
     expect(rows).toHaveLength(1);
     expect(alertCounts?.byEntityId).toEqual({});
-    expect(errors).toEqual([
+    expect(alertCounts?.errors).toEqual([
       expect.objectContaining({
         indexPattern: '.alerts-stack.*,.alerts-observability.*',
         status: 503,
       }),
     ]);
+    expect(errors).toEqual([]);
   });
 
-  it('reports a partial alert result in errors and keeps its counts', async () => {
+  it('reports a partial alert result in alertCounts.errors and keeps its counts', async () => {
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answer(esClient, { ...alertResponse([[2, CART]]), is_partial: true });
 
@@ -1048,8 +1050,9 @@ describe('InventoryService.list with includeAlertCounts', () => {
     });
 
     expect(alertCounts?.byEntityId).toEqual({ [CART]: 2 });
-    expect(errors).toEqual([
+    expect(alertCounts?.errors).toEqual([
       expect.objectContaining({ reason: expect.stringContaining('partial result') }),
     ]);
+    expect(errors).toEqual([]);
   });
 });
