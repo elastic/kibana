@@ -6,6 +6,7 @@
  */
 
 import type { FC } from 'react';
+import type { Observable } from 'rxjs';
 import type { IconType } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
@@ -85,4 +86,11 @@ export interface ElasticsearchHomePageProps {
 
 export interface ElasticsearchHomePublicStart {
   HomePage: FC<ElasticsearchHomePageProps>;
+  /**
+   * Emits whether integrated onboarding is enabled, following flag changes. For code outside React,
+   * such as an `AppUpdater`.
+   */
+  getIntegratedOnboardingEnabled$: () => Observable<boolean>;
+  /** React hook returning whether integrated onboarding is enabled. */
+  useIntegratedOnboardingEnabled: () => boolean;
 }

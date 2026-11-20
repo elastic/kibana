@@ -10,7 +10,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux-v7';
 import type { Store } from 'redux-v4';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import { configureStore } from 'redux-toolkit-v1';
 import { createKibanaContextProviderMock } from './kibana_react.mock';

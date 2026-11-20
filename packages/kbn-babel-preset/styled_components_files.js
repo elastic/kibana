@@ -23,8 +23,6 @@ module.exports = {
     /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-npm[\/\\]/,
     /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-src[\/\\]/,
 
-    /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]assistant[\/\\]settings[\/\\]assistant_settings.tsx/,
-    /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]data_anonymization_editor[\/\\]context_editor[\/\\]get_columns[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]fleet_server_instructions[\/\\]components[\/\\]fleet_server_hosts_form.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]fleet_server_instructions[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]fleet_server_instructions[\/\\]steps[\/\\]create_service_token.tsx/,
