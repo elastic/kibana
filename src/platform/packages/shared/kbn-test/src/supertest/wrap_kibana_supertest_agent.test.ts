@@ -365,14 +365,17 @@ describe('wrapKibanaSupertestAgent', () => {
       });
 
       try {
-        // stall the event loop so the backoff timer fires after the 400ms deadline
-        setTimeout(() => {
+        // stall from onRetry: the retry is already scheduled, so the backoff timer fires after the 400ms deadline
+        const onRetry = jest.fn(() => {
           const until = Date.now() + 500;
           while (Date.now() < until) {
             // busy wait
           }
-        }, 50);
-        await expect(kibanaSupertest(url).get('/').timeout(400).expect(200)).rejects.toThrow();
+        });
+        await expect(
+          kibanaSupertest(url, undefined, { onRetry }).get('/').timeout(400).expect(200)
+        ).rejects.toThrow(/got 429/);
+        expect(onRetry).toHaveBeenCalledTimes(1);
         expect(attempts).toBe(1);
       } finally {
         await close();
