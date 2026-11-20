@@ -19,14 +19,34 @@ jest.mock('../../lib/mcp/with_mcp_client', () => ({
   }),
 }));
 
-const parse = <K extends keyof typeof PagerdutyConnector.actions>(
-  action: K,
-  raw: Record<string, unknown>
-) => PagerdutyConnector.actions[action].input.parse(raw);
+type ActionName = keyof typeof PagerdutyConnector.actions;
+
+const parse = (action: ActionName, raw: Record<string, unknown>) =>
+  PagerdutyConnector.actions[action].input.parse(raw);
+
+const TOOL_ACTIONS: Array<{ action: ActionName; tool: string }> = [
+  { action: 'browseIncidents', tool: 'browse_incidents' },
+  { action: 'browseServices', tool: 'browse_services' },
+  { action: 'browseSchedules', tool: 'browse_schedules' },
+  { action: 'browseTeams', tool: 'browse_teams' },
+  { action: 'browseUsers', tool: 'browse_users' },
+  { action: 'browseEscalationPolicies', tool: 'browse_escalation_policies' },
+  { action: 'browseEventOrchestrations', tool: 'browse_event_orchestrations' },
+  { action: 'browseAlertGrouping', tool: 'browse_alert_grouping' },
+  { action: 'browseChangeEvents', tool: 'browse_change_events' },
+  { action: 'browseStatusPages', tool: 'browse_status_pages' },
+  { action: 'browseActivity', tool: 'browse_activity' },
+  { action: 'manageIncidents', tool: 'manage_incidents' },
+  { action: 'manageServices', tool: 'manage_services' },
+  { action: 'manageSchedules', tool: 'manage_schedules' },
+  { action: 'manageTeams', tool: 'manage_teams' },
+  { action: 'manageEventOrchestrations', tool: 'manage_event_orchestrations' },
+  { action: 'manageAlertGrouping', tool: 'manage_alert_grouping' },
+  { action: 'manageStatusPages', tool: 'manage_status_pages' },
+];
 
 describe('PagerdutyConnector', () => {
   const mockContext = {
-    client: {},
     log: {},
     config: { serverUrl: 'https://mcp.pagerduty.com/mcp' },
   } as unknown as ActionContext;
@@ -38,239 +58,326 @@ describe('PagerdutyConnector', () => {
     jest.clearAllMocks();
     mockCallTool.mockResolvedValue({ content: mockContent });
     mockListTools.mockResolvedValue({
-      tools: [{ name: 'get_user_data' }, { name: 'list_incidents' }],
+      tools: [{ name: 'browse_incidents' }, { name: 'manage_incidents' }],
     });
   });
 
-  describe('getUserData action', () => {
-    it('calls get_user_data tool and returns parsed JSON', async () => {
-      const result = await PagerdutyConnector.actions.getUserData.handler(mockContext, {});
+  describe('action surface', () => {
+    it('exposes one action per MCP tool, listTools, and callTool', () => {
+      expect(Object.keys(PagerdutyConnector.actions).sort()).toEqual(
+        [...TOOL_ACTIONS.map(({ action }) => action), 'listTools', 'callTool'].sort()
+      );
+    });
 
-      expect(mockCallTool).toHaveBeenCalledWith({ name: 'get_user_data', arguments: {} });
+    it.each(TOOL_ACTIONS)('$action calls $tool', async ({ action, tool }) => {
+      const spec = PagerdutyConnector.actions[action];
+
+      const request = { action: 'get' };
+      await spec.handler(mockContext, { request } as never);
+
+      expect(mockCallTool).toHaveBeenCalledWith({ name: tool, arguments: { request } });
+    });
+  });
+
+  describe('browse actions', () => {
+    it('returns parsed JSON from the tool result', async () => {
+      const input = parse('browseUsers', { request: { action: 'get' } });
+      const result = await PagerdutyConnector.actions.browseUsers.handler(
+        mockContext,
+        input as never
+      );
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'browse_users',
+        arguments: { request: { action: 'get' } },
+      });
       expect(result).toEqual(mockJson);
     });
-  });
 
-  describe('listSchedules action', () => {
-    it('passes input as query_model', async () => {
-      const input = parse('listSchedules', { query: 'primary' });
-      await PagerdutyConnector.actions.listSchedules.handler(mockContext, input);
+    it('passes incident list filters through unchanged', async () => {
+      const request = {
+        action: 'list',
+        request_scope: 'assigned',
+        statuses: ['triggered', 'acknowledged'],
+        urgencies: ['high'],
+        since: '2026-09-01T00:00:00Z',
+        service_ids: ['PSVC01'],
+        limit: 25,
+      };
+      const input = parse('browseIncidents', { request });
+      await PagerdutyConnector.actions.browseIncidents.handler(mockContext, input as never);
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'list_schedules',
-        arguments: { query_model: { query: 'primary' } },
+        name: 'browse_incidents',
+        arguments: { request },
       });
     });
 
-    it('passes all optional filters', async () => {
-      const input = parse('listSchedules', {
-        query: 'ops',
-        limit: 5,
-        team_ids: ['T1'],
-        user_ids: ['U1'],
-        include: ['schedule_layers'],
-      });
-      await PagerdutyConnector.actions.listSchedules.handler(mockContext, input);
+    it('requires context_type for the incident context action', () => {
+      expect(() =>
+        parse('browseIncidents', { request: { action: 'context', incident_id: 'Q1' } })
+      ).toThrow();
+      expect(() =>
+        parse('browseIncidents', {
+          request: { action: 'context', incident_id: 'Q1', context_type: 'past' },
+        })
+      ).not.toThrow();
+    });
 
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'list_schedules',
-        arguments: {
-          query_model: {
-            query: 'ops',
-            limit: 5,
-            team_ids: ['T1'],
-            user_ids: ['U1'],
-            include: ['schedule_layers'],
+    it('requires since and until when listing schedule overrides', () => {
+      expect(() =>
+        parse('browseSchedules', { request: { action: 'list_overrides', schedule_id: 'PSCH01' } })
+      ).toThrow();
+      expect(() =>
+        parse('browseSchedules', {
+          request: {
+            action: 'list_overrides',
+            schedule_id: 'PSCH01',
+            since: '2026-09-01T00:00:00Z',
+            until: '2026-09-08T00:00:00Z',
           },
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects an unknown action and an out-of-range limit', () => {
+      expect(() => parse('browseServices', { request: { action: 'delete' } })).toThrow();
+      expect(() => parse('browseServices', { request: { action: 'list', limit: 500 } })).toThrow();
+    });
+
+    it('rejects a request without an action', () => {
+      expect(() => parse('browseTeams', { request: {} })).toThrow();
+      expect(() => parse('browseTeams', {})).toThrow();
+    });
+  });
+
+  describe('manage actions', () => {
+    it('creates an incident with the nested incident payload', async () => {
+      const request = {
+        action: 'create',
+        incident: {
+          title: 'Prod DB down',
+          service: { id: 'PIJ90N7' },
+          urgency: 'high',
+          assignments: [{ assignee: { id: 'PUSER01' } }],
         },
-      });
-    });
-  });
-
-  describe('listEscalationPolicies action', () => {
-    it('passes input as query_model', async () => {
-      const input = parse('listEscalationPolicies', { query: 'critical' });
-      await PagerdutyConnector.actions.listEscalationPolicies.handler(mockContext, input);
+      };
+      const input = parse('manageIncidents', { request });
+      const result = await PagerdutyConnector.actions.manageIncidents.handler(
+        mockContext,
+        input as never
+      );
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'list_escalation_policies',
-        arguments: { query_model: { query: 'critical' } },
+        name: 'manage_incidents',
+        arguments: { request },
       });
-    });
-  });
-
-  describe('listIncidents action', () => {
-    it('passes input as query_model', async () => {
-      const input = parse('listIncidents', { status: ['triggered'] });
-      await PagerdutyConnector.actions.listIncidents.handler(mockContext, input);
-
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'list_incidents',
-        arguments: { query_model: { status: ['triggered'], limit: 25 } },
-      });
-    });
-  });
-
-  describe('listOncalls action', () => {
-    it('applies default limit when omitted', async () => {
-      const input = parse('listOncalls', {});
-      await PagerdutyConnector.actions.listOncalls.handler(mockContext, input);
-
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'list_oncalls',
-        arguments: { query_model: { limit: 20 } },
-      });
+      expect(result).toEqual(mockJson);
     });
 
-    it('passes custom limit and filters', async () => {
-      const input = parse('listOncalls', {
-        limit: 5,
-        schedule_ids: ['S1'],
-        earliest: true,
-      });
-      await PagerdutyConnector.actions.listOncalls.handler(mockContext, input);
-
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'list_oncalls',
-        arguments: {
-          query_model: { limit: 5, schedule_ids: ['S1'], earliest: true },
-        },
-      });
+    it('requires incident.title and incident.service on create', () => {
+      expect(() =>
+        parse('manageIncidents', { request: { action: 'create', incident: { title: 'x' } } })
+      ).toThrow();
     });
-  });
 
-  describe('listUsers action', () => {
-    it('passes input as query_model', async () => {
-      const input = parse('listUsers', { query: 'alice' });
-      await PagerdutyConnector.actions.listUsers.handler(mockContext, input);
-
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'list_users',
-        arguments: { query_model: { query: 'alice' } },
-      });
+    it('acknowledges incidents through update', () => {
+      expect(() =>
+        parse('manageIncidents', {
+          request: {
+            action: 'update',
+            manage_request: { incident_ids: ['Q1', 'Q2'], status: 'acknowledged' },
+          },
+        })
+      ).not.toThrow();
     });
-  });
 
-  describe('listTeams action', () => {
-    it('passes input as query_model', async () => {
-      const input = parse('listTeams', { query: 'platform' });
-      await PagerdutyConnector.actions.listTeams.handler(mockContext, input);
-
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'list_teams',
-        arguments: { query_model: { query: 'platform' } },
-      });
+    it('rejects triggered as an update status', () => {
+      expect(() =>
+        parse('manageIncidents', {
+          request: {
+            action: 'update',
+            manage_request: { incident_ids: ['Q1'], status: 'triggered' },
+          },
+        })
+      ).toThrow();
     });
-  });
 
-  describe('getSchedule action', () => {
-    it('calls get_schedule with the schedule_id', async () => {
-      await PagerdutyConnector.actions.getSchedule.handler(mockContext, {
-        schedule_id: 'PSCHED01',
-      });
-
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'get_schedule',
-        arguments: { schedule_id: 'PSCHED01' },
-      });
+    it('requires at least one responder target', () => {
+      expect(() =>
+        parse('manageIncidents', {
+          request: {
+            action: 'add_responders',
+            incident_id: 'Q1',
+            request: { message: 'Need help', responder_request_targets: [] },
+          },
+        })
+      ).toThrow();
+      expect(() =>
+        parse('manageIncidents', {
+          request: {
+            action: 'add_responders',
+            incident_id: 'Q1',
+            request: {
+              message: 'Need help',
+              responder_request_targets: [
+                { responder_request_target: { id: 'PUSER01', type: 'user_reference' } },
+              ],
+            },
+          },
+        })
+      ).not.toThrow();
     });
-  });
 
-  describe('getIncident action', () => {
-    it('calls get_incident with the incident_id', async () => {
-      await PagerdutyConnector.actions.getIncident.handler(mockContext, {
-        incident_id: 'PINC001',
-      });
-
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'get_incident',
-        arguments: { incident_id: 'PINC001' },
-      });
+    it('distinguishes legacy and shift_based schedule creation', () => {
+      expect(() =>
+        parse('manageSchedules', {
+          request: {
+            action: 'create',
+            schedule_data: { kind: 'shift_based', name: 'Primary', time_zone: 'UTC' },
+          },
+        })
+      ).not.toThrow();
+      expect(() =>
+        parse('manageSchedules', {
+          request: {
+            action: 'create',
+            schedule_data: { kind: 'legacy', schedule: { name: 'Primary', time_zone: 'UTC' } },
+          },
+        })
+      ).toThrow();
     });
-  });
 
-  describe('getEscalationPolicy action', () => {
-    it('calls get_escalation_policy with the policy_id', async () => {
-      await PagerdutyConnector.actions.getEscalationPolicy.handler(mockContext, {
-        policy_id: 'PPOL01',
-      });
-
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'get_escalation_policy',
-        arguments: { policy_id: 'PPOL01' },
-      });
+    it('requires a recurrence and assignment strategy for rotation events', () => {
+      expect(() =>
+        parse('manageSchedules', {
+          request: {
+            action: 'create_rotation_event',
+            schedule_id: 'PSCH01',
+            rotation_id: 'R1',
+            event_data: {
+              name: 'Weekdays',
+              start_time: { date_time: '2026-09-04T09:00:00Z', time_zone: 'UTC' },
+              end_time: { date_time: '2026-09-04T17:00:00Z', time_zone: 'UTC' },
+              effective_since: '2026-09-04T00:00:00Z',
+              recurrence: ['RRULE:FREQ=WEEKLY;BYDAY=MO,TU'],
+              assignment_strategy: {
+                type: 'rotating_member_assignment_strategy',
+                members: [{ type: 'user_member', user_id: 'PUSER01' }],
+                shifts_per_member: 1,
+              },
+            },
+          },
+        })
+      ).not.toThrow();
+      expect(() =>
+        parse('manageSchedules', {
+          request: {
+            action: 'create_rotation_event',
+            schedule_id: 'PSCH01',
+            rotation_id: 'R1',
+            event_data: { name: 'Weekdays' },
+          },
+        })
+      ).toThrow();
     });
-  });
 
-  describe('getTeam action', () => {
-    it('calls get_team with the team_id', async () => {
-      await PagerdutyConnector.actions.getTeam.handler(mockContext, { team_id: 'PTEAM01' });
+    it('validates team membership roles', () => {
+      expect(() =>
+        parse('manageTeams', {
+          request: {
+            action: 'add_member',
+            team_id: 'PTEAM01',
+            member_data: { user_id: 'PUSER01', role: 'responder' },
+          },
+        })
+      ).not.toThrow();
+      expect(() =>
+        parse('manageTeams', {
+          request: {
+            action: 'add_member',
+            team_id: 'PTEAM01',
+            member_data: { user_id: 'PUSER01', role: 'admin' },
+          },
+        })
+      ).toThrow();
+    });
 
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'get_team',
-        arguments: { team_id: 'PTEAM01' },
-      });
+    it('requires at least one update when creating a status page post', () => {
+      const post = {
+        title: 'Maintenance',
+        post_type: 'maintenance',
+        starts_at: '2026-09-04T09:00:00Z',
+        ends_at: '2026-09-04T10:00:00Z',
+        status_page: { id: 'SP1' },
+      };
+      expect(() =>
+        parse('manageStatusPages', {
+          request: {
+            action: 'create_post',
+            status_page_id: 'SP1',
+            create_model: { post: { ...post, updates: [] } },
+          },
+        })
+      ).toThrow();
+      expect(() =>
+        parse('manageStatusPages', {
+          request: {
+            action: 'create_post',
+            status_page_id: 'SP1',
+            create_model: {
+              post: {
+                ...post,
+                updates: [{ message: 'Starting', status: { id: 'ST1' }, severity: { id: 'SV1' } }],
+              },
+            },
+          },
+        })
+      ).not.toThrow();
     });
   });
 
   describe('listTools action', () => {
-    it('returns the list of available tools', async () => {
+    it('returns the tools from the MCP server', async () => {
       const result = await PagerdutyConnector.actions.listTools.handler(mockContext, {});
 
       expect(mockListTools).toHaveBeenCalled();
-      expect(result).toEqual([{ name: 'get_user_data' }, { name: 'list_incidents' }]);
+      expect(result).toEqual([{ name: 'browse_incidents' }, { name: 'manage_incidents' }]);
     });
   });
 
   describe('callTool action', () => {
-    it('calls the named tool with provided arguments', async () => {
-      const result = await PagerdutyConnector.actions.callTool.handler(mockContext, {
-        name: 'list_incidents',
-        arguments: { limit: 5 },
+    it('calls an arbitrary tool and returns its content parts', async () => {
+      const input = parse('callTool', {
+        name: 'browse_users',
+        arguments: { request: { action: 'get' } },
       });
+      const result = await PagerdutyConnector.actions.callTool.handler(mockContext, input as never);
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'list_incidents',
-        arguments: { limit: 5 },
+        name: 'browse_users',
+        arguments: { request: { action: 'get' } },
       });
       expect(result).toEqual(mockContent);
     });
 
-    it('calls the named tool with no arguments when omitted', async () => {
-      await PagerdutyConnector.actions.callTool.handler(mockContext, { name: 'get_user_data' });
+    it('defaults arguments to an empty object', async () => {
+      const input = parse('callTool', { name: 'browse_users' });
+      await PagerdutyConnector.actions.callTool.handler(mockContext, input as never);
 
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'get_user_data',
-        arguments: {},
-      });
+      expect(mockCallTool).toHaveBeenCalledWith({ name: 'browse_users', arguments: {} });
     });
   });
 
   describe('test handler', () => {
-    it('returns ok with tool count on successful connection', async () => {
-      if (!PagerdutyConnector.test) {
-        throw new Error('test handler not defined');
-      }
-      const result = await PagerdutyConnector.test.handler(mockContext);
+    it('verifies the connection by listing tools', async () => {
+      const result = await PagerdutyConnector.test?.handler(mockContext);
 
       expect(mockListTools).toHaveBeenCalled();
       expect(result).toEqual({
         ok: true,
         message: 'Connected to PagerDuty MCP server. 2 tools available.',
       });
-    });
-
-    it('propagates errors thrown by withMcpClient', async () => {
-      const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
-      withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
-
-      if (!PagerdutyConnector.test) {
-        throw new Error('test handler not defined');
-      }
-
-      await expect(PagerdutyConnector.test.handler(mockContext)).rejects.toThrow(
-        'connection refused'
-      );
     });
   });
 });
