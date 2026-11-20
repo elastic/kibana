@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { AnnotationConversionFailureReason } from './convert_annotations_to_esql';
 
 /**
  * Specific reasons why ES|QL conversion failed.
@@ -30,7 +31,12 @@ export type EsqlConversionFailureReason =
   | 'terms_custom_order_by_not_supported'
   | 'terms_rank_metric_not_supported'
   | 'saved_to_library_not_supported'
-  | 'query_annotations_not_supported'
+  | 'annotation_library_not_supported'
+  | 'query_annotation_global_filters_not_supported'
+  | 'query_annotation_data_view_not_found'
+  | 'query_annotation_time_field_not_found'
+  | 'query_annotation_filter_not_convertible'
+  | 'query_annotation_data_view_only_field_not_supported'
   | 'reference_line_not_supported'
   | 'trendline_not_supported'
   | 'unsupported_settings'
@@ -140,11 +146,42 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
       defaultMessage: 'Charts saved to library will be supported in an upcoming update.',
     }
   ),
-  query_annotations_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlQueryAnnotationsReason',
+  annotation_library_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlAnnotationLibraryReason',
+    {
+      defaultMessage: 'Annotation groups from the library cannot be converted.',
+    }
+  ),
+  query_annotation_global_filters_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlQueryAnnotationGlobalFiltersReason',
     {
       defaultMessage:
-        'Annotation library groups and query-based annotations that apply global filters cannot be converted.',
+        'Query-based annotations that apply global filters cannot be converted, because ES|QL annotations ignore them.',
+    }
+  ),
+  query_annotation_data_view_not_found: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlQueryAnnotationDataViewNotFoundReason',
+    {
+      defaultMessage: 'The data view of a query-based annotation layer could not be found.',
+    }
+  ),
+  query_annotation_time_field_not_found: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlQueryAnnotationTimeFieldReason',
+    {
+      defaultMessage: 'A query-based annotation has no time field to convert.',
+    }
+  ),
+  query_annotation_filter_not_convertible: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlQueryAnnotationFilterReason',
+    {
+      defaultMessage: 'The filter of a query-based annotation cannot be expressed in ES|QL.',
+    }
+  ),
+  query_annotation_data_view_only_field_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlQueryAnnotationDataViewOnlyFieldReason',
+    {
+      defaultMessage:
+        'A query-based annotation uses a runtime or scripted data view field, which ES|QL cannot query.',
     }
   ),
   reference_line_not_supported: i18n.translate(
@@ -166,6 +203,18 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
   unknown: i18n.translate('xpack.lens.config.cannotConvertToEsqlUnknownReason', {
     defaultMessage: 'This visualization will be supported in an upcoming update.',
   }),
+};
+
+/** Maps each annotation conversion failure to its tooltip reason; exhaustive by construction. */
+export const annotationConversionFailureToReason: Record<
+  AnnotationConversionFailureReason,
+  EsqlConversionFailureReason
+> = {
+  global_filters_not_supported: 'query_annotation_global_filters_not_supported',
+  data_view_not_found: 'query_annotation_data_view_not_found',
+  time_field_not_found: 'query_annotation_time_field_not_found',
+  filter_not_convertible: 'query_annotation_filter_not_convertible',
+  data_view_only_field_not_supported: 'query_annotation_data_view_only_field_not_supported',
 };
 
 /** Builds tooltip content for a conversion failure */

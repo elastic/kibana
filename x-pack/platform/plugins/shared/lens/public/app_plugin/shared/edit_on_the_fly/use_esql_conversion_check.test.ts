@@ -196,6 +196,46 @@ describe('useEsqlConversionCheck', () => {
     );
   });
 
+  it.each([
+    [
+      'an annotation library group',
+      { annotationGroupId: 'saved-group' },
+      'annotation_library_not_supported',
+    ],
+    [
+      'a query annotation layer that applies global filters',
+      { ignoreGlobalFilters: false, indexPatternId: 'dv1' },
+      'query_annotation_global_filters_not_supported',
+    ],
+    [
+      'a query annotation layer with a missing data view',
+      { ignoreGlobalFilters: true, indexPatternId: 'missing' },
+      'query_annotation_data_view_not_found',
+    ],
+  ] as const)('shows the specific tooltip for %s', (_, layerOverrides, expectedReason) => {
+    generateEsqlQueryMock.mockReturnValue(esqlSuccess);
+    const visualization = {
+      ...hookParams.visualization,
+      state: {
+        layers: [
+          {
+            layerId: 'annotations',
+            layerType: 'annotations',
+            annotations: [queryAnnotation],
+            ...layerOverrides,
+          },
+        ],
+      },
+    };
+
+    const { result } = renderHook(() =>
+      useEsqlConversionCheck(true, { ...hookParams, visualization }, hookServices)
+    );
+
+    expect(result.current.isConvertToEsqlButtonDisabled).toBe(true);
+    expect(result.current.convertToEsqlButtonTooltip).toBe(getFailureTooltipText(expectedReason));
+  });
+
   it.each(['average', 'formula'])(
     'disables conversion when a reference line uses %s instead of a static value',
     (operationType) => {

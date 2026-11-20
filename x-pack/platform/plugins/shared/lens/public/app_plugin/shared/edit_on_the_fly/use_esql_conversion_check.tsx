@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 
 import {
+  annotationConversionFailureToReason,
   convertQueryAnnotationsToEsql,
   generateEsqlQuery,
   getFailureTooltipText,
@@ -159,7 +160,7 @@ export const useEsqlConversionCheck = (
 
     // Guard: annotation library groups are not supported on ES|QL charts
     if (hasUnsupportedAnnotations(state)) {
-      return getEsqlConversionDisabledSettings('query_annotations_not_supported');
+      return getEsqlConversionDisabledSettings('annotation_library_not_supported');
     }
 
     // Detect trendline layer from metric visualization state
@@ -310,13 +311,14 @@ export const useEsqlConversionCheck = (
       ? [...convertibleDataLayers, trendlineResult.layer]
       : convertibleDataLayers;
 
-    // The specific reason is not surfaced yet: all annotation failures share one tooltip.
     const annotationsConversion = convertQueryAnnotationsToEsql(
       visualization.state,
       framePublicAPI.dataViews.indexPatterns
     );
     if (!annotationsConversion.ok) {
-      return getEsqlConversionDisabledSettings('query_annotations_not_supported');
+      return getEsqlConversionDisabledSettings(
+        annotationConversionFailureToReason[annotationsConversion.reason]
+      );
     }
     const visualizationState = annotationsConversion.state;
 
