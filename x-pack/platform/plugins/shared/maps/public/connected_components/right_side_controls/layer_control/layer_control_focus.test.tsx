@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+
+import { LayerControl } from './layer_control';
+
 jest.mock('./layer_toc', () => ({
   LayerTOC: () => <div>mockLayerTOC</div>,
 }));
@@ -12,13 +19,6 @@ jest.mock('./layer_toc', () => ({
 jest.mock('../../../kibana_services', () => ({
   isScreenshotMode: () => false,
 }));
-
-import React, { useState } from 'react';
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
-
-import { LayerControl } from './layer_control';
 
 const Harness = ({ initialOpen }: { initialOpen: boolean }) => {
   const [isLayerTOCOpen, setIsLayerTOCOpen] = useState(initialOpen);
