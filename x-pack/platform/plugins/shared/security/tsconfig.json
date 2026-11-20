@@ -9,6 +9,7 @@
     "server/**/*",
     "__mocks__/**/*",
     "test/scout/**/*",
+    "test/scout_session_credentials/**/*",
   ],
   "kbn_references": [
     "@kbn/scout",

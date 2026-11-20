@@ -26,14 +26,19 @@ import { getFakeKibanaRequest } from './fake_kibana_request';
 import type { SecurityLicense } from '../../../common';
 import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
+import type { APIKeyAuthenticator, RequestCredentials } from '../authenticator';
 import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
 } from '../http_authentication';
+import { isTokenExpiredError } from '../is_token_expired_error';
 
 export type { UpdateAPIKeyParams, UpdateAPIKeyResult };
 
-const ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER = 'es-client-authentication';
+/**
+ * The HTTP header that carries native ES JWT client authentication, including its scheme.
+ */
+const ES_NATIVE_CLIENT_AUTHENTICATION_HEADER = 'es-client-authentication';
 
 /**
  * Represents the options to create an APIKey class instance that will be
@@ -45,6 +50,7 @@ export interface ConstructorOptions {
   license: SecurityLicense;
   applicationName: string;
   kibanaFeatures: KibanaFeature[];
+  authenticator: APIKeyAuthenticator;
 }
 
 type GrantAPIKeyParams =
@@ -69,6 +75,7 @@ export class APIKeys implements APIKeysType {
   private readonly license: SecurityLicense;
   private readonly applicationName: string;
   private readonly kibanaFeatures: KibanaFeature[];
+  private readonly authenticator: APIKeyAuthenticator;
 
   constructor({
     logger,
@@ -76,12 +83,14 @@ export class APIKeys implements APIKeysType {
     license,
     applicationName,
     kibanaFeatures,
+    authenticator,
   }: ConstructorOptions) {
     this.logger = logger;
     this.clusterClient = clusterClient;
     this.license = license;
     this.applicationName = applicationName;
     this.kibanaFeatures = kibanaFeatures;
+    this.authenticator = authenticator;
   }
 
   /**
@@ -265,18 +274,12 @@ export class APIKeys implements APIKeysType {
     }
 
     this.logger.debug('Trying to grant an API key');
-    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-    if (authorizationHeader == null) {
+    const credentials = this.authenticator.getRequestCredentials(request);
+    if (!credentials) {
       throw new Error(
         `Unable to grant an API Key, request does not contain an authorization header`
       );
     }
-
-    // Try to extract optional Elasticsearch client credentials (currently only used by JWT).
-    const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
-      request,
-      ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER
-    );
 
     const { expiration, metadata, name } = createParams;
     const roleDescriptors =
@@ -288,22 +291,78 @@ export class APIKeys implements APIKeysType {
             false
           );
 
-    const params = this.getGrantParams(
-      { expiration, metadata, name, role_descriptors: roleDescriptors },
-      authorizationHeader,
-      clientAuthorizationHeader
-    );
-    // User needs `manage_api_key` or `grant_api_key` privilege to use this API
-    let result: GrantAPIKeyResult;
+    const params = this.getGrantParamsForCredentials(request, credentials, {
+      expiration,
+      metadata,
+      name,
+      role_descriptors: roleDescriptors,
+    });
     try {
-      result = await this.clusterClient.asInternalUser.security.grantApiKey({ body: params });
+      const result = await this.grantWithReauthentication(request, credentials, params);
       this.logger.debug('API key was granted successfully');
-    } catch (e) {
-      this.logger.error(`Failed to grant API key: ${e.message}`);
-      throw e;
+      return result;
+    } catch (error) {
+      this.logger.error(`Failed to grant API key: ${error.message}`);
+      throw error;
     }
+  }
 
-    return result;
+  /**
+   * Grants an API key and retries once after session-token renewal.
+   * @param request The original incoming request that owns the session.
+   * @param credentials The credential snapshot used by the first attempt.
+   * @param params Grant parameters, including credential-independent API-key settings.
+   */
+  private async grantWithReauthentication(
+    request: KibanaRequest,
+    credentials: RequestCredentials,
+    params: GrantAPIKeyParams
+  ): Promise<GrantAPIKeyResult> {
+    const grantOnce = (grantParams: GrantAPIKeyParams) => {
+      this.logger.debug(`Granting an API key with grant type [${grantParams.grant_type}]`);
+      return this.clusterClient.asInternalUser.security.grantApiKey({ body: grantParams });
+    };
+
+    try {
+      return await grantOnce(params);
+    } catch (error) {
+      if (params.grant_type !== 'access_token' || !isTokenExpiredError(error, true)) {
+        throw error;
+      }
+
+      const renewedCredentials = await this.authenticator.reauthenticate(
+        request,
+        credentials.authHeaders
+      );
+      if (!renewedCredentials) {
+        throw error;
+      }
+
+      // Reauthentication validates the replacement credential. Retrying another expiry could loop
+      // indefinitely on a broken session, so a second failure must reach the normal error handler.
+      return grantOnce(
+        this.getGrantParamsForCredentials(request, renewedCredentials, params.api_key)
+      );
+    }
+  }
+
+  /**
+   * Builds grant parameters with the current token and its backend's client authentication.
+   * @param request The original request carrying native ES client authentication.
+   * @param credentials Current authentication headers.
+   * @param apiKey Credential-independent API-key settings.
+   */
+  private getGrantParamsForCredentials(
+    request: KibanaRequest,
+    credentials: RequestCredentials,
+    apiKey: GrantAPIKeyParams['api_key']
+  ): GrantAPIKeyParams {
+    // Native JWT client credentials remain on the request when the session token is renewed.
+    const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
+      request,
+      ES_NATIVE_CLIENT_AUTHENTICATION_HEADER
+    );
+    return this.getGrantParams(apiKey, credentials.authorizationHeader, clientAuthorizationHeader);
   }
 
   /**

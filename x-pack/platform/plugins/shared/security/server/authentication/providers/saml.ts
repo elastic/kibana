@@ -11,7 +11,7 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
 import { isInternalURL } from '@kbn/std';
 
-import type { AuthenticationProviderOptions } from './base';
+import type { AuthenticationOptions, AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -200,15 +200,22 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
   /**
    * Performs SAML request authentication.
+   * During session renewal, ignore the expired token that Core put in the Authorization header.
+   * Use the supplied session and contact Elasticsearch, even on minimal-authentication routes.
+   * The request headers stay unchanged.
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
+  public async authenticate(
+    request: KibanaRequest,
+    state?: ProviderState | null,
+    options?: AuthenticationOptions
+  ) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}`
     );
 
-    if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
+    if (!options?.reauthenticate && HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
       return AuthenticationResult.notHandled();
     }

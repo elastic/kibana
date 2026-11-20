@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
+import type {
+  AuthHeaders,
+  Headers,
+  IAuthHeadersStorage,
+  IBasePath,
+  IClusterClient,
+  KibanaRequest,
+  LoggerFactory,
+} from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -43,7 +51,7 @@ import { shouldProviderUseLoginForm } from '../../common/model';
 import { LogoutReason } from '../../common/types';
 import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
 import type { ConfigType } from '../config';
-import { getErrorStatusCode } from '../errors';
+import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import {
   getPrintableSessionId,
@@ -90,6 +98,7 @@ export interface AuthenticatorOptions {
   featureUsageService: SecurityFeatureUsageServiceStart;
   userProfileService: UserProfileServiceStartInternal;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+  authHeadersStorage: IAuthHeadersStorage;
   config: Pick<ConfigType, 'authc' | 'accessAgreement'>;
   basePath: IBasePath;
   license: SecurityLicense;
@@ -100,6 +109,27 @@ export interface AuthenticatorOptions {
   isElasticCloudDeployment: () => boolean;
   customLogoutURL?: string;
 }
+
+/** The credentials used by an Elasticsearch call or an API-key grant. */
+export interface RequestCredentials {
+  /** Authentication headers, including any client secret paired with the token. */
+  readonly authHeaders: AuthHeaders;
+  /** The parsed Authorization header from `authHeaders`. */
+  readonly authorizationHeader: HTTPAuthorizationHeader;
+}
+
+/** The latest credentials and any renewal in progress for one incoming request. */
+interface RequestAuthenticationState {
+  /** The latest authentication headers. Successful renewal replaces this object. */
+  authHeaders: AuthHeaders;
+  /** Authorization values used by this request, including tokens that expired before renewal. */
+  readonly authorizationHistory: Set<Headers['authorization']>;
+  /** A renewal shared by concurrent calls for this request. Cleared when the attempt finishes. */
+  reauthentication?: Promise<RequestCredentials | null>;
+}
+
+/** Authenticator methods used by the Elasticsearch API-key service. */
+export type APIKeyAuthenticator = Pick<Authenticator, 'getRequestCredentials' | 'reauthenticate'>;
 
 /** @internal */
 interface InvalidateSessionValueParams {
@@ -207,6 +237,12 @@ function instantiateProvider(
  * will be returned.
  */
 export class Authenticator {
+  // Core stores one authentication-header object per incoming request. All KibanaRequest wrappers
+  // for that request read the same object. Keep both old and renewed header objects in this map,
+  // so calls that still hold an expired token can find the latest token and share its renewal.
+  // Different incoming requests have different header objects, even when they use the same token.
+  private readonly requestAuthenticationStates = new WeakMap<Headers, RequestAuthenticationState>();
+
   /**
    * List of configured and instantiated authentication providers.
    */
@@ -508,10 +544,169 @@ export class Authenticator {
   }
 
   /**
-   * Tries to reauthenticate request with the existing session.
-   * @param request Request instance.
+   * Returns the authenticated user associated with the specified request.
+   * @param request The raw Kibana request.
    */
-  async reauthenticate(request: KibanaRequest) {
+  getCurrentUser(request: KibanaRequest): AuthenticatedUser | null {
+    return this.options.getCurrentUser(request);
+  }
+
+  /**
+   * Returns the latest credentials. Fake requests use their own headers, not Core storage.
+   * @param request The raw Kibana request.
+   */
+  getRequestCredentials(request: KibanaRequest): RequestCredentials | null {
+    const authHeaders = request.isFakeRequest
+      ? this.copyAuthHeaders(request.headers)
+      : this.getRequestAuthenticationState(request).authHeaders;
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest({ headers: authHeaders });
+    return authorizationHeader ? { authHeaders, authorizationHeader } : null;
+  }
+
+  /**
+   * Renews an expired session token and stores the new authentication headers in Core.
+   * Concurrent calls for the same request share one renewal attempt.
+   * Late failures also check the session, since a newer token may already have expired.
+   * @param request The original incoming request whose session owns the credential.
+   * @param failedAuthHeaders Headers sent by the failed call. Defaults to the latest headers.
+   */
+  async reauthenticate(
+    request: KibanaRequest,
+    failedAuthHeaders?: Headers
+  ): Promise<RequestCredentials | null> {
+    const user = this.getCurrentUser(request);
+    // A session cookie on the same request must not let an explicit HTTP credential fall back
+    // to another user's session.
+    // Fake requests have no browser session to renew.
+    if (
+      request.isFakeRequest ||
+      !user ||
+      user.authentication_provider.type === HTTPAuthenticationProvider.type
+    ) {
+      return null;
+    }
+
+    const state = this.getRequestAuthenticationState(request);
+    const failedAuthorization = (failedAuthHeaders ?? state.authHeaders).authorization;
+    // Ignore credentials this request never owned, such as a per-call authorization override.
+    if (!state.authorizationHistory.has(failedAuthorization)) {
+      return null;
+    }
+
+    // Store the promise before calling the provider, so concurrent failures share one attempt.
+    // Clear it afterward, so a later expiry or a failed renewal can trigger a new attempt.
+    state.reauthentication ??= Promise.resolve()
+      .then(() => this.updateSessionCredentials(request, user, state))
+      .finally(() => {
+        state.reauthentication = undefined;
+      });
+    return state.reauthentication;
+  }
+
+  /**
+   * Returns the latest credentials and pending renewal for this incoming request.
+   * @param request A KibanaRequest wrapper for the incoming request.
+   */
+  private getRequestAuthenticationState(request: KibanaRequest): RequestAuthenticationState {
+    const storedAuthHeaders = this.options.authHeadersStorage.get(request);
+    // Core's stored object identifies the incoming request across its KibanaRequest wrappers.
+    // Before Core stores authentication headers, the request's own headers provide that identity.
+    const key = storedAuthHeaders ?? request.headers;
+
+    // Both the original headers and headers stored after renewal point to the same state.
+    const existingState = this.requestAuthenticationStates.get(key);
+    if (existingState) {
+      return existingState;
+    }
+
+    // Start with the credentials that Core will send. If authentication stored no headers,
+    // copy the request headers without undefined values to match Core's outbound header type.
+    const authHeaders = storedAuthHeaders ?? this.copyAuthHeaders(request.headers);
+    const state = { authHeaders, authorizationHistory: new Set([authHeaders.authorization]) };
+    this.requestAuthenticationStates.set(key, state);
+    return state;
+  }
+
+  /**
+   * Copies request headers without undefined values, as required by Core's outbound header type.
+   * @param headers Headers to copy and filter.
+   */
+  private copyAuthHeaders(headers: Headers): AuthHeaders {
+    return Object.fromEntries(
+      Object.entries(headers).filter(
+        (entry): entry is [string, string | string[]] => entry[1] !== undefined
+      )
+    );
+  }
+
+  /**
+   * Renews the session and stores new credentials only if the authenticated user stays the same.
+   * @param request The raw Kibana request.
+   * @param user The authenticated user.
+   * @param state The request authentication state.
+   */
+  private async updateSessionCredentials(
+    request: KibanaRequest,
+    user: AuthenticatedUser,
+    state: RequestAuthenticationState
+  ): Promise<RequestCredentials | null> {
+    try {
+      const result = await this.authenticateSession(request);
+      if (result.succeeded()) {
+        const authHeaders = result.authHeaders && { ...result.authHeaders };
+        const authorizationHeader = authHeaders
+          ? HTTPAuthorizationHeader.parseFromRequest({ headers: authHeaders })
+          : null;
+        if (!authHeaders || !authorizationHeader) {
+          this.logger.error(
+            'Re-authentication succeeded, but authentication headers are not available.'
+          );
+          return null;
+        }
+
+        if (
+          result.user?.username !== user.username ||
+          result.user.profile_uid !== user.profile_uid
+        ) {
+          this.logger.error('Re-authentication changed the authenticated user identity.');
+          return null;
+        }
+
+        // New scoped clients and grants read these headers from Core. Calls that still hold the
+        // old headers keep the same state and share any pending renewal. Remember the new object
+        // for later KibanaRequest wrappers too.
+        this.options.authHeadersStorage.set(request, authHeaders);
+        state.authHeaders = authHeaders;
+        state.authorizationHistory.add(authHeaders.authorization);
+        this.requestAuthenticationStates.set(authHeaders, state);
+        this.logger.debug('Re-authentication succeeded');
+        return { authHeaders, authorizationHeader };
+      }
+
+      if (result.failed()) {
+        this.logger.error(
+          `Re-authentication failed due to: ${getDetailedErrorMessage(result.error)}`
+        );
+      } else if (result.redirected()) {
+        this.logger.error('Re-authentication failed since redirect is required.');
+      } else {
+        this.logger.debug('Re-authentication cannot be handled.');
+      }
+    } catch (error) {
+      this.logger.error(
+        `Re-authentication failed due to unexpected error: ${getDetailedErrorMessage(error)}.`
+      );
+    }
+
+    return null;
+  }
+
+  /**
+   * Checks the existing session with its owning provider without changing the request headers.
+   * @param request The raw Kibana request.
+   * @private
+   */
+  private async authenticateSession(request: KibanaRequest): Promise<AuthenticationResult> {
     // Return early if request doesn't have any associated session. We retrieve session ID separately from the session
     // content because it doesn't trigger session invalidation for expired sessions.
     const sid = await this.session.getSID(request);
@@ -533,8 +728,22 @@ export class Authenticator {
     // We can ignore `undefined` value here since it's ruled out on the previous step, if provider isn't
     // available then `getSessionValue` should have returned `null`.
     const provider = this.providers.get(existingSessionValue.provider.name)!;
-    const authenticationResult = await provider.authenticate(request, existingSessionValue.state);
+    const authenticationResult = await provider.authenticate(request, existingSessionValue.state, {
+      reauthenticate: true,
+    });
     if (!authenticationResult.notHandled()) {
+      // Renewal must not switch the session to another user, so it fails here, before the session
+      // update. If the user really changed, the next regular request replaces the session and
+      // shows the overwritten-session notice.
+      if (
+        authenticationResult.succeeded() &&
+        authenticationResult.user?.username !== existingSessionValue.username
+      ) {
+        return AuthenticationResult.failed(
+          new Error('Provider returned a user other than the session owner.')
+        );
+      }
+
       const sessionUpdateResult = await this.updateSessionValue(request, {
         provider: existingSessionValue.provider,
         authenticationResult,

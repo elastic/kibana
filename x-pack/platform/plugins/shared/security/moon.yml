@@ -117,5 +117,6 @@ fileGroups:
     - server/**/*
     - __mocks__/**/*
     - test/scout/**/*
+    - test/scout_session_credentials/**/*
     - '!target/**/*'
 tasks: {}
