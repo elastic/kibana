@@ -284,7 +284,7 @@ describe('Dashboard search sessions', () => {
     expect(session.start).not.toHaveBeenCalled();
   });
 
-  test('registers an incoming editor session without a compatible registration', () => {
+  test('does not register an incoming editor session without a compatible registration', () => {
     jest.mocked(session.getSessionId).mockReturnValue('editor-session');
     const { api } = setup({
       incomingEmbeddables: [
@@ -293,12 +293,24 @@ describe('Dashboard search sessions', () => {
     });
 
     expect(api.searchSessionId$.value).toBe('editor-session');
-    expect(api.replayCacheLastFetched$.value).toBeUndefined();
-    expect(replayCache.set).toHaveBeenCalledWith(
-      'dashboard:dashboard-id',
-      expect.objectContaining({ sessionId: 'editor-session' })
-    );
+    expect(replayCache.set).not.toHaveBeenCalled();
     expect(session.start).not.toHaveBeenCalled();
+  });
+
+  test('does not register a restored background search returned from an editor', () => {
+    jest.mocked(replayCache.get).mockReturnValue(replay);
+    jest.mocked(session.getSessionId).mockReturnValue('restored-session');
+    jest.mocked(session.isRestore).mockReturnValue(true);
+    const { api } = setup({
+      incomingEmbeddables: [
+        { type: 'lens', serializedState: {}, searchSessionId: 'restored-session' },
+      ],
+    });
+
+    expect(api.searchSessionId$.value).toBe('restored-session');
+    expect(api.replayCacheLastFetched$.value).toBeUndefined();
+    expect(replayCache.set).not.toHaveBeenCalled();
+    expect(replayCache.delete).toHaveBeenCalledWith('dashboard:dashboard-id');
   });
 
   test.each([

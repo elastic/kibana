@@ -104,9 +104,11 @@ export function initializeSearchSessionManager(
     if (continuedSessionId) {
       // Returning from an editor continues the session it used. If that session is the
       // registered one, registering it again would evict the responses we are about to reuse.
-      if (replay.hit && replay.sessionId === continuedSessionId) {
+      if (session.isRestore()) {
+        unregisterSearchSession();
+      } else if (replay.hit && replay.sessionId === continuedSessionId) {
         replayCacheLastFetched$.next(replay.lastFetched);
-      } else {
+      } else if (replay.hit) {
         registerSearchSession(continuedSessionId);
       }
 
