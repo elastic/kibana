@@ -57,7 +57,11 @@ import {
 import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
 import { OptionsListStrings } from './options_list_strings';
-import { initializeSelectionsManager, selectionComparators } from './selections_manager';
+import {
+  hasInitialSelections,
+  initializeSelectionsManager,
+  selectionComparators,
+} from './selections_manager';
 import { initializeTemporayStateManager } from './temporay_state_manager';
 import type { DSLOptionsListComponentApi, OptionsListControlApi } from './types';
 import { buildFilter } from './utils/filter_utils';
@@ -77,6 +81,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
   return {
     type: OPTIONS_LIST_CONTROL,
     getPlacementHints,
+    isAwaitingFilters: (state) => Boolean(state.required && !hasInitialSelections(state)),
     layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState: state, finalizeApi, uuid, parentApi }) => {
       const editorStateManager = initializeEditorStateManager(state);

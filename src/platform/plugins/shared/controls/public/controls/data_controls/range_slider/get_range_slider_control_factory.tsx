@@ -40,6 +40,8 @@ import { editorComparators, initializeEditorStateManager } from './editor_state_
 import { buildFilter } from './utils/filter_utils';
 import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
+const hasInitialValue = (state: RangeSliderControlState): boolean => state.value !== undefined;
+
 export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
   RangeSliderControlState,
   RangeSliderControlApi
@@ -47,6 +49,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
   return {
     type: RANGE_SLIDER_CONTROL,
     getPlacementHints,
+    isAwaitingFilters: (state) => Boolean(state.required && !hasInitialValue(state)),
     layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
@@ -64,7 +67,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         typeDisplayName: RangeSliderStrings.control.getDisplayName(),
         state,
         parentApi,
-        willHaveInitialFilter: state.value !== undefined,
+        willHaveInitialFilter: hasInitialValue(state),
         getInitialFilter: (dataView) => buildFilter(dataView, uuid, state),
         editorStateManager,
       });

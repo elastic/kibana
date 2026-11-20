@@ -14,6 +14,7 @@ import { asyncForEach } from '@kbn/std';
 import { getLastSavedState } from '../../../common/default_dashboard_state';
 import { dashboardClient } from '../../dashboard_client';
 import { getPlacementHints } from '../../panel_placement/get_placement_hints';
+import { getInitiallyAwaitingFilters } from './get_initially_awaiting_filters';
 import { getAccessControlClient } from '../../services/access_control_service';
 import {
   getDashboardBackupService,
@@ -103,6 +104,9 @@ export async function loadDashboardApi({
     }
   });
 
+  // Resolved here due to async definition loading, so the grid is not rendered before required filters are known
+  const initiallyAwaitingFilters = await getInitiallyAwaitingFilters(initialState.pinned_panels);
+
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     panelFlyoutType,
@@ -150,6 +154,7 @@ export async function loadDashboardApi({
       telemetrySubscription.unsubscribe();
     },
     internalApi,
+    initiallyAwaitingFilters,
     useControlsIntegration: creationOptions?.useControlsIntegration,
   };
 }

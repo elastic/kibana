@@ -114,6 +114,13 @@ export interface EmbeddablePublicDefinition<
   }>;
 
   /**
+   * Whether an embeddable built from this serialized state will have to wait for filters it is required to
+   * provide (e.g. a required control without selections). Lets containers know this before anything is built,
+   * so that they can avoid rendering content that depends on those filters.
+   */
+  isAwaitingFilters?: (serializedState: SerializedState) => MaybePromise<boolean>;
+
+  /**
    * Provide layout contraints to customize resize behavior
    */
   layoutConstraints?: LayoutConstraints;
