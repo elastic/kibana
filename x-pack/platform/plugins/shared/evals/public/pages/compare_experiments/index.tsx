@@ -879,7 +879,6 @@ export const CompareExperimentsPage: React.FC = () => {
             {
               name: i18n.COLUMN_STABILITY,
               nameTooltip: { content: i18n.STABILITY_NOTE },
-              width: '240px',
               render: (item: ComparisonResult) =>
                 `${formatScore(item.baseline.stability)} / ${formatScore(item.target.stability)}`,
               align: 'right' as const,

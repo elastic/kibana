@@ -158,7 +158,7 @@ describe('CompareExperimentsPage', () => {
       'median'
     );
     expect(screen.getByText(/Repetition policy: median\./)).toBeInTheDocument();
-    expect(screen.getByText(/N\*: some examples have a different/)).toBeInTheDocument();
+    expect(screen.getByText(/N\*: some examples/)).toBeInTheDocument();
     expect(screen.getByText('Score outside [0, 1]: Dataset 1 / latency.')).toBeInTheDocument();
 
     const flaggedRow = screen.getByText('quality').closest('tr');

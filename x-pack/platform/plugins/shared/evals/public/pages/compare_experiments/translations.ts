@@ -403,19 +403,19 @@ export const getRepetitionPolicyNote = (policy: RepetitionPolicy) =>
 
 export const STABILITY_NOTE = i18n.translate('xpack.evals.compareExperiments.stabilityNote', {
   defaultMessage:
-    "Stability is the mean standard deviation across an example's repetitions. Lower is steadier.",
+    "Stability is the mean standard deviation across an example's repetitions, shown as baseline / target. Lower is steadier.",
 });
 
 export const REPETITION_WARNING_NOTE = i18n.translate(
   'xpack.evals.compareExperiments.repetitionWarningNote',
   {
     defaultMessage:
-      'N*: some examples have a different number of valid repetitions in the two experiments, or null scores.',
+      'N*: some examples are missing from one experiment, ran a different number of times, or have a null score.',
   }
 );
 
 export const COLUMN_STABILITY = i18n.translate('xpack.evals.compareExperiments.columns.stability', {
-  defaultMessage: 'Stability (baseline / target)',
+  defaultMessage: 'Stability',
 });
 
 export const getRepetitionsHint = ({
