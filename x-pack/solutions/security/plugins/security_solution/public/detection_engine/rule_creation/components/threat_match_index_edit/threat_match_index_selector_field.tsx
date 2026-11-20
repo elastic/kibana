@@ -10,8 +10,7 @@ import { isEqual } from 'lodash';
 import { css } from '@emotion/css';
 import { EuiText, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { DEFAULT_THREAT_INDEX_KEY } from '../../../../../common/constants';
-import { useUiSetting$ } from '../../../../common/lib/kibana';
+import { useDefaultThreatIndices } from '../../../../common/hooks/use_curated_indicator_alias';
 import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
 
@@ -23,7 +22,7 @@ export const ThreatMatchIndexSelectorField = memo(function ThreatIndexField({
   field,
 }: ThreatMatchIndexSelectorFieldProps): JSX.Element {
   const { euiTheme } = useEuiTheme();
-  const [defaultThreatIndices] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
+  const { threatIndices: defaultThreatIndices } = useDefaultThreatIndices();
   const isIndexModified = !isEqual(field.value, defaultThreatIndices);
 
   const handleResetIndices = useCallback(

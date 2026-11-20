@@ -27,6 +27,11 @@ jest.mock('../../../../../common/hooks/use_app_toasts', () => ({
   }),
 }));
 
+const mockUseDefaultThreatIndices = jest.fn();
+jest.mock('../../../../../common/hooks/use_curated_indicator_alias', () => ({
+  useDefaultThreatIndices: () => mockUseDefaultThreatIndices(),
+}));
+
 const mockStorageGet = jest.fn();
 jest.mock('../../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../../common/lib/kibana');
@@ -55,6 +60,11 @@ jest.mock('../../../../../common/lib/kibana', () => {
 describe('useInvestigationTimeEnrichment', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseDefaultThreatIndices.mockReturnValue({
+      threatIndices: ['logs-ti_*'],
+      indicatorAlias: undefined,
+      isLoading: false,
+    });
   });
 
   it('should return default range', () => {
@@ -141,5 +151,56 @@ describe('useInvestigationTimeEnrichment', () => {
       totalCount: 0,
     });
     expect(result.current.loading).toEqual(false);
+  });
+
+  describe('threat indices', () => {
+    const startEnrichment = (threatIndices: string[]) => {
+      mockUseDefaultThreatIndices.mockReturnValue({
+        threatIndices,
+        indicatorAlias: undefined,
+        isLoading: false,
+      });
+      const start = jest.fn();
+      (useEventEnrichmentComplete as jest.Mock).mockReturnValue({ start });
+      const view = renderHook(() =>
+        useInvestigationTimeEnrichment({ eventFields: { 'file.hash.sha256': 'abc' } })
+      );
+      return { start, view };
+    };
+
+    it('queries the configured threat indices alone when there is no curated alias', () => {
+      const { start } = startEnrichment(['logs-ti_*']);
+
+      expect(start).toHaveBeenCalledTimes(1);
+      expect(start).toHaveBeenCalledWith(expect.objectContaining({ defaultIndex: ['logs-ti_*'] }));
+    });
+
+    it('adds the curated alias to the queried indices', () => {
+      const { start } = startEnrichment(['logs-ti_*', '.threat-intel-indicators-default']);
+
+      expect(start).toHaveBeenCalledWith(
+        expect.objectContaining({
+          defaultIndex: ['logs-ti_*', '.threat-intel-indicators-default'],
+        })
+      );
+    });
+
+    it('re-runs the enrichment when the alias arrives after the first request', () => {
+      const { start, view } = startEnrichment(['logs-ti_*']);
+
+      mockUseDefaultThreatIndices.mockReturnValue({
+        threatIndices: ['logs-ti_*', '.threat-intel-indicators-default'],
+        indicatorAlias: '.threat-intel-indicators-default',
+        isLoading: false,
+      });
+      view.rerender();
+
+      expect(start).toHaveBeenCalledTimes(2);
+      expect(start).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          defaultIndex: ['logs-ti_*', '.threat-intel-indicators-default'],
+        })
+      );
+    });
   });
 });

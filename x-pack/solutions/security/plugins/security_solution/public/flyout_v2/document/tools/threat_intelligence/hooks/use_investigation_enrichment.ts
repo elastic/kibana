@@ -23,7 +23,7 @@ import {
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { inputsActions } from '../../../../../common/store/actions';
-import { DEFAULT_THREAT_INDEX_KEY } from '../../../../../../common/constants';
+import { useDefaultThreatIndices } from '../../../../../common/hooks/use_curated_indicator_alias';
 import { FLYOUT_STORAGE_KEYS } from '../../../main/constants/local_storage';
 
 const INVESTIGATION_ENRICHMENT_REQUEST_ERROR = i18n.translate(
@@ -72,8 +72,8 @@ export const useInvestigationTimeEnrichment = ({
   eventFields,
 }: UseInvestigationTimeEnrichmentProps): UseInvestigationTimeEnrichmentResult => {
   const { addError } = useAppToasts();
-  const { data, storage, uiSettings } = useKibana().services;
-  const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
+  const { data, storage } = useKibana().services;
+  const { threatIndices: defaultThreatIndices } = useDefaultThreatIndices();
 
   const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.THREAT_INTELLIGENCE_TIME_RANGE);
 
@@ -128,11 +128,14 @@ export const useInvestigationTimeEnrichment = ({
 
   const prevEventFields = usePrevious(eventFields);
   const prevRange = usePrevious(range);
+  const prevThreatIndices = usePrevious(defaultThreatIndices);
 
   useEffect(() => {
     if (
       !isEmpty(eventFields) &&
-      (!isEqual(eventFields, prevEventFields) || !isEqual(range, prevRange))
+      (!isEqual(eventFields, prevEventFields) ||
+        !isEqual(range, prevRange) ||
+        !isEqual(defaultThreatIndices, prevThreatIndices))
     ) {
       start({
         data,
@@ -142,7 +145,16 @@ export const useInvestigationTimeEnrichment = ({
         filterQuery: '',
       });
     }
-  }, [start, data, eventFields, prevEventFields, range, prevRange, defaultThreatIndices]);
+  }, [
+    start,
+    data,
+    eventFields,
+    prevEventFields,
+    range,
+    prevRange,
+    defaultThreatIndices,
+    prevThreatIndices,
+  ]);
 
   return {
     result: isEmpty(eventFields) ? noEnrichments : result,

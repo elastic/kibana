@@ -137,8 +137,10 @@ const fullyMigratedIndicatorMappings = () => ({
     sources: { properties: { report_id: {}, first_seen: {} } },
     sources_truncated: {},
     source_report_url: { ignore_above: 2048 },
+    event: { properties: { kind: {}, category: {}, type: {} } },
     threat: {
       properties: {
+        feed: { properties: { name: { ignore_above: 2048 } } },
         indicator: {
           properties: {
             email: { ignore_above: 2048 },
@@ -650,6 +652,52 @@ describe('index_templates — mapping coverage guard', () => {
     const installIdx = src.indexOf('export const installIndexTemplates');
     const callIdx = src.indexOf('await backfillKevRankScore', installIdx);
     expect(callIdx).toBeGreaterThan(installIdx);
+  });
+
+  describe('indicator ECS event fields', () => {
+    const withoutEcsEvent = () => {
+      const mappings = fullyMigratedIndicatorMappings();
+      const props = mappings.properties as Record<string, unknown>;
+      delete props.event;
+      delete (props.threat as { properties: Record<string, unknown> }).properties.feed;
+      return mappings;
+    };
+
+    it('adds event.* and threat.feed.name when absent', async () => {
+      const { patchedPaths } = await runMigrations({ indicatorMappings: withoutEcsEvent() });
+      expect(patchedPaths).toEqual(
+        expect.arrayContaining(['event.kind', 'event.category', 'event.type', 'threat.feed.name'])
+      );
+    });
+
+    it('backfills rows that lack event.kind, taking the feed name from the provider', async () => {
+      const { esClient } = await runMigrations({ indicatorMappings: withoutEcsEvent() });
+
+      const backfill = esClient.updateByQuery.mock.calls
+        .map(([arg]) => arg)
+        .find((arg) => arg.index === THREAT_INTEL_INDICATORS_INDEX);
+      expect(backfill?.conflicts).toBe('proceed');
+      expect(backfill?.query).toEqual({
+        bool: { must_not: [{ exists: { field: 'event.kind' } }] },
+      });
+      const source = (backfill?.script as { source: string }).source;
+      expect(source).toContain("'kind': 'enrichment'");
+      expect(source).toContain("'type': ['indicator']");
+      expect(source).toContain('ctx._source.threat.feed.name = provider');
+    });
+
+    it('declares event.* and threat.feed.name on the indicators template', async () => {
+      const { esClient } = await runMigrations();
+      const template = esClient.indices.putIndexTemplate.mock.calls
+        .map(([arg]) => arg)
+        .find((arg) => arg.name === `${THREAT_INTEL_INDICATORS_INDEX}-template`);
+      const props = template?.template?.mappings?.properties as {
+        event: { properties: Record<string, unknown> };
+        threat: { properties: { feed: { properties: { name: { type: string } } } } };
+      };
+      expect(Object.keys(props.event.properties)).toEqual(['kind', 'category', 'type']);
+      expect(props.threat.properties.feed.properties.name.type).toBe('keyword');
+    });
   });
 
   it('backfills rank_score only onto KEV reports that still lack it', async () => {

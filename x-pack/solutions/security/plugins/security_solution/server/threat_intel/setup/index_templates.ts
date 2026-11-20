@@ -15,6 +15,7 @@ import {
   THREAT_REPORTS_INDEX_PATTERN,
   THREAT_INTEL_SOURCES_INDEX,
   THREAT_INTEL_INDICATORS_INDEX,
+  INDICATOR_ECS_EVENT,
   DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID,
   MAX_URL_LENGTH,
 } from '../../../common/threat_intel';
@@ -432,8 +433,22 @@ const COMPANION_INDEX_TEMPLATES: Array<{
           dynamic: 'strict',
           properties: {
             '@timestamp': { type: 'date' },
+            // The ECS event fields every Fleet `ti_*` indicator row carries and every
+            // legacy reader (Indicators page, flyout enrichment) filters on.
+            event: {
+              properties: {
+                kind: { type: 'keyword' },
+                category: { type: 'keyword' },
+                type: { type: 'keyword' },
+              },
+            },
             threat: {
               properties: {
+                feed: {
+                  properties: {
+                    name: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                  },
+                },
                 indicator: {
                   properties: {
                     type: { type: 'keyword' },
@@ -1305,6 +1320,95 @@ const migrateExistingIndicatorTypeMappings = async (
 };
 
 /**
+ * Adds the ECS `event.*` and `threat.feed.name` fields to an existing indicators
+ * index and backfills them on rows promoted before they existed.
+ *
+ * The index is `dynamic: strict`, so the mapping has to land before the promote task
+ * writes the fields. Rows already in the index only pick the fields up on their next
+ * citation, so without the `update_by_query` any indicator promoted earlier stays
+ * invisible to the readers that filter on `event.type: indicator`.
+ */
+const INDICATOR_ECS_EVENT_BACKFILL_SCRIPT = `
+ctx._source.event = ['kind': '${INDICATOR_ECS_EVENT.kind}', 'category': ['${INDICATOR_ECS_EVENT.category[0]}'], 'type': ['${INDICATOR_ECS_EVENT.type[0]}']];
+def provider = ctx._source.threat?.indicator?.provider;
+if (provider != null) {
+  if (ctx._source.threat.feed == null) { ctx._source.threat.feed = [:]; }
+  ctx._source.threat.feed.name = provider;
+}
+`.trim();
+
+const migrateExistingIndicatorEcsEventMapping = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('indicator-ecs-event-mapping-migration');
+
+  try {
+    const exists = await esClient.indices.exists({ index: THREAT_INTEL_INDICATORS_INDEX });
+    if (!exists) {
+      log.debug('indicator-ecs-event-mapping-migration: index not found, skipping');
+      return;
+    }
+
+    const { [THREAT_INTEL_INDICATORS_INDEX]: indexMappings } = await esClient.indices.getMapping({
+      index: THREAT_INTEL_INDICATORS_INDEX,
+    });
+    const props = indexMappings?.mappings?.properties as
+      | Record<string, { properties?: Record<string, { properties?: Record<string, unknown> }> }>
+      | undefined;
+    const mapped =
+      props?.event?.properties?.kind &&
+      props?.event?.properties?.category &&
+      props?.event?.properties?.type &&
+      props?.threat?.properties?.feed?.properties?.name;
+
+    if (!mapped) {
+      await esClient.indices.putMapping({
+        index: THREAT_INTEL_INDICATORS_INDEX,
+        properties: {
+          event: {
+            properties: {
+              kind: { type: 'keyword' },
+              category: { type: 'keyword' },
+              type: { type: 'keyword' },
+            },
+          },
+          threat: {
+            properties: {
+              feed: {
+                properties: { name: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE } },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    // Runs every install rather than only after the mapping patch: a run that patched the
+    // mapping and then failed the backfill would otherwise never retry it. A query on a
+    // missing field is a cheap no-op once every row has been stamped.
+    await esClient.updateByQuery({
+      index: THREAT_INTEL_INDICATORS_INDEX,
+      conflicts: 'proceed',
+      refresh: true,
+      query: { bool: { must_not: [{ exists: { field: 'event.kind' } }] } },
+      script: {
+        lang: 'painless',
+        source: INDICATOR_ECS_EVENT_BACKFILL_SCRIPT,
+      },
+    });
+    log.info(`Migrated event.* and threat.feed.name on ${THREAT_INTEL_INDICATORS_INDEX}`);
+  } catch (err) {
+    log.error(
+      `Failed to migrate event.* and threat.feed.name on ${THREAT_INTEL_INDICATORS_INDEX}: ${
+        (err as Error).message
+      }. Promoted indicators will be rejected by dynamic: strict, or stay invisible to ` +
+        `Indicator Match and enrichment, until the mapping is updated and the rows are backfilled.`
+    );
+  }
+};
+
+/**
  * Adds the top-level `space_id` keyword to the indicators index (v24). Indicators
  * are keyed `<space_id>:<type>:<value>` so a value cited by reports in different
  * spaces stays in separate docs and sources[] never merges across space
@@ -1763,6 +1867,10 @@ const REQUIRED_INDICATOR_FIELDS: readonly RequiredMapping[] = [
   { path: 'sources.first_seen' },
   { path: 'sources_truncated' },
   { path: 'ioc_tier' },
+  { path: 'event.kind' },
+  { path: 'event.category' },
+  { path: 'event.type' },
+  { path: 'threat.feed.name', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'threat.indicator.email', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   // Leaves, not parents: the v23 migration writes these, and a parent object can
   // exist without them.
@@ -1951,6 +2059,7 @@ export const installIndexTemplates = async ({
   await migrateExistingIndicatorSourcesMapping(esClient, log);
   await migrateExistingIndicatorTypeMappings(esClient, log);
   await migrateExistingIndicatorSpaceIdMapping(esClient, log);
+  await migrateExistingIndicatorEcsEventMapping(esClient, log);
   await migrateExistingIndicatorKeywordBounds(esClient, log);
   await migrateExistingReportKeywordBounds(esClient, reportIndices, log);
   await migrateExistingVulnerabilityMappings(esClient, reportIndices, log);
