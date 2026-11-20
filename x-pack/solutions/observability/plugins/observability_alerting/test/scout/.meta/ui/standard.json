@@ -32,7 +32,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
-        "line": 87,
+        "line": 90,
         "column": 13
       }
     },
@@ -48,7 +48,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
-        "line": 98,
+        "line": 101,
         "column": 11
       }
     },
@@ -64,7 +64,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
-        "line": 107,
+        "line": 110,
         "column": 74
       }
     },
@@ -80,7 +80,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
-        "line": 118,
+        "line": 121,
         "column": 21
       }
     },
@@ -96,7 +96,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
-        "line": 140,
+        "line": 143,
         "column": 13
       }
     },
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
-        "line": 157,
-        "column": 44
+        "line": 186,
+        "column": 10
       }
     },
     {

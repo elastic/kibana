@@ -9,9 +9,10 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
+// The Synthetics App status overview is disabled on serverless.
 test.describe(
   'DefaultStatusAlert',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: tags.stateful.classic },
   () => {
     let configId: string;
     let locationId: string;

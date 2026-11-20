@@ -26,7 +26,10 @@ import {
   LOGS_READ_WITH_CASES_ROLE,
   LOGS_READ_WITHOUT_CASES_ROLE,
 } from '../fixtures/add_to_case_test_data';
-import { deleteV1PrivilegeRule } from '../fixtures/privilege_test_data';
+import {
+  deleteV1PrivilegeRule,
+  OBS_THRESHOLD_ALERTS_INDEX_PATTERN,
+} from '../fixtures/privilege_test_data';
 import type { ObservabilityAlertingPage } from '../fixtures/page_objects';
 
 const CASE_TAGS = ['scout-add-to-case'];
@@ -183,6 +186,7 @@ test.describe(
     test('skips the alerts already attached to the chosen case', async ({
       apiServices,
       browserAuth,
+      esClient,
       page,
       pageObjects: { addToCaseModal, observabilityAlerting },
     }) => {
@@ -198,6 +202,24 @@ test.describe(
         await addToCaseModal.selectExistingCase(existingCase.id);
         await expect
           .poll(async () => (await apiServices.cases.get(existingCase.id)).data.totalAlerts)
+          .toBe(1);
+        await expect
+          .poll(
+            async () =>
+              (
+                await esClient.count({
+                  index: OBS_THRESHOLD_ALERTS_INDEX_PATTERN,
+                  query: {
+                    bool: {
+                      filter: [
+                        { term: { 'kibana.alert.rule.uuid': ruleId } },
+                        { term: { 'kibana.alert.case_ids': existingCase.id } },
+                      ],
+                    },
+                  },
+                })
+              ).count
+          )
           .toBe(1);
       });
 
