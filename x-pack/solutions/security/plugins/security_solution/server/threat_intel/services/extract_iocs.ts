@@ -90,7 +90,12 @@ export interface ExtractIocsResult {
 // ── Atomic patterns ────────────────────────────────────────────────────────────
 const HASH_PATTERN = /\b([a-f0-9]{32}|[a-f0-9]{40}|[a-f0-9]{64})\b/gi;
 // IPv4 dotted quad with octet bounds; IPv6 left out (false-positive prone).
-const IP_PATTERN = /\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\b/g;
+// Four parts of a longer dotted number are not an address: a quad preceded by a digit and a
+// dot, or followed by a dot and a digit, never matches (`3.0.4.2` inside `<=3.0.4.2.0` is a
+// version, not an IP). A sentence period (`at 185.220.101.4.`) still matches. The packet-capture
+// `host.port` form is the one exception; see `neutralizeCapturePorts`.
+const IP_PATTERN =
+  /(?<!\d\.)\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\b(?!\.\d)/g;
 // Domain: 2+ labels, last label 2+ alpha chars.
 const DOMAIN_PATTERN = /\b(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}\b/gi;
 // The terminal class excludes whitespace, angle brackets, and quotes. Sentence
@@ -265,9 +270,10 @@ const classifyEmail = ({
     : { tier: 'uncertain', basis: 'uncertain_default' };
 };
 
-// CIDR: IPv4/mask (defang already applied before this runs)
+// CIDR: IPv4/mask (defang already applied before this runs). A mask followed by a dot and a
+// digit is not a range (`2.1.0.3/2.1.0.4` is two versions).
 const CIDR_PATTERN =
-  /\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\/(?:3[0-2]|[12]?\d)\b/g;
+  /\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\/(?:3[0-2]|[12]?\d)\b(?!\.\d)/g;
 
 // Crypto wallets — MUST run before hash.
 // BTC legacy: starts with 1 or 3, base58, 26-34 chars.
@@ -283,7 +289,8 @@ const IPV4_OCTET = '(?:25[0-5]|2[0-4]\\d|[01]?\\d?\\d)';
 const IPV4 = `(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}`;
 const DOMAIN_LABEL = '[a-z0-9](?:[a-z0-9\\-]*[a-z0-9])?';
 const DOMAIN_HOST = `(?:${DOMAIN_LABEL}\\.)+[a-z]{2,24}`;
-const SOCKET_PATTERN = new RegExp(`\\b(${IPV4}|${DOMAIN_HOST}):(\\d{1,5})\\b`, 'gi');
+// The leading boundary matches IP_PATTERN's, so `1.3.4.2.1:8080` does not yield `3.4.2.1`.
+const SOCKET_PATTERN = new RegExp(`(?<!\\d\\.)\\b(${IPV4}|${DOMAIN_HOST}):(\\d{1,5})\\b`, 'gi');
 
 // ── Keep existing filter infrastructure ─────────────────────────────────────
 
@@ -941,6 +948,99 @@ const sectionKindAtOffset = (
   return undefined;
 };
 
+// ── Packet-capture `host.port` ──────────────────────────────────────────────────
+// tcpdump and netstat write a socket as `10.0.0.5.51234`, which the longer-dotted-number rule
+// would otherwise reject. On a line carrying a capture marker the `.port` part is blanked out
+// (same length, so offsets are unchanged) and the quad is left to the ordinary passes. A marker:
+//   - the tcpdump protocol word (`IP ` / `IP6 `) directly before a `quad.port` token;
+//   - a tcpdump flow, `quad.port > quad.port:` with the trailing colon, anywhere on the line;
+//   - a netstat protocol column at the start of the line (`tcp`, `tcp4`, `udp6`, ... lower case,
+//     then whitespace and a column starting with a digit).
+// Without a marker the five-part rule wins. Solaris `netstat -an` rows (no protocol column) and
+// `ip.port -> ip.port` text without a marker yield no IP.
+const QUAD_PORT = new RegExp(`(?<!\\d\\.)\\b(${IPV4})(\\.\\d{1,5})\\b(?!\\.\\d)`, 'g');
+const TCPDUMP_PROTOCOL = new RegExp(`\\bIP6? ${IPV4}\\.\\d`);
+const TCPDUMP_FLOW = new RegExp(`${IPV4}\\.\\d{1,5}\\s*>\\s*${IPV4}\\.\\d{1,5}:`);
+const NETSTAT_ROW = /^[ \t]*(?:tcp|udp)[46]?[ \t]+\d/;
+
+const hasCaptureMarker = (line: string): boolean =>
+  TCPDUMP_PROTOCOL.test(line) || TCPDUMP_FLOW.test(line) || NETSTAT_ROW.test(line);
+
+const neutralizeCapturePorts = (text: string): string =>
+  text.replace(/^.*$/gm, (line) =>
+    hasCaptureMarker(line)
+      ? line.replace(
+          QUAD_PORT,
+          (_match, quad: string, port: string) => quad + ' '.repeat(port.length)
+        )
+      : line
+  );
+
+// ── Version numbers ─────────────────────────────────────────────────────────────
+// A `vers:` token is a version range specifier (`vers:intdot/>=8.2.0.1|<8.2.0.5`). Nothing inside
+// one is an indicator, bare numbers listed after one are more versions, and every dotted quad
+// found this way is a value the report itself marks as a version. Only these spans mark a value.
+const VERS_TOKEN_START = /(?<![A-Za-z0-9])vers:[A-Za-z0-9.+-]+\//gi;
+const VERS_TOKEN_TERMINATOR = /[\s,;)\]"']/;
+const VERS_COMPARISON_CHARS = '<>=!';
+const VERS_LIST_CONTINUATION = /[ \t]*,[ \t]*\d+(?:\.\d+)+(?![A-Za-z0-9_])/y;
+
+interface VersionSpans {
+  readonly spans: readonly Span[];
+  readonly markedValues: ReadonlySet<string>;
+}
+
+const collectVersionSpans = (text: string): VersionSpans => {
+  const spans: Span[] = [];
+  const markedValues = new Set<string>();
+  for (const match of text.matchAll(VERS_TOKEN_START)) {
+    const start = match.index ?? 0;
+    let end = start + match[0].length;
+    // Token: runs to whitespace, comma, semicolon, `)`, `]` or a quote. `<` and `>` are part of
+    // a constraint. It runs past `|` only when a comparison character follows.
+    while (end < text.length && !VERS_TOKEN_TERMINATOR.test(text[end])) {
+      if (text[end] === '|' && !VERS_COMPARISON_CHARS.includes(text[end + 1] ?? ' ')) break;
+      end++;
+    }
+    // List continuation: bare dotted numbers after `,` on the same line.
+    for (;;) {
+      VERS_LIST_CONTINUATION.lastIndex = end;
+      if (!VERS_LIST_CONTINUATION.test(text)) break;
+      end = VERS_LIST_CONTINUATION.lastIndex;
+    }
+    spans.push([start, end]);
+    for (const quad of text.slice(start, end).match(new RegExp(IP_PATTERN.source, 'g')) ?? []) {
+      markedValues.add(quad);
+    }
+  }
+  return { spans, markedValues };
+};
+
+// Version wording before an occurrence: a version word (not preceded by a letter or digit, so
+// `product_version` counts and `server.` does not), then optionally a closing quote, `:` or `=`,
+// one filler word, and an opening quote or `(`, all on the same line.
+const VERSION_WORD_BEFORE =
+  /(?<![A-Za-z0-9])(?:versions?|ver\.)[ \t]*["']?[ \t]*[:=]?[ \t]*(?:(?:before|prior to|up to|through|from|between|including|below|above)[ \t]*)?["'(]?[ \t]*$/i;
+const QUAD_JOINED_BEFORE =
+  /(\d{1,3}(?:\.\d{1,3}){3})(?:[ \t]+and[ \t]+(?:prior|earlier|later|below|above))?(?:[ \t]*[,/][ \t]*|[ \t]+(?:and|or|through|to)[ \t]+)$/i;
+const MAX_VERSION_JOIN_DEPTH = 50;
+
+/**
+ * True when the occurrence at `offset` reads as a version: version wording before it, a
+ * comparison operator touching it, or it is joined (`,`, `/`, `and`, `or`, `through`, `to`) to
+ * another occurrence that does. Reads `text` (the refanged text, not the masked remainder), same
+ * line only. Wording is only trusted for a value the report already marked with a `vers:` token.
+ */
+const isVersionContext = (text: string, offset: number, depth = 0): boolean => {
+  const lineStart = text.lastIndexOf('\n', offset - 1) + 1;
+  const before = text.slice(lineStart, offset);
+  if (VERSION_WORD_BEFORE.test(before)) return true;
+  if (/(?:<=|>=|≤|≥)$/.test(before)) return true;
+  if (depth >= MAX_VERSION_JOIN_DEPTH) return false;
+  const joined = QUAD_JOINED_BEFORE.exec(before);
+  return joined !== null && isVersionContext(text, lineStart + joined.index, depth + 1);
+};
+
 /**
  * Post-pass: override tier/tier_basis for IOCs that appear in a classified
  * section span. tier_heuristic is NEVER modified — it records the per-value
@@ -1015,7 +1115,7 @@ const applySectionOverrides = (iocs: readonly WorkingIoc[]): void => {
 
 export const extractIocs = ({ text, defang = true }: ExtractIocsParams): ExtractIocsResult => {
   // Pre-pass: recover defanged IOCs before regex matching.
-  const refangedText = refang(text);
+  const refangedText = neutralizeCapturePorts(refang(text));
   const sectionSpans = classifySectionSpans(refangedText);
   const seen = new Set<string>();
   const iocByKey = new Map<string, WorkingIoc>();
@@ -1026,7 +1126,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   // A domain present in refangedText but absent from the original text was
   // created BY refang, meaning the vendor deliberately defanged it — strongest
   // possible corroboration that it is a live indicator.
-  const originalLower = text.toLowerCase();
+  const originalLower = neutralizeCapturePorts(text).toLowerCase();
   const rawDomainsInOriginal = new Set(
     (originalLower.match(DOMAIN_PATTERN) ?? []).map((d) => d.toLowerCase())
   );
@@ -1235,6 +1335,22 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     }
   }
 
+  // ── Version spans ─────────────────────────────────────────────────────────
+  // `vers:` tokens and the comma lists continuing them are consumed before the CIDR, socket and
+  // bare-IP passes, and the dotted quads inside them are the values the report marks as versions.
+  const { spans: versionSpans, markedValues: markedVersionValues } =
+    collectVersionSpans(refangedText);
+  consumed.push(...versionSpans);
+
+  // A marked value is skipped only in a version context, never under an IOC heading, and never
+  // when the report wrote it defanged. An unmarked value is always emitted, whatever the words
+  // around it, and a marked value that also appears plainly (`C2 at 9.2.1.6`) is emitted.
+  const isMarkedVersionMention = (value: string, offset: number): boolean =>
+    markedVersionValues.has(value) &&
+    !defangedIps.has(value) &&
+    sectionKindAtOffset(offset, sectionSpans) !== 'ioc' &&
+    isVersionContext(refangedText, offset);
+
   // ── PASS 3: CIDRs ─────────────────────────────────────────────────────────
   // Emit cidr value AND derive bare network IP.
   {
@@ -1248,57 +1364,61 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
       const networkIp = raw.slice(0, slashIdx);
       const maskWidth = parseInt(raw.slice(slashIdx + 1), 10);
 
-      // CIDR tier: private and reserved space first, then mask width.
-      //
-      // Mask width alone put 10.20.0.0/16 in `contextual`, which the promote task
-      // admits, so an RFC1918 range became a live Indicator Match row and matched
-      // essentially all internal traffic. The bare IP derived just below was
-      // already classified `reference/private_ip`, so the two disagreed about the
-      // same network.
-      const isPrivateNetwork = isPrivateIp(networkIp);
-      const cidrTier: IocTier = isPrivateNetwork
-        ? 'reference'
-        : maskWidth >= 29
-        ? 'discriminating'
-        : 'contextual';
-      const cidrBasis = isPrivateNetwork
-        ? 'private_ip'
-        : maskWidth >= 29
-        ? 'cidr_narrow'
-        : 'cidr_broad';
+      // The network address decides: a marked version in a version context skips the range and
+      // its derived IP.
+      if (!isMarkedVersionMention(networkIp, idx)) {
+        // CIDR tier: private and reserved space first, then mask width.
+        //
+        // Mask width alone put 10.20.0.0/16 in `contextual`, which the promote task
+        // admits, so an RFC1918 range became a live Indicator Match row and matched
+        // essentially all internal traffic. The bare IP derived just below was
+        // already classified `reference/private_ip`, so the two disagreed about the
+        // same network.
+        const isPrivateNetwork = isPrivateIp(networkIp);
+        const cidrTier: IocTier = isPrivateNetwork
+          ? 'reference'
+          : maskWidth >= 29
+          ? 'discriminating'
+          : 'contextual';
+        const cidrBasis = isPrivateNetwork
+          ? 'private_ip'
+          : maskWidth >= 29
+          ? 'cidr_narrow'
+          : 'cidr_broad';
 
-      pushIoc({
-        type: 'cidr',
-        value: raw,
-        defanged: defangValue('cidr', raw, defang),
-        tier: cidrTier,
-        tier_heuristic: cidrTier,
-        tier_basis: cidrBasis,
-        _offset: idx,
-      });
+        pushIoc({
+          type: 'cidr',
+          value: raw,
+          defanged: defangValue('cidr', raw, defang),
+          tier: cidrTier,
+          tier_heuristic: cidrTier,
+          tier_basis: cidrBasis,
+          _offset: idx,
+        });
 
-      // Derived bare IP — private wins, then defanged-in-source, else uncertain.
-      let ipTier: IocTier;
-      let ipBasis: string;
-      if (isPrivateIp(networkIp)) {
-        ipTier = 'reference';
-        ipBasis = 'private_ip';
-      } else if (defangedIps.has(networkIp)) {
-        ipTier = 'discriminating';
-        ipBasis = 'defanged_source';
-      } else {
-        ipTier = 'uncertain';
-        ipBasis = 'uncertain_default';
+        // Derived bare IP — private wins, then defanged-in-source, else uncertain.
+        let ipTier: IocTier;
+        let ipBasis: string;
+        if (isPrivateIp(networkIp)) {
+          ipTier = 'reference';
+          ipBasis = 'private_ip';
+        } else if (defangedIps.has(networkIp)) {
+          ipTier = 'discriminating';
+          ipBasis = 'defanged_source';
+        } else {
+          ipTier = 'uncertain';
+          ipBasis = 'uncertain_default';
+        }
+        pushIoc({
+          type: 'ip',
+          value: networkIp,
+          defanged: defangValue('ip', networkIp, defang),
+          tier: ipTier,
+          tier_heuristic: ipTier,
+          tier_basis: ipBasis,
+          _offset: idx,
+        });
       }
-      pushIoc({
-        type: 'ip',
-        value: networkIp,
-        defanged: defangValue('ip', networkIp, defang),
-        tier: ipTier,
-        tier_heuristic: ipTier,
-        tier_basis: ipBasis,
-        _offset: idx,
-      });
     }
   }
 
@@ -1340,7 +1460,9 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
       const ipMatch =
         /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)$/.test(host);
 
-      if (ipMatch) {
+      if (ipMatch && isMarkedVersionMention(host, idx)) {
+        // A marked version followed by `:` (`version 9.2.2.1:2026-10-01`) is not a socket.
+      } else if (ipMatch) {
         let tier: IocTier;
         let basis: string;
         if (isPrivateIp(host)) {
@@ -1414,27 +1536,29 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     const pattern = new RegExp(IP_PATTERN.source, IP_PATTERN.flags);
     for (const match of matchesWithOffset(remainderText, pattern)) {
       const raw = match[0];
-      let tier: IocTier;
-      let basis: string;
-      if (isPrivateIp(raw)) {
-        tier = 'reference';
-        basis = 'private_ip';
-      } else if (defangedIps.has(raw)) {
-        tier = 'discriminating';
-        basis = 'defanged_source';
-      } else {
-        tier = 'uncertain';
-        basis = 'uncertain_default';
+      if (!isMarkedVersionMention(raw, match.index)) {
+        let tier: IocTier;
+        let basis: string;
+        if (isPrivateIp(raw)) {
+          tier = 'reference';
+          basis = 'private_ip';
+        } else if (defangedIps.has(raw)) {
+          tier = 'discriminating';
+          basis = 'defanged_source';
+        } else {
+          tier = 'uncertain';
+          basis = 'uncertain_default';
+        }
+        pushIoc({
+          type: 'ip',
+          value: raw,
+          defanged: defangValue('ip', raw, defang),
+          tier,
+          tier_heuristic: tier,
+          tier_basis: basis,
+          _offset: match.index,
+        });
       }
-      pushIoc({
-        type: 'ip',
-        value: raw,
-        defanged: defangValue('ip', raw, defang),
-        tier,
-        tier_heuristic: tier,
-        tier_basis: basis,
-        _offset: match.index,
-      });
     }
   }
 

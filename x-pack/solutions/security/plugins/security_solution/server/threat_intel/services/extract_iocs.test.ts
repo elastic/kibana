@@ -2243,3 +2243,254 @@ describe('extract_iocs — example emails, Message-IDs and non-addresses', () =>
     expect(emailValues(result)).toEqual([]);
   });
 });
+
+describe('extract_iocs — version numbers are not IPs', () => {
+  const ipsOf = (text: string) => ipValues(extractIocs({ text })).sort();
+  const WITH_TOKEN = '- X vers:generic/<=9.2.1.6';
+
+  describe('yields no ip and no cidr', () => {
+    const HITACHI = [
+      '- TRO600 vers:TRO600/<=9.2.1.6, vers:TRO600/<=9.1.1.0, 9.2.2.1, 9.1.2.0 (CVE-2026-10756, CVE-2026-106087)',
+      '## TRO600 version 9.2.1.6 and prior',
+      'Update to version 9.2.2.1',
+      'Fixed in version 9.1.2.0. Update to the latest version 9.2.2.1.',
+    ].join('\n');
+
+    test.each<[string, string]>([
+      ['the full Hitachi advisory text', HITACHI],
+      ['an intdot range', '- SIMATIC BRAUMAT vers:intdot/>=8.2.0.1|<8.2.0.5 (CVE-2026-1)'],
+      ['an intdot upper bound', '- SIMATIC WinCC OA V3.20 vers:intdot/<3.20.17.1'],
+      ['a five-part number after <=', '- EB2 <=3.0.4.2.0'],
+      ['a five-part number after <', '- VM1 <1.3.4.2.1'],
+      ['a five-part number in prose', 'updated firmware (VM1 1.3.4.2.1)'],
+      ['a marked value in a JSON key', `${WITH_TOKEN}\n"product_version": "9.2.1.6"`],
+      ['a marked value after version=', `${WITH_TOKEN}\nversion=9.2.1.6`],
+      ['a marked value after all versions before', `${WITH_TOKEN}\nall versions before 9.2.1.6`],
+      ['a marked value after a touching <=', `${WITH_TOKEN}\nX <=9.2.1.6`],
+      ['a marked value after Versions', `${WITH_TOKEN}\nVersions 9.2.1.6 and prior`],
+      [
+        'a marked value joined to a version context',
+        '- X vers:generic/<=9.1.1.0, 9.2.1.6\nversions between 9.1.1.0 and 9.2.1.6',
+      ],
+      [
+        'a marked value in the CIDR pass',
+        '- X vers:generic/<=2.1.0.3\nVersions 2.1.0.3/4 are affected',
+      ],
+      [
+        'a marked value in the socket pass',
+        '- X vers:generic/<=9.2.2.1\nFixed in version 9.2.2.1:2026-10-01',
+      ],
+      ['a v-prefixed number', 'v1.2.3.4'],
+      ['a defanged five-part number', '3[.]0[.]4[.]2[.]0'],
+      ['a five-part number around >', 'Bump agent 3.0.4.2.0 > 3.0.4.2.1'],
+      [
+        'a marked value mentioned defanged after a plain token',
+        `${WITH_TOKEN}\nversion 9[.]2[.]1[.]6`,
+      ],
+      ['a five-part number in a socket', 'firmware 1.3.4.2.1:8080'],
+      ['a slash between two versions (no cidr)', 'Firmware versions 2.1.0.3/2.1.0.4'],
+    ])('%s', (label, text) => {
+      const result = extractIocs({ text });
+      expect(cidrValues(result)).toEqual([]);
+      if (!label.includes('no cidr')) {
+        expect(ipValues(result)).toEqual([]);
+      }
+    });
+  });
+
+  describe('real IPs are still emitted', () => {
+    test.each<[string, string, string[]]>([
+      [
+        'same line as a version',
+        '- TRO600 vers:TRO600/<=9.2.1.6 was seen beaconing to 185.220.101.4',
+        ['185.220.101.4'],
+      ],
+      ['a marked value that also appears plainly', `${WITH_TOKEN}\nC2 at 9.2.1.6`, ['9.2.1.6']],
+      [
+        'a marked value under an IOC heading',
+        `${WITH_TOKEN}\n\n## Indicators of Compromise\n\n- 9.2.1.6\n`,
+        ['9.2.1.6'],
+      ],
+      ['a table cell', '| 185.220.101.4 | C2 |', ['185.220.101.4']],
+      [
+        'a table cell after a vers token',
+        '|vers:intdot/<3.20.17.1|185.220.101.4|',
+        ['185.220.101.4'],
+      ],
+      [
+        'a list that leaves the token through a word',
+        'vers:generic/<=9.1.1.0, and 185.220.101.4',
+        ['185.220.101.4'],
+      ],
+      ['a sentence period', 'C2 was 185.220.101.4.', ['185.220.101.4']],
+      ['ip=', 'ip=185.220.101.4', ['185.220.101.4']],
+      ['an arrow', 'evil.example.cloud -> 185.220.101.4', ['185.220.101.4']],
+      ['a fat arrow', '=> 185.220.101.4', ['185.220.101.4']],
+      ['a blockquote', '> 185.220.101.4', ['185.220.101.4']],
+      ['angle brackets', '<185.220.101.4>', ['185.220.101.4']],
+      ['a bracketed socket', 'Connection from <185.220.101.4:49152> accepted', ['185.220.101.4']],
+      [
+        'a bracketed list',
+        'peers: <185.220.101.4, 45.9.148.108>',
+        ['185.220.101.4', '45.9.148.108'],
+      ],
+      [
+        'a spaced query filter',
+        'source.ip >= 185.220.101.0 and source.ip <= 185.220.101.255',
+        ['185.220.101.0', '185.220.101.255'],
+      ],
+      [
+        'an unspaced query filter',
+        'destination.ip>=185.220.101.4 and destination.ip<=185.220.101.255',
+        ['185.220.101.255', '185.220.101.4'],
+      ],
+      [
+        'version wording around an unmarked IP (from)',
+        'Victims downloaded a trojanized version from 185.220.101.4',
+        ['185.220.101.4'],
+      ],
+      [
+        'version wording around an unmarked IP (colon)',
+        'The C2 server for this version: 185.220.101.4',
+        ['185.220.101.4'],
+      ],
+      [
+        'version wording around an unmarked IP (paren)',
+        'A second version (185.220.101.4) was used',
+        ['185.220.101.4'],
+      ],
+      [
+        'versions from an IP',
+        'Malicious versions from 185.220.101.4 were pushed',
+        ['185.220.101.4'],
+      ],
+      [
+        'a version heading on the previous line',
+        'Affected versions:\n185.220.101.4 hosted the payload',
+        ['185.220.101.4'],
+      ],
+      ['updated to', 'The C2 address was updated to 185.220.101.4', ['185.220.101.4']],
+      ['up to', 'sent up to 45.9.148.108 over FTP', ['45.9.148.108']],
+      [
+        'a latest release',
+        'In the latest release 185.220.101.4 replaced the earlier C2',
+        ['185.220.101.4'],
+      ],
+      [
+        'firmware from two IPs',
+        'downloaded modified firmware from 185.220.101.4 and 45.9.148.108',
+        ['185.220.101.4', '45.9.148.108'],
+      ],
+      ['Firmware colon', 'Firmware: 185.220.101.4 served the update', ['185.220.101.4']],
+      ['a version next to an IP', 'version 9.2.1.6, 185.220.101.4', ['185.220.101.4', '9.2.1.6']],
+      [
+        'a reported version and an IP',
+        'reports its version 1.4.0.2 to 185.220.101.4',
+        ['1.4.0.2', '185.220.101.4'],
+      ],
+      [
+        'and later to',
+        'beaconed to 185.220.101.4 and later to 45.9.148.108',
+        ['185.220.101.4', '45.9.148.108'],
+      ],
+      [
+        'a comma list with a label',
+        'C2Servers:185.220.101.4,45.9.148.108',
+        ['185.220.101.4', '45.9.148.108'],
+      ],
+      ['a sentence end then an IP', 'C2 server. 185.220.101.4', ['185.220.101.4']],
+      ['a token closed by a bracket', '[vers:generic/<=9.1.1.0]185.220.101.4', ['185.220.101.4']],
+      ['a plain socket', 'beacon 185.220.101.4:443', ['185.220.101.4']],
+      ['a plain cidr', 'range 185.220.101.0/24', ['185.220.101.0']],
+    ])('%s', (_label, text, expected) => {
+      expect(ipsOf(text)).toEqual([...expected].sort());
+    });
+
+    test('an existing CIDR and socket are unchanged', () => {
+      expect(cidrValues(extractIocs({ text: 'range 185.220.101.0/24' }))).toEqual([
+        '185.220.101.0/24',
+      ]);
+      const socket = extractIocs({ text: 'beacon 185.220.101.4:443' }).iocs.find(
+        (ioc) => ioc.type === 'ip'
+      );
+      expect(socket?.port).toBe(443);
+    });
+  });
+
+  describe('packet-capture host.port', () => {
+    const CAPTURES = [
+      'IP 10.0.0.5.51234 > 185.220.101.4.443: Flags [S]',
+      'tcp4 0 0 10.0.0.5.51234 185.220.101.4.443 ESTABLISHED',
+      '    10.0.0.5.51234 > 185.220.101.4.443: Flags [S]',
+      '... ethertype IPv4 (0x0800), length 74: 10.0.0.5.51234 > 185.220.101.4.443: Flags [S]',
+      '  tcp4  0  0  10.0.0.5.51234  185.220.101.4.443  ESTABLISHED',
+    ];
+
+    test.each(CAPTURES)('recovers the public address from %s', (text) => {
+      const result = extractIocs({ text });
+      expect(ipValues(result)).toContain('185.220.101.4');
+      const ioc = result.iocs.find((i) => i.type === 'ip' && i.value === '185.220.101.4');
+      expect(ioc?.tier).toBe('uncertain');
+      expect(ioc?.tier_basis).toBe('uncertain_default');
+    });
+
+    test('the private side stays reference / private_ip', () => {
+      const result = extractIocs({ text: CAPTURES[0] });
+      const ioc = result.iocs.find((i) => i.type === 'ip' && i.value === '10.0.0.5');
+      expect(ioc?.tier).toBe('reference');
+      expect(ioc?.tier_basis).toBe('private_ip');
+    });
+
+    test('a changelog line shaped like a tcpdump flow still yields the first four parts', () => {
+      expect(ipsOf('3.0.4.2.0 > 3.0.4.2.1: fixes')).toEqual(['3.0.4.2']);
+    });
+
+    test('ip.port text with no capture marker yields no IP (known gap)', () => {
+      expect(ipsOf('10.0.0.5.51234 -> 185.220.101.4.443')).toEqual([]);
+    });
+
+    test('a Solaris-style netstat row with no protocol column yields no IP (known gap)', () => {
+      expect(ipsOf('   10.0.0.5.22   185.220.101.4.51234   64128 0 ESTABLISHED')).toEqual([]);
+    });
+
+    test.each(['tcp: fix stall in agent 3.0.4.2.0', 'TCP keepalive fixed in 3.0.4.2.0'])(
+      'prose that starts like a protocol column is not a marker: %s',
+      (text) => {
+        expect(ipsOf(text)).toEqual([]);
+      }
+    );
+  });
+
+  describe('defanged values', () => {
+    test('a value written only defanged, token included, is emitted outside the token as defanged_source', () => {
+      const result = extractIocs({
+        text: '- X vers:generic/<=9[.]2[.]1[.]6\nversion 9[.]2[.]1[.]6',
+      });
+      const ioc = result.iocs.find((i) => i.type === 'ip' && i.value === '9.2.1.6');
+      expect(ioc?.tier).toBe('discriminating');
+      expect(ioc?.tier_basis).toBe('defanged_source');
+    });
+  });
+
+  describe('known gaps: nothing marks the value structurally, so it is still an IP', () => {
+    test.each<[string, string, string]>([
+      ['version wording alone', 'version 9.2.1.6', '9.2.1.6'],
+      ['a touching comparison alone', 'EB2 <=3.0.4.2', '3.0.4.2'],
+      ['fixed in', 'fixed in 9.1.2.0', '9.1.2.0'],
+      ['a User-Agent version', 'Chrome/119.0.0.0', '119.0.0.0'],
+      ['the first of a slash pair', 'Firmware versions 2.1.0.3/2.1.0.4', '2.1.0.3'],
+      ['the second of a slash pair', 'Firmware versions 2.1.0.3/2.1.0.4', '2.1.0.4'],
+      [
+        'a four-part number whose five-part form is also written',
+        'EB2 <=3.0.4.2.0\nEB2 version 3.0.4.2',
+        '3.0.4.2',
+      ],
+    ])('%s', (_label, text, expected) => {
+      expect(ipsOf(text)).toContain(expected);
+    });
+
+    test('a real IP directly in a comma list after a vers token is dropped (declared cost)', () => {
+      expect(ipsOf('vers:generic/<=9.1.1.0, 185.220.101.4')).toEqual([]);
+    });
+  });
+});
