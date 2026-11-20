@@ -231,13 +231,11 @@ const alertDeterminationValues = [
   'securityTesting',
   'unwantedSoftware',
   'multiStagedAttack',
-  'compromisedUser',
   'compromisedAccount',
   'maliciousUserActivity',
   'phishing',
   'confirmedActivity',
   'lineOfBusinessApplication',
-  'confirmationNeeded',
   'other',
   'notEnoughDataToValidate',
 ] as const;
@@ -323,11 +321,6 @@ export const UpdateIncidentInputSchema = lazySchema(() =>
         .max(50)
         .optional()
         .describe('Full replacement list of custom tags to apply to the incident.'),
-      comment: z
-        .string()
-        .max(MAX_COMMENT_LENGTH)
-        .optional()
-        .describe('Comment to add to the incident activity log.'),
     })
     .refine(
       (input) =>
@@ -336,8 +329,7 @@ export const UpdateIncidentInputSchema = lazySchema(() =>
         input.classification !== undefined ||
         input.determination !== undefined ||
         input.severity !== undefined ||
-        input.customTags !== undefined ||
-        input.comment !== undefined,
+        input.customTags !== undefined,
       { message: 'At least one field to update must be provided.' }
     )
 );
@@ -418,18 +410,13 @@ export const UpdateAlertInputSchema = lazySchema(() =>
         .enum(alertDeterminationValues)
         .optional()
         .describe('Alert determination (requires classification to be set).'),
-      severity: z
-        .enum(severityValues)
-        .optional()
-        .describe('Alert severity: unknown, informational, low, medium, or high.'),
     })
     .refine(
       (input) =>
         input.status !== undefined ||
         input.assignedTo !== undefined ||
         input.classification !== undefined ||
-        input.determination !== undefined ||
-        input.severity !== undefined,
+        input.determination !== undefined,
       { message: 'At least one field to update must be provided.' }
     )
 );

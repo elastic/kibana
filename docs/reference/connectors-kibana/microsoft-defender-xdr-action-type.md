@@ -1,7 +1,7 @@
 ---
 navigation_title: "Microsoft Defender XDR"
 type: reference
-description: "Use the Microsoft Defender XDR connector to manage incidents and alerts, run advanced hunting KQL queries, manage custom detection rules, and triage threats in Microsoft Defender XDR."
+description: "Use the Microsoft Defender XDR connector to manage incidents and alerts, run advanced hunting KQL queries, enrich threat intelligence, and triage threats in Microsoft Defender XDR."
 applies_to:
   stack: preview 9.6
   serverless: preview
@@ -9,9 +9,9 @@ applies_to:
 
 # Microsoft Defender XDR connector [microsoft-defender-xdr-action-type]
 
-The Microsoft Defender XDR connector uses the [Microsoft Graph Security API](https://learn.microsoft.com/en-us/graph/api/resources/security-api-overview) so agents can manage incidents and alerts, run advanced hunting KQL queries, manage custom detection rules, enrich threat intelligence, and report on secure score against Microsoft Defender XDR threat data.
+The Microsoft Defender XDR connector uses the [Microsoft Graph Security API](https://learn.microsoft.com/en-us/graph/api/resources/security-api-overview) so agents can manage incidents and alerts, run advanced hunting KQL queries, audit custom detection rules, enrich threat intelligence, and report on secure score against Microsoft Defender XDR threat data.
 
-This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+This connector is currently available in **Agent Builder** only.
 
 ## Create connectors in {{kib}} [define-microsoft-defender-xdr-ui]
 
@@ -29,7 +29,7 @@ Authentication: Client secret (OAuth 2.0 Client Credentials)
 :   Configure the following fields:
 
 Token URL
-:   The Microsoft Entra ID token endpoint for your tenant. Use the format `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`, replacing `{tenant-id}` with your directory (tenant) ID (GUID). For GCC High use `https://login.microsoftonline.us/{tenant-id}/oauth2/v2.0/token`; for DoD use `https://login.microsoftonline.us/{tenant-id}/oauth2/v2.0/token` with the DoD endpoint.
+:   The Microsoft Entra ID token endpoint for your tenant. Use the format `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`, replacing `{tenant-id}` with your directory (tenant) ID (GUID). For GCC High and DoD use `https://login.microsoftonline.us/{tenant-id}/oauth2/v2.0/token`.
 
 Client ID
 :   The Application (client) ID from your Microsoft Entra app registration.
@@ -50,16 +50,16 @@ The following actions are available for the Microsoft Defender XDR connector.
 |---|---|---|---|---|
 | `listIncidents` | Incident management | — | `filter`, `top`, `skip`, `includeAlerts` | `SecurityIncident.ReadWrite.All` |
 | `getIncident` | Incident management | `incidentId` | — | `SecurityIncident.ReadWrite.All` |
-| `updateIncident` | Incident management | `incidentId` + at least one field | `status`, `assignedTo`, `classification`, `determination`, `severity`, `customTags`, `comment` | `SecurityIncident.ReadWrite.All` |
+| `updateIncident` | Incident management | `incidentId` + at least one field | `status`, `assignedTo`, `classification`, `determination`, `severity`, `customTags` | `SecurityIncident.ReadWrite.All` |
 | `addIncidentComment` | Incident management | `incidentId`, `comment` | — | `SecurityIncident.ReadWrite.All` |
 | `mergeIncidents` _(not yet available as an agent tool)_ | Incident management | `incidentIds` (≥ 2 IDs) | `comment` | `SecurityIncident.ReadWrite.All` |
 | `listAlerts` | Alert management | — | `filter`, `top`, `skip` | `SecurityAlert.ReadWrite.All` |
 | `getAlert` | Alert management | `alertId` | — | `SecurityAlert.ReadWrite.All` |
-| `updateAlert` | Alert management | `alertId` + at least one field | `status`, `assignedTo`, `classification`, `determination`, `severity` | `SecurityAlert.ReadWrite.All` |
+| `updateAlert` | Alert management | `alertId` + at least one field | `status`, `assignedTo`, `classification`, `determination` | `SecurityAlert.ReadWrite.All` |
 | `addAlertComment` | Alert management | `alertId`, `comment` | — | `SecurityAlert.ReadWrite.All` |
 | `runHuntingQuery` | Advanced hunting | `query` | `timespan` | `ThreatHunting.Read.All` |
-| `listDetectionRules` | Custom detection rules | — | `top`, `skip` | `CustomDetection.ReadWrite.All` |
-| `getDetectionRule` | Custom detection rules | `ruleId` | — | `CustomDetection.ReadWrite.All` |
+| `listDetectionRules` | Custom detection rules | — | `top`, `skip` | `CustomDetection.Read.All` |
+| `getDetectionRule` | Custom detection rules | `ruleId` | — | `CustomDetection.Read.All` |
 | `createDetectionRule` _(not yet available as an agent tool)_ | Custom detection rules | `displayName`, `queryText`, `period`, `alertTemplate` | `isEnabled` | `CustomDetection.ReadWrite.All` |
 | `updateDetectionRule` _(not yet available as an agent tool)_ | Custom detection rules | `ruleId` + at least one field | `displayName`, `isEnabled`, `queryText`, `period`, `alertTemplate` | `CustomDetection.ReadWrite.All` |
 | `deleteDetectionRule` _(not yet available as an agent tool)_ | Custom detection rules | `ruleId` | — | `CustomDetection.ReadWrite.All` |
@@ -78,7 +78,7 @@ The following actions are available for the Microsoft Defender XDR connector.
 :   Retrieves full details for a single incident by its numeric ID, including all related alerts, evidence, and affected assets. Device evidence items include `mdeDeviceId` and `deviceDnsName`, which can be passed to the Microsoft Defender for Endpoint connector for containment or live-response actions.
 
 `updateIncident`
-:   Updates an incident — change `status` (`active`, `resolved`, `inProgress`, `redirected`), assign to an analyst (`assignedTo`), set `classification` and `determination`, adjust `severity`, replace `customTags`, or add a `comment`. Only the fields you provide are changed.
+:   Updates an incident — change `status` (`active`, `resolved`, `inProgress`, `redirected`), assign to an analyst (`assignedTo`), set `classification` and `determination`, adjust `severity`, or replace `customTags`. Only the fields you provide are changed. To add a comment, use `addIncidentComment` instead.
 
 `addIncidentComment`
 :   Appends a comment to an incident's activity log. Use to record analyst notes, investigation findings, or escalation decisions for audit trail purposes.
@@ -95,7 +95,7 @@ The following actions are available for the Microsoft Defender XDR connector.
 :   Retrieves full details for a single alert, including evidence (affected devices, users, files, processes, and network connections). Device evidence includes `mdeDeviceId` for use with the Microsoft Defender for Endpoint connector.
 
 `updateAlert`
-:   Updates an alert independently of its parent incident — change `status` (`new`, `inProgress`, `resolved`), assign to an analyst (`assignedTo`), set `classification`, `determination`, or `severity`. Use for triage that does not warrant touching the full incident yet. Provide only the fields you want to change.
+:   Updates an alert independently of its parent incident — change `status` (`new`, `inProgress`, `resolved`), assign to an analyst (`assignedTo`), or set `classification` and `determination`. Alert severity cannot be changed via PATCH. Use for triage that does not warrant touching the full incident yet. Provide only the fields you want to change.
 
 `addAlertComment`
 :   Appends a comment to an alert's activity log. Use to record triage notes, analyst observations, or escalation decisions directly on the alert for audit trail purposes.
@@ -149,7 +149,7 @@ The `getAlert` response includes a top-level `evidence` array. The `getIncident`
 - `deviceDnsName` — the device hostname
 - `azureAdDeviceId` — the Azure AD device object ID (when available)
 
-Pass `mdeDeviceId` to the Microsoft Defender for Endpoint connector to trigger isolate, scan, or live-response steps as part of a workflow.
+Pass `mdeDeviceId` to the Microsoft Defender for Endpoint connector to trigger isolate, scan, or live-response actions.
 
 ## Get API credentials [microsoft-defender-xdr-api-credentials]
 
@@ -171,7 +171,7 @@ To use this connector, register an application in Microsoft Entra ID and grant i
    | `SecurityIncident.ReadWrite.All` | Read, update, merge, and comment on incidents |
    | `SecurityAlert.ReadWrite.All` | Read, update, and comment on alerts |
    | `ThreatHunting.Read.All` | Run advanced hunting queries |
-   | `CustomDetection.ReadWrite.All` | Manage custom detection rules |
+   | `CustomDetection.Read.All` | List and read custom detection rules |
    | `ThreatIntelligence.Read.All` | Threat intelligence enrichment (host details, reputation, passive DNS, WHOIS) |
    | `SecurityEvents.Read.All` | Read Microsoft Secure Score |
 

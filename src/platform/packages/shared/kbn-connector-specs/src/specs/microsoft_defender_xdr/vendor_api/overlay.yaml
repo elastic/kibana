@@ -36,16 +36,16 @@ actions:
 
   - target: $.components.schemas['microsoft.graph.security.alertDetermination'].enum
     description: >-
-      Remove the existing alertDetermination enum so it can be replaced with a broader
-      one that includes compromisedUser and confirmationNeeded.
+      Remove the existing alertDetermination enum so it can be replaced with
+      the full set documented at
+      https://learn.microsoft.com/en-us/graph/api/resources/security-alert.
     remove: true
 
   - target: $.components.schemas['microsoft.graph.security.alertDetermination']
     description: >-
-      Add the full determination enum including values the connector uses
-      (compromisedUser, confirmationNeeded) per
-      https://learn.microsoft.com/en-us/graph/api/resources/security-alert.
-      Both alert and incident schemas reference this shared enum type.
+      Replace the alertDetermination enum with the full set from Graph v1.0 docs.
+      Does NOT include compromisedUser or confirmationNeeded — those are not
+      valid alertDetermination values in Graph v1.0.
     update:
       enum:
         - unknown
@@ -57,13 +57,11 @@ actions:
         - other
         - multiStagedAttack
         - compromisedAccount
-        - compromisedUser
         - phishing
         - maliciousUserActivity
         - notMalicious
         - notEnoughDataToValidate
         - confirmedActivity
-        - confirmationNeeded
         - lineOfBusinessApplication
         - unknownFutureValue
 

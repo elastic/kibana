@@ -358,7 +358,7 @@ describe('updateIncident handler', () => {
     );
   });
 
-  it('does not send undefined fields', async () => {
+  it('does not send undefined fields or comment', async () => {
     const client = makeClient();
     client.patch = jest.fn().mockResolvedValue({ data: {} });
     const ctx = makeCtx(client);
@@ -368,6 +368,7 @@ describe('updateIncident handler', () => {
     expect(body).not.toHaveProperty('classification');
     expect(body).not.toHaveProperty('determination');
     expect(body).not.toHaveProperty('customTags');
+    expect(body).not.toHaveProperty('comment');
   });
 });
 
@@ -444,7 +445,7 @@ describe('getAlert handler', () => {
 // ---- updateAlert handler ----
 
 describe('updateAlert handler', () => {
-  it('calls PATCH /security/alerts_v2/{id} with provided fields', async () => {
+  it('calls PATCH /security/alerts_v2/{id} with provided fields (no severity)', async () => {
     const client = makeClient();
     client.patch = jest.fn().mockResolvedValue({ data: { id: 'alert-7', status: 'resolved' } });
     const ctx = makeCtx(client);
@@ -460,6 +461,19 @@ describe('updateAlert handler', () => {
       { status: 'resolved', classification: 'truePositive', determination: 'malware' },
       expect.any(Object)
     );
+  });
+
+  it('does not include severity in the update body', async () => {
+    const client = makeClient();
+    client.patch = jest.fn().mockResolvedValue({ data: {} });
+    const ctx = makeCtx(client);
+    const action = MicrosoftDefenderXdr.actions?.updateAlert;
+    await action?.handler(ctx as never, {
+      alertId: 'alert-7',
+      status: 'inProgress',
+    });
+    const body = client.patch.mock.calls[0][1] as Record<string, unknown>;
+    expect(body).not.toHaveProperty('severity');
   });
 });
 
