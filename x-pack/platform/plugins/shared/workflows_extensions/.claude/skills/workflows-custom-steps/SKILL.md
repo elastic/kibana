@@ -47,7 +47,8 @@ Both sides register through the `workflowsExtensions` setup contract: `registerS
 
 - Extended code templates (full scaffold, selection handlers, dynamic schema): [reference.md](reference.md)
 - Worked example: `examples/workflows_extensions_example/`
-- Common base type: `src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts` (`BaseStepDefinition`, `StepCategory`, `StabilityLevel`, `StepDocumentation`)
+- Common definition type: `x-pack/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts` (`CommonStepDefinition`, `StepExposure`). Type the common definition as `CommonStepDefinition`, not `BaseStepDefinition`: only `CommonStepDefinition` has `exposure`
+- Base type that `CommonStepDefinition` extends: `src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts` (`BaseStepDefinition`, `StepCategory`, `StabilityLevel`, `StepDocumentation`)
 - Editor handler types: `src/platform/packages/shared/kbn-workflows/types/v1.ts` (`EditorHandlers`, `StepPropertyHandler`, `PropertySelectionHandler`, `ConnectorIdSelectionHandler`, `DynamicSchema`)
 - Reusable index selection handler: `src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts`
 - Server step types: `x-pack/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts` (`ServerStepDefinition`, `StepHandler`, `StepHandlerContext`, `ContextManager`, `CallKibanaApiParams`, `OnCancelHandler`)

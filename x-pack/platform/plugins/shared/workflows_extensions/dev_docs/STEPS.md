@@ -110,6 +110,8 @@ export const myStepCommonDefinition: CommonStepDefinition = {
 };
 ```
 
+`exposure` is part of `CommonStepDefinition`, not of `BaseStepDefinition` from `@kbn/workflows`, because only steps registered here have one; built-in steps are always `open`. If your common definition is typed as `BaseStepDefinition`, change it to `CommonStepDefinition`. Setting `exposure` on the server and public definitions instead works only if both set the same value: the editor reads the public one, and the AI authoring tools read the server one.
+
 Only the workflow editor checks `exposure`; the server doesn't yet. A workflow that uses a `managed_only` step can still be saved and enabled outside the editor's Enabled switch, for example through the API or from the workflow list. The check only looks at whether the workflow is managed, not at which plugin installed it.
 
 The exposure is up to the step owner. Before restricting an existing step, check whether user workflows already use it: they start showing the warning (`internal`) or the error (`managed_only`).
