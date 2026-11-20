@@ -29,7 +29,6 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
 import type { KubernetesSecurityStart } from '@kbn/kubernetes-security-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
@@ -161,7 +160,6 @@ export interface StartPlugins {
   licensing: LicensingPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
-  timelines: TimelinesUIStart;
   sessionView: SessionViewStart;
   uiActions: UiActionsStart;
   maps: MapsStartApi;

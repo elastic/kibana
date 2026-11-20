@@ -16,8 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import illustration from '../../../images/illustration_product_no_results_magnifying_glass.svg';
 
 const heights = {
   tall: 490,
@@ -48,8 +47,6 @@ const panelStyle = {
 };
 
 export const EmptyTable: React.FC = () => {
-  const { http } = useKibana<CoreStart>().services;
-
   return (
     <EuiPanel color="subdued" data-test-subj="tGridEmptyState">
       <EuiFlexGroup alignItems="center" justifyContent="center">
@@ -75,13 +72,7 @@ export const EmptyTable: React.FC = () => {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiImage
-                  size="200"
-                  alt=""
-                  url={http.basePath.prepend(
-                    '/plugins/timelines/assets/illustration_product_no_results_magnifying_glass.svg'
-                  )}
-                />
+                <EuiImage size="200" alt="" url={illustration} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

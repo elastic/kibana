@@ -1330,7 +1330,6 @@
     "@kbn/testing-embedded-lens-plugin": "workspace:*",
     "@kbn/third-party-lens-navigation-prompt-plugin": "workspace:*",
     "@kbn/third-party-vis-lens-example-plugin": "workspace:*",
-    "@kbn/timelines-plugin": "workspace:*",
     "@kbn/timelion-grammar": "workspace:*",
     "@kbn/timerange": "workspace:*",
     "@kbn/tinymath": "workspace:*",

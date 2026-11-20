@@ -3919,9 +3919,6 @@ importers:
       '@kbn/third-party-vis-lens-example-plugin':
         specifier: workspace:*
         version: link:x-pack/examples/third_party_vis_lens_example
-      '@kbn/timelines-plugin':
-        specifier: workspace:*
-        version: link:x-pack/solutions/security/plugins/timelines
       '@kbn/timelion-grammar':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-timelion-grammar
@@ -8872,12 +8869,6 @@ importers:
 
   src/platform/plugins/shared/visualizations: {}
 
-  x-pack/platform/plugins/shared/workflows_execution_engine: {}
-
-  x-pack/platform/plugins/shared/workflows_extensions: {}
-
-  x-pack/platform/plugins/shared/workflows_management: {}
-
   src/platform/test: {}
 
   src/platform/test_plugins/analytics/analytics_ftr_helpers: {}
@@ -9644,6 +9635,12 @@ importers:
 
   x-pack/platform/plugins/shared/usage_api: {}
 
+  x-pack/platform/plugins/shared/workflows_execution_engine: {}
+
+  x-pack/platform/plugins/shared/workflows_extensions: {}
+
+  x-pack/platform/plugins/shared/workflows_management: {}
+
   x-pack/platform/test: {}
 
   x-pack/platform/test_plugins/agent_builder_sml_test_types: {}
@@ -10021,8 +10018,6 @@ importers:
   x-pack/solutions/security/plugins/security_solution_serverless: {}
 
   x-pack/solutions/security/plugins/session_view: {}
-
-  x-pack/solutions/security/plugins/timelines: {}
 
   x-pack/solutions/security/test: {}
 
