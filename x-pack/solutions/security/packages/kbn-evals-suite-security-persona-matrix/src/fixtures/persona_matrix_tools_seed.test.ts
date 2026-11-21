@@ -635,6 +635,29 @@ describe('persona_matrix_tools_seed', () => {
       );
     });
 
+    it('deletes no todo documents when the pre-seed snapshot could not be read', async () => {
+      const mod = await load('parity');
+      const client = createClient();
+      const deleteByQuery = jest.fn(async () => ({}));
+      await mod.seedPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        esClient: {
+          openPointInTime: jest.fn(async () => {
+            throw new Error('search_phase_execution_exception');
+          }),
+        } as unknown as EsClient,
+        profile: 'chrysalis-parity',
+      });
+      expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('todo cleanup disabled'));
+      await mod.cleanupPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        esClient: { deleteByQuery } as unknown as EsClient,
+      });
+      expect(deleteByQuery).not.toHaveBeenCalled();
+    });
+
     it('leaves todo documents alone when write-todos pre-existed (not this run)', async () => {
       const mod = await load('parity');
       const client = createClient({ postBehavior: 'conflict' });

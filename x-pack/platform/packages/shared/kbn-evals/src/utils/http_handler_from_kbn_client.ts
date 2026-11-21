@@ -8,6 +8,10 @@ import type { HttpFetchOptions, HttpFetchOptionsWithPath, HttpHandler } from '@k
 import type { KbnClient, KbnClientRequesterError } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { EXECUTION_ID_BAGGAGE_KEY, EVAL_EXPERIMENT_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
+import { parseRetryAfterHeaderMs } from './retry_utils';
+
+/** Same cap as `withRetry`'s default `maxDelayMs`: a server hint never stalls a run longer. */
+const MAX_RETRY_AFTER_MS = 60_000;
 
 // redefine args type to make it easier to handle in a type-safe way
 type HttpHandlerArgs =
@@ -70,21 +74,9 @@ export function httpHandlerFromKbnClient({
       await new Promise((r) => setTimeout(r, ms));
     }
 
-    function parseRetryAfterMsFromHeaders(
+    const parseRetryAfterMsFromHeaders = (
       responseHeaders: Headers | undefined
-    ): number | undefined {
-      const value = responseHeaders?.get('retry-after');
-      if (!value) {
-        return undefined;
-      }
-
-      const seconds = Number.parseInt(value, 10);
-      if (!Number.isFinite(seconds) || seconds <= 0) {
-        return undefined;
-      }
-
-      return seconds * 1000;
-    }
+    ): number | undefined => parseRetryAfterHeaderMs(responseHeaders?.get('retry-after'));
 
     function parseRetryAfterMsFromMessage(message: string): number | undefined {
       const match = message.match(/retry after\s+(\d+)\s*seconds?/i);
@@ -155,7 +147,9 @@ export function httpHandlerFromKbnClient({
 
         // Exponential backoff (1s, 2s, 4s, ...) with jitter, but never sooner than retry-after.
         const baseBackoffMs = 1000 * Math.pow(2, attempt);
-        const baseDelayMs = retryAfterMs ? Math.max(baseBackoffMs, retryAfterMs) : baseBackoffMs;
+        const baseDelayMs = retryAfterMs
+          ? Math.min(MAX_RETRY_AFTER_MS, Math.max(baseBackoffMs, retryAfterMs))
+          : baseBackoffMs;
         const jitterMs = Math.floor(
           Math.random() * Math.min(1000, Math.max(100, baseDelayMs * 0.15))
         );

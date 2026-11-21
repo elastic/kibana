@@ -33,8 +33,18 @@ const settle = async (response: unknown): Promise<unknown> => {
 };
 
 describe('countingJudgeClient', () => {
-  beforeEach(() => jest.useFakeTimers());
-  afterEach(() => jest.useRealTimers());
+  // The wrapper skips statuses the HTTP handler retries when KBN_EVALS_HTTP_RETRIES is
+  // set, so a value inherited from the shell would flip the retry expectations below.
+  const originalHttpRetries = process.env.KBN_EVALS_HTTP_RETRIES;
+  beforeEach(() => {
+    jest.useFakeTimers();
+    delete process.env.KBN_EVALS_HTTP_RETRIES;
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+    if (originalHttpRetries === undefined) delete process.env.KBN_EVALS_HTTP_RETRIES;
+    else process.env.KBN_EVALS_HTTP_RETRIES = originalHttpRetries;
+  });
 
   it('retries a dropped connection and returns the next response', async () => {
     const prompt = jest.fn().mockRejectedValueOnce(fetchFailed()).mockResolvedValueOnce('verdict');
@@ -116,9 +126,6 @@ describe('countingJudgeClient', () => {
   describe('with KBN_EVALS_HTTP_RETRIES set', () => {
     beforeEach(() => {
       process.env.KBN_EVALS_HTTP_RETRIES = '2';
-    });
-    afterEach(() => {
-      delete process.env.KBN_EVALS_HTTP_RETRIES;
     });
 
     it('does not retry a status the HTTP handler already retried', async () => {

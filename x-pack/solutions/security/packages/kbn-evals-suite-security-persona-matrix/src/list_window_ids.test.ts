@@ -97,12 +97,20 @@ describe('listWindowIds', () => {
     expect(client.closePointInTime as jest.Mock).toHaveBeenCalledWith({ id: 'pit-1' });
   });
 
-  it('stops instead of looping when a page does not advance', async () => {
+  it('throws instead of looping or returning a partial list when a page does not advance', async () => {
     const stuck = { _id: 'a', sort: ['0'] };
     const search = jest.fn(async () => ({ hits: { hits: [stuck] } }));
-    const ids = await listWindowIds(clientWith(search), 'idx', WINDOW);
-    expect(ids).toEqual(['a']);
-    // First page + one repeat confirming the cursor is stuck, then stop.
-    expect(search.mock.calls.length).toBeLessThanOrEqual(3);
+    const client = clientWith(search);
+    await expect(listWindowIds(client, 'idx', WINDOW)).rejects.toThrow('stopped advancing');
+    // First page + one repeat confirming the cursor is stuck, then fail.
+    expect(search).toHaveBeenCalledTimes(2);
+    expect(client.closePointInTime as jest.Mock).toHaveBeenCalledWith({ id: 'pit-1' });
+  });
+
+  it('throws when a hit carries no sort values', async () => {
+    const search = jest.fn(async () => ({ hits: { hits: [{ _id: 'a' }] } }));
+    await expect(listWindowIds(clientWith(search), 'idx', WINDOW)).rejects.toThrow(
+      'stopped advancing'
+    );
   });
 });

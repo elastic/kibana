@@ -78,15 +78,22 @@ function parseRetryAfterMsFromMessage(message: string): number | undefined {
   return seconds * 1000;
 }
 
-function parseRetryAfterMsFromHeaders(error: any): number | undefined {
-  const headers = error?.headers ?? error?.response?.headers;
-  const value: unknown =
-    typeof headers?.get === 'function' ? headers.get('retry-after') : undefined;
+/**
+ * A `Retry-After` header value in ms: delay-seconds or an HTTP-date (RFC 9110 §10.2.3).
+ */
+export function parseRetryAfterHeaderMs(value: unknown): number | undefined {
   if (typeof value !== 'string' || !value.trim()) return undefined;
   const seconds = Number(value);
   if (Number.isFinite(seconds)) return seconds > 0 ? seconds * 1000 : undefined;
   const dateMs = Date.parse(value) - Date.now();
   return Number.isFinite(dateMs) && dateMs > 0 ? dateMs : undefined;
+}
+
+function parseRetryAfterMsFromHeaders(error: any): number | undefined {
+  const headers = error?.headers ?? error?.response?.headers;
+  return parseRetryAfterHeaderMs(
+    typeof headers?.get === 'function' ? headers.get('retry-after') : undefined
+  );
 }
 
 function computeDelayMs({
@@ -103,7 +110,9 @@ function computeDelayMs({
   jitter: boolean;
 }): number {
   const exp = Math.min(maxDelayMs, minDelayMs * Math.pow(2, attempt - 1));
-  const base = retryAfterMs ? Math.max(exp, retryAfterMs) : exp;
+  // A quota-exhausted 429 can advertise an hour; past the cap the attempt budget,
+  // not the server's hint, bounds the wait, so the error still surfaces.
+  const base = retryAfterMs ? Math.min(maxDelayMs, Math.max(exp, retryAfterMs)) : exp;
 
   if (!jitter) return base;
 

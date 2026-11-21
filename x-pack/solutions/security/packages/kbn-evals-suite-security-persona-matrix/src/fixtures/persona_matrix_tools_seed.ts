@@ -237,9 +237,10 @@ async function listTodoIds(esClient: EsClient): Promise<Set<string>> {
 
 /**
  * Deletes only todo documents this run added: every id NOT in the pre-seed
- * snapshot. A doc another process writes after the snapshot is also outside
- * it and is deleted, so this is safe only when no other run shares the stack
- * at the same time.
+ * snapshot. Both scans are complete or throw (`listIdsInPit`), so a partial
+ * list never widens the delete. A doc another process writes after the
+ * snapshot is also outside it and is deleted; concurrent runs on one stack are
+ * unsupported anyway (cleanup hard-deletes the shared workflows).
  */
 async function deleteTodosCreatedThisRun(esClient: EsClient): Promise<void> {
   const preexisting = preexistingTodoIds;
@@ -424,8 +425,17 @@ async function createWorkflowIfMissing({
     if (workflow.id === WRITE_TODOS_WORKFLOW_ID && esClient) {
       // Snapshot the ids already in the todos index BEFORE this run can add any,
       // so cleanup can delete only this run's docs (the workflow indexes with
-      // `id: execution.id`, so ids are stable and cheap to diff).
-      preexistingTodoIds = await listTodoIds(esClient);
+      // `id: execution.id`, so ids are stable and cheap to diff). Without a
+      // complete snapshot cleanup cannot tell this run's docs apart, so it is
+      // skipped rather than guessed.
+      preexistingTodoIds = undefined;
+      try {
+        preexistingTodoIds = await listTodoIds(esClient);
+      } catch (error) {
+        log.warning(
+          `[persona-matrix] todos snapshot failed, todo cleanup disabled for this run: ${error}`
+        );
+      }
     }
     log.info(`[persona-matrix] created workflow '${workflow.id}'`);
   } catch (error) {

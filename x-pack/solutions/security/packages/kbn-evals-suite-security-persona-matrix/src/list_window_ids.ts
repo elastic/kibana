@@ -53,13 +53,21 @@ export const listIdsInPit = async (
       const hits = response.hits?.hits ?? [];
       if (hits.length === 0) break;
       const last = hits[hits.length - 1];
-      // Guard against a page that does not advance (bad sort payload): stop instead
-      // of looping — and do it BEFORE collecting the page, or the repeated page's
-      // ids land in the result twice.
-      const nextAfter = last.sort as string[];
-      if (searchAfter && JSON.stringify(nextAfter) === JSON.stringify(searchAfter)) break;
+      // A cursor that does not advance (bad sort payload) would loop forever, and
+      // stopping there returns a partial list that callers read as complete (the
+      // data gate as the corpus, the todo cleanup as the pre-run snapshot). Fail
+      // instead, before the repeated page is collected.
+      const nextAfter = last.sort as string[] | undefined;
+      const stuck =
+        nextAfter === undefined ||
+        nextAfter.length === 0 ||
+        (searchAfter !== undefined && JSON.stringify(nextAfter) === JSON.stringify(searchAfter));
+      if (stuck) {
+        throw new Error(
+          `[persona-matrix] paging '${index}' stopped advancing after ${ids.length} ids; refusing to return a partial id list`
+        );
+      }
       for (const hit of hits) if (hit._id !== undefined) ids.push(hit._id);
-      if (nextAfter === undefined || nextAfter.length === 0) break;
       searchAfter = nextAfter;
     }
   } finally {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { withRetry } from './retry_utils';
+import { parseRetryAfterHeaderMs, withRetry } from './retry_utils';
 
 const fastRetryOptions = { minDelayMs: 1, maxDelayMs: 2, jitter: false } as const;
 
@@ -107,21 +107,49 @@ describe('withRetry', () => {
         headers: new Headers({ 'retry-after': retryAfter }),
       });
 
+    // The HTTP-date is built inside the test, after the fake clock is installed:
+    // a date computed at collection time drifts by however late the test starts.
     it.each([
-      ['delay-seconds', '30'],
-      ['HTTP-date', new Date(Date.now() + 30_000).toUTCString()],
+      ['delay-seconds', () => '30'],
+      ['HTTP-date', () => new Date(Date.now() + 30_000).toUTCString()],
     ])('waits at least the %s value before retrying', async (_format, retryAfter) => {
       const fn = jest
         .fn()
-        .mockRejectedValueOnce(rateLimited(retryAfter))
+        .mockRejectedValueOnce(rateLimited(retryAfter()))
         .mockResolvedValueOnce('ok');
-      const result = withRetry(fn, fastRetryOptions);
+      const result = withRetry(fn, { ...fastRetryOptions, maxDelayMs: 60_000 });
 
       await jest.advanceTimersByTimeAsync(25_000);
       expect(fn).toHaveBeenCalledTimes(1);
       await jest.advanceTimersByTimeAsync(10_000);
       await expect(result).resolves.toBe('ok');
       expect(fn).toHaveBeenCalledTimes(2);
+    });
+
+    it('caps a Retry-After hint at maxDelayMs', async () => {
+      const onRetry = jest.fn();
+      const fn = jest.fn().mockRejectedValueOnce(rateLimited('3600')).mockResolvedValueOnce('ok');
+      const result = withRetry(fn, { ...fastRetryOptions, maxDelayMs: 60_000, onRetry });
+
+      await jest.advanceTimersByTimeAsync(60_000);
+      await expect(result).resolves.toBe('ok');
+      expect(onRetry).toHaveBeenCalledWith(expect.objectContaining({ delayMs: 60_000 }));
+    });
+  });
+
+  describe('parseRetryAfterHeaderMs', () => {
+    beforeEach(() => jest.useFakeTimers({ now: new Date('2026-11-21T10:00:00.000Z') }));
+    afterEach(() => jest.useRealTimers());
+
+    it.each([
+      ['30', 30_000],
+      ['Sat, 21 Nov 2026 10:00:45 GMT', 45_000],
+      ['0', undefined],
+      ['Sat, 21 Nov 2026 09:59:00 GMT', undefined],
+      ['soon', undefined],
+      [undefined, undefined],
+    ])('parses %p as %p ms', (value, expected) => {
+      expect(parseRetryAfterHeaderMs(value)).toBe(expected);
     });
   });
 
