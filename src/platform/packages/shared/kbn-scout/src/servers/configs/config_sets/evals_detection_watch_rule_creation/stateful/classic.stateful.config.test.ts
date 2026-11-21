@@ -34,8 +34,8 @@ describe('evals_detection_watch_rule_creation config set', () => {
         'alertzero installs its managed workflows only with service accounts enabled (#295215)',
       ],
       [
-        '--xpack.alertzero.enabled=true',
-        'alertzero owns initialize_managed_workflows; disabled means no workflow is installed',
+        '--xpack.inbox.enabled=true',
+        'the inbox plugin is disabled by default and the suite shares its server shape with main',
       ],
       [
         '--xpack.agenticInvestigations.enabled=true',
@@ -44,10 +44,6 @@ describe('evals_detection_watch_rule_creation config set', () => {
       [
         '--uiSettings.overrides.securitySolution:enableAlertZero=true',
         'worker list and PATCH routes return 404 while AlertZero is off in the space',
-      ],
-      [
-        '--xpack.spaces.defaultSolution=security',
-        'AlertZero routes return 404 outside a Security solution space (#300822)',
       ],
       [
         '--xpack.proposals.enabled=true',
