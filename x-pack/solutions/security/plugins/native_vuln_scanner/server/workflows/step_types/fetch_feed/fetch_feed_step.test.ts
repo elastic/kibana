@@ -50,10 +50,12 @@ describe('native_vuln.fetch_feed handler', () => {
   it('downloads each release once and keeps only metadata in the output', async () => {
     inventoryMock.mockResolvedValue(snapshot([ubuntuHost, ubuntuHost, rhelHost]));
     downloadMock.mockImplementation(async (os) => ({
-      status: 'ok',
+      status: 'ok' as const,
       body: new Uint8Array(10),
       etag: `"${os.family}"`,
       lastModified: 'Fri, 13 Nov 2026 00:00:00 GMT',
+      durationMs: 5,
+      downloadedBytes: 10,
     }));
 
     const { result } = await run();
@@ -86,7 +88,13 @@ describe('native_vuln.fetch_feed handler', () => {
       bodySha256: bodySha256(body),
     });
     inventoryMock.mockResolvedValue(snapshot([ubuntuHost]));
-    downloadMock.mockResolvedValue({ status: 'ok', body, etag: '"new"' });
+    downloadMock.mockResolvedValue({
+      status: 'ok',
+      body,
+      etag: '"new"',
+      durationMs: 5,
+      downloadedBytes: body.length,
+    });
 
     const { result } = await run();
 
@@ -108,7 +116,12 @@ describe('native_vuln.fetch_feed handler', () => {
       includeUnfixed: false,
     });
     inventoryMock.mockResolvedValue(snapshot([ubuntuHost]));
-    downloadMock.mockResolvedValue({ status: 'not_modified', etag: '"old"' });
+    downloadMock.mockResolvedValue({
+      status: 'not_modified',
+      etag: '"old"',
+      durationMs: 5,
+      downloadedBytes: 0,
+    });
 
     const { result } = await run();
 
@@ -129,7 +142,7 @@ describe('native_vuln.fetch_feed handler', () => {
     inventoryMock.mockResolvedValue(snapshot([ubuntuHost, rhelHost]));
     downloadMock.mockImplementation(async (os) => {
       if (os.family === 'ubuntu') throw new Error('Advisory feed returned HTTP 503');
-      return { status: 'ok', body: new Uint8Array(4) };
+      return { status: 'ok', body: new Uint8Array(4), durationMs: 5, downloadedBytes: 4 };
     });
 
     const { result, deps } = await run();
@@ -155,7 +168,7 @@ describe('native_vuln.fetch_feed handler', () => {
     inventoryMock.mockResolvedValue(snapshot([ubuntuHost]));
     downloadMock.mockImplementation(async (_os, options) => {
       options?.logger?.warn('CSAF delta over cap; using the archive alone.');
-      return { status: 'ok', body: new Uint8Array(4) };
+      return { status: 'ok', body: new Uint8Array(4), durationMs: 5, downloadedBytes: 4 };
     });
 
     const { result, deps } = await run();
@@ -166,7 +179,7 @@ describe('native_vuln.fetch_feed handler', () => {
 
   it('fails a 304 that has no cached feed behind it', async () => {
     inventoryMock.mockResolvedValue(snapshot([ubuntuHost]));
-    downloadMock.mockResolvedValue({ status: 'not_modified' });
+    downloadMock.mockResolvedValue({ status: 'not_modified', durationMs: 5, downloadedBytes: 0 });
 
     const { result } = await run();
 
@@ -184,7 +197,12 @@ describe('native_vuln.fetch_feed handler', () => {
 
   it('reports an unavailable release with its url', async () => {
     inventoryMock.mockResolvedValue(snapshot([rhelHost]));
-    downloadMock.mockResolvedValue({ status: 'unavailable', url: 'https://example.invalid/rhel' });
+    downloadMock.mockResolvedValue({
+      status: 'unavailable',
+      url: 'https://example.invalid/rhel',
+      durationMs: 5,
+      downloadedBytes: 0,
+    });
 
     const { result } = await run();
 
@@ -211,7 +229,7 @@ describe('native_vuln.fetch_feed handler', () => {
     inventoryMock.mockResolvedValue(snapshot([ubuntuHost, rhelHost]));
     downloadMock.mockImplementation(async () => {
       controller.abort();
-      return { status: 'ok', body: new Uint8Array(1) };
+      return { status: 'ok', body: new Uint8Array(1), durationMs: 5, downloadedBytes: 1 };
     });
 
     const { result } = await run(controller.signal);

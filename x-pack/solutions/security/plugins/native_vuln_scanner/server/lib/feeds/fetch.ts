@@ -142,6 +142,8 @@ export type LoadFeedResult =
       feed: FeedParseResult;
       /** Set on a 304: the knowledge ids already written cleanly for these exact feed bytes. */
       knowledgeStoredIds?: ReadonlySet<string>;
+      /** sha256 of the feed body bytes, hex; the checkpoint's feed fingerprint. */
+      bodySha256?: string;
     } & FeedHeaders)
   /** The vendor publishes no feed for this release (HTTP 404), e.g. an EOL codename. */
   | { status: 'unavailable'; url: string };
@@ -278,7 +280,14 @@ export const downloadFeed = async (
     const body = await readCapped(response, url, requestSignal);
     const etag = response.headers.get('etag') ?? undefined;
     const lastModified = response.headers.get('last-modified') ?? undefined;
-    return { status: 'ok', body, etag, lastModified, ...timing(), downloadedBytes: body.byteLength };
+    return {
+      status: 'ok',
+      body,
+      etag,
+      lastModified,
+      ...timing(),
+      downloadedBytes: body.byteLength,
+    };
   });
 };
 
@@ -330,7 +339,13 @@ export const loadFeed = async (
   }
   const { body, etag, lastModified } = downloaded;
   const feed = await parseFeedBody(os, body, { signal, maxDecompressedBytes, includeUnfixed });
-  return { status: 'ok', feed, etag, lastModified };
+  return {
+    status: 'ok',
+    feed,
+    etag,
+    lastModified,
+    bodySha256: createHash('sha256').update(body).digest('hex'),
+  };
 };
 
 /**
