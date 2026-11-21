@@ -27,7 +27,9 @@ const lowerKeyword: MappingProperty = {
 const text: MappingProperty = { type: 'text' };
 const textWithKeyword: MappingProperty = {
   type: 'text',
-  fields: { keyword: { type: 'keyword', ignore_above: 1024, normalizer: 'investigation_lowercase' } },
+  fields: {
+    keyword: { type: 'keyword', ignore_above: 1024, normalizer: 'investigation_lowercase' },
+  },
 };
 const date: MappingProperty = { type: 'date' };
 const bool: MappingProperty = { type: 'boolean' };
@@ -52,14 +54,30 @@ const SETTINGS: IndicesIndexSettings = {
 export const RECORDS_MAPPING: MappingTypeMapping = {
   dynamic: false,
   dynamic_templates: [
-    { fields_keyword: { path_match: 'fields.*_keyword', mapping: { type: 'keyword', ignore_above: 1024 } } },
-    { fields_text: { path_match: 'fields.*_text', mapping: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 1024 } } } } },
+    {
+      fields_keyword: {
+        path_match: 'fields.*_keyword',
+        mapping: { type: 'keyword', ignore_above: 1024 },
+      },
+    },
+    {
+      fields_text: {
+        path_match: 'fields.*_text',
+        mapping: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 1024 } } },
+      },
+    },
     { fields_long: { path_match: 'fields.*_long', mapping: { type: 'long' } } },
     { fields_double: { path_match: 'fields.*_double', mapping: { type: 'double' } } },
     { fields_date: { path_match: 'fields.*_date', mapping: { type: 'date' } } },
     { fields_bool: { path_match: 'fields.*_bool', mapping: { type: 'boolean' } } },
     { fields_other: { path_match: 'fields.*', mapping: { type: 'keyword', ignore_above: 1024 } } },
-    { counters_numbers: { path_match: 'counters.*', match_mapping_type: 'long', mapping: { type: 'long' } } },
+    {
+      counters_numbers: {
+        path_match: 'counters.*',
+        match_mapping_type: 'long',
+        mapping: { type: 'long' },
+      },
+    },
   ],
   properties: {
     id: keyword,
@@ -87,6 +105,12 @@ export const RECORDS_MAPPING: MappingTypeMapping = {
     closed_at: date,
     investigation_type: keyword,
     template_id: keyword,
+    status_key: keyword,
+    paused_at: { type: 'date' },
+    time_paused: { type: 'long' },
+    pause_reason: keyword,
+    resume_to_status_key: keyword,
+    template_version: { type: 'integer' },
     stage: keyword,
     fields: { type: 'object', dynamic: true },
     agent_verdict: {
@@ -237,7 +261,12 @@ export const ITEMS_MAPPING: MappingTypeMapping = {
         owner: { properties: { type: keyword, id: keyword, name: keyword } },
         depends_on: keyword,
         auto: {
-          properties: { type: keyword, claim_id: keyword, question: lowerKeyword, category: keyword },
+          properties: {
+            type: keyword,
+            claim_id: keyword,
+            question: lowerKeyword,
+            category: keyword,
+          },
         },
         skip_reason: text,
         note: text,

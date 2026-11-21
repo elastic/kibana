@@ -14,7 +14,8 @@ export type ModalName =
   | 'merge'
   | 'close'
   | 'reopen'
-  | 'restrict';
+  | 'restrict'
+  | 'changeType';
 
 export interface InvestigationModalProps {
   record: InvestigationRecord;

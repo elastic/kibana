@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
@@ -24,11 +24,15 @@ import { INVESTIGATION_LIMITS } from '../../../common/investigations/constants';
 
 type GetService = InvestigationsSetup['getServiceForRequest'];
 
-const recordIdArg = z
-  .string()
-  .max(512)
-  .optional()
-  .describe('Investigation record id. Omit it to use the investigation linked to this conversation.');
+const recordIdArg = lazySchema(() =>
+  z
+    .string()
+    .max(512)
+    .optional()
+    .describe(
+      'Investigation record id. Omit it to use the investigation linked to this conversation.'
+    )
+);
 
 const ok = (data: object) => ({ results: [{ type: 'other' as const, data }] });
 const fail = (message: string) => ({ results: [{ type: 'error' as const, data: { message } }] });
@@ -50,7 +54,11 @@ const resolve = async (
   const agent = getAgentFromRunContext(context.runContext);
   const agentId = agent?.agentId ?? INVESTIGATION_AGENT_ID;
   const service = await getService(context.request, {
-    asAgent: { id: agentId, name: agent?.agentName ?? (agentId === INVESTIGATION_AGENT_ID ? 'Investigation agent' : agentId) },
+    asAgent: {
+      id: agentId,
+      name:
+        agent?.agentName ?? (agentId === INVESTIGATION_AGENT_ID ? 'Investigation agent' : agentId),
+    },
   });
   if (recordId) return { service, recordId };
   const conversationId = agent?.conversationId;
@@ -84,18 +92,36 @@ const compact = (item: InvestigationItem) => ({
     : {}),
 });
 
-const findByRef = async (service: InvestigationsService, recordId: string, ref: string, kind: InvestigationItem['kind']) => {
-  const res = await service.findItemsUnchecked(recordId, { refs: [ref], kind: [kind], per_page: 1 });
+const findByRef = async (
+  service: InvestigationsService,
+  recordId: string,
+  ref: string,
+  kind: InvestigationItem['kind']
+) => {
+  const res = await service.findItemsUnchecked(recordId, {
+    refs: [ref],
+    kind: [kind],
+    per_page: 1,
+  });
   return res.items[0];
 };
 
-const refsToIds = async (service: InvestigationsService, recordId: string, refs: string[] = []): Promise<string[]> => {
+const refsToIds = async (
+  service: InvestigationsService,
+  recordId: string,
+  refs: string[] = []
+): Promise<string[]> => {
   if (!refs.length) return [];
-  const res = await service.findItemsUnchecked(recordId, { refs, kind: ['evidence'], per_page: Math.min(refs.length, 100) });
+  const res = await service.findItemsUnchecked(recordId, {
+    refs,
+    kind: ['evidence'],
+    per_page: Math.min(refs.length, 100),
+  });
   return res.items.map((i) => i.id);
 };
 
-const guard = <A>(fn: (args: A, context: ToolHandlerContext) => Promise<ReturnType<typeof ok>>) =>
+const guard =
+  <A>(fn: (args: A, context: ToolHandlerContext) => Promise<ReturnType<typeof ok>>) =>
   async (args: A, context: ToolHandlerContext) => {
     try {
       return await fn(args, context);
@@ -104,76 +130,177 @@ const guard = <A>(fn: (args: A, context: ToolHandlerContext) => Promise<ReturnTy
     }
   };
 
-const readItemsSchema = z.object({
-  record_id: recordIdArg,
-  kind: z.enum(['evidence', 'claim', 'entity', 'link', 'task', 'proposal', 'comment', 'timeline_event']).optional(),
-  type: z
-    .enum(['alert', 'event', 'entity', 'indicator', 'query', 'saved_search', 'visualization', 'file', 'note', 'finding', 'conversation'])
-    .optional()
-    .describe('Evidence type filter.'),
-  status: z.array(z.string().max(32)).max(10).optional(),
-  search: z.string().max(512).optional(),
-  page: z.number().int().min(1).max(200).optional(),
-  per_page: z.number().int().min(1).max(50).optional().describe('Items per page (max 50, default 20).'),
-});
+const readItemsSchema = lazySchema(() =>
+  z.object({
+    record_id: recordIdArg,
+    kind: z
+      .enum([
+        'evidence',
+        'claim',
+        'entity',
+        'link',
+        'task',
+        'proposal',
+        'comment',
+        'timeline_event',
+      ])
+      .optional(),
+    type: z
+      .enum([
+        'alert',
+        'event',
+        'entity',
+        'indicator',
+        'query',
+        'saved_search',
+        'visualization',
+        'file',
+        'note',
+        'finding',
+        'conversation',
+      ])
+      .optional()
+      .describe('Evidence type filter.'),
+    status: z.array(z.string().max(32)).max(10).optional(),
+    search: z.string().max(512).optional(),
+    page: z.number().int().min(1).max(200).optional(),
+    per_page: z
+      .number()
+      .int()
+      .min(1)
+      .max(50)
+      .optional()
+      .describe('Items per page (max 50, default 20).'),
+  })
+);
 
-const addEvidenceSchema = z.object({
-  record_id: recordIdArg,
-  items: z
-    .array(
-      z.object({
-        type: z.enum(['indicator', 'note', 'query', 'event', 'finding', 'alert', 'entity', 'saved_search', 'visualization', 'file', 'conversation']),
-        title: z.string().min(1).max(512),
-        why: z.string().max(2048).optional(),
-        text: z.string().max(10000).optional(),
-        indicator_type: z.enum(['ip', 'domain', 'url', 'file_hash', 'file_path', 'email', 'registry_key', 'other']).optional(),
-        indicator_value: z.string().max(2048).optional(),
-      })
-    )
-    .min(1)
-    .max(INVESTIGATION_LIMITS.maxAgentBulkItems),
-});
+const addEvidenceSchema = lazySchema(() =>
+  z.object({
+    record_id: recordIdArg,
+    items: z
+      .array(
+        z.object({
+          type: z.enum([
+            'indicator',
+            'note',
+            'query',
+            'event',
+            'finding',
+            'alert',
+            'entity',
+            'saved_search',
+            'visualization',
+            'file',
+            'conversation',
+          ]),
+          title: z.string().min(1).max(512),
+          why: z.string().max(2048).optional(),
+          text: z.string().max(10000).optional(),
+          indicator_type: z
+            .enum([
+              'ip',
+              'domain',
+              'url',
+              'file_hash',
+              'file_path',
+              'email',
+              'registry_key',
+              'other',
+            ])
+            .optional(),
+          indicator_value: z.string().max(2048).optional(),
+        })
+      )
+      .min(1)
+      .max(INVESTIGATION_LIMITS.maxAgentBulkItems),
+  })
+);
 
-const upsertClaimSchema = z.object({
-  record_id: recordIdArg,
-  claim_ref: z.string().max(32).optional().describe('Existing claim ref such as C3. Omit to open a new claim.'),
-  question: z.string().max(2048).optional(),
-  status: z.enum(['open', 'supported', 'blocked', 'refuted']).optional(),
-  conclusion: z.string().max(10000).optional(),
-  reasoning: z.string().max(10000).optional(),
-  confidence: z.number().min(0).max(100).optional(),
-  note: z.string().max(10000).optional(),
-  supporting_evidence_refs: z.array(z.string().max(32)).max(100).optional(),
-});
+const upsertClaimSchema = lazySchema(() =>
+  z.object({
+    record_id: recordIdArg,
+    claim_ref: z
+      .string()
+      .max(32)
+      .optional()
+      .describe('Existing claim ref such as C3. Omit to open a new claim.'),
+    question: z.string().max(2048).optional(),
+    status: z.enum(['open', 'supported', 'blocked', 'refuted']).optional(),
+    conclusion: z.string().max(10000).optional(),
+    reasoning: z.string().max(10000).optional(),
+    confidence: z.number().min(0).max(100).optional(),
+    note: z.string().max(10000).optional(),
+    supporting_evidence_refs: z.array(z.string().max(32)).max(100).optional(),
+  })
+);
 
-const setTaskStatusSchema = z.object({
-  record_id: recordIdArg,
-  task_ref: z.string().max(32).optional(),
-  task_title: z.string().max(512).optional(),
-  status: z.enum(['todo', 'doing', 'done', 'skipped']),
-  note: z.string().max(2048).optional(),
-  skip_reason: z.string().max(2048).optional(),
-});
+const setTaskStatusSchema = lazySchema(() =>
+  z.object({
+    record_id: recordIdArg,
+    task_ref: z.string().max(32).optional(),
+    task_title: z.string().max(512).optional(),
+    status: z.enum(['todo', 'doing', 'done', 'skipped']),
+    note: z.string().max(2048).optional(),
+    skip_reason: z.string().max(2048).optional(),
+  })
+);
 
-const upsertEntitySchema = z.object({
-  record_id: recordIdArg,
-  entity_ref: z.string().max(32).optional(),
-  name: z.string().min(1).max(512),
-  type: z.enum(['host', 'user', 'nhi', 'external']),
-  scope: z.enum(['primary', 'scoped', 'suspected', 'dismissed', 'external']).optional(),
-  criticality: z.string().max(64).optional(),
-  risk_score: z.number().min(0).max(100).optional(),
-});
+const upsertEntitySchema = lazySchema(() =>
+  z.object({
+    record_id: recordIdArg,
+    entity_ref: z.string().max(32).optional(),
+    name: z.string().min(1).max(512),
+    type: z.enum(['host', 'user', 'nhi', 'external']),
+    scope: z.enum(['primary', 'scoped', 'suspected', 'dismissed', 'external']).optional(),
+    criticality: z.string().max(64).optional(),
+    risk_score: z.number().min(0).max(100).optional(),
+  })
+);
 
-const proposeActionSchema = z.object({
-  record_id: recordIdArg,
-  category: z.enum(['Contain', 'Block', 'Escalate', 'Collect evidence', 'Tune detection']),
-  title: z.string().min(1).max(512),
-  effect: z.string().min(1).max(2048),
-  disruption: z.enum(['high', 'medium', 'low']),
-  evidence_refs: z.array(z.string().max(32)).max(50).optional(),
-  scope: z.array(z.object({ key: z.string().max(128), value: z.string().max(1024) })).max(20).optional(),
-});
+const proposeActionSchema = lazySchema(() =>
+  z.object({
+    record_id: recordIdArg,
+    category: z.enum(['Contain', 'Block', 'Escalate', 'Collect evidence', 'Tune detection']),
+    title: z.string().min(1).max(512),
+    effect: z.string().min(1).max(2048),
+    disruption: z.enum(['high', 'medium', 'low']),
+    evidence_refs: z.array(z.string().max(32)).max(50).optional(),
+    scope: z
+      .array(z.object({ key: z.string().max(128), value: z.string().max(1024) }))
+      .max(20)
+      .optional(),
+  })
+);
+
+const updateRecordSchema = lazySchema(() =>
+  z.object({
+    record_id: recordIdArg,
+    mode: z
+      .enum(['set_fields'])
+      .describe(
+        'set_fields: set form field values of the investigation type (case extended fields).'
+      ),
+    fields: z
+      .array(
+        z.object({
+          key: z
+            .string()
+            .min(1)
+            .max(1000)
+            .describe('Field key as shown in the digest, e.g. business_unit_as_keyword.'),
+          value: z
+            .string()
+            .max(30000)
+            .describe(
+              'Value as a string. Numbers as digits, toggles "true"/"false", multi-value fields as a JSON array string. Empty string clears.'
+            ),
+        })
+      )
+      .min(1)
+      .max(50)
+      .optional(),
+  })
+);
 
 /** Agent Builder tools that read and write an investigation record through the service. */
 export const createInvestigationTools = (getService: GetService) => {
@@ -231,7 +358,10 @@ export const createInvestigationTools = (getService: GetService) => {
         },
       }));
       const res = await service.bulkCreateItems(recordId, { items });
-      return ok({ created: res.items.map((i) => ({ id: i.id, ref: i.ref, title: i.title })), errors: res.errors });
+      return ok({
+        created: res.items.map((i) => ({ id: i.id, ref: i.ref, title: i.title })),
+        errors: res.errors,
+      });
     }),
   };
 
@@ -247,7 +377,9 @@ export const createInvestigationTools = (getService: GetService) => {
       const { service, recordId } = await resolve(getService, context, args.record_id);
       const evidenceIds = await refsToIds(service, recordId, args.supporting_evidence_refs);
       if (args.claim_ref) {
-        const existing = (await findByRef(service, recordId, args.claim_ref, 'claim')) as ClaimItem | undefined;
+        const existing = (await findByRef(service, recordId, args.claim_ref, 'claim')) as
+          | ClaimItem
+          | undefined;
         if (!existing) throw new Error(`Claim ${args.claim_ref} not found`);
         const updated = await service.updateItemUnchecked(recordId, existing.id, {
           version: existing.version as string,
@@ -260,13 +392,19 @@ export const createInvestigationTools = (getService: GetService) => {
               ...(args.confidence !== undefined ? { confidence: args.confidence } : {}),
               ...(args.note !== undefined ? { note: args.note } : {}),
               ...(evidenceIds.length
-                ? { supporting_evidence_ids: Array.from(new Set([...(existing.claim.supporting_evidence_ids ?? []), ...evidenceIds])) }
+                ? {
+                    supporting_evidence_ids: Array.from(
+                      new Set([...(existing.claim.supporting_evidence_ids ?? []), ...evidenceIds])
+                    ),
+                  }
                 : {}),
               needs_review: true,
             },
           },
         });
-        return ok({ claim: { id: updated.id, ref: updated.ref, title: updated.title, status: updated.status } });
+        return ok({
+          claim: { id: updated.id, ref: updated.ref, title: updated.title, status: updated.status },
+        });
       }
       if (!args.question) throw new Error('A question is required to open a claim');
       const res = await service.bulkCreateItems(recordId, {
@@ -290,24 +428,35 @@ export const createInvestigationTools = (getService: GetService) => {
         ],
       });
       const created = res.items[0];
-      return ok({ claim: { id: created.id, ref: created.ref, title: created.title, status: created.status } });
+      return ok({
+        claim: { id: created.id, ref: created.ref, title: created.title, status: created.status },
+      });
     }),
   };
 
   const setTaskStatus: BuiltinToolDefinition<typeof setTaskStatusSchema> = {
     id: platformCoreCasesTools.investigationSetTaskStatus,
     type: ToolType.builtin,
-    description: 'Set the status of a procedure task by ref (T5) or exact title: todo, doing, done, or skipped (skipped needs a reason).',
+    description:
+      'Set the status of a procedure task by ref (T5) or exact title: todo, doing, done, or skipped (skipped needs a reason).',
     annotations: annotations('Set a task status', false),
     schema: setTaskStatusSchema,
     tags: ['cases', 'investigations'],
     handler: guard(async (args, context) => {
       const { service, recordId } = await resolve(getService, context, args.record_id);
       let task: TaskItem | undefined;
-      if (args.task_ref) task = (await findByRef(service, recordId, args.task_ref, 'task')) as TaskItem | undefined;
+      if (args.task_ref)
+        task = (await findByRef(service, recordId, args.task_ref, 'task')) as TaskItem | undefined;
       if (!task && args.task_title) {
-        const res = await service.findItemsUnchecked(recordId, { kind: ['task'], search: args.task_title, per_page: 5 });
-        task = (res.items as TaskItem[]).find((t) => t.title.toLowerCase() === args.task_title?.toLowerCase()) ?? (res.items[0] as TaskItem | undefined);
+        const res = await service.findItemsUnchecked(recordId, {
+          kind: ['task'],
+          search: args.task_title,
+          per_page: 5,
+        });
+        task =
+          (res.items as TaskItem[]).find(
+            (t) => t.title.toLowerCase() === args.task_title?.toLowerCase()
+          ) ?? (res.items[0] as TaskItem | undefined);
       }
       if (!task) throw new Error('Task not found. Pass task_ref (e.g. T5) or the exact title.');
       const updated = await service.updateItemUnchecked(recordId, task.id, {
@@ -320,24 +469,56 @@ export const createInvestigationTools = (getService: GetService) => {
           },
         },
       });
-      return ok({ task: { id: updated.id, ref: updated.ref, title: updated.title, status: updated.status } });
+      return ok({
+        task: { id: updated.id, ref: updated.ref, title: updated.title, status: updated.status },
+      });
+    }),
+  };
+
+  const updateRecord: BuiltinToolDefinition<typeof updateRecordSchema> = {
+    id: platformCoreCasesTools.investigationUpdateRecord,
+    type: ToolType.builtin,
+    description:
+      'Update the investigation record. Mode set_fields sets form field values by key; the investigation type rules (required, allowed options, patterns, ranges) are enforced and errors name the field.',
+    annotations: annotations('Update the investigation', false),
+    schema: updateRecordSchema,
+    tags: ['cases', 'investigations'],
+    handler: guard(async (args, context) => {
+      const { service, recordId } = await resolve(getService, context, args.record_id);
+      if (!args.fields?.length) throw new Error('Pass fields: [{ key, value }].');
+      const record = await service.updateRecord(recordId, {
+        extended_fields: Object.fromEntries(args.fields.map(({ key, value }) => [key, value])),
+      });
+      return ok({
+        record: { id: record.id, display_id: record.display_id, fields: record.fields },
+      });
     }),
   };
 
   const upsertEntity: BuiltinToolDefinition<typeof upsertEntitySchema> = {
     id: platformCoreCasesTools.investigationUpsertEntity,
     type: ToolType.builtin,
-    description: 'Add a host, user, non-human identity or external destination to the investigation scope, or change its scope status.',
+    description:
+      'Add a host, user, non-human identity or external destination to the investigation scope, or change its scope status.',
     annotations: annotations('Add or change a scope entity', false),
     schema: upsertEntitySchema,
     tags: ['cases', 'investigations'],
     handler: guard(async (args, context) => {
       const { service, recordId } = await resolve(getService, context, args.record_id);
       let existing: EntityItem | undefined;
-      if (args.entity_ref) existing = (await findByRef(service, recordId, args.entity_ref, 'entity')) as EntityItem | undefined;
+      if (args.entity_ref)
+        existing = (await findByRef(service, recordId, args.entity_ref, 'entity')) as
+          | EntityItem
+          | undefined;
       if (!existing) {
-        const res = await service.findItemsUnchecked(recordId, { kind: ['entity'], search: args.name, per_page: 5 });
-        existing = (res.items as EntityItem[]).find((e) => e.entity.name.toLowerCase() === args.name.toLowerCase());
+        const res = await service.findItemsUnchecked(recordId, {
+          kind: ['entity'],
+          search: args.name,
+          per_page: 5,
+        });
+        existing = (res.items as EntityItem[]).find(
+          (e) => e.entity.name.toLowerCase() === args.name.toLowerCase()
+        );
       }
       if (existing) {
         const updated = await service.updateItemUnchecked(recordId, existing.id, {
@@ -350,7 +531,14 @@ export const createInvestigationTools = (getService: GetService) => {
             },
           },
         });
-        return ok({ entity: { id: updated.id, ref: updated.ref, title: updated.title, status: updated.status } });
+        return ok({
+          entity: {
+            id: updated.id,
+            ref: updated.ref,
+            title: updated.title,
+            status: updated.status,
+          },
+        });
       }
       const res = await service.bulkCreateItems(recordId, {
         items: [
@@ -371,7 +559,9 @@ export const createInvestigationTools = (getService: GetService) => {
         ],
       });
       const created = res.items[0];
-      return ok({ entity: { id: created.id, ref: created.ref, title: created.title, status: created.status } });
+      return ok({
+        entity: { id: created.id, ref: created.ref, title: created.title, status: created.status },
+      });
     }),
   };
 
@@ -396,7 +586,12 @@ export const createInvestigationTools = (getService: GetService) => {
               category: args.category,
               effect: args.effect,
               disruption: args.disruption,
-              confirm_label: args.category === 'Contain' ? 'Contain' : args.category === 'Block' ? 'Block' : 'Approve',
+              confirm_label:
+                args.category === 'Contain'
+                  ? 'Contain'
+                  : args.category === 'Block'
+                  ? 'Block'
+                  : 'Approve',
               scope: (args.scope ?? []).map((s) => [s.key, s.value] as [string, string]),
               evidence_ids: evidenceIds,
               revision: 1,
@@ -406,9 +601,24 @@ export const createInvestigationTools = (getService: GetService) => {
         ],
       });
       const created = res.items[0];
-      return ok({ proposal: { id: created.id, ref: created.ref, title: created.title, status: created.status } });
+      return ok({
+        proposal: {
+          id: created.id,
+          ref: created.ref,
+          title: created.title,
+          status: created.status,
+        },
+      });
     }),
   };
 
-  return [readItems, addEvidence, upsertClaim, setTaskStatus, upsertEntity, proposeAction];
+  return [
+    readItems,
+    addEvidence,
+    upsertClaim,
+    setTaskStatus,
+    upsertEntity,
+    proposeAction,
+    updateRecord,
+  ];
 };

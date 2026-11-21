@@ -9,7 +9,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiFieldSearch,
-  EuiFieldText,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,10 +24,12 @@ import type {
 import { useInvestigationTypes } from '../../hooks';
 import { useInvestigationsServices } from '../../services';
 import * as sharedI18n from '../shared/translations';
+import { ColumnsPicker, FieldsFilter } from './fields_filter';
 import { FilterPopover } from './filter_popover';
 import type { FilterOption } from './filter_popover';
+import type { QueueFieldDef } from './use_queue_fields';
 import * as i18n from './translations';
-import { BUSINESS_UNIT_FIELD_KEY, hasActiveFilters } from './use_queue_url_state';
+import { hasActiveFilters } from './use_queue_url_state';
 import type { QueueState } from './use_queue_url_state';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -54,6 +55,8 @@ export interface QueueFiltersProps {
   onClear: () => void;
   /** Records on screen, used to offer the owners seen so far. */
   records: InvestigationRecord[];
+  /** Form fields of the investigation types, for the Fields filter and the optional columns. */
+  fields: QueueFieldDef[];
 }
 
 const useCurrentUsername = (): string | undefined => {
@@ -81,6 +84,7 @@ export const QueueFilters: React.FC<QueueFiltersProps> = ({
   onChange,
   onClear,
   records,
+  fields,
 }) => {
   const { data: typesData } = useInvestigationTypes();
   const username = useCurrentUsername();
@@ -134,20 +138,6 @@ export const QueueFilters: React.FC<QueueFiltersProps> = ({
     if (state.owner) add(state.owner, state.owner);
     return options;
   }, [records, state.owner, username]);
-
-  const businessUnitOptions = useMemo<FilterOption[]>(() => {
-    const values = new Set<string>();
-    (typesData?.types ?? []).forEach(({ fields }) =>
-      fields
-        .filter(({ key }) => key === BUSINESS_UNIT_FIELD_KEY)
-        .forEach(({ options }) => options?.forEach((option) => values.add(option)))
-    );
-    if (state.businessUnit) values.add(state.businessUnit);
-    return Array.from(values).map((value) => ({ value, label: value }));
-  }, [typesData, state.businessUnit]);
-
-  const [businessUnitText, setBusinessUnitText] = useState(state.businessUnit ?? '');
-  useEffect(() => setBusinessUnitText(state.businessUnit ?? ''), [state.businessUnit]);
 
   return (
     <EuiFlexGroup
@@ -216,37 +206,18 @@ export const QueueFilters: React.FC<QueueFiltersProps> = ({
             singleSelection
             data-test-subj="investigationsFilterOwner"
           />
-          {businessUnitOptions.length > 0 ? (
-            <FilterPopover
-              label={i18n.FILTER_BUSINESS_UNIT}
-              options={businessUnitOptions}
-              selected={state.businessUnit ? [state.businessUnit] : []}
-              onChange={(selected) => onChange({ businessUnit: selected[0] })}
-              singleSelection
-              data-test-subj="investigationsFilterBusinessUnit"
-            />
-          ) : null}
+          <FieldsFilter
+            fields={fields}
+            filters={state.fieldFilters}
+            onChange={(fieldFilters) => onChange({ fieldFilters })}
+          />
+          <ColumnsPicker
+            fields={fields}
+            selected={state.columns}
+            onChange={(columns) => onChange({ columns, pageIndex: state.pageIndex })}
+          />
         </EuiFilterGroup>
       </EuiFlexItem>
-      {businessUnitOptions.length === 0 ? (
-        <EuiFlexItem grow={false}>
-          <EuiFieldText
-            compressed
-            value={businessUnitText}
-            placeholder={i18n.FILTER_BUSINESS_UNIT_FREE_TEXT}
-            aria-label={i18n.FILTER_BUSINESS_UNIT}
-            maxLength={512}
-            onChange={(event) => setBusinessUnitText(event.target.value)}
-            onBlur={() => onChange({ businessUnit: businessUnitText.trim() || undefined })}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                onChange({ businessUnit: businessUnitText.trim() || undefined });
-              }
-            }}
-            data-test-subj="investigationsFilterBusinessUnitText"
-          />
-        </EuiFlexItem>
-      ) : null}
       {hasActiveFilters(state) ? (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty size="s" onClick={onClear} data-test-subj="investigationsClearFilters">

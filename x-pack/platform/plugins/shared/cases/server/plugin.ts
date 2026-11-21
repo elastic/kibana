@@ -269,7 +269,7 @@ export class CasePlugin
           core,
           config: this.caseConfig,
           logger: this.logger,
-          getCasesClient: (request) => getCasesClient('agent_builder')(request),
+          getCasesClient: (request, options) => getCasesClient('agent_builder')(request, options),
           getSpaceId,
           agentBuilder: plugins.agentBuilder,
         })

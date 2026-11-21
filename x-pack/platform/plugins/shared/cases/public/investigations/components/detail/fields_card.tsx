@@ -5,205 +5,103 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import {
-  EuiFieldNumber,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSelect,
-  EuiSwitch,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
-import type {
-  FieldValue,
-  InvestigationRecord,
-  InvestigationType,
-} from '../../../../common/investigations/types';
-import { useInvestigationTypes, useUpdateRecord } from '../../hooks';
+import React, { useCallback } from 'react';
+import { EuiCallOut, EuiSkeletonText, EuiText } from '@elastic/eui';
+import type { InvestigationRecord } from '../../../../common/investigations/types';
+import { useRecord, useUpdateRecord } from '../../hooks';
+import { AutosaveFieldsForm } from '../fields/autosave_fields_form';
+import type { SaveFieldHandlers } from '../fields/autosave_fields_form';
+import { useTypeFields } from '../fields/use_type_fields';
+import * as fieldsI18n from '../fields/translations';
 import { SideCard } from './side_card';
 import * as i18n from './translations';
 
-type TypeField = InvestigationType['fields'][number];
-
-const toText = (value: FieldValue | undefined): string =>
-  value === null || value === undefined ? '' : String(value);
-
-interface FieldEditorProps {
-  field: TypeField;
-  value: FieldValue | undefined;
-  onCommit: (value: FieldValue) => void;
+interface TypeFieldsProps {
+  recordId: string;
+  template: { id: string; version: number };
+  extendedFields: Record<string, string>;
 }
 
-/** One typed form field. Text, number and date inputs save on blur, choices save on change. */
-const FieldEditor: React.FC<FieldEditorProps> = ({ field, value, onCommit }) => {
-  const [draft, setDraft] = useState<string>(toText(value));
-  const [error, setError] = useState<string | null>(null);
+/** The fields of the record's Cases template, read from `case.extended_fields`. */
+const TypeFields: React.FC<TypeFieldsProps> = ({ recordId, template, extendedFields }) => {
+  const { fields, isLoading, isError } = useTypeFields(template.id, template.version);
+  const { mutate: updateRecord } = useUpdateRecord(recordId, { silentErrors: true });
 
-  useEffect(() => {
-    setDraft(toText(value));
-    setError(null);
-  }, [value]);
-
-  const inputTestSubj = `investigationField-${field.key}`;
-
-  if (field.type === 'bool') {
-    return (
-      <EuiFormRow fullWidth>
-        <EuiSwitch
-          compressed
-          label={field.label}
-          checked={value === true}
-          onChange={(event) => onCommit(event.target.checked)}
-          data-test-subj={inputTestSubj}
-        />
-      </EuiFormRow>
-    );
-  }
-
-  if (field.options && field.options.length > 0) {
-    return (
-      <EuiFormRow label={field.label} fullWidth>
-        <EuiSelect
-          compressed
-          fullWidth
-          options={[
-            { value: '', text: i18n.FIELD_NO_OPTION },
-            ...field.options.map((option) => ({ value: option, text: option })),
-          ]}
-          value={toText(value)}
-          onChange={(event) => onCommit(event.target.value === '' ? null : event.target.value)}
-          data-test-subj={inputTestSubj}
-        />
-      </EuiFormRow>
-    );
-  }
-
-  const commit = () => {
-    if (draft === toText(value)) {
-      setError(null);
-      return;
-    }
-    if (draft.trim() === '') {
-      setError(null);
-      onCommit(null);
-      return;
-    }
-    if (field.type === 'long' || field.type === 'double') {
-      const parsed = Number(draft);
-      const isValid =
-        Number.isFinite(parsed) && (field.type === 'double' || Number.isInteger(parsed));
-      if (!isValid) {
-        setError(i18n.FIELD_NUMBER_INVALID);
-        return;
-      }
-      setError(null);
-      onCommit(parsed);
-      return;
-    }
-    if (field.type === 'date' && Number.isNaN(Date.parse(draft))) {
-      setError(i18n.FIELD_DATE_INVALID);
-      return;
-    }
-    setError(null);
-    onCommit(draft);
-  };
-
-  const isNumber = field.type === 'long' || field.type === 'double';
-
-  return (
-    <EuiFormRow label={field.label} fullWidth isInvalid={error !== null} error={error}>
-      {isNumber ? (
-        <EuiFieldNumber
-          compressed
-          fullWidth
-          step={field.type === 'long' ? 1 : 'any'}
-          value={draft}
-          placeholder={i18n.FIELD_EMPTY}
-          isInvalid={error !== null}
-          onChange={(event) => setDraft(event.target.value)}
-          onBlur={commit}
-          data-test-subj={inputTestSubj}
-        />
-      ) : (
-        <EuiFieldText
-          compressed
-          fullWidth
-          value={draft}
-          placeholder={field.type === 'date' ? i18n.FIELD_DATE_PLACEHOLDER : i18n.FIELD_EMPTY}
-          isInvalid={error !== null}
-          onChange={(event) => setDraft(event.target.value)}
-          onBlur={commit}
-          data-test-subj={inputTestSubj}
-        />
-      )}
-    </EuiFormRow>
+  const saveField = useCallback(
+    (key: string, value: string, { onSuccess, onError }: SaveFieldHandlers) =>
+      updateRecord({ extended_fields: { [key]: value } }, { onSuccess, onError }),
+    [updateRecord]
   );
+
+  if (isLoading) {
+    return <EuiSkeletonText lines={3} aria-label={fieldsI18n.FIELDS_LOADING} />;
+  }
+  if (isError) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        size="s"
+        color="danger"
+        title={fieldsI18n.FIELDS_ERROR}
+        data-test-subj="investigationFieldsError"
+      />
+    );
+  }
+  if (fields.length === 0) {
+    return (
+      <EuiText size="s" color="subdued" data-test-subj="investigationFieldsNone">
+        {i18n.FIELDS_NONE}
+      </EuiText>
+    );
+  }
+  return <AutosaveFieldsForm fields={fields} values={extendedFields} onSaveField={saveField} />;
 };
-FieldEditor.displayName = 'FieldEditor';
+TypeFields.displayName = 'TypeFields';
 
 export interface FieldsCardProps {
   record: InvestigationRecord;
 }
 
-/** Editable investigation type and the type's form fields. */
+/** The form fields of the record's investigation type. The type itself changes in Take action. */
 export const FieldsCard: React.FC<FieldsCardProps> = ({ record }) => {
-  const { euiTheme } = useEuiTheme();
-  const { data, isLoading } = useInvestigationTypes();
-  const { mutate: updateRecord } = useUpdateRecord(record.id);
-
-  const types = data?.types ?? [];
-  const currentType = types.find(({ name }) => name === record.investigation_type);
-  const typeNames = types.map(({ name }) => name);
-  if (!typeNames.includes(record.investigation_type)) {
-    typeNames.unshift(record.investigation_type);
-  }
+  const { data, isLoading, isError } = useRecord(record.id);
+  const theCase = data?.case;
+  const template = theCase?.template ?? null;
 
   return (
     <SideCard
       title={i18n.FIELDS}
       action={
-        <EuiText size="xs" color="subdued">
-          {i18n.FIELDS_SEARCHABLE}
-        </EuiText>
+        record.investigation_type ? (
+          <EuiText size="xs" color="subdued" data-test-subj="investigationFieldsTypeName">
+            {record.investigation_type}
+          </EuiText>
+        ) : undefined
       }
       data-test-subj="investigationFieldsCard"
     >
-      <div
-        css={css`
-          display: flex;
-          flex-direction: column;
-          gap: ${euiTheme.size.s};
-        `}
-      >
-        <EuiFormRow label={i18n.INVESTIGATION_TYPE} fullWidth>
-          <EuiSelect
-            compressed
-            fullWidth
-            isLoading={isLoading}
-            options={typeNames.map((name) => ({ value: name, text: name }))}
-            value={record.investigation_type}
-            onChange={(event) => {
-              if (event.target.value !== record.investigation_type) {
-                updateRecord({ investigation_type: event.target.value });
-              }
-            }}
-            data-test-subj="investigationTypeSelect"
-          />
-        </EuiFormRow>
-        {(currentType?.fields ?? []).map((field) => (
-          <FieldEditor
-            key={field.key}
-            field={field}
-            value={record.fields[field.key]}
-            onCommit={(value) => updateRecord({ fields: { ...record.fields, [field.key]: value } })}
-          />
-        ))}
-        <EuiText size="xs" color="subdued">
-          {i18n.FIELDS_HELP}
+      {isLoading ? (
+        <EuiSkeletonText lines={3} aria-label={fieldsI18n.FIELDS_LOADING} />
+      ) : isError || !theCase ? (
+        <EuiCallOut
+          announceOnMount
+          size="s"
+          color="danger"
+          title={fieldsI18n.FIELDS_ERROR}
+          data-test-subj="investigationFieldsError"
+        />
+      ) : template ? (
+        <TypeFields
+          key={`${template.id}:${template.version}`}
+          recordId={record.id}
+          template={template}
+          extendedFields={theCase.extended_fields}
+        />
+      ) : (
+        <EuiText size="s" color="subdued" data-test-subj="investigationFieldsNoType">
+          {i18n.FIELDS_NO_TYPE}
         </EuiText>
-      </div>
+      )}
     </SideCard>
   );
 };

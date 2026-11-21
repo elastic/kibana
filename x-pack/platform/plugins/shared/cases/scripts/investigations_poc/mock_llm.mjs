@@ -64,7 +64,7 @@ const findTool = (body, suffix) => {
 };
 
 const toolSuffix = (name) => {
-  const hit = ['read_items', 'add_evidence', 'upsert_claim', 'set_task_status', 'upsert_entity', 'propose_action']
+  const hit = ['read_items', 'add_evidence', 'upsert_claim', 'set_task_status', 'upsert_entity', 'propose_action', 'update_record']
     .find((s) => String(name).endsWith(`investigation_${s}`));
   return hit ?? null;
 };
@@ -194,6 +194,22 @@ const SCRIPTS = [
       const created = data?.created ?? deepFind(data, 'created') ?? [];
       const ref = created[0]?.ref ?? created[0]?.id ?? 'a new item';
       return `I added ${indicator.value} as an indicator (${ref}).`;
+    },
+  },
+  {
+    name: 'set_field',
+    match: (text) => {
+      const m = text.match(/\bset\s+(?:the\s+)?(?:field\s+)?([a-z0-9_]+_as_[a-z_]+)\s+to\s+["\u201c]?(.+?)["\u201d]?\s*$/is);
+      return m ? { key: m[1], value: m[2].trim() } : null;
+    },
+    call: ({ key, value }) => ({
+      suffix: 'update_record',
+      args: { mode: 'set_fields', fields: [{ key, value }] },
+    }),
+    reply: ({ key, value }, { data }) => {
+      const message = data?.message ?? deepFind(data, 'message');
+      if (message) return `I could not set ${key}: ${message}`;
+      return `I set ${key} to ${value}.`;
     },
   },
   {

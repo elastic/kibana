@@ -11,6 +11,7 @@
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/ui-callout",
     "@kbn/core",
     // optionalPlugins from ./kibana.json
     "@kbn/lens-plugin",

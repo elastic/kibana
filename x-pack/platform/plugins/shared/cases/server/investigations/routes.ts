@@ -21,12 +21,16 @@ import {
   INVESTIGATIONS_INDICATOR_LOOKUP_URL,
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_PROCEDURE_TEMPLATES_URL,
+  INVESTIGATIONS_STATUSES_URL,
   INVESTIGATIONS_TYPES_URL,
 } from '../../common/investigations/constants';
 import type {
   BulkCreateItemsRequest,
   BulkUpdateItemsRequest,
+  AddCommentRequest,
   CloseRecordRequest,
+  FindCommentsRequest,
+  UpdateCommentRequest,
   CreateActivityRequest,
   CreateRecordRequest,
   ExportItemsRequest,
@@ -38,8 +42,14 @@ import type {
   UpdateRecordRequest,
 } from '../../common/investigations/types';
 import type { InvestigationsService } from './service';
+import type { StatusesConfiguration } from '../../common/investigations/statuses';
 import {
+  addCommentBody,
+  findCommentsQuery,
+  recordCommentParams,
+  updateCommentBody,
   applyProcedureBody,
+  statusesBody,
   bulkCreateItemsBody,
   bulkDeleteItemsBody,
   bulkUpdateItemsBody,
@@ -83,12 +93,25 @@ const normalizeArrays = <T extends AnyQuery>(query: T, keys: string[]): T => {
   return out as T;
 };
 
-const ITEM_ARRAY_KEYS = ['kind', 'type', 'indicator_type', 'added_by', 'added_by_type', 'status', 'ids', 'refs'];
+const ITEM_ARRAY_KEYS = [
+  'kind',
+  'type',
+  'indicator_type',
+  'added_by',
+  'added_by_type',
+  'status',
+  'ids',
+  'refs',
+];
 
 /** All investigation routes, registered through the Cases router so errors are wrapped the same way. */
 export const getInvestigationRoutes = (getService: GetInvestigationsService): CaseRoute[] => {
   const route = <P, Q, B>(r: CaseRoute<P, Q, B>) =>
-    createCasesRoute<P, Q, B>({ security: DEFAULT_CASES_ROUTE_SECURITY, routerOptions: internal, ...r });
+    createCasesRoute<P, Q, B>({
+      security: DEFAULT_CASES_ROUTE_SECURITY,
+      routerOptions: internal,
+      ...r,
+    });
 
   return [
     route({
@@ -107,7 +130,17 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       params: { query: findRecordsQuery },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        const query = normalizeArrays(request.query as AnyQuery, ['status', 'priority', 'severity', 'investigation_type', 'verdict', 'tags', 'field']);
+        const query = normalizeArrays(request.query as AnyQuery, [
+          'status',
+          'status_key',
+          'assignees',
+          'priority',
+          'severity',
+          'investigation_type',
+          'verdict',
+          'tags',
+          'field',
+        ]);
         return response.ok({ body: await service.findRecords(query as FindRecordsRequest) });
       },
     }),
@@ -126,8 +159,13 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       params: { query: indicatorLookupQuery },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        const { values, exclude_record_id: exclude } = request.query as { values: string | string[]; exclude_record_id?: string };
-        return response.ok({ body: await service.lookupIndicators(toArray(values) ?? [], exclude) });
+        const { values, exclude_record_id: exclude } = request.query as {
+          values: string | string[];
+          exclude_record_id?: string;
+        };
+        return response.ok({
+          body: await service.lookupIndicators(toArray(values) ?? [], exclude),
+        });
       },
     }),
     route({
@@ -154,7 +192,28 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
         const service = await getService({ context, request });
         const { type } = request.params as { type: string };
         const { tasks } = request.body as { tasks: ProcedureTemplateTask[] };
-        return response.ok({ body: { template: await service.saveProcedureTemplate(type, tasks) } });
+        return response.ok({
+          body: { template: await service.saveProcedureTemplate(type, tasks) },
+        });
+      },
+    }),
+    route({
+      method: 'get',
+      path: INVESTIGATIONS_STATUSES_URL,
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        return response.ok({ body: await service.getStatusesConfiguration() });
+      },
+    }),
+    route({
+      method: 'put',
+      path: INVESTIGATIONS_STATUSES_URL,
+      params: { body: statusesBody },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        return response.ok({
+          body: await service.saveStatusesConfiguration(request.body as StatusesConfiguration),
+        });
       },
     }),
     route({
@@ -171,7 +230,9 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       params: { params: recordIdParams },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        return response.ok({ body: await service.getRecord((request.params as { id: string }).id) });
+        return response.ok({
+          body: await service.getRecord((request.params as { id: string }).id),
+        });
       },
     }),
     route({
@@ -180,7 +241,10 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       params: { params: recordIdParams, body: updateRecordBody },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        const record = await service.updateRecord((request.params as { id: string }).id, request.body as UpdateRecordRequest);
+        const record = await service.updateRecord(
+          (request.params as { id: string }).id,
+          request.body as UpdateRecordRequest
+        );
         return response.ok({ body: { record } });
       },
     }),
@@ -190,8 +254,64 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       params: { params: recordIdParams, body: closeRecordBody },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        const record = await service.closeRecord((request.params as { id: string }).id, request.body as CloseRecordRequest);
+        const record = await service.closeRecord(
+          (request.params as { id: string }).id,
+          request.body as CloseRecordRequest
+        );
         return response.ok({ body: { record } });
+      },
+    }),
+    route({
+      method: 'get',
+      path: `${base}/{id}/comments`,
+      params: { params: recordIdParams, query: findCommentsQuery },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        const { id } = request.params as { id: string };
+        return response.ok({
+          body: await service.findComments(id, request.query as FindCommentsRequest),
+        });
+      },
+    }),
+    route({
+      method: 'post',
+      path: `${base}/{id}/comments`,
+      params: { params: recordIdParams, body: addCommentBody },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        const { id } = request.params as { id: string };
+        return response.ok({
+          body: { comment: await service.addComment(id, request.body as AddCommentRequest) },
+        });
+      },
+    }),
+    route({
+      method: 'patch',
+      path: `${base}/{id}/comments/{comment_id}`,
+      params: { params: recordCommentParams, body: updateCommentBody },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        const { id, comment_id: commentId } = request.params as { id: string; comment_id: string };
+        return response.ok({
+          body: {
+            comment: await service.updateComment(
+              id,
+              commentId,
+              request.body as UpdateCommentRequest
+            ),
+          },
+        });
+      },
+    }),
+    route({
+      method: 'delete',
+      path: `${base}/{id}/comments/{comment_id}`,
+      params: { params: recordCommentParams },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        const { id, comment_id: commentId } = request.params as { id: string; comment_id: string };
+        await service.deleteComment(id, commentId);
+        return response.noContent();
       },
     }),
     route({
@@ -200,7 +320,9 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       params: { params: recordIdParams },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        return response.ok({ body: { record: await service.reopenRecord((request.params as { id: string }).id) } });
+        return response.ok({
+          body: { record: await service.reopenRecord((request.params as { id: string }).id) },
+        });
       },
     }),
     route({
@@ -209,8 +331,13 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       params: { params: recordIdParams, body: mergeRecordBody },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        const { other_id: otherId, keep } = request.body as { other_id: string; keep: 'this' | 'other' };
-        return response.ok({ body: await service.mergeRecord((request.params as { id: string }).id, otherId, keep) });
+        const { other_id: otherId, keep } = request.body as {
+          other_id: string;
+          keep: 'this' | 'other';
+        };
+        return response.ok({
+          body: await service.mergeRecord((request.params as { id: string }).id, otherId, keep),
+        });
       },
     }),
     route({
@@ -220,7 +347,15 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
         const { type, replace } = request.body as { type: string; replace: boolean };
-        return response.ok({ body: { tasks: await service.applyProcedure((request.params as { id: string }).id, type, replace) } });
+        return response.ok({
+          body: {
+            tasks: await service.applyProcedure(
+              (request.params as { id: string }).id,
+              type,
+              replace
+            ),
+          },
+        });
       },
     }),
     route({
@@ -238,7 +373,12 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       params: { params: recordIdParams, query: sinceQuery },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        return response.ok({ body: await service.since((request.params as { id: string }).id, (request.query as { since?: string }).since) });
+        return response.ok({
+          body: await service.since(
+            (request.params as { id: string }).id,
+            (request.query as { since?: string }).since
+          ),
+        });
       },
     }),
     route({
@@ -256,7 +396,12 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       params: { params: recordIdParams, query: historyQuery },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        return response.ok({ body: await service.history((request.params as { id: string }).id, (request.query as { target_id?: string }).target_id) });
+        return response.ok({
+          body: await service.history(
+            (request.params as { id: string }).id,
+            (request.query as { target_id?: string }).target_id
+          ),
+        });
       },
     }),
     route({
@@ -265,7 +410,12 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       params: { params: recordIdParams, body: createThreadBody },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        return response.ok({ body: await service.createThread((request.params as { id: string }).id, request.body as { title: string; anchor?: string | null }) });
+        return response.ok({
+          body: await service.createThread(
+            (request.params as { id: string }).id,
+            request.body as { title: string; anchor?: string | null }
+          ),
+        });
       },
     }),
     route({
@@ -275,7 +425,12 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
         const query = normalizeArrays(request.query as AnyQuery, ITEM_ARRAY_KEYS);
-        return response.ok({ body: await service.findItems((request.params as { id: string }).id, query as FindItemsRequest) });
+        return response.ok({
+          body: await service.findItems(
+            (request.params as { id: string }).id,
+            query as FindItemsRequest
+          ),
+        });
       },
     }),
     route({
@@ -285,7 +440,12 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       routerOptions: { ...internal, body: { maxBytes: 64 * 1024 * 1024 } },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        return response.ok({ body: await service.bulkCreateItems((request.params as { id: string }).id, request.body as BulkCreateItemsRequest) });
+        return response.ok({
+          body: await service.bulkCreateItems(
+            (request.params as { id: string }).id,
+            request.body as BulkCreateItemsRequest
+          ),
+        });
       },
     }),
     route({
@@ -295,7 +455,12 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       routerOptions: { ...internal, body: { maxBytes: 64 * 1024 * 1024 } },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        return response.ok({ body: await service.bulkUpdateItems((request.params as { id: string }).id, request.body as BulkUpdateItemsRequest) });
+        return response.ok({
+          body: await service.bulkUpdateItems(
+            (request.params as { id: string }).id,
+            request.body as BulkUpdateItemsRequest
+          ),
+        });
       },
     }),
     route({
@@ -304,7 +469,12 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       params: { params: recordIdParams, body: bulkDeleteItemsBody },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        return response.ok({ body: await service.bulkDeleteItems((request.params as { id: string }).id, (request.body as { ids: string[] }).ids) });
+        return response.ok({
+          body: await service.bulkDeleteItems(
+            (request.params as { id: string }).id,
+            (request.body as { ids: string[] }).ids
+          ),
+        });
       },
     }),
     route({
@@ -325,7 +495,9 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
         const service = await getService({ context, request });
         const { id, item_id: itemId } = request.params as { id: string; item_id: string };
         try {
-          return response.ok({ body: { item: await service.updateItem(id, itemId, request.body as UpdateItemRequest) } });
+          return response.ok({
+            body: { item: await service.updateItem(id, itemId, request.body as UpdateItemRequest) },
+          });
         } catch (error) {
           if (Boom.isBoom(error) && error.output.statusCode === 409) {
             return response.conflict({ body: { message: error.message } });
@@ -341,7 +513,12 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       routerOptions: { ...internal, body: { maxBytes: 12 * 1024 * 1024 } },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        return response.ok({ body: await service.importIndicators((request.params as { id: string }).id, (request.body as { csv: string }).csv) });
+        return response.ok({
+          body: await service.importIndicators(
+            (request.params as { id: string }).id,
+            (request.body as { csv: string }).csv
+          ),
+        });
       },
     }),
     route({
@@ -351,10 +528,16 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
         const query = normalizeArrays(request.query as AnyQuery, ITEM_ARRAY_KEYS);
-        const out = await service.exportItems((request.params as { id: string }).id, query as unknown as ExportItemsRequest);
+        const out = await service.exportItems(
+          (request.params as { id: string }).id,
+          query as unknown as ExportItemsRequest
+        );
         return response.ok({
           body: out.body,
-          headers: { 'content-type': out.contentType, 'content-disposition': `attachment; filename="${out.filename}"` },
+          headers: {
+            'content-type': out.contentType,
+            'content-disposition': `attachment; filename="${out.filename}"`,
+          },
         });
       },
     }),
@@ -364,7 +547,14 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       params: { params: recordIdParams, body: preserveBody },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        return response.ok({ body: { items: await service.preserve((request.params as { id: string }).id, (request.body as { ids: string[] }).ids) } });
+        return response.ok({
+          body: {
+            items: await service.preserve(
+              (request.params as { id: string }).id,
+              (request.body as { ids: string[] }).ids
+            ),
+          },
+        });
       },
     }),
     route({
@@ -380,11 +570,20 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       },
       routerOptions: {
         ...internal,
-        body: { maxBytes: 105 * 1024 * 1024, output: 'stream', parse: true, accepts: 'multipart/form-data' },
+        body: {
+          maxBytes: 105 * 1024 * 1024,
+          output: 'stream',
+          parse: true,
+          accepts: 'multipart/form-data',
+        },
       },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        const body = request.body as { file: NodeJS.ReadableStream & { hapi?: { filename: string } }; filename?: string; why?: string };
+        const body = request.body as {
+          file: NodeJS.ReadableStream & { hapi?: { filename: string } };
+          filename?: string;
+          why?: string;
+        };
         const chunks: Buffer[] = [];
         let size = 0;
         for await (const chunk of body.file as AsyncIterable<Buffer>) {
@@ -410,7 +609,12 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
         const query = normalizeArrays(request.query as AnyQuery, ['actor_type', 'action']);
-        return response.ok({ body: await service.findActivity((request.params as { id: string }).id, query as FindActivityRequest) });
+        return response.ok({
+          body: await service.findActivity(
+            (request.params as { id: string }).id,
+            query as FindActivityRequest
+          ),
+        });
       },
     }),
     route({
@@ -419,7 +623,14 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       params: { params: recordIdParams, body: createActivityBody },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        return response.ok({ body: { entry: await service.createActivity((request.params as { id: string }).id, request.body as CreateActivityRequest) } });
+        return response.ok({
+          body: {
+            entry: await service.createActivity(
+              (request.params as { id: string }).id,
+              request.body as CreateActivityRequest
+            ),
+          },
+        });
       },
     }),
   ] as CaseRoute[];

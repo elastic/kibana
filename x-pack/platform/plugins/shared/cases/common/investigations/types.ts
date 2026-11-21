@@ -25,6 +25,8 @@ export interface Actor {
   name: string;
   /** Set when an agent or automation acted for a person (their display name). */
   on_behalf_of?: string | null;
+  /** User profile uid of a person (makes a person owner a case assignee). */
+  profile_uid?: string | null;
 }
 
 /* ------------------------------------------------------------------ */
@@ -119,7 +121,12 @@ export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
 };
 /** Scope status of an entity (stored in the item envelope `status`). */
 export type EntityScope = 'primary' | 'scoped' | 'suspected' | 'dismissed' | 'external';
-export type LinkKind = 'execution' | 'ownership' | 'authentication' | 'network' | 'lateral_movement';
+export type LinkKind =
+  | 'execution'
+  | 'ownership'
+  | 'authentication'
+  | 'network'
+  | 'lateral_movement';
 export const LINK_KIND_LABELS: Record<LinkKind, string> = {
   execution: 'Execution',
   ownership: 'Ownership',
@@ -210,7 +217,7 @@ export interface Argument {
  * templates: `_keyword`, `_text`, `_long`, `_double`, `_date`, `_bool`.
  * Example: { business_unit_keyword: 'Engineering', impact_keyword: '1 host, 1 user' }.
  */
-export type FieldValue = string | number | boolean | null;
+export type FieldValue = string | number | boolean | string[] | null;
 export type RecordFields = Record<string, FieldValue>;
 
 export interface AgentVerdictAlternative {
@@ -302,6 +309,15 @@ export interface InvestigationRecord {
   title: string;
   description: string;
   status: InvestigationStatus;
+  /** Key of the configured status; its category is `status`. Null means the category default. */
+  status_key?: string | null;
+  /** Set while the record sits in a status that pauses time tracking. */
+  paused_at?: string | null;
+  /** Seconds spent in pausing statuses, left out of age and timings. */
+  time_paused?: number;
+  pause_reason?: string | null;
+  /** Status the record was paused from. */
+  resume_to_status_key?: string | null;
   severity: InvestigationSeverity;
   priority: InvestigationPriority;
   priority_note?: string | null;
@@ -316,8 +332,11 @@ export interface InvestigationRecord {
   updated_at: string;
   updated_by: Actor;
   closed_at?: string | null;
+  /** Name of the Cases template the record uses (its investigation type). */
   investigation_type: string;
+  /** Cases template id and pinned version; null when no type has been applied. */
   template_id?: string | null;
+  template_version?: number | null;
   stage?: string | null;
   /** Short plain-language summary of the record ("What this is"). */
   summary?: string | null;
@@ -373,7 +392,14 @@ export type EvidenceSnapshot =
       intel: Array<[string, string]>;
       seen: Array<[string, string]>;
     }
-  | { kind: 'query'; query: string; columns: string[]; rows: string[][]; meta: string; note?: string }
+  | {
+      kind: 'query';
+      query: string;
+      columns: string[];
+      rows: string[][];
+      meta: string;
+      note?: string;
+    }
   | { kind: 'finding'; text: string; steps: Array<[string, string, string]> }
   | { kind: 'event'; category: string; timestamp: string; fields: Array<[string, string]> }
   | { kind: 'file'; name: string; size: string; sha256: string; mime_type?: string }
@@ -559,7 +585,11 @@ export interface ItemEnvelope {
 
 export type EvidenceItem = ItemEnvelope & { kind: 'evidence'; evidence: EvidenceDetails };
 export type ClaimItem = ItemEnvelope & { kind: 'claim'; status: ClaimStatus; claim: ClaimDetails };
-export type EntityItem = ItemEnvelope & { kind: 'entity'; status: EntityScope; entity: EntityDetails };
+export type EntityItem = ItemEnvelope & {
+  kind: 'entity';
+  status: EntityScope;
+  entity: EntityDetails;
+};
 export type LinkItem = ItemEnvelope & { kind: 'link'; status: LinkStatus; link: LinkDetails };
 export type TaskItem = ItemEnvelope & { kind: 'task'; status: TaskStatus; task: TaskDetails };
 export type CommentItem = ItemEnvelope & { kind: 'comment'; comment: CommentDetails };
@@ -585,14 +615,79 @@ export type InvestigationItem =
 
 /** Input for creating an item: the server fills id, ref, record/space ids, actors and times. */
 export type ItemInput =
-  | { kind: 'evidence'; title: string; text?: string | null; status?: string | null; links?: ItemLink[]; restricted?: boolean; exclude_from_ai?: boolean; evidence: EvidenceDetails; created_at?: string }
-  | { kind: 'claim'; title: string; text?: string | null; status: ClaimStatus; links?: ItemLink[]; claim: ClaimDetails; created_at?: string }
-  | { kind: 'entity'; title: string; text?: string | null; status: EntityScope; links?: ItemLink[]; entity: EntityDetails; created_at?: string }
-  | { kind: 'link'; title: string; text?: string | null; status: LinkStatus; links?: ItemLink[]; link: LinkDetails; created_at?: string }
-  | { kind: 'task'; title: string; text?: string | null; status: TaskStatus; links?: ItemLink[]; task: TaskDetails; created_at?: string }
-  | { kind: 'comment'; title?: string; text: string; links?: ItemLink[]; comment: CommentDetails; created_at?: string }
-  | { kind: 'proposal'; title: string; text?: string | null; status: ProposalStatus; links?: ItemLink[]; proposal: ProposalDetails; created_at?: string }
-  | { kind: 'timeline_event'; title: string; text?: string | null; status?: string | null; links?: ItemLink[]; timeline_event: TimelineEventDetails; created_at?: string };
+  | {
+      kind: 'evidence';
+      title: string;
+      text?: string | null;
+      status?: string | null;
+      links?: ItemLink[];
+      restricted?: boolean;
+      exclude_from_ai?: boolean;
+      evidence: EvidenceDetails;
+      created_at?: string;
+    }
+  | {
+      kind: 'claim';
+      title: string;
+      text?: string | null;
+      status: ClaimStatus;
+      links?: ItemLink[];
+      claim: ClaimDetails;
+      created_at?: string;
+    }
+  | {
+      kind: 'entity';
+      title: string;
+      text?: string | null;
+      status: EntityScope;
+      links?: ItemLink[];
+      entity: EntityDetails;
+      created_at?: string;
+    }
+  | {
+      kind: 'link';
+      title: string;
+      text?: string | null;
+      status: LinkStatus;
+      links?: ItemLink[];
+      link: LinkDetails;
+      created_at?: string;
+    }
+  | {
+      kind: 'task';
+      title: string;
+      text?: string | null;
+      status: TaskStatus;
+      links?: ItemLink[];
+      task: TaskDetails;
+      created_at?: string;
+    }
+  | {
+      kind: 'comment';
+      title?: string;
+      text: string;
+      links?: ItemLink[];
+      comment: CommentDetails;
+      created_at?: string;
+    }
+  | {
+      kind: 'proposal';
+      title: string;
+      text?: string | null;
+      status: ProposalStatus;
+      links?: ItemLink[];
+      proposal: ProposalDetails;
+      created_at?: string;
+    }
+  | {
+      kind: 'timeline_event';
+      title: string;
+      text?: string | null;
+      status?: string | null;
+      links?: ItemLink[];
+      timeline_event: TimelineEventDetails;
+      created_at?: string;
+    };
 
 /**
  * Partial update of an item. Per-kind objects are shallow-merged into the stored object, so a
@@ -620,11 +715,24 @@ export interface ItemPatch {
 /* ------------------------------------------------------------------ */
 
 export interface ActivityLink {
-  kind: 'evidence' | 'claim' | 'task' | 'entity' | 'link' | 'proposal' | 'tab' | 'thread' | 'verdict' | 'record';
+  kind:
+    | 'evidence'
+    | 'claim'
+    | 'task'
+    | 'entity'
+    | 'link'
+    | 'proposal'
+    | 'tab'
+    | 'thread'
+    | 'verdict'
+    | 'record';
   /** Item id, conversation id, tab name or record id. */
   id?: string | null;
   label?: string | null;
 }
+
+/** Where an activity entry came from: a person, an agent, a workflow, a rule, the API or a ticket connector. */
+export type ActivityOrigin = 'person' | 'agent' | 'workflow' | 'rule' | 'api' | 'connector';
 
 export interface ActivityEntry {
   id: string;
@@ -634,7 +742,12 @@ export interface ActivityEntry {
   actor: Actor;
   /** Dotted action, e.g. "record.created", "item.created", "claim.status_changed", "note". */
   action: string;
-  target?: { kind: ItemKind | 'record'; id: string; ref?: string | null; title?: string | null } | null;
+  target?: {
+    kind: ItemKind | 'record';
+    id: string;
+    ref?: string | null;
+    title?: string | null;
+  } | null;
   /** One-line summary shown in the response log. */
   message: string;
   details?: string | null;
@@ -642,6 +755,10 @@ export interface ActivityEntry {
   /** Stored, not indexed. Used by change history. */
   before?: unknown;
   after?: unknown;
+  /** Set on entries ingested from case user actions. */
+  origin?: ActivityOrigin | null;
+  /** Case user action id the entry was ingested from. */
+  case_action_id?: string | null;
 }
 
 /* ------------------------------------------------------------------ */
@@ -669,12 +786,31 @@ export interface ProcedureTemplate {
   version?: string;
 }
 
+/** One form field of an investigation type, resolved from its Cases template. */
+export interface InvestigationTypeField {
+  /** Case `extended_fields` key, `<name>_as_<type>`. */
+  key: string;
+  name: string;
+  label: string;
+  /** Storage type of the field (keyword, long, boolean, date, ...). */
+  type: string;
+  /** Cases control (INPUT_TEXT, SELECT_BASIC, USER_PICKER, ...). */
+  control: string;
+  /** Key of the typed copy on the investigation record, under `fields.`. */
+  mirror_key: string;
+  options?: string[];
+  required: boolean;
+  required_on_close: boolean;
+  display_only: boolean;
+}
+
+/** An investigation type is a Cases template tagged `investigation-type`. */
 export interface InvestigationType {
   name: string;
-  /** Cases template id, when one exists. */
-  template_id: string | null;
+  template_id: string;
+  version: number;
   description?: string | null;
-  fields: Array<{ key: string; label: string; type: 'keyword' | 'text' | 'long' | 'double' | 'date' | 'bool'; options?: string[] }>;
+  fields: InvestigationTypeField[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -691,11 +827,15 @@ export interface AlertRefInput {
 export interface CreateRecordRequest {
   title: string;
   description: string;
-  investigation_type: string;
+  /** Cases template to apply. The type name is taken from it. */
+  template_id?: string | null;
+  /** Values keyed `<name>_as_<type>`; Cases expands defaults and validates them. */
+  extended_fields?: Record<string, string>;
+  /** Only used when no template is given (records without a type). */
+  investigation_type?: string;
   priority?: InvestigationPriority;
   severity?: InvestigationSeverity;
   tags?: string[];
-  fields?: RecordFields;
   summary?: string | null;
   origin?: RecordOrigin;
   ai_enabled?: boolean;
@@ -718,6 +858,10 @@ export interface CreateRecordResponse {
 export interface FindRecordsRequest {
   search?: string;
   status?: InvestigationStatus[];
+  /** Configured status keys. */
+  status_key?: string[];
+  /** Case assignee profile uids; `none` = unassigned, `me` = the current user. */
+  assignees?: string[];
   priority?: InvestigationPriority[];
   severity?: InvestigationSeverity[];
   investigation_type?: string[];
@@ -756,12 +900,18 @@ export interface GetRecordResponse {
     created_at: string;
     updated_at: string | null;
     created_by: { username?: string | null; full_name?: string | null };
+    template: { id: string; version: number } | null;
+    extended_fields: Record<string, string>;
+    extended_fields_labels: Record<string, string>;
+    extended_fields_controls: Record<string, string>;
   };
   /** Whether the current user may use the agent on this record. */
   agent_available: boolean;
 }
 
 export interface UpdateRecordRequest {
+  /** Case assignees (user profile uids, at most 10); a person owner is always kept. */
+  assignees?: string[];
   title?: string;
   description?: string;
   summary?: string | null;
@@ -769,8 +919,10 @@ export interface UpdateRecordRequest {
   priority_note?: string | null;
   severity?: InvestigationSeverity;
   tags?: string[];
-  fields?: RecordFields;
-  investigation_type?: string;
+  /** Case `extended_fields` to merge (`''` clears a value). Cases validates every rule. */
+  extended_fields?: Record<string, string>;
+  /** Apply a different Cases template (change type); null removes it. */
+  template?: { id: string; version: number } | null;
   stage?: string | null;
   /** Set to an actor to assign, null to unassign. `{ self: true }` assigns the caller. */
   owner?: Actor | null | { self: true };
@@ -778,7 +930,12 @@ export interface UpdateRecordRequest {
   agent_verdict?: Omit<AgentVerdict, 'set_by' | 'set_at'> | null;
   /** null reverts to the agent verdict. */
   analyst_verdict?: Omit<AnalystVerdict, 'set_by' | 'set_at'> | null;
+  /** Category only; the category's default status is used. Closing goes through close. */
   status?: 'open' | 'in-progress';
+  /** A configured open or in-progress status. */
+  status_key?: string;
+  /** Required when the target status pauses time tracking. */
+  pause_reason?: string;
   restricted_to?: string[];
   ai_enabled?: boolean;
   /** Optimistic concurrency on the record document ("seq_no:primary_term"). */
@@ -789,6 +946,10 @@ export interface UpdateRecordRequest {
 }
 
 export interface CloseRecordRequest {
+  /** A configured closed status; defaults to the closed category's default. */
+  status_key?: string;
+  /** Values for close-required fields, saved to the case before it closes. */
+  extended_fields?: Record<string, string>;
   verdict: Verdict;
   reason: string;
   root_cause: string;
@@ -825,7 +986,15 @@ export interface FindItemsRequest {
   search?: string;
   /** Only items created after this time (e.g. "since the last handoff"). */
   created_after?: string;
-  sort_field?: 'created_at' | 'updated_at' | 'title' | 'ref_num' | 'kind' | 'evidence.type' | 'status' | 'created_by';
+  sort_field?:
+    | 'created_at'
+    | 'updated_at'
+    | 'title'
+    | 'ref_num'
+    | 'kind'
+    | 'evidence.type'
+    | 'status'
+    | 'created_by';
   sort_order?: 'asc' | 'desc';
   page?: number;
   per_page?: number;
@@ -903,7 +1072,8 @@ export interface ImportIndicatorsResponse {
   errors: Array<{ line: number; message: string }>;
 }
 
-export interface ExportItemsRequest extends Omit<FindItemsRequest, 'page' | 'per_page' | 'cursor' | 'facets'> {
+export interface ExportItemsRequest
+  extends Omit<FindItemsRequest, 'page' | 'per_page' | 'cursor' | 'facets'> {
   format: 'csv' | 'json' | 'stix' | 'list';
 }
 
@@ -943,7 +1113,18 @@ export interface CreateActivityRequest {
 export interface RelatedRecord {
   record: Pick<
     InvestigationRecord,
-    'id' | 'display_id' | 'title' | 'status' | 'priority' | 'created_at' | 'updated_at' | 'owner' | 'close_outcome' | 'counters' | 'summary' | 'origin'
+    | 'id'
+    | 'display_id'
+    | 'title'
+    | 'status'
+    | 'priority'
+    | 'created_at'
+    | 'updated_at'
+    | 'owner'
+    | 'close_outcome'
+    | 'counters'
+    | 'summary'
+    | 'origin'
   >;
   reasons: Array<{ type: 'indicator' | 'entity' | 'alert' | 'merged'; value: string }>;
   shared_values: string[];
@@ -962,7 +1143,10 @@ export interface DuplicateCheckRequest {
 
 export interface IndicatorLookupResponse {
   /** Lowercased value -> other records containing it. */
-  values: Record<string, { count: number; records: Array<{ id: string; display_id: string; title: string }> }>;
+  values: Record<
+    string,
+    { count: number; records: Array<{ id: string; display_id: string; title: string }> }
+  >;
 }
 
 export interface SinceLastHandoffResponse {
@@ -1013,7 +1197,42 @@ export const INVESTIGATION_AGENT_TOOL_IDS = {
   setTaskStatus: 'platform.core.cases.investigation_set_task_status',
   upsertEntity: 'platform.core.cases.investigation_upsert_entity',
   proposeAction: 'platform.core.cases.investigation_propose_action',
+  updateRecord: 'platform.core.cases.investigation_update_record',
 } as const;
 
 export const INVESTIGATION_AGENT_ID = 'cases-investigation-agent' as const;
 export const INVESTIGATION_CONVERSATION_TEMPLATE_ID = 'cases_investigation' as const;
+
+/** A record-level comment: a Cases comment on the investigation's case. */
+export interface RecordComment {
+  id: string;
+  version: string;
+  content: string;
+  created_at: string;
+  created_by: { username?: string | null; full_name?: string | null; profile_uid?: string | null };
+  updated_at?: string | null;
+}
+
+export interface FindCommentsRequest {
+  page?: number;
+  per_page?: number;
+  sort_order?: 'asc' | 'desc';
+}
+
+export interface FindCommentsResponse {
+  comments: RecordComment[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+export interface AddCommentRequest {
+  content: string;
+  /** Comment being replied to; its text is quoted the way Cases quotes. */
+  reply_to?: string;
+}
+
+export interface UpdateCommentRequest {
+  content: string;
+  version: string;
+}

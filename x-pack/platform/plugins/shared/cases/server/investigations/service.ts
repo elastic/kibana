@@ -16,6 +16,7 @@ import type {
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { CasesClient } from '../client';
+import { COMMENT_ATTACHMENT_TYPE, MAX_ASSIGNEES_PER_CASE } from '../../common/constants';
 import {
   INVESTIGATION_ACTIVITY_INDEX,
   INVESTIGATION_CONFIG_INDEX,
@@ -27,6 +28,12 @@ import {
 } from '../../common/investigations/constants';
 import type {
   ActivityEntry,
+  ActivityOrigin,
+  AddCommentRequest,
+  FindCommentsRequest,
+  FindCommentsResponse,
+  RecordComment,
+  UpdateCommentRequest,
   Actor,
   BulkCreateItemsRequest,
   BulkCreateItemsResponse,
@@ -78,7 +85,27 @@ import {
   INDICATOR_TYPE_LABELS,
   EVIDENCE_TYPE_LABELS,
 } from '../../common/investigations/types';
-import { DEFAULT_INVESTIGATION_TYPES, DEFAULT_PROCEDURE_TEMPLATES } from './default_templates';
+import { DEFAULT_PROCEDURE_TEMPLATES } from './default_templates';
+import type {
+  CaseStatusConfiguration,
+  PauseFields,
+  StatusesConfiguration,
+} from '../../common/investigations/statuses';
+import {
+  findStatusByKey,
+  getDefaultStatus,
+  getEffectiveStatuses,
+  getPauseFieldsForUpdate,
+  getRecordStatus,
+  StatusRuleError,
+  validatePauseReasons,
+  validateStatusesConfiguration,
+} from '../../common/investigations/statuses';
+import {
+  buildFieldsMirror,
+  getMirrorKey,
+  INVESTIGATION_TYPE_TEMPLATE_TAG,
+} from '../../common/investigations/template_fields';
 import {
   PRIORITY_RANK,
   SEVERITY_RANK,
@@ -131,6 +158,12 @@ export interface InvestigationsServiceDeps {
   /** Default actor for writes; agent tools pass an agent actor. */
   actor?: Actor;
   getAlertsClient: () => Promise<AlertsClientLike | undefined>;
+  /** Resolves user profile uids (case assignees) to names. */
+  getUserProfiles: (
+    uids: string[]
+  ) => Promise<Array<{ uid: string; username: string; fullName: string }>>;
+  /** Whether the caller may change investigation settings (Cases `updateConfiguration`). */
+  canManageSettings: () => Promise<boolean>;
   /** Whether the caller holds the Cases update privilege for the investigations owner. */
   canUpdateCases: () => Promise<boolean>;
   agent: {
@@ -142,6 +175,80 @@ export interface InvestigationsServiceDeps {
 }
 
 const now = (): string => new Date().toISOString();
+const sameEntries = (a: Record<string, unknown>, b: Record<string, unknown>): boolean => {
+  const keys = Object.keys(a);
+  return (
+    keys.length === Object.keys(b).length &&
+    keys.every((key) => JSON.stringify(a[key]) === JSON.stringify(b[key]))
+  );
+};
+/** An investigation write that changed the case: its actions are relabelled with this actor and time. */
+interface OwnCaseWrite {
+  startedAt: string;
+  actor: Actor;
+  ts: string;
+  /** Action types already described by a record-level activity entry. */
+  skipTypes?: string[];
+}
+const commentContent = (attachment: unknown): string | null => {
+  const value = attachment as { data?: { content?: unknown }; comment?: unknown };
+  if (typeof value.data?.content === 'string') return value.data.content;
+  if (typeof value.comment === 'string') return value.comment;
+  return null;
+};
+const toRecordComment = (attachment: unknown): RecordComment => {
+  const value = attachment as {
+    id: string;
+    version: string;
+    created_at: string;
+    created_by?: { username?: string | null; full_name?: string | null; profile_uid?: string };
+    updated_at?: string | null;
+  };
+  return {
+    id: value.id,
+    version: value.version,
+    content: commentContent(attachment) ?? '',
+    created_at: value.created_at,
+    created_by: {
+      username: value.created_by?.username ?? null,
+      full_name: value.created_by?.full_name ?? null,
+      profile_uid: value.created_by?.profile_uid ?? null,
+    },
+    updated_at: value.updated_at ?? null,
+  };
+};
+type CaseUserAction = Awaited<
+  ReturnType<CasesClient['userActions']['find']>
+>['userActions'][number];
+const CASE_STATUS_WORDS: Record<string, string> = {
+  open: 'Open',
+  'in-progress': 'In progress',
+  closed: 'Closed',
+};
+const CASE_CREATE_ACTION_TYPES = [
+  'create_case',
+  'title',
+  'description',
+  'tags',
+  'severity',
+  'status',
+  'assignees',
+  'category',
+  'settings',
+  'connector',
+  'template',
+  'extended_fields',
+];
+const ORIGIN_BY_SOURCE: Record<string, ActivityOrigin> = {
+  user: 'person',
+  none: 'person',
+  agent: 'agent',
+  workflow: 'workflow',
+  rule: 'rule',
+  attack: 'rule',
+  api: 'api',
+  connector: 'connector',
+};
 const HISTORY_ACTIONS = [
   'record.created',
   'record.description_changed',
@@ -758,15 +865,20 @@ export class InvestigationsService {
     }
     const severity = req.severity ?? req.priority ?? 'medium';
     const priority = req.priority ?? severity;
+    const template = req.template_id ? await this.getInvestigationTemplate(req.template_id) : null;
+    const investigationType = template?.name ?? req.investigation_type ?? 'Investigation';
     const theCase = await this.deps.casesClient.cases.create({
       title: req.title,
       description: req.description,
       tags: Array.from(new Set(['investigation', ...(req.tags ?? [])])),
       owner: INVESTIGATIONS_OWNER,
       severity,
-      category: req.investigation_type.slice(0, 50),
+      category: investigationType.slice(0, 50),
       connector: { id: 'none', name: 'none', type: '.none' as const, fields: null },
       settings: { syncAlerts: true },
+      ...(template
+        ? { template: { id: template.id }, extended_fields: req.extended_fields ?? {} }
+        : {}),
     } as Parameters<CasesClient['cases']['create']>[0]);
 
     const aiEnabled = req.ai_enabled ?? true;
@@ -779,6 +891,11 @@ export class InvestigationsService {
       title: req.title,
       description: req.description,
       status: 'open',
+      status_key: getDefaultStatus((await this.getStatusesConfiguration()).statuses, 'open').key,
+      paused_at: null,
+      time_paused: 0,
+      pause_reason: null,
+      resume_to_status_key: null,
       severity,
       severity_rank: SEVERITY_RANK[severity],
       priority,
@@ -793,11 +910,12 @@ export class InvestigationsService {
       updated_at: createdAt,
       updated_by: actor,
       closed_at: null,
-      investigation_type: req.investigation_type,
-      template_id: null,
+      investigation_type: investigationType,
+      template_id: theCase.template?.id ?? null,
+      template_version: theCase.template?.version ?? null,
       stage: 'Triage',
       summary: req.summary ?? null,
-      fields: req.fields ?? {},
+      fields: buildFieldsMirror(theCase.extended_fields, theCase.extended_fields_controls),
       agent_verdict: null,
       analyst_verdict: null,
       verdict_effective: null,
@@ -838,6 +956,13 @@ export class InvestigationsService {
     if (req.create_conversation ?? aiEnabled) {
       await this.attachMainConversation(record.id, `${displayId}: ${req.title}`);
     }
+    await this.ingestCaseUserActions(record, {
+      startedAt: '',
+      actor,
+      ts: createdAt,
+      // "Started the investigation" already covers what the case was created with.
+      skipTypes: CASE_CREATE_ACTION_TYPES,
+    });
 
     await this.appendActivity(record.id, [
       {
@@ -856,7 +981,7 @@ export class InvestigationsService {
     ]);
 
     if (req.apply_procedure ?? true) {
-      await this.applyProcedureInternal(record, req.investigation_type, false, actor, createdAt);
+      await this.applyProcedureInternal(record, investigationType, false, actor, createdAt);
     }
     if (req.alerts?.length) {
       await this.bulkCreateItemsInternal(
@@ -927,6 +1052,18 @@ export class InvestigationsService {
     if (req.status?.length) filter.push(terms('status', req.status));
     if (req.priority?.length) filter.push(terms('priority', req.priority));
     if (req.severity?.length) filter.push(terms('severity', req.severity));
+    if (req.status_key?.length) filter.push(terms('status_key', req.status_key));
+    if (req.assignees?.length) {
+      const uids = req.assignees
+        .filter((uid) => uid !== 'none')
+        .map((uid) => (uid === 'me' ? this.deps.user.profileUid ?? '__none__' : uid));
+      const should: QueryDslQueryContainer[] = [];
+      if (uids.length) should.push(terms('assignees', uids));
+      if (req.assignees.includes('none')) {
+        should.push({ bool: { must_not: [{ exists: { field: 'assignees' } }] } });
+      }
+      filter.push({ bool: { should, minimum_should_match: 1 } });
+    }
     if (req.investigation_type?.length)
       filter.push(terms('investigation_type', req.investigation_type));
     if (req.verdict?.length) filter.push(terms('verdict_effective', req.verdict));
@@ -1015,9 +1152,386 @@ export class InvestigationsService {
     ];
   }
 
+  /**
+   * Copies case user actions newer than the record's sync point into the activity index, so the
+   * Activity tab is the one history of the investigation. Entries get deterministic ids, so a
+   * repeated sync never duplicates. `ownWrite` relabels actions caused by an investigation write
+   * (same actor and, for seeded data, the same backdated time).
+   */
+  private async ingestCaseUserActions(
+    record: StoredRecord,
+    ownWrite?: OwnCaseWrite
+  ): Promise<void> {
+    const cursorId = `case_actions_cursor:${record.id}`;
+    const cursor = await this.es
+      .get<{ synced_at?: string; ids_at?: string[] }>({
+        index: INVESTIGATION_CONFIG_INDEX,
+        id: cursorId,
+      })
+      .catch(() => undefined);
+    const since = cursor?._source?.synced_at ?? null;
+    const seenAtSince = new Set(cursor?._source?.ids_at ?? []);
+    const collected: CaseUserAction[] = [];
+    for (let page = 1; page <= 20; page++) {
+      const res = await this.deps.casesClient.userActions.find({
+        caseId: record.case_id,
+        params: { sortOrder: 'desc', perPage: 100, page },
+      });
+      const older = res.userActions.findIndex((action) => since && action.created_at < since);
+      const fresh = older === -1 ? res.userActions : res.userActions.slice(0, older);
+      collected.push(
+        ...fresh.filter((action) => !(action.created_at === since && seenAtSince.has(action.id)))
+      );
+      if (older !== -1 || res.userActions.length < 100) break;
+    }
+    if (!collected.length) return;
+    const newest = collected[0].created_at;
+    const entries = await this.describeCaseUserActions(record, [...collected].reverse(), ownWrite);
+    if (entries.length) {
+      await this.es.bulk({
+        refresh: true,
+        // Create-only: the first write of an action wins, so an investigation write's relabelled
+        // entry is never overwritten by a later sync that sees the same action again.
+        operations: entries.flatMap((doc) => [
+          { create: { _index: INVESTIGATION_ACTIVITY_INDEX, _id: doc.id } },
+          doc,
+        ]),
+      });
+    }
+    // Actions that share the cursor's millisecond are remembered by id, so skipped or already
+    // copied ones are never picked up again.
+    const idsAtNewest = collected.filter((a) => a.created_at === newest).map((a) => a.id);
+    await this.es.index({
+      index: INVESTIGATION_CONFIG_INDEX,
+      id: cursorId,
+      refresh: false,
+      document: {
+        type: 'case_actions_cursor',
+        record_id: record.id,
+        synced_at: newest,
+        ids_at: newest === since ? [...seenAtSince, ...idsAtNewest] : idsAtNewest,
+      },
+    });
+  }
+
+  private async describeCaseUserActions(
+    record: StoredRecord,
+    actions: CaseUserAction[],
+    ownWrite?: OwnCaseWrite
+  ): Promise<ActivityEntry[]> {
+    const uids = new Set<string>();
+    for (const action of actions) {
+      if (action.type === 'assignees') {
+        for (const { uid } of (action.payload as { assignees?: Array<{ uid: string }> })
+          .assignees ?? []) {
+          uids.add(uid);
+        }
+      }
+    }
+    const profiles = new Map(
+      (await this.deps.getUserProfiles([...uids]).catch(() => [])).map((p) => [p.uid, p.fullName])
+    );
+    const fieldLabels = actions.some((action) => action.type === 'extended_fields')
+      ? new Map(
+          (
+            await this.deps.casesClient.cases
+              .getApplicableFields({ caseId: record.case_id })
+              .catch(() => ({ fields: [] }))
+          ).fields.map((f) => [f.key, f.label])
+        )
+      : new Map<string, string>();
+    const labelOf = (key: string): string =>
+      fieldLabels.get(key) ?? key.replace(/_as_[a-z_]+$/, '').replace(/_/g, ' ');
+    const target = { kind: 'record' as const, id: record.id, title: record.title };
+    const out: ActivityEntry[] = [];
+    const toEntry = (action: CaseUserAction): ActivityEntry | null => {
+      if (ownWrite?.skipTypes?.includes(action.type) && action.created_at >= ownWrite.startedAt) {
+        return null;
+      }
+      const payload = action.payload as Record<string, unknown>;
+      let entry: Pick<ActivityEntry, 'action' | 'message'> &
+        Partial<Pick<ActivityEntry, 'details' | 'after' | 'links'>>;
+      switch (action.type) {
+        case 'title':
+          entry = {
+            action: 'record.title_changed',
+            message: `Renamed the investigation to "${clip(String(payload.title ?? ''), 120)}"`,
+            after: payload.title,
+          };
+          break;
+        case 'description':
+          entry = {
+            action: 'record.description_changed',
+            message: 'Edited the description',
+            after: payload.description,
+          };
+          break;
+        case 'tags': {
+          const tags = ((payload.tags as string[]) ?? []).filter((t) => t !== 'investigation');
+          if (!tags.length) return null;
+          entry = {
+            action: 'record.tags_changed',
+            message: `${action.action === 'delete' ? 'Removed' : 'Added'} ${
+              tags.length === 1 ? 'the tag' : 'the tags'
+            } ${tags.join(', ')}`,
+            after: tags,
+          };
+          break;
+        }
+        case 'severity':
+          entry = {
+            action: 'record.priority_changed',
+            message: `Changed the priority to ${String(payload.severity)}`,
+            after: payload.severity,
+          };
+          break;
+        case 'status':
+          entry = {
+            action: 'record.status_changed',
+            message:
+              payload.status === 'closed'
+                ? 'Closed the investigation'
+                : `Changed the status to ${
+                    CASE_STATUS_WORDS[String(payload.status)] ?? payload.status
+                  }`,
+            after: payload.status,
+          };
+          break;
+        case 'assignees': {
+          const names = ((payload.assignees as Array<{ uid: string }>) ?? []).map(
+            ({ uid }) => profiles.get(uid) ?? 'Unknown user'
+          );
+          if (!names.length) return null;
+          entry = {
+            action: 'record.assignees_changed',
+            message: `${action.action === 'delete' ? 'Unassigned' : 'Assigned'} ${names.join(
+              ', '
+            )}`,
+            after: names,
+          };
+          break;
+        }
+        case 'extended_fields': {
+          const values = (payload.extended_fields as Record<string, string>) ?? {};
+          const keys = Object.keys(values);
+          if (!keys.length) return null;
+          const first = labelOf(keys[0]);
+          entry = {
+            action: 'record.fields_changed',
+            message:
+              keys.length === 1
+                ? `Set ${first} to ${values[keys[0]] === '' ? 'empty' : clip(values[keys[0]], 80)}`
+                : `Changed ${keys.length} fields`,
+            after: values,
+          };
+          break;
+        }
+        case 'template': {
+          const template = payload.template as { id?: string; name?: string } | null;
+          entry = {
+            action: 'record.type_changed',
+            message: template
+              ? `Changed the investigation type to ${template.name ?? template.id}`
+              : 'Removed the investigation type',
+            after: template,
+          };
+          break;
+        }
+        case 'comment': {
+          const comment = payload.comment as { type?: string; data?: { content?: string } } | null;
+          if (comment?.type !== 'comment' && comment?.type !== 'user') return null;
+          const content =
+            comment.data?.content ?? (comment as unknown as { comment?: string }).comment ?? '';
+          entry = {
+            action:
+              action.action === 'delete'
+                ? 'record.comment_deleted'
+                : action.action === 'update'
+                ? 'record.comment_edited'
+                : 'record.comment_added',
+            message:
+              action.action === 'delete'
+                ? 'Deleted a comment'
+                : action.action === 'update'
+                ? 'Edited a comment'
+                : 'Commented',
+            details: action.action === 'delete' ? null : clip(content, 300),
+            links: [{ kind: 'tab', id: 'conversation', label: 'Discussion' }],
+          };
+          break;
+        }
+        case 'connector': {
+          const connector = payload.connector as { name?: string; type?: string } | null;
+          entry = {
+            action: 'record.connector_changed',
+            message:
+              !connector || connector.type === '.none'
+                ? 'Removed the external ticket connector'
+                : `Set the external ticket connector to ${connector.name}`,
+          };
+          break;
+        }
+        case 'pushed': {
+          const service = payload.externalService as {
+            connector_name?: string;
+            external_title?: string;
+            external_url?: string;
+          } | null;
+          entry = {
+            action: 'record.pushed',
+            message: `Pushed to ${service?.connector_name ?? 'the external system'}${
+              service?.external_title ? ` as ${service.external_title}` : ''
+            }`,
+            details: service?.external_url ?? null,
+          };
+          break;
+        }
+        case 'workflow': {
+          const workflow = payload.workflow as { name?: string; id?: string } | null;
+          entry = {
+            action: 'record.workflow_run',
+            message: `Ran the workflow ${workflow?.name ?? workflow?.id ?? ''}`.trim(),
+          };
+          break;
+        }
+        default:
+          return null;
+      }
+      const own = ownWrite && action.created_at >= ownWrite.startedAt;
+      const source = (action as { source?: { type?: string; id?: string; name?: string } | null })
+        .source;
+      const person = action.created_by?.full_name || action.created_by?.username || 'Unknown user';
+      const origin = ORIGIN_BY_SOURCE[source?.type ?? 'user'] ?? 'person';
+      const actor: Actor = own
+        ? ownWrite.actor
+        : source?.type === 'agent'
+        ? {
+            type: 'agent',
+            id: source.id ?? 'agent',
+            name: source.name ?? 'Agent',
+            on_behalf_of: person,
+          }
+        : origin === 'workflow' || origin === 'rule'
+        ? {
+            type: 'automation',
+            id: source?.id ?? 'automation',
+            name: source?.name ?? (origin === 'rule' ? 'Rule' : 'Workflow'),
+            on_behalf_of: person,
+          }
+        : { type: 'user', id: action.created_by?.username ?? 'unknown', name: person };
+      return {
+        id: `case-action-${action.id}`,
+        record_id: record.id,
+        space_id: this.deps.spaceId,
+        ts: own ? ownWrite.ts : action.created_at,
+        actor,
+        target,
+        links: [],
+        details: null,
+        ...entry,
+        origin: own && ownWrite.actor.type === 'agent' ? 'agent' : origin,
+        case_action_id: action.id,
+      };
+    };
+    for (const action of actions) {
+      const entry = toEntry(action);
+      if (entry) out.push(entry);
+    }
+    return out;
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Record-level discussion = case comments                          */
+  /* ---------------------------------------------------------------- */
+
+  public async findComments(
+    recordId: string,
+    req: FindCommentsRequest
+  ): Promise<FindCommentsResponse> {
+    const { record } = await this.load(recordId);
+    const page = req.page ?? 1;
+    const perPage = Math.min(req.per_page ?? 50, 100);
+    const res = await this.deps.casesClient.attachments.find({
+      caseID: record.case_id,
+      findQueryParams: {
+        page,
+        perPage,
+        sortOrder: req.sort_order ?? 'asc',
+        type: COMMENT_ATTACHMENT_TYPE,
+      },
+    });
+    return {
+      comments: res.data.map(toRecordComment),
+      total: res.total,
+      page,
+      per_page: perPage,
+    };
+  }
+
+  public async addComment(recordId: string, req: AddCommentRequest): Promise<RecordComment> {
+    const { record } = await this.loadForWrite(recordId);
+    let content = req.content.trim();
+    if (!content) throw Boom.badRequest('A comment cannot be empty.');
+    if (req.reply_to) {
+      const parent = await this.deps.casesClient.attachments
+        .get({ caseID: record.case_id, savedObjectId: req.reply_to })
+        .catch(() => undefined);
+      const quoted = parent ? commentContent(parent) : null;
+      if (quoted == null) throw Boom.notFound('The comment you are replying to no longer exists.');
+      // Same quote format as the Cases "Quote" action.
+      content = `> ${quoted.replace(/\r?\n/g, '\n> ')} \n\n${content}`;
+    }
+    const startedAt = new Date().toISOString();
+    const created = await this.deps.casesClient.attachments.add({
+      caseId: record.case_id,
+      comment: { type: COMMENT_ATTACHMENT_TYPE, owner: INVESTIGATIONS_OWNER, data: { content } },
+    });
+    await this.ingestCaseUserActions(record, { startedAt, actor: this.actor(), ts: now() });
+    return toRecordComment(created);
+  }
+
+  public async updateComment(
+    recordId: string,
+    commentId: string,
+    req: UpdateCommentRequest
+  ): Promise<RecordComment> {
+    const { record } = await this.loadForWrite(recordId);
+    const startedAt = new Date().toISOString();
+    await this.deps.casesClient.attachments.update({
+      caseID: record.case_id,
+      updateRequest: {
+        id: commentId,
+        version: req.version,
+        type: COMMENT_ATTACHMENT_TYPE,
+        owner: INVESTIGATIONS_OWNER,
+        data: { content: req.content },
+      },
+    } as Parameters<CasesClient['attachments']['update']>[0]);
+    await this.ingestCaseUserActions(record, { startedAt, actor: this.actor(), ts: now() });
+    return toRecordComment(
+      await this.deps.casesClient.attachments.get({
+        caseID: record.case_id,
+        savedObjectId: commentId,
+      })
+    );
+  }
+
+  public async deleteComment(recordId: string, commentId: string): Promise<void> {
+    const { record } = await this.loadForWrite(recordId);
+    const startedAt = new Date().toISOString();
+    await this.deps.casesClient.attachments.delete({
+      caseID: record.case_id,
+      savedObjectId: commentId,
+    });
+    await this.ingestCaseUserActions(record, { startedAt, actor: this.actor(), ts: now() });
+  }
+
   public async getRecord(recordId: string): Promise<GetRecordResponse> {
     const { record, seqNo, primaryTerm, theCase } = await this.load(recordId);
     const synced = await this.syncFromCase(record, theCase, seqNo, primaryTerm);
+    await this.ingestCaseUserActions(record).catch((error) =>
+      this.deps.logger.warn(`Investigation ${recordId}: case history sync failed: ${error}`)
+    );
     const { available } = await this.deps.agent.isAvailable().catch(() => ({ available: false }));
     return {
       record: synced,
@@ -1036,6 +1550,10 @@ export class InvestigationsService {
           username: theCase.created_by?.username,
           full_name: theCase.created_by?.full_name,
         },
+        template: theCase.template ?? null,
+        extended_fields: theCase.extended_fields ?? {},
+        extended_fields_labels: theCase.extended_fields_labels ?? {},
+        extended_fields_controls: theCase.extended_fields_controls ?? {},
       },
       agent_available: available && synced.ai_enabled,
     };
@@ -1052,21 +1570,96 @@ export class InvestigationsService {
     const patch: Partial<StoredRecord> = {};
     if (theCase.title !== record.title) patch.title = theCase.title;
     if (theCase.description !== record.description) patch.description = theCase.description;
-    if (theCase.status !== record.status) patch.status = theCase.status as StoredRecord['status'];
+    if (theCase.status !== record.status) {
+      // Changed outside the investigation (classic Cases): use the category's default status.
+      const config = await this.getStatusesConfiguration();
+      const target = getDefaultStatus(config.statuses, theCase.status as StoredRecord['status']);
+      patch.status = target.category;
+      patch.status_key = target.key;
+      try {
+        Object.assign(
+          patch,
+          getPauseFieldsForUpdate({
+            original: record,
+            target,
+            pauseReasons: config.pauseReasons,
+            statuses: config.statuses,
+            now: theCase.updated_at ?? now(),
+          }) ?? {}
+        );
+      } catch (error) {
+        this.deps.logger.warn(`Investigation ${record.id}: pause bookkeeping failed: ${error}`);
+      }
+    }
     if (theCase.severity !== record.severity) {
       patch.severity = theCase.severity as StoredRecord['severity'];
       patch.severity_rank = SEVERITY_RANK[patch.severity];
     }
     if (JSON.stringify(tags) !== JSON.stringify(record.tags ?? [])) patch.tags = tags;
+    const assignees = (theCase.assignees ?? []).map(({ uid }) => uid);
+    if (JSON.stringify(assignees) !== JSON.stringify(record.assignees ?? [])) {
+      patch.assignees = assignees;
+    }
+    Object.assign(patch, await this.templatePatchFromCase(record, theCase));
     if (!Object.keys(patch).length) return this.toRecord(record, seqNo, primaryTerm);
     const res = await this.es.update<StoredRecord>({
       index: INVESTIGATION_RECORDS_INDEX,
       id: record.id,
       refresh: true,
       retry_on_conflict: 3,
-      doc: patch,
+      script: {
+        lang: 'painless',
+        source: 'for (def e : params.patch.entrySet()) { ctx._source[e.getKey()] = e.getValue(); }',
+        params: { patch },
+      },
     });
     return this.toRecord({ ...record, ...patch }, res._seq_no, res._primary_term);
+  }
+
+  /** Mirror fields, template and type name that differ between the record and its case. */
+  private async templatePatchFromCase(
+    record: StoredRecord,
+    theCase: Pick<
+      Awaited<ReturnType<CasesClient['cases']['get']>>,
+      'template' | 'extended_fields' | 'extended_fields_controls'
+    >
+  ): Promise<Partial<StoredRecord>> {
+    const patch: Partial<StoredRecord> = {};
+    const mirror = buildFieldsMirror(theCase.extended_fields, theCase.extended_fields_controls);
+    if (!sameEntries(mirror, record.fields ?? {})) patch.fields = mirror;
+    const templateId = theCase.template?.id ?? null;
+    const templateVersion = theCase.template?.version ?? null;
+    if (
+      templateId !== (record.template_id ?? null) ||
+      templateVersion !== (record.template_version ?? null)
+    ) {
+      patch.template_id = templateId;
+      patch.template_version = templateVersion;
+      if (templateId) {
+        const template = await this.getInvestigationTemplate(templateId, templateVersion, true);
+        if (template.name !== record.investigation_type) patch.investigation_type = template.name;
+      }
+    }
+    return patch;
+  }
+
+  /** Loads a Cases template that may be used as an investigation type. */
+  private async getInvestigationTemplate(
+    templateId: string,
+    version?: number | null,
+    includeDeleted = false
+  ): Promise<{ id: string; version: number; name: string }> {
+    const template = await this.deps.casesClient.templates
+      .getTemplate(templateId, version ? String(version) : undefined, { includeDeleted })
+      .catch(() => undefined);
+    if (!template || template.attributes.owner !== INVESTIGATIONS_OWNER) {
+      throw Boom.badRequest(`Investigation type ${templateId} not found`);
+    }
+    return {
+      id: template.attributes.templateId,
+      version: template.attributes.templateVersion,
+      name: template.attributes.name,
+    };
   }
 
   public async updateRecord(
@@ -1100,18 +1693,10 @@ export class InvestigationsService {
     if (req.title !== undefined && req.title !== record.title) {
       patch.title = req.title;
       casePatch.title = req.title;
-      log('record.title_changed', `Renamed the investigation to "${clip(req.title, 120)}"`, {
-        before: record.title,
-        after: req.title,
-      });
     }
     if (req.description !== undefined && req.description !== record.description) {
       patch.description = req.description;
       casePatch.description = req.description;
-      log('record.description_changed', 'Edited the description', {
-        before: record.description,
-        after: req.description,
-      });
     }
     if (req.summary !== undefined && req.summary !== record.summary) {
       patch.summary = req.summary;
@@ -1140,64 +1725,70 @@ export class InvestigationsService {
       patch.severity = req.severity;
       patch.severity_rank = SEVERITY_RANK[req.severity];
       casePatch.severity = req.severity;
-      log(
-        'record.severity_changed',
-        `Changed the severity from ${record.severity} to ${req.severity}`
-      );
+    }
+    if (req.assignees !== undefined) {
+      const ownerUid = record.owner?.type === 'user' ? record.owner.profile_uid : null;
+      const next = Array.from(new Set([...req.assignees, ...(ownerUid ? [ownerUid] : [])]));
+      if (next.length > MAX_ASSIGNEES_PER_CASE) {
+        throw Boom.badRequest(
+          `An investigation can have at most ${MAX_ASSIGNEES_PER_CASE} assignees.`
+        );
+      }
+      const current = (theCase.assignees ?? []).map(({ uid }) => uid);
+      if (next.length !== current.length || next.some((uid) => !current.includes(uid))) {
+        casePatch.assignees = next.map((uid) => ({ uid }));
+        patch.assignees = next;
+      }
     }
     if (req.tags !== undefined) {
       patch.tags = req.tags;
       casePatch.tags = Array.from(new Set(['investigation', ...req.tags]));
-      log('record.tags_changed', 'Changed the tags', { before: record.tags, after: req.tags });
     }
-    if (req.fields !== undefined) {
-      const changed = Object.entries(req.fields).filter(([k, v]) => (record.fields ?? {})[k] !== v);
-      if (changed.length) {
-        patch.fields = { ...(record.fields ?? {}), ...req.fields };
-        const label = (key: string) =>
-          key.replace(/_(keyword|text|long|double|date|bool)$/, '').replace(/_/g, ' ');
-        log(
-          'record.fields_changed',
-          changed.length === 1
-            ? `Set ${label(changed[0][0])} to ${
-                changed[0][1] === null || changed[0][1] === '' ? 'empty' : String(changed[0][1])
-              }`
-            : `Changed ${changed.length} fields`,
-          {
-            before: Object.fromEntries(changed.map(([k]) => [k, (record.fields ?? {})[k] ?? null])),
-            after: Object.fromEntries(changed),
-          }
-        );
+    if (req.extended_fields !== undefined) {
+      const current = theCase.extended_fields ?? {};
+      const changed = Object.fromEntries(
+        Object.entries(req.extended_fields).filter(([key, value]) => (current[key] ?? '') !== value)
+      );
+      if (Object.keys(changed).length || req.template !== undefined) {
+        casePatch.extended_fields = changed;
       }
     }
-    if (
-      req.investigation_type !== undefined &&
-      req.investigation_type !== record.investigation_type
-    ) {
-      patch.investigation_type = req.investigation_type;
-      log('record.type_changed', `Changed the investigation type to ${req.investigation_type}`, {
-        before: record.investigation_type,
-        after: req.investigation_type,
-      });
+    if (req.template !== undefined) {
+      const sameTemplate =
+        (req.template?.id ?? null) === (theCase.template?.id ?? null) &&
+        (req.template?.version ?? null) === (theCase.template?.version ?? null);
+      if (!sameTemplate) {
+        if (req.template)
+          await this.getInvestigationTemplate(req.template.id, req.template.version);
+        casePatch.template = req.template;
+      }
     }
     if (req.stage !== undefined) patch.stage = req.stage;
+    let ownerStatusChange: 'open' | 'in-progress' | null = null;
     if (req.owner !== undefined) {
       const nextOwner: Actor | null =
         req.owner && 'self' in req.owner ? this.currentUserActor() : (req.owner as Actor | null);
       const previous = record.owner ?? null;
       if ((nextOwner?.id ?? null) !== (previous?.id ?? null)) {
         patch.owner = nextOwner;
-        if (nextOwner && record.status === 'open') {
-          patch.status = 'in-progress';
-          casePatch.status = CaseStatuses['in-progress'];
+        ownerStatusChange = nextOwner ? 'in-progress' : previous ? 'open' : null;
+        const ownerUid =
+          nextOwner?.type === 'user'
+            ? nextOwner.profile_uid ??
+              (nextOwner.id === this.deps.user.username ? this.deps.user.profileUid : null)
+            : null;
+        if (nextOwner && ownerUid && !nextOwner.profile_uid) {
+          patch.owner = { ...nextOwner, profile_uid: ownerUid };
         }
-        if (!nextOwner && record.status === 'in-progress') {
-          patch.status = 'open';
-          casePatch.status = CaseStatuses.open;
-        }
-        if (nextOwner?.id === this.deps.user.username && this.deps.user.profileUid) {
-          casePatch.assignees = [{ uid: this.deps.user.profileUid }];
-          patch.assignees = [this.deps.user.profileUid];
+        if (ownerUid) {
+          const current =
+            (casePatch.assignees as Array<{ uid: string }> | undefined)?.map(({ uid }) => uid) ??
+            (theCase.assignees ?? []).map(({ uid }) => uid);
+          if (!current.includes(ownerUid)) {
+            const next = [...current, ownerUid].slice(-MAX_ASSIGNEES_PER_CASE);
+            casePatch.assignees = next.map((uid) => ({ uid }));
+            patch.assignees = next;
+          }
         }
         const message = !nextOwner
           ? 'Left the investigation without an owner'
@@ -1256,10 +1847,84 @@ export class InvestigationsService {
         }
       );
     }
-    if (req.status !== undefined && req.status !== record.status && record.status !== 'closed') {
-      patch.status = req.status;
-      casePatch.status = req.status === 'open' ? CaseStatuses.open : CaseStatuses['in-progress'];
-      log('record.status_changed', `Changed the status to ${req.status}`);
+    let statusLogged = false;
+    if (
+      record.status !== 'closed' &&
+      (req.status_key !== undefined ||
+        req.status !== undefined ||
+        req.pause_reason !== undefined ||
+        ownerStatusChange)
+    ) {
+      const config = await this.getStatusesConfiguration();
+      const current = getRecordStatus(config.statuses, record);
+      let target: CaseStatusConfiguration | undefined;
+      if (req.status_key !== undefined) {
+        target = findStatusByKey(config.statuses, req.status_key);
+        if (!target || target.disabled)
+          throw Boom.badRequest(`Unknown status key: ${req.status_key}`);
+        if (target.category === 'closed') {
+          throw Boom.badRequest('Close the investigation to move it to a closed status.');
+        }
+      } else if (req.status !== undefined && req.status !== record.status) {
+        target = getDefaultStatus(config.statuses, req.status);
+      } else if (ownerStatusChange) {
+        // Taking ownership only moves the default open status forward (and back); a custom
+        // status someone chose is never overridden.
+        const from = ownerStatusChange === 'in-progress' ? 'open' : 'in-progress';
+        if (current.key === getDefaultStatus(config.statuses, from).key) {
+          target = getDefaultStatus(config.statuses, ownerStatusChange);
+        }
+      }
+      if (target && target.key === current.key) target = undefined;
+      let pause: Partial<PauseFields> | undefined;
+      try {
+        pause = getPauseFieldsForUpdate({
+          original: record,
+          target,
+          pauseReason: req.pause_reason,
+          pauseReasons: config.pauseReasons,
+          statuses: config.statuses,
+          now: ts,
+        });
+      } catch (error) {
+        if (error instanceof StatusRuleError) throw Boom.badRequest(error.message);
+        throw error;
+      }
+      if (target) {
+        patch.status = target.category;
+        patch.status_key = target.key;
+        if (target.category !== record.status) {
+          casePatch.status =
+            target.category === 'open' ? CaseStatuses.open : CaseStatuses['in-progress'];
+        }
+      }
+      if (pause) Object.assign(patch, pause);
+      if (target || pause?.pause_reason) {
+        statusLogged = true;
+        const resumed = pause?.paused_at === null && record.paused_at;
+        log(
+          'record.status_changed',
+          target
+            ? `Changed the status to ${target.label}${
+                pause?.pause_reason ? ` (paused: ${pause.pause_reason})` : ''
+              }${resumed ? ' and resumed time tracking' : ''}`
+            : `Changed the pause reason to ${pause?.pause_reason}`,
+          {
+            before: {
+              key: current.key,
+              label: current.label,
+              pause_reason: record.pause_reason ?? null,
+            },
+            after: target
+              ? { key: target.key, label: target.label, pause_reason: pause?.pause_reason ?? null }
+              : {
+                  key: current.key,
+                  label: current.label,
+                  pause_reason: pause?.pause_reason ?? null,
+                },
+          }
+        );
+      }
     }
     if (req.restricted_to !== undefined) {
       patch.restricted_to = req.restricted_to;
@@ -1291,14 +1956,21 @@ export class InvestigationsService {
       patch.verdict_effective =
         record.close_outcome?.verdict ?? analyst?.verdict ?? agent?.classification ?? null;
     }
-    if (!Object.keys(patch).length) {
+    if (casePatch.extended_fields && !Object.keys(casePatch.extended_fields).length) {
+      delete casePatch.extended_fields;
+    }
+    if (!Object.keys(patch).length && !Object.keys(casePatch).length) {
       return this.toRecord(record, seqNo, primaryTerm);
     }
 
+    const caseWriteStartedAt = new Date().toISOString();
     if (Object.keys(casePatch).length) {
-      await this.deps.casesClient.cases.bulkUpdate({
+      const [updatedCase] = await this.deps.casesClient.cases.bulkUpdate({
         cases: [{ id: recordId, version: theCase.version, ...casePatch }],
       } as Parameters<CasesClient['cases']['bulkUpdate']>[0]);
+      if (updatedCase && (casePatch.extended_fields || casePatch.template !== undefined)) {
+        Object.assign(patch, await this.templatePatchFromCase(record, updatedCase));
+      }
     }
     patch.updated_at = ts;
     patch.updated_by = actor;
@@ -1324,6 +1996,17 @@ export class InvestigationsService {
       throw error;
     }
     await this.appendActivity(recordId, entries);
+    if (Object.keys(casePatch).length) {
+      await this.ingestCaseUserActions(record, {
+        startedAt: caseWriteStartedAt,
+        actor,
+        ts,
+        skipTypes: [
+          ...(statusLogged || patch.owner !== undefined ? ['status'] : []),
+          ...(patch.owner !== undefined ? ['assignees'] : []),
+        ],
+      });
+    }
     await this.refreshCounters(recordId, actor, { touch: false });
     if (patch.restricted_to?.length && !patch.restricted_to.includes(this.deps.user.username)) {
       return this.toRecord({ ...record, ...patch } as StoredRecord);
@@ -1357,6 +2040,55 @@ export class InvestigationsService {
       );
     }
 
+    const statusConfig = await this.getStatusesConfiguration();
+    const closedStatus = req.status_key
+      ? findStatusByKey(statusConfig.statuses, req.status_key)
+      : getDefaultStatus(statusConfig.statuses, 'closed');
+    if (!closedStatus || closedStatus.disabled || closedStatus.category !== 'closed') {
+      throw Boom.badRequest(`Unknown closed status: ${req.status_key}`);
+    }
+    const closePause =
+      getPauseFieldsForUpdate({
+        original: record,
+        target: closedStatus,
+        pauseReasons: statusConfig.pauseReasons,
+        statuses: statusConfig.statuses,
+        now: ts,
+      }) ?? {};
+    const caseWriteStartedAt = new Date().toISOString();
+    let caseVersion = theCase.version;
+    const fieldsToSave = Object.fromEntries(
+      Object.entries(req.extended_fields ?? {}).filter(
+        ([key, value]) => (theCase.extended_fields?.[key] ?? '') !== value
+      )
+    );
+    if (Object.keys(fieldsToSave).length) {
+      const [updatedCase] = await this.deps.casesClient.cases.bulkUpdate({
+        cases: [{ id: recordId, version: caseVersion, extended_fields: fieldsToSave }],
+      } as Parameters<CasesClient['cases']['bulkUpdate']>[0]);
+      caseVersion = updatedCase.version;
+    }
+
+    await this.deps.casesClient.cases.bulkUpdate({
+      cases: [
+        {
+          id: recordId,
+          version: caseVersion,
+          status: CaseStatuses.closed,
+          ...(theCase.settings?.syncAlerts
+            ? {
+                closeReason:
+                  req.verdict === 'true_positive'
+                    ? 'true_positive'
+                    : req.verdict === 'benign'
+                    ? 'benign_positive'
+                    : 'other',
+              }
+            : {}),
+        },
+      ],
+    } as Parameters<CasesClient['cases']['bulkUpdate']>[0]);
+
     // Withdraw pending proposals.
     const pending = await this.searchItems<ProposalItem>(
       recordId,
@@ -1384,26 +2116,6 @@ export class InvestigationsService {
 
     const alertsClosed = await this.setAlertsStatus(recordId, 'closed');
 
-    await this.deps.casesClient.cases.bulkUpdate({
-      cases: [
-        {
-          id: recordId,
-          version: theCase.version,
-          status: CaseStatuses.closed,
-          ...(theCase.settings?.syncAlerts
-            ? {
-                closeReason:
-                  req.verdict === 'true_positive'
-                    ? 'true_positive'
-                    : req.verdict === 'benign'
-                    ? 'benign_positive'
-                    : 'other',
-              }
-            : {}),
-        },
-      ],
-    } as Parameters<CasesClient['cases']['bulkUpdate']>[0]);
-
     const outcome = {
       verdict: req.verdict,
       reason: req.reason,
@@ -1421,6 +2133,8 @@ export class InvestigationsService {
       retry_on_conflict: 5,
       doc: {
         status: 'closed',
+        status_key: closedStatus.key,
+        ...closePause,
         closed_at: ts,
         close_outcome: outcome,
         verdict_effective: req.verdict,
@@ -1469,6 +2183,12 @@ export class InvestigationsService {
       });
     }
     await this.appendActivity(recordId, entries);
+    await this.ingestCaseUserActions(record, {
+      startedAt: caseWriteStartedAt,
+      actor,
+      ts,
+      skipTypes: ['status'],
+    });
     await this.refreshCounters(recordId, actor, { touch: false });
     return (await this.getRecord(recordId)).record;
   }
@@ -1517,6 +2237,9 @@ export class InvestigationsService {
     const actor = this.actor();
     const ts = now();
     const nextStatus = record.owner ? 'in-progress' : 'open';
+    const statusConfig = await this.getStatusesConfiguration();
+    const reopenTo = getDefaultStatus(statusConfig.statuses, nextStatus);
+    const caseWriteStartedAt = new Date().toISOString();
     await this.deps.casesClient.cases.bulkUpdate({
       cases: [
         {
@@ -1534,6 +2257,11 @@ export class InvestigationsService {
       retry_on_conflict: 5,
       doc: {
         status: nextStatus,
+        status_key: reopenTo.key,
+        paused_at: null,
+        pause_reason: null,
+        resume_to_status_key: null,
+        time_paused: 0,
         closed_at: null,
         close_outcome: null,
         verdict_effective:
@@ -1554,6 +2282,12 @@ export class InvestigationsService {
         links: [],
       },
     ]);
+    await this.ingestCaseUserActions(record, {
+      startedAt: caseWriteStartedAt,
+      actor,
+      ts,
+      skipTypes: ['status'],
+    });
     await this.refreshCounters(recordId, actor, { touch: false });
     return (await this.getRecord(recordId)).record;
   }
@@ -1715,27 +2449,101 @@ export class InvestigationsService {
   /* Procedure templates and investigation types                       */
   /* ---------------------------------------------------------------- */
 
-  public async listTypes(): Promise<InvestigationType[]> {
-    const types = DEFAULT_INVESTIGATION_TYPES.map((t) => ({ ...t, fields: [...t.fields] }));
-    try {
-      const templatesClient = (
-        this.deps.casesClient as unknown as {
-          templates?: { getAllTemplates?: (args: unknown) => Promise<unknown> };
-        }
-      ).templates;
-      const found = (await templatesClient?.getAllTemplates?.({
-        owner: [INVESTIGATIONS_OWNER],
-        page: 1,
-        perPage: 100,
-      })) as { templates?: Array<{ templateId: string; name: string }> } | undefined;
-      for (const tpl of found?.templates ?? []) {
-        const match = types.find((t) => t.name.toLowerCase() === tpl.name.toLowerCase());
-        if (match) match.template_id = tpl.templateId;
-      }
-    } catch (error) {
-      this.deps.logger.debug(`Investigation types: case templates lookup failed: ${error}`);
+  /** The space's status list and pause reasons (built-in statuses until someone configures them). */
+  public async getStatusesConfiguration(): Promise<StatusesConfiguration> {
+    const res = await this.es
+      .get<{ statuses?: CaseStatusConfiguration[]; pauseReasons?: string[] }>({
+        index: INVESTIGATION_CONFIG_INDEX,
+        id: `statuses:${this.deps.spaceId}`,
+      })
+      .catch((error) => {
+        if (error?.meta?.statusCode === 404) return undefined;
+        throw error;
+      });
+    return {
+      statuses: getEffectiveStatuses(res?._source?.statuses),
+      pauseReasons: res?._source?.pauseReasons ?? [],
+      version:
+        res?._seq_no !== undefined && res?._primary_term !== undefined
+          ? encodeVersion(res._seq_no, res._primary_term)
+          : null,
+    };
+  }
+
+  public async saveStatusesConfiguration(
+    req: StatusesConfiguration
+  ): Promise<StatusesConfiguration> {
+    if (!(await this.deps.canManageSettings())) {
+      throw Boom.forbidden('You need the Cases settings privilege to change statuses.');
     }
-    return types;
+    const current = await this.getStatusesConfiguration();
+    if ((req.version ?? null) !== (current.version ?? null)) {
+      throw Boom.conflict('The statuses were changed by someone else. Reload and try again.');
+    }
+    const statuses = req.statuses.map((status) => ({ ...status, label: status.label.trim() }));
+    const pauseReasons = req.pauseReasons.map((reason) => reason.trim());
+    const problem =
+      validateStatusesConfiguration(statuses, current.statuses) ??
+      validatePauseReasons(pauseReasons, statuses);
+    if (problem) throw Boom.badRequest(problem);
+    await this.es.index({
+      index: INVESTIGATION_CONFIG_INDEX,
+      id: `statuses:${this.deps.spaceId}`,
+      refresh: true,
+      ...(current.version ? decodeVersion(current.version) : { op_type: 'create' as const }),
+      document: {
+        doc_type: 'statuses',
+        space_id: this.deps.spaceId,
+        statuses,
+        pauseReasons,
+        updated_at: now(),
+        updated_by: this.actor(),
+      },
+    });
+    return this.getStatusesConfiguration();
+  }
+
+  /** Investigation types are the owner's enabled Cases templates tagged `investigation-type`. */
+  public async listTypes(): Promise<InvestigationType[]> {
+    const { casesClient } = this.deps;
+    const found = await casesClient.templates.getAllTemplates({
+      owner: [INVESTIGATIONS_OWNER],
+      tags: [INVESTIGATION_TYPE_TEMPLATE_TAG],
+      page: 1,
+      perPage: 100,
+      sortField: 'name',
+      sortOrder: 'asc',
+      search: '',
+      author: [],
+      isDeleted: false,
+      isEnabled: true,
+    });
+    return Promise.all(
+      found.templates.map(async (template) => {
+        const { fields } = await casesClient.cases.getApplicableFields({
+          owner: INVESTIGATIONS_OWNER,
+          templateId: template.templateId,
+        });
+        return {
+          name: template.name,
+          template_id: template.templateId,
+          version: template.templateVersion,
+          description: template.description ?? null,
+          fields: fields.map((field) => ({
+            key: field.key,
+            name: field.name,
+            label: field.label,
+            type: field.type,
+            control: field.control,
+            mirror_key: getMirrorKey(field.name, field.type, field.control),
+            ...(field.options ? { options: [...field.options] } : {}),
+            required: field.required,
+            required_on_close: field.requiredOnClose,
+            display_only: field.displayOnly,
+          })),
+        };
+      })
+    );
   }
 
   public async listProcedureTemplates(): Promise<ProcedureTemplate[]> {
@@ -2422,11 +3230,10 @@ export class InvestigationsService {
         });
         for (const hit of res.hits.hits) {
           const source = alerts.find((a) => a.evidence.alert?.id === hit._id);
-          if (!source) continue;
-          for (const [field, type] of FIELDS) {
+          for (const [field, type] of source ? FIELDS : []) {
             const values = (hit.fields?.[field] as unknown[] | undefined) ?? [];
             for (const v of values) {
-              if (typeof v === 'string' && v.length && v.length < 2048) {
+              if (source && typeof v === 'string' && v.length && v.length < 2048) {
                 const key = v.toLowerCase();
                 if (!found.has(key)) found.set(key, { type, source });
               }
@@ -3321,21 +4128,18 @@ export class InvestigationsService {
     const ts = now();
     const got = await this.es.mget<StoredItem>({ index: INVESTIGATION_ITEMS_INDEX, ids });
     const updates: Array<{ id: string; version: string; patch: ItemPatch }> = [];
-    for (const raw of got.docs) {
-      const doc = raw as {
+    const evidenceDocs = (
+      got.docs as Array<{
         found?: boolean;
         _id: string;
         _source?: StoredItem;
         _seq_no?: number;
         _primary_term?: number;
-      };
-      if (
-        !doc.found ||
-        !doc._source ||
-        doc._source.record_id !== recordId ||
-        doc._source.kind !== 'evidence'
-      )
-        continue;
+      }>
+    ).filter(
+      (doc) => doc.found && doc._source?.record_id === recordId && doc._source.kind === 'evidence'
+    );
+    for (const doc of evidenceDocs) {
       const item = doc._source as unknown as EvidenceItem & { ref_num: number };
       let snapshot = item.evidence.snapshot ?? null;
       if (item.evidence.type === 'alert' && item.evidence.alert?.id && item.evidence.alert.index) {
@@ -3383,12 +4187,15 @@ export class InvestigationsService {
           };
         }
       }
-      if (!snapshot) continue;
-      updates.push({
-        id: doc._id,
-        version: encodeVersion(doc._seq_no, doc._primary_term) as string,
-        patch: { evidence: { snapshot, snapshot_hash: hashSnapshot(snapshot), preserved_at: ts } },
-      });
+      if (snapshot) {
+        updates.push({
+          id: doc._id,
+          version: encodeVersion(doc._seq_no, doc._primary_term) as string,
+          patch: {
+            evidence: { snapshot, snapshot_hash: hashSnapshot(snapshot), preserved_at: ts },
+          },
+        });
+      }
     }
     if (!updates.length) return [];
     const res = await this.bulkUpdateItems(recordId, { items: updates, actor });
@@ -3651,10 +4458,10 @@ export class InvestigationsService {
         index: INVESTIGATION_RECORDS_INDEX,
         ids: mergedIds,
       });
-      for (const raw of docs.docs) {
-        const d = raw as { found?: boolean; _source?: StoredRecord };
-        if (!d.found || !d._source || !this.canRead(d._source)) continue;
-        const r = d._source;
+      const readable = (docs.docs as Array<{ found?: boolean; _source?: StoredRecord }>)
+        .map((d) => (d.found ? d._source : undefined))
+        .filter((r): r is StoredRecord => r !== undefined && this.canRead(r));
+      for (const r of readable) {
         related.unshift({
           record: {
             id: r.id,
@@ -4036,9 +4843,29 @@ export class InvestigationsService {
     return res.hits.hits[0]?._source?.id ?? null;
   }
 
+  /** Required (now or on close) template fields of the record that have no value, at most 8. */
+  private async emptyRequiredFields(
+    record: StoredRecord,
+    values: Record<string, string>
+  ): Promise<Array<{ key: string; label: string; onClose: boolean }>> {
+    if (!record.template_id) return [];
+    const { fields } = await this.deps.casesClient.cases
+      .getApplicableFields({ caseId: record.case_id })
+      .catch(() => ({ fields: [] }));
+    return fields
+      .filter((field) => !field.displayOnly && (field.required || field.requiredOnClose))
+      .filter((field) => {
+        const value = values[field.key];
+        return value === undefined || value === '' || value === '[]';
+      })
+      .slice(0, 8)
+      .map((field) => ({ key: field.key, label: field.label, onClose: !field.required }));
+  }
+
   /** Compact record state for the agent, built from the record and its five newest items. */
   public async buildDigest(recordId: string): Promise<string> {
-    const { record } = await this.load(recordId);
+    const { record, theCase } = await this.load(recordId);
+    const emptyFields = await this.emptyRequiredFields(record, theCase.extended_fields ?? {});
     const newest = await this.es.search<StoredItem>({
       index: INVESTIGATION_ITEMS_INDEX,
       size: INVESTIGATION_LIMITS.digestNewestItems,
@@ -4085,6 +4912,13 @@ export class InvestigationsService {
       } suspected | Tasks: ${c.tasks_done}/${c.tasks - c.tasks_skipped} done, ${
         c.required_tasks_left
       } required left | Proposals pending: ${c.proposals_pending}`,
+      ...(emptyFields.length
+        ? [
+            `Empty required fields: ${emptyFields
+              .map((f) => `${f.label} (${f.key}${f.onClose ? ', to close' : ''})`)
+              .join('; ')}`,
+          ]
+        : []),
       'Newest items:',
       ...newest.hits.hits.map((h) => {
         const s = h._source as StoredItem & { evidence?: { type?: string } };

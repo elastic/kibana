@@ -66,6 +66,7 @@ export const platformCoreCasesTools = {
   investigationSetTaskStatus: casesTool('investigation_set_task_status'),
   investigationUpsertEntity: casesTool('investigation_upsert_entity'),
   investigationProposeAction: casesTool('investigation_propose_action'),
+  investigationUpdateRecord: casesTool('investigation_update_record'),
 } as const;
 
 /**

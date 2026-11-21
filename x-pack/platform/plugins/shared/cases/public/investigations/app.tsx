@@ -10,9 +10,14 @@ import { Redirect } from 'react-router-dom';
 import type { History } from 'history';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
+import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { canUseCases } from '../client/helpers/can_use_cases';
+import type { UnifiedAttachmentTypeRegistry } from '../client/attachment_framework/unified_attachment_registry';
+import { CasesProvider } from '../components/cases_context';
 import type { CasesPublicStartDependencies } from '../types';
 import { DetailPage } from './components/detail/detail_page';
 import { QueuePage } from './components/queue/queue_page';
@@ -21,7 +26,11 @@ export interface InvestigationsAppProps {
   coreStart: CoreStart;
   pluginsStart: CasesPublicStartDependencies;
   history: History;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
+  getFilesClient: (scope: string) => ScopedFilesClient;
 }
+
+const CASES_OWNERS = [SECURITY_SOLUTION_OWNER];
 
 const rootStyles = css`
   display: flex;
@@ -44,25 +53,47 @@ export const InvestigationsApp: React.FC<InvestigationsAppProps> = ({
   coreStart,
   pluginsStart,
   history,
+  unifiedAttachmentTypeRegistry,
+  getFilesClient,
 }) => {
   const queryClient = useMemo(createQueryClient, []);
-  // Core services win over plugin contracts that share a name, such as `security`.
-  const services = useMemo(() => ({ ...pluginsStart, ...coreStart }), [coreStart, pluginsStart]);
+  // The plugin `security` contract (with `userProfiles`, needed by the Cases user picker) replaces
+  // the core `security` service, which only has `authc` and `serviceAccounts`.
+  const services = useMemo(
+    () => ({ ...pluginsStart, ...coreStart, security: pluginsStart.security }),
+    [coreStart, pluginsStart]
+  );
+  const permissions = useMemo(
+    () => canUseCases(coreStart.application.capabilities)(CASES_OWNERS),
+    [coreStart.application.capabilities]
+  );
+  const casesContextValue = useMemo(
+    () => ({
+      owner: CASES_OWNERS,
+      permissions,
+      unifiedAttachmentTypeRegistry,
+      getFilesClient,
+    }),
+    [permissions, unifiedAttachmentTypeRegistry, getFilesClient]
+  );
 
   return (
     <KibanaContextProvider services={services}>
       <QueryClientProvider client={queryClient}>
-        <Router history={history}>
-          <div css={rootStyles} data-test-subj="investigationsApp">
-            <Routes>
-              <Route exact path="/" component={QueuePage} />
-              <Route exact path="/:id" component={DetailPage} />
-              <Route path="*">
-                <Redirect to="/" />
-              </Route>
-            </Routes>
-          </div>
-        </Router>
+        {/* Shares the app's query client, so every hook of the app and of Cases uses one cache. */}
+        <CasesProvider value={casesContextValue} queryClient={queryClient}>
+          <Router history={history}>
+            <div css={rootStyles} data-test-subj="investigationsApp">
+              <Routes>
+                <Route exact path="/" component={QueuePage} />
+                <Route exact path="/:id" component={DetailPage} />
+                <Route path="*">
+                  <Redirect to="/" />
+                </Route>
+              </Routes>
+            </div>
+          </Router>
+        </CasesProvider>
       </QueryClientProvider>
     </KibanaContextProvider>
   );

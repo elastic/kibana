@@ -74,6 +74,9 @@ export const TYPE_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Select a type',
   }
 );
+export const TYPES_NONE = i18n.translate('xpack.cases.investigations.create.typesNone', {
+  defaultMessage: 'There are no investigation types yet. Add one on the Cases templates page.',
+});
 export const TYPES_ERROR = i18n.translate('xpack.cases.investigations.create.typesError', {
   defaultMessage: 'Could not load the investigation types.',
 });
@@ -109,32 +112,6 @@ export const TYPE_FIELDS_SECTION = (type: string) =>
     defaultMessage: '{type} details',
     values: { type },
   });
-export const FIELD_NO_OPTION = i18n.translate('xpack.cases.investigations.create.fieldNoOption', {
-  defaultMessage: 'Not set',
-});
-export const FIELD_NUMBER_INVALID = i18n.translate(
-  'xpack.cases.investigations.create.fieldNumberInvalid',
-  {
-    defaultMessage: 'Enter a number.',
-  }
-);
-export const FIELD_INTEGER_INVALID = i18n.translate(
-  'xpack.cases.investigations.create.fieldIntegerInvalid',
-  {
-    defaultMessage: 'Enter a whole number.',
-  }
-);
-export const FIELD_DATE_INVALID = i18n.translate(
-  'xpack.cases.investigations.create.fieldDateInvalid',
-  {
-    defaultMessage: 'Enter a valid date and time, for example 2026-11-20T14:00:00Z.',
-  }
-);
-export const FIELD_DATE_PLACEHOLDER = i18n.translate(
-  'xpack.cases.investigations.create.fieldDatePlaceholder',
-  { defaultMessage: '2026-11-20T14:00:00Z' }
-);
-
 export const ENTITIES_LABEL = i18n.translate('xpack.cases.investigations.create.entitiesLabel', {
   defaultMessage: 'Hosts and users involved',
 });

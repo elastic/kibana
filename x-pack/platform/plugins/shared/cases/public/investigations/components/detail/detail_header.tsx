@@ -197,6 +197,7 @@ RestrictedBadge.displayName = 'RestrictedBadge';
 
 interface ActionPanelsOptions {
   hasDetermination: boolean;
+  hasType: boolean;
   isClosed: boolean;
   isMerged: boolean;
   openModal: (name: ModalName) => void;
@@ -209,6 +210,7 @@ interface ActionPanelsOptions {
  */
 const useActionPanels = ({
   hasDetermination,
+  hasType,
   isClosed,
   isMerged,
   openModal,
@@ -251,6 +253,13 @@ const useActionPanels = ({
             'data-test-subj': 'investigationActionMerge',
           },
           {
+            name: hasType ? i18n.CHANGE_TYPE : i18n.APPLY_TYPE,
+            icon: ICONS.template,
+            onClick: choose('changeType'),
+            disabled: isMerged,
+            'data-test-subj': 'investigationActionChangeType',
+          },
+          {
             name: modalsI18n.HEADER_RESTRICT_ACCESS,
             icon: ICONS.restricted,
             onClick: choose('restrict'),
@@ -276,7 +285,7 @@ const useActionPanels = ({
         ],
       },
     ];
-  }, [hasDetermination, isClosed, isMerged, openModal, closeMenu]);
+  }, [hasDetermination, hasType, isClosed, isMerged, openModal, closeMenu]);
 
 export interface DetailHeaderProps {
   record: InvestigationRecord;
@@ -306,6 +315,7 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({ record, openModal })
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
   const panels = useActionPanels({
     hasDetermination: Boolean(record.analyst_verdict),
+    hasType: Boolean(record.template_id),
     isClosed,
     isMerged,
     openModal,

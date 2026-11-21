@@ -22,6 +22,21 @@ Waits for Kibana, then creates or updates: POC users (`braxton.w`, `priya.k`, `d
 
 If the investigation tools are not registered yet, the agent step prints a warning and reports `pending`. Re-run once Kibana has the tools.
 
+### Investigation types
+
+An investigation type is a Cases template (templates v2) of owner `securitySolution` tagged `investigation-type`; `GET /internal/cases/investigations/_types` lists them with their fields. Setup creates or updates (new template version) four of them. The names must stay `Malware`, `Phishing`, `Account compromise` and `Alert triage`, because the default procedure is picked by type name.
+
+Every type has guidance (Markdown, display only), business unit (select), impact (text, required to close), data classification (select, required, default Internal), ticket (text, pattern `SEC-1234`) and root cause notes (textarea, 20 to 2,000 characters, required to close). On top of that:
+
+| Type | Extra fields and rules |
+|---|---|
+| Malware | file hash (SHA-256 pattern), hosts affected (number 0 to 10,000), observed behaviors (checkbox group), containment done (toggle), contained at (date, shown and required only when containment done), remediation (select, required to close) |
+| Phishing | sender (email pattern), reported at (date), affected users (number 0 to 100,000), link clicked (toggle), users who clicked (number, shown and required only when link clicked), credentials entered (radio), escalation contacts (user picker), mailbox purge (radio, required to close) |
+| Account compromise | affected business units (checkbox group), data exfiltrated (radio), exfiltration volume (number, shown and required only when data exfiltrated is Yes), escalation contacts (user picker), credentials reset (radio, required to close) |
+| Alert triage | alert count (number 1 to 100,000), reviewer (single user picker), tuning action (select, required to close) |
+
+Records are created with `template_id` and `extended_fields` (Cases storage format: strings keyed `<name>_as_<type>`; toggles `"true"`/`"false"`, checkbox groups and user pickers as JSON array strings). Cases validates every rule. The record keeps a typed copy in `fields.<name>_<keyword|text|long|double|bool|date>` for queue filters, sorting and columns.
+
 ## Mock model
 
 ```sh

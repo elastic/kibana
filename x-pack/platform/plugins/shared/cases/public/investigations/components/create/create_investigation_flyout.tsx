@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
@@ -38,21 +39,27 @@ import type {
   InvestigationSeverity,
   RelatedRecord,
 } from '../../../../common/investigations/types';
+import { parseCaseFieldErrors } from '../../../../common/investigations/template_fields';
 import { checkDuplicates } from '../../api/client';
 import { investigationKeys } from '../../api/query_keys';
 import {
+  getHttpErrorMessage,
   useCapabilities,
   useCreateRecord,
   useDuplicateCheck,
   useInvestigationTypes,
 } from '../../hooks';
 import { useInvestigationsServices } from '../../services';
+import { collectExtendedFieldValues } from '../fields/field_utils';
+import type { ExtendedFieldsFormApi } from '../fields/extended_fields_form';
+import { ManageTypesLink } from '../fields/manage_types_link';
+import { ServerErrorsCallout } from '../fields/server_errors_callout';
 import { ConfirmModal } from '../shared/confirm_modal';
 import * as sharedI18n from '../shared/translations';
 import { DuplicateStatus } from './duplicate_callout';
-import { TypeFields } from './type_fields';
+import { TypeFieldsSection } from './type_fields_section';
 import * as i18n from './translations';
-import { EMPTY_FORM, buildFields, hasErrors, validateForm } from './validation';
+import { EMPTY_FORM, hasErrors, validateForm } from './validation';
 import type { CreateFormValues } from './validation';
 
 const DUPLICATE_DEBOUNCE_MS = 500;
@@ -98,7 +105,11 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
   const { data: capabilities } = useCapabilities();
   const { mutate: createRecord, isLoading: isCreating } = useCreateRecord({
     onSuccess: ({ record }) => onCreated(record.id),
+    silentErrors: true,
   });
+  const fieldsFormRef = useRef<ExtendedFieldsFormApi | null>(null);
+  const [areFieldsDirty, setAreFieldsDirty] = useState(false);
+  const [serverErrors, setServerErrors] = useState<string[]>([]);
 
   const [values, setValues] = useState<CreateFormValues>(EMPTY_FORM);
   const [showErrors, setShowErrors] = useState(false);
@@ -108,19 +119,19 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
 
   const types = useMemo(() => typesData?.types ?? [], [typesData]);
-  const selectedType = types.find(({ name }) => name === values.investigationType);
+  const selectedType = types.find(
+    ({ template_id: templateId }) => templateId === values.templateId
+  );
   const agentUnavailable = capabilities ? !capabilities.agent_builder_available : false;
 
   // Preselect the first type once the list arrives.
   useEffect(() => {
-    if (values.investigationType === '' && types.length > 0) {
+    if (values.templateId === '' && types.length > 0) {
       setValues((current) =>
-        current.investigationType === ''
-          ? { ...current, investigationType: types[0].name }
-          : current
+        current.templateId === '' ? { ...current, templateId: types[0].template_id } : current
       );
     }
-  }, [types, values.investigationType]);
+  }, [types, values.templateId]);
 
   const duplicateRequest = useMemo(
     () => ({
@@ -135,14 +146,14 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
   const liveDuplicates = !isDebouncing ? duplicateQuery.data?.related ?? [] : [];
   const visibleDuplicates = submitDuplicates ?? liveDuplicates;
 
-  const errors = useMemo(() => validateForm(values, selectedType), [values, selectedType]);
+  const errors = useMemo(() => validateForm(values), [values]);
   const isDirty =
     values.title !== '' ||
     values.description !== '' ||
     values.tags.length > 0 ||
     values.entities.length > 0 ||
     values.alertIds.length > 0 ||
-    Object.keys(values.fieldDrafts).length > 0;
+    areFieldsDirty;
 
   const update = useCallback((change: Partial<CreateFormValues>) => {
     setValues((current) => ({ ...current, ...change }));
@@ -157,17 +168,35 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
   const buildRequest = (): CreateRecordRequest => ({
     title: values.title.trim(),
     description: values.description.trim(),
-    investigation_type: values.investigationType,
+    template_id: values.templateId,
+    extended_fields: collectExtendedFieldValues(fieldsFormRef.current?.getValues() ?? {}),
     priority: values.priority,
     severity: values.severity,
     tags: values.tags,
-    fields: buildFields(selectedType, values.fieldDrafts),
     ai_enabled: values.aiEnabled && !agentUnavailable,
   });
 
+  /** Shows what Cases refused next to the fields it names; the rest is listed in the flyout. */
+  const sendRequest = () => {
+    setServerErrors([]);
+    createRecord(buildRequest(), {
+      onError: (error) => {
+        const message = getHttpErrorMessage(error);
+        const fieldErrors = parseCaseFieldErrors(message);
+        if (fieldErrors.length === 0) {
+          setServerErrors([message]);
+          return;
+        }
+        setServerErrors(fieldsFormRef.current?.showServerErrors(fieldErrors) ?? [message]);
+      },
+    });
+  };
+
   const submit = async () => {
     setShowErrors(true);
-    if (hasErrors(errors)) {
+    // Validate the type's fields too, so every problem is marked at once.
+    const areFieldsValid = (await fieldsFormRef.current?.trigger()) ?? true;
+    if (hasErrors(errors) || !areFieldsValid) {
       return;
     }
     const hasIdentifiers = values.entities.length > 0 || values.alertIds.length > 0;
@@ -189,12 +218,12 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
         setIsCheckingOnSubmit(false);
       }
     }
-    createRecord(buildRequest());
+    sendRequest();
   };
 
   const createAnyway = () => {
     setConfirmedDuplicates(true);
-    createRecord(buildRequest());
+    sendRequest();
   };
 
   const requestClose = () => {
@@ -206,7 +235,6 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
   };
 
   const showError = (message: string | undefined) => (showErrors ? message : undefined);
-  const fieldErrors = showErrors ? errors.fields : {};
 
   return (
     <>
@@ -277,21 +305,37 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
             <EuiFormRow
               label={i18n.TYPE_LABEL}
               helpText={i18n.TYPE_HELP}
+              labelAppend={<ManageTypesLink />}
               fullWidth
-              isInvalid={Boolean(showError(errors.investigationType)) || isTypesError}
-              error={isTypesError ? i18n.TYPES_ERROR : showError(errors.investigationType)}
+              isInvalid={Boolean(showError(errors.templateId)) || isTypesError}
+              error={isTypesError ? i18n.TYPES_ERROR : showError(errors.templateId)}
             >
               <EuiSelect
                 fullWidth
                 isLoading={isLoadingTypes}
-                hasNoInitialSelection={values.investigationType === ''}
-                options={types.map(({ name }) => ({ value: name, text: name }))}
-                value={values.investigationType}
-                isInvalid={Boolean(showError(errors.investigationType)) || isTypesError}
-                onChange={(event) => update({ investigationType: event.target.value })}
+                hasNoInitialSelection={values.templateId === ''}
+                options={types.map(({ name, template_id: templateId }) => ({
+                  value: templateId,
+                  text: name,
+                }))}
+                value={values.templateId}
+                isInvalid={Boolean(showError(errors.templateId)) || isTypesError}
+                onChange={(event) => {
+                  setServerErrors([]);
+                  update({ templateId: event.target.value });
+                }}
                 data-test-subj="investigationCreateType"
               />
             </EuiFormRow>
+            {!isLoadingTypes && !isTypesError && types.length === 0 ? (
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                color="warning"
+                title={i18n.TYPES_NONE}
+                data-test-subj="investigationCreateNoTypes"
+              />
+            ) : null}
             <EuiFlexGroup gutterSize="m" responsive={false}>
               <EuiFlexItem>
                 <EuiFormRow label={i18n.PRIORITY_LABEL} fullWidth>
@@ -343,22 +387,12 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
               />
             </EuiFormRow>
 
-            {selectedType && selectedType.fields.length > 0 ? (
-              <>
-                <EuiHorizontalRule margin="m" />
-                <EuiTitle size="xxs">
-                  <h3>{i18n.TYPE_FIELDS_SECTION(selectedType.name)}</h3>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <TypeFields
-                  fields={selectedType.fields}
-                  drafts={values.fieldDrafts}
-                  errors={fieldErrors}
-                  onChange={(key, value) =>
-                    update({ fieldDrafts: { ...values.fieldDrafts, [key]: value } })
-                  }
-                />
-              </>
+            {selectedType ? (
+              <TypeFieldsSection
+                type={selectedType}
+                formApiRef={fieldsFormRef}
+                onDirtyChange={setAreFieldsDirty}
+              />
             ) : null}
 
             <EuiHorizontalRule margin="m" />
@@ -408,6 +442,10 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
             />
 
             <EuiHorizontalRule margin="m" />
+            <ServerErrorsCallout
+              messages={serverErrors}
+              data-test-subj="investigationCreateServerErrors"
+            />
             <EuiFormRow fullWidth helpText={agentUnavailable ? i18n.AI_UNAVAILABLE : i18n.AI_HELP}>
               <EuiSwitch
                 label={i18n.AI_LABEL}

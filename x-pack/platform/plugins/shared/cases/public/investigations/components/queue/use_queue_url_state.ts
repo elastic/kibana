@@ -18,7 +18,10 @@ import { INVESTIGATION_LIMITS } from '../../../../common/investigations/constant
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 export const DEFAULT_PAGE_SIZE = 25;
 export const DEFAULT_SORT_FIELD = 'updated_at';
-export const BUSINESS_UNIT_FIELD_KEY = 'business_unit_keyword';
+
+/** Mirror keys look like `<name>_keyword`; anything else in the URL is ignored. */
+const MIRROR_KEY_PATTERN = /^[a-z0-9_]+$/i;
+const FIELD_SORT_PATTERN = /^fields\.[a-z0-9_]+$/i;
 
 export interface QueueState {
   search: string;
@@ -28,7 +31,10 @@ export interface QueueState {
   verdict: Verdict[];
   /** A username, or `unassigned`. */
   owner: string | undefined;
-  businessUnit: string | undefined;
+  /** Form field filters from the investigation types: mirror key to the value to match. */
+  fieldFilters: Record<string, string>;
+  /** Mirror keys of the form fields shown as extra columns. */
+  columns: string[];
   sortField: string;
   sortOrder: 'asc' | 'desc';
   /** Zero based. */
@@ -43,7 +49,8 @@ export const DEFAULT_QUEUE_STATE: QueueState = {
   investigationType: [],
   verdict: [],
   owner: undefined,
-  businessUnit: undefined,
+  fieldFilters: {},
+  columns: [],
   sortField: DEFAULT_SORT_FIELD,
   sortOrder: 'desc',
   pageIndex: 0,
@@ -65,8 +72,20 @@ export const SORTABLE_FIELDS: readonly string[] = [
   'created_at',
   'counters.alerts',
   'counters.evidence',
-  `fields.${BUSINESS_UNIT_FIELD_KEY}`,
 ];
+
+/** Form fields sort on `fields.<mirror key>`; the server accepts any such key. */
+export const isSortableField = (field: string): boolean =>
+  SORTABLE_FIELDS.includes(field) || FIELD_SORT_PATTERN.test(field);
+
+/** One `field` param, `<mirror key>:<value>`, split at the first colon. */
+const parseFieldFilter = (param: string): [string, string] | undefined => {
+  const separator = param.indexOf(':');
+  if (separator <= 0) return undefined;
+  const key = param.slice(0, separator);
+  const value = param.slice(separator + 1);
+  return MIRROR_KEY_PATTERN.test(key) && value.length > 0 ? [key, value] : undefined;
+};
 
 const pickAllowed = <T extends string>(values: string[], allowed: readonly T[]): T[] =>
   allowed.filter((candidate) => values.includes(candidate));
@@ -84,8 +103,16 @@ export const parseQueueState = (search: string): QueueState => {
     investigationType: params.getAll('type'),
     verdict: pickAllowed(params.getAll('verdict'), VERDICTS),
     owner: params.get('owner') ?? undefined,
-    businessUnit: params.get('unit') ?? undefined,
-    sortField: SORTABLE_FIELDS.includes(sortField) ? sortField : DEFAULT_SORT_FIELD,
+    fieldFilters: Object.fromEntries(
+      params.getAll('field').flatMap((param) => {
+        const parsed = parseFieldFilter(param);
+        return parsed ? [parsed] : [];
+      })
+    ),
+    columns: Array.from(
+      new Set(params.getAll('col').filter((key) => MIRROR_KEY_PATTERN.test(key)))
+    ),
+    sortField: isSortableField(sortField) ? sortField : DEFAULT_SORT_FIELD,
     sortOrder: params.get('dir') === 'asc' ? 'asc' : 'desc',
     pageIndex: Number.isInteger(page) && page > 1 ? page - 1 : 0,
     pageSize: PAGE_SIZE_OPTIONS.some((option) => option === pageSize)
@@ -103,7 +130,10 @@ export const serializeQueueState = (state: QueueState): string => {
   state.investigationType.forEach((value) => params.append('type', value));
   state.verdict.forEach((value) => params.append('verdict', value));
   if (state.owner) params.set('owner', state.owner);
-  if (state.businessUnit) params.set('unit', state.businessUnit);
+  Object.entries(state.fieldFilters).forEach(([key, value]) =>
+    params.append('field', `${key}:${value}`)
+  );
+  state.columns.forEach((key) => params.append('col', key));
   if (state.sortField !== DEFAULT_SORT_FIELD || state.sortOrder !== 'desc') {
     params.set('sort', state.sortField);
     params.set('dir', state.sortOrder);
@@ -121,7 +151,9 @@ export const toFindRequest = (state: QueueState): FindRecordsRequest => ({
   investigation_type: state.investigationType.length ? state.investigationType : undefined,
   verdict: state.verdict.length ? state.verdict : undefined,
   owner: state.owner,
-  field: state.businessUnit ? [`${BUSINESS_UNIT_FIELD_KEY}:${state.businessUnit}`] : undefined,
+  field: Object.keys(state.fieldFilters).length
+    ? Object.entries(state.fieldFilters).map(([key, value]) => `${key}:${value}`)
+    : undefined,
   sort_field: state.sortField,
   sort_order: state.sortOrder,
   page: state.pageIndex + 1,
@@ -135,7 +167,7 @@ export const hasActiveFilters = (state: QueueState): boolean =>
   state.investigationType.length > 0 ||
   state.verdict.length > 0 ||
   state.owner !== undefined ||
-  state.businessUnit !== undefined;
+  Object.keys(state.fieldFilters).length > 0;
 
 export interface UseQueueUrlState {
   state: QueueState;
@@ -167,12 +199,13 @@ export const useQueueUrlState = (): UseQueueUrlState => {
       pathname: history.location.pathname,
       search: serializeQueueState({
         ...DEFAULT_QUEUE_STATE,
+        columns: state.columns,
         sortField: state.sortField,
         sortOrder: state.sortOrder,
         pageSize: state.pageSize,
       }),
     });
-  }, [history, state.pageSize, state.sortField, state.sortOrder]);
+  }, [history, state.columns, state.pageSize, state.sortField, state.sortOrder]);
 
   return { state, update, clearFilters };
 };

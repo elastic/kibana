@@ -19,6 +19,7 @@ import { CaseDetailsAppHeader } from './components/case_details_header';
 import { CaseViewTabContent } from './components/case_view_tab_content';
 import { CaseDetailsTour } from './tour/case_details_tour';
 import { useCaseRefreshRef } from './hooks/use_case_refresh_ref';
+import { InvestigationCallout } from './components/investigation_callout';
 
 export type CaseViewPageComponentProps = Omit<CaseViewPageProps, 'fetchCase'>;
 
@@ -52,6 +53,7 @@ export const CaseViewPage = React.memo<CaseViewPageComponentProps>(({ caseData, 
         {KibanaServices.getConfig()?.attachments?.enabled === true && (
           <LensAttachReturnConsumer caseId={caseData.id} />
         )}
+        <InvestigationCallout caseData={caseData} />
         <CaseViewTabContent
           caseData={caseData}
           searchTerm={searchTerm}

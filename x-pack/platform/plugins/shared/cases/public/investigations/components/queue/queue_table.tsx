@@ -18,7 +18,9 @@ import { RelativeTime } from '../shared/relative_time';
 import { StatusBadge } from '../shared/status_badge';
 import { VerdictBadge, getEffectiveVerdict } from '../shared/verdict_badge';
 import * as i18n from './translations';
-import { BUSINESS_UNIT_FIELD_KEY, PAGE_SIZE_OPTIONS } from './use_queue_url_state';
+import { formatFieldValue } from './use_queue_fields';
+import type { QueueFieldDef } from './use_queue_fields';
+import { PAGE_SIZE_OPTIONS } from './use_queue_url_state';
 import type { QueueState } from './use_queue_url_state';
 
 export interface QueueTableProps {
@@ -27,6 +29,8 @@ export interface QueueTableProps {
   state: QueueState;
   isLoading: boolean;
   noItemsMessage: React.ReactNode;
+  /** Form fields shown as extra columns after the built-in ones. */
+  fieldColumns: QueueFieldDef[];
   onChange: (change: Partial<QueueState>) => void;
 }
 
@@ -69,6 +73,7 @@ export const QueueTable: React.FC<QueueTableProps> = ({
   state,
   isLoading,
   noItemsMessage,
+  fieldColumns,
   onChange,
 }) => {
   const columns = useMemo<Array<EuiBasicTableColumn<InvestigationRecord>>>(
@@ -94,13 +99,7 @@ export const QueueTable: React.FC<QueueTableProps> = ({
         sortable: true,
         truncateText: true,
         render: (_value: string, record) => {
-          const unit = record.fields[BUSINESS_UNIT_FIELD_KEY];
-          const secondary = [
-            record.investigation_type,
-            typeof unit === 'string' && unit.length > 0 ? unit : undefined,
-          ]
-            .filter(Boolean)
-            .join(' \u00b7 ');
+          const secondary = record.investigation_type;
           return (
             <>
               <EuiToolTip content={record.title} anchorProps={{ css: truncateStyle }}>
@@ -214,8 +213,37 @@ export const QueueTable: React.FC<QueueTableProps> = ({
         width: '96px',
         render: (value: string) => <RelativeTime value={value} />,
       },
+      ...fieldColumns.map(
+        ({ mirrorKey, label }): EuiBasicTableColumn<InvestigationRecord> => ({
+          field: `fields.${mirrorKey}`,
+          name: label,
+          sortable: true,
+          truncateText: true,
+          width: '140px',
+          render: (_value: unknown, record) => {
+            const text = formatFieldValue(
+              record.fields[mirrorKey],
+              i18n.FILTER_FIELDS_YES,
+              i18n.FILTER_FIELDS_NO
+            );
+            return text === null ? (
+              <EuiText size="s" color="subdued">
+                {i18n.NO_VALUE}
+              </EuiText>
+            ) : (
+              <span
+                css={truncateStyle}
+                title={text}
+                data-test-subj={`investigationFieldCell-${mirrorKey}`}
+              >
+                {text}
+              </span>
+            );
+          },
+        })
+      ),
     ],
-    []
+    [fieldColumns]
   );
 
   const cappedTotal = Math.min(total, INVESTIGATION_LIMITS.maxDeepPageFrom);

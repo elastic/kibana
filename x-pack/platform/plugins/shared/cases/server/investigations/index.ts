@@ -22,6 +22,8 @@ import { ensureInvestigationIndices } from './indices';
 import { InvestigationsService } from './service';
 import type { AlertsClientLike } from './service';
 import { getInvestigationRoutes } from './routes';
+import type { GetCasesClientFn } from '../client/types';
+import { toActionSource } from '../../common/types/domain/user_action/source/v1';
 
 export { InvestigationsService } from './service';
 
@@ -47,7 +49,7 @@ export const setupInvestigations = ({
   core: CoreSetup<CasesServerStartDependencies>;
   config: ConfigType;
   logger: Logger;
-  getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
+  getCasesClient: GetCasesClientFn;
   getSpaceId: (request?: KibanaRequest) => string;
   agentBuilder?: AgentBuilderPluginSetup;
 }): InvestigationsSetup => {
@@ -137,6 +139,24 @@ export const setupInvestigations = ({
         });
         return hasAllRequested;
       },
+      getUserProfiles: async (uids) => {
+        if (!uids.length) return [];
+        const profiles = await pluginsStart.security.userProfiles.bulkGet({ uids: new Set(uids) });
+        return profiles.map((profile) => ({
+          uid: profile.uid,
+          username: profile.user.username,
+          fullName: profile.user.full_name || profile.user.username,
+        }));
+      },
+      canManageSettings: async () => {
+        const { authz } = pluginsStart.security;
+        if (!authz.mode.useRbacForRequest(request)) return true;
+        const check = authz.checkPrivilegesDynamicallyWithRequest(request);
+        const { hasAllRequested } = await check({
+          kibana: [authz.actions.cases.get(INVESTIGATIONS_OWNER, 'updateConfiguration')],
+        });
+        return hasAllRequested;
+      },
       getAlertsClient: async () =>
         (await pluginsStart.ruleRegistry.getRacClientWithRequest(
           request
@@ -173,7 +193,22 @@ export const setupInvestigations = ({
   return {
     routes,
     getServiceForRequest: async (request, opts) =>
-      buildService(request, await getCasesClient(request), opts?.asAgent),
+      buildService(
+        request,
+        await getCasesClient(
+          request,
+          opts?.asAgent
+            ? {
+                actionSource: toActionSource({
+                  type: 'agent',
+                  id: opts.asAgent.id,
+                  name: opts.asAgent.name,
+                }),
+              }
+            : undefined
+        ),
+        opts?.asAgent
+      ),
     start: async (coreStart) => {
       try {
         await ensureInvestigationIndices(coreStart.elasticsearch.client.asInternalUser, log);

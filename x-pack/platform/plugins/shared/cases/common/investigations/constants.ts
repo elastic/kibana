@@ -5,6 +5,19 @@
  * 2.0.
  */
 
+import {
+  MAX_ALERTS_PER_CASE,
+  MAX_BULK_CREATE_ATTACHMENTS,
+  MAX_BULK_GET_CASES,
+  MAX_CASE_ID_LENGTH,
+  MAX_CASES_PER_PAGE,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_DOCS_PER_PAGE,
+  MAX_FIELD_DEFINITIONS_PER_OWNER,
+  MAX_LENGTH_PER_TAG,
+  MAX_TAGS_PER_CASE,
+} from '../constants';
+
 export const INVESTIGATIONS_APP_ID = 'investigations' as const;
 export const INVESTIGATIONS_APP_PATH = '/app/investigations' as const;
 export const INVESTIGATIONS_OWNER = 'securitySolution' as const;
@@ -17,11 +30,14 @@ export const INVESTIGATION_CONFIG_INDEX = '.kibana-cases-investigation-config' a
 export const INVESTIGATIONS_INTERNAL_URL = '/internal/cases/investigations' as const;
 export const INVESTIGATIONS_FIND_URL = `${INVESTIGATIONS_INTERNAL_URL}/_find` as const;
 export const INVESTIGATIONS_DUPLICATES_URL = `${INVESTIGATIONS_INTERNAL_URL}/_duplicates` as const;
-export const INVESTIGATIONS_INDICATOR_LOOKUP_URL = `${INVESTIGATIONS_INTERNAL_URL}/_indicators` as const;
+export const INVESTIGATIONS_INDICATOR_LOOKUP_URL =
+  `${INVESTIGATIONS_INTERNAL_URL}/_indicators` as const;
 export const INVESTIGATIONS_TYPES_URL = `${INVESTIGATIONS_INTERNAL_URL}/_types` as const;
+export const INVESTIGATIONS_STATUSES_URL = `${INVESTIGATIONS_INTERNAL_URL}/_statuses` as const;
 export const INVESTIGATIONS_PROCEDURE_TEMPLATES_URL =
   `${INVESTIGATIONS_INTERNAL_URL}/_procedure_templates` as const;
-export const INVESTIGATIONS_CAPABILITIES_URL = `${INVESTIGATIONS_INTERNAL_URL}/_capabilities` as const;
+export const INVESTIGATIONS_CAPABILITIES_URL =
+  `${INVESTIGATIONS_INTERNAL_URL}/_capabilities` as const;
 
 export const getRecordUrl = (recordId: string): string =>
   `${INVESTIGATIONS_INTERNAL_URL}/${encodeURIComponent(recordId)}`;
@@ -31,27 +47,27 @@ export const getRecordItemUrl = (recordId: string, itemId: string): string =>
 export const getRecordActivityUrl = (recordId: string): string =>
   `${getRecordUrl(recordId)}/activity`;
 
-/** Hard bounds shared by the routes, the service and the UI. */
+/** Hard bounds shared by the routes, the service and the UI. Cases limits are reused where one exists. */
 export const INVESTIGATION_LIMITS = {
-  maxPerPage: 100,
+  maxPerPage: MAX_CASES_PER_PAGE,
   defaultPerPage: 50,
-  maxBulkItems: 1000,
-  maxAgentBulkItems: 100,
+  maxBulkItems: MAX_ALERTS_PER_CASE,
+  maxAgentBulkItems: MAX_BULK_CREATE_ATTACHMENTS,
   maxTitleLength: 512,
-  maxTextLength: 30000,
+  maxTextLength: MAX_DESCRIPTION_LENGTH,
   maxShortTextLength: 2048,
-  maxIdLength: 512,
-  maxTags: 200,
-  maxTagLength: 256,
-  maxFields: 200,
-  maxIdsPerArray: 1000,
+  maxIdLength: MAX_CASE_ID_LENGTH,
+  maxTags: MAX_TAGS_PER_CASE,
+  maxTagLength: MAX_LENGTH_PER_TAG,
+  maxFields: MAX_FIELD_DEFINITIONS_PER_OWNER,
+  maxIdsPerArray: MAX_BULK_GET_CASES,
   maxSearchLength: 1024,
   maxImportBytes: 10 * 1024 * 1024,
   maxSnapshotRows: 200,
   maxThreads: 100,
   maxRestrictedTo: 100,
   digestNewestItems: 5,
-  maxDeepPageFrom: 10000,
+  maxDeepPageFrom: MAX_DOCS_PER_PAGE,
 } as const;
 
 /** Display prefixes for item `ref` values (E12, C3, P1, T4, N2, L5, S7). */

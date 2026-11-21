@@ -425,3 +425,41 @@ export const HEADER_MERGED_BODY = i18n.translate(`${PREFIX}.headerMergedBody`, {
   defaultMessage:
     'This investigation is closed and its items moved to the primary investigation. Open the primary to keep working.',
 });
+
+/* Change type */
+export const CHANGE_TYPE_TITLE = i18n.translate(`${PREFIX}.changeTypeTitle`, {
+  defaultMessage: 'Change type',
+});
+export const APPLY_TYPE_TITLE = i18n.translate(`${PREFIX}.applyTypeTitle`, {
+  defaultMessage: 'Apply a type',
+});
+export const CHANGE_TYPE_LABEL = i18n.translate(`${PREFIX}.changeTypeLabel`, {
+  defaultMessage: 'Type',
+});
+export const CHANGE_TYPE_PLACEHOLDER = i18n.translate(`${PREFIX}.changeTypePlaceholder`, {
+  defaultMessage: 'Select a type',
+});
+export const CHANGE_TYPE_HINT = i18n.translate(`${PREFIX}.changeTypeHint`, {
+  defaultMessage:
+    "The current type's fields will be hidden, but their saved values stay on the investigation. Values with the same field name and kind are kept in the new type.",
+});
+export const CHANGE_TYPE_NO_TYPES = i18n.translate(`${PREFIX}.changeTypeNoTypes`, {
+  defaultMessage: 'There are no investigation types to choose from.',
+});
+export const CHANGE_TYPE_TYPES_ERROR = i18n.translate(`${PREFIX}.changeTypeTypesError`, {
+  defaultMessage: 'Could not load the investigation types.',
+});
+export const CHANGE_TYPE_SERVER_ERROR_TITLE = i18n.translate(
+  `${PREFIX}.changeTypeServerErrorTitle`,
+  {
+    defaultMessage: 'The type could not be changed',
+  }
+);
+
+/* Required on close */
+export const CLOSE_FIELDS_TITLE = i18n.translate(`${PREFIX}.closeFieldsTitle`, {
+  defaultMessage: 'Required before closing',
+});
+export const CLOSE_FIELDS_HELP = i18n.translate(`${PREFIX}.closeFieldsHelp`, {
+  defaultMessage: 'The type of this investigation needs these fields filled in to close it.',
+});

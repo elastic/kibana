@@ -92,6 +92,8 @@ export const useDuplicateCheck = (request: DuplicateCheckRequest, enabled: boole
 
 export const useCreateRecord = (options?: {
   onSuccess?: (response: CreateRecordResponse) => void;
+  /** The caller shows the error itself (next to a form field), so no toast. */
+  silentErrors?: boolean;
 }) => {
   const { http } = useInvestigationsServices();
   const queryClient = useQueryClient();
@@ -103,11 +105,20 @@ export const useCreateRecord = (options?: {
       void queryClient.invalidateQueries(investigationKeys.findAll());
       options?.onSuccess?.(response);
     },
-    onError: (error) => showError(error, i18n.CREATE_RECORD_ERROR),
+    onError: (error) => {
+      if (!options?.silentErrors) showError(error, i18n.CREATE_RECORD_ERROR);
+    },
   });
 };
 
-export const useUpdateRecord = (recordId: string, options?: { successMessage?: string }) => {
+export const useUpdateRecord = (
+  recordId: string,
+  options?: {
+    successMessage?: string;
+    /** The caller shows the error itself (next to a form field), so no toast. */
+    silentErrors?: boolean;
+  }
+) => {
   const { http } = useInvestigationsServices();
   const queryClient = useQueryClient();
   const { showError, showSuccess } = useInvestigationToasts();
@@ -120,11 +131,13 @@ export const useUpdateRecord = (recordId: string, options?: { successMessage?: s
       void queryClient.invalidateQueries(investigationKeys.recordScope(recordId));
       void queryClient.invalidateQueries(investigationKeys.findAll());
     },
-    onError: (error) => showError(error, i18n.UPDATE_RECORD_ERROR),
+    onError: (error) => {
+      if (!options?.silentErrors) showError(error, i18n.UPDATE_RECORD_ERROR);
+    },
   });
 };
 
-export const useCloseRecord = (recordId: string) => {
+export const useCloseRecord = (recordId: string, options?: { silentErrors?: boolean }) => {
   const { http } = useInvestigationsServices();
   const queryClient = useQueryClient();
   const { showError, showSuccess } = useInvestigationToasts();
@@ -135,7 +148,9 @@ export const useCloseRecord = (recordId: string) => {
       void queryClient.invalidateQueries(investigationKeys.recordScope(recordId));
       void queryClient.invalidateQueries(investigationKeys.findAll());
     },
-    onError: (error) => showError(error, i18n.CLOSE_RECORD_ERROR),
+    onError: (error) => {
+      if (!options?.silentErrors) showError(error, i18n.CLOSE_RECORD_ERROR);
+    },
   });
 };
 

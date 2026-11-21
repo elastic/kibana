@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -33,6 +33,7 @@ import {
   ROOT_CAUSES,
   VERDICT_LABELS,
 } from '../../../../common/investigations/types';
+import { parseCaseFieldErrors } from '../../../../common/investigations/template_fields';
 import type {
   InvestigationRecord,
   RecordCounters,
@@ -46,8 +47,12 @@ import {
   useItems,
 } from '../../hooks';
 import { ICONS } from '../../icons';
+import { collectExtendedFieldValues } from '../fields/field_utils';
+import type { ExtendedFieldsFormApi } from '../fields/extended_fields_form';
+import { ServerErrorsCallout } from '../fields/server_errors_callout';
 import { ErrorState } from '../shared/error_state';
 import { LoadingState } from '../shared/loading_state';
+import { CloseRequiredFields } from './close_required_fields';
 import type { InvestigationModalProps } from './modal_props';
 import * as i18n from './translations';
 
@@ -226,7 +231,11 @@ export const CloseModal: React.FC<InvestigationModalProps> = ({ record, onClose 
   const titleId = useGeneratedHtmlId();
   const formId = useGeneratedHtmlId({ prefix: 'investigationCloseForm' });
   const { getRecordPath, navigate } = useInvestigationsNavigation();
-  const { mutate: closeRecord, isLoading: isClosing } = useCloseRecord(record.id);
+  const { mutate: closeRecord, isLoading: isClosing } = useCloseRecord(record.id, {
+    silentErrors: true,
+  });
+  const requiredFieldsRef = useRef<ExtendedFieldsFormApi | null>(null);
+  const [areFieldsLoading, setAreFieldsLoading] = useState(true);
 
   const initialVerdict = record.analyst_verdict?.verdict ?? '';
   const [verdict, setVerdict] = useState<Verdict | ''>(initialVerdict);
@@ -235,7 +244,7 @@ export const CloseModal: React.FC<InvestigationModalProps> = ({ record, onClose 
   const [summary, setSummary] = useState(() => getCloseDraft(record, initialVerdict));
   const [isSummaryEdited, setIsSummaryEdited] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
+  const [serverErrors, setServerErrors] = useState<string[]>([]);
 
   const tasksQuery = useItems(record.id, {
     kind: ['task'],
@@ -273,18 +282,40 @@ export const CloseModal: React.FC<InvestigationModalProps> = ({ record, onClose 
     }
   };
 
-  const onSubmit = (event: React.FormEvent) => {
+  const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setServerError(null);
+    setServerErrors([]);
+    // Validate the fields the type needs too, so every problem is marked at once.
+    const areFieldsValid = (await requiredFieldsRef.current?.trigger()) ?? true;
     if (hasErrors || verdict === '') {
       setShowErrors(true);
       return;
     }
+    if (!areFieldsValid) {
+      return;
+    }
+    const extendedFields = collectExtendedFieldValues(requiredFieldsRef.current?.getValues() ?? {});
     closeRecord(
-      { verdict, reason, root_cause: rootCause, summary: summary.trim() },
+      {
+        verdict,
+        reason,
+        root_cause: rootCause,
+        summary: summary.trim(),
+        ...(Object.keys(extendedFields).length > 0 ? { extended_fields: extendedFields } : {}),
+      },
       {
         onSuccess: onClose,
-        onError: (error) => setServerError(getHttpErrorMessage(error)),
+        onError: (error) => {
+          // Errors that name a field are shown at it; the rest are listed in the modal.
+          const message = getHttpErrorMessage(error);
+          const fieldErrors = parseCaseFieldErrors(message);
+          setServerErrors(
+            fieldErrors.length > 0
+              ? requiredFieldsRef.current?.showServerErrors(fieldErrors) ??
+                  fieldErrors.map((fieldError) => fieldError.message)
+              : [message]
+          );
+        },
       }
     );
   };
@@ -317,6 +348,11 @@ export const CloseModal: React.FC<InvestigationModalProps> = ({ record, onClose 
         />
         <CloseNotices counters={record.counters} />
         <EuiSpacer size="m" />
+        <CloseRequiredFields
+          recordId={record.id}
+          formApiRef={requiredFieldsRef}
+          onLoadingChange={setAreFieldsLoading}
+        />
         <EuiForm
           component="form"
           id={formId}
@@ -392,18 +428,14 @@ export const CloseModal: React.FC<InvestigationModalProps> = ({ record, onClose 
             />
           </EuiFormRow>
         </EuiForm>
-        {serverError ? (
+        {serverErrors.length > 0 ? (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
-              announceOnMount
-              color="danger"
-              iconType={ICONS.error}
+            <ServerErrorsCallout
+              messages={serverErrors}
               title={i18n.CLOSE_SERVER_ERROR_TITLE}
               data-test-subj="investigationCloseServerError"
-            >
-              {serverError}
-            </EuiCallOut>
+            />
           </>
         ) : null}
       </EuiModalBody>
@@ -420,7 +452,9 @@ export const CloseModal: React.FC<InvestigationModalProps> = ({ record, onClose 
               type="submit"
               form={formId}
               isLoading={isClosing}
-              isDisabled={isBlocked || isCheckingTasks || hasTasksError || isClosing}
+              isDisabled={
+                isBlocked || isCheckingTasks || hasTasksError || isClosing || areFieldsLoading
+              }
               data-test-subj="investigationCloseConfirm"
             >
               {i18n.CLOSE_CONFIRM}

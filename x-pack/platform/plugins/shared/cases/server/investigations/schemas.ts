@@ -54,21 +54,49 @@ export const actorSchema = schema.object({
   id: str(512, 1),
   name: str(512, 1),
   on_behalf_of: optStr(512),
+  profile_uid: optStr(512),
 });
 
 const verdictSchema = lits(['true_positive', 'benign', 'inconclusive'] as const);
 const prioritySchema = lits(['low', 'medium', 'high', 'critical'] as const);
-const fieldsSchema = schema.recordOf(
-  schema.string({
-    maxLength: 128,
-    validate: (k) => (/^[a-z0-9_]+$/i.test(k) ? undefined : `Invalid field key "${k}"`),
-  }),
-  schema.nullable(schema.oneOf([str(L.maxShortTextLength), schema.number(), schema.boolean()])),
+/** Case `extended_fields`: `<name>_as_<type>` -> string value; Cases validates the content. */
+const extendedFieldsSchema = schema.recordOf(
+  schema.string({ minLength: 1, maxLength: 1000 }),
+  schema.string({ maxLength: 30000 }),
   {
     validate: (v) =>
       Object.keys(v).length > L.maxFields ? `At most ${L.maxFields} fields are allowed` : undefined,
   }
 );
+const templateRefSchema = schema.object({
+  id: schema.string({ minLength: 1, maxLength: 512 }),
+  version: schema.number({ min: 1, max: 100000 }),
+});
+const statusKeySchema = schema.string({
+  minLength: 1,
+  maxLength: 50,
+  validate: (v) =>
+    /^[a-z0-9_-]+$/.test(v)
+      ? undefined
+      : "Key must be lower case, a-z, 0-9, '_', and '-' are allowed",
+});
+const pauseReasonSchema = schema.string({ minLength: 1, maxLength: 50 });
+export const statusesBody = schema.object({
+  statuses: schema.arrayOf(
+    schema.object({
+      key: statusKeySchema,
+      label: schema.string({ minLength: 1, maxLength: 50 }),
+      category: lits(['open', 'in-progress', 'closed'] as const),
+      order: schema.number({ min: 0, max: 1000 }),
+      isDefault: schema.boolean(),
+      disabled: schema.boolean(),
+      pausesTimeTracking: schema.maybe(schema.boolean()),
+    }),
+    { maxSize: 30 }
+  ),
+  pauseReasons: schema.arrayOf(pauseReasonSchema, { maxSize: 10 }),
+  version: schema.maybe(schema.nullable(schema.string({ maxLength: 64 }))),
+});
 const tagsSchema = schema.arrayOf(str(L.maxTagLength, 1), { maxSize: L.maxTags });
 const originSchema = schema.object({
   type: lits(['user', 'rule', 'agent', 'automation'] as const),
@@ -387,11 +415,12 @@ export const createRecordBody = schema.object({
   // The record title is the case title, so the Cases bound applies.
   title: str(CASE_TITLE_MAX, 1),
   description: str(L.maxTextLength, 1),
-  investigation_type: str(256, 1),
+  investigation_type: schema.maybe(str(256, 1)),
+  template_id: schema.maybe(schema.nullable(str(512, 1))),
+  extended_fields: schema.maybe(extendedFieldsSchema),
   priority: schema.maybe(prioritySchema),
   severity: schema.maybe(prioritySchema),
   tags: schema.maybe(tagsSchema),
-  fields: schema.maybe(fieldsSchema),
   summary: optStr(L.maxTextLength),
   origin: schema.maybe(originSchema),
   ai_enabled: schema.maybe(schema.boolean()),
@@ -407,6 +436,8 @@ export const createRecordBody = schema.object({
 export const findRecordsQuery = schema.object({
   search: schema.maybe(str(L.maxSearchLength)),
   status: queryArray(lits(['open', 'in-progress', 'closed'] as const)),
+  status_key: queryArray(str(50)),
+  assignees: queryArray(str(512)),
   priority: queryArray(prioritySchema),
   severity: queryArray(prioritySchema),
   investigation_type: queryArray(str(256)),
@@ -437,6 +468,9 @@ const agentVerdictSchema = schema.object({
 });
 
 export const updateRecordBody = schema.object({
+  assignees: schema.maybe(schema.arrayOf(str(512, 1), { maxSize: 10 })),
+  status_key: schema.maybe(statusKeySchema),
+  pause_reason: schema.maybe(pauseReasonSchema),
   title: schema.maybe(str(CASE_TITLE_MAX, 1)),
   description: schema.maybe(str(L.maxTextLength, 1)),
   summary: optStr(L.maxTextLength),
@@ -444,8 +478,8 @@ export const updateRecordBody = schema.object({
   priority_note: optStr(512),
   severity: schema.maybe(prioritySchema),
   tags: schema.maybe(tagsSchema),
-  fields: schema.maybe(fieldsSchema),
-  investigation_type: schema.maybe(str(256, 1)),
+  extended_fields: schema.maybe(extendedFieldsSchema),
+  template: schema.maybe(schema.nullable(templateRefSchema)),
   stage: optStr(256),
   owner: schema.maybe(
     schema.nullable(schema.oneOf([actorSchema, schema.object({ self: schema.literal(true) })]))
@@ -466,6 +500,8 @@ export const updateRecordBody = schema.object({
 });
 
 export const closeRecordBody = schema.object({
+  status_key: schema.maybe(statusKeySchema),
+  extended_fields: schema.maybe(extendedFieldsSchema),
   verdict: verdictSchema,
   reason: str(256, 1),
   root_cause: str(256, 1),
@@ -637,3 +673,18 @@ export const procedureTemplateBody = schema.object({
 
 export const toArray = <T>(v: T | T[] | undefined): T[] | undefined =>
   v === undefined ? undefined : Array.isArray(v) ? v : [v];
+
+export const recordCommentParams = schema.object({ id: id(), comment_id: id() });
+export const findCommentsQuery = schema.object({
+  page: schema.maybe(schema.number({ min: 1, max: 10000 })),
+  per_page: schema.maybe(schema.number({ min: 1, max: 100 })),
+  sort_order: schema.maybe(lits(['asc', 'desc'] as const)),
+});
+export const addCommentBody = schema.object({
+  content: schema.string({ minLength: 1, maxLength: 30000 }),
+  reply_to: schema.maybe(id()),
+});
+export const updateCommentBody = schema.object({
+  content: schema.string({ minLength: 1, maxLength: 30000 }),
+  version: schema.string({ minLength: 1, maxLength: 512 }),
+});

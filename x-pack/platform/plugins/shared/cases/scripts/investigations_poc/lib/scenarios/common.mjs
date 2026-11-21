@@ -139,6 +139,116 @@ const chunk = (list, size) => {
   return out;
 };
 
+/* ------------------------------------------------------------------ */
+/* Investigation types (Cases templates) and extended fields           */
+/* ------------------------------------------------------------------ */
+
+let typesCache;
+/** Investigation types by template name, from `_types` (cached). */
+export const getTypes = async () => {
+  if (!typesCache) {
+    const { json } = await kbn('GET', `${BASE}/_types`);
+    typesCache = new Map((json.types ?? json).map((t) => [t.name, t]));
+  }
+  return typesCache;
+};
+
+export const resolveType = async (name) => {
+  const types = await getTypes();
+  const type = types.get(name);
+  if (!type) throw new Error(`Investigation type "${name}" not found in _types (have: ${[...types.keys()].join(', ')}). Run: node setup.mjs`);
+  return type;
+};
+
+const profileCache = new Map();
+/** `{ uid, name }` user picker item for a username, from the Cases suggest route. */
+export const resolveProfile = async (username) => {
+  if (!profileCache.has(username)) {
+    const { json } = await kbn('POST', '/internal/cases/_suggest_user_profiles', { name: username, owners: [OWNER], size: 5 });
+    const hit = (json ?? []).find((p) => p.user?.username === username);
+    if (!hit) throw new Error(`No user profile for ${username}. Run: node setup.mjs`);
+    profileCache.set(username, { uid: hit.uid, name: hit.user.full_name || hit.user.username });
+  }
+  return profileCache.get(username);
+};
+
+/**
+ * Encodes field values keyed by field NAME into `extended_fields` (`<name>_as_<type>` -> string). Empty values are
+ * left out. Toggles are booleans, number fields numbers, checkbox groups string arrays, user pickers username arrays.
+ */
+export const buildExtendedFields = async (typeName, values) => {
+  const type = await resolveType(typeName);
+  const out = {};
+  for (const [name, value] of Object.entries(values)) {
+    if (value === undefined || value === null || value === '' || (Array.isArray(value) && !value.length)) continue;
+    const f = type.fields.find((x) => x.name === name);
+    if (!f) throw new Error(`Field "${name}" is not part of the "${typeName}" template (has: ${type.fields.map((x) => x.name).join(', ')})`);
+    if (f.control === 'USER_PICKER') out[f.key] = JSON.stringify(await Promise.all(value.map(resolveProfile)));
+    else if (f.control === 'CHECKBOX_GROUP') out[f.key] = JSON.stringify(value);
+    else out[f.key] = String(value);
+  }
+  return out;
+};
+
+/** Values for the close-required fields of each type; close-required fields are left empty on open records. */
+export const CLOSE_VALUES = {
+  Malware: { remediation: 'Removed malware' },
+  Phishing: { purge_status: 'Purged' },
+  'Account compromise': { credentials_reset: 'Yes' },
+  'Alert triage': { tuning_action: 'None' },
+};
+
+const UNIT_OPTIONS = ['IT Infrastructure', 'Engineering', 'Finance', 'Data Platform', 'Sales', 'Support', 'Legal', 'HR', 'Operations', 'Marketing'];
+
+/** Field values the prototype carries on every record, mapped to the template fields. */
+const prototypeFieldValues = (ctx) => {
+  const f = ctx.d.state.fields;
+  const units = String(f.unit ?? '').split(', ').filter((u) => UNIT_OPTIONS.includes(u));
+  return {
+    business_unit: units[0],
+    impact: f.impact,
+    data_classification: f.cls,
+    ticket: f.ticket || undefined,
+    ...(units.length > 1 ? { affected_units: units } : {}),
+  };
+};
+
+/**
+ * What each scenario fills in beyond the prototype fields. Close-required fields (root cause notes and the
+ * type-specific one) stay empty on open records so the close dialog has something to ask for. Scenario C (a team
+ * working a phishing report by hand) fills most of its template, including the conditional "Users who clicked" and the
+ * escalation contacts.
+ */
+const SCENARIO_FIELD_VALUES = {
+  A: () => ({ alert_count: 40, reviewer: ['priya.k'] }),
+  B: () => ({
+    file_hash: '9f2c4be71d0a6e83b5c2f19d7a40e6c8d35b1f72a9e04c6d8b7f3a21e5c0a1e4',
+    hosts_affected: 1,
+    observed_behaviors: ['Credential access', 'Command and control'],
+    containment_done: false,
+  }),
+  C: (ctx) => ({
+    ticket: 'SEC-7712',
+    sender: 'billing@inv0ice-portal.example',
+    reported_at: ctx.clock.iso(ctx.t(9, 38, 0)),
+    affected_users: 14,
+    link_clicked: true,
+    clicked_users: 2,
+    credentials_entered: 'Unknown',
+    escalation_contacts: ['dana.r', 'marcus.r'],
+  }),
+  D: () => ({ data_exfiltrated: 'Unknown', escalation_contacts: ['marcus.r', 'jun.t'] }),
+  E: () => ({ data_exfiltrated: 'No', escalation_contacts: ['braxton.w'] }),
+};
+
+/** Template id and `extended_fields` for a scenario record. */
+export const recordTemplateFields = async (ctx) => {
+  const typeName = ctx.d.state.procType;
+  const type = await resolveType(typeName);
+  const values = { ...prototypeFieldValues(ctx), ...(SCENARIO_FIELD_VALUES[ctx.id]?.(ctx) ?? {}) };
+  return { template_id: type.template_id, extended_fields: await buildExtendedFields(typeName, values) };
+};
+
 export const createRecordApi = async (body) => (await kbn('POST', BASE, body)).json.record;
 export const getRecordApi = async (id) => (await kbn('GET', `${BASE}/${id}`)).json;
 export const patchRecord = async (id, body) => (await kbn('PATCH', `${BASE}/${id}`, body)).json.record;
@@ -526,17 +636,6 @@ export const newCtx = (id, clockOptions = {}) => {
 /* Steps                                                               */
 /* ------------------------------------------------------------------ */
 
-export const recordFields = (ctx) => {
-  const f = ctx.d.state.fields;
-  return {
-    business_unit_keyword: f.unit,
-    impact_keyword: f.impact,
-    data_classification_keyword: f.cls,
-    ticket_keyword: f.ticket || null,
-    ...(ctx.sc.tag ? { flag_keyword: ctx.sc.tag } : {}),
-  };
-};
-
 /**
  * Description versions from the prototype change history (oldest first). The newest version is the current
  * description (`what`) so the case and the history agree.
@@ -556,15 +655,15 @@ export const createRecordStep = async (ctx, { createdProto, creator, description
   const versions = descriptions ?? descriptionVersions(ctx);
   const first = versions[0];
   const createdAt = ctx.clock.iso(createdProto);
+  const templateFields = await recordTemplateFields(ctx);
   const record = await createRecordApi({
     title: sc.title,
     description: first.text,
     summary: ctx.clock.text(sc.what),
-    investigation_type: ctx.d.state.procType,
+    ...templateFields,
     priority: sc.priority.l.toLowerCase(),
     severity: sc.priority.l.toLowerCase(),
-    tags: ['uipoc-seed', `uipoc-seed-${ctx.id}`, ...tagsExtra],
-    fields: recordFields(ctx),
+    tags: ['uipoc-seed', `uipoc-seed-${ctx.id}`, ...(sc.tag ? [sc.tag] : []), ...tagsExtra],
     origin: { type: sc.originAgent ? 'agent' : 'user', label: sc.origin, actor: creator },
     ai_enabled: sc.ai,
     create_conversation: sc.ai,
@@ -1057,12 +1156,17 @@ export const relatedStep = async (ctx) => {
     if (!detail) continue;
     const creator = actorOf(detail.who[0]);
     const createdMs = parseLabel(detail.created, ctx.sc.now);
-    const type = ctx.d.state.procType;
+    const typeName = ctx.d.state.procType;
+    const type = await resolveType(typeName);
     const rec = await createRecordApi({
       title: row.t,
       description: ctx.clock.text(detail.summary),
       summary: ctx.clock.text(detail.summary),
-      investigation_type: type,
+      template_id: type.template_id,
+      extended_fields: await buildExtendedFields(typeName, {
+        business_unit: prototypeFieldValues(ctx).business_unit,
+        impact: `${detail.entities.length} entities in scope`,
+      }),
       priority: 'medium',
       tags: ['uipoc-seed', `uipoc-seed-${ctx.id}`, 'uipoc-seed-related'],
       origin: { type: creator.type === 'agent' ? 'agent' : 'user', label: `Started by ${detail.src}`, actor: creator },
@@ -1084,6 +1188,10 @@ export const relatedStep = async (ctx) => {
     const closed = /^Closed/.test(row.st) ? outcomeOf(detail.outcome) : null;
     if (closed) {
       await closeRecordApi(rec.id, {
+        extended_fields: await buildExtendedFields(typeName, {
+          ...CLOSE_VALUES[typeName],
+          root_cause_notes: `${closed.root_cause}. ${ctx.clock.text(detail.summary)}`,
+        }),
         verdict: closed.verdict,
         reason: closed.reason,
         root_cause: closed.root_cause,

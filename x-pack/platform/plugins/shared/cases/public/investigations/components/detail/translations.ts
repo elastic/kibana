@@ -164,40 +164,18 @@ export const CONVERSATION_MESSAGES = (count: number) =>
 export const FIELDS = i18n.translate('xpack.cases.investigations.detail.fields', {
   defaultMessage: 'Fields',
 });
-export const FIELDS_SEARCHABLE = i18n.translate(
-  'xpack.cases.investigations.detail.fieldsSearchable',
-  { defaultMessage: 'Searchable and reportable' }
-);
-export const INVESTIGATION_TYPE = i18n.translate(
-  'xpack.cases.investigations.detail.investigationType',
-  { defaultMessage: 'Investigation type' }
-);
-export const FIELDS_HELP = i18n.translate('xpack.cases.investigations.detail.fieldsHelp', {
-  defaultMessage:
-    'The type sets the procedure and its required tasks. People and agents can both write these fields. Changes appear in Activity.',
+export const FIELDS_NO_TYPE = i18n.translate('xpack.cases.investigations.detail.fieldsNoType', {
+  defaultMessage: 'No type applied. Use Take action, then Apply a type, to see its fields here.',
 });
-export const FIELD_EMPTY = i18n.translate('xpack.cases.investigations.detail.fieldEmpty', {
-  defaultMessage: 'Empty',
+export const FIELDS_NONE = i18n.translate('xpack.cases.investigations.detail.fieldsNone', {
+  defaultMessage: 'This type has no fields.',
 });
-export const FIELD_DATE_PLACEHOLDER = i18n.translate(
-  'xpack.cases.investigations.detail.fieldDatePlaceholder',
-  { defaultMessage: 'Date and time, for example 2026-11-20T14:00:00Z' }
-);
-export const FIELD_NO_OPTION = i18n.translate('xpack.cases.investigations.detail.fieldNoOption', {
-  defaultMessage: 'Not set',
+export const CHANGE_TYPE = i18n.translate('xpack.cases.investigations.detail.changeType', {
+  defaultMessage: 'Change type',
 });
-export const FIELD_NUMBER_INVALID = i18n.translate(
-  'xpack.cases.investigations.detail.fieldNumberInvalid',
-  { defaultMessage: 'Enter a number.' }
-);
-export const FIELD_DATE_INVALID = i18n.translate(
-  'xpack.cases.investigations.detail.fieldDateInvalid',
-  { defaultMessage: 'Enter a valid date and time.' }
-);
-export const FIELDS_LOADING_TYPES = i18n.translate(
-  'xpack.cases.investigations.detail.fieldsLoadingTypes',
-  { defaultMessage: 'Loading investigation types' }
-);
+export const APPLY_TYPE = i18n.translate('xpack.cases.investigations.detail.applyType', {
+  defaultMessage: 'Apply a type',
+});
 
 export const RELATED = i18n.translate('xpack.cases.investigations.detail.related', {
   defaultMessage: 'Related investigations',

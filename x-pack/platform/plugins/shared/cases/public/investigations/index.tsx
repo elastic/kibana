@@ -8,6 +8,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, AppUnmount, CoreStart } from '@kbn/core/public';
+import type { ScopedFilesClient } from '@kbn/files-plugin/public';
+import type { UnifiedAttachmentTypeRegistry } from '../client/attachment_framework/unified_attachment_registry';
 import type { CasesPublicStartDependencies } from '../types';
 import { InvestigationsApp } from './app';
 
@@ -15,6 +17,8 @@ export interface RenderInvestigationsAppProps {
   coreStart: CoreStart;
   pluginsStart: CasesPublicStartDependencies;
   params: AppMountParameters;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
+  getFilesClient: (scope: string) => ScopedFilesClient;
 }
 
 /** Mounts the Investigations app and returns the function that unmounts it. */
@@ -22,6 +26,8 @@ export const renderInvestigationsApp = ({
   coreStart,
   pluginsStart,
   params,
+  unifiedAttachmentTypeRegistry,
+  getFilesClient,
 }: RenderInvestigationsAppProps): AppUnmount => {
   ReactDOM.render(
     coreStart.rendering.addContext(
@@ -29,6 +35,8 @@ export const renderInvestigationsApp = ({
         coreStart={coreStart}
         pluginsStart={pluginsStart}
         history={params.history}
+        unifiedAttachmentTypeRegistry={unifiedAttachmentTypeRegistry}
+        getFilesClient={getFilesClient}
       />
     ),
     params.element

@@ -48,6 +48,20 @@ const pick = (rand, list) => list[Math.floor(rand() * list.length)];
 const int = (rand, min, max) => min + Math.floor(rand() * (max - min + 1));
 
 const INVESTIGATION_TYPES = ['Malware', 'Phishing', 'Account compromise', 'Alert triage'];
+// Per type: the number field the template offers (key and range), if any. Ranges stay inside the template rules.
+const NUMBER_FIELDS = {
+  Malware: { key: 'hosts_affected_as_integer', min: 1, max: 500 },
+  Phishing: { key: 'affected_users_as_integer', min: 1, max: 500 },
+  'Alert triage': { key: 'alert_count_as_integer', min: 1, max: 500 },
+};
+const TEMPLATE_IDS = new Map(); // type name -> Cases template id, loaded from `_types` before records are created
+
+const loadTemplateIds = async () => {
+  const { json } = await kbn('GET', `${BASE}/_types`);
+  for (const type of json.types ?? json) TEMPLATE_IDS.set(type.name, type.template_id);
+  const missing = INVESTIGATION_TYPES.filter((name) => !TEMPLATE_IDS.has(name));
+  if (missing.length) throw new Error(`investigation types not found: ${missing.join(', ')}. Run: node setup.mjs`);
+};
 const PRIORITIES = ['low', 'medium', 'high', 'critical'];
 const BUSINESS_UNITS = [
   'Finance',
@@ -87,19 +101,19 @@ const buildRecordBody = (rand, index) => {
   const type = pick(rand, INVESTIGATION_TYPES);
   const priority = pick(rand, PRIORITIES);
   const createdAt = new Date(Date.now() - Math.floor(rand() * 90 * DAY_MS)).toISOString();
-  const due = new Date(Date.now() + int(rand, -30, 60) * DAY_MS).toISOString().slice(0, 10);
   const unit = pick(rand, BUSINESS_UNITS);
+  const number = NUMBER_FIELDS[type];
   return {
     title: `${pick(rand, VERBS)} ${pick(rand, NOUNS)} ${unit.toLowerCase()}-${index} (${type})`,
     description: `Synthetic load-test investigation ${index} of type ${type}.`,
-    investigation_type: type,
+    template_id: TEMPLATE_IDS.get(type),
     priority,
     severity: priority,
     tags: [LOAD_TAG],
-    fields: {
-      business_unit_keyword: unit,
-      impact_long: int(rand, 1, 500),
-      due_date: due,
+    extended_fields: {
+      business_unit_as_keyword: unit,
+      impact_as_keyword: `${int(rand, 1, 500)} hosts, ${int(rand, 1, 500)} users`,
+      ...(number && { [number.key]: String(int(rand, number.min, number.max)) }),
     },
     ai_enabled: false,
     apply_procedure: false,
@@ -243,6 +257,7 @@ const bulkCreateItems = async (recordId, items) =>
 
 const createLoad = async ({ records, items, concurrency, seed }) => {
   log(`creating ${records} records x ${items} items (concurrency ${concurrency}, seed ${seed})`);
+  await loadTemplateIds();
   const started = Date.now();
   let next = 0;
   let done = 0;
@@ -414,6 +429,7 @@ const measureQueue = async () => {
     'queue first page (default sort)': find({ per_page: '25' }),
     'sort title': find({ per_page: '25', sort_field: 'title', sort_order: 'asc' }),
     'sort priority': find({ per_page: '25', sort_field: 'priority', sort_order: 'desc' }),
+    'sort fields.hosts_affected_long': find({ per_page: '25', sort_field: 'fields.hosts_affected_long', sort_order: 'desc' }),
     'sort fields.business_unit_keyword': find({ per_page: '25', sort_field: 'fields.business_unit_keyword', sort_order: 'asc' }),
     'sort counters.evidence': find({ per_page: '25', sort_field: 'counters.evidence', sort_order: 'desc' }),
     'text search ("malware")': find({ per_page: '25', search: 'malware' }),

@@ -129,7 +129,13 @@ export class CasesUiPlugin
           ];
           const { renderInvestigationsApp } = await import('./investigations');
 
-          return renderInvestigationsApp({ coreStart, pluginsStart, params });
+          return renderInvestigationsApp({
+            coreStart,
+            pluginsStart,
+            params,
+            unifiedAttachmentTypeRegistry,
+            getFilesClient: pluginsStart.files.filesClientFactory.asScoped,
+          });
         },
       });
     }

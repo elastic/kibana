@@ -2,7 +2,7 @@
 //
 //   node setup.mjs
 //
-// Env: KBN_URL (http://localhost:5602), ES_URL (http://localhost:9201), KBN_AUTH (elastic:changeme),
+// Env: KBN_URL (http://localhost:5602), UIPOC_ES_URL (http://localhost:9201), KBN_AUTH (elastic:changeme),
 //      MOCK_PORT (18555, only used to build the mock connector URL)
 import { kbn, es, waitForKibana, log, KBN, ES } from './lib/client.mjs';
 
@@ -24,6 +24,7 @@ const TOOL_IDS = [
   'platform.core.cases.investigation_set_task_status',
   'platform.core.cases.investigation_upsert_entity',
   'platform.core.cases.investigation_propose_action',
+  'platform.core.cases.investigation_update_record',
   'platform.core.cases',
 ];
 
@@ -65,10 +66,18 @@ const putUser = async (username, fullName, roles) => {
   record('users', username, exists ? 'existed' : 'created', `roles=${roles.join(',')}`);
 };
 
+// The user picker control suggests user profiles, and a profile only exists once the user has signed in.
+// Activating it through the ES profile API creates the same profile a login would.
+const activateProfile = async (username) => {
+  const { json } = await es('POST', '/_security/profile/_activate', { grant_type: 'password', username, password: PASSWORD });
+  record('profiles', username, 'activated', json?.uid ?? '');
+};
+
 const setupUsers = async () => {
   for (const [username, fullName] of POC_USERS) {
     try {
       await putUser(username, fullName, ['superuser']);
+      await activateProfile(username);
     } catch (e) {
       record('users', username, 'failed', messageOf(e));
     }
@@ -183,108 +192,248 @@ const setupAgent = async () => {
 };
 
 // ---------------------------------------------------------------------------------------------
-// 6. Investigation-type templates
+// 6. Investigation-type templates (Cases templates v2)
 // ---------------------------------------------------------------------------------------------
-const textField = (name, label) =>
-  `  - name: ${name}\n    label: ${label}\n    type: keyword\n    control: INPUT_TEXT\n`;
+// An investigation type is a Cases template of owner securitySolution tagged `investigation-type`. The template
+// names are fixed: the server picks the procedure template (default tasks) whose key equals the template name.
+// Across the four templates every field control and every validation rule is used at least once.
+const INVESTIGATION_TYPE_TAG = 'investigation-type';
 
-const templateYaml = ({ title, severity, tag, extraFields }) =>
-  [
-    `name: ${title}`,
-    `severity: ${severity}`,
-    'tags:',
-    `  - ${tag}`,
-    'settings:',
-    '  syncAlerts: true',
-    'fields:',
-    textField('business_unit', 'Business unit') +
-      textField('impact', 'Impact') +
-      [
-        '  - name: data_classification',
-        '    label: Data classification',
-        '    type: keyword',
-        '    control: SELECT_BASIC',
-        '    metadata:',
-        '      options:',
-        '        - Public',
-        '        - Internal',
-        '        - Confidential',
-        '        - "SOX, restricted"',
-        '      default: Internal',
-        '',
-      ].join('\n') +
-      textField('ticket', 'Ticket') +
-      extraFields,
-  ].join('\n');
+const BUSINESS_UNITS = [
+  'IT Infrastructure',
+  'Engineering',
+  'Finance',
+  'Data Platform',
+  'Sales',
+  'Support',
+  'Legal',
+  'HR',
+  'Operations',
+  'Marketing',
+];
+const TICKET_PATTERN = { regex: '^[A-Z]{2,10}-\\d{1,8}$', message: 'Use a ticket id like SEC-1234 (2-10 capital letters, a dash, 1-8 digits).' };
+const SHA256_PATTERN = { regex: '^[a-fA-F0-9]{64}$', message: 'Enter a SHA-256 hash: exactly 64 hexadecimal characters.' };
+const EMAIL_PATTERN = { regex: '^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$', message: 'Enter a full sender address like billing@example.com.' };
+
+/** Serializes plain objects, arrays and scalars to YAML (strings are JSON-quoted, which is valid YAML). */
+const toYaml = (value, indent = 0) => {
+  const pad = ' '.repeat(indent);
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => {
+        if (item !== null && typeof item === 'object') {
+          const [first, ...rest] = toYaml(item, indent + 2).split('\n');
+          return [`${pad}- ${first.trimStart()}`, ...rest].join('\n');
+        }
+        return `${pad}- ${JSON.stringify(item)}`;
+      })
+      .join('\n');
+  }
+  return Object.entries(value)
+    .filter(([, v]) => v !== undefined)
+    .map(([key, v]) => {
+      if (v !== null && typeof v === 'object') return `${pad}${key}:\n${toYaml(v, indent + 2)}`;
+      return `${pad}${key}: ${JSON.stringify(v)}`;
+    })
+    .join('\n');
+};
+
+const field = (name, label, control, type, extra = {}) => ({ name, label, type, control, ...extra });
+const whenEquals = (name, value) => ({ field: name, operator: 'eq', value });
+
+const guidance = (content) => field('guidance', 'Guidance', 'MARKDOWN', 'keyword', { metadata: { content } });
+const businessUnit = () =>
+  field('business_unit', 'Business unit', 'SELECT_BASIC', 'keyword', { metadata: { options: BUSINESS_UNITS } });
+const impact = () =>
+  field('impact', 'Impact', 'INPUT_TEXT', 'keyword', { validation: { required_on_close: true, max_length: 200 } });
+const dataClassification = () =>
+  field('data_classification', 'Data classification', 'SELECT_BASIC', 'keyword', {
+    metadata: { options: ['Public', 'Internal', 'Confidential', 'SOX, restricted'], default: 'Internal' },
+    validation: { required: true },
+  });
+const ticket = () =>
+  field('ticket', 'Ticket', 'INPUT_TEXT', 'keyword', { validation: { pattern: TICKET_PATTERN } });
+const rootCauseNotes = () =>
+  field('root_cause_notes', 'Root cause notes', 'TEXTAREA', 'keyword', {
+    validation: { required_on_close: true, min_length: 20, max_length: 2000 },
+  });
+
+const FIELD_SETS = {
+  Malware: [
+    guidance(
+      '**Malware handling.** Isolate before you collect. Record the SHA-256 of every dropped file and note the behaviors you observed. Close only after the remediation and root cause are written down.'
+    ),
+    businessUnit(),
+    impact(),
+    dataClassification(),
+    ticket(),
+    field('file_hash', 'File hash', 'INPUT_TEXT', 'keyword', { validation: { pattern: SHA256_PATTERN } }),
+    field('hosts_affected', 'Hosts affected', 'INPUT_NUMBER', 'integer', { validation: { min: 0, max: 10000 } }),
+    field('observed_behaviors', 'Observed behaviors', 'CHECKBOX_GROUP', 'keyword', {
+      metadata: {
+        options: ['Persistence', 'Credential access', 'Lateral movement', 'Command and control', 'Data staging', 'Defense evasion'],
+      },
+    }),
+    field('containment_done', 'Containment done', 'TOGGLE', 'boolean', { metadata: { default: false } }),
+    field('contained_at', 'Contained at', 'DATE_PICKER', 'date', {
+      metadata: { show_time: true, timezone: 'utc' },
+      display: { show_when: whenEquals('containment_done', true) },
+      validation: { required_when: whenEquals('containment_done', true) },
+    }),
+    field('remediation', 'Remediation', 'SELECT_BASIC', 'keyword', {
+      metadata: { options: ['Reimaged host', 'Removed malware', 'Isolated and monitoring', 'No action needed'] },
+      validation: { required_on_close: true },
+    }),
+    rootCauseNotes(),
+  ],
+  Phishing: [
+    guidance(
+      '**Phishing report.** Capture the sender and when it was reported, then count everyone who received the message. Ask escalation contacts to confirm before you purge mailboxes.'
+    ),
+    businessUnit(),
+    impact(),
+    dataClassification(),
+    ticket(),
+    field('sender', 'Sender', 'INPUT_TEXT', 'keyword', { validation: { pattern: EMAIL_PATTERN } }),
+    field('reported_at', 'Reported at', 'DATE_PICKER', 'date', { metadata: { show_time: true, timezone: 'utc' } }),
+    field('affected_users', 'Affected users', 'INPUT_NUMBER', 'integer', { validation: { min: 0, max: 100000 } }),
+    field('link_clicked', 'Link clicked', 'TOGGLE', 'boolean', { metadata: { default: false } }),
+    field('clicked_users', 'Users who clicked', 'INPUT_NUMBER', 'integer', {
+      display: { show_when: whenEquals('link_clicked', true) },
+      validation: { required_when: whenEquals('link_clicked', true), min: 1, max: 100000 },
+    }),
+    field('credentials_entered', 'Credentials entered', 'RADIO_GROUP', 'keyword', {
+      metadata: { options: ['Yes', 'No', 'Unknown'], default: 'Unknown' },
+    }),
+    field('escalation_contacts', 'Escalation contacts', 'USER_PICKER', 'keyword', { metadata: { multiple: true } }),
+    field('purge_status', 'Mailbox purge', 'RADIO_GROUP', 'keyword', {
+      metadata: { options: ['Purged', 'Pending', 'Not needed'] },
+      validation: { required_on_close: true },
+    }),
+    rootCauseNotes(),
+  ],
+  'Account compromise': [
+    guidance(
+      '**Account compromise.** List every business unit the actor touched and whether data left the environment. Rotate credentials before you close.'
+    ),
+    businessUnit(),
+    impact(),
+    dataClassification(),
+    ticket(),
+    field('affected_units', 'Affected business units', 'CHECKBOX_GROUP', 'keyword', { metadata: { options: BUSINESS_UNITS } }),
+    field('data_exfiltrated', 'Data exfiltrated', 'RADIO_GROUP', 'keyword', {
+      metadata: { options: ['Yes', 'No', 'Unknown'], default: 'Unknown' },
+    }),
+    field('exfiltration_volume_gb', 'Exfiltration volume (GB)', 'INPUT_NUMBER', 'double', {
+      display: { show_when: whenEquals('data_exfiltrated', 'Yes') },
+      validation: { required_when: whenEquals('data_exfiltrated', 'Yes'), min: 0, max: 100000 },
+    }),
+    field('escalation_contacts', 'Escalation contacts', 'USER_PICKER', 'keyword', { metadata: { multiple: true } }),
+    field('credentials_reset', 'Credentials reset', 'RADIO_GROUP', 'keyword', {
+      metadata: { options: ['Yes', 'No', 'Not needed'] },
+      validation: { required_on_close: true },
+    }),
+    rootCauseNotes(),
+  ],
+  'Alert triage': [
+    guidance('**Alert triage.** Group related alerts, decide quickly, and record what you would tune so the next shift sees less noise.'),
+    businessUnit(),
+    impact(),
+    dataClassification(),
+    ticket(),
+    field('alert_count', 'Alert count', 'INPUT_NUMBER', 'integer', { validation: { min: 1, max: 100000 } }),
+    field('reviewer', 'Reviewer', 'USER_PICKER', 'keyword', { metadata: { multiple: false } }),
+    field('tuning_action', 'Tuning action', 'SELECT_BASIC', 'keyword', {
+      metadata: { options: ['None', 'Tune the rule', 'Add an exception', 'Hand to detection engineering'] },
+      validation: { required_on_close: true },
+    }),
+    rootCauseNotes(),
+  ],
+};
+
+const templateYaml = ({ title, severity, tag, fields }) =>
+  toYaml({
+    name: title,
+    severity,
+    tags: [tag],
+    settings: { syncAlerts: true },
+    fields,
+  });
 
 const TEMPLATES = [
   {
     name: 'Malware',
     description: 'Investigate a suspected malware infection on one or more hosts.',
-    yaml: templateYaml({
-      title: 'Malware investigation',
-      severity: 'high',
-      tag: 'malware',
-      extraFields: textField('file_hash', 'File hash'),
-    }),
+    yaml: templateYaml({ title: 'Malware investigation', severity: 'high', tag: 'malware', fields: FIELD_SETS.Malware }),
   },
   {
     name: 'Phishing',
     description: 'Investigate a reported or detected phishing message and its recipients.',
-    yaml: templateYaml({
-      title: 'Phishing investigation',
-      severity: 'medium',
-      tag: 'phishing',
-      extraFields: textField('sender', 'Sender'),
-    }),
+    yaml: templateYaml({ title: 'Phishing investigation', severity: 'medium', tag: 'phishing', fields: FIELD_SETS.Phishing }),
   },
   {
     name: 'Account compromise',
     description: 'Investigate suspected takeover of a user or service account.',
-    yaml: templateYaml({ title: 'Account compromise investigation', severity: 'high', tag: 'account-compromise', extraFields: '' }),
+    yaml: templateYaml({
+      title: 'Account compromise investigation',
+      severity: 'high',
+      tag: 'account-compromise',
+      fields: FIELD_SETS['Account compromise'],
+    }),
   },
   {
     name: 'Alert triage',
     description: 'Triage a group of related alerts and decide whether to escalate.',
-    yaml: templateYaml({ title: 'Alert triage', severity: 'low', tag: 'alert-triage', extraFields: '' }),
+    yaml: templateYaml({ title: 'Alert triage', severity: 'low', tag: 'alert-triage', fields: FIELD_SETS['Alert triage'] }),
   },
 ];
 
 const setupTemplates = async () => {
-  let existingNames;
+  let existing;
   try {
     const { json } = await kbn('GET', `/api/cases/templates?owner=${OWNER}&perPage=100`, undefined, { public: true });
-    existingNames = new Set((json?.templates ?? []).map((t) => t.name.toLowerCase()));
+    existing = new Map((json?.templates ?? []).map((t) => [t.name.toLowerCase(), t]));
   } catch (e) {
     record('templates', 'list existing', 'failed', messageOf(e));
     return;
   }
 
   for (const template of TEMPLATES) {
-    if (existingNames.has(template.name.toLowerCase())) {
-      record('templates', template.name, 'existed');
-      continue;
-    }
     const body = {
       owner: OWNER,
       name: template.name,
       description: template.description,
-      tags: ['investigation-type'],
+      tags: [INVESTIGATION_TYPE_TAG],
       definition: template.yaml,
     };
+    const current = existing.get(template.name.toLowerCase());
+    const dryPath = current
+      ? `/api/cases/templates/${current.templateId}?dry_run=true`
+      : '/api/cases/templates?dry_run=true';
     try {
-      const dry = await kbn('POST', '/api/cases/templates?dry_run=true', body, { public: true, okStatuses: [200, 400, 409] });
-      if (dry.status === 409) {
-        record('templates', template.name, 'existed', 'name conflict on dry run');
+      if (
+        current &&
+        (current.definitionString ?? '').trim() === template.yaml.trim() &&
+        current.description === template.description &&
+        (current.tags ?? []).includes(INVESTIGATION_TYPE_TAG) &&
+        current.isEnabled !== false
+      ) {
+        record('templates', template.name, 'unchanged', `v${current.templateVersion}`);
         continue;
       }
+      const dry = await kbn(current ? 'PUT' : 'POST', dryPath, body, { public: true, okStatuses: [200, 400, 409] });
       if (dry.status !== 200) {
         console.error(`Template "${template.name}" failed validation:\n${dry.text}\n--- YAML ---\n${template.yaml}`);
-        record('templates', template.name, 'failed', `validation: ${dry.text.slice(0, 300)}`);
+        record('templates', template.name, 'failed', `validation (${dry.status}): ${dry.text.slice(0, 300)}`);
         continue;
       }
-      await kbn('POST', '/api/cases/templates', body, { public: true });
-      record('templates', template.name, 'created');
+      if (current) {
+        const { json } = await kbn('PUT', `/api/cases/templates/${current.templateId}`, { ...body, isEnabled: true }, { public: true });
+        record('templates', template.name, 'updated', `v${current.templateVersion} -> v${json?.templateVersion}`);
+      } else {
+        const { json } = await kbn('POST', '/api/cases/templates', body, { public: true });
+        record('templates', template.name, 'created', `v${json?.templateVersion}`);
+      }
     } catch (e) {
       record('templates', template.name, 'failed', messageOf(e));
     }

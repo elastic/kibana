@@ -70,6 +70,34 @@ const guessInvestigationType = (text) => {
 
 const SEVERITIES = ['low', 'medium', 'high', 'critical'];
 
+// The record's type is a Cases template (an investigation type) tagged `investigation-type`.
+let typesByName;
+const getType = async (name) => {
+  if (!typesByName) {
+    const { json } = await kbn('GET', `${BASE}/_types`);
+    typesByName = new Map((json.types ?? json).map((t) => [t.name, t]));
+  }
+  const type = typesByName.get(name) ?? typesByName.get('Alert triage');
+  if (!type) throw new Error('No investigation types found (not even "Alert triage"). Run: node setup.mjs');
+  return type;
+};
+
+// Values the template rules accept for the close-required fields. Migrated conversations carry no form data, so
+// only `impact` (from the migrated entities) is set at creation; the type-specific close field and the root cause
+// notes are written when a closed conversation closes its record.
+const CLOSE_FIELD_BY_TYPE = {
+  Malware: ['remediation_as_keyword', 'Removed malware'],
+  Phishing: ['purge_status_as_keyword', 'Purged'],
+  'Account compromise': ['credentials_reset_as_keyword', 'Yes'],
+  'Alert triage': ['tuning_action_as_keyword', 'None'],
+};
+const impactOf = (plannedItems) => {
+  const entities = plannedItems.filter((p) => p.kind === 'entity').length;
+  return `${entities} ${entities === 1 ? 'entity' : 'entities'} in scope`;
+};
+const closeNotes = ({ root_cause: rootCause }, summary) =>
+  clip(`Root cause: ${rootCause}. ${summary || 'Closed in the agentic investigation.'}`, 2000).padEnd(20, '.');
+
 const searchAll = async (index, query, { auth, source, sort } = {}) => {
   const hits = [];
   let searchAfter;
@@ -330,6 +358,7 @@ const report = {
   },
   links: { recordToConversation: 0, conversationToRecord: 0 },
   closed: 0,
+  templatesApplied: 0,
   errors: [],
 };
 
@@ -349,9 +378,29 @@ const migrateConversation = async (hit) => {
   let recordId = existingRecord?.id;
   const existingSourceIds = new Set();
   const existingEntityKeys = new Set();
+  let typeName; // investigation type of a record created in this run
 
   if (existingRecord) {
     report.records.skipped++;
+    if (!existingRecord.template_id) {
+      // Created by an earlier run, before investigation types were Cases templates.
+      const type = await getType(existingRecord.investigation_type);
+      if (dryRun) {
+        log(`[dry-run] would apply the "${type.name}" template to record ${existingRecord.display_id}`);
+      } else {
+        try {
+          await kbn('PATCH', `${BASE}/${encodeURIComponent(recordId)}`, {
+            template: { id: type.template_id, version: type.version },
+            extended_fields: { impact_as_keyword: impactOf(plannedItems) },
+            actor: MIGRATION_ACTOR,
+          });
+          report.templatesApplied++;
+          log(`applied the "${type.name}" template to record ${existingRecord.display_id}`);
+        } catch (error) {
+          report.errors.push(`${conversationId}: applying the template: ${error.message}`);
+        }
+      }
+    }
     for (const item of await listItems(recordId)) {
       for (const itemLink of item.links ?? []) {
         if (itemLink.relation === 'derived_from') existingSourceIds.add(itemLink.target_id);
@@ -360,13 +409,16 @@ const migrateConversation = async (hit) => {
     }
   } else {
     const text = `${conversation.title ?? ''} ${metadata.summary ?? ''} ${metadata.verdict ?? ''}`;
-    const investigationType = guessInvestigationType(text);
+    const type = await getType(guessInvestigationType(text));
+    const investigationType = type.name;
+    typeName = type.name;
     const severity = SEVERITIES.includes(metadata.severity) ? metadata.severity : 'medium';
     const body = {
       title: clip(conversation.title?.trim() || `Agentic investigation ${conversationId.slice(0, 8)}`, MAX_TITLE),
       description: clip(metadata.summary || 'Migrated from an agentic investigation.', MAX_TEXT),
       summary: metadata.summary ? clip(metadata.summary, MAX_TEXT) : null,
-      investigation_type: investigationType,
+      template_id: type.template_id,
+      extended_fields: { impact_as_keyword: impactOf(plannedItems) },
       priority: severity,
       severity,
       ai_enabled: true,
@@ -458,9 +510,15 @@ const migrateConversation = async (hit) => {
   // Closed conversations: close the new record, after its items are in.
   if (!existingRecord && metadata.status === 'closed') {
     const close = inferClose(metadata.verdict, metadata.summary);
+    const [closeKey, closeValue] = CLOSE_FIELD_BY_TYPE[typeName] ?? [];
+    const closeSummary = clip(metadata.verdict || metadata.summary || 'Closed in the agentic investigation.', MAX_TEXT);
     await kbn('POST', `${BASE}/${encodeURIComponent(recordId)}/_close`, {
+      extended_fields: {
+        ...(closeKey && { [closeKey]: closeValue }),
+        root_cause_notes_as_keyword: closeNotes(close, closeSummary),
+      },
       ...close,
-      summary: clip(metadata.verdict || metadata.summary || 'Closed in the agentic investigation.', MAX_TEXT),
+      summary: closeSummary,
       actor: MIGRATION_ACTOR,
       ...(conversation.updated_at && { closed_at: conversation.updated_at }),
     });
@@ -498,6 +556,7 @@ const main = async () => {
   if (!dryRun) {
     console.log(`links written       : record->conversation ${report.links.recordToConversation}, conversation->record ${report.links.conversationToRecord}`);
     console.log(`records closed      : ${report.closed}`);
+    console.log(`templates applied   : ${report.templatesApplied} (records from earlier runs)`);
   }
   console.log(`errors              : ${report.errors.length}`);
   for (const error of report.errors) console.log(`  - ${error}`);

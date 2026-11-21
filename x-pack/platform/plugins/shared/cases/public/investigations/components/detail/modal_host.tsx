@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import type { InvestigationRecord } from '../../../../common/investigations/types';
 import { useReopenRecord } from '../../hooks';
+import { ChangeTypeModal } from '../modals/change_type_modal';
 import { CloseModal } from '../modals/close_modal';
 import { DeterminationModal } from '../modals/determination_modal';
 import { HistoryModal } from '../modals/history_modal';
@@ -59,6 +60,8 @@ export const ModalHost: React.FC<ModalHostProps> = ({ name, record, onClose }) =
       return <CloseModal record={record} onClose={handleClose} />;
     case 'restrict':
       return <RestrictModal record={record} onClose={handleClose} />;
+    case 'changeType':
+      return <ChangeTypeModal record={record} onClose={handleClose} />;
     case 'reopen':
       return (
         <ConfirmModal

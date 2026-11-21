@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiButton, EuiPageHeader, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { INVESTIGATION_LIMITS } from '../../../../common/investigations/constants';
@@ -21,6 +21,7 @@ import { ErrorState } from '../shared/error_state';
 import { LoadingState } from '../shared/loading_state';
 import { QueueFilters } from './queue_filters';
 import { QueueTable } from './queue_table';
+import { useQueueFields } from './use_queue_fields';
 import * as i18n from './translations';
 import { hasActiveFilters, toFindRequest, useQueueUrlState } from './use_queue_url_state';
 
@@ -34,6 +35,16 @@ export const QueuePage: React.FC = () => {
 
   const { data, error, isLoading, isFetching, isError, refetch } = useFindRecords(
     toFindRequest(state)
+  );
+
+  const { fields } = useQueueFields();
+  const fieldColumns = useMemo(
+    () =>
+      state.columns.flatMap((key) => {
+        const field = fields.find(({ mirrorKey }) => mirrorKey === key);
+        return field ? [field] : [];
+      }),
+    [fields, state.columns]
   );
 
   const records = data?.records ?? [];
@@ -92,7 +103,13 @@ export const QueuePage: React.FC = () => {
         bottomBorder={false}
       />
       <EuiSpacer size="m" />
-      <QueueFilters state={state} onChange={update} onClear={clearFilters} records={records} />
+      <QueueFilters
+        state={state}
+        onChange={update}
+        onClear={clearFilters}
+        records={records}
+        fields={fields}
+      />
       <EuiSpacer size="m" />
       {isError ? (
         <ErrorState title={i18n.ERROR_TITLE} error={error} onRetry={() => void refetch()} />
@@ -115,6 +132,7 @@ export const QueuePage: React.FC = () => {
             state={state}
             isLoading={isFetching}
             noItemsMessage={noItemsMessage}
+            fieldColumns={fieldColumns}
             onChange={update}
           />
         </>

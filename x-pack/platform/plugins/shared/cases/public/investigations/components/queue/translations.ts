@@ -54,10 +54,6 @@ export const FILTER_VERDICT = i18n.translate('xpack.cases.investigations.queue.f
 export const FILTER_OWNER = i18n.translate('xpack.cases.investigations.queue.filterOwner', {
   defaultMessage: 'Owner',
 });
-export const FILTER_BUSINESS_UNIT = i18n.translate(
-  'xpack.cases.investigations.queue.filterBusinessUnit',
-  { defaultMessage: 'Business unit' }
-);
 export const FILTER_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.cases.investigations.queue.filterSearchPlaceholder',
   { defaultMessage: 'Filter options' }
@@ -71,10 +67,6 @@ export const FILTER_NO_OPTIONS = i18n.translate(
 export const FILTER_NO_MATCH = i18n.translate('xpack.cases.investigations.queue.filterNoMatch', {
   defaultMessage: 'No options match your search',
 });
-export const FILTER_BUSINESS_UNIT_FREE_TEXT = i18n.translate(
-  'xpack.cases.investigations.queue.filterBusinessUnitFreeText',
-  { defaultMessage: 'Business unit name' }
-);
 export const FILTER_APPLY = i18n.translate('xpack.cases.investigations.queue.filterApply', {
   defaultMessage: 'Apply',
 });
@@ -119,10 +111,6 @@ export const COLUMN_PRIORITY = i18n.translate('xpack.cases.investigations.queue.
 export const COLUMN_TYPE = i18n.translate('xpack.cases.investigations.queue.columnType', {
   defaultMessage: 'Type',
 });
-export const COLUMN_BUSINESS_UNIT = i18n.translate(
-  'xpack.cases.investigations.queue.columnBusinessUnit',
-  { defaultMessage: 'Business unit' }
-);
 export const COLUMN_OWNER = i18n.translate('xpack.cases.investigations.queue.columnOwner', {
   defaultMessage: 'Owner',
 });
@@ -199,3 +187,52 @@ export const ERROR_TITLE = i18n.translate('xpack.cases.investigations.queue.erro
 export const LOADING = i18n.translate('xpack.cases.investigations.queue.loading', {
   defaultMessage: 'Loading investigations',
 });
+
+export const FILTER_FIELDS = i18n.translate('xpack.cases.investigations.queue.filterFields', {
+  defaultMessage: 'Fields',
+});
+export const FILTER_FIELDS_TITLE = i18n.translate(
+  'xpack.cases.investigations.queue.filterFieldsTitle',
+  { defaultMessage: 'Filter by field' }
+);
+export const FILTER_FIELDS_TEXT_PLACEHOLDER = i18n.translate(
+  'xpack.cases.investigations.queue.filterFieldsTextPlaceholder',
+  { defaultMessage: 'Exact value' }
+);
+export const FILTER_FIELDS_ANY = i18n.translate(
+  'xpack.cases.investigations.queue.filterFieldsAny',
+  {
+    defaultMessage: 'Any',
+  }
+);
+export const FILTER_FIELDS_YES = i18n.translate(
+  'xpack.cases.investigations.queue.filterFieldsYes',
+  {
+    defaultMessage: 'Yes',
+  }
+);
+export const FILTER_FIELDS_NO = i18n.translate('xpack.cases.investigations.queue.filterFieldsNo', {
+  defaultMessage: 'No',
+});
+export const FILTER_FIELDS_NONE = i18n.translate(
+  'xpack.cases.investigations.queue.filterFieldsNone',
+  { defaultMessage: 'The investigation types have no fields to filter by.' }
+);
+export const FILTER_FIELDS_HELP = i18n.translate(
+  'xpack.cases.investigations.queue.filterFieldsHelp',
+  { defaultMessage: 'Fields come from the investigation types. Text fields match the exact value.' }
+);
+export const COLUMNS_BUTTON = i18n.translate('xpack.cases.investigations.queue.columnsButton', {
+  defaultMessage: 'Columns',
+});
+export const COLUMNS_TITLE = i18n.translate('xpack.cases.investigations.queue.columnsTitle', {
+  defaultMessage: 'Show field columns',
+});
+export const COLUMNS_SEARCH = i18n.translate('xpack.cases.investigations.queue.columnsSearch', {
+  defaultMessage: 'Find a field',
+});
+export const COLUMNS_ACTIVE_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.investigations.queue.columnsActiveCount', {
+    defaultMessage: 'Columns, {count} shown',
+    values: { count },
+  });

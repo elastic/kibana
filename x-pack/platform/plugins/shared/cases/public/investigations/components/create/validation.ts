@@ -9,25 +9,18 @@ import { INVESTIGATION_LIMITS } from '../../../../common/investigations/constant
 import type {
   InvestigationPriority,
   InvestigationSeverity,
-  InvestigationType,
-  RecordFields,
 } from '../../../../common/investigations/types';
 import * as i18n from './translations';
 import { MAX_TITLE_LENGTH } from '../../../../common/constants';
 
-export type TypeField = InvestigationType['fields'][number];
-
-/** Raw values of the type's form fields: text for inputs, booleans for switches. */
-export type FieldDrafts = Record<string, string | boolean>;
-
 export interface CreateFormValues {
   title: string;
   description: string;
-  investigationType: string;
+  /** Template id of the chosen investigation type. */
+  templateId: string;
   priority: InvestigationPriority;
   severity: InvestigationSeverity;
   tags: string[];
-  fieldDrafts: FieldDrafts;
   entities: string[];
   alertIds: string[];
   aiEnabled: boolean;
@@ -36,50 +29,24 @@ export interface CreateFormValues {
 export interface CreateFormErrors {
   title?: string;
   description?: string;
-  investigationType?: string;
+  templateId?: string;
   tags?: string;
-  fields: Record<string, string>;
 }
 
 export const EMPTY_FORM: CreateFormValues = {
   title: '',
   description: '',
-  investigationType: '',
+  templateId: '',
   priority: 'medium',
   severity: 'medium',
   tags: [],
-  fieldDrafts: {},
   entities: [],
   alertIds: [],
   aiEnabled: true,
 };
 
-const validateField = (
-  field: TypeField,
-  draft: string | boolean | undefined
-): string | undefined => {
-  if (typeof draft !== 'string' || draft.trim() === '') {
-    return undefined;
-  }
-  if (field.type === 'long') {
-    const parsed = Number(draft);
-    if (!Number.isFinite(parsed)) return i18n.FIELD_NUMBER_INVALID;
-    return Number.isInteger(parsed) ? undefined : i18n.FIELD_INTEGER_INVALID;
-  }
-  if (field.type === 'double') {
-    return Number.isFinite(Number(draft)) ? undefined : i18n.FIELD_NUMBER_INVALID;
-  }
-  if (field.type === 'date') {
-    return Number.isNaN(Date.parse(draft)) ? i18n.FIELD_DATE_INVALID : undefined;
-  }
-  return undefined;
-};
-
-export const validateForm = (
-  values: CreateFormValues,
-  type: InvestigationType | undefined
-): CreateFormErrors => {
-  const errors: CreateFormErrors = { fields: {} };
+export const validateForm = (values: CreateFormValues): CreateFormErrors => {
+  const errors: CreateFormErrors = {};
   const title = values.title.trim();
   const description = values.description.trim();
 
@@ -95,8 +62,8 @@ export const validateForm = (
     errors.description = i18n.DESCRIPTION_TOO_LONG(INVESTIGATION_LIMITS.maxTextLength);
   }
 
-  if (values.investigationType.length === 0) {
-    errors.investigationType = i18n.TYPE_REQUIRED;
+  if (values.templateId.length === 0) {
+    errors.templateId = i18n.TYPE_REQUIRED;
   }
 
   if (values.tags.length > INVESTIGATION_LIMITS.maxTags) {
@@ -105,36 +72,7 @@ export const validateForm = (
     errors.tags = i18n.TAG_TOO_LONG(INVESTIGATION_LIMITS.maxTagLength);
   }
 
-  (type?.fields ?? []).forEach((field) => {
-    const message = validateField(field, values.fieldDrafts[field.key]);
-    if (message) {
-      errors.fields[field.key] = message;
-    }
-  });
-
   return errors;
 };
 
-export const hasErrors = ({ fields, ...rest }: CreateFormErrors): boolean =>
-  Object.values(rest).some(Boolean) || Object.keys(fields).length > 0;
-
-/** Converts the drafts of the selected type into typed values. Empty inputs are left out. */
-export const buildFields = (
-  type: InvestigationType | undefined,
-  drafts: FieldDrafts
-): RecordFields => {
-  const fields: RecordFields = {};
-  (type?.fields ?? []).forEach((field) => {
-    const draft = drafts[field.key];
-    if (field.type === 'bool') {
-      if (typeof draft === 'boolean') fields[field.key] = draft;
-      return;
-    }
-    if (typeof draft !== 'string' || draft.trim() === '') {
-      return;
-    }
-    fields[field.key] =
-      field.type === 'long' || field.type === 'double' ? Number(draft) : draft.trim();
-  });
-  return fields;
-};
+export const hasErrors = (errors: CreateFormErrors): boolean => Object.values(errors).some(Boolean);

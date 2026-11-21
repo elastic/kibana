@@ -7,6 +7,8 @@ import {
   actorOf,
   verdictOf,
   closeRecordApi,
+  buildExtendedFields,
+  CLOSE_VALUES,
   verdictEnumOf,
   summarize,
   protoT,
@@ -111,6 +113,11 @@ export const run = async () => {
       conversations: { prompts: PROMPTS, prompter: 'BW', mainActor: 'BW' },
       close: async (c) => {
         await closeRecordApi(c.recordId, {
+          // Close-required fields are filled before the case closes.
+          extended_fields: await buildExtendedFields(st.procType, {
+            ...CLOSE_VALUES[st.procType],
+            root_cause_notes: `${closed.cause}. ${c.clock.text(closed.summary)}`,
+          }),
           verdict: verdictEnumOf(closed.verdict),
           reason: closed.reason,
           root_cause: closed.cause,
