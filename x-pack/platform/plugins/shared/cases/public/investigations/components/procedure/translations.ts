@@ -574,3 +574,11 @@ export const EDITOR_APPLY_CONFIRM = i18n.translate(
   'xpack.cases.investigations.procedure.editorApplyConfirm',
   { defaultMessage: 'Replace and apply' }
 );
+
+export const SHOW_COMMENTS = i18n.translate('xpack.cases.investigations.procedure.showComments', {
+  defaultMessage: 'Comments',
+});
+
+export const HIDE_COMMENTS = i18n.translate('xpack.cases.investigations.procedure.hideComments', {
+  defaultMessage: 'Hide comments',
+});

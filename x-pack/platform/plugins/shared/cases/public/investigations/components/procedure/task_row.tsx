@@ -32,6 +32,7 @@ import type {
 import { ICONS, PROPOSAL_CATEGORY_ICONS, TASK_OWNER_ICONS, TASK_STATUS_ICONS } from '../../icons';
 import { RelativeTime } from '../shared';
 import type { TabProps } from '../tabs/tab_props';
+import { ClaimComments } from '../claims/claim_comments';
 import { AssignPopover } from './assign_popover';
 import {
   OWNER_TYPE_LABELS,
@@ -364,9 +365,11 @@ const TaskActions: React.FC<TaskRowProps> = ({
 TaskActions.displayName = 'TaskActions';
 
 export const TaskRow: React.FC<TaskRowProps> = (props) => {
-  const { task, effectiveStatus, dependency, claim, isHighlighted, isBusy, onNavigateTab } = props;
+  const { task, effectiveStatus, dependency, claim, isHighlighted, isBusy, onNavigateTab, record } =
+    props;
   const { onToggleDone, onReopen } = props;
   const { euiTheme } = useEuiTheme();
+  const [showComments, setShowComments] = useState(false);
   const { owner } = task.task;
   const isFinished = task.status === 'done' || task.status === 'skipped';
   const isWaiting = effectiveStatus === 'waiting';
@@ -488,6 +491,23 @@ export const TaskRow: React.FC<TaskRowProps> = (props) => {
           >
             <TaskActions {...props} />
           </div>
+          <EuiButtonEmpty
+            size="xs"
+            iconType={ICONS.conversation}
+            flush="left"
+            onClick={() => setShowComments((open) => !open)}
+            aria-expanded={showComments}
+            data-test-subj={`investigationTaskComments-${task.id}`}
+          >
+            {showComments ? i18n.HIDE_COMMENTS : i18n.SHOW_COMMENTS}
+          </EuiButtonEmpty>
+          {showComments ? (
+            <ClaimComments
+              recordId={record.id}
+              claimId={task.id}
+              canComment={record.status !== 'closed'}
+            />
+          ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
