@@ -88,6 +88,22 @@ describe('composeSourceStatus', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  it('treats a cancelled probe as unknown without logging it as an error', async () => {
+    const hasMetricIndices = jest
+      .fn()
+      .mockRejectedValue(new errors.RequestAbortedError('Request aborted'));
+
+    await expect(compose(hasMetricIndices)).resolves.toEqual({
+      metricIndicesExist: false,
+      remoteClustersExist: true,
+      metricIndicesStatus: 'unknown',
+    });
+    // A client disconnect aborts the probe; that is a cancelled check, not an infrastructure
+    // failure, so it must stay out of the error (and warn) logs.
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
   it('collapses line breaks in the request-controlled source id so it cannot forge log lines', async () => {
     const hasMetricIndices = jest
       .fn()

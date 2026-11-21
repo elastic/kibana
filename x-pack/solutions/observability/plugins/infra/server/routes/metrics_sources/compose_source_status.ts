@@ -63,7 +63,16 @@ export const composeSourceStatus = async ({
       return defaultSourceStatus;
     }
 
-    if (err instanceof errors.TimeoutError) {
+    if (err instanceof errors.RequestAbortedError) {
+      // The client disconnected (for example the user navigated away) and the adapter aborted
+      // the probe. That is a cancelled check, not an infrastructure failure, so it must not be
+      // logged at error level.
+      logger.debug(
+        `Metric index status check was aborted for source "${toSingleLine(
+          sourceId
+        )}" (pattern: ${metricAlias})`
+      );
+    } else if (err instanceof errors.TimeoutError) {
       const reason = err instanceof Error ? err.message : String(err);
       logger.warn(
         `Metric index status check timed out for source "${toSingleLine(
