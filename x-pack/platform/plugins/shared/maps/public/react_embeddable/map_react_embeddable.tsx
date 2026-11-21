@@ -13,8 +13,6 @@ import {
   areTriggersDisabled,
   initializeTimeRangeManager,
   initializeTitleManager,
-  timeRangeComparators,
-  titleComparators,
   apiPublishesSettings,
   initializeStateApi,
   getViewModeSubject,
@@ -30,7 +28,7 @@ import {
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { MapApi } from './types';
 import { SavedMap } from '../routes/map_page';
-import { initializeReduxSync, reduxSyncComparators } from './initialize_redux_sync';
+import { initializeReduxSync } from './initialize_redux_sync';
 import {
   getByReferenceState,
   getByValueState,
@@ -40,10 +38,8 @@ import { getSpacesApi } from '../kibana_services';
 import { initializeActionHandlers } from './initialize_action_handlers';
 import { MapContainer } from '../connected_components/map_container';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
-import {
-  crossPanelActionsComparators,
-  initializeCrossPanelActions,
-} from './initialize_cross_panel_actions';
+import { initializeCrossPanelActions } from './initialize_cross_panel_actions';
+import { getComparators } from '../../common/embeddable/get_comparators';
 import { cancelAllInFlightRequests } from '../actions';
 import { initializeDataViews } from './initialize_data_views';
 import { initializeEsql } from './initialize_esql';
@@ -59,6 +55,7 @@ export function getControlledBy(id: string) {
 
 export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState, MapApi> = {
   type: MAP_SAVED_OBJECT_TYPE,
+  getComparators,
   buildEmbeddable: async ({
     initializeDrilldownsManager,
     initialState,
@@ -139,14 +136,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
       ),
       getComparators: () => {
         return {
-          ...crossPanelActionsComparators,
-          ...drilldownsManager.comparators,
-          ...reduxSyncComparators,
-          ...titleComparators,
-          ...timeRangeComparators,
-          attributes: savedMap.getSavedObjectId() !== undefined ? 'skip' : 'deepEquality',
-          mapSettings: 'deepEquality',
-          savedObjectId: 'skip',
+          ...getComparators(initialState),
           ...(viewMode$.getValue() === 'non-interactive' && { mapCenter: 'skip' }),
         };
       },
