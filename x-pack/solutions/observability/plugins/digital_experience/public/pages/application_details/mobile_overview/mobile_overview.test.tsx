@@ -93,7 +93,10 @@ beforeEach(() => {
     formatDate: String,
     timeZone: 'UTC',
   });
-  jest.mocked(useDiscoverHref).mockReturnValue('/app/discover');
+  // Like the hook, no link without a query.
+  jest
+    .mocked(useDiscoverHref)
+    .mockImplementation((esql, timeRange) => (esql && timeRange ? '/app/discover' : undefined));
   jest.mocked(useUpdateUrlQuery).mockReturnValue(updateUrlQuery);
   mockParams();
 });
@@ -314,8 +317,10 @@ describe('MobileOverview', () => {
     );
     expect(screen.queryByTestId('digitalExperienceMobileKpiSessionsChange')).toBeNull();
     expect(screen.queryByTestId('digitalExperienceMobileKpisPartialAccess')).toBeNull();
-    // The pickers keep the options of the last response.
-    expect(filterProps('digitalExperienceMobileReleaseFilter')?.options.length).toBeGreaterThan(1);
+    // The pickers keep the options of the last response, not only the selected one.
+    expect(
+      filterProps('digitalExperienceMobileReleaseFilter')?.options.map(({ value }) => value)
+    ).toEqual(['', '2.0.0', '1.9.0']);
   });
 
   it('shows the error with a retry, not endless loading, when the KPIs fail', async () => {
