@@ -173,6 +173,12 @@ describe('UploadLicense', () => {
     await store.dispatch(uploadLicense(validLicense, 'trial'));
     expect(appDependencies.plugins.licensing.refresh).toHaveBeenCalled();
     expect(thunkServices.history.replace).toHaveBeenCalled();
+    // toStrictEqual also rejects a License class instance, which is not serializable.
+    expect(store.getState().license).toStrictEqual({
+      type: 'basic',
+      expiryDateInMillis: 5000,
+      isActive: true,
+    });
   });
 
   it('should display error when ES returns error', async () => {
