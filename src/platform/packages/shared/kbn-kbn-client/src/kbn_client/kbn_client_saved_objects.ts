@@ -54,6 +54,7 @@ interface IndexOptions<Attributes> {
   migrationVersion?: MigrationVersion;
   references?: Reference[];
   space?: string;
+  initialNamespaces?: string[];
 }
 
 interface UpdateOptions<Attributes> extends IndexOptions<Attributes> {
@@ -225,6 +226,7 @@ export class KbnClientSavedObjects {
         attributes: options.attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
+        initialNamespaces: options.initialNamespaces,
       },
     });
     return data;
