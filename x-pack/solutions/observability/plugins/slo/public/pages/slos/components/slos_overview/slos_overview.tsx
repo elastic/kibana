@@ -61,6 +61,10 @@ export function SLOsOverview() {
               tooltip={i18n.translate('xpack.slo.sLOsOverview.euiStat.healthyLabel.tooltip', {
                 defaultMessage: 'Click to filter SLOs by Healthy status.',
               })}
+              ariaLabel={i18n.translate('xpack.slo.sLOsOverview.euiStat.healthyLabel.ariaLabel', {
+                defaultMessage: '{count} healthy SLOs. Filter the list by Healthy status.',
+                values: { count: data?.healthy ?? 0 },
+              })}
             />
             <OverviewItem
               title={data?.violated}
@@ -72,6 +76,10 @@ export function SLOsOverview() {
               isLoading={isLoading}
               tooltip={i18n.translate('xpack.slo.sLOsOverview.euiStat.violatedLabel.tooltip', {
                 defaultMessage: 'Click to filter SLOs by Violated status.',
+              })}
+              ariaLabel={i18n.translate('xpack.slo.sLOsOverview.euiStat.violatedLabel.ariaLabel', {
+                defaultMessage: '{count} violated SLOs. Filter the list by Violated status.',
+                values: { count: data?.violated ?? 0 },
               })}
             />
             <OverviewItem
@@ -85,6 +93,10 @@ export function SLOsOverview() {
               tooltip={i18n.translate('xpack.slo.sLOsOverview.euiStat.noDataLabel.tooltip', {
                 defaultMessage: 'Click to filter SLOs by no data status.',
               })}
+              ariaLabel={i18n.translate('xpack.slo.sLOsOverview.euiStat.noDataLabel.ariaLabel', {
+                defaultMessage: '{count} SLOs with no data. Filter the list by no data status.',
+                values: { count: data?.noData ?? 0 },
+              })}
             />
             <OverviewItem
               title={data?.degrading}
@@ -95,6 +107,10 @@ export function SLOsOverview() {
               isLoading={isLoading}
               tooltip={i18n.translate('xpack.slo.sLOsOverview.euiStat.degradingLabel.tooltip', {
                 defaultMessage: 'Click to filter SLOs by Degrading status.',
+              })}
+              ariaLabel={i18n.translate('xpack.slo.sLOsOverview.euiStat.degradingLabel.ariaLabel', {
+                defaultMessage: '{count} degrading SLOs. Filter the list by Degrading status.',
+                values: { count: data?.degrading ?? 0 },
               })}
               titleColor={theme.colors.textWarning}
             />
@@ -112,6 +128,15 @@ export function SLOsOverview() {
                 defaultMessage:
                   'Click to filter SLOs which have not been updated in last {value} hour. They are filtered out by default from the list. Threshold can be changed in SLO settings.',
                 values: {
+                  value:
+                    currentSettings?.staleThresholdInHours ?? DEFAULT_STALE_SLO_THRESHOLD_HOURS,
+                },
+              })}
+              ariaLabel={i18n.translate('xpack.slo.sLOsOverview.euiStat.staleLabel.ariaLabel', {
+                defaultMessage:
+                  '{count} stale SLOs. Filter the list by SLOs which have not been updated in the last {value} hour. They are filtered out by default. The threshold can be changed in SLO settings.',
+                values: {
+                  count: data?.stale ?? 0,
                   value:
                     currentSettings?.staleThresholdInHours ?? DEFAULT_STALE_SLO_THRESHOLD_HOURS,
                 },
