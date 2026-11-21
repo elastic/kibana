@@ -253,6 +253,29 @@ groups:
           ech: ga
           self: ga
 
+      - setting: xpack.actions.inboundEvents.enabled
+        description: |
+          Whether connectors can receive events from external systems, such as webhook requests that start workflows.
+
+          When `true`, you can turn on **Receive events** for connectors that support it, and you can create [Inbound Webhook](/reference/connectors-kibana/inbound-webhook-action-type.md) connectors.
+
+          When `false`:
+
+          - {{kib}} accepts no events for any connector.
+          - **Receive events** doesn't appear.
+          - The Inbound Webhook connector type isn't available.
+
+          Restart {{kib}} after you change this setting.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview 9.6+
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
       - setting: xpack.actions.inboundEvents.admission.enabled
         description: |
           When `true`, {{kib}} caps how many inbound event requests are in flight. When `false`, that cap is off. The per-minute rate limits stay in effect.
