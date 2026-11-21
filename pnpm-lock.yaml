@@ -2110,6 +2110,9 @@ importers:
       '@kbn/es-errors':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-es-errors
+      '@kbn/es-index-migration':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-es-index-migration
       '@kbn/es-mappings':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-es-mappings
@@ -9209,6 +9212,8 @@ importers:
   x-pack/platform/packages/shared/kbn-elastic-assistant-common: {}
 
   x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state: {}
+
+  x-pack/platform/packages/shared/kbn-es-index-migration: {}
 
   x-pack/platform/packages/shared/kbn-es-snapshot-loader: {}
 
