@@ -5,17 +5,34 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiEmptyPrompt, EuiPageSection, EuiSpacer } from '@elastic/eui';
+import React, { lazy, Suspense, useState } from 'react';
+import { EuiEmptyPrompt, EuiLoadingChart, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { APPLICATION_SOURCE } from '../../../common/application_source';
 import type { ApplicationSource } from '../../../common/types/applications';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
 import { ApplicationTabToolbar } from '../../components/application_tab_toolbar';
+import { LoadErrorPrompt } from '../../components/load_error_prompt';
+import { FRUSTRATION_EBT_ELEMENTS } from '../../ebt_constants';
+import { useApplicationData } from '../../hooks/use_application_data';
 import { useApplicationLinks } from '../../hooks/use_application_links';
+import { useEnvironment } from '../../hooks/use_environment';
+import { useFrustrationDashboardAvailable } from '../../hooks/use_frustration_dashboard_available';
 import { useLastEnvironments } from '../../hooks/use_last_environments';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { FrustrationPanel } from '../application_details/otel_overview/components/frustration_panel';
+import {
+  EMPTY_USAGE,
+  usageRequestOf,
+} from '../application_details/otel_overview/utils/usage_request';
 import { useApplicationErrors } from '../errors/hooks/use_application_errors';
+
+// Loaded on this page only: the dashboard bundle belongs to an optional plugin.
+const FrustrationDashboard = lazy(async () => {
+  const { FrustrationDashboard: component } = await import('./components/frustration_dashboard');
+  return { default: component };
+});
 
 const FRUSTRATION_LABEL = i18n.translate('xpack.digitalExperience.frustration.label', {
   defaultMessage: 'Frustration',
@@ -53,13 +70,88 @@ const classicUnavailablePrompt = (
   </EuiPageSection>
 );
 
-/** The time range and environment of the page; the application's environments come with its errors. */
-function FrustrationControls({ serviceName }: { serviceName: string }) {
-  const { response, isLoading, refresh } = useApplicationErrors(serviceName);
+const USAGE_FETCH_ERROR_TITLE = i18n.translate(
+  'xpack.digitalExperience.frustration.usageFetchErrorTitle',
+  { defaultMessage: 'Could not load the frustration signals' }
+);
+
+const DASHBOARD_UNAVAILABLE_BODY = i18n.translate(
+  'xpack.digitalExperience.frustration.dashboardUnavailable',
+  { defaultMessage: 'The dashboard needs the Dashboard and Lens plugins.' }
+);
+
+// The dashboard's queries only narrow by service and environment, so the usage does too.
+const usageRequest = usageRequestOf({});
+
+const dashboardUnavailablePrompt = (
+  <EuiEmptyPrompt
+    data-test-subj="digitalExperienceFrustrationDashboardUnavailable"
+    iconType="dashboardApp"
+    body={<p>{DASHBOARD_UNAVAILABLE_BODY}</p>}
+  />
+);
+
+/** The time range and environment of the page, then its dashboard and the native panel below it. */
+function FrustrationBody({ serviceName }: { serviceName: string }) {
+  const { response, isLoading, refresh: refreshEnvironments } = useApplicationErrors(serviceName);
   const environments = useLastEnvironments(serviceName, response);
+  const usage = useApplicationData(serviceName, usageRequest);
+  const { timeRange } = useTimeRange();
+  const { environment } = useEnvironment();
+  const isDashboardAvailable = useFrustrationDashboardAvailable();
+  const { sessionsHref } = useApplicationLinks(serviceName, APPLICATION_SOURCE.otel);
+  const [refreshCount, setRefreshCount] = useState(0);
+
+  const refreshAll = () => {
+    refreshEnvironments();
+    usage.refresh();
+    setRefreshCount((count) => count + 1);
+  };
+
+  const { frustration, frustratedElements, frustratedPages } = usage.response ?? EMPTY_USAGE;
 
   return (
-    <ApplicationTabToolbar environments={environments} isLoading={isLoading} onRefresh={refresh} />
+    <>
+      <ApplicationTabToolbar
+        environments={environments}
+        isLoading={isLoading}
+        onRefresh={refreshAll}
+      />
+      <EuiSpacer size="m" />
+      <div data-test-subj="digitalExperienceFrustrationDashboardSlot">
+        {isDashboardAvailable ? (
+          <Suspense fallback={<EuiLoadingChart size="l" />}>
+            <FrustrationDashboard
+              serviceName={serviceName}
+              environment={environment}
+              timeRange={timeRange}
+              refreshCount={refreshCount}
+            />
+          </Suspense>
+        ) : (
+          dashboardUnavailablePrompt
+        )}
+        <EuiSpacer size="m" />
+        {usage.error ? (
+          <LoadErrorPrompt
+            data-test-subj="digitalExperienceFrustrationUsageError"
+            retryDataTestSubj="digitalExperienceFrustrationUsageRetry"
+            retryEbtElement={FRUSTRATION_EBT_ELEMENTS.USAGE_RETRY}
+            title={USAGE_FETCH_ERROR_TITLE}
+            error={usage.error}
+            onRetry={usage.refresh}
+          />
+        ) : (
+          <FrustrationPanel
+            frustration={frustration}
+            frustratedElements={frustratedElements}
+            frustratedPages={frustratedPages}
+            isLoading={usage.isLoading}
+            sessionsHref={sessionsHref}
+          />
+        )}
+      </div>
+    </>
   );
 }
 
@@ -84,9 +176,7 @@ export function FrustrationPage({
       />
       {source === APPLICATION_SOURCE.otel ? (
         <EuiPageSection paddingSize="m" restrictWidth={false}>
-          <FrustrationControls serviceName={serviceName} />
-          <EuiSpacer size="m" />
-          <div data-test-subj="digitalExperienceFrustrationDashboardSlot" />
+          <FrustrationBody serviceName={serviceName} />
         </EuiPageSection>
       ) : (
         classicUnavailablePrompt

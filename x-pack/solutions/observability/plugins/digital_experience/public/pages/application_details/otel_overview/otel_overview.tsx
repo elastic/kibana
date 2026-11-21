@@ -51,6 +51,7 @@ import { OverviewTrends } from './components/overview_trends';
 import { TopClicksPanel } from './components/top_clicks_panel';
 import { TopPagesPanel } from './components/top_pages_panel';
 import { usePickerOptions } from './hooks/use_picker_options';
+import { EMPTY_USAGE, usageRequestOf } from './utils/usage_request';
 
 const PAGE_FILTER_NOTE = i18n.translate('xpack.digitalExperience.overview.filters.pageNote', {
   defaultMessage:
@@ -66,16 +67,6 @@ const USAGE_FETCH_ERROR_TITLE = i18n.translate(
   { defaultMessage: 'Could not load the pages, browsers and clicks' }
 );
 
-const EMPTY_USAGE: ApplicationUsageResponse = {
-  topPages: [],
-  breakdowns: { pageLoads: 0, browsers: [], operatingSystems: [], devices: [] },
-  topClicks: [],
-  totalClicks: 0,
-  frustration: { rageClicks: 0, deadClicks: 0, errorClicks: 0, total: 0, sessions: 0 },
-  frustratedElements: [],
-  frustratedPages: [],
-};
-
 /** The most frequent error groups on the Overview; the Errors tab lists the rest. */
 const TOP_ERRORS_ROWS = 5;
 
@@ -89,18 +80,6 @@ const overviewRequestOf = (
     return apiClient.fetch(
       'GET /internal/digital_experience/applications/{serviceName}/overview',
       withOverviewFilters(options, searchParams, { percentile, timeZone })
-    );
-  };
-};
-
-/** The request for the pages, breakdowns and clicks narrowed by `searchParams`. */
-const usageRequestOf = (
-  searchParams: OverviewSearchParams
-): ApplicationRequest<ApplicationUsageResponse> => {
-  return (apiClient, options) => {
-    return apiClient.fetch(
-      'GET /internal/digital_experience/applications/{serviceName}/usage',
-      withOverviewFilters(options, searchParams)
     );
   };
 };

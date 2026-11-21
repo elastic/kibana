@@ -127,6 +127,23 @@ describe('FrustrationPanel', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('has no dashboard link where the panel is not given one', () => {
+    render(
+      <FrustrationPanel
+        frustration={FRUSTRATION}
+        frustratedElements={[]}
+        frustratedPages={[]}
+        isLoading={false}
+        sessionsHref={sessionsHref}
+      />,
+      { wrapper: EuiProvider }
+    );
+
+    expect(
+      screen.queryByTestId('digitalExperienceOverviewFrustrationDashboardLink')
+    ).not.toBeInTheDocument();
+  });
+
   it('has no dashboard link without signals', () => {
     renderPanel({ frustration: NO_FRUSTRATION, elements: [], pages: [] });
 

@@ -271,7 +271,7 @@ export function FrustrationPanel({
   /** The sessions of the application, narrowed by the given filters. */
   sessionsHref: (query: SessionsListUrlQuery) => string;
   /** The frustration dashboard of the application, linked from the header when it can be shown. */
-  dashboardHref: string;
+  dashboardHref?: string;
 }) {
   const [tab, setTab] = useState<FrustrationTab>('elements');
   const isDashboardAvailable = useFrustrationDashboardAvailable();
@@ -321,7 +321,7 @@ export function FrustrationPanel({
       actions={
         !isEmpty && (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            {isDashboardAvailable && (
+            {isDashboardAvailable && dashboardHref && (
               <EuiFlexItem grow={false}>
                 <EuiLink
                   href={dashboardHref}

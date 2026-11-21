@@ -113,6 +113,10 @@ export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   PERCENTILE: 'overviewPercentile',
 } as const;
 
+export const FRUSTRATION_EBT_ELEMENTS = {
+  USAGE_RETRY: 'frustrationUsageRetry',
+} as const;
+
 export const ERRORS_EBT_ELEMENTS = {
   RETRY: 'errorsRetry',
   ERROR: 'errorsError',
