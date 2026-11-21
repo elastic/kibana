@@ -140,8 +140,8 @@ export type LoadFeedResult =
   | ({
       status: 'ok';
       feed: FeedParseResult;
-      /** False when the vendor reported the feed unchanged (304), so its knowledge text is already stored. */
-      changed?: boolean;
+      /** Set on a 304: the knowledge ids already written cleanly for these exact feed bytes. */
+      knowledgeStoredIds?: ReadonlySet<string>;
     } & FeedHeaders)
   /** The vendor publishes no feed for this release (HTTP 404), e.g. an EOL codename. */
   | { status: 'unavailable'; url: string };
@@ -308,7 +308,7 @@ export const loadFeed = async (
   }
   const { body, etag, lastModified } = downloaded;
   const feed = await parseFeedBody(os, body, { signal, maxDecompressedBytes, includeUnfixed });
-  return { status: 'ok', feed, etag, lastModified, changed: true };
+  return { status: 'ok', feed, etag, lastModified };
 };
 
 /**

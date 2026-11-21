@@ -71,7 +71,8 @@ const buildFeedLoader =
       feed,
       etag: cached.etag,
       lastModified: cached.lastModified,
-      changed: reported?.status !== 'not_modified' || cached.knowledgeStored !== true,
+      knowledgeStoredIds:
+        reported?.status === 'not_modified' ? cached.knowledgeStoredIds : undefined,
     };
   };
 
@@ -97,8 +98,8 @@ export const buildMatchStepDefinition = ({
             logger,
             loadFeed: buildFeedLoader(feeds, includeUnfixed),
             includeUnfixed,
-            onKnowledgeStored: (os, stored) =>
-              markKnowledgeStored(releaseKey(os), includeUnfixed, stored),
+            onKnowledgeStored: (os, storedIds) =>
+              markKnowledgeStored(releaseKey(os), includeUnfixed, storedIds),
             now,
           },
           { signal, runId }

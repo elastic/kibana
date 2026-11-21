@@ -172,7 +172,6 @@ describe('native_vuln.match handler', () => {
       expect(result).toEqual({
         status: 'ok',
         feed: parsed,
-        changed: true,
         etag: '"e"',
         lastModified: 'lm',
       });
@@ -181,45 +180,46 @@ describe('native_vuln.match handler', () => {
 
     describe('knowledge write after a 304', () => {
       const parsed = { records: [] } as never;
-      const cacheFeed = (knowledgeStored?: boolean) => {
+      const cacheFeed = (knowledgeStoredIds?: ReadonlySet<string>) => {
         parseMock.mockResolvedValue(parsed);
         setCachedFeed('ubuntu:noble', {
           etag: '"e"',
           body: new Uint8Array(2),
           includeUnfixed: false,
-          knowledgeStored,
+          knowledgeStoredIds,
         });
       };
       const loaded = (status: 'not_modified' | 'downloaded') =>
         load({ feeds: [{ release: 'ubuntu:noble', status, hosts: 1 }] });
 
-      it.each([undefined, false])(
-        'asks for the write again when the last write for these bytes was %s',
-        async (stored) => {
-          cacheFeed(stored);
-          expect(await loaded('not_modified')).toMatchObject({ changed: true });
-        }
-      );
-
-      it('skips the write when the last write for these bytes was clean', async () => {
-        cacheFeed(true);
-        expect(await loaded('not_modified')).toMatchObject({ changed: false });
+      it('hands the loader the ids already stored for these bytes on a 304', async () => {
+        const ids = new Set(['cve:ubuntu:noble:CVE-1']);
+        cacheFeed(ids);
+        expect((await loaded('not_modified')) as { knowledgeStoredIds?: unknown }).toMatchObject({
+          knowledgeStoredIds: ids,
+        });
       });
 
-      it('always writes when the bytes were just downloaded', async () => {
-        cacheFeed(true);
-        expect(await loaded('downloaded')).toMatchObject({ changed: true });
+      it('hands over no ids when nothing was stored cleanly', async () => {
+        cacheFeed(undefined);
+        expect(await loaded('not_modified')).toMatchObject({ knowledgeStoredIds: undefined });
       });
 
-      it('records the outcome of each write on the cached entry', async () => {
+      it('hands over no ids when the bytes were just downloaded', async () => {
+        cacheFeed(new Set(['cve:ubuntu:noble:CVE-1']));
+        expect(await loaded('downloaded')).toMatchObject({ knowledgeStoredIds: undefined });
+      });
+
+      it('records the ids of each clean write on the cached entry and clears them on a failure', async () => {
         runScanMock.mockResolvedValue(summary());
-        cacheFeed(false);
+        cacheFeed();
         const { scanDeps } = await run({ feeds: [] });
+        const ids = new Set(['cve:ubuntu:noble:CVE-1']);
 
-        scanDeps!.onKnowledgeStored!(noble, true);
-        expect(getCachedFeed('ubuntu:noble', false)?.knowledgeStored).toBe(true);
-        scanDeps!.onKnowledgeStored!(noble, false);
-        expect(getCachedFeed('ubuntu:noble', false)?.knowledgeStored).toBe(false);
+        scanDeps!.onKnowledgeStored!(noble, ids);
+        expect(getCachedFeed('ubuntu:noble', false)?.knowledgeStoredIds).toBe(ids);
+        scanDeps!.onKnowledgeStored!(noble, undefined);
+        expect(getCachedFeed('ubuntu:noble', false)?.knowledgeStoredIds).toBeUndefined();
       });
     });
 

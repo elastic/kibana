@@ -13,10 +13,11 @@ export interface CachedFeed {
   /** Which variant was fetched; a flag mismatch means the bytes are for the other feed. */
   includeUnfixed: boolean;
   /**
-   * True when the vendor text of these exact bytes (this etag) was written to the knowledge
-   * index without a failure; a 304 then has nothing left to write.
+   * Knowledge ids of these exact bytes (this etag) written to the knowledge index without a
+   * failure. A 304 then writes only the ids a run uses beyond these. Always a subset of the ids
+   * the parsed feed carries, so it stays small.
    */
-  knowledgeStored?: boolean;
+  knowledgeStoredIds?: ReadonlySet<string>;
 }
 
 /** More releases than this are unlikely (Ubuntu and RHEL majors in use); the cap bounds heap if that changes. */
@@ -40,14 +41,14 @@ export const setCachedFeed = (release: string, feed: CachedFeed): void => {
   }
 };
 
-/** Records whether the knowledge write for the cached bytes of `release` completed cleanly. */
+/** Records the knowledge ids written cleanly for the cached bytes of `release`; none clears them. */
 export const markKnowledgeStored = (
   release: string,
   includeUnfixed: boolean,
-  stored: boolean
+  ids?: ReadonlySet<string>
 ): void => {
   const cached = getCachedFeed(release, includeUnfixed);
-  if (cached) cached.knowledgeStored = stored;
+  if (cached) cached.knowledgeStoredIds = ids;
 };
 
 /** Drops every entry whose release was not just fetched, so a decommissioned OS release frees its feed. */

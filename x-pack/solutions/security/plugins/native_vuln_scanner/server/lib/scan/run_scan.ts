@@ -34,8 +34,8 @@ export interface ScanDeps {
   loadKev?: (signal: AbortSignal) => Promise<LoadKevResult>;
   /** From kibana.yml: whether this run's feeds and findings include vendor-unfixed CVEs. */
   includeUnfixed?: boolean;
-  /** Called after each release's knowledge write; `stored` is true when nothing failed. */
-  onKnowledgeStored?: (os: FeedOs, stored: boolean) => void;
+  /** Called after each release's knowledge write with every id now stored cleanly, or none after a failure. */
+  onKnowledgeStored?: (os: FeedOs, storedIds?: ReadonlySet<string>) => void;
   now?: () => Date;
 }
 
@@ -200,10 +200,9 @@ const storeKnowledge = async (
   es: ElasticsearchClient,
   logger: Logger,
   feed: FeedParseResult,
-  findings: readonly Finding[],
+  ids: ReadonlySet<string>,
   { now, signal }: { now: string; signal: AbortSignal }
 ): Promise<KnowledgeWriteResult> => {
-  const ids = knowledgeIdsOf(findings, feed.os.version);
   try {
     await ensureKnowledgeIndex(es);
     return await writeKnowledge(es, {
@@ -344,17 +343,24 @@ export const runScan = async (
         signal,
       });
       for (const { cve } of findings) cves.add(cve.id);
-      // An unchanged feed (304) has the same text already stored, unless the last write for it
-      // failed; the loader reports that as `changed`.
-      if (result.changed !== false) {
-        const stored = await storeKnowledge(es, logger, result.feed, findings, {
+      // An unchanged feed (304) has the text of `knowledgeStoredIds` already stored (none after a
+      // failed write), so only the ids this run uses beyond them are written.
+      const alreadyStored = result.knowledgeStoredIds;
+      const missing = alreadyStored
+        ? new Set([...usedKnowledge].filter((id) => !alreadyStored.has(id)))
+        : usedKnowledge;
+      if (!alreadyStored || missing.size > 0) {
+        const stored = await storeKnowledge(es, logger, result.feed, missing, {
           now: now().toISOString(),
           signal,
         });
         summary.knowledge.written += stored.written;
         summary.knowledge.unchanged += stored.unchanged;
         summary.knowledge.failed += stored.failed;
-        onKnowledgeStored?.(os, stored.failed === 0);
+        onKnowledgeStored?.(
+          os,
+          stored.failed === 0 ? new Set([...(alreadyStored ?? []), ...usedKnowledge]) : undefined
+        );
       } else if (summary.knowledge.skippedReleases.length < MAX_SKIPPED_RELEASES) {
         summary.knowledge.skippedReleases.push(key);
       }

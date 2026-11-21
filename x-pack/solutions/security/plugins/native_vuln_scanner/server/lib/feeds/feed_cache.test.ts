@@ -37,25 +37,27 @@ describe('feed cache', () => {
     expect(getCachedFeed(`rhel:${MAX_CACHED_FEEDS}`, false)).toBeDefined();
   });
 
-  it('tracks whether the knowledge write for the cached bytes was clean', () => {
+  it('tracks the knowledge ids written cleanly for the cached bytes', () => {
     setCachedFeed('rhel:9', feed('"b"'));
-    expect(getCachedFeed('rhel:9', false)?.knowledgeStored).toBeUndefined();
-    markKnowledgeStored('rhel:9', false, true);
-    expect(getCachedFeed('rhel:9', false)?.knowledgeStored).toBe(true);
-    markKnowledgeStored('rhel:9', false, false);
-    expect(getCachedFeed('rhel:9', false)?.knowledgeStored).toBe(false);
+    expect(getCachedFeed('rhel:9', false)?.knowledgeStoredIds).toBeUndefined();
+    markKnowledgeStored('rhel:9', false, new Set(['cve:redhat:9:a']));
+    expect(getCachedFeed('rhel:9', false)?.knowledgeStoredIds).toEqual(new Set(['cve:redhat:9:a']));
+    // A failed write clears them.
+    markKnowledgeStored('rhel:9', false, undefined);
+    expect(getCachedFeed('rhel:9', false)?.knowledgeStoredIds).toBeUndefined();
     // New bytes (new etag) start unstored again.
+    markKnowledgeStored('rhel:9', false, new Set(['cve:redhat:9:a']));
     setCachedFeed('rhel:9', feed('"c"'));
-    expect(getCachedFeed('rhel:9', false)?.knowledgeStored).toBeUndefined();
-    expect(() => markKnowledgeStored('rhel:10', false, true)).not.toThrow();
+    expect(getCachedFeed('rhel:9', false)?.knowledgeStoredIds).toBeUndefined();
+    expect(() => markKnowledgeStored('rhel:10', false, new Set())).not.toThrow();
   });
 
   it('marks the variant getCachedFeed would serve, and no other', () => {
     setCachedFeed('rhel:9', { ...feed('"b"'), includeUnfixed: true });
-    markKnowledgeStored('rhel:9', false, true);
-    expect(getCachedFeed('rhel:9', true)?.knowledgeStored).toBeUndefined();
-    markKnowledgeStored('rhel:9', true, true);
-    expect(getCachedFeed('rhel:9', true)?.knowledgeStored).toBe(true);
+    markKnowledgeStored('rhel:9', false, new Set(['x']));
+    expect(getCachedFeed('rhel:9', true)?.knowledgeStoredIds).toBeUndefined();
+    markKnowledgeStored('rhel:9', true, new Set(['x']));
+    expect(getCachedFeed('rhel:9', true)?.knowledgeStoredIds).toEqual(new Set(['x']));
   });
 
   it('retains only the releases it is told to keep', () => {

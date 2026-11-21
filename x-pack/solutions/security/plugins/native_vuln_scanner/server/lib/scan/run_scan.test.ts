@@ -185,6 +185,25 @@ describe('runScan', () => {
       (deps.es.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [], took: 1 });
     };
 
+    // Every knowledge id the findings of the (single-release) rhel 9 run reference.
+    const usedIds = (): Set<string> => {
+      const used = new Set<string>();
+      for (const finding of writeMock.mock.calls[0][1].findings) {
+        used.add(`cve:redhat:9:${finding.cve.id}`);
+        for (const { id } of finding.advisories) used.add(`adv:redhat:9:${id}`);
+      }
+      return used;
+    };
+    const run304 = async (knowledgeStoredIds?: ReadonlySet<string>) => {
+      const { deps } = setup([rhelAgent('a1', '9')], async () => ({
+        ...(await rhel9Feed()),
+        knowledgeStoredIds,
+      }));
+      mockKb(deps);
+      const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
+      return { deps, summary };
+    };
+
     it('creates the lookup index and writes the text of the advisories the findings use', async () => {
       const { deps } = setup([rhelAgent('a1', '9')]);
       mockKb(deps);
@@ -306,14 +325,13 @@ describe('runScan', () => {
       });
     });
 
-    it('skips the knowledge write when the feed was unchanged (304)', async () => {
-      const { deps } = setup([rhelAgent('a1', '9')], async () => ({
-        ...(await rhel9Feed()),
-        changed: false,
-      }));
-      mockKb(deps);
+    it('skips the knowledge write on a 304 when every used id is already stored', async () => {
+      const first = await run304();
+      const stored = usedIds();
+      expect(indexedIds(first.deps).length).toBeGreaterThan(0);
 
-      const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
+      writeMock.mockClear();
+      const { deps, summary } = await run304(stored);
 
       expect(summary.findings).toBeGreaterThan(0);
       expect(deps.es.mget).not.toHaveBeenCalled();
@@ -326,13 +344,45 @@ describe('runScan', () => {
       });
     });
 
+    it('writes only the used ids a 304 has not stored yet, and does not list the release as skipped', async () => {
+      const first = await run304();
+      const all = indexedIds(first.deps);
+      const stored = usedIds();
+      stored.delete(all[0]);
+
+      writeMock.mockClear();
+      const { deps, summary } = await run304(stored);
+
+      expect(indexedIds(deps)).toEqual([all[0]]);
+      expect(summary.knowledge).toEqual({
+        written: 1,
+        unchanged: 0,
+        failed: 0,
+        skippedReleases: [],
+      });
+    });
+
+    it('rewrites every used id on a 304 after a failed write left no stored ids', async () => {
+      const first = await run304();
+      const all = indexedIds(first.deps);
+
+      writeMock.mockClear();
+      const { deps, summary } = await run304(undefined);
+
+      expect(indexedIds(deps).sort()).toEqual([...all].sort());
+      expect(summary.knowledge.skippedReleases).toEqual([]);
+    });
+
     it('reports each release write to onKnowledgeStored, clean or not', async () => {
       const onKnowledgeStored = jest.fn();
       const clean = setup([rhelAgent('a1', '9')]);
       clean.deps.onKnowledgeStored = onKnowledgeStored;
       mockKb(clean.deps);
       await runScan(clean.deps, { signal: new AbortController().signal, runId: 'r1' });
-      expect(onKnowledgeStored).toHaveBeenLastCalledWith({ family: 'rhel', version: '9' }, true);
+      expect(onKnowledgeStored).toHaveBeenLastCalledWith(
+        { family: 'rhel', version: '9' },
+        usedIds()
+      );
 
       const failing = setup([rhelAgent('a1', '9')]);
       failing.deps.onKnowledgeStored = onKnowledgeStored;
@@ -347,24 +397,52 @@ describe('runScan', () => {
         took: 1,
       });
       await runScan(failing.deps, { signal: new AbortController().signal, runId: 'r2' });
-      expect(onKnowledgeStored).toHaveBeenLastCalledWith({ family: 'rhel', version: '9' }, false);
+      expect(onKnowledgeStored).toHaveBeenLastCalledWith(
+        { family: 'rhel', version: '9' },
+        undefined
+      );
     });
 
     it('does not call onKnowledgeStored for a 304 whose text is already stored', async () => {
       const onKnowledgeStored = jest.fn();
+      const first = await run304();
+      expect(indexedIds(first.deps).length).toBeGreaterThan(0);
+      const stored = usedIds();
+      writeMock.mockClear();
       const { deps } = setup([rhelAgent('a1', '9')], async () => ({
         ...(await rhel9Feed()),
-        changed: false,
+        knowledgeStoredIds: stored,
       }));
       deps.onKnowledgeStored = onKnowledgeStored;
       await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
       expect(onKnowledgeStored).not.toHaveBeenCalled();
     });
 
+    it('reports the stored ids plus the newly written ones after a partial 304 write', async () => {
+      const onKnowledgeStored = jest.fn();
+      const first = await run304();
+      const stored = usedIds();
+      stored.delete(indexedIds(first.deps)[0]);
+      const before = new Set(stored);
+      writeMock.mockClear();
+      const { deps } = setup([rhelAgent('a1', '9')], async () => ({
+        ...(await rhel9Feed()),
+        knowledgeStoredIds: stored,
+      }));
+      mockKb(deps);
+      deps.onKnowledgeStored = onKnowledgeStored;
+      await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
+      expect(before.size).toBeLessThan(usedIds().size);
+      expect(onKnowledgeStored).toHaveBeenCalledWith({ family: 'rhel', version: '9' }, usedIds());
+    });
+
     it('lists a release whose write was skipped on a 304 with a clean prior write', async () => {
+      await run304();
+      const stored9 = usedIds();
+      writeMock.mockClear();
       const { deps } = setup([rhelAgent('a1', '9'), rhelAgent('a10', '10')], async (os) => {
         const loaded = await rhel9Feed();
-        return os.version === '9' ? { ...loaded, changed: false } : loaded;
+        return os.version === '9' ? { ...loaded, knowledgeStoredIds: stored9 } : loaded;
       });
       const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
       expect(summary.knowledge.skippedReleases).toEqual(['rhel:9']);
