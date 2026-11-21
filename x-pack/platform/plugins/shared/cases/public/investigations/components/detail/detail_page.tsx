@@ -205,6 +205,7 @@ export const DetailPage: React.FC = () => {
             agentAvailable={agentAvailable}
             onNavigateTab={navigateTab}
             openItemId={openItemId}
+            onOpenModal={setOpenModal}
           />
         </main>
         {isSidePanelOpen ? (

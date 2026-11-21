@@ -6,6 +6,7 @@
  */
 
 import type { InvestigationRecord } from '../../../../common/investigations/types';
+import type { ModalName } from '../modals/modal_props';
 
 export type TabId = 'overview' | 'conversation' | 'evidence' | 'scope' | 'procedure' | 'activity';
 
@@ -28,4 +29,6 @@ export interface TabProps {
   onNavigateTab: (tab: TabId, opts?: { itemId?: string }) => void;
   /** The item opened through the `item` query parameter, if any. */
   openItemId?: string;
+  /** Opens one of the record-level modals owned by the detail page (determination, close, ...). */
+  onOpenModal: (name: ModalName) => void;
 }
