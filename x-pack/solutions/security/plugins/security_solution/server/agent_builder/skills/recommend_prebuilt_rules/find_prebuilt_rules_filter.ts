@@ -62,6 +62,14 @@ const orClause = (fieldName: string, values: string[]): string => {
   return `${fieldName}: (${values.map(prepareKQLStringParam).join(' OR ')})`;
 };
 
+/**
+ * Sub-technique IDs (`T1059.001`) are reduced to their parent (`T1059`): the filter targets
+ * `threat.technique.id`, and a rule mapped to a sub-technique also lists its parent there.
+ */
+const toParentTechniqueIds = (ids: string[]): string[] => [
+  ...new Set(ids.map((id) => id.replace(/\.\d{3}$/, ''))),
+];
+
 export const buildPrebuiltRulesToolFilter = (
   filter: PrebuiltRulesFilter = {}
 ): string | undefined => {
@@ -87,7 +95,7 @@ export const buildPrebuiltRulesToolFilter = (
   }
 
   if (filter.mitreTechnique?.length) {
-    parts.push(orClause(TECHNIQUE_ID_FIELD, filter.mitreTechnique));
+    parts.push(orClause(TECHNIQUE_ID_FIELD, toParentTechniqueIds(filter.mitreTechnique)));
   }
 
   if (filter.mitreTactic?.length) {
