@@ -80,8 +80,11 @@ describe('composeSourceStatus', () => {
       metricIndicesStatus: 'unknown',
     });
     // An unexpected failure (for example an authorization error) is not a timeout, so it stays
-    // at error level with its type and stack instead of being downgraded to a warning.
-    expect(logger.error).toHaveBeenCalledWith(error);
+    // at error level with its type and stack instead of being downgraded to a warning. Assert
+    // identity rather than equality so replacing the error with a fresh `new Error(message)`
+    // (which would discard its type and stack) would fail this test.
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.error.mock.calls[0][0]).toBe(error);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
