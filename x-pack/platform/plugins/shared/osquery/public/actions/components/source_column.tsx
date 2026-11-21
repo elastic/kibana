@@ -17,6 +17,9 @@ const SOURCE_LABELS: Record<UnifiedHistorySource, string> = {
   Rule: i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumn.rule', {
     defaultMessage: 'Rule',
   }),
+  Workflow: i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumn.workflow', {
+    defaultMessage: 'Workflow',
+  }),
   Scheduled: i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumn.scheduled', {
     defaultMessage: 'Scheduled',
   }),

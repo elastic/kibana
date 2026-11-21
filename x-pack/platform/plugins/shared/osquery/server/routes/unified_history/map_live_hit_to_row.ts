@@ -6,6 +6,7 @@
  */
 
 import type { LiveHistoryRow } from '../../../common/api/unified_history/types';
+import { resolveSource } from './resolve_source';
 
 export const getField = (
   hitFields: Record<string, unknown>,
@@ -55,6 +56,7 @@ interface ActionSource {
   agent_platforms?: string[];
   agent_policy_ids?: string[];
   alert_ids?: string[];
+  origin?: { type?: string; run_id?: string; verified?: boolean };
   tags?: string[];
   queries?: ActionQuery[];
 }
@@ -81,9 +83,6 @@ export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
       ? agentsList.length
       : queries.reduce((sum, q) => sum + (q.agents?.length ?? 0), 0);
 
-  const alertIdsRaw = hitFields.alert_ids ?? source.alert_ids;
-  const hasAlertIds = Array.isArray(alertIdsRaw) ? alertIdsRaw.length > 0 : !!alertIdsRaw;
-
   let singleQueryDetails: Pick<LiveHistoryRow, 'ecsMapping' | 'savedQueryId' | 'timeout'> = {};
   if (!isPack && queries[0]) {
     singleQueryDetails = {
@@ -99,7 +98,7 @@ export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
     timestamp: get('@timestamp') as string,
     queryText,
     queryName: packName,
-    source: hasAlertIds ? ('Rule' as const) : ('Live' as const),
+    source: resolveSource(hit),
     packName,
     packId,
     spaceId: get('space_id') as string | undefined,
