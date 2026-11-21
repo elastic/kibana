@@ -79,8 +79,7 @@ describe('assertAdDataGate', () => {
   });
 
   it('fails when foreign (non-corpus, non-Chrysalis) alerts are in the window', async () => {
-    // A foreign writer can no longer cover a partial restore: 94 corpus alerts
-    // plus 1 foreign alert fails on both the floor and the contamination check.
+    // 94 corpus alerts pass the floor; the single foreign alert alone fails the gate.
     const { esClient } = clientWith({ corpus: 94, foreign: 1, chrysalis: 0 });
     await expect(assertAdDataGate({ esClient, log, ...GATE })).rejects.toThrow('foreign=1');
   });

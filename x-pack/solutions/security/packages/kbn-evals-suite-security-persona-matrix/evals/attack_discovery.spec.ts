@@ -36,8 +36,6 @@ const AD_ALERTS_INDEX = '.alerts-security.alerts-default';
 // start:'now-24h', which selects nothing outside this window).
 const CORPUS_WINDOW = { start: '2026-03-01T00:00:00.000Z', end: '2026-04-01T00:00:00.000Z' };
 
-/** Every doc `_id` in the corpus window, paged via search_after (see src/list_window_ids.ts). */
-
 evaluate.describe(
   'Attack Discovery (Chrysalis kill-chains)',
   { tag: tags.stateful.classic },

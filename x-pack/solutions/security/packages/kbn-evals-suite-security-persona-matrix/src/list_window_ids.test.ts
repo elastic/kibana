@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with
- * the Elastic License 2.0, at your election.
- */
-
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { listWindowIds } from './list_window_ids';
 
@@ -52,7 +44,7 @@ describe('listWindowIds', () => {
     expect(search.mock.calls[2][0]).toMatchObject({ search_after: ['2'] });
   });
 
-  // Regression (Libra PRRT_kwDOAHeGUM65T_t6): sorting on `_id` throws on ES 8+
+  // Regression: sorting on `_id` throws on ES 8+
   // ("Fielddata access on the _id field is disallowed", fielddata on _id is
   // disabled by default), failing Attack Discovery setup on every run before
   // the data gate could execute. Paging must sort on `_shard_doc`, never `_id`.
@@ -65,7 +57,7 @@ describe('listWindowIds', () => {
     }
   });
 
-  // Regression (Libra PRRT_kwDOAHeGUM65U7hs): ES only accepts a `_shard_doc`
+  // Regression: ES only accepts a `_shard_doc`
   // sort inside a point-in-time search; without a PIT the request fails with
   // "[_shard_doc] sort field cannot be used without [point in time]". The
   // search must open a PIT, pass `pit` (not `index`), and close it afterwards.
@@ -84,7 +76,7 @@ describe('listWindowIds', () => {
     expect(closePointInTime).toHaveBeenCalledWith({ id: 'pit-1' });
   });
 
-  // Regression (Libra PRRT_kwDOAHeGUM65VpBn): ES can return a new PIT id on any search,
+  // Regression: ES can return a new PIT id on any search,
   // the final empty page included; the next page and the close must use the latest id.
   it('follows the pit_id each search returns, for paging and for the close', async () => {
     const search = jest

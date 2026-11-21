@@ -582,48 +582,51 @@ describe('persona_matrix_tools_seed', () => {
     it('deletes only todo documents this run added (ids not in the pre-seed snapshot)', async () => {
       const mod = await load('parity');
       const client = createClient();
-      const esIndex = jest.fn(async () => ({
-        // Snapshot taken at seed time: only this doc pre-exists the run.
-        hits: { hits: [{ _id: 'old-1', sort: ['old-1'] }] },
-      }));
+      // ES 8+ rejects a sort on `_id` (fielddata disabled) and a `_shard_doc` sort
+      // outside a point-in-time; the mock throws on both, as ES does.
+      const pitSearch = (pages: Array<Array<{ _id: string; sort: string[] }>>) =>
+        jest.fn(async (body: { pit?: { id: string }; sort?: string[] }) => {
+          if (JSON.stringify(body.sort ?? []).includes('_id')) {
+            throw new Error('Fielddata access on the _id field is disallowed');
+          }
+          if (!body.pit) {
+            throw new Error('[_shard_doc] sort field cannot be used without [point in time]');
+          }
+          return { hits: { hits: pages.shift() ?? [] } };
+        });
+      const pitClient = (search: jest.Mock, extras: Record<string, unknown> = {}) =>
+        ({
+          search,
+          openPointInTime: jest.fn(async () => ({ id: 'pit-1' })),
+          closePointInTime: jest.fn(async () => ({ succeeded: true })),
+          ...extras,
+        } as unknown as EsClient);
       const deleteByQuery = jest.fn(async () => ({}));
+      // Snapshot taken at seed time: only this doc pre-exists the run.
+      const seedSearch = pitSearch([[{ _id: 'old-1', sort: ['0'] }], []]);
       await mod.seedPersonaMatrixTools({
         kbnClient: asKbn(client),
         log,
-        esClient: { search: esIndex } as unknown as EsClient,
+        esClient: pitClient(seedSearch),
         profile: 'chrysalis-parity',
       });
-      // First cleanup page: the seeded id survived plus two run-added docs; second page: empty.
-      const cleanupSearch = jest
-        .fn()
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              { _id: 'old-1', sort: ['old-1'] },
-              { _id: 'new-1', sort: ['new-1'] },
-              { _id: 'new-2', sort: ['new-2'] },
-            ],
-          },
-        })
-        .mockResolvedValueOnce({ hits: { hits: [] } });
+      expect(seedSearch).toHaveBeenCalled();
+      // Cleanup: the seeded id survived plus two run-added docs, split over two pages.
+      const cleanupSearch = pitSearch([
+        [
+          { _id: 'old-1', sort: ['0'] },
+          { _id: 'new-1', sort: ['1'] },
+        ],
+        [{ _id: 'new-2', sort: ['2'] }],
+        [],
+      ]);
       await mod.cleanupPersonaMatrixTools({
         kbnClient: asKbn(client),
         log,
-        esClient: {
-          search: cleanupSearch,
-          deleteByQuery,
-        } as unknown as EsClient,
+        esClient: pitClient(cleanupSearch, { deleteByQuery }),
       });
+      expect(log.warning).not.toHaveBeenCalled();
       expect(deleteByQuery).toHaveBeenCalledTimes(1);
-      // Regression (Libra t_uA): sorting on `_id` throws on ES 8+ (fielddata on
-      // `_id` is disabled by default), so cleanup silently never deleted this
-      // run's todos. Paging must use `_shard_doc`, never `_id`.
-      const searchBodies = cleanupSearch.mock.calls.map((call) => call[0]);
-      expect(searchBodies.length).toBeGreaterThan(0);
-      for (const body of searchBodies) {
-        expect(JSON.stringify(body.sort)).not.toContain('_id');
-        expect(body.sort).toContain('_shard_doc');
-      }
       expect(deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: 'persona-matrix-todos',

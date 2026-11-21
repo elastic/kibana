@@ -5,32 +5,35 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with
- * the Elastic License 2.0, at your election.
- */
-
-import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { Client as EsClient, estypes } from '@elastic/elasticsearch';
 
 const PIT_KEEP_ALIVE = '2m';
 
 /**
  * Every doc `_id` in the time window, paged via search_after inside a
  * point-in-time (PIT).
+ */
+export const listWindowIds = (
+  esClient: EsClient,
+  index: string,
+  window: { start: string; end: string }
+): Promise<string[]> =>
+  listIdsInPit(esClient, index, {
+    range: { '@timestamp': { gte: window.start, lt: window.end } },
+  });
+
+/**
+ * Every doc `_id` matching `query`, paged via search_after inside a PIT.
  *
  * The PIT is required: `_shard_doc` — the only safe paging sort here — is only
  * accepted inside a PIT search, and sorting on `_id` is rejected outright on
  * ES 8+ ("Fielddata access on the _id field is disallowed",
- * `indices.id_field_data.enabled: false`), which would fail the caller's setup
- * before any evaluation runs.
+ * `indices.id_field_data.enabled: false`).
  */
-export const listWindowIds = async (
+export const listIdsInPit = async (
   esClient: EsClient,
   index: string,
-  window: { start: string; end: string }
+  query?: estypes.QueryDslQueryContainer
 ): Promise<string[]> => {
   const ids: string[] = [];
   // ES may return a new PIT id on any search (the final empty page included); the next
@@ -44,7 +47,7 @@ export const listWindowIds = async (
         size: 1000,
         sort: ['_shard_doc'],
         ...(searchAfter ? { search_after: searchAfter } : {}),
-        query: { range: { '@timestamp': { gte: window.start, lt: window.end } } },
+        ...(query ? { query } : {}),
       });
       if (response.pit_id) pitId = response.pit_id;
       const hits = response.hits?.hits ?? [];

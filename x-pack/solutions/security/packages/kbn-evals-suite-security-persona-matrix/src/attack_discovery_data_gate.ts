@@ -12,9 +12,9 @@ import type { ToolingLog } from '@kbn/tooling-log';
 export const AD_MIN_ENDPOINT_ALERTS = 80;
 
 /**
- * Most alerts AD may read. The restore deletes every alert index before loading the corpus,
- * and the window is months before any live rule run, so anything past the corpus size is a
- * foreign writer: without this cap, a partial restore plus unrelated alerts passes the floor.
+ * Most corpus alerts AD may read: the snapshot holds 95, so a higher count means the corpus
+ * ids were captured from more than the restored snapshot. Non-corpus alerts in the window
+ * are counted separately as foreign and fail the gate on their own.
  */
 export const AD_MAX_ENDPOINT_ALERTS = 95;
 

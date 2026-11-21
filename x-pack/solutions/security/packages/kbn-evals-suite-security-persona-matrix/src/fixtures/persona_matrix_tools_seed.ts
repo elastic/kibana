@@ -19,6 +19,7 @@ import {
 import { CHRYSALIS_PARITY_AGENT } from './chrysalis_parity_agent';
 import { seedProfile } from './chrysalis_seed';
 import type { AgentProfile } from '../agent_profile';
+import { listIdsInPit } from '../list_window_ids';
 import { STUB_CONNECTOR_ID } from './stub_connector';
 import { SINK_ORIGIN, startStubSink } from './stub_sink';
 
@@ -212,82 +213,46 @@ let parityCaseWindowStart: string | undefined;
 /**
  * Todo documents already in `persona-matrix-todos` when this process created the
  * `write-todos` workflow. Cleanup deletes only docs NOT in this snapshot, so a
- * reused Scout stack neither keeps this run's plans nor loses another run's
- * (a time window would: a concurrent run's writes after the window start would
- * be deleted).
+ * reused Scout stack keeps the docs that predate this run.
  */
 let preexistingTodoIds: Set<string> | undefined;
 
 const CASES_PAGE_SIZE = 100;
 
+const isIndexNotFound = (error: unknown): boolean =>
+  (error as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type ===
+  'index_not_found_exception';
+
 /**
- * Ids of every doc currently in the todos index, paged via search_after.
+ * Ids of every doc currently in the todos index; an absent index has none.
  */
 async function listTodoIds(esClient: EsClient): Promise<Set<string>> {
-  const ids = new Set<string>();
-  let searchAfter: string[] | undefined;
-  let lastSeenId: string | undefined;
-  for (;;) {
-    const response = await esClient.search<{ _id: string; sort: string[] }>({
-      index: TODOS_INDEX,
-      ignore_unavailable: true,
-      size: 1000,
-      // ES 8 disables fielddata on `_id` by default, so sorting on `_id` throws;
-      // `_shard_doc` is always available for search_after paging.
-      sort: ['_shard_doc'],
-      ...(searchAfter ? { search_after: searchAfter } : {}),
-    });
-    const hits = response.hits?.hits ?? [];
-    for (const hit of hits) if (hit._id !== undefined) ids.add(hit._id);
-    if (hits.length === 0) break;
-    const last = hits[hits.length - 1];
-    // Guard against a page that does not advance (bad sort payload): stop instead of looping.
-    if (last._id === lastSeenId) break;
-    lastSeenId = last._id;
-    searchAfter = last.sort as string[];
+  try {
+    return new Set(await listIdsInPit(esClient, TODOS_INDEX));
+  } catch (error) {
+    if (isIndexNotFound(error)) return new Set();
+    throw error;
   }
-  return ids;
 }
 
 /**
  * Deletes only todo documents this run added: every id NOT in the pre-seed
- * snapshot. Concurrent runs' writes (ids present before this run started, or
- * written by another process into a reused stack) survive.
+ * snapshot. A doc another process writes after the snapshot is also outside
+ * it and is deleted, so this is safe only when no other run shares the stack
+ * at the same time.
  */
 async function deleteTodosCreatedThisRun(esClient: EsClient): Promise<void> {
   const preexisting = preexistingTodoIds;
   if (!preexisting) return;
-  let searchAfter: string[] | undefined;
-  let lastSeenId: string | undefined;
-  for (;;) {
-    const response = await esClient.search<{ _id: string; sort: string[] }>({
-      index: TODOS_INDEX,
-      ignore_unavailable: true,
-      size: 1000,
-      // ES 8 disables fielddata on `_id` by default, so sorting on `_id` throws;
-      // `_shard_doc` is always available for search_after paging.
-      sort: ['_shard_doc'],
-      ...(searchAfter ? { search_after: searchAfter } : {}),
-    });
-    const hits = response.hits?.hits ?? [];
-    if (hits.length === 0) break;
-    const doomed = hits
-      .map((h) => h._id)
-      .filter((id): id is string => id !== undefined && !preexisting.has(id));
-    if (doomed.length > 0) {
-      await esClient.deleteByQuery({
-        index: TODOS_INDEX,
-        ignore_unavailable: true,
-        refresh: true,
-        query: { ids: { values: doomed } },
-      });
-    }
-    const last = hits[hits.length - 1];
-    // Guard against a page that does not advance (bad sort payload): stop instead of looping.
-    if (last._id === lastSeenId) break;
-    lastSeenId = last._id;
-    searchAfter = last.sort as string[];
-  }
+  // Collect every id first, then delete: deleting while paging would shift the pages.
+  const doomed = [...(await listTodoIds(esClient))].filter((id) => !preexisting.has(id));
+  if (doomed.length === 0) return;
+  await esClient.deleteByQuery({
+    index: TODOS_INDEX,
+    ignore_unavailable: true,
+    refresh: true,
+    query: { ids: { values: doomed } },
+  });
 }
 
 /**
