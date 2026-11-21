@@ -186,8 +186,54 @@ describe('RuleExecutionStatus', () => {
         ruleResultService,
       });
       expect(status.status).toBe('error');
-      expect(status.error).toEqual({ message: 'an error', reason: 'unknown' });
+      expect(status.error).toEqual({
+        message: 'an error',
+        reason: RuleExecutionStatusErrorReasons.Execute,
+      });
       expect(status.warning).toBe(undefined);
+    });
+
+    test('task state with lastRun user error is a configuration failure', () => {
+      const ruleResultService = new RuleResultService();
+      const lastRunSetters = ruleResultService.getLastRunSetters();
+      lastRunSetters.addLastRunError('invalid query', true);
+
+      const { status } = executionStatusFromState({
+        runRuleResult: {
+          state: { alertInstances: {} },
+          metrics: executionMetrics,
+        },
+        ruleResultService,
+      });
+      expect(status.status).toBe('error');
+      expect(status.error).toEqual({
+        message: 'invalid query',
+        reason: RuleExecutionStatusErrorReasons.Configuration,
+      });
+    });
+
+    test('task state with lastRun error keeps the reported reason', () => {
+      const ruleResultService = new RuleResultService();
+      const lastRunSetters = ruleResultService.getLastRunSetters();
+      lastRunSetters.addLastRunError('timed out', false, RuleExecutionStatusErrorReasons.Timeout);
+      lastRunSetters.addLastRunError(
+        'second error',
+        false,
+        RuleExecutionStatusErrorReasons.License
+      );
+
+      const { status } = executionStatusFromState({
+        runRuleResult: {
+          state: { alertInstances: {} },
+          metrics: executionMetrics,
+        },
+        ruleResultService,
+      });
+      expect(status.status).toBe('error');
+      expect(status.error).toEqual({
+        message: 'timed out,second error',
+        reason: RuleExecutionStatusErrorReasons.Timeout,
+      });
     });
 
     test('task state with framework warning and rule execution warning - only show framework warning', () => {
