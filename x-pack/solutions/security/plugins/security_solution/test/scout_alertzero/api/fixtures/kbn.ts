@@ -96,6 +96,12 @@ export const pollUntil = async <T>(
   const deadline = Date.now() + timeoutMs;
   let lastError: unknown;
   for (;;) {
+    // The deadline is checked before, not after, `read`: a caller that sleeps past it and
+    // returns undefined would otherwise clear `lastError` and report a causeless timeout.
+    if (Date.now() >= deadline) {
+      const cause = lastError instanceof Error ? `; last error: ${lastError.message}` : '';
+      throw new Error(`Timed out after ${timeoutMs}ms waiting for ${label}${cause}`);
+    }
     try {
       const value = await read();
       if (value !== undefined) {
@@ -104,10 +110,6 @@ export const pollUntil = async <T>(
       lastError = undefined;
     } catch (error) {
       lastError = error;
-    }
-    if (Date.now() >= deadline) {
-      const cause = lastError instanceof Error ? `; last error: ${lastError.message}` : '';
-      throw new Error(`Timed out after ${timeoutMs}ms waiting for ${label}${cause}`);
     }
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }

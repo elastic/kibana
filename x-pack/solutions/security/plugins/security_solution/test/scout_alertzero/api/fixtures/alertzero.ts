@@ -385,16 +385,10 @@ export const captureWorkerBaseline = async (
   return pollUntil(
     `worker ${workerId} settings to be readable for a baseline`,
     async () => {
-      // Past the deadline, stop before issuing another request: a fresh 1 ms signal would
-      // abort instantly and its TimeoutError replace the last useful error (e.g. `settings
-      // are unavailable`) in `pollUntil`'s report. Returning undefined lets `pollUntil`
-      // throw with that earlier error instead.
-      if (Date.now() >= deadline) {
-        return undefined;
-      }
-      // Each read is cut off at the same deadline as the poll, so one hung request cannot
-      // spend the next worker's budget in the isolation suite or surface as Playwright's
-      // generic beforeAll timeout instead of this poll's worker-naming error.
+      // Each read is cut off at the same deadline as the poll: a hung request cannot spend
+      // the next worker's budget in the isolation suite or surface as Playwright's generic
+      // beforeAll timeout instead of this poll's error naming the worker. `pollUntil`
+      // checks the deadline before each read, so no request is issued with a 1 ms budget.
       const deadline2 = timeoutSignal(Math.max(deadline - Date.now(), 1));
       try {
         const worker = await getWorker(api, workerId, {
