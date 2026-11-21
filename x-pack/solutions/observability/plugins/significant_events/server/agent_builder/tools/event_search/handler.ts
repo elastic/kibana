@@ -18,6 +18,7 @@ import {
 } from '../../../lib/significant_events/events';
 import { isBreachMemberSignal } from '../../../lib/significant_events/events/event_members';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import { getSignalCollectedAt } from '../../../lib/significant_events/events/signal_collected_at';
 import { StatusError } from '../../../lib/errors/status_error';
 
 export const EVENT_SEARCH_DEFAULT_PER_PAGE = 20;
@@ -141,7 +142,7 @@ const byMemberThenRecency = (left: Signal, right: Signal): number => {
   if (leftIsMember !== rightIsMember) {
     return leftIsMember ? -1 : 1;
   }
-  return (right.collected_at ?? '').localeCompare(left.collected_at ?? '');
+  return (getSignalCollectedAt(right) ?? '').localeCompare(getSignalCollectedAt(left) ?? '');
 };
 
 const getRuleUuid = (signal: Signal): string | undefined =>
@@ -230,7 +231,7 @@ const toDetailedEvent = (
       rule_uuid: getRuleUuid(signal),
       verdict: signal.verdict,
       description: truncateSignalDescription(signal.description),
-      collected_at: signal.collected_at,
+      collected_at: getSignalCollectedAt(signal),
     })),
     signals_page: signalsPage,
     signals_per_page: signalsPerPage,

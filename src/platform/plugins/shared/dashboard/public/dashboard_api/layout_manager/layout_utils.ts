@@ -22,6 +22,55 @@ export const getLayoutBottomRow = ({ panels, sections }: DashboardLayout): numbe
   return maxY;
 };
 
+/** Renumbers the pinned panels' `order` from 0 so removed panels leave no gaps */
+export const reorderPinnedPanels = (
+  pinnedPanels: DashboardLayout['pinnedPanels']
+): DashboardLayout['pinnedPanels'] =>
+  Object.entries(pinnedPanels)
+    .sort(([, a], [, b]) => a.order - b.order)
+    .reduce<DashboardLayout['pinnedPanels']>(
+      (result, [key, value], i) => ({ ...result, [key]: { ...value, order: i } }),
+      {}
+    );
+
+/**
+ * Removes the pinned panel from the layout and places it as a grid panel in the top left corner,
+ * bumping other panels down as necessary. Returns `undefined` when the panel is not pinned.
+ */
+export const unpinPanelFromLayout = (
+  layout: DashboardLayout,
+  uuid: string
+): DashboardLayout | undefined => {
+  const panelToUnpin = layout.pinnedPanels[uuid];
+  if (!panelToUnpin) return;
+
+  const newPinnedPanels = { ...layout.pinnedPanels };
+  const originalOrder = newPinnedPanels[uuid].order;
+  delete newPinnedPanels[uuid];
+  // adjust the order of the remaining pinned panels
+  for (const panelId of Object.keys(newPinnedPanels)) {
+    if (newPinnedPanels[panelId].order > originalOrder) newPinnedPanels[panelId].order--;
+  }
+  // place the new control panel in the top left corner, bumping other panels down as necessary
+  const updatedLayout = runPanelPlacementStrategy(PlacementStrategy.placeAtTop, {
+    currentLayout: layout,
+    newPanel: {
+      uuid,
+      type: panelToUnpin.type,
+      grid: {
+        w: 12,
+        h: 2,
+      },
+    },
+  });
+
+  // the layout with the pinned control removed and added as a panel
+  return {
+    ...updatedLayout,
+    pinnedPanels: newPinnedPanels,
+  };
+};
+
 /**
  * Moves the given grid panels into a new expanded section at the bottom of the layout.
  * The panels are packed into the section top-left first, in the order they appear in the dashboard.

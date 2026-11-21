@@ -7,23 +7,16 @@
 
 import type {
   SessionPageVisit,
+  SessionRequest,
   SessionSummary,
   SessionTimelineEvent,
-  SessionTimelineEventKind,
 } from '../../../../common/sessions';
 import { UNKNOWN_PAGE } from '../../../labels';
-
-/** Events the journey lists; spans and logs are left to traces and Discover. */
-export const JOURNEY_EVENT_KINDS: readonly SessionTimelineEventKind[] = [
-  'page_view',
-  'click',
-  'error',
-  'web_vital',
-];
 
 export interface PageVisitEvents {
   visit: SessionPageVisit;
   events: SessionTimelineEvent[];
+  requests: SessionRequest[];
 }
 
 /**
@@ -51,7 +44,8 @@ const ownVisitIndex = (
  */
 export const groupEventsByVisit = (
   pageVisits: SessionPageVisit[],
-  timeline: SessionTimelineEvent[]
+  timeline: SessionTimelineEvent[],
+  requests: SessionRequest[] = []
 ): PageVisitEvents[] => {
   if (pageVisits.length === 0) {
     return [];
@@ -59,9 +53,6 @@ export const groupEventsByVisit = (
   const startsMs = pageVisits.map(({ startTime }) => Date.parse(startTime));
   const events = pageVisits.map((): SessionTimelineEvent[] => []);
   for (const event of timeline) {
-    if (!JOURNEY_EVENT_KINDS.includes(event.kind)) {
-      continue;
-    }
     const eventMs = Date.parse(event.timestamp);
     const openIndex = Math.max(
       0,
@@ -69,7 +60,16 @@ export const groupEventsByVisit = (
     );
     events[ownVisitIndex(pageVisits, openIndex, event)].push(event);
   }
-  return pageVisits.map((visit, index) => ({ visit, events: events[index] }));
+  // The API attributes requests to visits, as only it knows which page load each came from.
+  const visitRequests = pageVisits.map((): SessionRequest[] => []);
+  for (const request of requests) {
+    visitRequests[request.visitIndex]?.push(request);
+  }
+  return pageVisits.map((visit, index) => ({
+    visit,
+    events: events[index],
+    requests: visitRequests[index],
+  }));
 };
 
 export interface WaterfallSegment {

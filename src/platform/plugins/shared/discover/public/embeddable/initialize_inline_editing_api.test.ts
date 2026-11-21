@@ -10,6 +10,7 @@
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
+import type { IDslPagination } from '@kbn/search-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type {
@@ -56,6 +57,8 @@ const createSearchEmbeddableStateManager = (): SearchEmbeddableStateManager => (
   rows: new BehaviorSubject<DataTableRecord[]>([]),
   totalHitCount: new BehaviorSubject<number | undefined>(undefined),
   inspectorAdapters: new BehaviorSubject<Record<string, unknown>>({}),
+  pagination: new BehaviorSubject<IDslPagination | undefined>(undefined),
+  isLoadingMore: new BehaviorSubject<boolean>(false),
 });
 
 const createMockSavedSearch = (): SavedSearch => ({

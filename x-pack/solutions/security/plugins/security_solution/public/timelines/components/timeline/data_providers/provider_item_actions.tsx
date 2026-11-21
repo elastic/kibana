@@ -9,7 +9,7 @@ import type { EuiContextMenuPanelDescriptor, EuiPopoverProps } from '@elastic/eu
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import {
   type DataProviderType,

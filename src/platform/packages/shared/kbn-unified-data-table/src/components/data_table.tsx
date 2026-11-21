@@ -1085,6 +1085,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onChangePageIndex: changeCurrentPageIndex,
       dataGridRef,
       dataGridWrapper,
+      scrollToCell,
     });
 
     const inTableSearchLatestStateRef = useRestorableRef('inTableSearch', undefined);

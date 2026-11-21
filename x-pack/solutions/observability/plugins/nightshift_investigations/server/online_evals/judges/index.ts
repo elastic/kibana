@@ -29,6 +29,7 @@ import {
   type MemoryWriteJudgeReferenceData,
 } from './memory_write';
 import { rcaRewardJudge } from './rca_reward';
+import { toolCallHealthJudge } from './tool_call_health';
 
 export {
   MEMORY_READ_JUDGE_VERSION,
@@ -49,6 +50,7 @@ export const referenceFreeJudges: readonly RegisteredEvaluatorDefinition[] = [
   investigationProcessJudge,
   conclusionQualityJudge,
   missingDataJudge,
+  toolCallHealthJudge,
 ];
 
 /** Reference-based judges ported from Deductive's alert-outcome scoring. */

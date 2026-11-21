@@ -17,6 +17,7 @@ import {
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
 import { DataViewSource, isSameDataset, type DataSource } from '@kbn/data-source';
+import { isEqual } from 'lodash';
 import {
   internalStateSlice,
   type TabActionPayload,
@@ -73,6 +74,37 @@ export const setDataSource: InternalStateThunkActionCreator<
       pinDataViewOfSource(republishedSource);
       currentDataSource$.next(republishedSource);
     }
+  };
+
+/** Publishes the fetched ES|QL source as the tab's source when its empty columns differ from the current one's. */
+export const publishFetchedEsqlSource: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataSource: DataSource }>]
+> =
+  ({ tabId, dataSource }) =>
+  (_, __, { runtimeStateManager }) => {
+    const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const currentSource = currentDataSource$.getValue();
+
+    if (
+      currentSource?.kind !== 'esql' ||
+      dataSource.kind !== 'esql' ||
+      currentSource === dataSource ||
+      currentSource.id !== dataSource.id
+    ) {
+      return;
+    }
+
+    if (isEqual(dataSource.getEmptyColumnNames(), currentSource.getEmptyColumnNames())) {
+      return;
+    }
+
+    const dataView = getDataViewOfSource(currentSource);
+    if (!dataView) {
+      return;
+    }
+
+    pinDataViewOfSource(dataSource, dataView);
+    currentDataSource$.next(dataSource);
   };
 
 /**

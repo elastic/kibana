@@ -23,6 +23,7 @@ import type { State } from './edit_transform_flyout_state';
 // the features of the transform edit form. All other functions are generic and could be reused
 // in the future for other forms.
 export const getDefaultState = (config?: TransformConfigUnion): State => ({
+  hasAttemptedSubmit: false,
   formFields: {
     // top level attributes
     description: initializeFormField('description', 'description', config),

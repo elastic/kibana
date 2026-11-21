@@ -159,6 +159,14 @@ export const Worker = lazySchema(() =>
         "Id of this Worker's installed per-space workflow. Null when that workflow has not been installed yet. The client uses it to open the workflow's Executions tab and does not derive it from the Worker id."
       ),
     /**
+     * True when this space's installed workflow is not what the current code would install for its stored settings: its rendered YAML or definition version differs, or the template no longer renders for those settings. False when the workflow is not installed, is disabled or invalid, or is not managed by AlertZero. Enabling a disabled workflow does not reinstall it, so a stale one reads true once enabled. Does not affect `state` or `blockingReasons`; an outdated Worker still runs.
+     */
+    workflowOutdated: z
+      .boolean()
+      .describe(
+        "True when this space's installed workflow is not what the current code would install for its stored settings: its rendered YAML or definition version differs, or the template no longer renders for those settings. False when the workflow is not installed, is disabled or invalid, or is not managed by AlertZero. Enabling a disabled workflow does not reinstall it, so a stale one reads true once enabled. Does not affect `state` or `blockingReasons`; an outdated Worker still runs."
+      ),
+    /**
      * Why this Worker can't run; empty when nothing blocks it. A blocking reason never changes the stored `enabled` value.
      */
     blockingReasons: z

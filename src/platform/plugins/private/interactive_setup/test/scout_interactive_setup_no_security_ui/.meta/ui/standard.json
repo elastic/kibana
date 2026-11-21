@@ -1,5 +1,5 @@
 {
-  "sha1": "5eaac48ebe65441ea80e76f760fbf6a9be00294d",
+  "sha1": "c7a8a6cd0a2d699af2e444af9c65525d09c9d243",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -9,12 +9,13 @@
       "title": "Interactive setup - manual configuration without security configures Kibana against a cluster with security disabled",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@limit/except-fips"
       ],
       "location": {
         "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_no_security_ui/ui/tests/manual_configuration_without_security.spec.ts",
-        "line": 26,
-        "column": 15
+        "line": 25,
+        "column": 9
       }
     }
   ]

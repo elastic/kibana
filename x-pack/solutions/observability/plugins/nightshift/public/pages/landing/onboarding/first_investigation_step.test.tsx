@@ -52,7 +52,12 @@ describe('OnboardingFirstInvestigationStep', () => {
     );
     expect(screen.getByTestId('grid-isAdditionalType')).toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftOnboardingSuggestions')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftOnboardingCompose')).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('nightshiftOnboardingCustomPrompt'), {
+      target: { value: ' Why is checkout slow? ' },
+    });
+    fireEvent.click(screen.getByTestId('nightshiftOnboardingInvestigateButton'));
+    expect(mockStartInvestigation).toHaveBeenCalledWith('Why is checkout slow?', undefined);
   });
 
   it('lists the suggestions with an Investigate each, five at a time', () => {

@@ -9,9 +9,10 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
-import { combineLatest, debounceTime, lastValueFrom, switchMap, tap } from 'rxjs';
+import { combineLatest, debounceTime, switchMap, tap } from 'rxjs';
 
 import type { KibanaExecutionContext } from '@kbn/core/types';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import {
   buildDataTableRecordList,
   SEARCH_EMBEDDABLE_TYPE,
@@ -175,6 +176,17 @@ export function initializeFetch({
   let abortController: AbortController | undefined;
   let cachedEsqlSource: { identity: string; source: EsqlSource } | undefined;
 
+  // `showWarnings` reports the warnings of every request the adapter retains, so a result that
+  // sent a request already reports the full set (the first page and every page loaded since)
+  const collectWarnings = (): SearchResponseWarning[] => {
+    const warnings: SearchResponseWarning[] = [];
+    discoverServices.data.search.showWarnings(inspectorAdapters.requests, (warning) => {
+      warnings.push(warning);
+      return true; // suppress the default behaviour
+    });
+    return warnings;
+  };
+
   const observables = [fetch$(api), api.savedSearch$, api.dataSources$, refreshTrigger$] as const;
 
   const fetchSubscription = combineLatest(observables)
@@ -186,6 +198,9 @@ export function initializeFetch({
           abortController.abort(AbortReason.REPLACED);
           abortController = undefined;
         }
+        // Reset pagination state when a new fetch starts
+        stateManager.pagination.next(undefined);
+        stateManager.isLoadingMore.next(false);
       }),
       switchMap(async ([parentFetchContext, savedSearch, dataViews]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
@@ -306,10 +321,16 @@ export function initializeFetch({
           const executionContext = await getExecutionContext(api, discoverServices);
 
           /**
-           * Fetch via saved search
+           * Fetch via dslPaginated for pagination support
            */
-          const { rawResponse: resp } = await lastValueFrom(
-            savedSearch.searchSource.fetch$({
+          const searchRequest = savedSearch.searchSource.build();
+          const result = await discoverServices.data.search.dslPaginated(
+            {
+              ...searchRequest.body,
+              index: dataView,
+              projectRouting: fetchContext.projectRouting,
+            },
+            {
               abortSignal: currentAbortController.signal,
               sessionId: searchSessionId,
               inspector: {
@@ -323,26 +344,21 @@ export function initializeFetch({
                 }),
               },
               executionContext,
-              disableWarningToasts: true,
-              projectRouting: fetchContext.projectRouting,
-            })
+            }
           );
-          const interceptedWarnings: SearchResponseWarning[] = [];
-          discoverServices.data.search.showWarnings(inspectorAdapters.requests, (warning) => {
-            interceptedWarnings.push(warning);
-            return true; // suppress the default behaviour
-          });
+          const interceptedWarnings = collectWarnings();
 
           return {
             warnings: interceptedWarnings,
             rows: buildDataTableRecordList({
-              records: resp.hits.hits,
+              records: result.rawResponse.hits.hits as EsHitRecord[],
               dataView,
               processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
             }),
-            hitCount: resp.hits.total as number,
+            hitCount: result.rawResponse.hits.total as number,
             resultDataSource: undefined,
             fetchContext,
+            pagination: result.pagination,
           };
         } catch (error) {
           return { error };
@@ -364,9 +380,61 @@ export function initializeFetch({
       api.fetchContext$.next(next.fetchContext);
       stateManager.resultDataSource.next(next.resultDataSource);
       setApproximationApplied(next.approximationApplied);
+      stateManager.pagination.next(next.pagination);
     });
 
+  const fetchMore = async () => {
+    const currentPagination = stateManager.pagination.getValue();
+    if (!currentPagination?.hasNextPage() || stateManager.isLoadingMore.getValue()) {
+      return;
+    }
+
+    // Own the abort controller so that cancelling the panel (or a refetch) aborts this request
+    const moreAbortController = new AbortController();
+    abortController = moreAbortController;
+
+    stateManager.isLoadingMore.next(true);
+    // The dashboard shows its cancel button based on the panels' loading state
+    setDataLoading(true);
+
+    try {
+      const executionContext = await getExecutionContext(api, discoverServices);
+      const nextPageResult = await currentPagination.nextPage({
+        abortSignal: moreAbortController.signal,
+        executionContext,
+      });
+      const dataView = api.dataSources$.getValue()?.[0];
+
+      if (!nextPageResult || !dataView) {
+        return;
+      }
+
+      const moreRecords = buildDataTableRecordList({
+        records: nextPageResult.rawResponse.hits.hits as EsHitRecord[],
+        dataView,
+        processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
+      });
+
+      stateManager.rows.next([...stateManager.rows.getValue(), ...moreRecords]);
+      stateManager.pagination.next(nextPageResult.pagination);
+      // This page sent a request, so its warnings replace the current ones. A page that sent none
+      // (nothing left to load) returned above, which keeps them, e.g. a shard failure callout.
+      api.fetchWarnings$.next(collectWarnings());
+    } catch (error) {
+      if (!moreAbortController.signal.aborted) {
+        setSearchError(error);
+      }
+    } finally {
+      // A refetch that replaced this request owns the loading state now
+      if (moreAbortController.signal.reason !== AbortReason.REPLACED) {
+        stateManager.isLoadingMore.next(false);
+        setDataLoading(false);
+      }
+    }
+  };
+
   return {
+    fetchMore,
     cleanup: () => {
       abortController?.abort(AbortReason.CLEANUP);
       fetchSubscription.unsubscribe();
