@@ -8,8 +8,15 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { css } from '@emotion/react';
-import { useResizeObserver, useEuiScrollBar, EuiIcon, useEuiTheme, EuiToolTip } from '@elastic/eui';
+import { css, type CSSObject } from '@emotion/react';
+import {
+  useResizeObserver,
+  useEuiScrollBar,
+  EuiIcon,
+  useEuiTheme,
+  EuiToolTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Chart, Metric, Settings, isMetricElementEvent } from '@elastic/charts';
 import type {
@@ -34,12 +41,107 @@ import type {
 import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 
 import { resolveVisIcon } from '@kbn/chart-icons';
-import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
+import { isSingleHueRamp } from '@kbn/contrast-roles';
+import {
+  DEFAULT_TRENDLINE_NAME,
+  METRIC_SUBDUED_TILES_FLAG,
+  METRIC_SUBDUED_TOP_BORDER_FLAG,
+} from '../../common/constants';
 import type { MetricVisParam, VisParams } from '../../common';
-import { getThemeService, getFormatService } from '../services';
+import { getThemeService, getFormatService, getFeatureFlagsService } from '../services';
 import { getColor, getMetricFormatter } from './helpers';
 import { getSecondaryMetricInfo } from './secondary_metric_info';
 import type { TrendConfig } from './secondary_metric_info';
+import {
+  TREND_GRADIENT_STOPS,
+  metricTileColors,
+  metricValueColor,
+  type MetricTileColors,
+} from './metric_tile_colors';
+
+// Feature flag values when they can't be evaluated (no provider or override).
+const SUBDUED_TILES_FALLBACK = true;
+const TOP_BORDER_FALLBACK = true;
+/*
+ * This is a very hacky, this styling should be in @elastic/charts, not here, but this is en experimental feature.
+ * We're adding gradient and reaching into the DOM to style the trend line and top border.
+ */
+const TREND_LINE_WIDTH = '1px';
+const TREND_LINE_BLEED = '2px';
+const TOP_BORDER_WIDTH = '1.5px';
+
+const trendGradientId = (prefix: string, i: number) => `${prefix}-${i}`;
+
+const tileSelector = (i: number) => `.echMetricContainer > li:nth-child(${i + 1})`;
+
+const subduedTileStyles = (
+  tiles: Array<MetricTileColors | undefined>,
+  gradientPrefix: string
+): CSSObject =>
+  Object.assign(
+    {},
+    ...tiles.map((colors, i) => {
+      if (!colors) return {};
+      const tile = tileSelector(i);
+      return {
+        [`${tile} .echSingleMetricSparkline__svg`]: {
+          inset: `0 -${TREND_LINE_BLEED} -${TREND_LINE_BLEED}`,
+          width: `calc(100% + 2 * ${TREND_LINE_BLEED})`,
+          height: `calc(100% + ${TREND_LINE_BLEED})`,
+        },
+        [`${tile} .echSingleMetricSparkline__svg path`]: {
+          fill: `url(#${trendGradientId(gradientPrefix, i)})`,
+          stroke: colors.trendLine,
+          strokeWidth: TREND_LINE_WIDTH,
+          strokeLinejoin: 'round',
+          vectorEffect: 'non-scaling-stroke',
+        },
+      };
+    })
+  );
+
+const topBorderStyles = (borders: Array<string | undefined>): CSSObject =>
+  Object.assign(
+    {},
+    ...borders.map((border, i) =>
+      border
+        ? {
+            [`${tileSelector(i)} .echMetric::before`]: {
+              content: '""',
+              position: 'absolute',
+              inset: `0 0 auto`,
+              height: TOP_BORDER_WIDTH,
+              background: border,
+              pointerEvents: 'none',
+              zIndex: 1,
+            },
+          }
+        : {}
+    )
+  );
+
+const SubduedTrendGradients = ({
+  tiles,
+  prefix,
+}: {
+  tiles: Array<MetricTileColors | undefined>;
+  prefix: string;
+}) => (
+  <svg width={0} height={0} aria-hidden="true" css={{ position: 'absolute' }}>
+    <defs>
+      {tiles.map(
+        (colors, i) =>
+          colors && (
+            <linearGradient key={i} id={trendGradientId(prefix, i)} x1={0} y1={1} x2={0} y2={0}>
+              {TREND_GRADIENT_STOPS.map(({ offset, opacity }) => (
+                <stop key={offset} offset={offset} stopColor={colors.trend} stopOpacity={opacity} />
+              ))}
+            </linearGradient>
+          )
+      )}
+    </defs>
+  </svg>
+);
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
   const column = table.columns[columnIdx];
@@ -127,8 +229,27 @@ export const MetricVis = ({
   const {
     euiTheme: { colors },
     highContrastMode,
+    colorMode,
   } = useEuiTheme();
   const defaultColor = colors.emptyShade;
+  const mode = colorMode === 'DARK' ? 'dark' : 'light';
+  const subduedTiles: Array<MetricTileColors | undefined> = [];
+  const topBorders: Array<string | undefined> = [];
+  const trendGradientPrefix = useGeneratedHtmlId({ prefix: 'metricTrendGradient' });
+  const featureFlags = getFeatureFlagsService();
+  const subdueTiles = featureFlags.useBooleanValue(
+    METRIC_SUBDUED_TILES_FLAG,
+    SUBDUED_TILES_FALLBACK
+  );
+  const topBorder = featureFlags.useBooleanValue(
+    METRIC_SUBDUED_TOP_BORDER_FLAG,
+    TOP_BORDER_FALLBACK
+  );
+  const paletteColors = config.metric.palette?.params?.colors;
+  const isRampPalette = useMemo(
+    () => Boolean(paletteColors && isSingleHueRamp(paletteColors)),
+    [paletteColors]
+  );
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -271,6 +392,20 @@ export const MetricVis = ({
         : { ...nonNumericMetricBase, value: formatPrimaryMetric(value) };
     }
 
+    const trendId = breakdownByColumn ? row[breakdownByColumn.id] : DEFAULT_TRENDLINE_NAME;
+    const trend = config.metric.trends?.[trendId];
+
+    // Trend tiles always paint their color as the background.
+    const isBackground = config.metric.applyColorTo === 'background' || Boolean(trend);
+    const ramp = Boolean(paletteColor) && isRampPalette;
+    const subdue = subdueTiles && !highContrastMode && tileColor !== defaultColor;
+    const tileColors = subdue
+      ? metricTileColors(tileColor, mode, { ramp, hasTrend: Boolean(trend) })
+      : undefined;
+    const subdued = isBackground ? tileColors : undefined;
+    subduedTiles[rowIdx] = subdued;
+    topBorders[rowIdx] = topBorder ? tileColors?.border : undefined;
+
     const baseMetric: MetricWNumber = {
       value,
       valueFormatter: formatPrimaryMetric,
@@ -278,14 +413,14 @@ export const MetricVis = ({
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
       extra: secondaryMetricProps,
-      color: tileColor,
+      color: subdued?.fill ?? tileColor,
+      ...(subdued && { valueColor: subdued.ink }),
     };
 
-    const trendId = breakdownByColumn ? row[breakdownByColumn.id] : DEFAULT_TRENDLINE_NAME;
-    if (config.metric.trends && config.metric.trends[trendId]) {
+    if (trend) {
       const metricWTrend: MetricWTrend = {
         ...baseMetric,
-        trend: config.metric.trends[trendId],
+        trend,
         trendShape: 'area',
         trendA11yTitle: i18n.translate('expressionMetricVis.trendA11yTitle', {
           defaultMessage: '{dataTitle} over time.',
@@ -306,6 +441,8 @@ export const MetricVis = ({
         ...baseMetric,
         domainMax: row[maxColId],
         progressBarDirection: config.metric.progressDirection,
+        // On progress tiles the color is the bar's, so the fill goes to the background.
+        ...(subdued && { color: subdued.border, background: subdued.fill }),
       };
 
       return metricWProgress;
@@ -317,11 +454,14 @@ export const MetricVis = ({
       // Override the background and main value color when the color is applied to the value
       ...(config.metric.applyColorTo === 'value' && {
         color: defaultColor,
-        valueColor: tileColor === defaultColor ? undefined : tileColor,
+        valueColor:
+          tileColor === defaultColor
+            ? undefined
+            : (subdue && metricValueColor(tileColor, mode, ramp)) || tileColor,
       }),
       ...(config.metric.applyColorTo === 'background' && {
-        color: tileColor,
-        valueColor: undefined,
+        color: subdued?.fill ?? tileColor,
+        valueColor: subdued?.ink,
       }),
     };
   });
@@ -376,10 +516,14 @@ export const MetricVis = ({
       ]}
     >
       <div
-        css={css`
-          height: ${scrollChildHeight};
-        `}
+        css={[
+          css`
+            height: ${scrollChildHeight};
+          `,
+          css(subduedTileStyles(subduedTiles, trendGradientPrefix), topBorderStyles(topBorders)),
+        ]}
       >
+        <SubduedTrendGradients tiles={subduedTiles} prefix={trendGradientPrefix} />
         <Chart {...getOverridesFor(overrides, 'chart')}>
           <Settings
             onWillRender={onWillRender}
