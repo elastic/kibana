@@ -46,6 +46,12 @@ jest.mock('../../../common/lib/kibana', () => ({
       settings: {},
       cases: {},
       agentBuilder: {},
+      // no profile: the user settings hooks fall back to localStorage
+      userStorage: {
+        isAvailable: jest.fn(() => false),
+        get$: jest.fn(() => jest.requireActual('rxjs').EMPTY),
+      },
+      storage: { get: jest.fn(() => null), set: jest.fn(), remove: jest.fn() },
     },
   })),
   KibanaServices: {

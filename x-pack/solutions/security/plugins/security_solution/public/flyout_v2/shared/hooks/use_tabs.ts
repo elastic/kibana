@@ -29,6 +29,16 @@ export interface UseTabsParams<T extends string> {
    * `FlyoutTabClicked` event tagged with this flyout type. Omit to skip tab-click telemetry.
    */
   flyoutType?: FlyoutType;
+  /**
+   * POC: tab id persisted server-side (User Storage). When `onPersistTabId` is provided it replaces
+   * the localStorage write; the localStorage value is still read as a fallback until it has been
+   * imported into User Storage. An empty string means "nothing stored".
+   */
+  persistedTabId?: string;
+  /**
+   * POC: called instead of writing to localStorage when the user explicitly selects a tab.
+   */
+  onPersistTabId?: (tabId: string) => void;
 }
 
 export interface UseTabsResult<T extends string> {
@@ -66,6 +76,8 @@ export const useTabs = <T extends string>({
   storageKey,
   initialTabId,
   flyoutType,
+  persistedTabId,
+  onPersistTabId,
 }: UseTabsParams<T>): UseTabsResult<T> => {
   const { storage } = useKibana().services;
   const { reportTabClicked } = useFlyoutTelemetry();
@@ -73,6 +85,7 @@ export const useTabs = <T extends string>({
   const [selectedTabId, setSelectedTabIdState] = useState<T>(
     () =>
       resolveTabId(validTabIds, initialTabId) ??
+      resolveTabId(validTabIds, persistedTabId) ??
       resolveTabId(validTabIds, storage.get(storageKey)) ??
       validTabIds[0]
   );
@@ -93,12 +106,16 @@ export const useTabs = <T extends string>({
   const setSelectedTabId = useCallback(
     (tabId: T) => {
       setSelectedTabIdState(tabId);
-      storage.set(storageKey, tabId);
+      if (onPersistTabId) {
+        onPersistTabId(tabId);
+      } else {
+        storage.set(storageKey, tabId);
+      }
       if (flyoutType) {
         reportTabClicked({ flyoutType, tabId });
       }
     },
-    [storage, storageKey, flyoutType, reportTabClicked]
+    [storage, storageKey, flyoutType, reportTabClicked, onPersistTabId]
   );
 
   return { selectedTabId, setSelectedTabId };
