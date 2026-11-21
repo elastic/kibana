@@ -9,6 +9,7 @@ import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 
+import { flushState } from './persistence_loop';
 import { runNode } from './run_node';
 import { runStackMonitor } from './run_stack_monitor/run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
@@ -154,5 +155,22 @@ describe('APM span context', () => {
     const stepSpans = fakeApm.startedSpans.filter(({ name }) => name.startsWith('step: '));
     expect(stepSpans).toHaveLength(STEP_COUNT);
     expect(stepSpans.every((span) => span.parent === parentSpan)).toBe(true);
+  });
+
+  it('flushState keeps its flush span out of the caller context', async () => {
+    const parentSpan = fakeApm.startSpan('workflow execution loop');
+    const params = {
+      stepIoService: { flush: jest.fn().mockResolvedValue(undefined) },
+      eventQueue: { flush: jest.fn().mockResolvedValue(undefined) },
+    } as unknown as WorkflowExecutionLoopParams;
+
+    for (let i = 0; i < STEP_COUNT; i++) {
+      await flushState(params);
+      expect(fakeApm.currentSpan).toBe(parentSpan);
+    }
+
+    const flushSpans = fakeApm.startedSpans.filter(({ name }) => name === 'persistence flush');
+    expect(flushSpans).toHaveLength(STEP_COUNT);
+    expect(flushSpans.every((span) => span.parent === parentSpan)).toBe(true);
   });
 });

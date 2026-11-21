@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AsyncLocalStorage } from 'async_hooks';
 import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -29,6 +30,7 @@ import type { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
 import { createMockWorkflowDataClient } from '../repositories/data_access_layer/mocks';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import * as serviceAccountExecution from '../service_account_execution';
 import type {
   InternalResumeWorkflowExecution,
   WorkflowsExecutionEnginePluginStart,
@@ -467,6 +469,38 @@ describe('runWorkflow', () => {
         expect(setupSpan!.end).toHaveBeenCalled();
         expect(startSpan!.end).toHaveBeenCalled();
         expect(recordedSpans).toHaveLength(2);
+      });
+
+      it('keeps the setup span out of the context of the identity wrapper that calls it', async () => {
+        const storage = new AsyncLocalStorage<unknown[]>();
+        const getStack = (): unknown[] => storage.getStore() ?? [];
+        // Copies the agent's rule: startSpan and end() replace the span stack of the current context.
+        mockStartSpan.mockImplementation(() => {
+          const span: { end: jest.Mock; setOutcome: jest.Mock } = {
+            end: jest.fn(() => storage.enterWith(getStack().filter((s) => s !== span))),
+            setOutcome: jest.fn(),
+          };
+          storage.enterWith([...getStack(), span]);
+          recordedSpans.push(span);
+          return span;
+        });
+        let wrapperStack: unknown[] | undefined;
+        const identitySpy = jest
+          .spyOn(serviceAccountExecution, 'withWorkflowExecutionIdentity')
+          .mockImplementation(async (_core, _execution, request, execute) => {
+            const result = await execute(request);
+            wrapperStack = getStack();
+            return result;
+          });
+
+        try {
+          await runWorkflowWithDefaults();
+        } finally {
+          identitySpy.mockRestore();
+        }
+
+        expect(recordedSpans[0]!.end).toHaveBeenCalled();
+        expect(wrapperStack).toEqual([]);
       });
 
       it('sets loop span outcome to failure and ends loop span when workflowExecutionLoop rejects', async () => {
