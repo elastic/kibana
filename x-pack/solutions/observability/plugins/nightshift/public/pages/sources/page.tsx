@@ -15,6 +15,7 @@ import { NightshiftAppHeader } from '../../components/app_header';
 import { getWorkflowFailureMessage } from '../../common/errors';
 import { SignificantEventsPageProvider } from '../../data/discovery/significant_events_page_context';
 import { useBlocksNewActivity } from '../../data/maintenance/use_significant_events_maintenance';
+import { usePageSectionPaddingSize } from '../../hooks/use_is_mobile';
 import { useKibana } from '../../hooks/use_kibana';
 import { KiGenerationProvider } from './onboarding/ki_generation_context';
 import { PausedActivityCallout } from './paused_activity_callout';
@@ -33,6 +34,7 @@ export function SourcesPage({
     notifications: { toasts },
   } = useKibana().services;
   const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
+  const sectionPaddingSize = usePageSectionPaddingSize();
   const {
     isBlocked,
     isLoading: isMaintenanceStatusLoading,
@@ -63,7 +65,12 @@ export function SourcesPage({
           }),
         }}
       />
-      <EuiPageTemplate.Section component="div" color="transparent" restrictWidth={false}>
+      <EuiPageTemplate.Section
+        component="div"
+        color="transparent"
+        restrictWidth={false}
+        paddingSize={sectionPaddingSize}
+      >
         {isMaintenanceStatusLoading && (
           <>
             <KbnInfoCallout

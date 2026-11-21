@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
 import { NightshiftAppHeader } from '../../components/app_header';
+import { usePageSectionPaddingSize } from '../../hooks/use_is_mobile';
 import { useKibana } from '../../hooks/use_kibana';
 import { DetectionsSettingsTab } from './detections_settings_tab';
 import { GeneralSettingsTab } from './general_settings_tab';
@@ -59,6 +60,7 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
   const history = useHistory();
   const { search } = useLocation();
   const isAppsEnabled = useAppsEnabled();
+  const sectionPaddingSize = usePageSectionPaddingSize();
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
 
   if (isAppsEnabled === undefined) {
@@ -108,7 +110,12 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
         }}
         tabs={tabs}
       />
-      <EuiPageTemplate.Section component="div" color="transparent" restrictWidth={false}>
+      <EuiPageTemplate.Section
+        component="div"
+        color="transparent"
+        restrictWidth={false}
+        paddingSize={sectionPaddingSize}
+      >
         {tab === 'general' && <GeneralSettingsTab />}
         {tab === 'investigations' && (
           <InvestigationsSettingsTab

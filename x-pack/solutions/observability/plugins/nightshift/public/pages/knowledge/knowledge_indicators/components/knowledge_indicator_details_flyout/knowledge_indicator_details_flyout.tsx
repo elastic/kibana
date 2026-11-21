@@ -32,6 +32,7 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { AggregatedFeature } from '@kbn/significant-events-schema';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useIsMobile } from '../../../../../hooks/use_is_mobile';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { buildFeatureDiscoverParams } from '../../../../../common/discover_helpers';
@@ -94,6 +95,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     },
   } = useKibana();
   const canManage = getNightshiftCapabilities(nightshift).canManage;
+  const isMobile = useIsMobile();
   const { timeState } = useTimefilter();
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'knowledgeIndicatorDetailsFlyoutTitle' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -307,6 +309,9 @@ export function KnowledgeIndicatorDetailsFlyout({
 
   const title = getKnowledgeIndicatorTitle(knowledgeIndicator);
 
+  // Four cards don't fit a row on a phone, so they wrap two to a row instead of being squeezed.
+  const metadataCardCss = isMobile ? { minWidth: '40%' } : undefined;
+
   const hasPagination =
     pageCount !== undefined &&
     pageCount > 1 &&
@@ -321,7 +326,7 @@ export function KnowledgeIndicatorDetailsFlyout({
         aria-labelledby={flyoutTitleId}
         type="push"
         ownFocus={false}
-        size="40%"
+        size={isMobile ? 'fill' : '40%'}
         hideCloseButton
       >
         <FlyoutToolbarHeader
@@ -384,7 +389,7 @@ export function KnowledgeIndicatorDetailsFlyout({
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
             {viewedKnowledgeIndicator.kind === 'feature' ? (
               <>
-                <EuiFlexItem>
+                <EuiFlexItem css={metadataCardCss}>
                   <FlyoutMetadataCard title={CONFIDENCE_LABEL}>
                     <EuiHealth
                       color={getConfidenceColor(viewedKnowledgeIndicator.feature.confidence)}
@@ -393,7 +398,7 @@ export function KnowledgeIndicatorDetailsFlyout({
                     </EuiHealth>
                   </FlyoutMetadataCard>
                 </EuiFlexItem>
-                <EuiFlexItem>
+                <EuiFlexItem css={metadataCardCss}>
                   <FlyoutMetadataCard title={TYPE_LABEL}>
                     <EuiBadge color="hollow">
                       {getFeatureTypeLabel(viewedKnowledgeIndicator.feature.type)}
@@ -403,19 +408,19 @@ export function KnowledgeIndicatorDetailsFlyout({
               </>
             ) : (
               <>
-                <EuiFlexItem>
+                <EuiFlexItem css={metadataCardCss}>
                   <FlyoutMetadataCard title={SEVERITY_LABEL}>
                     <SeverityBadge score={viewedKnowledgeIndicator.query.severity_score} />
                   </FlyoutMetadataCard>
                 </EuiFlexItem>
-                <EuiFlexItem>
+                <EuiFlexItem css={metadataCardCss}>
                   <FlyoutMetadataCard title={TYPE_LABEL}>
                     <EuiBadge color="hollow">{QUERY_TYPE_LABEL}</EuiBadge>
                   </FlyoutMetadataCard>
                 </EuiFlexItem>
               </>
             )}
-            <EuiFlexItem css={{ minWidth: 0 }}>
+            <EuiFlexItem css={[{ minWidth: 0 }, metadataCardCss]}>
               <FlyoutMetadataCard title={STREAM_LABEL}>
                 <KnowledgeIndicatorSourceBadge
                   knowledgeIndicator={viewedKnowledgeIndicator}
@@ -425,7 +430,7 @@ export function KnowledgeIndicatorDetailsFlyout({
                 />
               </FlyoutMetadataCard>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem css={metadataCardCss}>
               <FlyoutMetadataCard title={DURABILITY_LABEL}>
                 <DurabilityBadge
                   expiresAt={getKnowledgeIndicatorExpiresAt(viewedKnowledgeIndicator)}

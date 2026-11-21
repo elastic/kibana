@@ -38,6 +38,7 @@ import { AutomationsTimeRangePicker } from './time_range_picker';
 import { listLabels } from './translations';
 
 const COLLAPSE_CREATE_BELOW_PX = 900;
+const SEARCH_MIN_WIDTH_PX = 200;
 
 export interface AutomationFilterOptions {
   statuses: FilterOption[];
@@ -110,8 +111,9 @@ export const AutomationsToolbar = ({
   return (
     <>
       <div ref={setToolbar}>
-        <EuiFlexGroup gutterSize="s" responsive={false} wrap={false}>
-          <EuiFlexItem grow={true} css={css({ minWidth: 0 })}>
+        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+          {/* Wrapping keeps the filters and actions reachable when the toolbar gets narrow. */}
+          <EuiFlexItem grow={true} css={css({ minWidth: SEARCH_MIN_WIDTH_PX })}>
             <EuiFieldSearch
               compressed
               placeholder={listLabels.search}

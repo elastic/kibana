@@ -44,6 +44,7 @@ import {
 } from '../../common/url_params';
 import { useDetectionOverview } from '../../data/detection_overview/use_detection_overview';
 import { useMaintenanceStatus } from '../../data/maintenance/use_significant_events_maintenance';
+import { useIsMobile, usePageSectionPaddingSize } from '../../hooks/use_is_mobile';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import type { DetectionTabId } from './detection_tabs';
@@ -105,6 +106,10 @@ export const DetectionPage = ({
   const history = useHistory();
   const location = useLocation();
   const { euiTheme } = useEuiTheme();
+  // On a phone the workspace stacks and the page scrolls as one; its panes only scroll on their
+  // own (inside a viewport-high page) on larger screens.
+  const isMobile = useIsMobile();
+  const sectionPaddingSize = usePageSectionPaddingSize();
   const maintenanceStatus = useMaintenanceStatus();
   const { isDeveloperMode } = useDeveloperMode();
   const { timeRange, setTimeRange } = useDetectionTimeRange();
@@ -198,10 +203,11 @@ export const DetectionPage = ({
         component="div"
         color="transparent"
         restrictWidth={false}
+        paddingSize={sectionPaddingSize}
         grow
         css={css`
           min-height: 0;
-          overflow: hidden;
+          ${isMobile ? '' : 'overflow: hidden;'}
         `}
         contentProps={{
           css: css`
@@ -249,9 +255,11 @@ export const DetectionPage = ({
               <div
                 css={css`
                   flex: ${view.sourceCreation === 'enabled' ? '0 1 auto' : '1 1 auto'};
-                  max-block-size: ${view.sourceCreation === 'enabled' ? '40vh' : 'none'};
+                  max-block-size: ${view.sourceCreation === 'enabled' && !isMobile
+                    ? '40vh'
+                    : 'none'};
                   min-height: 0;
-                  overflow: auto;
+                  ${isMobile ? '' : 'overflow: auto;'}
                   margin-block-end: ${view.sourceCreation === 'enabled' ? euiTheme.size.m : 0};
                 `}
               >
@@ -292,7 +300,7 @@ export const DetectionPage = ({
                   <EuiFlexItem
                     grow={false}
                     css={css`
-                      width: ${euiTheme.base * 16}px;
+                      width: ${isMobile ? '100%' : `${euiTheme.base * 16}px`};
                       min-height: 0;
                     `}
                   >

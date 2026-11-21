@@ -262,7 +262,7 @@ function ChannelCell({ binding }: { binding: SlackChannelBinding }) {
   });
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
       <EuiFlexItem grow={false}>
         <EuiText size="s">
           <ChannelLabel

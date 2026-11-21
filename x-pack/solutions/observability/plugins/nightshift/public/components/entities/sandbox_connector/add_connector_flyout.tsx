@@ -11,6 +11,7 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,6 +32,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
+import { useIsMobile } from '../../../hooks/use_is_mobile';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   useConnectorsByType,
@@ -193,9 +195,27 @@ function ConnectorTypeRow({
   const { euiTheme } = useEuiTheme();
   const plateShadow = useEuiShadow('xs');
   const accordionId = useGeneratedHtmlId({ prefix: 'nightshiftConnectorType' });
+  const isMobile = useIsMobile();
   const hasConnectors = connectors.length > 0;
 
-  const createButton = (
+  // The labelled button doesn't fit next to the connector type's name on a phone.
+  const createButton = isMobile ? (
+    <EuiToolTip
+      position="top"
+      content={createDisabledReason ?? createLabel}
+      disableScreenReaderOutput={createDisabledReason === undefined}
+    >
+      <EuiButtonIcon
+        display="base"
+        color="text"
+        iconType="plus"
+        isDisabled={createDisabledReason !== undefined}
+        onClick={onCreate}
+        aria-label={`${createLabel}: ${item.name}`}
+        data-test-subj={`${actionType.id}-create`}
+      />
+    </EuiToolTip>
+  ) : (
     <EuiButton
       size="s"
       color="text"
@@ -250,7 +270,7 @@ function ConnectorTypeRow({
         }
         buttonProps={{ 'data-test-subj': `${actionType.id}-toggle` }}
         extraAction={
-          createDisabledReason === undefined ? (
+          createDisabledReason === undefined || isMobile ? (
             createButton
           ) : (
             <EuiToolTip position="top" content={createDisabledReason}>
