@@ -29,6 +29,7 @@ import type {
   ActionDetailsApiResponse,
   EndpointPrivileges,
   ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
 } from '../../../../../../common/endpoint/types';
 import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
@@ -382,6 +383,39 @@ describe('When using get-file action from response actions console', () => {
         'Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
       );
     });
+  });
+
+  it('should display where the file was uploaded to instead of a download link once an exported action completes', async () => {
+    const exportedTestId = 'getFile-actionResult-getFileResults-exportedFileResult';
+    const exportedAction = new EndpointActionGenerator('seed').generateActionDetails<
+      ResponseActionGetFileOutputContent,
+      ResponseActionGetFileParameters
+    >({
+      command: 'get-file',
+      agents: ['a.b.c'],
+      parameters: { path: 'one/two', export: 'azure-1' },
+    });
+    // The console renders the action returned by the create API while it waits for the details
+    apiMocks.responseProvider.getFile.mockReturnValue({ data: exportedAction });
+    apiMocks.responseProvider.actionDetails.mockReturnValue({ data: exportedAction });
+
+    const { getByTestId, queryByTestId } = await render();
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+    await waitFor(() => {
+      expect(getByTestId('getFile-success')).toBeTruthy();
+    });
+
+    expect(getByTestId(`${exportedTestId}-provider`)).toHaveTextContent('azure-1');
+    expect(getByTestId(`${exportedTestId}-type`)).toHaveTextContent('Azure Blob Storage');
+    expect(getByTestId(`${exportedTestId}-account`)).toHaveTextContent('acct');
+    expect(getByTestId(`${exportedTestId}-container`)).toHaveTextContent('response-actions');
+    expect(getByTestId(`${exportedTestId}-path`)).toHaveTextContent('123/upload.zip');
+    expect(getByTestId(`${exportedTestId}-passcodeMessage`)).toHaveTextContent(
+      '(ZIP file passcode: elastic).'
+    );
+    expect(queryByTestId('getFile-actionResult-getFileResults-getFileDownloadLink')).toBeNull();
+    expect(apiMocks.responseProvider.fileInfo).not.toHaveBeenCalled();
   });
 
   it.each([
