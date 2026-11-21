@@ -6,6 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -20,7 +21,7 @@ import {
   waitForActionCompletion,
 } from '../types';
 import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
-import { buildDispatchConfirmation, prepareDispatch } from '../services/dispatch_action';
+import { prepareDispatch } from '../services/dispatch_action';
 
 const isolateHostSchema = z
   .object({
@@ -40,36 +41,8 @@ export const isolateHostTool = (
   return {
     id: ISOLATE_TOOL_ID,
     type: ToolType.builtin,
-    description: `Isolates a host by its hostname or agent ID (pass the agent ID, from an ambiguous_hostname result, when several endpoints share the hostname). Isolation disconnects the endpoint from the network to contain a potential threat. The action is dispatched through the Elastic Defend Response Actions service.`,
+    description: `Isolates a host by its hostname, exact IP address, or agent ID (pass the selected agent ID after an ambiguous_hostname or ambiguous_ip result). Isolation disconnects the endpoint from the network to contain a potential threat. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: isolateHostSchema,
-    // HITL gate enforced by the framework, not skill prose: the runner prompts
-    // the analyst for confirmation before every dispatch. `always` (not `once`)
-    // so each host isolation is confirmed individually.
-    confirmation: {
-      askUser: 'always',
-      getConfirmation: async ({ toolParams, context }) =>
-        buildDispatchConfirmation(
-          {
-            action: 'isolate',
-            params: {
-              hostName: toolParams.hostName as string | undefined,
-              agentId: toolParams.agentId as string | undefined,
-            },
-            args: { comment: toolParams.comment as string | undefined },
-            context,
-            endpointAppContextService,
-            requiredPrivilege: 'canIsolateHost',
-          },
-          {
-            title: 'Isolate host?',
-            color: 'danger',
-            confirmText: 'Isolate host',
-            comment: toolParams.comment as string | undefined,
-            describe: (host) =>
-              `This will disconnect ${host} from the network. Only Elastic Defend will retain connectivity.`,
-          }
-        ),
-    },
     handler: async (params, context) => {
       const { logger, request, runContext, spaceId } = context;
       // Set just before the client call: from there on a throw does not mean
@@ -78,15 +51,41 @@ export const isolateHostTool = (
       try {
         const requestedHostName = params.hostName as string | undefined;
         const requestedAgentId = params.agentId as string | undefined;
+        const requestedIp = params.ip as string | undefined;
         const comment = params.comment as string | undefined;
 
         const prepared = await prepareDispatch({
           action: 'isolate',
-          params: { hostName: requestedHostName, agentId: requestedAgentId },
+          params: { hostName: requestedHostName, ip: requestedIp, agentId: requestedAgentId },
           args: { comment },
           context,
           endpointAppContextService,
           requiredPrivilege: 'canIsolateHost',
+          confirmation: {
+            title: i18n.translate(
+              'xpack.securitySolution.endpointResponseActionsSkill.confirmation.isolate.title',
+              {
+                defaultMessage: 'Isolate host?',
+              }
+            ),
+            color: 'danger',
+            confirmText: i18n.translate(
+              'xpack.securitySolution.endpointResponseActionsSkill.confirmation.isolate.confirmText',
+              {
+                defaultMessage: 'Isolate host',
+              }
+            ),
+            comment: params.comment as string | undefined,
+            describe: (host) =>
+              i18n.translate(
+                'xpack.securitySolution.endpointResponseActionsSkill.confirmation.isolate.message',
+                {
+                  defaultMessage:
+                    'This will disconnect {host} from the network. Only Elastic Defend will retain connectivity.',
+                  values: { host },
+                }
+              ),
+          },
         });
         if (prepared.kind === 'result') {
           return prepared.result;
@@ -122,17 +121,16 @@ export const isolateHostTool = (
           { hosts: { [endpointIds[0]]: { name: hostName } } }
         );
 
-        // The dispatch above returns the action's write-time snapshot
-        // (almost always `pending` — the endpoint agent hasn't checked in
-        // yet). Poll until Elastic Defend reports completion so the chat
-        // response reflects the actual outcome, not just "dispatched".
-        const actionDetails = await waitForActionCompletion(
-          endpointAppContextService,
-          spaceId,
-          dispatchedAction.id,
-          logger,
-          dispatchedAction
-        );
+        const actionDetails =
+          target.endpoint.status === 'offline'
+            ? dispatchedAction
+            : await waitForActionCompletion(
+                endpointAppContextService,
+                spaceId,
+                dispatchedAction.id,
+                logger,
+                dispatchedAction
+              );
 
         return {
           results: [
@@ -145,9 +143,13 @@ export const isolateHostTool = (
                 actionId: actionDetails.id,
                 status: actionDetails.status,
                 wasSuccessful: actionDetails.wasSuccessful,
-                // Why a failed action failed (bounded); without it the model
-                // sees only `status: failed`.
-                ...(summarizeActionErrors(actionDetails.errors) ?? {}),
+                ...(target.endpoint.status === 'offline'
+                  ? {
+                      queued: true,
+                      message:
+                        'The action is queued and will execute when the endpoint reconnects.',
+                    }
+                  : summarizeActionErrors(actionDetails.errors) ?? {}),
                 hosts: actionDetails.hosts,
                 comment,
               },

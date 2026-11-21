@@ -465,6 +465,8 @@ export interface EndpointNotFoundResult {
   hostName?: string;
   /** Set when the lookup was by agent ID only. */
   agentId?: string;
+  /** Set when the lookup was by IP address. */
+  ip?: string;
   found: false;
   reason: 'endpoint_not_found';
   /** Human-readable explanation for the agent's response text. */
@@ -478,13 +480,20 @@ export interface EndpointNotFoundResult {
  * answer claim a host is not isolated when nothing was found at all.
  */
 export function endpointNotFoundData(
-  lookup: { hostName: string } | { agentId: string }
+  lookup: { hostName: string } | { agentId: string } | { ip: string }
 ): EndpointNotFoundResult {
   const base = {
     kind: 'response_action_result' as const,
     found: false as const,
     reason: 'endpoint_not_found' as const,
   };
+  if ('ip' in lookup) {
+    return {
+      ...base,
+      ip: lookup.ip,
+      message: `No endpoint found with IP address '${lookup.ip}'.`,
+    };
+  }
   if ('hostName' in lookup) {
     return {
       ...base,
@@ -1011,6 +1020,9 @@ export function resolveAgentTypeFromPackages(packages: string[] = []): ResponseA
   return 'endpoint';
 }
 
+/** Lets the audit log tell an agent-dispatched action from an analyst's own. */
+const AI_AGENT_COMMENT_MARKER = 'Executed by AI agent';
+
 /**
  * Builds the comment recorded on a dispatched response action so its entry in
  * the Response Actions audit log links back to the originating agent
@@ -1021,7 +1033,7 @@ export function resolveAgentTypeFromPackages(packages: string[] = []): ResponseA
  *
  * The conversation id lives on the agent entry of the run-context stack, so it
  * is resolved via `getAgentFromRunContext`. An analyst-supplied comment is
- * preserved and the anchor is appended to it.
+ * preserved and the marker and anchor are appended to it.
  */
 export function buildResponseActionComment(
   defaultComment: string,
@@ -1030,7 +1042,8 @@ export function buildResponseActionComment(
 ): string {
   const base = analystComment ?? defaultComment;
   const correlationId = getAgentFromRunContext(runContext)?.conversationId ?? runContext.runId;
-  return correlationId ? `${base} [AI agent conversation: ${correlationId}]` : base;
+  const marked = `${base} [${AI_AGENT_COMMENT_MARKER}]`;
+  return correlationId ? `${marked} [AI agent conversation: ${correlationId}]` : marked;
 }
 
 /**

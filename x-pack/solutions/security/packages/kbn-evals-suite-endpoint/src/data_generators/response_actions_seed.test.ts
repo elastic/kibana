@@ -50,6 +50,18 @@ describe('response actions seed', () => {
     expect(release.agentId.startsWith(RESPONSE_ACTIONS_AGENT_ID_PREFIX)).toBe(true);
   });
 
+  it('seeds the isolate target IP in endpoint metadata for the exact-IP eval', async () => {
+    const esClient = { create: jest.fn().mockResolvedValue({}) };
+    const internalEsClient = { index: jest.fn().mockResolvedValue({}) };
+
+    await seedScenario({ esClient, internalEsClient } as never, isolate);
+
+    const metadataCall = esClient.create.mock.calls.find(
+      ([args]) => args.index === 'metrics-endpoint.metadata-default'
+    );
+    expect(metadataCall?.[0].document.host.ip).toEqual(['10.42.0.15']);
+  });
+
   it('writes policy_id and packages onto the .fleet-agents doc', async () => {
     const esClient = { create: jest.fn().mockResolvedValue({}) };
     const internalEsClient = { index: jest.fn().mockResolvedValue({}) };

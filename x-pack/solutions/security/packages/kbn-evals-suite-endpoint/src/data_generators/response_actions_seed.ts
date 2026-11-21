@@ -95,6 +95,7 @@ export const buildResponseActionsScenarios = (
   isolate: {
     agentId: RESPONSE_ACTIONS_ISOLATE_AGENT_ID,
     hostName: 'eval-host-isolate',
+    hostIp: ['10.42.0.15'],
     os: { name: 'Windows', version: '10' },
     policyName: 'eval-policy-response',
     policyStatus: 'success',

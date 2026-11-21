@@ -53,8 +53,10 @@ skill.
 
 The response actions available are isolate, release (unisolate), scan, and
 running processes; each runs solely through this skill's tools (\`isolate_host\`,
-\`unisolate_host\`, \`scan_host\`, \`get_running_processes\`), and all four pause for
-the analyst's confirmation. Never improvise one with another
+\`unisolate_host\`, \`scan_host\`, \`get_running_processes\`). Isolate, release and scan pause for
+the analyst's confirmation; running processes changes nothing on the host, so it
+runs without one, but it still enqueues a real action, so call it only on an
+explicit request. Never improvise one with another
 tool, such as a raw API call. Other response actions (execute, kill-process,
 suspend-process, get-file, upload, runscript, memory-dump) are not available
 from chat: say so and point the analyst to the Response Actions UI.
@@ -68,12 +70,15 @@ from chat: say so and point the analyst to the Response Actions UI.
    - isolate / quarantine / contain → \`isolate_host\` (write, platform-confirmed)
    - release / unisolate / reconnect → \`unisolate_host\` (write, platform-confirmed)
    - status / is isolated → \`get_endpoint_status\`
-   - running processes → \`get_running_processes\` (write, platform-confirmed)
+   - running processes → \`get_running_processes\` (no confirmation) — only
+     when the analyst explicitly asks for the process list
    - scan path → \`scan_host\` (write, platform-confirmed)
    - prior action status / action ID → \`get_response_action_status\`
 
-2. **Write tools** — call directly; Agent Builder shows the confirmation card.
-   Do not ask for chat confirmation first. If declined, report cancelled.
+2. **Isolate, release and scan** — call directly; Agent Builder shows the
+   confirmation card. Do not ask for chat confirmation first. If declined,
+   report cancelled. \`get_running_processes\` shows no card: call it directly
+   and report the result.
 
 3. **Report** — always include action ID, status, and output. For pending actions,
    offer \`get_response_action_status\` follow-up. See \`./reference\` for error
@@ -84,19 +89,23 @@ from chat: say so and point the analyst to the Response Actions UI.
 - For status and response action lookups, use the tools above instead of
   \`platform.core.search\` or raw Elasticsearch queries. This does not restrict
   diagnostic queries made by other loaded skills.
+- Open-ended questions about a host ("what do you see on it?", "does it look
+  compromised?") get \`get_endpoint_status\` only. Do not call
+  \`get_running_processes\` for them: it enqueues a real action on the host, so
+  it needs an explicit request for the process list. Offer it instead.
 - Never claim an endpoint was isolated, released, or scanned, or that its
-  process list was retrieved, until the tool result reports it. A write tool pauses for the analyst's confirmation first;
-  until then say the action is awaiting confirmation, and if declined report it
-  as cancelled.
-- Call a write tool directly with the hostname the analyst gave. The tool
-  resolves the host itself and returns \`reason: endpoint_not_found\` or
-  \`reason: ambiguous_hostname\` instead of acting on a guess, so no
-  \`get_endpoint_status\` pre-check is needed. On \`ambiguous_hostname\`, ask which
+  process list was retrieved, until the tool result reports it. Isolate, release
+  and scan pause for the analyst's confirmation first; until then say the action
+  is awaiting confirmation, and if declined report it as cancelled.
+- Call the isolate, release, scan or running-processes tool directly with the
+  hostname the analyst gave. The tool resolves the host itself and returns \`reason: endpoint_not_found\` or
+  \`reason: ambiguous_hostname\` or \`reason: ambiguous_ip\` instead of acting on a guess, so no
+  \`get_endpoint_status\` pre-check is needed. On either ambiguity result, ask which
   agent ID is meant, then call the same tool again with that \`agentId\`; never
   pick a candidate.
 - Branch on the typed signals the tools return: a missing host or action is
   \`found: false\` with \`reason: endpoint_not_found\` / \`reason: action_not_found\`
-  (and \`reason: ambiguous_hostname\` when several endpoints share the name);
+  (and \`reason: ambiguous_hostname\` / \`reason: ambiguous_ip\` when several endpoints share the supplied identity);
   \`error: invalid_argument\` means the request itself was out of range (narrow
   filters instead of paging further), while \`error: insufficient_privileges\`
   and \`error: unknown_error\` mean the lookup itself could not run, and
@@ -111,7 +120,7 @@ from chat: say so and point the analyst to the Response Actions UI.
   property of the project (serverless: requires the Endpoint Complete tier),
   do not suggest a role grant, a license upgrade, or the Security UI, and do
   not re-offer that action this conversation. License tier or product tier can
-  also make a write unavailable before you call it, so do not promise isolate,
+  also make an action unavailable before you call it, so do not promise isolate,
   scan, or running-processes will succeed until the tool result confirms.
   Details in \`./reference\`.`;
 

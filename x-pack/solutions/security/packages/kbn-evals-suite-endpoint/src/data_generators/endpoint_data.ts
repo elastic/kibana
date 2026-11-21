@@ -14,6 +14,7 @@ import {
   METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import { buildBaseEndpointMetadataFilter } from '@kbn/security-solution-plugin/common/endpoint/utils/endpoint_metadata_filter';
 
 const POLL_INTERVAL_MS = 5_000;
 
@@ -99,6 +100,11 @@ export async function waitForTransformPropagation(
   const start = Date.now();
   let lastCounts = { metadataCurrent: 0, metadataUnited: 0 };
   const seededQuery = { prefix: { 'agent.id': agentIdPrefix } };
+  // A half-merged united doc matches the prefix but not the base filter the
+  // lookup tools apply, so the first scenarios would see an empty inventory.
+  const seededUnitedQuery = {
+    bool: { filter: [seededQuery, buildBaseEndpointMetadataFilter()] },
+  };
   log.info(
     `Waiting for transform propagation: metadataCurrent >= ${expectedCounts.metadataCurrent}, metadataUnited >= ${expectedCounts.metadataUnited}`
   );
@@ -113,7 +119,7 @@ export async function waitForTransformPropagation(
         }),
         esClient.count({
           index: METADATA_UNITED_INDEX,
-          query: seededQuery,
+          query: seededUnitedQuery,
           ignore_unavailable: true,
         }),
       ]);
@@ -160,6 +166,8 @@ interface ExtraDocument {
 export interface EndpointScenario {
   agentId: string;
   hostName: string;
+  /** IP addresses written to endpoint metadata for exact-IP target resolution. */
+  hostIp?: string[];
   os: {
     name: string;
     version: string;
@@ -354,6 +362,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
   const {
     agentId,
     hostName,
+    hostIp,
     os,
     policyName,
     policyStatus,
@@ -382,7 +391,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
         namespace: 'default',
       },
       agent: { id: agentId, type: 'endpoint', version: agentVersion },
-      host: { name: hostName, hostname: hostName, os },
+      host: { name: hostName, hostname: hostName, ...(hostIp ? { ip: hostIp } : {}), os },
       Endpoint: {
         status: endpointStatus,
         policy: { applied: { status: policyStatus, name: policyName, id: policyId } },
@@ -406,7 +415,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
     document: {
       '@timestamp': now,
       agent: { id: agentId, version: agentVersion },
-      local_metadata: { host: { name: hostName } },
+      local_metadata: { host: { name: hostName, ...(hostIp ? { ip: hostIp } : {}) } },
       active: true,
       enrolled_at: now,
       last_checkin: lastCheckin ?? now,
