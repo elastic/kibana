@@ -12,11 +12,12 @@ export interface IPreviewRuleExecutionLogger {
   getExecutionResult: () => ExecutionResult | undefined;
   getErrors: () => string[];
   getWarnings: () => string[];
+  reset: () => void;
 }
 
 export const createPreviewRuleExecutionLogger = (): IPreviewRuleExecutionLogger => {
-  const errors: string[] = [];
-  const warnings: string[] = [];
+  let errors: string[] = [];
+  let warnings: string[] = [];
   let executionResult: ExecutionResult | undefined;
 
   return {
@@ -50,5 +51,11 @@ export const createPreviewRuleExecutionLogger = (): IPreviewRuleExecutionLogger 
     },
     getErrors: () => errors,
     getWarnings: () => warnings,
+    // New arrays (not cleared ones) so logs already collected for previous invocations stay intact
+    reset: () => {
+      errors = [];
+      warnings = [];
+      executionResult = undefined;
+    },
   };
 };

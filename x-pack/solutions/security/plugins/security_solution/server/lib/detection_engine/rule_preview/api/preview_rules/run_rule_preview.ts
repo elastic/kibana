@@ -265,6 +265,7 @@ export const runRulePreview = async (
 
     while (invocationCount > 0 && !isAborted) {
       invocationStartTime = moment();
+      previewRuleExecutionLogger.reset();
 
       ({ state: statePreview, loggedRequests } = (await ruleType.executor({
         executionId: uuidv4(),
