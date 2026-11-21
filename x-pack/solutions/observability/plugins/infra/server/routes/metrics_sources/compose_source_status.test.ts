@@ -107,6 +107,29 @@ describe('composeSourceStatus', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  it('keeps a response-size overrun visible as an error even though it is a RequestAbortedError', async () => {
+    // The ES client also throws RequestAbortedError when elasticsearch.maxResponseSize is
+    // exceeded. The browser is still waiting for a result in that case, so it is a real failure
+    // and must not be downgraded to a debug "cancelled" line.
+    const error = new errors.RequestAbortedError(
+      'The content length (12345) is bigger than the maximum allowed string (10000)'
+    );
+    const hasMetricIndices = jest.fn().mockRejectedValue(error);
+
+    await expect(compose(hasMetricIndices)).resolves.toEqual({
+      metricIndicesExist: false,
+      remoteClustersExist: true,
+      metricIndicesStatus: 'unknown',
+    });
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const [message, meta] = logger.error.mock.calls[0];
+    expect(message).toContain('default');
+    expect(message).toContain(metricAlias);
+    expect(meta).toEqual({ error });
+    expect(logger.debug).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
   it('collapses line breaks in the request-controlled source id so it cannot forge log lines', async () => {
     const hasMetricIndices = jest
       .fn()
