@@ -84,6 +84,8 @@ export interface ApiKeyValidationResult {
   isClusterScoped: boolean;
   hasValidScope: boolean;
   errorMessage?: string;
+  /** Set to CLOUD_API_UNREACHABLE when the Cloud API couldn't be reached at all */
+  errorCode?: string;
   clusterId?: string;
 }
 

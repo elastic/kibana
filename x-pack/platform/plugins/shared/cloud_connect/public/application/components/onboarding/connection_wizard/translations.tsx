@@ -81,3 +81,17 @@ export const CONNECT_BUTTON = i18n.translate('xpack.cloudConnect.wizard.connectB
 export const API_KEY_PLACEHOLDER = i18n.translate('xpack.cloudConnect.wizard.apiKeyPlaceholder', {
   defaultMessage: 'Paste your Cloud Connect API key',
 });
+
+export const AUTHENTICATION_FAILED_TITLE = i18n.translate(
+  'xpack.cloudConnect.wizard.authenticationFailedTitle',
+  {
+    defaultMessage: 'Authentication failed',
+  }
+);
+
+export const CLOUD_API_UNREACHABLE_TITLE = i18n.translate(
+  'xpack.cloudConnect.wizard.cloudApiUnreachableTitle',
+  {
+    defaultMessage: "Can't reach Elastic Cloud",
+  }
+);
