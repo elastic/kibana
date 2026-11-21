@@ -6,37 +6,27 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React, { lazy, memo, Suspense, useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { memo, useCallback, useState } from 'react';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { updateAntivirusRegistrationEnabled } from '../../../../../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { updateAntivirusRegistrationEnabled } from '../../../../../../common/endpoint/utils/update_antivirus_registration_enabled';
-import { useGetProtectionsUnavailableComponent } from './hooks/use_get_protections_unavailable_component';
-import { EventMergingBanner } from './components/event_merging_banner';
-import { AntivirusRegistrationCard } from './components/cards/antivirus_registration_card';
-import { LinuxEventCollectionCard } from './components/cards/linux_event_collection_card';
-import { MacEventCollectionCard } from './components/cards/mac_event_collection_card';
-import { WindowsEventCollectionCard } from './components/cards/windows_event_collection_card';
-import { AttackSurfaceReductionCard } from './components/cards/attack_surface_reduction_card';
-import { BehaviourProtectionCard } from './components/cards/protection_settings_card/behaviour_protection_card';
-import { MemoryProtectionCard } from './components/cards/memory_protection_card';
-import { RelatedDetectionRulesCallout } from './components/related_detection_rules_callout';
-import { RansomwareProtectionCard } from './components/cards/ransomware_protection_card';
-import { MalwareProtectionsCard } from './components/cards/malware_protections_card';
-import type { PolicyFormComponentCommonProps } from './types';
-import { AdvancedSection } from './components/advanced_section';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import { useGetDeviceControlUpsellComponent } from './hooks/use_get_device_control_component';
-import { DeviceControlCard } from './components/cards/device_control_card';
-
-const PerOsPolicySettingsForm = lazy(async () => {
-  const { PerOsPolicySettingsForm: LazyPerOsPolicySettingsForm } = await import(
-    './per_os/per_os_policy_settings_form'
-  );
-
-  return { default: LazyPerOsPolicySettingsForm };
-});
+import { AdvancedSection } from './components/advanced_section';
+import { EventMergingBanner } from './components/event_merging_banner';
+import { RelatedDetectionRulesCallout } from './components/related_detection_rules_callout';
+import { useGetProtectionsUnavailableComponent } from './hooks/use_get_protections_unavailable_component';
+import type { PolicyFormComponentCommonProps } from './types';
+import { AiDataCollectionCard } from './ai_data_collection_card';
+import { AntivirusRegistrationCard } from './antivirus_registration_card';
+import { AttackSurfaceReductionCard } from './attack_surface_reduction_card';
+import { BehaviourProtectionCard } from './behaviour_protection_card';
+import { DeviceControlCard } from './device_control_card';
+import { EventCollectionCard } from './event_collection_card';
+import { MalwareProtectionsCard } from './malware_protections_card';
+import { MemoryProtectionCard } from './memory_protection_card';
+import { RansomwareProtectionCard } from './ransomware_protection_card';
 
 const PROTECTIONS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.protections',
@@ -48,134 +38,141 @@ const SETTINGS_SECTION_TITLE = i18n.translate(
   { defaultMessage: 'Settings' }
 );
 
+const FORM_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.perOsFormDescription',
+  {
+    defaultMessage:
+      'Configure how Elastic Defend protects your endpoints. Changes apply to all hosts assigned to this policy.',
+  }
+);
+
+// The macOS row on the Ransomware card owns this field, so it is hidden from the advanced
+// settings rather than offered twice.
+const OMITTED_ADVANCED_KEYS: readonly string[] = ['mac.ransomware.mode'];
+
 export type PolicySettingsFormProps = PolicyFormComponentCommonProps;
 
-export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
-  const getTestId = useTestIdGenerator(props['data-test-subj']);
-  const ProtectionsUpSellingComponent = useGetProtectionsUnavailableComponent();
-  const DeviceControlUpSellingComponent = useGetDeviceControlUpsellComponent();
+export const PolicySettingsForm = memo(
+  ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }: PolicySettingsFormProps) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const ProtectionsUpSellingComponent = useGetProtectionsUnavailableComponent();
+    const trustedDevices = useIsExperimentalFeatureEnabled('trustedDevices');
+    const endpointAiDataCollection = useIsExperimentalFeatureEnabled('endpointAiDataCollection');
+    const { storage } = useKibana().services;
+    const [showEventMergingBanner, setShowEventMergingBanner] = useState(
+      storage.get('securitySolution.showEventMergingBanner') ?? true
+    );
+    const onBannerDismiss = useCallback(() => {
+      setShowEventMergingBanner(false);
+      storage.set('securitySolution.showEventMergingBanner', false);
+    }, [storage]);
+    const onChangeProxy: PolicyFormComponentCommonProps['onChange'] = ({
+      isValid,
+      updatedPolicy,
+    }) => {
+      updateAntivirusRegistrationEnabled(updatedPolicy);
+      onChange({ isValid, updatedPolicy });
+    };
+    const commonProps = { policy, onChange, mode, 'data-test-subj': dataTestSubj };
 
-  const { storage } = useKibana().services;
+    const renderDeviceControlSection = () => {
+      if (!trustedDevices) {
+        return null;
+      }
 
-  const trustedDevices = useIsExperimentalFeatureEnabled('trustedDevices');
-  const isPerOsFormEnabled = useIsExperimentalFeatureEnabled('perOsPolicySettings');
+      return (
+        <>
+          <DeviceControlCard {...commonProps} data-test-subj={getTestId('deviceControl')} />
+          <EuiSpacer size="l" />
+        </>
+      );
+    };
 
-  const [showEventMergingBanner, setShowEventMergingBanner] = useState(
-    storage.get('securitySolution.showEventMergingBanner') ?? true
-  );
-  const onBannerDismiss = useCallback(() => {
-    setShowEventMergingBanner(false);
-    storage.set('securitySolution.showEventMergingBanner', false);
-  }, [storage]);
-
-  if (isPerOsFormEnabled) {
     return (
-      <Suspense
-        fallback={
-          <EuiFlexGroup justifyContent="center" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="xl" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      >
-        <PerOsPolicySettingsForm {...props} />
-      </Suspense>
+      <div data-test-subj={getTestId()}>
+        <EuiText size="s" color="subdued" data-test-subj={getTestId('description')}>
+          <p>{FORM_DESCRIPTION}</p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        {showEventMergingBanner && (
+          <>
+            <EventMergingBanner onDismiss={onBannerDismiss} />
+            <EuiSpacer size="s" />
+          </>
+        )}
+        <FormSectionTitle>{PROTECTIONS_SECTION_TITLE}</FormSectionTitle>
+
+        {ProtectionsUpSellingComponent && (
+          <>
+            <EuiSpacer size="m" />
+            <ProtectionsUpSellingComponent />
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        {!ProtectionsUpSellingComponent && (
+          <>
+            <RelatedDetectionRulesCallout />
+            <EuiSpacer size="l" />
+            <MalwareProtectionsCard
+              {...commonProps}
+              onChange={onChangeProxy}
+              data-test-subj={getTestId('malware')}
+            />
+            <EuiSpacer size="l" />
+
+            <BehaviourProtectionCard {...commonProps} data-test-subj={getTestId('behaviour')} />
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        <AntivirusRegistrationCard
+          {...commonProps}
+          onChange={onChangeProxy}
+          data-test-subj={getTestId('antivirusRegistration')}
+        />
+        <EuiSpacer size="l" />
+
+        {!ProtectionsUpSellingComponent && (
+          <>
+            <RansomwareProtectionCard {...commonProps} data-test-subj={getTestId('ransomware')} />
+            <EuiSpacer size="l" />
+
+            <MemoryProtectionCard {...commonProps} data-test-subj={getTestId('memory')} />
+            <EuiSpacer size="l" />
+
+            {renderDeviceControlSection()}
+
+            <AttackSurfaceReductionCard
+              {...commonProps}
+              data-test-subj={getTestId('attackSurface')}
+            />
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        {endpointAiDataCollection && (
+          <>
+            <AiDataCollectionCard {...commonProps} data-test-subj={getTestId('aiDataCollection')} />
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        <FormSectionTitle>{SETTINGS_SECTION_TITLE}</FormSectionTitle>
+        <EuiSpacer size="s" />
+
+        <EventCollectionCard {...commonProps} data-test-subj={getTestId('eventCollection')} />
+
+        <EuiSpacer size="m" />
+        <AdvancedSection
+          {...commonProps}
+          omitKeys={OMITTED_ADVANCED_KEYS}
+          data-test-subj={getTestId('advancedSection')}
+        />
+      </div>
     );
   }
-
-  const renderDeviceControlSection = () => {
-    if (!trustedDevices) {
-      return null;
-    }
-
-    return (
-      <>
-        {DeviceControlUpSellingComponent ? (
-          <DeviceControlUpSellingComponent />
-        ) : (
-          <DeviceControlCard {...props} data-test-subj={getTestId('deviceControl')} />
-        )}
-        <EuiSpacer size="l" />
-      </>
-    );
-  };
-
-  const onChangeProxy: PolicySettingsFormProps['onChange'] = ({ isValid, updatedPolicy }) => {
-    // perform tasks that synchronises changes between settings
-    updateAntivirusRegistrationEnabled(updatedPolicy);
-
-    props.onChange({ isValid, updatedPolicy });
-  };
-
-  return (
-    <div data-test-subj={getTestId()}>
-      {showEventMergingBanner && (
-        <>
-          <EventMergingBanner onDismiss={onBannerDismiss} />
-          <EuiSpacer size="s" />
-        </>
-      )}
-      <FormSectionTitle>{PROTECTIONS_SECTION_TITLE}</FormSectionTitle>
-
-      {ProtectionsUpSellingComponent && (
-        <>
-          <EuiSpacer size="m" />
-          <ProtectionsUpSellingComponent />
-          <EuiSpacer size="l" />
-        </>
-      )}
-
-      {!ProtectionsUpSellingComponent && (
-        <>
-          <RelatedDetectionRulesCallout />
-          <EuiSpacer size="l" />
-          <MalwareProtectionsCard
-            {...props}
-            onChange={onChangeProxy}
-            data-test-subj={getTestId('malware')}
-          />
-          <EuiSpacer size="l" />
-
-          <RansomwareProtectionCard {...props} data-test-subj={getTestId('ransomware')} />
-          <EuiSpacer size="l" />
-
-          <MemoryProtectionCard {...props} data-test-subj={getTestId('memory')} />
-          <EuiSpacer size="l" />
-
-          <BehaviourProtectionCard {...props} data-test-subj={getTestId('behaviour')} />
-          <EuiSpacer size="l" />
-
-          <AttackSurfaceReductionCard {...props} data-test-subj={getTestId('attackSurface')} />
-          <EuiSpacer size="l" />
-
-          {renderDeviceControlSection()}
-        </>
-      )}
-
-      <FormSectionTitle>{SETTINGS_SECTION_TITLE}</FormSectionTitle>
-      <EuiSpacer size="s" />
-
-      <WindowsEventCollectionCard {...props} data-test-subj={getTestId('windowsEvents')} />
-      <EuiSpacer size="l" />
-
-      <MacEventCollectionCard {...props} data-test-subj={getTestId('macEvents')} />
-      <EuiSpacer size="l" />
-
-      <LinuxEventCollectionCard {...props} data-test-subj={getTestId('linuxEvents')} />
-      <EuiSpacer size="l" />
-
-      <AntivirusRegistrationCard
-        {...props}
-        onChange={onChangeProxy}
-        data-test-subj={getTestId('antivirusRegistration')}
-      />
-
-      <EuiSpacer size="m" />
-      <AdvancedSection {...props} data-test-subj={getTestId('advancedSection')} />
-    </div>
-  );
-});
+);
 PolicySettingsForm.displayName = 'PolicySettingsForm';
 
 const FormSectionTitle = memo<PropsWithChildren<unknown>>(({ children }) => {

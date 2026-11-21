@@ -6,43 +6,60 @@
  */
 
 import React from 'react';
+import userEvent from '@testing-library/user-event';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import { useLicense as _useLicense } from '../../../../../common/hooks/use_license';
+import { licenseService as licenseServiceMocked } from '../../../../../common/hooks/__mocks__/use_license';
+import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../../../../../../common/endpoint/service/policy/custom_yara_signatures';
+import { createLicenseServiceMock } from '../../../../../../common/license/mocks';
+import { AntivirusRegistrationModes } from '../../../../../../common/endpoint/types';
 import {
   expectIsViewOnly,
   getPolicySettingsFormTestSubjects,
   setAntivirusRegistration,
-  setMalwareMode,
   setMalwareModeToDetect,
 } from './mocks';
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import { useGetProtectionsUnavailableComponent as _useGetProtectionsUnavailableComponent } from './hooks/use_get_protections_unavailable_component';
+import { useGetDeviceControlUpsellComponent as _useGetDeviceControlUpsellComponent } from './hooks/use_get_device_control_component';
 import type { PolicySettingsFormProps } from './policy_settings_form';
 import { PolicySettingsForm } from './policy_settings_form';
-import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import type { UpsellingService } from '@kbn/security-solution-upselling/service';
-import type { PolicyConfig } from '../../../../../../common/endpoint/types';
-import { AntivirusRegistrationModes } from '../../../../../../common/endpoint/types';
-import userEvent from '@testing-library/user-event';
-import { cloneDeep } from 'lodash';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
 jest.mock('../../../../../common/hooks/use_license');
+jest.mock('./hooks/use_get_protections_unavailable_component');
+jest.mock('./hooks/use_get_device_control_component');
 
-describe('Endpoint Policy Settings Form', () => {
+jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+
+const useLicenseMock = _useLicense as jest.Mock;
+const useGetProtectionsUnavailableComponentMock =
+  _useGetProtectionsUnavailableComponent as jest.Mock;
+const useGetDeviceControlUpsellComponentMock = _useGetDeviceControlUpsellComponent as jest.Mock;
+
+describe('PolicySettingsForm', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test');
+  const omittedAdvancedKey = 'mac.ransomware.mode';
+  const neighbouringMacAdvancedKey = 'mac.advanced.ransomware.diagnostic';
 
   let formProps: PolicySettingsFormProps;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
-  let upsellingService: UpsellingService;
-  let storageMock: IStorageWrapper;
   let mockedContext: AppContextTestRender;
+  let storageMock: IStorageWrapper;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    mockedContext.setExperimentalFlag({ perOsPolicySettings: false });
-
-    upsellingService = mockedContext.startServices.upselling;
     storageMock = mockedContext.startServices.storage;
+    // trustedDevices and custom YARA signatures are on by default; keep them off unless a
+    // test is exercising that gate so card presence stays stable.
+    mockedContext.setExperimentalFlag({
+      linuxDnsEvents: true,
+      trustedDevices: false,
+      customYaraSignaturesEnabled: false,
+    });
 
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
@@ -53,46 +70,201 @@ describe('Endpoint Policy Settings Form', () => {
     };
 
     storageMock.set('securitySolution.showEventMergingBanner', false);
+    useLicenseMock.mockReturnValue(licenseServiceMocked);
+    useGetProtectionsUnavailableComponentMock.mockReturnValue(null);
+    useGetDeviceControlUpsellComponentMock.mockReturnValue(null);
 
     render = () => (renderResult = mockedContext.render(<PolicySettingsForm {...formProps} />));
   });
 
-  describe('event merging banner', () => {
+  it.each([
+    ['malware', testSubj.malware.card],
+    ['malicious behaviour', testSubj.behaviour.card],
+    ['antivirus registration', testSubj.antivirusRegistration.card],
+    ['ransomware', testSubj.ransomware.card],
+    ['memory', testSubj.memory.card],
+    ['attack surface', testSubj.attackSurface.card],
+    ['event collection', testSubj.eventCollection.card],
+    ['advanced settings', testSubj.advancedSection.container],
+  ])('includes the %s card', (_, testSubjSelector) => {
+    render();
+
+    expect(renderResult.getByTestId(testSubjSelector)).toBeInTheDocument();
+  });
+
+  describe('and when policy protections are not available', () => {
     beforeEach(() => {
-      storageMock.set('securitySolution.showEventMergingBanner', true);
+      useGetProtectionsUnavailableComponentMock.mockReturnValue(() => (
+        <div data-test-subj="paywall">{'pay up!'}</div>
+      ));
     });
 
-    it('should show the event merging banner if it has never been dismissed', () => {
+    it.each([
+      ['malware', testSubj.malware.card],
+      ['malicious behaviour', testSubj.behaviour.card],
+      ['antivirus registration', testSubj.antivirusRegistration.card],
+      ['ransomware', testSubj.ransomware.card],
+      ['memory', testSubj.memory.card],
+      ['attack surface', testSubj.attackSurface.card],
+    ])('hides the %s card', (_, testSubjSelector) => {
+      render();
+
+      expect(renderResult.queryByTestId(testSubjSelector)).not.toBeInTheDocument();
+    });
+
+    it('shows the upsell and keeps the non-protection cards', () => {
+      // The protection cards sit in two conditional blocks with Antivirus solution between
+      // them, so a mistake in that split would take Event collection or the advanced
+      // settings down with the protections.
+      render();
+
+      expect(renderResult.getByTestId('paywall')).toBeInTheDocument();
+      expect(renderResult.getByTestId(testSubj.eventCollection.card)).toBeInTheDocument();
+      expect(renderResult.getByTestId(testSubj.advancedSection.container)).toBeInTheDocument();
+    });
+  });
+
+  describe('antivirus-registration sync proxy', () => {
+    const changeWindowsMalwareMode = async (optionName: RegExp) => {
+      await selectOsControlOption(renderResult, testSubj.malware.windows.modeSelect, optionName);
+    };
+
+    const getUpdatedPolicy = () =>
+      (formProps.onChange as jest.Mock).mock.calls.at(-1)[0].updatedPolicy;
+
+    it('syncs antivirus registration with Windows malware when the AV mode is sync', async () => {
+      setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, true);
+      render();
+
+      await changeWindowsMalwareMode(/^Detect$/);
+
+      expect(getUpdatedPolicy().windows.antivirus_registration.enabled).toBe(false);
+    });
+
+    it('enables antivirus registration when Windows malware is set back to prevent under sync', async () => {
+      setMalwareModeToDetect(formProps.policy);
+      setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, false);
+      render();
+
+      await changeWindowsMalwareMode(/^Detect & prevent$/);
+
+      expect(getUpdatedPolicy().windows.antivirus_registration.enabled).toBe(true);
+    });
+
+    it('does not disable antivirus registration when the AV mode is forced on', async () => {
+      setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.enabled, true);
+      render();
+
+      await changeWindowsMalwareMode(/^Detect$/);
+
+      expect(getUpdatedPolicy().windows.antivirus_registration.enabled).toBe(true);
+    });
+  });
+
+  describe('advanced-settings omission', () => {
+    it('omits mac.ransomware.mode while still showing neighbouring mac advanced rows', async () => {
+      render();
+
+      await userEvent.click(renderResult.getByTestId(testSubj.advancedSection.showHideButton));
+
+      expect(
+        renderResult.queryByTestId(
+          testSubj.advancedSection.settingRowTestSubjects(omittedAdvancedKey).container
+        )
+      ).not.toBeInTheDocument();
+      expect(
+        renderResult.getByTestId(
+          testSubj.advancedSection.settingRowTestSubjects(neighbouringMacAdvancedKey).container
+        )
+      ).toBeInTheDocument();
+    }, 15_000);
+  });
+
+  describe('custom YARA signatures advanced settings', () => {
+    const renderAndShowAdvancedSettings = async () => {
+      render();
+      await userEvent.click(renderResult.getByTestId(testSubj.advancedSection.showHideButton));
+    };
+    const queryAdvancedSettingRow = (key: string) =>
+      renderResult.queryByTestId(testSubj.advancedSection.settingRowTestSubjects(key).container);
+
+    it('hides the custom YARA rescan interval rows when the experimental flag is off', async () => {
+      await renderAndShowAdvancedSettings();
+
+      for (const key of CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS) {
+        expect(queryAdvancedSettingRow(key)).toBeNull();
+      }
+    });
+
+    describe('and the custom YARA signatures experimental flag is enabled', () => {
+      beforeEach(() => {
+        mockedContext.setExperimentalFlag({
+          linuxDnsEvents: true,
+          trustedDevices: false,
+          customYaraSignaturesEnabled: true,
+        });
+      });
+
+      it('shows the custom YARA rescan interval row for every OS', async () => {
+        await renderAndShowAdvancedSettings();
+
+        for (const key of CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS) {
+          expect(queryAdvancedSettingRow(key)).toBeInTheDocument();
+        }
+      });
+
+      it('hides the custom YARA rescan interval rows when the license is lower than Enterprise', async () => {
+        const licenseServiceMock = createLicenseServiceMock();
+        licenseServiceMock.isEnterprise.mockReturnValue(false);
+        useLicenseMock.mockReturnValue(licenseServiceMock);
+        await renderAndShowAdvancedSettings();
+
+        for (const key of CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS) {
+          expect(queryAdvancedSettingRow(key)).toBeNull();
+        }
+      });
+
+      it('hides the custom YARA rescan interval rows when a serverless PLI upsell message is present', async () => {
+        mockedContext.startServices.upselling.setMessages({
+          endpoint_custom_yara_signatures:
+            'To apply custom YARA signatures, you must add Endpoint Complete to your project.',
+        });
+        await renderAndShowAdvancedSettings();
+
+        for (const key of CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS) {
+          expect(queryAdvancedSettingRow(key)).toBeNull();
+        }
+      });
+    });
+  });
+
+  describe('event merging banner', () => {
+    it('shows the banner when the storage key is unset', () => {
+      storageMock.remove('securitySolution.showEventMergingBanner');
       render();
 
       expect(renderResult.getByTestId('eventMergingCallout')).toBeInTheDocument();
     });
 
-    it('should show the event merging banner if `securitySolution.showEventMergingBanner` is `true`', () => {
+    it('shows the banner when the storage key is true', () => {
       storageMock.set('securitySolution.showEventMergingBanner', true);
       render();
 
       expect(renderResult.getByTestId('eventMergingCallout')).toBeInTheDocument();
     });
 
-    it('should hide the event merging banner when user dismisses it', async () => {
+    it('hides the banner after dismissal and persists false to storage', async () => {
+      storageMock.set('securitySolution.showEventMergingBanner', true);
       render();
       expect(renderResult.getByTestId('eventMergingCallout')).toBeInTheDocument();
 
       await userEvent.click(renderResult.getByTestId('euiDismissCalloutButton'));
 
       expect(renderResult.queryByTestId('eventMergingCallout')).not.toBeInTheDocument();
-    });
-
-    it('should persist that event merging banner have been dismissed', () => {
-      render();
-
-      renderResult.getByTestId('euiDismissCalloutButton').click();
-
       expect(storageMock.get('securitySolution.showEventMergingBanner')).toBe(false);
     });
 
-    it('should not show the banner if it was dismissed before', () => {
+    it('does not show the banner when it was previously dismissed', () => {
       storageMock.set('securitySolution.showEventMergingBanner', false);
       render();
 
@@ -100,200 +272,84 @@ describe('Endpoint Policy Settings Form', () => {
     });
   });
 
-  it.each([
-    ['malware', testSubj.malware.card],
-    ['ransomware', testSubj.ransomware.card],
-    ['memory', testSubj.memory.card],
-    ['behaviour', testSubj.behaviour.card],
-    ['attack surface', testSubj.attackSurface.card],
-    ['windows events', testSubj.windowsEvents.card],
-    ['mac events', testSubj.macEvents.card],
-    ['linux events', testSubj.linuxEvents.card],
-    ['antivirus registration', testSubj.antivirusRegistration.card],
-    ['advanced settings', testSubj.advancedSection.container],
-  ])('should include %s card', (_, testSubjSelector) => {
-    render();
+  describe('trustedDevices gate', () => {
+    it('does not render the device-control section when trustedDevices is off', () => {
+      mockedContext.setExperimentalFlag({ linuxDnsEvents: true, trustedDevices: false });
+      render();
 
-    expect(renderResult.getByTestId(testSubjSelector));
+      expect(renderResult.queryByTestId(testSubj.deviceControl.card)).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId(testSubj.deviceControl.lockedCard)).not.toBeInTheDocument();
+    });
+
+    it('renders the device-control section when trustedDevices is on', () => {
+      mockedContext.setExperimentalFlag({ linuxDnsEvents: true, trustedDevices: true });
+      render();
+
+      expect(renderResult.getByTestId(testSubj.deviceControl.card)).toBeInTheDocument();
+    });
   });
 
-  it('should render in View mode', () => {
+  describe('endpointAiDataCollection gate', () => {
+    it('does not render the AI Data Collection card when the flag is off', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: false,
+      });
+      render();
+
+      expect(renderResult.queryByTestId(testSubj.aiDataCollection.card)).not.toBeInTheDocument();
+    });
+
+    it('renders the AI Data Collection card when the flag is on', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: true,
+      });
+      render();
+
+      expect(renderResult.getByTestId(testSubj.aiDataCollection.card)).toBeInTheDocument();
+    });
+
+    it('still renders the AI Data Collection card when the protections upsell is active', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: true,
+      });
+      useGetProtectionsUnavailableComponentMock.mockReturnValue(() => (
+        <div data-test-subj="paywall">{'pay up!'}</div>
+      ));
+      render();
+
+      expect(renderResult.getByTestId('paywall')).toBeInTheDocument();
+      expect(renderResult.getByTestId(testSubj.aiDataCollection.card)).toBeInTheDocument();
+    });
+
+    it('renders before the Settings section, ahead of the Event collection card', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: true,
+      });
+      render();
+
+      const aiDataCollectionCard = renderResult.getByTestId(testSubj.aiDataCollection.card);
+      const eventCollectionCard = renderResult.getByTestId(testSubj.eventCollection.card);
+
+      // The Event collection card sits inside the Settings section, so this confirms the
+      // AI Data Collection card renders ahead of that section rather than inside it.
+      expect(aiDataCollectionCard.compareDocumentPosition(eventCollectionCard)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
+    });
+  });
+
+  it('renders in view mode', () => {
     formProps.mode = 'view';
     render();
 
-    expectIsViewOnly(renderResult.getByTestId('test'));
-  });
-
-  describe('and when policy protections are not available', () => {
-    beforeEach(() => {
-      upsellingService.setSections({
-        endpointPolicyProtections: () => <div data-test-subj="paywall">{'pay up!'}</div>,
-      });
-    });
-
-    it.each([
-      ['malware', testSubj.malware.card],
-      ['ransomware', testSubj.ransomware.card],
-      ['memory', testSubj.memory.card],
-      ['behaviour', testSubj.behaviour.card],
-      ['attack surface', testSubj.attackSurface.card],
-      ['antivirus registration', testSubj.antivirusRegistration.card],
-    ])('should include %s card', (_, testSubjSelector) => {
-      render();
-
-      expect(renderResult.queryByTestId(testSubjSelector)).not.toBeInTheDocument();
-    });
-
-    it('should display upselling component', () => {
-      render();
-      expect(renderResult.getByTestId('paywall'));
-    });
-  });
-
-  describe('when changing related settings', () => {
-    let clickOnRadio: (selector: string) => Promise<void>;
-    let expectOnChangeToBeCalledWith: (updatedPolicy: PolicyConfig) => void;
-
-    describe('related to antivirus registration', () => {
-      beforeEach(() => {
-        clickOnRadio = (selector) =>
-          userEvent.click(renderResult.getByTestId(selector).querySelector('input')!);
-
-        expectOnChangeToBeCalledWith = (updatedPolicy) =>
-          expect(formProps.onChange).toHaveBeenCalledWith({
-            isValid: true,
-            updatedPolicy,
-          });
-      });
-
-      describe('changing malware when antivirus registration is synced with malware', () => {
-        it('should enable antivirus registration when malware is enabled', async () => {
-          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, false);
-          setMalwareMode({ policy: formProps.policy, turnOff: true });
-          render();
-
-          await userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
-
-          const expectedPolicy = cloneDeep(formProps.policy);
-          setMalwareMode({ policy: expectedPolicy });
-          setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.sync, true);
-          expectOnChangeToBeCalledWith(expectedPolicy);
-        });
-
-        it('should disable antivirus registration when malware is disabled', async () => {
-          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, true);
-          render();
-
-          await userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
-
-          const expectedPolicy = cloneDeep(formProps.policy);
-          setMalwareMode({ policy: expectedPolicy, turnOff: true });
-          setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.sync, false);
-          expectOnChangeToBeCalledWith(expectedPolicy);
-        });
-
-        it('should disable antivirus registration when malware is set to detect only', async () => {
-          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, true);
-          setMalwareMode({ policy: formProps.policy });
-          render();
-
-          await clickOnRadio(testSubj.malware.protectionDetectRadio);
-
-          const expectedPolicy = cloneDeep(formProps.policy);
-          setMalwareModeToDetect(expectedPolicy);
-          setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.sync, false);
-          expectOnChangeToBeCalledWith(expectedPolicy);
-        });
-      });
-
-      describe('changing malware when antivirus registration is NOT synced with malware', () => {
-        it('should not change antivirus registration when malware is enabled', async () => {
-          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.disabled, false);
-          setMalwareMode({ policy: formProps.policy, turnOff: true });
-          render();
-
-          await userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
-
-          const expectedPolicy = cloneDeep(formProps.policy);
-          setMalwareMode({ policy: expectedPolicy });
-          expectOnChangeToBeCalledWith(expectedPolicy);
-        });
-
-        it('should not change antivirus registration when malware is disabled', async () => {
-          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.enabled, true);
-          render();
-
-          await userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
-
-          const expectedPolicy = cloneDeep(formProps.policy);
-          setMalwareMode({ policy: expectedPolicy, turnOff: true });
-          expectOnChangeToBeCalledWith(expectedPolicy);
-        });
-
-        it('should not change antivirus registration when malware is set to detect only', async () => {
-          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.enabled, true);
-          setMalwareMode({ policy: formProps.policy });
-          render();
-
-          await clickOnRadio(testSubj.malware.protectionDetectRadio);
-
-          const expectedPolicy = cloneDeep(formProps.policy);
-          setMalwareModeToDetect(expectedPolicy);
-          expectOnChangeToBeCalledWith(expectedPolicy);
-        });
-      });
-
-      describe('changing antivirus registration mode when malware is enabled', () => {
-        it('should enable antivirus registration when set to sync', async () => {
-          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.disabled, false);
-          render();
-
-          await clickOnRadio(testSubj.antivirusRegistration.syncRadioButton);
-
-          const expectedPolicy = cloneDeep(formProps.policy);
-          setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.sync, true);
-          expectOnChangeToBeCalledWith(expectedPolicy);
-        });
-
-        it('should disable antivirus registration when set to disabled', async () => {
-          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, true);
-          render();
-
-          await clickOnRadio(testSubj.antivirusRegistration.disabledRadioButton);
-
-          const expectedPolicy = cloneDeep(formProps.policy);
-          setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.disabled, false);
-          expectOnChangeToBeCalledWith(expectedPolicy);
-        });
-      });
-
-      describe('changing antivirus registration mode when malware is disabled', () => {
-        beforeEach(() => {
-          setMalwareMode({ policy: formProps.policy, turnOff: true });
-        });
-
-        it('should disable antivirus registration when set to sync', async () => {
-          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.enabled, true);
-          render();
-
-          await clickOnRadio(testSubj.antivirusRegistration.syncRadioButton);
-
-          const expectedPolicy = cloneDeep(formProps.policy);
-          setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.sync, false);
-          expectOnChangeToBeCalledWith(expectedPolicy);
-        });
-
-        it('should enable antivirus registration when set to enabled', async () => {
-          setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, false);
-          render();
-
-          await clickOnRadio(testSubj.antivirusRegistration.enabledRadioButton);
-
-          const expectedPolicy = cloneDeep(formProps.policy);
-          setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.enabled, true);
-          expectOnChangeToBeCalledWith(expectedPolicy);
-        });
-      });
-    });
+    expectIsViewOnly(renderResult.getByTestId(testSubj.form));
   });
 });

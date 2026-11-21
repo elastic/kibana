@@ -16,11 +16,7 @@ import { getUserPrivilegesMockDefaultValue } from '../../../../../common/compone
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import { allFleetHttpMocks } from '../../../../mocks';
 import userEvent from '@testing-library/user-event';
-import {
-  expectIsViewOnly,
-  getPolicySettingsFormTestSubjects,
-  setMalwareMode,
-} from '../policy_settings_form/mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../policy_settings_form/mocks';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { ProtectionModes } from '../../../../../../common/endpoint/types';
@@ -48,7 +44,6 @@ describe('When rendering PolicySettingsLayout', () => {
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
-    mockedContext.setExperimentalFlag({ perOsPolicySettings: false });
 
     toasts = mockedContext.coreStart.notifications.toasts;
     apiMocks = allFleetHttpMocks(mockedContext.coreStart.http);
@@ -101,26 +96,28 @@ describe('When rendering PolicySettingsLayout', () => {
       const { getByTestId } = renderResult;
       const expectedUpdates = cloneDeep(policyData);
       const policySettings = expectedUpdates.inputs[0].config.policy.value;
+      const allOses = ['windows', 'mac', 'linux'] as const;
 
-      // Turn off malware
+      // Turn off malware for every OS (the master toggle covers all three at once)
       await userEvent.click(getByTestId(testSubj.malware.enableDisableSwitch));
-      setMalwareMode({
-        policy: policySettings,
-        turnOff: true,
-        includeAntivirus: true,
-      });
+      for (const os of allOses) {
+        set(policySettings, `${os}.malware.mode`, ProtectionModes.off);
+        set(policySettings, `${os}.malware.blocklist`, false);
+        set(policySettings, `${os}.malware.on_write_scan`, false);
+        set(policySettings, `${os}.popup.malware.enabled`, false);
+      }
+      // Antivirus registration is synced to Windows malware mode and only exists on Windows.
+      set(policySettings, 'windows.antivirus_registration.enabled', false);
 
-      // Turn off Behaviour Protection
+      // Turn off Malicious behavior protection for every OS
       await userEvent.click(getByTestId(testSubj.behaviour.enableDisableSwitch));
-      set(policySettings, 'windows.behavior_protection.mode', ProtectionModes.off);
-      set(policySettings, 'mac.behavior_protection.mode', ProtectionModes.off);
-      set(policySettings, 'linux.behavior_protection.mode', ProtectionModes.off);
-      set(policySettings, 'windows.popup.behavior_protection.enabled', false);
-      set(policySettings, 'mac.popup.behavior_protection.enabled', false);
-      set(policySettings, 'linux.popup.behavior_protection.enabled', false);
+      for (const os of allOses) {
+        set(policySettings, `${os}.behavior_protection.mode`, ProtectionModes.off);
+        set(policySettings, `${os}.popup.behavior_protection.enabled`, false);
+      }
 
-      // Set Ransomware User Notification message
-      const messageInput = getByTestId(testSubj.ransomware.notifyCustomMessage);
+      // Set Windows Ransomware User Notification message
+      const messageInput = getByTestId(testSubj.ransomware.windows.notifyCustomMessage);
       await userEvent.clear(messageInput);
       await userEvent.paste('foo message');
       set(policySettings, 'windows.popup.ransomware.message', 'foo message');
@@ -155,11 +152,16 @@ describe('When rendering PolicySettingsLayout', () => {
       const expectedUpdatedPolicy = await makeUpdates();
       await clickSave();
 
-      expect(apiMocks.responseProvider.updateEndpointPolicy).toHaveBeenCalledWith({
-        path: packagePolicyRouteService.getUpdatePath(policyData.id),
-        body: JSON.stringify(getPolicyDataForUpdate(expectedUpdatedPolicy)),
-        version: API_VERSIONS.public.v1,
-      });
+      expect(apiMocks.responseProvider.updateEndpointPolicy).toHaveBeenCalledTimes(1);
+      // The per-OS cards rebuild each protection branch via object spreads, which can reorder
+      // its keys relative to this test's `set()`-based expected policy. Comparing the parsed
+      // body (rather than the raw JSON string) keeps the assertion about policy content, not key
+      // order.
+      const [{ path, body, version }] =
+        apiMocks.responseProvider.updateEndpointPolicy.mock.calls[0];
+      expect(path).toEqual(packagePolicyRouteService.getUpdatePath(policyData.id));
+      expect(version).toEqual(API_VERSIONS.public.v1);
+      expect(JSON.parse(body as string)).toEqual(getPolicyDataForUpdate(expectedUpdatedPolicy));
     });
 
     it('should show buttons disabled while update is in flight', async () => {

@@ -23,8 +23,6 @@ import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import type { HttpFetchOptions } from '@kbn/core/public';
 import { cloneDeep } from 'lodash';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
-import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 import type { AppAction } from '../../../../../common/store/actions';
 
 describe('policy details: ', () => {
@@ -212,7 +210,7 @@ describe('policy details: ', () => {
 
       // `policyConfig`'s `linux` section (selectors/policy_settings_selectors.ts) has no
       // `ransomware` key in its object literal at all -- Linux ransomware is only editable
-      // through the per-OS form. Because the key is genuinely absent (not set to `undefined`),
+      // through the policy form. Because the key is genuinely absent (not set to `undefined`),
       // the reducer's `{ ...currentOsPolicy, ...newSettings }` merge leaves the existing
       // `linux.ransomware` branch untouched. If the selector ever added an unconditional
       // `ransomware: linux.ransomware`, an absent branch would become an explicit `undefined`
@@ -504,12 +502,6 @@ describe('policy details: ', () => {
     let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
     let http: AppContextTestRender['coreStart']['http'];
 
-    const setPerOsFlag = (perOsPolicySettings: boolean) => {
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, perOsPolicySettings },
-      });
-    };
-
     beforeEach(() => {
       let actionSpyMiddleware: MiddlewareActionSpyHelper<PolicyDetailsState>['actionSpyMiddleware'];
       const { coreStart, depsStart } = createAppRootMockRenderer();
@@ -523,10 +515,6 @@ describe('policy details: ', () => {
       );
       getState = store.getState;
       dispatch = store.dispatch;
-    });
-
-    afterEach(() => {
-      setPerOsFlag(allowedExperimentalValues.perOsPolicySettings);
     });
 
     const loadPolicyWithMessages = async (windowsMessage: string, macMessage: string) => {
@@ -549,17 +537,14 @@ describe('policy details: ', () => {
       return policyDetails(getState())?.inputs[0].config.policy.value;
     };
 
-    it('keeps a per-OS malware message when the flag is on and the Windows one is empty', async () => {
-      setPerOsFlag(true);
-
+    it('keeps a per-OS malware message when the Windows one is empty', async () => {
       const loaded = await loadPolicyWithMessages('', 'Custom macOS malware notification');
 
       expect(loaded?.windows.popup.malware.message).toEqual(DefaultPolicyNotificationMessage);
       expect(loaded?.mac.popup.malware.message).toEqual('Custom macOS malware notification');
     });
 
-    it('defaults an empty macOS ransomware message when the flag is on', async () => {
-      setPerOsFlag(true);
+    it('defaults an empty macOS ransomware message', async () => {
       const loadedPolicy = generateNewPolicyItemMock();
       loadedPolicy.id = 'policy-1';
       loadedPolicy.policy_ids = [];
@@ -579,7 +564,6 @@ describe('policy details: ', () => {
     });
 
     it('loads a policy whose macOS ransomware popup branch is absent', async () => {
-      setPerOsFlag(true);
       const loadedPolicy = generateNewPolicyItemMock();
       loadedPolicy.id = 'policy-1';
       loadedPolicy.policy_ids = [];
@@ -596,16 +580,6 @@ describe('policy details: ', () => {
       });
 
       await expect(serverReturnedPolicy).resolves.toBeDefined();
-    });
-
-    it('defaults every OS from the Windows message when the flag is off', async () => {
-      setPerOsFlag(false);
-
-      const loaded = await loadPolicyWithMessages('', 'Custom macOS malware notification');
-
-      expect(loaded?.windows.popup.malware.message).toEqual(DefaultPolicyNotificationMessage);
-      expect(loaded?.mac.popup.malware.message).toEqual(DefaultPolicyNotificationMessage);
-      expect(loaded?.linux.popup.malware.message).toEqual(DefaultPolicyNotificationMessage);
     });
   });
 });

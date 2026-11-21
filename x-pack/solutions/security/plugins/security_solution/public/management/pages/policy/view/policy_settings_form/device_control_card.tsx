@@ -1,0 +1,231 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo, useCallback } from 'react';
+import type { EuiSwitchProps } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
+import { cloneDeep } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import type { Immutable, PolicyConfig } from '../../../../../../common/endpoint/types';
+import {
+  DeviceControlAccessLevel as DeviceControlAccessLevelEnum,
+  PolicyOperatingSystem,
+} from '../../../../../../common/endpoint/types';
+import { DefaultPolicyDeviceNotificationMessage } from '../../../../../../common/endpoint/models/policy_config';
+import { useLicense } from '../../../../../common/hooks/use_license';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
+import type { DeviceControlOSes } from '../../types';
+import { SettingCard } from './setting_card';
+import { SettingLockedCard } from './components/setting_locked_card';
+import { useGetDeviceControlUpsellComponent } from './hooks/use_get_device_control_component';
+import type { PolicyFormComponentCommonProps } from './types';
+import { OsRow, POLICY_OS_TO_OPERATING_SYSTEM } from './os_row';
+import { POLICY_SETTING_SECTION_DESCRIPTIONS } from './policy_setting_section_descriptions';
+import type { DeviceControlSelectValue } from './device_control_access_level_select';
+import {
+  DEVICE_CONTROL_DISABLED,
+  DeviceControlAccessLevelSelect,
+} from './device_control_access_level_select';
+import { DeviceControlNotifyUserOption } from './device_control_notify_user_option';
+import type { PolicyAccessor } from './policy_accessor';
+import { createDeviceControlPolicyAccessor } from './policy_accessor';
+
+const DEVICE_CONTROL_OS_VALUES: Immutable<DeviceControlOSes[]> = [
+  PolicyOperatingSystem.windows,
+  PolicyOperatingSystem.mac,
+];
+
+export const DEVICE_CONTROL_CARD_TITLE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.deviceControl.type',
+  {
+    defaultMessage: 'Device control',
+  }
+);
+
+const DEVICE_CONTROL_PROTECTION_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.protections.deviceControl',
+  {
+    defaultMessage: 'Device Control',
+  }
+);
+
+export type DeviceControlCardProps = PolicyFormComponentCommonProps;
+
+export const DeviceControlCard = memo(
+  ({ policy, onChange, mode = 'edit', 'data-test-subj': dataTestSubj }: DeviceControlCardProps) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const isEnterprise = useLicense().isEnterprise();
+    const DeviceControlUpsellingComponent = useGetDeviceControlUpsellComponent();
+    const selected = DEVICE_CONTROL_OS_VALUES.some(
+      (os) => createDeviceControlPolicyAccessor(policy, os).read().device_control?.enabled === true
+    );
+
+    if (DeviceControlUpsellingComponent) {
+      return <DeviceControlUpsellingComponent />;
+    }
+
+    if (!isEnterprise) {
+      return (
+        <SettingLockedCard
+          title={DEVICE_CONTROL_CARD_TITLE}
+          licenseType="enterprise"
+          data-test-subj={getTestId('locked')}
+        />
+      );
+    }
+
+    return (
+      <SettingCard
+        title={DEVICE_CONTROL_CARD_TITLE}
+        description={POLICY_SETTING_SECTION_DESCRIPTIONS.deviceControl}
+        dataTestSubj={getTestId()}
+        selected={selected}
+        mode={mode}
+        rightCorner={
+          <DeviceControlMasterToggle
+            policy={policy}
+            onChange={onChange}
+            mode={mode}
+            selected={selected}
+            data-test-subj={getTestId('enableDisableSwitch')}
+          />
+        }
+      >
+        {DEVICE_CONTROL_OS_VALUES.map((os, index) => {
+          const accessor = createDeviceControlPolicyAccessor(policy, os);
+          return (
+            <DeviceControlRow
+              key={os}
+              os={os}
+              accessor={accessor}
+              onChange={onChange}
+              mode={mode}
+              isLast={index === DEVICE_CONTROL_OS_VALUES.length - 1}
+              data-test-subj={getTestId(os)}
+            />
+          );
+        })}
+      </SettingCard>
+    );
+  }
+);
+DeviceControlCard.displayName = 'DeviceControlCard';
+
+interface DeviceControlMasterToggleProps {
+  policy: PolicyConfig;
+  onChange: PolicyFormComponentCommonProps['onChange'];
+  mode: 'edit' | 'view';
+  selected: boolean;
+  'data-test-subj'?: string;
+}
+
+const DeviceControlMasterToggle = memo<DeviceControlMasterToggleProps>(
+  ({ policy, onChange, mode, selected, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const handleSwitchChange = useCallback<EuiSwitchProps['onChange']>(
+      (event) => {
+        const enabled = event.target.checked;
+        const updatedPolicy = cloneDeep(policy);
+
+        for (const os of DEVICE_CONTROL_OS_VALUES) {
+          const osPolicy = updatedPolicy[os];
+
+          osPolicy.device_control = {
+            enabled,
+            usb_storage: enabled
+              ? DeviceControlAccessLevelEnum.deny_all
+              : DeviceControlAccessLevelEnum.audit,
+          };
+          osPolicy.popup.device_control ??= {
+            enabled,
+            message: DefaultPolicyDeviceNotificationMessage,
+          };
+          osPolicy.popup.device_control.enabled = enabled;
+        }
+
+        onChange({ isValid: true, updatedPolicy });
+      },
+      [onChange, policy]
+    );
+
+    return (
+      <EuiSwitch
+        label={DEVICE_CONTROL_PROTECTION_LABEL}
+        labelProps={{ 'data-test-subj': getTestId('label') }}
+        showLabel={false}
+        checked={selected}
+        disabled={mode !== 'edit'}
+        onChange={handleSwitchChange}
+        data-test-subj={getTestId()}
+      />
+    );
+  }
+);
+DeviceControlMasterToggle.displayName = 'DeviceControlMasterToggle';
+
+interface DeviceControlRowProps {
+  os: DeviceControlOSes;
+  accessor: PolicyAccessor<DeviceControlOSes>;
+  onChange: PolicyFormComponentCommonProps['onChange'];
+  mode: 'edit' | 'view';
+  isLast: boolean;
+  'data-test-subj'?: string;
+}
+
+const DeviceControlRow = memo<DeviceControlRowProps>(
+  ({ os, accessor, onChange, mode, isLast, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const deviceControl = accessor.read().device_control;
+    const selectedValue: DeviceControlSelectValue = deviceControl?.enabled
+      ? deviceControl.usb_storage
+      : DEVICE_CONTROL_DISABLED;
+    const handleAccessLevelChange = useCallback(
+      (nextAccessLevel: DeviceControlSelectValue) => {
+        const updatedPolicy = accessor.update((currentOsPolicy) => {
+          currentOsPolicy.device_control =
+            nextAccessLevel === DEVICE_CONTROL_DISABLED
+              ? { enabled: false, usb_storage: DeviceControlAccessLevelEnum.audit }
+              : { enabled: true, usb_storage: nextAccessLevel };
+          // Create the branch rather than skip the sync, matching the master toggle: an OS whose
+          // popup branch is missing would otherwise keep a disabled notification after Block all.
+          currentOsPolicy.popup.device_control ??= {
+            enabled: false,
+            message: DefaultPolicyDeviceNotificationMessage,
+          };
+          currentOsPolicy.popup.device_control.enabled =
+            nextAccessLevel === DeviceControlAccessLevelEnum.deny_all;
+        });
+        onChange({ isValid: true, updatedPolicy });
+      },
+      [accessor, onChange]
+    );
+
+    return (
+      <OsRow
+        os={POLICY_OS_TO_OPERATING_SYSTEM[os]}
+        primaryControl={
+          <DeviceControlAccessLevelSelect
+            accessLevel={selectedValue}
+            onAccessLevelChange={handleAccessLevelChange}
+            disabled={mode !== 'edit'}
+            data-test-subj={getTestId('accessLevel')}
+          />
+        }
+        isLast={isLast}
+        data-test-subj={getTestId()}
+      >
+        <DeviceControlNotifyUserOption
+          accessor={accessor}
+          onChange={onChange}
+          mode={mode}
+          data-test-subj={getTestId('notifyUser')}
+        />
+      </OsRow>
+    );
+  }
+);
+DeviceControlRow.displayName = 'DeviceControlRow';

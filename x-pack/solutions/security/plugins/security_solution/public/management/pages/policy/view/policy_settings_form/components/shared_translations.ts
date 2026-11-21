@@ -11,29 +11,10 @@ import { i18n } from '@kbn/i18n';
  * Shared translations for policy settings form components across different protection types
  */
 
-export const NOTIFY_USER_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetailsConfig.userNotification',
-  { defaultMessage: 'User notification' }
-);
-
 export const NOTIFY_USER_CHECKBOX_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policyDetail.notifyUser',
   {
     defaultMessage: 'Notify user',
-  }
-);
-
-export const NOTIFICATION_MESSAGE_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetailsConfig.notificationMessage',
-  {
-    defaultMessage: 'Notification message',
-  }
-);
-
-export const CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification',
-  {
-    defaultMessage: 'Customize notification message',
   }
 );
 
