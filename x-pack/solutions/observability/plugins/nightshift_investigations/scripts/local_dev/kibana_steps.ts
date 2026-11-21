@@ -316,7 +316,8 @@ export interface Verification {
   connectorOnInvestigator: boolean;
   /** Whether the space holds the ORCA source code context and its sandbox egress. */
   spaceContext: boolean;
-  orcaLogCount?: number;
+  /** `skipped` when the key is a placeholder that only works inside the sandbox. */
+  orcaLogCount?: number | 'skipped';
 }
 
 export const verifySetup = async ({
@@ -343,12 +344,14 @@ export const verifySetup = async ({
   const spaceContext =
     context.snippets.some(({ text }) => text === ORCA_SOURCE_CODE_CONTEXT) &&
     ORCA_SANDBOX_ALLOWED_HOSTS.every((host) => hosts.includes(host));
-  const response = await fetch(`${orca.url}/logs-orcabench.otel-*/_count`, {
-    headers: { Authorization: `ApiKey ${orca.apiKey}` },
-  });
-  const orcaLogCount = response.ok
-    ? ((await response.json()) as { count: number }).count
-    : undefined;
+  // A placeholder key only works through the sandbox, where River substitutes the real one.
+  let orcaLogCount: number | 'skipped' | undefined = 'skipped';
+  if (!orca.placeholder) {
+    const response = await fetch(`${orca.url}/logs-orcabench.otel-*/_count`, {
+      headers: { Authorization: `ApiKey ${orca.apiKey}` },
+    });
+    orcaLogCount = response.ok ? ((await response.json()) as { count: number }).count : undefined;
+  }
   return {
     available,
     connectorListed: connectors.some(({ id }) => id === ORCA_CONNECTOR_ID),

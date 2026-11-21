@@ -52,3 +52,17 @@ export const ORCA_SANDBOX_ALLOWED_HOSTS: readonly string[] = ['github.com'];
 
 export const MANAGED_BLOCK_START = '# >>> nightshift local-dev (managed by setup_local_dev.js) >>>';
 export const MANAGED_BLOCK_END = '# <<< nightshift local-dev (managed by setup_local_dev.js) <<<';
+
+/**
+ * River sessions hold no real credential: the River daemon relays sandbox-api on this loopback port
+ * over TLS with a certificate from a CA it publishes, and River's control plane attaches the real
+ * sandbox-api key and substitutes the ORCA key for its placeholder on the way out.
+ */
+export const RIVER_SANDBOX_RELAY_HOST = 'localhost';
+export const RIVER_SANDBOX_RELAY_PORT = 3003;
+export const RIVER_RELAY_CA_PATH = '/etc/river/relay-ca.pem';
+/** Placeholders River replaces. Neither grants anything inside the session. */
+export const RIVER_SANDBOX_API_KEY_PLACEHOLDER = 'river-relay';
+export const RIVER_ORCA_KEY_PLACEHOLDER = 'river-secret:orca-es';
+/** The ORCA cluster, for River mode, which cannot read the evals secret that names it. */
+export const ORCA_URL = 'https://nightshift-orca.es.us-west2.gcp.elastic-cloud.com:443';

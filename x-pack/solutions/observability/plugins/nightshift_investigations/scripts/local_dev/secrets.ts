@@ -12,12 +12,16 @@ export interface SandboxConnection {
   port: number;
   /** `<username>:<password>`, as sandbox-api expects it after `ApiKey `. */
   apiKey: string;
+  /** PEM file of the CA that signs sandbox-api's certificate, when it is not publicly trusted. */
+  certificateAuthorities?: string;
 }
 
 export interface OrcaConnection {
   url: string;
   /** Encoded Elasticsearch API key, sent as `ApiKey <apiKey>`. */
   apiKey: string;
+  /** The key is a placeholder that is replaced on the way out of the sandbox, not a usable key. */
+  placeholder?: boolean;
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>

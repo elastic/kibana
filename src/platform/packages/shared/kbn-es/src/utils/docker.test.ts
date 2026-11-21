@@ -427,6 +427,29 @@ describe('maybePullDockerImage()', () => {
     expect(execa.mock.calls[0][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
   });
 
+  test('uses the local image when the pull fails', async () => {
+    execa
+      .mockImplementationOnce(() =>
+        Promise.reject(new Error('unauthorized: authentication required'))
+      )
+      .mockImplementationOnce(() => Promise.resolve({ stdout: 'local-image-id' }));
+
+    await maybePullDockerImage(log, DOCKER_IMG);
+
+    expect(execa.mock.calls[0][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
+    expect(execa.mock.calls[1][1]).toEqual(['images', '-q', DOCKER_IMG]);
+  });
+
+  test('fails when the pull fails and the image is not local', async () => {
+    execa
+      .mockImplementationOnce(() =>
+        Promise.reject(new Error('unauthorized: authentication required'))
+      )
+      .mockImplementationOnce(() => Promise.resolve({ stdout: '' }));
+
+    await expect(maybePullDockerImage(log, DOCKER_IMG)).rejects.toThrow(/Error pulling image/);
+  });
+
   describe('with KBN_ES_SNAPSHOT_USE_CACHED=true', () => {
     beforeEach(() => {
       process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'true';

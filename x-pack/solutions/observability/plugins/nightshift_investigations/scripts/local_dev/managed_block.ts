@@ -19,6 +19,7 @@ export const getLocalDevSettings = ({
   host,
   port,
   apiKey,
+  certificateAuthorities,
 }: SandboxConnection): Record<string, SettingValue> => ({
   // Nightshift itself: the feature flag gates the app and every investigation route.
   'feature_flags.overrides.nightshift.enabled': true,
@@ -31,6 +32,9 @@ export const getLocalDevSettings = ({
   'xpack.sandbox.host': host,
   'xpack.sandbox.port': port,
   [SANDBOX_API_KEY_SETTING]: apiKey,
+  ...(certificateAuthorities
+    ? { 'xpack.sandbox.ssl.certificate_authorities': certificateAuthorities }
+    : {}),
 });
 
 /** Splits a kibana.yml into the managed block and the rest of the file. */
