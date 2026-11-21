@@ -232,6 +232,92 @@ describe('buildListQuery', () => {
       'list query limit must be a positive integer'
     );
   });
+
+  /**
+   * Rates are TS-only. STATS already omits them on FROM; KEEP and scale/offset must do the same
+   * so the query never references a column the plan did not produce.
+   */
+  describe('rate metrics under TS vs FROM', () => {
+    const rateMetricsDefinition: EntityDefinitionWithoutId = {
+      ...k8sNodeFixture,
+      dynamic: {
+        sources: [
+          {
+            indexPattern: 'metrics-host.network-*',
+            metrics: [
+              { name: 'cpu', field: 'system.cpu.total.norm.pct', agg: 'last' },
+              {
+                name: 'network_bytes',
+                field: 'host.network.bytes',
+                agg: 'sum_rate',
+                scale: 8,
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const queryFor = (hasTimeSeries: boolean, engine: 'TS' | 'FROM') => {
+      const plans = plansOf(rateMetricsDefinition, hasTimeSeries);
+      const plan = plans.find((candidate) => candidate.engine === engine);
+      if (plan === undefined) {
+        throw new Error(`expected a ${engine} plan`);
+      }
+      const identity = resolveIdentityPlan(rateMetricsDefinition);
+      return buildListQuery({
+        plan,
+        identity,
+        columns: buildColumns(rateMetricsDefinition, plans, identity),
+        window,
+        limit: LIMIT,
+      }).esql;
+    };
+
+    it('TS includes the rate in STATS, KEEP, and scale EVAL', () => {
+      const esql = queryFor(true, 'TS');
+      const keepLine = esql.split('\n').find((line) => line.startsWith('| KEEP '));
+      const evalLine = esql.split('\n').find((line) => line.startsWith('| EVAL '));
+
+      expect(esql).toContain('`network_bytes` = SUM(RATE(`host.network.bytes`))');
+      expect(esql).toContain('`cpu` = LAST(`system.cpu.total.norm.pct`, `@timestamp`)');
+      expect(keepLine).toContain('`network_bytes`');
+      expect(keepLine).toContain('`cpu`');
+      expect(evalLine).toContain('`network_bytes` = `network_bytes` * 8');
+      expect(Parser.parse(esql).errors).toEqual([]);
+    });
+
+    it('FROM omits sum_rate from both STATS and KEEP (and scale EVAL); keeps supported metrics', () => {
+      const esql = queryFor(true, 'FROM');
+      const keepLine = esql.split('\n').find((line) => line.startsWith('| KEEP '));
+      const evalLine = esql.split('\n').find((line) => line.startsWith('| EVAL '));
+      // Multi-line STATS … BY block (aggregations continue on indented lines).
+      const statsBlock = esql.slice(esql.indexOf('| STATS '), esql.indexOf('\n| EVAL '));
+
+      // sum_rate is unsupported under FROM: absent from STATS and KEEP.
+      expect(statsBlock).not.toContain('`network_bytes`');
+      expect(statsBlock).not.toContain('RATE(');
+      expect(keepLine).not.toContain('`network_bytes`');
+      expect(esql).toContain('`cpu` = LAST(`system.cpu.total.norm.pct`, `@timestamp`)');
+      expect(keepLine).toContain('`cpu`');
+      expect(evalLine).not.toContain('`network_bytes`');
+      // Presence still requires the rate field even when FROM omits the aggregate.
+      expect(esql).toContain('`host.network.bytes` IS NOT NULL');
+      expect(Parser.parse(esql).errors).toEqual([]);
+    });
+
+    it('FROM-only probe also omits the rate from KEEP and scale EVAL', () => {
+      const esql = queryFor(false, 'FROM');
+      const keepLine = esql.split('\n').find((line) => line.startsWith('| KEEP '));
+      const evalLine = esql.split('\n').find((line) => line.startsWith('| EVAL '));
+
+      expect(esql).not.toContain('RATE(');
+      expect(keepLine).not.toContain('`network_bytes`');
+      expect(evalLine).not.toContain('`network_bytes`');
+      expect(keepLine).toContain('`cpu`');
+      expect(Parser.parse(esql).errors).toEqual([]);
+    });
+  });
 });
 
 describe('generateListQueries', () => {

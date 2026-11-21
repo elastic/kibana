@@ -8,6 +8,7 @@
 import type { ESQLColumn } from '@kbn/es-types';
 import { LAST_SEEN_COLUMN } from '../generator';
 import type { IdentityPlan, OutputColumn } from '../generator';
+import { listMetricsUnsupportedOnEngine } from '../generator/metrics/utils';
 import type { PlanResult } from './types';
 
 // Reads what a plan's result says about the indices it reached, from column types alone. Every
@@ -31,7 +32,7 @@ import type { PlanResult } from './types';
 // (observed on 9.6, not documented), so "mapped" is the only question; whether a field is indexed
 // does not matter.
 
-/** Whether a plan's result can be used, and which of its attribute fields no index maps. */
+/** Whether a plan's result can be used, and which of its attribute/metric fields no index maps. */
 export interface PlanAvailability {
   usable: boolean;
   reason?: string;
@@ -45,16 +46,26 @@ const isMapped = (columns: ESQLColumn[], name: string): boolean => {
   return column !== undefined && column.type !== 'null';
 };
 
-const unavailableAttributeFields = (
+const unavailableSourceFields = (
   { plan, columns: resultColumns }: PlanResult,
   columns: OutputColumn[]
 ): string[] => {
+  const unsupportedMetricNames = new Set(
+    listMetricsUnsupportedOnEngine(plan.metrics, plan.engine).map(({ name }) => name)
+  );
   const fields = columns.flatMap(({ name, kind, fieldByPlan }) => {
     const field = fieldByPlan?.[plan.index];
-    if (kind !== 'attribute' || field === undefined) {
+    if (field === undefined) {
       return [];
     }
-    return isMapped(resultColumns, name) ? [] : [field];
+    if (kind === 'attribute') {
+      return isMapped(resultColumns, name) ? [] : [field];
+    }
+    // Rates omitted under FROM are not in KEEP; do not report them as unmapped.
+    if (kind === 'metric' && !unsupportedMetricNames.has(name)) {
+      return isMapped(resultColumns, name) ? [] : [field];
+    }
+    return [];
   });
   return [...new Set(fields)];
 };
@@ -72,7 +83,7 @@ export const interpretPlanResult = (
     plan: { indexPattern },
     columns: resultColumns,
   } = result;
-  const unavailableFields = unavailableAttributeFields(result, columns);
+  const unavailableFields = unavailableSourceFields(result, columns);
 
   if (!isMapped(resultColumns, LAST_SEEN_COLUMN)) {
     return {

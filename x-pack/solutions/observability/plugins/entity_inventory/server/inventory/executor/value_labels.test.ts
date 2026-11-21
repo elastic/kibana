@@ -18,6 +18,7 @@ const plan: QueryPlan = {
     { name: 'ready', field: 'k8s.pod.ready', valueLabels: { true: 'yes' } },
     { name: 'os', field: 'host.os.name' },
   ],
+  metrics: [],
 };
 
 describe('applyValueLabels', () => {

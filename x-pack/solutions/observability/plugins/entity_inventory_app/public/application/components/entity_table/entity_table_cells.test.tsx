@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { EmptyCellValue, EntityCell } from './entity_table_cells';
-import { NO_VALUE_LABEL } from './translations';
+import { EmptyCellValue, EntityCell, MetricNotAvailable } from './entity_table_cells';
+import { METRIC_NOT_AVAILABLE_LABEL, NO_VALUE_LABEL } from './translations';
 
 const DATE_FORMAT = 'YYYY-MM-DD';
 
@@ -21,6 +21,14 @@ describe('EmptyCellValue', () => {
 
     expect(screen.getByText('-')).toHaveAttribute('aria-hidden', 'true');
     expect(screen.getByText(NO_VALUE_LABEL)).toBeInTheDocument();
+  });
+});
+
+describe('MetricNotAvailable', () => {
+  it('shows N/A', () => {
+    render(<MetricNotAvailable />);
+
+    expect(screen.getByText(METRIC_NOT_AVAILABLE_LABEL)).toBeInTheDocument();
   });
 });
 
@@ -56,5 +64,17 @@ describe('EntityCell', () => {
     renderCell({ value });
 
     expect(screen.getByText(NO_VALUE_LABEL)).toBeInTheDocument();
+  });
+
+  it('formats a metric cell with its unit', () => {
+    const { container } = renderCell({ kind: 'metric', value: 0.95, unit: 'percent' });
+
+    expect(container).toHaveTextContent(/^95%$/);
+  });
+
+  it.each([null, undefined])('shows N/A for a metric cell with value %p', (value) => {
+    renderCell({ kind: 'metric', value, unit: 'percent' });
+
+    expect(screen.getByText(METRIC_NOT_AVAILABLE_LABEL)).toBeInTheDocument();
   });
 });

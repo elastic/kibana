@@ -11,13 +11,17 @@ import { getDynamicBlock } from './dynamic';
 import { InventoryDefinitionError } from './errors';
 import { assertSafeIndexPattern } from './esql_syntax';
 import { canonicalizeEsqlFilter } from './filters';
+import {
+  combineSourceFilterWithMetricFilter,
+  groupSourceMetricsByFilterForPlans,
+} from './metrics/metrics';
 import type { QueryPlan, SourceProbe } from './types';
 import { MAX_QUERY_PLANS } from './types';
 
 /**
  * Turns the sources of a definition into validated query plans, with `probes[i]` the probe result
- * for source `i`. Every source gives a `FROM` plan, preceded by a `TS` plan when its probe found a
- * readable time-series index; a plan's filter is the canonical form of its source's filter.
+ * for source `i`. Each source expands by metric-filter group, then by engine (`TS` when the probe
+ * found time-series indices, always `FROM`). Attributes ride on every group of the source.
  */
 export const planSources = (
   definition: EntityDefinitionWithoutId,
@@ -31,14 +35,32 @@ export const planSources = (
     );
   }
 
+  // Checked in source order, so the first bad source is the one reported.
+  const canonicalSourceFilters = sources.map(({ indexPattern, filter }) => {
+    assertSafeIndexPattern(indexPattern);
+    return filter === undefined
+      ? undefined
+      : canonicalizeEsqlFilter(filter, `source ${indexPattern} filter`);
+  });
+
   const plans = sources
-    .flatMap(({ indexPattern, attributes = [] }, sourceIndex) => {
-      // `TS` reads only time-series indices and `FROM` excludes them, so together they cover the
-      // pattern once; without a readable time-series index the `TS` query would fail to verify.
+    .flatMap(({ indexPattern, attributes = [], metrics = [] }, sourceIndex) => {
       const engines: QueryEngine[] = probes[sourceIndex].hasTimeSeries ? ['TS', 'FROM'] : ['FROM'];
-      return engines.map(
-        (engine): Omit<QueryPlan, 'index'> => ({ sourceIndex, indexPattern, attributes, engine })
-      );
+      const metricFilterGroups = groupSourceMetricsByFilterForPlans(metrics, indexPattern);
+      const sourceFilter = canonicalSourceFilters[sourceIndex];
+      return metricFilterGroups.flatMap(({ canonicalMetricFilter, metrics: metricsInGroup }) => {
+        const planFilter = combineSourceFilterWithMetricFilter(sourceFilter, canonicalMetricFilter);
+        return engines.map(
+          (engine): Omit<QueryPlan, 'index'> => ({
+            sourceIndex,
+            indexPattern,
+            attributes,
+            metrics: metricsInGroup,
+            engine,
+            ...(planFilter !== undefined ? { filter: planFilter } : {}),
+          })
+        );
+      });
     })
     .map((plan, index): QueryPlan => ({ index, ...plan }));
 
@@ -48,18 +70,5 @@ export const planSources = (
     );
   }
 
-  // Checked in source order, so the first bad source is the one reported.
-  const filters = sources.map(({ indexPattern, filter }) => {
-    assertSafeIndexPattern(indexPattern);
-    return filter === undefined
-      ? undefined
-      : canonicalizeEsqlFilter(filter, `source ${indexPattern} filter`);
-  });
-
-  // A plan carries the canonical form of its source's filter: parsed, checked and re-printed from
-  // the syntax tree, so only that text ever reaches a query.
-  return plans.map((plan): QueryPlan => {
-    const filter = filters[plan.sourceIndex];
-    return filter === undefined ? plan : { ...plan, filter };
-  });
+  return plans;
 };

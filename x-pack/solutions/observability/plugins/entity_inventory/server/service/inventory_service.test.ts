@@ -389,8 +389,8 @@ describe('InventoryService.list', () => {
       truncated: false,
       errors: [],
       unavailableColumns: [],
+      unsupportedMetrics: [],
     });
-    expect(response).not.toHaveProperty('unsupportedMetrics');
     expect(response).not.toHaveProperty('documentFilterWarnings');
   });
 
@@ -553,6 +553,53 @@ describe('InventoryService.list', () => {
     expect(response.columns.find(({ name }) => name === 'resource_id')).toEqual({
       name: 'resource_id',
       kind: 'attribute',
+    });
+  });
+
+  it('lists rates omitted under FROM in unsupportedMetrics on list and plan', async () => {
+    const withRate = {
+      ...k8sNodeFixture,
+      dynamic: {
+        sources: [
+          {
+            indexPattern: OTEL_PATTERN,
+            metrics: [
+              { name: 'cpu', field: 'system.cpu.pct', agg: 'last' as const },
+              { name: 'network_bytes', field: 'host.network.bytes', agg: 'sum_rate' as const },
+            ],
+          },
+        ],
+      },
+    };
+    const { service, esClient } = createService([withRate]);
+    answerByPattern(
+      esClient,
+      {
+        [OTEL_PATTERN]: esqlResponse(
+          ['entity.id', 'kubernetes.node.name', 'cpu', 'network_bytes', 'last_seen'],
+          []
+        ),
+      },
+      { timeSeries: [OTEL_PATTERN] }
+    );
+
+    const list = await service.list({ type: withRate.type, window: WINDOW, limit: 10 });
+    const plan = await service.plan({ type: withRate.type, window: WINDOW, limit: 10 });
+
+    expect(list.unsupportedMetrics).toEqual([
+      {
+        indexPattern: OTEL_PATTERN,
+        engine: 'FROM',
+        column: 'network_bytes',
+        field: 'host.network.bytes',
+        agg: 'sum_rate',
+      },
+    ]);
+    expect(plan.unsupportedMetrics).toEqual(list.unsupportedMetrics);
+    expect(list.columns.find(({ name }) => name === 'network_bytes')).toEqual({
+      name: 'network_bytes',
+      kind: 'metric',
+      agg: 'sum_rate',
     });
   });
 

@@ -11,6 +11,12 @@ import { LAST_SEEN_COLUMN, buildColumns, planColumnNames } from './columns';
 import { quoteIdentifier } from './esql_syntax';
 import type { IdentityPlan } from './identity';
 import { ENTITY_ID_COLUMN, resolveIdentityPlan } from './identity';
+import {
+  buildMetricPresenceWherePredicate,
+  buildMetricScaleOffsetEval,
+  buildMetricStatsAgg,
+} from './metrics/metrics';
+import { listMetricsUnsupportedOnEngine } from './metrics/utils';
 import { assertParses } from './parse_guard';
 import type { GeneratedQuery, QueryPlan, TimeWindow } from './types';
 
@@ -49,7 +55,27 @@ const attributeAggregations = (columns: OutputColumn[], plan: QueryPlan): string
     ];
   });
 
-/** Builds the list query of one plan: the newest attributes and `last_seen` per entity in the window. */
+/** Metrics this plan's engine can compute (rates omitted under `FROM`). */
+const metricsProducedByPlan = (plan: QueryPlan) => {
+  const unsupportedMetricNames = new Set(
+    listMetricsUnsupportedOnEngine(plan.metrics, plan.engine).map(({ name }) => name)
+  );
+  return plan.metrics.filter(({ name }) => !unsupportedMetricNames.has(name));
+};
+
+const metricStatsAggsForPlan = (plan: QueryPlan): string[] =>
+  metricsProducedByPlan(plan).flatMap(({ name, field, agg }) => {
+    const aggregation = buildMetricStatsAgg(name, field, agg, plan.engine);
+    return aggregation === undefined ? [] : [aggregation];
+  });
+
+const metricScaleOffsetEvalsForPlan = (plan: QueryPlan): string[] =>
+  metricsProducedByPlan(plan).flatMap(({ name, scale, offset }) => {
+    const evaluation = buildMetricScaleOffsetEval(name, scale, offset);
+    return evaluation === undefined ? [] : [evaluation];
+  });
+
+/** Builds the list query of one plan: attributes, metrics and `last_seen` per entity in the window. */
 export const buildListQuery = ({
   plan,
   identity,
@@ -58,7 +84,7 @@ export const buildListQuery = ({
   limit,
 }: ListQueryInput): GeneratedQuery => {
   assertValidLimit(limit);
-  const { engine, indexPattern, filter } = plan;
+  const { engine, indexPattern, filter, metrics } = plan;
   const { groupingFields, presenceFilter, idEvaluation, rawIdentityColumns } = identity;
 
   // One source becomes two plans that together read every index behind the pattern exactly once.
@@ -77,11 +103,13 @@ export const buildListQuery = ({
   // of type `null`; the executor reads readability and availability from that (plan_result.ts).
   const sourceCommand =
     engine === 'TS' ? `TS ${indexPattern}` : `FROM ${indexPattern} METADATA _index_mode`;
+  const metricPresencePredicate = buildMetricPresenceWherePredicate(metrics);
   const predicates = [
     ...(engine === 'FROM' ? [`${INDEX_MODE} != "time_series"`] : []),
     `${TIMESTAMP} >= ?from AND ${TIMESTAMP} < ?to`,
     ...(filter !== undefined ? [`(${filter})`] : []),
     presenceFilter,
+    ...(metricPresencePredicate !== undefined ? [metricPresencePredicate] : []),
   ];
   // The id evaluation assigns `entity.id`, so an identity on `entity.id` would lose its grouped
   // column, and with it the `null` type that says no index maps the field: the evaluation types it
@@ -91,8 +119,10 @@ export const buildListQuery = ({
   const rawAssignments = [...rawIdentityColumns].map(
     ([field, column]) => `${quoteIdentifier(column)} = ${quoteIdentifier(field)}`
   );
+  const metricScaleOffsetEvals = metricScaleOffsetEvalsForPlan(plan);
   const aggregations = [
     ...attributeAggregations(columns, plan),
+    ...metricStatsAggsForPlan(plan),
     `${quoteIdentifier(LAST_SEEN_COLUMN)} = MAX(${TIMESTAMP})`,
   ];
 
@@ -103,7 +133,7 @@ export const buildListQuery = ({
     `| STATS ${aggregations.join(`,${CONTINUATION}`)}${CONTINUATION}BY ${groupingFields
       .map(quoteIdentifier)
       .join(', ')}`,
-    `| EVAL ${[...rawAssignments, idEvaluation].join(', ')}`,
+    `| EVAL ${[...metricScaleOffsetEvals, ...rawAssignments, idEvaluation].join(', ')}`,
     `| KEEP ${[...planColumnNames(columns, plan), ...rawIdentityColumns.values()]
       .map(quoteIdentifier)
       .join(', ')}`,

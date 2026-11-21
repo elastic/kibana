@@ -6,6 +6,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { DynamicMetricAgg, DynamicMetricUnit } from '@kbn/entity-store/common';
+
+export type { DynamicMetricAgg, DynamicMetricUnit };
 
 /** The most rows one list request may ask for, and the route's default `limit`. */
 export const MAX_LIST_LIMIT = 9_999;
@@ -33,9 +36,10 @@ export interface SourceError {
  * - `identity`: a field of the definition's identity fields, such as `host.id` or `host.name`.
  *   Several can be null on one row, as an entity may be reported under one naming convention.
  * - `attribute`: any other field of the definition.
+ * - `metric`: a window aggregate declared on a `dynamic` source (`agg` / optional `unit` on the column).
  * - `last_seen`: when the entity was last reported.
  */
-export type OutputColumnKind = 'id' | 'identity' | 'attribute' | 'last_seen';
+export type OutputColumnKind = 'id' | 'identity' | 'attribute' | 'metric' | 'last_seen';
 
 /** The ES|QL source command a plan runs under. */
 export type QueryEngine = 'TS' | 'FROM';
@@ -46,6 +50,10 @@ export type NamedParams = Array<Record<string, string | number | boolean>>;
 export interface InventoryTypeColumn {
   name: string;
   kind: OutputColumnKind;
+  /** Present when `kind` is `metric`. */
+  agg?: DynamicMetricAgg;
+  /** Present when `kind` is `metric` and the definition declared a unit. */
+  unit?: DynamicMetricUnit;
 }
 
 export interface InventoryTypeSource {
@@ -68,11 +76,24 @@ export interface GetTypesResponse {
   types: InventoryType[];
 }
 
-/** An attribute column one source cannot fill because no index behind its pattern maps the field. */
+/** An attribute or metric column one source cannot fill because no index behind its pattern maps the field. */
 export interface UnavailableColumn {
   column: string;
   indexPattern: string;
   field: string;
+}
+
+/**
+ * A metric the generator skipped for a plan because the engine cannot compute it (rates under
+ * `FROM`). Same shape as the generator's skipped-metrics helper.
+ */
+export interface UnsupportedMetric {
+  indexPattern: string;
+  engine: QueryEngine;
+  /** Output column name (= metric `name`). */
+  column: string;
+  field: string;
+  agg: DynamicMetricAgg;
 }
 
 /** One plan query sent to Elasticsearch; a failed query has null `took` and `documentsFound` and `rowCount` 0. */
@@ -102,6 +123,8 @@ export interface ListResponse {
   queries: ListQueryDiagnostic[];
   errors: SourceError[];
   unavailableColumns: UnavailableColumn[];
+  /** Metrics omitted from a plan's STATS because the engine cannot compute them (e.g. rates on `FROM`). */
+  unsupportedMetrics: UnsupportedMetric[];
 }
 
 /** The body the inventory sends to Elasticsearch's `POST /_query` for one query. */
@@ -134,4 +157,6 @@ export interface PlanResponse {
   queries: PlanQuery[];
   /** One entry per source whose probe failed. */
   errors: SourceError[];
+  /** Metrics that would be omitted from those plan queries (e.g. rates on `FROM`). */
+  unsupportedMetrics: UnsupportedMetric[];
 }

@@ -52,16 +52,19 @@ const mergeInto = (
       }
       return;
     }
-    if (!hasValue(current)) {
-      state.row.set(name, value);
+    // Metrics, id, and identity: first non-null in plan order; null never clobbers.
+    if (kind === 'metric' || kind === 'id' || kind === 'identity') {
+      if (!hasValue(current)) {
+        state.row.set(name, value);
+      }
     }
   });
 };
 
 /**
  * Merges every plan's rows by `entity.id` in plan order: attributes from the row with the newest
- * `last_seen`, `entity.id` and identity fields first non-null, `last_seen` newest; a null never
- * replaces a value.
+ * `last_seen`, metrics / `entity.id` / identity first non-null in plan order, `last_seen` newest;
+ * a null never replaces a value. Provenance is recorded for attributes only.
  */
 export const mergeRows = (results: PlanResult[], columns: OutputColumn[]): MergeResult => {
   const orderedPlans = [...results].sort((a, b) => a.plan.index - b.plan.index);
