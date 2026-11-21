@@ -677,24 +677,43 @@ const removeSeededAlertsById = async ({
 };
 
 /**
- * Deletes a seed's world documents by exact `_id`. A delete by query on the ids reaches an alias
- * and a data stream alike, which a delete by id does not.
+ * Deletes a seed's world documents by exact `_id`, then counts the ids back. A delete by query on
+ * the ids reaches an alias and a data stream alike, which a delete by id does not; it refreshes, so
+ * the count sees every document the delete left. Ids that remain after `rounds` rounds throw.
  */
 const removeWorldDocs = async ({
   esClient,
   seeded: { worldDocs },
+  rounds = 1,
+  wait,
 }: {
   esClient: Client;
   seeded: SeededScenario;
+  rounds?: number;
+  wait?: (ms: number) => Promise<void>;
 }): Promise<void> => {
   const idsByIndex = new Map<string, string[]>();
   for (const { index, id } of worldDocs) {
     idsByIndex.set(index, [...(idsByIndex.get(index) ?? []), id]);
   }
   await Promise.all(
-    [...idsByIndex].map(([index, ids]) =>
-      deleteMatching({ esClient, index, query: { ids: { values: ids } } })
-    )
+    [...idsByIndex].map(async ([index, ids]) => {
+      const query = { ids: { values: ids } };
+      let remaining = 0;
+      for (let round = 1; round <= rounds; round++) {
+        await deleteMatching({ esClient, index, query });
+        ({ count: remaining } = await esClient.count({ index, query, ignore_unavailable: true }));
+        if (remaining === 0) return;
+        if (round < rounds && wait) await wait(UNSETTLED_REMOVE_PAUSE_MS);
+      }
+      throw new Error(
+        `${remaining} of ${
+          ids.length
+        } seeded world documents still exist in "${index}" after ${rounds} delete ${
+          rounds === 1 ? 'round' : 'rounds'
+        }`
+      );
+    })
   );
 };
 
@@ -1010,24 +1029,37 @@ export const seedScenario = async ({
       ({ _id }) => goldIdBySeededId.get(String(_id)) ?? String(_id)
     );
   } catch (seedError) {
-    try {
-      await removeSeededAlertsById({ esClient, seeded, bulkSettled, wait });
-      await removeWorldDocs({ esClient, seeded });
+    // Each removal is attempted even when an earlier one failed: a failure in one must not leave
+    // the others' documents behind for the next row.
+    const removals = await Promise.allSettled([
+      removeSeededAlertsById({ esClient, seeded, bulkSettled, wait }),
+      removeWorldDocs({
+        esClient,
+        seeded,
+        rounds: bulkSettled ? 1 : UNSETTLED_REMOVE_ROUNDS,
+        wait,
+      }),
       // The workflow has not started, so no fingerprints or discoveries of this row exist, except
       // the seeded discovery itself, which the same bulk wrote and a failed seed must remove.
-      if (seeded.seededDiscoveryId !== undefined) {
-        await deleteMatching({
-          esClient,
-          index: attackDiscoveryIndexForSpace(spaceId),
-          query: { ids: { values: [seeded.seededDiscoveryId] } },
-        });
-      }
-    } catch (cleanupError) {
+      seeded.seededDiscoveryId !== undefined
+        ? deleteMatching({
+            esClient,
+            index: attackDiscoveryIndexForSpace(spaceId),
+            query: { ids: { values: [seeded.seededDiscoveryId] } },
+          })
+        : Promise.resolve(),
+    ]);
+    const cleanupErrors = removals.flatMap((removal) =>
+      removal.status === 'rejected' ? [removal.reason] : []
+    );
+    if (cleanupErrors.length > 0) {
       throw new AggregateError(
-        [seedError, cleanupError],
+        [seedError, ...cleanupErrors],
         `Seeding "${scenario.id}" failed (${errorMessage(
           seedError
-        )}) and the partial seed could not be removed (${errorMessage(cleanupError)})`
+        )}) and the partial seed could not be removed (${cleanupErrors
+          .map(errorMessage)
+          .join('; ')})`
       );
     }
     throw seedError;
@@ -1155,7 +1187,7 @@ const healSpace = async ({
 
 /**
  * Removes a seed's alerts, the space's fingerprints so the next row cannot match an attack from
- * this one, and the space's persisted discoveries. Every delete is attempted, then the indices are
+ * this one, and the persisted discoveries of this run. Every delete is attempted, then the indices are
  * refreshed and recounted; a failed delete or a document written meanwhile starts another round,
  * and whatever is left after `CLEANUP_ROUNDS` is thrown, because a space left dirty would poison
  * the next row. Alerts match exactly by run marker (they are searchable here, the seed bulk waited
@@ -1187,7 +1219,20 @@ export const cleanupSeed = async ({
     {
       what: 'persisted discoveries',
       index: attackDiscoveryIndexForSpace(spaceId),
-      query: { match_all: {} },
+      query: {
+        bool: {
+          // The eval space may be an existing space (`ensureSpace` adopts it), so only this run's
+          // discoveries go: the ones citing its alerts, whose ids all start with `<marker>-`
+          // (the hyphen keeps `adw-1` from matching `adw-10`), and the seeded one by id.
+          minimum_should_match: 1,
+          should: [
+            { prefix: { 'kibana.alert.attack_discovery.alert_ids': `${runMarker}-` } },
+            ...(seeded.seededDiscoveryId !== undefined
+              ? [{ ids: { values: [seeded.seededDiscoveryId] } }]
+              : []),
+          ],
+        },
+      },
     },
     // The Investigations themselves (Agent Builder conversations) stay: `.chat-conversations` is a
     // restricted system index no user may write to, and the API deletes a private conversation

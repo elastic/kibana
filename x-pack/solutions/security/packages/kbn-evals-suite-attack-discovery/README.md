@@ -264,9 +264,11 @@ context alone.
 **`same-display-name-cross-account`.** The two accounts raise identical alerts; the baseline differs
 only in `_id` and `@timestamp` (`NON_IDENTIFYING_BASELINE_FIELDS`). A model that behaves correctly
 reports at most one three-alert story there and cannot know which account it belongs to, so baseline
-recall is any-of (`requiredAnyOf`: either group counts, best recall) and what baseline measures is
-`ForbiddenJoin`. The enriched variants carry the separators (`user.id`, `cloud.account.id`,
-`user_agent.original`) and require the production group. No group is a confirmed compromise
+recall is any-of (`requiredAnyOf`: either group counts, best recall) and baseline forbids no pair
+(`forbiddenCoCitation: []`), so `ForbiddenJoin` is N/A there: baseline only measures that a story is
+reported. The enriched variants carry the separators (`user.id`, `cloud.account.id`,
+`user_agent.original`), keep the pair forbidden (`ForbiddenJoin` scores them) and require the
+production group. No group is a confirmed compromise
 (`confirmedGroups: []`), so `ConditionalRemediation` scores every discovery.
 Its `operatorContext` is only "The organisation runs separate prod and sandbox AWS accounts."; it
 does not say that the same user name exists in both. No variant renders an account name (the

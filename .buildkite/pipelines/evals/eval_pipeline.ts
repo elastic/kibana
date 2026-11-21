@@ -310,8 +310,14 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
     const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
     return labels.some((label) => parsedLabels.includes(label));
   };
+  // A suite that only pins `requiredModelGroups` runs expensive tier models, so `evals:all` never
+  // expands to it, with or without a `models:*` label: its own ciLabel must select it.
+  const isRequiredOnly = (suite: EvalsSuiteMetadataEntry): boolean =>
+    !!suite.requiredModelGroups?.length && !suite.defaultModelGroups?.length;
   const selectedEvalSuites = (
-    runAllEvals ? evalSuites : evalSuites.filter(isSelectedByOwnLabel)
+    runAllEvals
+      ? evalSuites.filter((suite) => !isRequiredOnly(suite) || isSelectedByOwnLabel(suite))
+      : evalSuites.filter(isSelectedByOwnLabel)
   ).filter((suite) => !skippedSuiteIds.has(suite.id));
   // Model filtering (models:* labels): none => skip (explicit selection required);
   // `models:<group>` => run those groups; aliases (e.g. `models:weekly-eis-models`) expand.

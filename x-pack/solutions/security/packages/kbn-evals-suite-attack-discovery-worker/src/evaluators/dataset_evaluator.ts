@@ -17,6 +17,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import {
   getGoldForVariant,
+  getUnconfirmedEntityValues,
   type AuditReferenceResolver,
   type AuditScenario,
   createAuditConditionalRemediationEvaluator,
@@ -160,14 +161,16 @@ export const failedRowArtifacts = (rowError: string): WorkerArtifacts => ({
 /**
  * Why a runner that reports `completed` still produced nothing to score: it analyzed none of the
  * seeded alerts. The run swallowed whatever stopped it, so its error (when one was read) goes in
- * the explanation. A generation the model refused outright stays a scored `MODEL_FAULT` instead.
+ * the explanation. A generation that refused or failed every batch stays a scored `MODEL_FAULT`
+ * instead (see `readGenerationFault`).
  */
 const emptyCompletedRunError = (output: WorkerArtifacts): string | undefined => {
   if (
     output.runnerStatus !== 'completed' ||
     output.alertsAnalyzed !== 0 ||
     output.seededAlertCount === 0 ||
-    output.generationFault?.kind === 'refused'
+    output.generationFault?.kind === 'refused' ||
+    output.generationFault?.kind === 'failed'
   ) {
     return undefined;
   }
@@ -247,7 +250,11 @@ const baselineResolver: AuditReferenceResolver = (metadata) => {
       : undefined;
   const scenario = WORKER_AUDIT_SCENARIOS.find(({ id }) => id === scenarioId);
   return scenario
-    ? { gold: getGoldForVariant(scenario.gold, 'baseline'), replacements: {} }
+    ? {
+        gold: getGoldForVariant(scenario.gold, 'baseline'),
+        replacements: {},
+        unconfirmedEntityValues: getUnconfirmedEntityValues(scenario),
+      }
     : undefined;
 };
 

@@ -159,7 +159,42 @@ export interface AuditReference {
   gold: AuditGold;
   /** Anonymization token to original value for the example's rendered alerts. */
   replacements: Replacements;
+  /**
+   * Identity values (users, hosts, IPs, accounts) that appear only in alerts outside the
+   * confirmed groups. A discovery that names one of them is not exempt from the remediation
+   * check, because its advice can target a benign entity.
+   */
+  unconfirmedEntityValues?: readonly string[];
 }
+
+const ENTITY_FIELDS = [
+  'user.name',
+  'user.id',
+  'host.name',
+  'source.ip',
+  'destination.ip',
+  'cloud.account.id',
+  'cloud.account.name',
+] as const;
+
+const MIN_ENTITY_VALUE_LENGTH = 3;
+
+export const getUnconfirmedEntityValues = ({ alerts, gold }: AuditScenario): string[] => {
+  const confirmedIds = new Set(
+    gold.confirmedGroups.flatMap((group) => gold.alertGroups[group] ?? [])
+  );
+  const valuesOf = (inScope: boolean): Set<string> =>
+    new Set(
+      alerts
+        .filter(({ id }) => confirmedIds.has(id) === inScope)
+        .flatMap(({ fields }) => ENTITY_FIELDS.map((field) => fields[field]))
+        .filter((value): value is string | number => value !== undefined)
+        .map((value) => String(value).trim())
+        .filter((value) => value.length >= MIN_ENTITY_VALUE_LENGTH)
+    );
+  const confirmedValues = valuesOf(true);
+  return Array.from(valuesOf(false)).filter((value) => !confirmedValues.has(value));
+};
 
 export type AuditReferenceResolver = (metadata: unknown) => AuditReference | undefined;
 
@@ -178,6 +213,7 @@ export const resolveAuditReference: AuditReferenceResolver = (metadata) => {
   return {
     gold: getGoldForVariant(scenario.gold, variant),
     replacements: getAuditRendering(scenario, variant).replacements,
+    unconfirmedEntityValues: getUnconfirmedEntityValues(scenario),
   };
 };
 

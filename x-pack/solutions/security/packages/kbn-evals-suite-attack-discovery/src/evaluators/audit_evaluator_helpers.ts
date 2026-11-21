@@ -7,6 +7,7 @@
 import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import type { EvaluationResult } from '@kbn/evals';
 import { deanonymizeDiscoveries } from '../audit_failure_classes/deanonymize_discoveries';
+import { getDiscoveryMarkdown } from '../audit_failure_classes/discovery_text';
 import {
   resolveAuditReference,
   type AuditReferenceResolver,
@@ -36,7 +37,12 @@ export const resolveAuditInputs = ({
   output: AttackDiscoveryTaskOutput | undefined;
   resolveReference?: AuditReferenceResolver;
 }):
-  | { gold: AuditGold; replacements: Replacements; discoveries: AttackDiscovery[] }
+  | {
+      gold: AuditGold;
+      replacements: Replacements;
+      unconfirmedEntityValues?: readonly string[];
+      discoveries: AttackDiscovery[];
+    }
   | { result: EvaluationResult } => {
   const reference = resolveReference(metadata);
   if (!reference) {
@@ -57,20 +63,35 @@ export const resolveAuditInputs = ({
   };
 };
 
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const namesAnyValue = (text: string, values: readonly string[]): boolean =>
+  values.some((value) =>
+    new RegExp(`(?<![\\w-])${escapeRegExp(value)}(?![\\w-]|\\.\\d)`, 'i').test(text)
+  );
+
 /**
  * The discoveries a remediation evaluator scores. A discovery is exempt when every alert it cites
- * belongs to a group the gold marks as confirmed malicious (`confirmedGroups`); one that cites
- * anything else, or nothing at all, is scored.
+ * belongs to a group the gold marks as confirmed malicious (`confirmedGroups`) and its text names
+ * no entity that only unconfirmed alerts carry (`unconfirmedEntityValues`), since its advice could
+ * target that entity. One that cites anything else, or nothing at all, is scored.
  */
 export const selectScoredDiscoveries = (
   gold: AuditGold,
-  discoveries: AttackDiscovery[]
+  discoveries: AttackDiscovery[],
+  unconfirmedEntityValues: readonly string[] = []
 ): AttackDiscovery[] => {
   const confirmedIds = new Set(
     gold.confirmedGroups.flatMap((group) => gold.alertGroups[group] ?? [])
   );
   return discoveries.filter(
-    ({ alertIds }) => alertIds.length === 0 || alertIds.some((id) => !confirmedIds.has(id))
+    (discovery) =>
+      discovery.alertIds.length === 0 ||
+      discovery.alertIds.some((id) => !confirmedIds.has(id)) ||
+      namesAnyValue(
+        `${discovery.title}\n${getDiscoveryMarkdown(discovery)}`,
+        unconfirmedEntityValues
+      )
   );
 };
 
@@ -87,13 +108,17 @@ export const resolveScoredDiscoveries = (args: {
   const resolved = resolveAuditInputs(args);
   if ('result' in resolved) return resolved;
 
-  const { gold, discoveries } = resolved;
+  const { gold, discoveries, unconfirmedEntityValues } = resolved;
   if (discoveries.length === 0) {
     return { result: notApplicable('No discoveries to check for remediation advice.') };
   }
-  const scored = selectScoredDiscoveries(gold, discoveries);
+  const scored = selectScoredDiscoveries(gold, discoveries, unconfirmedEntityValues);
   if (scored.length === 0) {
-    return { result: notApplicable('Every discovery cites only confirmed-malicious alerts.') };
+    return {
+      result: notApplicable(
+        'Every discovery cites only confirmed-malicious alerts and names no other entity.'
+      ),
+    };
   }
   return { scored };
 };

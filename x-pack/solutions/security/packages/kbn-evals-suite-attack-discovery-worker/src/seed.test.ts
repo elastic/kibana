@@ -132,6 +132,27 @@ describe('cleanupSeed', () => {
     ]);
   });
 
+  it('deletes only the discoveries that cite this run, never the whole space index', async () => {
+    const deleteByQuery = jest.fn(async (_args: { index: string; query?: unknown }) => ({}));
+    await cleanupSeed({
+      esClient: esWith({ deleteByQuery }),
+      seeded: { ...seeded, seededDiscoveryId: 'disc-1' },
+    });
+    const call = deleteByQuery.mock.calls.find(
+      ([{ index }]) => index === attackDiscoveryIndexForSpace('space-a')
+    );
+    expect(call?.[0].query).toEqual({
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          { prefix: { 'kibana.alert.attack_discovery.alert_ids': 'adw-1-' } },
+          { ids: { values: ['disc-1'] } },
+        ],
+      },
+    });
+    expect(JSON.stringify(call?.[0].query)).not.toContain('match_all');
+  });
+
   it('retries a failed delete in the next round and passes once everything is gone', async () => {
     const wait = jest.fn(async (_ms: number) => undefined);
     const deleteByQuery = jest
@@ -295,10 +316,10 @@ describe('seedScenario world documents', () => {
       }: {
         query?: {
           ids?: { values: string[] };
-          bool?: { filter: Array<{ ids?: { values: string[] } }> };
+          bool?: { filter?: Array<{ ids?: { values: string[] } }> };
         };
       }) => ({
-        count: (query?.ids ?? query?.bool?.filter[0]?.ids)?.values.length ?? 0,
+        count: (query?.ids ?? query?.bool?.filter?.[0]?.ids)?.values.length ?? 0,
       })
     );
     const seededScenario = await seedScenario({
@@ -431,9 +452,13 @@ describe('seedScenario world documents', () => {
         }: {
           query?: {
             ids?: { values: string[] };
-            bool?: { filter: Array<{ ids?: { values: string[] } }> };
+            bool?: { filter?: Array<{ ids?: { values: string[] } }> };
           };
-        }) => ({ count: (query?.ids ?? query?.bool?.filter[0]?.ids)?.values.length ?? 0 })
+        }) => ({
+          count: deleteByQuery.mock.calls.length
+            ? 0
+            : (query?.ids ?? query?.bool?.filter?.[0]?.ids)?.values.length ?? 0,
+        })
       ),
       search: jest.fn(async () => ({ hits: { hits: [] } })),
       deleteByQuery,
@@ -509,6 +534,64 @@ describe('seedScenario world documents', () => {
       expect(time).toBeGreaterThanOrEqual(Math.min(...alertTimes) - twoHours);
       expect(time).toBeLessThanOrEqual(Math.max(...alertTimes) + twoHours);
     }
+  });
+
+  describe('when the seed fails partway', () => {
+    const wait = jest.fn(async (_ms: number) => undefined);
+    const rejected = {
+      errors: true,
+      items: [{ index: { error: { type: 'mapper_parsing_exception' } } }],
+    };
+    const seedFailing = (esClient: Client) =>
+      seedScenario({
+        esClient,
+        log,
+        scenario: scenarioById('benign-batch'),
+        spaceId: 's',
+        wait,
+      }).catch((error: unknown) => error);
+    const isRollbackCount = ({ query }: { query?: { ids?: unknown } }) => query?.ids !== undefined;
+    beforeEach(() => wait.mockClear());
+
+    it('still removes the world documents when removing the alerts fails', async () => {
+      const bulk = jest
+        .fn()
+        .mockResolvedValueOnce(rejected)
+        .mockRejectedValueOnce(new Error('alert delete failed'));
+      const deleteByQuery = jest.fn(async (_args: { index: string; query?: unknown }) => ({}));
+      const error = await seedFailing(esWith({ bulk, deleteByQuery }));
+      expect(error).toBeInstanceOf(AggregateError);
+      expect((error as Error).message).toMatch(/alert delete failed/);
+      expect(deleteByQuery.mock.calls.length).toBeGreaterThan(0);
+    });
+
+    it('verifies the world documents are gone and fails when they are not', async () => {
+      const bulk = jest
+        .fn()
+        .mockResolvedValueOnce(rejected)
+        .mockResolvedValue({ errors: false, items: [] });
+      const count = jest.fn(async (args: { query?: { ids?: unknown } }) => ({
+        count: isRollbackCount(args) ? 2 : 0,
+      }));
+      const error = await seedFailing(esWith({ bulk, count }));
+      expect(error).toBeInstanceOf(AggregateError);
+      expect((error as Error).message).toMatch(/seeded world documents still exist/);
+    });
+
+    it('retries the world rollback while the bulk may still be running', async () => {
+      const bulk = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('socket hang up'))
+        .mockResolvedValue({ errors: false, items: [] });
+      let reads = 0;
+      const count = jest.fn(async (args: { query?: { ids?: unknown } }) => ({
+        count: isRollbackCount(args) && ++reads === 1 ? 1 : 0,
+      }));
+      const deleteByQuery = jest.fn(async (_args: { index: string; query?: unknown }) => ({}));
+      const error = await seedFailing(esWith({ bulk, count, deleteByQuery }));
+      expect(error).not.toBeInstanceOf(AggregateError);
+      expect((error as Error).message).toMatch(/socket hang up/);
+    });
   });
 
   it('removes the world documents by id when cleaning up', async () => {
@@ -1074,13 +1157,13 @@ describe('seedScenario world indices', () => {
         index: string;
         query?: {
           ids?: { values: string[] };
-          bool?: { filter: Array<{ ids?: { values: string[] } }> };
+          bool?: { filter?: Array<{ ids?: { values: string[] } }> };
         };
       }) => ({
         count:
           index.startsWith('.alerts') || index.startsWith('.adhoc') || index.startsWith('ai-index')
             ? 0
-            : (query?.ids ?? query?.bool?.filter[0]?.ids)?.values.length ?? 0,
+            : (query?.ids ?? query?.bool?.filter?.[0]?.ids)?.values.length ?? 0,
       })
     );
     await seedScenario({

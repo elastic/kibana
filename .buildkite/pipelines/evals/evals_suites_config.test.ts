@@ -36,26 +36,44 @@ const nestedStepLists = (step: Record<string, any>): Array<Array<Record<string, 
   return lists.filter((list): list is Array<Record<string, any>> => Array.isArray(list));
 };
 
+const asList = (value: unknown): string[] =>
+  Array.isArray(value)
+    ? value.filter((id): id is string => typeof id === 'string')
+    : typeof value === 'string'
+    ? [value]
+    : [];
+
+/** Feature ids a step resolves its model from, in order: `with.feature_id`, then `connector-id-by-feature`; each is a string or a list. */
+const stepFeatureIds = (step: Record<string, any>): string[] => [
+  ...asList(step.with?.feature_id),
+  ...asList(step['connector-id-by-feature']),
+];
+
+/** The first step named `name`, descending into every nested step container. */
+const findStepByName = (
+  steps: Array<Record<string, any>>,
+  name: string
+): Record<string, any> | undefined => {
+  for (const step of steps) {
+    if (step.name === name) return step;
+    const nested = nestedStepLists(step)
+      .map((list) => findStepByName(list, name))
+      .find((found) => found !== undefined);
+    if (nested) return nested;
+  }
+  return undefined;
+};
+
 /** Tier feature ids used by a step list, descending into every nested step container. */
 const findTierFeatureUses = (
   steps: Array<Record<string, any>>
 ): Array<{ stepName: string; featureId: string }> =>
-  steps.flatMap((step) => {
-    const withBlock = step.with as Record<string, any> | undefined;
-    const featureIds: string[] = Array.isArray(withBlock?.feature_id)
-      ? withBlock.feature_id
-      : typeof withBlock?.feature_id === 'string'
-      ? [withBlock.feature_id]
-      : Array.isArray(step['connector-id-by-feature'])
-      ? step['connector-id-by-feature']
-      : [];
-    return [
-      ...featureIds
-        .filter((featureId) => TIER_FEATURE_IDS.includes(featureId))
-        .map((featureId) => ({ stepName: String(step.name ?? '?'), featureId })),
-      ...nestedStepLists(step).flatMap(findTierFeatureUses),
-    ];
-  });
+  steps.flatMap((step) => [
+    ...stepFeatureIds(step)
+      .filter((featureId) => TIER_FEATURE_IDS.includes(featureId))
+      .map((featureId) => ({ stepName: String(step.name ?? '?'), featureId })),
+    ...nestedStepLists(step).flatMap(findTierFeatureUses),
+  ]);
 
 describe('findTierFeatureUses', () => {
   const tier = (name: string) => ({
@@ -94,6 +112,26 @@ describe('findTierFeatureUses', () => {
     expect(findTierFeatureUses([wrap(tier('inner'))])).toEqual([
       { stepName: 'inner', featureId: 'alertzero_balanced' },
     ]);
+  });
+
+  it('finds a tier feature written as a single string', () => {
+    expect(
+      findTierFeatureUses([
+        { name: 'one-line', type: 'ai.agent', 'connector-id-by-feature': 'alertzero_balanced' },
+      ])
+    ).toEqual([{ stepName: 'one-line', featureId: 'alertzero_balanced' }]);
+  });
+
+  it('reads feature_id and connector-id-by-feature on the same step', () => {
+    expect(
+      findTierFeatureUses([
+        {
+          name: 'both',
+          with: { feature_id: ['alertzero_frontier'] },
+          'connector-id-by-feature': ['alertzero_efficient'],
+        },
+      ])
+    ).toEqual([{ stepName: 'both', featureId: 'alertzero_efficient' }]);
   });
 
   it('ignores the frontier feature', () => {
@@ -348,6 +386,28 @@ describe('evals.suites.json requiredModelGroups (AZ tier coverage)', () => {
     }
 
     expect(problems).toEqual([]);
+  });
+});
+
+describe('worker model-calling steps feature chain', () => {
+  const DEFINITIONS = Path.join(
+    __dirname,
+    '../../../src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero'
+  );
+  const stepsOf = (file: string): Array<Record<string, any>> =>
+    (
+      parseYaml(Fs.readFileSync(Path.join(DEFINITIONS, file), 'utf-8')) as {
+        steps: Array<Record<string, any>>;
+      }
+    ).steps;
+
+  it.each([
+    ['attack_discovery_batched_generation.yaml', 'run_batch'],
+    ['attack_discovery_fp_tp_analysis.yaml', 'analyze'],
+  ])('%s step %s resolves template models, then Frontier', (file, stepName) => {
+    const step = findStepByName(stepsOf(file), stepName);
+    if (!step) throw new Error(`${file} has no step "${stepName}"`);
+    expect(stepFeatureIds(step)).toEqual(['alertzero_template_models', 'alertzero_frontier']);
   });
 });
 

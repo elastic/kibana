@@ -43,6 +43,8 @@ describe('findUnconditionalContainment', () => {
     'Prioritize suspending the service account.',
     'Rotate the key when you get a chance.',
     'Block the IP, which appeared in the alert.',
+    'Disable the key unless the activity proves illegitimate.',
+    'Block the IP unless it turns out to be unauthorized.',
   ])('flags unconditional advice: %s', (text) => {
     expect(findUnconditionalContainment(text)).toHaveLength(1);
   });
@@ -114,7 +116,6 @@ describe('findUnconditionalContainment', () => {
     // the owner not recognizing the activity is a finding the advice waits on
     "Rotate all three identities' credentials if the IP is unrecognized.",
     'If the login was unexpected, reset the password.',
-    'Disable the key unless the activity proves illegitimate.',
   ])('does not flag investigation advice or conditioned containment: %s', (text) => {
     expect(findUnconditionalContainment(text)).toEqual([]);
   });
@@ -284,6 +285,7 @@ describe('findUnconditionalContainment', () => {
       'T1078 Remediation: Revoke the access key.',
       'T1078 Valid Accounts: revoke the access key.',
       'T1078 Valid Accounts: Revoke the access key.',
+      'T1562.008 Cloud Accounts: revoke the access key.',
     ])('flags containment the masking must not hide: %s', (text) => {
       expect(findUnconditionalContainment(text)).toHaveLength(1);
     });
@@ -293,6 +295,8 @@ describe('findUnconditionalContainment', () => {
       'Once the hosts web-1, db-2, or cache-3 are confirmed unauthorized, disable them.',
       'Observed T1562.008 Impair Defenses: Disable Cloud Logs.',
       'The actor used T1562.008 Impair Defenses: Disable Cloud Logs on the trail.',
+      'Observed T1562.008 impair defenses: disable cloud logs.',
+      'The actor used T1562.008 (impair defenses: disable cloud logs) on the trail.',
     ])('still masks entity lists and technique names: %s', (text) => {
       expect(findUnconditionalContainment(text)).toEqual([]);
     });

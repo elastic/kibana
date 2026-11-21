@@ -787,6 +787,28 @@ describe('collectWorkerArtifacts', () => {
     }
   );
 
+  it.each([[[]], ['']])(
+    'counts 0 when the runner reported an empty uuid list %p and nothing was persisted',
+    async (reported) => {
+      const count = jest.fn();
+      const search = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+      const artifacts = await collectEvicted(
+        evictedRun([step('emit_result', 'completed', { execution_uuids: reported })], []),
+        count,
+        search
+      );
+      expect(artifacts.indexedAttackCount).toBe(0);
+      expect(count).not.toHaveBeenCalled();
+    }
+  );
+
+  it('keeps the count unreadable when no runner output reported uuids and nothing was persisted', async () => {
+    const count = jest.fn();
+    const search = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+    const artifacts = await collectEvicted(evictedRun([], []), count, search);
+    expect(artifacts.indexedAttackCount).toBeUndefined();
+  });
+
   const emptySearch = () =>
     jest.fn().mockResolvedValue({ hits: { hits: [] } }) as unknown as jest.Mock;
   const collectGeneration = async (
@@ -985,5 +1007,102 @@ describe('readGenerationFault', () => {
       log,
     });
     expect(artifacts.generationFault).toEqual({ kind: 'refused', message: REFUSAL });
+  });
+});
+
+describe('collectWorkerArtifacts detached attachments', () => {
+  it('tracks and settles run_attach executions so teardown cannot leave one running', async () => {
+    const run = {
+      id: 'run-1',
+      status: 'completed',
+      stepExecutions: [
+        step('run_review', 'completed', { executionId: 'review-1' }),
+        step('run_attach', 'completed', { executionId: 'attach-1' }),
+        step('run_attach', 'completed', { executionId: 'attach-2' }),
+        step('run_attach', 'failed'),
+      ],
+    } as unknown as WorkflowExecutionDto;
+    const track = jest.fn();
+    const poll = jest.fn().mockResolvedValue({
+      execution: { id: 'x', status: 'completed', stepExecutions: [] },
+    });
+
+    await collectWorkerArtifacts({
+      client: {
+        track,
+        poll,
+        getChildren: jest.fn().mockResolvedValue([]),
+      } as unknown as AttackDiscoveryWorkerClient,
+      esClient: {} as Client,
+      run,
+      spaceId: 'space',
+      seeded: {
+        runMarker: 'marker',
+        spaceId: 'space',
+        goldIdBySeededId: new Map(),
+        alertCount: 0,
+        openAlertIds: [],
+        worldDocs: [],
+      },
+      fetch: jest.fn() as unknown as HttpHandler,
+      log: { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog,
+    });
+
+    expect(track.mock.calls.map(([, id]) => id)).toEqual(['review-1', 'attach-1', 'attach-2']);
+    expect(poll.mock.calls.map(([arg]) => arg.executionId).sort()).toEqual([
+      'attach-1',
+      'attach-2',
+      'review-1',
+    ]);
+  });
+
+  describe('when an attach poll does not settle cleanly', () => {
+    const collectWith = async (attachPoll: () => Promise<unknown>) => {
+      const run = {
+        id: 'run-1',
+        status: 'completed',
+        stepExecutions: [step('run_attach', 'completed', { executionId: 'attach-1' })],
+      } as unknown as WorkflowExecutionDto;
+      const warning = jest.fn();
+      const artifacts = await collectWorkerArtifacts({
+        client: {
+          track: jest.fn(),
+          poll: jest.fn(attachPoll),
+          getChildren: jest.fn().mockResolvedValue([]),
+        } as unknown as AttackDiscoveryWorkerClient,
+        esClient: {} as Client,
+        run,
+        spaceId: 'space',
+        seeded: {
+          runMarker: 'marker',
+          spaceId: 'space',
+          goldIdBySeededId: new Map(),
+          alertCount: 0,
+          openAlertIds: [],
+          worldDocs: [],
+        },
+        fetch: jest.fn() as unknown as HttpHandler,
+        log: { info: jest.fn(), warning, debug: jest.fn() } as unknown as ToolingLog,
+      });
+      return { artifacts, warning };
+    };
+
+    it('does not fail collection when the poll rejects, and warns about it', async () => {
+      const { artifacts, warning } = await collectWith(() =>
+        Promise.reject(new Error('execution not found (404)'))
+      );
+      expect(artifacts.runnerExecutionId).toBe('run-1');
+      expect(warning).toHaveBeenCalledWith(
+        expect.stringMatching(/attach-1.*execution not found \(404\)/)
+      );
+    });
+
+    it('does not fail collection when the poll times out, and warns about it', async () => {
+      const { artifacts, warning } = await collectWith(() =>
+        Promise.resolve({ execution: { id: 'attach-1', status: 'running' }, timedOutAfterMs: 5 })
+      );
+      expect(artifacts.runnerExecutionId).toBe('run-1');
+      expect(warning).toHaveBeenCalledWith(expect.stringMatching(/attach-1.*did not settle/));
+    });
   });
 });

@@ -311,7 +311,7 @@ describe('scoreReviewsSettled', () => {
 });
 
 describe('scoreInvestigationOpened', () => {
-  it('is N/A, not a pass, when the conversation could not be read', () => {
+  it('is MISSING, not a pass or N/A, when the conversation could not be read', () => {
     const result = scoreInvestigationOpened(
       expected,
       artifacts({
@@ -320,12 +320,12 @@ describe('scoreInvestigationOpened', () => {
     );
     expect(result).toEqual({
       score: null,
-      label: 'N/A',
+      label: 'MISSING',
       explanation: expect.stringContaining('could not be read'),
     });
   });
 
-  it('names the unreadable reviews when the verified ones pass', () => {
+  it('is MISSING when only some of the conversations could be read', () => {
     const result = scoreInvestigationOpened(
       expected,
       artifacts({
@@ -335,9 +335,8 @@ describe('scoreInvestigationOpened', () => {
         ],
       })
     );
-    expect(result.score).toBe(1);
-    expect(result.explanation).toContain('attack-1: Investigation opened');
-    expect(result.explanation).toContain('unverified: attack-2');
+    expect(result.label).toBe('MISSING');
+    expect(result.explanation).toContain('attack-2');
   });
 
   it('still passes a verified Investigation and fails a missing one', () => {
@@ -619,6 +618,35 @@ describe('scoreOneReviewPerAttack', () => {
     expect(result.score).toBe(1);
   });
 
+  it('fails when the runner reviewed a different attack than the matcher asked for', () => {
+    const result = scoreOneReviewPerAttack(
+      expected,
+      artifacts({
+        persistedAttackIds: ['attack-a'],
+        fingerprintReviewCount: 1,
+        fingerprintReviewedAttackIds: ['attack-a'],
+        dispatchedReviewExecutionIds: ['runner-review'],
+        reviews: [review({ executionId: 'runner-review', attackDiscoveryId: 'attack-b' })],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('attack-b');
+  });
+
+  it('passes when the reviewed attack is the one the matcher asked for', () => {
+    const result = scoreOneReviewPerAttack(
+      expected,
+      artifacts({
+        persistedAttackIds: ['attack-a'],
+        fingerprintReviewCount: 1,
+        fingerprintReviewedAttackIds: ['attack-a'],
+        dispatchedReviewExecutionIds: ['runner-review'],
+        reviews: [review({ executionId: 'runner-review', attackDiscoveryId: 'attack-a' })],
+      })
+    );
+    expect(result.score).toBe(1);
+  });
+
   it('is MISSING, not silently excluded, when a runner review reports no attack on a no-seed row', () => {
     // `seededDiscoveryId` is absent unless the scenario seeds an FP discovery; with both undefined
     // the old `attackDiscoveryId !== seededDiscoveryId` filter dropped the unidentified review and
@@ -762,6 +790,44 @@ describe('scoreStageModelResolved', () => {
       })
     );
     expect(result.score).toBe(1);
+  });
+
+  it('treats a refused analysis child that reported no usage as unattributable, not a failure', () => {
+    const result = score(
+      expected,
+      withBoth({
+        reviews: [
+          review({
+            analysis: analysed({
+              status: 'failed',
+              error: 'finish_reason: content_filter',
+              connectorIds: [],
+              unresolvedReason: 'no usage reported',
+            }),
+          }),
+        ],
+      })
+    );
+    expect(result.score).toBe(1);
+  });
+
+  it('still fails a refused analysis child that reported a different endpoint', () => {
+    const result = score(
+      expected,
+      withBoth({
+        reviews: [
+          review({
+            analysis: analysed({
+              status: 'failed',
+              error: 'finish_reason: content_filter',
+              connectorIds: ['other'],
+            }),
+          }),
+        ],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('ran on other, planned review-model');
   });
 
   it('fails, not passes, when the review model cannot be determined', () => {

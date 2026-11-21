@@ -24,6 +24,7 @@ export {
   getAuditExampleName,
   getAuditRendering,
   getGoldForVariant,
+  getUnconfirmedEntityValues,
   resolveAuditReference,
   validateGold,
   type AuditReference,

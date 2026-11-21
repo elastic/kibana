@@ -9,6 +9,7 @@ import { getDiscoveryMarkdown } from '../audit_failure_classes/discovery_text';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
 import type { AuditReferenceResolver } from '../audit_failure_classes/registry';
 import { resolveScoredDiscoveries } from './audit_evaluator_helpers';
+import { isKnownTechniqueName } from './mitre_technique_names';
 
 export const AUDIT_CONDITIONAL_REMEDIATION_EVALUATOR_NAME = 'ConditionalRemediation';
 
@@ -200,10 +201,18 @@ const VERIFICATION_CUE = new RegExp(
   'i'
 );
 const JUDGEMENT_CUE = new RegExp(
-  `\\b(?:if|once|unless|pending|only (?:after|when))\\b.*\\b(?:is|are|was|were|be|been|proves?|turns? out|deemed|found|determined)\\s+(?:to be\\s+)?(?:\\w+\\s+)?${SUSPECT_ADJECTIVE}`,
+  `\\b(?:if|once|pending|only (?:after|when))\\b.*\\b(?:is|are|was|were|be|been|proves?|turns? out|deemed|found|determined)\\s+(?:to be\\s+)?(?:\\w+\\s+)?${SUSPECT_ADJECTIVE}`,
   'i'
 );
-const ADJECTIVE_CUE = new RegExp(`\\b(?:if|once|unless)\\s+(?:\\w+\\s+)?${SUSPECT_ADJECTIVE}`, 'i');
+const ADJECTIVE_CUE = new RegExp(`\\b(?:if|once)\\s+(?:\\w+\\s+)?${SUSPECT_ADJECTIVE}`, 'i');
+/**
+ * "unless" reverses a finding: "Disable the key unless the activity proves illegitimate" advises
+ * disabling when nothing is found. Only "unless the owner confirms" waits on a verification.
+ */
+const UNLESS_FINDING = new RegExp(
+  `\\bunless\\b.*\\b(?:${SUSPECT_ADJECTIVE}|proves?|turns? out)\\b`,
+  'i'
+);
 /** "should the activity prove malicious", "should it be confirmed". */
 const SHOULD_PROVE_CUE = new RegExp(
   `\\bshould\\b(?:\\s+\\S+){0,4}?\\s+(?:prove|turn out|be (?:confirmed|verified|validated|deemed|found|determined))\\b`,
@@ -281,6 +290,12 @@ const HEADING_NOT_A_NAME = new RegExp(
   `^\\W*(?:${BASE_VERBS})\\b|\\b(?:remediations?|recommendations?|actions?|responses?|containment|mitigations?|steps?|fix(?:es)?|guidance)\\W*$`,
   'i'
 );
+/**
+ * A technique id followed by a name, a colon and a sub-name in any casing. Kept only when the
+ * names are the ones MITRE gives that id, so lowercase mentions stay intact too.
+ */
+const ANY_CASE_TECHNIQUE_COLON =
+  /\b(T\d{4}(?:\.\d{3})?)\)?\s*\(?([A-Za-z][\w /+-]{0,60}?):(?=\s+([\w /+-]+?)\s*(?:[).,;]|$))/g;
 const MAX_TECHNIQUE_NAME_LENGTH = 70;
 const KEPT_COMMA = '\u0001';
 const KEPT_COLON = '\u0002';
@@ -291,10 +306,19 @@ const keepTechniqueNameColon = (match: string): string => {
   return `${match.slice(0, -1)}${KEPT_COLON}`;
 };
 
+const keepKnownTechniqueColon = (
+  match: string,
+  id: string,
+  name: string,
+  subName: string
+): string =>
+  isKnownTechniqueName(id, name, subName) ? `${match.slice(0, -1)}${KEPT_COLON}` : match;
+
 const splitClauses = (sentence: string): string[] =>
   sentence
     .replace(SERIAL_LIST, (list) => list.split(',').join(KEPT_COMMA))
     .replace(TECHNIQUE_NAME_COLON, keepTechniqueNameColon)
+    .replace(ANY_CASE_TECHNIQUE_COLON, keepKnownTechniqueColon)
     .split(/\s*[,:]\s+|\s*[,:]$/)
     .map((clause) => clause.split(KEPT_COMMA).join(',').split(KEPT_COLON).join(':').trim())
     .filter((clause) => clause.length > 0);
@@ -306,7 +330,7 @@ const isAnaphoricCue = (clause: string, previousSentence: string): boolean =>
     (RESTATES_EVENT.test(clause) && VERIFIED_EVENT.test(previousSentence)));
 
 const isCue = (clause: string, previousSentence: string): boolean =>
-  VERIFICATION_CUE.test(clause) ||
+  (VERIFICATION_CUE.test(clause) && !UNLESS_FINDING.test(clause)) ||
   JUDGEMENT_CUE.test(clause) ||
   ADJECTIVE_CUE.test(clause) ||
   SHOULD_PROVE_CUE.test(clause) ||

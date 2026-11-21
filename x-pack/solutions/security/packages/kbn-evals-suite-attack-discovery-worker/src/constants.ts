@@ -64,6 +64,8 @@ export const RUN_GENERATION_STEP_ID = 'run_generation';
 export const RESOLVE_FANOUT_STEP_ID = 'resolve_fanout';
 export const MATCH_FINGERPRINTS_STEP_ID = 'match_fingerprints';
 export const REVIEW_DISPATCH_STEP_IDS: readonly string[] = ['run_review', 'run_unmatched_review'];
+/** Detached same-run and cross-run attachments; the runner does not wait for them. */
+export const ATTACH_DISPATCH_STEP_ID = 'run_attach';
 export const REPORT_RUN_COMPLETED_STEP_ID = 'report_run_completed';
 export const REPORT_WORKER_RUN_COMPLETED_STEP_ID = 'report_worker_run_completed';
 export const RUNNER_REQUIRED_STEP_IDS: readonly string[] = [

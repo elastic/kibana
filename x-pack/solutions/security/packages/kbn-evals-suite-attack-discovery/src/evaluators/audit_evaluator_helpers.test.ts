@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AUDIT_SCENARIOS } from '../audit_failure_classes/registry';
 import { resolveScoredDiscoveries, selectScoredDiscoveries } from './audit_evaluator_helpers';
 import {
   makeDiscovery,
@@ -46,12 +47,58 @@ describe('selectScoredDiscoveries', () => {
   });
 });
 
+describe('selectScoredDiscoveries with unconfirmed entity values', () => {
+  const unconfirmedEntityValues = ['203.0.113.50', 'ci-runner'];
+  const select = (discoveries: Parameters<typeof selectScoredDiscoveries>[1]) =>
+    selectScoredDiscoveries(gold, discoveries, unconfirmedEntityValues).map(({ title }) => title);
+
+  it('scores a confirmed-only discovery whose advice names an unconfirmed entity', () => {
+    const chainOnly = makeDiscovery({ title: 'chain only', alertIds: ['c1'] });
+    const blocksBenign = makeDiscovery({
+      title: 'blocks benign',
+      alertIds: ['c1'],
+      detailsMarkdown: 'Block {{ source.ip 203.0.113.50 }} at the firewall.',
+    });
+    const namesRunner = makeDiscovery({
+      title: 'names runner',
+      alertIds: ['c2'],
+      summaryMarkdown: 'Disable the CI-Runner role.',
+    });
+    expect(select([chainOnly, blocksBenign, namesRunner])).toEqual([
+      'blocks benign',
+      'names runner',
+    ]);
+  });
+});
+
 function selectScoredTitles(
   g: ReturnType<typeof makeGold>,
   discoveries: Parameters<typeof selectScoredDiscoveries>[1]
 ): string[] {
   return selectScoredDiscoveries(g, discoveries).map(({ title }) => title);
 }
+
+describe('resolveScoredDiscoveries with a registered scenario', () => {
+  it('scores a chain-only discovery that recommends blocking the shared CI egress IP', () => {
+    const scenario = AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise')!;
+    const chainId = scenario.gold.alertGroups['clickfix-chain'][0];
+    const metadata = { scenarioId: scenario.id, inputVariant: 'enriched' };
+    const resolve = (detailsMarkdown: string) =>
+      resolveScoredDiscoveries({
+        metadata,
+        output: makeOutput([
+          makeDiscovery({ title: 'chain', alertIds: [chainId], detailsMarkdown }),
+        ]),
+      });
+
+    expect(resolve('Isolate WS-FIN-214 and reset j.meyer.')).toEqual({
+      result: expect.objectContaining({ label: 'N/A' }),
+    });
+    expect(resolve('Block 203.0.113.50 at the perimeter.')).toEqual({
+      scored: [expect.objectContaining({ title: 'chain' })],
+    });
+  });
+});
 
 describe('resolveScoredDiscoveries', () => {
   const resolve = (

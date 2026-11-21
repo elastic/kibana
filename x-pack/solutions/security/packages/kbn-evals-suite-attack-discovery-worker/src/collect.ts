@@ -15,6 +15,7 @@ import {
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
+  ATTACH_DISPATCH_STEP_ID,
   BATCHED_GENERATION_WORKFLOW_ID,
   FP_TP_ANALYSIS_STEP_ID,
   FP_TP_ANALYZE_STEP_ID,
@@ -613,13 +614,18 @@ const persistedExecutionUuids = (
   return uuids.length > 0 ? uuids : undefined;
 };
 
-/** The reported uuids when there are any; an empty or unparseable report counts as none. */
+/**
+ * The reported uuids when there are any, else the uuids the persisted documents carry. An
+ * explicitly empty report with nothing persisted stays empty (every batch failed: an honest
+ * zero); an unparseable or absent report stays undefined.
+ */
 const reportedOrPersistedUuids = (
   reported: unknown,
   docs: readonly Record<string, unknown>[]
 ): string[] | undefined => {
   const uuids = executionUuidList(reported);
-  return uuids && uuids.length > 0 ? uuids : persistedExecutionUuids(docs);
+  if (uuids && uuids.length > 0) return uuids;
+  return persistedExecutionUuids(docs) ?? uuids;
 };
 
 /** Every attack id `match_fingerprints` handed back, as a review or an attachment. */
@@ -829,6 +835,17 @@ export const collectWorkerArtifacts = async ({
     }
   );
   dispatches.forEach(({ executionId }) => client.track(spaceId, executionId));
+  const attachExecutionIds = stepsOf(run, ATTACH_DISPATCH_STEP_ID).flatMap((step) => {
+    const executionId = asString(outputOf(step)?.executionId);
+    return executionId ? [executionId] : [];
+  });
+  attachExecutionIds.forEach((executionId) => client.track(spaceId, executionId));
+
+  const attachSettled = Promise.allSettled(
+    attachExecutionIds.map((executionId) =>
+      client.poll({ spaceId, executionId, maxWaitMs: REVIEW_SETTLE_TIMEOUT_MS })
+    )
+  );
 
   const reviews = await Promise.all(
     dispatches.map(async ({ step, executionId }) => {
@@ -849,6 +866,20 @@ export const collectWorkerArtifacts = async ({
       });
     })
   );
+  (await attachSettled).forEach((settled, index) => {
+    const executionId = attachExecutionIds[index];
+    if (settled.status === 'rejected') {
+      log.warning(
+        `[ad-worker] run ${
+          run.id
+        }: attach execution ${executionId} could not be read: ${errorMessage(settled.reason)}`
+      );
+    } else if (settled.value.timedOutAfterMs !== undefined) {
+      log.warning(
+        `[ad-worker] run ${run.id}: attach execution ${executionId} did not settle within ${settled.value.timedOutAfterMs}ms`
+      );
+    }
+  });
   const indexedAttackCount = await countIndexedAttacks({
     esClient,
     spaceId,

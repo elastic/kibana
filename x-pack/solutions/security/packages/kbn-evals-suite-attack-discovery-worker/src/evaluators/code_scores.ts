@@ -352,35 +352,45 @@ export const scoreOneReviewPerAttack: CodeScorer = (_expected, artifacts) => {
   if (unidentified > 0) {
     return missing(`${unidentified} reviews did not report which attack they cover`);
   }
-  return distinct === unmatched
-    ? pass(`${unmatched} unmatched attacks, ${distinct} distinct reviews`)
-    : fail(`${unmatched} unmatched attacks but ${distinct} distinct attacks reviewed`);
+  if (distinct !== unmatched) {
+    return fail(`${unmatched} unmatched attacks but ${distinct} distinct attacks reviewed`);
+  }
+  // A failed matcher falls back to reviewing every persisted attack; otherwise it names the ones to
+  // review. Counts alone would pass a review of attack B where the matcher asked for attack A.
+  const requested = artifacts.fingerprintMatchFailed
+    ? artifacts.persistedAttackIds
+    : artifacts.fingerprintReviewedAttackIds;
+  if (requested !== undefined) {
+    const requestedIds = new Set(requested.map((id) => id.slice(0, MATCHER_ID_LENGTH)));
+    const unrequested = [
+      ...new Set(
+        attackIds
+          .filter((id): id is string => id !== undefined)
+          .map((id) => id.slice(0, MATCHER_ID_LENGTH))
+      ),
+    ].filter((id) => !requestedIds.has(id));
+    if (unrequested.length > 0) {
+      return fail(`reviewed attacks the matcher did not ask for: ${unrequested.join(', ')}`);
+    }
+  }
+  return pass(`${unmatched} unmatched attacks, ${distinct} distinct reviews`);
 };
 
 const UNREADABLE_INVESTIGATION =
   'the Investigation conversation could not be read, so it is unverified';
 
-export const scoreInvestigationOpened: CodeScorer = (_expected, artifacts) => {
-  const result = foldReviews(
+export const scoreInvestigationOpened: CodeScorer = (_expected, artifacts) =>
+  foldReviews(
     artifacts.reviews,
     (review) =>
       // The flag then rests on the workflow's own report, which this check exists to verify.
       review.investigationLookupFailed
-        ? notApplicable(UNREADABLE_INVESTIGATION)
+        ? missing(UNREADABLE_INVESTIGATION)
         : review.investigationOpened
         ? pass('Investigation opened')
         : fail('no Investigation exists for this attack'),
-    // Only an unreadable conversation makes a review N/A here, so that is why the fold came up empty.
-    artifacts.reviews.length > 0 ? UNREADABLE_INVESTIGATION : 'no review ran'
+    'no review ran'
   );
-  // The fold drops N/A reviews, so a pass would not show that some were never verified.
-  const unverified = artifacts.reviews
-    .filter(({ investigationLookupFailed }) => investigationLookupFailed)
-    .map(({ attackDiscoveryId, executionId }) => attackDiscoveryId ?? executionId);
-  return result.score === 1 && unverified.length > 0
-    ? { ...result, explanation: `${result.explanation}; unverified: ${unverified.join(', ')}` }
-    : result;
-};
 
 /** Verdict against gold. A review with no verdict yet is a gap, not a wrong answer. */
 export const scoreVerdictMatchesGold: CodeScorer = (expected, artifacts) => {
@@ -616,6 +626,9 @@ export const scoreStageModelResolved =
       } else if (analysisFailure && !isModelRefusal(analysisFailure.error)) {
         // Usage reported by a failed analysis says nothing about a classification being produced.
         problems.push(`review ${label} ${analysisFailure.explanation}`);
+      } else if (analysisFailure && analysis.connectorIds.length === 0) {
+        // A refusal can stop the step before it reports usage; there is no model to attribute.
+        telemetryGapped.push(label);
       } else if (analysis.unresolvedReason === STEP_USAGE_TELEMETRY_GAP) {
         if (analysis.connectorIds.length === 0) {
           // Every usage row reported no connector id: nothing else in the execution doc carries

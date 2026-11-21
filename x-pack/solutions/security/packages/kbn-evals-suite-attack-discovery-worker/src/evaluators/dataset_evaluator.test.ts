@@ -115,7 +115,7 @@ const attackArtifacts = (
     insights: [
       {
         id: 'attack-1',
-        alertIds: chainIds,
+        alertIds: [...chainIds],
         title: 'ClickFix chain',
         summaryMarkdown: 'summary',
         detailsMarkdown: 'details',
@@ -633,6 +633,51 @@ describe('createEvaluateDataset', () => {
     await expect(evaluateRow('positive-chain-with-noise')).rejects.toThrow(/StageModelResolved/);
   });
 
+  describe('the ConditionalRemediation screen on a confirmed-only discovery', () => {
+    const scenario = WORKER_AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise');
+    const chainIds = scenario?.gold.alertGroups['clickfix-chain'] ?? [];
+    const benignIp = String(
+      scenario?.alerts.find(({ id }) => !chainIds.includes(id))?.fields['source.ip']
+    );
+    const remediation = async (detailsMarkdown: string) => {
+      const evaluator = createAuditEvaluators({ routing }).find(
+        ({ name }) => name === 'ConditionalRemediation'
+      );
+      if (!evaluator) throw new Error('no ConditionalRemediation evaluator');
+      return evaluator.evaluate({
+        input: rowFor('positive-chain-with-noise').input,
+        output: attackArtifacts({
+          insights: [
+            {
+              id: 'attack-1',
+              alertIds: [...chainIds],
+              title: 'ClickFix chain',
+              summaryMarkdown: 'summary',
+              detailsMarkdown,
+            },
+          ],
+        }),
+        expected: rowFor('positive-chain-with-noise').output,
+        metadata: undefined,
+      });
+    };
+
+    it('scores a discovery that cites only confirmed alerts but tells the analyst to block a benign entity', async () => {
+      expect(benignIp).toMatch(/^\d+\.\d+\.\d+\.\d+$/);
+      expect(await remediation(`Block ${benignIp} at the firewall immediately.`)).toMatchObject({
+        score: 0,
+        label: 'unconditional_containment',
+      });
+    });
+
+    it('stays N/A for a confirmed-only discovery that names no unconfirmed entity', async () => {
+      expect(await remediation('Isolate the affected workstation.')).toMatchObject({
+        score: null,
+        label: 'N/A',
+      });
+    });
+  });
+
   describe('a runner that completed but analyzed none of the seeded alerts', () => {
     const emptyRun = (overrides: Partial<WorkerArtifacts> = {}) =>
       attackArtifacts({
@@ -659,14 +704,12 @@ describe('createEvaluateDataset', () => {
     };
 
     it('fails the row instead of scoring the empty output, with the swallowed error', async () => {
-      const output = emptyRun({
-        generationFault: { kind: 'failed', message: 'connector returned 500' },
-      });
+      const output = emptyRun({ runnerError: 'step timed out' });
       for (const name of ['AlertsRetrieved', 'PositiveControlRecall', 'RunnerCompleted']) {
         expect(await scoreOf(name, output)).toMatchObject({
           score: null,
           label: 'ROW_FAILED',
-          explanation: `runner completed but analyzed 0 alerts, ${seededAlertCount} seeded: connector returned 500`,
+          explanation: `runner completed but analyzed 0 alerts, ${seededAlertCount} seeded: step timed out`,
         });
       }
     });
@@ -684,12 +727,24 @@ describe('createEvaluateDataset', () => {
       });
     });
 
-    it('keeps a refused generation a scored MODEL_FAULT, not a failed row', async () => {
-      const result = await scoreOf(
-        'AlertsRetrieved',
-        emptyRun({ generationFault: { kind: 'refused', message: 'I cannot help' } })
+    it.each([
+      ['refused', 'I cannot help'],
+      ['failed', 'connector returned 500'],
+    ] as const)(
+      'keeps a generation that %s every batch a scored MODEL_FAULT, not a failed row',
+      async (kind, message) => {
+        const output = emptyRun({ generationFault: { kind, message } });
+        for (const name of ['AlertsRetrieved', 'DiscoveriesPersisted']) {
+          expect(await scoreOf(name, output)).toMatchObject({ score: 0, label: 'MODEL_FAULT' });
+        }
+      }
+    );
+
+    it('does not let the gate fail a dataset whose generation failed every batch', async () => {
+      collect.mockResolvedValue(
+        emptyRun({ generationFault: { kind: 'failed', message: 'connector returned 500' } })
       );
-      expect(result).toMatchObject({ score: 0, label: 'MODEL_FAULT' });
+      await expect(evaluateRow('positive-chain-with-noise')).resolves.toBeUndefined();
     });
 
     it('leaves rows without an alert count, or with nothing seeded, to the regular checks', async () => {

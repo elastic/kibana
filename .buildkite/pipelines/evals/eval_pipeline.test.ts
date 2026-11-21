@@ -122,6 +122,21 @@ describe('eval_pipeline', () => {
       expect(shouldRunEvals('evals:all')).toBe(true);
     });
 
+    it('does not expand `evals:all,models:*` to a requiredModelGroups-only suite', () => {
+      const yaml = getEvalPipeline('evals:all,models:eis/openai-gpt-5.4') as string;
+
+      expect(yaml).toContain('kbn-evals-agent-builder');
+      expect(yaml).not.toContain('kbn-evals-tier-pinned');
+    });
+
+    it('still runs a requiredModelGroups-only suite whose own label rides along `evals:all,models:*`', () => {
+      const yaml = getEvalPipeline(
+        'evals:all,evals:tier-pinned,models:eis/openai-gpt-5.4'
+      ) as string;
+
+      expect(yaml).toContain('kbn-evals-tier-pinned');
+    });
+
     it('skips `evals:all` entirely when only requiredModelGroups-only suites would run', () => {
       readFileSync.mockReturnValue(
         JSON.stringify({ suites: SUITES.suites.filter((suite) => suite.id === 'tier-pinned') })
