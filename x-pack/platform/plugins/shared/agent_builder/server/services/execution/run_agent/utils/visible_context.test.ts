@@ -457,6 +457,49 @@ describe('renderVisibleContext', () => {
       expect(text(messages)).toContain('SUMMARY_TEXT');
       expect(text(messages)).not.toContain('<dynamic_tools>');
     });
+
+    it('renders the unannounced bound tools ahead of the history without a summary', async () => {
+      const messages = await renderVisibleContext(
+        {
+          conversation: {
+            ...conversation(twoRoundTimeline()),
+            unannouncedBoundToolDefinitions: async () => [definition('legacy-bound')],
+          },
+          run: run([]),
+          phase: 'research',
+        },
+        deps()
+      );
+      const rendered = text(messages);
+
+      expect(rendered.indexOf('<dynamic_tools>')).toBeLessThan(rendered.indexOf('FIRST_INPUT'));
+      expect(rendered).toContain('legacy-bound description');
+    });
+
+    it('adds the unannounced bound tools the summary snapshot does not carry', async () => {
+      const messages = await renderVisibleContext(
+        {
+          conversation: {
+            ...conversation(twoRoundTimeline()),
+            unannouncedBoundToolDefinitions: async () => [
+              { ...definition('dynamic-1'), description: 'rendered again' },
+              definition('legacy-bound'),
+            ],
+          },
+          run: runWithSnapshot([definition('dynamic-1')]),
+          phase: 'research',
+        },
+        deps()
+      );
+      const rendered = text(messages);
+
+      // one notice: the snapshot's definition, then the one it lacks
+      expect((rendered.match(/<dynamic_tools>/g) ?? []).length).toBe(1);
+      expect(rendered.indexOf('dynamic-1 description')).toBeLessThan(
+        rendered.indexOf('legacy-bound description')
+      );
+      expect(rendered).not.toContain('rendered again');
+    });
   });
 });
 
@@ -1000,7 +1043,7 @@ describe('prompt-cache stability through persistence and reload', () => {
     await context.attachmentStateManager
       .forToolCall('c2')
       .add({ id: 'tool-2', type: 'text', data: 'note' });
-    const toolEvents = runAttachmentEvents.drainToolCalls(['c1', 'c2']);
+    const toolEvents = await runAttachmentEvents.drainToolCalls(['c1', 'c2']);
 
     const during = await renderVisibleContext(
       {
@@ -1215,5 +1258,116 @@ describe('renderVisibleContext injected context', () => {
 
     const covered = text(await render(steps, { round_id: 'current', tool_call_id: 'x1' }));
     expect(covered.split('HOOK_NOTE')).toHaveLength(1);
+  });
+});
+
+describe('attachment events with bound tool definitions', () => {
+  const definition: DynamicToolDefinition = {
+    tool_id: 'bound.tool',
+    description: 'Fetch the host',
+    parameters: { type: 'object', properties: {} },
+  };
+  const boundToolDefinitions = () => [definition];
+  const describeAttachmentType = (type: string) => `${type} instructions`;
+  const standaloneEvent = attachmentEventFixture({ id: 'standalone', source: 'http_api' });
+  const countTools = (messages: BaseMessage[]) =>
+    (text(messages).match(/<dynamic_tools>/g) ?? []).length;
+
+  const standaloneConversation = (): ProcessedConversation => ({
+    ...conversation([standaloneEvent as unknown as ProcessedTimelineEvent]),
+    boundToolDefinitions,
+  });
+
+  it('renders the definitions of an attachment event for the research agent', async () => {
+    const messages = await renderVisibleContext(
+      { conversation: standaloneConversation(), run: run([]), phase: 'research' },
+      deps()
+    );
+
+    expect(text(messages)).toContain('bound.tool');
+    expect(countTools(messages)).toBe(1);
+  });
+
+  it('leaves them out for the answer agent, which has no tools', async () => {
+    const messages = await renderVisibleContext(
+      { conversation: standaloneConversation(), run: run([]), phase: 'answer' },
+      deps()
+    );
+
+    expect(text(messages)).not.toContain('dynamic_tools');
+    expect(text(messages)).toContain('att-1');
+  });
+
+  it('renders the round identically during the run and on the next turn', async () => {
+    const inputEvent = attachmentEventFixture({
+      id: 'in',
+      source: 'chat_input',
+      triggerEventId: 'r::user_message',
+      executionId: 'r::execution',
+    });
+    const toolEvent = attachmentEventFixture({
+      id: 'tool',
+      toolCallId: 'c1',
+      executionId: 'r::execution',
+      attachmentId: 'att-2',
+    });
+
+    const during = await renderVisibleContext(
+      {
+        conversation: {
+          ...conversation([]),
+          nextInput: { message: 'Q', attachments: [], attachment_events: [inputEvent] },
+          describeAttachmentType,
+          boundToolDefinitions,
+        },
+        run: {
+          ...run([call('c1')], { renderState: renderStateOf(['c1']) }),
+          attachmentEvents: [toolEvent],
+        },
+        phase: 'research',
+      },
+      deps()
+    );
+    const later = await renderVisibleContext(
+      {
+        conversation: {
+          ...conversation([
+            ...timelineFromRounds([
+              {
+                id: 'r',
+                input: { message: 'Q', attachments: [], attachment_events: [inputEvent] },
+                steps: [call('c1')],
+                response: { message: 'A' },
+              },
+            ]),
+            inputEvent,
+            toolEvent,
+          ]),
+          describeAttachmentType,
+          boundToolDefinitions,
+        },
+        run: run([]),
+        phase: 'research',
+      },
+      deps()
+    );
+
+    expect(countTools(during)).toBe(2);
+    expect(text(later.slice(0, during.length))).toEqual(text(during));
+  });
+
+  it('renders the definitions in a standalone event unit, without type instructions', async () => {
+    const history = standaloneConversation();
+    const view = buildContextView({ conversation: history, run: run([]) }, deps());
+    const units = listVisibleUnits({
+      entries: view.history.entries,
+      steps: [],
+      visibility: view.visibility,
+    });
+
+    const rendered = await renderUnit(units[0], { view, run: run([]), conversation: history });
+
+    expect(countTools(rendered)).toBe(1);
+    expect(text(rendered)).not.toContain('ATTACHMENT TYPES');
   });
 });

@@ -65,7 +65,6 @@ import type {
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AgentExecutionService, ExecutionRunAs } from '@kbn/agent-builder-server/execution';
-import { AGENT_BUILDER_DYNAMIC_TOOLS_SETTING_ID } from '../../../../common/constants';
 import { DEDUCTIVE_AGENT_ID, getDeductiveConfig } from '../run_agent/deductive/config';
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
@@ -359,24 +358,15 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     const uiSettingsClient = runnerDeps.uiSettings.asScopedToClient(
       runnerDeps.savedObjects.getScopedClient(request)
     );
-    const [
-      experimentalEnabled,
-      bashEnabled,
-      apiDiscoveryEnabled,
-      contextEngineEnabled,
-      dynamicToolsEnabled,
-    ] = await Promise.all([
-      uiSettingsClient
-        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
-        .catch(() => false),
-      uiSettingsClient.get<boolean>(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID).catch(() => false),
-      uiSettingsClient.get<boolean>(AGENT_BUILDER_API_DISCOVERY_SETTING_ID).catch(() => false),
-      uiSettingsClient.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID).catch(() => false),
-      uiSettingsClient
-        .get<boolean | undefined>(AGENT_BUILDER_DYNAMIC_TOOLS_SETTING_ID)
-        .then((value) => !!value)
-        .catch(() => false),
-    ]);
+    const [experimentalEnabled, bashEnabled, apiDiscoveryEnabled, contextEngineEnabled] =
+      await Promise.all([
+        uiSettingsClient
+          .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+          .catch(() => false),
+        uiSettingsClient.get<boolean>(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID).catch(() => false),
+        uiSettingsClient.get<boolean>(AGENT_BUILDER_API_DISCOVERY_SETTING_ID).catch(() => false),
+        uiSettingsClient.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID).catch(() => false),
+      ]);
     const experimentalFeatures: ExperimentalFeatures = {
       skills: true,
       aiIndices: contextEngineEnabled,
@@ -386,7 +376,6 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       // forcefully disabled until the UI is implemented
       bash: bashEnabled,
       apiDiscovery: apiDiscoveryEnabled,
-      dynamicTools: dynamicToolsEnabled,
     };
 
     // External Deductive execution path: gated per-deployment by the LaunchDarkly feature

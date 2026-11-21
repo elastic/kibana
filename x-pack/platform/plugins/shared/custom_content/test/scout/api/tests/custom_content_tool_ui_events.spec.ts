@@ -12,10 +12,10 @@ import type { KbnClient } from '@kbn/kbn-client';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { createLlmProxy } from '@kbn/ftr-llm-proxy';
 import {
+  mockDynamicToolCall,
   mockFinalAnswer,
   mockTemplateGeneration,
   mockTitleGeneration,
-  mockToolCall,
 } from '../../common/llm_mocks';
 
 const COMMON_HEADERS = {
@@ -144,7 +144,8 @@ apiTest.describe(
       'a tool UI event sent by custom_content_update_panel reaches the events-native stream',
       async ({ apiClient }) => {
         mockTitleGeneration(llmProxy, 'Tool UI events');
-        mockToolCall(llmProxy, CUSTOM_CONTENT_UPDATE_TOOL_ID, {
+        // the tool is exposed by the attachment type, so the agent calls it as a dynamic tool
+        mockDynamicToolCall(llmProxy, CUSTOM_CONTENT_UPDATE_TOOL_ID, {
           embeddable_id: EMBEDDABLE_ID,
           dataQueries: [{ esql: UPDATED_ESQL_QUERY }],
         });

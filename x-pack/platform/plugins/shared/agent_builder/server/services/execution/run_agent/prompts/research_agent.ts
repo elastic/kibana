@@ -234,7 +234,7 @@ ${
 
 ${getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash })}
 
-${experimentalFeatures.dynamicTools ? getDynamicToolsInstructions() : ''}
+${getDynamicToolsInstructions()}
 
 ${
   experimentalFeatures.skills && hasSkills

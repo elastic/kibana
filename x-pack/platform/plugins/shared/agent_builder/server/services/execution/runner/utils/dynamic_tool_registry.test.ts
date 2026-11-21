@@ -62,4 +62,16 @@ describe('DynamicToolRegistry', () => {
     expect(registry.get('a')).toBe(second);
     expect(registry.list()).toHaveLength(1);
   });
+
+  it('unregisters tools by id, ignoring unknown ids', () => {
+    const a = createTool('a');
+    const b = createTool('b');
+    registry.register([a, b]);
+
+    registry.unregister(['a', 'unknown']);
+
+    expect(registry.ids()).toEqual(['b']);
+    expect(registry.has('a')).toBe(false);
+    expect(registry.get('b')).toBe(b);
+  });
 });

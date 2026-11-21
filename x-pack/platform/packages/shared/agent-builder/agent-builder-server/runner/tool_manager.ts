@@ -11,15 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { ToolReturnSummarizerFn } from '../tools/builtin';
 import type { AgentEventEmitterFn, ExecutableTool } from '..';
 
-export interface ToolManagerParams {
-  dynamicToolCapacity: number;
-}
-
 export type ToolName = string;
-
-export interface AddToolOptions {
-  dynamic?: boolean;
-}
 
 export type ExecutableToolWithOrigin = ExecutableTool & { origin: ToolOrigin };
 export type BrowserToolWithOrigin = BrowserApiToolMetadata & { origin: ToolOrigin };
@@ -42,21 +34,38 @@ export interface BrowserToolInput {
   tools: BrowserToolWithOrigin | BrowserToolWithOrigin[];
 }
 
+/** What provides a dynamic tool: the active attachments, or the skills the agent loaded. */
+export type DynamicToolSource = 'attachments' | 'skills';
+
+/** A registered dynamic tool, with the source that registered it last. */
+export type DynamicTool = ExecutableToolWithOrigin & { source?: DynamicToolSource };
+
 /**
  * Tools reachable only through the `execute_dynamic_tool` meta-tool. They are not bound to the
  * model, so `list()` does not include them; their definitions are written into the transcript
- * instead. No LangChain conversion happens, hence no logger.
+ * instead.
  */
 export interface DynamicToolInput {
   type: ToolManagerToolType.dynamic;
+  /** The source providing the tools; it owns their ids until another source registers them. */
+  source: DynamicToolSource;
   tools: ExecutableToolWithOrigin | ExecutableToolWithOrigin[];
+  logger?: Logger;
+}
+
+/** The dynamic tools a source provides now, replacing the ones it provided before. */
+export interface SyncDynamicToolsInput {
+  source: DynamicToolSource;
+  tools: ExecutableToolWithOrigin[];
+  logger?: Logger;
 }
 
 export type AddToolInput = ExecutableToolInput | BrowserToolInput | DynamicToolInput;
 
 /**
  * Interface for managing tools in the agent system.
- * Handles both static and dynamic tools with LRU eviction for dynamic tools.
+ * Natively bound tools are fixed for the run; dynamic tools are reachable only through the
+ * `execute_dynamic_tool` meta-tool, so adding one leaves the bound tool list unchanged.
  */
 export interface ToolManager {
   /**
@@ -76,25 +85,32 @@ export interface ToolManager {
    * Adds tools to the tool manager.
    * Supports executable tools, browser API tools and dynamic tools. A dynamic tool is reachable
    * only through the `execute_dynamic_tool` meta-tool: adding an id again replaces the previous
-   * entry, and ids already bound natively are skipped, as the model calls those directly. Use
-   * `getDynamicTool` to tell which ids landed in the registry.
+   * entry, whichever source registered it, and ids already bound natively are skipped, as the
+   * model calls those directly. Use `getDynamicTool` to tell which ids landed in the registry.
    * @param input - The tool input configuration (executable, browser or dynamic)
-   * @param options - Optional configuration for tool storage (static vs dynamic)
    */
-  addTools(input: AddToolInput, options?: AddToolOptions): Promise<void>;
+  addTools(input: AddToolInput): Promise<void>;
 
   /**
-   * Lists all tools in the tool manager.
-   * @returns an array of all tools (static and dynamic)
+   * Makes the dynamic tools of a source the given ones: registers them as `addTools` does, and
+   * removes the ones the source registered before and no longer provides. Tools of other sources
+   * stay. An id another source registered since is no longer the source's to remove; an id the
+   * source took over from another one is removed with the rest, not handed back.
+   */
+  syncDynamicTools(input: SyncDynamicToolsInput): void;
+
+  /**
+   * Removes tools added with a `DynamicToolInput`, so they are no longer reachable through
+   * `execute_dynamic_tool` nor persisted. Natively bound and unknown ids are ignored.
+   * @param toolIds - The internal ids of the dynamic tools to remove
+   */
+  removeDynamicTools(toolIds: string[]): void;
+
+  /**
+   * Lists the tools bound to the model (not the dynamic tools).
+   * @returns an array of the natively bound tools
    */
   list(): StructuredTool[];
-
-  /**
-   * Records the use of a tool, marking it as recently used.
-   * This affects LRU eviction for dynamic tools.
-   * @param name - the name of the tool to record usage for
-   */
-  recordToolUse(langchainToolName: ToolName): void;
 
   /**
    * Gets the tool id mapping.
@@ -115,9 +131,13 @@ export interface ToolManager {
   getExecutable(toolId: string): ExecutableTool | undefined;
 
   /**
-   * Gets the internal tool IDs of all dynamic tools currently in the tool manager: those bound
-   * with the `dynamic` option, then those added with a `dynamic` input.
-   * Returns internal tool IDs (not LangChain names) for persistence.
+   * Whether a tool was added under the given internal id with an `executable` input, so is bound
+   * natively: the model calls it directly. False for dynamic tools and unknown ids.
+   */
+  hasExecutableTool(toolId: string): boolean;
+
+  /**
+   * Gets the internal tool IDs of the dynamic tools, for persistence.
    * @returns array of internal tool IDs
    */
   getDynamicToolIds(): string[];
@@ -126,12 +146,18 @@ export interface ToolManager {
    * Returns a tool added with a `dynamic` input, or `undefined` for natively bound and unknown
    * ids.
    */
-  getDynamicTool(toolId: string): ExecutableToolWithOrigin | undefined;
+  getDynamicTool(toolId: string): DynamicTool | undefined;
+
+  /**
+   * Whether a tool added with a `dynamic` input is registered under the given internal id. False
+   * for natively bound and unknown ids.
+   */
+  hasDynamicTool(toolId: string): boolean;
 
   /**
    * Lists the tools added with a `dynamic` input.
    */
-  listDynamicTools(): ExecutableToolWithOrigin[];
+  listDynamicTools(): DynamicTool[];
 
   /**
    * Gets the summarizer function for a tool by its internal tool ID.

@@ -93,7 +93,6 @@ const createTestGraph = ({
   } as unknown as InferenceChatModel;
   const toolManager = {
     list: jest.fn(() => []),
-    recordToolUse: jest.fn(),
     getToolIdMapping: jest.fn(
       () =>
         new Map([
@@ -188,7 +187,7 @@ describe('createAgentGraph', () => {
   });
 
   it('preserves valid tool-call and handover behavior', async () => {
-    const { graph, researchInvoke, toolManager } = createTestGraph();
+    const { graph, researchInvoke } = createTestGraph();
     researchInvoke
       .mockResolvedValueOnce(
         new AIMessage({
@@ -200,7 +199,6 @@ describe('createAgentGraph', () => {
 
     const result = await graph.invoke({ cycleLimit: 10 });
 
-    expect(toolManager.recordToolUse).toHaveBeenCalledWith('test-tool');
     expect(result.finalAnswer).toBe('answer after tool call');
     expect(result.errorCount).toBe(0);
   });
@@ -952,7 +950,7 @@ describe('createAgentGraph - execute_dynamic_tool', () => {
   });
 
   it('interrupts the run on a prompt from the inner tool, with the step keyed on the inner tool', async () => {
-    const { graph, researchInvoke, toolManager } = createTestGraph();
+    const { graph, researchInvoke } = createTestGraph();
     researchInvoke.mockResolvedValueOnce(
       new AIMessage({ content: '', tool_calls: [dynamicCall('c1')] })
     );
@@ -976,8 +974,6 @@ describe('createAgentGraph - execute_dynamic_tool', () => {
       toolName: internalTools.executeDynamicTool,
       kind: 'server',
     });
-    // the outer call is what reached the tool node
-    expect(toolManager.recordToolUse).toHaveBeenCalledWith(internalTools.executeDynamicTool);
   });
 
   it('resolves the result under the inner tool id and completes the run', async () => {
@@ -1004,5 +1000,39 @@ describe('createAgentGraph - execute_dynamic_tool', () => {
       results,
     });
     expect(result.pendingToolCallIds).toEqual([]);
+  });
+});
+
+describe('createAgentGraph attachment events of a tool batch', () => {
+  it('waits for the drain, which may be async, before the next prompt is built', async () => {
+    const event = { id: 'att-evt', type: 'attachment_added' } as unknown as AttachmentTimelineEvent;
+    let drained = false;
+    const drainToolCalls = jest.fn(async () => {
+      await Promise.resolve();
+      drained = true;
+      return [event];
+    });
+    const { graph, researchInvoke, promptFactory } = createTestGraph({
+      runAttachmentEvents: { drainToolCalls } as unknown as RunAttachmentEvents,
+    });
+    // the drain must be done by the time the second prompt is built
+    const drainedAtPrompt: boolean[] = [];
+    promptFactory.getMainPrompt.mockImplementation(async () => {
+      drainedAtPrompt.push(drained);
+      return [];
+    });
+    researchInvoke
+      .mockResolvedValueOnce(
+        new AIMessage({ content: '', tool_calls: [{ id: 'c1', name: 'my_tool', args: {} }] })
+      )
+      .mockResolvedValueOnce(new AIMessage({ content: 'done' }));
+    mockToolNodeOnce([
+      new ToolMessage({ tool_call_id: 'c1', content: '{}', artifact: { results: [] } }),
+    ]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(drainedAtPrompt).toEqual([false, true]);
+    expect(result.attachmentEvents).toEqual([event]);
   });
 });

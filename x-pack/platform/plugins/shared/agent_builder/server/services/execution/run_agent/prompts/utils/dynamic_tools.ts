@@ -13,8 +13,8 @@ import type { DynamicToolDefinition } from '@kbn/agent-builder-common';
 const executeDynamicTool = sanitizeToolId(internalTools.executeDynamicTool);
 
 /**
- * System prompt section for the `execute_dynamic_tool` meta-tool. Only rendered when the
- * dynamic tools feature is on, next to the filesystem instructions.
+ * System prompt section for the `execute_dynamic_tool` meta-tool, rendered next to the filesystem
+ * instructions.
  */
 export const getDynamicToolsInstructions = (): string => {
   return cleanPrompt(`

@@ -697,4 +697,20 @@ describe('compactContext dynamic tools snapshot', () => {
     expect(result?.summary).toBeDefined();
     expect(result?.summary).not.toHaveProperty('dynamic_tools');
   });
+
+  it('leaves out a tool whose definition cannot be rendered, keeping the others', async () => {
+    const toolManager = createToolManagerMock();
+    const broken = {
+      ...dynamicTool('dyn.broken'),
+      getSchema: () => {
+        throw new Error('no schema');
+      },
+    };
+    toolManager.listDynamicTools.mockReturnValue([broken, dynamicTool('dyn.b')]);
+
+    const result = await compactWith(toolManager);
+
+    expect(result?.summary.dynamic_tools).toEqual([expect.objectContaining({ tool_id: 'dyn.b' })]);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('dyn.broken'));
+  });
 });

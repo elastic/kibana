@@ -272,7 +272,7 @@ export const compactContext = async (
       cursor,
     })
   );
-  const dynamicTools = await snapshotDynamicTools(deps.toolManager);
+  const dynamicTools = await snapshotDynamicTools(deps.toolManager, deps.logger);
   const summary: CompactionSummary = {
     summarized_up_to: cursor,
     summarized_round_count: coveredRoundIds.length,
@@ -294,10 +294,27 @@ export const compactContext = async (
 /**
  * The definitions of the dynamic tools registered when the summary is generated. Taken once per
  * compaction so the notice rendered after the summary stays identical until the next one; a tool
- * loaded later is seen through its own tool result.
+ * loaded later is seen through its own tool result. A tool whose definition cannot be rendered is
+ * left out rather than failing the compaction: it was undescribed before the summary too.
  */
-const snapshotDynamicTools = (toolManager?: ToolManager): Promise<DynamicToolDefinition[]> =>
-  Promise.all((toolManager?.listDynamicTools() ?? []).map(renderDynamicToolDefinition));
+const snapshotDynamicTools = async (
+  toolManager: ToolManager | undefined,
+  logger: CompactContextDeps['logger']
+): Promise<DynamicToolDefinition[]> => {
+  const definitions = await Promise.all(
+    (toolManager?.listDynamicTools() ?? []).map(async (tool) => {
+      try {
+        return await renderDynamicToolDefinition(tool);
+      } catch (error) {
+        logger.warn(
+          `Failed to render the definition of dynamic tool ${tool.id} for the compaction summary: ${error}`
+        );
+        return undefined;
+      }
+    })
+  );
+  return definitions.filter((def): def is DynamicToolDefinition => def !== undefined);
+};
 
 /** The LLM half of the summary when the summarizer failed: the existing one, else placeholders. */
 const fallbackLlmOutput = ({

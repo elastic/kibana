@@ -35,6 +35,11 @@ export interface RunAttachmentEventsOptions {
   inputActor: EventActor;
   /** Agent running the round; actor of the `execution` events. */
   agentId: string;
+  /**
+   * Awaited with the events a tool batch produced, before the run goes on to render them: what
+   * they announce (such as the tools bound to an attachment) is available from the next model call.
+   */
+  onToolCallEvents?: (events: AttachmentTimelineEvent[]) => Promise<void>;
 }
 
 /**
@@ -51,16 +56,23 @@ export class RunAttachmentEvents {
     return this.materialize(this.options.attachmentStateManager.drainChanges(), 'chat_input');
   }
 
-  /** The changes made by the given tool calls; those of other calls stay recorded. */
-  drainToolCalls(toolCallIds: readonly string[]): AttachmentTimelineEvent[] {
+  /**
+   * The changes made by the given tool calls; those of other calls stay recorded. Resolves once
+   * `onToolCallEvents` has handled the events.
+   */
+  async drainToolCalls(toolCallIds: readonly string[]): Promise<AttachmentTimelineEvent[]> {
     const ids = new Set(toolCallIds);
-    return this.materialize(
+    const events = this.materialize(
       this.options.attachmentStateManager.drainChanges(
         (change: AttachmentChange) =>
           change.tool_call_id !== undefined && ids.has(change.tool_call_id)
       ),
       'execution'
     );
+    if (events.length > 0 && this.options.onToolCallEvents) {
+      await this.options.onToolCallEvents(events);
+    }
+    return events;
   }
 
   /** Everything not drained yet: changes outside a tool call, by nested calls, or by a batch that threw. */

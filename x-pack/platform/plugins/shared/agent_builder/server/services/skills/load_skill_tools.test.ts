@@ -35,44 +35,6 @@ describe('loadSkillTools', () => {
     ctx = createToolHandlerContextMock();
   });
 
-  it('returns the ids of the loaded tools, inline first then registry', async () => {
-    const inlineTool = { id: 'inline-1', type: ToolType.builtin } as SkillBoundedTool;
-    const convertedInline = { id: 'inline-1' } as any;
-    const registryTool = { id: 'registry-1' } as any;
-
-    const skill = createMockSkill({
-      getInlineTools: jest.fn().mockReturnValue([inlineTool]),
-      getRegistryTools: jest.fn().mockReturnValue(['registry-1']),
-    });
-
-    ctx.skills.convertSkillTool.mockReturnValue(convertedInline);
-    ctx.toolProvider.list.mockResolvedValue([registryTool]);
-
-    const result = await loadSkillTools({
-      skill,
-      skillsService: ctx.skills,
-      toolProvider: ctx.toolProvider,
-      request: ctx.request,
-      toolManager: ctx.toolManager,
-      logger: ctx.logger,
-      runContext: ctx.runContext,
-    });
-
-    expect(result).toEqual({ loadedToolIds: ['inline-1', 'registry-1'], dynamicTools: [] });
-    expect(ctx.toolManager.addTools).toHaveBeenCalledTimes(1);
-    expect(ctx.toolManager.addTools).toHaveBeenCalledWith(
-      {
-        type: ToolManagerToolType.executable,
-        tools: [
-          { ...convertedInline, origin: ToolOrigin.inline },
-          { ...registryTool, origin: ToolOrigin.registry },
-        ],
-        logger: ctx.logger,
-      },
-      { dynamic: true }
-    );
-  });
-
   it(`throws when the skill exceeds the ${MAX_SKILL_REGISTRY_TOOLS}-tool registry limit`, async () => {
     const tooMany = Array.from({ length: MAX_SKILL_REGISTRY_TOOLS + 1 }, (_, i) => `t-${i}`);
     const skill = createMockSkill({
@@ -110,12 +72,15 @@ describe('loadSkillTools', () => {
     });
 
     expect(result).toEqual({ loadedToolIds: [], dynamicTools: [] });
-    expect(ctx.toolManager.addTools).toHaveBeenCalledWith(expect.objectContaining({ tools: [] }), {
-      dynamic: true,
+    expect(ctx.toolManager.addTools).toHaveBeenCalledWith({
+      type: ToolManagerToolType.dynamic,
+      source: 'skills',
+      tools: [],
+      logger: ctx.logger,
     });
   });
 
-  describe('with dynamic tools enabled', () => {
+  describe('registration', () => {
     const inlineSchema = z.object({ query: z.string().describe('What to search for') });
     const registrySchema = z.object({ id: z.number() });
 
@@ -135,6 +100,7 @@ describe('loadSkillTools', () => {
 
     const dynamicToolsInput = {
       type: ToolManagerToolType.dynamic,
+      source: 'skills',
       tools: [
         { ...convertedInline, origin: ToolOrigin.inline },
         { ...registryTool, origin: ToolOrigin.registry },
@@ -159,14 +125,16 @@ describe('loadSkillTools', () => {
         toolManager: ctx.toolManager,
         logger: ctx.logger,
         runContext: ctx.runContext,
-        dynamicToolsEnabled: true,
       });
 
-    it('registers the tools as dynamic tools instead of binding them', async () => {
+    it('registers the tools as dynamic tools, inline first then registry, with a definition each', async () => {
       const result = await load();
 
       expect(ctx.toolManager.addTools).toHaveBeenCalledTimes(1);
-      expect(ctx.toolManager.addTools).toHaveBeenCalledWith(dynamicToolsInput);
+      expect(ctx.toolManager.addTools).toHaveBeenCalledWith({
+        ...dynamicToolsInput,
+        logger: ctx.logger,
+      });
       expect(result.loadedToolIds).toEqual(['inline-1', 'registry-1']);
       expect(result.dynamicTools).toEqual([
         {
@@ -201,7 +169,6 @@ describe('loadSkillTools', () => {
         toolManager: ctx.toolManager,
         logger: ctx.logger,
         runContext: ctx.runContext,
-        dynamicToolsEnabled: true,
         analyticsService,
       });
 

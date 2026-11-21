@@ -202,13 +202,16 @@ export const createToolManagerMock = (): ToolManagerMock => {
     setMaxToolResultTokens: jest.fn(),
     addTools: jest.fn(),
     list: jest.fn(),
-    recordToolUse: jest.fn(),
     getToolIdMapping: jest.fn(),
     getToolMeta: jest.fn(),
     getExecutable: jest.fn(),
+    hasExecutableTool: jest.fn().mockReturnValue(false),
     getDynamicToolIds: jest.fn(),
+    removeDynamicTools: jest.fn(),
+    syncDynamicTools: jest.fn(),
     getSummarizer: jest.fn(),
     getDynamicTool: jest.fn(),
+    hasDynamicTool: jest.fn().mockReturnValue(false),
     listDynamicTools: jest.fn().mockReturnValue([]),
   };
 };
@@ -262,7 +265,7 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
   const mock: AttachmentStateManagerMock = {
     get: jest.fn(),
     getAttachmentRecord: jest.fn(),
-    getActive: jest.fn(),
+    getActive: jest.fn().mockReturnValue([]),
     getAll: jest.fn(),
     getDiff: jest.fn(),
     add: jest.fn(),
@@ -389,7 +392,6 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       backgroundWake: false,
       bash: false,
       apiDiscovery: false,
-      dynamicTools: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
@@ -469,7 +471,6 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
       backgroundWake: false,
       bash: false,
       apiDiscovery: false,
-      dynamicTools: false,
     },
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
@@ -531,7 +532,6 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       backgroundWake: false,
       bash: false,
       apiDiscovery: false,
-      dynamicTools: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),

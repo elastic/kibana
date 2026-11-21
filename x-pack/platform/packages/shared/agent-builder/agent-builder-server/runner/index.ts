@@ -63,7 +63,12 @@ export type { ConnectorSkillsService } from './connector_skills_service';
 export type { RenderersService } from './renderers_service';
 export type { ConversationEventTypesService } from './conversation_event_types_service';
 export type { ConversationTemplatesService } from './conversation_templates_service';
-export type { ToolManager } from './tool_manager';
+export type {
+  DynamicTool,
+  DynamicToolSource,
+  SyncDynamicToolsInput,
+  ToolManager,
+} from './tool_manager';
 export { ToolManagerToolType } from './tool_manager';
 export type { SkillsStore, WritableSkillsStore } from './skills_store';
 export type {

@@ -330,8 +330,6 @@ export const createAgentGraph = ({
       );
     }
 
-    outcome.toolCalls.forEach((toolCall) => toolManager.recordToolUse(toolCall.toolName));
-
     // Snapshot the tracker's creation counter before executing the batch.
     const creationsBefore = subagentTracker?.creationCount() ?? 0;
 
@@ -370,8 +368,9 @@ export const createAgentGraph = ({
 
     const completed = new Set(processed.completedToolCallIds);
     const attachmentEvents =
-      runAttachmentEvents?.drainToolCalls(outcome.toolCalls.map(({ toolCallId }) => toolCallId)) ??
-      [];
+      (await runAttachmentEvents?.drainToolCalls(
+        outcome.toolCalls.map(({ toolCallId }) => toolCallId)
+      )) ?? [];
     return {
       steps: updates,
       toolRenderState: processed.renderState,

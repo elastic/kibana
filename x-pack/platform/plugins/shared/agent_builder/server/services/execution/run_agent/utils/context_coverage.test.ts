@@ -19,6 +19,7 @@ import {
   ToolResultType,
 } from '@kbn/agent-builder-common';
 import {
+  attachmentEventFixture,
   eventsNativeConversation,
   pauseState,
   pausedRoundTimeline,
@@ -42,6 +43,7 @@ import {
   resolveVisibility,
   translateLegacySummary,
   unitAnchor,
+  visibleAttachmentEvents,
   type ContextUnit,
 } from './context_coverage';
 
@@ -474,5 +476,52 @@ describe('translateLegacySummary', () => {
         legacyEligibleIds: new Set(),
       })
     ).toEqual(legacy);
+  });
+});
+
+describe('visibleAttachmentEvents', () => {
+  /** Round `a` (two cycles) with `att-a`, a standalone `att-s`, then round `b` with `att-b`. */
+  const fixtureWithAttachments = () => {
+    // the rounds' events are at the epoch; entries sharing it keep their timeline order
+    const createdAt = new Date(0).toISOString();
+    const events: ProcessedTimelineEvent[] = [
+      ...timelineFromRounds([{ id: 'a', input: input('first'), steps: [call('a1'), call('a2')] }]),
+      attachmentEventFixture({
+        id: 'att-a',
+        executionId: 'a::execution',
+        toolCallId: 'a1',
+        createdAt,
+      }),
+      attachmentEventFixture({ id: 'att-s', attachmentId: 'att-2', createdAt }),
+      ...timelineFromRounds([{ id: 'b', input: input('second'), steps: [call('b1')] }]),
+      attachmentEventFixture({
+        id: 'att-b',
+        executionId: 'b::execution',
+        toolCallId: 'b1',
+        createdAt,
+      }),
+    ];
+    const { entries } = historyView(conversationOf(events));
+    return { events, entries };
+  };
+
+  const visibleIds = (cursor?: Parameters<typeof resolveVisibility>[0]['cursor']) => {
+    const { events, entries } = fixtureWithAttachments();
+    const visibility = resolveVisibility({ entries, roundId: 'c', steps: [], cursor });
+    return visibleAttachmentEvents({ events, entries, visibility }).map((event) => event.id);
+  };
+
+  it('keeps every attachment event without a cursor', () => {
+    expect(visibleIds()).toEqual(['att-a', 'att-s', 'att-b']);
+  });
+
+  it('leaves out the events of the entries the cursor hides whole', () => {
+    // the standalone event after round `a` is still rendered
+    expect(visibleIds({ round_id: 'a', tool_call_id: 'a2' })).toEqual(['att-s', 'att-b']);
+    expect(visibleIds({ round_id: 'b', tool_call_id: 'b1' })).toEqual([]);
+  });
+
+  it('keeps the events of a partially hidden round', () => {
+    expect(visibleIds({ round_id: 'a', tool_call_id: 'a1' })).toEqual(['att-a', 'att-s', 'att-b']);
   });
 });

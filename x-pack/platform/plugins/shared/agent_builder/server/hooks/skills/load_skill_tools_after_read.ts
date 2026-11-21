@@ -24,16 +24,8 @@ export const createLoadSkillToolsAfterRead = ({
       return;
     }
 
-    const {
-      skillsStore,
-      skills,
-      toolProvider,
-      toolManager,
-      request,
-      logger,
-      runContext,
-      experimentalFeatures,
-    } = context.toolHandlerContext;
+    const { skillsStore, skills, toolProvider, toolManager, request, logger, runContext } =
+      context.toolHandlerContext;
 
     const path = context.toolParams.path as string | undefined;
     if (!path) {
@@ -67,13 +59,12 @@ export const createLoadSkillToolsAfterRead = ({
       toolManager,
       logger,
       runContext,
-      dynamicToolsEnabled: experimentalFeatures.dynamicTools,
       analyticsService,
       trackingService,
     });
 
-    // Natively bound tools show up in the model's tool list on their own. Dynamic tools are
-    // only reachable through their definitions, so append them to the file's content.
+    // Dynamic tools are only reachable through their definitions, so append them to the file's
+    // content.
     const { results } = context.toolReturn;
     if (dynamicTools.length === 0 || !results) {
       return;
