@@ -20,6 +20,7 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { Logger } from '@kbn/core/server';
+import { toDashboardSurfaceComposition } from './dashboard_surface';
 
 interface CreateDashboardAttachmentTypeOptions {
   logger: Logger;
@@ -119,6 +120,7 @@ export const createDashboardAttachmentType = ({
       }
     },
     format: () => ({}),
+    toSurfaceComposition: toDashboardSurfaceComposition,
     getAgentDescription: () =>
       `A dashboard attachment represents a composed dashboard with panels and sections. Rendering it inline displays an interactive dashboard card in the conversation UI that the user can click to open the full dashboard. Summarize the dashboard content (title, description, panel list) in plain text alongside the rendered attachment. To modify this dashboard, load the dashboards skill, then call the \`platform.dashboard.generate_dashboard\` tool with this attachment's id as \`dashboardId\`; the tool reads and updates this attachment in place.`,
     getTools: () => [],
