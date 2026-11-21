@@ -1,0 +1,260 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  EuiButtonEmpty,
+  EuiFieldSearch,
+  EuiFieldText,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { VERDICT_LABELS } from '../../../../common/investigations/types';
+import type {
+  InvestigationPriority,
+  InvestigationRecord,
+  InvestigationStatus,
+  Verdict,
+} from '../../../../common/investigations/types';
+import { useInvestigationTypes } from '../../hooks';
+import { useInvestigationsServices } from '../../services';
+import * as sharedI18n from '../shared/translations';
+import { FilterPopover } from './filter_popover';
+import type { FilterOption } from './filter_popover';
+import * as i18n from './translations';
+import { BUSINESS_UNIT_FIELD_KEY, hasActiveFilters } from './use_queue_url_state';
+import type { QueueState } from './use_queue_url_state';
+
+const SEARCH_DEBOUNCE_MS = 300;
+export const OWNER_UNASSIGNED_VALUE = 'unassigned';
+
+const STATUS_OPTIONS: FilterOption[] = [
+  { value: 'open', label: i18n.STATUS_OPEN },
+  { value: 'in-progress', label: i18n.STATUS_IN_PROGRESS },
+  { value: 'closed', label: i18n.STATUS_CLOSED },
+];
+
+const PRIORITY_OPTIONS: FilterOption[] = (['critical', 'high', 'medium', 'low'] as const).map(
+  (value) => ({ value, label: sharedI18n.PRIORITY_LABELS[value] })
+);
+
+const VERDICT_OPTIONS: FilterOption[] = (['true_positive', 'benign', 'inconclusive'] as const).map(
+  (value) => ({ value, label: VERDICT_LABELS[value] })
+);
+
+export interface QueueFiltersProps {
+  state: QueueState;
+  onChange: (change: Partial<QueueState>) => void;
+  onClear: () => void;
+  /** Records on screen, used to offer the owners seen so far. */
+  records: InvestigationRecord[];
+}
+
+const useCurrentUsername = (): string | undefined => {
+  const { security } = useInvestigationsServices();
+  const [username, setUsername] = useState<string | undefined>();
+
+  useEffect(() => {
+    let isMounted = true;
+    security.authc
+      .getCurrentUser()
+      .then((user) => {
+        if (isMounted) setUsername(user.username);
+      })
+      .catch(() => undefined);
+    return () => {
+      isMounted = false;
+    };
+  }, [security]);
+
+  return username;
+};
+
+export const QueueFilters: React.FC<QueueFiltersProps> = ({
+  state,
+  onChange,
+  onClear,
+  records,
+}) => {
+  const { data: typesData } = useInvestigationTypes();
+  const username = useCurrentUsername();
+  const [searchText, setSearchText] = useState(state.search);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const appliedSearchRef = useRef(state.search);
+
+  // Follow changes made outside the box, such as clearing filters.
+  useEffect(() => {
+    if (state.search !== appliedSearchRef.current) {
+      appliedSearchRef.current = state.search;
+      setSearchText(state.search);
+    }
+  }, [state.search]);
+
+  useEffect(() => {
+    if (searchText === appliedSearchRef.current) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      appliedSearchRef.current = searchText;
+      onChangeRef.current({ search: searchText });
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [searchText]);
+
+  const typeOptions = useMemo<FilterOption[]>(() => {
+    const names = (typesData?.types ?? []).map(({ name }) => name);
+    state.investigationType.forEach((name) => {
+      if (!names.includes(name)) names.push(name);
+    });
+    return names.map((name) => ({ value: name, label: name }));
+  }, [typesData, state.investigationType]);
+
+  const ownerOptions = useMemo<FilterOption[]>(() => {
+    const options: FilterOption[] = [
+      { value: OWNER_UNASSIGNED_VALUE, label: i18n.OWNER_UNASSIGNED },
+    ];
+    const seen = new Set<string>(options.map(({ value }) => value));
+    const add = (value: string, label: string) => {
+      if (!seen.has(value)) {
+        seen.add(value);
+        options.push({ value, label });
+      }
+    };
+    if (username) add(username, i18n.OWNER_ME);
+    records.forEach(({ owner }) => {
+      if (owner) add(owner.id, owner.name);
+    });
+    if (state.owner) add(state.owner, state.owner);
+    return options;
+  }, [records, state.owner, username]);
+
+  const businessUnitOptions = useMemo<FilterOption[]>(() => {
+    const values = new Set<string>();
+    (typesData?.types ?? []).forEach(({ fields }) =>
+      fields
+        .filter(({ key }) => key === BUSINESS_UNIT_FIELD_KEY)
+        .forEach(({ options }) => options?.forEach((option) => values.add(option)))
+    );
+    if (state.businessUnit) values.add(state.businessUnit);
+    return Array.from(values).map((value) => ({ value, label: value }));
+  }, [typesData, state.businessUnit]);
+
+  const [businessUnitText, setBusinessUnitText] = useState(state.businessUnit ?? '');
+  useEffect(() => setBusinessUnitText(state.businessUnit ?? ''), [state.businessUnit]);
+
+  return (
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      wrap
+      responsive={false}
+      role="search"
+      aria-label={i18n.FILTERS_LABEL}
+      data-test-subj="investigationsQueueFilters"
+    >
+      <EuiFlexItem
+        grow
+        css={css`
+          min-width: 240px;
+          max-width: 420px;
+        `}
+      >
+        <EuiFieldSearch
+          fullWidth
+          value={searchText}
+          placeholder={i18n.SEARCH_PLACEHOLDER}
+          aria-label={i18n.SEARCH_ARIA_LABEL}
+          incremental={false}
+          maxLength={1024}
+          onChange={(event) => setSearchText(event.target.value)}
+          data-test-subj="investigationsQueueSearch"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup>
+          <FilterPopover
+            label={i18n.FILTER_STATUS}
+            options={STATUS_OPTIONS}
+            selected={state.status}
+            onChange={(selected) => onChange({ status: selected as InvestigationStatus[] })}
+            data-test-subj="investigationsFilterStatus"
+          />
+          <FilterPopover
+            label={i18n.FILTER_PRIORITY}
+            options={PRIORITY_OPTIONS}
+            selected={state.priority}
+            onChange={(selected) => onChange({ priority: selected as InvestigationPriority[] })}
+            data-test-subj="investigationsFilterPriority"
+          />
+          <FilterPopover
+            label={i18n.FILTER_TYPE}
+            options={typeOptions}
+            selected={state.investigationType}
+            onChange={(selected) => onChange({ investigationType: selected })}
+            searchable
+            data-test-subj="investigationsFilterType"
+          />
+          <FilterPopover
+            label={i18n.FILTER_VERDICT}
+            options={VERDICT_OPTIONS}
+            selected={state.verdict}
+            onChange={(selected) => onChange({ verdict: selected as Verdict[] })}
+            data-test-subj="investigationsFilterVerdict"
+          />
+          <FilterPopover
+            label={i18n.FILTER_OWNER}
+            options={ownerOptions}
+            selected={state.owner ? [state.owner] : []}
+            onChange={(selected) => onChange({ owner: selected[0] })}
+            singleSelection
+            data-test-subj="investigationsFilterOwner"
+          />
+          {businessUnitOptions.length > 0 ? (
+            <FilterPopover
+              label={i18n.FILTER_BUSINESS_UNIT}
+              options={businessUnitOptions}
+              selected={state.businessUnit ? [state.businessUnit] : []}
+              onChange={(selected) => onChange({ businessUnit: selected[0] })}
+              singleSelection
+              data-test-subj="investigationsFilterBusinessUnit"
+            />
+          ) : null}
+        </EuiFilterGroup>
+      </EuiFlexItem>
+      {businessUnitOptions.length === 0 ? (
+        <EuiFlexItem grow={false}>
+          <EuiFieldText
+            compressed
+            value={businessUnitText}
+            placeholder={i18n.FILTER_BUSINESS_UNIT_FREE_TEXT}
+            aria-label={i18n.FILTER_BUSINESS_UNIT}
+            maxLength={512}
+            onChange={(event) => setBusinessUnitText(event.target.value)}
+            onBlur={() => onChange({ businessUnit: businessUnitText.trim() || undefined })}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                onChange({ businessUnit: businessUnitText.trim() || undefined });
+              }
+            }}
+            data-test-subj="investigationsFilterBusinessUnitText"
+          />
+        </EuiFlexItem>
+      ) : null}
+      {hasActiveFilters(state) ? (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="s" onClick={onClear} data-test-subj="investigationsClearFilters">
+            {i18n.CLEAR_FILTERS}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
+  );
+};
+QueueFilters.displayName = 'QueueFilters';

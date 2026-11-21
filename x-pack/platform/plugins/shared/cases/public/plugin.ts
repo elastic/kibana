@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -13,6 +14,9 @@ import { createBrowserHistory } from 'history';
 import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
+import { INVESTIGATIONS_APP_ID, INVESTIGATIONS_APP_PATH } from '../common/investigations/constants';
+import { ICONS } from './investigations/icons';
+import { APP_TITLE as INVESTIGATIONS_APP_TITLE } from './investigations/translations';
 import { APP_TITLE, APP_DESC } from './common/translations';
 import { registerCasesSteps, registerCasesWorkflowTriggers } from './workflows';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
@@ -104,6 +108,28 @@ export class CasesUiPlugin
             kibanaVersion,
             unifiedAttachmentTypeRegistry,
           });
+        },
+      });
+    }
+
+    if (config.investigations?.enabled) {
+      core.application.register({
+        id: INVESTIGATIONS_APP_ID,
+        title: INVESTIGATIONS_APP_TITLE,
+        appRoute: INVESTIGATIONS_APP_PATH,
+        category: DEFAULT_APP_CATEGORIES.security,
+        euiIconType: ICONS.investigation,
+        order: 14,
+        visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+        mount: async (params) => {
+          const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+            CoreStart,
+            CasesPublicStartDependencies,
+            unknown
+          ];
+          const { renderInvestigationsApp } = await import('./investigations');
+
+          return renderInvestigationsApp({ coreStart, pluginsStart, params });
         },
       });
     }

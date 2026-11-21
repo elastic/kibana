@@ -74,6 +74,10 @@ export const createNavigationTree = (
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
       },
       defaultNavigationTree.cases(),
+      {
+        link: 'investigations' as AppDeepLinkId,
+        icon: 'inspect',
+      },
       defaultNavigationTree.entityAnalytics(),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
