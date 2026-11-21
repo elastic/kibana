@@ -23,6 +23,8 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     deploymentId: 'mock-deployment-id',
     isCloudEnabled: true,
     isEce: undefined,
+    isFedrampHigh: undefined,
+    isElasticCloudHosted: undefined,
     cname: 'cname',
     fetchElasticsearchConfig: jest
       .fn()

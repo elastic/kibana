@@ -43,6 +43,8 @@ export interface CloudConfigType {
   performance_url?: string;
   trial_end_date?: string;
   isSaasContainer?: boolean;
+  isFedrampHigh?: boolean;
+  isElasticCloudHosted?: boolean;
   is_elastic_staff_owned?: boolean;
   managed_otlp?: {
     url?: string;
@@ -108,6 +110,8 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
       isEce,
+      isFedrampHigh: this.config.isFedrampHigh,
+      isElasticCloudHosted: this.config.isElasticCloudHosted,
       managedOtlp: {
         url: this.config.managed_otlp?.url,
       },
