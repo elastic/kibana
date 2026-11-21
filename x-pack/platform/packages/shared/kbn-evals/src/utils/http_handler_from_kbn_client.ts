@@ -145,11 +145,14 @@ export function httpHandlerFromKbnClient({
           parseRetryAfterMsFromHeaders(error.headers) ??
           parseRetryAfterMsFromMessage(error.message);
 
+        // Retrying inside a longer Retry-After window would still be throttled.
+        if (retryAfterMs !== undefined && retryAfterMs > MAX_RETRY_AFTER_MS) {
+          throw error;
+        }
+
         // Exponential backoff (1s, 2s, 4s, ...) with jitter, but never sooner than retry-after.
         const baseBackoffMs = 1000 * Math.pow(2, attempt);
-        const baseDelayMs = retryAfterMs
-          ? Math.min(MAX_RETRY_AFTER_MS, Math.max(baseBackoffMs, retryAfterMs))
-          : baseBackoffMs;
+        const baseDelayMs = retryAfterMs ? Math.max(baseBackoffMs, retryAfterMs) : baseBackoffMs;
         const jitterMs = Math.floor(
           Math.random() * Math.min(1000, Math.max(100, baseDelayMs * 0.15))
         );

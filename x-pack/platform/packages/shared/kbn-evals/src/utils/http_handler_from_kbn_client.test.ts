@@ -51,11 +51,10 @@ describe('httpHandlerFromKbnClient retries', () => {
     expect(request).toHaveBeenCalledTimes(2);
   });
 
-  it('caps a Retry-After hint at 60s', async () => {
-    const { request, result } = setup('3600');
+  it('surfaces the 429 instead of retrying early when Retry-After exceeds 60s', async () => {
+    const { request, result } = setup('90');
 
-    await jest.advanceTimersByTimeAsync(61_000);
-    await expect(result).resolves.toBe('ok');
-    expect(request).toHaveBeenCalledTimes(2);
+    await expect(result).rejects.toMatchObject({ status: 429 });
+    expect(request).toHaveBeenCalledTimes(1);
   });
 });

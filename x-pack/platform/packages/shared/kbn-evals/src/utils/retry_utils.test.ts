@@ -126,14 +126,26 @@ describe('withRetry', () => {
       expect(fn).toHaveBeenCalledTimes(2);
     });
 
-    it('caps a Retry-After hint at maxDelayMs', async () => {
+    it('surfaces the error instead of retrying early when Retry-After exceeds maxDelayMs', async () => {
       const onRetry = jest.fn();
-      const fn = jest.fn().mockRejectedValueOnce(rateLimited('3600')).mockResolvedValueOnce('ok');
-      const result = withRetry(fn, { ...fastRetryOptions, maxDelayMs: 60_000, onRetry });
+      const error = rateLimited('90');
+      const fn = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce('ok');
 
-      await jest.advanceTimersByTimeAsync(60_000);
+      await expect(
+        withRetry(fn, { ...fastRetryOptions, maxDelayMs: 60_000, onRetry })
+      ).rejects.toBe(error);
+      expect(fn).toHaveBeenCalledTimes(1);
+      expect(onRetry).not.toHaveBeenCalled();
+    });
+
+    it('waits the full Retry-After when it equals maxDelayMs', async () => {
+      const fn = jest.fn().mockRejectedValueOnce(rateLimited('60')).mockResolvedValueOnce('ok');
+      const result = withRetry(fn, { ...fastRetryOptions, maxDelayMs: 60_000 });
+
+      await jest.advanceTimersByTimeAsync(59_000);
+      expect(fn).toHaveBeenCalledTimes(1);
+      await jest.advanceTimersByTimeAsync(1_000);
       await expect(result).resolves.toBe('ok');
-      expect(onRetry).toHaveBeenCalledWith(expect.objectContaining({ delayMs: 60_000 }));
     });
   });
 

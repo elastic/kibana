@@ -110,9 +110,7 @@ function computeDelayMs({
   jitter: boolean;
 }): number {
   const exp = Math.min(maxDelayMs, minDelayMs * Math.pow(2, attempt - 1));
-  // A quota-exhausted 429 can advertise an hour; past the cap the attempt budget,
-  // not the server's hint, bounds the wait, so the error still surfaces.
-  const base = retryAfterMs ? Math.min(maxDelayMs, Math.max(exp, retryAfterMs)) : exp;
+  const base = retryAfterMs ? Math.max(exp, retryAfterMs) : exp;
 
   if (!jitter) return base;
 
@@ -177,6 +175,11 @@ export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions =
       const { retry, retryAfterMs } = isRetryable(error);
       const isLast = attempt === maxAttempts;
       if (!retry || isLast || options.shouldRetry?.(error) === false) {
+        throw error;
+      }
+      // A retry sent before the server's Retry-After window (a quota 429 can
+      // advertise an hour) is still throttled and only burns an attempt.
+      if (retryAfterMs !== undefined && retryAfterMs > maxDelayMs) {
         throw error;
       }
 
