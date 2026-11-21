@@ -73,4 +73,15 @@ describe('the golden fixture seeds a chain that spans more than one rule', () =>
 
     expect(new Set(rules.map(({ name }) => name)).size).toBe(rules.length);
   });
+
+  it('links the LSASS access to the encoded PowerShell process as its child', async () => {
+    const [powershell, lsass] = (await seededDocuments()).map(
+      ({ source }) =>
+        source.process as { name: string; entity_id?: string; parent?: Record<string, unknown> }
+    );
+
+    expect(lsass.parent).toEqual(
+      expect.objectContaining({ name: powershell.name, entity_id: powershell.entity_id })
+    );
+  });
 });
