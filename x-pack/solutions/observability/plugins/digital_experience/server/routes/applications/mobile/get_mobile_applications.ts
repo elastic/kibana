@@ -7,9 +7,8 @@
 
 import { withSpan } from '@kbn/apm-utils';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import type { RESULT_COLUMNS } from '../../../../common/mobile/fields';
-import { MOBILE_FIELDS } from '../../../../common/mobile/fields';
-import { runMobileEsql, timeFilter } from '../../../lib/mobile/esql';
+import { MOBILE_FIELDS, RESULT_COLUMNS } from '../../../../common/mobile/fields';
+import { runEsql, timeFilter } from '../../../lib/esql';
 import { toEnvironments } from '../../../lib/mobile/rows';
 import type { EnvironmentRow } from '../../../lib/mobile/rows';
 import { MOBILE_SEARCH_SPAN_NAME } from '../constants';
@@ -40,13 +39,13 @@ const searchMobileApplications = async ({
   environment,
 }: GetMobileApplicationsParams): Promise<SourceApplications> => {
   const [applicationRows, environmentRows] = await Promise.all([
-    runMobileEsql<MobileApplicationRow>(
+    runEsql<MobileApplicationRow>(
       esClient,
       'get_mobile_applications',
       applicationsQuery(),
       timeFilter(start, end, environment)
     ),
-    runMobileEsql<EnvironmentRow>(
+    runEsql<EnvironmentRow>(
       esClient,
       'get_mobile_environments',
       environmentsQuery(),
@@ -56,10 +55,12 @@ const searchMobileApplications = async ({
 
   // Only for the listed applications, so each gets its latest release whatever the cap; that of
   // the last 24 hours of the range.
-  const serviceNames = applicationRows.map((row) => row[MOBILE_FIELDS.serviceName]);
+  const serviceNames = applicationRows.map(
+    (row: MobileApplicationRow) => row[MOBILE_FIELDS.serviceName]
+  );
   const releaseRows =
     serviceNames.length > 0
-      ? await runMobileEsql<LatestReleaseRow>(
+      ? await runEsql<LatestReleaseRow>(
           esClient,
           'get_mobile_latest_releases',
           latestReleasesQuery(serviceNames),
@@ -67,7 +68,10 @@ const searchMobileApplications = async ({
         )
       : [];
   const latestByApplication = new Map(
-    releaseRows.map((row) => [row[MOBILE_FIELDS.serviceName], row.latest_release ?? null])
+    releaseRows.map((row) => [
+      row[MOBILE_FIELDS.serviceName],
+      row[RESULT_COLUMNS.latestRelease] ?? null,
+    ])
   );
 
   return {

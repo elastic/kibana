@@ -8,8 +8,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ComposerQuery } from '@elastic/esql';
 import type { EsqlOutput, TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { ENVIRONMENT_FIELDS } from '../../../common/otel_data';
-import { environmentFilter } from '../helpers/environment';
+import { ENVIRONMENT_FIELDS } from '../../common/otel_data';
+import { environmentFilter } from './helpers/environment';
 
 const UNKNOWN_INDEX = /Unknown index/;
 
@@ -22,10 +22,10 @@ export const isUnknownIndexError = (error: unknown): boolean => {
 };
 
 /**
- * The rows of a mobile ES|QL query, traced as `operationName`; none when its indices don't exist.
+ * The rows of an ES|QL query, traced as `operationName`; none when its indices don't exist.
  * A failed shard fails the query, as partial counts would pass for complete ones.
  */
-export const runMobileEsql = async <TRow extends object>(
+export const runEsql = async <TRow extends object>(
   esClient: TracedElasticsearchClient,
   operationName: string,
   query: ComposerQuery,

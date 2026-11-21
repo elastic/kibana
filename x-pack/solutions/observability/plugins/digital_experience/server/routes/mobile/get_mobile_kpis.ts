@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { compact } from 'lodash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { mobilePanelDiscoverEsql } from '../../../common/mobile/discover';
+import { RESULT_COLUMNS } from '../../../common/mobile/fields';
 import { mobilePanelQuery, type MobilePanelFilters } from '../../../common/mobile/filters';
 import {
   getMobileTimeBucket,
@@ -16,7 +18,7 @@ import {
   type KpiRow,
 } from '../../../common/mobile/kpis';
 import type { MobileKpisResponse } from '../../../common/types/mobile';
-import { runMobileEsql, timeFilter } from '../../lib/mobile/esql';
+import { runEsql, timeFilter } from '../../lib/esql';
 import { withEnvironmentCounts, withOsCounts, withReleaseCounts } from '../../lib/mobile/queries';
 import { toEnvironments, toOsNames, toPlatforms, toReleases } from '../../lib/mobile/rows';
 import type { EnvironmentRow, OsRow, ReleaseRow } from '../../lib/mobile/rows';
@@ -32,8 +34,14 @@ export interface GetMobileKpisParams {
 /** Releases listed in the release picker. */
 const MAX_RELEASE_ROWS = 1000;
 
-const errorRateOf = (row: KpiRow | undefined): number | null =>
-  row?.sessions ? (row.exceptions ?? 0) / row.sessions : null;
+/** A KPI of the row; `null` without data, when the row or its column is missing. */
+const kpiOf = (row: KpiRow | undefined, column: keyof KpiRow): number | null =>
+  row?.[column] ?? null;
+
+const errorRateOf = (row: KpiRow | undefined): number | null => {
+  const sessions = kpiOf(row, RESULT_COLUMNS.sessions);
+  return sessions ? (kpiOf(row, RESULT_COLUMNS.exceptions) ?? 0) / sessions : null;
+};
 
 /** The KPI row of an application: the period's values against the period of equal length before. */
 export const getMobileKpis = async ({
@@ -51,31 +59,26 @@ export const getMobileKpis = async ({
   // The pickers list what the application reported, whatever their own filter: the releases on the
   // selected OS, the OS names on any release.
   const [[current], [before], releaseRows, osRows, environmentRows] = await Promise.all([
-    runMobileEsql<KpiRow>(
-      esClient,
-      'get_mobile_kpis',
-      statsQuery,
-      timeFilter(start, end, environment)
-    ),
-    runMobileEsql<KpiRow>(
+    runEsql<KpiRow>(esClient, 'get_mobile_kpis', statsQuery, timeFilter(start, end, environment)),
+    runEsql<KpiRow>(
       esClient,
       'get_mobile_kpis_previous',
       statsQuery,
       timeFilter(previous.start, previous.end, environment)
     ),
-    runMobileEsql<ReleaseRow>(
+    runEsql<ReleaseRow>(
       esClient,
       'get_mobile_releases',
       withReleaseCounts(mobilePanelQuery({ ...application, osName }), MAX_RELEASE_ROWS),
       timeFilter(start, end, environment)
     ),
-    runMobileEsql<OsRow>(
+    runEsql<OsRow>(
       esClient,
       'get_mobile_os_names',
       withOsCounts(mobilePanelQuery(application)),
       timeFilter(start, end, environment)
     ),
-    runMobileEsql<EnvironmentRow>(
+    runEsql<EnvironmentRow>(
       esClient,
       'get_mobile_application_environments',
       withEnvironmentCounts(mobilePanelQuery(application)),
@@ -84,15 +87,23 @@ export const getMobileKpis = async ({
   ]);
 
   return {
-    hasData: (current?.docs ?? 0) > 0,
-    sessions: toComparedValue(current?.sessions ?? null, before?.sessions ?? null),
-    users: toComparedValue(current?.users ?? null, before?.users ?? null),
+    hasData: (kpiOf(current, RESULT_COLUMNS.docs) ?? 0) > 0,
+    sessions: toComparedValue(
+      kpiOf(current, RESULT_COLUMNS.sessions),
+      kpiOf(before, RESULT_COLUMNS.sessions)
+    ),
+    users: toComparedValue(
+      kpiOf(current, RESULT_COLUMNS.users),
+      kpiOf(before, RESULT_COLUMNS.users)
+    ),
     // A crash isn't defined yet (#64) and session start doesn't reach the SDKs: not enough data.
     crashFreeSessions: toComparedValue(null, null),
     errorRate: toComparedValue(errorRateOf(current), errorRateOf(before)),
     releases: toReleases(releaseRows),
     osNames: toOsNames(osRows),
-    platforms: toPlatforms(osRows.flatMap(({ platform }) => (platform ? [platform] : []))),
+    platforms: toPlatforms(
+      compact(osRows.map(({ [RESULT_COLUMNS.platform]: platform }) => platform))
+    ),
     environments: toEnvironments(environmentRows),
     bucket,
     esql: mobilePanelDiscoverEsql(filters, { bucket, environment }),

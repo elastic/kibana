@@ -6,8 +6,7 @@
  */
 
 import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../../common/application_source';
-import type { RESULT_COLUMNS } from '../../../../common/mobile/fields';
-import { MOBILE_FIELDS } from '../../../../common/mobile/fields';
+import { MOBILE_FIELDS, RESULT_COLUMNS } from '../../../../common/mobile/fields';
 import type { MobileApplicationSummary } from '../../../../common/types/applications';
 import { toPlatforms } from '../../../lib/mobile/rows';
 
@@ -27,9 +26,16 @@ export const toApplication = (
   row: MobileApplicationRow,
   { environments, latest }: { environments: string[]; latest: string | null }
 ): MobileApplicationSummary => {
-  const { sessions = 0, users = 0, exceptions = 0, platforms, last_seen: lastSeen } = row;
+  const {
+    [MOBILE_FIELDS.serviceName]: serviceName,
+    [RESULT_COLUMNS.sessions]: sessions = 0,
+    [RESULT_COLUMNS.users]: users = 0,
+    [RESULT_COLUMNS.exceptions]: exceptions = 0,
+    [RESULT_COLUMNS.platforms]: platforms,
+    [RESULT_COLUMNS.lastSeen]: lastSeen,
+  } = row;
   return {
-    serviceName: row[MOBILE_FIELDS.serviceName],
+    serviceName,
     source: APPLICATION_SOURCE.otel,
     applicationType: APPLICATION_TYPE.mobile,
     platforms: toPlatforms(platforms),

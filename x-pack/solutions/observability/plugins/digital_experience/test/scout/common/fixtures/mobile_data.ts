@@ -78,15 +78,20 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
     installationId: 'installation-rn-ipad',
     sessionId: 'RN-I-2',
   },
-  {
+  // Most sessions still on 2.9.0, the newest release 2.10.0, which only a version sort puts last.
+  ...[
+    { version: '2.9.0', sessionId: 'android-1' },
+    { version: '2.9.0', sessionId: 'android-2' },
+    { version: '2.10.0', sessionId: 'android-3' },
+  ].map(({ version, sessionId }) => ({
     ...EDOT_MOBILE,
     serviceName: MOBILE_APPS.android,
     sdkLanguage: 'java',
     osName: 'Android',
-    version: '2.1.0',
-    installationId: 'installation-android',
-    sessionId: 'android-1',
-  },
+    version,
+    installationId: `installation-${sessionId}`,
+    sessionId,
+  })),
   {
     serviceName: MOBILE_APPS.legacyAndroid,
     sdkName: 'android',
@@ -148,11 +153,12 @@ export const EXPECTED_MOBILE_ROWS = [
     errorRate: 0.25,
   },
   {
+    // The newest release, not the one with the most sessions.
     serviceName: MOBILE_APPS.android,
     platforms: ['android'],
-    latestRelease: '2.1.0',
-    sessions: { count: 1 },
-    users: { count: 1 },
+    latestRelease: '2.10.0',
+    sessions: { count: 3 },
+    users: { count: 3 },
     errorRate: 0,
   },
   {

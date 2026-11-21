@@ -7,8 +7,7 @@
 
 import { castArray, compact, sortBy, uniq } from 'lodash';
 import { isMobilePlatform } from '../../../common/application_source';
-import type { RESULT_COLUMNS } from '../../../common/mobile/fields';
-import { MOBILE_FIELDS } from '../../../common/mobile/fields';
+import { MOBILE_FIELDS, RESULT_COLUMNS } from '../../../common/mobile/fields';
 import type { MobilePlatform } from '../../../common/types/applications';
 import { MAX_ENVIRONMENTS } from '../constants';
 import { withNotDefined } from '../helpers/environment';
@@ -38,11 +37,11 @@ export const toPlatforms = (values: string | string[] | null | undefined): Mobil
 
 /** The OS names of rows, in their order. */
 export const toOsNames = (rows: OsRow[]): string[] =>
-  uniq(compact(rows.map(({ os_name: osName }) => osName)));
+  uniq(compact(rows.map(({ [RESULT_COLUMNS.osName]: osName }) => osName)));
 
 /** The releases of rows, in their order. */
 export const toReleases = (rows: ReleaseRow[]): string[] =>
-  compact(rows.map(({ release }) => release));
+  compact(rows.map(({ [RESULT_COLUMNS.release]: release }) => release));
 
 /**
  * The environments of rows grouped by both environment fields, "Not defined" included when a row
@@ -56,7 +55,7 @@ export const toEnvironments = (rows: EnvironmentRow[]): string[] => {
   );
   const notDefined = rows
     .filter((row) => !row[MOBILE_FIELDS.environment] && !row[MOBILE_FIELDS.environmentName])
-    .reduce((total, { docs }) => total + (docs ?? 0), 0);
+    .reduce((total, { [RESULT_COLUMNS.docs]: docs }) => total + (docs ?? 0), 0);
   // Rows come most used first, so the cap keeps the most used names, as the web sources' terms do.
   return withNotDefined(names.slice(0, MAX_ENVIRONMENTS), notDefined);
 };

@@ -27,8 +27,8 @@ export const applicationsQuery = (): ComposerQuery =>
   )} ASC`.pipe`LIMIT ${MAX_APPLICATIONS_PER_SOURCE}`;
 
 /**
- * The latest release, the one with the most sessions, of each of `serviceNames` on each platform
- * over the window the query is run with.
+ * The newest release of each of `serviceNames` on any platform over the window the query is run
+ * with.
  */
 export const latestReleasesQuery = (serviceNames: string[]): ComposerQuery =>
   withLatestReleases(mobileDocuments().pipe`WHERE ${inValues('serviceName', serviceNames)}`)

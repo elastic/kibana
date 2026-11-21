@@ -7,7 +7,7 @@
 
 import { esql } from '@elastic/esql';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { runMobileEsql, timeFilter } from './esql';
+import { runEsql, timeFilter } from './esql';
 
 const verificationError = (reason: string) =>
   Object.assign(new Error('verification_exception'), {
@@ -17,14 +17,14 @@ const verificationError = (reason: string) =>
 const clientWith = (esqlCall: jest.Mock) =>
   ({ esql: esqlCall } as unknown as TracedElasticsearchClient);
 
-describe('runMobileEsql', () => {
+describe('runEsql', () => {
   const filter = { match_all: {} };
   const query = esql.from('logs-*').pipe`WHERE a == ${{ a: 'b' }}`;
 
   it('runs the query traced, with its params, asking for complete results as plain rows', async () => {
     const esqlCall = jest.fn().mockResolvedValue({ hits: [{ a: 1 }] });
 
-    const rows = await runMobileEsql(clientWith(esqlCall), 'get_rows', query, filter);
+    const rows = await runEsql(clientWith(esqlCall), 'get_rows', query, filter);
 
     expect(rows).toEqual([{ a: 1 }]);
     expect(esqlCall).toHaveBeenCalledWith(
@@ -43,15 +43,13 @@ describe('runMobileEsql', () => {
   it('has no rows when the indices are gone', async () => {
     const esqlCall = jest.fn().mockRejectedValue(verificationError('Unknown index [logs-*]'));
 
-    await expect(runMobileEsql(clientWith(esqlCall), 'get_rows', query, filter)).resolves.toEqual(
-      []
-    );
+    await expect(runEsql(clientWith(esqlCall), 'get_rows', query, filter)).resolves.toEqual([]);
   });
 
   it('fails on any other error, e.g. a failed shard', async () => {
     const esqlCall = jest.fn().mockRejectedValue(new Error('search_phase_execution_exception'));
 
-    await expect(runMobileEsql(clientWith(esqlCall), 'get_rows', query, filter)).rejects.toThrow(
+    await expect(runEsql(clientWith(esqlCall), 'get_rows', query, filter)).rejects.toThrow(
       'search_phase_execution_exception'
     );
   });

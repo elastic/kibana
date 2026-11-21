@@ -46,6 +46,11 @@ export const attributeField = (name: string): string => `attributes.${name}`;
 /** A resource attribute as stored in the OTel indices, e.g. `resource.attributes.service.name`. */
 export const resourceAttributeField = (name: string): string => `resource.attributes.${name}`;
 
+/** OTel resource attributes the mobile data carries that `@kbn/apm-types` doesn't name. */
+export const OS_NAME = 'os.name';
+export const TELEMETRY_DISTRO_NAME = 'telemetry.distro.name';
+export const APP_INSTALLATION_ID = 'app.installation.id';
+
 /** Span name in the OTel traces indices; events are named in `event_name` instead. */
 export const OTEL_SPAN_NAME = 'name';
 

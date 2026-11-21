@@ -6,6 +6,7 @@
  */
 
 import { forbidden, internal } from '@hapi/boom';
+import { orderBy } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../common/application_source';
@@ -63,22 +64,18 @@ const toClientError = (failures: SourceFailure[]) =>
     ? forbidden(NO_ACCESS_MESSAGE)
     : internal(LOAD_FAILED_MESSAGE);
 
-/** Web rows sort by page loads and mobile rows by sessions; web rows come first. */
-const byActivityThenName = (a: ApplicationSummary, b: ApplicationSummary): number => {
-  if (
-    a.applicationType === APPLICATION_TYPE.mobile &&
-    b.applicationType === APPLICATION_TYPE.mobile
-  ) {
-    return b.sessions.count - a.sessions.count || a.serviceName.localeCompare(b.serviceName);
-  }
-  if (a.applicationType === APPLICATION_TYPE.mobile) {
-    return 1;
-  }
-  if (b.applicationType === APPLICATION_TYPE.mobile) {
-    return -1;
-  }
-  return b.pageLoads.count - a.pageLoads.count || a.serviceName.localeCompare(b.serviceName);
-};
+const isMobile = ({ applicationType }: ApplicationSummary): boolean =>
+  applicationType === APPLICATION_TYPE.mobile;
+
+/** Sessions of a mobile row, page loads of a web row. */
+const activityOf = (application: ApplicationSummary): number =>
+  application.applicationType === APPLICATION_TYPE.mobile
+    ? application.sessions.count
+    : application.pageLoads.count;
+
+/** Web rows first, then each by activity, most first, then by name. */
+const sortApplications = (applications: ApplicationSummary[]): ApplicationSummary[] =>
+  orderBy(applications, [isMobile, activityOf, 'serviceName'], ['asc', 'desc', 'asc']);
 
 /**
  * Merges the applications of each source; a source whose search fails is left out and listed in
@@ -184,7 +181,7 @@ export const getApplications = async ({
   allFailures.forEach((failure) => logger.warn(describeFailure(failure)));
 
   return {
-    applications: loaded.flatMap(({ applications }) => applications).sort(byActivityThenName),
+    applications: sortApplications(loaded.flatMap(({ applications }) => applications)),
     environments: sortEnvironments(loaded.flatMap(({ environments }) => environments)),
     pageLoadsOverTime,
     sessionsOverTime,

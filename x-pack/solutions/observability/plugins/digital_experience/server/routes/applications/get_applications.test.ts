@@ -309,6 +309,24 @@ describe('getApplications', () => {
       expect(mobileAvailability).toBe('complete');
     });
 
+    it('sorts rows with the same activity by name, web and mobile alike', async () => {
+      const { applications } = await getApplications({
+        getOtelApplications: async () => result([app('shop', 'otel', 5), app('docs', 'otel', 5)]),
+        getMobileApplications: async () => ({
+          applications: [mobileApp('trailmap', 3), mobileApp('news', 3)],
+          environments: [],
+        }),
+        logger,
+      });
+
+      expect(applications.map(({ serviceName }) => serviceName)).toEqual([
+        'docs',
+        'shop',
+        'news',
+        'trailmap',
+      ]);
+    });
+
     it('reports them unavailable, not a source, when their search fails', async () => {
       const response = await getApplications({
         getOtelApplications: async () => result([app('shop', 'otel', 5)]),

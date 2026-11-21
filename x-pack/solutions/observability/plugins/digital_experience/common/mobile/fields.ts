@@ -7,6 +7,7 @@
 
 import { Builder, esql } from '@elastic/esql';
 import {
+  EXCEPTION_TYPE,
   RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -15,13 +16,19 @@ import {
   TELEMETRY_SDK_LANGUAGE,
   TELEMETRY_SDK_NAME,
 } from '@kbn/apm-types';
-import { attributeField, resourceAttributeField } from '../otel_data';
+import {
+  APP_INSTALLATION_ID,
+  OS_NAME,
+  TELEMETRY_DISTRO_NAME,
+  attributeField,
+  resourceAttributeField,
+} from '../otel_data';
 import type { MobilePlatform } from '../types/applications';
 
 /** The fields the mobile queries read, as stored in the OTel indices. */
 export const MOBILE_FIELDS = {
-  distroName: resourceAttributeField('telemetry.distro.name'),
-  osName: resourceAttributeField('os.name'),
+  distroName: resourceAttributeField(TELEMETRY_DISTRO_NAME),
+  osName: resourceAttributeField(OS_NAME),
   sdkLanguage: TELEMETRY_SDK_LANGUAGE,
   sdkName: TELEMETRY_SDK_NAME,
   serviceName: SERVICE_NAME,
@@ -29,8 +36,8 @@ export const MOBILE_FIELDS = {
   serviceVersion: SERVICE_VERSION,
   sessionId: attributeField(SESSION_ID),
   /** One per install of the app, so it counts users. */
-  installationId: resourceAttributeField('app.installation.id'),
-  exceptionType: attributeField('exception.type'),
+  installationId: resourceAttributeField(APP_INSTALLATION_ID),
+  exceptionType: attributeField(EXCEPTION_TYPE),
   environment: SERVICE_ENVIRONMENT,
   environmentName: RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
 } as const;
