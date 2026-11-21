@@ -11,13 +11,16 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   createConversationNotFoundError,
+  isUserProfileId,
 } from '@kbn/agent-builder-common';
 import type {
   AttachmentPublicClient,
   ConversationPublicClient,
   ConversationTemplatesStart,
 } from '@kbn/agent-builder-server';
-import type { ConversationSearchSort } from '@kbn/agent-builder-common';
+import type { Conversation, ConversationSearchSort } from '@kbn/agent-builder-common';
+import type { AssignmentsService } from '../../assignments/assignments_service';
+import { toStringArray } from '../../assignments/assignments_service';
 import type { EscalationLinkActor } from '../../../common/escalations/can_link_escalation';
 import { canLinkEscalation } from '../../../common/escalations/can_link_escalation';
 import type {
@@ -38,6 +41,8 @@ import type {
 import type { ImpactReadClient } from '../../impact/services/impact_client';
 import type { InvestigationStatusService } from '../../investigations/services/investigation_status_service';
 import { assertNoUnexpectedProposals } from '../../investigations/services/investigation_status_service';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
+import { InvestigationsForbiddenError } from '../../investigations/services/investigations_forbidden_error';
 import { CloseTargetsChangedError } from '../../investigations/services/close_targets_changed_error';
 import { EscalationCloseIncompleteError } from './escalation_close_incomplete_error';
 import { LinkedInvestigationUnavailableError } from './linked_investigation_unavailable_error';
@@ -146,6 +151,9 @@ export interface EscalationsServiceDeps {
   ) => Promise<Map<string, number> | undefined>;
   /** Conversation principal of the caller, matching `user.id` and ACL entry ids. */
   getLinkActor: (request: KibanaRequest) => EscalationLinkActor | Promise<EscalationLinkActor>;
+  getAssignmentsService: () => AssignmentsService;
+  /** Gates assigning the caller to the investigations an escalation is created from or linked to. */
+  investigationsPrivileges: Pick<InvestigationsPrivilegesChecker, 'assertCanManage'>;
 }
 
 export class EscalationsService {
@@ -161,6 +169,8 @@ export class EscalationsService {
   private readonly getInvestigationStatusService: () => InvestigationStatusService;
   private readonly countPendingProposals: EscalationsServiceDeps['countPendingProposals'];
   private readonly getLinkActor: EscalationsServiceDeps['getLinkActor'];
+  private readonly getAssignmentsService: () => AssignmentsService;
+  private readonly investigationsPrivileges: EscalationsServiceDeps['investigationsPrivileges'];
 
   constructor({
     logger,
@@ -171,6 +181,8 @@ export class EscalationsService {
     getImpactClient,
     countPendingProposals,
     getLinkActor,
+    getAssignmentsService,
+    investigationsPrivileges,
   }: EscalationsServiceDeps) {
     this.logger = logger;
     this.getImpactClient = getImpactClient;
@@ -180,6 +192,8 @@ export class EscalationsService {
     this.getInvestigationStatusService = getInvestigationStatusService;
     this.countPendingProposals = countPendingProposals;
     this.getLinkActor = getLinkActor;
+    this.getAssignmentsService = getAssignmentsService;
+    this.investigationsPrivileges = investigationsPrivileges;
   }
 
   async create(
@@ -254,6 +268,8 @@ export class EscalationsService {
       },
     ]);
 
+    await this.assignToInvestigations(request, escalation.user?.id, [investigation]);
+
     return escalation;
   }
 
@@ -309,18 +325,84 @@ export class EscalationsService {
     );
 
     const previouslyLinked = new Set(prev);
+    const newlyLinked = [...new Set(toAdd)]
+      .filter((id) => !previouslyLinked.has(id))
+      .flatMap((id) => {
+        const investigation = resolved.get(id);
+        return investigation ? [investigation] : [];
+      });
     await this.addTimelineEvents(
       client,
       escalationId,
-      toAdd
-        .filter((id, index) => !previouslyLinked.has(id) && toAdd.indexOf(id) === index)
-        .map((id) => ({
-          type: ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
-          data: toEventData(resolved.get(id)!),
-        }))
+      newlyLinked.map((investigation) => ({
+        type: ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
+        data: toEventData(investigation),
+      }))
+    );
+
+    // Linking only claims investigations nobody is assigned to yet.
+    await this.assignToInvestigations(
+      request,
+      actor.profileUid,
+      newlyLinked.filter(({ metadata }) => toStringArray(metadata?.assignees).length === 0)
     );
 
     return conversation;
+  }
+
+  /**
+   * Appends `assignee` to each investigation's assignees. Best-effort like `addTimelineEvents`:
+   * the escalation write already succeeded, so a failure is logged and never thrown. Skipped for
+   * principals without a user profile and for callers who may not manage investigations.
+   */
+  private async assignToInvestigations(
+    request: KibanaRequest,
+    assignee: string | undefined,
+    investigations: Array<Pick<Conversation, 'id' | 'metadata'>>
+  ): Promise<void> {
+    if (!isUserProfileId(assignee)) return;
+
+    const targets = investigations
+      .map(({ id, metadata }) => ({ id, assignees: toStringArray(metadata?.assignees) }))
+      .filter(({ assignees }) => !assignees.includes(assignee));
+    if (targets.length === 0) return;
+
+    try {
+      await this.investigationsPrivileges.assertCanManage(request);
+    } catch (error) {
+      if (error instanceof InvestigationsForbiddenError) {
+        this.logger.debug(
+          `Not assigning the caller to investigations ${targets.map(({ id }) => id).join(', ')}: ${
+            error.message
+          }`
+        );
+      } else {
+        this.logger.warn(
+          `Failed to check investigation privileges before assigning: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+      return;
+    }
+
+    const assignmentsService = this.getAssignmentsService();
+    for (const { id, assignees } of targets) {
+      try {
+        await assignmentsService.assign({
+          request,
+          conversationId: id,
+          assignees: [...assignees, assignee],
+          expectedTemplate: INVESTIGATION_TEMPLATE_ID,
+        });
+      } catch (error) {
+        this.logger.warn(
+          `Failed to assign the caller to investigation ${id}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
   }
 
   /**
