@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSkillInvocationEvaluator } from './skill_invocation';
+import { createSkillInvocationEvaluator, getSkillInvocationPatterns } from './skill_invocation';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -64,6 +64,31 @@ describe('createSkillInvocationEvaluator', () => {
     expect(calledQuery).toContain('attributes.elastic.inference.span.kind == "TOOL"');
     expect(calledQuery).toContain('attributes.gen_ai.tool.name == "filestore.read"');
     expect(calledQuery).toContain('*/data-exploration/SKILL.md*');
+  });
+
+  it('should build a query that also matches load_skill calls for the skill', async () => {
+    const evaluator = createSkillInvocationEvaluator({
+      traceEsClient: mockEsClient,
+      log: mockLog,
+      skillName: 'data-exploration',
+    });
+
+    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+      columns: [
+        { name: 'total_spans', type: 'long' },
+        { name: 'total_tool_spans', type: 'long' },
+        { name: 'skill_invoked', type: 'long' },
+      ],
+      values: [[50, 1, 1]],
+    });
+
+    await evaluateWith(evaluator, VALID_TRACE_ID);
+
+    const calledQuery = (mockEsClient.esql.query as jest.Mock).mock.calls[0][0].query;
+    expect(calledQuery).toContain('attributes.gen_ai.tool.name == "load_skill"');
+    expect(calledQuery).toContain(
+      String.raw`RLIKE ".*[\\\" /]data-exploration(/SKILL\\.md)?[\\\" ].*"`
+    );
   });
 
   it('should return 1 when the skill was invoked', async () => {
@@ -277,6 +302,66 @@ describe('createSkillInvocationEvaluator', () => {
 
     expect(result.label).toBe('error');
     expect(result.score).toBeUndefined();
+  });
+
+  describe('getSkillInvocationPatterns', () => {
+    // ES|QL LIKE: `*` matches any run of characters, `?` a single character.
+    const likeToRegExp = (pattern: string) =>
+      new RegExp(
+        `^${pattern
+          .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+          .replace(/\*/g, '.*')
+          .replace(/\?/g, '.')}$`
+      );
+
+    // ES|QL RLIKE matches the whole string, like an anchored JS regex.
+    const matchesLoadSkill = (skillName: string, args: string) =>
+      new RegExp(`^${getSkillInvocationPatterns(skillName).loadSkill}$`).test(args);
+
+    const matchesFilestoreRead = (skillName: string, args: string) =>
+      likeToRegExp(getSkillInvocationPatterns(skillName).filestoreRead).test(args);
+
+    // Every form resolveSkill accepts: it trims whitespace, drops a trailing `/SKILL.md` and
+    // tolerates a leading `/`.
+    it.each([
+      ['bare name', '{"skill":"alert-analysis"}'],
+      ['bare name with surrounding whitespace', '{"skill":" alert-analysis "}'],
+      ['bare name with a leading slash', '{"skill":"/alert-analysis"}'],
+      ['bare name with a SKILL.md suffix', '{"skill":"alert-analysis/SKILL.md"}'],
+      ['folder path', '{"skill":"/skills/security/alert-analysis"}'],
+      ['SKILL.md path', '{"skill":"/skills/security/alert-analysis/SKILL.md"}'],
+      ['padded SKILL.md path', '{"skill":" /skills/security/alert-analysis/SKILL.md "}'],
+    ])('matches a load_skill call using a %s', (_label, args) => {
+      expect(matchesLoadSkill('alert-analysis', args)).toBe(true);
+    });
+
+    it.each([
+      ['a longer name', '{"skill":"alert-analysis-v2"}'],
+      ['a prefixed name', '{"skill":"my-alert-analysis"}'],
+      ['a different skill', '{"skill":"data-exploration"}'],
+      ['a shorter name', '{"skill":"alert"}'],
+      ['a longer name with a SKILL.md suffix', '{"skill":"alert-analysis-v2/SKILL.md"}'],
+      ['a longer folder path', '{"skill":"/skills/security/alert-analysis-v2"}'],
+      ['a longer SKILL.md path', '{"skill":"/skills/security/alert-analysis-v2/SKILL.md"}'],
+      ['a prefixed folder path', '{"skill":"/skills/security/my-alert-analysis"}'],
+    ])('does not match a load_skill call for %s', (_label, args) => {
+      expect(matchesLoadSkill('alert-analysis', args)).toBe(false);
+    });
+
+    it('matches a filestore.read of the skill SKILL.md only', () => {
+      expect(
+        matchesFilestoreRead(
+          'alert-analysis',
+          '{"path":"/skills/security/alert-analysis/SKILL.md"}'
+        )
+      ).toBe(true);
+      expect(
+        matchesFilestoreRead(
+          'alert-analysis',
+          '{"path":"/skills/security/alert-analysis-v2/SKILL.md"}'
+        )
+      ).toBe(false);
+    });
   });
 
   it('should throw for invalid skill names', () => {
