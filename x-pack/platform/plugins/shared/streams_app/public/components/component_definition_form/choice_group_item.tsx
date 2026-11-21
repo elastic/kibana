@@ -13,6 +13,7 @@ import { isFieldAvailable } from './conditions';
 import { labelOf } from './field_helpers';
 import { FieldRowItem } from './field_row_item';
 import { useDefinitionFormContext } from './form_context';
+import { toRowChrome } from './row_chrome';
 import type { FormValue, ObjectValue } from './values';
 
 const NO_CHOICE = '__none__';
@@ -25,6 +26,7 @@ interface ChoiceGroupItemProps {
   selected: string | undefined;
   onSelect: (group: CatalogueChoiceGroup, fieldName: string | undefined) => void;
   onFieldChange: (name: string, fieldValue: FormValue | undefined) => void;
+  compact?: boolean;
 }
 
 /**
@@ -39,6 +41,7 @@ export function ChoiceGroupItem({
   selected,
   onSelect,
   onFieldChange,
+  compact,
 }: ChoiceGroupItemProps) {
   const { telemetry } = useDefinitionFormContext();
   const members = group.fields.flatMap((name) => {
@@ -86,8 +89,13 @@ export function ChoiceGroupItem({
   );
 
   if (!selectedField) {
+    const { label, labelAppend, helpText } = toRowChrome({
+      label: group.label ?? group.id,
+      alternatives: links,
+      compact,
+    });
     return (
-      <EuiFormRow fullWidth label={group.label ?? group.id} labelAppend={links}>
+      <EuiFormRow fullWidth label={label} labelAppend={labelAppend} helpText={helpText}>
         <EuiText size="s" color="subdued">
           {i18n.translate('xpack.streams.componentDefinitionForm.choice.unset', {
             defaultMessage: 'Not set',
@@ -102,7 +110,8 @@ export function ChoiceGroupItem({
       value={value}
       pointer={pointer}
       onFieldChange={onFieldChange}
-      labelAppend={links}
+      alternatives={links || undefined}
+      compact={compact}
     />
   );
 }
