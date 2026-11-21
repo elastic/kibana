@@ -454,4 +454,13 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+  [
+    '.microsoft_defender_xdr',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconMicrosoftDefenderXdr" */ './specs/microsoft_defender_xdr/icon'
+        )
+    ),
+  ],
 ]);
