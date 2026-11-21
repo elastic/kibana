@@ -29,7 +29,6 @@ import {
   type InspectorSession,
 } from './profile_capture';
 import { fileName, prepareProfile } from './profile_file';
-import { capDir } from './sanitize';
 import { summarizeProfile, type CallerSummary, type ProfileSummary } from './profile_summary';
 import type {
   BlockLogMeta,
@@ -181,7 +180,7 @@ export const runWatchdogWorker = (
     const { blockedMs, startedAt, phase, suppressedBlocks, ongoing } = block;
     logger.warn<BlockLogMeta>(
       `Event loop blocked for ~${blockedMs}ms${ongoing ? ' so far' : ''}${
-        suppressedBlocks ? `; ${blocks(suppressedBlocks)} before it not reported` : ''
+        suppressedBlocks ? `; ${suppressedBlocks} rate-limited, not logged` : ''
       }`,
       {
         tags: ['event-loop-watchdog'],
@@ -347,11 +346,10 @@ export const runWatchdogWorker = (
         ? 'no_directory'
         : admission.admit(profileSignature(summary), wallClockMs());
     let path: string | undefined;
-    let loggedPath: string | undefined;
+    let name: string | undefined;
     if (diagnosticDir && file === 'admitted') {
-      const name = fileName(phase, blockedMs, new Date());
+      name = fileName(phase, blockedMs, new Date());
       path = Path.join(diagnosticDir, name);
-      loggedPath = Path.join(capDir(diagnosticDir), name);
     }
     if (file === 'same_frame') {
       counts.files.sameFrame++;
@@ -368,7 +366,7 @@ export const runWatchdogWorker = (
         stopReason === 'block_ended' ? '' : ' so far'
       } (profiled after ~${profiledAfterMs}ms, profiler start took ~${profilerStartMs}ms), ${
         summary.samples
-      } samples; stopped: ${stopReason}.${loggedPath ? ` Writing ${loggedPath}.` : ''}${
+      } samples; stopped: ${stopReason}.${name ? ` Writing ${name}.` : ''}${
         frameLists ? ` ${frameLists}` : ''
       }`,
       {
@@ -470,6 +468,7 @@ export const runWatchdogWorker = (
     }
     const droppedBefore = logger.getDroppedLogLineCount();
     const snapshot = stats.snapshot(now);
+    const profilingOn = Atomics.load(shared, Slot.profiling) === 1n;
     logger.info<StatsLogMeta>(
       `Event loop watchdog stats for the last ${Math.round(snapshot.periodMs / 1000)}s: ${blocks(
         snapshot.starting.blocks
@@ -482,7 +481,10 @@ export const runWatchdogWorker = (
               ...snapshot,
               heapUsed: heapUsed(),
               droppedLogLines: droppedBefore - reportedDroppedLogLines,
-              profiling: counts,
+              profiling: {
+                ...counts,
+                diagnosticDir: profilingOn ? profiling.diagnosticDir : undefined,
+              },
             },
           },
         },

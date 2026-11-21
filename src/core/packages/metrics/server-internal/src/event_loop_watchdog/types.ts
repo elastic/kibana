@@ -152,7 +152,10 @@ export interface StatsLogMeta extends LogMeta {
         heapUsed: number;
         /** Worker log lines lost since the last stats log line that was written. */
         droppedLogLines: number;
-        profiling: ProfilingStats;
+        profiling: ProfilingStats & {
+          /** Where profile files are written, while profiling is on; capture lines only give the file name. */
+          diagnosticDir?: string;
+        };
       };
     };
   };

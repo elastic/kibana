@@ -8,11 +8,9 @@
  */
 
 import {
-  capDir,
   capLocation,
   capName,
   MAX_LOCATION_LENGTH,
-  MAX_LOGGED_DIR_LENGTH,
   MAX_NAME_LENGTH,
   relativeLocation,
 } from './sanitize';
@@ -36,20 +34,6 @@ describe('capLocation', () => {
 
   it('leaves short locations unchanged', () => {
     expect(capLocation('src/a.ts:3')).toBe('src/a.ts:3');
-  });
-});
-
-describe('capDir', () => {
-  it('keeps the end of a long directory with a leading ellipsis, at MAX_LOGGED_DIR_LENGTH characters', () => {
-    const dir = capDir(`/mnt/${'shared_volume/'.repeat(10)}watchdog-profiles`);
-    expect(dir).toHaveLength(MAX_LOGGED_DIR_LENGTH);
-    expect(dir.startsWith('...')).toBe(true);
-    expect(dir).toBe('...ared_volume/watchdog-profiles');
-  });
-
-  it('leaves a directory of up to MAX_LOGGED_DIR_LENGTH characters unchanged', () => {
-    const dir = `/${'d'.repeat(MAX_LOGGED_DIR_LENGTH - 1)}`;
-    expect(capDir(dir)).toBe(dir);
   });
 });
 

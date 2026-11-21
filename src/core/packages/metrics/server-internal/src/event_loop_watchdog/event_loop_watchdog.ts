@@ -157,7 +157,7 @@ export class EventLoopWatchdog {
     if (on !== this.profilingLoggedOn) {
       this.profilingLoggedOn = on;
       const { diagnosticDir } = this.params.profiling;
-      // The full directory: capture lines show only its end.
+      // The full directory: capture lines only give the file name.
       const dir = on && diagnosticDir ? `. Profile directory: ${diagnosticDir}` : '';
       this.params.logger.info(
         `Event loop watchdog profiling ${on ? 'on' : 'off'} for this node${dir}`

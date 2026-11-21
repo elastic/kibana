@@ -27,7 +27,7 @@ import {
   Slot,
   WATCHDOG_WORKER_NAME,
 } from './constants';
-import { MAX_LOCATION_LENGTH, MAX_NAME_LENGTH, capDir } from './sanitize';
+import { MAX_LOCATION_LENGTH, MAX_NAME_LENGTH } from './sanitize';
 import { PROFILING_DIR_MAX_LENGTH } from '../ops_config';
 
 jest.mock('node:worker_threads', () => ({ isMainThread: true, threadId: 99 }));
@@ -381,7 +381,7 @@ describe('runWatchdogWorker', () => {
     expect(statsMeta().starting).toMatchObject({ blocks: 6, suppressed: 1 });
   });
 
-  it('says how many blocks were not reported before a warning', () => {
+  it('says how many blocks were rate-limited, not logged, before a warning', () => {
     start();
     for (let i = 0; i < 7; i++) {
       block(300);
@@ -390,7 +390,7 @@ describe('runWatchdogWorker', () => {
     block(300);
     expect(logger.warn).toHaveBeenCalledTimes(6);
     expect(logger.warn.mock.calls[5][0]).toBe(
-      'Event loop blocked for ~300ms; 2 blocks before it not reported'
+      'Event loop blocked for ~300ms; 2 rate-limited, not logged'
     );
     expect(logger.warn.mock.calls[5][1]).toMatchObject({
       kibana: { event_loop_watchdog: { suppressedBlocks: 2 } },
@@ -1212,8 +1212,9 @@ describe('runWatchdogWorker', () => {
       const parsed = JSON.parse(line);
       expect(parsed.message.endsWith(' [truncated]')).toBe(false);
       expect(parsed.message).toContain(
-        `Writing ${capDir(LONGEST_DIR)}/event-loop-block-starting-100000ms-`
+        'stopped: block_ended. Writing event-loop-block-starting-100000ms-'
       );
+      expect(parsed.message).not.toContain(LONGEST_DIR);
       expect(parsed.message).toContain(
         `-${'h'.repeat(MAX_HOSTNAME_LENGTH)}-${process.pid}.cpuprofile. Top: `
       );
@@ -1327,7 +1328,7 @@ describe('runWatchdogWorker', () => {
       });
       afterEach(() => jest.restoreAllMocks());
 
-      it('logs the capture at warn with the file path, then writes the prepared profile', async () => {
+      it('logs the capture at warn with the file name, then writes the prepared profile', async () => {
         const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
         startWriting();
         await profiledBlock(2_000);
@@ -1343,7 +1344,9 @@ describe('runWatchdogWorker', () => {
         expect(profileLines()).toHaveLength(0);
         expect(warnLines()).toHaveLength(1);
         const [message, meta] = warnLines()[0];
-        expect(message).toContain(`stopped: block_ended. Writing ${file}. Top: 100% spin`);
+        expect(message).toContain(
+          `stopped: block_ended. Writing ${path.basename(String(file))}. Top: 100% spin`
+        );
         expect((meta as ProfileLogMeta).kibana.event_loop_watchdog.profile.file).toBe('admitted');
         expect(warnLineOrder()).toBeLessThan(writeFile.mock.invocationCallOrder[0]);
         expect(fileCounts()).toEqual({ written: 1, sameFrame: 0, hourLimit: 0, writeFailed: 0 });
@@ -1364,7 +1367,7 @@ describe('runWatchdogWorker', () => {
           { tags: ['event-loop-watchdog'] }
         );
         expect(warnLines()).toHaveLength(1);
-        expect(warnLines()[0][0]).toContain('Writing /diag/');
+        expect(warnLines()[0][0]).toContain('Writing event-loop-block-starting-');
         expect(warnLineOrder()).toBeLessThan(logger.error.mock.invocationCallOrder[0]);
         expect(fileCounts()).toMatchObject({ written: 0, writeFailed: 1 });
       });
@@ -1448,7 +1451,7 @@ describe('runWatchdogWorker', () => {
         expect(profileMeta()).toMatchObject({ phase: 'running', file: 'same_frame' });
       });
 
-      it('writes to the full directory but logs only the end of a long one', async () => {
+      it('writes to the full directory but logs only the file name, with the directory in the stats', async () => {
         const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
         const longDir = `/${'d'.repeat(PROFILING_DIR_MAX_LENGTH - 1)}`;
         start({ profiling: { ...profilingData, diagnosticDir: longDir } }, undefined, {
@@ -1459,8 +1462,22 @@ describe('runWatchdogWorker', () => {
 
         const file = String(writeFile.mock.calls[0][0]);
         expect(path.dirname(file)).toBe(longDir);
-        expect(warnLines()[0][0]).toContain(`Writing ${capDir(longDir)}/${path.basename(file)}.`);
+        expect(warnLines()[0][0]).toContain(`Writing ${path.basename(file)}.`);
         expect(warnLines()[0][0]).not.toContain(longDir);
+        jest.advanceTimersByTime(STATS_INTERVAL_MS);
+        expect(lastStats().profiling.diagnosticDir).toBe(longDir);
+      });
+
+      it('gives the directory in the stats only while profiling is on', () => {
+        start({ profiling: { ...profilingData, diagnosticDir: DIR } });
+        jest.advanceTimersByTime(STATS_INTERVAL_MS);
+        expect(lastStats().profiling.diagnosticDir).toBeUndefined();
+        setSlot(Slot.profiling, 1);
+        jest.advanceTimersByTime(STATS_INTERVAL_MS);
+        expect(lastStats().profiling.diagnosticDir).toBe(DIR);
+        setSlot(Slot.profiling, 0);
+        jest.advanceTimersByTime(STATS_INTERVAL_MS);
+        expect(lastStats().profiling.diagnosticDir).toBeUndefined();
       });
 
       it('writes a running-phase capture with the running phase in the file name', async () => {

@@ -406,15 +406,14 @@ describe('event loop watchdog in a child process', () => {
       expect(restarts(result)).toEqual([]);
     }, 120_000);
 
-    it('writes the profile to the profiling directory and logs its path at WARN', async () => {
+    it('writes the profile to the profiling directory and logs its file name at WARN', async () => {
       const { result, file, profile } = await runWritingHarness('profile_blocks');
       expectCleanExit(result);
       const lines = profileLogLines(result);
       expect(lines).toHaveLength(1);
       expect(lines[0].log.level).toBe('WARN');
-      // Long directories, such as the macOS temp directory, show only their end in the line.
-      expect(lines[0].message).toContain('. Writing ');
-      expect(lines[0].message).toContain(`/${Path.basename(file)}. Top: `);
+      expect(lines[0].message).toContain(`. Writing ${Path.basename(file)}. Top: `);
+      expect(lines[0].message).not.toContain(Path.dirname(file));
       expect(lines[0].kibana?.event_loop_watchdog?.profile?.file).toBe('admitted');
       // The stats count the write only after it completes, so this confirms it finished before
       // shutdown.
