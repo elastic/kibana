@@ -15,6 +15,7 @@ import {
 import { getEuidKqlFilterBasedOnDocument } from './kql';
 import { getEntityIdentifiersFromDocument, getEuidFromObject } from './memory';
 import { getEuidPainlessEvaluation, getEuidPainlessRuntimeMapping } from './painless';
+import { esqlIdentityValue } from '../../esql/strings';
 
 /** The id compiler reads only the identity core, so a definition without `extraction` compiles. */
 
@@ -59,13 +60,13 @@ describe('id compiler on a core-only definition', () => {
 
     it('compiles ES|QL', () => {
       expect(getEuidEsqlEvaluation(definition, 'entity.id')).toBe(
-        'entity.id = CONCAT("k8s.pod:", TO_STRING(kubernetes.pod.uid))'
+        `entity.id = CONCAT("k8s.pod:", ${esqlIdentityValue('kubernetes.pod.uid')})`
       );
       expect(getEuidEsqlDocumentsContainsIdFilter(definition)).toBe(
-        '(TO_STRING(kubernetes.pod.uid) IS NOT NULL AND TO_STRING(kubernetes.pod.uid) != "")'
+        `(${esqlIdentityValue('kubernetes.pod.uid')} IS NOT NULL)`
       );
       expect(getEuidEsqlFilterBasedOnDocument(definition, fullDoc)).toBe(
-        '(kubernetes.pod.uid == "pod-1")'
+        `(${esqlIdentityValue('kubernetes.pod.uid')} == "pod-1")`
       );
     });
 
@@ -118,7 +119,7 @@ describe('id compiler on a core-only definition', () => {
         'TO_STRING(kubernetes.pod.uid) IS NOT NULL OR TO_STRING(kubernetes.pod.name) IS NOT NULL'
       );
       expect(getEuidEsqlFilterBasedOnDocument(definition, fullDoc)).toBe(
-        '((kubernetes.pod.uid == "pod-1"))'
+        `((${esqlIdentityValue('kubernetes.pod.uid')} == "pod-1"))`
       );
     });
 
@@ -148,7 +149,7 @@ describe('id compiler on a core-only definition', () => {
     it('compiles Painless', () => {
       expect(getEuidPainlessEvaluation(definition)).toMatchSnapshot();
       expect(getEuidPainlessRuntimeMapping(definition).script.source).toContain(
-        'return "k8s.pod:" + doc[\'kubernetes.pod.name\'].value;'
+        'return "k8s.pod:" + __euid_min(doc[\'kubernetes.pod.name\']);'
       );
     });
 

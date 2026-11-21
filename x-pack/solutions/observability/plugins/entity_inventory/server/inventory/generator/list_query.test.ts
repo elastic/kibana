@@ -7,6 +7,7 @@
 
 import { Parser } from '@elastic/esql';
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
+import { euid } from '@kbn/entity-store/common/euid_helpers';
 import {
   INVENTORY_DEFINITION_FIXTURES,
   entityIdFixture,
@@ -274,16 +275,18 @@ describe('generateListQueries', () => {
       window,
       LIMIT
     );
+    const namespaceValue = euid.esql.getIdentityValue('kubernetes.namespace');
+    const nameValue = euid.esql.getIdentityValue('kubernetes.deployment.name');
     const tail = `    AND (metricset.name == "state_deployment")
-    AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != "" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != "")
+    AND (${namespaceValue} IS NOT NULL AND ${nameValue} IS NOT NULL)
 | STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
     \`paused\` = LAST(\`kubernetes.deployment.paused\`, \`@timestamp\`) WHERE \`kubernetes.deployment.paused\` IS NOT NULL,
     \`last_seen\` = MAX(\`@timestamp\`)
     BY \`kubernetes.namespace\`, \`kubernetes.deployment.name\`
-| EVAL kubernetes_namespace_present = TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != "",
- kubernetes_deployment_name_present = TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != "",
- kubernetes_namespace_present_or_null = CASE(kubernetes_namespace_present, TO_STRING(kubernetes.namespace)),
- kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, TO_STRING(kubernetes.deployment.name)),
+| EVAL kubernetes_namespace_present = ${namespaceValue} IS NOT NULL,
+ kubernetes_deployment_name_present = ${nameValue} IS NOT NULL,
+ kubernetes_namespace_present_or_null = CASE(kubernetes_namespace_present, ${namespaceValue}),
+ kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, ${nameValue}),
  entity.id = CONCAT("k8s.deployment:", CONCAT(kubernetes_namespace_present_or_null, "/", kubernetes_deployment_name_present_or_null))
 | KEEP \`entity.id\`, \`kubernetes.namespace\`, \`kubernetes.deployment.name\`, \`cluster\`, \`paused\`, \`last_seen\`
 | SORT \`last_seen\` DESC NULLS LAST, \`entity.id\` ASC

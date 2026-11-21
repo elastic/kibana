@@ -8,6 +8,7 @@
 import { fieldNotOneOfCondition, isNotEmptyCondition } from '../domain/definitions/common_fields';
 import { LOCAL_NAMESPACE_EXCLUDED_USER_NAMES } from '../domain/definitions/user_entity_constants';
 import { entityStoreConditionToESQL } from './condition_to_esql';
+import { esqlIdentityValue } from './strings';
 
 describe('entityStoreConditionToESQL', () => {
   describe('homogeneous OR-of-EQ optimization', () => {
@@ -53,9 +54,9 @@ describe('entityStoreConditionToESQL', () => {
   });
 
   describe('isNotEmpty condition optimization', () => {
-    it('rewrites AND(exists:true, neq:"") on same field to IS NOT NULL AND != ""', () => {
+    it('rewrites AND(exists:true, neq:"") on same field to an identity value IS NOT NULL check', () => {
       const result = entityStoreConditionToESQL(isNotEmptyCondition('host.id'));
-      expect(result).toBe('TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != ""');
+      expect(result).toBe(`${esqlIdentityValue('host.id')} IS NOT NULL`);
     });
 
     it('does not optimize AND(exists:true, neq:"") with different fields', () => {
@@ -67,7 +68,7 @@ describe('entityStoreConditionToESQL', () => {
       };
       // Falls through to general AND handling
       const result = entityStoreConditionToESQL(condition as any);
-      expect(result).not.toBe('TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != ""');
+      expect(result).not.toBe(`${esqlIdentityValue('host.id')} IS NOT NULL`);
     });
 
     it('optimizes isNotEmpty inside OR (documentsFilter pattern)', () => {
@@ -80,9 +81,9 @@ describe('entityStoreConditionToESQL', () => {
       };
       const result = entityStoreConditionToESQL(condition);
       expect(result).toBe(
-        'TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != "" OR ' +
-          'TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != "" OR ' +
-          'TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != ""'
+        `${esqlIdentityValue('host.id')} IS NOT NULL OR ` +
+          `${esqlIdentityValue('host.name')} IS NOT NULL OR ` +
+          `${esqlIdentityValue('host.hostname')} IS NOT NULL`
       );
     });
 
@@ -105,9 +106,9 @@ describe('entityStoreConditionToESQL', () => {
         ],
       };
       const result = entityStoreConditionToESQL(condition as any);
-      expect(result).toContain('TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != ""');
-      expect(result).toContain('TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != ""');
-      expect(result).toContain('TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != ""');
+      expect(result).toContain(`${esqlIdentityValue('user.email')} IS NOT NULL`);
+      expect(result).toContain(`${esqlIdentityValue('user.id')} IS NOT NULL`);
+      expect(result).toContain(`${esqlIdentityValue('user.name')} IS NOT NULL`);
       // event.outcome arms use our own leaf emitter — no backtick quoting
       expect(result).not.toContain('NOT(`event.outcome`');
     });
@@ -206,6 +207,41 @@ describe('entityStoreConditionToESQL', () => {
     it('exempts @timestamp from casting', () => {
       expect(entityStoreConditionToESQL({ field: '@timestamp', exists: true })).toBe(
         '@timestamp IS NOT NULL'
+      );
+    });
+  });
+
+  describe('reduceMultiValued', () => {
+    const reduced = { reduceMultiValued: true };
+    const identityValue = (field: string) => esqlIdentityValue(field);
+
+    it('compares eq and neq on a string by the identity value', () => {
+      expect(entityStoreConditionToESQL({ field: 'cloud.provider', eq: 'aws' }, reduced)).toBe(
+        `${identityValue('cloud.provider')} == "aws"`
+      );
+      expect(entityStoreConditionToESQL({ field: 'cloud.provider', neq: 'aws' }, reduced)).toBe(
+        `${identityValue('cloud.provider')} != "aws"`
+      );
+    });
+
+    it('compares the IN of an OR-of-EQ by the identity value', () => {
+      const result = entityStoreConditionToESQL(
+        fieldNotOneOfCondition('user.name', ['root', 'bin']),
+        reduced
+      );
+
+      expect(result).toBe(`NOT (${identityValue('user.name')} IN ("root", "bin"))`);
+    });
+
+    it('leaves non-string comparisons on the plain reference', () => {
+      expect(entityStoreConditionToESQL({ field: 'event.code', eq: 4 }, reduced)).toBe(
+        'TO_STRING(event.code) == 4'
+      );
+    });
+
+    it('is off by default, so a WHERE filter keeps the plain reference', () => {
+      expect(entityStoreConditionToESQL({ field: 'cloud.provider', eq: 'aws' })).toBe(
+        'TO_STRING(cloud.provider) == "aws"'
       );
     });
   });

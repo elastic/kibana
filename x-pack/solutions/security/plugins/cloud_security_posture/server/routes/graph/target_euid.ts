@@ -36,7 +36,8 @@ export const getTargetEuidEsqlEvaluation = (
   outputColumn: string
 ): string => {
   const definition = getBuiltInEntityDefinition(entityType);
-  const fragment = getEuidEsqlEvaluation(definition, outputColumn);
+  // The graph expands multi-valued ids into one row each, so they must reach it unreduced.
+  const fragment = getEuidEsqlEvaluation(definition, outputColumn, { reduceMultiValued: false });
   const { identitySourceFields } = getEuidSourceFields(definition);
 
   // Sort by length descending to prevent partial matches

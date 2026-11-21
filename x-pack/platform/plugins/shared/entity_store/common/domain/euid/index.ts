@@ -12,6 +12,7 @@ export {
 } from './memory';
 export { getEuidFromTimelineNonEcsData, type NonEcsTimelineDataRow } from './non_ecs_timeline_data';
 export {
+  EUID_PAINLESS_PREAMBLE,
   getEuidPainlessEvaluation,
   getEuidPainlessEvaluationForSearch,
   getEuidPainlessRuntimeMapping,
