@@ -17,6 +17,7 @@ import {
 import {
   assertEntitiesEqual,
   expectedHostEntities,
+  expectedUserEntities,
 } from '../../../common/fixtures/entity_extraction_expected';
 import {
   clearInstalledEntityStoreDocuments,
@@ -32,6 +33,8 @@ apiTest.describe(
   'Entity Store Logs Extraction with pagination (entity pages + maxLogsPerPage)',
   { tag: ENTITY_STORE_TAGS },
   () => {
+    const DOCS_LIMIT = 5;
+
     let defaultHeaders: Record<string, string>;
     let internalHeaders: Record<string, string>;
 
@@ -55,7 +58,7 @@ apiTest.describe(
       const updateResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
         headers: defaultHeaders,
         responseType: 'json',
-        body: { logExtraction: { docsLimit: 5 } },
+        body: { logExtraction: { docsLimit: DOCS_LIMIT } },
       });
       expect(updateResponse.statusCode).toBe(200);
     });
@@ -78,25 +81,74 @@ apiTest.describe(
       }
     });
 
-    apiTest(
-      'Should extract host with entity pagination (docsLimit 5, wide log slices)',
-      async ({ apiClient, esClient, log }) => {
-        const expectedPageCount = 5;
+    apiTest('Should extract host with entity pagination', async ({ apiClient, esClient, log }) => {
+      const expectedPageCount = Math.ceil(expectedHostEntities.length / DOCS_LIMIT);
 
+      const extractionResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
+        {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: {
+            fromDateISO: '2026-01-20T11:00:00Z',
+            toDateISO: '2026-01-20T13:00:00Z',
+          },
+        }
+      );
+      expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body.success).toBe(true);
+      expect(extractionResponse.body.count).toBe(expectedHostEntities.length);
+      expect(extractionResponse.body.pages).toBe(expectedPageCount);
+
+      const entities = await esClient.search({
+        index: LATEST_ALIAS,
+        query: {
+          bool: {
+            filter: {
+              term: { 'entity.EngineMetadata.Type': 'host' },
+            },
+          },
+        },
+        size: 1000, // a lot just to be sure we are not capping it
+      });
+
+      assertEntitiesEqual(expectedHostEntities, entities.hits.hits, (msg) => log.error(msg));
+    });
+
+    apiTest(
+      'Should extract user entities across entity pages, through the postAggFilter path',
+      async ({ apiClient, esClient, log }) => {
+        const expectedPageCount = Math.ceil(expectedUserEntities.length / DOCS_LIMIT);
+
+        await esClient.deleteByQuery({
+          index: LATEST_ALIAS,
+          refresh: true,
+          query: {
+            bool: {
+              filter: {
+                term: { 'entity.EngineMetadata.Type': 'user' },
+              },
+            },
+          },
+        });
+
+        // Pinned to 'single': the archive includes non-asset user logs that the priority
+        // identity-source gate drops when entityStore.dualProcess.enabled defaults to true.
         const extractionResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
           {
             headers: internalHeaders,
             responseType: 'json',
             body: {
               fromDateISO: '2026-01-20T11:00:00Z',
               toDateISO: '2026-01-20T13:00:00Z',
+              process: 'single',
             },
           }
         );
         expect(extractionResponse.statusCode).toBe(200);
         expect(extractionResponse.body.success).toBe(true);
-        expect(extractionResponse.body.count).toBe(expectedHostEntities.length);
+        expect(extractionResponse.body.count).toBe(expectedUserEntities.length);
         expect(extractionResponse.body.pages).toBe(expectedPageCount);
 
         const entities = await esClient.search({
@@ -104,14 +156,14 @@ apiTest.describe(
           query: {
             bool: {
               filter: {
-                term: { 'entity.EngineMetadata.Type': 'host' },
+                term: { 'entity.EngineMetadata.Type': 'user' },
               },
             },
           },
           size: 1000, // a lot just to be sure we are not capping it
         });
 
-        assertEntitiesEqual(expectedHostEntities, entities.hits.hits, (msg) => log.error(msg));
+        assertEntitiesEqual(expectedUserEntities, entities.hits.hits, (msg) => log.error(msg));
       }
     );
 
