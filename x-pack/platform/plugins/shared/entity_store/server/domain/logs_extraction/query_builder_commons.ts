@@ -45,6 +45,17 @@ export const TIMESTAMP_FIELD = '@timestamp';
 
 export const NULLIFY_UNMAPPED_FIELDS_SETTING = 'SET unmapped_fields="nullify";';
 
+/**
+ * Fields of the latest index that an index created before the definition stored them lacks, until
+ * the startup migration has mapped them (see LATEST_INDEX_MAPPINGS_VERSION). `unmapped_fields="nullify"`
+ * does not reach a lookup index's column once a `STATS` precedes the join, so the join is preceded by
+ * an `EVAL <field> = TO_STRING(null)`: where the lookup index maps the field its value replaces the
+ * null. Removable once every install is migrated.
+ * Keep in sync with `JOINED_FIELDS_UNMAPPED_ON_OLDER_INDICES` in the security_solution entities grid
+ * (`entities_grid/queries/esql.ts`): edit both together.
+ */
+export const LOOKUP_FIELDS_UNMAPPED_ON_OLDER_INDICES = ['user.entity.id'] as const;
+
 /** Entity-page cursor within a log slice. The entity id is derived purely from identity fields,
  * so it is stable across query re-executions; the slice time bounds are owned by the probe. */
 export interface PaginationParams {
