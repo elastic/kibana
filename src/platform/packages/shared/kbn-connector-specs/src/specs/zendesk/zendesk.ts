@@ -33,31 +33,56 @@ export const ZendeskConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
+  // Zendesk's API reference accepts OAuth access tokens on these endpoints, and its docs deprecate
+  // API-token basic auth.
   auth: {
     types: [
       {
-        type: 'basic',
-        defaults: {},
+        type: 'oauth_authorization_code',
+        defaults: {
+          // `read` gives access to every GET endpoint; the ticket operations list `tickets:read`.
+          scope: 'read tickets:read',
+        },
         overrides: {
           meta: {
-            password: {
-              label: i18n.translate('connectorSpecs.zendesk.auth.password.label', {
-                defaultMessage: 'API token',
-              }),
-              helpText: i18n.translate('connectorSpecs.zendesk.auth.password.helpText', {
+            authorizationUrl: {
+              placeholder: 'https://your-company.zendesk.com/oauth/authorizations/new',
+              helpText: i18n.translate(
+                'connectorSpecs.zendesk.auth.oauth.authorizationUrl.helpText',
+                {
+                  defaultMessage:
+                    "Your Zendesk OAuth authorization URL, https://'{subdomain}'.zendesk.com/oauth/authorizations/new. Replace '{subdomain}' with the subdomain of your Zendesk account.",
+                }
+              ),
+            },
+            tokenUrl: {
+              placeholder: 'https://your-company.zendesk.com/oauth/tokens',
+              helpText: i18n.translate('connectorSpecs.zendesk.auth.oauth.tokenUrl.helpText', {
                 defaultMessage:
-                  'Your Zendesk API token (Admin Center > Apps and integrations > APIs)',
+                  "Your Zendesk OAuth token URL, https://'{subdomain}'.zendesk.com/oauth/tokens. Replace '{subdomain}' with the subdomain of your Zendesk account.",
               }),
             },
-            username: {
-              label: i18n.translate('connectorSpecs.zendesk.auth.username.label', {
-                defaultMessage: 'Email',
+            scope: { hidden: true },
+          },
+        },
+      },
+      {
+        type: 'bearer',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('connectorSpecs.zendesk.auth.bearer.label', {
+            defaultMessage: 'OAuth access token',
+          }),
+          meta: {
+            token: {
+              sensitive: true,
+              label: i18n.translate('connectorSpecs.zendesk.auth.bearer.token.label', {
+                defaultMessage: 'OAuth access token',
               }),
-              helpText: i18n.translate('connectorSpecs.zendesk.auth.username.helpText', {
+              helpText: i18n.translate('connectorSpecs.zendesk.auth.bearer.token.helpText', {
                 defaultMessage:
-                  'Your Zendesk account email; add "/token" at the end for API token auth (e.g. your_email@example.com/token)',
+                  'A Zendesk OAuth access token with the read scope. Create an OAuth client in Admin Center (Apps and integrations > APIs), then generate an access token for it.',
               }),
-              placeholder: 'your_email@example.com/token',
             },
           },
         },
