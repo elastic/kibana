@@ -22,12 +22,16 @@ export interface AlertZeroApi {
   internal: <T = unknown>(
     method: Method,
     path: string,
-    options?: { body?: unknown; query?: Record<string, string | number | boolean> }
+    options?: {
+      body?: unknown;
+      query?: Record<string, string | number | boolean>;
+      signal?: AbortSignal;
+    }
   ) => Promise<ApiResult<T>>;
   public: <T = unknown>(
     method: Method,
     path: string,
-    options?: { body?: unknown }
+    options?: { body?: unknown; signal?: AbortSignal }
   ) => Promise<ApiResult<T>>;
 }
 
@@ -36,12 +40,13 @@ export const createApi = (apiClient: ApiClientFixture, cookieHeader: Headers): A
     method: Method,
     path: string,
     headers: Headers,
-    body?: unknown
+    options?: { body?: unknown; signal?: AbortSignal }
   ): Promise<ApiResult<T>> => {
     const response = await apiClient[method.toLowerCase() as Lowercase<Method>]<T>(path, {
       headers: { ...cookieHeader, ...headers },
-      body,
+      body: options?.body,
       responseType: 'json',
+      signal: options?.signal,
     });
     return { statusCode: response.statusCode, body: response.body };
   };
@@ -50,8 +55,8 @@ export const createApi = (apiClient: ApiClientFixture, cookieHeader: Headers): A
 
   return {
     internal: (method, path, options) =>
-      send(method, withQuery(path, options?.query), INTERNAL_HEADERS, options?.body),
-    public: (method, path, options) => send(method, path, PUBLIC_HEADERS, options?.body),
+      send(method, withQuery(path, options?.query), INTERNAL_HEADERS, options),
+    public: (method, path, options) => send(method, path, PUBLIC_HEADERS, options),
   };
 };
 

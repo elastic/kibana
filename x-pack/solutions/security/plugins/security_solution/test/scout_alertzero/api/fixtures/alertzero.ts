@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import type { ListProposalsResponse } from '@kbn/proposals-common';
 import type { EsClient } from '@kbn/scout-security';
 import {
@@ -183,11 +184,23 @@ export interface WorkerRecord {
   state?: string;
 }
 
-export const listWorkers = async (api: AlertZeroApi): Promise<WorkerRecord[]> =>
-  ok(await api.internal<{ workers: WorkerRecord[] }>('GET', WORKERS_URL), 'list workers').workers;
+export const listWorkers = async (
+  api: AlertZeroApi,
+  options?: { signal?: AbortSignal }
+): Promise<WorkerRecord[]> =>
+  ok(
+    await api.internal<{ workers: WorkerRecord[] }>('GET', WORKERS_URL, {
+      signal: options?.signal,
+    }),
+    'list workers'
+  ).workers;
 
-export const getWorker = async (api: AlertZeroApi, workerId: string): Promise<WorkerRecord> => {
-  const worker = (await listWorkers(api)).find((candidate) => candidate.id === workerId);
+export const getWorker = async (
+  api: AlertZeroApi,
+  workerId: string,
+  options?: { signal?: AbortSignal }
+): Promise<WorkerRecord> => {
+  const worker = (await listWorkers(api, options)).find((candidate) => candidate.id === workerId);
   if (!worker) {
     throw new Error(`Worker ${workerId} is not in the catalog`);
   }
@@ -367,23 +380,35 @@ export interface WorkerBaseline {
 export const captureWorkerBaseline = async (
   api: AlertZeroApi,
   workerId: string
-): Promise<WorkerBaseline> =>
-  pollUntil(
+): Promise<WorkerBaseline> => {
+  const deadline = Date.now() + BASELINE_TIMEOUT_MS;
+  return pollUntil(
     `worker ${workerId} settings to be readable for a baseline`,
     async () => {
-      const worker = await getWorker(api, workerId);
-      if (worker.state === 'unavailable') {
-        throw new Error(`Worker ${workerId} settings are unavailable`);
+      // Each read is cut off at the same deadline as the poll, so one hung request cannot
+      // spend the next worker's budget in the isolation suite or surface as Playwright's
+      // generic beforeAll timeout instead of this poll's worker-naming error.
+      const deadline2 = timeoutSignal(Math.max(deadline - Date.now(), 1));
+      try {
+        const worker = await getWorker(api, workerId, {
+          signal: deadline2,
+        });
+        if (worker.state === 'unavailable') {
+          throw new Error(`Worker ${workerId} settings are unavailable`);
+        }
+        return {
+          workerId,
+          enabled: worker.enabled,
+          autonomy: worker.settings.autonomy,
+          serviceAccountId: worker.settings.serviceAccountId,
+        };
+      } finally {
+        deadline2.dispose();
       }
-      return {
-        workerId,
-        enabled: worker.enabled,
-        autonomy: worker.settings.autonomy,
-        serviceAccountId: worker.settings.serviceAccountId,
-      };
     },
     { timeoutMs: BASELINE_TIMEOUT_MS }
   );
+};
 
 /**
  * Puts a worker back the way `captureWorkerBaseline` found it, after `resetWorker` left it
