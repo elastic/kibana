@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import { randomBytes } from 'crypto';
+import { deflateSync } from 'zlib';
 import { getPackagePolicyWithSourceMap } from './get_package_policy_decorators';
-import type { ArtifactSourceMap } from './source_maps';
-import { getCleanedBundleFilePath } from './source_maps';
+import type { ArtifactSourceMap, FleetPluginStart } from './source_maps';
+import {
+  getArtifactMetadata,
+  getCleanedBundleFilePath,
+  listSourceMapArtifactsMetadata,
+} from './source_maps';
 
 const packagePolicy = {
   id: '123',
@@ -187,6 +193,85 @@ describe('Source maps', () => {
       expect(getCleanedBundleFilePath('/general-usecase/bundle.js.map')).toEqual(
         '/general-usecase/bundle.js.map'
       );
+    });
+  });
+
+  describe('getArtifactMetadata', () => {
+    const metadata = {
+      serviceName: 'service_name',
+      serviceVersion: '1.0.0',
+      bundleFilepath: 'http://localhost:3000/static/js/main.chunk.js',
+    };
+    // ~400 KB of hex does not compress below the 16 KB prefix that is decompressed
+    const largeSourceMap = {
+      version: 3,
+      sources: ['main.ts'],
+      mappings: 'AAAA',
+      sourcesContent: [randomBytes(200 * 1024).toString('hex')],
+    };
+    // same encoding as the Fleet artifacts client: deflate, then base64
+    const encodeBody = (body: object) =>
+      deflateSync(Buffer.from(JSON.stringify(body))).toString('base64');
+
+    it('reads the metadata from a large artifact', async () => {
+      const body = encodeBody({ ...metadata, sourceMap: largeSourceMap });
+      expect(await getArtifactMetadata(body)).toEqual(metadata);
+    });
+
+    it('only decompresses the start of the body', async () => {
+      const truncatedBody = encodeBody({ ...metadata, sourceMap: largeSourceMap }).slice(0, 40_000);
+      expect(await getArtifactMetadata(truncatedBody)).toEqual(metadata);
+    });
+
+    it('reads the metadata from a small artifact', async () => {
+      const body = encodeBody({
+        ...metadata,
+        sourceMap: { version: 3, sources: [], mappings: '' },
+      });
+      expect(await getArtifactMetadata(body)).toEqual(metadata);
+    });
+
+    it('falls back to the full body when the metadata is not at the start', async () => {
+      const body = encodeBody({ sourceMap: largeSourceMap, ...metadata });
+      expect(await getArtifactMetadata(body)).toEqual(metadata);
+    });
+  });
+
+  describe('listSourceMapArtifactsMetadata', () => {
+    it('returns the newest artifacts with only metadata in the body', async () => {
+      const metadata = {
+        serviceName: 'service_name',
+        serviceVersion: '1.0.0',
+        bundleFilepath: 'http://localhost:3000/static/js/main.chunk.js',
+      };
+      const sourceMap = { version: 3, sources: ['main.ts'], mappings: 'AAAA' };
+      const listArtifacts = jest.fn().mockResolvedValue({
+        items: [
+          {
+            ...artifacts[0],
+            body: deflateSync(Buffer.from(JSON.stringify({ ...metadata, sourceMap }))).toString(
+              'base64'
+            ),
+          },
+        ],
+        total: 1,
+        page: 1,
+        perPage: 20,
+      });
+      const fleetPluginStart = {
+        createArtifactsClient: () => ({ listArtifacts }),
+      } as unknown as FleetPluginStart;
+
+      const result = await listSourceMapArtifactsMetadata({ fleetPluginStart });
+
+      expect(listArtifacts).toHaveBeenCalledWith({
+        kuery: 'type: sourcemap',
+        perPage: 20,
+        page: 1,
+        sortOrder: 'desc',
+        sortField: 'created',
+      });
+      expect(result).toEqual([{ ...artifacts[0], body: metadata }]);
     });
   });
 });
