@@ -1960,13 +1960,14 @@ describe('Slack', () => {
         })
       );
 
-      // Step 1 — getUploadURLExternal
-      expect(mockClient.post).toHaveBeenNthCalledWith(
-        1,
-        'https://slack.com/api/files.getUploadURLExternal',
-        expect.objectContaining({ filename: 'report.txt' }),
-        expect.any(Object)
-      );
+      // Step 1 — getUploadURLExternal, which only takes a form body
+      const [uploadUrlRequestUrl, uploadUrlBody, uploadUrlConfig] = mockClient.post.mock.calls[0];
+      expect(uploadUrlRequestUrl).toBe('https://slack.com/api/files.getUploadURLExternal');
+      expect(uploadUrlBody).toBeInstanceOf(URLSearchParams);
+      expect((uploadUrlBody as URLSearchParams).get('filename')).toBe('report.txt');
+      expect(uploadUrlConfig).toEqual({
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      });
       // Step 2 — POST content
       expect(mockClient.post).toHaveBeenNthCalledWith(
         2,
@@ -2002,12 +2003,9 @@ describe('Slack', () => {
         })
       );
 
-      expect(mockClient.post).toHaveBeenNthCalledWith(
-        1,
-        'https://slack.com/api/files.getUploadURLExternal',
-        { filename: 'hello.txt', length: 5 },
-        expect.any(Object)
-      );
+      const [uploadUrlRequestUrl, uploadUrlBody] = mockClient.post.mock.calls[0];
+      expect(uploadUrlRequestUrl).toBe('https://slack.com/api/files.getUploadURLExternal');
+      expect(String(uploadUrlBody)).toBe('filename=hello.txt&length=5');
       expect(mockClient.post).toHaveBeenNthCalledWith(
         2,
         'https://files.slack.com/upload/v1/abc',

@@ -146,3 +146,50 @@ actions:
             required: true
             schema:
               type: string
+
+  - target: $.paths
+    description: >-
+      https://learn.microsoft.com/en-us/graph/api/sitepage-get?view=graph-rest-1.0 documents
+      GET /sites/{site-id}/pages/{page-id}/microsoft.graph.sitePage with the full namespace; the
+      spec only spells the cast with its `graph` alias, as
+      /sites/{site-id}/pages/{baseSitePage-id}/graph.sitePage. Copied from it.
+    update:
+      /sites/{site-id}/pages/{page-id}/microsoft.graph.sitePage:
+        get:
+          operationId: sites.GetPages.AsSitePage.FullNamespace
+          parameters:
+            - name: site-id
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: page-id
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: $select
+              in: query
+              style: form
+              explode: false
+              schema:
+                uniqueItems: true
+                type: array
+                items:
+                  type: string
+            - name: $expand
+              in: query
+              style: form
+              explode: false
+              schema:
+                uniqueItems: true
+                type: array
+                items:
+                  type: string
+          responses:
+            2XX:
+              description: Entity result.
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/microsoft.graph.sitePage'

@@ -1,0 +1,27 @@
+overlay: 1.0.0
+info:
+  title: Shodan API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths
+    description: >-
+      https://developer.shodan.io/api documents GET /shodan/services ("List all services that
+      Shodan crawls"), which returns an object of the services Shodan's crawlers look at; the spec
+      only has its siblings /shodan/ports and /shodan/protocols. Written like /shodan/protocols,
+      with the API key in the `key` query parameter.
+    update:
+      /shodan/services:
+        get:
+          parameters:
+            - name: key
+              in: query
+              required: true
+              schema:
+                type: string
+          responses:
+            '200':
+              description: The services Shodan crawls
+              content:
+                application/json:
+                  schema:
+                    type: object
