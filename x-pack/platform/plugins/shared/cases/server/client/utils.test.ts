@@ -14,7 +14,6 @@ import {
   arraysDifference,
   buildAttachmentRequestFromFileJSON,
   buildFilter,
-  buildObservablesFieldsFilter,
   buildRangeFilter,
   constructQueryOptions,
   constructSearch,
@@ -1557,62 +1556,6 @@ describe('utils', () => {
       });
 
       expect(res).toEqual([]);
-    });
-  });
-
-  describe('buildObservablesFieldsFilter', () => {
-    it('builds the filter escaping quotes in the value', () => {
-      expect(buildObservablesFieldsFilter({ type: ['{"json":"value"}'] })).toMatchInlineSnapshot(`
-        Object {
-          "arguments": Array [
-            Object {
-              "isQuoted": false,
-              "type": "literal",
-              "value": "cases.attributes.observables",
-            },
-            Object {
-              "arguments": Array [
-                Object {
-                  "arguments": Array [
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": "value",
-                    },
-                    Object {
-                      "isQuoted": true,
-                      "type": "literal",
-                      "value": "{\\"json\\":\\"value\\"}",
-                    },
-                  ],
-                  "function": "is",
-                  "type": "function",
-                },
-                Object {
-                  "arguments": Array [
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": "typeKey",
-                    },
-                    Object {
-                      "isQuoted": true,
-                      "type": "literal",
-                      "value": "type",
-                    },
-                  ],
-                  "function": "is",
-                  "type": "function",
-                },
-              ],
-              "function": "and",
-              "type": "function",
-            },
-          ],
-          "function": "nested",
-          "type": "function",
-        }
-      `);
     });
   });
 

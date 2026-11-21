@@ -109,6 +109,7 @@ import {
   CLEAR_TEMPLATE_COUNTER,
   incrementCasesClientCounter,
 } from '../usage_counters';
+import { withObservablesPreview } from '../../common/observables_preview';
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
@@ -611,6 +612,7 @@ export const bulkUpdate = async (
       attachmentService,
       templatesService,
       fieldDefinitionsService,
+      observableService,
     },
     user,
     logger,
@@ -1086,7 +1088,9 @@ export const bulkUpdate = async (
 
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
-    const updatedCasesResponse = decodeOrThrowZod(PatchCasesResponseSchema)(returnUpdatedCase);
+    const updatedCasesResponse = decodeOrThrowZod(PatchCasesResponseSchema)(
+      await withObservablesPreview(returnUpdatedCase, observableService)
+    );
 
     const { appliedCases, clearedCases, casesPerTemplateId } = countTemplateChanges(
       casesToUpdate,

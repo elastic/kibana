@@ -20,6 +20,7 @@ import type { Template } from '../../../common/types/domain/template/latest';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 import { createCaseError } from '../../common/error';
 import type { CasePersistedAttributes } from '../../common/types/case';
+import type { ObservablePersistedAttributes } from '../../common/types/observable';
 import type { ConfigType } from '../../config';
 import {
   getAttachmentsAndUserActionsForCases,
@@ -50,6 +51,7 @@ export async function handleExport({
       | AttachmentAttributesWithoutRefs
       | AttachmentAttributesV2
       | CaseUserActionWithoutReferenceIds
+      | ObservablePersistedAttributes
       | Template
       | FieldDefinition
     >

@@ -146,6 +146,25 @@ describe('buildCaseDoc', () => {
     expect(JSON.stringify(doc.case.observables)).not.toContain('site');
   });
 
+  it('adds the oldest cases-observables objects after the case field, up to 50', () => {
+    const typeObservables = Array.from({ length: 60 }, (_, i) => ({
+      id: `type-${i}`,
+      typeKey: 'domain',
+      value: `host-${i}.example.com`,
+      description: null,
+      createdAt: '2026-11-06T00:00:00.000Z',
+      updatedAt: null,
+    }));
+
+    const doc = buildCaseDoc(fullCaseSO(), typeObservables);
+
+    expect(doc.case.observables?.url).toEqual(['http://example.com', 'http://other.com']);
+    expect(doc.case.observables?.ipv4).toEqual(['1.2.3.4']);
+    // The field holds 3, so 47 of the type fill the preview of 50.
+    expect(doc.case.observables?.domain).toHaveLength(47);
+    expect(doc.case.observables?.domain?.[0]).toBe('host-0.example.com');
+  });
+
   it('returns undefined observables when the SO has none', () => {
     const doc = buildCaseDoc(fullCaseSO({ observables: [] }));
     expect(doc.case.observables).toBeUndefined();

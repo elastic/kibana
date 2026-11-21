@@ -634,6 +634,40 @@ describe('CasesWorkflowRunService', () => {
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
   });
 
+  it('accepts an observable stored as a cases-observables object outside the case response', async () => {
+    casesClient.cases.getObservablesByIds.mockResolvedValueOnce([
+      {
+        id: 'type-observable',
+        typeKey: 'observable-type-hostname',
+        value: 'host-1',
+        description: null,
+        createdAt: '2026-11-06T00:00:00.000Z',
+        updatedAt: null,
+      },
+    ]);
+
+    await expect(
+      run({
+        caseIds: ['case-1'],
+        inputs: {},
+        origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'type-observable' },
+      })
+    ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
+
+    expect(casesClient.cases.getObservablesByIds).toHaveBeenCalledWith('case-1', [
+      'type-observable',
+    ]);
+    expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventOverrides: {
+          caseIds: ['case-1'],
+          observableIds: ['type-observable'],
+          observableTypeKeys: ['observable-type-hostname'],
+        },
+      })
+    );
+  });
+
   it('passes observableIds and observableTypeKeys (not values) via eventOverrides for cases.observable', async () => {
     // The `value` field must never reach the workflow execution so that users without Cases read
     // access cannot observe case data through a workflow or the persisted trigger-events data stream.

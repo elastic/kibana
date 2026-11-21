@@ -50,6 +50,7 @@ export enum ReadOperations {
   GetFieldDefinitions = 'getFieldDefinitions',
   GetTemplate = 'getTemplate',
   FindTemplates = 'findTemplates',
+  FindObservables = 'findObservables',
 }
 
 /**

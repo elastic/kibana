@@ -66,7 +66,7 @@ export const AttachmentTypeFilter = React.memo<AttachmentTypeFilterProps>(
       const observablesOption =
         observablesAuthorized &&
         isObservablesFeatureEnabled &&
-        caseData.observables.length > 0 &&
+        (caseData.totalObservables ?? 0) > 0 &&
         !excluded.has(OBSERVABLES_FILTER_ID)
           ? [{ key: OBSERVABLES_FILTER_ID, label: i18n.OBSERVABLES }]
           : [];
@@ -78,7 +78,7 @@ export const AttachmentTypeFilter = React.memo<AttachmentTypeFilterProps>(
       availableTypes,
       observablesAuthorized,
       isObservablesFeatureEnabled,
-      caseData.observables,
+      caseData.totalObservables,
       excluded,
     ]);
 
