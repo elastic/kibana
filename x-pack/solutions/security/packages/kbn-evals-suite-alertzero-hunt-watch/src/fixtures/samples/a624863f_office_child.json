@@ -1,0 +1,46 @@
+{
+  "rule": {"source": "prebuilt", "rule_id": "a624863f-a70d-417f-a7d2-7a404638d47f"},
+  "chain": "encoded-powershell",
+  "step": "Office -> encoded PowerShell",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {"category": ["process"], "type": ["start"], "action": "exec", "kind": "event"},
+          "host": {"name": "wks-alice-01", "id": "azqa-wks-alice-01", "os": {"type": "windows", "family": "windows"}},
+          "user": {"name": "alice.chen", "domain": "CORP"},
+          "process": {
+            "name": "powershell.exe",
+            "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "command_line": "powershell.exe -NoP -W Hidden -EncodedCommand SQBFAFgA",
+            "entity_id": "azqa-ps-001",
+            "parent": {"name": "WINWORD.EXE", "executable": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE", "entity_id": "azqa-word-001"}
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Parent is notepad.exe instead of WINWORD.EXE (no Office parent)",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {"category": ["process"], "type": ["start"], "action": "exec", "kind": "event"},
+          "host": {"name": "wks-alice-01", "id": "azqa-wks-alice-01", "os": {"type": "windows", "family": "windows"}},
+          "user": {"name": "alice.chen", "domain": "CORP"},
+          "process": {
+            "name": "powershell.exe",
+            "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "command_line": "powershell.exe -NoP -W Hidden -EncodedCommand SQBFAFgA",
+            "entity_id": "azqa-ps-001",
+            "parent": {"name": "notepad.exe", "executable": "C:\\Windows\\System32\\notepad.exe", "entity_id": "azqa-np-001"}
+          }
+        }
+      }
+    ]
+  }
+}
