@@ -32,6 +32,12 @@ export class SignificantEventsPublicPlugin
     plugins: SignificantEventsPublicSetupDependencies
   ): SignificantEventsPublicPluginSetup {
     registerSignificantEventsWorkflowTriggers(plugins.workflowsExtensions);
+    plugins.workflowsExtensions?.registerStepDefinition(() =>
+      import('./workflows/steps/resolve_written_detections').then(
+        ({ resolveWrittenDetectionsPublicStepDefinition }) =>
+          resolveWrittenDetectionsPublicStepDefinition
+      )
+    );
     return {};
   }
 

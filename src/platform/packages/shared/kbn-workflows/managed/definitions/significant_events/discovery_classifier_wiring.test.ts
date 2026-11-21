@@ -15,6 +15,7 @@ interface WorkflowStep {
   name: string;
   type?: string;
   condition?: string;
+  if?: string;
   'on-failure'?: { continue?: boolean };
   'iteration-on-failure'?: { continue?: boolean };
   foreach?: string;
@@ -105,6 +106,97 @@ describe('discovery workflow detection classifier wiring', () => {
 
       expect(step.type).toBe('significantEvents.classifyDetections');
       expect(step['on-failure']).toBeUndefined();
+    });
+
+    it('resolves written detections only when the agent succeeded, and a failure does not fail the run', () => {
+      const resolve = requireStep('resolve_written_detections');
+
+      expect(evaluate(resolve.if, { steps: { run_discovery_agent: { error: null } } })).toBe(true);
+      expect(
+        evaluate(resolve.if, { steps: { run_discovery_agent: { error: { message: 'failed' } } } })
+      ).toBe(false);
+      expect(resolve['on-failure']).toEqual({ continue: true });
+    });
+
+    it('uses the workflow execution space rather than caller-provided step input', () => {
+      const resolve = requireStep('resolve_written_detections');
+
+      expect(resolve.with).not.toHaveProperty('space_id');
+    });
+
+    describe('stamp rule uuids', () => {
+      const resolved = requireStep('compute_resolved_stamp_rule_uuids');
+      const fallback = requireStep('compute_fallback_stamp_rule_uuids');
+      const stampRuleUuids = requireStep('compute_stamp_rule_uuids').with?.stamp_rule_uuids;
+
+      // Runs each stamp step only when its `if` passes, as the engine does, then merges the outputs.
+      const stampRules = (resolver: { error: { message: string } | null; stamp: string[] }) => {
+        const context = {
+          steps: {
+            resolve_written_detections: {
+              error: resolver.error,
+              output: resolver.error ? undefined : { stamp_rule_uuids: resolver.stamp },
+            },
+            compute_written_rule_uuids: { output: { written_rule_uuids: ['rule-X'] } },
+          },
+        };
+        const run = (step: typeof resolved) =>
+          evaluate(step.if, context)
+            ? { output: { stamp_rule_uuids: evaluate(step.with?.stamp_rule_uuids, context) } }
+            : undefined;
+
+        return evaluate(stampRuleUuids, {
+          steps: {
+            compute_resolved_stamp_rule_uuids: run(resolved),
+            compute_fallback_stamp_rule_uuids: run(fallback),
+          },
+        });
+      };
+
+      it('keeps an empty resolver result instead of falling back to the reported rules', () => {
+        expect(stampRules({ error: null, stamp: [] })).toEqual([]);
+      });
+
+      it('falls back to the reported rules when the resolver step failed', () => {
+        expect(stampRules({ error: { message: 'down' }, stamp: [] })).toEqual(['rule-X']);
+      });
+    });
+
+    it('reports the unknown reported rule count in the completed body', () => {
+      const body = requireStep('report_discovery_completed').with?.body as Record<string, unknown>;
+
+      expect(
+        evaluate(body.unknown_reported_rule_count, {
+          steps: { resolve_written_detections: { output: { unknown_reported_count: 3 } } },
+        })
+      ).toBe(3);
+    });
+
+    it('limits the agent answer to the rule uuids of the batch', () => {
+      const schemaStep = requireStep('build_agent_answer_schema');
+      const agent = requireStep('run_discovery_agent');
+      const schema = schemaStep.with?.schema as {
+        properties: { written_rule_uuids: { items: { enum: string } } };
+      };
+      const batch = [
+        { rule_uuid: 'rule-A', detection_id: 'detection-A' },
+        { rule_uuid: 'rule-B', detection_id: 'detection-B' },
+        { rule_uuid: 'rule-A', detection_id: 'detection-A2' },
+        { detection_id: 'detection-C' },
+      ];
+      const builtSchema = { type: 'object' };
+
+      expect(
+        evaluate(
+          schema.properties.written_rule_uuids.items.enum,
+          withClassify({ output: { batch } })
+        )
+      ).toEqual(['rule-A', 'rule-B']);
+      expect(
+        evaluate(agent.with?.schema, {
+          steps: { build_agent_answer_schema: { output: { schema: builtSchema } } },
+        })
+      ).toBe(builtSchema);
     });
 
     it('passes the detection rows, the space and every classifier input to the step', () => {

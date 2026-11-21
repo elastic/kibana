@@ -103,6 +103,7 @@ import { registerSignificantEventsSkills } from './agent_builder/skills/register
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
 import { classifyDetectionsStepDefinition } from './step_definitions/classify_detections';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
+import { resolveWrittenDetectionsStepDefinition } from './step_definitions/resolve_written_detections';
 import {
   createContinuousOnboardingWorkflowService,
   type ContinuousOnboardingWorkflowService,
@@ -525,6 +526,11 @@ export class SignificantEventsPlugin
     );
     plugins.workflowsExtensions?.registerStepDefinition(
       classifyDetectionsStepDefinition({ logger: this.logger.get('classify_detections') })
+    );
+    plugins.workflowsExtensions?.registerStepDefinition(
+      resolveWrittenDetectionsStepDefinition({
+        logger: this.logger.get('resolve_written_detections'),
+      })
     );
 
     // Custom event-driven triggers users can subscribe to from their own workflows.

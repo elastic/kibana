@@ -50,7 +50,7 @@ export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 30,
+  version: 31,
   billable: false,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'significant_events/discovery.yaml');
