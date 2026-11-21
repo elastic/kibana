@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentTimelineEvent, DynamicToolDefinition } from '@kbn/agent-builder-common';
-import { TimelineEventType, ToolOrigin } from '@kbn/agent-builder-common';
+import { TimelineEventType, ToolOrigin, filterToolsBySelection } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { getVersion, toAttachment } from '@kbn/agent-builder-common/attachments';
 import { renderDynamicToolDefinition } from '@kbn/agent-builder-genai-utils/langchain';
@@ -17,7 +17,6 @@ import type {
   AttachmentStateManager,
 } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentsService, ToolManager } from '@kbn/agent-builder-server/runner';
-import { pickTools } from './select_tools';
 
 /**
  * The tools an attachment binds to itself at one of its versions (`getBoundedTools`), ready to run.
@@ -104,8 +103,9 @@ export interface AttachmentDynamicToolsOptions {
   toolProvider: ToolProvider;
   /**
    * Whether the agent has the tool in its native tool list. It calls such a tool directly, so a
-   * type tool it has natively is neither described nor registered as a dynamic tool. Asked when
-   * the definitions are read, not in `prepare`, which runs before the run adds its native tools.
+   * tool it has natively (a type tool, or a bound tool under a native id) is not described, and a
+   * type tool it has natively is not registered as a dynamic tool either. Asked when the
+   * definitions are read, not in `prepare`, which runs before the run adds its native tools.
    */
   isNativeTool: (toolId: string) => boolean;
   logger?: Logger;
@@ -125,7 +125,8 @@ export interface AttachmentDynamicToolsOptions {
  *   tool manager removes the ones it was given before that are no longer available (a deleted
  *   attachment, a version replaced by one binding fewer tools, the last attachment of a type gone).
  *
- * A type tool the agent already has in its native tool list stays native: it is left out of both.
+ * A tool the agent already has in its native tool list stays native: no event describes it, and a
+ * type tool is not registered either (the tool manager refuses a bound tool under a native id).
  */
 export class AttachmentDynamicTools {
   /** The bound tools of each attachment version, resolved once. */
@@ -145,8 +146,13 @@ export class AttachmentDynamicTools {
   private readonly typeToolOwners = new Map<string, string>();
   /** The attachment versions the events given to `prepare` announced, by key. */
   private readonly announced = new Set<string>();
+  /** The tool provider's listing, taken once: the tools of every type are picked from it. */
+  private listing?: Promise<ExecutableTool[]>;
 
   constructor(private readonly options: AttachmentDynamicToolsOptions) {}
+
+  private readonly isDynamic = (definition: DynamicToolDefinition): boolean =>
+    !this.options.isNativeTool(definition.tool_id);
 
   /** Resolves the definitions of the events that carry them; call before rendering the events. */
   async prepare(events: readonly AttachmentTimelineEvent[]): Promise<void> {
@@ -179,11 +185,10 @@ export class AttachmentDynamicTools {
       return undefined;
     }
     const key = versionKey(event.data.attachment_id, version);
-    const bound = this.definitions.get(key) ?? [];
+    const bound = (this.definitions.get(key) ?? []).filter(this.isDynamic);
     const owned = (this.renderedTypeDefinitions.get(event.data.attachment_type) ?? []).filter(
       (definition) =>
-        this.typeToolOwners.get(definition.tool_id) === key &&
-        !this.options.isNativeTool(definition.tool_id)
+        this.typeToolOwners.get(definition.tool_id) === key && this.isDynamic(definition)
     );
     const carried = [...bound, ...owned];
     return carried.length > 0 ? carried : undefined;
@@ -219,13 +224,14 @@ export class AttachmentDynamicTools {
       typeDefinitions
         .flat()
         .filter(
-          (definition) =>
-            !this.typeToolOwners.has(definition.tool_id) &&
-            !this.options.isNativeTool(definition.tool_id)
+          (definition) => !this.typeToolOwners.has(definition.tool_id) && this.isDynamic(definition)
         )
         .map((definition) => [definition.tool_id, definition])
     );
-    return bound.flatMap((rendered) => rendered ?? []).concat(unowned.values().toArray());
+    return bound
+      .flatMap((rendered) => rendered ?? [])
+      .filter(this.isDynamic)
+      .concat(unowned.values().toArray());
   }
 
   private async resolveVersionDefinitions(
@@ -306,11 +312,8 @@ export class AttachmentDynamicTools {
     if (toolIds.length === 0) {
       return [];
     }
-    return pickTools({
-      toolProvider,
-      selection: [{ tool_ids: toolIds }],
-      request: formatContext.request,
-    });
+    this.listing ??= toolProvider.list({ request: formatContext.request });
+    return filterToolsBySelection(await this.listing, [{ tool_ids: toolIds }]);
   }
 
   private resolveTypeDefinitions(type: string): Promise<DynamicToolDefinition[]> {

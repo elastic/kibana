@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { findLast, findLastIndex } from 'lodash';
+import { escapeRegExp, findLast, findLastIndex } from 'lodash';
 import type { LlmProxy, LLMMessage } from '@kbn/ftr-llm-proxy';
 import { createToolCallMessage } from '@kbn/ftr-llm-proxy';
 
@@ -33,15 +33,29 @@ const isToolResultRequest = (messages: ProxyMessages) => {
 const interceptToolResult = (
   proxy: LlmProxy,
   name: string,
-  responseMock: (messages: ProxyMessages) => LLMMessage
+  responseMock: (messages: ProxyMessages) => LLMMessage,
+  when: (messages: ProxyMessages) => boolean = () => true
 ) => {
   void proxy
     .intercept({
       name,
-      when: ({ messages }) => !isTitleGenerationRequest(messages) && isToolResultRequest(messages),
+      when: ({ messages }) =>
+        !isTitleGenerationRequest(messages) && isToolResultRequest(messages) && when(messages),
       responseMock: ({ messages }) => responseMock(messages),
     })
     .completeAfterIntercept();
+};
+
+/**
+ * Whether the request carries the dynamic tool's definition: in the `load_skill` result that
+ * unlocked it, or after the attachment event that made it available. Tool results are
+ * JSON-encoded, so quotes may be escaped.
+ */
+const describesDynamicTool = (messages: ProxyMessages, toolId: string) => {
+  const definition = new RegExp(`\\\\?"tool_id\\\\?"\\s*:\\s*\\\\?"${escapeRegExp(toolId)}\\\\?"`);
+  return messages.some(({ content }) =>
+    definition.test(typeof content === 'string' ? content : JSON.stringify(content ?? ''))
+  );
 };
 
 /** LLM-facing tool name: Agent Builder replaces `.` with `_` in tool ids. */
@@ -90,14 +104,23 @@ export const mockToolResultCall = (
   interceptToolResult(proxy, interceptorName, () => createToolCallMessage(toolName, toolArg));
 };
 
-/** Answers the next tool result with a dynamic tool call, as to a tool a loaded skill unlocked. */
+/**
+ * Answers the next tool result with a dynamic tool call, as to a tool a loaded skill unlocked, once
+ * the model has been given the tool's definition: a call scripted before that would pass with the
+ * tool registered but undescribed.
+ */
 export const mockDynamicToolResultCall = (
   proxy: LlmProxy,
   interceptorName: string,
   toolId: string,
   params: Record<string, unknown>
 ) => {
-  interceptToolResult(proxy, interceptorName, () => createDynamicToolCallMessage(toolId, params));
+  interceptToolResult(
+    proxy,
+    interceptorName,
+    () => createDynamicToolCallMessage(toolId, params),
+    (messages) => describesDynamicTool(messages, toolId)
+  );
 };
 
 const ATTACHED_ID_PATTERN = /\\?"attachment_id\\?"\s*:\s*\\?"([^"\\]+)/;
@@ -114,11 +137,16 @@ export const mockDynamicToolResultCallOnAttachment = (
   attachmentIdArg: string,
   params: Record<string, unknown>
 ) => {
-  interceptToolResult(proxy, interceptorName, (messages) => {
-    const toolResult = String(findLast(messages, ({ role }) => role === 'tool')?.content ?? '');
-    const [, attachmentId] = toolResult.match(ATTACHED_ID_PATTERN) ?? [];
-    return createDynamicToolCallMessage(toolId, { ...params, [attachmentIdArg]: attachmentId });
-  });
+  interceptToolResult(
+    proxy,
+    interceptorName,
+    (messages) => {
+      const toolResult = String(findLast(messages, ({ role }) => role === 'tool')?.content ?? '');
+      const [, attachmentId] = toolResult.match(ATTACHED_ID_PATTERN) ?? [];
+      return createDynamicToolCallMessage(toolId, { ...params, [attachmentIdArg]: attachmentId });
+    },
+    (messages) => describesDynamicTool(messages, toolId)
+  );
 };
 
 /**

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { escapeRegExp } from 'lodash';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { createToolCallMessage } from '@kbn/ftr-llm-proxy';
 
@@ -53,7 +54,21 @@ const EXECUTE_DYNAMIC_TOOL = 'execute_dynamic_tool';
 export const createDynamicToolCallMessage = (toolId: string, params: Record<string, unknown>) =>
   createToolCallMessage(EXECUTE_DYNAMIC_TOOL, { tool_id: toolId, params });
 
-/** Answers the user's message with a dynamic tool call. */
+/**
+ * Whether the request carries the dynamic tool's definition, as rendered after the attachment
+ * event that makes it available. Tool results are JSON-encoded, so quotes may be escaped.
+ */
+const describesDynamicTool = (messages: Array<{ content?: unknown }>, toolId: string) => {
+  const definition = new RegExp(`\\\\?"tool_id\\\\?"\\s*:\\s*\\\\?"${escapeRegExp(toolId)}\\\\?"`);
+  return messages.some(({ content }) =>
+    definition.test(typeof content === 'string' ? content : JSON.stringify(content ?? ''))
+  );
+};
+
+/**
+ * Answers the user's message with a dynamic tool call, once the model has been given the tool's
+ * definition: a call scripted before that would pass with the tool registered but undescribed.
+ */
 export const mockDynamicToolCall = (
   proxy: LlmProxy,
   toolId: string,
@@ -61,7 +76,8 @@ export const mockDynamicToolCall = (
 ) => {
   void proxy.interceptors.userMessage({
     name: `agent:${EXECUTE_DYNAMIC_TOOL}:${toolId}`,
-    when: ({ messages }) => !isTitleGenerationRequest(messages),
+    when: ({ messages }) =>
+      !isTitleGenerationRequest(messages) && describesDynamicTool(messages, toolId),
     response: createDynamicToolCallMessage(toolId, params),
   });
 };

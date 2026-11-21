@@ -235,3 +235,48 @@ describe('the tools an attachment type exposes (getTools)', () => {
     );
   });
 });
+
+describe('the dynamic tools stored with the conversation', () => {
+  it('leave out the tools of the attachments: the active attachments provide them on every turn', async () => {
+    const scenario = createScenario({
+      tools: [attachAlert],
+      unselectedTools: [getAlertDetails],
+      attachmentTypes: [alertType],
+    });
+
+    const first = await scenario.turn('Look at alert a1', [
+      { toolCalls: [{ function: { name: 'attach_alert', arguments: { alert_id: 'a1' } } }] },
+      {
+        toolCalls: [
+          {
+            function: {
+              name: 'execute_dynamic_tool',
+              arguments: { tool_id: 'get_alert_details', params: { alert_id: 'a1' } },
+            },
+          },
+        ],
+      },
+      'Attached and read a1.',
+    ]);
+    // A restored dynamic tool keeps its registration whatever happens to the attachment between
+    // the turns; the attachment's tools are registered from the attachments active at the turn.
+    expect(first.conversation.state?.dynamic_tool_ids).toEqual([]);
+
+    const second = await scenario.turn('And again?', [
+      {
+        toolCalls: [
+          {
+            function: {
+              name: 'execute_dynamic_tool',
+              arguments: { tool_id: 'get_alert_details', params: { alert_id: 'a1' } },
+            },
+          },
+        ],
+      },
+      'Still high.',
+    ]);
+    expect(second.round.steps.filter(isToolCallStep)).toEqual([
+      expect.objectContaining({ tool_id: 'get_alert_details', invocation: 'dynamic' }),
+    ]);
+  });
+});

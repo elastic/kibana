@@ -92,13 +92,22 @@ export class ToolManager implements IToolManager {
         return;
     }
 
-    this.toolIdMappings = new Map([...this.toolIdMappings, ...idMappings]);
-
+    const logger = input.type === ToolManagerToolType.executable ? input.logger : undefined;
     langchainTools.forEach((langchainTool) => {
       const { name } = langchainTool;
-      // a tool already bound keeps its first binding
-      if (!this.staticTools.has(name)) {
-        this.staticTools.set(name, langchainTool);
+      // a tool already bound keeps its first binding, and with it the id its name resolves to
+      if (this.staticTools.has(name)) {
+        logger?.warn(
+          `Tool "${idMappings.get(
+            name
+          )}" is not bound: the agent already has a tool named "${name}"`
+        );
+        return;
+      }
+      this.staticTools.set(name, langchainTool);
+      const toolId = idMappings.get(name);
+      if (toolId !== undefined) {
+        this.toolIdMappings.set(name, toolId);
       }
     });
   }

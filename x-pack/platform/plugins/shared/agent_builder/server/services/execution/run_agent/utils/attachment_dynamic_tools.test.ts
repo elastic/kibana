@@ -587,6 +587,27 @@ describe('AttachmentDynamicTools', () => {
         expect(toolProvider.list).toHaveBeenCalledWith({ request: formatContext.request });
       });
 
+      it('lists the registry once however many types declare tools', async () => {
+        const { dynamicTools, toolProvider } = setupTypeTools({
+          typeTools: { text: ['text.type_tool'], other: ['other.type_tool'] },
+          registryToolIds: ['text.type_tool', 'other.type_tool'],
+          records: [createAttachment(), createSecondAttachment('other')],
+        });
+        const [textEvent, otherEvent] = [addedEvent(1), secondAddedEvent('other')];
+
+        await dynamicTools.prepare([textEvent, otherEvent]);
+
+        expect(toolProvider.list).toHaveBeenCalledTimes(1);
+        expect(definitionIds(dynamicTools.get(textEvent))).toEqual([
+          'bound.tool',
+          'text.type_tool',
+        ]);
+        expect(definitionIds(dynamicTools.get(otherEvent))).toEqual([
+          'bound.tool',
+          'other.type_tool',
+        ]);
+      });
+
       it('does not ask the registry for a type that declares no tools', async () => {
         const { dynamicTools, toolManager, toolProvider } = setupTypeTools({ typeTools: {} });
 
@@ -764,6 +785,23 @@ describe('AttachmentDynamicTools', () => {
         const definitions = await dynamicTools.unannouncedDefinitions([]);
 
         expect(definitionIds(definitions)).toEqual(['bound.tool', 'text.type_tool']);
+      });
+
+      it('leaves a bound tool under a native id out of the definitions of the event', async () => {
+        const { dynamicTools } = setupTypeTools({ nativeToolIds: ['bound.tool'] });
+        const event = addedEvent(1);
+
+        await dynamicTools.prepare([event]);
+
+        expect(definitionIds(dynamicTools.get(event))).toEqual(['text.type_tool']);
+      });
+
+      it('leaves a bound tool under a native id out of the definitions no event describes', async () => {
+        const { dynamicTools } = setupTypeTools({ nativeToolIds: ['bound.tool'] });
+
+        const definitions = await dynamicTools.unannouncedDefinitions([]);
+
+        expect(definitionIds(definitions)).toEqual(['text.type_tool']);
       });
     });
   });

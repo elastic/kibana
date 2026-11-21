@@ -7,6 +7,7 @@
 
 import type { Conversation } from '@kbn/agent-builder-common';
 import { CONVERSATION_SCHEMA_VERSION, isEventsNativeVersion } from '@kbn/agent-builder-common';
+import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { roundsToEvents } from '../services/conversation/client/rounds_to_events';
 import type { ConversationWithOperation } from '../services/execution/utils/conversations';
@@ -21,7 +22,8 @@ export interface ConversationStore {
 
 /**
  * A stored conversation behind the conversation client: a legacy document reads with its events
- * derived from its rounds, and `appendEvents` / `replaceRoundEvents` apply as the client does.
+ * derived from its rounds, and `appendEvents` / `replaceRoundEvents` apply as the client does,
+ * the state they carry (the dynamic tool ids, the compaction summary) included.
  */
 export const createConversationStore = (initial: Conversation): ConversationStore => {
   let stored = initial;
@@ -33,39 +35,51 @@ export const createConversationStore = (initial: Conversation): ConversationStor
         : roundsToEvents(stored),
     operation: 'UPDATE',
   });
-  const write = (
-    events: NonNullable<Conversation['events']>,
-    attachments?: { produced: VersionedAttachment[] }
-  ): Conversation => {
+  const write = ({
+    events,
+    attachments,
+    state,
+  }: {
+    events: NonNullable<Conversation['events']>;
+    attachments?: { produced: VersionedAttachment[] };
+    state?: ConversationInternalState;
+  }): Conversation => {
     stored = {
       ...stored,
       schema_version: CONVERSATION_SCHEMA_VERSION,
       events,
       ...(attachments ? { attachments: attachments.produced } : {}),
+      // as the client: a write without a state keeps the stored one
+      ...(state ? { state } : {}),
     };
     return stored;
   };
   const client = createConversationClientMock();
-  client.appendEvents.mockImplementation(async ({ events, attachments }) => {
+  client.appendEvents.mockImplementation(async ({ events, attachments, state }) => {
     const current = read().events ?? [];
     const ids = new Set(current.map(({ id }) => id));
-    return write([...current, ...events.filter(({ id }) => !ids.has(id))], attachments);
+    return write({
+      events: [...current, ...events.filter(({ id }) => !ids.has(id))],
+      attachments,
+      state,
+    });
   });
-  client.replaceRoundEvents.mockImplementation(async ({ roundId, events, attachments }) => {
+  client.replaceRoundEvents.mockImplementation(async ({ roundId, events, attachments, state }) => {
     const current = read().events ?? [];
     const isRoundEvent = ({ id }: { id: string }) => id.startsWith(`${roundId}::`);
     const others = current.filter((event) => !isRoundEvent(event));
     const otherIds = new Set(others.map(({ id }) => id));
     const firstRoundIndex = current.findIndex(isRoundEvent);
     const insertAt = firstRoundIndex === -1 ? others.length : firstRoundIndex;
-    return write(
-      [
+    return write({
+      events: [
         ...others.slice(0, insertAt),
         ...events.filter(({ id }) => !otherIds.has(id)),
         ...others.slice(insertAt),
       ],
-      attachments
-    );
+      attachments,
+      state,
+    });
   });
   return { client, read };
 };

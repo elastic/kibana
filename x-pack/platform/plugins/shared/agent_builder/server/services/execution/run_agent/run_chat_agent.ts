@@ -24,7 +24,6 @@ import {
   AgentExecutionMode,
   EventActorType,
   parseExecutionId,
-  isAttachmentEvent,
   platformCoreTools,
   unreadSettledSteerIds,
 } from '@kbn/agent-builder-common';
@@ -44,6 +43,7 @@ import {
   type PendingTurn,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
+import { createExecuteDynamicTool } from './tools/execute_dynamic_tool';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildResumeInitialization } from './utils/resume_initialization';
@@ -326,7 +326,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   // Resolve the definitions of the attachment events that are about to be rendered: the history's
   // but those the summary hides, then the incoming message's.
-  await attachmentDynamicTools.prepare([
+  const renderedAttachmentEvents = [
     ...visibleAttachmentEvents({
       events: processedConversation.timeline,
       entries: historyEntries,
@@ -338,17 +338,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       }),
     }),
     ...chatInputEvents,
-  ]);
-  processedConversation.boundToolDefinitions = (event) => attachmentDynamicTools.get(event);
-  // A conversation stored before attachment events existed carries its attachments on its
-  // messages: no event renders their definitions, so a notice ahead of the history does. The
-  // events of the run reach `prepare`, so resolving at render time reflects them.
-  const storedAttachmentEvents = [
-    ...processedConversation.timeline.filter(isAttachmentEvent),
-    ...chatInputEvents,
   ];
+  await attachmentDynamicTools.prepare(renderedAttachmentEvents);
+  processedConversation.boundToolDefinitions = (event) => attachmentDynamicTools.get(event);
+  // The tools of the active attachments no rendered event describes get a notice ahead of the
+  // history: a conversation stored before attachment events existed carries its attachments on
+  // its messages, and a summary stored before bound tools were dynamic hides their events without
+  // carrying their definitions. The events of the run reach `prepare`, so resolving at render
+  // time reflects them.
   processedConversation.unannouncedBoundToolDefinitions = () =>
-    attachmentDynamicTools.unannouncedDefinitions(storedAttachmentEvents);
+    attachmentDynamicTools.unannouncedDefinitions(renderedAttachmentEvents);
 
   // Started before the tool setup so a 'first' hook overlaps it, as the skill selection below does.
   const cycleHooks = new CycleHookRuntime({
@@ -397,7 +396,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       runner: context.runner,
     });
 
-    // First add static tools
+    // `execute_dynamic_tool` first: always bound, so the native tool list stays the same however
+    // many dynamic tools appear, and ahead of the configured tools, so one whose id maps to its
+    // name cannot take its binding.
+    await toolManager.addTools({
+      type: ToolManagerToolType.executable,
+      tools: [createExecuteDynamicTool({ toolManager })],
+      logger,
+    });
+    // Then the static tools
     await Promise.all([
       toolManager.addTools({
         type: ToolManagerToolType.executable,
@@ -717,9 +724,15 @@ const getConversationState = ({
   subagents?: Record<string, SubagentEntry>;
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
+  // The attachments' tools are left out: each run registers them from the attachments active
+  // then, while a restored tool would stay registered once its attachment is gone.
+  const dynamicToolIds = toolManager
+    .listDynamicTools()
+    .filter(({ source }) => source !== 'attachments')
+    .map(({ id }) => id);
   return {
     prompt: promptManager.dump(),
-    dynamic_tool_ids: toolManager.getDynamicToolIds(),
+    dynamic_tool_ids: dynamicToolIds,
     ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
     ...(Object.keys(bgState).length > 0 ? { background_executions: bgState } : {}),
     ...(subagents && Object.keys(subagents).length > 0 ? { subagents } : {}),

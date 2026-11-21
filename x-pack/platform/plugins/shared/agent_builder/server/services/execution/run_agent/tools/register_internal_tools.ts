@@ -28,7 +28,6 @@ import { createAskUserQuestionTool } from './ask_user_question';
 import { createReadFileTool } from './read_file';
 import { createListFilesTool } from './list_files';
 import { createBashTool } from './bash';
-import { createExecuteDynamicTool } from './execute_dynamic_tool';
 import {
   createDiscoverApisTool,
   createDescribeApiTool,
@@ -235,14 +234,10 @@ export const registerInternalTools = async ({
 
   await toolManager.addTools({
     type: ToolManagerToolType.executable,
-    tools: [
-      ...tools.map((tool) => ({
-        ...builtinToolToExecutable({ tool, runner: runner as ScopedRunner }),
-        origin: ToolOrigin.internal,
-      })),
-      // always bound, so the native tool list stays the same however many dynamic tools appear
-      createExecuteDynamicTool({ toolManager }),
-    ],
+    tools: tools.map((tool) => ({
+      ...builtinToolToExecutable({ tool, runner: runner as ScopedRunner }),
+      origin: ToolOrigin.internal,
+    })),
     logger,
   });
 };

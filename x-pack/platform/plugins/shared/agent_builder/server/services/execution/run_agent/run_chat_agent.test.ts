@@ -46,6 +46,8 @@ import {
 import { createAgentGraph } from './graph';
 import { RunAttachmentEvents } from './run_attachment_events';
 import { registerInternalTools } from './tools/register_internal_tools';
+import { createExecuteDynamicTool } from './tools/execute_dynamic_tool';
+import { visibleAttachmentEvents } from './utils/context_coverage';
 import { createPromptFactory } from './prompts';
 import { createImageResolver } from './utils/image_resolver';
 import { AttachmentDynamicTools } from './utils/attachment_dynamic_tools';
@@ -74,6 +76,16 @@ jest.mock('./utils', () => ({
 jest.mock('./tools/register_internal_tools', () => ({
   registerInternalTools: jest.fn(),
 }));
+
+jest.mock('./tools/execute_dynamic_tool', () => ({
+  createExecuteDynamicTool: jest.fn(() => ({ id: 'execute_dynamic_tool' })),
+}));
+
+// the real coverage, with the attachment events' visibility mockable per test
+jest.mock('./utils/context_coverage', () => {
+  const actual = jest.requireActual('./utils/context_coverage');
+  return { ...actual, visibleAttachmentEvents: jest.fn(actual.visibleAttachmentEvents) };
+});
 
 jest.mock('./utils/image_resolver', () => ({
   createImageResolver: jest.fn(() => jest.fn()),
@@ -189,22 +201,29 @@ describe('runDefaultAgentMode', () => {
       context
     );
 
-    expect(context.toolManager.addTools).toHaveBeenCalledTimes(3);
+    expect(context.toolManager.addTools).toHaveBeenCalledTimes(4);
 
-    // Static tools are added first (executable tools + browser API tools)
+    // execute_dynamic_tool is bound first, ahead of a configured tool whose id maps to its name
+    expect(createExecuteDynamicTool).toHaveBeenCalledWith({ toolManager: context.toolManager });
     expect(context.toolManager.addTools).toHaveBeenNthCalledWith(1, {
+      type: ToolManagerToolType.executable,
+      tools: [{ id: 'execute_dynamic_tool' }],
+      logger: context.logger,
+    });
+    // Then the static tools (executable tools + browser API tools)
+    expect(context.toolManager.addTools).toHaveBeenNthCalledWith(2, {
       type: ToolManagerToolType.executable,
       tools: staticTools,
       logger: context.logger,
     });
-    expect(context.toolManager.addTools).toHaveBeenNthCalledWith(2, {
+    expect(context.toolManager.addTools).toHaveBeenNthCalledWith(3, {
       type: ToolManagerToolType.browser,
       tools: [{ ...browserApiTools[0], origin: ToolOrigin.internal }],
     });
 
     // Dynamic tools are added afterwards, behind execute_dynamic_tool: the restored ones are the
     // tools of the skills loaded in earlier rounds
-    expect(context.toolManager.addTools).toHaveBeenNthCalledWith(3, {
+    expect(context.toolManager.addTools).toHaveBeenNthCalledWith(4, {
       type: ToolManagerToolType.dynamic,
       source: 'skills',
       tools: dynamicTools,
@@ -1654,7 +1673,7 @@ describe('runDefaultAgentMode', () => {
         context
       );
 
-      expect(context.toolManager.addTools).toHaveBeenNthCalledWith(3, {
+      expect(context.toolManager.addTools).toHaveBeenNthCalledWith(4, {
         type: ToolManagerToolType.dynamic,
         source: 'skills',
         tools: dynamicTools,
@@ -1819,7 +1838,7 @@ describe('runDefaultAgentMode attachment bound tools', () => {
 
     const { processedConversation } = await run({ timeline: [timelineEvent] });
 
-    // resolved when the prompt is built, against the stored events
+    // resolved when the prompt is built, against the rendered events
     expect(await processedConversation.unannouncedBoundToolDefinitions?.()).toEqual([
       legacyDefinition,
     ]);
@@ -1827,6 +1846,23 @@ describe('runDefaultAgentMode attachment bound tools', () => {
       timelineEvent,
       expect.objectContaining({ data: expect.objectContaining({ source: 'chat_input' }) }),
     ]);
+  });
+
+  it('counts an event the summary hides as not announcing its tools', async () => {
+    const hiddenEvent = attachmentEventFixture({ id: 'hidden' });
+    const visibleEvent = attachmentEventFixture({ id: 'visible', attachmentId: 'att-2' });
+    jest.mocked(visibleAttachmentEvents).mockReturnValueOnce([visibleEvent]);
+
+    const { processedConversation } = await run({ timeline: [hiddenEvent, visibleEvent] });
+    await processedConversation.unannouncedBoundToolDefinitions?.();
+
+    // the events `prepare` resolved: the tools of a hidden event get the notice ahead of the history
+    const [prepared] = prepare.mock.calls[0];
+    expect(prepared).toEqual([
+      visibleEvent,
+      expect.objectContaining({ data: expect.objectContaining({ source: 'chat_input' }) }),
+    ]);
+    expect(mockAttachmentDynamicTools.unannouncedDefinitions).toHaveBeenCalledWith(prepared);
   });
 
   it('syncs the bound tools into the registry after the restored dynamic tools', async () => {

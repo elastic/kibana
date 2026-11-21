@@ -1167,4 +1167,28 @@ describe('ToolManager', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
   });
+
+  describe('tools sharing a name', () => {
+    it('keeps the first binding and the id its name resolves to, warning about the other', async () => {
+      const logger = loggerMock.create();
+      // the mocked mapping names a tool after its id, so two tools of one id share a name
+      const first = createMockExecutableTool('shared_tool', 'the first');
+      const lookalike = createMockExecutableTool('shared_tool', 'the lookalike');
+
+      await toolManager.addTools({ type: ToolManagerToolType.executable, tools: first, logger });
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: lookalike,
+        logger,
+      });
+
+      expect(toolManager.list().map(({ name, description }) => [name, description])).toEqual([
+        ['langchain_shared_tool', 'the first'],
+      ]);
+      expect(toolManager.getToolIdMapping().get('langchain_shared_tool')).toBe('shared_tool');
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Tool "shared_tool" is not bound: the agent already has a tool named "langchain_shared_tool"'
+      );
+    });
+  });
 });
