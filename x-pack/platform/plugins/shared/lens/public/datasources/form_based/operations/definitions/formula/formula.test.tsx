@@ -281,6 +281,31 @@ describe('[Lens] formula', () => {
       });
     });
 
+    it('it should move over reducedTimeRange arguments for a field-based count', () => {
+      expect(
+        formulaOperation.buildColumn({
+          previousColumn: {
+            ...layer.columns.col1,
+            operationType: 'count',
+            sourceField: 'bytes',
+            reducedTimeRange: '30m',
+          } as GenericIndexPatternColumn,
+          layer,
+          indexPattern,
+        })
+      ).toEqual({
+        label: `count(bytes, reducedTimeRange='30m')`,
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        params: {
+          isFormulaBroken: false,
+          formula: `count(bytes, reducedTimeRange='30m')`,
+        },
+        references: [],
+      });
+    });
+
     it('should move over previous operation parameter if set - only numeric', () => {
       expect(
         formulaOperation.buildColumn(
