@@ -155,7 +155,7 @@ describe('createEstimatedCostEvaluator', () => {
     const result = await evaluate();
 
     expect(result.score).toBeNull();
-    expect(result.label).toBe('unavailable');
+    expect(result.label).toBe('skipped');
     expect(result.explanation).toContain(
       'Could not price acme-unreleased-model (no EIS list price)'
     );
@@ -178,7 +178,7 @@ describe('createEstimatedCostEvaluator', () => {
     const result = await evaluate();
 
     expect(result.score).toBeNull();
-    expect(result.label).toBe('unavailable');
+    expect(result.label).toBe('skipped');
     expect(result.explanation).toContain(
       `Could not price ${SOL} (cache reads and writes exceed input tokens)`
     );

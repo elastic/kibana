@@ -235,4 +235,108 @@ describe('report_table', () => {
       expect(result).toContain('3 x');
     });
   });
+
+  describe('createTable with unscored runs', () => {
+    const withErrors = (errorCount: number, count: number): EvaluatorStats[] => [
+      {
+        datasetId: 'ds-id',
+        datasetName: 'ds',
+        evaluatorName: 'Factuality',
+        stats: { mean: 0.5, median: 0.5, stdDev: 0, min: 0.5, max: 0.5, count, errorCount },
+      },
+    ];
+
+    it('shows the number of unscored runs next to the stats', () => {
+      const result = createTable(withErrors(3, 7), 1);
+
+      expect(result).toContain('mean: 0.50');
+      expect(result).toContain('errors: 3');
+    });
+
+    it('shows errors, not zero stats, when every run was unscored', () => {
+      const result = createTable(withErrors(4, 0), 1);
+
+      expect(result).toContain('errors: 4');
+      expect(result).not.toContain('mean:');
+    });
+
+    it('omits the errors line when every run was scored', () => {
+      const result = createTable(withErrors(0, 7), 1);
+
+      expect(result).not.toContain('errors:');
+    });
+
+    it('ignores fully errored datasets when computing the overall min and max', () => {
+      const scored: EvaluatorStats = {
+        datasetId: 'ds-scored',
+        datasetName: 'scored',
+        evaluatorName: 'Factuality',
+        stats: { mean: 0.6, median: 0.6, stdDev: 0.1, min: 0.4, max: 0.8, count: 5 },
+      };
+      const allErrored: EvaluatorStats = {
+        datasetId: 'ds-errored',
+        datasetName: 'errored',
+        evaluatorName: 'Factuality',
+        stats: { mean: 0, median: 0, stdDev: 0, min: 0, max: 0, count: 0, errorCount: 3 },
+      };
+
+      const result = createTable([scored, allErrored], 1);
+      const countOf = (text: string) => result.split(text).length - 1;
+
+      // Once in the scored dataset's row and once in the overall row.
+      expect(countOf('min: 0.40')).toBe(2);
+      expect(countOf('max: 0.80')).toBe(2);
+      expect(countOf('mean: 0.60')).toBe(2);
+      expect(result).not.toMatch(/min: 0(?![.\d])/);
+      expect(result).not.toMatch(/max: 0(?![.\d])/);
+    });
+
+    it('shows only errors in the overall row when every dataset was fully errored', () => {
+      const result = createTable(
+        [
+          ...withErrors(2, 0),
+          ...withErrors(3, 0).map((s) => ({ ...s, datasetId: 'ds-2', datasetName: 'ds2' })),
+        ],
+        1
+      );
+
+      expect(result).toContain('errors: 5');
+      expect(result).not.toContain('NaN');
+      expect(result).not.toContain('Infinity');
+      expect(result).not.toContain('mean:');
+    });
+
+    it('sums unscored runs across datasets in the overall row', () => {
+      const result = createTable(
+        [
+          ...withErrors(1, 5),
+          ...withErrors(2, 5).map((s) => ({ ...s, datasetId: 'ds-2', datasetName: 'ds2' })),
+        ],
+        1
+      );
+
+      expect(result).toContain('errors: 1');
+      expect(result).toContain('errors: 2');
+      expect(result).toContain('errors: 3');
+    });
+
+    it('counts errored runs in the # column', () => {
+      const result = createTable(withErrors(3, 0), 1);
+
+      // All runs errored: the # column must show 3 runs, not 0. (The table uses
+      // box-drawing borders, so assert on the rendered row rather than raw `#\s*3`.)
+      expect(result).toMatch(/ds\s+│\s+3\s+│/);
+      expect(result).not.toMatch(/ds\s+│\s+0\s+│/);
+    });
+
+    it('does not render a fractional example count when some runs errored', () => {
+      // 3 repetitions, 4 runs: 2 scored + 2 errored. Counting only scored runs would
+      // divide 2 by 3 and render "3 x 0.666...".
+      const result = createTable(withErrors(2, 2), 3);
+
+      expect(result).toContain('3 x 1.33');
+      expect(result).not.toContain('0.67');
+      expect(result).not.toContain('0.66');
+    });
+  });
 });

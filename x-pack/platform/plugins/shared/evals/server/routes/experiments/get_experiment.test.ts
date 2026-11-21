@@ -96,6 +96,7 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
                     key: 'correctness',
                     score_stats: { avg: 0.85, std_deviation: 0.1, min: 0.5, max: 1.0, count: 10 },
                     score_median: { values: { '50.0': 0.9 } },
+                    score_error: { doc_count: 2 },
                     evaluator_model_id: {
                       buckets: [
                         {
@@ -144,6 +145,7 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
         min: 0.5,
         max: 1.0,
         count: 10,
+        error_count: 2,
       },
     });
   });

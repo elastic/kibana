@@ -71,7 +71,7 @@ describe('createCachedTokensEvaluator', () => {
     const result = await evaluate();
 
     expect(result.score).toBeNull();
-    expect(result.label).toBe('unavailable');
+    expect(result.label).toBe('skipped');
     expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
     expect(mockLog.error).not.toHaveBeenCalled();
     expect(mockLog.warning).not.toHaveBeenCalled();
@@ -110,7 +110,7 @@ describe('createCachedTokensEvaluator', () => {
       const result = await evaluate();
 
       expect(result.score).toBeNull();
-      expect(result.label).toBe('unavailable');
+      expect(result.label).toBe('skipped');
       expect(query).toHaveBeenCalledTimes(2);
       expect(mockLog.error).not.toHaveBeenCalled();
       expect(mockLog.warning).not.toHaveBeenCalled();

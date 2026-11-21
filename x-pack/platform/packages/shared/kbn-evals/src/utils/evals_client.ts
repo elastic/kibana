@@ -52,6 +52,8 @@ export interface EvaluatorStats {
     min: number;
     max: number;
     count: number;
+    /** Runs whose score is null: the evaluator or task could not produce a score. */
+    errorCount?: number;
   };
 }
 
@@ -177,6 +179,7 @@ const mapStatsResponse = (
         min: stat.stats.min,
         max: stat.stats.max,
         count: stat.stats.count,
+        errorCount: stat.stats.error_count ?? 0,
       },
     })),
   };

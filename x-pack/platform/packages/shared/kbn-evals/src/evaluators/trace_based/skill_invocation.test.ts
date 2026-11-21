@@ -172,7 +172,7 @@ describe('createSkillInvocationEvaluator', () => {
     expect(evaluator.name).toBe('Skill Invoked (data-exploration)');
   });
 
-  it('should return unavailable when no traceId is present', async () => {
+  it('should return skipped when no traceId is present', async () => {
     const evaluator = createSkillInvocationEvaluator({
       traceEsClient: mockEsClient,
       log: mockLog,
@@ -187,7 +187,7 @@ describe('createSkillInvocationEvaluator', () => {
     });
 
     expect(result.score).toBeNull();
-    expect(result.label).toBe('unavailable');
+    expect(result.label).toBe('skipped');
   });
 
   it('should return 0 when tool spans exist but skill was not among them', async () => {
@@ -276,7 +276,7 @@ describe('createSkillInvocationEvaluator', () => {
     const result = await promise;
 
     expect(result.label).toBe('error');
-    expect(result.score).toBeUndefined();
+    expect(result.score).toBeNull();
   });
 
   it('should throw for invalid skill names', () => {

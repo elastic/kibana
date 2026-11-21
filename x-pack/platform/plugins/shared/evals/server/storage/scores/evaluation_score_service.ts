@@ -83,6 +83,7 @@ const toEvaluationScoreDocuments = (
         trace_id: score.task.trace_id,
         repetition_index: score.task.repetition_index,
         output: score.task.output,
+        ...(score.task.error != null && { error: score.task.error }),
         model: request.task_model,
       },
       evaluator: {

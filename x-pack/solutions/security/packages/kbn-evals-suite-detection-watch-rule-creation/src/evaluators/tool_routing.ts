@@ -109,7 +109,8 @@ export function createToolRoutingEvaluator({
       if (!traceId && !conversationId) {
         return {
           score: null,
-          label: 'unavailable',
+          // Instrumentation failure (the run was not traced), not a deliberate skip: count it.
+          label: 'error',
           explanation: 'No traceId and no draft conversation_id to join tool spans on',
           metadata: undefined,
         };
@@ -160,7 +161,8 @@ export function createToolRoutingEvaluator({
       log.warning(`Tool Routing unavailable — ${diagnosis}`);
       return {
         score: null,
-        label: 'unavailable',
+        // Trace/export failure, not a deliberate skip: count it in error stats.
+        label: 'error',
         explanation: `No TOOL spans reachable via the workflow trace id or the draft conversation_id. ${diagnosis}`,
         metadata: undefined,
       };

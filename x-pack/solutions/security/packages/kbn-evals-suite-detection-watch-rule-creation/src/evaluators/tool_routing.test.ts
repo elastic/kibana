@@ -119,7 +119,7 @@ describe('createToolRoutingEvaluator', () => {
     const client = esWith((q) => (q.includes('STATS tool_spans') ? spans(0) : counts(0, 0)));
     const res = await evaluateWith(client, result());
     expect(res.score).toBeNull();
-    expect(res.label).toBe('unavailable');
+    expect(res.label).toBe('error');
     expect(res.explanation).toContain('NO TOOL spans at all');
   });
 
@@ -131,12 +131,13 @@ describe('createToolRoutingEvaluator', () => {
     expect(res.explanation).toContain('attribute drift');
   });
 
-  it('is unavailable when the run carries no join keys at all', async () => {
+  it('errors when the run carries no join keys at all', async () => {
     const res = await evaluateWith(
       esWith(() => counts(9, 9)),
       result({ traceId: undefined, stepExecutions: [] as never })
     );
     expect(res.score).toBeNull();
+    expect(res.label).toBe('error');
   });
 
   it('queries for the tool id the workflow prompt names', async () => {

@@ -17,6 +17,7 @@ import type {
   Evaluator,
   EvaluationDataset,
   EvaluationDatasetWithId,
+  EvaluationResult,
   ExperimentTask,
   OnEvaluationComplete,
   OnExperimentStart,
@@ -25,6 +26,31 @@ import type {
 } from '../types';
 import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
 import { DEFAULT_EXPERIMENT_CONCURRENCY } from '../utils/concurrency';
+
+// The ingest API caps `evaluator.explanation` at 4096 characters; a longer one rejects the score.
+const MAX_ERROR_MESSAGE_LENGTH = 1000;
+
+const toErrorMessage = (error: unknown): string =>
+  (error instanceof Error ? error.message : String(error)).slice(0, MAX_ERROR_MESSAGE_LENGTH);
+
+/** A null score means "could not score"; 0 is reserved for output that was scored and wrong. */
+const toErrorResult = (message: string): EvaluationResult => ({
+  score: null,
+  label: 'error',
+  explanation: message,
+});
+
+/**
+ * Reads an evaluator's optional metadata getter. Attribution is best-effort: a getter that
+ * throws must not reject the experiment or turn a finished score into an error.
+ */
+const readEvaluatorAttribute = <T>(getter: (() => T) | undefined): T | undefined => {
+  try {
+    return getter?.();
+  } catch {
+    return undefined;
+  }
+};
 
 const EXPERIMENT_UUID_NAMESPACE = 'c7e6c018-66dc-4511-b97d-046e2194d017';
 
@@ -225,27 +251,34 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 `🔧 Running task "${resolvedDataset.name}" on dataset "${datasetId}" (exampleIndex=${exampleIndex}, repetition=${rep})`
               );
 
-              const { taskOutput, traceId } = await withTaskSpan(
-                resolvedDataset.name,
-                {
-                  attributes: {
-                    'dataset.name': resolvedDataset.name,
-                    'dataset.id': datasetId,
+              let traceId: string | null | undefined;
+              let taskOutput: TTaskOutput | null = null;
+              let taskErrorMessage: string | undefined;
+              try {
+                taskOutput = await withTaskSpan(
+                  resolvedDataset.name,
+                  {
+                    attributes: {
+                      'dataset.name': resolvedDataset.name,
+                      'dataset.id': datasetId,
+                    },
                   },
-                },
-                async () => {
-                  const _traceId = getCurrentTraceId();
-                  const _taskOutput = await task(example);
-                  return {
-                    taskOutput: _taskOutput,
-                    traceId: _traceId,
-                  };
-                }
-              );
+                  async () => {
+                    traceId = getCurrentTraceId();
+                    return task(example);
+                  }
+                );
+              } catch (error) {
+                taskErrorMessage = toErrorMessage(error);
+                this.options.log.error(
+                  `❌ Task "${resolvedDataset.name}" failed (exampleIndex=${exampleIndex}, repetition=${rep}): ${taskErrorMessage}`
+                );
+              }
 
               // Prefer the trace id the task itself surfaced (e.g. converse's response
               // trace_id) over the eval client's own task-span trace id. See #276308.
-              const taskOrClientTraceId = (taskOutput as { traceId?: string })?.traceId || traceId;
+              const taskOrClientTraceId =
+                (taskOutput as { traceId?: string } | null)?.traceId || traceId;
 
               runs[runKey] = {
                 exampleIndex,
@@ -255,6 +288,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 metadata: example.metadata ?? {},
                 output: taskOutput,
                 traceId: taskOrClientTraceId,
+                ...(taskErrorMessage !== undefined && { taskError: { message: taskErrorMessage } }),
               };
 
               this.options.log.info(
@@ -263,43 +297,67 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
               const results = await Promise.all(
                 evaluators.map(async (evaluator) => {
+                  const evaluatorSummary = {
+                    evaluatorName: evaluator.name,
+                    direction: evaluator.direction,
+                    kind: evaluator.kind,
+                  };
+
+                  // Evaluators score task output, so a failed task has nothing to score. Running
+                  // them on a missing output would turn the task failure into a false 0.
+                  if (taskErrorMessage !== undefined) {
+                    return {
+                      ...evaluatorSummary,
+                      result: toErrorResult(taskErrorMessage),
+                      evaluatorTraceId: undefined,
+                      model: readEvaluatorAttribute(() => evaluator.getModel?.()),
+                      version: readEvaluatorAttribute(() => evaluator.getVersion?.()),
+                    };
+                  }
+
                   this.options.log.info(
                     `🧠 Evaluating run (exampleIndex=${exampleIndex}, repetition=${rep}) with evaluator "${evaluator.name}"`
                   );
-                  const { result, evaluatorTraceId } = await withEvaluatorSpan(
-                    evaluator.name,
-                    {},
-                    async () => {
-                      const _traceId = getCurrentTraceId();
-                      const _result = await evaluator.evaluate({
+                  let evaluatorTraceId: string | null | undefined;
+                  try {
+                    const result = await withEvaluatorSpan(evaluator.name, {}, async () => {
+                      evaluatorTraceId = getCurrentTraceId();
+                      return evaluator.evaluate({
                         input: example.input,
                         output: {
-                          ...taskOutput,
+                          // Not null here: a failed task returned before reaching this call.
+                          ...(taskOutput as object),
                           traceId: taskOrClientTraceId,
-                        },
+                        } as TTaskOutput,
                         expected: example.output ?? null,
                         metadata: example.metadata ?? {},
                       });
-                      return {
-                        result: _result,
-                        evaluatorTraceId: _traceId,
-                      };
-                    }
-                  );
-                  this.options.log.info(
-                    `✅ Evaluator "${evaluator.name}" on run (exampleIndex=${exampleIndex}, repetition=${rep}) completed`
-                  );
-                  return {
-                    evaluatorName: evaluator.name,
-                    direction: evaluator.direction,
-                    result,
-                    evaluatorTraceId,
-                    kind: evaluator.kind,
-                    // Read after `evaluate` so evaluators that learn their model from
-                    // the `_evaluate` response have it by now.
-                    model: evaluator.getModel?.(),
-                    version: evaluator.getVersion?.(),
-                  };
+                    });
+                    this.options.log.info(
+                      `✅ Evaluator "${evaluator.name}" on run (exampleIndex=${exampleIndex}, repetition=${rep}) completed`
+                    );
+                    return {
+                      ...evaluatorSummary,
+                      result,
+                      evaluatorTraceId,
+                      // Read after `evaluate` so evaluators that learn their model from
+                      // the `_evaluate` response have it by now.
+                      model: readEvaluatorAttribute(() => evaluator.getModel?.()),
+                      version: readEvaluatorAttribute(() => evaluator.getVersion?.()),
+                    };
+                  } catch (error) {
+                    const message = toErrorMessage(error);
+                    this.options.log.error(
+                      `❌ Evaluator "${evaluator.name}" failed on run (exampleIndex=${exampleIndex}, repetition=${rep}): ${message}`
+                    );
+                    return {
+                      ...evaluatorSummary,
+                      result: toErrorResult(message),
+                      evaluatorTraceId,
+                      model: readEvaluatorAttribute(() => evaluator.getModel?.()),
+                      version: readEvaluatorAttribute(() => evaluator.getVersion?.()),
+                    };
+                  }
                 })
               );
 
