@@ -38,6 +38,7 @@
     "@kbn/proposals-common",
     "@kbn/evals-suite-attack-discovery-agent-builder",
     "@kbn/deeplinks-security",
-    "@kbn/inference-common"
+    "@kbn/inference-common",
+    "@kbn/std"
   ]
 }
