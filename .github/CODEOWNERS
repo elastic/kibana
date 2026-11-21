@@ -1537,7 +1537,6 @@ x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps
-x-pack/solutions/security/plugins/timelines @elastic/security-investigations
 x-pack/solutions/security/test
 x-pack/solutions/security/test_helpers/detections-response-ftr-services @elastic/security-detection-engineering
 x-pack/solutions/security/test_plugins/resolver_test @elastic/security-solution
