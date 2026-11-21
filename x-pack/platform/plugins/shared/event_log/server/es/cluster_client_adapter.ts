@@ -271,9 +271,21 @@ export class ClusterClientAdapter<
       });
 
       if (response.errors) {
-        const error = new Error('Error writing some bulk events');
-        error.stack += '\n' + util.inspect(response.items, { depth: null });
-        this.logger.error(error);
+        const { failedItems, duplicateCount } = classifyBulkCreateErrors(response.items);
+
+        // Docs indexed with a fixed id return a 409 when the bulk request was
+        // retried after it had already been written, so they are not failures.
+        if (duplicateCount > 0) {
+          this.logger.debug(
+            `Skipped ${duplicateCount} event log documents that already exist; the bulk request was likely retried`
+          );
+        }
+
+        if (failedItems.length > 0) {
+          const error = new Error('Error writing some bulk events');
+          error.stack += '\n' + util.inspect(failedItems, { depth: null });
+          this.logger.error(error);
+        }
       }
     } catch (err) {
       this.logger.error(
@@ -997,6 +1009,29 @@ export function getQueryBodyWithAuthFilter(
       must: reject(musts, isUndefined),
     },
   };
+}
+
+type BulkResponseItems = BulkResponse['items'];
+
+export function classifyBulkCreateErrors(items: BulkResponseItems): {
+  failedItems: BulkResponseItems;
+  duplicateCount: number;
+} {
+  const failedItems: BulkResponseItems = [];
+  let duplicateCount = 0;
+
+  for (const item of items) {
+    const result = item.create;
+    if (!result?.error) continue;
+
+    if (result.status === 409 && result.error.type === 'version_conflict_engine_exception') {
+      duplicateCount++;
+    } else {
+      failedItems.push(item);
+    }
+  }
+
+  return { failedItems, duplicateCount };
 }
 
 function getNamespaceQuery(namespace?: string): estypes.QueryDslQueryContainer {
