@@ -6,11 +6,11 @@
  */
 
 import { Observable, type MonoTypeOperatorFunction } from 'rxjs';
-import type { ChatCompletionChunkEvent, ChatCompletionTokenCountEvent } from '@kbn/inference-common';
-import {
-  isChatCompletionChunkEvent,
-  isChatCompletionTokenCountEvent,
+import type {
+  ChatCompletionChunkEvent,
+  ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
+import { isChatCompletionChunkEvent, isChatCompletionTokenCountEvent } from '@kbn/inference-common';
 
 /**
  * Gives streaming consumers an attempt boundary when retrying.

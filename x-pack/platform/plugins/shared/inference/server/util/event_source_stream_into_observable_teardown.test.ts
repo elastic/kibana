@@ -26,14 +26,16 @@ describe('eventSourceStreamIntoObservable teardown', () => {
     const idleTimerArmedAfterTeardown = { value: false };
 
     const originalSetTimeout = globalThis.setTimeout;
-    const spy = jest
-      .spyOn(globalThis, 'setTimeout')
-      .mockImplementation(((handler: any, ms?: number, ...args: any[]) => {
-        if (ms === idleTimeoutMs && unsubscribeTime !== undefined && Date.now() >= unsubscribeTime) {
-          idleTimerArmedAfterTeardown.value = true;
-        }
-        return originalSetTimeout(handler, ms, ...args);
-      }) as any);
+    const spy = jest.spyOn(globalThis, 'setTimeout').mockImplementation(((
+      handler: any,
+      ms?: number,
+      ...args: any[]
+    ) => {
+      if (ms === idleTimeoutMs && unsubscribeTime !== undefined && Date.now() >= unsubscribeTime) {
+        idleTimerArmedAfterTeardown.value = true;
+      }
+      return originalSetTimeout(handler, ms, ...args);
+    }) as any);
 
     try {
       const subscription = eventSourceStreamIntoObservable(readable, { idleTimeoutMs }).subscribe(

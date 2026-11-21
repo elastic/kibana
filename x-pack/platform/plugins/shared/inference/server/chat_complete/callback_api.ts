@@ -23,8 +23,6 @@ import {
 import type { Logger } from '@kbn/logging';
 import type { Observable } from 'rxjs';
 import { defer, forkJoin, from, identity, share, switchMap, catchError, throwError } from 'rxjs';
-import { filter, map, mergeScan, startWith } from 'rxjs/operators';
-import type { ChatCompletionChunkEvent } from '@kbn/inference-common';
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';

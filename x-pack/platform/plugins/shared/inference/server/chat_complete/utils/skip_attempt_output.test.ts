@@ -95,7 +95,9 @@ describe('skipStreamedOutputFromRetryableAttempts', () => {
 
     it('publishes the buffered chunks of a successful attempt, order preserved', async () => {
       const upstream = new Subject<any>();
-      const result = upstream.pipe(skipStreamedOutputFromRetryableAttempts(), toArray()).toPromise();
+      const result = upstream
+        .pipe(skipStreamedOutputFromRetryableAttempts(), toArray())
+        .toPromise();
 
       upstream.next(chunkEvent('a'));
       upstream.next(tokensEvent);
