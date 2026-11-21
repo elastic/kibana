@@ -76,12 +76,18 @@ export const AlertEpisodeMetadataSection = ({
       dataViews: services.dataViews,
       http: services.http,
     });
+  // Without a rule (or when its data view can't be built) the field types are guessed from
+  // the `data` values.
   const dataView = useMemo(
     () =>
-      sourceDataView
-        ? createDataContainerDataView(sourceDataView, services.data.fieldFormats)
+      eventData
+        ? createDataContainerDataView({
+            sourceDataView,
+            data: eventData.data,
+            fieldFormats: services.data.fieldFormats,
+          })
         : undefined,
-    [services.data.fieldFormats, sourceDataView]
+    [eventData, services.data.fieldFormats, sourceDataView]
   );
 
   const tableDocView = useMemo(
@@ -138,10 +144,6 @@ export const AlertEpisodeMetadataSection = ({
         <EuiSkeletonText lines={8} size="s" />
       </EuiPanel>
     );
-  }
-
-  if (!isRuleLoaded(ruleState)) {
-    return null;
   }
 
   if (!hit || !dataView || !eventData) {

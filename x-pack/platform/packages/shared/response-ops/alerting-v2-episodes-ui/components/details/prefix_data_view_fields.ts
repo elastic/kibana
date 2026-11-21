@@ -8,6 +8,7 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import { inferDataContainerFieldSpecs } from './infer_data_container_fields';
 
 /** Prefix applied to evaluation fields stored under the episode `data` object. */
 export const DATA_CONTAINER_FIELD_PREFIX = 'data.';
@@ -105,14 +106,40 @@ export const prefixDataViewSpecFields = (spec: DataViewSpec): DataViewSpec => {
   };
 };
 
-/** Clones a data view in memory so `data.*` names keep the source field types and formatters. */
-export const createDataContainerDataView = (
-  dataView: DataView,
-  fieldFormats: FieldFormatsStartCommon
-): DataView =>
-  new DataView({
-    spec: prefixDataViewSpecFields(dataView.toSpec()),
+// Base id of the data view guessed from the alert `data` alone, when there is no rule query.
+const INFERRED_DATA_VIEW_ID = 'alerting-v2-episode';
+
+export interface CreateDataContainerDataViewOptions {
+  /** Data view built from the rule query, if any. Its fields win over the guessed ones. */
+  sourceDataView?: DataView;
+  /** The alert `data` object, used to guess the type of fields the source doesn't know. */
+  data: Record<string, unknown>;
+  fieldFormats: FieldFormatsStartCommon;
+}
+
+/**
+ * Builds an in-memory data view whose `data.*` fields match the episode `data` object. Types and
+ * formatters come from the rule source data view when there is one, and are guessed from the
+ * values otherwise (e.g. ruleless alerts, or columns computed by the rule query).
+ */
+export const createDataContainerDataView = ({
+  sourceDataView,
+  data,
+  fieldFormats,
+}: CreateDataContainerDataViewOptions): DataView => {
+  const sourceSpec: DataViewSpec = sourceDataView?.toSpec() ?? {
+    id: INFERRED_DATA_VIEW_ID,
+    title: 'data',
+  };
+  const spec = prefixDataViewSpecFields({
+    ...sourceSpec,
+    fields: { ...inferDataContainerFieldSpecs(data), ...sourceSpec.fields },
+  });
+
+  return new DataView({
+    spec,
     fieldFormats,
     // No field is named `data`, so flattenHit walks into the synthetic hit and `data.C` matches.
-    metaFields: dataView.metaFields,
+    metaFields: sourceDataView?.metaFields,
   });
+};

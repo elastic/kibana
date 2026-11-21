@@ -16,12 +16,10 @@ export type EpisodeDetailsMainPanel =
 
 export const getEpisodeHeaderTabs = ({
   actualMainPanel,
-  showRuleDependentUi,
   showActionPolicyHistory,
   onSelect,
 }: {
   actualMainPanel: EpisodeDetailsMainPanel;
-  showRuleDependentUi: boolean;
   showActionPolicyHistory: boolean;
   onSelect: (panel: EpisodeDetailsMainPanel) => void;
 }): AppHeaderTab[] => [
@@ -32,17 +30,13 @@ export const getEpisodeHeaderTabs = ({
     isSelected: actualMainPanel === 'overview',
     onClick: () => onSelect('overview'),
   },
-  ...(showRuleDependentUi
-    ? [
-        {
-          id: 'metadata',
-          'data-test-subj': 'alertingV2EpisodeDetailsMainTabMetadata',
-          label: i18n.METADATA_TAB_TITLE,
-          isSelected: actualMainPanel === 'metadata',
-          onClick: () => onSelect('metadata'),
-        },
-      ]
-    : []),
+  {
+    id: 'metadata',
+    'data-test-subj': 'alertingV2EpisodeDetailsMainTabMetadata',
+    label: i18n.METADATA_TAB_TITLE,
+    isSelected: actualMainPanel === 'metadata',
+    onClick: () => onSelect('metadata'),
+  },
   {
     id: 'timeline',
     'data-test-subj': 'alertingV2EpisodeDetailsMainTabTimeline',

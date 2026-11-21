@@ -466,19 +466,20 @@ describe('EpisodeDetailsPage', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('hides the metadata tab when the rule is not loaded', () => {
+  it('shows the metadata tab when the rule is not found', async () => {
     mockUseFetchRule.mockReturnValue({
       ...fetchRuleResult,
       ruleState: {
-        status: RuleStateStatus.loading,
+        status: RuleStateStatus.not_found,
         ruleId: 'rule-1',
       },
     } as unknown as FetchRuleResult);
 
     renderPage();
 
-    expect(screen.getByTestId('alertingV2EpisodeDetailsMainTabOverview')).toBeInTheDocument();
-    expect(screen.queryByTestId('alertingV2EpisodeDetailsMainTabMetadata')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('alertingV2EpisodeDetailsMainTabMetadata'));
+
+    expect(screen.getByTestId('stubMetadataSection')).toBeInTheDocument();
   });
 
   it('renders episode actions in the app header menu', async () => {
