@@ -272,6 +272,70 @@
       }
     },
     {
+      "id": "ca8a0d625d823f2-367eca5593ea09b",
+      "title": "Traces in Discover - latency map shows the RED charts by default and the latency map on demand",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
+        "line": 31,
+        "column": 61
+      }
+    },
+    {
+      "id": "ca8a0d625d823f2-2f22c17cedecd0e",
+      "title": "Traces in Discover - latency map a drawn selection rewrites the query and clearing it restores the query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
+        "line": 52,
+        "column": 15
+      }
+    },
+    {
+      "id": "ca8a0d625d823f2-6e27b9c1cc69ea4",
+      "title": "Traces in Discover - latency map a reload with the selection in the query restores the map and the selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
+        "line": 74,
+        "column": 22
+      }
+    },
+    {
+      "id": "ca8a0d625d823f2-6ce231b71ac41ae",
+      "title": "Traces in Discover - latency map a click on a cell opens the document flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
+        "line": 92,
+        "column": 24
+      }
+    },
+    {
       "id": "fe6fb329fd8b986-292942683092e7c",
       "title": "Traces in Discover - Logs overview tab Similar errors - occurrences chart renders without error in the log child flyout",
       "expectedStatus": "passed",

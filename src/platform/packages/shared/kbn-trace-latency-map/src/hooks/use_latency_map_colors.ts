@@ -33,6 +33,8 @@ export interface LatencyMapColors {
   failureRamp: string[];
   selectionStroke: string;
   selectionFill: string;
+  /** Veils the cells outside the selection, so the selected ones stand out. */
+  outsideSelectionMask: string;
   handleFill: string;
   axisText: string;
   /** Outline of the cell under the pointer. */
@@ -63,6 +65,7 @@ export function useLatencyMapColors(): LatencyMapColors {
       failureRamp: [cool[DENSITY_LEVELS - 1], ...warm],
       selectionStroke: euiTheme.colors.primary,
       selectionFill: transparentize(euiTheme.colors.primary, 0.12),
+      outsideSelectionMask: transparentize(euiTheme.colors.emptyShade, 0.7),
       handleFill: euiTheme.colors.emptyShade,
       axisText: euiTheme.colors.textSubdued,
       hoverOutline: euiTheme.colors.fullShade,

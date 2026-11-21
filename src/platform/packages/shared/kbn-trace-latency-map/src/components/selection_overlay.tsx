@@ -17,6 +17,52 @@ import type { LatencyMapColors } from '../hooks/use_latency_map_colors';
 /** Marks what takes the pointer in the overlay, so a press elsewhere is known to be the chart's. */
 export const OVERLAY_CONTROL_ATTRIBUTE = 'data-latency-map-control';
 
+/** Veils the plot around the selection, as four rectangles, so the selected cells stand out. */
+function OutsideSelectionMask({
+  rect,
+  geometry,
+  fill,
+}: {
+  rect: PxRect;
+  geometry: MapGeometry;
+  fill: string;
+}) {
+  const { plotLeft, plotRight, plotTop, plotBottom } = geometry;
+  const width = plotRight - plotLeft;
+  return (
+    <g pointerEvents="none" data-test-subj="traceLatencyMapOutsideMask">
+      <rect
+        x={plotLeft}
+        y={plotTop}
+        width={width}
+        height={Math.max(rect.y0 - plotTop, 0)}
+        fill={fill}
+      />
+      <rect
+        x={plotLeft}
+        y={rect.y1}
+        width={width}
+        height={Math.max(plotBottom - rect.y1, 0)}
+        fill={fill}
+      />
+      <rect
+        x={plotLeft}
+        y={rect.y0}
+        width={Math.max(rect.x0 - plotLeft, 0)}
+        height={rect.y1 - rect.y0}
+        fill={fill}
+      />
+      <rect
+        x={rect.x1}
+        y={rect.y0}
+        width={Math.max(plotRight - rect.x1, 0)}
+        height={rect.y1 - rect.y0}
+        fill={fill}
+      />
+    </g>
+  );
+}
+
 /**
  * What goes over the chart. The cell under the pointer gets an outline, which the chart does not
  * draw. The selection, which the chart draws itself, gets what it cannot: a grip and handles for
@@ -70,6 +116,9 @@ export function SelectionOverlay({
       `}
       data-test-subj="traceLatencyMapOverlay"
     >
+      {rect && (
+        <OutsideSelectionMask rect={rect} geometry={geometry} fill={colors.outsideSelectionMask} />
+      )}
       {hoverRect && (
         <rect
           x={hoverRect.x0}

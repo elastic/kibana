@@ -9,11 +9,25 @@
 
 import { globalTeardownHook } from '@kbn/scout';
 
-globalTeardownHook('Teardown traces experience tests data', async ({ esClient, log }) => {
-  await esClient.indices
-    .deleteDataStream({ name: 'traces-test.otel-default' })
-    .then(() => log.debug('[teardown:traces] Deleted traces-test.otel-default data stream'))
-    .catch((err) =>
-      log.warning(`[teardown:traces] Failed to delete traces-test.otel-default: ${err.message}`)
-    );
-});
+globalTeardownHook(
+  'Teardown traces experience tests data',
+  async ({ esClient, apiServices, log }) => {
+    await apiServices.core
+      .settings({
+        'feature_flags.overrides': {
+          'observability.tracesLatencyMapEnabled': null,
+        },
+      })
+      .then(() => log.debug('[teardown:traces] feature flag overrides reset'))
+      .catch((err) =>
+        log.warning(`[teardown:traces] Failed to reset feature flag overrides: ${err.message}`)
+      );
+
+    await esClient.indices
+      .deleteDataStream({ name: 'traces-test.otel-default' })
+      .then(() => log.debug('[teardown:traces] Deleted traces-test.otel-default data stream'))
+      .catch((err) =>
+        log.warning(`[teardown:traces] Failed to delete traces-test.otel-default: ${err.message}`)
+      );
+  }
+);
