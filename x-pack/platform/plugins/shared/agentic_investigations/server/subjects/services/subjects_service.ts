@@ -88,11 +88,13 @@ const mergeInputs = (subjects: InvestigationSubjectInput[]): InvestigationSubjec
 const definedFields = ({
   summary,
   triggerType,
+  automation,
   snapshot,
   slack,
 }: InvestigationSubjectInput): Partial<SubjectDocument> => ({
   ...(summary !== undefined && { summary }),
   ...(triggerType !== undefined && { triggerType }),
+  ...(automation !== undefined && { automation }),
   ...(snapshot !== undefined && { snapshot }),
   ...(slack !== undefined && { slack }),
 });

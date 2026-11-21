@@ -15,6 +15,7 @@ import type {
   InvestigationSubjectTriggerType,
   InvestigationSubjectType,
   SlackThreadSubject,
+  SubjectAutomation,
 } from '../subjects/subject';
 import {
   DEFAULT_INVESTIGATIONS_PAGE_SIZE,
@@ -124,6 +125,8 @@ export interface InvestigationSubjectResponse {
   id: string;
   summary?: string;
   trigger_type?: InvestigationSubjectTriggerType;
+  /** The automation the subject triggered the investigation through. Absent without one. */
+  automation?: SubjectAutomation;
   snapshot?: AlertSubjectSnapshot;
   slack?: SlackThreadSubject;
   created_at: string;

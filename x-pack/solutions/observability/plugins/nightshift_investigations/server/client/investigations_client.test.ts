@@ -1473,6 +1473,63 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     });
   const runInputs = () => mockManagement.runWorkflow.mock.calls[0][2];
 
+  describe('records the automation that started a new investigation on its subjects', () => {
+    const startFromAutomation = () =>
+      makeClient().start(
+        {
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'automatic',
+          context: { alerts: [makeAlert('alert-1')] },
+        },
+        {
+          automationId: 'automation-1',
+          automationName: 'Payments alerts',
+          entryPoint: 'automation',
+        }
+      );
+
+    it('in the subjects the run records', async () => {
+      await startFromAutomation();
+
+      expect(runInputs().subjects).toEqual([
+        expect.objectContaining({
+          id: 'alert-1',
+          automation: { id: 'automation-1', name: 'Payments alerts' },
+        }),
+      ]);
+    });
+
+    it('not for a start no automation made', async () => {
+      await startAlerts('alert-1');
+
+      expect(runInputs().subjects[0]).not.toHaveProperty('automation');
+    });
+
+    it('only on the subjects a follow-up adds, never on the ones already recorded', async () => {
+      agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-recent' }]);
+      withConversations(makeConversation({ id: 'inv-recent' }));
+      subjectsClient.listByConversationIds.mockResolvedValue([
+        makeStoredSubject({ conversationId: 'inv-recent', subjectId: 'alert-1' }),
+      ]);
+
+      await makeClient().start(
+        {
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'automatic',
+          context: { alerts: [makeAlert('alert-1'), makeAlert('alert-3')] },
+        },
+        { automationId: 'automation-2', automationName: 'Other', entryPoint: 'automation' }
+      );
+
+      expect(runInputs().subjects).toEqual([
+        expect.objectContaining({
+          id: 'alert-3',
+          automation: { id: 'automation-2', name: 'Other' },
+        }),
+      ]);
+    });
+  });
+
   beforeEach(() => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-1');

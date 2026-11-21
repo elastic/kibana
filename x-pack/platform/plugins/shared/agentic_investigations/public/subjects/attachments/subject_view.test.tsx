@@ -9,6 +9,7 @@ import React from 'react';
 import moment from 'moment';
 import { createEvent, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import type { ApplicationStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import type { InvestigationSubject } from '../../../common/subjects/subject';
@@ -257,6 +258,17 @@ describe('SubjectView presentation', () => {
       'Trigger · Significant event'
     );
   });
+
+  it('shows the automation its document records as a "via" line', () => {
+    renderView({
+      ...base,
+      subjectType: 'alert',
+      subjectId: 'alert-1',
+      automation: { id: 'automation-1', name: 'Payments alerts' },
+    });
+
+    expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent('via Payments alerts');
+  });
 });
 
 describe('SubjectView alert flyout', () => {
@@ -442,6 +454,83 @@ const renderList = (subjects: SubjectRowData[], services: SubjectServices = {}) 
   );
 
 describe('SubjectList', () => {
+  describe('with the automation that started the investigation', () => {
+    const automation = { id: 'automation-1', name: 'Payments alerts' };
+    const viaAutomation = (subject: SubjectRowData): SubjectRowData => ({ ...subject, automation });
+    const getUrlForApp = jest.fn(
+      (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
+    );
+    const navigateToApp = jest.fn();
+    const application = { getUrlForApp, navigateToApp } as unknown as ApplicationStart;
+
+    beforeEach(() => jest.clearAllMocks());
+
+    it('adds a "via" line under the trigger that links to the automation', () => {
+      renderList([viaAutomation(alertSubject('a-1'))], { application });
+
+      // The trigger row keeps its own line; the automation is a further line below it.
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveTextContent(
+        /^Rule a-1Trigger · Alert$/
+      );
+      expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent(
+        'via Payments alerts'
+      );
+      const link = screen.getByTestId('investigationSubjectViaLink');
+      expect(link).toHaveTextContent('Payments alerts');
+      expect(link).toHaveAttribute('href', '/app/nightshift/automations/automation-1');
+      expect(screen.getByTestId('investigationSubject-alert')).not.toContainElement(link);
+    });
+
+    it('adds it under the "N alerts" row too, once', () => {
+      renderList([alertSubject('a-1'), alertSubject('a-2')].map(viaAutomation), { application });
+
+      expect(screen.getAllByTestId('investigationSubjectVia')).toHaveLength(1);
+      expect(screen.getByTestId('investigationSubject-alerts')).not.toContainElement(
+        screen.getByTestId('investigationSubjectVia')
+      );
+    });
+
+    it('opens the automation inside Kibana, and leaves a modified click to the browser', () => {
+      renderList([viaAutomation(alertSubject('a-1'))], { application });
+      const link = screen.getByTestId('investigationSubjectViaLink');
+
+      fireEvent.click(link);
+      expect(navigateToApp).toHaveBeenCalledWith('nightshift', {
+        path: '/automations/automation-1',
+      });
+
+      navigateToApp.mockClear();
+      fireEvent.click(link, { metaKey: true });
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('escapes the automation id in the link', () => {
+      renderList([{ ...alertSubject('a-1'), automation: { id: 'a/b?c', name: 'Odd' } }], {
+        application,
+      });
+
+      expect(screen.getByTestId('investigationSubjectViaLink')).toHaveAttribute(
+        'href',
+        '/app/nightshift/automations/a%2Fb%3Fc'
+      );
+    });
+
+    it('shows the name without a link when the application service is missing', () => {
+      renderList([viaAutomation(alertSubject('a-1'))], {});
+
+      expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent(
+        'via Payments alerts'
+      );
+      expect(screen.queryByTestId('investigationSubjectViaLink')).not.toBeInTheDocument();
+    });
+
+    it('shows no "via" line for a subject without an automation', () => {
+      renderList([alertSubject('a-1')], { application });
+
+      expect(screen.queryByTestId('investigationSubjectVia')).not.toBeInTheDocument();
+    });
+  });
+
   it('renders one row per subject when there is at most one alert', () => {
     renderList([alertSubject('a-1'), { type: 'manual', id: 'q-1', summary: 'Why is it slow?' }]);
 

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { InvestigationSubjectType } from '../../../common/subjects/subject';
 
 export const SUBJECT_TYPE_LABELS: Record<InvestigationSubjectType, string> = {
@@ -49,6 +51,14 @@ export const subjectTriggerLabel = (type: InvestigationSubjectType): string =>
   i18n.translate('xpack.agenticInvestigations.subjects.triggerLabel', {
     defaultMessage: 'Trigger · {type}',
     values: { type: SUBJECT_TYPE_LABELS[type] },
+  });
+
+/** The line under a trigger row when an automation started the investigation. */
+export const viaAutomationLabel = (automation: React.ReactNode): React.ReactNode =>
+  React.createElement(FormattedMessage, {
+    id: 'xpack.agenticInvestigations.subjects.viaAutomation',
+    defaultMessage: 'via {automation}',
+    values: { automation },
   });
 
 export const OPENS_IN_NEW_TAB = i18n.translate(

@@ -175,7 +175,11 @@ describe('InvestigationsQueryService', () => {
       const { service, client, inProgress } = setup({
         subjects: [
           subject('conv-1', 'alert-2', { createdAt: '2026-01-02T00:00:00.000Z' }),
-          subject('conv-1', 'alert-1', { triggerType: 'automatic', summary: 'High latency' }),
+          subject('conv-1', 'alert-1', {
+            triggerType: 'automatic',
+            summary: 'High latency',
+            automation: { id: 'automation-1', name: 'Payments alerts' },
+          }),
         ],
         impacts: [impact('conv-1')],
         hypotheses,
@@ -225,6 +229,7 @@ describe('InvestigationsQueryService', () => {
             id: 'alert-1',
             summary: 'High latency',
             trigger_type: 'automatic',
+            automation: { id: 'automation-1', name: 'Payments alerts' },
             created_at: '2026-01-01T00:00:00.000Z',
           },
           { type: 'alert', id: 'alert-2', created_at: '2026-01-02T00:00:00.000Z' },

@@ -11,6 +11,7 @@ import {
   recoverSubjectsFromInputs,
   toSlackThreadKey,
   toStartSubjects,
+  toSubjectAutomation,
   toSubjectKeys,
   withoutRecordedSubjects,
 } from './investigation_subjects';
@@ -35,7 +36,53 @@ describe('toSlackThreadKey', () => {
   });
 });
 
+describe('toSubjectAutomation', () => {
+  it('records the automation id and name, cut to the subject limits', () => {
+    expect(toSubjectAutomation({ id: 'a1', name: 'Payments alerts' })).toEqual({
+      id: 'a1',
+      name: 'Payments alerts',
+    });
+    expect(toSubjectAutomation({ id: 'a'.repeat(300), name: 'n'.repeat(600) })).toEqual({
+      id: 'a'.repeat(256),
+      name: 'n'.repeat(500),
+    });
+  });
+
+  it.each([{}, { id: 'a1' }, { name: 'Payments alerts' }, { id: '', name: '' }])(
+    'records no automation for %p',
+    (automation) => {
+      expect(toSubjectAutomation(automation)).toBeUndefined();
+    }
+  );
+});
+
 describe('toStartSubjects', () => {
+  it('records the automation on every subject of a start an automation made', () => {
+    const automation = { id: 'a1', name: 'Payments alerts' };
+
+    expect(
+      toStartSubjects({
+        subject: { type: 'alert', id: 'alert-1' },
+        alerts: [makeAlert('alert-1'), makeAlert('alert-2')],
+        triggerType: 'automatic',
+        investigationId: 'inv-1',
+        slackThread: { workspace: 'T1', channel: 'C1', thread_ts: '1.1' },
+        automation,
+      }).map((subject) => subject.automation)
+    ).toEqual([automation, automation, automation]);
+  });
+
+  it('records no automation for a start no automation made', () => {
+    const subjects = toStartSubjects({
+      subject: { type: 'alert', id: 'alert-1' },
+      alerts: [makeAlert('alert-1')],
+      triggerType: 'manual',
+      investigationId: 'inv-1',
+    });
+
+    expect(subjects[0]).not.toHaveProperty('automation');
+  });
+
   it('records one alert subject per snapshot, carrying the snapshot', () => {
     expect(
       toStartSubjects({
