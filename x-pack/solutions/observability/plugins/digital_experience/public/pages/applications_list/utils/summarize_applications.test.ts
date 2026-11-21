@@ -83,7 +83,7 @@ describe('summarizeApplications', () => {
       ).toBe(7);
     });
 
-    it('has no total when the applications were read from the raw events', () => {
+    it('has no total when no application has its sessions counted', () => {
       expect(
         summarizeApplications([
           app({ serviceName: 'shop', sessions: null }),

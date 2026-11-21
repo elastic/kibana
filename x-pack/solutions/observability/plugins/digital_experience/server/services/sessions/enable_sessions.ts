@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IScopedClusterClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { SESSIONS_TASK_ID, type SessionsSettings } from '../../../common/sessions';
 import { describeError } from '../../lib/helpers/errors';
 import { checkSessionsPrivileges } from './sessions_privileges';
+import { SessionsPrivilegesError } from './sessions_privileges_error';
+import { SessionsRestrictedReadError } from './sessions_restricted_read_error';
 import { createSessionsIndex, putSessionsIndexTemplate } from './sessions_index';
 import { scheduleSessionsTask } from './sessions_task';
 
@@ -40,10 +47,44 @@ const step = async <T>(name: SessionsEnableStep, run: () => Promise<T>): Promise
 };
 
 /**
+ * Whether enabling sessions as the requesting user would pass its checks: Kibana can store the
+ * task's API key, and the user has the privileges `checkSessionsPrivileges` asks for. Never throws,
+ * so a failed check only means the app asks instead of enabling on its own.
+ */
+export const canEnableSessions = async ({
+  client,
+  canEncrypt,
+  isServerless,
+  logger,
+}: {
+  client: ElasticsearchClient;
+  canEncrypt: boolean;
+  isServerless: boolean;
+  logger: Logger;
+}): Promise<boolean> => {
+  if (!canEncrypt) {
+    return false;
+  }
+  try {
+    await checkSessionsPrivileges(client, { isServerless });
+    return true;
+  } catch (error) {
+    if (
+      !(error instanceof SessionsPrivilegesError) &&
+      !(error instanceof SessionsRestrictedReadError)
+    ) {
+      logger.debug(`Could not check whether sessions can be enabled: ${describeError(error)}`);
+    }
+    return false;
+  }
+};
+
+/**
  * Enables sessions for the requesting user: checks they can read every event in full and write
  * the summaries, puts the index template and creates the index, then schedules the summaries task
  * with an API key Task Manager grants on their behalf. Enabling again replaces the key, so the task
- * then reads what that user can read, and keeps the summaries built so far.
+ * then reads what that user can read, and keeps the summaries built so far; it also turns a task
+ * that was turned off back on.
  */
 export const enableSessions = async ({
   esClient,
@@ -70,7 +111,16 @@ export const enableSessions = async ({
   });
   await step('template', () => putSessionsIndexTemplate(esClient.asInternalUser));
   await step('index', () => createSessionsIndex(esClient.asCurrentUser));
-  await step('task', () => scheduleSessionsTask({ taskManager, request, settings }));
+  await step('task', async () => {
+    await scheduleSessionsTask({ taskManager, request, settings });
+    // A task that was turned off keeps its checkpoint, so it carries on from where it stopped.
+    const {
+      errors: [failure],
+    } = await taskManager.bulkEnable([SESSIONS_TASK_ID], true, { request });
+    if (failure) {
+      throw new Error(`Could not turn the summaries task on: ${JSON.stringify(failure.error)}`);
+    }
+  });
   // Start building now rather than at the next interval; the interval runs it anyway.
   try {
     await taskManager.runSoon(SESSIONS_TASK_ID);

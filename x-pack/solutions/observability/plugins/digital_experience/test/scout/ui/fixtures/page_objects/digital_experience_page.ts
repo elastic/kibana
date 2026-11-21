@@ -35,6 +35,7 @@ export class DigitalExperiencePage {
   public readonly search: Locator;
   public readonly summary: Locator;
   public readonly pageLoadsChart: Locator;
+  public readonly sessionsRetention: Locator;
   public readonly otelOverviewKpis: Locator;
   public readonly otelOverviewVitals: Locator;
   public readonly otelOverviewTrends: Locator;
@@ -98,6 +99,7 @@ export class DigitalExperiencePage {
     this.search = page.getByTestId('digitalExperienceApplicationsSearch');
     this.summary = page.getByTestId('digitalExperienceApplicationsSummary');
     this.pageLoadsChart = page.getByTestId('digitalExperiencePageLoadsChart');
+    this.sessionsRetention = page.getByTestId('digitalExperienceSessionsRetention');
     this.otelOverviewKpis = page.getByTestId('digitalExperienceOverviewKpis');
     this.otelOverviewVitals = page.getByTestId('digitalExperienceOverviewVitals');
     this.otelOverviewTrends = page.getByTestId('digitalExperienceOverviewTrends');

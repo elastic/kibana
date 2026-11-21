@@ -10,11 +10,11 @@ import { test, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_WITH_UX_TAGS } from '../../tags';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
-const { SERVICE_NAME, OTEL_APPS, OTEL_SHOP_PAGE_LOADS, TIME_RANGE } = testData;
+const { SERVICE_NAME, OTEL_APPS, OTEL_SHOP_PAGE_LOADS, LIST_TIME_RANGE } = testData;
 
 const hasTimeRange = (url: URL): boolean =>
-  url.searchParams.get('rangeFrom') === TIME_RANGE.rangeFrom &&
-  url.searchParams.get('rangeTo') === TIME_RANGE.rangeTo;
+  url.searchParams.get('rangeFrom') === LIST_TIME_RANGE.rangeFrom &&
+  url.searchParams.get('rangeTo') === LIST_TIME_RANGE.rangeTo;
 
 test.describe(
   'Digital Experience application navigation',
@@ -26,7 +26,7 @@ test.describe(
 
     test.beforeEach(async ({ browserAuth, pageObjects: { digitalExperience } }) => {
       await browserAuth.loginAsViewer();
-      await digitalExperience.gotoApplications();
+      await digitalExperience.gotoApplications(LIST_TIME_RANGE);
     });
 
     test.afterAll(async ({ apiServices }) => {

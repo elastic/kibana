@@ -35,8 +35,12 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   SELECT_COLUMNS: 'selectColumns',
   /** The user loads the list again after it failed. */
   RETRY_LOAD: 'retryLoad',
-  /** The user sets up sessions, or updates them. */
+  /** The user sets up sessions, updates them, or turns them back on. */
   ENABLE_SESSIONS: 'enableSessions',
+  /** The user asks to turn sessions off, and then confirms it. */
+  DISABLE_SESSIONS: 'disableSessions',
+  /** The user keeps sessions on after asking to turn them off. */
+  CANCEL_DISABLE_SESSIONS: 'cancelDisableSessions',
   /** The user opens the sessions list narrowed to what they clicked, e.g. a browser. */
   VIEW_SESSIONS: 'viewSessions',
   /** The user opens the full list behind a summary, e.g. every error from the Overview. */
@@ -82,6 +86,7 @@ export const APPLICATIONS_LIST_EBT_ELEMENTS = {
   COLUMN_SELECTOR: 'columnSelector',
   RETRY: 'applicationsRetry',
   SHOW_ALL_ENVIRONMENTS: 'showAllEnvironments',
+  ENABLE_SESSIONS: 'applicationsEnableSessions',
 } as const;
 
 export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
@@ -124,6 +129,10 @@ export const NETWORK_EBT_ELEMENTS = {
 export const SESSIONS_EBT_ELEMENTS = {
   ENABLE: 'sessionsEnable',
   UPDATE: 'sessionsUpdate',
+  TURN_ON: 'sessionsTurnOn',
+  TURN_OFF: 'sessionsTurnOff',
+  TURN_OFF_CONFIRM: 'sessionsTurnOffConfirm',
+  TURN_OFF_CANCEL: 'sessionsTurnOffCancel',
   RETRY: 'sessionsRetry',
   SESSION_RETRY: 'sessionRetry',
   SESSION_LINK: 'sessionLink',

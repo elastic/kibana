@@ -35,14 +35,16 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
     page,
     pageObjects: { digitalExperience },
   }) => {
-    await digitalExperience.gotoApplications();
+    await digitalExperience.gotoApplications(SESSIONS_TIME_RANGE);
     await digitalExperience.applicationLink(SESSIONS_APP).click();
     await digitalExperience.sessionsTab.click();
 
     await expect(digitalExperience.sessionsTab).toHaveAttribute('aria-selected', 'true');
     await expect(page).toHaveURL(new RegExp(`/${SESSIONS_APP}/sessions\\?`));
-    // The list's 2021 range, before the mock sessions: the tab explains how sessions get there.
-    await expect(digitalExperience.sessionsEmpty).toContainText('session.id');
+    await expect(page).toHaveURL(
+      new RegExp(`rangeFrom=${encodeURIComponent(SESSIONS_TIME_RANGE.rangeFrom)}`)
+    );
+    await expect(digitalExperience.sessionsKpi('total')).toContainText(String(SESSION_COUNT));
   });
 
   test('filters, searches and pages through the sessions', async ({

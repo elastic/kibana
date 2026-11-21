@@ -24,6 +24,7 @@ import type { SessionsTaskState } from './sessions_task';
 
 const MISSING_STATUS: SessionsStatus = {
   installed: false,
+  disabled: false,
   health: 'missing',
   installedVersion: null,
   currentVersion: SESSIONS_VERSION,
@@ -36,9 +37,12 @@ const MISSING_STATUS: SessionsStatus = {
   lastError: null,
   enabledBy: null,
   retentionDays: SESSIONS_LOOKBACK_DAYS,
+  autoEnable: false,
+  canManage: false,
 };
 
-const getTask = async (
+/** The summaries task, or undefined before sessions are set up. */
+export const getSessionsTask = async (
   taskManager: TaskManagerStartContract
 ): Promise<ConcreteTaskInstance | undefined> => {
   try {
@@ -70,31 +74,46 @@ const healthOf = ({
 /**
  * The sessions status, from the summaries task and what its last run recorded. Without Task
  * Manager, nothing can build sessions, so they're missing. Who enabled sessions and why the last
- * run failed are only told `withDetails`, to users who can set sessions up.
+ * run failed are only told to users who `canManage` sessions.
  */
 export const getSessionsStatus = async ({
   taskManager,
   settings,
-  withDetails = false,
+  canManage = false,
   now = Date.now(),
 }: {
   taskManager: TaskManagerStartContract | undefined;
   settings: SessionsSettings;
-  withDetails?: boolean;
+  canManage?: boolean;
   now?: number;
 }): Promise<SessionsStatus> => {
-  const task = taskManager ? await getTask(taskManager) : undefined;
+  const task = taskManager ? await getSessionsTask(taskManager) : undefined;
   if (!task) {
-    return MISSING_STATUS;
+    return { ...MISSING_STATUS, canManage };
   }
   const state: SessionsTaskState = task.state;
   const installedVersion = state.version ?? null;
-  const rebuilding = state.caughtUp !== true || installedVersion !== SESSIONS_VERSION;
   const summarizedUntil = state.checkpoint ?? null;
   const lagSeconds =
     summarizedUntil === null
       ? null
       : Math.max(0, Math.round((now - Date.parse(summarizedUntil)) / 1000));
+  const shared = {
+    ...MISSING_STATUS,
+    installed: true,
+    installedVersion,
+    lagSeconds,
+    summarizedUntil,
+    lastRunAt: state.lastRunAt ?? null,
+    lastSuccessAt: state.lastSuccessAt ?? null,
+    enabledBy: canManage ? task.userScope?.userName ?? null : null,
+    canManage,
+  };
+  // Turned off on purpose: neither rebuilding nor failing, as the task doesn't run.
+  if (task.enabled === false) {
+    return { ...shared, disabled: true, health: 'disabled' };
+  }
+  const rebuilding = state.caughtUp !== true || installedVersion !== SESSIONS_VERSION;
   // A rejected key that the task no longer has: sessions were enabled again since, with a new key
   // that no run has used yet, so the failure is the old key's.
   const replacedKeyFailed =
@@ -105,26 +124,19 @@ export const getSessionsStatus = async ({
   const apiKeyInvalid = !task.userScope || (state.apiKeyInvalid === true && !replacedKeyFailed);
   const recordedError = replacedKeyFailed ? null : state.lastError ?? null;
   // Elasticsearch errors can name the user who enabled sessions, their roles and indices, so
-  // only users who can set sessions up are told why a run failed; the others just that one did.
+  // only users who manage sessions are told why a run failed; the others just that one did.
   const lastError: SessionsRunError | null =
-    recordedError && !withDetails ? { ...recordedError, message: null } : recordedError;
+    recordedError && !canManage ? { ...recordedError, message: null } : recordedError;
   const lagging =
     !rebuilding &&
     lagSeconds !== null &&
     lagSeconds > sessionsLagThresholdSeconds(settings.frequency);
 
   return {
-    ...MISSING_STATUS,
-    installed: true,
+    ...shared,
     health: healthOf({ apiKeyInvalid, lastError, lagging }),
-    installedVersion,
     rebuilding,
     apiKeyInvalid,
-    lagSeconds,
-    summarizedUntil,
-    lastRunAt: state.lastRunAt ?? null,
-    lastSuccessAt: state.lastSuccessAt ?? null,
     lastError,
-    enabledBy: withDetails ? task.userScope?.userName ?? null : null,
   };
 };

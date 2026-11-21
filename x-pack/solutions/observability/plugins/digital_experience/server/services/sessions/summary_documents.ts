@@ -98,6 +98,10 @@ export const toSessionDocuments = (rows: EsqlRow[]): SessionDocument[] =>
         page_load_count: numberOr(row.page_load_count, 0),
         click_count: numberOr(row.click_count, 0),
         js_error_count: numberOr(row.js_error_count, 0),
+        load_time: {
+          p75: numberOr(row.load_time_p75, null),
+          count: numberOr(row.load_time_samples, 0),
+        },
         http_request_count: numberOr(row.http_request_count, 0),
         http_failed_request_count: numberOr(row.http_failed_request_count, 0),
         // Bounced when the visit never left the page it landed on: the pages it saw, not the

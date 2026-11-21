@@ -61,7 +61,7 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
           'xpack.digitalExperience.featureRegistry.sessionsSubFeatureTooltip',
           {
             defaultMessage:
-              'Requires "*" (All spaces). Users also need to read the OTel logs and traces in full, and to write the {sessionsIndex} indices.',
+              'Requires "*" (All spaces). Turning sessions back on also needs read on the OTel logs and traces in full, and write on the {sessionsIndex} indices.',
             values: { sessionsIndex: SESSIONS_INDEX_PATTERN },
           }
         ),
@@ -73,11 +73,11 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
                 id: MANAGE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID,
                 name: i18n.translate(
                   'xpack.digitalExperience.featureRegistry.manageSessionsPrivilegeName',
-                  { defaultMessage: 'Set up session summaries' }
+                  { defaultMessage: 'Manage session summaries' }
                 ),
-                // Never granted with `all`: setting sessions up runs the summaries task with this
-                // user's data access, for everyone who reads sessions.
-                includeIn: 'none',
+                // Setting sessions up needs no Kibana privilege beyond read, only the index
+                // privileges the task needs; this turns them off for everyone, and back on.
+                includeIn: 'all',
                 api: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions],
                 ui: [DIGITAL_EXPERIENCE_UI_PRIVILEGES.manageSessions],
                 savedObject: { all: [], read: [] },

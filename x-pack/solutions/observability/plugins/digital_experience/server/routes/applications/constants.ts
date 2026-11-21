@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { ApplicationSource } from '../../../common/types/applications';
-
-/** Name of the APM span that traces each source's searches. */
-export const SEARCH_SPAN_NAMES: Record<ApplicationSource, string> = {
-  otel: 'get_digital_experience_otel_applications',
-  classic: 'get_digital_experience_classic_applications',
-};
+/** Name of the APM span that traces the Classic RUM search. */
+export const CLASSIC_SEARCH_SPAN_NAME = 'get_digital_experience_classic_applications';
 
 /** Name of the APM span that traces the EDOT Browser search of the sessions index. */
 export const SESSIONS_SEARCH_SPAN_NAME = 'get_digital_experience_otel_applications_from_sessions';
+
+/** Name of the APM span that traces the search of the EDOT Browser applications' p75 vitals. */
+export const SESSIONS_VITALS_SEARCH_SPAN_NAME =
+  'get_digital_experience_otel_application_vitals_from_sessions';
 
 /** Maximum number of applications returned per source. */
 export const MAX_APPLICATIONS_PER_SOURCE = 1000;

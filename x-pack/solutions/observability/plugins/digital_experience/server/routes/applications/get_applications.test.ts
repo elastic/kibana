@@ -104,16 +104,6 @@ describe('getApplications', () => {
       expect(partiallyAvailableSources).toEqual(['classic']);
     });
 
-    it('ignores the OTel access when the sessions index answered', async () => {
-      const { partiallyAvailableSources } = await getApplications({
-        getOtelApplications: async () => result([], [], [], []),
-        hasPartialOtelAccess: async () => true,
-        logger,
-      });
-
-      expect(partiallyAvailableSources).toEqual([]);
-    });
-
     it('lists a failed source only in unavailableSources', async () => {
       const response = await getApplications({
         getOtelApplications: async () => {
@@ -231,7 +221,7 @@ describe('getApplications', () => {
   describe('sessions over time', () => {
     const sessions = [{ timestamp: 0, count: 3 }];
 
-    it('returns the sessions of EDOT Browser when it read them from the sessions index', async () => {
+    it('returns the sessions of EDOT Browser', async () => {
       const { sessionsOverTime } = await getApplications({
         getOtelApplications: async () => result([], [], [], sessions),
         getClassicApplications: async () => result([]),
@@ -241,7 +231,7 @@ describe('getApplications', () => {
       expect(sessionsOverTime).toEqual(sessions);
     });
 
-    it('returns none when EDOT Browser read the raw events, as Classic RUM has no sessions', async () => {
+    it('never takes them from Classic RUM, which has no sessions', async () => {
       const { sessionsOverTime } = await getApplications({
         getOtelApplications: async () => result([]),
         getClassicApplications: async () => result([], [], [], sessions),

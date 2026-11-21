@@ -69,10 +69,7 @@ export const getApplications = async ({
   getOtelApplications: ApplicationsFetcher;
   /** Undefined when the Classic source is not available (serverless). */
   getClassicApplications?: ApplicationsFetcher;
-  /**
-   * Resolves to `true` when the user can't read every index of the source; never rejects. Ignored
-   * when the source read the sessions index.
-   */
+  /** Resolves to `true` when the user can't read every index of the source; never rejects. */
   hasPartialOtelAccess?: AccessCheck;
   hasPartialClassicAccess?: AccessCheck;
   logger: Logger;
@@ -109,7 +106,7 @@ export const getApplications = async ({
     classic: [],
     histogram,
   };
-  // Only EDOT Browser has sessions, and only when its source read them from the sessions index.
+  // Only EDOT Browser has sessions.
   let sessionsOverTime: TimeSeriesPoint[] | null = null;
   results.forEach((result, index) => {
     if (result.status === 'fulfilled') {
@@ -119,9 +116,7 @@ export const getApplications = async ({
       if (source === APPLICATION_SOURCE.otel) {
         sessionsOverTime = result.value.sessionsOverTime;
       }
-      // The sessions index is summarized with the access of the user who enabled sessions, so when
-      // it answered (the only source with sessions), the user's raw indices hide no rows.
-      if (partialAccess[index] && result.value.sessionsOverTime === null) {
+      if (partialAccess[index]) {
         partiallyAvailableSources.push(source);
       }
     } else {

@@ -21,11 +21,13 @@ import {
 import {
   NO_ENCRYPTION_KEY_MESSAGE,
   SessionsEnableError,
+  canEnableSessions,
   enableSessions,
   type SessionsEnableStep,
 } from './enable_sessions';
 import { checkSessionsPrivileges } from './sessions_privileges';
 import { SessionsPrivilegesError } from './sessions_privileges_error';
+import { SessionsRestrictedReadError } from './sessions_restricted_read_error';
 
 jest.mock('./sessions_privileges');
 
@@ -71,6 +73,7 @@ describe('enableSessions', () => {
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient();
     taskManager = taskManagerMock.createStart();
+    taskManager.bulkEnable.mockResolvedValue({ tasks: [], errors: [] });
     logger = loggingSystemMock.createLogger();
     jest.mocked(checkSessionsPrivileges).mockResolvedValue();
   });
@@ -104,7 +107,22 @@ describe('enableSessions', () => {
       }),
       { request, regenerateApiKey: true, includeRunningTasks: true }
     );
+    // A no-op unless sessions were turned off.
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith([SESSIONS_TASK_ID], true, { request });
     expect(taskManager.runSoon).toHaveBeenCalledWith(SESSIONS_TASK_ID);
+  });
+
+  it('fails at the task step when the task cannot be turned back on', async () => {
+    taskManager.bulkEnable.mockResolvedValue({
+      tasks: [],
+      errors: [{ type: 'task', id: SESSIONS_TASK_ID, error: { type: 'conflict', reason: 'x' } }],
+    });
+
+    const error = await enableError();
+
+    expect(error).toBeInstanceOf(SessionsEnableError);
+    expect(error.step).toBe('task');
+    expect(taskManager.runSoon).not.toHaveBeenCalled();
   });
 
   it('checks the privileges first, then runs the steps in order', async () => {
@@ -115,6 +133,7 @@ describe('enableSessions', () => {
       esClient.asInternalUser.indices.putIndexTemplate,
       esClient.asCurrentUser.indices.create,
       taskManager.ensureScheduled,
+      taskManager.bulkEnable,
       taskManager.runSoon,
     ].map((fn) => fn.mock.invocationCallOrder[0]);
     expect(order).toEqual([...order].sort((a, b) => a - b));
@@ -192,5 +211,46 @@ describe('enableSessions', () => {
 
     await expect(enable()).resolves.toBeUndefined();
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('task is already running'));
+  });
+});
+
+describe('canEnableSessions', () => {
+  const client = elasticsearchServiceMock.createElasticsearchClient();
+  const logger = loggingSystemMock.createLogger();
+
+  const canEnable = (canEncrypt = true) =>
+    canEnableSessions({ client, canEncrypt, isServerless: false, logger });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('is true when the user passes the checks enabling runs', async () => {
+    jest.mocked(checkSessionsPrivileges).mockResolvedValue();
+
+    expect(await canEnable()).toBe(true);
+    expect(checkSessionsPrivileges).toHaveBeenCalledWith(client, { isServerless: false });
+  });
+
+  it('is false without checking the user when Kibana cannot store the API key', async () => {
+    expect(await canEnable(false)).toBe(false);
+    expect(checkSessionsPrivileges).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['missing privileges', new SessionsPrivilegesError(['index:logs-*.otel-*:read'])],
+    ['a filtered source read', new SessionsRestrictedReadError(['logs-*.otel-*'], 'filtered')],
+  ])('is false for %s, which is expected', async (_name, error) => {
+    jest.mocked(checkSessionsPrivileges).mockRejectedValue(error);
+
+    expect(await canEnable()).toBe(false);
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
+
+  it('is false, and logs why, when the check itself fails', async () => {
+    jest.mocked(checkSessionsPrivileges).mockRejectedValue(new Error('no shards available'));
+
+    expect(await canEnable()).toBe(false);
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('no shards available'));
   });
 });

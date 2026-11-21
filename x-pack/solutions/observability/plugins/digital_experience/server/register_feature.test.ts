@@ -41,7 +41,7 @@ describe('registerDigitalExperienceFeature', () => {
     });
   });
 
-  it('grants setting up sessions only through a separate, all-spaces sub-feature privilege', () => {
+  it('grants turning sessions off and on through an all-spaces sub-feature privilege that all includes', () => {
     const [sessions] = registerKibanaFeature.mock.calls[0][0].subFeatures;
     expect(sessions.requireAllSpaces).toBe(true);
     expect(sessions.privilegeGroups).toEqual([
@@ -50,8 +50,8 @@ describe('registerDigitalExperienceFeature', () => {
         privileges: [
           expect.objectContaining({
             id: 'manage_sessions',
-            // Not part of `all`: it must be granted explicitly.
-            includeIn: 'none',
+            name: 'Manage session summaries',
+            includeIn: 'all',
             api: ['manage_digital_experience_sessions'],
             ui: ['manageSessions'],
           }),

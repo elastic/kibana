@@ -15,12 +15,6 @@ import { DIGITAL_EXPERIENCE_FEATURE_ID, DIGITAL_EXPERIENCE_UI_PRIVILEGES } from 
 export const hasDigitalExperienceAccess = (capabilities: Capabilities): boolean =>
   Boolean(capabilities[DIGITAL_EXPERIENCE_FEATURE_ID]?.show && capabilities.apm?.show);
 
-/** Whether the user can set up sessions, a sub-feature privilege granted apart from `all`. */
-export const canManageSessions = (capabilities: Capabilities): boolean =>
-  Boolean(
-    capabilities[DIGITAL_EXPERIENCE_FEATURE_ID]?.[DIGITAL_EXPERIENCE_UI_PRIVILEGES.manageSessions]
-  );
-
 /** Whether the user can create short URLs, a sub-feature privilege that `all` includes. */
 export const canCreateShortUrl = (capabilities: Capabilities): boolean =>
   Boolean(

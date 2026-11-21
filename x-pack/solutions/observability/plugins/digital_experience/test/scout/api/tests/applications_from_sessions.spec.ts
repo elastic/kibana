@@ -14,18 +14,13 @@ import {
   SESSIONS_SOURCE_INDICES,
   type SessionsStatus,
 } from '../../../../common/sessions';
-import type {
-  ApplicationSummary,
-  ApplicationsResponse,
-} from '../../../../common/types/applications';
+import type { ApplicationsResponse } from '../../../../common/types/applications';
 import { deleteSessionsData, runSessionsTask } from '../../common/fixtures/sessions_data';
 import { findApplication, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
-const { APPLICATIONS_PATH, COMMON_HEADERS, SESSIONS_ENABLE_PATH } = testData;
-
-const SESSIONS_STATUS_PATH = 'internal/digital_experience/sessions/status';
+const { APPLICATIONS_PATH, COMMON_HEADERS, SESSIONS_ENABLE_PATH, SESSIONS_STATUS_PATH } = testData;
 
 const LOGS_INDEX = 'logs-generic.otel-default';
 const TRACES_INDEX = 'traces-generic.otel-default';
@@ -41,9 +36,9 @@ const MINUTE_MS = 60_000;
 /** The summaries task is run with `run_soon`, so summarizing takes seconds, not minutes. */
 const SUMMARIZE_TIMEOUT_MS = 90_000;
 const POLL_MS = 2_000;
-const TEST_TIMEOUT_MS = 4 * SUMMARIZE_TIMEOUT_MS;
+const TEST_TIMEOUT_MS = 3 * SUMMARIZE_TIMEOUT_MS;
 
-/** Everything the list needs from the raw events, but no read on the sessions index. */
+/** Everything the raw events need, but no read on the sessions index the list reads. */
 const NO_SESSIONS_READ_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
@@ -52,13 +47,17 @@ const NO_SESSIONS_READ_ROLE: KibanaRole = {
   kibana: [{ base: [], feature: { digital_experience: ['read'], apm: ['read'] }, spaces: ['*'] }],
 };
 
+const [ONE, TWO, THREE] = ['dx-sessions-app-1', 'dx-sessions-app-2', 'dx-sessions-app-3'];
+
 /**
  * Three sessions of one EDOT Browser application, with every metric of the list:
  *
- * - `production`: two page loads, an LCP of 2,000 ms (good), an INP of 300 ms (needs improvement),
- *   a CLS of 0.3 (poor), a JS error, and three requests: a success, a 500 and one with no response.
- * - `staging`: a page load, an LCP of 5,000 ms (poor), and two requests: a success and a 404.
- * - no environment: a page load.
+ * - `production`: two page loads that took 1,200 ms to load, an LCP of 2,000 ms (good), an INP of
+ *   300 ms (needs improvement), a CLS of 0.3 (poor), a JS error, and three requests: a success,
+ *   a 500 and one with no response.
+ * - `staging`: a page load that took 2,400 ms, an LCP of 5,000 ms (poor), and two requests:
+ *   a success and a 404.
+ * - no environment: a page load without a load event.
  */
 const buildEvents = (baseMs: number) => {
   const at = (offsetMs: number) => new Date(baseMs + offsetMs).toISOString();
@@ -83,8 +82,18 @@ const buildEvents = (baseMs: number) => {
     resource: resource(environment),
     attributes: { 'session.id': sessionId, ...attributes },
   });
-  const pageLoad = (offsetMs: number, sessionId: string, environment: string | undefined) =>
-    log(offsetMs, sessionId, environment, 'browser.navigation_timing', { 'url.full': url('/') });
+  const pageLoad = (
+    offsetMs: number,
+    sessionId: string,
+    environment: string | undefined,
+    loadTimeMs?: number
+  ) =>
+    log(offsetMs, sessionId, environment, 'browser.navigation_timing', {
+      'url.full': url('/'),
+      ...(loadTimeMs === undefined
+        ? {}
+        : { 'browser.navigation_timing.load_event_end': loadTimeMs }),
+    });
   const vital = (
     offsetMs: number,
     sessionId: string,
@@ -125,28 +134,27 @@ const buildEvents = (baseMs: number) => {
     };
   };
 
-  const [one, two, three] = ['dx-sessions-app-1', 'dx-sessions-app-2', 'dx-sessions-app-3'];
   return {
     logs: [
-      pageLoad(0, one, PRODUCTION),
-      pageLoad(MINUTE_MS, one, PRODUCTION),
-      vital(5_000, one, PRODUCTION, 'lcp', 2000),
-      vital(5_000, one, PRODUCTION, 'inp', 300),
-      vital(5_000, one, PRODUCTION, 'cls', 0.3),
-      log(30_000, one, PRODUCTION, 'exception', {
+      pageLoad(0, ONE, PRODUCTION, 1200),
+      pageLoad(MINUTE_MS, ONE, PRODUCTION, 1200),
+      vital(5_000, ONE, PRODUCTION, 'lcp', 2000),
+      vital(5_000, ONE, PRODUCTION, 'inp', 300),
+      vital(5_000, ONE, PRODUCTION, 'cls', 0.3),
+      log(30_000, ONE, PRODUCTION, 'exception', {
         'exception.type': 'TypeError',
         'exception.message': 'x is undefined',
       }),
-      pageLoad(2 * MINUTE_MS, two, STAGING),
-      vital(2 * MINUTE_MS, two, STAGING, 'lcp', 5000),
-      pageLoad(4 * MINUTE_MS, three, undefined),
+      pageLoad(2 * MINUTE_MS, TWO, STAGING, 2400),
+      vital(2 * MINUTE_MS, TWO, STAGING, 'lcp', 5000),
+      pageLoad(4 * MINUTE_MS, THREE, undefined),
     ],
     spans: [
-      request(10_000, one, PRODUCTION, 200),
-      request(20_000, one, PRODUCTION, 500),
-      request(40_000, one, PRODUCTION),
-      request(2 * MINUTE_MS, two, STAGING, 200),
-      request(2 * MINUTE_MS + 10_000, two, STAGING, 404),
+      request(10_000, ONE, PRODUCTION, 200),
+      request(20_000, ONE, PRODUCTION, 500),
+      request(40_000, ONE, PRODUCTION),
+      request(2 * MINUTE_MS, TWO, STAGING, 200),
+      request(2 * MINUTE_MS + 10_000, TWO, STAGING, 404),
     ],
   };
 };
@@ -162,17 +170,6 @@ const deleteEvents = (esClient: EsClient) =>
 /** The sessions of a trend, all its buckets together. */
 const totalOf = (trend: ApplicationsResponse['sessionsOverTime']) =>
   trend?.reduce((total, { count }) => total + count, 0);
-
-/**
- * The row without what only one source has: the order of its environments, which the sources list
- * by their own counts, and the sessions, which only the sessions index counts.
- */
-const comparable = (application?: ApplicationSummary) =>
-  application && {
-    ...application,
-    sessions: null,
-    environments: [...application.environments].sort(),
-  };
 
 apiTest.describe(
   'Digital Experience applications API from the sessions index',
@@ -198,6 +195,12 @@ apiTest.describe(
       });
       expect(response).toHaveStatusCode(200);
       return response.body as ApplicationsResponse;
+    };
+
+    const getStatus = async (apiClient: ApiClientFixture, headers: Record<string, string>) => {
+      const response = await apiClient.get(SESSIONS_STATUS_PATH, { headers, responseType: 'json' });
+      expect(response).toHaveStatusCode(200);
+      return response.body as SessionsStatus;
     };
 
     apiTest.beforeAll(async ({ apiServices, esClient, kbnClient, samlAuth }) => {
@@ -236,45 +239,31 @@ apiTest.describe(
     });
 
     // One test, as the stages build on each other: a retry in a fresh worker runs `beforeAll` again,
-    // which starts from the raw events, so it can't be left half-way through the lifecycle.
+    // which starts before sessions are set up, so it can't be left half-way through the lifecycle.
     apiTest(
-      'reads the applications from the raw events, then from the sessions index',
+      'lists the EDOT Browser applications from the sessions index only',
       async ({ apiClient, esClient, kbnClient, samlAuth }) => {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
 
-        // What the raw events give, before sessions are set up: the numbers the sessions must match.
-        const rawApplication = await apiTest.step(
-          'reads the raw events while sessions are not set up',
+        await apiTest.step(
+          'lists no EDOT Browser application before sessions are set up',
           async () => {
-            const { applications, environments, sessionsOverTime } = await getApplications(
-              apiClient,
-              viewerHeaders
-            );
+            const { applications } = await getApplications(apiClient, viewerHeaders);
+            expect(findApplication(applications, APP, 'otel')).toBeUndefined();
+          }
+        );
 
-            // The raw events don't count sessions, so there is no trend of them either.
-            expect(sessionsOverTime).toBeNull();
-            const application = findApplication(applications, APP, 'otel');
-            expect(application).toMatchObject({
-              pageLoads: { count: 4 },
-              sessions: null,
-              jsErrors: { count: 1, perPageLoad: 0.25 },
-              httpRequests: { count: 5, failedCount: 3, failedRatio: 0.6 },
-              webVitals: {
-                lcp: { sampleCount: 2, ratings: { good: 0.5, needsImprovement: 0, poor: 0.5 } },
-                inp: { sampleCount: 1, ratings: { good: 0, needsImprovement: 1, poor: 0 } },
-                cls: { sampleCount: 1, ratings: { good: 0, needsImprovement: 0, poor: 1 } },
-                fcp: { sampleCount: 0 },
-                ttfb: { sampleCount: 0 },
-              },
+        await apiTest.step(
+          'has the app set sessions up only for a user who can set them up',
+          async () => {
+            expect(await getStatus(apiClient, adminHeaders)).toMatchObject({
+              installed: false,
+              autoEnable: true,
             });
-            expect([...(application?.environments ?? [])].sort()).toStrictEqual([
-              PRODUCTION,
-              STAGING,
-            ]);
-            expect(environments).toStrictEqual(
-              expect.arrayContaining([PRODUCTION, STAGING, NOT_DEFINED])
-            );
-            return application;
+            expect(await getStatus(apiClient, viewerHeaders)).toMatchObject({
+              installed: false,
+              autoEnable: false,
+            });
           }
         );
 
@@ -302,79 +291,78 @@ apiTest.describe(
               )
               .toBe(3);
 
-            // The list reads the sessions only once the task is healthy and has caught up since
-            // sessions were enabled, so a build in progress is never shown as lower numbers.
-            await expect
-              .poll(
-                async () => {
-                  const response = await apiClient.get(SESSIONS_STATUS_PATH, {
-                    headers: viewerHeaders,
-                    responseType: 'json',
-                  });
-                  const { health, rebuilding } = response.body as SessionsStatus;
-                  return `${health}${rebuilding ? ' (rebuilding)' : ''}`;
-                },
-                { timeout: SUMMARIZE_TIMEOUT_MS, intervals: [POLL_MS] }
-              )
-              .toBe('healthy');
+            const status = await getStatus(apiClient, adminHeaders);
+            expect(status).toMatchObject({ installed: true, autoEnable: false });
           }
         );
 
+        await apiTest.step('lists the application with the metrics of its sessions', async () => {
+          const { applications, environments, sessionsOverTime } = await getApplications(
+            apiClient,
+            viewerHeaders
+          );
+
+          const application = findApplication(applications, APP, 'otel');
+          expect(application).toMatchObject({
+            pageLoads: { count: 4 },
+            sessions: { count: 3 },
+            jsErrors: { count: 1, perPageLoad: 0.25 },
+            httpRequests: { count: 5, failedCount: 3, failedRatio: 0.6 },
+            webVitals: {
+              lcp: { sampleCount: 2, ratings: { good: 0.5, needsImprovement: 0, poor: 0.5 } },
+              inp: { sampleCount: 1, ratings: { good: 0, needsImprovement: 1, poor: 0 } },
+              cls: { sampleCount: 1, ratings: { good: 0, needsImprovement: 0, poor: 1 } },
+              fcp: { sampleCount: 0 },
+              ttfb: { sampleCount: 0 },
+            },
+          });
+          expect(application?.webVitals.lcp.p75Ms).toBeGreaterThanOrEqual(2000);
+          expect(application?.webVitals.lcp.p75Ms).toBeLessThanOrEqual(5000);
+          expect([...(application?.environments ?? [])].sort()).toStrictEqual([
+            PRODUCTION,
+            STAGING,
+          ]);
+          // All three sessions started within the range; the trend covers every application, so
+          // other suites' sessions may add to it.
+          expect(totalOf(sessionsOverTime)).toBeGreaterThanOrEqual(3);
+          expect(environments).toStrictEqual(
+            expect.arrayContaining([PRODUCTION, STAGING, NOT_DEFINED])
+          );
+        });
+
+        await apiTest.step('keeps the load time of each session', async () => {
+          const { hits } = await esClient.search<{
+            session: { id: string };
+            load_time: { p75: number | null; count: number };
+          }>({
+            index: SESSIONS_INDEX,
+            query: { term: { 'service.name': APP } },
+            _source: ['session.id', 'load_time'],
+          });
+          const loadTimes = Object.fromEntries(
+            hits.hits.map(({ _source }) => [_source?.session.id, _source?.load_time])
+          );
+
+          expect(loadTimes).toStrictEqual({
+            [ONE]: { p75: 1200, count: 2 },
+            [TWO]: { p75: 2400, count: 1 },
+            [THREE]: { p75: null, count: 0 },
+          });
+        });
+
         await apiTest.step(
-          'still reads the raw events for a user who can not read the sessions index',
+          'reports EDOT Browser as partially available to a user who can not read the sessions',
           async () => {
             const { cookieHeader } = await samlAuth.asInteractiveUser(NO_SESSIONS_READ_ROLE);
 
-            const { applications, sessionsOverTime } = await getApplications(apiClient, {
+            const { applications, partiallyAvailableSources } = await getApplications(apiClient, {
               ...COMMON_HEADERS,
               ...cookieHeader,
             });
 
-            // Served from the raw events, which don't count sessions: the sessions index, which
-            // this user can't read, would have given `{ count: 3 }` and a trend.
-            const application = findApplication(applications, APP, 'otel');
-            expect(application?.sessions).toBeNull();
-            expect(sessionsOverTime).toBeNull();
-            expect(comparable(application)).toStrictEqual(comparable(rawApplication));
-          }
-        );
-
-        await apiTest.step(
-          'reads the sessions index, with the numbers of the raw events, once they are gone',
-          async () => {
-            // The sessions keep their summaries when the events they summarize are deleted, so an
-            // application that stays in the list is read from them.
-            await deleteEvents(esClient);
-
-            await expect
-              .poll(
-                async () =>
-                  comparable(
-                    findApplication(
-                      (
-                        await getApplications(apiClient, viewerHeaders)
-                      ).applications,
-                      APP,
-                      'otel'
-                    )
-                  ),
-                { timeout: SUMMARIZE_TIMEOUT_MS, intervals: [POLL_MS] }
-              )
-              .toStrictEqual(comparable(rawApplication));
-
-            const { applications, environments, sessionsOverTime } = await getApplications(
-              apiClient,
-              viewerHeaders
-            );
-            expect(findApplication(applications, APP, 'otel')?.sessions).toStrictEqual({
-              count: 3,
-            });
-            // All three sessions started within the range, in the buckets of the page loads; the
-            // trend covers every application, so other suites' sessions may add to it.
-            expect(totalOf(sessionsOverTime)).toBeGreaterThanOrEqual(3);
-            expect(environments).toStrictEqual(
-              expect.arrayContaining([PRODUCTION, STAGING, NOT_DEFINED])
-            );
+            // Elasticsearch skips the sessions index this user can't read instead of failing.
+            expect(findApplication(applications, APP, 'otel')).toBeUndefined();
+            expect(partiallyAvailableSources).toContain('otel');
           }
         );
 
@@ -387,7 +375,11 @@ apiTest.describe(
             jsErrors: { count: 0, perPageLoad: 0 },
             httpRequests: { count: 2, failedCount: 1, failedRatio: 0.5 },
             webVitals: {
-              lcp: { sampleCount: 1, ratings: { good: 0, needsImprovement: 0, poor: 1 } },
+              lcp: {
+                p75Ms: 5000,
+                sampleCount: 1,
+                ratings: { good: 0, needsImprovement: 0, poor: 1 },
+              },
             },
           });
           // Only this suite has sessions in its environments, so the trend is its one.

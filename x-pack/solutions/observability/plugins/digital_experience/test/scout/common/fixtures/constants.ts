@@ -17,6 +17,12 @@ export const TIME_RANGE = {
 };
 
 /**
+ * From `TIME_RANGE` to now: the applications list reads EDOT Browser applications from the mock
+ * sessions, which are recent, and Classic RUM ones from the 2021 archive.
+ */
+export const LIST_TIME_RANGE = { rangeFrom: TIME_RANGE.rangeFrom, rangeTo: 'now' };
+
+/**
  * Has page loads in both sources inside `TIME_RANGE`: Classic RUM in `RUM_TEST_DATA` and EDOT
  * Browser in the mock OTel data.
  */

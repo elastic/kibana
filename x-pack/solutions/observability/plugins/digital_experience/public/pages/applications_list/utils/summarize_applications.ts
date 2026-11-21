@@ -18,7 +18,7 @@ export interface ApplicationsSummary {
   applications: number;
   /**
    * Sessions that started in the time range, of the EDOT Browser applications. `null` when they
-   * were not counted: the raw events don't, nor does Classic RUM.
+   * were not counted: Classic RUM has none, and the EDOT Browser source may have failed.
    */
   sessions: number | null;
   pageLoads: number;
@@ -77,7 +77,7 @@ export const summarizeApplications = (applications: ApplicationSummary[]): Appli
 
 /**
  * The sessions over time of the selected source, `null` when they are not counted. Only EDOT Browser
- * has sessions, so Classic RUM has none, and so has a list read from the raw events.
+ * has sessions, so Classic RUM has none.
  */
 export const sessionsOfSource = (
   sessionsOverTime: TimeSeriesPoint[] | null,
