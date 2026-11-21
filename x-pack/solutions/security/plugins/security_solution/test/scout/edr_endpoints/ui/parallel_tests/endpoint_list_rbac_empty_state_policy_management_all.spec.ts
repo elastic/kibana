@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import { createRbacEmptyStateSuite } from './rbac_empty_state_test_suite';
+import { describeEndpointListRbacEmptyState } from '../fixtures/endpoint_list_rbac_empty_state_suite';
 
-describe(
-  'Endpoints page RBAC - neither Defend policy nor hosts are present (siem v1)',
-  { tags: ['@ess'] },
-  () => {
-    createRbacEmptyStateSuite('siem');
-  }
-);
+describeEndpointListRbacEmptyState('all');
