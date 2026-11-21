@@ -21,8 +21,8 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
   describe(`with disableUnsafeEval=${disableUnsafeEval}`, () => {
     let root: ReturnType<typeof createRoot>;
     const defaultCspRules = disableUnsafeEval
-      ? `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'; frame-src 'report-sample' 'self' kibana.estccdn.com play.vidyard.com videos.elastic.co ela.st`
-      : `script-src 'report-sample' 'self' 'unsafe-eval'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'; frame-src 'report-sample' 'self' kibana.estccdn.com play.vidyard.com videos.elastic.co ela.st`;
+      ? `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'; frame-src 'report-sample' 'self' kibana.estccdn.com play.vidyard.com videos.elastic.co ela.st; font-src 'self' data:; img-src 'self' data: blob: https: http:; media-src 'self' kibana.estccdn.com`
+      : `script-src 'report-sample' 'self' 'unsafe-eval'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'; frame-src 'report-sample' 'self' kibana.estccdn.com play.vidyard.com videos.elastic.co ela.st; font-src 'self' data:; img-src 'self' data: blob: https: http:; media-src 'self' kibana.estccdn.com`;
     beforeEach(async () => {
       root = createRoot({
         csp: { disableUnsafeEval },
