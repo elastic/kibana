@@ -203,6 +203,7 @@ const ITEM_SORT_FIELDS: Record<string, string> = {
   kind: 'kind',
   'evidence.type': 'evidence.type',
   status: 'status',
+  created_by: 'created_by.name',
 };
 
 const pluralNoun = (noun: string): string =>
@@ -299,7 +300,15 @@ export class InvestigationsService {
     primaryTerm: number;
     theCase: Awaited<ReturnType<CasesClient['cases']['get']>>;
   }> {
-    const theCase = await this.deps.casesClient.cases.get({ id: recordId, includeComments: false });
+    let theCase: Awaited<ReturnType<CasesClient['cases']['get']>>;
+    try {
+      theCase = await this.deps.casesClient.cases.get({ id: recordId, includeComments: false });
+    } catch (error) {
+      if (Boom.isBoom(error) && error.output.statusCode === 404) {
+        await this.purgeOrphans([recordId]);
+      }
+      throw error;
+    }
     const doc = await this.es.get<StoredRecord>(
       { index: INVESTIGATION_RECORDS_INDEX, id: recordId },
       { ignore: [404] }
@@ -317,6 +326,21 @@ export class InvestigationsService {
       primaryTerm: doc._primary_term ?? 0,
       theCase,
     };
+  }
+
+  /** Removes investigation documents whose case was deleted outside the investigation API. */
+  private async purgeOrphans(recordIds: string[]): Promise<void> {
+    if (!recordIds.length) return;
+    try {
+      await Promise.all([
+        this.es.deleteByQuery({ index: INVESTIGATION_ITEMS_INDEX, refresh: true, conflicts: 'proceed', query: terms('record_id', recordIds) }),
+        this.es.deleteByQuery({ index: INVESTIGATION_ACTIVITY_INDEX, refresh: true, conflicts: 'proceed', query: terms('record_id', recordIds) }),
+        this.es.deleteByQuery({ index: INVESTIGATION_RECORDS_INDEX, refresh: true, conflicts: 'proceed', query: terms('id', recordIds) }),
+      ]);
+      this.deps.logger.info(`Removed ${recordIds.length} investigation record(s) whose case no longer exists`);
+    } catch (error) {
+      this.deps.logger.warn(`Could not remove orphaned investigation records: ${error}`);
+    }
   }
 
   private toRecord(source: StoredRecord, seqNo?: number, primaryTerm?: number): InvestigationRecord {
@@ -814,13 +838,21 @@ export class InvestigationsService {
       query: { bool: { filter, must, must_not: mustNot } },
       sort,
     });
-    return {
-      records: res.hits.hits.map((h) => this.toRecord(h._source as StoredRecord, h._seq_no, h._primary_term)),
-      total: typeof res.hits.total === 'number' ? res.hits.total : res.hits.total?.value ?? 0,
-      page,
-      per_page: perPage,
-      took_ms: Date.now() - started,
-    };
+    let records = res.hits.hits.map((h) => this.toRecord(h._source as StoredRecord, h._seq_no, h._primary_term));
+    let total = typeof res.hits.total === 'number' ? res.hits.total : res.hits.total?.value ?? 0;
+    if (records.length) {
+      // Cases can be deleted from the classic Cases pages; drop and clean up their records.
+      const checked = await this.deps.casesClient.cases.bulkGet({ ids: records.map((r) => r.id) });
+      const missing = new Set(
+        checked.errors.filter((e) => e.status === 404).map((e) => e.caseId)
+      );
+      if (missing.size) {
+        records = records.filter((r) => !missing.has(r.id));
+        total = Math.max(0, total - missing.size);
+        void this.purgeOrphans(Array.from(missing));
+      }
+    }
+    return { records, total, page, per_page: perPage, took_ms: Date.now() - started };
   }
 
   private recordSort(field?: string, order: 'asc' | 'desc' = 'desc'): Sort {
@@ -1674,9 +1706,11 @@ export class InvestigationsService {
         term('evidence.alert.id', q),
         term('evidence.snapshot_hash', lower),
       ];
-      if (lower.length >= 4) {
-        should.push({ prefix: { 'evidence.indicator.value': lower } });
-        should.push({ prefix: { 'title.keyword': lower } });
+      if (lower.length >= 3) {
+        // Substring match on short keyword fields; bounded by the record_id filter.
+        const pattern = `*${lower.replace(/[\\*?]/g, (c) => `\\${c}`)}*`;
+        should.push({ wildcard: { 'evidence.indicator.value': { value: pattern } } });
+        should.push({ wildcard: { 'title.keyword': { value: pattern } } });
       }
       must.push({ bool: { should, minimum_should_match: 1 } });
     }

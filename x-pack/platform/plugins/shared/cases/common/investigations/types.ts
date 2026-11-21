@@ -825,7 +825,7 @@ export interface FindItemsRequest {
   search?: string;
   /** Only items created after this time (e.g. "since the last handoff"). */
   created_after?: string;
-  sort_field?: 'created_at' | 'updated_at' | 'title' | 'ref_num' | 'kind' | 'evidence.type' | 'status';
+  sort_field?: 'created_at' | 'updated_at' | 'title' | 'ref_num' | 'kind' | 'evidence.type' | 'status' | 'created_by';
   sort_order?: 'asc' | 'desc';
   page?: number;
   per_page?: number;

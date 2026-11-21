@@ -397,7 +397,7 @@ export const findItemsQuery = schema.object({
   refs: queryArray(str(64), L.maxPerPage),
   search: schema.maybe(str(L.maxSearchLength)),
   created_after: schema.maybe(isoDate()),
-  sort_field: schema.maybe(lits(['created_at', 'updated_at', 'title', 'ref_num', 'kind', 'evidence.type', 'status'] as const)),
+  sort_field: schema.maybe(lits(['created_at', 'updated_at', 'title', 'ref_num', 'kind', 'evidence.type', 'status', 'created_by'] as const)),
   sort_order: schema.maybe(lits(['asc', 'desc'] as const)),
   page: schema.maybe(schema.number({ min: 1, max: 10000 })),
   per_page: schema.maybe(schema.number({ min: 1, max: L.maxPerPage })),
