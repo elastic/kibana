@@ -31,7 +31,6 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
 import {
-  PROFILING_DIR_MAX_LENGTH,
   OPS_CONFIG_PATH,
   type OpsConfigType,
   type OpsConfigEventLoopWatchdogProfiling,
@@ -40,6 +39,7 @@ import { EventLoopWatchdog } from './event_loop_watchdog';
 import { resolveDiagnosticDir } from './resolve_diagnostic_dir';
 import { resolveWorkerLogging, type LoggingConfigSubset } from './resolve_worker_logging';
 import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './constants';
+import { capDir } from './sanitize';
 
 /** Feature flag that turns the event loop watchdog on and off at runtime. */
 export const EVENT_LOOP_WATCHDOG_FEATURE_FLAG = 'core.eventLoopWatchdog.enabled';
@@ -95,7 +95,7 @@ export class EventLoopWatchdogService {
       running: profiling[key].asMilliseconds(),
     });
     this.enabledFallback = config.enabled;
-    this.profileDir = this.resolveProfileDir(profiling.dir);
+    this.profileDir = profiling.dir ?? resolveDiagnosticDir();
     this.watchdog = new EventLoopWatchdog({
       logger: this.logger,
       thresholdsMs: {
@@ -224,23 +224,13 @@ export class EventLoopWatchdogService {
     try {
       await Fs.access(dir, Fs.constants.W_OK);
     } catch (error) {
+      // The error code, not the message: the message repeats the full directory.
       this.logger.warn(
-        `Event loop watchdog profiling is on, but the profile directory ${dir} can't be written: ${error.message}. Profile file writes will fail.`
+        `Event loop watchdog profiling is on, but the profile directory ${capDir(
+          dir
+        )} can't be written (${error.code ?? error.message}). Profile file writes will fail.`
       );
     }
-  }
-
-  private resolveProfileDir(configured: string | undefined): string | undefined {
-    if (configured !== undefined) {
-      return configured;
-    }
-    const dir = resolveDiagnosticDir();
-    if (dir !== undefined && dir.length > PROFILING_DIR_MAX_LENGTH) {
-      this.logger.warn(
-        `Node's --diagnostic-dir is longer than ${PROFILING_DIR_MAX_LENGTH} characters, the limit for ops.eventLoopWatchdog.profiling.dir. Set that setting to a shorter path.`
-      );
-    }
-    return dir;
   }
 
   private logFailure(level: 'warn' | 'error', message: string, error: Error): void {

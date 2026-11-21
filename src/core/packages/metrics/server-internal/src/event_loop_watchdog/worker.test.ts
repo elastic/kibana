@@ -27,7 +27,7 @@ import {
   Slot,
   WATCHDOG_WORKER_NAME,
 } from './constants';
-import { MAX_LOCATION_LENGTH, MAX_NAME_LENGTH } from './sanitize';
+import { MAX_LOCATION_LENGTH, MAX_NAME_LENGTH, capDir } from './sanitize';
 import { PROFILING_DIR_MAX_LENGTH } from '../ops_config';
 
 jest.mock('node:worker_threads', () => ({ isMainThread: true, threadId: 99 }));
@@ -1204,14 +1204,15 @@ describe('runWatchdogWorker', () => {
       const { line, droppedLogLines } = await logCaptureLine('a_long_function_name_'.repeat(4));
       expect(droppedLogLines).toBe(0);
       // Account for the longest PID width without trying to replace the read-only `process.pid`.
+      // The PID is in the line twice: in the file name and in `process.pid`.
       const lineBytes =
-        Buffer.byteLength(line, 'utf8') + MAX_PID_DIGITS - String(process.pid).length;
+        Buffer.byteLength(line, 'utf8') + 2 * (MAX_PID_DIGITS - String(process.pid).length);
       expect(lineBytes).toBeLessThanOrEqual(4_094);
 
       const parsed = JSON.parse(line);
       expect(parsed.message.endsWith(' [truncated]')).toBe(false);
       expect(parsed.message).toContain(
-        `Writing profile to ${LONGEST_DIR}/event-loop-block-starting-100000ms-`
+        `Writing profile to ${capDir(LONGEST_DIR)}/event-loop-block-starting-100000ms-`
       );
       expect(parsed.message).toContain(
         `-${'h'.repeat(MAX_HOSTNAME_LENGTH)}-${process.pid}.cpuprofile. Top: `
@@ -1246,7 +1247,7 @@ describe('runWatchdogWorker', () => {
     });
 
     it('keeps the whole message and drops the profile data when non-ASCII names push the line past 4,094 bytes', async () => {
-      // The ASCII worst case is 3,843 bytes; '€' takes 3 bytes, so these names add well over the 251 left.
+      // The ASCII worst case is 4,092 bytes; '€' takes 3 bytes, so these names add well over the 2 left.
       const { line, droppedLogLines } = await logCaptureLine('€'.repeat(84));
       expect(droppedLogLines).toBe(0);
       expect(Buffer.byteLength(line, 'utf8')).toBeLessThanOrEqual(4_094);
@@ -1447,6 +1448,23 @@ describe('runWatchdogWorker', () => {
 
         expect(writeFile).toHaveBeenCalledTimes(1);
         expect(profileMeta()).toMatchObject({ phase: 'running', file: 'same_frame' });
+      });
+
+      it('writes to the full directory but logs only the end of a long one', async () => {
+        const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
+        const longDir = `/${'d'.repeat(PROFILING_DIR_MAX_LENGTH - 1)}`;
+        start({ profiling: { ...profilingData, diagnosticDir: longDir } }, undefined, {
+          wallClockMs: () => wallMs,
+        });
+        setSlot(Slot.profiling, 1);
+        await profiledBlock(2_000);
+
+        const file = String(writeFile.mock.calls[0][0]);
+        expect(path.dirname(file)).toBe(longDir);
+        expect(warnLines()[0][0]).toContain(
+          `Writing profile to ${capDir(longDir)}/${path.basename(file)}.`
+        );
+        expect(warnLines()[0][0]).not.toContain(longDir);
       });
 
       it('writes a running-phase capture with the running phase in the file name', async () => {

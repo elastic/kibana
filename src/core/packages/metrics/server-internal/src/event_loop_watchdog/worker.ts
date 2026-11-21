@@ -29,6 +29,7 @@ import {
   type InspectorSession,
 } from './profile_capture';
 import { fileName, prepareProfile } from './profile_file';
+import { capDir } from './sanitize';
 import { summarizeProfile, type CallerSummary, type ProfileSummary } from './profile_summary';
 import type {
   BlockLogMeta,
@@ -345,10 +346,13 @@ export const runWatchdogWorker = (
         : diagnosticDir === undefined
         ? 'no_directory'
         : admission.admit(profileSignature(summary), wallClockMs());
-    const path =
-      diagnosticDir && file === 'admitted'
-        ? Path.join(diagnosticDir, fileName(phase, blockedMs, new Date()))
-        : undefined;
+    let path: string | undefined;
+    let loggedPath: string | undefined;
+    if (diagnosticDir && file === 'admitted') {
+      const name = fileName(phase, blockedMs, new Date());
+      path = Path.join(diagnosticDir, name);
+      loggedPath = Path.join(capDir(diagnosticDir), name);
+    }
     if (file === 'same_frame') {
       counts.files.sameFrame++;
     }
@@ -364,7 +368,7 @@ export const runWatchdogWorker = (
         stopReason === 'block_ended' ? '' : ' so far'
       } (profiled after ~${profiledAfterMs}ms, profiler start took ~${profilerStartMs}ms), ${
         summary.samples
-      } samples; stopped: ${stopReason}.${path ? ` Writing profile to ${path}.` : ''}${
+      } samples; stopped: ${stopReason}.${loggedPath ? ` Writing profile to ${loggedPath}.` : ''}${
         frameLists ? ` ${frameLists}` : ''
       }`,
       {

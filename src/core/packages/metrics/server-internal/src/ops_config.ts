@@ -18,11 +18,11 @@ export const OPS_CONFIG_PATH = 'ops' as const;
 const OPS_METRICS_INTERVAL = '5s';
 
 /**
- * Maximum length of `profiling.dir`, in characters. Each character consumes bytes in the log line.
- * The limit is to keep the log line within the allowed size.
+ * Maximum length of `profiling.dir`, in characters. Log lines show only the end of a long
+ * directory, so this limit only bounds the setting.
  * @internal
  */
-export const PROFILING_DIR_MAX_LENGTH = 64;
+export const PROFILING_DIR_MAX_LENGTH = 1024;
 
 /** @internal */
 interface OpsConfigCGroupOverridesOps {

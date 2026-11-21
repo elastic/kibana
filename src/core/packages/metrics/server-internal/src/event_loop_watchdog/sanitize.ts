@@ -12,6 +12,8 @@ import { fileURLToPath } from 'node:url';
 
 export const MAX_NAME_LENGTH = 48;
 export const MAX_LOCATION_LENGTH = 120;
+/** Longest profile directory shown in a log line. */
+export const MAX_LOGGED_DIR_LENGTH = 64;
 const ELLIPSIS = '...';
 
 /** Keeps the start of a function name, capped at `MAX_NAME_LENGTH` characters. */
@@ -22,6 +24,15 @@ export const capLocation = (location: string): string =>
   location.length <= MAX_LOCATION_LENGTH
     ? location
     : `${ELLIPSIS}${location.slice(ELLIPSIS.length - MAX_LOCATION_LENGTH)}`;
+
+/**
+ * Keeps the end of a profile directory for log lines, capped at `MAX_LOGGED_DIR_LENGTH`
+ * characters, so the line stays within its size limit however long the directory is.
+ */
+export const capDir = (dir: string): string =>
+  dir.length <= MAX_LOGGED_DIR_LENGTH
+    ? dir
+    : `${ELLIPSIS}${dir.slice(ELLIPSIS.length - MAX_LOGGED_DIR_LENGTH)}`;
 
 /** Repo-relative path, `node:` specifier, or the file name for paths outside the repo. */
 export const relativeLocation = (url: string, root: string): string | undefined => {
