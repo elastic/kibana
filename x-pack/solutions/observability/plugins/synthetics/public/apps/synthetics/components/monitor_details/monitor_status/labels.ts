@@ -48,3 +48,10 @@ export const BRUSH_AREA_MESSAGE = i18n.translate(
     defaultMessage: 'Brush an area for higher fidelity',
   }
 );
+
+export const CLICK_TO_VIEW_ERROR_DETAILS = i18n.translate(
+  'xpack.synthetics.monitorDetails.statusChart.clickToViewErrorDetails',
+  {
+    defaultMessage: 'Click to view error details',
+  }
+);
