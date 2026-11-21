@@ -36,6 +36,7 @@ import {
   FleetUnauthorizedError,
   PackagePolicyNameExistsError,
   PackageBreakingChangesNotAcknowledgedError,
+  PackagePolicyAgentVersionIncompatibleError,
   PackageOutdatedError,
   PackageInvalidArchiveError,
   BundledPackageLocationNotFoundError,
@@ -84,6 +85,9 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 400;
   }
   if (error instanceof PackageBreakingChangesNotAcknowledgedError) {
+    return 400;
+  }
+  if (error instanceof PackagePolicyAgentVersionIncompatibleError) {
     return 400;
   }
   if (error instanceof PackageInvalidArchiveError) {

@@ -924,6 +924,7 @@ describe('Agent policy API handlers', () => {
                     { key: '8.1.0', doc_count: 2 },
                   ],
                 },
+                active: { versions: { buckets: [{ key: '8.1.0', doc_count: 2 }] } },
               },
               // policy-2 has no matching agents
               'policy-2': {
@@ -951,6 +952,8 @@ describe('Agent policy API handlers', () => {
         'policy-1',
         'policy-2',
       ]);
+      // Active agents per version only count the agents agent version conditions apply to
+      expect(listAgentsArgs.aggregations.policies.aggs.active.filter).toBeDefined();
 
       expect(agentPolicies[0]).toEqual(
         expect.objectContaining({
@@ -961,6 +964,7 @@ describe('Agent policy API handlers', () => {
             { version: '8.0.0', count: 3 },
             { version: '8.1.0', count: 2 },
           ],
+          active_agents_per_version: [{ version: '8.1.0', count: 2 }],
         })
       );
       expect(agentPolicies[1]).toEqual(
@@ -969,6 +973,7 @@ describe('Agent policy API handlers', () => {
           unprivileged_agents: 0,
           fips_agents: 0,
           agents_per_version: [],
+          active_agents_per_version: [],
         })
       );
     });

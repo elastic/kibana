@@ -199,9 +199,48 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
 
     // Only upgrade agent-based policies that don't have conflicts (package-policy dry-run shape:
     // conflicts are keyed by the nested `diff[0].id`).
-    const packagePolicyIdsToUpdate = packagePolicyIds.filter(
-      (id) => !dryRunData?.find((dryRunRecord) => dryRunRecord.diff?.[0].id === id)?.hasErrors
-    );
+    // Policies blocked by their agents' versions are skipped too: upgrading them would make some
+    // of their agents stop collecting the integration's data.
+    const agentVersionBlockedRecords =
+      dryRunData?.filter(
+        (dryRunRecord) =>
+          !!dryRunRecord.agent_version_block &&
+          packagePolicyIds.includes(dryRunRecord.diff?.[0].id ?? '')
+      ) ?? [];
+    const packagePolicyIdsToUpdate = packagePolicyIds.filter((id) => {
+      const dryRunRecord = dryRunData?.find((record) => record.diff?.[0].id === id);
+      return !dryRunRecord?.hasErrors && !dryRunRecord?.agent_version_block;
+    });
+    if (agentVersionBlockedRecords.length > 0) {
+      notifications.toasts.addWarning({
+        title: i18n.translate(
+          'xpack.fleet.integrations.settings.skippedAgentVersionPoliciesToast.title',
+          {
+            defaultMessage:
+              'Fleet skipped {skippedCount, plural, one {# agent-based policy} other {# agent-based policies}}',
+            values: { skippedCount: agentVersionBlockedRecords.length },
+          }
+        ),
+        text: i18n.translate(
+          'xpack.fleet.integrations.settings.skippedAgentVersionPoliciesToast.message',
+          {
+            defaultMessage:
+              "Some agents using {skippedNames} don't satisfy the agent version required by this integration ({versionCondition}) and would stop collecting its data. Upgrade those agents, then upgrade {skippedCount, plural, one {this policy} other {these policies}}.",
+            values: {
+              skippedCount: agentVersionBlockedRecords.length,
+              skippedNames: i18n.formatList(
+                'conjunction',
+                agentVersionBlockedRecords.map(
+                  (record) => record.diff?.[0].name ?? record.diff?.[0].id ?? ''
+                )
+              ),
+              versionCondition:
+                agentVersionBlockedRecords[0].agent_version_block?.version_condition,
+            },
+          }
+        ),
+      });
+    }
 
     // Agentless policies upgrade through the agentless API. The agentless dry-run shape exposes a
     // top-level `id`/`hasErrors`, so conflicts are matched directly by id.
@@ -253,10 +292,41 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
         return;
       }
       try {
-        await upgradePackagePoliciesMutation.mutateAsync({
+        const results = await upgradePackagePoliciesMutation.mutateAsync({
           packagePolicyIds: packagePolicyIdsToUpdate,
           acknowledgeBreakingChanges,
         });
+        // Some policies can fail while others are upgraded, e.g. when agents changed versions
+        // since the dry run.
+        const failed = results.filter((result) => !result.success);
+        if (failed.length > 0) {
+          notifications.toasts.addWarning({
+            title: i18n.translate(
+              'xpack.fleet.integrations.settings.partiallyUpdatedPoliciesToast.title',
+              {
+                defaultMessage:
+                  'Fleet could not upgrade {failedCount, plural, one {# agent-based policy} other {# agent-based policies}}',
+                values: { failedCount: failed.length },
+              }
+            ),
+            text: i18n.translate(
+              'xpack.fleet.integrations.settings.partiallyUpdatedPoliciesToast.message',
+              {
+                defaultMessage: 'Upgrade {failedNames} manually.{errorMessage}',
+                values: {
+                  failedNames: i18n.formatList(
+                    'conjunction',
+                    failed.map((result) => result.name ?? result.id)
+                  ),
+                  errorMessage: failed[0].body?.message ? `\nError: ${failed[0].body.message}` : '',
+                },
+              }
+            ),
+          });
+        }
+        if (failed.length > 0 && failed.length === results.length) {
+          return;
+        }
         notifications.toasts.addSuccess({
           title: toMountPoint(
             <FormattedMessage
@@ -270,7 +340,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
             <FormattedMessage
               id="xpack.fleet.integrations.packageUpdateSuccessDescription"
               defaultMessage="Fleet upgraded {agentBasedPolicyCount, plural, one {# agent-based policy} other {# agent-based policies}}."
-              values={{ agentBasedPolicyCount: packagePolicyIdsToUpdate.length }}
+              values={{ agentBasedPolicyCount: results.length - failed.length }}
             />,
             startServices
           ),

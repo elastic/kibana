@@ -37,6 +37,7 @@ import {
 import { type AgentClient } from '../../services/agents';
 import { logLegacyAgentlessWriteDeprecation } from '../../services/utils/agentless';
 import { UNPRIVILEGED_AGENT_KUERY } from '../../constants';
+import { AGENT_VERSION_CONDITION_AGENTS_KUERY } from '../../services/package_policies/agent_version_guard';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -105,6 +106,7 @@ interface AssignedAgentsCountAggregation {
       unprivileged?: { doc_count: number };
       fips?: { doc_count: number };
       versions?: { buckets: Array<{ key: string; doc_count: number }> };
+      active?: { versions?: { buckets: Array<{ key: string; doc_count: number }> } };
     }
   >;
 }
@@ -149,6 +151,10 @@ export async function populateAssignedAgentsCount(
           },
           fips: { filter: toElasticsearchQuery(fromKueryExpression(FIPS_AGENT_KUERY)) },
           versions: { terms: { field: 'agent.version', size: 1000 } },
+          active: {
+            filter: toElasticsearchQuery(fromKueryExpression(AGENT_VERSION_CONDITION_AGENTS_KUERY)),
+            aggs: { versions: { terms: { field: 'agent.version', size: 1000 } } },
+          },
         },
       },
     },
@@ -166,6 +172,9 @@ export async function populateAssignedAgentsCount(
       version: version.key,
       count: version.doc_count,
     }));
+    agentPolicy.active_agents_per_version = (bucket?.active?.versions?.buckets ?? []).map(
+      (version) => ({ version: version.key, count: version.doc_count })
+    );
   }
 }
 
