@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/logging';
 import { SeededOfrepWebProvider } from './seeded_ofrep_provider';
 
 /** How often the browser asks Kibana for the server's flag snapshot. */
-const OFREP_POLL_INTERVAL_MS = 10_000;
+const OFREP_POLL_INTERVAL_MS = 10_000_000_000;
 
 /**
  * Path the OFREP web provider treats as its server root.

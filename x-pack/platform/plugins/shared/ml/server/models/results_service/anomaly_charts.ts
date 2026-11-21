@@ -57,6 +57,8 @@ import {
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import { isEsqlDatafeed } from '../../../common/util/esql_metric_query';
+import { esqlMetricDataProvider } from './esql_metric_data';
 import { findAggField } from '../../../common/util/validation_utils';
 import type { ChartType } from '../../../common/constants/charts';
 import { CHART_TYPE, SCHEDULE_EVENT_MARKER_ENTITY } from '../../../common/constants/charts';
@@ -1294,6 +1296,24 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       const datafeedQuery = get(config, 'datafeedConfig.query');
 
       try {
+        if (isEsqlDatafeed(config.datafeedConfig)) {
+          return await esqlMetricDataProvider(client).fetchEsqlMetricData(
+            config.datafeedConfig,
+            config.timeField,
+            {
+              entityFields: entityFields.map(({ fieldName, fieldValue }) => ({
+                fieldName,
+                fieldValue: fieldValue ?? null,
+              })),
+              metricFunction: config.metricFunction,
+              metricFieldName: config.metricFieldName,
+              earliestMs: range.min,
+              latestMs: range.max,
+              intervalMs: bucketSpanSeconds * 1000,
+            }
+          );
+        }
+
         return await fetchMetricData(
           Array.isArray(config.datafeedConfig.indices)
             ? config.datafeedConfig.indices.join()

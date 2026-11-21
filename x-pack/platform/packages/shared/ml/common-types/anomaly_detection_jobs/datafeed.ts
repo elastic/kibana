@@ -13,6 +13,9 @@ export type Datafeed = estypes.MlDatafeed & {
   // remove this when the datafeed types are correct
   project_routing?: string;
   authorization?: Authorization;
+  esql_query?: string;
+  source_time_field?: string;
+  grouping_interval?: string;
 };
 
 export type ChunkingConfig = estypes.MlChunkingConfig;

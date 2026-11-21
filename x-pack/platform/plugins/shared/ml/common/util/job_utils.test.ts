@@ -308,6 +308,25 @@ describe('ML - job utils', () => {
       expect(isSourceDataChartableForDetector(job, 35)).toBe(false);
       expect(isSourceDataChartableForDetector(job, 36)).toBe(false);
     });
+
+    test('returns true for an ES|QL datafeed unless the detector uses mlcategory', () => {
+      const esqlJob = {
+        analysis_config: {
+          detectors: [
+            { function: 'high_sum', field_name: 'total_bytes', partition_field_name: 'host' },
+            { function: 'count', by_field_name: 'mlcategory' },
+          ],
+        },
+        datafeed_config: {
+          esql_query: 'FROM logs | STATS total_bytes = SUM(bytes) BY t = BUCKET(@timestamp, 1h)',
+          source_time_field: '@timestamp',
+          grouping_interval: '1h',
+        },
+      } as unknown as CombinedJob;
+
+      expect(isSourceDataChartableForDetector(esqlJob, 0)).toBe(true);
+      expect(isSourceDataChartableForDetector(esqlJob, 1)).toBe(false);
+    });
   });
 
   describe('isModelPlotChartableForDetector', () => {
