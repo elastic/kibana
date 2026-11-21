@@ -27,6 +27,7 @@ import {
   CASES_SOLUTION_CONTEXT_INSTRUCTION,
 } from '../utils/tool_instructions';
 import { emitFromStepResult, injectAttachmentIds } from '../attachments/emit_attachments';
+import { resolveAlertRules } from './resolve_alert_rules';
 
 type GetCasesClientFn = (request: KibanaRequest) => Promise<CasesClient>;
 
@@ -50,7 +51,7 @@ const describeAttachmentsField = (authorableTypeIds: string[]): string => {
   lines.push(
     'Each item is discriminated by `type`; never set `owner` (it is derived from the case). Common shapes:',
     '- comment: { type: "comment", data: { content: string } }',
-    '- alert: { type: "stack.alert", attachmentId: "<alertId>", metadata: { index: string, rule?: { id: string, name?: string } } }',
+    '- alert: { type: "stack.alert", attachmentId: "<alertId>", metadata: { index: string, rule?: { id: string, name?: string } } } (rule.id is the alert\'s `kibana.alert.rule.uuid`, not its `kibana.alert.rule.rule_id`)',
     '- saved object (e.g. dashboard, discoverSession, lens, map): { type, attachmentId: "<savedObjectId>", metadata: { title: string, soType: string } }'
   );
   return lines.join('\n');
@@ -63,7 +64,7 @@ const buildManageAttachmentsSchema = (authorableTypeIds: string[]) =>
       .describe(
         'Required fields per mode:\n' +
           '- add_comment: case_id, comment\n' +
-          '- add_alerts: case_id, alerts ({alertId, index, rule?}[])\n' +
+          '- add_alerts: case_id, alerts ({alertId, index, rule?}[]; rule is read from each alert, so it can be omitted)\n' +
           '- add_events: case_id, events ({eventId, index}[])\n' +
           '- add_attachments: case_id, attachments (generic bulk; supports comments, alerts, and saved-object types like dashboards — see the `attachments` field)\n' +
           '- delete_attachments: case_id, ids (the `id` of each attachment from get_attachments, not its `attachmentId` or an alert/event id; deletion cannot be undone)'
@@ -156,8 +157,16 @@ export const manageAttachmentsTool = (
         switch (mode) {
           case 'add_comment':
             return invokeStepHandler(addCommentStepDef, { case_id, ...rest }, toolContext);
-          case 'add_alerts':
-            return invokeStepHandler(addAlertsStepDef, { case_id, ...rest }, toolContext);
+          case 'add_alerts': {
+            const alerts =
+              rest.alerts &&
+              (await resolveAlertRules({
+                alerts: rest.alerts,
+                esClient: toolContext.esClient.asCurrentUser,
+                logger: toolContext.logger,
+              }));
+            return invokeStepHandler(addAlertsStepDef, { case_id, ...rest, alerts }, toolContext);
+          }
           case 'add_events':
             return invokeStepHandler(addEventsStepDef, { case_id, ...rest }, toolContext);
           case 'add_attachments': {
