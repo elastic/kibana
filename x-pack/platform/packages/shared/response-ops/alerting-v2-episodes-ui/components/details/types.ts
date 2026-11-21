@@ -10,6 +10,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
@@ -21,6 +22,7 @@ export interface AlertEpisodeDetailsServices {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   http: HttpStart;
+  notifications: NotificationsStart;
   spaces: SpacesPluginStart;
   uiSettings: IUiSettingsClient;
   unifiedDocViewer: UnifiedDocViewerStart;

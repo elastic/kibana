@@ -76,6 +76,30 @@ describe('deriveEpisodeAlertTimelineData', () => {
     });
   });
 
+  it('ends a flapping open episode on the status it resumed, not the last status first seen', () => {
+    // Collapsed rows swept for a still-open alert: recovering is a single event inside an
+    // active run, so the sweep emits recovering and then active at the same instant.
+    const result = deriveEpisodeAlertTimelineData(
+      [
+        createEvent('2025-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.PENDING),
+        createEvent('2025-01-01T00:01:00.000Z', ALERT_EPISODE_STATUS.ACTIVE),
+        createEvent('2025-01-01T00:04:00.000Z', ALERT_EPISODE_STATUS.RECOVERING),
+        createEvent('2025-01-01T00:04:00.000Z', ALERT_EPISODE_STATUS.ACTIVE),
+      ],
+      Date.parse('2025-01-01T00:10:00.000Z')
+    );
+
+    expect(result?.windowEndMs).toBe(Date.parse('2025-01-01T00:10:00.000Z'));
+    expect(result?.row.segments.at(-1)).toEqual(
+      expect.objectContaining({
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        x0Ms: Date.parse('2025-01-01T00:04:00.000Z'),
+        x1Ms: Date.parse('2025-01-01T00:10:00.000Z'),
+        isOngoing: true,
+      })
+    );
+  });
+
   it('ignores invalid events and returns no timeline when none remain', () => {
     expect(
       deriveEpisodeAlertTimelineData(

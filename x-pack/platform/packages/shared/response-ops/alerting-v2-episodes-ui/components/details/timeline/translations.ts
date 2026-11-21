@@ -165,3 +165,15 @@ export const formatSnoozeDuration = (startIso: string, endIso: string): string |
     values: { n },
   });
 };
+
+export const COLLAPSED_CALLOUT_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.timeline.collapsedCalloutTitle',
+  { defaultMessage: 'Some status and severity changes are not shown' }
+);
+
+export const getCollapsedCalloutBody = (eventLimit: number): string =>
+  i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.collapsedCalloutBody', {
+    defaultMessage:
+      'This alert has more than {eventLimit} events, so its status and severity changes are collapsed. Changes that repeat in between may not appear.',
+    values: { eventLimit },
+  });

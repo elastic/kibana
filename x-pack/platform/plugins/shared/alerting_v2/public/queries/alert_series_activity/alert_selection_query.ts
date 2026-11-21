@@ -12,7 +12,7 @@ import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
  * Selects the alerts the alert timeline draws, scoped to the chosen top-N
  * series. One row per alert (its series + most-recent activity in the window).
  * `LIMIT ... BY group_hash` gives each series its own alert budget, so a busy
- * series can't crowd out quieter ones. Start/phases come from {@link buildAlertPhasesQuery}.
+ * series can't crowd out quieter ones. Start/phases come from {@link buildCollapsedStatusPhasesQuery}.
  */
 export interface AlertSelectionRow {
   'episode.id': string;

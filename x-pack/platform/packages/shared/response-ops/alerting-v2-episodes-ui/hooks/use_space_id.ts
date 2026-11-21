@@ -11,9 +11,13 @@ import { map } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
-/** Subscribes to `services.spaces.getActiveSpace$()` and returns the active space id. */
-export const useSpaceId = (spaces: SpacesPluginStart): string => {
-  const spaceId$ = useMemo(() => spaces.getActiveSpace$().pipe(map((space) => space.id)), [spaces]);
+const useSpaceId$ = (spaces: SpacesPluginStart) =>
+  useMemo(() => spaces.getActiveSpace$().pipe(map((space) => space.id)), [spaces]);
 
-  return useObservable(spaceId$, DEFAULT_SPACE_ID);
-};
+/** Subscribes to `services.spaces.getActiveSpace$()` and returns the active space id. */
+export const useSpaceId = (spaces: SpacesPluginStart): string =>
+  useObservable(useSpaceId$(spaces), DEFAULT_SPACE_ID);
+
+/** Returns the active space id, or undefined until `spaces.getActiveSpace$()` has emitted. */
+export const useActiveSpaceId = (spaces: SpacesPluginStart): string | undefined =>
+  useObservable(useSpaceId$(spaces));

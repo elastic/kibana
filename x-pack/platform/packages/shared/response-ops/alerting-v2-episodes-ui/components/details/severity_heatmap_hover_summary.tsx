@@ -13,11 +13,14 @@ import * as i18n from './translations';
 export interface SeverityHeatmapHoverSummaryProps {
   severityLabel: string;
   timestamp?: string;
+  /** Shows the "Click to see data" hint; off when the marker cannot be clicked. */
+  showClickHint?: boolean;
 }
 
 export const SeverityHeatmapHoverSummary = ({
   severityLabel,
   timestamp,
+  showClickHint = true,
 }: SeverityHeatmapHoverSummaryProps) => {
   const { euiTheme } = useEuiTheme();
   const timeLabel = timestamp && timestamp.length > 0 ? timestamp : '';
@@ -40,11 +43,13 @@ export const SeverityHeatmapHoverSummary = ({
             <EuiText size="xs">{timeLabel}</EuiText>
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {i18n.SEVERITY_HEATMAP_CLICK_TO_SEE_DATA}
-          </EuiText>
-        </EuiFlexItem>
+        {showClickHint && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {i18n.SEVERITY_HEATMAP_CLICK_TO_SEE_DATA}
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </div>
   );

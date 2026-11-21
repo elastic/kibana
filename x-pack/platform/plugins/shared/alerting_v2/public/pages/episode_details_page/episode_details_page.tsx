@@ -201,6 +201,7 @@ export function EpisodeDetailsPage({
     () => ({
       data: services.data,
       http: services.http,
+      notifications: services.notifications,
       expressions: services.expressions,
       userProfile: services.userProfile,
       spaces: services.spaces,
@@ -210,6 +211,7 @@ export function EpisodeDetailsPage({
     [
       services.data,
       services.http,
+      services.notifications,
       services.expressions,
       services.userProfile,
       services.spaces,
@@ -513,7 +515,7 @@ export function EpisodeDetailsPage({
                     episodeId={episodeId}
                     seriesId={episode ? episode.series_id ?? null : undefined}
                     groupHash={groupHash}
-                    services={{ data, spaces, userProfile: services.userProfile }}
+                    services={detailsServices}
                   />
                 </EuiPanel>
               ) : actualMainPanel === 'action_policy_history' ? (

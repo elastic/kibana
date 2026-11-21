@@ -189,6 +189,36 @@ describe('mergeTimelineEntries', () => {
 
     expect(merged.map((e) => e.kind)).toEqual(['severity_change', 'state_change']);
   });
+
+  it('puts the later of two same-instant changes on top, so a resumed value reads as current', () => {
+    // A one-event recovering phase inside an active run: the sweep emits recovering then
+    // active at the same instant, oldest first.
+    const stateChanges = deriveStateChangeEntries([
+      makeRow(ALERT_EPISODE_STATUS.ACTIVE, '2024-01-01T00:00:00.000Z'),
+      makeRow(ALERT_EPISODE_STATUS.RECOVERING, '2024-01-01T00:04:00.000Z'),
+      makeRow(ALERT_EPISODE_STATUS.ACTIVE, '2024-01-01T00:04:00.000Z'),
+    ]);
+    const severityChanges = deriveSeverityChangeEntries([
+      makeSeverityRow('high', '2024-01-01T00:00:00.000Z'),
+      makeSeverityRow('critical', '2024-01-01T00:04:00.000Z'),
+      makeSeverityRow('high', '2024-01-01T00:04:00.000Z'),
+    ]);
+
+    const merged = mergeTimelineEntries(stateChanges, severityChanges, []);
+
+    expect(
+      merged.map((e) =>
+        e.kind === 'state_change' ? e.newStatus : e.kind === 'severity_change' ? e.newSeverity : ''
+      )
+    ).toEqual([
+      'high',
+      'critical',
+      ALERT_EPISODE_STATUS.ACTIVE,
+      ALERT_EPISODE_STATUS.RECOVERING,
+      'high',
+      ALERT_EPISODE_STATUS.ACTIVE,
+    ]);
+  });
 });
 
 describe('deriveSeverityChangeEntries', () => {

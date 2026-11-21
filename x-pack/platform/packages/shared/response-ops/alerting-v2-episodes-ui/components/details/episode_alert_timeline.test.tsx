@@ -72,10 +72,14 @@ const createEventRow = (overrides: Partial<EpisodeEventRow> = {}): EpisodeEventR
   ...overrides,
 });
 
-const renderTimeline = (eventRows: EpisodeEventRow[]) =>
+const renderTimeline = (eventRows: EpisodeEventRow[], collapsedEventLimit?: number) =>
   render(
     <I18nProvider>
-      <AlertEpisodeAlertTimeline eventRows={eventRows} />
+      <AlertEpisodeAlertTimeline
+        statusRows={eventRows}
+        severityRows={eventRows}
+        collapsedEventLimit={collapsedEventLimit}
+      />
     </I18nProvider>
   );
 
@@ -98,9 +102,39 @@ describe('AlertEpisodeAlertTimeline', () => {
     expect(screen.getByText('server-1')).toBeInTheDocument();
   });
 
+  it('does not open the event-data panel when the rows are collapsed', () => {
+    renderTimeline([createEventRow({ severity: 'high' })], 1000);
+
+    expect(screen.getByText('Severity')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open severity transition' }));
+
+    expect(
+      screen.queryByTestId('alertingV2EpisodeSeverityHeatmapDetailPanel')
+    ).not.toBeInTheDocument();
+  });
+
   it('hides the severity lane when no events have a supported severity', () => {
     renderTimeline([createEventRow()]);
 
     expect(screen.queryByText('Severity')).not.toBeInTheDocument();
+  });
+
+  it('does not show the collapsed warning when the rows are not collapsed', () => {
+    renderTimeline([createEventRow()]);
+
+    expect(screen.queryByTestId('alertingV2EpisodeCollapsedEventsWarning')).not.toBeInTheDocument();
+  });
+
+  it('shows a collapsed warning naming the event limit', async () => {
+    renderTimeline([createEventRow()], 1000);
+
+    fireEvent.mouseOver(screen.getByTestId('alertingV2EpisodeCollapsedEventsWarning'));
+
+    expect(
+      await screen.findByText(
+        'Severity and status changes are collapsed for alerts with over 1000 events'
+      )
+    ).toBeInTheDocument();
   });
 });
