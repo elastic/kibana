@@ -454,4 +454,11 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  [
+    '.sentinelone2',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconSentinelone2" */ './specs/sentinelone/icon')
+    ),
+  ],
 ]);
