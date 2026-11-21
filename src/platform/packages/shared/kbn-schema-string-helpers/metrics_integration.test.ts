@@ -24,7 +24,8 @@ test('defers each record until the api loads, so reporting that ran before provi
   reportStringLengthViolation({
     helper: 'savedObjectId',
     library: 'zod',
-    maxLength: 512,
+    bound: 'max',
+    limit: 512,
     length: 600,
   });
 
@@ -35,20 +36,30 @@ test('defers each record until the api loads, so reporting that ran before provi
     reportStringLengthViolation({
       helper: 'savedObjectId',
       library: 'zod',
-      maxLength: 512,
+      bound: 'max',
+      limit: 512,
       length: 600,
     });
     reportStringLengthViolation({
       helper: 'savedObjectId',
       library: 'zod',
-      maxLength: 512,
+      bound: 'max',
+      limit: 512,
       length: 200000,
     });
     reportStringLengthViolation({
       helper: 'spaceId',
       library: 'config-schema',
-      maxLength: 512,
+      bound: 'max',
+      limit: 512,
       length: 600,
+    });
+    reportStringLengthViolation({
+      helper: 'spaceId',
+      library: 'config-schema',
+      bound: 'min',
+      limit: 1,
+      length: 0,
     });
     await flush();
     const { resourceMetrics } = await reader.collect();
@@ -57,13 +68,14 @@ test('defers each record until the api loads, so reporting that ran before provi
     expect(scope.scope.name).toBe('kibana.schema');
     expect(scope.metrics).toHaveLength(1);
     expect(scope.metrics[0].descriptor.name).toBe('kibana.schema.string_length_violation.length');
-    expect(scope.metrics[0].dataPoints).toHaveLength(2);
+    expect(scope.metrics[0].dataPoints).toHaveLength(3);
     expect(scope.metrics[0].dataPoints).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           attributes: {
             'schema.helper': 'savedObjectId',
             'schema.library': 'zod',
+            'schema.bound': 'max',
             'schema.max_length': 512,
           },
           value: expect.objectContaining({
@@ -84,9 +96,19 @@ test('defers each record until the api loads, so reporting that ran before provi
           attributes: {
             'schema.helper': 'spaceId',
             'schema.library': 'config-schema',
+            'schema.bound': 'max',
             'schema.max_length': 512,
           },
           value: expect.objectContaining({ count: 1, sum: 600, min: 600, max: 600 }),
+        }),
+        expect.objectContaining({
+          attributes: {
+            'schema.helper': 'spaceId',
+            'schema.library': 'config-schema',
+            'schema.bound': 'min',
+            'schema.min_length': 1,
+          },
+          value: expect.objectContaining({ count: 1, sum: 0, min: 0, max: 0 }),
         }),
       ])
     );
