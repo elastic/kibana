@@ -17,6 +17,7 @@ import {
 import type { EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import * as i18n from './translations';
+import { ICONS } from '../../icons';
 
 export interface FilterOption {
   value: string;
@@ -72,7 +73,7 @@ export const FilterPopover: React.FC<FilterPopoverProps> = ({
       aria-label={label}
       button={
         <EuiFilterButton
-          iconType="chevronSingleDown"
+          iconType={ICONS.chevronDown}
           onClick={() => setIsOpen((open) => !open)}
           isSelected={isOpen}
           hasActiveFilters={selected.length > 0}
