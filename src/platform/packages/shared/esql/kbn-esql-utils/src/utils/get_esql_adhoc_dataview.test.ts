@@ -28,6 +28,7 @@ function createMockDataViewsService() {
 function createMockHttp(timeField?: string) {
   return {
     post: jest.fn(async () => ({ timeField })),
+    fetch: jest.fn(async () => ({ timeField })),
   } as unknown as HttpStart;
 }
 
@@ -184,8 +185,9 @@ describe('getESQLAdHocDataview', () => {
 
       await getESQLAdHocDataview({ dataViewsService, query, http });
 
-      expect(http.post).toHaveBeenCalledWith(TIMEFIELD_ROUTE, {
-        body: JSON.stringify({ query }),
+      // Short query, so it goes through the cacheable GET path.
+      expect(http.fetch).toHaveBeenCalledWith(TIMEFIELD_ROUTE, {
+        query: { query, projectRouting: undefined },
       });
       expect(dataViewsService.create).toHaveBeenCalledWith(
         expect.objectContaining({ timeFieldName: '@timestamp' }),
@@ -204,8 +206,8 @@ describe('getESQLAdHocDataview', () => {
         projectRouting: '_alias:*',
       });
 
-      expect(http.post).toHaveBeenCalledWith(TIMEFIELD_ROUTE, {
-        body: JSON.stringify({ query, projectRouting: '_alias:*' }),
+      expect(http.fetch).toHaveBeenCalledWith(TIMEFIELD_ROUTE, {
+        query: { query, projectRouting: '_alias:*' },
       });
     });
 
@@ -223,7 +225,7 @@ describe('getESQLAdHocDataview', () => {
 
     it('should leave timeFieldName undefined on HTTP failure', async () => {
       const http = {
-        post: jest.fn().mockRejectedValue(new Error('network error')),
+        fetch: jest.fn().mockRejectedValue(new Error('network error')),
       } as unknown as HttpStart;
       jest.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -248,7 +250,7 @@ describe('getESQLAdHocDataview', () => {
       await getESQLAdHocDataview({ dataViewsService, query, http });
       await getESQLAdHocDataview({ dataViewsService, query, http });
 
-      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.fetch).toHaveBeenCalledTimes(1);
     });
 
     it('should make separate HTTP calls for different queries', async () => {
@@ -257,7 +259,7 @@ describe('getESQLAdHocDataview', () => {
       await getESQLAdHocDataview({ dataViewsService, query: uniqueQuery('a'), http });
       await getESQLAdHocDataview({ dataViewsService, query: uniqueQuery('b'), http });
 
-      expect(http.post).toHaveBeenCalledTimes(2);
+      expect(http.fetch).toHaveBeenCalledTimes(2);
     });
 
     it('should make separate HTTP calls for different project routing', async () => {
@@ -277,7 +279,7 @@ describe('getESQLAdHocDataview', () => {
         projectRouting: '_alias:*',
       });
 
-      expect(http.post).toHaveBeenCalledTimes(2);
+      expect(http.fetch).toHaveBeenCalledTimes(2);
     });
 
     it('should deduplicate concurrent calls for the same query', async () => {
@@ -286,7 +288,7 @@ describe('getESQLAdHocDataview', () => {
         resolveHttp = resolve;
       });
       const http = {
-        post: jest.fn(() => httpPromise),
+        fetch: jest.fn(() => httpPromise),
       } as unknown as HttpStart;
 
       const query = uniqueQuery();
@@ -296,14 +298,14 @@ describe('getESQLAdHocDataview', () => {
       resolveHttp({ timeField: '@timestamp' });
 
       const [result1, result2] = await Promise.all([promise1, promise2]);
-      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.fetch).toHaveBeenCalledTimes(1);
       expect(result1.timeFieldName).toBe('@timestamp');
       expect(result2.timeFieldName).toBe('@timestamp');
     });
 
     it('should retry after HTTP failure', async () => {
       const http = {
-        post: jest
+        fetch: jest
           .fn()
           .mockRejectedValueOnce(new Error('fail'))
           .mockResolvedValueOnce({ timeField: '@timestamp' }),
@@ -316,7 +318,7 @@ describe('getESQLAdHocDataview', () => {
 
       const result2 = await getESQLAdHocDataview({ dataViewsService, query, http });
       expect(result2.timeFieldName).toBe('@timestamp');
-      expect(http.post).toHaveBeenCalledTimes(2);
+      expect(http.fetch).toHaveBeenCalledTimes(2);
     });
 
     it('should evict the least recently used query after reaching the cache limit', async () => {
@@ -335,7 +337,7 @@ describe('getESQLAdHocDataview', () => {
       await getESQLAdHocDataview({ dataViewsService, query: uniqueQuery('overflow'), http });
       await getESQLAdHocDataview({ dataViewsService, query: firstQuery, http });
 
-      expect(http.post).toHaveBeenCalledTimes(102);
+      expect(http.fetch).toHaveBeenCalledTimes(102);
     });
   });
 
@@ -345,7 +347,7 @@ describe('getESQLAdHocDataview', () => {
       const query = uniqueQuery();
 
       await getESQLAdHocDataview({ dataViewsService, query, http });
-      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.fetch).toHaveBeenCalledTimes(1);
 
       await getESQLAdHocDataview({
         dataViewsService,
@@ -355,7 +357,7 @@ describe('getESQLAdHocDataview', () => {
       });
 
       expect(dataViewsService.clearInstanceCache).toHaveBeenCalled();
-      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.fetch).toHaveBeenCalledTimes(1);
     });
   });
 });

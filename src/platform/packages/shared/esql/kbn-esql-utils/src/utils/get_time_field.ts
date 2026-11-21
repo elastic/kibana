@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { HttpStart } from '@kbn/core/public';
-import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
+import { TIMEFIELD_ROUTE, TIMEFIELD_GET_MAX_QUERY_LENGTH } from '@kbn/esql-types';
 import { LRUCache } from 'lru-cache';
 import { parseTimeFieldFromESQLQuery } from './query_parsing_helpers';
 import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
@@ -18,6 +18,17 @@ import { getProjectRoutingFromEsqlQuery } from './set_instructions_helpers';
 // if multiple callers request the same query and routing before the first resolves,
 // they all await the same promise instead of each firing a separate HTTP request.
 const timeFieldCache = new LRUCache<string, Promise<string | undefined>>({ max: 100 });
+
+// TIMEFIELD_ROUTE's GET variant is HTTP-cacheable (stale-while-revalidate), unlike
+// POST, but can only safely carry a short query string. Measure the actual encoded
+// length rather than assuming queries are short - they can be up to 1MB.
+function fitsInCacheableGetRequest(query: string, projectRouting: string | undefined): boolean {
+  const params = new URLSearchParams({ query });
+  if (projectRouting) {
+    params.set('projectRouting', projectRouting);
+  }
+  return params.toString().length <= TIMEFIELD_GET_MAX_QUERY_LENGTH;
+}
 
 /**
  * Resolves the time field for an ES|QL query by calling the server-side timefield API.
@@ -57,8 +68,10 @@ export async function getESQLTimeField({
   if (!http) {
     return undefined;
   }
-  const pendingRequest = http
-    .post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query, projectRouting }) })
+  const request = fitsInCacheableGetRequest(query, projectRouting)
+    ? http.fetch(TIMEFIELD_ROUTE, { query: { query, projectRouting } })
+    : http.post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query, projectRouting }) });
+  const pendingRequest = request
     .then((response) => (response as { timeField?: string } | undefined)?.timeField)
     .catch((error) => {
       // eslint-disable-next-line no-console
