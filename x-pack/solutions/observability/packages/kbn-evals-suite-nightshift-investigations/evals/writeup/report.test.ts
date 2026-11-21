@@ -10,6 +10,7 @@ import { judgeAgreement, pearson } from './judge_agreement';
 import {
   formatReport,
   judgeCoverage,
+  pairedReplies,
   ratchetCandidates,
   toWriteupRows,
   type WriteupResults,
@@ -217,5 +218,28 @@ describe('judgeAgreement', () => {
 describe('pearson', () => {
   it('is 1 for a perfect linear relation', () => {
     expect(pearson([1, 2, 3], [2, 4, 6])).toBeCloseTo(1);
+  });
+});
+
+describe('pairedReplies', () => {
+  it('counts only rounds with both replies, when each prompt fails on different rounds', () => {
+    // Each prompt replies to 8 of 10 rounds, but only 6 rounds have both: below an 80% bar.
+    const outputs = Array.from({ length: 10 }, (_, i) => ({
+      case_id: `case-${i}`,
+      reply: i < 2 ? undefined : `reply ${i}`,
+      baseline: {
+        reply: i === 2 || i === 3 ? undefined : `baseline ${i}`,
+        error: i === 2 ? 'Model call failed' : undefined,
+        extra_calls: [],
+        prompt_hash: 'base',
+      },
+    }));
+    const paired = pairedReplies(outputs);
+    expect(paired).toMatchObject({ total: 10, compared: 6 });
+    expect(paired.compared / paired.total).toBeLessThan(0.8);
+    expect(paired.baselineMissing).toEqual([
+      { caseId: 'case-2', error: 'Model call failed' },
+      { caseId: 'case-3', error: 'no baseline reply' },
+    ]);
   });
 });

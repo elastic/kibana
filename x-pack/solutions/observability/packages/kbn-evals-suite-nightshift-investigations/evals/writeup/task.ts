@@ -33,6 +33,8 @@ export const INVESTIGATOR_PROMPT_PATH =
   'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions/investigator.md.text';
 const INSTRUCTIONS_DIR =
   'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions';
+/** The reply rules, which the prompt pulls in at `{{response_style_section}}`. */
+export const RESPONSE_STYLE_PATH = `${INSTRUCTIONS_DIR}/response_style.md.text`;
 /** The knowledge section, by the name a prompt's placeholder uses: `wiki` now, `cortex` before #303544. */
 export const knowledgeSectionPath = (name: 'wiki' | 'cortex') =>
   `${INSTRUCTIONS_DIR}/knowledge_${name}.text`;
@@ -56,7 +58,7 @@ export const fillKnowledge = (prompt: string, section: string): string =>
 export const WRITEUP_DATA_DIR = join(REPO_ROOT, 'data', 'nightshift_writeup');
 
 export interface PromptArm {
-  /** `current`, a git ref, or a file name. */
+  /** `current`, a file name, or a git ref with the commit it resolved to (`origin/main@1a2b3c4d5e`). */
   label: string;
   prompt: string;
   hash: string;
@@ -66,9 +68,50 @@ export const hashText = (text: string): string =>
   createHash('sha256').update(text).digest('hex').slice(0, 12);
 
 /**
+ * The commit a prompt spec names. `merge-base` is where this checkout branched from `main`, the
+ * baseline a branch's change should be compared against. In a fork checkout `origin` is the fork,
+ * whose `main` can lag behind, so `upstream/main` is used when it exists. A commit this checkout
+ * doesn't have (a shallow CI clone) is fetched from `origin` first, shallow only if the clone is.
+ */
+export const resolvePromptCommit = (spec: string, repoRoot = REPO_ROOT): string => {
+  const git = (...args: string[]) =>
+    execFileSync('git', args, { cwd: repoRoot, encoding: 'utf8', stdio: 'pipe' }).trim();
+  const hasRef = (ref: string) => {
+    try {
+      git('rev-parse', '--verify', '--quiet', `${ref}^{commit}`);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  if (spec === 'merge-base') {
+    return git('merge-base', 'HEAD', hasRef('upstream/main') ? 'upstream/main' : 'origin/main');
+  }
+  if (!hasRef(spec) && /^[0-9a-f]{40}$/.test(spec)) {
+    // Only a clone that is already shallow fetches shallow; a full clone must not become one.
+    const shallow = git('rev-parse', '--is-shallow-repository') === 'true';
+    git('fetch', '--quiet', '--no-tags', ...(shallow ? ['--depth=1'] : []), 'origin', spec);
+  }
+  return git('rev-parse', '--verify', `${spec}^{commit}`);
+};
+
+/**
+ * The prompt the writeup eval compares against. `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` when set (empty
+ * turns the comparison off). Otherwise a PR build compares against the commit the PR branched from,
+ * which CI exports as `PR_MERGE_BASE`, so a PR run scores the change head to head in one run.
+ */
+export const baselinePromptSpec = (
+  env: Record<string, string | undefined> = process.env
+): string | undefined => {
+  const explicit = env.NIGHTSHIFT_WRITEUP_BASELINE_PROMPT;
+  if (explicit !== undefined) return explicit.trim() || undefined;
+  return env.GITHUB_PR_NUMBER && env.PR_MERGE_BASE ? env.PR_MERGE_BASE.trim() : undefined;
+};
+
+/**
  * The investigator prompt to replay with. Without a spec it is the working tree's, so the eval
- * measures the checkout it runs from. A spec is a prompt file, or else a git ref whose prompt is
- * read with `git show`.
+ * measures the checkout it runs from. A spec is a prompt file, or else a git ref (or `merge-base`)
+ * whose prompt is read with `git show` at the commit it resolves to.
  */
 export const loadPromptArm = (spec?: string, repoRoot = REPO_ROOT): PromptArm => {
   const fromTree = (path: string) => readFileSync(join(repoRoot, path), 'utf8');
@@ -76,17 +119,25 @@ export const loadPromptArm = (spec?: string, repoRoot = REPO_ROOT): PromptArm =>
     execFileSync('git', ['show', `${ref}:${path}`], { cwd: repoRoot, encoding: 'utf8' });
   let label = 'current';
   let prompt: string;
-  // The Cortex section comes from the same place as the prompt; a prompt file uses the checkout's.
+  // The sections come from the same place as the prompt; a prompt file uses the checkout's.
   let section = (name: 'wiki' | 'cortex') => fromTree(knowledgeSectionPath(name));
+  let responseStyle = () => fromTree(RESPONSE_STYLE_PATH);
   if (!spec) {
     prompt = fromTree(INVESTIGATOR_PROMPT_PATH);
   } else if (existsSync(resolve(spec))) {
     label = spec.split('/').at(-1)!;
     prompt = readFileSync(resolve(spec), 'utf8');
   } else {
-    label = spec;
-    prompt = fromRef(spec, INVESTIGATOR_PROMPT_PATH);
-    section = (name) => fromRef(spec, knowledgeSectionPath(name));
+    // A ref like `origin/main` moves, so read the prompt at the commit it names now and say which.
+    const commit = resolvePromptCommit(spec, repoRoot);
+    label = `${spec}@${commit.slice(0, 10)}`;
+    prompt = fromRef(commit, INVESTIGATOR_PROMPT_PATH);
+    section = (name) => fromRef(commit, knowledgeSectionPath(name));
+    responseStyle = () => fromRef(commit, RESPONSE_STYLE_PATH);
+  }
+  // A prompt from before the reply rules had their own file has them inline and no placeholder.
+  if (prompt.includes('{{response_style_section}}')) {
+    prompt = prompt.replace('{{response_style_section}}', responseStyle().trimEnd());
   }
   const knowledge = prompt.match(/\{\{knowledge_(wiki|cortex)_section\}\}/)?.[1] as
     | 'wiki'

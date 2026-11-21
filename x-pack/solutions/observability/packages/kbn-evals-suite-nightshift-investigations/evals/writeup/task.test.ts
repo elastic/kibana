@@ -6,9 +6,10 @@
  */
 
 import { randomUUID } from 'crypto';
-import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { execFileSync } from 'child_process';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
-import { join } from 'path';
+import { dirname, join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { MessageRole } from '@kbn/inference-common';
 import { buildReplay } from './replay';
@@ -18,6 +19,9 @@ import {
   createWriteupTask,
   fillKnowledge,
   loadPromptArm,
+  RESPONSE_STYLE_PATH,
+  baselinePromptSpec,
+  resolvePromptCommit,
   replayReply,
 } from './task';
 import type { WriteupExample } from './types';
@@ -253,5 +257,126 @@ describe('loadPromptArm', () => {
     expect(() => loadPromptArm(undefined, root)).toThrow(
       INVESTIGATOR_PROMPT_PATH.split('/').at(-1)
     );
+  });
+
+  it('reads a git ref at the commit it names now, and says which', () => {
+    const root = mkdtempSync(join(tmpdir(), 'writeup-git-'));
+    const git = (...args: string[]) =>
+      execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+        cwd: root,
+        encoding: 'utf8',
+      }).trim();
+    const commitPrompt = (text: string) => {
+      mkdirSync(dirname(join(root, INVESTIGATOR_PROMPT_PATH)), { recursive: true });
+      writeFileSync(join(root, INVESTIGATOR_PROMPT_PATH), text);
+      git('add', '.');
+      git('commit', '-q', '-m', text);
+      return git('rev-parse', 'HEAD');
+    };
+    git('init', '-q');
+    const base = commitPrompt('main prompt');
+    git('update-ref', 'refs/remotes/origin/main', base);
+    const head = commitPrompt('branch prompt');
+
+    expect(loadPromptArm('HEAD~1', root)).toMatchObject({
+      label: `HEAD~1@${base.slice(0, 10)}`,
+      prompt: 'main prompt',
+    });
+    expect(resolvePromptCommit('merge-base', root)).toBe(base);
+    expect(loadPromptArm('merge-base', root).prompt).toBe('main prompt');
+    expect(loadPromptArm('HEAD', root).label).toBe(`HEAD@${head.slice(0, 10)}`);
+    expect(() => resolvePromptCommit('no-such-ref', root)).toThrow();
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it('prefers upstream/main for merge-base, so a stale fork main adds no prompt change', () => {
+    const root = mkdtempSync(join(tmpdir(), 'writeup-upstream-'));
+    const git = (...args: string[]) =>
+      execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+        cwd: root,
+        encoding: 'utf8',
+      }).trim();
+    const commitPrompt = (text: string) => {
+      mkdirSync(dirname(join(root, INVESTIGATOR_PROMPT_PATH)), { recursive: true });
+      writeFileSync(join(root, INVESTIGATOR_PROMPT_PATH), text);
+      git('add', '.');
+      git('commit', '-q', '-m', text);
+      return git('rev-parse', 'HEAD');
+    };
+    git('init', '-q');
+    const forkMain = commitPrompt('old main prompt');
+    const upstreamMain = commitPrompt("someone else's prompt change");
+    git('update-ref', 'refs/remotes/origin/main', forkMain);
+    commitPrompt('branch prompt');
+
+    expect(resolvePromptCommit('merge-base', root)).toBe(forkMain);
+    git('update-ref', 'refs/remotes/upstream/main', upstreamMain);
+    expect(resolvePromptCommit('merge-base', root)).toBe(upstreamMain);
+    expect(loadPromptArm('merge-base', root).prompt).toBe("someone else's prompt change");
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it('fetches a baseline commit the clone lacks without making a full clone shallow', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'writeup-fetch-'));
+    const origin = join(tmp, 'origin');
+    const clone = join(tmp, 'clone');
+    const gitIn = (cwd: string, ...args: string[]) =>
+      execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+        cwd,
+        encoding: 'utf8',
+      }).trim();
+    mkdirSync(origin);
+    // resolvePromptCommit fetches 40-character ids, so pin SHA-1 whatever init.defaultObjectFormat is.
+    gitIn(origin, 'init', '-q', '--object-format=sha1');
+    gitIn(origin, 'config', 'uploadpack.allowAnySHA1InWant', 'true');
+    gitIn(origin, 'commit', '-q', '--allow-empty', '-m', 'first');
+    gitIn(tmp, 'clone', '-q', `file://${origin}`, clone);
+    // A commit the clone never saw, on no branch, like a PR's merge base after main moved on.
+    gitIn(origin, 'commit', '-q', '--allow-empty', '-m', 'second');
+    const missing = gitIn(origin, 'rev-parse', 'HEAD');
+    gitIn(origin, 'reset', '-q', '--hard', 'HEAD~1');
+
+    expect(resolvePromptCommit(missing, clone)).toBe(missing);
+    expect(gitIn(clone, 'rev-parse', '--is-shallow-repository')).toBe('false');
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('compares a PR build against its merge base unless a baseline is set', () => {
+    const pr = { GITHUB_PR_NUMBER: '306343', PR_MERGE_BASE: 'abc123' };
+    expect(baselinePromptSpec(pr)).toBe('abc123');
+    expect(baselinePromptSpec({ PR_MERGE_BASE: 'abc123' })).toBeUndefined();
+    expect(baselinePromptSpec({})).toBeUndefined();
+    expect(baselinePromptSpec({ ...pr, NIGHTSHIFT_WRITEUP_BASELINE_PROMPT: 'origin/main' })).toBe(
+      'origin/main'
+    );
+    expect(baselinePromptSpec({ ...pr, NIGHTSHIFT_WRITEUP_BASELINE_PROMPT: ' ' })).toBeUndefined();
+  });
+
+  it('fills the reply rules from the same place as the prompt', () => {
+    const root = mkdtempSync(join(tmpdir(), 'writeup-style-'));
+    const git = (...args: string[]) =>
+      execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+        cwd: root,
+        encoding: 'utf8',
+      }).trim();
+    const write = (path: string, text: string) => {
+      mkdirSync(dirname(join(root, path)), { recursive: true });
+      writeFileSync(join(root, path), text);
+    };
+    git('init', '-q');
+    // Before the split: the rules are inline and there's no placeholder.
+    write(INVESTIGATOR_PROMPT_PATH, 'Method.\nInline style.\n');
+    git('add', '.');
+    git('commit', '-q', '-m', 'inline');
+    write(INVESTIGATOR_PROMPT_PATH, 'Method.\n{{response_style_section}}\n');
+    write(RESPONSE_STYLE_PATH, 'Committed style.\n');
+    git('add', '.');
+    git('commit', '-q', '-m', 'split');
+    write(RESPONSE_STYLE_PATH, 'Edited style.\n');
+
+    expect(loadPromptArm(undefined, root).prompt).toBe('Method.\nEdited style.\n');
+    expect(loadPromptArm('HEAD', root).prompt).toBe('Method.\nCommitted style.\n');
+    expect(loadPromptArm('HEAD~1', root).prompt).toBe('Method.\nInline style.\n');
+    rmSync(root, { recursive: true, force: true });
   });
 });

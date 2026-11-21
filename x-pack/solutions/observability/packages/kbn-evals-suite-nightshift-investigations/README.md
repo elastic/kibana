@@ -601,21 +601,44 @@ diluted.
 
 ## Writeup
 
-`NIGHTSHIFT_DATASETS=writeup` rewrites the agent's final reply from a recorded investigation under
+The `nightshift-investigations-writeup` suite rewrites the agent's final reply from a recorded investigation under
 a given prompt, and scores how it's written up. No investigation runs: for each recorded round it
 rebuilds what the model saw just before it replied, and asks it to write that reply again under the
 investigator prompt in your checkout (or another one, below). A run takes minutes and changes only with the prompt, the model and the judge, so it can
 show a prompt change's before and after. How well the agent investigates is the end-to-end evals'
 job (trace-only and ORCA above).
 
-It is opt-in: unset and `all` never select it. It needs model connectors but no sandbox or
-telemetry, so it runs on a plain Scout server:
+It has its own suite and Playwright config (`writeup.playwright.config.ts`), so the
+`nightshift-investigations` suite never runs it. `NIGHTSHIFT_DATASET_NAME` picks the data: a stored
+dataset's name, or a conversations file (a `.json` path). Unset, it runs the pinned ORCA release. It
+needs model connectors but no sandbox or telemetry, so it runs on a plain Scout server:
 
 ```bash
-NIGHTSHIFT_DATASETS=writeup node scripts/evals start \
-  --suite nightshift-investigations --profile dev-vault --scout-arch stateful \
-  --model eis-anthropic-claude-5-sonnet --judge eis-anthropic-claude-5-opus
+node scripts/evals start --suite nightshift-investigations-writeup --profile dev-vault \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
 ```
+
+The reply rules live in their own file,
+[`response_style.md.text`](../../plugins/nightshift_investigations/server/agents/investigation/instructions/response_style.md.text),
+which the investigator prompt pulls in at `{{response_style_section}}`. A PR that changes that file
+(or this eval) gets the `evals:nightshift-investigations-writeup` label from `.github/paths-labeller.yml`, and the
+label runs the `nightshift-investigations-writeup` suite: this eval alone, on Sonnet 5.5, judged by GPT 6 Sol.
+The PR run rewrites each reply twice, under the PR's prompt and under the prompt at the commit the
+PR branched from, and the report's `vs_baseline` row is the head to head between them: more wins
+than losses means the change reads better to the judge. The command above reproduces it locally
+with `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT=merge-base`.
+
+A change that only touches how the agent replies needs nothing else. A change to the method, the
+tools or the recorder can change how the agent investigates, which this eval can't see, so it
+needs the end-to-end evals too. To skip the run on a PR, add `evals:skip-nightshift-investigations-writeup`.
+
+The same suite runs on `main` every day and publishes to the golden cluster, so PR runs and
+the daily history share one suite id. It has its own Playwright config
+(`writeup.playwright.config.ts`) and runs on the plain evals server, without the Nightshift Vault
+secret or Scout hook: replay never touches the sandbox or a live target. That's the history to
+watch `main` over time. A prompt change is still measured against a baseline in the same run
+(below, and automatic on a PR), not against an old run: the head to head needs both replies in front of one judge, and an
+old run used whatever harness, judge and dataset it had then.
 
 `--model` writes the replies (Sonnet 5 wrote most production rounds) and `--judge` scores them.
 Use a judge from another family than the model, or at least a different model, so nothing grades
@@ -690,22 +713,34 @@ candidate before it replaces its golden file.
 
 ### Before and after a prompt change
 
-Run on `main` for a baseline, then on the prompt branch. To score both prompts in one run and add a
-head-to-head comparison, point `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` at a git ref or a prompt file.
+Set `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` to score a second prompt in the same run and compare the two
+head to head. Use `merge-base`, the commit the branch started from, so the only difference is the
+branch's own change; a moving ref like `origin/main` would also pick up other people's changes to
+the prompt. A git ref is read at the commit it names when the run starts, and the report labels it
+with that commit (`merge-base@1a2b3c4d5e`). A prompt file works too. On a PR build it defaults to
+the commit the PR branched from (`PR_MERGE_BASE`, which CI exports); set it empty to turn that off.
 `NIGHTSHIFT_WRITEUP_PROMPT` does the same for the prompt under test, which otherwise is the
-checkout's, so a branch's prompt can be measured without switching to it:
+checkout's, so a branch's prompt can be measured without switching to it. Without a baseline a run
+scores one prompt, and the only comparisons are the goldens and `recorded`, the reply the
+conversation actually got under an older prompt.
 
 ```bash
-NIGHTSHIFT_DATASETS=writeup NIGHTSHIFT_WRITEUP_BASELINE_PROMPT=origin/main \
-  node scripts/evals run --suite nightshift-investigations --profile dev-vault \
-  --model eis-anthropic-claude-5-sonnet --judge eis-anthropic-claude-5-opus
+NIGHTSHIFT_WRITEUP_BASELINE_PROMPT=merge-base \
+  node scripts/evals run --suite nightshift-investigations-writeup --profile dev-vault \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
 ```
 
 Replies are cached under `data/nightshift_writeup/cache/` by round, model, prompt and
-repetition, so a re-run only makes judge calls (`NIGHTSHIFT_WRITEUP_CACHE=off` regenerates). One
-repetition per round is usually enough to compare prompts, since averaging over rounds evens out a
-single reply's randomness. Use `--repetitions 2` or more before replacing a golden, which is decided
-per round, or when two prompts are only a few words apart.
+repetition, so a re-run only makes judge calls; delete that folder to regenerate. Use
+`--repetitions 2` or more before replacing a golden, which is decided per round, or when two
+prompts are only a few words apart.
+
+How big a margin means something: a PR run that didn't change the prompt compared the same prompt
+against itself ([build 2151](https://buildkite.com/elastic/kibana-evals-pr-llm-evals/builds/2151))
+and came out 41–27, from sampling and judge noise alone. On the 20-round ORCA set that's about 70
+votes, and a sign test only clears p < 0.05 from about 43–25. Treat that as a floor, not a pass
+mark: votes on the same round aren't independent, so the real noise is wider. A change that should
+matter needs a clearly bigger margin, or `--repetitions 2` and a second look, before it counts.
 
 ### Judge agreement
 
@@ -758,8 +793,8 @@ node -r @kbn/setup-node-env x-pack/solutions/observability/packages/kbn-evals-su
   --goldens-dir x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/evals/writeup/goldens/writeup_orca_v2 \
   exports/*.json
 gcloud storage cp writeup_orca_v2.json gs://nightshift-datasets/investigation-engine/writeup/orca/v2/
-NIGHTSHIFT_DATASETS=writeup NIGHTSHIFT_WRITEUP_EXAMPLES_FILE=writeup_orca_v2.json \
-  node scripts/evals start --suite nightshift-investigations --profile dev-vault \
+NIGHTSHIFT_DATASET_NAME=writeup_orca_v2.json \
+  node scripts/evals start --suite nightshift-investigations-writeup --profile dev-vault \
   --model <model-endpoint-id> --judge <model-endpoint-id>
 ```
 
@@ -774,12 +809,12 @@ node -r @kbn/setup-node-env x-pack/solutions/observability/packages/kbn-evals-su
   --dataset nightshift/writeup-c0 --rounds last exports/*.json
 
 # Run it; the executor stores it under its dataset name in the profile's evaluations cluster
-NIGHTSHIFT_DATASETS=writeup NIGHTSHIFT_WRITEUP_EXAMPLES_FILE=~/private/writeup-c0.json \
-  node scripts/evals start --suite nightshift-investigations --profile dev-vault ...
+NIGHTSHIFT_DATASET_NAME=~/private/writeup-c0.json \
+  node scripts/evals start --suite nightshift-investigations-writeup --profile dev-vault ...
 
 # Later runs read the stored dataset
-NIGHTSHIFT_DATASETS=writeup NIGHTSHIFT_DATASET_NAME=nightshift/writeup-c0 \
-  node scripts/evals run --suite nightshift-investigations --profile dev-vault ...
+NIGHTSHIFT_DATASET_NAME=nightshift/writeup-c0 \
+  node scripts/evals run --suite nightshift-investigations-writeup --profile dev-vault ...
 ```
 
 `--prototype-goldens <dir>` reads the prototype's last-round goldens, and `--goldens <file>` any
@@ -851,16 +886,13 @@ Follow [`evals/connector_probe/`](evals/connector_probe) for a quick agent call,
 
 | Variable                         | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed), which can be combined, e.g. `trace-only,wiki-optimize`. `trace-only` selects the file-driven investigations; unset or `all` runs them too, and so does a stored `NIGHTSHIFT_DATASET_NAME` when selection is unset. Without sandbox credentials, unset, `all` and `trace-only` fail before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include; neither do the ids of the [Customer-0 stored datasets](#customer-0-stored-datasets). `wiki-optimize` selects the [Wiki optimizer replay](#wiki-optimizer-replay), which unset and `all` never include and which needs no sandbox credentials. `writeup` selects the [writeup eval](#writeup), which likewise is never included by unset or `all` and needs no sandbox credentials. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. `reinforcement` selects the [reinforcement micro-eval](#reinforcement-micro-eval) and enables decision trees without turning Wiki on; it needs sandbox credentials, cannot be combined with other ids or with `NIGHTSHIFT_KNOWLEDGE`, and unset and `all` never include it. Unknown ids fail early. |
+| `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed), which can be combined, e.g. `trace-only,wiki-optimize`. `trace-only` selects the file-driven investigations; unset or `all` runs them too, and so does a stored `NIGHTSHIFT_DATASET_NAME` when selection is unset. Without sandbox credentials, unset, `all` and `trace-only` fail before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include; neither do the ids of the [Customer-0 stored datasets](#customer-0-stored-datasets). `wiki-optimize` selects the [Wiki optimizer replay](#wiki-optimizer-replay), which unset and `all` never include and which needs no sandbox credentials. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. `reinforcement` selects the [reinforcement micro-eval](#reinforcement-micro-eval) and enables decision trees without turning Wiki on; it needs sandbox credentials, cannot be combined with other ids or with `NIGHTSHIFT_KNOWLEDGE`, and unset and `all` never include it. Unknown ids fail early. |
 | `NIGHTSHIFT_KNOWLEDGE`           | Comma-separated knowledge systems (`memory`, `wiki`, `decision-trees`) to turn on and restore before the first example. Unset turns them all off. See [knowledge switches](#knowledge-switches).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `NIGHTSHIFT_PROBE_EXAMPLES_FILE` | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `NIGHTSHIFT_WIKI_REPLAY_FILE` | Replay file for `wiki-optimize`; the bundled synthetic examples when unset. Same `nightshift/` dataset-file format as the investigation examples, with the round and expectation fields in [Wiki optimizer replay](#wiki-optimizer-replay). |
 | `NIGHTSHIFT_PROBE_TIME_BUDGET_S` | Seconds a probe may take before `within_time_budget` scores 0 (default 30).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `NIGHTSHIFT_WRITEUP_EXAMPLES_FILE` | Conversations file for `writeup`, stored on the run. See [writeup](#writeup). |
 | `NIGHTSHIFT_WRITEUP_PROMPT` | Git ref or prompt file the writeup eval tests instead of the checkout's investigator prompt. |
-| `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` | Git ref or prompt file the writeup eval also rewrites replies under, and compares head to head. |
-| `NIGHTSHIFT_WRITEUP_VOTES` | Pairwise votes per order for the writeup judges (default 2). |
-| `NIGHTSHIFT_WRITEUP_CACHE` | `off` regenerates writeup replies instead of reading the cache. |
+| `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` | Git ref (`merge-base` for where the branch started) or prompt file the writeup eval also rewrites replies under, and compares head to head. Defaults to `PR_MERGE_BASE` on a PR build; empty turns it off. |
 | `NIGHTSHIFT_REINFORCEMENT_DATASET`     | When set, the micro-eval runs the first examples of this Customer-0 investigation dataset instead of replaying the committed rounds. A new tree from that path cannot declare merges. |
 | `NIGHTSHIFT_REINFORCEMENT_LIMIT`       | How many of that dataset's examples to run, from 1 to 5. Defaults to 3. Used only with `NIGHTSHIFT_REINFORCEMENT_DATASET`. |
 | `NIGHTSHIFT_REINFORCEMENT_TRACES_FILE` | JSON file of full investigation rounds. When set, the micro-eval replays those rounds instead of the committed ones. |

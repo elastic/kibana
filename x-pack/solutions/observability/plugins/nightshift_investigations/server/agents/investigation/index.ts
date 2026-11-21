@@ -27,6 +27,8 @@ import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
+// The reply rules live in their own file so a change to them runs the writeup eval on the PR.
+import responseStyleSection from './instructions/response_style.md.text';
 import { TIME_CONVERTER_TOOL_ID } from '../../tools/time_converter/tool';
 import { SLACK_READ_TOOL_ID } from '../../tools/slack_read/tool';
 import knowledgeWikiSection from './instructions/knowledge_wiki.text';
@@ -82,6 +84,7 @@ const fillContextInstructions = ({
   includeMemory: boolean;
 }): string =>
   instructions
+    .replace('{{response_style_section}}', responseStyleSection.trimEnd())
     .replace(
       '{{knowledge_wiki_section}}',
       includeWiki ? `\n${knowledgeWikiSection.trimEnd()}\n` : ''

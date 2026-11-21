@@ -185,6 +185,24 @@
       ]
     },
     {
+      "id": "nightshift-investigations-writeup",
+      "name": "Nightshift Investigations: reply writeup",
+      "slackChannel": "#nightshift-alerts",
+      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/writeup.playwright.config.ts",
+      "tags": [
+        "observability",
+        "nightshift-investigations"
+      ],
+      "ciLabels": [
+        "evals:nightshift-investigations-writeup"
+      ],
+      "defaultJudge": "eis-openai-gpt-6-sol",
+      "defaultModelGroups": [
+        "eis/anthropic-claude-5.5-sonnet"
+      ],
+      "stepTimeoutInMinutes": 60
+    },
+    {
       "id": "llm-tasks",
       "name": "LLM Tasks",
       "slackChannel": "#search-ml-ux-team",

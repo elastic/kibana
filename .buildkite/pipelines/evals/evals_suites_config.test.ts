@@ -190,4 +190,34 @@ describe('Nightshift CI coverage', () => {
     const suiteRoot = Path.dirname(Path.resolve(__dirname, '../../..', configPath));
     for (const file of files) expect(Fs.existsSync(Path.join(suiteRoot, file))).toBe(true);
   });
+
+  it('runs the writeup eval alone, with a default model, when a PR carries its label', () => {
+    const suite = suites.find(({ id }) => id === 'nightshift-investigations-writeup');
+    expect(suite?.ciLabels).toEqual(['evals:nightshift-investigations-writeup']);
+    expect(suite?.defaultModelGroups?.length).toBeGreaterThan(0);
+    // Replay needs model and judge connectors only: no Nightshift Vault secret, hook or server.
+    expect(suite?.configPath).toMatch(/\/writeup\.playwright\.config\.ts$/);
+    expect(suite).not.toHaveProperty('vaultSecret');
+    expect(suite).not.toHaveProperty('scoutHook');
+    expect(suite).not.toHaveProperty('serverConfigSet');
+    // One results identity: the daily run publishes under the same suite id the PR run compares to.
+    const daily = Fs.readFileSync(Path.resolve(__dirname, 'daily_evals.yml'), 'utf8');
+    expect(daily).toContain("EVAL_SUITE_ID: 'nightshift-investigations-writeup'");
+    // One spec, so no shards; the daily step names the same judge PR runs get from defaultJudge.
+    expect(suite).not.toHaveProperty('shards');
+    expect(suite?.defaultJudge).toBeDefined();
+    expect(daily).toContain(`EVAL_CONNECTOR_ID: '${suite?.defaultJudge}'`);
+    // The label comes from .github/paths-labeller.yml, on changes to the reply rules.
+    const repoRoot = Path.resolve(__dirname, '../../..');
+    const labeller = parseYaml(
+      Fs.readFileSync(Path.join(repoRoot, '.github/paths-labeller.yml'), 'utf8')
+    ) as Array<Record<string, string[]>>;
+    const paths = labeller.find((entry) => 'evals:nightshift-investigations-writeup' in entry)?.[
+      'evals:nightshift-investigations-writeup'
+    ];
+    const responseStyle =
+      'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions/response_style.md.text';
+    expect(paths).toContain(responseStyle);
+    expect(Fs.existsSync(Path.join(repoRoot, responseStyle))).toBe(true);
+  });
 });

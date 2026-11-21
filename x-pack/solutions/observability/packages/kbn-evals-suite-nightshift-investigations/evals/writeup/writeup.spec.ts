@@ -10,11 +10,28 @@ import { join } from 'path';
 import { expect } from '@playwright/test';
 import { selectEvaluators, tags } from '@kbn/evals';
 import { evaluate } from '../../src/evaluate';
-import { ORCA_WRITEUP_RELEASE, guardValidatedExamples, loadWriteupDataset } from './datasets';
+import {
+  ORCA_WRITEUP_RELEASE,
+  guardValidatedExamples,
+  isWriteupDatasetFile,
+  loadWriteupDataset,
+} from './datasets';
 import { goldensByCase, goldensDirFor, readGoldens } from './goldens';
 import { createWriteupEvaluators } from './evaluators';
-import { formatReport, judgeCoverage, toWriteupRows, type WriteupResults } from './report';
-import { WRITEUP_DATA_DIR, createGenerationCache, createWriteupTask, loadPromptArm } from './task';
+import {
+  formatReport,
+  judgeCoverage,
+  pairedReplies,
+  toWriteupRows,
+  type WriteupResults,
+} from './report';
+import {
+  WRITEUP_DATA_DIR,
+  baselinePromptSpec,
+  createGenerationCache,
+  createWriteupTask,
+  loadPromptArm,
+} from './task';
 import type { WriteupTaskOutput } from './types';
 
 /**
@@ -30,14 +47,8 @@ const MIN_REPLY_RATE = 0.8;
 /** Judge calls that came back with a score, of those with something to judge. */
 const MIN_JUDGED_RATE = 0.8;
 
-const parseVotes = (value = process.env.NIGHTSHIFT_WRITEUP_VOTES): number => {
-  if (!value) return 2;
-  const votes = Number(value);
-  if (!Number.isInteger(votes) || votes < 1) {
-    throw new Error(`NIGHTSHIFT_WRITEUP_VOTES must be a positive integer, got "${value}"`);
-  }
-  return votes;
-};
+/** Judge votes per pairwise comparison, each asked in both orders. */
+const VOTES = 2;
 
 evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () => {
   evaluate(
@@ -57,10 +68,10 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
       const goldens = goldensByCase(readGoldens(goldensDirFor(dataset.name)), dataset.examples, {
         everyRecordedRound: dataset.name === ORCA_WRITEUP_RELEASE.name,
       });
-      const votes = parseVotes();
+      const votes = VOTES;
       // The checkout's prompt unless NIGHTSHIFT_WRITEUP_PROMPT names another (a git ref or a file).
       const arm = loadPromptArm(process.env.NIGHTSHIFT_WRITEUP_PROMPT);
-      const baselineSpec = process.env.NIGHTSHIFT_WRITEUP_BASELINE_PROMPT;
+      const baselineSpec = baselinePromptSpec();
       const baseline = baselineSpec ? loadPromptArm(baselineSpec) : undefined;
       log.info(
         `Rewriting the final reply of ${dataset.examples.length} rounds of ${dataset.name} with prompt ${arm.label} (${arm.hash})` +
@@ -80,8 +91,8 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
           goldens,
         })
       );
-      const cache =
-        process.env.NIGHTSHIFT_WRITEUP_CACHE === 'off' ? undefined : createGenerationCache();
+      // Keyed by round, model, prompt and repetition; delete the cache folder to regenerate.
+      const cache = createGenerationCache();
       // The executor fetches a stored dataset again; check what it runs against what was validated.
       const guarded = guardValidatedExamples(
         dataset.examples,
@@ -92,7 +103,9 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
           name: 'Nightshift writeup',
           datasets: [dataset],
           // A stored dataset runs as stored; only a conversations file is upserted.
-          trustUpstreamDataset: !process.env.NIGHTSHIFT_WRITEUP_EXAMPLES_FILE,
+          trustUpstreamDataset: !isWriteupDatasetFile(
+            process.env.NIGHTSHIFT_DATASET_NAME?.trim() ?? ''
+          ),
           concurrency,
           metadata: {
             concurrency,
@@ -129,17 +142,30 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
       writeFileSync(join(outDir, 'report.md'), report);
       log.info(`\n${summary}\n\nReport: ${join(outDir, 'report.md')}`);
 
-      // Scores grade the prompt; replies that never came back mean the run itself is broken.
-      const failed = runs
-        .map(({ output }) => output as WriteupTaskOutput)
-        .filter(({ reply }) => !reply);
+      // Scores grade the prompt; replies that never came back mean the run itself is broken. Both
+      // prompts' misses are logged before either check, so a failing run shows all of them.
+      const outputs = runs.map(({ output }) => output as WriteupTaskOutput);
+      const failed = outputs.filter(({ reply }) => !reply);
       for (const { case_id: caseId, error } of failed) {
         log.warning(`No reply for ${caseId}: ${error}`);
+      }
+      const paired = baseline ? pairedReplies(outputs) : undefined;
+      for (const { caseId, error } of paired?.baselineMissing ?? []) {
+        log.warning(`No baseline reply for ${caseId}: ${error}`);
       }
       expect(
         (runs.length - failed.length) / runs.length,
         `Too few replies were generated (${failed.length} of ${runs.length} failed)`
       ).toBeGreaterThanOrEqual(MIN_REPLY_RATE);
+
+      // With a baseline, the head to head is the point of the run (a PR's before and after), so a
+      // baseline that mostly failed to reply leaves nothing to compare and fails the run too.
+      if (paired) {
+        expect(
+          paired.compared / paired.total,
+          `Too few rounds have both replies to compare (${paired.compared} of ${paired.total})`
+        ).toBeGreaterThanOrEqual(MIN_REPLY_RATE);
+      }
 
       // A judge outage turns every judge score into null; that's a broken run, not a passing one.
       const judged = judgeCoverage(experiment.evaluationRuns);
