@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { z, lazySchema } from '@kbn/zod/v4';
+import { isRequestAbortedError } from '@kbn/agent-builder-common';
 import { resolveNightshiftModelForRequest, type InferenceDocument } from '@kbn/nightshift-ai';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
@@ -305,11 +306,17 @@ const identifyInferredFeaturesRoute = createServerRoute({
 
       return { ...result, connectorId };
     } catch (error) {
-      routeLogger.error(
-        `Inferred feature identification failed for source [${sourceId}]: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+      const canceled = isRequestAbortedError(error);
+
+      if (canceled) {
+        routeLogger.debug(`Inferred feature identification canceled for source [${sourceId}]`);
+      } else {
+        routeLogger.error(
+          `Inferred feature identification failed for source [${sourceId}]: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
 
       trackTelemetryBestEffort({
         logger: routeLogger,
@@ -330,7 +337,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
                 has_filtered_documents: hasFilteredDocuments,
               },
               Date.now() - now,
-              { state: 'failure' }
+              { state: canceled ? 'canceled' : 'failure' }
             ),
             request
           ),

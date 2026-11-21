@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createRequestAbortedError } from '@kbn/agent-builder-common';
 import { NightshiftModelNotFoundError } from '@kbn/significant-events-schema';
 import {
   EVENT_CHAIN_DEPTH_HEADER,
@@ -47,7 +48,9 @@ jest.mock('../../../../lib/significant_events/features', () => ({
   MAX_INFERENCE_DOCUMENT_BYTES: 32 * 1024,
   MAX_INFERENCE_DOCUMENT_FIELDS: 100,
   MAX_INFERENCE_FIELD_NAME_LENGTH: 1024,
-  buildTelemetry: jest.fn(),
+  buildTelemetry: jest.requireActual(
+    '../../../../lib/significant_events/features/identify_inferred_features'
+  ).buildTelemetry,
   prepareInferredSampling: jest.fn(),
   identifyInferredFeatures: (...args: unknown[]) => mockIdentifyInferredFeatures(...args),
   identifyComputedFeatures: (...args: unknown[]) => mockIdentifyComputedFeatures(...args),
@@ -107,6 +110,7 @@ const makeRequest = () => ({
 });
 
 const makeRouteLogger = () => ({
+  debug: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
 });
@@ -538,6 +542,43 @@ describe('inferred feature identification route', () => {
         parent_workflow_execution_id: 'onboarding-run-1',
       }),
       expect.anything()
+    );
+  });
+
+  it('reports an Agent Builder abort as a cancellation and rethrows it', async () => {
+    const { handlerParams, request, routeLogger, telemetry, ensureEnabled } =
+      makeInferredHandlerParams();
+    const error = createRequestAbortedError('Converse request was aborted');
+    mockIdentifyInferredFeatures.mockRejectedValueOnce(error);
+
+    await expect(inferredRoute.handler(handlerParams)).rejects.toBe(error);
+
+    expect(routeLogger.debug).toHaveBeenCalledWith(
+      'Inferred feature identification canceled for source [logs.test]'
+    );
+    expect(routeLogger.error).not.toHaveBeenCalled();
+    expect(telemetry.trackFeaturesIdentified).toHaveBeenCalledTimes(1);
+    expect(telemetry.trackFeaturesIdentified).toHaveBeenCalledWith(
+      expect.objectContaining({ state: 'canceled', source_id: 'logs.test', run_id: 'run-1' }),
+      request
+    );
+    expect(ensureEnabled).not.toHaveBeenCalled();
+  });
+
+  it('reports a plain error with the abort message as a failure', async () => {
+    const { handlerParams, request, routeLogger, telemetry } = makeInferredHandlerParams();
+    const error = new Error('Converse request was aborted');
+    mockIdentifyInferredFeatures.mockRejectedValueOnce(error);
+
+    await expect(inferredRoute.handler(handlerParams)).rejects.toBe(error);
+
+    expect(routeLogger.error).toHaveBeenCalledWith(
+      'Inferred feature identification failed for source [logs.test]: Converse request was aborted'
+    );
+    expect(telemetry.trackFeaturesIdentified).toHaveBeenCalledTimes(1);
+    expect(telemetry.trackFeaturesIdentified).toHaveBeenCalledWith(
+      expect.objectContaining({ state: 'failure', source_id: 'logs.test', run_id: 'run-1' }),
+      request
     );
   });
 
