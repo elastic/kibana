@@ -114,6 +114,29 @@ describe('ConvertToEsqlModal', () => {
     });
   });
 
+  describe('annotation limit warning', () => {
+    const queryAnnotationLayer: ConvertibleLayer = {
+      ...mockLayers[2],
+      isConvertibleToEsql: true,
+    };
+
+    it('warns about the converted annotation query limit when query annotations are converted', () => {
+      renderComponent({ layers: [mockLayers[0], queryAnnotationLayer] });
+
+      expect(screen.getByTestId('lnsConvertToEsqlAnnotationLimitWarning')).toHaveTextContent(
+        /at most the 1000 most recent events/
+      );
+    });
+
+    it('does not warn when no annotation layer is converted', () => {
+      renderComponent();
+
+      expect(
+        screen.queryByTestId('lnsConvertToEsqlAnnotationLimitWarning')
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe('multiple layers', () => {
     it('renders table with all layers', () => {
       renderComponent();

@@ -37,16 +37,17 @@ import { htmlIdGenerator } from '@elastic/eui';
 import type {
   AvailableAnnotationIcon,
   EventAnnotationConfig,
+  EsqlEventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import { getResolvedAnnotationColor, isAutoAnnotationColor } from '@kbn/event-annotation-common';
-import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 import {
-  defaultAnnotationLabel,
-  defaultRangeAnnotationLabel,
-  toLineAnnotationColor,
-} from './helpers';
+  getResolvedAnnotationColor,
+  isAutoAnnotationColor,
+  isEsqlAnnotationConfig,
+} from '@kbn/event-annotation-common';
+import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
+import { defaultAnnotationLabel, getRangeToPointOverrides } from './helpers';
 import { annotationsIconSet } from './icon_set';
 import { sanitizeProperties } from './helpers';
 import { TooltipSection } from './tooltip_annotation_panel';
@@ -63,10 +64,15 @@ export interface Props {
   queryInputServices: QueryInputServices;
   appName: string;
   /**
-   * Hides all query-based (data-view-dependent) controls and restricts the editor
-   * to manual annotations. Used for ES|QL charts where no data view is available.
+   * Hides data-view-dependent controls. ES|QL controls can be supplied separately.
    */
   hideQueryBasedControls?: boolean;
+  esql?: {
+    renderControls: (
+      annotation: EsqlEventAnnotationConfig,
+      onChange: (annotation: EsqlEventAnnotationConfig) => void
+    ) => React.ReactNode;
+  };
 }
 
 export const idPrefix = htmlIdGenerator()();
@@ -80,12 +86,16 @@ const AnnotationEditorControls = ({
   queryInputServices,
   appName,
   hideQueryBasedControls,
+  esql,
 }: Props) => {
   const { hasFieldData } = useExistingFieldsReader();
   const { colorMode } = useEuiTheme();
 
   const isQueryBased = isQueryAnnotationConfig(currentAnnotation);
-  const isRange = isRangeAnnotationConfig(currentAnnotation);
+  const isEsqlBased = isEsqlAnnotationConfig(currentAnnotation);
+  const isRange =
+    isRangeAnnotationConfig(currentAnnotation) ||
+    (isEsqlBased && 'endTimeColumn' in currentAnnotation);
   const isDarkMode = colorMode === 'DARK';
   const defaultColor = getResolvedAnnotationColor({
     color: currentAnnotation.color,
@@ -124,7 +134,7 @@ const AnnotationEditorControls = ({
           defaultMessage: 'Placement',
         })}
       >
-        {!hideQueryBasedControls && (
+        {(!hideQueryBasedControls || esql) && (
           <EuiFormRow
             label={i18n.translate(
               'eventAnnotationComponents.xyChart.annotationDate.placementType',
@@ -153,13 +163,24 @@ const AnnotationEditorControls = ({
                   }),
                   'data-test-subj': 'lnsXY_annotation_manual',
                 },
-                {
-                  id: `lens_xyChart_annotation_query`,
-                  label: i18n.translate('eventAnnotationComponents.xyChart.annotation.query', {
-                    defaultMessage: 'Custom query',
-                  }),
-                  'data-test-subj': 'lnsXY_annotation_query',
-                },
+                esql
+                  ? {
+                      id: 'lens_xyChart_annotation_esql',
+                      label: i18n.translate(
+                        'eventAnnotationComponents.esqlAnnotation.placementLabel',
+                        {
+                          defaultMessage: 'ES|QL',
+                        }
+                      ),
+                      'data-test-subj': 'lnsXY_annotation_esql',
+                    }
+                  : {
+                      id: `lens_xyChart_annotation_query`,
+                      label: i18n.translate('eventAnnotationComponents.xyChart.annotation.query', {
+                        defaultMessage: 'Custom query',
+                      }),
+                      'data-test-subj': 'lnsXY_annotation_query',
+                    },
               ]}
               idSelected={`lens_xyChart_annotation_${currentAnnotation?.type}`}
               onChange={(id) => {
@@ -170,16 +191,22 @@ const AnnotationEditorControls = ({
                 if (currentAnnotation?.type === typeFromId) {
                   return;
                 }
+                if (typeFromId === 'esql' && esql) {
+                  return onAnnotationChange(
+                    sanitizeProperties({
+                      ...currentAnnotation,
+                      type: 'esql',
+                      query: { esql: '' },
+                      timeColumn: '',
+                      key: { type: 'point_in_time' },
+                      ...(isRange ? getRangeToPointOverrides(currentAnnotation) : {}),
+                    })
+                  );
+                }
                 if (typeFromId === 'query') {
                   // If coming from a range type, it requires some additional resets
                   const additionalRangeResets = isRangeAnnotationConfig(currentAnnotation)
-                    ? {
-                        label:
-                          currentAnnotation.label === defaultRangeAnnotationLabel
-                            ? defaultAnnotationLabel
-                            : currentAnnotation.label,
-                        color: toLineAnnotationColor(currentAnnotation.color),
-                      }
+                    ? getRangeToPointOverrides(currentAnnotation)
                     : {};
                   return update({
                     type: typeFromId,
@@ -196,7 +223,7 @@ const AnnotationEditorControls = ({
                 }
                 // From query to manual annotation
                 return update<PointInTimeEventAnnotationConfig>({
-                  type: typeFromId,
+                  type: 'manual',
                   key: { type: 'point_in_time', timestamp: moment().toISOString() },
                 });
               }}
@@ -204,7 +231,11 @@ const AnnotationEditorControls = ({
             />
           </EuiFormRow>
         )}
-        {isQueryBased ? (
+        {isEsqlBased ? (
+          esql?.renderControls(currentAnnotation, (annotation) =>
+            onAnnotationChange(sanitizeProperties(annotation))
+          )
+        ) : isQueryBased ? (
           dataView ? (
             <ConfigPanelQueryAnnotation
               annotation={currentAnnotation}
@@ -245,10 +276,28 @@ const AnnotationEditorControls = ({
               customIconSet={annotationsIconSet}
             />
             <TextDecorationSetting
+              // ES|QL text bindings are edited in the placement section; remount to reflect them.
+              key={
+                isEsqlBased
+                  ? `${currentAnnotation.textVisibility}-${currentAnnotation.textColumn}`
+                  : undefined
+              }
               idPrefix={idPrefix}
-              setConfig={update}
-              currentConfig={currentAnnotation}
-              isQueryBased={isQueryBased}
+              setConfig={
+                isEsqlBased
+                  ? ({ textVisibility, textField }) =>
+                      update<EsqlEventAnnotationConfig>({ textVisibility, textColumn: textField })
+                  : update
+              }
+              currentConfig={
+                isEsqlBased
+                  ? {
+                      textVisibility: currentAnnotation.textVisibility,
+                      textField: currentAnnotation.textColumn,
+                    }
+                  : currentAnnotation
+              }
+              isQueryBased={isQueryBased || isEsqlBased}
             >
               {(textDecorationSelected) => {
                 if (textDecorationSelected !== 'field' || !dataView) {

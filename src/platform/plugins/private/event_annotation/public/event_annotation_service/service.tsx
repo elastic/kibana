@@ -21,6 +21,7 @@ import {
   getPersistedAnnotationColor,
   isRangeAnnotationConfig,
   isQueryAnnotationConfig,
+  isEsqlAnnotationConfig,
   defaultAnnotationLabel,
   type EventAnnotationGroupContent,
   type EventAnnotationConfig,
@@ -334,7 +335,9 @@ export function getEventAnnotationService(
                 type: 'function',
                 function: 'event_annotation_group',
                 arguments: {
-                  dataView: [indexPatternExpression],
+                  dataView: annotations.some(isQueryAnnotationConfig)
+                    ? [indexPatternExpression]
+                    : [],
                   annotations: [...annotationExpressions],
                   ignoreGlobalFilters: [Boolean(ignoreGlobalFilters)],
                 },
@@ -372,6 +375,39 @@ const annotationsToExpression = (annotations: EventAnnotationConfig[]) => {
   const expressions = [];
 
   for (const annotation of manualBasedAnnotations) {
+    if (isEsqlAnnotationConfig(annotation)) {
+      const isRange = 'endTimeColumn' in annotation;
+      expressions.push({
+        type: 'expression' as const,
+        chain: [
+          {
+            type: 'function' as const,
+            function: 'esql_event_annotation',
+            arguments: {
+              id: [annotation.id],
+              query: [annotation.query.esql],
+              timeField: annotation.timeField ? [annotation.timeField] : [],
+              timeColumn: [annotation.timeColumn],
+              endTimeColumn: isRange ? [annotation.endTimeColumn] : [],
+              textColumn: annotation.textColumn ? [annotation.textColumn] : [],
+              extraColumns: annotation.extraColumns ?? [],
+              label: [annotation.label || defaultAnnotationLabel],
+              color: [getPersistedAnnotationColor(annotation.color)],
+              isHidden: [Boolean(annotation.isHidden)],
+              ...(isRange
+                ? { outside: [Boolean(annotation.outside)] }
+                : {
+                    lineWidth: [annotation.lineWidth || 1],
+                    lineStyle: [annotation.lineStyle || 'solid'],
+                    icon: hasIcon(annotation.icon) ? [annotation.icon] : ['triangle'],
+                    textVisibility: [Boolean(annotation.textVisibility)],
+                  }),
+            },
+          },
+        ],
+      });
+      continue;
+    }
     if (isRangeAnnotationConfig(annotation)) {
       const { label, color, key, outside, id } = annotation;
       const { timestamp: time, endTimestamp: endTime } = key;

@@ -37,7 +37,9 @@ export type ManualRangeEventAnnotationRow = {
   id: string;
   time: string;
   endTime: string;
+  textField?: string;
   type: 'range';
+  skippedCount?: number;
 } & RangeStyleProps;
 
 export type ManualRangeEventAnnotationOutput = ManualRangeEventAnnotationArgs & {

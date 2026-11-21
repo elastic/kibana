@@ -18,6 +18,7 @@ import type {
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
+import type { EsqlEventAnnotationConfig, PointStyleProps } from '@kbn/event-annotation-common';
 import { getValueColumn } from '../../columns/esql_column';
 import { toLensStateFilterLanguage } from '../../columns/filter';
 import type {
@@ -42,6 +43,7 @@ import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import { fromColorMappingAPIToLensState, isAutoColor } from '../../coloring';
 import { processMetricColumnsWithReferences } from '../utils';
 import { getDefaultBreakdownColorMapping } from './defaults';
+import { DEFAULT_API_ANNOTATION_LABEL } from './constants';
 
 const X_ACCESSOR = 'x';
 const BREAKDOWN_ACCESSOR = 'breakdown';
@@ -152,11 +154,7 @@ function buildByValueAnnotationLayer(
             endTimestamp: String(annotation.interval.to),
           },
           outside: annotation.fill === 'outside',
-          ...(annotation.color && !isAutoColor(annotation.color)
-            ? { color: annotation.color.color }
-            : {}),
-          label: annotation.label ?? 'Event',
-          ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
+          ...toStateAnnotationAppearance(annotation),
         };
       }
       if (annotation.type === 'point') {
@@ -167,18 +165,12 @@ function buildByValueAnnotationLayer(
             type: 'point_in_time',
             timestamp: String(annotation.timestamp),
           },
-          ...(annotation.color && !isAutoColor(annotation.color)
-            ? { color: annotation.color.color }
-            : {}),
-          label: annotation.label ?? 'Event',
-          ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
-          ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
-          ...(annotation.icon ? { icon: annotationIconCompat.toState(annotation.icon) } : {}),
-          ...(annotation.line?.stroke_width != null
-            ? { lineWidth: annotation.line.stroke_width }
-            : {}),
-          ...(annotation.line?.stroke_dash ? { lineStyle: annotation.line.stroke_dash } : {}),
+          ...toStateAnnotationAppearance(annotation),
+          ...toStatePointStyle(annotation),
         };
+      }
+      if (annotation.type === 'esql') {
+        return buildStateEsqlAnnotation(annotation, `${layer.type}_event_${index}`);
       }
       return {
         type: 'query',
@@ -188,25 +180,66 @@ function buildByValueAnnotationLayer(
           query: annotation.query.expression,
           language: toLensStateFilterLanguage(annotation.query.language),
         },
-        label: annotation.label ?? 'Event',
-        ...(annotation.color && !isAutoColor(annotation.color)
-          ? { color: annotation.color.color }
-          : {}),
-        ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
+        ...toStateAnnotationAppearance(annotation),
         timeField: annotation.time_field,
         ...(annotation.extra_fields ? { extraFields: annotation.extra_fields } : {}),
-        ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
+        ...toStatePointStyle(annotation),
         ...(annotation.text?.field ? { textField: annotation.text.field } : {}),
-        ...(annotation.icon ? { icon: annotationIconCompat.toState(annotation.icon) } : {}),
-        ...(annotation.line?.stroke_width != null
-          ? { lineWidth: annotation.line.stroke_width }
-          : {}),
-        ...(annotation.line?.stroke_dash ? { lineStyle: annotation.line.stroke_dash } : {}),
         key: {
           type: 'point_in_time',
         },
       };
     }),
+  };
+}
+
+type APIEsqlAnnotation = Extract<AnnotationLayerByValueType['events'][number], { type: 'esql' }>;
+type APIPointAnnotation = Extract<AnnotationLayerByValueType['events'][number], { type: 'point' }>;
+
+const toStateAnnotationAppearance = (
+  annotation: Pick<APIPointAnnotation, 'label' | 'color' | 'visible'>
+): Pick<PointStyleProps, 'label' | 'color' | 'isHidden'> => ({
+  label: annotation.label ?? DEFAULT_API_ANNOTATION_LABEL,
+  ...(annotation.color && !isAutoColor(annotation.color) ? { color: annotation.color.color } : {}),
+  ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
+});
+
+// Text column and field bindings differ per annotation kind, so only the shared part lives here.
+const toStatePointStyle = (
+  annotation: Pick<APIPointAnnotation, 'icon' | 'line'> & { text?: { visible?: boolean } }
+): Pick<PointStyleProps, 'textVisibility' | 'icon' | 'lineWidth' | 'lineStyle'> => ({
+  ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
+  ...(annotation.icon ? { icon: annotationIconCompat.toState(annotation.icon) } : {}),
+  ...(annotation.line?.stroke_width != null ? { lineWidth: annotation.line.stroke_width } : {}),
+  ...(annotation.line?.stroke_dash ? { lineStyle: annotation.line.stroke_dash } : {}),
+});
+
+function buildStateEsqlAnnotation(
+  annotation: APIEsqlAnnotation,
+  id: string
+): EsqlEventAnnotationConfig {
+  const common = {
+    type: 'esql' as const,
+    id,
+    query: { esql: annotation.data_source.query },
+    timeColumn: annotation.time_column,
+    ...(annotation.time_field ? { timeField: annotation.time_field } : {}),
+    ...(annotation.extra_columns ? { extraColumns: annotation.extra_columns } : {}),
+    ...(annotation.text?.column ? { textColumn: annotation.text.column } : {}),
+    ...toStateAnnotationAppearance(annotation),
+  };
+  if ('end_time_column' in annotation) {
+    return {
+      ...common,
+      key: { type: 'range' },
+      endTimeColumn: annotation.end_time_column,
+      outside: annotation.fill === 'outside',
+    };
+  }
+  return {
+    ...common,
+    key: { type: 'point_in_time' },
+    ...toStatePointStyle(annotation),
   };
 }
 

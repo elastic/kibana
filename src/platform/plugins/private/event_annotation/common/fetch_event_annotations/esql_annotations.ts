@@ -1,0 +1,269 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import moment from 'moment';
+import type { TimeRange } from '@kbn/data-plugin/common';
+import type { ExpressionValueSearchContext } from '@kbn/data-plugin/common';
+import type { ISearchMethods } from '@kbn/search-types';
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type {
+  Datatable,
+  DatatableColumn,
+  DatatableRow,
+  ExecutionContext,
+} from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
+import type { EsqlEventAnnotationOutput } from '../esql_event_annotation';
+import { annotationColumns } from '../types';
+import {
+  ANNOTATIONS_PER_BUCKET,
+  sortByTime,
+  toAbsoluteDates,
+  toTimebucket,
+  wrapRowsInDatatable,
+} from './utils';
+
+interface AnnotationColumns {
+  timeColumn: DatatableColumn;
+  endTimeColumn: DatatableColumn | undefined;
+  extraColumns: DatatableColumn[];
+}
+
+// Independent queries may reuse aliases with different types and formatters.
+const toFieldId = ({ annotationId, name }: { annotationId: string; name: string }): string =>
+  JSON.stringify([annotationId, name]);
+
+// Column problems are configuration errors and fail the chart, like missing fields on DSL
+// query annotations. Row problems are skipped, like documents without the time field.
+const resolveAnnotationColumns = ({
+  annotation,
+  datatable,
+}: {
+  annotation: EsqlEventAnnotationOutput;
+  datatable: Datatable;
+}): AnnotationColumns => {
+  const findColumn = (name: string, dateOnly = false): DatatableColumn => {
+    const column = datatable.columns.find((candidate) => candidate.name === name);
+    if (!column || (dateOnly && column.meta.type !== 'date')) {
+      throw new Error(
+        i18n.translate('eventAnnotation.esqlAnnotation.invalidColumnErrorMessage', {
+          defaultMessage:
+            'Annotation {label}: column {column} is missing or has an incompatible type.',
+          values: { label: annotation.label, column: name },
+        })
+      );
+    }
+    return column;
+  };
+  const extraNames = new Set([
+    ...(annotation.extraColumns ?? []),
+    ...(annotation.textColumn ? [annotation.textColumn] : []),
+  ]);
+  return {
+    timeColumn: findColumn(annotation.timeColumn, true),
+    endTimeColumn: annotation.endTimeColumn
+      ? findColumn(annotation.endTimeColumn, true)
+      : undefined,
+    extraColumns: [...extraNames].map((name) => findColumn(name)),
+  };
+};
+
+// Rows with an unparseable time, an end before the start, or outside the time range are skipped.
+const toAnnotationRows = ({
+  annotation,
+  datatable,
+  columns: { timeColumn, endTimeColumn, extraColumns },
+  interval,
+  timezone,
+  timeRange,
+}: {
+  annotation: EsqlEventAnnotationOutput;
+  datatable: Datatable;
+  columns: AnnotationColumns;
+  interval: string;
+  timezone: string;
+  timeRange: TimeRange;
+}): DatatableRow[] => {
+  const bounds = toAbsoluteDates(timeRange);
+  const rows: DatatableRow[] = [];
+
+  for (const [index, row] of datatable.rows.entries()) {
+    const startMs = parseTimestamp(row[timeColumn.id]);
+    const endMs = endTimeColumn ? parseTimestamp(row[endTimeColumn.id]) : undefined;
+    if (startMs === undefined || (endTimeColumn && (endMs === undefined || endMs < startMs))) {
+      continue;
+    }
+    const time = moment(startMs).toISOString();
+    const endTime = endMs === undefined ? undefined : moment(endMs).toISOString();
+    if (
+      bounds &&
+      (moment(time).isAfter(bounds.to) || moment(endTime ?? time).isBefore(bounds.from))
+    ) {
+      continue;
+    }
+
+    rows.push({
+      id: endTime ? `${annotation.id}:${index}` : annotation.id,
+      type: endTime ? 'range' : 'point',
+      time,
+      ...(endTime
+        ? { endTime, outside: annotation.outside }
+        : {
+            icon: annotation.icon,
+            lineStyle: annotation.lineStyle,
+            lineWidth: annotation.lineWidth,
+            textVisibility: annotation.textVisibility,
+          }),
+      label: annotation.label,
+      color: annotation.color,
+      timebucket: toTimebucket({ time, interval, timezone }),
+      ...(annotation.textColumn
+        ? { textField: toFieldId({ annotationId: annotation.id, name: annotation.textColumn }) }
+        : {}),
+      ...Object.fromEntries(
+        extraColumns.map((column) => [
+          `field:${toFieldId({ annotationId: annotation.id, name: column.name })}`,
+          row[column.id],
+        ])
+      ),
+    });
+  }
+  return rows;
+};
+
+// Ranges and points are limited separately per start bucket, so many ranges cannot hide points.
+const limitRowsPerBucket = (rows: DatatableRow[]): DatatableRow[] => {
+  const limitedRows: DatatableRow[] = [];
+  const lastKeptRowPerBucket = new Map<string, DatatableRow>();
+  const countPerBucket = new Map<string, number>();
+  for (const row of [...rows].sort(sortByTime)) {
+    const bucketKey = `${row.type}:${row.timebucket}`;
+    const count = (countPerBucket.get(bucketKey) ?? 0) + 1;
+    countPerBucket.set(bucketKey, count);
+    if (count <= ANNOTATIONS_PER_BUCKET) {
+      limitedRows.push(row);
+      lastKeptRowPerBucket.set(bucketKey, row);
+      continue;
+    }
+    const lastKeptRow = lastKeptRowPerBucket.get(bucketKey);
+    if (lastKeptRow) {
+      lastKeptRow.skippedCount = count - ANNOTATIONS_PER_BUCKET;
+    }
+  }
+  return limitedRows;
+};
+
+export const toEsqlAnnotationDatatable = ({
+  annotation,
+  datatable,
+  interval,
+  timezone,
+  timeRange,
+}: {
+  annotation: EsqlEventAnnotationOutput;
+  datatable: Datatable;
+  interval: string;
+  timezone: string;
+  timeRange: TimeRange;
+}): Datatable => {
+  const columns = resolveAnnotationColumns({ annotation, datatable });
+  const rows = toAnnotationRows({ annotation, datatable, columns, interval, timezone, timeRange });
+
+  return wrapRowsInDatatable(limitRowsPerBucket(rows), [
+    ...annotationColumns,
+    ...columns.extraColumns.map((column) => ({
+      ...column,
+      id: `field:${toFieldId({ annotationId: annotation.id, name: column.name })}`,
+    })),
+  ]);
+};
+
+// ES|QL date columns arrive as ISO 8601 strings or epoch milliseconds; strict parsing skips any
+// other string instead of letting moment guess a date from it.
+const parseTimestamp = (value: unknown): number | undefined => {
+  if (typeof value !== 'number' && typeof value !== 'string') return undefined;
+  const date = typeof value === 'number' ? moment(value) : moment(value, moment.ISO_8601, true);
+  return date.isValid() ? date.valueOf() : undefined;
+};
+
+// skippedCount stays on the point of the annotation that overflowed its bucket; the renderer
+// sums it across the bucket's rows.
+export const mergeAnnotationDatatables = (tables: Datatable[]): Datatable => {
+  const columns = new Map<string, DatatableColumn>();
+  for (const table of tables) {
+    for (const column of table.columns) {
+      columns.set(column.id, column);
+    }
+  }
+  const rows = tables.flatMap((table) => table.rows).sort(sortByTime);
+  return wrapRowsInDatatable(rows, [...columns.values()]);
+};
+
+export const fetchEsqlAnnotationDatatables = ({
+  annotations,
+  esql,
+  input,
+  interval,
+  timezone,
+  timeRange,
+  abortSignal,
+  inspectorAdapters,
+  searchSessionId,
+  executionContext,
+}: {
+  annotations: EsqlEventAnnotationOutput[];
+  esql: ISearchMethods['esql'];
+  input: ExpressionValueSearchContext;
+  interval: string;
+  timezone: string;
+  timeRange: TimeRange;
+  abortSignal: AbortSignal;
+  inspectorAdapters: Adapters;
+  searchSessionId: string | undefined;
+  executionContext: ReturnType<ExecutionContext['getExecutionContext']>;
+}): Promise<Datatable[]> =>
+  Promise.all(
+    annotations.map(async (annotation) => {
+      const { datatable } = await esql(
+        {
+          query: annotation.query,
+          timeZone: timezone,
+          kibanaQueryContext: {
+            timeRange,
+            timeField: annotation.timeField,
+            esqlVariables: input.esqlVariables,
+          },
+          approximation: input.isApproximate,
+          projectRouting: input.projectRouting,
+          dropNullColumns: false,
+          columnMetadata: true,
+          includeExecutionMetadata: true,
+        },
+        {
+          abortSignal,
+          sessionId: searchSessionId,
+          executionContext,
+          includeDataTable: true,
+          inspector: {
+            adapter: inspectorAdapters.requests ?? new RequestAdapter(),
+            title: i18n.translate(
+              'eventAnnotation.fetchEventAnnotations.inspector.dataRequest.title',
+              { defaultMessage: 'Annotations' }
+            ),
+            description: i18n.translate('eventAnnotation.esqlAnnotation.inspectorDescription', {
+              defaultMessage: 'This request fetches annotation events using ES|QL.',
+            }),
+          },
+        }
+      );
+      if (!datatable) throw new Error('The ES|QL annotation request did not return a datatable.');
+      return toEsqlAnnotationDatatable({ annotation, datatable, interval, timezone, timeRange });
+    })
+  );

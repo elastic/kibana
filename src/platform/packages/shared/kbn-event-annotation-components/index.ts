@@ -12,6 +12,7 @@ export {
   annotationsIconSet,
 } from './components/annotation_editor_controls';
 export { getAnnotationAccessor } from './components';
+export { ConfigPanelEsqlAnnotation } from './components/annotation_editor_controls/esql_annotation_panel';
 export {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,

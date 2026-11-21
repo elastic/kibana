@@ -8,7 +8,17 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '@kbn/event-annotation-common';
+import {
+  isQueryAnnotationConfig,
+  isRangeAnnotationConfig,
+  isEsqlAnnotationConfig,
+} from '@kbn/event-annotation-common';
+import type {
+  EsqlEventAnnotationConfig,
+  PointInTimeEventAnnotationConfig,
+  PointStyleProps,
+  RangeEventAnnotationConfig,
+} from '@kbn/event-annotation-common';
 import type {
   FormBasedLayer,
   SeriesType,
@@ -378,6 +388,60 @@ export function buildAPIReferenceLinesLayer(
   };
 }
 
+const toApiAnnotationAppearance = (annotation: Pick<PointStyleProps, 'color' | 'isHidden'>) => ({
+  color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
+  ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
+});
+
+const toApiIconAndLine = (
+  annotation: Pick<PointStyleProps, 'icon' | 'lineWidth' | 'lineStyle'>
+) => ({
+  ...(annotation.icon ? { icon: getAnnotationIconAPIName(annotation.icon) } : {}),
+  // lineWidth isn't allowed to be zero, so the truthy check is valid here
+  ...(annotation.lineWidth || annotation.lineStyle
+    ? {
+        line: {
+          stroke_width: annotation.lineWidth ? annotation.lineWidth : 1,
+          stroke_dash: annotation.lineStyle ? annotation.lineStyle : 'solid',
+        },
+      }
+    : {}),
+});
+
+function buildAPIEsqlAnnotation(
+  annotation: EsqlEventAnnotationConfig
+): Extract<AnnotationLayerByValueType['events'][number], { type: 'esql' }> {
+  const common = {
+    type: 'esql' as const,
+    data_source: { type: 'esql' as const, query: annotation.query.esql },
+    time_column: annotation.timeColumn,
+    ...(annotation.timeField ? { time_field: annotation.timeField } : {}),
+    ...(annotation.extraColumns?.length ? { extra_columns: annotation.extraColumns } : {}),
+    ...(annotation.label ? { label: annotation.label } : {}),
+    ...toApiAnnotationAppearance(annotation),
+  };
+  if ('endTimeColumn' in annotation) {
+    return {
+      ...common,
+      end_time_column: annotation.endTimeColumn,
+      fill: annotation.outside ? 'outside' : 'inside',
+      ...(annotation.textColumn ? { text: { column: annotation.textColumn } } : {}),
+    };
+  }
+  return {
+    ...common,
+    ...(annotation.textVisibility != null || annotation.textColumn
+      ? {
+          text: {
+            visible: Boolean(annotation.textVisibility),
+            ...(annotation.textColumn ? { column: annotation.textColumn } : {}),
+          },
+        }
+      : {}),
+    ...toApiIconAndLine(annotation),
+  };
+}
+
 function getTextConfigurationForQueryAnnotation(
   annotation: XYByValueAnnotationLayerConfig['annotations'][number]
 ): Pick<
@@ -457,13 +521,35 @@ export function buildAPIAnnotationsLayer(
     throw new DataViewNotFoundError(layer.layerId);
   }
 
+  const esqlAnnotations = layer.annotations.filter(isEsqlAnnotationConfig);
+  const otherAnnotations = layer.annotations.filter(
+    (annotation): annotation is Exclude<typeof annotation, EsqlEventAnnotationConfig> =>
+      !isEsqlAnnotationConfig(annotation)
+  );
+
+  // ES|QL annotations carry their own query, so their layers use the ES|QL layer schema,
+  // which has no data view and no DSL query events.
+  if (esqlAnnotations.length > 0) {
+    return {
+      type: 'annotations',
+      ignore_global_filters: layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
+      events: layer.annotations.map((annotation) => {
+        if (isEsqlAnnotationConfig(annotation)) return buildAPIEsqlAnnotation(annotation);
+        if (isQueryAnnotationConfig(annotation)) {
+          throw new Error('ES|QL and DSL query annotations cannot share an annotation layer.');
+        }
+        return buildAPIManualAnnotation(annotation);
+      }),
+    };
+  }
+
   const dataSource: DataSourceTypeNoESQL | null =
     !hasQueryAnnotation || !dataViewId ? null : buildDataViewDataSource(dataViewId, adHocDataViews);
   return {
     type: 'annotations',
     ...(dataSource ? { data_source: dataSource } : {}),
     ignore_global_filters: layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
-    events: layer.annotations.map((annotation) => {
+    events: otherAnnotations.map((annotation) => {
       if (isQueryAnnotationConfig(annotation)) {
         return {
           type: 'query',
@@ -479,56 +565,42 @@ export function buildAPIAnnotationsLayer(
 
           time_field: annotation.timeField!,
           ...(annotation.extraFields ? { extra_fields: annotation.extraFields } : {}),
-          color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
-          ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
+          ...toApiAnnotationAppearance(annotation),
           ...getTextConfigurationForQueryAnnotation(annotation),
-          ...(annotation.icon ? { icon: getAnnotationIconAPIName(annotation.icon) } : {}),
-          // lineWidth isn't allowed to be zero, so the truthy check is valid here
-          ...(annotation.lineWidth || annotation.lineStyle
-            ? {
-                line: {
-                  stroke_width: annotation.lineWidth ? annotation.lineWidth : 1,
-                  stroke_dash: annotation.lineStyle ? annotation.lineStyle : 'solid',
-                },
-              }
-            : {}),
+          ...toApiIconAndLine(annotation),
         };
       }
-      if (isRangeAnnotationConfig(annotation)) {
-        return {
-          type: 'range',
-          interval: {
-            from: annotation.key.timestamp,
-            to: annotation.key.endTimestamp,
-          },
-          color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
-          fill: annotation.outside ? 'outside' : 'inside',
-          ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
-          ...(annotation.label ? { label: annotation.label } : {}),
-        };
-      }
-
-      return {
-        type: 'point',
-        timestamp: annotation.key.timestamp,
-        color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
-        ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
-        ...(annotation.textVisibility != null
-          ? {
-              text: { visible: annotation.textVisibility },
-            }
-          : {}),
-        ...(annotation.label ? { label: annotation.label } : {}),
-        ...(annotation.icon ? { icon: getAnnotationIconAPIName(annotation.icon) } : {}),
-        ...(annotation.lineWidth || annotation.lineStyle
-          ? {
-              line: {
-                stroke_width: annotation.lineWidth ? annotation.lineWidth : 1,
-                stroke_dash: annotation.lineStyle ? annotation.lineStyle : 'solid',
-              },
-            }
-          : {}),
-      };
+      return buildAPIManualAnnotation(annotation);
     }),
+  };
+}
+
+function buildAPIManualAnnotation(
+  annotation: PointInTimeEventAnnotationConfig | RangeEventAnnotationConfig
+): Extract<AnnotationLayerByValueType['events'][number], { type: 'point' | 'range' }> {
+  if (isRangeAnnotationConfig(annotation)) {
+    return {
+      type: 'range',
+      interval: {
+        from: annotation.key.timestamp,
+        to: annotation.key.endTimestamp,
+      },
+      ...toApiAnnotationAppearance(annotation),
+      fill: annotation.outside ? 'outside' : 'inside',
+      ...(annotation.label ? { label: annotation.label } : {}),
+    };
+  }
+
+  return {
+    type: 'point',
+    timestamp: annotation.key.timestamp,
+    ...toApiAnnotationAppearance(annotation),
+    ...(annotation.textVisibility != null
+      ? {
+          text: { visible: annotation.textVisibility },
+        }
+      : {}),
+    ...(annotation.label ? { label: annotation.label } : {}),
+    ...toApiIconAndLine(annotation),
   };
 }

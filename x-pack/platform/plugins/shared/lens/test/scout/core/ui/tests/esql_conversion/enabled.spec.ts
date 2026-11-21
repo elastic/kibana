@@ -155,60 +155,6 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     await expect(lens.applyFlyoutButton).toBeDisabled();
   });
 
-  test('converts eligible data layers and preserves annotation and reference layers', async ({
-    pageObjects,
-    page,
-  }) => {
-    const { dashboard, lens } = pageObjects;
-
-    await openInlineEditorAndWaitVisible(
-      pageObjects,
-      testData.ESQL_CONVERSION_PANEL_IDS.MULTI_LAYER
-    );
-    await lens.workspace.convertToEsqlButton.click();
-
-    const modal = lens.workspace.convertToEsqlModal;
-    await expect(modal.getByText('Will be converted', { exact: true })).toHaveCount(2);
-    await expect(modal.getByText('Will remain unchanged', { exact: true })).toHaveCount(2);
-    await expect(modal.getByRole('checkbox')).toHaveCount(0);
-    await lens.workspace.convertToEsqlModalConfirmButton.click();
-    await expect(modal).toBeHidden();
-    await expect(lens.workspace.convertToEsqlButton).toBeHidden();
-
-    // Conversion recreates the inline editor store with the text-based datasource.
-    // Wait for the remounted layer tabs instead of reading during the transient unmount.
-    await expect.poll(() => lens.layers.getLayerCount()).toBe(4);
-    expect(await lens.workspace.getEsqlQuery()).toContain('STATS COUNT(*)');
-
-    await lens.layers.activateLayerTab(1);
-    expect(await lens.workspace.getEsqlQuery()).toContain('STATS MEDIAN(bytes)');
-
-    await lens.layers.activateLayerTab(2);
-    await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeHidden();
-    await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_xAnnotationsPanel')).toHaveText(
-      'Event'
-    );
-
-    await lens.layers.activateLayerTab(3);
-    await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeHidden();
-    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yReferenceLineLeftPanel')).toMatch(
-      /^Static value: /
-    );
-
-    const panel = dashboard.getPanelByEmbeddableId(testData.ESQL_CONVERSION_PANEL_IDS.MULTI_LAYER);
-    await expect(panel.getByRole('button', { name: /Count of records/ })).toBeVisible();
-    await expect(panel.getByRole('button', { name: /Median of bytes/ })).toBeVisible();
-    await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
-
-    await applyLensInlineEditorAndWaitClosed({ lens });
-    await openInlineEditorAndWaitVisible(
-      pageObjects,
-      testData.ESQL_CONVERSION_PANEL_IDS.MULTI_LAYER
-    );
-    expect(await lens.layers.getLayerCount()).toBe(4);
-    expect(await lens.workspace.getEsqlQuery()).toContain('STATS COUNT(*)');
-  });
-
   test('should disable Convert to ES|QL button when any data layer is unsupported', async ({
     pageObjects,
   }) => {
@@ -254,30 +200,5 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       testData.ESQL_CONVERSION_PANEL_IDS.SAVED_METRIC
     );
     await expect(pageObjects.lens.workspace.convertToEsqlButton).toBeDisabled();
-  });
-
-  test('should disable Convert to ES|QL button when the chart has query-based annotations', async ({
-    pageObjects,
-    page,
-  }) => {
-    const { lens } = pageObjects;
-
-    await openInlineEditorAndWaitVisible(
-      pageObjects,
-      testData.ESQL_CONVERSION_PANEL_IDS.MULTI_LAYER
-    );
-    await expect(lens.workspace.convertToEsqlButton).toBeEnabled();
-
-    // Turn the fixture's manual annotation into a query-based one; query annotations
-    // are not yet supported on ES|QL charts, so this must gate the conversion.
-    await lens.layers.activateLayerTab(2);
-    await lens.dimensions.openDimensionEditor('lnsXY_xAnnotationsPanel > lns-dimensionTrigger', 2);
-    await page.testSubj.click('lnsXY_annotation_query');
-    await lens.style.configureQueryAnnotation({ queryString: '*', timeField: 'utc_time' });
-    await lens.closeDimensionEditor();
-
-    await expect(lens.workspace.convertToEsqlButton).toBeDisabled();
-
-    await cancelLensInlineEditorAndWaitClosed({ lens });
   });
 });
