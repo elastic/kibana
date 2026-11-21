@@ -1,6 +1,6 @@
 # How the Continuous Threat Hunt Worker reports
 
-The Worker reports its sweep, packaging reports each threat report, and packaging and the proposal gate report their closes. The reopen is reported from TypeScript (see `alertzero_worker_investigation_reopened`). Event fields are in the [telemetry README](../README.md).
+The Worker reports its sweep, packaging reports each threat report, and packaging and the proposal gate report their closes. The reopen is reported from TypeScript (see `alertzero_worker_investigation_reopened`). Its own events are under [Events](#events); the envelope and the events every Worker shares are in the [telemetry README](../README.md).
 
 | Workflow | Step | `event` | Where |
 |---|---|---|---|
@@ -40,3 +40,33 @@ The items are the selected threat reports: `candidates_found` is the reports sel
 | Proposal gate | Every Proposal of the Investigation settled | `resolved` |
 
 Every gate of an Investigation runs `close_if_settled` once its own Proposal settles, so only the gate whose close changed `status` reports.
+
+## Events
+
+Each event takes this input on the `alertzero.reportWorkerOutcome` step (see the [step README](../../step_types/report_worker_outcome/README.md)):
+
+| `event` | Reports | Fields |
+|---|---|---|
+| `hunt_report_completed` | `alertzero_hunt_report_completed` | `hunt_status`, `package_status` (required), `mint_suppression` (default `none`), `has_confirmed_hit`, `closed_clean` (flags), `tier2_invoked` (optional), `proposals_prepared`, `proposals_dispatch_failed`, `coverage_kis_written`, `coverage_kis_skipped` (counts), `investigation_id` (UUID, required unless `package_status` is `run_incomplete`) |
+
+
+### `alertzero_hunt_report_completed`
+
+Emitted by Hunt packaging for one threat report, once packaging has run.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| envelope | | | See [the envelope](../README.md#the-envelope) |
+| `hunt_status` | keyword | yes | The hunt child's result status: `success`, `partial`, `retired_incomplete` (a settled run that left a gap no rerun can close), `failed` or `unknown` |
+| `has_confirmed_hit` | boolean | yes | Whether the hunt cleared the confirmed-hit bar |
+| `tier2_invoked` | boolean | no | Whether the hunt ran Tier 2 (behavioral queries). Absent when the Worker did not pass it |
+| `package_status` | keyword | yes | Packaging's own status: `success` or `run_incomplete` |
+| `closed_clean` | boolean | yes | Whether a run with no confirmed hit closed the Investigation: as benign, or as `other` for `retired_incomplete`, which is true too |
+| `proposals_prepared` | long | yes | Proposals packaging prepared and launched a gate for |
+| `proposals_dispatch_failed` | long | yes | Proposal gates that failed to launch |
+| `mint_suppression` | keyword | yes | Why packaging held back its Proposals: `none`, `existing_proposals` or `check_failed` |
+| `coverage_kis_written` | long | yes | Coverage knowledge items written for Detection Watch |
+| `coverage_kis_skipped` | long | yes | Coverage knowledge items not written |
+| `investigation_id` | keyword | no | The report's Investigation. It joins to the close and the reopen. Absent only when `package_status` is `run_incomplete`, because the Worker could not find or create the Investigation |
+
+The epic's sweep counts (reports swept, Tier 2 invoked, findings reviewable or clean, coverage written) are sums of these events by `run_id`.

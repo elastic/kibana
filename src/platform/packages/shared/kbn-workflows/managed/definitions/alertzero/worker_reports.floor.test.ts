@@ -22,7 +22,7 @@ import {
 
 /**
  * The Alert Triage Worker's reports (`alertzero.reportWorkerOutcome`), rendered the way the engine
- * renders them. The plugin's `shipped_yaml_contract.floor.test.ts` validates the same `with` blocks
+ * renders them. The plugin's `shipped_yaml_contract.alert_triage.test.ts` validates the same `with` blocks
  * against the step's real input schema; these tests pin the values each scenario renders.
  */
 

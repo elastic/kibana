@@ -15,26 +15,14 @@ import {
   SYSTEM_SECURITY_WORKER_IDS,
 } from '@kbn/alertzero-common';
 import { REPORT_WORKER_OUTCOME_EVENTS } from '../../../common/step_types';
-import { ANY_CATALOG_WORKER, EVENT_WORKER_IDS, isEventFromItsWorker } from './event_worker_ids';
+import { isEventFromItsWorker } from './event_worker_ids';
 
-describe('EVENT_WORKER_IDS', () => {
-  it('names an owner for every event the step accepts', () => {
-    expect(Object.keys(EVENT_WORKER_IDS).sort()).toEqual([...REPORT_WORKER_OUTCOME_EVENTS].sort());
-  });
-
-  it('names only catalogued Workers as owners', () => {
+describe('events any catalogued Worker may report', () => {
+  it('are only the run event and the Investigation close', () => {
     expect(
-      Object.values(EVENT_WORKER_IDS).filter(
-        (owner) =>
-          owner !== ANY_CATALOG_WORKER &&
-          !(SYSTEM_SECURITY_WORKER_IDS as readonly string[]).includes(owner)
+      REPORT_WORKER_OUTCOME_EVENTS.filter((event) =>
+        SYSTEM_SECURITY_WORKER_IDS.every((workerId) => isEventFromItsWorker(event, workerId))
       )
-    ).toEqual([]);
-  });
-
-  it('lets any catalogued Worker report only the run event and the Investigation close', () => {
-    expect(
-      REPORT_WORKER_OUTCOME_EVENTS.filter((event) => EVENT_WORKER_IDS[event] === ANY_CATALOG_WORKER)
     ).toEqual(['worker_investigation_closed', 'worker_run_completed']);
   });
 });

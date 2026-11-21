@@ -11,30 +11,41 @@ import * as ts from 'typescript';
 import { createAnalytics } from '@elastic/ebt/client';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  ALERT_TRIAGE_CLOSURE_OUTCOMES,
   DETECTION_RULE_SOURCES,
   DETECTION_RULE_TYPES,
-  ENDPOINT_ANALYSIS_OUTCOMES,
-  HUNT_REPORT_HUNT_STATUSES,
-  HUNT_REPORT_MINT_SUPPRESSIONS,
-  HUNT_REPORT_PACKAGE_STATUSES,
   INVESTIGATION_CLOSE_REASONS,
-  RULE_COVERAGE_PROPOSAL_KINDS,
-  RULE_COVERAGE_VERDICTS,
-  RULE_TUNING_CHANGE_TYPES,
   RULE_REVIEW_ENTRY_GATES,
   WORKER_DEGRADED_REASONS,
   WORKER_RECOMMENDATION_CONFIDENCES,
   WORKER_REVIEW_DECISIONS,
   WORKER_RUN_OUTCOMES,
 } from '../../common/telemetry/constants';
-import { ALERTZERO_TELEMETRY_EVENTS, ALERTZERO_TELEMETRY_PREFIX } from './constants';
-import type { AlertZeroEnvelope, AlertZeroTelemetryEventPayloads } from './event_types';
+import { ALERT_TRIAGE_CLOSURE_OUTCOMES } from '../../common/telemetry/workers/alert_triage';
 import {
-  ALERTZERO_AD_WORKER_RUN_COMPLETED_EVENT,
+  RULE_COVERAGE_PROPOSAL_KINDS,
+  RULE_COVERAGE_VERDICTS,
+} from '../../common/telemetry/workers/rule_coverage';
+import { RULE_TUNING_CHANGE_TYPES } from '../../common/telemetry/workers/rule_tuning';
+import { ENDPOINT_ANALYSIS_OUTCOMES } from '../../common/telemetry/workers/endpoint_analysis';
+import {
+  HUNT_REPORT_HUNT_STATUSES,
+  HUNT_REPORT_MINT_SUPPRESSIONS,
+  HUNT_REPORT_PACKAGE_STATUSES,
+} from '../../common/telemetry/workers/continuous_threat_hunt';
+import { ALERTZERO_TELEMETRY_EVENTS, ALERTZERO_TELEMETRY_PREFIX } from './constants';
+import type { AlertZeroTelemetryEventPayloads } from './event_types';
+import {
   ALERTZERO_TELEMETRY_EVENT_TYPES,
   ALERTZERO_WORKER_INVESTIGATION_CLOSED_EVENT,
 } from './event_types';
+import { ENVELOPE_FIXTURE as envelope } from './worker_event_fields.fixture';
+import { ALERT_TRIAGE_EVENT_FIXTURES } from './workers/alert_triage.fixture';
+import { ALERTZERO_AD_WORKER_RUN_COMPLETED_EVENT } from './workers/attack_discovery';
+import { ATTACK_DISCOVERY_EVENT_FIXTURES } from './workers/attack_discovery.fixture';
+import { ENDPOINT_ANALYSIS_EVENT_FIXTURES } from './workers/endpoint_analysis.fixture';
+import { RULE_COVERAGE_EVENT_FIXTURES } from './workers/rule_coverage.fixture';
+import { RULE_TUNING_EVENT_FIXTURES } from './workers/rule_tuning.fixture';
+import { CONTINUOUS_THREAT_HUNT_EVENT_FIXTURES } from './workers/continuous_threat_hunt.fixture';
 import { registerAlertZeroTelemetryEvents } from './register_telemetry_events';
 
 /** Identity and free-text field names no AlertZero event may declare, at any nesting depth. */
@@ -128,46 +139,11 @@ const collectImportedNames = (filePath: string): string[] => {
   });
 };
 
-const envelope: AlertZeroEnvelope = {
-  autonomy_level: 'supervised',
-  autonomy_mode: 'auto_accept',
-  execution_id: 'c5d0e2a9-3b7e-4c61-8f2d-6a9b0e4d7f21',
-  is_default_space: true,
-  run_id: '0b6a1f4e-8c43-4a39-9a4e-1f7f5f3f9c10',
-  trigger_type: 'scheduled',
-  watch_tag: 'watch-floor',
-  worker_id: 'system-security-floor-attack-discovery',
-};
-
 /** One valid payload per event, typed against the payload map so types and schemas agree. */
 const FIXTURES: {
   [K in keyof AlertZeroTelemetryEventPayloads]: AlertZeroTelemetryEventPayloads[K];
 } = {
-  [ALERTZERO_TELEMETRY_EVENTS.AdWorkerRunCompleted]: {
-    ...envelope,
-    alerts_analyzed: 120,
-    attacks_generated: 4,
-    attacks_persisted: 3,
-    batches_failed: 0,
-    batches_total: 2,
-    run_outcome: 'produced',
-  },
-  [ALERTZERO_TELEMETRY_EVENTS.AdWorkerReviewStarted]: {
-    ...envelope,
-    investigation_id: '5f0c3c8e-2d51-4b8a-9e0f-7c1d2b3a4e5f',
-    is_rereview: false,
-  },
-  [ALERTZERO_TELEMETRY_EVENTS.AdWorkerAnalysisCompleted]: {
-    ...envelope,
-    analysis_error: false,
-    verdict: 'true_positive',
-  },
-  [ALERTZERO_TELEMETRY_EVENTS.AdWorkerHandoffResolved]: {
-    ...envelope,
-    auto_approve_requested: true,
-    outcome: 'approved',
-    verdict: 'true_positive',
-  },
+  ...ATTACK_DISCOVERY_EVENT_FIXTURES,
   [ALERTZERO_TELEMETRY_EVENTS.WorkerInvestigationClosed]: {
     ...envelope,
     close_reason: 'false_positive',
@@ -193,125 +169,39 @@ const FIXTURES: {
     watch_tag: 'watch-detection',
     worker_id: 'system-security-detection-rule-coverage',
   },
-  [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchClassified]: {
-    ...envelope,
-    alerts_total: 40,
-    alerts_without_verdict: 2,
-    fp_below_floor: 3,
-    fp_candidates: 20,
-    investigation_id: '5f0c3c8e-2d51-4b8a-9e0f-7c1d2b3a4e5f',
-    verdicts_false_positive: 23,
-    verdicts_inconclusive: 5,
-    verdicts_true_positive: 10,
-    worker_id: 'system-security-floor-alert-triage',
-  },
-  [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchGrouped]: {
-    ...envelope,
-    alerts_joined: 0,
-    alerts_pooled: 0,
-    alerts_with_strict_key: 36,
-    conversation_created: false,
-    fp_candidates_on_fallback: 4,
-    grouping: 'on',
-    proposals_created: 0,
-    strict_keys: 12,
-    strict_keys_single_alert: 5,
-    wide_keys: 8,
-    wide_keys_single_alert: 3,
-    worker_id: 'system-security-floor-alert-triage',
-  },
-  [ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved]: {
-    ...envelope,
-    alerts_proposed: 20,
-    alerts_retag_failed: 0,
-    revisions: 1,
-    auto_approve_requested: true,
-    investigation_id: '5f0c3c8e-2d51-4b8a-9e0f-7c1d2b3a4e5f',
-    outcome: 'approved',
-    proposal_read_failed: false,
-    worker_id: 'system-security-floor-alert-triage',
-  },
-  [ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted]: {
-    ...envelope,
-    applied: true,
-    approved_not_applied: false,
-    backtest_ran: true,
-    backtest_reduced_alerts: true,
-    change_type: 'exception',
-    confidence: 'medium',
-    decision: 'approved',
-    entry_gate: 'approved',
-    investigation_id: '5f0c3c8e-2d51-4b8a-9e0f-7c1d2b3a4e5f',
-    rule_source: 'custom',
-    rule_type: 'esql',
-    rule_unavailable: false,
-    watch_tag: 'watch-detection',
-    worker_id: 'system-security-detection-rule-tuning',
-  },
-  [ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted]: {
-    ...envelope,
-    applied: true,
-    approved_not_applied: false,
-    check_failed: false,
-    creation_failed: false,
-    creation_skipped: false,
-    decision: 'approved',
-    entry_gate: 'skipped',
-    investigation_id: '5f0c3c8e-2d51-4b8a-9e0f-7c1d2b3a4e5f',
-    ki_processed: true,
-    proposal_kind: 'enable_rule',
-    rule_created: false,
-    rule_source: 'prebuilt',
-    rule_type: 'eql',
-    verdict: 'covered_disabled',
-    watch_tag: 'watch-detection',
-    worker_id: 'system-security-detection-rule-coverage',
-  },
-  [ALERTZERO_TELEMETRY_EVENTS.HuntReportCompleted]: {
-    ...envelope,
-    closed_clean: true,
-    coverage_kis_skipped: 0,
-    coverage_kis_written: 2,
-    has_confirmed_hit: false,
-    hunt_status: 'success',
-    investigation_id: '3f1c2b4a-5d6e-5f70-8a9b-0c1d2e3f4a5b',
-    mint_suppression: 'none',
-    package_status: 'success',
-    proposals_dispatch_failed: 0,
-    proposals_prepared: 0,
-    tier2_invoked: false,
-    watch_tag: 'watch-hunt',
-    worker_id: 'system-security-hunt-continuous-threat-hunt',
-  },
-  [ALERTZERO_TELEMETRY_EVENTS.EndpointAnalysisCompleted]: {
-    ...envelope,
-    actions_recommended: 2,
-    agent_failed: false,
-    analysis_outcome: 'processed',
-    auto_approve_requested: false,
-    findings_attached: true,
-    host_resolved: true,
-    iocs_found: true,
-    proposals_dispatch_failed: 0,
-    proposals_dispatched: 2,
-    reused_prior_assessment: false,
-    timeline_found: true,
-    watch_tag: 'watch-forensics',
-    worker_id: 'system-security-forensics-endpoint-analysis',
-  },
+  ...ALERT_TRIAGE_EVENT_FIXTURES,
+  ...RULE_TUNING_EVENT_FIXTURES,
+  ...RULE_COVERAGE_EVENT_FIXTURES,
+  ...CONTINUOUS_THREAT_HUNT_EVENT_FIXTURES,
+  ...ENDPOINT_ANALYSIS_EVENT_FIXTURES,
 };
 
 const README_PATH = join(__dirname, 'README.md');
+const WORKER_DOCS_DIR = join(__dirname, 'workers');
 
-/** Event names documented as `### \`alertzero_…\`` headings in the telemetry README. */
+/** The README, which documents the events any Worker reports, and each Worker's own doc. */
+const DOC_PATHS = [
+  README_PATH,
+  ...readdirSync(WORKER_DOCS_DIR)
+    .filter((entry) => entry.endsWith('.md'))
+    .map((entry) => join(WORKER_DOCS_DIR, entry)),
+];
+
+/** Event names documented as `### \`alertzero_…\`` headings in the README and the Worker docs. */
 const readDocumentedEventNames = (): string[] =>
-  Array.from(readFileSync(README_PATH, 'utf8').matchAll(/^### `(alertzero_[a-z0-9_]+)`\s*$/gm)).map(
-    ([, eventName]) => eventName
+  DOC_PATHS.flatMap((docPath) =>
+    Array.from(readFileSync(docPath, 'utf8').matchAll(/^### `(alertzero_[a-z0-9_]+)`\s*$/gm)).map(
+      ([, eventName]) => eventName
+    )
   );
 
-/** The README text under one event's `### \`alertzero_…\`` heading, up to the next heading. */
+/** The doc text under one event's `### \`alertzero_…\`` heading, up to the next heading. */
 const readDocumentedEventSection = (eventName: string): string => {
-  const [, afterHeading = ''] = readFileSync(README_PATH, 'utf8').split(`### \`${eventName}\`\n`);
+  const heading = `### \`${eventName}\`\n`;
+  const doc = DOC_PATHS.map((docPath) => readFileSync(docPath, 'utf8')).find((text) =>
+    text.includes(heading)
+  );
+  const [, afterHeading = ''] = (doc ?? '').split(heading);
   const [section] = afterHeading.split(/^#{2,3} /m);
   return section;
 };
@@ -394,6 +284,14 @@ describe('AlertZero telemetry event types', () => {
   );
 
   describe('README', () => {
+    it('documents each event in one place only', () => {
+      const documented = readDocumentedEventNames();
+
+      expect(
+        documented.filter((eventName, index) => documented.indexOf(eventName) !== index)
+      ).toEqual([]);
+    });
+
     it('documents every registered event', () => {
       const documented = readDocumentedEventNames();
 

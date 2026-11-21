@@ -25,7 +25,7 @@ import {
 
 /**
  * The Endpoint Analysis Worker's reports (`alertzero.reportWorkerOutcome`), rendered the way the
- * engine renders them. The plugin's `shipped_yaml_contract.forensics.test.ts` validates the same
+ * engine renders them. The plugin's `shipped_yaml_contract.endpoint_analysis.test.ts` validates the same
  * `with` blocks against the step's real input schema; these tests pin the values each scenario
  * renders.
  */

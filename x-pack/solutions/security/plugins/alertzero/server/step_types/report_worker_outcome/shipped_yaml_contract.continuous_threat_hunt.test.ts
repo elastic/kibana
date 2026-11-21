@@ -17,7 +17,7 @@ import {
   reportOnDevModeClient,
   reportStepsOf,
 } from './shipped_yaml_contract.test_helpers';
-import { SHIPPED_YAML_CONTRACTS } from './shipped_yaml_contract.hunt.fixture';
+import { SHIPPED_YAML_CONTRACTS } from './shipped_yaml_contract.continuous_threat_hunt.fixture';
 
 describe('shipped Continuous Threat Hunt Worker YAML and the reportWorkerOutcome schema', () => {
   describeWorkerWorkflowContracts(SHIPPED_YAML_CONTRACTS);

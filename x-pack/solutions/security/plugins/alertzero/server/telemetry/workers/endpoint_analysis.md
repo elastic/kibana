@@ -1,6 +1,6 @@
 # How the Endpoint Analysis Worker reports
 
-The Worker reports its sweep, each analysis run reports how it settled its indicator, and the close gate reports an approved close. Event fields are in the [telemetry README](../README.md).
+The Worker reports its sweep, each analysis run reports how it settled its indicator, and the close gate reports an approved close. Its own events are under [Events](#events); the envelope and the events every Worker shares are in the [telemetry README](../README.md).
 
 | Workflow | Step | `event` | Where |
 |---|---|---|---|
@@ -38,3 +38,31 @@ The Worker never opens an Investigation, and none of its workflows closes one. I
 - The report is in the close gate, not the action: the step verifies that every ancestor is an AlertZero-managed execution, and the action's chain passes through the platform's proposal workflow, so a report there would skip as `not_managed`.
 - `close_reason` is what the analysis decided and what the action writes on the attack and its alerts as `workflow_reason`. The status route writes no close reason on the Investigation itself yet.
 - The action does not continue past a failed status-route close, so `succeeded` means the route returned. The route is idempotent, so an Investigation someone closed while the card was pending is counted as the Worker's. The route also sends `agentic_investigations_investigation_closed`.
+
+## Events
+
+Each event takes this input on the `alertzero.reportWorkerOutcome` step (see the [step README](../../step_types/report_worker_outcome/README.md)):
+
+| `event` | Reports | Fields |
+|---|---|---|
+| `endpoint_analysis_completed` | `alertzero_endpoint_analysis_completed` | `analysis_outcome` (required), `reused_prior_assessment`, `host_resolved`, `agent_failed`, `timeline_found`, `iocs_found`, `findings_attached` (flags), `auto_approve_requested` (required flag), `actions_recommended`, `proposals_dispatched`, `proposals_dispatch_failed` (counts) |
+
+
+### `alertzero_endpoint_analysis_completed`
+
+Emitted by one Endpoint Analysis run for one indicator, once it has reached its verdict and before it writes it to the indicator. The run works on the Attack Discovery Investigation named by the indicator and never opens one of its own. The Worker's proposal gate closes that Investigation once every containment Proposal is decided.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| envelope | | | See [the envelope](../README.md#the-envelope) |
+| `analysis_outcome` | keyword | yes | How the run settled the indicator: `processed`, `no_host` (the discovery named no host), `failed` (no findings landed), `proposals_lost` (findings landed but a containment proposal did not reach the queue), `unreachable` (the Investigation could not be read), `invalid` (a malformed indicator) or `not_pending` (the indicator was no longer pending) |
+| `reused_prior_assessment` | boolean | yes | Whether an earlier run's findings were already attached, so the agent did not run again |
+| `host_resolved` | boolean | yes | Whether a host was found to analyze |
+| `agent_failed` | boolean | yes | Whether the forensic agent failed |
+| `timeline_found` | boolean | yes | Whether the analysis reconstructed any timeline event |
+| `iocs_found` | boolean | yes | Whether the analysis extracted any indicator of compromise |
+| `findings_attached` | boolean | yes | Whether both findings are on the Investigation |
+| `actions_recommended` | long | yes | Containment actions the analysis recommended |
+| `proposals_dispatched` | long | yes | Containment proposals dispatched to the queue |
+| `proposals_dispatch_failed` | long | yes | Containment proposals that did not reach the queue |
+| `auto_approve_requested` | boolean | yes | Whether the proposals ask the gate to auto-approve (supervised autonomy) |
