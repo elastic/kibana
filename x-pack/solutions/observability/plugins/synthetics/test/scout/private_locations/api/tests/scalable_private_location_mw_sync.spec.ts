@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -52,9 +53,13 @@ const TRIGGER_SYNC_TASK_PATH = 'internal/synthetics/trigger_task_run/syncPrivate
  * only the deferred bump can move it past them.
  */
 // Failing: See https://github.com/elastic/kibana/issues/298264
+// Stateful-only: `indexFakeFleetAgent` (common/fixtures/fleet.ts) writes fake agents into
+// `.fleet-agents` as a native ES user it creates with `security.putUser`, with
+// `allow_restricted_indices`. Serverless Elasticsearch has no native realm users, so that
+// helper can't run there.
 apiTest.describe.skip(
   'ScalablePrivateLocationMaintenanceWindowSync',
-  { tag: ['@local-stateful-classic'] },
+  { tag: tags.local.stateful.classic },
   () => {
     let adminHeaders: Record<string, string>;
     let privateLocation: ScoutPrivateLocation;

@@ -1,5 +1,5 @@
 {
-  "sha1": "e6a0a083eb7fd3620c33855a433cea8d0126830c",
+  "sha1": "9960ee687b803ae8a95a683557c42524f3eb0ac6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1228,7 +1228,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/settings/slo_settings_stateful.spec.ts",
-        "line": 13,
+        "line": 14,
         "column": 92
       }
     },

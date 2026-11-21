@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, KIBANA_HEADERS } from '../../../common/fixtures';
 
@@ -23,13 +24,12 @@ import { apiTest, KIBANA_HEADERS } from '../../../common/fixtures';
  * here (and use `'*'` for `ALL_SPACES_ID`) to avoid importing across the plugin
  * server boundary, matching the local-constants convention in this Scout suite.
  *
- * Tagged stateful-only to preserve the original FTR scope: the legacy `uptime`
- * feature privilege and the stateful-only `read_ilm` cluster privilege are not
- * meaningful in the serverless observability target.
+ * `read_ilm` is only requested on stateful, mirroring `getServiceApiKeyPrivileges`, which
+ * omits it when Elasticsearch is serverless (ILM isn't available there).
  */
 
-const SYNTHETICS_SERVICE_ES_PRIVILEGES = {
-  cluster: ['monitor', 'read_pipeline', 'read_ilm'],
+const getServiceEsPrivileges = (isServerless: boolean) => ({
+  cluster: isServerless ? ['monitor', 'read_pipeline'] : ['monitor', 'read_pipeline', 'read_ilm'],
   indices: [
     {
       names: ['synthetics-*'],
@@ -37,44 +37,48 @@ const SYNTHETICS_SERVICE_ES_PRIVILEGES = {
     },
   ],
   run_as: [],
-} as const;
+});
 
-apiTest.describe('ApiKeys', { tag: ['@local-stateful-classic'] }, () => {
-  let adminHeaders: Record<string, string>;
+apiTest.describe(
+  'ApiKeys',
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
+  () => {
+    let adminHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-    adminHeaders = { ...KIBANA_HEADERS, ...cookieHeader };
-  });
+    apiTest.beforeAll(async ({ samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      adminHeaders = { ...KIBANA_HEADERS, ...cookieHeader };
+    });
 
-  apiTest(
-    '[POST] internal/security/api_key allows an API key to be created with kibana privileges',
-    async ({ apiClient }) => {
-      const res = await apiClient.post('internal/security/api_key', {
-        headers: adminHeaders,
-        body: {
-          name: 'test_api_key',
-          expiration: '12d',
-          kibana_role_descriptors: {
-            uptime_save: {
-              elasticsearch: SYNTHETICS_SERVICE_ES_PRIVILEGES,
-              kibana: [
-                {
-                  base: [],
-                  spaces: ['*'],
-                  feature: {
-                    uptime: ['all'],
+    apiTest(
+      '[POST] internal/security/api_key allows an API key to be created with kibana privileges',
+      async ({ apiClient, config }) => {
+        const res = await apiClient.post('internal/security/api_key', {
+          headers: adminHeaders,
+          body: {
+            name: 'test_api_key',
+            expiration: '12d',
+            kibana_role_descriptors: {
+              uptime_save: {
+                elasticsearch: getServiceEsPrivileges(config.serverless),
+                kibana: [
+                  {
+                    base: [],
+                    spaces: ['*'],
+                    feature: {
+                      uptime: ['all'],
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
           },
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        });
 
-      expect(res).toHaveStatusCode(200);
-      expect(res.body).toMatchObject({ name: 'test_api_key' });
-    }
-  );
-});
+        expect(res).toHaveStatusCode(200);
+        expect(res.body).toMatchObject({ name: 'test_api_key' });
+      }
+    );
+  }
+);

@@ -11,6 +11,10 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { ProfilingSchema } from '@kbn/profiling-utils';
 import { test, testData } from '../../fixtures';
 
+// Stateful only: Universal Profiling is not supported on serverless (its setup, status and
+// storage explorer routes are not registered there). Serverless will get profiling through
+// OTel profiling data instead, which needs its own tests. See
+// https://github.com/elastic/kibana/issues/297749
 test.describe('Storage explorer page', { tag: tags.stateful.classic }, () => {
   const { rangeFrom, rangeTo } = testData.PROFILING_TEST_DATES;
 

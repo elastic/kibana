@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import type { ApiClientFixture, EsClient } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { mergeSyntheticsApiHeaders } from '../../../scout/common/fixtures';
@@ -99,9 +100,11 @@ const assertBrowserJourneyStep = async (
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet synthetics_agent_e2e
  *   node scripts/scout run-tests --arch stateful --domain classic --config x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/playwright.config.ts
  */
+// Stateful-only: this Docker Elastic Agent + Fleet Server setup is not configured on
+// serverless (the `synthetics_agent_e2e` server config set only has a stateful variant).
 apiTest.describe(
   'Synthetics real-agent monitor types',
-  { tag: ['@local-stateful-classic'] },
+  { tag: tags.local.stateful.classic },
   () => {
     let editorHeaders: Record<string, string>;
     const createdMonitorIds: string[] = [];

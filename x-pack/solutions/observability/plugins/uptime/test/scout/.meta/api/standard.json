@@ -1,5 +1,5 @@
 {
-  "sha1": "75328191b4d9faac0bfca968e8b163493387d3f2",
+  "sha1": "e3932c92bf148e7c8775248c7a4cc0dc1affe8d9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/certs.spec.ts",
-        "line": 27,
+        "line": 28,
         "column": 14
       }
     },
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/certs.spec.ts",
-        "line": 45,
+        "line": 46,
         "column": 9
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/dynamic_settings.spec.ts",
-        "line": 30,
+        "line": 31,
         "column": 31
       }
     },
@@ -52,7 +52,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/dynamic_settings.spec.ts",
-        "line": 45,
+        "line": 46,
         "column": 25
       }
     },
@@ -65,7 +65,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/feature_controls.spec.ts",
-        "line": 22,
+        "line": 23,
         "column": 45
       }
     },
@@ -78,7 +78,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/feature_controls.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 7
       }
     },
@@ -91,7 +91,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/feature_controls.spec.ts",
-        "line": 74,
+        "line": 75,
         "column": 19
       }
     },
@@ -104,7 +104,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/feature_controls.spec.ts",
-        "line": 110,
+        "line": 111,
         "column": 30
       }
     },
@@ -117,7 +117,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/feature_controls.spec.ts",
-        "line": 155,
+        "line": 156,
         "column": 35
       }
     },
@@ -130,7 +130,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/get_all_pings.spec.ts",
-        "line": 15,
+        "line": 16,
         "column": 41
       }
     },
@@ -143,7 +143,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/get_all_pings.spec.ts",
-        "line": 27,
+        "line": 28,
         "column": 80
       }
     },
@@ -156,7 +156,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/get_all_pings.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 55
       }
     },
@@ -169,7 +169,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/get_all_pings.spec.ts",
-        "line": 60,
+        "line": 61,
         "column": 22
       }
     },
@@ -182,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/index_status.spec.ts",
-        "line": 16,
+        "line": 17,
         "column": 41
       }
     },
@@ -195,7 +195,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_duration.spec.ts",
-        "line": 16,
+        "line": 17,
         "column": 41
       }
     },
@@ -208,7 +208,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_duration.spec.ts",
-        "line": 32,
+        "line": 33,
         "column": 25
       }
     },
@@ -221,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_latest_status.spec.ts",
-        "line": 16,
+        "line": 17,
         "column": 41
       }
     },
@@ -234,7 +234,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_generated.spec.ts",
-        "line": 24,
+        "line": 25,
         "column": 14
       }
     },
@@ -247,7 +247,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_generated.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 24
       }
     },
@@ -260,7 +260,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_generated.spec.ts",
-        "line": 187,
+        "line": 188,
         "column": 40
       }
     },
@@ -273,7 +273,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_generated.spec.ts",
-        "line": 201,
+        "line": 202,
         "column": 9
       }
     },
@@ -286,7 +286,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_generated.spec.ts",
-        "line": 221,
+        "line": 222,
         "column": 42
       }
     },
@@ -299,7 +299,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_real_data.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 5
       }
     },
@@ -312,7 +312,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_real_data.spec.ts",
-        "line": 71,
+        "line": 72,
         "column": 18
       }
     },
@@ -325,7 +325,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/monitor_states_real_data.spec.ts",
-        "line": 94,
+        "line": 95,
         "column": 55
       }
     },
@@ -338,7 +338,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_histogram.spec.ts",
-        "line": 20,
+        "line": 21,
         "column": 41
       }
     },
@@ -351,7 +351,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_histogram.spec.ts",
-        "line": 32,
+        "line": 33,
         "column": 21
       }
     },
@@ -364,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_histogram.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 22
       }
     },
@@ -377,7 +377,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_list.spec.ts",
-        "line": 21,
+        "line": 22,
         "column": 24
       }
     },
@@ -390,7 +390,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_list.spec.ts",
-        "line": 139,
+        "line": 140,
         "column": 13
       }
     },
@@ -403,7 +403,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_list.spec.ts",
-        "line": 132,
+        "line": 133,
         "column": 27
       }
     },
@@ -416,7 +416,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/snapshot.spec.ts",
-        "line": 22,
+        "line": 23,
         "column": 14
       }
     },
@@ -429,7 +429,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/snapshot.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 5
       }
     },
@@ -442,7 +442,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/snapshot.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 5
       }
     },
@@ -455,7 +455,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/snapshot.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 5
       }
     },
@@ -468,7 +468,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/snapshot.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 5
       }
     },
@@ -481,7 +481,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/uptime_integration_deprecation.spec.ts",
-        "line": 56,
+        "line": 57,
         "column": 55
       }
     },
@@ -494,7 +494,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/uptime_integration_deprecation.spec.ts",
-        "line": 63,
+        "line": 64,
         "column": 78
       }
     }

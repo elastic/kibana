@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { tags } from '@kbn/scout-oblt';
 import type { ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
@@ -24,7 +25,7 @@ const scanPage = (page: ScoutPage) =>
     timeoutMs: 60_000,
   });
 
-test.describe('Uptime accessibility', { tag: ['@local-stateful-classic'] }, () => {
+test.describe('Uptime accessibility', { tag: tags.local.stateful.classic }, () => {
   test.beforeAll(async ({ esClient, kbnClient }) => {
     await kbnClient.uiSettings.update({ 'observability:enableLegacyUptimeApp': true });
     // Partial x509 fails monitor-list runtime validation (issuer.distinguished_name) and stalls overview.

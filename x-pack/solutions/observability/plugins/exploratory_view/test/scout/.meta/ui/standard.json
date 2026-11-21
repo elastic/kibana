@@ -1,5 +1,5 @@
 {
-  "sha1": "983e050e990f384a371d7c0c0620e38d0fb3e075",
+  "sha1": "a77aecfe9ea1e3bf7ae249dd2f06903778f79ee0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/exploratory_view/test/scout/ui/tests/global.setup.ts",
-        "line": 5,
+        "line": 12,
         "column": 1
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/exploratory_view/test/scout/ui/tests/step_duration.spec.ts",
-        "line": 16,
+        "line": 19,
         "column": 77
       }
     },
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/exploratory_view/test/scout/ui/tests/ux_prefill_exploratory_view.spec.ts",
-        "line": 34,
+        "line": 36,
         "column": 5
       }
     }

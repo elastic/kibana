@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, testData } from '../../fixtures';
 import { expectFixtureEql } from '../../fixtures/helpers/expect_fixture_eql';
 
-apiTest.describe('get monitor latest status API', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('get monitor latest status API', { tag: tags.local.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, esArchiver }) => {

@@ -30,8 +30,7 @@ node scripts/playwright test --config x-pack/solutions/observability/plugins/pro
 
 Tests are tagged with:
 
-- `@local-stateful-classic` - Stateful tests
-- `@local-serverless-observability_complete` - Serverless tests - currently not supported in Universal Profiling
+Every spec uses `tags.stateful.classic` (`@local-stateful-classic` and `@cloud-stateful-classic`). No serverless tags are used on purpose: Universal Profiling is not supported on serverless, and its setup, status and storage explorer routes are not registered there. Serverless is expected to get profiling later through OTel profiling data (https://github.com/elastic/kibana/issues/297749), which will need its own tests.
 
 Test results are available in `x-pack/solutions/observability/plugins/profiling/test/scout/ui/output`
 

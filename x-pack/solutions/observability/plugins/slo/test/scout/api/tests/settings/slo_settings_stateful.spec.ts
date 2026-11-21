@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout-oblt/api';
 import { DEFAULT_SETTINGS } from '../../../../../server/services/slo_settings_repository';
 import { apiTest, mergeSloApiHeaders } from '../../fixtures';
 
+// Stateful-only test for SLO settings API
 apiTest.describe('SLO settings API (stateful)', { tag: [...tags.stateful.classic] }, () => {
   apiTest('PUT updates settings', async ({ apiClient, requestAuth }) => {
     const { apiKeyHeader } = await requestAuth.getApiKey('admin');

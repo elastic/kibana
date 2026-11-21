@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import {
   apiTest,
@@ -47,7 +48,9 @@ const SYNTHETICS_PARAM_SO_TYPE = 'synthetics-param';
  */
 apiTest.describe(
   'SyncGlobalParams',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  {
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
+  },
   () => {
     let editorHeaders: Record<string, string>;
     let adminHeaders: Record<string, string>;

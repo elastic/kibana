@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment-timezone';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
@@ -38,7 +39,9 @@ const splitLocationNames = (locationNames?: string) => (locationNames ?? '').spl
  */
 apiTest.describe(
   'SyntheticsAlertOnNoData — ungrouped',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  {
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
+  },
   () => {
     const env = createStatusRuleTestEnv('alert-on-no-data-ungrouped');
 

@@ -32,6 +32,7 @@ const setAnomalyThreshold = async (kbnClient: KbnClient, anomalyThreshold: numbe
   });
 };
 
+// The anomaly results depend on stateful-only ML jobs recreated from the archived fixture.
 test.describe('Metrics UI Anomaly Flyout', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, kbnClient, page }) => {
     // Repair state left by a previously interrupted run, and isolate tests that mutate

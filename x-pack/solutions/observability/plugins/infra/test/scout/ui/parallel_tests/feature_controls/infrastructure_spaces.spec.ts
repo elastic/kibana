@@ -15,6 +15,8 @@ const SPACE_INFRA_DISABLED = 'infra_spaces_infra_disabled';
 const SPACE_LOGS_DISABLED = 'infra_spaces_logs_disabled';
 const SPACE_APM_DISABLED = 'infra_spaces_apm_disabled';
 
+// Stateful-only: creates spaces with `disabledFeatures`, and serverless sets
+// `xpack.spaces.allowFeatureVisibility: false` (config/serverless.yml).
 test.describe('Infrastructure feature controls - spaces', { tag: tags.stateful.classic }, () => {
   const SPACE_IDS = [
     SPACE_ALL_ENABLED,

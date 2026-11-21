@@ -14,6 +14,8 @@ const expectActiveBodyNavItem = async (nav: ObservabilityNavigation, deepLinkId:
   await expect(item).toHaveAttribute('data-test-subj', /nav-item-isActive/);
 };
 
+// Stateful-only: covers the stateful Observability solution navigation. Serverless has its own
+// navigation, covered in `serverless_observability/test/scout`.
 test.describe(
   'Stateful Observability Navigation - Sidebar',
   { tag: [...tags.stateful.classic] },

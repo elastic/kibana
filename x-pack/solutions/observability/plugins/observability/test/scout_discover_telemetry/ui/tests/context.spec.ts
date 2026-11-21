@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { getEbtEvents, setEbtOptIn } from '../fixtures/ebt';
 import { test } from '../fixtures/discover_actions';
 
 test.describe(
   'Discover observability telemetry context',
-  { tag: ['@local-serverless-observability_complete'] },
+  { tag: tags.local.serverless.observability.complete },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();

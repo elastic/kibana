@@ -1,5 +1,5 @@
 {
-  "sha1": "d072271cf1c1dccbd5c2d48310677ae71367e7bb",
+  "sha1": "0ebf262cfe47894e39cff64b6228d2ac41ca8eb7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -26,12 +26,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/ui/tests/project_monitor_read_only.spec.ts",
-        "line": 19,
-        "column": 11
+        "line": 25,
+        "column": 28
       }
     }
   ]

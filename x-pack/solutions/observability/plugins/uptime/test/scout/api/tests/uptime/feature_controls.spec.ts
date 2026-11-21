@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, testData } from '../../fixtures';
 
-apiTest.describe('feature controls', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('feature controls', { tag: tags.local.stateful.classic }, () => {
   const space1Id = 'space_1';
 
   apiTest.beforeAll(async ({ kbnClient }) => {

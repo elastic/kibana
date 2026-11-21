@@ -169,7 +169,9 @@ const expectPanelForRole = async (
 // Suite fails on MKI: https://github.com/elastic/kibana/issues/295308
 test.describe(
   'Observability Alerts nav — alerting v2',
-  { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
+  {
+    tag: [...tags.stateful.classic, ...tags.local.serverless.observability.complete],
+  },
   () => {
     test.beforeAll(async ({ scoutSpace, kbnClient, config }) => {
       // Serverless Observability is already the observability project; solution

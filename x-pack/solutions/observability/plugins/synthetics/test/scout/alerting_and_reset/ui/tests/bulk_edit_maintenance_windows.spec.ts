@@ -64,75 +64,79 @@ const capture = async (page: ScoutPage, testInfo: CaptureTestInfo, name: string)
   await testInfo.attach(name, { path: filePath, contentType: 'image/png' });
 };
 
-test.describe('Bulk edit — maintenance windows', { tag: tags.stateful.classic }, () => {
-  let maintenanceWindow: MaintenanceWindow;
+test.describe(
+  'Bulk edit — maintenance windows',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    let maintenanceWindow: MaintenanceWindow;
 
-  test.beforeAll(async ({ syntheticsServices, kbnClient }) => {
-    await syntheticsServices.enable();
-    await syntheticsServices.deleteMonitors();
-    await syntheticsServices.ensurePrivateLocationExists();
-    await syntheticsServices.addMonitor('mw bulk monitor 1', {
-      type: 'http',
-      urls: 'https://elastic.co',
-    });
-    await syntheticsServices.addMonitor('mw bulk monitor 2', {
-      type: 'http',
-      urls: 'https://example.com',
-    });
-    maintenanceWindow = await createMaintenanceWindow(kbnClient, MW_TITLE);
-  });
-
-  test.afterAll(async ({ syntheticsServices, kbnClient }) => {
-    await syntheticsServices.deleteMonitors();
-    if (maintenanceWindow?.id) {
-      await deleteMaintenanceWindow(kbnClient, maintenanceWindow.id);
-    }
-  });
-
-  test('applies a maintenance window to selected monitors in bulk', async ({
-    page,
-    pageObjects,
-    browserAuth,
-  }, testInfo) => {
-    const app = pageObjects.syntheticsApp;
-
-    await test.step('setup: login and open monitor management', async () => {
-      await browserAuth.loginAsPrivilegedUser();
-      await app.navigateToMonitorManagement();
-    });
-
-    await test.step('select monitors and capture', async () => {
-      await app.selectAllMonitors();
-      await expect(page.testSubj.locator('syntheticsBulkActionsButton')).toBeVisible();
-      await capture(page, testInfo, '01-monitors-selected');
-    });
-
-    await test.step('open bulk actions menu and capture', async () => {
-      await app.openBulkActionsMenu();
-      await expect(page.testSubj.locator('syntheticsBulkMaintenanceWindowsItem')).toBeVisible();
-      await capture(page, testInfo, '02-bulk-menu-open');
-    });
-
-    await test.step('open the maintenance windows flyout and capture', async () => {
-      await page.testSubj.click('syntheticsBulkMaintenanceWindowsItem');
-      await expect(page.testSubj.locator('syntheticsBulkMaintenanceWindowsFlyout')).toBeVisible();
-      await capture(page, testInfo, '03-flyout-empty');
-    });
-
-    await test.step('select a maintenance window and capture', async () => {
-      await app.selectMaintenanceWindowInFlyout(MW_TITLE);
-      await expect(page.testSubj.locator('syntheticsBulkMaintenanceWindowsSave')).toBeEnabled();
-      await capture(page, testInfo, '04-flyout-filled');
-    });
-
-    await test.step('save and confirm success', async () => {
-      await app.saveBulkMaintenanceWindows();
-      await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(/applied/i, {
-        timeout: 15_000,
+    test.beforeAll(async ({ syntheticsServices, kbnClient }) => {
+      await syntheticsServices.enable();
+      await syntheticsServices.deleteMonitors();
+      await syntheticsServices.ensurePrivateLocationExists();
+      await syntheticsServices.addMonitor('mw bulk monitor 1', {
+        type: 'http',
+        urls: 'https://elastic.co',
       });
-      await capture(page, testInfo, '05-success-toast');
-      await app.waitForMonitorManagementLoadingToFinish();
-      await capture(page, testInfo, '06-result-table');
+      await syntheticsServices.addMonitor('mw bulk monitor 2', {
+        type: 'http',
+        urls: 'https://example.com',
+      });
+      maintenanceWindow = await createMaintenanceWindow(kbnClient, MW_TITLE);
     });
-  });
-});
+
+    test.afterAll(async ({ syntheticsServices, kbnClient }) => {
+      await syntheticsServices.deleteMonitors();
+      if (maintenanceWindow?.id) {
+        await deleteMaintenanceWindow(kbnClient, maintenanceWindow.id);
+      }
+    });
+
+    test('applies a maintenance window to selected monitors in bulk', async ({
+      page,
+      pageObjects,
+      browserAuth,
+    }, testInfo) => {
+      const app = pageObjects.syntheticsApp;
+
+      await test.step('setup: login and open monitor management', async () => {
+        await browserAuth.loginAsPrivilegedUser();
+        await app.navigateToMonitorManagement();
+      });
+
+      await test.step('select monitors and capture', async () => {
+        await app.selectAllMonitors();
+        await expect(page.testSubj.locator('syntheticsBulkActionsButton')).toBeVisible();
+        await capture(page, testInfo, '01-monitors-selected');
+      });
+
+      await test.step('open bulk actions menu and capture', async () => {
+        await app.openBulkActionsMenu();
+        await expect(page.testSubj.locator('syntheticsBulkMaintenanceWindowsItem')).toBeVisible();
+        await capture(page, testInfo, '02-bulk-menu-open');
+      });
+
+      await test.step('open the maintenance windows flyout and capture', async () => {
+        await page.testSubj.click('syntheticsBulkMaintenanceWindowsItem');
+        await expect(page.testSubj.locator('syntheticsBulkMaintenanceWindowsFlyout')).toBeVisible();
+        await capture(page, testInfo, '03-flyout-empty');
+      });
+
+      await test.step('select a maintenance window and capture', async () => {
+        await app.selectMaintenanceWindowInFlyout(MW_TITLE);
+        await expect(page.testSubj.locator('syntheticsBulkMaintenanceWindowsSave')).toBeEnabled();
+        await capture(page, testInfo, '04-flyout-filled');
+      });
+
+      await test.step('save and confirm success', async () => {
+        await app.saveBulkMaintenanceWindows();
+        await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(/applied/i, {
+          timeout: 15_000,
+        });
+        await capture(page, testInfo, '05-success-toast');
+        await app.waitForMonitorManagementLoadingToFinish();
+        await capture(page, testInfo, '06-result-table');
+      });
+    });
+  }
+);

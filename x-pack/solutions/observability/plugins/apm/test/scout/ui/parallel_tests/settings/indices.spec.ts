@@ -13,6 +13,7 @@ import { waitForApmAppMenuReady } from '../../fixtures/page_helpers';
 const APM_INDICES_SAVED_OBJECT_TYPE = 'apm-indices';
 const APM_INDICES_SAVED_OBJECT_ID = 'apm-indices';
 
+// APM indices are not customizable on serverless, so this test only runs on stateful.
 test.describe('Indices', { tag: tags.stateful.classic }, () => {
   test.afterAll(async ({ kbnClient }) => {
     // The settings are persisted as the `apm-indices` saved object. Deleting it
