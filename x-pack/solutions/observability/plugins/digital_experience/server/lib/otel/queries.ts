@@ -29,11 +29,8 @@ import {
   SPAN_STATUS_ERROR,
   WEB_VITAL_NAME,
   WEB_VITAL_VALUE,
-  ENVIRONMENT_FIELDS as OTEL_ENVIRONMENT_FIELDS,
+  ENVIRONMENT_FIELDS,
 } from '../../../common/otel_data';
-
-/** The OTel environment fields, shared with the mobile ES|QL so both filter the same ones. */
-export const ENVIRONMENT_FIELDS = [...OTEL_ENVIRONMENT_FIELDS];
 
 /** The browser SDK documents of the time range, for every application. */
 export const browserDocuments = (start: number, end: number) => [

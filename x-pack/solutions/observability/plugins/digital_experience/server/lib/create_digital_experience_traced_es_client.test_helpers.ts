@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createDigitalExperienceTracedEsClient } from './create_digital_experience_traced_es_client';
 
@@ -17,4 +18,18 @@ export const createTracedEsClientMock = (abortSignal?: AbortSignal) => {
     abortSignal,
   });
   return { client, esClient };
+};
+
+/**
+ * The response of `client.esql.query` with `rows`, as columns and values; a column a row lacks is
+ * null in it. For `mockResolvedValue`, whose response type it doesn't spell out.
+ */
+export const esqlResponse = (rows: ReadonlyArray<Record<string, unknown>>): never => {
+  const names = uniq(rows.flatMap((row) => Object.keys(row)));
+  return {
+    body: {
+      columns: names.map((name) => ({ name, type: 'keyword' })),
+      values: rows.map((row) => names.map((name) => row[name] ?? null)),
+    },
+  } as never;
 };

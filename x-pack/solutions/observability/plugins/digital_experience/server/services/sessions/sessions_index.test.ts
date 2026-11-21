@@ -17,7 +17,7 @@ import {
   SESSIONS_VERSION,
 } from '../../../common/sessions';
 import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fields';
-import { ENVIRONMENT_FIELDS } from '../../lib/otel/queries';
+import { ENVIRONMENT_FIELDS } from '../../../common/otel_data';
 import {
   createSessionsIndex,
   putSessionsIndexTemplate,

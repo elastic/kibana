@@ -10,30 +10,33 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiLink,
   EuiSpacer,
   EuiSwitch,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useAbortableAsync } from '@kbn/react-hooks';
+import { DataPanel } from '../../../components/data_panel';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
 import { EnvironmentFilter } from '../../../components/environment_filter';
 import { TimeRangePicker } from '../../../components/time_range_picker';
-import { MOBILE_APPLICATION_EBT_ELEMENTS } from '../../../ebt_constants';
+import {
+  DIGITAL_EXPERIENCE_EBT_ACTIONS,
+  MOBILE_APPLICATION_EBT_ELEMENTS,
+} from '../../../ebt_constants';
 import { MobileOnboardingPrompt } from '../../../components/mobile_onboarding_prompt';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
 import { useApiClient } from '../../../hooks/use_api_client';
-import { useDigitalExperienceParams } from '../../../hooks/use_digital_experience_params';
-import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
 import { useDiscoverHref } from '../../../hooks/use_discover_href';
 import { useEnvironment } from '../../../hooks/use_environment';
 import { useFormatters } from '../../../hooks/use_formatters';
+import { useQueryParam } from '../../../hooks/use_query_param';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { toTimeRangeQuery } from '../../../utils/time_range_query';
 import { PlatformBadges } from '../../../components/platform_badges';
 import { MobilePanel } from './mobile_panel';
+import type { MobilePanelProps } from './mobile_panel';
 
 // Empty, which no OS or release reported in the data can be, so every reported value is selectable.
 const ALL = '';
@@ -59,7 +62,7 @@ const toOptions = (
 ];
 
 /** The sections the sibling issues fill; each shows a placeholder until then. */
-export const MOBILE_SECTIONS = [
+const MOBILE_SECTIONS = [
   {
     id: 'healthSummary',
     title: i18n.translate('xpack.digitalExperience.mobile.section.healthSummary', {
@@ -102,6 +105,75 @@ const COMING_SOON = i18n.translate('xpack.digitalExperience.mobile.section.comin
   defaultMessage: 'Coming soon',
 });
 
+const DISCOVER_LABEL = i18n.translate('xpack.digitalExperience.mobile.kpis.openInDiscover', {
+  defaultMessage: 'Open in Discover',
+});
+
+type MobileKpi = 'sessions' | 'users' | 'crashFreeSessions' | 'errorRate';
+
+/** The KPI row, in order; the share KPIs change in percentage points, the others relatively. */
+const MOBILE_KPIS: ReadonlyArray<
+  Pick<
+    MobilePanelProps,
+    'title' | 'tooltip' | 'changeUnit' | 'higherIsBetter' | 'data-test-subj'
+  > & {
+    kpi: MobileKpi;
+    format: 'number' | 'percent';
+  }
+> = [
+  {
+    kpi: 'sessions',
+    'data-test-subj': 'digitalExperienceMobileKpiSessions',
+    title: i18n.translate('xpack.digitalExperience.mobile.kpi.sessions', {
+      defaultMessage: 'Sessions',
+    }),
+    tooltip: i18n.translate('xpack.digitalExperience.mobile.kpi.sessionsTooltip', {
+      defaultMessage: 'Distinct session.id values in the time range.',
+    }),
+    format: 'number',
+    changeUnit: 'relative',
+  },
+  {
+    kpi: 'users',
+    'data-test-subj': 'digitalExperienceMobileKpiUsers',
+    title: i18n.translate('xpack.digitalExperience.mobile.kpi.users', {
+      defaultMessage: 'Users',
+    }),
+    tooltip: i18n.translate('xpack.digitalExperience.mobile.kpi.usersTooltip', {
+      defaultMessage: 'Distinct app.installation.id values in the time range.',
+    }),
+    format: 'number',
+    changeUnit: 'relative',
+  },
+  {
+    kpi: 'crashFreeSessions',
+    'data-test-subj': 'digitalExperienceMobileKpiCrashFree',
+    title: i18n.translate('xpack.digitalExperience.mobile.kpi.crashFree', {
+      defaultMessage: 'Crash-free sessions',
+    }),
+    tooltip: i18n.translate('xpack.digitalExperience.mobile.kpi.crashFreeTooltip', {
+      defaultMessage:
+        'Share of sessions without a crash. Needs a crash definition and session start events, which are not available yet.',
+    }),
+    format: 'percent',
+    changeUnit: 'percentagePoints',
+    higherIsBetter: true,
+  },
+  {
+    kpi: 'errorRate',
+    'data-test-subj': 'digitalExperienceMobileKpiErrorRate',
+    title: i18n.translate('xpack.digitalExperience.mobile.kpi.errorRate', {
+      defaultMessage: 'Error rate',
+    }),
+    tooltip: i18n.translate('xpack.digitalExperience.mobile.kpi.errorRateTooltip', {
+      defaultMessage: 'Exceptions per session in the time range.',
+    }),
+    format: 'number',
+    changeUnit: 'relative',
+    higherIsBetter: false,
+  },
+];
+
 const LOAD_ERROR_TITLE = i18n.translate('xpack.digitalExperience.mobile.loadError', {
   defaultMessage: 'Could not load the mobile application',
 });
@@ -124,15 +196,9 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
   const { timeRange } = useTimeRange();
   const { environment, setEnvironment } = useEnvironment();
   const { formatNumber, formatPercent } = useFormatters();
-  // In the URL, so a reload or a shared link keeps it.
-  const {
-    query: { release: releaseParam, osName: osNameParam },
-  } = useDigitalExperienceParams('/{serviceName}');
-  const release = releaseParam || undefined;
-  const osName = osNameParam || undefined;
-  const updateUrlQuery = useUpdateUrlQuery();
-  const setRelease = (value: string | undefined) => updateUrlQuery({ release: value });
-  const setOsName = (value: string | undefined) => updateUrlQuery({ osName: value });
+  // In the URL, so a reload or a shared link keeps them.
+  const { value: release, setValue: setRelease } = useQueryParam('release');
+  const { value: osName, setValue: setOsName } = useQueryParam('osName');
   const [isComparing, setIsComparing] = useState(false);
 
   const {
@@ -153,10 +219,12 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
     { unsetValueOnError: true }
   );
   const isLoading = loading || (!kpis && !error);
-  const discoverHref = useDiscoverHref(kpis?.esql, {
-    from: timeRange.rangeFrom,
-    to: timeRange.rangeTo,
-  });
+  const discoverTimeRange = useMemo(
+    () => ({ from: timeRange.rangeFrom, to: timeRange.rangeTo }),
+    [timeRange.rangeFrom, timeRange.rangeTo]
+  );
+  const discoverHref = useDiscoverHref(kpis?.esql, discoverTimeRange);
+  const valueFormatters = { number: formatNumber, percent: formatPercent };
 
   const releaseOptions = useMemo(
     () => toOptions(ALL_RELEASES_LABEL, kpis?.releases, release),
@@ -250,84 +318,50 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
         ) : (
           <>
             <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>
-              <EuiFlexItem>
+              {MOBILE_KPIS.map(({ kpi, format, ...panel }) => (
                 <MobilePanel
-                  data-test-subj="digitalExperienceMobileKpiSessions"
-                  title={i18n.translate('xpack.digitalExperience.mobile.kpi.sessions', {
-                    defaultMessage: 'Sessions',
-                  })}
-                  tooltip={i18n.translate('xpack.digitalExperience.mobile.kpi.sessionsTooltip', {
-                    defaultMessage: 'Distinct session.id values in the time range.',
-                  })}
-                  value={kpis?.sessions}
-                  formatValue={formatNumber}
+                  key={kpi}
+                  {...panel}
+                  value={kpis?.[kpi]}
+                  formatValue={valueFormatters[format]}
                   isComparing={isComparing}
                   isLoading={isLoading}
-                  discoverHref={discoverHref}
                 />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <MobilePanel
-                  data-test-subj="digitalExperienceMobileKpiUsers"
-                  title={i18n.translate('xpack.digitalExperience.mobile.kpi.users', {
-                    defaultMessage: 'Users',
-                  })}
-                  tooltip={i18n.translate('xpack.digitalExperience.mobile.kpi.usersTooltip', {
-                    defaultMessage: 'Distinct app.installation.id values in the time range.',
-                  })}
-                  value={kpis?.users}
-                  formatValue={formatNumber}
-                  isComparing={isComparing}
-                  isLoading={isLoading}
-                  discoverHref={discoverHref}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <MobilePanel
-                  data-test-subj="digitalExperienceMobileKpiCrashFree"
-                  title={i18n.translate('xpack.digitalExperience.mobile.kpi.crashFree', {
-                    defaultMessage: 'Crash-free sessions',
-                  })}
-                  tooltip={i18n.translate('xpack.digitalExperience.mobile.kpi.crashFreeTooltip', {
-                    defaultMessage:
-                      'Share of sessions without a crash. Needs a crash definition and session start events, which are not available yet.',
-                  })}
-                  value={kpis?.crashFreeSessions}
-                  formatValue={formatPercent}
-                  isComparing={isComparing}
-                  isLoading={isLoading}
-                  discoverHref={discoverHref}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <MobilePanel
-                  data-test-subj="digitalExperienceMobileKpiErrorRate"
-                  title={i18n.translate('xpack.digitalExperience.mobile.kpi.errorRate', {
-                    defaultMessage: 'Error rate',
-                  })}
-                  tooltip={i18n.translate('xpack.digitalExperience.mobile.kpi.errorRateTooltip', {
-                    defaultMessage: 'Exceptions per session in the time range.',
-                  })}
-                  value={kpis?.errorRate}
-                  formatValue={formatNumber}
-                  isComparing={isComparing}
-                  isLoading={isLoading}
-                  discoverHref={discoverHref}
-                />
-              </EuiFlexItem>
+              ))}
             </EuiFlexGroup>
+            {discoverHref && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiLink
+                      href={discoverHref}
+                      target="_blank"
+                      external
+                      data-test-subj="digitalExperienceMobileKpisDiscover"
+                      {...getEbtProps({
+                        action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_IN_DISCOVER,
+                        element: MOBILE_APPLICATION_EBT_ELEMENTS.KPIS_DISCOVER_LINK,
+                      })}
+                    >
+                      {DISCOVER_LABEL}
+                    </EuiLink>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
             {MOBILE_SECTIONS.map(({ id, title }) => (
               <React.Fragment key={id}>
                 <EuiSpacer size="l" />
-                <EuiPanel hasBorder data-test-subj={`digitalExperienceMobileSection-${id}`}>
-                  <EuiTitle size="s">
-                    <h2>{title}</h2>
-                  </EuiTitle>
-                  <EuiSpacer size="s" />
-                  <EuiText size="s" color="subdued">
-                    {COMING_SOON}
-                  </EuiText>
-                </EuiPanel>
+                <DataPanel
+                  data-test-subj={`digitalExperienceMobileSection-${id}`}
+                  title={title}
+                  isLoading={false}
+                  isEmpty
+                  emptyMessage={COMING_SOON}
+                >
+                  {null}
+                </DataPanel>
               </React.Fragment>
             ))}
           </>

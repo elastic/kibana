@@ -6,19 +6,9 @@
  */
 
 import { mobileDocuments } from './documents';
-import { getMobileTimeBucket, getPreviousPeriod, toComparedValue, withKpiStats } from './kpis';
+import { getPreviousPeriod, toComparedValue, withKpiStats } from './kpis';
 
-const HOUR = 60 * 60 * 1000;
-const DAY = 24 * HOUR;
-
-describe('getMobileTimeBucket', () => {
-  it('is hourly up to 24 hours and daily from there', () => {
-    expect(getMobileTimeBucket(0, HOUR)).toBe('hour');
-    expect(getMobileTimeBucket(0, DAY)).toBe('hour');
-    expect(getMobileTimeBucket(0, 7 * DAY)).toBe('day');
-    expect(getMobileTimeBucket(0, 30 * DAY)).toBe('day');
-  });
-});
+const DAY = 24 * 60 * 60 * 1000;
 
 describe('getPreviousPeriod', () => {
   it('is the period of equal length that ends where the range starts', () => {

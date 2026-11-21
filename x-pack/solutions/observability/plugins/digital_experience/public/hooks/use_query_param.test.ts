@@ -59,6 +59,12 @@ describe('useQueryParam', () => {
 
     expect(push).toHaveBeenCalledWith(expect.objectContaining({ search: 'rangeFrom=now-15m' }));
   });
+
+  it("reads the mobile page's filters from the application's route", () => {
+    mockRoute({ release: '2.0.0' });
+    expect(renderHook(() => useQueryParam('release')).result.current.value).toBe('2.0.0');
+    expect(useDigitalExperienceParams).toHaveBeenCalledWith('/{serviceName}');
+  });
 });
 
 describe('useSourceFilter', () => {

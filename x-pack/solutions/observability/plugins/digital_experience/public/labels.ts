@@ -109,3 +109,10 @@ export const percentagePointsLabel = (points: string): string =>
     defaultMessage: '{points} pp',
     values: { points },
   });
+
+/** A value with its change against the previous period, e.g. "98% (+1.5 pp)". */
+export const valueWithChangeLabel = (value: string, change: string): string =>
+  i18n.translate('xpack.digitalExperience.mobile.valueWithChange', {
+    defaultMessage: '{value} ({change})',
+    values: { value, change },
+  });

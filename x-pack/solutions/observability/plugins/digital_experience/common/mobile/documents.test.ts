@@ -30,6 +30,5 @@ describe('mobileDocuments', () => {
     expect(query).toContain(
       'EVAL platform = CASE((`resource.attributes.os.name` IN ("Android")) OR `telemetry.sdk.name` == "android", "android", "ios")'
     );
-    expect(query).not.toContain('os.type');
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import { Builder, esql } from '@elastic/esql';
+import type { ESQLBinaryExpression, ESQLColumn } from '@elastic/esql/types';
 import {
   EXCEPTION_TYPE,
   RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
@@ -43,7 +44,8 @@ export const MOBILE_FIELDS = {
 } as const;
 
 /** A field the mobile queries read, as an ES|QL column. */
-export const mobileColumn = (field: keyof typeof MOBILE_FIELDS) => esql.col(MOBILE_FIELDS[field]);
+export const mobileColumn = (field: keyof typeof MOBILE_FIELDS): ESQLColumn =>
+  esql.col(MOBILE_FIELDS[field]);
 
 /**
  * The columns the mobile queries compute, which their row types are keyed on, so a rename here
@@ -61,14 +63,19 @@ export const RESULT_COLUMNS = {
   latestRelease: 'latest_release',
   osName: 'os_name',
   bucket: 'bucket',
+  environments: 'environments',
+  environmentNames: 'environment_names',
 } as const;
 
 /** A column the mobile queries compute, as an ES|QL column. */
-export const resultColumn = (column: keyof typeof RESULT_COLUMNS) =>
+export const resultColumn = (column: keyof typeof RESULT_COLUMNS): ESQLColumn =>
   esql.col(RESULT_COLUMNS[column]);
 
 /** `field IN (values)`, the values as escaped string literals. */
-export const inValues = (field: keyof typeof MOBILE_FIELDS, values: readonly string[]) =>
+export const inValues = (
+  field: keyof typeof MOBILE_FIELDS,
+  values: readonly string[]
+): ESQLBinaryExpression =>
   Builder.expression.func.binary('in', [
     mobileColumn(field),
     Builder.expression.list.tuple({

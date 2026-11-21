@@ -55,9 +55,7 @@ const searchMobileApplications = async ({
 
   // Only for the listed applications, so each gets its latest release whatever the cap; that of
   // the last 24 hours of the range.
-  const serviceNames = applicationRows.map(
-    (row: MobileApplicationRow) => row[MOBILE_FIELDS.serviceName]
-  );
+  const serviceNames = applicationRows.map((row) => row[MOBILE_FIELDS.serviceName]);
   const releaseRows =
     serviceNames.length > 0
       ? await runEsql<LatestReleaseRow>(
@@ -76,10 +74,7 @@ const searchMobileApplications = async ({
 
   return {
     applications: applicationRows.map((row) =>
-      toApplication(row, {
-        environments: [],
-        latest: latestByApplication.get(row[MOBILE_FIELDS.serviceName]) ?? null,
-      })
+      toApplication(row, latestByApplication.get(row[MOBILE_FIELDS.serviceName]) ?? null)
     ),
     environments: toEnvironments(environmentRows),
   };

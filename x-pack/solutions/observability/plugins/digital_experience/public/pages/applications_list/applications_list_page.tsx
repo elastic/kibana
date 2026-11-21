@@ -84,6 +84,11 @@ const NO_MATCHES_MESSAGE = i18n.translate('xpack.digitalExperience.applications.
   defaultMessage: 'No applications match the search or the source.',
 });
 
+const NO_MOBILE_MATCHES_MESSAGE = i18n.translate(
+  'xpack.digitalExperience.applications.mobile.noMatches',
+  { defaultMessage: 'No mobile applications match the search or the platform.' }
+);
+
 const LOADING_MESSAGE = i18n.translate('xpack.digitalExperience.applications.loading', {
   defaultMessage: 'Loading applications…',
 });
@@ -386,7 +391,7 @@ export function ApplicationsListPage() {
       );
     }
     if (hasMobileApplications) {
-      return NO_MATCHES_MESSAGE;
+      return NO_MOBILE_MATCHES_MESSAGE;
     }
     if (environment) {
       return noApplicationsInEnvironmentPrompt;

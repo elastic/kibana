@@ -26,7 +26,6 @@ const RESPONSE: MobileKpisResponse = {
   osNames: ['iOS'],
   platforms: ['ios'],
   environments: ['production'],
-  bucket: 'hour',
   esql: 'FROM traces-*.otel-*,logs-*.otel-*',
 };
 

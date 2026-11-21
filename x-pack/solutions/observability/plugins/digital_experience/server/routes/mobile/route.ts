@@ -6,13 +6,12 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
-import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { MobileKpisResponse } from '../../../common/types/mobile';
-import { createDigitalExperienceTracedEsClient } from '../../lib/create_digital_experience_traced_es_client';
 import { MAX_OS_NAME_LENGTH, MAX_RELEASE_LENGTH } from '../../lib/constants';
 import {
   APPLICATION_TAB_ROUTE_OPTIONS,
   APPLICATION_TAB_ROUTE_SECURITY,
+  toApplicationSearch,
 } from '../application_tab_route';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
 import {
@@ -44,18 +43,18 @@ export const mobileRouteRepository = createDigitalExperienceServerRoute({
     })
   ),
   handler: async ({ params, context, request, logger }): Promise<MobileKpisResponse> => {
-    const { elasticsearch } = await context.core;
-    const { serviceName } = params.path;
-    const { start, end, environment, osName, release } = params.query;
+    const { osName, release } = params.query;
+    const { esClient, serviceName, start, end, environment } = await toApplicationSearch({
+      params,
+      context,
+      request,
+      logger,
+    });
     return getMobileKpis({
-      esClient: createDigitalExperienceTracedEsClient({
-        client: elasticsearch.client.asCurrentUser,
-        logger,
-        abortSignal: getRequestAbortedSignal(request.events.aborted$),
-      }),
+      esClient,
       filters: { serviceName, osName, release },
-      start: Date.parse(start),
-      end: Date.parse(end),
+      start,
+      end,
       environment,
     });
   },

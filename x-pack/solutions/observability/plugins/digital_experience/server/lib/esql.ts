@@ -7,22 +7,26 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ComposerQuery } from '@elastic/esql';
+import { isResponseError } from '@kbn/es-errors';
 import type { EsqlOutput, TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { ENVIRONMENT_FIELDS } from '../../common/otel_data';
 import { environmentFilter } from './helpers/environment';
 
 const UNKNOWN_INDEX = /Unknown index/;
 
-/** Whether ES|QL rejected the query because none of its indices exists, e.g. without OTel data. */
-export const isUnknownIndexError = (error: unknown): boolean => {
-  const { type, reason } =
-    (error as { meta?: { body?: { error?: { type?: string; reason?: string } } } })?.meta?.body
-      ?.error ?? {};
+/** Whether ES|QL rejected the query because an index it names doesn't exist. */
+const isUnknownIndexError = (error: unknown): boolean => {
+  if (!isResponseError(error)) {
+    return false;
+  }
+  const { type, reason } = error.body?.error ?? {};
   return type === 'verification_exception' && UNKNOWN_INDEX.test(reason ?? '');
 };
 
 /**
  * The rows of an ES|QL query, traced as `operationName`; none when its indices don't exist.
+ * A wildcard that matches nothing already answers with no rows; a concrete index name that doesn't
+ * exist fails with "Unknown index" instead, which counts as no rows too.
  * A failed shard fails the query, as partial counts would pass for complete ones.
  */
 export const runEsql = async <TRow extends object>(
@@ -64,7 +68,7 @@ export const timeFilter = (
   bool: {
     filter: [
       { range: { '@timestamp': { gte: start, lt: end, format: 'epoch_millis' } } },
-      environmentFilter([...ENVIRONMENT_FIELDS], environment),
+      environmentFilter(ENVIRONMENT_FIELDS, environment),
     ],
   },
 });

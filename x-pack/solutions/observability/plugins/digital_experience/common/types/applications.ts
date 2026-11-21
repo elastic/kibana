@@ -124,7 +124,10 @@ export interface MobileApplicationSummary {
   /** The platforms it reported on in the time range, sorted. */
   platforms: MobilePlatform[];
   environments: string[];
-  /** `service.version` with the most sessions in the last 24 hours, any platform, `null` if none. */
+  /**
+   * The newest `service.version` in the last 24 hours, compared as versions (2.10.0 after 2.9.0),
+   * any platform; `null` if none.
+   */
   latestRelease: string | null;
   sessions: { count: number };
   /** Distinct `app.installation.id`. */

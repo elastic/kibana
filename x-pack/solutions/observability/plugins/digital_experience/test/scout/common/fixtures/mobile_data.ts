@@ -121,7 +121,8 @@ const documents = MOBILE_DOCUMENTS.map((doc, index) => ({
   id: `dx-mobile-${index}`,
   document: {
     '@timestamp': TIMESTAMP,
-    event_name: doc.exception ? 'exception' : 'app.screen',
+    // Events the EDOT mobile SDKs send: an app lifecycle change, or an exception.
+    event_name: doc.exception ? 'exception' : 'device.app.lifecycle',
     resource: {
       attributes: {
         'service.name': doc.serviceName,

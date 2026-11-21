@@ -11,15 +11,6 @@ import type { ComparedValue } from '../types/applications';
 import type { RESULT_COLUMNS } from './fields';
 import { mobileColumn, resultColumn } from './fields';
 
-const HOUR_MS = 60 * 60 * 1000;
-const DAY_MS = 24 * HOUR_MS;
-
-export type MobileTimeBucket = 'hour' | 'day';
-
-/** Hourly up to 24 hours, daily from there on (7 to 30 days in practice). */
-export const getMobileTimeBucket = (startMs: number, endMs: number): MobileTimeBucket =>
-  endMs - startMs <= DAY_MS ? 'hour' : 'day';
-
 /** The period of equal length that ends where `[start, end)` starts. */
 export const getPreviousPeriod = (
   startMs: number,

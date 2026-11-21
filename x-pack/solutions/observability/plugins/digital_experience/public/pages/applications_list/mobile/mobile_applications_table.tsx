@@ -30,8 +30,9 @@ import {
   LAST_SEEN_LABEL,
   NOT_ENOUGH_DATA_LABEL,
   SESSIONS_LABEL,
-  percentagePointsLabel,
+  valueWithChangeLabel,
 } from '../../../labels';
+import { formatChange } from '../../../utils/compared_value';
 import {
   applicationColumnPreset,
   metricColumnPreset,
@@ -63,20 +64,19 @@ const nameCss = css({ minWidth: 0 });
 
 const SORT_BY_SESSIONS = { sort: { field: 'sessions.count', direction: 'desc' } } as const;
 
-const renderCrashFree =
-  ({ formatPercent, formatNumber }: Formatters) =>
-  ({ value, delta }: ComparedValue) => {
-    if (value === null) {
-      return <span data-test-subj="digitalExperienceMobileCrashFree">{NOT_ENOUGH_DATA_LABEL}</span>;
-    }
-    const points = delta === null ? null : `${delta >= 0 ? '+' : ''}${formatNumber(delta * 100)}`;
-    return (
-      <span data-test-subj="digitalExperienceMobileCrashFree">
-        {formatPercent(value)}
-        {points !== null && ` (${percentagePointsLabel(points)})`}
-      </span>
-    );
-  };
+const renderCrashFree = (formatters: Formatters) => (compared: ComparedValue) => {
+  const { value } = compared;
+  if (value === null) {
+    return <span data-test-subj="digitalExperienceMobileCrashFree">{NOT_ENOUGH_DATA_LABEL}</span>;
+  }
+  const formatted = formatters.formatPercent(value);
+  const change = formatChange(compared, 'percentagePoints', formatters);
+  return (
+    <span data-test-subj="digitalExperienceMobileCrashFree">
+      {change === null ? formatted : valueWithChangeLabel(formatted, change)}
+    </span>
+  );
+};
 
 /** The mobile applications, with the columns that suit them; sorted by sessions. */
 export function MobileApplicationsTable({

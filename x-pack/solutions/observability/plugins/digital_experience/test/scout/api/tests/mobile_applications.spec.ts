@@ -14,7 +14,13 @@ import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { findMobileApplication, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
-const { APPLICATIONS_IN_TIME_RANGE_PATH, COMMON_HEADERS, TIME_RANGE } = testData;
+const {
+  APPLICATIONS_IN_TIME_RANGE_PATH,
+  COMMON_HEADERS,
+  DIGITAL_EXPERIENCE_ONLY_ROLE,
+  TIME_RANGE,
+  mobileKpisPath,
+} = testData;
 
 apiTest.describe(
   'Digital Experience applications API with mobile data',
@@ -77,16 +83,10 @@ apiTest.describe(
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
         const getKpis = async (query: Record<string, string>) => {
-          const response = await apiClient.get(
-            `internal/digital_experience/mobile_applications/${encodeURIComponent(
-              MOBILE_APPS.reactNative
-            )}/kpis?${new URLSearchParams({
-              start: TIME_RANGE.rangeFrom,
-              end: TIME_RANGE.rangeTo,
-              ...query,
-            })}`,
-            { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
-          );
+          const response = await apiClient.get(mobileKpisPath(MOBILE_APPS.reactNative, query), {
+            headers: { ...COMMON_HEADERS, ...cookieHeader },
+            responseType: 'json',
+          });
           expect(response).toHaveStatusCode(200);
           return response.body as MobileKpisResponse;
         };
@@ -112,6 +112,37 @@ apiTest.describe(
         expect((await getKpis({ osName: 'iPadOS' })).sessions.value).toBe(1);
         expect((await getKpis({ release: '1.0.0' })).sessions.value).toBe(4);
         expect((await getKpis({ release: '9.9.9' })).hasData).toBe(false);
+      }
+    );
+
+    apiTest(
+      'answers 403 for the KPIs without the APM privilege',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(DIGITAL_EXPERIENCE_ONLY_ROLE);
+
+        const response = await apiClient.get(mobileKpisPath(MOBILE_APPS.reactNative), {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+
+    apiTest(
+      'answers 400 for the KPIs of a range that starts after it ends',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+        const response = await apiClient.get(
+          mobileKpisPath(MOBILE_APPS.reactNative, {
+            start: TIME_RANGE.rangeTo,
+            end: TIME_RANGE.rangeFrom,
+          }),
+          { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
+        );
+
+        expect(response).toHaveStatusCode(400);
       }
     );
   }

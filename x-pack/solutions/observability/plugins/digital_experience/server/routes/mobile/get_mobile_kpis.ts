@@ -11,7 +11,6 @@ import { mobilePanelDiscoverEsql } from '../../../common/mobile/discover';
 import { RESULT_COLUMNS } from '../../../common/mobile/fields';
 import { mobilePanelQuery, type MobilePanelFilters } from '../../../common/mobile/filters';
 import {
-  getMobileTimeBucket,
   getPreviousPeriod,
   toComparedValue,
   withKpiStats,
@@ -52,7 +51,6 @@ export const getMobileKpis = async ({
   environment,
 }: GetMobileKpisParams): Promise<MobileKpisResponse> => {
   const previous = getPreviousPeriod(start, end);
-  const bucket = getMobileTimeBucket(start, end);
   const { release, osName, ...application } = filters;
   const statsQuery = withKpiStats(mobilePanelQuery(filters));
 
@@ -105,7 +103,6 @@ export const getMobileKpis = async ({
       compact(osRows.map(({ [RESULT_COLUMNS.platform]: platform }) => platform))
     ),
     environments: toEnvironments(environmentRows),
-    bucket,
-    esql: mobilePanelDiscoverEsql(filters, { bucket, environment }),
+    esql: mobilePanelDiscoverEsql(filters, { environment }),
   };
 };

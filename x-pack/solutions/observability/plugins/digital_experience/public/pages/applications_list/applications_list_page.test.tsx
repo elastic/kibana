@@ -760,4 +760,17 @@ describe('ApplicationsListPage', () => {
     expect(screen.getByText('No applications match the search or the source.')).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceApplicationsEmpty')).not.toBeInTheDocument();
   });
+
+  it('names the platform, not the source, when no mobile application matches', async () => {
+    respondWith([mobileApp()]);
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileApplicationsTable');
+
+    fireEvent.change(screen.getByTestId('digitalExperienceApplicationsSearch'), {
+      target: { value: 'nothing' },
+    });
+    expect(
+      screen.getByText('No mobile applications match the search or the platform.')
+    ).toBeInTheDocument();
+  });
 });

@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { MobileKpisResponse } from '../../../../common/types/mobile';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
 import { useApiClient } from '../../../hooks/use_api_client';
@@ -44,7 +45,6 @@ const KPIS: MobileKpisResponse = {
   osNames: ['iOS', 'iPadOS', 'Android'],
   platforms: ['android', 'ios'],
   environments: ['production'],
-  bucket: 'hour',
   esql: 'FROM traces-*.otel-*,logs-*.otel-*',
 };
 
@@ -64,8 +64,13 @@ const filterProps = (testSubj: string) =>
     .filter((props) => props['data-test-subj'] === testSubj)
     .pop();
 
-const renderPage = () =>
-  render(<MobileOverview serviceName="shop-mobile" />, { wrapper: EuiProvider });
+const Wrapper = ({ children }: { children: React.ReactNode }) => (
+  <I18nProvider>
+    <EuiProvider>{children}</EuiProvider>
+  </I18nProvider>
+);
+
+const renderPage = () => render(<MobileOverview serviceName="shop-mobile" />, { wrapper: Wrapper });
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -111,8 +116,31 @@ describe('MobileOverview', () => {
       'performance',
       'views',
     ].forEach((section) =>
-      expect(screen.getByTestId(`digitalExperienceMobileSection-${section}`)).toBeInTheDocument()
+      expect(
+        screen.getByTestId(`digitalExperienceMobileSection-${section}Empty`)
+      ).toHaveTextContent('Coming soon')
     );
+  });
+
+  it('links the KPI row to Discover once, and shows the crash-free change in percentage points', async () => {
+    fetch.mockResolvedValue({
+      ...KPIS,
+      crashFreeSessions: { value: 0.99, previous: 0.98, delta: 0.01 },
+    });
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    expect(screen.getByTestId('digitalExperienceMobileKpisDiscover')).toHaveAttribute(
+      'href',
+      '/app/discover'
+    );
+    expect(screen.getByTestId('digitalExperienceMobileKpiCrashFreeChange')).toHaveTextContent(
+      '+1 pp'
+    );
+    expect(useDiscoverHref).toHaveBeenLastCalledWith(KPIS.esql, {
+      from: '2021-01-18T12:00:00.000Z',
+      to: '2021-01-18T13:00:00.000Z',
+    });
   });
 
   it('queries the KPIs with the OS and release from the URL', async () => {

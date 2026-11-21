@@ -25,8 +25,6 @@ export interface MobileKpisResponse {
   platforms: MobilePlatform[];
   /** Environments in the time range, whatever the environment filter. */
   environments: string[];
-  /** The bucket the panels chart with: hourly up to 24 hours, daily from there on. */
-  bucket: 'hour' | 'day';
   /** The ES|QL of the panels with every filter, for Discover. */
   esql: string;
 }

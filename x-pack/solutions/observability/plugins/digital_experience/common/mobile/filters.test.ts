@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { ENVIRONMENT_FIELDS } from '../otel_data';
 import { mobileDocuments } from './documents';
+import { MOBILE_FIELDS } from './fields';
 import { mobilePanelQuery, withEnvironment } from './filters';
 import { withKpiStats } from './kpis';
 
@@ -37,6 +39,10 @@ describe('mobilePanelQuery', () => {
 describe('withEnvironment', () => {
   const print = (environment?: string) =>
     withEnvironment(mobileDocuments(), environment).print('basic');
+
+  it("reads the environment fields the routes' environmentFilter reads", () => {
+    expect([MOBILE_FIELDS.environment, MOBILE_FIELDS.environmentName]).toEqual(ENVIRONMENT_FIELDS);
+  });
 
   it('filters nothing for all environments', () => {
     expect(print(undefined)).toBe(mobileDocuments().print('basic'));

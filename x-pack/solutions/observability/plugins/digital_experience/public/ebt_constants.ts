@@ -77,7 +77,7 @@ export const DIGITAL_EXPERIENCE_EBT_ELEMENTS = {
 export const MOBILE_APPLICATION_EBT_ELEMENTS = {
   RELEASE_FILTER: 'mobileReleaseFilter',
   OS_FILTER: 'mobileOsFilter',
-  PANEL_DISCOVER_LINK: 'mobilePanelDiscoverLink',
+  KPIS_DISCOVER_LINK: 'mobileKpisDiscoverLink',
   RETRY: 'mobileRetry',
 } as const;
 

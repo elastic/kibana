@@ -87,6 +87,12 @@ export class DigitalExperiencePage {
   public readonly permissionDenied: Locator;
   public readonly classicRumPageLoadMetric: Locator;
   public readonly classicRumServiceSelect: Locator;
+  public readonly mobileTab: Locator;
+  public readonly mobileApplicationsTable: Locator;
+  public readonly mobileKpis: Locator;
+  public readonly mobilePagePlatforms: Locator;
+  public readonly mobileOsFilter: Locator;
+  public readonly mobileEmpty: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.mainContainer = page.getByTestId('digitalExperienceMainContainer');
@@ -152,6 +158,37 @@ export class DigitalExperiencePage {
     this.permissionDenied = page.getByTestId('ResetSessionButton');
     this.classicRumPageLoadMetric = page.getByTestId('uxClientMetrics-totalPageLoad');
     this.classicRumServiceSelect = page.getByTestId('uxServiceNameFilterSelect');
+    this.mobileTab = page.getByTestId('digitalExperienceApplicationTypeTab-mobile');
+    this.mobileApplicationsTable = page.getByTestId('digitalExperienceMobileApplicationsTable');
+    this.mobileKpis = page.getByTestId('digitalExperienceMobileKpis');
+    this.mobilePagePlatforms = page
+      .getByTestId('digitalExperienceMobilePagePlatforms')
+      .getByTestId('digitalExperiencePlatformBadge');
+    this.mobileOsFilter = page.getByTestId('digitalExperienceMobileOsFilter');
+    this.mobileEmpty = page.getByTestId('digitalExperienceMobileEmpty');
+  }
+
+  /** The row of a mobile application in the Mobile tab's table. */
+  mobileApplicationRow(serviceName: string): Locator {
+    return this.mobileApplicationsTable.getByRole('row').filter({ hasText: serviceName });
+  }
+
+  /** The link that opens a mobile application's page. */
+  mobileApplicationLink(serviceName: string): Locator {
+    return this.mobileApplicationsTable
+      .getByTestId('digitalExperienceMobileApplicationLink')
+      .filter({ hasText: serviceName });
+  }
+
+  /** The value of a KPI of the mobile page, e.g. `Sessions`. */
+  mobileKpiValue(kpi: 'Sessions' | 'Users' | 'CrashFree' | 'ErrorRate'): Locator {
+    return this.page.getByTestId(`digitalExperienceMobileKpi${kpi}Value`);
+  }
+
+  /** Narrows the mobile page to one OS, e.g. `iPadOS`. */
+  async selectMobileOs(osName: string): Promise<void> {
+    await this.mobileOsFilter.click();
+    await this.page.getByTestId(`digitalExperienceMobileOsFilterOption-${osName}`).click();
   }
 
   /** Opens the list with the given URL query, by default only the time range. */
