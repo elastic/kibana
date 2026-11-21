@@ -21,6 +21,19 @@ const SONNET_5 = '.anthropic-claude-5-sonnet-chat_completion';
 const SONNET_5_5 = '.anthropic-claude-5.5-sonnet-chat_completion';
 const GPT_6_SOL = '.openai-gpt-6-sol-chat_completion';
 const GPT_5_6_SOL = '.openai-gpt-5.6-sol-chat_completion';
+const GLM_5_2 = '.zai-glm-5-2-chat_completion';
+const KIMI_K3 = '.moonshot-kimi-k3-chat_completion';
+
+// Chat-completion endpoints the Serverless trial EIS catalog serves. It serves none of the other
+// recommendations, so without these every tier falls through to the same catalog entry.
+const TRIAL_CATALOG_CHAT_ENDPOINTS = [
+  SONNET_5,
+  KIMI_K3,
+  '.nvidia-nemotron-3.5-super-vl-chat_completion',
+  '.qwen-3.8-2.4t-a95b-chat_completion',
+  '.zai-glm-5.3-chat_completion',
+  '.zai-glm-5-2-chat_completion',
+];
 
 const createSetupMock = (result: { ok: boolean; error?: string } = { ok: true }) => {
   const register = jest.fn().mockReturnValue(result);
@@ -91,6 +104,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
         '.openai-gpt-6-luna-chat_completion',
         '.google-gemini-3.5-flash-lite-chat_completion',
         '.anthropic-claude-4.5-haiku-chat_completion',
+        GLM_5_2,
       ],
     });
   });
@@ -114,6 +128,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
         SONNET_5_5,
         '.openai-gpt-5.6-terra-chat_completion',
         '.google-gemini-3.6-flash-chat_completion',
+        SONNET_5,
       ],
     });
   });
@@ -132,7 +147,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
       featureName: 'Frontier models',
       featureDescription:
         'Complex, single-pass work where output quality matters most, such as generating attack discoveries or drafting a detection rule. Choose your most capable model.',
-      recommendedEndpoints: [GPT_6_SOL, GPT_5_6_SOL, OPUS_5],
+      recommendedEndpoints: [GPT_6_SOL, GPT_5_6_SOL, OPUS_5, KIMI_K3],
     });
   });
 
@@ -176,6 +191,24 @@ describe('registerAlertZeroInferenceFeatures', () => {
     for (const endpoint of balancedEndpoints) {
       expect(recommendedEndpoints).not.toContain(endpoint);
     }
+  });
+
+  it('keeps a distinct trial-served model on every tier', () => {
+    const { setup, register } = createSetupMock();
+
+    registerAlertZeroInferenceFeatures(setup, logger);
+
+    const trialServed = [
+      ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+      ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+      ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+    ].map((tierId) =>
+      registeredTier(register, tierId).recommendedEndpoints.find((endpoint: string) =>
+        TRIAL_CATALOG_CHAT_ENDPOINTS.includes(endpoint)
+      )
+    );
+
+    expect(trialServed).toEqual([GLM_5_2, SONNET_5, KIMI_K3]);
   });
 
   it('registers the prompt-template row with no recommended model', () => {
