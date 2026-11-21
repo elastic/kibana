@@ -22,6 +22,8 @@ import {
 } from '../../../common/overview_filters';
 import { EVENT_NAVIGATION_TIMING } from '../../../common/otel_data';
 import {
+  DEVICE_DESKTOP_LABEL,
+  DEVICE_MOBILE_LABEL,
   SOURCE_APP_VERSION_FIELDS,
   SOURCE_MOBILE_FIELDS,
   SOURCE_URL_FIELD,
@@ -31,7 +33,10 @@ import { ENVIRONMENT_FIELDS, eventCount } from './queries';
 
 /** What a field that is not a name says, per value: the device name of `browser.mobile`. */
 const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEntries(
-  SOURCE_MOBILE_FIELDS.map((field) => [field, { true: 'Mobile', false: 'Desktop' }])
+  SOURCE_MOBILE_FIELDS.map((field) => [
+    field,
+    { true: DEVICE_MOBILE_LABEL, false: DEVICE_DESKTOP_LABEL },
+  ])
 );
 
 /**

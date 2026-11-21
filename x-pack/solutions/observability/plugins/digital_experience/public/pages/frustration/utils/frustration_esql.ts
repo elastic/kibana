@@ -14,6 +14,8 @@ import {
   OTEL_LOGS_INDEX,
 } from '../../../../common/otel_data';
 import {
+  DEVICE_DESKTOP_LABEL,
+  DEVICE_MOBILE_LABEL,
   SOURCE_APP_VERSION_FIELDS,
   SOURCE_EVENT_NAME_FIELD,
   SOURCE_EXCEPTION_MESSAGE_FIELD,
@@ -54,19 +56,22 @@ const literal = (value: string): string => `"${escapeEsqlString(value)}"`;
 
 const eventList = FRUSTRATION_EVENTS.map(literal).join(', ');
 
-// A frustration event is exactly one of the three, so the CASE needs no default.
-const TYPE_LABELS: ReadonlyArray<readonly [FrustrationEvent, string]> = [
-  [EVENT_RAGE_CLICK, 'rage'],
-  [EVENT_DEAD_CLICK, 'dead'],
-  [EVENT_ERROR_CLICK, 'error'],
+// One column per type, so a chart stacks them and each value of a dimension is one row.
+const TYPE_COLUMNS: ReadonlyArray<readonly [string, FrustrationEvent]> = [
+  ['rage', EVENT_RAGE_CLICK],
+  ['dead', EVENT_DEAD_CLICK],
+  ['error', EVENT_ERROR_CLICK],
 ];
-const TYPE_EVAL = `type = CASE(${TYPE_LABELS.map(
-  ([event, label]) => `${SOURCE_EVENT_NAME_FIELD} == ${literal(event)}, ${literal(label)}`
-).join(', ')})`;
+const SIGNALS_BY_TYPE = `${TYPE_COLUMNS.map(
+  ([column, event]) => `${column} = COUNT(*) WHERE ${SOURCE_EVENT_NAME_FIELD} == ${literal(event)}`
+).join(', ')}, signals = COUNT(*)`;
 
 const ENVIRONMENT_FIELDS = SESSION_ATTRIBUTE_FIELDS.environment;
 
-/** Nothing for all environments, as `environmentFilter` does on the server. */
+/**
+ * Nothing for all environments. No environment means every environment field is unset: OTel data
+ * doesn't carry APM's "Not defined" value, which the server's `environmentFilter` also matches.
+ */
 const environmentClause = (environment: string): string => {
   if (!environment || environment === ENVIRONMENT_ALL_VALUE) {
     return '';
@@ -113,17 +118,13 @@ export const signalsOfTypeQuery = (
   AND ${SOURCE_EVENT_NAME_FIELD} == ${literal(event)}
 | STATS signals = COUNT(*)`;
 
-/** The signals per type over the dashboard's time range. */
+/** The signals of each type per bucket of the dashboard's time range. */
 export const signalsOverTimeQuery = (params: FrustrationQueryParams): string =>
   `${frustrationBase(params)}
-| EVAL ${TYPE_EVAL}
-| STATS signals = COUNT(*) BY time = BUCKET(@timestamp, ${TIME_BUCKETS}, ?_tstart, ?_tend), type
+| STATS ${SIGNALS_BY_TYPE} BY time = BUCKET(@timestamp, ${TIME_BUCKETS}, ?_tstart, ?_tend)
 | SORT time`;
 
-/**
- * The signals per type of the `top` values of an expression. The rows of the most frequent values
- * come first, and each has at most one row per type, so the limit keeps every type of each.
- */
+/** The signals of each type of the `top` most affected values of an expression, a row each. */
 const signalsByDimensionQuery = (
   params: FrustrationQueryParams,
   column: string,
@@ -132,18 +133,17 @@ const signalsByDimensionQuery = (
   preEvals: readonly string[] = []
 ): string =>
   `${frustrationBase(params)}
-| EVAL ${TYPE_EVAL}${preEvals.map((preEval) => `, ${preEval}`).join('')}, ${column} = ${expression}
-| STATS signals = COUNT(*) BY ${column}, type
-| INLINE STATS total = SUM(signals) BY ${column}
-| SORT total DESC, ${column}, type
-| LIMIT ${top * FRUSTRATION_EVENTS.length}
-| DROP total`;
+| EVAL ${[...preEvals, `${column} = ${expression}`].join(', ')}
+| WHERE ${column} IS NOT NULL
+| STATS ${SIGNALS_BY_TYPE} BY ${column}
+| SORT signals DESC, ${column}
+| LIMIT ${top}`;
 
-/** The signals per type of the most affected application versions. */
+/** The signals of each type of the most affected application versions. */
 export const signalsByVersionQuery = (params: FrustrationQueryParams): string =>
   signalsByDimensionQuery(params, 'version', firstOf(SOURCE_APP_VERSION_FIELDS), TOP_VERSIONS);
 
-/** The signals per type of the most affected browsers. */
+/** The signals of each type of the most affected browsers. */
 export const signalsByBrowserQuery = (params: FrustrationQueryParams): string =>
   signalsByDimensionQuery(
     params,
@@ -153,8 +153,8 @@ export const signalsByBrowserQuery = (params: FrustrationQueryParams): string =>
   );
 
 /**
- * The signals per type of the most affected devices: the device model or type, else "Mobile" or
- * "Desktop" from `browser.mobile`, as the Overview's device filter reads it.
+ * The signals of each type of the most affected devices: the device model or type, else "Mobile"
+ * or "Desktop" from `browser.mobile`, as the Overview's device filter reads it.
  */
 export const signalsByDeviceQuery = (params: FrustrationQueryParams): string =>
   signalsByDimensionQuery(
@@ -162,7 +162,9 @@ export const signalsByDeviceQuery = (params: FrustrationQueryParams): string =>
     'device',
     `COALESCE(${[
       ...SESSION_ATTRIBUTE_FIELDS.device,
-      `CASE(mobile == "true", "Mobile", mobile == "false", "Desktop")`,
+      `CASE(mobile == "true", ${literal(DEVICE_MOBILE_LABEL)}, mobile == "false", ${literal(
+        DEVICE_DESKTOP_LABEL
+      )})`,
     ].join(', ')})`,
     TOP_DEVICES,
     [`mobile = COALESCE(${SOURCE_MOBILE_FIELDS.map((field) => `TO_STRING(${field})`).join(', ')})`]

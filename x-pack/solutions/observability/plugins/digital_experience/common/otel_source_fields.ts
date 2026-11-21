@@ -50,3 +50,5 @@ export const SOURCE_MOBILE_FIELDS = [
   resourceAttributeField('browser.mobile'),
   attributeField('browser.mobile'),
 ] as const;
+export const DEVICE_MOBILE_LABEL = 'Mobile';
+export const DEVICE_DESKTOP_LABEL = 'Desktop';

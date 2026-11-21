@@ -17,9 +17,13 @@ import {
 import {
   SOURCE_APP_VERSION_FIELDS,
   SOURCE_EXCEPTION_MESSAGE_FIELD,
+  SOURCE_EVENT_NAME_FIELD,
   SOURCE_EXCEPTION_TYPE_FIELD,
+  SOURCE_MOBILE_FIELDS,
   SOURCE_SERVICE_NAME_FIELD,
   SOURCE_SESSION_ID_FIELD,
+  DEVICE_DESKTOP_LABEL,
+  DEVICE_MOBILE_LABEL,
 } from '../../../../common/otel_source_fields';
 import { SESSION_ATTRIBUTE_FIELDS } from '../../../../common/session_attribute_fields';
 import {
@@ -54,6 +58,10 @@ const builders: Array<[string, (queryParams: FrustrationQueryParams) => string]>
   ['signalsByDeviceQuery', signalsByDeviceQuery],
   ['errorClicksQuery', errorClicksQuery],
 ];
+
+const WIDE_STATS = `STATS rage = COUNT(*) WHERE ${SOURCE_EVENT_NAME_FIELD} == "${EVENT_RAGE_CLICK}", dead = COUNT(*) WHERE ${SOURCE_EVENT_NAME_FIELD} == "${EVENT_DEAD_CLICK}", error = COUNT(*) WHERE ${SOURCE_EVENT_NAME_FIELD} == "${EVENT_ERROR_CLICK}", signals = COUNT(*)`;
+
+const statsOf = (query: string): string[] => query.match(/\| STATS /g) ?? [];
 
 const withEnvironment = (environment: string): FrustrationQueryParams => ({
   ...params,
@@ -155,7 +163,7 @@ describe('frustration ES|QL', () => {
       const query = frustratedSessionsQuery(params);
       expect(query).toContain(`${SOURCE_SERVICE_NAME_FIELD} == "media-portal-web"`);
       expect(query).toContain(
-        `frustrated = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) WHERE event_name IN (`
+        `frustrated = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) WHERE ${SOURCE_EVENT_NAME_FIELD} IN (`
       );
       expect(query).toContain(`sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD})`);
     });
@@ -174,7 +182,7 @@ describe('frustration ES|QL', () => {
   describe('signalsOfTypeQuery', () => {
     it.each(FRUSTRATION_EVENTS)('counts only %s', (event) => {
       const query = signalsOfTypeQuery(params, event);
-      expect(query).toContain(`event_name == "${event}"`);
+      expect(query).toContain(`${SOURCE_EVENT_NAME_FIELD} == "${event}"`);
       FRUSTRATION_EVENTS.filter((other) => other !== event).forEach((other) =>
         expect(query).not.toContain(other)
       );
@@ -183,18 +191,13 @@ describe('frustration ES|QL', () => {
   });
 
   describe('signalsOverTimeQuery', () => {
-    it('counts the signals by type over the dashboard time range', () => {
+    it('counts each type per bucket of the dashboard time range, in one row per bucket', () => {
       const query = signalsOverTimeQuery(params);
       expect(query).toContain('BUCKET(@timestamp, 50, ?_tstart, ?_tend)');
-      expect(query).toContain('STATS signals = COUNT(*) BY time =');
-      expect(query).toMatch(/BY time = .*, type/);
-    });
-
-    it('labels the types with CASE over the event constants', () => {
-      const query = signalsOverTimeQuery(params);
-      expect(query).toContain(
-        `CASE(event_name == "${EVENT_RAGE_CLICK}", "rage", event_name == "${EVENT_DEAD_CLICK}", "dead", event_name == "${EVENT_ERROR_CLICK}", "error")`
-      );
+      expect(statsOf(query)).toHaveLength(1);
+      expect(query).toContain(`${WIDE_STATS} BY time = BUCKET(`);
+      expect(query).toContain('SORT time');
+      expect(query).not.toContain('INLINE STATS');
     });
   });
 
@@ -213,28 +216,40 @@ describe('frustration ES|QL', () => {
     it('reads the device from its fields, then from whether the browser is mobile', () => {
       const query = signalsByDeviceQuery(params);
       SESSION_ATTRIBUTE_FIELDS.device.forEach((field) => expect(query).toContain(field));
-      expect(query).toContain('browser.mobile');
-      expect(query).toContain('"Mobile"');
-      expect(query).toContain('"Desktop"');
+      SOURCE_MOBILE_FIELDS.forEach((field) => expect(query).toContain(field));
+      expect(query).toContain(`"${DEVICE_MOBILE_LABEL}"`);
+      expect(query).toContain(`"${DEVICE_DESKTOP_LABEL}"`);
     });
 
     it.each([
       ['version', signalsByVersionQuery, 10],
       ['browser', signalsByBrowserQuery, 5],
       ['device', signalsByDeviceQuery, 5],
-    ])('keeps every type of the top %s values', (column, build, top) => {
+    ])('lists one row per %s value, the %s most affected', (column, build, top) => {
       const query = build(params);
-      expect(query).toContain(`STATS signals = COUNT(*) BY ${column}, type`);
-      expect(query).toContain(`INLINE STATS total = SUM(signals) BY ${column}`);
-      expect(query).toContain(`SORT total DESC, ${column}, type`);
-      expect(query).toContain(`LIMIT ${top * FRUSTRATION_EVENTS.length}`);
+      expect(statsOf(query)).toHaveLength(1);
+      expect(query).toContain(`${WIDE_STATS} BY ${column}`);
+      expect(query).not.toContain('INLINE STATS');
+      expect(query).toContain(`SORT signals DESC, ${column}`);
+      expect(query.trimEnd().split('\n').pop()).toBe(`| LIMIT ${top}`);
+    });
+
+    it.each([
+      ['version', signalsByVersionQuery],
+      ['browser', signalsByBrowserQuery],
+      ['device', signalsByDeviceQuery],
+    ])('keeps a missing %s out of the ranking', (column, build) => {
+      const query = build(params);
+      const notNull = query.indexOf(`| WHERE ${column} IS NOT NULL`);
+      expect(notNull).toBeGreaterThan(query.indexOf('| EVAL'));
+      expect(notNull).toBeLessThan(query.indexOf('| STATS'));
     });
   });
 
   describe('errorClicksQuery', () => {
     it('counts error clicks only, by exception', () => {
       const query = errorClicksQuery(params);
-      expect(query).toContain(`event_name == "${EVENT_ERROR_CLICK}"`);
+      expect(query).toContain(`${SOURCE_EVENT_NAME_FIELD} == "${EVENT_ERROR_CLICK}"`);
       expect(query).not.toContain(EVENT_RAGE_CLICK);
       expect(query).not.toContain(EVENT_DEAD_CLICK);
       expect(query).toContain(
