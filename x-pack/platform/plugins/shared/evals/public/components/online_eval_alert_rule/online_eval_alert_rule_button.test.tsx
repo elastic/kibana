@@ -61,13 +61,17 @@ const setPermissions = (authorizedToCreateAnyRules: boolean) => {
   } as unknown as ReturnType<typeof useGetRuleTypesPermissions>);
 };
 
-const renderButton = () =>
+const renderButton = (
+  metrics: Array<{ metric: string; evaluatorName: string }> = [
+    { metric: 'factuality', evaluatorName: 'correctness' },
+  ]
+) =>
   render(
     <OnlineEvalAlertRuleButton
       workflowId="workflow-1"
       workflowName="quality monitor"
       spaceId="space-a"
-      metrics={[{ metric: 'factuality', evaluatorName: 'correctness' }]}
+      metrics={metrics}
     />
   );
 
@@ -120,6 +124,19 @@ describe('OnlineEvalAlertRuleButton', () => {
     fireEvent.mouseOver(button);
     expect(
       await screen.findByText(/read index privilege on \.evaluation-online-scores/)
+    ).toBeInTheDocument();
+  });
+
+  it('is disabled with an explanatory tooltip when the monitor has no scores yet', async () => {
+    renderButton([]);
+
+    const button = screen.getByTestId('onlineEvalCreateAlertRuleButton');
+    expect(button).toBeDisabled();
+    fireEvent.mouseOver(button);
+    expect(
+      await screen.findByText(
+        'Alert rules can be created once this monitor has recorded at least one score.'
+      )
     ).toBeInTheDocument();
   });
 

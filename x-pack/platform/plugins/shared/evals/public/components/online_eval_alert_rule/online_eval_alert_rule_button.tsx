@@ -187,14 +187,9 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
     return score ? getJudgeScoreDirection(score) : undefined;
   }, [evaluatorData, selectedMetric?.metric]);
   const trigger = triggerOverride ?? getDefaultAlertTrigger(direction);
+  const hasMetrics = metrics.length > 0;
 
-  if (
-    !ruleFormPlugins ||
-    ruleTypesState.isLoading ||
-    !authorizedToCreateAnyRules ||
-    !spaceId ||
-    metrics.length === 0
-  ) {
+  if (!ruleFormPlugins || ruleTypesState.isLoading || !authorizedToCreateAnyRules || !spaceId) {
     return null;
   }
 
@@ -262,7 +257,7 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
     <EuiButton
       size="s"
       iconType="bell"
-      isDisabled={!canReadOnlineScores}
+      isDisabled={!canReadOnlineScores || !hasMetrics}
       isLoading={isLoadingPrivileges}
       onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
       data-test-subj="onlineEvalCreateAlertRuleButton"
@@ -275,7 +270,19 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
 
   const buttonWithTooltip =
     canReadOnlineScores || isLoadingPrivileges ? (
-      button
+      hasMetrics ? (
+        button
+      ) : (
+        <EuiToolTip
+          content={i18n.translate('xpack.evals.onlineEvaluations.alertRule.noScoresTooltip', {
+            defaultMessage:
+              'Alert rules can be created once this monitor has recorded at least one score.',
+          })}
+          data-test-subj="onlineEvalCreateAlertRuleTooltip"
+        >
+          {button}
+        </EuiToolTip>
+      )
     ) : (
       <EuiToolTip
         content={

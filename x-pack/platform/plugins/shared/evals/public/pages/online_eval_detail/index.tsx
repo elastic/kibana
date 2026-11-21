@@ -488,18 +488,15 @@ export const OnlineEvalDetailPage: React.FC = () => {
     [draftState.draft?.evaluators, evaluatorOptions]
   );
 
+  // Only observed `score.name` values are offered: an evaluator can emit scores under other names,
+  // and a rule on a name that was never ingested matches no documents.
   const alertMetrics = useMemo<OnlineEvalAlertMetric[]>(() => {
     const byMetric = new Map<string, OnlineEvalAlertMetric>();
     scoresData.forEach(({ score, evaluator }) => {
       byMetric.set(score.name, { metric: score.name, evaluatorName: evaluator.name });
     });
-    (workflow?.parsedConfig?.evaluators ?? []).forEach(({ name }) => {
-      if (!byMetric.has(name)) {
-        byMetric.set(name, { metric: name, evaluatorName: name });
-      }
-    });
     return Array.from(byMetric.values());
-  }, [scoresData, workflow?.parsedConfig?.evaluators]);
+  }, [scoresData]);
 
   const canEditSettings = canManage && Boolean(draftState.draft);
   const hasLlmEvaluatorSelected = selectedEvaluators.some((option) => option.kind === 'llm');

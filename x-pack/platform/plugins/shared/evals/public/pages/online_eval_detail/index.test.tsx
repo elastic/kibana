@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router, Route } from '@kbn/shared-ux-router';
 import { API_VERSIONS, EVALS_ONLINE_SCORES_URL } from '@kbn/evals-common';
@@ -210,12 +210,39 @@ describe('OnlineEvalDetailPage', () => {
     expect(lensEmbeddableComponent).not.toHaveBeenCalled();
   });
 
-  it('offers the scored metrics and configured evaluators to the alert rule button', async () => {
+  it('offers only observed score names to the alert rule button, never the evaluator name', async () => {
+    const scoreRow = (name: string) => ({
+      '@timestamp': '2026-07-03T14:00:00.000Z',
+      monitor: { id: 'workflow-1', name: '[online-eval] quality monitor' },
+      trace_id: `trace-${name}`,
+      evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
+      score: { name, value: 0.9, label: 'pass' },
+    });
+    httpGet.mockImplementation(async (url: string) =>
+      url === EVALS_ONLINE_SCORES_URL
+        ? { total: 2, data: [scoreRow('factuality'), scoreRow('relevance')] }
+        : { evaluators: [{ name: 'correctness', version: '1.0.0', kind: 'llm' }] }
+    );
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByTestId('mockAlertRuleButton')).toHaveTextContent('factuality,correctness');
+      expect(screen.getByTestId('mockAlertRuleButton')).toHaveTextContent('factuality,relevance');
     });
+    expect(screen.getByTestId('mockAlertRuleButton')).not.toHaveTextContent('correctness');
+  });
+
+  it('offers no alert metrics while the monitor has no scores', async () => {
+    httpGet.mockImplementation(async (url: string) =>
+      url === EVALS_ONLINE_SCORES_URL
+        ? { total: 0, data: [] }
+        : { evaluators: [{ name: 'correctness', version: '1.0.0', kind: 'llm' }] }
+    );
+    renderPage();
+
+    await waitFor(() => {
+      expect(httpGet).toHaveBeenCalledWith(EVALS_ONLINE_SCORES_URL, expect.anything());
+    });
+    expect(screen.getByTestId('mockAlertRuleButton')).toBeEmptyDOMElement();
   });
 
   it('renders rows from the online scores route response', async () => {
@@ -234,7 +261,9 @@ describe('OnlineEvalDetailPage', () => {
 
     expect(await screen.findByText('trace-123')).toBeInTheDocument();
     expect(screen.getByText('correctness@1.0.0')).toBeInTheDocument();
-    expect(screen.getByText('factuality')).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('onlineEvalRecentScoresTable')).getByText('factuality')
+    ).toBeInTheDocument();
     expect(screen.getByText('Scores and traces')).toBeInTheDocument();
     expect(screen.getByText('Score trends')).toBeInTheDocument();
   });
