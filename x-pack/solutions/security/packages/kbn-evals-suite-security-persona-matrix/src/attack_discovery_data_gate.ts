@@ -49,9 +49,7 @@ export const assertAdDataGate = async ({
   end: string;
   /**
    * `_id`s of the restored corpus, captured right after the snapshot restore.
-   * The floor/max count only alerts positively identified as corpus docs; any
-   * other non-Chrysalis alert in the window is reported (and fails) as foreign
-   * contamination instead of silently making up a shortfall.
+   * The floor/max count only alerts positively identified as corpus docs.
    */
   corpusIds: string[];
 }): Promise<void> => {

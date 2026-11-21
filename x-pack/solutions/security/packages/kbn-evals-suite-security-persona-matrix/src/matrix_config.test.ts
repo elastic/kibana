@@ -209,7 +209,7 @@ describe.each([
 /**
  * The matrix report reads `metadata.suite_id`, which the harness records from `EVAL_SUITE_ID`.
  * A parity column only fills when the suite id it names is a registered suite whose run
- * resolves to the parity seed and agent profiles, so the three are asserted together.
+ * resolves to the parity seed and agent profiles.
  */
 describe('persona_matrix.parity.config.json', () => {
   // `--model` ids for the calibration subset; documented in the README.

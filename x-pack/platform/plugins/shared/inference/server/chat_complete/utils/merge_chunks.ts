@@ -31,13 +31,12 @@ const mergeToolCalls = (chunks: ChatCompletionChunkEvent[]): UnvalidatedToolCall
     chunk.tool_calls?.forEach((toolCall) => {
       const key = resolveIndex(toolCall);
       if (key === undefined) {
-        // Some providers (observed: gpt-oss-120b via the EIS gateway) emit
-        // continuation chunks — no toolCallId, no name, sometimes argument
-        // fragments — for a source index whose tool call never started. The
-        // call is unexecutable without an id anyway, so there is nothing to
-        // merge; throwing here 500s the whole converse request and takes the
-        // agent run down with it. A chunk that carries a name is a call start
-        // that cannot be keyed — a genuine protocol break — and still throws.
+        // Some providers emit continuation chunks — no toolCallId, no name, sometimes
+        // argument fragments — for a source index whose tool call never started. The
+        // call is unexecutable without an id anyway, so there is nothing to merge;
+        // throwing here would 500 the whole converse request. A chunk that carries a
+        // name is a call start that cannot be keyed — a genuine protocol break — and
+        // still throws.
         if (!toolCall.toolCallId && !toolCall.function.name) {
           return;
         }

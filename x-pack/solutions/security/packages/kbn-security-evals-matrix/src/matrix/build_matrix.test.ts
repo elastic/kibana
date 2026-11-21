@@ -1737,10 +1737,9 @@ describe('round 8 regression: per-column self-judged and exclusion scoping', () 
     expect(huntCell.kind).toBe('missing');
   });
 
-  // Regression (Libra PRRT_kwDOAHeGUM65T_uB): a column allowlisting only code-only
-  // contract checks must not inherit judge-policy rejections recorded against a
-  // different (judged) evaluator of the same dataset: its numeric mean rests on
-  // code-only checks that stay admitted under every judge policy.
+  // A column allowlisting only code-only contract checks must not inherit judge-policy
+  // rejections recorded against a different (judged) evaluator of the same dataset: its
+  // numeric mean rests on code-only checks that stay admitted under every judge policy.
   it('keeps a code-only column scoreable when an unrelated judged grade was rejected', () => {
     const codeOnlyCfg = parseMatrixConfig({
       columns: [
@@ -1823,9 +1822,9 @@ describe('round 8 regression: per-column self-judged and exclusion scoping', () 
     if (cell.kind === 'excluded') expect(cell.reason).toBe('non-eis-judge');
   });
 
-  // Regression (Libra PRRT_kwDOAHeGUM65U7hw): the allowlist decides whether a column reads
-  // judged grades. Aggregation keeps only admitted scores, so a judged evaluator whose every
-  // grade was rejected is absent from the dataset and must not make the column look code-only.
+  // The allowlist decides whether a column reads judged grades. Aggregation keeps only
+  // admitted scores, so a judged evaluator whose every grade was rejected is absent from
+  // the dataset and must not make the column look code-only.
   it.each([
     ['contract checks plus a judged evaluator', ['FinalAnswerPresent', 'Relevance']],
     ['only a judged evaluator', ['Relevance']],
@@ -1871,12 +1870,12 @@ describe('round 8 regression: per-column self-judged and exclusion scoping', () 
     }
   );
 
-  // Regression (Libra PRRT_kwDOAHeGUM65xD58): rejections are matched by evaluator, so a
-  // rejected grade the column does not select cannot hide the column's valid score.
+  // Rejections are matched by evaluator, so a rejected grade the column does not select
+  // cannot hide the column's valid score.
   it.each([
     ['an unrelated judged evaluator was rejected', ['Relevance'], 'score'],
     ['a selected judged evaluator was rejected', ['Groundedness'], 'excluded'],
-  ])('scores an allowlisted column when %s', (_name, rejectedEvaluators, kind) => {
+  ])('resolves an allowlisted column when %s', (_name, rejectedEvaluators, kind) => {
     const allowlistCfg = parseMatrixConfig({
       columns: [
         {

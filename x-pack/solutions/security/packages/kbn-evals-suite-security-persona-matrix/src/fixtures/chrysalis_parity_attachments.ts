@@ -181,10 +181,7 @@ const PARITY_ATTACHMENT_KIND: Readonly<Record<string, ParityInlineAttachment['ki
   'detection-rule-edit-c': 'rule',
 };
 
-/**
- * The JSON the external benchmark attached to `exampleId`, or undefined when it
- * attached nothing (and always for the default profile).
- */
+/** The JSON the benchmark attached to `exampleId`; undefined if none (always for the default profile). */
 export const resolveParityInlineAttachment = (
   exampleId: string | undefined,
   profile: AgentProfile,

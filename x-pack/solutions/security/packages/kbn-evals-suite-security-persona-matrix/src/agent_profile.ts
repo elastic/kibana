@@ -28,10 +28,8 @@ export const resolveAgentProfile = (raw: string | undefined): AgentProfile => {
 };
 
 /**
- * The registry suite id each profile runs under. The scores index records
- * `EVAL_SUITE_ID` as `suite_id` and the matrix report filters on it, so the
- * suite id is the single source for which profiles a run uses and for the
- * experiment's reporting name.
+ * The registry suite id each profile runs under. The scores index records `EVAL_SUITE_ID`
+ * as `suite_id` and the matrix report filters on it.
  */
 export const PERSONA_MATRIX_SUITE_IDS = {
   default: 'security-persona-matrix',
@@ -46,8 +44,7 @@ interface ProfileEnv {
 /**
  * Raw SEED_PROFILE / AGENT_PROFILE values implied by `suiteId`. The parity suite id selects
  * the parity seed and agent; an explicit value that disagrees with the suite id throws,
- * since the run would otherwise land in a report it does not belong to. Other suite ids
- * pass the raw values through, except that the default suite id rejects non-default ones.
+ * since the run would otherwise land in a report it does not belong to.
  */
 export const resolveSuiteProfileEnv = (
   suiteId: string | undefined,

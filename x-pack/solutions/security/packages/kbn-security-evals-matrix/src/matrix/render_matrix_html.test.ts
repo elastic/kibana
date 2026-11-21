@@ -73,6 +73,12 @@ const mockMatrix: Matrix = {
   openSource: [],
 };
 
+const tokenCostTable = (html: string): string => {
+  const [table] = html.match(/<table class="tokencost">[\s\S]*?<\/table>/) ?? [];
+  if (table === undefined) throw new Error('token-cost table was not rendered');
+  return table;
+};
+
 describe('renderMatrixHtml', () => {
   it('renders a self-contained HTML document', () => {
     const html = renderMatrixHtml(mockMatrix, mockConfig);
@@ -167,9 +173,9 @@ describe('renderMatrixHtml', () => {
   });
 
   it('measures completeness against the configured token columns, not every matrix column', () => {
-    // config.tokenCost.columns scopes the axis to `alert` only; `threat` is a
-    // matrix column the axis never aggregates. A model with counts for `alert`
-    // alone must read complete, and the bucket headers must not include `threat`.
+    // config.tokenCost.columns scopes the axis to `alert` (group "Agent Builder"); `threat`
+    // is an ungrouped matrix column the axis never aggregates. A model with counts for
+    // `alert` alone must read complete, and the token table must not bucket `threat`.
     const config: MatrixConfig = {
       ...mockConfig,
       tokenCost: {
@@ -180,6 +186,10 @@ describe('renderMatrixHtml', () => {
     };
     const matrixWithCost: Matrix = {
       ...mockMatrix,
+      columns: [
+        { id: 'alert', label: 'Alert Analysis', group: 'Agent Builder' },
+        { id: 'threat', label: 'Threat Hunting' },
+      ],
       tokenCost: {
         models: [
           {
@@ -192,11 +202,14 @@ describe('renderMatrixHtml', () => {
         ],
       },
     };
-    const html = renderMatrixHtml(matrixWithCost, config);
-    expect(html).toContain('>2k<br>$0.25</td>');
-    expect(html).not.toContain('<span class="model-id">partial</span>');
-    // The bucket headers cover only the configured `alert` column.
-    expect(html).toContain('<th>Alert Analysis</th>');
+    // Scoped to the token table: the score table also renders these column labels.
+    const table = tokenCostTable(renderMatrixHtml(matrixWithCost, config));
+    expect(table).toContain(
+      '<thead><tr><th>Model</th><th>Agent Builder</th><th>Total</th></tr></thead>'
+    );
+    expect(table).not.toContain('Threat Hunting');
+    expect(table).toContain('>2k<br>$0.25</td>');
+    expect(table).not.toContain('<span class="model-id">partial</span>');
 
     // With both columns configured, the same single-cell model must read partial.
     const fullAxisConfig: MatrixConfig = {
@@ -207,7 +220,10 @@ describe('renderMatrixHtml', () => {
         columns: ['alert', 'threat'],
       },
     };
-    const partial = renderMatrixHtml(matrixWithCost, fullAxisConfig);
+    const partial = tokenCostTable(renderMatrixHtml(matrixWithCost, fullAxisConfig));
+    expect(partial).toContain(
+      '<thead><tr><th>Model</th><th>Agent Builder</th><th>Threat Hunting</th><th>Total</th></tr></thead>'
+    );
     expect(partial).toContain('<span class="model-id">partial</span></td></tr>');
   });
 

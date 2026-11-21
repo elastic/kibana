@@ -153,11 +153,9 @@ const PARITY_TOOLS: ReadonlyArray<Record<string, unknown>> = [
   {
     id: 'write_todos',
     type: 'workflow',
-    // Verbatim copy of the builtin `write_todos` tool description as it read at
-    // removal (#303186, Nov 5 2026): the Oct-29 external-benchmark baseline was
-    // captured with this exact text, and tool-selection keys on it. Do not
-    // reword. The tool itself is gone platform-wide; this seeded workflow tool
-    // reproduces its contract (schema: todos: [{content, status}], ack result).
+    // Verbatim copy of the builtin `write_todos` description; tool-selection keys
+    // on it, do not reword. The input schema is reproduced by the `write-todos`
+    // workflow (see parity_workflows.ts).
     description:
       'Manage the plan for this conversation by creating and tracking tasks. Use this tool frequently so the user can see what you are doing and how you are progressing.\n\n' +
       '## When to use it\n\n' +

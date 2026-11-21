@@ -49,8 +49,8 @@ const DELETE_BACKOFF_MS = 1_000;
 
 // Enough for a connector params error; the full error stays on the execution.
 const EXECUTION_ERROR_MAX_CHARS = 500;
-// Mirrors `TerminalExecutionStatuses` in @kbn/workflows; inlined because this
-// package does not depend on it.
+// Mirrors `TerminalExecutionStatuses` in @kbn/workflows (already a tsconfig reference
+// of this package); kept as a local set, so update it if the platform list changes.
 const TERMINAL_STATUSES = new Set(['completed', 'failed', 'cancelled', 'timed_out', 'skipped']);
 
 /**

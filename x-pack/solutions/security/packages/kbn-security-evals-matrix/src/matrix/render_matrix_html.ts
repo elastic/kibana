@@ -360,8 +360,7 @@ const renderTokenCost = (matrix: Matrix, config: MatrixConfig): string => {
   if (!matrix.tokenCost || matrix.tokenCost.models.length === 0) return '';
   // Bucket ONLY the columns the token axis is configured over. Bucketing every
   // matrix column would let non-token columns pad `expectedColumns`, so a model
-  // missing counts in a configured column still reads "complete" (and buckets
-  // built from matrix.columns would include columns the axis never aggregates).
+  // missing counts in a configured column still reads "complete".
   const tokenColumnIds = new Set(config.tokenCost?.columns ?? []);
   const tokenColumns = matrix.columns.filter((c) =>
     tokenColumnIds.size === 0 ? true : tokenColumnIds.has(c.id)

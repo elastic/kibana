@@ -740,13 +740,10 @@ const buildMatrixRow = (
                 .reduce((sum, dataset) => sum + (pick(dataset) || 0), 0)),
         0
       );
-    // A column whose allowlist names only code-only contract checks (e.g.
-    // `FinalAnswerPresent`) keeps its score under every judge policy, so it must
-    // not inherit judge-policy rejections recorded against other evaluators of the
-    // same datasets. Decided from the recorded rejected evaluator names, not the
-    // aggregated evaluators: those hold only admitted scores, so a judged evaluator
-    // whose every grade was rejected is absent there. (A suite rejected wholesale
-    // pushes `datasets: []`: its fate is the column's fate, so the counts stay.)
+    // Decided from the recorded rejected evaluator names, not the aggregated
+    // evaluators: those hold only admitted scores, so a judged evaluator whose every
+    // grade was rejected is absent there. (A suite rejected wholesale pushes
+    // `datasets: []`: its fate is the column's fate, so the counts stay.)
     const columnAllows = column.evaluators ? new Set(column.evaluators) : undefined;
     const canScopeToSelection = columnSuitesAll.every((suite) => suite.datasets.length > 0);
     const readsJudgedGrades = allowlistReadsRejectedGrades(
@@ -771,10 +768,8 @@ const buildMatrixRow = (
       // `excluded:non-eis-judge` just because `alert` was fully rejected.
       excludedSelfJudged: scopedExcludedSelfJudged,
       excludedNonEis: scopedExcludedNonEis,
-      // True only when EVERY dataset this column reads holds rejected judged grades and
-      // no admitted judged grade — i.e. the column's numeric mean would rest purely on
-      // judge-less contract checks. Datasets without any judge-policy rejection (the
-      // ordinary case) never trip it.
+      // True only when EVERY dataset this column reads has rejected judged grades and no
+      // admitted one.
       judgelessOnly:
         columnDatasetIds !== undefined &&
         columnSuitesAll.some((suite) =>

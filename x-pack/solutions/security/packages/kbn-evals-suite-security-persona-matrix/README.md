@@ -58,7 +58,7 @@ The suite id picks the profiles, so nothing beyond `EVAL_SUITE_ID` (or `--suite`
 | `security-persona-matrix`        | `minimal`    | `default`          |
 | `security-persona-matrix-parity` | `parity`     | `chrysalis-parity` |
 
-`SEED_PROFILE` and `AGENT_PROFILE` only take effect when `EVAL_SUITE_ID` is unset (a raw `node scripts/playwright test` run). When it is set, a `SEED_PROFILE` or `AGENT_PROFILE` that disagrees with the suite id fails the run at startup. No CI step sets either variable.
+`EVAL_SUITE_ID` fixes the profiles only for the two suite ids in the table above; for those, a `SEED_PROFILE` or `AGENT_PROFILE` that disagrees with the suite id fails the run at startup. Any other suite id, or none (a raw `node scripts/playwright test` run), passes `SEED_PROFILE` and `AGENT_PROFILE` through unchanged. No CI step sets either variable.
 
 ### Seed profiles (`SEED_PROFILE`)
 

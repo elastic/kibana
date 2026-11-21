@@ -20,9 +20,6 @@ import { servers as personaMatrixConfig } from '../../evals_security_persona_mat
  * in the external benchmark whose per-model behaviour this suite reproduces
  * (its baseline never calls an `sml` tool and has no `search_relevant_skills`),
  * so enabling them here adds tool-surface noise the baseline cannot match.
- *
- * Everything else — the experimental security skills, alerting_v2, the tracing
- * config — carries over from the parent config set unchanged.
  */
 export const servers: ScoutServerConfig = {
   ...personaMatrixConfig,

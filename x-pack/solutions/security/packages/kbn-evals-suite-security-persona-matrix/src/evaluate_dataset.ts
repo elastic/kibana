@@ -951,8 +951,9 @@ export function createEvaluatePersonaMatrixDataset({
           } catch (error) {
             // Fail soft: one unreachable agent must not abort the whole suite. The
             // executor has no per-example boundary, so a throw here discards every
-            // (example, rep) pair after it. Record the failure as a scored 'error'
-            // row instead.
+            // (example, rep) pair after it. Record the failure as an errored submission
+            // instead: the unanswered marker and `errors` are kept, and the qualitative
+            // judges report 'unavailable' (not a score of 0).
             const message = error instanceof Error ? error.message : String(error);
             log.error(
               `[persona-matrix] converse failed for example "${example.id ?? question}": ${message}`

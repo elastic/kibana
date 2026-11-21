@@ -126,13 +126,11 @@ export interface ParityWorkflow {
 export const TODOS_INDEX = 'persona-matrix-todos';
 
 /**
- * The external benchmark's agent had the platform's builtin `write_todos` tool;
- * the platform removed it platform-wide (#303186) after that baseline was
- * captured. This workflow reconstructs the tool's contract: a required
- * `todos` array of `{content, status}` objects (JSON-Schema root-level inputs,
- * the only format carrying arrays of objects), a verbatim copy of the original
- * tool description (model tool-selection keys on it). The result is the raw
- * index response; nothing reads it.
+ * Backs the `write_todos` workflow tool. Input: a required `todos` array of
+ * `{content, status}` objects (JSON-Schema root-level inputs, the only format
+ * carrying arrays of objects). The model-facing description comes from
+ * `PARITY_TOOLS`; output differs from the removed builtin because the workflow
+ * tool returns the workflow-execution wrapper.
  * Writes land in TODOS_INDEX so planning divergence stays diagnosable without
  * affecting any evaluator (planning is not a side effect, see
  * `SIDE_EFFECT_TOOL_IDS`).

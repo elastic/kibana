@@ -9,10 +9,7 @@ import type { Client as EsClient, estypes } from '@elastic/elasticsearch';
 
 const PIT_KEEP_ALIVE = '2m';
 
-/**
- * Every doc `_id` in the time window, paged via search_after inside a
- * point-in-time (PIT).
- */
+/** Every doc `_id` in the time window, paged via search_after inside a PIT. */
 export const listWindowIds = (
   esClient: EsClient,
   index: string,

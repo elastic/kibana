@@ -92,9 +92,8 @@ export function parityRestampOffset(nowMs: number): number {
 let parityEpochMs: number | undefined;
 
 /**
- * The instant the parity corpus was (or will be) re-stamped to. Fixed on first use so the
- * seeded docs and the alert inlined into prompts share one offset for the whole run;
- * `seedChrysalisAlerts` pins it at seed time.
+ * The instant the parity corpus is re-stamped to. Fixed on first use so the seeded docs
+ * and the alert inlined into prompts share one offset for the whole run.
  */
 export function getParityEpochMs(): number {
   parityEpochMs ??= Date.now();

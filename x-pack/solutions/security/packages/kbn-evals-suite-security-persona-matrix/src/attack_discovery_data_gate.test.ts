@@ -21,8 +21,8 @@ const WINDOW = {
 };
 
 /**
- * Answers the corpus count (query whose must_not mentions the corpus ids filter), the
- * Chrysalis count, and the foreign count by inspecting the ids filter presence.
+ * Answers the three gate counts by where the corpus `ids` clause sits: in `filter` for
+ * corpus, only in `must_not` for foreign, nowhere for Chrysalis.
  */
 const clientWith = ({
   corpus,

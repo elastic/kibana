@@ -44,10 +44,7 @@ describe('listWindowIds', () => {
     expect(search.mock.calls[2][0]).toMatchObject({ search_after: ['2'] });
   });
 
-  // Regression: sorting on `_id` throws on ES 8+
-  // ("Fielddata access on the _id field is disallowed", fielddata on _id is
-  // disabled by default), failing Attack Discovery setup on every run before
-  // the data gate could execute. Paging must sort on `_shard_doc`, never `_id`.
+  // Regression: paging must sort on `_shard_doc`, not `_id` (ES 8+ rejects `_id` fielddata).
   it('never sorts on _id (ES 8 disables _id fielddata)', async () => {
     const search = pagedSearch([[{ _id: 'a', sort: ['0'] }], []]);
     await listWindowIds(clientWith(search), 'idx', WINDOW);
@@ -57,10 +54,7 @@ describe('listWindowIds', () => {
     }
   });
 
-  // Regression: ES only accepts a `_shard_doc`
-  // sort inside a point-in-time search; without a PIT the request fails with
-  // "[_shard_doc] sort field cannot be used without [point in time]". The
-  // search must open a PIT, pass `pit` (not `index`), and close it afterwards.
+  // Regression: `_shard_doc` sorts need a PIT: open one, pass `pit` (not `index`), close it.
   it('searches inside a PIT and closes it', async () => {
     const search = pagedSearch([[{ _id: 'a', sort: ['0'] }], []]);
     const client = clientWith(search);

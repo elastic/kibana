@@ -477,10 +477,8 @@ describe('mergeChunks', () => {
   });
 
   it('skips an orphaned arguments fragment for an index whose tool call never started', async () => {
-    // A continuation delta carrying an arguments prefix (e.g. `{"`) but no
-    // toolCallId and no name — the call never started, so the fragment is
-    // unexecutable. It must not 500 the converse request nor corrupt the
-    // merged calls.
+    // A continuation delta with an arguments prefix (e.g. `{"`) but no toolCallId and
+    // no name: the call never started, so the fragment is dropped.
     const merged = mergeChunks([
       {
         content: '',
