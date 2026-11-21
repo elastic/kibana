@@ -314,6 +314,16 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      {!errorPrompt && kpis?.isPartial && (
+        <>
+          <KbnWarningCallout
+            data-test-subj="digitalExperienceMobileKpisPartialAccess"
+            size="s"
+            title={PARTIAL_ACCESS_TITLE}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       {errorPrompt ??
         (hasNoData ? (
           <MobileOnboardingPrompt
@@ -323,16 +333,6 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
           />
         ) : (
           <>
-            {kpis?.isPartial && (
-              <>
-                <KbnWarningCallout
-                  data-test-subj="digitalExperienceMobileKpisPartialAccess"
-                  size="s"
-                  title={PARTIAL_ACCESS_TITLE}
-                />
-                <EuiSpacer size="m" />
-              </>
-            )}
             <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>
               {MOBILE_KPIS.map(({ kpi, format, ...panel }) => (
                 <MobilePanel

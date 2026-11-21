@@ -165,6 +165,14 @@ describe('MobileOverview', () => {
     ).toBeInTheDocument();
   });
 
+  it('warns about the unreadable indices next to the no data prompt', async () => {
+    fetch.mockResolvedValue({ ...KPIS, hasData: false, isPartial: true });
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceMobileEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('digitalExperienceMobileKpisPartialAccess')).toBeInTheDocument();
+  });
+
   it('shows no access warning when the user reads every index', async () => {
     renderPage();
     await screen.findByTestId('digitalExperienceMobileKpisDiscover');
