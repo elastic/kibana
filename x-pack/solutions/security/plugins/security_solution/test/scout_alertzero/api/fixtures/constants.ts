@@ -90,6 +90,11 @@ export const PROPOSAL_TIMEOUT_MS = 10 * 60_000;
 export const ACTION_TIMEOUT_MS = 3 * 60_000;
 export const POLL_INTERVAL_MS = 5_000;
 
+/** Ceiling for a `beforeAll` to read a worker's baseline while the catalog settles. */
+export const BASELINE_TIMEOUT_MS = 60_000;
+/** A `beforeAll` that reads a baseline: the poll ceiling plus the rest of its setup. */
+export const BASELINE_HOOK_TIMEOUT_MS = BASELINE_TIMEOUT_MS + 60_000;
+
 /** Ceiling `cancelNewExecutions` polls for in-flight executions to stop. */
 export const DRAIN_TIMEOUT_MS = 60_000;
 /** One drain end to end: the poll ceiling plus the list/cancel round trips around it. */

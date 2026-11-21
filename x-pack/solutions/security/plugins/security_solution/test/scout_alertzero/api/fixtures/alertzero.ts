@@ -179,6 +179,8 @@ export interface WorkerRecord {
   settingsRevision?: number | null;
   settings: { autonomy: string; serviceAccountId?: string };
   blockingReasons?: string[];
+  /** `'unavailable'`: the stored settings could not be read, so `settings` holds defaults. */
+  state?: string;
 }
 
 export const listWorkers = async (api: AlertZeroApi): Promise<WorkerRecord[]> =>
@@ -361,6 +363,10 @@ export const captureWorkerBaseline = async (
   workerId: string
 ): Promise<WorkerBaseline> => {
   const worker = await getWorker(api, workerId);
+  // An unavailable record carries default settings; restoring those would overwrite the real ones.
+  if (worker.state === 'unavailable') {
+    throw new Error(`Worker ${workerId} settings are unavailable; cannot capture a baseline`);
+  }
   return {
     workerId,
     enabled: worker.enabled,

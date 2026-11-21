@@ -114,6 +114,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
   let workerTouched = false;
 
   apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
+    apiTest.setTimeout(testData.BASELINE_HOOK_TIMEOUT_MS);
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     restoreAlertZero = await withAlertZeroEnabledInSpace({
       apiClient,
@@ -127,7 +128,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
     workerBaseline = await pollUntil(
       `worker ${WORKER_ID} baseline`,
       () => captureWorkerBaseline(api, WORKER_ID),
-      { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
+      { timeoutMs: testData.BASELINE_TIMEOUT_MS }
     );
   });
 
