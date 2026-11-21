@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0", and the "Server Side Public License v 1"; you may not use this file
  * except in compliance with, at your election, the "Elastic License 2.0",
  * the "GNU Affero General Public License v3.0 only", and the "Server Side
@@ -32,7 +39,9 @@ export const ensureCheckpointIndex = async (es: ElasticsearchClient): Promise<vo
 };
 
 /** Reads every release checkpoint in one request; a missing release has none. */
-export const readCheckpoints = async (es: ElasticsearchClient): Promise<Map<string, CheckpointDoc>> => {
+export const readCheckpoints = async (
+  es: ElasticsearchClient
+): Promise<Map<string, CheckpointDoc>> => {
   const checkpoints = new Map<string, CheckpointDoc>();
   let searchAfter: string[] | undefined;
   for (;;) {
@@ -60,3 +69,23 @@ export const writeCheckpoint = async (
 ): Promise<void> => {
   await es.index({ index: CHECKPOINT_INDEX, id: doc.release, document: doc, refresh: false });
 };
+
+/** {@link ScanDeps.readCheckpoints} default: read every checkpoint from ES (absent index is empty). */
+export const defaultReadCheckpoints =
+  (es: ElasticsearchClient) => (): Promise<Map<string, CheckpointDoc>> =>
+    readCheckpoints(es);
+
+/** {@link ScanDeps.writeCheckpoint} default: write the checkpoint to ES, failure only warned. */
+export const defaultWriteCheckpoint =
+  (es: ElasticsearchClient, logger: { warn: (message: string) => void }) =>
+  async (doc: CheckpointDoc): Promise<void> => {
+    try {
+      await writeCheckpoint(es, doc);
+    } catch (error) {
+      logger.warn(
+        `Could not write the ${doc.release} refresh checkpoint: ${
+          error instanceof Error ? error.message : String(error)
+        }. The next refresh will rematch this release.`
+      );
+    }
+  };
