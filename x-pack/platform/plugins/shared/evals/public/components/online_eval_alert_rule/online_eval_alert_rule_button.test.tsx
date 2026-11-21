@@ -177,4 +177,22 @@ describe('OnlineEvalAlertRuleButton', () => {
     expect(esql).toContain('avg_score < 0.7');
     expect(esql).toContain('/app/evals/online/workflow-1');
   });
+
+  it('keeps the create button disabled until the window and sample size are whole numbers', async () => {
+    renderButton();
+
+    fireEvent.click(screen.getByTestId('onlineEvalCreateAlertRuleButton'));
+    const windowInput = await screen.findByTestId('onlineEvalAlertRuleWindowSize');
+    const sampleInput = screen.getByTestId('onlineEvalAlertRuleMinSample');
+
+    fireEvent.change(windowInput, { target: { value: '1.5' } });
+    expect(screen.getByTestId('onlineEvalAlertRuleContinue')).toBeDisabled();
+
+    fireEvent.change(windowInput, { target: { value: '2' } });
+    fireEvent.change(sampleInput, { target: { value: '10.5' } });
+    expect(screen.getByTestId('onlineEvalAlertRuleContinue')).toBeDisabled();
+
+    fireEvent.change(sampleInput, { target: { value: '10' } });
+    expect(screen.getByTestId('onlineEvalAlertRuleContinue')).toBeEnabled();
+  });
 });

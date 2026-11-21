@@ -194,12 +194,14 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
   }
 
   const thresholdValue = Number(threshold);
-  const windowSizeValue = Math.floor(Number(windowSize));
-  const minSampleSizeValue = Math.floor(Number(minSampleSize));
+  const windowSizeValue = Number(windowSize);
+  const minSampleSizeValue = Number(minSampleSize);
   const isFormValid =
     threshold.trim() !== '' &&
     Number.isFinite(thresholdValue) &&
+    Number.isInteger(windowSizeValue) &&
     windowSizeValue >= 1 &&
+    Number.isInteger(minSampleSizeValue) &&
     minSampleSizeValue >= 1 &&
     Boolean(selectedMetric);
 
@@ -383,6 +385,7 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
                 <EuiFieldNumber
                   compressed
                   min={1}
+                  step={1}
                   value={windowSize}
                   onChange={(event) => setWindowSize(event.target.value)}
                   data-test-subj="onlineEvalAlertRuleWindowSize"
@@ -410,6 +413,7 @@ export const OnlineEvalAlertRuleButton: React.FC<OnlineEvalAlertRuleButtonProps>
             <EuiFieldNumber
               compressed
               min={1}
+              step={1}
               value={minSampleSize}
               onChange={(event) => setMinSampleSize(event.target.value)}
               data-test-subj="onlineEvalAlertRuleMinSample"
