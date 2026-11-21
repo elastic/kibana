@@ -249,7 +249,8 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
     [kpis?.osNames, osName]
   );
 
-  const hasNoData = kpis !== undefined && !kpis.hasData;
+  // While loading, the KPIs are still the previous filters', which the empty prompts would describe.
+  const hasNoData = !isLoading && kpis !== undefined && !kpis.hasData;
   const errorPrompt =
     error && !loading ? (
       <LoadErrorPrompt

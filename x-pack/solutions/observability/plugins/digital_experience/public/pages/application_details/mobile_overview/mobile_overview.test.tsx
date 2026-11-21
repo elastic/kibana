@@ -190,6 +190,21 @@ describe('MobileOverview', () => {
     );
   });
 
+  it('hides the empty prompt while the KPIs of new filters load', async () => {
+    mockParams({ release: '9.9.9' });
+    fetch.mockResolvedValue({ ...KPIS, hasData: false, isPartial: true });
+    const { rerender } = renderPage();
+    await screen.findByTestId('digitalExperienceMobileUnreadableData');
+
+    fetch.mockReturnValue(new Promise(() => {}));
+    mockParams({ release: '2.0.0' });
+    rerender(<MobileOverview serviceName="shop-mobile" />);
+
+    await waitFor(() =>
+      expect(screen.queryByTestId('digitalExperienceMobileUnreadableData')).toBeNull()
+    );
+  });
+
   it('shows no access warning when the user reads every index', async () => {
     renderPage();
     await screen.findByTestId('digitalExperienceMobileKpisDiscover');

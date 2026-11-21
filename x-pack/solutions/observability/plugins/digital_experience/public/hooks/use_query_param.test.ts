@@ -7,7 +7,9 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { ENVIRONMENT_ALL_VALUE } from '@kbn/apm-types';
 import { useDigitalExperienceParams } from './use_digital_experience_params';
+import { useEnvironment } from './use_environment';
 import { useQueryParam } from './use_query_param';
 import { useSourceFilter } from './use_source_filter';
 
@@ -64,6 +66,18 @@ describe('useQueryParam', () => {
     mockRoute({ release: '2.0.0' });
     expect(renderHook(() => useQueryParam('release')).result.current.value).toBe('2.0.0');
     expect(useDigitalExperienceParams).toHaveBeenCalledWith('/{serviceName}');
+  });
+});
+
+describe('useEnvironment', () => {
+  it('reads the environment', () => {
+    mockRoute({ environment: 'production' });
+    expect(renderHook(() => useEnvironment()).result.current.environment).toBe('production');
+  });
+
+  it('reads ENVIRONMENT_ALL as all environments', () => {
+    mockRoute({ environment: ENVIRONMENT_ALL_VALUE });
+    expect(renderHook(() => useEnvironment()).result.current.environment).toBeUndefined();
   });
 });
 

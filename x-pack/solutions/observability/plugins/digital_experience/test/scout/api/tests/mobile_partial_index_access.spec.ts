@@ -25,6 +25,15 @@ const NO_OTEL_LOGS_ROLE = {
   },
 };
 
+/** The same role, with the OTel logs too. */
+const OTEL_LOGS_AND_TRACES_ROLE = {
+  ...NO_OTEL_LOGS_ROLE,
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['logs-*.otel-*', 'traces-*.otel-*'], privileges: ['read'] }],
+  },
+};
+
 apiTest.describe(
   'Digital Experience mobile APIs with partial index access',
   { tag: DIGITAL_EXPERIENCE_TAGS },
@@ -91,6 +100,25 @@ apiTest.describe(
         expect(response.body as MobileKpisResponse).toMatchObject({
           isPartial: true,
           hasData: false,
+        });
+      }
+    );
+
+    apiTest(
+      'reports the KPIs of the same application with data once the logs are readable',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(OTEL_LOGS_AND_TRACES_ROLE);
+
+        const response = await apiClient.get(mobileKpisPath(MOBILE_APPS.legacyAndroid), {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body as MobileKpisResponse).toMatchObject({
+          isPartial: false,
+          hasData: true,
+          sessions: { value: 1 },
         });
       }
     );
