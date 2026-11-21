@@ -149,6 +149,71 @@
         "additionalProperties": false
       }
     },
+    "system-security-detection-rule-doctor": {
+      "defaults": {
+        "workerId": "system-security-detection-rule-doctor",
+        "autonomy": "manual",
+        "scheduleInterval": "1h",
+        "extras": {
+          "ruleOutcomes": "failed_and_warning"
+        }
+      },
+      "schema": {
+        "kind": "object",
+        "fields": {
+          "workerId": {
+            "kind": "leaf",
+            "type": "string",
+            "const": "system-security-detection-rule-doctor"
+          },
+          "autonomy": {
+            "kind": "leaf",
+            "type": "string",
+            "enum": [
+              "manual",
+              "assisted"
+            ]
+          },
+          "scheduleInterval": {
+            "kind": "leaf",
+            "type": "string",
+            "maxLength": 6,
+            "pattern": "^[1-9][0-9]*[mhd]$"
+          },
+          "extras": {
+            "kind": "object",
+            "fields": {
+              "ruleOutcomes": {
+                "kind": "leaf",
+                "type": "string",
+                "enum": [
+                  "failed_and_warning",
+                  "failed",
+                  "warning"
+                ]
+              }
+            },
+            "required": [
+              "ruleOutcomes"
+            ],
+            "additionalProperties": false
+          },
+          "serviceAccountId": {
+            "kind": "leaf",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "autonomy",
+          "extras",
+          "scheduleInterval",
+          "workerId"
+        ],
+        "additionalProperties": false
+      }
+    },
     "system-security-detection-rule-tuning": {
       "defaults": {
         "workerId": "system-security-detection-rule-tuning",

@@ -1,0 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from './constants';
+import DETECTION_RULE_DOCTOR_YAML from './rule_doctor_worker.yaml';
+import {
+  RULE_DOCTOR_WORKER_SETTINGS_DEFAULTS,
+  upgradeStoredWorkerSettings,
+} from './worker_settings_defaults';
+import {
+  renderRuleDoctorWorkerYaml,
+  type RuleDoctorWorkerTemplateValues,
+} from './worker_template_values';
+import type { ManagedWorkflowDefinition } from '../../types';
+
+export const ALERTZERO_WORKER_DETECTION_RULE_DOCTOR_WORKFLOW_ID =
+  'system-security-detection-rule-doctor';
+
+export const ALERTZERO_WORKER_DETECTION_RULE_DOCTOR_WORKFLOW = {
+  billable: true,
+  id: ALERTZERO_WORKER_DETECTION_RULE_DOCTOR_WORKFLOW_ID,
+  management: ALERTZERO_WORKER_MANAGEMENT,
+  pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
+  version: 3,
+  yamlTemplate: (values: RuleDoctorWorkerTemplateValues): string =>
+    renderRuleDoctorWorkerYaml(
+      DETECTION_RULE_DOCTOR_YAML,
+      upgradeStoredWorkerSettings(RULE_DOCTOR_WORKER_SETTINGS_DEFAULTS, values)
+    ),
+} as const satisfies ManagedWorkflowDefinition<RuleDoctorWorkerTemplateValues>;

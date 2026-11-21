@@ -1187,13 +1187,15 @@ describe('detection rule workflows', () => {
         const [trigger] = yaml.triggers as unknown as Array<{
           inputs: { properties: { actionInput: { properties: Record<string, unknown> } } };
         }>;
+        // The `doctored_` keys tag a Rule Doctor proposal and are never patched onto the rule.
         const editable = Object.keys(trigger.inputs.properties.actionInput.properties).filter(
-          (key) => key !== 'expected_revision'
+          (key) => key !== 'expected_revision' && !key.startsWith('doctored_')
         );
         const patch = String(patchStep.with?.patch);
 
         expect(patch).toMatch(/^\$\{\{ inputs\.actionInput \| pick: /);
         expect(patch).not.toContain('expected_revision');
+        expect(patch).not.toContain('doctored_');
         for (const key of editable) {
           expect(patch).toContain(`'${key}'`);
         }
@@ -1254,7 +1256,34 @@ describe('detection rule workflows', () => {
         expect(accepts({ id: 'r', query: 'a: b' })).toBe(true);
         expect(accepts({ id: 'r', risk_score: 21, severity: 'low' })).toBe(true);
         expect(accepts({ id: 'r', query: 'a: b', risk_score: 21 })).toBe(true);
+        expect(accepts({ id: 'r', index: ['logs-*'] })).toBe(true);
+        expect(accepts({ id: 'r', timestamp_override: 'event.ingested' })).toBe(true);
         expect(accepts({ query: 'a: b' })).toBe(false);
+        // An empty index list would leave the rule searching nothing.
+        expect(accepts({ id: 'r', index: [] })).toBe(false);
+        expect(accepts({ id: 'r', timestamp_override: '' })).toBe(false);
+        expect(accepts({ id: 'r', threat_index: ['threat-intel-*'] })).toBe(true);
+        expect(accepts({ id: 'r', threat_index: [] })).toBe(false);
+        expect(
+          accepts({
+            id: 'r',
+            alert_suppression: {
+              group_by: ['host.name'],
+              duration: { value: 1, unit: 'h' },
+              missing_fields_strategy: 'suppress',
+            },
+          })
+        ).toBe(true);
+        // A threshold rule suppresses on its own fields, so duration alone is valid.
+        expect(accepts({ id: 'r', alert_suppression: { duration: { value: 5, unit: 'm' } } })).toBe(
+          true
+        );
+        expect(accepts({ id: 'r', alert_suppression: { group_by: ['a', 'b', 'c', 'd'] } })).toBe(
+          false
+        );
+        expect(accepts({ id: 'r', alert_suppression: { duration: { value: 1, unit: 'd' } } })).toBe(
+          false
+        );
         // Values are still checked.
         expect(accepts({ id: 'r', risk_score: '21' })).toBe(false);
         expect(accepts({ id: 'r', risk_score: 500 })).toBe(false);

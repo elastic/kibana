@@ -41,6 +41,8 @@ export {
   LookbackDays,
   MaxGapsPerRun,
   RuleCoverageWorkerExtras,
+  RuleDoctorWorkerExtras,
+  RuleOutcomes,
   RuleTuningWorkerExtras,
 } from './components/detection_watch_settings.gen';
 

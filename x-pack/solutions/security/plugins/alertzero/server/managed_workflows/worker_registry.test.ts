@@ -90,6 +90,11 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
     extras: { lookbackDays: 14, maxGapsPerRun: 5 },
     triggerTypes: ['scheduled', 'manual'],
   },
+  'system-security-detection-rule-doctor': {
+    settingsVersion: 1,
+    scheduleInterval: '1h',
+    triggerTypes: ['scheduled', 'manual'],
+  },
 };
 
 const getYamlTemplate = (workerId: RegisteredWorkerId) => {

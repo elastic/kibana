@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_DOCTOR_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -40,6 +41,10 @@ const WORKER_NAMES: Record<string, () => string> = {
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: () =>
     i18n.translate('xpack.alertzero.watches.workers.detectionRuleCoverage.name', {
       defaultMessage: 'Rule Coverage',
+    }),
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_DOCTOR_ID]: () =>
+    i18n.translate('xpack.alertzero.watches.workers.detectionRuleDoctor.name', {
+      defaultMessage: 'Rule Doctor',
     }),
 };
 
