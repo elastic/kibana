@@ -8,7 +8,7 @@
  */
 
 import type { Container } from 'inversify';
-import { OnSetup, OnStart } from '@kbn/core-di';
+import { OnReady, OnSetup, OnStart } from '@kbn/core-di';
 
 export function setup(container: Container): void {
   return container.getAll(OnSetup, { chained: true }).forEach((fn) => fn(container));
@@ -16,4 +16,8 @@ export function setup(container: Container): void {
 
 export function start(container: Container): void {
   return container.getAll(OnStart, { chained: true }).forEach((fn) => fn(container));
+}
+
+export function ready(container: Container): void {
+  return container.getAll(OnReady, { chained: true }).forEach((fn) => fn(container));
 }

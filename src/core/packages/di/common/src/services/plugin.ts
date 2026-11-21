@@ -36,6 +36,12 @@ export const OnSetup = createToken<(container: Container) => void>('OnSetup');
 export const OnStart = createToken<(container: Container) => void>('OnStart');
 
 /**
+ * Plugin's ready lifecycle hook, run once per plugin after every plugin has started.
+ * @public
+ */
+export const OnReady = createToken<(container: Container) => void>('OnReady');
+
+/**
  * Plugin's setup dependency.
  * @param plugin The dependency plugin name.
  * @public

@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/di-soft-deps-lookup-a-example-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "Uses the greeter of diSoftDepsLookupB when it is enabled, with no plugin dependency on it",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "diSoftDepsLookupA",
+    "server": true,
+    "browser": true
+  }
+}

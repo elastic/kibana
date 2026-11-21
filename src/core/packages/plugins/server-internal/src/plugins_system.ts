@@ -233,6 +233,7 @@ export class PluginsSystem<T extends PluginType> {
     }
 
     this.runtimeResolver.resolveStartRequests(contracts);
+    deps.injection.ready();
     // After the start loop, so expensive `initialize()` work never runs while plugins are starting.
     this.deferredInitEngine.startInitialization(initializeRuns);
 

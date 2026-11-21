@@ -75,10 +75,14 @@ export class Greeting {
   }
 }
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(Greeting).toSelf();
 });
+
+export { pluginModule as module };
 ```
+
+Export the module under a different local name: a top-level `const module` collides with the CommonJS `module` variable and the plugin fails to load.
 
 The service should now be available in other container modules.
 
@@ -123,7 +127,10 @@ In this case, the contract returned from the classic definition has precedence o
 
 
 ### Lifecycle Hooks
-It is possible to subscribe to the lifecycle events and run some initialization logic. This can be done via binding `OnSetup` or `OnStart` callbacks. It is allowed to bind multiple of the same kind.
+It is possible to subscribe to the lifecycle events and run some initialization logic. This can be done via binding `OnSetup`, `OnStart`, or `OnReady` callbacks. It is allowed to bind multiple of the same kind.
+
+`OnSetup` and `OnStart` run when the plugin sets up and starts.
+`OnReady` runs once per plugin after every plugin has started, so it is the first hook where [soft dependencies](#soft-dependencies) resolve.
 
 There is no dedicated teardown hook alike `stop` in the classic plugins.
 That's done in favor of the built-in [deactivation](https://inversify.io/docs/fundamentals/lifecycle/deactivation/) lifecycle hook.
@@ -145,6 +152,61 @@ export const module = new ContainerModule(({ bind }) => {
   );
 });
 ```
+
+### Soft Dependencies
+A plugin can use another plugin's services when that plugin is enabled and keep working when it is disabled, with no `requiredPlugins` or `optionalPlugins` entry.
+Without a manifest edge, two plugins can use each other without forming a circular dependency.
+Put the shared tokens and types in a separate package with no runtime code, so the TypeScript project references stay acyclic too.
+
+`expose` from `KibanaContainerModule` binds a service and publishes that binding to every plugin.
+Each call publishes one binding, so a plugin can expose the same token several times:
+```ts
+import { KibanaContainerModule } from '@kbn/core-di';
+import { Greeter } from '@kbn/greeter-tokens';
+
+const pluginModule = new KibanaContainerModule(({ expose }) => {
+  expose(Greeter).toConstantValue({ greet: () => 'hello' });
+});
+
+export { pluginModule as module };
+```
+
+A consumer looks the service up through `SoftDependencies`. `get` returns `undefined` when no enabled plugin exposes it:
+```ts
+import { inject, injectable } from 'inversify';
+import { SoftDependencies } from '@kbn/core-di';
+import { Greeter } from '@kbn/greeter-tokens';
+
+@injectable()
+class Welcome {
+  constructor(@inject(SoftDependencies) private readonly softDependencies: SoftDependencies) {}
+
+  run() {
+    return this.softDependencies.get(Greeter)?.greet() ?? 'hello from the fallback';
+  }
+}
+```
+
+A registry owner collects every contribution once all plugins started with `collect`, which has the same signature as `onStart`.
+Contributors only `expose` the owner's token and never reference the owner plugin:
+```ts
+import { KibanaContainerModule } from '@kbn/core-di';
+import { Widget } from '@kbn/widget-tokens';
+import { WidgetRegistry } from './widget_registry';
+
+const pluginModule = new KibanaContainerModule(({ bind, collect }) => {
+  bind(WidgetRegistry).toSelf().inSingletonScope();
+  collect(Widget, WidgetRegistry, (context, widget, registry) => registry.register(widget));
+});
+
+export { pluginModule as module };
+```
+
+Plugins are not ordered relative to each other without a manifest edge, and an exposed service can depend on start-only services such as `CoreStart('http')` of the plugin that exposes it.
+So `SoftDependencies` throws when it is used before every plugin has started.
+Inject it anywhere, but call `get` and `getAll` in an `OnReady` hook, in request handlers, or later.
+`get` throws when more than one plugin exposes the token. Use `getAll` or `collect` for tokens with several contributors.
+Do not call `getAll` for a token inside a request scope that also exposes that token with `Scope.expose`. There it returns only the request scope's bindings and hides the ones plugins exposed.
 
 ### Existing Plugins
 The `PluginSetup` and `PluginStart` injection tokens can be used to inject existing plugins without migrating or adapting them. This is similar to accessing plugin dependencies from the lifecycle methods.

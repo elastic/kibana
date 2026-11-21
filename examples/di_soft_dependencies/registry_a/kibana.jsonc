@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/di-soft-deps-registry-a-example-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "Owns a registry that diSoftDepsRegistryB contributes to, with no plugin dependency between them",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "diSoftDepsRegistryA",
+    "server": true,
+    "browser": true
+  }
+}

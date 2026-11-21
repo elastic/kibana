@@ -1978,6 +1978,18 @@ importers:
       '@kbn/developer-examples-plugin':
         specifier: workspace:*
         version: link:examples/developer_examples
+      '@kbn/di-soft-deps-lookup-a-example-plugin':
+        specifier: workspace:*
+        version: link:examples/di_soft_dependencies/lookup_a
+      '@kbn/di-soft-deps-lookup-b-example-plugin':
+        specifier: workspace:*
+        version: link:examples/di_soft_dependencies/lookup_b
+      '@kbn/di-soft-deps-registry-a-example-plugin':
+        specifier: workspace:*
+        version: link:examples/di_soft_dependencies/registry_a
+      '@kbn/di-soft-deps-registry-b-example-plugin':
+        specifier: workspace:*
+        version: link:examples/di_soft_dependencies/registry_b
       '@kbn/digital-experience-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/digital_experience
@@ -5549,6 +5561,9 @@ importers:
       '@kbn/developer-toolbar-profilers-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/developer_toolbar_profilers
+      '@kbn/di-soft-dependencies-example-tokens':
+        specifier: workspace:*
+        version: link:examples/di_soft_dependencies/tokens
       '@kbn/docs-utils':
         specifier: workspace:*
         version: link:packages/kbn-docs-utils
@@ -6971,6 +6986,16 @@ importers:
   examples/dependency_injection: {}
 
   examples/developer_examples: {}
+
+  examples/di_soft_dependencies/lookup_a: {}
+
+  examples/di_soft_dependencies/lookup_b: {}
+
+  examples/di_soft_dependencies/registry_a: {}
+
+  examples/di_soft_dependencies/registry_b: {}
+
+  examples/di_soft_dependencies/tokens: {}
 
   examples/discover_customization_examples: {}
 

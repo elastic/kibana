@@ -8,8 +8,18 @@
  */
 
 export type { CoreDiServiceSetup, CoreDiServiceStart } from './src/contracts';
+export { Global } from './src/services/global';
 export { Logger, LoggerFactory } from './src/services/logging';
-export { OnSetup, OnStart, PluginSetup, PluginStart, Setup, Start } from './src/services/plugin';
+export { SoftDependencies } from './src/services/soft_dependencies';
+export {
+  OnReady,
+  OnSetup,
+  OnStart,
+  PluginSetup,
+  PluginStart,
+  Setup,
+  Start,
+} from './src/services/plugin';
 export { Scope, type ScopedContainer } from './src/services/scope';
 export { createToken, type ServiceToken, type ServiceTypeOf } from './src/token';
 export {

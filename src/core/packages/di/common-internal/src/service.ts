@@ -26,6 +26,7 @@ export class CoreInjectionService {
   constructor() {
     this.fork = this.fork.bind(this);
     this.getContainer = this.getContainer.bind(this);
+    this.ready = this.ready.bind(this);
   }
 
   protected getContainer(id?: PluginOpaqueId, container: Container = this.root): Container {
@@ -50,8 +51,16 @@ export class CoreInjectionService {
     const contract = {
       fork: this.fork,
       getContainer: this.getContainer,
+      ready: this.ready,
     };
 
     return contract;
+  }
+
+  /**
+   * Runs once every plugin has started, unlocking `SoftDependencies` and running the plugins' `OnReady` hooks.
+   */
+  public ready(): void {
+    this.module.ready();
   }
 }
