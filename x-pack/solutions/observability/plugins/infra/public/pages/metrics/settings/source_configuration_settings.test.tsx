@@ -23,6 +23,8 @@ interface MockMetricsSource {
   };
 }
 
+let mockUnsavedChanges: Record<string, unknown> = {};
+
 const mockSourceContext: {
   persistSourceConfiguration: jest.Mock;
   loadSource: jest.Mock;
@@ -75,9 +77,17 @@ jest.mock('../../../components/page_template', () => ({
 jest.mock('./indices_configuration_panel', () => ({
   IndicesConfigurationPanel: ({
     onRetryMetricIndicesCheck,
+    isMetricAliasChanged,
   }: {
     onRetryMetricIndicesCheck?: () => void;
-  }) => <button data-test-subj="indicesConfigurationPanel" onClick={onRetryMetricIndicesCheck} />,
+    isMetricAliasChanged?: boolean;
+  }) => (
+    <button
+      data-test-subj="indicesConfigurationPanel"
+      data-metric-alias-changed={String(Boolean(isMetricAliasChanged))}
+      onClick={onRetryMetricIndicesCheck}
+    />
+  ),
 }));
 
 jest.mock('./ml_configuration_panel', () => ({
@@ -96,7 +106,7 @@ jest.mock('./source_configuration_form_state', () => ({
     isFormValid: true,
     formState: {},
     formStateChanges: {},
-    getUnsavedChanges: () => ({}),
+    getUnsavedChanges: () => mockUnsavedChanges,
   }),
 }));
 
@@ -119,6 +129,7 @@ const renderSettings = () =>
 describe('SourceConfigurationSettings', () => {
   beforeEach(() => {
     mockSourceContext.loadSource.mockClear();
+    mockUnsavedChanges = {};
     mockSourceContext.source = {
       configuration: {},
       origin: 'stored',
@@ -164,5 +175,29 @@ describe('SourceConfigurationSettings', () => {
     fireEvent.click(await screen.findByTestId('indicesConfigurationPanel'));
 
     expect(mockSourceContext.loadSource).toHaveBeenCalledTimes(1);
+  });
+
+  it('treats a cleared metric alias as a change so retry does not re-check the saved pattern', async () => {
+    // Clearing the field leaves `metricAlias: ''` in the unsaved changes. A truthiness check
+    // would treat the empty string as unchanged; the key must be considered present instead.
+    mockUnsavedChanges = { metricAlias: '' };
+
+    renderSettings();
+
+    expect(await screen.findByTestId('indicesConfigurationPanel')).toHaveAttribute(
+      'data-metric-alias-changed',
+      'true'
+    );
+  });
+
+  it('treats an untouched metric alias as unchanged', async () => {
+    mockUnsavedChanges = {};
+
+    renderSettings();
+
+    expect(await screen.findByTestId('indicesConfigurationPanel')).toHaveAttribute(
+      'data-metric-alias-changed',
+      'false'
+    );
   });
 });

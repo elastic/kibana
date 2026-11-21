@@ -164,7 +164,7 @@ export const SourceConfigurationSettings = ({
                 metricIndicesStatus={metricIndicesStatus}
                 remoteClustersExist={remoteClustersExist}
                 onRetryMetricIndicesCheck={loadSource}
-                isMetricAliasChanged={Boolean(getUnsavedChanges().metricAlias)}
+                isMetricAliasChanged={'metricAlias' in getUnsavedChanges()}
                 numberOfInfraRules={numberOfInfraRules}
               />
             </EuiPanel>
