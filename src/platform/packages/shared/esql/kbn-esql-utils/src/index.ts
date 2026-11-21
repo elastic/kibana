@@ -111,13 +111,17 @@ export { extractCategorizeTokens } from './utils/extract_categorize_tokens';
 export { getLookupIndicesFromQuery } from './utils/get_lookup_indices';
 export {
   type ESQLStatsQueryMeta,
+  type ESQLStatsQueryMetaExclusionReason,
+  type NodeAggregatedValues,
+  ESQL_STATS_QUERY_META_EXCLUSION_REASON,
   getESQLStatsQueryMeta,
   constructCascadeQuery,
   appendFilteringWhereClauseForCascadeLayout,
 } from './utils/cascaded_documents_helpers';
 export {
   getStatsGroupFieldType,
-  getFieldParamDefinition,
+  getFieldParamDefinition as getFieldParamDefinition,
+  isAggregateFilteringFunction,
 } from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
 export { isComputedColumn, getQuerySummary, resolveSourceField } from './utils/get_query_summary';

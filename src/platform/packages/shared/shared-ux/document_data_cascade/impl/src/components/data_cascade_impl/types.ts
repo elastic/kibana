@@ -61,6 +61,11 @@ type OnCascadeLeafNodeCollapsedArgs<G extends GroupNode> = CascadeGroupNodeUIInt
 export interface CascadeRowCellRendererProps<G extends GroupNode, L extends LeafNode> {
   data: L[] | null;
   cellId: string;
+  /**
+   * The group node the leaf cell belongs to, so the cell can reach what the group row displays
+   * rather than only the path that identifies it.
+   */
+  row: G;
   nodePath: string[];
   nodePathMap: Record<string, string>;
   virtualizerController: ChildVirtualizerController;

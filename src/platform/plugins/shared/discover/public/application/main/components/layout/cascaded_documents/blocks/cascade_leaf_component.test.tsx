@@ -76,7 +76,16 @@ const cellData = [expandedDoc, nextExpandedDoc];
 const cellId = 'leaf-1';
 const nodePath = ['extension'];
 const nodePathMap = { extension: 'png' };
-const cascadePath = { nodePath, nodePathMap };
+const nodeAggregatedValues = { 'values(tags)': ['info', 'warning'] };
+const groupNode = {
+  id: 'group-1',
+  groupId: 'extension',
+  groupValue: 'png',
+  aggregatedValues: nodeAggregatedValues,
+} as unknown as ESQLDataGroupNode;
+// the values the row displays travel with the path, so a link copied from the flyout rebuilds the
+// same narrowed query the expansion used
+const cascadePath = { nodePath, nodePathMap, nodeAggregatedValues };
 const cascadedLeafDataSource = createMockEsqlSource([
   { name: 'category', type: 'string', source: 'index' },
 ]);
@@ -135,6 +144,7 @@ const renderLeafCellWithContext = ({
         <ESQLDataCascadeLeafCell
           cellData={cellData}
           cellId={cellId}
+          row={groupNode}
           nodePath={nodePath}
           nodePathMap={nodePathMap}
           rowIndex={0}

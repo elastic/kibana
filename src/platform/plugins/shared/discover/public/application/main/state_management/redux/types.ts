@@ -39,6 +39,7 @@ import type { DocViewerRestorableState, DocViewerShareableState } from '@kbn/uni
 import type { SerializedError } from '@reduxjs/toolkit';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
+import type { NodeAggregatedValues } from '@kbn/esql-utils';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { ExpandedDocRef } from '../../utils/expanded_doc';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
@@ -50,6 +51,12 @@ import type { CascadedDocumentsDataGridUiStateMap } from '../../components/layou
 export interface ExpandedDocCascadePath {
   nodePath: string[];
   nodePathMap: Record<string, string>;
+  /**
+   * The values the expanded row displayed for its aggregates. Without them the query rebuilt for a
+   * shared link is narrowed by the group alone, so it reopens a broader set of documents than the
+   * one the link was copied from.
+   */
+  nodeAggregatedValues?: NodeAggregatedValues;
 }
 
 export interface InternalStateDataRequestParams {

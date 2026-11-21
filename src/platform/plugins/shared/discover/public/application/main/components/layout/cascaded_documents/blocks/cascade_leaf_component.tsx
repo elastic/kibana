@@ -44,7 +44,7 @@ interface ESQLDataCascadeLeafCellProps
     >,
     Pick<
       Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
-      'virtualizerController' | 'nodePath' | 'nodePathMap' | 'stickyHeaderExtensionPoint'
+      'virtualizerController' | 'row' | 'nodePath' | 'nodePathMap' | 'stickyHeaderExtensionPoint'
     > {
   cellData: DataTableRecord[];
   cellId: string;
@@ -78,6 +78,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
     virtualizerController,
     rowIndex,
     onUpdateDataGridDensity,
+    row,
     nodePath,
     nodePathMap,
     stickyHeaderExtensionPoint,
@@ -95,8 +96,15 @@ export const ESQLDataCascadeLeafCell = React.memo(
     const expandedDoc = useObservable(expandedDoc$, expandedDoc$.getValue());
     const expandedDocOwner = useObservable(expandedDocOwner$, expandedDocOwner$.getValue());
     const setExpandedDoc = useMemo(
-      () => getExpandedDocSetter(cellId, { nodePath, nodePathMap }),
-      [cellId, getExpandedDocSetter, nodePath, nodePathMap]
+      // the aggregate values travel with the path so the query rebuilt for a shared link narrows
+      // the documents the same way the expansion that produced the flyout did
+      () =>
+        getExpandedDocSetter(cellId, {
+          nodePath,
+          nodePathMap,
+          nodeAggregatedValues: row.aggregatedValues,
+        }),
+      [cellId, getExpandedDocSetter, nodePath, nodePathMap, row.aggregatedValues]
     );
     const setRenderDocumentViewMeta = useMemo(
       () => getRenderDocumentViewMetaSetter(cellId),
