@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fsPromises from 'node:fs/promises';
 import { BehaviorSubject, Subject, of } from 'rxjs';
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
@@ -427,6 +428,92 @@ describe('EventLoopWatchdogService', () => {
       profilingFlags[UI_PROFILING_FLAG].next(true);
       expect(watchdog().setProfiling).toHaveBeenLastCalledWith(true);
       expect(watchdog().stop).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('profile directory check', () => {
+    const NO_DIR_WARNING =
+      "Event loop watchdog profiling is on, but no profile directory is set. Set ops.eventLoopWatchdog.profiling.dir or Node's --diagnostic-dir to write profile files.";
+    const fsError = (code: string, message: string) => Object.assign(new Error(message), { code });
+    const warnings = () => loggingSystemMock.collect(logger).warn;
+    /** Lets the asynchronous directory check finish. */
+    const settle = async () => {
+      for (let i = 0; i < 5; i++) {
+        await Promise.resolve();
+      }
+    };
+    let access: jest.SpyInstance;
+
+    beforeEach(() => {
+      access = jest.spyOn(fsPromises, 'access').mockResolvedValue();
+    });
+    afterEach(() => access.mockRestore());
+
+    it("doesn't check the directory while profiling stays off", async () => {
+      await start();
+      profilingFlags[BG_PROFILING_FLAG].next(false);
+      await settle();
+      expect(access).not.toHaveBeenCalled();
+      expect(warnings()).toEqual([]);
+    });
+
+    it("doesn't warn when profiling turns on with a writable directory", async () => {
+      await start();
+      profilingFlags[BG_PROFILING_FLAG].next(true);
+      await settle();
+      expect(access).toHaveBeenCalledWith('/diag', fsPromises.constants.W_OK);
+      expect(warnings()).toEqual([]);
+    });
+
+    it('warns when profiling turns on without a directory', async () => {
+      resolveDiagnosticDirMock.mockReturnValue(undefined);
+      await start();
+      profilingFlags[BG_PROFILING_FLAG].next(true);
+      await settle();
+      expect(access).not.toHaveBeenCalled();
+      expect(warnings()).toEqual([[NO_DIR_WARNING]]);
+      expect(watchdog().setProfiling).toHaveBeenLastCalledWith(true);
+    });
+
+    it("warns when profiling turns on and the directory doesn't exist", async () => {
+      access.mockRejectedValue(
+        fsError('ENOENT', "ENOENT: no such file or directory, access '/diag'")
+      );
+      await start();
+      profilingFlags[BG_PROFILING_FLAG].next(true);
+      await settle();
+      expect(warnings()).toEqual([
+        [
+          "Event loop watchdog profiling is on, but the profile directory /diag can't be written: ENOENT: no such file or directory, access '/diag'. Profile file writes will fail.",
+        ],
+      ]);
+      expect(watchdog().setProfiling).toHaveBeenLastCalledWith(true);
+    });
+
+    it("warns when profiling turns on and the directory can't be written", async () => {
+      access.mockRejectedValue(fsError('EACCES', "EACCES: permission denied, access '/diag'"));
+      await start();
+      profilingFlags[BG_PROFILING_FLAG].next(true);
+      await settle();
+      expect(warnings()).toEqual([
+        [
+          "Event loop watchdog profiling is on, but the profile directory /diag can't be written: EACCES: permission denied, access '/diag'. Profile file writes will fail.",
+        ],
+      ]);
+    });
+
+    it('warns again each time profiling turns back on', async () => {
+      resolveDiagnosticDirMock.mockReturnValue(undefined);
+      await start({}, ['background_tasks', 'ui']);
+      profilingFlags[BG_PROFILING_FLAG].next(true);
+      profilingFlags[UI_PROFILING_FLAG].next(true);
+      await settle();
+      expect(warnings()).toEqual([[NO_DIR_WARNING]]);
+      profilingFlags[BG_PROFILING_FLAG].next(false);
+      profilingFlags[UI_PROFILING_FLAG].next(false);
+      profilingFlags[BG_PROFILING_FLAG].next(true);
+      await settle();
+      expect(warnings()).toEqual([[NO_DIR_WARNING], [NO_DIR_WARNING]]);
     });
   });
 

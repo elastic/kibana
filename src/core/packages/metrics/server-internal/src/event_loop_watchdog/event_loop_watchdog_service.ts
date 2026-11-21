@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'node:fs/promises';
 import {
   EMPTY,
   catchError,
@@ -73,6 +74,7 @@ export class EventLoopWatchdogService {
   private nodeRoles: readonly string[] = [];
   private subscription?: Subscription;
   private overall$?: Observable<ServiceStatus>;
+  private profileDir?: string;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get(...LOGGER_CONTEXT);
@@ -93,6 +95,7 @@ export class EventLoopWatchdogService {
       running: profiling[key].asMilliseconds(),
     });
     this.enabledFallback = config.enabled;
+    this.profileDir = this.resolveProfileDir(profiling.dir);
     this.watchdog = new EventLoopWatchdog({
       logger: this.logger,
       thresholdsMs: {
@@ -108,7 +111,7 @@ export class EventLoopWatchdogService {
         startAfterMs: perPhaseMs('startAfter'),
         maxDurationMs: perPhaseMs('maxDuration'),
         cooldownMs: perPhaseMs('cooldown'),
-        diagnosticDir: this.resolveProfileDir(profiling.dir),
+        diagnosticDir: this.profileDir,
       },
     });
   }
@@ -201,7 +204,30 @@ export class EventLoopWatchdogService {
         // Profiling starts off, so there's nothing to apply until a flag is first on.
         skipWhile((enabled) => !enabled)
       )
-      .subscribe((enabled) => watchdog.setProfiling(enabled));
+      .subscribe((enabled) => {
+        watchdog.setProfiling(enabled);
+        if (enabled) {
+          void this.checkProfileDir();
+        }
+      });
+  }
+
+  /** Warns each time profiling turns on if profile files can't be written. */
+  private async checkProfileDir(): Promise<void> {
+    const dir = this.profileDir;
+    if (dir === undefined) {
+      this.logger.warn(
+        "Event loop watchdog profiling is on, but no profile directory is set. Set ops.eventLoopWatchdog.profiling.dir or Node's --diagnostic-dir to write profile files."
+      );
+      return;
+    }
+    try {
+      await Fs.access(dir, Fs.constants.W_OK);
+    } catch (error) {
+      this.logger.warn(
+        `Event loop watchdog profiling is on, but the profile directory ${dir} can't be written: ${error.message}. Profile file writes will fail.`
+      );
+    }
   }
 
   private resolveProfileDir(configured: string | undefined): string | undefined {
