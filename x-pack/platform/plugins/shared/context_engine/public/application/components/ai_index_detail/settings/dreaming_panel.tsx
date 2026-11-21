@@ -32,13 +32,22 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import React, { useMemo, useState } from 'react';
 import {
-  DEFAULT_DREAMING_INTERVAL,
+  DEFAULT_LUCID_DREAMING_INTERVAL,
+  DEFAULT_RELATIONSHIP_DREAMING_INTERVAL,
   DREAMING_DISABLED,
+  MAX_DREAMING_CONNECTOR_ID_LENGTH,
+  MAX_DREAMING_INTERVAL_LENGTH,
+  dreamingTypesOf,
+  isDreamingConfigured,
+  isSplitDreaming,
   type AiIndexDreamingConfig,
 } from '../../../../../common/dreaming';
 import { matchingTemplateId } from '../../../../../common/dreaming_templates';
 import type { AiIndexHttpItem } from '../../../../../common/http_api/ai_indices';
-import { validateDreamingInterval } from '../../../../../common/validation';
+import {
+  validateLucidDreamingInterval,
+  validateRelationshipDreamingInterval,
+} from '../../../../../common/validation';
 import { useAiIndexDreaming } from '../../../hooks/use_ai_index_dreaming';
 import { useDreamingTemplates } from '../../../hooks/use_dreaming_templates';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -113,42 +122,84 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
   const saved = useMemo(() => draftOf(dreaming), [dreaming]);
   const [edited, setEdited] = useState<DreamingConfigDraft>();
   const [editedInstructions, setEditedInstructions] = useState<string>();
-  const [editedEnabled, setEditedEnabled] = useState<boolean>();
-  const [editedInterval, setEditedInterval] = useState<string>();
+  const [editedLucid, setEditedLucid] = useState<boolean>();
+  const [editedLucidInterval, setEditedLucidInterval] = useState<string>();
+  const [editedLucidConnector, setEditedLucidConnector] = useState<string>();
+  const [editedRelationships, setEditedRelationships] = useState<boolean>();
+  const [editedRelationshipInterval, setEditedRelationshipInterval] = useState<string>();
   const { saveConfig, isSaving } = useSaveDreamingConfig();
   const { templates } = useDreamingTemplates();
 
   const draft = edited ?? saved;
   const savedInstructions = dreaming.instructions ?? '';
   const instructions = editedInstructions ?? savedInstructions;
-  const enabled = editedEnabled ?? dreaming.enabled;
-  const savedInterval = dreaming.schedule?.interval ?? DEFAULT_DREAMING_INTERVAL;
-  const interval = editedInterval ?? savedInterval;
-  const intervalError = validateDreamingInterval(interval.trim());
+  const split = isSplitDreaming(dreaming);
+
+  const savedLucid = split ? dreaming.lucid?.enabled ?? false : dreaming.enabled;
+  const lucid = editedLucid ?? savedLucid;
+  const savedLucidInterval = dreaming.lucid?.interval ?? DEFAULT_LUCID_DREAMING_INTERVAL;
+  const lucidInterval = editedLucidInterval ?? savedLucidInterval;
+  const lucidIntervalError = validateLucidDreamingInterval(lucidInterval.trim());
+  const savedLucidConnector = dreaming.lucid?.connector_id ?? '';
+  const lucidConnector = editedLucidConnector ?? savedLucidConnector;
+
+  const hasRelationshipTypes = dreamingTypesOf(typesOfDraft(draft)).relationships.length > 0;
+  const savedRelationships = split
+    ? dreaming.relationship_dreaming?.enabled ?? false
+    : dreaming.enabled;
+  const relationships = (editedRelationships ?? savedRelationships) && hasRelationshipTypes;
+  const savedRelationshipInterval =
+    dreaming.relationship_dreaming?.interval ?? DEFAULT_RELATIONSHIP_DREAMING_INTERVAL;
+  const relationshipInterval = editedRelationshipInterval ?? savedRelationshipInterval;
+  const relationshipIntervalError = validateRelationshipDreamingInterval(
+    relationshipInterval.trim()
+  );
+
   const isDirty =
     (edited !== undefined && !sameTypes(edited, saved)) ||
     instructions !== savedInstructions ||
-    enabled !== dreaming.enabled ||
-    interval.trim() !== savedInterval;
+    lucid !== savedLucid ||
+    lucidInterval.trim() !== savedLucidInterval ||
+    lucidConnector.trim() !== savedLucidConnector ||
+    relationships !== (savedRelationships && hasRelationshipTypes) ||
+    relationshipInterval.trim() !== savedRelationshipInterval;
   const suggestedId = matchingTemplateId(dreaming, templates);
   const suggestedEntities = templates.find(({ id }) => id === suggestedId)?.dreaming.entities;
 
   const discard = () => {
     setEdited(undefined);
     setEditedInstructions(undefined);
-    setEditedEnabled(undefined);
-    setEditedInterval(undefined);
+    setEditedLucid(undefined);
+    setEditedLucidInterval(undefined);
+    setEditedLucidConnector(undefined);
+    setEditedRelationships(undefined);
+    setEditedRelationshipInterval(undefined);
   };
 
   const save = async () => {
-    const { instructions: _, schedule: __, ...rest } = dreaming;
+    const {
+      instructions: _,
+      schedule: __,
+      lucid: ___,
+      relationship_dreaming: ____,
+      ...rest
+    } = dreaming;
     const trimmed = instructions.trim();
+    const trimmedLucidConnector = lucidConnector.trim();
     const config: AiIndexDreamingConfig = {
       ...rest,
-      enabled,
-      schedule: { interval: interval.trim() },
+      enabled: false,
       ...(trimmed && { instructions: trimmed }),
       ...typesOfDraft(draft),
+      lucid: {
+        enabled: lucid,
+        interval: lucidInterval.trim(),
+        ...(trimmedLucidConnector && { connector_id: trimmedLucidConnector }),
+      },
+      relationship_dreaming: {
+        enabled: relationships,
+        interval: relationshipInterval.trim(),
+      },
     };
     if (await saveConfig({ aiIndexId, config })) {
       discard();
@@ -157,40 +208,116 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="l" alignItems="flexEnd" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false} wrap>
+        <EuiFlexItem grow={false} css={{ width: 320 }}>
           <EuiFormRow
             hasEmptyLabelSpace
-            helpText={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.enabledHelp', {
-              defaultMessage: 'Runs the dreaming workflow on its schedule.',
+            helpText={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.lucidHelp', {
+              defaultMessage:
+                'Builds facts and entities from new memories and agent rounds within minutes of their arrival.',
             })}
           >
             <EuiSwitch
-              label={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.enabledLabel', {
-                defaultMessage: 'Dream on a schedule',
+              label={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.lucidLabel', {
+                defaultMessage: 'Lucid Dreaming',
               })}
-              checked={enabled}
-              onChange={(event) => setEditedEnabled(event.target.checked)}
-              data-test-subj="contextAiIndexDreamingEnabled"
+              checked={lucid}
+              onChange={(event) => setEditedLucid(event.target.checked)}
+              data-test-subj="contextAiIndexDreamingLucid"
             />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ minWidth: 200 }}>
           <EuiFormRow
-            label={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.intervalLabel', {
+            label={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.lucidIntervalLabel', {
               defaultMessage: 'Every',
             })}
-            helpText={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.intervalHelp', {
-              defaultMessage: 'For example 30m, 6h or 1d.',
-            })}
-            isInvalid={intervalError !== undefined}
-            error={intervalError}
+            helpText={i18n.translate(
+              'xpack.contextEngine.aiIndexDetail.dreaming.lucidIntervalHelp',
+              { defaultMessage: 'From 1m to 59m.' }
+            )}
+            isInvalid={lucidIntervalError !== undefined}
+            error={lucidIntervalError}
+            isDisabled={!lucid}
           >
             <EuiFieldText
-              value={interval}
-              isInvalid={intervalError !== undefined}
-              onChange={(event) => setEditedInterval(event.target.value)}
-              data-test-subj="contextAiIndexDreamingInterval"
+              value={lucidInterval}
+              isInvalid={lucidIntervalError !== undefined}
+              maxLength={MAX_DREAMING_INTERVAL_LENGTH}
+              onChange={(event) => setEditedLucidInterval(event.target.value)}
+              data-test-subj="contextAiIndexDreamingLucidInterval"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={{ minWidth: 280 }}>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.contextEngine.aiIndexDetail.dreaming.lucidConnectorLabel',
+              { defaultMessage: 'Lucid dreaming connector ID' }
+            )}
+            helpText={i18n.translate(
+              'xpack.contextEngine.aiIndexDetail.dreaming.lucidConnectorHelp',
+              { defaultMessage: 'Optional, such as a cheaper model. Empty: the dreaming model.' }
+            )}
+            isDisabled={!lucid}
+          >
+            <EuiFieldText
+              value={lucidConnector}
+              maxLength={MAX_DREAMING_CONNECTOR_ID_LENGTH}
+              onChange={(event) => setEditedLucidConnector(event.target.value)}
+              data-test-subj="contextAiIndexDreamingLucidConnector"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false} wrap>
+        <EuiFlexItem grow={false} css={{ width: 320 }}>
+          <EuiFormRow
+            hasEmptyLabelSpace
+            helpText={
+              hasRelationshipTypes
+                ? i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.relationshipsHelp', {
+                    defaultMessage: 'Links the facts and entities of this AI index.',
+                  })
+                : i18n.translate(
+                    'xpack.contextEngine.aiIndexDetail.dreaming.relationshipsNoTypesHelp',
+                    { defaultMessage: 'Add a relationship type below to link entities.' }
+                  )
+            }
+          >
+            <EuiSwitch
+              label={i18n.translate(
+                'xpack.contextEngine.aiIndexDetail.dreaming.relationshipsLabel',
+                { defaultMessage: 'Relationship Dreaming' }
+              )}
+              checked={relationships}
+              disabled={!hasRelationshipTypes}
+              onChange={(event) => setEditedRelationships(event.target.checked)}
+              data-test-subj="contextAiIndexDreamingRelationships"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={{ minWidth: 200 }}>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.contextEngine.aiIndexDetail.dreaming.relationshipIntervalLabel',
+              { defaultMessage: 'Every' }
+            )}
+            helpText={i18n.translate(
+              'xpack.contextEngine.aiIndexDetail.dreaming.relationshipIntervalHelp',
+              { defaultMessage: 'From 1h to 30d.' }
+            )}
+            isInvalid={relationshipIntervalError !== undefined}
+            error={relationshipIntervalError}
+            isDisabled={!relationships}
+          >
+            <EuiFieldText
+              value={relationshipInterval}
+              isInvalid={relationshipIntervalError !== undefined}
+              maxLength={MAX_DREAMING_INTERVAL_LENGTH}
+              onChange={(event) => setEditedRelationshipInterval(event.target.value)}
+              data-test-subj="contextAiIndexDreamingRelationshipInterval"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -236,7 +363,11 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
                 fill
                 onClick={save}
                 isLoading={isSaving}
-                isDisabled={!draftBuildsAnything(draft) || intervalError !== undefined}
+                isDisabled={
+                  !draftBuildsAnything(draft) ||
+                  lucidIntervalError !== undefined ||
+                  relationshipIntervalError !== undefined
+                }
                 data-test-subj="contextAiIndexDreamingSave"
               >
                 {i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.save', {
@@ -264,7 +395,7 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
   const [isJsonOpen, setIsJsonOpen] = useState(false);
   const { dreaming: savedDreaming, isLoading } = useAiIndexDreaming(aiIndex.id, { enabled: true });
   const dreaming = savedDreaming ?? DREAMING_DISABLED;
-  const isSetUp = dreaming.enabled || draftBuildsAnything(draftOf(dreaming));
+  const isSetUp = isDreamingConfigured(dreaming);
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextAiIndexDreamingPanel">

@@ -24,61 +24,84 @@ export const MAX_TRACE_TRANSCRIPTS_BATCH_TOKENS = 1_000_000;
 export const DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS = 50_000;
 /** Rounds that ended this recently are left for the next run: their spans may still be exporting. */
 export const DEFAULT_TRACE_SETTLE_MINUTES = 5;
+/** The most rounds one read names. */
+export const MAX_TRACE_TRANSCRIPTS_ROUNDS = 200;
 const MAX_TIMESTAMP_LENGTH = 64;
 const MAX_CURSOR_LENGTH = 512;
 
+const isoDateSchema = () =>
+  z
+    .string()
+    .max(MAX_TIMESTAMP_LENGTH)
+    .refine((value) => !Number.isNaN(Date.parse(value)), { message: 'Must be an ISO 8601 date.' });
+
 export const readTraceTranscriptsInputSchema = lazySchema(() =>
-  z.object({
-    ai_index_id: aiIndexIdSchema,
-    since: z
-      .string()
-      .max(MAX_TIMESTAMP_LENGTH)
-      .refine((value) => !Number.isNaN(Date.parse(value)), { message: 'Must be an ISO 8601 date.' })
-      .describe('Read the rounds that ended since this ISO 8601 time'),
-    after: z
-      .string()
-      .max(MAX_CURSOR_LENGTH)
-      .optional()
-      .describe(
-        'The resume_after of the read that stopped at since: the trace id to continue after. Empty or omitted: read from since.'
-      ),
-    size: z
-      .number()
-      .int()
-      .min(1)
-      .max(MAX_TRACE_TRANSCRIPTS_READ_SIZE)
-      .optional()
-      .describe(
-        `How many rounds to read, oldest first. Defaults to ${DEFAULT_TRACE_TRANSCRIPTS_READ_SIZE}.`
-      ),
-    max_tokens: z
-      .number()
-      .int()
-      .min(1)
-      .max(MAX_TRACE_TRANSCRIPTS_READ_TOKENS)
-      .optional()
-      .describe(
-        `Stop the read before its transcripts exceed this many estimated tokens. Defaults to ${DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS}.`
-      ),
-    batch_tokens: z
-      .number()
-      .int()
-      .min(1)
-      .max(MAX_TRACE_TRANSCRIPTS_BATCH_TOKENS)
-      .optional()
-      .describe(
-        `The most estimated tokens of one batch: what one model call reads. Defaults to ${DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS}.`
-      ),
-    settle_minutes: z
-      .number()
-      .int()
-      .min(0)
-      .max(60)
-      .optional()
-      .describe(
-        `Leave rounds that ended this recently for the next run. Defaults to ${DEFAULT_TRACE_SETTLE_MINUTES}.`
-      ),
-  })
+  z
+    .object({
+      ai_index_id: aiIndexIdSchema,
+      since: isoDateSchema()
+        .optional()
+        .describe('Read the rounds that ended since this ISO 8601 time. Required without rounds.'),
+      rounds: z
+        .array(
+          z.object({
+            trace_id: z.string().min(1).max(MAX_CURSOR_LENGTH),
+            ended_at: isoDateSchema(),
+          })
+        )
+        .min(1)
+        .max(MAX_TRACE_TRANSCRIPTS_ROUNDS)
+        .optional()
+        .describe(
+          'Read these rounds instead of a time window: each by its trace id and when it ended. A round the trace sources of the AI index do not find is left out.'
+        ),
+      after: z
+        .string()
+        .max(MAX_CURSOR_LENGTH)
+        .optional()
+        .describe(
+          'The resume_after of the read that stopped at since: the trace id to continue after. Empty or omitted: read from since.'
+        ),
+      size: z
+        .number()
+        .int()
+        .min(1)
+        .max(MAX_TRACE_TRANSCRIPTS_READ_SIZE)
+        .optional()
+        .describe(
+          `How many rounds to read, oldest first. Defaults to ${DEFAULT_TRACE_TRANSCRIPTS_READ_SIZE}.`
+        ),
+      max_tokens: z
+        .number()
+        .int()
+        .min(1)
+        .max(MAX_TRACE_TRANSCRIPTS_READ_TOKENS)
+        .optional()
+        .describe(
+          `Stop the read before its transcripts exceed this many estimated tokens. Defaults to ${DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS}.`
+        ),
+      batch_tokens: z
+        .number()
+        .int()
+        .min(1)
+        .max(MAX_TRACE_TRANSCRIPTS_BATCH_TOKENS)
+        .optional()
+        .describe(
+          `The most estimated tokens of one batch: what one model call reads. Defaults to ${DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS}.`
+        ),
+      settle_minutes: z
+        .number()
+        .int()
+        .min(0)
+        .max(60)
+        .optional()
+        .describe(
+          `Leave rounds that ended this recently for the next run. Defaults to ${DEFAULT_TRACE_SETTLE_MINUTES}.`
+        ),
+    })
+    .refine(({ since, rounds }) => since !== undefined || rounds !== undefined, {
+      message: 'Set since or rounds.',
+    })
 );
 
 /** A round as dreaming reads it: the shape of the memories `applyDreamChanges` takes. */

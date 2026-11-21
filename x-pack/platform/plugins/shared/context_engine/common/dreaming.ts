@@ -11,6 +11,14 @@ export const DREAMING_TYPE_PATTERN = /^[a-z0-9_]+$/;
 export const DEFAULT_DREAMING_INTERVAL = '24h';
 export const MIN_DREAMING_INTERVAL_MINUTES = 15;
 
+export const DEFAULT_LUCID_DREAMING_INTERVAL = '1m';
+export const MIN_LUCID_DREAMING_INTERVAL_MINUTES = 1;
+export const MAX_LUCID_DREAMING_INTERVAL_MINUTES = 59;
+
+export const DEFAULT_RELATIONSHIP_DREAMING_INTERVAL = '24h';
+export const MIN_RELATIONSHIP_DREAMING_INTERVAL_MINUTES = 60;
+export const MAX_RELATIONSHIP_DREAMING_INTERVAL_MINUTES = 30 * 24 * 60;
+
 export const MAX_DREAMING_INTERVAL_LENGTH = 16;
 export const MAX_DREAMING_INSTRUCTIONS_LENGTH = 8192;
 export const MAX_DREAMING_TYPE_LENGTH = 128;
@@ -88,6 +96,25 @@ export interface DreamingRelationshipType {
 }
 
 /**
+ * Lucid dreaming: facts and entities are extracted from new memories and agent rounds soon after
+ * they arrive, in small batches.
+ */
+export interface AiIndexLucidDreamingConfig {
+  enabled: boolean;
+  /** How often to look for new memories and agent rounds. Defaults to {@link DEFAULT_LUCID_DREAMING_INTERVAL}. */
+  interval?: string;
+  /** The AI connector lucid dreaming prompts. Missing: the dreaming connector. */
+  connector_id?: string;
+}
+
+/** Relationship dreaming: links the facts and entities of an AI index on its own schedule. */
+export interface AiIndexRelationshipDreamingConfig {
+  enabled: boolean;
+  /** How often to link. Defaults to {@link DEFAULT_RELATIONSHIP_DREAMING_INTERVAL}. */
+  interval?: string;
+}
+
+/**
  * What an AI index learns from its memories: facts, entities, and the relationships between them.
  * A kind with no types configured is not built.
  */
@@ -109,7 +136,27 @@ export interface AiIndexDreamingConfig {
    * also link to the entities they are about, with the built-in `about` type.
    */
   relationships?: DreamingRelationshipType[] | null;
+  /** Set, alone or with `relationship_dreaming`: replaces `enabled` and `schedule`. */
+  lucid?: AiIndexLucidDreamingConfig;
+  /** Set, alone or with `lucid`: replaces `enabled` and `schedule`. */
+  relationship_dreaming?: AiIndexRelationshipDreamingConfig;
 }
+
+/**
+ * Whether a config turns lucid dreaming and relationship dreaming on and off separately, instead
+ * of dreaming everything on one schedule.
+ */
+export const isSplitDreaming = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
+  dreaming?.lucid !== undefined || dreaming?.relationship_dreaming !== undefined;
+
+/** Whether lucid dreaming builds facts and entities. */
+export const isLucidDreaming = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
+  dreaming?.lucid?.enabled === true && dreamingBuildsAnything(dreaming);
+
+/** Whether relationship dreaming links entities on its own schedule. */
+export const isRelationshipDreaming = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
+  dreaming?.relationship_dreaming?.enabled === true &&
+  dreamingTypesOf(dreaming).relationships.length > 0;
 
 /** The parts of a dreaming config that say what it builds. */
 export type DreamingTypesConfig = Pick<
@@ -150,12 +197,17 @@ export const dreamingTypesOf = ({
  * dreaming runs on its schedule.
  */
 export const isDreamingConfigured = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
-  dreaming !== undefined && (dreaming.enabled || dreamingBuildsAnything(dreaming));
+  dreaming !== undefined &&
+  (dreaming.enabled ||
+    dreaming.lucid?.enabled === true ||
+    dreaming.relationship_dreaming?.enabled === true ||
+    dreamingBuildsAnything(dreaming));
 
 const DREAMING_AUTOMATION_WORKFLOW_ID_PREFIXES: readonly string[] = [
   'system-context-engine-dreaming-',
   'system-context-engine-trace-dreaming-',
   'system-context-engine-relationships-',
+  'system-context-engine-lucid-dreaming-',
 ];
 
 /** Whether an automation is one of the workflows dreaming attaches to an AI index. */

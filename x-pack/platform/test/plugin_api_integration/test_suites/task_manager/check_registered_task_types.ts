@@ -190,6 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_incremental_id_assignment',
         'cases_templates_v2_migration',
         'cloud_security_posture-stats_task',
+        'contextEngine:lucidDreaming',
         'contextEngine:signalGenerator',
         'dashboard_telemetry',
         'digital_experience:sessions-summaries',

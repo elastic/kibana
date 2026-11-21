@@ -82,6 +82,29 @@ describe('readTraceTranscripts step', () => {
     ]);
   });
 
+  it('reads the rounds it is given, from just before the first ended, without settling', async () => {
+    await run({
+      ai_index_id: 'support',
+      after: 'ignored',
+      rounds: [
+        { trace_id: 'trace-2', ended_at: '2026-11-11T13:19:00.000Z' },
+        { trace_id: 'trace-1', ended_at: '2026-11-11T13:10:00.000Z' },
+        { trace_id: 'trace-1', ended_at: '2026-11-11T13:10:00.000Z' },
+      ],
+    });
+
+    expect(readTraceTranscripts).toHaveBeenCalledWith({
+      esClient,
+      traces,
+      spaceId: 'team-a',
+      since: '2026-11-11T13:09:59.999Z',
+      until: NOW.toISOString(),
+      size: 2,
+      maxTokens: DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS,
+      traceIds: ['trace-2', 'trace-1'],
+    });
+  });
+
   it('takes the settle time it is given, and reads from since without an after', async () => {
     await run({ ...input, after: '', settle_minutes: 0 });
     expect(readTraceTranscripts).toHaveBeenCalledWith(

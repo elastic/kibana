@@ -11,6 +11,8 @@ import DREAMING_YAML from './dreaming.yaml';
 import TRACE_DREAMING_YAML from './dreaming_traces.yaml';
 import TRACE_DREAMING_BATCH_YAML from './dreaming_traces_batch.yaml';
 import FEEDBACK_ANALYSIS_YAML from './feedback_analysis.yaml';
+import LUCID_DREAMING_YAML from './lucid_dreaming.yaml';
+import LUCID_TRACE_DREAMING_YAML from './lucid_dreaming_traces.yaml';
 import RELATIONSHIPS_YAML from './relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
@@ -159,6 +161,61 @@ export const CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW = {
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineTraceDreamingBatchWorkflowTemplateValues>;
+
+export const CONTEXT_ENGINE_LUCID_DREAMING_WORKFLOW_ID = 'system-context-engine-lucid-dreaming';
+
+/** The same config as dreaming, which lucid dreaming replaces for memories. */
+export type ContextEngineLucidDreamingWorkflowTemplateValues =
+  ContextEngineDreamingWorkflowTemplateValues;
+
+/**
+ * Consolidates a small batch of new memories of one AI index into long-term facts and entities,
+ * when Context Engine reports the batch ready.
+ */
+export const CONTEXT_ENGINE_LUCID_DREAMING_WORKFLOW = {
+  id: CONTEXT_ENGINE_LUCID_DREAMING_WORKFLOW_ID,
+  pluginId: 'contextEngine',
+  version: 1,
+  billable: false,
+  yamlTemplate: (values) =>
+    renderJsonTemplate(LUCID_DREAMING_YAML, {
+      __NAME__: `Lucid dreaming: ${values.aiIndexId}`,
+      __AI_INDEX_ID__: values.aiIndexId,
+      __CONCURRENCY_KEY__: `context-engine-lucid-dreaming-${values.instanceKey}`,
+      __MEMORIES_INDEX__: values.memoriesIndex,
+      __CONNECTOR_ID__: values.connectorId,
+      __INSTRUCTIONS__: values.instructions,
+      __FACT_TYPES__: values.factTypes,
+      __ENTITY_TYPES__: values.entityTypes,
+    }),
+  management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<ContextEngineLucidDreamingWorkflowTemplateValues>;
+
+export const CONTEXT_ENGINE_LUCID_TRACE_DREAMING_WORKFLOW_ID =
+  'system-context-engine-lucid-dreaming-traces';
+
+/** The same config as dreaming, which lucid trace dreaming replaces for agent rounds. */
+export type ContextEngineLucidTraceDreamingWorkflowTemplateValues =
+  ContextEngineDreamingWorkflowTemplateValues;
+
+/**
+ * Extracts long-term facts and entities from a small batch of agent rounds of one AI index, when
+ * Context Engine reports the batch ready.
+ */
+export const CONTEXT_ENGINE_LUCID_TRACE_DREAMING_WORKFLOW = {
+  id: CONTEXT_ENGINE_LUCID_TRACE_DREAMING_WORKFLOW_ID,
+  pluginId: 'contextEngine',
+  version: 1,
+  billable: false,
+  yamlTemplate: (values) =>
+    renderJsonTemplate(LUCID_TRACE_DREAMING_YAML, {
+      __NAME__: `Lucid trace dreaming: ${values.aiIndexId}`,
+      __AI_INDEX_ID__: values.aiIndexId,
+      __CONCURRENCY_KEY__: `context-engine-lucid-trace-dreaming-${values.instanceKey}`,
+      __BATCH_WORKFLOW_ID__: `${CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID}-${values.instanceKey}`,
+    }),
+  management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<ContextEngineLucidTraceDreamingWorkflowTemplateValues>;
 
 export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID = 'system-context-engine-relationships';
 

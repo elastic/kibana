@@ -11,9 +11,31 @@ import {
   validateIsoDate,
   validateNonBlank,
   validateFeedbackAnalysisInterval,
+  validateLucidDreamingInterval,
+  validateRelationshipDreamingInterval,
   validateRelativeSignalWindow,
   validateSignalWindowCoversInterval,
 } from './validation';
+
+describe('validateLucidDreamingInterval', () => {
+  it.each(['1m', '5m', '59m'])('accepts %s', (value) => {
+    expect(validateLucidDreamingInterval(value)).toBeUndefined();
+  });
+
+  it.each(['0m', '60m', '1h', '1d', 'often'])('rejects %s', (value) => {
+    expect(validateLucidDreamingInterval(value)).toMatch(/from 1m to 59m/);
+  });
+});
+
+describe('validateRelationshipDreamingInterval', () => {
+  it.each(['60m', '1h', '6h', '30d', '720h'])('accepts %s', (value) => {
+    expect(validateRelationshipDreamingInterval(value)).toBeUndefined();
+  });
+
+  it.each(['59m', '31d', '721h', 'daily'])('rejects %s', (value) => {
+    expect(validateRelationshipDreamingInterval(value)).toMatch(/from 1h to 30d/);
+  });
+});
 
 describe('parseIntervalMinutes', () => {
   it.each([

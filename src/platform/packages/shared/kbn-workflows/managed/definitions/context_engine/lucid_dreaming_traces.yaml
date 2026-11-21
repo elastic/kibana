@@ -1,0 +1,152 @@
+version: '1'
+name: __NAME__
+description: 'Extracts long-term facts and entities from a small batch of agent rounds the trace sources of a Context Engine AI index record, soon after they end, for lucid dreaming.'
+enabled: false
+tags:
+  - context-engine
+  - memory
+  - dreaming
+  - traces
+  - lucid
+settings:
+  timeout: '30m'
+  concurrency:
+    key: __CONCURRENCY_KEY__
+    strategy: queue
+    max: 2
+consts:
+  ai_index_id: __AI_INDEX_ID__
+  batch_workflow_id: __BATCH_WORKFLOW_ID__
+outputs:
+  - name: rounds
+    type: number
+  - name: created
+    type: number
+  - name: updated
+    type: number
+  - name: deleted
+    type: number
+  - name: rejected
+    type: number
+triggers:
+  - type: context-engine.lucidDreamingBatchReady
+    on:
+      condition: 'event.source: "traces" and event.ai_index_id: __AI_INDEX_ID__'
+  - type: manual
+    inputs:
+      additionalProperties: false
+      required:
+        - rounds
+      properties:
+        rounds:
+          type: array
+          maxItems: 200
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - trace_id
+              - ended_at
+            properties:
+              trace_id:
+                type: string
+                maxLength: 512
+              ended_at:
+                type: string
+                maxLength: 64
+          description: The rounds to dream on, by trace id and when they ended.
+        dry_run:
+          type: boolean
+          default: false
+          description: Report what dreaming would write and reject, and write nothing.
+steps:
+  - name: status
+    type: context-engine.getDreamingStatus
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source: traces
+
+  - name: paused
+    type: if
+    condition: '${{ steps.status.output.dream != true }}'
+    steps:
+      - name: skip
+        type: workflow.output
+        status: cancelled
+        with:
+          rounds: 0
+          reason: '{{ steps.status.output.reason }}'
+
+  - name: read_traces
+    type: context-engine.readTraceTranscripts
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      rounds: '${{ event.rounds | default: inputs.rounds }}'
+      max_tokens: 600000
+      batch_tokens: 50000
+
+  - name: active
+    type: data.set
+    with:
+      memories: '${{ steps.read_traces.output.memories }}'
+      batches: '${{ steps.read_traces.output.batches }}'
+      created: 0
+      updated: 0
+      deleted: 0
+      rejected: 0
+      would_write: []
+
+  - name: dream
+    type: if
+    condition: '${{ variables.memories.size > 0 }}'
+    steps:
+      - name: batches
+        type: parallel
+        foreach: '{{ variables.batches | json }}'
+        concurrency: 2
+        steps:
+          - name: dream_batch
+            type: workflow.execute
+            with:
+              workflow-id: '{{ consts.batch_workflow_id }}'
+              inputs:
+                memories: '${{ foreach.item }}'
+                dry_run: '${{ inputs.dry_run == true }}'
+
+      - name: tally
+        type: foreach
+        foreach: '{{ steps.batches.output.results | json }}'
+        steps:
+          - name: add_batch
+            type: data.set
+            with:
+              created: '${{ variables.created | plus: foreach.item.output.created }}'
+              updated: '${{ variables.updated | plus: foreach.item.output.updated }}'
+              deleted: '${{ variables.deleted | plus: foreach.item.output.deleted }}'
+              rejected: '${{ variables.rejected | plus: foreach.item.output.rejected }}'
+              would_write: '${{ variables.would_write | concat: foreach.item.output.would_write }}'
+
+  - name: dry_run_result
+    type: if
+    condition: '${{ inputs.dry_run == true }}'
+    steps:
+      - name: dry_run_output
+        type: workflow.output
+        status: cancelled
+        with:
+          rounds: '${{ variables.memories | size | default: 0 }}'
+          created: '${{ variables.created | default: 0 }}'
+          updated: '${{ variables.updated | default: 0 }}'
+          deleted: '${{ variables.deleted | default: 0 }}'
+          rejected: '${{ variables.rejected | default: 0 }}'
+          would_write: '${{ variables.would_write }}'
+          reason: 'Dry run: nothing was written.'
+
+  - name: output_result
+    type: workflow.output
+    with:
+      rounds: '${{ variables.memories | size | default: 0 }}'
+      created: '${{ variables.created | default: 0 }}'
+      updated: '${{ variables.updated | default: 0 }}'
+      deleted: '${{ variables.deleted | default: 0 }}'
+      rejected: '${{ variables.rejected | default: 0 }}'
