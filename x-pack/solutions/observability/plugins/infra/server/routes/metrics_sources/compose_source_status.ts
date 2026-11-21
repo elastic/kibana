@@ -81,8 +81,16 @@ export const composeSourceStatus = async ({
       );
     } else {
       // Any other failure is unexpected (for example an authorization error), so keep it
-      // visible as a structured error with its type and stack rather than downgrading it.
-      logger.error(err instanceof Error ? err : new Error(String(err)));
+      // visible at error level. Carry the source and pattern in the message so an operator can
+      // tell which configured source failed, and attach the original error as metadata so its
+      // type and stack are preserved.
+      const error = err instanceof Error ? err : new Error(String(err));
+      logger.error(
+        `Metric index status check failed for source "${toSingleLine(
+          sourceId
+        )}" (pattern: ${metricAlias}): ${error.message}`,
+        { error }
+      );
     }
 
     return {

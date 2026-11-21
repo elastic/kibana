@@ -70,7 +70,7 @@ describe('composeSourceStatus', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('keeps an unexpected probe failure visible as a structured error and reports unknown', async () => {
+  it('keeps an unexpected probe failure visible as a structured error with the source context and reports unknown', async () => {
     const error = new Error('cluster unhealthy');
     const hasMetricIndices = jest.fn().mockRejectedValue(error);
 
@@ -80,11 +80,14 @@ describe('composeSourceStatus', () => {
       metricIndicesStatus: 'unknown',
     });
     // An unexpected failure (for example an authorization error) is not a timeout, so it stays
-    // at error level with its type and stack instead of being downgraded to a warning. Assert
-    // identity rather than equality so replacing the error with a fresh `new Error(message)`
-    // (which would discard its type and stack) would fail this test.
+    // at error level. The source and pattern are carried in the message so an operator can tell
+    // which configured source failed, and the original Error is attached as metadata (asserted
+    // by identity) so its type and stack survive.
     expect(logger.error).toHaveBeenCalledTimes(1);
-    expect(logger.error.mock.calls[0][0]).toBe(error);
+    const [message, meta] = logger.error.mock.calls[0];
+    expect(message).toContain('default');
+    expect(message).toContain(metricAlias);
+    expect(meta).toEqual({ error });
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
