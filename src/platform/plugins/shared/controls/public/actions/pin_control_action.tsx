@@ -39,6 +39,9 @@ type PinnableControlApi = HasType &
   IsPinnable &
   HasParentApi<PresentationContainer & HasType & CanPinPanels>;
 
+const apiCanSetRequired = (api: unknown): api is { setRequired: (required: boolean) => void } =>
+  typeof (api as { setRequired?: unknown } | null)?.setRequired === 'function';
+
 const compatibilityCheck = (api: unknown | null): api is PinnableControlApi =>
   Boolean(
     apiHasType(api) &&
@@ -92,6 +95,8 @@ export class PinControlAction
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
     if (embeddable.parentApi.panelIsPinned(embeddable.uuid)) {
       embeddable.parentApi.unpinPanel(embeddable.uuid);
+      // only pinned controls can be required, so clear it when the control is unpinned
+      if (apiCanSetRequired(embeddable)) embeddable.setRequired(false);
     } else {
       embeddable.parentApi.pinPanel(embeddable.uuid);
     }
