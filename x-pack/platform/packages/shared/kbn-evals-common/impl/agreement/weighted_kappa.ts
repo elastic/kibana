@@ -20,7 +20,11 @@ export interface WeightedKappaOptions {
 /**
  * Cohen's weighted kappa for ordinal scores: 1 - observed disagreement / chance disagreement,
  * where disagreement between two scores grows with their distance. Returns null when it is
- * undefined (no pairs, or both raters used a single identical value).
+ * undefined (no pairs, a non-finite score, or both raters used a single identical value).
+ *
+ * Quadratic weighting is computed in O(n) from moments, because chance disagreement over every
+ * judge x human combination expands to var(judge) + var(human) + (mean(judge) - mean(human))^2.
+ * Linear weighting has no such closed form here and stays a pairwise O(n^2) sum.
  */
 export const computeWeightedKappa = (
   pairs: readonly ScorePair[],
@@ -30,23 +34,61 @@ export const computeWeightedKappa = (
   if (n === 0) {
     return null;
   }
-  const all = pairs.flatMap(({ judge, human }) => [judge, human]);
+  // Plain loop rather than Math.max(...values): spreading every score overflows the call stack
+  // once there are ~100k of them.
+  let min = Infinity;
+  let max = -Infinity;
+  for (const { judge, human } of pairs) {
+    if (!Number.isFinite(judge) || !Number.isFinite(human)) {
+      return null;
+    }
+    min = Math.min(min, judge, human);
+    max = Math.max(max, judge, human);
+  }
   // Normalising by the range cancels in the observed/expected ratio, so it only keeps the
   // weights in [0, 1]; the result does not depend on the scale's width.
-  const range = Math.max(...all) - Math.min(...all);
-  if (range <= 0) {
+  let scale = 1;
+  let range = max - min;
+  if (!Number.isFinite(range)) {
+    // Finite extremes of opposite sign (e.g. -MAX_VALUE and MAX_VALUE) overflow the subtraction.
+    // Halving every score is exact and uniform, so the ratio is unchanged and max/2 - min/2 is
+    // finite. Narrower ranges keep scale 1: multiplying by 1 leaves direct subtraction untouched.
+    scale = 0.5;
+    range = max * scale - min * scale;
+  }
+  if (!(range > 0) || !Number.isFinite(range)) {
     return null;
   }
-  const weight = (a: number, b: number): number => {
-    const distance = Math.abs(a - b) / range;
-    return weighting === 'linear' ? distance : distance * distance;
-  };
+
+  const { observed, expected } =
+    weighting === 'linear'
+      ? linearDisagreement(pairs, range, scale)
+      : quadraticDisagreement(pairs, min, range, scale);
+
+  if (expected === 0) {
+    return null;
+  }
+  const kappa = 1 - observed / expected;
+  return Number.isFinite(kappa) ? kappa : null;
+};
+
+interface Disagreement {
+  observed: number;
+  expected: number;
+}
+
+const linearDisagreement = (
+  pairs: readonly ScorePair[],
+  range: number,
+  scale: number
+): Disagreement => {
+  const n = pairs.length;
+  const weight = (a: number, b: number): number => Math.abs(a * scale - b * scale) / range;
 
   let observed = 0;
   for (const { judge, human } of pairs) {
     observed += weight(judge, human);
   }
-  observed /= n;
 
   let expected = 0;
   for (const { judge } of pairs) {
@@ -54,7 +96,42 @@ export const computeWeightedKappa = (
       expected += weight(judge, human);
     }
   }
-  expected /= n * n;
+  return { observed: observed / n, expected: expected / (n * n) };
+};
 
-  return expected === 0 ? null : 1 - observed / expected;
+const quadraticDisagreement = (
+  pairs: readonly ScorePair[],
+  min: number,
+  range: number,
+  scale: number
+): Disagreement => {
+  const n = pairs.length;
+  // Scores are shifted to the scale minimum and divided by the range before any squaring, so a
+  // large constant offset or a very wide scale cannot swamp the variances.
+  const unit = (score: number): number => (score * scale - min * scale) / range;
+
+  let judgeSum = 0;
+  let humanSum = 0;
+  for (const { judge, human } of pairs) {
+    judgeSum += unit(judge);
+    humanSum += unit(human);
+  }
+  const judgeMean = judgeSum / n;
+  const humanMean = humanSum / n;
+
+  // Second pass about the means (not a raw sum of squares) avoids catastrophic cancellation.
+  let observed = 0;
+  let judgeSquares = 0;
+  let humanSquares = 0;
+  for (const { judge, human } of pairs) {
+    const distance = (judge * scale - human * scale) / range;
+    observed += distance * distance;
+    judgeSquares += (unit(judge) - judgeMean) ** 2;
+    humanSquares += (unit(human) - humanMean) ** 2;
+  }
+
+  return {
+    observed: observed / n,
+    expected: judgeSquares / n + humanSquares / n + (judgeMean - humanMean) ** 2,
+  };
 };
