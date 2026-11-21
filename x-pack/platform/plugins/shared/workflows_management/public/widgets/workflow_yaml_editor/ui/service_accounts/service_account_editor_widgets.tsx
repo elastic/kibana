@@ -358,6 +358,8 @@ export const ServiceAccountEditorWidgets = ({
         dismissed = false;
         filterByTypedValue = false;
         close();
+        // A pending hover resolves against the old model, which the version check cannot catch.
+        cancelHover();
         restoreSuggestions();
       }),
       editor.onDidScrollChange(close),

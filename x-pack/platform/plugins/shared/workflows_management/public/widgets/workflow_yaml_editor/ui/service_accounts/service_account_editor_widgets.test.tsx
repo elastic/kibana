@@ -322,6 +322,25 @@ describe('ServiceAccountEditorWidgets', () => {
     expect(screen.getByText('This deployment')).toBeInTheDocument();
   });
 
+  it('drops a pending hover when the editor swaps models', async () => {
+    jest.useFakeTimers();
+    const { editor } = setup(true, 'settings:\n  run_as: opaque-id');
+    jest.mocked(editor.hasTextFocus).mockReturnValue(false);
+    await act(async () => {
+      jest.advanceTimersByTime(100);
+    });
+    act(() => {
+      jest.mocked(editor.onMouseMove).mock.calls[0][0](mouseEvent(new monaco.Position(2, 12)));
+      jest
+        .mocked(editor.onDidChangeModel)
+        .mock.calls[0][0]({ oldModelUrl: null, newModelUrl: null });
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(250);
+    });
+    expect(screen.queryByText('This deployment')).not.toBeInTheDocument();
+  });
+
   it('shows name and role badges, and clicking inserts only the stable ID', async () => {
     const { editor } = setup();
     const option = await screen.findByRole('option');
