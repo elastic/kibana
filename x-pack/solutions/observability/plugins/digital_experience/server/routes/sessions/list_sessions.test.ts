@@ -214,6 +214,46 @@ describe('buildListSessionsRequest', () => {
     ).toEqual({ bool: { filter: [{ range: { http_failed_request_count: { gte: 1 } } }] } });
   });
 
+  it('filters to sessions with a frustration signal', () => {
+    const request = buildListSessionsRequest({ ...baseParams, filters: { withFrustration: true } });
+    expect(request.post_filter).toEqual({
+      bool: { filter: expect.arrayContaining([{ range: { frustration_count: { gte: 1 } } }]) },
+    });
+    expect(request.aggs?.kpis.filter).toEqual(request.post_filter);
+  });
+
+  it('filters to the sessions that were frustrated on a target', () => {
+    const request = buildListSessionsRequest({
+      ...baseParams,
+      filters: { frustrationTarget: '#checkout > button.buy' },
+    });
+    expect(request.post_filter).toEqual({
+      bool: { filter: [{ term: { frustration_targets: '#checkout > button.buy' } }] },
+    });
+  });
+
+  it('filters to the sessions that were frustrated on a page', () => {
+    const request = buildListSessionsRequest({
+      ...baseParams,
+      filters: { frustrationPage: '/cart' },
+    });
+    expect(request.post_filter).toEqual({
+      bool: { filter: [{ term: { frustration_pages: '/cart' } }] },
+    });
+  });
+
+  it('sorts by the frustration count even where an index predates its mapping', () => {
+    const request = buildListSessionsRequest({
+      ...baseParams,
+      sortField: 'frustration_count',
+      sortDirection: 'desc',
+    });
+    expect(request.sort).toEqual([
+      { frustration_count: { order: 'desc', unmapped_type: 'long' } },
+      { 'session.id': 'asc' },
+    ]);
+  });
+
   it('applies an open-ended duration range', () => {
     const request = buildListSessionsRequest({ ...baseParams, filters: { minDurationMs: 0 } });
     expect(request.post_filter).toEqual({
@@ -231,6 +271,7 @@ describe('buildListSessionsRequest', () => {
         bounced: { filter: { term: { bounced: true } } },
         with_js_errors: { filter: { range: { js_error_count: { gte: 1 } } } },
         with_failed_requests: { filter: { range: { http_failed_request_count: { gte: 1 } } } },
+        with_frustration: { filter: { range: { frustration_count: { gte: 1 } } } },
         vital_lcp: { percentiles: { field: 'web_vitals.lcp', percents: [75], keyed: false } },
       })
     );
@@ -266,6 +307,24 @@ describe('toSessionSummary', () => {
       geo: { countryIso: 'NL', region: 'North Holland', city: 'Amsterdam' },
       webVitals: { lcp: 1800, inp: null, cls: 0.05, fcp: null, ttfb: null },
     });
+  });
+
+  it('maps the frustration counts', () => {
+    expect(
+      toSessionSummary({
+        ...sessionDoc,
+        rage_click_count: 2,
+        dead_click_count: 3,
+        error_click_count: 1,
+        frustration_count: 6,
+      }).frustration
+    ).toEqual({ rageClicks: 2, deadClicks: 3, errorClicks: 1, total: 6 });
+  });
+
+  it('reads missing frustration counts as 0', () => {
+    expect(toSessionSummary({ session: { id: 's' }, service: { name: 'a' } }).frustration).toEqual(
+      emptyFrustration()
+    );
   });
 
   it('defaults the fields a document lacks', () => {
@@ -328,6 +387,7 @@ describe('parseListSessionsResponse', () => {
           bounced: { doc_count: 40 },
           with_js_errors: { doc_count: 5 },
           with_failed_requests: { doc_count: 7 },
+          with_frustration: { doc_count: 4 },
           vital_lcp: { values: [{ key: 75, value: 2100 }] },
           vital_inp: { values: [{ key: 75, value: null }] },
           vital_cls: { values: [] },
@@ -359,7 +419,7 @@ describe('parseListSessionsResponse', () => {
         bounceRate: 0.5,
         sessionsWithJsErrors: 5,
         sessionsWithFailedRequests: 7,
-        sessionsWithFrustration: 0,
+        sessionsWithFrustration: 4,
         webVitals: { lcp: 2100, inp: null, cls: null, fcp: null, ttfb: null },
       },
     });
@@ -380,6 +440,7 @@ describe('parseListSessionsResponse', () => {
           bounced: { doc_count: 0 },
           with_js_errors: { doc_count: 0 },
           with_failed_requests: { doc_count: 0 },
+          with_frustration: { doc_count: 0 },
           vital_lcp: { values: [] },
           vital_inp: { values: [] },
           vital_cls: { values: [] },

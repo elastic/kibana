@@ -12,7 +12,6 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { CORE_WEB_VITALS, type CoreWebVital } from '../../../common/core_web_vitals';
-import { emptyFrustration } from '../../../common/frustration';
 import {
   SESSIONS_INDEX_PATTERN,
   SESSIONS_LOOKBACK_DAYS,
@@ -52,6 +51,11 @@ type FacetName = keyof typeof SESSION_FACET_FIELDS;
 export interface SessionListFilters {
   withJsErrors?: boolean;
   withFailedRequests?: boolean;
+  withFrustration?: boolean;
+  /** CSS selector of an element with a frustration signal. */
+  frustrationTarget?: string;
+  /** Path of a page with a frustration signal. */
+  frustrationPage?: string;
   /** Inclusive lower bound of the session duration. */
   minDurationMs?: number;
   /** Exclusive upper bound of the session duration. */
@@ -119,15 +123,22 @@ const facetFilters = (
 const atLeastOne = (field: string): QueryDslQueryContainer => ({ range: { [field]: { gte: 1 } } });
 const WITH_JS_ERRORS = atLeastOne('js_error_count');
 const WITH_FAILED_REQUESTS = atLeastOne('http_failed_request_count');
+const WITH_FRUSTRATION = atLeastOne('frustration_count');
 
 const sessionFilters = ({
   withJsErrors,
   withFailedRequests,
+  withFrustration,
+  frustrationTarget,
+  frustrationPage,
   minDurationMs,
   maxDurationMs,
 }: SessionListFilters = {}): QueryDslQueryContainer[] => [
   ...(withJsErrors ? [WITH_JS_ERRORS] : []),
   ...(withFailedRequests ? [WITH_FAILED_REQUESTS] : []),
+  ...(withFrustration ? [WITH_FRUSTRATION] : []),
+  ...(frustrationTarget ? [{ term: { frustration_targets: frustrationTarget } }] : []),
+  ...(frustrationPage ? [{ term: { frustration_pages: frustrationPage } }] : []),
   ...(minDurationMs !== undefined || maxDurationMs !== undefined
     ? [
         {
@@ -149,6 +160,20 @@ const listedFilter = (
 ): QueryDslQueryContainer => ({
   bool: { filter: [...sessionFilters(filters), ...facetFilters(facets, exclude)] },
 });
+
+/** `unmapped_type` keeps a sort on the field from failing on an index created before its mapping. */
+const sortOf = ({
+  sortField,
+  sortDirection,
+}: Pick<ListSessionsParams, 'sortField' | 'sortDirection'>): SearchRequest['sort'] => [
+  {
+    [sortField]:
+      sortField === 'frustration_count'
+        ? { order: sortDirection, unmapped_type: 'long' }
+        : sortDirection,
+  },
+  { 'session.id': 'asc' },
+];
 
 const vitalAggregationName = (vital: CoreWebVital) => `vital_${vital}` as const;
 
@@ -174,7 +199,7 @@ export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequ
     track_total_hits: true,
     from,
     size,
-    sort: [{ [params.sortField]: params.sortDirection }, { 'session.id': 'asc' }],
+    sort: sortOf(params),
     query: { bool: { filter: [...sessionScopeFilters(params), ...searchFilter(params.query)] } },
     post_filter: listedFilter(params),
     aggs: {
@@ -189,6 +214,7 @@ export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequ
           bounced: { filter: { term: { bounced: true } } },
           with_js_errors: { filter: WITH_JS_ERRORS },
           with_failed_requests: { filter: WITH_FAILED_REQUESTS },
+          with_frustration: { filter: WITH_FRUSTRATION },
           ...Object.fromEntries(
             CORE_WEB_VITALS.map((vital) => [
               vitalAggregationName(vital),
@@ -220,7 +246,12 @@ export const toSessionSummary = (doc: StoredSessionDocument): SessionSummary => 
     jsErrorCount: numberOr(doc.js_error_count, 0),
     httpRequestCount: numberOr(doc.http_request_count, 0),
     failedRequestCount: numberOr(doc.http_failed_request_count, 0),
-    frustration: emptyFrustration(),
+    frustration: {
+      rageClicks: numberOr(doc.rage_click_count, 0),
+      deadClicks: numberOr(doc.dead_click_count, 0),
+      errorClicks: numberOr(doc.error_click_count, 0),
+      total: numberOr(doc.frustration_count, 0),
+    },
     bounced: doc.bounced ?? pageViewCount === 1,
     entryPage: stringOrNull(doc.entry_page),
     exitPage: stringOrNull(doc.exit_page),
@@ -258,6 +289,7 @@ export type ListSessionsAggs = Record<FacetName, FacetAggregation> & {
     bounced: DocCount;
     with_js_errors: DocCount;
     with_failed_requests: DocCount;
+    with_frustration: DocCount;
   } & Record<ReturnType<typeof vitalAggregationName>, PercentilesAggregation>;
 };
 
@@ -297,7 +329,7 @@ export const parseListSessionsResponse = (
         sessionsWithPageViews > 0 ? (kpis?.bounced.doc_count ?? 0) / sessionsWithPageViews : null,
       sessionsWithJsErrors: kpis?.with_js_errors.doc_count ?? 0,
       sessionsWithFailedRequests: kpis?.with_failed_requests.doc_count ?? 0,
-      sessionsWithFrustration: 0,
+      sessionsWithFrustration: kpis?.with_frustration.doc_count ?? 0,
       webVitals,
     },
   };

@@ -49,6 +49,8 @@ export const SESSION_DETAIL_ENDPOINT =
   'GET /internal/digital_experience/applications/{serviceName}/sessions/{sessionId}';
 
 const MAX_SERVICE_NAME_LENGTH = 1024;
+/** The keyword `ignore_above` of the summarized targets and pages. */
+const MAX_FRUSTRATION_FILTER_LENGTH = 1024;
 
 const NO_ACCESS_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.api.noAccess', {
   defaultMessage:
@@ -252,6 +254,9 @@ const listRoute = createDigitalExperienceServerRoute({
           environment: z.string().min(1).max(MAX_ENVIRONMENT_LENGTH).optional(),
           withJsErrors: z.stringbool().optional(),
           withFailedRequests: z.stringbool().optional(),
+          withFrustration: z.stringbool().optional(),
+          frustrationTarget: facetValue(MAX_FRUSTRATION_FILTER_LENGTH),
+          frustrationPage: facetValue(MAX_FRUSTRATION_FILTER_LENGTH),
           minDurationMs: durationMs(),
           maxDurationMs: durationMs(),
           sortField: z.enum(SESSION_SORT_FIELDS).default('start_time'),
@@ -286,6 +291,9 @@ const listRoute = createDigitalExperienceServerRoute({
       entryPage,
       withJsErrors,
       withFailedRequests,
+      withFrustration,
+      frustrationTarget,
+      frustrationPage,
       minDurationMs,
       maxDurationMs,
       ...query
@@ -295,7 +303,15 @@ const listRoute = createDigitalExperienceServerRoute({
         ...query,
         serviceName: params.path.serviceName,
         facets: { browsers: browser, os, countries: country, entryPages: entryPage },
-        filters: { withJsErrors, withFailedRequests, minDurationMs, maxDurationMs },
+        filters: {
+          withJsErrors,
+          withFailedRequests,
+          withFrustration,
+          frustrationTarget,
+          frustrationPage,
+          minDurationMs,
+          maxDurationMs,
+        },
       });
     } catch (error) {
       throw toReadError(error, logger, 'the sessions list');
