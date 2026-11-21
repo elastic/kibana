@@ -17,9 +17,8 @@ import {
 } from '@elastic/eui';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment } from 'react';
 import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form';
-import type { Option } from '../../../helpers/create_options';
 import { createOptionsFromFields } from '../../../helpers/create_options';
 import type { CreateSLOForm } from '../../../types';
 import { QueryBuilder } from '../../common/query_builder';
@@ -100,11 +99,7 @@ export function HistogramIndicator({
 }: HistogramIndicatorProps) {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
   const formState = useFormState({ control, name: `indicator.params.${type}.field` });
-  const [options, setOptions] = useState<Option[]>(createOptionsFromFields(histogramFields));
-
-  useEffect(() => {
-    setOptions(createOptionsFromFields(histogramFields));
-  }, [histogramFields]);
+  const options = createOptionsFromFields(histogramFields);
 
   const indexPattern = useWatch({ control, name: 'indicator.params.index' });
   const aggregation = useWatch({ control, name: `indicator.params.${type}.aggregation` });
@@ -169,7 +164,6 @@ export function HistogramIndicator({
               render={({ field: { ref, ...field }, fieldState }) => (
                 <EuiComboBox
                   {...field}
-                  async
                   fullWidth
                   singleSelection={{ asPlainText: true }}
                   placeholder={i18n.translate(
@@ -201,13 +195,6 @@ export function HistogramIndicator({
                         ]
                       : []
                   }
-                  onSearchChange={(searchValue: string) => {
-                    setOptions(
-                      createOptionsFromFields(histogramFields, ({ value }) =>
-                        value.includes(searchValue)
-                      )
-                    );
-                  }}
                   options={options}
                 />
               )}

@@ -39,5 +39,33 @@ describe('useShowSections', () => {
       expect(result.current.showObjectiveSection).toBe(true);
       expect(result.current.showDescriptionSection).toBe(true);
     });
+
+    it('keeps the sections shown once the indicator section becomes invalid again', () => {
+      const { result, rerender } = renderHook(
+        ({ isIndicatorSectionValid }) =>
+          useShowSections(false, false, isIndicatorSectionValid, isIndicatorSectionValid),
+        { initialProps: { isIndicatorSectionValid: true } }
+      );
+
+      rerender({ isIndicatorSectionValid: false });
+
+      expect(result.current.showObjectiveSection).toBe(true);
+      expect(result.current.showDescriptionSection).toBe(true);
+    });
+
+    it('waits for the form validation to settle before showing the sections', () => {
+      const { result, rerender } = renderHook(
+        ({ isFormValidating }) => useShowSections(false, isFormValidating, true, true),
+        { initialProps: { isFormValidating: true } }
+      );
+
+      expect(result.current.showObjectiveSection).toBe(false);
+      expect(result.current.showDescriptionSection).toBe(false);
+
+      rerender({ isFormValidating: false });
+
+      expect(result.current.showObjectiveSection).toBe(true);
+      expect(result.current.showDescriptionSection).toBe(true);
+    });
   });
 });

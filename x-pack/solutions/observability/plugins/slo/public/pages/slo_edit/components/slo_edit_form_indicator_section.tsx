@@ -11,7 +11,7 @@ import { assertNever } from '@kbn/std';
 import React, { useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { SLI_OPTIONS } from '../constants';
-import { useUnregisterFields } from '../hooks/use_unregister_fields';
+import { useResetOnIndicatorTypeChange } from '../hooks/use_reset_on_indicator_type_change';
 import type { CreateSLOForm, FormSettings } from '../types';
 import { MAX_WIDTH } from '../constants';
 import { ApmAvailabilityIndicatorTypeForm } from './indicator_section/apm_availability/apm_availability_indicator_type_form';
@@ -30,7 +30,7 @@ interface SloEditFormIndicatorSectionProps {
 export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicatorSectionProps) {
   const { isEditMode = false, allowedIndicatorTypes = [] } = formSettings;
   const { control } = useFormContext<CreateSLOForm>();
-  useUnregisterFields({ isEditMode });
+  useResetOnIndicatorTypeChange({ isEditMode });
 
   const indicatorType = useWatch({ control, name: 'indicator.type' });
 

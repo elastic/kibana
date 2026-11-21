@@ -402,6 +402,44 @@ describe('SLO Edit Page', () => {
         )
       ).toBeInTheDocument();
     });
+
+    it('resets the indicator params to the selected SLI type defaults', async () => {
+      const { getByTestId, getAllByTestId } = render(<SloEditPage />);
+
+      fireEvent.change(getByTestId('sloFormIndicatorTypeSelect'), {
+        target: { value: 'sli.metric.custom' },
+      });
+
+      await waitFor(() => {
+        expect(getAllByTestId('customMetricIndicatorAddMetricButton')).toHaveLength(2);
+      });
+      expect(getByTestId('sloFormIndicatorTypeSelect')).toHaveValue('sli.metric.custom');
+      const equations = getAllByTestId('o11yCustomMetricEquation');
+      expect(equations).toHaveLength(2);
+      equations.forEach((equation) => expect(equation).toHaveValue('A'));
+    });
+
+    it('applies the timeslice metric defaults to an already visible objective section', async () => {
+      const { getByTestId, queryByTestId } = render(<SloEditPage />);
+
+      fireEvent.change(getByTestId('sloFormIndicatorTypeSelect'), {
+        target: { value: 'sli.synthetics.availability' },
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('sloFormBudgetingMethodSelect')).toHaveValue('occurrences');
+      });
+
+      fireEvent.change(getByTestId('sloFormIndicatorTypeSelect'), {
+        target: { value: 'sli.metric.timeslice' },
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('sloFormBudgetingMethodSelect')).toHaveValue('timeslices');
+      });
+      expect(getByTestId('sloFormBudgetingMethodSelect')).toBeDisabled();
+      expect(queryByTestId('sloEditFormObjectiveSection')).toBeInTheDocument();
+    });
   });
 
   describe('edit SLO flow', () => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionMatcher } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 export const AGGREGATION_OPTIONS = [
   {
@@ -66,6 +67,12 @@ export const AGGREGATION_OPTIONS = [
 export const CUSTOM_METRIC_AGGREGATION_OPTIONS = AGGREGATION_OPTIONS.filter((option) =>
   ['doc_count', 'sum'].includes(option.value)
 );
+
+/** Matches an aggregation option by its label or its value (e.g. `avg`, `doc_count`). */
+export const matchAggregationOption: EuiComboBoxOptionMatcher<string> = ({
+  option: { label, value },
+  normalizedSearchValue,
+}) => [label, value].some((text) => text?.toLowerCase().includes(normalizedSearchValue));
 
 export function aggValueToLabel(value: string) {
   const aggregation = AGGREGATION_OPTIONS.find((agg) => agg.value === value);
