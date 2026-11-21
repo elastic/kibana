@@ -402,6 +402,61 @@ describe('DeprecationFactory', () => {
       `);
     });
 
+    describe('with `mergeObjects`', () => {
+      it('merges the old object into the new one, preferring the new values and replacing arrays', () => {
+        const rawConfig = {
+          oldplugin: { a: 1, nested: { x: 1, y: 1 }, list: [1, 2, 3] },
+          newplugin: { nested: { y: 2 }, list: [9] },
+        };
+        const commands = renameFromRoot('oldplugin', 'newplugin', {
+          level: 'warning',
+          mergeObjects: true,
+        })(rawConfig, 'does-not-matter', addDeprecation, context);
+        expect(commands).toEqual({
+          set: [{ path: 'newplugin', value: { a: 1, nested: { x: 1, y: 2 }, list: [9] } }],
+          unset: [{ path: 'oldplugin' }],
+        });
+        expect(addDeprecation).toHaveBeenCalledTimes(1);
+        const [details] = addDeprecation.mock.calls[0];
+        expect(details.message).toBe(
+          'Setting "oldplugin" has been replaced by "newplugin". However, both are present. Settings in "newplugin" take precedence over "oldplugin"'
+        );
+        expect(details).not.toHaveProperty('mergeObjects');
+      });
+
+      it('moves the old value when the new key is not present', () => {
+        const rawConfig = { oldplugin: { a: 1 } };
+        const commands = renameFromRoot('oldplugin', 'newplugin', {
+          level: 'warning',
+          mergeObjects: true,
+        })(rawConfig, 'does-not-matter', addDeprecation, context);
+        expect(commands).toEqual({
+          set: [{ path: 'newplugin', value: { a: 1 } }],
+          unset: [{ path: 'oldplugin' }],
+        });
+      });
+
+      it('ignores the old value when it is not an object', () => {
+        const rawConfig = { oldplugin: { a: 1 }, newplugin: 'value' };
+        const commands = renameFromRoot('oldplugin', 'newplugin', {
+          level: 'warning',
+          mergeObjects: true,
+        })(rawConfig, 'does-not-matter', addDeprecation, context);
+        expect(commands).toEqual({ unset: [{ path: 'oldplugin' }] });
+      });
+    });
+
+    it('ignores the old object when both are present and `mergeObjects` is not set', () => {
+      const rawConfig = { oldplugin: { a: 1 }, newplugin: { b: 2 } };
+      const commands = renameFromRoot('oldplugin', 'newplugin', { level: 'warning' })(
+        rawConfig,
+        'does-not-matter',
+        addDeprecation,
+        context
+      );
+      expect(commands).toEqual({ unset: [{ path: 'oldplugin' }] });
+    });
+
     it('does not alter config and does not log if old property is not present', () => {
       const rawConfig = {
         myplugin: {

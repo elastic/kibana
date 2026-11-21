@@ -44,8 +44,10 @@ export const config: PluginConfigDescriptor = {
     secretConnections: { enabled: true },
   },
   deprecations: ({ renameFromRoot, unused }) => [
-    // Must run first so the `unused` checks below see the renamed keys.
-    renameFromRoot('xpack.uptime', 'xpack.synthetics', { level: 'warning' }),
+    // `mergeObjects`: the namespaces can be set by different sources (e.g. bundled yml and
+    // control plane), so settings under `xpack.uptime` must survive when `xpack.synthetics` is set.
+    // Must run first so the `unused` checks below see the migrated keys.
+    renameFromRoot('xpack.uptime', 'xpack.synthetics', { level: 'warning', mergeObjects: true }),
     unused('experimental.ccs.enabled', { level: 'warning' }),
     unused('rebalancePrivateLocationShardsTaskEnabled', { level: 'warning' }),
   ],
