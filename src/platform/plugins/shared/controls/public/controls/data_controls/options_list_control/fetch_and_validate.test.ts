@@ -8,9 +8,10 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 
-import { coreServices } from '../../../services/kibana_services';
+import { coreServices, dataService } from '../../../services/kibana_services';
 import { setStubKibanaServices } from '../../../services/mocks';
 import type { ValuesSourceFetchPlan } from '../types';
 import { fetchAndValidate$ } from './fetch_and_validate';
@@ -69,6 +70,36 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
 
   afterEach(() => {
     fetchSpy.mockRestore();
+  });
+
+  it('sends the session time range to the server for ES|QL time parameters', async () => {
+    const resolvedTimeRange = {
+      from: '2026-11-01T11:45:00.000Z',
+      to: '2026-11-01T12:00:00.000Z',
+    };
+    jest.mocked(dataService.search.session.resolveTimeRange).mockReturnValueOnce(resolvedTimeRange);
+
+    const api = buildApi({
+      filters$: new BehaviorSubject<unknown>([]),
+      parentQuery$: new BehaviorSubject<unknown>(undefined),
+    });
+    api.valuesSourceFetchPlan$.next({
+      fetchMode: 'esql',
+      query: 'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | KEEP host',
+    });
+
+    const { suggestions$ } = fetchAndValidate$({
+      api,
+      requestSize$: new BehaviorSubject(10),
+      runPastTimeout$: new BehaviorSubject(false),
+      selectedOptions$: new BehaviorSubject([]),
+      searchTechnique$: new BehaviorSubject(DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique),
+      sort$: new BehaviorSubject(DEFAULT_DSL_OPTIONS_LIST_STATE.sort),
+    });
+    await firstValueFrom(suggestions$);
+
+    const body = JSON.parse(fetchSpy.mock.calls[0][1].body);
+    expect(body.timeRange).toEqual(resolvedTimeRange);
   });
 
   it('refetches with the new pre-filter when dashboard filters change', async () => {

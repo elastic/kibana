@@ -236,13 +236,14 @@ export class ESQLSource
       filters.push(extentFilter);
     }
 
+    const { session } = getData().search;
     const timeRange = requestMeta.timeslice
       ? {
           from: new Date(requestMeta.timeslice.from).toISOString(),
           to: new Date(requestMeta.timeslice.to).toISOString(),
           mode: 'absolute' as 'absolute',
         }
-      : requestMeta.timeFilters;
+      : session.resolveTimeRange(requestMeta.timeFilters);
 
     if (requestMeta.applyGlobalTime) {
       if (!this._descriptor.dateField) {

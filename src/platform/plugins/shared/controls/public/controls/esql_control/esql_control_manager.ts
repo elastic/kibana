@@ -164,7 +164,7 @@ export function initializeESQLControlManager(
     ? undefined
     : fetch$({ uuid, parentApi })
         .pipe(
-          filter(({ esqlVariables, timeRange }) => {
+          filter(({ esqlVariables, timeRange, isReload }) => {
             if (hasStartEndParams(esqlQuery$.getValue()) && !timeRange) {
               return false;
             }
@@ -182,6 +182,7 @@ export function initializeESQLControlManager(
 
             const shouldFetch =
               !hasInitialFetch ||
+              isReload ||
               timeRangeChanged ||
               haveVariablesValuesChanged(
                 externalVariables,
@@ -197,7 +198,7 @@ export function initializeESQLControlManager(
 
             return shouldFetch;
           }),
-          switchMap(({ timeRange, esqlVariables }) => {
+          switchMap(({ timeRange, esqlVariables, searchSessionId, projectRouting }) => {
             fetchAbortController.abort();
             fetchAbortController = new AbortController();
             const { signal } = fetchAbortController;
@@ -209,7 +210,9 @@ export function initializeESQLControlManager(
                 query: esqlQuery$.getValue(),
                 search: dataService.search.search,
                 signal,
-                timeRange,
+                timeRange: timeRange && dataService.search.session.resolveTimeRange(timeRange),
+                sessionId: searchSessionId,
+                projectRouting,
                 esqlVariables: variablesInParent,
                 timezone: getControlsTimezone(),
               })

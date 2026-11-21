@@ -11,52 +11,138 @@ import { BehaviorSubject } from 'rxjs';
 
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 
+import { getDashboardBackupService } from '../../services/dashboard_api_services';
+import {
+  DASHBOARD_PANELS_UNSAVED_ID,
+  getReplayCacheAssetId,
+} from '../../services/dashboard_backup_service';
 import { dataService } from '../../services/kibana_services';
 import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
+import { getReplayCacheContextKey } from './get_replay_cache_context_key';
 import { startDashboardSearchSessionIntegration } from './start_dashboard_search_session_integration';
 
 export function initializeSearchSessionManager(
   searchSessionSettings: DashboardCreationOptions['searchSessionSettings'],
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
-  dashboardApi: Omit<DashboardApi, 'searchSessionId$'>,
-  dashboardInternalApi: DashboardInternalApi
+  dashboardApi: Omit<DashboardApi, 'searchSessionId$' | 'replayCacheLastFetched$'>,
+  dashboardInternalApi: DashboardInternalApi,
+  skipReplay = false
 ) {
   const searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
+  const replayCacheLastFetched$ = new BehaviorSubject<string | undefined>(undefined);
   const searchSessionGenerationInProgress$ = new BehaviorSubject<boolean>(false);
+  const { replayCache, search, query } = dataService;
+  const { session } = search;
+  const { timefilter } = query.timefilter;
+
+  const getAssetId = () => getReplayCacheAssetId(dashboardApi.savedObjectId$.value);
+
+  const getContextKey = () =>
+    getReplayCacheContextKey({
+      timeRange: dashboardApi.timeRange$.value,
+      pinnedFilters: query.filterManager.getGlobalFilters(),
+      projectRouting: dashboardApi.projectRouting$?.value,
+    });
+
+  const registerSearchSession = (sessionId: string) => {
+    const timeRange = session.resolveTimeRange(
+      dashboardApi.timeRange$.value ?? timefilter.getTime()
+    );
+    replayCache.set(getAssetId(), {
+      sessionId,
+      timeRange: { ...timeRange, mode: 'absolute' },
+      contextKey: getContextKey(),
+    });
+  };
+
+  // Starts a new session and registers it, so the next visit can replay it.
+  const startSearchSession = () => {
+    const sessionId = session.start();
+    replayCacheLastFetched$.next(undefined);
+    registerSearchSession(sessionId);
+
+    return sessionId;
+  };
+
+  const unregisterSearchSession = () => replayCache.delete(getAssetId());
+
+  // Restored background searches are never replayed, so the registration goes away.
+  const restoreSearchSession = (sessionId: string) => {
+    session.restore(sessionId);
+    unregisterSearchSession();
+    replayCacheLastFetched$.next(undefined);
+  };
+
+  // First match wins: background restore, the session an editor returns, a new session when
+  // navigation changed the search, a compatible cached session, otherwise a new one.
+  const getInitialSearchSessionId = (sessionIdToRestore?: string) => {
+    if (sessionIdToRestore) {
+      restoreSearchSession(sessionIdToRestore);
+
+      return sessionIdToRestore;
+    }
+
+    for (const { searchSessionId } of incomingEmbeddables ?? []) {
+      if (searchSessionId && !session.isCurrentSession(searchSessionId)) {
+        session.continue(searchSessionId);
+      }
+    }
+
+    const continuedSessionId = incomingEmbeddables?.length ? session.getSessionId() : undefined;
+    if (skipReplay && !continuedSessionId) {
+      return startSearchSession();
+    }
+
+    // Every draft shares the unsaved id: a brand-new dashboard must not replay an earlier draft.
+    const isNewDraft =
+      dashboardApi.savedObjectId$.value === undefined &&
+      getDashboardBackupService().getState(DASHBOARD_PANELS_UNSAVED_ID) === undefined;
+    const replay = isNewDraft
+      ? { hit: false as const }
+      : replayCache.get(getAssetId(), getContextKey());
+
+    if (continuedSessionId) {
+      // Returning from an editor continues the session it used. If that session is the
+      // registered one, registering it again would evict the responses we are about to reuse.
+      if (session.isRestore()) {
+        unregisterSearchSession();
+      } else if (replay.hit && replay.sessionId === continuedSessionId) {
+        replayCacheLastFetched$.next(replay.lastFetched);
+      } else if (replay.hit) {
+        registerSearchSession(continuedSessionId);
+      }
+
+      return continuedSessionId;
+    }
+
+    if (replay.hit) {
+      if (!session.isCurrentSession(replay.sessionId)) {
+        session.continue(replay.sessionId);
+      }
+
+      replayCacheLastFetched$.next(replay.lastFetched);
+
+      return replay.sessionId;
+    }
+
+    return startSearchSession();
+  };
 
   let stopSearchSessionIntegration: (() => void) | undefined;
   let requestSearchSessionId: (() => Promise<string | undefined>) | undefined;
   if (searchSessionSettings) {
+    const api = { ...dashboardApi, searchSessionId$, replayCacheLastFetched$ };
     stopSearchSessionIntegration = startDashboardSearchSessionIntegration(
-      {
-        ...dashboardApi,
-        searchSessionId$,
-      },
+      api,
       dashboardInternalApi,
       searchSessionSettings,
       (searchSessionId: string) => searchSessionId$.next(searchSessionId),
-      searchSessionGenerationInProgress$
+      searchSessionGenerationInProgress$,
+      startSearchSession,
+      restoreSearchSession
     );
 
-    const { sessionIdToRestore } = searchSessionSettings;
-
-    // if this incoming embeddable has a session, continue it.
-    incomingEmbeddables?.forEach((embeddablePackage) => {
-      if (embeddablePackage.searchSessionId) {
-        dataService.search.session.continue(embeddablePackage.searchSessionId);
-      }
-    });
-    if (sessionIdToRestore) {
-      dataService.search.session.restore(sessionIdToRestore);
-    }
-    const existingSession = dataService.search.session.getSessionId();
-
-    const initialSearchSessionId =
-      sessionIdToRestore ??
-      (existingSession && incomingEmbeddables?.length
-        ? existingSession
-        : dataService.search.session.start());
-    searchSessionId$.next(initialSearchSessionId);
+    searchSessionId$.next(getInitialSearchSessionId(searchSessionSettings.sessionIdToRestore));
 
     // `requestSearchSessionId` should be used when you need to ensure that you have the up-to-date search session ID
     requestSearchSessionId = async () => {
@@ -74,7 +160,16 @@ export function initializeSearchSessionManager(
   return {
     api: {
       searchSessionId$,
+      replayCacheLastFetched$,
       requestSearchSessionId,
+      asyncResetToLastSavedState: async () => {
+        unregisterSearchSession();
+        await dashboardApi.asyncResetToLastSavedState();
+      },
+      cancelAllRequests: () => {
+        unregisterSearchSession();
+        dashboardApi.cancelAllRequests();
+      },
     },
     cleanup: () => {
       stopSearchSessionIntegration?.();

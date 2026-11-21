@@ -31,6 +31,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
 
+import type { DashboardStartDependencies } from '../plugin';
 import { setKibanaServices } from './kibana_services';
 import { setLogger } from './logger';
 import type { DashboardCapabilities } from '../../common';
@@ -43,7 +44,7 @@ const defaultDashboardCapabilities: DashboardCapabilities = {
   storeSearchSession: true,
 };
 
-export const setStubKibanaServices = () => {
+export const setStubKibanaServices = (overrides: Partial<DashboardStartDependencies> = {}) => {
   const core = coreMock.createStart();
   (core.application.capabilities as any).dashboard_v2 = defaultDashboardCapabilities;
 
@@ -70,6 +71,7 @@ export const setStubKibanaServices = () => {
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     urlForwarding: urlForwardingPluginMock.createStartContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
+    ...overrides,
   });
 };
 

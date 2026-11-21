@@ -25,7 +25,9 @@ export function startDashboardSearchSessionIntegration(
   dashboardInternalApi: DashboardInternalApi,
   searchSessionSettings: DashboardCreationOptions['searchSessionSettings'],
   setSearchSessionId: (searchSessionId: string) => void,
-  searchSessionGenerationInProgress$: BehaviorSubject<boolean>
+  searchSessionGenerationInProgress$: BehaviorSubject<boolean>,
+  startSearchSession: () => string,
+  restoreSearchSession: (sessionId: string) => void
 ) {
   if (!searchSessionSettings) return;
 
@@ -39,13 +41,15 @@ export function startDashboardSearchSessionIntegration(
   dataService.search.session.enableStorage(
     createSessionRestorationDataProvider(dashboardApi, dashboardInternalApi),
     {
-      isDisabled: () =>
-        getDashboardCapabilities().storeSearchSession
-          ? { disabled: false }
-          : {
-              disabled: true,
-              reasonText: noSearchSessionStorageCapabilityMessage,
-            },
+      isDisabled: () => {
+        if (dashboardApi.replayCacheLastFetched$.value !== undefined) {
+          return { disabled: true, reasonText: '' };
+        }
+        if (!getDashboardCapabilities().storeSearchSession) {
+          return { disabled: true, reasonText: noSearchSessionStorageCapabilityMessage };
+        }
+        return { disabled: false };
+      },
     }
   );
 
@@ -78,10 +82,10 @@ export function startDashboardSearchSessionIntegration(
             removeSessionIdFromUrl();
             searchSessionIdFromURL = undefined;
           } else {
-            dataService.search.session.restore(searchSessionIdFromURL);
+            restoreSearchSession(searchSessionIdFromURL);
           }
         }
-        return searchSessionIdFromURL ?? dataService.search.session.start();
+        return searchSessionIdFromURL ?? startSearchSession();
       })();
 
       if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {

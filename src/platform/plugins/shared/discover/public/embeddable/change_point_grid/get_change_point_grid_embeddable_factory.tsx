@@ -9,7 +9,6 @@
 
 import { EuiLoadingChart } from '@elastic/eui';
 import type { ChangePointCardModel } from '@kbn/change-point-chart-viewer';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -218,7 +217,9 @@ export const getChangePointGridEmbeddableFactory = ({
               ? ({
                   // Mini charts compare annotation timestamps to this range, which is only
                   // valid once relative dates like `now-15m` are resolved to absolute ISO.
-                  timeRange: getAbsoluteTimeRange(searchContext.timeRange),
+                  timeRange: discoverServices.data.search.session.resolveTimeRange(
+                    searchContext.timeRange
+                  ),
                   esqlVariables: searchContext.esqlVariables,
                   searchSessionId: searchContext.searchSessionId,
                   lastReloadRequestTime: Date.now(),
