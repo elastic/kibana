@@ -160,16 +160,18 @@ export const StateCard: React.FC<StateCardProps> = ({ record, onNavigateTab, onO
                 {i18n.GENERATE_REPORT}
               </EuiButton>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                iconType={ICONS.refresh}
-                onClick={() => onOpenModal('reopen')}
-                data-test-subj="investigationClosedBarReopen"
-              >
-                {i18n.REOPEN}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            {record.merged_into ? null : (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  iconType={ICONS.refresh}
+                  onClick={() => onOpenModal('reopen')}
+                  data-test-subj="investigationClosedBarReopen"
+                >
+                  {i18n.REOPEN}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiPanel>
       ) : null}

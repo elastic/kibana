@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { InvestigationRecord } from '../../../../common/investigations/types';
 import { useReopenRecord } from '../../hooks';
 import { CloseModal } from '../modals/close_modal';
@@ -15,7 +15,11 @@ import { MergeModal } from '../modals/merge_modal';
 import type { ModalName } from '../modals/modal_props';
 import * as modalI18n from '../modals/translations';
 import { ReportModal } from '../modals/report_modal';
+import { RestrictModal } from '../modals/restrict_modal';
 import { ConfirmModal } from '../shared/confirm_modal';
+
+const TAKE_ACTION_SELECTOR = '[data-test-subj="investigationTakeAction"]';
+const FOCUS_RETURN_DELAY_MS = 100;
 
 export interface ModalHostProps {
   /** The open modal, or null when none is open. */
@@ -24,21 +28,37 @@ export interface ModalHostProps {
   onClose: () => void;
 }
 
-/** Renders the modal the header asked for. Reopening confirms and calls the API directly. */
+/**
+ * Renders the modal the header asked for. Reopening confirms and calls the API directly. When a
+ * modal closes and focus has nowhere to go (the menu item that opened it is gone), focus returns
+ * to the Take action button.
+ */
 export const ModalHost: React.FC<ModalHostProps> = ({ name, record, onClose }) => {
   const { mutate: reopen, isLoading: isReopening } = useReopenRecord(record.id);
 
+  const handleClose = useCallback(() => {
+    onClose();
+    window.setTimeout(() => {
+      const active = document.activeElement;
+      if (!active || active === document.body) {
+        document.querySelector<HTMLElement>(TAKE_ACTION_SELECTOR)?.focus();
+      }
+    }, FOCUS_RETURN_DELAY_MS);
+  }, [onClose]);
+
   switch (name) {
     case 'determination':
-      return <DeterminationModal record={record} onClose={onClose} />;
+      return <DeterminationModal record={record} onClose={handleClose} />;
     case 'report':
-      return <ReportModal record={record} onClose={onClose} />;
+      return <ReportModal record={record} onClose={handleClose} />;
     case 'history':
-      return <HistoryModal record={record} onClose={onClose} />;
+      return <HistoryModal record={record} onClose={handleClose} />;
     case 'merge':
-      return <MergeModal record={record} onClose={onClose} />;
+      return <MergeModal record={record} onClose={handleClose} />;
     case 'close':
-      return <CloseModal record={record} onClose={onClose} />;
+      return <CloseModal record={record} onClose={handleClose} />;
+    case 'restrict':
+      return <RestrictModal record={record} onClose={handleClose} />;
     case 'reopen':
       return (
         <ConfirmModal
@@ -46,8 +66,8 @@ export const ModalHost: React.FC<ModalHostProps> = ({ name, record, onClose }) =
           body={modalI18n.REOPEN_BODY}
           confirmLabel={modalI18n.REOPEN_CONFIRM}
           isLoading={isReopening}
-          onConfirm={() => reopen(undefined, { onSettled: onClose })}
-          onCancel={onClose}
+          onConfirm={() => reopen(undefined, { onSettled: handleClose })}
+          onCancel={handleClose}
           data-test-subj="investigationReopenModal"
         />
       );

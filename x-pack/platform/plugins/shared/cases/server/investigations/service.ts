@@ -628,6 +628,10 @@ export class InvestigationsService {
     };
   }
 
+  /**
+   * Allocates the next display number atomically from a per-space counter document, never below
+   * the highest number already used (records may carry supplied display ids).
+   */
   private async nextDisplayNum(): Promise<number> {
     const res = await this.es.search({
       index: INVESTIGATION_RECORDS_INDEX,
@@ -636,7 +640,26 @@ export class InvestigationsService {
       aggs: { max: { max: { field: 'display_num' } } },
     });
     const max = (res.aggregations?.max as { value?: number | null } | undefined)?.value ?? 0;
-    return Math.max(Math.floor(max ?? 0), 0) + 1;
+    const floor = Math.max(Math.floor(max ?? 0), 0) + 1;
+    const counter = await this.es.update<{ value: number }, unknown, { value: number }>({
+      index: INVESTIGATION_CONFIG_INDEX,
+      id: `display_counter:${this.deps.spaceId}`,
+      retry_on_conflict: 10,
+      refresh: false,
+      _source: true,
+      scripted_upsert: true,
+      upsert: {},
+      script: {
+        lang: 'painless',
+        source: `
+          ctx._source.doc_type = 'display_counter';
+          ctx._source.space_id = params.space;
+          def current = ctx._source.value == null ? 0 : ctx._source.value;
+          ctx._source.value = Math.max(current + 1, params.floor);`,
+        params: { floor, space: this.deps.spaceId },
+      },
+    });
+    return counter.get?._source?.value ?? floor;
   }
 
   public async createRecord(req: CreateRecordRequest): Promise<InvestigationRecord> {
@@ -818,7 +841,13 @@ export class InvestigationsService {
       must.push({
         bool: {
           should: [
-            { multi_match: { query: q, fields: ['title^3', 'description', 'summary', 'investigation_type'] } },
+            {
+              multi_match: {
+                query: q,
+                fields: ['title^3', 'description', 'summary', 'investigation_type'],
+                operator: 'and',
+              },
+            },
             term('display_id', q),
             { prefix: { 'title.keyword': q.toLowerCase() } },
           ],
@@ -1126,7 +1155,13 @@ export class InvestigationsService {
         id: recordId,
         refresh: true,
         ...(req.version ? decodeVersion(req.version) : { retry_on_conflict: 3 }),
-        doc: patch,
+        // Replace top-level keys wholesale: a partial `doc` would deep-merge objects such as
+        // analyst_verdict and keep stale nested values (e.g. an old reason).
+        script: {
+          lang: 'painless',
+          source: 'for (def e : params.patch.entrySet()) { ctx._source[e.getKey()] = e.getValue(); }',
+          params: { patch },
+        },
       });
     } catch (error) {
       if (error?.meta?.statusCode === 409) {

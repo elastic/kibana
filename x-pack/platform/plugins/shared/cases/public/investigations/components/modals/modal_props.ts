@@ -7,7 +7,14 @@
 
 import type { InvestigationRecord } from '../../../../common/investigations/types';
 
-export type ModalName = 'determination' | 'report' | 'history' | 'merge' | 'close' | 'reopen';
+export type ModalName =
+  | 'determination'
+  | 'report'
+  | 'history'
+  | 'merge'
+  | 'close'
+  | 'reopen'
+  | 'restrict';
 
 export interface InvestigationModalProps {
   record: InvestigationRecord;
