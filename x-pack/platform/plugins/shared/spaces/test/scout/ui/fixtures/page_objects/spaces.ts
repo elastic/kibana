@@ -342,7 +342,8 @@ export class SpacesPage {
   }
 
   async confirmSaveAndWaitForReload() {
-    // The post-reload grid is DOM-identical to the SPA-redirected one; only the load event differs.
+    // Only the reload's load event distinguishes the grid; settle the current load first.
+    await this.page.waitForLoadState('load', { timeout: 30_000 });
     await Promise.all([
       this.page.waitForEvent('load', { timeout: 30_000 }),
       this.page.testSubj.click('confirmModalConfirmButton'),
