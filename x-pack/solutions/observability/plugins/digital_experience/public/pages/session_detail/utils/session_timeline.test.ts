@@ -40,6 +40,7 @@ const event = (
   offsetMs,
   page: null,
   detail: null,
+  clickCount: null,
   stacktrace: null,
   traceId: null,
   spanId: null,

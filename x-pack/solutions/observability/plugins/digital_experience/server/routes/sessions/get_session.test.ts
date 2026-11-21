@@ -32,6 +32,9 @@ const JOURNEY_EVENT_NAMES = [
   'browser.user_action.click',
   'exception',
   'browser.web_vital',
+  'browser.frustration.rage_click',
+  'browser.frustration.dead_click',
+  'browser.frustration.error_click',
 ];
 
 /** Raw events as the `fields` option returns them: arrays of values by dotted name. */
@@ -104,6 +107,14 @@ const eventsResponse = (
   },
 });
 
+const frustration = (eventName: string, attrs: OtelEventFields = {}): OtelEventFields => ({
+  '@timestamp': [at(5_000)],
+  event_name: [eventName],
+  'attributes.browser.css_selector': ['#pay'],
+  'attributes.url.full': ['https://shop.example.com/checkout'],
+  ...attrs,
+});
+
 describe('buildTimeline', () => {
   it('classifies events and computes offsets from the session start', () => {
     const timeline = buildTimeline(events, startMs);
@@ -166,7 +177,94 @@ describe('buildTimeline', () => {
   });
 });
 
+describe('buildTimeline frustration signals', () => {
+  it('lists them as frustration events with the selector and, for rage clicks, the click count', () => {
+    const timeline = buildTimeline(
+      [
+        frustration('browser.frustration.rage_click', {
+          'attributes.browser.frustration.click_count': [5],
+        }),
+        frustration('browser.frustration.dead_click'),
+        frustration('browser.frustration.error_click', {
+          'attributes.exception.message': ['x is undefined'],
+        }),
+        {
+          '@timestamp': [at(6_000)],
+          event_name: ['browser.user_action.click'],
+          'attributes.browser.css_selector': ['#pay'],
+          'attributes.url.full': ['https://shop.example.com/checkout'],
+        },
+      ],
+      startMs
+    );
+
+    expect(
+      timeline.map(({ kind, name, detail, clickCount }) => ({ kind, name, detail, clickCount }))
+    ).toEqual([
+      {
+        kind: 'frustration',
+        name: 'browser.frustration.rage_click',
+        detail: '#pay',
+        clickCount: 5,
+      },
+      {
+        kind: 'frustration',
+        name: 'browser.frustration.dead_click',
+        detail: '#pay',
+        clickCount: null,
+      },
+      {
+        kind: 'frustration',
+        name: 'browser.frustration.error_click',
+        detail: '#pay',
+        clickCount: null,
+      },
+      { kind: 'click', name: 'browser.user_action.click', detail: '#pay', clickCount: null },
+    ]);
+    expect(timeline[0]).toMatchObject({ offsetMs: 5_000, page: '/checkout' });
+  });
+
+  it('falls back to the XPath when there is no selector', () => {
+    const [event] = buildTimeline(
+      [
+        frustration('browser.frustration.dead_click', {
+          'attributes.browser.css_selector': undefined,
+          'attributes.target_xpath': ['//*[@id="pay"]'],
+        }),
+      ],
+      startMs
+    );
+
+    expect(event.detail).toBe('//*[@id="pay"]');
+  });
+});
+
 describe('buildPageVisits', () => {
+  it('counts frustration signals per visit without counting them as clicks', () => {
+    const visits = buildPageVisits(
+      [
+        {
+          '@timestamp': [at(0)],
+          event_name: ['browser.navigation'],
+          'attributes.url.full': ['https://shop.example.com/checkout'],
+        },
+        {
+          '@timestamp': [at(1_000)],
+          event_name: ['browser.user_action.click'],
+          'attributes.browser.css_selector': ['#pay'],
+        },
+        frustration('browser.frustration.rage_click'),
+        frustration('browser.frustration.dead_click'),
+      ],
+      startMs,
+      at(10_000)
+    );
+
+    expect(visits).toEqual([
+      expect.objectContaining({ page: '/checkout', clickCount: 1, frustrationCount: 2 }),
+    ]);
+  });
+
   it('builds the per-page journey with counts and web vitals', () => {
     const visits = buildPageVisits(events, startMs, at(10_000));
 
@@ -371,6 +469,7 @@ describe('getSession', () => {
         'attributes.browser.web_vital.value',
         'attributes.exception.message',
         'resource.attributes.exception.message',
+        'attributes.browser.frustration.click_count',
       ])
     );
   });

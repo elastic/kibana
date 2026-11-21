@@ -24,6 +24,8 @@ import {
   EVENT_EXCEPTION,
   EVENT_WEB_VITAL,
   EXCEPTION_STACKTRACE,
+  FRUSTRATION_CLICK_COUNT,
+  FRUSTRATION_EVENTS,
   OTEL_SPAN_NAME,
   PAGE_VIEW_EVENTS,
   WEB_VITAL_NAME,
@@ -96,6 +98,7 @@ const TIMELINE_ATTRIBUTES = [
   EXCEPTION_STACKTRACE,
   BROWSER_CSS_SELECTOR,
   TARGET_XPATH,
+  FRUSTRATION_CLICK_COUNT,
 ] as const;
 
 /**
@@ -142,6 +145,9 @@ const classify = (event: OtelEventFields): SessionTimelineEventKind | null => {
   if (name === EVENT_EXCEPTION) {
     return 'error';
   }
+  if (isOneOf(name, FRUSTRATION_EVENTS)) {
+    return 'frustration';
+  }
   if (isOneOf(name, CLICK_EVENTS)) {
     return 'click';
   }
@@ -156,6 +162,7 @@ const detailOf = (kind: SessionTimelineEventKind, event: OtelEventFields): strin
     case 'error':
       return attributeString(event, EXCEPTION_MESSAGE) ?? attributeString(event, ERROR_TYPE);
     case 'click':
+    case 'frustration':
       return attributeString(event, BROWSER_CSS_SELECTOR) ?? attributeString(event, TARGET_XPATH);
     case 'web_vital':
       return attributeString(event, WEB_VITAL_VALUE);
@@ -194,6 +201,7 @@ const toTimelineEvent = (
     offsetMs: Math.max(0, ms - sessionStartMs),
     page: pageOf(event),
     detail: detailOf(kind, event),
+    clickCount: kind === 'frustration' ? attributeNumber(event, FRUSTRATION_CLICK_COUNT) : null,
     stacktrace: kind === 'error' ? attributeString(event, EXCEPTION_STACKTRACE) : null,
     traceId: fieldString(event, 'trace_id'),
     spanId: fieldString(event, 'span_id'),
@@ -276,6 +284,9 @@ export const buildPageVisits = (
     if (kind === 'error') {
       current.errorCount += 1;
     }
+    if (kind === 'frustration') {
+      current.frustrationCount += 1;
+    }
     const vital = webVitalOf(event);
     if (vital) {
       // EDOT Browser reports a final value per page; keep the latest one.
@@ -312,6 +323,7 @@ const JOURNEY_EVENT_NAMES = [
   ...CLICK_EVENTS,
   EVENT_EXCEPTION,
   EVENT_WEB_VITAL,
+  ...FRUSTRATION_EVENTS,
 ];
 
 /**

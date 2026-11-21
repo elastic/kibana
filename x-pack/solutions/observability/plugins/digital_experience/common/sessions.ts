@@ -242,6 +242,8 @@ export interface SessionTimelineEvent {
   offsetMs: number;
   page: string | null;
   detail: string | null;
+  /** The clicks a rage click summarizes; `null` for every other event. */
+  clickCount: number | null;
   /** The stack trace of an error, when the browser reported one. */
   stacktrace: string | null;
   traceId: string | null;
