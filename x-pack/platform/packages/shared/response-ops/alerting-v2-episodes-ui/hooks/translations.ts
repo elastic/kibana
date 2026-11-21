@@ -78,9 +78,9 @@ export const SOURCE_FIELD_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.sou
 });
 
 export const SUPPRESSED_FIELD_LABEL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.suppressedFieldLabel',
+  'xpack.alertingV2EpisodesUi.notificationsFieldLabel',
   {
-    defaultMessage: 'Suppressed',
+    defaultMessage: 'Notifications',
   }
 );
 

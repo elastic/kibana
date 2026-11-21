@@ -111,7 +111,7 @@ const services = {
   uiActions: { getTriggerCompatibleActions: jest.fn() },
   http: {},
   notifications: {},
-  application: {},
+  application: { capabilities: {} },
   dataViews: {},
 } as unknown as EpisodesTableServices;
 

@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import type {
   ApplicationStart,
   DocLinksStart,
@@ -103,6 +104,9 @@ import {
 } from '../translations';
 
 const SUPPRESSED_COLUMN_ID = 'suppressed';
+
+const MANAGEMENT_APP_ID = 'management';
+const MAINTENANCE_WINDOWS_DEEP_LINK_ID = 'maintenanceWindows';
 
 const EPISODES_TABLE_CONSUMER = 'alertingV2Alerts';
 
@@ -288,6 +292,17 @@ export const EpisodesTable = ({
   const getEpisodeDetailsHref =
     getEpisodeDetailsHrefProp ?? host.getEpisodeDetailsHref ?? noEpisodeDetailsHref;
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
+
+  const { application } = services;
+  const maintenanceWindowsLinkProps = useMemo(() => {
+    if (!application.capabilities.maintenanceWindow?.show) {
+      return undefined;
+    }
+    const href = application.getUrlForApp(MANAGEMENT_APP_ID, {
+      deepLinkId: MAINTENANCE_WINDOWS_DEEP_LINK_ID,
+    });
+    return getRouterLinkProps({ href, onClick: () => application.navigateToUrl(href) });
+  }, [application]);
 
   const [visibleColumnsState, setVisibleColumnsState] = useState(
     DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS
@@ -598,7 +613,12 @@ export const EpisodesTable = ({
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
       alerting_source: (props) => <EpisodeSourceCell {...props} />,
-      [SUPPRESSED_COLUMN_ID]: (props) => <EpisodeSuppressedCell {...props} />,
+      [SUPPRESSED_COLUMN_ID]: (props) => (
+        <EpisodeSuppressedCell
+          {...props}
+          maintenanceWindowsLinkProps={maintenanceWindowsLinkProps}
+        />
+      ),
       duration: (props) => <EpisodeDurationCell {...props} />,
       reason: (props) => <EpisodeReasonCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
@@ -632,6 +652,7 @@ export const EpisodesTable = ({
       onRuleNameClick,
       services.userProfile,
       sourceDataViewsByRule,
+      maintenanceWindowsLinkProps,
     ]
   );
 

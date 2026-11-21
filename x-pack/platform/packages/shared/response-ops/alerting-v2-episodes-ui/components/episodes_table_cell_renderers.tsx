@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiCode,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiPopover,
   EuiSkeletonText,
+  EuiText,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
@@ -199,18 +203,94 @@ export const EpisodeRuleTagsCell = ({
   return <TagBadges tags={rule?.metadata.tags ?? []} data-test-subj="episodeRuleTagsCell" />;
 };
 
-export const EpisodeSuppressedCell = ({ row }: CellRendererProps) => {
+type LinkProps = ReturnType<typeof getRouterLinkProps>;
+
+const UniversalAlertingMaintenanceWindowInfo = ({ linkProps }: { linkProps?: LinkProps }) => {
+  const { euiTheme } = useEuiTheme();
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <EuiPopover
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      anchorPosition="downLeft"
+      panelPaddingSize="s"
+      aria-label={i18n.MAINTENANCE_WINDOW_INFO_BUTTON_LABEL}
+      panelProps={{ 'data-test-subj': 'episodeSuppressedCellInfoPopover' }}
+      button={
+        <EuiToolTip content={i18n.MAINTENANCE_WINDOW_INFO_BUTTON_LABEL} disableScreenReaderOutput>
+          <EuiButtonEmpty
+            size="xs"
+            flush="both"
+            color="text"
+            aria-label={i18n.MAINTENANCE_WINDOW_INFO_BUTTON_LABEL}
+            onClick={() => setIsOpen((open) => !open)}
+            data-test-subj="episodeSuppressedCellInfoButton"
+          >
+            {EMPTY_VALUE}
+          </EuiButtonEmpty>
+        </EuiToolTip>
+      }
+    >
+      <EuiText
+        size="s"
+        css={css`
+          max-inline-size: ${euiTheme.base * 20}px;
+        `}
+      >
+        <p>
+          {linkProps ? (
+            <FormattedMessage
+              id="xpack.alertingV2EpisodesUi.suppressedCell.universalAlertingMaintenanceWindowWithLinkDescription"
+              defaultMessage="Universal Alerting applies maintenance windows when it sends notifications. To see which windows were active, go to <link>Maintenance Windows</link>."
+              values={{
+                link: (chunks) => (
+                  <EuiLink
+                    {...linkProps}
+                    data-test-subj="episodeSuppressedCellMaintenanceWindowsLink"
+                  >
+                    {chunks}
+                  </EuiLink>
+                ),
+              }}
+            />
+          ) : (
+            i18n.UNIVERSAL_ALERTING_MAINTENANCE_WINDOW_DESCRIPTION
+          )}
+        </p>
+      </EuiText>
+    </EuiPopover>
+  );
+};
+
+export interface EpisodeSuppressedCellProps extends CellRendererProps {
+  /** Link to the Maintenance Windows page. Omit when the user can't open it. */
+  maintenanceWindowsLinkProps?: LinkProps;
+}
+
+export const EpisodeSuppressedCell = ({
+  row,
+  maintenanceWindowsLinkProps,
+}: EpisodeSuppressedCellProps) => {
   const ids = row.flattened.maintenance_window_ids;
 
-  if (!Array.isArray(ids) || ids.length === 0) {
+  if (Array.isArray(ids) && ids.length > 0) {
+    return (
+      <EuiToolTip content={i18n.SUPPRESSED_BY_MAINTENANCE_WINDOW_TOOLTIP}>
+        <EuiBadge color="hollow" tabIndex={0} data-test-subj="episodeSuppressedCell">
+          {i18n.SUPPRESSED_BY_MAINTENANCE_WINDOW}
+        </EuiBadge>
+      </EuiToolTip>
+    );
+  }
+
+  if (isSourceEpisode(row.flattened as unknown as AlertEpisode)) {
     return <>{EMPTY_VALUE}</>;
   }
 
-  return (
-    <EuiBadge color="hollow" data-test-subj="episodeSuppressedCell">
-      {i18n.SUPPRESSED_BY_MAINTENANCE_WINDOW}
-    </EuiBadge>
-  );
+  // Universal Alerting rows never carry maintenance window ids, so an empty value doesn't
+  // mean that no window applied.
+  return <UniversalAlertingMaintenanceWindowInfo linkProps={maintenanceWindowsLinkProps} />;
 };
 
 /**

@@ -30,8 +30,18 @@ describe('EmptyPrompt', () => {
 
     expect(result.getByText('Create your first maintenance window')).toBeInTheDocument();
     expect(
-      result.getByText('Schedule a time period in which rule notifications cease.')
+      result.getByText('Schedule a period when notifications stop, such as planned maintenance.')
     ).toBeInTheDocument();
+  });
+
+  test('it links to the maintenance windows docs with descriptive link text', () => {
+    const result = appMockRenderer.render(
+      <EmptyPrompt onClickCreate={handleClickCreate} docLinks={docLinks} />
+    );
+
+    expect(
+      result.getByRole('link', { name: /Learn how maintenance windows work/ })
+    ).toHaveAttribute('href', docLinks.alerting.maintenanceWindows);
   });
 
   test('it renders an action button when showCreateButton is provided', () => {
