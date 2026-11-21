@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getCombined } from '.';
+import { getCombined, getCombinedAfterFailedAttempt } from '.';
 
 describe('getCombined', () => {
   it('combines two strings correctly', () => {
@@ -33,5 +33,22 @@ describe('getCombined', () => {
     const result = getCombined({ combinedGenerations, partialResponse });
 
     expect(result).toEqual(expected);
+  });
+});
+
+describe('getCombinedAfterFailedAttempt', () => {
+  it('keeps the accumulated text when the failed attempt produced no content', () => {
+    expect(
+      getCombinedAfterFailedAttempt({ combinedGenerations: 'generation1', combinedResponse: '' })
+    ).toEqual('generation1');
+  });
+
+  it('uses the combined response when the failed attempt got as far as combining', () => {
+    expect(
+      getCombinedAfterFailedAttempt({
+        combinedGenerations: 'generation1',
+        combinedResponse: 'generation1response1',
+      })
+    ).toEqual('generation1response1');
   });
 });
