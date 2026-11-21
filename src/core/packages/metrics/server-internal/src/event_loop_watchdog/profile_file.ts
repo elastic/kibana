@@ -18,7 +18,8 @@ const NODE_MODULES = 'node_modules/';
 
 /**
  * Puts the phase and zero-padded block duration first so filenames group by phase and sort by
- * duration.
+ * duration, for example
+ * `event-loop-block-running-041250ms-2026-11-20T10-15-30-123Z-kibana-0-12345.cpuprofile`.
  */
 export const fileName = (phase: Phase, blockedMs: number, date: Date): string => {
   const duration = String(Math.round(blockedMs)).padStart(BLOCKED_MS_DIGITS, '0');

@@ -88,7 +88,8 @@ const configSchema = schema.object({
       cooldown: schema.duration({ defaultValue: '1m', ...cooldownBounds }),
       // Directory for profile files. Use an absolute path; a relative one resolves against the
       // directory Kibana was started from. Defaults to Node's `--diagnostic-dir`; without either,
-      // no files are written.
+      // no files are written. `bin/kibana` sets `--diagnostic-dir` to its `data` directory on
+      // Linux, macOS and in Docker.
       dir: schema.maybe(schema.string({ minLength: 1, maxLength: PROFILING_DIR_MAX_LENGTH })),
     }),
     startup: schema.object({
