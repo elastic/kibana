@@ -222,7 +222,7 @@ export const registerPublicRoutes = (router: FleetRouter) => {
       summary: 'Receive a provisioning callback',
       operationId: 'receive-provisioning-callback',
       description:
-        'Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. `role_arn` and `stack_arn` must be in the same AWS account. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.',
+        "Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. `role_arn` and `stack_arn` must be in the same AWS account, and `caller_identity` must carry an STS `GetCallerIdentity` request signed from that account by the stack's callback function, with the callback id and the SHA-256 of the reported values among its signed headers. Kibana forwards the request to `sts.<region>.amazonaws.com`, so it needs egress to the regional STS endpoints; a report whose proof does not verify returns 401 and leaves the record waiting. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.",
       access: 'public',
       security: {
         authc: {
@@ -258,6 +258,11 @@ export const registerPublicRoutes = (router: FleetRouter) => {
               body: () => ReceiveProvisioningCallbackResponseSchema,
             },
             400: { description: 'A bad request.', body: genericErrorResponse },
+            401: {
+              description:
+                'The proof of the sending AWS account did not verify, or was made for another callback or other values.',
+              body: genericErrorResponse,
+            },
             404: { description: 'Not found.', body: notFoundResponse },
             409: {
               description: 'Different values were already received for this callback.',
