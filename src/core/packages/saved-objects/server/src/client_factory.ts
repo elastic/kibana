@@ -13,6 +13,7 @@ import type {
   ISavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectsEncryptionExtension } from './extensions/encryption';
+import type { ISavedObjectsOlsExtension } from './extensions/ols';
 import type { SavedObjectsExtensions } from './extensions/extensions';
 import type { ISavedObjectsSecurityExtension } from './extensions/security';
 import type { ISavedObjectsSpacesExtension } from './extensions/spaces';
@@ -66,6 +67,17 @@ export type SavedObjectsSpacesExtensionFactory = SavedObjectsExtensionFactory<
 >;
 
 /**
+ * Describes the factory used to create instances of the Saved Objects OLS Extension. It returns
+ * `undefined` when it cannot enforce object-level security (OLS) for the request, and Core then
+ * uses an extension that fails closed. Deliberately disabled OLS is an extension with
+ * `enabled: false`, never `undefined`.
+ * @public
+ */
+export type SavedObjectsOlsExtensionFactory = SavedObjectsExtensionFactory<
+  ISavedObjectsOlsExtension | undefined
+>;
+
+/**
  * Provider to invoke to retrieve a {@link SavedObjectsClientFactory}.
  * @public
  */
@@ -80,7 +92,10 @@ export type SavedObjectsClientFactoryProvider = (
 export interface SavedObjectsClientProviderOptions {
   /** Array of hidden types to include */
   includedHiddenTypes?: string[];
-  /** array of extensions to exclude (ENCRYPTION_EXTENSION_ID | SECURITY_EXTENSION_ID | SPACES_EXTENSION_ID) */
+  /**
+   * array of extensions to exclude (ENCRYPTION_EXTENSION_ID | SECURITY_EXTENSION_ID | SPACES_EXTENSION_ID).
+   * The OLS extension cannot be excluded: passing OLS_EXTENSION_ID throws.
+   */
   excludedExtensions?: string[];
 }
 

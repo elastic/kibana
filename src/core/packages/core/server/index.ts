@@ -431,6 +431,7 @@ export type {
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
+  SavedObjectsOlsExtensionFactory,
   SavedObjectsExtensionFactory,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
   SavedObjectsExportResultDetails,
@@ -475,12 +476,17 @@ export type {
   RedactNamespacesParams,
   ISavedObjectsSecurityExtension,
   ISavedObjectsSpacesExtension,
+  ISavedObjectsOlsExtension,
+  OlsObject,
+  OlsRepositoryOperation,
   SavedObjectsExtensions,
 } from '@kbn/core-saved-objects-server';
 export {
   ENCRYPTION_EXTENSION_ID,
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
+  OLS_EXTENSION_ID,
+  getOlsObjectKey,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 export { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
