@@ -6,6 +6,7 @@
  */
 
 import type { CoreWebVital } from './core_web_vitals';
+import type { FrustrationCounts } from './frustration';
 import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from './otel_data';
 
 /**
@@ -59,6 +60,10 @@ export const SESSIONS_JOURNEY_SIZE = 10;
  * URLs that differ only in their query or hash collapse into one page.
  */
 export const SESSIONS_JOURNEY_URL_CANDIDATES = 3 * SESSIONS_JOURNEY_SIZE;
+/** Frustrated element selectors and page paths kept per session. */
+export const SESSIONS_FRUSTRATION_VALUES = 20;
+/** The longest value the summaries index as a keyword (`ignore_above`). */
+export const SESSIONS_MAX_KEYWORD_LENGTH = 1024;
 
 export const SESSION_SORT_FIELDS = [
   'start_time',
@@ -67,6 +72,7 @@ export const SESSION_SORT_FIELDS = [
   'click_count',
   'js_error_count',
   'http_failed_request_count',
+  'frustration_count',
 ] as const;
 export type SessionSortField = (typeof SESSION_SORT_FIELDS)[number];
 
@@ -85,6 +91,8 @@ export const SESSIONS_LIST_MAX_FACET_LENGTHS = {
   country: 16,
   entryPage: 1024,
 } as const;
+/** The longest frustrated element selector or page path the list filters by: the summaries' keyword `ignore_above`. */
+export const SESSIONS_LIST_MAX_FRUSTRATION_FILTER_LENGTH = SESSIONS_MAX_KEYWORD_LENGTH;
 
 export type SessionWebVitals = Record<CoreWebVital, number | null>;
 
@@ -177,6 +185,7 @@ export interface SessionSummary {
   jsErrorCount: number;
   httpRequestCount: number;
   failedRequestCount: number;
+  frustration: FrustrationCounts;
   bounced: boolean;
   entryPage: string | null;
   exitPage: string | null;
@@ -207,6 +216,7 @@ export interface SessionListKpis {
   bounceRate: number | null;
   sessionsWithJsErrors: number;
   sessionsWithFailedRequests: number;
+  sessionsWithFrustration: number;
   webVitals: SessionWebVitals;
 }
 
@@ -222,7 +232,12 @@ export interface SessionListResponse {
 }
 
 /** The events the journey lists; the API leaves out all others, which Discover shows. */
-export type SessionTimelineEventKind = 'page_view' | 'click' | 'error' | 'web_vital';
+export type SessionTimelineEventKind =
+  | 'page_view'
+  | 'click'
+  | 'error'
+  | 'web_vital'
+  | 'frustration';
 
 export interface SessionTimelineEvent {
   kind: SessionTimelineEventKind;
@@ -231,6 +246,8 @@ export interface SessionTimelineEvent {
   offsetMs: number;
   page: string | null;
   detail: string | null;
+  /** The clicks a rage click summarizes; `null` for every other event. */
+  clickCount: number | null;
   /** The stack trace of an error, when the browser reported one. */
   stacktrace: string | null;
   traceId: string | null;
@@ -300,6 +317,7 @@ export interface SessionPageVisit {
   durationMs: number;
   clickCount: number;
   errorCount: number;
+  frustrationCount: number;
   webVitals: SessionWebVitals;
   /** Set on a visit that loaded the page document, rather than an in-app navigation. */
   load: SessionPageLoad | null;

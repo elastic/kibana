@@ -100,6 +100,11 @@ const badgeLabel = (signal: SessionSignal): string => {
         defaultMessage: '{count, plural, one {# failed request} other {# failed requests}}',
         values: { count: signal.count },
       });
+    case 'frustration':
+      return i18n.translate('xpack.digitalExperience.sessionDetail.badges.frustration', {
+        defaultMessage: '{count, plural, one {# frustration signal} other {# frustration signals}}',
+        values: { count: signal.count },
+      });
     case 'bounced':
       return i18n.translate('xpack.digitalExperience.sessionDetail.badges.bounced', {
         defaultMessage: 'Bounced',
@@ -183,10 +188,11 @@ function SessionDetail({
       request: requests.length,
       click: 0,
       error: 0,
+      frustration: 0,
       web_vital: 0,
     };
     for (const { kind } of timeline) {
-      if (kind === 'click' || kind === 'error' || kind === 'web_vital') {
+      if (kind === 'click' || kind === 'error' || kind === 'frustration' || kind === 'web_vital') {
         byKind[kind] += 1;
       }
     }

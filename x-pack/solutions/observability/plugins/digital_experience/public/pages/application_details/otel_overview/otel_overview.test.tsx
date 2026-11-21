@@ -113,6 +113,8 @@ const respond = async (endpoint: string) => {
 const NO_VITAL = { p75Ms: null, sampleCount: 0, ratings: null };
 
 const USAGE_RESPONSE: ApplicationUsageResponse = {
+  serviceName: 'shop',
+  environments: [],
   topPages: [{ url: 'https://shop.example.com/', pageLoads: 9, loadTimeP75Ms: 1200 }],
   breakdowns: {
     pageLoads: 9,
@@ -122,6 +124,9 @@ const USAGE_RESPONSE: ApplicationUsageResponse = {
   },
   topClicks: [{ cssSelector: '#add-to-cart', tagName: 'BUTTON', count: 5 }],
   totalClicks: 5,
+  frustration: { rageClicks: 0, deadClicks: 0, errorClicks: 0, total: 0, sessions: 0 },
+  frustratedElements: [],
+  frustratedPages: [],
 };
 
 const response = (pageLoads: number): ApplicationOverviewResponse => ({
@@ -780,6 +785,7 @@ describe('OtelOverview', () => {
       'digitalExperienceOverviewTopPages',
       'digitalExperienceOverviewBreakdowns',
       'digitalExperienceOverviewTopClicks',
+      'digitalExperienceOverviewFrustration',
     ].forEach((testId) => {
       return expect(screen.getByTestId(testId)).toBeInTheDocument();
     });

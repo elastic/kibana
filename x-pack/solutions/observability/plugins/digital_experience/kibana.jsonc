@@ -10,7 +10,14 @@
     "server": true,
     "configPath": ["xpack", "digital_experience"],
     "requiredPlugins": ["features", "observabilityShared", "data", "unifiedSearch", "share"],
-    "optionalPlugins": ["ux", "apmDataAccess", "taskManager", "encryptedSavedObjects"],
+    "optionalPlugins": [
+      "ux",
+      "apmDataAccess",
+      "taskManager",
+      "encryptedSavedObjects",
+      "dashboard",
+      "lens"
+    ],
     "requiredBundles": ["kibanaReact", "fieldFormats", "observability", "charts"]
   }
 }

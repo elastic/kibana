@@ -8,7 +8,11 @@
 import { createHash } from 'crypto';
 import type { estypes } from '@elastic/elasticsearch';
 import { CORE_WEB_VITAL, type CoreWebVital } from '../../../common/core_web_vitals';
-import { SESSIONS_JOURNEY_SIZE, toPagePath } from '../../../common/sessions';
+import {
+  SESSIONS_FRUSTRATION_VALUES,
+  SESSIONS_JOURNEY_SIZE,
+  toPagePath,
+} from '../../../common/sessions';
 import type { SessionAttribute } from '../../../common/session_attribute_fields';
 import { numberOr, stringOrNull, stringsOf } from '../../lib/helpers/values';
 import type { SessionDocument, WebVitalSamples } from './sessions_index';
@@ -31,6 +35,13 @@ const toJourney = (urls: string[]): string[] =>
       ? [...journey, page]
       : journey;
   }, []);
+
+/** Up to `SESSIONS_FRUSTRATION_VALUES` distinct values, the lowest sorted ones, so a rebuild keeps the same. */
+const distinctCapped = (values: string[]): string[] =>
+  [...new Set(values)].sort().slice(0, SESSIONS_FRUSTRATION_VALUES);
+
+const toFrustrationPages = (urls: string[]): string[] =>
+  distinctCapped(urls.flatMap((url) => toPagePath(url) ?? []));
 
 const byVital = <T>(valueOf: (vital: CoreWebVital) => T): Record<CoreWebVital, T> => ({
   lcp: valueOf(CORE_WEB_VITAL.lcp),
@@ -98,6 +109,12 @@ export const toSessionDocuments = (rows: EsqlRow[]): SessionDocument[] =>
         page_load_count: numberOr(row.page_load_count, 0),
         click_count: numberOr(row.click_count, 0),
         js_error_count: numberOr(row.js_error_count, 0),
+        rage_click_count: numberOr(row.rage_click_count, 0),
+        dead_click_count: numberOr(row.dead_click_count, 0),
+        error_click_count: numberOr(row.error_click_count, 0),
+        frustration_count: numberOr(row.frustration_count, 0),
+        frustration_targets: distinctCapped(stringsOf(row.frustration_targets)),
+        frustration_pages: toFrustrationPages(stringsOf(row.frustration_urls)),
         http_request_count: numberOr(row.http_request_count, 0),
         http_failed_request_count: numberOr(row.http_failed_request_count, 0),
         // Bounced when the visit never left the page it landed on: the pages it saw, not the

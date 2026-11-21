@@ -48,6 +48,12 @@ const fullDocument: SessionDocument = {
   page_load_count: 1,
   click_count: 4,
   js_error_count: 2,
+  rage_click_count: 2,
+  dead_click_count: 1,
+  error_click_count: 0,
+  frustration_count: 3,
+  frustration_targets: ['#buy'],
+  frustration_pages: ['/cart'],
   http_request_count: 5,
   http_failed_request_count: 1,
   bounced: false,
@@ -115,6 +121,21 @@ describe('sessions index', () => {
 
     it('searches anywhere in a value with a wildcard field', () => {
       expect(sessionsIndexMappings.properties.search).toEqual({ type: 'wildcard' });
+    });
+
+    it('maps the frustration counts as numbers, and the frustrated selectors and pages as keywords', () => {
+      const { properties } = sessionsIndexMappings;
+
+      for (const field of [
+        properties.rage_click_count,
+        properties.dead_click_count,
+        properties.error_click_count,
+        properties.frustration_count,
+      ]) {
+        expect(field).toEqual({ type: 'long' });
+      }
+      expect(properties.frustration_targets).toEqual({ type: 'keyword', ignore_above: 1024 });
+      expect(properties.frustration_pages).toEqual({ type: 'keyword', ignore_above: 1024 });
     });
 
     it('bounds the environment, which the browser sets', () => {

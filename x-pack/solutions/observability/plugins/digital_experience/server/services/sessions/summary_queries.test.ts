@@ -134,6 +134,39 @@ describe('sessionSummaryQuery', () => {
     );
   });
 
+  it('counts the frustration signals per session', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+
+    expect(query).toContain(
+      'rage_click_count = COUNT(*) WHERE event == "browser.frustration.rage_click"'
+    );
+    expect(query).toContain(
+      'dead_click_count = COUNT(*) WHERE event == "browser.frustration.dead_click"'
+    );
+    expect(query).toContain(
+      'error_click_count = COUNT(*) WHERE event == "browser.frustration.error_click"'
+    );
+    expect(query).toContain('frustration_count = COUNT(*) WHERE is_frustration');
+    expect(query).toContain(
+      'is_frustration = event IN ("browser.frustration.rage_click", "browser.frustration.dead_click", "browser.frustration.error_click")'
+    );
+    expect(query).toContain('frustration_count = MAX(frustration_count)');
+  });
+
+  it('collects the frustrated selectors and pages in the session branch, and merges them with VALUES', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+
+    expect(query).toContain(
+      'frustration_targets = VALUES(attributes.browser.css_selector) WHERE is_frustration'
+    );
+    expect(query).toContain('frustration_urls = VALUES(attributes.url.full) WHERE is_frustration');
+    // Multi-valued, so not merged with MAX as the counts are.
+    expect(query).not.toContain('MAX(frustration_targets)');
+    expect(query).not.toContain('MAX(frustration_urls)');
+    expect(query).toContain('frustration_targets = VALUES(frustration_targets)');
+    expect(query).toContain('frustration_urls = VALUES(frustration_urls)');
+  });
+
   it('reads every attribute field from its group’s latest event', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
 

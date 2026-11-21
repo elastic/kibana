@@ -21,19 +21,22 @@ import {
   type OverviewFilters,
 } from '../../../common/overview_filters';
 import { EVENT_NAVIGATION_TIMING } from '../../../common/otel_data';
-import { SOURCE_URL_FIELD } from './source_fields';
+import {
+  DEVICE_DESKTOP_LABEL,
+  DEVICE_MOBILE_LABEL,
+  SOURCE_APP_VERSION_FIELDS,
+  SOURCE_MOBILE_FIELDS,
+  SOURCE_URL_FIELD,
+} from '../../../common/otel_source_fields';
 import { environmentFilter } from '../helpers/environment';
 import { ENVIRONMENT_FIELDS, eventCount } from './queries';
 
-/**
- * Whether the browser runs on a mobile device. EDOT Browser records it even where no device model
- * or type is, so the device falls back to "Mobile" or "Desktop" rather than to nothing.
- */
-const MOBILE_FIELDS = ['resource.attributes.browser.mobile', 'attributes.browser.mobile'] as const;
-
 /** What a field that is not a name says, per value: the device name of `browser.mobile`. */
 const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEntries(
-  MOBILE_FIELDS.map((field) => [field, { true: 'Mobile', false: 'Desktop' }])
+  SOURCE_MOBILE_FIELDS.map((field) => [
+    field,
+    { true: DEVICE_MOBILE_LABEL, false: DEVICE_DESKTOP_LABEL },
+  ])
 );
 
 /**
@@ -44,10 +47,9 @@ const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEn
 const FILTER_SOURCE_FIELDS: Record<OverviewFilterName, readonly string[]> = {
   browser: SESSION_ATTRIBUTE_FIELDS.browser,
   os: SESSION_ATTRIBUTE_FIELDS.os,
-  device: [...SESSION_ATTRIBUTE_FIELDS.device, ...MOBILE_FIELDS],
+  device: [...SESSION_ATTRIBUTE_FIELDS.device, ...SOURCE_MOBILE_FIELDS],
   country: SESSION_ATTRIBUTE_FIELDS.countryIso,
-  // The version the application reports, a resource attribute of OpenTelemetry.
-  appVersion: ['resource.attributes.service.version', 'attributes.service.version'],
+  appVersion: SOURCE_APP_VERSION_FIELDS,
   pageUrl: [SOURCE_URL_FIELD],
   pageContains: [SOURCE_URL_FIELD],
 };

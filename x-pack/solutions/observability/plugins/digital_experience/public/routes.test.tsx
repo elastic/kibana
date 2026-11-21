@@ -5,8 +5,33 @@
  * 2.0.
  */
 
-import { InvalidRouteParamsException } from '@kbn/typed-react-router-config';
+import React from 'react';
+import type { ComponentProps } from 'react';
+import { render, screen } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import {
+  InvalidRouteParamsException,
+  RouteRenderer,
+  RouterProvider,
+} from '@kbn/typed-react-router-config';
 import { digitalExperienceRouter } from './routes';
+
+jest.mock('./application/digital_experience_layout', () => ({
+  DigitalExperienceLayout: () => {
+    const { Outlet: LayoutOutlet } = jest.requireActual('@kbn/typed-react-router-config');
+    return <LayoutOutlet />;
+  },
+}));
+jest.mock('./pages/frustration/frustration_page', () => ({
+  FrustrationPage: ({ serviceName, source }: { serviceName: string; source: string }) => (
+    <div data-test-subj="frustrationPage">{`${serviceName} ${source}`}</div>
+  ),
+}));
+jest.mock('./pages/application_details/application_page', () => ({
+  ApplicationPage: ({ selectedTab }: { selectedTab: string }) => (
+    <div data-test-subj="applicationPage">{selectedTab}</div>
+  ),
+}));
 
 const locationOf = (pathname: string) => ({ pathname, search: '', hash: '', state: undefined });
 
@@ -98,7 +123,9 @@ describe('digitalExperienceRouter', () => {
   it('removes invalid sessions list params', () => {
     const location = {
       ...locationOf('/my-app/sessions'),
-      search: `?source=otel&withJsErrors=true&withFailedRequests=true&duration=forever&sortField=error_count&page=1001&perPage=30&os=&country=${'X'.repeat(
+      search: `?source=otel&withJsErrors=true&withFailedRequests=true&frustrationTarget=${'X'.repeat(
+        1025
+      )}&frustrationPage=&duration=forever&sortField=error_count&page=1001&perPage=30&os=&country=${'X'.repeat(
         17
       )}&browser=Chrome`,
     };
@@ -121,7 +148,7 @@ describe('digitalExperienceRouter', () => {
     const location = {
       ...locationOf('/my-app/sessions'),
       search:
-        '?source=otel&withJsErrors=true&withFailedRequests=false&sortField=http_failed_request_count&page=2&perPage=50&browser=Chrome',
+        '?source=otel&withJsErrors=true&withFailedRequests=false&withFrustration=true&frustrationTarget=%23pay&frustrationPage=%2Fcheckout&sortField=frustration_count&page=2&perPage=50&browser=Chrome',
     };
 
     expect(digitalExperienceRouter.getParams('/{serviceName}/sessions', location)).toEqual({
@@ -130,7 +157,10 @@ describe('digitalExperienceRouter', () => {
         source: 'otel',
         withJsErrors: true,
         withFailedRequests: false,
-        sortField: 'http_failed_request_count',
+        withFrustration: true,
+        frustrationTarget: '#pay',
+        frustrationPage: '/checkout',
+        sortField: 'frustration_count',
         page: 2,
         perPage: 50,
         browser: 'Chrome',
@@ -145,5 +175,50 @@ describe('digitalExperienceRouter', () => {
         query: { source: 'otel', withFailedRequests: true, perPage: 50 },
       })
     ).toBe('/my-app/sessions/abc?perPage=50&source=otel&withFailedRequests=true');
+  });
+
+  it('matches the frustration page below the application, and not as a tab', () => {
+    expect(
+      digitalExperienceRouter
+        .matchRoutes({ ...locationOf('/my-app/frustration'), search: '?source=otel' })
+        .map(({ route }) => route.path)
+    ).toEqual(['/', '/{serviceName}', '/{serviceName}/frustration']);
+  });
+
+  it('links the frustration page with the source', () => {
+    expect(
+      digitalExperienceRouter.link('/{serviceName}/frustration', {
+        path: { serviceName: 'my-app' },
+        query: { source: 'otel', rangeFrom: 'now-7d', rangeTo: 'now', environment: 'production' },
+      })
+    ).toBe('/my-app/frustration?environment=production&rangeFrom=now-7d&rangeTo=now&source=otel');
+  });
+
+  describe('rendering', () => {
+    const renderAt = (url: string) =>
+      render(
+        <RouterProvider
+          history={createMemoryHistory({ initialEntries: [url] })}
+          router={
+            digitalExperienceRouter as unknown as ComponentProps<typeof RouterProvider>['router']
+          }
+        >
+          <RouteRenderer />
+        </RouterProvider>
+      );
+
+    it('renders the frustration page for the application and source of the URL', () => {
+      renderAt('/my-app/frustration?source=otel');
+
+      expect(screen.getByTestId('frustrationPage')).toHaveTextContent('my-app otel');
+      expect(screen.queryByTestId('applicationPage')).not.toBeInTheDocument();
+    });
+
+    it('still renders the Overview at the application path', () => {
+      renderAt('/my-app?source=otel');
+
+      expect(screen.getByTestId('applicationPage')).toHaveTextContent('overview');
+      expect(screen.queryByTestId('frustrationPage')).not.toBeInTheDocument();
+    });
   });
 });

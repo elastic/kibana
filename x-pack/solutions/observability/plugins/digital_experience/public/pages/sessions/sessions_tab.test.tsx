@@ -13,6 +13,7 @@ import type { MemoryHistory } from 'history';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RouterProvider } from '@kbn/typed-react-router-config';
+import { emptyFrustration } from '../../../common/frustration';
 import {
   emptyWebVitals,
   type SessionListResponse,
@@ -82,6 +83,7 @@ const session = (overrides: Partial<SessionSummary> = {}): SessionSummary => ({
   jsErrorCount: 2,
   httpRequestCount: 12,
   failedRequestCount: 1,
+  frustration: emptyFrustration(),
   bounced: false,
   entryPage: '/',
   exitPage: '/cart',
@@ -113,6 +115,7 @@ const listResponse = (overrides: Partial<SessionListResponse> = {}): SessionList
     bounceRate: 0.2,
     sessionsWithJsErrors: 4,
     sessionsWithFailedRequests: 2,
+    sessionsWithFrustration: 3,
     webVitals: emptyWebVitals(),
   },
   ...overrides,
@@ -477,6 +480,9 @@ describe('SessionsTab', () => {
     expect(screen.getByTestId('digitalExperienceSessionsKpi-withFailedRequests')).toHaveTextContent(
       '20% of sessions'
     );
+    expect(screen.getByTestId('digitalExperienceSessionsKpi-withFrustration')).toHaveTextContent(
+      '30% of sessions'
+    );
     expect(screen.getByTestId('digitalExperienceSessionsKpi-medianDuration')).toHaveTextContent(
       '1 min 30 s'
     );
@@ -500,7 +506,7 @@ describe('SessionsTab', () => {
     respondWith();
     renderTab({
       search:
-        '&search=jane&os=macOS&withJsErrors=true&withFailedRequests=true&duration=1mTo5m&sortField=js_error_count&sortDirection=asc&page=2&perPage=50',
+        '&search=jane&os=macOS&withJsErrors=true&withFailedRequests=true&withFrustration=true&frustrationTarget=%23pay&frustrationPage=%2Fcheckout&duration=1mTo5m&sortField=js_error_count&sortDirection=asc&page=2&perPage=50',
     });
 
     await screen.findByTestId('digitalExperienceSessionRow-session-1');
@@ -515,6 +521,9 @@ describe('SessionsTab', () => {
           os: 'macOS',
           withJsErrors: 'true',
           withFailedRequests: 'true',
+          withFrustration: 'true',
+          frustrationTarget: '#pay',
+          frustrationPage: '/checkout',
           minDurationMs: 60_000,
           maxDurationMs: 300_000,
           sortField: 'js_error_count',
@@ -567,6 +576,14 @@ describe('SessionsTab', () => {
       'Failed requests2'
     );
 
+    fireEvent.click(screen.getByTestId('digitalExperienceSessionsFrustrationFilter'));
+    expect(searchParams(history)).toEqual(
+      expect.objectContaining({ withFailedRequests: 'true', withFrustration: 'true' })
+    );
+    expect(screen.getByTestId('digitalExperienceSessionsFrustrationFilter')).toHaveTextContent(
+      'Frustrated3'
+    );
+
     // A second click turns a filter off, leaving the other one.
     fireEvent.click(screen.getByTestId('digitalExperienceSessionsJsErrorsFilter'));
     expect(searchParams(history).withJsErrors).toBeUndefined();
@@ -580,6 +597,107 @@ describe('SessionsTab', () => {
 
     fireEvent.click(screen.getByTestId('digitalExperienceSessionsClearFilters'));
     expect(searchParams(history)).toEqual({ rangeFrom: 'now-15m', rangeTo: 'now', source: 'otel' });
+  });
+
+  it('shows the element and page a link filters by, and removes each from the URL', async () => {
+    respondWith();
+    const history = renderTab({
+      search: '&withFrustration=true&frustrationTarget=%23pay&frustrationPage=%2Fcheckout&page=2',
+    });
+
+    const element = await screen.findByTestId('digitalExperienceSessionsFrustrationTarget');
+    const page = screen.getByTestId('digitalExperienceSessionsFrustrationPage');
+    expect(element).toHaveTextContent('Element: #pay');
+    expect(page).toHaveTextContent('Page: /checkout');
+
+    fireEvent.click(within(element).getByRole('button', { name: 'Remove Element: #pay' }));
+    expect(searchParams(history).frustrationTarget).toBeUndefined();
+    expect(searchParams(history)).toEqual(
+      expect.objectContaining({ withFrustration: 'true', frustrationPage: '/checkout' })
+    );
+    expect(searchParams(history).page).toBeUndefined();
+    expect(
+      screen.queryByTestId('digitalExperienceSessionsFrustrationTarget')
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(
+      within(screen.getByTestId('digitalExperienceSessionsFrustrationPage')).getByRole('button', {
+        name: 'Remove Page: /checkout',
+      })
+    );
+    expect(searchParams(history).frustrationPage).toBeUndefined();
+    expect(searchParams(history).withFrustration).toBe('true');
+  });
+
+  it('drops the element and page filters with the Frustrated toggle', async () => {
+    respondWith();
+    const history = renderTab({
+      search: '&withFrustration=true&frustrationTarget=%23pay&frustrationPage=%2Fcheckout',
+    });
+
+    fireEvent.click(await screen.findByTestId('digitalExperienceSessionsFrustrationFilter'));
+
+    expect(searchParams(history)).toEqual({ rangeFrom: 'now-15m', rangeTo: 'now', source: 'otel' });
+    expect(
+      screen.queryByTestId('digitalExperienceSessionsFrustrationTarget')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('digitalExperienceSessionsFrustrationPage')
+    ).not.toBeInTheDocument();
+  });
+
+  it('clears the element and page together with the other filters', async () => {
+    respondWith();
+    const history = renderTab({ search: '&frustrationTarget=%23pay&frustrationPage=%2Fcheckout' });
+
+    fireEvent.click(await screen.findByTestId('digitalExperienceSessionsClearFilters'));
+
+    expect(searchParams(history)).toEqual({ rangeFrom: 'now-15m', rangeTo: 'now', source: 'otel' });
+  });
+
+  it('links each session with the frustration filters', async () => {
+    respondWith();
+    renderTab({
+      search: '&withFrustration=true&frustrationTarget=%23pay&frustrationPage=%2Fcheckout',
+    });
+
+    const link = await screen.findByTestId('digitalExperienceSessionLink');
+    const { searchParams: params } = new URL(link.getAttribute('href') ?? '', 'http://localhost');
+    expect(Object.fromEntries(params)).toEqual(
+      expect.objectContaining({
+        withFrustration: 'true',
+        frustrationTarget: '#pay',
+        frustrationPage: '/checkout',
+      })
+    );
+  });
+
+  it('breaks the frustration of a session down by kind', async () => {
+    respondWith({
+      list: listResponse({
+        sessions: [
+          session({ frustration: { rageClicks: 2, deadClicks: 1, errorClicks: 0, total: 3 } }),
+        ],
+      }),
+    });
+    renderTab();
+
+    const row = await screen.findByTestId('digitalExperienceSessionRow-session-1');
+    const badge = within(row).getByTestId('digitalExperienceSessionFrustration');
+    expect(badge).toHaveTextContent('3');
+
+    fireEvent.mouseOver(badge);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('2 rage, 1 dead, 0 error clicks');
+  });
+
+  it('shows no frustration as a plain number', async () => {
+    respondWith();
+    renderTab();
+
+    const row = await screen.findByTestId('digitalExperienceSessionRow-session-1');
+    expect(
+      within(row).queryByTestId('digitalExperienceSessionFrustration')
+    ).not.toBeInTheDocument();
   });
 
   it('searches once typing pauses', async () => {
@@ -623,6 +741,17 @@ describe('SessionsTab', () => {
       fireEvent.click(within(table).getByRole('button', { name: /^JS errors/ }));
     });
     expect(searchParams(history)).toEqual(expect.objectContaining({ sortField: 'js_error_count' }));
+
+    await act(async () => {
+      fireEvent.click(within(table).getByRole('button', { name: /^Frustration/ }));
+    });
+    expect(searchParams(history)).toEqual(
+      expect.objectContaining({ sortField: 'frustration_count', sortDirection: 'asc' })
+    );
+    expect(within(table).getByRole('columnheader', { name: /^Frustration/ })).toHaveAttribute(
+      'aria-sort',
+      'ascending'
+    );
   });
 
   it('shows the summary columns by default, and the others on request', async () => {
@@ -646,8 +775,9 @@ describe('SessionsTab', () => {
       'Page views',
       'Clicks',
       'JS errors',
+      'Frustration',
     ]);
-    expect(screen.getByTestId('digitalExperienceColumnSelector')).toHaveTextContent('5/18');
+    expect(screen.getByTestId('digitalExperienceColumnSelector')).toHaveTextContent('6/19');
 
     fireEvent.click(screen.getByTestId('digitalExperienceColumnSelector'));
     fireEvent.click(screen.getByTestId('digitalExperienceColumnSelectorOption-failedRequests'));
@@ -664,6 +794,7 @@ describe('SessionsTab', () => {
       'Page views',
       'JS errors',
       'Failed requests',
+      'Frustration',
       'Environment',
       'Location',
       'LCP',

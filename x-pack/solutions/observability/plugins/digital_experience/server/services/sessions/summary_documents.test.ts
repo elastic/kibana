@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SESSIONS_FRUSTRATION_VALUES } from '../../../common/sessions';
 import {
   sessionDocumentId,
   toEsqlRows,
@@ -22,6 +23,10 @@ const summaryRow = (overrides: EsqlRow = {}): EsqlRow => ({
   page_load_count: 1,
   click_count: 4,
   js_error_count: 2,
+  rage_click_count: 2,
+  dead_click_count: 1,
+  error_click_count: 0,
+  frustration_count: 3,
   http_request_count: 5,
   http_failed_request_count: 1,
   attribute_environment: 'production',
@@ -83,6 +88,12 @@ describe('toSessionDocuments', () => {
       page_load_count: 1,
       click_count: 4,
       js_error_count: 2,
+      rage_click_count: 2,
+      dead_click_count: 1,
+      error_click_count: 0,
+      frustration_count: 3,
+      frustration_targets: [],
+      frustration_pages: [],
       http_request_count: 5,
       http_failed_request_count: 1,
       bounced: false,
@@ -161,6 +172,65 @@ describe('toSessionDocuments', () => {
     ]);
 
     expect(document.journey).toEqual(['/x|y']);
+  });
+
+  it('counts no frustration for a row without the columns', () => {
+    const [document] = toSessionDocuments([
+      summaryRow({
+        rage_click_count: null,
+        dead_click_count: null,
+        error_click_count: null,
+        frustration_count: null,
+      }),
+    ]);
+
+    expect(document).toMatchObject({
+      rage_click_count: 0,
+      dead_click_count: 0,
+      error_click_count: 0,
+      frustration_count: 0,
+    });
+  });
+
+  it('keeps the frustrated selectors, and the page paths of the frustrated URLs, without repeats', () => {
+    const [document] = toSessionDocuments([
+      summaryRow({
+        frustration_targets: ['#buy', 'button.promo', '#buy'],
+        frustration_urls: [
+          'https://shop.example.com/cart?item=1',
+          'https://shop.example.com/cart?item=2',
+          'https://shop.example.com/checkout?step=pay',
+        ],
+      }),
+    ]);
+
+    expect(document).toMatchObject({
+      frustration_targets: ['#buy', 'button.promo'],
+      frustration_pages: ['/cart', '/checkout'],
+    });
+  });
+
+  it('takes a single frustrated selector and URL, which ES|QL returns as values rather than lists', () => {
+    const [document] = toSessionDocuments([
+      summaryRow({ frustration_targets: '#buy', frustration_urls: 'https://shop.example.com/' }),
+    ]);
+
+    expect(document).toMatchObject({ frustration_targets: ['#buy'], frustration_pages: ['/'] });
+  });
+
+  it('keeps the lowest sorted frustrated selectors and pages of a session that has more than the cap', () => {
+    const indices = Array.from({ length: 30 }, (_, index) => String(index).padStart(2, '0'));
+    const unsorted = [...indices].reverse();
+    const [document] = toSessionDocuments([
+      summaryRow({
+        frustration_targets: unsorted.map((index) => `#target-${index}`),
+        frustration_urls: unsorted.map((index) => `https://shop.example.com/page-${index}?q=1`),
+      }),
+    ]);
+
+    const kept = indices.slice(0, SESSIONS_FRUSTRATION_VALUES);
+    expect(document.frustration_targets).toEqual(kept.map((index) => `#target-${index}`));
+    expect(document.frustration_pages).toEqual(kept.map((index) => `/page-${index}`));
   });
 
   it('skips rows without a session, an application or times', () => {

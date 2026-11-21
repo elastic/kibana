@@ -235,6 +235,39 @@ it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percent
   is shown as an error and not applied; the routes answer one with a 400. The Sessions index has
   other fields, so the query does not carry over to the Sessions tab.
 
+- **Frustration:** a panel with the rage, dead and error clicks of the application, from the
+  `frustration`, `frustratedElements` and `frustratedPages` of `/usage`. **Elements** ranks the
+  clicked elements (`browser.css_selector`) and **Pages** the page paths, by signals, each row with
+  its per-type counts, its sessions (**Pages** shows a lower bound: the largest session count of the
+  URLs that fold into the path) and **Open sessions**, which opens the Sessions list filtered to
+  that element or page (`withFrustration`, `frustrationTarget` / `frustrationPage`). The page filter
+  narrows it, as the signals carry a page URL. A **View dashboard** link in its header opens the
+  Frustration page below. See [Frustration signals](#frustration-signals).
+
+### Frustration (`/{serviceName}/frustration?source=otel`)
+
+A page of EDOT Browser applications only (Classic RUM shows an empty prompt), opened from the
+Overview's Frustration panel with **View dashboard**; it has no tab. Its breadcrumb is Applications >
+{application} > Frustration. The time range and environment are the app's and are kept in the URL.
+
+- **Dashboard:** the portable dashboard (`DashboardRenderer`, view mode) with ten Lens panels built
+  as code from ES|QL (`LensConfigBuilder`, `public/pages/frustration/utils/frustration_panels.ts`),
+  so each has the panel menu's inspect, maximize and **Explore in Discover / Lens**. Metrics:
+  frustration signals, frustrated sessions (share of all sessions, with their count), rage, dead and
+  error clicks. Charts: signals over time, and by app version, browser and device, stacked by type.
+  Table: error clicks by exception, with signals and sessions.
+- **Queries:** every panel filters on the application and, unless all environments are picked, the
+  environment, in the ES|QL `WHERE` (escaped); the time range goes through the dashboard. The field
+  names are shared with the summary query (`common/otel_source_fields.ts`) and the event names come
+  from `common/otel_data.ts`.
+- **Native panel:** below the grid, the Overview's **Elements** / **Pages** panel from `/usage`, with
+  **Open sessions**, as Lens tables can't link into the Sessions list with those filters.
+- **Plugins:** `dashboard` and `lens` are optional. Without them the Overview hides the
+  link and the page shows an empty prompt in place of the dashboard.
+- **Limits:** the Overview's filters (browser, OS, device, country, version, page) and KQL query
+  aren't carried over yet: the dashboard and the panel below it cover the application and
+  environment only.
+
 ### Sessions (`/{serviceName}/sessions?source=otel`)
 
 A tab of EDOT Browser applications only, as sessions are built from EDOT Browser data (see
@@ -247,29 +280,38 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
   run of the summaries task with its error, or summaries that are behind. A line next to the time
   picker says up to when events are in. While the sessions index is first built, an empty list says
   sessions are being built.
-- **KPIs:** sessions, sessions with JS errors, sessions with failed requests, median duration, page
-  views per session and bounce rate, over the listed sessions, so they follow the search and filters.
+- **KPIs:** sessions, sessions with JS errors, sessions with failed requests, frustrated sessions,
+  median duration, page views per session and bounce rate, over the listed sessions, so they follow
+  the search and filters.
 - **Filters:** a debounced search (session ID, user, pages, browser, OS, location), **JS errors**,
-  **Failed requests**, duration ranges, and browser, OS, country and entry page facets with their
+  **Failed requests**, **Frustrated** (sessions with a rage, dead or error click; `withFrustration`),
+  duration ranges, and browser, OS, country and entry page facets with their
   counts. The environment picked in the app filters the sessions too.
 - **Table:** start time, user with browser and OS, journey (entry → number of pages in between →
   exit), duration, page views, clicks, JS errors and failed requests; sortable and paged on the
-  server. A column selector, kept in local storage, adds environment, location, entry and exit page,
+  server. A column selector, kept in local storage, adds frustration (the signals of the session,
+  with their split by type on hover), environment, location, entry and exit page,
   device, session ID, last activity, events, bounced, and LCP / INP / CLS colored by rating. The
   search, filters, sort and page are kept in the URL, and links to a session carry them so its
   **Sessions** breadcrumb leads back to the same list. **Page views** count page loads and in-app
   navigations, unlike the applications list's page loads, and say so on hover.
+- **Frustration links:** a link from the Overview's Frustration panel also narrows the list to an
+  element (`frustrationTarget`, a CSS selector) or a page (`frustrationPage`, a path), shown as a
+  badge that removes it.
 - **Empty states:** with no sessions, how they get there; with none matching, a button to clear the
   filters. A time range that starts before the 30 days sessions are kept says so.
 
 ### Session (`/{serviceName}/sessions/{sessionId}`)
 
-- **Summary:** duration, page views, page loads, clicks, JS errors and failed requests; when, who,
+- **Summary:** duration, page views, page loads, clicks, JS errors, frustration signals (with the
+  rage, dead and error split) and failed requests; when, who,
   environment, browser and OS, location, entry and exit pages; and the session's Core Web Vitals.
 - **Timeline:** one bar for the session, with a segment per page visit as wide as the time spent on
-  the page and a marker per error. Selecting a segment scrolls to that visit.
-- **Page journey:** a card per page visit with its time, share of the session, clicks, errors and web
-  vitals, and its page views, clicks, errors and web vitals in order. Spans and logs are left out.
+  the page and a marker per error and per frustration signal. Selecting a segment scrolls to that
+  visit.
+- **Page journey:** a card per page visit with its time, share of the session, clicks, errors,
+  frustration signals and web vitals, and its page views, clicks, errors, frustration signals and
+  web vitals in order, which a **Frustration** filter narrows. Spans and logs are left out.
   Every page view opens a visit, so loading the same URL again is a visit of its own with the web
   vitals it measured, and the visits add up to the summary's `page_view_count`.
 - **States:** a 404 leads back to the list; a timeline cut at the event limit is flagged.
@@ -279,7 +321,7 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
 A Task Manager task (`digital_experience:sessions-summaries`, every minute) summarizes EDOT Browser
 sessions from `traces-*.otel-*,logs-*.otel-*` into `digital-experience-sessions-browser-<version>` with
 ES|QL, one document per `service.name` + `session.id`: start/end time and duration, page views with
-entry/exit page and journey, page loads, clicks, JS errors, HTTP requests and failed requests, p75
+entry/exit page and journey, page loads, clicks, JS errors, frustration signals, HTTP requests and failed requests, p75
 Core Web Vitals with their samples by rating, and environment, user, browser, OS and geo attributes.
 Like the applications list, it only reads browser SDK data (`telemetry.sdk.language: webjs`), and it
 skips events with an empty `service.name` or `session.id`.
@@ -357,6 +399,37 @@ page loads and in-app navigations (`documentLoad`, `browser.navigation`); `page_
 `js_error_count` and the HTTP request counts use the applications list's own definitions. The
 summary also keeps a lowercased `search` field (`wildcard`) of the session id, user, browser, OS,
 country, city and pages, which the list's search matches anywhere in.
+
+### Frustration signals
+
+EDOT Browser reports a rage, dead or error click as a log event of its own
+(`browser.frustration.rage_click`, `.dead_click` and `.error_click`, in `common/otel_data.ts`),
+timestamped at the first click, with the element's `browser.css_selector` and the page's `url.full`.
+Kibana adds no detection of its own; it counts what the SDK reports:
+
+- **Rage click:** 3 or more clicks on one element within 1 second.
+- **Dead click:** a click on a clickable element with no response within 1 second.
+- **Error click:** an uncaught JS error within 1 second of the click, or after a slow request the
+  click started, up to 10 seconds.
+
+They are not clicks: a rage click summarizes clicks that are `browser.user_action.click` events
+already, so none of them is added to `click_count`. They need EDOT Browser with frustration
+detection (elastic/elastic-otel-rum-js#191): sessions of older SDKs show 0 of each, and the UI says
+so.
+
+The summary keeps `rage_click_count`, `dead_click_count`, `error_click_count` and their sum
+`frustration_count`, which the list's filter, sort and KPI read, and `frustration_targets` and
+`frustration_pages`, the distinct selectors and page paths of the signals (up to 20 each, the lowest sorted), which the
+Overview panel's links filter by with an exact `term`. A summary without them reads as 0.
+
+The index is `dynamic: false` and `SESSIONS_VERSION` was not bumped, as a second version would list
+every session twice (readers span `digital-experience-sessions-browser-*`). The new fields are only
+mapped in indices created after this change. On an existing index, rebuilt summaries still carry
+the counts in `_source`, so the table and detail show real numbers, while the filter, sort, KPI
+and drill-down find nothing until the index is deleted for the task to rebuild it.
+
+For local data, the `digital_experience_browser` synthtrace scenario emits these events by default
+(`--scenarioOpts frustration=false` turns them off).
 
 `has_replay` is mapped but never written yet. Session replay records one `elastic.replay.start`
 per recorded segment to `logs-rum.replay.otel-*`, which the task already reads as part of
@@ -544,5 +617,6 @@ logged and answer 500 without Elasticsearch details:
 - `server/services/sessions/`: the session summaries: the task, its ES|QL queries, the index, status,
   and enabling, with their routes and readers in `server/routes/sessions/`.
 - `public/pages/`: one folder per page (`applications_list/`, `application_details/`, `sessions/`,
-  `session_detail/`) with its own components, hooks and utils; what several pages share is in
-  `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the app shell.
+  `session_detail/`, `frustration/`) with its own components, hooks and utils; what several pages
+  share is in `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the
+  app shell.

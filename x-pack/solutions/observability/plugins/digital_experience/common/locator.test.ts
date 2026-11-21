@@ -50,6 +50,34 @@ describe('DigitalExperienceLocatorDefinition', () => {
     );
   });
 
+  it('opens the frustration page of an application, with its state', async () => {
+    expect(
+      await pathOf({
+        serviceName: 'storefront-web',
+        view: 'frustration',
+        source: 'otel',
+        rangeFrom: 'now-7d',
+        rangeTo: 'now',
+        environment: 'production',
+      })
+    ).toBe(
+      '/storefront-web/frustration?environment=production&rangeFrom=now-7d&rangeTo=now&source=otel'
+    );
+  });
+
+  it('opens the view over the tab, and ignores a view it does not know', async () => {
+    expect(
+      await pathOf({ serviceName: 'storefront-web', tab: 'errors', view: 'frustration' })
+    ).toBe('/storefront-web/frustration');
+    expect(
+      await pathOf({
+        serviceName: 'storefront-web',
+        tab: 'errors',
+        view: 'admin' as DigitalExperienceLocatorParams['view'],
+      })
+    ).toBe('/storefront-web/errors');
+  });
+
   it('opens the Overview for a tab it does not know', async () => {
     expect(
       await pathOf({
@@ -98,6 +126,9 @@ describe('DigitalExperienceLocatorDefinition', () => {
       source: 'otel',
       withJsErrors: true,
       withFailedRequests: true,
+      withFrustration: true,
+      frustrationTarget: '#pay',
+      frustrationPage: '/checkout',
       page: 2,
       perPage: 50,
       sortField: 'duration',
@@ -105,7 +136,7 @@ describe('DigitalExperienceLocatorDefinition', () => {
     });
 
     expect(path).toBe(
-      '/storefront-web/sessions?page=2&perPage=50&sortDirection=desc&sortField=duration&source=otel&withFailedRequests=true&withJsErrors=true'
+      '/storefront-web/sessions?frustrationPage=%2Fcheckout&frustrationTarget=%23pay&page=2&perPage=50&sortDirection=desc&sortField=duration&source=otel&withFailedRequests=true&withFrustration=true&withJsErrors=true'
     );
   });
 

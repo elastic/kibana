@@ -16,6 +16,7 @@ import {
   SESSIONS_LIST_DEFAULT_PER_PAGE,
   SESSIONS_LIST_MAX_DURATION_MS,
   SESSIONS_LIST_MAX_FACET_LENGTHS,
+  SESSIONS_LIST_MAX_FRUSTRATION_FILTER_LENGTH,
   SESSIONS_LIST_MAX_PAGE,
   SESSIONS_LIST_MAX_PER_PAGE,
   SESSIONS_LIST_MAX_SEARCH_LENGTH,
@@ -252,6 +253,9 @@ const listRoute = createDigitalExperienceServerRoute({
           environment: z.string().min(1).max(MAX_ENVIRONMENT_LENGTH).optional(),
           withJsErrors: z.stringbool().optional(),
           withFailedRequests: z.stringbool().optional(),
+          withFrustration: z.stringbool().optional(),
+          frustrationTarget: facetValue(SESSIONS_LIST_MAX_FRUSTRATION_FILTER_LENGTH),
+          frustrationPage: facetValue(SESSIONS_LIST_MAX_FRUSTRATION_FILTER_LENGTH),
           minDurationMs: durationMs(),
           maxDurationMs: durationMs(),
           sortField: z.enum(SESSION_SORT_FIELDS).default('start_time'),
@@ -286,6 +290,9 @@ const listRoute = createDigitalExperienceServerRoute({
       entryPage,
       withJsErrors,
       withFailedRequests,
+      withFrustration,
+      frustrationTarget,
+      frustrationPage,
       minDurationMs,
       maxDurationMs,
       ...query
@@ -295,7 +302,15 @@ const listRoute = createDigitalExperienceServerRoute({
         ...query,
         serviceName: params.path.serviceName,
         facets: { browsers: browser, os, countries: country, entryPages: entryPage },
-        filters: { withJsErrors, withFailedRequests, minDurationMs, maxDurationMs },
+        filters: {
+          withJsErrors,
+          withFailedRequests,
+          withFrustration,
+          frustrationTarget,
+          frustrationPage,
+          minDurationMs,
+          maxDurationMs,
+        },
       });
     } catch (error) {
       throw toReadError(error, logger, 'the sessions list');
