@@ -14,6 +14,7 @@ import {
   TEMPLATE_ID_INVESTIGATION,
 } from '@kbn/alertzero-common';
 import { loggerMock } from '@kbn/logging-mocks';
+import { BehaviorSubject } from 'rxjs';
 import type { AlertZeroConfig } from './config';
 import { ALERTZERO_API_PRIVILEGE_READ, ALERTZERO_API_PRIVILEGE_WRITE } from '../common/constants';
 import { AlertZeroPlugin } from './plugin';
@@ -24,6 +25,12 @@ import { ensureAgentSafe, registerAgentType } from './agent';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { ALERTZERO_TELEMETRY_EVENT_TYPES } from './telemetry';
 import { ReportWorkerOutcomeStepId } from '../common/step_types';
+import { WORKER_SERVER_DEFINITIONS } from './workers';
+import { createWorkerServerContextMock } from './workers/worker_server_context.mock';
+import {
+  TRIAGE_GROUPING_KILL_SWITCH,
+  alertTriageServerDefinition,
+} from './alert_triage/worker_server';
 
 jest.mock('./managed_workflows/register_owner', () => ({
   registerOwner: jest.fn(),
@@ -60,6 +67,22 @@ const createContext = (config: AlertZeroConfig) => {
   } as unknown as ConstructorParameters<typeof AlertZeroPlugin>[0];
   return context;
 };
+
+const setupWithSteps = (
+  plugin: AlertZeroPlugin,
+  workflowsExtensions: {
+    registerManagedWorkflowOwner: jest.Mock;
+    registerStepDefinition: jest.Mock;
+  }
+) =>
+  plugin.setup(
+    coreMock.createSetup() as never,
+    {
+      features: { registerKibanaFeature: jest.fn() },
+      workflowsExtensions,
+      workflowsManagement: { management: {} },
+    } as never
+  );
 
 describe('AlertZeroPlugin feature-flag gating', () => {
   beforeEach(() => {
@@ -468,6 +491,70 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       expect(
         workflowsExtensions.registerStepDefinition.mock.calls.map(([def]) => def.id)
       ).toContain(ReportWorkerOutcomeStepId);
+    });
+
+    it('registers every shared and Worker step type during setup', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      const workflowsExtensions = {
+        registerManagedWorkflowOwner: jest.fn(),
+        registerStepDefinition: jest.fn(),
+      };
+
+      setupWithSteps(plugin, workflowsExtensions);
+
+      const workerStepIds = WORKER_SERVER_DEFINITIONS.flatMap(
+        (worker) => worker.getStepDefinitions?.(createWorkerServerContextMock()) ?? []
+      ).map((definition) => ('id' in definition ? definition.id : undefined));
+      expect(
+        workflowsExtensions.registerStepDefinition.mock.calls.map(([def]) => def.id).sort()
+      ).toEqual(
+        [
+          'alertzero.investigation.summarize',
+          'alertzero.reportWorkerOutcome',
+          'alertzero.resolveProposals',
+          ...workerStepIds,
+        ].sort()
+      );
+    });
+
+    it('subscribes to each Worker feature flag in start and drops it in stop', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      const coreStart = coreMock.createStart();
+      const flag$ = new BehaviorSubject(true);
+      jest.mocked(coreStart.featureFlags.getBooleanValue$).mockReturnValue(flag$);
+
+      plugin.start(coreStart, {} as never);
+
+      for (const { key, fallback } of WORKER_SERVER_DEFINITIONS.flatMap(
+        ({ featureFlags = [] }) => featureFlags
+      )) {
+        expect(coreStart.featureFlags.getBooleanValue$).toHaveBeenCalledWith(key, fallback);
+      }
+      expect(flag$.observed).toBe(true);
+
+      plugin.stop();
+
+      expect(flag$.observed).toBe(false);
+    });
+
+    it('hands a flag value that changes after start to the Worker steps', () => {
+      const getStepDefinitions = jest.spyOn(alertTriageServerDefinition, 'getStepDefinitions');
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      setupWithSteps(plugin, {
+        registerManagedWorkflowOwner: jest.fn(),
+        registerStepDefinition: jest.fn(),
+      });
+      const [[context]] = getStepDefinitions.mock.calls;
+      const coreStart = coreMock.createStart();
+      const flag$ = new BehaviorSubject(true);
+      jest.mocked(coreStart.featureFlags.getBooleanValue$).mockReturnValue(flag$);
+
+      plugin.start(coreStart, {} as never);
+      flag$.next(false);
+
+      expect(context.getFeatureFlag(TRIAGE_GROUPING_KILL_SWITCH)).toBe(false);
+      plugin.stop();
+      getStepDefinitions.mockRestore();
     });
 
     it('registers the per-space enablement advanced setting', () => {
