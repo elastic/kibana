@@ -641,7 +641,7 @@ export class InvestigationsService {
     });
     const max = (res.aggregations?.max as { value?: number | null } | undefined)?.value ?? 0;
     const floor = Math.max(Math.floor(max ?? 0), 0) + 1;
-    const counter = await this.es.update<{ value: number }, unknown, { value: number }>({
+    const counter = await this.es.update<{ value?: number }, unknown, { value?: number }>({
       index: INVESTIGATION_CONFIG_INDEX,
       id: `display_counter:${this.deps.spaceId}`,
       // One hot document under concurrent creates: retry generously rather than fail the create.
