@@ -200,6 +200,7 @@ const ebtAction = {
     VIEW_ROUND_METADATA_BY_MODEL: 'view_round_metadata_by_model',
     EXPAND_TOOL_CALL_STEP: 'expand_tool_call_step',
     EXPAND_TOOL_CALL_GROUP: 'expand_tool_call_group',
+    EXPAND_MODEL_REASONING: 'expand_model_reasoning',
     EXPAND_EXECUTION_ERROR: 'expand_execution_error',
     VIEW_TOOL_RESPONSE: 'view_tool_response',
     VIEW_SUB_AGENT_EXECUTION: 'view_sub_agent_execution',

@@ -106,4 +106,23 @@ describe('ToolCallGroup', () => {
     await user.click(screen.getAllByRole('button')[1]);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
+
+  it('exposes whether the group is expanded, but not on the steps that open a flyout', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(
+      <ToolCallGroup
+        steps={[
+          toolStep('c1', 'search', [otherResult('r1')]),
+          toolStep('c2', 'read', [otherResult('r2')]),
+        ]}
+      />
+    );
+    const group = screen.getByRole('button', { name: '2 tools ran' });
+    expect(group).toHaveAttribute('aria-expanded', 'false');
+
+    await user.click(group);
+    expect(group).toHaveAttribute('aria-expanded', 'true');
+    const [, firstStep] = screen.getAllByRole('button');
+    expect(firstStep).not.toHaveAttribute('aria-expanded');
+  });
 });

@@ -20,6 +20,10 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { ResponseMessage } from './response/response_message';
 import { EventSteps } from './event_steps/event_steps';
+import {
+  ModelReasoningStep,
+  findAnswerModelReasoning,
+} from './event_steps/steps/model_reasoning_step';
 import { AttachmentReferences } from './attachments/attachment_references';
 
 interface AgentResponseProps {
@@ -49,6 +53,7 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
   executionId,
 }) => {
   const conversationId = useConversationId();
+  const answerModelReasoning = findAnswerModelReasoning(steps);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -60,6 +65,11 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
             attachmentRefs={attachmentRefs}
             conversationId={conversationId}
           />
+        </EuiFlexItem>
+      )}
+      {answerModelReasoning && (
+        <EuiFlexItem grow={false}>
+          <ModelReasoningStep step={answerModelReasoning} />
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
