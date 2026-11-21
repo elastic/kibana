@@ -57,11 +57,16 @@ export const composeSourceStatus = async ({
       return defaultSourceStatus;
     }
 
-    const outcome = err instanceof errors.TimeoutError ? 'timed out' : 'failed';
-    const reason = err instanceof Error ? err.message : String(err);
-    logger.warn(
-      `Metric index status check ${outcome} for source "${sourceId}" (pattern: ${metricAlias}): ${reason}`
-    );
+    if (err instanceof errors.TimeoutError) {
+      const reason = err instanceof Error ? err.message : String(err);
+      logger.warn(
+        `Metric index status check timed out for source "${sourceId}" (pattern: ${metricAlias}): ${reason}`
+      );
+    } else {
+      // Any other failure is unexpected (for example an authorization error), so keep it
+      // visible as a structured error with its type and stack rather than downgrading it.
+      logger.error(err instanceof Error ? err : new Error(String(err)));
+    }
 
     return {
       metricIndicesExist: false,

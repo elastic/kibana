@@ -70,17 +70,19 @@ describe('composeSourceStatus', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('reports an unknown status when the probe fails for another reason', async () => {
-    const hasMetricIndices = jest.fn().mockRejectedValue(new Error('cluster unhealthy'));
+  it('keeps an unexpected probe failure visible as a structured error and reports unknown', async () => {
+    const error = new Error('cluster unhealthy');
+    const hasMetricIndices = jest.fn().mockRejectedValue(error);
 
     await expect(compose(hasMetricIndices)).resolves.toEqual({
       metricIndicesExist: false,
       remoteClustersExist: true,
       metricIndicesStatus: 'unknown',
     });
-    expect(logger.warn).toHaveBeenCalledWith(
-      'Metric index status check failed for source "default" (pattern: metrics-*,metricbeat-*): cluster unhealthy'
-    );
+    // An unexpected failure (for example an authorization error) is not a timeout, so it stays
+    // at error level with its type and stack instead of being downgraded to a warning.
+    expect(logger.error).toHaveBeenCalledWith(error);
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('keeps the error log and reports missing remote clusters when the remote cluster does not exist', async () => {
