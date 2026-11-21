@@ -628,6 +628,20 @@ const reportedOrPersistedUuids = (
   return persistedExecutionUuids(docs) ?? uuids;
 };
 
+/**
+ * The generation execution uuids one runner execution reported, read straight off its steps
+ * (`run_generation`, and `emit_result` which repeats them after the engine evicts the former's
+ * output). Unlike `collectWorkerArtifacts` it does no I/O and cannot throw on a malformed step, so
+ * the caller can hold these before collecting and still own the run's persisted discoveries when
+ * the collect fails. Empty when the execution reported none.
+ */
+export const generationUuidsOf = (run: WorkflowExecutionDto): string[] =>
+  distinct(
+    (run.stepExecutions ?? [])
+      .filter(({ stepId }) => stepId === RUN_GENERATION_STEP_ID || stepId === 'emit_result')
+      .flatMap((step) => executionUuidList(outputOf(step)?.execution_uuids) ?? [])
+  );
+
 /** Every attack id `match_fingerprints` handed back, as a review or an attachment. */
 const attackIdsOf = (matchOutput: Record<string, unknown> | undefined): string[] =>
   distinct(

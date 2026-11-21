@@ -679,7 +679,10 @@ const removeSeededAlertsById = async ({
 /**
  * Deletes a seed's world documents by exact `_id`, then counts the ids back. A delete by query on
  * the ids reaches an alias and a data stream alike, which a delete by id does not; it refreshes, so
- * the count sees every document the delete left. Ids that remain after `rounds` rounds throw.
+ * the count sees every document the delete left. Every one of the `rounds` rounds runs, and only the
+ * count of the LAST round is judged: with an unsettled seed bulk a first count of 0 proves nothing,
+ * because a document may land after it (the same rule as `removeSeededAlertsById`). Ids that remain
+ * after the last round throw.
  */
 const removeWorldDocs = async ({
   esClient,
@@ -703,9 +706,9 @@ const removeWorldDocs = async ({
       for (let round = 1; round <= rounds; round++) {
         await deleteMatching({ esClient, index, query });
         ({ count: remaining } = await esClient.count({ index, query, ignore_unavailable: true }));
-        if (remaining === 0) return;
         if (round < rounds && wait) await wait(UNSETTLED_REMOVE_PAUSE_MS);
       }
+      if (remaining === 0) return;
       throw new Error(
         `${remaining} of ${
           ids.length
@@ -1197,14 +1200,23 @@ const healSpace = async ({
 export const cleanupSeed = async ({
   esClient,
   seeded,
+  executionUuids = [],
   wait = sleep,
 }: {
   esClient: Client;
   seeded: SeededScenario;
+  /**
+   * The generation execution uuids of this run (`generationUuids` in collect.ts). A persisted
+   * discovery stamped with one of them is this run's even when it cites no alert of the seed (an
+   * empty citation list, or ids the model took from elsewhere), which the marker prefix cannot see.
+   */
+  executionUuids?: readonly string[];
   /** Pause between rounds; injected so tests do not wait. */
   wait?: (ms: number) => Promise<void>;
 }): Promise<void> => {
   const { spaceId, runMarker } = seeded;
+  // Blank entries are dropped: a `terms` clause on an empty value must not widen the selector.
+  const ownedUuids = executionUuids.map((uuid) => uuid.trim()).filter((uuid) => uuid !== '');
   const targets: SpaceTarget[] = [
     {
       what: 'seeded alerts',
@@ -1223,12 +1235,16 @@ export const cleanupSeed = async ({
         bool: {
           // The eval space may be an existing space (`ensureSpace` adopts it), so only this run's
           // discoveries go: the ones citing its alerts, whose ids all start with `<marker>-`
-          // (the hyphen keeps `adw-1` from matching `adw-10`), and the seeded one by id.
+          // (the hyphen keeps `adw-1` from matching `adw-10`), the seeded one by id, and the ones
+          // a generation of this run wrote, by its execution uuid, whatever they cite.
           minimum_should_match: 1,
           should: [
             { prefix: { 'kibana.alert.attack_discovery.alert_ids': `${runMarker}-` } },
             ...(seeded.seededDiscoveryId !== undefined
               ? [{ ids: { values: [seeded.seededDiscoveryId] } }]
+              : []),
+            ...(ownedUuids.length > 0
+              ? [{ terms: { 'kibana.alert.rule.execution.uuid': ownedUuids } }]
               : []),
           ],
         },

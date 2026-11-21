@@ -224,6 +224,119 @@ describe('cleanupSeed', () => {
     ).rejects.toThrow(/could not recount the space: refresh failed/);
     expect(refresh).toHaveBeenCalledTimes(CLEANUP_ROUNDS);
   });
+
+  describe('discoveries owned by a generation', () => {
+    const EXECUTION_UUID = 'kibana.alert.rule.execution.uuid';
+    const CITED_IDS = 'kibana.alert.attack_discovery.alert_ids';
+    type Discovery = Record<string, unknown> & { _id: string };
+
+    const discoveries = (): Discovery[] => [
+      // Owned by generation g1; the model cited nothing.
+      { _id: 'owned-empty', [EXECUTION_UUID]: 'g1', [CITED_IDS]: [] },
+      // Owned by generation g1; every alert it cites belongs to someone else.
+      { _id: 'owned-foreign', [EXECUTION_UUID]: 'g1', [CITED_IDS]: ['other-run-1'] },
+      // Cites this run's alerts, so the marker prefix reaches it.
+      { _id: 'cites-run', [EXECUTION_UUID]: 'g0', [CITED_IDS]: ['adw-1-alert-0'] },
+      // Somebody else's discovery in the same space.
+      { _id: 'unrelated', [EXECUTION_UUID]: 'g9', [CITED_IDS]: ['other-run-2'] },
+    ];
+
+    /** Evaluates the three clause types `cleanupSeed` may put in the discovery selector. */
+    const matches = (doc: Discovery, query: unknown): boolean => {
+      const { bool } = query as {
+        bool?: { should?: Array<Record<string, Record<string, unknown>>> };
+      };
+      if (bool?.should === undefined)
+        throw new Error(`unbounded selector: ${JSON.stringify(query)}`);
+      return bool.should.some((clause) => {
+        if ('ids' in clause) return (clause.ids.values as string[]).includes(doc._id);
+        if ('prefix' in clause) {
+          const [[field, prefix]] = Object.entries(clause.prefix);
+          return ((doc[field] as string[]) ?? []).some((id) => id.startsWith(String(prefix)));
+        }
+        if ('terms' in clause) {
+          const [[field, values]] = Object.entries(clause.terms);
+          return (values as unknown[]).includes(doc[field]);
+        }
+        throw new Error(`unknown clause: ${JSON.stringify(clause)}`);
+      });
+    };
+
+    const discoveryIndex = attackDiscoveryIndexForSpace('space-a');
+    const storeEs = (store: Discovery[], { stuck = [] }: { stuck?: string[] } = {}) => {
+      const deleteByQuery = jest.fn(
+        async ({ index, query }: { index: string; query?: unknown }) => {
+          if (index !== discoveryIndex) return {};
+          const doomed = store.filter((doc) => !stuck.includes(doc._id) && matches(doc, query));
+          for (const doc of doomed) store.splice(store.indexOf(doc), 1);
+          return { deleted: doomed.length, total: doomed.length };
+        }
+      );
+      const count = jest.fn(async ({ index, query }: { index: string; query?: unknown }) => ({
+        count: index === discoveryIndex ? store.filter((doc) => matches(doc, query)).length : 0,
+      }));
+      return { esClient: esWith({ deleteByQuery, count }), deleteByQuery, count };
+    };
+    const ids = (store: Discovery[]) => store.map(({ _id }) => _id);
+    const discoveryQuery = (deleteByQuery: jest.Mock) =>
+      deleteByQuery.mock.calls.find(([{ index }]) => index === discoveryIndex)?.[0].query;
+
+    it('adds the generation uuids to the selector and keeps the marker and id selectors', async () => {
+      const { esClient, deleteByQuery } = storeEs(discoveries());
+      await cleanupSeed({
+        esClient,
+        seeded: { ...seeded, seededDiscoveryId: 'disc-1' },
+        executionUuids: ['g1', 'g2'],
+      });
+      expect(discoveryQuery(deleteByQuery)).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            { prefix: { [CITED_IDS]: 'adw-1-' } },
+            { ids: { values: ['disc-1'] } },
+            { terms: { [EXECUTION_UUID]: ['g1', 'g2'] } },
+          ],
+        },
+      });
+    });
+
+    it.each([[undefined], [[]], [['', '  ']]])(
+      'adds no uuid clause for %j, so nothing can widen into an unbounded delete',
+      async (executionUuids) => {
+        const store = discoveries();
+        const { esClient, deleteByQuery } = storeEs(store);
+        await cleanupSeed({ esClient, seeded, executionUuids });
+        expect(JSON.stringify(discoveryQuery(deleteByQuery))).not.toContain(EXECUTION_UUID);
+        expect(JSON.stringify(discoveryQuery(deleteByQuery))).not.toContain('match_all');
+        expect(ids(store)).toEqual(['owned-empty', 'owned-foreign', 'unrelated']);
+      }
+    );
+
+    it('trims the uuids and drops the blank ones', async () => {
+      const { esClient, deleteByQuery } = storeEs(discoveries());
+      await cleanupSeed({ esClient, seeded, executionUuids: [' g1 ', '', '  '] });
+      expect(discoveryQuery(deleteByQuery).bool.should).toContainEqual({
+        terms: { [EXECUTION_UUID]: ['g1'] },
+      });
+    });
+
+    it('deletes the owned discoveries, with empty or foreign citations, and nothing else', async () => {
+      const store = discoveries();
+      const { esClient } = storeEs(store);
+      await cleanupSeed({ esClient, seeded, executionUuids: ['g1'] });
+      expect(ids(store)).toEqual(['unrelated']);
+    });
+
+    it('fails when an owned discovery is still there after the deletes', async () => {
+      const store = discoveries();
+      const { esClient } = storeEs(store, { stuck: ['owned-foreign'] });
+      const wait = jest.fn(async (_ms: number) => undefined);
+      await expect(cleanupSeed({ esClient, seeded, executionUuids: ['g1'], wait })).rejects.toThrow(
+        /1 persisted discoveries are still present/
+      );
+      expect(ids(store)).toEqual(['owned-foreign', 'unrelated']);
+    });
+  });
 });
 
 describe('seedScenario', () => {
@@ -591,6 +704,72 @@ describe('seedScenario world documents', () => {
       const error = await seedFailing(esWith({ bulk, count, deleteByQuery }));
       expect(error).not.toBeInstanceOf(AggregateError);
       expect((error as Error).message).toMatch(/socket hang up/);
+    });
+
+    /**
+     * Counts of the world rollback, by round: the nth `ids` count of an index answers
+     * `countsByRound[n]` (the last entry repeats). Every other count answers 0.
+     */
+    const worldCountsByRound = (countsByRound: readonly number[]) => {
+      const reads = new Map<string, number>();
+      return jest.fn(async ({ index, query }: { index: string; query?: { ids?: unknown } }) => {
+        if (!isRollbackCount({ query })) return { count: 0 };
+        const read = reads.get(index) ?? 0;
+        reads.set(index, read + 1);
+        return { count: countsByRound[Math.min(read, countsByRound.length - 1)] };
+      });
+    };
+    const rollbackDeleteMock = () =>
+      jest.fn(async (_args: { index: string; query?: { ids?: unknown } }) => ({}));
+    const rollbackDeletesPerIndex = (deleteByQuery: ReturnType<typeof rollbackDeleteMock>) => {
+      const perIndex = new Map<string, number>();
+      for (const [{ index, query }] of deleteByQuery.mock.calls) {
+        if (isRollbackCount({ query })) perIndex.set(index, (perIndex.get(index) ?? 0) + 1);
+      }
+      return perIndex;
+    };
+
+    it('runs the whole unsettled window when the first world count is already 0', async () => {
+      const bulk = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('socket hang up'))
+        .mockResolvedValue({ errors: false, items: [] });
+      // The bulk is still running in Elasticsearch: 0 now, the document lands one round later.
+      const count = worldCountsByRound([0, 1, 0]);
+      const deleteByQuery = rollbackDeleteMock();
+      const error = await seedFailing(esWith({ bulk, count, deleteByQuery }));
+      const perIndex = rollbackDeletesPerIndex(deleteByQuery);
+      expect(perIndex.size).toBeGreaterThan(0);
+      for (const rounds of perIndex.values()) expect(rounds).toBe(8);
+      expect(error).not.toBeInstanceOf(AggregateError);
+      expect((error as Error).message).toMatch(/socket hang up/);
+    });
+
+    it('judges only the last count of the unsettled window', async () => {
+      const bulk = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('socket hang up'))
+        .mockResolvedValue({ errors: false, items: [] });
+      // The document lands in the last round, so the delete before it could not reach it.
+      const count = worldCountsByRound([0, 0, 0, 0, 0, 0, 0, 1]);
+      const error = await seedFailing(esWith({ bulk, count, deleteByQuery: rollbackDeleteMock() }));
+      expect(error).toBeInstanceOf(AggregateError);
+      expect((error as Error).message).toMatch(
+        /seeded world documents still exist .* after 8 delete rounds/
+      );
+    });
+
+    it('keeps one round when the bulk returned', async () => {
+      const bulk = jest
+        .fn()
+        .mockResolvedValueOnce(rejected)
+        .mockResolvedValue({ errors: false, items: [] });
+      const count = worldCountsByRound([0, 1]);
+      const deleteByQuery = rollbackDeleteMock();
+      await seedFailing(esWith({ bulk, count, deleteByQuery }));
+      const perIndex = rollbackDeletesPerIndex(deleteByQuery);
+      expect(perIndex.size).toBeGreaterThan(0);
+      for (const rounds of perIndex.values()) expect(rounds).toBe(1);
     });
   });
 

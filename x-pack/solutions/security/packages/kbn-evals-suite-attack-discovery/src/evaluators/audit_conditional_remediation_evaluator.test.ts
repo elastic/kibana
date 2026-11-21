@@ -286,6 +286,8 @@ describe('findUnconditionalContainment', () => {
       'T1078 Valid Accounts: revoke the access key.',
       'T1078 Valid Accounts: Revoke the access key.',
       'T1562.008 Cloud Accounts: revoke the access key.',
+      'T1562.008 Impair Defenses: disable logs.',
+      'Observed T1562.008 impair defenses: disable logs.',
     ])('flags containment the masking must not hide: %s', (text) => {
       expect(findUnconditionalContainment(text)).toHaveLength(1);
     });

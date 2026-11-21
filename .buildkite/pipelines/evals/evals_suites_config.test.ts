@@ -409,6 +409,12 @@ describe('worker model-calling steps feature chain', () => {
     if (!step) throw new Error(`${file} has no step "${stepName}"`);
     expect(stepFeatureIds(step)).toEqual(['alertzero_template_models', 'alertzero_frontier']);
   });
+
+  it('attack_discovery_batched_generation.yaml step run_batch lets an explicit connector_id input win over the feature ids', () => {
+    const step = findStepByName(stepsOf('attack_discovery_batched_generation.yaml'), 'run_batch');
+    if (!step) throw new Error('attack_discovery_batched_generation.yaml has no step "run_batch"');
+    expect(step.with?.connector_id).toBe('{{ inputs.connector_id }}');
+  });
 });
 
 describe('Nightshift CI coverage', () => {

@@ -27,7 +27,12 @@ import {
   createAuditNegativeControlEvaluator,
   createAuditPositiveControlRecallEvaluator,
 } from '@kbn/evals-suite-attack-discovery';
-import { collectReviewArtifact, collectWorkerArtifacts, isReviewSettled } from '../collect';
+import {
+  collectReviewArtifact,
+  collectWorkerArtifacts,
+  generationUuidsOf,
+  isReviewSettled,
+} from '../collect';
 import type { CohortRouting } from '../cohort_routing';
 import {
   FLOOR_SCHEDULE_INTERVAL,
@@ -161,16 +166,16 @@ export const failedRowArtifacts = (rowError: string): WorkerArtifacts => ({
 /**
  * Why a runner that reports `completed` still produced nothing to score: it analyzed none of the
  * seeded alerts. The run swallowed whatever stopped it, so its error (when one was read) goes in
- * the explanation. A generation that refused or failed every batch stays a scored `MODEL_FAULT`
- * instead (see `readGenerationFault`).
+ * the explanation. Only a generation the model refused in every batch stays a scored
+ * `MODEL_FAULT` instead (see `readGenerationFault`). Any other batch failure (a broken alert query,
+ * a persistence error, a cause nobody could read) says nothing about the model, so it fails the row.
  */
 const emptyCompletedRunError = (output: WorkerArtifacts): string | undefined => {
   if (
     output.runnerStatus !== 'completed' ||
     output.alertsAnalyzed !== 0 ||
     output.seededAlertCount === 0 ||
-    output.generationFault?.kind === 'refused' ||
-    output.generationFault?.kind === 'failed'
+    output.generationFault?.kind === 'refused'
   ) {
     return undefined;
   }
@@ -512,6 +517,11 @@ export const createEvaluateDataset =
       const errors: unknown[] = [];
       let artifacts: WorkerArtifacts | undefined;
       let seeded: Awaited<ReturnType<typeof seedScenario>> | undefined;
+      // The generation uuids of this row's runner, read off the execution as soon as it returns
+      // so they survive a collect that throws. They are what makes a persisted discovery this
+      // row's when it cites none of the seeded alerts. Stays empty when the runner never returned
+      // (`client.run` threw): nothing is guessed then, and the clean-space checks report the rest.
+      let ownedExecutionUuids: string[] = [];
       try {
         // A failed seed removes its own partial writes; if that removal failed too, the error says
         // so and the final clean-space check reports what is left.
@@ -523,6 +533,7 @@ export const createEvaluateDataset =
           scenario.id === POSITIVE_CHAIN_LARGE_BATCH_SCENARIO_ID
             ? await runWithBatchSize({ client, spaceId, floorWorkflowId })
             : await client.run({ spaceId, floorWorkflowId });
+        ownedExecutionUuids = generationUuidsOf(run);
         artifacts = await collectWorkerArtifacts({
           client,
           esClient,
@@ -584,7 +595,7 @@ export const createEvaluateDataset =
           errors.push(error);
         }
         try {
-          await cleanupSeed({ esClient, seeded });
+          await cleanupSeed({ esClient, seeded, executionUuids: ownedExecutionUuids });
         } catch (error) {
           errors.push(error);
         }

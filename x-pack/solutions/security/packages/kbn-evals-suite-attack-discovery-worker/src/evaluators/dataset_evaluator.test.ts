@@ -27,6 +27,9 @@ jest.mock('../collect', () => ({
   collectWorkerArtifacts: jest.fn(),
   collectReviewArtifact: jest.fn(),
   isReviewSettled: jest.fn(() => true),
+  // Real on purpose: it reads the run the stubbed client returns, which is how the row learns
+  // which discoveries are its own.
+  generationUuidsOf: jest.requireActual('../collect').generationUuidsOf,
 }));
 jest.mock('../seed', () => ({
   assertCleanSpace: jest.fn(),
@@ -678,6 +681,172 @@ describe('createEvaluateDataset', () => {
     });
   });
 
+  describe('the discoveries a row owns at cleanup', () => {
+    const generationStep = (stepId: string, uuids: unknown) => ({
+      stepId,
+      status: 'completed',
+      output: { execution_uuids: uuids },
+    });
+    const runnerReporting = (...steps: Array<ReturnType<typeof generationStep>>) =>
+      (client.run as jest.Mock).mockResolvedValueOnce({
+        execution: { id: 'run-1', status: 'completed', stepExecutions: steps },
+      });
+    const lastCleanup = () => cleanup.mock.calls[cleanup.mock.calls.length - 1]?.[0];
+
+    it('hands the cleanup the uuids the runner reported, from either step that carries them', async () => {
+      runnerReporting(
+        generationStep('run_generation', ['g1', 'g2']),
+        generationStep('emit_result', 'g2, g3')
+      );
+      collect.mockResolvedValue(quietArtifacts());
+      await expect(evaluateRow('benign-batch')).resolves.toBeUndefined();
+      expect(cleanup).toHaveBeenCalledTimes(1);
+      expect(lastCleanup()?.executionUuids).toEqual(['g1', 'g2', 'g3']);
+    });
+
+    it('hands the cleanup no uuids when the runner reported none, never a guess', async () => {
+      collect.mockResolvedValue(quietArtifacts());
+      await expect(evaluateRow('benign-batch')).resolves.toBeUndefined();
+      expect(lastCleanup()?.executionUuids).toEqual([]);
+    });
+
+    it('still hands the cleanup the uuids when collecting the artifacts throws', async () => {
+      runnerReporting(generationStep('run_generation', ['g1']));
+      collect.mockRejectedValue(new Error('collect blew up'));
+      await expect(evaluateRow('benign-batch')).rejects.toThrow(/collect blew up/);
+      expect(lastCleanup()?.executionUuids).toEqual(['g1']);
+    });
+
+    it('still hands the cleanup the uuids when a later step of the row throws', async () => {
+      const seededDiscoveryId = 'a'.repeat(64);
+      seed.mockResolvedValue({
+        runMarker: 'marker',
+        spaceId: 'space',
+        goldIdBySeededId: new Map(),
+        alertCount: 4,
+        openAlertIds: SEEDED_IDS,
+        worldDocs: [],
+        seededDiscoveryId,
+      });
+      runnerReporting(generationStep('run_generation', ['g1']));
+      collect.mockResolvedValue(quietArtifacts());
+      (client.runReview as jest.Mock).mockRejectedValueOnce(new Error('review start failed'));
+      await expect(evaluateRow('seeded-false-positive')).rejects.toThrow(/review start failed/);
+      expect(lastCleanup()?.executionUuids).toEqual(['g1']);
+    });
+
+    describe('through the real cleanup', () => {
+      const EXECUTION_UUID = 'kibana.alert.rule.execution.uuid';
+      const CITED_IDS = 'kibana.alert.attack_discovery.alert_ids';
+      type Discovery = Record<string, unknown> & { _id: string };
+
+      const storeWith = (): Discovery[] => [
+        { _id: 'owned-empty', [EXECUTION_UUID]: 'g1', [CITED_IDS]: [] },
+        { _id: 'owned-foreign', [EXECUTION_UUID]: 'g1', [CITED_IDS]: ['other-run-1'] },
+        { _id: 'cites-run', [EXECUTION_UUID]: 'g0', [CITED_IDS]: ['marker-alert-0'] },
+        { _id: 'unrelated', [EXECUTION_UUID]: 'g9', [CITED_IDS]: ['other-run-2'] },
+      ];
+
+      const matches = (doc: Discovery, query: unknown): boolean => {
+        const { bool } = query as {
+          bool?: { should?: Array<Record<string, Record<string, unknown>>> };
+        };
+        if (bool?.should === undefined) {
+          throw new Error(`unbounded selector: ${JSON.stringify(query)}`);
+        }
+        return bool.should.some((clause) => {
+          if ('ids' in clause) return (clause.ids.values as string[]).includes(doc._id);
+          if ('prefix' in clause) {
+            const [[field, prefix]] = Object.entries(clause.prefix);
+            return ((doc[field] as string[]) ?? []).some((id) => id.startsWith(String(prefix)));
+          }
+          if ('terms' in clause) {
+            const [[field, values]] = Object.entries(clause.terms);
+            return (values as unknown[]).includes(doc[field]);
+          }
+          throw new Error(`unknown clause: ${JSON.stringify(clause)}`);
+        });
+      };
+
+      const discoveryIndex = jest
+        .requireActual('../constants')
+        .attackDiscoveryIndexForSpace('space');
+
+      /** An ES whose discovery index applies the selectors the real cleanup sends. */
+      const storeEs = (store: Discovery[]) => {
+        const deleteByQuery = jest.fn(
+          async ({ index, query }: { index: string; query?: unknown }) => {
+            if (index !== discoveryIndex) return {};
+            const doomed = store.filter((doc) => matches(doc, query));
+            doomed.forEach((doc) => store.splice(store.indexOf(doc), 1));
+            return { deleted: doomed.length, total: doomed.length };
+          }
+        );
+        const esClient = {
+          deleteByQuery,
+          indices: { refresh: jest.fn(async () => ({})) },
+          count: jest.fn(async ({ index, query }: { index: string; query?: unknown }) => ({
+            count: index === discoveryIndex ? store.filter((doc) => matches(doc, query)).length : 0,
+          })),
+        } as unknown as Client;
+        return { esClient, deleteByQuery };
+      };
+
+      const evaluateWith = (esClient: Client) =>
+        createEvaluateDataset({
+          client,
+          evaluators,
+          executorClient: realStyleExecutor(),
+          esClient,
+          fetch: jest.fn() as unknown as HttpHandler,
+          log,
+          routing,
+          floorWorkflowId: 'floor-wf',
+        })({
+          dataset: {
+            name: 'seam',
+            description: 'real-style',
+            examples: [rowFor('benign-batch')],
+          },
+        });
+
+      const ids = (store: Discovery[]) => store.map(({ _id }) => _id);
+
+      beforeEach(() => {
+        cleanup.mockImplementation(jest.requireActual('../seed').cleanupSeed);
+      });
+      afterEach(() => {
+        cleanup.mockReset();
+      });
+
+      it('removes the discoveries the run wrote, citing nothing or foreign alerts, and keeps the rest', async () => {
+        const store = storeWith();
+        const { esClient } = storeEs(store);
+        runnerReporting(generationStep('run_generation', ['g1']));
+        collect.mockResolvedValue(quietArtifacts());
+        await expect(evaluateWith(esClient)).resolves.toBeUndefined();
+        expect(ids(store)).toEqual(['unrelated']);
+      });
+
+      it('does not scan the space when the runner reported no uuids: the owned ones stay', async () => {
+        const store = storeWith();
+        const { esClient, deleteByQuery } = storeEs(store);
+        collect.mockResolvedValue(quietArtifacts());
+        await expect(evaluateWith(esClient)).resolves.toBeUndefined();
+        // Ownership is unknown, so the row cannot claim them; nothing widened into a delete of the space.
+        expect(ids(store)).toEqual(['owned-empty', 'owned-foreign', 'unrelated']);
+        const discoveryQueries = deleteByQuery.mock.calls
+          .filter(([{ index }]) => index === discoveryIndex)
+          .map(([{ query }]) => JSON.stringify(query));
+        expect(discoveryQueries.length).toBeGreaterThan(0);
+        discoveryQueries.forEach((query) => {
+          expect(query).not.toContain('match_all');
+          expect(query).not.toContain(EXECUTION_UUID);
+        });
+      });
+    });
+  });
+
   describe('a runner that completed but analyzed none of the seeded alerts', () => {
     const emptyRun = (overrides: Partial<WorkerArtifacts> = {}) =>
       attackArtifacts({
@@ -727,24 +896,54 @@ describe('createEvaluateDataset', () => {
       });
     });
 
+    it('keeps a generation that refused every batch a scored MODEL_FAULT, not a failed row', async () => {
+      const output = emptyRun({ generationFault: { kind: 'refused', message: 'I cannot help' } });
+      for (const name of ['AlertsRetrieved', 'DiscoveriesPersisted']) {
+        expect(await scoreOf(name, output)).toMatchObject({ score: 0, label: 'MODEL_FAULT' });
+      }
+    });
+
+    it('does not let the gate fail a dataset whose generation refused every batch', async () => {
+      collect.mockResolvedValue(
+        emptyRun({ generationFault: { kind: 'refused', message: 'I cannot help' } })
+      );
+      await expect(evaluateRow('positive-chain-with-noise')).resolves.toBeUndefined();
+    });
+
+    // `failed` is every batch failure that is not a model refusal: a broken alert query, a
+    // persistence error, or a failure whose cause could not be read. None of them says anything
+    // about the model, so none may turn into a green row.
     it.each([
-      ['refused', 'I cannot help'],
-      ['failed', 'connector returned 500'],
-    ] as const)(
-      'keeps a generation that %s every batch a scored MODEL_FAULT, not a failed row',
-      async (kind, message) => {
-        const output = emptyRun({ generationFault: { kind, message } });
-        for (const name of ['AlertsRetrieved', 'DiscoveriesPersisted']) {
-          expect(await scoreOf(name, output)).toMatchObject({ score: 0, label: 'MODEL_FAULT' });
+      ['an alert query error', 'search_phase_execution_exception: alerts index missing'],
+      [
+        'a persistence error',
+        'failed to persist attack discovery: version_conflict_engine_exception',
+      ],
+      ['an unreadable cause', undefined],
+    ])(
+      'fails the row when every batch failed with %s, naming the cause when one was read',
+      async (_label, message) => {
+        const output = emptyRun({ generationFault: { kind: 'failed', message } });
+        for (const name of ['AlertsRetrieved', 'DiscoveriesPersisted', 'RunnerCompleted']) {
+          expect(await scoreOf(name, output)).toMatchObject({
+            score: null,
+            label: 'ROW_FAILED',
+            explanation: `runner completed but analyzed 0 alerts, ${seededAlertCount} seeded${
+              message ? `: ${message}` : ''
+            }`,
+          });
         }
       }
     );
 
-    it('does not let the gate fail a dataset whose generation failed every batch', async () => {
+    it('turns the dataset red through the gate when every batch failed for a non-model reason', async () => {
       collect.mockResolvedValue(
-        emptyRun({ generationFault: { kind: 'failed', message: 'connector returned 500' } })
+        emptyRun({ generationFault: { kind: 'failed', message: 'alerts query failed' } })
       );
-      await expect(evaluateRow('positive-chain-with-noise')).resolves.toBeUndefined();
+      const error = await rejectionOf(evaluateRow('positive-chain-with-noise'));
+      expect(error.message).toMatch(
+        /positive-chain-with-noise: \d+ code evaluator\(s\) ROW_FAILED/
+      );
     });
 
     it('leaves rows without an alert count, or with nothing seeded, to the regular checks', async () => {
