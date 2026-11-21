@@ -67,10 +67,10 @@ node scripts/evals init
 
 #### Loading datasets from Golden Cluster
 
-Use `--datasets-profile` when dataset credentials should come from the shared golden cluster:
+Use `--evaluations-kbn-profile` when the Kibana holding datasets, scores and results should come from the shared golden cluster:
 
 ```bash
-node scripts/evals start --suite agent-builder --datasets-profile dev-vault
+node scripts/evals start --suite agent-builder --evaluations-kbn-profile dev-vault
 ```
 
 #### Filtering, model selection, judge, repetitions, concurrency
@@ -220,7 +220,7 @@ results and triage.
 Every run logs a link to its experiments in the evals UI
 (`/app/management/ai/evals/experiments/<experiment-id>?execution_id=<execution-id>`) after the
 score table. The link points at the Kibana that received the scores: `EVAL_KBN_URL` when set
-(by CI, `--evaluations-kbn-url`, or the datasets profile's `evaluationsKbn.url`; `dev-vault` and a
+(by CI, `--evaluations-kbn-url`, or the evaluations-kbn profile's `evaluationsKbn.url`; `dev-vault` and a
 synced `config.json` point it at the golden cluster), otherwise the Kibana Scout ran against. On Buildkite (PR, weekly and on-demand builds) the same
 links are added to a `kbn-evals-experiments-<suite>` build annotation, one row per model and
 shard, so they show at the top of the build. Logged URLs never include credentials.
@@ -369,7 +369,7 @@ Give the suite its own Vault secret with `vaultSecret`, so rotating its credenti
 | No `vaultSecret` (any place) | The general config (`--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI)                 |
 
 CI forwards the initial hook input as `KBN_EVALS_SCOUT_HOOK_CONFIG_B64`. The native `evals run`
-command reuses it when no datasets profile is selected, so both hook invocations see the same
+command reuses it when no evaluations-kbn profile is selected, so both hook invocations see the same
 suite secret without another Vault read. Explicit profiles retain their own configuration.
 
 Manage the secret with the Vault scripts' `--suite` flag, which keeps the local copy in a gitignored `vault/config.json` next to the suite's `playwright.config.ts` (copy `vault/config.example.json` to start):
