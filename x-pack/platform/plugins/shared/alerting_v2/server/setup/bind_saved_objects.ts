@@ -16,6 +16,12 @@ import {
   ActionPolicySavedObjectServiceScopedToken,
 } from '../lib/services/action_policy_saved_object_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
+import { ImportConfigSavedObjectService } from '../lib/services/import_config_saved_object_service/import_config_saved_object_service';
+import {
+  ImportConfigSavedObjectsClientToken,
+  ImportConfigSavedObjectServiceInternalToken,
+  ImportConfigSavedObjectServiceScopedToken,
+} from '../lib/services/import_config_saved_object_service/tokens';
 import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { MaintenanceWindowService } from '../lib/services/maintenance_window_service/maintenance_window_service';
 import {
@@ -33,6 +39,7 @@ import { EncryptedSavedObjectsClientToken } from '../lib/dispatcher/steps/dispat
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
   ACTION_POLICY_SAVED_OBJECT_TYPE,
+  IMPORT_CONFIG_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../common/saved_object_types';
@@ -41,8 +48,8 @@ import type { AlertingServerStartDependencies } from '../types';
 
 /**
  * Saved-object client factories and the saved-object-backed services (rules,
- * action policies, maintenance windows, api keys), in both request-scoped and
- * internal (singleton) flavors.
+ * action policies, import configs, maintenance windows, api keys), in both
+ * request-scoped and internal (singleton) flavors.
  */
 export function bindSavedObjects({ bind }: ContainerModuleLoadOptions) {
   bind(RuleSavedObjectsClientToken)
@@ -109,6 +116,25 @@ export function bindSavedObjects({ bind }: ContainerModuleLoadOptions) {
         esoClient
       ),
     [CoreStart('savedObjects'), SpacesService, EncryptedSavedObjectsClientToken]
+  );
+
+  bind(ImportConfigSavedObjectsClientToken)
+    .toResolvedValue(
+      (savedObjectsClientFactory) =>
+        savedObjectsClientFactory({ includedHiddenTypes: [IMPORT_CONFIG_SAVED_OBJECT_TYPE] }),
+      [SavedObjectsClientFactory]
+    )
+    .inRequestScope();
+
+  bind(ImportConfigSavedObjectService).toSelf().inRequestScope();
+  bind(ImportConfigSavedObjectServiceScopedToken).toService(ImportConfigSavedObjectService);
+  bind(ImportConfigSavedObjectServiceInternalToken).toResolvedValue(
+    (savedObjects, spacesService) =>
+      new ImportConfigSavedObjectService(
+        savedObjects.createInternalRepository([IMPORT_CONFIG_SAVED_OBJECT_TYPE]),
+        spacesService
+      ),
+    [CoreStart('savedObjects'), SpacesService]
   );
 
   bind(ApiKeyServiceSavedObjectsClientToken).toResolvedValue(
