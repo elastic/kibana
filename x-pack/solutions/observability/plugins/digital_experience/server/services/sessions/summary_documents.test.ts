@@ -218,23 +218,19 @@ describe('toSessionDocuments', () => {
     expect(document).toMatchObject({ frustration_targets: ['#buy'], frustration_pages: ['/'] });
   });
 
-  it('keeps the first frustrated selectors and pages of a session that has more than the cap', () => {
+  it('keeps the lowest sorted frustrated selectors and pages of a session that has more than the cap', () => {
+    const indices = Array.from({ length: 30 }, (_, index) => String(index).padStart(2, '0'));
+    const unsorted = [...indices].reverse();
     const [document] = toSessionDocuments([
       summaryRow({
-        frustration_targets: Array.from({ length: 30 }, (_, index) => `#target-${index}`),
-        frustration_urls: Array.from(
-          { length: 30 },
-          (_, index) => `https://shop.example.com/page-${index}?q=1`
-        ),
+        frustration_targets: unsorted.map((index) => `#target-${index}`),
+        frustration_urls: unsorted.map((index) => `https://shop.example.com/page-${index}?q=1`),
       }),
     ]);
 
-    expect(document.frustration_targets).toEqual(
-      Array.from({ length: SESSIONS_FRUSTRATION_VALUES }, (_, index) => `#target-${index}`)
-    );
-    expect(document.frustration_pages).toEqual(
-      Array.from({ length: SESSIONS_FRUSTRATION_VALUES }, (_, index) => `/page-${index}`)
-    );
+    const kept = indices.slice(0, SESSIONS_FRUSTRATION_VALUES);
+    expect(document.frustration_targets).toEqual(kept.map((index) => `#target-${index}`));
+    expect(document.frustration_pages).toEqual(kept.map((index) => `/page-${index}`));
   });
 
   it('skips rows without a session, an application or times', () => {

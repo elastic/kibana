@@ -93,7 +93,7 @@ const signalLabel = (signal: SessionSignal): string => {
       });
     case 'frustration':
       return i18n.translate('xpack.digitalExperience.sessionDetail.rail.frustration', {
-        defaultMessage: '{count} frustrated',
+        defaultMessage: '{count, plural, one {# frustration signal} other {# frustration signals}}',
         values: { count: signal.count },
       });
     case 'bounced':

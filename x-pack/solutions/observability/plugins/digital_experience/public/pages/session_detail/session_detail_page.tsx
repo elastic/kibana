@@ -102,7 +102,7 @@ const badgeLabel = (signal: SessionSignal): string => {
       });
     case 'frustration':
       return i18n.translate('xpack.digitalExperience.sessionDetail.badges.frustration', {
-        defaultMessage: '{count, plural, one {# frustrated click} other {# frustrated clicks}}',
+        defaultMessage: '{count, plural, one {# frustration signal} other {# frustration signals}}',
         values: { count: signal.count },
       });
     case 'bounced':

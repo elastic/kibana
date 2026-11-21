@@ -394,14 +394,14 @@ so.
 
 The summary keeps `rage_click_count`, `dead_click_count`, `error_click_count` and their sum
 `frustration_count`, which the list's filter, sort and KPI read, and `frustration_targets` and
-`frustration_pages`, the distinct selectors and page paths of the signals (up to 20 each), which the
+`frustration_pages`, the distinct selectors and page paths of the signals (up to 20 each, the lowest sorted), which the
 Overview panel's links filter by with an exact `term`. A summary without them reads as 0.
 
 The index is `dynamic: false` and `SESSIONS_VERSION` was not bumped, as a second version would list
 every session twice (readers span `digital-experience-sessions-browser-*`). The new fields are only
-mapped in indices created after this change: delete an existing index to have the task rebuild it
-with them, or its summaries show 0 and the frustration filters match nothing until they age out
-(30 days).
+mapped in indices created after this change. On an existing index, rebuilt summaries still carry
+the counts in `_source`, so the table and detail show real numbers, while the filter, sort, KPI
+and drill-down find nothing until the index is deleted for the task to rebuild it.
 
 For local data, the `digital_experience_browser` synthtrace scenario emits these events by default
 (`--scenarioOpts frustration=false` turns them off).

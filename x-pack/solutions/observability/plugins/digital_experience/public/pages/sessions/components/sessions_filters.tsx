@@ -201,7 +201,15 @@ export function SessionsFilters({
             hasActiveFilters={state.withFrustration}
             numFilters={sessionsWithFrustration}
             onClick={() =>
-              onChange({ withFrustration: state.withFrustration ? undefined : 'true' })
+              onChange(
+                state.withFrustration
+                  ? {
+                      withFrustration: undefined,
+                      frustrationTarget: undefined,
+                      frustrationPage: undefined,
+                    }
+                  : { withFrustration: 'true' }
+              )
             }
           >
             {i18n.translate('xpack.digitalExperience.sessions.filters.withFrustrationLabel', {

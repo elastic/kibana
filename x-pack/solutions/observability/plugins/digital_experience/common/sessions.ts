@@ -62,6 +62,8 @@ export const SESSIONS_JOURNEY_SIZE = 10;
 export const SESSIONS_JOURNEY_URL_CANDIDATES = 3 * SESSIONS_JOURNEY_SIZE;
 /** Frustrated element selectors and page paths kept per session. */
 export const SESSIONS_FRUSTRATION_VALUES = 20;
+/** The longest value the summaries index as a keyword (`ignore_above`). */
+export const SESSIONS_MAX_KEYWORD_LENGTH = 1024;
 
 export const SESSION_SORT_FIELDS = [
   'start_time',
@@ -90,7 +92,7 @@ export const SESSIONS_LIST_MAX_FACET_LENGTHS = {
   entryPage: 1024,
 } as const;
 /** The longest frustrated element selector or page path the list filters by: the summaries' keyword `ignore_above`. */
-export const SESSIONS_LIST_MAX_FRUSTRATION_FILTER_LENGTH = 1024;
+export const SESSIONS_LIST_MAX_FRUSTRATION_FILTER_LENGTH = SESSIONS_MAX_KEYWORD_LENGTH;
 
 export type SessionWebVitals = Record<CoreWebVital, number | null>;
 

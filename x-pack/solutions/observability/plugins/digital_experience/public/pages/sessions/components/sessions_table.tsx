@@ -377,7 +377,11 @@ export function SessionsTable({
                 'xpack.digitalExperience.sessions.table.frustrationBreakdown',
                 {
                   defaultMessage: '{rage} rage, {dead} dead, {error} error clicks',
-                  values: { rage: rageClicks, dead: deadClicks, error: errorClicks },
+                  values: {
+                    rage: formatNumber(rageClicks),
+                    dead: formatNumber(deadClicks),
+                    error: formatNumber(errorClicks),
+                  },
                 }
               )}
             >

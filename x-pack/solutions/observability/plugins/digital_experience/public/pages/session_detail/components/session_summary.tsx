@@ -98,7 +98,7 @@ export function SessionSummary({
       breakdown:
         session.frustration.total === 0
           ? i18n.translate('xpack.digitalExperience.sessionDetail.summary.frustrationHint', {
-              defaultMessage: 'Needs EDOT Browser with frustration detection.',
+              defaultMessage: 'None. Reported by EDOT Browser with frustration detection.',
             })
           : i18n.translate('xpack.digitalExperience.sessionDetail.summary.frustrationBreakdown', {
               defaultMessage: '{rage} rage, {dead} dead, {error} error clicks',

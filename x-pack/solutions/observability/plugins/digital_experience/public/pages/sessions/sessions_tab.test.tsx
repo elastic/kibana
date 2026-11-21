@@ -629,6 +629,23 @@ describe('SessionsTab', () => {
     expect(searchParams(history).withFrustration).toBe('true');
   });
 
+  it('drops the element and page filters with the Frustrated toggle', async () => {
+    respondWith();
+    const history = renderTab({
+      search: '&withFrustration=true&frustrationTarget=%23pay&frustrationPage=%2Fcheckout',
+    });
+
+    fireEvent.click(await screen.findByTestId('digitalExperienceSessionsFrustrationFilter'));
+
+    expect(searchParams(history)).toEqual({ rangeFrom: 'now-15m', rangeTo: 'now', source: 'otel' });
+    expect(
+      screen.queryByTestId('digitalExperienceSessionsFrustrationTarget')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('digitalExperienceSessionsFrustrationPage')
+    ).not.toBeInTheDocument();
+  });
+
   it('clears the element and page together with the other filters', async () => {
     respondWith();
     const history = renderTab({ search: '&frustrationTarget=%23pay&frustrationPage=%2Fcheckout' });

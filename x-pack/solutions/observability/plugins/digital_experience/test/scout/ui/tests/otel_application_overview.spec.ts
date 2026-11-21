@@ -85,6 +85,9 @@ test.describe(
       await expect(page).toHaveURL(
         new RegExp(`frustrationTarget=${encodeURIComponent(element.cssSelector)}`)
       );
+      await expect(page.getByTestId('digitalExperienceSessionsFrustrationTarget')).toHaveText(
+        `Element: ${element.cssSelector}`
+      );
     });
 
     test('shows the top errors on the Overview, linked to the Errors tab', async ({

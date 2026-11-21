@@ -14,6 +14,7 @@ import {
   SESSIONS_INDEX_PATTERN,
   SESSIONS_INDEX_TEMPLATE_NAME,
   SESSIONS_MANAGED_BY,
+  SESSIONS_MAX_KEYWORD_LENGTH,
   SESSIONS_VERSION,
 } from '../../../common/sessions';
 
@@ -59,8 +60,10 @@ export interface SessionDocument {
   has_replay?: boolean;
   /**
    * EDOT Browser frustration signals. Mapped without a `SESSIONS_VERSION` bump: summaries written
-   * before them have none, which readers take as 0. An index created before them doesn't map them:
-   * delete it to have the task rebuild it (only pre-release setups have one).
+   * before them have none, which readers take as 0. An index created before them doesn't map them
+   * (`dynamic: false`): rebuilt summaries still carry the counts in `_source`, so the table and
+   * detail show them, but the filter, sort, KPI and drill-down find nothing until the index is
+   * deleted for the task to rebuild it (only pre-release setups have one).
    */
   rage_click_count?: number;
   dead_click_count?: number;
@@ -95,9 +98,7 @@ export interface SessionDocument {
  * whole bulk request. A longer value stays in `_source` but is not indexed, so it drops out of
  * search and the facets instead of stalling every summary behind it.
  */
-const MAX_KEYWORD_LENGTH = 1024;
-
-const keyword = { type: 'keyword', ignore_above: MAX_KEYWORD_LENGTH } as const;
+const keyword = { type: 'keyword', ignore_above: SESSIONS_MAX_KEYWORD_LENGTH } as const;
 const count = { type: 'long' } as const;
 
 const frustrationMappings = {

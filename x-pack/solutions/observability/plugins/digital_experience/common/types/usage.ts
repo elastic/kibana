@@ -46,7 +46,7 @@ export interface FrustratedElement extends FrustrationCounts {
   tagName: string | null;
   /** Distinct sessions with a signal on the element. */
   sessions: number;
-  /** The page path with the most signals on the element. */
+  /** The path of the full URL with the most signals on the element; URLs differing only by query aren't combined. */
   topPage: string | null;
 }
 

@@ -116,9 +116,10 @@ const BADGE_TYPES: Array<{
   },
 ];
 
-const subtitleOf = (total: string, sessions: string) => {
+const subtitleOf = (total: number, sessions: number) => {
   return i18n.translate('xpack.digitalExperience.overview.frustration.subtitle', {
-    defaultMessage: '{total} signals in {sessions} sessions',
+    defaultMessage:
+      '{total, plural, one {# signal} other {# signals}} in {sessions, plural, one {# session} other {# sessions}}',
     values: { total, sessions },
   });
 };
@@ -144,7 +145,7 @@ const topPageLabel = (page: string) => {
 
 const sessionsLinkLabel = (name: string) => {
   return i18n.translate('xpack.digitalExperience.overview.frustration.sessionsLinkLabel', {
-    defaultMessage: 'Open the sessions with frustration on {name}',
+    defaultMessage: 'Open sessions with frustration on {name}',
     values: { name },
   });
 };
@@ -261,7 +262,6 @@ export function FrustrationPanel({
   /** The sessions of the application, narrowed by the given filters. */
   sessionsHref: (query: SessionsListUrlQuery) => string;
 }) {
-  const { formatNumber } = useFormatters();
   const [tab, setTab] = useState<FrustrationTab>('elements');
   const isEmpty = frustration.total === 0;
 
@@ -305,11 +305,7 @@ export function FrustrationPanel({
   return (
     <DataPanel
       title={TITLE}
-      subtitle={
-        isEmpty
-          ? undefined
-          : subtitleOf(formatNumber(frustration.total), formatNumber(frustration.sessions))
-      }
+      subtitle={isEmpty ? undefined : subtitleOf(frustration.total, frustration.sessions)}
       actions={
         !isEmpty && (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

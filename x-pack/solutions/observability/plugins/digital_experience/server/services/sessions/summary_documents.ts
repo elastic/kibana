@@ -36,9 +36,9 @@ const toJourney = (urls: string[]): string[] =>
       : journey;
   }, []);
 
-/** The first `SESSIONS_FRUSTRATION_VALUES` distinct values, in the order given. */
+/** Up to `SESSIONS_FRUSTRATION_VALUES` distinct values, the lowest sorted ones, so a rebuild keeps the same. */
 const distinctCapped = (values: string[]): string[] =>
-  [...new Set(values)].slice(0, SESSIONS_FRUSTRATION_VALUES);
+  [...new Set(values)].sort().slice(0, SESSIONS_FRUSTRATION_VALUES);
 
 const toFrustrationPages = (urls: string[]): string[] =>
   distinctCapped(urls.flatMap((url) => toPagePath(url) ?? []));

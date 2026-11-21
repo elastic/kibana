@@ -496,13 +496,50 @@ describe('SessionDetailPage', () => {
     ).not.toHaveTextContent('Needs EDOT Browser');
   });
 
-  it('hints that frustration needs EDOT Browser when the session has none', async () => {
+  it('counts the frustration signals of the session, not clicks, in its header and the rail', async () => {
+    const base = withFrustration();
+    // The header shows two badges at most, and the others collapse.
+    const frustrated = {
+      ...base,
+      session: { ...base.session, jsErrorCount: 0, failedRequestCount: 0 },
+    };
+    mockDetail.mockResolvedValue(frustrated);
+    mockList.mockResolvedValue({
+      sessions: [
+        {
+          ...listedSession('abcdef123456', 'jane@example.com'),
+          frustration: frustrated.session.frustration,
+        },
+        {
+          ...listedSession('first111', 'sam@example.com'),
+          frustration: { rageClicks: 1, deadClicks: 0, errorClicks: 0, total: 1 },
+        },
+      ],
+      total: 2,
+      page: 0,
+      perPage: 25,
+    });
+    renderPage();
+
+    expect(
+      await screen.findByTestId('digitalExperienceSessionBadge-frustration')
+    ).toHaveTextContent('2 frustration signals');
+    const rail = await screen.findByTestId('digitalExperienceSessionsRail');
+    expect(
+      await within(rail).findByTestId('digitalExperienceSessionsRailItem-abcdef123456')
+    ).toHaveTextContent('2 frustration signals');
+    expect(
+      within(rail).getByTestId('digitalExperienceSessionsRailItem-first111')
+    ).toHaveTextContent('1 frustration signal');
+  });
+
+  it('says a session without frustration signals was reported by EDOT Browser with detection', async () => {
     mockDetail.mockResolvedValue(detail());
     renderPage();
 
     await screen.findByTestId('digitalExperienceSessionStat-frustration');
     const hint = screen.getByTestId('digitalExperienceSessionStatBreakdown-frustration');
-    expect(hint).toHaveTextContent('Needs EDOT Browser with frustration detection.');
+    expect(hint).toHaveTextContent('None. Reported by EDOT Browser with frustration detection.');
     expect(hint).not.toHaveTextContent('rage');
   });
 

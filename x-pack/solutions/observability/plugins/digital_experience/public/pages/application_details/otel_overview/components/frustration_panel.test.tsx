@@ -97,6 +97,20 @@ describe('FrustrationPanel', () => {
     expect(screen.getByText('21 signals in 20 sessions')).toBeInTheDocument();
   });
 
+  it('writes one signal in one session in the singular', () => {
+    renderPanel({ frustration: { ...FRUSTRATION, total: 1, sessions: 1 } });
+
+    expect(screen.getByText('1 signal in 1 session')).toBeInTheDocument();
+  });
+
+  it('names a sessions link with the text it shows', () => {
+    renderPanel();
+
+    expect(
+      screen.getByTestId('digitalExperienceOverviewFrustrationSessionsLink-#checkout')
+    ).toHaveAccessibleName('Open sessions with frustration on #checkout');
+  });
+
   it('shows a row per element with its tag, page and exact sessions', () => {
     renderPanel();
 
