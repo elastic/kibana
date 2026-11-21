@@ -274,7 +274,7 @@ const context = (...items: string[]): ComponentsNode[] => {
 
 const openInvestigation = (url: string): ComponentsNode => ({
   type: 'actions',
-  buttons: [{ label: 'View Full Investigation', url, primary: true }],
+  buttons: [{ label: 'View Full Investigation', url, style: 'primary' }],
 });
 
 const timedOutLabel = (): string =>
