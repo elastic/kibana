@@ -1870,6 +1870,55 @@ describe('round 8 regression: per-column self-judged and exclusion scoping', () 
     }
   );
 
+  // The control for the case above: an admitted judged grade the column selects keeps the
+  // cell a real ranked score whose value draws on that grade, while the unrelated
+  // `Relevance` rejection stays recorded on the dataset.
+  it('ranks an allowlisted column on its admitted selected judged grade when only an unrelated grade was rejected', () => {
+    const gradedCfg = parseMatrixConfig({
+      columns: [
+        {
+          id: 'answer',
+          label: 'Answer',
+          suites: ['suite-a'],
+          examplePrefixes: ['alert'],
+          evaluators: ['FinalAnswerPresent', 'Groundedness'],
+          weight: 1,
+        },
+      ],
+      models: [{ id: 'model-x', label: 'Model X' }],
+    });
+    const admitted: AggregatedModelScores[] = [
+      {
+        modelId: 'model-x',
+        suites: [
+          {
+            suiteId: 'suite-a',
+            experimentId: 'run-10',
+            datasets: [
+              {
+                datasetId: 'prefix:alert',
+                datasetName: 'alert',
+                excludedNonEis: 4,
+                rejectedEvaluators: ['Relevance'],
+                evaluators: [
+                  { evaluatorName: 'FinalAnswerPresent', mean: 1, count: 4 },
+                  { evaluatorName: 'Groundedness', mean: 0.5, count: 4 },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    const cell = buildMatrix(admitted, gradedCfg).proprietary[0].cells.answer;
+    expect(cell.kind).toBe('score');
+    if (cell.kind === 'score') {
+      // 1 and 0.5 with equal weights scale to the 0-10 range as 7.5: the value must
+      // depend on the admitted judged grade, not just the code check.
+      expect(cell.value).toBe(7.5);
+    }
+  });
+
   // Rejections are matched by evaluator, so a rejected grade the column does not select
   // cannot hide the column's valid score.
   it.each([
