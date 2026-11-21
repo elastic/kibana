@@ -95,6 +95,26 @@ describe('validateToolCalls', () => {
     ).toThrowErrorMatchingInlineSnapshot(`"Failed parsing arguments for my_function"`);
   });
 
+  it('includes the JSON parse error in errorsText when the arguments are not valid JSON', () => {
+    const args = '{"verdict": "unclear", "timeline": \n<parameter name="window">{}}';
+    let thrown: unknown;
+    try {
+      validateToolCalls({
+        logger,
+        toolCalls: [{ function: { name: 'my_function', arguments: args }, toolCallId: '1' }],
+        tools: { my_function: { description: 'description' } },
+      });
+    } catch (error) {
+      thrown = error;
+    }
+
+    if (!(thrown instanceof Error) || !isToolValidationError(thrown)) {
+      throw new Error('expected a tool validation error');
+    }
+    expect(thrown.meta.arguments).toBe(args);
+    expect(thrown.meta.errorsText).toContain(`Unexpected token '<'`);
+  });
+
   it('throws an error if the function call has invalid arguments', () => {
     function validate() {
       validateToolCalls({
