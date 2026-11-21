@@ -5,10 +5,8 @@
  * 2.0.
  */
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
-import type {
-  OTLPExporterNodeConfigBase,
-  createOtlpNetworkExportDelegate,
-} from '@opentelemetry/otlp-exporter-base';
+import type { createOtlpNetworkExportDelegate } from '@opentelemetry/otlp-exporter-base';
+import type { OTLPExporterNodeConfigBase } from '@opentelemetry/otlp-exporter-base/node-http';
 
 interface Delegate {
   _serializer: Parameters<typeof createOtlpNetworkExportDelegate>[1];

@@ -1460,7 +1460,6 @@
     "@openfeature/server-sdk": "1.23.0",
     "@openfeature/web-sdk": "1.10.0",
     "@opentelemetry/api": "1.10.0",
-    "@opentelemetry/api-logs": "0.223.2",
     "@opentelemetry/context-async-hooks": "3.1.0",
     "@opentelemetry/core": "3.1.0",
     "@opentelemetry/exporter-logs-otlp-grpc": "0.301.0",

@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@opentelemetry/exporter-trace-otlp-grpc');
-jest.mock('@opentelemetry/exporter-trace-otlp-http');
-jest.mock('@opentelemetry/exporter-trace-otlp-proto');
+jest.mock('@opentelemetry/exporter-trace-otlp-grpc', () => ({
+  OTLPTraceExporter: jest.fn(),
+}));
+jest.mock('@opentelemetry/exporter-trace-otlp-http', () => ({
+  OTLPTraceExporter: jest.fn(),
+}));
+jest.mock('@opentelemetry/exporter-trace-otlp-proto', () => ({
+  OTLPTraceExporter: jest.fn(),
+}));
 
 import { OTLPTraceExporter as OTLPTraceExporterGRPC } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { OTLPTraceExporter as OTLPTraceExporterHTTP } from '@opentelemetry/exporter-trace-otlp-http';
