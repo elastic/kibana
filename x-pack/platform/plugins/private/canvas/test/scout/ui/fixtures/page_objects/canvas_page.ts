@@ -325,34 +325,12 @@ export class CanvasPage {
     return this.page.testSubj.locator(`embeddablePanelHoverActions-${title.replace(/\s/g, '')}`);
   }
 
-  /** Open the context menu for an embeddable panel. */
-  async openPanelContextMenu(title?: string) {
-    const wrapper = this.panelHoverActions(title);
-    await wrapper.scrollIntoViewIfNeeded();
-    await wrapper.hover();
-    const contextMenuOpen = this.page.testSubj.locator('embeddablePanelContextMenuOpen');
-    if (await contextMenuOpen.isVisible()) {
-      return;
-    }
-    await wrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]').click();
-    await contextMenuOpen.waitFor({ state: 'visible' });
-  }
-
-  /**
-   * Click a panel action, preferring the hover action if it is present and
-   * falling back to the context menu otherwise (mirrors FTR `clickPanelAction`).
-   */
+  /** Click a panel action from the panel's hover actions bar. */
   async clickPanelAction(actionTestSubj: string, title?: string) {
     const wrapper = this.panelHoverActions(title);
     await wrapper.scrollIntoViewIfNeeded();
     await wrapper.hover();
-    const actionInWrapper = wrapper.locator(`[data-test-subj="${actionTestSubj}"]`);
-    if (await actionInWrapper.isVisible()) {
-      await actionInWrapper.click();
-      return;
-    }
-    await this.openPanelContextMenu(title);
-    await this.page.testSubj.locator(actionTestSubj).click();
+    await wrapper.locator(`[data-test-subj="${actionTestSubj}"]`).click();
   }
 
   /** Click the "Edit" panel action to open the embeddable's editor (inline or full). */
