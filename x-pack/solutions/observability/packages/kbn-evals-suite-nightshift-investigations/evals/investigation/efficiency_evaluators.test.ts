@@ -10,11 +10,12 @@ import {
   decisionTreesAccessedEvaluator,
   latencySecondsEvaluator,
   outputTokensEvaluator,
+  sandboxEgressDeniedEvaluator,
   toolCallsTotalEvaluator,
   uncachedInputTokensEvaluator,
 } from './efficiency_evaluators';
 import type { InvestigationExample, InvestigationTaskOutput } from './types';
-import { countToolCalls, extractUsage } from './usage';
+import { countSandboxEgressDenials, countToolCalls, extractUsage } from './usage';
 
 const example = {
   input: { question: 'Why?' },
@@ -66,6 +67,152 @@ describe('countToolCalls', () => {
   });
 });
 
+describe('countSandboxEgressDenials', () => {
+  const bash = (results: unknown[]) => ({
+    type: 'tool_call',
+    tool_id: 'nightshift_sandbox_bash',
+    params: {},
+    results,
+  });
+  const refusedTunnel = {
+    type: 'error',
+    data: {
+      message:
+        "Command exited with code 128.\nstderr:\nfatal: unable to access 'https://github.com/open-telemetry/opentelemetry-demo.git/': CONNECT tunnel failed, response 403\n",
+    },
+  };
+
+  it('counts sandbox commands the egress firewall refused, whatever their exit code', () => {
+    const rounds = [
+      {
+        steps: [
+          bash([refusedTunnel]),
+          // A refused clone followed by more commands can still exit 0.
+          bash([
+            {
+              type: 'other',
+              data: {
+                stdout: '',
+                stderr: 'fatal: ... CONNECT tunnel failed, response 403',
+                exit_code: 0,
+              },
+            },
+          ]),
+          bash([
+            { type: 'other', data: { stdout: '{"error":"sandbox_egress_denied"}', exit_code: 0 } },
+          ]),
+          bash([{ type: 'other', data: { stdout: 'ok', exit_code: 0 } }]),
+        ],
+      },
+      {
+        steps: [
+          { ...refusedTunnel, type: 'tool_call', tool_id: 'other_tool', results: [refusedTunnel] },
+        ],
+      },
+    ] as unknown as ConversationRound[];
+    expect(countSandboxEgressDenials(rounds)).toBe(3);
+  });
+
+  it('counts requests the firewall refused after letting the tunnel through', () => {
+    const http403 = 'The requested URL returned error: 403';
+    const command = (text: string, stderr: string) => ({
+      ...bash([{ type: 'other', data: { stdout: '', stderr, exit_code: 22 } }]),
+      params: { command: text },
+    });
+    const rounds = [
+      {
+        steps: [
+          // git names the refused URL.
+          bash([
+            {
+              type: 'error',
+              data: {
+                message: `Command exited with code 128.\nstderr:\nfatal: unable to access 'https://github.com/elastic/beats/': ${http403}\n`,
+              },
+            },
+          ]),
+          // `curl -f` doesn't, so the command has to request github.com, quoted or not.
+          command('curl -f https://github.com/elastic/kibana/issues/1', `curl: (22) ${http403}`),
+          command(
+            `cd /tmp && curl -sSf "https://github.com/elastic/kibana/pulls" | head`,
+            `curl: (22) ${http403}`
+          ),
+          // An explicit port is the same host, and operators need no spaces around them.
+          command(
+            'cd /tmp&&curl -f 2>&1 https://github.com:443/elastic/kibana/issues',
+            `curl: (22) ${http403}`
+          ),
+          bash([
+            {
+              type: 'error',
+              data: {
+                message: `fatal: unable to access 'https://github.com:443/elastic/beats/': ${http403}\n`,
+              },
+            },
+          ]),
+        ],
+      },
+    ] as unknown as ConversationRound[];
+    expect(countSandboxEgressDenials(rounds)).toBe(5);
+  });
+
+  it('follows a curl command across backslash-newline continuations', () => {
+    const rounds = [
+      {
+        steps: [
+          {
+            ...bash([
+              {
+                type: 'other',
+                data: { stderr: 'curl: (22) The requested URL returned error: 403', exit_code: 22 },
+              },
+            ]),
+            params: { command: 'curl -sSf \\\n  https://github.com/elastic/kibana/issues' },
+          },
+        ],
+      },
+    ] as unknown as ConversationRound[];
+    expect(countSandboxEgressDenials(rounds)).toBe(1);
+  });
+
+  it("doesn't count another host's 403 as the firewall's", () => {
+    const http403 = 'The requested URL returned error: 403';
+    const command = (text: string, stderr: string) => ({
+      ...bash([{ type: 'other', data: { stdout: '', stderr, exit_code: 22 } }]),
+      params: { command: text },
+    });
+    const rounds = [
+      {
+        steps: [
+          // A connector's cluster answering 403 is a permission error, not the firewall.
+          command(
+            'curl -f -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" "$CONNECTOR_CONFIG_URL/_search"',
+            `curl: (22) ${http403}`
+          ),
+          // Even when the request body mentions a github.com URL.
+          command(
+            `curl -f "$CONNECTOR_CONFIG_URL/_query" -d '{"query":"FROM logs-* | WHERE url.full == \\"https://github.com/elastic/kibana\\""}'`,
+            `curl: (22) ${http403}`
+          ),
+          // curl and a github.com URL in different commands of one line.
+          command(
+            'echo https://github.com/elastic/kibana;curl -f "$CONNECTOR_CONFIG_URL/_search"',
+            `curl: (22) ${http403}`
+          ),
+          // A host that only starts with github.com is another host.
+          command('curl -f https://github.com.example.net/x', `curl: (22) ${http403}`),
+          // git refused by another host is that host's answer.
+          command(
+            'git clone https://git.example.com/repo',
+            `fatal: unable to access 'https://git.example.com/repo/': ${http403}`
+          ),
+        ],
+      },
+    ] as unknown as ConversationRound[];
+    expect(countSandboxEgressDenials(rounds)).toBe(0);
+  });
+});
+
 describe('efficiency evaluators', () => {
   const usage = {
     input_tokens: 1000,
@@ -83,6 +230,12 @@ describe('efficiency evaluators', () => {
     expect((await toolCallsTotalEvaluator.evaluate(params)).score).toBe(9);
   });
 
+  it('scores sandbox commands the egress firewall refused', async () => {
+    expect(
+      (await sandboxEgressDeniedEvaluator.evaluate(run({ sandbox_egress_denied_count: 2 }))).score
+    ).toBe(2);
+  });
+
   it('never reports negative uncached tokens', async () => {
     const params = run({ usage: { ...usage, cached_input_tokens: 2000 } });
     expect((await uncachedInputTokensEvaluator.evaluate(params)).score).toBe(0);
@@ -95,6 +248,7 @@ describe('efficiency evaluators', () => {
       outputTokensEvaluator,
       latencySecondsEvaluator,
       toolCallsTotalEvaluator,
+      sandboxEgressDeniedEvaluator,
       decisionTreesAccessedEvaluator,
     ]) {
       expect(await evaluator.evaluate(params)).toMatchObject({ score: null, label: 'n/a' });

@@ -26,7 +26,7 @@ export const CUSTOMER0_CUSTOM_CONTEXT: readonly string[] = [
  * the alert fired; `rca_anti_leakage` still scores what it actually accessed.
  */
 export const RETROSPECTIVE_GUARDRAIL_CONTEXT =
-  "Evaluation guardrail: this alert fired in the past and has since been resolved. Investigate it as if it is the alert's timestamp now, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the alert's timestamp. Do not read human discussion of this incident (Slack or chat threads, including replies under the alert, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the alert's timestamp. Code, commits, deploys and config changes from before the alert are fair game.";
+  "Evaluation guardrail: this alert fired in the past and has since been resolved. Investigate it as if it is the alert's timestamp now, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the alert's timestamp. Do not read human discussion of this incident (Slack or chat threads, including replies under the alert, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the alert's timestamp. Code, commits, deploys and config changes from before the alert are fair game. Read source code as it was when the alert fired, not today's: instead of a shallow clone, clone the week before the alert and check out its last commit before the alert, e.g. `git clone --filter=blob:none --no-checkout --shallow-since=<alert date minus 7 days> https://github.com/elastic/kibana && git -C kibana checkout $(git -C kibana rev-list -1 --first-parent --before=<alert timestamp> HEAD)`.";
 
 /** ORCA's environment is built on the upstream demo at this commit (paper, Appendix I). */
 export const ORCA_DEMO_COMMIT = 'fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733';
@@ -40,21 +40,33 @@ export const ORCA_CUSTOM_CONTEXT: readonly string[] = [
   `Source code: the system is the OpenTelemetry Astronomy Shop demo, and its source is public: github.com/open-telemetry/opentelemetry-demo at commit ${ORCA_DEMO_COMMIT} (blobless clone in the sandbox with \`git clone --filter=blob:none\`, then \`git checkout ${ORCA_DEMO_COMMIT}\`; find files with \`git ls-tree\`/\`git grep\`, don't guess paths).`,
 ];
 
-/**
- * The custom context snippets an investigation dataset runs with. Stored datasets are not named
- * `nightshift/customer0…`, so they are recognized by their `customer0` tag.
- */
-export const getDatasetCustomContext = ({
-  name,
-  tags = [],
-}: {
+export interface DatasetIdentity {
   name: string;
   tags?: readonly string[];
-}): readonly string[] => {
-  if (name.startsWith('nightshift/customer0') || tags.includes('customer0')) {
-    return [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT];
+}
+
+/**
+ * Which deployment's space an investigation dataset reproduces, if any. Stored datasets are not
+ * named `nightshift/customer0…`, so they are recognized by their `customer0` tag.
+ */
+export const getDatasetEnvironment = ({
+  name,
+  tags = [],
+}: DatasetIdentity): 'customer0' | 'orca' | undefined => {
+  if (name.startsWith('nightshift/customer0') || tags.includes('customer0')) return 'customer0';
+  return name.startsWith('nightshift/orca-') ? 'orca' : undefined;
+};
+
+/** The custom context snippets an investigation dataset runs with. */
+export const getDatasetCustomContext = (dataset: DatasetIdentity): readonly string[] => {
+  switch (getDatasetEnvironment(dataset)) {
+    case 'customer0':
+      return [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT];
+    case 'orca':
+      return ORCA_CUSTOM_CONTEXT;
+    default:
+      return [];
   }
-  return name.startsWith('nightshift/orca-') ? ORCA_CUSTOM_CONTEXT : [];
 };
 
 /** The space's current custom context snippets, in stored order. */
