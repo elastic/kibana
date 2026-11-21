@@ -69,7 +69,7 @@ describe('SearchConnectorsPlugin (public)', () => {
         expect.objectContaining({
           id: PLUGIN_ID,
           order: 8,
-          keywords: ['content connectors', 'search'],
+          keywords: ['content crawlers', 'search'],
           mount: expect.any(Function),
         })
       );

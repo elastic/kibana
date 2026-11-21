@@ -20,7 +20,7 @@ const TITLE_CASE_GLOSSARY = [
   'Data Set Quality',
   'Ingest Pipelines',
   'Logstash Pipelines',
-  'Content Connectors',
+  'Content Crawlers',
   'Stack Monitoring',
   'Maintenance Windows',
   'Trained Models',

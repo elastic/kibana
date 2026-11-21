@@ -974,7 +974,7 @@
               "id": "management:content_connectors",
               "href": "/jom/app/management/data/content_connectors",
               "path": "data_management.node-0.management:content_connectors",
-              "title": "Content Connectors",
+              "title": "Content Crawlers",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"
