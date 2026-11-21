@@ -22,6 +22,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useQueryClient } from '@kbn/react-query';
+import { INVESTIGATION_AGENT_ID } from '../../../../common/investigations/types';
 import type { ItemPatch, TaskItem, TaskOwnerType } from '../../../../common/investigations/types';
 import {
   useInvestigationToasts,
@@ -29,7 +31,10 @@ import {
   useProcedureTemplates,
   useUpdateItem,
 } from '../../hooks';
+import { investigationKeys } from '../../api/query_keys';
 import { ICONS } from '../../icons';
+import { useInvestigationsServices } from '../../services';
+import { converse } from '../conversation/conversation_api';
 import { EmptyState, ErrorState, LoadingState } from '../shared';
 import { isTaskItem, useAllItems } from '../scope/use_all_items';
 import { useItemsByIds } from '../scope/use_items_by_ids';
@@ -60,13 +65,16 @@ const HIGHLIGHT_MS = 3500;
 
 export const ProcedurePanel: React.FC<TabProps> = ({
   record,
+  agentAvailable,
   openItemId,
   onNavigateTab,
   onOpenModal,
 }) => {
   const recordId = record.id;
   const { euiTheme } = useEuiTheme();
-  const { showSuccess } = useInvestigationToasts();
+  const { showSuccess, showError } = useInvestigationToasts();
+  const { http } = useInvestigationsServices();
+  const queryClient = useQueryClient();
   const currentUser = useCurrentUser();
   const tasksQuery = useAllItems(recordId, 'task', isTaskItem, MAX_TASKS);
   const templatesQuery = useProcedureTemplates();
@@ -79,6 +87,7 @@ export const ProcedurePanel: React.FC<TabProps> = ({
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [applyType, setApplyType] = useState<string | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  const [agentRunTaskId, setAgentRunTaskId] = useState<string | null>(null);
   const handledItemIdRef = useRef<string | undefined>(undefined);
 
   const tasks = useMemo(() => sortTasks(tasksQuery.data?.items ?? []), [tasksQuery.data]);
@@ -141,6 +150,32 @@ export const ProcedurePanel: React.FC<TabProps> = ({
         ? { task: { owner: personOwner(currentUser) } }
         : {}),
     });
+  const conversationId = record.conversation_id;
+  const handleRunWithAgent = async (task: TaskItem) => {
+    if (!conversationId) {
+      return;
+    }
+    setAgentRunTaskId(task.id);
+    const started = await updateItem
+      .mutateAsync({ itemId: task.id, version: task.version ?? '', patch: { status: 'doing' } })
+      .then(() => true)
+      .catch(() => false);
+    if (started) {
+      try {
+        await converse(http, {
+          agentId: INVESTIGATION_AGENT_ID,
+          conversationId,
+          input: i18n.AGENT_RUN_PROMPT(task.ref),
+          triggerMode: 'always',
+        });
+        showSuccess(i18n.RUN_WITH_AGENT_SUCCESS(task.title));
+      } catch (error) {
+        showError(error, i18n.RUN_WITH_AGENT_ERROR);
+      }
+    }
+    await queryClient.invalidateQueries(investigationKeys.recordScope(recordId));
+    setAgentRunTaskId(null);
+  };
   const handleReopen = (task: TaskItem) =>
     patchTask(task, { status: 'todo', task: { note: null, skip_reason: null } });
   const handleAssign = (task: TaskItem, owner: Owner) => patchTask(task, { task: { owner } });
@@ -474,7 +509,20 @@ export const ProcedurePanel: React.FC<TabProps> = ({
                       claim={claim}
                       currentUser={currentUser}
                       isHighlighted={highlightedId === task.id}
-                      isBusy={updateItem.isLoading && updateItem.variables?.itemId === task.id}
+                      isBusy={
+                        (updateItem.isLoading && updateItem.variables?.itemId === task.id) ||
+                        agentRunTaskId === task.id
+                      }
+                      canRunWithAgent={
+                        agentAvailable &&
+                        Boolean(conversationId) &&
+                        record.status !== 'closed' &&
+                        task.task.owner.type === 'agent' &&
+                        !task.task.auto &&
+                        !isTaskFinished(task)
+                      }
+                      isRunningWithAgent={agentRunTaskId === task.id}
+                      onRunWithAgent={handleRunWithAgent}
                       onToggleDone={handleToggleDone}
                       onStart={handleStart}
                       onReopen={handleReopen}

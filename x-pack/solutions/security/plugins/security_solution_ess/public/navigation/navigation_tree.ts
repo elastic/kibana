@@ -60,6 +60,10 @@ export const createNavigationTree = (
             icon: 'warning',
             link: securityLink(SecurityPageName.alerts),
           },
+      {
+        link: 'investigations' as AppDeepLinkId,
+        icon: 'folderOpen',
+      },
       ...getWorkflowsNavPanel(services),
       ...(!alertZeroEnabled && showAgentBuilder ? [agentBuilderLink] : []),
       ...(alertZeroEnabled || showAgentBuilder ? [contextEngineLink] : []),
@@ -74,10 +78,6 @@ export const createNavigationTree = (
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
       },
       defaultNavigationTree.cases(),
-      {
-        link: 'investigations' as AppDeepLinkId,
-        icon: 'inspect',
-      },
       defaultNavigationTree.entityAnalytics(),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),

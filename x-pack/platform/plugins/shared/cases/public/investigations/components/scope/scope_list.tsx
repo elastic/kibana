@@ -16,6 +16,7 @@ import {
   EuiSelect,
   EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import type { EntityItem, EntityScope, EntityType } from '../../../../common/investigations/types';
 import { ENTITY_TYPE_LABELS } from '../../../../common/investigations/types';
@@ -24,6 +25,10 @@ import { CriticalityPill, RiskChip, ScopeStatusBadge } from './entity_badges';
 import { ENTITY_TYPE_ORDER, getCriticalityTone, isEntityVisible } from './scope_helpers';
 import type { ScopeFilters } from './scope_helpers';
 import * as i18n from './translations';
+
+const noWrapStyle = css`
+  white-space: nowrap;
+`;
 
 type SortField = 'name' | 'type' | 'status' | 'criticality' | 'risk' | 'evidence';
 
@@ -126,14 +131,15 @@ export const ScopeList: React.FC<ScopeListProps> = ({
     {
       field: 'name',
       name: i18n.COL_ENTITY,
-      width: '240px',
       sortable: true,
+      truncateText: true,
       render: (_value: unknown, entity: ScopeRow) => (
         <EuiButtonEmpty
           size="s"
           flush="left"
           onClick={() => onSelect(entity.id)}
           aria-label={i18n.ACTION_INSPECT_DESC(entity.entity.name)}
+          title={entity.entity.name}
           data-test-subj={`investigationScopeRowName-${entity.id}`}
         >
           {entity.entity.name}
@@ -143,9 +149,16 @@ export const ScopeList: React.FC<ScopeListProps> = ({
     {
       field: 'type',
       name: i18n.COL_TYPE,
+      width: '104px',
       sortable: true,
       render: (_value: unknown, entity: ScopeRow) => (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexGroup
+          gutterSize="xs"
+          alignItems="center"
+          responsive={false}
+          wrap={false}
+          css={noWrapStyle}
+        >
           <EuiFlexItem grow={false}>
             <EuiIcon type={ENTITY_TYPE_ICONS[entity.entity.type]} aria-hidden="true" />
           </EuiFlexItem>
@@ -156,24 +169,29 @@ export const ScopeList: React.FC<ScopeListProps> = ({
     {
       field: 'status',
       name: i18n.COL_STATUS,
+      width: '120px',
       sortable: true,
       render: (_value: unknown, entity: ScopeRow) => (
-        <ScopeStatusBadge status={entity.status} short />
+        <span css={noWrapStyle}>
+          <ScopeStatusBadge status={entity.status} short />
+        </span>
       ),
     },
     {
       field: 'criticality',
       name: i18n.COL_CRITICALITY,
-      width: '150px',
+      width: '112px',
       sortable: true,
       render: (_value: unknown, entity: ScopeRow) => (
-        <CriticalityPill criticality={entity.entity.criticality} />
+        <span css={noWrapStyle}>
+          <CriticalityPill criticality={entity.entity.criticality} />
+        </span>
       ),
     },
     {
       field: 'risk',
       name: i18n.COL_RISK,
-      width: '170px',
+      width: '128px',
       sortable: true,
       render: (_value: unknown, entity: ScopeRow) =>
         entity.entity.risk_score === null || entity.entity.risk_score === undefined ? (
@@ -181,7 +199,13 @@ export const ScopeList: React.FC<ScopeListProps> = ({
             {i18n.EMPTY_VALUE}
           </EuiText>
         ) : (
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            responsive={false}
+            wrap={false}
+            css={noWrapStyle}
+          >
             <EuiFlexItem grow={false}>
               <RiskChip score={entity.entity.risk_score} />
             </EuiFlexItem>
@@ -198,12 +222,14 @@ export const ScopeList: React.FC<ScopeListProps> = ({
     {
       field: 'evidence',
       name: i18n.COL_EVIDENCE,
+      width: '92px',
       sortable: true,
       align: 'right',
       render: (_value: unknown, entity: ScopeRow) => entity.entity.evidence_ids.length,
     },
     {
       name: i18n.COL_ACTIONS,
+      width: '84px',
       actions: [
         {
           name: i18n.ACTION_ADD_TO_SCOPE,
@@ -283,6 +309,7 @@ export const ScopeList: React.FC<ScopeListProps> = ({
       <EuiFlexItem>
         <EuiBasicTable<ScopeRow>
           tableCaption={i18n.LIST_TABLE_CAPTION}
+          tableLayout="fixed"
           items={visibleRows}
           itemId="id"
           columns={columns}

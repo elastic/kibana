@@ -20,6 +20,7 @@ import type { InvestigationRecord } from '../../../../common/investigations/type
 import { ICONS } from '../../icons';
 import type { TabId } from '../tabs/tab_props';
 import { TAB_IDS } from '../tabs/tab_props';
+import { useMessageCount } from './at_a_glance_card';
 import * as tabI18n from '../tabs/translations';
 import * as i18n from './translations';
 
@@ -33,12 +34,15 @@ const TAB_LABELS: Record<TabId, string> = {
 };
 
 /** The count shown next to a tab, or undefined when the tab has none. */
-export const getTabCount = (tab: TabId, record: InvestigationRecord): string | undefined => {
+export const getTabCount = (
+  tab: TabId,
+  record: InvestigationRecord,
+  messageCount: number
+): string | undefined => {
   const { counters } = record;
   switch (tab) {
     case 'conversation': {
-      const count = record.threads.length + (record.conversation_id ? 1 : 0);
-      return count > 0 ? String(count) : undefined;
+      return messageCount > 0 ? String(messageCount) : undefined;
     }
     case 'evidence':
       return String(counters.evidence);
@@ -71,6 +75,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   onShowSidePanel,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const messageCount = useMessageCount(record);
 
   return (
     <EuiFlexGroup
@@ -93,7 +98,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
           data-test-subj="investigationTabs"
         >
           {TAB_IDS.map((tab) => {
-            const count = getTabCount(tab, record);
+            const count = getTabCount(tab, record, messageCount);
             return (
               <EuiTab
                 key={tab}

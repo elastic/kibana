@@ -12,6 +12,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiIconTip,
   EuiLink,
   EuiText,
@@ -26,7 +27,8 @@ import {
 import type { ClaimItem, EvidenceItem } from '../../../../common/investigations/types';
 import { EVIDENCE_TYPE_ICONS, ICONS } from '../../icons';
 import { ActorBadge } from '../shared/actor_badge';
-import { RelativeTime } from '../shared/relative_time';
+import { formatAbsoluteUtc, formatRelativeTime } from '../shared/formatters';
+import { useNow } from '../shared/use_now';
 import { SeenElsewhereCell } from './seen_elsewhere';
 import type { SeenElsewhereInfo } from './seen_elsewhere';
 import { EVIDENCE_PAGE_SIZE_OPTIONS } from './evidence_state';
@@ -51,9 +53,18 @@ export interface EvidenceTableProps {
   seenByValue: Map<string, SeenElsewhereInfo>;
   claimsByEvidenceId: Map<string, ClaimItem[]>;
   commentCounts: Map<string, number>;
-  commentCountsExact: boolean;
+  commentCountsExact?: boolean;
   onOpenClaim: (claimId: string) => void;
 }
+
+const MAX_USED_IN_BADGES = 1;
+
+const clampStyle = (lines: number): string => `
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: ${lines};
+  overflow: hidden;
+`;
 
 const INTERACTIVE_SELECTOR = 'input, button, a, label, [role="checkbox"], [role="button"]';
 
@@ -71,10 +82,11 @@ export const EvidenceTable: React.FC<EvidenceTableProps> = ({
   seenByValue,
   claimsByEvidenceId,
   commentCounts,
-  commentCountsExact,
   onOpenClaim,
 }) => {
   const { euiTheme } = useEuiTheme();
+
+  const now = useNow();
 
   const columns = useMemo<Array<EuiBasicTableColumn<EvidenceItem>>>(
     () => [
@@ -82,7 +94,7 @@ export const EvidenceTable: React.FC<EvidenceTableProps> = ({
         field: 'ref',
         name: i18n.COLUMN_ID,
         sortable: true,
-        width: '88px',
+        width: '76px',
         render: (_value: string, item) => (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
             <EuiFlexItem grow={false}>
@@ -100,6 +112,7 @@ export const EvidenceTable: React.FC<EvidenceTableProps> = ({
                   size="s"
                   content={i18n.PRESERVED_TOOLTIP(item.evidence.snapshot_hash)}
                   aria-label={i18n.PRESERVED_ARIA(item.ref)}
+                  iconProps={{ tabIndex: -1 }}
                   data-test-subj={`investigationEvidencePreserved-${item.ref}`}
                 />
               </EuiFlexItem>
@@ -111,7 +124,7 @@ export const EvidenceTable: React.FC<EvidenceTableProps> = ({
         field: 'type',
         name: i18n.COLUMN_TYPE,
         sortable: true,
-        width: '150px',
+        width: '108px',
         render: (_value: string, item) => (
           <div>
             <EuiBadge color="hollow" iconType={EVIDENCE_TYPE_ICONS[item.evidence.type]}>
@@ -146,17 +159,31 @@ export const EvidenceTable: React.FC<EvidenceTableProps> = ({
         field: 'title',
         name: i18n.COLUMN_EVIDENCE,
         sortable: true,
-        width: '260px',
         render: (_value: string, item) => (
           <div>
             <EuiText
               size="s"
               css={css`
                 overflow-wrap: anywhere;
+                ${clampStyle(2)}
                 ${item.evidence.indicator ? `font-family: ${euiTheme.font.familyCode};` : ''}
               `}
+              title={item.title}
+              data-test-subj={`investigationEvidenceTitle-${item.ref}`}
             >
               {item.title}
+            </EuiText>
+            <EuiText
+              size="xs"
+              color="subdued"
+              css={css`
+                overflow-wrap: anywhere;
+                margin-block-start: ${euiTheme.size.xxs};
+                ${clampStyle(1)}
+              `}
+              data-test-subj={`investigationEvidenceSource-${item.ref}`}
+            >
+              {item.evidence.source.label}
             </EuiText>
             {item.evidence.why ? (
               <EuiText
@@ -165,7 +192,9 @@ export const EvidenceTable: React.FC<EvidenceTableProps> = ({
                 css={css`
                   overflow-wrap: anywhere;
                   margin-block-start: ${euiTheme.size.xxs};
+                  ${clampStyle(2)}
                 `}
+                title={item.evidence.why}
               >
                 {item.evidence.why}
               </EuiText>
@@ -174,35 +203,49 @@ export const EvidenceTable: React.FC<EvidenceTableProps> = ({
         ),
       },
       {
-        field: 'source',
-        name: i18n.COLUMN_SOURCE,
-        width: '110px',
-        render: (_value: unknown, item) => item.evidence.source.label,
-      },
-      {
-        field: 'created_by',
-        name: i18n.COLUMN_ADDED_BY,
-        sortable: true,
-        width: '170px',
-        render: (_value: unknown, item) => <ActorBadge actor={item.created_by} />,
-      },
-      {
         field: 'created_at',
         name: i18n.COLUMN_ADDED,
         sortable: true,
-        width: '96px',
-        render: (value: string) => <RelativeTime value={value} />,
+        width: '128px',
+        render: (value: string, item) => (
+          <div>
+            <ActorBadge actor={item.created_by} compact />
+            <EuiText
+              size="xs"
+              color="subdued"
+              css={css`
+                margin-block-start: ${euiTheme.size.xxs};
+              `}
+            >
+              <time
+                dateTime={value}
+                title={formatAbsoluteUtc(value)}
+                data-test-subj="investigationEvidenceAddedAt"
+              >
+                {formatRelativeTime(value, now)}
+              </time>
+            </EuiText>
+          </div>
+        ),
       },
       {
         field: 'comments',
-        name: i18n.COLUMN_COMMENTS,
-        width: '96px',
+        name: (
+          <EuiIcon
+            type={ICONS.conversation}
+            aria-label={i18n.COLUMN_COMMENTS}
+            data-test-subj="investigationEvidenceCommentsHeader"
+          />
+        ),
+        description: i18n.COLUMN_COMMENTS,
+        width: '56px',
         render: (_value: unknown, item) => {
           const count = commentCounts.get(item.id) ?? 0;
-          const label = count > 0 ? String(count) : commentCountsExact ? i18n.ADD : '';
+          const label = count > 0 ? String(count) : '';
           return (
             <EuiButtonEmpty
               size="xs"
+              flush="both"
               iconType={ICONS.conversation}
               aria-label={i18n.COMMENTS_ON(count, item.ref)}
               onClick={() => onOpen(item.id, 'comments')}
@@ -215,12 +258,14 @@ export const EvidenceTable: React.FC<EvidenceTableProps> = ({
       },
       {
         field: 'seen',
-        name: i18n.COLUMN_SEEN_ELSEWHERE,
-        width: '150px',
+        name: i18n.COLUMN_SEEN_IN,
+        description: i18n.COLUMN_SEEN_ELSEWHERE,
+        width: '84px',
         render: (_value: unknown, item) =>
           item.evidence.indicator ? (
             <SeenElsewhereCell
               info={seenByValue.get(item.evidence.indicator.value.toLowerCase())}
+              compact
             />
           ) : (
             <EuiText size="s" color="subdued">
@@ -231,19 +276,21 @@ export const EvidenceTable: React.FC<EvidenceTableProps> = ({
       {
         field: 'used_in',
         name: i18n.COLUMN_USED_IN,
-        width: '100px',
+        width: '76px',
         render: (_value: unknown, item) => {
           const claims = claimsByEvidenceId.get(item.id) ?? [];
           if (claims.length === 0) {
             return (
-              <EuiText size="s" color="subdued">
-                {i18n.NOT_LINKED}
+              <EuiText size="s" color="subdued" title={i18n.NOT_LINKED}>
+                {i18n.NO_VALUE}
               </EuiText>
             );
           }
+          const shown = claims.slice(0, MAX_USED_IN_BADGES);
+          const hidden = claims.length - shown.length;
           return (
             <span>
-              {claims.map((claim) => (
+              {shown.map((claim) => (
                 <EuiBadge
                   key={claim.id}
                   color="hollow"
@@ -254,6 +301,11 @@ export const EvidenceTable: React.FC<EvidenceTableProps> = ({
                   {claim.ref}
                 </EuiBadge>
               ))}
+              {hidden > 0 ? (
+                <EuiText size="xs" color="subdued" component="span">
+                  {i18n.USED_IN_MORE(hidden)}
+                </EuiText>
+              ) : null}
             </span>
           );
         },
@@ -262,9 +314,9 @@ export const EvidenceTable: React.FC<EvidenceTableProps> = ({
     [
       claimsByEvidenceId,
       commentCounts,
-      commentCountsExact,
       euiTheme.font.familyCode,
       euiTheme.size.xxs,
+      now,
       onOpen,
       onOpenClaim,
       seenByValue,

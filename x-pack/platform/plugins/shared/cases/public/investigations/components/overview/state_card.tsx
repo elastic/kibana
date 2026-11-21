@@ -226,12 +226,14 @@ export const StateCard: React.FC<StateCardProps> = ({ record, onNavigateTab, onO
           {link(i18n.SCOPE_GRAPH, () => onNavigateTab('scope'), 'investigationStateScopeLink')}
         </StateCell>
         <StateCell label={i18n.PROCEDURE} testSubj="investigationStateProcedure">
-          {i18n.PROCEDURE_SUMMARY(
-            record.investigation_type,
-            counters.tasks_done,
-            tasksTotal,
-            counters.required_tasks_left
-          )}{' '}
+          {counters.tasks === 0
+            ? i18n.PROCEDURE_NONE(record.investigation_type)
+            : i18n.PROCEDURE_SUMMARY(
+                record.investigation_type,
+                counters.tasks_done,
+                tasksTotal,
+                counters.required_tasks_left
+              )}{' '}
           {link(
             i18n.PROCEDURE_LINK,
             () => onNavigateTab('procedure'),

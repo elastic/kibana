@@ -208,6 +208,10 @@ export const COLUMN_SEEN_ELSEWHERE = i18n.translate(
   }
 );
 
+export const COLUMN_SEEN_IN = i18n.translate('xpack.cases.investigations.evidence.columnSeenIn', {
+  defaultMessage: 'Seen in',
+});
+
 export const COLUMN_USED_IN = i18n.translate('xpack.cases.investigations.evidence.columnUsedIn', {
   defaultMessage: 'Used in',
 });
@@ -248,6 +252,12 @@ export const SEEN_IN_OTHER = (count: number) =>
   i18n.translate('xpack.cases.investigations.evidence.seenInOther', {
     defaultMessage:
       'Seen in {count, plural, one {# other investigation} other {# other investigations}}',
+    values: { count },
+  });
+
+export const USED_IN_MORE = (count: number) =>
+  i18n.translate('xpack.cases.investigations.evidence.usedInMore', {
+    defaultMessage: '+{count}',
     values: { count },
   });
 
@@ -1172,6 +1182,10 @@ export const BACK_TO_INVESTIGATION = i18n.translate(
     defaultMessage: 'Back to investigation',
   }
 );
+
+export const OPEN_IN_ALERTS = i18n.translate('xpack.cases.investigations.evidence.openInAlerts', {
+  defaultMessage: 'Open in Alerts',
+});
 
 export const OPEN_IN_CONVERSATION = i18n.translate(
   'xpack.cases.investigations.evidence.openInConversation',

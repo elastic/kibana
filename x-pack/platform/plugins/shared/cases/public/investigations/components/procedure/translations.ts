@@ -179,6 +179,11 @@ export const COMPLETED_BY = (name: string, kind: string) =>
     defaultMessage: 'Completed by {name} ({kind})',
     values: { name, kind },
   });
+export const ON_BEHALF_OF = (name: string) =>
+  i18n.translate('xpack.cases.investigations.procedure.onBehalfOf', {
+    defaultMessage: 'on behalf of {name}',
+    values: { name },
+  });
 export const NOT_APPLICABLE_NOTE = (reason: string) =>
   i18n.translate('xpack.cases.investigations.procedure.notApplicableNote', {
     defaultMessage: 'Not applicable. {reason}',
@@ -192,6 +197,24 @@ export const NOT_APPLICABLE_BY = (name: string) =>
 export const MARK_DONE = i18n.translate('xpack.cases.investigations.procedure.markDone', {
   defaultMessage: 'Mark done',
 });
+export const RUN_WITH_AGENT = i18n.translate('xpack.cases.investigations.procedure.runWithAgent', {
+  defaultMessage: 'Run with agent',
+});
+export const RUNNING_WITH_AGENT = i18n.translate(
+  'xpack.cases.investigations.procedure.runningWithAgent',
+  { defaultMessage: 'Agent is working' }
+);
+export const RUN_WITH_AGENT_SUCCESS = (title: string) =>
+  i18n.translate('xpack.cases.investigations.procedure.runWithAgentSuccess', {
+    defaultMessage: 'The agent finished "{title}"',
+    values: { title },
+  });
+/** The prompt the agent is sent. The agent completes the task with its set-task-status tool. */
+export const AGENT_RUN_PROMPT = (ref: string) => `Mark task ${ref} done`;
+export const RUN_WITH_AGENT_ERROR = i18n.translate(
+  'xpack.cases.investigations.procedure.runWithAgentError',
+  { defaultMessage: 'The agent could not run this task' }
+);
 export const START = i18n.translate('xpack.cases.investigations.procedure.start', {
   defaultMessage: 'Start',
 });

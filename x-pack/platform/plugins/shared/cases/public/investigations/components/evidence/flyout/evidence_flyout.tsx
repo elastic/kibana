@@ -52,6 +52,16 @@ import * as i18n from '../translations';
 
 export type FlyoutTab = 'details' | 'comments' | 'used_in';
 
+const SECURITY_APP_ID = 'securitySolutionUI';
+
+const getAlertPath = (alert: { id: string; index: string; timestamp?: string | null }): string => {
+  const params = new URLSearchParams({ index: alert.index });
+  if (alert.timestamp) {
+    params.set('timestamp', alert.timestamp);
+  }
+  return `/alerts/redirect/${encodeURIComponent(alert.id)}?${params.toString()}`;
+};
+
 const WhyEditor: React.FC<{ item: EvidenceItem; recordId: string }> = ({ item, recordId }) => {
   const updateItem = useUpdateItem(recordId);
   const [isEditing, setIsEditing] = useState(false);
@@ -275,6 +285,7 @@ export const EvidenceFlyout: React.FC<EvidenceFlyoutProps> = ({
   onOpenConversation,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { application } = useInvestigationsServices();
   const titleId = useGeneratedHtmlId({ prefix: 'investigationEvidenceFlyoutTitle' });
   const { data, isLoading, error, refetch } = useItem(recordId, itemId);
   const { claims } = useRecordClaims(recordId);
@@ -292,6 +303,9 @@ export const EvidenceFlyout: React.FC<EvidenceFlyoutProps> = ({
       ),
     [claims, itemId]
   );
+
+  const alertRef = item?.evidence.alert;
+  const alertPath = alertRef?.id && alertRef.index ? getAlertPath(alertRef) : undefined;
 
   const renderBody = (evidenceItem: EvidenceItem) => {
     if (tab === 'comments') {
@@ -438,6 +452,16 @@ export const EvidenceFlyout: React.FC<EvidenceFlyoutProps> = ({
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
               <EuiFlexItem grow={false}>
+                {alertPath ? (
+                  <EuiButtonEmpty
+                    iconType={ICONS.external}
+                    iconSide="right"
+                    href={application.getUrlForApp(SECURITY_APP_ID, { path: alertPath })}
+                    data-test-subj="investigationEvidenceOpenInAlerts"
+                  >
+                    {i18n.OPEN_IN_ALERTS}
+                  </EuiButtonEmpty>
+                ) : null}
                 {item.evidence.type === 'conversation' ? (
                   <EuiButtonEmpty
                     iconType={ICONS.chevronRight}

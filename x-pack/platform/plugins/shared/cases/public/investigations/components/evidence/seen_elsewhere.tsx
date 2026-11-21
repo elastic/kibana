@@ -79,10 +79,12 @@ SeenElsewhereList.displayName = 'SeenElsewhereList';
 
 export interface SeenElsewhereCellProps {
   info: SeenElsewhereInfo | undefined;
+  /** Icon and count only, with the full sentence as the accessible name. */
+  compact?: boolean;
 }
 
 /** "Seen in N other investigations" with a popover listing them. Empty when none. */
-export const SeenElsewhereCell: React.FC<SeenElsewhereCellProps> = ({ info }) => {
+export const SeenElsewhereCell: React.FC<SeenElsewhereCellProps> = ({ info, compact = false }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!info || info.count === 0) {
@@ -105,9 +107,11 @@ export const SeenElsewhereCell: React.FC<SeenElsewhereCellProps> = ({ info }) =>
             event.stopPropagation();
             setIsOpen((open) => !open);
           }}
+          aria-label={compact ? i18n.SEEN_IN_OTHER(info.count) : undefined}
+          title={compact ? i18n.SEEN_IN_OTHER(info.count) : undefined}
           data-test-subj="investigationEvidenceSeenElsewhere"
         >
-          {i18n.SEEN_IN_OTHER(info.count)}
+          {compact ? String(info.count) : i18n.SEEN_IN_OTHER(info.count)}
         </EuiButtonEmpty>
       }
       isOpen={isOpen}

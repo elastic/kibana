@@ -30,6 +30,14 @@ export interface QueueTableProps {
   onChange: (change: Partial<QueueState>) => void;
 }
 
+const truncateStyle = css`
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
 const RecordLink: React.FC<{ record: InvestigationRecord; children: React.ReactNode }> = ({
   record,
   children,
@@ -69,28 +77,54 @@ export const QueueTable: React.FC<QueueTableProps> = ({
         field: 'display_num',
         name: i18n.COLUMN_ID,
         sortable: true,
-        width: '88px',
+        width: '116px',
         render: (_value: number, record) => (
-          <RecordLink record={record}>{record.display_id}</RecordLink>
+          <span
+            css={css`
+              white-space: nowrap;
+            `}
+          >
+            <RecordLink record={record}>{record.display_id}</RecordLink>
+          </span>
         ),
       },
       {
         field: 'title.keyword',
         name: i18n.COLUMN_TITLE,
         sortable: true,
-        width: '280px',
-        truncateText: { lines: 2 },
-        render: (_value: string, record) => (
-          <EuiToolTip content={record.title}>
-            <RecordLink record={record}>{record.title}</RecordLink>
-          </EuiToolTip>
-        ),
+        truncateText: true,
+        render: (_value: string, record) => {
+          const unit = record.fields[BUSINESS_UNIT_FIELD_KEY];
+          const secondary = [
+            record.investigation_type,
+            typeof unit === 'string' && unit.length > 0 ? unit : undefined,
+          ]
+            .filter(Boolean)
+            .join(' \u00b7 ');
+          return (
+            <>
+              <EuiToolTip content={record.title} anchorProps={{ css: truncateStyle }}>
+                <RecordLink record={record}>{record.title}</RecordLink>
+              </EuiToolTip>
+              {secondary ? (
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  css={truncateStyle}
+                  data-test-subj="investigationQueueTitleMeta"
+                >
+                  {secondary}
+                </EuiText>
+              ) : null}
+            </>
+          );
+        },
       },
       {
         field: 'status',
         name: i18n.COLUMN_STATUS,
         sortable: true,
-        width: '130px',
+        width: '128px',
         render: (_value: string, record) => (
           <StatusBadge status={record.status} owner={record.owner} />
         ),
@@ -99,32 +133,15 @@ export const QueueTable: React.FC<QueueTableProps> = ({
         field: 'priority',
         name: i18n.COLUMN_PRIORITY,
         sortable: true,
-        width: '96px',
+        width: '92px',
         render: (_value: string, record) => (
           <PriorityBadge priority={record.priority} note={record.priority_note} />
         ),
       },
       {
-        field: 'investigation_type',
-        name: i18n.COLUMN_TYPE,
-        sortable: true,
-        width: '110px',
-        render: (value: string) => value,
-      },
-      {
-        field: `fields.${BUSINESS_UNIT_FIELD_KEY}`,
-        name: i18n.COLUMN_BUSINESS_UNIT,
-        sortable: true,
-        width: '120px',
-        render: (_value: string, record) => {
-          const unit = record.fields[BUSINESS_UNIT_FIELD_KEY];
-          return typeof unit === 'string' && unit.length > 0 ? unit : '-';
-        },
-      },
-      {
         field: 'owner',
         name: i18n.COLUMN_OWNER,
-        width: '150px',
+        width: '116px',
         render: (_value: unknown, record) =>
           record.owner ? (
             <ActorBadge actor={record.owner} compact />
@@ -137,7 +154,7 @@ export const QueueTable: React.FC<QueueTableProps> = ({
       {
         field: 'verdict',
         name: i18n.COLUMN_VERDICT,
-        width: '170px',
+        width: '152px',
         render: (_value: unknown, record) => {
           const verdict = getEffectiveVerdict(record);
           if (verdict.source === null) {
@@ -147,20 +164,18 @@ export const QueueTable: React.FC<QueueTableProps> = ({
               </EuiText>
             );
           }
+          const text =
+            verdict.source === 'agent'
+              ? `${verdict.label} (${i18n.VERDICT_AGENT_SUFFIX})`
+              : verdict.label;
           return (
-            <span>
+            <EuiToolTip content={text} anchorProps={{ css: truncateStyle }}>
               <VerdictBadge
                 label={verdict.label}
                 verdict={verdict.classification}
                 source={verdict.source}
               />
-              {verdict.source === 'agent' ? (
-                <EuiText size="xs" color="subdued" component="span">
-                  {' '}
-                  {i18n.VERDICT_AGENT_SUFFIX}
-                </EuiText>
-              ) : null}
-            </span>
+            </EuiToolTip>
           );
         },
       },
@@ -169,36 +184,34 @@ export const QueueTable: React.FC<QueueTableProps> = ({
         name: i18n.COLUMN_ALERTS,
         sortable: true,
         align: 'right',
-        width: '72px',
+        width: '78px',
         render: (_value: number, record) => record.counters.alerts,
       },
       {
         field: 'counters.evidence',
-        name: i18n.COLUMN_EVIDENCE,
+        name: i18n.COLUMN_EVIDENCE_CLAIMS,
         sortable: true,
         align: 'right',
-        width: '84px',
-        render: (_value: number, record) => record.counters.evidence,
-      },
-      {
-        field: 'open_claims',
-        name: i18n.COLUMN_OPEN_CLAIMS,
-        align: 'right',
-        width: '96px',
-        render: (_value: unknown, record) => record.counters.claims_by_status.open ?? 0,
+        width: '140px',
+        render: (_value: number, record) => (
+          <span
+            css={css`
+              white-space: nowrap;
+            `}
+            data-test-subj="investigationQueueEvidenceClaims"
+          >
+            {i18n.EVIDENCE_CLAIMS(
+              record.counters.evidence,
+              record.counters.claims_by_status.open ?? 0
+            )}
+          </span>
+        ),
       },
       {
         field: 'updated_at',
         name: i18n.COLUMN_UPDATED,
         sortable: true,
-        width: '104px',
-        render: (value: string) => <RelativeTime value={value} />,
-      },
-      {
-        field: 'created_at',
-        name: i18n.COLUMN_CREATED,
-        sortable: true,
-        width: '104px',
+        width: '96px',
         render: (value: string) => <RelativeTime value={value} />,
       },
     ],
@@ -224,11 +237,14 @@ export const QueueTable: React.FC<QueueTableProps> = ({
   return (
     <div
       css={css`
+        max-width: 100%;
         overflow-x: auto;
       `}
     >
       <EuiBasicTable<InvestigationRecord>
         tableCaption={i18n.TABLE_CAPTION}
+        tableLayout="fixed"
+        responsiveBreakpoint="m"
         items={records}
         itemId="id"
         columns={columns}

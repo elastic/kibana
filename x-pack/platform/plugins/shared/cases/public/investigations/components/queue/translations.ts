@@ -139,6 +139,15 @@ export const COLUMN_OPEN_CLAIMS = i18n.translate(
   'xpack.cases.investigations.queue.columnOpenClaims',
   { defaultMessage: 'Open claims' }
 );
+export const COLUMN_EVIDENCE_CLAIMS = i18n.translate(
+  'xpack.cases.investigations.queue.columnEvidenceClaims',
+  { defaultMessage: 'Evidence / claims' }
+);
+export const EVIDENCE_CLAIMS = (evidence: number, openClaims: number) =>
+  i18n.translate('xpack.cases.investigations.queue.evidenceClaims', {
+    defaultMessage: '{evidence} / {openClaims} open',
+    values: { evidence, openClaims },
+  });
 export const COLUMN_UPDATED = i18n.translate('xpack.cases.investigations.queue.columnUpdated', {
   defaultMessage: 'Updated',
 });

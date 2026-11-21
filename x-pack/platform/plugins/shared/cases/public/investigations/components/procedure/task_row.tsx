@@ -53,6 +53,10 @@ export interface TaskRowProps {
   currentUser: CurrentUser | undefined;
   isHighlighted: boolean;
   isBusy: boolean;
+  /** An agent owns the task, it has no automatic rule and the record has a conversation. */
+  canRunWithAgent: boolean;
+  isRunningWithAgent: boolean;
+  onRunWithAgent: (task: TaskItem) => void;
   onToggleDone: (task: TaskItem) => void;
   onStart: (task: TaskItem) => void;
   onReopen: (task: TaskItem) => void;
@@ -111,7 +115,7 @@ const CompletionLine: React.FC<{ task: TaskItem }> = ({ task }) => {
     return (
       <EuiText size="xs" color="subdued" data-test-subj="investigationTaskCompletion">
         {i18n.COMPLETED_BY(completedBy.name, getActorKindLabel(completedBy))}
-        {completedBy.on_behalf_of ? `, ${completedBy.on_behalf_of}` : ''}
+        {completedBy.on_behalf_of ? ` ${i18n.ON_BEHALF_OF(completedBy.on_behalf_of)}` : ''}
         {when}
         {task.task.note ? `. ${task.task.note}` : ''}
       </EuiText>
@@ -264,6 +268,9 @@ const TaskActions: React.FC<TaskRowProps> = ({
   dependency,
   currentUser,
   isBusy,
+  canRunWithAgent,
+  isRunningWithAgent,
+  onRunWithAgent,
   onToggleDone,
   onStart,
   onReopen,
@@ -290,6 +297,20 @@ const TaskActions: React.FC<TaskRowProps> = ({
         </EuiFlexItem>
       ) : (
         <>
+          {canRunWithAgent && !isWaiting ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType={ICONS.agent}
+                isLoading={isRunningWithAgent}
+                isDisabled={isBusy}
+                onClick={() => onRunWithAgent(task)}
+                data-test-subj={`investigationTaskRunWithAgent-${task.id}`}
+              >
+                {isRunningWithAgent ? i18n.RUNNING_WITH_AGENT : i18n.RUN_WITH_AGENT}
+              </EuiButton>
+            </EuiFlexItem>
+          ) : null}
           {effectiveStatus === 'todo' ? (
             <EuiFlexItem grow={false}>
               <EuiButton
