@@ -25,16 +25,16 @@ No body and no parameters. It returns one entry per registered definition that h
       "description": "A Kubernetes deployment, identified by namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment) and the OpenTelemetry k8sclusterreceiver. The same namespace/name in two clusters is one entity; the cluster is shown as a column.",
       "identityFields": ["kubernetes.namespace", "kubernetes.deployment.name"],
       "columns": [
-        { "name": "entity.id", "kind": "id" },
-        { "name": "kubernetes.namespace", "kind": "identity" },
+        { "name": "entity.id", "kind": "id", "label": "ID" },
+        { "name": "kubernetes.namespace", "kind": "identity", "label": "Namespace" },
         { "name": "kubernetes.deployment.name", "kind": "identity" },
-        { "name": "k8s.cluster.name", "kind": "attribute" },
+        { "name": "k8s.cluster.name", "kind": "attribute", "label": "Cluster" },
         { "name": "k8s.deployment.available", "kind": "attribute" },
         { "name": "k8s.deployment.desired", "kind": "attribute" },
         { "name": "k8s.deployment.paused", "kind": "attribute" },
         { "name": "k8s.deployment.label.app", "kind": "attribute" },
         { "name": "k8s.deployment.uid", "kind": "attribute" },
-        { "name": "last_seen", "kind": "last_seen" }
+        { "name": "last_seen", "kind": "last_seen", "label": "Last seen" }
       ],
       "sources": [
         {
@@ -47,6 +47,8 @@ No body and no parameters. It returns one entry per registered definition that h
   ]
 }
 ```
+
+A column's optional `label` is its user-facing text. It comes from the definition's `dynamic.displayLabels` (a list of `{ name, label }`, where `name` is an identity field or an attribute), with built-in defaults for `entity.id` ("ID") and `last_seen` ("Last seen"). A column with no label is shown by its `name`. Only this route returns labels; the `_list` response columns stay `{ name, kind }`.
 
 ### `POST /internal/entity_inventory/entities/{type}/_list`
 
@@ -63,7 +65,7 @@ Response:
 
 | key | |
 | --- | --- |
-| `columns` | `{ name, kind }` in column order: `entity.id`, the identity fields, the attributes in source order, `last_seen`. The same columns the `types` route returns for the type. No Elasticsearch type: values arrive with their JSON type and `kind` marks `last_seen` as the date. |
+| `columns` | `{ name, kind }` in column order: `entity.id`, the identity fields, the attributes in source order, `last_seen`. The same names and kinds the `types` route returns for the type, without its labels. No Elasticsearch type: values arrive with their JSON type and `kind` marks `last_seen` as the date. |
 | `rows` | At most `limit`, ordered by `last_seen` descending, ties by `entity.id`. Every row carries every column, null where no source produced a value. |
 | `provenance` | For each returned row's `entity.id`, the index pattern that supplied each attribute value. |
 | `truncated` | True only when the row limit left rows out: a plan was cut (returned `limit + 1` rows), or the merge holds more than `limit` rows. A failed or partial plan does not set it, since narrowing the request would not fix it; it is reported in `errors`. There is no `total`. |

@@ -46,6 +46,7 @@ import {
 } from '../inventory/generator';
 import type { GeneratedQuery, IdentityPlan, OutputColumn, QueryPlan } from '../inventory/generator';
 import type { ListRequest } from '../inventory/types';
+import { toTypeColumns } from './type_columns';
 
 /** Everything the list queries are generated from. */
 interface ListPlan {
@@ -322,7 +323,7 @@ export class InventoryService {
 
   private buildType = (definition: RegisteredEntityDefinition): InventoryType => {
     const { type, name, description } = definition;
-    const { sources } = getDynamicBlock(definition);
+    const { sources, displayLabels } = getDynamicBlock(definition);
     const identityPlan = resolveIdentityPlan(definition);
     const columns = buildColumns(
       definition,
@@ -334,7 +335,7 @@ export class InventoryService {
       name,
       description,
       identityFields: identityPlan.groupingFields,
-      columns: toResponseColumns(columns),
+      columns: toTypeColumns(columns, displayLabels),
       sources: sources.map(({ indexPattern, filter }) => ({ indexPattern, filter })),
     };
   };
