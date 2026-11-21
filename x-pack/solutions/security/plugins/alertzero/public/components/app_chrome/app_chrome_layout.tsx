@@ -10,6 +10,8 @@ import { AppHeaderView } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
+import { AppStatus } from '@kbn/core/public';
 import type { ApplicationStart, ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
@@ -57,11 +59,16 @@ const getSectionTitle = (pathname: string): string | undefined => {
  */
 const getBreadcrumbs = (
   pathname: string,
-  getUrlForApp: ApplicationStart['getUrlForApp']
+  getUrlForApp: ApplicationStart['getUrlForApp'],
+  canOpenSecurity: boolean
 ): ChromeBreadcrumb[] => {
   const sectionTitle = getSectionTitle(pathname);
   return [
-    { text: SECURITY_BREADCRUMB, href: getUrlForApp(SECURITY_UI_APP_ID) },
+    // AlertZero access doesn't imply access to the Security app, so it only links when it can open.
+    {
+      text: SECURITY_BREADCRUMB,
+      ...(canOpenSecurity && { href: getUrlForApp(SECURITY_UI_APP_ID) }),
+    },
     { text: BRAND_TITLE, ...(sectionTitle && { href: getUrlForApp(ALERTZERO_APP_ID) }) },
     ...(sectionTitle ? [{ text: sectionTitle }] : []),
   ];
@@ -94,9 +101,13 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
   const hideAppHeading = isWatchesShell;
   const appHeadingTitle = pageTitle ?? getSectionTitle(pathname) ?? BRAND_TITLE;
 
+  // Core leaves out the apps the user can't access.
+  const applications = useObservable(application.applications$);
+  const canOpenSecurity = applications?.get(SECURITY_UI_APP_ID)?.status === AppStatus.accessible;
+
   useEffect(() => {
-    chrome.setBreadcrumbs(getBreadcrumbs(pathname, application.getUrlForApp));
-  }, [application, chrome, pathname]);
+    chrome.setBreadcrumbs(getBreadcrumbs(pathname, application.getUrlForApp, canOpenSecurity));
+  }, [application, canOpenSecurity, chrome, pathname]);
 
   return (
     <AppHeadingTitleContext.Provider value={setPageTitle}>

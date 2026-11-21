@@ -15,7 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
-import type { CoreStart } from '@kbn/core/public';
+import { AppStatus, type CoreStart } from '@kbn/core/public';
 import { AppChromeLayout } from './app_chrome_layout';
 import { useAppHeadingDocLink } from './app_heading_doc_link';
 import { useAppHeadingTitle } from './app_heading_title';
@@ -31,7 +31,10 @@ const coreStartStub = {
       securitySolution: { alertZero: { overview: OVERVIEW_DOC_LINK, setUp: SET_UP_DOC_LINK } },
     },
   },
-  application: { getUrlForApp: (appId: string) => `/app/${appId}` },
+  application: {
+    getUrlForApp: (appId: string) => `/app/${appId}`,
+    applications$: of(new Map([['securitySolutionUI', { status: AppStatus.accessible }]])),
+  },
   chrome: { setBreadcrumbs },
 } as unknown as CoreStart;
 
@@ -143,9 +146,9 @@ describe('AppChromeLayout breadcrumbs', () => {
     setBreadcrumbs.mockClear();
   });
 
-  const renderAt = (pathname: string) =>
+  const renderAt = (pathname: string, services: CoreStart = coreStartStub) =>
     render(
-      <KibanaContextProvider services={coreStartStub}>
+      <KibanaContextProvider services={services}>
         <MockChromeContextProvider chrome={makeChromeWithFeedback(jest.fn())}>
           <EuiProvider>
             <Router history={createMemoryHistory({ initialEntries: [pathname] })}>
@@ -155,6 +158,14 @@ describe('AppChromeLayout breadcrumbs', () => {
         </MockChromeContextProvider>
       </KibanaContextProvider>
     );
+
+  it('should not link the Security breadcrumb when the user cannot open the Security app', () => {
+    renderAt('/', {
+      ...coreStartStub,
+      application: { ...coreStartStub.application, applications$: of(new Map()) },
+    });
+    expect(setBreadcrumbs).toHaveBeenLastCalledWith([{ text: 'Security' }, { text: 'AlertZero' }]);
+  });
 
   it('should set Security > AlertZero when on the landing page', () => {
     renderAt('/');
