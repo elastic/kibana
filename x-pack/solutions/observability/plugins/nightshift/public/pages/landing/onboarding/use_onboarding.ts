@@ -12,6 +12,7 @@ import { NIGHTSHIFT_ONBOARDING_QUERY_KEY } from '../../../data/query_keys';
 import { useKibana } from '../../../hooks/use_kibana';
 
 const POLL_INTERVAL_MS = 3_000;
+const START_SUGGESTIONS_MUTATION_KEY = ['nightshift.startOnboardingSuggestions'] as const;
 
 /** The space's onboarding state: its latest onboarding suggestions workflow execution. */
 export const useOnboarding = () => {
@@ -38,16 +39,26 @@ export const useStartOnboardingSuggestions = () => {
   const investigationsClient = nightshiftInvestigations?.investigationsClient;
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async () => {
+  type RefetchOnboarding = ReturnType<typeof useOnboarding>['refetch'];
+
+  const { isLoading, mutate } = useMutation({
+    mutationKey: START_SUGGESTIONS_MUTATION_KEY,
+    mutationFn: async (refetch?: RefetchOnboarding) => {
       if (!investigationsClient) {
         throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      if (refetch) {
+        const { data } = await refetch({ throwOnError: true });
+        if (!data?.execution?.needs_refresh) return;
       }
       return investigationsClient.fetch('POST /internal/nightshift/onboarding/suggestions', {
         signal: null,
       });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_ONBOARDING_QUERY_KEY }),
+    onSuccess: (execution) => {
+      if (execution)
+        return queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_ONBOARDING_QUERY_KEY });
+    },
     onError: (error: Error) => {
       notifications.toasts.addError(error, {
         title: i18n.translate('xpack.nightshift.onboarding.startErrorToastTitle', {
@@ -56,4 +67,16 @@ export const useStartOnboardingSuggestions = () => {
       });
     },
   });
+
+  return {
+    isLoading,
+    start: (refetch?: RefetchOnboarding, onReuseSuggestions?: () => void) => {
+      if (queryClient.isMutating({ mutationKey: START_SUGGESTIONS_MUTATION_KEY })) return;
+      mutate(refetch, {
+        onSuccess: (execution) => {
+          if (!execution) onReuseSuggestions?.();
+        },
+      });
+    },
+  };
 };

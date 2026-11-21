@@ -47,6 +47,7 @@ import { OnboardingFirstInvestigationStep } from './first_investigation_step';
 import { OnboardingAutomationStep } from './automation_step';
 import { useOnboarding, useStartOnboardingSuggestions } from './use_onboarding';
 import { useFetchAutomations } from '../../../data/automations/use_automations';
+import { useIsAssigningAgentConnectors } from '../../../data/sandbox_connectors/use_agent_connectors';
 import { useConnectorsByType } from '../../../data/sandbox_connectors/use_connectors_by_type';
 import {
   isAdditionalType,
@@ -124,10 +125,11 @@ export function NightshiftOnboarding({
   const { agentBuilder } = useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
-  const { data, isInitialLoading } = useOnboarding();
+  const { data, isInitialLoading, refetch } = useOnboarding();
   // The enable step binds the space's service accounts and installs the agent in one click.
   const serviceAccount = useInvestigatorServiceAccount();
   const startSuggestions = useStartOnboardingSuggestions();
+  const isAssigningConnectors = useIsAssigningAgentConnectors();
   const { groups: connectorGroups } = useConnectorsByType();
   const [stepOverride, setStepOverride] = useState<StepOverride>();
   const automations = useFetchAutomations({ enabled: automationsHref != null });
@@ -246,6 +248,13 @@ export function NightshiftOnboarding({
   const linkTo = (id: 'addData' | 'connectSources' | 'investigate') =>
     isReachable[id] && step !== id ? () => setStepOverride(id) : undefined;
 
+  const returnToSuggestions = () => {
+    if (isAssigningConnectors) return;
+    startSuggestions.start(isConnected ? refetch : undefined, () => setStepOverride(undefined));
+  };
+  const canReturnToSuggestions =
+    isConnected && !latestInvestigation && (step === 'addData' || step === 'connectSources');
+
   const steps: Record<OnboardingStepId, OnboardingStepState> = {
     enable: { status: statusOf('enable') },
     addData: { status: statusOf('addData'), onClick: linkTo('addData') },
@@ -256,7 +265,8 @@ export function NightshiftOnboarding({
     },
     investigate: {
       status: statusOf('investigate'),
-      onClick: linkTo('investigate'),
+      onClick: canReturnToSuggestions ? returnToSuggestions : linkTo('investigate'),
+      isDisabled: canReturnToSuggestions && (isAssigningConnectors || startSuggestions.isLoading),
       hint:
         step === 'investigate' && execution?.status === 'running'
           ? i18n.translate('xpack.nightshift.onboarding.steps.analyzingHint', {
@@ -287,7 +297,6 @@ export function NightshiftOnboarding({
         </EuiButton>
       )
     ) : step === 'connectSources' ? (
-      // The first pass starts looking for first investigations; a revisit just returns to them.
       <EuiButton
         fill={hasAdditionalSource}
         fullWidth
@@ -295,7 +304,12 @@ export function NightshiftOnboarding({
         iconType="sortRight"
         iconSide="right"
         isLoading={startSuggestions.isLoading}
-        onClick={() => (isConnected ? setStepOverride(undefined) : startSuggestions.mutate())}
+        isDisabled={isAssigningConnectors}
+        onClick={
+          isConnected && latestInvestigation
+            ? () => setStepOverride(undefined)
+            : returnToSuggestions
+        }
         data-test-subj="nightshiftOnboardingConnectSourcesProceedButton"
       >
         {hasAdditionalSource ? PROCEED_LABEL : SKIP_LABEL}

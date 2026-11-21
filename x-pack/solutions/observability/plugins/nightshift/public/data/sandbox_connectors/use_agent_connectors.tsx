@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { useIsMutating, useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { AgentWithPermissions } from '@kbn/agent-builder-browser';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
@@ -14,6 +14,10 @@ import { isHttpClientError } from '../../common/http_error';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const INVESTIGATION_AGENT_QUERY_KEY = ['nightshift.investigationAgent'] as const;
+const ASSIGN_AGENT_CONNECTOR_MUTATION_KEY = ['nightshift.assignAgentConnector'] as const;
+
+export const useIsAssigningAgentConnectors = (): boolean =>
+  useIsMutating({ mutationKey: ASSIGN_AGENT_CONNECTOR_MUTATION_KEY }) > 0;
 
 export const noAgentPermissionReason = i18n.translate(
   'xpack.nightshift.agentConnectors.noPermission',
@@ -66,6 +70,7 @@ export function useAgentConnectors(): {
     actions?.save === true;
 
   const update = useMutation<unknown, Error, { connector: ConnectorRef; add: boolean }>({
+    mutationKey: ASSIGN_AGENT_CONNECTOR_MUTATION_KEY,
     mutationFn: ({ connector, add }) => {
       if (!agents) throw new Error('Agent Builder is unavailable');
       const params = { agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID, connectorId: connector.id };
@@ -91,9 +96,7 @@ export function useAgentConnectors(): {
         }),
       });
     },
-    onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: INVESTIGATION_AGENT_QUERY_KEY });
-    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: INVESTIGATION_AGENT_QUERY_KEY }),
   });
   const { mutate } = update;
   const assign = useCallback(
