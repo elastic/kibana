@@ -149,6 +149,31 @@ describe('withRetry', () => {
     });
   });
 
+  it('uses normal backoff for Retry-After: 0 even when the message advertises a longer wait', async () => {
+    jest.useFakeTimers();
+    try {
+      const error = Object.assign(new Error('Too Many Requests, retry after 90 seconds'), {
+        statusCode: 429,
+        headers: new Headers({ 'retry-after': '0' }),
+      });
+      const onRetry = jest.fn();
+      const fn = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce('ok');
+      const result = withRetry(fn, {
+        maxAttempts: 2,
+        minDelayMs: 10,
+        maxDelayMs: 60_000,
+        jitter: false,
+        onRetry,
+      });
+
+      await jest.advanceTimersByTimeAsync(10);
+      await expect(result).resolves.toBe('ok');
+      expect(onRetry).toHaveBeenCalledWith(expect.objectContaining({ delayMs: 10 }));
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   describe('parseRetryAfterHeaderMs', () => {
     beforeEach(() => jest.useFakeTimers({ now: new Date('2026-11-21T10:00:00.000Z') }));
     afterEach(() => jest.useRealTimers());
@@ -156,8 +181,9 @@ describe('withRetry', () => {
     it.each([
       ['30', 30_000],
       ['Sat, 21 Nov 2026 10:00:45 GMT', 45_000],
-      ['0', undefined],
-      ['Sat, 21 Nov 2026 09:59:00 GMT', undefined],
+      ['0', 0],
+      ['Sat, 21 Nov 2026 09:59:00 GMT', 0],
+      ['-5', undefined],
       ['soon', undefined],
       [undefined, undefined],
     ])('parses %p as %p ms', (value, expected) => {

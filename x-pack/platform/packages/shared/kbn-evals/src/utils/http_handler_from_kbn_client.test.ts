@@ -51,6 +51,25 @@ describe('httpHandlerFromKbnClient retries', () => {
     expect(request).toHaveBeenCalledTimes(2);
   });
 
+  it('caps exponential backoff at 60s when many retries are configured', async () => {
+    process.env.KBN_EVALS_HTTP_RETRIES = '10';
+    const request = jest.fn();
+    for (let i = 0; i < 9; i++) request.mockRejectedValueOnce(rateLimited('1'));
+    request.mockResolvedValueOnce({ data: 'ok' });
+    const log = { warning: jest.fn() };
+    const result = httpHandlerFromKbnClient({
+      kbnClient: { request } as unknown as KbnClient,
+      log: log as unknown as ToolingLog,
+    })('/api/status');
+
+    await jest.advanceTimersByTimeAsync(10 * 61_000);
+    await expect(result).resolves.toBe('ok');
+    const delays = log.warning.mock.calls.map(([msg]: [string]) =>
+      Number(/retrying in (\d+)s/.exec(msg)?.[1])
+    );
+    expect(Math.max(...delays)).toBeLessThanOrEqual(61);
+  });
+
   it('surfaces the 429 instead of retrying early when Retry-After exceeds 60s', async () => {
     const { request, result } = setup('90');
 

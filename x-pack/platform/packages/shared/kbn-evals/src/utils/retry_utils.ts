@@ -80,13 +80,14 @@ function parseRetryAfterMsFromMessage(message: string): number | undefined {
 
 /**
  * A `Retry-After` header value in ms: delay-seconds or an HTTP-date (RFC 9110 §10.2.3).
+ * A valid hint with no time left is 0, not undefined, so callers skip the message fallback.
  */
 export function parseRetryAfterHeaderMs(value: unknown): number | undefined {
   if (typeof value !== 'string' || !value.trim()) return undefined;
   const seconds = Number(value);
-  if (Number.isFinite(seconds)) return seconds > 0 ? seconds * 1000 : undefined;
+  if (Number.isFinite(seconds)) return seconds >= 0 ? seconds * 1000 : undefined;
   const dateMs = Date.parse(value) - Date.now();
-  return Number.isFinite(dateMs) && dateMs > 0 ? dateMs : undefined;
+  return Number.isFinite(dateMs) ? Math.max(0, dateMs) : undefined;
 }
 
 function parseRetryAfterMsFromHeaders(error: any): number | undefined {

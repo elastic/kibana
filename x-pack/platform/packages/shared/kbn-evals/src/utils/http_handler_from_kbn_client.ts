@@ -150,8 +150,8 @@ export function httpHandlerFromKbnClient({
           throw error;
         }
 
-        // Exponential backoff (1s, 2s, 4s, ...) with jitter, but never sooner than retry-after.
-        const baseBackoffMs = 1000 * Math.pow(2, attempt);
+        // Exponential backoff (1s, 2s, 4s, ... up to 60s) with jitter, but never sooner than retry-after.
+        const baseBackoffMs = Math.min(MAX_RETRY_AFTER_MS, 1000 * Math.pow(2, attempt));
         const baseDelayMs = retryAfterMs ? Math.max(baseBackoffMs, retryAfterMs) : baseBackoffMs;
         const jitterMs = Math.floor(
           Math.random() * Math.min(1000, Math.max(100, baseDelayMs * 0.15))
