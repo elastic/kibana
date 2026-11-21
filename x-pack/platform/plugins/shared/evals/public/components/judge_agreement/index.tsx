@@ -91,7 +91,7 @@ const BADGE_TEXT = (kappa: string, n: number, majorLabel: string) =>
 
 const BADGE_TOOLTIP = i18n.translate('xpack.evals.judgeAgreement.badgeTooltip', {
   defaultMessage:
-    'Pooled over every review queue of this evaluator on the same major version. A major version bump starts a new tally.',
+    'Pooled over every review queue of this evaluator on the same version line (the major version for semver, the exact version otherwise). A new version line starts a new tally.',
 });
 
 const TRUNCATED_NOTE = i18n.translate('xpack.evals.judgeAgreement.truncatedNote', {
@@ -99,7 +99,8 @@ const TRUNCATED_NOTE = i18n.translate('xpack.evals.judgeAgreement.truncatedNote'
     'Only the most recent review queues were scanned, so older queues are not included in this tally.',
 });
 
-const majorOf = (version: string): string | undefined => /^v?(\d+)(?:\.|$)/.exec(version)?.[1];
+const majorOf = (version: string): string | undefined =>
+  /^v?(\d+)(?:\.|$)/.exec(version.trim())?.[1];
 
 /**
  * Agreement of one evaluator version line with its human reviewers. Renders nothing until a
@@ -117,7 +118,7 @@ export const EvaluatorAgreementBadge: React.FC<{ evaluatorName: string; version:
   const text = BADGE_TEXT(
     formatMetricWithInterval(data.binary.kappa, data.binary.kappaInterval),
     data.binary.n,
-    major === undefined ? version : `v${major}.x`
+    major === undefined ? version.trim() : `v${major}.x`
   );
   return (
     <EuiBadge

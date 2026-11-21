@@ -51,6 +51,27 @@ describe('EvaluatorAgreementBadge', () => {
     expect(mockedUseAgreement).toHaveBeenCalledWith('correctness', '2.4.0');
   });
 
+  it('trims the version before reading its major, as the server does when it pools', () => {
+    renderBadge({ binary: binary() }, ' 1.2.0 ');
+
+    expect(screen.getByTestId('evalsEvaluatorAgreementBadge')).toHaveTextContent('(v1.x)');
+  });
+
+  it('shows a non-semver version as is, since it only pools with itself', () => {
+    renderBadge({ binary: binary() }, ' latest ');
+
+    expect(screen.getByTestId('evalsEvaluatorAgreementBadge')).toHaveTextContent('(latest)');
+  });
+
+  it('describes both pooling rules in the tooltip', () => {
+    renderBadge({ binary: binary() });
+
+    expect(screen.getByTestId('evalsEvaluatorAgreementBadge')).toHaveAttribute(
+      'title',
+      expect.stringContaining('the exact version otherwise')
+    );
+  });
+
   it('notes in the tooltip when only the newest queues were scanned', () => {
     renderBadge({ binary: binary(), truncated: true });
     expect(screen.getByTestId('evalsEvaluatorAgreementBadge')).toHaveAttribute(
