@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 import type { InvestigationRecord } from '../../../../common/investigations/types';
 import { ICONS } from '../../icons';
 import type { TabId } from '../tabs/tab_props';
-import { AtAGlanceCard, getMessageCount } from './at_a_glance_card';
+import { AtAGlanceCard, useMessageCount } from './at_a_glance_card';
 import { FieldsCard } from './fields_card';
 import { RecentActivityCard } from './recent_activity_card';
 import { RelatedCard } from './related_card';
@@ -50,6 +50,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   onNavigateTab,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const messageCount = useMessageCount(record);
   // The Conversation tab already is the chat, so the panel only offers context there.
   const isConversationTab = activeTab === 'conversation';
   const effectiveMode: SidePanelMode = isConversationTab ? 'context' : mode;
@@ -98,9 +99,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                   label: (
                     <>
                       {i18n.CHAT}{' '}
-                      <EuiNotificationBadge color="subdued">
-                        {getMessageCount(record)}
-                      </EuiNotificationBadge>
+                      <EuiNotificationBadge color="subdued">{messageCount}</EuiNotificationBadge>
                     </>
                   ),
                   'data-test-subj': 'investigationSideModeChat',

@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiButtonEmpty, EuiDescriptionList } from '@elastic/eui';
 import type { InvestigationRecord } from '../../../../common/investigations/types';
 import { ICONS } from '../../icons';
+import { useConversationMessageCount } from '../conversation/use_conversation';
 import type { TabId } from '../tabs/tab_props';
 import { SideCard } from './side_card';
 import * as i18n from './translations';
@@ -18,11 +19,18 @@ export interface AtAGlanceCardProps {
   onNavigateTab: (tab: TabId) => void;
 }
 
-/** Number of messages in the conversation. Threads plus the main conversation stand in for it. */
-export const getMessageCount = (record: InvestigationRecord): number => record.threads.length + 1;
+/**
+ * Messages in the record's discussion: the main agent conversation for AI records, otherwise the
+ * comment counter (team discussion).
+ */
+export const useMessageCount = (record: InvestigationRecord): number => {
+  const { count } = useConversationMessageCount(record);
+  return record.conversation_id ? count ?? 0 : record.counters.comments;
+};
 
 export const AtAGlanceCard: React.FC<AtAGlanceCardProps> = ({ record, onNavigateTab }) => {
   const { counters } = record;
+  const messageCount = useMessageCount(record);
   const openClaims = counters.claims_by_status.open ?? 0;
   const activeTasks = counters.tasks - counters.tasks_skipped;
 
@@ -67,7 +75,7 @@ export const AtAGlanceCard: React.FC<AtAGlanceCardProps> = ({ record, onNavigate
                 onClick={() => onNavigateTab('conversation')}
                 data-test-subj="investigationGlanceConversationLink"
               >
-                {i18n.CONVERSATION_MESSAGES(getMessageCount(record))}
+                {i18n.CONVERSATION_MESSAGES(messageCount)}
               </EuiButtonEmpty>
             ),
           },
