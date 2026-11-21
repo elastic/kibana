@@ -351,7 +351,7 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
         const query = normalizeArrays(request.query as AnyQuery, ITEM_ARRAY_KEYS);
-        const out = await service.exportItems((request.params as { id: string }).id, query as ExportItemsRequest);
+        const out = await service.exportItems((request.params as { id: string }).id, query as unknown as ExportItemsRequest);
         return response.ok({
           body: out.body,
           headers: { 'content-type': out.contentType, 'content-disposition': `attachment; filename="${out.filename}"` },

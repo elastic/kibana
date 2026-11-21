@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import type { CasesClient } from '../client';
 import type { ConfigType } from '../config';
 import type { CasesServerStartDependencies } from '../types';
@@ -131,7 +132,7 @@ export const setupInvestigations = ({
                 title: title.slice(0, 250),
                 templateId: INVESTIGATION_CONVERSATION_TEMPLATE_ID,
                 metadata: { record_id: recordId },
-                accessControl: { access_mode: 'public' },
+                accessControl: { access_mode: ConversationAccessControlMode.Public },
               });
               return created.id;
             }

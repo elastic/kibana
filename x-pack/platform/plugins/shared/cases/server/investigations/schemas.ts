@@ -19,7 +19,9 @@ const optStr = (max: number = L.maxShortTextLength) => schema.maybe(schema.nulla
 const id = () => str(L.maxIdLength, 1);
 const ids = (max: number = L.maxIdsPerArray) => schema.arrayOf(id(), { maxSize: max });
 const lits = <T extends string>(values: readonly T[]) =>
-  schema.oneOf(values.map((v) => schema.literal(v)) as [Type<T>, ...Array<Type<T>>]);
+  schema.string({
+    validate: (v) => (values.includes(v as T) ? undefined : `must be one of: ${values.join(', ')}`),
+  }) as unknown as Type<T>;
 const pairs = (max = 200) => schema.arrayOf(schema.arrayOf(str(4096), { maxSize: 3 }), { maxSize: max });
 const isoDate = () =>
   schema.string({
@@ -54,7 +56,10 @@ const prioritySchema = lits(['low', 'medium', 'high', 'critical'] as const);
 const fieldsSchema = schema.recordOf(
   schema.string({ maxLength: 128, validate: (k) => (/^[a-z0-9_]+$/i.test(k) ? undefined : `Invalid field key "${k}"`) }),
   schema.nullable(schema.oneOf([str(L.maxShortTextLength), schema.number(), schema.boolean()])),
-  { maxSize: L.maxFields }
+  {
+    validate: (v) =>
+      Object.keys(v).length > L.maxFields ? `At most ${L.maxFields} fields are allowed` : undefined,
+  }
 );
 const tagsSchema = schema.arrayOf(str(L.maxTagLength, 1), { maxSize: L.maxTags });
 const originSchema = schema.object({

@@ -173,8 +173,10 @@ const filterCount = (agg: AggregationsAggregate | undefined): number =>
 const toMap = (list: Bucket[]): Record<string, number> =>
   Object.fromEntries(list.map((b) => [b.key, b.doc_count]));
 
-const term = (field: string, value: unknown): QueryDslQueryContainer => ({ term: { [field]: value } });
-const terms = (field: string, values: unknown[]): QueryDslQueryContainer => ({
+const term = (field: string, value: string | number | boolean): QueryDslQueryContainer => ({
+  term: { [field]: value },
+});
+const terms = (field: string, values: Array<string | number | boolean>): QueryDslQueryContainer => ({
   terms: { [field]: values },
 });
 
