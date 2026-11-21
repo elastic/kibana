@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { Query, SearchSource } from '@kbn/data-plugin/common';
+import type { ISearchSource, Query } from '@kbn/data-plugin/common';
 import type { AggregateQuery, Filter } from '@kbn/es-query';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { DiscoverServerPluginLocatorService, LocatorServiceScopedClient } from '..';
@@ -22,7 +22,7 @@ export const createLocatorServiceMock = (): DiscoverServerPluginLocatorService =
     .mockResolvedValue(mockFields);
 
   const searchSourceFromLocatorMock = jest
-    .fn<Promise<SearchSource>, [DiscoverAppLocatorParams]>()
+    .fn<Promise<ISearchSource>, [DiscoverAppLocatorParams]>()
     .mockResolvedValue(createSearchSourceMock({ fields: mockFields }));
 
   const titleFromLocatorMock = jest

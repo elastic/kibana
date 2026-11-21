@@ -25,7 +25,12 @@ export const getScopedClient = (
       const searchSourceStart = await deps.data.search.searchSource.asScoped(req);
       const savedObjects = core.savedObjects.getScopedClient(req);
       const uiSettings = core.uiSettings.asScopedToClient(savedObjects);
-      const services = { searchSourceStart, savedObjects, uiSettings };
+      const dataViewsService = await deps.dataViews.dataViewsServiceFactory(
+        savedObjects,
+        core.elasticsearch.client.asScoped(req).asCurrentUser,
+        req
+      );
+      const services = { searchSourceStart, savedObjects, uiSettings, dataViewsService };
 
       return {
         columnsFromLocator: columnsFromLocatorFactory(services),

@@ -12,7 +12,7 @@ import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { ISearchStartSearchSource, SearchSource } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
@@ -62,6 +62,7 @@ let searchSourceStart: ISearchStartSearchSource;
 let mockServices: Services;
 let mockSavedSearch: SavedObject<SavedSearchAttributes>;
 let mockDataView: DataView;
+let dataViewsService: jest.Mocked<Pick<DataViewsService, 'get'>>;
 
 // mock search source belonging to the saved search
 let mockSearchSource: SearchSource;
@@ -76,10 +77,13 @@ beforeAll(async () => {
   uiSettingsClient = coreMock.createStart().uiSettings.asScopedToClient(soClient);
   searchSourceStart = await dataStartMock.search.searchSource.asScoped(request);
 
+  dataViewsService = { get: jest.fn() };
+
   mockServices = {
     searchSourceStart,
     savedObjects: soClient,
     uiSettings: uiSettingsClient,
+    dataViewsService: dataViewsService as unknown as DataViewsService,
   };
 
   const soClientGet = soClient.get;
@@ -174,4 +178,53 @@ test('with saved search containing ["_source"]', async () => {
   const provider = columnsFromLocatorFactory(mockServices);
   const columns = await provider(mockPayload[0].params);
   expect(columns).not.toBeDefined(); // must erase the field since it can not be used for search query
+});
+
+describe('with locator params containing a dataViewId (unsaved search)', () => {
+  beforeEach(() => {
+    mockSearchSource.removeField('index');
+    dataViewsService.get.mockResolvedValue(mockDataView);
+  });
+
+  test('uses the columns of the locator params and prepends the time field', async () => {
+    const provider = columnsFromLocatorFactory(mockServices);
+    const columns = await provider({ dataViewId: mockDataView.id, columns: ['response', 'url'] });
+    expect(dataViewsService.get).toHaveBeenCalledWith(mockDataView.id);
+    expect(columns).toEqual(['timestamp', 'response', 'url']);
+  });
+
+  test('returns undefined without columns', async () => {
+    const provider = columnsFromLocatorFactory(mockServices);
+    const columns = await provider({ dataViewId: mockDataView.id });
+    expect(columns).toBeUndefined();
+  });
+
+  test('does not prepend the time field if the time column is hidden', async () => {
+    (uiSettingsClient.get as jest.Mock).mockImplementation((key: string) =>
+      key === DOC_HIDE_TIME_COLUMN_SETTING ? true : undefined
+    );
+    const provider = columnsFromLocatorFactory(mockServices);
+    const columns = await provider({ dataViewId: mockDataView.id, columns: ['response'] });
+    expect(columns).toEqual(['response']);
+  });
+});
+
+test('columns of the locator params take precedence over the saved search columns', async () => {
+  const provider = columnsFromLocatorFactory(mockServices);
+  const columns = await provider({ savedSearchId: mockSavedSearchId, columns: ['url'] });
+  expect(columns).toEqual(['timestamp', 'url']);
+});
+
+test('throws without a saved search or data view reference', async () => {
+  const provider = columnsFromLocatorFactory(mockServices);
+  await expect(provider({ columns: ['url'] })).rejects.toThrow(
+    'DiscoverAppLocatorParams must contain a saved search reference'
+  );
+});
+
+test('throws when only an ad hoc data view spec is provided', async () => {
+  const provider = columnsFromLocatorFactory(mockServices);
+  await expect(provider({ dataViewSpec: { title: 'logs-*' } })).rejects.toThrow(
+    'DiscoverAppLocatorParams must contain a saved search reference'
+  );
 });
