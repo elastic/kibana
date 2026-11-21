@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { createAction } from 'redux-actions';
 import { canStartTrial, startTrial } from '../../lib/es';
+import { trialStatusLoaded } from '../reducers/trial_status';
 import type { AppThunkAction } from '../types';
-
-export const trialStatusLoaded = createAction<boolean>('LICENSE_MANAGEMENT_TRIAL_STATUS_LOADED');
 
 export const loadTrialStatus =
   (): AppThunkAction<Promise<void>> =>

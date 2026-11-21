@@ -8,7 +8,7 @@
 /* eslint-env jest */
 
 import React from 'react';
-import { Provider } from 'react-redux-v7';
+import { Provider } from 'react-redux';
 
 import type { RenderResult } from '@testing-library/react';
 import { render } from '@testing-library/react';
@@ -16,10 +16,14 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock, httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import type { ILicense, LicenseType } from '@kbn/licensing-types';
-import type { CombinedState, PreloadedState } from 'redux-v4';
+import type { LicenseType } from '@kbn/licensing-types';
 import { licenseManagementStore } from '../../public/application/store/store';
-import type { ThunkServices, LicenseManagementState } from '../../public/application/store/types';
+import type { AppStore } from '../../public/application/store/store';
+import type {
+  ThunkServices,
+  LicenseManagementState,
+  LicenseState,
+} from '../../public/application/store/types';
 import { AppContextProvider, type AppDependencies } from '../../public/application/app_context';
 import { BreadcrumbService } from '../../public/application/breadcrumbs';
 
@@ -34,7 +38,7 @@ export interface GetComponentResult {
   history: History;
   services: ThunkServices;
   http: HttpMock;
-  store: ReturnType<typeof licenseManagementStore>;
+  store: AppStore;
 }
 
 const createHistory = (): History => {
@@ -48,18 +52,14 @@ const createHistory = (): History => {
 export const createMockLicense = (
   type: LicenseType,
   expiryDateInMillis: number = highExpirationMillis
-): ILicense => {
-  const baseMock = licensingMock.createLicenseMock();
-  return {
-    ...baseMock,
-    type,
-    expiryDateInMillis,
-    isActive: new Date().getTime() < expiryDateInMillis,
-  };
-};
+): LicenseState => ({
+  type,
+  expiryDateInMillis,
+  isActive: new Date().getTime() < expiryDateInMillis,
+});
 
 export const getComponent = (
-  initialState: PreloadedState<CombinedState<LicenseManagementState>>,
+  initialState: Partial<LicenseManagementState>,
   Component: React.ComponentType<{}>
 ): GetComponentResult => {
   const history = createHistory();
@@ -78,13 +78,7 @@ export const getComponent = (
     breadcrumbService,
   };
 
-  const trialStatus = initialState.trialStatus;
-  const canStartTrial = Boolean(
-    typeof trialStatus === 'object' &&
-      trialStatus !== null &&
-      'canStartTrial' in trialStatus &&
-      trialStatus.canStartTrial
-  );
+  const canStartTrial = Boolean(initialState.trialStatus?.canStartTrial);
   http.get.mockResolvedValue(canStartTrial);
 
   const store = licenseManagementStore(initialState, services);

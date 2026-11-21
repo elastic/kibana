@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import type { Action } from 'redux-actions';
-import { handleActions } from 'redux-actions';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { addUploadErrorMessage } from '../actions/add_error_message';
+const getInitialState = (): string => '';
 
-export const uploadErrorMessage = handleActions<string, string>(
-  {
-    [String(addUploadErrorMessage)](_state: string, { payload }: Action<string>) {
-      return payload;
-    },
+const uploadErrorMessageSlice = createSlice({
+  name: 'uploadErrorMessage',
+  initialState: getInitialState,
+  reducers: {
+    addUploadErrorMessage: (_state, { payload }: PayloadAction<string>) => payload,
   },
-  ''
-);
+});
+
+export const { addUploadErrorMessage } = uploadErrorMessageSlice.actions;
+export const uploadErrorMessage = uploadErrorMessageSlice.reducer;

@@ -50,7 +50,7 @@ export interface Props {
   telemetry?: TelemetryPluginStart;
   history: ScopedHistory | History;
   setBreadcrumb: (section: 'dashboard' | 'upload') => void;
-  addUploadErrorMessage: (message: string | React.ReactNode) => void;
+  addUploadErrorMessage: (message: string) => void;
   uploadLicense: (license: string, currentType: string, acknowledge?: boolean) => void;
   uploadLicenseStatus: (status: UploadStatusState) => void;
 }
@@ -158,10 +158,9 @@ export class UploadLicense extends React.PureComponent<Props, State> {
       this.send();
     } else {
       this.props.addUploadErrorMessage(
-        <FormattedMessage
-          id="xpack.licenseMgmt.uploadLicense.licenseFileNotSelectedErrorMessage"
-          defaultMessage="You must select a license file."
-        />
+        i18n.translate('xpack.licenseMgmt.uploadLicense.licenseFileNotSelectedErrorMessage', {
+          defaultMessage: 'You must select a license file.',
+        })
       );
     }
   };

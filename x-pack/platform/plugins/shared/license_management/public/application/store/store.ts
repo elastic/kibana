@@ -5,33 +5,22 @@
  * 2.0.
  */
 
-import {
-  createStore,
-  applyMiddleware,
-  compose,
-  type CombinedState,
-  type PreloadedState,
-  type StoreEnhancer,
-} from 'redux-v4';
-import thunk from 'redux-thunk-v2';
+import { configureStore } from '@reduxjs/toolkit';
 
 import { licenseManagement } from './reducers';
-import type { AppStore, LicenseManagementState, ThunkServices } from './types';
-
-declare global {
-  interface Window {
-    __REDUX_DEVTOOLS_EXTENSION__?: () => StoreEnhancer;
-  }
-}
+import type { LicenseManagementState, ThunkServices } from './types';
 
 export const licenseManagementStore = (
-  initialState: PreloadedState<CombinedState<LicenseManagementState>>,
+  initialState: Partial<LicenseManagementState>,
   services: ThunkServices
-): AppStore => {
-  const thunkEnhancer = applyMiddleware(thunk.withExtraArgument(services));
-  const enhancer = window.__REDUX_DEVTOOLS_EXTENSION__
-    ? compose(thunkEnhancer, window.__REDUX_DEVTOOLS_EXTENSION__())
-    : thunkEnhancer;
-
-  return createStore(licenseManagement, initialState, enhancer) as AppStore;
+) => {
+  return configureStore({
+    reducer: licenseManagement,
+    preloadedState: initialState,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({ thunk: { extraArgument: services } }),
+  });
 };
+
+export type AppStore = ReturnType<typeof licenseManagementStore>;
+export type AppDispatch = AppStore['dispatch'];

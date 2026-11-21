@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import { createAction } from 'redux-actions';
 import { getPermissions } from '../../lib/es';
+import { permissionsError, permissionsLoading, permissionsSuccess } from '../reducers/permissions';
 import type { AppThunkAction } from '../types';
 
-export const permissionsLoading = createAction<boolean>('LICENSE_MANAGEMENT_PERMISSIONS_LOADING');
-
-export const permissionsSuccess = createAction<boolean>('LICENSE_MANAGEMENT_PERMISSIONS_SUCCESS');
-
-export const permissionsError = createAction<unknown>('LICENSE_MANAGEMENT_PERMISSIONS_ERROR');
+const extractErrorMessage = (err: unknown): string | undefined => {
+  if (typeof err !== 'object' || err === null || !('data' in err)) {
+    return undefined;
+  }
+  const { data } = err;
+  if (typeof data !== 'object' || data === null || !('message' in data)) {
+    return undefined;
+  }
+  const { message } = data;
+  return typeof message === 'string' ? message : undefined;
+};
 
 export const loadPermissions =
   (): AppThunkAction<Promise<void>> =>
@@ -25,6 +31,6 @@ export const loadPermissions =
       dispatch(permissionsSuccess(hasPermission));
     } catch (e) {
       dispatch(permissionsLoading(false));
-      dispatch(permissionsError(e));
+      dispatch(permissionsError({ message: extractErrorMessage(e) }));
     }
   };

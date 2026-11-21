@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { Action } from 'redux-actions';
-import { handleActions } from 'redux-actions';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { uploadLicenseStatus } from '../actions/upload_license';
 import type { UploadStatusState } from '../types';
 
-export const uploadStatus = handleActions<UploadStatusState, UploadStatusState>(
-  {
-    [String(uploadLicenseStatus)](
-      state: UploadStatusState,
-      { payload }: Action<UploadStatusState>
-    ) {
-      return payload;
-    },
+const initialState: UploadStatusState = {};
+
+const uploadStatusSlice = createSlice({
+  name: 'uploadStatus',
+  initialState,
+  reducers: {
+    uploadLicenseStatus: (_state, { payload }: PayloadAction<UploadStatusState>) => payload,
   },
-  {}
-);
+});
+
+export const { uploadLicenseStatus } = uploadStatusSlice.actions;
+export const uploadStatus = uploadStatusSlice.reducer;

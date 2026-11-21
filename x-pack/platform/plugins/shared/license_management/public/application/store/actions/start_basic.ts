@@ -6,17 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createAction } from 'redux-actions';
 import { startBasic } from '../../lib/es';
-import type { StartBasicStatusState, AppThunkAction } from '../types';
-
-export const startBasicLicenseStatus = createAction<StartBasicStatusState>(
-  'LICENSE_MANAGEMENT_START_BASIC_LICENSE_STATUS'
-);
-
-export const cancelStartBasicLicense = createAction(
-  'LICENSE_MANAGEMENT_CANCEL_START_BASIC_LICENSE'
-);
+import { startBasicLicenseStatus } from '../reducers/start_basic_license_status';
+import type { AppThunkAction } from '../types';
 
 export const startBasicLicense =
   (currentLicenseType: string, ack?: boolean): AppThunkAction<Promise<void>> =>
