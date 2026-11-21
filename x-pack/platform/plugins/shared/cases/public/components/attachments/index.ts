@@ -13,10 +13,12 @@ import { getFileAttachmentType } from './file';
 import { getMapAttachmentType } from './map';
 import { getVisualizationAttachmentType } from './lens';
 import { getStackAlertAttachmentType } from './alert';
+import { getIncidentTimelineEntryAttachmentType } from './incident_timeline_entry';
 
 export interface RegisterInternalAttachmentsOptions {
   hasDashboardPluginEnabled?: boolean;
   hasMapsPluginEnabled?: boolean;
+  incidentTimelineEnabled?: boolean;
 }
 
 export const registerInternalAttachments = (
@@ -24,6 +26,7 @@ export const registerInternalAttachments = (
   {
     hasDashboardPluginEnabled = false,
     hasMapsPluginEnabled = false,
+    incidentTimelineEnabled = false,
   }: RegisterInternalAttachmentsOptions = {}
 ) => {
   unifiedRegistry.register(getFileAttachmentType());
@@ -36,5 +39,8 @@ export const registerInternalAttachments = (
   }
   if (hasMapsPluginEnabled) {
     unifiedRegistry.register(getMapAttachmentType());
+  }
+  if (incidentTimelineEnabled) {
+    unifiedRegistry.register(getIncidentTimelineEntryAttachmentType());
   }
 };

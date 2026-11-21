@@ -8,6 +8,33 @@
 import { i18n } from '@kbn/i18n';
 import type { CaseMarkerKind, EntryCategory } from './model';
 
+export const PANEL_TITLE = i18n.translate('xpack.cases.incidentTimeline.panelTitle', {
+  defaultMessage: 'Incident timeline',
+});
+
+export const RESET_ZOOM = i18n.translate('xpack.cases.incidentTimeline.resetZoom', {
+  defaultMessage: 'Reset zoom',
+});
+
+export const ADD_ENTRY = i18n.translate('xpack.cases.incidentTimeline.addEntry', {
+  defaultMessage: 'Add entry',
+});
+
+export const OPEN_IN_DISCOVER = i18n.translate('xpack.cases.incidentTimeline.openInDiscover', {
+  defaultMessage: 'Open alerts in Discover',
+});
+
+export const DISCOVER_UNAVAILABLE = i18n.translate(
+  'xpack.cases.incidentTimeline.discoverUnavailable',
+  { defaultMessage: 'Discover is not available in this deployment.' }
+);
+
+export const DATA_VIEW_NAME = (caseTitle: string) =>
+  i18n.translate('xpack.cases.incidentTimeline.dataViewName', {
+    defaultMessage: 'Alerts in case {caseTitle}',
+    values: { caseTitle },
+  });
+
 export const LANE_CASE = i18n.translate('xpack.cases.incidentTimeline.laneCase', {
   defaultMessage: 'Case',
 });
@@ -82,9 +109,69 @@ export const DURATION = i18n.translate('xpack.cases.incidentTimeline.duration', 
   defaultMessage: 'Duration',
 });
 
+export const NO_ALERTS = i18n.translate('xpack.cases.incidentTimeline.noAlerts', {
+  defaultMessage: 'No alerts are attached to this case.',
+});
+
+export const ALERTS_ERROR = i18n.translate('xpack.cases.incidentTimeline.alertsError', {
+  defaultMessage: 'Unable to load the alerts of this case',
+});
+
+export const RETRY = i18n.translate('xpack.cases.incidentTimeline.retry', {
+  defaultMessage: 'Retry',
+});
+
+export const NOT_FOUND = (count: number) =>
+  i18n.translate('xpack.cases.incidentTimeline.notFound', {
+    defaultMessage:
+      '{count, plural, one {# attached alert could not be loaded. It may have been deleted or you may not have access to its index.} other {# attached alerts could not be loaded. They may have been deleted or you may not have access to their index.}}',
+    values: { count },
+  });
+
+export const REMOTE = (count: number) =>
+  i18n.translate('xpack.cases.incidentTimeline.remote', {
+    defaultMessage:
+      '{count} {count, plural, one {alert} other {alerts}} from linked projects {count, plural, one {is} other {are}} not shown.',
+    values: { count },
+  });
+
+export const AT_LIMIT = i18n.translate('xpack.cases.incidentTimeline.atLimit', {
+  defaultMessage: "This case has reached the 1,000-alert limit. Newer alerts can't be attached.",
+});
+
+export const SHOW_MORE_RULES = (count: number) =>
+  i18n.translate('xpack.cases.incidentTimeline.showMoreRules', {
+    defaultMessage: 'Show {count} more {count, plural, one {rule} other {rules}}',
+    values: { count },
+  });
+
+export const SHOW_FEWER_RULES = i18n.translate('xpack.cases.incidentTimeline.showFewerRules', {
+  defaultMessage: 'Show fewer rules',
+});
+
 export const REOPEN_COUNT = (count: number) =>
   i18n.translate('xpack.cases.incidentTimeline.reopenCount', {
     defaultMessage: '{count} {count, plural, one {reopen} other {reopens}}',
+    values: { count },
+  });
+
+export const ALERTS_PRIVILEGES_TITLE = i18n.translate(
+  'xpack.cases.incidentTimeline.alertsPrivilegesTitle',
+  { defaultMessage: 'Privileges required' }
+);
+
+export const ALERTS_PRIVILEGES_BODY = i18n.translate(
+  'xpack.cases.incidentTimeline.alertsPrivilegesBody',
+  {
+    defaultMessage:
+      'To view alerts, you must update privileges. For more information, contact your Kibana administrator.',
+  }
+);
+
+export const DISCOVER_COUNT_MAY_DIFFER = (count: number) =>
+  i18n.translate('xpack.cases.incidentTimeline.discoverCountMayDiffer', {
+    defaultMessage:
+      'The timeline shows {count} {count, plural, one {alert} other {alerts}}. Discover searches by case id, so it may show a different number of alerts.',
     values: { count },
   });
 
@@ -146,6 +233,16 @@ export const DELETE = i18n.translate('xpack.cases.incidentTimeline.delete', {
   defaultMessage: 'Delete',
 });
 
+export const ENTRY_DELETED = i18n.translate('xpack.cases.incidentTimeline.entryDeleted', {
+  defaultMessage: 'Timeline entry deleted',
+});
+
+export const DELETE_ENTRY_TITLE = (title: string) =>
+  i18n.translate('xpack.cases.incidentTimeline.deleteEntryTitle', {
+    defaultMessage: 'Delete the timeline entry "{title}"?',
+    values: { title },
+  });
+
 export const CREATED_BY = i18n.translate('xpack.cases.incidentTimeline.createdBy', {
   defaultMessage: 'Created by',
 });
@@ -161,12 +258,102 @@ export const LINKED_ALERT_NOT_ATTACHED = i18n.translate(
   { defaultMessage: 'The linked alert is no longer attached.' }
 );
 
+export const ADD_ENTRY_TITLE = i18n.translate('xpack.cases.incidentTimeline.addEntryTitle', {
+  defaultMessage: 'Add timeline entry',
+});
+
+export const EDIT_ENTRY_TITLE = i18n.translate('xpack.cases.incidentTimeline.editEntryTitle', {
+  defaultMessage: 'Edit timeline entry',
+});
+
+export const FIELD_TITLE = i18n.translate('xpack.cases.incidentTimeline.fieldTitle', {
+  defaultMessage: 'Title',
+});
+
+export const FIELD_TIME = i18n.translate('xpack.cases.incidentTimeline.fieldTime', {
+  defaultMessage: 'Time',
+});
+
+export const FIELD_TIME_HELP = (timeZone: string) =>
+  i18n.translate('xpack.cases.incidentTimeline.fieldTimeHelp', {
+    defaultMessage: 'Set an end time to make the entry a range. Time zone: {timeZone}',
+    values: { timeZone },
+  });
+
+export const START_TIME_ARIA = i18n.translate('xpack.cases.incidentTimeline.startTimeAria', {
+  defaultMessage: 'Start time',
+});
+
+export const END_TIME_ARIA = i18n.translate('xpack.cases.incidentTimeline.endTimeAria', {
+  defaultMessage: 'End time, optional',
+});
+
 export const FIELD_CATEGORY = i18n.translate('xpack.cases.incidentTimeline.fieldCategory', {
   defaultMessage: 'Category',
 });
 
 export const FIELD_TEXT = i18n.translate('xpack.cases.incidentTimeline.fieldText', {
   defaultMessage: 'Text',
+});
+
+export const CATEGORY_NONE = i18n.translate('xpack.cases.incidentTimeline.categoryNone', {
+  defaultMessage: 'None',
+});
+
+export const TITLE_REQUIRED = i18n.translate('xpack.cases.incidentTimeline.titleRequired', {
+  defaultMessage: 'Enter a title.',
+});
+
+export const TOO_LONG = (max: number) =>
+  i18n.translate('xpack.cases.incidentTimeline.tooLong', {
+    defaultMessage: 'Use {max} characters or fewer.',
+    values: { max },
+  });
+
+export const END_BEFORE_START = i18n.translate('xpack.cases.incidentTimeline.endBeforeStart', {
+  defaultMessage: 'The end time must not be before the start time.',
+});
+
+export const SAVE = i18n.translate('xpack.cases.incidentTimeline.save', {
+  defaultMessage: 'Save',
+});
+
+export const CANCEL = i18n.translate('xpack.cases.incidentTimeline.cancel', {
+  defaultMessage: 'Cancel',
+});
+
+export const ENTRY_LABEL = i18n.translate('xpack.cases.incidentTimeline.entryLabel', {
+  defaultMessage: 'Timeline entry',
+});
+
+export const ENTRY_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.incidentTimeline.entryCount', {
+    defaultMessage: '{count} timeline {count, plural, one {entry} other {entries}}',
+    values: { count },
+  });
+
+export const ADDED_ENTRY = i18n.translate('xpack.cases.incidentTimeline.addedEntry', {
+  defaultMessage: 'added a timeline entry',
+});
+
+export const REMOVED_ENTRY = i18n.translate('xpack.cases.incidentTimeline.removedEntry', {
+  defaultMessage: 'removed a timeline entry',
+});
+
+export const SHOW_ON_TIMELINE = i18n.translate('xpack.cases.incidentTimeline.showOnTimeline', {
+  defaultMessage: 'Show on timeline',
+});
+
+export const VIEW_LEGEND = i18n.translate('xpack.cases.incidentTimeline.viewLegend', {
+  defaultMessage: 'Timeline view',
+});
+
+export const VIEW_CHART = i18n.translate('xpack.cases.incidentTimeline.viewChart', {
+  defaultMessage: 'Chart',
+});
+
+export const VIEW_TABLE = i18n.translate('xpack.cases.incidentTimeline.viewTable', {
+  defaultMessage: 'Table',
 });
 
 export const TABLE_CAPTION = i18n.translate('xpack.cases.incidentTimeline.tableCaption', {

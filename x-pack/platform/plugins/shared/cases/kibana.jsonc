@@ -41,6 +41,7 @@
       "spaces",
       "serverless",
       "savedObjectsTaggingOss",
+      "share",
       "workflowsManagement"
     ],
     "requiredBundles": [
