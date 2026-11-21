@@ -590,13 +590,61 @@ describe('deliverCallbackEvents', () => {
     renderPayload.mockRestore();
   });
 
-  it('renders no surface payload for an execution that asks for user input', async () => {
+  it('renders the prompts of an execution that asks for user input, after what the round wrote', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const renderPayload = jest.spyOn(surfacesDeps.surfacesService, 'renderPayload');
+    const prompts = [{ type: 'confirmation', id: 'prompt-1', message: 'Delete the index?' }];
 
     await deliverCallbackEvents({
       execution: createSlackExecution(),
-      events$: of(createExecutionTerminatedEvent({ type: 'prompt_requested', prompts: [] })),
+      events$: of(
+        createRoundCompleteEvent('I need your approval.'),
+        createExecutionTerminatedEvent({ type: 'prompt_requested', prompts })
+      ),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    const [terminated, roundComplete] = getDeliveredEvents(service);
+
+    expect(renderPayload).toHaveBeenCalledTimes(1);
+    expect(renderPayload).toHaveBeenCalledWith(
+      { message: 'I need your approval.', prompts, attachments: [] },
+      expect.objectContaining({ originType: ConversationOriginType.Slack })
+    );
+    const surfacePayload = {
+      text: expect.stringContaining('Delete the index?'),
+      blocks: expect.arrayContaining([
+        {
+          type: 'actions',
+          elements: [
+            expect.objectContaining({
+              action_id: 'prompt_response:0',
+              value: '{"p":"prompt-1","a":true}',
+            }),
+            expect.objectContaining({
+              action_id: 'prompt_response:1',
+              value: '{"p":"prompt-1","a":false}',
+            }),
+          ],
+        },
+      ]),
+    };
+
+    expect(terminated).toMatchObject({ surface_payload: surfacePayload });
+    expect(roundComplete).toMatchObject({ surface_payload: surfacePayload });
+
+    renderPayload.mockRestore();
+  });
+
+  it('renders the prompts alone when the paused round wrote nothing', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const prompts = [{ type: 'confirmation', id: 'prompt-1', message: 'Delete the index?' }];
+
+    await deliverCallbackEvents({
+      execution: createSlackExecution(),
+      events$: of(createExecutionTerminatedEvent({ type: 'prompt_requested', prompts })),
       callbackDeliveryService: service,
       ...surfacesDeps,
       logger: loggerMock.create(),
@@ -604,11 +652,9 @@ describe('deliverCallbackEvents', () => {
 
     const [terminated] = getDeliveredEvents(service);
 
-    expect(renderPayload).not.toHaveBeenCalled();
-    expect(conversationClient.get).not.toHaveBeenCalled();
-    expect(terminated).toMatchObject({ surface_payload: undefined, tool_calls: [] });
-
-    renderPayload.mockRestore();
+    expect(terminated).toMatchObject({
+      surface_payload: { text: expect.stringContaining('Delete') },
+    });
   });
 
   it('does not add a surface payload to executions without an origin', async () => {

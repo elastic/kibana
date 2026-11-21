@@ -10,6 +10,7 @@ import type {
   SurfacePayload,
   VersionedAttachment,
 } from '@kbn/agent-builder-common';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { IBasePath } from '@kbn/core/server';
@@ -18,13 +19,22 @@ import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
 import { getPublicKibanaUrl } from '../../utils/get_kibana_url';
 import { buildComposition } from './composition';
+import { promptsToNodes } from './prompts';
 import { slackSurface } from './slack';
 import type { SurfaceRenderer } from './types';
+
+/** What a round wrote for its reader: its message, and the prompts it paused on. */
+export interface SurfaceResponse {
+  message: string;
+  attachments: VersionedAttachment[];
+  /** Prompts the round is waiting on, asked after the message. */
+  prompts?: PromptRequest[];
+}
 
 export interface SurfacesService {
   /** Renders a response message for its surface, or resolves to nothing when unavailable or rendering fails. */
   renderPayload(
-    response: { message: string; attachments: VersionedAttachment[] },
+    response: SurfaceResponse,
     options: { originType?: ConversationOriginType; agentId: string } & AttachmentFormatContext
   ): Promise<SurfacePayload | undefined>;
 }
@@ -58,7 +68,7 @@ export class SurfacesServiceImpl implements SurfacesService {
   }
 
   async renderPayload(
-    { message, attachments }: { message: string; attachments: VersionedAttachment[] },
+    { message, attachments, prompts = [] }: SurfaceResponse,
     {
       originType,
       agentId,
@@ -85,8 +95,10 @@ export class SurfacesServiceImpl implements SurfacesService {
         runtime,
       });
 
-      return composition.body.length > 0
-        ? renderer.render(composition, runtime, { baseUrl: kibanaUrl })
+      const body = [...composition.body, ...promptsToNodes(prompts, runtime)];
+
+      return body.length > 0
+        ? renderer.render({ ...composition, body }, runtime, { baseUrl: kibanaUrl })
         : undefined;
     } catch (error) {
       this.logger.error(`Failed to render the ${renderer.id} surface payload: ${error.message}`);

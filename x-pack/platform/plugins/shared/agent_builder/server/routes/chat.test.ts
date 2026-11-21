@@ -179,6 +179,18 @@ describe('callbackConversePayloadSchema', () => {
     expect(() => callbackConversePayloadSchema.validate(basePayload)).not.toThrow();
   });
 
+  it('accepts bounded prompt selections', () => {
+    const validate = (promptSelections: string[]) =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        prompt_selections: promptSelections,
+      });
+
+    expect(() => validate(['{"p":"prompt-1","a":true}'])).not.toThrow();
+    expect(() => validate(['x'.repeat(2001)])).toThrow(/prompt_selections/);
+    expect(() => validate(Array(201).fill('x'))).toThrow(/prompt_selections/);
+  });
+
   it('rejects trigger_mode', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
