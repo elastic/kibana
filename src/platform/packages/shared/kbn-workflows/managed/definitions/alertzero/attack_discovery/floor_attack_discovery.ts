@@ -1,0 +1,34 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import FLOOR_ATTACK_DISCOVERY_YAML from './floor_attack_discovery.yaml';
+import { renderAttackDiscoveryWorkerYaml } from './worker_template_values';
+import type { ManagedWorkflowDefinition } from '../../../types';
+import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from '../constants';
+import {
+  ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS,
+  upgradeStoredWorkerSettings,
+} from '../worker_settings_defaults';
+import type { ScheduledWorkerTemplateValues } from '../worker_template_values';
+
+export const ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID =
+  'system-security-floor-attack-discovery';
+
+export const ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW = {
+  billable: true,
+  id: ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
+  management: ALERTZERO_WORKER_MANAGEMENT,
+  pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
+  version: 9,
+  yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
+    renderAttackDiscoveryWorkerYaml(
+      FLOOR_ATTACK_DISCOVERY_YAML,
+      upgradeStoredWorkerSettings(ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS, values)
+    ),
+} as const satisfies ManagedWorkflowDefinition<ScheduledWorkerTemplateValues>;
