@@ -85,9 +85,12 @@ describe('endpointForensicAnalysisSkill', () => {
 
   describe(`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID} handler`, () => {
     const resolveIndex = jest.fn();
-    const context = {
-      esClient: { asCurrentUser: { indices: { resolveIndex } } },
-    } as unknown as ToolHandlerContext;
+    const createContext = (spaceId: string) =>
+      ({
+        spaceId,
+        esClient: { asCurrentUser: { indices: { resolveIndex } } },
+      } as unknown as ToolHandlerContext);
+    const context = createContext('default');
 
     const getTool = async (): Promise<BuiltinSkillBoundedTool> => {
       const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
@@ -102,9 +105,12 @@ describe('endpointForensicAnalysisSkill', () => {
       return tool;
     };
 
-    const runHandler = async (args: Record<string, unknown> = {}) => {
+    const runHandler = async (
+      args: Record<string, unknown> = {},
+      handlerContext: ToolHandlerContext = context
+    ) => {
       const tool = await getTool();
-      const toolReturn = await tool.handler(args, context);
+      const toolReturn = await tool.handler(args, handlerContext);
       if (!isToolHandlerStandardReturn(toolReturn)) {
         throw new Error('discover_telemetry did not return a standard tool result');
       }
@@ -245,12 +251,59 @@ describe('endpointForensicAnalysisSkill', () => {
       });
     });
 
+    it.each([
+      ['ritik', '.alerts-security.alerts-ritik'],
+      ['default', '.alerts-security.alerts-default'],
+    ])('returns the alerts index of space %s', async (spaceId, alertsIndex) => {
+      const data = await runHandler({ hosts: ['WKSTN-RECV01'] }, createContext(spaceId));
+
+      expect(data.alerts_index).toBe(alertsIndex);
+      // Alert guidance lives in the case-attachment section only, so the discovery result
+      // does not prompt alert lookups during plain forensic questions.
+      expect(data.guidance).not.toContain('alert');
+    });
+
+    it('never mentions the default-space alerts index for a non-default space', async () => {
+      const data = await runHandler({ hosts: ['WKSTN-RECV01'] }, createContext('ritik'));
+
+      expect(JSON.stringify(data)).not.toContain('alerts-default');
+    });
+
     it('rejects a start without an end', async () => {
       const tool = await getTool();
       await expect(
         tool.handler({ hosts: ['h'], start: '2026-10-16T10:00:00.000Z' }, context)
       ).rejects.toThrow();
     });
+  });
+
+  it('scopes alert lookups and case attachments to the current space', () => {
+    const { content } = endpointForensicAnalysisSkill;
+    expect(content).toContain('## Attaching alerts to a case');
+    expect(content).toContain('Only when the analyst asks to attach alerts to a case.');
+    expect(content).toContain('Forensic reconstruction uses the telemetry indices, not alerts.');
+    expect(content).toContain('`alerts_index`');
+    expect(content).toContain('FROM <alerts_index> METADATA _id, _index');
+    // The alerts index is named in the case-attachment section only.
+    expect(content.indexOf('alerts_index')).toBeGreaterThan(
+      content.indexOf('## Attaching alerts to a case')
+    );
+    expect(content).toContain('Pass `_id` and `_index` unchanged');
+    expect(content).toContain('do not rewrite it to the alias');
+    expect(content).toContain('`kibana.alert.uuid` equals `_id`');
+    expect(content).toContain('This skill has no case tool');
+    expect(content).toContain('`platform.core.cases.manage_attachments`, mode `add_alerts`');
+    expect(content).toContain(
+      'If the `alerts_index` does not exist, the space has no alerts; do not query another index.'
+    );
+    // The skill registers no alerts tool, so it must not tell the agent to call one.
+    expect(content).not.toContain('`security.alerts`');
+    expect(content).toContain('Never hardcode');
+    expect(content).toContain('another space');
+    // The default-space index may be named only as a thing to avoid, never as a query target.
+    expect(content).toMatch(/Never hardcode[^\n]*`\.alerts-security\.alerts-default`/);
+    // Exactly one mention: the "Never hardcode" line above. A second one would be a usable query target.
+    expect(content.match(/\.alerts-security\.alerts-default/g)).toHaveLength(1);
   });
 
   it('tells the agent to anchor on the incident and keep history apart from it', () => {
