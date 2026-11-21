@@ -26,6 +26,7 @@ import { ForeachIterationsSection } from './foreach_iterations_section';
 import { NestedWorkflowExecutionLinks } from './nested_workflow_execution_links';
 import { ResumeExecutionButton } from './resume_execution_button';
 import { StepDataSection } from './step_data_section';
+import { StepLogsSection } from './step_logs_section';
 import { isOverviewContextField } from './workflow_pseudo_step_context';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
@@ -306,7 +307,7 @@ const RegularStepDetail = ({
   stepAi,
   onSelectStep,
 }: StepDetailContentProps) => {
-  const { isPseudoStep, executionMetadata, activeStepExecution } = detail;
+  const { isPseudoStep, executionMetadata, activeStepExecution, resolvedExecutionId } = detail;
   const isForeachOrWhileStep = stepType === 'foreach' || stepType === 'while';
   const metadataFieldPathPrefix = getStepFieldPathPrefix({
     stepId: 'Overview',
@@ -364,6 +365,13 @@ const RegularStepDetail = ({
         stepType={stepType}
         hasStepError={hasStepError}
       />
+      {!isPseudoStep && activeStepExecution && (
+        <StepLogsSection
+          key={`logs-${selectedStepExecutionId}`}
+          stepExecution={activeStepExecution}
+          workflowExecutionId={resolvedExecutionId}
+        />
+      )}
     </>
   );
 };
