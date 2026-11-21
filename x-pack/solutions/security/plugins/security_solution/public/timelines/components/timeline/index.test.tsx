@@ -12,11 +12,12 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { mockGlobalState, TestProviders } from '../../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 
 import type { Props as StatefulTimelineOwnProps } from '.';
 import { StatefulTimeline } from '.';
 import { useTimelineEvents } from '../../containers';
+import { timelineActions } from '../../store';
 import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
 import { defaultRowRenderers } from './body/renderers';
@@ -132,5 +133,56 @@ describe('StatefulTimeline', () => {
         .first()
         .exists()
     ).toEqual(true);
+  });
+
+  describe('data view sync', () => {
+    const mountWithSavedTimeline = (savePromptDismissed: boolean) => {
+      const store = createMockStore({
+        ...mockGlobalState,
+        timeline: {
+          ...mockGlobalState.timeline,
+          timelineById: {
+            ...mockGlobalState.timeline.timelineById,
+            [TimelineId.test]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.test],
+              savedObjectId: 'saved-timeline',
+              changed: true,
+              savePromptDismissed,
+            },
+          },
+        },
+      });
+      // The page data view differs from the one saved on the timeline, which triggers the sync.
+      jest.mocked(useDataView).mockReturnValue(withIndices(['synced-*'], 'synced-data-view'));
+
+      mount(
+        <TestProviders store={store}>
+          <StatefulTimeline {...props} />
+        </TestProviders>
+      );
+    };
+
+    const dismissAction = timelineActions.setSavePromptDismissed({
+      id: TimelineId.test,
+      dismissed: true,
+    });
+
+    test('keeps the save prompt dismissal that the sync would re-arm', () => {
+      mountWithSavedTimeline(true);
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: timelineActions.updateDataView.type })
+      );
+      expect(mockDispatch).toHaveBeenCalledWith(dismissAction);
+    });
+
+    test('does not dismiss the save prompt when the user did not', () => {
+      mountWithSavedTimeline(false);
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: timelineActions.updateDataView.type })
+      );
+      expect(mockDispatch).not.toHaveBeenCalledWith(dismissAction);
+    });
   });
 });

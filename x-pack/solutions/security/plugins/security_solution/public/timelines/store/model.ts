@@ -133,6 +133,8 @@ export interface TimelineModel {
   isDataProviderVisible: boolean;
   /** used to mark the timeline as unsaved in the UI */
   changed?: boolean;
+  /** the user chose to leave with unsaved changes; cleared by the next change or save */
+  savePromptDismissed?: boolean;
   /* row height, used only by unified data table */
   rowHeight?: number;
   /* sample size, total record number stored in in memory EuiDataGrid */

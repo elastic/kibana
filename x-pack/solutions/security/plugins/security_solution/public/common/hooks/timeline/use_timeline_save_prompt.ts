@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import type { AppLeaveHandler } from '@kbn/core-application-browser';
 import { useHistory } from 'react-router-dom';
@@ -40,6 +40,7 @@ export const useTimelineSavePrompt = (
     status: timelineStatus,
     updated,
     changed,
+    savePromptDismissed,
   } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
 
   const showSaveTimelineModal = useCallback(() => {
@@ -68,6 +69,9 @@ export const useTimelineSavePrompt = (
         });
 
         if (confirmRes) {
+          // The user chose to leave anyway, so stop asking until the timeline changes again.
+          // `changed` stays true: the timeline still has unsaved edits.
+          dispatch(timelineActions.setSavePromptDismissed({ id: timelineId, dismissed: true }));
           unblock();
           application.navigateToUrl(
             http.basePath.get() + location.pathname + location.hash + location.search,
@@ -82,6 +86,7 @@ export const useTimelineSavePrompt = (
 
       if (
         !getIsTimelineVisible(relativePath) &&
+        !savePromptDismissed &&
         (changed || (timelineStatus === TimelineStatusEnum.draft && updated != null))
       ) {
         confirmSaveTimeline();
@@ -95,6 +100,8 @@ export const useTimelineSavePrompt = (
       unblock();
     };
   }, [
+    dispatch,
+    timelineId,
     history,
     http.basePath,
     application,
@@ -104,21 +111,42 @@ export const useTimelineSavePrompt = (
     timelineStatus,
     updated,
     changed,
+    savePromptDismissed,
   ]);
+
+  // Core only calls back on cancel of the app leave prompt. If the wrapper unmounts while the
+  // prompt is pending, the user confirmed leaving.
+  const appLeavePromptPendingRef = useRef(false);
+
+  useEffect(
+    () => () => {
+      if (appLeavePromptPendingRef.current) {
+        dispatch(timelineActions.setSavePromptDismissed({ id: timelineId, dismissed: true }));
+      }
+    },
+    [dispatch, timelineId]
+  );
 
   useEffect(() => {
     onAppLeave((actions, nextAppId) => {
       // Confirm when the user has made any changes to a timeline
       if (
         !(nextAppId ?? '').includes(APP_ID) &&
+        !savePromptDismissed &&
         (changed || (timelineStatus === TimelineStatusEnum.draft && updated != null))
       ) {
+        // `nextAppId` is undefined for the browser `beforeunload` prompt, which never unmounts the app.
+        appLeavePromptPendingRef.current = nextAppId != null;
         return actions.confirm(
           UNSAVED_TIMELINE_SAVE_PROMPT,
           UNSAVED_TIMELINE_SAVE_PROMPT_TITLE,
-          showSaveTimelineModal
+          () => {
+            appLeavePromptPendingRef.current = false;
+            showSaveTimelineModal();
+          }
         );
       } else {
+        appLeavePromptPendingRef.current = false;
         return actions.default();
       }
     });

@@ -16,6 +16,7 @@ import {
   pinEvent,
   unPinEvent,
   showCallOutUnauthorizedMsg,
+  setSavePromptDismissed,
 } from '../actions';
 
 jest.mock('../actions', () => {
@@ -74,6 +75,26 @@ describe('Timeline pinned event middleware', () => {
     expect(selectTimelineById(store.getState(), TimelineId.test).pinnedEventIds).toEqual({
       [testEventId]: true,
     });
+  });
+
+  it('should re-arm the unsaved changes prompt once a pin is persisted', async () => {
+    (persistPinnedEvent as jest.Mock).mockResolvedValue({
+      eventId: testEventId,
+    });
+    store.dispatch(setSavePromptDismissed({ id: TimelineId.test, dismissed: true }));
+
+    await store.dispatch(pinEvent({ id: TimelineId.test, eventId: testEventId }));
+
+    expect(selectTimelineById(store.getState(), TimelineId.test).savePromptDismissed).toBe(false);
+  });
+
+  it('should keep the dismissal when persisting the pin fails', async () => {
+    (persistPinnedEvent as jest.Mock).mockRejectedValue(new Error('boom'));
+    store.dispatch(setSavePromptDismissed({ id: TimelineId.test, dismissed: true }));
+
+    await store.dispatch(pinEvent({ id: TimelineId.test, eventId: testEventId }));
+
+    expect(selectTimelineById(store.getState(), TimelineId.test).savePromptDismissed).toBe(true);
   });
 
   it('should persist a timeline un-pin event', async () => {
