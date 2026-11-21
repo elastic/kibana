@@ -1210,7 +1210,9 @@ describe('runWatchdogWorker', () => {
 
       const parsed = JSON.parse(line);
       expect(parsed.message.endsWith(' [truncated]')).toBe(false);
-      expect(parsed.message).toContain(`File: ${LONGEST_DIR}/event-loop-block-starting-100000ms-`);
+      expect(parsed.message).toContain(
+        `Writing profile to ${LONGEST_DIR}/event-loop-block-starting-100000ms-`
+      );
       expect(parsed.message).toContain(
         `-${'h'.repeat(MAX_HOSTNAME_LENGTH)}-${process.pid}.cpuprofile. Top: `
       );
@@ -1252,7 +1254,7 @@ describe('runWatchdogWorker', () => {
       expect(parsed.kibana?.event_loop_watchdog).toBeUndefined();
       expect(parsed.message.endsWith(' [truncated]')).toBe(true);
       expect(parsed.message).toContain('Event loop block profile #1: block ~100000ms ');
-      expect(parsed.message).toContain('stopped: block_ended. File: ');
+      expect(parsed.message).toContain('stopped: block_ended. Writing profile to ');
       expect(parsed.message).toContain('.cpuprofile. Top: ');
       // The message itself is not cut: the frame lists are all there, up to their own `...` cap.
       const frameLists = parsed.message.slice(
@@ -1340,7 +1342,9 @@ describe('runWatchdogWorker', () => {
         expect(profileLines()).toHaveLength(0);
         expect(warnLines()).toHaveLength(1);
         const [message, meta] = warnLines()[0];
-        expect(message).toContain(`stopped: block_ended. File: ${file}. Top: 100% spin`);
+        expect(message).toContain(
+          `stopped: block_ended. Writing profile to ${file}. Top: 100% spin`
+        );
         expect((meta as ProfileLogMeta).kibana.event_loop_watchdog.profile.file).toBe('admitted');
         expect(warnLineOrder()).toBeLessThan(writeFile.mock.invocationCallOrder[0]);
         expect(fileCounts()).toEqual({ written: 1, sameFrame: 0, hourLimit: 0, writeFailed: 0 });
@@ -1361,7 +1365,7 @@ describe('runWatchdogWorker', () => {
           { tags: ['event-loop-watchdog'] }
         );
         expect(warnLines()).toHaveLength(1);
-        expect(warnLines()[0][0]).toContain('File: /diag/');
+        expect(warnLines()[0][0]).toContain('Writing profile to /diag/');
         expect(warnLineOrder()).toBeLessThan(logger.error.mock.invocationCallOrder[0]);
         expect(fileCounts()).toMatchObject({ written: 0, writeFailed: 1 });
       });
@@ -1394,7 +1398,7 @@ describe('runWatchdogWorker', () => {
         expect(writeFile).toHaveBeenCalledTimes(1);
         expect(warnLines()).toHaveLength(1);
         expect(profileLines()).toHaveLength(1);
-        expect(profileLines()[0][0]).not.toContain('File: ');
+        expect(profileLines()[0][0]).not.toContain('Writing profile to ');
         expect(profileMeta().file).toBe('same_frame');
         expect(summedFiles('written')).toBe(1);
         expect(summedFiles('sameFrame')).toBe(1);

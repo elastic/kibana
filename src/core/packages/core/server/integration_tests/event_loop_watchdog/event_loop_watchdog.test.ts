@@ -412,7 +412,7 @@ describe('event loop watchdog in a child process', () => {
       const lines = profileLogLines(result);
       expect(lines).toHaveLength(1);
       expect(lines[0].log.level).toBe('WARN');
-      expect(lines[0].message).toContain(`File: ${file}. Top: `);
+      expect(lines[0].message).toContain(`Writing profile to ${file}. Top: `);
       expect(lines[0].kibana?.event_loop_watchdog?.profile?.file).toBe('admitted');
       // The stats count the write only after it completes, so this confirms it finished before
       // shutdown.

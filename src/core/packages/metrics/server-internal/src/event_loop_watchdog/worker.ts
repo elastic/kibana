@@ -364,7 +364,7 @@ export const runWatchdogWorker = (
         stopReason === 'block_ended' ? '' : ' so far'
       } (profiled after ~${profiledAfterMs}ms, profiler start took ~${profilerStartMs}ms), ${
         summary.samples
-      } samples; stopped: ${stopReason}.${path ? ` File: ${path}.` : ''}${
+      } samples; stopped: ${stopReason}.${path ? ` Writing profile to ${path}.` : ''}${
         frameLists ? ` ${frameLists}` : ''
       }`,
       {
