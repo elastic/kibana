@@ -90,6 +90,9 @@ export const getNextSteps = (record: InvestigationRecord): string[] => {
   if (counters.required_tasks_left > 0) {
     steps.push(i18n.NEXT_FINISH_TASKS(counters.required_tasks_left));
   }
+  if (counters.tasks === 0) {
+    steps.push(i18n.NEXT_APPLY_PROCEDURE);
+  }
   if (steps.length === 0) {
     steps.push(i18n.NEXT_CLOSE);
   }
