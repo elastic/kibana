@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 import { useIsSharedConversation } from '../../../../hooks/use_conversation';
 
-/** Mentions only work in a shared chat, behind the experimental flag. */
+/** Mentions only work in a shared chat. */
 export const useCanMention = (): boolean => {
-  const isExperimentalEnabled = useExperimentalFeatures();
-  const isShared = useIsSharedConversation();
-  return isExperimentalEnabled && isShared;
+  return useIsSharedConversation();
 };
