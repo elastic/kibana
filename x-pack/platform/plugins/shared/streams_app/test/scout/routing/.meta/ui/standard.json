@@ -1,5 +1,5 @@
 {
-  "sha1": "0d72498bab8044c339ca5e40a1a831d074cf82cc",
+  "sha1": "a3779d48544e365a0036dc9371229e51103b80d6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -11,8 +11,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -25,8 +25,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_button.spec.ts",
-        "line": 42,
-        "column": 7
+        "line": 29,
+        "column": 54
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_button.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 34,
+        "column": 11
       }
     },
     {
@@ -53,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_button.spec.ts",
-        "line": 62,
-        "column": 7
+        "line": 45,
+        "column": 11
       }
     },
     {
@@ -67,8 +67,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_editing_validation.spec.ts",
-        "line": 62,
-        "column": 9
+        "line": 49,
+        "column": 47
       }
     },
     {
@@ -81,8 +81,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_editing_validation.spec.ts",
-        "line": 74,
-        "column": 9
+        "line": 57,
+        "column": 70
       }
     },
     {
@@ -95,8 +95,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_editing_validation.spec.ts",
-        "line": 92,
-        "column": 9
+        "line": 67,
+        "column": 13
       }
     },
     {
@@ -109,8 +109,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_editing_validation.spec.ts",
-        "line": 109,
-        "column": 9
+        "line": 80,
+        "column": 25
       }
     },
     {
@@ -123,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_editing_validation.spec.ts",
-        "line": 145,
-        "column": 9
+        "line": 114,
+        "column": 11
       }
     },
     {
@@ -137,8 +137,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_generation.spec.ts",
-        "line": 49,
-        "column": 9
+        "line": 36,
+        "column": 56
       }
     },
     {
@@ -151,8 +151,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_generation.spec.ts",
-        "line": 59,
-        "column": 9
+        "line": 44,
+        "column": 39
       }
     },
     {
@@ -165,8 +165,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_interactions.spec.ts",
-        "line": 54,
-        "column": 9
+        "line": 38,
+        "column": 10
       }
     },
     {
@@ -179,8 +179,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_interactions.spec.ts",
-        "line": 61,
-        "column": 9
+        "line": 39,
+        "column": 13
       }
     },
     {
@@ -193,8 +193,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_interactions.spec.ts",
-        "line": 70,
-        "column": 9
+        "line": 51,
+        "column": 13
       }
     },
     {
@@ -207,8 +207,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_interactions.spec.ts",
-        "line": 79,
-        "column": 9
+        "line": 58,
+        "column": 13
       }
     },
     {
@@ -221,8 +221,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_interactions.spec.ts",
-        "line": 108,
-        "column": 9
+        "line": 73,
+        "column": 13
       }
     },
     {
@@ -235,8 +235,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_interactions.spec.ts",
-        "line": 138,
-        "column": 9
+        "line": 101,
+        "column": 22
       }
     },
     {
@@ -249,8 +249,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/ai_suggestions_interactions.spec.ts",
-        "line": 172,
-        "column": 9
+        "line": 134,
+        "column": 13
       }
     },
     {
@@ -265,8 +265,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/create_routing_rules.spec.ts",
-        "line": 31,
-        "column": 9
+        "line": 26,
+        "column": 10
       }
     },
     {
@@ -281,8 +281,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/create_routing_rules.spec.ts",
-        "line": 68,
-        "column": 9
+        "line": 47,
+        "column": 16
       }
     },
     {
@@ -297,8 +297,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/create_routing_rules.spec.ts",
-        "line": 81,
-        "column": 9
+        "line": 56,
+        "column": 24
       }
     },
     {
@@ -313,8 +313,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/create_routing_rules.spec.ts",
-        "line": 99,
-        "column": 9
+        "line": 68,
+        "column": 66
       }
     },
     {
@@ -329,8 +329,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/create_routing_rules.spec.ts",
-        "line": 131,
-        "column": 9
+        "line": 102,
+        "column": 11
       }
     },
     {
@@ -345,8 +345,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/create_routing_rules.spec.ts",
-        "line": 145,
-        "column": 9
+        "line": 112,
+        "column": 27
       }
     },
     {
@@ -361,8 +361,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/create_routing_rules.spec.ts",
-        "line": 158,
-        "column": 9
+        "line": 121,
+        "column": 26
       }
     },
     {
@@ -377,8 +377,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/create_routing_rules.spec.ts",
-        "line": 183,
-        "column": 9
+        "line": 141,
+        "column": 25
       }
     },
     {
@@ -393,8 +393,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/create_routing_rules.spec.ts",
-        "line": 208,
-        "column": 9
+        "line": 158,
+        "column": 10
+      }
+    },
+    {
+      "id": "be855e55bf78c3f-4d85923d39641b1",
+      "title": "Stream data routing - creating routing rules should only show the create button once AI connectors have loaded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/create_routing_rules.spec.ts",
+        "line": 188,
+        "column": 25
       }
     },
     {
@@ -409,7 +425,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/edit_routing_rules.spec.ts",
-        "line": 40,
+        "line": 30,
         "column": 9
       }
     },
@@ -425,8 +441,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/edit_routing_rules.spec.ts",
-        "line": 61,
-        "column": 9
+        "line": 42,
+        "column": 25
       }
     },
     {
@@ -441,8 +457,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/edit_routing_rules.spec.ts",
-        "line": 84,
-        "column": 9
+        "line": 53,
+        "column": 13
       }
     },
     {
@@ -457,8 +473,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/edit_routing_rules.spec.ts",
-        "line": 105,
-        "column": 9
+        "line": 78,
+        "column": 25
       }
     },
     {
@@ -473,8 +489,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/edit_routing_rules.spec.ts",
-        "line": 131,
-        "column": 9
+        "line": 97,
+        "column": 13
       }
     },
     {
@@ -489,8 +505,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/edit_routing_rules.spec.ts",
-        "line": 153,
-        "column": 9
+        "line": 114,
+        "column": 25
       }
     },
     {
@@ -505,8 +521,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/edit_routing_rules.spec.ts",
-        "line": 175,
-        "column": 9
+        "line": 131,
+        "column": 10
       }
     },
     {
@@ -521,8 +537,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/edit_routing_rules.spec.ts",
-        "line": 199,
-        "column": 9
+        "line": 150,
+        "column": 7
       }
     },
     {
@@ -537,8 +553,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/edit_routing_rules.spec.ts",
-        "line": 211,
-        "column": 9
+        "line": 147,
+        "column": 24
       }
     },
     {
@@ -553,8 +569,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/error_handling.spec.ts",
-        "line": 26,
-        "column": 9
+        "line": 21,
+        "column": 28
       }
     },
     {
@@ -569,8 +585,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/error_handling.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 39,
+        "column": 7
       }
     },
     {
@@ -585,8 +601,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/error_handling.spec.ts",
-        "line": 90,
-        "column": 9
+        "line": 68,
+        "column": 7
       }
     },
     {
@@ -601,8 +617,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/reorder_routing_rules.spec.ts",
-        "line": 43,
-        "column": 9
+        "line": 42,
+        "column": 10
       }
     },
     {
@@ -617,8 +633,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/reorder_routing_rules.spec.ts",
-        "line": 62,
-        "column": 9
+        "line": 66,
+        "column": 10
       }
     },
     {
@@ -633,8 +649,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/reorder_routing_rules.spec.ts",
-        "line": 80,
-        "column": 9
+        "line": 74,
+        "column": 24
       }
     },
     {
@@ -649,8 +665,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/reorder_routing_rules.spec.ts",
-        "line": 100,
-        "column": 9
+        "line": 110,
+        "column": 25
       }
     },
     {
@@ -665,8 +681,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/reorder_routing_rules.spec.ts",
-        "line": 118,
-        "column": 9
+        "line": 122,
+        "column": 66
       }
     },
     {
@@ -681,8 +697,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/reorder_routing_rules.spec.ts",
-        "line": 135,
-        "column": 9
+        "line": 139,
+        "column": 10
       }
     },
     {
@@ -697,8 +713,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/routing_data_preview.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 28,
+        "column": 25
       }
     },
     {
@@ -713,8 +729,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/routing_data_preview.spec.ts",
-        "line": 61,
-        "column": 9
+        "line": 46,
+        "column": 16
       }
     },
     {
@@ -729,8 +745,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/routing_data_preview.spec.ts",
-        "line": 102,
-        "column": 9
+        "line": 81,
+        "column": 7
       }
     },
     {
@@ -745,8 +761,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/routing_data_preview.spec.ts",
-        "line": 117,
-        "column": 9
+        "line": 93,
+        "column": 24
       }
     },
     {
@@ -761,8 +777,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/routing_data_preview.spec.ts",
-        "line": 139,
-        "column": 9
+        "line": 106,
+        "column": 7
       }
     },
     {
@@ -777,8 +793,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/routing_data_preview.spec.ts",
-        "line": 171,
-        "column": 9
+        "line": 124,
+        "column": 7
       }
     },
     {
@@ -793,7 +809,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/routing_data_preview.spec.ts",
-        "line": 208,
+        "line": 150,
         "column": 9
       }
     },
@@ -809,8 +825,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/routing_data_preview.spec.ts",
-        "line": 231,
-        "column": 9
+        "line": 173,
+        "column": 25
       }
     },
     {
@@ -820,8 +836,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/global.teardown.ts",
-        "line": 10,
-        "column": 19
+        "line": 5,
+        "column": 1
       }
     }
   ]
