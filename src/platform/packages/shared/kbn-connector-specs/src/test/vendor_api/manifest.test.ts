@@ -181,6 +181,36 @@ describe('MCP sources', () => {
       /A captured source needs a/
     );
   });
+
+  it('accepts a pinned source, which needs a note saying why it cannot follow the vendor', () => {
+    const openapi = { format: 'openapi', url: 'https://vendor.example.com/v1/openapi.json' };
+    const note = 'The vendor publishes a file per release and no URL for the latest.';
+
+    expect(parseManifest(withSource({ ...openapi, pinned: true, note })).sources.mcp).toMatchObject(
+      { pinned: true, note }
+    );
+    expect(() => parseManifest(withSource({ ...openapi, pinned: true }))).toThrow(
+      /A pinned source needs a/
+    );
+  });
+
+  it('accepts a latest page whose pattern finds a version in the URL, and rejects one that does not', () => {
+    const openapi = { format: 'openapi', url: 'https://vendor.example.com/v1.2/openapi.json' };
+    const latest = { url: 'https://vendor.example.com/', pattern: '/(v\\d+\\.\\d+)/' };
+
+    expect(parseManifest(withSource({ ...openapi, latest })).sources.mcp.latest).toEqual(latest);
+    for (const pattern of ['/(v\\d+\\.\\d+)/x', '/v\\d+\\.\\d+/', '(']) {
+      expect(() =>
+        parseManifest(withSource({ ...openapi, latest: { ...latest, pattern } }))
+      ).toThrow(/capture group that finds a version/);
+    }
+  });
+
+  it('rejects a source that is both captured and pinned', () => {
+    expect(() =>
+      parseManifest(withSource({ ...mcp, captured: true, pinned: true, note: 'Both.' }))
+    ).toThrow(/captured or pinned, not both/);
+  });
 });
 
 describe('fixtures', () => {

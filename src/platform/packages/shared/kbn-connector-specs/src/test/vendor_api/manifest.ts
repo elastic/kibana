@@ -64,6 +64,24 @@ const sourceSchema = z
      * what the capture took.
      */
     captured: z.literal(true).optional(),
+    /**
+     * Set when the vendor publishes no way to follow its spec: the URL names a version, a commit
+     * or a dated file, and a newer one lives at another URL. The source is fetched as any other,
+     * so a vendor that removes it still raises an issue, but one that answers with the snapshot is
+     * reported as `pinned` rather than `unchanged`, as it can't notice a vendor change. Refreshing
+     * it means moving the URL. Needs a `note` saying why it can't follow the vendor.
+     */
+    pinned: z.literal(true).optional(),
+    /**
+     * Where to learn that the vendor has published a newer version than the one the source's URL
+     * names: a page or API response, and a pattern with one capture group that finds a version in
+     * it and in the URL, such as `/network/(v\d+(?:\.\d+)+)`. `--drift` fetches the page, takes
+     * the highest version it names and reports the source when that is above the URL's.
+     */
+    latest: z
+      .object({ url: z.url(), pattern: z.string().min(1) })
+      .strict()
+      .optional(),
     /** The spec's `info.version`, when it has one. */
     apiVersion: z.string().optional(),
     /** When the snapshot last changed, as an ISO date-time. */
@@ -88,6 +106,30 @@ const sourceSchema = z
   .refine(({ captured, note }) => captured === undefined || note !== undefined, {
     message: 'A captured source needs a "note" saying what capturing it took',
     path: ['note'],
+  })
+  .refine(({ pinned, note }) => pinned === undefined || note !== undefined, {
+    message: 'A pinned source needs a "note" saying why it can\'t follow the vendor',
+    path: ['note'],
+  })
+  .refine(
+    ({ latest, url }) => {
+      if (latest === undefined) {
+        return true;
+      }
+      try {
+        return new RegExp(latest.pattern).exec(url)?.[1] !== undefined;
+      } catch {
+        return false;
+      }
+    },
+    {
+      message: '"latest" needs a pattern with a capture group that finds a version in "url"',
+      path: ['latest'],
+    }
+  )
+  .refine(({ pinned, captured }) => pinned === undefined || captured === undefined, {
+    message: 'A source is captured or pinned, not both: a captured one is never fetched',
+    path: ['pinned'],
   });
 
 const located = { in: z.enum(['query', 'body', 'header']).optional() };

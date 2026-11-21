@@ -120,10 +120,10 @@
     },
     "prometheus_v1": {
       "apiVersion": "0.0.1-undefined",
-      "fetchedAt": "2026-10-07T20:57:05.786Z",
+      "fetchedAt": "2026-11-20T21:25:06.426Z",
       "format": "openapi",
-      "note": "Prometheus publishes its HTTP API spec only as this golden test file, which its tests generate from the server's API definitions (web/api/v1/openapi.go). Pinned to a commit, since main changes with every API change; refresh by moving the pin.",
-      "url": "https://raw.githubusercontent.com/prometheus/prometheus/fa0e970a7c57f20733225ea44a7259b1b8b72a2c/web/api/v1/testdata/openapi_3.1_golden.yaml"
+      "note": "Prometheus publishes its HTTP API spec only as this golden test file, which its tests generate from the server's API definitions (web/api/v1/openapi.go). It is read from main, so a change to the API shows as drift.",
+      "url": "https://raw.githubusercontent.com/prometheus/prometheus/main/web/api/v1/testdata/openapi_3.1_golden.yaml"
     }
   }
 }

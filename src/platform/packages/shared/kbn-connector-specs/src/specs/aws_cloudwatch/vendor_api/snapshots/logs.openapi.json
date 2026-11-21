@@ -515,7 +515,8 @@
         "enum": [
           "STANDARD",
           "INFREQUENT_ACCESS",
-          "DELIVERY"
+          "DELIVERY",
+          "ESSENTIALS"
         ],
         "type": "string"
       },

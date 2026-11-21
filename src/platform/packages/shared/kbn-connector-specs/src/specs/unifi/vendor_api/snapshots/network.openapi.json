@@ -457,6 +457,9 @@
           "name": {
             "type": "string"
           },
+          "reportFlowEnabled": {
+            "type": "boolean"
+          },
           "schedule": {
             "$ref": "#/components/schemas/Firewall schedule"
           },
@@ -474,6 +477,7 @@
           "loggingEnabled",
           "metadata",
           "name",
+          "reportFlowEnabled",
           "source"
         ],
         "type": "object"
@@ -706,6 +710,7 @@
         "properties": {
           "frequencyGHz": {
             "enum": [
+              0.9,
               2.4,
               5,
               6,
@@ -1165,12 +1170,24 @@
           },
           "frequencyGHz": {
             "enum": [
+              0.9,
               2.4,
               5,
               6,
               60
             ],
             "type": "number"
+          },
+          "txPowerMode": {
+            "enum": [
+              "AUTO",
+              "LOW",
+              "MEDIUM",
+              "HIGH",
+              "CUSTOM",
+              "DISABLED"
+            ],
+            "type": "string"
           },
           "wlanStandard": {
             "enum": [
@@ -1180,7 +1197,8 @@
               "802.11n",
               "802.11ac",
               "802.11ax",
-              "802.11be"
+              "802.11be",
+              "802.11ah"
             ],
             "type": "string"
           }
@@ -1188,6 +1206,7 @@
         "required": [
           "channelWidthMHz",
           "frequencyGHz",
+          "txPowerMode",
           "wlanStandard"
         ],
         "type": "object"
