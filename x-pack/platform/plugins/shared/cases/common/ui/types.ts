@@ -52,6 +52,7 @@ import type {
   CasesMetricsResponse,
   SingleCaseMetricsResponse,
   CasesSimilarResponse,
+  FindCasesByObservableResponse,
 } from '../types/api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
@@ -151,6 +152,12 @@ export type CaseUICustomField = CaseUI['customFields'][number];
 export type CasesSimilarResponseUI = SnakeToCamelCase<CasesSimilarResponse>;
 export type SimilarCaseUI = Omit<SnakeToCamelCase<CasesSimilarResponseUI['cases'][0]>, 'comments'>;
 export type SimilarCasesUI = SimilarCaseUI[];
+export type CasesByObservableResponseUI = Omit<
+  SnakeToCamelCase<FindCasesByObservableResponse>,
+  'cases'
+> & {
+  cases: CasesUI;
+};
 
 export interface ResolvedCase {
   case: CaseUI;

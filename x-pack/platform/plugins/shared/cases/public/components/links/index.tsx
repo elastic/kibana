@@ -40,6 +40,8 @@ export interface CaseDetailsLinkProps {
   children?: React.ReactNode;
   detailName: string;
   title?: string;
+  /** Opens the case in a new browser tab instead of navigating within the app. */
+  openInNewTab?: boolean;
 }
 
 // TODO: Fix this manually. Issue #123375
@@ -48,6 +50,7 @@ const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkProps> = ({
   children,
   detailName,
   title,
+  openInNewTab = false,
 }) => {
   const { getCaseViewUrl, navigateToCaseView } = useCaseViewNavigation();
   const navigateToCaseViewClick = useCallback(
@@ -60,8 +63,11 @@ const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkProps> = ({
 
   return (
     <LinkAnchor
-      onClick={navigateToCaseViewClick}
+      // A new tab follows the link itself; in the app, the click navigates without a reload.
+      onClick={openInNewTab ? undefined : navigateToCaseViewClick}
       href={getCaseViewUrl({ detailName })}
+      target={openInNewTab ? '_blank' : undefined}
+      rel={openInNewTab ? 'noopener noreferrer' : undefined}
       data-test-subj="case-details-link"
       aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
     >

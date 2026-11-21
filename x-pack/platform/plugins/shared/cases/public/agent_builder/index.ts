@@ -10,9 +10,11 @@ import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser'
 import {
   CASE_ATTACHMENT_TYPE,
   CASES_ATTACHMENT_TYPE,
+  OBSERVABLE_ATTACHMENT_TYPE,
 } from '../../common/types/agent_builder/attachment_schemas';
 import { createCaseAttachmentDefinition } from './attachments/case_attachment_definition';
 import { createCasesAttachmentDefinition } from './attachments/cases_attachment_definition';
+import { createObservableAttachmentDefinition } from './attachments/observable_attachment_definition';
 
 interface RegisterCasesAgentBuilderAttachmentsArgs {
   attachments: AttachmentServiceStartContract;
@@ -31,4 +33,5 @@ export const registerCasesAgentBuilderAttachments = ({
     CASES_ATTACHMENT_TYPE,
     createCasesAttachmentDefinition({ application })
   );
+  attachments.addAttachmentType(OBSERVABLE_ATTACHMENT_TYPE, createObservableAttachmentDefinition());
 };

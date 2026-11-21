@@ -25,6 +25,8 @@ import {
   COMMENT_ATTACHMENT_TYPE,
   INTERNAL_CASE_METRICS_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
+  INTERNAL_FIND_CASES_BY_OBSERVABLE_URL,
+  INTERNAL_COUNT_CASES_BY_OBSERVABLES_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '@kbn/cases-plugin/common/constants';
 import type {
@@ -48,6 +50,12 @@ import type {
   BulkCreateObservablesResponse,
   FindObservablesRequest,
   FindObservablesResponse,
+  GetObservableMetadataRequest,
+  GetObservableMetadataResponse,
+  FindCasesByObservableRequest,
+  FindCasesByObservableResponse,
+  CountCasesByObservablesRequest,
+  CountCasesByObservablesResponse,
   CaseResolveResponse,
   CasesBulkGetResponse,
   CasesFindResponse,
@@ -65,6 +73,7 @@ import type {
 import {
   getCaseBulkCreateObservablesUrl,
   getCaseFindObservablesUrl,
+  getCaseObservableMetadataUrl,
   getCaseBulkDeleteObservablesUrl,
   getCaseCreateObservableUrl,
   getCaseDeleteObservableUrl,
@@ -169,7 +178,7 @@ export const deleteAllCaseItems = async (es: Client) => {
 export const deleteCaseObservables = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    q: 'type:cases-observables',
+    q: 'type:cases-observables OR type:cases-observable-shared',
     wait_for_completion: true,
     refresh: true,
     body: {},
@@ -1233,6 +1242,83 @@ export const findObservables = async ({
 }): Promise<FindObservablesResponse> => {
   const apiCall = supertest.post(
     `${getSpaceUrlPrefix(auth?.space)}${getCaseFindObservablesUrl(caseId)}`
+  );
+  void setupAuth({ apiCall, headers: {}, auth });
+
+  const { body } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return body;
+};
+
+export const getObservableMetadata = async ({
+  supertest,
+  caseId,
+  params,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  params: GetObservableMetadataRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+}): Promise<GetObservableMetadataResponse> => {
+  const apiCall = supertest.post(
+    `${getSpaceUrlPrefix(auth?.space)}${getCaseObservableMetadataUrl(caseId)}`
+  );
+  void setupAuth({ apiCall, headers: {}, auth });
+
+  const { body } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return body;
+};
+
+export const findCasesByObservable = async ({
+  supertest,
+  params,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  params: FindCasesByObservableRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+}): Promise<FindCasesByObservableResponse> => {
+  const apiCall = supertest.post(
+    `${getSpaceUrlPrefix(auth?.space)}${INTERNAL_FIND_CASES_BY_OBSERVABLE_URL}`
+  );
+  void setupAuth({ apiCall, headers: {}, auth });
+
+  const { body } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return body;
+};
+
+export const countCasesByObservables = async ({
+  supertest,
+  params,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  params: CountCasesByObservablesRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+}): Promise<CountCasesByObservablesResponse> => {
+  const apiCall = supertest.post(
+    `${getSpaceUrlPrefix(auth?.space)}${INTERNAL_COUNT_CASES_BY_OBSERVABLES_URL}`
   );
   void setupAuth({ apiCall, headers: {}, auth });
 

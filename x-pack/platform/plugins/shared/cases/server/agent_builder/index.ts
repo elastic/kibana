@@ -21,6 +21,7 @@ import { buildCasesSkill } from './skills/cases_skill';
 import { casesAnalyticsSkill } from './skills/cases_analytics_skill';
 import { createCaseAttachmentType } from './attachments/case_attachment_type';
 import { createCasesAttachmentType } from './attachments/cases_attachment_type';
+import { createObservableAttachmentType } from './attachments/observable_attachment_type';
 import { createCasesToolAvailability } from './utils/get_cases_tool_availability';
 
 /**
@@ -81,5 +82,8 @@ export function registerCasesAgentBuilderTools(
   );
   agentBuilder.attachments.registerType(
     createCasesAttachmentType() as Parameters<typeof agentBuilder.attachments.registerType>[0]
+  );
+  agentBuilder.attachments.registerType(
+    createObservableAttachmentType() as Parameters<typeof agentBuilder.attachments.registerType>[0]
   );
 }

@@ -17,6 +17,8 @@ import {
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
+  INTERNAL_FIND_CASES_BY_OBSERVABLE_URL,
+  INTERNAL_COUNT_CASES_BY_OBSERVABLES_URL,
 } from '../../common/constants';
 import { SortFieldCase } from '../../common/ui/types';
 
@@ -46,6 +48,9 @@ import {
   patchObservable,
   deleteObservable,
   bulkDeleteObservables,
+  findCasesByObservable,
+  countCasesByObservables,
+  getObservableMetadata,
 } from './api';
 
 import {
@@ -1427,6 +1432,92 @@ describe('Cases API', () => {
         perPage: 10,
       });
       expect(resp).toEqual(similarCases);
+    });
+  });
+
+  describe('findCasesByObservable', () => {
+    const params = {
+      owner: SECURITY_SOLUTION_OWNER,
+      typeKey: 'observable-type-ipv4',
+      value: '10.0.0.8',
+      excludeCaseId: mockCase.id,
+      page: 1,
+      perPage: 10,
+    };
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({
+        cases: [basicCaseSnake],
+        page: 1,
+        per_page: 10,
+        total: 1,
+        total_relation: 'eq',
+      });
+    });
+
+    it('posts the request to the internal route', async () => {
+      await findCasesByObservable(params, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(INTERNAL_FIND_CASES_BY_OBSERVABLE_URL, {
+        method: 'POST',
+        body: JSON.stringify(params),
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('returns the cases in camel case', async () => {
+      const resp = await findCasesByObservable(params, abortCtrl.signal);
+
+      expect(resp).toEqual({
+        cases: [basicCase],
+        page: 1,
+        perPage: 10,
+        total: 1,
+        totalRelation: 'eq',
+      });
+    });
+  });
+
+  describe('countCasesByObservables', () => {
+    it('posts the observables of a page to the internal route', async () => {
+      const params = {
+        owner: SECURITY_SOLUTION_OWNER,
+        excludeCaseId: mockCase.id,
+        observables: [{ typeKey: 'observable-type-ipv4', value: '10.0.0.8' }],
+      };
+      const counts = [{ typeKey: 'observable-type-ipv4', value: '10.0.0.8', total: 2 }];
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({ counts });
+
+      const resp = await countCasesByObservables(params, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(INTERNAL_COUNT_CASES_BY_OBSERVABLES_URL, {
+        method: 'POST',
+        body: JSON.stringify(params),
+        signal: abortCtrl.signal,
+      });
+      expect(resp).toEqual({ counts });
+    });
+  });
+
+  describe('getObservableMetadata', () => {
+    it('posts the type key and value to the internal route of the case', async () => {
+      const params = { typeKey: 'observable-type-ipv4', value: '10.0.0.8' };
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({ metadata: { triage: 'confirmed' } });
+
+      const resp = await getObservableMetadata(mockCase.id, params, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${mockCase.id}/observables/_metadata`,
+        {
+          method: 'POST',
+          body: JSON.stringify(params),
+          signal: abortCtrl.signal,
+        }
+      );
+      expect(resp).toEqual({ metadata: { triage: 'confirmed' } });
     });
   });
 

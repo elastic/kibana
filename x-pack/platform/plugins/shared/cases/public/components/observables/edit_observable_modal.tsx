@@ -14,22 +14,25 @@ import {
 } from '@elastic/eui';
 import React, { type FC } from 'react';
 import type { ObservablePatch } from '../../../common/types/api/observable/v1';
-import type { Observable } from '../../../common/types/domain/observable/v1';
 import { ObservableForm } from './observable_form';
 import * as i18n from './translations';
 import { usePatchObservable } from '../../containers/use_patch_observables';
 import { type CaseUI } from '../../containers/types';
+import type { ObservableWithMetadata } from '../../../common/types/api';
 
 export interface EditObservableModalProps {
   onCloseModal: VoidFunction;
-  observable: Observable;
+  observable: ObservableWithMetadata;
   caseData: CaseUI;
+  /** Called once the change is saved, after the modal has closed. */
+  onObservableUpdated?: (patch: ObservablePatch) => void;
 }
 
 export const EditObservableModal: FC<EditObservableModalProps> = ({
   onCloseModal: closeModal,
   observable,
   caseData,
+  onObservableUpdated,
 }) => {
   const modalTitleId = useGeneratedHtmlId();
 
@@ -37,11 +40,16 @@ export const EditObservableModal: FC<EditObservableModalProps> = ({
     caseData.id,
     observable.id
   );
+  // The save button spins until the update settles. The modal closes only once it is saved, and
+  // stays open on an error (the mutation shows it in a toast) so the user can retry.
   const handleUpdateObservable = async (updatedObservable: ObservablePatch) => {
-    patchObservable({
-      observable: updatedObservable,
-    });
+    try {
+      await patchObservable({ observable: updatedObservable });
+    } catch {
+      return;
+    }
     closeModal();
+    onObservableUpdated?.(updatedObservable);
   };
 
   return (
@@ -55,6 +63,7 @@ export const EditObservableModal: FC<EditObservableModalProps> = ({
       </EuiModalHeader>
       <EuiModalBody>
         <ObservableForm
+          caseId={caseData.id}
           onCancel={closeModal}
           observable={observable}
           isLoading={isLoading}

@@ -19,7 +19,7 @@ export const getAppIdForOwner = (owner: string): string => getOwnerInfo(owner).a
 
 const getCasesBasePath = (owner: string): string => getOwnerInfo(owner).casesBasePath;
 
-const getCasePathForOwner = (owner: string, caseId: string): string =>
+export const getCasePathForOwner = (owner: string, caseId: string): string =>
   `${getCasesBasePath(owner)}/${caseId}`;
 
 export const getCasesListPathForOwner = (owner: string, query?: string): string => {

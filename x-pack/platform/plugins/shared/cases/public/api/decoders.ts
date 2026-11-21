@@ -11,6 +11,7 @@ import type {
   CasesBulkGetResponse,
   CasesMetricsResponse,
   CasesSimilarResponse,
+  FindCasesByObservableResponse,
 } from '../../common/types/api';
 import {
   CasesFindResponseSchema,
@@ -18,6 +19,7 @@ import {
   CasesBulkGetResponseSchema,
   CasesMetricsResponseSchema,
   CasesSimilarResponseSchema,
+  FindCasesByObservableResponseSchema,
 } from '../../common/types/api';
 import { decodeWithToasterError } from '../containers/utils';
 
@@ -42,3 +44,6 @@ export const decodeCasesBulkGetResponse = (res: CasesBulkGetResponse) => {
 
 export const decodeCasesSimilarResponse = (respCases?: CasesSimilarResponse) =>
   decodeWithToasterError(CasesSimilarResponseSchema, respCases);
+
+export const decodeCasesByObservableResponse = (respCases?: FindCasesByObservableResponse) =>
+  decodeWithToasterError(FindCasesByObservableResponseSchema, respCases);

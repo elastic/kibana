@@ -50,6 +50,7 @@ import {
   TemplatesService,
   FieldDefinitionsService,
   ObservableService,
+  ObservableSharedService,
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
@@ -408,6 +409,12 @@ export class CasesClientFactory {
         savedObjectsSerializer,
         namespace,
         scheduleCaseObservablesDeletion: this.options.scheduleCaseObservablesDeletion,
+      }),
+      observableSharedService: new ObservableSharedService({
+        log: this.logger,
+        unsecuredSavedObjectsClient,
+        savedObjectsSerializer,
+        namespace,
       }),
     };
   }

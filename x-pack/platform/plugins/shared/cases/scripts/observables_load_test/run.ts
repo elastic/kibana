@@ -51,7 +51,7 @@ interface BulkCreateReport {
 }
 
 interface FindResponse {
-  observables: Array<{ id: string }>;
+  observables: Array<{ id: string; typeKey: string; value: string }>;
   total: number;
   cursor?: string;
 }
@@ -293,6 +293,24 @@ export const runObservablesLoadTest = async (): Promise<void> => {
     const [{ id: caseId }] = cases;
     const find = (body: Record<string, unknown>) =>
       request<FindResponse>('POST', `/internal/cases/${caseId}/observables/_find`, body);
+    const pageKeys = (await find({ perPage: 20 })).observables.map(({ typeKey, value }) => ({
+      typeKey,
+      value,
+    }));
+    const countCases = (observables: Array<{ typeKey: string; value: string }>) =>
+      request('POST', '/internal/cases/observables/_count_cases', {
+        owner: config.owner,
+        excludeCaseId: caseId,
+        observables,
+      });
+    const findCasesBySharedValue = (perPage: number) =>
+      request<TotalsResponse>('POST', '/internal/cases/observables/_find_cases', {
+        owner: config.owner,
+        typeKey: IPV4,
+        value: SHARED_VALUE,
+        excludeCaseId: caseId,
+        perPage,
+      });
     const similarCases = (perPage: number) =>
       request<TotalsResponse>('POST', `/internal/cases/${caseId}/_similar`, { page: 1, perPage });
 
@@ -322,6 +340,15 @@ export const runObservablesLoadTest = async (): Promise<void> => {
           ids: cases.slice(0, 1_000).map(({ id }) => id),
         })
       ),
+      // The observables table's Related cases column: one count request per page of 20.
+      countCasesForAPage: await sample(config.readSamples, () => countCases(pageKeys)),
+      countCasesBySharedValue: await sample(config.readSamples, () =>
+        countCases([{ typeKey: IPV4, value: SHARED_VALUE }])
+      ),
+      findCasesBySharedValue: await sample(config.readSamples, () => findCasesBySharedValue(20)),
+      findCasesBySharedValueTotal: await sample(config.readSamples, () =>
+        findCasesBySharedValue(0)
+      ),
       // The similar cases tab, and its count, which every case view loads.
       similarCases: await sample(config.readSamples, () => similarCases(20)),
       similarCasesTotal: await sample(config.readSamples, () => similarCases(0)),
@@ -342,12 +369,15 @@ export const runObservablesLoadTest = async (): Promise<void> => {
 
     const theCase = await request<CaseResponse>('GET', `/api/cases/${caseId}`);
     const firstPage = await find({ perPage: 20 });
+    const sharedValueCases = await findCasesBySharedValue(0);
     const similar = await similarCases(0);
     const checks = {
       expectedObservables: config.observables,
       caseTotalObservables: theCase.total_observables,
       casePreviewSize: theCase.observables.length,
       findTotal: firstPage.total,
+      sharedValueCases: sharedValueCases.total,
+      sharedValueCasesIsMinimum: Number(sharedValueCases.total_relation === 'gte'),
       similarCases: similar.total,
       similarSkippedCommon: similar.skipped_common_observables ?? 0,
     };

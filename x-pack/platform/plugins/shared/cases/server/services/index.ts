@@ -17,6 +17,7 @@ export { UserProfileService } from './user_profiles';
 export { TemplatesService } from './templates';
 export { FieldDefinitionsService } from './field_definitions';
 export { ObservableService } from './observables';
+export { ObservableSharedService } from './observable_shared';
 
 export interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
