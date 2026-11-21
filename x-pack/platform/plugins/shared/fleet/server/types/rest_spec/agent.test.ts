@@ -15,6 +15,7 @@ import {
   BulkMigrateAgentsRequestSchema,
   GetAgentsRequestSchema,
   GetOneAgentRequestSchema,
+  PostGenerateAgentsReportRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostBulkAgentRestartRequestSchema,
   PostBulkAgentRollbackRequestSchema,
@@ -212,5 +213,57 @@ describe('PostAgentRestartRequestSchema', () => {
     expect(() =>
       PostAgentRestartRequestSchema.params.validate({ agentId: 'a'.repeat(513) })
     ).toThrow();
+  });
+});
+
+describe('GetAgentsRequestSchema sortField validation', () => {
+  it.each(['default_api_key', 'access_api_key', 'default_api_key.keyword'])(
+    'rejects sorting by the non-queryable field %s',
+    (sortField) => {
+      expect(() => GetAgentsRequestSchema.query.validate({ sortField })).toThrow(
+        /is not supported/
+      );
+    }
+  );
+
+  it.each(['enrolled_at', 'local_metadata.host.hostname', 'default_api_key_id', 'policy_id'])(
+    'still allows sorting by the queryable field %s',
+    (sortField) => {
+      expect(() => GetAgentsRequestSchema.query.validate({ sortField })).not.toThrow();
+    }
+  );
+});
+
+describe('PostGenerateAgentsReportRequestSchema field validation', () => {
+  it.each(['default_api_key', 'access_api_key'])(
+    'rejects a report that exports the non-queryable field %s',
+    (field) => {
+      expect(() =>
+        PostGenerateAgentsReportRequestSchema.body.validate({ agents: '*', fields: [field] })
+      ).toThrow(/is not supported/);
+    }
+  );
+
+  it.each(['default_api_key', 'access_api_key'])(
+    'rejects a report sorted by the non-queryable field %s',
+    (field) => {
+      expect(() =>
+        PostGenerateAgentsReportRequestSchema.body.validate({
+          agents: '*',
+          fields: ['agent.id'],
+          sort: { field, direction: 'asc' },
+        })
+      ).toThrow(/is not supported/);
+    }
+  );
+
+  it('still allows a report that exports and sorts by queryable fields', () => {
+    expect(() =>
+      PostGenerateAgentsReportRequestSchema.body.validate({
+        agents: '*',
+        fields: ['agent.id', 'local_metadata.host.hostname', 'default_api_key_id'],
+        sort: { field: 'enrolled_at', direction: 'desc' },
+      })
+    ).not.toThrow();
   });
 });
