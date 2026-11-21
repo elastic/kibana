@@ -22,21 +22,29 @@ import { defer, map } from 'rxjs';
  * deltas by index. The resolver keys tool calls by `toolCallId` instead:
  * - a chunk with a new `toolCallId` gets the next available index
  * - a chunk without `toolCallId` is a continuation of the most recent tool call at that source index
- *
- * Returns `undefined` for a continuation chunk whose tool call was never started.
+ * - a chunk without `toolCallId` at a source index that has no tool call yet (some gateways drop
+ *   the id, e.g. GPT-OSS via EIS) starts a new tool call, which later id-less chunks at that
+ *   source index continue
  */
 export const createToolCallIndexResolver = () => {
   const indexByToolCallId = new Map<string, number>();
   const currentIndexBySourceIndex = new Map<number, number>();
+  let nextIndex = 0;
 
-  return (toolCall: ChatCompletionChunkToolCall): number | undefined => {
+  return (toolCall: ChatCompletionChunkToolCall): number => {
     if (!toolCall.toolCallId) {
-      return currentIndexBySourceIndex.get(toolCall.index);
+      const currentIndex = currentIndexBySourceIndex.get(toolCall.index);
+      if (currentIndex !== undefined) {
+        return currentIndex;
+      }
+      const startedIndex = nextIndex++;
+      currentIndexBySourceIndex.set(toolCall.index, startedIndex);
+      return startedIndex;
     }
 
     let index = indexByToolCallId.get(toolCall.toolCallId);
     if (index === undefined) {
-      index = indexByToolCallId.size;
+      index = nextIndex++;
       indexByToolCallId.set(toolCall.toolCallId, index);
     }
     currentIndexBySourceIndex.set(toolCall.index, index);
@@ -44,17 +52,30 @@ export const createToolCallIndexResolver = () => {
   };
 };
 
+const DEFAULT_GENERATED_ID_PREFIX = 'generated_tool_call';
+
 /**
  * Rewrites the `index` of streamed tool call chunks so that each tool call has a unique index,
- * see {@link createToolCallIndexResolver}.
+ * see {@link createToolCallIndexResolver}. A tool call that starts without a `toolCallId` gets a
+ * generated one on its first chunk (`<generatedIdPrefix>_<index>`), because consumers such as Agent
+ * Builder require every tool call to have an id.
+ *
+ * The id is derived from the normalized index, not generated at random per subscription, so a
+ * stream normalized twice (e.g. the two subscriptions of a synchronous source in
+ * `chunksIntoMessage`) gets the same id on its chunks and on the message. Ids must still differ
+ * between completions, because Agent Builder rejects a duplicate tool call id across the steps of
+ * a run: pass a `generatedIdPrefix` that is unique per completion.
  */
 export function normalizeToolCallIndexes<
   T extends ChatCompletionChunkEvent | ChatCompletionTokenCountEvent
->(): OperatorFunction<T, T> {
+>({
+  generatedIdPrefix = DEFAULT_GENERATED_ID_PREFIX,
+}: { generatedIdPrefix?: string } = {}): OperatorFunction<T, T> {
   return (source$) =>
     // defer so each subscription (e.g. a retry) starts with fresh state
     defer(() => {
       const resolveIndex = createToolCallIndexResolver();
+      const startedIndexes = new Set<number>();
 
       return source$.pipe(
         map((event) => {
@@ -66,9 +87,17 @@ export function normalizeToolCallIndexes<
             ...event,
             tool_calls: event.tool_calls.map((toolCall) => {
               const index = resolveIndex(toolCall);
-              return index === undefined || index === toolCall.index
+              const isFirstChunk = !startedIndexes.has(index);
+              startedIndexes.add(index);
+
+              const toolCallId =
+                isFirstChunk && !toolCall.toolCallId
+                  ? `${generatedIdPrefix}_${index}`
+                  : toolCall.toolCallId;
+
+              return index === toolCall.index && toolCallId === toolCall.toolCallId
                 ? toolCall
-                : { ...toolCall, index };
+                : { ...toolCall, index, toolCallId };
             }),
           };
         })
