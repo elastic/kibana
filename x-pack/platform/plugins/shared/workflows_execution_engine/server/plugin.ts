@@ -2431,6 +2431,7 @@ export class WorkflowsExecutionEnginePlugin
       __internalStorage: {
         workflowExecutionsDataClient: this.dataClientBundle.createWorkflowDataClient(),
         stepExecutionsDataClient: this.dataClientBundle.createStepDataClient(),
+        executionsIoDataClient: this.dataClientBundle.createIoDataClient(),
       },
     };
   }

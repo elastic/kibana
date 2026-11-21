@@ -45,6 +45,7 @@ describe('workflowExecutionLoop', () => {
     },
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
+      flush: jest.fn().mockResolvedValue(undefined),
     },
     stepIoService: {
       flush: jest.fn().mockResolvedValue(undefined),
@@ -66,6 +67,15 @@ describe('workflowExecutionLoop', () => {
 
   it('runs execution and persistence loops and flushes state', async () => {
     const params = createParams();
+    const flushOrder: string[] = [];
+    params.stepIoService.flush.mockImplementation(() =>
+      Promise.resolve().then(() => {
+        flushOrder.push('io');
+      })
+    );
+    params.workflowExecutionState.flush.mockImplementation(async () => {
+      flushOrder.push('state');
+    });
     await workflowExecutionLoop(params as any);
 
     // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
@@ -79,6 +89,7 @@ describe('workflowExecutionLoop', () => {
     expect(params.workflowExecutionCursor.start).toHaveBeenCalled();
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
     expect(params.stepIoService.flush).toHaveBeenCalled();
+    expect(flushOrder).toEqual(['io', 'state']);
     // Workflow-end cleanup for transient rehydrations (deferred-release pattern).
     expect(params.stepIoService.releaseTransientlyRehydratedOutputs).toHaveBeenCalled();
     expect(params.eventQueue.flush).toHaveBeenCalled();

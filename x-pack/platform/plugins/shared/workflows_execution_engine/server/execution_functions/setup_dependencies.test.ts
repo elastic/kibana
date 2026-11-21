@@ -15,10 +15,20 @@ import type { WorkflowsExecutionEngineConfig } from '../config';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { WorkflowsExecutionEnginePluginStart } from '../types';
 
 import '../workflow_event_logger/mocks';
 jest.mock('../repositories/workflow_execution_repository');
 jest.mock('@kbn/workflows/graph');
+
+const mockWorkflowsExecutionEngine = {
+  __internalStorage: {
+    executionsIoDataClient: {
+      getByIds: jest.fn().mockResolvedValue({ items: [], missing: [] }),
+      bulkCreate: jest.fn().mockResolvedValue({ items: [], errors: false }),
+    },
+  },
+} as unknown as WorkflowsExecutionEnginePluginStart;
 
 describe('setupDependencies', () => {
   const workflowRunId = 'test-workflow-run-id';
@@ -128,7 +138,8 @@ describe('setupDependencies', () => {
       mockDependencies,
       mockWorkflowExecutionRepository,
       mockStepExecutionRepository,
-      mockFakeRequest
+      mockFakeRequest,
+      mockWorkflowsExecutionEngine
     );
 
     expect(mockAsScoped).toHaveBeenCalledWith(mockFakeRequest);
@@ -158,7 +169,8 @@ describe('setupDependencies', () => {
       mockDependencies,
       mockWorkflowExecutionRepository,
       mockStepExecutionRepository,
-      mockFakeRequest
+      mockFakeRequest,
+      mockWorkflowsExecutionEngine
     );
 
     expect(mockDependencies.actions.getActionsClientWithRequest).toHaveBeenCalledWith(
@@ -191,7 +203,8 @@ describe('setupDependencies', () => {
         mockDependencies,
         mockWorkflowExecutionRepository,
         mockStepExecutionRepository,
-        mockFakeRequest
+        mockFakeRequest,
+        mockWorkflowsExecutionEngine
       );
 
       expect(WorkflowGraph.fromWorkflowDefinition).toHaveBeenCalledWith(
@@ -213,7 +226,8 @@ describe('setupDependencies', () => {
         mockDependencies,
         mockWorkflowExecutionRepository,
         mockStepExecutionRepository,
-        mockFakeRequest
+        mockFakeRequest,
+        mockWorkflowsExecutionEngine
       );
 
       expect(WorkflowGraph.fromWorkflowDefinition).toHaveBeenCalledWith(expect.anything(), {
@@ -252,7 +266,8 @@ describe('setupDependencies', () => {
           mockDependencies,
           mockWorkflowExecutionRepository,
           mockStepExecutionRepository,
-          mockFakeRequest
+          mockFakeRequest,
+          mockWorkflowsExecutionEngine
         )
       ).rejects.toBeInstanceOf(WorkflowGraphSetupError);
 
@@ -282,7 +297,8 @@ describe('setupDependencies', () => {
           mockDependencies,
           mockWorkflowExecutionRepository,
           mockStepExecutionRepository,
-          mockFakeRequest
+          mockFakeRequest,
+          mockWorkflowsExecutionEngine
         )
       ).rejects.toBe(otherError);
 
@@ -311,7 +327,8 @@ describe('setupDependencies', () => {
         mockDependencies,
         mockWorkflowExecutionRepository,
         mockStepExecutionRepository,
-        mockFakeRequest
+        mockFakeRequest,
+        mockWorkflowsExecutionEngine
       )
     ).rejects.toThrow(`Workflow execution with ID ${workflowRunId} not found`);
 
@@ -354,7 +371,8 @@ describe('setupDependencies', () => {
         mockDependencies,
         mockWorkflowExecutionRepository,
         mockStepExecutionRepository,
-        mockFakeRequest
+        mockFakeRequest,
+        mockWorkflowsExecutionEngine
       );
 
       // Let any microtasks before the isReady await run

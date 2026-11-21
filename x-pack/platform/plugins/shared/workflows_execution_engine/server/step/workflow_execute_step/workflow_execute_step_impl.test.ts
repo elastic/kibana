@@ -12,6 +12,7 @@ import type { WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
 import { WorkflowExecuteStepImpl } from './workflow_execute_step_impl';
 import type { WorkflowExecuteStepImplInit } from './workflow_execute_step_impl';
 import type { WorkflowsExecutionEngineConfig } from '../../config';
+import type { ExecutionsIoClient } from '../../repositories/data_access_layer/implementations/executions_io/executions_io_data_client';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../types';
@@ -104,6 +105,9 @@ const createMockInit = (
     workflowsExecutionEngine,
     workflowExecutionRepository,
     stepExecutionRepository,
+    executionsIoDataClient: {
+      getByIds: jest.fn().mockResolvedValue({ items: [], missing: [] }),
+    } as unknown as ExecutionsIoClient,
     workflowLogger,
     config: {
       maxWorkflowDepth: MAX_WORKFLOW_DEPTH,
