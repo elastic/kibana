@@ -22,6 +22,8 @@ export interface CreateBatchesParams {
   corruptDocumentIds?: string[];
   transformErrors?: TransformErrorObjects[];
   maxBatchSizeBytes: number;
+  /** Builds the index operation of a transformed document. */
+  createIndexOperation?: (document: SavedObjectsRawDoc) => BulkIndexOperationTuple;
 }
 
 export interface DocumentExceedsBatchSize {
@@ -40,6 +42,7 @@ export function createBatches({
   corruptDocumentIds = [],
   transformErrors = [],
   maxBatchSizeBytes,
+  createIndexOperation = createBulkIndexOperationTuple,
 }: CreateBatchesParams): Either.Either<DocumentExceedsBatchSize, BulkOperation[][]> {
   /* To build up the NDJSON request body we construct an array of objects like:
    * [
@@ -93,7 +96,7 @@ export function createBatches({
 
   // create index (update) operations for all transformed documents
   for (const document of documents) {
-    const bulkIndexOperationBody = createBulkIndexOperationTuple(document);
+    const bulkIndexOperationBody = createIndexOperation(document);
     // take into account that this tuple's surrounding brackets `[]` won't be present in the NDJSON
     const docSizeBytes =
       Buffer.byteLength(JSON.stringify(bulkIndexOperationBody), 'utf8') - BRACKETS_BYTES;
