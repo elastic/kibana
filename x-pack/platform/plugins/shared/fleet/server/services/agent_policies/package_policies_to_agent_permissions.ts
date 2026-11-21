@@ -27,6 +27,10 @@ import {
 import { appContextService } from '../app_context';
 
 import { getNormalizedDataStreams } from '../../../common/services';
+import {
+  isAgentlessIntegration,
+  isInputAllowedForDeploymentMode,
+} from '../../../common/services/agentless_policy_helper';
 
 import type {
   FullAgentPolicyOutputPermissions,
@@ -354,7 +358,7 @@ export function storedPackagePoliciesToAgentPermissions(
       packagePolicy.id,
       maybeAddAdditionalPackagePoliciesPermissions(
         packagePolicy,
-        maybeAddAgentlessPermissions(packagePolicy, {
+        maybeAddAgentlessPermissions(packagePolicy, pkg, {
           indices: dataStreamsForPermissions.map((ds) => getDataStreamPrivileges(ds, namespace)),
           ...clusterRoleDescriptor,
         })
@@ -475,9 +479,23 @@ function universalProfilingPermissions(
 
 function maybeAddAgentlessPermissions(
   packagePolicy: PackagePolicy,
+  pkg: PackageInfo,
   existing: SecurityRoleDescriptor
 ): SecurityRoleDescriptor {
-  if (!packagePolicy.supports_agentless) {
+  // Grant agentless index permissions only for a policy that is genuinely an agentless deployment,
+  // not when the stored flag alone says so. The flag can be set through a write path that skips the
+  // package-policy service validation, so re-apply the same eligibility checks that validation runs:
+  // the package must be agentless-eligible and every enabled input must be allowed in agentless mode
+  // (the per-input, per-template deployment-mode check). This mirrors `validateAgentlessForPackagePolicy`
+  // so a legitimately saved policy keeps the grant while an invalid stored one does not.
+  const isAgentlessDeployment =
+    Boolean(packagePolicy.supports_agentless) &&
+    isAgentlessIntegration(pkg) &&
+    packagePolicy.inputs
+      .filter((input) => input.enabled)
+      .every((input) => isInputAllowedForDeploymentMode(input, 'agentless', pkg));
+
+  if (!isAgentlessDeployment) {
     return existing;
   }
   existing.indices!.push({
