@@ -18,7 +18,7 @@ import type {
   SeriesColorAccessorFn,
   LinearGradient,
 } from '@elastic/charts';
-import { ColorVariant, ScaleType } from '@elastic/charts';
+import { ColorVariant, ScaleType, type ScaleContinuousType } from '@elastic/charts';
 import { easing } from 'ts-easing';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-common';
@@ -36,7 +36,7 @@ import type {
   XScaleType,
   PointVisibility,
 } from '../../common';
-import { AreaFillOptions, AxisModes, SeriesTypes } from '../../common/constants';
+import { AreaFillOptions, AxisModes, SeriesTypes, XScaleTypes } from '../../common/constants';
 import type { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
 import type { ColorAssignments } from './color_assignment';
@@ -129,6 +129,24 @@ export interface DatatableWithFormatInfo {
 export type DatatablesWithFormatInfo = Record<string, DatatableWithFormatInfo>;
 
 export type FormattedDatatables = Record<string, Datatable>;
+
+/** X scale of a data layer's series: ordinal when the layer has no X column. */
+export const getSeriesXScaleType = (
+  layer: CommonXYDataLayerConfig,
+  xColumnId: string | undefined,
+  defaultXScaleType: XScaleType
+): XScaleType => (xColumnId ? layer.xScaleType ?? defaultXScaleType : XScaleTypes.ORDINAL);
+
+/** Y scale of a series: the axis scale, switched to binary for `bytes` columns on a linear axis. */
+export const getSeriesYScaleType = (
+  yAxis: GroupsConfiguration[number] | undefined,
+  columnFormatId: string | undefined
+): ScaleContinuousType => {
+  const scaleType = yAxis?.scaleType || ScaleType.Linear;
+  return columnFormatId === 'bytes' && scaleType === ScaleType.Linear
+    ? ScaleType.LinearBinary
+    : scaleType;
+};
 
 export const getFormattedRow = (
   row: Datatable['rows'][number],
@@ -431,7 +449,6 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   if (yAxis?.mode) {
     stackMode = yAxis?.mode === AxisModes.NORMAL ? undefined : yAxis?.mode;
   }
-  const yScaleType = yAxis?.scaleType || ScaleType.Linear;
   const isBarChart = layer.seriesType === SeriesTypes.BAR;
   const xColumnId =
     layer.xAccessor !== undefined
@@ -578,11 +595,8 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     markSizeAccessor: markSizeColumnId,
     markFormat: (value) => markFormatter.convertToText(value),
     data: rows,
-    xScaleType: xColumnId ? layer.xScaleType ?? defaultXScaleType : 'ordinal',
-    yScaleType:
-      formatter?.id === 'bytes' && yScaleType === ScaleType.Linear
-        ? ScaleType.LinearBinary
-        : yScaleType,
+    xScaleType: getSeriesXScaleType(layer, xColumnId, defaultXScaleType),
+    yScaleType: getSeriesYScaleType(yAxis, formatter?.id),
     color: colorAccessorFn,
     groupId: yAxis?.groupId,
     enableHistogramMode,

@@ -233,6 +233,20 @@ The Lens embeddable offers a way to extends the current set of visualization fea
 The each override is component-specific and it inherits the prop from its `elastic-charts` definition directly. Callback/handlers are not supported as functions, but the special value `"ignore"` can be provided in order to disable them in the embeddable rendering.
 **Note**: overrides are only applied to the local embeddable instance and will disappear when the visualization is open in the Lens editor.
 
+## XY overlay providers
+
+Plugins can draw overlays, such as points, on top of existing XY charts on every surface that renders Lens (dashboards, Discover, embedding apps) by registering an XY overlay provider with `lens.registerXYOverlayProvider` in their setup lifecycle. Nothing is stored in the chart. Apps embedding the component can switch providers off for a chart with the runtime-only `xyOverlayProviders` prop:
+
+```tsx
+<EmbeddableComponent
+  // ...
+  executionContext={{ type: 'myApp' }}
+  xyOverlayProviders={{ 'myPlugin.exemplars': false }}
+/>
+```
+
+See [`public/xy_overlay_providers/README.md`](./public/xy_overlay_providers/README.md) for the provider contract and `x-pack/examples/lens_exemplars_example` for a working example.
+
 # Lens Development
 
 The following sections are concerned with developing the Lens plugin itself.

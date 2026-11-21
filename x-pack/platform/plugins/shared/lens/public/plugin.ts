@@ -47,6 +47,7 @@ import {
   type DatasourceMap,
   type VisualizationMap,
   type LensTopNavMenuEntryGenerator,
+  type LensXYOverlayProvider,
   type VisualizeEditorContext,
   type EditorFrameSetup,
   type LensDocument,
@@ -141,6 +142,10 @@ import type { Visualization, LensSerializedState, TypedLensByValueInput, Suggest
 import type { LensEmbeddableStartServices } from './react_embeddable/types';
 import type { EditorFrameServiceValue } from './editor_frame_service/editor_frame_service_context';
 import { setLensBuilder } from './lazy_builder';
+import {
+  createXYOverlayProviderRegistry,
+  type XYOverlayProviderRegistry,
+} from './xy_overlay_providers';
 
 export type { SaveProps } from './app_plugin';
 
@@ -213,6 +218,15 @@ export interface LensPublicSetup {
   registerTopNavMenuEntryGenerator: (
     navigationPromptGenerator: LensTopNavMenuEntryGenerator
   ) => void;
+  /**
+   * Register a provider of overlays, such as points, that Lens draws at render time on top of the
+   * XY charts matching its rules. Nothing is persisted in the chart.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  registerXYOverlayProvider: (provider: LensXYOverlayProvider) => void;
 }
 
 export interface LensPublicStart {
@@ -304,6 +318,7 @@ export class LensPlugin {
   private gaugeVisualization: GaugeVisualizationType | undefined;
   private tagcloudVisualization: TagcloudVisualizationType | undefined;
   private topNavMenuEntries: LensTopNavMenuEntryGenerator[] = [];
+  private xyOverlayProviderRegistry: XYOverlayProviderRegistry = createXYOverlayProviderRegistry();
   private hasDiscoverAccess: boolean = false;
   private dataViewsService: DataViewsPublicPluginStart | undefined;
   private locator?: LensAppLocator;
@@ -380,6 +395,7 @@ export class LensPlugin {
         eventAnnotationService,
         theme: core.theme,
         uiSettings: core.uiSettings,
+        xyOverlayProviderRegistry: this.xyOverlayProviderRegistry,
       };
     };
 
@@ -573,6 +589,9 @@ export class LensPlugin {
       },
       registerTopNavMenuEntryGenerator: (menuEntryGenerator: LensTopNavMenuEntryGenerator) => {
         this.topNavMenuEntries.push(menuEntryGenerator);
+      },
+      registerXYOverlayProvider: (provider: LensXYOverlayProvider) => {
+        this.xyOverlayProviderRegistry.register(provider);
       },
     };
   }

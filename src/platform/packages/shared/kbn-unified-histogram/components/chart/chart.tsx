@@ -12,6 +12,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { EuiDelayRender, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ApproximationBadge } from '@kbn/esql-browser';
 import type {
   EmbeddableComponentProps,
@@ -80,6 +81,8 @@ export interface UnifiedHistogramChartProps {
   withLensActions?: boolean;
   lensActionsOptions?: UnifiedHistogramLensActionsOptions;
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
+  /** Identifies the host rendering the chart, e.g. `{ type: 'discover' }`; forwarded to Lens */
+  executionContext?: KibanaExecutionContext;
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
@@ -106,6 +109,7 @@ export function UnifiedHistogramChart({
   onApiAvailable: consumerOnApiAvailable,
   withLensActions = true,
   lensActionsOptions,
+  executionContext,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
   const lensVisServiceCurrentSuggestionContext = lensVisServiceState.currentSuggestionContext;
@@ -226,6 +230,7 @@ export function UnifiedHistogramChart({
   const lensPropsContext = useLensProps({
     fetch$,
     onLoad,
+    executionContext,
   });
 
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
