@@ -1657,6 +1657,42 @@ describe('createChatCompleteApi', () => {
     });
   });
 
+  describe('template timeouts', () => {
+    beforeEach(() => {
+      mockEsClient.inference.get.mockResolvedValue({
+        endpoints: [
+          { inference_id: 'my-endpoint', task_type: 'chat_completion', service: 'openai' },
+        ],
+      });
+      resolveInferenceEndpointMock.mockResolvedValue({
+        inferenceId: 'my-endpoint',
+        provider: 'openai',
+        modelId: 'gpt-4o',
+        taskType: 'chat_completion',
+      });
+      inferenceEndpointAdapterMock.chatComplete.mockReturnValue(of(chunkEvent('ok')));
+    });
+
+    it('forwards first-byte and idle timeouts to the adapter for template requests', async () => {
+      await chatComplete({
+        connectorId: 'my-endpoint',
+        messages: [],
+        template: { id: '.attack-discovery', version: 1, variables: {} },
+        firstByteTimeoutMs: 45_000,
+        idleTimeoutMs: 120_000,
+        maxRetries: 0,
+      });
+
+      expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          template: { id: '.attack-discovery', version: 1, variables: {} },
+          firstByteTimeoutMs: 45_000,
+          idleTimeoutMs: 120_000,
+        })
+      );
+    });
+  });
+
   describe('template token usage', () => {
     const tokenUsageLogger = {
       log: jest.fn().mockResolvedValue(undefined),

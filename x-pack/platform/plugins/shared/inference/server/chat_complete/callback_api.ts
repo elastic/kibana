@@ -23,6 +23,8 @@ import {
 import type { Logger } from '@kbn/logging';
 import type { Observable } from 'rxjs';
 import { defer, forkJoin, from, identity, share, switchMap, catchError, throwError } from 'rxjs';
+import { filter, map, mergeScan, startWith } from 'rxjs/operators';
+import type { ChatCompletionChunkEvent } from '@kbn/inference-common';
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
@@ -52,6 +54,7 @@ import type { InferenceCallbackManager } from '../inference_client/callback_mana
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import { anonymizeChatTemplate } from './anonymize_chat_template';
+import { skipStreamedOutputFromRetryableAttempts } from './utils/skip_attempt_output';
 import { prepareAnonymization } from './prepare_anonymization';
 import type { TokenUsageLogger } from '../token_usage';
 import { handleTokenUsageLogging, buildTokenUsageContext } from '../token_usage';
@@ -181,6 +184,11 @@ export function createChatCompleteCallbackApi({
             shouldStreamInferenceEndpoint,
           })
         ).pipe(
+          // a retryable attempt that already streamed output must not resurface:
+          // merging a stalled attempt's partial chunks with the retry's would
+          // corrupt consumers (e.g. tool-call argument JSON). Errors that will
+          // not be retried fail through untouched.
+          skipStreamedOutputFromRetryableAttempts(),
           retryHoldingTokenCountEvents({
             maxRetry: maxRetries,
             backoffMultiplier: retryConfiguration.backoffMultiplier,
@@ -348,6 +356,8 @@ function createChatCompletePipeline({
               abortSignal,
               metadata,
               timeout,
+              firstByteTimeoutMs,
+              idleTimeoutMs,
               maxContentLength,
               cacheControl,
               sessionId,

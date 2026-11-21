@@ -46,6 +46,12 @@ export function eventSourceStreamIntoObservable(
 
     async function processStream() {
       for await (const chunk of readable) {
+        // a buffered chunk can still be delivered after teardown destroyed the
+        // stream; rearming the idle timer then would leave a dangling timer
+        // that keeps the event loop alive for `idleTimeoutMs`
+        if (tornDown) {
+          return;
+        }
         armIdleTimer();
         if (Date.now() > deadline) {
           throw createTimeoutError();

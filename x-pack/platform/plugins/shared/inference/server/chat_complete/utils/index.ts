@@ -30,4 +30,5 @@ export {
 } from './handle_connector_response';
 export { handleLifecycleCallbacks } from './handle_lifecycle_callbacks';
 export { retryHoldingTokenCountEvents } from './hold_token_count_events';
+export { skipStreamedOutputFromRetryableAttempts } from './skip_attempt_output';
 export { ensureToolsWhenHistoryHasToolUse } from './ensure_tools_when_history_has_tool_use';
