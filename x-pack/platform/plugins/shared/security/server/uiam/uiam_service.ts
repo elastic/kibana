@@ -381,9 +381,14 @@ export interface UiamServicePublic {
   /**
    * Fetches one service account via the UIAM service. Only returns the account when its
    * `assumable_by` policy names this Kibana's project. Resolves `null` when UIAM does not know the
-   * account, whether it says so with a 404 or with the 403 it sends for an unknown account.
+   * account, whether it says so with a 404 or with the 403 it sends for an unknown account. A 404
+   * without a UIAM error code rejects, because it may not come from UIAM.
+   * `signal` aborts the request.
    */
-  getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails | null>;
+  getServiceAccount(
+    serviceAccountId: string,
+    options?: { signal?: AbortSignal }
+  ): Promise<UiamServiceAccountDetails | null>;
 
   /**
    * Revokes one service account via the UIAM service. Authorized against the account's
@@ -1055,7 +1060,10 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.getServiceAccount}.
    */
-  async getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails | null> {
+  async getServiceAccount(
+    serviceAccountId: string,
+    { signal }: { signal?: AbortSignal } = {}
+  ): Promise<UiamServiceAccountDetails | null> {
     try {
       this.#logger.debug(`Attempting to get service account [${serviceAccountId}].`);
 
@@ -1068,6 +1076,7 @@ export class UiamService implements UiamServicePublic {
             method: 'GET',
             // No credential headers on purpose, for the same reason as `listServiceAccounts`.
             headers: { 'User-Agent': this.#userAgentHeader },
+            signal,
             // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
             dispatcher: this.#dispatcher,
           }
@@ -1077,11 +1086,13 @@ export class UiamService implements UiamServicePublic {
       this.#logger.debug(`Successfully got service account [${serviceAccountId}].`);
       return response;
     } catch (err) {
-      // An unknown account is an answer rather than a failure, so it resolves rather than throws.
+      // An unknown account is an answer rather than a failure, so it resolves rather than throws. A
+      // 404 counts only when it carries a UIAM error code: one from a gateway in front of UIAM
+      // says nothing about the account, and callers remove bindings when an account is gone.
+      const errorCode = UiamService.#getErrorCode(err);
       if (
-        UiamService.#getErrorCode(err) ===
-          UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND ||
-        (Boom.isBoom(err) && err.output.statusCode === 404)
+        errorCode === UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND ||
+        (Boom.isBoom(err) && err.output.statusCode === 404 && errorCode !== undefined)
       ) {
         this.#logger.debug(`Service account [${serviceAccountId}] was not found.`);
         return null;

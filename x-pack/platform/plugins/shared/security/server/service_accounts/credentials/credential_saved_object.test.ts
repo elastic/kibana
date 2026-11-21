@@ -10,6 +10,8 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 
 import type { ServiceAccountCredentialAttributes } from './credential_saved_object';
 import {
+  BINDING_CLOCK_SKEW_TOLERANCE_MS,
+  isBoundBeforeCredential,
   registerServiceAccountCredentialSavedObjectType,
   SERVICE_ACCOUNT_CREDENTIAL_TYPE,
 } from './credential_saved_object';
@@ -99,5 +101,26 @@ describe('registerServiceAccountCredentialSavedObjectType', () => {
         serviceAccountId: { type: 'keyword', ignore_above: 1024 },
       },
     });
+  });
+});
+
+describe('isBoundBeforeCredential', () => {
+  const BOUND_AT = '2026-08-21T12:00:00.000Z';
+  const after = (ms: number) => new Date(Date.parse(BOUND_AT) + ms).toISOString();
+
+  it('accepts a credential created before the bind, or within the clock skew after it', () => {
+    expect(isBoundBeforeCredential(BOUND_AT, after(-60_000))).toBe(false);
+    expect(isBoundBeforeCredential(BOUND_AT, after(BINDING_CLOCK_SKEW_TOLERANCE_MS))).toBe(false);
+  });
+
+  it('flags a credential created later than the clock skew allows', () => {
+    expect(isBoundBeforeCredential(BOUND_AT, after(BINDING_CLOCK_SKEW_TOLERANCE_MS + 1))).toBe(
+      true
+    );
+  });
+
+  it('flags a timestamp that does not parse', () => {
+    expect(isBoundBeforeCredential('not a date', after(-60_000))).toBe(true);
+    expect(isBoundBeforeCredential(BOUND_AT, 'not a date')).toBe(true);
   });
 });

@@ -41,6 +41,14 @@ export const getCredentialId = (serviceAccountId: string): string =>
  */
 export const BINDING_CLOCK_SKEW_TOLERANCE_MS = 10_000;
 
+/**
+ * Whether a workload bound at `boundAt` was bound to an earlier account with the same ID than the
+ * one whose credential was created at `credentialCreatedAt`. A timestamp that does not parse counts
+ * as bound before, so a binding Kibana cannot place is never waved through.
+ */
+export const isBoundBeforeCredential = (boundAt: string, credentialCreatedAt: string): boolean =>
+  !(Date.parse(credentialCreatedAt) <= Date.parse(boundAt) + BINDING_CLOCK_SKEW_TOLERANCE_MS);
+
 export interface ServiceAccountCredentialAttributes {
   /** The Elasticsearch principal, `{namespace}/{service}`. */
   serviceAccountId: string;

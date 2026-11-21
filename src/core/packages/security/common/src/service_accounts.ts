@@ -178,9 +178,11 @@ export interface ServiceAccountSummary {
   /**
    * Whether this Kibana expects to be able to run as the account, judged without asking the
    * account's identity provider. On Elasticsearch, that means Kibana holds a credential for it,
-   * which can be stale for an account that was deleted and recreated outside Kibana. On
-   * Serverless, it is always `true`, because UIAM only returns accounts that this project may
-   * assume.
+   * which can be stale for an account that was deleted and recreated outside Kibana. A summary of
+   * a workload's account is also `false` when the workload was bound before the account was
+   * deleted and created again with the same ID, because Kibana refuses to run the workload as the
+   * new account until it is bound again. On Serverless, it is always `true`, because UIAM only
+   * returns accounts that this project may assume.
    */
   assumable: boolean;
 }
