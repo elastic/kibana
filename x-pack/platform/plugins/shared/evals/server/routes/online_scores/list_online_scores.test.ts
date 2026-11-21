@@ -47,7 +47,7 @@ describe('GET /internal/evals/online_scores', () => {
       } as any,
     });
 
-    return { handler, context, onlineScoreService, logger, getSpaceId };
+    return { handler, context, onlineScoreService, logger, getSpaceId, router };
   };
 
   const makeRequest = ({
@@ -106,6 +106,77 @@ describe('GET /internal/evals/online_scores', () => {
           score: { name: 'factuality', value: 0.9, label: 'pass' },
         },
       ],
+    });
+  });
+
+  it('forwards the time window and score name filters to the service', async () => {
+    const { handler, context, onlineScoreService } = setup();
+    onlineScoreService.list.mockResolvedValueOnce({ total: 0, data: [] });
+
+    const request = httpServerMock.createKibanaRequest({
+      method: 'get',
+      path: EVALS_ONLINE_SCORES_URL,
+      query: {
+        monitor_id: 'workflow-1',
+        from: 'now-1h',
+        to: 'now',
+        score_name: 'factuality',
+      },
+    });
+    const response = await handler(context as any, request, kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    // The mocked request skips schema defaults, so page/perPage are left to the service defaults.
+    expect(onlineScoreService.list).toHaveBeenCalledWith({
+      monitorId: 'workflow-1',
+      spaceId: 'space-a',
+      page: undefined,
+      perPage: undefined,
+      from: 'now-1h',
+      to: 'now',
+      scoreName: 'factuality',
+    });
+  });
+
+  describe('query validation', () => {
+    const validateQuery = (query: unknown) => {
+      const versionedRouter = setup().router.versioned as MockedVersionedRouter;
+      const { config } = versionedRouter.getRoute('get', EVALS_ONLINE_SCORES_URL).versions[
+        API_VERSIONS.internal.v1
+      ];
+      const validate = (
+        config.validate as unknown as {
+          request: {
+            query: (
+              input: unknown,
+              factory: {
+                ok: (value: unknown) => { value: unknown };
+                badRequest: (message: string) => { error: string };
+              }
+            ) => { value?: unknown; error?: string };
+          };
+        }
+      ).request.query;
+      return validate(query, {
+        ok: (value) => ({ value }),
+        badRequest: (message) => ({ error: message }),
+      });
+    };
+
+    it.each([
+      ['ISO dates', { from: '2026-07-03T12:00:00.000Z', to: '2026-07-04T12:00:00.000Z' }],
+      ['date math', { from: 'now-24h', to: 'now' }],
+    ])('accepts %s for from/to', (_label, range) => {
+      expect(validateQuery({ monitor_id: 'workflow-1', ...range }).error).toBeUndefined();
+    });
+
+    it.each([
+      ['from', { from: 'yesterday-ish' }],
+      ['to', { to: 'now-banana' }],
+    ])('rejects an invalid %s with a 400 validation error', (_label, range) => {
+      const result = validateQuery({ monitor_id: 'workflow-1', ...range });
+      expect(result.value).toBeUndefined();
+      expect(result.error).toEqual(expect.any(String));
     });
   });
 

@@ -16,6 +16,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   API_VERSIONS,
+  EVALS_ONLINE_SCORES_PRIVILEGES_URL,
   EVALS_ONLINE_SCORES_URL,
   EvaluationIndices,
   type IngestOnlineScoresRequestBodyInput,
@@ -31,6 +32,11 @@ import {
 } from '../storage/scores/online_score_service';
 import { registerIngestOnlineScoresRoute } from '../routes/online_scores/ingest_online_scores';
 import { registerListOnlineScoresRoute } from '../routes/online_scores/list_online_scores';
+import { registerGetOnlineScoresPrivilegesRoute } from '../routes/online_scores/get_online_scores_privileges';
+import {
+  buildOnlineEvalAlertRuleParams,
+  type OnlineEvalAlertTrigger,
+} from '../../common/online_evals/alert_rule_query';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -94,7 +100,7 @@ const cleanupOnlineScoresStorage = async (esClient: ElasticsearchClient) => {
 };
 
 describe('online scores ingestion and listing integration', () => {
-  jest.setTimeout(180000);
+  jest.setTimeout(420000);
 
   let manageES: TestElasticsearchUtils;
   let esClient: ElasticsearchClient;
@@ -326,5 +332,195 @@ describe('online scores ingestion and listing integration', () => {
         perPage: 10,
       })
     ).resolves.toMatchObject({ total: 3 });
+  });
+
+  describe('online score alert rule query', () => {
+    // A fresh monitor per test keeps seeded docs from earlier tests out of the rule window.
+    let MONITOR_ID = 'workflow-alert-0';
+    let monitorCounter = 0;
+
+    const seedScores = async (
+      docs: Array<{ value: number; spaceId?: string; spaceIds?: string[]; metric?: string }>
+    ) => {
+      const now = Date.now();
+      await esClient.bulk({
+        refresh: 'wait_for',
+        operations: docs.flatMap(
+          ({ value, spaceId = 'space-a', spaceIds, metric = 'factuality' }, i) => [
+            { create: { _index: EvaluationIndices.ONLINE_SCORES } },
+            {
+              '@timestamp': new Date(now - i * 1000).toISOString(),
+              space_ids: spaceIds ?? [spaceId],
+              monitor: { id: MONITOR_ID, name: 'Alert monitor' },
+              trace_id: `trace-${i}`,
+              evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
+              score: { name: metric, value, label: 'x' },
+            },
+          ]
+        ),
+      });
+    };
+
+    /** Runs the generated rule params the way the `.es-query` ES|QL executor does. */
+    const runRule = async (
+      threshold: number,
+      trigger: OnlineEvalAlertTrigger = 'below',
+      minSampleSize = 3
+    ) => {
+      const params = buildOnlineEvalAlertRuleParams({
+        monitorId: MONITOR_ID,
+        spaceId: 'space-a',
+        metric: 'factuality',
+        threshold,
+        trigger,
+        minSampleSize,
+        windowSize: 1,
+        windowUnit: 'h',
+        drillDownUrl: `/online/${MONITOR_ID}?from=now-1h&to=now&metric=factuality`,
+      });
+      const response = await esClient.esql.query({
+        query: params.esqlQuery.esql,
+        filter: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  [params.timeField]: {
+                    gt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+                    lte: new Date(Date.now() + 1000).toISOString(),
+                    format: 'strict_date_optional_time',
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+      return response.values;
+    };
+
+    beforeEach(async () => {
+      monitorCounter += 1;
+      MONITOR_ID = `workflow-alert-${monitorCounter}`;
+      await seedScores([
+        { value: 0.2 },
+        { value: 0.3 },
+        { value: 0.4 },
+        // Same monitor and metric in another space: must never count towards the rule.
+        { value: 1, spaceId: 'space-b' },
+        { value: 1, spaceId: 'space-b' },
+        { value: 1, spaceId: 'space-b' },
+        // Another metric on the same monitor.
+        { value: 1, metric: 'relevance' },
+      ]);
+    });
+
+    it('fires when the windowed average is below the threshold', async () => {
+      const rows = await runRule(0.5);
+      expect(rows).toHaveLength(1);
+      expect(rows[0][0]).toBeCloseTo(0.3, 5);
+      expect(rows[0][1]).toBe(3);
+      expect(String(rows[0][2])).toContain(`/online/${MONITOR_ID}`);
+    });
+
+    it('counts documents that belong to several spaces for each of those spaces', async () => {
+      // Shared across space-a and space-b: the rule for space-a must see it, a multi-value
+      // `space_ids` is not matched by `==` or `IN`, only by MV_CONTAINS / `:`.
+      await seedScores([
+        { value: 0.1, spaceIds: ['space-a', 'space-b'] },
+        { value: 0.1, spaceIds: ['space-a', 'space-b'] },
+      ]);
+      const rows = await runRule(0.5, 'below', 5);
+      expect(rows).toHaveLength(1);
+      expect(rows[0][1]).toBe(5);
+      expect(rows[0][0]).toBeCloseTo((0.2 + 0.3 + 0.4 + 0.1 + 0.1) / 5, 5);
+    });
+
+    it('stays quiet when the average is above the threshold', async () => {
+      expect(await runRule(0.1)).toHaveLength(0);
+    });
+
+    it('stays quiet below the minimum sample size', async () => {
+      expect(await runRule(0.5, 'below', 4)).toHaveLength(0);
+    });
+
+    it('respects the trigger direction', async () => {
+      expect(await runRule(0.1, 'above')).toHaveLength(1);
+      expect(await runRule(0.5, 'above')).toHaveLength(0);
+    });
+  });
+  describe('online scores privileges route', () => {
+    const basicAuth = (username: string, password: string) =>
+      `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+    const NO_READ_USER = { username: 'online_scores_no_read', password: 'changeme-no-read' };
+
+    const callPrivilegesRoute = async (authorization: string) => {
+      const router = httpServiceMock.createRouter();
+      registerGetOnlineScoresPrivilegesRoute({
+        router,
+        logger,
+        canEncrypt: false,
+        evaluatorRegistry: createEvaluatorRegistry(),
+        getInferenceStart: async () =>
+          ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+        getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
+        getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+        security: { license: { isEnabled: () => true } },
+      });
+      const { handler } = (router.versioned as MockedVersionedRouter).getRoute(
+        'get',
+        EVALS_ONLINE_SCORES_PRIVILEGES_URL
+      ).versions[API_VERSIONS.internal.v1];
+      // Acts as the request's user: a real ES client that authenticates with the given credentials.
+      const asCurrentUser = esClient.child({ headers: { authorization } });
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: { asCurrentUser } } }),
+      } as unknown as Parameters<typeof handler>[0];
+      return handler(
+        context,
+        httpServerMock.createKibanaRequest({
+          method: 'get',
+          path: EVALS_ONLINE_SCORES_PRIVILEGES_URL,
+        }) as Parameters<typeof handler>[1],
+        kibanaResponseFactory
+      );
+    };
+
+    beforeAll(async () => {
+      const admin = esClient.child({
+        headers: { authorization: basicAuth('elastic', 'changeme') },
+      });
+      await admin.security.putRole({
+        name: 'online_scores_no_read',
+        indices: [{ names: ['unrelated-*'], privileges: ['read'] }],
+      });
+      await admin.security.putUser({
+        username: NO_READ_USER.username,
+        password: NO_READ_USER.password,
+        roles: ['online_scores_no_read'],
+      });
+    });
+
+    afterAll(async () => {
+      const admin = esClient.child({
+        headers: { authorization: basicAuth('elastic', 'changeme') },
+      });
+      await admin.security.deleteUser({ username: NO_READ_USER.username }).catch(() => {});
+      await admin.security.deleteRole({ name: 'online_scores_no_read' }).catch(() => {});
+    });
+
+    it('reports has_read: false for a user without read on the online scores index', async () => {
+      const response = await callPrivilegesRoute(
+        basicAuth(NO_READ_USER.username, NO_READ_USER.password)
+      );
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({ has_read: false });
+    });
+
+    it('reports has_read: true for a superuser', async () => {
+      const response = await callPrivilegesRoute(basicAuth('elastic', 'changeme'));
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({ has_read: true });
+    });
   });
 });

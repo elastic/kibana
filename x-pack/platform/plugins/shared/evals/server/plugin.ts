@@ -149,6 +149,7 @@ export class EvalsPlugin
       encryptedSavedObjects,
       workflowsExtensions,
       workflowsManagement,
+      security: securitySetup,
     }: EvalsSetupDependencies,
     evaluatorRegistry: EvaluatorRegistry,
     taskProviderRegistry: TaskProviderRegistry
@@ -284,6 +285,7 @@ export class EvalsPlugin
       getAccessibleSpaceIds,
       taskProviderRegistry,
       workflowsManagement,
+      security: securitySetup,
     });
 
     if (workflowsExtensions) {

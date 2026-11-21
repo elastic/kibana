@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { EvalsRouter, EvalsWorkflowsManagementSetup } from '../types';
 import type { SpaceDependencies } from './shared/resolve_dataset_spaces';
 import type { EvaluatorRegistry } from '../evaluators/types';
@@ -40,7 +41,9 @@ import { registerGetTracingProjectsRoute } from './tracing/get_projects';
 import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
 import { registerIngestScoresRoute } from './scores/ingest_scores';
 import { registerIngestOnlineScoresRoute } from './online_scores/ingest_online_scores';
+import { registerGetOnlineScoresPrivilegesRoute } from './online_scores/get_online_scores_privileges';
 import { registerListOnlineScoresRoute } from './online_scores/list_online_scores';
+import { registerListOnlineScoreNamesRoute } from './online_scores/list_online_score_names';
 import { registerListEvaluatorsRoute } from './evaluators/list_evaluators';
 import { registerCreateEvaluatorRoute } from './evaluators/create_evaluator';
 import { registerGetEvaluatorRoute } from './evaluators/get_evaluator';
@@ -70,6 +73,8 @@ export interface RouteDependencies extends SpaceDependencies {
   getCurrentUsername?: (request: KibanaRequest) => Promise<string | undefined>;
   taskProviderRegistry?: TaskProviderRegistry;
   workflowsManagement?: EvalsWorkflowsManagementSetup;
+  /** Absent when the security plugin is not installed; its license says whether ES security is on. */
+  security?: { license: Pick<SecurityPluginSetup['license'], 'isEnabled'> };
 }
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
@@ -89,6 +94,8 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerIngestScoresRoute(dependencies);
   registerIngestOnlineScoresRoute(dependencies);
   registerListOnlineScoresRoute(dependencies);
+  registerListOnlineScoreNamesRoute(dependencies);
+  registerGetOnlineScoresPrivilegesRoute(dependencies);
   registerListDatasetsRoute(dependencies);
   registerCreateDatasetRoute(dependencies);
   // Registered before the `{datasetId}` route it would otherwise read as an id.
