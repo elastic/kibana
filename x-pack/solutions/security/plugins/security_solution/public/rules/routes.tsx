@@ -24,6 +24,7 @@ import {
   ENABLE_DE_HEALTH_UI_SETTING,
   ENABLE_RULE_CHANGES_HISTORY_SETTING,
   RULES_LANDING_PATH,
+  RULES_LIBRARIES_PATH,
   RULES_PATH,
   SecurityPageName,
 } from '../../common/constants';
@@ -39,6 +40,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { AllRulesTabs } from '../detection_engine/rule_management_ui/components/rules_table/constants';
 import { AddRulesPage } from '../detection_engine/rule_management_ui/pages/add_rules';
+import { RuleLibrariesPage } from '../detection_engine/rule_management_ui/pages/rule_libraries';
 import {
   DetectionEngineRuleHealthPage,
   DetectionEngineSpaceRulesHealthPage,
@@ -108,11 +110,17 @@ interface Features {
   deHealthUIEnabled: boolean;
   ruleHealthUIEnabled: boolean;
   endpointExceptionsTabEnabled: boolean;
+  ruleLibrariesEnabled: boolean;
 }
 
 const getRulesSubRoutes = (
   capabilities: Capabilities,
-  { deHealthUIEnabled, ruleHealthUIEnabled, endpointExceptionsTabEnabled }: Features
+  {
+    deHealthUIEnabled,
+    ruleHealthUIEnabled,
+    endpointExceptionsTabEnabled,
+    ruleLibrariesEnabled,
+  }: Features
 ) => [
   ...(hasCapabilities(capabilities, RULES_UI_READ_PRIVILEGE) // regular detection rules are enabled
     ? [
@@ -135,6 +143,19 @@ const getRulesSubRoutes = (
           }),
           exact: true,
         },
+        ...(ruleLibrariesEnabled
+          ? [
+              {
+                path: RULES_LIBRARIES_PATH,
+                main: withSecurityRoutePageWrapper(
+                  RuleLibrariesPage,
+                  SecurityPageName.rulesLibraries,
+                  { omitSpyRoute: true }
+                ),
+                exact: true,
+              },
+            ]
+          : []),
         {
           path: ALERT_ANALYSIS_WORKFLOW_PATH,
           main: withSecurityRoutePageWrapper(
@@ -202,6 +223,7 @@ const RulesContainerComponent: React.FC = () => {
   const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
   );
+  const ruleLibrariesEnabled = useIsExperimentalFeatureEnabled('ruleLibrariesEnabled');
   const ruleChangesHistoryFFEnabled = useIsExperimentalFeatureEnabled('ruleChangesHistoryEnabled');
   const [ruleChangesHistoryAdvancedSetting] = useUiSetting$<boolean>(
     ENABLE_RULE_CHANGES_HISTORY_SETTING
@@ -214,12 +236,19 @@ const RulesContainerComponent: React.FC = () => {
       deHealthUIEnabled,
       ruleHealthUIEnabled,
       endpointExceptionsTabEnabled: !isEndpointExceptionsMovedFFEnabled,
+      ruleLibrariesEnabled,
     }).map((route) => (
       <Route key={`rules-route-${route.path}`} path={route.path} exact={route?.exact ?? false}>
         <route.main />
       </Route>
     ));
-  }, [capabilities, deHealthUIEnabled, ruleHealthUIEnabled, isEndpointExceptionsMovedFFEnabled]);
+  }, [
+    capabilities,
+    deHealthUIEnabled,
+    ruleHealthUIEnabled,
+    isEndpointExceptionsMovedFFEnabled,
+    ruleLibrariesEnabled,
+  ]);
 
   return (
     <PluginTemplateWrapper>

@@ -25,7 +25,7 @@ export async function fetchTagsByVersion(
   versions: RuleVersionSpecifier[]
 ): Promise<string[]> {
   const soIds = versions.map((version) =>
-    getPrebuiltRuleAssetSoId(version.rule_id, version.version)
+    getPrebuiltRuleAssetSoId(version.rule_id, version.version, version.library_id)
   );
 
   const searchResult = await savedObjectsClient.search<

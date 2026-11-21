@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { ELASTIC_LIBRARY_ID } from '@kbn/security-rule-libraries';
 import type { RuleToImport } from '../../../../../../../../common/api/detection_engine';
-import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
+import type { PrebuiltRuleAsset, PrebuiltRuleAssetRecord } from '../../../../../prebuilt_rules';
 import type { IPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { withSecuritySpan } from '../../../../../../../utils/with_security_span';
 
@@ -36,9 +37,17 @@ export const fetchPrebuiltImportContext = async ({
       ruleAssetsClient.fetchAssetsByVersion(ruleVersions).then((r) => r.assets),
     ]);
 
-    const matchingAssetsByRuleId: Record<string, PrebuiltRuleAsset> = {};
+    const matchingAssetsByRuleId: Record<string, PrebuiltRuleAssetRecord> = {};
     for (const asset of matchingAssets) {
-      matchingAssetsByRuleId[asset.rule_id] = asset;
+      const existing = matchingAssetsByRuleId[asset.rule_id];
+      const assetLibrary = asset.library_id ?? ELASTIC_LIBRARY_ID;
+      const existingLibrary = existing?.library_id ?? ELASTIC_LIBRARY_ID;
+      const preferAsset =
+        !existing ||
+        (existingLibrary !== ELASTIC_LIBRARY_ID && assetLibrary === ELASTIC_LIBRARY_ID);
+      if (preferAsset) {
+        matchingAssetsByRuleId[asset.rule_id] = asset;
+      }
     }
 
     const availableRuleAssetIds = new Set<string>([

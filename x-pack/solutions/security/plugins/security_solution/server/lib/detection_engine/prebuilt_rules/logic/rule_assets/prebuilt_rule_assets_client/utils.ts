@@ -27,6 +27,25 @@ export const PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS: MappingRuntimeFields = {
   },
 };
 
+export function buildLibraryIdsEsFilter(libraryIds?: string[]): ESFilter | undefined {
+  if (!libraryIds?.length) {
+    return undefined;
+  }
+
+  return { terms: { [`${PREBUILT_RULE_ASSETS_SO_TYPE}.library_id`]: libraryIds } };
+}
+
+export function buildLibraryIdsKueryFilter(libraryIds?: string[]): string | undefined {
+  if (!libraryIds?.length) {
+    return undefined;
+  }
+
+  const attr = `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.library_id`;
+  const parts = libraryIds.map((id) => `${attr}: "${id}"`);
+
+  return parts.length === 1 ? parts[0] : `(${parts.join(' OR ')})`;
+}
+
 /**
  * Builds the filter clauses for prebuilt rule
  * asset searches.
@@ -41,10 +60,12 @@ export function prepareQueryDslFilter({
   ruleIds,
   excludeRuleIds,
   filter,
+  libraryIds,
 }: {
   ruleIds?: string[];
   excludeRuleIds?: string[];
   filter?: string;
+  libraryIds?: string[];
 }): { filter: ESFilter[]; must_not?: ESFilter } {
   const filterClauses: ESFilter[] = [];
 
@@ -64,6 +85,11 @@ export function prepareQueryDslFilter({
       const message = err instanceof Error ? err.message : String(err);
       throw new Error(`Invalid KQL filter: ${message}`);
     }
+  }
+
+  const libraryFilter = buildLibraryIdsEsFilter(libraryIds);
+  if (libraryFilter) {
+    filterClauses.push(libraryFilter);
   }
 
   if (excludeRuleIds && excludeRuleIds.length > 0) {
@@ -101,6 +127,11 @@ export function getPrebuiltRuleAssetsSearchNamespace(
   return [savedObjectsClient.getCurrentNamespace() ?? 'default'];
 }
 
-export function getPrebuiltRuleAssetSoId(ruleId: string, version: number): string {
-  return `${PREBUILT_RULE_ASSETS_SO_TYPE}:${ruleId}_${version}`;
+export function getPrebuiltRuleAssetSoId(
+  ruleId: string,
+  version: number,
+  libraryId?: string
+): string {
+  const idBody = libraryId ? `${libraryId}_${ruleId}_${version}` : `${ruleId}_${version}`;
+  return `${PREBUILT_RULE_ASSETS_SO_TYPE}:${idBody}`;
 }

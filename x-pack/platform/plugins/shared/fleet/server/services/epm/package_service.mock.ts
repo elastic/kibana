@@ -19,6 +19,7 @@ const createClientMock = (): jest.Mocked<PackageClient> => ({
   getAgentPolicyConfigYAML: jest.fn(),
   getLatestPackageInfo: jest.fn(),
   getPackage: jest.fn(),
+  getPackageStream: jest.fn(),
   getPackageFieldsMetadata: jest.fn(),
   getPackages: jest.fn(),
   reinstallEsAssets: jest.fn(),

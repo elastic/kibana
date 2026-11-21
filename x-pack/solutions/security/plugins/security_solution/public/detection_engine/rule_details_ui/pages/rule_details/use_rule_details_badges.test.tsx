@@ -310,6 +310,21 @@ describe('useRuleDetailsBadges', () => {
     expect(screen.queryByTestId('ruleDetailsEnabledBadge')).not.toBeInTheDocument();
   });
 
+  it('shows the library a prebuilt rule came from', () => {
+    renderHeader({
+      rule: {
+        ...mockRule('rule-id'),
+        library: {
+          id: 'elastic-community',
+          title: 'Elastic Community Rules',
+          icon: 'users',
+        },
+      },
+    });
+
+    expect(screen.getByTestId('ruleDetailsLibraryBadge')).toHaveTextContent('Community');
+  });
+
   it('keeps the snooze badge visible next to the enabled badge when badges overflow', () => {
     renderHeader({
       rule: {

@@ -180,6 +180,7 @@ const createSecuritySolutionRequestContextMock = (
       throw new Error('Not implemented');
     }),
     getSpaceId: jest.fn(() => 'default'),
+    getEncryptedSavedObjectsClient: jest.fn(),
     getRuleDataService: jest.fn(() => clients.ruleDataService),
     getDetectionRulesClient: jest.fn(() => clients.detectionRulesClient),
     getDetectionEngineHealthClient: jest.fn(() => clients.detectionEngineHealthClient),

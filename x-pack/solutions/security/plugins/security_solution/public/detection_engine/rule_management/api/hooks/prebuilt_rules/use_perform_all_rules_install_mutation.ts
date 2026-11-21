@@ -18,6 +18,7 @@ import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_p
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFetchPrebuiltRulesDeprecationReviewQuery } from './use_fetch_prebuilt_rules_deprecation_review_query';
 import { cappedExponentialBackoff } from './capped_exponential_backoff';
+import { useInvalidateBrowseRuleLibraryQuery } from './use_browse_rule_library_query';
 
 export const PERFORM_ALL_RULES_INSTALLATION_KEY = [
   'POST',
@@ -25,9 +26,19 @@ export const PERFORM_ALL_RULES_INSTALLATION_KEY = [
   PERFORM_RULE_INSTALLATION_URL,
 ];
 
+export interface UsePerformAllRulesInstallParams {
+  // Installs the rules of this library only. Without it, the rules of every library are installed.
+  libraryId?: string;
+}
+
 export const usePerformAllRulesInstallMutation = (
-  options?: UseMutationOptions<PerformRuleInstallationResponseBody>
+  options?: UseMutationOptions<
+    PerformRuleInstallationResponseBody,
+    unknown,
+    UsePerformAllRulesInstallParams | void
+  >
 ) => {
+  const invalidateBrowseRuleLibrary = useInvalidateBrowseRuleLibraryQuery();
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRulesSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
   const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
@@ -38,10 +49,15 @@ export const usePerformAllRulesInstallMutation = (
   const invalidateFetchPrebuiltRulesDeprecationReview =
     useInvalidateFetchPrebuiltRulesDeprecationReviewQuery();
 
-  return useMutation<PerformRuleInstallationResponseBody>(() => performInstallAllRules(), {
+  return useMutation<
+    PerformRuleInstallationResponseBody,
+    unknown,
+    UsePerformAllRulesInstallParams | void
+  >((params) => performInstallAllRules(params?.libraryId), {
     ...options,
     mutationKey: PERFORM_ALL_RULES_INSTALLATION_KEY,
     onSettled: (...args) => {
+      invalidateBrowseRuleLibrary();
       invalidateFindRulesQuery();
       invalidateFetchRulesSnoozeSettings();
       invalidateFetchRuleManagementFilters();

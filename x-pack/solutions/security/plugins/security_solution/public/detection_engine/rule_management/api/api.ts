@@ -17,14 +17,26 @@ import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_st
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   GetPrebuiltRuleBaseVersionRequest,
+  BrowseRuleLibraryRequestBody,
+  BrowseRuleLibraryResponseBody,
+  CreateRuleLibraryRequestBody,
+  CreateRuleLibraryResponseBody,
+  DeleteRuleLibraryResponseBody,
+  GetRuleLibraryRuleRequestQuery,
+  GetRuleLibraryRuleResponseBody,
+  ListRuleLibraryTagsResponseBody,
+  ScanRuleLibraryRequestBody,
+  ScanRuleLibraryResponseBody,
   GetPrebuiltRuleBaseVersionResponseBody,
   GetPrebuiltRulesStatusResponseBody,
   InstallSpecificRulesRequest,
+  ListRuleLibrariesResponseBody,
   PerformRuleInstallationResponseBody,
   PerformRuleUpgradeRequestBody,
   PerformRuleUpgradeResponseBody,
   ReviewRuleDeprecationRequestBody,
   ReviewRuleDeprecationResponseBody,
+  SyncRuleLibrariesResponseBody,
   RevertPrebuiltRulesRequest,
   RevertPrebuiltRulesResponseBody,
   ReviewRuleInstallationRequestBody,
@@ -34,11 +46,19 @@ import type {
 } from '../../../../common/api/detection_engine/prebuilt_rules';
 import {
   BOOTSTRAP_EASE_RULES_URL,
+  BROWSE_RULE_LIBRARY_URL,
+  CREATE_RULE_LIBRARY_URL,
+  DELETE_RULE_LIBRARY_URL,
+  GET_RULE_LIBRARY_RULE_URL,
+  LIST_RULE_LIBRARY_TAGS_URL,
+  SCAN_RULE_LIBRARY_URL,
   GET_PREBUILT_RULES_BASE_VERSION_URL,
   GET_PREBUILT_RULES_STATUS_URL,
+  LIST_RULE_LIBRARIES_URL,
   PERFORM_RULE_INSTALLATION_URL,
   PERFORM_RULE_UPGRADE_URL,
   PREBUILT_RULES_STATUS_URL,
+  SYNC_RULE_LIBRARIES_URL,
   REVERT_PREBUILT_RULES_URL,
   REVIEW_RULE_DEPRECATION_URL,
   REVIEW_RULE_INSTALLATION_URL,
@@ -857,12 +877,111 @@ export const reviewRuleInstall = async ({
     body: JSON.stringify(request),
   });
 
-export const performInstallAllRules = async (): Promise<PerformRuleInstallationResponseBody> =>
+export const fetchRuleLibraries = async ({
+  signal,
+}: {
+  signal?: AbortSignal;
+}): Promise<ListRuleLibrariesResponseBody> =>
+  KibanaServices.get().http.fetch(LIST_RULE_LIBRARIES_URL, {
+    method: 'GET',
+    version: '1',
+    signal,
+  });
+
+export const browseRuleLibrary = async ({
+  body,
+  signal,
+}: {
+  body: BrowseRuleLibraryRequestBody;
+  signal?: AbortSignal;
+}): Promise<BrowseRuleLibraryResponseBody> =>
+  KibanaServices.get().http.fetch(BROWSE_RULE_LIBRARY_URL, {
+    method: 'POST',
+    version: '1',
+    signal,
+    body: JSON.stringify(body),
+  });
+
+export const fetchRuleLibraryRule = async ({
+  query,
+  signal,
+}: {
+  query: GetRuleLibraryRuleRequestQuery;
+  signal?: AbortSignal;
+}): Promise<GetRuleLibraryRuleResponseBody> =>
+  KibanaServices.get().http.fetch(GET_RULE_LIBRARY_RULE_URL, {
+    method: 'GET',
+    version: '1',
+    signal,
+    query,
+  });
+
+export const fetchRuleLibraryTags = async ({
+  libraryId,
+  signal,
+}: {
+  libraryId?: string;
+  signal?: AbortSignal;
+}): Promise<ListRuleLibraryTagsResponseBody> =>
+  KibanaServices.get().http.fetch(LIST_RULE_LIBRARY_TAGS_URL, {
+    method: 'GET',
+    version: '1',
+    signal,
+    query: libraryId ? { library_id: libraryId } : undefined,
+  });
+
+export const createRuleLibrary = async (
+  body: CreateRuleLibraryRequestBody
+): Promise<CreateRuleLibraryResponseBody> =>
+  KibanaServices.get().http.fetch(CREATE_RULE_LIBRARY_URL, {
+    method: 'POST',
+    version: '1',
+    body: JSON.stringify(body),
+  });
+
+export const deleteRuleLibrary = async ({
+  libraryId,
+  keepRuleVersions,
+}: {
+  libraryId: string;
+  keepRuleVersions: boolean;
+}): Promise<DeleteRuleLibraryResponseBody> =>
+  KibanaServices.get().http.fetch(
+    DELETE_RULE_LIBRARY_URL.replace('{library_id}', encodeURIComponent(libraryId)),
+    {
+      method: 'DELETE',
+      version: '1',
+      query: { keep_rule_versions: keepRuleVersions },
+    }
+  );
+
+export const scanRuleLibrary = async (
+  body: ScanRuleLibraryRequestBody
+): Promise<ScanRuleLibraryResponseBody> =>
+  KibanaServices.get().http.fetch(SCAN_RULE_LIBRARY_URL, {
+    method: 'POST',
+    version: '1',
+    body: JSON.stringify(body),
+  });
+
+export const syncRuleLibraries = async (
+  libraryIds?: string[]
+): Promise<SyncRuleLibrariesResponseBody> =>
+  KibanaServices.get().http.fetch(SYNC_RULE_LIBRARIES_URL, {
+    method: 'POST',
+    version: '1',
+    body: JSON.stringify({ library_ids: libraryIds }),
+  });
+
+export const performInstallAllRules = async (
+  libraryId?: string
+): Promise<PerformRuleInstallationResponseBody> =>
   KibanaServices.get().http.fetch(PERFORM_RULE_INSTALLATION_URL, {
     method: 'POST',
     version: '1',
     body: JSON.stringify({
       mode: 'ALL_RULES',
+      ...(libraryId ? { library_id: libraryId } : {}),
     }),
   });
 

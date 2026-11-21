@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/security-rule-libraries",
+  "version": "1.0.0",
+  "description": "Rule library definitions, saved objects and providers for Security prebuilt rules",
+  "license": "Elastic License 2.0",
+  "private": true
+}

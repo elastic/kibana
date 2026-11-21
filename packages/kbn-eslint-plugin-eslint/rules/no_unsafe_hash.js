@@ -22,6 +22,11 @@ const ALLOWED_UNSAFE_HASHES = [
     path: 'x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases/server/routes.ts',
     algorithms: ['sha1'],
   },
+  // Git object ids are SHA-1 by protocol; required for the rule-library git provider.
+  {
+    path: 'x-pack/solutions/security/packages/kbn-security-rule-libraries/src/git/protocol.ts',
+    algorithms: ['sha1'],
+  },
 ];
 
 const allowedAlgorithms = ['sha256', 'sha3-256', 'sha512'];

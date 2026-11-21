@@ -15,7 +15,10 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import { invariant } from '../../../../../../../../common/utils/invariant';
-import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_rule_asset';
+import type {
+  PrebuiltRuleAsset,
+  PrebuiltRuleAssetRecord,
+} from '../../../../model/rule_assets/prebuilt_rule_asset';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { validatePrebuiltRuleAssets } from '../../prebuilt_rule_assets_validation';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
@@ -32,10 +35,14 @@ export interface FetchAssetsByVersionSearchParams {
   page?: number;
   perPage?: number;
   fields?: string[];
+  libraryId?: string;
+  libraryIds?: string[];
 }
 
+type AssetVersion = RuleVersionSpecifier & { library?: { id: string } };
+
 export interface FetchAssetsByVersionResult {
-  assets: PrebuiltRuleAsset[];
+  assets: PrebuiltRuleAssetRecord[];
   aggregations?: Record<string, AggregationsAggregate>;
 }
 
@@ -51,7 +58,7 @@ export interface FetchAssetsByVersionResult {
  */
 export async function fetchAssetsByVersion(
   savedObjectsClient: SavedObjectsClientContract,
-  versions: RuleVersionSpecifier[],
+  versions: AssetVersion[],
   params?: FetchAssetsByVersionSearchParams
 ): Promise<FetchAssetsByVersionResult> {
   if (versions.length === 0) {
@@ -61,9 +68,7 @@ export async function fetchAssetsByVersion(
     };
   }
 
-  const soIds = versions.map((version) =>
-    getPrebuiltRuleAssetSoId(version.rule_id, version.version)
-  );
+  const soIds = versions.flatMap((version) => versionSoIds(version, params));
 
   const sourceIncludes = buildPrebuiltRuleAssetSourceIncludes(params?.fields);
 
@@ -93,7 +98,11 @@ export async function fetchAssetsByVersion(
     invariant(hitSource, 'Expected hit source to be defined');
 
     const asset = hitSource[PREBUILT_RULE_ASSETS_SO_TYPE];
-    ruleAssetsMap.set(getPrebuiltRuleAssetSoId(asset.rule_id, asset.version), asset);
+    const assetLibraryId = (asset as { library_id?: string }).library_id ?? params?.libraryId;
+    ruleAssetsMap.set(
+      getPrebuiltRuleAssetSoId(asset.rule_id, asset.version, assetLibraryId),
+      asset
+    );
   }
 
   // When the caller specifies `sort`, ES already returned hits in the requested
@@ -113,6 +122,23 @@ export async function fetchAssetsByVersion(
     aggregations: searchResult.aggregations as Record<string, AggregationsAggregate>,
   };
 }
+
+const versionSoIds = (
+  version: AssetVersion,
+  params?: FetchAssetsByVersionSearchParams
+): string[] => {
+  const libraryIds = params?.libraryIds;
+  if (!libraryIds?.length) {
+    return [getPrebuiltRuleAssetSoId(version.rule_id, version.version)];
+  }
+
+  const libraryId = version.library_id ?? version.library?.id ?? params?.libraryId;
+  if (libraryId) {
+    return [getPrebuiltRuleAssetSoId(version.rule_id, version.version, libraryId)];
+  }
+
+  return libraryIds.map((id) => getPrebuiltRuleAssetSoId(version.rule_id, version.version, id));
+};
 
 const buildQuery = (soIds: string[], filter: string | undefined): QueryDslQueryContainer => {
   const must: QueryDslQueryContainer[] = [

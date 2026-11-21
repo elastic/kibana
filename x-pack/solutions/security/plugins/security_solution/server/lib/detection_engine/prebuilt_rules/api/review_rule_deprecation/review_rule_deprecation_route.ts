@@ -44,10 +44,13 @@ export const reviewRuleDeprecationRoute = (router: SecuritySolutionPluginRouter)
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const ctx = await context.resolve(['core', 'alerting']);
+          const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
           const soClient = ctx.core.savedObjects.client;
           const rulesClient = await ctx.alerting.getRulesClient();
-          const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
+          const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient, {
+            ruleLibraryEnabled:
+              ctx.securitySolution.getConfig().experimentalFeatures.ruleLibrariesEnabled,
+          });
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
           const ids = request.body?.ids;

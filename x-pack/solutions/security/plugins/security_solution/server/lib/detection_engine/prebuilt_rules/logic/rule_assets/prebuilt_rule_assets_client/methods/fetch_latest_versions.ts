@@ -44,9 +44,10 @@ export async function fetchLatestVersions(
     ruleIds?: string[];
     sort?: PrebuiltRuleAssetsSort;
     filter?: string;
+    libraryIds?: string[];
   }
 ): Promise<BasicRuleInfo[]> {
-  const { ruleIds, sort, filter } = queryParameters || {};
+  const { ruleIds, sort, filter, libraryIds } = queryParameters || {};
 
   if (ruleIds && ruleIds.length === 0) {
     return [];
@@ -55,12 +56,12 @@ export async function fetchLatestVersions(
   // First, fetch the latest version numbers for each rule_id.
   const latestVersionSpecifiers: RuleVersionSpecifier[] = await fetchLatestVersionSpecifiers(
     savedObjectsClient,
-    ruleIds
+    ruleIds,
+    libraryIds
   );
 
-  // Then, fetch the rule type for each latest version and sort the result.
   const soIds = latestVersionSpecifiers.map((rule) =>
-    getPrebuiltRuleAssetSoId(rule.rule_id, rule.version)
+    getPrebuiltRuleAssetSoId(rule.rule_id, rule.version, rule.library_id)
   );
   const latestVersions = await fetchVersionsBySoIds(savedObjectsClient, soIds, sort, filter);
 
@@ -69,7 +70,8 @@ export async function fetchLatestVersions(
 
 async function fetchLatestVersionSpecifiers(
   savedObjectsClient: SavedObjectsClientContract,
-  ruleIds?: string[]
+  ruleIds?: string[],
+  libraryIds?: string[]
 ) {
   /**
    * Fetches deprecated rule assets in order to filter out all versions of the deprecated rules
@@ -78,17 +80,20 @@ async function fetchLatestVersionSpecifiers(
    * version older. This filter ensures all rule assets fetched will not contain any rule ids that
    * have been labeled as deprecated.
    */
-  const deprecatedRuleAssets = await fetchDeprecatedRules(savedObjectsClient, ruleIds);
+  const deprecatedRuleAssets = await fetchDeprecatedRules(savedObjectsClient, ruleIds, libraryIds);
   const deprecatedRuleIds = deprecatedRuleAssets.map((asset) => asset.rule_id);
 
   const latestVersionSpecifiersResult = await savedObjectsClient.search<
     SavedObjectsRawDocSource,
     {
       rules: AggregationsMultiBucketAggregateBase<{
+        // [rule_id, library_id] for the library query, the rule_id otherwise.
+        key: string | string[];
         latest_version: {
-          hits: SearchHitsMetadata<{
+          hits?: SearchHitsMetadata<{
             [PREBUILT_RULE_ASSETS_SO_TYPE]: RuleVersionSpecifier;
           }>;
+          value?: number | null;
         };
       }>;
     }
@@ -98,31 +103,29 @@ async function fetchLatestVersionSpecifiers(
     _source: false,
     size: 0,
     query: {
-      bool: prepareQueryDslFilter({ ruleIds, excludeRuleIds: deprecatedRuleIds }),
+      bool: prepareQueryDslFilter({ ruleIds, excludeRuleIds: deprecatedRuleIds, libraryIds }),
     },
     aggs: {
-      rules: {
-        terms: {
-          field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
-          size: MAX_PREBUILT_RULES_COUNT,
-        },
-        aggs: {
-          latest_version: {
-            top_hits: {
-              size: 1,
-              sort: [
-                {
-                  [`${PREBUILT_RULE_ASSETS_SO_TYPE}.version`]: 'desc',
-                },
+      rules: libraryIds?.length
+        ? {
+            multi_terms: {
+              terms: [
+                { field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id` },
+                { field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.library_id` },
               ],
-              _source: [
-                `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
-                `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
-              ],
+              size: MAX_PREBUILT_RULES_COUNT,
             },
+            // The saved object id is built from rule, library and version, so the highest version
+            // number is enough. It is much cheaper than reading the latest document of each group.
+            aggs: { latest_version: { max: { field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.version` } } },
+          }
+        : {
+            terms: {
+              field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
+              size: MAX_PREBUILT_RULES_COUNT,
+            },
+            aggs: latestVersionAgg(),
           },
-        },
-      },
     },
   });
 
@@ -133,21 +136,51 @@ async function fetchLatestVersionSpecifiers(
     'fetchLatestVersionSpecifiers: expected buckets to be an array'
   );
 
-  const latestVersionSpecifiers: RuleVersionSpecifier[] = buckets.map((bucket) => {
-    const hit = bucket.latest_version.hits.hits[0];
+  const latestVersionSpecifiers: RuleVersionSpecifier[] = buckets.flatMap((bucket) => {
+    if (Array.isArray(bucket.key)) {
+      const [ruleId, libraryId] = bucket.key;
+      const version = bucket.latest_version.value;
+      return typeof version === 'number'
+        ? [{ rule_id: ruleId, version, library_id: libraryId }]
+        : [];
+    }
+
+    const hit = bucket.latest_version.hits?.hits[0];
     const hitSource = hit?._source;
 
     invariant(hitSource, 'fetchLatestVersionSpecifiers: expected hit source to be defined');
 
     const soAttributes = hitSource[PREBUILT_RULE_ASSETS_SO_TYPE];
 
-    return {
-      rule_id: soAttributes.rule_id,
-      version: soAttributes.version,
-    };
+    return [
+      {
+        rule_id: soAttributes.rule_id,
+        version: soAttributes.version,
+        library_id: soAttributes.library_id,
+      },
+    ];
   });
+
   return latestVersionSpecifiers;
 }
+
+const latestVersionAgg = () => ({
+  latest_version: {
+    top_hits: {
+      size: 1,
+      sort: [
+        {
+          [`${PREBUILT_RULE_ASSETS_SO_TYPE}.version`]: 'desc',
+        },
+      ],
+      _source: [
+        `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
+        `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
+        `${PREBUILT_RULE_ASSETS_SO_TYPE}.library_id`,
+      ],
+    },
+  },
+});
 
 async function fetchVersionsBySoIds(
   savedObjectsClient: SavedObjectsClientContract,
@@ -180,6 +213,7 @@ async function fetchVersionsBySoIds(
       `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
       `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
       `${PREBUILT_RULE_ASSETS_SO_TYPE}.type`,
+      `${PREBUILT_RULE_ASSETS_SO_TYPE}.library_id`,
     ],
   });
 
@@ -192,6 +226,7 @@ async function fetchVersionsBySoIds(
       rule_id: soAttributes.rule_id,
       version: soAttributes.version,
       type: soAttributes.type,
+      ...(soAttributes.library_id ? { library_id: soAttributes.library_id } : {}),
     };
     return versionInfo;
   });

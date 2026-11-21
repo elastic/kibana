@@ -9,6 +9,8 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
@@ -32,28 +34,39 @@ import type { UpgradePrebuiltRulesTableActions } from './upgrade_prebuilt_rules_
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { RuleLibraryBadge } from '../../../../common/components/rule_library_badge';
 
 export type TableColumn = EuiBasicTableColumn<RuleUpgradeState>;
 
 interface RuleNameProps {
   name: string;
   ruleId: string;
+  library: RuleUpgradeState['current_rule']['library'];
 }
 
-const RuleName = ({ name, ruleId }: RuleNameProps) => {
+const RuleName = ({ name, ruleId, library }: RuleNameProps) => {
   const {
     actions: { openRulePreview },
   } = useUpgradePrebuiltRulesTableContext();
 
   return (
-    <EuiLink
-      onClick={() => {
-        openRulePreview(ruleId);
-      }}
-      data-test-subj="ruleName"
-    >
-      {name}
-    </EuiLink>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false} className="eui-textTruncate">
+        <EuiLink
+          onClick={() => {
+            openRulePreview(ruleId);
+          }}
+          data-test-subj="ruleName"
+        >
+          {name}
+        </EuiLink>
+      </EuiFlexItem>
+      {library ? (
+        <EuiFlexItem grow={false}>
+          <RuleLibraryBadge library={library} />
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
   );
 };
 
@@ -61,7 +74,11 @@ const RULE_NAME_COLUMN: TableColumn = {
   field: 'current_rule.name',
   name: i18n.COLUMN_RULE,
   render: (value: RuleUpgradeState['current_rule']['name'], ruleUpgradeState: RuleUpgradeState) => (
-    <RuleName name={value} ruleId={ruleUpgradeState.rule_id} />
+    <RuleName
+      name={value}
+      ruleId={ruleUpgradeState.rule_id}
+      library={ruleUpgradeState.current_rule.library}
+    />
   ),
   sortable: true,
   truncateText: true,

@@ -40,6 +40,10 @@ export const createRulesNavigationTree = (): RootNodePanelOpenerDefinition => ({
           ],
         },
         {
+          id: SecurityPageName.rulesLibraries,
+          link: securityLink(SecurityPageName.rulesLibraries),
+        },
+        {
           id: SecurityPageName.cloudSecurityPostureBenchmarks,
           link: securityLink(SecurityPageName.cloudSecurityPostureBenchmarks),
         },

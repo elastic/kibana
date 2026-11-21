@@ -74,6 +74,7 @@ export const convertRuleResponseToAlertingRule = (
       investigationFields: rule.investigation_fields,
       immutable: rule.immutable,
       ruleSource: rule.rule_source ? convertObjectKeysToCamelCase(rule.rule_source) : undefined,
+      library: rule.library,
       license: rule.license,
       outputIndex: rule.output_index ?? '',
       timelineId: rule.timeline_id,
