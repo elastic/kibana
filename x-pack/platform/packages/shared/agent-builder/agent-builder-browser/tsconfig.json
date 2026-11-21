@@ -22,5 +22,6 @@
     "@kbn/zod",
     "@kbn/i18n",
     "@kbn/core-spaces-common",
+    "@kbn/flyout-template",
   ]
 }

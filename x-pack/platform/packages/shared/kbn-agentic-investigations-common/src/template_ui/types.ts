@@ -154,7 +154,7 @@ export interface LiveStateSlotRenderProps {
  */
 export type RenderLiveState = (props: LiveStateSlotRenderProps) => React.ReactNode;
 
-/** Props passed to the `renderTitle` render prop. */
+/** Props passed to `InvestigationDetailsFlyoutContext.useTitle`. */
 export interface TitleSlotRenderProps {
   conversationId: string;
   /** The conversation's title, which Agent Builder generates from the first round. */
@@ -162,21 +162,29 @@ export interface TitleSlotRenderProps {
 }
 
 /**
- * A render prop for the investigation's title in the header. Supplied by the consuming plugin so it
- * can name an investigation Agent Builder has not titled yet, for example after its first
- * subject. Renders inside the header's heading, so it should render text.
+ * What the consuming plugin adds to a conversation details flyout. `Provider` wraps the flyout so
+ * the hooks below, and the render props' values, can use the plugin's Kibana services and query
+ * client. Each hook is called on every render of the flyout.
  */
-export type RenderTitle = (props: TitleSlotRenderProps) => React.ReactNode;
-
-/** Props passed to the `renderSyncIndicator` render prop. */
-export interface SyncIndicatorSlotRenderProps {
-  /** Escalation conversation id whose attachments are synced while the flyout is open. */
-  escalationId: string;
+export interface DetailsFlyoutContext {
+  Provider?: React.ComponentType<{ children: React.ReactNode }>;
 }
 
-/**
- * A render prop that the consuming plugin provides to render the sync indicator beside the
- * escalation title (a spinner while syncing). It also owns the sync request and its toasts, so
- * the shared package stays free of HTTP hooks. When absent, the header shows nothing there.
- */
-export type RenderSyncIndicator = (props: SyncIndicatorSlotRenderProps) => React.ReactNode;
+export interface InvestigationDetailsFlyoutContext extends DetailsFlyoutContext {
+  /** Whether the user may open an escalation. Without it, the footer offers one whenever it can. */
+  useCanOpenEscalation?: () => boolean;
+  /**
+   * Returns the header's title, for example one that names an investigation Agent Builder has not
+   * titled yet. Plain text, so the collapsed header can show it in full on hover. Without it, the
+   * header shows the conversation's title.
+   */
+  useTitle?: (props: TitleSlotRenderProps) => string;
+}
+
+export interface EscalationDetailsFlyoutContext extends DetailsFlyoutContext {
+  /**
+   * Syncs the escalation's attachments with its linked investigations once per open, and returns
+   * whether the sync is running. The header shows a spinner beside the title while it is.
+   */
+  useEscalationSync?: (escalationId: string) => boolean;
+}

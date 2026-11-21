@@ -155,5 +155,6 @@
     "@kbn/ui-callout",
     "@kbn/core-http-browser-mocks",
     "@kbn/projects-solutions-groups",
+    "@kbn/flyout-template",
   ]
 }

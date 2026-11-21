@@ -121,7 +121,6 @@ const toTimelineEvents = (events: Conversation['events']): TimelineEvent[] =>
  *
  * The field names intentionally duplicate the constants from `agentic_investigations/common`
  * (which cannot be imported from this package without crossing a plugin boundary).
- * See the comment at the top of `escalation_flyout_header.tsx` for the authoritative source.
  */
 export const conversationToEscalationHeader = (
   conversation: Conversation

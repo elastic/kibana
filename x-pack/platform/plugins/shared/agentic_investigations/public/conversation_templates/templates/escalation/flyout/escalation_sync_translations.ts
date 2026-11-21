@@ -8,9 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const ESCALATION_SYNC_TRANSLATIONS = Object.freeze({
-  syncing: i18n.translate('xpack.agenticInvestigations.escalationSync.syncing', {
-    defaultMessage: 'Syncing attachments from linked investigations',
-  }),
   updated: (count: number) =>
     i18n.translate('xpack.agenticInvestigations.escalationSync.updated', {
       defaultMessage:

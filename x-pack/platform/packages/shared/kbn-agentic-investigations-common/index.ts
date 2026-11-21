@@ -33,28 +33,12 @@ export { type ConversationsActionsGroupProps } from './src/components/conversati
 
 export { ConversationQueue } from './src/components/conversation_queue/conversation_queue';
 
-export {
-  ConversationDetailsFlyoutHeader,
-  type ConversationDetailsFlyoutHeaderProps,
-} from './src/components/details/flyout_header';
-export {
-  ConversationDetailsFlyoutFooter,
-  type ConversationDetailsFlyoutFooterProps,
-  type CloseInvestigationModalRenderProps,
-} from './src/components/details/flyout_footer';
-export {
-  ConversationHeaderBlocks,
-  type ConversationHeaderBlocksProps,
-} from './src/components/details/header_blocks';
+export { type CloseInvestigationModalRenderProps } from './src/components/modals/investigation_action_modals';
 export {
   OverviewTab,
   type OverviewTabProps,
   type OverviewSections,
 } from './src/components/details/details_flyout_tab_contents';
-export {
-  EscalationFlyoutHeader,
-  type EscalationFlyoutHeaderProps,
-} from './src/components/details/escalation_flyout_header';
 export { StatusToggle, type StatusToggleProps } from './src/components/details/status_toggle';
 export { SeverityPicker, type SeverityPickerProps } from './src/components/details/severity_picker';
 export {
@@ -106,14 +90,14 @@ export {
   type RenderSeverity,
   type SeveritySlotRenderProps,
   type RenderLinkedInvestigations,
-  type RenderSyncIndicator,
-  type SyncIndicatorSlotRenderProps,
+  type DetailsFlyoutContext,
+  type InvestigationDetailsFlyoutContext,
+  type EscalationDetailsFlyoutContext,
   type LinkedInvestigationsSlotRenderProps,
   type RenderOverview,
   type OverviewSlotRenderProps,
   type RenderLiveState,
   type LiveStateSlotRenderProps,
-  type RenderTitle,
   type TitleSlotRenderProps,
 } from './src/template_ui/types';
 export {
