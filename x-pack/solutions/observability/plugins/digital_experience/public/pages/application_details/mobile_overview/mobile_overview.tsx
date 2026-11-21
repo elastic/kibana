@@ -233,11 +233,14 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
     { unsetValueOnError: true }
   );
   const isLoading = loading || (!kpis && !error);
+  // While loading, `kpis` is still the previous filters' response: only the filter options use it,
+  // not what describes the current selection.
+  const currentKpis = isLoading ? undefined : kpis;
   const discoverTimeRange = useMemo(
     () => ({ from: timeRange.rangeFrom, to: timeRange.rangeTo }),
     [timeRange.rangeFrom, timeRange.rangeTo]
   );
-  const discoverHref = useDiscoverHref(kpis?.esql, discoverTimeRange);
+  const discoverHref = useDiscoverHref(currentKpis?.esql, discoverTimeRange);
   const valueFormatters = { number: formatNumber, percent: formatPercent };
 
   const releaseOptions = useMemo(
@@ -249,8 +252,7 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
     [kpis?.osNames, osName]
   );
 
-  // While loading, the KPIs are still the previous filters', which the empty prompts would describe.
-  const hasNoData = !isLoading && kpis !== undefined && !kpis.hasData;
+  const hasNoData = currentKpis !== undefined && !currentKpis.hasData;
   const errorPrompt =
     error && !loading ? (
       <LoadErrorPrompt
@@ -323,7 +325,7 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!errorPrompt && !hasNoData && kpis?.isPartial && (
+      {!errorPrompt && !hasNoData && currentKpis?.isPartial && (
         <>
           <KbnWarningCallout
             data-test-subj="digitalExperienceMobileKpisPartialAccess"
@@ -336,7 +338,7 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
       {errorPrompt ??
         (hasNoData ? (
           // Without full access, the data may be in the indices the user can't read.
-          kpis?.isPartial ? (
+          currentKpis?.isPartial ? (
             <MobileUnreadableDataPrompt
               data-test-subj="digitalExperienceMobileUnreadableData"
               title={UNREADABLE_DATA_TITLE}
@@ -358,15 +360,14 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
                 <MobilePanel
                   key={kpi}
                   {...panel}
-                  value={kpis?.[kpi]}
+                  value={currentKpis?.[kpi]}
                   formatValue={valueFormatters[format]}
                   isComparing={isComparing}
                   isLoading={isLoading}
                 />
               ))}
             </EuiFlexGroup>
-            {/* While loading, the query is still the previous filters'. */}
-            {discoverHref && !isLoading && (
+            {discoverHref && (
               <>
                 <EuiSpacer size="s" />
                 <EuiFlexGroup justifyContent="flexEnd" responsive={false}>

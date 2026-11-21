@@ -298,6 +298,26 @@ describe('MobileOverview', () => {
     expect(screen.getByTestId('digitalExperienceMobileKpiUsersPrevious')).toBeInTheDocument();
   });
 
+  it("shows neither the previous filters' values nor their access warning while new ones load", async () => {
+    fetch.mockResolvedValue({ ...KPIS, isPartial: true });
+    const { rerender } = renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpisPartialAccess');
+    fireEvent.click(screen.getByTestId('digitalExperienceMobileCompareToggle'));
+    expect(screen.getByTestId('digitalExperienceMobileKpiSessionsPrevious')).toBeInTheDocument();
+
+    fetch.mockReturnValue(new Promise(() => {}));
+    mockParams({ release: '2.0.0' });
+    rerender(<MobileOverview serviceName="shop-mobile" />);
+
+    await waitFor(() =>
+      expect(screen.queryByTestId('digitalExperienceMobileKpiSessionsPrevious')).toBeNull()
+    );
+    expect(screen.queryByTestId('digitalExperienceMobileKpiSessionsChange')).toBeNull();
+    expect(screen.queryByTestId('digitalExperienceMobileKpisPartialAccess')).toBeNull();
+    // The pickers keep the options of the last response.
+    expect(filterProps('digitalExperienceMobileReleaseFilter')?.options.length).toBeGreaterThan(1);
+  });
+
   it('shows the error with a retry, not endless loading, when the KPIs fail', async () => {
     fetch.mockRejectedValueOnce(new Error('Internal Server Error')).mockResolvedValue(KPIS);
     renderPage();
