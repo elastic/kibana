@@ -107,24 +107,68 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
   const { setFieldValue } = useFormContext();
 
   const hasInitializedFromFormData = useRef(false);
+  // Last discriminator value this widget saw in, or wrote to, the form.
+  const lastSyncedFormValueRef = useRef<string | undefined>(undefined);
   const discriminatorValueFromForm = formData[rootPath]?.[discriminatorKey] as string | undefined;
   const discriminatorFieldPath = `${rootPath}.${discriminatorKey}`;
 
   useEffect(() => {
     if (discriminatorValueFromForm && !hasInitializedFromFormData.current) {
       setSelectedOption(discriminatorValueFromForm);
+      lastSyncedFormValueRef.current = discriminatorValueFromForm;
       hasInitializedFromFormData.current = true;
       return;
     }
 
-    // After initialization: Sync selectedOption changes back to form data
-    // This happens when user clicks a different option
-    if (hasInitializedFromFormData.current && discriminatorValueFromForm !== selectedOption) {
+    if (!hasInitializedFromFormData.current) {
+      return;
+    }
+
+    // Another field set the discriminator, so show that option.
+    if (
+      discriminatorValueFromForm &&
+      discriminatorValueFromForm !== lastSyncedFormValueRef.current
+    ) {
+      lastSyncedFormValueRef.current = discriminatorValueFromForm;
+      setSelectedOption(discriminatorValueFromForm);
+      return;
+    }
+
+    // The user clicked a different option, so write it to the form.
+    if (discriminatorValueFromForm !== selectedOption) {
+      lastSyncedFormValueRef.current = selectedOption;
       setFieldValue(discriminatorFieldPath, selectedOption);
     }
   }, [discriminatorFieldPath, discriminatorValueFromForm, selectedOption, setFieldValue]);
 
   const isFieldsetDisabled = formConfig.disabled || getMeta(schema).disabled;
+
+  // Options another control sets (hideInPicker) are left out of the picker. When that leaves a
+  // single option and it is selected, show its fields directly instead of one lone card.
+  const isHiddenInPicker = (option: (typeof options)[number]) =>
+    Boolean((getMeta(option) as Record<string, unknown>).hideInPicker);
+  const pickableOptions = options.filter((option) => !isHiddenInPicker(option));
+  const onlyPickableOption =
+    pickableOptions.length === 1 && pickableOptions.length < options.length
+      ? pickableOptions[0]
+      : undefined;
+  if (
+    onlyPickableOption &&
+    getDiscriminatorFieldValue(onlyPickableOption, discriminatorKey) === selectedOption
+  ) {
+    return (
+      <SingleOptionUnionWidget
+        options={[onlyPickableOption]}
+        path={rootPath}
+        schema={schema}
+        discriminatorKey={discriminatorKey}
+        fieldConfig={fieldConfig}
+        fieldProps={fieldProps}
+        formConfig={formConfig}
+        meta={meta}
+      />
+    );
+  }
 
   return (
     <EuiFormFieldset
@@ -148,7 +192,7 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
 
         // Neither is offered as a choice, but both still render while active so an existing
         // connector's credentials stay viewable.
-        if ((isLegacy || isKibanaManaged) && !isChecked) return null;
+        if ((isLegacy || isKibanaManaged || isHiddenInPicker(option)) && !isChecked) return null;
 
         // if the entire fieldset is disabled, ensure each option is also marked as disabled
         if (isFieldsetDisabled && optionMeta.disabled !== false) {

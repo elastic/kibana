@@ -64,13 +64,13 @@ describe('MicrosoftTeams', () => {
   });
 
   describe('auth', () => {
-    it('should support ears, oauth_authorization_code, oauth_client_credentials, and oauth_client_credentials_private_key_jwt as visible options', () => {
+    it('should support ears, oauth_authorization_code, oauth_client_credentials, oauth_client_credentials_private_key_jwt, and none as visible options', () => {
       const { auth } = MicrosoftTeams;
       expect(auth).toBeDefined();
       const visibleTypes = auth?.types.filter(
         (t) => typeof t === 'string' || !(t as AuthTypeDef).isLegacy
       );
-      expect(visibleTypes).toHaveLength(4);
+      expect(visibleTypes).toHaveLength(5);
       expect(visibleTypes?.[0]).toEqual(
         expect.objectContaining({ type: 'ears', isRecommended: true })
       );
@@ -83,6 +83,7 @@ describe('MicrosoftTeams', () => {
       expect(visibleTypes?.[3]).toEqual(
         expect.objectContaining({ type: 'oauth_client_credentials_private_key_jwt' })
       );
+      expect(visibleTypes?.[4]).toEqual(expect.objectContaining({ type: 'none' }));
     });
 
     it('marks only ears (Quick Connect) as recommended', () => {

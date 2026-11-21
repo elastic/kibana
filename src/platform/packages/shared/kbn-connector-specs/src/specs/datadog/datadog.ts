@@ -12,6 +12,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import { createReceiveOnlyConnectorValidator } from '../../receive_only_connector_validator';
 import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
 import {
   DATADOG_ALERT_EVENT_ID,
@@ -56,10 +57,10 @@ import {
  * Datadog headers and clear axios HTTP Basic auth so Datadog never sees an
  * Authorization: Basic header.
  */
-const applyDatadogAuthHeaders = (ctx: ActionContext): void => {
+const applyDatadogAuthHeaders = (ctx: ActionContext, actionName: string): void => {
   const secrets = ctx.secrets;
   if (!secrets || secrets.authType !== 'basic') {
-    throw new Error('Datadog connector requires API Key and Application Key (basic auth secrets).');
+    throw new Error(`The Datadog ${actionName} action requires an API Key and Application Key.`);
   }
   const apiKey = secrets.username;
   const applicationKey = secrets.password;
@@ -194,6 +195,16 @@ export const Datadog: ConnectorSpec = {
           },
         },
       },
+      {
+        // For connectors that only receive events.
+        type: 'none',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('connectorSpecs.datadog.auth.none.label', {
+            defaultMessage: 'No authentication (receive events only)',
+          }),
+        },
+      },
     ],
     headers: {
       Accept: 'application/json',
@@ -221,6 +232,8 @@ export const Datadog: ConnectorSpec = {
     })
   ),
 
+  validateConnector: createReceiveOnlyConnectorValidator('Datadog'),
+
   actions: {
     listMonitors: {
       isTool: true,
@@ -229,7 +242,7 @@ export const Datadog: ConnectorSpec = {
         'List Datadog monitors and their alert states, optionally filtered by tags, name, or group state. Use this to enumerate alerting rules before acting on a specific monitor.',
       input: ListMonitorsInputSchema,
       handler: async (ctx, input: ListMonitorsInput) => {
-        applyDatadogAuthHeaders(ctx);
+        applyDatadogAuthHeaders(ctx, 'listMonitors');
         const baseUrl = getBaseUrl(ctx);
         try {
           const response = await ctx.client.get(`${baseUrl}/api/v1/monitor`, {
@@ -257,7 +270,7 @@ export const Datadog: ConnectorSpec = {
         "Retrieve a single Datadog monitor's full definition and current overall state by numeric ID. Use the IDs returned by listMonitors.",
       input: GetMonitorInputSchema,
       handler: async (ctx, input: GetMonitorInput) => {
-        applyDatadogAuthHeaders(ctx);
+        applyDatadogAuthHeaders(ctx, 'getMonitor');
         const baseUrl = getBaseUrl(ctx);
         try {
           const response = await ctx.client.get(
@@ -282,7 +295,7 @@ export const Datadog: ConnectorSpec = {
         'Search Datadog alert-type events over a time range. Use this to triage and enrich a firing monitor with recent alert events from the event stream.',
       input: GetAlertEventsInputSchema,
       handler: async (ctx, input: GetAlertEventsInput) => {
-        applyDatadogAuthHeaders(ctx);
+        applyDatadogAuthHeaders(ctx, 'getAlertEvents');
         const baseUrl = getBaseUrl(ctx);
         const query = /\bsource\s*:/i.test(input.query)
           ? input.query
@@ -312,7 +325,7 @@ export const Datadog: ConnectorSpec = {
         'Mute a Datadog monitor (optionally for a scope or until a timestamp) so notifications are suppressed during maintenance or noise suppression.',
       input: MuteMonitorInputSchema,
       handler: async (ctx, input: MuteMonitorInput) => {
-        applyDatadogAuthHeaders(ctx);
+        applyDatadogAuthHeaders(ctx, 'muteMonitor');
         const baseUrl = getBaseUrl(ctx);
         try {
           const response = await ctx.client.post(
@@ -339,7 +352,7 @@ export const Datadog: ConnectorSpec = {
         'Unmute a previously muted Datadog monitor (optionally for a scope) so notifications resume.',
       input: UnmuteMonitorInputSchema,
       handler: async (ctx, input: UnmuteMonitorInput) => {
-        applyDatadogAuthHeaders(ctx);
+        applyDatadogAuthHeaders(ctx, 'unmuteMonitor');
         const baseUrl = getBaseUrl(ctx);
         try {
           const response = await ctx.client.post(
@@ -366,7 +379,7 @@ export const Datadog: ConnectorSpec = {
         'Schedule a Datadog downtime for a scope (and optional monitor tags or monitor ID) over a time window so alerting is suppressed during deploys or maintenance.',
       input: ScheduleDowntimeInputSchema,
       handler: async (ctx, input: ScheduleDowntimeInput) => {
-        applyDatadogAuthHeaders(ctx);
+        applyDatadogAuthHeaders(ctx, 'scheduleDowntime');
         const baseUrl = getBaseUrl(ctx);
         const monitorIdentifier = input.monitorId
           ? { monitor_id: input.monitorId }
@@ -400,7 +413,7 @@ export const Datadog: ConnectorSpec = {
         'Cancel an active or scheduled Datadog downtime by ID so alerting resumes for that scope. Use the downtime ID returned by scheduleDowntime.',
       input: CancelDowntimeInputSchema,
       handler: async (ctx, input: CancelDowntimeInput) => {
-        applyDatadogAuthHeaders(ctx);
+        applyDatadogAuthHeaders(ctx, 'cancelDowntime');
         const baseUrl = getBaseUrl(ctx);
         try {
           const response = await ctx.client.delete(
@@ -420,7 +433,7 @@ export const Datadog: ConnectorSpec = {
         'Create a Datadog incident (for example when an alert crosses a severity threshold). Returns the new incident including its ID for later updateIncident calls. Requires Datadog Incident Management to be enabled on the account.',
       input: CreateIncidentInputSchema,
       handler: async (ctx, input: CreateIncidentInput) => {
-        applyDatadogAuthHeaders(ctx);
+        applyDatadogAuthHeaders(ctx, 'createIncident');
         const baseUrl = getBaseUrl(ctx);
         // Datadog Incident Management single-select fields use
         // `{ type: 'dropdown', value: '<string>' }` (see IncidentFieldAttributesSingleValue).
@@ -476,7 +489,7 @@ export const Datadog: ConnectorSpec = {
         'Update a Datadog incident (title, severity, customer impact, or state such as resolved). Provide at least one field to change. Use the incident ID from createIncident.',
       input: UpdateIncidentInputSchema,
       handler: async (ctx, input: UpdateIncidentInput) => {
-        applyDatadogAuthHeaders(ctx);
+        applyDatadogAuthHeaders(ctx, 'updateIncident');
         const baseUrl = getBaseUrl(ctx);
         const attributes: Record<string, unknown> = {};
         if (input.title !== undefined) {
@@ -526,7 +539,7 @@ export const Datadog: ConnectorSpec = {
         'Post an event to the Datadog Events Explorer so workflow actions (remediation ran, ticket opened) appear on Datadog timelines and dashboards.',
       input: PostEventInputSchema,
       handler: async (ctx, input: PostEventInput) => {
-        applyDatadogAuthHeaders(ctx);
+        applyDatadogAuthHeaders(ctx, 'postEvent');
         const baseUrl = getBaseUrl(ctx);
         try {
           const response = await ctx.client.post(`${baseUrl}/api/v1/events`, {
@@ -551,7 +564,7 @@ export const Datadog: ConnectorSpec = {
         'Query Datadog timeseries metrics over a time range. Use this to confirm or enrich an alert with the metric current value before acting.',
       input: QueryTimeseriesInputSchema,
       handler: async (ctx, input: QueryTimeseriesInput) => {
-        applyDatadogAuthHeaders(ctx);
+        applyDatadogAuthHeaders(ctx, 'queryTimeseries');
         const baseUrl = getBaseUrl(ctx);
         try {
           const response = await ctx.client.get(`${baseUrl}/api/v1/query`, {
@@ -575,7 +588,7 @@ export const Datadog: ConnectorSpec = {
         'Search Datadog logs over a time range and optional indexes. Use matching log events as evidence during alert triage or incident response. Requires Log Management with at least one valid index on the Datadog account; pass indexes (e.g. ["main"]) when the account does not search all indexes by default.',
       input: SearchLogsInputSchema,
       handler: async (ctx, input: SearchLogsInput) => {
-        applyDatadogAuthHeaders(ctx);
+        applyDatadogAuthHeaders(ctx, 'searchLogs');
         const baseUrl = getBaseUrl(ctx);
         try {
           const response = await ctx.client.post(`${baseUrl}/api/v2/logs/events/search`, {
@@ -643,7 +656,7 @@ export const Datadog: ConnectorSpec = {
     enabled: true,
     description: 'Validates the API and Application keys against the selected Datadog site.',
     handler: async (ctx) => {
-      applyDatadogAuthHeaders(ctx);
+      applyDatadogAuthHeaders(ctx, 'test');
       const baseUrl = getBaseUrl(ctx);
       await ctx.client.get(`${baseUrl}/api/v1/validate`);
       return {};

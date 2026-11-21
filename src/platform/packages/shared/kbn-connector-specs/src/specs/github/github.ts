@@ -18,6 +18,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
+import { createReceiveOnlyConnectorValidator } from '../../receive_only_connector_validator';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import { githubEvents } from './events';
 import { githubSkillFile } from './skills/github_skill';
@@ -108,6 +109,8 @@ export const GithubConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
+  validateConnector: createReceiveOnlyConnectorValidator('GitHub'),
+
   auth: {
     types: [
       {
@@ -133,6 +136,16 @@ export const GithubConnector: ConnectorSpec = {
         overrides: {
           label: i18n.translate('connectorSpecs.github.auth.bearer.label', {
             defaultMessage: 'Personal Access Token (PAT)',
+          }),
+        },
+      },
+      {
+        // For connectors that only receive events.
+        type: 'none',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('connectorSpecs.github.auth.none.label', {
+            defaultMessage: 'No authentication (receive events only)',
           }),
         },
       },

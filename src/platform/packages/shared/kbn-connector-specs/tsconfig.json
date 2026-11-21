@@ -21,6 +21,7 @@
     "@kbn/zod",
     "@kbn/logging",
     "@kbn/licensing-types",
+    "@kbn/actions-types",
     "@kbn/actions-utils",
     "@kbn/i18n",
     "@kbn/mcp-client",

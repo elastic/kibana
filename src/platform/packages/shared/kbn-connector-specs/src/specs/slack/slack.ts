@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
+import { createReceiveOnlyConnectorValidator } from '../../receive_only_connector_validator';
 import { SLACK_CONNECTOR_TYPE_ID } from './constants';
 import { slackEvents } from './events';
 import { slackRelay } from './relay';
@@ -225,6 +226,8 @@ export const Slack: ConnectorSpec = {
     docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/slack-v2-action-type`,
   },
 
+  validateConnector: createReceiveOnlyConnectorValidator('Slack'),
+
   auth: {
     types: [
       {
@@ -286,6 +289,16 @@ export const Slack: ConnectorSpec = {
         overrides: {
           label: i18n.translate('connectorSpecs.slack.auth.relay.label', {
             defaultMessage: 'Elastic Slack app (Bot Token)',
+          }),
+        },
+      },
+      {
+        // For connectors that only receive events.
+        type: 'none',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('connectorSpecs.slack.auth.none.label', {
+            defaultMessage: 'No authentication (receive events only)',
           }),
         },
       },

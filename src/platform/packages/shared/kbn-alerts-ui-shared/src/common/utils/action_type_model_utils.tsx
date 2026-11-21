@@ -12,7 +12,11 @@ import { i18n } from '@kbn/i18n';
 import type { ActionType } from '@kbn/actions-types';
 import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
-import { getConnectorSpec, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
+import {
+  getConnectorSpec,
+  getOutboundToggleDefaultAuthTypeId,
+  isInboundOnlyConnectorSpec,
+} from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { fromConnectorSpecSchema, narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs';
 import type { ConnectorZodSchema } from '@kbn/connector-specs';
@@ -103,6 +107,30 @@ function getIconFromSpec(spec: ConnectorSpecResponse): IconType {
   return 'plugs';
 }
 
+const NO_AUTH_TYPE_ID = 'none';
+
+/**
+ * Whether the action selection is an empty custom list the form should reject. With Run actions
+ * off (auth type none), the form saves no actions on purpose.
+ */
+export const isMissingSelectedActions = (selectedActions: unknown, authType: unknown): boolean =>
+  authType !== NO_AUTH_TYPE_ID && Array.isArray(selectedActions) && selectedActions.length === 0;
+
+/** Hides one auth type option from the form's auth picker. */
+export const hideAuthTypeInPicker = (schema: ConnectorZodSchema, authTypeId: string): void => {
+  const { secrets } = schema.shape;
+  if (!('options' in secrets)) {
+    return;
+  }
+  for (const option of secrets.options) {
+    const authTypeField = (option as { shape?: Record<string, { value?: unknown }> }).shape
+      ?.authType;
+    if (authTypeField?.value === authTypeId) {
+      setMeta(option, { ...getMeta(option), hideInPicker: true });
+    }
+  }
+};
+
 /**
  * Transforms a ConnectorSpecResponse into an ActionTypeModel.
  *
@@ -138,6 +166,10 @@ export function transformSpecToActionTypeModel(
       }
       const connectorZodSchema: ConnectorZodSchema = parsedZodSchema;
       const specActions = spec.actions ?? [];
+      // Connectors with an Outbound switch hide auth type none in outbound options.
+      if (getOutboundToggleDefaultAuthTypeId(registeredSpec) !== undefined) {
+        hideAuthTypeInPicker(connectorZodSchema, NO_AUTH_TYPE_ID);
+      }
 
       // Bridges UseField's FieldHook API to ConnectorActionSelector's value/onChange props.
       const ConnectorActionSelectorField = ({
@@ -184,8 +216,8 @@ export function transformSpecToActionTypeModel(
                 defaultValue: null,
                 validations: [
                   {
-                    validator: ({ value }) =>
-                      Array.isArray(value) && (value as string[]).length === 0
+                    validator: ({ value, form }) =>
+                      isMissingSelectedActions(value, form.getFields()['secrets.authType']?.value)
                         ? {
                             message: i18n.translate(
                               'alertsUIShared.connectorActionSelector.emptySelectionError',

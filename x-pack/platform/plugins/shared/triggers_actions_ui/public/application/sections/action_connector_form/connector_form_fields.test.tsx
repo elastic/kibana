@@ -7,6 +7,7 @@
 
 import React, { lazy } from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
+import { getOutboundToggleDefaultAuthTypeId } from '@kbn/connector-specs';
 import { FormTestProvider } from '../../components/test_utils';
 import { ConnectorFormFields } from './connector_form_fields';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
@@ -21,8 +22,11 @@ jest.mock('@kbn/connector-specs', () => {
     ...actual,
     connectorTypeIsDual: jest.fn((id: string) => id === '.dual'),
     connectorTypeIsInboundOnly: jest.fn((id: string) => id === '.inboundWebhook'),
+    getOutboundToggleDefaultAuthTypeId: jest.fn(() => undefined),
   };
 });
+
+const mockGetOutboundToggleDefaultAuthTypeId = getOutboundToggleDefaultAuthTypeId as jest.Mock;
 
 describe('ConnectorFormFields', () => {
   let appMockRenderer: AppMockRenderer;
@@ -270,6 +274,57 @@ describe('ConnectorFormFields', () => {
       expect(result.getByTestId('connector-outbound-label')).toBeInTheDocument();
       await waitFor(() => {
         expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
+      });
+    });
+
+    describe('Run actions switch', () => {
+      beforeEach(() => {
+        mockGetOutboundToggleDefaultAuthTypeId.mockReturnValue(undefined);
+      });
+
+      const renderDual = (showInboundEvents = true) =>
+        appMockRenderer.render(
+          <FormTestProvider
+            onSubmit={onSubmit}
+            defaultValue={{ ...dualDefaultValue, secrets: { authType: 'basic' } }}
+          >
+            <ConnectorFormFields
+              actionTypeModel={dualActionTypeModel}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+              showInboundEvents={showInboundEvents}
+            />
+          </FormTestProvider>
+        );
+
+      it('shows the switch with the outbound fields for a dual connector that offers no authentication', async () => {
+        mockGetOutboundToggleDefaultAuthTypeId.mockReturnValue('basic');
+
+        const result = renderDual();
+
+        expect(result.getAllByTestId('connector-outbound-label')).toHaveLength(1);
+        expect(result.getByTestId('outbound-actions-enabled-switch')).toBeChecked();
+        await waitFor(() => {
+          expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
+        });
+      });
+
+      it('shows only the Outbound heading for a dual connector without no authentication', async () => {
+        const result = renderDual();
+
+        expect(result.getByTestId('connector-outbound-label')).toBeInTheDocument();
+        expect(result.queryByTestId('outbound-actions-enabled-switch')).not.toBeInTheDocument();
+        await waitFor(() => {
+          expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
+        });
+      });
+
+      it('does not show the switch when inbound events are hidden', () => {
+        mockGetOutboundToggleDefaultAuthTypeId.mockReturnValue('basic');
+
+        const result = renderDual(false);
+
+        expect(result.queryByTestId('outbound-actions-enabled-switch')).not.toBeInTheDocument();
       });
     });
   });

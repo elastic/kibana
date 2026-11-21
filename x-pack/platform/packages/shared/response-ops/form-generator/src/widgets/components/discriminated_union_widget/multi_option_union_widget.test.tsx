@@ -10,7 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Form, useForm, useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { MultiOptionUnionWidget } from './multi_option_union_widget';
 import { getMeta, setMeta, addMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 
@@ -697,6 +697,81 @@ describe('MultiOptionUnionWidget', () => {
       });
 
       expect(screen.getByText('Elastic app')).toBeInTheDocument();
+    });
+  });
+
+  describe('options hidden from the picker and outside changes', () => {
+    const SetAuthTypeButton = ({ value }: { value: string }) => {
+      const { setFieldValue } = useFormContext();
+      return (
+        <button type="button" onClick={() => setFieldValue('auth.type', value)}>
+          {`Set ${value}`}
+        </button>
+      );
+    };
+
+    const renderOptions = (
+      options: Array<z.ZodObject<z.ZodRawShape>>,
+      { setAuthTypeTo }: { setAuthTypeTo?: string } = {}
+    ) => {
+      const schema = z.discriminatedUnion('type', options as any);
+      render(
+        <TestFormWrapper>
+          <MultiOptionUnionWidget
+            meta={meta}
+            formConfig={{}}
+            path="auth"
+            schema={schema}
+            options={options as any}
+            fieldProps={{ label: 'Authentication', euiFieldProps: {} }}
+            fieldConfig={{ validations: [{ validator: () => undefined }] }}
+            discriminatorKey="type"
+          />
+          {setAuthTypeTo ? <SetAuthTypeButton value={setAuthTypeTo} /> : null}
+        </TestFormWrapper>,
+        { wrapper }
+      );
+    };
+
+    const basic = () =>
+      z
+        .object({ type: z.literal('basic'), username: z.string().meta({ label: 'Username' }) })
+        .meta({ label: 'Basic Auth' });
+    const bearer = () =>
+      z
+        .object({ type: z.literal('bearer'), token: z.string().meta({ label: 'Token' }) })
+        .meta({ label: 'Bearer Token' });
+    const hiddenNone = () =>
+      z
+        .object({ type: z.literal('none') })
+        .meta({ label: 'No authentication', hideInPicker: true });
+
+    it('does not offer an option marked hideInPicker', () => {
+      renderOptions([basic(), bearer(), hiddenNone()]);
+
+      expect(screen.getByText('Basic Auth')).toBeInTheDocument();
+      expect(screen.getByText('Bearer Token')).toBeInTheDocument();
+      expect(screen.queryByText('No authentication')).toBeNull();
+    });
+
+    it('shows the fields of the only remaining option directly, without cards', () => {
+      renderOptions([basic(), hiddenNone()]);
+
+      expect(screen.getByLabelText('Username', { selector: 'input' })).toBeInTheDocument();
+      expect(screen.queryAllByRole('radio')).toHaveLength(0);
+    });
+
+    it('follows an auth type set by another field', async () => {
+      renderOptions([basic(), bearer()], { setAuthTypeTo: 'bearer' });
+
+      expect(screen.getByLabelText('Username', { selector: 'input' })).toBeInTheDocument();
+
+      await userEvent.click(screen.getByText('Set bearer'));
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Token', { selector: 'input' })).toBeInTheDocument();
+      });
+      expect(screen.queryByLabelText('Username', { selector: 'input' })).toBeNull();
     });
   });
 

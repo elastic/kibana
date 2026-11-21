@@ -137,6 +137,14 @@ describe('connector spec contracts', () => {
     }
   });
 
+  // A connector that receives events must be able to do so without outbound credentials.
+  it.each(allSpecs)('%s offers no authentication when it receives events', (_exportName, spec) => {
+    if (spec.events === undefined) {
+      return;
+    }
+    expect((spec.auth?.types ?? []).map(getAuthTypeId)).toContain('none');
+  });
+
   it.each(allSpecs)('%s forwards only lowercase non-credential headers', (_exportName, spec) => {
     for (const name of spec.events?.headers ?? []) {
       expect(name).toBe(name.toLowerCase());

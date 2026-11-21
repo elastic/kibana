@@ -24,6 +24,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import { createReceiveOnlyConnectorValidator } from '../../receive_only_connector_validator';
 import {
   SearchInputSchema,
   GetRecordInputSchema,
@@ -95,6 +96,8 @@ export const ServicenowSearch: ConnectorSpec = {
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
+  validateConnector: createReceiveOnlyConnectorValidator('ServiceNow'),
+
   auth: {
     types: [
       {
@@ -123,6 +126,16 @@ export const ServicenowSearch: ConnectorSpec = {
             },
             scope: { hidden: true },
           },
+        },
+      },
+      {
+        // For connectors that only receive events.
+        type: 'none',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('connectorSpecs.servicenowSearch.auth.none.label', {
+            defaultMessage: 'No authentication (receive events only)',
+          }),
         },
       },
     ],
