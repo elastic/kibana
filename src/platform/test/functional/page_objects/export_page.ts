@@ -62,6 +62,12 @@ export class ExportPageObject extends FtrService {
         throw error;
       }
     }
+
+    // A single registered export action runs immediately and opens a flyout instead of the popover.
+    await this.testSubjects.waitForFirst(
+      ['exportPopoverPanel', 'exportDerivativeFlyout-exportJson', 'exportItemDetailsFlyout'],
+      { timeout: 10_000 }
+    );
     return true;
   }
 
@@ -83,16 +89,11 @@ export class ExportPageObject extends FtrService {
   ) {
     this.log.debug(`clickPopoverItem label: ${label}`);
 
-    await this.retry.waitFor('ascertain that export popover is open', async () => {
-      let isExportPopoverOpen = await this.isExportPopoverOpen();
-
-      if (!isExportPopoverOpen) {
-        await exportPopoverOpener();
-        isExportPopoverOpen = await this.isExportPopoverOpen();
-      }
-
-      return isExportPopoverOpen;
-    });
+    // The opener is a toggle, so wait the item out before concluding the popover needs opening.
+    if (!(await this.testSubjects.waitForExists(`exportMenuItem-${label}`))) {
+      await exportPopoverOpener();
+      await this.testSubjects.existOrFail(`exportMenuItem-${label}`, { timeout: 20_000 });
+    }
 
     await this.testSubjects.click(`exportMenuItem-${label}`);
   }
