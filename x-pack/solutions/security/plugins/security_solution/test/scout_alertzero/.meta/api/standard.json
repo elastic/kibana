@@ -1,5 +1,5 @@
 {
-  "sha1": "48c72c4384d60961666aca14d7d3b2342369faaf",
+  "sha1": "595f910928cce184edc347be8af7bafe17120c98",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -569,7 +569,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 166,
+        "line": 167,
         "column": 5
       }
     },
@@ -583,7 +583,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 176,
+        "line": 177,
         "column": 31
       }
     },
@@ -597,7 +597,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 204,
+        "line": 205,
         "column": 7
       }
     },
@@ -611,7 +611,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 238,
+        "line": 239,
         "column": 29
       }
     },
