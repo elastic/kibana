@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TransportRequestParams, TransportRequestOptions } from '@elastic/elasticsearch';
+import {
+  errors,
+  type TransportRequestParams,
+  type TransportRequestOptions,
+} from '@elastic/elasticsearch';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { TransportContext } from '../create_transport';
 import { getTimingRequestHandler } from './timing_request_handler';
 
 describe('getTimingRequestHandler', () => {
@@ -33,11 +38,12 @@ describe('getTimingRequestHandler', () => {
     expect(options.context).toBeDefined();
     expect((options.context as any).timingContext).toBeDefined();
     expect((options.context as any).timingContext.startTime).toBeGreaterThan(0);
-    expect((options.context as any).timingContext.kibanaRequest).toBeUndefined();
+    expect((options.context as TransportContext).timingContext?.measure).toBeUndefined();
   });
 
-  it('includes kibanaRequest in timing context when provided', () => {
+  it('includes a bound timing measurement callback without exposing the request', () => {
     const mockRequest = httpServerMock.createKibanaRequest() as KibanaRequest;
+    const measure = jest.spyOn(mockRequest.serverTiming, 'measure');
     const handler = getTimingRequestHandler(mockRequest);
     const params: TransportRequestParams = {
       method: 'GET',
@@ -49,8 +55,52 @@ describe('getTimingRequestHandler', () => {
 
     expect(options.context).toBeDefined();
     expect((options.context as any).timingContext).toBeDefined();
-    expect((options.context as any).timingContext.kibanaRequest).toBe(mockRequest);
+    expect((options.context as any).timingContext).not.toHaveProperty('kibanaRequest');
     expect((options.context as any).timingContext.startTime).toBeGreaterThan(0);
+    (options.context as TransportContext).timingContext?.measure?.(
+      'es-request',
+      10,
+      'GET /_search'
+    );
+    expect(measure).toHaveBeenCalledWith('es-request', 10, 'GET /_search');
+    expect(measure.mock.contexts[0]).toBe(mockRequest.serverTiming);
+  });
+
+  it('does not traverse the browser request when redacting Elasticsearch errors', () => {
+    const mockRequest = httpServerMock.createKibanaRequest();
+    const readSocket = jest.fn(() => {
+      throw new Error('The socket has been disconnected from the Http2Session');
+    });
+    Object.defineProperty(mockRequest, 'disconnectedSocket', {
+      enumerable: true,
+      get: readSocket,
+    });
+    const handler = getTimingRequestHandler(mockRequest);
+    const params = { method: 'GET', path: '/_search' };
+    const options: TransportRequestOptions = {};
+
+    handler({ scoped: true }, params, options, mockLogger);
+
+    const error = new errors.ResponseError({
+      statusCode: 503,
+      body: {},
+      headers: {},
+      warnings: [],
+      meta: {
+        context: options.context,
+        name: 'test',
+        request: { params, options, id: 1 },
+        connection: null,
+        attempts: 0,
+        aborted: false,
+      },
+    });
+
+    expect(error.statusCode).toBe(503);
+    expect(readSocket).not.toHaveBeenCalled();
+    expect((error.meta.meta.context as TransportContext).timingContext).not.toHaveProperty(
+      'kibanaRequest'
+    );
   });
 
   it('creates context object if not present', () => {
