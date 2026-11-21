@@ -167,6 +167,136 @@ describe('connector metrics', () => {
       });
     });
 
+    it('records the failure class on the counter, not on the duration', () => {
+      recordConnectorExecute({
+        connectorType: '.sharepoint',
+        specBased: true,
+        origin: 'agent_builder',
+        subAction: 'search',
+        errorType: 'other',
+        errorSource: 'user',
+        failureClass: 'vendor_4xx',
+        durationMs: 8,
+      });
+
+      expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': '.sharepoint',
+        'connector.spec_based': true,
+        'connector.origin': 'agent_builder',
+        'connector.sub_action': 'search',
+        success: false,
+        'error.type': 'other',
+        'error.source': 'user',
+        'error.failure_class': 'vendor_4xx',
+      });
+      expect(connectorExecuteDuration.record).toHaveBeenCalledWith(8, {
+        'connector.type': '.sharepoint',
+        'connector.spec_based': true,
+        'connector.origin': 'agent_builder',
+        'connector.sub_action': 'search',
+        success: false,
+        'error.type': 'other',
+      });
+    });
+
+    it('reports a known vendor status code as itself', () => {
+      recordConnectorExecute({
+        connectorType: '.slack',
+        specBased: true,
+        origin: 'saved_object',
+        errorType: 'other',
+        errorSource: 'user',
+        failureClass: 'vendor_4xx',
+        statusCode: 429,
+      });
+
+      expect(connectorExecuteCounter.add).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ 'error.status_code': '429', 'error.failure_class': 'vendor_4xx' })
+      );
+    });
+
+    it('reports a status code outside the allowlist as unknown, keeping the label bounded', () => {
+      recordConnectorExecute({
+        connectorType: '.slack',
+        specBased: true,
+        origin: 'saved_object',
+        errorType: 'other',
+        errorSource: 'user',
+        failureClass: 'vendor_4xx',
+        statusCode: 418,
+      });
+
+      expect(connectorExecuteCounter.add).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ 'error.status_code': 'unknown' })
+      );
+    });
+
+    it('leaves out the status code when the execution succeeded', () => {
+      recordConnectorExecute({
+        connectorType: '.slack',
+        specBased: true,
+        origin: 'saved_object',
+        statusCode: 429,
+      });
+
+      expect(connectorExecuteCounter.add).toHaveBeenCalledWith(
+        1,
+        expect.not.objectContaining({ 'error.status_code': expect.anything() })
+      );
+    });
+
+    it('reports a known error name as itself', () => {
+      recordConnectorExecute({
+        connectorType: '.slack',
+        specBased: true,
+        origin: 'saved_object',
+        errorType: 'other',
+        errorSource: 'user',
+        failureClass: 'handler',
+        errorName: 'TypeError',
+      });
+
+      expect(connectorExecuteCounter.add).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ 'error.name': 'TypeError', 'error.failure_class': 'handler' })
+      );
+    });
+
+    it('reports an error name outside the allowlist as unknown', () => {
+      recordConnectorExecute({
+        connectorType: '.slack',
+        specBased: true,
+        origin: 'saved_object',
+        errorType: 'other',
+        errorSource: 'user',
+        failureClass: 'handler',
+        errorName: 'SomeVendorSdkError',
+      });
+
+      expect(connectorExecuteCounter.add).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ 'error.name': 'unknown' })
+      );
+    });
+
+    it('leaves out the failure class when the execution succeeded', () => {
+      recordConnectorExecute({
+        connectorType: '.sharepoint',
+        specBased: true,
+        origin: 'saved_object',
+        failureClass: 'handler',
+      });
+
+      expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': '.sharepoint',
+        'connector.spec_based': true,
+        'connector.origin': 'saved_object',
+        success: true,
+      });
+    });
+
     it('omits the sub-action and the duration when they are not known', () => {
       recordConnectorExecute({
         connectorType: '.sharepoint',

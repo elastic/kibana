@@ -15,6 +15,7 @@ export type {
   ActionTypeExecutorResult,
   ActionTypeExecutorRawResult,
   ActionsPublicConfigType,
+  ConnectorExecuteFailureClass,
 } from './types';
 export { InvalidEmailReason, isActionTypeExecutorResult } from './types';
 export {

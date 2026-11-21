@@ -28,12 +28,17 @@ import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/tas
 import type { ExecutorParams } from '../../sub_action_framework/types';
 import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
-  ActionTypeExecutorResult as ConnectorTypeExecutorResult,
+  ActionTypeExecutorRawResult as ConnectorTypeExecutorRawResult,
 } from '../../types';
 import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_instance';
 import type { LeasePool } from '../lease_pool';
 import { buildClientLeaseKey } from './build_client_lease_key';
 import { AllowlistDeniedError } from './connector_network_errors';
+import {
+  classifyConnectorFailure,
+  getHttpStatus,
+  getVendorStatus,
+} from './classify_connector_failure';
 
 type RecordUnknown = Record<string, unknown>;
 interface FetchOptions {
@@ -73,11 +78,6 @@ const getResponseSizeHeaderBytes = ({
   error: unknown;
   headerName: string;
 }): number | undefined => getFinitePositiveNumber(getErrorHeaderValue({ error, headerName }));
-
-const getHttpStatus = (error: unknown): number | undefined => {
-  const status = (error as AxiosLikeError | undefined)?.response?.status;
-  return typeof status === 'number' ? status : undefined;
-};
 
 // A time in the past means the service can be called again now. Dates beyond the JS range are
 // dropped: they would make `retry.toISOString()` throw downstream.
@@ -176,7 +176,7 @@ export const generateExecutorFunction = ({
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
-  ): Promise<ConnectorTypeExecutorResult<unknown>> {
+  ): Promise<ConnectorTypeExecutorRawResult<unknown>> {
     const {
       actionId: connectorId,
       config,
@@ -349,11 +349,19 @@ export const generateExecutorFunction = ({
       });
       const errorMeta = getErrorMeta({ error, contentLengthBytes });
       const retryDate = getRetryDate(error);
+      const vendorStatusCode = getVendorStatus(error);
+      // Splits a `handler` failure that crashed on the data (a TypeError on a field that
+      // wasn't there) from one the connector raised deliberately. Kept separate from the
+      // public `errorName`, which callers branch on and which carries its own `errorMeta`.
+      const failureErrorName = error instanceof Error ? error.name : undefined;
       logger.error(`error on ${connectorId} event: ${errorMessage}`);
       return {
         status: 'error',
         message: errorMessage,
         actionId: connectorId,
+        failureClass: classifyConnectorFailure(error),
+        ...(vendorStatusCode !== undefined ? { vendorStatusCode } : {}),
+        ...(failureErrorName ? { failureErrorName } : {}),
         ...(errorMeta ? { errorMeta } : {}),
         ...(errorSource === TaskErrorSource.USER
           ? { retry: false, errorSource: TaskErrorSource.USER }

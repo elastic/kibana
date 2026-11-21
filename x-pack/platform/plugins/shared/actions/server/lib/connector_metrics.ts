@@ -7,6 +7,7 @@
 
 import type { Attributes } from '@opentelemetry/api';
 import { metrics, ValueType } from '@opentelemetry/api';
+import type { ConnectorExecuteFailureClass } from '../../common';
 import { ActionExecutionSourceType } from './action_execution_source';
 
 const meter = metrics.getMeter('kibana.actions');
@@ -76,6 +77,32 @@ export type ConnectorExecuteOrigin =
 
 /** Who is responsible for a failed execution. */
 export type ConnectorErrorSource = 'user' | 'framework';
+
+/**
+ * The vendor status codes reported as themselves. Anything else is reported as `unknown`, so
+ * the label stays low-cardinality whatever a vendor answers; `error.failure_class` still
+ * carries the 4xx/5xx split for the codes that fall through.
+ */
+const REPORTED_STATUS_CODES = new Set([
+  400, 401, 403, 404, 408, 409, 413, 422, 429, 500, 502, 503, 504,
+]);
+
+/**
+ * Error names reported as themselves. A `TypeError` or `SyntaxError` means the handler crashed
+ * on the data it got, which is what a vendor changing a response looks like; a plain `Error`
+ * means the connector rejected something deliberately. Anything else is `unknown`.
+ */
+const REPORTED_ERROR_NAMES = new Set([
+  'AllowlistDeniedError',
+  'AxiosError',
+  'ConnectorAuthorizationError',
+  'Error',
+  'RangeError',
+  'ReferenceError',
+  'RelayRequestError',
+  'SyntaxError',
+  'TypeError',
+]);
 
 const NO_AUTH_TYPE = 'none';
 /** Sub-action reported for connectors that have a single operation and no sub-actions. */
@@ -182,6 +209,12 @@ export interface RecordConnectorExecuteOpts {
   subAction?: string;
   errorType?: ConnectorExecuteErrorType;
   errorSource?: ConnectorErrorSource;
+  /** Why a connector's own handler failed, when the failure came from one. */
+  failureClass?: ConnectorExecuteFailureClass;
+  /** The HTTP status the vendor answered with, reported bounded. */
+  statusCode?: number;
+  /** The thrown error's name, reported bounded. */
+  errorName?: string;
   durationMs?: number;
 }
 
@@ -192,6 +225,9 @@ export const recordConnectorExecute = ({
   subAction,
   errorType,
   errorSource,
+  failureClass,
+  statusCode,
+  errorName,
   durationMs,
 }: RecordConnectorExecuteOpts): void => {
   const attributes: Attributes = {
@@ -206,6 +242,18 @@ export const recordConnectorExecute = ({
   connectorExecuteCounter.add(1, {
     ...attributes,
     ...(errorType && errorSource ? { 'error.source': errorSource } : {}),
+    ...(errorType && failureClass ? { 'error.failure_class': failureClass } : {}),
+    ...(errorType && statusCode !== undefined
+      ? {
+          'error.status_code': toBoundedLabel(
+            String(statusCode),
+            REPORTED_STATUS_CODES.has(statusCode)
+          ),
+        }
+      : {}),
+    ...(errorType && errorName
+      ? { 'error.name': toBoundedLabel(errorName, REPORTED_ERROR_NAMES.has(errorName)) }
+      : {}),
   });
 
   if (durationMs !== undefined) {

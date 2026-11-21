@@ -25,6 +25,7 @@ import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
+import { AllowlistDeniedError } from './single_file_connectors/connector_network_errors';
 import type { ConnectorTokenClientContract } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
 import { getAxiosAuthStrategy } from './axios_auth_strategies';
@@ -357,7 +358,15 @@ export const getAxiosInstanceWithAuth = ({
       // against the Actions allowedHosts policy before any network dispatch.
       configuredAxiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
         const resolvedUrl = configuredAxiosInstance.getUri(config);
-        configurationUtilities.ensureUriAllowed(resolvedUrl);
+        try {
+          configurationUtilities.ensureUriAllowed(resolvedUrl);
+        } catch (err) {
+          // Typed so the failure is classified as a denied egress rather than a bug in the
+          // connector's own code, the same way `createConnectorNetworkSettings` types it.
+          throw new AllowlistDeniedError(err instanceof Error ? err.message : String(err), {
+            cause: err,
+          });
+        }
         return config;
       });
 
