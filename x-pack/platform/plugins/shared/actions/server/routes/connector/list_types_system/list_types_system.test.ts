@@ -13,6 +13,7 @@ import { listTypesWithSystemRoute } from './list_types_system';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { actionsClientMock } from '../../../mocks';
 import type { SubFeature } from '../../../../common';
+import type { ConnectorSpecSummary } from '../../../../common/connector_spec';
 import { createMockConnectorType } from '../../../application/connector/mocks';
 
 jest.mock('../../verify_access_and_context', () => ({
@@ -29,7 +30,7 @@ describe('listTypesWithSystemRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    listTypesWithSystemRoute(router, licenseState);
+    listTypesWithSystemRoute(router, licenseState, () => []);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -101,7 +102,7 @@ describe('listTypesWithSystemRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    listTypesWithSystemRoute(router, licenseState);
+    listTypesWithSystemRoute(router, licenseState, () => []);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -187,7 +188,7 @@ describe('listTypesWithSystemRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    listTypesWithSystemRoute(router, licenseState);
+    listTypesWithSystemRoute(router, licenseState, () => []);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -226,7 +227,7 @@ describe('listTypesWithSystemRoute', () => {
       throw new Error('OMG');
     });
 
-    listTypesWithSystemRoute(router, licenseState);
+    listTypesWithSystemRoute(router, licenseState, () => []);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -255,5 +256,28 @@ describe('listTypesWithSystemRoute', () => {
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
+  });
+
+  it('adds the icon and EARS flag to spec-backed types only', async () => {
+    const router = httpServiceMock.createRouter();
+    const specs = [
+      { id: '.spec-type', icon: 'logo', isEarsExperimental: true },
+    ] as ConnectorSpecSummary[];
+
+    listTypesWithSystemRoute(router, licenseStateMock.create(), () => specs);
+    const [, handler] = router.get.mock.calls[0];
+    const actionsClient = actionsClientMock.create();
+    actionsClient.listTypes.mockResolvedValueOnce([
+      createMockConnectorType({ id: '.spec-type', name: 'Spec type' }),
+      createMockConnectorType({ id: '.stack-type', name: 'Stack type' }),
+    ]);
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+
+    expect(await handler(context, req, res)).toEqual({
+      body: [
+        expect.objectContaining({ icon: 'logo', is_ears_experimental: true }),
+        expect.not.objectContaining({ is_ears_experimental: expect.anything() }),
+      ],
+    });
   });
 });
