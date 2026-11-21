@@ -85,6 +85,25 @@ describe('composeSourceStatus', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  it('collapses line breaks in the request-controlled source id so it cannot forge log lines', async () => {
+    const hasMetricIndices = jest
+      .fn()
+      .mockRejectedValue(new errors.TimeoutError('Request timed out'));
+
+    await composeSourceStatus({
+      logger,
+      sourceStatus: { hasMetricIndices },
+      requestContext,
+      request,
+      sourceId: 'default\nerror forged line',
+      metricAlias,
+    });
+
+    const [message] = logger.warn.mock.calls[0];
+    expect(message).not.toContain('\n');
+    expect(message).toContain('default error forged line');
+  });
+
   it('keeps the error log and reports missing remote clusters when the remote cluster does not exist', async () => {
     const error = new NoSuchRemoteClusterError('no such remote cluster');
     const hasMetricIndices = jest.fn().mockRejectedValue(error);

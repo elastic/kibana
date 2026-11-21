@@ -19,6 +19,12 @@ export const defaultSourceStatus: MetricsSourceStatus = {
   metricIndicesStatus: 'unknown',
 };
 
+/**
+ * Collapses line breaks so a request-controlled value cannot forge additional log lines when
+ * interpolated into a single-line log message.
+ */
+const toSingleLine = (value: string): string => value.replace(/[\r\n]+/g, ' ');
+
 interface ComposeSourceStatusParams {
   logger: Logger;
   sourceStatus: Pick<InfraSourceStatus, 'hasMetricIndices'>;
@@ -60,7 +66,9 @@ export const composeSourceStatus = async ({
     if (err instanceof errors.TimeoutError) {
       const reason = err instanceof Error ? err.message : String(err);
       logger.warn(
-        `Metric index status check timed out for source "${sourceId}" (pattern: ${metricAlias}): ${reason}`
+        `Metric index status check timed out for source "${toSingleLine(
+          sourceId
+        )}" (pattern: ${metricAlias}): ${reason}`
       );
     } else {
       // Any other failure is unexpected (for example an authorization error), so keep it
