@@ -9,6 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { createSecurityRelevanceEvaluator } from '@kbn/security-evals-matrix';
 import type { DefaultEvaluators, EvalsExecutorClient, Evaluator, TaskOutput } from '@kbn/evals';
 import {
   PERSONA_RUBRIC_EVALUATOR_NAME,
@@ -787,7 +788,7 @@ describe('task output shape', () => {
     expect(output.judgedAnswerEmpty).toBe(true);
   });
 
-  it('records a rejected converse as an empty, errored submission instead of throwing', async () => {
+  it('records a rejected converse as an ungraded, errored submission instead of throwing', async () => {
     const log = buildLog();
     let capturedTask: ((example: unknown) => Promise<unknown>) | undefined;
     const evaluateDataset = createEvaluatePersonaMatrixDataset({
@@ -822,14 +823,20 @@ describe('task output shape', () => {
     const output = (await capturedTask!(toDatasetExample(baseExample))) as {
       messages: Array<{ message: string }>;
       errors: unknown[];
-      judgedAnswerEmpty?: boolean;
     };
     expect(output.messages[0].message).toBe(
       `${UNANSWERED_PROMPT_MARKER} converse failed: ECONNREFUSED`
     );
     expect(output.errors).toHaveLength(1);
-    expect(output.judgedAnswerEmpty).toBe(true);
     expect(log.error).toHaveBeenCalled();
+
+    const relevance = await createSecurityRelevanceEvaluator().evaluate({
+      input: {},
+      output,
+      expected: {},
+      metadata: {},
+    } as unknown as Parameters<Evaluator['evaluate']>[0]);
+    expect(relevance).toMatchObject({ score: null, label: 'unavailable' });
   });
 });
 

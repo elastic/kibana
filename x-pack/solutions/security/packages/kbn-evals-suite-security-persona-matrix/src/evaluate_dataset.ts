@@ -969,10 +969,9 @@ export function createEvaluatePersonaMatrixDataset({
               rawResponse: '',
               correctnessAnalysis: undefined,
               groundednessAnalysis: undefined,
+              // No judge ran, so Relevance reports 'unavailable': a transport
+              // failure is not graded as the model's answer.
               criteriaAnalysis: undefined,
-              // The marker text is non-empty, so without this Relevance would
-              // treat a failed converse as an answer.
-              judgedAnswerEmpty: true,
             };
           }
 
