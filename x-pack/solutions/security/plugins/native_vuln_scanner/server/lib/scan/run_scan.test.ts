@@ -793,3 +793,51 @@ describe('runScan refresh scope', () => {
     expect(writeCheckpoint).not.toHaveBeenCalled();
   });
 });
+
+describe('inventoryFingerprint ordering', () => {
+  const packages = [
+    { name: 'openssl', version: '3.0.7', arch: 'x86_64', source: 'openssl-3.0.7.src.rpm' },
+    { name: 'openssl', version: '3.0.7', arch: 'i686', source: 'openssl-3.0.7.src.rpm' },
+    { name: 'zlib', version: '1.2.11', arch: 'x86_64', source: 'zlib-1.2.11.src.rpm' },
+  ];
+  const hostOf = (rpm: typeof packages) => ({
+    agentId: 'a1',
+    hostName: 'h',
+    os: { platform: 'rhel', major: '9', platform_like: 'rhel', name: 'RHEL 9' },
+    rpm,
+  });
+
+  it('is independent of the osquery iteration order of same-name entries', () => {
+    const direct = inventoryFingerprint(normalizeInventories([hostOf(packages)]).hosts);
+    const shuffled = inventoryFingerprint(
+      normalizeInventories([hostOf([packages[1], packages[2], packages[0]])]).hosts
+    );
+    expect(shuffled).toBe(direct);
+  });
+});
+
+describe('refresh checkpoint-read resilience', () => {
+  const signal = new AbortController().signal;
+
+  it('matches every release when the checkpoint read fails, without failing the run', async () => {
+    const agents = [rhelAgent('a1', '9')];
+    const load = async (): Promise<LoadFeedResult> => ({
+      status: 'ok',
+      feed: await parseRhelOval([rhelFixture], { major: '9' }),
+      bodySha256: 'feed-sha',
+    });
+    const { deps } = setup(agents, load);
+    const summary = await runScan(
+      {
+        ...deps,
+        scope: 'refresh',
+        readCheckpoints: async () => {
+          throw new Error('es read timeout');
+        },
+      },
+      { signal, runId: 'r1' }
+    );
+    expect(summary.releases['rhel:9']).toBe('matched');
+    expect(writeMock).toHaveBeenCalled();
+  });
+});

@@ -289,10 +289,8 @@ describe('downloadFeed', () => {
   });
 
   it('reports how long the download took and how many bytes the vendor transferred', async () => {
-    let ticks = 0;
     const result = await downloadFeed(rhel9, {
       fetchImpl: respond(rhelBz2),
-      clock: () => ticks++ * 1500,
     });
     expect(result).toMatchObject({
       status: 'ok',

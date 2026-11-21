@@ -8,12 +8,13 @@
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { clearFeedCache, getCachedFeed, setCachedFeed } from '../../../lib/feeds/feed_cache';
 import { loadFeed, parseFeedBody } from '../../../lib/feeds/fetch';
+import { bodySha256 } from '../fetch_feed/fetch_feed_step';
 import type { FeedOs } from '../../../lib/feeds/fetch';
 import { NATIVE_VULN_SCANNER_REFRESH_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { ScanFailedError, runScan } from '../../../lib/scan';
 import type { ScanDeps, ScanSummary } from '../../../lib/scan';
 import { RUN_ID, buildContext, buildDeps } from '../test_helpers';
-import { buildMatchStepDefinition } from './match_step';
+import { buildFeedLoader, buildMatchStepDefinition } from './match_step';
 
 jest.mock('../../../lib/feeds/fetch', () => ({
   ...jest.requireActual('../../../lib/feeds/fetch'),
@@ -190,6 +191,8 @@ describe('native_vuln.match handler', () => {
         feed: parsed,
         etag: '"e"',
         lastModified: 'lm',
+        bodySha256: bodySha256(new Uint8Array(2)),
+        knowledgeStoredIds: undefined,
       });
       expect(loadFeedMock).not.toHaveBeenCalled();
     });
@@ -221,9 +224,12 @@ describe('native_vuln.match handler', () => {
         expect(await loaded('not_modified')).toMatchObject({ knowledgeStoredIds: undefined });
       });
 
-      it('hands over no ids when the bytes were just downloaded', async () => {
-        cacheFeed(new Set(['cve:ubuntu:noble:CVE-1']));
-        expect(await loaded('downloaded')).toMatchObject({ knowledgeStoredIds: undefined });
+      it('hands over the ids on an unchanged-200 too, which preserves them like a 304', async () => {
+        const ids = new Set(['cve:ubuntu:noble:CVE-1']);
+        cacheFeed(ids);
+        expect((await loaded('downloaded')) as { knowledgeStoredIds?: unknown }).toMatchObject({
+          knowledgeStoredIds: ids,
+        });
       });
 
       it('records the ids of each clean write on the cached entry and clears them on a failure', async () => {
@@ -313,5 +319,28 @@ describe('native_vuln.match refresh scope', () => {
     const { result, scanDeps } = await run();
     expect(scanDeps?.scope).toBe('full');
     expect(result.output).not.toHaveProperty('scope');
+  });
+});
+
+describe('buildFeedLoader against a real feed cache', () => {
+  const body = new Uint8Array([1, 2, 3]);
+
+  const loaderWithCache = async (knowledgeStoredIds?: ReadonlySet<string>) => {
+    clearFeedCache();
+    setCachedFeed('ubuntu:noble', { etag: '"e"', body, includeUnfixed: false, knowledgeStoredIds });
+    parseMock.mockResolvedValue({ records: [] } as never);
+    const loader = buildFeedLoader([{ release: 'ubuntu:noble', status: 'downloaded' }], false);
+    return loader(noble, { signal: new AbortController().signal });
+  };
+
+  it('carries the cached body sha256 (backfilled by setCachedFeed), so the refresh skip works on a warm node', async () => {
+    const result = (await loaderWithCache()) as { bodySha256?: string };
+    expect(result.bodySha256).toBe(bodySha256(body));
+  });
+
+  it('carries the ids stored for exactly these bytes regardless of the fetch status', async () => {
+    const ids = new Set(['cve:ubuntu:noble:CVE-1']);
+    const result = (await loaderWithCache(ids)) as { knowledgeStoredIds?: ReadonlySet<string> };
+    expect(result.knowledgeStoredIds).toBe(ids);
   });
 });

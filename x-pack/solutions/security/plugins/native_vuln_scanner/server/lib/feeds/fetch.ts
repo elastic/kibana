@@ -157,8 +157,6 @@ export interface DownloadFeedOptions {
   includeUnfixed?: boolean;
   /** Receives CSAF degradations that do not fail the download (delta over cap, skipped docs). */
   logger?: { warn: (message: string) => void };
-  /** Server-clock skew folded out of the reported duration; for tests. */
-  clock?: () => number;
 }
 
 export interface DownloadFeedTiming {
@@ -235,21 +233,14 @@ const guardBlocks = function* (
 /** Downloads the compressed advisory feed for one OS release without parsing it. */
 export const downloadFeed = async (
   os: FeedOs,
-  {
-    signal,
-    fetchImpl = fetch,
-    etag: knownEtag,
-    includeUnfixed,
-    logger,
-    clock = () => Date.now(),
-  }: DownloadFeedOptions = {}
+  { signal, fetchImpl = fetch, etag: knownEtag, includeUnfixed, logger }: DownloadFeedOptions = {}
 ): Promise<DownloadFeedResult> => {
   if (isCsafRelease(os)) {
-    return downloadCsafCorpus(os.version, knownEtag, signal, fetchImpl, logger, clock);
+    return downloadCsafCorpus(os.version, knownEtag, signal, fetchImpl, logger);
   }
-  const startedAt = clock();
+  const startedAt = Date.now();
   const timing = (): DownloadFeedTiming => ({
-    durationMs: Math.max(1, Math.round(clock() - startedAt)),
+    durationMs: Math.max(1, Math.round(Date.now() - startedAt)),
     downloadedBytes: 0,
   });
   const url = feedUrl(os, { includeUnfixed });
@@ -519,12 +510,11 @@ const downloadCsafCorpus = async (
   knownEtag: string | undefined,
   signal: AbortSignal | undefined,
   fetchImpl: typeof fetch,
-  logger: DownloadFeedOptions['logger'],
-  clock: () => number = () => Date.now()
+  logger: DownloadFeedOptions['logger']
 ): Promise<DownloadFeedResult> => {
-  const startedAt = clock();
+  const startedAt = Date.now();
   const timing = (downloadedBytes: number): DownloadFeedTiming => ({
-    durationMs: Math.max(1, Math.round(clock() - startedAt)),
+    durationMs: Math.max(1, Math.round(Date.now() - startedAt)),
     downloadedBytes,
   });
   const latestResponse = await withTimeout(signal, CSAF_REQUEST_TIMEOUT_MS, (requestSignal) =>

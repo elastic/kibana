@@ -127,9 +127,9 @@ describe('NATIVE_VULN_SCANNER_REFRESH_WORKFLOW yaml', () => {
 
   it('runs the same steps as the scan workflow in the same order', () => {
     expect(flatten(workflow.steps).map(({ type }) => type)).toEqual(
-      flatten(
-        (parse(NATIVE_VULN_SCANNER_SCAN_WORKFLOW.yaml) as { steps: YamlStep[] }).steps
-      ).map(({ type }) => type)
+      flatten((parse(NATIVE_VULN_SCANNER_SCAN_WORKFLOW.yaml) as { steps: YamlStep[] }).steps).map(
+        ({ type }) => type
+      )
     );
   });
 

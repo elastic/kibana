@@ -140,7 +140,7 @@ export const inventoryFingerprint = (releaseHosts: readonly NormalizedHost[]): s
       enabledModules ? [...enabledModules].sort() : null,
       packages
         .map(({ name, version, arch, source }) => [name, version, arch ?? null, source ?? null])
-        .sort((a, b) => (a[0] ?? '').localeCompare(b[0] ?? '')),
+        .sort((a, b) => a.join('\u0000').localeCompare(b.join('\u0000'))),
     ]
   );
   return createHash('sha256').update(JSON.stringify(stable)).digest('hex');
@@ -337,8 +337,20 @@ export const runScan = async (
   const scanStart = now();
   // A refresh decides per release from the checkpoints of the last run that matched and wrote it;
   // a full scan needs none and matches everything.
-  const checkpoints =
-    scope === 'refresh' ? await readCheckpoints() : new Map<string, CheckpointDoc>();
+  let checkpoints = new Map<string, CheckpointDoc>();
+  if (scope === 'refresh') {
+    try {
+      checkpoints = await readCheckpoints();
+    } catch (error) {
+      // A transient read failure degrades to the no-checkpoint state (a full rematch),
+      // never a failed run: refresh is an optimization over the scan's correctness.
+      logger.warn(
+        `Could not read the scan checkpoints; matching every release: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
   for (const [key, releaseHosts] of byRelease) {
     if (signal.aborted) {
       summary.aborted = true;
@@ -372,7 +384,8 @@ export const runScan = async (
       }
       // Only a refresh with a live checkpoint whose feed body and inventory both hash the same
       // skips: its findings were written by the checkpointed run and must stay open. A full scan
-      // always matches. `unchanged`-200 feeds report the checkpoint's etag as their own.
+      // always matches. Skip decisions (and checkpoint comparisons) use the body sha256 only —
+      // an unchanged-200 may rotate the vendor's etag, so an etag can never prove the bytes.
       const inventorySha256 = inventoryFingerprint(releaseHosts);
       const checkpoint = checkpoints.get(key);
       const feedUnchanged =

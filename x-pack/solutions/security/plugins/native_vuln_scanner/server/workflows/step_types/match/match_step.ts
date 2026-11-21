@@ -55,7 +55,7 @@ const toOutput = (summary: ScanSummary): MatchOutput => ({
  * engine may run steps on different nodes) downloads the feed itself; a release the fetch step
  * already reported as failed or unavailable is not retried.
  */
-const buildFeedLoader =
+export const buildFeedLoader =
   (feeds: NonNullable<MatchInput['feeds']>, includeUnfixed: boolean) =>
   async (os: FeedOs, { signal }: { signal: AbortSignal }): Promise<LoadFeedResult> => {
     const release = releaseKey(os);
@@ -74,8 +74,11 @@ const buildFeedLoader =
       feed,
       etag: cached.etag,
       lastModified: cached.lastModified,
-      knowledgeStoredIds:
-        reported?.status === 'not_modified' ? cached.knowledgeStoredIds : undefined,
+      // setCachedFeed backfills this, so a warm node can always fingerprint its bytes.
+      bodySha256: cached.bodySha256,
+      // The entry only carries ids recorded for exactly these bytes (a clean write, or
+      // preserved by the fetch step on not_modified/unchanged-200), so it is safe for both.
+      knowledgeStoredIds: cached.knowledgeStoredIds,
     };
   };
 

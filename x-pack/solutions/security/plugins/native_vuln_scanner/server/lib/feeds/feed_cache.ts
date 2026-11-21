@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
+
 /** Compressed feed bytes the fetch step downloaded, held for the match step and the next run's conditional request. */
 export interface CachedFeed {
   etag?: string;
@@ -34,6 +36,9 @@ export const getCachedFeed = (release: string, includeUnfixed: boolean): CachedF
 };
 
 export const setCachedFeed = (release: string, feed: CachedFeed): void => {
+  // Entries written before bodySha256 existed are backfilled here, so every reader
+  // (the refresh skip check, the unchanged-200 detector) can rely on it being present.
+  if (feed.bodySha256 === undefined) feed.bodySha256 = sha256(feed.body);
   cache.delete(release);
   cache.set(release, feed);
   while (cache.size > MAX_CACHED_FEEDS) {
@@ -61,3 +66,5 @@ export const retainCachedFeeds = (releases: ReadonlySet<string>): void => {
 };
 
 export const clearFeedCache = (): void => cache.clear();
+
+const sha256 = (body: Uint8Array): string => createHash('sha256').update(body).digest('hex');
