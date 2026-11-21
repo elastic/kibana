@@ -416,4 +416,71 @@ ${ATTACK_DISCOVERY_REFINE}
     );
     expect(mockInvoke).toHaveBeenCalledTimes(1);
   });
+
+  it('records a parse error instead of feeding prose back when a continuation returns no JSON', async () => {
+    // a continuation whose response stopped before the JSON section: only reasoning prose
+    const proseResponse = '## Reasoning\n\nThe alerts share a host, so the chain is likely causal.';
+    const mockLlmWithResponse = new FakeLLM({
+      response: proseResponse,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions({
+      llm: mockLlmWithResponse,
+      generationSchema,
+    }).chain.invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValueOnce(proseResponse);
+
+    const refineNode = getRefineNode({
+      llm: mockLlmWithResponse,
+      logger: mockLogger,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const withPreviousRefinements = {
+      ...initialGraphState,
+      combinedRefinements: '{"insights": ',
+      generationAttempts: 2,
+      refinements: ['{"insights": '],
+    };
+
+    const state = await refineNode(withPreviousRefinements);
+
+    // the accumulated JSON partial must be preserved untouched: the prose must
+    // never become part of the combined refinements, which is exactly what the
+    // next continuation prompt would re-send:
+    expect(state.combinedRefinements).toBe('{"insights": ');
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain('response contains no JSON to continue from');
+    expect(state.generationAttempts).toBe(3);
+  });
+
+  it('records a parse error when a first response returns only prose', async () => {
+    // prose from a first call is just as unusable to combine and just as unsafe to
+    // feed back later, so the guard is unconditional on the first attempt too:
+    const proseResponse = '**Step 1: Schema compliance.** No stray fields.';
+    const mockLlmWithResponse = new FakeLLM({
+      response: proseResponse,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions({
+      llm: mockLlmWithResponse,
+      generationSchema,
+    }).chain.invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValueOnce(proseResponse);
+
+    const refineNode = getRefineNode({
+      llm: mockLlmWithResponse,
+      logger: mockLogger,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await refineNode(initialGraphState);
+
+    expect(state.combinedRefinements).toBe('');
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain('response contains no JSON to continue from');
+    expect(state.refinements).toEqual([proseResponse]);
+  });
 });
