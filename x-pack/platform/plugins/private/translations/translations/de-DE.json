@@ -19330,8 +19330,6 @@
     "xpack.alertingV2EpisodesUi.severityFilter.label": "Schweregrad",
     "xpack.alertingV2EpisodesUi.severityFilter.noMatch": "Keine passenden Schweregrade",
     "xpack.alertingV2EpisodesUi.severityFilter.noneLabel": "Kein Schweregrad",
-    "xpack.alertingV2EpisodesUi.snoozedTooltipUnknownExpiry": "Benachrichtigungen sind zurückgestellt.",
-    "xpack.alertingV2EpisodesUi.snoozedUntilTooltip": "Benachrichtigungen bis {expiry} zurückgestellt.",
     "xpack.alertingV2EpisodesUi.source.classicAlertingLabel": "Classic Alerting",
     "xpack.alertingV2EpisodesUi.source.classicLabel": "Classic",
     "xpack.alertingV2EpisodesUi.source.universalAlertingLabel": "Universal Alerting",

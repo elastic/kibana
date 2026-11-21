@@ -39,6 +39,27 @@ export const UNSNOOZE = i18n.translate(
   }
 );
 
+export const CONDITIONAL_SNOOZE_UNSUPPORTED = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.conditionalSnoozeUnsupported',
+  {
+    defaultMessage: 'Condition based snooze is not available for Universal alerts yet.',
+  }
+);
+
+export const CONDITIONAL_SNOOZE_ACTIVE_ONLY = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.conditionalSnoozeActiveOnly',
+  {
+    defaultMessage: 'Condition based snooze is only available for active alerts.',
+  }
+);
+
+export const getReplacedSnoozeWarning = (count: number): string =>
+  i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.replacedSnoozeWarning', {
+    defaultMessage:
+      '{count, plural, one {# selected alert is already snoozed. The new period and conditions replace the existing ones.} other {# selected alerts are already snoozed. The new period and conditions replace the existing ones.}}',
+    values: { count },
+  });
+
 export const RESOLVE = i18n.translate(
   'xpack.alertingV2EpisodesUi.episodesUi.resolveAction.deactivate',
   {
