@@ -6,17 +6,14 @@
  */
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { TextBasedLayer, TextBasedLayerColumn } from '@kbn/lens-common';
+import type { TextBasedLayer } from '@kbn/lens-common';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type {
+  DatatableConfigESQL,
   LensAttributes,
-  LensBreakdownConfig,
-  LensESQLDataset,
-  LensMetricConfig,
-  LensTableConfig,
-  LensXYConfig,
+  MetricConfigESQL,
+  XYConfigESQL,
 } from '@kbn/lens-embeddable-utils';
 import {
   EVENT_DEAD_CLICK,
@@ -35,12 +32,7 @@ import {
   type FrustrationQueryParams,
 } from './frustration_esql';
 
-type EsqlConfig<T> = T & { dataset: LensESQLDataset };
-
-export type FrustrationLensConfig =
-  | EsqlConfig<LensMetricConfig>
-  | EsqlConfig<LensXYConfig>
-  | EsqlConfig<LensTableConfig>;
+export type FrustrationLensConfig = MetricConfigESQL | XYConfigESQL | DatatableConfigESQL;
 
 export interface FrustrationPanelGrid {
   x: number;
@@ -49,21 +41,11 @@ export interface FrustrationPanelGrid {
   h: number;
 }
 
-/**
- * What the Lens config can't express for an ES|QL layer, applied to the built attributes:
- * stacked bars, column labels and percent formatting.
- */
-export interface FrustrationPanelAppearance {
-  stacked?: 'vertical' | 'horizontal';
-  columns?: Readonly<Record<string, { label?: string; percent?: boolean }>>;
-}
-
 export interface FrustrationPanelConfig {
   id: string;
   title: string;
   grid: FrustrationPanelGrid;
   config: FrustrationLensConfig;
-  appearance?: FrustrationPanelAppearance;
 }
 
 /** One color per signal type, as hex strings from the theme. */
@@ -76,7 +58,9 @@ export interface FrustrationColors {
 const GRID_ROW_HEIGHT = 7;
 const GRID_CHART_HEIGHT = 14;
 
-const labels = {
+const SERIES_COLUMNS = ['rage', 'dead', 'error'] as const;
+
+const SERIES_LABELS = {
   rage: i18n.translate('xpack.digitalExperience.frustrationDashboard.series.rage', {
     defaultMessage: 'Rage',
   }),
@@ -88,48 +72,90 @@ const labels = {
   }),
 };
 
-const signalsLabel = i18n.translate('xpack.digitalExperience.frustrationDashboard.signalsLabel', {
+const SIGNALS_LABEL = i18n.translate('xpack.digitalExperience.frustrationDashboard.signalsLabel', {
   defaultMessage: 'Signals',
 });
 
-const SERIES_COLUMNS = ['rage', 'dead', 'error'] as const;
+const EXCEPTIONS_TITLE = i18n.translate(
+  'xpack.digitalExperience.frustrationDashboard.exceptions.title',
+  { defaultMessage: 'Error clicks by exception' }
+);
 
-const seriesAppearance = (
-  stacked: FrustrationPanelAppearance['stacked']
-): FrustrationPanelAppearance => ({
-  stacked,
-  columns: Object.fromEntries(SERIES_COLUMNS.map((column) => [column, { label: labels[column] }])),
-});
+const layerSettings = { sampling: 1, ignore_global_filters: false } as const;
 
-const metricPanel = (
+const countMetricPanel = (
   id: string,
   title: string,
   esql: string,
-  grid: Pick<FrustrationPanelGrid, 'x' | 'w'>,
-  options: Pick<LensMetricConfig, 'value' | 'querySecondaryMetric'> = { value: 'signals' },
-  columns: NonNullable<FrustrationPanelAppearance['columns']> = { signals: { label: signalsLabel } }
+  grid: Pick<FrustrationPanelGrid, 'x' | 'w'>
 ): FrustrationPanelConfig => ({
   id,
   title,
   grid: { ...grid, y: 0, h: GRID_ROW_HEIGHT },
-  config: { chartType: 'metric', title, dataset: { esql }, ...options },
-  appearance: { columns },
+  config: {
+    type: 'metric',
+    title,
+    ...layerSettings,
+    data_source: { type: 'esql', query: esql },
+    metrics: [{ type: 'primary', column: 'signals', label: SIGNALS_LABEL }],
+  },
 });
 
+const sessionsMetricPanel = (
+  id: string,
+  title: string,
+  esql: string,
+  grid: Pick<FrustrationPanelGrid, 'x' | 'w'>
+): FrustrationPanelConfig => ({
+  id,
+  title,
+  grid: { ...grid, y: 0, h: GRID_ROW_HEIGHT },
+  config: {
+    type: 'metric',
+    title,
+    ...layerSettings,
+    data_source: { type: 'esql', query: esql },
+    styling: { secondary: { label: { visible: true } } },
+    metrics: [
+      {
+        type: 'primary',
+        column: 'share',
+        label: i18n.translate('xpack.digitalExperience.frustrationDashboard.sessions.share', {
+          defaultMessage: 'Share of sessions',
+        }),
+        format: { type: 'percent', decimals: 0, compact: false },
+      },
+      {
+        type: 'secondary',
+        column: 'frustrated',
+        label: i18n.translate('xpack.digitalExperience.frustrationDashboard.sessions.frustrated', {
+          defaultMessage: 'Frustrated',
+        }),
+      },
+    ],
+  },
+});
+
+/**
+ * Rage, dead and error clicks stacked per value of `xColumn`: a time axis, or horizontal bars
+ * for the breakdowns, whose version and browser names read better on the vertical axis.
+ */
 const stackedBarsPanel = (
   id: string,
   title: string,
   esql: string,
   grid: Pick<FrustrationPanelGrid, 'x' | 'y' | 'w'>,
   {
-    xAxis,
-    horizontal,
-    showLegend,
+    xColumn,
+    isTime = false,
+    isHorizontal = false,
+    showLegend = true,
     colors,
   }: {
-    xAxis: LensBreakdownConfig;
-    horizontal: boolean;
-    showLegend: boolean;
+    xColumn: string;
+    isTime?: boolean;
+    isHorizontal?: boolean;
+    showLegend?: boolean;
     colors?: FrustrationColors;
   }
 ): FrustrationPanelConfig => ({
@@ -137,33 +163,70 @@ const stackedBarsPanel = (
   title,
   grid: { ...grid, h: GRID_CHART_HEIGHT },
   config: {
-    chartType: 'xy',
+    type: 'xy',
     title,
-    dataset: { esql },
-    legend: { show: showLegend, position: 'bottom' },
-    axisTitleVisibility: { showXAxisTitle: false, showYAxisTitle: false },
+    legend: { visibility: showLegend ? 'visible' : 'hidden', position: 'bottom' },
+    axis: {
+      x: { title: { visible: false }, ...(isTime ? { scale: 'temporal' } : {}) },
+      y: { title: { visible: false } },
+    },
     layers: [
       {
-        type: 'series',
-        seriesType: 'bar',
-        xAxis,
-        yAxis: SERIES_COLUMNS.map((column) => ({
-          label: labels[column],
-          value: column,
-          seriesColor: colors?.[column],
+        type: isHorizontal ? 'bar_horizontal_stacked' : 'bar_stacked',
+        ...layerSettings,
+        data_source: { type: 'esql', query: esql },
+        x: { column: xColumn },
+        y: SERIES_COLUMNS.map((column) => ({
+          column,
+          label: SERIES_LABELS[column],
+          ...(colors ? { color: { type: 'static', color: colors[column] } } : {}),
         })),
       },
     ],
   },
-  appearance: seriesAppearance(horizontal ? 'horizontal' : 'vertical'),
 });
 
-/** The Lens ES|QL configs of the dashboard panels, in layout order. */
+const exceptionsPanel = (esql: string): FrustrationPanelConfig => ({
+  id: 'frustration-error-click-exceptions',
+  title: EXCEPTIONS_TITLE,
+  grid: { x: 0, y: 35, w: 48, h: GRID_CHART_HEIGHT },
+  config: {
+    type: 'data_table',
+    title: EXCEPTIONS_TITLE,
+    ...layerSettings,
+    data_source: { type: 'esql', query: esql },
+    rows: [
+      {
+        column: 'type',
+        label: i18n.translate('xpack.digitalExperience.frustrationDashboard.exceptions.type', {
+          defaultMessage: 'Exception',
+        }),
+      },
+      {
+        column: 'message',
+        label: i18n.translate('xpack.digitalExperience.frustrationDashboard.exceptions.message', {
+          defaultMessage: 'Message',
+        }),
+      },
+    ],
+    metrics: [
+      { column: 'signals', label: SIGNALS_LABEL },
+      {
+        column: 'sessions',
+        label: i18n.translate('xpack.digitalExperience.frustrationDashboard.exceptions.sessions', {
+          defaultMessage: 'Sessions',
+        }),
+      },
+    ],
+  },
+});
+
+/** The Lens API configs of the dashboard panels, in layout order. */
 export const frustrationPanelConfigs = (
   params: FrustrationQueryParams,
   colors?: FrustrationColors
 ): FrustrationPanelConfig[] => [
-  metricPanel(
+  countMetricPanel(
     'frustration-signals',
     i18n.translate('xpack.digitalExperience.frustrationDashboard.signals.title', {
       defaultMessage: 'Frustration signals',
@@ -171,29 +234,15 @@ export const frustrationPanelConfigs = (
     signalsQuery(params),
     { x: 0, w: 10 }
   ),
-  metricPanel(
+  sessionsMetricPanel(
     'frustration-sessions',
     i18n.translate('xpack.digitalExperience.frustrationDashboard.sessions.title', {
       defaultMessage: 'Frustrated sessions',
     }),
     frustratedSessionsQuery(params),
-    { x: 10, w: 10 },
-    { value: 'share', querySecondaryMetric: 'frustrated' },
-    {
-      share: {
-        percent: true,
-        label: i18n.translate('xpack.digitalExperience.frustrationDashboard.sessions.share', {
-          defaultMessage: 'Share of sessions',
-        }),
-      },
-      frustrated: {
-        label: i18n.translate('xpack.digitalExperience.frustrationDashboard.sessions.frustrated', {
-          defaultMessage: 'Frustrated',
-        }),
-      },
-    }
+    { x: 10, w: 10 }
   ),
-  metricPanel(
+  countMetricPanel(
     'frustration-rage-clicks',
     i18n.translate('xpack.digitalExperience.frustrationDashboard.rageClicks.title', {
       defaultMessage: 'Rage clicks',
@@ -201,7 +250,7 @@ export const frustrationPanelConfigs = (
     signalsOfTypeQuery(params, EVENT_RAGE_CLICK),
     { x: 20, w: 10 }
   ),
-  metricPanel(
+  countMetricPanel(
     'frustration-dead-clicks',
     i18n.translate('xpack.digitalExperience.frustrationDashboard.deadClicks.title', {
       defaultMessage: 'Dead clicks',
@@ -209,7 +258,7 @@ export const frustrationPanelConfigs = (
     signalsOfTypeQuery(params, EVENT_DEAD_CLICK),
     { x: 30, w: 9 }
   ),
-  metricPanel(
+  countMetricPanel(
     'frustration-error-clicks',
     i18n.translate('xpack.digitalExperience.frustrationDashboard.errorClicks.title', {
       defaultMessage: 'Error clicks',
@@ -224,7 +273,7 @@ export const frustrationPanelConfigs = (
     }),
     signalsOverTimeQuery(params),
     { x: 0, y: 7, w: 48 },
-    { xAxis: { type: 'dateHistogram', field: 'time' }, horizontal: false, showLegend: true, colors }
+    { xColumn: 'time', isTime: true, colors }
   ),
   stackedBarsPanel(
     'frustration-by-version',
@@ -233,7 +282,7 @@ export const frustrationPanelConfigs = (
     }),
     signalsByVersionQuery(params),
     { x: 0, y: 21, w: 24 },
-    { xAxis: 'version', horizontal: true, showLegend: true, colors }
+    { xColumn: 'version', isHorizontal: true, colors }
   ),
   stackedBarsPanel(
     'frustration-by-browser',
@@ -242,7 +291,7 @@ export const frustrationPanelConfigs = (
     }),
     signalsByBrowserQuery(params),
     { x: 24, y: 21, w: 12 },
-    { xAxis: 'browser', horizontal: true, showLegend: false, colors }
+    { xColumn: 'browser', isHorizontal: true, showLegend: false, colors }
   ),
   stackedBarsPanel(
     'frustration-by-device',
@@ -251,135 +300,62 @@ export const frustrationPanelConfigs = (
     }),
     signalsByDeviceQuery(params),
     { x: 36, y: 21, w: 12 },
-    { xAxis: 'device', horizontal: true, showLegend: false, colors }
+    { xColumn: 'device', isHorizontal: true, showLegend: false, colors }
   ),
-  {
-    id: 'frustration-error-click-exceptions',
-    title: i18n.translate('xpack.digitalExperience.frustrationDashboard.exceptions.title', {
-      defaultMessage: 'Error clicks by exception',
-    }),
-    grid: { x: 0, y: 35, w: 48, h: GRID_CHART_HEIGHT },
-    config: {
-      chartType: 'table',
-      title: i18n.translate('xpack.digitalExperience.frustrationDashboard.exceptions.title', {
-        defaultMessage: 'Error clicks by exception',
-      }),
-      dataset: { esql: errorClicksQuery(params) },
-      // The table lists its value column first, then the breakdowns in order.
-      value: 'type',
-      breakdown: ['message', 'signals', 'sessions'],
-    },
-    appearance: {
-      columns: {
-        type: {
-          label: i18n.translate('xpack.digitalExperience.frustrationDashboard.exceptions.type', {
-            defaultMessage: 'Exception',
-          }),
-        },
-        message: {
-          label: i18n.translate('xpack.digitalExperience.frustrationDashboard.exceptions.message', {
-            defaultMessage: 'Message',
-          }),
-        },
-        signals: {
-          label: i18n.translate('xpack.digitalExperience.frustrationDashboard.exceptions.signals', {
-            defaultMessage: 'Signals',
-          }),
-        },
-        sessions: {
-          label: i18n.translate(
-            'xpack.digitalExperience.frustrationDashboard.exceptions.sessions',
-            { defaultMessage: 'Sessions' }
-          ),
-        },
-      },
-    },
-  },
+  exceptionsPanel(errorClicksQuery(params)),
 ];
 
-const STACKED_SERIES_TYPE = {
-  vertical: 'bar_stacked',
-  horizontal: 'bar_horizontal_stacked',
-} as const;
-
-interface XYVisualizationLike {
-  preferredSeriesType?: string;
-  layers?: Array<{ seriesType?: string }>;
-}
-
-const applyColumns = (
-  layer: TextBasedLayer,
-  columns: NonNullable<FrustrationPanelAppearance['columns']>
-): TextBasedLayer => ({
-  ...layer,
-  columns: layer.columns.map((column): TextBasedLayerColumn => {
-    const { label, percent } = columns[column.fieldName] ?? {};
-    return {
-      ...column,
-      ...(label ? { label, customLabel: true } : {}),
-      ...(percent ? { params: { format: { id: 'percent', params: { decimals: 0 } } } } : {}),
-    };
-  }),
-});
-
-const applyAppearance = (
+const withTextBasedLayers = (
   attributes: LensAttributes,
-  { stacked, columns }: FrustrationPanelAppearance
+  update: (layer: TextBasedLayer) => TextBasedLayer
 ): LensAttributes => {
-  const { datasourceStates, visualization } = attributes.state;
-  const textBased = datasourceStates.textBased;
-  const stackedType = stacked ? STACKED_SERIES_TYPE[stacked] : undefined;
-  const xy = visualization as XYVisualizationLike;
-
+  const { textBased } = attributes.state.datasourceStates;
+  if (!textBased) {
+    return attributes;
+  }
   return {
     ...attributes,
     state: {
       ...attributes.state,
       datasourceStates: {
-        ...datasourceStates,
-        ...(textBased && columns
-          ? {
-              textBased: {
-                ...textBased,
-                layers: Object.fromEntries(
-                  Object.entries(textBased.layers).map(([layerId, layer]) => [
-                    layerId,
-                    applyColumns(layer, columns),
-                  ])
-                ),
-              },
-            }
-          : {}),
+        ...attributes.state.datasourceStates,
+        textBased: {
+          ...textBased,
+          layers: Object.fromEntries(
+            Object.entries(textBased.layers).map(([layerId, layer]) => [layerId, update(layer)])
+          ),
+        },
       },
-      ...(stackedType
-        ? {
-            visualization: {
-              ...xy,
-              preferredSeriesType: stackedType,
-              layers: xy.layers?.map((layer) => ({ ...layer, seriesType: stackedType })),
-            },
-          }
-        : {}),
     },
   };
 };
 
+/**
+ * Lens drops the time buckets that extend past the dashboard's time range, which hides the
+ * latest signals whenever the ES|QL bucket is wider than Lens' own interval. The as-code API has
+ * no option for it on ES|QL columns.
+ */
+const keepPartialTimeBuckets = (attributes: LensAttributes): LensAttributes =>
+  withTextBasedLayers(attributes, (layer) => ({
+    ...layer,
+    columns: layer.columns.map((column) =>
+      column.meta?.type === 'date'
+        ? { ...column, params: { ...column.params, dropPartials: false } }
+        : column
+    ),
+  }));
+
 /** The dashboard panels of the frustration page, with the Lens attributes built from the configs. */
-export const buildFrustrationPanels = async (
-  dataViews: DataViewsPublicPluginStart,
+export const buildFrustrationPanels = (
   params: FrustrationQueryParams,
   colors?: FrustrationColors
-): Promise<DashboardState['panels']> => {
-  const builder = new LensConfigBuilder(dataViews);
+): DashboardState['panels'] => {
+  const builder = new LensConfigBuilder();
 
-  return Promise.all(
-    frustrationPanelConfigs(params, colors).map(async ({ id, title, grid, config, appearance }) => {
-      const built = (await builder.build(config, {
-        query: { esql: config.dataset.esql },
-      })) as LensAttributes;
-      const attributes = appearance ? applyAppearance(built, appearance) : built;
-
-      return { type: 'lens' as const, grid, uid: id, config: { id, title, attributes } };
-    })
-  );
+  return frustrationPanelConfigs(params, colors).map(({ id, title, grid, config }) => ({
+    type: 'lens' as const,
+    grid,
+    uid: id,
+    config: { id, title, attributes: keepPartialTimeBuckets(builder.fromAPIFormat(config)) },
+  }));
 };

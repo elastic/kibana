@@ -6,8 +6,7 @@
  */
 
 import { ENVIRONMENT_ALL_VALUE } from '@kbn/apm-types';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import { LensConfigBuilder, lensApiConfigSchemaESQL } from '@kbn/lens-embeddable-utils';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import {
   EVENT_DEAD_CLICK,
@@ -29,6 +28,7 @@ import {
   buildFrustrationPanels,
   frustrationPanelConfigs,
   type FrustrationColors,
+  type FrustrationLensConfig,
 } from './frustration_panels';
 
 const params: FrustrationQueryParams = {
@@ -40,21 +40,27 @@ const colors: FrustrationColors = { rage: '#bd271e', dead: '#f5a700', error: '#6
 
 const GRID_COLUMNS = 48;
 
-const dataViewsStub = {
-  get: jest.fn(),
-  create: jest.fn(async (spec: { id: string; title: string; timeFieldName: string }) => ({
-    ...spec,
-    toSpec: () => spec,
-  })),
-} as unknown as DataViewsPublicPluginStart;
-
 const configsById = () =>
-  Object.fromEntries(frustrationPanelConfigs(params).map((panel) => [panel.id, panel]));
+  Object.fromEntries(frustrationPanelConfigs(params, colors).map((panel) => [panel.id, panel]));
+
+const dataLayerOf = (config: FrustrationLensConfig) => {
+  if (config.type !== 'xy') {
+    throw new Error('not an xy config');
+  }
+  const [layer] = config.layers;
+  if (!('y' in layer)) {
+    throw new Error('not a data layer');
+  }
+  return layer;
+};
+
+const esqlOf = (config: FrustrationLensConfig): string =>
+  config.type === 'xy' ? dataLayerOf(config).data_source.query : config.data_source.query;
 
 describe('frustrationPanelConfigs', () => {
   it('lists the panels in layout order with stable ids and titles', () => {
     expect(
-      frustrationPanelConfigs(params).map(({ id, title, config }) => [id, title, config.chartType])
+      frustrationPanelConfigs(params).map(({ id, title, config }) => [id, title, config.type])
     ).toEqual([
       ['frustration-signals', 'Frustration signals', 'metric'],
       ['frustration-sessions', 'Frustrated sessions', 'metric'],
@@ -65,13 +71,19 @@ describe('frustrationPanelConfigs', () => {
       ['frustration-by-version', 'Signals by app version', 'xy'],
       ['frustration-by-browser', 'Signals by browser', 'xy'],
       ['frustration-by-device', 'Signals by device', 'xy'],
-      ['frustration-error-click-exceptions', 'Error clicks by exception', 'table'],
+      ['frustration-error-click-exceptions', 'Error clicks by exception', 'data_table'],
     ]);
   });
 
   it('uses the title as the Lens title', () => {
     frustrationPanelConfigs(params).forEach(({ title, config }) => {
       expect(config.title).toBe(title);
+    });
+  });
+
+  it('is valid as-code ES|QL configs', () => {
+    frustrationPanelConfigs(params, colors).forEach(({ config }) => {
+      expect(() => lensApiConfigSchemaESQL.parse(config)).not.toThrow();
     });
   });
 
@@ -87,89 +99,88 @@ describe('frustrationPanelConfigs', () => {
     ['frustration-by-device', signalsByDeviceQuery(params)],
     ['frustration-error-click-exceptions', errorClicksQuery(params)],
   ])('%s runs the matching ES|QL query', (id, esql) => {
-    expect(configsById()[id].config.dataset).toEqual({ esql });
+    expect(esqlOf(configsById()[id].config)).toBe(esql);
   });
 
-  it('shows the frustrated sessions share, with the count as the secondary metric', () => {
-    const { config, appearance } = configsById()['frustration-sessions'];
-
-    expect(config).toMatchObject({ value: 'share', querySecondaryMetric: 'frustrated' });
-    expect(appearance?.columns).toEqual({
-      share: { percent: true, label: 'Share of sessions' },
-      frustrated: { label: 'Frustrated' },
+  it('shows the frustrated sessions share as a whole percent, with the count as the secondary metric', () => {
+    expect(configsById()['frustration-sessions'].config).toMatchObject({
+      metrics: [
+        {
+          type: 'primary',
+          column: 'share',
+          label: 'Share of sessions',
+          format: { type: 'percent', decimals: 0 },
+        },
+        { type: 'secondary', column: 'frustrated', label: 'Frustrated' },
+      ],
     });
   });
 
   it('labels the count of the other metrics', () => {
-    expect(configsById()['frustration-rage-clicks'].appearance?.columns).toEqual({
-      signals: { label: 'Signals' },
+    expect(configsById()['frustration-rage-clicks'].config).toMatchObject({
+      metrics: [{ type: 'primary', column: 'signals', label: 'Signals' }],
     });
   });
 
   it('stacks rage, dead and error clicks in every chart, with their labels and colors', () => {
-    const panels = frustrationPanelConfigs(params, colors).filter(
-      ({ config }) => config.chartType === 'xy'
-    );
-    expect(panels).toHaveLength(4);
+    const charts = Object.values(configsById()).filter(({ config }) => config.type === 'xy');
+    expect(charts).toHaveLength(4);
 
-    panels.forEach(({ config, appearance }) => {
-      expect(config).toMatchObject({
-        layers: [
-          {
-            type: 'series',
-            seriesType: 'bar',
-            yAxis: [
-              { value: 'rage', seriesColor: colors.rage },
-              { value: 'dead', seriesColor: colors.dead },
-              { value: 'error', seriesColor: colors.error },
-            ],
-          },
-        ],
-      });
-      expect(appearance?.columns).toMatchObject({
-        rage: { label: 'Rage' },
-        dead: { label: 'Dead' },
-        error: { label: 'Error' },
-      });
-      expect(appearance?.stacked).toBeDefined();
+    charts.forEach(({ config }) => {
+      expect(dataLayerOf(config).type).toMatch(/^bar_(horizontal_)?stacked$/);
+      expect(dataLayerOf(config).y).toEqual([
+        { column: 'rage', label: 'Rage', color: { type: 'static', color: colors.rage } },
+        { column: 'dead', label: 'Dead', color: { type: 'static', color: colors.dead } },
+        { column: 'error', label: 'Error', color: { type: 'static', color: colors.error } },
+      ]);
     });
   });
 
   it('leaves the series colors to Lens when none are given', () => {
-    const { config } = configsById()['frustration-over-time'];
+    const { 'frustration-over-time': overTime } = Object.fromEntries(
+      frustrationPanelConfigs(params).map((panel) => [panel.id, panel])
+    );
 
-    expect(config).toMatchObject({
-      layers: [{ yAxis: [{ seriesColor: undefined }, {}, {}] }],
-    });
+    expect(dataLayerOf(overTime.config).y.map((metric) => 'color' in metric)).toEqual([
+      false,
+      false,
+      false,
+    ]);
   });
 
-  it('puts time on the x axis and each dimension on its own', () => {
-    const xAxes = Object.fromEntries(
+  it('puts time on a temporal x axis and each dimension on its own', () => {
+    const charts = Object.fromEntries(
       Object.entries(configsById())
-        .filter(([, { config }]) => config.chartType === 'xy')
+        .filter(([, { config }]) => config.type === 'xy')
         .map(([id, { config }]) => [
           id,
-          config.chartType === 'xy' && config.layers[0].type === 'series'
-            ? config.layers[0].xAxis
-            : undefined,
+          [
+            dataLayerOf(config).x?.column,
+            dataLayerOf(config).type,
+            config.type === 'xy' && config.axis?.x?.scale,
+          ],
         ])
     );
 
-    expect(xAxes).toEqual({
-      'frustration-over-time': { type: 'dateHistogram', field: 'time' },
-      'frustration-by-version': 'version',
-      'frustration-by-browser': 'browser',
-      'frustration-by-device': 'device',
+    expect(charts).toEqual({
+      'frustration-over-time': ['time', 'bar_stacked', 'temporal'],
+      'frustration-by-version': ['version', 'bar_horizontal_stacked', undefined],
+      'frustration-by-browser': ['browser', 'bar_horizontal_stacked', undefined],
+      'frustration-by-device': ['device', 'bar_horizontal_stacked', undefined],
     });
   });
 
   it('lists the exception, message, signals and sessions in the table', () => {
-    const { config } = configsById()['frustration-error-click-exceptions'];
-
-    expect(config).toMatchObject({
-      chartType: 'table',
-      value: 'type',
-      breakdown: ['message', 'signals', 'sessions'],
+    expect(configsById()['frustration-error-click-exceptions'].config).toMatchObject({
+      type: 'data_table',
+      rows: [
+        { column: 'type', label: 'Exception' },
+        { column: 'message', label: 'Message' },
+      ],
+      metrics: [
+        { column: 'signals', label: 'Signals' },
+        { column: 'sessions', label: 'Sessions' },
+      ],
     });
   });
 
@@ -211,10 +222,29 @@ describe('buildFrustrationPanels', () => {
     jest.restoreAllMocks();
   });
 
-  it('builds each config once into a lens panel of the dashboard', async () => {
-    const panels = await buildFrustrationPanels(dataViewsStub, params, colors);
+  const attributesOf = (id: string): LensAttributes => {
+    const panel = buildFrustrationPanels(params, colors).find(
+      (candidate) => 'uid' in candidate && candidate.uid === id
+    );
+    const config: unknown = panel && 'config' in panel ? panel.config : undefined;
+    return (config as { attributes: LensAttributes }).attributes;
+  };
+
+  const textBasedLayers = (attributes: LensAttributes) =>
+    Object.values(attributes.state.datasourceStates.textBased?.layers ?? {});
+
+  const textBasedColumns = (attributes: LensAttributes) =>
+    textBasedLayers(attributes).flatMap(({ columns }) => columns);
+
+  it('converts each config once into a lens panel of the dashboard', () => {
+    const fromAPIFormat = jest.spyOn(LensConfigBuilder.prototype, 'fromAPIFormat');
+
+    const panels = buildFrustrationPanels(params, colors);
 
     const expected = frustrationPanelConfigs(params, colors);
+    expect(fromAPIFormat.mock.calls.map(([config]) => config)).toEqual(
+      expected.map(({ config }) => config)
+    );
     expect(panels).toHaveLength(expected.length);
     panels.forEach((panel, index) => {
       const { id, title, grid } = expected[index];
@@ -227,61 +257,57 @@ describe('buildFrustrationPanels', () => {
     });
   });
 
-  it('builds every config once, with its ES|QL query', async () => {
-    const build = jest.spyOn(LensConfigBuilder.prototype, 'build');
-
-    await buildFrustrationPanels(dataViewsStub, params);
-
-    const expected = frustrationPanelConfigs(params);
-    expect(build).toHaveBeenCalledTimes(expected.length);
-    expected.forEach(({ config }, index) => {
-      expect(build.mock.calls[index]).toEqual([config, { query: { esql: config.dataset.esql } }]);
+  it('throws when a config cannot be converted', () => {
+    const failure = new Error('unsupported config');
+    jest.spyOn(LensConfigBuilder.prototype, 'fromAPIFormat').mockImplementationOnce(() => {
+      throw failure;
     });
+
+    expect(() => buildFrustrationPanels(params)).toThrow(failure);
   });
 
-  it('rejects when a config cannot be built', async () => {
-    const failure = new Error('no data view');
-    jest.spyOn(LensConfigBuilder.prototype, 'build').mockRejectedValueOnce(failure);
+  it('reads the dashboard time range through the @timestamp of the ES|QL layer', () => {
+    const attributes = attributesOf('frustration-over-time');
 
-    await expect(buildFrustrationPanels(dataViewsStub, params)).rejects.toThrow(failure);
-  });
-});
-
-describe('built attributes', () => {
-  const attributesOf = async (id: string): Promise<LensAttributes> => {
-    const panels = await buildFrustrationPanels(dataViewsStub, params, colors);
-    const panel = panels.find((candidate) => 'uid' in candidate && candidate.uid === id);
-    const config: unknown = panel && 'config' in panel ? panel.config : undefined;
-    return (config as { attributes: LensAttributes }).attributes;
-  };
-
-  const textBasedColumns = (attributes: LensAttributes) =>
-    Object.values(attributes.state.datasourceStates.textBased?.layers ?? {}).flatMap(
-      ({ columns }) => columns
-    );
-
-  it('reads the dashboard time range through @timestamp', async () => {
-    const attributes = await attributesOf('frustration-over-time');
-
-    expect(dataViewsStub.create).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'logs-*.otel-*', timeFieldName: '@timestamp' })
-    );
-    expect(attributes.state.datasourceStates.textBased?.layers).toBeDefined();
-    expect(Object.values(attributes.state.datasourceStates.textBased?.layers ?? {})).toEqual([
-      expect.objectContaining({ query: { esql: signalsOverTimeQuery(params) } }),
+    expect(textBasedLayers(attributes)).toEqual([
+      expect.objectContaining({
+        timeField: '@timestamp',
+        query: { esql: signalsOverTimeQuery(params) },
+      }),
     ]);
   });
 
-  it('stacks the bars and labels the series', async () => {
-    const attributes = await attributesOf('frustration-over-time');
+  it('keeps the partial time bucket that Lens would drop, only on the time column', () => {
+    expect(
+      textBasedColumns(attributesOf('frustration-over-time')).map(
+        ({ fieldName, meta, params: columnParams }) => [fieldName, meta?.type, columnParams]
+      )
+    ).toEqual([
+      ['time', 'date', { dropPartials: false }],
+      ['rage', 'number', undefined],
+      ['dead', 'number', undefined],
+      ['error', 'number', undefined],
+    ]);
+    expect(
+      textBasedColumns(attributesOf('frustration-by-version')).some(
+        ({ params: columnParams }) => columnParams?.dropPartials !== undefined
+      )
+    ).toBe(false);
+  });
 
-    expect(attributes.visualizationType).toBe('lnsXY');
-    expect(attributes.state.visualization).toMatchObject({
-      preferredSeriesType: 'bar_stacked',
+  it('stacks the bars, horizontally for the breakdowns, and labels the series', () => {
+    const overTime = attributesOf('frustration-over-time');
+    const byVersion = attributesOf('frustration-by-version');
+
+    expect(overTime.visualizationType).toBe('lnsXY');
+    expect(overTime.state.visualization).toMatchObject({
       layers: [{ seriesType: 'bar_stacked' }],
     });
+    expect(byVersion.state.visualization).toMatchObject({
+      layers: [{ seriesType: 'bar_horizontal_stacked' }],
+    });
     expect(
-      textBasedColumns(attributes)
+      textBasedColumns(overTime)
         .filter(({ fieldName }) => ['rage', 'dead', 'error'].includes(fieldName))
         .map(({ fieldName, label, customLabel }) => [fieldName, label, customLabel])
     ).toEqual([
@@ -291,36 +317,31 @@ describe('built attributes', () => {
     ]);
   });
 
-  it('draws the breakdown bars horizontally', async () => {
-    const attributes = await attributesOf('frustration-by-version');
+  it('formats the frustrated share as a whole percent', () => {
+    const attributes = attributesOf('frustration-sessions');
 
-    expect(attributes.state.visualization).toMatchObject({
-      layers: [{ seriesType: 'bar_horizontal_stacked' }],
+    expect(attributes.visualizationType).toBe('lnsMetric');
+    expect(
+      textBasedColumns(attributes).find(({ fieldName }) => fieldName === 'share')
+    ).toMatchObject({
+      label: 'Share of sessions',
+      customLabel: true,
+      params: { format: { id: 'percent', params: { decimals: 0 } } },
     });
   });
 
-  it('formats the frustrated share as a whole percent', async () => {
-    const attributes = await attributesOf('frustration-sessions');
-
-    expect(attributes.visualizationType).toBe('lnsMetric');
-    expect(textBasedColumns(attributes).find(({ fieldName }) => fieldName === 'share')).toEqual(
-      expect.objectContaining({
-        label: 'Share of sessions',
-        customLabel: true,
-        params: { format: { id: 'percent', params: { decimals: 0 } } },
-      })
-    );
-  });
-
-  it('builds the exceptions table', async () => {
-    const attributes = await attributesOf('frustration-error-click-exceptions');
+  it('displays the exceptions table columns in order', () => {
+    const attributes = attributesOf('frustration-error-click-exceptions');
+    const fieldNameOf = (columnId: string) =>
+      textBasedColumns(attributes).find((column) => column.columnId === columnId)?.fieldName;
 
     expect(attributes.visualizationType).toBe('lnsDatatable');
-    expect(textBasedColumns(attributes).map(({ fieldName }) => fieldName)).toEqual([
+    const { columns } = attributes.state.visualization as { columns: Array<{ columnId: string }> };
+    expect(columns.map(({ columnId }) => fieldNameOf(columnId))).toEqual([
+      'type',
       'message',
       'signals',
       'sessions',
-      'type',
     ]);
   });
 });
