@@ -18,6 +18,7 @@ import {
 } from './attack_discovery_generator_skill';
 import { GET_ATTACK_DISCOVERY_STATUS_TOOL_ID } from '../tools/get_attack_discovery_status_tool';
 import { GET_DEFAULT_ESQL_QUERY_TOOL_ID } from '../tools/get_default_esql_query_tool';
+import { RUN_ATTACK_DISCOVERY_TOOL_ID } from '../tools/run_attack_discovery_tool';
 
 const attackDiscoveryGeneratorSkill = createAttackDiscoveryGeneratorSkill({
   getEventLogIndex: async () => 'event-log-*',
@@ -237,8 +238,15 @@ describe('attackDiscoveryGeneratorSkill', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain('Retrieve alerts upstream');
     });
 
-    it('frames the default ES|QL query as a baseline that the agent may adapt', () => {
-      expect(attackDiscoveryGeneratorSkill.content).toContain('sensible **baseline**');
+    it('runs the query the tool returned unchanged instead of adapting it', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'the query you execute is **the one the tool returned**'
+      );
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'the audited retrieval path executes it **unchanged**'
+      );
+      expect(attackDiscoveryGeneratorSkill.content).not.toContain('edit the query text yourself');
+      expect(attackDiscoveryGeneratorSkill.content).not.toContain('supported adaptation path');
     });
 
     it('encourages best-effort corroboration with at least one additional tool', () => {
@@ -387,6 +395,187 @@ describe('attackDiscoveryGeneratorSkill', () => {
 
     it('still forbids running Missed Detection Closure in the Mode C ground-truth gate', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain('Never run this pass in Mode C');
+    });
+  });
+
+  describe('audited-route contract (trajectory / cost / forbidden-tools gates)', () => {
+    // The eval suite scores a run against the audited route only: StrictTrajectory
+    // divides the expected path by every non-`load_skill` call the run made, and
+    // CostPerAlert divides every call by the passed alert count. Anything else this
+    // skill mandates is therefore scored as noise, so the content has to name the
+    // required calls and mark the corroboration / report extras optional.
+    //
+    // The expected routes below mirror the eval suite's fixtures:
+    // x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder/src/dataset.ts
+    // (`goldenPathExamples`) and .../src/datasets/dense_profile_live_retrieval.ts.
+    const EXPECTED_ROUTE_BY_LABEL: Array<[string, string[]]> = [
+      [
+        'Live retrieval',
+        [
+          GET_DEFAULT_ESQL_QUERY_TOOL_ID,
+          platformCoreTools.executeEsql,
+          RUN_ATTACK_DISCOVERY_TOOL_ID,
+        ],
+      ],
+      ['Provided alerts', [RUN_ATTACK_DISCOVERY_TOOL_ID]],
+      ['Status-only', [GET_ATTACK_DISCOVERY_STATUS_TOOL_ID]],
+      ['Missing alerts', [GET_DEFAULT_ESQL_QUERY_TOOL_ID, platformCoreTools.executeEsql]],
+    ];
+
+    const TOOL_ID_VOCABULARY = [
+      ...EXPECTED_ROUTE_BY_LABEL.flatMap(([, route]) => route),
+      platformCoreTools.generateEsql,
+      platformCoreTools.getDocumentById,
+      platformCoreTools.search,
+    ];
+
+    const routeFromContent = (label: string): string[] => {
+      const line = attackDiscoveryGeneratorSkill.content
+        .split('\n')
+        .find((candidate) => candidate.startsWith(`- **${label}**`));
+
+      if (line === undefined) return [];
+
+      return [...line.matchAll(/`([^`]+)`/g)]
+        .map((match) => match[1])
+        .filter((token) => TOOL_ID_VOCABULARY.includes(token));
+    };
+
+    it.each(EXPECTED_ROUTE_BY_LABEL)(
+      'documents the %s route the trajectory gate scores',
+      (label, expectedRoute) => {
+        expect(routeFromContent(label)).toEqual(expectedRoute);
+      }
+    );
+
+    it('short-circuits retrieval when the alerts are already provided', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('never re-derive it');
+    });
+
+    it('marks corroboration and graph rendering optional instead of mandated', () => {
+      const optionalSection = attackDiscoveryGeneratorSkill.content.split(
+        '**Optional — skip unless the result can change your next action:**'
+      )[1];
+
+      expect(optionalSection).toBeDefined();
+      expect(optionalSection).toContain('`threat-hunting`');
+      expect(optionalSection).toContain('`entity-analytics`');
+      expect(optionalSection).toContain('`alert-analysis`');
+      expect(optionalSection).toContain('`graph-creation`');
+    });
+
+    it('takes the alert-retrieval-builder skill out of the generator route', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        '`attack-discovery-alert-retrieval-builder`'
+      );
+      expect(attackDiscoveryGeneratorSkill.content).toContain('never load it');
+    });
+
+    it('forbids the ES|QL generation tool as the rewrite path', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        `Do **not** call \`${platformCoreTools.generateEsql}\``
+      );
+    });
+
+    it('forbids re-fetching alerts a query already returned', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        `Do **not** call \`${platformCoreTools.getDocumentById}\``
+      );
+    });
+
+    it('drops the complementary ES|QL slice from the corroboration options', () => {
+      expect(attackDiscoveryGeneratorSkill.content).not.toContain('complementary ES|QL slice');
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'do **not** add a second ES|QL slice beside the default query'
+      );
+    });
+
+    it('reserves the esql retrieval mode for user-supplied queries', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('Did the user supply an ES|QL query');
+      expect(attackDiscoveryGeneratorSkill.content).not.toContain(
+        'Did you refine retrieval into an ES|QL query'
+      );
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'it is **not** a way to re-author or refine the default query'
+      );
+    });
+  });
+
+  describe('empty-retrieval stop contract (the retrieval-only fixture)', () => {
+    // dataset.ts: golden-path (missing-alert-retrieval) expects exactly
+    // [`get_default_esql_query`, `execute_esql`], `expectedWorkflowStages: []`
+    // and a `null` passedAlertCount. Any run that reaches the pipeline therefore
+    // scores 0 on WorkflowEvidence (a `null` expectation asserts the run reports
+    // null) and pays StrictTrajectory precision for every extra call
+    // (precision = expected path / all non-`load_skill` calls). The retrieval
+    // fallback ladder is what invites that extra call, so the ladder has to make
+    // an empty upstream retrieval a reported answer instead of a mode choice.
+    const ladder = () =>
+      attackDiscoveryGeneratorSkill.content
+        .split('### Choose the retrieval mode that matches the evidence you have gathered')[1]
+        .split('### Anonymization note')[0];
+
+    const decisionTreeItem = (index: number) =>
+      ladder()
+        .split('### Mode selection decision tree')[1]
+        .split('\n')
+        .find((line) => line.trim().startsWith(`${index}.`)) ?? '';
+
+    const missingAlertsRow = () =>
+      attackDiscoveryGeneratorSkill.content
+        .split('\n')
+        .find((line) => line.startsWith('- **Missing alerts**')) ?? '';
+
+    it('names the mode the audited upstream retrieval hands over to', () => {
+      expect(ladder()).toContain('the audited retrieval path is');
+      expect(ladder()).toContain('`provided`');
+    });
+
+    it('stops on an empty upstream retrieval instead of retrying it', () => {
+      expect(ladder()).toContain('Report that nothing matched and stop.');
+    });
+
+    it('makes the empty upstream retrieval the first branch of the mode tree', () => {
+      expect(decisionTreeItem(1)).toContain('empty');
+      expect(decisionTreeItem(1)).not.toContain(RUN_ATTACK_DISCOVERY_TOOL_ID);
+      expect(decisionTreeItem(1)).not.toContain('custom_query');
+    });
+
+    it('gates custom_query on a retrieval that never ran in this turn', () => {
+      const customQueryBullet =
+        ladder()
+          .split('\n')
+          .find((line) => line.startsWith('- **`custom_query`**')) ?? '';
+
+      expect(customQueryBullet).toContain('no audited upstream retrieval ran in this turn');
+      expect(decisionTreeItem(5)).toContain('Did no retrieval run in this turn');
+    });
+
+    it('keeps the empty-retrieval route on the two retrieval calls, with no pipeline re-issue', () => {
+      const [route] = missingAlertsRow().split('. ');
+
+      expect(route).toContain(GET_DEFAULT_ESQL_QUERY_TOOL_ID);
+      expect(route).toContain(platformCoreTools.executeEsql);
+      expect(route).not.toContain(RUN_ATTACK_DISCOVERY_TOOL_ID);
+      expect(missingAlertsRow()).toContain('do not switch retrieval mode');
+    });
+
+    it('does not let the upfront pattern re-issue the query on an empty result', () => {
+      const upfrontStep =
+        attackDiscoveryGeneratorSkill.content
+          .split('\n')
+          .find((line) => line.startsWith('1. **Retrieve alerts upstream.**')) ?? '';
+
+      expect(upfrontStep).toContain('report that nothing matched and stop');
+      expect(upfrontStep).not.toMatch(/broaden the window in the query text/);
+    });
+
+    it('gives the reference run-modes doc the same empty-retrieval gate', () => {
+      const runModes = attackDiscoveryGeneratorSkill.referencedContent?.find(
+        (entry) => entry.name === 'attack-discovery-run-modes'
+      );
+
+      expect(runModes?.content).toContain('no audited upstream retrieval ran in this turn');
     });
   });
 
