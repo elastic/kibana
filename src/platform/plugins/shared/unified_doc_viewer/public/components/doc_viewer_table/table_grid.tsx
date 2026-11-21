@@ -8,7 +8,10 @@
  */
 
 import React from 'react';
+import { KBN_DATA_GRID_ENABLED_FEATURE_FLAG_KEY } from '@kbn/discover-utils';
+import { getUnifiedDocViewerServices } from '../../plugin';
 import { EuiDataGridAdapter } from './table_grid/eui_data_grid_adapter';
+import { KbnDataGridAdapter } from './table_grid/kbn_data_grid_adapter';
 import {
   GRID_COLUMN_FIELD_NAME,
   GRID_COLUMN_FIELD_VALUE,
@@ -21,6 +24,16 @@ export type TableGridProps = UseTableGridModelParams;
 export { GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE };
 
 export function TableGrid(props: TableGridProps) {
+  const { core } = getUnifiedDocViewerServices();
+  const isKbnDataGridEnabled = core.featureFlags.useBooleanValue(
+    KBN_DATA_GRID_ENABLED_FEATURE_FLAG_KEY,
+    false
+  );
   const model = useTableGridModel(props);
-  return <EuiDataGridAdapter model={model} />;
+
+  return isKbnDataGridEnabled ? (
+    <KbnDataGridAdapter model={model} />
+  ) : (
+    <EuiDataGridAdapter model={model} />
+  );
 }

@@ -67,3 +67,24 @@ describe('DataGrid rendering', () => {
     expect(getComputedStyle(headerRowGroup).position).toBe('sticky');
   });
 });
+
+describe('DataGrid viewport', () => {
+  beforeEach(resetDataGridTestState);
+  afterEach(cleanupDataGridTestState);
+
+  it('gives a fixed viewport its height in pixels', () => {
+    renderGrid({ viewport: { mode: 'fixed', height: 250 } });
+
+    expect(screen.getByRole('grid').getAttribute('style')).toContain('block-size: 250px');
+    expect(mockUseVirtualizer.mock.calls[0][0].initialRect).toEqual({ width: 0, height: 250 });
+  });
+
+  it('fills its container, up to the screen height, by default', () => {
+    renderGrid({ viewport: null });
+
+    const grid = screen.getByRole('grid');
+    expect(grid.getAttribute('style')).not.toContain('block-size');
+    expect(getComputedStyle(grid).blockSize).toBe('100%');
+    expect(getComputedStyle(grid).maxBlockSize).toBe('100dvh');
+  });
+});

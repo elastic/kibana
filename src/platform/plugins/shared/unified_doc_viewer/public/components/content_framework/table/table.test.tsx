@@ -39,6 +39,7 @@ jest.mock('../../../plugin', () => ({
       }),
     },
     fieldFormats: {},
+    core: { featureFlags: { useBooleanValue: (_flagName: string, fallback: boolean) => fallback } },
   }),
 }));
 

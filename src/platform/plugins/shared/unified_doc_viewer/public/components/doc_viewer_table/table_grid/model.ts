@@ -43,6 +43,7 @@ export interface TableGridColumn<TRow> {
   visibleCellActions?: number;
   actions?: readonly TableGridCellActionDefinition<TRow>[];
   renderCell: (context: TableGridCellContext<TRow>) => ReactNode;
+  getTextValue: (context: TableGridCellContext<TRow>) => string;
   renderDetails: (context: TableGridCellContext<TRow>) => ReactNode;
   getDetailsWarning?: (context: TableGridCellContext<TRow>) => string | undefined;
 }

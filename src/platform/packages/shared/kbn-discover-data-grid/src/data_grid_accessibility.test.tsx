@@ -59,6 +59,14 @@ describe('DataGrid accessibility', () => {
     expect(() => renderGrid({ gridColumns: [] })).toThrow('DataGrid requires at least one column.');
   });
 
+  it('places the test subject on the grid element', () => {
+    renderGrid({ dataTestSubj: 'exampleGrid' });
+
+    expect(screen.getByTestId('exampleGrid')).toBe(
+      screen.getByRole('grid', { name: 'Example data' })
+    );
+  });
+
   it('allows a column header to override its accessible name', () => {
     renderGrid({ gridColumns: columnsWithAriaLabel });
 
