@@ -3983,6 +3983,9 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 # Kibana accessibility
 /.agents/skills/accessibility/** @elastic/kibana-accessibility
 
+# Docs: API docs review
+/.agents/skills/api-docs-review/** @elastic/ski-docs
+
 # No owner - generated files covered by CI checks
 **/moon.yml
 # Only the workflow step schema sync PR changes these (auto-approved), feature PRs never do
