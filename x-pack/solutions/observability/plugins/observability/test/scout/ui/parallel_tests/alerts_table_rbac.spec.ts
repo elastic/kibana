@@ -193,10 +193,10 @@ test.describe(
         const classicNavAlerts = page.testSubj.locator(
           'observability-nav-observability-overview-alerts'
         );
-        const projectNavAlerts = pageObjects.observabilityNavigation.navItemInSidenavByDeepLinkId(
-          'observability-overview:alerts'
-        );
-        await expect(classicNavAlerts.or(projectNavAlerts)).toBeVisible();
+        // Project nav lists Alerts inside the Alerting panel, so its opener is what renders here.
+        const projectNavAlerting =
+          pageObjects.observabilityNavigation.navItemInSidenavById('alerting');
+        await expect(classicNavAlerts.or(projectNavAlerting)).toBeVisible();
       });
 
       await gotoAlertsForRule(pageObjects, logsRuleId);

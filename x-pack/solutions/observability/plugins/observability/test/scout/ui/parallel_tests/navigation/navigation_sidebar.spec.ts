@@ -14,6 +14,14 @@ const expectActiveBodyNavItem = async (nav: ObservabilityNavigation, deepLinkId:
   await expect(item).toHaveAttribute('data-test-subj', /nav-item-isActive/);
 };
 
+/** Same as `expectActiveBodyNavItem`, for panel openers keyed by node `id`. */
+const expectActiveBodyNavItemById = async (nav: ObservabilityNavigation, id: string) => {
+  const item = await nav.revealBodyNavItemById(id);
+  await expect(item).toHaveAttribute('data-test-subj', /nav-item-isActive/);
+};
+
+const ALERTING_PANEL_ID = 'alerting';
+
 test.describe(
   'Stateful Observability Navigation - Sidebar',
   { tag: [...tags.stateful.classic] },
@@ -40,13 +48,12 @@ test.describe(
         }
       });
 
-      await test.step('overflow-boundary body items are visible and linked', async () => {
-        const boundaryDeepLinks = ['workflows', 'observability-overview:alerts'];
-        for (const deepLinkId of boundaryDeepLinks) {
-          const item = await nav.revealBodyNavItemByDeepLinkId(deepLinkId);
-          await expect(item).toBeVisible();
-          await expect(item).toHaveAttribute('href', /.+/);
-        }
+      await test.step('overflow-boundary body items are visible', async () => {
+        const workflows = await nav.revealBodyNavItemByDeepLinkId('workflows');
+        await expect(workflows).toBeVisible();
+        await expect(workflows).toHaveAttribute('href', /.+/);
+
+        await expect(await nav.revealBodyNavItemById(ALERTING_PANEL_ID)).toBeVisible();
       });
 
       await test.step('Open More menu', async () => {
@@ -101,9 +108,9 @@ test.describe(
       });
 
       await test.step('Alerts', async () => {
-        await nav.clickBodyNavItemByDeepLinkId('observability-overview:alerts');
+        await nav.clickPanelNavItemByDeepLinkId(ALERTING_PANEL_ID, 'observability-overview:alerts');
         await expect(page.testSubj.locator('alertsPageWithData')).toBeVisible();
-        await expectActiveBodyNavItem(nav, 'observability-overview:alerts');
+        await expectActiveBodyNavItemById(nav, ALERTING_PANEL_ID);
       });
 
       await test.step('SLOs (via More menu)', async () => {
