@@ -118,6 +118,15 @@ export const getDateHistogramBucketAgg = ({
               'histogram:barTarget': getConfig(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
               dateFormat: getConfig('dateFormat'),
               'dateFormat:scaled': getConfig('dateFormat:scaled'),
+              'dateFormat:tz': this.params.field?.timeZone?.includes('UTC')
+                ? 'UTC'
+                : inferTimeZone(
+                    this.params,
+                    this.getIndexPattern(),
+                    'date_histogram',
+                    getConfig,
+                    aggExecutionContext
+                  ),
             });
 
             try {
@@ -231,7 +240,9 @@ export const getDateHistogramBucketAgg = ({
             return;
           }
 
-          const shouldForceFixedInterval: boolean = agg.params.field?.fixedInterval?.length;
+          const shouldForceFixedInterval = Boolean(
+            agg.params.field?.fixedInterval?.length || interval.forceFixed
+          );
 
           output.params = {
             ...output.params,

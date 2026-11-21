@@ -55,6 +55,7 @@ dependsOn:
   - '@kbn/field-types'
   - '@kbn/utility-types'
   - '@kbn/es-query'
+  - '@kbn/es-date-rounding'
   - '@kbn/coloring'
   - '@kbn/inspector-plugin'
   - '@kbn/interpreter'
