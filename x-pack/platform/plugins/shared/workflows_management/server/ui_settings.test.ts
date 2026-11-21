@@ -10,6 +10,7 @@ import {
   WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
   WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
   WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
+  WORKFLOWS_PAGES_ENABLED_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
 } from '@kbn/workflows';
@@ -83,6 +84,19 @@ describe('Workflows Management UI Settings', () => {
         }),
       })
     );
+  });
+
+  it('registers the page kill switch only with the pages option on', () => {
+    const registeredGlobalIds = () =>
+      coreSetupMock.uiSettings.registerGlobal.mock.calls.flatMap(([settings]) =>
+        Object.keys(settings)
+      );
+
+    registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps);
+    expect(registeredGlobalIds()).not.toContain(WORKFLOWS_PAGES_ENABLED_SETTING_ID);
+
+    registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps, { pagesEnabled: true });
+    expect(registeredGlobalIds()).toContain(WORKFLOWS_PAGES_ENABLED_SETTING_ID);
   });
 
   it('should include license text if serverless is false', () => {

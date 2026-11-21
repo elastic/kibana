@@ -122,6 +122,8 @@ import type {
   CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
   ExecuteWorkflow,
+  ExecuteWorkflowAsServiceAccount,
+  ExecuteWorkflowResponse,
   ExecuteWorkflowStep,
   InternalResumeWorkflowExecution,
   ResumeWorkflowExecution,
@@ -1713,15 +1715,21 @@ export class WorkflowsExecutionEnginePlugin
       logger: this.logger,
     };
 
-    const executeWorkflow: ExecuteWorkflow = async (workflow, context, originalRequest) => {
+    const startWorkflow = async (
+      workflow: WorkflowExecutionEngineModel,
+      context: Record<string, unknown>,
+      originalRequest: KibanaRequest,
+      { forceSchedule = false }: { forceSchedule?: boolean } = {}
+    ): Promise<ExecuteWorkflowResponse> => {
       const request = getWorkflowOriginalRequest(originalRequest);
       await checkLicense(plugins.licensing);
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context
       const isRunningInTaskManager =
-        (context.triggeredBy as string | undefined) === 'scheduled' ||
-        (context.source as string | undefined) === 'task-manager' ||
-        request?.isFakeRequest === true;
+        !forceSchedule &&
+        ((context.triggeredBy as string | undefined) === 'scheduled' ||
+          (context.source as string | undefined) === 'task-manager' ||
+          request?.isFakeRequest === true);
 
       // Child executions (triggered by a workflow step) must always be scheduled in their own task,
       // never run inline in the parent's task. Otherwise the parent's runtime is blocked until the
@@ -1834,6 +1842,35 @@ export class WorkflowsExecutionEnginePlugin
       return {
         workflowExecutionId: workflowExecution.id,
       };
+    };
+
+    const executeWorkflow: ExecuteWorkflow = (workflow, context, originalRequest) =>
+      startWorkflow(workflow, context, originalRequest);
+
+    // shortcut: runs under a core-minted request, not Task Manager's native runAs. Replace with
+    // the shared entry point from elastic/kibana#297390 before pages leave the feature flag.
+    const executeWorkflowAsServiceAccount: ExecuteWorkflowAsServiceAccount = async (
+      workflow,
+      context
+    ) => {
+      const serviceAccountId = workflow.definition?.settings?.run_as;
+      if (!serviceAccountId) {
+        throw Boom.forbidden('This run needs a workflow bound to a service account.');
+      }
+      if (!coreStart.security.serviceAccounts.isEnabled()) {
+        throw Boom.forbidden('Service account execution is disabled.');
+      }
+      // There is no caller. The service account creates the execution, and the scheduled task
+      // runs as it. The minted request is a fake request, so force scheduling: never run inline.
+      return coreStart.security.serviceAccounts.withScopedRequestForWorkload(
+        {
+          workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
+          workloadId: workflow.id,
+          spaceId: context.spaceId,
+          expectedServiceAccountId: serviceAccountId,
+        },
+        (request) => startWorkflow(workflow, context, request, { forceSchedule: true })
+      );
     };
 
     const scheduleWorkflow: ScheduleWorkflow = async (
@@ -2420,6 +2457,7 @@ export class WorkflowsExecutionEnginePlugin
     return {
       workflowEventLoggerService,
       executeWorkflow,
+      executeWorkflowAsServiceAccount,
       executeWorkflowStep,
       scheduleWorkflow,
       bulkScheduleWorkflow,

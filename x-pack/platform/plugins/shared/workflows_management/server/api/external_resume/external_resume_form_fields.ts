@@ -46,7 +46,21 @@ function getArrayOfEnumChoices(field: FlatFieldSchema): unknown[] | undefined {
   return itemEnum;
 }
 
-function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<string>): string {
+const rawToString = (raw: unknown): string =>
+  raw == null ? '' : typeof raw === 'string' ? raw : JSON.stringify(raw);
+
+const rawToStrings = (raw: unknown): string[] =>
+  raw == null ? [] : (Array.isArray(raw) ? raw : [raw]).map(String);
+
+function buildFieldHtml(
+  name: string,
+  field: FlatFieldSchema,
+  required: Set<string>,
+  raw?: unknown
+): string {
+  const valueAttr = raw == null ? '' : ` value="${escapeHtml(rawToString(raw))}"`;
+  const selected = new Set(rawToStrings(raw));
+  const selectedAttr = (choice: unknown) => (selected.has(String(choice)) ? ' selected' : '');
   const label = escapeHtml(field.title ?? name);
   const description =
     typeof field.description === 'string' && field.description.length > 0
@@ -62,7 +76,9 @@ function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<stri
           ${description}
           <textarea id="${escapeHtml(name)}" name="${escapeHtml(
       name
-    )}" rows="4"${requiredAttr} placeholder="{&quot;key&quot;: &quot;value&quot;}"></textarea>
+    )}" rows="4"${requiredAttr} placeholder="{&quot;key&quot;: &quot;value&quot;}">${escapeHtml(
+      rawToString(raw)
+    )}</textarea>
         </label>`;
   }
 
@@ -70,7 +86,9 @@ function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<stri
     const options = field.enum
       .map(
         (choice) =>
-          `<option value="${escapeHtml(String(choice))}">${escapeHtml(String(choice))}</option>`
+          `<option value="${escapeHtml(String(choice))}"${selectedAttr(choice)}>${escapeHtml(
+            String(choice)
+          )}</option>`
       )
       .join('');
     return `
@@ -89,7 +107,9 @@ function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<stri
     const options = arrayEnumChoices
       .map(
         (choice) =>
-          `<option value="${escapeHtml(String(choice))}">${escapeHtml(String(choice))}</option>`
+          `<option value="${escapeHtml(String(choice))}"${selectedAttr(choice)}>${escapeHtml(
+            String(choice)
+          )}</option>`
       )
       .join('');
     return `
@@ -105,7 +125,9 @@ function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<stri
   if (field.type === 'boolean') {
     return `
         <label class="field field-checkbox" for="${escapeHtml(name)}">
-          <input type="checkbox" id="${escapeHtml(name)}" name="${escapeHtml(name)}" value="true" />
+          <input type="checkbox" id="${escapeHtml(name)}" name="${escapeHtml(name)}" value="true"${
+      raw === true || raw === 'true' || raw === 'on' ? ' checked' : ''
+    } />
           <span class="field-label">${label}</span>
           ${description}
         </label>`;
@@ -116,7 +138,9 @@ function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<stri
         <label class="field" for="${escapeHtml(name)}">
           <span class="field-label">${label}${requiredMarker}</span>
           ${description}
-          <input type="number" id="${escapeHtml(name)}" name="${escapeHtml(name)}"${requiredAttr} />
+          <input type="number" id="${escapeHtml(name)}" name="${escapeHtml(
+      name
+    )}"${requiredAttr}${valueAttr} />
         </label>`;
   }
 
@@ -124,11 +148,17 @@ function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<stri
       <label class="field" for="${escapeHtml(name)}">
         <span class="field-label">${label}${requiredMarker}</span>
         ${description}
-        <input type="text" id="${escapeHtml(name)}" name="${escapeHtml(name)}"${requiredAttr} />
+        <input type="text" id="${escapeHtml(name)}" name="${escapeHtml(
+    name
+  )}"${requiredAttr}${valueAttr} />
       </label>`;
 }
 
-export function buildExternalResumeFormFieldsHtml(schema: JsonModelSchemaType | undefined): string {
+export function buildExternalResumeFormFieldsHtml(
+  schema: JsonModelSchemaType | undefined,
+  /** Raw submitted values, as the browser sent them, to refill the form after a 400. */
+  values: Record<string, unknown> = {}
+): string {
   const properties = schema?.properties;
   if (!properties || typeof properties !== 'object') {
     return '';
@@ -138,7 +168,7 @@ export function buildExternalResumeFormFieldsHtml(schema: JsonModelSchemaType | 
   const fields = Object.entries(properties)
     .filter(([, propertySchema]) => propertySchema != null && typeof propertySchema === 'object')
     .map(([name, propertySchema]) =>
-      buildFieldHtml(name, propertySchema as FlatFieldSchema, required)
+      buildFieldHtml(name, propertySchema as FlatFieldSchema, required, values[name])
     );
 
   return fields.join('\n');

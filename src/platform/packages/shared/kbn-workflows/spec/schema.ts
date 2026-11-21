@@ -1629,56 +1629,63 @@ export const WorkflowTemplatePersistedContextSchema = z.object({
   hitl: WorkflowHitlTemplateContextSchema.optional(),
 });
 
-export const WorkflowContextSchema = z.object({
-  /**
-   * Persisted execution-context values exposed to templates as `context.*`
-   * (for example `context.hitl.externalFormLink` during external waitForInput).
-   */
-  context: WorkflowTemplatePersistedContextSchema.optional(),
-  /**
-   * Alias for the inputs defined on the manual trigger (`triggers[type=manual].inputs`) or
-   * workflow call trigger (`triggers[type=workflow_call].inputs`). Populated from the trigger's
-   * event.input values at execution time.
-   */
-  inputs: z.record(z.string(), z.unknown()).optional(),
-  event: AlertEventSchema.optional(),
-  execution: WorkflowExecutionContextSchema,
-  workflow: WorkflowDataContextSchema,
-  kibanaUrl: z.string(),
-  output: z
-    .record(
-      z.string(),
-      z.union([
+export const WorkflowContextSchema = lazySchema(() =>
+  z.object({
+    /**
+     * Persisted execution-context values exposed to templates as `context.*`
+     * (for example `context.hitl.externalFormLink` during external waitForInput).
+     */
+    context: WorkflowTemplatePersistedContextSchema.optional(),
+    /**
+     * Alias for the inputs defined on the manual trigger (`triggers[type=manual].inputs`) or
+     * workflow call trigger (`triggers[type=workflow_call].inputs`). Populated from the trigger's
+     * event.input values at execution time.
+     */
+    inputs: z.record(z.string(), z.unknown()).optional(),
+    /** A page run's submitted values (`triggers[type=page].inputs`). Untrusted, so apart from `inputs`. */
+    page: z.object({ inputs: z.record(z.string(), z.unknown()).optional() }).optional(),
+    event: AlertEventSchema.optional(),
+    execution: WorkflowExecutionContextSchema,
+    workflow: WorkflowDataContextSchema,
+    kibanaUrl: z.string(),
+    output: z
+      .record(
         z.string(),
-        z.number(),
-        z.boolean(),
-        z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
-      ])
-    )
-    .optional(),
-  consts: z.record(z.string(), z.any()).optional(),
-  now: z.date().optional(),
-  parent: z
-    .object({
-      workflowId: z.string(),
-      executionId: z.string(),
-      depth: z.number().optional(),
-    })
-    .optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
-});
+        z.union([
+          z.string(),
+          z.number(),
+          z.boolean(),
+          z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
+        ])
+      )
+      .optional(),
+    consts: z.record(z.string(), z.any()).optional(),
+    now: z.date().optional(),
+    parent: z
+      .object({
+        workflowId: z.string(),
+        executionId: z.string(),
+        depth: z.number().optional(),
+      })
+      .optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
+  })
+);
 export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 
-export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
-  // overriding record with object to avoid type mismatch when
-  // extending with actual inputs, outputs and consts of different types
-  inputs: z.object({}),
-  output: z.object({}),
-  consts: z.object({}),
-  // overriding event with base event schema (spaceId only) so it can be
-  // dynamically extended with trigger-specific properties (e.g., alerts, rule)
-  event: BaseEventSchema.optional(),
-});
+// `page` exists only for a workflow with a page trigger, so the dynamic schema adds it back then.
+export const DynamicWorkflowContextSchema = lazySchema(() =>
+  WorkflowContextSchema.omit({ page: true }).extend({
+    // overriding record with object to avoid type mismatch when
+    // extending with actual inputs, outputs and consts of different types
+    inputs: z.object({}),
+    output: z.object({}),
+    consts: z.object({}),
+    // overriding event with base event schema (spaceId only) so it can be
+    // dynamically extended with trigger-specific properties (e.g., alerts, rule)
+    event: BaseEventSchema.optional(),
+  })
+);
 export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;
 
 export const StepDataSchema = z.object({

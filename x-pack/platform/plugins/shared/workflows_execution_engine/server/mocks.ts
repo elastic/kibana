@@ -30,6 +30,7 @@ export const workflowsExecutionEngineMock = {
       bindWorkload: jest.fn(),
       unbindWorkload: jest.fn(),
       getWorkloadBinding: jest.fn(),
+      getWorkloadServiceAccountSummary: jest.fn(),
     },
     __internalStorage: {
       workflowExecutionsDataClient: createMockWorkflowDataClient(),
@@ -37,6 +38,7 @@ export const workflowsExecutionEngineMock = {
     },
     workflowEventLoggerService: createMockWorkflowEventLoggerService(),
     executeWorkflow: jest.fn(),
+    executeWorkflowAsServiceAccount: jest.fn(),
     executeWorkflowStep: jest.fn(),
     cancelWorkflowExecution: jest.fn(),
     cancelAllActiveWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
