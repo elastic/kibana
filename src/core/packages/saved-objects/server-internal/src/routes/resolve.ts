@@ -30,9 +30,8 @@ interface RouteDependencies {
 
 export const registerResolveRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
+  { coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
-  const { allowHttpApiAccess } = config;
   router.get(
     {
       path: '/resolve/{type}/{id}',
@@ -79,9 +78,7 @@ Under certain circumstances, when Kibana is upgraded, saved object migrations ma
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsResolve({ request, types: [type] }).catch(() => {});
-      if (!allowHttpApiAccess) {
-        throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
-      }
+      throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
       const result = await savedObjects.client.resolve(type, id, {
         migrationVersionCompatibility: 'compatible',
       });

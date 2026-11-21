@@ -35,9 +35,8 @@ interface RouteDependencies {
 
 export const registerBulkDeleteRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
+  { coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
-  const { allowHttpApiAccess } = config;
   router.post(
     {
       path: '/_bulk_delete',
@@ -94,9 +93,7 @@ There is currently no complete replacement for deleting arbitrary saved objects 
 
       const { savedObjects } = await context.core;
 
-      if (!allowHttpApiAccess) {
-        throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
-      }
+      throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
       const statuses = await savedObjects.client.bulkDelete(request.body, { force });
       return response.ok({ body: statuses });
     })
