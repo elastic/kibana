@@ -9,7 +9,7 @@
 
 import type React from 'react';
 import { useCallback, useMemo } from 'react';
-import type { List } from 'react-virtualized';
+import type { ListImperativeAPI } from 'react-virtualized';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 
 export function useScrollToOrigin({
@@ -21,7 +21,7 @@ export function useScrollToOrigin({
 }: {
   contextSpanId?: string;
   visibleList: TraceWaterfallItem[];
-  listRef: React.RefObject<List>;
+  listRef: React.RefObject<ListImperativeAPI>;
   scrollToOriginRef: React.MutableRefObject<() => void>;
   setIsContextSpanVisible: (visible: boolean) => void;
 }) {
@@ -33,7 +33,7 @@ export function useScrollToOrigin({
 
   scrollToOriginRef.current = () => {
     if (contextSpanIndex !== undefined) {
-      listRef.current?.scrollToRow(contextSpanIndex);
+      listRef.current?.scrollToRow({ index: contextSpanIndex });
     }
   };
 

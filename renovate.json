@@ -691,7 +691,7 @@
     },
     {
       "groupName": "react-virtualized",
-      "matchDepNames": ["react-virtualized", "@types/react-virtualized"],
+      "matchDepNames": ["react-virtualized"],
       "reviewers": ["team:kibana-management", "team:streams-ui"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Kibana Management", "Team:Monitoring"],

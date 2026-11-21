@@ -17,25 +17,21 @@ import type { Props } from '..';
 import { initHttpRequests } from './http_requests.helpers';
 import { ProcessorsEditorWithDeps } from './processors_editor';
 
-type AutoSizerChildren = (size: { height: number; width: number }) => React.ReactNode;
-jest.mock(
-  'react-virtualized/dist/commonjs/AutoSizer',
-  () =>
-    ({ children }: { children: AutoSizerChildren }) =>
-      <div>{children({ height: 500, width: 500 })}</div>
-);
-
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
 const getDomInputValue = (evt: unknown): string =>
   isRecord(evt) && isRecord(evt.target) && typeof evt.target.value === 'string'
     ? evt.target.value
     : '';
 
+type AutoSizerChildren = (size: { height: number; width: number }) => React.ReactNode;
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
 
   return {
     ...original,
+    EuiAutoSizer: ({ children }: { children: AutoSizerChildren }) => (
+      <div>{children({ height: 500, width: 500 })}</div>
+    ),
     EuiComboBox: (props: {
       'data-test-subj'?: string;
       selectedOptions?: Array<{ label?: string }>;

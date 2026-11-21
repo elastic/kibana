@@ -23,11 +23,15 @@ const getDomInputValue = (evt: unknown): string =>
     ? evt.target.value
     : '';
 
+type AutoSizerChildren = (size: { height: number; width: number }) => React.ReactNode;
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
 
   return {
     ...original,
+    EuiAutoSizer: ({ children }: { children: AutoSizerChildren }) => (
+      <div>{children({ height: 500, width: 500 })}</div>
+    ),
     // Mock `EuiComboBox` as a plain input.
     EuiComboBox: (props: {
       'data-test-subj'?: string;
@@ -45,14 +49,6 @@ jest.mock('@elastic/eui', () => {
     ),
   };
 });
-
-type AutoSizerChildren = (size: { height: number; width: number }) => React.ReactNode;
-jest.mock(
-  'react-virtualized/dist/commonjs/AutoSizer',
-  () =>
-    ({ children }: { children: AutoSizerChildren }) =>
-      <div>{children({ height: 500, width: 500 })}</div>
-);
 
 export const renderProcessorEditor = (httpSetup: HttpSetup, props: Props) => {
   apiService.setup(httpSetup, uiMetricService);

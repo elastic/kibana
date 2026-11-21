@@ -15,6 +15,7 @@ import type { Props } from '..';
 import { ProcessorsEditorWithDeps } from './processors_editor';
 import { documentationService, uiMetricService } from '../../../services';
 
+type AutoSizerChildren = (size: { height: number; width: number }) => React.ReactNode;
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
 
@@ -27,6 +28,9 @@ jest.mock('@elastic/eui', () => {
 
   return {
     ...original,
+    EuiAutoSizer: ({ children }: { children: AutoSizerChildren }) => (
+      <div>{children({ height: 500, width: 500 })}</div>
+    ),
     // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
     // which does not produce a valid component wrapper
     EuiComboBox: (props: {
@@ -47,14 +51,6 @@ jest.mock('@elastic/eui', () => {
     },
   };
 });
-
-type AutoSizerChildren = (size: { height: number; width: number }) => React.ReactNode;
-jest.mock(
-  'react-virtualized/dist/commonjs/AutoSizer',
-  () =>
-    ({ children }: { children: AutoSizerChildren }) =>
-      <div>{children({ height: 500, width: 500 })}</div>
-);
 
 export const setupEnvironment = () => {
   // Initialize mock services

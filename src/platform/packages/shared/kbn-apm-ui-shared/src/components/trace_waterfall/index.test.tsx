@@ -16,36 +16,34 @@ import { convertTreeToList, TraceWaterfall } from '.';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 
 let mockListProps: Record<string, any> = {};
+const mockScrollToRow = jest.fn();
 
 // Mock react-virtualized to avoid ResizeObserver issues in jsdom and to capture List props
 jest.mock('react-virtualized', () => {
   const actual = jest.requireActual('react-virtualized');
+  const { forwardRef, useImperativeHandle } = jest.requireActual('react');
 
-  function MockList(props: any) {
+  const MockList = forwardRef((props: any, ref: any) => {
+    useImperativeHandle(ref, () => ({ scrollToRow: mockScrollToRow }));
     mockListProps = props;
     const rows = Array.from({ length: props.rowCount }, (_: any, i: number) =>
       props.rowRenderer({ index: i, style: {}, key: String(i), parent: {} })
     );
-    const style: React.CSSProperties = props.autoHeight
-      ? { height: 'auto', overflowY: 'hidden' }
-      : {};
-    return (
-      <div role="grid" style={style}>
-        {rows}
-      </div>
-    );
-  }
+    return <div role={props.role}>{rows}</div>;
+  });
 
   return {
     ...actual,
-    AutoSizer: ({ children }: { children: (size: { width: number; height: number }) => any }) =>
-      children({ width: 800, height: 600 }),
-    WindowScroller: ({ children }: any) =>
-      children({ height: 600, onChildScroll: jest.fn(), scrollTop: 0, registerChild: jest.fn() }),
     CellMeasurer: ({ children }: any) => children,
     List: MockList,
   };
 });
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  EuiAutoSizer: ({ children }: { children: (size: { width: number; height: number }) => any }) =>
+    children({ width: 800, height: 600 }),
+}));
 
 describe('convertTreeToList', () => {
   const itemA: TraceWaterfallItem = {
@@ -163,6 +161,7 @@ describe('TraceWaterfall', () => {
   afterEach(() => {
     cleanup();
     mockListProps = {};
+    mockScrollToRow.mockClear();
   });
 
   const mockTraceItems: TraceItem[] = [
@@ -312,10 +311,8 @@ describe('TraceWaterfall', () => {
     it('uses delegated scroll pattern to prevent scroll issues', () => {
       renderTraceWaterfall({ showAccordion: false });
 
-      const list = screen.getByRole('grid');
-
-      expect(list).toHaveStyle({ height: 'auto' });
-      expect(list).toHaveStyle({ overflowY: 'hidden' });
+      expect(mockListProps.scrollElement).toBe('window');
+      expect(mockListProps.height).toBeUndefined();
     });
 
     it('renders the waterfall container with virtualized list', () => {
@@ -341,19 +338,21 @@ describe('TraceWaterfall', () => {
   });
 
   describe('Scroll strategy', () => {
-    it('uses auto-height layout for window scroll strategy', () => {
+    it('scrolls the window for window scroll strategy', () => {
       renderTraceWaterfall({ scrollStrategy: 'window' });
 
-      expect(screen.getByRole('grid')).toHaveStyle({ height: 'auto' });
+      expect(mockListProps.scrollElement).toBe('window');
+      expect(mockListProps.height).toBeUndefined();
     });
 
     it('uses fixed-height layout for parent scroll strategy', () => {
       renderTraceWaterfall({ scrollStrategy: 'parent' });
 
-      expect(screen.getByRole('grid')).not.toHaveStyle({ height: 'auto' });
+      expect(mockListProps.scrollElement).toBeUndefined();
+      expect(mockListProps.height).toBe(600);
     });
 
-    it('passes scrollToIndex when scrollToContextOnMount is true for parent strategy', () => {
+    it('scrolls to the context span when scrollToContextOnMount is true for parent strategy', () => {
       renderTraceWaterfall({
         scrollStrategy: 'parent',
         contextSpanIds: ['span-1'],
@@ -361,36 +360,37 @@ describe('TraceWaterfall', () => {
       });
 
       // span-1 is at index 1 in the visible list (after the root trace-1)
-      expect(mockListProps.scrollToIndex).toBe(1);
+      expect(mockScrollToRow).toHaveBeenCalledTimes(1);
+      expect(mockScrollToRow).toHaveBeenCalledWith({ index: 1, align: 'center' });
     });
 
-    it('does not pass scrollToIndex for window strategy even when contextSpanIds is set', () => {
+    it('does not scroll to the context span for window strategy even when contextSpanIds is set', () => {
       renderTraceWaterfall({
         scrollStrategy: 'window',
         contextSpanIds: ['span-1'],
       });
 
-      expect(mockListProps.scrollToIndex).toBeUndefined();
+      expect(mockScrollToRow).not.toHaveBeenCalled();
     });
 
-    it('does not pass scrollToIndex when scrollToContextOnMount is false', () => {
+    it('does not scroll to the context span when scrollToContextOnMount is false', () => {
       renderTraceWaterfall({
         scrollStrategy: 'parent',
         contextSpanIds: ['span-1'],
         scrollToContextOnMount: false,
       });
 
-      expect(mockListProps.scrollToIndex).toBeUndefined();
+      expect(mockScrollToRow).not.toHaveBeenCalled();
     });
 
-    it('does not pass scrollToIndex when contextSpanIds is not in the trace', () => {
+    it('does not scroll to the context span when contextSpanIds is not in the trace', () => {
       renderTraceWaterfall({
         scrollStrategy: 'parent',
         contextSpanIds: ['nonexistent-span'],
         scrollToContextOnMount: true,
       });
 
-      expect(mockListProps.scrollToIndex).toBeUndefined();
+      expect(mockScrollToRow).not.toHaveBeenCalled();
     });
   });
 });

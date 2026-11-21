@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { EuiAccordionProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiAutoSizer, EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
   Error,
@@ -17,15 +17,9 @@ import type {
   WaterfallGetServiceBadgeHref,
 } from '@kbn/apm-types';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import type { ListRowProps, ListRowRenderer } from 'react-virtualized';
-import {
-  AutoSizer,
-  CellMeasurer,
-  CellMeasurerCache,
-  List,
-  WindowScroller,
-} from 'react-virtualized';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ListImperativeAPI, RowRendererParams } from 'react-virtualized';
+import { CellMeasurer, CellMeasurerCache, List } from 'react-virtualized';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../timeline';
 import { CriticalPathToggle } from './critical_path';
 import { ScrollToOriginButton } from './scroll_to_origin_button';
@@ -328,7 +322,12 @@ function TraceTree({
     scrollToContextOnMount,
   } = useTraceWaterfallContext();
 
-  const listRef = useRef<List>(null);
+  const listRef = useRef<ListImperativeAPI | null>(null);
+  const [isListMounted, setIsListMounted] = useState(false);
+  const setListRef = useCallback((list: ListImperativeAPI | null) => {
+    listRef.current = list;
+    setIsListMounted(list !== null);
+  }, []);
 
   const rowHeightCache = useRef(
     new CellMeasurerCache({
@@ -348,19 +347,26 @@ function TraceTree({
     [visibleList]
   );
 
-  const [scrollComplete, setScrollComplete] = useState(false);
-
   const scrollToIndex = useMemo(() => {
     if (!scrollToContextOnMount || scrollStrategy !== 'parent') {
       return undefined;
     }
     const scrollTarget = contextSpanIds?.[0];
-    if (scrollComplete || !scrollTarget || visibleList.length === 0) {
+    if (!scrollTarget || visibleList.length === 0) {
       return undefined;
     }
     const index = visibleList.findIndex((item) => item.id === scrollTarget);
     return index >= 0 ? index : undefined;
-  }, [scrollToContextOnMount, scrollStrategy, scrollComplete, contextSpanIds, visibleList]);
+  }, [scrollToContextOnMount, scrollStrategy, contextSpanIds, visibleList]);
+
+  const hasScrolledToContextRef = useRef(false);
+  useEffect(() => {
+    if (hasScrolledToContextRef.current || scrollToIndex === undefined || !isListMounted) {
+      return;
+    }
+    hasScrolledToContextRef.current = true;
+    listRef.current?.scrollToRow({ index: scrollToIndex, align: 'center' });
+  }, [scrollToIndex, isListMounted]);
 
   const { onScrolled } = useScrollToOrigin({
     contextSpanId: contextSpanIds?.[0],
@@ -370,22 +376,8 @@ function TraceTree({
     setIsContextSpanVisible,
   });
 
-  const onRowsRendered = useCallback(
-    ({ startIndex, stopIndex }: { startIndex: number; stopIndex: number }) => {
-      if (
-        scrollToIndex !== undefined &&
-        startIndex <= scrollToIndex &&
-        scrollToIndex <= stopIndex
-      ) {
-        setScrollComplete(true);
-      }
-      onScrolled({ startIndex, stopIndex });
-    },
-    [scrollToIndex, onScrolled]
-  );
-
-  const rowRenderer: ListRowRenderer = useCallback(
-    ({ index, style, key, parent }) => {
+  const rowRenderer = useCallback(
+    ({ index, style, key, parent }: RowRendererParams) => {
       const item = visibleList[index];
       const children = traceWaterfallMap[item.id] || [];
 
@@ -407,11 +399,12 @@ function TraceTree({
   );
 
   const listProps = {
-    ref: listRef,
+    ref: setListRef,
     rowCount: visibleList.length,
     deferredMeasurementCache: rowHeightCache.current,
     rowHeight: rowHeightCache.current.rowHeight,
     rowRenderer,
+    role: 'grid',
     containerRole: 'rowgroup',
   };
 
@@ -432,31 +425,17 @@ function TraceTree({
         `}
       >
         {verticalLines}
-        <WindowScroller
-          scrollElement={document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined}
-        >
-          {({ height, onChildScroll, scrollTop, registerChild }) => (
-            <AutoSizer disableHeight>
-              {({ width }) => (
-                <div data-test-subj="waterfall" ref={registerChild}>
-                  <List
-                    ref={listRef}
-                    autoHeight
-                    height={height}
-                    onScroll={onChildScroll}
-                    scrollTop={scrollTop}
-                    width={width}
-                    rowCount={visibleList.length}
-                    deferredMeasurementCache={rowHeightCache.current}
-                    rowHeight={rowHeightCache.current.rowHeight}
-                    rowRenderer={rowRenderer}
-                    containerRole="rowgroup"
-                  />
-                </div>
-              )}
-            </AutoSizer>
+        <EuiAutoSizer disableHeight>
+          {({ width }) => (
+            <div data-test-subj="waterfall">
+              <List
+                {...listProps}
+                scrollElement={document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? 'window'}
+                width={width}
+              />
+            </div>
           )}
-        </WindowScroller>
+        </EuiAutoSizer>
       </div>
     );
   }
@@ -469,25 +448,18 @@ function TraceTree({
       `}
     >
       {verticalLines}
-      <AutoSizer>
+      <EuiAutoSizer>
         {({ width, height }) => (
           <div data-test-subj="waterfall">
-            <List
-              {...listProps}
-              scrollToIndex={scrollToIndex}
-              scrollToAlignment="center"
-              onRowsRendered={onRowsRendered}
-              height={height}
-              width={width}
-            />
+            <List {...listProps} onRowsRendered={onScrolled} height={height} width={width} />
           </div>
         )}
-      </AutoSizer>
+      </EuiAutoSizer>
     </div>
   );
 }
 
-interface VirtualRowProps extends Pick<ListRowProps, 'index' | 'style' | 'parent'> {
+interface VirtualRowProps extends Pick<RowRendererParams, 'index' | 'style' | 'parent'> {
   rowHeightCache: CellMeasurerCache;
   item: TraceWaterfallItem;
   childrenCount: number;
