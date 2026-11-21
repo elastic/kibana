@@ -6,10 +6,16 @@
  */
 
 import { castArray, compact, sortBy, uniq } from 'lodash';
+import { ENVIRONMENT_NOT_DEFINED_VALUE } from '@kbn/apm-types';
 import { isMobilePlatform } from '../../../common/application_source';
 import { MOBILE_FIELDS, RESULT_COLUMNS } from '../../../common/mobile/fields';
 import type { MobilePlatform } from '../../../common/types/applications';
-import { MAX_ENVIRONMENTS } from '../constants';
+import {
+  MAX_ENVIRONMENTS,
+  MAX_ENVIRONMENT_LENGTH,
+  MAX_OS_NAME_LENGTH,
+  MAX_RELEASE_LENGTH,
+} from '../constants';
 import { withNotDefined } from '../helpers/environment';
 
 /**
@@ -35,26 +41,44 @@ export interface OsRow {
 export const toPlatforms = (values: string | string[] | null | undefined): MobilePlatform[] =>
   sortBy(uniq(castArray(values ?? []).filter(isMobilePlatform)));
 
+/** Values the KPI route accepts as a filter: an option longer than its limit would fail it. */
+const accepted = (values: Array<string | null>, maxLength: number): string[] =>
+  compact(values).filter((value) => value.length <= maxLength);
+
 /** The OS names of rows, in their order. */
 export const toOsNames = (rows: OsRow[]): string[] =>
-  uniq(compact(rows.map(({ [RESULT_COLUMNS.osName]: osName }) => osName)));
+  uniq(
+    accepted(
+      rows.map(({ [RESULT_COLUMNS.osName]: osName }) => osName),
+      MAX_OS_NAME_LENGTH
+    )
+  );
 
 /** The releases of rows, in their order. */
 export const toReleases = (rows: ReleaseRow[]): string[] =>
-  compact(rows.map(({ [RESULT_COLUMNS.release]: release }) => release));
+  accepted(
+    rows.map(({ [RESULT_COLUMNS.release]: release }) => release),
+    MAX_RELEASE_LENGTH
+  );
+
+/** "Not defined" as the KPI filter (`withEnvironment`) applies it: APM's sentinel, or neither field. */
+const isEnvironmentNotDefined = (row: EnvironmentRow): boolean =>
+  row[MOBILE_FIELDS.environment] === ENVIRONMENT_NOT_DEFINED_VALUE ||
+  (!row[MOBILE_FIELDS.environment] && !row[MOBILE_FIELDS.environmentName]);
 
 /**
  * The environments of rows grouped by both environment fields, "Not defined" included when a row
- * has neither, as the web sources list them.
+ * is, as the web sources list them.
  */
 export const toEnvironments = (rows: EnvironmentRow[]): string[] => {
   const names = uniq(
-    rows.flatMap((row) =>
-      compact([row[MOBILE_FIELDS.environment], row[MOBILE_FIELDS.environmentName]])
+    accepted(
+      rows.flatMap((row) => [row[MOBILE_FIELDS.environment], row[MOBILE_FIELDS.environmentName]]),
+      MAX_ENVIRONMENT_LENGTH
     )
   );
   const notDefined = rows
-    .filter((row) => !row[MOBILE_FIELDS.environment] && !row[MOBILE_FIELDS.environmentName])
+    .filter(isEnvironmentNotDefined)
     .reduce((total, { [RESULT_COLUMNS.docs]: docs }) => total + (docs ?? 0), 0);
   // Rows come most used first, so the cap keeps the most used names, as the web sources' terms do.
   return withNotDefined(names.slice(0, MAX_ENVIRONMENTS), notDefined);

@@ -37,6 +37,7 @@ const NO_VALUE = { value: null, previous: null, delta: null };
 
 const KPIS: MobileKpisResponse = {
   hasData: true,
+  isPartial: false,
   sessions: { value: 12, previous: 10, delta: 2 },
   users: { value: 4, previous: 4, delta: 0 },
   crashFreeSessions: NO_VALUE,
@@ -128,9 +129,8 @@ describe('MobileOverview', () => {
       crashFreeSessions: { value: 0.99, previous: 0.98, delta: 0.01 },
     });
     renderPage();
-    await screen.findByTestId('digitalExperienceMobileKpis');
 
-    expect(screen.getByTestId('digitalExperienceMobileKpisDiscover')).toHaveAttribute(
+    expect(await screen.findByTestId('digitalExperienceMobileKpisDiscover')).toHaveAttribute(
       'href',
       '/app/discover'
     );
@@ -141,6 +141,35 @@ describe('MobileOverview', () => {
       from: '2021-01-18T12:00:00.000Z',
       to: '2021-01-18T13:00:00.000Z',
     });
+  });
+
+  it('hides the Discover link while the KPIs of new filters load', async () => {
+    const { rerender } = renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpisDiscover');
+
+    fetch.mockReturnValue(new Promise(() => {}));
+    mockParams({ osName: 'iPadOS' });
+    rerender(<MobileOverview serviceName="shop-mobile" />);
+
+    await waitFor(() =>
+      expect(screen.queryByTestId('digitalExperienceMobileKpisDiscover')).toBeNull()
+    );
+  });
+
+  it("warns that the values may be missing data when the user can't read every index", async () => {
+    fetch.mockResolvedValue({ ...KPIS, isPartial: true });
+    renderPage();
+
+    expect(
+      await screen.findByTestId('digitalExperienceMobileKpisPartialAccess')
+    ).toBeInTheDocument();
+  });
+
+  it('shows no access warning when the user reads every index', async () => {
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpisDiscover');
+
+    expect(screen.queryByTestId('digitalExperienceMobileKpisPartialAccess')).toBeNull();
   });
 
   it('queries the KPIs with the OS and release from the URL', async () => {

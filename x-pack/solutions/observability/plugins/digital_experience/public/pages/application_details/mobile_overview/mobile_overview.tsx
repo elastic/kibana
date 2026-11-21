@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAbortableAsync } from '@kbn/react-hooks';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { DataPanel } from '../../../components/data_panel';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
 import { EnvironmentFilter } from '../../../components/environment_filter';
@@ -178,6 +179,11 @@ const LOAD_ERROR_TITLE = i18n.translate('xpack.digitalExperience.mobile.loadErro
   defaultMessage: 'Could not load the mobile application',
 });
 
+const PARTIAL_ACCESS_TITLE = i18n.translate('xpack.digitalExperience.mobile.partialAccess', {
+  defaultMessage:
+    "You can't read all of the mobile indices, so these values may be missing some data. Ask an administrator for read access to them.",
+});
+
 const NO_DATA_TITLE = i18n.translate('xpack.digitalExperience.mobile.empty.title', {
   defaultMessage: 'No mobile data for this application',
 });
@@ -317,6 +323,16 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
           />
         ) : (
           <>
+            {kpis?.isPartial && (
+              <>
+                <KbnWarningCallout
+                  data-test-subj="digitalExperienceMobileKpisPartialAccess"
+                  size="s"
+                  title={PARTIAL_ACCESS_TITLE}
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
             <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>
               {MOBILE_KPIS.map(({ kpi, format, ...panel }) => (
                 <MobilePanel
@@ -329,7 +345,8 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
                 />
               ))}
             </EuiFlexGroup>
-            {discoverHref && (
+            {/* While loading, the query is still the previous filters'. */}
+            {discoverHref && !isLoading && (
               <>
                 <EuiSpacer size="s" />
                 <EuiFlexGroup justifyContent="flexEnd" responsive={false}>

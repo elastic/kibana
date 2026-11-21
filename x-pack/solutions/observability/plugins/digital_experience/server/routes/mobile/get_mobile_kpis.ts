@@ -42,14 +42,17 @@ const errorRateOf = (row: KpiRow | undefined): number | null => {
   return sessions ? (kpiOf(row, RESULT_COLUMNS.exceptions) ?? 0) / sessions : null;
 };
 
-/** The KPI row of an application: the period's values against the period of equal length before. */
+/**
+ * The KPI row of an application: the period's values against the period of equal length before.
+ * The route adds whether the user reads every index.
+ */
 export const getMobileKpis = async ({
   esClient,
   filters,
   start,
   end,
   environment,
-}: GetMobileKpisParams): Promise<MobileKpisResponse> => {
+}: GetMobileKpisParams): Promise<Omit<MobileKpisResponse, 'isPartial'>> => {
   const previous = getPreviousPeriod(start, end);
   const { release, osName, ...application } = filters;
   const statsQuery = withKpiStats(mobilePanelQuery(filters));

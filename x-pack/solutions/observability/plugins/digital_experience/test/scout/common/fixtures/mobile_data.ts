@@ -7,27 +7,38 @@
 
 import type { EsClient } from '@kbn/scout-oblt';
 
-const INDEX = 'logs-generic.otel-default';
+const LOGS_INDEX = 'logs-generic.otel-default';
+const TRACES_INDEX = 'traces-generic.otel-default';
 
 /** Inside `TIME_RANGE`. */
 const TIMESTAMP = '2021-01-18T12:30:00.000Z';
 
 /**
+ * The edges of `TIME_RANGE` (12:00 to 13:00) and of the hour before it, the previous period. Both
+ * periods include their start and exclude their end.
+ */
+export const BOUNDARY_TIMESTAMPS = {
+  previousStart: '2021-01-18T11:00:00.000Z',
+  previousLast: '2021-01-18T11:59:59.999Z',
+  start: '2021-01-18T12:00:00.000Z',
+  end: '2021-01-18T13:00:00.000Z',
+} as const;
+
+/**
  * Mobile applications as EDOT Android and iOS send them, in miniature: the Elastic distribution
  * (`telemetry.distro.name: elastic`) on a mobile `os.name`, with the upstream `telemetry.sdk.*`.
  * A React Native app on Android, iOS and iPadOS, an Android app, an Android app on an SDK that
- * still sends `telemetry.sdk.name: android` without the distribution, and two services that must
- * never show up as mobile: a backend Java service, and EDOT Browser on an iPhone, which is the Elastic
- * distribution on `os.name: iOS` too.
+ * still sends `telemetry.sdk.name: android` without the distribution, an Android app with sessions
+ * on the edges of the periods, and two services that must never show up as mobile: a backend Java
+ * service, and EDOT Browser on an iPhone, which is the Elastic distribution on `os.name: iOS` too.
  */
 export const MOBILE_APPS = {
   reactNative: 'scout-shop-mobile',
   android: 'scout-trailmap-android',
   legacyAndroid: 'scout-legacy-android',
+  boundaryAndroid: 'scout-boundary-android',
   backendJava: 'scout-backend-java',
   browserOnIphone: 'scout-browser-on-iphone',
-  /** In no data at all, for the empty state. */
-  noData: 'scout-no-mobile-data',
 } as const;
 
 interface MobileDocument {
@@ -43,6 +54,10 @@ interface MobileDocument {
   installationId?: string;
   sessionId: string;
   exception?: boolean;
+  /** A span in the traces index; a log event otherwise. */
+  isSpan?: boolean;
+  /** `TIMESTAMP` unless set. */
+  timestamp?: string;
 }
 
 const EDOT_MOBILE = { distroName: 'elastic', version: '1.0.0' };
@@ -59,7 +74,19 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
     sessionId,
     exception: index === 0,
   })),
-  // React Native on an iPhone and an iPad: the same release, the iOS platform both.
+  // A span of a session that has a log event too: still one session.
+  {
+    ...EDOT_MOBILE,
+    serviceName: MOBILE_APPS.reactNative,
+    sdkLanguage: 'java',
+    osName: 'Android',
+    buildId: '10',
+    installationId: 'installation-rn-android',
+    sessionId: 'rn-a-2',
+    isSpan: true,
+  },
+  // React Native on an iPhone and an iPad: the same release, the iOS platform both. The iPad
+  // session only has a span.
   {
     ...EDOT_MOBILE,
     serviceName: MOBILE_APPS.reactNative,
@@ -77,6 +104,7 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
     buildId: '5',
     installationId: 'installation-rn-ipad',
     sessionId: 'RN-I-2',
+    isSpan: true,
   },
   // Most sessions still on 2.9.0, the newest release 2.10.0, which only a version sort puts last.
   ...[
@@ -100,6 +128,17 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
     installationId: 'installation-legacy-android',
     sessionId: 'legacy-1',
   },
+  // One session per edge: the previous period's start and last millisecond, the time range's start
+  // and its end, which neither period includes.
+  ...Object.entries(BOUNDARY_TIMESTAMPS).map(([edge, timestamp]) => ({
+    ...EDOT_MOBILE,
+    serviceName: MOBILE_APPS.boundaryAndroid,
+    sdkLanguage: 'java',
+    osName: 'Android',
+    installationId: 'installation-boundary',
+    sessionId: `boundary-${edge}`,
+    timestamp,
+  })),
   {
     serviceName: MOBILE_APPS.backendJava,
     sdkLanguage: 'java',
@@ -117,12 +156,26 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
   },
 ];
 
+const toSpanFields = (index: number) => {
+  const id = index.toString(16);
+  return {
+    trace_id: id.padStart(32, '0'),
+    span_id: id.padStart(16, '0'),
+    kind: 'Internal',
+    name: 'ActivityResumed',
+    duration: 1000000,
+  };
+};
+
 const documents = MOBILE_DOCUMENTS.map((doc, index) => ({
   id: `dx-mobile-${index}`,
+  index: doc.isSpan ? TRACES_INDEX : LOGS_INDEX,
   document: {
-    '@timestamp': TIMESTAMP,
+    '@timestamp': doc.timestamp ?? TIMESTAMP,
     // Events the EDOT mobile SDKs send: an app lifecycle change, or an exception.
-    event_name: doc.exception ? 'exception' : 'device.app.lifecycle',
+    ...(doc.isSpan
+      ? toSpanFields(index)
+      : { event_name: doc.exception ? 'exception' : 'device.app.lifecycle' }),
     resource: {
       attributes: {
         'service.name': doc.serviceName,
@@ -171,12 +224,21 @@ export const EXPECTED_MOBILE_ROWS = [
     users: { count: 1 },
     errorRate: 0,
   },
+  {
+    // Only the session on the time range's start: its end is excluded.
+    serviceName: MOBILE_APPS.boundaryAndroid,
+    platforms: ['android'],
+    latestRelease: '1.0.0',
+    sessions: { count: 1 },
+    users: { count: 1 },
+    errorRate: 0,
+  },
 ] as const;
 
-/** Deletes the mobile documents by their ids, leaving the rest of the data stream. */
+/** Deletes the mobile documents by their ids, leaving the rest of the data streams. */
 export const deleteMobileData = async (esClient: EsClient): Promise<void> => {
   await esClient.deleteByQuery({
-    index: INDEX,
+    index: [LOGS_INDEX, TRACES_INDEX],
     query: { ids: { values: documents.map(({ id }) => id) } },
     refresh: true,
     ignore_unavailable: true,
@@ -189,8 +251,8 @@ export const ingestMobileData = async (esClient: EsClient): Promise<void> => {
   await deleteMobileData(esClient);
   const { errors, items } = await esClient.bulk({
     refresh: 'wait_for',
-    operations: documents.flatMap(({ id, document }) => [
-      { create: { _index: INDEX, _id: id } },
+    operations: documents.flatMap(({ id, index, document }) => [
+      { create: { _index: index, _id: id } },
       document,
     ]),
   });

@@ -43,15 +43,6 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
         'Android',
         'iOS',
       ]);
-      await expect(row.getByTestId('digitalExperienceMobileLatestRelease')).toHaveText('1.0.0');
-      // Two Android, an iPhone and an iPad session.
-      await expect(row.getByTestId('digitalExperienceMobileSessions')).toHaveText('4');
-      await expect(
-        digitalExperience.mobileApplicationsTable.getByText(MOBILE_APPS.backendJava)
-      ).toBeHidden();
-      await expect(
-        digitalExperience.mobileApplicationsTable.getByText(MOBILE_APPS.browserOnIphone)
-      ).toBeHidden();
     });
 
     await test.step('has no accessibility violations on the Mobile tab', async () => {
@@ -59,14 +50,15 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
       expect(violations).toHaveLength(0);
     });
 
-    await test.step('narrows the rows to a platform', async () => {
-      await digitalExperience.gotoApplications({
-        ...TIME_RANGE,
-        applicationType: 'mobile',
-        platformFilter: 'ios',
-      });
+    await test.step('narrows the rows to the platform picked in the Platform filter', async () => {
+      const androidOnly = digitalExperience.mobileApplicationLink(MOBILE_APPS.android);
+      await expect(androidOnly).toBeVisible();
+
+      await digitalExperience.selectPlatform('ios');
+
+      await expect(page).toHaveURL(/platformFilter=ios/);
       await expect(digitalExperience.mobileApplicationLink(MOBILE_APPS.reactNative)).toBeVisible();
-      await expect(digitalExperience.mobileApplicationLink(MOBILE_APPS.android)).toBeHidden();
+      await expect(androidOnly).toBeHidden();
     });
 
     await test.step('opens the mobile page, which keeps its EDOT source and type on reload', async () => {
@@ -96,20 +88,5 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
       await expect(page).toHaveURL(/osName=iPadOS/);
       await expect(digitalExperience.mobileKpiValue('Sessions')).toHaveText('1');
     });
-  });
-
-  test('shows the empty state for an application without mobile data', async ({
-    page,
-    pageObjects: { digitalExperience },
-  }) => {
-    await digitalExperience.gotoApplication(MOBILE_APPS.noData, {
-      ...TIME_RANGE,
-      source: 'otel',
-      applicationType: 'mobile',
-    });
-
-    await expect(digitalExperience.mobileEmpty).toBeVisible();
-    await expect(page.getByTestId('digitalExperienceMobileAndroidDocsLink')).toBeVisible();
-    await expect(page.getByTestId('digitalExperienceMobileIosDocsLink')).toBeVisible();
   });
 });

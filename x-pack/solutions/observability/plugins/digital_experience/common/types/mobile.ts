@@ -11,6 +11,8 @@ import type { ComparedValue, MobilePlatform } from './applications';
 export interface MobileKpisResponse {
   /** Whether the application has mobile data in the time range and filters. */
   hasData: boolean;
+  /** Whether the user can't read every OTel index, so the values may be missing some data. */
+  isPartial: boolean;
   sessions: ComparedValue;
   users: ComparedValue;
   /** `null` values until a crash is defined (#64) and session start reaches the SDKs. */

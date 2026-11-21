@@ -68,9 +68,9 @@ on serverless and stateful.
 - **Releases:** the release is `service.version` as the SDKs send it: Android's `versionName` and
   iOS's short version, with the build (`versionCode`, `CFBundleVersion`) in `app.build_id`. It isn't
   rewritten at query time; a version that carries its build would need fixing in the SDK or at
-  ingest. The latest release is each application's release with the most sessions in the last 24
-  hours of the time range, on any platform, picked per application in ES|QL (`TOP`), so no row
-  limit drops one.
+  ingest. The latest release is each application's highest `service.version` in the last 24 hours
+  of the time range, on any platform, whatever its session count, compared as versions so `2.10.0`
+  is after `2.9.0` (`MAX(TO_VERSION(...))` per application in ES|QL, so no row limit drops one).
 - **Applications list:** Web and Mobile tabs (`applicationType` in the URL), each with its count,
   shown when both have data, when the mobile search failed, or when the URL picks one; otherwise the
   list shows the only kind there is. The Mobile tab has its own table (the name with a badge per
@@ -86,9 +86,13 @@ on serverless and stateful.
   Compare toggle, a KPI row (sessions, users, crash-free sessions, error rate) and empty sections
   (Health summary, Release health, Stability, Users and engagement, Performance, Views) for the
   sibling issues to fill. Every KPI uses `MobilePanel`: current value with its change against the
-  previous period of equal length, the Compare overlay, a tooltip with the calculation and a Discover
-  link with the same ES|QL and filters (`common/mobile/discover.ts`). The time bucket is hourly up to
-  24 hours and daily above. Without mobile data it links to the EDOT Android and iOS setup docs.
+  previous period of equal length, the Compare overlay and a tooltip with the calculation. One
+  "Open in Discover" link opens the KPIs over time with the same ES|QL and filters
+  (`common/mobile/discover.ts`). Its buckets follow Discover's time range: `BUCKET` divides the range
+  by `TARGET_BUCKETS` (50, as the plugin's charts) and rounds the width up to a standard one, so a
+  day shows 30-minute buckets and 30 days daily ones, and the width changes with the range. A
+  warning shows when the user can't read every OTel index, as the counts may then miss data.
+  Without mobile data it links to the EDOT Android and iOS setup docs.
 - **Route:** `GET /internal/digital_experience/mobile_applications/{serviceName}/kpis`, with a
   optional `osName` and `release`. It also lists the OS names, platforms, releases (on the selected
   OS) and environments for the pickers.

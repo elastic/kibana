@@ -35,7 +35,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'returns a row per mobile application, with its platforms and EDOT as its source',
+      'returns a row per mobile application, with its platforms and EDOT as its source, and never a backend Java service nor EDOT Browser on an iPhone',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
@@ -55,21 +55,6 @@ apiTest.describe(
             crashFreeSessions: { value: null, previous: null, delta: null },
           });
         }
-      }
-    );
-
-    apiTest(
-      'never lists a backend Java service, nor EDOT Browser on an iPhone, as mobile',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
-
-        const response = await apiClient.get(APPLICATIONS_IN_TIME_RANGE_PATH, {
-          headers: { ...COMMON_HEADERS, ...cookieHeader },
-          responseType: 'json',
-        });
-
-        expect(response).toHaveStatusCode(200);
-        const { applications } = response.body as ApplicationsResponse;
         const mobileNames = applications
           .filter(({ applicationType }) => applicationType === 'mobile')
           .map(({ serviceName }) => serviceName);
@@ -91,9 +76,12 @@ apiTest.describe(
           return response.body as MobileKpisResponse;
         };
 
+        // Two Android sessions, one with a log event and a span, an iPhone one and an iPad one with
+        // only a span.
         const all = await getKpis({});
         expect(all).toMatchObject({
           hasData: true,
+          isPartial: false,
           sessions: { value: 4 },
           users: { value: 3 },
           errorRate: { value: 0.25 },
@@ -112,6 +100,26 @@ apiTest.describe(
         expect((await getKpis({ osName: 'iPadOS' })).sessions.value).toBe(1);
         expect((await getKpis({ release: '1.0.0' })).sessions.value).toBe(4);
         expect((await getKpis({ release: '9.9.9' })).hasData).toBe(false);
+      }
+    );
+
+    apiTest(
+      'counts a session on the edge of a period in that period only',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+        const response = await apiClient.get(mobileKpisPath(MOBILE_APPS.boundaryAndroid), {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        // The time range's start, not its end; the previous period's start and last millisecond.
+        expect((response.body as MobileKpisResponse).sessions).toStrictEqual({
+          value: 1,
+          previous: 2,
+          delta: -1,
+        });
       }
     );
 

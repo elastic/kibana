@@ -18,9 +18,18 @@ globalTeardownHook(
   'Delete the mock OTel RUM data and sessions',
   { tag: DIGITAL_EXPERIENCE_TAGS },
   async ({ esClient, kbnClient }) => {
-    await deleteOtelRumData(esClient);
-    await deleteMobileData(esClient);
-    await deleteSessionsData(esClient, kbnClient);
+    // Every cleanup runs, whichever fails; the failures are reported together.
+    const results = await Promise.allSettled([
+      deleteOtelRumData(esClient),
+      deleteMobileData(esClient),
+      deleteSessionsData(esClient, kbnClient),
+    ]);
+    const failures = results.flatMap((result) =>
+      result.status === 'rejected' ? [result.reason] : []
+    );
+    if (failures.length > 0) {
+      throw new AggregateError(failures, 'Could not delete all of the test data');
+    }
   }
 );
 

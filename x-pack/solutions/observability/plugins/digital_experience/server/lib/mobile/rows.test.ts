@@ -5,18 +5,46 @@
  * 2.0.
  */
 
-import { toEnvironments, toReleases } from './rows';
-import type { EnvironmentRow, ReleaseRow } from './rows';
+import { toEnvironments, toOsNames, toReleases } from './rows';
+import type { EnvironmentRow, OsRow, ReleaseRow } from './rows';
 
 // A column every row has null for is dropped from the response, so rows can miss any value.
 const environmentRows = (rows: Array<Partial<EnvironmentRow>>) => rows as EnvironmentRow[];
 const releaseRows = (rows: Array<Partial<ReleaseRow>>) => rows as ReleaseRow[];
+const osRows = (rows: Array<Partial<OsRow>>) => rows as OsRow[];
 
 describe('toReleases', () => {
   it('lists the releases of the rows in their order', () => {
     expect(
       toReleases(releaseRows([{ release: '1.1.0' }, { release: '1.0.0' }, { release: null }]))
     ).toEqual(['1.1.0', '1.0.0']);
+  });
+
+  it('leaves out a release longer than the KPI route accepts', () => {
+    expect(toReleases(releaseRows([{ release: 'x'.repeat(1025) }, { release: '1.0.0' }]))).toEqual([
+      '1.0.0',
+    ]);
+  });
+});
+
+describe('toOsNames', () => {
+  it('lists each OS name once, in the order of the rows', () => {
+    expect(
+      toOsNames(
+        osRows([
+          { os_name: 'Android', platform: 'android' },
+          { os_name: 'iOS', platform: 'ios' },
+          { os_name: 'Android', platform: 'android' },
+          { os_name: null, platform: 'android' },
+        ])
+      )
+    ).toEqual(['Android', 'iOS']);
+  });
+
+  it('leaves out an OS name longer than the KPI route accepts', () => {
+    expect(toOsNames(osRows([{ os_name: 'x'.repeat(65) }, { os_name: 'x'.repeat(64) }]))).toEqual([
+      'x'.repeat(64),
+    ]);
   });
 });
 
@@ -31,6 +59,25 @@ describe('toEnvironments', () => {
         ])
       )
     ).toEqual(['production', 'staging', 'ENVIRONMENT_NOT_DEFINED']);
+  });
+
+  it('lists "Not defined" for APM\'s sentinel, as the KPI filter matches it', () => {
+    expect(
+      toEnvironments(
+        environmentRows([
+          { docs: 3, 'service.environment': 'production' },
+          { docs: 1, 'service.environment': 'ENVIRONMENT_NOT_DEFINED' },
+        ])
+      )
+    ).toEqual(['production', 'ENVIRONMENT_NOT_DEFINED']);
+  });
+
+  it('leaves out a name longer than the environment filter accepts', () => {
+    expect(
+      toEnvironments(
+        environmentRows([{ docs: 2, 'service.environment': 'x'.repeat(1025) }, { docs: 1 }])
+      )
+    ).toEqual(['ENVIRONMENT_NOT_DEFINED']);
   });
 
   it('keeps the 100 most used names, as the web sources do', () => {

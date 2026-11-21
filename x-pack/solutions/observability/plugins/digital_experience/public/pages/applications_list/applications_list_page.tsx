@@ -260,12 +260,12 @@ export function ApplicationsListPage() {
   const hasMobileApplications = response?.applications.some(isMobileApplication) ?? false;
   const unavailableSources = response?.unavailableSources ?? [];
   const hasWebFailures = unavailableSources.length > 0;
-  // Web and mobile applications have their own tab, shown when both have data or a failed search,
-  // so its warning and retry stay reachable, or when the URL picks one.
+  // Web and mobile applications have their own tab, shown when both have data, when the URL picks
+  // one, or when the mobile search failed, whatever the web rows, so its retry stays reachable.
   const showsTabs =
     applicationType !== undefined ||
-    ((hasWebApplications || hasWebFailures) &&
-      (hasMobileApplications || mobileAvailability === 'unavailable'));
+    mobileAvailability === 'unavailable' ||
+    ((hasWebApplications || hasWebFailures) && hasMobileApplications);
   const selectedType =
     applicationType ??
     (!hasWebApplications && !hasWebFailures && hasMobileApplications

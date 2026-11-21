@@ -8,15 +8,17 @@
 import { NEVER } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MobileKpisResponse } from '../../../common/types/mobile';
+import { hasPartialReadAccess } from '../applications/get_partial_access';
 import { getMobileKpis } from './get_mobile_kpis';
 import { MOBILE_KPIS_ENDPOINT, mobileRouteRepository } from './route';
 
 jest.mock('./get_mobile_kpis');
+jest.mock('../applications/get_partial_access');
 
 const START = '2021-01-18T12:00:00.000Z';
 const END = '2021-01-18T13:00:00.000Z';
 
-const RESPONSE: MobileKpisResponse = {
+const KPIS: Omit<MobileKpisResponse, 'isPartial'> = {
   hasData: true,
   sessions: { value: 7, previous: 5, delta: 2 },
   users: { value: 3, previous: 3, delta: 0 },
@@ -30,6 +32,7 @@ const RESPONSE: MobileKpisResponse = {
 };
 
 const esClient = { esql: { query: jest.fn() } };
+const internalEsClient = { indices: { resolveIndex: jest.fn() } };
 
 const runHandler = ({
   query = { start: START, end: END },
@@ -43,7 +46,7 @@ const runHandler = ({
     params: { path: { serviceName: 'shop-mobile' }, query },
     context: {
       core: Promise.resolve({
-        elasticsearch: { client: { asCurrentUser: esClient } },
+        elasticsearch: { client: { asCurrentUser: esClient, asInternalUser: internalEsClient } },
         featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
       }),
     },
@@ -56,7 +59,8 @@ const runHandler = ({
 };
 
 beforeEach(() => {
-  jest.mocked(getMobileKpis).mockReset().mockResolvedValue(RESPONSE);
+  jest.mocked(getMobileKpis).mockReset().mockResolvedValue(KPIS);
+  jest.mocked(hasPartialReadAccess).mockReset().mockResolvedValue(false);
 });
 
 describe('mobile KPIs route', () => {
@@ -71,7 +75,7 @@ describe('mobile KPIs route', () => {
       },
     });
 
-    expect(response).toBe(RESPONSE);
+    expect(response).toEqual({ ...KPIS, isPartial: false });
     expect(jest.mocked(getMobileKpis)).toHaveBeenCalledWith(
       expect.objectContaining({
         // The plugin's traced client, over the user's.
@@ -82,6 +86,20 @@ describe('mobile KPIs route', () => {
         environment: 'production',
       })
     );
+  });
+
+  it("reports partial values when the user can't read every OTel index", async () => {
+    jest.mocked(hasPartialReadAccess).mockResolvedValue(true);
+
+    const response = await runHandler({});
+
+    expect(response.isPartial).toBe(true);
+    expect(jest.mocked(hasPartialReadAccess)).toHaveBeenCalledWith(
+      expect.objectContaining({ esClient, internalEsClient })
+    );
+    await expect(
+      jest.mocked(hasPartialReadAccess).mock.calls[0][0].getIndices()
+    ).resolves.toStrictEqual(['logs-*.otel-*', 'traces-*.otel-*']);
   });
 
   describe('params', () => {

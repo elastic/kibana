@@ -301,6 +301,14 @@ describe('ApplicationsListPage mobile applications', () => {
     expect(screen.queryByTestId('digitalExperienceMobileApplicationsEmpty')).toBeNull();
   });
 
+  it('keeps the Mobile tab reachable when the mobile search failed and there are no web rows', async () => {
+    respondWith([], [], [], null, [], 'unavailable');
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceApplicationTypeTabs')).toBeVisible();
+    expect(screen.getByTestId('digitalExperienceApplicationTypeTab-mobile')).toBeVisible();
+  });
+
   it('keeps the tabs on the web tab, and offers a retry, when every web search failed', async () => {
     respondWith([mobileApp()], [], ['otel', 'classic']);
     renderPage();

@@ -92,7 +92,7 @@ export class DigitalExperiencePage {
   public readonly mobileKpis: Locator;
   public readonly mobilePagePlatforms: Locator;
   public readonly mobileOsFilter: Locator;
-  public readonly mobileEmpty: Locator;
+  public readonly platformFilter: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.mainContainer = page.getByTestId('digitalExperienceMainContainer');
@@ -165,7 +165,7 @@ export class DigitalExperiencePage {
       .getByTestId('digitalExperienceMobilePagePlatforms')
       .getByTestId('digitalExperiencePlatformBadge');
     this.mobileOsFilter = page.getByTestId('digitalExperienceMobileOsFilter');
-    this.mobileEmpty = page.getByTestId('digitalExperienceMobileEmpty');
+    this.platformFilter = page.getByTestId('digitalExperiencePlatformFilter');
   }
 
   /** The row of a mobile application in the Mobile tab's table. */
@@ -189,6 +189,12 @@ export class DigitalExperiencePage {
   async selectMobileOs(osName: string): Promise<void> {
     await this.mobileOsFilter.click();
     await this.page.getByTestId(`digitalExperienceMobileOsFilterOption-${osName}`).click();
+  }
+
+  /** Narrows the Mobile tab to one platform, `android` or `ios`. */
+  async selectPlatform(platform: 'android' | 'ios'): Promise<void> {
+    await this.platformFilter.click();
+    await this.page.getByTestId(`digitalExperiencePlatformFilterOption-${platform}`).click();
   }
 
   /** Opens the list with the given URL query, by default only the time range. */
