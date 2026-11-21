@@ -75,7 +75,7 @@ export const SERVERLESS_INPUTS: MigrationInputs = {
 export const createMigrationConfig = (
   parts: Partial<SavedObjectsMigrationConfigType> = {}
 ): SavedObjectsMigrationConfigType => ({
-  algorithm: 'v2',
+  algorithm: 'v3',
   batchSize: 1000,
   maxBatchSizeBytes: new ByteSizeValue(1e8),
   maxReadBatchSizeBytes: new ByteSizeValue(1e6),
