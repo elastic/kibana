@@ -47,15 +47,23 @@ export const computeWeightedKappa = (
   }
   // Normalising by the range cancels in the observed/expected ratio, so it only keeps the
   // weights in [0, 1]; the result does not depend on the scale's width.
-  const range = max - min;
+  let scale = 1;
+  let range = max - min;
+  if (!Number.isFinite(range)) {
+    // Finite extremes of opposite sign (e.g. -MAX_VALUE and MAX_VALUE) overflow the subtraction.
+    // Halving every score is exact and uniform, so the ratio is unchanged and max/2 - min/2 is
+    // finite. Narrower ranges keep scale 1: multiplying by 1 leaves direct subtraction untouched.
+    scale = 0.5;
+    range = max * scale - min * scale;
+  }
   if (!(range > 0) || !Number.isFinite(range)) {
     return null;
   }
 
   const { observed, expected } =
     weighting === 'linear'
-      ? linearDisagreement(pairs, range)
-      : quadraticDisagreement(pairs, min, range);
+      ? linearDisagreement(pairs, range, scale)
+      : quadraticDisagreement(pairs, min, range, scale);
 
   if (expected === 0) {
     return null;
@@ -69,9 +77,13 @@ interface Disagreement {
   expected: number;
 }
 
-const linearDisagreement = (pairs: readonly ScorePair[], range: number): Disagreement => {
+const linearDisagreement = (
+  pairs: readonly ScorePair[],
+  range: number,
+  scale: number
+): Disagreement => {
   const n = pairs.length;
-  const weight = (a: number, b: number): number => Math.abs(a - b) / range;
+  const weight = (a: number, b: number): number => Math.abs(a * scale - b * scale) / range;
 
   let observed = 0;
   for (const { judge, human } of pairs) {
@@ -90,12 +102,13 @@ const linearDisagreement = (pairs: readonly ScorePair[], range: number): Disagre
 const quadraticDisagreement = (
   pairs: readonly ScorePair[],
   min: number,
-  range: number
+  range: number,
+  scale: number
 ): Disagreement => {
   const n = pairs.length;
   // Scores are shifted to the scale minimum and divided by the range before any squaring, so a
   // large constant offset or a very wide scale cannot swamp the variances.
-  const unit = (score: number): number => (score - min) / range;
+  const unit = (score: number): number => (score * scale - min * scale) / range;
 
   let judgeSum = 0;
   let humanSum = 0;
@@ -111,7 +124,7 @@ const quadraticDisagreement = (
   let judgeSquares = 0;
   let humanSquares = 0;
   for (const { judge, human } of pairs) {
-    const distance = (judge - human) / range;
+    const distance = (judge * scale - human * scale) / range;
     observed += distance * distance;
     judgeSquares += (unit(judge) - judgeMean) ** 2;
     humanSquares += (unit(human) - humanMean) ** 2;

@@ -82,7 +82,10 @@ const pairwiseReference = (
   weighting: 'linear' | 'quadratic'
 ): number | null => {
   const n = pairs.length;
-  const values = pairs.flatMap((pair) => [pair.judge, pair.human]);
+  // Halving is exact and keeps max - min finite for any finite scores, so this reference cannot
+  // overflow where the helper under test might.
+  const half = (value: number) => value / 2;
+  const values = pairs.flatMap((pair) => [half(pair.judge), half(pair.human)]);
   const max = values.reduce((acc, value) => Math.max(acc, value), -Infinity);
   const min = values.reduce((acc, value) => Math.min(acc, value), Infinity);
   const range = max - min;
@@ -90,7 +93,7 @@ const pairwiseReference = (
     return null;
   }
   const weight = (a: number, b: number) => {
-    const distance = Math.abs(a - b) / range;
+    const distance = Math.abs(half(a) - half(b)) / range;
     return weighting === 'linear' ? distance : distance * distance;
   };
   const observed = pairs.reduce((sum, pair) => sum + weight(pair.judge, pair.human), 0) / n;
@@ -121,6 +124,10 @@ describe('computeWeightedKappa against the explicit pairwise definition', () => 
     ['mixed sign with a wide spread', (random) => (random() - 0.5) * 2000],
     ['a large constant offset', (random) => 1e9 + Math.floor(random() * 4) * 0.25],
     ['tiny magnitudes', (random) => random() * 1e-6],
+    [
+      'extreme magnitudes whose raw range overflows',
+      (random) => (random() - 0.5) * Number.MAX_VALUE * 1.9,
+    ],
   ];
 
   const sizes: Array<[number, number]> = [
@@ -168,6 +175,48 @@ describe('computeWeightedKappa against the explicit pairwise definition', () => 
       expect(actual).toBeLessThan(0);
       expect(actual).toBeCloseTo(pairwiseReference(pairs, weighting) as number, 12);
     });
+  });
+
+  describe.each([
+    ['default', undefined],
+    ['quadratic', { weighting: 'quadratic' as const }],
+    ['linear', { weighting: 'linear' as const }],
+  ])('finite extremes whose raw range overflows (%s weighting)', (_label, options) => {
+    const MAX = Number.MAX_VALUE;
+
+    it('gives 1 for perfect agreement at opposite extremes', () => {
+      // Analytically: observed disagreement 0, chance disagreement 1/2.
+      const pairs = [
+        { judge: -MAX, human: -MAX },
+        { judge: MAX, human: MAX },
+      ];
+      expect(MAX - -MAX).toBe(Infinity);
+      expect(computeWeightedKappa(pairs, options)).toBeCloseTo(1, 12);
+    });
+
+    it('gives -1 for fully reversed raters at opposite extremes', () => {
+      // Analytically: observed disagreement 1, chance disagreement 1/2.
+      const pairs = [
+        { judge: -MAX, human: MAX },
+        { judge: MAX, human: -MAX },
+      ];
+      expect(computeWeightedKappa(pairs, options)).toBeCloseTo(-1, 12);
+    });
+
+    it('still rejects non-finite input', () => {
+      expect(computeWeightedKappa(toPairs([-MAX, Infinity], [MAX, 0]), options)).toBeNull();
+    });
+  });
+
+  it('keeps a narrow range around a large offset exact (no lossy rescaling)', () => {
+    const base = randomPairs(21, 400, (random) => Math.floor(random() * 4) * 0.25);
+    const shifted = base.map(({ judge, human }) => ({ judge: judge + 1e15, human: human + 1e15 }));
+    for (const weighting of modes) {
+      expect(computeWeightedKappa(shifted, { weighting }) as number).toBeCloseTo(
+        computeWeightedKappa(base, { weighting }) as number,
+        12
+      );
+    }
   });
 
   it('keeps the quadratic result stable under a large constant offset', () => {
