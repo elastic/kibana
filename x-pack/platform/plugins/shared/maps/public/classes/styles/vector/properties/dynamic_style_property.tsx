@@ -351,7 +351,14 @@ export class DynamicStyleProperty<T extends object>
     }
 
     const stats = styleMetaData[`${this._field.getRootName()}_range`];
-    if (!stats || !('avg' in stats)) {
+    if (
+      !stats ||
+      !('avg' in stats) ||
+      stats.avg === null ||
+      stats.std_deviation === null ||
+      stats.min === null ||
+      stats.max === null
+    ) {
       return null;
     }
 
