@@ -363,7 +363,7 @@ const decide = (body) => {
   const system = messages.filter((m) => m.role === 'system').map((m) => textOf(m.content)).join('\n');
   // Agent Builder prefixes each user message in shared conversations with "[User: x — Sent: t]" and
   // bundles earlier skip-agent messages into the same turn; scripts match the newest segment only.
-  const userText = latestUserText(messages).split(/\[User: [^\]]*\]\s*/).map((part) => part.trim()).filter(Boolean).pop() ?? '';
+  const userText = latestUserText(messages).replace(/<attachments>[\s\S]*?<\/attachments>/g, '').split(/\[User: [^\]]*\]\s*/).map((part) => part.trim()).filter(Boolean).pop() ?? '';
 
   if (system.includes('title-generation') || body.tool_choice?.function?.name === 'set_title') {
     const title = userText.replace(/\s+/g, ' ').slice(0, 60) || 'Investigation';
