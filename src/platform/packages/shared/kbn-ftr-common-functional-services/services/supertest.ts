@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { systemIndicesSuperuser } from '@kbn/test';
+import { systemIndicesSuperuser, wrapKibanaSupertestAgent } from '@kbn/test';
 
 import { format as formatUrl } from 'url';
 
@@ -17,6 +17,7 @@ import type { FtrProviderContext } from './ftr_provider_context';
 
 export function KibanaSupertestProvider({ getService }: FtrProviderContext): supertest.Agent {
   const config = getService('config');
+  const log = getService('log');
   const kibanaServerConfig = config.get('servers.kibana');
   const kibanaServerUrl = formatUrl(kibanaServerConfig);
 
@@ -32,7 +33,12 @@ export function KibanaSupertestProvider({ getService }: FtrProviderContext): sup
     options.http2 = true;
   }
 
-  return supertest(kibanaServerUrl, options);
+  const maxRetryMs = config.get('timeouts.try') as number;
+  return wrapKibanaSupertestAgent(supertest(kibanaServerUrl, options), {
+    maxRetryMs,
+    onRetry: ({ method, url, attempt, delayMs }) =>
+      log.warning(`ELU rate limiter 429, retry #${attempt} in ${delayMs}ms: ${method} ${url}`),
+  });
 }
 
 export function ElasticsearchSupertestProvider({
