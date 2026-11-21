@@ -14,10 +14,11 @@ import type { KevEntries, LoadKevResult } from '../enrichment/kev';
 import type { FeedOs, LoadFeedResult } from '../feeds/fetch';
 import type { KnowledgeEntry } from '../feeds/types';
 import type { AgentInventoryRows } from '../inventory';
-import { findInventoryScheduleIds, readAgentInventories } from '../inventory';
+import { findInventoryScheduleIds, normalizeInventories, readAgentInventories } from '../inventory';
 import { ensureFindingsIndex, toFindingDoc, writeFindings } from '../findings';
 import type { ScanDeps } from './run_scan';
-import { ScanFailedError, runScan, truncate } from './run_scan';
+import { ScanFailedError, inventoryFingerprint, runScan, truncate } from './run_scan';
+import type { CheckpointDoc } from '../checkpoint';
 
 jest.mock('../inventory', () => ({
   ...jest.requireActual('../inventory'),
@@ -640,5 +641,155 @@ describe('truncate', () => {
     // '😀' is two UTF-16 code units; a cut after the first would leave a lone surrogate.
     expect(truncate('ab😀cd', 3)).toBe('ab');
     expect(truncate('ab😀cd', 4)).toBe('ab😀');
+  });
+});
+
+describe('runScan refresh scope', () => {
+  const signal = new AbortController().signal;
+  const fingerprintOf = (agents: AgentInventoryRows[]): string =>
+    inventoryFingerprint(normalizeInventories(agents).hosts);
+
+  const checkpointed = async (
+    agents: AgentInventoryRows[],
+    load: (os: FeedOs) => Promise<LoadFeedResult>,
+    feedSha: string,
+    inventorySha: string
+  ) => {
+    const { deps, loadFeed } = setup(agents, load);
+    const checkpoints = new Map<string, CheckpointDoc>([
+      [
+        'rhel:9',
+        {
+          release: 'rhel:9',
+          feed: { etag: '"e"', sha256: feedSha },
+          inventory_sha256: inventorySha,
+          matched_at: '2026-11-13T00:00:00.000Z',
+          run_id: 'r0',
+          run_scope: 'refresh',
+        },
+      ],
+    ]);
+    const writeCheckpoint = jest.fn();
+    const depsRefresh: ScanDeps = {
+      ...deps,
+      scope: 'refresh',
+      readCheckpoints: async () => checkpoints,
+      writeCheckpoint,
+    };
+    return { depsRefresh, loadFeed, writeCheckpoint };
+  };
+
+  it('skips a release whose feed body and inventory both match the checkpoint, without writing findings', async () => {
+    const agents = [rhelAgent('a1', '9')];
+    const load = async (): Promise<LoadFeedResult> => ({
+      status: 'ok',
+      feed: await parseRhelOval([rhelFixture], { major: '9' }),
+      bodySha256: 'feed-sha',
+    });
+    const { depsRefresh, writeCheckpoint } = await checkpointed(
+      agents,
+      load,
+      'feed-sha',
+      fingerprintOf(agents)
+    );
+    const summary = await runScan(depsRefresh, { signal, runId: 'r1' });
+    expect(summary.releases['rhel:9']).toBe('skipped');
+    expect(summary.skippedReleases).toBe(1);
+    expect(summary.matchedReleases).toBe(0);
+    expect(writeMock).not.toHaveBeenCalled();
+    // Skipping never rewrites the checkpoint.
+    expect(writeCheckpoint).not.toHaveBeenCalled();
+  });
+
+  it('rematches a release whose feed body changed', async () => {
+    const agents = [rhelAgent('a1', '9')];
+    const load = async (): Promise<LoadFeedResult> => ({
+      status: 'ok',
+      feed: await parseRhelOval([rhelFixture], { major: '9' }),
+      bodySha256: 'new-feed-sha',
+    });
+    const { depsRefresh, writeCheckpoint } = await checkpointed(
+      agents,
+      load,
+      'old-feed-sha',
+      fingerprintOf(agents)
+    );
+    const summary = await runScan(depsRefresh, { signal, runId: 'r1' });
+    expect(summary.releases['rhel:9']).toBe('matched');
+    expect(writeMock).toHaveBeenCalled();
+    expect(writeCheckpoint).toHaveBeenCalledWith(
+      expect.objectContaining({
+        release: 'rhel:9',
+        feed: { etag: undefined, sha256: 'new-feed-sha' },
+        run_scope: 'refresh',
+        run_id: 'r1',
+      })
+    );
+  });
+
+  it('rematches a release whose inventory changed', async () => {
+    const agents = [rhelAgent('a1', '9')];
+    const load = async (): Promise<LoadFeedResult> => ({
+      status: 'ok',
+      feed: await parseRhelOval([rhelFixture], { major: '9' }),
+      bodySha256: 'feed-sha',
+    });
+    const { depsRefresh } = await checkpointed(agents, load, 'feed-sha', 'stale-inventory-sha');
+    const summary = await runScan(depsRefresh, { signal, runId: 'r1' });
+    expect(summary.releases['rhel:9']).toBe('matched');
+    expect(writeMock).toHaveBeenCalled();
+  });
+
+  it('rematches everything when there is no checkpoint, and writes one', async () => {
+    const agents = [rhelAgent('a1', '9')];
+    const load = async (): Promise<LoadFeedResult> => ({
+      status: 'ok',
+      feed: await parseRhelOval([rhelFixture], { major: '9' }),
+      bodySha256: 'feed-sha',
+    });
+    const { deps } = setup(agents, load);
+    const writeCheckpoint = jest.fn();
+    const summary = await runScan(
+      { ...deps, scope: 'refresh', readCheckpoints: async () => new Map(), writeCheckpoint },
+      { signal, runId: 'r1' }
+    );
+    expect(summary.releases['rhel:9']).toBe('matched');
+    expect(writeCheckpoint).toHaveBeenCalledTimes(1);
+    expect(writeCheckpoint.mock.calls[0][0].inventory_sha256).toBe(fingerprintOf(agents));
+  });
+
+  it('matches every release on the full scope even with an unchanged checkpoint present', async () => {
+    const agents = [rhelAgent('a1', '9')];
+    const load = async (): Promise<LoadFeedResult> => ({
+      status: 'ok',
+      feed: await parseRhelOval([rhelFixture], { major: '9' }),
+      bodySha256: 'feed-sha',
+    });
+    const { deps } = setup(agents, load);
+    const readCheckpoints = jest.fn();
+    const summary = await runScan({ ...deps, readCheckpoints }, { signal, runId: 'r1' });
+    expect(summary.scope).toBe('full');
+    expect(summary.releases['rhel:9']).toBe('matched');
+    expect(writeMock).toHaveBeenCalled();
+    // A full scan never reads the checkpoints: its match set is not skippable.
+    expect(readCheckpoints).not.toHaveBeenCalled();
+  });
+
+  it('does not advance the checkpoint when the findings write fails', async () => {
+    const agents = [rhelAgent('a1', '9')];
+    const load = async (): Promise<LoadFeedResult> => ({
+      status: 'ok',
+      feed: await parseRhelOval([rhelFixture], { major: '9' }),
+      bodySha256: 'new-feed-sha',
+    });
+    writeMock.mockRejectedValueOnce(new Error('es write failed'));
+    const { depsRefresh, writeCheckpoint } = await checkpointed(
+      agents,
+      load,
+      'old-feed-sha',
+      fingerprintOf(agents)
+    );
+    await expect(runScan(depsRefresh, { signal, runId: 'r1' })).rejects.toThrow(ScanFailedError);
+    expect(writeCheckpoint).not.toHaveBeenCalled();
   });
 });

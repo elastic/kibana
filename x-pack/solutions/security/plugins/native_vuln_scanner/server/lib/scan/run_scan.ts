@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { createHash } from 'crypto';
 import type { KevEntries, LoadKevResult } from '../enrichment/kev';
 import { loadKev } from '../enrichment/kev';
 import type { FeedOs, LoadFeedResult } from '../feeds/fetch';
@@ -15,6 +16,10 @@ import { findInventoryScheduleIds, normalizeInventories, readAgentInventories } 
 import type { Finding, MatchStats } from '../matcher';
 import { buildAdvisoryIndex, matchHost } from '../matcher';
 import { ensureFindingsIndex, writeFindings } from '../findings';
+import type { CheckpointDoc, ScanRunScope } from '../checkpoint';
+import { defaultReadCheckpoints, defaultWriteCheckpoint } from '../checkpoint';
+
+export type { ScanRunScope };
 import type { AdvisorySource, FeedParseResult } from '../feeds/types';
 import {
   advisoryKnowledgeId,
@@ -36,6 +41,15 @@ export interface ScanDeps {
   includeUnfixed?: boolean;
   /** Called after each release's knowledge write with every id now stored cleanly, or none after a failure. */
   onKnowledgeStored?: (os: FeedOs, storedIds?: ReadonlySet<string>) => void;
+  /**
+   * `refresh` (the hourly workflow): a release whose feed and inventory fingerprints both match
+   * its checkpoint is skipped instead of matched. The default `full` scope matches every release.
+   */
+  scope?: ScanRunScope;
+  /** Reads the release checkpoints a refresh decides against; defaults to reading ES. */
+  readCheckpoints?: () => Promise<Map<string, CheckpointDoc>>;
+  /** Writes one release's checkpoint after its findings were written; defaults to writing ES. */
+  writeCheckpoint?: (doc: CheckpointDoc) => Promise<void>;
   now?: () => Date;
 }
 
@@ -43,8 +57,15 @@ export interface ScanSummary {
   hosts: number;
   skippedHosts: Record<string, number>;
   skippedRows: Record<string, number>;
-  /** Per OS release (`family:version`): matched, unavailable (no vendor feed) or failed. */
-  releases: Record<string, 'matched' | 'unavailable' | 'failed'>;
+  /** `refresh` runs rematch only changed releases; `full` (the default) matches every release. */
+  scope: ScanRunScope;
+  /** Per OS release (`family:version`): matched, unavailable (no vendor feed), failed or skipped. */
+  releases: Record<string, 'matched' | 'unavailable' | 'failed' | 'skipped'>;
+  /** Run-level outcome counts over `releases`, so a refresh's skipping is visible at a glance. */
+  matchedReleases: number;
+  skippedReleases: number;
+  failedReleases: number;
+  unavailableReleases: number;
   findings: number;
   fixed: number;
   fixSkipped: number;
@@ -103,6 +124,26 @@ export const groupByRelease = (hosts: NormalizedHost[]): Map<string, NormalizedH
     else byRelease.set(key, [host]);
   }
   return byRelease;
+};
+
+/**
+ * Fingerprint of one release's per-host inventory, over exactly what the matcher reads: each
+ * host's os, kernel release and (sorted, so package listing order cannot matter) packages.
+ * Host identity (agent id, hostname) is deliberately excluded: a renamed host with the same
+ * software must hash the same and stay skipped.
+ */
+export const inventoryFingerprint = (releaseHosts: readonly NormalizedHost[]): string => {
+  const stable = releaseHosts.map(
+    ({ inventory: { os, kernelRelease, enabledModules, packages } }) => [
+      `${os.family}:${os.version}`,
+      kernelRelease ?? null,
+      enabledModules ? [...enabledModules].sort() : null,
+      packages
+        .map(({ name, version, arch, source }) => [name, version, arch ?? null, source ?? null])
+        .sort((a, b) => (a[0] ?? '').localeCompare(b[0] ?? '')),
+    ]
+  );
+  return createHash('sha256').update(JSON.stringify(stable)).digest('hex');
 };
 
 const collect = async (rows: AsyncIterable<AgentInventoryRows>): Promise<AgentInventoryRows[]> => {
@@ -243,6 +284,9 @@ export const runScan = async (
     loadFeed: load = loadFeed,
     loadKev: loadKevCatalog = (abort) => loadKev(abort, { logger }),
     includeUnfixed,
+    scope = 'full',
+    readCheckpoints = defaultReadCheckpoints(es),
+    writeCheckpoint = defaultWriteCheckpoint(es, logger),
     onKnowledgeStored,
     now = () => new Date(),
   }: ScanDeps,
@@ -252,7 +296,12 @@ export const runScan = async (
     hosts: 0,
     skippedHosts: {},
     skippedRows: {},
+    scope,
     releases: {},
+    matchedReleases: 0,
+    skippedReleases: 0,
+    failedReleases: 0,
+    unavailableReleases: 0,
     findings: 0,
     fixed: 0,
     fixSkipped: 0,
@@ -286,6 +335,10 @@ export const runScan = async (
   const failures: Record<string, string> = {};
   const cves = new Set<string>();
   const scanStart = now();
+  // A refresh decides per release from the checkpoints of the last run that matched and wrote it;
+  // a full scan needs none and matches everything.
+  const checkpoints =
+    scope === 'refresh' ? await readCheckpoints() : new Map<string, CheckpointDoc>();
   for (const [key, releaseHosts] of byRelease) {
     if (signal.aborted) {
       summary.aborted = true;
@@ -310,10 +363,28 @@ export const runScan = async (
       };
       if (result.status === 'unavailable') {
         summary.releases[key] = 'unavailable';
+        summary.unavailableReleases++;
         logger.warn(
           `No advisory feed for ${key} (${result.url}); skipped ${releaseHosts.length} hosts. ` +
             'This OS release is not supported by the native scanner, so its findings are not updated.'
         );
+        continue;
+      }
+      // Only a refresh with a live checkpoint whose feed body and inventory both hash the same
+      // skips: its findings were written by the checkpointed run and must stay open. A full scan
+      // always matches. `unchanged`-200 feeds report the checkpoint's etag as their own.
+      const inventorySha256 = inventoryFingerprint(releaseHosts);
+      const checkpoint = checkpoints.get(key);
+      const feedUnchanged =
+        result.bodySha256 !== undefined && checkpoint?.feed.sha256 === result.bodySha256;
+      if (
+        scope === 'refresh' &&
+        checkpoint &&
+        feedUnchanged &&
+        checkpoint.inventory_sha256 === inventorySha256
+      ) {
+        summary.releases[key] = 'skipped';
+        summary.skippedReleases++;
         continue;
       }
       const findings: Finding[] = [];
@@ -366,6 +437,19 @@ export const runScan = async (
       }
       summary.distinctCves = cves.size;
       summary.releases[key] = 'matched';
+      summary.matchedReleases++;
+      // The checkpoint advances only once the findings write succeeded: a release that failed
+      // keeps its previous checkpoint so the next refresh rematches it. Knowledge never gates it.
+      if (result.bodySha256) {
+        await writeCheckpoint({
+          release: key,
+          feed: { ...(result.etag ? { etag: result.etag } : {}), sha256: result.bodySha256 },
+          inventory_sha256: inventorySha256,
+          matched_at: now().toISOString(),
+          run_id: runId,
+          run_scope: scope,
+        });
+      }
       summary.findings += written.written;
       summary.fixed += written.fixed;
       summary.fixSkipped += written.fixSkipped;
@@ -376,6 +460,7 @@ export const runScan = async (
         break;
       }
       summary.releases[key] = 'failed';
+      summary.failedReleases++;
       failures[key] = error instanceof Error ? error.message : String(error);
       logger.warn(
         `Vulnerability scan of ${key} failed: ${failures[key]}. If this is a feed download error, ` +

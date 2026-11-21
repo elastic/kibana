@@ -9,6 +9,7 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { clearFeedCache, getCachedFeed, setCachedFeed } from '../../../lib/feeds/feed_cache';
 import { loadFeed, parseFeedBody } from '../../../lib/feeds/fetch';
 import type { FeedOs } from '../../../lib/feeds/fetch';
+import { NATIVE_VULN_SCANNER_REFRESH_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { ScanFailedError, runScan } from '../../../lib/scan';
 import type { ScanDeps, ScanSummary } from '../../../lib/scan';
 import { RUN_ID, buildContext, buildDeps } from '../test_helpers';
@@ -34,7 +35,12 @@ const summary = (overrides: Partial<ScanSummary> = {}): ScanSummary => ({
   hosts: 3,
   skippedHosts: {},
   skippedRows: {},
+  scope: 'full',
   releases: { 'ubuntu:noble': 'matched' },
+  matchedReleases: 1,
+  skippedReleases: 0,
+  failedReleases: 0,
+  unavailableReleases: 0,
   findings: 5,
   fixed: 1,
   fixSkipped: 0,
@@ -47,6 +53,15 @@ const summary = (overrides: Partial<ScanSummary> = {}): ScanSummary => ({
   feedInfo: {},
   ...overrides,
 });
+
+const runRefresh = async (input: unknown = {}, signal?: AbortSignal) => {
+  const { deps } = buildDeps();
+  const result = await buildMatchStepDefinition(deps).handler(
+    buildContext(input, signal, '2026-11-13T00:00:00.000Z', NATIVE_VULN_SCANNER_REFRESH_WORKFLOW_ID)
+  );
+  const scanDeps = runScanMock.mock.calls[0]?.[0] as ScanDeps | undefined;
+  return { result, scanDeps };
+};
 
 const run = async (input: unknown = {}, signal?: AbortSignal) => {
   const { deps } = buildDeps();
@@ -78,6 +93,7 @@ describe('native_vuln.match handler', () => {
         aborted: false,
         pack_missing: false,
         releases: { 'ubuntu:noble': 'matched' },
+        skipped_releases: 0,
         failures: {},
         kev: { status: 'ok', listed: 0 },
         knowledge: { written: 0, unchanged: 0, failed: 0, skipped_releases: [] },
@@ -263,5 +279,39 @@ describe('native_vuln.match handler', () => {
 
     expect(result.error).toBeUndefined();
     expect(runScanMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('native_vuln.match refresh scope', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    clearFeedCache();
+  });
+
+  it('runs the scan with the refresh scope under the refresh workflow', async () => {
+    runScanMock.mockResolvedValue(
+      summary({
+        scope: 'refresh',
+        releases: { 'ubuntu:noble': 'skipped' },
+        skippedReleases: 1,
+        matchedReleases: 0,
+      })
+    );
+
+    const { result, scanDeps } = await runRefresh();
+
+    expect(scanDeps?.scope).toBe('refresh');
+    expect(result.output).toMatchObject({
+      scope: 'refresh',
+      releases: { 'ubuntu:noble': 'skipped' },
+      skipped_releases: 1,
+    });
+  });
+
+  it('runs the scan with the full scope under any other workflow', async () => {
+    runScanMock.mockResolvedValue(summary());
+    const { result, scanDeps } = await run();
+    expect(scanDeps?.scope).toBe('full');
+    expect(result.output).not.toHaveProperty('scope');
   });
 });

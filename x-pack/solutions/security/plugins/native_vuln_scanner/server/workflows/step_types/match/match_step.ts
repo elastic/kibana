@@ -6,6 +6,7 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { NATIVE_VULN_SCANNER_REFRESH_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { matchStepCommonDefinition } from '../../../../common/workflows/step_types/match/match_common';
 import type {
   MatchInput,
@@ -16,7 +17,7 @@ import { loadFeed, parseFeedBody } from '../../../lib/feeds/fetch';
 import type { FeedOs, LoadFeedResult } from '../../../lib/feeds/fetch';
 import { LicenseRequiredError, isEnterprise } from '../../../lib/license';
 import { ScanFailedError, releaseKey, runScan } from '../../../lib/scan';
-import type { ScanSummary } from '../../../lib/scan';
+import type { ScanRunScope, ScanSummary } from '../../../lib/scan';
 import type { StepDeps } from '../deps';
 
 const toOutput = (summary: ScanSummary): MatchOutput => ({
@@ -25,7 +26,9 @@ const toOutput = (summary: ScanSummary): MatchOutput => ({
   fixed: summary.fixed,
   aborted: summary.aborted,
   pack_missing: summary.packMissing,
+  ...(summary.scope === 'refresh' ? { scope: summary.scope } : {}),
   releases: summary.releases,
+  skipped_releases: summary.skippedReleases,
   failures: {},
   feed_provenance: Object.fromEntries(
     Object.entries(summary.feedInfo).map(([release, info]) => [
@@ -90,6 +93,11 @@ export const buildMatchStepDefinition = ({
       const { feeds = [] } = input as MatchInput;
       const { es, packRepository } = await getScanDeps();
       const runId = contextManager.getContext().execution.id;
+      // The hourly refresh workflow runs this same step; only it matches changed releases.
+      const scope: ScanRunScope =
+        contextManager.getContext().workflow.id === NATIVE_VULN_SCANNER_REFRESH_WORKFLOW_ID
+          ? 'refresh'
+          : 'full';
       try {
         const summary = await runScan(
           {
@@ -98,6 +106,7 @@ export const buildMatchStepDefinition = ({
             logger,
             loadFeed: buildFeedLoader(feeds, includeUnfixed),
             includeUnfixed,
+            scope,
             onKnowledgeStored: (os, storedIds) =>
               markKnowledgeStored(releaseKey(os), includeUnfixed, storedIds),
             now,

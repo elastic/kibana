@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-export type { InventorySnapshot, ScanDeps, ScanSummary } from './run_scan';
+export type { InventorySnapshot, ScanDeps, ScanRunScope, ScanSummary } from './run_scan';
 export {
   MAX_STATE_MESSAGE_LENGTH,
   ScanFailedError,
   groupByRelease,
+  inventoryFingerprint,
   readInventory,
   releaseKey,
   runScan,

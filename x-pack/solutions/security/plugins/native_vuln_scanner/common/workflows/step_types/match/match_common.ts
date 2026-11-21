@@ -23,6 +23,8 @@ export const matchInputSchema = lazySchema(() =>
           status: z.enum(FETCH_FEED_STATUSES),
           url: z.string().optional(),
           error: z.string().optional(),
+          /** A 200 whose bytes matched the cached copy: content-identical to a 304. */
+          unchanged: z.boolean().optional(),
         })
       )
       .optional(),
@@ -36,7 +38,11 @@ export const matchOutputSchema = lazySchema(() =>
     fixed: z.number(),
     aborted: z.boolean(),
     pack_missing: z.boolean(),
-    releases: z.record(z.string(), z.enum(['matched', 'unavailable', 'failed'])),
+    /** `refresh` runs skipped releases whose feed and inventory are both unchanged. */
+    scope: z.enum(['full', 'refresh']).optional(),
+    releases: z.record(z.string(), z.enum(['matched', 'unavailable', 'failed', 'skipped'])),
+    /** Count of releases the refresh skipped as unchanged. */
+    skipped_releases: z.number().int().min(0),
     failures: z.record(z.string(), z.string()),
     /** Feed provenance per release: where the feed came from and how old its snapshot was. */
     feed_provenance: z.record(

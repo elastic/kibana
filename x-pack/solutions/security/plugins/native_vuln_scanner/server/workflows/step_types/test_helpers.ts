@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+import { NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { StepDeps } from './deps';
 
 export const RUN_ID = 'exec-1';
@@ -15,12 +16,15 @@ export const RUN_ID = 'exec-1';
 export const buildContext = (
   input: unknown,
   signal: AbortSignal = new AbortController().signal,
-  startedAt: string | Date = '2026-11-13T00:00:00.000Z'
+  startedAt: string | Date = '2026-11-13T00:00:00.000Z',
+  workflowId: string = NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID
 ): StepHandlerContext<unknown, unknown> =>
   ({
     input,
     abortSignal: signal,
-    contextManager: { getContext: () => ({ execution: { id: RUN_ID, startedAt } }) },
+    contextManager: {
+      getContext: () => ({ execution: { id: RUN_ID, startedAt }, workflow: { id: workflowId } }),
+    },
   } as unknown as StepHandlerContext<unknown, unknown>);
 
 export const buildDeps = (overrides: Partial<StepDeps> = {}) => {
