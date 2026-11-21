@@ -28,7 +28,11 @@ import { reportToParent, wakeParent } from '../utils/wake_parent';
 import { AbortMonitor } from './abort_monitor';
 import { HeartbeatReporter } from './heartbeat_reporter';
 import type { SurfacesService } from '../../surfaces';
-import { deliverCallbackEvents, type CallbackDeliveryService } from '../callback';
+import {
+  deliverCallbackEvents,
+  deliverPromptResolved,
+  type CallbackDeliveryService,
+} from '../callback';
 
 type TaskRunAsContext = NonNullable<RunContext['runAs']>;
 
@@ -176,6 +180,18 @@ class TaskHandlerImpl implements TaskHandler {
         execution,
         events$,
         request,
+        callbackDeliveryService: this.deps.callbackDeliveryService,
+        conversationService: this.deps.conversationService,
+        surfacesService: this.deps.surfacesService,
+        logger: this.logger,
+      });
+
+      // Fire-and-forget, so a slow callback never holds the run. Never rejects.
+      void deliverPromptResolved({
+        execution,
+        events$,
+        request,
+        executionClient,
         callbackDeliveryService: this.deps.callbackDeliveryService,
         conversationService: this.deps.conversationService,
         surfacesService: this.deps.surfacesService,

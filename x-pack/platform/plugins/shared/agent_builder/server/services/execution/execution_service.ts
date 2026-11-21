@@ -84,7 +84,8 @@ import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
 import type { ConversationClient } from '../conversation';
 import type { AcquireActiveExecution } from '../conversation/client/types';
-import type { CallbackDeliveryService } from './callback';
+import { deliverPromptResolved, type CallbackDeliveryService } from './callback';
+import type { SurfacesService } from '../surfaces';
 import {
   getConversation,
   persistUserMessage,
@@ -115,6 +116,7 @@ export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   spaces?: SpacesPluginStart;
   attachmentsService: AttachmentServiceStart;
   callbackDeliveryService: CallbackDeliveryService;
+  surfacesService: SurfacesService;
   getSmlTypeDefinition: GetSmlTypeDefinition;
   securityPlugin?: SecurityPluginStart;
 }
@@ -762,6 +764,19 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
       // Multicast the stream so multiple subscribers share the same source
       const events$ = rawEvents$.pipe(shareReplay());
+
+      // Fire-and-forget: tells the surface a paused conversation asked its prompts on that they
+      // were answered here. Never rejects.
+      void deliverPromptResolved({
+        execution,
+        events$,
+        request,
+        executionClient,
+        callbackDeliveryService: this.deps.callbackDeliveryService,
+        conversationService: this.deps.conversationService,
+        surfacesService: this.deps.surfacesService,
+        logger: this.logger,
+      });
 
       // Side-effect subscription: write events to ES and update execution status.
       // The abortMonitor and heartbeatReporter are stopped in the .finally() of this subscription.

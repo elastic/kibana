@@ -318,6 +318,7 @@ export class ServiceManager {
       meteringService: this.services.metering,
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
+      surfacesService: surfaces,
       securityPlugin,
     });
 

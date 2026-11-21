@@ -107,6 +107,7 @@ const mockTaskManagerRunSoon = jest.fn();
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { createAgentExecutionService } from './execution_service';
 import { CallbackDeliveryService } from './callback';
+import type { SurfacesService } from '../surfaces';
 import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS } from './constants';
 
 describe('AgentExecutionService', () => {
@@ -176,6 +177,7 @@ describe('AgentExecutionService', () => {
     actions: actionsMock.createSetup(),
     logger,
   });
+  const surfacesService: jest.Mocked<SurfacesService> = { renderPayload: jest.fn() };
   const resolveConversation = jest.spyOn(callbackDeliveryService, 'resolveConversation');
   const runOnBeforeNewConversation = jest.spyOn(
     callbackDeliveryService,
@@ -198,6 +200,7 @@ describe('AgentExecutionService', () => {
     meteringService,
     searchInferenceEndpoints,
     callbackDeliveryService,
+    surfacesService,
   });
 
   beforeEach(() => {
@@ -358,6 +361,7 @@ describe('AgentExecutionService', () => {
         meteringService,
         searchInferenceEndpoints,
         callbackDeliveryService,
+        surfacesService,
         getSmlTypeDefinition,
       });
     const converse = (

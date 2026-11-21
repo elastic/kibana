@@ -7,3 +7,4 @@
 
 export { CallbackDeliveryService } from './callback_delivery_service';
 export { deliverCallbackEvents } from './deliver_callback_events';
+export { deliverPromptResolved } from './deliver_prompt_resolved';

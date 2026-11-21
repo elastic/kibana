@@ -335,6 +335,8 @@ export interface FollowExecutionOptions {
 export interface FindExecutionsFilter {
   /** Match executions whose metadata contains all specified key-value pairs. */
   metadata?: Record<string, string>;
+  /** Match the executions that ran in this conversation. */
+  conversationId?: string;
   /** Match executions with one of these statuses. */
   status?: ExecutionStatus[];
 }
