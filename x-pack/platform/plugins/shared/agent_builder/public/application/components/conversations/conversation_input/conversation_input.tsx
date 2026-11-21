@@ -28,18 +28,14 @@ import { KbnInfoCallout } from '@kbn/ui-callout';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useCurrentUser } from '../../../hooks/use_current_user';
-import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { labels } from '../../../utils/i18n';
-import { useInputDraft } from '../../../hooks/use_input_draft';
+import { toDraftContent, useInputDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { useSendSteer } from '../../../hooks/use_send_steer';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
-import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
-import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
-import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
-import { useAgentModel } from '../../../hooks/agents/use_agent_model';
+import { useAgentSendState } from '../../../hooks/agents/use_agent_send_state';
 import {
   useAgentId,
   useConversationReadOnly,
@@ -185,10 +181,14 @@ const InputContainer: React.FC<
   );
 };
 
+export type TakeInputDraft = () => string | null;
+
 interface ConversationInputProps {
   onSubmit?: () => void;
   onEditorFocus?: () => void;
   onSubmitOverride?: (message: string) => void;
+  onUploadingChange?: (isUploading: boolean) => void;
+  takeDraftRef?: React.MutableRefObject<TakeInputDraft | null>;
 }
 
 // A steer carries text only.
@@ -259,11 +259,12 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   onSubmit,
   onEditorFocus,
   onSubmitOverride,
+  onUploadingChange,
+  takeDraftRef,
 }) => {
   const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
 
   const { isResponseLoading, canCancel } = useConversationStream();
-  const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
 
@@ -369,22 +370,42 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     return undefined;
   };
 
-  const validateAgentId = useValidateAgentId();
-  const isAgentIdValid = validateAgentId(agentId);
-  const { isLoading: isAgentModelLoading } = useAgentModel(agentId);
+  const isUploading = uploadingNames.size > 0;
+  useEffect(() => {
+    onUploadingChange?.(isUploading);
+    return () => onUploadingChange?.(false);
+  }, [isUploading, onUploadingChange]);
 
-  const { agent: agentById, isLoading: isLoadingAgentById } = useAgentBuilderAgentById(
-    !isAgentIdValid && isFetched && Boolean(agentId) ? agentId : undefined
-  );
-  const agentExists = isAgentIdValid || Boolean(agentById);
+  useEffect(() => {
+    if (!takeDraftRef) return;
+    const takeDraft: TakeInputDraft = () => {
+      // The pending save is dropped: it would write the text back after it was taken.
+      if (saveDraftDebounceRef.current) {
+        clearTimeout(saveDraftDebounceRef.current);
+        saveDraftDebounceRef.current = null;
+      }
+      // Read from the editor, since text put there by a restored draft or an initial message never
+      // went through the change handler. A command badge that can't be serialized falls back to the
+      // last content the handler saw.
+      let content = lastEditorContentRef.current;
+      try {
+        content = messageEditorControllerRef.current?.getContent() ?? content;
+      } catch (err) {
+        if (!(err instanceof CommandBadgeSerializationError)) throw err;
+      }
+      const draftContent = toDraftContent(content);
+      lastEditorContentRef.current = '';
+      clearDraft();
+      return draftContent;
+    };
+    takeDraftRef.current = takeDraft;
+    return () => {
+      if (takeDraftRef.current === takeDraft) takeDraftRef.current = null;
+    };
+  }, [takeDraftRef, clearDraft]);
 
-  // An agent bound to a service account can only be invoked with the dedicated privilege; the
-  // server refuses the request, so the composer says why up front instead of failing on send.
-  const { invokeBoundAgents } = useUiPrivileges();
-  const { agent: currentAgent } = useAgentBuilderAgentById(isAgentIdValid ? agentId : undefined);
-  const isBoundAgentForbidden = Boolean(currentAgent?.service_account_id) && !invokeBoundAgents;
-
-  const isAgentDeleted = !agentExists && !isLoadingAgentById && isFetched && Boolean(agentId);
+  const { agentExists, isAgentDeleted, isBoundAgentForbidden, isAgentModelLoading } =
+    useAgentSendState(agentId);
   const isInputDisabled =
     isAgentDeleted ||
     isBoundAgentForbidden ||
@@ -403,7 +424,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     isBoundAgentForbidden ||
     isAgentModelLoading ||
     isAwaitingPrompt ||
-    uploadingNames.size > 0;
+    isUploading;
 
   const placeholder = isAgentDeleted
     ? disabledPlaceholder(agentId)

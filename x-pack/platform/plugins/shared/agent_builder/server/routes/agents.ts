@@ -20,6 +20,7 @@ import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/consta
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
 import { autoApprovedApisSchema } from './approvals_schema';
+import { conversationStartersSchema } from './conversation_starters_schema';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, AGENTS_WRITE_SECURITY } from './route_security';
@@ -409,6 +410,12 @@ export function registerAgentRoutes({
                   }
                 )
               ),
+              conversation_starters: schema.maybe(
+                conversationStartersSchema({
+                  description:
+                    'Optional conversation starters shown on the new conversation empty state.',
+                })
+              ),
               access_control: schema.maybe(ACCESS_CONTROL_MODE_ONLY_SCHEMA),
               configuration: schema.object(
                 {
@@ -560,6 +567,11 @@ export function registerAgentRoutes({
                     meta: { description: 'Updated labels for categorizing and organizing agents.' },
                   }
                 )
+              ),
+              conversation_starters: schema.maybe(
+                conversationStartersSchema({
+                  description: 'Updated conversation starters. An empty list removes all starters.',
+                })
               ),
               access_control: schema.maybe(ACCESS_CONTROL_MODE_ONLY_SCHEMA),
               configuration: schema.maybe(

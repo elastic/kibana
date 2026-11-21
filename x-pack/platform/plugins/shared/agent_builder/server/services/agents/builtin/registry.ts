@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateAgentId } from '@kbn/agent-builder-common/agents';
+import { validateAgentId, validateConversationStarters } from '@kbn/agent-builder-common/agents';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 
 export interface BuiltinAgentRegistry {
@@ -31,6 +31,12 @@ class BuiltinAgentRegistryImpl implements BuiltinAgentRegistry {
     const errorMessage = validateAgentId({ agentId: agent.id, builtIn: true });
     if (errorMessage) {
       throw new Error(`Invalid agent id: "${agent.id}": ${errorMessage}`);
+    }
+    const startersErrorMessage = validateConversationStarters(agent.conversation_starters);
+    if (startersErrorMessage) {
+      throw new Error(
+        `Invalid conversation starters for agent "${agent.id}": ${startersErrorMessage}`
+      );
     }
     this.agents.set(agent.id, agent);
   }

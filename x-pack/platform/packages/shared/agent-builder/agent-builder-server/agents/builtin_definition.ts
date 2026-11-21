@@ -31,7 +31,14 @@ export interface AgentConfigContext {
  */
 export type BuiltInAgentDefinition = Pick<
   AgentDefinition,
-  'id' | 'name' | 'description' | 'labels' | 'avatar_icon' | 'avatar_symbol' | 'avatar_color'
+  | 'id'
+  | 'name'
+  | 'description'
+  | 'labels'
+  | 'avatar_icon'
+  | 'avatar_symbol'
+  | 'avatar_color'
+  | 'conversation_starters'
 > & {
   /**
    * Id of a registered agent type. Defaults to the chat type (empty base).

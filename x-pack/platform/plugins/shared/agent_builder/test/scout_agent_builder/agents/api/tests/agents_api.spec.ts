@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -56,6 +57,52 @@ apiTest.describe(
       });
       createdAgentIds.push(mockAgent.id);
     });
+
+    apiTest(
+      'POST /api/agent_builder/agents creates agent with conversation starters',
+      async ({ asAdmin }) => {
+        const agent = {
+          ...mockAgent,
+          id: `test-agent-with-starters-${randomUUID()}`,
+          conversation_starters: [{ label: 'Top errors' }, { label: 'Plain label' }],
+        };
+        createdAgentIds.push(agent.id);
+
+        const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
+          body: agent,
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.conversation_starters).toStrictEqual(agent.conversation_starters);
+
+        const getResponse = await asAdmin.get(`${API_AGENT_BUILDER}/agents/${agent.id}`, {
+          responseType: 'json',
+        });
+        expect(getResponse).toHaveStatusCode(200);
+        expect(getResponse.body.conversation_starters).toStrictEqual(agent.conversation_starters);
+      }
+    );
+
+    apiTest(
+      'POST /api/agent_builder/agents rejects more than 3 conversation starters',
+      async ({ asAdmin }) => {
+        const id = `test-starters-over-limit-${randomUUID()}`;
+        createdAgentIds.push(id);
+
+        const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
+          body: {
+            ...mockAgent,
+            id,
+            conversation_starters: ['a', 'b', 'c', 'd'].map((label) => ({ label })),
+          },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(400);
+        expect(String((response.body as { message?: string }).message ?? '')).toContain(
+          'conversation_starters'
+        );
+      }
+    );
 
     apiTest('POST /api/agent_builder/agents validates agent ID format', async ({ asAdmin }) => {
       const invalidAgent = {
