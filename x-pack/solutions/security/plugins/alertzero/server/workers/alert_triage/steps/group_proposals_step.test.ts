@@ -8,9 +8,9 @@
 import { ProposalLookupTruncatedError } from '@kbn/proposals-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
-import { generationIds } from '../../alert_triage/group_proposals';
-import { hashKey } from '../../alert_triage/key_tags';
-import { buildPatternKeys } from '../../alert_triage/pattern_key';
+import { generationIds } from '../group_proposals';
+import { hashKey } from '../key_tags';
+import { buildPatternKeys } from '../pattern_key';
 import {
   getTriageGroupFpCandidatesStepDefinition,
   getTriageJoinProposalStepDefinition,

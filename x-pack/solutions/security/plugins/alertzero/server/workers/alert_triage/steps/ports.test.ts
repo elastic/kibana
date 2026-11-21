@@ -6,8 +6,8 @@
  */
 
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
-import { ALERT_FETCH_LIMIT, BATCH_ALERT_CAP, RULE_FETCH_LIMIT } from '../../alert_triage/constants';
-import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
+import { ALERT_FETCH_LIMIT, BATCH_ALERT_CAP, RULE_FETCH_LIMIT } from '../constants';
+import { LOADED_ALERT_FIELDS } from '../loaded_alert_fields';
 import {
   fetchTriageAlerts,
   listLiveExecutionIds,

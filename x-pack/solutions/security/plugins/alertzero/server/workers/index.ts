@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertTriageServerDefinition } from '../alert_triage/worker_server';
+import { alertTriageServerDefinition } from './alert_triage/worker_server';
 import { continuousThreatHuntServerDefinition } from '../services/watches/hunt/worker_server';
 import type { WorkerServerDefinition } from './types';
 

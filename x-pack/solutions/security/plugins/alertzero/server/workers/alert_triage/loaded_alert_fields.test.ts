@@ -6,7 +6,7 @@
  */
 
 import { ALERT_ANALYSIS_FIELDS } from '@kbn/workflows/managed';
-import { entityIdsOf } from '../step_types/alert_triage/group_proposals_step';
+import { entityIdsOf } from './steps/group_proposals_step';
 import { REPLAY_PARITY_SCENARIOS } from './grouping_replay_parity_fixture';
 import { LOADED_ALERT_FIELDS } from './loaded_alert_fields';
 import { buildPatternKeys, getDetection, getField } from './pattern_key';

@@ -15,10 +15,10 @@ import {
   AlertTriageWorkerExtras,
   type WorkerSettings,
 } from '@kbn/alertzero-common';
-import { MinimumConfidenceScoreField } from '../components/minimum_confidence_score_field';
-import { SettingRow } from '../components/setting_row';
-import * as i18n from '../settings_translations';
-import type { WorkerCustomSettingsComponent } from './types';
+import { MinimumConfidenceScoreField } from '../../pages/watches/components/minimum_confidence_score_field';
+import { SettingRow } from '../../pages/watches/components/setting_row';
+import * as i18n from '../../pages/watches/settings_translations';
+import type { WorkerCustomSettingsComponent } from '../../pages/watches/custom_settings/types';
 
 /**
  * The server projects complete extras. A field that fails validation falls back to its own default

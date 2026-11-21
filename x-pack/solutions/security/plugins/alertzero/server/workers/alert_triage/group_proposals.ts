@@ -7,7 +7,7 @@
 
 import { ProposalConflictError } from '@kbn/proposals-plugin/server';
 import { asyncMapWithLimit } from '@kbn/std';
-import { buildProposalId } from '../services/proposals/dedup/proposal_id';
+import { buildProposalId } from '../../services/proposals/dedup/proposal_id';
 import {
   GROUPED_PROPOSAL_JOIN_CONCURRENCY,
   GROUPED_PROPOSAL_JOIN_MARGIN_MS,

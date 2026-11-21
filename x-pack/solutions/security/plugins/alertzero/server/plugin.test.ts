@@ -30,7 +30,7 @@ import { createWorkerServerContextMock } from './workers/worker_server_context.m
 import {
   TRIAGE_GROUPING_KILL_SWITCH,
   alertTriageServerDefinition,
-} from './alert_triage/worker_server';
+} from './workers/alert_triage/worker_server';
 
 jest.mock('./managed_workflows/register_owner', () => ({
   registerOwner: jest.fn(),
