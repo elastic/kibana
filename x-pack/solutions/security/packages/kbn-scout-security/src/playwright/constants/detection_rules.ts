@@ -71,6 +71,20 @@ export interface EqlRule extends Omit<CustomQueryRule, 'type' | 'response_action
   language: 'eql';
 }
 
+/** Alert suppression settings of a rule, as the detection engine API accepts them. */
+export interface RuleAlertSuppression {
+  group_by: string[];
+  duration?: { value: number; unit: 's' | 'm' | 'h' };
+  missing_fields_strategy: 'suppress' | 'doNotSuppress';
+}
+
+/** ES|QL rules read the data sources from the query, so they have no `index`. */
+export interface EsqlRule extends Omit<CustomQueryRule, 'type' | 'response_actions' | 'index'> {
+  type: 'esql';
+  language: 'esql';
+  alert_suppression?: RuleAlertSuppression;
+}
+
 export const DEFAULT_SECURITY_SOLUTION_INDEXES = [
   'apm-*-transaction*',
   'auditbeat-*',
@@ -107,5 +121,18 @@ export const EQL_RULE: EqlRule = {
   type: 'eql',
   language: 'eql',
   query: 'any where process.name == "zsh"',
+  from: '2019-01-01T00:00:00.000Z',
+};
+
+export const ESQL_RULE: EsqlRule = {
+  enabled: true,
+  name: 'ES|QL Alert Testing Query',
+  description: 'Tests a simple ES|QL query',
+  risk_score: 1,
+  rule_id: 'esql-rule-1',
+  severity: 'high',
+  type: 'esql',
+  language: 'esql',
+  query: 'from auditbeat-* metadata _id, _version, _index | keep agent.*,_id | eval test_id=_id',
   from: '2019-01-01T00:00:00.000Z',
 };

@@ -7,8 +7,13 @@
 
 import type { KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
-import type { CustomQueryRule, EqlRule, ThreatMatchRule } from '../../../constants/detection_rules';
-import { CUSTOM_QUERY_RULE, EQL_RULE } from '../../../constants/detection_rules';
+import type {
+  CustomQueryRule,
+  EqlRule,
+  EsqlRule,
+  ThreatMatchRule,
+} from '../../../constants/detection_rules';
+import { CUSTOM_QUERY_RULE, EQL_RULE, ESQL_RULE } from '../../../constants/detection_rules';
 
 const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
 const DETECTION_ENGINE_RULES_BULK_ACTION = '/api/detection_engine/rules/_bulk_action';
@@ -19,6 +24,7 @@ export interface DetectionRuleApiService {
   createThreatMatchRule: (body: ThreatMatchRule) => Promise<{ id: string }>;
   disable: (id: string) => Promise<void>;
   createEqlRule: (body: EqlRule) => Promise<{ id: string }>;
+  createEsqlRule: (body: EsqlRule) => Promise<{ id: string }>;
   deleteAll: () => Promise<void>;
 }
 
@@ -33,7 +39,10 @@ export const getDetectionRuleApiService = ({
 }): DetectionRuleApiService => {
   const basePath = scoutSpace?.id ? `/s/${scoutSpace?.id}` : '';
 
-  const createRule = (operation: string, body: CustomQueryRule | EqlRule | ThreatMatchRule) =>
+  const createRule = (
+    operation: string,
+    body: CustomQueryRule | EqlRule | EsqlRule | ThreatMatchRule
+  ) =>
     measurePerformanceAsync(log, `security.detectionRule.${operation}`, async () => {
       const { data } = await kbnClient.request<{ id: string }>({
         method: 'POST',
@@ -50,6 +59,8 @@ export const getDetectionRuleApiService = ({
       createRule('createCustomQueryRule', body),
 
     createEqlRule: async (body = EQL_RULE) => createRule('createEqlRule', body),
+
+    createEsqlRule: async (body = ESQL_RULE) => createRule('createEsqlRule', body),
 
     getById: async (id: string) => {
       const { data } = await kbnClient.request<CustomQueryRule>({

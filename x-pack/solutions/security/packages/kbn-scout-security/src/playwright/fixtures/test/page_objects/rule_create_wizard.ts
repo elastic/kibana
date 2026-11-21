@@ -236,6 +236,11 @@ export class RuleCreateWizardPage {
     await this.ruleDetailsTitle.waitFor({ state: 'visible', timeout: DATA_LOAD_TIMEOUT_MS });
   }
 
+  /** Waits until the About step is editable; it stays disabled while the app initializes user info and lists. */
+  async waitForAboutStepEnabled(): Promise<void> {
+    await expect(this.aboutRuleName).toBeEnabled({ timeout: APP_LOAD_TIMEOUT_MS });
+  }
+
   /** Expands the Advanced Settings accordion on the About step. */
   async expandAdvancedSettings(): Promise<void> {
     await this.advancedSettingsToggle.click();
