@@ -32,9 +32,13 @@ export const createRangeSliderControlAction =
         i18n.translate('controls.rangeSlider.displayName', {
           defaultMessage: 'Range slider',
         }),
-      isCompatible: async ({ state: { data_view_id: dataViewId, field_name: fieldName } }) => {
-        if (!dataViewId || !fieldName) return false;
-        const dataView = await dataViewsService.get(dataViewId);
+      isCompatible: async ({
+        state: { data_view_id: dataViewId, field_name: fieldName },
+        source,
+      }) => {
+        const dataView =
+          source ?? (dataViewId ? await dataViewsService.get(dataViewId) : undefined);
+        if (!dataView || !fieldName) return false;
         const field = dataView.getFieldByName(fieldName);
         return Boolean(field && isFieldCompatible(field));
       },

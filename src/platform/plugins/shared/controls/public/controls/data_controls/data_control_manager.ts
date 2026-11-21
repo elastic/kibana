@@ -33,7 +33,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { appendStatsByToQuery, formatEsqlIdentifier, formatEsqlSources } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
-import { type StateComparators } from '@kbn/presentation-publishing';
+import { apiPublishesProjectRouting, type StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager, WithAllKeys } from '@kbn/presentation-publishing/state_manager/types';
 
@@ -43,7 +43,7 @@ import type { DataControlApi, DataControlFieldFormatter, ValuesSourceFetchPlan }
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 import { getESQLSingleColumnValues } from '../../../common/options_list';
 import { getControlsTimezone } from '../utils';
-import { getDataViewIdFromESQLQuery } from '../utils/get_data_view_id_from_esql_query';
+import { getSourceFromESQLQuery } from '../utils/get_source_from_esql_query';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
   ...defaultControlLabelComparators,
@@ -129,8 +129,8 @@ export const initializeDataControlManager = async <EditorState extends object = 
     dataControlStateManager.api.valuesSource$,
   ])
     .pipe(
-      // Skip empty IDs only for ESQL controls so we don't fire a blocking "data view not found" error before the ID has been loaded
-      filter(([id, valuesSource]) => valuesSource !== ControlValuesSource.ESQL || Boolean(id)),
+      // The source of an ESQL control comes from its query, which is not always a data view that the id can load
+      filter(([, valuesSource]) => valuesSource !== ControlValuesSource.ESQL),
       tap(() => {
         filtersLoading$.next(true);
         if (blockingError$.value) {
@@ -242,6 +242,11 @@ export const initializeDataControlManager = async <EditorState extends object = 
     ? parentApi.esqlVariables$
     : new BehaviorSubject<ESQLControlVariable[]>([]);
 
+  const parentProjectRouting$ = apiPublishesProjectRouting(parentApi)
+    ? parentApi.projectRouting$
+    : new BehaviorSubject<string | undefined>(undefined);
+
+  let latestEsqlRun = 0;
   const esqlQueryDataSourceSubscription = combineLatest([
     dataControlStateManager.api.esqlQuery$,
     dataControlStateManager.api.valuesSource$,
@@ -253,8 +258,12 @@ export const initializeDataControlManager = async <EditorState extends object = 
         return next.every((v) => prevKeys.has(v.key));
       })
     ),
+    // The source of the query depends on the project routing
+    parentProjectRouting$,
   ]).subscribe(async ([query, valuesSource, esqlVariables]) => {
     if (valuesSource !== ControlValuesSource.ESQL) return;
+    // Only the latest run applies, as the query, the variables and the routing can change while one is pending
+    const run = ++latestEsqlRun;
     try {
       if (!query) {
         throw new Error(
@@ -263,8 +272,9 @@ export const initializeDataControlManager = async <EditorState extends object = 
           })
         );
       }
-      const dataViewId = await getDataViewIdFromESQLQuery(query, { parentApi });
-      if (!dataViewId) {
+      const source = await getSourceFromESQLQuery(query, { parentApi });
+      if (run !== latestEsqlRun) return;
+      if (!source.id) {
         throw new Error(
           i18n.translate('controls.dataControl.esqlDataViewDeriveFailed', {
             defaultMessage: 'Could not derive a data view from the ES|QL query',
@@ -272,7 +282,9 @@ export const initializeDataControlManager = async <EditorState extends object = 
         );
       }
 
-      dataControlStateManager.api.setDataViewId(dataViewId);
+      dataControlStateManager.api.setDataViewId(source.id);
+      dataSources$.next([source]);
+      resolveInitialDataSourceReady(source);
       const result = await getESQLSingleColumnValues({
         query,
         search: dataService.search.search,
@@ -280,6 +292,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
         timeRange: dataService.query.timefilter.timefilter.getTime(),
         timezone: getControlsTimezone(),
       });
+      if (run !== latestEsqlRun) return;
       if (!getESQLSingleColumnValues.isSuccess(result)) {
         throw result.errors[0];
       }
@@ -289,6 +302,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
         setBlockingError(undefined);
       }
     } catch (e) {
+      if (run !== latestEsqlRun) return;
       setBlockingError(e);
       if (willHaveInitialFilter && getInitialFilter) rejectInitialDataSourceReady(e);
     }
