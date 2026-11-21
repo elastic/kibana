@@ -699,7 +699,9 @@ const removeWorldDocs = async ({
   for (const { index, id } of worldDocs) {
     idsByIndex.set(index, [...(idsByIndex.get(index) ?? []), id]);
   }
-  await Promise.all(
+  // Every index is rolled back to the end even when another fails: `Promise.all` would reject at
+  // the first failure and let the caller go on while the other indices are still deleting.
+  const removals = await Promise.allSettled(
     [...idsByIndex].map(async ([index, ids]) => {
       const query = { ids: { values: ids } };
       let remaining = 0;
@@ -718,6 +720,18 @@ const removeWorldDocs = async ({
       );
     })
   );
+  const failures = removals.flatMap((removal) =>
+    removal.status === 'rejected' ? [removal.reason] : []
+  );
+  if (failures.length === 1) throw failures[0];
+  if (failures.length > 1) {
+    throw new AggregateError(
+      failures,
+      `Removing the seeded world documents failed in ${failures.length} indices (${failures
+        .map(errorMessage)
+        .join('; ')})`
+    );
+  }
 };
 
 const DATA_STREAMS_ONLY = /creates data streams only/;

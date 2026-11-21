@@ -934,6 +934,49 @@ describe('readGenerationFault', () => {
     await expect(read(allFailed, getChildren)).resolves.toEqual({ kind: 'failed' });
   });
 
+  describe('when more than one batch failed', () => {
+    const twoFailed = runCompleted({
+      run_outcome: 'failed_all_batches',
+      alerts_analyzed: 0,
+      batches_total: 2,
+      batches_failed: 2,
+    });
+
+    it('is refused when every failed batch has a readable refusal', async () => {
+      const getChildren = jest.fn().mockResolvedValue([batchChild([REFUSAL, REFUSAL])]);
+      await expect(read(twoFailed, getChildren)).resolves.toEqual({
+        kind: 'refused',
+        message: REFUSAL,
+      });
+    });
+
+    it('is failed when one failed batch carries no readable error', async () => {
+      const getChildren = jest.fn().mockResolvedValue([batchChild([REFUSAL, undefined])]);
+      await expect(read(twoFailed, getChildren)).resolves.toEqual({
+        kind: 'failed',
+        message: REFUSAL,
+      });
+    });
+
+    it('is failed when one failed batch is missing from the children', async () => {
+      const getChildren = jest.fn().mockResolvedValue([batchChild([REFUSAL])]);
+      await expect(read(twoFailed, getChildren)).resolves.toEqual({
+        kind: 'failed',
+        message: REFUSAL,
+      });
+    });
+
+    it('is failed when a refusal is mixed with another failure', async () => {
+      const getChildren = jest
+        .fn()
+        .mockResolvedValue([batchChild([REFUSAL, 'connector timed out'])]);
+      await expect(read(twoFailed, getChildren)).resolves.toEqual({
+        kind: 'failed',
+        message: REFUSAL,
+      });
+    });
+  });
+
   it('is empty when every batch succeeded over the alerts and found no attack', async () => {
     const getChildren = jest.fn();
     await expect(

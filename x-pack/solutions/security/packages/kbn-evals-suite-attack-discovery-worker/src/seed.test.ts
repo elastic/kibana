@@ -771,6 +771,93 @@ describe('seedScenario world documents', () => {
       expect(perIndex.size).toBeGreaterThan(0);
       for (const rounds of perIndex.values()) expect(rounds).toBe(1);
     });
+
+    describe('when one world index fails while another is still rolling back', () => {
+      const flush = () => new Promise<void>((resolve) => setImmediate(resolve));
+
+      /**
+       * The first world index to be deleted from fails at once. Every other world index holds its
+       * first read-back on a gate the test opens, then answers `remainingAfterGate`, and 0 after.
+       */
+      const failingFirstIndex = (remainingAfterGate: number) => {
+        let failingIndex: string | undefined;
+        let openGate: () => void = () => undefined;
+        const gate = new Promise<void>((resolve) => {
+          openGate = resolve;
+        });
+        const reads = new Map<string, number>();
+        const deleteByQuery = jest.fn(
+          async ({ index, query }: { index: string; query?: { ids?: unknown } }) => {
+            if (!isRollbackCount({ query })) return {};
+            failingIndex = failingIndex ?? index;
+            if (index === failingIndex) throw new Error(`delete failed in ${index}`);
+            return {};
+          }
+        );
+        const count = jest.fn(
+          async ({ index, query }: { index: string; query?: { ids?: unknown } }) => {
+            if (!isRollbackCount({ query })) return { count: 0 };
+            const read = reads.get(index) ?? 0;
+            reads.set(index, read + 1);
+            if (read > 0) return { count: 0 };
+            await gate;
+            return { count: remainingAfterGate };
+          }
+        );
+        return { deleteByQuery, count, openGate, getFailingIndex: () => failingIndex, reads };
+      };
+
+      const settleOnlyAfterGate = async (
+        bulk: jest.Mock,
+        harness: ReturnType<typeof failingFirstIndex>
+      ) => {
+        let settled = false;
+        const seeding = seedFailing(
+          esWith({ bulk, count: harness.count, deleteByQuery: harness.deleteByQuery })
+        ).then((error) => {
+          settled = true;
+          return error;
+        });
+        await flush();
+        expect(harness.reads.size).toBeGreaterThan(0);
+        // The other index is still reading back, so its rollback is not over.
+        expect(settled).toBe(false);
+        harness.openGate();
+        return seeding;
+      };
+
+      it('waits for the other index and reports both failures when the bulk returned', async () => {
+        const bulk = jest
+          .fn()
+          .mockResolvedValueOnce(rejected)
+          .mockResolvedValue({ errors: false, items: [] });
+        const harness = failingFirstIndex(1);
+        const error = await settleOnlyAfterGate(bulk, harness);
+        expect(error).toBeInstanceOf(AggregateError);
+        expect((error as Error).message).toContain(`delete failed in ${harness.getFailingIndex()}`);
+        expect((error as Error).message).toMatch(/seeded world documents still exist/);
+        for (const reads of harness.reads.values()) expect(reads).toBe(1);
+      });
+
+      it('waits for the other index and keeps all 8 rounds while the bulk may still run', async () => {
+        const bulk = jest
+          .fn()
+          .mockRejectedValueOnce(new Error('socket hang up'))
+          .mockResolvedValue({ errors: false, items: [] });
+        const harness = failingFirstIndex(0);
+        const error = await settleOnlyAfterGate(bulk, harness);
+        const failingIndex = harness.getFailingIndex();
+        expect((error as Error).message).toContain(`delete failed in ${failingIndex}`);
+        expect((error as Error).message).toMatch(/socket hang up/);
+        expect(harness.reads.size).toBeGreaterThan(0);
+        for (const reads of harness.reads.values()) expect(reads).toBe(8);
+        const perIndex = rollbackDeletesPerIndex(harness.deleteByQuery);
+        expect(perIndex.get(failingIndex ?? '')).toBe(1);
+        for (const [index, rounds] of perIndex) {
+          if (index !== failingIndex) expect(rounds).toBe(8);
+        }
+      });
+    });
   });
 
   it('removes the world documents by id when cleaning up', async () => {

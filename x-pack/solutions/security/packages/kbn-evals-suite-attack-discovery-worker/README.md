@@ -39,8 +39,11 @@ A runner that reports `completed` but analyzed 0 of the seeded alerts is also a 
 swallowed whatever stopped it, so there is no output to score, and scoring the empty insights would
 read as a quiet model (`AlertsRetrieved` 0, `PositiveControlRecall` 0). Every evaluator reports
 `ROW_FAILED` with "runner completed but analyzed 0 alerts, N seeded" and the generation or runner
-error when one was read. A generation that refused or failed every batch stays a scored
-`MODEL_FAULT` (reported, not gating).
+error when one was read. Only a generation where every batch error is a recognized model refusal
+stays a scored `MODEL_FAULT` (reported, not gating). Every other all-batches-failed case fails the
+row: failures that are not refusals or whose cause is unknown, a mix of refusals and failures, and
+batch errors that could not be read. A generation that exhausts its retries on hallucinated output
+is not a recognized refusal, so it gates too.
 
 If the executor itself throws (its own span or model lookup, not one of our rows), `runExperiment`
 rejects at once while a row may be mid-run and later rows are still queued. `createEvaluateDataset`

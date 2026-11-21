@@ -288,6 +288,9 @@ describe('findUnconditionalContainment', () => {
       'T1562.008 Cloud Accounts: revoke the access key.',
       'T1562.008 Impair Defenses: disable logs.',
       'Observed T1562.008 impair defenses: disable logs.',
+      'Observed T1562.008 impair defenses: disable cloud logs or revoke the key.',
+      'Observed T1562.008 impair defenses: disable cloud logs or modify logs.',
+      'Observed T1078 valid accounts: revoke the access key.',
     ])('flags containment the masking must not hide: %s', (text) => {
       expect(findUnconditionalContainment(text)).toHaveLength(1);
     });
@@ -298,6 +301,8 @@ describe('findUnconditionalContainment', () => {
       'Observed T1562.008 Impair Defenses: Disable Cloud Logs.',
       'The actor used T1562.008 Impair Defenses: Disable Cloud Logs on the trail.',
       'Observed T1562.008 impair defenses: disable cloud logs.',
+      'Observed T1562.008 impair defenses: disable cloud logs or modify cloud logs.',
+      'Observed T1562.008 Impair Defenses: Disable Cloud Logs or Modify Cloud Logs.',
       'The actor used T1562.008 (impair defenses: disable cloud logs) on the trail.',
     ])('still masks entity lists and technique names: %s', (text) => {
       expect(findUnconditionalContainment(text)).toEqual([]);

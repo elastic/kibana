@@ -549,7 +549,7 @@ export const readGenerationFault = async ({
   }
   const messages = (await readBatchErrors({ client, run, spaceId, log })) ?? [];
   const refused =
-    messages.length > 0 && messages.every((message) => MODEL_REFUSAL_PATTERN.test(message));
+    messages.length === failed && messages.every((message) => MODEL_REFUSAL_PATTERN.test(message));
   return { kind: refused ? 'refused' : 'failed', ...(messages[0] ? { message: messages[0] } : {}) };
 };
 
