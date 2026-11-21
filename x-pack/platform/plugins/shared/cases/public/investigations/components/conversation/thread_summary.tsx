@@ -35,6 +35,8 @@ export interface ThreadSummaryProps {
   thread: ThreadRef;
   /** Called after the agent posted its summary, so the embedded conversation can reload. */
   onAgentSummarized: () => void;
+  /** Places the button and the summary separately, e.g. the button in a toolbar. */
+  children?: (parts: { button: React.ReactNode; callout: React.ReactNode }) => React.ReactNode;
 }
 
 /**
@@ -46,6 +48,7 @@ export const ThreadSummary: React.FC<ThreadSummaryProps> = ({
   record,
   thread,
   onAgentSummarized,
+  children,
 }) => {
   const { data: capabilities } = useCapabilities();
   const { messages } = useConversationMessages(record, thread.conversation_id, { enabled: true });
@@ -69,31 +72,41 @@ export const ThreadSummary: React.FC<ThreadSummaryProps> = ({
     summarize.mutateAsync(thread.conversation_id).then(onAgentSummarized).catch(showLocalSummary);
   };
 
+  const button = (
+    <EuiButton
+      size="s"
+      iconType={ICONS.report}
+      isLoading={summarize.isLoading}
+      onClick={ask}
+      aria-label={i18n.THREAD_SUMMARY_SHOW}
+      data-test-subj="investigationThreadSummaryButton"
+    >
+      {summarize.isLoading ? i18n.THREAD_SUMMARY_WORKING : i18n.THREAD_SUMMARY_SHOW}
+    </EuiButton>
+  );
+  const callout = isLocalOpen ? (
+    <EuiCallOut
+      announceOnMount
+      size="s"
+      iconType={ICONS.info}
+      title={i18n.THREAD_SUMMARY_DETERMINISTIC_TITLE}
+      onDismiss={() => setIsLocalOpen(false)}
+      dismissButtonProps={{ 'aria-label': i18n.THREAD_SUMMARY_CLOSE }}
+      text={<p>{localSummary ?? i18n.THREAD_SUMMARY_EMPTY}</p>}
+      data-test-subj="investigationThreadSummaryLocal"
+    />
+  ) : null;
+
+  if (children) {
+    return <>{children({ button, callout })}</>;
+  }
   return (
     <>
-      <EuiButton
-        size="s"
-        iconType={ICONS.report}
-        isLoading={summarize.isLoading}
-        onClick={ask}
-        aria-label={i18n.THREAD_SUMMARY_SHOW}
-        data-test-subj="investigationThreadSummaryButton"
-      >
-        {summarize.isLoading ? i18n.THREAD_SUMMARY_WORKING : i18n.THREAD_SUMMARY_SHOW}
-      </EuiButton>
-      {isLocalOpen ? (
+      {button}
+      {callout ? (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
-            announceOnMount
-            size="s"
-            iconType={ICONS.info}
-            title={i18n.THREAD_SUMMARY_DETERMINISTIC_TITLE}
-            onDismiss={() => setIsLocalOpen(false)}
-            dismissButtonProps={{ 'aria-label': i18n.THREAD_SUMMARY_CLOSE }}
-            text={<p>{localSummary ?? i18n.THREAD_SUMMARY_EMPTY}</p>}
-            data-test-subj="investigationThreadSummaryLocal"
-          />
+          {callout}
         </>
       ) : null}
     </>

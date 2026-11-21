@@ -25,10 +25,18 @@ export interface ThreadBarProps {
   /** Right-aligned content, e.g. the thread summary button. */
   actions?: React.ReactNode;
   compact?: boolean;
+  /** The embedded chat's own header already shows the thread title. */
+  hideTitle?: boolean;
 }
 
 /** Shown above a thread: back to the main conversation, the thread's title, anchor and creator. */
-export const ThreadBar: React.FC<ThreadBarProps> = ({ thread, onBack, actions, compact }) => (
+export const ThreadBar: React.FC<ThreadBarProps> = ({
+  thread,
+  onBack,
+  actions,
+  compact,
+  hideTitle,
+}) => (
   <EuiPanel
     color="subdued"
     hasShadow={false}
@@ -49,7 +57,11 @@ export const ThreadBar: React.FC<ThreadBarProps> = ({ thread, onBack, actions, c
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText size="s">
-          <strong data-test-subj="investigationThreadTitle">{thread.title}</strong>{' '}
+          {hideTitle ? null : (
+            <>
+              <strong data-test-subj="investigationThreadTitle">{thread.title}</strong>{' '}
+            </>
+          )}
           {thread.anchor ? (
             <EuiBadge color="hollow" data-test-subj="investigationThreadAnchor">
               {i18n.THREAD_ANCHOR(thread.anchor)}

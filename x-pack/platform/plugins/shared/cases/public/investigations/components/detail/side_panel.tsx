@@ -124,12 +124,17 @@ export const SidePanel: React.FC<SidePanelProps> = ({
         css={css`
           flex: 1 1 auto;
           min-height: 0;
-          overflow-y: auto;
-          padding: ${euiTheme.size.m};
+          overflow-y: ${effectiveMode === 'chat' ? 'hidden' : 'auto'};
+          padding: ${effectiveMode === 'chat' ? euiTheme.size.s : euiTheme.size.m};
         `}
       >
         {effectiveMode === 'chat' ? (
-          <SideChat record={record} agentAvailable={agentAvailable} />
+          <SideChat
+            record={record}
+            agentAvailable={agentAvailable}
+            activeTab={activeTab}
+            onCloseChat={() => onModeChange('context')}
+          />
         ) : (
           <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>

@@ -21,6 +21,7 @@ import { css } from '@emotion/react';
 import type { InvestigationRecord } from '../../../../common/investigations/types';
 import { ICONS } from '../../icons';
 import { RelativeTime } from '../shared';
+import { useConversationMessages } from './use_conversation';
 import * as i18n from './translations';
 
 export interface ThreadsMenuProps {
@@ -34,6 +35,26 @@ export interface ThreadsMenuProps {
 }
 
 const MENU_WIDTH = '22rem';
+
+/** Reply count and last activity of a thread; read from its conversation when the menu opens. */
+const ThreadActivity: React.FC<{ record: InvestigationRecord; conversationId: string }> = ({
+  record,
+  conversationId,
+}) => {
+  const { messages, conversation } = useConversationMessages(record, conversationId);
+
+  if (!conversation) {
+    return null;
+  }
+  return (
+    <EuiText size="xs" color="subdued" data-test-subj="investigationThreadActivity">
+      {i18n.REPLIES(messages.length)}
+      {' · '}
+      {i18n.LAST_REPLY} <RelativeTime value={conversation.updated_at} />
+    </EuiText>
+  );
+};
+ThreadActivity.displayName = 'ThreadActivity';
 
 /** A button with the thread count that lists the main conversation and the threads. */
 export const ThreadsMenu: React.FC<ThreadsMenuProps> = ({
@@ -97,6 +118,7 @@ export const ThreadsMenu: React.FC<ThreadsMenuProps> = ({
           {' · '}
           <RelativeTime value={thread.created_at} />
         </EuiText>
+        <ThreadActivity record={record} conversationId={thread.conversation_id} />
       </EuiContextMenuItem>
     );
   });

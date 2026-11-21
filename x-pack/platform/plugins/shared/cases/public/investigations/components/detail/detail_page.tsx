@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { EuiButton, EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -19,6 +19,7 @@ import {
 import { ICONS } from '../../icons';
 import { ErrorState } from '../shared/error_state';
 import { LoadingState } from '../shared/loading_state';
+import { FROM_PARAM, SIDE_CHAT_VALUE, SIDE_PARAM } from '../conversation/side_chat_url';
 import type { ModalName } from '../modals/modal_props';
 import { ActivityTab } from '../tabs/activity_tab';
 import { ConversationTab } from '../tabs/conversation_tab';
@@ -104,12 +105,15 @@ export const DetailPage: React.FC = () => {
   const { data, isLoading, error, refetch } = useRecord(id);
   const [openModal, setOpenModal] = useState<ModalName | null>(null);
   const [isSidePanelOpen, setIsSidePanelOpen] = useSidePanelOpen();
-  const [sidePanelMode, setSidePanelMode] = useState<SidePanelMode>('context');
 
   const searchParams = useMemo(() => new URLSearchParams(search), [search]);
   const requestedTab = searchParams.get('tab');
   const activeTab: TabId = isTabId(requestedTab) ? requestedTab : 'overview';
   const openItemId = searchParams.get('item') ?? undefined;
+  // The side panel mode is URL state (`?side=chat`), so a reload and the Collapse button keep it.
+  const sidePanelMode: SidePanelMode =
+    searchParams.get(SIDE_PARAM) === SIDE_CHAT_VALUE ? 'chat' : 'context';
+  const returnTab = searchParams.get(FROM_PARAM);
 
   useInvestigationBreadcrumbs(data?.record.display_id);
   useLivePolling(id);
@@ -123,11 +127,48 @@ export const DetailPage: React.FC = () => {
       if (opts?.itemId) {
         params.set('item', opts.itemId);
       }
+      if (sidePanelMode === 'chat') {
+        params.set(SIDE_PARAM, SIDE_CHAT_VALUE);
+      }
+      if (tab === 'conversation') {
+        // Collapse returns to the tab the conversation was opened from.
+        const from = activeTab === 'conversation' ? returnTab : activeTab;
+        if (isTabId(from) && from !== 'conversation' && from !== 'overview') {
+          params.set(FROM_PARAM, from);
+        }
+      }
       const query = params.toString();
       history.push({ pathname: history.location.pathname, search: query ? `?${query}` : '' });
     },
+    [history, activeTab, returnTab, sidePanelMode]
+  );
+
+  const changeSidePanelMode = useCallback(
+    (mode: SidePanelMode) => {
+      const params = new URLSearchParams(history.location.search);
+      if (mode === 'chat') {
+        params.set(SIDE_PARAM, SIDE_CHAT_VALUE);
+      } else {
+        params.delete(SIDE_PARAM);
+      }
+      const query = params.toString();
+      history.replace({ pathname: history.location.pathname, search: query ? `?${query}` : '' });
+    },
     [history]
   );
+
+  const closeSidePanel = useCallback(() => {
+    // Drop `side` first, otherwise the effect below reopens the panel for it.
+    changeSidePanelMode('context');
+    setIsSidePanelOpen(false);
+  }, [changeSidePanelMode, setIsSidePanelOpen]);
+
+  // Collapsing to the side panel must show it, even when it was hidden before.
+  useEffect(() => {
+    if (sidePanelMode === 'chat' && !isSidePanelOpen) {
+      setIsSidePanelOpen(true);
+    }
+  }, [sidePanelMode, isSidePanelOpen, setIsSidePanelOpen]);
 
   if (isLoading) {
     return (
@@ -223,8 +264,8 @@ export const DetailPage: React.FC = () => {
               agentAvailable={agentAvailable}
               activeTab={activeTab}
               mode={sidePanelMode}
-              onModeChange={setSidePanelMode}
-              onClose={() => setIsSidePanelOpen(false)}
+              onModeChange={changeSidePanelMode}
+              onClose={closeSidePanel}
               onNavigateTab={navigateTab}
             />
           </div>

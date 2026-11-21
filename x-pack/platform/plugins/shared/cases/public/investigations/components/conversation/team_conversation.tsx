@@ -17,6 +17,7 @@ import {
 import { css } from '@emotion/react';
 import type { InvestigationRecord } from '../../../../common/investigations/types';
 import { ICONS } from '../../icons';
+import { CollapseButton } from './collapse_button';
 import { ParticipantAvatars } from './participant_avatars';
 import { TeamDiscussion } from './team_discussion';
 import { useFillViewportHeight } from './use_fill_viewport_height';
@@ -83,6 +84,9 @@ export const TeamConversation: React.FC<TeamConversationProps> = ({ record, expl
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ParticipantAvatars participants={record.participants} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CollapseButton />
         </EuiFlexItem>
       </EuiFlexGroup>
       <div

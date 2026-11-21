@@ -24,6 +24,8 @@ export interface EmbeddedChatProps {
   record: InvestigationRecord;
   /** The main conversation or the id of one of the record's threads. */
   conversationId: string;
+  /** Called by the close button of the embedded chat's own header. */
+  onClose?: () => void;
 }
 
 /**
@@ -31,7 +33,7 @@ export interface EmbeddedChatProps {
  * conversation stored in localStorage for its session tag and agent, so the id is stored for a
  * tag unique to this record and conversation before the component mounts.
  */
-export const EmbeddedChat: React.FC<EmbeddedChatProps> = ({ record, conversationId }) => {
+export const EmbeddedChat: React.FC<EmbeddedChatProps> = ({ record, conversationId, onClose }) => {
   const { agentBuilder } = useInvestigationsServices();
   const agentId = record.agent_id ?? INVESTIGATION_AGENT_ID;
   const sessionTag = getChatSessionTag(record.id, conversationId);
@@ -61,7 +63,12 @@ export const EmbeddedChat: React.FC<EmbeddedChatProps> = ({ record, conversation
       `}
       data-test-subj="investigationEmbeddedChat"
     >
-      <EmbeddableConversation key={sessionTag} sessionTag={sessionTag} agentId={agentId} />
+      <EmbeddableConversation
+        key={sessionTag}
+        sessionTag={sessionTag}
+        agentId={agentId}
+        onClose={onClose}
+      />
     </div>
   );
 };

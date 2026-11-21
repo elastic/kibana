@@ -100,6 +100,64 @@ export const EXPAND_ARIA = i18n.translate(`${PREFIX}.expandAria`, {
   defaultMessage: 'Open the conversation in the Conversation tab',
 });
 
+export const COLLAPSE = i18n.translate(`${PREFIX}.collapse`, { defaultMessage: 'Collapse' });
+export const COLLAPSE_TOOLTIP = i18n.translate(`${PREFIX}.collapseTooltip`, {
+  defaultMessage: 'Collapse to side panel',
+});
+export const COLLAPSE_ARIA = i18n.translate(`${PREFIX}.collapseAria`, {
+  defaultMessage: 'Collapse the conversation to the side panel',
+});
+export const CHAT_CLOSE_ARIA = i18n.translate(`${PREFIX}.chatCloseAria`, {
+  defaultMessage: 'Close the conversation',
+});
+export const SWITCH_HINT = (displayId: string) =>
+  i18n.translate(`${PREFIX}.switchHint`, {
+    defaultMessage: 'This conversation belongs to {displayId}; use Threads to switch.',
+    values: { displayId },
+  });
+export const TOOLBAR_LABEL = i18n.translate(`${PREFIX}.toolbarLabel`, {
+  defaultMessage: 'Conversation actions',
+});
+export const LAST_REPLY = i18n.translate(`${PREFIX}.lastReply`, {
+  defaultMessage: 'Last activity',
+});
+
+/* ------------------------------ Suggestion chips ------------------------------ */
+
+export const SUGGESTIONS_LABEL = i18n.translate(`${PREFIX}.suggestionsLabel`, {
+  defaultMessage: 'Suggested prompts',
+});
+export const SUGGESTION_SUMMARIZE = i18n.translate(`${PREFIX}.suggestionSummarize`, {
+  defaultMessage: 'Summarize what is still unresolved',
+});
+export const SUGGESTION_SUMMARIZE_SHORT = i18n.translate(`${PREFIX}.suggestionSummarizeShort`, {
+  defaultMessage: 'Summarize unresolved',
+});
+export const SUGGESTION_BLOCK = (indicator: string) =>
+  i18n.translate(`${PREFIX}.suggestionBlock`, {
+    defaultMessage: 'Propose blocking {indicator}',
+    values: { indicator },
+  });
+export const SUGGESTION_BLOCK_SHORT = (indicator: string) =>
+  i18n.translate(`${PREFIX}.suggestionBlockShort`, {
+    defaultMessage: 'Block {indicator}',
+    values: { indicator },
+  });
+export const SUGGESTION_CLAIM = (indicator: string) =>
+  i18n.translate(`${PREFIX}.suggestionClaim`, {
+    defaultMessage: 'Open a claim: Is {indicator} malicious?',
+    values: { indicator },
+  });
+export const SUGGESTION_SENDING = i18n.translate(`${PREFIX}.suggestionSending`, {
+  defaultMessage: 'Sending to the agent',
+});
+export const SUGGESTION_SENT = i18n.translate(`${PREFIX}.suggestionSent`, {
+  defaultMessage: 'The agent answered. The reply is in the conversation.',
+});
+export const SUGGESTION_ERROR = i18n.translate(`${PREFIX}.suggestionError`, {
+  defaultMessage: 'The agent could not answer that prompt.',
+});
+
 /* ------------------------------ Create claim from conversation ------------------------------ */
 
 export const CREATE_CLAIM = i18n.translate(`${PREFIX}.createClaim`, {
