@@ -22,6 +22,7 @@ const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
           executorClient,
           traceEsClient,
           log,
+          naWhenUnset: true,
         })
       );
     },
