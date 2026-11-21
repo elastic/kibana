@@ -97,6 +97,7 @@
     "@kbn/es-errors",
     "@kbn/core-http-server-mocks",
     "@kbn/connector-specs",
+    "@kbn/connector-topics",
     "@kbn/workflows-extensions",
     "@kbn/alerts-ui-shared",
     "@kbn/licensing-plugin",

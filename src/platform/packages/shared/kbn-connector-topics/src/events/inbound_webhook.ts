@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
+import type { ConnectorEventTopicDefinition } from './connector_event_topic';
 
-export const InboundWebhookReceivedEventSchema = lazySchema(() =>
+const InboundWebhookReceivedEventSchema = lazySchema(() =>
   z.object({
     body: z.unknown().describe('Raw inbound JSON body. Filter with KQL on event.body.<path>.'),
   })
 );
 
-export type InboundWebhookReceivedEvent = z.infer<typeof InboundWebhookReceivedEventSchema>;
+export const inboundWebhookReceived = {
+  name: 'inboundWebhook.received',
+  eventSchema: InboundWebhookReceivedEventSchema,
+} as const satisfies ConnectorEventTopicDefinition;
