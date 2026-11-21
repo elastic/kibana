@@ -213,6 +213,7 @@ export const renderIndexApp = async (options?: {
       enableLegacyTemplates: true,
       enableIndexActions: true,
       enableIndexStats: true,
+      enableIndexMode: true,
     },
     settings: settingsServiceMock.createStartContract(),
     privs: {
