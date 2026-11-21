@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import type { InternalUiSettingsRequestHandlerContext } from '../internal_types';
 import type { InternalUiSettingsRouter } from '../internal_types';
+import { OAS_TAGS, settingsResponseSchema } from './oas';
 
 export function registerGetRoute(router: InternalUiSettingsRouter) {
   const getFromRequest = async (
@@ -40,7 +42,19 @@ export function registerGetRoute(router: InternalUiSettingsRouter) {
   router.get(
     {
       path: '/api/kibana/settings',
-      validate: false,
+      validate: {
+        request: {},
+        response: {
+          200: { body: () => settingsResponseSchema, description: 'Indicates a successful call.' },
+        },
+      },
+      options: {
+        access: 'public',
+        summary: 'Get all advanced settings',
+        description: `Retrieve all user-provided advanced settings for the current space. Settings that were not changed from their default value are not returned.`,
+        tags: OAS_TAGS,
+        oasOperationObject: () => path.resolve(__dirname, './get.examples.yaml'),
+      },
       security: {
         authz: {
           enabled: false,
@@ -56,7 +70,19 @@ export function registerGetRoute(router: InternalUiSettingsRouter) {
   router.get(
     {
       path: '/api/kibana/global_settings',
-      validate: false,
+      validate: {
+        request: {},
+        response: {
+          200: { body: () => settingsResponseSchema, description: 'Indicates a successful call.' },
+        },
+      },
+      options: {
+        access: 'public',
+        summary: 'Get all global advanced settings',
+        description: `Retrieve all user-provided advanced settings that apply globally, across all spaces.`,
+        tags: OAS_TAGS,
+        oasOperationObject: () => path.resolve(__dirname, './get.examples.yaml'),
+      },
       security: {
         authz: {
           enabled: false,

@@ -1,0 +1,14 @@
+responses:
+  '200':
+    description: Indicates a successful call.
+    content:
+      application/json:
+        examples:
+          getSettingsResponse:
+            summary: User-provided settings
+            value:
+              settings:
+                defaultRoute:
+                  userValue: /app/dashboards
+                theme:darkMode:
+                  userValue: enabled
