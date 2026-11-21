@@ -579,6 +579,11 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(overrides?.tools).toEqual([]);
     });
 
+    // `tools: []` does not remove the attachment tools Agent Builder adds to every run.
+    it('tells the agent not to call the attachment tools', () => {
+      expect(String(analyze?.with?.message)).toContain('call no tools, attachment tools included');
+    });
+
     it('prefers a saved template-row model, then the AlertZero frontier feature', () => {
       expect(analyze?.['connector-id-by-feature']).toEqual([
         'alertzero_template_models',
