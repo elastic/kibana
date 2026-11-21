@@ -1074,6 +1074,7 @@ export const teamOverrides: OxlintOverride[] = [
       'src/platform/packages/shared/kbn-jest/src/setup/mocks.eui.js',
       'src/platform/packages/shared/kbn-jest/src/setup/mocks.kbn_i18n_react.js',
       'src/platform/packages/shared/kbn-jest/src/setup/mocks.moment_timezone.js',
+      'src/platform/packages/shared/kbn-jest/src/setup/mocks.pdfmake.js',
       'src/platform/packages/shared/kbn-jest/src/setup/mocks.vega.js',
       'src/platform/packages/shared/kbn-jest/src/setup/react_testing_library.js',
       'x-pack/platform/plugins/private/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',

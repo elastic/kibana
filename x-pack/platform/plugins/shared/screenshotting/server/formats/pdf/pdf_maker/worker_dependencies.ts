@@ -6,6 +6,6 @@
  */
 
 import _ from 'lodash';
-import Printer from 'pdfmake';
+import pdfmake from 'pdfmake';
 
-export { _, Printer };
+export { _, pdfmake };

@@ -81,6 +81,7 @@ module.exports = {
     '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/react_testing_library.js',
     '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/mocks.kbn_i18n_react.js',
     '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/mocks.vega.js',
+    '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/mocks.pdfmake.js',
     process.env.CI
       ? '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/disable_console_logs.js'
       : [],
