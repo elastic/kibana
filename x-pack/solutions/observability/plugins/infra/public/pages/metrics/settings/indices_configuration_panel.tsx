@@ -193,9 +193,18 @@ export const IndicesConfigurationPanel = ({
             >
               <FormattedMessage
                 id="xpack.infra.sourceConfiguration.metricIndicesCheckIncomplete"
-                defaultMessage="We couldn’t verify whether the pattern entered matches any index because the check didn’t complete. This can happen when the cluster is slow to respond."
+                defaultMessage="We couldn’t verify whether the saved pattern matches any index because the check didn’t complete. This can happen when the cluster is slow to respond."
               />
-              {onRetryMetricIndicesCheck && (
+              {isMetricAliasChanged && (
+                <>
+                  <EuiSpacer size="s" />
+                  <FormattedMessage
+                    id="xpack.infra.sourceConfiguration.metricIndicesCheckIncompleteUnsaved"
+                    defaultMessage="Save your changes to check the pattern you entered."
+                  />
+                </>
+              )}
+              {onRetryMetricIndicesCheck && !isMetricAliasChanged && (
                 <>
                   <EuiSpacer size="s" />
                   <EuiButton

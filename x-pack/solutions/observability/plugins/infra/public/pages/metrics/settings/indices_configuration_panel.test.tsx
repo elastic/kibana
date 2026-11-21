@@ -31,6 +31,7 @@ const renderPanel = (
     metricIndicesExist?: boolean;
     remoteClustersExist?: boolean;
     onRetryMetricIndicesCheck?: () => void;
+    isMetricAliasChanged?: boolean;
   } = {}
 ) =>
   render(
@@ -78,6 +79,31 @@ describe('IndicesConfigurationPanel status callouts', () => {
     fireEvent.click(screen.getByTestId(RETRY_BUTTON));
 
     expect(onRetryMetricIndicesCheck).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides retry while the pattern has unsaved changes, since retry re-checks the saved pattern', () => {
+    const onRetryMetricIndicesCheck = jest.fn();
+    renderPanel({
+      metricIndicesStatus: 'unknown',
+      onRetryMetricIndicesCheck,
+      isMetricAliasChanged: true,
+    });
+
+    // The callout still explains the incomplete check, but retry is hidden because it would
+    // re-check the saved pattern rather than the unsaved one shown in the field.
+    expect(screen.getByTestId(CHECK_INCOMPLETE_CALLOUT)).toBeInTheDocument();
+    expect(screen.queryByTestId(RETRY_BUTTON)).not.toBeInTheDocument();
+  });
+
+  it('shows retry when the pattern has no unsaved changes', () => {
+    const onRetryMetricIndicesCheck = jest.fn();
+    renderPanel({
+      metricIndicesStatus: 'unknown',
+      onRetryMetricIndicesCheck,
+      isMetricAliasChanged: false,
+    });
+
+    expect(screen.getByTestId(RETRY_BUTTON)).toBeInTheDocument();
   });
 
   it('shows no status callout when the indices are available', () => {
