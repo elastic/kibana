@@ -79,7 +79,7 @@ The scan window, persisted action history, and content-addressed dedup let the d
 
 The pipeline then moves through these phases:
 
-1. Wait for plugin resources to be ready
+1. Wait for the data streams the dispatcher reads and writes to be ready
 2. Fetch candidate alerts (keys-only scan — no `data` payload)
 3. Fetch suppression facts
 4. Split into dispatchable vs suppressed alerts
@@ -219,7 +219,7 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 
 | #   | Step                         | Responsibility                                                                                   |
 | --- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
-| 1   | `WaitForResourcesStep`       | Block the run until the dispatcher's required plugin resources are ready.                        |
+| 1   | `WaitForResourcesStep`       | Wait for the `.rule-events` and `.alert-actions` data streams (`DISPATCHER_RESOURCE_KEYS`).      |
 | 2   | `FetchAlertsStep`            | Load alerts via a keys-only scan (no `_source`/`data` payload). Halts on empty result.           |
 | 3   | `FetchSuppressionsStep`      | Load alert-action facts needed for suppression decisions (see [Suppression queries](#suppression-queries)). |
 | 4   | `ApplySuppressionStep`       | Mark each alert as dispatchable or suppressed, preserving reasons.                               |

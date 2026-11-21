@@ -12,6 +12,13 @@ import {
   ResourceManager,
   type ResourceManagerContract,
 } from '../../services/resource_service/resource_manager';
+import { ALERT_ACTIONS_RESOURCE_KEY } from '../../../resources/datastreams/alert_actions';
+import { ALERT_EVENTS_RESOURCE_KEY } from '../../../resources/datastreams/alert_events';
+
+export const RULE_EXECUTOR_RESOURCE_KEYS = [
+  ALERT_EVENTS_RESOURCE_KEY,
+  ALERT_ACTIONS_RESOURCE_KEY,
+] as const;
 
 @injectable()
 export class WaitForResourcesStep implements RuleExecutionStep {
@@ -27,7 +34,7 @@ export class WaitForResourcesStep implements RuleExecutionStep {
 
       logger.debug({ message: 'Waiting for resources' });
 
-      await this.resourcesService.waitUntilReady();
+      await this.resourcesService.waitForResources(RULE_EXECUTOR_RESOURCE_KEYS);
 
       logger.debug({ message: 'Resources ready' });
 
