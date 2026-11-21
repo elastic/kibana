@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema, description as stringDescription } from '@kbn/zod/v4';
 import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import {
   validateEsqlQuery,
@@ -28,6 +28,7 @@ import {
   ID_MAX_LENGTH,
   MAX_CONSECUTIVE_BREACHES,
   MAX_DESCRIPTION_LENGTH,
+  MAX_REASON_TEMPLATE_LENGTH,
   MAX_ESQL_QUERY_LENGTH,
   MAX_FIELD_NAME_LENGTH,
   MAX_PER_PAGE,
@@ -707,6 +708,23 @@ const artifactsSchema = lazySchema(() =>
 
 /** Create rule API schema */
 
+const REASON_DESCRIPTION = `Alert reason configuration. Only allowed when kind is "alert". \`template\` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Maximum ${MAX_REASON_TEMPLATE_LENGTH} characters. Whitespace is preserved; empty or whitespace-only templates are rejected.`;
+
+const reasonSchema = lazySchema(() =>
+  z
+    .object({
+      template: stringDescription({
+        minLength: 1,
+        maxLength: MAX_REASON_TEMPLATE_LENGTH,
+      })
+        .refine((value) => value.trim().length > 0, {
+          message: 'Reason template must not be blank.',
+        })
+        .describe('Alert reason template.'),
+    })
+    .strict()
+);
+
 const TIME_FIELD_DESCRIPTION =
   'Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.';
 /**
@@ -732,12 +750,21 @@ type RuleWriteApi = keyof typeof ENABLED_DESCRIPTIONS;
 const enabledSchema = (api: RuleWriteApi) =>
   z.boolean().optional().describe(ENABLED_DESCRIPTIONS[api]);
 
+const REASON_DESCRIPTIONS = {
+  create: `${REASON_DESCRIPTION} Omit to leave it unset. Null is not accepted.`,
+  put: `${REASON_DESCRIPTION} Omit to leave it unset on create or clear it when replacing an existing rule. Null is not accepted.`,
+} as const satisfies Record<RuleWriteApi, string>;
+
+const reasonSchemaFor = (api: RuleWriteApi) =>
+  reasonSchema.optional().describe(REASON_DESCRIPTIONS[api]);
+
 const buildRuleDataBaseSchema = (api: RuleWriteApi) =>
   z
     .object({
       kind: ruleKindSchema,
       enabled: enabledSchema(api),
       metadata: metadataSchema,
+      reason: reasonSchemaFor(api),
       time_field: timeFieldSchema.default(DEFAULT_TIME_FIELD).describe(TIME_FIELD_DESCRIPTION),
       schedule: scheduleSchema,
       query: querySchema,
@@ -779,6 +806,14 @@ export const isRoutingTagsAllowedForKind = (data: {
 
 export const ROUTING_TAGS_SIGNAL_RULE_MESSAGE =
   'metadata.routing_tags is only allowed when kind is "alert".';
+
+/** Only alert rules can configure an alert reason template. */
+export const isReasonAllowedForKind = (data: {
+  kind?: string;
+  reason?: { template: string } | null;
+}): boolean => data.kind === 'alert' || data.reason == null;
+
+export const REASON_SIGNAL_RULE_MESSAGE = 'reason is only allowed when kind is "alert".';
 
 /** The two objects that describe an alert rule's episode lifecycle. */
 const LIFECYCLE_FIELDS = ['recovery', 'no_data'] as const;
@@ -851,7 +886,7 @@ export const isRecoveryTransitionConsistentWithStrategy = (data: RuleLifecycleSh
 /** The create-rule fields the refinements below read. */
 type CreateRuleRefinementFields = Pick<
   z.infer<typeof createRuleDataBaseSchema>,
-  'kind' | 'metadata' | 'query' | 'recovery' | 'no_data' | 'state_transition'
+  'kind' | 'metadata' | 'reason' | 'query' | 'recovery' | 'no_data' | 'state_transition'
 >;
 
 /**
@@ -872,6 +907,10 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
     .refine(isRoutingTagsAllowedForKind, {
       message: ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
       path: ['metadata', 'routing_tags'],
+    })
+    .refine(isReasonAllowedForKind, {
+      message: REASON_SIGNAL_RULE_MESSAGE,
+      path: ['reason'],
     })
     .check((ctx) => {
       const allowed = isLifecycleConfigAllowedForKind(ctx.value);
@@ -1003,6 +1042,12 @@ export const updateRuleDataSchema = lazySchema(() =>
   z
     .object({
       metadata: metadataPatchSchema.optional().describe(METADATA_DESCRIPTION),
+      reason: reasonSchema
+        .nullable()
+        .optional()
+        .describe(
+          `${REASON_DESCRIPTION} Omit to preserve the current value; send null to clear it.`
+        ),
       time_field: timeFieldSchema.optional().describe(TIME_FIELD_DESCRIPTION),
       schedule: schedulePatchSchema.optional().describe(SCHEDULE_DESCRIPTION),
       query: queryPatchSchema.optional().describe(QUERY_DESCRIPTION),
@@ -1034,6 +1079,9 @@ export const ruleResponseSchema = lazySchema(() =>
       // strict `metadata` block would break a GET -> PUT round-trip. Lifecycle
       // events and telemetry still read it from the saved object.
       metadata: metadataSchema.describe('Rule metadata.'),
+      reason: reasonSchema
+        .optional()
+        .describe(`${REASON_DESCRIPTION} Absent when no reason template is set.`),
       id: z.string().describe('Unique rule identifier.'),
       version: z
         .number()

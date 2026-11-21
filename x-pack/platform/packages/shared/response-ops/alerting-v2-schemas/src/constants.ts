@@ -84,6 +84,9 @@ export const MAX_EPISODE_LABEL_LENGTH = MAX_NAME_LENGTH * 2 + 32;
 /** Maximum length for human-readable description fields (rule description, action policy description). */
 export const MAX_DESCRIPTION_LENGTH = 1024;
 
+/** Maximum length of an alert reason template. */
+export const MAX_REASON_TEMPLATE_LENGTH = 1024;
+
 /** Maximum length for an external alert `fingerprint`, the caller's own series key. */
 export const MAX_FINGERPRINT_LENGTH = 1024;
 
