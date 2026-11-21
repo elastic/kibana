@@ -11,6 +11,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import {
   API_VERSIONS,
+  EVALS_EVALUATE_TIMEOUT_MS,
   EVALS_EVALUATE_URL,
   EvaluateRequestBody,
   type EvaluateResponse,
@@ -150,6 +151,12 @@ describe('POST /internal/evals/_evaluate', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('raises the idle socket timeout so slow LLM judges are not cut off mid-request', () => {
+    const { routeConfig } = setup();
+
+    expect(routeConfig.options?.timeout?.idleSocket).toBe(EVALS_EVALUATE_TIMEOUT_MS);
   });
 
   it('registers manage privilege authz requirement', () => {
@@ -981,6 +988,36 @@ describe('POST /internal/evals/_evaluate', () => {
         evaluator: expect.objectContaining({ name: 'latency' }),
         scores: [{ name: 'latency', score: 42 }],
       }),
+    ]);
+  });
+
+  it.each([
+    ['null', null],
+    ['undefined', undefined],
+  ])('reports an item error when an evaluator throws %s', async (label, thrown) => {
+    const groundedness = buildEvaluator({
+      name: 'groundedness',
+      kind: 'code',
+      evaluate: jest.fn().mockRejectedValue(thrown),
+    });
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([groundedness]),
+    });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: { traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }] },
+          evaluators: [{ name: 'groundedness' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload.results).toEqual([
+      expect.objectContaining({ status: 'error', error: { message: label } }),
     ]);
   });
 

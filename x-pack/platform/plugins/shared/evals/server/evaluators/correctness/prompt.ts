@@ -123,7 +123,8 @@ export const LlmCorrectnessEvaluationPrompt = createPrompt({
               description: 'Detailed analysis of each claim in the agent response.',
             },
           },
-          required: ['summary', 'analysis'],
+          // `summary` is derivable from `analysis`, and some judges stop after the claim list.
+          required: ['analysis'],
         },
       },
     },

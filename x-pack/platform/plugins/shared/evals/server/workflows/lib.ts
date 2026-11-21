@@ -8,6 +8,7 @@
 import os from 'os';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import {
+  EVALS_EVALUATE_TIMEOUT_MS,
   EVALS_EVALUATE_URL,
   EVALS_ONLINE_SCORES_URL,
   EVALS_SCORES_URL,
@@ -121,6 +122,7 @@ export const evaluateTrace = async (
     method: 'POST',
     path: EVALS_EVALUATE_URL,
     headers: INTERNAL_API_HEADERS,
+    timeout: EVALS_EVALUATE_TIMEOUT_MS,
     body: {
       subject: {
         mode: 'single-turn',

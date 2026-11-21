@@ -82,6 +82,152 @@ describe('correctness evaluator', () => {
     ]);
   });
 
+  it('derives the summary from the claim analysis when the judge omits it', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { esClient } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    const promptMock = jest.fn().mockResolvedValue({
+      toolCalls: [
+        {
+          function: {
+            arguments: {
+              analysis: [
+                {
+                  claim: 'Event 4625 is a failed logon.',
+                  centrality: 'central',
+                  centrality_reason: 'Answers the question.',
+                  verdict: 'FULLY_SUPPORTED',
+                  sequence_match: 'NOT_APPLICABLE',
+                  justification_snippet: 'failed logon',
+                  explanation: 'Matches.',
+                },
+                {
+                  claim: 'It is logged by LSASS.',
+                  centrality: 'peripheral',
+                  centrality_reason: 'Extra detail.',
+                  verdict: 'NOT_IN_GROUND_TRUTH',
+                  sequence_match: 'NOT_APPLICABLE',
+                  justification_snippet: null,
+                  explanation: 'Not covered.',
+                },
+              ],
+            },
+          },
+        },
+      ],
+    });
+
+    const result = await correctnessEvaluator.evaluate({
+      trace: traceAccessor,
+      round: {
+        input: { message: 'What does event 4625 indicate?' },
+        response: { message: 'Event 4625 is a failed logon. It is logged by LSASS.' },
+        steps: [],
+      },
+      referenceData: { expected: 'Event ID 4625 indicates a failed logon attempt.' },
+      inferenceClient: { prompt: promptMock } as unknown as BoundInferenceClient,
+      log: logger,
+    });
+
+    expect(result.scores.map(({ name, label }) => [name, label])).toEqual([
+      ['factuality', 'MINOR_INACCURACIES'],
+      ['relevance', 'RELEVANT'],
+      ['sequence_accuracy', 'NOT_APPLICABLE'],
+    ]);
+    expect(result.scores.find(({ name }) => name === 'sequence_accuracy')?.score).toBe(1);
+  });
+
+  it('labels a derived sequence summary MISMATCH when only some central claims match', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { esClient } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    const centralClaim = (claim: string, sequenceMatch: string) => ({
+      claim,
+      centrality: 'central',
+      centrality_reason: 'Required step.',
+      verdict: 'FULLY_SUPPORTED',
+      sequence_match: sequenceMatch,
+      justification_snippet: claim,
+      explanation: 'Matches.',
+    });
+    const promptMock = jest.fn().mockResolvedValue({
+      toolCalls: [
+        {
+          function: {
+            arguments: {
+              analysis: [
+                centralClaim('Open the rule.', 'MATCH'),
+                centralClaim('Enable it.', 'NOT_APPLICABLE'),
+              ],
+            },
+          },
+        },
+      ],
+    });
+
+    const result = await correctnessEvaluator.evaluate({
+      trace: traceAccessor,
+      round: {
+        input: { message: 'How do I enable a rule?' },
+        response: { message: 'Open the rule. Enable it.' },
+        steps: [],
+      },
+      referenceData: { expected: 'Open the rule, then enable it.' },
+      inferenceClient: { prompt: promptMock } as unknown as BoundInferenceClient,
+      log: logger,
+    });
+
+    const sequenceScore = result.scores.find(({ name }) => name === 'sequence_accuracy');
+    expect(sequenceScore?.label).toBe('MISMATCH');
+    expect(sequenceScore?.score).toBe(0.5);
+  });
+
+  it('labels a derived factual summary MAJOR_INACCURACIES for an unsupported central claim', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { esClient } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    const promptMock = jest.fn().mockResolvedValue({
+      toolCalls: [
+        {
+          function: {
+            arguments: {
+              analysis: [
+                {
+                  claim: 'Event 4625 means the account is locked.',
+                  centrality: 'central',
+                  centrality_reason: 'Answers the question.',
+                  verdict: 'NOT_IN_GROUND_TRUTH',
+                  sequence_match: 'NOT_APPLICABLE',
+                  justification_snippet: null,
+                  explanation: 'Not covered.',
+                },
+              ],
+            },
+          },
+        },
+      ],
+    });
+
+    const result = await correctnessEvaluator.evaluate({
+      trace: traceAccessor,
+      round: {
+        input: { message: 'What does event 4625 indicate?' },
+        response: { message: 'Event 4625 means the account is locked.' },
+        steps: [],
+      },
+      referenceData: { expected: 'Event ID 4625 indicates a failed logon attempt.' },
+      inferenceClient: { prompt: promptMock } as unknown as BoundInferenceClient,
+      log: logger,
+    });
+
+    const factuality = result.scores.find(({ name }) => name === 'factuality');
+    expect(factuality?.label).toBe('MAJOR_INACCURACIES');
+    expect(factuality?.score).toBeCloseTo(0.1);
+  });
+
   it('throws when inferenceClient is not provided', async () => {
     const logger = loggingSystemMock.createLogger();
     const { esClient } = createEsClient();
