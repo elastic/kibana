@@ -194,6 +194,7 @@ export class EndpointAppContextService {
   private fleetServicesFactory: EndpointFleetServicesFactoryInterface | null = null;
   private savedObjectsFactoryService: SavedObjectsClientFactory | null = null;
   private readonly ccsCache = new SimpleMemCache({ ttl: CCS_CACHE_TTL_SECONDS });
+  private readonly authzCache = new WeakMap<KibanaRequest, Promise<EndpointAuthz>>();
 
   public security: SecurityServiceStart | undefined;
 
@@ -525,6 +526,22 @@ export class EndpointAppContextService {
   }
 
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
+    let promise = this.authzCache.get(request);
+
+    if (!promise) {
+      // Endpoint auth is per user. Same request = same user.
+      // Cache it for duration of request (via WeakMap); delete on rejection.
+      promise = this.resolveEndpointAuthz(request).catch((error) => {
+        this.authzCache.delete(request);
+        throw error;
+      });
+      this.authzCache.set(request, promise);
+    }
+
+    return promise;
+  }
+
+  private async resolveEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
     if (!this.startDependencies?.productFeaturesService) {
       throw new EndpointAppContentServicesNotStartedError();
     }
