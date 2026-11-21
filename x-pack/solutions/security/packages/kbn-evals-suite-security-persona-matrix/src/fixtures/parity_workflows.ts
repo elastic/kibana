@@ -129,7 +129,7 @@ export const TODOS_INDEX = 'persona-matrix-todos';
  * The external benchmark's agent had the platform's builtin `write_todos` tool;
  * the platform removed it platform-wide (#303186) after that baseline was
  * captured. This workflow reconstructs the tool's contract: a required
- * `todos` array of `{content, status}` objects (JSON-Schema trigger inputs,
+ * `todos` array of `{content, status}` objects (JSON-Schema root-level inputs,
  * the only format carrying arrays of objects), a verbatim copy of the original
  * tool description (model tool-selection keys on it). The result is the raw
  * index response; nothing reads it.

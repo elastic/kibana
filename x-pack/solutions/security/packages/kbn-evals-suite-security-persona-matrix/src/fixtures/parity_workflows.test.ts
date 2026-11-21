@@ -46,10 +46,11 @@ describe('parity workflows', () => {
   );
 
   it.each(PARITY_WORKFLOWS.map((w) => w.id))(
-    '%s trigger inputs satisfy the workflow-input schema the server enforces',
+    '%s root-level inputs satisfy the manual-trigger workflow-input schema',
     (id) => {
-      // The server parses trigger inputs with WorkflowInputSchema on create;
-      // a violation only surfaces at seed time (POST 400), so validate here.
+      // Root-level inputs use the manual trigger's WorkflowInputSchema; the agent
+      // tool schema reads them from the raw YAML, so a malformed block only
+      // surfaces at converse time. Validate here.
       const workflow = parse(PARITY_WORKFLOWS.find((w) => w.id === id)?.yaml ?? '') as {
         inputs?: unknown;
       };
@@ -142,7 +143,7 @@ describe('parity workflows', () => {
     expect(String(getDeep(step.with, 'document.todos'))).toContain('{{ inputs.todos | json }}');
   });
 
-  it('write-todos declares JSON-Schema trigger inputs with a required todos array of {content, status}', () => {
+  it('write-todos declares JSON-Schema root-level inputs with a required todos array of {content, status}', () => {
     // JSON-Schema inputs (object, not the legacy array form): the only input
     // format that can express an array of objects.
     const workflow = parse(

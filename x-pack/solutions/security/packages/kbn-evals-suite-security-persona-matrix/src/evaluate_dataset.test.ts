@@ -786,6 +786,51 @@ describe('task output shape', () => {
     const output = (await capturedTask!(toDatasetExample(baseExample))) as Record<string, unknown>;
     expect(output.judgedAnswerEmpty).toBe(true);
   });
+
+  it('records a rejected converse as an empty, errored submission instead of throwing', async () => {
+    const log = buildLog();
+    let capturedTask: ((example: unknown) => Promise<unknown>) | undefined;
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: {
+        query: jest.fn().mockRejectedValue(new Error('ECONNREFUSED')),
+      } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {
+          inputTokens: { name: 'inputTokens' },
+          outputTokens: { name: 'outputTokens' },
+          toolCalls: { name: 'toolCalls' },
+          latency: { name: 'latency' },
+        },
+        criteria: () => ({ evaluate: jest.fn().mockResolvedValue({ score: 1 }) }),
+        correctnessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
+        groundednessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
+      } as unknown as DefaultEvaluators,
+      executorClient: {
+        runExperiment: jest.fn(async (params: { task: unknown }) => {
+          capturedTask = params.task as (example: unknown) => Promise<unknown>;
+        }),
+      } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log,
+    });
+
+    await evaluateDataset({
+      dataset: { name: 'ds', description: 'desc', examples: [baseExample] },
+    });
+
+    const output = (await capturedTask!(toDatasetExample(baseExample))) as {
+      messages: Array<{ message: string }>;
+      errors: unknown[];
+      judgedAnswerEmpty?: boolean;
+    };
+    expect(output.messages[0].message).toBe(
+      `${UNANSWERED_PROMPT_MARKER} converse failed: ECONNREFUSED`
+    );
+    expect(output.errors).toHaveLength(1);
+    expect(output.judgedAnswerEmpty).toBe(true);
+    expect(log.error).toHaveBeenCalled();
+  });
 });
 
 describe('task judges and the last-assistant-step fallback', () => {

@@ -970,6 +970,9 @@ export function createEvaluatePersonaMatrixDataset({
               correctnessAnalysis: undefined,
               groundednessAnalysis: undefined,
               criteriaAnalysis: undefined,
+              // The marker text is non-empty, so without this Relevance would
+              // treat a failed converse as an answer.
+              judgedAnswerEmpty: true,
             };
           }
 
