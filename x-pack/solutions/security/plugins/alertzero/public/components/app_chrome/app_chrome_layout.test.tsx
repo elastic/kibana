@@ -159,10 +159,13 @@ describe('AppChromeLayout breadcrumbs', () => {
       </KibanaContextProvider>
     );
 
-  it('should not link the Security breadcrumb when the user cannot open the Security app', () => {
+  it.each([
+    ['absent', new Map()],
+    ['inaccessible', new Map([['securitySolutionUI', { status: AppStatus.inaccessible }]])],
+  ])('should not link the Security breadcrumb when the Security app is %s', (_, applications) => {
     renderAt('/', {
       ...coreStartStub,
-      application: { ...coreStartStub.application, applications$: of(new Map()) },
+      application: { ...coreStartStub.application, applications$: of(applications) },
     });
     expect(setBreadcrumbs).toHaveBeenLastCalledWith([{ text: 'Security' }, { text: 'AlertZero' }]);
   });
