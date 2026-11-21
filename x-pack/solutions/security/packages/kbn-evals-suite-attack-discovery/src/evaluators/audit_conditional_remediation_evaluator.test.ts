@@ -43,6 +43,8 @@ describe('findUnconditionalContainment', () => {
     'Prioritize suspending the service account.',
     'Rotate the key when you get a chance.',
     'Block the IP, which appeared in the alert.',
+    'Disable the key unless the activity proves illegitimate.',
+    'Block the IP unless it turns out to be unauthorized.',
   ])('flags unconditional advice: %s', (text) => {
     expect(findUnconditionalContainment(text)).toHaveLength(1);
   });
@@ -92,6 +94,9 @@ describe('findUnconditionalContainment', () => {
     'The SOC should immediately isolate the host.',
     'Recommended Actions:\n- Revoke the key',
     'Revoke the key, then confirm with the owner.',
+    // a descriptive adjective is not a condition
+    'Block the unrecognized IP.',
+    'Rotate the unexpected access key.',
   ])('flags unconditional advice anywhere in the sentence: %s', (text) => {
     expect(findUnconditionalContainment(text).length).toBeGreaterThan(0);
   });
@@ -108,6 +113,9 @@ describe('findUnconditionalContainment', () => {
     'Check CloudTrail for other actions by the principal and review the key age.',
     'The attacker attempted to disable logging and delete the trail.',
     'Do not block the IP until the owner confirms the traffic is unauthorized.',
+    // the owner not recognizing the activity is a finding the advice waits on
+    "Rotate all three identities' credentials if the IP is unrecognized.",
+    'If the login was unexpected, reset the password.',
   ])('does not flag investigation advice or conditioned containment: %s', (text) => {
     expect(findUnconditionalContainment(text)).toEqual([]);
   });
@@ -250,6 +258,61 @@ describe('findUnconditionalContainment', () => {
     const markdown =
       '**Recommended actions (if confirmed malicious):**\n1. Revoke the key\n2. Disable the user\n3. Isolate the host';
     expect(findUnconditionalContainment(markdown)).toEqual([]);
+  });
+
+  describe('commas and colons that do not end a clause', () => {
+    it.each([
+      'If alice.dev, ci-runner, or bob.analyst are confirmed compromised, revoke active sessions, rotate access keys, and enforce MFA re-enrollment.',
+      'If {{ user.name alice }}, {{ user.name bob }}, or {{ user.name carol }} is confirmed compromised, revoke active sessions, rotate keys, and enforce MFA.',
+      'Once alice, bob and carol are confirmed unauthorized, disable their keys.',
+      '- **13:18:15 UTC — Defense Evasion first (T1562.008 Impair Defenses: Disable Cloud Logs).** The rule fired twice for {{ user.name deploy-bot }}.',
+    ])('does not flag: %s', (text) => {
+      expect(findUnconditionalContainment(text)).toEqual([]);
+    });
+
+    it.each([
+      'Revoke the keys for alice, bob, or carol.',
+      'Block the IP, the host, and the user.',
+      'Next steps: block the IP, then review T1078 (Valid Accounts: Cloud Accounts) activity.',
+    ])('still flags: %s', (text) => {
+      expect(findUnconditionalContainment(text)).toHaveLength(1);
+    });
+
+    it.each([
+      'Review the account, revoke, and notify the owner.',
+      'Check the host, isolate or notify the owner.',
+      'T1078 remediation: revoke the access key.',
+      'T1078 Remediation: Revoke the access key.',
+      'T1078 Valid Accounts: revoke the access key.',
+      'T1078 Valid Accounts: Revoke the access key.',
+      'T1562.008 Cloud Accounts: revoke the access key.',
+      'T1562.008 Impair Defenses: disable logs.',
+      'Observed T1562.008 impair defenses: disable logs.',
+      'Observed T1562.008 impair defenses: disable cloud logs or revoke the key.',
+      'Observed T1562.008 impair defenses: disable cloud logs or modify logs.',
+      'Observed T1078 valid accounts: revoke the access key.',
+    ])('flags containment the masking must not hide: %s', (text) => {
+      expect(findUnconditionalContainment(text)).toHaveLength(1);
+    });
+
+    it.each([
+      'If hosts A, B, and C are confirmed compromised, isolate them.',
+      'Once the hosts web-1, db-2, or cache-3 are confirmed unauthorized, disable them.',
+      'Observed T1562.008 Impair Defenses: Disable Cloud Logs.',
+      'The actor used T1562.008 Impair Defenses: Disable Cloud Logs on the trail.',
+      'Observed T1562.008 impair defenses: disable cloud logs.',
+      'Observed T1562.008 impair defenses: disable cloud logs or modify cloud logs.',
+      'Observed T1562.008 Impair Defenses: Disable Cloud Logs or Modify Cloud Logs.',
+      'The actor used T1562.008 (impair defenses: disable cloud logs) on the trail.',
+    ])('still masks entity lists and technique names: %s', (text) => {
+      expect(findUnconditionalContainment(text)).toEqual([]);
+    });
+  });
+
+  it('documented limits: a gate with no condition word is flagged', () => {
+    expect(
+      findUnconditionalContainment('For any principal confirmed compromised, revoke its sessions.')
+    ).toHaveLength(1);
   });
 
   it('documented limits: a conditional split across sentences is flagged', () => {

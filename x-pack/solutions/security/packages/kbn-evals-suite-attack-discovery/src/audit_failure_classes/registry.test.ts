@@ -163,6 +163,30 @@ describe('audit failure class registry', () => {
         /unknown group/,
       ],
       [
+        'a variant override forbidden pair naming unknown groups',
+        {
+          variantOverrides: {
+            baseline: {
+              requiredAnyOf: [firstGroup],
+              forbiddenCoCitation: [['nope', firstGroup]] as Array<[string, string]>,
+            },
+          },
+        },
+        /variantOverrides\.baseline\.forbiddenCoCitation names unknown group "nope"/,
+      ],
+      [
+        'a variant override forbidden pair of one group',
+        {
+          variantOverrides: {
+            baseline: {
+              requiredAnyOf: [firstGroup],
+              forbiddenCoCitation: [[firstGroup, firstGroup]] as Array<[string, string]>,
+            },
+          },
+        },
+        /variantOverrides\.baseline\.forbiddenCoCitation needs two distinct groups/,
+      ],
+      [
         'a recall target missing in one variant',
         { variantOverrides: { baseline: { requiredAnyOf: [] } } },
         /must declare a recall target/,
@@ -241,6 +265,37 @@ describe('audit failure class registry', () => {
           requiredGroup: 'prod-deploy-bot',
         });
       }
+    });
+
+    describe('forbiddenCoCitation override', () => {
+      const pair: AuditScenario['gold']['forbiddenCoCitation'] = [[left, right]];
+      const goldWith = (override?: AuditScenario['gold']['forbiddenCoCitation']) => ({
+        ...scenario.gold,
+        forbiddenCoCitation: pair,
+        variantOverrides: {
+          baseline: {
+            requiredAnyOf: [left],
+            ...(override === undefined ? {} : { forbiddenCoCitation: override }),
+          },
+        },
+      });
+
+      it('replaces the scenario pairs when the override names others', () => {
+        const other: AuditScenario['gold']['forbiddenCoCitation'] = [[right, left]];
+        expect(getGoldForVariant(goldWith(other), 'baseline').forbiddenCoCitation).toEqual(other);
+      });
+
+      it('clears the pairs when the override is an empty list', () => {
+        expect(getGoldForVariant(goldWith([]), 'baseline').forbiddenCoCitation).toEqual([]);
+      });
+
+      it('keeps the scenario pairs when the override does not set them', () => {
+        expect(getGoldForVariant(goldWith(), 'baseline').forbiddenCoCitation).toEqual(pair);
+      });
+
+      it('keeps the scenario pairs in a variant with no override', () => {
+        expect(getGoldForVariant(goldWith([]), 'enriched').forbiddenCoCitation).toEqual(pair);
+      });
     });
 
     it.each(AUDIT_SCENARIOS.map((candidate) => [candidate.id, candidate] as const))(

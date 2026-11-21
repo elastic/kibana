@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/discoveries'
   - '@kbn/kbn-client'
+  - '@kbn/security-mitre-attack-server'
 tags:
   - functional-tests
   - package

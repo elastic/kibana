@@ -267,6 +267,7 @@ export const importsOverrides: OxlintOverride[] = [
     files: [
       'kbn-evals-suite-alert-analysis-workflow',
       'kbn-evals-suite-attack-discovery-fp-tp',
+      'kbn-evals-suite-attack-discovery-worker',
       'kbn-evals-suite-security-alert-triage',
     ].map((suite) => `${SECURITY_PACKAGES_DIR}/${suite}/${ESLINT_LINTED_FILES}`),
     rules: {

@@ -90,6 +90,13 @@ triggers:
             How many alerts generation may retrieve. The per-space worker renders
             this from its schedule interval (10,000 per 24h, at least 100, at most
             10,000). Omit on a standalone run to retrieve a full day.
+        batch_size:
+          type: integer
+          minimum: 50
+          maximum: 1000
+          description: >-
+            Maximum alerts per generation batch. Omit to keep the batched
+            generation child's default (100). Passed through only when set.
         parent_run_id:
           type: string
           maxLength: 128
@@ -163,7 +170,8 @@ steps:
       workflow-id: system-security-attack-discovery-batched-generation
       run-as-mode: inherit
       inputs:
-        # `batch_size` stays at the child's default. `lookback` is this run's
+        # `batch_size` is forwarded only when this run was given one, so an unset
+        # input leaves the child's default. `lookback` is this run's
         # schedule interval, so an hourly worker reads the last hour rather than
         # the last day. The child also reads one minute further, covering the
         # seam between ticks. `max_alerts` defaults to a full day when this run
@@ -171,6 +179,7 @@ steps:
         connector_id: "{{ inputs.connector_id }}"
         max_alerts: "${{ inputs.max_alerts | default: 10000 }}"
         lookback: "{{ inputs.schedule_interval }}"
+        batch_size: "${{ inputs.batch_size }}"
 
   # The fan-out list, resolved once so the batches, the parallel step, and the
   # summary agree on it. `| default: consts.no_discoveries` normalizes the three

@@ -8,7 +8,8 @@ import type { Evaluator } from '@kbn/evals';
 import { getDiscoveryMarkdown } from '../audit_failure_classes/discovery_text';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
 import type { AuditReferenceResolver } from '../audit_failure_classes/registry';
-import { notApplicable, resolveAuditInputs } from './audit_evaluator_helpers';
+import { resolveScoredDiscoveries } from './audit_evaluator_helpers';
+import { isKnownTechniqueName } from './mitre_technique_names';
 
 export const AUDIT_CONDITIONAL_REMEDIATION_EVALUATOR_NAME = 'ConditionalRemediation';
 
@@ -182,7 +183,9 @@ const MID_CLAUSE_FRAMES: readonly RegExp[] = [
 const MID_CLAUSE_CANCEL = new RegExp(`${NEGATION.source}|\\b(?:whether|if)\\b`, 'i');
 
 const VERIFY_VERB = '(?:confirm\\w*|verif\\w+|validat\\w+)';
-const SUSPECT_ADJECTIVE = '(?:malicious|unauthori[sz]ed|suspicious|compromised)';
+/** A finding against the activity, including the owner not recognizing it ("if the IP is unrecognized"). */
+const SUSPECT_ADJECTIVE =
+  '(?:malicious|unauthori[sz]ed|suspicious|compromised|unrecogni[sz]ed|unexpected|illegitimate|unapproved)';
 /**
  * A condition word counts only with a finding it waits on. Only if/once/unless/pending open a
  * condition (and "should" in SHOULD_PROVE_CUE, "only after/when" as an explicit gate); bare
@@ -198,10 +201,18 @@ const VERIFICATION_CUE = new RegExp(
   'i'
 );
 const JUDGEMENT_CUE = new RegExp(
-  `\\b(?:if|once|unless|pending|only (?:after|when))\\b.*\\b(?:is|are|was|were|be|been|proves?|turns? out|deemed|found|determined)\\s+(?:to be\\s+)?(?:\\w+\\s+)?${SUSPECT_ADJECTIVE}`,
+  `\\b(?:if|once|pending|only (?:after|when))\\b.*\\b(?:is|are|was|were|be|been|proves?|turns? out|deemed|found|determined)\\s+(?:to be\\s+)?(?:\\w+\\s+)?${SUSPECT_ADJECTIVE}`,
   'i'
 );
-const ADJECTIVE_CUE = new RegExp(`\\b(?:if|once|unless)\\s+(?:\\w+\\s+)?${SUSPECT_ADJECTIVE}`, 'i');
+const ADJECTIVE_CUE = new RegExp(`\\b(?:if|once)\\s+(?:\\w+\\s+)?${SUSPECT_ADJECTIVE}`, 'i');
+/**
+ * "unless" reverses a finding: "Disable the key unless the activity proves illegitimate" advises
+ * disabling when nothing is found. Only "unless the owner confirms" waits on a verification.
+ */
+const UNLESS_FINDING = new RegExp(
+  `\\bunless\\b.*\\b(?:${SUSPECT_ADJECTIVE}|proves?|turns? out)\\b`,
+  'i'
+);
 /** "should the activity prove malicious", "should it be confirmed". */
 const SHOULD_PROVE_CUE = new RegExp(
   `\\bshould\\b(?:\\s+\\S+){0,4}?\\s+(?:prove|turn out|be (?:confirmed|verified|validated|deemed|found|determined))\\b`,
@@ -250,10 +261,66 @@ const splitSentences = (line: string): string[] =>
     )
     .filter((segment) => segment.length > 0);
 
+/**
+ * A list of one-word items ("alice, bob, or carol"); its commas do not end a clause. A containment
+ * verb is never a list item: "Review the account, revoke, and notify the owner" is coordinated
+ * actions, and the comma before "revoke" must still end the clause.
+ */
+const LIST_ITEM_WORD = `(?!(?:${BASE_VERBS})\\b)[\\w.@\`'/-]+`;
+const SERIAL_LIST = new RegExp(
+  `[\\w.@\`'/-]+(?:,\\s+${LIST_ITEM_WORD})+,?\\s+(?:and|or)\\s+${LIST_ITEM_WORD}`,
+  'gi'
+);
+/**
+ * The colon in a MITRE technique name ("T1562.008 (Impair Defenses: Disable Cloud Logs)"). The
+ * name and the sub-name are Title Case, so a lowercase label ("T1078 remediation: revoke the key")
+ * or a sentence after the colon ("T1078 Valid Accounts: Revoke the key.") is not one. Cost: a
+ * Title Case imperative after a technique name ("T1078 Valid Accounts: Revoke Access Keys.") is
+ * indistinguishable from a sub-name and stays masked.
+ */
+const TITLE_WORD = '[A-Z][\\w/+-]*';
+const CONNECTOR = '(?:and|or|of|the|for|to|in|on|with|via|from)';
+const NEXT_NAME_WORD = `\\s+(?:${CONNECTOR}\\s+)?${TITLE_WORD}`;
+const TECHNIQUE_NAME_COLON = new RegExp(
+  `\\bT\\d{4}(?:\\.\\d{3})?\\)?\\s*\\(?${TITLE_WORD}(?:\\s+(?:${CONNECTOR}\\s+)?${TITLE_WORD})*:(?=\\s+${TITLE_WORD}(?:${NEXT_NAME_WORD}|\\s*[).,;]|\\s*$))`,
+  'g'
+);
+/** A capitalized heading ("T1078 Account Remediation: ...") is a label, not a name. */
+const HEADING_NOT_A_NAME = new RegExp(
+  `^\\W*(?:${BASE_VERBS})\\b|\\b(?:remediations?|recommendations?|actions?|responses?|containment|mitigations?|steps?|fix(?:es)?|guidance)\\W*$`,
+  'i'
+);
+/**
+ * A technique id followed by a name, a colon and a sub-name in any casing. Kept only when the
+ * names are the ones MITRE gives that id, so lowercase mentions stay intact too.
+ */
+const ANY_CASE_TECHNIQUE_COLON =
+  /\b(T\d{4}(?:\.\d{3})?)\)?\s*\(?([A-Za-z][\w /+-]{0,60}?):(?=\s+([\w /+-]+?)\s*(?:[).,;]|$))/g;
+const MAX_TECHNIQUE_NAME_LENGTH = 70;
+const KEPT_COMMA = '\u0001';
+const KEPT_COLON = '\u0002';
+
+const keepTechniqueNameColon = (match: string): string => {
+  const name = match.replace(/^T\d{4}(?:\.\d{3})?/, '').slice(0, -1);
+  if (name.length > MAX_TECHNIQUE_NAME_LENGTH || HEADING_NOT_A_NAME.test(name)) return match;
+  return `${match.slice(0, -1)}${KEPT_COLON}`;
+};
+
+const keepKnownTechniqueColon = (
+  match: string,
+  id: string,
+  name: string,
+  subName: string
+): string =>
+  isKnownTechniqueName(id, name, subName) ? `${match.slice(0, -1)}${KEPT_COLON}` : match;
+
 const splitClauses = (sentence: string): string[] =>
   sentence
+    .replace(SERIAL_LIST, (list) => list.split(',').join(KEPT_COMMA))
+    .replace(TECHNIQUE_NAME_COLON, keepTechniqueNameColon)
+    .replace(ANY_CASE_TECHNIQUE_COLON, keepKnownTechniqueColon)
     .split(/\s*[,:]\s+|\s*[,:]$/)
-    .map((clause) => clause.trim())
+    .map((clause) => clause.split(KEPT_COMMA).join(',').split(KEPT_COLON).join(':').trim())
     .filter((clause) => clause.length > 0);
 
 const isAnaphoricCue = (clause: string, previousSentence: string): boolean =>
@@ -263,7 +330,7 @@ const isAnaphoricCue = (clause: string, previousSentence: string): boolean =>
     (RESTATES_EVENT.test(clause) && VERIFIED_EVENT.test(previousSentence)));
 
 const isCue = (clause: string, previousSentence: string): boolean =>
-  VERIFICATION_CUE.test(clause) ||
+  (VERIFICATION_CUE.test(clause) && !UNLESS_FINDING.test(clause)) ||
   JUDGEMENT_CUE.test(clause) ||
   ADJECTIVE_CUE.test(clause) ||
   SHOULD_PROVE_CUE.test(clause) ||
@@ -348,7 +415,8 @@ export const findUnconditionalContainment = (markdown: string): string[] => {
  * governing condition; N/A when nothing is scored.
  *
  * Heuristic, regex based; it does not parse grammar. Each sentence is split into clauses at
- * commas and colons. A clause is an instruction when a containment verb opens it ("Revoke the
+ * commas and colons, except the commas of a one-word list ("If alice, bob, or carol is confirmed
+ * compromised") and the colon in a MITRE technique name. A clause is an instruction when a containment verb opens it ("Revoke the
  * key", "Next steps: revoke the key", "To contain it, isolate the host"), follows a directive
  * (should, must, recommend, prioritize, "critical to", "steps include revoking", "should include
  * isolating"), is joined to an earlier instruction with and/then/or, is a gerund under a
@@ -366,6 +434,7 @@ export const findUnconditionalContainment = (markdown: string): string[] => {
  * and the clauses after it, and the clauses before it when it opens with the cue.
  *
  * Known misses: a conditional split across sentences ("Verify first. Then revoke.") is flagged;
+ * so is a gate with no condition word ("for any principal confirmed compromised, revoke ...");
  * past forms ("the key was revoked") are never flagged; a verb used mid-clause with no
  * directive frame ("the team can disable it") is not flagged; a gerund after before/after
  * ("before revoking it") is never an instruction. Treat it as a screen for review, not a verdict.
@@ -377,23 +446,10 @@ export const createAuditConditionalRemediationEvaluator = (
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, metadata }) => {
-    const resolved = resolveAuditInputs({ metadata, output, resolveReference });
+    const resolved = resolveScoredDiscoveries({ metadata, output, resolveReference });
     if ('result' in resolved) return resolved.result;
 
-    const { gold, discoveries } = resolved;
-    if (discoveries.length === 0) {
-      return notApplicable('No discoveries to check for remediation advice.');
-    }
-
-    const confirmedIds = new Set(
-      gold.confirmedGroups.flatMap((group) => gold.alertGroups[group] ?? [])
-    );
-    const scored = discoveries.filter(
-      ({ alertIds }) => alertIds.length === 0 || alertIds.some((id) => !confirmedIds.has(id))
-    );
-    if (scored.length === 0) {
-      return notApplicable('Every discovery cites only confirmed-malicious alerts.');
-    }
+    const { scored } = resolved;
 
     const offending = scored.flatMap((discovery) =>
       findUnconditionalContainment(getDiscoveryMarkdown(discovery)).map(

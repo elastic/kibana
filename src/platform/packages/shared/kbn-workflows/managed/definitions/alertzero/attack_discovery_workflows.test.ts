@@ -92,6 +92,9 @@ interface YamlWorkflow {
         {
           type?: string;
           maxLength?: number;
+          minimum?: number;
+          maximum?: number;
+          default?: unknown;
           enum?: string[];
           properties?: Record<string, unknown>;
           additionalProperties?: boolean;
@@ -341,6 +344,43 @@ describe('Attack Discovery worker chain', () => {
 
     it('looks back over the schedule interval', () => {
       expect(asInputs(run).lookback).toBe('{{ inputs.schedule_interval }}');
+    });
+
+    describe('optional batch_size', () => {
+      const manual = worker.triggers?.find((trigger) => trigger.type === 'manual');
+      const batchSizeInput = manual?.inputs?.properties?.batch_size;
+      const forwarded = (inputs: Record<string, unknown>): unknown =>
+        createWorkflowLiquidEngine().evalValueSync(
+          String(asInputs(run).batch_size)
+            .replace(/^\$?\{\{/, '')
+            .replace(/\}\}$/, '')
+            .trim(),
+          { inputs }
+        );
+
+      it('accepts batch_size on the runner within the same bounds as the child', () => {
+        expect({
+          type: batchSizeInput?.type,
+          minimum: batchSizeInput?.minimum,
+          maximum: batchSizeInput?.maximum,
+        }).toEqual({ type: 'integer', minimum: 50, maximum: 1000 });
+      });
+
+      it('does not require batch_size', () => {
+        expect(manual?.inputs?.required).not.toContain('batch_size');
+      });
+
+      it('has no default of its own, so the child default applies when unset', () => {
+        expect(batchSizeInput?.default).toBeUndefined();
+      });
+
+      it('forwards a set batch_size to the child unchanged', () => {
+        expect(forwarded({ schedule_interval: '1h', batch_size: 50 })).toBe(50);
+      });
+
+      it('forwards nothing when batch_size is unset', () => {
+        expect(forwarded({ schedule_interval: '1h' })).toBeUndefined();
+      });
     });
 
     it('reads one minute past the lookback so a tick covers the seam', () => {

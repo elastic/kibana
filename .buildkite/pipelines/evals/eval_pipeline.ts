@@ -38,6 +38,7 @@ export interface EvalsSuiteMetadataEntry {
   scoutDomain?: string;
   weeklyEisModelGroups?: string[];
   defaultModelGroups?: string[] | null;
+  requiredModelGroups?: string[];
   defaultJudge?: string;
   shards?: EvalsSuiteShard[];
   stepTimeoutInMinutes?: number;
@@ -305,13 +306,18 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
   const evalSuites = readEvalsSuiteMetadata();
   const runAllEvals = parsedLabels.includes('evals:all');
+  const isSelectedByOwnLabel = (suite: EvalsSuiteMetadataEntry): boolean => {
+    const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
+    return labels.some((label) => parsedLabels.includes(label));
+  };
+  // A suite that only pins `requiredModelGroups` runs expensive tier models, so `evals:all` never
+  // expands to it, with or without a `models:*` label: its own ciLabel must select it.
+  const isRequiredOnly = (suite: EvalsSuiteMetadataEntry): boolean =>
+    !!suite.requiredModelGroups?.length && !suite.defaultModelGroups?.length;
   const selectedEvalSuites = (
     runAllEvals
-      ? evalSuites
-      : evalSuites.filter((suite) => {
-          const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
-          return labels.some((label) => parsedLabels.includes(label));
-        })
+      ? evalSuites.filter((suite) => !isRequiredOnly(suite) || isSelectedByOwnLabel(suite))
+      : evalSuites.filter(isSelectedByOwnLabel)
   ).filter((suite) => !skippedSuiteIds.has(suite.id));
   // Model filtering (models:* labels): none => skip (explicit selection required);
   // `models:<group>` => run those groups; aliases (e.g. `models:weekly-eis-models`) expand.
@@ -344,9 +350,13 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
       : [];
     const resolved = [...new Set([...explicitModelGroups, ...weeklyModels])];
     if (resolved.length > 0) {
-      return resolved;
+      // `requiredModelGroups` is always unioned in: the worker suite must run the AZ tier models it
+      // uses even when the requester asked for one specific model.
+      return [...new Set([...resolved, ...(suite.requiredModelGroups ?? [])])];
     }
-    return suite.defaultModelGroups ?? [];
+    return [
+      ...new Set([...(suite.defaultModelGroups ?? []), ...(suite.requiredModelGroups ?? [])]),
+    ];
   };
 
   const resolveJudge = (suite: EvalsSuiteMetadataEntry): EvalJudge => {
@@ -365,10 +375,15 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
     return null;
   }
 
-  // Without models:* labels, skip (running all models is expensive) — except suites with
-  // `defaultModelGroups`, which use their pinned defaults.
+  // Without models:* labels, skip (running all models is expensive) — except suites that pin a
+  // cheap `defaultModelGroups`. A suite with only `requiredModelGroups` pins expensive tier models,
+  // so it runs unlabelled only when its own ciLabel selected it, never through a bare `evals:all`.
   const suitesWithDefaults = selectedEvalSuites.filter(
-    (suite) => suite.defaultModelGroups && suite.defaultModelGroups.length > 0
+    (suite) =>
+      (suite.defaultModelGroups && suite.defaultModelGroups.length > 0) ||
+      (suite.requiredModelGroups &&
+        suite.requiredModelGroups.length > 0 &&
+        isSelectedByOwnLabel(suite))
   );
   if (!hasGlobalModelSelection && suitesWithDefaults.length === 0) {
     return null;
