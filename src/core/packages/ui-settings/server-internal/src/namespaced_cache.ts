@@ -19,11 +19,24 @@ interface NamespacedCacheEntry<T = unknown> {
 export const NAMESPACED_CACHE_TTL = 10_000;
 
 /**
- * Shared process-wide cache for namespace-keyed data with configurable TTL.
- * Used to cache getUserProvided() results across IUiSettingsClient instances.
+ * Entries that omit a scope share this one. Production readers pass the
+ * caller's credential scope so different principals never collide.
+ */
+const DEFAULT_CACHE_SCOPE = '';
+const CACHE_KEY_SEPARATOR = '\0';
+
+function storageKey(namespace: string, scope: string): string {
+  return `${namespace}${CACHE_KEY_SEPARATOR}${scope}`;
+}
+
+/**
+ * Shared process-wide cache for namespace-and-scope-keyed data with configurable TTL.
+ * Used to cache getUserProvided() results across IUiSettingsClient instances that
+ * authenticate as the same principal.
  *
- * Includes in-flight request deduplication to prevent thundering herd when
- * multiple concurrent requests fetch the same namespace's data.
+ * Includes in-flight request deduplication to prevent a thundering herd of
+ * concurrent reads for one namespace and one credential. A settings write
+ * drops every scope in the namespace.
  *
  * @internal
  */
@@ -32,40 +45,54 @@ export class NamespacedCache<T = unknown> {
   private readonly inflightReads = new Map<string, Promise<T>>();
 
   /**
-   * Get cached value for a specific namespace
+   * Get cached value for a namespace and credential scope.
    */
-  get(namespace: string): T | null {
-    const entry = this.entries.get(namespace);
+  get(namespace: string, scope: string = DEFAULT_CACHE_SCOPE): T | null {
+    const entry = this.entries.get(storageKey(namespace, scope));
     return entry ? entry.value : null;
   }
 
   /**
-   * Set cached value with TTL
+   * Set cached value with TTL for a namespace and credential scope.
+   * Replaces only that scope. Other principals in the namespace are left alone.
    */
-  set(namespace: string, value: T, ttl: number = NAMESPACED_CACHE_TTL): void {
-    this.del(namespace); // Clear existing timer
+  set(
+    namespace: string,
+    value: T,
+    ttl: number = NAMESPACED_CACHE_TTL,
+    scope: string = DEFAULT_CACHE_SCOPE
+  ): void {
+    const key = storageKey(namespace, scope);
+    this.clearEntry(key);
+    this.inflightReads.delete(key);
 
     const timer = setTimeout(() => {
-      this.entries.delete(namespace);
+      this.entries.delete(key);
     }, ttl);
 
-    this.entries.set(namespace, { value, timer });
+    this.entries.set(key, { value, timer });
   }
 
   /**
-   * Delete cached value and clear any in-flight promises.
-   * This ensures cache invalidation also prevents stale in-flight requests.
+   * Delete every cached value and in-flight read in a namespace, for every scope.
+   * A settings write must not leave another principal holding the pre-write value.
    */
   del(namespace: string): void {
-    // Clear cached value
-    const entry = this.entries.get(namespace);
+    const prefix = storageKey(namespace, '');
+    [...this.entries.keys()]
+      .filter((key) => key.startsWith(prefix))
+      .forEach((key) => this.clearEntry(key));
+    [...this.inflightReads.keys()]
+      .filter((key) => key.startsWith(prefix))
+      .forEach((key) => this.inflightReads.delete(key));
+  }
+
+  private clearEntry(key: string): void {
+    const entry = this.entries.get(key);
     if (entry) {
       clearTimeout(entry.timer);
-      this.entries.delete(namespace);
+      this.entries.delete(key);
     }
-
-    // Clear in-flight promises to prevent stale data
-    this.inflightReads.delete(namespace);
   }
 
   /**
@@ -83,37 +110,37 @@ export class NamespacedCache<T = unknown> {
    * Get in-flight read promise for a specific namespace.
    * Used for request deduplication - caller receives the actual result.
    */
-  getInflightRead(namespace: string): Promise<T> | null {
-    const promise = this.inflightReads.get(namespace);
+  getInflightRead(namespace: string, scope: string = DEFAULT_CACHE_SCOPE): Promise<T> | null {
+    const promise = this.inflightReads.get(storageKey(namespace, scope));
     return promise ? promise : null;
   }
 
   /**
-   * Set in-flight promise for a specific namespace.
+   * Set in-flight promise for a namespace and credential scope.
    * The promise is automatically removed when it resolves or rejects.
    */
-  setInflightRead(namespace: string, promise: Promise<T>): void {
-    this.inflightReads.set(namespace, promise);
+  setInflightRead(
+    namespace: string,
+    promise: Promise<T>,
+    scope: string = DEFAULT_CACHE_SCOPE
+  ): void {
+    const key = storageKey(namespace, scope);
+    this.inflightReads.set(key, promise);
 
-    // Auto-cleanup when promise settles
-    // Only delete if this promise is still the current one (prevents race conditions)
-    promise
-      .then(() => {
-        if (this.inflightReads.get(namespace) === promise) {
-          this.inflightReads.delete(namespace);
-        }
-      })
-      .catch(() => {
-        if (this.inflightReads.get(namespace) === promise) {
-          this.inflightReads.delete(namespace);
-        }
-      });
+    // Auto-cleanup when promise settles.
+    // Only delete if this promise is still the current one (prevents race conditions).
+    const clearIfCurrent = () => {
+      if (this.inflightReads.get(key) === promise) {
+        this.inflightReads.delete(key);
+      }
+    };
+    promise.then(clearIfCurrent, clearIfCurrent);
   }
 
   /**
-   * Check if a namespace has a cached value
+   * Check if a namespace and scope have a cached value
    */
-  has(namespace: string): boolean {
-    return this.entries.has(namespace);
+  has(namespace: string, scope: string = DEFAULT_CACHE_SCOPE): boolean {
+    return this.entries.has(storageKey(namespace, scope));
   }
 }

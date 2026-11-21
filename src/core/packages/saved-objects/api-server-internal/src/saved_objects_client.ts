@@ -60,6 +60,9 @@ import type {
  * Core internal implementation of {@link SavedObjectsClientContract}
  * @internal
  */
+const clientCacheScopes = new WeakMap<SavedObjectsClient, string>();
+let unscopedClientCount = 0;
+
 export class SavedObjectsClient implements SavedObjectsClientContract {
   public static errors = SavedObjectsErrorHelpers;
   public errors = SavedObjectsErrorHelpers;
@@ -69,6 +72,27 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   /** @internal */
   constructor(repository: ISavedObjectsRepository) {
     this._repository = repository;
+  }
+
+  /**
+   * Credential scope of the underlying repository. Callers that cache results of
+   * this client must include it in the cache key.
+   */
+  getCacheScope(): string | null {
+    const repository = this._repository as ISavedObjectsRepository & {
+      getCacheScope?: () => string | null;
+    };
+    if (typeof repository.getCacheScope === 'function') {
+      return repository.getCacheScope();
+    }
+
+    const existing = clientCacheScopes.get(this);
+    if (existing !== undefined) {
+      return existing;
+    }
+    const scope = `unscoped-client:${++unscopedClientCount}`;
+    clientCacheScopes.set(this, scope);
+    return scope;
   }
 
   /** {@inheritDoc SavedObjectsClientContract.create} */

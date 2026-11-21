@@ -333,6 +333,30 @@ describe('uiSettings', () => {
     });
 
     describe('#asScopedToClient', () => {
+      it('passes the saved objects client credential scope through to UiSettingsClient', async () => {
+        await service.setup(setupDeps);
+        const start = await service.start();
+        const scopedClient = Object.assign(savedObjectsClient, {
+          getCacheScope: () => 'credential-a',
+        });
+
+        start.asScopedToClient(scopedClient);
+
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].cacheScope).toBe('credential-a');
+      });
+
+      it('skips the shared cache when the saved objects client has no credential scope', async () => {
+        await service.setup(setupDeps);
+        const start = await service.start();
+        const scopedClient = Object.assign(savedObjectsClient, {
+          getCacheScope: () => null,
+        });
+
+        start.asScopedToClient(scopedClient);
+
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].cacheScope).toBeNull();
+      });
+
       it('passes saved object type "config" to UiSettingsClient', async () => {
         await service.setup(setupDeps);
         const start = await service.start();

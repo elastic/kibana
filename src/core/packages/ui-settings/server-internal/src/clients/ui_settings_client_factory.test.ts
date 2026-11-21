@@ -25,6 +25,7 @@ describe('ui settings factory', () => {
       savedObjectsClient,
       log: logger.get(),
       namespace: 'default',
+      cacheScope: '',
     };
   };
 

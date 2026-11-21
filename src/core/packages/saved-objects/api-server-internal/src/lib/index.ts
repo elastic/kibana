@@ -8,6 +8,10 @@
  */
 
 export { SavedObjectsRepository } from './repository';
+export {
+  associateEsClientCacheScope,
+  INTERNAL_SAVED_OBJECTS_CACHE_SCOPE,
+} from './es_client_cache_scope';
 export { SavedObjectsClientProvider } from './scoped_client_provider';
 export { PointInTimeFinder } from './point_in_time_finder';
 export type { ISavedObjectsClientProvider } from './scoped_client_provider';
