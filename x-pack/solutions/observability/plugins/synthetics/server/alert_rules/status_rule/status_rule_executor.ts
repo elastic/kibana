@@ -10,7 +10,7 @@ import type {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/core/server';
-import { intersection, isEmpty } from 'lodash';
+import { intersection, isEmpty, union } from 'lodash';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { type StatusRuleCondition } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
@@ -119,24 +119,33 @@ export class StatusRuleExecutor {
     }
   }
 
-  async init() {
+  async init(alertingConfigIds: string[] = []) {
     const { uiSettingsClient } = this.options.services;
     this.dateFormat = await uiSettingsClient.get('dateFormat');
     const timezone = await uiSettingsClient.get('dateFormat:tz');
     this.tz = timezone === 'Browser' ? 'UTC' : timezone;
-    return await this.getMonitors();
+    return await this.getMonitors(alertingConfigIds);
   }
 
-  async getMonitors() {
+  /**
+   * Loads the monitors in the rule's scope. `alertingConfigIds` are monitors that were down or
+   * pending in the previous run; they stay in scope even if the KQL filter can't match them.
+   */
+  async getMonitors(alertingConfigIds: string[] = []) {
     const baseFilter = !this.hasCustomCondition
       ? `${syntheticsMonitorAttributes}.${AlertConfigKey.STATUS_ENABLED}: true`
       : '';
 
-    const configIds = await queryFilterMonitors({
+    const kqlConfigIds = await queryFilterMonitors({
       spaceId: this.options.spaceId,
       esClient: this.esClient,
       ruleParams: this.params,
     });
+
+    // The KQL filter only matches monitors with pings in the last 24h, so a monitor that stopped
+    // reporting would drop out of scope and its alerts would recover as if it had been deleted.
+    // Keep alerting monitors in scope until they recover.
+    const configIds = kqlConfigIds ? union(kqlConfigIds, alertingConfigIds) : kqlConfigIds;
 
     if (this.params.kqlQuery && isEmpty(configIds)) {
       this.debug(`No monitor found with the given KQL query ${this.params.kqlQuery}`);
@@ -181,8 +190,13 @@ export class StatusRuleExecutor {
     prevDownConfigs?: AlertStatusConfigs;
     prevPendingConfigs?: AlertPendingStatusConfigs;
   }): Promise<AlertOverviewStatus> {
-    const { enabledMonitorQueryIds, maxPeriod, monitorLocationIds, monitorsData } =
-      await this.init();
+    const alertingConfigIds = [
+      ...Object.values(prevDownConfigs),
+      ...Object.values(prevPendingConfigs),
+    ].map(({ configId }) => configId);
+    const { enabledMonitorQueryIds, maxPeriod, monitorLocationIds, monitorsData } = await this.init(
+      alertingConfigIds
+    );
 
     const range = this.getRange(maxPeriod);
 
