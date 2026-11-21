@@ -9,7 +9,11 @@ import { createHash } from 'node:crypto';
 import type { Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { AnyIDataStreamClient, ClientSearchRequest } from '@kbn/data-streams';
-import { EvaluationIndices, type ListOnlineScoresResponse } from '@kbn/evals-common';
+import {
+  EvaluationIndices,
+  type ListOnlineScoresResponse,
+  type ListOnlineScoreNamesResponse,
+} from '@kbn/evals-common';
 
 export interface OnlineScoreIngestFailure {
   index: number;
@@ -28,6 +32,14 @@ export type OnlineScoreDocument = OnlineScore & { space_ids: string[] };
 type DataStreamSearchResponse = Awaited<ReturnType<AnyIDataStreamClient['search']>>;
 
 const ONLINE_SCORE_SOURCE_EXCLUDES = ['score.metadata'] as const;
+
+/** Upper bound on the number of distinct score names returned by the alert-metric list. */
+const MAX_SCORE_NAMES = 100;
+
+interface ScoreNameAggBucket {
+  key: string;
+  evaluators?: { buckets?: Array<{ key: string }> };
+}
 
 export interface ListOnlineScoresParams {
   monitorId: string;
@@ -192,6 +204,55 @@ export class OnlineScoreService {
         const { space_ids: _, ...onlineScore } = hit._source as OnlineScoreDocument;
         return [onlineScore];
       }),
+    };
+  }
+
+  /**
+   * Every stored `score.name` for one monitor and space, with the evaluator that most
+   * recently produced each name. Bounded by the terms-agg size: at most
+   * `MAX_SCORE_NAMES` names are returned.
+   */
+  public async listScoreNames({
+    monitorId,
+    spaceId,
+  }: Omit<ListOnlineScoresParams, 'page' | 'perPage'>): Promise<ListOnlineScoreNamesResponse> {
+    const response = await this.search({
+      size: 0,
+      aggs: {
+        score_names: {
+          terms: {
+            field: 'score.name',
+            size: MAX_SCORE_NAMES,
+            order: { latest_score: 'desc' },
+          },
+          aggs: {
+            latest_score: { max: { field: '@timestamp' } },
+            evaluators: {
+              terms: { field: 'evaluator.name', size: 1 },
+            },
+          },
+        },
+      },
+      query: {
+        bool: {
+          filter: [
+            { term: { 'monitor.id': monitorId } },
+            { term: { space_ids: spaceId } },
+            { exists: { field: 'score.name' } },
+          ],
+        },
+      },
+    });
+
+    const buckets =
+      (response.aggregations as { score_names?: { buckets?: ScoreNameAggBucket[] } })?.score_names
+        ?.buckets ?? [];
+
+    return {
+      names: buckets.map((bucket) => ({
+        name: bucket.key,
+        evaluatorName: bucket.evaluators?.buckets?.[0]?.key ?? '',
+      })),
     };
   }
 }

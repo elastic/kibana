@@ -210,4 +210,81 @@ describe('OnlineScoreService', () => {
       ],
     });
   });
+
+  it('lists every stored score name with its top evaluator via a bounded terms aggregation', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, search } = createDataStreamsMock();
+
+    search.mockResolvedValue({
+      aggregations: {
+        score_names: {
+          buckets: [
+            {
+              key: 'factuality',
+              latest_score: { value: 1_751_500_000_000 },
+              evaluators: { buckets: [{ key: 'correctness', doc_count: 12 }] },
+            },
+            {
+              key: 'tone',
+              latest_score: { value: 1_751_400_000_000 },
+              evaluators: { buckets: [{ key: 'style', doc_count: 7 }] },
+            },
+          ],
+        },
+      },
+    });
+
+    const service = new OnlineScoreService(logger, coreDataStreams);
+    const result = await service.listScoreNames({
+      monitorId: 'workflow-1',
+      spaceId: 'space-a',
+    });
+
+    expect(search).toHaveBeenCalledWith({
+      size: 0,
+      aggs: {
+        score_names: {
+          terms: {
+            field: 'score.name',
+            size: 100,
+            order: { latest_score: 'desc' },
+          },
+          aggs: {
+            latest_score: { max: { field: '@timestamp' } },
+            evaluators: { terms: { field: 'evaluator.name', size: 1 } },
+          },
+        },
+      },
+      query: {
+        bool: {
+          filter: [
+            { term: { 'monitor.id': 'workflow-1' } },
+            { term: { space_ids: 'space-a' } },
+            { exists: { field: 'score.name' } },
+          ],
+        },
+      },
+    });
+    expect(result).toEqual({
+      names: [
+        { name: 'factuality', evaluatorName: 'correctness' },
+        { name: 'tone', evaluatorName: 'style' },
+      ],
+    });
+  });
+
+  it('returns an empty names list when the aggregation has no buckets', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, search } = createDataStreamsMock();
+
+    search.mockResolvedValue({ aggregations: {} });
+
+    const service = new OnlineScoreService(logger, coreDataStreams);
+    const result = await service.listScoreNames({
+      monitorId: 'workflow-1',
+      spaceId: 'space-a',
+    });
+
+    expect(result).toEqual({ names: [] });
+  });
 });

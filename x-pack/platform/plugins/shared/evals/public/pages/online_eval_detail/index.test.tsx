@@ -20,6 +20,7 @@ import {
 } from '../../hooks/use_online_eval_workflows';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { useEvalsTraceFetcher } from '../../hooks/use_evals_api';
+import { useOnlineScoreNames } from '../../hooks/use_online_score_names';
 import { useModelConnectors } from '../../hooks/use_model_connectors';
 import { useActiveSpaceId } from '../../hooks/use_active_space_id';
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -29,6 +30,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 jest.mock('../../hooks/use_online_eval_workflows');
 jest.mock('../../hooks/use_evals_permissions');
 jest.mock('../../hooks/use_evals_api');
+jest.mock('../../hooks/use_online_score_names');
 jest.mock('../../hooks/use_model_connectors');
 jest.mock('../../hooks/use_active_space_id');
 jest.mock('../../components/online_eval_alert_rule/online_eval_alert_rule_button', () => ({
@@ -64,6 +66,7 @@ const mockedUseEvalsPermissions = jest.mocked(useEvalsPermissions);
 const mockedUseEvalsTraceFetcher = jest.mocked(useEvalsTraceFetcher);
 const mockedUseModelConnectors = jest.mocked(useModelConnectors);
 const mockedUseActiveSpaceId = jest.mocked(useActiveSpaceId);
+const mockedUseOnlineScoreNames = jest.mocked(useOnlineScoreNames);
 
 const lensEmbeddableComponent = jest.fn((props: { attributes?: unknown }) => (
   <div data-test-subj="mockLensEmbeddable">{JSON.stringify(props.attributes)}</div>
@@ -108,6 +111,9 @@ describe('OnlineEvalDetailPage', () => {
 
     mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true });
     mockedUseActiveSpaceId.mockReturnValue({ spaceId: 'space-a', isLoading: false });
+    mockedUseOnlineScoreNames.mockReturnValue({ data: undefined } as unknown as ReturnType<
+      typeof useOnlineScoreNames
+    >);
     mockedUseEvalsTraceFetcher.mockReturnValue(jest.fn());
     mockedUseOnlineEvalWorkflow.mockReturnValue({
       data: {
@@ -210,7 +216,7 @@ describe('OnlineEvalDetailPage', () => {
     expect(lensEmbeddableComponent).not.toHaveBeenCalled();
   });
 
-  it('offers only observed score names to the alert rule button, never the evaluator name', async () => {
+  it('offers every stored score name to the alert rule button, not just the loaded page', async () => {
     const scoreRow = (name: string) => ({
       '@timestamp': '2026-07-03T14:00:00.000Z',
       monitor: { id: 'workflow-1', name: '[online-eval] quality monitor' },
@@ -220,15 +226,48 @@ describe('OnlineEvalDetailPage', () => {
     });
     httpGet.mockImplementation(async (url: string) =>
       url === EVALS_ONLINE_SCORES_URL
-        ? { total: 2, data: [scoreRow('factuality'), scoreRow('relevance')] }
+        ? { total: 1, data: [scoreRow('factuality')] }
         : { evaluators: [{ name: 'correctness', version: '1.0.0', kind: 'llm' }] }
     );
+    mockedUseOnlineScoreNames.mockReturnValue({
+      data: {
+        names: [
+          { name: 'factuality', evaluatorName: 'correctness' },
+          { name: 'tone', evaluatorName: 'style' },
+        ],
+      },
+    } as unknown as ReturnType<typeof useOnlineScoreNames>);
+    renderPage();
+
+    // `tone` is stored but not on the loaded page; it must still be offered.
+    await waitFor(() => {
+      expect(screen.getByTestId('mockAlertRuleButton')).toHaveTextContent('factuality,tone');
+    });
+  });
+
+  it('falls back to the observed page names when the score names request fails', async () => {
+    const scoreRow = (name: string) => ({
+      '@timestamp': '2026-07-03T14:00:00.000Z',
+      monitor: { id: 'workflow-1', name: '[online-eval] quality monitor' },
+      trace_id: `trace-${name}`,
+      evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
+      score: { name, value: 0.9, label: 'pass' },
+    });
+    httpGet.mockImplementation(async (url: string) =>
+      url === EVALS_ONLINE_SCORES_URL
+        ? { total: 1, data: [scoreRow('factuality')] }
+        : { evaluators: [{ name: 'correctness', version: '1.0.0', kind: 'llm' }] }
+    );
+    mockedUseOnlineScoreNames.mockReturnValue({
+      data: undefined,
+      error: new Error('es failure'),
+    } as unknown as ReturnType<typeof useOnlineScoreNames>);
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByTestId('mockAlertRuleButton')).toHaveTextContent('factuality,relevance');
+      expect(screen.getByTestId('mockAlertRuleButton')).toHaveTextContent('factuality');
     });
-    expect(screen.getByTestId('mockAlertRuleButton')).not.toHaveTextContent('correctness');
+    expect(screen.getByTestId('mockAlertRuleButton')).not.toHaveTextContent('tone');
   });
 
   it('offers no alert metrics while the monitor has no scores', async () => {

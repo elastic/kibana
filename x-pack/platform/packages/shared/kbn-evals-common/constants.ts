@@ -34,6 +34,7 @@ export const EVALS_EXPERIMENT_EXAMPLE_DETAILS_URL =
 export const EVALS_EXAMPLE_SCORES_URL =
   `${EVALS_INTERNAL_URL}/examples/{exampleId}/scores` as const;
 export const EVALS_ONLINE_SCORES_URL = `${EVALS_INTERNAL_URL}/online_scores` as const;
+export const EVALS_ONLINE_SCORES_NAMES_URL = `${EVALS_INTERNAL_URL}/online_scores/_names` as const;
 export const EVALS_ONLINE_SCORES_PRIVILEGES_URL =
   `${EVALS_INTERNAL_URL}/online_scores/_privileges` as const;
 export const EVALS_TRACE_URL = `${EVALS_INTERNAL_URL}/traces/{traceId}` as const;

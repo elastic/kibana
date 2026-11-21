@@ -43,6 +43,7 @@ import { registerIngestScoresRoute } from './scores/ingest_scores';
 import { registerIngestOnlineScoresRoute } from './online_scores/ingest_online_scores';
 import { registerGetOnlineScoresPrivilegesRoute } from './online_scores/get_online_scores_privileges';
 import { registerListOnlineScoresRoute } from './online_scores/list_online_scores';
+import { registerListOnlineScoreNamesRoute } from './online_scores/list_online_score_names';
 import { registerListEvaluatorsRoute } from './evaluators/list_evaluators';
 import { registerCreateEvaluatorRoute } from './evaluators/create_evaluator';
 import { registerGetEvaluatorRoute } from './evaluators/get_evaluator';
@@ -93,6 +94,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerIngestScoresRoute(dependencies);
   registerIngestOnlineScoresRoute(dependencies);
   registerListOnlineScoresRoute(dependencies);
+  registerListOnlineScoreNamesRoute(dependencies);
   registerGetOnlineScoresPrivilegesRoute(dependencies);
   registerListDatasetsRoute(dependencies);
   registerCreateDatasetRoute(dependencies);

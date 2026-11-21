@@ -7,6 +7,8 @@
 
 export * from './common_attributes.gen';
 
+export * from './online_scores/list_online_score_names';
+
 export * from './experiments/get_experiments_route.gen';
 export * from './experiments/get_experiment_route.gen';
 export * from './experiments/get_experiment_runs_route.gen';

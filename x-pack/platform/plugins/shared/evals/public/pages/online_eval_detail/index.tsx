@@ -52,6 +52,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import { useEvalsTraceFetcher } from '../../hooks/use_evals_api';
+import { useOnlineScoreNames } from '../../hooks/use_online_score_names';
 import { OnlineEvalScoresTable } from '../../components/online_eval_scores_table';
 import { OnlineEvalAlertRuleButton } from '../../components/online_eval_alert_rule/online_eval_alert_rule_button';
 import type { OnlineEvalAlertMetric } from '../../components/online_eval_alert_rule/online_eval_alert_rule_button';
@@ -488,15 +489,22 @@ export const OnlineEvalDetailPage: React.FC = () => {
     [draftState.draft?.evaluators, evaluatorOptions]
   );
 
-  // Only observed `score.name` values are offered: an evaluator can emit scores under other names,
-  // and a rule on a name that was never ingested matches no documents.
+  // The server aggregation covers every stored `score.name` for this monitor, not just the
+  // page currently loaded; the page rows win when both know a name, so the evaluator
+  // attribution stays exact for freshly ingested scores.
+  const { data: storedScoreNames } = useOnlineScoreNames(workflowId);
   const alertMetrics = useMemo<OnlineEvalAlertMetric[]>(() => {
     const byMetric = new Map<string, OnlineEvalAlertMetric>();
+    storedScoreNames?.names.forEach(({ name, evaluatorName }) => {
+      if (!byMetric.has(name)) {
+        byMetric.set(name, { metric: name, evaluatorName });
+      }
+    });
     scoresData.forEach(({ score, evaluator }) => {
       byMetric.set(score.name, { metric: score.name, evaluatorName: evaluator.name });
     });
     return Array.from(byMetric.values());
-  }, [scoresData]);
+  }, [scoresData, storedScoreNames]);
 
   const canEditSettings = canManage && Boolean(draftState.draft);
   const hasLlmEvaluatorSelected = selectedEvaluators.some((option) => option.kind === 'llm');
