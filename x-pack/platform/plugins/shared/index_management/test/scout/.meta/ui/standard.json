@@ -1,5 +1,5 @@
 {
-  "sha1": "4aac21807b31724c72ac29fc59152cc877134758",
+  "sha1": "02fb10cc530b4071900e1a2ee6c47ecf3fc481d2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -648,7 +648,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_actions_context_menu.spec.ts",
-        "line": 37,
+        "line": 36,
         "column": 23
       }
     },
@@ -666,8 +666,78 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_actions_context_menu.spec.ts",
-        "line": 68,
+        "line": 67,
         "column": 7
+      }
+    },
+    {
+      "id": "8ee1438e960f412-2b996d12c5f465e",
+      "title": "Index actions closes and reopens an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_actions.spec.ts",
+        "line": 36,
+        "column": 27
+      }
+    },
+    {
+      "id": "8ee1438e960f412-44ed281284d4702",
+      "title": "Index actions refreshes an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_actions.spec.ts",
+        "line": 42,
+        "column": 34
+      }
+    },
+    {
+      "id": "8ee1438e960f412-9ea860349ff5ddb",
+      "title": "Index actions flushes an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_actions.spec.ts",
+        "line": 61,
+        "column": 12
+      }
+    },
+    {
+      "id": "8ee1438e960f412-e119ec721070029",
+      "title": "Index actions clears the cache of an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_actions.spec.ts",
+        "line": 66,
+        "column": 75
+      }
+    },
+    {
+      "id": "8ee1438e960f412-d518f29deddcb0b",
+      "title": "Index actions force merges an index into the requested number of segments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_actions.spec.ts",
+        "line": 74,
+        "column": 43
       }
     },
     {

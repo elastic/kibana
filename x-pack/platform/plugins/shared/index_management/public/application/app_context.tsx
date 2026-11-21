@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import type SemVer from 'semver/classes/semver';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type {
@@ -29,7 +29,7 @@ import type { CloudConnectedPluginStart } from '@kbn/cloud-connect-plugin/public
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { ReindexServicePublicStart } from '@kbn/reindex-service-plugin/public';
-
+import type { EsClientPluginStart } from '@kbn/es-client-plugin/public';
 import type { EuiBreadcrumb } from '@elastic/eui';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -61,6 +61,7 @@ export interface AppDependencies {
     ml?: MlPluginStart;
     streams?: StreamsPluginStart;
     reindexService: ReindexServicePublicStart;
+    esClient: EsClientPluginStart;
   };
   services: {
     uiMetricService: UiMetricService;
@@ -103,7 +104,10 @@ export interface AppDependencies {
   };
 }
 
-const queryClient = new QueryClient({});
+const createQueryClient = () =>
+  new QueryClient({
+    defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } },
+  });
 
 export const AppContextProvider = ({
   children,
@@ -112,6 +116,7 @@ export const AppContextProvider = ({
   value: AppDependencies;
   children: React.ReactNode;
 }) => {
+  const [queryClient] = useState(createQueryClient);
   return (
     <AppContext.Provider value={value}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

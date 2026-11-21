@@ -10,7 +10,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, forDeployment, testData } from '../../fixtures';
 
-const { API_BASE_PATH, COMMON_HEADERS } = testData;
+const { API_BASE_PATH, COMMON_HEADERS, ES_CLIENT_PROXY_HEADERS, ES_CLIENT_PROXY_PATH } = testData;
 
 const INDEX_NAME = 'index-management-api-settings';
 
@@ -114,22 +114,25 @@ apiTest.describe('Index settings API', { tag: tags.deploymentAgnostic }, () => {
     await esClient.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
   });
 
-  apiTest('fetches an index settings', async ({ apiClient }) => {
-    const response = await apiClient.get(`${API_BASE_PATH}/settings/${INDEX_NAME}`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-    });
+  apiTest('fetches an index settings with defaults through the proxy', async ({ apiClient }) => {
+    // Matches the request the settings editor sends through the Elasticsearch proxy.
+    const response = await apiClient.get(
+      `${ES_CLIENT_PROXY_PATH}/${INDEX_NAME}/_settings?expand_wildcards=none&flat_settings=false&include_defaults=true`,
+      {
+        headers: { ...COMMON_HEADERS, ...ES_CLIENT_PROXY_HEADERS, ...credentials.apiKeyHeader },
+        responseType: 'json',
+      }
+    );
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.settings.index?.provided_name).toBe(expectedProvidedName);
+    const { settings, defaults } = response.body[INDEX_NAME];
+    expect(settings.index?.provided_name).toBe(expectedProvidedName);
 
-    const missing = expectedDefaults.filter(
-      (setting) => !Object.hasOwn(response.body.defaults.index, setting)
-    );
+    const missing = expectedDefaults.filter((setting) => !Object.hasOwn(defaults.index, setting));
     expect(missing).toStrictEqual([]);
   });
 
-  apiTest('updates an index settings', async ({ apiClient }) => {
+  apiTest('updates an index settings', async ({ apiClient, esClient }) => {
     const [setting, value] = editableSetting;
 
     const updateResponse = await apiClient.put(`${API_BASE_PATH}/settings/${INDEX_NAME}`, {
@@ -139,11 +142,7 @@ apiTest.describe('Index settings API', { tag: tags.deploymentAgnostic }, () => {
     });
     expect(updateResponse).toHaveStatusCode(200);
 
-    const response = await apiClient.get(`${API_BASE_PATH}/settings/${INDEX_NAME}`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-    });
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.settings.index[setting]).toBe(value);
+    const response = await esClient.indices.getSettings({ index: INDEX_NAME });
+    expect(response[INDEX_NAME].settings?.index).toMatchObject({ [setting]: value });
   });
 });

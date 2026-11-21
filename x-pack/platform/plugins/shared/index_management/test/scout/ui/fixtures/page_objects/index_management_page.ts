@@ -98,8 +98,19 @@ export class IndexManagement extends AbstractPageObject {
     await expect(this.page.testSubj.locator('indexDetailsContent')).toBeVisible();
   }
 
+  // Filters the list to the index, so its row is on the first page however many indices exist.
+  async filterIndices(indexName: string) {
+    const searchBox = this.page.testSubj.locator('indicesSearch');
+    await this.fillSearchBox(searchBox, `"${indexName}"`);
+    await searchBox.press('Enter');
+    const checkboxes = this.page.locator('input[id^="checkboxSelectIndex-"]');
+    await expect(checkboxes).toHaveCount(1);
+    await expect(this.page.locator(`input[id="checkboxSelectIndex-${indexName}"]`)).toBeVisible();
+  }
+
   // Selects the index row checkbox and opens its "manage index" context menu.
   async manageIndex(indexName: string) {
+    await this.filterIndices(indexName);
     const checkbox = this.page.locator(`input[id="checkboxSelectIndex-${indexName}"]`);
     if (!(await checkbox.isChecked())) {
       await checkbox.click();
@@ -115,6 +126,28 @@ export class IndexManagement extends AbstractPageObject {
       | 'showMappingsIndexMenuButton'
   ) {
     await this.page.testSubj.locator(manageIndexTab).click();
+  }
+
+  async runIndexActionFromContextMenu(
+    indexName: string,
+    action:
+      | 'closeIndexMenuButton'
+      | 'openIndexMenuButton'
+      | 'refreshIndexMenuButton'
+      | 'flushIndexMenuButton'
+      | 'clearCacheIndexMenuButton'
+  ) {
+    await this.manageIndex(indexName);
+    await this.page.testSubj.locator(action).click();
+  }
+
+  async forcemergeIndexFromContextMenu(indexName: string, maxNumSegments: number) {
+    await this.manageIndex(indexName);
+    await this.page.testSubj.locator('forcemergeIndexMenuButton').click();
+    await this.page.testSubj
+      .locator('indexActionsForcemergeNumSegments')
+      .fill(String(maxNumSegments));
+    await this.page.testSubj.locator('confirmModalConfirmButton').click();
   }
 
   async deleteIndexFromContextMenu() {
