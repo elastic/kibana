@@ -3622,7 +3622,7 @@ describe('xy_visualization', () => {
           expect(errors![0]).toEqual(
             expect.objectContaining({
               shortMessage: expect.stringContaining(
-                'Expected "(", "{", value, whitespace but """ found.'
+                'Expected "(", "{", NOT, value, whitespace but """ found.'
               ),
             })
           );

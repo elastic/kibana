@@ -51,7 +51,7 @@ describe('kuery node types', () => {
       test('reserved keywords', () => {
         const node = buildNode('foo and bar not baz or qux');
         const result = toKqlExpression(node);
-        expect(result).toBe('foo \\and bar \\not baz \\or qux');
+        expect(result).toBe('foo \\and bar \\u006eot baz \\or qux');
       });
 
       test('quoted with escaped quotes', () => {

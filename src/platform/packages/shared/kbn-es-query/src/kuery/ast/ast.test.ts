@@ -81,6 +81,62 @@ describe('kuery AST API', () => {
       expect(fromKueryExpression('not      foo')).toEqual(withSingleSpaces);
     });
 
+    test.each(['cannot connect', 'knot tie', 'CANNOT CONNECT'])(
+      'should treat "not" inside a word in an unquoted value as plain text: %p',
+      (value) => {
+        expect(fromKueryExpression(`foo: ${value}`)).toEqual(
+          nodeTypes.function.buildNode('is', 'foo', value)
+        );
+        expect(fromKueryExpression(value)).toEqual(nodeTypes.function.buildNode('is', null, value));
+      }
+    );
+
+    test.each(['*cannot connect*', '*do not touch*', 'do not touch*'])(
+      'should treat "not" inside an unquoted wildcard value as plain text: %p',
+      (value) => {
+        const expected = nodeTypes.function.buildNode('is', 'foo', value);
+        const actual = fromKueryExpression(`foo: ${value}`);
+        expect(actual).toEqual(expected);
+      }
+    );
+
+    test.each(['definitely not the flaky test monster', 'definitely NOT the flaky test monster'])(
+      'should treat a standalone "not" inside an unquoted value as plain text: %p',
+      (value) => {
+        expect(fromKueryExpression(`foo: ${value}`)).toEqual(
+          nodeTypes.function.buildNode('is', 'foo', value)
+        );
+        expect(fromKueryExpression(value)).toEqual(nodeTypes.function.buildNode('is', null, value));
+      }
+    );
+
+    test('should support "not" at the start of a field value', () => {
+      expect(fromKueryExpression('foo: not the flaky test monster')).toEqual(
+        nodeTypes.function.buildNode(
+          'not',
+          nodeTypes.function.buildNode('is', 'foo', 'the flaky test monster')
+        )
+      );
+      expect(fromKueryExpression('foo: not (the flaky test monster or a bug)')).toEqual(
+        nodeTypes.function.buildNode(
+          'not',
+          nodeTypes.function.buildNode('or', [
+            nodeTypes.function.buildNode('is', 'foo', 'the flaky test monster'),
+            nodeTypes.function.buildNode('is', 'foo', 'a bug'),
+          ])
+        )
+      );
+    });
+
+    test('should still support "not" at the start of a clause in a list of values', () => {
+      const expected = nodeTypes.function.buildNode('or', [
+        nodeTypes.function.buildNode('is', 'foo', 'cannot connect'),
+        nodeTypes.function.buildNode('not', nodeTypes.function.buildNode('is', 'foo', 'bar')),
+      ]);
+      const actual = fromKueryExpression('foo: (cannot connect or not bar)');
+      expect(actual).toEqual(expected);
+    });
+
     test('should normalize extra spaces around "and" for field:value followed by another clause', () => {
       const withSingleSpaces = fromKueryExpression('host:foo and bar');
       expect(fromKueryExpression('host:foo    and    bar')).toEqual(withSingleSpaces);

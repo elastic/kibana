@@ -347,7 +347,7 @@ describe('MaintenanceWindowClient - create', () => {
         },
       });
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Error validating create maintenance window data - invalid scope - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
+      "Error validating create maintenance window data - invalid scope - Expected \\"(\\", \\"{\\", NOT, value, whitespace but end of input found.
       invalid: 
       ---------^"
     `);

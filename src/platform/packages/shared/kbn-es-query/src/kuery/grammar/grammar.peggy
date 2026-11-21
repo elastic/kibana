@@ -104,7 +104,7 @@ FieldRangeExpression
   }
 
 FieldValueExpression
-  = field:Field Space* ':' Space* partial:ListOfValues {
+  = field:Field Space* ':' Space* partial:NotListOfValues {
     if (partial.type === 'cursor') {
       return {
         ...partial,
@@ -230,8 +230,9 @@ QuotedCharacter
   / '\\' char:[\\"] { return char; }
   / !Cursor char:[^"] { return char; }
 
+// A leading NOT is consumed by NotQuery / NotListOfValues first, so a dangling "not" stays a syntax error.
 UnquotedLiteral
-  = &{ return parseCursor; } prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
+  = &{ return parseCursor; } !Not prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
     const { start, end } = location();
     return {
       type: 'cursor',
@@ -242,7 +243,7 @@ UnquotedLiteral
       text: text().replace(cursor, '')
     };
   }
-  / chars:UnquotedCharacter+ {
+  / !Not chars:UnquotedCharacter+ {
     const sequence = chars.join('').trim();
     if (sequence === 'null') return buildLiteralNode(null);
     if (sequence === 'true') return buildLiteralNode(true);
@@ -287,11 +288,12 @@ EscapedSpecialCharacter
 EscapedKeyword
   = '\\' keyword:('or'i / 'and'i / 'not'i) { return keyword; }
 
-// We don't use the And/Or/Not rules here because they cause recursive backtracking.
+// We don't use the And/Or rules here because they cause recursive backtracking.
+// "not" is intentionally excluded: NOT is only valid at the start of a clause, so "cannot connect"
+// or "do not touch" inside an unquoted value must be read as plain text.
 Keyword
   = Space 'or'i Space
   / Space 'and'i Space
-  / 'not'i Space
 
 SpecialCharacter
   = [\\():<>"*{}]
