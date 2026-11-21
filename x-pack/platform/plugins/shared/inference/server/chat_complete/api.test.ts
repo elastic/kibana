@@ -13,7 +13,16 @@ import {
   inferenceEndpointAdapterMock,
 } from './api.test.mocks';
 
-import { of, Subject, isObservable, toArray, firstValueFrom, filter } from 'rxjs';
+import {
+  of,
+  Subject,
+  isObservable,
+  toArray,
+  firstValueFrom,
+  filter,
+  concat,
+  throwError,
+} from 'rxjs';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -353,6 +362,43 @@ describe('createChatCompleteApi', () => {
       expect(response.toolCalls).toEqual([
         { toolCallId: 'call-2', function: { name: 'myTool', arguments: {} } },
       ]);
+    });
+
+    it("does not concatenate a stalled attempt's partial output with the retry's response", async () => {
+      // API-level regression: an attempt emits a partial chunk and then fails
+      // with a retryable error; the retry succeeds. The stalled attempt's
+      // chunk must not surface alongside the retry's output.
+      let count = 0;
+      inferenceAdapter.chatComplete.mockImplementation(() => {
+        count++;
+        if (count === 1) {
+          const partial = chunkEvent('partial');
+          return concat(
+            of(partial),
+            throwError(() => createInferenceProviderError('Inference stream idle', { status: 504 }))
+          );
+        }
+        return of(chunkEvent('full answer'));
+      });
+
+      const events$ = chatComplete({
+        stream: true,
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 1,
+        retryConfiguration: {
+          retryOn: 'all',
+          initialDelay: 1,
+          backoffMultiplier: 1,
+        },
+      });
+
+      const events = await firstValueFrom(
+        events$.pipe(filter(isChatCompletionChunkEvent), toArray())
+      );
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(2);
+      expect(events.map((event) => event.content)).toEqual(['full answer']);
     });
 
     describe('request cancellation', () => {

@@ -154,11 +154,19 @@ export function createChatCompleteCallbackApi({
     }: ChatCompleteApiWithCallbackInitOptions,
     callback: ChatCompleteApiWithCallbackCallback
   ) => {
+    const errorFilter = getRetryFilter(retryConfiguration.retryOn);
+
+    // Knowing whether an error will be retried is needed to decide whether the
+    // failed attempt's buffered chunks are discarded or flushed. The counter
+    // must reset per subscription, so this lives inside the deferred source
+    // (same pattern as `retryHoldingTokenCountEvents`).
     const inference$ = defer(() =>
       resolveEndpoint({ target, resolveFeatureEndpoint, abortSignal })
     ).pipe(
-      switchMap(({ connectorId, ...parameters }) =>
-        defer(() =>
+      switchMap(({ connectorId, ...parameters }) => {
+        let errorCount = 0;
+        const willRetry = (error: Error) => errorCount <= maxRetries && errorFilter(error);
+        return defer(() =>
           resolveAndCreatePipeline({
             connectorId,
             featureId: target.featureId,
@@ -184,17 +192,23 @@ export function createChatCompleteCallbackApi({
         ).pipe(
           // a retryable attempt that already streamed output must not resurface:
           // merging a stalled attempt's partial chunks with the retry's would
-          // corrupt consumers (e.g. tool-call argument JSON). Errors that will
-          // not be retried fail through untouched.
-          skipStreamedOutputFromRetryableAttempts(),
+          // corrupt consumers (e.g. tool-call argument JSON). Buffered chunks
+          // are flushed before a terminal error; errors that will not be
+          // retried fail through untouched.
+          skipStreamedOutputFromRetryableAttempts({
+            discardHeldChunksOnError: (error) => {
+              errorCount += 1;
+              return willRetry(error);
+            },
+          }),
           retryHoldingTokenCountEvents({
             maxRetry: maxRetries,
             backoffMultiplier: retryConfiguration.backoffMultiplier,
             initialDelay: retryConfiguration.initialDelay,
-            errorFilter: getRetryFilter(retryConfiguration.retryOn),
+            errorFilter,
           })
-        )
-      ),
+        );
+      }),
       callbackManager ? handleLifecycleCallbacks({ callbackManager }) : identity,
       abortSignal ? handleCancellation(abortSignal) : identity
     );

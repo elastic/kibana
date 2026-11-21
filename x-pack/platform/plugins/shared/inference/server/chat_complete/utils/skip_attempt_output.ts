@@ -22,17 +22,26 @@ import { isChatCompletionChunkEvent, isChatCompletionTokenCountEvent } from '@kb
  * attempt's unfinished JSON.
  *
  * Chunk events are buffered per attempt and only published once the attempt
- * has proven successful (first message event, or stream completion). On error
- * the buffered chunks are dropped — partial output of a failed attempt is
- * never a valid prefix of the response — and the error itself is forwarded
- * unchanged so downstream retry logic keeps working.
+ * has proven successful (first message event, or stream completion). On error,
+ * the buffered chunks are dropped when `discardHeldChunksOnError` says the
+ * error will be retried — partial output of a retried attempt is never a valid
+ * prefix of the response — and flushed before the error when it is terminal,
+ * exactly like `holdTokenCountEventsUntilMessage` treats token counts. The
+ * error itself is always forwarded unchanged so downstream retry logic keeps
+ * working.
+ *
+ * `discardHeldChunksOnError` is called once per error and typically closes
+ * over an attempt counter (see `retryHoldingTokenCountEvents`); keep it free of
+ * other side effects.
  *
  * Token-count events pass through unbuffered; `retryHoldingTokenCountEvents`
  * further downstream already holds/discards them per retry outcome.
  */
-export function skipStreamedOutputFromRetryableAttempts(): MonoTypeOperatorFunction<
-  ChatCompletionChunkEvent | ChatCompletionTokenCountEvent
-> {
+export function skipStreamedOutputFromRetryableAttempts({
+  discardHeldChunksOnError,
+}: {
+  discardHeldChunksOnError: (error: Error) => boolean;
+}): MonoTypeOperatorFunction<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent> {
   return (source$) =>
     new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
       let published = false;
@@ -66,9 +75,13 @@ export function skipStreamedOutputFromRetryableAttempts(): MonoTypeOperatorFunct
           subscriber.next(event);
         },
         error: (error) => {
-          // partial output of a failed attempt is never exposed, but the error
-          // itself must reach downstream retry logic untouched
-          chunks.length = 0;
+          // partial output of an attempt that will be retried is never
+          // exposed; a terminal error flushes it so callers that relied on
+          // partial output before the error keep getting it. The error itself
+          // must reach downstream retry logic untouched either way.
+          if (!discardHeldChunksOnError(error)) {
+            publish();
+          }
           published = true;
           subscriber.error(error);
         },
