@@ -153,7 +153,11 @@ describe('github', () => {
     const paginate = jest.mocked(client.paginate);
     const { createComment, updateComment, deleteComment } = jest.mocked(client.issues);
     const marker = `<!-- ${KIBANA_COMMENT_SIGIL}:ctx -->`;
-    const upsert = (opts: { clearPrevious: boolean; createIfMissing?: boolean }) =>
+    const upsert = (opts: {
+      clearPrevious: boolean;
+      createIfMissing?: boolean;
+      authorLogin?: string;
+    }) =>
       upsertComment({ commentBody: 'new', commentContext: 'ctx', ...opts }, 'elastic', 'kibana', 1);
 
     beforeEach(() => {
@@ -186,6 +190,28 @@ describe('github', () => {
         expect.objectContaining({ request: { signal } })
       );
       expect(createComment).toHaveBeenCalledWith(expect.objectContaining({ request: { signal } }));
+    });
+
+    it('ignores a marker in a comment by someone else when an author is given', async () => {
+      paginate.mockResolvedValue([
+        { id: 7, body: `${marker}\nspoofed`, user: { login: 'someone-else' } },
+      ]);
+
+      await upsert({ clearPrevious: false, authorLogin: 'kibanamachine' });
+
+      expect(updateComment).not.toHaveBeenCalled();
+      expect(createComment).toHaveBeenCalled();
+    });
+
+    it('updates the comment written by the given author', async () => {
+      paginate.mockResolvedValue([
+        { id: 7, body: `${marker}\nspoofed`, user: { login: 'someone-else' } },
+        { id: 8, body: `${marker}\nold`, user: { login: 'kibanamachine' } },
+      ]);
+
+      await upsert({ clearPrevious: false, authorLogin: 'kibanamachine' });
+
+      expect(updateComment).toHaveBeenCalledWith(expect.objectContaining({ comment_id: 8 }));
     });
 
     it('posts nothing when there is no comment and createIfMissing is false', async () => {

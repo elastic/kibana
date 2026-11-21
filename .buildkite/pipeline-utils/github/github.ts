@@ -144,6 +144,9 @@ export async function upsertComment(
     clearPrevious: boolean;
     // When false, only an existing comment is updated; nothing is posted if there is none.
     createIfMissing?: boolean;
+    // When set, only a comment written by this login is treated as the existing one, so a marker
+    // pasted into someone else's comment (which cannot be edited) is never picked.
+    authorLogin?: string;
     // Aborts the GitHub requests, so a stalled request can't keep the process alive.
     signal?: AbortSignal;
   },
@@ -156,6 +159,7 @@ export async function upsertComment(
     commentContext,
     clearPrevious,
     createIfMissing = true,
+    authorLogin,
     signal,
   } = messageOpts;
   if (!owner || !repo || !prNumber) {
@@ -177,7 +181,10 @@ export async function upsertComment(
       issue_number: typeof prNumber === 'number' ? prNumber : parseInt(prNumber, 10),
       request: { signal },
     })
-  ).find((comment) => comment.body?.includes(commentMarker));
+  ).find(
+    (comment) =>
+      comment.body?.includes(commentMarker) && (!authorLogin || comment.user?.login === authorLogin)
+  );
 
   if (!existingComment) {
     return createIfMissing ? addComment(body, owner, repo, prNumber, signal) : undefined;
