@@ -35,7 +35,7 @@ import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './bindin
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { auditableName, parseCreateServiceAccountParams } from './create_params';
 import { ServiceAccountCredentialRefusedError } from './credential_refused_error';
-import { BINDING_CLOCK_SKEW_TOLERANCE_MS } from './credentials';
+import { isBoundBeforeCredential } from './credentials';
 import type { ServiceAccountCredentialStore } from './credentials';
 import { toDescriptionField } from './description_field';
 import {
@@ -53,7 +53,12 @@ import type {
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
 import { getOperationErrorType, serviceAccountsMetrics } from './metrics';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
-import type { ListServiceAccountsParams, ServiceAccountsBackend } from './types';
+import type {
+  ListServiceAccountsParams,
+  ServiceAccountLookup,
+  ServiceAccountsBackend,
+  ServiceAccountSummaryBinding,
+} from './types';
 import type { SecurityLicense } from '../../common';
 import type {
   DeleteServiceAccountResponse,
@@ -741,27 +746,15 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
   /**
    * Reads the account as `kibana_system`, which can read service accounts but not their tokens.
-   * So `assumable` comes from the stored credential alone, the same as in {@link list}.
+   * So `assumable` comes from the stored credential alone, the same as in {@link list}. It is
+   * `false` when the exchange would refuse the binding because it predates the credential, or
+   * because Kibana cannot decrypt stored credentials.
    */
-  async getSummary(id: string): Promise<ServiceAccountSummary | null> {
-    if (!this.license.isEnabled()) {
-      throw Boom.forbidden(
-        'Cannot get a service account: security features are disabled in Elasticsearch'
-      );
-    }
-
-    // Only an account Kibana could run as is named. Any other id names nothing a workload can be
-    // bound to, so it is missing rather than malformed.
-    const principal = parseBindableEsServiceAccountId(id);
-    if (!principal) {
-      return null;
-    }
-
-    const account = await this.readAccount(
-      this.clusterClient.asInternalUser,
-      principal.namespace,
-      principal.name
-    );
+  async getSummary(
+    id: string,
+    { boundAt }: ServiceAccountSummaryBinding
+  ): Promise<ServiceAccountSummary | null> {
+    const account = await this.readAccountAsInternalUser(id);
     if (!account) {
       return null;
     }
@@ -769,8 +762,38 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     // `kibana_system` cannot read the account's tokens, so unlike `get` this cannot confirm that
     // the token Kibana minted still exists. The stored credential is the best answer available,
     // and the same one `list` gives.
-    const assumable = (await this.credentialStore.findExisting([id])).has(id);
+    const credentialCreatedAt = await this.credentialStore.getCreatedAt(id);
+    const assumable =
+      this.canEncrypt &&
+      credentialCreatedAt !== null &&
+      !isBoundBeforeCredential(boundAt, credentialCreatedAt);
     return { id: account.id, name: account.name, enabled: account.enabled, assumable };
+  }
+
+  async lookupAccountAsInternalUser(
+    id: string,
+    { signal }: { signal?: AbortSignal }
+  ): Promise<ServiceAccountLookup> {
+    try {
+      const account = await this.readAccountAsInternalUser(id, { signal });
+      if (!account) {
+        return { status: 'missing' };
+      }
+
+      // Read the same way the exchange reads it, so the creation time is authenticated.
+      const credential = await this.credentialStore.getDecrypted(id);
+      if (!credential) {
+        return { status: 'present' };
+      }
+      if (credential.serviceAccountId !== id) {
+        this.logger.debug(`Stored credential for service account [${id}] names another account`);
+        return { status: 'unknown' };
+      }
+      return { status: 'present', credentialCreatedAt: credential.createdAt };
+    } catch (e) {
+      this.logger.debug(`Unable to look up service account [${id}]: ${getDetailedErrorMessage(e)}`);
+      return { status: 'unknown' };
+    }
   }
 
   /**
@@ -1130,10 +1153,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     // An account deleted and created again keeps its `{namespace}/{name}` id, so a binding left
     // over from the earlier account would otherwise run as the new one. Both timestamps are
     // authenticated, and one that does not parse is refused rather than waved through.
-    if (
-      boundAt !== undefined &&
-      !(Date.parse(credential.createdAt) <= Date.parse(boundAt) + BINDING_CLOCK_SKEW_TOLERANCE_MS)
-    ) {
+    if (boundAt !== undefined && isBoundBeforeCredential(boundAt, credential.createdAt)) {
       this.logger.error(
         `Refusing to exchange service account [${serviceAccountId}]: its workload was bound at ` +
           `[${boundAt}], before the account was created at [${credential.createdAt}]. Bind the ` +
@@ -1193,6 +1213,35 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   }
 
   /**
+   * Reads an account as `kibana_system`, for the callers that have no user request. Resolves
+   * `undefined` when there is no such account. An ID Kibana could never run as names no account a
+   * workload can be bound to, so it is missing too, the same as the exchange refusing it for good.
+   * The read is strict, so an answer that does not clearly leave the account out throws.
+   */
+  private async readAccountAsInternalUser(
+    id: string,
+    { signal }: { signal?: AbortSignal } = {}
+  ): Promise<ElasticsearchServiceAccount | undefined> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot get a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    const principal = parseBindableEsServiceAccountId(id);
+    if (!principal) {
+      return undefined;
+    }
+
+    return await this.readAccount(
+      this.clusterClient.asInternalUser,
+      principal.namespace,
+      principal.name,
+      { signal, strict: true }
+    );
+  }
+
+  /**
    * Reads the account back, resolving `undefined` when it does not exist, or when the principal
    * resolves to a built-in account: those are not Kibana's to manage, and must never be mistaken
    * for one it created.
@@ -1203,12 +1252,21 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    *
    * `withCreator` reads the account's creator too, and asks Elasticsearch for the creator's user
    * profile, which costs it a profile lookup. Only reads that show the creator ask for it.
+   *
+   * `strict` resolves `undefined` only for an answer from Elasticsearch that leaves the account out.
+   * A 404, which a proxy in front of Elasticsearch can send too, and an entry that is not
+   * user-managed both throw instead. It is for callers that remove bindings when an account is
+   * absent, where a wrong "absent" is the costly mistake.
    */
   private async readAccount(
     esClient: ElasticsearchClient,
     namespace: string,
     name: string,
-    { withCreator = false }: { withCreator?: boolean } = {}
+    {
+      withCreator = false,
+      signal,
+      strict = false,
+    }: { withCreator?: boolean; signal?: AbortSignal; strict?: boolean } = {}
   ): Promise<ElasticsearchServiceAccount | undefined> {
     const principal = `${namespace}/${name}`;
 
@@ -1222,12 +1280,19 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
           querystring: { type: 'user_managed', ...(withProfileUid && { with_profile_uid: true }) },
         },
         // An unknown principal is an empty 200 rather than a 404. Ignore 404 as well, so a future
-        // tightening upstream does not turn "no such account" into an error.
-        { ignore: [404] }
+        // tightening upstream does not turn "no such account" into an error. A strict read does
+        // not, because it cannot tell that 404 from one a proxy sent.
+        { ...(strict ? {} : { ignore: [404] }), ...(signal ? { signal } : {}) }
       );
     const response = withCreator
       ? await this.withCreatorProfileUids(`read service account [${principal}]`, send)
       : await send(false);
+
+    if (strict && (typeof response !== 'object' || response === null)) {
+      throw Boom.badGateway(
+        `Cannot determine the state of service account [${name}]: Elasticsearch did not answer with an object.`
+      );
+    }
 
     const entry = response?.[principal];
     if (entry === undefined) {
@@ -1236,8 +1301,13 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
     // The type filter above should keep built-in accounts out of the response. This is what holds
     // if it does not, and what makes a future third account type read as "not Kibana's" rather
-    // than as unreadable.
+    // than as unreadable. A strict read cannot take that view, because "not Kibana's" is absent.
     if (!userManagedEntrySchema.safeParse(entry).success) {
+      if (strict) {
+        throw Boom.badGateway(
+          `Cannot determine the state of service account [${name}]: Elasticsearch did not report it as user-managed.`
+        );
+      }
       this.logger.debug(`Service account [${principal}] is not a user-managed account`);
       return undefined;
     }

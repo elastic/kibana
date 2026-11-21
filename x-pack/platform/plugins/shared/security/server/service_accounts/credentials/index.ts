@@ -8,6 +8,7 @@
 export {
   BINDING_CLOCK_SKEW_TOLERANCE_MS,
   getCredentialId,
+  isBoundBeforeCredential,
   registerServiceAccountCredentialSavedObjectType,
   SERVICE_ACCOUNT_CREDENTIAL_TYPE,
 } from './credential_saved_object';
