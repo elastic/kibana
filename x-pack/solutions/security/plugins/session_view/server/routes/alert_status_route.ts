@@ -17,7 +17,7 @@ import {
   ALERT_UUID_PROPERTY,
   PREVIEW_ALERTS_INDEX,
 } from '../../common/constants';
-import { expandDottedObject } from '../../common/utils/expand_dotted_object';
+import { normalizeEventSource } from '../../common/utils/normalize_event_source';
 import { alertIdSchema } from './validation';
 
 export const registerAlertStatusRoute = (
@@ -88,7 +88,7 @@ export const searchAlertByUuid = async (client: AlertsClient, alertUuid: string)
 
   const events = result.hits.hits.map((hit: any) => {
     // the alert indexes flattens many properties. this util unflattens them as session view expects structured json.
-    hit._source = expandDottedObject(hit._source);
+    hit._source = normalizeEventSource(hit._source);
 
     return hit;
   });

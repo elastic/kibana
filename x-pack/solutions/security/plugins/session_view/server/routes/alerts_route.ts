@@ -24,8 +24,7 @@ import {
   ALERT_FIELDS,
 } from '../../common/constants';
 
-import { expandDottedObject } from '../../common/utils/expand_dotted_object';
-import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
+import { normalizeEventSource } from '../../common/utils/normalize_event_source';
 import { alertIdSchema, sessionEntityIdSchema, sessionTimestampSchema } from './validation';
 
 export const registerAlertsRoute = (
@@ -152,9 +151,7 @@ export const searchAlerts = async (
     const events = results.hits.hits.map((hit) => {
       const typedHit = hit as SearchHit<ProcessEvent>;
       // the alert indexes flattens many properties. this util unflattens them as session view expects structured json.
-      typedHit._source = expandDottedObject(typedHit._source);
-      // normalize args fields to ensure consistent array structure
-      typedHit._source = normalizeEventProcessArgs(typedHit._source);
+      typedHit._source = normalizeEventSource(typedHit._source);
       return typedHit;
     });
 

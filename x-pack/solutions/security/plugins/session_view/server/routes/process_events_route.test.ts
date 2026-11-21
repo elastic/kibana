@@ -14,6 +14,33 @@ import {
 } from '../../common/mocks/constants/session_view_process.mock';
 import { getAlertsClientMockInstance } from './alerts_client_mock.test';
 import type { ProcessEvent } from '../../common';
+import { normalizeEventSource } from '../../common/utils/normalize_event_source';
+
+type FlatSource = Record<string, unknown>;
+
+// mimics a logsdb_columnar `_source`: dotted top-level keys, single-element arrays as plain values
+const toColumnarSource = (value: object, prefix = '', flat: FlatSource = {}): FlatSource => {
+  Object.entries(value).forEach(([key, val]) => {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (val && typeof val === 'object' && !Array.isArray(val)) {
+      toColumnarSource(val, path, flat);
+    } else {
+      flat[path] = Array.isArray(val) && val.length === 1 ? val[0] : val;
+    }
+  });
+  return flat;
+};
+
+const getColumnarResponse = async () => {
+  return {
+    hits: {
+      total: { value: mockEvents.length, relation: 'eq' },
+      hits: mockEvents.map((event) => {
+        return { _source: toColumnarSource(event) };
+      }),
+    },
+  };
+};
 
 const getEmptyResponse = async () => {
   return {
@@ -105,7 +132,30 @@ describe('process_events_route.ts', () => {
         return action !== 'text_output' && kind === 'event';
       });
 
-      expect(eventsWithoutOutput[0]._source).toEqual(mockEvents[mockEvents.length - 1]);
+      expect(eventsWithoutOutput[0]._source).toEqual(
+        normalizeEventSource(mockEvents[mockEvents.length - 1])
+      );
+    });
+
+    it('returns the same events for a columnar (flattened) _source as for a nested one', async () => {
+      const alertsClient = getAlertsClientMockInstance();
+      const fetch = (response: ReturnType<typeof getResponse>) =>
+        fetchEventsAndScopedAlerts(
+          elasticsearchServiceMock.createElasticsearchClient(response),
+          alertsClient,
+          TEST_PROCESS_INDEX,
+          'mockId',
+          TEST_SESSION_START_TIME,
+          undefined
+        );
+
+      const nestedBody = await fetch(getResponse());
+      const columnarBody = await fetch(getColumnarResponse());
+      const sources = (events: typeof nestedBody.events) =>
+        events.slice(0, mockEvents.length).map((event) => event._source);
+
+      expect(sources(columnarBody.events)).toEqual(sources(nestedBody.events));
+      expect((sources(columnarBody.events)[0] as ProcessEvent).process?.entity_id).toBeDefined();
     });
   });
 });
