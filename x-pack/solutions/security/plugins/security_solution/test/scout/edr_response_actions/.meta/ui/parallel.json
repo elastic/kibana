@@ -1,5 +1,5 @@
 {
-  "sha1": "81575da0cddb14509a174b5831b5fda6b46d1252",
+  "sha1": "702f883fc6a481102aac8ead7a46661dd050960a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -27,6 +27,19 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/alert_flyout_results.spec.ts",
         "line": 55,
+        "column": 35
+      }
+    },
+    {
+      "id": "7586980fd1201f0-6b4cad9190ac4be",
+      "title": "Endpoint list row actions on Security Essentials offers Release but not Respond in the row actions of an isolated host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/endpoint_list_essentials_row_actions.spec.ts",
+        "line": 32,
         "column": 35
       }
     },
