@@ -18501,9 +18501,6 @@ packages:
     peerDependencies:
       react: '>=16.8.0'
 
-  forwarded-parse@2.1.2:
-    resolution: {integrity: sha512-alTFZZQDKMporBH77856pXgzhEzaUVmLCDk+egLgIgHst3Tpndzz8MnKe+GzRJRfvVdn69HhpW7cmXzvtLvJAw==}
-
   forwarded-parse@2.2.0:
     resolution: {integrity: sha512-jYQDJm+NayL3VZVE+tydz/Ja3dy8xurckRr9R1mmVkpdOdQlTqJktv4ZVDThu2iZj3mLZL/qpL3CKfJe1eS7Cw==}
 
@@ -35209,8 +35206,6 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  forwarded-parse@2.1.2: {}
-
   forwarded-parse@2.2.0: {}
 
   forwarded@0.2.0: {}
@@ -38832,7 +38827,7 @@ snapshots:
 
   original-url@1.2.3:
     dependencies:
-      forwarded-parse: 2.1.2
+      forwarded-parse: 2.2.0
 
   os-browserify@0.3.0: {}
 
