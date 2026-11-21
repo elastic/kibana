@@ -23,7 +23,13 @@ export type TracedGraphState = Pick<
 
 const ATTRIBUTE_PREFIX = 'attack_discovery';
 
-/** Records the retry counters held in graph state as span attributes. */
+/**
+ * Records the retry counters held in graph state as span attributes.
+ *
+ * `generation_attempts` counts every LLM call made by the generate and refine nodes, so a run
+ * with one generate call and one refine call reports 2, not one retry. It is the counter that
+ * `max_generation_attempts` caps.
+ */
 export const setGraphCounterAttributes = (
   span: Span | undefined,
   {
