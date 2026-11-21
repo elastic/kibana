@@ -11,13 +11,19 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { useCustomContentHtml } from './use_custom_content_html';
 import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
 import { CustomContentGeneratingPrompt } from './custom_content_generating_prompt';
 import type { CustomContentRendererServices } from './types';
 import { CUSTOM_CONTENT_IFRAME_SANDBOX } from './constants';
+import {
+  readInteraction,
+  type CustomContentInteraction,
+  type CustomContentInteractionAction,
+} from './interactions';
 
 export interface CustomContentComponentProps {
   services: CustomContentRendererServices;
@@ -39,6 +45,13 @@ export interface CustomContentComponentProps {
   isGenerating?: boolean;
   /** False in a read-only view such as a dashboard preview, where nothing may navigate away. */
   isInteractive?: boolean;
+  /**
+   * Called when a click on the content asks for an allowlisted action (see `interactions.ts`). When
+   * given, this component listens to clicks in the frame, which is same-origin but has no scripts.
+   */
+  onInteraction?: (interaction: CustomContentInteraction) => void;
+  /** The actions this host can run. Leave it out when it runs all of them. */
+  interactionActions?: readonly CustomContentInteractionAction[];
   /** Floor for the panel height. Only lower it in a host that gives the panel a definite height. */
   minHeight?: number;
   /** Records the panel's ES|QL request so the host can offer Inspect. */
@@ -88,12 +101,14 @@ export const CustomContentComponent = ({
   isInteractive = true,
   minHeight = DEFAULT_MIN_HEIGHT,
   requestAdapter,
+  onInteraction,
+  interactionActions,
   onLoadingChange,
   setApproximationApplied,
   onGenerateWithChat,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
-  const { html, isLoading, error, noContent } = useCustomContentHtml({
+  const { html, columns, isLoading, error, noContent } = useCustomContentHtml({
     services,
     embeddableId,
     esqlQueries,
@@ -113,6 +128,33 @@ export const CustomContentComponent = ({
   });
 
   useEffect(() => onLoadingChange(isLoading), [isLoading, onLoadingChange]);
+
+  const hasInteractions = isInteractive && onInteraction !== undefined;
+  // The listener outlives renders, so it reads what is current instead of closing over it.
+  const latest = useLatest({ columns, onInteraction, interactionActions });
+
+  // A new srcDoc is a new document, so the listener is attached on every load. It belongs to that
+  // document and goes with it, on a reload and when the frame is removed: nothing removes it.
+  const attachListener = useCallback(
+    (event: React.SyntheticEvent<HTMLIFrameElement>) => {
+      if (!hasInteractions) return;
+
+      const frameDocument = event.currentTarget.contentDocument;
+      if (!frameDocument) return;
+      const onClick = (clickEvent: Event) => {
+        if (!clickEvent.isTrusted) return;
+        const interaction = readInteraction(
+          clickEvent.target,
+          latest.current.columns,
+          latest.current.interactionActions
+        );
+        if (interaction) latest.current.onInteraction?.(interaction);
+      };
+      // Through the prototype, so nothing in the frame can replace the method (DOM clobbering).
+      EventTarget.prototype.addEventListener.call(frameDocument, 'click', onClick);
+    },
+    [hasInteractions, latest]
+  );
 
   const wrapperCss = useMemo(
     () =>
@@ -161,6 +203,7 @@ export const CustomContentComponent = ({
               css={iframeCss}
               srcDoc={html}
               sandbox={isInteractive ? CUSTOM_CONTENT_IFRAME_SANDBOX : ''}
+              onLoad={attachListener}
               title={IFRAME_TITLE}
             />
           </div>

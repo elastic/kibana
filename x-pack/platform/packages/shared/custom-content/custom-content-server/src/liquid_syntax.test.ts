@@ -25,4 +25,21 @@ describe('getLiquidSyntaxError', () => {
   it('reports an output tag that is not closed', () => {
     expect(getLiquidSyntaxError('<div>{{ row["host"].value </div>')).toBeDefined();
   });
+
+  it.each([
+    ['an output', '<p>{{ r.x | raw }}</p>'],
+    ['after another filter', '<p>{{ r.x | upcase | raw }}</p>'],
+    [
+      'inside a loop and a condition',
+      '{% for r in rows %}{% if r.a %}{{ r.x | raw }}{% endif %}{% endfor %}',
+    ],
+    ['in an assign', '{% assign z = q | raw %}{{ z }}'],
+    ['in a capture', '{% capture c %}{{ w | raw }}{% endcapture %}{{ c }}'],
+  ])('rejects the raw filter %s', (_, template) => {
+    expect(getLiquidSyntaxError(template)).toContain('"raw" filter is not allowed');
+  });
+
+  it('does not mistake the word raw in text or a column name for the filter', () => {
+    expect(getLiquidSyntaxError('<p>raw data | raw</p>{{ r["raw"].value }}')).toBeUndefined();
+  });
 });

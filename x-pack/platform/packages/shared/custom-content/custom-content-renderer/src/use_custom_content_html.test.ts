@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 
 // DOMPurify requires a real DOM — pass-through in Jest
@@ -227,6 +227,89 @@ describe('useCustomContentHtml', () => {
         { columns, rows: [[1]] },
         { columns, rows: [[2]] },
       ]);
+    });
+
+    it('reports the names of the columns of every query, for the host to validate clicks against', async () => {
+      mockFetchEsqlData
+        .mockResolvedValueOnce({
+          columns: [{ name: 'host', type: 'keyword' }],
+          values: [],
+          all_columns: [],
+        })
+        .mockResolvedValueOnce({
+          columns: [{ name: 'n', type: 'long' }],
+          values: [],
+          all_columns: [],
+        });
+
+      const { result } = renderHook(() =>
+        useCustomContentHtml({
+          ...esqlParams,
+          esqlQueries: [...esqlParams.esqlQueries, 'FROM metrics | STATS n = COUNT()'],
+        })
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.columns).toEqual(new Set(['host', 'n']));
+    });
+
+    it.each<[string, { esqlQueries: string[]; savedTemplate: string | undefined }]>([
+      ['becomes static', { esqlQueries: [], savedTemplate: '<p>static</p>' }],
+      ['loses its template', { esqlQueries: ['FROM logs | LIMIT 10'], savedTemplate: undefined }],
+    ])('forgets the columns when a panel with data %s', async (_, next) => {
+      mockFetchEsqlData.mockResolvedValueOnce({
+        columns: [{ name: 'host', type: 'keyword' }],
+        values: [],
+        all_columns: [],
+      });
+
+      const { result, rerender } = renderHook(
+        (props: { esqlQueries: string[]; savedTemplate: string | undefined }) =>
+          useCustomContentHtml({ ...baseParams, ...props }),
+        {
+          initialProps: {
+            esqlQueries: ['FROM logs | LIMIT 10'],
+            savedTemplate: '<p>{{ rows.size }}</p>' as string | undefined,
+          },
+        }
+      );
+      await waitFor(() => expect(result.current.columns).toEqual(new Set(['host'])));
+
+      // Clicks must stop being checked against columns the panel no longer has.
+      rerender(next);
+
+      await waitFor(() => expect(result.current.columns.size).toBe(0));
+    });
+
+    it('ignores the columns of a fetch that was superseded before it finished', async () => {
+      let finishFirst!: (response: Awaited<ReturnType<typeof fetchEsqlData>>) => void;
+      mockFetchEsqlData
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              finishFirst = resolve;
+            })
+        )
+        .mockResolvedValueOnce({
+          columns: [{ name: 'fresh', type: 'long' }],
+          values: [],
+          all_columns: [],
+        });
+
+      const { result, rerender } = renderHook(
+        ({ query }: { query: string }) =>
+          useCustomContentHtml({ ...esqlParams, esqlQueries: [query] }),
+        { initialProps: { query: 'FROM a | LIMIT 1' } }
+      );
+      // A new query aborts the first fetch, which is still waiting.
+      rerender({ query: 'FROM b | LIMIT 1' });
+      await waitFor(() => expect(result.current.columns).toEqual(new Set(['fresh'])));
+
+      finishFirst({ columns: [{ name: 'stale', type: 'keyword' }], values: [], all_columns: [] });
+      await act(async () => {});
+
+      expect(result.current.columns).toEqual(new Set(['fresh']));
     });
 
     it('refetches only when the additional queries change, not when the list is rebuilt', async () => {

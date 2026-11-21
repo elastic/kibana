@@ -158,6 +158,17 @@ describe('applyHtmlTheme', () => {
   });
 });
 
+describe('sanitizeHtml interactions', () => {
+  it('keeps the data-cc attributes of an element that is not a link', () => {
+    const html = sanitizeHtml(
+      '<button data-cc-action="filter" data-cc-field="host.name" data-cc-value="a">x</button>'
+    );
+    expect(html).toContain('data-cc-action="filter"');
+    expect(html).toContain('data-cc-field="host.name"');
+    expect(html).toContain('data-cc-value="a"');
+  });
+});
+
 describe('sanitizeHtml', () => {
   it('strips inline event handlers', () => {
     const result = sanitizeHtml('<img src="x" onerror="alert(1)">');

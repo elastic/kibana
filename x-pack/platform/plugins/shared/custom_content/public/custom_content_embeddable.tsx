@@ -67,11 +67,13 @@ import {
 } from '@kbn/custom-content-common';
 import {
   CustomContentComponent,
+  type CustomContentInteraction,
   type CustomContentRendererServices,
 } from '@kbn/custom-content-renderer';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { css } from '@emotion/react';
+import { SUPPORTED_INTERACTION_ACTIONS, runInteraction } from './run_interaction';
 import { getServices } from './services';
 import { readContextQueries } from '../common/panel_context_queries';
 import { getTelemetry } from './telemetry';
@@ -126,7 +128,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 > = {
   type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const { core, search, dataViews, agentBuilder } = getServices();
+    const { core, search, dataViews, agentBuilder, uiActions, filterManager } = getServices();
     const rendererServices: CustomContentRendererServices = {
       http: core.http,
       uiSettings: core.uiSettings,
@@ -547,6 +549,16 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           return () => sub.unsubscribe();
         }, []);
 
+        // What a click on the panel's content may do is a closed list (see `run_interaction.ts`).
+        const handleInteraction = useCallback((interaction: CustomContentInteraction) => {
+          runInteraction(interaction, {
+            dataSources: dataSources$.getValue(),
+            filterManager,
+            uiActions,
+            embeddable: api,
+          });
+        }, []);
+
         const handleLoadingChange = useCallback((isLoading: boolean) => {
           dataLoading$.next(isLoading);
         }, []);
@@ -605,6 +617,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               isInteractive={viewMode !== 'non-interactive'}
               minHeight={0}
               requestAdapter={requestAdapter}
+              onInteraction={handleInteraction}
+              interactionActions={SUPPORTED_INTERACTION_ACTIONS}
               onLoadingChange={handleLoadingChange}
               setApproximationApplied={setApproximationApplied}
               onGenerateWithChat={handleGenerateWithChat}

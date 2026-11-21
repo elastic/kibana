@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { CUSTOM_CONTENT_LIQUID_OPTIONS } from '@kbn/custom-content-common';
+import {
+  CUSTOM_CONTENT_FORBIDDEN_FILTERS,
+  CUSTOM_CONTENT_LIQUID_OPTIONS,
+} from '@kbn/custom-content-common';
 import type { ESQLColumn } from '@kbn/es-types';
 
 /**
@@ -15,7 +18,11 @@ import type { ESQLColumn } from '@kbn/es-types';
  */
 const getEngine = async () => {
   const { Liquid } = await import('liquidjs');
-  return new Liquid(CUSTOM_CONTENT_LIQUID_OPTIONS);
+  const liquid = new Liquid(CUSTOM_CONTENT_LIQUID_OPTIONS);
+  // A panel saved through the API never met the server's check, so the engine itself must keep
+  // escaping: a forbidden filter becomes the identity, and the output is escaped as for any value.
+  CUSTOM_CONTENT_FORBIDDEN_FILTERS.forEach((name) => liquid.registerFilter(name, (value) => value));
+  return liquid;
 };
 
 function isFiniteNumber(value: unknown): value is number {
