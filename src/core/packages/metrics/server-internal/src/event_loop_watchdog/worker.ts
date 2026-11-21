@@ -283,17 +283,15 @@ export const runWatchdogWorker = (
       .finally(() => endCapture(current));
   };
 
-  /** Returns the error code or name of a failed write, or `undefined` once the file is written. */
-  const writeProfile = async (path: string, profile: CpuProfile): Promise<string | undefined> => {
+  const writeProfile = async (path: string, profile: CpuProfile) => {
     try {
       await Fs.writeFile(path, JSON.stringify(prepareProfile(profile, root)));
       counts.files.written++;
-      return undefined;
     } catch (error) {
       counts.files.writeFailed++;
-      // The code or name only: Node's error messages repeat the full path.
-      const { code, name } = error as NodeJS.ErrnoException;
-      return code ?? name ?? 'unknown';
+      logger.error(`Failed to write an event loop block profile: ${errorMessage(error)}`, {
+        tags: ['event-loop-watchdog'],
+      });
     }
   };
 
@@ -342,26 +340,18 @@ export const runWatchdogWorker = (
       counts.maxStopHeartbeatGapMs = Math.max(counts.maxStopHeartbeatGapMs, stopHeartbeatGapMs);
     }
     const { diagnosticDir } = profiling;
-    let file: ProfileFileOutcome;
-    let fileText = '';
-    if (summary.samples === 0) {
-      file = 'empty';
-    } else if (diagnosticDir === undefined) {
-      file = 'no_directory';
-    } else {
-      const admitted = admission.admit(profileSignature(summary), wallClockMs());
-      if (admitted === 'admitted') {
-        // Writes before logging, so the capture line can say whether the file was written.
-        const name = fileName(phase, blockedMs, new Date());
-        const loggedPath = Path.join(capDir(diagnosticDir), name);
-        const failure = await writeProfile(Path.join(diagnosticDir, name), profile);
-        file = failure ? 'write_failed' : 'written';
-        fileText = failure
-          ? ` File not written (${failure}): ${loggedPath}.`
-          : ` File: ${loggedPath}.`;
-      } else {
-        file = admitted;
-      }
+    const file: ProfileFileOutcome =
+      summary.samples === 0
+        ? 'empty'
+        : diagnosticDir === undefined
+        ? 'no_directory'
+        : admission.admit(profileSignature(summary), wallClockMs());
+    let path: string | undefined;
+    let loggedPath: string | undefined;
+    if (diagnosticDir && file === 'admitted') {
+      const name = fileName(phase, blockedMs, new Date());
+      path = Path.join(diagnosticDir, name);
+      loggedPath = Path.join(capDir(diagnosticDir), name);
     }
     if (file === 'same_frame') {
       counts.files.sameFrame++;
@@ -371,14 +361,16 @@ export const runWatchdogWorker = (
     }
     captureNumber++;
     const frameLists = formatFrameLists(summary);
-    // Log levels chosen specifically to indicate if a profile file was attempted: warn if written or
-    // failed, otherwise use info.
-    logger[fileText ? 'warn' : 'info']<ProfileLogMeta>(
+    // Log levels chosen specifically to indicate if a profile was admitted for file output: warn if
+    // admitted for file output, otherwise use info.
+    logger[file === 'admitted' ? 'warn' : 'info']<ProfileLogMeta>(
       `Event loop block profile #${captureNumber}: block ~${blockedMs}ms${
         stopReason === 'block_ended' ? '' : ' so far'
       } (profiled after ~${profiledAfterMs}ms, profiler start took ~${profilerStartMs}ms), ${
         summary.samples
-      } samples; stopped: ${stopReason}.${fileText}${frameLists ? ` ${frameLists}` : ''}`,
+      } samples; stopped: ${stopReason}.${loggedPath ? ` Writing ${loggedPath}.` : ''}${
+        frameLists ? ` ${frameLists}` : ''
+      }`,
       {
         tags: ['event-loop-watchdog'],
         kibana: {
@@ -402,6 +394,9 @@ export const runWatchdogWorker = (
         },
       }
     );
+    if (path) {
+      await writeProfile(path, profile);
+    }
   };
 
   /** Starts or stops a capture after each poll; `ended` is the block this poll saw end. */

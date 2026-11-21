@@ -413,9 +413,9 @@ describe('event loop watchdog in a child process', () => {
       expect(lines).toHaveLength(1);
       expect(lines[0].log.level).toBe('WARN');
       // Long directories, such as the macOS temp directory, show only their end in the line.
-      expect(lines[0].message).toContain(' File: ');
+      expect(lines[0].message).toContain('. Writing ');
       expect(lines[0].message).toContain(`/${Path.basename(file)}. Top: `);
-      expect(lines[0].kibana?.event_loop_watchdog?.profile?.file).toBe('written');
+      expect(lines[0].kibana?.event_loop_watchdog?.profile?.file).toBe('admitted');
       // The stats count the write only after it completes, so this confirms it finished before
       // shutdown.
       const files = statsOf(result).map(({ profiling }) => profiling?.files);

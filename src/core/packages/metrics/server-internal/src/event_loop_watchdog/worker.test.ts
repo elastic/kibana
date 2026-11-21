@@ -1132,10 +1132,7 @@ describe('runWatchdogWorker', () => {
 
       jest.replaceProperty(workerThreads, 'isMainThread', false);
       jest.spyOn(process, 'uptime').mockReturnValue(999_999.999_999_999);
-      // A failed write logs more than a written one: Node's longest write error code.
-      jest
-        .spyOn(fsPromises, 'writeFile')
-        .mockRejectedValue(Object.assign(new Error('x'), { code: 'ERR_FS_FILE_TOO_LARGE' }));
+      jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
       // Pair the longest supported directory and hostname to exercise the maximum output path.
       jest.spyOn(os, 'hostname').mockReturnValue('h'.repeat(MAX_HOSTNAME_LENGTH));
 
@@ -1215,14 +1212,12 @@ describe('runWatchdogWorker', () => {
       const parsed = JSON.parse(line);
       expect(parsed.message.endsWith(' [truncated]')).toBe(false);
       expect(parsed.message).toContain(
-        `File not written (ERR_FS_FILE_TOO_LARGE): ${capDir(
-          LONGEST_DIR
-        )}/event-loop-block-starting-100000ms-`
+        `Writing ${capDir(LONGEST_DIR)}/event-loop-block-starting-100000ms-`
       );
       expect(parsed.message).toContain(
         `-${'h'.repeat(MAX_HOSTNAME_LENGTH)}-${process.pid}.cpuprofile. Top: `
       );
-      expect(parsed.kibana.event_loop_watchdog.profile.file).toBe('write_failed');
+      expect(parsed.kibana.event_loop_watchdog.profile.file).toBe('admitted');
       expect(parsed.message).toContain('Kibana code: 45.5% ');
       // The frame lists are cut at their cap; the full lists are in `profile`.
       const frameLists = parsed.message.slice(parsed.message.indexOf('Top: '));
@@ -1252,7 +1247,7 @@ describe('runWatchdogWorker', () => {
     });
 
     it('keeps the whole message and drops the profile data when non-ASCII names push the line past 4,094 bytes', async () => {
-      // The ASCII worst case is 4,087 bytes; '€' takes 3 bytes, so these names add well over the 7 left.
+      // The ASCII worst case is 4,049 bytes; '€' takes 3 bytes, so these names add well over the 45 left.
       const { line, droppedLogLines } = await logCaptureLine('€'.repeat(84));
       expect(droppedLogLines).toBe(0);
       expect(Buffer.byteLength(line, 'utf8')).toBeLessThanOrEqual(4_094);
@@ -1260,7 +1255,7 @@ describe('runWatchdogWorker', () => {
       expect(parsed.kibana?.event_loop_watchdog).toBeUndefined();
       expect(parsed.message.endsWith(' [truncated]')).toBe(true);
       expect(parsed.message).toContain('Event loop block profile #1: block ~100000ms ');
-      expect(parsed.message).toContain('stopped: block_ended. File not written (');
+      expect(parsed.message).toContain('stopped: block_ended. Writing ');
       expect(parsed.message).toContain('.cpuprofile. Top: ');
       // The message itself is not cut: the frame lists are all there, up to their own `...` cap.
       const frameLists = parsed.message.slice(
@@ -1332,7 +1327,7 @@ describe('runWatchdogWorker', () => {
       });
       afterEach(() => jest.restoreAllMocks());
 
-      it('writes the prepared profile, then logs the capture at warn with the file path', async () => {
+      it('logs the capture at warn with the file path, then writes the prepared profile', async () => {
         const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
         startWriting();
         await profiledBlock(2_000);
@@ -1348,44 +1343,30 @@ describe('runWatchdogWorker', () => {
         expect(profileLines()).toHaveLength(0);
         expect(warnLines()).toHaveLength(1);
         const [message, meta] = warnLines()[0];
-        expect(message).toContain(`stopped: block_ended. File: ${file}. Top: 100% spin`);
-        expect((meta as ProfileLogMeta).kibana.event_loop_watchdog.profile.file).toBe('written');
-        expect(warnLineOrder()).toBeGreaterThan(writeFile.mock.invocationCallOrder[0]);
+        expect(message).toContain(`stopped: block_ended. Writing ${file}. Top: 100% spin`);
+        expect((meta as ProfileLogMeta).kibana.event_loop_watchdog.profile.file).toBe('admitted');
+        expect(warnLineOrder()).toBeLessThan(writeFile.mock.invocationCallOrder[0]);
         expect(fileCounts()).toEqual({ written: 1, sameFrame: 0, hourLimit: 0, writeFailed: 0 });
       });
 
-      it('logs a failed write on the capture line with its error code only', async () => {
-        jest.spyOn(fsPromises, 'writeFile').mockRejectedValue(
-          Object.assign(new Error("EACCES: permission denied, open '/diag/x'"), {
-            code: 'EACCES',
-          })
-        );
-        startWriting();
-        await profiledBlock(2_000);
-
-        expect(logger.error).not.toHaveBeenCalled();
-        expect(warnLines()).toHaveLength(1);
-        expect(warnLines()[0][0]).toContain(
-          'stopped: block_ended. File not written (EACCES): /diag/'
-        );
-        expect(warnLines()[0][0]).not.toContain('permission denied');
-        expect((warnLines()[0][1] as ProfileLogMeta).kibana.event_loop_watchdog.profile.file).toBe(
-          'write_failed'
-        );
-        expect(fileCounts()).toMatchObject({ written: 0, writeFailed: 1 });
-      });
-
-      it('logs the error name of a failed write without a code', async () => {
+      it('logs a failed write once at error after the capture', async () => {
         jest
           .spyOn(fsPromises, 'writeFile')
-          .mockRejectedValue(new RangeError('Invalid string length'));
+          .mockRejectedValue(
+            Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' })
+          );
         startWriting();
         await profiledBlock(2_000);
 
-        expect(warnLines()[0][0]).toContain('File not written (RangeError): /diag/');
-        expect((warnLines()[0][1] as ProfileLogMeta).kibana.event_loop_watchdog.profile.file).toBe(
-          'write_failed'
+        expect(logger.error).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledWith(
+          'Failed to write an event loop block profile: EACCES: permission denied',
+          { tags: ['event-loop-watchdog'] }
         );
+        expect(warnLines()).toHaveLength(1);
+        expect(warnLines()[0][0]).toContain('Writing /diag/');
+        expect(warnLineOrder()).toBeLessThan(logger.error.mock.invocationCallOrder[0]);
+        expect(fileCounts()).toMatchObject({ written: 0, writeFailed: 1 });
       });
 
       it("doesn't write or ask admission without a directory", async () => {
@@ -1416,7 +1397,7 @@ describe('runWatchdogWorker', () => {
         expect(writeFile).toHaveBeenCalledTimes(1);
         expect(warnLines()).toHaveLength(1);
         expect(profileLines()).toHaveLength(1);
-        expect(profileLines()[0][0]).not.toContain(' File');
+        expect(profileLines()[0][0]).not.toContain('Writing ');
         expect(profileMeta().file).toBe('same_frame');
         expect(summedFiles('written')).toBe(1);
         expect(summedFiles('sameFrame')).toBe(1);
@@ -1478,7 +1459,7 @@ describe('runWatchdogWorker', () => {
 
         const file = String(writeFile.mock.calls[0][0]);
         expect(path.dirname(file)).toBe(longDir);
-        expect(warnLines()[0][0]).toContain(`File: ${capDir(longDir)}/${path.basename(file)}.`);
+        expect(warnLines()[0][0]).toContain(`Writing ${capDir(longDir)}/${path.basename(file)}.`);
         expect(warnLines()[0][0]).not.toContain(longDir);
       });
 
