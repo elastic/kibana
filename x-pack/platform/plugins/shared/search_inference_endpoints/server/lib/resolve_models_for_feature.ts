@@ -11,10 +11,18 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
+import { NO_DEFAULT_MODEL } from '../../common/constants';
 import { mergeConnectors } from './merge_connectors';
 import type { GetForFeatureOptions, ResolvedInferenceEndpoints } from '../types';
 
 export const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+
+// The Models settings page stores `NO_DEFAULT_MODEL` for "No default model", while `NO_DEFAULT_CONNECTOR`
+// is the value the default AI connector setting has historically held for no default.
+const isDefaultSet = (defaultConnectorId: string | undefined): defaultConnectorId is string =>
+  !!defaultConnectorId &&
+  defaultConnectorId !== NO_DEFAULT_CONNECTOR &&
+  defaultConnectorId !== NO_DEFAULT_MODEL;
 
 export interface ResolvedConnectorsForFeature {
   connectors: ApiInferenceConnector[];
@@ -87,12 +95,12 @@ export const resolveModelsForFeature = async ({
     });
 
   if (defaultConnectorOnly) {
-    if (!defaultConnectorId || defaultConnectorId === NO_DEFAULT_CONNECTOR) {
+    if (!isDefaultSet(defaultConnectorId)) {
       return { connectors: [], warnings: [], soEntryFound: false };
     }
     const connector = await fetchConnectorById(defaultConnectorId);
     return {
-      connectors: connector ? [connector] : [],
+      connectors: connector ? [{ ...connector, isDefault: true }] : [],
       warnings: [],
       soEntryFound: false,
     };
@@ -122,21 +130,58 @@ export const resolveModelsForFeature = async ({
   const merged = mergeConnectors(featureResult.endpoints, allConnectors, soEntryFound);
 
   let connectors: ApiInferenceConnector[] = merged;
-  if (
-    !soEntryFound &&
-    !ignoreGlobalDefault &&
-    defaultConnectorId &&
-    defaultConnectorId !== NO_DEFAULT_CONNECTOR
-  ) {
+  if (!soEntryFound && !ignoreGlobalDefault && isDefaultSet(defaultConnectorId)) {
     const defaultConnector = await fetchConnectorById(defaultConnectorId);
     if (defaultConnector) {
+      // The setting may hold a stack connector alias of an inference endpoint, in which case the
+      // feature declares its parameters under the endpoint id (`defaultConnector.connectorId`).
       const parameters = featureResult.endpoints.find(
-        ({ connectorId }) => connectorId === defaultConnectorId
+        ({ connectorId }) =>
+          connectorId === defaultConnectorId || connectorId === defaultConnector.connectorId
       )?.parameters;
+      // An alias default replaces the endpoint's own merged entry, which used to stay in the list
+      // with its recommended flag, so carry the flag over.
+      const isAlias = defaultConnector.connectorId !== defaultConnectorId;
+      const isRecommended = isAlias
+        ? merged.find((c) => c.connectorId === defaultConnector.connectorId)?.isRecommended
+        : undefined;
       connectors = [
-        parameters ? { ...defaultConnector, parameters } : defaultConnector,
-        ...merged.filter((c) => c.connectorId !== defaultConnectorId),
+        {
+          ...defaultConnector,
+          ...(parameters ? { parameters } : {}),
+          ...(isRecommended ? { isRecommended } : {}),
+          isDefault: true,
+        },
+        ...merged.filter(
+          (c) =>
+            c.connectorId !== defaultConnectorId && c.connectorId !== defaultConnector.connectorId
+        ),
       ];
+    }
+  }
+
+  if (
+    soEntryFound &&
+    !ignoreGlobalDefault &&
+    isDefaultSet(defaultConnectorId) &&
+    connectors.length > 0
+  ) {
+    // A saved override replaces the list, so the default is not added to it. Still flag the
+    // entry the default setting resolves to when the override already contains it. An exact id
+    // match is flagged from the list in memory. A setting that is a known connector id the
+    // override left out has nothing to flag. Only a setting that matches no known id may be a
+    // stack connector alias of an endpoint, which needs a lookup to resolve.
+    let defaultEntryId = connectors.some((c) => c.connectorId === defaultConnectorId)
+      ? defaultConnectorId
+      : undefined;
+    const isKnownConnectorId = allConnectors.some((c) => c.connectorId === defaultConnectorId);
+    if (!defaultEntryId && !isKnownConnectorId) {
+      defaultEntryId = (await fetchConnectorById(defaultConnectorId))?.connectorId;
+    }
+    if (defaultEntryId) {
+      connectors = connectors.map((c) =>
+        c.connectorId === defaultEntryId ? { ...c, isDefault: true } : c
+      );
     }
   }
 

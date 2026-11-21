@@ -6,119 +6,186 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 import { useDefaultAIConnectorId } from './use_default_ai_connector_id';
 import { useKibana } from '../lib/kibana';
 import { useLoadConnectors } from '@kbn/inference-connectors';
-import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 
 jest.mock('../lib/kibana');
 jest.mock('@kbn/inference-connectors');
-jest.mock('@kbn/elastic-assistant/impl/assistant/helpers');
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseLoadConnectors = useLoadConnectors as jest.Mock;
-const mockGetDefaultConnector = getDefaultConnector as jest.Mock;
 
 describe('useDefaultAIConnectorId', () => {
-  const mockSettings = {};
   const mockHttp = {};
   const mockToasts = {};
-  const mockConnectors = [
-    { id: 'connector-1', name: 'Connector 1' },
-    { id: 'connector-2', name: 'Connector 2' },
-  ];
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-
+  const mockGlobalDefault = (id?: string) =>
     mockUseKibana.mockReturnValue({
       services: {
         http: mockHttp,
         notifications: { toasts: mockToasts },
-        settings: mockSettings,
+        settings: { client: { get: jest.fn().mockReturnValue(id) } },
       },
     });
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockGlobalDefault();
+
     mockUseLoadConnectors.mockReturnValue({
-      data: mockConnectors,
+      data: [
+        { id: 'connector-1', name: 'Connector 1' },
+        { id: 'connector-2', name: 'Connector 2' },
+      ],
       isLoading: false,
+      soEntryFound: false,
+    });
+  });
+
+  describe('when the admin saved models for the feature', () => {
+    it('should use the first model, in the admin order, even when a later one is flagged as the global default', () => {
+      mockUseLoadConnectors.mockReturnValue({
+        data: [
+          { id: 'bedrock-connector', name: 'Bedrock', actionTypeId: '.bedrock' },
+          {
+            id: 'openai-connector',
+            name: 'OpenAI',
+            actionTypeId: '.gen-ai',
+            apiProvider: OpenAiProviderType.OpenAi,
+            isDefault: true,
+          },
+        ],
+        isLoading: false,
+        soEntryFound: true,
+      });
+      mockGlobalDefault('openai-connector');
+
+      const { result } = renderHook(() => useDefaultAIConnectorId());
+
+      expect(result.current.defaultConnectorId).toBe('bedrock-connector');
     });
 
-    mockGetDefaultConnector.mockReturnValue({ id: 'connector-id' });
+    it('should skip a model that is missing secrets', () => {
+      mockUseLoadConnectors.mockReturnValue({
+        data: [
+          { id: 'connector-1', name: 'Connector 1', isMissingSecrets: true },
+          { id: 'connector-2', name: 'Connector 2' },
+        ],
+        isLoading: false,
+        soEntryFound: true,
+      });
+
+      const { result } = renderHook(() => useDefaultAIConnectorId());
+
+      expect(result.current.defaultConnectorId).toBe('connector-2');
+    });
+
+    it('should return undefined when the saved list is empty', () => {
+      mockUseLoadConnectors.mockReturnValue({ data: [], isLoading: false, soEntryFound: true });
+
+      const { result } = renderHook(() => useDefaultAIConnectorId());
+
+      expect(result.current.defaultConnectorId).toBeUndefined();
+    });
   });
 
-  it('should return connector id from getDefaultConnector', () => {
-    const { result } = renderHook(() => useDefaultAIConnectorId());
+  describe('when the admin did not save models for the feature', () => {
+    it('should return the inference endpoint the server flagged as the default, whichever its position', () => {
+      mockGlobalDefault('.custom-stack-connector');
+      mockUseLoadConnectors.mockReturnValue({
+        data: [
+          { id: 'Anthropic-Claude-Sonnet-3-7', name: 'Anthropic Claude Sonnet 3.7' },
+          {
+            id: 'custom-inference-endpoint',
+            name: 'custom-inference-endpoint',
+            isInferenceEndpoint: true,
+            isDefault: true,
+          },
+        ],
+        isLoading: false,
+        soEntryFound: false,
+      });
 
-    expect(result.current.defaultConnectorId).toBe('connector-id');
+      const { result } = renderHook(() => useDefaultAIConnectorId());
+
+      expect(result.current.defaultConnectorId).toBe('custom-inference-endpoint');
+    });
+
+    it('should return the configured inference endpoint instead of the Elastic-managed connector', () => {
+      mockGlobalDefault('custom-inference-endpoint');
+      mockUseLoadConnectors.mockReturnValue({
+        data: [
+          { id: 'Anthropic-Claude-Sonnet-3-7', name: 'Anthropic Claude Sonnet 3.7' },
+          {
+            id: 'custom-inference-endpoint',
+            name: 'custom-inference-endpoint',
+            isInferenceEndpoint: true,
+          },
+        ],
+        isLoading: false,
+        soEntryFound: false,
+      });
+
+      const { result } = renderHook(() => useDefaultAIConnectorId());
+
+      expect(result.current.defaultConnectorId).toBe('custom-inference-endpoint');
+    });
+
+    it('should keep the fallback priority when the server did not select a model, so OpenAI is preferred over an earlier provider', () => {
+      mockUseLoadConnectors.mockReturnValue({
+        data: [
+          { id: 'bedrock-connector', name: 'Bedrock', actionTypeId: '.bedrock' },
+          {
+            id: 'openai-connector',
+            name: 'OpenAI',
+            actionTypeId: '.gen-ai',
+            apiProvider: OpenAiProviderType.OpenAi,
+          },
+        ],
+        isLoading: false,
+        soEntryFound: false,
+      });
+
+      const { result } = renderHook(() => useDefaultAIConnectorId());
+
+      expect(result.current.defaultConnectorId).toBe('openai-connector');
+    });
+
+    it('should return undefined when there are no connectors', () => {
+      mockUseLoadConnectors.mockReturnValue({ data: [], isLoading: false, soEntryFound: false });
+
+      const { result } = renderHook(() => useDefaultAIConnectorId());
+
+      expect(result.current.defaultConnectorId).toBeUndefined();
+    });
   });
 
-  it('should return undefined when getDefaultConnector returns undefined', () => {
-    mockGetDefaultConnector.mockReturnValue(undefined);
+  it('should return undefined when the connectors are not loaded yet', () => {
+    mockUseLoadConnectors.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      soEntryFound: false,
+    });
 
     const { result } = renderHook(() => useDefaultAIConnectorId());
 
     expect(result.current.defaultConnectorId).toBeUndefined();
   });
 
-  it('should return undefined when getDefaultConnector returns null', () => {
-    mockGetDefaultConnector.mockReturnValue(null);
-
-    const { result } = renderHook(() => useDefaultAIConnectorId());
-
-    expect(result.current.defaultConnectorId).toBeUndefined();
-  });
-
-  it('should call getDefaultConnector with correct parameters', () => {
-    renderHook(() => useDefaultAIConnectorId());
-
-    expect(mockGetDefaultConnector).toHaveBeenCalledWith(mockConnectors, mockSettings);
-  });
-
-  it('should load the connectors from the elastic_assistant inference feature, reporting load errors through toasts, so that inference endpoints are included', () => {
+  it('should load the connectors from the alert_ai_summary inference feature, reporting load errors through toasts, so that inference endpoints are included', () => {
     renderHook(() => useDefaultAIConnectorId());
 
     expect(mockUseLoadConnectors).toHaveBeenCalledWith({
       http: mockHttp,
       toasts: mockToasts,
-      featureId: 'elastic_assistant',
+      featureId: 'alert_ai_summary',
     });
-  });
-
-  it('should return the configured inference endpoint instead of the Elastic-managed connector', () => {
-    const { getDefaultConnector: actualGetDefaultConnector } = jest.requireActual(
-      '@kbn/elastic-assistant/impl/assistant/helpers'
-    );
-    mockGetDefaultConnector.mockImplementation(actualGetDefaultConnector);
-    mockUseKibana.mockReturnValue({
-      services: {
-        http: mockHttp,
-        notifications: { toasts: mockToasts },
-        settings: { client: { get: jest.fn().mockReturnValue('custom-inference-endpoint') } },
-      },
-    });
-    mockUseLoadConnectors.mockReturnValue({
-      data: [
-        { id: 'Anthropic-Claude-Sonnet-3-7', name: 'Anthropic Claude Sonnet 3.7' },
-        {
-          id: 'custom-inference-endpoint',
-          name: 'custom-inference-endpoint',
-          isInferenceEndpoint: true,
-        },
-      ],
-      isLoading: false,
-    });
-
-    const { result } = renderHook(() => useDefaultAIConnectorId());
-
-    expect(result.current.defaultConnectorId).toBe('custom-inference-endpoint');
   });
 
   it('should return isLoading true when connectors are loading', () => {
-    mockUseLoadConnectors.mockReturnValue({
-      data: mockConnectors,
-      isLoading: true,
-    });
+    mockUseLoadConnectors.mockReturnValue({ data: [], isLoading: true, soEntryFound: false });
 
     const { result } = renderHook(() => useDefaultAIConnectorId());
 
@@ -126,11 +193,6 @@ describe('useDefaultAIConnectorId', () => {
   });
 
   it('should return isLoading false when connectors are not loading', () => {
-    mockUseLoadConnectors.mockReturnValue({
-      data: mockConnectors,
-      isLoading: false,
-    });
-
     const { result } = renderHook(() => useDefaultAIConnectorId());
 
     expect(result.current.isLoading).toBe(false);

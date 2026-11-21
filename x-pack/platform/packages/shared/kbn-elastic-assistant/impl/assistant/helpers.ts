@@ -39,7 +39,6 @@ export const getMessageFromRawResponse = (
 };
 
 const ELASTIC_LLM_CONNECTOR_IDS = ['Elastic-Managed-LLM', 'Anthropic-Claude-Sonnet-3-7'];
-
 /**
  * Returns a default connector if there is only one connector
  * @param connectors
@@ -54,9 +53,12 @@ export const getDefaultConnector = (
   );
 
   const validConnectors = connectors?.filter((connector) => !connector.isMissingSecrets);
-  const defaultConnector = validConnectors?.find(
-    (connector) => connector.id === defaultAiConnectorId
-  );
+  // The server resolves the default setting, which can hold a stack connector alias of an inference
+  // endpoint, and flags the resulting entry. Prefer that over the browser's copy of the setting,
+  // which can be stale or not match the endpoint id; fall back to an exact id match otherwise.
+  const defaultConnector =
+    validConnectors?.find((connector) => connector.isDefault) ??
+    validConnectors?.find((connector) => connector.id === defaultAiConnectorId);
 
   if (defaultConnector) {
     // If the user has set a default connector setting, and that connector exists, use it

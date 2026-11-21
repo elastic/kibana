@@ -77,6 +77,22 @@ describe('useDocumentSummary', () => {
     expect(result.current.recommendedActions).toBeUndefined();
   });
 
+  it('should look the connector up in the alert_ai_summary inference feature to resolve its action type', () => {
+    renderHook(() =>
+      useDocumentSummary({
+        documentId: 'test-document-id',
+        defaultConnectorId: 'test-connector-id',
+        promptContext,
+        showAnonymizedValues: false,
+      })
+    );
+
+    expect(useChatComplete).toHaveBeenCalledWith({
+      connectorId: 'test-connector-id',
+      featureId: 'alert_ai_summary',
+    });
+  });
+
   it('should fetch AI summary when fetchAISummary is called', async () => {
     (useFetchDocumentSummary as jest.Mock)
       .mockReturnValueOnce({
